@@ -1,0 +1,14 @@
+{
+  "id": "small_change_coins",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-85525c76-f807-4e3a-ad72-83963c1b3468.png",
+  "source_file": "exec-85525c76-f807-4e3a-ad72-83963c1b3468.png",
+  "creative_brief": "Little bronze coins buy a loaf or a cup, so the poorest can trade with money instead of favors. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/small_change_coins-v1.png",
+  "sha256": "90b9c69361846b52332dc6e04c8935ef7059a37bf1b81e859032dcffa82d9a85",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

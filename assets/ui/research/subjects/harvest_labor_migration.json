@@ -1,0 +1,14 @@
+{
+  "id": "harvest_labor_migration",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6513a842-8bc1-46b0-abc0-d3eb117d628c.png",
+  "source_file": "exec-6513a842-8bc1-46b0-abc0-d3eb117d628c.png",
+  "creative_brief": "Bands of hill folk walk down to the plains each summer to reap for wages, and carry fevers home with their pay. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/harvest_labor_migration-v1.png",
+  "sha256": "4cb933f641252a554bcd81666e8f7eebfc74c9224c7bcb0cb01067d3cf867a36",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

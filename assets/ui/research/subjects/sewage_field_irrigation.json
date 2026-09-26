@@ -1,0 +1,14 @@
+{
+  "id": "sewage_field_irrigation",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-45180747-6d8f-4f27-b930-b8ce4d1e41e4.png",
+  "source_file": "exec-45180747-6d8f-4f27-b930-b8ce4d1e41e4.png",
+  "creative_brief": "Town sewage is led out along channels onto the outlying fields, which grow heavy crops. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/sewage_field_irrigation-v1.png",
+  "sha256": "ded409e811cc246ebb604e8c16c02290894a69adfeb43116987dca4a276b568f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

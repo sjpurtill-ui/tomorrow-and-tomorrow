@@ -1,0 +1,14 @@
+{
+  "id": "sloped_climbing_kilns",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-31b962ef-75f8-4a28-8164-7d8f5fa02acb.png",
+  "source_file": "exec-31b962ef-75f8-4a28-8164-7d8f5fa02acb.png",
+  "creative_brief": "The kiln climbs the hillside in a long tunnel, and the fire's heat rises through it to fire thousands of pots at once. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/sloped_climbing_kilns-v1.png",
+  "sha256": "6a1296203c56b765cfa52b3708f0ef62ae55817fd6bbced6c8237706ed0be0d3",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

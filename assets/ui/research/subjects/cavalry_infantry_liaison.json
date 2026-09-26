@@ -1,0 +1,14 @@
+{
+  "id": "cavalry_infantry_liaison",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fd163004-31de-455c-9ef5-3f10889d34ef.png",
+  "source_file": "exec-fd163004-31de-455c-9ef5-3f10889d34ef.png",
+  "creative_brief": "Cavalry and infantry liaison in battle. Show the people, tools and materials of this practice in a guard post, camp or fortified place, classical antiquity.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/cavalry_infantry_liaison-v1.png",
+  "sha256": "4df2a11e2513ac7a579dc3837aae6e53ac00e3d5a3c2777da0c91fef22bc0dca",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

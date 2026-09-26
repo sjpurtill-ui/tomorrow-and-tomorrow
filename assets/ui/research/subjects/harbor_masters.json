@@ -1,0 +1,14 @@
+{
+  "id": "harbor_masters",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-62b9d193-51f7-4e4d-8aa0-cddda8f0e05b.png",
+  "source_file": "exec-62b9d193-51f7-4e4d-8aa0-cddda8f0e05b.png",
+  "creative_brief": "A harbor master gives each ship its berth and its turn to load, and the quays stop clogging. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/harbor_masters-v1.png",
+  "sha256": "7e9e33393c29c3be6f7dca56bab4c6bae298609e038bdedc13ab167c160f14ae",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

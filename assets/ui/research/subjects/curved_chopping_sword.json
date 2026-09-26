@@ -1,0 +1,14 @@
+{
+  "id": "curved_chopping_sword",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-077d20b5-9b34-4d04-8422-01030c17a1c2.png",
+  "source_file": "exec-077d20b5-9b34-4d04-8422-01030c17a1c2.png",
+  "creative_brief": "A forward-curved iron blade falls like a cleaver and bites through shield rims. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/curved_chopping_sword-v1.png",
+  "sha256": "2fe0517e054145ebf394a679295f9a3da7b4603069770e93bf79cc2ea474f27c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

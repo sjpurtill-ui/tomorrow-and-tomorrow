@@ -91,7 +91,7 @@ func run()->void:
 		while not mesh.advance(5000):await get_tree().process_frame
 		terrain._install_regional_patch({"mesh":mesh.commit(),"center":mesh.center,"span":mesh.span,"resolution":mesh.resolution,"heights":mesh.heights})
 		if mode==0:terrain._build_water()
-		for material:ShaderMaterial in terrain.terrain_fog_materials:material.set_shader_parameter("fog_current_origin",Vector2(-2000,1000))
+		for material:ShaderMaterial in terrain.terrain_fog_materials.live_materials():material.set_shader_parameter("fog_current_origin",Vector2(-2000,1000))
 		terrain.coastal_water_material.set_shader_parameter("wave_speed",0.0)
 		terrain.ocean_surface.material_override.set_shader_parameter("wave_speed",0.0)
 		await settle();var picture:=canvas.get_texture().get_image();picture.save_png(output+"fog-"+str(mode)+".png");concealed.append(picture.get_data())
@@ -100,7 +100,7 @@ func run()->void:
 	var edge:=Vector2(terrain.world_width*.5,0);var build:=BUILDER.new(33,2,edge,func(_x:float,_z:float)->float:return .2,func(_x:float,_z:float,_h:float)->Color:return Color(.4,.3,.2,0),func(_x:float,_z:float,_h:float)->Vector4:return Vector4(1.2,.8,.5,.3))
 	while not build.advance(5000):await get_tree().process_frame
 	terrain._install_regional_patch({"mesh":build.commit(),"center":edge,"span":2.0,"resolution":33,"heights":build.heights})
-	for material:ShaderMaterial in terrain.terrain_fog_materials:material.set_shader_parameter("discovery_mask",white_fog())
+	for material:ShaderMaterial in terrain.terrain_fog_materials.live_materials():material.set_shader_parameter("discovery_mask",white_fog())
 	camera.position=Vector3(edge.x,10,0);camera.look_at(Vector3(edge.x,0,0),Vector3.FORWARD)
 	await settle();var boundary:=canvas.get_texture().get_image();boundary.save_png(output+"planet-edge.png")
 	terrain.regional_terrain_patch.visible=false;await settle();var ocean:=canvas.get_texture().get_image()

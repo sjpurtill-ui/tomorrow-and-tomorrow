@@ -1,0 +1,14 @@
+{
+  "id": "bowshot_tower_spacing",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8c7ee8ee-34b8-4524-8d55-5ce40a479452.png",
+  "source_file": "exec-8c7ee8ee-34b8-4524-8d55-5ce40a479452.png",
+  "creative_brief": "Towers stand a bowshot apart, so archers can sweep every stretch of wall from the side. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/bowshot_tower_spacing-v1.png",
+  "sha256": "03797579d44749eb548335dc8f805a45e9f440b00c600cddab54471b0d428d1e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

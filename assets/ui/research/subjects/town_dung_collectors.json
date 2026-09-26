@@ -1,0 +1,14 @@
+{
+  "id": "town_dung_collectors",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4a22e4a5-be19-4a2a-9eb7-11b6d22c3ea1.png",
+  "source_file": "exec-4a22e4a5-be19-4a2a-9eb7-11b6d22c3ea1.png",
+  "creative_brief": "Hired collectors carry the town's dung and refuse out through the gates and sell it to farmers. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/town_dung_collectors-v1.png",
+  "sha256": "f5438d234b2b64a2feff52621c781bf7bd44acbb7294d53c6efc9d3227d6fc65",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

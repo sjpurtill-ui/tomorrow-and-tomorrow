@@ -1,0 +1,14 @@
+{
+  "id": "offering_birth_counts",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3c195d9c-4fda-4e50-b377-845ee8ff4ba0.png",
+  "source_file": "exec-3c195d9c-4fda-4e50-b377-845ee8ff4ba0.png",
+  "creative_brief": "Temple keepers count births by the coins and cakes offered at the shrine. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/offering_birth_counts-v1.png",
+  "sha256": "2243b1ebd79188a1a0da72bb82808850a15de9855df8974b08bf075fc5727c14",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

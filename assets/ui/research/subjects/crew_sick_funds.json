@@ -1,0 +1,14 @@
+{
+  "id": "crew_sick_funds",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c6074ff4-cfb9-479e-a474-14d3600cb9f0.png",
+  "source_file": "exec-c6074ff4-cfb9-479e-a474-14d3600cb9f0.png",
+  "creative_brief": "Each man drops a small coin in the crew's jar on payday, and a man down with fever draws from it until he mends. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/crew_sick_funds-v1.png",
+  "sha256": "93cc5bf9c12c845c832e10d07be035ac001d40a92d2f4c2747235919fa5061f1",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
