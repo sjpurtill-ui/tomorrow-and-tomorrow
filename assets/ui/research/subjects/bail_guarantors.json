@@ -1,0 +1,14 @@
+{
+  "id": "bail_guarantors",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c581bccb-1aa0-4d89-9fbd-94032a33d778.png",
+  "source_file": "exec-c581bccb-1aa0-4d89-9fbd-94032a33d778.png",
+  "creative_brief": "Friends stand as guarantors for an accused man, and he stays free until his trial. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/bail_guarantors-v1.png",
+  "sha256": "0c2ad78f040784912b57f50590a2238490e2feed821f0279094d7ebea6090ea1",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

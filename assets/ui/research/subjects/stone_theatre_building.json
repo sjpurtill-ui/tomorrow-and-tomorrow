@@ -1,0 +1,14 @@
+{
+  "id": "stone_theatre_building",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b06c3a8f-c77c-4e94-8d10-71b04b4bc865.png",
+  "source_file": "exec-b06c3a8f-c77c-4e94-8d10-71b04b4bc865.png",
+  "creative_brief": "Stone seats rise in a great half-bowl, and ten thousand hear an actor's whisper. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/stone_theatre_building-v1.png",
+  "sha256": "52153473a8866d34c77789af015e5ca7217d50f0d277eb6a70be620a7293b463",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

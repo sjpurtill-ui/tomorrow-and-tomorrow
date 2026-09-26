@@ -1,0 +1,14 @@
+{
+  "id": "wound_classification",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8db3ff44-7156-4039-b495-26ec0b55e9c0.png",
+  "source_file": "exec-8db3ff44-7156-4039-b495-26ec0b55e9c0.png",
+  "creative_brief": "Wounds are classed by weapon, place struck and depth, and each class has its own treatment. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/wound_classification-v1.png",
+  "sha256": "bde16282cc1cc2eac9f9531f8e2c1000d162b3cb018f2646f5ac69948cf05d1d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

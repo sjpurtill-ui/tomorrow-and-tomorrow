@@ -1,0 +1,14 @@
+{
+  "id": "dried_noodle_strips",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2fd4054d-e501-43e2-a5cb-90fe27634c70.png",
+  "source_file": "exec-2fd4054d-e501-43e2-a5cb-90fe27634c70.png",
+  "creative_brief": "Dough rolled thin and cut into strips is dried on racks and keeps for months. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/dried_noodle_strips-v1.png",
+  "sha256": "c52945976d383aededd027e24ee977ab0ee2bcbb30b308ca0c5591127e48c86c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
