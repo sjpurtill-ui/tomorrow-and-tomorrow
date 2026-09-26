@@ -108,7 +108,7 @@ func test_toolbar_words_are_the_peoples()->void:
 	assert_str(EraWords.scouts_out(1)).is_equal("⌖ ONE WALKER OUT")
 	for word in EraWords.DISTANCE_WORDS:
 		assert_str(String(word)).not_contains("ft")
-	assert_str(EraWords.babes_lost_short(300.0)).is_equal("30 in 100 lost")
+	assert_str(EraWords.babes_lost_short(300.0)).is_equal("30 in 100 babes lost")
 
 
 func test_a_rumored_people_is_never_the_the()->void:

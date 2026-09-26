@@ -1,20 +1,15 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 ## The Chronicle rail entry: one readable feed of what has happened to the
-## people. Tab one holds moments and notices; tab two adds the seasons' tallies.
+## people. It tells the story (moments and notices); one labelled checkbox in
+## the feed adds every season's tally. No tabs, no counting tiles.
 const Chronicle:=preload("res://scripts/chronicle.gd")
 
 func meta()->Dictionary:
 	var voice:=Chronicle.voice()
-	return {"eyebrow":"THE STORY OF THE PEOPLE","title":String(voice.feed),"subtabs":["THE STORY","EVERY SEASON"]}
+	return {"eyebrow":"THE STORY OF THE PEOPLE","title":String(voice.feed),"subtabs":[]}
 
-func tab(sub:int)->Dictionary:
-	var voice:=Chronicle.voice()
-	var entries:=Chronicle.entries("notice" if sub==0 else "whisper")
-	var moments:=0
-	for e in entries:
-		if String((e as Dictionary).get("tier",""))=="moment":moments+=1
-	var told:=[{"label":"MOMENTS","value":str(moments),"note":"Remembered with a card"},{"label":"TOLD","value":str(entries.size()),"note":"Entries in this view"}]
-	return {"blocks":[{"type":"tiles","columns":2,"items":told},{"type":"chronicle_feed","entries":entries,"voice":voice}]}
+func tab(_sub:int)->Dictionary:
+	return {"blocks":[{"type":"chronicle_feed","entries":Chronicle.entries("whisper"),"voice":Chronicle.voice()}]}
 
 func signature()->Array:
 	var entries:Array=GameState.chronicle.get("entries",[])

@@ -84,17 +84,20 @@ const WORDS:={
 		"rail.government":"Chiefs","rail.inquiry":"Lore","rail.production":"Crafts","rail.military":"Warriors","rail.wealth":"Exchange",
 		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIVES","kpi.science":"LORE","kpi.gdp":"HANDS AT WORK",
 		"scope":"All our hearths","place":"hearth","places":"hearths",
+		"chronicle.caption":"Great moments told at the fire, and smaller things remembered.","chronicle.tallies":"Show every season's tally",
 	},
 	"lettered":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Ledgers",
 		"rail.inquiry":"Learning","rail.production":"Crafts",
 		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"GOODS","kpi.health":"LIVES","kpi.science":"LEARNING","kpi.gdp":"DAILY LABOUR",
 		"scope":"All our towns","place":"town","places":"towns",
+		"chronicle.caption":"Great moments entered in the annals, and lesser things noted.","chronicle.tallies":"Show every season's register",
 	},
 	"reckoned":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Ledgers",
 		"kpi.population":"POPULATION","kpi.food":"FOOD","kpi.water":"WATER","kpi.goods":"GOODS","kpi.health":"HEALTH","kpi.science":"SCIENCE","kpi.gdp":"REAL GDP / DAY",
 		"scope":"Entire civilization","place":"city","places":"cities",
+		"chronicle.caption":"Major events and notable news, newest first.","chronicle.tallies":"Show every season's report",
 	},
 }
 

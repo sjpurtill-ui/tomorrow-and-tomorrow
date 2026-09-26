@@ -102,6 +102,15 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 	await _open(ChronicleDock.new(null,hud))
 	var feed:Node=panel.body.find_child("ChronicleFeed",true,false)
 	assert_object(feed).is_not_null()
+	Chronicle.record({"key":"tally:1","title":"Season tally","text":"Notches cut.","tier":"whisper","kind":"story","day":69})
+	await _open(ChronicleDock.new(null,hud))
+	feed=panel.body.find_child("ChronicleFeed",true,false)
+	# One feed, no tabs: the story hides the season tallies until asked.
+	assert_bool(panel.tabs_row.visible).is_false()
+	var total:int=(feed.data.entries as Array).size()
+	assert_int(feed.visible_entries().size()).is_equal(total-1)
+	feed.tallies_check.button_pressed=true
+	assert_int(feed.visible_entries().size()).is_equal(total)
 	# Open older tales; a refresh must not fold them away again.
 	feed.shown+=feed.PAGE;feed._fill()
 	await _frames(6)
@@ -115,6 +124,7 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 		assert_int(absi(panel.body_scroll.scroll_vertical-middle)).is_less_equal(3)
 	feed=panel.body.find_child("ChronicleFeed",true,false)
 	assert_int(int(feed.shown)).is_equal(int(feed.PAGE)*2)
+	assert_bool(feed.show_tallies).is_true()
 
 func test_the_people_update_in_place_keeping_scene_card_and_place()->void:
 	var provider:=PeopleDock.new(null,hud)
