@@ -1,38 +1,62 @@
 extends VBoxContainer
-## The Chronicle feed: moments and notices as the story of the people, newest
-## first, grouped by year. Seasonal tallies (whispers) appear only when asked.
+## The Chronicle feed: the story of the people, newest first, grouped by year.
+## Moments are large picture cards; notices are compact lines. Seasonal tallies
+## (whispers) join the feed only when the one checkbox asks for them.
 ## Wording follows the era: hearth-tales and tally-marks, later the annals.
 
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Card:=preload("res://scripts/hud/chronicle_card.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const PAGE:=40
 
 var data:Dictionary={}
 var shown:=PAGE
+var show_tallies:=false
 var list:VBoxContainer
+var tallies_check:CheckBox
 
 
 func setup(block:Dictionary)->void:
 	data=block;name="ChronicleFeed";add_theme_constant_override("separation",10)
 	var voice:Dictionary=block.get("voice",Chronicle.voice())
-	var intro:=T.make_label(String(voice.get("subtitle","")),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(intro)
+	var intro:=T.make_label(EraWords.word("chronicle.caption",String(voice.get("subtitle",""))),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(intro)
+	tallies_check=CheckBox.new();tallies_check.name="ShowTallies"
+	tallies_check.text=EraWords.word("chronicle.tallies",String(voice.get("show_whispers","Show every season's tally")))
+	tallies_check.add_theme_font_size_override("font_size",12);tallies_check.add_theme_color_override("font_color",T.TEXT_SOFT)
+	tallies_check.button_pressed=show_tallies
+	tallies_check.toggled.connect(func(on:bool)->void:show_tallies=on;_fill())
+	add_child(tallies_check)
 	list=VBoxContainer.new();list.add_theme_constant_override("separation",8);add_child(list)
 	_fill()
 
 
 ## Kept across a live refresh (see view_state.gd): how far back the reader has
-## opened the feed.
-func view_state()->Dictionary:return {"shown":shown}
+## opened the feed, and whether the season tallies are shown.
+func view_state()->Dictionary:return {"shown":shown,"tallies":show_tallies}
 func restore_view_state(state:Dictionary)->void:
 	var wanted:=int(state.get("shown",PAGE))
-	if wanted!=shown:shown=wanted;_fill()
+	var tallies:=bool(state.get("tallies",false))
+	if wanted==shown and tallies==show_tallies:return
+	shown=wanted;show_tallies=tallies
+	if tallies_check!=null:tallies_check.set_pressed_no_signal(tallies)
+	_fill()
+
+
+## The entries in the current view: the story alone, or with every tally.
+func visible_entries()->Array:
+	var all:Array=data.get("entries",[])
+	if show_tallies:return all
+	var story:Array=[]
+	for e in all:
+		if String((e as Dictionary).get("tier","notice"))!="whisper":story.append(e)
+	return story
 
 
 func _fill()->void:
 	for child in list.get_children():list.remove_child(child);child.queue_free()
-	var entries:Array=data.get("entries",[])
+	var entries:Array=visible_entries()
 	var voice:Dictionary=data.get("voice",Chronicle.voice())
 	if entries.is_empty():
 		var quiet:=T.make_label("Nothing has been told yet. The story of the people begins at the first fire.",13,T.TEXT_SOFT)
@@ -78,7 +102,7 @@ func _moment(entry:Dictionary,voice:Dictionary)->void:
 func _notice(entry:Dictionary)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);list.add_child(row)
 	var kind:=String(entry.get("kind","story"))
-	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(40,40);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(28,28);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.texture=Icons.moment_texture(kind,Card.ACCENTS.get(kind,Color("e1c27a")),56)
 	row.add_child(mark)
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",2);row.add_child(copy)
