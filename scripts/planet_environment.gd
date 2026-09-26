@@ -7,6 +7,7 @@ extends Node
 const PLANET_WIDTH_KM:=40075.0
 const PLANET_DEPTH_KM:=20004.0
 const SEA_LEVEL:=0.0
+const COAST_SHAPE:=preload("res://scripts/coast_shape.gd")
 
 var _configured_seed:=2147483647
 var _continent:=FastNoiseLite.new()
@@ -76,15 +77,18 @@ func _world_height_unchecked(position:Vector2)->float:
 	continental+=_continent.get_noise_2d(x*0.47+7813.0,z*0.47-4197.0)*0.34
 	var cradle:=exp(-pow(x/1150.0,2.0)-pow(z/880.0,2.0))*1.05
 	var land_signal:=continental+cradle-0.075-pow(latitude,3.2)*0.72
-	if land_signal<=0.0: return -0.06-pow(-land_signal,1.22)*6.8
+	# Same shared coastline as LocalTerrain._world_height_at.
+	land_signal=COAST_SHAPE.roughen(land_signal,x,z,_terrain,_detail)
+	if land_signal<=0.0: return COAST_SHAPE.sea_height(land_signal)
+	var shore_relief:=COAST_SHAPE.relief_weight(land_signal)
 	var rolling:=_terrain.get_noise_2d(x,z)
 	var local_detail:=_detail.get_noise_2d(x,z)
 	var hill_signal:=maxf(0.0,_terrain.get_noise_2d(x+820.0,z-460.0)+0.10)
 	var ridge:=1.0-absf(_mountains.get_noise_2d(x,z))
 	ridge=pow(clampf((ridge-0.34)/0.66,0.0,1.0),2.35)
 	var belt:=clampf((_mountains.get_noise_2d(x*0.41+9200.0,z*0.41-3800.0)+0.18)*1.55,0.0,1.0)
-	var height:=0.06+land_signal*1.48+rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4
-	return height+_mountain_relief.height_at(x,z,ridge*belt*8.4)*smoothstep(.2,.8,height)
+	var height:=COAST_SHAPE.land_base(land_signal)+(rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4)*shore_relief
+	return height+_mountain_relief.height_at(x,z,ridge*belt*8.4*shore_relief)*smoothstep(.2,.8,height)
 
 
 func is_land(position:Vector2)->bool:

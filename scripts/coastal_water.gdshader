@@ -15,6 +15,7 @@ varying vec2 surface_position;
 uniform vec2 surface_origin = vec2(0.0);
 uniform vec4 wave_phase = vec4(0.0);
 uniform vec2 ripple_phase = vec2(0.0);
+#include "res://scripts/coast_mask.gdshaderinc"
 
 // This is the alternating triangle interpolation of TerrainPatchBuilder, not
 // bilinear interpolation or a second noise field. Heights and distances are km.
@@ -40,25 +41,45 @@ void vertex() {
 }
 
 void fragment() {
+	// Before any discard (derivatives are undefined once a quad diverges).
+	float pixel_world = max(length(dFdx(relative_position.xz)),length(dFdy(relative_position.xz)));
 	vec2 point = surface_position;
 	vec2 local_grid = terrain_grid.xy-surface_origin;
 	if (!regional_surface && terrain_grid.z>0.0 &&
 		max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))<terrain_grid.z*0.5) { discard; }
+	// Land and water agree across LODs: beyond the streamed patch, and where its
+	// soft margin gives way, the macro raster decides the shoreline, exactly as
+	// it does for the coarse planet mesh (which draws there).
+	if (coast_mask_ready()) {
+		bool raster_decides = !regional_surface
+			|| (terrain_grid.z>0.0 && coast_patch_yields(world_position.xz, vec4(terrain_grid.xy, terrain_grid.z, 1.0)));
+		if (raster_decides && coast_mask_height(world_position.xz) > 0.0) { discard; }
+	}
 	vec2 uv = clamp(world_position.xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
 	float current_visibility = 1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float visible = smoothstep(0.06,0.62,max(texture(discovery_mask,uv).r,current_visibility));
 	float depth = 1.0;
 	float surveyed_surface = 0.0;
+	float patch_weight = 0.0;
+	float patch_depth = 1.0;
 	if (terrain_grid.z>0.0 && terrain_grid.w>=2.0) {
 		float edge = max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))/terrain_grid.z*2.0;
 		if (edge<=1.0) {
-			depth = max(sea_level-visible_ground(point),0.0);
+			patch_depth = max(sea_level-visible_ground(point),0.0);
 			// The regional patch extends beyond the camera. Fade its *color* at the
 			// outer margin; do not draw an invented shallow rim at a texture edge.
-			surveyed_surface = 1.0-smoothstep(0.84,1.0,edge);
+			patch_weight = 1.0-smoothstep(0.70,0.95,edge);
 		}
 	}
-	float pixel_world = max(length(dFdx(relative_position.xz)),length(dFdy(relative_position.xz)));
+	if (coast_mask_ready()) {
+		// Beyond the streamed bathymetry the macro raster supplies the shelf, so
+		// the coast keeps its shallows instead of turning deep at a square edge.
+		depth = mix(max(sea_level-coast_mask_height(world_position.xz),0.0),patch_depth,patch_weight);
+		surveyed_surface = 1.0;
+	} else {
+		depth = patch_depth;
+		surveyed_surface = patch_weight;
+	}
 	// At continental distances the streamed bathymetry covers less than the
 	// view. Resolve to ocean color before its moving patch can read as a square.
 	surveyed_surface *= 1.0-smoothstep(0.15,0.65,pixel_world);
@@ -101,9 +122,13 @@ void fragment() {
 	// irregular mineral tint visible in aerial imagery without animating the bed.
 	float sediment = 0.0;
 	if (surveyed_surface>0.0 && depth<0.15) {
-		float sediment_field = 0.5+0.28*sin(dot(point,vec2(1.7,0.8))+wave_phase.z)
-			+0.22*sin(dot(point,vec2(-0.55,1.25))+wave_phase.w);
-		sediment = exp(-depth/0.034)*surveyed_surface*clamp(sediment_field,0.0,1.0);
+		// World-anchored value noise. The former pair of crossed sine waves drew a
+		// regular ~4 km lattice of blotches over every shelf, which read as a
+		// cloud texture laid across the sea at regional zoom.
+		float sediment_field = coast_feather_noise(world_position.xz*0.23+vec2(41.0,-17.0));
+		// Plumes are a close-view cue; at regional footprints they only mottle.
+		sediment = exp(-depth/0.034)*surveyed_surface*smoothstep(0.30,0.75,sediment_field)
+			*(1.0-smoothstep(0.03,0.12,pixel_world));
 	}
 	water = mix(water,vec3(0.315,0.335,0.245),sediment*0.42);
 	// Only an actual shallow bed can produce a narrow wash. Filter it out before
