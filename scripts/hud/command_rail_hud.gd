@@ -72,6 +72,8 @@ var toolbar_action_buttons:Dictionary={}
 var scale_line:ColorRect
 var scale_label:Label
 var compass_label:Button
+## The one hover card for the whole top bar (hud/hover_card.gd).
+var hover_cards:CanvasLayer
 
 var dock:PanelContainer
 var detail_dock:PanelContainer
@@ -499,7 +501,7 @@ func _build_time_pill()->void:
 	time_text.autowrap_mode=TextServer.AUTOWRAP_OFF
 	time_text.scroll_active=false
 	time_text.custom_minimum_size=Vector2(166,28)
-	time_text.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	time_text.mouse_filter=Control.MOUSE_FILTER_PASS
 	time_text.add_theme_font_size_override("normal_font_size",15)
 	time_text.add_theme_font_size_override("bold_font_size",15)
 	row.add_child(time_text)
@@ -531,11 +533,38 @@ func _build_time_pill()->void:
 		button.text=["","½h","2h","8h","1d","3d"][speed]
 		button.custom_minimum_size=Vector2(32,26)
 		button.add_theme_font_size_override("font_size",10)
-		button.tooltip_text=SPEED_TOOLTIPS[speed]+" · keyboard %d"%speed
 		button.pressed.connect(_on_speed_pressed.bind(speed))
 		speed_row.add_child(button)
 		speed_buttons.append(button)
 	_style_speed_controls(0)
+	var host:=_hover_host()
+	host.attach(time_text,_time_card)
+	for index:int in speed_buttons.size():host.attach(speed_buttons[index],_speed_card.bind(index))
+
+## The hover card host, made on first use (tests build parts of the bar alone).
+func _hover_host()->CanvasLayer:
+	if not is_instance_valid(hover_cards):
+		hover_cards=preload("res://scripts/hud/hover_card.gd").new()
+		add_child(hover_cards)
+	return hover_cards
+
+func _time_card()->Dictionary:
+	if terrain==null:return {}
+	var day:=int(floor(GameState.elapsed_days))
+	return {"kicker":"The day","value":"Year %d · Day %d" % [day/365+1,day%365+1],
+		"headline":"%s at the hearth today. The year's warm and cold decide how much the land yields and how much the people must eat." % _temperature_text().rstrip(" →↑↓"),
+		"facts":[{"text":"Warming day by day" if _temperature_text().ends_with("↑") else "Cooling day by day" if _temperature_text().ends_with("↓") else "Much like yesterday","trend":1 if _temperature_text().ends_with("↑") else -1 if _temperature_text().ends_with("↓") else 0,"good":true}],
+		"action":"Keys 0–5 stop time or set its pace"}
+
+const SPEED_WORDS:Array[String]=["Time stands still","Half an hour a moment","Two hours a moment","A third of a day a moment","A day a moment","Three days a moment"]
+
+func _speed_card(index:int)->Dictionary:
+	var paused:=terrain!=null and int(terrain.game_speed)==0
+	if index==0:
+		return {"kicker":"Resume" if paused else "Stop time","value":"Paused" if paused else "Stop",
+			"headline":"The world waits while you look and think." if not paused else "Time waits for you; press to let it run again at %s." % SPEED_WORDS[last_running_speed].to_lower(),
+			"action":"Key 0"}
+	return {"kicker":"Pace","value":SPEED_WORDS[index],"headline":"How fast the days pass while you watch; slower paces let you follow each day's work.","action":"Key %d" % index}
 
 func _on_speed_pressed(speed:int)->void:
 	if terrain and terrain.has_method("_set_game_speed"):
@@ -547,7 +576,6 @@ func _style_speed_controls(selected:int)->void:
 	speed_selector.select(selected)
 	var paused:=selected==0
 	pause_button.text="▶" if paused else "Ⅱ"
-	pause_button.tooltip_text="Resume at %s" % SPEED_TOOLTIPS[last_running_speed] if paused else "Pause · 0"
 	for index:int in speed_buttons.size():
 		var button:=speed_buttons[index]
 		var active:=index==selected
@@ -604,6 +632,7 @@ func _build_kpi_strip()->void:
 		chip.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		chip.pressed.connect(func()->void: section_requested.emit(String(def.section),int(def.sub)))
 		row.add_child(chip)
+		_hover_host().attach(chip,chip.hover_spec)
 		var inner:=HBoxContainer.new()
 		inner.set_anchors_preset(Control.PRESET_FULL_RECT)
 		# A gutter on the right keeps a chip's last word off the next caption.
@@ -651,7 +680,6 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	# A warning note tints the chip's accent bar too, so it reads at a glance.
 	if parts.has("accent"):(parts.accent as ColorRect).color=Tokens.RED if delta_color==Tokens.RED else parts.accent_color
 	var chip:Button=parts.chip
-	chip.tooltip_text="View details"
 	# Width is intentionally independent of live text so a deficit cannot move
 	# the complete top bar. Hover details read fresh state when opened.
 	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),KPI_HEIGHT)
@@ -1076,7 +1104,6 @@ func _refresh_time()->void:
 	if signature==_time_signature: return
 	_time_signature=signature
 	time_text.text="[b][color=#%s]Year %d · Day %d[/color][/b][color=#%s] · %s[/color]" % [Tokens.INK.to_html(false),year,day_of_year,Tokens.TEXT_SOFT.to_html(false),temperature_text]
-	time_pill.tooltip_text="Local air temperature at the settlement. The annual warm–cold cycle drives food yields and cold-season rations; the arrow is the day-to-day trend."
 	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()

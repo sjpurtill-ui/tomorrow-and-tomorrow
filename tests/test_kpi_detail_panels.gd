@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
 const Data=preload("res://scripts/hud/kpi_detail_data.gd")
 const Chip=preload("res://scripts/hud/kpi_detail_chip.gd")
+const HoverCard=preload("res://scripts/hud/hover_card.gd")
 class HeaderTerrain extends Node:
 	var game_speed:float=1.0
 	func site_temperature_c(_day:float=-1.0)->float:return 20.0
@@ -18,13 +19,65 @@ func before_test()->void:
 	GameState.settlement_completed=["Hearth Circle"]
 	SettlementModel.ensure_founded()
 func test_all_six_panels_have_structured_data_and_build()->void:
-	var chip=auto_free(Chip.new());add_child(chip)
 	for id in ["population","food","water","health","science","gdp"]:
 		var data:=Data.snapshot(id)
 		assert_str(data.title).is_not_empty()
 		assert_int(data.rows.size()).is_greater_equal(1)
-		var panel=auto_free(chip.detail_panel(data));add_child(panel)
-		assert_int(panel.get_child_count()).is_greater(0)
+
+## Hover cards are a glance: a headline sentence, at most four facts, no
+## city-by-city table, and never taller than a third of the design screen.
+func test_hover_cards_are_small_readable_cards()->void:
+	var chip=auto_free(Chip.new());add_child(chip)
+	for id in ["population","food","water","goods","health","science","gdp"]:
+		chip.metric_id=id
+		var spec:Dictionary=chip.hover_spec()
+		assert_str(String(spec.headline)).is_not_empty()
+		assert_int((spec.facts as Array).size()).is_less_equal(HoverCard.MAX_FACTS)
+		for fact:Dictionary in spec.facts:assert_str(String(fact.text)).is_not_empty()
+		var host=auto_free(HoverCard.new());add_child(host)
+		host.show_for(chip,chip.hover_spec)
+		assert_bool(host.card.visible).is_true()
+		assert_float(host.card.size.x).is_equal(HoverCard.WIDTH)
+		assert_float(host.card.size.y).is_less(360.0)
+		assert_bool(host.card.mouse_filter==Control.MOUSE_FILTER_IGNORE).is_true()
+
+func test_hover_card_stays_on_screen_under_its_anchor()->void:
+	var view:=Vector2(1600,900)
+	var size:=Vector2(300,220)
+	# Under the chip, left edges aligned.
+	var chip:=Rect2(800,6,120,46)
+	var at:=HoverCard.place(chip,size,view)
+	assert_vector(at).is_equal(Vector2(800,60))
+	assert_bool(Rect2(at,size).intersects(chip)).is_false()
+	# Near the right edge it flips to right-align with the chip, still on screen.
+	var right_chip:=Rect2(1480,6,112,46)
+	at=HoverCard.place(right_chip,size,view)
+	assert_float(at.x+size.x).is_equal(right_chip.end.x)
+	assert_bool(Rect2(Vector2.ZERO,view).encloses(Rect2(at,size))).is_true()
+	assert_bool(Rect2(at,size).intersects(right_chip)).is_false()
+	# Near the bottom it opens above.
+	var low:=Rect2(700,820,100,40)
+	at=HoverCard.place(low,size,view)
+	assert_float(at.y+size.y).is_less_equal(low.position.y)
+
+func test_hover_host_opens_once_and_switches_without_stacking()->void:
+	var host=auto_free(HoverCard.new());add_child(host)
+	var a:Button=auto_free(Chip.new());a.metric_id="food";add_child(a)
+	var b:Button=auto_free(Chip.new());b.metric_id="water";add_child(b)
+	host.attach(a,a.hover_spec);host.attach(b,b.hover_spec)
+	assert_str(a.tooltip_text).is_empty()
+	host._on_enter(a,a.hover_spec)
+	assert_bool(host.card.visible).is_false()
+	host._on_open_timeout()
+	assert_bool(host.is_open()).is_true()
+	assert_object(host.anchor).is_same(a)
+	# Moving to the neighbour switches at once; one card node, one card shown.
+	host._on_exit(a);host._on_enter(b,b.hover_spec)
+	assert_object(host.anchor).is_same(b)
+	assert_int(host.find_children("HoverCard","",true,false).size()).is_equal(1)
+	host._on_exit(b)
+	host.hide_card()
+	assert_bool(host.card.visible).is_false()
 func test_food_net_is_rations_not_production_ratio()->void:
 	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_balance":0.25,"food_net":-7.5,"food_intake_ratio":0.8}
 	var data:=Data.snapshot("food")
