@@ -1,0 +1,14 @@
+{
+  "id": "mine_lease_labor",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5c251eba-c5c1-4b20-bda9-cda6ae6ac93f.png",
+  "source_file": "exec-5c251eba-c5c1-4b20-bda9-cda6ae6ac93f.png",
+  "creative_brief": "The city leases each gallery to a man who hires his own diggers and pays the city a share of the ore. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mine_lease_labor-v1.png",
+  "sha256": "bb222c747f52acc113f3cbbaa28ed8075437d390f354febf2892fe8c4ddb8f8d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

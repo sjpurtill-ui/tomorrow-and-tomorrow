@@ -1,0 +1,14 @@
+{
+  "id": "end_of_term_audits",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e05aea75-150e-4ce9-80e7-2f93163e7cfc.png",
+  "source_file": "exec-e05aea75-150e-4ce9-80e7-2f93163e7cfc.png",
+  "creative_brief": "No magistrate may leave office until auditors have checked every coin and measure of grain he handled. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/end_of_term_audits-v1.png",
+  "sha256": "976359dfc6c87a756e162432be573712e968bc422f2dba4f0d554b6b6e2c0eba",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

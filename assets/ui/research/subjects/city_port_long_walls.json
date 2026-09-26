@@ -1,0 +1,14 @@
+{
+  "id": "city_port_long_walls",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2da6faf4-442b-4fef-9039-1ed098dcaae2.png",
+  "source_file": "exec-2da6faf4-442b-4fef-9039-1ed098dcaae2.png",
+  "creative_brief": "Two long walls run from the city to its harbor, so it can be fed by sea while an army camps outside. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/city_port_long_walls-v1.png",
+  "sha256": "9e34a735ada051e2497320a80aa50f0f07429eb23e7b7ce7fdf894f974aaaf0b",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
