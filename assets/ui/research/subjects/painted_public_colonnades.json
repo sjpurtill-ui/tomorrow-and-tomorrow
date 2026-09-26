@@ -1,0 +1,14 @@
+{
+  "id": "painted_public_colonnades",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f9d6d3e5-5a4e-47f2-bef9-9523848d36f0.png",
+  "source_file": "exec-f9d6d3e5-5a4e-47f2-bef9-9523848d36f0.png",
+  "creative_brief": "Long colonnades painted with battles and myths serve as the town's meeting place. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/painted_public_colonnades-v1.png",
+  "sha256": "719d3d01fe57189dbb0c27f2203b8ed90bccf27ede9129e931acf122a20bfff3",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

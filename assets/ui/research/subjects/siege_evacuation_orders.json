@@ -1,0 +1,14 @@
+{
+  "id": "siege_evacuation_orders",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d3729af6-fe33-45be-83ec-4f865a8c3072.png",
+  "source_file": "exec-d3729af6-fe33-45be-83ec-4f865a8c3072.png",
+  "creative_brief": "Before the siege closes, the children, the old and the herds are sent away to allied towns. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/siege_evacuation_orders-v1.png",
+  "sha256": "68cc82be8075eef7ac755b1e2716d0db08bedfc3195d7ff7876dad46ef92875c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

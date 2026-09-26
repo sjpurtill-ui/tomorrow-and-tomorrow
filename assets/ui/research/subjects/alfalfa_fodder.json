@@ -1,0 +1,14 @@
+{
+  "id": "alfalfa_fodder",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4c240e7e-1a14-4aad-ac8a-8b5a1895a91a.png",
+  "source_file": "exec-4c240e7e-1a14-4aad-ac8a-8b5a1895a91a.png",
+  "creative_brief": "A deep-rooted fodder brought from far lands is cut five times a year for horses and leaves the field richer. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/alfalfa_fodder-v1.png",
+  "sha256": "c2b2177fe17db830f12ac3b56162daccdc3b34932ba9c4650ec0c68a7998bfc6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

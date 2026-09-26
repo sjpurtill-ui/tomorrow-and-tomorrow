@@ -1,0 +1,14 @@
+{
+  "id": "incommensurable_lengths",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9017f3f8-a7d2-4eda-9372-ee9d79820bfc.png",
+  "source_file": "exec-9017f3f8-a7d2-4eda-9372-ee9d79820bfc.png",
+  "creative_brief": "The diagonal of a square is shown to share no measure with its side, however small the unit is made. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/incommensurable_lengths-v1.png",
+  "sha256": "9502fa6bb5173fcaf7cfd23ef0f1f836208a0c28d3c581af7259062e66c2c86c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

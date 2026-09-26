@@ -1,0 +1,14 @@
+{
+  "id": "hernia_trusses",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-354ac7ce-5cea-4789-a44d-293a99530f83.png",
+  "source_file": "exec-354ac7ce-5cea-4789-a44d-293a99530f83.png",
+  "creative_brief": "Padded bands and trusses hold ruptures in, so porters and ploughmen can keep working. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/hernia_trusses-v1.png",
+  "sha256": "d4f6d1bc8f1bd6dd190dfcbf57861fb593b5e7c78bded4947b7dae180ecafeca",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

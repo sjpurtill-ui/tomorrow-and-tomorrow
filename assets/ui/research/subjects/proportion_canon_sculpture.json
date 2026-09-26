@@ -1,0 +1,14 @@
+{
+  "id": "proportion_canon_sculpture",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-25116432-9114-466e-a6e2-0e51b8290611.png",
+  "source_file": "exec-25116432-9114-466e-a6e2-0e51b8290611.png",
+  "creative_brief": "Sculptors follow a canon in which each part of the body is a fixed fraction of the whole. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/proportion_canon_sculpture-v1.png",
+  "sha256": "0a32861c63b403ba7f14fd1df3279bcf88bc985e654314b298d8156e0c889fad",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "inscribed_treasury_accounts",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7d3d29b2-90eb-4be7-b9a5-2b35d0b32a7f.png",
+  "source_file": "exec-7d3d29b2-90eb-4be7-b9a5-2b35d0b32a7f.png",
+  "creative_brief": "The treasury's receipts and payments are cut in stone where every citizen may read them. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/inscribed_treasury_accounts-v1.png",
+  "sha256": "783943d660c2d5a03213897b7f4525f6bfa2a50390b6de5c407b75a2b5fcfd0d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

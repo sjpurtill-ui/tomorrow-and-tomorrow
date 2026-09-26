@@ -1,0 +1,14 @@
+{
+  "id": "nineteen_year_cycle",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7e415075-0567-4e95-b9f3-5bd98a3375eb.png",
+  "source_file": "exec-7e415075-0567-4e95-b9f3-5bd98a3375eb.png",
+  "creative_brief": "Seven extra months set into nineteen years keep the moon's months in step with the sun's seasons. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/nineteen_year_cycle-v1.png",
+  "sha256": "6265890efc6bd90d020b2721594b187489e82dfaed01d8193e2202eb9b0c8c81",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
