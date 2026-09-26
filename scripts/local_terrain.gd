@@ -13,6 +13,7 @@ const MAX_CLOSE_ARMY_FORMATIONS:=6
 var close_army_figures:Dictionary={}
 
 const FIT_CONTENT_PANEL:=preload("res://scripts/viewport_fit_panel.gd")
+const COAST_SHAPE:=preload("res://scripts/coast_shape.gd")
 const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
 const FoundingSiteAdvice:=preload("res://scripts/founding_site_advice.gd")
@@ -220,6 +221,7 @@ var map_selection_marker:MeshInstance3D
 var map_selection_generation:=0
 var settlement_visual_root: Node3D
 var detail_terrain_patch: MeshInstance3D
+var coast_mask_rasters:Array=[null,null]
 var close_terrain_job:RefCounted
 var close_terrain_last_slice_usec:=0
 var close_terrain_last_finish_usec:=0
@@ -920,6 +922,31 @@ func _capture_preview_if_requested() -> void:
 		# layout and canvas one real frame before the capture draw.
 		await get_tree().process_frame
 		await get_tree().process_frame
+	var capture_arguments:=OS.get_cmdline_user_args()
+	if "--capture-wait-macro" in capture_arguments:
+		# Terrain audits: let the per-seed macro rasters (and the shared coast
+		# mask built from them) land before the image, bounded to three minutes.
+		var macro_deadline:=Time.get_ticks_msec()+180000
+		while not macro_render.ready() and Time.get_ticks_msec()<macro_deadline:
+			await get_tree().process_frame
+		_sync_coast_mask()
+		print("CAPTURE MACRO READY: ",macro_render.ready())
+	for argument in capture_arguments:
+		if argument.begins_with("--capture-zoom-out="):
+			# Reproduce a zoom-out mid-stream: the finished patch is now smaller than
+			# the view while the wider patch is still being sampled.
+			camera.size=float(argument.trim_prefix("--capture-zoom-out="))
+			_update_camera()
+			_update_world_streaming()
+			for stream_frame in 4:
+				_advance_terrain_patch()
+				await get_tree().process_frame
+			_update_scale_lod()
+			print("CAPTURE MID-STREAM: patch_span=",regional_patch_span," pending=",terrain_patch_job!=null)
+	if "--capture-hide-ui" in capture_arguments:
+		# Terrain audits: hide every 2D layer (HUD, modals) so the map is visible.
+		for layer in get_tree().root.find_children("*","CanvasLayer",true,false):(layer as CanvasLayer).visible=false
+		await get_tree().process_frame
 	RenderingServer.force_sync()
 	RenderingServer.force_draw(true,0.0)
 	if capture_audit_root:
@@ -1023,6 +1050,7 @@ func _process(delta: float) -> void:
 	_update_world_streaming()
 	stamp=trace.mark("frame_world_streaming",stamp)
 	macro_render.tick(delta) # codex/terrain-bake: start/assemble off-thread rasters
+	_sync_coast_mask()
 	_advance_terrain_patch()
 	stamp=trace.mark("frame_terrain_patch",stamp)
 	# Scale visibility follows the camera every frame it moves; otherwise only
@@ -1677,15 +1705,19 @@ func _world_height_at(x: float,z: float) -> float:
 	continental += continent_noise.get_noise_2d(x*0.47+7813.0,z*0.47-4197.0)*0.34
 	var cradle := exp(-pow(x/1150.0,2.0)-pow(z/880.0,2.0))*1.05
 	var land_signal := continental+cradle-0.075-pow(latitude,3.2)*0.72
+	# One shared coastline (CoastShape): roughened near sea level, continuous
+	# across it, with land relief growing in from the shore.
+	land_signal=COAST_SHAPE.roughen(land_signal,x,z,terrain_noise,detail_noise)
 	if land_signal<=0.0:
-		return -0.06-pow(-land_signal,1.22)*6.8
+		return COAST_SHAPE.sea_height(land_signal)
+	var shore_relief:=COAST_SHAPE.relief_weight(land_signal)
 	var rolling := terrain_noise.get_noise_2d(x,z)
 	var local_detail := detail_noise.get_noise_2d(x,z)
 	var hill_signal:=maxf(0.0,terrain_noise.get_noise_2d(x+820.0,z-460.0)+0.10)
 	var ridge := 1.0-absf(mountain_noise.get_noise_2d(x,z))
 	ridge = pow(clampf((ridge-0.34)/0.66,0.0,1.0),2.35)
 	var belt := clampf((mountain_noise.get_noise_2d(x*0.41+9200.0,z*0.41-3800.0)+0.18)*1.55,0.0,1.0)
-	var height := 0.06+land_signal*1.48+rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4
+	var height := COAST_SHAPE.land_base(land_signal)+(rolling*1.42+local_detail*0.56+pow(hill_signal,2.0)*2.05+ridge*belt*8.4)*shore_relief
 	# Continental noise establishes mountain belts, but it cannot by itself make a
 	# six-kilometre camera footprint read as terrain. Add seeded kilometre-scale
 	# hills and low ridges to the authoritative height field so visuals, travel and
@@ -1702,14 +1734,16 @@ func _world_height_at(x: float,z: float) -> float:
 	var cradle_z:=x*sin(cradle_angle)+z*cos(cradle_angle)
 	var range_band:=exp(-pow((cradle_x-55.0)/25.0,2.0))*exp(-pow(cradle_z/510.0,4.0))
 	var range_teeth:=pow(clampf((1.0-absf(detail_noise.get_noise_2d(x*0.72+330.0,z*0.72-710.0))-0.20)/0.80,0.0,1.0),1.55)
-	height+=range_band*(0.65+range_teeth*6.8)
-	height+=mountain_relief.height_at(x,z,ridge*belt*8.4+range_band*(0.65+range_teeth*6.8))*smoothstep(.2,.8,height)
+	height+=range_band*(0.65+range_teeth*6.8)*shore_relief
+	height+=mountain_relief.height_at(x,z,(ridge*belt*8.4+range_band*(0.65+range_teeth*6.8))*shore_relief)*smoothstep(.2,.8,height)
 	var local_drainage_distance:=_local_drainage_distance_at(x,z)
 	if local_drainage_distance<0.11:
 		var swale:=pow(1.0-local_drainage_distance/0.11,1.72)
 		# Four to nine metres of relief is enough to create a real drainage floor at
 		# settlement scale without turning every intermittent reach into a canyon.
-		height-=swale*(0.0045+0.0045*swale)
+		# Faded out at the shore: parallel reaches must not cut below sea level
+		# into straight flooded strips across a low coastal plain.
+		height-=swale*(0.0045+0.0045*swale)*smoothstep(0.004,0.03,height)
 	var river_x := _world_river_x(z)
 	if river_x!=INF:
 		var distance:=absf(x-river_x)
@@ -1906,6 +1940,7 @@ func _build_terrain() -> void:
 	province_terrain_mesh = mesh_instance
 	mesh_instance.mesh = surface.commit()
 	mesh_instance.material_override = _create_terrain_material()
+	if SEAMLESS_WORLD:(mesh_instance.material_override as ShaderMaterial).set_shader_parameter("far_layer",true)
 	add_child(mesh_instance)
 	if not SEAMLESS_WORLD:
 		mesh_instance.create_trimesh_collision()
@@ -2008,6 +2043,8 @@ func _install_regional_patch(completed:Dictionary)->void:
 	replacement.name="RegionalTerrainLOD"
 	replacement.mesh=completed.mesh
 	replacement.material_override=regional_terrain_patch.material_override if regional_terrain_patch else _create_terrain_material()
+	# Soft outer edge (coast_mask.gdshaderinc): the patch dissolves into the planet layer.
+	replacement.set_instance_shader_parameter("patch_feather",Vector4(completed.center.x,completed.center.y,float(completed.span),1.0))
 	add_child(replacement)
 	var previous:=regional_terrain_patch
 	regional_terrain_patch=replacement
@@ -2024,6 +2061,43 @@ func _install_regional_patch(completed:Dictionary)->void:
 		previous.visible=false
 		previous.queue_free()
 
+
+func _sync_coast_mask()->void:
+	## Upload each macro raster's exact heights once, when it lands or changes, so
+	## the planet mesh and planet ocean share one per-pixel shoreline with the
+	## streamed patches (coast_mask.gdshaderinc). Until then they fall back to
+	## their own geometry.
+	for index in 2:
+		var raster:RefCounted=macro_render.levels[index]
+		if raster==coast_mask_rasters[index]:continue
+		coast_mask_rasters[index]=raster
+		var texture:Texture2D=null
+		var color_texture:Texture2D=null
+		var fields_texture:Texture2D=null
+		var grid:=Vector4.ZERO
+		if raster!=null:
+			var columns:=int(raster.get("columns"));var rows:=int(raster.get("rows"))
+			var heights:PackedFloat32Array=raster.get("heights")
+			var colors:PackedInt32Array=raster.get("colors")
+			var fields:PackedInt32Array=raster.get("fields")
+			var nodes:=columns*rows
+			if columns>1 and rows>1 and heights.size()==nodes and colors.size()==nodes and fields.size()==nodes:
+				var image:=Image.create_from_data(columns,rows,false,Image.FORMAT_RF,heights.to_byte_array())
+				# Half floats filter linearly on every GPU; metre precision near sea level.
+				image.convert(Image.FORMAT_RH)
+				texture=ImageTexture.create_from_image(image)
+				color_texture=ImageTexture.create_from_image(Image.create_from_data(columns,rows,false,Image.FORMAT_RGBA8,colors.to_byte_array()))
+				fields_texture=ImageTexture.create_from_image(Image.create_from_data(columns,rows,false,Image.FORMAT_RGBA8,fields.to_byte_array()))
+				var origin:Vector2=raster.get("origin");var cell:Vector2=raster.get("cell")
+				grid=Vector4(origin.x,origin.y,cell.x,cell.y)
+		for material:ShaderMaterial in [province_terrain_mesh.material_override if province_terrain_mesh else null,ocean_surface.material_override if ocean_surface else null,coastal_water_material]:
+			if material==null:continue
+			material.set_shader_parameter("coast_level%d" % index,texture)
+			material.set_shader_parameter("coast_grid%d" % index,grid)
+		if province_terrain_mesh and province_terrain_mesh.material_override is ShaderMaterial:
+			var far:=province_terrain_mesh.material_override as ShaderMaterial
+			far.set_shader_parameter("coast_color%d" % index,color_texture)
+			far.set_shader_parameter("coast_fields%d" % index,fields_texture)
 
 func _discovery_mask_pixel(position:Vector2,width:int,height:int)->Vector2:
 	return Vector2((position.x/world_width+0.5)*float(width-1),(position.y/world_depth+0.5)*float(height-1))
@@ -2130,6 +2204,10 @@ uniform bool woodland_channel = true;
 
 varying vec3 world_position;
 uniform vec4 streamed_cutout = vec4(0.0);
+// Planet mesh only: land/sea from the macro rasters instead of its own triangles.
+uniform bool far_layer = false;
+// Streamed patches: centre.xy, span, enabled. Drives the soft outer edge.
+instance uniform vec4 patch_feather = vec4(0.0);
 varying vec3 world_normal;
 varying vec3 relative_position;
 varying vec2 surface_position;
@@ -2172,6 +2250,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/surface_precision.gdshaderinc"
 #include "res://scripts/ground_surface.gdshaderinc"
 #include "res://scripts/seasonal_surface.gdshaderinc"
+#include "res://scripts/coast_mask.gdshaderinc"
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -2179,13 +2258,40 @@ void vertex() {
 	relative_position = world_position-CAMERA_POSITION_WORLD;
 	surface_position = world_position.xz-floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	seasonal_amplitude = CUSTOM0.x;
+	// Slide the coarse planet a few percent further along each view ray: same
+	// pixels, but any streamed patch drawn over it always wins the depth test,
+	// so the planet only shows where the patch has dissolved or is absent.
+	// (A shader that writes POSITION must write it on every path.)
+	vec4 view_position = MODELVIEW_MATRIX*vec4(VERTEX,1.0);
+	if (far_layer && coast_mask_ready()) { view_position.xyz *= 1.04; }
+	POSITION = PROJECTION_MATRIX*view_position;
 }
 
 void fragment() {
+	// Interpolate the small camera-relative value. Differencing absolute
+	// 20,000 km positions quantized a sub-metre footprint into alternating bands.
+	// Taken before any discard: derivatives are undefined once quads diverge,
+	// which lit a one-pixel seam along every cut and dissolve edge.
+	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
 	// A continental patch can straddle the finite planet map. Never extrapolate
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
-	if (streamed_cutout.w > 0.5 && abs(world_position.x-streamed_cutout.x)<streamed_cutout.z*0.5 && abs(world_position.z-streamed_cutout.y)<streamed_cutout.z*0.5) { discard; }
+	// The coarse planet yields to the streamed patch only inside the patch core;
+	// over the patch's dissolving margin both layers draw, so there is no gap.
+	if (streamed_cutout.w > 0.5 && coast_patch_edge(world_position.xz,streamed_cutout) < COAST_CUTOUT_CORE) { discard; }
+	if (coast_patch_yields(world_position.xz,patch_feather)) { discard; }
+	// ~83 km triangles cannot draw a coastline. Let the raster decide, and let
+	// the ocean plane (which yields over raster land) show through here. The
+	// planet keeps a little of the shelf: it sits behind the ocean there, and
+	// parallax between the two surfaces can then never open a dark seam.
+	if (far_layer && coast_mask_ready() && coast_mask_height(world_position.xz) < -0.08) { discard; }
+	// The planet mesh reads colour and climate fields from the macro rasters
+	// (~7-21 km) rather than its ~83 km vertices, so where it shows beside a
+	// streamed patch both layers carry the same land cover.
+	vec4 surface_color=COLOR;
+	vec2 surface_uv=UV;
+	vec2 surface_uv2=UV2;
+	if (far_layer && coast_mask_ready()) { coast_far_surface(world_position.xz,surface_color,surface_uv,surface_uv2); }
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
@@ -2199,9 +2305,6 @@ void fragment() {
 	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
 	float slope = 1.0 - clamp(dot(normalize(world_normal), vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
-	// Interpolate the small camera-relative value. Differencing absolute
-	// 20,000 km positions quantized a sub-metre footprint into alternating bands.
-	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
 	// The material is a scale hierarchy, not one photograph enlarged forever.
 	// World units are kilometres.  Country and regional imagery only enters once
 	// the projected pixel footprint can actually resolve it; this also prevents
@@ -2230,12 +2333,12 @@ void fragment() {
 	// scale, while the biome FBM above remains responsible for large land-cover mass.
 	vec2 close_uv = periodic_surface_uv(surface_position,surface_origin,68,1,false,vec2(0.0));
 	vec2 close_uv_rotated = periodic_surface_uv(surface_position,surface_origin,5644,100,true,vec2(0.19,-0.27));
-	float precipitation=UV.x>=0.999?clamp(UV.x-1.0,0.0,1.0):clamp((COLOR.g-COLOR.r)*4.0+0.48,0.0,1.0);
-	float climate_woodland_mean=clamp(COLOR.a,0.0,1.0);
-	vec3 filtered_vertex_color=COLOR.rgb;
-	if (woodland_channel && UV.x>=0.999) {
+	float precipitation=surface_uv.x>=0.999?clamp(surface_uv.x-1.0,0.0,1.0):clamp((surface_color.g-surface_color.r)*4.0+0.48,0.0,1.0);
+	float climate_woodland_mean=clamp(surface_color.a,0.0,1.0);
+	vec3 filtered_vertex_color=surface_color.rgb;
+	if (woodland_channel && surface_uv.x>=0.999) {
 		climate_woodland_mean=clamp((precipitation-0.40)*2.6,0.0,1.0)
-			*clamp((UV.y-0.16)*3.4,0.0,1.0);
+			*clamp((surface_uv.y-0.16)*3.4,0.0,1.0);
 		if (world_position.y>3.2) {
 			climate_woodland_mean*=1.0-clamp((world_position.y-3.2)/5.2,0.0,0.74);
 		}
@@ -2376,16 +2479,16 @@ void fragment() {
 	forest_surface *= mix(1.0,crown_light,crown_detail);
 	// Alpha carries woodland density from the same biome samples used by
 	// resource access and inspection. Green grass no longer implies forest.
-	float filtered_woodland=clamp(COLOR.a,0.0,1.0);
-	if (woodland_channel && UV.x>=0.999) {
-		// COLOR.a contains exact sub-kilometre woodland density. A continental
+	float filtered_woodland=clamp(surface_color.a,0.0,1.0);
+	if (woodland_channel && surface_uv.x>=0.999) {
+		// surface_color.a contains exact sub-kilometre woodland density. A continental
 		// mesh samples it every ~20 km, where those values alias into a vertex
 		// lattice. Reconstruct the climate-owned mean until that field resolves.
 		filtered_woodland=mix(climate_woodland_mean,filtered_woodland,country_detail);
 	}
-	float forest_mask=woodland_channel?filtered_woodland:smoothstep(0.025,0.105,COLOR.g-max(COLOR.r,COLOR.b*0.82));
+	float forest_mask=woodland_channel?filtered_woodland:smoothstep(0.025,0.105,surface_color.g-max(surface_color.r,surface_color.b*0.82));
 	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
-	// COLOR.a is the authoritative woodland density. Resolve that density into
+	// surface_color.a is the authoritative woodland density. Resolve that density into
 	// irregular stands instead of rendering it as one airbrushed green wash.
 	// Zero density remains zero, while dense forest retains connected mass.
 	float stand_pattern=smoothstep(0.31,0.69,regional*0.62+soil_patch*0.38);
@@ -2406,7 +2509,7 @@ void fragment() {
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
-	float climate_green=smoothstep(-0.018,0.065,COLOR.g-COLOR.r);
+	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
 	// Seeded intermittent swales bridge the visual scale between a continental
 	// river and local soil mottling. Once one pixel covers their entire riparian
 	// shoulder, evaluating four trigonometric meanders only produces striped
@@ -2462,25 +2565,25 @@ void fragment() {
 	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail));
 	earth*=1.0+structure_contrast;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
-	if (UV.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,UV2); }
+	if (surface_uv.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,surface_uv2); }
 	// Rock exposure follows steepness, including low coastal cliffs. The old
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
-	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(UV,UV2));
+	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(surface_uv,surface_uv2));
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
 	earth=mix(earth,vec3(0.43,0.405,0.35),land_resources*rock_mask*0.46);
-	float productive_open=(1.0-forest_mask)*(1.0-rock_mask)*smoothstep(0.0,0.04,COLOR.g-COLOR.r);
+	float productive_open=(1.0-forest_mask)*(1.0-rock_mask)*smoothstep(0.0,0.04,surface_color.g-surface_color.r);
 	earth=mix(earth,earth*vec3(1.18,1.08,0.76),land_resources*productive_open*0.40);
 	float highland = smoothstep(5.8, 12.0, world_position.y) * (0.35 + slope * 0.65);
 	earth = mix(earth, vec3(0.40,0.39,0.36), highland * 0.36);
 	// Snow and hard frost sit above the final soil/rock material. Their extent is
 	// governed by the same temperature, rainfall and calendar used by the game,
 	// with existing regional fields breaking up the edge like satellite imagery.
-	if (UV.x>=0.999 && world_position.y>0.0) {
+	if (surface_uv.x>=0.999 && world_position.y>0.0) {
 		float cryosphere_pattern=regional*0.62+soil_patch*0.38;
-		earth=seasonal_terrain(earth,UV.y,UV.x-1.0,seasonal_amplitude,world_position.z,forest_mask,slope,cryosphere_pattern);
+		earth=seasonal_terrain(earth,surface_uv.y,surface_uv.x-1.0,seasonal_amplitude,world_position.z,forest_mask,slope,cryosphere_pattern);
 	}
 	// A fixed north-west sun gives the orthographic world the same readable relief
 	// cues as satellite hillshade. Keep the effect restrained at close range where
@@ -3929,6 +4032,8 @@ func _install_close_terrain_mesh(mesh:ArrayMesh,center:Vector3)->void:
 	# material rather than retaining another shader in the fog material list.
 	detail_terrain_patch.material_override=regional_terrain_patch.material_override if regional_terrain_patch and regional_terrain_patch.material_override else _create_terrain_material()
 	detail_terrain_patch.visible=camera!=null and camera.size<=1.8
+	# 0.42 km: its edge dissolves into the regional patch instead of a hard square.
+	detail_terrain_patch.set_instance_shader_parameter("patch_feather",Vector4(center.x,center.z,0.42,1.0))
 	add_child(detail_terrain_patch)
 	_rebuild_close_vegetation(center)
 
