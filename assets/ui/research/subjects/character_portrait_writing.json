@@ -1,0 +1,14 @@
+{
+  "id": "character_portrait_writing",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-66a5ee07-3883-4cbc-a833-a184d539c8d6.png",
+  "source_file": "exec-66a5ee07-3883-4cbc-a833-a184d539c8d6.png",
+  "creative_brief": "Writers sketch human types, the flatterer, the miser, the boor, in short, sharp portraits. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/character_portrait_writing-v1.png",
+  "sha256": "2db0c9bb54b1bb3fd87e54afa94e3787dd9bfd6e99cbcc7107da2b43e80b1183",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
