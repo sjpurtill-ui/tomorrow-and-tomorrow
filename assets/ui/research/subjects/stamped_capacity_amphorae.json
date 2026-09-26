@@ -1,0 +1,14 @@
+{
+  "id": "stamped_capacity_amphorae",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3acc8db6-e17f-4a04-ac73-86d5ac55016e.png",
+  "source_file": "exec-3acc8db6-e17f-4a04-ac73-86d5ac55016e.png",
+  "creative_brief": "Each transport jar is stamped at the handle with its potter and its measure, and merchants stop re-measuring the cargo. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/stamped_capacity_amphorae-v1.png",
+  "sha256": "fc58ca73b46a6b7575678d24c386b1c9486b1ca1f96175b2bec13b23d183187f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

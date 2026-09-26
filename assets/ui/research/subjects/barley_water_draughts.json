@@ -1,0 +1,14 @@
+{
+  "id": "barley_water_draughts",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-46eac101-bc90-4d7f-b2e9-21ff88df2a12.png",
+  "source_file": "exec-46eac101-bc90-4d7f-b2e9-21ff88df2a12.png",
+  "creative_brief": "The feverish are given barley water and honey with vinegar, and fewer waste away in the fever's drought. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/barley_water_draughts-v1.png",
+  "sha256": "9cb399613df0dad168f433ed812679f45ecbae3be72bc2a26424ba022568afcb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

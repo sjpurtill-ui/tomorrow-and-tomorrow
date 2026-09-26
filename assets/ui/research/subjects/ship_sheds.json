@@ -1,0 +1,14 @@
+{
+  "id": "ship_sheds",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-645380b8-187c-46d0-9f36-1a87459cec00.png",
+  "source_file": "exec-645380b8-187c-46d0-9f36-1a87459cec00.png",
+  "creative_brief": "Warships are hauled up stone slipways into long roofed sheds, and their timbers dry out between campaigns. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/ship_sheds-v1.png",
+  "sha256": "94869c74f63826c7bdc584965458b554ea323f8cb5e8d43d3f0497dc12b407cc",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

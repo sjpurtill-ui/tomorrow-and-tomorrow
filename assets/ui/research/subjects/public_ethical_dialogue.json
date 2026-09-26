@@ -1,0 +1,14 @@
+{
+  "id": "public_ethical_dialogue",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-208ec152-8358-460d-bbdb-f27b329fec8e.png",
+  "source_file": "exec-208ec152-8358-460d-bbdb-f27b329fec8e.png",
+  "creative_brief": "A questioner stops men in the market and asks them what justice is, until their answers fall apart. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/public_ethical_dialogue-v1.png",
+  "sha256": "8b9c6a88bc6b94504d5c146a48d2491f2b2241f2da6b112c4819f9e49f4b0c5a",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

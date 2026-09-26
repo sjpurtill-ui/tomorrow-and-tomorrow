@@ -1,0 +1,14 @@
+{
+  "id": "star_weather_almanac",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d80dd1b5-16e6-487b-ab30-94e1c7dee38d.png",
+  "source_file": "exec-d80dd1b5-16e6-487b-ab30-94e1c7dee38d.png",
+  "creative_brief": "A stone slab in the square lists the star risings with a peg moved each day, and the weather each one brings. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/star_weather_almanac-v1.png",
+  "sha256": "73f6518ecb75a95619f1bd90b29e842b61dca387819d9610b1a7b58a31681e7c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
