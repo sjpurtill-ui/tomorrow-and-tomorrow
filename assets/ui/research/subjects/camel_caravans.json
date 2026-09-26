@@ -1,0 +1,14 @@
+{
+  "id": "camel_caravans",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9e7c2a4a-9f2b-4aa1-b29e-719b4c4bc953.png",
+  "source_file": "exec-9e7c2a4a-9f2b-4aa1-b29e-719b4c4bc953.png",
+  "creative_brief": "Laden camels cross arid country between distant wells.",
+  "medium": "Panoramic travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/camel_caravans-v1.png",
+  "sha256": "5839206c3a251708bb2b303640a2f7d6ca05731c88ade054e78b6ad29bab590c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

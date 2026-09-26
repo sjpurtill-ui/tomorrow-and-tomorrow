@@ -1,0 +1,14 @@
+{
+  "id": "forced_resettlement",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-22081d37-ba38-44e4-a4ba-e8d14c566fa8.png",
+  "source_file": "exec-22081d37-ba38-44e4-a4ba-e8d14c566fa8.png",
+  "creative_brief": "Conquered families are marched to new homes under guard.",
+  "medium": "Chalk pastel and cut-paper collage",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/forced_resettlement-v1.png",
+  "sha256": "3a7d584ce28a2c5a47ec657aff93c0bcf6f04634bcbbadc00caedfea9d43c494",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

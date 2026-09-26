@@ -1,0 +1,14 @@
+{
+  "id": "marsh_fever_drainage",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9191355a-5a77-4683-9a9c-1462a6ccef8a.png",
+  "source_file": "exec-9191355a-5a77-4683-9a9c-1462a6ccef8a.png",
+  "creative_brief": "Adults drain stagnant marsh to a nearby stream.",
+  "medium": "Transparent watercolor with restrained ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/marsh_fever_drainage-v1.png",
+  "sha256": "78caeb1f80df925e22191cc359f8bf3dc2cd205f56e4c45859c8bab6c8a8a5c6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

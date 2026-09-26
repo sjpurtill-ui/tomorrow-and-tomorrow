@@ -1,0 +1,14 @@
+{
+  "id": "silver_wage_payment",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0cf148c3-f370-4a62-bdad-edd8deee5d1d.png",
+  "source_file": "exec-0cf148c3-f370-4a62-bdad-edd8deee5d1d.png",
+  "creative_brief": "Stonecutter weighs silver wages then purchases bread.",
+  "medium": "Charcoal over ochre wash",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/silver_wage_payment-v1.png",
+  "sha256": "85cfb93a07994ffce3e06e77fd9533dc2371cb28fc88b70bc0f16d40f3ba0cd1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

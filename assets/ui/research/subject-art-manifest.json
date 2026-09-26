@@ -3362,5 +3362,17 @@
   "iron_sword_issue": {"path": "res://assets/ui/research/subjects/iron_sword_issue-v1.png", "focus": [0.5, 0.5]},
   "full_vowel_alphabet": {"path": "res://assets/ui/research/subjects/full_vowel_alphabet-v1.png", "focus": [0.5, 0.52]},
   "groundwater_tunnels": {"path": "res://assets/ui/research/subjects/groundwater_tunnels-v1.png", "focus": [0.5, 0.52]},
-  "die_struck_coinage": {"path": "res://assets/ui/research/subjects/die_struck_coinage-v1.png", "focus": [0.5, 0.52]}
+  "die_struck_coinage": {"path": "res://assets/ui/research/subjects/die_struck_coinage-v1.png", "focus": [0.5, 0.52]},
+  "marsh_fever_drainage": {"path": "res://assets/ui/research/subjects/marsh_fever_drainage-v1.png", "focus": [0.5, 0.5]},
+  "forced_resettlement": {"path": "res://assets/ui/research/subjects/forced_resettlement-v1.png", "focus": [0.5, 0.5]},
+  "village_self_rule_after_collapse": {"path": "res://assets/ui/research/subjects/village_self_rule_after_collapse-v1.png", "focus": [0.5, 0.5]},
+  "silver_wage_payment": {"path": "res://assets/ui/research/subjects/silver_wage_payment-v1.png", "focus": [0.5, 0.5]},
+  "deep_hold_merchantmen": {"path": "res://assets/ui/research/subjects/deep_hold_merchantmen-v1.png", "focus": [0.5, 0.5]},
+  "double_descent_citizenship": {"path": "res://assets/ui/research/subjects/double_descent_citizenship-v1.png", "focus": [0.5, 0.5]},
+  "dough_leavening": {"path": "res://assets/ui/research/subjects/dough_leavening-v1.png", "focus": [0.5, 0.53]},
+  "shrine_league_confederation": {"path": "res://assets/ui/research/subjects/shrine_league_confederation-v1.png", "focus": [0.5, 0.5]},
+  "camel_caravans": {"path": "res://assets/ui/research/subjects/camel_caravans-v1.png", "focus": [0.5, 0.5]},
+  "town_physicians": {"path": "res://assets/ui/research/subjects/town_physicians-v1.png", "focus": [0.5, 0.5]},
+  "oracle_consultation": {"path": "res://assets/ui/research/subjects/oracle_consultation-v1.png", "focus": [0.5, 0.5]},
+  "household_tax_registers": {"path": "res://assets/ui/research/subjects/household_tax_registers-v1.png", "focus": [0.5, 0.5]}
 }

@@ -1,0 +1,14 @@
+{
+  "id": "deep_hold_merchantmen",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cc64075b-2be9-4125-9f9d-d21e0813c973.png",
+  "source_file": "exec-cc64075b-2be9-4125-9f9d-d21e0813c973.png",
+  "creative_brief": "Round-bellied merchant ship carries grain and jars in a deep hold.",
+  "medium": "Panoramic travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/deep_hold_merchantmen-v1.png",
+  "sha256": "7fd8b27eb2efdb7b6f3ed6bcc7766ec5244e40850492d6e8418c2c75cc9a3155",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

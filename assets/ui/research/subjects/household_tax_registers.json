@@ -1,0 +1,14 @@
+{
+  "id": "household_tax_registers",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e590ad8e-470c-4c15-98d6-08205d577af8.png",
+  "source_file": "exec-e590ad8e-470c-4c15-98d6-08205d577af8.png",
+  "creative_brief": "Official visits household to count goats and land for tax register.",
+  "medium": "Chalk pastel and cut-paper collage",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/household_tax_registers-v1.png",
+  "sha256": "b5bd6a4f32c3d919718ce7adf3001610a8490a168c6cdae8b3f49b978599dee1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

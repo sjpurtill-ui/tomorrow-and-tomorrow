@@ -1,0 +1,14 @@
+{
+  "id": "shrine_league_confederation",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9d92e44a-2f48-47de-8a84-cb5611124797.png",
+  "source_file": "exec-9d92e44a-2f48-47de-8a84-cb5611124797.png",
+  "creative_brief": "Delegates from three villages pledge peace at a shared shrine.",
+  "medium": "Matte civic fresco on plaster",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/shrine_league_confederation-v1.png",
+  "sha256": "90ae1087e23dfc6c561bcfa389164c621dcd323ff92b3bf552037109570a4ae7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

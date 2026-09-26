@@ -1,0 +1,14 @@
+{
+  "id": "oracle_consultation",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-087fdde1-38c2-41d1-96fa-dd783787278f.png",
+  "source_file": "exec-087fdde1-38c2-41d1-96fa-dd783787278f.png",
+  "creative_brief": "Oracle at a spring answers town delegates; messenger departs.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/oracle_consultation-v1.png",
+  "sha256": "c8c5e91d1c92c4a0be2b50dde09071e06769aea3a7fafafa45d342a10b17899c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}

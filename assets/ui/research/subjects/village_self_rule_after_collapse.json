@@ -1,0 +1,14 @@
+{
+  "id": "village_self_rule_after_collapse",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5a83bd72-999d-4d2e-95af-b8738b6faaa8.png",
+  "source_file": "exec-5a83bd72-999d-4d2e-95af-b8738b6faaa8.png",
+  "creative_brief": "Village elders manage fields and stores after palace collapse.",
+  "medium": "Matte civic fresco on plaster",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/village_self_rule_after_collapse-v1.png",
+  "sha256": "51c2304d1dac404b2a1eb1daa77775bbce3b6ba3b73ce9e85e84624a31c726e7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; more repetitive variants rejected."
+}
