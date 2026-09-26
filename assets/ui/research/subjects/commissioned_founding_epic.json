@@ -1,0 +1,14 @@
+{
+  "id": "commissioned_founding_epic",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-33dcccaa-3a6b-4d05-8a57-451411dabf9f.png",
+  "source_file": "exec-33dcccaa-3a6b-4d05-8a57-451411dabf9f.png",
+  "creative_brief": "The ruler's poet sings the town's founding by the god's will, and every schoolboy learns the new epic. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/commissioned_founding_epic-v1.png",
+  "sha256": "b116d7f87c349bc50553dabffe3515a5534d71a4440aaec15937548e1c4e7a2d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

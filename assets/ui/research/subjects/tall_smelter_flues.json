@@ -1,0 +1,14 @@
+{
+  "id": "tall_smelter_flues",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fb835ada-ccaf-4693-a6ba-6649b10508a3.png",
+  "source_file": "exec-fb835ada-ccaf-4693-a6ba-6649b10508a3.png",
+  "creative_brief": "Tall flues carry the smelting fumes high above the works; the fields beside them recover, though a haze now drifts over farther valleys. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/tall_smelter_flues-v1.png",
+  "sha256": "685e648f185e6e485fb331fc101a32e8b0f6f723520b61438c2371b5bd8f0887",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "anesthetic_wine_powder",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c8fdda87-b883-4f9c-a771-92321a38617c.png",
+  "source_file": "exec-c8fdda87-b883-4f9c-a771-92321a38617c.png",
+  "creative_brief": "The patient drinks a numbing powder in wine and lies still while the surgeon opens the belly. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/anesthetic_wine_powder-v1.png",
+  "sha256": "09608aa4b2a25f6a7f70fe9c257a0e385b60f68f1131e23f474174849ae908b6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

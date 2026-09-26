@@ -1,0 +1,14 @@
+{
+  "id": "alimentary_child_funds",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cf142069-c55b-4acf-8562-31d08d95f23f.png",
+  "source_file": "exec-cf142069-c55b-4acf-8562-31d08d95f23f.png",
+  "creative_brief": "Estates are pledged to an endowment, and its interest buys monthly grain for the district's poor children. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/alimentary_child_funds-v1.png",
+  "sha256": "7525e2899253eaf538219346cb6d6f5f8965587b21c8844140f7306e5c32d8d6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
