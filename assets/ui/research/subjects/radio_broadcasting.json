@@ -1,0 +1,17 @@
+{
+  "id": "radio_broadcasting",
+  "line": "culture",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b838edb3-5a51-49b9-8616-b17feabd9046.png",
+  "source_file": "exec-b838edb3-5a51-49b9-8616-b17feabd9046.png",
+  "creative_brief": "Radio Broadcasting: a community hears a speaker through a radio receiver.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/radio_broadcasting-v1.png",
+  "sha256": "f73fb987bfd6db89cf3d8308b93ab90861e8b24f821fdbc962e1c188ff33189b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop.",
+  "focus": [
+    0.5,
+    0.4
+  ]
+}

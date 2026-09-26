@@ -1,0 +1,13 @@
+{
+  "id": "hydroelectric_stations",
+  "line": "infrastructure",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-44ce661f-2f70-4925-bcdc-f3719a880aeb.png",
+  "source_file": "exec-44ce661f-2f70-4925-bcdc-f3719a880aeb.png",
+  "creative_brief": "Hydroelectric Stations: reservoir water runs down penstocks to a turbine house.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/hydroelectric_stations-v1.png",
+  "sha256": "26d2383e2ad1fc826adfd61e62be62d57e452be8538ccbd3c756a21b32e62951",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop."
+}

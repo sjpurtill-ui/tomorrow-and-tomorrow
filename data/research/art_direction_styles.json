@@ -1,0 +1,18 @@
+{
+  "schema": "research_direction_styles/2",
+  "shared": "Mature 2D editorial art for Tomorrow and Tomorrow discovery cards. Each direction uses its own visible handmade medium and limited palette. Keep the discovery's action or mechanism legible in a central 3:2 crop and match its historical stage. Reject photographic rendering, volumetric digital painting, CGI, cinematic lighting, cute faces, child-book proportions, pseudo-writing, emblems, borders, and watermarks. Art medium describes rendering, never an object placed in the historical scene.",
+  "directions": {
+    "demography": {"name": "People & homes", "accent": "#cf9c78", "medium": "Mature editorial chalk pastel and cut-paper collage", "palette": "Terracotta, rust, muted peach, warm ivory, slate", "form": "Angular adult silhouettes, asymmetrical flat planes, rubbed pigment, intimate civic decisions"},
+    "nutrition": {"name": "Food & farming", "accent": "#adbb77", "medium": "Opaque botanical egg tempera", "palette": "Olive, deep green, wheat gold, cream, earth", "form": "Flat plant shapes, crisp crop morphology, repeated field patterns, visible brush marks"},
+    "health": {"name": "Health & care", "accent": "#92c1ab", "medium": "Transparent watercolor with restrained ink", "palette": "Sage, celadon, warm linen, muted skin tones", "form": "Compassionate care gesture, open paper, bleeding washes, dignified adult figures"},
+    "labor": {"name": "Work & tools", "accent": "#d5b57d", "medium": "Expressive charcoal over ochre wash", "palette": "Charcoal, ochre, warm gray, raw timber", "form": "Hands, tools, forceful diagonals, smears and coarse grain"},
+    "knowledge": {"name": "Learning & records", "accent": "#9db9d7", "medium": "Blue-black ink drawing with lapis wash", "palette": "Lapis, blue-black, parchment ivory", "form": "Precise contour, crosshatching, open paper, visible observation or record-making"},
+    "production": {"name": "Craft & industry", "accent": "#d6a36d", "medium": "Palette-knife impasto oil", "palette": "Copper, ember orange, soot black, umber", "form": "Chunky paint relief, scraped edges, material transformation and apparatus"},
+    "infrastructure": {"name": "Water & building", "accent": "#90bccc", "medium": "Matte architectural casein gouache", "palette": "Mineral blue, cool ivory, limestone, slate", "form": "Broad planar geometry, brushed edges, readable structure and water path"},
+    "logistics": {"name": "Transport & supply", "accent": "#b7af83", "medium": "Panoramic travel watercolor", "palette": "Sand gold, sea slate, faded indigo, brown", "form": "Flowing washes, moving silhouettes, directional transfer route"},
+    "ecology": {"name": "Land & nature", "accent": "#84b895", "medium": "Naturalist field painting in layered plant pigments", "palette": "Moss, fern, earth, muted sky", "form": "Detailed living foreground against flat landscape bands; small observer when needed"},
+    "institutions": {"name": "Government", "accent": "#baa2cd", "medium": "Matte civic fresco on plaster", "palette": "Dusty plum, limestone, muted gold, warm gray", "form": "Flat frieze arrangement, deliberate civic gesture, era-correct clothing"},
+    "security": {"name": "Defense", "accent": "#d28c7c", "medium": "Layered hand-cut woodblock print", "palette": "Vermilion, charcoal, warm parchment", "form": "Bold carved silhouettes, graphic tension, limited ink layers"},
+    "culture": {"name": "Culture & memory", "accent": "#c29cb0", "medium": "Tapestry-inspired painting", "palette": "Indigo, dusty rose, warm gold, dusk violet", "form": "Interlocking woven shapes, rhythmic adult silhouettes, communal expression"}
+  }
+}
