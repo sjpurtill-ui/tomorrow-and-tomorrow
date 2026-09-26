@@ -54,8 +54,14 @@ static var _control_theme:Theme
 # for voices and quotes, Barlow for the interface.
 const FONT_DISPLAY:=preload("res://assets/fonts/cinzel/Cinzel.ttf")
 const FONT_UI:=preload("res://assets/fonts/battle/Barlow-Medium.ttf")
-const FONT_VOICE_FILE:=preload("res://assets/fonts/serif/EBGaramond.ttf")
-const FONT_VOICE_ITALIC_FILE:=preload("res://assets/fonts/serif/EBGaramond-Italic.ttf")
+const FONT_VOICE_PATH:="res://assets/fonts/serif/EBGaramond.ttf"
+const FONT_VOICE_ITALIC_PATH:="res://assets/fonts/serif/EBGaramond-Italic.ttf"
+
+# Loaded at run time, not preloaded: a fresh checkout imports the new font files
+# during the same scan that compiles this script.
+static func _voice_file(italic:bool=false)->Font:
+	var path:=FONT_VOICE_ITALIC_PATH if italic else FONT_VOICE_PATH
+	return load(path) as Font if ResourceLoader.exists(path) else FONT_UI
 const MIN_FONT_SIZE:=12
 const SPACE:=[0,4,8,12,16,24,32,48]
 const RADIUS_CONTROL:=2
@@ -86,10 +92,10 @@ static func font(face:String)->Font:
 	var result:Font
 	match face:
 		"display":result=FONT_DISPLAY
-		"voice":result=FONT_VOICE_FILE
-		"voice_italic":result=FONT_VOICE_ITALIC_FILE
+		"voice":result=_voice_file()
+		"voice_italic":result=_voice_file(true)
 		"voice_bold":
-			var bold:=FontVariation.new();bold.base_font=FONT_VOICE_FILE;bold.variation_opentype={TextServerManager.get_primary_interface().name_to_tag("wght"):600};result=bold
+			var bold:=FontVariation.new();bold.base_font=_voice_file();bold.variation_opentype={TextServerManager.get_primary_interface().name_to_tag("wght"):600};result=bold
 		"ui_strong":
 			var strong:=FontVariation.new();strong.base_font=FONT_UI;strong.variation_embolden=0.35;result=strong
 		_:result=FONT_UI
