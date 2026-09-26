@@ -1,0 +1,14 @@
+{
+  "id": "realm_wide_standardization",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-867d41e7-dddf-4458-b3db-17ce1dcb5d6a.png",
+  "source_file": "exec-867d41e7-dddf-4458-b3db-17ce1dcb5d6a.png",
+  "creative_brief": "One set of weights, one script and one axle width are decreed for every province of the realm. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/realm_wide_standardization-v1.png",
+  "sha256": "08c145dec9a0aa99de731c5bb69f3e1917a2d05cfa2d3f4da612761fe16e0f4d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
