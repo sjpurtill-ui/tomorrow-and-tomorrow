@@ -30,6 +30,11 @@ const REPEAT_TEXT_DAYS:=1095
 const ANNALS_MAX:=600
 const CRISIS_LOG_MAX:=200
 const TOLD_LINES_MAX:=300
+## Two sources telling the same finding (a scout return and an arc beat, a
+## directive issued and implemented) within this many days are told once.
+const SAME_FINDING_DAYS:=60
+const SAID_MAX:=240
+const SAID_TEXTS_MAX:=400
 const NUMBER_WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 const ORDINALS:=["zeroth","first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"]
 ## Crisis onset titles (crisis_system.gd) to the crisis type.
@@ -104,9 +109,85 @@ static func shape(c:Dictionary,moment:Dictionary,tier:String)->Dictionary:
 		# The season's learning is told in the year's entry.
 		out.tier="whisper";out.folded=true
 		return out
-	if tier=="notice" and _dampable(moment,key) and _told_recently(c,String(out.family),int(moment.get("day",int(GameState.elapsed_days))),text):
+	var day:=int(moment.get("day",int(GameState.elapsed_days)))
+	if tier!="whisper" and not key.begins_with("annal:"):
+		_same_finding(c,moment,key,out,day)
+		if bool(out.folded):return out
+	if tier=="notice" and _dampable(moment,key) and (_told_recently(c,String(out.family),day,String(out.text)) or _said_before(c,String(out.text))):
 		out.tier="whisper";out.folded=true
 	return out
+
+
+## One finding told by two sources is told once. A beat or a first (the
+## story's own telling) takes the place of the plainer report told a few days
+## before; anything else drops the sentences already told, and steps back
+## into the tallies when nothing new is left.
+static func _same_finding(c:Dictionary,moment:Dictionary,key:String,out:Dictionary,day:int)->void:
+	var said:Array=c.get("said",[]) if c.get("said") is Array else []
+	if said.is_empty():return
+	var recent:={}
+	for item in said:
+		if item is Dictionary and day-int(item.get("day",-99999))<=SAME_FINDING_DAYS:recent[String(item.s)]=String(item.get("key",""))
+	if recent.is_empty():return
+	var kept:PackedStringArray=[]
+	var older:={}
+	var sentences:=_sentences(String(out.text))
+	for sentence in sentences:
+		var norm:=_said_norm(sentence)
+		if norm.length()>=24 and recent.has(norm):older[recent[norm]]=true
+		else:kept.append(sentence)
+	if older.is_empty():return
+	var story:=bool(moment.get("priority",false)) or bool(moment.get("first",false))
+	for prefix in ["beat:","first:","turning:"]:
+		if key.begins_with(prefix):story=true
+	if story:
+		out["demote"]=older.keys()
+		return
+	if key.begins_with("crisis:"):return
+	var substance:=0
+	for sentence in kept:substance+=sentence.length()
+	if substance<24:
+		out.tier="whisper";out.folded=true;out["same_as"]=String(older.keys()[0])
+		return
+	out.text=" ".join(kept)
+
+
+static func _sentences(text:String)->PackedStringArray:
+	var out:PackedStringArray=[]
+	var re:=RegEx.create_from_string("[^.!?]+[.!?]+['\")]*")
+	for m in re.search_all(text):
+		var t:=m.get_string().strip_edges()
+		if t!="":out.append(t)
+	if out.is_empty() and text.strip_edges()!="":out.append(text.strip_edges())
+	return out
+
+
+static func _said_norm(sentence:String)->String:
+	return sentence.to_lower().strip_edges().trim_suffix(".").strip_edges()
+
+
+## The very same words, told at any time before, by a plain report.
+static func _said_before(c:Dictionary,text:String)->bool:
+	var said:=_family(text)
+	if said.length()<=24:return false
+	return (c.get("said_texts",{}) as Dictionary).has(said) if c.get("said_texts") is Dictionary else false
+
+
+static func _remember_said(c:Dictionary,entry:Dictionary)->void:
+	var key:=String(entry.get("key",""))
+	if String(entry.get("tier",""))=="whisper" or key.begins_with("annal:"):return
+	if not c.get("said") is Array:c["said"]=[]
+	var said:Array=c.said
+	var day:=int(entry.get("day",0))
+	for sentence in _sentences(String(entry.get("text",""))):
+		var norm:=_said_norm(sentence)
+		if norm.length()>=24:said.append({"s":norm,"day":day,"key":key})
+	while said.size()>SAID_MAX:said.pop_front()
+	if key.begins_with("crisis:"):return
+	if not c.get("said_texts") is Dictionary:c["said_texts"]={}
+	var texts:Dictionary=c.said_texts
+	texts[_family(String(entry.get("text","")))]=day
+	while texts.size()>SAID_TEXTS_MAX:texts.erase(texts.keys()[0])
 
 
 static func _dampable(moment:Dictionary,key:String)->bool:
@@ -225,7 +306,12 @@ static func _onset(c:Dictionary,id:String,title:String,text:String)->Array:
 		title+=String([" Again"," Once More"][posmod(seed>>3,2)])
 	else:
 		var took:=", and it killed no one" if int(last.deaths)==0 else ", which took %s" % _number(int(last.deaths))
-		line="The last %s here was %s, in year %d%s." % [_word(type,false),String(last.short),int(last.y)+1,took]
+		if type in ["thinning","cold"] or int(last.deaths)==0:
+			# Nothing to count but the years between.
+			line=["The last %s here was %s, in year %d." % [_word(type,false),String(last.short),int(last.y)+1],
+				"It is %s years since %s." % [_number(gap),String(last.short)],
+				("It is the %s %s since the founding; the last was in year %d." % [ORDINALS[prior.size()+1],_word(type,false),int(last.y)+1]) if prior.size()+1<ORDINALS.size() else ("There have been %d before it; the last was in year %d." % [prior.size(),int(last.y)+1])][posmod(seed>>7,3)]
+		else:line="The last %s here was %s, in year %d%s." % [_word(type,false),String(last.short),int(last.y)+1,took]
 		if gap<=4:title+=" Again"
 	return [title,_before_summons(_summons(text,seed),line)]
 
@@ -289,6 +375,7 @@ static func _ending(c:Dictionary,id:String,title:String,text:String)->String:
 		for p in prior:worst=maxi(worst,int(p.deaths))
 		var last:Dictionary=prior.back()
 		if deaths>0 and deaths>worst:lines.append("No %s before it had killed so many." % _word(type,false))
+		elif bool(live.get("compared",false)) or ("year %d" % (int(last.y)+1)) in body:pass # the ending already set it against the last one
 		elif deaths==0 and int(last.deaths)>0:lines.append("%s took %s; this one took no one." % [_cap(String(last.short)),_number(int(last.deaths))])
 		elif prior.size()+1<ORDINALS.size():lines.append("It was the %s %s since the founding." % [ORDINALS[prior.size()+1],_word(type,false)])
 	# The god's part, with the run of silences it continues or breaks.
@@ -302,7 +389,13 @@ static func _ending(c:Dictionary,id:String,title:String,text:String)->String:
 		run+=1
 		if run==1:lines.append("The god said nothing, and %s decided." % who)
 		elif run<=3:lines.append(["Again the god said nothing; %s decided alone." % who,"Once more the god kept silent, and %s chose the course." % who][posmod(seed,2)])
-		else:lines.append(["That makes %s troubles in a row the god has left to %s." % [_number(run),who],"The god has now been silent through %s troubles in a row; %s decided this one." % [_number(run),who]][posmod(seed,2)])
+		else:
+			# A long silence is counted at its milestones, or when someone new
+			# is left to decide; in between the year's entry carries it.
+			var last_who:=String(c.get("silence_who",""))
+			if run%5==0 or (last_who!="" and last_who!=who):
+				lines.append(["That makes %s troubles in a row the god has left to the court; this one fell to %s." % [_number(run),who],"The god has now been silent through %s troubles in a row; %s decided this one." % [_number(run),who]][posmod(seed,2)])
+		c["silence_who"]=who
 		if run==6:lines.append("At the fires, people have stopped waiting for the god's word when trouble comes.")
 	elif run>=2:
 		lines.append("This time the god answered, after %s troubles met in silence." % _number(run))
@@ -382,6 +475,7 @@ static func _scout_title(party:String,sentence:String)->String:
 static func note(c:Dictionary,entry:Dictionary)->void:
 	var kind:=String(entry.get("kind",""))
 	if kind=="annal":return
+	_remember_said(c,entry)
 	var a:=acc(c,int(entry.get("day",-1)))
 	var key:=String(entry.get("key",""))
 	var title:=String(entry.get("title",""))
@@ -407,8 +501,9 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 		var age:=RegEx.create_from_string("(?:aged|at) (\\d+)").search(String(entry.get("text","")))
 		(a.deaths as Array).append({"name":title.trim_suffix(" Is Dead"),"age":int(age.get_string(1)) if age!=null else 0,"great":tier=="moment"})
 		return
-	if title.ends_with(" Keeps the Fire"):
-		_add_unique(a.heads,title.trim_suffix(" Keeps the Fire"))
+	if title.ends_with(" Keeps the Fire") or key.begins_with("court:succession:kept:"):
+		var m:=RegEx.create_from_string("^(.+?) (?:Keeps the Fire|Follows |in .+'s Place)").search(title)
+		_add_unique(a.heads,m.get_string(1) if m!=null else title.trim_suffix(" Keeps the Fire"))
 		return
 	if key.begins_with("aim:done:"):(a.aims as Array).append({"kind":"done","name":title.trim_prefix("Remembered: ")});return
 	if key.begins_with("aim:fail:"):(a.aims as Array).append({"kind":"fail","name":title.trim_prefix("An Aim Unmet: ")});return
@@ -626,7 +721,20 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	if lines.is_empty():lines.append("Nothing out of the ordinary was told at the fires." if tally else "The keepers found little to add to the registers.")
 	var text:=" ".join(lines)
 	if text.length()>900:text=text.left(897)+"..."
-	return {"key":"annal:%d" % y,"day":y*365+364,"title":title,"text":text,"kind":"annal","tier":"notice","ledger":false,"domain":"annals","year":y+1,"memory":memory}
+	return {"key":"annal:%d" % y,"day":y*365+364,"title":title,"text":text,"kind":"annal","tier":"notice","ledger":false,"domain":"annals","year":y+1,"memory":memory,"facts":_facts(a,memory,title)}
+
+
+## The year's structured facts, for the optional live rewrite
+## (chronicle_polish.gd): only what the entry was built from.
+static func _facts(a:Dictionary,memory:Dictionary,title:String)->Dictionary:
+	var troubles:Array=[]
+	for cr in a.crises:
+		troubles.append({"name":_crisis_short(cr),"deaths":int(cr.get("deaths",0)),"over":bool(cr.get("ended",false)),"god_silent":bool(cr.get("silent",false)),"decided_by":String(cr.get("holder",""))})
+	var dead:Array=[]
+	for d in a.deaths:dead.append({"name":String(d.name),"age":int(d.age)})
+	return {"year":int(a.year)+1,"title":title,"troubles":troubles,"dead":dead,"new_keepers":(a.heads as Array).duplicate(),"learned":(a.learned as Array).duplicate(),
+		"scouts":(a.scouts as Dictionary).duplicate(),"aims":(a.aims as Array).duplicate(true),"works":(a.works as Array).duplicate(),"peoples":(a.contacts as Array).duplicate(),
+		"wars":(a.wars as Array).duplicate(),"people_now":int(memory.get("pop",0)),"people_a_year_before":int(a.pop0),"born":int(a.born),"buried":int(a.buried)}
 
 
 static func _crisis_short(cr:Dictionary)->String:

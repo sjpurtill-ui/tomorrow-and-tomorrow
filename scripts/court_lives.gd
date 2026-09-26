@@ -354,10 +354,17 @@ static func _watch_successions(day:int)->void:
 		if acting.is_empty(): continue
 		var given:=EraNames.given_of(String(entry.get("name","")))
 		var kin:=kin_words(int(acting.get("person_id",0)),int(entry.pid))
-		var who:="%s%s" % [String(acting.get("name","")),(", %s," % kin) if kin!="" else ""]
-		var age:=GovernmentPeopleSystem.age_years(acting)
-		record("succession","%s Keeps the Fire" % EraNames.given_of(String(acting.get("name",""))).substr(0,40),
-			"A month after %s's burning, %s keeps the fire as %s. %s is %d and has %s. The god has named no one; the people take this as the god's leave." % [given,who,String(office.title).to_lower(),EraNames.given_of(String(acting.get("name",""))),age,_own_words(acting)],
+		# How many deaths in office the god has already left to the people.
+		var unnamed:=0
+		for other in state().remembered:
+			if other is Dictionary and other!=entry and bool(other.get("told_successor",false)) and String(other.get("successor",""))=="" and int(other.get("pid",0))>0 and String(other.get("title",""))!="of the hearth": unnamed+=1
+		# Told from who they are to the dead, their ages and the dead one's
+		# years in the place (chronicle_specifics.gd).
+		var told:Array=preload("res://scripts/chronicle_specifics.gd").succession({"dead":given,"successor":String(acting.get("name","")),
+			"given":EraNames.given_of(String(acting.get("name",""))),"kin":kin,"office":String(office.title),"age":GovernmentPeopleSystem.age_years(acting),
+			"dead_age":int(entry.get("age",0)),"served":int(int(dead.get("experience_months",0))/12.0),"skill":_own_words(acting),"unnamed":unnamed,
+			"seed":hash("succession:%d:%d" % [int(entry.pid),int(acting.get("person_id",0))])})
+		record("succession",String(told[0]).substr(0,60),String(told[1]),
 			{"pid":int(acting.get("person_id",0))},{"key":"court:succession:kept:%d" % int(entry.pid),"tier":"moment","focus":{"person_id":int(acting.get("person_id",0))}})
 
 static func _office_of(person:Dictionary)->Dictionary:
@@ -398,7 +405,9 @@ static func _on_official_death(person:Dictionary,day:int)->void:
 	var tenure:=(" after %s in office" % _years_words(months)) if months>=12 else ""
 	var said:="%s, %s, died aged %d%s. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,tenure,deed]
 	var told:={"key":"court:death:person:%d" % pid,"focus":{"person_id":holder_pid} if holder_pid>0 else {}}
-	if holder_pid>0: told["text"]=said+" Summon the court to name who follows."
+	if holder_pid>0:
+		var holder_name:=EraNames.given_of(String(Hall._official(holder_pid).get("name",""))) if holder_pid!=pid else ""
+		told["text"]=said.trim_suffix(" The court gathers at the fire to mourn them.")+" "+preload("res://scripts/chronicle_specifics.gd").mourning_close(holder_name,hash("mourn:%d" % pid))
 	record("death","%s Is Dead" % String(person.get("name","")).substr(0,60),said,{"pid":pid},told)
 	_mark_rite("pyre","for "+given,day,5,pid)
 

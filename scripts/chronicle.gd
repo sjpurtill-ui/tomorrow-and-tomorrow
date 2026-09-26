@@ -50,6 +50,7 @@ const RESEARCH_MILESTONES:=["seed_selection","public_schools","printing_process"
 ## Headcounts the people have never reached before are remembered once.
 const PEOPLE_MILESTONES:=[150,200,300,500,1000,2000,5000,10000,20000,50000,100000,250000,500000,1000000]
 const Annals:=preload("res://scripts/chronicle_annals.gd")
+const Polish:=preload("res://scripts/chronicle_polish.gd")
 const DOMAIN_NAMES:={"demography":"people & homes","nutrition":"food & farming","health":"health & care","labor":"work & tools","knowledge":"learning & records","production":"craft & making","infrastructure":"water & building","logistics":"travel & carrying","ecology":"land & seasons","institutions":"custom & law","security":"watch & war","culture":"song & custom","wealth":"exchange & wealth"}
 
 ## Moment cards waiting to be shown; hud/chronicle_card.gd drains this.
@@ -117,6 +118,9 @@ static func record(moment:Dictionary)->Dictionary:
 	if downgraded:entry["crowded"]=true
 	if String(shaped.family)!="":entry["family"]=String(shaped.family)
 	if bool(shaped.folded):entry["folded"]=true
+	if shaped.has("same_as"):entry["same_as"]=String(shaped.same_as)
+	# The story's own telling replaces a plainer report of the same finding.
+	for older in shaped.get("demote",[]):_demote(c,String(older),key)
 	for optional in ["art","action","domain","source","first","learned"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
 	(c.entries as Array).push_front(entry)
@@ -131,6 +135,16 @@ static func record(moment:Dictionary)->Dictionary:
 	Annals.note(c,entry)
 	_trim(c)
 	return entry
+
+
+static func _demote(c:Dictionary,older_key:String,by_key:String)->void:
+	for e in c.entries:
+		if String((e as Dictionary).get("key",""))!=older_key:continue
+		if String(e.get("tier",""))=="whisper":return
+		e["tier"]="whisper";e["folded"]=true;e["same_as"]=by_key
+		for i in range(pending_cards.size()-1,-1,-1):
+			if String((pending_cards[i] as Dictionary).get("key",""))==older_key:pending_cards.remove_at(i)
+		return
 
 
 ## The people's own words: a cart, saddle or gun they cannot name yet is told
@@ -340,7 +354,11 @@ static func ingest_day(day_result:Dictionary)->void:
 	if not active():return
 	var c:=data()
 	# A year just ended: tell it as one entry before today's news.
-	for year in Annals.roll(c,int(GameState.elapsed_days)):record(year)
+	for year in Annals.roll(c,int(GameState.elapsed_days)):
+		var told:=record(year)
+		# With the AI connection on, the finished year may be told better,
+		# once, without the game waiting (chronicle_polish.gd).
+		if not told.is_empty():Polish.request(c,told,year.get("facts",{}))
 	# A season just ended: keep what it taught in the season's tally.
 	_flush_learned(c,int(GameState.elapsed_days))
 	for discovery in day_result.get("discoveries",[]):
