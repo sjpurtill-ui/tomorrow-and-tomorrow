@@ -1,0 +1,14 @@
+{
+  "id": "small_game_pens",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-028ef202-43ee-459d-8938-7c7c1711c3e4.png",
+  "source_file": "exec-028ef202-43ee-459d-8938-7c7c1711c3e4.png",
+  "creative_brief": "Hares are kept in walled warrens and snails fattened in pens on bran and wine lees. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/small_game_pens-v1.png",
+  "sha256": "6cc9e0507b30ed00c857522fb0cd090fb3fdcdbbfcecf84d4b6fcff0114d3873",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

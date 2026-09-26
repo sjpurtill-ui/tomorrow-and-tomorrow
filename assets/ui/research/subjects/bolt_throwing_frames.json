@@ -1,0 +1,14 @@
+{
+  "id": "bolt_throwing_frames",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7f565472-7508-4186-886b-6763f517237b.png",
+  "source_file": "exec-7f565472-7508-4186-886b-6763f517237b.png",
+  "creative_brief": "A great bow on a stand throws a heavy bolt farther than any archer can shoot. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/bolt_throwing_frames-v1.png",
+  "sha256": "83eb67a3dd902ca828ff9129419a66a9e7f7d18333b01c48c5e02353f0a71ccb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

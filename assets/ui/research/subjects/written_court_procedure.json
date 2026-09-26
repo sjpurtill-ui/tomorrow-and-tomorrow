@@ -1,0 +1,14 @@
+{
+  "id": "written_court_procedure",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-79cfe4a9-9129-4041-9942-d9d6f4cd4287.png",
+  "source_file": "exec-79cfe4a9-9129-4041-9942-d9d6f4cd4287.png",
+  "creative_brief": "Charges, answers, witnesses and the time for speeches are fixed in writing, and a water-clock times each side. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/written_court_procedure-v1.png",
+  "sha256": "166647a796a4ce7c52ed34b1d142f6bfcfcb431c469ab1b36e58a71ea497f91c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

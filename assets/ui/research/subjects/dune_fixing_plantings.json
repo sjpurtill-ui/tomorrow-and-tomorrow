@@ -1,0 +1,14 @@
+{
+  "id": "dune_fixing_plantings",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3a9f68d8-07a8-4af2-96cc-b64b5c32c97d.png",
+  "source_file": "exec-3a9f68d8-07a8-4af2-96cc-b64b5c32c97d.png",
+  "creative_brief": "Brush fences and planted grasses hold the moving sand before it buries the fields. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/dune_fixing_plantings-v1.png",
+  "sha256": "4a375cbd7041aea2ce563d3a0ece4cc1ffb8f5e5e9a2b2fd6836273829be2afe",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

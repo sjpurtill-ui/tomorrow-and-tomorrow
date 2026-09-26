@@ -1,0 +1,14 @@
+{
+  "id": "multivallate_hillforts",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e255711-8d65-4ec1-a55d-6f3aa671e597.png",
+  "source_file": "exec-6e255711-8d65-4ec1-a55d-6f3aa671e597.png",
+  "creative_brief": "Rings of rampart and ditch, one inside another, keep slingers and attackers at a distance from the gate. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/multivallate_hillforts-v1.png",
+  "sha256": "0045671544b8a70cdc26d72221c75da72fc40bc906bfb752d2c46b4829be0ff0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
