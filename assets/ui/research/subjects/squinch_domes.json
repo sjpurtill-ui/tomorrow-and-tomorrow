@@ -1,0 +1,14 @@
+{
+  "id": "squinch_domes",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5c6045e3-3e48-48e0-812f-77ebe40e2390.png",
+  "source_file": "exec-5c6045e3-3e48-48e0-812f-77ebe40e2390.png",
+  "creative_brief": "Small arches thrown across the corners of a square hall turn it into an octagon, and the dome rises on top. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/squinch_domes-v1.png",
+  "sha256": "5a473d056d9786ed88a5d82ecf0748052adcfdb298eea0246d2500f936874f1f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

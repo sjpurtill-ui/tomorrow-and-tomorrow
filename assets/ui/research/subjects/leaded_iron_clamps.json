@@ -1,0 +1,14 @@
+{
+  "id": "leaded_iron_clamps",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0daf9751-eb06-4cc6-ae1a-8d1721fbd1a3.png",
+  "source_file": "exec-0daf9751-eb06-4cc6-ae1a-8d1721fbd1a3.png",
+  "creative_brief": "Iron clamps set in slots between blocks are sealed with poured lead, and the wall stands as one piece when the ground shakes. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/leaded_iron_clamps-v1.png",
+  "sha256": "167e97cabc645e75835a4831b738ceaef4773936009feab2461cee46ab60b88d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

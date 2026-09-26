@@ -1,0 +1,14 @@
+{
+  "id": "contraceptive_herbs",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e61b3f5e-f281-4caa-bd0b-3a59011c1174.png",
+  "source_file": "exec-e61b3f5e-f281-4caa-bd0b-3a59011c1174.png",
+  "creative_brief": "Women trade herbs and resins said to prevent or end a pregnancy, and some who take them sicken. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/contraceptive_herbs-v1.png",
+  "sha256": "735587fd7785ce54cb7cc48c18c4b65d025ffdb0ae043f3820a7f35b04badb38",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

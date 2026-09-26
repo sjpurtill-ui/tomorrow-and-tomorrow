@@ -1878,7 +1878,8 @@ func _build_environment() -> void:
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("#0b1417")
+	# Beyond the chart's edge: the dark leather of the map table.
+	settings.background_color = Color("#1c1812")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	# Low warm key light (docs/ART_DIRECTION.md): a painted landscape in the
 	# first hours of the day. The sky fill is cooler and dimmer than the key so
@@ -2260,6 +2261,12 @@ float organic_noise(vec2 p) {
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
 
+// Charted ground: the discovery mask, plus the ground around the people now.
+float charted_at(vec2 xz) {
+	vec2 fog_uv=clamp(xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
+	return max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(xz,fog_current_origin)));
+}
+
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
@@ -2281,6 +2288,8 @@ void fragment() {
 	// Taken before any discard: derivatives are undefined once quads diverge,
 	// which lit a one-pixel seam along every cut and dissolve edge.
 	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
+	// Screen-space rate of height, for the inked coastline (also pre-discard).
+	float height_px = fwidth(world_position.y);
 	// A continental patch can straddle the finite planet map. Never extrapolate
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
@@ -2300,11 +2309,22 @@ void fragment() {
 	vec2 surface_uv=UV;
 	vec2 surface_uv2=UV2;
 	if (far_layer && coast_mask_ready()) { coast_far_surface(world_position.xz,surface_color,surface_uv,surface_uv2); }
-	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
-	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
-	vec3 unknown_ground=vec3(0.006,0.012,0.014);
+	float discovered=charted_at(world_position.xz);
+	// Uncharted ground is blank vellum (map_palette.gdshaderinc), with the
+	// frontier of the known world inked where the chart ends.
+	vec3 unknown_ground=map_unknown(world_position.xz,CAMERA_POSITION_WORLD.y);
 	float reveal=smoothstep(0.06,0.62,discovered);
+	if (discovered>0.02 && discovered<0.75) {
+		// One mask texel is ~39 km; the mask is linear inside it, so a forward
+		// difference over half a texel gives its exact local slope.
+		float step_km=fog_world_size.x/2048.0;
+		vec2 slope_per_km=vec2(charted_at(world_position.xz+vec2(step_km,0.0))-discovered,charted_at(world_position.xz+vec2(0.0,step_km))-discovered)/step_km;
+		vec3 frontier=map_frontier(discovered,1.0/max(length(slope_per_km)*pixel_world,0.00001));
+		float frontier_scale=smoothstep(0.015,0.20,pixel_world);
+		unknown_ground=mix(unknown_ground,unknown_ground*0.82,frontier.y*frontier_scale*0.6);
+		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
+		reveal=mix(reveal,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
+	}
 	// Fully hidden ground needs only the existing unlit veil. Avoid all
 	// texture and procedural surface work until there is visible ground.
 	if (reveal<=0.0) {
@@ -2515,6 +2535,11 @@ void fragment() {
 		crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
 	}
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
+	// On the chart scale woodland is a muted green wash, not near-black stains.
+	// From the regional view outward the land is drawn as a chart: even washes
+	// of colour with relief shading, not photographic cloud mottling.
+	float chart_scale=smoothstep(0.02,0.30,pixel_world);
+	forest_surface=mix(forest_surface,vec3(0.18,0.22,0.12),smoothstep(0.01,0.20,pixel_world)*0.70);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
@@ -2564,13 +2589,13 @@ void fragment() {
 	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27*climate_green);
 	earth = mix(earth,vec3(0.31,0.295,0.205),close_clearings*0.16);
 	}
-	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06*country_detail;
+	float modulation = 0.94 + ((broad - 0.5) * 0.11 + (regional - 0.5) * 0.06*country_detail)*(1.0-chart_scale*0.6);
 	earth *= modulation;
 	// Reused regional fields provide a cheap aerial-photo contrast hierarchy:
 	// broad climate still owns the colour, while soil/cover boundaries remain
 	// legible instead of dissolving into uniformly soft brown or green blobs.
 	float cover_structure=smoothstep(0.30,0.72,regional*0.58+soil_patch*0.42);
-	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail));
+	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail))*(1.0-chart_scale*0.6);
 	earth*=1.0+structure_contrast;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
 	if (surface_uv.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,surface_uv2); }
@@ -2635,13 +2660,21 @@ void fragment() {
 	earth=map_palette_grade(earth);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
-	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
+	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.36;
 	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.002,0.35,pixel_world);
-	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.30);
+	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.40);
 	earth=map_haze(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
+	// The coast is inked, one to two pixels wide, where this surface's own
+	// triangles rise out of the sea (streamed patches only: the planet mesh
+	// takes its shoreline from the macro raster instead).
+	if (!far_layer) {
+		float shore_px=world_position.y/max(height_px,0.0000001);
+		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,world_position.y);
+		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
+	}
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;
@@ -2905,13 +2938,15 @@ render_mode diffuse_burley, specular_disabled;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size=vec2(40075.0,20004.0);
 uniform vec2 fog_current_origin=vec2(0.0);
+#include "res://scripts/map_palette.gdshaderinc"
 varying vec3 world_position;
 void vertex(){ world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
 void fragment(){
 	vec2 uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=smoothstep(0.12,0.62,max(texture(discovery_mask,uv).r,current_visibility));
-	ALBEDO=mix(vec3(0.004,0.009,0.010),COLOR.rgb,discovered);
+	ALBEDO=COLOR.rgb*discovered;
+	EMISSION=MAP_VELLUM*(1.0-discovered);
 	ROUGHNESS=1.0;
 }
 """
@@ -3793,9 +3828,25 @@ func _update_scale_lod() -> void:
 var city_banner_identity:Dictionary={}
 var city_labels:Control
 
+## Map labels found once and re-found only when a Label3D enters the tree.
+## Walking the whole scene every frame the camera moved cost more the larger
+## the civilization grew.
+var aerial_labels:Array[Node]=[]
+var aerial_labels_dirty:=true
+
+func _on_aerial_label_added(node:Node)->void:
+	if node is Label3D and is_ancestor_of(node): aerial_labels_dirty=true
+
 func _normalize_aerial_labels()->void:
 	if camera==null or camera.projection!=Camera3D.PROJECTION_PERSPECTIVE: return
-	for node in find_children("*","Label3D",true,false):
+	if is_inside_tree() and not get_tree().node_added.is_connected(_on_aerial_label_added):
+		get_tree().node_added.connect(_on_aerial_label_added)
+		aerial_labels_dirty=true
+	if aerial_labels_dirty or not is_inside_tree():
+		aerial_labels=find_children("*","Label3D",true,false)
+		aerial_labels_dirty=not is_inside_tree()
+	for node in aerial_labels:
+		if not is_instance_valid(node) or not is_ancestor_of(node): continue
 		var label:=node as Label3D
 		if not label.fixed_size or String(label.name) in ["ArmyLabel","FormationLabel","StrengthLabel"]: continue
 		if not label.has_meta("aerial_font_size"):
@@ -3822,6 +3873,12 @@ func _update_city_flag(label:Label3D)->void:
 		label.add_child(flag)
 	flag.texture=identity.texture
 	if flag.texture==null:return
+	# Measuring the name is the costly part; redo it only when it can change.
+	var flag_key:=[label.text,label.font_size,label.pixel_size,label.font,flag.texture]
+	if flag.get_meta("layout_key",[])==flag_key:
+		_register_city_card(label)
+		return
+	flag.set_meta("layout_key",flag_key)
 	var font:Font=label.font if label.font!=null else ThemeDB.fallback_font
 	var width:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size).x
 	var ratio:=float(label.font_size)*1.2/float(flag.texture.get_height())
@@ -4419,7 +4476,8 @@ void fragment() {
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
 	// Same map palette as the ground: olive and slate canopy, not neon blobs.
 	base=map_palette_grade(base);
-	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
+	ALBEDO=base*smoothstep(0.06,0.62,revealed);
+	EMISSION=MAP_VELLUM*(1.0-smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
 }
@@ -4572,7 +4630,9 @@ func _refresh_undertaking_visuals(force:bool=false)->void:
 	visual.render(GameState.player_settlements,undertaking_visual_root,_close_surface_height_at)
 
 func _refresh_settlement_network(force:=false)->void:
+	var undertaking_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	_refresh_undertaking_visuals(force)
+	preload("res://scripts/performance_trace.gd").mark("network_undertakings",undertaking_stamp)
 	if "Hearth Circle" not in GameState.settlement_completed:
 		if settlement_border_root: settlement_border_root.visible=false
 		if settlement_network_marker_root: settlement_network_marker_root.visible=false
@@ -4603,7 +4663,9 @@ func _refresh_settlement_network(force:=false)->void:
 	# The coarse signature above also moves for records that draw nothing (daily
 	# labour allocations, monthly drift). Rebuild meshes only when what is drawn
 	# changed; secondary town designs still get their own per-town check.
-	var geometry_key:=_settlement_network_geometry_key(network,[network_view_key])
+	var key_stamp:int=preload("res://scripts/performance_trace.gd").start()
+	var geometry_key:=_settlement_network_geometry_key(network,_settlement_network_visibility_key(network))
+	preload("res://scripts/performance_trace.gd").mark("network_geometry_key",key_stamp)
 	if not force and geometry_key==rendered_settlement_network_geometry_key and is_instance_valid(settlement_border_root):
 		var unchanged_secondary:Array[Dictionary]=[]
 		for settlement in network.settlements:
@@ -4627,10 +4689,8 @@ func _refresh_settlement_network(force:=false)->void:
 		settlement_network_fabric_root.name="SettlementNetworkPhysicalFabric"
 		add_child(settlement_network_fabric_root)
 	settlement_network_fabric_root.visible=true
-	var border_surface:=SurfaceTool.new()
-	border_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var border_halo_surface:=SurfaceTool.new()
-	border_halo_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var border_surface:=TERRITORY_BAND.Arrays.new()
+	var border_halo_surface:=TERRITORY_BAND.Arrays.new()
 	var ownership_surface:=SurfaceTool.new()
 	ownership_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count:=0
@@ -4638,7 +4698,8 @@ func _refresh_settlement_network(force:=false)->void:
 	var ownership_triangle_count:=0
 	var visible_secondary_settlements:Array[Dictionary]=[]
 	# One exact height sample set serves fills and both border ribbons.
-	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
+	var borders_stamp:int=preload("res://scripts/performance_trace.gd").start()
+	var samples:=_territory_height_samples()
 	for settlement in network.settlements:
 		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): visible_secondary_settlements.append(settlement)
 		if not _settlement_boundary_in_current_view(settlement): continue
@@ -4654,7 +4715,7 @@ func _refresh_settlement_network(force:=false)->void:
 		# the edge never becomes a heavy 3D ring; they only change on a rebuild.
 		var ink_pixel:=_territory_ink_pixel_km()
 		var primary:=bool(settlement.get("primary",false))
-		var core_width:=ink_pixel*lerpf(0.55,0.85,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
+		var core_width:=ink_pixel*lerpf(0.65,0.95,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
 		var wash_color:Color=TERRITORY_WASH.lerp(color,0.25)
 		var ownership_color:Color=wash_color
 		# Store base opacity in geometry; the camera fade is updated live in material.
@@ -4662,13 +4723,22 @@ func _refresh_settlement_network(force:=false)->void:
 		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
 		var edge_wash:=wash_color
 		edge_wash.a=0.15 if primary else 0.10
+		# Mitred bands (territory_border_band.gd): the wash pools at the ink line
+		# and fades inward; the hairline takes its heights from the boundary.
 		var wash_band:=ink_pixel*2.5
-		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,_inset_boundary(boundary,wash_band),wash_band,edge_wash,0.0045,samples)
+		var subdivisions:=_border_ribbon_subdivisions()
+		var inner_wash:=TERRITORY_BAND.offset(boundary,-wash_band*2.0)
+		var faded_wash:=edge_wash;faded_wash.a=0.0
+		edge_wash.a*=1.5
+		# The wash's inner edge takes the boundary's cached heights, raised by what
+		# a 25% slope could climb across the band; it is transparent there, so
+		# no zoom step has to sample the planet height field afresh.
+		halo_segment_count+=TERRITORY_BAND.append(border_halo_surface,boundary,inner_wash,boundary,boundary,edge_wash,faded_wash,0.0045,samples,subdivisions,wash_band*2.0*0.25)
 		var ink:=TERRITORY_INK
 		ink.a=(0.85 if primary else 0.62)*clampf(float(visual_profile.border_alpha)/0.7,0.8,1.2)
-		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,ink,0.0065,samples)
+		segment_count+=TERRITORY_BAND.append(border_surface,TERRITORY_BAND.offset(boundary,core_width),TERRITORY_BAND.offset(boundary,-core_width),boundary,boundary,ink,ink,0.0065,samples,subdivisions)
 	var trace=preload("res://scripts/performance_trace.gd")
-	var stamp:int=trace.start()
+	var stamp:int=trace.mark("network_borders",borders_stamp)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
 	stamp=trace.mark("network_markers",stamp)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
@@ -4715,7 +4785,9 @@ func _refresh_settlement_network(force:=false)->void:
 		material.roughness=1.0
 		border_instance.material_override=material
 		settlement_border_root.add_child(border_instance)
+	stamp=trace.mark("network_meshes",stamp)
 	_update_scale_lod()
+	trace.mark("network_scale_lod",stamp)
 
 
 ## Everything the border, claim-wash and marker meshes read, and nothing else.
@@ -4916,6 +4988,37 @@ func _settlement_network_lod_band()->int:
 	if camera.size<=600.0: return 2
 	if camera.size<=2600.0: return 3
 	return 4
+
+## Territory outlines sample the fixed planet height field. The same boundary
+## points recur on every rebuild (pan culling, zoom buckets, daily claim ticks),
+## so their heights are kept for this world instead of resampled each time.
+var territory_height_cache:RefCounted
+var territory_height_cache_world:=""
+
+func _territory_height_samples()->RefCounted:
+	var world:="%d:%d" % [GameState.world_seed,GameState.active_province]
+	if territory_height_cache==null or territory_height_cache_world!=world or int(territory_height_cache.misses)>40000:
+		territory_height_cache=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
+		territory_height_cache_world=world
+	return territory_height_cache
+
+## Render tessellation per boundary edge, chosen by view scale only.
+func _border_ribbon_subdivisions()->int:
+	if camera==null: return 8
+	return 10 if camera.size<4.0 else (6 if camera.size<180.0 else (3 if camera.size<2600.0 else 1))
+
+## What the network meshes depend on from the view: which settlements are culled
+## in, and the zoom-driven widths and tessellation. The pan position itself is
+## not keyed, so panning over unchanged territory never rebuilds a mesh.
+func _settlement_network_visibility_key(network:Dictionary)->Array:
+	var borders:=PackedStringArray()
+	var markers:=PackedStringArray()
+	for settlement:Dictionary in network.settlements:
+		var id:=String(settlement.get("id",""))
+		if _settlement_boundary_in_current_view(settlement): borders.append(id)
+		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): markers.append(id)
+	var zoom_bucket:=roundi(log(maxf(0.10,camera.size))/log(1.8)) if camera else 0
+	return [_settlement_network_lod_band(),zoom_bucket,camera.size<=3.0 if camera else false,_border_ribbon_subdivisions(),borders,markers]
 
 func _settlement_network_view_key()->String:
 	if camera==null: return "0:0:0"
@@ -7747,7 +7850,8 @@ func _update_settlement_claim_opacity()->void:
 	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 
 const TERRITORY_WASH:=Color("#A8782A")
-const TERRITORY_INK:=Color("#3A2E22")
+const TERRITORY_BAND:=preload("res://scripts/territory_border_band.gd")
+const TERRITORY_INK:=Color("#1E150D")
 
 ## One screen pixel in kilometres at the current zoom bucket (the same bucket
 ## as the network view key), so ink widths are stable between rebuilds.
@@ -7790,9 +7894,7 @@ func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVecto
 		# border remains the fixed 32-point aggregate polygon. Subdivision is selected by
 		# view scale, never claim radius or population: a billion-person civilization must
 		# not allocate more border vertices simply because its territory is physically vast.
-		var subdivisions:=8
-		if camera!=null:
-			subdivisions=10 if camera.size<4.0 else (6 if camera.size<180.0 else (3 if camera.size<2600.0 else 1))
+		var subdivisions:=_border_ribbon_subdivisions()
 		for subdivision in subdivisions:
 			var segment_a:=a.lerp(b,float(subdivision)/float(subdivisions))
 			var segment_b:=a.lerp(b,float(subdivision+1)/float(subdivisions))
@@ -14951,6 +15053,24 @@ func _ensure_map_selection_marker()->void:
 	material.render_priority=12
 	material.albedo_color=Color(0.88,0.75,0.39,0.90)
 	map_selection_marker.material_override=material
+	# A fine ink keyline just outside the gold ring keeps it legible on pale
+	# chart paper and bright ground alike.
+	var keyline:=MeshInstance3D.new()
+	keyline.name="InkKeyline"
+	var key_ring:=TorusMesh.new()
+	key_ring.inner_radius=1.0
+	key_ring.outer_radius=1.07
+	key_ring.rings=40
+	key_ring.ring_segments=5
+	keyline.mesh=key_ring
+	var key_material:=StandardMaterial3D.new()
+	key_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	key_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	key_material.no_depth_test=true
+	key_material.render_priority=11
+	key_material.albedo_color=Color(TERRITORY_INK,0.80)
+	keyline.material_override=key_material
+	map_selection_marker.add_child(keyline)
 	map_selection_marker.visible=false
 	add_child(map_selection_marker)
 
@@ -14970,6 +15090,10 @@ func _show_map_selection(position:Vector3)->void:
 	if not bool(surface_assessment.get("valid",false)): color=Color(0.92,0.30,0.23,0.90)
 	(map_selection_marker.material_override as StandardMaterial3D).albedo_color=color
 	map_selection_marker.visible=true
+	# The ring settles onto the spot, so the click reads as answered at once.
+	map_selection_marker.scale=Vector3.ONE*radius*1.45
+	var settle:=create_tween()
+	settle.tween_property(map_selection_marker,"scale",Vector3.ONE*radius,0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	get_tree().create_timer(2.5).timeout.connect(_hide_map_selection.bind(generation))
 
 

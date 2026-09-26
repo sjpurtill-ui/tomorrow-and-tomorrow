@@ -1,0 +1,14 @@
+{
+  "id": "eclipse_cycle_prediction",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c4562692-de1c-4dc5-9e53-dc7644ac3d9d.png",
+  "source_file": "exec-c4562692-de1c-4dc5-9e53-dc7644ac3d9d.png",
+  "creative_brief": "Knowing the long cycle, the watchers warn the court months ahead when the sun will darken. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/eclipse_cycle_prediction-v1.png",
+  "sha256": "86a7681348256611972ea66ea8445b790b413c4d0cee21517a1c1a2c58f69881",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

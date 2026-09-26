@@ -1,0 +1,14 @@
+{
+  "id": "trunk_canals",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6bb6576d-470c-477a-abce-f414dc199d4e.png",
+  "source_file": "exec-6bb6576d-470c-477a-abce-f414dc199d4e.png",
+  "creative_brief": "Long canals join one river system to the next, and barges carry grain between basins that never met. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/trunk_canals-v1.png",
+  "sha256": "f140b2b82c6dfe8810764aaed5bf3f8aeb27c500175fd524828743a78ab201f0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

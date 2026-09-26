@@ -187,6 +187,20 @@ func _assert_steady_and_changes()->void:
 	stats.clear()
 	for i in 20:_frame()
 	check(_count("territory_borders")==0,"borders rebuilt again at the new LOD (%d)" % _count("territory_borders"))
+	# Panning over unchanged territory draws nothing new.
+	stats.clear()
+	var home:Vector3=t.camera_target
+	for i in 20:
+		t.camera_target=home+Vector3(t.camera.size*0.02*i,0,0)
+		_frame()
+	check(_count("territory_borders")==0,"borders rebuilt while panning over unchanged territory (%d)" % _count("territory_borders"))
+	# Panning the territory out of view culls it: exactly one rebuild.
+	stats.clear()
+	t.camera_target=home+Vector3(t.camera.size*6.0,0,0)
+	for i in 2:_frame()
+	check(_count("territory_borders")==1,"borders did not rebuild once when panned out of view (%d)" % _count("territory_borders"))
+	t.camera_target=home
+	for i in 2:_frame()
 	# A civ met / new charted ground: fog mask rebuilds once.
 	stats.clear()
 	CivilizationSystem.fog_revision+=1
