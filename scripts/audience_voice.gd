@@ -1434,7 +1434,7 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		var text:=_clean_text(String((item as Dictionary).get("text","")),_member(s,key))
 		text=without_filler(text,names)
 		# Invented maxims go; the plain part of the line stays if it stands alone.
-		text=Plain.strip(text)
+		text=Plain.strip_tics(Plain.strip(text))
 		if text.is_empty(): continue
 		if (obeyed or ordered) and refusal.search(text)!=null: continue   # the engine, not the model, decides obedience
 		if text.is_empty() or meta.search(text)!=null: continue
@@ -1612,8 +1612,21 @@ func _persons_response(audience_id:String,request:Dictionary,body:PackedByteArra
 	var s:Dictionary=request.scene
 	var lines:=validate_lines(raw.get("lines",[]) if raw.get("lines") is Array else [],s,"persons",extra)
 	var params:Dictionary=mapped.params
-	if raw.get("descriptor") is Dictionary and String(mapped.action) in ["ask_about","summon"] and not params.has("desc") and not params.has("ref"):
+	var action:=String(mapped.action)
+	if raw.get("descriptor") is Dictionary and action in ["ask_about","summon"] and not params.has("desc") and not params.has("ref"):
 		params["desc"]=Persons.descriptor_from(raw.descriptor)
+	# "Who is the smartest man?" is always a question about a person, and
+	# "summon him" always brings the one just named, whatever the mapping.
+	var typed:=Persons.typed_action(String(extra.get("player_text","")))
+	var engine_words:=false
+	if not typed.is_empty():
+		engine_words=action!=String(typed.action)
+		var live_desc:Dictionary=params.get("desc",{}) if params.get("desc") is Dictionary else {}
+		action=String(typed.action)
+		params=(typed.params as Dictionary).duplicate(true)
+		if params.get("desc") is Dictionary:
+			for k in ["trade","sex"]:
+				if not (params.desc as Dictionary).has(k) and live_desc.has(k): params.desc[k]=live_desc[k]
 	var spoken:Array=[]
 	var principal_text:=""
 	for line in lines:
@@ -1625,10 +1638,10 @@ func _persons_response(audience_id:String,request:Dictionary,body:PackedByteArra
 		if member.is_empty(): continue
 		spoken.append({"speaker":String(member.name),"role":"official","person_id":int(member.person_id),"text":String(l.text),"aside":bool(l.get("aside",false))})
 		if principal_text=="" and not bool(l.get("aside",false)): principal_text=String(l.text)
+	if engine_words: spoken.clear()
 	_requests.erase(audience_id)
 	_finish_receipt(receipt,true,false,"")
 	last_problem.erase(audience_id)
-	var action:=String(mapped.action)
 	var result:Dictionary
 	if action=="talk":
 		if not spoken.is_empty():
@@ -1655,7 +1668,14 @@ const GENERAL_ORDER:={"act":"command","verb":"order","actor_ref":"","target_ref"
 
 func _deliver_offline(s:Dictionary,stage:String,extra:Dictionary,_problem:String)->void:
 	if stage=="persons":
-		# The words could not be mapped: the one before you simply answers.
+		# The words could not be mapped live: the engine still answers what it
+		# can read ("who is the strongest man?", "summon him").
+		var typed:=Persons.typed_action(String(extra.get("player_text","")))
+		if not typed.is_empty():
+			persons_done.emit.call_deferred(String(s.id),Persons.perform(String(s.id),String(typed.action),typed.params as Dictionary,{}))
+			lines_ready.emit.call_deferred(String(s.id))
+			return
+		# Otherwise the one before you simply answers.
 		var said:={"player_text":String(extra.get("player_text",""))}
 		_deliver(s,"speak",said,_offline_lines(s,"speak",said,_scene_rng(s,"speak")),0.0)
 		persons_done.emit.call_deferred(String(s.id),{"ok":false,"action":"talk"})
@@ -2933,6 +2953,7 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var bench:int=int(s.officials.size())
 	match stage:
 		"open":
+			if String(s.kind)=="summons": return "'envoy' was sent for by the ruler and brings nothing of their own: exactly ONE short, plain line in their own voice that hands the floor back (like 'You sent for me. What do you need?'). No petition, no request for themselves, no remark on the state of the settlement, no promise to remember, no verbal tic. No official speaks. mood_shift 0."
 			var who:="'envoy' is the petitioning official: they make their case with feeling and a little self-interest." if s.origin=="court" else "'envoy' speaks first: a greeting with flourish and attitude, then the business in plain terms, exact amounts as given."
 			if String(s.kind) in WORK_KINDS: who=_work_open_instruction(s)
 			if String(s.kind)=="report": who="'envoy' is the Chief Scout, back from the field. Debrief in 2 to 3 lines: plain-spoken, concrete and sensory (what they saw, heard, smelled, who they met, what surprised or worried them, what they covet), opinionated, with uncertainty spoken naturally ('I'd not swear to it, but...'). Use only the findings supplied; never add numbers, places or events."

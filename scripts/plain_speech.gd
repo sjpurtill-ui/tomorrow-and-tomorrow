@@ -246,6 +246,20 @@ static func strip_tag_opener(text:String)->String:
 	if rest.is_empty(): return ""
 	return rest.substr(0,1).to_upper()+rest.substr(1)
 
+## Verbal tics a live model leans on to sound like a character ("strictly
+## speaking", "to wit", "mark you", "if I may"): cut wherever they fall.
+const TICS:="(?i)(,\\s*)?\\b(strictly speaking|to wit|mark you|if i may|if you will|so to speak|as it were|truth be told|verily|forsooth|i daresay)\\b\\s*[,;:]?"
+
+## The line without its verbal tics, first letter raised again.
+static func strip_tics(text:String)->String:
+	var out:=_re("tics",TICS).sub(text,"",true)
+	out=_re("tic_space","\\s{2,}").sub(out," ",true).strip_edges()
+	out=_re("tic_punct","\\s+([,;:.!?])").sub(out,"$1",true)
+	out=_re("tic_end","[,;:]+([.!?])").sub(out,"$1",true)
+	out=_re("tic_lead","^[,;:]\\s*").sub(out,"",true)
+	if not out.is_empty(): out=out.substr(0,1).to_upper()+out.substr(1)
+	return out
+
 ## Share of lines flagged, for reports: {"lines","flagged","share","examples"}.
 static func survey(lines:Array,keep_examples:int=12)->Dictionary:
 	var flagged:=0

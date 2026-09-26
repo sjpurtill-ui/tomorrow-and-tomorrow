@@ -729,7 +729,7 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if not resolved_result.is_empty():return resolved_result
 	var result:=Hall.divine(audience_id,action,words)
 	if not bool(result.get("ok",false)):
-		_show_toast(String(result.get("outcome","That cannot be done.")))
+		_show_toast(String(result.get("outcome","")))
 		return result
 	if voice_reacts and _voice_ok() and voice.has_method("divine_reaction"):voice.divine_reaction(audience_id,result)
 	_refresh_regard()
@@ -745,7 +745,7 @@ func act_on_envoy(act_id:String,words:String="")->Dictionary:
 	if not resolved_result.is_empty():return resolved_result
 	var result:=Hall.envoy_act(audience_id,act_id,words)
 	if not bool(result.get("handled",false)):
-		_show_toast(String(result.get("outcome","That cannot be done.")))
+		_show_toast(String(result.get("outcome","")))
 		return result
 	_after_command(result)
 	return result
@@ -895,8 +895,9 @@ func _speak()->void:
 			return
 	# Words about people, with a live voice: one call maps them onto the
 	# persons engine's actions (ask, summon, question, accuse, judge).
+	var typed:=Persons.typed_action(text) if resolved_result.is_empty() and String(Hall.find(audience_id).get("origin",""))=="court" else {}
 	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id):
-		var about_people:=not Persons.speaker_known(audience_id).is_empty()
+		var about_people:=not Persons.speaker_known(audience_id).is_empty() or not typed.is_empty()
 		if not about_people:
 			var re:=RegEx.new();re.compile(PERSONS_WORDS)
 			about_people=re.search(text)!=null
@@ -904,6 +905,12 @@ func _speak()->void:
 			voice.persons_turn(audience_id,text)
 			_pump()
 			return
+	# Offline, the same words reach the same engine: "who is the strongest
+	# man?" names a real person (made and remembered if need be); "summon
+	# him" brings the one just named.
+	if not typed.is_empty() and not _persons_live():
+		_after_persons(Persons.perform(audience_id,String(typed.action),typed.params as Dictionary,{"echo":text}))
+		return
 	# The god's word is law: an order (to the one before you, to anyone at
 	# court, or to the guards) is decided and carried out by the engine first;
 	# the court then reacts to what actually happened.
@@ -982,7 +989,7 @@ func choose(option_id:String)->Dictionary:
 	var audience:=Hall.find(audience_id)
 	var result:Dictionary=Hall.resolve(audience_id,option_id)
 	if not bool(result.get("ok",false)):
-		_show_toast(String(result.get("outcome",result.get("error","That cannot be done."))))
+		_show_toast(String(result.get("outcome",result.get("error",""))))
 		_build_options();return result
 	if not String(result.get("next_audience_id","")).is_empty():
 		# They set the first matter aside and raise the other one.
@@ -1088,6 +1095,7 @@ func _refresh_footer()->void:
 	_refresh_voice_indicator()
 
 func _show_toast(text:String)->void:
+	if text.strip_edges().is_empty():return
 	if not is_instance_valid(transcript):
 		_court_note(text);return
 	var note:=Tokens.make_label(text,13,Tokens.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

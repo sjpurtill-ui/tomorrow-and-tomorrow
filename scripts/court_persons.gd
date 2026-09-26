@@ -263,6 +263,14 @@ static func find_or_create(desc:Dictionary)->Dictionary:
 	for p in people():
 		var rec:Dictionary=p
 		if (rec.get("keys",[]) as Array).has(key) and String(rec.get("status",""))=="living": return rec
+	var grounded:=_ground(desc)
+	if not grounded.is_empty():
+		(grounded.keys as Array).append(key)
+		var had:=_quals(grounded)
+		for q in String(desc.get("quality","")).split("+",false):
+			if not had.has(q): had.append(q)
+		grounded["excels"]="+".join(PackedStringArray(had))
+		return grounded
 	return create(desc,key)
 
 static func create(desc:Dictionary,key:String="")->Dictionary:
@@ -289,9 +297,17 @@ static func create(desc:Dictionary,key:String="")->Dictionary:
 	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").family_of(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))))
 	var n:=_name_for(sex,rng,family)
 	var children:=0
+	var quals:=String(desc.get("quality","")).split("+",false)
+	if quals.has("fertile") and age_band=="": age=rng.randi_range(34,46)
 	if age>=20: children=clampi(roundi((float(age)-19.0)*0.18*rng.randf_range(0.5,1.3)),0,7)
+	if quals.has("fertile"):
+		# More than anyone the court already knows, within what one hearth bears.
+		var most:=0
+		for other in people():
+			if String((other as Dictionary).get("status",""))=="living": most=maxi(most,int(((other as Dictionary).get("household",{}) as Dictionary).get("children",0)))
+		children=clampi(maxi(rng.randi_range(7,9),most+1),7,11)
 	var spouse:={}
-	if age>=18 and rng.randf()<0.7:
+	if age>=18 and (rng.randf()<0.7 or quals.has("fertile")):
 		var sp:=_name_for("female" if sex=="male" else "male",rng,String(n.family))
 		spouse={"name":String(sp.given),"alive":not bool(desc.get("widow",false))}
 	if bool(desc.get("widow",false)) and spouse.is_empty(): spouse={"name":String(_name_for("male" if sex=="female" else "female",rng,String(n.family)).given),"alive":false}
@@ -494,6 +510,158 @@ static func categories()->Array[Dictionary]:
 		out.append({"label":"whoever made the last discovery","desc":{"discovery":String(d.get("id","")),"deed":"found %s" % String(d.get("name","a new way")).to_lower(),"trade":_fit_trade(["gatherer","flint-knapper","potter","healer"]),"settlement_id":sid}})
 	out.append({"label":"a stranger from beyond the hills","desc":{"far":true,"trade":_fit_trade(["trader","tracker","hunter"]),"settlement_id":sid}})
 	return out
+
+# --------------------------------------------------------------------------
+# Typed words about people ("who is the smartest man?", "summon him")
+# --------------------------------------------------------------------------
+
+## [quality key, stem pattern]. A superlative question names one or more.
+const QUALITY_WORDS:=[
+	["fertile","(fertil|virile|most (children|sons|daughters|babies|kids|offspring)|fathered the most|borne the most)"],
+	["wit","(smart|clever|wise|wisest|brigh?test|brilliant|intelligen|cunning|shrewd|quick-witted|sharpest)"],
+	["strength","(strong|mightiest|powerful|stoutest|biggest)"],
+	["speed","(fast|swift|fleet)"],
+	["beauty","(beaut|handsome|comel|fairest|prett|love?liest)"],
+	["courage","(brave|boldest|fearless|courageous)"],
+	["kindness","(kind|gentle|generous)"],
+	["height","(tall)"],
+	["honesty","(honest|truthful)"],
+	["sloth","(lazi|lazy|idlest)"],
+	["cruelty","(cruel|meanest|harshest)"],
+	["skill","(best|finest|greatest|ablest|most skil)"],
+]
+const PEOPLE_OPEN:="(?i)^\\W*(and |so |then |now |tell me,? )?(who|whom|which (man|woman|one|person|of (them|us|my people|the \\w+)))\\b|^\\W*(tell me (of|about)|name|point out|show me|find me|is there)\\b"
+const PEOPLE_NOT:="(?i)\\b(responsible|blame|fault|to blame|did this|did it|are you|art thou|is this|is that|goes there|sent you|speaks|is speaking|lied|lying)\\b"
+const SUMMON_WORDS:="(?i)^\\W*(please |now |then |so |good\\.? )?(?<verb>summon|bring|fetch|send for|call for|call in|call)\\s+(me\\s+|to me\\s+|here\\s+)?(?<who>him|her|them|that (man|woman|one|person|fellow)|this (man|woman|one|person)|the (man|woman|one|fellow)|(?-i:[A-Z])[\\w'-]+)\\b"
+
+static func people_question(text:String)->Dictionary:
+	## A description for a "who is the -est ..." question, or {} when the words
+	## are not asking the court to name someone.
+	var t:=text.strip_edges()
+	if t=="" or RegEx.create_from_string(PEOPLE_OPEN).search(t)==null: return {}
+	if RegEx.create_from_string(PEOPLE_NOT).search(t)!=null: return {}
+	var low:=t.to_lower()
+	var quals:Array[String]=[]
+	for q in QUALITY_WORDS:
+		if RegEx.create_from_string("(?i)\\b"+String(q[1])).search(low)!=null: quals.append(String(q[0]))
+	var desc:Dictionary={"settlement_id":String(_settlement("").get("id",""))}
+	for key in TRADES:
+		var k:=String(key)
+		if RegEx.create_from_string("(?i)\\b(%s|%s|%s)\\b" % [k,trade_label(k),trade_label(k,true)]).search(low)!=null:
+			desc["trade"]=k if trade_ok(k) else _fit_trade([k,"gatherer"])
+			break
+	if RegEx.create_from_string("(?i)\\b(oldest|eldest)\\b").search(low)!=null:
+		desc["age"]="oldest"; quals.append("oldest living")
+	elif RegEx.create_from_string("(?i)\\byoungest\\b").search(low)!=null:
+		desc["age"]="young"; quals.append("youngest")
+	if quals.has("skill") and desc.has("trade"):
+		quals.erase("skill"); quals.append("best %s" % String(desc.trade))
+	if RegEx.create_from_string("(?i)\\b(man|men|male|boy|husband|father|fellow|lad|he|him)\\b").search(low)!=null: desc["sex"]="male"
+	elif RegEx.create_from_string("(?i)\\b(woman|women|female|girl|wife|mother|maid|lass|she|her)\\b").search(low)!=null: desc["sex"]="female"
+	if quals.is_empty():
+		# "Who is the most <word> ..." / "who is the <word>est ..." still names someone.
+		var m:=RegEx.create_from_string("(?i)\\b(most|least) ([a-z]+)|\\bthe ([a-z]{3,}est)\\b").search(low)
+		if m!=null: quals.append((m.get_string(1)+" "+m.get_string(2)) if m.get_string(2)!="" else m.get_string(3))
+		elif desc.has("trade"):
+			# "Tell me about the potters": the trade as a group, with a spokesperson.
+			desc["count"]=6
+			return desc
+		else: return {}
+	quals.sort()
+	desc["quality"]="+".join(quals)
+	return desc
+
+static func typed_action(text:String)->Dictionary:
+	## Typed words the persons engine can act on without a live voice:
+	## {action, params} or {}. "Who is the strongest man?" asks about someone;
+	## "summon him" brings the one just named.
+	var q:=people_question(text)
+	if not q.is_empty(): return {"action":"ask_about","params":{"desc":q}}
+	var m:=RegEx.create_from_string(SUMMON_WORDS).search(text.strip_edges())
+	if m==null:
+		# "Summon the tallest man": whoever the court names for it, brought in.
+		var d:=RegEx.create_from_string("(?i)^\\W*(please |now |then |so )?(summon|fetch|send for|call for|bring( me)?)\\s+(?<rest>(the|our|my|your|a|an) .+)$").search(text.strip_edges())
+		if d==null: return {}
+		var described:=people_question("who is "+d.get_string("rest"))
+		return {"action":"summon","params":{"desc":described}} if not described.is_empty() and int(described.get("count",1))<=1 else {}
+	var who:=m.get_string("who")
+	# "bring him bread" and "call him a liar" are not summonses.
+	var tail:=text.strip_edges().substr(m.get_end()).strip_edges().to_lower()
+	if m.get_string("verb").to_lower() in ["bring","call"] and RegEx.create_from_string("^(to me|here|before me|in|now|at once|to (the )?(court|fire|hall))?\\W*$").search(tail)==null: return {}
+	var focus:Dictionary=state().focus.get("person",{}) if state().focus.get("person") is Dictionary else {}
+	if who.substr(0,1)==who.substr(0,1).to_upper() and not who.to_lower() in ["him","her","them","that","this","the"]:
+		var r:=resolve_name(who)
+		return {"action":"summon","params":{"ref":r}} if not r.is_empty() else {}
+	if focus.is_empty(): return {}
+	return {"action":"summon","params":{"ref":focus.duplicate()}}
+
+static func resolve_name(given:String)->Dictionary:
+	## Someone the court already knows by this name (never creates anyone).
+	var named:=given.strip_edges().to_lower()
+	if named=="": return {}
+	for p:Dictionary in Hall._officials():
+		if String(p.get("name","")).to_lower().get_slice(" ",0)==named: return {"kind":"official","pid":int(p.person_id)}
+	for p2 in people():
+		if String((p2 as Dictionary).get("given","")).to_lower()==named and String((p2 as Dictionary).get("status",""))=="living": return ref_of(p2)
+	for f in HistoricalFigures.people:
+		if f is Dictionary and String((f as Dictionary).get("name","")).to_lower().get_slice(" ",0)==named: return {"kind":"figure","id":String((f as Dictionary).get("id",""))}
+	return {}
+
+static func _quals(p:Dictionary)->Array:
+	return Array(String(p.get("excels","")).split("+",false))
+
+static func excels_words(p:Dictionary)->String:
+	## One or two plain sentences on what the person is known for.
+	var he:="she" if String(p.get("sex",""))=="female" else "he"
+	var him:="her" if he=="she" else "him"
+	var his:="her" if he=="she" else "his"
+	var He:=he.capitalize()
+	var village:=String(p.get("village","the camp"))
+	var out:PackedStringArray=PackedStringArray()
+	for q in _quals(p):
+		var k:=String(q)
+		match k:
+			"fertile":
+				var kids:=int((p.get("household",{}) as Dictionary).get("children",0))
+				out.append("%s has %s %s children, more than anyone at %s." % [He,"borne" if he=="she" else "fathered",Notables._number_word(kids),village])
+			"wit": out.append("Nobody at the fire is quicker of mind; people bring %s their quarrels to settle." % him)
+			"strength": out.append("%s can carry a grown deer on %s back alone." % [He,his])
+			"speed": out.append("Nobody at %s outruns %s." % [village,him])
+			"beauty": out.append("People stop their work to watch %s pass." % him)
+			"courage": out.append("%s backs away from nothing, beast or man." % He)
+			"kindness": out.append("%s shares %s food before %s own children eat." % [He,his,his])
+			"height": out.append("%s stands a head above everyone at the fire." % He)
+			"honesty": out.append("Nobody has ever caught %s in a lie." % him)
+			"sloth": out.append("%s sleeps while the rest of us work, and everyone knows it." % He)
+			"cruelty": out.append("The children keep out of %s way." % his)
+			"skill": out.append("Nobody does the work better.")
+			"oldest living": out.append("No one alive at %s is older." % village)
+			"youngest": out.append("%s is the youngest who works among us." % He)
+			_:
+				if k.begins_with("best ") and k!="best maker": out.append("Nobody at %s is a better %s." % [village,trade_label(k.trim_prefix("best "))])
+				elif k.begins_with("kin:") or k in ["newborn","sick","troublemaker","best maker"]: pass
+				else: out.append("Ask anyone who is the %s, and they will say %s." % [k,String(p.get("given",""))])
+	return " ".join(out)
+
+static func _ground(desc:Dictionary)->Dictionary:
+	## A remembered person who already fits a superlative (the one with the
+	## most children, the oldest alive), so the court answers from what exists.
+	var quals:=String(desc.get("quality","")).split("+",false)
+	if not (quals.has("fertile") or quals.has("oldest living")): return {}
+	var best:Dictionary={}
+	var best_score:=-1.0
+	for p in people():
+		var rec:Dictionary=p
+		if String(rec.get("status",""))!="living" or int(rec.get("count",1))>1: continue
+		if String(desc.get("sex",""))!="" and String(rec.get("sex",""))!=String(desc.sex): continue
+		if String(desc.get("settlement_id",""))!="" and String(rec.get("settlement_id",""))!=String(desc.settlement_id): continue
+		var score:=float(int((rec.get("household",{}) as Dictionary).get("children",0))) if quals.has("fertile") else float(age_of(rec))
+		if score>best_score:
+			best_score=score; best=rec
+	if best.is_empty(): return {}
+	if quals.has("fertile") and best_score<7.0: return {}
+	if not quals.has("fertile") and best_score<66.0: return {}
+	return best
 
 # --------------------------------------------------------------------------
 # Resolution (structured): existing people first, then the created
@@ -1021,7 +1189,14 @@ static func perform(audience_id:String,action:String,params:Dictionary={},how:Di
 	var d:=decide(audience_id,action,params)
 	result.merge(d,true)
 	if not bool(d.get("ok",false)):
-		result.outcome="That cannot be done here."
+		# Never a dead end: whoever is before the god asks what they meant.
+		result.outcome=""
+		result["clarified"]=true
+		var ask:=_answerer_beat(audience_id,"clarify",{})
+		if not ask.is_empty():
+			var said:=Lines.render([ask],result.signature,_rng("clarify|%s|%s|%d" % [audience_id,action,(Hall.find(audience_id).get("lines",[]) as Array).size()]))
+			_speak_lines(audience_id,said)
+			result["spoken"]=said
 		return result
 	var beats:Array=[]
 	match action:
@@ -1081,6 +1256,18 @@ static func _speak_lines(audience_id:String,lines:Array)->void:
 
 # ---- beats: {who:"speaker"|"official"|"narrator"|"known", person:{...}, beat, slots}
 
+static func _answerer_beat(audience_id:String,beat:String,slots:Dictionary)->Dictionary:
+	## The one before the god answers: the official speaking, a summoned
+	## commoner, or the first of the bench.
+	var a:=Hall.find(audience_id)
+	var sp:=int((a.get("speaker",{}) as Dictionary).get("person_id",0)) if not a.is_empty() else 0
+	if sp>0 and not _official_person(sp).is_empty(): return _beat_official(_official_person(sp),beat,slots)
+	var known:=speaker_known(audience_id)
+	if not known.is_empty(): return _beat_known(known,beat,slots)
+	var b:=bench(audience_id)
+	if not b.is_empty(): return _beat_official(b[0],beat,slots)
+	return {}
+
 static func _beat_official(person:Dictionary,beat:String,slots:Dictionary,aside:bool=false)->Dictionary:
 	return {"speaker":String(person.get("name","")),"role":"official","person_id":int(person.get("person_id",0)),"beat":beat,"slots":slots,"aside":aside,"persona_of":{"official":int(person.get("person_id",0))}}
 
@@ -1098,7 +1285,7 @@ static func slots_for(ref:Dictionary)->Dictionary:
 			var p:=by_id(String(ref.id))
 			var v:=view(p)
 			out.merge({"trade":String(v.trade) if int(p.get("count",1))<=1 else trade_label(String(p.get("trade","")),true),"village":String(v.village),"age":str(int(v.age)),"detail":String(v.detail),"temper":String(v.temper),"role":title_of(p),"place":String(v.village),
-				"household":_household_words(p),"count":str(int(p.get("count",1))),"he":"she" if String(p.get("sex",""))=="female" else "he","his":"her" if String(p.get("sex",""))=="female" else "his"},true)
+				"household":_household_words(p),"excels":excels_words(p),"count":str(int(p.get("count",1))),"he":"she" if String(p.get("sex",""))=="female" else "he","his":"her" if String(p.get("sex",""))=="female" else "his"},true)
 			var kin:Dictionary=p.get("kin_of",{}) if p.get("kin_of") is Dictionary else {}
 			if not kin.is_empty(): out["kin"]="%s's %s" % [String(GovernmentPeopleSystem.person_snapshot(int(kin.pid)).get("name","")).get_slice(" ",0),String(kin.get("relation","kin"))]
 		"official":
@@ -1192,7 +1379,11 @@ static func _do_ask_about(audience_id:String,params:Dictionary,result:Dictionary
 	result["named"]=ref.duplicate()
 	if String(ref.get("kind",""))=="known": _importance(by_id(String(ref.id)),1.0)
 	result.outcome=""
-	return [_beat_official(answerer,"describe" if int(by_id(String(ref.get("id",""))).get("count",1))<=1 else "describe_group",slots_for(ref))]
+	var known:=by_id(String(ref.get("id","")))
+	var slots:=slots_for(ref)
+	if int(known.get("count",1))>1: return [_beat_official(answerer,"describe_group",slots)]
+	if String(slots.get("excels",""))!="" and String(desc.get("quality",""))!="": return [_beat_official(answerer,"describe_best",slots)]
+	return [_beat_official(answerer,"describe",slots)]
 
 static func _do_seek(audience_id:String,params:Dictionary,result:Dictionary)->Array:
 	var desc:Dictionary=(params.get("desc",{}) as Dictionary).duplicate() if params.get("desc") is Dictionary else {}
@@ -1212,16 +1403,15 @@ static func _do_summon(audience_id:String,params:Dictionary,result:Dictionary)->
 	if params.get("desc") is Dictionary and not (params.get("desc") as Dictionary).is_empty():
 		var r:=resolve(params.desc)
 		if not r.has("ref"):
-			result.ok=false
-			result.outcome="Nobody at court knows where to find such a person; have them sought out first."
-			return []
+			state().focus["seek"]=(params.desc as Dictionary).duplicate()
+			result.outcome=""
+			return [_answerer_beat(audience_id,"unknown",{"trade":trade_label(String((params.desc as Dictionary).get("trade","hunter")),true)})]
 		ref=r.ref
 	result["named"]=ref.duplicate()
 	var made:=summon_ref(ref,audience_id)
 	if made.is_empty():
-		result.ok=false
-		result.outcome="They cannot be brought before you now."
-		return []
+		result.outcome=""
+		return [_answerer_beat(audience_id,"cannot_bring",slots_for(ref))]
 	result["summon_audience_id"]=String(made.id)
 	result["speak_in"]=String(made.id)
 	result.outcome=""

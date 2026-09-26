@@ -26,6 +26,13 @@ const BANK:={
 	"describe":["{name}, {god_address}: a {trade} of {village}, {age} winters, {household}. {He} {detail}.",
 		"There is {name}, the {trade}. {Age} winters, {household}. {He} {detail}; you would know {him} anywhere.",
 		"{name} of {village}. A {trade}; {household}. {He} {detail}, and {he} is {temper}."],
+	"describe_best":["{name}, {god_address}. A {trade} of {village}, {age} winters. {excels} {He} {detail}.",
+		"That is {name}, the {trade}. {excels} {He} is {age} winters, and {he} {detail}.",
+		"{name} of {village}. {excels} {He} {detail}; you would know {him} anywhere."],
+	"clarify":["Whom do you mean, {god_address}? Give me a name, or tell me what they did, and I will see to it.",
+		"Tell me who, {god_address}. A name or a trade, and I will find them or see it done.",
+		"I am not sure what you want of me. Say it another way and I will do it."],
+	"cannot_bring":["{name} cannot come before you now, {god_address}. Ask me about someone else, or tell me what you want of {him}."],
 	"describe_group":["The {trade} of {village}? {count} of them work together. {name} speaks for them; {he} {detail}.",
 		"There are {count} {trade} at {village}, and {name} is the one they listen to. {He} is {temper}."],
 	"unknown":["No one at this court knows such a one, {god_address}. The {trade} beyond the hills might. We could send runners to look.",
@@ -119,7 +126,7 @@ const BANK:={
 
 ## Beats that belong to the principal speaker of an exchange; these may be
 ## replaced by a learned template for the same situation.
-const PRINCIPAL_BEATS:=["blame","blame_lie","blame_again","credit","describe","describe_group","found","unknown","alibi","alibi_named","alibi_kin","protest","protest_named","swear_true","swear_true_named",
+const PRINCIPAL_BEATS:=["blame","blame_lie","blame_again","credit","describe","describe_best","describe_group","clarify","cannot_bring","found","unknown","alibi","alibi_named","alibi_kin","protest","protest_named","swear_true","swear_true_named",
 	"thanks_alibi","thanks_alibi_named","witness","vague","deny","beg","confess","swear_false","shift_blame","no_one_guilty","no_one","false_confession","did_what","where_plain","thanks","cower","talk",
 	"protest_honest","confess_self","confess_kin","double_down","react_exalt","react_reward","react_pardon","react_priest","react_marry","react_curse","react_example"]
 
