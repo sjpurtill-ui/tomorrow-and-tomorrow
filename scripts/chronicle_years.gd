@@ -782,7 +782,7 @@ static func age(y:int,annals:Array,seed:int)->Dictionary:
 		lines.append("%d troubles came in these years, and %s%s." % [cr,cost,then])
 		if not worst.is_empty() and int(worst.deaths)>=2:lines.append("The worst was %s, in year %d." % [_lower_first(String(worst.get("worst",worst.get("name","the troubles")))),int(worst.y)+1])
 		if calm>=3:lines.append("%s years passed with no trouble at all." % cap(num(calm)))
-	if mild>=3:lines.append("Small fevers went round %d times besides%s." % [mild,", and took %d" % mild_dead if mild_dead>0 else "; they took no one"])
+	if mild>=3:lines.append("Small fevers went round %s times besides%s." % [num(mild),(", and took %s" % num(mild_dead)) if mild_dead>0 else "; they took no one"])
 	if silent+answered>0:
 		if answered==0:lines.append("The god did not answer once; the court met every trouble alone.")
 		elif silent==0:lines.append("The god answered every trouble the court brought.")

@@ -237,3 +237,10 @@ func test_a_crisis_saved_before_the_change_carries_on()->void:
 	saved.erase("mild_log")
 	assert_bool(Crisis.valid_state(saved)).is_true()
 	assert_bool(Crisis.valid_state(Crisis.state())).is_true()
+
+
+func test_the_generation_counts_its_small_fevers()->void:
+	var annals:Array=[]
+	for y in 20:annals.append({"y":y,"crises":1 if y%4==0 else 0,"deaths":0,"mild":1 if y%3==0 else 0,"mild_deaths":1 if y==6 else 0,"pop":100+y})
+	var told:=Years.age(19,annals,1)
+	assert_str(String(told.get("text",""))).contains("Small fevers went round seven times besides, and took one.")
