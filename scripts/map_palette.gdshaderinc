@@ -78,6 +78,7 @@ vec3 map_frontier(float discovered, float pixels_per_unit) {
 	float distance_px = (discovered-0.30)*pixels_per_unit;
 	float ink = 1.0-smoothstep(0.55, 1.35, abs(distance_px));
 	float shadow = (1.0-smoothstep(0.0, 7.0, -distance_px))*step(distance_px, 0.0);
-	float crisp = smoothstep(0.6, 2.6, distance_px);
+	// Land starts beneath the ink, so no sliver of paper shows between them.
+	float crisp = smoothstep(-0.4, 0.9, distance_px);
 	return vec3(ink, shadow, crisp);
 }
