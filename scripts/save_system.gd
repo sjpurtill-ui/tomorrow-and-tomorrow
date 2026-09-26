@@ -94,6 +94,7 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	if payload.is_empty(): return {"error":"No readable save exists in that slot."}
 	# Research ids renamed since the save was written load under their current ids.
 	payload=preload("res://scripts/discovery_id_aliases.gd").migrate(payload)
+	_repair_shared_craft_positions(payload)
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}
 	var metadata:Dictionary=payload.get("metadata",{})
 	# Older releases could lose this entire section after its popup was closed.
@@ -142,6 +143,21 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	if legacy_campaign:message+=" This campaign keeps its original opponent model. Start a new world for equal civilization rules."
 	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
+
+## Crafts shared under a rival compact were once stored without a position,
+## which the exchange validator rejects. Place them at the rival's home.
+static func _repair_shared_craft_positions(payload:Dictionary)->void:
+	var actors:Variant=payload.get("curated_WorldSimulation",{}).get("actors",{})
+	if not actors is Dictionary:return
+	for actor:Variant in actors.values():
+		if not actor is Dictionary:continue
+		var origin:Variant=actor.get("origin",Vector2.ZERO)
+		if not origin is Vector2:origin=Vector2.ZERO
+		var exchange:Variant=actor.get("state",{}).get("GameState",{}).get("society_exchange",{})
+		if not exchange is Dictionary or not exchange.get("collections") is Dictionary:continue
+		for item:Variant in exchange.collections.values():
+			if item is Dictionary and item.get("position") is Dictionary and item.position.is_empty() and String(item.get("source_id",""))=="player":
+				item.position={"x":origin.x,"z":origin.y}
 
 func _read_payload(slot:String)->Dictionary:
 	var path:=slot_path(slot)

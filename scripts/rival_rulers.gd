@@ -1067,7 +1067,7 @@ static func _share_craft(civ_id:String,craft_id:String,craft_name:String)->void:
 	var collections:Dictionary=target.society_exchange.get("collections",{})
 	if collections.has(key) or collections.size()>=int(SOCIETY.COLLECTION_LIMIT): return
 	var definition:Dictionary=WorldSimulation.discovery.discovery_definition(craft_id)
-	collections[key]={"id":key,"kind":"knowledge","name":"A trader's account of "+craft_name,"source_id":"player","source_name":String(GameState.settlement_name),"position":{},"observed_day":_day(),"returned_day":_day(),"discovery_id":craft_id,"study":0.0,"work":90.0,"signals":(definition.get("signals",[]) as Array).duplicate(),"acquisition":"Carried home by traders under the compact"}
+	collections[key]={"id":key,"kind":"knowledge","name":"A trader's account of "+craft_name,"source_id":"player","source_name":String(GameState.settlement_name),"position":{"x":CivilizationSystem.player_world_origin.x,"z":CivilizationSystem.player_world_origin.y},"observed_day":_day(),"returned_day":_day(),"discovery_id":craft_id,"study":0.0,"work":90.0,"signals":(definition.get("signals",[]) as Array).duplicate(),"acquisition":"Carried home by traders under the compact"}
 
 static func bluff_called(audience:Dictionary,option_id:String)->Dictionary:
 	## The threat was empty: they back down, lose face, and remember it.
