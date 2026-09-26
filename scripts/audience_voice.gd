@@ -16,6 +16,9 @@ signal divine_intent(audience_id:String,action:String)
 ## A court-known persons exchange finished (court_persons.gd result; ok=false
 ## when the words could not be mapped and the room simply answered).
 signal persons_done(audience_id:String,result:Dictionary)
+## The live model chose different (still state-backed) business for an envoy
+## before they spoke (envoy_request_ai.gd); the court rebuilds its answers.
+signal request_revised(audience_id:String)
 
 const CV:=preload("res://scripts/character_voice.gd")
 const DV:=preload("res://scripts/divine_voice.gd")
@@ -25,6 +28,7 @@ const PersonsBridge:=preload("res://scripts/court_persons_bridge.gd")
 const PersonsLines:=preload("res://scripts/court_persons_lines.gd")
 const Plain:=preload("res://scripts/plain_speech.gd")
 const Relevance:=preload("res://scripts/court_relevance.gd")
+const RequestAI:=preload("res://scripts/envoy_request_ai.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim"]
@@ -796,6 +800,9 @@ var totals:Dictionary={"calls":0,"accepted":0,"failed":0,"offline":0,"prompt_tok
 var remembered:Dictionary={}    ## audience_id -> the line in which the visitor recalled a past audience
 var _compat:Dictionary={}      ## endpoint quirks learned this session: no_reasoning_effort, no_schema
 var _requests:Dictionary={}
+var pick_hook:Callable           ## tests: (audience_id, payload) -> reply body (empty = failure); replaces HTTP for request picks
+var _picking:Dictionary={}       ## audience_id -> the one live call choosing an envoy's business
+var _open_after_pick:Dictionary={}
 var _used:Dictionary={}
 
 # ---------------------------------------------------------------------------
@@ -803,10 +810,88 @@ var _used:Dictionary={}
 # ---------------------------------------------------------------------------
 
 func busy(audience_id:String)->bool:
-	return _requests.has(audience_id)
+	return _requests.has(audience_id) or _picking.has(audience_id)
+
+func picking(audience_id:String)->bool:
+	return _picking.has(audience_id)
 
 func open_scene(audience_id:String)->void:
+	# The envoy speaks once their business is settled.
+	if _picking.has(audience_id):
+		_open_after_pick[audience_id]=true
+		return
 	_begin(audience_id,"open",{})
+
+# ---------------------------------------------------------------------------
+# Envoy business (envoy_request_ai.gd): one cheap call per visit, validated;
+# the hall's deterministic choice stands on any failure and offline.
+# ---------------------------------------------------------------------------
+
+func pick_request(audience_id:String)->bool:
+	## True while (or after) the live model chooses; false when nothing to do.
+	if _picking.has(audience_id): return true
+	var h:Variant=_hall()
+	if h==null: return false
+	var audience:Dictionary=h.find(audience_id)
+	if not RequestAI.wants(audience): return false
+	var config:=_config()
+	if config.is_empty():
+		RequestAI.mark(audience,"offline",offline_reason())
+		return false
+	var payload:=RequestAI.build_payload(audience,config)
+	var request:={"stage":"request","attempts":1,"config":config,"started_ms":Time.get_ticks_msec(),"payload":payload,"http":null}
+	_picking[audience_id]=request
+	if pick_hook.is_valid():
+		var body:Variant=pick_hook.call(audience_id,payload.duplicate(true))
+		var ok:bool=body is PackedByteArray and not (body as PackedByteArray).is_empty()
+		_on_pick_response(HTTPRequest.RESULT_SUCCESS if ok else HTTPRequest.RESULT_TIMEOUT,200 if ok else 0,PackedStringArray(),body if ok else PackedByteArray(),audience_id)
+		return true
+	var http:=HTTPRequest.new()
+	add_child(http)
+	request.http=http
+	http.timeout=RequestAI.TIMEOUT_SECONDS
+	http.max_redirects=0
+	http.body_size_limit=MAX_RESPONSE_BYTES
+	http.request_completed.connect(_on_pick_response.bind(audience_id))
+	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: envoy-request-%s-%d" % [audience_id,Time.get_ticks_msec()]])
+	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+		request.http=null
+		http.queue_free()
+		RequestAI.mark(audience,"fallback","request could not start")
+		_finish_pick.call_deferred(audience_id,false)
+	return true
+
+func _on_pick_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,audience_id:String)->void:
+	if not _picking.has(audience_id): return
+	var request:Dictionary=_picking[audience_id]
+	var http:Variant=request.get("http")
+	if http is HTTPRequest and is_instance_valid(http): (http as HTTPRequest).queue_free()
+	request.http=null
+	var envelope:=_envelope_facts(body)
+	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
+	var audience:Dictionary=_hall().find(audience_id) if _hall()!=null else {}
+	var swapped:=false
+	var reason:=""
+	if result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300:
+		var model:=String(envelope.get("model","")) if not String(envelope.get("model","")).is_empty() else String((request.config as Dictionary).get("model",""))
+		var applied:=RequestAI.apply(audience,RequestAI.parse(body),model)
+		swapped=bool(applied.get("swapped",false))
+		if not bool(applied.get("ok",false)): reason=String(applied.get("reason","rejected"))
+	else:
+		reason="could not reach the service (transport %d)" % result if result!=HTTPRequest.RESULT_SUCCESS else _http_words(response_code,String(envelope.get("error","")))
+		if not audience.is_empty() and RequestAI.wants(audience): RequestAI.mark(audience,"fallback",reason)
+	_finish_receipt(receipt,reason=="",reason!="",reason)
+	_finish_pick(audience_id,swapped)
+
+func _finish_pick(audience_id:String,swapped:bool)->void:
+	_picking.erase(audience_id)
+	var wanted:=_open_after_pick.has(audience_id)
+	_open_after_pick.erase(audience_id)
+	# A court already showing this envoy rebuilds (and opens the scene itself).
+	if swapped: request_revised.emit(audience_id)
+	if wanted and not busy(audience_id):
+		var h:Variant=_hall()
+		if h!=null and ((h.find(audience_id) as Dictionary).get("lines",[]) as Array).is_empty(): _begin(audience_id,"open",{})
 
 ## True when a live model is configured (the court may let it read orders).
 func is_live()->bool:
@@ -2320,7 +2405,12 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 				_append_if(out,_say(s,envoy,topic_bank,rng,first_official,false,ENVOY_OPEN.petition_generic))
 		_:
 			var generic:Array=(ENVOY_OPEN.get(kind,ENVOY_OPEN.news) as Array)+(ENVOY_OPEN_MORE.get(kind,[]) as Array)
-			var business:=_say(s,envoy,CV.model_bank(envoy.persona,kind),rng,first_official,false,generic)
+			# Wider business (envoy_requests.gd) says exactly what it is.
+			var own:Array=[]
+			var er:=load("res://scripts/envoy_requests.gd") as GDScript
+			if er!=null and String(s.get("origin",""))=="foreign": own=er.call("open_lines",s.audience)
+			var business:=_fresh_line(s,own,"envoy",false) if not own.is_empty() else _say(s,envoy,CV.model_bank(envoy.persona,kind),rng,first_official,false,generic)
+			if business.is_empty() and not own.is_empty(): business={"key":"envoy","text":String(own[-1]),"aside":false,"fact":true}
 			if business.is_empty(): business=_business_fallback(s)
 			_append_if(out,business)
 	while out.size()>2: out.pop_front()
@@ -2856,7 +2946,11 @@ func _kind_words(s:Dictionary)->String:
 		"gift":
 			var string:=String(((s.get("situation",{}) as Dictionary).get("string",{}) as Dictionary).get("text",""))
 			return "An envoy of %s brings a GIFT: %s %s, from their own stores. It is NOT free; its string or cost: %s Whoever speaks of the gift names this cost or string; nobody calls it free, a free bundle, or without strings." % [civ,s.amt,s.res,string if string!="" else "every gift between peoples obliges something in return, and their ruler will remember it."]
-		"request": return "An envoy of %s makes a REQUEST: they ask the ruler for %s %s." % [civ,s.amt,s.res]
+		"request":
+			var er:=load("res://scripts/envoy_requests.gd") as GDScript
+			if er!=null and bool(er.call("handles",String(s.get("sit_type","")))):
+				return "An envoy of %s makes a REQUEST (%s): %s" % [civ,String(s.get("headline","a request")),String(s.get("sit_summary",""))]
+			return "An envoy of %s makes a REQUEST: they ask the ruler for %s %s." % [civ,s.amt,s.res]
 		"threat": return "A herald of %s makes a THREAT: they demand %s %s as tribute." % [civ,s.amt,s.res]
 		"news": return "A messenger of %s brings NEWS: %s" % [civ,s.fact]
 		"report":
