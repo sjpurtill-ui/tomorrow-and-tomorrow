@@ -390,7 +390,7 @@ func _artifact_signature()->Array:
 	var facade:Variant=_artifact_facade()
 	if facade==null:return []
 	var summary:Dictionary=facade.summary()
-	return [summary.get("collection_count",0),summary.get("studied_count",0),summary.get("in_study_count",0),summary.get("exhibited_count",0),snappedf(float(summary.get("allure",0)),.01),summary.get("study_role",{}).get("workers",0)]
+	return [summary.get("collection_count",0),summary.get("studied_count",0),summary.get("in_study_count",0),summary.get("exhibited_count",0),snappedf(float(summary.get("allure",0)),.01),snappedf(float(summary.get("study_role",{}).get("researchers",0.0)),.1)]
 
 func _government_overview()->Array:
 	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"OPEN GOVERNMENT","sub":"Officeholders, removals and policy","on_press":jump("government",0)},{"label":"TALK TO OUR LEADER","sub":"Discuss and direct local work, in the court","on_press":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))})}]}]

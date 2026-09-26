@@ -227,7 +227,7 @@ static func showcase(block:Dictionary)->Control:
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",10);actions.add_theme_constant_override("v_separation",8);box.add_child(actions)
 	var open_button:=action_button(actions,"Open the collection",on_open.bind("") if on_open.is_valid() else Callable(),true,"Browse, study and exhibit every piece we hold")
 	open_button.name="OpenArtifactGallery"
-	action_button(actions,"Study team · %d researcher%s" % [int(study.get("workers",0)),"" if int(study.get("workers",0))==1 else "s"],on_study,false,String(study.get("rate_text","Artifact study is part of the research allocation.")))
+	action_button(actions,"Study team · %s" % String(study.get("researcher_text","no researchers")),on_study,false,String(study.get("rate_text","Artifact study is part of the research allocation.")))
 	return box
 
 static func _breakdown_tip(summary:Dictionary)->String:
@@ -610,12 +610,12 @@ func _study_team(parent:Node,item:Dictionary)->void:
 	var box:=PanelContainer.new();box.name="StudyTeam";box.add_theme_stylebox_override("panel",T.brief_style("info"));parent.add_child(box)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",5);box.add_child(column)
 	label(column,"STUDY TEAM · RESEARCH ALLOCATION",10,T.TEAL,false,.1)
-	var workers:=int(role.get("workers",0))
+	var workers:=float(role.get("researchers",0.0))
 	var rate:=String(role.get("rate_text",""))
-	label(column,rate if not rate.is_empty() else "%d researcher%s assigned to artifact study." % [workers,"" if workers==1 else "s"],13,T.BODY)
+	label(column,rate if not rate.is_empty() else "%s assigned to artifact study." % String(role.get("researcher_text","No researchers")).capitalize(),13,T.BODY)
 	if has_api("change_study_weight"):
 		var weight_row:=HBoxContainer.new();weight_row.name="StudyWeight";weight_row.add_theme_constant_override("separation",8);column.add_child(weight_row)
-		label(weight_row,"Share of research attention · weight %d" % int(role.get("weight",0)),12,T.TEXT_SOFT,false).size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		label(weight_row,"%d%% of research attention · weight %d" % [roundi(float(role.get("share",0.0))*100.0),int(role.get("weight",0))],12,T.TEXT_SOFT,false).size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		var less:=action_button(weight_row,"−",func()->void:_act(api("change_study_weight",[-1],{}),""),false,"Less artifact study; attention returns to other research");less.name="StudyWeightLess";less.custom_minimum_size.x=34;less.disabled=int(role.get("weight",0))<=0
 		var more:=action_button(weight_row,"+",func()->void:_act(api("change_study_weight",[1],{}),""),false,"More artifact study, drawn from the same research budget");more.name="StudyWeightMore";more.custom_minimum_size.x=34
 	var focus:=String(role.get("focus_id",""))

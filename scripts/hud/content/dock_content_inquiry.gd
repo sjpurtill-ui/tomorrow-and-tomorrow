@@ -337,13 +337,16 @@ func _discovery_board()->Dictionary:
 
 ## Artifact study is a research-team role inside the same attention budget.
 func _artifact_study_item(total_weight:int,observers:int)->Dictionary:
-	var weight:=ArtifactCulture.study_weight()
-	var share:=float(weight)/maxf(1.0,float(total_weight))
+	# The same headcount the collection shows: study speed follows these
+	# researchers, and the bare weight is not a number of people.
 	var capacity:Dictionary=ArtifactCulture.A.study_capacity()
-	var rate_text:="No researchers are assigned; recovered artifacts wait unstudied." if float(capacity.researchers)<=0 else "About %.1f researchers, %.1f study-work per day (a common piece needs 20, a legendary one 160)." % [float(capacity.researchers),float(capacity.rate)]
+	var weight:=int(capacity.weight)
+	var share:=float(weight)/maxf(1.0,float(capacity.total_weight))
+	var people:=ArtifactCulture.researcher_text(float(capacity.researchers))
+	var rate_text:="No researchers are assigned; recovered artifacts wait unstudied." if float(capacity.researchers)<=0 else "About %s, %.1f study-work per day (a common piece needs 20, a legendary one 160)." % [people,float(capacity.rate)]
 	return {
-		"name":"Artifact study","count":weight,"pct":"%d%%" % roundi(share*100.0),"color":ARTIFACT_COLOR,
-		"tip":"Scholars examine held artifacts so they yield culture, research and appraisal value. Weight %d of %d — about %.1f of %d observers.\n%s" % [weight,total_weight,share*float(observers),observers,rate_text],
+		"name":"Artifact study · %s" % people,"count":weight,"count_text":"","pct":"%d%%" % roundi(share*100.0),"color":ARTIFACT_COLOR,
+		"tip":"Scholars examine held artifacts so they yield culture, research and appraisal value. Weight %d of %d.\n%s" % [weight,int(capacity.total_weight),rate_text],
 		"on_minus":_change_artifact_study.bind(-1),"on_plus":_change_artifact_study.bind(1),
 	}
 

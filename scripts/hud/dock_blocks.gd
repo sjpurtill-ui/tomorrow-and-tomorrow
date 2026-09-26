@@ -219,7 +219,7 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 			var pct_label:=Tokens.make_label(String(item.pct),10,Tokens.MUTED)
 			row.add_child(pct_label)
 			Live.attach(pct_label,"text",item.get("live_pct"))
-		var count_label:=Tokens.make_label(str(int(item.get("count",0))),13,Tokens.INK)
+		var count_label:=Tokens.make_label(String(item.count_text) if item.has("count_text") else str(int(item.get("count",0))),13,Tokens.INK)
 		count_label.custom_minimum_size=Vector2(40,0)
 		count_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(count_label)

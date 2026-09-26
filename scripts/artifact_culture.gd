@@ -37,11 +37,11 @@ static func summary()->Dictionary:
 	var report:=allure_report()
 	var capacity:=A.study_capacity()
 	var workers:=float(capacity.researchers)
-	var rate_text:="No researchers are assigned to artifact study. Unstudied pieces wait." if workers<=0 else ("About %.1f researchers study artifacts, %.1f study-work per day. A common piece needs 20, a legendary one 160." % [workers,float(capacity.rate)])
+	var rate_text:="No researchers are assigned to artifact study. Unstudied pieces wait." if workers<=0 else ("About %s study artifacts, %.1f study-work per day. A common piece needs 20, a legendary one 160." % [researcher_text(workers),float(capacity.rate)])
 	return {"allure":report.allure,"allure_label":report.label,"allure_breakdown":report.breakdown,"allure_effects":report.effects,
 		"collection_count":counts.collection,"studied_count":counts.studied,"in_study_count":counts.in_study,"unstudied_count":counts.unstudied,"exhibited_count":counts.exhibited,
 		"prestige_total":snappedf(prestige,.01),"value_totals":{"culture":snappedf(totals.culture,.01),"research":snappedf(totals.research,.01),"economic":snappedf(totals.economic,.01)},
-		"study_role":{"allocation_key":ALLOCATION_KEY,"weight":int(role.weight),"workers":roundi(workers),"researchers":workers,"rate":float(capacity.rate),"rate_text":rate_text,"focus_id":String(role.focus)},
+		"study_role":{"allocation_key":ALLOCATION_KEY,"weight":int(role.weight),"workers":roundi(workers),"researchers":workers,"researcher_text":researcher_text(workers),"share":float(capacity.weight)/maxf(1.0,float(capacity.total_weight)),"rate":float(capacity.rate),"rate_text":rate_text,"focus_id":String(role.focus)},
 		"museum_ready":A.museum_ready(),"museum_revenue":float(WorldSimulation.state.society_exchange.get("museum_revenue",0.0))}
 
 # --- Listing ----------------------------------------------------------------
@@ -104,6 +104,13 @@ static func set_exhibited(id:String,on:bool)->Dictionary:
 		if float(item.study)<1:return {"error":"Scholars must study this piece before it can be shown and explained to visitors."}
 	item.exhibited=on
 	return {"ok":true}
+
+## The study team's actual headcount, shown the same way everywhere: a part-time
+## team reads "0.9 researchers" (a rounded "1" or "0" misstates the work done).
+static func researcher_text(researchers:float)->String:
+	if researchers<=0.0:return "no researchers"
+	if is_equal_approx(snappedf(researchers,.1),1.0):return "1 researcher"
+	return ("%.1f researchers" % researchers) if researchers<9.95 else ("%d researchers" % roundi(researchers))
 
 ## Research-allocation role: same emphasis budget as the twelve domains (0-12).
 static func study_weight()->int:return int(A.study_role().weight)

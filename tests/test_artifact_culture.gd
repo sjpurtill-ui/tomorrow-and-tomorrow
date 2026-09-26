@@ -66,6 +66,20 @@ func test_study_role_draws_from_the_shared_research_budget()->void:
 	C.set_study_weight(4)
 	assert_float(float(DiscoverySystem.research_capacity_for(parts[0],parts[1]).researchers)).is_less(alone)
 
+func test_collection_and_research_panel_report_the_same_headcount()->void:
+	held()
+	C.set_study_weight(3)
+	var capacity:=A.study_capacity()
+	var role:Dictionary=C.summary().study_role
+	assert_str(String(role.researcher_text)).is_equal(C.researcher_text(float(capacity.researchers)))
+	assert_float(float(role.share)).is_equal_approx(3.0/float(capacity.total_weight),.0001)
+	# A part-time team is not rounded to a whole person or to nobody.
+	assert_str(C.researcher_text(0.9)).is_equal("0.9 researchers")
+	assert_str(C.researcher_text(0.4)).is_equal("0.4 researchers")
+	assert_str(C.researcher_text(1.02)).is_equal("1 researcher")
+	assert_str(C.researcher_text(0.0)).is_equal("no researchers")
+	assert_str(C.researcher_text(14.6)).is_equal("15 researchers")
+
 func test_focus_piece_is_studied_first()->void:
 	var first:=held(Vector2(100,100),0);var focus:=held(Vector2(900,100),2)
 	assert_bool(C.set_study_focus(focus.id).has("ok")).is_true()
