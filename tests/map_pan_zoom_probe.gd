@@ -82,6 +82,15 @@ func _ready()->void:
 		var s:=Time.get_ticks_usec();terrain._refresh_settlement_network(true)
 		report[pass_name]=snappedf(float(Time.get_ticks_usec()-s)/1000.0,0.01)
 	report["border_height_samples"]=int(terrain.territory_height_cache.misses) if terrain.territory_height_cache else -1
+	# Settled view: once the streamed terrain has finished refining, an idle
+	# frame should cost almost nothing.
+	terrain.camera.size=40.0;terrain.zoom_target_size=-1.0;terrain.camera_target=GameState.settlement_founded_at;terrain._update_camera()
+	var settle_frames:=0
+	var lod=preload("res://scripts/terrain_lod.gd")
+	while settle_frames<6000 and (terrain.terrain_patch_job!=null or settle_frames<60 or terrain.regional_patch_resolution!=lod.resolution_for(terrain.regional_patch_span)):
+		terrain._process(DT);settle_frames+=1
+	report["settle_frames"]=settle_frames
+	report["idle_settled"]=_phase("idle",40.0,90)
 	report["failures"]=failures
 	print("MAP_PAN_ZOOM: ",JSON.stringify(report))
 	terrain.queue_free()
