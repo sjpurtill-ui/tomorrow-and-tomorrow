@@ -1,0 +1,14 @@
+{
+  "id": "fodder_legume_fields",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-251cf5e6-51c0-4d4f-af8a-3ec56988b790.png",
+  "source_file": "exec-251cf5e6-51c0-4d4f-af8a-3ec56988b790.png",
+  "creative_brief": "Vetch and clover sown as fodder feed the herds and leave the field richer for the grain that follows. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/fodder_legume_fields-v1.png",
+  "sha256": "6af0ec7c25729c069f4d26fd22af03c14725afbe18e5bb054177a0c15d09aceb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

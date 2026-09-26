@@ -1,0 +1,14 @@
+{
+  "id": "epidemic_chronicles",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-33b42777-4795-44a8-bf3c-ccc7adcbff12.png",
+  "source_file": "exec-33b42777-4795-44a8-bf3c-ccc7adcbff12.png",
+  "creative_brief": "Scribes record each pestilence by town, season and weather, and the elders learn which summers bring sickness. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/epidemic_chronicles-v1.png",
+  "sha256": "726edbf5de4ab321c15867e386340834c252eb24e7b498955b4a1f7bcfc4dbb6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

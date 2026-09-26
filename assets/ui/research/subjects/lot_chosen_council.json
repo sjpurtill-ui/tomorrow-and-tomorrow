@@ -1,0 +1,14 @@
+{
+  "id": "lot_chosen_council",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b4d2a52c-59da-48d8-b61c-f532ad1aea0f.png",
+  "source_file": "exec-b4d2a52c-59da-48d8-b61c-f532ad1aea0f.png",
+  "creative_brief": "A council chosen by lot from every district prepares the assembly's business, and is replaced each year. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/lot_chosen_council-v1.png",
+  "sha256": "03a3ed12b60c247f7c8b298d3eeb4101615de36340462834e660c1c0fb3ecf7c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

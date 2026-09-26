@@ -1,0 +1,14 @@
+{
+  "id": "dry_season_fire_bans",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-778991a3-b8fb-438c-a067-625a310a7d06.png",
+  "source_file": "exec-778991a3-b8fb-438c-a067-625a310a7d06.png",
+  "creative_brief": "In the dry months no one may burn stubble or clear land with fire, and a careless burner pays for the damage. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/dry_season_fire_bans-v1.png",
+  "sha256": "5d682738e0038f4e4017d8277ad26dbc25c1bfddb7d88f4ccf535d2ab3ba707d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

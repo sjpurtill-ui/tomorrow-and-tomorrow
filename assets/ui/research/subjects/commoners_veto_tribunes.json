@@ -1,0 +1,14 @@
+{
+  "id": "commoners_veto_tribunes",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c28beb08-db50-45d3-b11a-b8c23c33ac01.png",
+  "source_file": "exec-c28beb08-db50-45d3-b11a-b8c23c33ac01.png",
+  "creative_brief": "Officers of the common people may halt any magistrate's act with a single word. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/commoners_veto_tribunes-v1.png",
+  "sha256": "18d13d242ee8acbf68aea9a13bfaf97dff1409c4b321be1593332a543e72aac6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "ostracism_vote",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cc716b5f-c1e7-46d8-963b-8afcd0bfd1a9.png",
+  "source_file": "exec-cc716b5f-c1e7-46d8-963b-8afcd0bfd1a9.png",
+  "creative_brief": "Once a year the citizens may scratch a name on sherds; the man named most must leave for ten years. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/ostracism_vote-v1.png",
+  "sha256": "1999aa77084ba8f0462a3a0c3211d4bc686877d7f38c61052c23feac1730f023",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

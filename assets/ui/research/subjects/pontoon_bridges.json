@@ -1,0 +1,14 @@
+{
+  "id": "pontoon_bridges",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bf44d565-c862-4b2d-9ed1-59c587b102e5.png",
+  "source_file": "exec-bf44d565-c862-4b2d-9ed1-59c587b102e5.png",
+  "creative_brief": "Boats anchored side by side and planked over carry a whole army across the strait in a day. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/pontoon_bridges-v1.png",
+  "sha256": "9cb3dd163265023e5e6b773f292fecd93cca4d65155920778ae4a76dd6793eff",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

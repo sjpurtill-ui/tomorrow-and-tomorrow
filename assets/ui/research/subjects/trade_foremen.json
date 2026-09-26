@@ -1,0 +1,14 @@
+{
+  "id": "trade_foremen",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1ea61e23-ce34-4d93-b073-504f55f6fa11.png",
+  "source_file": "exec-1ea61e23-ce34-4d93-b073-504f55f6fa11.png",
+  "creative_brief": "Masons answer to the master mason and carpenters to the master carpenter, and neither gives the other's men orders. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/trade_foremen-v1.png",
+  "sha256": "64cba86fd247cfd242ecefe1b3c106c49cea25cfa9fc48acc6cb52499677c461",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
