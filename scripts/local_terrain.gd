@@ -2536,7 +2536,10 @@ void fragment() {
 	}
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
 	// On the chart scale woodland is a muted green wash, not near-black stains.
-	forest_surface=mix(forest_surface,vec3(0.15,0.19,0.105),smoothstep(0.01,0.20,pixel_world)*0.55);
+	// From the regional view outward the land is drawn as a chart: even washes
+	// of colour with relief shading, not photographic cloud mottling.
+	float chart_scale=smoothstep(0.02,0.30,pixel_world);
+	forest_surface=mix(forest_surface,vec3(0.18,0.22,0.12),smoothstep(0.01,0.20,pixel_world)*0.70);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
@@ -2586,13 +2589,13 @@ void fragment() {
 	earth = mix(earth,vec3(0.19,0.285,0.145),close_lush_mass*0.27*climate_green);
 	earth = mix(earth,vec3(0.31,0.295,0.205),close_clearings*0.16);
 	}
-	float modulation = 0.94 + (broad - 0.5) * 0.11 + (regional - 0.5) * 0.06*country_detail;
+	float modulation = 0.94 + ((broad - 0.5) * 0.11 + (regional - 0.5) * 0.06*country_detail)*(1.0-chart_scale*0.6);
 	earth *= modulation;
 	// Reused regional fields provide a cheap aerial-photo contrast hierarchy:
 	// broad climate still owns the colour, while soil/cover boundaries remain
 	// legible instead of dissolving into uniformly soft brown or green blobs.
 	float cover_structure=smoothstep(0.30,0.72,regional*0.58+soil_patch*0.42);
-	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail));
+	float structure_contrast=(cover_structure-0.5)*0.24*max(country_detail,max(regional_detail,local_detail))*(1.0-chart_scale*0.6);
 	earth*=1.0+structure_contrast;
 	vec3 exposed_rock = mix(vec3(0.25,0.245,0.225), vertex_tint * 0.78, 0.35);
 	if (surface_uv.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,surface_uv2); }
@@ -4686,10 +4689,8 @@ func _refresh_settlement_network(force:=false)->void:
 		settlement_network_fabric_root.name="SettlementNetworkPhysicalFabric"
 		add_child(settlement_network_fabric_root)
 	settlement_network_fabric_root.visible=true
-	var border_surface:=SurfaceTool.new()
-	border_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var border_halo_surface:=SurfaceTool.new()
-	border_halo_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var border_surface:=TERRITORY_BAND.Arrays.new()
+	var border_halo_surface:=TERRITORY_BAND.Arrays.new()
 	var ownership_surface:=SurfaceTool.new()
 	ownership_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count:=0
@@ -4729,7 +4730,10 @@ func _refresh_settlement_network(force:=false)->void:
 		var inner_wash:=TERRITORY_BAND.offset(boundary,-wash_band*2.0)
 		var faded_wash:=edge_wash;faded_wash.a=0.0
 		edge_wash.a*=1.5
-		halo_segment_count+=TERRITORY_BAND.append(border_halo_surface,boundary,inner_wash,boundary,inner_wash,edge_wash,faded_wash,0.0045,samples,subdivisions)
+		# The wash's inner edge takes the boundary's cached heights, raised by what
+		# a 25% slope could climb across the band; it is transparent there, so
+		# no zoom step has to sample the planet height field afresh.
+		halo_segment_count+=TERRITORY_BAND.append(border_halo_surface,boundary,inner_wash,boundary,boundary,edge_wash,faded_wash,0.0045,samples,subdivisions,wash_band*2.0*0.25)
 		var ink:=TERRITORY_INK
 		ink.a=(0.85 if primary else 0.62)*clampf(float(visual_profile.border_alpha)/0.7,0.8,1.2)
 		segment_count+=TERRITORY_BAND.append(border_surface,TERRITORY_BAND.offset(boundary,core_width),TERRITORY_BAND.offset(boundary,-core_width),boundary,boundary,ink,ink,0.0065,samples,subdivisions)
