@@ -1,0 +1,14 @@
+{
+  "id": "head_land_tax_units",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8d963f25-bf44-423d-ac99-3a39410ec7dc.png",
+  "source_file": "exec-8d963f25-bf44-423d-ac99-3a39410ec7dc.png",
+  "creative_brief": "Assessors count heads and land together into tax units, and each village owes by its units. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/head_land_tax_units-v1.png",
+  "sha256": "93625c583c4c7c5a8d665bb470b24724bf17e0287a6bc6ce8bcb9d41c229f572",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

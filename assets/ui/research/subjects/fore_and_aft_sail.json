@@ -1,0 +1,14 @@
+{
+  "id": "fore_and_aft_sail",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be573f95-51a0-4d8b-ba62-c33aa653c2bf.png",
+  "source_file": "exec-be573f95-51a0-4d8b-ba62-c33aa653c2bf.png",
+  "creative_brief": "A triangular sail set along the ship's length lets it work close into the wind instead of waiting for a fair one. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/fore_and_aft_sail-v1.png",
+  "sha256": "b2a6c0db5c0c5cf8dd13df8f9d9b418d0269ed1f5914754131f7eab0637d41f7",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

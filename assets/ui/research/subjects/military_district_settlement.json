@@ -1,0 +1,14 @@
+{
+  "id": "military_district_settlement",
+  "line": "security",
+  "block": "y1200_1800",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7b72a5f7-5542-49c0-8aa5-131c4d70bffd.png",
+  "source_file": "exec-7b72a5f7-5542-49c0-8aa5-131c4d70bffd.png",
+  "creative_brief": "Soldiers are given farms in the frontier districts, and their sons inherit both the land and the duty to serve. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/military_district_settlement-v1.png",
+  "sha256": "cf2e89f353383e55b701eb5bee9e26f8d39d4a922a10e4defc49f8e543fb5f38",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
