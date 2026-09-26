@@ -13,7 +13,10 @@ extends RefCounted
 ##             water, health practice, hunger, disease pool) with a local base
 ##             rate, and the catalog's mortality formula (virulence x density x
 ##             (1 - immunity) x (1 - medicine)^2 x hunger). Waves that kill
-##             many return weaker 8-20 years later (catalog echoes).
+##             many return weaker 8-20 years later (catalog echoes). Only a
+##             grave sickness (is_grave) comes to court; a mild one is met by
+##             the people's own custom and told in the year's entry, and comes
+##             to court at its turn only if it turns grave.
 ##   stranger  the strangers' sickness: each people met can pass its sickness
 ##             to ours once, along contact and trade. When their disease pool
 ##             is far richer than ours it is a virgin-soil wave (catalog §3.1).
@@ -61,6 +64,7 @@ const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 const ERAS:=preload("res://scripts/technology_eras.gd")
 const HEARTH:=preload("res://scripts/hearth_count.gd")
 const SPECIFICS:=preload("res://scripts/chronicle_specifics.gd")
+const ANNALS:=preload("res://scripts/chronicle_annals.gd")
 const TURNING_PATH:="res://scripts/turning_points.gd"
 
 const KEY:="crises"
@@ -101,6 +105,20 @@ const HEALTH_REF:=0.9
 const POOL_REF:=0.12
 ## Reporting thresholds (catalog HISTORICAL_BASE_RATES).
 const SEVERE:={"hunger":0.02,"sickness":0.05,"stranger":0.05}
+## A mild sickness (everyday fevers, coughs and flux) is not staged at court:
+## the people meet it by their own custom and the year's entry tells it. A
+## sickness comes to court (is "grave") when at its onset a death is at least
+## a one-in-three prospect AND at least 3 in 1000 of the people are expected to
+## die of it, or when a tenth or more of the people fall ill. Measured on a
+## 59-year campaign of about 110 people this stages roughly 9 of 31 sicknesses
+## (docs in the task handoff); the second clause keeps the share staged steady
+## as the people grow. A new pestilence always comes to court.
+const GRAVE_DEATHS:=0.33
+const GRAVE_DEAD_SHARE:=0.003
+const GRAVE_SICK_SHARE:=0.10
+## A mild sickness that kills this many before its turn comes to court then.
+const ESCALATE_DEATHS:=2
+const MILD_LOG_MAX:=40
 
 const TYPES:={
 	"hunger":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"nutrition"},
@@ -133,7 +151,7 @@ static func state()->Dictionary:
 static func _seed(s:Dictionary)->void:
 	for key in ["active","last","exchanged","flags","stats","until"]:
 		if not s.get(key) is Dictionary: s[key]={}
-	for key in ["history","log","echoes"]:
+	for key in ["history","log","echoes","mild_log"]:
 		if not s.get(key) is Array: s[key]=[]
 	for key in ["serial","last_day","last_onset","immunity","pool"]:
 		if not _num(s.get(key)): s[key]=0 if key!="last_onset" else -99999
@@ -147,7 +165,7 @@ static func valid_state(data:Variant)->bool:
 	if JSON.stringify(d).length()>120000: return false
 	for key in ["active","last","exchanged","flags","stats","until"]:
 		if d.has(key) and not d[key] is Dictionary: return false
-	var limits:={"history":HISTORY_MAX,"log":LOG_MAX,"echoes":24}
+	var limits:={"history":HISTORY_MAX,"log":LOG_MAX,"echoes":24,"mild_log":MILD_LOG_MAX}
 	for key:String in limits:
 		if not d.has(key): continue
 		if not d[key] is Array or (d[key] as Array).size()>int(limits[key]): return false
@@ -189,7 +207,8 @@ static func _stat(type:String,key:String,amount:float=1.0)->void:
 
 static func stats()->Dictionary:
 	## Per type: onsets, severe (the catalog-scale tail), deaths, decisions
-	## (answered by the god), silent (the holder acted), years watched.
+	## (answered by the god), silent (the holder acted), mild (met by custom,
+	## never staged), escalated (mild, then brought to court), years watched.
 	var s:=state()
 	var out:=(s.stats as Dictionary).duplicate(true)
 	out["years_watched"]=maxf(0.0,float(_day()-maxi(0,GameState.settlement_founded_day)))/365.0
@@ -210,6 +229,17 @@ static func apart_custom()->bool:
 	## sickness they lived through, or told as the turning point "The Sick Kept
 	## Apart". Either way officials follow it when the god is silent.
 	return unlocked("sickness:apart_plus") or bool((state().flags as Dictionary).get("apart_custom",false))
+
+static func is_grave(pop:float,m:float)->bool:
+	## Whether a sickness of death share `m` among `pop` people comes to court.
+	if 0.06+3.0*m>=GRAVE_SICK_SHARE: return true
+	return pop*m>=GRAVE_DEATHS and m>=GRAVE_DEAD_SHARE
+
+static func mild_log()->Array:
+	## The mild sicknesses the people met by custom (newest first).
+	var s:=state()
+	if not s.get("mild_log") is Array: s["mild_log"]=[]
+	return s.mild_log
 
 static func unlocked(option_key:String)->bool:
 	## A crisis choice opened by a turning point the people have lived through.
@@ -236,6 +266,17 @@ static func _the(name:String)->String:
 
 static func _season(day:int)->String:
 	return HEARTH.season_name_for_day(day)
+
+static func _season_part(day:int)->String:
+	## "early", "late" or "" (the middle) of the season `day` falls in.
+	var name:=_season(day)
+	var back:=0; var ahead:=0
+	while back<150 and _season(day-back-3)==name: back+=3
+	while ahead<150 and _season(day+ahead+3)==name: ahead+=3
+	var span:=back+ahead+1
+	if back*3<span: return "early"
+	if back*3>2*span: return "late"
+	return ""
 
 static func _era_ok(text:String)->bool:
 	return CV.permits(text,CV.era_tags("player"))
@@ -690,7 +731,8 @@ static func _open_sickness(day:int,x:Dictionary,type:String,v:float,civ_id:Strin
 	var label:String={"flux":"the Summer Flux","cough":"the Coughing Winter","fever":"the Shaking Fever","pestilence":"the Spotted Sickness"}[kind]
 	var name:="%s of %s" % [label,_year_words(day)]
 	if echo: name="%s Come Back" % label
-	var c:=_new(type,kind,name,day,x,{"v":v,"echo":echo,"civ_id":civ_id,"mid_day":day+rng.randi_range(14,24),"end_day":day+rng.randi_range(45,80)})
+	var c:=_new(type,kind,name,day,x,{"v":v,"echo":echo,"civ_id":civ_id,"mid_day":day+rng.randi_range(14,24),"end_day":day+rng.randi_range(45,80),
+		"hunger0":not _active_of("hunger").is_empty()})
 	_plan_deaths(c,_mortality(v,x,float(s.pool),rng))
 	c.signs=_signs(x,"sickness")
 	var sick:=clampi(roundi(float(x.pop)*(0.06+3.0*float(c.m))),3,maxi(3,int(float(x.pop)/2.0)))
@@ -698,12 +740,37 @@ static func _open_sickness(day:int,x:Dictionary,type:String,v:float,civ_id:Strin
 	var where:=_pick(["at the east fire","at the fires by the water","in the huts nearest the midden","among the families at the edge of camp",
 		"at the hearths by the drying racks","among the old ones' hearths","at the fires upstream","in the huts along the path to the water"],"where:%s" % String(c.id))
 	c["where"]=where
+	# The sick do not work while they are down.
+	_policy(c,"sick",{"labor_multiplier":-clampf(float(sick)/maxf(1.0,float(x.pop))*0.5,0.01,0.05)},21)
+	if type=="sickness" and not new_pestilence and not is_grave(float(x.pop),float(c.m)):
+		_open_mild(c,day)
+		return
 	var what:String={"flux":"the flux, the watery sickness","cough":"a deep cough and fever","fever":"a shaking fever","pestilence":"a sickness with spots no one has seen"}[kind]
 	var summary:="%s are down with %s %s." % [_cap(_count(sick)),what,where]
 	if echo: summary="%s It is the sickness we had before, come back." % summary
 	if not (c.signs as Array).is_empty(): summary+=" %s." % _cap(String(c.signs[0]))
 	_file(c,"open",summary,"comes about the sick",int(c.decide_by))
 	_announce(c,"Sickness at the Fires",summary)
+
+static func _open_mild(c:Dictionary,day:int)->void:
+	## A mild sickness: no court, no cards. The people meet it by their own
+	## custom (keeping the sick apart, once they have that custom; otherwise
+	## everyone tends them) and the year's entry tells it.
+	c["quiet"]=true
+	c["season"]=_season(day)
+	c["season_part"]=_season_part(day)
+	_stat(String(c.type),"mild")
+	if apart_custom():
+		c.choice="apart"
+		c.mult=float(c.mult)*0.4
+		_policy(c,"apart",{"disease_risk":-0.3},45)
+		_metric("cohesion",-0.004)
+	else:
+		c.choice="tend"
+		c.mult=float(c.mult)*1.25
+		_policy(c,"tend",{"labor_multiplier":-0.05},30)
+		_metric("cohesion",0.004)
+	_log("mild","%s went round %s; %d fell ill." % [_cap(String(c.name)),String(c.where),int(c.sick)],{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":String(c.choice)})
 
 static func _civ_pool(civ:Dictionary)->float:
 	var pop:=float(civ.get("population",100.0))
@@ -933,7 +1000,16 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		# Still undecided at the turn: the holder acts now.
 		_withdraw(c)
 		_apply(c,_default_choice(c,"open"),"open",true)
+	if type in ["sickness","stranger"] and c.has("hunger0") and not bool(c.hunger0) and not _active_of("hunger").is_empty():
+		# Hunger came after the sickness began: the catalog's famine term of
+		# the same mortality formula now holds for the rest of the wave.
+		c.m=clampf(float(c.m)*1.6,0.0,0.6)
+		c.hunger0=true
 	var n:=_due_deaths(c,0.4,"mid")
+	if bool(c.get("quiet",false)):
+		# A mild sickness says nothing at its turn, unless it has turned grave.
+		if int(c.deaths)>=ESCALATE_DEATHS or is_grave(float(c.pop0),float(c.m)): _escalate(c,day,n)
+		return
 	var text:=""
 	var needs:=false
 	var names:Array=c.dead
@@ -974,10 +1050,32 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		var ask:=text
 		_file(c,"mid",ask,"comes back about %s" % String(c.name).to_lower(),int(c.mid_decide_by))
 
+static func _escalate(c:Dictionary,day:int,n:int)->void:
+	## A mild sickness that turned grave comes to court at its turn, as a
+	## normal crisis from here on.
+	c.quiet=false
+	c["escalated"]=day
+	_stat(String(c.type),"escalated")
+	var names:Array=c.dead
+	var dead_words:=""
+	if n>0: dead_words=" %s died of it%s." % [_cap(_count(n)),(": "+", ".join(PackedStringArray(names.slice(maxi(0,names.size()-mini(n,3)),names.size())))) if not names.is_empty() else ""]
+	var custom:="The sick were kept apart, as the people do now, and still it spreads." if String(c.choice)=="apart" else "Everyone has been tending the sick, and it spreads with them."
+	var text:="%s went round %s like any fever, but it has not passed. %s%s It has reached the children's fire." % [_cap(String(c.name)),String(c.get("where","the camp")),custom,dead_words]
+	(c.notes as Array).append(text)
+	var waits:=" %s waits to be summoned." % _given(String(c.holder)) if String(c.holder)!="" else ""
+	_record(c,"onset","The Sickness Spreads",text+waits,"moment","omen",true,true)
+	_log("onset",text,{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false)),"escalated":true})
+	c["mid_decide_by"]=day+MID_DECIDE_DAYS
+	c.end_day=maxi(int(c.end_day),day+MID_DECIDE_DAYS+14)
+	_file(c,"mid",text,"comes about the sick",int(c.mid_decide_by))
+
 static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 	if String(c.phase)=="mid" and String(c.get("matter_phase",""))=="mid" and String(c.mid_choice)=="":
 		_withdraw(c)
 		_apply(c,_default_choice(c,"mid"),"mid",true)
+	if bool(c.get("quiet",false)):
+		_end_mild(c,day)
+		return
 	var n:=_due_deaths(c,0.6,"end")
 	var type:=String(c.type)
 	var total:=int(c.deaths)
@@ -993,21 +1091,7 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 	match type:
 		"sickness","stranger":
 			text=SPECIFICS.crisis_end(facts)+" "
-			# Survivors are harder to kill with the same sickness; and a people
-			# that lived through one learns to keep the sick apart (catalog R).
-			var s:=state()
-			s.immunity=maxf(float(s.immunity),minf(0.85,0.35+4.0*float(c.m)))
-			if type=="stranger":
-				var gap:=maxf(0.0,float(c.get("their_pool",0.0))-float(s.pool))
-				s.pool=float(s.pool)+(0.35*gap if bool(c.get("virgin",false)) else maxf(0.0,0.9*float(c.get("their_pool",0.0))-float(s.pool)))
-			_health(0.15*float(c.m))
-			if float(c.m)>=0.02 or String(c.choice)=="apart": (s.flags as Dictionary)["apart_custom"]=true
-			var v:=float(c.get("v",0.0))
-			var echoes:=int(c.get("echo_count",0))
-			if v>=0.03 and echoes<6 and _rng("echo:%s" % String(c.id)).randf()<minf(0.8,0.9 if bool(c.get("virgin",false)) else 2.0*v):
-				var gap_years:=_rng("echoy:%s" % String(c.id)).randi_range(8,20)
-				(s.echoes as Array).append({"count":echoes+1,"day":day+gap_years*365,"v":v*(0.75 if bool(c.get("virgin",false)) else _rng("echov:%s" % String(c.id)).randf_range(0.35,0.75)),"civ_id":String(c.get("civ_id",""))})
-				while (s.echoes as Array).size()>24: (s.echoes as Array).pop_front()
+			_sickness_after(c,day)
 		"hunger":
 			text="%s is over; the land gives again. " % _cap(String(c.name))
 			text+=("It took %s. " % names) if total>0 else "No one starved. "
@@ -1043,6 +1127,38 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 		c["remember_by"]=day+MID_DECIDE_DAYS
 		_file(c,"remember","%s is over. %s died of it. The families ask how they are to be remembered." % [_cap(String(c.name)),_cap(_count(total))],"comes from the burials",int(c.remember_by))
 		return
+	_close(c)
+
+static func _sickness_after(c:Dictionary,day:int)->void:
+	## Survivors are harder to kill with the same sickness; and a people that
+	## lived through one learns to keep the sick apart (catalog R).
+	var s:=state()
+	s.immunity=maxf(float(s.immunity),minf(0.85,0.35+4.0*float(c.m)))
+	if String(c.type)=="stranger":
+		var gap:=maxf(0.0,float(c.get("their_pool",0.0))-float(s.pool))
+		s.pool=float(s.pool)+(0.35*gap if bool(c.get("virgin",false)) else maxf(0.0,0.9*float(c.get("their_pool",0.0))-float(s.pool)))
+	_health(0.15*float(c.m))
+	if float(c.m)>=0.02 or String(c.choice)=="apart": (s.flags as Dictionary)["apart_custom"]=true
+	var v:=float(c.get("v",0.0))
+	var echoes:=int(c.get("echo_count",0))
+	if v>=0.03 and echoes<6 and _rng("echo:%s" % String(c.id)).randf()<minf(0.8,0.9 if bool(c.get("virgin",false)) else 2.0*v):
+		var gap_years:=_rng("echoy:%s" % String(c.id)).randi_range(8,20)
+		(s.echoes as Array).append({"count":echoes+1,"day":day+gap_years*365,"v":v*(0.75 if bool(c.get("virgin",false)) else _rng("echov:%s" % String(c.id)).randf_range(0.35,0.75)),"civ_id":String(c.get("civ_id",""))})
+		while (s.echoes as Array).size()>24: (s.echoes as Array).pop_front()
+
+static func _end_mild(c:Dictionary,day:int)->void:
+	## A mild sickness ends as it began, without the court: its dead are
+	## counted and named, and the year's entry tells it in one line.
+	_due_deaths(c,0.6,"end")
+	_sickness_after(c,day)
+	var fact:={"id":String(c.id),"kind":String(c.kind),"name":String(c.name),"where":String(c.get("where","")),"season":String(c.get("season","")),
+		"part":String(c.get("season_part","")),"sick":int(c.get("sick",0)),"days":day-int(c.start),"deaths":int(c.deaths),"dead":(c.dead as Array).slice(0,3),
+		"custom":String(c.choice),"start":int(c.start),"end":day}
+	var list:=mild_log()
+	list.push_front(fact)
+	while list.size()>MILD_LOG_MAX: list.pop_back()
+	if Chronicle.active(): ANNALS.note_mild(Chronicle.data(),fact)
+	_log("mild_end","%s passed; %d fell ill, %d died." % [_cap(String(c.name)),int(fact.sick),int(fact.deaths)],{"type":String(c.type),"crisis":String(c.id),"deaths":int(fact.deaths),"m":float(c.m),"mult":float(c.mult)})
 	_close(c)
 
 static func _end_facts(c:Dictionary,day:int,helper:String)->Dictionary:
@@ -1101,6 +1217,9 @@ static func on_open(audience:Dictionary)->void:
 	var phase:=_phase_of(audience)
 	var given:=_given(String(holder.get("name","")))
 	match phase:
+		"mid" when c.has("escalated"):
+			_narrate(audience,"[%s comes in from the sick fire and does not sit.]" % given)
+			_line(audience,holder,"%s What do you want done?" % String((c.notes as Array).back() if not (c.notes as Array).is_empty() else String(c.name)))
 		"mid":
 			_narrate(audience,"[%s comes back in, tired, %s.]" % [given,String({"sickness":"smelling of the sick fire","stranger":"smelling of the sick fire","hunger":"thinner than before","drought":"with dust to the knees"}.get(String(c.type),"and sits down heavily"))])
 			_line(audience,holder,"%s What do you want done now?" % String((c.notes as Array).back() if not (c.notes as Array).is_empty() else String(c.name)))
