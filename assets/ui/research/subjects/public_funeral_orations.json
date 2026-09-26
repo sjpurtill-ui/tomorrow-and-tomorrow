@@ -1,0 +1,14 @@
+{
+  "id": "public_funeral_orations",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-40169bd7-edb8-4dbb-9781-b2d7e0e6ed54.png",
+  "source_file": "exec-40169bd7-edb8-4dbb-9781-b2d7e0e6ed54.png",
+  "creative_brief": "Each year a chosen speaker praises the town's war dead before their families. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/public_funeral_orations-v1.png",
+  "sha256": "4ed2b218785a876cf250a7b0f821ea0774c8cd370f9aae8dda7ab744b6e08c59",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

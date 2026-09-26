@@ -1,0 +1,14 @@
+{
+  "id": "timber_pile_foundations",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ea67f071-6d08-4b37-b76d-20ca01cebac8.png",
+  "source_file": "exec-ea67f071-6d08-4b37-b76d-20ca01cebac8.png",
+  "creative_brief": "Oak piles hammered into the marsh until they stop sinking carry the warehouse walls above the soft ground. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/timber_pile_foundations-v1.png",
+  "sha256": "bd2a3eb60ae79a8f488c58df0e32affc5b90b5c70ced46566790fbeba38668c7",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

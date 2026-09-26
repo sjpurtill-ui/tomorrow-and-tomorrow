@@ -1,0 +1,14 @@
+{
+  "id": "authored_prose_treatises",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b9978a98-3d46-4958-9b91-86c9722ddfb8.png",
+  "source_file": "exec-b9978a98-3d46-4958-9b91-86c9722ddfb8.png",
+  "creative_brief": "Writers set their own names to prose books on nature, healing and the heavens, and answer each other by name. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/authored_prose_treatises-v1.png",
+  "sha256": "23d3a5a6e396d19958aa14aeaf8728982faded607482da4362286d7141aaa6ca",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

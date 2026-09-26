@@ -1,0 +1,14 @@
+{
+  "id": "sounding_lead",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-838f0fc1-9ab0-4be8-abe7-96bd785f1856.png",
+  "source_file": "exec-838f0fc1-9ab0-4be8-abe7-96bd785f1856.png",
+  "creative_brief": "A lead weight armed with tallow is dropped overboard, and the sand or shell it brings up tells the pilot where he is. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/sounding_lead-v1.png",
+  "sha256": "6976b519382798f2f41ffdd33210bebe8dc6cc0eb10d7386e129716c5e83aac3",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

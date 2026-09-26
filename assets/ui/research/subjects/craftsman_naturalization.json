@@ -1,0 +1,14 @@
+{
+  "id": "craftsman_naturalization",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e4adfd4-a9a5-4ce9-afb6-334b05447ea1.png",
+  "source_file": "exec-6e4adfd4-a9a5-4ce9-afb6-334b05447ea1.png",
+  "creative_brief": "Skilled incomers are granted local rights so they settle, bring their families and teach their craft. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/craftsman_naturalization-v1.png",
+  "sha256": "3a31fc323dc4755a45aeb3e0c48935a66f6d1ce0a9a384f130c6c72be569a98f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

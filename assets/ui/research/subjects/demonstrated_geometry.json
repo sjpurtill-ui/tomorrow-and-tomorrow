@@ -1,0 +1,14 @@
+{
+  "id": "demonstrated_geometry",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-33530b4e-31d7-418c-aa4b-ec8b8630a3fa.png",
+  "source_file": "exec-33530b4e-31d7-418c-aa4b-ec8b8630a3fa.png",
+  "creative_brief": "A claim about triangles is accepted only when it is shown step by step from what is already agreed. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/demonstrated_geometry-v1.png",
+  "sha256": "922ef0a418ad8486aae8907694cb28aa07789e243d5ea235e8abf40784623260",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

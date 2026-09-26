@@ -1,0 +1,14 @@
+{
+  "id": "touchstone_testing",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-02f5873b-5de0-4177-beff-035838a478e2.png",
+  "source_file": "exec-02f5873b-5de0-4177-beff-035838a478e2.png",
+  "creative_brief": "A streak of metal drawn across the black stone shows a trained eye whether the gold or silver is good. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/touchstone_testing-v1.png",
+  "sha256": "cdf52fca7516e7cec93b000b258ab986ee9ed73f3548649ea88b4cede5e66bc8",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -20,11 +20,11 @@ func _ready()->void:
 	var batch:String="all-early" if all_early else ("key3" if key3 else ("key2" if key2 else ("bronze" if bronze else "later")))
 	var selected:Array=BRONZE_IDS+KEY2_IDS+KEY3_IDS if all_early else (KEY3_IDS if key3 else (KEY2_IDS if key2 else (BRONZE_IDS if bronze else IDS)))
 	if key3:get_window().size=Vector2i(1440,1120)
-	for classical_batch:String in ["classical-01","classical-02","classical-03","classical-04","classical-other-01"]:
+	for classical_batch:String in ["classical-01","classical-02","classical-03","classical-04","classical-other-01","classical-other-02"]:
 		if "--"+classical_batch in OS.get_cmdline_user_args():
 			var selection:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-"+classical_batch+"/selected.json"))
 			selected=selection.keys();batch=classical_batch
-			assert(selected.size()==(21 if classical_batch in ["classical-04","classical-other-01"] else 22))
+			assert(selected.size()==(21 if classical_batch in ["classical-04","classical-other-01","classical-other-02"] else 22))
 			get_window().size=Vector2i(1440,1720)
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
