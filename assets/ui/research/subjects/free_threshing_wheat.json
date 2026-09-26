@@ -1,0 +1,14 @@
+{
+  "id": "free_threshing_wheat",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-39a2a415-fe5e-4395-9cf9-a92421002ae5.png",
+  "source_file": "exec-39a2a415-fe5e-4395-9cf9-a92421002ae5.png",
+  "creative_brief": "Farmer separates free-threshing grain beside tight-spelt sheaf.",
+  "medium": "Opaque botanical egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/free_threshing_wheat-v1.png",
+  "sha256": "758a69a670e75cd5b10a4ba7231c6255dfbeb3953aeb297123ddbcac45561c48",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

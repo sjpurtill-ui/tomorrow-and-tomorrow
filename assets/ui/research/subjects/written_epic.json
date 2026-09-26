@@ -1,0 +1,14 @@
+{
+  "id": "written_epic",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e30bf575-5023-40fc-9323-bb30f01b8277.png",
+  "source_file": "exec-e30bf575-5023-40fc-9323-bb30f01b8277.png",
+  "creative_brief": "Reciter dictates epic as scribe records it on a blank wax tablet.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/written_epic-v1.png",
+  "sha256": "dfdbac576819142a655f82d1bc60b415d709043588c52b61092abf1beb94abd6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}

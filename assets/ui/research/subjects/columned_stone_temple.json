@@ -1,0 +1,14 @@
+{
+  "id": "columned_stone_temple",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8fc84267-ed35-4f1b-86ee-f90015c42023.png",
+  "source_file": "exec-8fc84267-ed35-4f1b-86ee-f90015c42023.png",
+  "creative_brief": "Masons raise column drums for early stone temple.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/columned_stone_temple-v1.png",
+  "sha256": "c129d1f9f52398ce34af412c346d234df5188b6a75ebed1f51b6e34c964c747c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 game-banner crop review on 2026-09-26; repetitive, anachronistic, and pseudo-script variants rejected."
+}
