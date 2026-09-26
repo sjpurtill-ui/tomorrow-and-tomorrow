@@ -1,0 +1,14 @@
+{
+  "id": "coulter_plough",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1133b578-b090-4582-9356-9f33a7823454.png",
+  "source_file": "exec-1133b578-b090-4582-9356-9f33a7823454.png",
+  "creative_brief": "A heavy wheeled plough slices the sod with an iron coulter and turns it over, breaking clay the ard could not. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/coulter_plough-v1.png",
+  "sha256": "75841fcc33917cb8826d1188090599f5f465d06b35192b16c98beb919954c6e9",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

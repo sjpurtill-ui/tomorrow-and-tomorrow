@@ -1,0 +1,14 @@
+{
+  "id": "devotee_communities_under_rule",
+  "line": "culture",
+  "block": "y1200_1800",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4cb5ffd4-88c4-4d5b-9c35-a7f61a91e5da.png",
+  "source_file": "exec-4cb5ffd4-88c4-4d5b-9c35-a7f61a91e5da.png",
+  "creative_brief": "Devotees live together under a written rule that sets their hours of prayer, work in the fields and reading. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/devotee_communities_under_rule-v1.png",
+  "sha256": "eb30d8232ce802354b093a799a979473609d3d6967f0dad2ee7019d0ccf09e9d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

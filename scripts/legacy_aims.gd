@@ -769,7 +769,11 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 	elif mode=="renew":
 		summary="Some at the fire are tired of the old aim and speak of new ones: %s." % "; ".join(titles)
 	else:
-		summary="What should our children say of us? The court speaks of: %s." % "; ".join(titles)
+		# The first time, the old question; after that, what the last aim came to.
+		var last:Dictionary=(s.history as Array)[0] if not (s.history as Array).is_empty() and (s.history as Array)[0] is Dictionary else {}
+		var came:=String({"fulfilled":"was kept","failed":"ran out of winters","released":"was set aside"}.get(String(last.get("status","")),""))
+		if last.is_empty() or came=="":summary="What should our children say of us? The court speaks of: %s." % "; ".join(titles)
+		else:summary="%s %s. Now the court speaks of: %s." % [_cap(String(last.get("title",""))),came,"; ".join(titles)]
 	audience.petition={"topic":"aim","summary":summary.substr(0,400),"suggested_decree":""}
 	audience.situation={"type":"aim","ask":"aim:%d" % int(s.serial),"headline":"speaks of what we should strive for","summary":summary.substr(0,400),
 		"occasion":{"type":"aim","text":"what our children should say of us","day":day,"crisis":mode=="crisis"},
@@ -1324,7 +1328,16 @@ static func adopt(cand:Dictionary,chosen_by:String,day:int)->Dictionary:
 	PeopleDirection.inclination_review_day=-1
 	if String(aim.template)=="learn" and String(aim.get("first",""))!="": DiscoverySystem.select_research_target(String(aim.first))
 	var by:=""
-	if chosen_by=="people": by="The god said nothing, so the people took it up themselves."
+	if chosen_by=="people":
+		# Counted: how many aims the people have already chosen without the god.
+		var alone:=0
+		for h in s.history:
+			if h is Dictionary and String(h.get("chosen_by",""))=="people": alone+=1
+			else: break
+		var whose:=" It was %s's proposal." % String(aim.by_given) if String(aim.get("by_given",""))!="" and String(aim.get("source",""))=="official" else ""
+		if alone==0: by="The god said nothing, so the people took it up themselves."+whose
+		elif alone==1: by="Again the god gave no answer, and the people chose for themselves."+whose
+		else: by="It is the %s aim in a row the people have chosen without a word from the god.%s" % [String(["","first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"][mini(alone+1,10)]),whose]
 	elif String(aim.source)=="god": by="The god declared it."
 	elif String(aim.source)=="people": by="The god chose what the people asked for."
 	else: by="The god chose %s's proposal." % String(aim.by_given)
@@ -1380,8 +1393,12 @@ static func value_words(aim:Dictionary)->String:
 	var p:=float(aim.get("progress",0.0))
 	match template:
 		"grow": return "%s souls of %s" % [_count(GameState.population_total),_count(int(aim.target))]
-		"knowledge": return "%s new ways of %s" % [_count(maxi(0,GameState.known_discoveries.size()-int(aim.baseline))),_count(int(aim.target))]
-		"learn": return "%s new ways of %s" % [_count(maxi(0,known_in(String(aim.subject))-int(aim.baseline))),_count(int(aim.target))]
+		"knowledge":
+			var got:=maxi(0,GameState.known_discoveries.size()-int(aim.baseline))
+			return "%s new way%s of %s" % [_count(got),"" if got==1 else "s",_count(int(aim.target))]
+		"learn":
+			var got_in:=maxi(0,known_in(String(aim.subject))-int(aim.baseline))
+			return "%s new way%s of %s" % [_count(got_in),"" if got_in==1 else "s",_count(int(aim.target))]
 		"settle": return "%s of %s hearths" % [_count(GameState.player_settlements.size()),_count(int(aim.target))]
 		"plenty": return "%s of %s full" % [winters(int(floor(float(aim.get("acc",0.0))/365.0))),winters(int(aim.years))]
 		"unity":
@@ -1415,9 +1432,11 @@ static func _track(day:int,span:int)->void:
 	for mark in MILESTONES:
 		if p*100.0>=float(mark) and not int(mark) in reached and p<1.0:
 			reached.append(int(mark))
-			var text:=_say(Lines.MILESTONE[mark],{"name":String(aim.title)},"mile:%s:%d" % [String(aim.id),int(mark)],Lines.MILESTONE[mark])
-			Chronicle.record({"key":"aim:mile:%s:%d" % [String(aim.id),int(mark)],"title":"%s: %s" % [String(aim.title),{25:"A Quarter Done",50:"Halfway",75:"Nearly Done"}[mark]],
-				"text":"%s (%s.)" % [text,value_words(aim)],"tier":"moment" if int(mark)==50 else "notice","kind":"milestone","domain":String(aim.domain),"ledger":false})
+			# Told from the aim itself: how far, in what, against its winters, and
+			# who keeps count (chronicle_specifics.gd).
+			var told:Array=preload("res://scripts/chronicle_specifics.gd").aim_mark(mark_facts(aim,int(mark),day))
+			Chronicle.record({"key":"aim:mile:%s:%d" % [String(aim.id),int(mark)],"title":String(told[0]),
+				"text":String(told[1]),"tier":"moment" if int(mark)==50 else "notice","kind":"milestone","domain":String(aim.domain),"ledger":false})
 			_log("milestone",String(aim.title),{"mark":int(mark)})
 			if int(mark)==50 and String(s.matter_id)=="" and not aim.has("course_filed"): file_halfway(day)
 	if p>=1.0:
@@ -1435,6 +1454,39 @@ static func _track(day:int,span:int)->void:
 		aim.erase("course_filed")
 		file_course(day)
 		aim["course_filed"]=day
+
+static func mark_facts(aim:Dictionary,mark:int,day:int)->Dictionary:
+	## What a milestone is told from: real progress, winters used and left,
+	## the pace against them, who keeps count, and what moved it.
+	var start:=int(aim.get("start_day",day)); var deadline:=int(aim.get("deadline",day))
+	var p:=float(aim.get("progress",0.0))
+	var elapsed:=float(day-start)/maxf(1.0,float(deadline-start))
+	var pace:="even"
+	if p>=elapsed+0.15: pace="ahead"
+	elif p<elapsed-0.1: pace="behind"
+	var keeper:=_holder_for([aim])
+	var f:={"title":String(aim.title),"template":String(aim.template),"mark":mark,"value":value_words(aim),
+		"used":int(floor(float(day-start)/365.0)),"left":maxi(0,int(ceil(float(deadline-day)/365.0))),"pace":pace,
+		"keeper":EraNames.given_of(String(keeper.get("name",""))) if not keeper.is_empty() else "","subject":String(aim.get("subject_name","")),
+		"seed":hash("%s:%d" % [String(aim.id),mark])}
+	match String(aim.template):
+		"knowledge","learn":
+			var latest:Array=[]
+			var known:Array=GameState.known_discoveries
+			for i in range(known.size()-1,-1,-1):
+				var id:=String(known[i])
+				var def:Dictionary=DiscoverySystem.discovery_definition(id)
+				if String(aim.template)=="learn" and String(def.get("dynamic",""))!=String(aim.get("subject","")): continue
+				latest.append(String(def.get("name",id.replace("_"," "))))
+				if latest.size()>=2: break
+			f["latest"]=latest
+		"grow":
+			f["pop0"]=int(aim.get("baseline",0)); f["pop"]=GameState.population_total
+		"work":
+			f["builders"]=roundi(float(GameState.population_total)*float(GameState.population_allocation_percentages.get("Construction",8.0))/100.0)
+		"plenty":
+			f["food_days"]=roundi(float(GameState.simulation_metrics.get("food_days",0.0)))
+	return f
 
 static func _bonds_all(deltas:Dictionary)->void:
 	for person in _officials(): GovernmentPeopleSystem.adjust_person_bonds(int(person.person_id),deltas)

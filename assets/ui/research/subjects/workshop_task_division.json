@@ -1,0 +1,14 @@
+{
+  "id": "workshop_task_division",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d112d12b-0a24-4633-adbb-0023521614e3.png",
+  "source_file": "exec-d112d12b-0a24-4633-adbb-0023521614e3.png",
+  "creative_brief": "In the lamp shop one man only throws, another only trims, a third only paints, and the lamps come off twice as fast. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/workshop_task_division-v1.png",
+  "sha256": "a42db5d50ea2661d76911d3a3770ef0ea9be5e3e139cf93f50c6fbf60fafe707",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

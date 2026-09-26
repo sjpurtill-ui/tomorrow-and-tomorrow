@@ -1,0 +1,14 @@
+{
+  "id": "bookbinding_assemblies",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-473fa480-e5a3-4f26-a550-fc4343ce6304.png",
+  "source_file": "exec-473fa480-e5a3-4f26-a550-fc4343ce6304.png",
+  "creative_brief": "Leaves are stacked, folded and sewn at the spine, and a whole work opens at any page. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/bookbinding_assemblies-v1.png",
+  "sha256": "292556ed38bf59c31d5a200e510bf4d5bd14bb7ca7761f5724ec369c2922003f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

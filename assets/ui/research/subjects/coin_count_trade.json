@@ -1,0 +1,14 @@
+{
+  "id": "coin_count_trade",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-edea0d0e-fcf4-4f6f-895b-ed55a6b23ba7.png",
+  "source_file": "exec-edea0d0e-fcf4-4f6f-895b-ed55a6b23ba7.png",
+  "creative_brief": "Stamped coins of known weight pass from hand to hand by count, and no one unpacks a balance at every stall. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/coin_count_trade-v1.png",
+  "sha256": "01fa07b39e296d4a565313e30efae19a676d5c0709b5d485210a13f214ed17f9",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

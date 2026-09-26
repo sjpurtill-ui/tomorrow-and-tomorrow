@@ -1,0 +1,14 @@
+{
+  "id": "ranked_priestly_hierarchy",
+  "line": "institutions",
+  "block": "y1200_1800",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a04c76db-f716-4aa2-a34b-828ddb37e103.png",
+  "source_file": "exec-a04c76db-f716-4aa2-a34b-828ddb37e103.png",
+  "creative_brief": "The god's overseers of the towns answer to senior overseers in the great cities, and they to the heads of the oldest sees. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/ranked_priestly_hierarchy-v1.png",
+  "sha256": "14e1f3881e0d4ec8eee45281439ddb021559cca0aa6a5d6f30a6d497688529d3",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

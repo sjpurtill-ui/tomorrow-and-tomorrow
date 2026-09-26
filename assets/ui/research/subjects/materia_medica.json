@@ -1,0 +1,14 @@
+{
+  "id": "materia_medica",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-89bbe8cd-61f6-41de-a08e-4cc21676bc3e.png",
+  "source_file": "exec-89bbe8cd-61f6-41de-a08e-4cc21676bc3e.png",
+  "creative_brief": "A great herbal describes hundreds of plants, minerals and animal parts, how each looks, where it grows and what it cures. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/materia_medica-v1.png",
+  "sha256": "10a60ebbf6295b641c93a971ea932ae4332fbce4489888ab9b184abd6c9c9843",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

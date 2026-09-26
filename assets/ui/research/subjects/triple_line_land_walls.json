@@ -1,0 +1,14 @@
+{
+  "id": "triple_line_land_walls",
+  "line": "security",
+  "block": "y1200_1800",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2cfab2b0-f70c-430e-ba29-bdb41f28a148.png",
+  "source_file": "exec-2cfab2b0-f70c-430e-ba29-bdb41f28a148.png",
+  "creative_brief": "A moat, a low outer wall and a tall towered inner wall stand one behind another across the landward side. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/triple_line_land_walls-v1.png",
+  "sha256": "b72bcdb7f85e259fde79172794d0b1d08106c69c99c35f09687e280ef81fcd4a",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

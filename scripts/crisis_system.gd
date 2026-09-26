@@ -60,6 +60,7 @@ const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 const ERAS:=preload("res://scripts/technology_eras.gd")
 const HEARTH:=preload("res://scripts/hearth_count.gd")
+const SPECIFICS:=preload("res://scripts/chronicle_specifics.gd")
 const TURNING_PATH:="res://scripts/turning_points.gd"
 
 const KEY:="crises"
@@ -204,6 +205,12 @@ static func active()->Array[Dictionary]:
 static func _turning()->GDScript:
 	return load(TURNING_PATH) as GDScript if ResourceLoader.exists(TURNING_PATH) else null
 
+static func apart_custom()->bool:
+	## The people keep the sick apart on their own: learned from a hard
+	## sickness they lived through, or told as the turning point "The Sick Kept
+	## Apart". Either way officials follow it when the god is silent.
+	return unlocked("sickness:apart_plus") or bool((state().flags as Dictionary).get("apart_custom",false))
+
 static func unlocked(option_key:String)->bool:
 	## A crisis choice opened by a turning point the people have lived through.
 	var tp:=_turning()
@@ -254,50 +261,90 @@ static func _dead_words(total:int,dead:Array)->String:
 	if total>named.size(): return "%s, among them %s" % [_count(total),listed]
 	return "%s: %s" % [_count(total),listed]
 
-static func _used_names()->Dictionary:
-	## Names at court, and the names this people's crises have lately told.
-	var used:Dictionary=EraNames.used_in_court()
-	for given in (state().get("names",[]) as Array): used["given:"+String(given)]=true
-	return used
+## How many victims' and helpers' names the crises keep in mind. Older ones
+## come round again only when every other name of the palette is in use.
+const RECENT_NAMES:=60
 
 static func _remember_name(given:String)->void:
+	if given=="": return
 	var s:=state()
 	if not s.get("names") is Array: s["names"]=[]
-	(s.names as Array).push_back(given)
-	while (s.names as Array).size()>30: (s.names as Array).pop_front()
+	var recent:Array=s.names
+	recent.erase(given)
+	recent.push_back(given)
+	while recent.size()>RECENT_NAMES: recent.pop_front()
+
+static func _free_given(woman:bool,start:int,living:Dictionary,taken:Dictionary,allow_recent:bool)->String:
+	## A given name of this people's tradition for an ordinary person. Never a
+	## living named person's (officials, court, great figures) nor one already
+	## taken in this telling; a name the crises told lately is used again only
+	## when allowed, the longest-ago first. "" when there is none.
+	var palette:Array=EraNames.PALETTES[EraNames.tradition("player",int(GameState.world_seed))]
+	var half:Array=palette[0] if woman else palette[1]
+	var recent:Array=state().get("names",[]) as Array
+	var best:=""
+	var best_age:=1<<30
+	for offset in half.size():
+		var given:=String(half[posmod(start+offset,half.size())])
+		if living.has("given:"+given) or taken.has("given:"+given): continue
+		var at:=recent.rfind(given)
+		if at<0: return given
+		if at<best_age: best=given; best_age=at
+	return best if allow_recent else ""
+
+static func _fresh_person(rng:RandomNumberGenerator,woman:bool,living:Dictionary,taken:Dictionary)->Dictionary:
+	## {given, woman}: a name not told lately, of the sex asked for if one is
+	## left, else of the other; only then the longest-ago recent name.
+	var start:=rng.randi()
+	for allow_recent in [false,true]:
+		for flip in [false,true]:
+			var w:bool=woman!=flip
+			var given:=_free_given(w,start,living,taken,allow_recent)
+			if given!="": return {"given":given,"woman":w}
+	return {}
 
 static func _dead_names(count:int,salt:String)->Array[String]:
 	## The dead are ordinary people: a given name and who they were.
 	var out:Array[String]=[]
-	var used:=_used_names()
+	var living:Dictionary=EraNames.used_in_court()
+	var taken:Dictionary={}
 	var s:=state()
 	for i in count:
 		s.serial=int(s.serial)+1
 		var rng:=_rng("dead:%s:%d" % [salt,i])
-		var woman:=rng.randf()<0.5
-		var made:Dictionary=EraNames.make(int(GameState.world_seed),900000+int(s.serial),woman,"player",used,{})
-		var given:=String(made.get("given",""))
-		if given=="": continue
-		used["given:"+given]=true
+		var who:=_fresh_person(rng,rng.randf()<0.5,living,taken)
+		if who.is_empty(): continue
+		var given:=String(who.given)
+		taken["given:"+given]=true
 		_remember_name(given)
-		var roles:Array=WOMEN_ROLES if woman else MEN_ROLES
+		var roles:Array=WOMEN_ROLES if bool(who.woman) else MEN_ROLES
 		out.append("%s, %s" % [given,String(roles[rng.randi_range(0,roles.size()-1)])])
 	return out
 
 static func _people_names(count:int,salt:String,woman_bias:float=0.5)->Array[String]:
-	## Invented names for ordinary people touched by a crisis (the dead, the
-	## helpers). Never real names; never a name already at court.
+	## Invented names for ordinary people touched by a crisis (the helpers, a
+	## culprit). Never real names; never a living named person's name.
 	var out:Array[String]=[]
-	var used:=_used_names()
+	var living:Dictionary=EraNames.used_in_court()
+	var taken:Dictionary={}
 	var s:=state()
+	var palette:Array=EraNames.PALETTES[EraNames.tradition("player",int(GameState.world_seed))]
 	for i in count:
 		s.serial=int(s.serial)+1
 		var rng:=_rng("name:%s:%d" % [salt,i])
-		var made:Dictionary=EraNames.make(int(GameState.world_seed),900000+int(s.serial),rng.randf()<woman_bias,"player",used,{})
+		var who:=_fresh_person(rng,rng.randf()<woman_bias,living,taken)
+		if who.is_empty(): continue
+		var given:=String(who.given)
+		# EraNames adds the era's byname; every other given name is closed to it.
+		var used:Dictionary=living.duplicate()
+		for half in palette:
+			for other in half:
+				if String(other)!=given: used["given:"+String(other)]=true
+		var made:Dictionary=EraNames.make(int(GameState.world_seed),900000+int(s.serial),bool(who.woman),"player",used,{})
 		var name:=String(made.get("name",""))
-		if name=="": continue
-		used[name]=true; used["given:"+String(made.get("given",""))]=true
-		_remember_name(String(made.get("given","")))
+		if name=="" or String(made.get("given",""))!=given: name=given
+		taken["given:"+given]=true
+		_remember_name(given)
 		out.append(name)
 	return out
 
@@ -417,7 +464,7 @@ static func hazards(day:int,x:Dictionary={})->Dictionary:
 	var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)+1.5*(1.0-minf(1.0,float(x.water_q)))+1.5*(HEALTH_REF-float(x.health))+0.8*hunger_on+0.6*(float(s.pool)-POOL_REF))*(1.0-0.5*float(x.med))*season_factor
 	if day<_until("after_flood"): sick*=2.0
 	if drought_on>0.0: sick*=1.3
-	if bool(flags.get("apart_custom",false)): sick*=0.85
+	if apart_custom(): sick*=0.85
 	out["sickness"]=clampf(sick,0.0,3.0)
 	# Emergence of a truly new pestilence (catalog pandemic_emerge), era-scaled.
 	out["pestilence_emerge"]=_ramp(PANDEMIC_EMERGE,float(x.H))/100.0*exp(1.6*(float(x.dens)-0.4)+1.2*(float(x.trade)-0.4)+0.8*hunger_on+0.6*(float(s.pool)-0.4))*(1.0-0.5*float(x.med))
@@ -648,7 +695,9 @@ static func _open_sickness(day:int,x:Dictionary,type:String,v:float,civ_id:Strin
 	c.signs=_signs(x,"sickness")
 	var sick:=clampi(roundi(float(x.pop)*(0.06+3.0*float(c.m))),3,maxi(3,int(float(x.pop)/2.0)))
 	c["sick"]=sick
-	var where:=_pick(["at the east fire","at the fires by the water","in the huts nearest the midden","among the families at the edge of camp"],"where:%s" % String(c.id))
+	var where:=_pick(["at the east fire","at the fires by the water","in the huts nearest the midden","among the families at the edge of camp",
+		"at the hearths by the drying racks","among the old ones' hearths","at the fires upstream","in the huts along the path to the water"],"where:%s" % String(c.id))
+	c["where"]=where
 	var what:String={"flux":"the flux, the watery sickness","cough":"a deep cough and fever","fever":"a shaking fever","pestilence":"a sickness with spots no one has seen"}[kind]
 	var summary:="%s are down with %s %s." % [_cap(_count(sick)),what,where]
 	if echo: summary="%s It is the sickness we had before, come back." % summary
@@ -689,7 +738,9 @@ static func _open_drought(day:int,x:Dictionary)->void:
 	var c:=_new("drought","drought","the Dry Year of %s" % _year_words(day) if sev<0.2 else "the Year the Springs Failed",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
 	_plan_deaths(c,_lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
 	if sev>=0.18: c["severe"]=true; _stat("drought","severe")
-	var summary:="The rain has not come. The gathering grounds are brown and the %s is low. What we gather this season will be about %d parts in ten of a good year." % ["river" if bool(x.river) else "water",clampi(roundi(float(x.weather_season)*10.0),3,9)]
+	# Told a little differently each time: the chronicle keeps every dry year.
+	var dry_words:=_pick(["The rain has not come. The gathering grounds are brown and the %s is low.","No rain for weeks. The %s has shrunk back from its banks and the grass crackles underfoot.","The sky stays hard and clear. The seed-grass is brown before it has filled, and the %s is low."],"dry:%s" % String(c.id))
+	var summary:=(dry_words % ("river" if bool(x.river) else "water"))+(" "+_pick(["What we gather this season will be about %d parts in ten of a good year.","The gatherers expect about %d parts in ten of what a good year brings.","At this rate the season will give about %d parts in ten of the usual."],"dry_tail:%s" % String(c.id)) % clampi(roundi(float(x.weather_season)*10.0),3,9))
 	_file(c,"open",summary,"comes about the dry weather",int(c.decide_by))
 	_announce(c,"The Rain Does Not Come",summary)
 
@@ -749,7 +800,9 @@ static func _watch_thinning(day:int,x:Dictionary)->void:
 	_plan_deaths(c,0.0)
 	# The notice is not told again while this is being settled, nor for years after.
 	GameState.last_simulation_event_days["ecology_strain"]=day+1200
-	var summary:="The gatherers walk half a day now for what they once found by the camp. The near ground is worn out: roots dug, game gone, the brush stripped."
+	var summary:=_pick(["The gatherers walk half a day now for what they once found by the camp. The near ground is worn out: roots dug, game gone, the brush stripped.",
+		"Every root near the camp has been dug and the snares by the stream come back empty. The gatherers are out from before light until after dark.",
+		"The gatherers pass the old digging places and walk on to the far slopes, and still come home with half-full baskets. The game has left the near woods."],"worn:%s" % String(c.id))
 	_file(c,"open",summary,"comes about the worn land",int(c.decide_by))
 	_announce(c,"The Land Is Worn Out",summary)
 
@@ -934,11 +987,12 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 	var helper:=String(helpers[0]) if not helpers.is_empty() else ""
 	c.helpers=helpers
 	var text:=""
+	# Told from what happened: how many fell ill and where, what was tried, and
+	# how it compares with the last one of its kind (chronicle_specifics.gd).
+	var facts:=_end_facts(c,day,helper)
 	match type:
 		"sickness","stranger":
-			text="%s has passed. " % _cap(String(c.name))
-			text+=("It took %s. " % names) if total>0 else "No one died of it. "
-			if helper!="": text+="%s sat with the sick every night and did not fall ill; the people remember it. " % helper
+			text=SPECIFICS.crisis_end(facts)+" "
 			# Survivors are harder to kill with the same sickness; and a people
 			# that lived through one learns to keep the sick apart (catalog R).
 			var s:=state()
@@ -959,25 +1013,27 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 			text+=("It took %s. " % names) if total>0 else "No one starved. "
 			if helper!="": text+="%s found roots under the snow when others had stopped looking. " % helper
 		"drought":
-			text="The rains came back. "+(("The dry year took %s. " % names) if total>0 else "Everyone lived through the dry year. ")
+			text=SPECIFICS.crisis_end(facts)+" "
 		"flood":
 			text="The river is back in its bed. "+(("It drowned %s. " % names) if total>0 else "No one drowned. ")
 			if String(c.choice)=="wait": (state().until as Dictionary)["after_flood"]=day+60
 		"fire":
-			text="The camp has its roofs again. "+(("The fire killed %s. " % names) if total>0 else "The fire killed no one. ")
+			text=SPECIFICS.crisis_end(facts)+" "
 			GameState.housing_capacity=int(GameState.housing_capacity)+int(float(c.get("house_lost",0))*(1.0 if String(c.choice) in ["apart","earth"] else 0.0))
 		"cold":
 			text="The sun is clear again. It was a hungry year, and the people are glad to see it end. "
 		"thinning":
 			var eco:=float(x.ecology)
-			text="The gatherers say the near ground %s. " % ("is coming back" if eco>=float(c.get("eco0",eco)) else "is still worn")
+			var back:=eco>=float(c.get("eco0",eco))
+			facts["back"]=back
+			text=SPECIFICS.crisis_end(facts)+" "
 	if String(c.get("silent_note",""))!="": text+=String(c.silent_note)
 	(c.notes as Array).append(text)
 	if type in ["flood"] and String(c.choice) in ["high_ground","mounds"]:
 		GameState.housing_capacity=int(GameState.housing_capacity)+int(float(c.get("house_lost",0))*0.8)
 	_record(c,"end","After %s" % String(c.name),text.strip_edges(),"moment","death" if total>0 else "ceremony",false)
 	_log("end",text,{"type":type,"crisis":String(c.id),"deaths":total,"severe":bool(c.get("severe",false)),"m":float(c.m),"mult":float(c.mult)})
-	var hist:Dictionary={"id":String(c.id),"type":type,"name":String(c.name),"start":int(c.start),"end":day,"deaths":total,"dead":dead.slice(0,6),"choice":String(c.choice),"mid_choice":String(c.mid_choice),"severe":bool(c.get("severe",false)),"m":float(c.m)}
+	var hist:Dictionary={"id":String(c.id),"type":type,"name":String(c.name),"start":int(c.start),"end":day,"deaths":total,"dead":dead.slice(0,6),"choice":String(c.choice),"mid_choice":String(c.mid_choice),"severe":bool(c.get("severe",false)),"m":float(c.m),"sick":int(c.get("sick",0)),"where":String(c.get("where",""))}
 	var hl:Array=state().history
 	hl.push_front(hist)
 	while hl.size()>HISTORY_MAX: hl.pop_back()
@@ -988,6 +1044,25 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 		_file(c,"remember","%s is over. %s died of it. The families ask how they are to be remembered." % [_cap(String(c.name)),_cap(_count(total))],"comes from the burials",int(c.remember_by))
 		return
 	_close(c)
+
+static func _end_facts(c:Dictionary,day:int,helper:String)->Dictionary:
+	## The facts a crisis ending is told from. Words only: nothing here changes
+	## the crisis.
+	var prior:={}
+	var count:=1
+	# The run of this kind of trouble met the same way, most recent first.
+	var run:=1; var run_deaths:=int(c.deaths); var since:=int(c.start)/365+1; var running:=true
+	for h in state().history:
+		if not h is Dictionary or String(h.get("type",""))!=String(c.type) or String(h.get("id",""))==String(c.id): continue
+		count+=1
+		if prior.is_empty(): prior={"name":String(h.get("name","")),"year":int(h.get("start",0))/365+1,"deaths":int(h.get("deaths",0)),"choice":String(h.get("choice",""))}
+		if running and String(h.get("choice",""))==String(c.choice):
+			run+=1; run_deaths+=int(h.get("deaths",0)); since=int(h.get("start",0))/365+1
+		else: running=false
+	if not prior.is_empty(): c["compared"]=true
+	return {"year":int(c.start)/365+1,"run":run,"run_deaths":run_deaths,"since":since,"type":String(c.type),"name":String(c.name),"days":day-int(c.start),"sick":int(c.get("sick",0)),"where":String(c.get("where","")),
+		"deaths":int(c.deaths),"dead":(c.dead as Array).duplicate(),"choice":String(c.choice),"mid_choice":String(c.mid_choice),"helper":helper,
+		"house_lost":int(c.get("house_lost",0)),"prior":prior,"count":count,"seed":hash(String(c.id)+String(c.name))}
 
 static func _close(c:Dictionary)->void:
 	c.phase="done"
@@ -1094,7 +1169,7 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			if unlocked("hunger:herd"): out.append(_opt("herd","Kill from the tame herd","Meat now. Fewer young animals in spring.","neutral",{"cost":"herd"}))
 			out.append(_opt("speak","Go among them as their god","It feeds no one. It may hold them together.","warm"))
 		"sickness","stranger":
-			var better:=unlocked("sickness:apart_plus") or bool((state().flags as Dictionary).get("apart_custom",false))
+			var better:=apart_custom()
 			out.append(_opt("apart","Keep the sick at their own fire","Their kin will hate it. %s" % ("We know how to do this now; it works if done early." if better else "Done now, it may stop the spread."),"neutral",{"cost":"cohesion","objection":"You would leave them alone in the dark?" if float(c.get("sick",0))>=6 and Hall._officials().size()>1 else ""}))
 			out.append(_opt("tend","Everyone tends the sick","No one is left alone. More will catch it.","warm",{"cost":"String: more will fall sick"}))
 			if unlocked("sickness:herbs"): out.append(_opt("herbs","Send for the plant-knowers","Bitter roots and bark. It eases more than it cures.","warm"))
@@ -1170,7 +1245,7 @@ static func _default_choice(c:Dictionary,phase:String)->String:
 		return String({"sickness":"children_apart","stranger":"children_apart","hunger":"roots","drought":"hold"}.get(String(c.type),"hold"))
 	match String(c.type):
 		"hunger": return "ration"
-		"sickness","stranger": return "apart" if bool((state().flags as Dictionary).get("apart_custom",false)) else "tend"
+		"sickness","stranger": return "apart" if apart_custom() else "tend"
 		"drought": return "carry"
 		"cold": return "ration"
 		"flood": return "wait"
@@ -1320,7 +1395,7 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			outcome="You went among them as their god. It fed no one. They held together."
 			reaction="delighted"
 		"apart":
-			var strong:=unlocked("sickness:apart_plus") or bool((state().flags as Dictionary).get("apart_custom",false))
+			var strong:=apart_custom()
 			c.mult=float(c.mult)*(0.4 if strong else 0.55)
 			_policy(c,"apart",{"disease_risk":-0.3},45)
 			_metric("cohesion",-0.01)

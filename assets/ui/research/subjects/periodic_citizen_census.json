@@ -1,0 +1,14 @@
+{
+  "id": "periodic_citizen_census",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-037291a1-2aa6-4963-8536-268ecb86b079.png",
+  "source_file": "exec-037291a1-2aa6-4963-8536-268ecb86b079.png",
+  "creative_brief": "Every five years each citizen declares under oath his household, bond-servants and property. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/periodic_citizen_census-v1.png",
+  "sha256": "96f0c67709622179d77c167fa5b7d8e2a4c6a510c23d293b140e498fb7555e18",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

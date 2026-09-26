@@ -1,0 +1,14 @@
+{
+  "id": "congregation_hall_temples",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4883786f-ca73-4f28-92d6-ded3e9c5e823.png",
+  "source_file": "exec-4883786f-ca73-4f28-92d6-ded3e9c5e823.png",
+  "creative_brief": "Long timber-roofed halls hold the whole congregation when it gathers for the god's rites. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/congregation_hall_temples-v1.png",
+  "sha256": "de52e750f9632635119fcb512ea372c79b1117bdfbe95f5c56cbf406922ca785",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

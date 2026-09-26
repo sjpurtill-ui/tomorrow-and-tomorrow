@@ -98,6 +98,10 @@ const MIGRATION_KEEP:=2
 const MATTERS_MAX:=40
 const MATTERS_PER_HOLDER:=5
 const MATTER_DAYS:=150
+## Fast surrogate for long envoy checks (tests/fun_audit/envoy_variety_probe.gd):
+## only foreign occasions, pacing and envoy business run; the court, aims,
+## crises, lives and war loops are skipped. Never set in play.
+static var envoys_only:=false
 ## Set while a test, capture or the ruler's own call raises a court audience directly.
 static var _court_direct:=false
 ## Occasions that continue an earlier audience (they may follow sooner).
@@ -146,6 +150,23 @@ const SITUATIONS:={
 	"dread_tribute":{"kind":"gift","headline":"brings tribute, fearing your wrath","mechanic":"civilization_exchange take/receive between real ledgers"},
 	"debt_call":{"kind":"request","headline":"comes to collect a debt","mechanic":"rival_rulers.gd debts; player stores debited"},
 	"redress_demand":{"kind":"threat","headline":"demands redress for an old wrong","mechanic":"rival_rulers.gd grudges; stores debited or ForeignDiplomacy.apply_conversation_reaction"},
+	# Wider envoy business (envoy_requests.gd): each from real state, each resolved through real ledgers and relations.
+	"food_loan":{"kind":"request","headline":"asks to borrow food against their next harvest","mechanic":"envoy_requests.gd; stores lent, repaid by traders when due (pledges)"},
+	"work_for_food":{"kind":"request","headline":"offers their labour for food","mechanic":"envoy_requests.gd; Food now, goods their workers gather delivered when the work is done"},
+	"barter":{"kind":"request","headline":"offers a trade of goods","mechanic":"envoy_requests.gd; civilization_exchange between real ledgers"},
+	"refuge":{"kind":"request","headline":"asks you to take in their families","mechanic":"envoy_requests.gd; people move between the peoples"},
+	"forage_leave":{"kind":"request","headline":"asks leave to hunt in your country","mechanic":"envoy_requests.gd; rival_rulers hunting bond drains Food monthly"},
+	"craft_teaching":{"kind":"request","headline":"asks for a teacher of your craft","mechanic":"envoy_requests.gd; rival_rulers._share_craft, goods paid from their ledger"},
+	"healer_plea":{"kind":"request","headline":"asks for your healers","mechanic":"envoy_requests.gd; plants sent, their health, delayed sickness risk"},
+	"mediation":{"kind":"request","headline":"asks the god to judge a quarrel","mechanic":"envoy_requests.gd; border tension between two other peoples, grudges"},
+	"marriage_request":{"kind":"request","headline":"seeks a marriage into your people","mechanic":"envoy_requests.gd; a person moves, in-law bond, a rival's grudge"},
+	"border_line":{"kind":"request","headline":"wants the border fixed","mechanic":"envoy_requests.gd; border tension, lost woods or shared hunting"},
+	"fugitive_return":{"kind":"request","headline":"demands a fugitive back","mechanic":"envoy_requests.gd; a person handed over, blood-price, or a grudge"},
+	"blessing_rite":{"kind":"request","headline":"asks the god's blessing","mechanic":"envoy_requests.gd; offering from their ledger, reverence or dread"},
+	"war_supplies":{"kind":"request","headline":"asks for supplies for their war","mechanic":"envoy_requests.gd; goods to a belligerent, the enemy's grudge"},
+	"succession_backing":{"kind":"request","headline":"asks you to recognise their new ruler","mechanic":"envoy_requests.gd; leader trust, border concession or grudge"},
+	"hostage_exchange":{"kind":"request","headline":"proposes an exchange of pledges","mechanic":"envoy_requests.gd; hostage bond, border tension"},
+	"sacred_site":{"kind":"request","headline":"asks leave to visit a sacred place","mechanic":"envoy_requests.gd; pilgrimage bond, toll or grudge"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -269,6 +290,12 @@ static func _war()->GDScript:
 	## loaded lazily because it reaches back into this one.
 	return load(WAR_PATH) as GDScript
 
+const REQUESTS_PATH:="res://scripts/envoy_requests.gd"
+static func _requests()->GDScript:
+	## The wider envoy business (envoy_requests.gd); loaded lazily because it
+	## reaches back into this one.
+	return load(REQUESTS_PATH) as GDScript
+
 static func _great_works()->GDScript:
 	## Great Works audiences (architects, rival races, forecasts); loaded lazily
 	## because that module reaches back into this one.
@@ -368,16 +395,19 @@ static func daily(day:int)->Array[Dictionary]:
 	if WorldSimulation.actor_id!="player": return arrivals
 	var s:=state()
 	# Dread curdled with resentment shows first in speech, then in flight.
-	for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
+	if not envoys_only:
+		for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
 	_expire(day)
 	_observe(day)
 	_prune_occasions(day)
 	_prune_matters(day)
-	_lives().call("daily",day)
-	_aims().call("daily",day)
-	_crises().call("daily",day)
+	if not envoys_only:
+		_lives().call("daily",day)
+		_aims().call("daily",day)
+		_crises().call("daily",day)
 	_rivals().call("daily",day)
-	_war().call("daily",day)
+	if not envoys_only: _war().call("daily",day)
+	_requests().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -804,6 +834,7 @@ static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
 	s.last_speaker=key
 	if key.begins_with("civ:"): s.last_civ[key.trim_prefix("civ:")]=day
 	elif key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
+	if String(audience.get("origin",""))=="foreign": _requests().call("note_arrival",audience)
 	_ledger_add(audience)
 
 static func _gift_recent(civ_id:String,day:int)->bool:
@@ -1052,7 +1083,7 @@ static func _observe(day:int)->void:
 			_add_occasion({"key":"third_war:%s:%s:%d" % [String(pair[0]),String(pair[1]),floori(day/365.0)],"type":"third_war","civ_id":id,"day":day,"expires":day+100,
 				"data":{"text":"war has broken out between %s and %s" % [name,enemy_name],"enemy":String(enemy),"enemy_name":enemy_name}})
 		civs[id]=now
-	_observe_court(day,baseline)
+	if not envoys_only: _observe_court(day,baseline)
 	watch["ready"]=true
 	if baseline: s.next_any=maxi(int(s.next_any),day+10)
 	_ambient(day)
@@ -1198,7 +1229,7 @@ static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
 	var harmed:=option_id.begins_with("envoy_")
 	var refused:=option_id in ["refuse","rebuff","rebuke","abstain","dismiss","ignored","expired","defy","stand","decline","counter"]
 	var threat_paid:=String(audience.get("kind",""))=="threat" and option_id=="pay"
-	var aid_given:=_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]
+	var aid_given:=(_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]) or bool(_requests().call("brings_sequel",_situation_type(audience),option_id))
 	if not (harmed or refused or threat_paid or aid_given): return
 	var list:Array=state().occasions
 	for existing in list.duplicate():
@@ -1308,7 +1339,31 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day)
 	var chosen:=_weighted(candidates,rng)
 	if chosen.is_empty(): return {}
-	return _foreign_audience(civ_id,chosen,occasion,day)
+	var audience:=_foreign_audience(civ_id,chosen,occasion,day)
+	_keep_alternatives(audience,chosen,candidates)
+	return audience
+
+const ALTERNATIVES_MAX:=2
+static func _keep_alternatives(audience:Dictionary,chosen:Dictionary,candidates:Array[Dictionary])->void:
+	## Other business the same state truly backs (different types, likeliest
+	## first). With a live model, envoy_request_ai.gd may choose among them
+	## before the envoy speaks; offline the hall's own choice stands.
+	var chosen_type:=String((chosen.get("situation",{}) as Dictionary).get("type",""))
+	var seen:={chosen_type:true}
+	var ranked:=candidates.duplicate()
+	ranked.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.w)>float(b.w))
+	var alts:Array=[]
+	for candidate in ranked:
+		var t:=String((candidate.get("situation",{}) as Dictionary).get("type",""))
+		if seen.has(t) or float(candidate.w)<=0.0 or (candidate.get("situation",{}) as Dictionary).has("arc"): continue
+		seen[t]=true
+		var alt:={"kind":String(candidate.kind),"situation":(candidate.situation as Dictionary).duplicate(true)}
+		if candidate.get("terms") is Dictionary: alt["terms"]=(candidate.terms as Dictionary).duplicate()
+		if candidate.get("news") is Dictionary: alt["news"]=(candidate.news as Dictionary).duplicate()
+		if JSON.stringify(alt).length()>SITUATION_JSON_MAX: continue
+		alts.append(alt)
+		if alts.size()>=ALTERNATIVES_MAX: break
+	if not alts.is_empty(): audience["request_alts"]=alts
 
 static func _weighted(candidates:Array[Dictionary],rng:RandomNumberGenerator)->Dictionary:
 	var total:=0.0
@@ -1336,6 +1391,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	var p:=_personality(civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var result:Array[Dictionary]=[]
+	var er:=_requests()
 	for situation_type:String in mix:
 		var base:=float(mix[situation_type])
 		if base<=0.0: continue
@@ -1346,6 +1402,22 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 			var previous:Dictionary=(occasion.get("data",{}) as Dictionary).get("previous",{})
 			(candidate.situation as Dictionary)["arc"]={"branch":String(branches[situation_type]),"previous":previous.duplicate(true)}
 		result.append(candidate)
+	# Whether an envoy comes at all is the hall's business alone (the pace of
+	# visits is unchanged): wider requests join only business the hall could
+	# already back, drawn with their own dice so the hall's are untouched.
+	if result.is_empty() or not wronged.is_empty(): return result
+	var extra:Dictionary=er.call("extra_mix",type)
+	if not extra.is_empty():
+		var wider:=_rng("wider:%s:%s" % [civ_id,String(occasion.get("key",""))],day)
+		for situation_type:String in extra:
+			if mix.has(situation_type): continue
+			var candidate:Dictionary=er.call("candidate",situation_type,civ_id,occasion,wider,used,day)
+			if candidate.is_empty(): continue
+			candidate["w"]=float(extra[situation_type])*float(er.call("temperament",situation_type,civ_id))*float(_lives().call("dread_weight",situation_type,civ_id))
+			result.append(candidate)
+	# Variety: the same business (or family of business) back to back grows unlikely.
+	for candidate in result:
+		candidate["w"]=float(candidate.w)*float(er.call("variety_factor",String((candidate.situation as Dictionary).get("type","")),civ_id,day))
 	return result
 
 static func _temperament_factor(situation_type:String,p:Dictionary,civ:Dictionary)->float:
@@ -1392,7 +1464,7 @@ static func _sequel_plan(civ_id:String,occasion:Dictionary)->Dictionary:
 	if kind=="threat" and option in ["defy","counter"]:
 		if bold: return {"mix":{"test_of_resolve":1.4,"news_report":0.2},"branch":{"test_of_resolve":"test_of_resolve","news_report":"cooler"}}
 		return {"mix":{"nonaggression_offer":1.0,"accord_offer":0.6},"branch":{"nonaggression_offer":"second_thoughts","accord_offer":"second_thoughts"}}
-	if situation=="aid_request" and option in ["grant","grant_half"]:
+	if (situation=="aid_request" and option in ["grant","grant_half"]) or bool(_requests().call("brings_sequel",situation,option)):
 		return {"mix":{"gratitude_gift":1.3,"artifact_gift":0.6,"protection_pact":0.7,"accord_offer":0.6,"trade_offer":0.5},"branch":{"gratitude_gift":"gratitude","artifact_gift":"gratitude","protection_pact":"alliance_feeler","accord_offer":"alliance_feeler","trade_offer":"alliance_feeler"}}
 	if refused:
 		var mix:Dictionary={"news_report":0.8,"rumor_share":0.3}
@@ -1538,6 +1610,7 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			return {"kind":kind,"situation":situation}
 		"debt_call","redress_demand":
 			return _rivals().call("candidate",situation_type,civ_id,occasion,rng,used,day)
+	if bool(_requests().call("handles",situation_type)): return _requests().call("candidate",situation_type,civ_id,occasion,rng,used,day)
 	return {}
 
 static func _rumor_candidate(civ_id:String,name:String,used:Dictionary,day:int,situation:Dictionary)->Dictionary:
@@ -2214,6 +2287,8 @@ static func options(id:String)->Array[Dictionary]:
 			result.append(_option("accept_return","Accept and send a courtesy gift","Receive %s; send back %s." % [text,_terms_text(courtesy)],"warm",short=="",short))
 			result.append(_option("decline","Decline it courteously","Thank them and let them take it home: no gift, and nothing owed.","neutral"))
 			result.append(_option("refuse","Refuse the gift","Send it back unopened. They will take offence.","hostile"))
+		"request" when bool(_requests().call("handles",_situation_type(audience))):
+			for option:Dictionary in _requests().call("options",audience): result.append(option)
 		"request":
 			var half:={"resource":terms.resource,"amount":_nice(float(terms.amount)*0.5)}
 			var short_full:=_short(String(terms.resource),float(terms.amount))
@@ -2491,6 +2566,7 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 	# An empty threat, called: they back down (rival_rulers.gd keeps the truth).
 	if String(audience.kind)=="threat" and option_id in ["defy","counter"] and bool((audience.get("hidden",{}) as Dictionary).get("bluff",false)):
 		return _rivals().call("bluff_called",audience,option_id)
+	if bool(_requests().call("handles",_situation_type(audience))): return _requests().call("resolve",audience,option_id)
 	match "%s:%s" % [audience.kind,option_id]:
 		"gift:accept","gift:accept_return":
 			var got:=EXCHANGE.take(civ_id,resource,amount)
@@ -3623,6 +3699,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
+	if data.has("envoy_requests") and not bool(_requests().call("valid_state",data.envoy_requests)): return false
 	if data.has("turning_points") and not bool((load(TURNING_PATH) as GDScript).call("valid_state",data.turning_points)): return false
 	if data.has("court_persons"):
 		var persons:GDScript=load("res://scripts/court_persons.gd")

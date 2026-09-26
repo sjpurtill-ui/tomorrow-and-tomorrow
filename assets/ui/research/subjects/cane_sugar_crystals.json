@@ -1,0 +1,14 @@
+{
+  "id": "cane_sugar_crystals",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f47cdf34-0954-4605-8487-bc0dade07f8c.png",
+  "source_file": "exec-f47cdf34-0954-4605-8487-bc0dade07f8c.png",
+  "creative_brief": "Cane juice is boiled and cooled until it forms hard sweet grains, prized by healers and rich households. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/cane_sugar_crystals-v1.png",
+  "sha256": "9b0f2d8d3bdc88040c985d892ee1bd2d3f7d180bd476bd7150808e25ebaa94b2",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

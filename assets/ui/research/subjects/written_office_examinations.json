@@ -1,0 +1,14 @@
+{
+  "id": "written_office_examinations",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ce80d070-d509-4ec9-b545-1de4a81bc022.png",
+  "source_file": "exec-ce80d070-d509-4ec9-b545-1de4a81bc022.png",
+  "creative_brief": "Candidates for office sit written examinations, and posts go to those who pass. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/written_office_examinations-v1.png",
+  "sha256": "53c69b5ea1c21b788c9827ae762fda775c441b5ce6ae91beaa416407e6256d7d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
