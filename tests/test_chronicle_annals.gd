@@ -100,8 +100,11 @@ func test_the_year_ends_in_one_entry_named_for_its_worst_trouble()->void:
 	assert_int(int(annal.day)/365).is_equal(0)
 	assert_str(String(annal.title)).is_equal("The Coughing Winter")
 	var text:=String(annal.text)
-	assert_str(text).contains("took three")
-	assert_str(text).contains("Hadra of Fernside, at 68")
+	# Told by what happened, in wordings that change from year to year.
+	assert_str(text).contains("three")
+	assert_str(text).contains("Ama")
+	assert_str(text).contains("Hadra of Fernside")
+	assert_str(text).contains("68")
 	assert_str(text).contains("thorn barriers and load backframes")
 	assert_str(text).contains("6 fewer than a year before")
 	# One entry per year, never twice.
@@ -151,8 +154,10 @@ func test_forty_years_read_without_repeating()->void:
 		GameState.population_total=maxi(40,GameState.population_total+rng.randi_range(-6,8))
 	_at(40*365+1)
 	var entries:Array=GameState.chronicle.entries
-	var annals:=entries.filter(func(e:Dictionary)->bool:return String(e.get("kind",""))=="annal")
+	var annals:=entries.filter(func(e:Dictionary)->bool:return String(e.get("key","")).begins_with("annal:"))
 	assert_int(annals.size()).is_equal(40)
+	# And a generation's account after each twentieth year.
+	assert_int(entries.filter(func(e:Dictionary)->bool:return String(e.get("key","")).begins_with("age:")).size()).is_equal(2)
 	# The story told per year stays readable.
 	var per_year:={}
 	for e in entries:

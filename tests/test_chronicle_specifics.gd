@@ -175,7 +175,8 @@ func test_online_a_year_is_rewritten_once_and_only_from_its_facts()->void:
 	assert_str(String(sent[0][0])).is_equal("1")
 	var draft:=String(_told("annal:0").text)
 	# The game did not wait: the entry is already told in its own words.
-	assert_str(draft).contains("Hadra of Fernside, at 68")
+	assert_str(draft).contains("Hadra of Fernside")
+	assert_str(draft).contains("68")
 	var good:="Hadra of Fernside died this year, at 68. The people learned thorn barriers, and there were 114 people in the registers, 6 fewer than a year before."
 	assert_bool(Polish.receive("1",_body(good))).is_true()
 	assert_str(String(_told("annal:0").text)).is_equal(good)

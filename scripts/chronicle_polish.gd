@@ -59,7 +59,8 @@ static func _store(c:Dictionary)->Dictionary:
 ## A year's entry has just been told: ask once for a better telling. Returns
 ## true if a request went out.
 static func request(c:Dictionary,entry:Dictionary,facts:Dictionary={})->bool:
-	if String(entry.get("kind",""))!="annal":return false
+	# Only a year's own entry; a generation's account is told as written.
+	if String(entry.get("kind",""))!="annal" or not String(entry.get("key","")).begins_with("annal:"):return false
 	var config:=_config()
 	if config.is_empty():return false
 	var year:=str(int(entry.get("year",int(String(entry.get("key","annal:-1")).get_slice(":",1))+1)))
