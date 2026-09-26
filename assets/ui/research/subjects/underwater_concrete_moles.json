@@ -1,0 +1,14 @@
+{
+  "id": "underwater_concrete_moles",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-94d05320-b83b-44d2-b2ca-a84dbc3a100c.png",
+  "source_file": "exec-94d05320-b83b-44d2-b2ca-a84dbc3a100c.png",
+  "creative_brief": "Timber forms sunk offshore are filled with lime and volcanic ash, and a harbor wall rises where there was open sea. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/underwater_concrete_moles-v1.png",
+  "sha256": "ea65060d5da8f018cd26a5213169a02ef9261df851c6c0a8a1ba5d6bb023f565",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

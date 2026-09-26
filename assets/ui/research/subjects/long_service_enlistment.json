@@ -1,0 +1,14 @@
+{
+  "id": "long_service_enlistment",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3f13ca14-9f55-49eb-a57f-456a3b671fef.png",
+  "source_file": "exec-3f13ca14-9f55-49eb-a57f-456a3b671fef.png",
+  "creative_brief": "Men enlist for twenty years and more, and leave with land or money when their term is done. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/long_service_enlistment-v1.png",
+  "sha256": "0e0b3ae04cb04f732ea324fda946daa1e6ba0f15e2d4629db64694f367415f2a",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

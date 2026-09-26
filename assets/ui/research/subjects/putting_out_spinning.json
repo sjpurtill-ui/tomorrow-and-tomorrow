@@ -1,0 +1,14 @@
+{
+  "id": "putting_out_spinning",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9f672a13-9111-42e1-8661-ed762d5b3ac4.png",
+  "source_file": "exec-9f672a13-9111-42e1-8661-ed762d5b3ac4.png",
+  "creative_brief": "The cloth merchant leaves carded wool at each farmhouse in autumn and collects the spun yarn in spring, paying by weight. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/putting_out_spinning-v1.png",
+  "sha256": "15097beea0cb1d28306178f18d1bc61daf90880a1ef805d4f563168f70dc35b2",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
