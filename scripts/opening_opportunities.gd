@@ -1,4 +1,5 @@
 extends RefCounted
+const Research600=preload("res://scripts/research_600_catalog.gd")
 ## The opening tree is exposed by accumulated cases, not by the calendar. Each
 ## value below is a bounded count of days on which the civilization actually
 ## encountered the problem while assigning people who could notice it.
@@ -183,6 +184,9 @@ static func _opening_program_active(context:Dictionary)->bool:
 static func _recognized_resource(resource:String)->bool:
 	for deposit:Variant in WorldSimulation.state.resource_deposits:
 		if deposit is Dictionary and String(deposit.get("resource",""))==resource and String(deposit.get("stage","unknown")) in ["recognized","surveyed","accessible","developed"]:return true
+	# The settlement's own farmland or clay needs no mapped deposit to be known.
+	if resource in Research600.HOME_SURFACE_RESOURCES:
+		return Research600.home_surface_resources(WorldSimulation.state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {}).has(resource)
 	return false
 
 static func _suitable_game_population()->Dictionary:

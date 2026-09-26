@@ -804,6 +804,9 @@ func _resource_requirements_met(requirements: Array) -> bool:
 				break
 		if not found and float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
 			found=true
+		# The home ground's own clay, soil or timber is recognized without a mapped deposit.
+		if not found and needed_stage=="recognized" and resource_name in Research600.HOME_SURFACE_RESOURCES:
+			found=Research600.home_surface_resources(WorldSimulation.state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {}).has(resource_name)
 		if not found and bool(requirement.get("sample_sufficient",false)) and needed_stage in ["recognized","surveyed"]:
 			found=preload("res://scripts/society_exchange.gd").studied_resource_sample(resource_name)
 		if not found:
@@ -1374,6 +1377,8 @@ func research_600_player_society()->Dictionary:
 		if _stage_rank(String(deposit.get("stage","unknown")))>=_stage_rank("recognized"): resources[String(deposit.get("resource",""))]=true
 	for resource_name:Variant in state.resource_stockpiles:
 		if float(state.resource_stockpiles[resource_name])>0.0: resources[String(resource_name)]=true
+	# Materials of the home ground count as known, as they do for rivals.
+	Research600.home_surface_resources(state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {},resources)
 	var environment:Dictionary={}
 	for settlement:Dictionary in state.player_settlements:
 		Research600.environment_tags(settlement.get("environment_profile",{}),environment)

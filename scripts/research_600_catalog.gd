@@ -515,6 +515,27 @@ static func _environment_label(tag:String)->String:
 	return {"river":"a river","coast":"the coast","woodland":"woodland","dry":"dry country"}.get(tag,tag)
 
 
+## Surface materials a settled people handles on its own ground every day. The
+## player's research conditions ("Knowledge of Clay") and the opening seed
+## program read known materials from mapped deposits only, and a home site's
+## clay or farmland often has no deposit record at all; rivals already count
+## their landscape potentials (RIVAL_RESOURCE_FLOOR). Without this a riverside
+## grassland people never "knew" clay or its soil, and the pottery and planting
+## trees (thousands of descendants) stayed shut for the whole game.
+const HOME_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants","Clay","Flint"]
+
+static func home_surface_resources(settlements:Array,fallback_profile:Dictionary={},into:Dictionary={})->Dictionary:
+	var profiles:Array=[]
+	for settlement:Variant in settlements:
+		if settlement is Dictionary and not (settlement.get("environment_profile",{}) as Dictionary).is_empty(): profiles.append(settlement.environment_profile)
+	if profiles.is_empty() and not fallback_profile.is_empty(): profiles.append(fallback_profile)
+	for profile:Dictionary in profiles:
+		var potentials:Dictionary=profile.get("resource_potentials",{})
+		for resource_name:String in HOME_SURFACE_RESOURCES:
+			if float(potentials.get(resource_name,0.0))>=RIVAL_RESOURCE_FLOOR: into[resource_name]=true
+	return into
+
+
 ## Environment tags (river, coast, woodland, dry) of a PlanetEnvironment profile.
 static func environment_tags(profile:Dictionary,into:Dictionary={})->Dictionary:
 	if profile.is_empty(): return into

@@ -169,11 +169,19 @@ func test_player_conditions_read_the_live_society()->void:
 	var entry:=_entry("clay_shaping")
 	GameState.known_discoveries.assign(entry.requires_all)
 	GameState.resource_deposits=[];GameState.resource_stockpiles.clear()
+	# A home site without clay in its ground, and no mapped deposit: unknown.
+	GameState.player_settlements.assign([{"environment_profile":{"resource_potentials":{"Clay":0.0}}}])
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,_day(100))).is_false()
 	var reasons:=DiscoverySystem.research_600_missing(entry)
 	assert_bool("; ".join(PackedStringArray(reasons)).contains("Clay")).is_true()
 	GameState.resource_deposits=[{"resource":"Clay","stage":"recognized"}]
 	assert_bool(DiscoverySystem.research_600_open(entry)).is_true()
+	# The settlement's own clay ground counts as known without a mapped deposit.
+	GameState.resource_deposits=[]
+	assert_bool(DiscoverySystem.research_600_open(entry)).is_false()
+	GameState.player_settlements.assign([{"environment_profile":{"resource_potentials":{"Clay":0.3}}}])
+	assert_bool(DiscoverySystem.research_600_open(entry)).is_true()
+	GameState.player_settlements.clear()
 	var specialists:=_entry("part_time_specialists")
 	GameState.population_total=20
 	assert_bool(DiscoverySystem.research_600_open(specialists)).is_false()

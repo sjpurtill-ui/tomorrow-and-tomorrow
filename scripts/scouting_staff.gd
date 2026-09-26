@@ -52,7 +52,11 @@ func veterancy()->float:
 func record_homecoming(returned:int,personnel:int,lost:int,day:int)->void:
 	## Returning scouts teach the corps; the dead take their craft with them.
 	data["veterancy"]=SURVIVAL.updated_veterancy(veterancy(),returned,personnel,lost)
-	if returned>0:data["homecomings"]=int(data.get("homecomings",0))+1
+	if returned>0:
+		data["homecomings"]=int(data.get("homecomings",0))+1
+		# A returned party's remembered route is the "returned route observation"
+		# the opening route_memory question waits for (OpeningOpportunities).
+		preload("res://scripts/opening_opportunities.gd").record("route_memory",4.0)
 	if lost>0:
 		data["scouts_lost"]=int(data.get("scouts_lost",0))+lost
 		data["last_loss_day"]=day
@@ -155,7 +159,13 @@ func advance_steps(day:int)->Array:
 			if not shared.searching:return
 			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
 			var caution:Dictionary=shared.caution
-			if days>int(caution.max_duration):
+			# When every trip within the Chief Scout's limit covers charted ground
+			# only, one party may go one length farther (still one party at a time
+			# and inside the risk budget); otherwise a cautious people that has
+			# charted its near country never scouts again.
+			var stretch:=days>int(caution.max_duration) and String(shared.last_reason).begins_with("No useful uncharted") and not bool(shared.get("stretched",false))
+			if stretch:shared["stretched"]=true
+			elif days>int(caution.max_duration):
 				shared.searching=false
 				if shared.last_reason.begins_with("No connected"):shared.last_reason="The Chief Scout will not send parties farther than %d days out. %s" % [int(caution.max_duration),String(caution.label)]
 				data.status=shared.last_reason;return
