@@ -129,7 +129,9 @@ static func status(item:Dictionary)->String:
 	if item.get("known",false):return "Established"
 	var assignment:Dictionary=item.get("assignment",{})
 	if assignment.get("active",false):return "Waiting for workers" if team(item)<=0 else "Being researched"
-	return "Ready to investigate" if item.get("ready",false) else "Unexplored"
+	if item.get("ready",false):return "Ready to investigate"
+	if item.get("next",false):return "Next · "+DiscoverySystem.plain_wait_reason(item.get("missing",[]))
+	return "Unexplored"
 static func lead(item:Dictionary)->String:
 	var leader:Dictionary=item.get("assignment",{}).get("leader",{})
 	if leader.is_empty():return ""

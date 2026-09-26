@@ -18603,7 +18603,7 @@ func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
 
 
 func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world")->void:
-	PeopleDirection.auto_scouting=false
+	# A one-off party leaves the Pathfinder's standing delegation as it was.
 	var result:=CivilizationSystem.dispatch_scouts(duration_days,target_id,pending_scout_heading if target_id in ["open_world","recruit_people"] else "")
 	if result.has("error"):
 		if scout_dispatch_status:

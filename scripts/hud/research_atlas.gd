@@ -89,7 +89,7 @@ func _ready()->void:
 	Art.button(tree_controls,"−",func()->void:plot.zoom_at(1/1.15,plot.size*.5));Art.button(tree_controls,"+",func()->void:plot.zoom_at(1.15,plot.size*.5));Art.button(tree_controls,"Fit",func()->void:plot.fit());Art.button(tree_controls,"Find selected",func()->void:plot.center_selected())
 	tree_scope_selector=OptionButton.new();tree_scope_selector.add_item("Frontier & branches");tree_scope_selector.set_item_metadata(0,"frontier");tree_scope_selector.add_item("Entire knowledge map");tree_scope_selector.set_item_metadata(1,"all");tree_scope_selector.tooltip_text="Frontier keeps current investigations, their foundations, and their immediate possibilities readable. Entire map shows every matching question."
 	tree_scope_selector.item_selected.connect(func(index:int)->void:tree_scope=String(tree_scope_selector.get_item_metadata(index));refresh(true));tree_controls.add_child(tree_scope_selector)
-	locked_toggle=CheckButton.new();locked_toggle.text="Show unexplored paths";locked_toggle.add_theme_font_size_override("font_size",12);tree_controls.add_child(locked_toggle)
+	locked_toggle=CheckButton.new();locked_toggle.text="Show next questions";locked_toggle.add_theme_font_size_override("font_size",12);tree_controls.add_child(locked_toggle)
 	locked_toggle.toggled.connect(func(on:bool)->void:show_locked=on;refresh(true))
 	detail_back=Art.button(box,"← Back to research",func()->void:narrow_details=false;_layout())
 	main=BoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",14);box.add_child(main)
@@ -180,7 +180,8 @@ func refresh(refit:bool)->void:
 		if query!="" and not (String(item.name)+" "+Art.lead(item)+" "+Art.name_for(item.domain)).to_lower().contains(query.to_lower()):continue
 		if view_mode=="active" and not item.assignment.get("active",false):continue
 		if view_mode=="known" and not item.known:continue
-		if view_mode=="tree" and not show_locked and not item.exposed:hidden+=1;continue
+		# Only the next reachable questions are drawn; deeper ones become a count.
+		if view_mode=="tree" and not item.exposed and (not show_locked or item.get("beyond",false)):hidden+=1;continue
 		records.append(item)
 	if view_mode=="tree" and tree_scope=="frontier" and query.is_empty():records=_frontier_records(records)
 	if view_mode=="active":records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Art.lead(a)+String(a.name)<Art.lead(b)+String(b.name))
@@ -402,7 +403,7 @@ func _tree_legend(hidden:int)->String:
 		forks+=(item.get("requires_any",[]) as Array).size()
 		approaches+=maxi(0,(item.get("pathways",[]) as Array).size()-1)
 	var scope:="active frontier" if tree_scope=="frontier" and query.is_empty() else "matching map"
-	return "%s · %d questions · %d choice forks · %d alternate approaches. Solid: every foundation. Teal fork: one of several. Dotted: another inquiry route. Drag to pan; wheel to zoom. %d distant questions hidden." % [scope.capitalize(),records.size(),forks,approaches,hidden]
+	return "%s · %d questions · %d choice forks · %d alternate approaches. Solid: every foundation. Teal fork: one of several. Dotted: another inquiry route. Drag to pan; wheel to zoom. %d further questions beyond." %[scope.capitalize(),records.size(),forks,approaches,hidden]
 
 func _branching_possibilities(item:Dictionary)->Array[Dictionary]:
 	var result:Array[Dictionary]=[];var id:=String(item.id)

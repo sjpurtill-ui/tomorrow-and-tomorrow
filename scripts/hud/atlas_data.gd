@@ -2,11 +2,17 @@ extends RefCounted
 const Goods=preload("res://scripts/civilian_goods.gd")
 static func inquiry(domain:String="",query:String="")->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for entry:Dictionary in DiscoverySystem.technology_tree():
+	var rows:=DiscoverySystem.technology_tree()
+	# Next reachable questions (every foundation known) are named with what they
+	# wait on; deeper locked questions stay redacted and are flagged "beyond" so
+	# views can collapse them into a count instead of a wall of blank cards.
+	var next:Dictionary=DiscoverySystem.technology_frontier(rows).next
+	for entry:Dictionary in rows:
 		if domain!="" and String(entry.dynamic)!=domain: continue
 		var known:=String(entry.status)=="DISCOVERED"
 		var exposed:=known or String(entry.status) in ["AVAILABLE","RESEARCHING"]
-		var title:=String(entry.name) if exposed else "Unexplored question"
+		var upcoming:=not exposed and next.has(String(entry.id))
+		var title:=String(entry.name) if exposed or upcoming else "Unexplored question"
 		if query!="" and not title.to_lower().contains(query.to_lower()): continue
 		var item:Dictionary={"id":String(entry.id),"name":title,"domain":String(entry.dynamic),"status":String(entry.status),"known":known,"ready":bool(entry.ready),"requires":entry.get("requires",[]).duplicate(),"progress":float(entry.progress),"description":String(entry.get("observation","")) if exposed else "This question needs earlier knowledge or further evidence. Its outcome is not yet known.","missing":entry.missing.duplicate() if exposed else [],"effects":entry.get("effects",{}).duplicate() if known else {}}
 		item["requires_any"]=entry.get("requires_any",[]).duplicate(true)
@@ -15,6 +21,12 @@ static func inquiry(domain:String="",query:String="")->Array[Dictionary]:
 		item["pathway_description"]=String(entry.get("pathway_description","")) if exposed else ""
 		item["subcategory"]=String(entry.get("subcategory",""))
 		item["exposed"]=exposed
+		item["next"]=upcoming
+		item["beyond"]=not exposed and not upcoming
+		if upcoming:
+			item["status"]="NEXT · LOCKED"
+			item["missing"]=entry.missing.duplicate()
+			item["description"]=DiscoverySystem.plain_wait_reason(entry.missing)+". Its outcome is not yet known."
 		item["assignment"]=DiscoverySystem.research_assignment(entry) if exposed and not known else {}
 		item["discovered_day"]=_discovered_day(String(entry.id)) if known else -1
 		result.append(item)

@@ -38,11 +38,14 @@ static func advance(context:Dictionary)->void:
 	_add(state,"seasonal_patterns",1.0 if _workers("Food")>=1.0 and float(context.get("foraging",0.0))>=.25 else 0.0)
 	var rain:=clampf(float(context.get("precipitation",context.get("rain",0.0))),0.0,1.0)
 	_add(state,"drainage",clampf(rain,.25,1.0) if bool(context.get("settled",WorldSimulation.state.settlement_site_committed)) and _workers("Construction")>=1.0 and rain>=.10 else 0.0)
-	var injuries:=_injuries()
-	_add(state,"wound_cleaning",minf(1.0,injuries) if injuries>0.0 and float(context.get("freshwater",0.0))>=.5 else 0.0)
+	# Cuts, scrapes and bites happen every season in any working band, recorded
+	# injury or not: about one small wound per 2,500 person-days.
+	var injuries:=_injuries()+maxf(0.0,float(WorldSimulation.state.population_exact))*.0004
+	var water:=float(context.get("freshwater",0.0))>=.5 or bool(WorldSimulation.state.water_metrics.get("source_accessible",false))
+	_add(state,"wound_cleaning",minf(1.0,injuries) if injuries>0.0 and water else 0.0)
 	_add(state,"herbal_classification",1.0 if _medicinal_access() and (_workers("Food")+_workers("Survey")>=1.0 or float(context.get("illness",0.0))>.0) else 0.0)
 	_add(state,"tallies",1.0 if _stored_quantity()>=20.0 and _workers("Logistics")+_workers("Administration")>=1.0 else 0.0)
-	_add(state,"route_memory",1.0 if bool(context.get("traveling",false)) or float(context.get("travel",0.0))>=.75 else 0.0)
+	_add(state,"route_memory",1.0 if bool(context.get("traveling",false)) or float(context.get("travel",0.0))>=.75 else _scout_route_evidence())
 	_add(state,"labor_rotations",1.0 if _competing_roles()>=3 and WorldSimulation.state.settlement_site_committed else 0.0)
 	var guard_duty:=_workers("Defense")
 	var danger:=maxf(0.0,float(context.get("danger",0.0)))
@@ -231,6 +234,16 @@ static func _injuries()->float:
 		var home:Variant=military.get("home_army")
 		if home is Dictionary:total+=maxf(0.0,float(home.get("wounded_pool",0)))
 	return total
+
+## A scout party on the road is a journey day. Parties that came home before
+## homecomings were recorded as route evidence still count (older saves).
+static func _scout_route_evidence()->float:
+	var world:Variant=WorldSimulation.world
+	if world==null or not ("scout_missions" in world):return 0.0
+	var amount:=.5 if not (world.scout_missions as Array).is_empty() else 0.0
+	var staff:Variant=world.get("scouting_staff")
+	if staff!=null and progress("route_memory")<=0.0:amount+=4.0*float(staff.data.get("homecomings",0))
+	return amount
 
 static func _medicinal_access()->bool:
 	if float(WorldSimulation.state.resource_stockpiles.get("Medicinal Plants",0.0))>0.0:return true

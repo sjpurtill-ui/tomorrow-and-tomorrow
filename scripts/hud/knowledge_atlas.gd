@@ -74,10 +74,14 @@ func _process(delta:float)->void:
 	var next:=str(int(GameState.elapsed_days))+str(GameState.discovery_progress)+str(GameState.research_targets)+str(GameState.selected_player_settlement_id)
 	if next!=revision: revision=next;refresh(false)
 func refresh(refit:bool)->void:
-	if mode=="inquiry": records=Data.inquiry(domain,query)
+	var beyond:=0
+	if mode=="inquiry":
+		records=Data.inquiry(domain,query)
+		beyond=records.filter(func(item:Dictionary)->bool:return bool(item.get("beyond",false))).size()
+		records.assign(records.filter(func(item:Dictionary)->bool:return not bool(item.get("beyond",false))))
 	else:
 		records.assign(SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array: return Data.materials()).filter(func(item:Dictionary)->bool: return (domain=="" or item.domain==domain) and (query=="" or String(item.name).to_lower().contains(query.to_lower()))))
-	legend.text=("DISCOVERED = colored · AVAILABLE / RESEARCHING = outlined · LOCKED = gray. Lines are prerequisites. " if mode=="inquiry" else "Stock: bulk units; water: daily drinking portions (one person-day). Delivery uses the same unit per day. ")+"Drag to pan, wheel to zoom. %d entries." % records.size()
+	legend.text=("DISCOVERED = colored · AVAILABLE / RESEARCHING = outlined · LOCKED = gray. Lines are prerequisites. " if mode=="inquiry" else "Stock: bulk units; water: daily drinking portions (one person-day). Delivery uses the same unit per day. ")+"Drag to pan, wheel to zoom. %d entries." % records.size()+(" %d further questions beyond." % beyond if beyond>0 else "")
 	plot.arrange()
 	if refit: plot.call_deferred("fit")
 	var found:=false

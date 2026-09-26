@@ -263,6 +263,12 @@ func apply_inclinations(day:int)->void:
 	ensure();_ensure_cultural_memory()
 	if cultural_memory.choices.is_empty() or inclination_review_day==day:return
 	inclination_review_day=day
+	var staff=WorldSimulation.world.scouting_staff
+	if not auto_scouting and WorldSimulation.actor_id=="player" and float(staff.data.get("share",0.0))<=0.0 and not bool(staff.data.get("player_chosen",false)):
+		# Older saves lost delegation to a one-off party while a food-shortage
+		# pause held the share at 0. Nobody chose "none": hand it back.
+		auto_scouting=true
+		preload("res://scripts/chronicle.gd").record({"key":"scouting_delegation_restored","title":"The Pathfinder takes up the scouting again.","text":"No one ordered the scouts home for good. The Pathfinder sends parties out again as the people's ambition asks.","kind":"scout","tier":"notice"})
 	if auto_scouting:
 		var share:=Culture.scout_share(cultural_memory,day)
 		if float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",1))<.98:share=0.0
@@ -279,7 +285,9 @@ func apply_inclinations(day:int)->void:
 		controller.research_orders(WorldSimulation.actor_id,plan)
 func set_delegated(area:String,enabled:bool)->void:
 	match area:
-		"scouting":auto_scouting=enabled
+		"scouting":
+			auto_scouting=enabled
+			WorldSimulation.world.scouting_staff.data["player_chosen"]=not enabled
 		"settlement":auto_settlement=enabled
 		"research":auto_research=enabled
 	inclination_review_day=-1

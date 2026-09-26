@@ -124,6 +124,19 @@ func _investigation_blocks(domain_filter:String="")->Array:
 			# Never name the hidden discovery: only the line of inquiry and the
 			# vague shape of what it may yield are known before it lands.
 			unlock_lines.append("%s → %s" % [String(record.get("subcategory","An open question")).capitalize(),String(record.get("unlock_summary",""))])
+	# A staffed line with nothing to study says why instead of looking empty.
+	for domain_variant in GameState.research_subcategory_allocations:
+		var domain:=String(domain_variant)
+		if domain_filter!="" and domain!=domain_filter:continue
+		var subs:Dictionary=GameState.research_subcategory_allocations[domain_variant]
+		var rows:Array=[]
+		for sub_variant in subs:
+			var sub:=String(sub_variant)
+			if int(subs[sub_variant])<=0 or String(GameState.active_investigations.get(DiscoverySystem._channel_key(domain,sub),""))!="":continue
+			if rows.is_empty():rows=DiscoverySystem.technology_tree(domain)
+			var reason:=DiscoverySystem.line_wait_reason(domain,sub,rows)
+			if reason=="":continue
+			items.append({"name":sub,"sub":"%s · waiting" % domain.capitalize(),"detail":reason,"icon":ResourceIcons.domain_texture(domain,Tokens.MUTED),"value":"—","value_color":Tokens.MUTED,"accent":Tokens.MUTED,"tip":reason})
 	if items.is_empty():
 		return [{"type":"text","heading":"CURRENT INVESTIGATIONS","text":"No viable investigation is running. Attention without supporting evidence waits; explore, work, and observe to create clues."}]
 	var blocks:Array=[{"type":"rows","heading":"CURRENT INVESTIGATIONS","note":"evidence","items":items}]
@@ -240,11 +253,14 @@ func _technology_blocks()->Array:
 	blocks.append({"type":"actions","heading":"RESEARCH BRANCHES","items":filters})
 	blocks.append({"type":"text","text":"Choose a technology to pursue. Research competes for your finite observers. Switching projects preserves unfinished work; prerequisites and material access still apply."})
 	var technologies:=DiscoverySystem.technology_tree(tree_domain)
+	var frontier:=DiscoverySystem.technology_frontier(technologies)
 	for technology in technologies:
 		var id:=String(technology.id)
 		var status:=String(technology.status)
 		if status=="LOCKED":
-			blocks.append({"type":"rows","items":[{"name":"Unexplored question","sub":"LOCKED","detail":"Earlier knowledge or further evidence is needed. The outcome is not yet known.","accent":Tokens.MUTED}]})
+			# Next reachable questions are named with what they wait on; deeper
+			# ones are summarized as a count below.
+			if frontier.next.has(id):blocks.append({"type":"rows","items":[{"name":String(technology.name),"sub":"NEXT · LOCKED","detail":DiscoverySystem.plain_wait_reason(technology.missing)+". The outcome is not yet known.","accent":Tokens.MUTED}]})
 			continue
 		var detail:=String(technology.get("observation",""))+"\n"+_established_effect_text(technology)
 		var children:Array=technology.leads_to
@@ -255,6 +271,7 @@ func _technology_blocks()->Array:
 		if not (technology.missing as Array).is_empty(): detail+="\nWAITING FOR → "+", ".join(technology.missing)
 		blocks.append({"type":"rows","items":[{"name":String(technology.name),"sub":status,"detail":detail,"value":"%d%%" % roundi(float(technology.progress)*100.0) if status=="RESEARCHING" else "","accent":Tokens.GREEN if status=="DISCOVERED" else (Tokens.GOLD if bool(technology.ready) else Tokens.MUTED)}]})
 		if bool(technology.ready) and status!="RESEARCHING": blocks.append({"type":"actions","items":[{"label":"RESEARCH "+String(technology.name).to_upper(),"primary":true,"on_press":_research_technology.bind(id)}]})
+	if int(frontier.beyond)>0:blocks.append({"type":"rows","items":[{"name":"%d further questions beyond" % int(frontier.beyond),"sub":"LOCKED","detail":"They open as the questions above are answered. Their outcomes are not yet known.","accent":Tokens.MUTED}]})
 	return blocks
 
 func _choose_tree_domain(domain:String)->void:

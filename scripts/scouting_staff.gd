@@ -34,7 +34,10 @@ func restore(value:Dictionary)->void:
 	reset();data.merge(value,true)
 func set_policy(share:float,focus:String,delegated:bool=false)->Dictionary:
 	if not is_finite(share) or share<0 or share>.10 or not FOCI.has(focus):return {"error":"Choose 0–10% of the population and a scouting focus."}
-	if not delegated and WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_scouting=false
+	if not delegated and WorldSimulation.actor_id=="player":
+		WorldSimulation.direction.auto_scouting=false
+		# Remembered so a load can tell a chosen "none" from a share left at 0.
+		data["player_chosen"]=true
 	if is_equal_approx(float(data.share),share) and data.focus==focus:return {"ok":true}
 	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0
 	data.status="Staff will organize parties on the next day." if share>0 else "No new departures. Parties already away will finish and return."

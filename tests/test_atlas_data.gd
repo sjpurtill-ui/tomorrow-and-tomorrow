@@ -4,8 +4,10 @@ func before_test()->void:
 	GameState.reset_for_new_world(424242);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 func test_locked_outcomes_are_redacted_and_cannot_be_searched_by_secret_name()->void:
 	var source:=DiscoverySystem.technology_tree()
+	var next:Dictionary=DiscoverySystem.technology_frontier(source).next
 	for row:Dictionary in source:
-		if row.status!="LOCKED":continue
+		# Next reachable questions are named on purpose; deeper ones stay redacted.
+		if row.status!="LOCKED" or next.has(String(row.id)):continue
 		var visible:=Data.inquiry(String(row.dynamic))
 		for item:Dictionary in visible:
 			if item.id!=row.id:continue

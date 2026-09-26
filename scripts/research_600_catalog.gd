@@ -499,6 +499,10 @@ static func unmet_conditions(id:String,society:Dictionary)->Array[String]:
 		var found:=false
 		for tag:Variant in environments:
 			if tags.has(String(tag)): found=true;break
+			# Few grassland sites lack trees: known timber (home ground or a mapped
+			# stand), or timber-working neighbors met through contact, stand in
+			# for a woodland setting.
+			if String(tag)=="woodland" and (resources.has("Timber") or bool(society.get("contact",false))): found=true;break
 		if not found: reasons.append("A settlement by %s" % " or ".join(PackedStringArray(environments.map(func(tag:Variant)->String: return _environment_label(String(tag))))))
 	if conditions.has("institutions_min") and float(society.get("institutions",0.0))<float(conditions.institutions_min):
 		reasons.append("Institutional capacity of at least %d%%" % int(round(float(conditions.institutions_min)*100.0)))

@@ -1059,6 +1059,46 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		rows.append(row)
 	return rows
 
+## Splits technology_tree rows for display: a LOCKED row whose prerequisites
+## are all known is the next reachable question and is shown by name with what
+## it waits on; deeper LOCKED rows only count toward "further questions beyond".
+func technology_frontier(rows:Array)->Dictionary:
+	var known:Dictionary={}
+	for row:Dictionary in rows:
+		if String(row.get("status",""))=="DISCOVERED":known[String(row.id)]=true
+	var next:Dictionary={}
+	var beyond:=0
+	for row:Dictionary in rows:
+		if String(row.get("status",""))!="LOCKED":continue
+		var reachable:=true
+		for parent:Variant in row.get("requires",[]):
+			if not known.has(String(parent)) and not WorldSimulation.state.known_discoveries.has(String(parent)):reachable=false;break
+		if reachable:next[String(row.id)]=true
+		else:beyond+=1
+	return {"next":next,"beyond":beyond}
+
+
+## Plain words for a line's first unmet condition ("Needs knowledge of Clay").
+static func plain_wait_reason(missing:Array)->String:
+	if missing.is_empty():return "Needs earlier knowledge before a question here is in reach."
+	var text:=String(missing[0]).strip_edges()
+	if text.begins_with("Knowledge of ") or text.begins_with("A ") or text.begins_with("At least ") or text.begins_with("Contact "):return "Needs "+text[0].to_lower()+text.substr(1)
+	return "Waits on "+text
+
+
+## Why a staffed line has no open question, in plain words; "" when it has one.
+func line_wait_reason(dynamic_id:String,subcategory:String,rows:Array=[])->String:
+	if _channel_has_candidate(_channel_key(dynamic_id,subcategory),int(floor(WorldSimulation.state.elapsed_days))):return ""
+	if rows.is_empty():rows=technology_tree(dynamic_id)
+	var frontier:=technology_frontier(rows)
+	var best:Dictionary={}
+	for row:Dictionary in rows:
+		if String(row.get("subcategory",""))!=subcategory or not frontier.next.has(String(row.id)):continue
+		if best.is_empty() or float(row.get("earliest_year",0.0))<float(best.get("earliest_year",0.0)):best=row
+	if best.is_empty():return "No question in reach yet: this line needs earlier knowledge from another line."
+	return "%s (next: %s)" % [plain_wait_reason(best.get("missing",[])),String(best.get("name",""))]
+
+
 func select_research_target(discovery_id:String)->Dictionary:
 	initialize()
 	var discovery:Dictionary=catalog_by_id.get(discovery_id,{})

@@ -74,8 +74,11 @@ func test_leader_and_known_subject_filters_do_not_expose_locked_outcomes()->void
 	var locked:=0
 	for item:Dictionary in view.records:
 		if item.exposed:continue
-		locked+=1;assert_str(item.name).is_equal("Unexplored question");assert_dict(item.assignment).is_empty()
+		# Only next reachable questions are drawn, named with what they wait on;
+		# deeper locked questions collapse into the legend's count.
+		locked+=1;assert_bool(item.next).is_true();assert_bool(item.beyond).is_false();assert_dict(item.assignment).is_empty()
 	assert_int(locked).is_greater(0)
+	assert_str(view.legend.text).contains("further questions beyond")
 func test_focus_redirects_only_selected_channel_and_live_view_reports_it()->void:
 	var view:=fixture();view.tree_scope="all";view.set_view("tree")
 	var candidate:Dictionary={}
