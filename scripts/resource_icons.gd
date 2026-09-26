@@ -375,3 +375,33 @@ static func _people_glyph(kind:String,c:Color)->Array:
 		"steward": return _figure(24,c)+[_s(38,12,38,49,2,hi),_ring(38,10,3.6,1.6,hi),_s(24,24,37,22,2.4,c)]
 		"watch": return _figure(26,c)+[_s(39,4,39,50,2,hi),_t(39,1,36,8,42,8,hi),_rr(18,28,4,7,2,dim)]
 	return _figure(28,c)
+
+
+# -- Scout chart marks --------------------------------------------------------
+
+static var _chart_textures:Dictionary={}
+
+## Small inked marks for the scout chart, drawn bare on a faint paper wash so
+## they read over any ground: a camp tent, a find (four-point star), a
+## sighting (an eye), and the walker figure for a party still out.
+static func chart_texture(kind:String,ink:Color,px:int=40)->Texture2D:
+	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
+	if _chart_textures.has(key): return _chart_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(_chart_glyph(kind,ink),px,false))
+	_chart_textures[key]=texture
+	return texture
+
+
+static func _chart_glyph(kind:String,c:Color)->Array:
+	var paper:=Color(0.95,0.90,0.78,0.62)
+	var wash:=_c(28,28,17,Color(paper,0.40))
+	match kind:
+		"camp": return [wash,_t(28,15,15,39,41,39,c),_t(28,26,24,39,32,39,paper),_s(12,40,44,40,2.2,c)]
+		"find": return [wash,_t(28,10,24.5,28,31.5,28,c),_t(28,46,24.5,28,31.5,28,c),_t(10,28,28,24.5,28,31.5,c),_t(46,28,28,24.5,28,31.5,c),_c(28,28,3.2,paper)]
+		"sighting": return [wash,_ring(28,28,11,2.6,c),_c(28,28,4.6,c),_s(28,11,28,6,2.2,c),_s(40,16,43,12,2.2,c),_s(16,16,13,12,2.2,c)]
+		"walker": return [_c(28,30,19,paper),_ring(28,30,19,1.8,Color(c,0.7))]+_figure_small(28,c)+[_s(36,14,38,46,2.2,c)]
+	return [wash,_c(28,28,5,c)]
+
+
+static func _figure_small(x:float,c:Color)->Array:
+	return [_c(x,17,4.2,c),_rr(x,28,4.6,7.2,3,c),_s(x-1.8,35,x-4.5,45,3.0,c),_s(x+1.8,35,x+4.0,45,3.0,c)]
