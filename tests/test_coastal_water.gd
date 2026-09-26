@@ -38,4 +38,4 @@ func test_water_created_after_patch_uses_existing_bed_and_fog_registry()->void:
 	var terrain:Terrain=auto_free(Terrain.new());add_child(terrain)
 	terrain._install_regional_patch(patch(Vector2(3,2),5));terrain._build_water()
 	assert_object(terrain.coastal_water_material.get_shader_parameter("terrain_heights")).is_same(terrain.river_terrain_height_texture)
-	assert_bool(terrain.coastal_water_material in terrain.terrain_fog_materials).is_true()
+	assert_bool(terrain.coastal_water_material in terrain.terrain_fog_materials.live_materials()).is_true()
