@@ -804,9 +804,11 @@ func _resource_requirements_met(requirements: Array) -> bool:
 				break
 		if not found and float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>=minimum_stock and minimum_stock>0.0:
 			found=true
-		# The home ground's own clay, soil or timber is recognized without a mapped deposit.
-		if not found and needed_stage=="recognized" and resource_name in Research600.HOME_SURFACE_RESOURCES:
-			found=Research600.home_surface_resources(WorldSimulation.state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {}).has(resource_name)
+		# The home ground's own clay, soil or timber is recognized and within reach
+		# (dug from a bank, cut nearby) without a mapped deposit; only "developed"
+		# needs worked ground. Requiring a mapped pit for bonfire firing stalled
+		# every line whose questions descend from Pit Firing.
+		if not found and _home_ground_supplies(resource_name,needed_stage): found=true
 		if not found and bool(requirement.get("sample_sufficient",false)) and needed_stage in ["recognized","surveyed"]:
 			found=preload("res://scripts/society_exchange.gd").studied_resource_sample(resource_name)
 		if not found:
@@ -826,9 +828,14 @@ func _resource_evidence(requirements:Array)->float:
 			var worked:=clampf(float(deposit.get("lifetime_extracted",0.0))/200.0,0.0,0.35)
 			best=maxf(best,0.65+stage_score*0.25+worked)
 		if float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))>0.0: best=maxf(best,0.82)
+		if _home_ground_supplies(resource_name,String(requirement.get("stage","recognized"))): best=maxf(best,0.82)
 		if _alternative_research_stock_met(requirement):best=maxf(best,0.82)
 		evidence+=best
 	return clampf(evidence/maxf(1.0,float(requirements.size())),0.55,1.25)
+
+func _home_ground_supplies(resource_name:String,needed_stage:String)->bool:
+	if _stage_rank(needed_stage)>_stage_rank("accessible") or not resource_name in Research600.HOME_SURFACE_RESOURCES: return false
+	return Research600.home_surface_resources(WorldSimulation.state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {}).has(resource_name)
 
 func _stage_rank(stage:String)->int:
 	return {"unknown":0,"recognized":1,"surveyed":2,"accessible":3,"developed":4}.get(stage,0)
