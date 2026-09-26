@@ -280,3 +280,14 @@ func test_old_mission_timing_and_new_observation_fields_round_trip()->void:
 	assert_bool(intel().valid_observation(JSON.parse_string(JSON.stringify(report)))).is_true()
 	report.observation_days=-1
 	assert_bool(intel().valid_observation(report)).is_false()
+
+func test_dossier_account_speaks_plainly_and_measures_against_home()->void:
+	var dossier=preload("res://scripts/hud/city_dossier.gd")
+	var seen:=func(low:float,high:float)->Dictionary:return {"low":low,"high":high,"observed_low":low,"observed_high":high,"observed_day":100}
+	var city:={"observed_day":100,"reported_day":110,"fields":{"population":seen.call(65.0,143.0),"fortification":seen.call(0.0,.05),"infant_mortality":seen.call(212.0,436.0)}}
+	var text:String=dossier.account(city,{"population":99.0},"Home",600)
+	assert_str(text).contains("between 65 and 143 people, about as many as live in Home.")
+	assert_str(text).contains("Three of every ten children")
+	assert_str(text).contains("no wall worth the name")
+	assert_str(text).contains("about a year ago; much may have changed since.")
+	assert_str(dossier.account(city,{},"",120)).not_contains("Home")
