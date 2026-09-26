@@ -1,0 +1,14 @@
+{
+  "id": "mobile_field_reserves",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc7f761a-ada1-4d61-bc3e-ca15521fe6cb.png",
+  "source_file": "exec-fc7f761a-ada1-4d61-bc3e-ca15521fe6cb.png",
+  "creative_brief": "A field army of picked horse and foot waits behind the frontier forts and marches wherever the line is broken. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mobile_field_reserves-v1.png",
+  "sha256": "056803241ef4a175a602e1760019fffef8057eda652df128075446f44a37b12e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

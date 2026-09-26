@@ -1,0 +1,14 @@
+{
+  "id": "forest_supervisors",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ae4162df-2b5c-4cf1-b3e7-cf78c839ed20.png",
+  "source_file": "exec-ae4162df-2b5c-4cf1-b3e7-cf78c839ed20.png",
+  "creative_brief": "Appointed supervisors mark the timber that may be felled in the state woods, and answer for any that is stolen. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/forest_supervisors-v1.png",
+  "sha256": "c8e2c25a3a45bf7e8b2fb71a88aa6a49dde6ebfb49770bb340fa49057c1e767d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "promulgated_edict_code",
+  "line": "institutions",
+  "block": "y1200_1800",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7779c7c8-13d8-4aa1-be92-3c1098c33cfb.png",
+  "source_file": "exec-7779c7c8-13d8-4aa1-be92-3c1098c33cfb.png",
+  "creative_brief": "Every standing edict is gathered into one official book and a copy sent to each court of the realm. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/promulgated_edict_code-v1.png",
+  "sha256": "9253d203029c99debdb1cd9090417f73b81be5766f8a8704ac4cdca544966b31",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
