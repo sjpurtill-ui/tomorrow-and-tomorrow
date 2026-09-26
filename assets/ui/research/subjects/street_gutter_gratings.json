@@ -1,0 +1,14 @@
+{
+  "id": "street_gutter_gratings",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-782a8be3-ec4b-4c48-9d0c-38d344b91614.png",
+  "source_file": "exec-782a8be3-ec4b-4c48-9d0c-38d344b91614.png",
+  "creative_brief": "Rain and waste run off the street through slotted stone gratings into the covered drain below. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/street_gutter_gratings-v1.png",
+  "sha256": "8cf855f1e6d9ae1570a0710f7a495c691864fcc31b53f27ebc7b04fbc373caaf",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

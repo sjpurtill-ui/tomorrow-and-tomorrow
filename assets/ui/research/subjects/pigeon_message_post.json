@@ -1,0 +1,14 @@
+{
+  "id": "pigeon_message_post",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-94bb8580-c849-4baa-b69d-9ffdc92c3c88.png",
+  "source_file": "exec-94bb8580-c849-4baa-b69d-9ffdc92c3c88.png",
+  "creative_brief": "Birds bred at the capital carry thin rolled notes home from distant posts within a day. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/pigeon_message_post-v1.png",
+  "sha256": "6c7814c55da37447fb16d88a0a415df9ec16a870113a88b76ef1af9c0be04976",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "gymnasium_baths",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-72227ee1-f19d-4079-8016-cea92c7e31ba.png",
+  "source_file": "exec-72227ee1-f19d-4079-8016-cea92c7e31ba.png",
+  "creative_brief": "Citizens exercise in walled grounds and wash in the adjoining baths, and skin complaints pass from bather to bather. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/gymnasium_baths-v1.png",
+  "sha256": "ffc32a5556b636a41952b0cc98368920cfd7ed78531f915e95a056b9e8f21a0c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

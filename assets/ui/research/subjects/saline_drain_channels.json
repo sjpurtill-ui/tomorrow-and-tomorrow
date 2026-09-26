@@ -1,0 +1,14 @@
+{
+  "id": "saline_drain_channels",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a0783a61-9e30-4571-9a4d-e1a038fd94be.png",
+  "source_file": "exec-a0783a61-9e30-4571-9a4d-e1a038fd94be.png",
+  "creative_brief": "Deep drains carry the salty water off the irrigated fields and down into the marshes. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/saline_drain_channels-v1.png",
+  "sha256": "a715cb5c49c46f222bc840e9f0663b4668782b0167841e73e771eb15bcd8accb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
