@@ -1,0 +1,14 @@
+{
+  "id": "deposit_transfer_orders",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3e25aba1-8738-4a85-afcd-2fe2e81fe817.png",
+  "source_file": "exec-3e25aba1-8738-4a85-afcd-2fe2e81fe817.png",
+  "creative_brief": "A merchant leaves his silver with a banker and pays others by written order, and no coin changes hands. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/deposit_transfer_orders-v1.png",
+  "sha256": "3e98a26d92c34ed6e8cb677ec1cad5e51305b0f96d550f24cb03fa7e63bc9fb0",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}
