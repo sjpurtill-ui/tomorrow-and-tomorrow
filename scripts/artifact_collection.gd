@@ -177,6 +177,32 @@ static func study(elapsed:int,day:int)->void:
 			item.study=1.0
 			preload("res://scripts/society_exchange.gd").finish_study(item,day)
 
+## What people would call the object, lower case and without an article:
+## "carved bone toggle", "clay storage jar". Catalogue titles and their
+## " · variation" tags stay on the record; a legend keeps its own name.
+static func plain_name(item:Dictionary)->String:
+	var raw:=String(item.get("name","")).strip_edges()
+	if raw.is_empty():return "object"
+	if int(item.get("rarity",0))>=4 and String(item.get("site_id","")).begins_with("legend:"):return raw
+	var base:=raw.split(" · ",false,1)[0].strip_edges() if raw.contains(" · ") else raw
+	var known:=String(PREHISTORY.plain_names.get(base.to_lower(),""))
+	if not known.is_empty():return known
+	var id:=int(item.get("catalogue_id",-1))
+	if String(item.get("artifact_origin",""))=="prehistoric" and not item.has("insight") and id>=0 and id<4096:
+		return String(PREHISTORY.FORMS[id%16])
+	var lower:=base.to_lower()
+	for article in ["the ","a ","an "]:
+		if lower.begins_with(article):return base.substr(article.length()).to_lower()
+	return lower
+
+## "a carved bone toggle", "an old clay bowl"; rare pieces say so.
+static func plain_label(item:Dictionary)->String:
+	var name:=plain_name(item)
+	if int(item.get("rarity",0))>=4 and String(item.get("site_id","")).begins_with("legend:"):return name
+	var tier:=clampi(int(item.get("rarity",0)),0,4)
+	var words:=(String(TIERS[tier]).to_lower()+" "+name) if tier>=2 else name
+	return ("an " if words.substr(0,1) in ["a","e","i","o","u"] else "a ")+words
+
 ## Deterministic presentation facets; catalogue ids encode form, style and motif.
 static func descriptor(item:Dictionary)->Dictionary:
 	var id:=int(item.get("catalogue_id",-1))

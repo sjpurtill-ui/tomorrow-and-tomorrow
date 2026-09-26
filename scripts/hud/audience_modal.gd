@@ -168,6 +168,7 @@ func _reset_card(next_mode:String)->void:
 	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
 	civic_settlement="";civic_seen.clear();civic_signature=""
 	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
+	envoy_stage=null;speech_box=null;business_label=null;scene_note=null;envoy_popovers.clear()
 	transcript=null;transcript_scroll=null;thinking=null;options_row=null;outcome_box=null;proposal_box=null
 	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
 	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null
@@ -221,6 +222,11 @@ func show_audience(id:String)->void:
 	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
 	card.add_theme_stylebox_override("panel",style)
 	_add_backdrop(card)
+	if _envoy_scene(audience):
+		# A foreign envoy: the scene itself, not a form (see "The envoy scene").
+		_build_envoy_view(audience)
+		_finish_audience(id,audience)
+		return
 	_civic_begin(audience)
 	body=VBoxContainer.new();body.add_theme_constant_override("separation",0);card.add_child(body)
 	body.add_child(_build_herald(audience))
@@ -243,6 +249,9 @@ func show_audience(id:String)->void:
 	persons_row=HBoxContainer.new();persons_row.name="PersonsRow";persons_row.add_theme_constant_override("separation",6);column.add_child(persons_row)
 	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)
 	body.add_child(_build_footer())
+	_finish_audience(id,audience)
+
+func _finish_audience(id:String,audience:Dictionary)->void:
 	_fit()
 	if String(audience.get("status",""))=="resolved":
 		_show_outcome({"ok":true,"outcome":String(audience.get("outcome","")),"reaction":"neutral"})
@@ -445,16 +454,17 @@ func _build_speaker(audience:Dictionary)->Control:
 	if dossier:column.add_child(dossier)
 	return column
 
-func _build_regard(audience:Dictionary)->Control:
+func _build_regard(audience:Dictionary,width:float=222.0,height:float=-1.0)->Control:
 	## Love and dread: how the summoned person holds their god, or how the
 	## envoy's people regard you. Two gauges and one plain line.
 	var strip:=PanelContainer.new();strip.name="Regard";strip.mouse_filter=Control.MOUSE_FILTER_PASS
 	var strip_style:=StyleBoxFlat.new();strip_style.bg_color=Color(.06,.05,.04,.8)   # dark in both themes: it sits on the picture
 	strip_style.content_margin_left=8;strip_style.content_margin_right=8;strip_style.content_margin_top=4;strip_style.content_margin_bottom=4
 	strip.add_theme_stylebox_override("panel",strip_style)
-	strip.position=Vector2(0,_portrait_height()-52);strip.size=Vector2(222,52)
+	if height<0.0:height=_portrait_height()
+	strip.position=Vector2(0,height-52);strip.size=Vector2(width,52)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.add_child(box)
-	regard_meter=RegardMeter.new();regard_meter.name="RegardMeter";regard_meter.custom_minimum_size=Vector2(206,24);regard_meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(regard_meter)
+	regard_meter=RegardMeter.new();regard_meter.name="RegardMeter";regard_meter.custom_minimum_size=Vector2(width-16,24);regard_meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(regard_meter)
 	regard_label=Tokens.make_label("",12,Color("f6ecd6"));regard_label.name="RegardRead";regard_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	regard_label.clip_text=true;regard_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;box.add_child(regard_label)
 	_refresh_regard()
@@ -480,6 +490,18 @@ func _refresh_regard()->void:
 
 func _build_dossier(audience:Dictionary)->Control:
 	## Plain facts beside the performance: what the ruler actually knows.
+	var rows:=_dossier_rows(audience)
+	if rows.is_empty():return null
+	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",3)
+	box.add_child(Tokens.make_label("WHAT YOU KNOW",11,Tokens.TEXT_DIM,.1))
+	for row:Array in rows:
+		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);box.add_child(line)
+		var key:=Tokens.make_label(String(row[0]),12,Tokens.MUTED);key.custom_minimum_size.x=96;line.add_child(key)
+		var value:=Tokens.make_label(String(row[1]),13,row[2]);value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		value.clip_text=true;value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;value.tooltip_text=String(row[1]);value.mouse_filter=Control.MOUSE_FILTER_PASS;line.add_child(value)
+	return box
+
+func _dossier_rows(audience:Dictionary)->Array:
 	var context:Dictionary=Hall.voice_context(String(audience.get("id","")))
 	var rows:Array=[]
 	if String(audience.get("origin",""))=="foreign":
@@ -499,15 +521,7 @@ func _build_dossier(audience:Dictionary)->Control:
 			rows.append(["Trust in you",String(petitioner.get("trust","moderate")),Tokens.BODY])
 			rows.append(["Resentment",String(petitioner.get("resentment","none")),Tokens.RED if String(petitioner.get("resentment",""))=="deep" else Tokens.BODY])
 	if context.has("food_situation"):rows.append(["Our stores",String(context.food_situation).trim_prefix("the stores are ").trim_prefix("food is "),Tokens.BODY])
-	if rows.is_empty():return null
-	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",3)
-	box.add_child(Tokens.make_label("WHAT YOU KNOW",11,Tokens.TEXT_DIM,.1))
-	for row:Array in rows:
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);box.add_child(line)
-		var key:=Tokens.make_label(String(row[0]),12,Tokens.MUTED);key.custom_minimum_size.x=96;line.add_child(key)
-		var value:=Tokens.make_label(String(row[1]),13,row[2]);value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		value.clip_text=true;value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;value.tooltip_text=String(row[1]);value.mouse_filter=Control.MOUSE_FILTER_PASS;line.add_child(value)
-	return box
+	return rows
 
 func _speaker_person(audience:Dictionary)->Dictionary:
 	var speaker:Dictionary=audience.get("speaker",{})
@@ -580,7 +594,7 @@ func _build_options()->void:
 	var listed:=Hall.options(audience_id)
 	_option_count=listed.size()
 	for option:Dictionary in listed:
-		options_row.add_child(_option_card(option))
+		options_row.add_child(_envoy_option_card(option) if is_instance_valid(envoy_stage) else _option_card(option))
 	_build_divine_row()
 	_build_persons_row()
 
@@ -1096,6 +1110,8 @@ func _refresh_footer()->void:
 
 func _show_toast(text:String)->void:
 	if text.strip_edges().is_empty():return
+	if is_instance_valid(scene_note):
+		scene_note.text=text;scene_note.visible=true
 	if not is_instance_valid(transcript):
 		_court_note(text);return
 	var note:=Tokens.make_label(text,13,Tokens.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -1122,6 +1138,7 @@ func skip_reveal()->void:
 	var lines:Array=Hall.find(audience_id).get("lines",[])
 	while rendered_lines<lines.size():
 		_add_line(lines[rendered_lines],false);rendered_lines+=1
+	_refresh_speech(false)
 	follow_scroll=.5
 
 func _process(delta:float)->void:
@@ -1176,6 +1193,7 @@ func _pump()->void:
 	if rendered_lines>=lines.size():return
 	var line:Dictionary=lines[rendered_lines];rendered_lines+=1
 	_add_line(line,true)
+	_refresh_speech(true)
 
 # --- Transcript rows --------------------------------------------------------
 
@@ -1281,6 +1299,487 @@ func _update_mood(audience:Dictionary)->void:
 	var mood:=clampf(float(audience.get("mood",0.0)),-1.0,1.0)
 	mood_meter.value=mood;mood_meter.queue_redraw()
 	mood_label.text="Frosty" if mood<=-.5 else ("Tense" if mood<=-.15 else ("Cordial" if mood<.15 else ("Warm" if mood<.5 else "Glowing")))
+
+# --- The envoy scene ----------------------------------------------------------
+## A foreign envoy is received as a scene, not a form: the era's court with
+## the envoy standing in it and what they bring held up to be seen; their
+## business in one plain sentence; three or four answers as cards, each with
+## what it really costs. The last few words spoken hang in the scene; the full
+## exchange sits behind "What was said", the court's knowledge and the room's
+## mood behind "What you know", pacing and the voice behind the settings menu.
+
+const Artifacts:=preload("res://scripts/artifact_collection.gd")
+const ArtifactArt:=preload("res://scripts/hud/artifact_visuals.gd")
+const ArtifactStory:=preload("res://scripts/artifact_culture.gd")
+const ENVOY_STAGE_MIN_H:=400.0
+const OFFER_W:=292.0
+const SPEECH_SHOWN:=3
+const CREAM:=Color("f6ecd6")
+const CREAM_DIM:=Color("e2d3b4")
+const PAPER_INK:=Color("2a2217")
+const PAPER_SOFT:=Color("5d4a2a")
+const COST_PREFIXES:=["String: ","Cost: ","Risk: "]
+
+var envoy_stage:Control
+var speech_box:VBoxContainer
+var business_label:Label
+var scene_note:Label
+var envoy_popovers:Dictionary={}   # popover name -> PanelContainer
+
+func _envoy_scene(audience:Dictionary)->bool:
+	return String(audience.get("origin",""))=="foreign" and not String(audience.get("kind","")) in WORK_KINDS
+
+func _build_envoy_view(audience:Dictionary)->void:
+	body=VBoxContainer.new();body.name="EnvoyView";body.add_theme_constant_override("separation",0);card.add_child(body)
+	body.add_child(_build_envoy_stage(audience))
+	# The lower band takes what its words need; the scene takes the rest.
+	var veil:=PanelContainer.new();veil.name="Veil";veil.size_flags_vertical=Control.SIZE_FILL
+	var wash:=_veil_style();wash.corner_radius_bottom_left=9;wash.corner_radius_bottom_right=9
+	veil.add_theme_stylebox_override("panel",wash);body.add_child(veil)
+	var inner:=MarginContainer.new()
+	for side in ["left","right"]:inner.add_theme_constant_override("margin_"+side,22)
+	inner.add_theme_constant_override("margin_top",14);inner.add_theme_constant_override("margin_bottom",12)
+	veil.add_child(inner)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);inner.add_child(column)
+	business_label=Tokens.make_label(_envoy_business(audience),21,Tokens.BODY);business_label.name="Business"
+	business_label.add_theme_font_override("font",_bold);business_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	column.add_child(business_label)
+	scene_note=Tokens.make_label("",13,Tokens.RED);scene_note.name="SceneNote";scene_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;scene_note.visible=false
+	column.add_child(scene_note)
+	options_row=HBoxContainer.new();options_row.name="Options";options_row.add_theme_constant_override("separation",12);column.add_child(options_row)
+	persons_row=HBoxContainer.new();persons_row.name="PersonsRow";persons_row.visible=false;column.add_child(persons_row)
+	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)
+	column.add_child(_build_envoy_talk(audience))
+
+func _build_envoy_stage(audience:Dictionary)->Control:
+	var stage:=Control.new();stage.name="EnvoyStage";stage.custom_minimum_size.y=ENVOY_STAGE_MIN_H;stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.clip_contents=true
+	stage.mouse_filter=Control.MOUSE_FILTER_PASS;stage.gui_input.connect(_on_transcript_input)
+	envoy_stage=stage
+	var offer:=_envoy_offer(audience)
+	stage.add_child(_envoy_band(audience))
+	stage.add_child(_envoy_figure(audience))
+	if not offer.is_empty():stage.add_child(_envoy_offer_plinth(offer))
+	# The last words spoken, as speech in the room beside the envoy.
+	speech_box=VBoxContainer.new();speech_box.name="SceneSpeech";speech_box.alignment=BoxContainer.ALIGNMENT_CENTER
+	speech_box.add_theme_constant_override("separation",8);speech_box.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	_place(speech_box,Vector4(0,0,1,1),Vector4(318,86,-(OFFER_W+52.0) if not offer.is_empty() else -36.0,-58))
+	stage.add_child(speech_box)
+	thinking=Tokens.make_label("",15,CREAM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false
+	thinking.add_theme_color_override("font_outline_color",Color(0,0,0,.85));thinking.add_theme_constant_override("outline_size",5)
+	_place(thinking,Vector4(0,1,1,1),Vector4(322,-50,-(OFFER_W+52.0) if not offer.is_empty() else -36.0,-18))
+	stage.add_child(thinking)
+	stage.add_child(_envoy_transcript_popover())
+	stage.add_child(_envoy_dossier_popover(audience))
+	stage.add_child(_envoy_settings_popover())
+	return stage
+
+static func _place(node:Control,anchors:Vector4,offsets:Vector4)->void:
+	## anchors/offsets as (left, top, right, bottom).
+	node.anchor_left=anchors.x;node.anchor_top=anchors.y;node.anchor_right=anchors.z;node.anchor_bottom=anchors.w
+	node.offset_left=offsets.x;node.offset_top=offsets.y;node.offset_right=offsets.z;node.offset_bottom=offsets.w
+
+func _envoy_band(audience:Dictionary)->Control:
+	## The herald's line across the top of the scene: what this visit is, when
+	## they came, and the three small doors (what was said, what you know, settings).
+	var kind:=String(audience.get("kind","news"))
+	var band:=PanelContainer.new();band.name="Herald"
+	var shade:=accent.darkened(.72);shade.a=.62
+	var style:=_plate(shade);style.corner_radius_top_left=9;style.corner_radius_top_right=9
+	style.content_margin_left=18;style.content_margin_right=14;style.content_margin_top=10;style.content_margin_bottom=10
+	band.add_theme_stylebox_override("panel",style)
+	_place(band,Vector4(0,0,1,0),Vector4(0,0,0,0))
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);band.add_child(row)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
+	var day:=int(GameState.elapsed_days);var waited:=day-int(audience.get("arrived_day",day))
+	var timing:="arrived today" if waited<=0 else "waiting %d day%s" % [waited,"" if waited==1 else "s"]
+	var expires:=int(audience.get("expires_day",0))
+	if expires>0 and String(audience.get("status",""))=="waiting":
+		var left:=expires-day
+		timing+=" · leaves %s" % ("today" if left<=0 else ("tomorrow" if left==1 else "in %d days" % left))
+	var eyebrow:=Tokens.make_label("%s · %s" % [String(KINDS.get(kind,KINDS.news).eyebrow),timing.to_upper()],11,CREAM_DIM,.12);words.add_child(eyebrow)
+	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
+	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation",{}) is Dictionary else {}
+	var headline:=String(situation.get("headline","")).strip_edges()
+	if not headline.is_empty():herald_text=("%s %s" % [subject,headline]).to_upper()
+	var title:=Tokens.make_label(herald_text,22,CREAM);title.name="HeraldTitle";title.add_theme_font_override("font",_bold)
+	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
+	for pair in [["WhatWasSaid","What was said"],["WhatYouKnow","What you know"],["CourtSettings","⚙"]]:
+		var button:=Button.new();button.name="Open"+String(pair[0]);button.text=String(pair[1]);button.toggle_mode=true
+		button.focus_mode=Control.FOCUS_NONE;button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		button.custom_minimum_size=Vector2(40 if String(pair[0])=="CourtSettings" else 0,32)
+		button.add_theme_font_size_override("font_size",13 if String(pair[0])!="CourtSettings" else 17)
+		var plain:=_plate(Color(1,1,1,.10),6,0);plain.border_color=Color(CREAM,.4);plain.set_border_width_all(1);plain.content_margin_left=12;plain.content_margin_right=12
+		var lit:=plain.duplicate() as StyleBoxFlat;lit.bg_color=Color(1,1,1,.24);lit.border_color=CREAM
+		for state in ["normal","focus"]:button.add_theme_stylebox_override(state,plain)
+		for state in ["hover","pressed","hover_pressed"]:button.add_theme_stylebox_override(state,lit)
+		for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,CREAM)
+		button.tooltip_text={"WhatWasSaid":"Everything said in this audience.","WhatYouKnow":"What your court knows of them, and how the room feels.","CourtSettings":"Make them wait, how often visitors come, and which voice speaks."}[String(pair[0])]
+		var target:=String(pair[0])
+		button.toggled.connect(func(on:bool):_show_popover(target,on))
+		row.add_child(button)
+	return band
+
+func _envoy_figure(audience:Dictionary)->Control:
+	## The envoy stands in the court, large, facing the god; their people's
+	## emblem and ruler are only a caption.
+	var speaker:Dictionary=audience.get("speaker",{})
+	var figure:=VBoxContainer.new();figure.name="Speaker";figure.add_theme_constant_override("separation",0)
+	var width:=252.0
+	_place(figure,Vector4(0,0,0,1),Vector4(34,84,34+width,-10))
+	speaker_frame=PanelContainer.new();speaker_frame.name="SpeakerFrame";speaker_frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	speaker_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),envoy_color,2,8,4))
+	figure.add_child(speaker_frame)
+	var holder:=Control.new();holder.custom_minimum_size=Vector2(width-8,180);holder.clip_contents=true;speaker_frame.add_child(holder)
+	var portrait:=Portrait.picture(_speaker_person(audience),width-8,180);portrait.custom_minimum_size=Vector2.ZERO;portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
+	var regard:=_build_regard(audience,width-8,180)
+	_place(regard,Vector4(0,1,1,1),Vector4(0,-52,0,0))
+	holder.add_child(regard)
+	var plate:=PanelContainer.new();plate.name="NamePlate"
+	var plate_style:=_plate(Color(.07,.06,.05,.80),0,0);plate_style.corner_radius_bottom_left=8;plate_style.corner_radius_bottom_right=8
+	plate_style.border_color=envoy_color;plate_style.border_width_left=4;plate_style.content_margin_left=12;plate_style.content_margin_right=10;plate_style.content_margin_top=6;plate_style.content_margin_bottom=7
+	plate.add_theme_stylebox_override("panel",plate_style);figure.add_child(plate)
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);plate.add_child(line)
+	var names:=VBoxContainer.new();names.size_flags_horizontal=Control.SIZE_EXPAND_FILL;names.add_theme_constant_override("separation",0);line.add_child(names)
+	var name_label:=Tokens.make_label(String(speaker.get("name","An envoy")),18,CREAM);name_label.name="EnvoyName";name_label.add_theme_font_override("font",_bold)
+	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(name_label)
+	var caption:="%s · %s" % [String(speaker.get("title","Envoy")),String(audience.get("civ_name",""))]
+	var caption_label:=Tokens.make_label(caption,12,CREAM_DIM);caption_label.name="EnvoyCaption";caption_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(caption_label)
+	var flag:=TextureRect.new();flag.name="Flag";flag.texture=Identity.foreign(String(audience.get("civ_id",""))).texture
+	flag.custom_minimum_size=Vector2(30,36);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	flag.size_flags_vertical=Control.SIZE_SHRINK_CENTER;flag.tooltip_text=String(audience.get("civ_name",""));line.add_child(flag)
+	return figure
+
+func _offer_artifact(audience:Dictionary)->Dictionary:
+	## The very object in question, wherever it now lies.
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	var id:=String(situation.get("artifact_id",""))
+	if id.is_empty():return {}
+	for owner in [String(audience.get("civ_id","")),"player"]:
+		if owner.is_empty():continue
+		var held:=Artifacts.holdings(owner)
+		if held.has(id):return held[id]
+	return {}
+
+func _artifact_history(item:Dictionary)->String:
+	## One line on what the thing is or where it came from.
+	var insight:=String(item.get("insight","")).strip_edges()
+	if not insight.is_empty():
+		var end:=insight.find(". ")
+		return insight.substr(0,end+1) if end>0 else insight
+	var story:=ArtifactStory.story(item)
+	var cut:=story.find(". ")
+	return story.substr(0,cut+1) if cut>0 else story
+
+func _envoy_offer(audience:Dictionary)->Dictionary:
+	## What stands between the peoples, as a thing to be seen: the object, the
+	## goods, or the people the news concerns. Empty when it is only words.
+	var kind:=String(audience.get("kind",""))
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	var type:=String(situation.get("type",""))
+	var item:=_offer_artifact(audience)
+	if not item.is_empty():
+		var tier:=clampi(int(item.get("rarity",0)),0,4)
+		var art:=ArtifactArt.texture(item)
+		return {"caption":{"artifact_gift":"THEY OFFER","artifact_purchase":"THEY WANT YOUR","artifact_return":"THEY ASK BACK"}.get(type,"THE OBJECT"),
+			"name":_cap(Artifacts.plain_name(item)),"history":_artifact_history(item),"tag":"%s piece" % String(Artifacts.TIERS[tier]),
+			"texture":art if art else Icons.domain_texture("culture",Tokens.GOLD),"painted":art!=null,
+			"tooltip":"Known as “%s”.\n%s" % [String(item.get("name","")),ArtifactStory.story(item)]}
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	if float(terms.get("amount",0))>0:
+		var resource:=String(terms.get("resource",""))
+		return {"caption":{"gift":"THEY BRING","request":"THEY ASK FOR","threat":"THEY DEMAND"}.get(kind,"THE TERMS"),
+			"name":"%s %s" % [_amount(float(terms.amount)),resource.to_lower()],"history":"","tag":"",
+			"texture":Icons.domain_texture("nutrition",Color("5f7f35")) if resource=="Food" else Icons.texture_for(resource),"painted":false,"tooltip":""}
+	var news:Dictionary=audience.get("news",{}) if audience.get("news") is Dictionary else {}
+	if kind=="news" and not String(news.get("subject_civ_name","")).is_empty():
+		return {"caption":"NEWS OF","name":String(news.subject_civ_name),"history":"","tag":"",
+			"texture":Identity.foreign(String(news.get("subject_civ_id",""))).texture,"painted":false,"tooltip":""}
+	return {}
+
+func _envoy_offer_plinth(offer:Dictionary)->Control:
+	var plinth:=PanelContainer.new();plinth.name="OfferObject";plinth.mouse_filter=Control.MOUSE_FILTER_PASS
+	plinth.tooltip_text=String(offer.get("tooltip",""))
+	var style:=_plate(Color(CREAM,.94),10,0);style.border_color=accent.lightened(.15);style.set_border_width_all(2)
+	style.shadow_color=Color(0,0,0,.35);style.shadow_size=12
+	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=12;style.content_margin_bottom=14
+	plinth.add_theme_stylebox_override("panel",style)
+	_place(plinth,Vector4(1,0,1,1),Vector4(-(OFFER_W+30.0),88,-30,-16))
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",4);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;plinth.add_child(stack)
+	var caption:=Tokens.make_label(String(offer.caption),11,PAPER_SOFT,.14);caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(caption)
+	var picture:=TextureRect.new();picture.name="OfferPicture";picture.texture=offer.texture
+	# Painted pieces fill the plinth; a drawn resource icon stays icon-sized.
+	var painted:=bool(offer.get("painted",false))
+	picture.custom_minimum_size=Vector2(96,96) if painted else Vector2(104,104)
+	picture.size_flags_vertical=Control.SIZE_EXPAND_FILL if painted else (Control.SIZE_EXPAND|Control.SIZE_SHRINK_CENTER);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	picture.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(picture)
+	var name_label:=Tokens.make_label(String(offer.name),21,PAPER_INK);name_label.name="OfferName";name_label.add_theme_font_override("font",_bold)
+	name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(name_label)
+	if not String(offer.get("tag","")).is_empty():
+		var tag:=Tokens.make_label(String(offer.tag),12,PAPER_SOFT);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(tag)
+	if not String(offer.get("history","")).is_empty():
+		var history:=Tokens.make_label(String(offer.history),13,PAPER_SOFT);history.name="OfferHistory";history.add_theme_font_override("font",_italic)
+		history.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;history.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(history)
+	return plinth
+
+func _envoy_business(audience:Dictionary)->String:
+	## Their business in plain words: what they offer or want, and the catch.
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	var text:=String(situation.get("summary","")).strip_edges()
+	var item:=_offer_artifact(audience)
+	if not item.is_empty() and String(situation.get("type",""))=="artifact_gift":
+		text="%s offers %s as a gift%s." % [String(audience.get("civ_name","They")),Artifacts.plain_label(item)," — a piece made by your own people, coming home" if text.contains("coming home") else ""]
+	# Older records named pieces by catalogue title and grade.
+	var grade:=RegEx.new();grade.compile(" \\((common|unusual|rare|exceptional|legendary)\\)")
+	text=grade.sub(text,"",true)
+	if text.is_empty():
+		var headline:=String(situation.get("headline","comes to you")).strip_edges()
+		text="%s %s." % [String(audience.get("civ_name","A foreign people")),headline]
+	var string:Dictionary=situation.get("string",{}) if situation.get("string") is Dictionary else {}
+	var tied:=String(string.get("text","")).strip_edges()
+	if not tied.is_empty() and not text.contains(tied):text+=" "+tied
+	return text
+
+static func _cap(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1) if not text.is_empty() else text
+
+func _envoy_popover(node_name:String,anchors:Vector4,offsets:Vector4)->PanelContainer:
+	var pop:=PanelContainer.new();pop.name=node_name;pop.visible=false;pop.mouse_filter=Control.MOUSE_FILTER_STOP
+	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER_SOFT,1,8,0)
+	style.shadow_color=Color(0,0,0,.4);style.shadow_size=14
+	style.content_margin_left=16;style.content_margin_right=14;style.content_margin_top=12;style.content_margin_bottom=12
+	pop.add_theme_stylebox_override("panel",style)
+	_place(pop,anchors,offsets)
+	envoy_popovers[node_name]=pop
+	return pop
+
+func _show_popover(node_name:String,on:bool)->void:
+	for key in envoy_popovers:
+		var pop:PanelContainer=envoy_popovers[key]
+		if not is_instance_valid(pop):continue
+		pop.visible=on and key==node_name
+		if not is_instance_valid(envoy_stage):continue
+		var button:=envoy_stage.find_child("Open"+String(key),true,false) as Button
+		if button and button.button_pressed!=pop.visible:button.set_pressed_no_signal(pop.visible)
+	if on and node_name=="WhatWasSaid":follow_scroll=.4
+
+func toggle_popover(node_name:String)->void:
+	var pop:PanelContainer=envoy_popovers.get(node_name)
+	if pop:_show_popover(node_name,not pop.visible)
+
+func _envoy_transcript_popover()->Control:
+	var pop:=_envoy_popover("WhatWasSaid",Vector4(0,0,1,1),Vector4(300,72,-26,-12))
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",8);pop.add_child(stack)
+	stack.add_child(Tokens.make_label("WHAT WAS SAID",11,Tokens.TEXT_DIM,.12))
+	transcript_scroll=ScrollContainer.new();transcript_scroll.name="Transcript";transcript_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	transcript_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;stack.add_child(transcript_scroll)
+	transcript_scroll.gui_input.connect(_on_transcript_input)
+	transcript=VBoxContainer.new();transcript.size_flags_horizontal=Control.SIZE_EXPAND_FILL;transcript.add_theme_constant_override("separation",10)
+	transcript_scroll.add_child(transcript)
+	return pop
+
+func _envoy_dossier_popover(audience:Dictionary)->Control:
+	var pop:=_envoy_popover("WhatYouKnow",Vector4(0,0,0,0),Vector4(300,72,720,72))
+	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",5);pop.add_child(box)
+	box.add_child(Tokens.make_label("WHAT YOU KNOW",11,Tokens.TEXT_DIM,.12))
+	for row:Array in _dossier_rows(audience):
+		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);box.add_child(line)
+		var key:=Tokens.make_label(String(row[0]),13,Tokens.MUTED);key.custom_minimum_size.x=104;line.add_child(key)
+		var value:=Tokens.make_label(_cap(String(row[1])),14,row[2]);value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;line.add_child(value)
+	var room:=HBoxContainer.new();room.add_theme_constant_override("separation",10);box.add_child(room)
+	var room_key:=Tokens.make_label("The room",13,Tokens.MUTED);room_key.custom_minimum_size.x=104;room.add_child(room_key)
+	mood_label=Tokens.make_label("",14,Tokens.BODY);mood_label.custom_minimum_size.x=70;room.add_child(mood_label)
+	mood_meter=MoodMeter.new();mood_meter.custom_minimum_size=Vector2(150,10);mood_meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;mood_meter.size_flags_vertical=Control.SIZE_SHRINK_CENTER;room.add_child(mood_meter)
+	_update_mood(audience)
+	return pop
+
+func _envoy_settings_popover()->Control:
+	var pop:=_envoy_popover("CourtSettings",Vector4(1,0,1,0),Vector4(-356,72,-26,72))
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);pop.add_child(box)
+	box.add_child(Tokens.make_label("THE COURT",11,Tokens.TEXT_DIM,.12))
+	wait_button=Button.new();wait_button.name="MakeThemWait";wait_button.text="Make them wait";wait_button.custom_minimum_size=Vector2(0,34)
+	wait_button.tooltip_text="Send them to the antechamber. Guests kept waiting too long leave insulted."
+	wait_button.pressed.connect(make_them_wait);box.add_child(wait_button)
+	_add_court_controls(box,"Receive envoys at once")
+	voice_label.clip_text=false;voice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;voice_label.custom_minimum_size=Vector2(290,0)
+	box.move_child(voice_label,box.get_child_count()-1)
+	return pop
+
+func _build_envoy_talk(audience:Dictionary)->Control:
+	var row:=HBoxContainer.new();row.name="SpeechRow";row.add_theme_constant_override("separation",8)
+	row.add_child(_build_return_button())
+	speech_input=LineEdit.new();speech_input.name="SpeechInput";speech_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	speech_input.custom_minimum_size.y=40;speech_input.max_length=400;speech_input.add_theme_font_size_override("font_size",15)
+	speech_input.placeholder_text="Speak to %s…" % String((audience.get("speaker",{}) as Dictionary).get("name","the envoy")).get_slice(" ",0)
+	speech_input.add_theme_stylebox_override("read_only",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,3,8))
+	speech_input.text_submitted.connect(func(_t:String):_speak())
+	row.add_child(speech_input)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(96,40)
+	speak_button.add_theme_font_size_override("font_size",14);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	speak_button.pressed.connect(_speak);row.add_child(speak_button)
+	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
+	queue_label=Tokens.make_label("",13,Tokens.TEXT_SOFT);queue_label.name="QueueLabel";queue_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(queue_label)
+	next_button=Button.new();next_button.name="NextAudience";next_button.text="Receive the next ›";next_button.custom_minimum_size=Vector2(150,40)
+	next_button.pressed.connect(receive_next);row.add_child(next_button)
+	return row
+
+# Speech in the scene.
+
+func _refresh_speech(animate:bool)->void:
+	if not is_instance_valid(speech_box):return
+	for child in speech_box.get_children():speech_box.remove_child(child);child.queue_free()
+	var lines:Array=Hall.find(audience_id).get("lines",[])
+	var shown:Array=[]
+	var index:=mini(rendered_lines,lines.size())-1
+	while index>=0 and shown.size()<SPEECH_SHOWN:
+		var line:Dictionary=lines[index];index-=1
+		if not String(line.get("text","")).strip_edges().is_empty():shown.push_front(line)
+	for i in shown.size():
+		speech_box.add_child(_speech_bubble(shown[i],animate and i==shown.size()-1,i<shown.size()-1))
+
+func _speech_bubble(line:Dictionary,animate:bool,older:bool)->Control:
+	var role:=String(line.get("role",""))
+	var text:=String(line.get("text","")).strip_edges()
+	var wrap:=MarginContainer.new();wrap.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if older:wrap.modulate.a=.78
+	var body_label:Label
+	if role=="narrator":
+		# What happens in the hall, told plainly across the scene.
+		var said:=Tokens.make_label(text.trim_prefix("[").trim_suffix("]"),15,CREAM);said.add_theme_font_override("font",_italic)
+		said.add_theme_color_override("font_outline_color",Color(0,0,0,.85));said.add_theme_constant_override("outline_size",5)
+		said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		wrap.add_theme_constant_override("margin_left",12);wrap.add_child(said);body_label=said
+	else:
+		var ruler:=role=="ruler"
+		wrap.add_theme_constant_override("margin_left",90 if ruler else 0);wrap.add_theme_constant_override("margin_right",0 if ruler else 50)
+		var bubble:=PanelContainer.new();bubble.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var colour:=_line_color(line)
+		var style:=_plate(Color("fbf4e4") if not ruler else Color("f3e3bb"),10,0)
+		style.border_color=colour;style.border_width_left=0 if ruler else 4;style.border_width_right=4 if ruler else 0
+		if ruler:style.corner_radius_top_right=2
+		else:style.corner_radius_top_left=2
+		style.content_margin_left=14;style.content_margin_right=14;style.content_margin_top=7;style.content_margin_bottom=9
+		style.shadow_color=Color(0,0,0,.28);style.shadow_size=6
+		bubble.add_theme_stylebox_override("panel",style);wrap.add_child(bubble)
+		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",1);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;bubble.add_child(stack)
+		var who:=String(line.get("speaker",""))
+		if ruler:who="You"
+		var note:=_line_note(line)
+		if bool(line.get("aside",false)):note="aside to you"
+		var head:=Tokens.make_label(who+("  ·  "+note if not note.is_empty() else ""),12,colour.darkened(.35));head.add_theme_font_override("font",_bold)
+		head.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(head)
+		var said:=Tokens.make_label(text,16,PAPER_INK);said.name="SpeechText";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		if bool(line.get("aside",false)):said.add_theme_font_override("font",_italic)
+		stack.add_child(said);body_label=said
+	if animate:
+		body_label.visible_ratio=0.0
+		var tween:=create_tween()
+		tween.tween_property(body_label,"visible_ratio",1.0,clampf(text.length()*.014,.25,1.8))
+	return wrap
+
+# Answer cards.
+
+func _envoy_option_card(option:Dictionary)->Button:
+	## Icon, a few words, and one line of what it really does. Nothing is cut;
+	## the tooltip repeats it all with the court's voices.
+	var tone:=String(option.get("tone","neutral"))
+	var tone_color:=_tone_color(tone)
+	var enabled:=bool(option.get("enabled",true))
+	var audience:=Hall.find(audience_id)
+	var button:=Button.new();button.name="Option_"+String(option.get("id",""))
+	button.set_meta("option_id",String(option.get("id","")))
+	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.custom_minimum_size=Vector2(0,96)
+	button.disabled=not enabled;button.focus_mode=Control.FOCUS_ALL
+	var base:=Tokens.flat(tone_color.lerp(Tokens.PANEL_BG_SOLID,.86 if Tokens.is_light() else .80),tone_color,1,8,0);base.border_width_top=4
+	var hover:=base.duplicate() as StyleBoxFlat;hover.bg_color=tone_color.lerp(Tokens.PANEL_BG_SOLID,.72 if Tokens.is_light() else .64);hover.set_border_width_all(2);hover.border_width_top=4
+	var off:=Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,8,0);off.border_width_top=4
+	for state in ["normal","focus"]:button.add_theme_stylebox_override(state,base)
+	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover);button.add_theme_stylebox_override("disabled",off)
+	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);margin.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	for side in ["left","right"]:margin.add_theme_constant_override("margin_"+side,14)
+	margin.add_theme_constant_override("margin_top",10);margin.add_theme_constant_override("margin_bottom",10)
+	button.add_child(margin)
+	var stack:=VBoxContainer.new();stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_theme_constant_override("separation",4);margin.add_child(stack)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",10);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(head)
+	var ink:=_ink(tone_color) if enabled else Tokens.DISABLED
+	var icon:=TextureRect.new();icon.name="OptionIcon";icon.texture=_option_icon(option,audience,ink);icon.custom_minimum_size=Vector2(34,34)
+	icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if not enabled:icon.modulate.a=.45
+	head.add_child(icon)
+	var title:=Tokens.make_label(String(option.get("label","")),18,ink);title.name="OptionTitle";title.add_theme_font_override("font",_bold);title.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(title)
+	var consequence:=_consequence(option,audience)
+	var sub:=Tokens.make_label(consequence,14,Tokens.BODY_2 if enabled else Tokens.RED);sub.name="OptionConsequence";sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	if not enabled:sub.add_theme_font_override("font",_italic)
+	stack.add_child(sub)
+	button.tooltip_text=String(option.get("label",""))+"\n"+consequence
+	var full_sub:=String(option.get("sub",""))
+	if enabled and not full_sub.is_empty() and full_sub!=consequence:button.tooltip_text+="\n"+full_sub
+	# At most one court voice, and only when it tells the ruler something new.
+	var shown:=false
+	for side in ["objection","support"]:
+		var said:=String(option.get(side,""))
+		if said.is_empty() or not enabled or not preload("res://scripts/court_relevance.gd").card_voice_ok(option,side):continue
+		var words:=("Objects · " if side=="objection" else "For it · ")+said
+		button.tooltip_text+="\n"+words
+		if shown:continue
+		shown=true
+		var voice_words:=Tokens.make_label(words,13,Tokens.RED if side=="objection" else Tokens.GREEN)
+		voice_words.name="Option"+side.capitalize();voice_words.mouse_filter=Control.MOUSE_FILTER_IGNORE;voice_words.add_theme_font_override("font",_italic)
+		voice_words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		stack.add_child(voice_words)
+	# A button does not grow with its children; follow the wrapped text.
+	stack.minimum_size_changed.connect(func():
+		var need:=maxf(96.0,stack.get_combined_minimum_size().y+20.0)
+		if absf(button.custom_minimum_size.y-need)>.5:button.custom_minimum_size.y=need)
+	var chosen:=String(option.get("id",""))
+	button.pressed.connect(func():choose(chosen))
+	return button
+
+func _consequence(option:Dictionary,audience:Dictionary)->String:
+	## One line of what the answer really does: what we get, and what it costs.
+	if not bool(option.get("enabled",true)):return String(option.get("reason",option.get("sub","")))
+	var cost:=String(option.get("cost",""))
+	var sub:=String(option.get("sub","")).strip_edges()
+	if not cost.is_empty() and sub.begins_with(cost):sub=sub.substr(cost.length()).strip_edges()
+	var price:=cost
+	for prefix in COST_PREFIXES:price=price.trim_prefix(prefix)
+	price=price.strip_edges().trim_suffix(".")
+	var gain:=""
+	var id:=String(option.get("id",""))
+	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	if id in ["accept","accept_return"]:
+		var item:=_offer_artifact(audience)
+		var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+		if not item.is_empty() and String(situation.get("type",""))=="artifact_gift":gain="We keep the %s" % Artifacts.plain_name(item)
+		elif String(audience.get("kind",""))=="gift" and float(terms.get("amount",0))>0:gain="We receive %s %s" % [_amount(float(terms.amount)),String(terms.get("resource","")).to_lower()]
+	if not gain.is_empty():
+		if price.is_empty():return gain+"."
+		var first:=price.get_slice(" ",0)
+		if first in ["Their","The","You","Your","No","A","An","Lose","Goods"]:price=first.to_lower()+price.substr(first.length())
+		return "%s; %s." % [gain,price]
+	if not price.is_empty():return _cap(price)+"."
+	return sub
+
+func _option_icon(option:Dictionary,audience:Dictionary,ink:Color)->Texture2D:
+	var id:=String(option.get("id",""))
+	var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+	var resource:=String(terms.get("resource",""))
+	if id in ["accept","accept_return"]:
+		if not _offer_artifact(audience).is_empty():return Icons.domain_texture("culture",ink)
+		if float(terms.get("amount",0))>0 and not resource.is_empty():
+			return Icons.domain_texture("nutrition",ink) if resource=="Food" else Icons.texture_for(resource)
+		return Icons.moment_texture("contact",ink)
+	if id in ["pay","grant","grant_half","reward","compensate","sell","trade"]:return Icons.domain_texture("wealth",ink)
+	if id in ["defy","counter","stand"]:return Icons.domain_texture("security",ink)
+	if id in ["rebuff","refuse"]:return Icons.war_texture("feud",ink)
+	if id.begins_with("hear:"):return Icons.moment_texture("court",ink)
+	match String(option.get("tone","neutral")):
+		"warm":return Icons.moment_texture("contact",ink)
+		"hostile":return Icons.war_texture("feud",ink)
+	return Icons.moment_texture("court",ink)
 
 # --- Great works ------------------------------------------------------------
 
@@ -1485,7 +1984,7 @@ func open_conception()->void:
 
 # --- Footer controls shared by every view -----------------------------------
 
-func _add_court_controls(row:HBoxContainer,summon_words:String="Summon me at once when envoys arrive")->void:
+func _add_court_controls(row:BoxContainer,summon_words:String="Summon me at once when envoys arrive")->void:
 	summon_check=CheckBox.new();summon_check.name="SummonImmediately";summon_check.text=summon_words
 	summon_check.add_theme_font_size_override("font_size",13)
 	summon_check.tooltip_text="When an envoy arrives, open the court at once. Otherwise they wait in the antechamber."
