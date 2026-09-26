@@ -198,3 +198,13 @@ func test_an_answer_that_invents_a_name_or_a_number_is_refused()->void:
 	assert_str(String((GameState.chronicle.polish as Dictionary)["1"].status)).is_equal("fallback")
 	assert_str(Polish.validate(draft,"",{},"Hadra of Fernside died at 71. The people learned thorn barriers and there were 114 people in the registers.")).contains("number")
 	assert_str(Polish.validate(draft,"",{},"Hadra of Fernside died at 68; a great plague of bronze swords and iron ploughs followed across the seven kingdoms of the east.")).is_not_empty()
+
+
+func test_tests_and_probes_never_reach_the_live_service()->void:
+	# Outside the player's game (tests, probes, headless simulations) the live
+	# rewrite stays off even when a key is configured on this machine.
+	var sent:=[]
+	Polish.send_hook=func(year:String,_p:Dictionary)->void:sent.append(year)
+	_year_with_news()
+	_at(366)
+	assert_int(sent.size()).is_equal(0)

@@ -43,6 +43,11 @@ static func _config()->Dictionary:
 	if force_offline:return {}
 	if not config_override.is_empty():return config_override
 	if Engine.get_main_loop()==null:return {}
+	# Only the player's game spends on the live service: never a headless run,
+	# a test runner or a probe scene, even when a key is configured.
+	if DisplayServer.get_name()=="headless":return {}
+	var scene:=(Engine.get_main_loop() as SceneTree).current_scene if Engine.get_main_loop() is SceneTree else null
+	if scene==null or scene.scene_file_path!=String(ProjectSettings.get_setting("application/run/main_scene","")):return {}
 	return PronouncementInterpreter._api_config()
 
 
