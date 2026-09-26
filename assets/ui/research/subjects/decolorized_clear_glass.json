@@ -1,0 +1,14 @@
+{
+  "id": "decolorized_clear_glass",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-185f499d-4476-4135-8809-5540963187e3.png",
+  "source_file": "exec-185f499d-4476-4135-8809-5540963187e3.png",
+  "creative_brief": "A pinch of a dark mineral in the batch clears the green from the glass, and the cup shows the wine's true color. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/decolorized_clear_glass-v1.png",
+  "sha256": "413282df6a59e48903e4d21bf1a8ef2c0933c815a3593b9f8cdfa8132ca5ecde",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

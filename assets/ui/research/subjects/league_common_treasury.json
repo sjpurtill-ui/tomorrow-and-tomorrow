@@ -1,0 +1,14 @@
+{
+  "id": "league_common_treasury",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d4e83826-b40a-421e-8d4b-2588112daa9f.png",
+  "source_file": "exec-d4e83826-b40a-421e-8d4b-2588112daa9f.png",
+  "creative_brief": "League members pay assessed shares into a common treasury at the shrine, for ships and defence. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/league_common_treasury-v1.png",
+  "sha256": "96ca281a1adec1bdcf9b76ce97620df6d458aa372e00693bec69254dbb9b73be",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
