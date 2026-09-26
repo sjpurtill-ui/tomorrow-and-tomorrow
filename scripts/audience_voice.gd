@@ -2642,6 +2642,9 @@ func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	var reaction:String=String(result.get("reaction","neutral"))
 	var envoy:Dictionary=s.envoy
 	if String(s.kind)=="request" and option_id=="refuse": option_id="refuse_request"
+	# Wider envoy business: parting words follow how they took it, not a gift's bank.
+	var er:=load("res://scripts/envoy_requests.gd") as GDScript
+	if er!=null and option_id!="refuse_request" and bool(er.call("handles",String(s.get("sit_type","")))): option_id="wider:"+option_id
 	if String(s.kind)=="proposal" and option_id in ["accept","refuse"]: option_id=option_id+"_proposal"
 	if String(s.kind)=="report":
 		if "reward" in option_id: option_id="reward_scouts"

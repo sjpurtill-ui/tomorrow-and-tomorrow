@@ -42,6 +42,7 @@ const PLACES:=["north woods","east ridge","river bend","upper valley","south mar
 ## family as well as by type, so "Food, Food, Food" cannot recur in disguise).
 const TYPES:={
 	"food_loan":{"headline":"asks to borrow food against their next harvest","family":"food","help":true},
+	"work_for_food":{"headline":"offers their labour for food","family":"labour","help":true},
 	"barter":{"headline":"offers a trade of goods","family":"trade"},
 	"refuge":{"headline":"asks you to take in their families","family":"people","help":true},
 	"forage_leave":{"headline":"asks leave to hunt in your country","family":"land"},
@@ -67,8 +68,8 @@ const HALL_FAMILY:={"aid_request":"food","gift_goods":"gift","gratitude_gift":"g
 ## Which requests each occasion may also bring (their own candidates decide
 ## whether the state truly backs them).
 const EXTRA_MIX:={
-	"their_famine":{"food_loan":1.0,"barter":0.7,"refuge":0.6,"forage_leave":0.7,"healer_plea":0.4},
-	"ambient":{"barter":0.5,"craft_teaching":0.5,"healer_plea":0.8,"mediation":0.6,"marriage_request":0.35,"border_line":0.6,"fugitive_return":0.35,
+	"their_famine":{"food_loan":1.0,"work_for_food":0.8,"barter":0.7,"refuge":0.6,"forage_leave":0.6,"healer_plea":0.4},
+	"ambient":{"work_for_food":0.3,"barter":0.5,"craft_teaching":0.5,"healer_plea":0.8,"mediation":0.6,"marriage_request":0.35,"border_line":0.6,"fugitive_return":0.35,
 		"blessing_rite":0.4,"war_supplies":0.6,"succession_backing":0.9,"sacred_site":0.35,"refuge":0.4,"forage_leave":0.3},
 	"first_contact":{"barter":0.4,"sacred_site":0.4,"craft_teaching":0.3,"blessing_rite":0.3},
 	"relation_warm":{"marriage_request":0.6,"craft_teaching":0.5,"blessing_rite":0.5,"barter":0.4,"sacred_site":0.4,"succession_backing":0.5},
@@ -263,6 +264,20 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			req={"amount":amount,"repay_res":repay_res,"repay_amt":repay_amt,"due_in":rng.randi_range(240,360)}
 			terms={"resource":"Food","amount":amount}
 			s.summary="%s's stores would last about %d days. %s asks to borrow %d Food and promises %d %s back within the year." % [name,roundi(float(civ.get("food_days",0))),who,roundi(amount),roundi(repay_amt),repay_res]
+		"work_for_food":
+			if not Hall._hungry(civ): return {}
+			var have2:=Hall.player_stock("Food")
+			var food:=Hall._nice(minf(pop*rng.randf_range(0.25,0.4),have2*0.2))
+			if food<10.0 or food>have2: return {}
+			var workers:=clampi(roundi(pop*0.08),4,30)
+			var place0:=_pick(PLACES,rng)
+			var yields:={"Timber":"woods","Stone":"quarries","Clay":"clay pits","Fiber Plants":"reed beds"}
+			var goods:=_pick(yields.keys(),rng)
+			var amount0:=Hall._nice(float(workers)*60.0*0.12*float(VALUES.Food)/float(VALUES.get(goods,1.0))*rng.randf_range(0.9,1.2))
+			s.ask="er:labour:%d" % floori(day/365.0)
+			req={"food":food,"workers":workers,"res":goods,"amount":amount0,"where":"%s in the %s" % [String(yields[goods]),place0],"days":60}
+			terms={"resource":"Food","amount":food}
+			s.summary="%s offers %d of its young people to work your %s for two months, bringing in about %d %s, for %d Food now to feed their families." % [name,workers,String(req.where),roundi(amount0),goods,roundi(food)]
 		"barter":
 			var want:=""
 			if Hall._hungry(civ): want="Food"
@@ -423,6 +438,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 		s.ask="request:Food:%s:%d" % [situation_type,int(data.get("episode",floori(day/365.0)))]
 	if used.has(String(s.ask)): return {}
 	s["req"]=req
+	s.summary=_fix(String(s.get("summary","")))
 	var out:={"kind":"request","situation":s}
 	if not terms.is_empty(): out["terms"]=terms
 	return out
@@ -453,6 +469,13 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			o.append(Hall._option("gift","Give it freely","Send %d Food and ask nothing back. They will not forget it." % _n(amt),"warm",short=="",short))
 			o.append(Hall._option("partial","Lend half","Send %d Food; they owe half the promised return." % _n(half),"neutral",Hall._short("Food",half)=="",Hall._short("Food",half)))
 			o.append(Hall._option("refuse","Refuse","Keep your stores. They are hungry and will remember who would not lend.","hostile"))
+		"work_for_food":
+			var short0:=Hall._short("Food",float(p.food))
+			var half0:=Hall._nice(float(p.food)*0.5)
+			o.append(Hall._option("accept","Take their labour","Give %d Food now; %d workers bring in about %d %s over two months." % [_n(p.food),int(p.workers),_n(p.amount),String(p.res)],"warm",short0=="",short0))
+			o.append(Hall._option("partial","Take half of them","Give %d Food; half the workers come, for half the %s." % [_n(half0),String(p.res)],"neutral",Hall._short("Food",half0)=="",Hall._short("Food",half0)))
+			o.append(Hall._option("gift","Feed them and ask no work","Give %d Food and send the workers home to their own fields." % _n(p.food),"warm",short0=="",short0))
+			o.append(Hall._option("refuse","Refuse","No food and no work. They go home hungry.","hostile"))
 		"barter":
 			var short2:=Hall._short(String(p.give_res),float(p.give_amt))
 			o.append(Hall._option("accept","Make the trade","Give %d %s; receive %d %s." % [_n(p.give_amt),String(p.give_res),_n(p.get_amt),String(p.get_res)],"warm",short2=="",short2))
@@ -518,6 +541,10 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			o.append(Hall._option("accept","Let them come","Their people may visit the %s each spring." % String(p.place),"warm"))
 			if p.has("toll_res"): o.append(Hall._option("bargain","Let them come for a toll","Ask %d %s now. They may pay, or go home bitter." % [_n(p.toll_amt),String(p.toll_res)],"neutral"))
 			o.append(Hall._option("refuse","Bar them","The %s is yours. They will not forgive being kept from %s." % [String(p.place),String(p.what).replace("its ","their ")],"hostile"))
+	for option in o:
+		option["label"]=_fix(String(option.label)); option["sub"]=_fix(String(option.sub))
+		# Every answer states what it costs or risks; the card shows this line.
+		if bool(option.get("enabled",true)): option["cost"]=("Risk: " if String(option.id)=="bargain" else "Cost: ")+String(option.sub)
 	return o
 
 # ---- effects ----
@@ -551,7 +578,7 @@ static func _between(a:String,b:String,tension:float)->void:
 static func _people(delta:int)->int:
 	## Settle or send away real people; bounded to a small share.
 	if delta==0: return 0
-	var total:=int(GameState.population_total)
+	var total:=roundi(float(GameState.population_exact))
 	var target:=maxi(1,total+delta)
 	GameState.ensure_population_total(target)
 	return target-total
@@ -631,6 +658,34 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			reaction="offended"
 			outcome="You refused to lend %s food.%s" % [name," They are hungry and proud; the border grew tenser." if hard else ""]
 			memory="We asked the ruler for a loan of food in our hunger and were refused."
+		"work_for_food:accept","work_for_food:partial":
+			var share:=1.0 if option_id=="accept" else 0.5
+			var fed:=_give(civ_id,"Food",Hall._nice(float(p.food)*share))
+			if fed>0.0: Hall._commitments().note_food_aid(civ_id,fed,_day())
+			var owed:=Hall._nice(float(p.amount)*share*fed/maxf(1.0,float(p.food)*share))
+			var list:Array=store().pledges
+			list.append({"civ":civ_id,"res":String(p.res),"amt":owed,"due":_day()+int(p.days),"day":_day(),"text":"the work of %d of our young people in your %s" % [roundi(float(p.workers)*share),String(p.where)],"tries":0,"kind":"labour"})
+			while list.size()>PLEDGES_MAX: list.pop_front()
+			Hall._shift_relation(civ_id,(0.06 if option_id=="accept" else 0.03)+mood,-0.03)
+			Hall._leader_trust(civ_id,0.04)
+			reaction="pleased"
+			outcome="You gave %d Food to %s. %d of their young people will work your %s for two months, for about %d %s." % [_n(fed),name,roundi(float(p.workers)*share),String(p.where),_n(owed),String(p.res)]
+			memory="The ruler fed our families for %d of our young people's work." % roundi(float(p.workers)*share)
+		"work_for_food:gift":
+			var fed2:=_give(civ_id,"Food",float(p.food))
+			if fed2>0.0: Hall._commitments().note_food_aid(civ_id,fed2,_day())
+			Hall._shift_relation(civ_id,0.1+mood,-0.05)
+			Hall._leader_trust(civ_id,0.08)
+			_bond(civ_id,"dependent","the food you gave and would take no work for",_day()+1095)
+			reaction="delighted"
+			outcome="You gave %d Food to %s and sent their workers home to their own fields." % [_n(fed2),name]
+			memory="The ruler fed our families and would take no work for it."
+		"work_for_food:refuse":
+			Hall._shift_relation(civ_id,-0.03+mood,0.02)
+			Hall._leader_trust(civ_id,-0.03)
+			reaction="offended"
+			outcome="You refused %s's workers. They went home hungry." % name
+			memory="The ruler would not trade food for our work."
 		"barter:accept","barter:bargain":
 			var get_amt:=float(p.get_amt)
 			if option_id=="bargain":
@@ -641,7 +696,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 					outcome="You held out for more %s. %s's envoy would not pay it and left without a trade." % [String(p.get_res),name]
 					memory="The ruler haggled over our trade and we left with nothing."
 					ForeignDiplomacy.remember(civ_id,memory)
-					return {"outcome":outcome,"reaction":reaction}
+					return {"outcome":_fix(outcome),"reaction":reaction}
 				get_amt=Hall._nice(get_amt*1.33)
 			var gave:=_give(civ_id,String(p.give_res),float(p.give_amt))
 			var got:=_take_from(civ_id,String(p.get_res),get_amt*gave/maxf(1.0,float(p.give_amt)))
@@ -846,7 +901,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 					outcome="You asked %s for twice the offering. They could not give it and went home unblessed and afraid." % name
 					memory="The god of that people asked more than we could give."
 					ForeignDiplomacy.remember(civ_id,memory)
-					return {"outcome":outcome,"reaction":reaction}
+					return {"outcome":_fix(outcome),"reaction":reaction}
 				ask*=2.0
 			var got2:=_take_from(civ_id,String(p.offer_res),ask)
 			if option_id=="bargain": DIVINE.add_civ_dread(civ_id,0.06)
@@ -966,7 +1021,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 		_:
 			return {"error":"That answer is not open to you here."}
 	if memory!="": ForeignDiplomacy.remember(civ_id,memory)
-	return {"outcome":outcome,"reaction":reaction}
+	return {"outcome":_fix(outcome),"reaction":reaction}
 
 # --------------------------------------------------------------------------
 # Offline words: concrete, from the request itself
@@ -989,6 +1044,9 @@ static func open_lines(audience:Dictionary)->Array:
 		"food_loan":
 			out.append_array(["%s asks to borrow %d Food, not to be given it. You'll have %d %s back within the year." % [who,_n(p.amount),_n(p.repay_amt),String(p.repay_res)],
 				"Our stores last about %d more days. Lend us %d Food and %s will pay it back in %s." % [_n(civ.get("food_days",0)),_n(p.amount),who,String(p.repay_res)]])
+		"work_for_food":
+			out.append_array(["We have more hands than food. %d of our young people will work your %s until the next moon but one, for %d Food now." % [int(p.workers),String(p.where),_n(p.food)],
+				"%s asks no gift. Feed our families and our young people will bring you about %d %s." % [who,_n(p.amount),String(p.res)]])
 		"barter":
 			out.append_array(["We have %s to spare and not enough %s. %d of ours for %d of yours." % [String(p.get_res),String(p.give_res),_n(p.get_amt),_n(p.give_amt)],
 				"%s sent me to trade: %d %s for %d %s, carried to your door." % [who,_n(p.get_amt),String(p.get_res),_n(p.give_amt),String(p.give_res)]])
@@ -1031,7 +1089,7 @@ static func open_lines(audience:Dictionary)->Array:
 		"sacred_site":
 			out.append_array(["%s lies in your %s. %s asks that our people may go there each spring." % [Hall._cap_first(String(p.what).replace("its ","our ")),String(p.place),who],
 				"Our people have gone to the %s since before your people came. %s asks leave to keep going." % [String(p.place),who]])
-	return out
+	return out.map(func(line:Variant)->String:return _fix(String(line)))
 
 # --------------------------------------------------------------------------
 # Daily: loans fall due
@@ -1048,6 +1106,13 @@ static func daily(day:int)->void:
 			list.erase(pledge); continue
 		if _at_war(civ):
 			pledge["due"]=day+90; continue
+		if String(pledge.get("kind",""))=="labour":
+			# Their workers' own gathering, not their stores.
+			list.erase(pledge)
+			var brought:=EXCHANGE.receive("player",String(pledge.res),float(pledge.amt))
+			Hall._shift_relation(civ_id,0.02,0.0)
+			_record("%s Workers Go Home" % _fix(String(civ.get("name",civ_id))+"'s").substr(0,50),"The workers from %s finished %s and went home. They brought in %d %s." % [String(civ.get("name",civ_id)),_narrate(String(pledge.text)),roundi(brought),String(pledge.res)],civ_id)
+			continue
 		var res:=String(pledge.res)
 		var owed:=float(pledge.amt)
 		var name:=String(civ.get("name",civ_id))
@@ -1077,6 +1142,12 @@ static func daily(day:int)->void:
 		else:
 			pledge["due"]=day+180
 			_record("%s Asks for Time" % name.substr(0,40),"Word from %s: they cannot yet repay %s, and ask until the autumn." % [name,_narrate(String(pledge.text))],civ_id)
+
+static var _poss_re:RegEx
+static func _fix(text:String)->String:
+	if _poss_re==null:
+		_poss_re=RegEx.new(); _poss_re.compile("(\\w)s's\\b")
+	return _poss_re.sub(text,"$1s'",true)
 
 static func _narrate(text:String)->String:
 	var r:=_rivals()

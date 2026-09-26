@@ -98,6 +98,10 @@ const MIGRATION_KEEP:=2
 const MATTERS_MAX:=40
 const MATTERS_PER_HOLDER:=5
 const MATTER_DAYS:=150
+## Fast surrogate for long envoy checks (tests/fun_audit/envoy_variety_probe.gd):
+## only foreign occasions, pacing and envoy business run; the court, aims,
+## crises, lives and war loops are skipped. Never set in play.
+static var envoys_only:=false
 ## Set while a test, capture or the ruler's own call raises a court audience directly.
 static var _court_direct:=false
 ## Occasions that continue an earlier audience (they may follow sooner).
@@ -148,6 +152,7 @@ const SITUATIONS:={
 	"redress_demand":{"kind":"threat","headline":"demands redress for an old wrong","mechanic":"rival_rulers.gd grudges; stores debited or ForeignDiplomacy.apply_conversation_reaction"},
 	# Wider envoy business (envoy_requests.gd): each from real state, each resolved through real ledgers and relations.
 	"food_loan":{"kind":"request","headline":"asks to borrow food against their next harvest","mechanic":"envoy_requests.gd; stores lent, repaid by traders when due (pledges)"},
+	"work_for_food":{"kind":"request","headline":"offers their labour for food","mechanic":"envoy_requests.gd; Food now, goods their workers gather delivered when the work is done"},
 	"barter":{"kind":"request","headline":"offers a trade of goods","mechanic":"envoy_requests.gd; civilization_exchange between real ledgers"},
 	"refuge":{"kind":"request","headline":"asks you to take in their families","mechanic":"envoy_requests.gd; people move between the peoples"},
 	"forage_leave":{"kind":"request","headline":"asks leave to hunt in your country","mechanic":"envoy_requests.gd; rival_rulers hunting bond drains Food monthly"},
@@ -390,16 +395,18 @@ static func daily(day:int)->Array[Dictionary]:
 	if WorldSimulation.actor_id!="player": return arrivals
 	var s:=state()
 	# Dread curdled with resentment shows first in speech, then in flight.
-	for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
+	if not envoys_only:
+		for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
 	_expire(day)
 	_observe(day)
 	_prune_occasions(day)
 	_prune_matters(day)
-	_lives().call("daily",day)
-	_aims().call("daily",day)
-	_crises().call("daily",day)
+	if not envoys_only:
+		_lives().call("daily",day)
+		_aims().call("daily",day)
+		_crises().call("daily",day)
 	_rivals().call("daily",day)
-	_war().call("daily",day)
+	if not envoys_only: _war().call("daily",day)
 	_requests().call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
@@ -1076,7 +1083,7 @@ static func _observe(day:int)->void:
 			_add_occasion({"key":"third_war:%s:%s:%d" % [String(pair[0]),String(pair[1]),floori(day/365.0)],"type":"third_war","civ_id":id,"day":day,"expires":day+100,
 				"data":{"text":"war has broken out between %s and %s" % [name,enemy_name],"enemy":String(enemy),"enemy_name":enemy_name}})
 		civs[id]=now
-	_observe_court(day,baseline)
+	if not envoys_only: _observe_court(day,baseline)
 	watch["ready"]=true
 	if baseline: s.next_any=maxi(int(s.next_any),day+10)
 	_ambient(day)

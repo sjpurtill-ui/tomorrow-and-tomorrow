@@ -55,7 +55,7 @@ func _back(type:String,civ_index:int=0)->Dictionary:
 	# Each test answer stands alone: bonds made by the last one are cleared.
 	(Rivals.character(met[civ_index]).bonds as Array).clear()
 	match type:
-		"food_loan","refuge","forage_leave": civ.food_days=10.0
+		"food_loan","refuge","forage_leave","work_for_food": civ.food_days=10.0
 		"healer_plea": civ.health=0.4
 		"mediation":
 			civ.relations[String(other.id)]={"border_tension":0.7,"at_war":false}
@@ -103,7 +103,7 @@ func test_every_kind_rises_from_backing_state_and_every_answer_resolves_within_b
 			assert_int(absi(int(GameState.population_total)-pop_before)).is_less_equal(40)
 			assert_float(float(civ.player_relation.opinion)).is_between(-1.0,1.0)
 			assert_float(float(civ.player_relation.border_tension)).is_between(0.0,1.0)
-	assert_int(raised).is_greater_equal(11)
+	assert_int(raised).is_greater_equal(12)
 
 func test_requests_need_the_state_that_backs_them()->void:
 	var civ:=_civ()
@@ -134,6 +134,18 @@ func test_a_loan_is_repaid_by_traders_without_another_envoy()->void:
 		assert_int(ER.pledges().size()).is_equal(0)
 		assert_float(Hall.player_stock(res)).is_greater(before)
 	assert_int(Hall.waiting().size()).is_equal(queued)
+
+func test_their_workers_deliver_what_they_gathered()->void:
+	var audience:=_raise("work_for_food")
+	assert_dict(audience).is_not_empty()
+	var p:Dictionary=audience.situation.req
+	var before:=Hall.player_stock(String(p.res))
+	assert_bool(bool(Hall.resolve(String(audience.id),"accept").ok)).is_true()
+	var due:=int(GameState.elapsed_days)+int(p.days)
+	GameState.elapsed_days=due+(10-due%10)%10
+	ER.daily(int(GameState.elapsed_days))
+	assert_float(Hall.player_stock(String(p.res))).is_greater(before)
+	assert_int(ER.pledges().size()).is_equal(0)
 
 func test_refusing_is_remembered_by_their_ruler()->void:
 	var audience:=_raise("sacred_site")
