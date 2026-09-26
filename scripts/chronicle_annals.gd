@@ -24,6 +24,7 @@ extends RefCounted
 ##   told_lines   normalised sentences already told by returning scouts
 ##   annal_year   the last 0-based year already closed
 
+const Years:=preload("res://scripts/chronicle_years.gd")
 const REPEAT_QUIET_DAYS:=240
 ## The same words told again within this many days are kept as a tally line.
 const REPEAT_TEXT_DAYS:=1095
@@ -48,6 +49,7 @@ const ROUTINE_SCOUT:=["turned the party back","hurt on the road","who kept movin
 const REGARD_WORDS:={"worships":"speak of the god with love and fear together","reveres":"speak of the god with reverence","fearless_love":"speak of the god warmly and without fear",
 	"terror":"lower their voices when they speak of the god","hates_dread":"fear the god, and some curse the god in whispers","resents":"grumble about the god when they think no one hears",
 	"wary":"keep a careful distance from the god","cold":"speak of the god less and less","dutiful":"do what the god asks, without much feeling"}
+const ROLE_PLAIN:={"engineer":"builder","physician":"healer","scholar":"one who asked why things are so","agronomist":"grower","organizer":"one who ordered the common work","artist":"carver and painter","explorer":"pathfinder","general":"war leader","architect":"master builder"}
 const DIVINE_WORDS:={"terrify":"The god's fury fell on %s before the court.","penance":"%s was made to fast and keep vigil for the god.","cast_out":"%s was cast out at the god's word.",
 	"strike_down":"%s was put to death at the god's word.","bless":"The god blessed %s before everyone.","boon":"The god gave %s a gift from the stores.","raise_up":"The god raised %s above the others.",
 	"flight":"%s fled beyond the god's reach."}
@@ -70,7 +72,8 @@ static func acc(c:Dictionary,day:int=-1)->Dictionary:
 
 static func _new_acc(year:int)->Dictionary:
 	return {"year":year,"pop0":_people(),"crises":[],"deaths":[],"learned":[],"firsts":[],"scouts":{"n":0,"km":0,"days":0,"hurt":0,"back":0,"news":0},
-		"contacts":[],"aims":[],"works":[],"wars":[],"heads":[],"milestones":[],"born":0,"buried":0,"folded":0,"regard":""}
+		"contacts":[],"aims":[],"works":[],"wars":[],"heads":[],"milestones":[],"born":0,"buried":0,"folded":0,"regard":"",
+		"abroad":[],"births":[],"turnings":[]}
 
 
 static func _list_of(c:Dictionary,key:String)->Array:
@@ -363,6 +366,11 @@ static func _ending(c:Dictionary,id:String,title:String,text:String)->String:
 		(a.crises as Array).append(cr)
 	cr.short=short;cr.deaths=deaths;cr.silent=silent;cr.ended=true;cr.type=type
 	if holder!="":cr.holder=holder
+	# Who died of it and who stood out, for the year's telling.
+	var named:=_victims(live,body)
+	if not named.is_empty():cr["dead"]=named
+	var helper:=_helper(live,body)
+	if helper!="":cr["helper"]=helper
 	var lines:PackedStringArray=[]
 	var prior:=_prior(c,type)
 	var seed:=hash(id)
@@ -402,6 +410,28 @@ static func _ending(c:Dictionary,id:String,title:String,text:String)->String:
 	log.append({"id":id,"type":type,"short":short,"y":_year_of(int(GameState.elapsed_days)),"deaths":deaths,"silent":silent})
 	while log.size()>CRISIS_LOG_MAX:log.pop_front()
 	return (body+" "+" ".join(lines)).strip_edges()
+
+
+## The dead of a crisis by name ("Ulim, an old man"), at most three.
+static func _victims(live:Dictionary,body:String)->Array:
+	var out:Array=[]
+	for d in live.get("dead",[]):if out.size()<3:out.append(String(d))
+	if not out.is_empty():return out
+	var m:=RegEx.create_from_string("(?:took|killed) \\w+(?: before it was done)?(?:, among them|:) ([^.]+)\\.").search(body)
+	if m==null:return out
+	for part in m.get_string(1).replace("; and ",";").split(";"):
+		var p:=part.strip_edges()
+		if p!="" and out.size()<3:out.append(p)
+	return out
+
+
+static func _helper(live:Dictionary,body:String)->String:
+	var helpers:Variant=live.get("helpers",[])
+	if helpers is Array and not (helpers as Array).is_empty():return String(helpers[0])
+	for pattern in ["(?:^|\\. )([A-Z][^.;]*?) sat with the sick every night","(?:^|\\. )([A-Z][^.;]*?) carried water to the sick fire","It was ([A-Z][^.;]*?) who sat up with the worst"]:
+		var m:=RegEx.create_from_string(pattern).search(body)
+		if m!=null:return m.get_string(1).strip_edges()
+	return ""
 
 
 static func _deaths_in(text:String)->int:
@@ -493,13 +523,26 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 				if title.ends_with(" Acts Alone"):cr.holder=title.trim_suffix(" Acts Alone")
 		return
 	if key.begins_with("learned:"):return
+	var abroad:=_abroad_note(key,title,String(entry.get("text","")),kind,tier)
+	if not abroad.is_empty():
+		var heard:Array=_list_of(a,"abroad")
+		if heard.size()<8:heard.append(abroad)
+		return
+	if key.begins_with("turning:") and tier!="whisper":
+		_list_of(a,"turnings").append({"title":title,"text":Years.first_sentence(String(entry.get("text","")))})
+		return
+	if kind=="birth" and tier!="whisper" and key.begins_with("beat:") and "named_child" in key:
+		var born:=Years.first_sentence(String(entry.get("text","")))
+		for pair in [[" has a daughter"," had a daughter"],[" has a son"," had a son"],[" has a child"," had a child"]]:born=born.replace(String(pair[0]),String(pair[1]))
+		_add_unique(_list_of(a,"births"),born)
+		return
 	if key.begins_with("discovery:") and tier!="whisper":
 		_add_unique(a.learned,title)
 		if bool(entry.get("first",false)):_add_unique(a.firsts,title)
 		return
 	if title.ends_with(" Is Dead") and kind=="death":
 		var age:=RegEx.create_from_string("(?:aged|at) (\\d+)").search(String(entry.get("text","")))
-		(a.deaths as Array).append({"name":title.trim_suffix(" Is Dead"),"age":int(age.get_string(1)) if age!=null else 0,"great":tier=="moment"})
+		(a.deaths as Array).append({"name":title.trim_suffix(" Is Dead"),"age":int(age.get_string(1)) if age!=null else 0,"great":tier=="moment","role":_role_of(String(entry.get("text","")))})
 		return
 	if title.ends_with(" Keeps the Fire") or key.begins_with("court:succession:kept:"):
 		var m:=RegEx.create_from_string("^(.+?) (?:Keeps the Fire|Follows |in .+'s Place)").search(title)
@@ -546,6 +589,8 @@ static func roll(c:Dictionary,today:int)->Array:
 		if int(a.year)==closing:
 			var told_year:=compose(c,a)
 			if not told_year.is_empty():told.append(told_year)
+			var told_age:=compose_age(c,closing)
+			if not told_age.is_empty():told.append(told_age)
 			a=_new_acc(closing+1)
 			c["year_acc"]=a
 		c["annal_year"]=closing
@@ -555,6 +600,7 @@ static func roll(c:Dictionary,today:int)->Array:
 
 ## Writes the entry for the year held in `a` and remembers it. Returns the
 ## record request (Chronicle.record is called by the caller) with "memory".
+## The lines themselves are chosen and ordered by chronicle_years.gd.
 static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var y:=int(a.year)
 	var annals:Array=_list_of(c,"annals")
@@ -563,158 +609,61 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var seed:=y*7919+int(GameState.world_seed) if Engine.get_main_loop()!=null else y*7919
 	var crises:Array=a.crises
 	var memory:={"y":y,"crises":crises.size(),"deaths":0,"learned":(a.learned as Array).size(),"pop":_people(),"km":int(a.scouts.km),"silent":0,"answered":0,"regard":"","name":""}
-	var lines:PackedStringArray=[]
-	# 1. Troubles, with the run of quiet years they end or extend.
 	var crisis_deaths:=0
-	for cr in crises:crisis_deaths+=int(cr.deaths)
+	var worst:Dictionary={}
+	var kinds:Array=[]
+	for cr in crises:
+		cr["told"]=_crisis_short(cr)
+		crisis_deaths+=int(cr.deaths)
+		if int(cr.deaths)>0 and (worst.is_empty() or int(cr.deaths)>int(worst.deaths)):worst=cr
+		if not kinds.has(_crisis_short(cr)):kinds.append(_crisis_short(cr))
 	memory.deaths=crisis_deaths
-	if crises.is_empty():
-		var quiet:=1
-		for i in range(annals.size()-1,-1,-1):
-			if int((annals[i] as Dictionary).get("crises",1))==0:quiet+=1
-			else:break
-		var log:=crisis_log(c)
-		if annals.size()>=1 and quiet==1:
-			if not log.is_empty() and posmod(seed,3)==2:
-				var last:Dictionary=log.back()
-				lines.append("No trouble came this year; the last was %s, in year %d." % [String(last.short),int(last.y)+1])
-			else:lines.append(["No sickness, hunger, fire or flood came this year.","It was a year without sickness, hunger or fire.","No sickness, hunger, fire or flood came this year."][posmod(seed,3)])
-		elif quiet>=2 and quiet<ORDINALS.size():lines.append("It was the %s year in a row without sickness, hunger or fire." % ORDINALS[quiet])
-		elif quiet>=ORDINALS.size():lines.append("%d years now without sickness, hunger or fire." % quiet)
-	else:
-		var shorts:PackedStringArray=[]
-		var seen_short:={}
-		for cr in crises:
-			var sn:=_crisis_short(cr)
-			seen_short[sn]=int(seen_short.get(sn,0))+1
-			if int(seen_short[sn])==1 and shorts.size()<3:shorts.append(sn)
-		for i in shorts.size():
-			if int(seen_short[shorts[i]])>1:shorts[i]="%s %s" % [shorts[i],_times(int(seen_short[shorts[i]]))]
-		if crises.size()==1:
-			var cr:Dictionary=crises[0]
-			if not bool(cr.ended):lines.append("%s was still on the camp at the year's end." % _cap(shorts[0]))
-			elif int(cr.deaths)>0:lines.append("%s took %s." % [_cap(shorts[0]),_number(int(cr.deaths))])
-			else:lines.append(["%s came and went without a death." % _cap(shorts[0]),"No one died of %s." % shorts[0]][posmod(seed,2)])
-		else:
-			var head:="%s troubles came: %s." % [_cap(_number(crises.size())),_list(Array(shorts))]
-			if crisis_deaths>0:head+=" Together they took %s." % _number(crisis_deaths)
-			else:head+=" "+["None of them killed anyone.","No one died of any of them.","All of them passed without a death."][posmod(seed,3)]
-			lines.append(head)
-		var worst_year:=0
-		for m in annals:worst_year=maxi(worst_year,int((m as Dictionary).get("deaths",0)))
-		if crisis_deaths>0 and crisis_deaths>worst_year and annals.size()>=3:lines.append("No year since the founding has lost so many to its troubles.")
-	# 2. The god: silence or word in the troubles, acts of wrath and favour,
-	# and how the people's talk of the god has turned.
-	var holders:PackedStringArray=[]
-	var silent:=0;var answered:=0
 	for cr in crises:
 		if not bool(cr.ended):continue
-		if bool(cr.silent):
-			silent+=1
-			if String(cr.holder)!="" and not holders.has(String(cr.holder)):holders.append(String(cr.holder))
-		else:answered+=1
-	memory.silent=silent;memory.answered=answered
-	if silent>0 and answered==0:
-		var who:=_list(Array(holders)) if not holders.is_empty() else "the court"
-		var years:=1
-		for i in range(annals.size()-1,-1,-1):
-			var m:Dictionary=annals[i]
-			if int(m.get("crises",0))==0:continue
-			if int(m.get("silent",0))>0 and int(m.get("answered",0))==0:years+=1
-			else:break
-		if years>=3 and years<ORDINALS.size():lines.append(["For the %s year the god kept silent through every trouble, and %s decided." % [ORDINALS[years],who],"%s decided again; in %s years of troubles the god has not answered once." % [_cap(who),_number(years)]][posmod(seed>>2,2)])
-		elif silent==1:lines.append(_cap(String(["The god kept silent, and %s decided.","%s decided; the god said nothing.","The god gave no word, and %s chose the course."][posmod(seed>>1,3)]) % who))
-		else:lines.append(["Each time the god kept silent, and %s decided.","The god was silent through all of them; %s decided each time."][posmod(seed>>1,2)] % who)
-	elif answered>0 and silent>0:
-		lines.append("The god answered %s and left %s to the court." % [_times(answered),_times(silent)])
-	elif answered>0:
-		lines.append("When trouble came to the court, the god answered.")
-	for line in _divine_lines(y):lines.append(line)
+		if bool(cr.silent):memory.silent=int(memory.silent)+1
+		else:memory.answered=int(memory.answered)+1
 	var regard:=_regard()
 	memory.regard=regard
-	if regard!="" and not annals.is_empty():
-		var before:=String((annals.back() as Dictionary).get("regard",""))
-		if before!="" and before!=regard:
-			lines.append("By the year's end people %s; a year before they would %s." % [String(REGARD_WORDS.get(regard,"")),String(REGARD_WORDS.get(before,""))])
-	# 3. The dead and the living who took their place.
-	var deaths:Array=a.deaths
-	if not deaths.is_empty():
-		var named:PackedStringArray=[]
-		for d in deaths.slice(0,3):
-			named.append(("%s, at %d" % [String(d.name),int(d.age)]) if int(d.age)>0 else String(d.name))
-		var more:=" and %s others the people knew" % _number(deaths.size()-3) if deaths.size()>3 else ""
-		lines.append("Died this year: %s%s." % ["; ".join(named),more])
-	if not (a.heads as Array).is_empty():
-		lines.append("%s now %s the fire." % [_list(a.heads),"keeps" if (a.heads as Array).size()==1 else "keep"])
-	# 4. What was learned, measured against earlier years.
-	var learned:Array=a.learned
-	var most:=0
-	for m in annals:most=maxi(most,int((m as Dictionary).get("learned",0)))
-	if learned.size()>0:
-		var names:Array=[]
-		for n in learned:names.append(String(n).to_lower())
-		var who_learned:="the keepers recorded" if not tally else "the people learned"
-		if names.size()<=3:lines.append("%s %s." % [_cap(who_learned),_list(names)])
-		else:lines.append("%s %s new ways, among them %s." % [_cap(who_learned),_number(names.size()),_list(names.slice(0,3))])
-		if names.size()>most and annals.size()>=3 and names.size()>=3:lines.append("No year before had taught so much.")
-	else:
-		var dry:=1
-		for i in range(annals.size()-1,-1,-1):
-			if int((annals[i] as Dictionary).get("learned",1))==0:dry+=1
-			else:break
-		if dry>=3 and dry<ORDINALS.size():lines.append("Nothing new was learned, for the %s year running." % ORDINALS[dry])
-	# 5. The roads.
-	var sc:Dictionary=a.scouts
-	if int(sc.n)>0:
-		var road:="%s went out %s and walked some %s km" % ["Scouts" if tally else "Parties",_times(int(sc.n)),_grouped(int(sc.km))]
-		if posmod(seed>>4,2)==1:road="The scouts walked some %s km on %s" % [_grouped(int(sc.km)),"one journey" if int(sc.n)==1 else "%s journeys" % _number(int(sc.n))]
-		var far:=0
-		for m in annals:far=maxi(far,int((m as Dictionary).get("km",0)))
-		if int(sc.km)>far and annals.size()>=3 and far>0:road+=", farther than in any year before"
-		var hard:PackedStringArray=[]
-		if int(sc.hurt)>0:hard.append("%s hurt and carried home" % ("one was" if int(sc.hurt)==1 else "%s were" % _number(int(sc.hurt))))
-		if int(sc.back)>0:hard.append("%s turned back by sickness or hard going" % ("one party" if int(sc.back)==1 else "%s parties" % _number(int(sc.back))))
-		lines.append(road+("; "+" and ".join(hard) if not hard.is_empty() else "")+".")
-	# 6. Aims, works and other peoples.
-	for aim in a.aims:
-		match String(aim.kind):
-			"done":lines.append("The people kept their aim: %s." % String(aim.name))
-			"fail":lines.append("%s was not done in time." % String(aim.name))
-			"start":lines.append("A new aim was taken up: %s." % String(aim.name))
-	for work in a.works:lines.append("%s was finished." % String(work))
-	if not (a.contacts as Array).is_empty():
-		var told:PackedStringArray=[]
-		for t in (a.contacts as Array).slice(0,2):
-			told.append(("the %s came into our knowing" % String(t).get_slice(": ",1)) if ": " in String(t) else String(t))
-		lines.append("Of other peoples: %s." % "; ".join(told))
-	if not (a.wars as Array).is_empty():lines.append("Of war: %s." % "; ".join(PackedStringArray((a.wars as Array).slice(0,2))))
-	# 7. The count of the people, against the last year and the best.
-	var pop:=int(memory.pop)
-	var pop0:=int(a.pop0)
-	if pop>0 and pop0>0:
-		var delta:=pop-pop0
-		var peak:=0
-		for m in annals:peak=maxi(peak,int((m as Dictionary).get("pop",0)))
-		var count:=("%d souls at the hearths" if tally else "%d people in the registers") % pop
-		var change:=""
-		if delta>0:change=", %d more than a year before" % delta
-		elif delta<0:change=", %d fewer than a year before" % -delta
-		var rec:=""
-		if pop>peak and peak>0 and delta>0:rec=", more than ever before"
-		elif delta!=0 or int(a.born)+int(a.buried)>0:
-			var falls:=0
-			for i in range(annals.size()-1,-1,-1):
-				var prev_pop:=int((annals[i] as Dictionary).get("pop",0))
-				var older:=int((annals[i-1] as Dictionary).get("pop",0)) if i>0 else 0
-				if older>0 and prev_pop<older:falls+=1
-				else:break
-			if delta>0 and falls>=2:rec=", the first rise in %s years" % _number(falls+1)
-		var births:=""
-		if int(a.born)+int(a.buried)>0:births=" (%s born, %s buried)" % [_number(int(a.born)),_number(int(a.buried))]
-		if delta!=0 or rec!="":lines.append("%s%s%s%s." % [_cap(count),change,rec,births])
+	# Live reads for the year: envoys answered, figures who came forward, the
+	# god's acts, and the new way that changed the most.
+	a["envoys"]=_envoy_lines(y)
+	a["figures"]=_figure_lines(y)
+	var recent:={}
+	for m in annals.slice(maxi(0,annals.size()-Years.FRESH_YEARS)):
+		for u in (m as Dictionary).get("used",[]):recent[String(u)]=true
+	var ctx:={"seed":seed,"era":"tally" if tally else "annals","recent":recent,"used":[],"regard":regard,"divine":_divine_lines(y),"pop":int(memory.pop),"change":_biggest_change(a.learned),"sayable":_sayable(a.learned)}
+	var picked:=Years.entry(Years.items(a,annals,ctx))
+	var lines:PackedStringArray=picked.lines
 	# The year's name, from its most memorable event.
 	var name:=_name_year(a,annals)
 	memory.name=name
+	# What the years after need to set themselves against.
+	memory["used"]=ctx.used
+	memory["sig"]=picked.sig
+	if not (picked.abroad as Array).is_empty():memory["abroad"]=picked.abroad
+	if not worst.is_empty():memory["worst"]=_crisis_short(worst)
+	if not kinds.is_empty():memory["kinds"]=kinds.slice(0,4)
+	var oldest:=0
+	var lost:Array=[]
+	for d in a.deaths:
+		oldest=maxi(oldest,int(d.age))
+		if bool(d.get("great",false)) or String(d.get("role",""))!="":lost.append(String(d.name).get_slice(",",0))
+	if oldest>0:memory["oldest"]=oldest
+	if not lost.is_empty():memory["lost"]=lost.slice(0,4)
+	if not (a.heads as Array).is_empty():memory["heads"]=(a.heads as Array).duplicate()
+	var kept:Array=[];var unmet:Array=[]
+	for aim in a.aims:
+		if String(aim.kind)=="done":kept.append(String(aim.name))
+		elif String(aim.kind)=="fail":unmet.append(String(aim.name))
+	if not kept.is_empty():memory["kept"]=kept
+	if not unmet.is_empty():memory["unmet"]=unmet
+	var met:Array=[]
+	for t in a.contacts:if ": " in String(t):met.append(String(t).get_slice(": ",1))
+	if not met.is_empty():memory["met"]=met
+	if not (a.works as Array).is_empty():memory["works"]=(a.works as Array).duplicate()
+	var turns:Array=[]
+	for t in a.get("turnings",[]):turns.append(String((t as Dictionary).get("title","")))
+	if not turns.is_empty():memory["turns"]=turns
 	annals.append(memory)
 	while annals.size()>ANNALS_MAX:annals.pop_front()
 	var title:=_cap(name) if name!="" else _quiet_title(a,seed)
@@ -724,17 +673,36 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	return {"key":"annal:%d" % y,"day":y*365+364,"title":title,"text":text,"kind":"annal","tier":"notice","ledger":false,"domain":"annals","year":y+1,"memory":memory,"facts":_facts(a,memory,title)}
 
 
+## Every GENERATION_YEARS, an account of the generation just ended, told
+## after its last year's entry. {} when it is not due or has too little to say.
+static func compose_age(c:Dictionary,y:int)->Dictionary:
+	var annals:Array=_list_of(c,"annals")
+	if not Years.age_due(y,annals):return {}
+	var told:=Years.age(y,annals,y*7919)
+	if told.is_empty():return {}
+	return {"key":"age:%d" % y,"day":y*365+364,"title":String(told.title),"text":String(told.text),"kind":"annal","tier":"notice","ledger":false,"domain":"annals","year":y+1}
+
+
 ## The year's structured facts, for the optional live rewrite
 ## (chronicle_polish.gd): only what the entry was built from.
 static func _facts(a:Dictionary,memory:Dictionary,title:String)->Dictionary:
 	var troubles:Array=[]
 	for cr in a.crises:
-		troubles.append({"name":_crisis_short(cr),"deaths":int(cr.get("deaths",0)),"over":bool(cr.get("ended",false)),"god_silent":bool(cr.get("silent",false)),"decided_by":String(cr.get("holder",""))})
+		troubles.append({"name":_crisis_short(cr),"deaths":int(cr.get("deaths",0)),"over":bool(cr.get("ended",false)),"god_silent":bool(cr.get("silent",false)),"decided_by":String(cr.get("holder","")),
+			"dead":(cr.get("dead",[]) as Array).duplicate(),"helper":String(cr.get("helper",""))})
 	var dead:Array=[]
-	for d in a.deaths:dead.append({"name":String(d.name),"age":int(d.age)})
+	for d in a.deaths:dead.append({"name":String(d.name),"age":int(d.age),"role":String(d.get("role",""))})
 	return {"year":int(a.year)+1,"title":title,"troubles":troubles,"dead":dead,"new_keepers":(a.heads as Array).duplicate(),"learned":(a.learned as Array).duplicate(),
 		"scouts":(a.scouts as Dictionary).duplicate(),"aims":(a.aims as Array).duplicate(true),"works":(a.works as Array).duplicate(),"peoples":(a.contacts as Array).duplicate(),
-		"wars":(a.wars as Array).duplicate(),"people_now":int(memory.get("pop",0)),"people_a_year_before":int(a.pop0),"born":int(a.born),"buried":int(a.buried)}
+		"wars":(a.wars as Array).duplicate(),"people_now":int(memory.get("pop",0)),"people_a_year_before":int(a.pop0),"born":int(a.born),"buried":int(a.buried),
+		"abroad":_texts(a.get("abroad",[])),"envoys":(a.get("envoys",[]) as Array).duplicate(),"named_births":(a.get("births",[]) as Array).duplicate(),"came_forward":(a.get("figures",[]) as Array).duplicate(),
+		"changed_daily_life":_texts(a.get("turnings",[]))}
+
+
+static func _texts(items:Array)->Array:
+	var out:Array=[]
+	for i in items:out.append(String((i as Dictionary).get("text","")) if i is Dictionary else String(i))
+	return out
 
 
 static func _crisis_short(cr:Dictionary)->String:
@@ -789,7 +757,7 @@ static func _divine_lines(y:int)->Array:
 	if not events is Array:return out
 	for e in events:
 		if not e is Dictionary or _year_of(int(e.get("day",-1)))!=y:continue
-		var words:=String(DIVINE_WORDS.get(String(e.get("action","")),""))
+		var words:=String(Years.DIVINE_WORDS.get(String(e.get("action","")),""))
 		if words=="" or String(e.get("name",""))=="":continue
 		out.push_front(words % String(e.name))
 		if out.size()>=2:break
@@ -805,6 +773,120 @@ static func _regard()->String:
 	if not officials is Array or (officials as Array).is_empty():return ""
 	var read:Variant=regard.call("people_regard",officials)
 	return String((read as Dictionary).get("id","")) if read is Dictionary else ""
+
+
+## "Imeri of Windgap, First Elder, died aged 67" -> "first elder";
+## "Adu Bone-Setter, engineer, is dead" -> "builder".
+static func _role_of(text:String)->String:
+	var m:=RegEx.create_from_string("^[^,.]+, ([^,.]+?), (?:died|is dead)").search(text)
+	if m==null:return ""
+	var role:=m.get_string(1).strip_edges()
+	var plain:=String(ROLE_PLAIN.get(role.to_lower(),""))
+	return plain if plain!="" else role.to_lower()
+
+
+## Word of other peoples, told once in the year's entry: vows, famines heard
+## of, debts repaid, their rulers' doings. {} when the line is not such word.
+static func _abroad_note(key:String,title:String,text:String,kind:String,tier:String)->Dictionary:
+	var first:=Years.first_sentence(text)
+	if key.begins_with("stale:"):
+		var parts:=key.split(":")
+		var said:=first.trim_prefix("Travellers told of it: ")
+		if said==first:return {"sig":"stale:"+title,"text":first,"w":3.0}
+		return {"sig":"stale:%s:%s" % [parts[1] if parts.size()>1 else "",parts[2] if parts.size()>2 else ""],"text":"Travellers brought word that %s" % _lower_first(said),"w":3.0}
+	if tier=="whisper":return {}
+	if key.begins_with("aim:rival:"):
+		var parts2:=key.split(":")
+		var status:=parts2[2] if parts2.size()>2 else ""
+		var civ:=parts2[3] if parts2.size()>3 else ""
+		var line:=first
+		var w:=4.0
+		match status:
+			"known":
+				var m:=RegEx.create_from_string("slip: (.+?) has sworn to (.+?)\\.").search(text)
+				if m!=null:line="Word came that %s had sworn to %s." % [m.get_string(1),m.get_string(2)]
+			"warn":
+				var m2:=RegEx.create_from_string("kept: (.+?) is close to what they swore: (.+?)\\.").search(text)
+				if m2!=null:line="%s was said to be close to what they swore: %s." % [m2.get_string(1),m2.get_string(2)]
+				w=5.0
+			"fulfilled":
+				line=first.replace(" has done what they swore"," did what they swore");w=6.0
+		return {"sig":"vow:%s:%s" % [status,civ],"text":line,"w":w}
+	if key.begins_with("er:"):return {"sig":"","text":first,"w":5.0}
+	if kind=="contact" and tier=="notice" and not key.begins_with("first:") and not key.begins_with("beat:"):
+		if title.ends_with(" Is Dead"):return {"sig":"dead:"+title,"text":"Word came that %s had died." % title.trim_suffix(" Is Dead"),"w":4.0}
+		return {"sig":"news:"+_family(title),"text":first,"w":3.5}
+	return {}
+
+
+## How the god answered envoys this year, from what their peoples remember
+## (envoy_requests.gd answers). Live state only; nothing in tests or replays.
+static func _envoy_lines(y:int)->Array:
+	var out:Array=[]
+	if Engine.get_main_loop()==null:return out
+	var requests:Script=load("res://scripts/envoy_requests.gd")
+	var hall:Script=load("res://scripts/audience_hall.gd")
+	if requests==null or hall==null:return out
+	var store:Variant=requests.call("store")
+	if not store is Dictionary or not (store as Dictionary).get("answers") is Dictionary:return out
+	var answers:Dictionary=store.answers
+	for civ_id in answers:
+		if not answers[civ_id] is Array:continue
+		for entry in answers[civ_id]:
+			if not entry is Dictionary or _year_of(int(entry.get("d",-1)))!=y:continue
+			var line:=Years.envoy_line(String(hall.call("_civ_name",String(civ_id))),entry)
+			if line!="" and not out.has(line):out.append(line)
+			if out.size()>=3:return out
+	return out
+
+
+## Remarkable people who came forward this year (HistoricalFigures), told by
+## what they do in the people's own words. Live state only.
+static func _figure_lines(y:int)->Array:
+	var out:Array=[]
+	var tree:=Engine.get_main_loop() as SceneTree
+	if tree==null or tree.root==null:return out
+	var figures:Node=tree.root.get_node_or_null("HistoricalFigures")
+	if figures==null or not figures.get("people") is Array:return out
+	for p in figures.get("people"):
+		if not p is Dictionary or int(p.get("emerged",-1))<=0 or _year_of(int(p.emerged))!=y:continue
+		var role:=String(Years.ROLE_WORDS.get(String(p.get("role","")),""))
+		if role=="":continue
+		var age:=(int(p.emerged)-int(p.get("born",p.emerged)))/365
+		out.append(("%s came forward this year as a %s, at %d." % [String(p.get("name","")),role,age]) if age>0 else ("%s came forward this year as a %s." % [String(p.get("name","")),role]))
+		if out.size()>=2:break
+	return out
+
+
+## The year's new ways whose names use only words the people have.
+static func _sayable(names:Array)->Array:
+	if Engine.get_main_loop()==null:return names.duplicate()
+	var voice:=preload("res://scripts/character_voice.gd")
+	var tags:=voice.era_tags("player")
+	return names.filter(func(n:Variant)->bool:return voice.permits(String(n),tags))
+
+
+## Of the ways learned this year, the one that weighs most in daily life
+## (largest effects), with a sentence on what it is. {} when unknown.
+static func _biggest_change(names:Array)->Dictionary:
+	if names.is_empty() or Engine.get_main_loop()==null:return {}
+	var best:={}
+	var best_w:=-1.0
+	for d in GameState.discovery_log:
+		if not d is Dictionary or not names.has(String(d.get("name",""))):continue
+		var w:=0.0
+		var effects:Variant=d.get("effects",{})
+		if effects is Dictionary:
+			for k in effects:w+=absf(float(effects[k]))
+		var how:=Years.first_sentence(String(d.get("description","")))
+		if how=="" or how.length()>200 or preload("res://scripts/plain_speech.gd").is_maxim(how):continue
+		# Nothing the people have no word for yet (a name can run ahead of them).
+		var voice:=preload("res://scripts/character_voice.gd")
+		if not voice.permits(String(d.get("name",""))+" "+how,voice.era_tags("player")):continue
+		if w>best_w:
+			best_w=w
+			best={"name":String(d.get("name","")),"how":how}
+	return best
 
 
 # --- Words ----------------------------------------------------------------------
