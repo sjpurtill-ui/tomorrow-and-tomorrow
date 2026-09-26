@@ -33,8 +33,8 @@ void fragment(){
 """
 
 static var _veil_shader:Shader
-static var _serif:SystemFont
-static var _italic:SystemFont
+static var _serif:Font
+static var _italic:Font
 
 var source:Variant=null
 var hud:Node
@@ -110,12 +110,12 @@ static func tier_name(item:Dictionary)->String:
 static func plate_color()->Color:
 	return Color("f8f1e3") if T.is_light() else Color("121b1e")
 
-static func serif_font()->SystemFont:
-	if _serif==null:_serif=SystemFont.new();_serif.font_names=PackedStringArray(["Georgia","Noto Serif","Times New Roman","serif"])
+static func serif_font()->Font:
+	if _serif==null:_serif=preload("res://scripts/hud/hud_tokens.gd").voice_font()
 	return _serif
 
-static func italic_font()->SystemFont:
-	if _italic==null:_italic=SystemFont.new();_italic.font_names=PackedStringArray(["Georgia","Noto Serif","Times New Roman","serif"]);_italic.font_italic=true
+static func italic_font()->Font:
+	if _italic==null:_italic=preload("res://scripts/hud/hud_tokens.gd").voice_font(true)
 	return _italic
 
 static func veil_material(amount:float,vignette:float=0.0)->ShaderMaterial:

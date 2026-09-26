@@ -89,8 +89,8 @@ var reveal_tweens:Array[Tween]=[]
 var follow_scroll:=0.0
 var resolved_result:Dictionary={}
 var clock:=0.0
-var _italic:FontVariation
-var _bold:FontVariation
+var _italic:Font
+var _bold:Font
 var proposal_box:VBoxContainer
 var weigh_clock:=-1.0
 var conceive_next:=false
@@ -134,10 +134,10 @@ func _ready()->void:
 	theme=Tokens.control_theme()
 	var host:Node=terrain if is_instance_valid(terrain) else get_tree().current_scene
 	pause.acquire(host)
-	_italic=FontVariation.new();_italic.base_font=ThemeDB.fallback_font;_italic.variation_transform=Transform2D(Vector2(1,0),Vector2(.2,1),Vector2.ZERO)
-	_bold=FontVariation.new();_bold.base_font=ThemeDB.fallback_font;_bold.variation_embolden=.7
+	_italic=Tokens.voice_font(true)
+	_bold=Tokens.font("ui_strong")
 	var backdrop:=ColorRect.new();backdrop.name="Backdrop"
-	backdrop.color=Color(.02,.03,.04,.80) if not Tokens.is_light() else Color(.08,.07,.05,.66)
+	backdrop.color=Tokens.SCRIM
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(backdrop)
 	card=PanelContainer.new();card.name="AudienceCard";add_child(card)
 	get_viewport().size_changed.connect(_fit)
@@ -279,7 +279,7 @@ func _build_herald(audience:Dictionary)->Control:
 		flag.custom_minimum_size=Vector2(50,58);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
-	var cream:=Color("f6ecd6");var cream_dim:=Color("e2d3b4")
+	var cream:=Tokens.INK;var cream_dim:=Tokens.INK_MUTED
 	var work_info:=_work_herald(audience) if kind in WORK_KINDS else {}
 	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(work_info.get("eyebrow",KINDS.get(kind,KINDS.news).eyebrow)),12,cream_dim,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
@@ -293,7 +293,7 @@ func _build_herald(audience:Dictionary)->Control:
 		herald_text=("%s %s" % [subject,headline]).to_upper()
 	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
 	var title:=Tokens.make_label(herald_text,24 if _compact() else 30,cream);title.name="HeraldTitle"
-	title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
+	title.add_theme_font_override("font",Tokens.font("display"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	var day:=int(GameState.elapsed_days);var arrived:=int(audience.get("arrived_day",day))
 	var waited:=day-arrived
 	var byline:="%s, %s" % [String(speaker.get("name","An envoy")),String(speaker.get("title","envoy"))] if origin=="foreign" else String((audience.get("petition",{}) as Dictionary).get("summary",""))
@@ -342,11 +342,9 @@ func _build_herald(audience:Dictionary)->Control:
 func _herald_style()->StyleBoxFlat:
 	## The herald band is a dark wash over the scene: the setting shows through,
 	## the cream lettering stays legible in both themes.
-	var shade:=accent.darkened(.55) if Tokens.is_light() else accent.darkened(.72)
-	shade.a=.76
-	var style:=_plate(shade)
-	style.corner_radius_top_left=9;style.corner_radius_top_right=9
-	style.border_color=accent.lightened(.25);style.border_width_bottom=3
+	var style:=_plate(Tokens.PAPER)
+	style.corner_radius_top_left=Tokens.RADIUS_CARD;style.corner_radius_top_right=Tokens.RADIUS_CARD
+	style.border_color=accent;style.border_width_bottom=3
 	style.content_margin_left=20;style.content_margin_right=20;style.content_margin_top=14;style.content_margin_bottom=12
 	return style
 
@@ -582,7 +580,7 @@ func _build_speech_row()->Control:
 	speech_input.add_theme_stylebox_override("read_only",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,3,8))
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
-	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(110,42)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(110,42)
 	speak_button.add_theme_font_size_override("font_size",15);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
@@ -598,7 +596,7 @@ func _build_options()->void:
 	_build_divine_row()
 	_build_persons_row()
 
-const PERSONS_GROUPS:=[["ask","ASK ▾"],["summon","SUMMON ▾"],["question","QUESTION ▾"],["confront","CONFRONT ▾"],["judge","JUDGE ▾"]]
+const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"]]
 
 func _persons_live()->bool:
 	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
@@ -689,7 +687,7 @@ func _build_divine_row()->void:
 	if acts.is_empty():return
 	if String(Hall.find(audience_id).get("origin",""))=="foreign":
 		var act:Dictionary=acts[0]
-		var button:=Button.new();button.name="Divine_terrify";button.text="TERRIFY"
+		var button:=Button.new();button.name="Divine_terrify";button.text="Terrify"
 		_divine_style(button,Tokens.RED)
 		button.disabled=not bool(act.get("enabled",true))
 		button.tooltip_text=String(act.get("sub","")) if not button.disabled else String(act.get("reason",""))
@@ -698,7 +696,7 @@ func _build_divine_row()->void:
 		# The god's hand on the envoy: maim, flog, kill, seize, drive out.
 		var envoy_acts:=Hall.envoy_acts(audience_id)
 		if not envoy_acts.is_empty():
-			var menu:=MenuButton.new();menu.name="Divine_envoy";menu.text="WRATH ▾";menu.flat=false
+			var menu:=MenuButton.new();menu.name="Divine_envoy";menu.text="Wrath ▾";menu.flat=false
 			_divine_style(menu,Tokens.RED)
 			menu.tooltip_text="Your hand on the envoy: maim, flog, death, chains or the door."
 			var popup:=menu.get_popup()
@@ -712,7 +710,7 @@ func _build_divine_row()->void:
 			divine_row.add_child(menu)
 		return
 	for tone in ["wrath","favor"]:
-		var menu:=MenuButton.new();menu.name="Divine_"+tone;menu.text="WRATH ▾" if tone=="wrath" else "FAVOUR ▾"
+		var menu:=MenuButton.new();menu.name="Divine_"+tone;menu.text="Wrath ▾" if tone=="wrath" else "Favour ▾"
 		menu.flat=false
 		_divine_style(menu,Tokens.RED if tone=="wrath" else Tokens.GOLD)
 		menu.tooltip_text="Your anger: terror, penance, exile, death." if tone=="wrath" else "Your favour: blessing, a gift from the stores, honour."
@@ -1383,8 +1381,7 @@ func _envoy_band(audience:Dictionary)->Control:
 	## they came, and the three small doors (what was said, what you know, settings).
 	var kind:=String(audience.get("kind","news"))
 	var band:=PanelContainer.new();band.name="Herald"
-	var shade:=accent.darkened(.72);shade.a=.62
-	var style:=_plate(shade);style.corner_radius_top_left=9;style.corner_radius_top_right=9
+	var style:=_herald_style()
 	style.content_margin_left=18;style.content_margin_right=14;style.content_margin_top=10;style.content_margin_bottom=10
 	band.add_theme_stylebox_override("panel",style)
 	_place(band,Vector4(0,0,1,0),Vector4(0,0,0,0))
@@ -1396,24 +1393,24 @@ func _envoy_band(audience:Dictionary)->Control:
 	if expires>0 and String(audience.get("status",""))=="waiting":
 		var left:=expires-day
 		timing+=" · leaves %s" % ("today" if left<=0 else ("tomorrow" if left==1 else "in %d days" % left))
-	var eyebrow:=Tokens.make_label("%s · %s" % [String(KINDS.get(kind,KINDS.news).eyebrow),timing.to_upper()],11,CREAM_DIM,.12);words.add_child(eyebrow)
+	var eyebrow:=Tokens.make_label("%s · %s" % [String(KINDS.get(kind,KINDS.news).eyebrow),timing.to_upper()],12,Tokens.INK_MUTED,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
 	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation",{}) is Dictionary else {}
 	var headline:=String(situation.get("headline","")).strip_edges()
 	if not headline.is_empty():herald_text=("%s %s" % [subject,headline]).to_upper()
-	var title:=Tokens.make_label(herald_text,22,CREAM);title.name="HeraldTitle";title.add_theme_font_override("font",_bold)
+	var title:=Tokens.make_label(herald_text,22,Tokens.INK);title.name="HeraldTitle";title.add_theme_font_override("font",Tokens.font("display"))
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	for pair in [["WhatWasSaid","What was said"],["WhatYouKnow","What you know"],["CourtSettings","⚙"]]:
 		var button:=Button.new();button.name="Open"+String(pair[0]);button.text=String(pair[1]);button.toggle_mode=true
 		button.focus_mode=Control.FOCUS_NONE;button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		button.custom_minimum_size=Vector2(40 if String(pair[0])=="CourtSettings" else 0,32)
 		button.add_theme_font_size_override("font_size",13 if String(pair[0])!="CourtSettings" else 17)
-		var plain:=_plate(Color(1,1,1,.10),6,0);plain.border_color=Color(CREAM,.4);plain.set_border_width_all(1);plain.content_margin_left=12;plain.content_margin_right=12
-		var lit:=plain.duplicate() as StyleBoxFlat;lit.bg_color=Color(1,1,1,.24);lit.border_color=CREAM
+		var plain:=Tokens.action_button_style(false)
+		var lit:=Tokens.action_button_style(true,true)
 		for state in ["normal","focus"]:button.add_theme_stylebox_override(state,plain)
 		for state in ["hover","pressed","hover_pressed"]:button.add_theme_stylebox_override(state,lit)
-		for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,CREAM)
+		for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,Tokens.INK)
 		button.tooltip_text={"WhatWasSaid":"Everything said in this audience.","WhatYouKnow":"What your court knows of them, and how the room feels.","CourtSettings":"Make them wait, how often visitors come, and which voice speaks."}[String(pair[0])]
 		var target:=String(pair[0])
 		button.toggled.connect(func(on:bool):_show_popover(target,on))
@@ -1615,7 +1612,7 @@ func _build_envoy_talk(audience:Dictionary)->Control:
 	speech_input.add_theme_stylebox_override("read_only",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,3,8))
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
-	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(96,40)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(96,40)
 	speak_button.add_theme_font_size_override("font_size",14);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
@@ -1994,8 +1991,8 @@ func _add_court_controls(row:BoxContainer,summon_words:String="Summon me at once
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
 	# Which voice is speaking and what it has cost; the tooltip carries the receipts.
 	voice_label=Tokens.make_label("",12,Tokens.MUTED);voice_label.name="VoiceIndicator"
-	voice_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice_label.custom_minimum_size=Vector2(150,0)
-	voice_label.clip_text=true;voice_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	voice_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice_label.custom_minimum_size=Vector2(170,0)
+	voice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	voice_label.mouse_filter=Control.MOUSE_FILTER_PASS
 	row.add_child(voice_label)
 	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_NONE
@@ -2071,7 +2068,7 @@ func show_court()->void:
 	_reset_card("rest")
 	from_court=true
 	accent=Tokens.GOLD
-	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.GOLD.darkened(.1),2,10,0)
+	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.RULE,1,Tokens.RADIUS_CARD,0)
 	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
 	card.add_theme_stylebox_override("panel",style)
 	body=VBoxContainer.new();body.name="CourtAtRest";body.add_theme_constant_override("separation",0);card.add_child(body)
@@ -2104,10 +2101,11 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 	scene_area=Control.new();scene_area.name="CourtSceneArea";scene_area.clip_contents=true
 	scene_area.custom_minimum_size=Vector2(0,_rest_scene_height())
 	_add_backdrop(scene_area)
-	# The header sits on a dark wash across the top of the painting.
+	# The header is a paper plate across the top of the painting.
 	var head:=PanelContainer.new();head.name="CourtHeader"
-	var head_style:=_plate(Color(.06,.045,.03,.66),0,0)
-	head_style.corner_radius_top_left=9;head_style.corner_radius_top_right=9
+	var head_style:=_plate(Tokens.PAPER,0,0)
+	head_style.border_color=Tokens.GOLD;head_style.border_width_bottom=2
+	head_style.corner_radius_top_left=Tokens.RADIUS_CARD;head_style.corner_radius_top_right=Tokens.RADIUS_CARD
 	head_style.content_margin_left=20;head_style.content_margin_right=16;head_style.content_margin_top=10;head_style.content_margin_bottom=10
 	head.add_theme_stylebox_override("panel",head_style)
 	head.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
@@ -2117,12 +2115,12 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 	var seal:=Seal.new();seal.kind="petition";seal.tint=Color("b98a2e");seal.custom_minimum_size=Vector2(46,46);seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(seal)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
 	var day:=int(GameState.elapsed_days)
-	words.add_child(Tokens.make_label("YOUR COURT · YEAR %d, DAY %d" % [day/365+1,day%365+1],11,Color("e2d3b4"),.12))
+	words.add_child(Tokens.make_label("YOUR COURT · YEAR %d, DAY %d" % [day/365+1,day%365+1],12,Tokens.INK_MUTED,.12))
 	# The form of court follows discoveries: its name, its setting, its ceremony.
-	var title:=Tokens.make_label(Backdrop.stage_place_name(),28,Color("f6ecd6"));title.name="CourtTitle";title.add_theme_font_override("font",_bold);words.add_child(title)
+	var title:=Tokens.make_label(Backdrop.stage_place_name(),28,Tokens.INK);title.name="CourtTitle";title.add_theme_font_override("font",Tokens.font("display"));words.add_child(title)
 	var place:=Backdrop.stage_place_line()
-	var line:=Tokens.make_label(place.substr(0,1).to_upper()+place.substr(1),13,Color("e2d3b4"));line.add_theme_font_override("font",_italic);words.add_child(line)
-	var ceremony:=Tokens.make_label(Roster.ceremony_line(),11,Color("d8c8a4"));ceremony.name="CourtProtocol";ceremony.clip_text=true;ceremony.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	var line:=Tokens.make_label(place.substr(0,1).to_upper()+place.substr(1),18,Tokens.BODY);line.add_theme_font_override("font",_italic);words.add_child(line)
+	var ceremony:=Tokens.make_label(Roster.ceremony_line(),13,Tokens.INK_MUTED);ceremony.name="CourtProtocol";ceremony.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	ceremony.tooltip_text=(Roster.ceremony_line()+"
 "+Roster.attendance_line()).strip_edges();ceremony.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(ceremony)
 	var people:=Hall.people_regard()
@@ -2130,8 +2128,8 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 		var regard_box:=VBoxContainer.new();regard_box.name="PeopleRegard";regard_box.add_theme_constant_override("separation",2);regard_box.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		regard_box.tooltip_text="How your people hold their god: love from your officials' regard, legitimacy and cohesion; dread from your officials and your recent wrath."
 		regard_box.mouse_filter=Control.MOUSE_FILTER_PASS
-		var meter:=RegardMeter.new();meter.custom_minimum_size=Vector2(200,24);meter.love=float(people.love);meter.dread=float(people.dread);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(meter)
-		var read:=Tokens.make_label(_first_upper(String(people.get("read",""))),12,Color("f6ecd6"));read.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(read)
+		var meter:=RegardMeter.new();meter.label_color=Tokens.INK_MUTED;meter.custom_minimum_size=Vector2(200,28);meter.love=float(people.love);meter.dread=float(people.dread);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(meter)
+		var read:=Tokens.make_label(_first_upper(String(people.get("read",""))),13,Tokens.BODY);read.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(read)
 		row.add_child(regard_box)
 	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_NONE
 	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER;close.custom_minimum_size=Vector2(150,34);close.tooltip_text="Close the court and return to your lands. Esc."
@@ -2239,9 +2237,10 @@ func _threshold_chip(audience:Dictionary)->Control:
 func _rest_column(node_name:String,heading:String,sub:String,content:Control,ratio:float)->Control:
 	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.size_flags_stretch_ratio=ratio
 	column.add_theme_constant_override("separation",4)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);column.add_child(head)
+	# Kicker, then its note on a line of its own; prose wraps, never ellipsizes.
+	var head:=VBoxContainer.new();head.add_theme_constant_override("separation",0);column.add_child(head)
 	head.add_child(Tokens.make_label(heading,12,Tokens.GOLD_BRIGHT,.12))
-	var note:=Tokens.make_label(sub,12,Tokens.TEXT_DIM);note.add_theme_font_override("font",_italic);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.clip_text=true;note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;head.add_child(note)
+	var note:=Tokens.make_label(sub,16,Tokens.TEXT_DIM);note.add_theme_font_override("font",_italic);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(note)
 	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);column.add_child(rule)
 	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(content)
@@ -2383,18 +2382,19 @@ func _build_rest_footer()->Control:
 	speech_input.tooltip_text="Name whom you address (by name or office), or speak plainly and your local leader answers. Name a foreign people to brief an envoy."
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
-	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SPEAK";speak_button.custom_minimum_size=Vector2(96,38)
+	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(96,38)
 	speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());speak_button.pressed.connect(_speak);row.add_child(speak_button)
-	_add_court_controls(row,"Receive envoys at once")
 	if not _persons_live():
-		# Offline: ask the court about people from choices, not parsing.
-		var ask_row:=HBoxContainer.new();ask_row.name="PersonsRow";ask_row.add_theme_constant_override("separation",6);stack.add_child(ask_row)
+		# Offline: ask the court about people from choices, not parsing. The
+		# choices sit beside SPEAK in the one speaking row, not orphaned below.
+		var ask_row:=HBoxContainer.new();ask_row.name="PersonsRow";ask_row.add_theme_constant_override("separation",6);ask_row.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(ask_row)
 		persons_row=ask_row
 		var rest_choices:Array[Dictionary]=[]
 		for c in persons_choices():
 			if String(c.get("group",""))in ["ask","summon"]:rest_choices.append(c)
 		_fill_persons_menus(ask_row,rest_choices)
-	var note:=Tokens.make_label("",12,Tokens.TEXT_DIM);note.name="CourtNote";note.add_theme_font_override("font",_italic);stack.add_child(note)
+	_add_court_controls(row,"Receive envoys at once")
+	var note:=Tokens.make_label("",13,Tokens.TEXT_DIM);note.name="CourtNote";note.add_theme_font_override("font",_italic);stack.add_child(note)
 	return bar
 
 func speak_to_court(text:String)->void:
@@ -2640,10 +2640,10 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 	var flag:=TextureRect.new();flag.name="Flag";flag.texture=Identity.foreign(civ_id).texture
 	flag.custom_minimum_size=Vector2(50,58);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
-	words.add_child(Tokens.make_label("THE ENVOY CHANNEL · YOU SEND WORD ABROAD",12,Color("e2d3b4"),.12))
-	var title:=Tokens.make_label(("WORD TO %s OF %s" % [String(leader.get("name","their ruler")),String(civ.get("name",civ_id))]).to_upper(),24 if _compact() else 30,Color("f6ecd6"))
-	title.name="HeraldTitle";title.add_theme_font_override("font",_bold);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
-	var sub:=Tokens.make_label("You set the brief; your envoy chooses the words and carries them there and back.",14,Color("e2d3b4"));sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
+	words.add_child(Tokens.make_label("THE ENVOY CHANNEL · YOU SEND WORD ABROAD",12,Tokens.INK_MUTED,.12))
+	var title:=Tokens.make_label(("WORD TO %s OF %s" % [String(leader.get("name","their ruler")),String(civ.get("name",civ_id))]).to_upper(),24 if _compact() else 30,Tokens.INK)
+	title.name="HeraldTitle";title.add_theme_font_override("font",Tokens.font("display"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
+	var sub:=Tokens.make_label("You set the brief; your envoy chooses the words and carries them there and back.",14,Tokens.BODY);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
 	# The court looks on from the scene here too.
 	var officials:Array=Hall._officials()
 	var seats:=VBoxContainer.new();seats.name="CourtBench";seats.add_theme_constant_override("separation",4);seats.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -3101,15 +3101,17 @@ class RegardMeter extends Control:
 	var love:=.5
 	var dread:=0.0
 	var love_word:="LOVE"
+	## Cream over a portrait; ink when the meter sits on a paper plate.
+	var label_color:=Color("e2d3b4")
 	func _draw()->void:
-		var font:=ThemeDB.fallback_font
+		var font:=HudTokens.FONT_UI
 		var label_w:=70.0
 		var h:=size.y*.34
 		for row in 2:
 			var y:=row*size.y*.5+size.y*.08
 			var value:=clampf(love if row==0 else dread,0,1)
 			var colour:=Color("d9a93a") if row==0 else Color("c2453a")
-			draw_string(font,Vector2(0,y+h),love_word if row==0 else "DREAD",HORIZONTAL_ALIGNMENT_LEFT,label_w,10,Color("e2d3b4"))
+			draw_string(font,Vector2(0,y+h),love_word if row==0 else "DREAD",HORIZONTAL_ALIGNMENT_LEFT,label_w,12,label_color)
 			var track:=Rect2(Vector2(label_w,y),Vector2(size.x-label_w,h))
 			draw_rect(track,Color(colour,.18))
 			draw_rect(Rect2(track.position,Vector2(track.size.x*value,h)),colour)

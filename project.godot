@@ -58,6 +58,10 @@ window/stretch/mode="canvas_items"
 
 enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg", "res://addons/gdUnit4/plugin.cfg")
 
+[gui]
+
+theme/custom="res://ui/theme/chronicle_theme.tres"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

@@ -33,6 +33,7 @@ func _ready()->void:
 	# Long hover clues wrap at a readable width.
 	if not get_tree().node_added.is_connected(Tokens.tooltip_node_added):get_tree().node_added.connect(Tokens.tooltip_node_added)
 	get_window().size_changed.connect(apply)
+	Tokens.install_global_fonts()
 	Tokens.set_color_mode(color_theme)
 	apply()
 

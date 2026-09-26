@@ -63,7 +63,7 @@ func setup(data:Dictionary)->void:
 	_button(footer,"Close line",data.get("on_close"),"Finished stock remains; consumed materials are not refunded.",false,T.RED)
 func _button(parent:Node,text:String,callback:Variant,tip:String,selected:bool=false,color:Color=T.BODY)->void:
 	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.custom_minimum_size.y=29;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	button.add_theme_font_size_override("font_size",11);button.add_theme_color_override("font_color",color)
+	button.add_theme_font_size_override("font_size",12);button.add_theme_color_override("font_color",color)
 	button.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if selected else T.BUTTON_BG,T.GOLD if selected else T.BORDER_SOFT,1,4,5))
 	button.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,4,5));parent.add_child(button)
 	if callback is Callable and callback.is_valid():button.pressed.connect(callback)

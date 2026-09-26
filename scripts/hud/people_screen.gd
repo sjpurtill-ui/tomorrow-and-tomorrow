@@ -418,7 +418,7 @@ func _fact(parent:Node,head:String,text:String)->void:
 
 func _button(parent:Node,label:String,callback:Variant,tip:String,primary:bool=false)->void:
 	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.custom_minimum_size=Vector2(28,28)
-	b.add_theme_font_size_override("font_size",11);b.add_theme_color_override("font_color",T.INK if primary else T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
+	b.add_theme_font_size_override("font_size",12);b.add_theme_color_override("font_color",T.INK if primary else T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
 	b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if primary else Color.TRANSPARENT,T.GOLD if primary else T.BORDER_SOFT,1,3,7))
 	b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,3,7))
 	parent.add_child(b)
@@ -434,6 +434,5 @@ static func _cap(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
 
 
-static func _serif(italic:bool=false)->SystemFont:
-	var font:=SystemFont.new();font.font_names=PackedStringArray(["Georgia","Noto Serif","serif"]);font.font_italic=italic
-	return font
+static func _serif(italic:bool=false)->Font:
+	return preload("res://scripts/hud/hud_tokens.gd").voice_font(italic)

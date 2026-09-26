@@ -65,4 +65,4 @@ func _composition()->void:
 		legend.add_child(T.make_label("%d%%  %s" % [roundi(share*100),String(account.name)],11,PALETTE[index]))
 	add_child(legend)
 func _serif(text:String,font_size:int)->Label:
-	var label:=T.make_label(text,font_size,T.INK);var font:=SystemFont.new();font.font_names=PackedStringArray(["Georgia"]);label.add_theme_font_override("font",font);return label
+	var label:=T.make_label(text,font_size,T.INK);label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font());return label

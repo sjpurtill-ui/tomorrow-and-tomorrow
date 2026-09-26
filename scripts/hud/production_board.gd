@@ -22,7 +22,7 @@ func _rebuild()->void:
 	for index:int in 3:
 		var button:=Button.new()
 		button.text=["IN PRODUCTION","FINISHED","ATTENTION"][index]
-		button.add_theme_font_size_override("font_size",11)
+		button.add_theme_font_size_override("font_size",12)
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.toggle_mode=true;button.button_pressed=mode==index
 		button.pressed.connect(func():mode=index;view.get("view_state",{})["mode"]=index;_rebuild())

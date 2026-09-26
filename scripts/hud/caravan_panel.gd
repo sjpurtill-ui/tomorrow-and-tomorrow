@@ -111,7 +111,7 @@ func _button(parent:Node,text_value:String,callback:Callable,tip:String)->Button
 	button.text=text_value
 	button.tooltip_text=tip
 	button.custom_minimum_size=Vector2(0,26)
-	button.add_theme_font_size_override("font_size",11)
+	button.add_theme_font_size_override("font_size",12)
 	button.add_theme_stylebox_override("normal",T.action_button_style(false))
 	button.add_theme_stylebox_override("hover",T.action_button_style(true,true))
 	button.add_theme_stylebox_override("pressed",T.action_button_style(true,true))

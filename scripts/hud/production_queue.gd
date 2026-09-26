@@ -86,7 +86,7 @@ func _expanded(parent:Node,line:Dictionary)->void:
 	_bar(progress,clampf(float(line.get("progress_days",0))/maxf(.001,float(line.get("work_per_item",1))),0,1),T.TEAL)
 	progress.add_child(T.make_label("Next item · last day %d made" % int(line.get("last_output",0)),10,T.MUTED))
 func _button(parent:Node,label:String,callback:Variant,tip:String,active:bool=false)->void:
-	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.custom_minimum_size=Vector2(28,28);b.add_theme_font_size_override("font_size",11);b.add_theme_color_override("font_color",T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
+	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.custom_minimum_size=Vector2(28,28);b.add_theme_font_size_override("font_size",12);b.add_theme_color_override("font_color",T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
 	b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD if active else T.BORDER_SOFT,1,0,5));b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,0,5));parent.add_child(b)
 	if callback is Callable and callback.is_valid():b.pressed.connect(callback)
 	else:b.disabled=true

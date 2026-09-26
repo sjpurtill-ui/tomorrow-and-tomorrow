@@ -53,7 +53,7 @@ func _ready()->void:
 	theme=T.control_theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	pause.acquire(terrain if is_instance_valid(terrain) else get_tree().current_scene)
-	var dim:=ColorRect.new();dim.color=Color(.02,.03,.03,.7);dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dim)
+	var dim:=ColorRect.new();dim.color=T.SCRIM;dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dim)
 	dim.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:close())
 	panel=PanelContainer.new();panel.name="WorksPanel";panel.mouse_filter=Control.MOUSE_FILTER_STOP

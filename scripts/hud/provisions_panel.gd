@@ -58,4 +58,4 @@ func _summary(parent:Node,index:int,value:String,caption:String,color:Color)->vo
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.add_theme_stylebox_override("panel",T.flat(Color.TRANSPARENT,T.BORDER_SOFT,1,0,8));parent.add_child(panel)
 	var row:=HBoxContainer.new();panel.add_child(row);row.add_child(FoodArt.picture(index,105,65))
 	var stack:=VBoxContainer.new();stack.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(stack)
-	var label:=T.make_label(value,28,color);var serif:=SystemFont.new();serif.font_names=PackedStringArray(["Georgia"]);label.add_theme_font_override("font",serif);stack.add_child(label);stack.add_child(T.make_label(caption,12,T.MUTED))
+	var label:=T.make_label(value,28,color);label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font());stack.add_child(label);stack.add_child(T.make_label(caption,12,T.MUTED))

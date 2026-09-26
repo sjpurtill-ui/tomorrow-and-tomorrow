@@ -70,7 +70,7 @@ func _ready()->void:
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",4);row.add_child(copy)
 	eyebrow=_label(copy,"",11,T.GOLD)
 	title_label=_label(copy,"",21,T.INK,true)
-	var serif:=SystemFont.new();serif.font_names=PackedStringArray(["Georgia","Noto Serif","serif"])
+	var serif:Font=preload("res://scripts/hud/hud_tokens.gd").voice_font()
 	title_label.add_theme_font_override("font",serif)
 	caption=_label(copy,"",13,T.BODY,true);caption.max_lines_visible=3;caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",6);copy.add_child(actions)

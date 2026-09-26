@@ -15,7 +15,7 @@ func setup(value:Dictionary)->void:
 		var button:=Button.new()
 		button.text=["1 YEAR","10 YEARS","100 YEARS","ALL"][index]
 		button.toggle_mode=true
-		button.add_theme_font_size_override("font_size",10)
+		button.add_theme_font_size_override("font_size",12)
 		button.pressed.connect(_select.bind(index))
 		controls.add_child(button)
 		buttons.append(button)
