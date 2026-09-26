@@ -1,3 +1,11 @@
+## September 26 — Classical priority art, batch 1: INTEGRATED
+
+Worker `5fd38e6067eb0ac705665a8b15aef3182bc90915`, branch `codex/research-art-classical-01`, base `5732aa0f`, merged without conflicts with current main `c3d85a83` as `301ffdb7`. Adds 22 distinct subject paintings and provenance/manifest entries. Selected source and crop sheets: `art_source/research-classical-01/README.md`. Earlier approved batches remain included; rejected realistic variants were not installed.
+
+Integrator removed only the obsolete `voussoir_arch_assembly` first300 atlas binding so the new subject painting and focal point take precedence; old art files remain preserved and no global lookup rule changes. Godot 4.7.2 combined import completed without logged errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --classical-01` passes 22 live catalogue IDs, actual art lookup, unique textures/provenance hashes, hidden gating and crop bounds. Reviewed the shared renderer's 1440x1720 capture. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/classical01-runtime.log` and `classical-01-research-in-game-crops.png`.
+
+No simulation/save changes, rejected artwork or unrelated generated import churn included. Full campaign play and unrelated historical suites were not rerun. No player or editor was stopped/restarted; process inspection found no active canonical player during this validation. Other workers' processes were left untouched. This is 22 Classical priority paintings, not the full research catalogue.
+
 ## September 26 — final thirteen early-priority paintings: INTEGRATED
 
 Worker `b8a3aa5aa9b9c20912d155f9a6936fec31c58ed9`, branch `codex/research-art-bronze-key3`, base `9508d53b`, merged with current main `c4876463` as `370f35d8`. Thirteen more subject paintings, provenance and manifest entries complete the selected 37-painting Late Bronze / Iron Age priority set (12 + 12 + 13); this is not the complete research catalogue. Prompts and review sheet: `art_source/research-bronze-key3/README.md`.
