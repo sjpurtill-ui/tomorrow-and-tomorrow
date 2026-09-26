@@ -49,7 +49,7 @@ func test_crisis_chatter_folds_and_the_end_calls_back()->void:
 	assert_bool(String(onset.title).ends_with(" Again") or String(onset.title).ends_with(" Once More")).is_true()
 	assert_str(String(onset.text)).contains("Coughing Winter")
 	var end:=_told("crisis:c2:end")
-	assert_str(String(end.text)).contains("No sickness before it had killed so many.")
+	assert_str(String(end.text)).contains("No bad sickness before it had killed so many.")
 	assert_bool("said nothing" in String(end.text) or "kept silent" in String(end.text)).is_true()
 
 

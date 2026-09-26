@@ -192,8 +192,13 @@ static func _troubles(a:Dictionary,annals:Array,ctx:Dictionary,out:Array,last_si
 	var crises:Array=a.get("crises",[])
 	var deaths:=0
 	for cr in crises:deaths+=int(cr.get("deaths",0))
+	var mild:Array=a.get("mild",[])
+	if not mild.is_empty():
+		var mild_dead:=0
+		for f in mild:mild_dead+=int((f as Dictionary).get("deaths",0))
+		out.append({"t":"mild","w":2.5+2.0*float(mild_dead)+(0.5 if mild.size()>=2 else 0.0),"sig":"mild","text":mild_line(mild,ctx)})
 	if crises.is_empty():
-		_calm(a,annals,ctx,out,last_sig)
+		if mild.is_empty():_calm(a,annals,ctx,out,last_sig)
 		return
 	var ended:Array=[]
 	var still:Array=[]
@@ -267,14 +272,14 @@ static func _calm(a:Dictionary,annals:Array,ctx:Dictionary,out:Array,last_sig:Di
 	if annals.is_empty():return
 	var quiet:=1
 	for i in range(annals.size()-1,-1,-1):
-		if int((annals[i] as Dictionary).get("crises",1))==0:quiet+=1
+		if not troubled(annals[i]):quiet+=1
 		else:break
 	var best:=_longest_quiet(annals)
 	var last:Dictionary=annals.back()
 	if quiet==1 and int(last.get("deaths",0))>0:
 		out.append({"t":"troubles","w":6.0,"sig":"calm","text":say(ctx,"calm_after",["After the graves of last year, no sickness, hunger, fire or flood came at all.","No trouble came this year, a year after %s had filled graves." % _lower_first(String(last.get("worst","the troubles"))),"This time no sickness, hunger or fire came; the year before had cost %s %s." % [num(int(last.get("deaths",0))),"life" if int(last.get("deaths",0))==1 else "lives"]])})
 	elif quiet==1:
-		var since:=_since(annals,func(m:Dictionary)->bool:return int(m.get("crises",1))==0)
+		var since:=_since(annals,func(m:Dictionary)->bool:return not troubled(m))
 		var gap:=y_of(a)-since if since>=0 else -1
 		if gap>=4:out.append({"t":"troubles","w":5.0,"sig":"calm","text":say(ctx,"calm_first",["It was the first year without sickness, hunger or fire since year %d." % (since+1),"For the first time since year %d, no trouble came to the camp." % (since+1),"No trouble came at all, which had not happened since year %d." % (since+1)])})
 		elif String(last_sig.get("troubles",""))!="calm":out.append({"t":"troubles","w":2.0,"sig":"calm","text":say(ctx,"calm",["No sickness, hunger, fire or flood came this year.","It was a year without sickness, hunger or fire.","The fevers, the dry sky and the fire all kept away this year."])})
@@ -305,10 +310,79 @@ static func _since(annals:Array,test:Callable)->int:
 	return -1
 
 
+## Whether a closed year had any trouble: a crisis at court, or a mild
+## sickness met by custom (a year with a fever in it was not free of sickness).
+static func troubled(m:Dictionary)->bool:
+	return int(m.get("crises",1))>0 or int(m.get("mild",0))>0
+
+
+## A season in the people's words: "in late autumn", "in the summer".
+static func _when(f:Dictionary)->String:
+	var season:=String(f.get("season",""))
+	if season=="":return ""
+	var part:=String(f.get("part",""))
+	return "in %s %s" % [part,season] if part!="" else "in the %s" % season
+
+
+const MILD_KINDS:={"cough":["A cough","a cough"],"flux":["The flux","the flux"],"fever":["A shaking fever","a shaking fever"]}
+
+
+## "at the east fire" -> "the east fire", for "went round the east fire".
+static func _round_where(where:String)->String:
+	for lead in ["at ","in ","among "]:
+		if where.begins_with(lead):return where.substr(lead.length())
+	return where if where!="" else "the camp"
+
+
+static func _weeks(days:int)->String:
+	var w:=maxi(1,roundi(float(days)/7.0))
+	return "a week" if w==1 else "%s weeks" % num(w)
+
+
+static func _dead_of(mild:Array)->Array:
+	var out:Array=[]
+	for f in mild:
+		for d in (f as Dictionary).get("dead",[]):if out.size()<3:out.append(String(d))
+	return out
+
+
+## The year's mild sicknesses in one plain line: what, where, when, how many
+## were down, and who died. Several are counted across the year.
+static func mild_line(mild:Array,ctx:Dictionary)->String:
+	var sick:=0;var dead:=0
+	for f in mild:
+		sick+=int((f as Dictionary).get("sick",0));dead+=int((f as Dictionary).get("deaths",0))
+	var named:=_dead_of(mild)
+	if mild.size()==1:
+		var f:Dictionary=mild[0]
+		var kind:Array=MILD_KINDS.get(String(f.get("kind","")),["A fever","a fever"])
+		var round_where:=_round_where(String(f.get("where","")))
+		var when:=_when(f)
+		var when_s:=(" "+when) if when!="" else ""
+		var span:=_weeks(int(f.get("days",0)))
+		var head:=say(ctx,"mild_one",["%s went round %s%s; %s were down with it over %s" % [String(kind[0]),round_where,when_s,num(int(f.get("sick",0))),span],
+			"%s %s%s put %s on their backs for %s" % [String(kind[0]),String(f.get("where","at the fires")),when_s,num(int(f.get("sick",0))),span],
+			"%s came through %s%s and laid %s low for %s" % [String(kind[0]),round_where,when_s,num(int(f.get("sick",0))),span]])
+		if dead<=0:return head+", and no one died of it."
+		if named.size()==1 and dead==1:return "%s, and %s, died of it." % [head,String(named[0])]
+		return "%s, and %s died of it%s." % [head,num(dead),(": "+"; ".join(PackedStringArray(named))) if not named.is_empty() else ""]
+	var parts:Array=[]
+	for f in mild.slice(0,3):
+		var ff:Dictionary=f
+		var kind2:Array=MILD_KINDS.get(String(ff.get("kind","")),["A fever","a fever"])
+		var at:=String(ff.get("where",""))
+		parts.append(("%s %s %s" % [String(kind2[1]),at,_when(ff)]).strip_edges().replace("  "," "))
+	var what:=list(parts)+(", and others" if mild.size()>3 else "")
+	var head2:=say(ctx,"mild_many",["Small sicknesses went round %s times this year: %s. %s were down with them in all" % [num(mild.size()),what,cap(num(sick))],
+		"%s small fevers came and went this year: %s. Between them they put %s on their backs" % [cap(num(mild.size())),what,num(sick)]])
+	if dead<=0:return head2+", and no one died of them."
+	return "%s, and %s died%s." % [head2,num(dead),(": "+"; ".join(PackedStringArray(named))) if not named.is_empty() else ""]
+
+
 static func _longest_quiet(annals:Array)->int:
 	var best:=0;var run:=0
 	for m in annals:
-		if int((m as Dictionary).get("crises",1))==0:run+=1;best=maxi(best,run)
+		if not troubled(m):run+=1;best=maxi(best,run)
 		else:run=0
 	return best
 
@@ -689,12 +763,13 @@ static func age(y:int,annals:Array,seed:int)->Dictionary:
 			p1=p
 	if p0>0 and p1>0 and p0!=p1:lines.append("The hearths went from %d souls to %d." % [p0,p1])
 	# Troubles and their cost, against the generation before.
-	var cr:=0;var dead:=0;var silent:=0;var answered:=0;var calm:=0
+	var cr:=0;var dead:=0;var silent:=0;var answered:=0;var calm:=0;var mild:=0;var mild_dead:=0
 	var worst:Dictionary={}
 	for m in span:
 		var mm:Dictionary=m
 		cr+=int(mm.get("crises",0));dead+=int(mm.get("deaths",0));silent+=int(mm.get("silent",0));answered+=int(mm.get("answered",0))
-		if int(mm.get("crises",0))==0:calm+=1
+		if not troubled(mm):calm+=1
+		mild+=int(mm.get("mild",0));mild_dead+=int(mm.get("mild_deaths",0))
 		if int(mm.get("deaths",0))>0 and (worst.is_empty() or int(mm.deaths)>int(worst.deaths)):worst=mm
 	var cr0:=0;var dead0:=0
 	for m in before:cr0+=int((m as Dictionary).get("crises",0));dead0+=int((m as Dictionary).get("deaths",0))
@@ -707,6 +782,7 @@ static func age(y:int,annals:Array,seed:int)->Dictionary:
 		lines.append("%d troubles came in these years, and %s%s." % [cr,cost,then])
 		if not worst.is_empty() and int(worst.deaths)>=2:lines.append("The worst was %s, in year %d." % [_lower_first(String(worst.get("worst",worst.get("name","the troubles")))),int(worst.y)+1])
 		if calm>=3:lines.append("%s years passed with no trouble at all." % cap(num(calm)))
+	if mild>=3:lines.append("Small fevers went round %d times besides%s." % [mild,", and took %d" % mild_dead if mild_dead>0 else "; they took no one"])
 	if silent+answered>0:
 		if answered==0:lines.append("The god did not answer once; the court met every trouble alone.")
 		elif silent==0:lines.append("The god answered every trouble the court brought.")

@@ -20,7 +20,11 @@ extends RefCounted
 ## simply begin their annals at the next year's end):
 ##   year_acc     the current year's facts
 ##   annals       one compact record per closed year (for records and streaks)
-##   crisis_log   one line per finished crisis (for callbacks)
+##   crisis_log   one line per finished crisis (for callbacks). Only
+##                crises staged at court are kept: a mild sickness met by the
+##                people's own custom (crisis_system.gd) is told once, in its
+##                year's entry, and never counts toward a callback such as
+##                "the third bad sickness in ten years".
 ##   told_lines   normalised sentences already told by returning scouts
 ##   annal_year   the last 0-based year already closed
 
@@ -39,9 +43,10 @@ const SAID_TEXTS_MAX:=400
 const NUMBER_WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 const ORDINALS:=["zeroth","first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"]
 ## Crisis onset titles (crisis_system.gd) to the crisis type.
-const CRISIS_TYPES:={"Sickness at the Fires":"sickness","The Strangers' Sickness":"stranger","The Rain Does Not Come":"drought","The Sun Is Dim":"cold","The River Comes In":"flood","Fire in the Camp":"fire","The Land Is Worn Out":"thinning"}
+const CRISIS_TYPES:={"Sickness at the Fires":"sickness","The Strangers' Sickness":"stranger","The Rain Does Not Come":"drought","The Sun Is Dim":"cold","The River Comes In":"flood","Fire in the Camp":"fire","The Land Is Worn Out":"thinning","The Sickness Spreads":"sickness"}
 ## [singular, plural] for callbacks.
-const TYPE_WORDS:={"sickness":["sickness","sicknesses"],"stranger":["strangers' sickness","strangers' sicknesses"],"drought":["dry year","dry years"],"cold":["dim-sun year","dim-sun years"],
+## Callbacks count only sicknesses that came to court, so they are called bad.
+const TYPE_WORDS:={"sickness":["bad sickness","bad sicknesses"],"stranger":["strangers' sickness","strangers' sicknesses"],"drought":["dry year","dry years"],"cold":["dim-sun year","dim-sun years"],
 	"flood":["flood","floods"],"fire":["fire in the camp","fires in the camp"],"thinning":["wearing-out of the near ground","wearings-out of the near ground"],"hunger":["hunger","hungers"]}
 ## Scout lines that are ordinary road news: counted, not told as a card.
 const ROUTINE_SCOUT:=["turned the party back","hurt on the road","who kept moving","found no wandering band","nomadic groups are scarce","band will not remain there"]
@@ -73,7 +78,7 @@ static func acc(c:Dictionary,day:int=-1)->Dictionary:
 static func _new_acc(year:int)->Dictionary:
 	return {"year":year,"pop0":_people(),"crises":[],"deaths":[],"learned":[],"firsts":[],"scouts":{"n":0,"km":0,"days":0,"hurt":0,"back":0,"news":0},
 		"contacts":[],"aims":[],"works":[],"wars":[],"heads":[],"milestones":[],"born":0,"buried":0,"folded":0,"regard":"",
-		"abroad":[],"births":[],"turnings":[]}
+		"abroad":[],"births":[],"turnings":[],"mild":[]}
 
 
 static func _list_of(c:Dictionary,key:String)->Array:
@@ -576,6 +581,14 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 	if kind=="war" and tier!="whisper":_add_unique(a.wars,title)
 
 
+## A mild sickness the people met by their own custom (crisis_system.gd):
+## no card, no court; counted in the year it ended and told in its entry.
+const MILD_PER_YEAR:=12
+static func note_mild(c:Dictionary,fact:Dictionary)->void:
+	var list:=_list_of(acc(c,int(fact.get("end",-1))),"mild")
+	if list.size()<MILD_PER_YEAR:list.append(fact.duplicate(true))
+
+
 static func note_learned(c:Dictionary,name:String,day:int)->void:
 	_add_unique(acc(c,day).learned,name)
 
@@ -637,6 +650,12 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 		if int(cr.deaths)>0 and (worst.is_empty() or int(cr.deaths)>int(worst.deaths)):worst=cr
 		if not kinds.has(_crisis_short(cr)):kinds.append(_crisis_short(cr))
 	memory.deaths=crisis_deaths
+	var mild:Array=a.get("mild",[])
+	if not mild.is_empty():
+		var mild_deaths:=0
+		for f in mild:mild_deaths+=int((f as Dictionary).get("deaths",0))
+		memory["mild"]=mild.size()
+		memory["mild_deaths"]=mild_deaths
 	for cr in crises:
 		if not bool(cr.ended):continue
 		if bool(cr.silent):memory.silent=int(memory.silent)+1
@@ -715,7 +734,7 @@ static func _facts(a:Dictionary,memory:Dictionary,title:String)->Dictionary:
 		"scouts":(a.scouts as Dictionary).duplicate(),"aims":(a.aims as Array).duplicate(true),"works":(a.works as Array).duplicate(),"peoples":(a.contacts as Array).duplicate(),
 		"wars":(a.wars as Array).duplicate(),"people_now":int(memory.get("pop",0)),"people_a_year_before":int(a.pop0),"born":int(a.born),"buried":int(a.buried),
 		"abroad":_texts(a.get("abroad",[])),"envoys":(a.get("envoys",[]) as Array).duplicate(),"named_births":(a.get("births",[]) as Array).duplicate(),"came_forward":(a.get("figures",[]) as Array).duplicate(),
-		"changed_daily_life":_texts(a.get("turnings",[]))}
+		"changed_daily_life":_texts(a.get("turnings",[])),"small_sicknesses":(a.get("mild",[]) as Array).duplicate(true)}
 
 
 static func _texts(items:Array)->Array:
