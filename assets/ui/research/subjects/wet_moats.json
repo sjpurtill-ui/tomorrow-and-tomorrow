@@ -1,0 +1,14 @@
+{
+  "id": "wet_moats",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f3b517d1-0b2b-4570-8313-42b849b860ab.png",
+  "source_file": "exec-f3b517d1-0b2b-4570-8313-42b849b860ab.png",
+  "creative_brief": "A ditch flooded from the river rings the walls, and rams and mines cannot reach their foot. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/wet_moats-v1.png",
+  "sha256": "4127e66f5f9bfb5e8a24847172a06e2d36edfc9ef9cc604d509221ec800ecea2",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

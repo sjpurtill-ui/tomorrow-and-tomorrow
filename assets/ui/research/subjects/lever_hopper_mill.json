@@ -1,0 +1,14 @@
+{
+  "id": "lever_hopper_mill",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c0160fa8-46a5-43ad-9fb3-88285cb41696.png",
+  "source_file": "exec-c0160fa8-46a5-43ad-9fb3-88285cb41696.png",
+  "creative_brief": "Grain poured into a hopper cut in the upper stone is ground as a lever slides the stone back and forth across its bed. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/lever_hopper_mill-v1.png",
+  "sha256": "fbe26a495ec4da9ad4c0ea5943dbf81a2dee8f530da515db6fb7a4c1be45f1e2",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

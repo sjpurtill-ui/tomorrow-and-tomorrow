@@ -1,0 +1,14 @@
+{
+  "id": "narrative_figure_pottery",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e0bff52a-f91b-49eb-8632-484abe92fc9e.png",
+  "source_file": "exec-e0bff52a-f91b-49eb-8632-484abe92fc9e.png",
+  "creative_brief": "Painted figures on vases tell the stories of gods and heroes, and the vases sell overseas. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/narrative_figure_pottery-v1.png",
+  "sha256": "d86644ff284103778ca0c9d125c60948eb33c16ad72f6b14d97bb2bfb46b8354",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

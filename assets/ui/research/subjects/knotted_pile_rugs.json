@@ -1,0 +1,14 @@
+{
+  "id": "knotted_pile_rugs",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-79d378a3-82b9-48f4-a844-48ea1a5ec1db.png",
+  "source_file": "exec-79d378a3-82b9-48f4-a844-48ea1a5ec1db.png",
+  "creative_brief": "Wool tufts knotted row by row around the warp make a rug thick enough to sleep on through a mountain winter. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/knotted_pile_rugs-v1.png",
+  "sha256": "58f2de584418aa6a59930f50d2cf223faf6809b38f7c3b2168e1aceb00433708",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

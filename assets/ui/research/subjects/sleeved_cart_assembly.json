@@ -1,0 +1,14 @@
+{
+  "id": "sleeved_cart_assembly",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b74cdcfb-1181-4251-975d-92472e6a0680.png",
+  "source_file": "exec-b74cdcfb-1181-4251-975d-92472e6a0680.png",
+  "creative_brief": "Carts assembled with sleeved axles and iron fittings. Show the people, tools and materials of this practice in a road, quay or storehouse with goods on the move, classical antiquity.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/sleeved_cart_assembly-v1.png",
+  "sha256": "b9732ae38e435510b51580cde408c73872b722fe885441137bf9ec8e13035d79",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

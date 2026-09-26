@@ -1,0 +1,14 @@
+{
+  "id": "framed_camel_saddle",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b62eec86-9d56-4e93-b0f0-e0cd5e2dc8f2.png",
+  "source_file": "exec-b62eec86-9d56-4e93-b0f0-e0cd5e2dc8f2.png",
+  "creative_brief": "A wooden frame over the hump spreads the load, so a camel carries more and a rider can sit and fight from its back. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/framed_camel_saddle-v1.png",
+  "sha256": "404a85dac2cd8ab7f19036deed2d744b143556655387579633220919c89b84be",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "term_limited_emergency_office",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e29730bd-87a1-4d3d-9306-3d2e09665c64.png",
+  "source_file": "exec-e29730bd-87a1-4d3d-9306-3d2e09665c64.png",
+  "creative_brief": "In a crisis one man may rule alone, but for six months only, and then he must lay the power down. Paint it as a classical antiquity scene.",
+  "medium": "Civic fresco",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/term_limited_emergency_office-v1.png",
+  "sha256": "1a02fb109e26d6ca1fa6ab3ec50fe7a61210211b3ee409f31defb7b652094d00",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
