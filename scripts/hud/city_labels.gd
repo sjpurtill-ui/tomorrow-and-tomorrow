@@ -74,6 +74,8 @@ var hover_id:=""
 var hover_elapsed:=0.0
 var pinned_id:=""
 var last_bounds:=Rect2()
+## Per-city measured card text, keyed by what the text depends on.
+var measured:Dictionary={}
 
 func _ready()->void:
 	theme=T.control_theme()
@@ -100,8 +102,15 @@ static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={},res
 		return String(a.id)<String(b.id))
 	for entry:Dictionary in ordered:
 		var anchor:Vector2=entry.anchor;var extent:Vector2=entry.extent
+		# While the map pans or zooms every label keeps its place beside its pin
+		# if it still fits. Test that first; only a blocked label searches.
+		if old.has(entry.id):
+			var kept:=_fit(anchor+Vector2(old[entry.id]),extent,bounds,reserved,placed,entries)
+			if kept.size!=Vector2.ZERO:
+				var kept_card:=entry.duplicate();kept_card.rect=kept;placed.append(kept_card)
+				memory[entry.id]=kept.position-anchor
+				continue
 		var candidates:Array[Vector2]=[]
-		if old.has(entry.id):candidates.append(anchor+Vector2(old[entry.id]))
 		for row in range(12):
 			var step:=float(row)*(extent.y+GAP)
 			candidates.append(anchor+Vector2(-extent.x*.5,-extent.y-14-step))
@@ -117,25 +126,35 @@ static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={},res
 			var pos:Vector2=candidates[index]
 			pos.x=clampf(pos.x,bounds.position.x,maxf(bounds.position.x,bounds.end.x-extent.x))
 			pos.y=clampf(pos.y,bounds.position.y,maxf(bounds.position.y,bounds.end.y-extent.y))
-			var rect:=Rect2(pos,extent)
-			if not bounds.encloses(rect):continue
-			var blocked:=false
-			for obstacle:Rect2 in reserved:
-				if rect.grow(GAP).intersects(obstacle):blocked=true;break
-			for other:Dictionary in placed:
-				if rect.grow(GAP*.5).intersects(other.rect.grow(GAP*.5)):blocked=true;break
-			if blocked:continue
-			# Protect the city pins as well as the other labels.
-			for other:Dictionary in entries:
-				if rect.grow(8).has_point(other.anchor):blocked=true;break
-			if blocked:continue
-			var score:=anchor.distance_squared_to(rect.get_center())
-			if index==0 and old.has(entry.id):chosen=rect;break
-			if score<best:best=score;chosen=rect
+			var score:=anchor.distance_squared_to(Rect2(pos,extent).get_center())
+			# A candidate farther than the best so far cannot win; skip its tests.
+			if score>=best:continue
+			var rect:=_fit(pos,extent,bounds,reserved,placed,entries)
+			if rect.size==Vector2.ZERO:continue
+			best=score;chosen=rect
 		if chosen.size==Vector2.ZERO:hidden.append(entry);continue
 		var card:=entry.duplicate();card.rect=chosen;placed.append(card)
 		memory[entry.id]=chosen.position-anchor
 	return {"cards":placed,"overflow":hidden,"memory":memory}
+
+## `pos` clamped into bounds, or an empty rect when it would cover another
+## label, a reserved panel or any city pin.
+static func _fit(pos:Vector2,extent:Vector2,bounds:Rect2,reserved:Array[Rect2],placed:Array[Dictionary],entries:Array[Dictionary])->Rect2:
+	pos.x=clampf(pos.x,bounds.position.x,maxf(bounds.position.x,bounds.end.x-extent.x))
+	pos.y=clampf(pos.y,bounds.position.y,maxf(bounds.position.y,bounds.end.y-extent.y))
+	var rect:=Rect2(pos,extent)
+	if not bounds.encloses(rect):return Rect2()
+	var grown:=rect.grow(GAP)
+	for obstacle:Rect2 in reserved:
+		if grown.intersects(obstacle):return Rect2()
+	var half:=rect.grow(GAP*.5)
+	for other:Dictionary in placed:
+		if half.intersects((other.rect as Rect2).grow(GAP*.5)):return Rect2()
+	# Protect the city pins as well as the other labels.
+	var pin_guard:=rect.grow(8)
+	for other:Dictionary in entries:
+		if pin_guard.has_point(other.anchor):return Rect2()
+	return rect
 
 func refresh()->void:
 	if not is_instance_valid(terrain) or terrain.camera==null:return
@@ -152,39 +171,31 @@ func refresh()->void:
 	for id in sources.keys():
 		var source:Dictionary=sources[id]
 		var label:Label3D=source.label.get_ref()
-		if not is_instance_valid(label) or label.is_queued_for_deletion():sources.erase(id);continue
+		if not is_instance_valid(label) or label.is_queued_for_deletion():sources.erase(id);measured.erase(id);continue
 		var kind:=String(label.get_meta("map_annotation_kind","city"))
 		if kind=="founding_convoy" and is_instance_valid(terrain.get("settler_marker")):
 			source.anchor=terrain.settler_marker.global_position
 		if not label.is_visible_in_tree() or camera.is_position_behind(source.anchor):continue
 		var anchor:=camera.unproject_position(source.anchor)
 		if not Rect2(Vector2.ZERO,viewport_size).has_point(anchor):continue
-		var parts:=label.text.split("  •  ",true,1)
-		var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
-		if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
-		var status:=String(label.get_meta("map_status",""))
-		var summary:Dictionary={}
-		if bool(source.foreign):
-			var record:Dictionary=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
-			summary=report_summary(record,int(GameState.elapsed_days))
-			status=summary.status
+		var record:Dictionary={}
+		if bool(source.foreign):record=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
-		var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
-		var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
-		for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+54)
-		width=maxf(width,font.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
-		var name_width:=54.0
-		for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if flag else 22))
-		var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))
-		if not summary.is_empty():detail=Vector2(maxf(260,width),float(lines.size())*20+130)
+		# The card's text and measured size change only with its label, report,
+		# day or era; the anchor moves every frame the camera does. Measure once.
+		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage()])
+		var text:Dictionary=measured.get(id,{})
+		if int(text.get("key",0))!=text_key:
+			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds)
+			text["key"]=text_key
+			measured[id]=text
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
 		var compact:=kind!="founding_convoy"
-		entries.append({"id":String(id),"kind":kind,"status":status,"foreign":source.foreign,"anchor":anchor,"title":title,"lines":lines,"population":count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(ceilf(name_width),float(lines.size())*20+10) if compact else detail})
-		if not summary.is_empty():
-			entries.back()["summary"]=summary
-			signature+=str(summary)
-		signature+=String(id)+str(anchor)+affiliation+status+label.text+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
+		var detail:Vector2=text.detail
+		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail})
+		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
+		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	if signature==layout_signature:return
 	layout_signature=signature
 	last_bounds=bounds
@@ -192,6 +203,26 @@ func refresh()->void:
 	cards=result.cards;overflow=result.overflow;previous=result.memory
 	_update_overflow(viewport_size)
 	queue_redraw()
+
+## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
+static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2)->Dictionary:
+	var parts:=label.text.split("  •  ",true,1)
+	var title:=String(parts[0]);var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
+	if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
+	var status:=String(label.get_meta("map_status",""))
+	var summary:Dictionary={}
+	if foreign:
+		summary=report_summary(record,int(GameState.elapsed_days))
+		status=summary.status
+	var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
+	var width:=maxf(font.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,font.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
+	for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+54)
+	width=maxf(width,font.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
+	var name_width:=54.0
+	for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if has_flag else 22))
+	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))
+	if not summary.is_empty():detail=Vector2(maxf(260,width),float(lines.size())*20+130)
+	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail}
 
 static func wrap_name(title:String,font:Font,width:float)->Array[String]:
 	var lines:Array[String]=[];var line:=""
