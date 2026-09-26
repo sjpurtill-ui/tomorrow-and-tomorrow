@@ -1,6 +1,7 @@
 extends Node
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const IDS=["climate_managed_resettlement","gene_edited_crops","oral_rehydration_salts","moving_assembly_line","stored_program_computer","industrial_robots","hydroelectric_stations","intermodal_shipping_containers","atmospheric_co2_record","civil_rights_law","radio_detection_ranging","radio_broadcasting"]
+const BRONZE_IDS=["palace_department_registers","overseas_colony_founding","incubation_shrines","brailed_square_sail","forge_crew_roles","iron_ard_shares","smelter_fuel_depletion_watch","lost_age_remembrance","iron_sword_issue","full_vowel_alphabet","groundwater_tunnels","die_struck_coinage"]
 func _ready()->void:
 	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_StylizedArt_Test"))
 	GameState.civic_api_enabled=false
@@ -10,7 +11,8 @@ func _ready()->void:
 	var paths:Dictionary={}
 	var hashes:Dictionary={}
 	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(18,18);add_child(grid)
-	for id:String in IDS:
+	var bronze:bool="--bronze" in OS.get_cmdline_user_args()
+	for id:String in (BRONZE_IDS if bronze else IDS):
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true
 		var expected:String=Art.manifest()[id].path
@@ -33,6 +35,6 @@ func _ready()->void:
 	for frame in 4:await get_tree().process_frame
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://artifacts/stylized-research-in-game-crops.png")
-	print("STYLIZED_RESEARCH_ART_PASS 12 live catalog IDs, manifest precedence, unique textures/provenance, hidden gating and banner crops")
+		get_viewport().get_texture().get_image().save_png("res://artifacts/bronze-research-in-game-crops.png" if bronze else "res://artifacts/stylized-research-in-game-crops.png")
+	print("STYLIZED_RESEARCH_ART_PASS batch=",("bronze" if bronze else "later")," 12 live catalog IDs, manifest precedence, unique textures/provenance, hidden gating and banner crops")
 	get_tree().quit()

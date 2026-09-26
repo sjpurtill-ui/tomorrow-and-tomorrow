@@ -1,3 +1,11 @@
+## September 26 — twelve early key-threshold research paintings: INTEGRATED
+
+Worker `48b70a2b7909f2f790f365c26eaf81a9ec157448`, branch `codex/research-art-bronze-priority`, base `385ac929`, merged without conflicts with main `0385b37c` as `c1f2ceac`. Twelve subjects in `y600_1200`, one per direction, now have distinct mature handmade paintings. The manifest is the only shared art assignment file. Prompt/provenance and selected crop sheet: `art_source/research-bronze-priority/README.md`. Prior approved later-research paintings remain included; rejected pilot branch remains excluded.
+
+Combined validation in `C:/Users/sjpur/tt-integrate-stylized-art` on `codex/integrate-bronze-art`: Godot 4.7.2 import completed without logged errors; private-desktop GPU probe passed all twelve actual catalogue IDs through `research_visuals.gd`, confirming manifest precedence, loaded distinct Texture2D resources, provenance hashes, hidden-discovery gating and crop bounds. Reviewed the actual shared card renderer's 1440x900 capture. Repro: `tests/stylized_research_art_probe.tscn -- --bronze` with its isolated test user directory. Evidence: `artifacts/bronze-combined-import.log`, `bronze-combined-runtime.log` and `bronze-research-in-game-crops.png`.
+
+No simulation or save changes and no unrelated generated import churn committed. The historical full subject-art suite and whole campaign were not rerun for this asset-only batch. Player PID50648 was left running; this integration does not hot-reload its cached art. Normal exit/relaunch is needed to reliably load the updated resources. This is twelve additional paintings, not a completed catalogue.
+
 ## September 26 — replacement stylized research paintings: INTEGRATED
 
 Approved replacement worker `f0ac30e4636c334e5585d428e8da038b06cbaf85`, branch `codex/research-art-stylized`, base `8e4d2867`, merged without conflicts with main `de1ffb7b` as `b9a514e9`. Twelve later-research subjects now use the new distinct handmade media through the existing subject manifest. This is twelve pilot paintings, not the complete research catalogue. New schema-2 art direction and review sheets are in `docs/art/RESEARCH_DIRECTION_ART_STYLIZED.md`. The rejected `195240b4` images and its prerequisite style brief were not merged; their rejection below remains in force.
