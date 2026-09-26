@@ -1,0 +1,17 @@
+{
+  "id": "climate_managed_resettlement",
+  "line": "demography",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ef279516-918b-4ba1-aa93-f432942ea9c4.png",
+  "source_file": "exec-ef279516-918b-4ba1-aa93-f432942ea9c4.png",
+  "creative_brief": "Managed Resettlement: adults decide a safe inland move before coastal flooding.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/climate_managed_resettlement-v1.png",
+  "sha256": "e1f3cc056fef1e5cc7ba6a1ebfaede39b7eee34400bd2552e9f637dd043e1faf",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop.",
+  "focus": [
+    0.5,
+    0.45
+  ]
+}

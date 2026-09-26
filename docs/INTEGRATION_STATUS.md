@@ -1,3 +1,11 @@
+## September 26 — replacement stylized research paintings: INTEGRATED
+
+Approved replacement worker `f0ac30e4636c334e5585d428e8da038b06cbaf85`, branch `codex/research-art-stylized`, base `8e4d2867`, merged without conflicts with main `de1ffb7b` as `b9a514e9`. Twelve later-research subjects now use the new distinct handmade media through the existing subject manifest. This is twelve pilot paintings, not the complete research catalogue. New schema-2 art direction and review sheets are in `docs/art/RESEARCH_DIRECTION_ART_STYLIZED.md`. The rejected `195240b4` images and its prerequisite style brief were not merged; their rejection below remains in force.
+
+Combined validation in `C:/Users/sjpur/tt-integrate-stylized-art`: twelve live catalogue IDs and paths verified, twelve distinct SHA-256 hashes match provenance, and a private-desktop Godot 4.7.2 scene passes the real `research_visuals.gd` lookup, manifest precedence, Texture2D loading, hidden-discovery gating and crop bounds. Reviewed the actual shared `subject_painting.gd` render at 1440x900. Repro: `tests/stylized_research_art_probe.tscn`, isolated user directory `TomorrowAndTomorrow_StylizedArt_Test`; evidence `artifacts/stylized-combined-runtime.log` and `artifacts/stylized-research-in-game-crops.png`.
+
+The initial cold import logged pre-import font errors and an existing `command_rail_hud.gd:597` constant-expression error (`KPI_DEFS` uses mutable theme values); those UI scripts are unchanged from pre-art main. A subsequent warm editor scan and the art runtime probe logged no errors. This is not whole-game play or a certification of unrelated UI startup; the full historical subject-art suite was not rerun. No simulation/save changes, no forced launch or restart, and no unrelated import churn is included. A running game retains loaded/cached resources until its normal restart.
+
 ## September 25 — twelve research direction pilot paintings: REJECTED / HELD (not queued)
 
 Worker branch `codex/research-art-first-batch`, base `48f74ed5`, head `195240b4c47c9f747ed7e7a16c98fee651c81316` (includes prerequisite art-direction/queue commit `32b00526`). Source worktree: `C:/Users/sjpur/tt-research-art-first-batch`. This is twelve pilot paintings, one per research direction, not the full 4,284-painting set.
