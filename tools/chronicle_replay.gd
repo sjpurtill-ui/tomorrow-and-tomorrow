@@ -113,6 +113,8 @@ func _check(e:Dictionary)->void:
 	var voice:=preload("res://scripts/character_voice.gd")
 	var t:=String(e.get("text",""))+" "+String(e.get("title",""))
 	if plain.is_maxim(t):_flags.append({"key":String(e.key),"why":"maxim","text":t})
+	var technical:=String(preload("res://scripts/chronicle_years.gd").technical(t))
+	if technical!="":_flags.append({"key":String(e.key),"why":"technical","word":technical,"text":t})
 	var tags:=voice.era_tags("player")
 	for tag in voice.ERA_GATES:
 		if tags.has(tag):continue

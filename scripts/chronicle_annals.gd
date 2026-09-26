@@ -548,9 +548,28 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 		var m:=RegEx.create_from_string("^(.+?) (?:Keeps the Fire|Follows |in .+'s Place)").search(title)
 		_add_unique(a.heads,m.get_string(1) if m!=null else title.trim_suffix(" Keeps the Fire"))
 		return
-	if key.begins_with("aim:done:"):(a.aims as Array).append({"kind":"done","name":title.trim_prefix("Remembered: ")});return
-	if key.begins_with("aim:fail:"):(a.aims as Array).append({"kind":"fail","name":title.trim_prefix("An Aim Unmet: ")});return
-	if key.begins_with("aim:start:"):(a.aims as Array).append({"kind":"start","name":title.trim_prefix("An Aim for a Generation: ")});return
+	if key.begins_with("aim:done:"):
+		# "It was done. Keep One Fire: they will call it the One Fire, ..."
+		var legacy:=title.trim_prefix("Remembered: ")
+		var m:=RegEx.create_from_string("It was done\\. (.+?): they will call it").search(String(entry.get("text","")))
+		var aim_title:=m.get_string(1) if m!=null else ""
+		(a.aims as Array).append({"kind":"done","name":legacy,"phrase":_aim_phrase(c,aim_title) if aim_title!="" else ""})
+		return
+	if key.begins_with("aim:fail:"):
+		var failed:=title.trim_prefix("An Aim Unmet: ")
+		(a.aims as Array).append({"kind":"fail","name":failed,"phrase":_aim_phrase(c,failed)})
+		return
+	if key.begins_with("aim:start:"):
+		var started:=title.trim_prefix("An Aim for a Generation: ")
+		# The aim's own words open its telling: "Learn nine new ways of making things."
+		var said:=Years.first_sentence(String(entry.get("text",""))).trim_suffix(".")
+		if said!="":
+			if not c.get("aim_phrases") is Dictionary:c["aim_phrases"]={}
+			var phrases:Dictionary=c.aim_phrases
+			phrases[started]=Years.third_person(said.substr(0,1).to_lower()+said.substr(1))
+			while phrases.size()>40:phrases.erase(phrases.keys()[0])
+		(a.aims as Array).append({"kind":"start","name":started,"phrase":_aim_phrase(c,started)})
+		return
 	if key.begins_with("ceremony:") or title.ends_with(" stands finished"):_add_unique(a.works,title.trim_suffix(" stands finished"));return
 	if key.begins_with("first:people:"):_add_unique(a.milestones,title);return
 	if kind=="contact" and tier=="moment":_add_unique(a.contacts,title);return
@@ -654,7 +673,7 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var kept:Array=[];var unmet:Array=[]
 	for aim in a.aims:
 		if String(aim.kind)=="done":kept.append(String(aim.name))
-		elif String(aim.kind)=="fail":unmet.append(String(aim.name))
+		elif String(aim.kind)=="fail":unmet.append(String(aim.get("phrase","")) if String(aim.get("phrase",""))!="" else Years.aim_words(String(aim.name)))
 	if not kept.is_empty():memory["kept"]=kept
 	if not unmet.is_empty():memory["unmet"]=unmet
 	var met:Array=[]
@@ -722,7 +741,7 @@ static func _name_year(a:Dictionary,annals:Array)->String:
 	if not deadliest.is_empty() and (name=="" or int(deadliest.deaths)>=3):name=_crisis_short(deadliest)
 	if name=="":
 		for aim in a.aims:
-			if String(aim.kind)=="done":name="the year of %s" % String(aim.name);break
+			if String(aim.kind)=="done":name="the year of %s" % _lower_first(String(aim.name));break
 	if name=="" and not (a.works as Array).is_empty():name="the year %s was finished" % String(a.works[0])
 	if name=="" and not (a.contacts as Array).is_empty():
 		var t:=String(a.contacts[0])
@@ -858,6 +877,14 @@ static func _figure_lines(y:int)->Array:
 	return out
 
 
+## An aim's own words ("learn nine new ways of making things"), remembered
+## from its beginning, or made from its title.
+static func _aim_phrase(c:Dictionary,title:String)->String:
+	var phrases:Variant=c.get("aim_phrases",{})
+	if phrases is Dictionary and (phrases as Dictionary).has(title):return String(phrases[title])
+	return Years.aim_words(title)
+
+
 ## The year's new ways whose names use only words the people have.
 static func _sayable(names:Array)->Array:
 	if Engine.get_main_loop()==null:return names.duplicate()
@@ -866,26 +893,27 @@ static func _sayable(names:Array)->Array:
 	return names.filter(func(n:Variant)->bool:return voice.permits(String(n),tags))
 
 
-## Of the ways learned this year, the one that weighs most in daily life
-## (largest effects), with a sentence on what it is. {} when unknown.
+## Of the ways learned this year, the one that did most for daily life: the
+## largest effect the people would notice (chronicle_years.gd EFFECT_WORDS),
+## told in their words, never the research text. {} when none is sayable.
 static func _biggest_change(names:Array)->Dictionary:
 	if names.is_empty() or Engine.get_main_loop()==null:return {}
+	var voice:=preload("res://scripts/character_voice.gd")
+	var tags:=voice.era_tags("player")
 	var best:={}
-	var best_w:=-1.0
+	var best_w:=0.0
 	for d in GameState.discovery_log:
 		if not d is Dictionary or not names.has(String(d.get("name",""))):continue
-		var w:=0.0
+		var name:=String(d.get("name",""))
+		if not voice.permits(name,tags):continue
 		var effects:Variant=d.get("effects",{})
-		if effects is Dictionary:
-			for k in effects:w+=absf(float(effects[k]))
-		var how:=Years.first_sentence(String(d.get("description","")))
-		if how=="" or how.length()>200 or preload("res://scripts/plain_speech.gd").is_maxim(how):continue
-		# Nothing the people have no word for yet (a name can run ahead of them).
-		var voice:=preload("res://scripts/character_voice.gd")
-		if not voice.permits(String(d.get("name",""))+" "+how,voice.era_tags("player")):continue
-		if w>best_w:
-			best_w=w
-			best={"name":String(d.get("name","")),"how":how}
+		if not effects is Dictionary:continue
+		for k in effects:
+			var v:=float(effects[k])
+			var key:="%s%s" % [String(k),"+" if v>0.0 else "-"]
+			if not Years.EFFECT_WORDS.has(key) or absf(v)<=best_w:continue
+			best_w=absf(v)
+			best={"name":name,"effect":key}
 	return best
 
 

@@ -22,6 +22,23 @@ extends RefCounted
 ## person, a number or an event.
 
 const GENERATION_YEARS:=20
+## What a new way changed, as the people would notice it, by its largest
+## effect (discovery effects: key and sign). Plain words any era has.
+const EFFECT_WORDS:={"cohesion+":"households pulled together more","legitimacy+":"people heeded the elders more readily","labor_efficiency+":"the day's work went quicker",
+	"knowledge_preservation+":"less of what the old ones knew was forgotten","storage_loss-":"less of the stores went bad","trade_capacity+":"there was more to trade with neighbours",
+	"fatigue-":"people came home from work less worn out","task_coordination+":"the work parties got in each other's way less","route_speed+":"the paths were walked faster",
+	"travel_speed+":"journeys took fewer days","security_efficiency+":"the watch kept better guard","survey_speed+":"the scouts came to know the land sooner",
+	"conception_support+":"more women carried a child","ecological_pressure-":"the ground near camp was spared","ecology_recovery+":"worn ground came back sooner",
+	"food_output+":"there was more to eat","disaster_risk-":"floods and fires did less harm","foraging_yield+":"the gatherers brought back more","container_capacity+":"more could be carried and kept",
+	"nutrition_quality+":"the meals were better","housing_output+":"huts went up faster","warfare_readiness+":"the young were readier to fight","soil_productivity+":"the sown ground gave more",
+	"food_storage+":"food kept longer","maternal_safety+":"fewer mothers died giving birth","water_safety+":"fewer fell sick from the water","craft_output+":"the makers turned out more",
+	"hunting_yield+":"the hunters brought home more meat","disaster_resilience+":"the camp stood up better to flood and fire","injury_risk-":"fewer were hurt at their work",
+	"stone_yield+":"more good stone came in","fiber_yield+":"there was more fibre for cord","cultivation_yield+":"the sown ground gave more","labor_demand-":"the work needed fewer hands",
+	"food_spoilage-":"less food spoiled","pollution-":"the camp was cleaner","construction_rate+":"building went faster","haul_capacity+":"one back could carry more",
+	"repair_capacity+":"broken things were mended sooner","neonatal_survival+":"more newborns lived","sanitation+":"the camp was cleaner","water_access+":"water was nearer to hand",
+	"disease_exposure-":"fewer caught sickness","timber_yield+":"more timber came in","health_protection+":"fewer fell sick","logistics_endurance+":"parties could stay out longer on the trail",
+	"mobile_shelter+":"shelter could be carried on the move","fuel_efficiency+":"the fires burned less wood","clay_yield+":"more good clay was dug","dry_storage+":"the stores stayed dry",
+	"health_risk-":"fewer fell sick","timber_pressure-":"fewer trees had to be felled"}
 const MAX_LINES:=5
 ## Wordings used within this many years are passed over when another will do.
 const FRESH_YEARS:=6
@@ -413,8 +430,9 @@ static func _learning(a:Dictionary,annals:Array,ctx:Dictionary,out:Array,last_si
 		var text:=""
 		if not pick.is_empty() and turnings.is_empty():
 			var name:=String(pick.get("name","")).to_lower()
-			var how:=String(pick.get("how",""))
-			text=say(ctx,"change",["Of what %s this year, %s changed the most: %s" % [who,name,_lower_first(how)],"The new way people talked about was %s. %s" % [name,how],"This year brought %s. %s" % [name,how],"%s came into use. %s" % [cap(name),how]])
+			var how:=String(EFFECT_WORDS.get(String(pick.get("effect","")),""))
+			if how=="":text=say(ctx,"change_plain",["%s came into use." % cap(name),"This year the people took up %s." % name])
+			else:text=say(ctx,"change",["%s came into use, and %s." % [cap(name),how],"This year the people took up %s, and %s." % [name,how],"With %s, %s." % [name,how],"Of all the new ways, %s mattered most: %s." % [name,how]])
 		else:
 			# Named only in words the people have (a name can run ahead of them).
 			var sayable:Array=ctx.get("sayable",learned) if ctx.get("sayable") is Array else learned
@@ -519,11 +537,46 @@ static func _people(a:Dictionary,annals:Array,ctx:Dictionary,out:Array,last_sig:
 static func _aims_and_works(a:Dictionary,ctx:Dictionary,out:Array)->void:
 	for aim in a.get("aims",[]):
 		var name:=String(aim.get("name",""))
+		var to:=String(aim.get("phrase",""))
+		if to=="":to=aim_words(name)
+		var short:=short_aim(to)
 		match String(aim.get("kind","")):
-			"done":out.append({"t":"aim","w":8.0,"sig":"","text":say(ctx,"aim_done",["The people kept their aim: %s." % name,"%s was done, as the people swore it would be." % name])})
-			"fail":out.append({"t":"aim","w":6.0,"sig":"","text":say(ctx,"aim_fail",["%s was not done in time." % name,"The aim to %s came to nothing." % name.to_lower()])})
-			"start":out.append({"t":"aim","w":4.5,"sig":"","text":say(ctx,"aim_start",["A new aim was taken up: %s." % name,"The people set themselves a new aim: %s." % name])})
+			"done":
+				var legacy:=_lower_first(name)
+				out.append({"t":"aim","w":8.0,"sig":"","text":say(ctx,"aim_done",["The people kept their aim, to %s; they call it %s." % [short,legacy],"The aim to %s was kept, and the people call it %s." % [short,legacy],"The people did what they had set out to do, and will remember it as %s." % legacy])})
+			"fail":out.append({"t":"aim","w":6.0,"sig":"","text":say(ctx,"aim_fail",["The aim to %s ran out of winters unmet." % short,"The winters ran out before the people could %s." % short])})
+			"start":out.append({"t":"aim","w":4.5,"sig":"","text":say(ctx,"aim_start",["The people set themselves to %s." % to,"A new aim was taken up: to %s." % to])})
 	for work in a.get("works",[]):out.append({"t":"work","w":8.0,"sig":"","text":say(ctx,"work",["%s was finished." % String(work),"The builders finished %s." % _lower_first(String(work))])})
+
+
+## An aim's title as the words of a sentence: "Master The Sky and the Counting
+## of Days" -> "master the sky and the counting of days". Names keep their
+## capitals.
+const AIM_COMMON:=["be","souls","again","let","our","hearths","hold","no","child","hungry","for","cross","great","river","master","learn","new","ways","in","sit","at","the","fire","fires",
+	"of","walk","farther","than","any","us","has","walked","make","fear","name","bind","to","friendship","found","a","daughter","hearth","raise","cairn","ring","standing","stones","keep",
+	"one","and","winters","winter","making","things","healing","sky","counting","days","building","water","food","farming","foraging","carrying","crossing","people","homes","health","care",
+	"work","tools","learning","records","craft","travel","land","seasons","custom","law","watch","war","song","exchange","wealth","two","three","four","five","six","seven","eight",
+	"nine","ten","eleven","twelve","god's","yield","them","spread","their","hunting","grounds","outnumber"]
+static func aim_words(title:String)->String:
+	var words:=title.strip_edges().split(" ",false)
+	for i in words.size():
+		if AIM_COMMON.has(words[i].to_lower()):words[i]=words[i].to_lower()
+	return third_person(" ".join(words))
+
+
+## The heart of an aim, without its reasons or its reckoning of winters:
+## "bind the Ildor to us, so that ..." -> "bind the Ildor to us".
+static func short_aim(to:String)->String:
+	var out:=to
+	for cut in [", "," before "," through "," until "]:
+		var at:=out.find(cut)
+		if at>8:out=out.substr(0,at)
+	return out
+
+
+## The people's own "our", told by the keeper of the annals: "their".
+static func third_person(text:String)->String:
+	return RegEx.create_from_string("\\bour\\b").sub(RegEx.create_from_string("\\bOur\\b").sub(text,"Their",true),"their",true)
 
 
 static func _roads(a:Dictionary,annals:Array,ctx:Dictionary,out:Array)->void:
@@ -567,10 +620,30 @@ static func entry(all:Array)->Dictionary:
 		# The lightest lines fill a thin year only.
 		if float(it.w)<2.0 and lines.size()>=2:continue
 		if lines.size()>=budget:break
-		lines.append(String(it.text).strip_edges())
+		var said:=cap(one_people(String(it.text).strip_edges()))
+		if technical(said)!="":continue
+		lines.append(said)
 		if String(it.get("sig",""))!="":sig[String(it.t)]=String(it.sig)
 		if String(it.get("asig",""))!="":abroad.append(String(it.asig))
 	return {"lines":lines,"sig":sig,"abroad":abroad}
+
+
+## "Hoya of Windgap of the Ildor" -> "the Ildor's Hoya of Windgap".
+static func one_people(text:String)->String:
+	var re:=RegEx.create_from_string("\\b([A-Z][\\w'\\-]*) of ([A-Z][\\w'\\-]*(?: [A-Z][\\w'\\-]*)?) of (?:the )?([A-Z][\\w'\\-]*)")
+	return re.sub(text,"the $3's $1 of $2",true)
+
+
+## Words of research papers, not of people at a fire. Returns the first one
+## found, or "".
+const TECHNICAL:=["reproduce","reproducible","managed","manage","cultures","temperature","repeatable","systematic","efficiency","efficient","process","processes","consistently",
+	"coordinated","coordination","capacity","optimal","structural","separation","treatment","enclosed","chambers","residue","reactive","sustained","quantities",
+	"regulate","regulated","standardized","methodical","variables","output","technique","techniques","mechanism","durable","permanently"]
+static func technical(text:String)->String:
+	var re:=RegEx.create_from_string("[A-Za-z']+")
+	for m in re.search_all(text.to_lower()):
+		if TECHNICAL.has(m.get_string()):return m.get_string()
+	return ""
 
 
 # --- A generation ---------------------------------------------------------------
@@ -652,8 +725,10 @@ static func age(y:int,annals:Array,seed:int)->Dictionary:
 		for t in mm.get("lost",[]):lost.append(String(t))
 	if not turns.is_empty():lines.append("These were the years of %s." % list(turns.slice(0,4)))
 	elif learned>0:lines.append("They learned %d new ways." % learned)
-	if not kept.is_empty():lines.append("They kept their %s: %s." % ["aim" if kept.size()==1 else "aims",list(kept.slice(0,3))])
-	if not unmet.is_empty():lines.append("%s came to nothing." % list(unmet.slice(0,3)))
+	if kept.size()==1:lines.append("One aim was kept, remembered as %s." % _lower_first(String(kept[0])))
+	elif kept.size()>1:lines.append("%s aims were kept, remembered as %s." % [cap(num(kept.size())),list(_lowered_articles(kept.slice(0,3)))])
+	if unmet.size()==1:lines.append("They set out to %s, and the winters ran out first." % short_aim(String(unmet[0])))
+	elif unmet.size()>1:lines.append("%s aims ran out of winters unmet, among them to %s." % [cap(num(unmet.size())),short_aim(String(unmet[0]))])
 	if not works.is_empty():lines.append("They finished %s." % list(_lowered_articles(works.slice(0,3))))
 	if not met.is_empty():lines.append("They came to know the %s." % list(met.slice(0,3)))
 	if not lost.is_empty():lines.append("Of those the people remember, %s died." % list(lost.slice(0,4)))
@@ -662,7 +737,7 @@ static func age(y:int,annals:Array,seed:int)->Dictionary:
 	if keeper!="":title="The generation of %s" % keeper
 	elif not turns.is_empty():title="The years of %s" % String(turns[0])
 	else:title="Twenty years, from year %d to year %d" % [first,y+1]
-	var text:=" ".join(lines)
+	var text:=one_people(" ".join(lines))
 	if text.length()>900:text=text.left(897)+"..."
 	return {"title":cap(title),"text":text}
 

@@ -163,7 +163,7 @@ func test_every_twenty_years_the_generation_is_told()->void:
 	assert_str(text).contains("Esru")
 	assert_str(text).contains("the Coughing Winter, in year 8")
 	assert_str(text).contains("the Sick Kept Apart")
-	assert_str(text).contains("The Mastery of Healing")
+	assert_str(text).contains("the Mastery of Healing")
 	assert_str(text).contains("Ildor")
 	assert_str(text).contains("The hearths went from 100 souls to 119")
 	assert_str(text).contains("The god did not answer once")
@@ -197,3 +197,61 @@ func test_older_annals_without_the_new_fields_still_compose()->void:
 	var told:=Annals.compose(c,a)
 	assert_bool(told.is_empty()).is_false()
 	assert_str(String(told.text)).is_not_empty()
+
+
+func test_a_new_way_is_told_in_plain_words_never_the_research_text()->void:
+	_at(0)
+	GameState.discovery_log.append({"day":100,"id":"controlled_fermentation","name":"Controlled Fermentation","description":"Temperature, vessels, and starter cultures are managed to reproduce fermentation.","effects":{"food_storage":0.02,"nutrition_quality":0.01}})
+	GameState.discovery_log.append({"day":120,"id":"controlled_kilns","name":"Controlled Kilns","description":"Enclosed firing chambers make heat repeatable enough to reproduce strong ceramics.","effects":{"craft_output":0.005}})
+	Annals.note_learned(Chronicle.data(),"Controlled Fermentation",100)
+	Annals.note_learned(Chronicle.data(),"Controlled Kilns",120)
+	_at(366)
+	var text:=String(_told("annal:0").text)
+	assert_str(text).contains("controlled fermentation")
+	assert_str(text).contains("food kept longer")
+	assert_str(text).not_contains("starter cultures")
+	assert_str(Years.technical(text)).is_equal("")
+
+
+func test_technical_vocabulary_never_reaches_a_year_entry()->void:
+	for word in ["reproduce","managed","cultures","temperature","repeatable","systematic","efficiency","process"]:
+		assert_str(Years.technical("Food kept by the %s of the elders." % word)).is_equal(word)
+	# A line in research words is left out of the year, not told.
+	var picked:=Years.entry([{"t":"x","w":9.0,"text":"Temperature, vessels, and starter cultures are managed to reproduce fermentation."},{"t":"y","w":3.0,"text":"The hunters brought home more meat."}])
+	assert_int((picked.lines as PackedStringArray).size()).is_equal(1)
+	assert_str(String(picked.lines[0])).is_equal("The hunters brought home more meat.")
+	# Forty years of the cadence test's news, plus research text: none of it.
+	_at(0)
+	for y in 10:
+		GameState.discovery_log.append({"day":y*365+50,"id":"w%d" % y,"name":"Way %d" % y,"description":"A systematic process of managed temperature.","effects":{"labor_efficiency":0.01}})
+		Annals.note_learned(Chronicle.data(),"Way %d" % y,y*365+50)
+	_at(10*365+1)
+	for e in GameState.chronicle.entries:
+		if String(e.get("kind",""))=="annal":assert_str(Years.technical(String(e.text))).is_equal("")
+
+
+func test_aims_read_as_sentences_with_their_own_words()->void:
+	_at(0)
+	_at(20)
+	Chronicle.record({"key":"aim:start:a1","title":"An Aim for a Generation: Master Making Things","text":"Learn nine new ways of making things. The god said nothing, so the people took it up themselves.","tier":"moment","kind":"milestone"})
+	_at(366)
+	var first:=String(_told("annal:0").text)
+	assert_bool("set themselves to learn nine new ways of making things" in first or "A new aim was taken up: to learn nine new ways of making things" in first).is_true()
+	assert_str(first).not_contains("Master Making Things")
+	_at(400)
+	Chronicle.record({"key":"aim:fail:a1","title":"An Aim Unmet: Master Making Things","text":"Master Making Things was not done, and the people grieve it.","tier":"moment","kind":"milestone"})
+	_at(2*365+1)
+	var second:=String(_told("annal:1").text)
+	assert_bool("aim to learn nine new ways of making things ran out of winters unmet" in second or "before the people could learn nine new ways of making things" in second).is_true()
+	# Without its beginning, the title still reads as words, names kept.
+	assert_str(Years.aim_words("Master The Sky and the Counting of Days")).is_equal("master the sky and the counting of days")
+	assert_str(Years.aim_words("Raise a Cairn for Liora")).is_equal("raise a cairn for Liora")
+	assert_str(Years.aim_words("Let Our Hearths Hold 121 Souls")).is_equal("let their hearths hold 121 souls")
+
+
+func test_a_ruler_of_a_place_of_a_people_reads_without_a_double_of()->void:
+	assert_str(Years.one_people("Word came that Hoya of Windgap of the Ildor had sworn to bind us to them.")).is_equal("Word came that the Ildor's Hoya of Windgap had sworn to bind us to them.")
+	assert_str(Years.one_people("Tendo of Crowfield of Esurai had died.")).is_equal("the Esurai's Tendo of Crowfield had died.")
+	assert_str(Years.one_people("Liora of the Red Cliff sat with the sick.")).is_equal("Liora of the Red Cliff sat with the sick.")
+	var picked:=Years.entry([{"t":"x","w":5.0,"text":"Hoya of Windgap of the Ildor was said to be close to what they swore."}])
+	assert_str(String(picked.lines[0])).is_equal("The Ildor's Hoya of Windgap was said to be close to what they swore.")
