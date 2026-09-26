@@ -8,7 +8,7 @@ func test_refinement_slices_preserve_camera_frame_budget()->void:
 
 func test_cartographic_relief_begins_after_close_ground_is_unresolved()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
-	assert_str(source).contains("float map_relief = smoothstep(0.035,0.28,pixel_world)")
+	assert_str(source).contains("float map_relief = smoothstep(0.008,0.16,pixel_world)")
 	assert_str(source).contains("directional_slope * 3.20")
 	assert_str(source).contains("smoothstep(0.65,5.60,world_position.y)*map_relief")
 	assert_str(source).contains("mapped_upland*0.36")

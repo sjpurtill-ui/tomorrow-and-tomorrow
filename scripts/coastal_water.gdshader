@@ -16,6 +16,7 @@ uniform vec2 surface_origin = vec2(0.0);
 uniform vec4 wave_phase = vec4(0.0);
 uniform vec2 ripple_phase = vec2(0.0);
 #include "res://scripts/coast_mask.gdshaderinc"
+#include "res://scripts/map_palette.gdshaderinc"
 
 // This is the alternating triangle interpolation of TerrainPatchBuilder, not
 // bilinear interpolation or a second noise field. Heights and distances are km.
@@ -112,10 +113,11 @@ void fragment() {
 		+0.28*sin(dot(world_position.xz,vec2(0.0011,0.0003))+0.7)
 		+0.22*sin(dot(world_position.xz,vec2(-0.0004,0.0017))-1.1),0.0,1.0);
 	float polar_water=clamp(abs(world_position.z)/(fog_world_size.y*0.5),0.0,1.0);
-	vec3 deep = mix(vec3(0.018,0.061,0.112),vec3(0.035,0.105,0.158),basin_field);
-	deep=mix(deep,vec3(0.030,0.083,0.125),polar_water*0.16);
-	vec3 shelf = vec3(0.045,0.162,0.215);
-	vec3 shallows = vec3(0.135,0.285,0.265);
+	// Map palette slate: deep #2F4A52 lifting to shallow #5E7F7A, never cyan.
+	vec3 deep = mix(vec3(0.028,0.064,0.078),vec3(0.040,0.086,0.098),basin_field);
+	deep=mix(deep,vec3(0.042,0.080,0.094),polar_water*0.16);
+	vec3 shelf = vec3(0.058,0.122,0.128);
+	vec3 shallows = vec3(0.111,0.200,0.184);
 	vec3 water = mix(deep,shelf,exp(-depth/0.19)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.018)*surveyed_surface);
 	// Broad, static suspended-sediment variation gives shallow coasts the
@@ -135,10 +137,11 @@ void fragment() {
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
 	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20);
-	float altitude_haze = smoothstep(0.65,5.0,pixel_world);
+	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
-	water = mix(water,vec3(0.17,0.245,0.28),clamp(altitude_haze*0.13+slant_haze*0.13,0.0,0.22));
+	// The same parchment haze as the land, so the coast does not change key.
+	water = map_haze(water,clamp(altitude_haze+slant_haze*0.14,0.0,0.30));
 	ALBEDO = water*visible;
 	EMISSION = vec3(0.006,0.012,0.014)*(1.0-visible);
 	NORMAL_MAP = vec3(normal_wave*visible,1.0)*0.5+0.5;
