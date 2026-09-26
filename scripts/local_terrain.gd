@@ -1878,7 +1878,8 @@ func _build_environment() -> void:
 	var environment := WorldEnvironment.new()
 	var settings := Environment.new()
 	settings.background_mode = Environment.BG_COLOR
-	settings.background_color = Color("#0b1417")
+	# Beyond the chart's edge: the dark leather of the map table.
+	settings.background_color = Color("#1c1812")
 	settings.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	# Low warm key light (docs/ART_DIRECTION.md): a painted landscape in the
 	# first hours of the day. The sky fill is cooler and dimmer than the key so
@@ -2260,6 +2261,12 @@ float organic_noise(vec2 p) {
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
 
+// Charted ground: the discovery mask, plus the ground around the people now.
+float charted_at(vec2 xz) {
+	vec2 fog_uv=clamp(xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
+	return max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(xz,fog_current_origin)));
+}
+
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
@@ -2281,6 +2288,8 @@ void fragment() {
 	// Taken before any discard: derivatives are undefined once quads diverge,
 	// which lit a one-pixel seam along every cut and dissolve edge.
 	float pixel_world = max(length(dFdx(relative_position.xz)), length(dFdy(relative_position.xz)));
+	// Screen-space rate of height, for the inked coastline (also pre-discard).
+	float height_px = fwidth(world_position.y);
 	// A continental patch can straddle the finite planet map. Never extrapolate
 	// procedural land beyond the playable geography. Legacy custom meshes lack UV fields.
 	if (UV.x>=0.999 && (abs(world_position.x)>fog_world_size.x*0.5 || abs(world_position.z)>fog_world_size.y*0.5)) { discard; }
@@ -2300,11 +2309,22 @@ void fragment() {
 	vec2 surface_uv=UV;
 	vec2 surface_uv2=UV2;
 	if (far_layer && coast_mask_ready()) { coast_far_surface(world_position.xz,surface_color,surface_uv,surface_uv2); }
-	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
-	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float discovered=max(texture(discovery_mask,fog_uv).r,current_visibility);
-	vec3 unknown_ground=vec3(0.006,0.012,0.014);
+	float discovered=charted_at(world_position.xz);
+	// Uncharted ground is blank vellum (map_palette.gdshaderinc), with the
+	// frontier of the known world inked where the chart ends.
+	vec3 unknown_ground=map_unknown(world_position.xz,CAMERA_POSITION_WORLD.y);
 	float reveal=smoothstep(0.06,0.62,discovered);
+	if (discovered>0.02 && discovered<0.75) {
+		// One mask texel is ~39 km; the mask is linear inside it, so a forward
+		// difference over half a texel gives its exact local slope.
+		float step_km=fog_world_size.x/2048.0;
+		vec2 slope_per_km=vec2(charted_at(world_position.xz+vec2(step_km,0.0))-discovered,charted_at(world_position.xz+vec2(0.0,step_km))-discovered)/step_km;
+		vec3 frontier=map_frontier(discovered,1.0/max(length(slope_per_km)*pixel_world,0.00001));
+		float frontier_scale=smoothstep(0.015,0.20,pixel_world);
+		unknown_ground=mix(unknown_ground,unknown_ground*0.82,frontier.y*frontier_scale*0.6);
+		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
+		reveal=mix(reveal,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
+	}
 	// Fully hidden ground needs only the existing unlit veil. Avoid all
 	// texture and procedural surface work until there is visible ground.
 	if (reveal<=0.0) {
@@ -2515,6 +2535,8 @@ void fragment() {
 		crown_shade=precise_surface_noise(surface_position,surface_origin,90,1,vec2(0.0));
 	}
 	forest_surface*=mix(1.0,0.86+crown_shade*0.25,local_detail);
+	// On the chart scale woodland is a muted green wash, not near-black stains.
+	forest_surface=mix(forest_surface,vec3(0.15,0.19,0.105),smoothstep(0.01,0.20,pixel_world)*0.55);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
@@ -2635,13 +2657,21 @@ void fragment() {
 	earth=map_palette_grade(earth);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
-	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
+	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.36;
 	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.002,0.35,pixel_world);
-	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.30);
+	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.40);
 	earth=map_haze(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
+	// The coast is inked, one to two pixels wide, where this surface's own
+	// triangles rise out of the sea (streamed patches only: the planet mesh
+	// takes its shoreline from the macro raster instead).
+	if (!far_layer) {
+		float shore_px=world_position.y/max(height_px,0.0000001);
+		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,world_position.y);
+		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
+	}
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;
@@ -2905,13 +2935,15 @@ render_mode diffuse_burley, specular_disabled;
 uniform sampler2D discovery_mask : source_color, filter_linear;
 uniform vec2 fog_world_size=vec2(40075.0,20004.0);
 uniform vec2 fog_current_origin=vec2(0.0);
+#include "res://scripts/map_palette.gdshaderinc"
 varying vec3 world_position;
 void vertex(){ world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
 void fragment(){
 	vec2 uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
 	float discovered=smoothstep(0.12,0.62,max(texture(discovery_mask,uv).r,current_visibility));
-	ALBEDO=mix(vec3(0.004,0.009,0.010),COLOR.rgb,discovered);
+	ALBEDO=COLOR.rgb*discovered;
+	EMISSION=MAP_VELLUM*(1.0-discovered);
 	ROUGHNESS=1.0;
 }
 """
@@ -4419,7 +4451,8 @@ void fragment() {
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
 	// Same map palette as the ground: olive and slate canopy, not neon blobs.
 	base=map_palette_grade(base);
-	ALBEDO=mix(vec3(0.006,0.012,0.014),base,smoothstep(0.06,0.62,revealed));
+	ALBEDO=base*smoothstep(0.06,0.62,revealed);
+	EMISSION=MAP_VELLUM*(1.0-smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
 }
@@ -4659,7 +4692,7 @@ func _refresh_settlement_network(force:=false)->void:
 		# the edge never becomes a heavy 3D ring; they only change on a rebuild.
 		var ink_pixel:=_territory_ink_pixel_km()
 		var primary:=bool(settlement.get("primary",false))
-		var core_width:=ink_pixel*lerpf(0.55,0.85,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
+		var core_width:=ink_pixel*lerpf(0.65,0.95,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
 		var wash_color:Color=TERRITORY_WASH.lerp(color,0.25)
 		var ownership_color:Color=wash_color
 		# Store base opacity in geometry; the camera fade is updated live in material.
@@ -7792,7 +7825,7 @@ func _update_settlement_claim_opacity()->void:
 
 const TERRITORY_WASH:=Color("#A8782A")
 const TERRITORY_BAND:=preload("res://scripts/territory_border_band.gd")
-const TERRITORY_INK:=Color("#3A2E22")
+const TERRITORY_INK:=Color("#1E150D")
 
 ## One screen pixel in kilometres at the current zoom bucket (the same bucket
 ## as the network view key), so ink widths are stable between rebuilds.

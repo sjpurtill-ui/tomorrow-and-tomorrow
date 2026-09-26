@@ -35,6 +35,11 @@ float visible_ground(vec2 point) {
 	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
 }
 
+float charted_at(vec2 xz) {
+	vec2 uv = clamp(xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
+	return max(texture(discovery_mask,uv).r,1.0-smoothstep(30.0,38.0,distance(xz,fog_current_origin)));
+}
+
 void vertex() {
 	world_position = (MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
 	relative_position = world_position-CAMERA_POSITION_WORLD;
@@ -56,9 +61,28 @@ void fragment() {
 			|| (terrain_grid.z>0.0 && coast_patch_yields(world_position.xz, vec4(terrain_grid.xy, terrain_grid.z, 1.0)));
 		if (raster_decides && coast_mask_height(world_position.xz) > 0.0) { discard; }
 	}
-	vec2 uv = clamp(world_position.xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
-	float current_visibility = 1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float visible = smoothstep(0.06,0.62,max(texture(discovery_mask,uv).r,current_visibility));
+	// Over the streamed patch the shoreline is where that patch's own triangles
+	// cross sea level. Decide it here rather than by depth test: a low shore
+	// lies within depth precision of the sea plane, and the two fought in
+	// combed stripes along every flat coast.
+	if (regional_surface && terrain_grid.z>0.0 && terrain_grid.w>=2.0
+		&& max(abs(point.x-local_grid.x),abs(point.y-local_grid.y))<terrain_grid.z*0.5
+		&& !coast_patch_yields(world_position.xz, vec4(terrain_grid.xy, terrain_grid.z, 1.0))
+		&& visible_ground(point) > sea_level) { discard; }
+	float charted = charted_at(world_position.xz);
+	float visible = smoothstep(0.06,0.62,charted);
+	// Uncharted sea is the same blank vellum as uncharted land, and the same
+	// frontier ink runs across the coast without a break.
+	vec3 unknown_surface = map_unknown(world_position.xz,CAMERA_POSITION_WORLD.y);
+	if (charted>0.02 && charted<0.75) {
+		float step_km = fog_world_size.x/2048.0;
+		vec2 slope_per_km = vec2(charted_at(world_position.xz+vec2(step_km,0.0))-charted,charted_at(world_position.xz+vec2(0.0,step_km))-charted)/step_km;
+		vec3 frontier = map_frontier(charted,1.0/max(length(slope_per_km)*pixel_world,0.00001));
+		float frontier_scale = smoothstep(0.015,0.20,pixel_world);
+		unknown_surface = mix(unknown_surface,unknown_surface*0.82,frontier.y*frontier_scale*0.6);
+		unknown_surface = mix(unknown_surface,MAP_INK,frontier.x*frontier_scale*0.85);
+		visible = mix(visible,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
+	}
 	float depth = 1.0;
 	float surveyed_surface = 0.0;
 	float patch_weight = 0.0;
@@ -114,9 +138,9 @@ void fragment() {
 		+0.22*sin(dot(world_position.xz,vec2(-0.0004,0.0017))-1.1),0.0,1.0);
 	float polar_water=clamp(abs(world_position.z)/(fog_world_size.y*0.5),0.0,1.0);
 	// Map palette slate: deep #2F4A52 lifting to shallow #5E7F7A, never cyan.
-	vec3 deep = mix(vec3(0.028,0.064,0.078),vec3(0.040,0.086,0.098),basin_field);
-	deep=mix(deep,vec3(0.042,0.080,0.094),polar_water*0.16);
-	vec3 shelf = vec3(0.058,0.122,0.128);
+	vec3 deep = mix(vec3(0.070,0.125,0.140),vec3(0.088,0.150,0.160),basin_field);
+	deep=mix(deep,vec3(0.092,0.140,0.150),polar_water*0.16);
+	vec3 shelf = vec3(0.105,0.178,0.172);
 	vec3 shallows = vec3(0.111,0.200,0.184);
 	vec3 water = mix(deep,shelf,exp(-depth/0.19)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.018)*surveyed_surface);
@@ -137,13 +161,25 @@ void fragment() {
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
 	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20);
+	// Engraved water-lines, as old charts drew them: three fine pale lines
+	// following the shore at widening screen-pixel spacing, fading seaward.
+	float shore_px = depth/max(fwidth(depth),0.0000001);
+	float water_lines = 0.0;
+	for (int k = 0; k < 3; k++) {
+		float at = 4.0+float(k*(k+3))*1.7;
+		water_lines = max(water_lines,(1.0-smoothstep(0.30,1.05,abs(shore_px-at)))*(1.0-float(k)*0.30));
+	}
+	water_lines *= smoothstep(0.003,0.02,pixel_world)*(1.0-smoothstep(0.35,0.95,pixel_world));
+	water = mix(water,vec3(0.34,0.37,0.31),water_lines*0.60);
 	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
 	// The same parchment haze as the land, so the coast does not change key.
 	water = map_haze(water,clamp(altitude_haze+slant_haze*0.14,0.0,0.30));
 	ALBEDO = water*visible;
-	EMISSION = vec3(0.006,0.012,0.014)*(1.0-visible);
+	// A chart's sea is a pale slate wash on the page, legible in any light:
+	// part of its colour is carried as emission so low sun cannot sink it to black.
+	EMISSION = unknown_surface*(1.0-visible)+water*visible*0.55;
 	NORMAL_MAP = vec3(normal_wave*visible,1.0)*0.5+0.5;
 	ROUGHNESS = mix(0.48,0.38,wind_detail);
 	SPECULAR = 0.14*visible;
