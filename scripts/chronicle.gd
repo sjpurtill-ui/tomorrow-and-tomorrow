@@ -49,6 +49,7 @@ const CONDITION_QUIET_DAYS:=60
 const RESEARCH_MILESTONES:=["seed_selection","public_schools","printing_process","steam_propulsion","powered_flight","reactor_engineering"]
 ## Headcounts the people have never reached before are remembered once.
 const PEOPLE_MILESTONES:=[150,200,300,500,1000,2000,5000,10000,20000,50000,100000,250000,500000,1000000]
+const Annals:=preload("res://scripts/chronicle_annals.gd")
 const DOMAIN_NAMES:={"demography":"people & homes","nutrition":"food & farming","health":"health & care","labor":"work & tools","knowledge":"learning & records","production":"craft & making","infrastructure":"water & building","logistics":"travel & carrying","ecology":"land & seasons","institutions":"custom & law","security":"watch & war","culture":"song & custom","wealth":"exchange & wealth"}
 
 ## Moment cards waiting to be shown; hud/chronicle_card.gd drains this.
@@ -105,11 +106,17 @@ static func record(moment:Dictionary)->Dictionary:
 	if keys.has(key):return {}
 	var tier:=String(moment.get("tier",""))
 	if tier not in TIERS:tier=grade(moment)
+	# Routine lines step back into the tallies; the rest gain their callbacks
+	# (chronicle_annals.gd).
+	var shaped:=Annals.shape(c,moment,tier)
+	tier=String(shaped.tier);title=String(shaped.title)
 	var downgraded:=false
 	if tier=="moment" and not bool(moment.get("priority",false)) and not _moment_room(c,day):
 		tier="notice";downgraded=true
-	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":plain(title),"text":plain(String(moment.get("text","")).strip_edges())}
+	var entry:Dictionary={"key":key,"day":day,"tier":tier,"kind":String(moment.get("kind","story")),"title":plain(title),"text":plain(String(shaped.text).strip_edges())}
 	if downgraded:entry["crowded"]=true
+	if String(shaped.family)!="":entry["family"]=String(shaped.family)
+	if bool(shaped.folded):entry["folded"]=true
 	for optional in ["art","action","domain","source","first","learned"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
 	(c.entries as Array).push_front(entry)
@@ -121,6 +128,7 @@ static func record(moment:Dictionary)->Dictionary:
 		pending_cards.append(entry.duplicate(true))
 		if pending_cards.size()>6:pending_cards.pop_front()
 	if tier!="whisper" and bool(moment.get("ledger",true)):_to_ledger(entry)
+	Annals.note(c,entry)
 	_trim(c)
 	return entry
 
@@ -331,7 +339,9 @@ static func kind_of(report:Dictionary)->String:
 static func ingest_day(day_result:Dictionary)->void:
 	if not active():return
 	var c:=data()
-	# A season just ended: tell what it taught before today's news.
+	# A year just ended: tell it as one entry before today's news.
+	for year in Annals.roll(c,int(GameState.elapsed_days)):record(year)
+	# A season just ended: keep what it taught in the season's tally.
 	_flush_learned(c,int(GameState.elapsed_days))
 	for discovery in day_result.get("discoveries",[]):
 		if discovery is Dictionary:_discovery(discovery)
@@ -389,6 +399,7 @@ static func _discovery(event:Dictionary)->void:
 		# end with everything else the people learned (_flush_learned).
 		var kept:=record({"key":"discovery:"+id,"title":name,"text":text.strip_edges(),"kind":"discovery","tier":"whisper","art":{"discovery_id":id,"domain":dynamic},"action":{"kind":"section","section":"inquiry","sub":0},"domain":dynamic,"ledger":false})
 		if kept.is_empty():return
+		Annals.note_learned(c,name,int(kept.day))
 		var ledger_line:=kept.duplicate(true);ledger_line["tier"]="notice"
 		_to_ledger(ledger_line)
 		var learned:Dictionary=c.get("learned",{})
@@ -472,6 +483,7 @@ static func _scan_ledger(c:Dictionary)->void:
 	# Oldest first, so the feed reads in the order things happened.
 	for pair in found:
 		var ev:Dictionary=pair[1]
+		if String(ev.get("kind",""))=="hearth_count":Annals.note_tally(c,ev)
 		var told:=_retell(ev)
 		var tier:=grade(ev)
 		if told.size()>2 and bool(told[2]):tier="whisper"
@@ -525,9 +537,10 @@ static func _retell(ev:Dictionary)->Array:
 				# marked on the map, not told at the fire.
 				if "crossed the trail of a foreign" in lower or kept.has(sentence):continue
 				kept.append(sentence)
-			var told:=" ".join(kept.slice(0,3)) if kept.size()>1 else " ".join(kept)
-			# Only the distance walked is left: a routine return, kept as a whisper.
-			return ["The scouts come home" if title=="SCOUTS RETURN" else "The seekers come home",told.left(320),kept.size()<=1]
+			# Road news the people have heard before is counted for the year's
+			# telling; only what is new is told (chronicle_annals.gd).
+			var story:=Annals.scout_story(data(),title,kept)
+			return [String(story[0]),String(story[1]).left(360),bool(story[2])]
 	return [_story_title(title),_story_text(ev)]
 
 

@@ -437,7 +437,24 @@ static func _on_figure_death(figure:Dictionary)->void:
 	var list:Array=state().remembered
 	list.push_front(entry)
 	while list.size()>REMEMBERED_MAX: list.pop_back()
-	record("death","%s Is Dead" % String(figure.get("name","")).substr(0,60),"%s, %s, is dead. They %s." % [String(figure.get("name","")),title.to_lower(),deed],{},{"key":"court:death:figure:"+String(figure.get("id","")),"tier":"notice"})
+	record("death","%s Is Dead" % String(figure.get("name","")).substr(0,60),_figure_obituary(figure,int(entry.age),title),{},{"key":"court:death:figure:"+String(figure.get("id","")),"tier":"notice"})
+
+## What the people remember a notable for: their age, how long they did the
+## work, and the work in plain words.
+const FIGURE_WORK:={"General":"the young spears followed them","Scholar":"they were the one people asked when no one else knew","Physician":"they sat with the sick",
+	"Engineer":"they made roofs and walls that stood","Agronomist":"they knew what grew where, and when to gather it","Organizer":"they settled who did what work and who got what share",
+	"Artist":"their songs and painted marks were the people's own","Explorer":"they walked the far paths and came back to tell them","Architect":"they raised what will outlast us"}
+
+static func _figure_obituary(figure:Dictionary,age:int,title:String)->String:
+	var name:=String(figure.get("name",""))
+	var years:=int((int(figure.get("death_day",_day()))-int(figure.get("emerged",figure.get("death_day",_day()))))/365.0)
+	var work:=String(FIGURE_WORK.get(String(figure.get("role","")),"they served the people"))
+	var said:="%s, %s, has died at %d." % [name,title.to_lower(),age] if age>0 else "%s, %s, has died." % [name,title.to_lower()]
+	if years>=2:said+=" For %d years %s." % [years,work]
+	else:said+=" They had only just come into their own; %s for barely a season." % work
+	var renown:=int(figure.get("renown",0))
+	if renown>=40:said+=" Their name is known at every fire."
+	return said
 
 static func _acting(office:Dictionary)->Dictionary:
 	if String(office.key)=="settlement": return GovernmentPeopleSystem.settlement_leader(String(office.settlement_id))
@@ -958,7 +975,20 @@ static func _mark_rite(kind:String,label:String,day:int,days:int,pid:int=0)->voi
 	var rites:Array=state().rites
 	rites.push_front({"day":day,"until":day+clampi(days,3,10),"kind":kind,"label":label.substr(0,80),"pid":pid,"slot":posmod(hash("%d|%s|%d" % [int(GameState.world_seed),label,day]),8)})
 	while rites.size()>RITES_MAX: rites.pop_back()
-	if kind!="pyre": record("rite","A Rite at the Camp","%s: %s." % [String(Lines.RITE_WORDS.get(kind,"a rite")).capitalize(),label])
+	if kind!="pyre":
+		var rite:=String(Lines.RITE_WORDS.get(kind,"a rite"))
+		record("rite",rite_title(rite,label),"%s: %s." % [rite.substr(0,1).to_upper()+rite.substr(1),label])
+
+## "A cairn of stones for the dead", "A standing stone for the first sown
+## ground": the rite and what it was for, so each reads as its own.
+static func rite_title(rite:String,label:String)->String:
+	var head:=rite.substr(0,1).to_upper()+rite.substr(1).to_lower()
+	var what:=label.strip_edges()
+	if what.begins_with("for the dead"): return head+" for the dead"
+	if what.begins_with("you said"): return head+" for the god's word"
+	if what.begins_with("for "): what=what.substr(4)
+	var title:="%s for %s" % [head,what]
+	return title if title.length()<=70 else head
 
 static func _prune_rites(day:int)->void:
 	var rites:Array=state().rites
