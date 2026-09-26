@@ -434,6 +434,11 @@ static func settlement_atlas()->Texture2D:
 	return _settlement_atlas
 
 
+## How far a settlement glyph reaches from its centre, as a fraction of its
+## cell (the halo radius on the 56px grid), for marks drawn around it.
+static func settlement_glyph_extent(index:int)->float:
+	return float([14.0,16.0,18.0,20.0,22.0,24.4,27.1,22.0][clampi(index,0,SETTLEMENT_GLYPH_COUNT-1)])/float(ICON_PX)
+
 static func _settlement_glyph(index:int)->Array:
 	var ink:=Color("#2b2118")
 	var paper:=Color("#f1e7cf")

@@ -106,6 +106,13 @@ float coast_patch_ground(vec2 rel, float pixel_world, float sea) {
 	float mesh_weight = max(1.0-smoothstep(1.0, 1.5, coast_patch_cell_px(pixel_world)),
 		smoothstep(spread*3.0+0.0015, spread*4.0+0.002, abs(mesh_height-sea)));
 	if (mesh_weight >= 1.0) { return mesh_height; }
-	float smooth_height = coast_patch_smooth(rel)+coast_patch_wobble(rel)*spread*0.30;
+	// A lone high or low vertex in any separable grid surface draws a rounded
+	// square. Warp where the surface is read by up to a third of a cell, on a
+	// field a little under two cells across, so each such islet or pond takes an
+	// irregular shape of its own; the coast moves at most a few pixels.
+	float cell_km = terrain_grid.z/max(terrain_grid.w-1.0, 1.0);
+	vec2 warp = vec2(coast_patch_wobble(rel*0.9+vec2(17.0*cell_km, 5.0*cell_km)),
+		coast_patch_wobble(rel*0.9-vec2(9.0*cell_km, 23.0*cell_km)))*cell_km*0.66;
+	float smooth_height = coast_patch_smooth(rel+warp)+coast_patch_wobble(rel)*spread*0.30;
 	return mix(smooth_height, mesh_height, mesh_weight);
 }

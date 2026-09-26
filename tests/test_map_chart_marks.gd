@@ -69,3 +69,43 @@ func test_settlement_atlas_has_a_distinct_mark_per_stage_and_for_strangers()->vo
 	# Every cell carries a mark, and the camp to megalopolis marks grow.
 	for index in ICONS.SETTLEMENT_GLYPH_COUNT:assert_int(inked[index]).is_greater(40)
 	for stage in range(1,7):assert_int(inked[stage]).is_greater_equal(inked[stage-1])
+
+
+func test_home_ring_clears_every_settlement_glyph()->void:
+	for stage in ICONS.SETTLEMENT_GLYPH_COUNT:
+		var extent:=ICONS.settlement_glyph_extent(stage)
+		assert_float(extent).is_greater(0.2)
+		assert_float(extent+0.07).is_less(0.56)
+	assert_float(ICONS.settlement_glyph_extent(1)).is_greater(ICONS.settlement_glyph_extent(0))
+
+
+func test_toolbar_counts_match_the_full_snapshots()->void:
+	# The HUD reads two cheap counts; they must equal what the snapshots say.
+	var known:=0
+	for encounter:Dictionary in CivilizationSystem.contact_encounters_snapshot():
+		if bool(encounter.get("home_location_known",false)): known+=1
+	assert_int(CivilizationSystem.known_home_destination_count()).is_equal(known)
+	if CivilizationSystem.civilizations.size()>0:
+		var civ:Dictionary=CivilizationSystem.civilizations[0]
+		var relation:Dictionary=civ.get("player_relation",{})
+		relation["contact_level"]=2;relation["contact_source"]="probe";relation["encounter_position"]=Vector2(3,4);relation["home_location_known"]=true
+		civ["player_relation"]=relation;CivilizationSystem.civilizations[0]=civ
+		var expected:=0
+		for encounter:Dictionary in CivilizationSystem.contact_encounters_snapshot():
+			if bool(encounter.get("home_location_known",false)): expected+=1
+		assert_int(expected).is_greater_equal(1)
+		assert_int(CivilizationSystem.known_home_destination_count()).is_equal(expected)
+	var full:Dictionary=CivilizationSystem.scouting_staff.snapshot()
+	var counts:Dictionary=CivilizationSystem.scouting_staff.toolbar_counts()
+	assert_int(int(counts.away)).is_equal(int(full.away))
+	assert_float(float(counts.share)).is_equal(float(full.share))
+
+
+func test_overlay_selection_skips_the_reveal_test_outside_the_view()->void:
+	var asked:=[0]
+	var deposits:=[{"resource":"Flint","stage":"recognized","position":Vector3(0,0,0)},{"resource":"Clay","stage":"recognized","position":Vector3(900,0,0)}]
+	var picked:Array=renderer._bounded_resource_overlay_selection(deposits,Vector2.ZERO,10.0,func(_p:Vector3)->bool:
+		asked[0]+=1
+		return true)
+	assert_int(picked.size()).is_equal(1)
+	assert_int(asked[0]).is_equal(1)

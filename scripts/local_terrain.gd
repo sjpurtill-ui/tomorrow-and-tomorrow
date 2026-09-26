@@ -3106,8 +3106,11 @@ func _river_width_factor(point:Vector3)->float:
 		+sin(point.z*2.30+point.x*0.37)*0.065,
 		0.68,1.18)
 
-func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color, headwater:bool=false) -> void:
+func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: float, color: Color, headwater:bool=false, downstream:=PackedFloat32Array(), trunk:=false, scale_role:=0.0) -> void:
 	var taper:=preload("res://scripts/river_geometry.gd").headwater_factors(points) if headwater else PackedFloat32Array()
+	# CUSTOM0 (format set at begin): how far downstream each point lies, trunk
+	# or tributary (the chart ink swells with both), and the scales the reach is
+	# drawn at: 0 all, 1 close up only, 2 chart scale only (map_river.gdshader).
 	for i in points.size() - 1:
 		var a := points[i]
 		var b := points[i + 1]
@@ -3138,6 +3141,7 @@ func _add_river_ribbon(surface: SurfaceTool, points: Array[Vector3], width: floa
 			var endpoint:=i if corner_index in [0,3,5] else i+1
 			var source_opacity:=smoothstep(0.12,0.15,taper[endpoint]) if headwater else 1.0
 			surface.set_uv2(Vector2(bend_a if corner_index in [0,3,5] else bend_b,source_opacity))
+			surface.set_custom(0,Color(downstream[endpoint] if endpoint<downstream.size() else 1.0,1.0 if trunk else 0.0,scale_role,0.0))
 			var seamless_lift := 0.0037 if width < 0.15 else 0.0021
 			point.y=_height_at(point.x,point.z)+(seamless_lift if SEAMLESS_WORLD else (0.105 if width<0.8 else 0.072))
 			surface.set_color(Color(color.r*reach_tint,color.g*reach_tint,color.b*reach_tint,color.a))
@@ -3176,8 +3180,13 @@ func _bind_river_terrain(material:ShaderMaterial)->void:
 func _build_river_network() -> void:
 	var banks := SurfaceTool.new()
 	var water_surface := SurfaceTool.new()
-	banks.begin(Mesh.PRIMITIVE_TRIANGLES)
-	water_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Tributaries at chart scale: a smoothed copy of each course, kept in its own
+	# meshes so battle grounds (which copy RiverWater) never see it.
+	var chart_banks:=SurfaceTool.new()
+	var chart_water:=SurfaceTool.new()
+	for river_surface in [banks,water_surface,chart_banks,chart_water]:
+		(river_surface as SurfaceTool).begin(Mesh.PRIMITIVE_TRIANGLES)
+		(river_surface as SurfaceTool).set_custom_format(0,SurfaceTool.CUSTOM_RGBA_FLOAT)
 	var points: Array[Vector3] = []
 	if SEAMLESS_WORLD:
 		# Sample the authoritative river over its actual 1,520 km reach. Sampling
@@ -3192,144 +3201,46 @@ func _build_river_network() -> void:
 			if current!=Vector3.INF: points.append(current)
 	if points.size() >= 2:
 		_trace_load("river points=%d from=%s to=%s" % [points.size(),points.front(),points.back()])
-		_add_river_ribbon(banks,points,0.22 if SEAMLESS_WORLD else 1.12,Color(0.15,0.205,0.17,0.64))
-		_add_river_ribbon(water_surface,points,0.105 if SEAMLESS_WORLD else 0.68,Color(0.055,0.17,0.205,0.92))
+		var trunk_flow:=preload("res://scripts/river_geometry.gd").downstream_fractions(points,SEA_LEVEL)
+		_add_river_ribbon(banks,points,0.22 if SEAMLESS_WORLD else 1.12,Color(0.15,0.205,0.17,0.64),false,trunk_flow,true)
+		_add_river_ribbon(water_surface,points,0.105 if SEAMLESS_WORLD else 0.68,Color(0.055,0.17,0.205,0.92),false,trunk_flow,true)
 	if SEAMLESS_WORLD:
 		world_tributary_courses = _seeded_world_tributaries()
 		for tributary in world_tributary_courses:
 			var original_course:Array[Vector3]=tributary
 			var tributary_points:=preload("res://scripts/river_geometry.gd").drape_course(original_course,_height_at)
-			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58),true)
-			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86),true)
-	for entry in [{"mesh": banks.commit(), "name": "RiverBanks", "rough": 1.0}, {"mesh": water_surface.commit(), "name": "RiverWater", "rough": 0.34}]:
+			var gathering:=preload("res://scripts/river_geometry.gd").course_fractions(tributary_points)
+			_add_river_ribbon(banks, tributary_points, 0.072, Color(0.14,0.20,0.17,0.58),true,gathering,false,1.0)
+			_add_river_ribbon(water_surface, tributary_points, 0.029, Color(0.052,0.155,0.185,0.86),true,gathering,false,1.0)
+			# The surveyed course kinks every few kilometres; an ink line at chart
+			# scale follows its smoothed line instead (the course itself is unchanged).
+			var chart_points:=preload("res://scripts/river_geometry.gd").drape_course(preload("res://scripts/river_geometry.gd").smoothed_course(original_course),_height_at)
+			var chart_gathering:=preload("res://scripts/river_geometry.gd").course_fractions(chart_points)
+			_add_river_ribbon(chart_banks, chart_points, 0.072, Color(0.14,0.20,0.17,0.58),true,chart_gathering,false,2.0)
+			_add_river_ribbon(chart_water, chart_points, 0.029, Color(0.052,0.155,0.185,0.86),true,chart_gathering,false,2.0)
+	var river_entries:=[{"mesh": banks.commit(), "name": "RiverBanks", "rough": 1.0}, {"mesh": water_surface.commit(), "name": "RiverWater", "rough": 0.34}]
+	if SEAMLESS_WORLD and not world_tributary_courses.is_empty():
+		river_entries.append_array([{"mesh": chart_banks.commit(), "name": "TributaryChartBanks", "rough": 1.0}, {"mesh": chart_water.commit(), "name": "TributaryChartWater", "rough": 0.34}])
+	for entry in river_entries:
 		if entry.mesh == null:
 			continue
 		var river := MeshInstance3D.new()
 		river.name = entry.name
 		river.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		river.mesh = entry.mesh
-		var river_shader:=Shader.new()
-		river_shader.code="""
-shader_type spatial;
-render_mode unshaded, specular_disabled, blend_mix, cull_disabled, depth_draw_never;
-uniform sampler2D discovery_mask : source_color, filter_linear;
-uniform vec2 fog_world_size=vec2(40075.0,20004.0);
-uniform vec2 fog_current_origin=vec2(0.0);
-uniform float resource_emphasis=0.0;
-uniform bool river_water=false;
-uniform sampler2D terrain_heights : filter_nearest, repeat_disable;
-uniform vec4 terrain_grid=vec4(0.0);
-float visible_ground(vec2 point) {
-	vec2 grid=(point-terrain_grid.xy)/terrain_grid.z+vec2(0.5);
-	vec2 cell=clamp(grid*(terrain_grid.w-1.0),vec2(0.0),vec2(terrain_grid.w-1.001));
-	vec2 base=floor(cell), f=fract(cell);
-	ivec2 texel=ivec2(base);
-	float a=texelFetch(terrain_heights,texel,0).r;
-	float b=texelFetch(terrain_heights,texel+ivec2(1,0),0).r;
-	float c=texelFetch(terrain_heights,texel+ivec2(1,1),0).r;
-	float d=texelFetch(terrain_heights,texel+ivec2(0,1),0).r;
-	// Match the visible mesh's alternating diagonals, rather than bilinear relief.
-	if(mod(base.x+base.y,2.0)<1.0) {
-		return f.x>=f.y ? a+(b-a)*f.x+(c-b)*f.y : a+(c-d)*f.x+(d-a)*f.y;
-	}
-	return f.x+f.y<=1.0 ? a+(b-a)*f.x+(d-a)*f.y : c+(d-c)*(1.0-f.x)+(b-c)*(1.0-f.y);
-}
-// Chart scale: once a pixel spans tens of metres a river is drawn as an inked
-// line, its width held in screen pixels and set by flow (main river widest,
-// tributaries tapering to their springs), instead of a ribbon that thins to
-// a flickering sub-pixel thread. `chart_half_px` is the main river's half
-// width in pixels; 0 keeps the ribbon (the banks, which fade out instead).
-uniform float chart_half_px=0.0;
-uniform float chart_reference_half=0.105;
-varying vec3 world_position;
-varying float chart_weight;
-varying float chart_coverage;
-varying float chart_width_px;
-void vertex(){
-	float half_width=max(UV.y,0.0);
-	vec3 side=vec3(NORMAL.x,0.0,NORMAL.z);
-	side=dot(side,side)>0.0?normalize(side):vec3(0.0);
-	vec3 centre=VERTEX-side*half_width;
-	vec4 clip=PROJECTION_MATRIX*(MODELVIEW_MATRIX*vec4(centre,1.0));
-	// Design pixels (1/1080 of the view height), the HUD's unit.
-	float km_per_px=2.0*abs(clip.w)/max(abs(PROJECTION_MATRIX[1][1])*1080.0,0.0001);
-	chart_weight=smoothstep(0.010,0.040,km_per_px);
-	float flow=pow(clamp(half_width/chart_reference_half,0.0,1.0),0.35);
-	float ink_half=chart_half_px*flow*km_per_px;
-	// Narrower than this a line only shimmers; thinner flow fades instead.
-	float min_half=0.85*km_per_px;
-	float drawn_half=chart_half_px>0.0?mix(half_width,max(half_width,max(ink_half,min_half)),chart_weight):half_width;
-	chart_coverage=chart_half_px>0.0?clamp(max(ink_half,half_width)/min_half,0.0,1.0):1.0;
-	chart_width_px=2.0*drawn_half/max(km_per_px,0.000001);
-	VERTEX=centre+side*drawn_half;
-	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
-	// Lift the chart line a pixel or two clear of the terrain it is drawn on.
-	float chart_lift=chart_weight*1.5*km_per_px;
-	if(terrain_grid.z>0.0 && max(abs(world_position.x-terrain_grid.x),abs(world_position.z-terrain_grid.y))<terrain_grid.z*0.49){
-		VERTEX.y=visible_ground(world_position.xz)+(river_water?0.0037:0.0021);
-	}
-	VERTEX.y+=chart_lift;
-	world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;
-}
-float river_noise(vec2 p){
-	vec2 i=floor(p),f=fract(p);
-	f=f*f*(3.0-2.0*f);
-	float a=fract(sin(dot(i,vec2(127.1,311.7)))*43758.5453);
-	float b=fract(sin(dot(i+vec2(1.0,0.0),vec2(127.1,311.7)))*43758.5453);
-	float c=fract(sin(dot(i+vec2(0.0,1.0),vec2(127.1,311.7)))*43758.5453);
-	float d=fract(sin(dot(i+vec2(1.0,1.0),vec2(127.1,311.7)))*43758.5453);
-	return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
-}
-void fragment(){
-	vec2 uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
-	float current_visibility=1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin));
-	float discovered=smoothstep(0.08,0.58,max(texture(discovery_mask,uv).r,current_visibility));
-	float edge=min(UV.x,1.0-UV.x)*2.0;
-	float footprint=max(length(dFdx(world_position.xz)),length(dFdy(world_position.xz)));
-	float bank_detail=1.0-smoothstep(0.015,0.090,footprint);
-	float water_detail=1.0-smoothstep(0.006,0.045,footprint);
-	float bank_mass=river_noise(world_position.xz*5.5);
-	float bank_grain=river_noise(world_position.xz*110.0);
-	float shore_variation=((bank_mass-0.5)*0.38+(bank_grain-0.5)*0.055)*bank_detail;
-	float coverage=smoothstep(0.01,river_water?0.16:0.65,edge+shore_variation);
-	// Positive curvature turns toward +side (UV.x=1); bars belong there.
-	float inside_bend=max(0.0,(UV.x*2.0-1.0)*UV2.x);
-	float shoal_width=0.45+inside_bend*0.55;
-	float shallows=1.0-smoothstep(0.03,shoal_width,edge+shore_variation);
-	float broad_turbidity=river_noise(world_position.xz*0.72);
-	float ripple=(river_noise(world_position.xz*19.0)-0.5)*0.006*water_detail;
-	vec3 deep_water=mix(vec3(0.025,0.082,0.088),vec3(0.045,0.105,0.098),broad_turbidity);
-	vec3 silty_water=mix(vec3(0.19,0.175,0.105),vec3(0.125,0.155,0.105),broad_turbidity);
-	vec3 water=mix(deep_water,silty_water,shallows*0.58)+vec3(ripple);
-	float exposed_bar=inside_bend*(1.0-smoothstep(0.04,0.28,edge))*bank_detail;
-	water=mix(water,vec3(0.38,0.345,0.245)*(0.94+bank_grain*0.12),exposed_bar*0.85);
-	float bank_margin=smoothstep(0.30,0.50,edge)*(1.0-smoothstep(0.68,0.96,edge));
-	vec3 bank=mix(COLOR.rgb,vec3(0.285,0.255,0.17),bank_margin*(0.30+inside_bend*0.46)*bank_detail);
-	// Chart ink: a slate line a shade deeper than the sea, soft at its rim.
-	vec3 chart_ink=vec3(0.052,0.094,0.106);
-	vec3 surface=mix(river_water?water:bank,chart_ink,river_water?chart_weight:0.0);
-	ALBEDO=mix(surface,vec3(0.10,0.31,0.34),resource_emphasis*0.35);
-	// UV2.y feathers the spring/source cap; normal reaches remain opaque.
-	float riparian_patch=mix(1.0,0.38+river_noise(world_position.xz*0.42)*0.62,bank_detail);
-	float ribbon_alpha=COLOR.a*discovered*coverage*UV2.y*(river_water?1.0:riparian_patch);
-	float ink_alpha=0.92*discovered*UV2.y*chart_coverage*smoothstep(0.0,0.85,edge*chart_width_px*0.5);
-	// At chart scale the riparian banks become a pale casing either side of
-	// the ink, so the line reads over dark woodland as well as open ground.
-	vec3 casing=vec3(0.58,0.54,0.40);
-	if(!river_water){ ALBEDO=mix(ALBEDO,casing,chart_weight); }
-	ALPHA=river_water?mix(ribbon_alpha,ink_alpha,chart_weight):mix(ribbon_alpha,0.42*discovered*UV2.y*chart_coverage,chart_weight);
-}
-"""
 		var material:=ShaderMaterial.new()
-		material.shader=river_shader
+		material.shader=preload("res://scripts/map_river.gdshader")
 		_bind_river_terrain(material)
-		material.set_shader_parameter("river_water",entry.name=="RiverWater")
-		# Chart-scale half widths in design pixels: a 3 px ink line in a 5 px casing.
-		material.set_shader_parameter("chart_half_px",1.5 if entry.name=="RiverWater" else 2.5)
-		material.set_shader_parameter("chart_reference_half",0.105 if entry.name=="RiverWater" else 0.22)
-		material.render_priority=-6 if entry.name=="RiverBanks" else -5
+		var water_mesh:=String(entry.name).ends_with("Water")
+		material.set_shader_parameter("river_water",water_mesh)
+		# Chart scale (map_river.gdshader): a 4 px blue-slate ink line that swells
+		# downstream, in a soft water tint reaching 6 px beyond it.
+		material.set_shader_parameter("chart_half_px",2.0)
+		material.set_shader_parameter("chart_tint_px",0.0 if water_mesh else 6.0)
+		material.set_shader_parameter("chart_reference_half",0.105 if water_mesh else 0.22)
+		material.render_priority=-5 if water_mesh else -6
 		_fog_shader_parameters(material)
-		material.set_shader_parameter("resource_emphasis",1.0 if resource_view_enabled and entry.name=="RiverWater" else 0.0)
+		material.set_shader_parameter("resource_emphasis",1.0 if resource_view_enabled and water_mesh else 0.0)
 		river.material_override = material
 		add_child(river)
 		river_overlays.append(river)
@@ -3841,11 +3752,18 @@ func _update_scale_lod() -> void:
 		# locator exists only after roofs and occupied ground have collapsed below the
 		# strategic map's useful detail threshold.
 		var blip_profile:=_settlement_expansion_visual_profile({"classification":_settlement_model().classification(),"population":roundi(_settlement_model().primary_population_exact())})
-		settlement_blip.visible = "Hearth Circle" in GameState.settlement_completed and camera.size>_settlement_stage_marker_zoom(blip_profile)
+		# A camp or hamlet has no fabric to see until very close, so its mark
+		# stays until then, fading in rather than appearing at one zoom.
+		var home_mark_zoom:=_home_mark_zoom(blip_profile)
+		settlement_blip.visible = "Hearth Circle" in GameState.settlement_completed and camera.size>home_mark_zoom
 		settlement_blip.scale = Vector3.ONE * maxf(0.010, camera.size * 0.0048)*float(blip_profile.marker_scale)
+		settlement_blip.set_instance_shader_parameter("mark_alpha",smoothstep(home_mark_zoom,home_mark_zoom*1.6,camera.size))
 		if int(settlement_blip.get_meta("glyph_stage",-1))!=int(blip_profile.stage):
 			settlement_blip.set_meta("glyph_stage",int(blip_profile.stage))
 			settlement_blip.set_instance_shader_parameter("glyph_index",float(blip_profile.stage))
+			var ring:=RESOURCE_ICONS.settlement_glyph_extent(int(blip_profile.stage))+0.07
+			settlement_blip.set_instance_shader_parameter("home_ring_radius",minf(ring,0.485))
+			if settlement_map_label:settlement_map_label.set_meta("glyph_clearance",minf(ring,0.485)*40.0+3.0)
 	if settlement_map_label:
 		# Google-Earth-like readability requires a name before the physical fabric
 		# becomes a tiny unlabeled fleck. The strategic blip still waits for the wider
@@ -4647,7 +4565,7 @@ func _refresh_settlement_footprint(force := false) -> void:
 		var blip_mesh := QuadMesh.new()
 		settlement_blip.mesh = blip_mesh
 		settlement_blip.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		settlement_blip.material_override = _map_glyph_material(false)
+		settlement_blip.material_override = _map_glyph_material(false,0.0,true)
 		add_child(settlement_blip)
 		settlement_map_label=Label3D.new()
 		settlement_map_label.name="SettlementMapLabel"
@@ -4761,11 +4679,13 @@ func _refresh_settlement_network(force:=false)->void:
 	var key_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	var geometry_key:=_settlement_network_geometry_key(network,_settlement_network_visibility_key(network))
 	preload("res://scripts/performance_trace.gd").mark("network_geometry_key",key_stamp)
-	if not force and geometry_key==rendered_settlement_network_geometry_key and is_instance_valid(settlement_border_root):
+	# A forced refresh (a convoy leaving or returning) still skips the meshes when
+	# nothing they draw has changed: the key covers every input they read.
+	if geometry_key==rendered_settlement_network_geometry_key and is_instance_valid(settlement_border_root):
 		var unchanged_secondary:Array[Dictionary]=[]
 		for settlement in network.settlements:
 			if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): unchanged_secondary.append(settlement)
-		_create_secondary_settlement_footprints(unchanged_secondary,false)
+		_create_secondary_settlement_footprints(unchanged_secondary,force)
 		_refresh_secondary_settlement_label_counts(network)
 		return
 	rendered_settlement_network_geometry_key=geometry_key
@@ -5258,6 +5178,11 @@ func _settlement_stage_landscape_max_zoom(profile:Dictionary)->float:
 	# systems earn wider persistence, and even a megalopolis culls before world view.
 	return float([820.0,820.0,820.0,820.0,1100.0,1800.0,2600.0][clampi(int(profile.get("stage",0)),0,6)])
 
+
+## The people's own place: a camp or hamlet keeps its mark almost to the
+## ground, since it has no roofs to show before then; larger places as others.
+func _home_mark_zoom(profile:Dictionary)->float:
+	return float([2.5,5.0][int(profile.get("stage",0))]) if int(profile.get("stage",0))<=1 else _settlement_stage_marker_zoom(profile)
 
 func _settlement_stage_marker_zoom(profile:Dictionary)->float:
 	# Small places need a locator soon after roofs collapse. A vast city remains its
@@ -8095,8 +8020,8 @@ func _update_secondary_settlement_blips()->void:
 
 ## Shared materials for the inked settlement glyphs (map_glyph.gdshader).
 var map_glyph_materials:Dictionary={}
-func _map_glyph_material(per_instance:bool,fixed_px:float=0.0)->ShaderMaterial:
-	var key:="%s:%s" % [per_instance,fixed_px]
+func _map_glyph_material(per_instance:bool,fixed_px:float=0.0,home:=false)->ShaderMaterial:
+	var key:="%s:%s:%s" % [per_instance,fixed_px,home]
 	if map_glyph_materials.has(key):return map_glyph_materials[key]
 	var material:=ShaderMaterial.new()
 	material.shader=preload("res://scripts/map_glyph.gdshader")
@@ -8104,6 +8029,12 @@ func _map_glyph_material(per_instance:bool,fixed_px:float=0.0)->ShaderMaterial:
 	material.set_shader_parameter("glyph_count",float(RESOURCE_ICONS.SETTLEMENT_GLYPH_COUNT))
 	material.set_shader_parameter("use_instance_glyph",per_instance)
 	material.set_shader_parameter("fixed_diameter_px",fixed_px)
+	if home:
+		# The people's own place is always findable: never smaller than a
+		# glance-sized mark, and circled in one fine gold ring (the sacred colour).
+		material.set_shader_parameter("min_diameter_px",40.0)
+		material.set_shader_parameter("max_diameter_px",56.0)
+		material.set_shader_parameter("home_ring",true)
 	# Above route and border ink (up to 18), below army counters and labels.
 	material.render_priority=19
 	map_glyph_materials[key]=material
@@ -13405,7 +13336,7 @@ func _set_resource_view_enabled(enabled:bool)->void:
 		if material.get_shader_parameter("land_resources")!=null:
 			material.set_shader_parameter("land_resources",1.0 if enabled else 0.0)
 	for river_overlay in river_overlays:
-		if not is_instance_valid(river_overlay) or String(river_overlay.name)!="RiverWater": continue
+		if not is_instance_valid(river_overlay) or not String(river_overlay.name).ends_with("Water"): continue
 		if river_overlay.material_override is ShaderMaterial:
 			(river_overlay.material_override as ShaderMaterial).set_shader_parameter("resource_emphasis",1.0 if enabled else 0.0)
 	_update_resource_view_toggle()
@@ -13631,18 +13562,20 @@ func _bounded_resource_overlay_selection(deposits:Array,view_center:Vector2,zoom
 	var cells:Dictionary={}
 	for deposit_variant in deposits:
 		var deposit:Dictionary=deposit_variant
+		# Cheapest test first: most known occurrences lie outside the view.
+		var position_value:Variant=deposit.get("position",Vector3.ZERO)
+		if not position_value is Vector3: continue
+		var position:=position_value as Vector3
+		var planar:=Vector2(position.x,position.z)
+		var distance_squared:=planar.distance_squared_to(view_center)
+		if distance_squared>view_radius*view_radius: continue
 		var resource_name:=String(deposit.get("resource","Resource"))
 		if resource_name=="Freshwater" or String(deposit.get("landscape_source","")).ends_with("_catchment"): continue
 		var stage:=String(deposit.get("stage","recognized"))
 		var strategic:=stage in ["accessible","developed"]
 		if zoom>240.0 and not strategic: continue
-		var position_value:Variant=deposit.get("position",Vector3.ZERO)
-		if not position_value is Vector3: continue
-		var position:=position_value as Vector3
+		# The reveal test walks the charted areas; ask it only of occurrences in view.
 		if reveal_filter.is_valid() and not bool(reveal_filter.call(position)): continue
-		var planar:=Vector2(position.x,position.z)
-		var distance_squared:=planar.distance_squared_to(view_center)
-		if distance_squared>view_radius*view_radius: continue
 		var visual_stage:="active" if strategic else ("surveyed" if stage=="surveyed" else "recognized")
 		var cell_key:="%s:%s:%d:%d" % [resource_name,visual_stage,floori(position.x/cell_size),floori(position.z/cell_size)]
 		if not cells.has(cell_key):
@@ -14722,7 +14655,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	# full strength, older charts fading in opacity but never turning grey.
 	var freshness:=1.0 if active else lerpf(1.0,0.42,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
 	var ink:=Color("#2b2118"); ink.a=0.88*freshness
-	var paper:=Color("#efe3c2"); paper.a=0.22*freshness
+	var paper:=Color("#efe3c2"); paper.a=(0.22 if active else 0.16)*freshness
 	# Simplify at ~3 screen pixels before fitting the curve (the view is ~900 px).
 	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()
@@ -14739,9 +14672,15 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	ScoutChartStroke.ribbon(halo_ink,chart,heights,float(profile.halo),paper,0.0,float(profile.tick)*2.0)
 	var halo:=MeshInstance3D.new(); halo.name="ScoutCorridorBacking"; halo.mesh=halo_ink.commit(); halo.material_override=_scout_chart_material(3); root.add_child(halo)
 	var line_ink:=ScoutChartStroke.Ink.new(visual_zoom)
-	# The party still out is one unbroken stroke; a returned chart is dotted.
-	ScoutChartStroke.ribbon(line_ink,chart,heights,route_width,ink,0.35,float(profile.tick)*2.2,0 if active else 1,0 if active else 2)
-	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=line_ink.commit(); path.material_override=_scout_chart_material(4); root.add_child(path)
+	# The party still out is one unbroken stroke; a returned chart is a fine
+	# track of round ink dots (scout_chart_ink.gdshader), set in a slightly
+	# wider band so the dots keep their full round shape.
+	ScoutChartStroke.ribbon(line_ink,chart,heights,route_width if active else route_width*1.25,ink,0.35 if active else 1.0,float(profile.tick)*2.2)
+	var path_material:=_scout_chart_material(4)
+	if not active:
+		path_material.set_shader_parameter("dot_period",0.0062)
+		path_material.set_shader_parameter("dot_radius",0.00125)
+	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=line_ink.commit(); path.material_override=path_material; root.add_child(path)
 	# Small, sparse open ticks show direction; only the freshest charts carry them.
 	var tick_fractions:Array=[0.3,0.55,0.8] if active else ([0.45] if rank<2 else [])
 	var tick_ink:=ScoutChartStroke.Ink.new(visual_zoom)

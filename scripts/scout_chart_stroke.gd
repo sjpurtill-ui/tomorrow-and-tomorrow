@@ -11,20 +11,24 @@ const MAX_POINTS:=420
 ## the route plus an offset kept in UV2 as a fraction of the view height it was
 ## built for, so scout_chart_ink.gdshader holds the stroke's on-screen width at
 ## any zoom: the map no longer rebuilds every route on each small zoom step.
+## UV carries the distance along the route and across it, both as fractions
+## of that view height, so the shader can set round dots along a returned chart.
 class Ink:
 	var vertices:=PackedVector3Array()
 	var colors:=PackedColorArray()
 	var offsets:=PackedVector2Array()
+	var marks:=PackedVector2Array()
 	var view_size:=1.0
 	func _init(built_for_view:float)->void:
 		view_size=maxf(built_for_view,0.000001)
-	func add(anchor:Vector3,offset:Vector2,color:Color)->void:
+	func add(anchor:Vector3,offset:Vector2,color:Color,along:float=0.0)->void:
 		vertices.append(anchor);offsets.append(offset/view_size);colors.append(color)
+		marks.append(Vector2(along,offset.length())/view_size)
 	func commit()->ArrayMesh:
 		var mesh:=ArrayMesh.new()
 		if vertices.is_empty():return mesh
 		var arrays:=[];arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_COLOR]=colors;arrays[Mesh.ARRAY_TEX_UV2]=offsets
+		arrays[Mesh.ARRAY_VERTEX]=vertices;arrays[Mesh.ARRAY_COLOR]=colors;arrays[Mesh.ARRAY_TEX_UV2]=offsets;arrays[Mesh.ARRAY_TEX_UV]=marks
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 		# Offsets reach past the anchors; keep the stroke from being culled early.
 		mesh.custom_aabb=mesh.get_aabb().grow(view_size*0.05)
@@ -170,7 +174,9 @@ static func ribbon(ink:Ink,points:PackedVector2Array,heights:PackedFloat32Array,
 		var core_a:=Color(color,color.a*weights[i]); var core_b:=Color(color,color.a*weights[i+1])
 		var rim_a:=Color(color,core_a.a*edge_alpha); var rim_b:=Color(color,core_b.a*edge_alpha)
 		for side in [1.0,-1.0]:
-			_quad(ink,centre[i],Vector2.ZERO,centre[i+1],Vector2.ZERO,centre[i+1],sides[i+1]*side,centre[i],sides[i]*side,core_a,core_b,rim_b,rim_a)
+			var a_side:Vector2=sides[i]*side; var b_side:Vector2=sides[i+1]*side
+			ink.add(centre[i],Vector2.ZERO,core_a,arcs[i]); ink.add(centre[i+1],Vector2.ZERO,core_b,arcs[i+1]); ink.add(centre[i+1],b_side,rim_b,arcs[i+1])
+			ink.add(centre[i],Vector2.ZERO,core_a,arcs[i]); ink.add(centre[i+1],b_side,rim_b,arcs[i+1]); ink.add(centre[i],a_side,rim_a,arcs[i])
 
 
 static func _quad(ink:Ink,a:Vector3,a_offset:Vector2,b:Vector3,b_offset:Vector2,c:Vector3,c_offset:Vector2,d:Vector3,d_offset:Vector2,ca:Color,cb:Color,cc:Color,cd:Color)->void:

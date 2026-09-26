@@ -2233,10 +2233,33 @@ func contact_encounters_snapshot()->Array[Dictionary]:
 	return encounters
 
 
+## The contact level _relation_with_strategy_defaults would give, read without
+## normalizing (and deep-copying) the whole relation.
+func _effective_contact_level(relation:Dictionary)->int:
+	if bool(relation.get("at_war",false)) or String(relation.get("treaty","none")) not in ["none",""]: return 2
+	return clampi(int(relation.get("contact_level",0)),0,2)
+
+## How many met peoples' homes are known: the toolbar's count of
+## contact_encounters_snapshot() entries with home_location_known, without
+## building the snapshot on every HUD refresh.
+func known_home_destination_count()->int:
+	initialize()
+	_repair_missing_contact_provenance()
+	var count:=0
+	for civ in civilizations:
+		var relation:Dictionary=civ.get("player_relation",{})
+		if _effective_contact_level(relation)<2 or not bool(relation.get("home_location_known",false)): continue
+		var position:Variant=relation.get("encounter_position",{})
+		if position is Vector2 or (position is Dictionary and position.has("x") and position.has("z")): count+=1
+	return count
+
 func _repair_missing_contact_provenance()->void:
 	for civ_index in civilizations.size():
 		var civ:Dictionary=civilizations[civ_index]
-		var relation:Dictionary=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
+		var raw_relation:Dictionary=civ.get("player_relation",{})
+		# Most relations need no repair; skip them before the normalizing copy.
+		if _effective_contact_level(raw_relation)<2 or String(raw_relation.get("contact_source",""))!="": continue
+		var relation:Dictionary=_relation_with_strategy_defaults(raw_relation,civ)
 		if int(relation.get("contact_level",0))<2 or String(relation.get("contact_source",""))!="": continue
 		var repaired:=false
 		for report_variant in scout_reports:

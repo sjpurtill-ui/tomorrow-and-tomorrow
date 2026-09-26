@@ -1229,14 +1229,12 @@ func _refresh_toolbar()->void:
 	var diplomat:Button=toolbar_action_buttons.get("diplomat")
 	var convoy:Button=toolbar_action_buttons.get("convoy")
 	var convoy_active:=bool(GameState.settlement_convoy.get("active",false))
-	var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
+	var scouting:Dictionary=CivilizationSystem.scouting_staff.toolbar_counts()
 	# The toolbar reports standing orders. Route planning belongs to departures,
 	# never to a HUD refresh.
 	var scout_presentation:Dictionary={"label":EraWords.scouts_out(int(scouting.away)),"disabled":false,"tooltip":"Choose how many of the people walk out as scouts, and where they look (%.1f%% of the people now)." % (float(scouting.share)*100)}
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
-	var known_destinations:=0
-	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-		if bool((encounter_variant as Dictionary).get("home_location_known",false)): known_destinations+=1
+	var known_destinations:=CivilizationSystem.known_home_destination_count()
 	var diplomat_presentation:Dictionary=terrain._diplomat_action_presentation(diplomatic_status,known_destinations)
 	var returned_reply:=""
 	if not bool(diplomatic_status.get("active",false)):

@@ -20,7 +20,14 @@ uniform float min_diameter_px = 14.0;
 uniform float max_diameter_px = 40.0;
 // When positive, a constant size that ignores the scale (scale still hides).
 uniform float fixed_diameter_px = 0.0;
+// The people's own place (local_terrain settlement_blip): a fine gold ring at
+// `home_ring_radius` (a fraction of the mark's square) set on a paper keyline,
+// and `mark_alpha` to fade the mark in as the view leaves its fabric.
+uniform bool home_ring = false;
+instance uniform float home_ring_radius = 0.0;
+instance uniform float mark_alpha = 1.0;
 varying float cell;
+varying float diameter;
 
 void vertex() {
 	float radius_km = length(MODEL_MATRIX[0].xyz);
@@ -34,6 +41,7 @@ void vertex() {
 	float diameter_px = radius_km > 0.0 ? clamp(radius_px*pixels_per_radius, min_diameter_px, max_diameter_px) : 0.0;
 	if (fixed_diameter_px > 0.0 && radius_km > 0.0) { diameter_px = fixed_diameter_px; }
 	VERTEX = vec3(VERTEX.xy*diameter_px*km_per_px, 0.0);
+	diameter = diameter_px;
 	cell = use_instance_glyph ? INSTANCE_CUSTOM.x : glyph_index;
 }
 
@@ -42,4 +50,15 @@ void fragment() {
 	vec4 mark = texture(glyphs, uv);
 	ALBEDO = mark.rgb;
 	ALPHA = mark.a*COLOR.a;
+	if (home_ring && home_ring_radius > 0.0) {
+		float from_ring_px = abs(length(UV-vec2(0.5))-home_ring_radius)*diameter;
+		float keyline = (1.0-smoothstep(1.2, 2.2, from_ring_px))*0.55;
+		float gold = 1.0-smoothstep(0.45, 1.05, from_ring_px);
+		// Linear colours: paper #F1E7CF, brass gold #A88A4A.
+		vec3 ring = mix(vec3(0.879, 0.799, 0.624), vec3(0.392, 0.254, 0.069), gold);
+		float ring_alpha = max(keyline, gold);
+		ALBEDO = mix(ring, ALBEDO, ALPHA);
+		ALPHA = max(ALPHA, ring_alpha);
+	}
+	ALPHA *= mark_alpha;
 }

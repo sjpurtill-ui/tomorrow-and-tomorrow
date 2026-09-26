@@ -84,6 +84,7 @@ func _ready()->void:
 		"rite_marks":func():preload("res://scripts/rite_marks.gd").refresh(terrain),
 		"living_map":func():preload("res://scripts/living_map.gd").refresh(terrain),
 		"settlement_network_forced":func():terrain._refresh_settlement_network(true),
+		"settlement_network_rebuild":func():terrain.rendered_settlement_network_geometry_key=0;terrain._refresh_settlement_network(true),
 		"discovery_mask_forced":func():terrain._refresh_discovery_mask(true),
 		"discovery_mask_new_record":_reveal_one_record,
 		"time_interface":func():terrain._update_time_interface()}
@@ -109,6 +110,7 @@ func _ready()->void:
 	terrain.camera.size=4.0;terrain.zoom_target_size=-1.0;terrain.camera_target=GameState.settlement_founded_at;terrain._update_camera()
 	terrain.territory_height_cache=null
 	for pass_name in ["border_rebuild_cold_ms","border_rebuild_warm_ms"]:
+		terrain.rendered_settlement_network_geometry_key=0
 		var s:=Time.get_ticks_usec();terrain._refresh_settlement_network(true)
 		report[pass_name]=snappedf(float(Time.get_ticks_usec()-s)/1000.0,0.01)
 	report["border_height_samples"]=int(terrain.territory_height_cache.misses) if terrain.territory_height_cache else -1

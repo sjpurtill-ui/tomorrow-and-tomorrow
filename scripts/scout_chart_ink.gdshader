@@ -14,7 +14,20 @@ void vertex() {
 	VERTEX.xz += UV2*view_height;
 }
 
+// A returned chart is set as a row of round ink dots, an explorer's track,
+// rather than hard-cut dashes. Both sizes are fractions of the view height
+// the stroke was built for (UV: along, across), like its width. 0 draws a
+// continuous line.
+uniform float dot_period = 0.0;
+uniform float dot_radius = 0.0;
+
 void fragment() {
 	ALBEDO = COLOR.rgb;
 	ALPHA = COLOR.a;
+	if (dot_period > 0.0) {
+		float along = (fract(UV.x/dot_period)-0.5)*dot_period;
+		float distance_to_dot = length(vec2(along, UV.y));
+		float soft = max(fwidth(distance_to_dot), 0.000001);
+		ALPHA *= 1.0-smoothstep(dot_radius-soft*0.5, dot_radius+soft*0.75, distance_to_dot);
+	}
 }

@@ -115,12 +115,14 @@ static func arrange(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={},res
 				memory[entry.id]=kept.position-anchor
 				continue
 		var candidates:Array[Vector2]=[]
+		# A larger mark (the people's own, ringed in gold) keeps its card clear.
+		var clear:=maxf(0.0,float(entry.get("clearance",GLYPH_CLEARANCE))-GLYPH_CLEARANCE)
 		for row in range(12):
 			var step:=float(row)*(extent.y+GAP)
-			candidates.append(anchor+Vector2(-extent.x*.5,-extent.y-14-step))
-			candidates.append(anchor+Vector2(-extent.x*.5,14+step))
-			candidates.append(anchor+Vector2(18,-extent.y*.5+step))
-			candidates.append(anchor+Vector2(-extent.x-18,-extent.y*.5-step))
+			candidates.append(anchor+Vector2(-extent.x*.5,-extent.y-14-clear-step))
+			candidates.append(anchor+Vector2(-extent.x*.5,14+clear+step))
+			candidates.append(anchor+Vector2(18+clear,-extent.y*.5+step))
+			candidates.append(anchor+Vector2(-extent.x-18-clear,-extent.y*.5-step))
 		# Dense clusters can use free space elsewhere on the map, with leader lines.
 		for y in range(int(bounds.position.y),int(bounds.end.y-extent.y)+1,int(extent.y+GAP)):
 			for x in range(int(bounds.position.x),int(bounds.end.x-extent.x)+1,int(extent.x+GAP)):
@@ -155,9 +157,8 @@ static func _fit(pos:Vector2,extent:Vector2,bounds:Rect2,reserved:Array[Rect2],p
 	for other:Dictionary in placed:
 		if half.intersects((other.rect as Rect2).grow(GAP*.5)):return Rect2()
 	# Protect the city pins as well as the other labels.
-	var pin_guard:=rect.grow(8)
 	for other:Dictionary in entries:
-		if pin_guard.has_point(other.anchor):return Rect2()
+		if rect.grow(maxf(8.0,float(other.get("clearance",GLYPH_CLEARANCE))-2.0)).has_point(other.anchor):return Rect2()
 	return rect
 
 func refresh()->void:
@@ -197,7 +198,7 @@ func refresh()->void:
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
 		var compact:=kind!="founding_convoy"
 		var detail:Vector2=text.detail
-		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail})
+		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE))})
 		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
 		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	if signature==layout_signature:return
@@ -335,8 +336,9 @@ func _draw()->void:
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
 		# A fine ink leader from just outside the place's glyph to its name.
 		var reach:=end-anchor
-		if reach.length()>GLYPH_CLEARANCE+2.0:
-			var start:=anchor+reach.normalized()*GLYPH_CLEARANCE
+		var clearance:=float(card.get("clearance",GLYPH_CLEARANCE))
+		if reach.length()>clearance+2.0:
+			var start:=anchor+reach.normalized()*clearance
 			draw_line(start,end,Color(T.PAPER_RAISED,.55),3,true)
 			draw_line(start,end,Color(T.INK,.55),1,true)
 	var open:=expanded_id();var opened:={}

@@ -33,3 +33,33 @@ func test_headwater_width_grows_by_distance_and_preserves_downstream_width()->vo
 	assert_float(refined_factors[40]).is_equal(factors[2])
 	for index in refined_factors.size()-1:
 		assert_float(refined_factors[index]).is_less_equal(refined_factors[index+1])
+
+func test_course_fractions_run_from_spring_to_join_by_distance()->void:
+	var points:Array[Vector3]=[Vector3.ZERO,Vector3(3,5,4),Vector3(3,-2,14)]
+	var fractions:=RIVER.course_fractions(points)
+	assert_float(fractions[0]).is_equal(0.0)
+	assert_float(fractions[1]).is_equal_approx(5.0/15.0,0.00001)
+	assert_float(fractions[2]).is_equal_approx(1.0,0.00001)
+
+func test_downstream_fractions_follow_the_fall_and_stop_at_the_sea()->void:
+	# Falls from +z toward -z; meets the sea at z=2 and runs on below it.
+	var points:Array[Vector3]=[]
+	for z in range(10,-3,-1): points.append(Vector3(0,float(z)*0.1-0.15,float(z)))
+	points.reverse()
+	var fractions:=RIVER.downstream_fractions(points,0.0)
+	assert_float(fractions[points.size()-1]).is_equal(0.0)
+	assert_float(fractions[0]).is_equal(1.0)
+	var mouth:=points.size()-1-9
+	assert_float(fractions[mouth]).is_equal_approx(1.0,0.00001)
+	for index in range(mouth,points.size()-1):
+		assert_float(fractions[index]).is_greater_equal(fractions[index+1])
+
+func test_smoothed_course_relaxes_kinks_and_keeps_its_ends()->void:
+	var course:Array[Vector3]=[]
+	for index in 21: course.append(Vector3(float(index),0.0,1.5 if index%2==1 else -1.5))
+	var smoothed:=RIVER.smoothed_course(course)
+	assert_vector(smoothed[0]).is_equal(course[0])
+	assert_vector(smoothed.back()).is_equal(course.back())
+	for index in range(3,smoothed.size()-3): assert_float(absf(smoothed[index].z)).is_less(0.2)
+	# The surveyed course itself is never changed.
+	assert_float(course[1].z).is_equal(1.5)

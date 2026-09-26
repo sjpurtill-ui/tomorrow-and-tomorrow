@@ -84,6 +84,12 @@ func standing_risk()->float:
 		if bool(mission.get("staff_managed",false)) or mission.has("city_watch"):total+=float(mission.get("field_annual_risk",0.0))
 	return total
 
+## The two numbers the map toolbar shows, without the full staff snapshot
+## (origins, prospecting and prudence), which the HUD refresh does not need.
+func toolbar_counts()->Dictionary:
+	var pool:Dictionary=host.scout_origin_staffing(String(data.get("origin_city_id","")))
+	return {"away":int(pool.away),"share":float(data.share)}
+
 func snapshot()->Dictionary:
 	var pool:Dictionary=host.scout_origin_staffing(String(data.get("origin_city_id","")))
 	var population:=maxi(0,floori(pool.population))
