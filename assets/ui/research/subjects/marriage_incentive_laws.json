@@ -1,0 +1,14 @@
+{
+  "id": "marriage_incentive_laws",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e91b141b-587b-49a2-976f-6208dd2cdec5.png",
+  "source_file": "exec-e91b141b-587b-49a2-976f-6208dd2cdec5.png",
+  "creative_brief": "The law grants privileges to parents of three children and taxes the unmarried and the childless. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/marriage_incentive_laws-v1.png",
+  "sha256": "e4fb735c9a0a05ebd9ccc88b3b49e27815d71afd71b7e6311f580522d8e49db4",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

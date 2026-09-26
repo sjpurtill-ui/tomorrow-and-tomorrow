@@ -1,0 +1,14 @@
+{
+  "id": "state_post_passes",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-51635c7e-f3df-431e-ade0-0ae9c2de963e.png",
+  "source_file": "exec-51635c7e-f3df-431e-ade0-0ae9c2de963e.png",
+  "creative_brief": "Officials carrying a sealed pass may claim fresh mounts, food and lodging at every station on the road. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/state_post_passes-v1.png",
+  "sha256": "60015da9de48bcc4d3fb6c1f88961ffd73b8da621cecc71d7e489891697d6c11",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

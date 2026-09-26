@@ -1,0 +1,14 @@
+{
+  "id": "mass_rubble_concrete",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d332f465-472a-4a2b-8e7c-474802fd68a3.png",
+  "source_file": "exec-d332f465-472a-4a2b-8e7c-474802fd68a3.png",
+  "creative_brief": "Rubble and mortar laid in layers between timber forms set into walls as solid as cut stone and far cheaper to raise. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mass_rubble_concrete-v1.png",
+  "sha256": "1ce7cfa60bf7dd3be8e974f5fbe4632ed9f0569451a13bd8c7b4e2503b3143fb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

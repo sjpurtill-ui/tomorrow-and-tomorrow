@@ -1,0 +1,14 @@
+{
+  "id": "city_firewood_supply",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bf9e7c19-4164-4956-a6d7-6daad61d6400.png",
+  "source_file": "exec-bf9e7c19-4164-4956-a6d7-6daad61d6400.png",
+  "creative_brief": "Rings of coppice and woodland around the city are cut in turn, and the fuel carts never go farther than a day's haul. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/city_firewood_supply-v1.png",
+  "sha256": "9600335ef48bf1e466ae6c19bfde04c338edd5e5e65aae0c1683e44eb6848992",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
