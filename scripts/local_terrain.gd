@@ -3825,9 +3825,25 @@ func _update_scale_lod() -> void:
 var city_banner_identity:Dictionary={}
 var city_labels:Control
 
+## Map labels found once and re-found only when a Label3D enters the tree.
+## Walking the whole scene every frame the camera moved cost more the larger
+## the civilization grew.
+var aerial_labels:Array[Node]=[]
+var aerial_labels_dirty:=true
+
+func _on_aerial_label_added(node:Node)->void:
+	if node is Label3D and is_ancestor_of(node): aerial_labels_dirty=true
+
 func _normalize_aerial_labels()->void:
 	if camera==null or camera.projection!=Camera3D.PROJECTION_PERSPECTIVE: return
-	for node in find_children("*","Label3D",true,false):
+	if is_inside_tree() and not get_tree().node_added.is_connected(_on_aerial_label_added):
+		get_tree().node_added.connect(_on_aerial_label_added)
+		aerial_labels_dirty=true
+	if aerial_labels_dirty or not is_inside_tree():
+		aerial_labels=find_children("*","Label3D",true,false)
+		aerial_labels_dirty=not is_inside_tree()
+	for node in aerial_labels:
+		if not is_instance_valid(node) or not is_ancestor_of(node): continue
 		var label:=node as Label3D
 		if not label.fixed_size or String(label.name) in ["ArmyLabel","FormationLabel","StrengthLabel"]: continue
 		if not label.has_meta("aerial_font_size"):
@@ -3854,6 +3870,12 @@ func _update_city_flag(label:Label3D)->void:
 		label.add_child(flag)
 	flag.texture=identity.texture
 	if flag.texture==null:return
+	# Measuring the name is the costly part; redo it only when it can change.
+	var flag_key:=[label.text,label.font_size,label.pixel_size,label.font,flag.texture]
+	if flag.get_meta("layout_key",[])==flag_key:
+		_register_city_card(label)
+		return
+	flag.set_meta("layout_key",flag_key)
 	var font:Font=label.font if label.font!=null else ThemeDB.fallback_font
 	var width:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.font_size).x
 	var ratio:=float(label.font_size)*1.2/float(flag.texture.get_height())

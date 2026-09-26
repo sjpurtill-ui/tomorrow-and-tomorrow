@@ -494,8 +494,10 @@ func military_fronts_snapshot()->Dictionary:
 	var fronts:Array[Dictionary]=[]
 	for civ_variant in civilizations:
 		var civ:Dictionary=civ_variant
+		# The map asks ten times a second; normalizing (a deep copy) every
+		# peaceful neighbour's relation just to read at_war cost most of it.
+		if not bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): continue
 		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-		if not bool(relation.get("at_war",false)): continue
 		var objective:=war_objective_status(String(civ.id))
 		var target_name:=String(objective.get("target_name","HOME TERRITORY"))
 		var target_region_id:=String(objective.get("target_region_id",""))

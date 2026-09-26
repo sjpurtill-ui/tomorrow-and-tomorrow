@@ -32,6 +32,38 @@ func _ready()->void:
 		var s:=Time.get_ticks_usec();terrain._update_scale_lod();lod_times.append(float(Time.get_ticks_usec()-s)/1000.0)
 	lod_times.sort()
 	report["update_scale_lod_median_ms"]=lod_times[15]
+	# The per-moving-frame parts of the scale LOD, one by one.
+	var parts:={}
+	for method in ["_normalize_aerial_labels","_update_secondary_settlement_blips","_update_scale_bar","_update_resource_overlay_lod","_update_settlement_claim_opacity"]:
+		var part_times:Array[float]=[]
+		for i in 21:
+			var s:=Time.get_ticks_usec();terrain.call(method);part_times.append(float(Time.get_ticks_usec()-s)/1000.0)
+		part_times.sort()
+		parts[method]=part_times[10]
+	var profile_times:Array[float]=[]
+	for i in 21:
+		var s:=Time.get_ticks_usec()
+		terrain._settlement_expansion_visual_profile({"classification":terrain._settlement_model().classification(),"population":roundi(terrain._settlement_model().primary_population_exact())})
+		profile_times.append(float(Time.get_ticks_usec()-s)/1000.0)
+	profile_times.sort()
+	parts["_settlement_expansion_visual_profile"]=profile_times[10]
+	report["scale_lod_parts_median_ms"]=parts
+	# The 10 Hz map snapshot refreshes and what they read.
+	var snaps:={}
+	var calls:={"field_armies":func():terrain._refresh_player_field_army_markers(),
+		"field_armies_snapshot":func():MilitaryCampaign.field_armies_snapshot(),
+		"military_fronts_snapshot":func():CivilizationSystem.military_fronts_snapshot(),
+		"engagement_snapshot":func():MilitaryCampaign.engagement_snapshot(),
+		"close_army_figures":func():terrain._refresh_close_army_figures([],-1),
+		"formations":func():terrain._refresh_foreign_formation_markers(),
+		"contacts":func():terrain._refresh_contact_encounter_markers(),
+		"scout_routes":func():terrain._refresh_player_scout_route_markers()}
+	for key in calls:
+		var t:Array[float]=[]
+		for i in 21:
+			var s:=Time.get_ticks_usec();(calls[key] as Callable).call();t.append(float(Time.get_ticks_usec()-s)/1000.0)
+		t.sort();snaps[key]=t[10]
+	report["snapshot_parts_median_ms"]=snaps
 	var failures:=0
 	for size in [4.0,40.0,400.0]:
 		terrain.camera.size=size
