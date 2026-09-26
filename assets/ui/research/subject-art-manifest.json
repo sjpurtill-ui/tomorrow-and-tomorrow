@@ -3350,5 +3350,17 @@
   "radio_broadcasting": {
     "path": "res://assets/ui/research/subjects/radio_broadcasting-v1.png",
     "focus": [0.5, 0.4]
-  }
+  },
+  "palace_department_registers": {"path": "res://assets/ui/research/subjects/palace_department_registers-v1.png", "focus": [0.5, 0.5]},
+  "overseas_colony_founding": {"path": "res://assets/ui/research/subjects/overseas_colony_founding-v1.png", "focus": [0.5, 0.5]},
+  "incubation_shrines": {"path": "res://assets/ui/research/subjects/incubation_shrines-v1.png", "focus": [0.5, 0.52]},
+  "brailed_square_sail": {"path": "res://assets/ui/research/subjects/brailed_square_sail-v1.png", "focus": [0.5, 0.49]},
+  "forge_crew_roles": {"path": "res://assets/ui/research/subjects/forge_crew_roles-v1.png", "focus": [0.5, 0.5]},
+  "iron_ard_shares": {"path": "res://assets/ui/research/subjects/iron_ard_shares-v1.png", "focus": [0.5, 0.55]},
+  "smelter_fuel_depletion_watch": {"path": "res://assets/ui/research/subjects/smelter_fuel_depletion_watch-v1.png", "focus": [0.5, 0.5]},
+  "lost_age_remembrance": {"path": "res://assets/ui/research/subjects/lost_age_remembrance-v1.png", "focus": [0.5, 0.52]},
+  "iron_sword_issue": {"path": "res://assets/ui/research/subjects/iron_sword_issue-v1.png", "focus": [0.5, 0.5]},
+  "full_vowel_alphabet": {"path": "res://assets/ui/research/subjects/full_vowel_alphabet-v1.png", "focus": [0.5, 0.52]},
+  "groundwater_tunnels": {"path": "res://assets/ui/research/subjects/groundwater_tunnels-v1.png", "focus": [0.5, 0.52]},
+  "die_struck_coinage": {"path": "res://assets/ui/research/subjects/die_struck_coinage-v1.png", "focus": [0.5, 0.52]}
 }

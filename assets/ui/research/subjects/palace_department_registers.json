@@ -1,0 +1,14 @@
+{
+  "id": "palace_department_registers",
+  "line": "institutions",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-860d1dc7-03d1-4218-a564-bbd4b99d2b44.png",
+  "source_file": "exec-860d1dc7-03d1-4218-a564-bbd4b99d2b44.png",
+  "creative_brief": "Palace bureaus keep separate field, flock, workshop and ration tablets.",
+  "medium": "Matte civic fresco on plaster",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/palace_department_registers-v1.png",
+  "sha256": "f0758ce8c083c3b2df52434f7537cb9e903697388ad9e85cd86e57e347c4cd1d",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

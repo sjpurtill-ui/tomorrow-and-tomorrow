@@ -1,0 +1,14 @@
+{
+  "id": "groundwater_tunnels",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4726e774-ce79-4b8e-8cf9-4daae0d71e16.png",
+  "source_file": "exec-4726e774-ce79-4b8e-8cf9-4daae0d71e16.png",
+  "creative_brief": "Cutaway shows sloping water tunnel and its access shafts reaching village fields.",
+  "medium": "Matte architectural casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/groundwater_tunnels-v1.png",
+  "sha256": "08e0abf8adab09f37ce88363a097a7674a3221c68b1f5f077fc53fd636de932a",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "smelter_fuel_depletion_watch",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-184037f0-0ace-446b-8b1d-ec973e87cdf9.png",
+  "source_file": "exec-184037f0-0ace-446b-8b1d-ec973e87cdf9.png",
+  "creative_brief": "Observer watches wood fuel cutting near an early iron hearth and rested woodland.",
+  "medium": "Naturalist field painting in plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/smelter_fuel_depletion_watch-v1.png",
+  "sha256": "f66fe2539e529c3401da0e0801f0e88794cd042a8500e5f13badd710260eac07",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

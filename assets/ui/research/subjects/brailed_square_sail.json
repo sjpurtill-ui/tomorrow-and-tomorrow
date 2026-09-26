@@ -1,0 +1,14 @@
+{
+  "id": "brailed_square_sail",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-30b6f8dc-e280-4010-87d5-c94a22868482.png",
+  "source_file": "exec-30b6f8dc-e280-4010-87d5-c94a22868482.png",
+  "creative_brief": "Crew hauls brail ropes from deck to shorten a square sail.",
+  "medium": "Panoramic travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/brailed_square_sail-v1.png",
+  "sha256": "8f4f5c52d4f1f75896ebd496ebf8b0fc3fccf0132c14a41c6cfe39ce9a5e98ce",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

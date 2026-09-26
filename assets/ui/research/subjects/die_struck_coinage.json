@@ -1,0 +1,14 @@
+{
+  "id": "die_struck_coinage",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-199ea308-fd2c-4294-8797-0e1549a8ba39.png",
+  "source_file": "exec-199ea308-fd2c-4294-8797-0e1549a8ba39.png",
+  "creative_brief": "Metalworkers strike a weighed silver blank between carved tools.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/die_struck_coinage-v1.png",
+  "sha256": "e4d8715181ecac6ebe7714e1d02ea7bfb78677ef8dbf745fa7040593702cc5ab",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "iron_sword_issue",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f77a6649-d16d-4efa-9a9a-3e853e62823d.png",
+  "source_file": "exec-f77a6649-d16d-4efa-9a9a-3e853e62823d.png",
+  "creative_brief": "Smith distributes iron swords to the ruler's guards.",
+  "medium": "Layered hand-cut woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/iron_sword_issue-v1.png",
+  "sha256": "0e4c9202c4a466cd91e411c839116a3382f40679b7dfa3bd018e1a58f959d66d",
+  "mode": "built-in image_gen / new image or directed edit",
+  "review": "Selected after wide-banner crop review on 2026-09-26; rejected more realistic and anachronistic variants."
+}
