@@ -189,8 +189,7 @@ func _ready()->void:
 			var profile:Dictionary=terrain._scout_route_visual_profile(zoom)
 			_expect(is_equal_approx(float(scout_marker.get_meta("route_width")),float(profile.width)),"actual scout refresh uses wrong-band width")
 			_expect(float(profile.width)/zoom<0.0024,"scout corridor covers excessive screen width")
-			var pennants:MultiMeshInstance3D=scout_marker.get_node("ScoutDirectionPennants")
-			_expect(pennants.multimesh.instance_count==(5 if zoom<=80.0 else 4),"actual scout caller supplied the wrong scale band")
+			_expect(int(scout_marker.get_meta("tick_count",0))<=3,"scout route carries more than three direction ticks")
 			_expect(not scout_marker.get_node("ScoutOrderLabel").visible,"scout route details should appear on hover, not as a permanent label")
 			var hover:Control=scout_marker.find_child("ScoutRouteOverlay",true,false)
 			_expect(hover!=null and "due day" in hover.caption,"scout corridor lost its hover account")
@@ -214,10 +213,10 @@ func _ready()->void:
 					_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"route part can be overdrawn by transparent drapes")
 					_expect(material.render_priority>4 and material.render_priority<17,"route escaped its below-counter layer band")
 		_expect(army_route.get_node("MarchChevrons").material_override.render_priority>army_route.get_node("MovementPath").material_override.render_priority,"army line covers its arrowheads")
-		_expect(scout_route.get_node("ScoutDirectionPennants").material_override.render_priority>scout_route.get_node("ScoutCorridor").material_override.render_priority,"scout corridor covers its arrowheads")
+		if scout_route.has_node("ScoutDirectionTicks"): _expect(scout_route.get_node("ScoutDirectionTicks").material_override.render_priority>scout_route.get_node("ScoutCorridor").material_override.render_priority,"scout corridor covers its direction ticks")
 		var objective:Node3D=army_route.get_node("MovementObjective")
 		_expect(objective.get_node("ObjectiveArrow").material_override.render_priority>objective.get_node("ObjectiveRing").material_override.render_priority,"objective ring covers its pointer")
-		for arrows:MultiMeshInstance3D in [army_route.get_node("MarchChevrons"),scout_route.get_node("ScoutDirectionPennants")]:
+		for arrows:MultiMeshInstance3D in [army_route.get_node("MarchChevrons")]:
 			var vertices:PackedVector3Array=arrows.multimesh.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 			_expect(vertices.size()==24,"route direction marker is not a triangular prism")
 			_expect(arrows.multimesh.instance_count==5,"local route exceeded its fixed five arrow budget")

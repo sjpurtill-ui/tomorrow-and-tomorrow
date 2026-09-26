@@ -698,6 +698,8 @@ func _capture_preview_if_requested() -> void:
 		if "Hearth Circle" not in GameState.settlement_completed:
 			GameState.settlement_completed.append("Hearth Circle")
 		_settlement_model().ensure_founded()
+	if "--capture-scout-chart" in OS.get_cmdline_user_args():
+		_seed_capture_scout_chart()
 	if capture_travel:
 		travel_start=settler_marker.position
 		travel_target=travel_start+Vector3(3200.0,0.0,0.0)
@@ -14306,29 +14308,71 @@ func _refresh_player_field_army_path(view:Dictionary)->void:
 		if objective_label: objective_label.scale=Vector3.ONE/objective_scale
 
 
+func _seed_capture_scout_chart()->void:
+	## Capture scenario: several returned scout charts and one party still out,
+	## wandering around the settlement, so the chart styling can be judged.
+	var home:=Vector2(settler_marker.position.x,settler_marker.position.z)
+	var rng:=RandomNumberGenerator.new(); rng.seed=90417
+	var today:=int(GameState.elapsed_days)
+	var reports:Array[Dictionary]=[]
+	for index in 8:
+		var heading:=float(index)*TAU/8.0+rng.randf_range(-0.3,0.3)
+		var reach:=rng.randf_range(34.0,70.0)
+		var route:Array=[{"x":home.x,"z":home.y}]
+		for leg in range(1,6):
+			var bend:=heading+rng.randf_range(-0.55,0.55)
+			var p:=home+Vector2.from_angle(bend)*reach*float(leg)/5.0
+			route.append({"x":p.x,"z":p.y})
+		var last:Dictionary=route[route.size()-1]
+		var report:={"mission_id":900+index,"day":today-index*9,"duration_days":24,"route":route,"target_label":"Open exploration","discoveries":[{"kind":"knowledge","title":"A river ford to the %s" % ["north","east","south","west"][index%4]}] if index%2==0 else [],"contact_records":[{"name":"Reed People","position":{"x":lerpf(home.x,float(last.x),0.7),"z":lerpf(home.y,float(last.z),0.7)},"day":today-index*9}] if index==1 else []}
+		reports.append(report)
+	CivilizationSystem.scout_reports.assign(reports)
+	var active_route:Array=[{"x":home.x,"z":home.y}]
+	for leg in range(1,7):
+		var p:=home+Vector2.from_angle(-0.9+sin(float(leg))*0.35)*9.0*float(leg)
+		active_route.append({"x":p.x,"z":p.y})
+	CivilizationSystem.scout_missions.assign([{"mission_id":990,"start_day":today-8,"return_day":today+22,"duration_days":30,"route":active_route,"ordered_heading":"northeast","planned_heading":"northeast"}])
+
+
+const SCOUT_CHART_RETURNED_LIMIT:=6
+const ScoutChartStroke:=preload("res://scripts/scout_chart_stroke.gd")
+
 func _refresh_player_scout_route_markers()->void:
-	# These are issued plans, not omniscient unit trackers. The corridor stays
-	# visible while a party is away, but it never reveals the party's present
-	# position or anything it has observed beyond known ground.
-	var active_ids:Dictionary={}
+	# Scout routes read as an explorer's chart: parties still out are issued
+	# plans in solid ink; the last few returned charts are dotted, fading with
+	# age. The walker stands at the plan's reckoned position, never the party's
+	# true one. Geometry rebuilds only when a route or the zoom step changes.
+	var visual_zoom:=maxf(0.035,camera.size if camera else 190.0)
+	var band:=WarfareMapPresentation.scale_band(visual_zoom)
+	var zoom_bucket:=floori(log(visual_zoom)/log(1.08))
+	var wanted:Array=[]
 	for mission_variant in CivilizationSystem.scout_missions:
 		var mission:Dictionary=mission_variant
 		var mission_id:=str(mission.get("mission_id",""))
 		var route:Array=mission.get("route",[])
 		if mission_id=="" or route.size()<2: continue
-		active_ids[mission_id]=true
-		var visual_zoom:=maxf(0.035,camera.size if camera else 190.0)
-		var band:=WarfareMapPresentation.scale_band(visual_zoom)
-		# Rebuild only after a meaningful scale step, not on every camera frame.
-		var zoom_bucket:=floori(log(visual_zoom)/log(1.08))
-		var signature:="%s:%s:%s:%d:%d:%d" % [mission_id,band,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),zoom_bucket]
-		var marker:Node3D=player_scout_route_markers.get(mission_id,null)
-		if marker==null or not is_instance_valid(marker) or String(marker.get_meta("signature",""))!=signature:
+		wanted.append({"key":mission_id,"mission":mission,"route":route,"rank":-1,"signature":"%s:%s:%s:%d:%d:%d:%d" % [mission_id,band,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),int(mission.get("start_day",0)),zoom_bucket]})
+	var rank:=0
+	for report_variant in CivilizationSystem.scout_reports:
+		if rank>=SCOUT_CHART_RETURNED_LIMIT: break
+		var report:Dictionary=report_variant
+		var route:Array=report.get("route",[])
+		if route.size()<2: continue
+		var key:="report:%d" % int(report.get("mission_id",0))
+		wanted.append({"key":key,"mission":report,"route":route,"rank":rank,"signature":"%s:%d:%s:%d:%d:%d" % [key,rank,band,route.size(),int(report.get("day",0)),zoom_bucket]})
+		rank+=1
+	var active_ids:Dictionary={}
+	for entry_variant in wanted:
+		var entry:Dictionary=entry_variant
+		var key:String=entry.key
+		active_ids[key]=true
+		var marker:Node3D=player_scout_route_markers.get(key,null)
+		if marker==null or not is_instance_valid(marker) or String(marker.get_meta("signature",""))!=String(entry.signature):
 			if marker and is_instance_valid(marker): marker.queue_free()
-			marker=_create_player_scout_route_marker(mission,route,band)
-			marker.set_meta("signature",signature)
+			marker=_create_player_scout_route_marker(entry.mission,entry.route,band,int(entry.rank))
+			marker.set_meta("signature",entry.signature)
 			add_child(marker)
-			player_scout_route_markers[mission_id]=marker
+			player_scout_route_markers[key]=marker
 		marker.visible=true
 	for mission_id in player_scout_route_markers.keys():
 		if active_ids.has(String(mission_id)): continue
@@ -14338,13 +14382,31 @@ func _refresh_player_scout_route_markers()->void:
 
 
 func _scout_route_visual_profile(camera_size:float)->Dictionary:
+	# Every size is a fixed fraction of the view, so the ink stays the same
+	# number of screen pixels at every zoom (rebuilt per 8% zoom step).
 	var zoom:=maxf(0.035,camera_size)
-	return {"width":clampf(zoom*0.0018,0.00008,4.2),"pennant_scale":clampf(zoom*0.010,0.0005,7.56),"clearance":WarfareMapPresentation.marker_ground_clearance(zoom)}
+	return {"width":zoom*0.0011,"halo":zoom*0.0046,"tick":zoom*0.010,"mark":zoom*0.022,"dot":zoom*0.0075,"clearance":WarfareMapPresentation.marker_ground_clearance(zoom)}
 
 
-func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:String)->Node3D:
+func _scout_chart_material(priority:int)->StandardMaterial3D:
+	var material:=StandardMaterial3D.new(); material.vertex_color_use_as_albedo=true; material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; material.no_depth_test=true; material.cull_mode=BaseMaterial3D.CULL_DISABLED; material.render_priority=priority
+	return material
+
+
+func _scout_chart_mark(kind:String,ink:Color,position_2d:Vector2,lift:float,world_size:float)->Sprite3D:
+	var mark:=Sprite3D.new(); mark.name="ScoutChartMark_%s" % kind
+	mark.texture=preload("res://scripts/resource_icons.gd").chart_texture(kind,Color(ink,1.0))
+	mark.billboard=BaseMaterial3D.BILLBOARD_ENABLED; mark.no_depth_test=true; mark.shaded=false; mark.double_sided=true
+	mark.alpha_cut=SpriteBase3D.ALPHA_CUT_DISABLED; mark.render_priority=18; mark.modulate=Color(1,1,1,clampf(ink.a*1.15,0.3,1.0))
+	mark.pixel_size=world_size/float(mark.texture.get_width())
+	mark.position=Vector3(position_2d.x,_close_surface_height_at(position_2d.x,position_2d.y)+lift,position_2d.y)
+	return mark
+
+
+func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:String,rank:int=-1)->Node3D:
 	var root:=Node3D.new()
-	root.name="ScoutOrder_%s" % str(mission.get("mission_id",""))
+	var active:=rank<0
+	root.name=("ScoutOrder_%s" if active else "ScoutChart_%s") % str(mission.get("mission_id",""))
 	var route_points:=PackedVector2Array()
 	for point_variant in route:
 		var point:Dictionary=point_variant
@@ -14355,52 +14417,93 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var clearance:=float(profile.clearance)
 	root.set_meta("visual_zoom",visual_zoom)
 	root.set_meta("route_width",route_width)
-	var amber:=Color("#e6bd58"); amber.a=0.92
-	var backing_surface:=SurfaceTool.new(); backing_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var backing_color:=Color(0.015,0.022,0.024,0.78)
-	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,_settlement_stage_land_at)
-	_append_settlement_system_ribbon(backing_surface,Vector3.ZERO,route_points,route_width*1.9,backing_color,clearance,42,0.0,0,samples)
-	var backing:=MeshInstance3D.new(); backing.name="ScoutCorridorBacking"; backing.mesh=backing_surface.commit()
-	var backing_material:=StandardMaterial3D.new(); backing_material.vertex_color_use_as_albedo=true; backing_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; backing_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; backing_material.no_depth_test=true; backing_material.render_priority=3; backing.material_override=backing_material; root.add_child(backing)
-	var path_surface:=SurfaceTool.new(); path_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_append_settlement_system_ribbon(path_surface,Vector3.ZERO,route_points,route_width*0.62,amber,clearance*1.1,42,0.0,0,samples)
-	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=path_surface.commit()
-	var path_material:=StandardMaterial3D.new(); path_material.vertex_color_use_as_albedo=true; path_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; path_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; path_material.no_depth_test=true; path_material.render_priority=4; path.material_override=path_material; root.add_child(path)
-	# A few forward-pointing pennants make the order legible even when the route
-	# curves around water or rough terrain. They communicate direction, not scouts.
-	var pennant_count:=5 if band in ["ground","local"] else (4 if band=="regional" else 3)
-	var pennant_mesh:=_warfare_arrowhead_mesh(0.92,0.12,Vector2.UP)
-	var pennants:=MultiMesh.new(); pennants.transform_format=MultiMesh.TRANSFORM_3D; pennants.instance_count=pennant_count; pennants.mesh=pennant_mesh
-	for pennant_index in pennant_count:
-		var progress:=(float(pennant_index)+1.0)/float(pennant_count+1)
-		var sample_index:=clampi(floori(progress*float(route_points.size()-1)),0,route_points.size()-2)
-		var local_progress:=fposmod(progress*float(route_points.size()-1),1.0)
-		var a:=route_points[sample_index]; var b:=route_points[sample_index+1]
-		var point:=a.lerp(b,local_progress); var direction:=b-a
-		var heading:=-direction.angle()-PI*0.5 if direction.length_squared()>0.000001 else 0.0
-		var world_point:=Vector3(point.x,_close_surface_height_at(point.x,point.y)+clearance*1.2,point.y)
-		var pennant_scale:=float(profile.pennant_scale)
-		pennants.set_instance_transform(pennant_index,Transform3D(Basis(Vector3.UP,heading).scaled(Vector3(pennant_scale,1.0,pennant_scale)),world_point))
-	var pennant_instance:=MultiMeshInstance3D.new(); pennant_instance.name="ScoutDirectionPennants"; pennant_instance.multimesh=pennants; pennant_instance.material_override=_warfare_marker_material(amber.lightened(0.16)); root.add_child(pennant_instance)
-	pennant_instance.material_override.render_priority=5
+	# Ink darkens with recency; older charts fade toward the map.
+	var freshness:=1.0 if active else lerpf(0.80,0.28,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
+	var ink:=Color("#24170c").lerp(Color("#6e5a40"),0.0 if active else 1.0-freshness)
+	ink.a=0.95*freshness
+	var paper:=Color("#f2e6c6"); paper.a=0.36*freshness
+	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot))
+	var heights:=PackedFloat32Array()
+	var raw_heights:=PackedFloat32Array()
+	for p in chart: raw_heights.append(_close_surface_height_at(p.x,p.y))
+	# Drape on a smoothed ground line: raw samples jitter between terrain
+	# patches and would saw the fine ink stroke in a tilted view.
+	for i in raw_heights.size():
+		var total:=0.0; var count:=0
+		for j in range(maxi(0,i-8),mini(raw_heights.size(),i+9)): total+=raw_heights[j]; count+=1
+		heights.append(total/float(count)+clearance)
+	root.set_meta("chart_points",chart.size())
+	var halo_surface:=SurfaceTool.new(); halo_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	ScoutChartStroke.ribbon(halo_surface,chart,heights,float(profile.halo),paper,0.0,float(profile.tick)*2.0)
+	var halo:=MeshInstance3D.new(); halo.name="ScoutCorridorBacking"; halo.mesh=halo_surface.commit(); halo.material_override=_scout_chart_material(3); root.add_child(halo)
+	var ink_surface:=SurfaceTool.new(); ink_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# The party still out is one unbroken stroke; a returned chart is dotted.
+	ScoutChartStroke.ribbon(ink_surface,chart,heights,route_width,ink,0.35,float(profile.tick)*2.2,0 if active else 1,0 if active else 2)
+	var path:=MeshInstance3D.new(); path.name="ScoutCorridor"; path.mesh=ink_surface.commit(); path.material_override=_scout_chart_material(4); root.add_child(path)
+	# Small, sparse open ticks show direction; only the freshest charts carry them.
+	var tick_fractions:Array=[0.3,0.55,0.8] if active else ([0.45] if rank<2 else [])
+	var tick_surface:=SurfaceTool.new(); tick_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tick_count:=ScoutChartStroke.ticks(tick_surface,chart,heights,tick_fractions,float(profile.tick),route_width*0.8,ink)
+	root.set_meta("tick_count",tick_count)
+	if tick_count>0:
+		var ticks:=MeshInstance3D.new(); ticks.name="ScoutDirectionTicks"; ticks.mesh=tick_surface.commit(); ticks.material_override=_scout_chart_material(5); root.add_child(ticks)
 	var endpoint:=route_points[route_points.size()-1]
-	var label:=Label3D.new(); label.name="ScoutOrderLabel"
 	var ordered:=String(mission.get("ordered_heading","")).to_upper()
 	var planned:=String(mission.get("planned_heading","")).to_upper()
 	var first_line:="SCOUT ORDER · %s" % ordered if ordered!="" else "SCOUTS · PARTY CHOSE %s" % planned
+	var label:=Label3D.new(); label.name="ScoutOrderLabel"
 	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
-	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=amber.lightened(0.22); label.outline_modulate=Color(0.01,0.015,0.017,0.98)
+	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=Color(ink,1.0); label.outline_modulate=Color(paper,0.95)
 	label.visible=false # Route details belong to hover, not permanent map clutter.
 	label.position=Vector3(endpoint.x,_close_surface_height_at(endpoint.x,endpoint.y)+minf(1.2,maxf(0.001,visual_zoom*0.016)),endpoint.y); root.add_child(label)
+	# Inked marks: camps along the way, a find or the turning point at the far
+	# end, sightings where people were met. Each carries its own hover line.
+	var marks_root:=Node3D.new(); marks_root.name="ScoutChartMarks"; root.add_child(marks_root)
+	var hover_marks:Array=[]
+	var mark_size:=float(profile.mark)*(1.0 if active or rank<3 else 0.8)
+	var duration:=maxi(1,int(mission.get("duration_days",maxi(1,int(mission.get("return_day",0))-int(mission.get("start_day",0))))))
+	var placed:Array=[]
+	if active or rank<3:
+		for fraction in [0.34,0.68]:
+			var camp:=_scout_chart_mark("camp",ink,ScoutChartStroke.point_at(chart,fraction),clearance*1.2,mark_size)
+			marks_root.add_child(camp)
+			placed.append([camp,"Camp · about day %d of %d" % [maxi(1,roundi(float(duration)*0.5*fraction)),duration]])
+	var discoveries:Array=mission.get("discoveries",[])
+	var end_caption:="Turning point · %s" % String(mission.get("target_label","planned")).capitalize() if active else "Turned for home here"
+	if not discoveries.is_empty(): end_caption="Find · %s" % String((discoveries[0] as Dictionary).get("title","Something worth reporting"))
+	var end_mark:=_scout_chart_mark("find" if not discoveries.is_empty() else "camp",ink,chart[chart.size()-1],clearance*1.2,mark_size)
+	marks_root.add_child(end_mark)
+	placed.append([end_mark,end_caption])
+	for contact_variant in mission.get("contact_records",[]):
+		var contact:Dictionary=contact_variant
+		var where:Dictionary=contact.get("position",{})
+		var sighting:=_scout_chart_mark("sighting",ink,Vector2(float(where.get("x",0.0)),float(where.get("z",0.0))),clearance*1.2,mark_size)
+		marks_root.add_child(sighting)
+		placed.append([sighting,"Sighting · met the %s, day %d" % [String(contact.get("name","strangers")),int(contact.get("day",0))]])
+	for entry in placed: hover_marks.append({"position":(entry[0] as Node3D).position,"caption":entry[1]})
+	if active:
+		var walker:=_scout_chart_mark("walker",ink,chart[0],clearance*1.4,mark_size*1.2)
+		walker.name="ScoutChartWalker"
+		var base_pixel_size:=walker.pixel_size
+		walker.set_script(preload("res://scripts/scout_chart_walker.gd"))
+		walker.set("chart",chart); walker.set("heights",heights); walker.set("arcs",ScoutChartStroke.arc_lengths(chart)); walker.set("lift",clearance*0.4)
+		walker.set("start_day",float(mission.get("start_day",GameState.elapsed_days))); walker.set("return_day",float(mission.get("return_day",GameState.elapsed_days+1.0))); walker.set("base_pixel_size",base_pixel_size)
+		marks_root.add_child(walker)
 	var hover_layer:=CanvasLayer.new()
 	hover_layer.layer=0
 	root.add_child(hover_layer)
 	var hover:=preload("res://scripts/hud/scout_route_overlay.gd").new()
 	hover.name="ScoutRouteOverlay"
 	hover.camera=camera
-	for point in route_points:
-		hover.points.append(Vector3(point.x,_close_surface_height_at(point.x,point.y)+clearance,point.y))
-	hover.caption="%s · planned route · due day %d" % [first_line.capitalize(),int(mission.get("return_day",0))]
+	var hover_stride:=maxi(1,chart.size()/48)
+	for index in range(0,chart.size(),hover_stride):
+		hover.points.append(Vector3(chart[index].x,heights[index],chart[index].y))
+	hover.points.append(Vector3(chart[chart.size()-1].x,heights[heights.size()-1],chart[chart.size()-1].y))
+	hover.marks=hover_marks
+	if active:
+		hover.caption="%s · planned route · due day %d · the walker marks the reckoned position" % [first_line.capitalize(),int(mission.get("return_day",0))]
+	else:
+		hover.caption="Returned chart · day %d · %s" % [int(mission.get("day",0)),String(mission.get("target_label","open exploration")).capitalize()]
 	hover_layer.add_child(hover)
 	_configure_warfare_overlay_layers(root,10)
 	return root
