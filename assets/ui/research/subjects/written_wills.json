@@ -1,0 +1,14 @@
+{
+  "id": "written_wills",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-05a62e6a-08a6-4ecb-8fdd-07adc2424337.png",
+  "source_file": "exec-05a62e6a-08a6-4ecb-8fdd-07adc2424337.png",
+  "creative_brief": "A man writes out his will before witnesses and seals it, choosing his heirs and legacies. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/written_wills-v1.png",
+  "sha256": "6798b614326b4d0827fbda5ad0fcacbfbdb8d2c62c67bbb8640d64ad3caf2ade",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

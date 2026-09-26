@@ -1,0 +1,14 @@
+{
+  "id": "philosophy_school_communities",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c5dfd195-e835-4372-ac72-f13102562c68.png",
+  "source_file": "exec-c5dfd195-e835-4372-ac72-f13102562c68.png",
+  "creative_brief": "Schools of philosophy hold their own grounds and heads, and teaching passes from each head to the next. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/philosophy_school_communities-v1.png",
+  "sha256": "703f4b06f3338572c58261d7aa94b0891feeae30517df4411a909fc3fbfa77b9",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

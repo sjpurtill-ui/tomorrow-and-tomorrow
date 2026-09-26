@@ -40,12 +40,14 @@ func test_first_discovery_in_a_field_is_a_moment_and_the_next_is_a_notice()->voi
 	assert_int(Chronicle.entries("notice").size()).is_equal(1)
 	GameState.elapsed_days=140.0
 	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+	# The season's learning is kept in its tally; the year's entry tells it.
 	var told:=Chronicle.entries("notice")
-	assert_int(told.size()).is_equal(2)
-	assert_str(String(told[1].tier)).is_equal("moment")
-	assert_bool(bool(told[1].first)).is_true()
-	assert_str(String(told[0].tier)).is_equal("notice")
-	assert_str(String(told[0].text)).contains("This season the people learned:")
+	assert_int(told.size()).is_equal(1)
+	assert_str(String(told[0].tier)).is_equal("moment")
+	assert_bool(bool(told[0].first)).is_true()
+	var season:Dictionary=Chronicle.entries("whisper")[0]
+	assert_str(String(season.key)).starts_with("learned:")
+	assert_str(String(season.text)).contains("This season the people learned:")
 	assert_bool(Chronicle.discovery_is_moment(pair[0])).is_true()
 	assert_bool(Chronicle.discovery_is_moment(pair[1])).is_false()
 	assert_int(Chronicle.pending_cards.size()).is_equal(1)
@@ -75,22 +77,23 @@ func test_repeat_discoveries_in_a_season_are_told_as_one_notice()->void:
 	GameState.elapsed_days=190.0
 	Chronicle.ingest_day({"discoveries":[{"id":run[4],"day":190}],"progression":[]})
 	var told:=Chronicle.entries("notice")
-	assert_int(told.size()).is_equal(2)
-	var batch:Dictionary=told[0]
+	assert_int(told.size()).is_equal(1)
+	var batch:Dictionary=Chronicle.entries("whisper").filter(func(e:Dictionary)->bool:return String(e.get("key","")).begins_with("learned:"))[0]
+	assert_str(String(batch.tier)).is_equal("whisper")
 	assert_str(String(batch.title)).is_equal("What the summer taught")
 	for i in [1,2,3]:
 		var name:=String(DiscoverySystem.player_facing_discovery_event({"id":run[i]}).get("name",run[i])).to_lower()
 		assert_str(String(batch.text)).contains(name)
 	assert_array(batch.learned).is_equal([run[1],run[2],run[3]])
 	# Each line is still kept for the season view and the ledger.
-	assert_int(Chronicle.entries("whisper").filter(func(e:Dictionary)->bool:return String(e.get("kind",""))=="discovery" and String(e.get("tier",""))=="whisper").size()).is_equal(4)
+	assert_int(Chronicle.entries("whisper").filter(func(e:Dictionary)->bool:return String(e.get("kind",""))=="discovery" and String(e.get("tier",""))=="whisper" and not String(e.get("key","")).begins_with("learned:")).size()).is_equal(4)
 	var ledger:=GameState.simulation_events.filter(func(e:Dictionary)->bool:return String(e.get("id","")).begins_with("chronicle_discovery:"))
 	# Four repeats and the first (a moment) each keep their ledger line.
 	assert_int(ledger.size()).is_equal(5)
 	# The autumn discovery waits for the autumn's telling.
 	GameState.elapsed_days=290.0
 	Chronicle.ingest_day({"discoveries":[],"progression":[]})
-	assert_str(String(Chronicle.entries("notice")[0].title)).is_equal("What the autumn taught")
+	assert_str(String(Chronicle.entries("whisper")[0].title)).is_equal("What the autumn taught")
 
 
 func test_a_carried_tally_is_labelled_with_the_year_it_closes_in()->void:
@@ -206,9 +209,10 @@ func test_old_saves_without_a_chronicle_do_not_replay_known_fields()->void:
 	# Not a first: told with the season's other learning when the season ends.
 	GameState.elapsed_days=1000.0
 	Chronicle.ingest_day({"discoveries":[],"progression":[]})
-	var told:=Chronicle.entries("notice")
+	# Kept in the season's tally (the year's entry tells it), never as a first.
+	assert_int(Chronicle.entries("notice").size()).is_equal(0)
+	var told:=Chronicle.entries("whisper").filter(func(e:Dictionary)->bool:return String(e.get("key","")).begins_with("learned:"))
 	assert_int(told.size()).is_equal(1)
-	assert_str(String(told[0].tier)).is_equal("notice")
 	assert_bool(bool(told[0].get("first",false))).is_false()
 
 func test_rival_simulations_keep_no_chronicle()->void:
@@ -251,8 +255,10 @@ func test_scout_and_death_lines_are_retold_for_the_people()->void:
 	GameState.simulation_events.push_front({"day":0,"title":"SCOUTS RETURN","description":"The scout party returns after 82 days and charts roughly 1122 km of land travel. No organized foreign polity was encountered. The pebble line counted by moving — the unfinished comparison — Your knowledge workers will examine this. Its specific evidence becomes usable after study. They passed a traveling band who kept moving; the dated sighting is marked, but the band will not remain there. The map now reveals only the physical route contained in its returned report.","domain":"diplomacy","severity":"major"})
 	GameState.simulation_events.push_front({"day":0,"title":"Officeholder Died","description":"Sana Ivers died aged 53 while serving as Hearth Chief. The office and local duties now pass through the same succession rules as every other appointment.","domain":"institutions","severity":"major"})
 	Chronicle.ingest_day({"discoveries":[],"progression":[]})
-	var told:=Chronicle.entries("notice")
-	# The clerk's death line is left to the court's mourning (court_lives.gd).
+	# The clerk's death line is left to the court's mourning (court_lives.gd),
+	# and a band that kept moving is road news for the year's telling.
+	assert_int(Chronicle.entries("notice").size()).is_equal(0)
+	var told:=Chronicle.entries("whisper")
 	assert_int(told.size()).is_equal(1)
 	assert_str(String(told[0].title)).is_equal("The scouts come home")
 	assert_str(String(told[0].text)).contains("traveling band")

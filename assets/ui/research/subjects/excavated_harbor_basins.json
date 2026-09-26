@@ -1,0 +1,14 @@
+{
+  "id": "excavated_harbor_basins",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b642eb36-2899-45a3-923d-2c1d60db21a6.png",
+  "source_file": "exec-b642eb36-2899-45a3-923d-2c1d60db21a6.png",
+  "creative_brief": "The harbor is dug out of the shore and lined with stone, and ships lie safe inside while the storms blow past. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/excavated_harbor_basins-v1.png",
+  "sha256": "62989da1ac4b1a247d1451956014832189dee56bb1cd1231040e73a43dbc08df",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

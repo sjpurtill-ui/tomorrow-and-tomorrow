@@ -1,0 +1,14 @@
+{
+  "id": "husbandry_handbooks",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8a7ab1a7-eb69-4560-98aa-e94922abe848.png",
+  "source_file": "exec-8a7ab1a7-eb69-4560-98aa-e94922abe848.png",
+  "creative_brief": "Landowners write handbooks on soil, vines, herds and the stewarding of hands, and their stewards farm by the book. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/husbandry_handbooks-v1.png",
+  "sha256": "2c5df8c31dec095f2bd43b05e9f5455c481d0d97d9238da1d7c1a85c7b8968c4",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}

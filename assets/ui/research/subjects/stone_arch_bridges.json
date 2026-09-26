@@ -1,0 +1,14 @@
+{
+  "id": "stone_arch_bridges",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8843949d-776d-4748-a71e-9ccce3001a38.png",
+  "source_file": "exec-8843949d-776d-4748-a71e-9ccce3001a38.png",
+  "creative_brief": "The river is crossed on stone arches, and floods that swept away three timber bridges pass beneath this one. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/stone_arch_bridges-v1.png",
+  "sha256": "bf45783e30869cd564ef8b29bdf004048cb3944e934978296b498e2fbf5bc65e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

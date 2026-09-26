@@ -689,7 +689,9 @@ static func _open_drought(day:int,x:Dictionary)->void:
 	var c:=_new("drought","drought","the Dry Year of %s" % _year_words(day) if sev<0.2 else "the Year the Springs Failed",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
 	_plan_deaths(c,_lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
 	if sev>=0.18: c["severe"]=true; _stat("drought","severe")
-	var summary:="The rain has not come. The gathering grounds are brown and the %s is low. What we gather this season will be about %d parts in ten of a good year." % ["river" if bool(x.river) else "water",clampi(roundi(float(x.weather_season)*10.0),3,9)]
+	# Told a little differently each time: the chronicle keeps every dry year.
+	var dry_words:=_pick(["The rain has not come. The gathering grounds are brown and the %s is low.","No rain for weeks. The %s has shrunk back from its banks and the grass crackles underfoot.","The sky stays hard and clear. The seed-grass is brown before it has filled, and the %s is low."],"dry:%s" % String(c.id))
+	var summary:=(dry_words % ("river" if bool(x.river) else "water"))+(" What we gather this season will be about %d parts in ten of a good year." % clampi(roundi(float(x.weather_season)*10.0),3,9))
 	_file(c,"open",summary,"comes about the dry weather",int(c.decide_by))
 	_announce(c,"The Rain Does Not Come",summary)
 
@@ -749,7 +751,9 @@ static func _watch_thinning(day:int,x:Dictionary)->void:
 	_plan_deaths(c,0.0)
 	# The notice is not told again while this is being settled, nor for years after.
 	GameState.last_simulation_event_days["ecology_strain"]=day+1200
-	var summary:="The gatherers walk half a day now for what they once found by the camp. The near ground is worn out: roots dug, game gone, the brush stripped."
+	var summary:=_pick(["The gatherers walk half a day now for what they once found by the camp. The near ground is worn out: roots dug, game gone, the brush stripped.",
+		"Every root near the camp has been dug and the snares by the stream come back empty. The gatherers are out from before light until after dark.",
+		"The gatherers pass the old digging places and walk on to the far slopes, and still come home with half-full baskets. The game has left the near woods."],"worn:%s" % String(c.id))
 	_file(c,"open",summary,"comes about the worn land",int(c.decide_by))
 	_announce(c,"The Land Is Worn Out",summary)
 
@@ -959,7 +963,7 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 			text+=("It took %s. " % names) if total>0 else "No one starved. "
 			if helper!="": text+="%s found roots under the snow when others had stopped looking. " % helper
 		"drought":
-			text="The rains came back. "+(("The dry year took %s. " % names) if total>0 else "Everyone lived through the dry year. ")
+			text=_pick(["The rains came back. ","The rain returned at last. ","The springs are running again. "],"rain:%s" % String(c.id))+(("The dry year took %s. " % names) if total>0 else "Everyone lived through the dry year. ")
 		"flood":
 			text="The river is back in its bed. "+(("It drowned %s. " % names) if total>0 else "No one drowned. ")
 			if String(c.choice)=="wait": (state().until as Dictionary)["after_flood"]=day+60
@@ -970,7 +974,8 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 			text="The sun is clear again. It was a hungry year, and the people are glad to see it end. "
 		"thinning":
 			var eco:=float(x.ecology)
-			text="The gatherers say the near ground %s. " % ("is coming back" if eco>=float(c.get("eco0",eco)) else "is still worn")
+			var back:=eco>=float(c.get("eco0",eco))
+			text=_pick(["The gatherers say the near ground %s. " % ("is coming back" if back else "is still worn"),("Green is coming back to the dug-over ground near camp. " if back else "The ground near camp is still bare and dug over. ")],"worn_end:%s" % String(c.id))
 	if String(c.get("silent_note",""))!="": text+=String(c.silent_note)
 	(c.notes as Array).append(text)
 	if type in ["flood"] and String(c.choice) in ["high_ground","mounds"]:

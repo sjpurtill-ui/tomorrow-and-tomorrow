@@ -1,0 +1,14 @@
+{
+  "id": "trigonometry",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-82c8d9f1-313b-4511-80fb-08870a620aa8.png",
+  "source_file": "exec-82c8d9f1-313b-4511-80fb-08870a620aa8.png",
+  "creative_brief": "Tables of chords turn angles into lengths, and distances nobody can walk are found by reckoning. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/trigonometry-v1.png",
+  "sha256": "196890e7e333ecd3088118b386ace0fdd0bdd4ed14a830b6df2e022134b3b906",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

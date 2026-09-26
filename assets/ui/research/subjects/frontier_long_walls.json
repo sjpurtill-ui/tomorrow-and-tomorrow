@@ -1,0 +1,14 @@
+{
+  "id": "frontier_long_walls",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9d35ac42-cfad-436d-835d-39d932b699af.png",
+  "source_file": "exec-9d35ac42-cfad-436d-835d-39d932b699af.png",
+  "creative_brief": "A wall with forts and watchtowers runs for days along the frontier, and raiders must climb it under watch. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/frontier_long_walls-v1.png",
+  "sha256": "5fa76e8b7a568368c83fc72a196c4875ef03996151263f80151ae7684917b292",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

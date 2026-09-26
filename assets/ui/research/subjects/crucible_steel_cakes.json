@@ -1,0 +1,14 @@
+{
+  "id": "crucible_steel_cakes",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0f3ac360-957e-43a3-a1f8-7056d2c04613.png",
+  "source_file": "exec-0f3ac360-957e-43a3-a1f8-7056d2c04613.png",
+  "creative_brief": "Iron and charred leaves sealed in clay pots are melted for a day, and the cakes forge into blades with a rippled sheen. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/crucible_steel_cakes-v1.png",
+  "sha256": "2a63df60b2610ddec22f7c8494395ed4f2710f1df204b003ff8cb377a9feb257",
+  "mode": "built-in image_gen / directed style redraw",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; realistic initial render rejected."
+}
