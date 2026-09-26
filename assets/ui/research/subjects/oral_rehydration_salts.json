@@ -1,0 +1,17 @@
+{
+  "id": "oral_rehydration_salts",
+  "line": "health",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-378ddc27-54ce-4f56-a0ea-4517ad01ef1d.png",
+  "source_file": "exec-378ddc27-54ce-4f56-a0ea-4517ad01ef1d.png",
+  "creative_brief": "Oral Rehydration Salts: a caregiver gives measured water, salt and sugar solution.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/oral_rehydration_salts-v1.png",
+  "sha256": "50e49d70ac61a7371c259baf26013a33c464f10de290d4de3acfdc82ac9993fa",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop.",
+  "focus": [
+    0.5,
+    0.45
+  ]
+}

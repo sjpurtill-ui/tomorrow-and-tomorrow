@@ -1,0 +1,13 @@
+{
+  "id": "moving_assembly_line",
+  "line": "labor",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e686ad19-19da-4076-8c9f-51aaf164f12a.png",
+  "source_file": "exec-e686ad19-19da-4076-8c9f-51aaf164f12a.png",
+  "creative_brief": "Moving Assembly Line: workers assemble chassis as a conveyor carries them forward.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/moving_assembly_line-v1.png",
+  "sha256": "fa5719a3acf2ef695e9db248d3cd162c52c2ae5e1d89d4eb9900dc359ebcbde1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop."
+}

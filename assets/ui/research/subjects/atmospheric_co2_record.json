@@ -1,0 +1,17 @@
+{
+  "id": "atmospheric_co2_record",
+  "line": "ecology",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-024a7daf-2ebd-426e-a2c0-1ec2e2c6ce89.png",
+  "source_file": "exec-024a7daf-2ebd-426e-a2c0-1ec2e2c6ce89.png",
+  "creative_brief": "Atmospheric CO2 Record: a small mountain station samples air across time.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/atmospheric_co2_record-v1.png",
+  "sha256": "53a4d5d2869d35d106269c3584027f443b477849dca5b30fe497a3030f32e8cd",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop.",
+  "focus": [
+    0.5,
+    0.35
+  ]
+}

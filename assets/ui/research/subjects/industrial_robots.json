@@ -1,0 +1,13 @@
+{
+  "id": "industrial_robots",
+  "line": "production",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cf840ee7-774c-4358-83d7-96e025612963.png",
+  "source_file": "exec-cf840ee7-774c-4358-83d7-96e025612963.png",
+  "creative_brief": "Industrial Robots: jointed arms weld vehicle bodies on a production line.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/industrial_robots-v1.png",
+  "sha256": "688da83cee32f5c1d74795dfe04bc1394200da2fe2e401a18789523eb6854d15",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop."
+}

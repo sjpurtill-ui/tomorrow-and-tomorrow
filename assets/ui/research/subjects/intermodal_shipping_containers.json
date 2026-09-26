@@ -1,0 +1,13 @@
+{
+  "id": "intermodal_shipping_containers",
+  "line": "logistics",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-84400fda-382c-474e-867b-bbcf2f5998cc.png",
+  "source_file": "exec-84400fda-382c-474e-867b-bbcf2f5998cc.png",
+  "creative_brief": "Intermodal Shipping Containers: crane transfers a container from ship to rail.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/intermodal_shipping_containers-v1.png",
+  "sha256": "5241e36bbb189e5e1f020d3558a9ad92b2378ef35c9665c0ff5f5e090b353136",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop."
+}

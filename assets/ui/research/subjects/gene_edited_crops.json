@@ -1,0 +1,13 @@
+{
+  "id": "gene_edited_crops",
+  "line": "nutrition",
+  "block": "y2400_3000",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-52d1c4e7-fb61-4370-a88a-7ee3a3ac2912.png",
+  "source_file": "exec-52d1c4e7-fb61-4370-a88a-7ee3a3ac2912.png",
+  "creative_brief": "Gene-edited Crops: compare drought-stressed grain with thriving trial rows.",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/gene_edited_crops-v1.png",
+  "sha256": "20eaabdd9941400ad775e6ff95aea709c1bdf187f2373b4ad113ed636e3f2723",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected from twelve-direction mature stylization review on 2026-09-26; inspect historical details at final card crop."
+}
