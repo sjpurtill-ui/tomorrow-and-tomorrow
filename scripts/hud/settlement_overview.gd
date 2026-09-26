@@ -49,6 +49,6 @@ func setup(block:Dictionary)->void:
 func _layout()->void:
 	if cards:cards.columns=3 if size.x>=650 else 2
 func _serif(value:String,font_size:int)->Label:
-	var label:=T.make_label(value,font_size,T.INK);var font:=SystemFont.new();font.font_names=PackedStringArray(["Georgia"]);label.add_theme_font_override("font",font);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return label
+	var label:=T.make_label(value,font_size,T.INK);label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font());label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return label
 func _note(parent:Node,value:String)->void:
 	var label:=T.make_label(value,13,T.BODY);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(label)

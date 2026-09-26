@@ -72,6 +72,8 @@ var toolbar_action_buttons:Dictionary={}
 var scale_line:ColorRect
 var scale_label:Label
 var compass_label:Button
+const MapCompass:=preload("res://scripts/hud/map_compass.gd")
+const TOOLBAR_FONT_SIZE:=14
 ## The one hover card for the whole top bar (hud/hover_card.gd).
 var hover_cards:CanvasLayer
 
@@ -165,7 +167,7 @@ func _layout()->void:
 			kpi_separators[2].visible=goods_shown
 			kpi_separators[5].visible=gdp_shown
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
+		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),1)
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
@@ -220,8 +222,8 @@ func _build_frame()->void:
 func _build_rail()->void:
 	rail_panel=PanelContainer.new()
 	rail_panel.name="CommandRail"
-	var style:=Tokens.flat(Color("29332c"),Color("a8935e"),0,0)
-	style.border_color=Tokens.BORDER
+	var style:=Tokens.flat(Tokens.PAPER,Tokens.RULE,0,0)
+	style.border_color=Tokens.RULE
 	style.border_width_right=1
 	style.content_margin_top=6.0
 	style.content_margin_bottom=6.0
@@ -249,7 +251,7 @@ func _build_rail()->void:
 	drawer_box.name="RailDrawer"
 	drawer_box.visible=false
 	drawer_box.add_theme_constant_override("separation",0)
-	var drawer_style:=Tokens.flat(Color(0,0,0,.16))
+	var drawer_style:=Tokens.flat(Tokens.PAPER_SUNK)
 	drawer_box.add_theme_constant_override("separation",0)
 	var drawer_panel:=PanelContainer.new()
 	drawer_panel.name="RailDrawerPanel"
@@ -297,14 +299,15 @@ func _make_rail_button(section:Dictionary)->Button:
 	if section.has("icon"):
 		var art:Control=ApprovedArt.icon(int(section.icon))
 		if drawer:art.custom_minimum_size=art.custom_minimum_size*0.6
+		art.self_modulate=_rail_icon_tint()
 		content.add_child(art)
 	else:
 		var symbol:=NavIcon.new(id)
-		symbol.set_icon_color(Color("e1cc91"))
+		symbol.set_icon_color(_rail_ink())
 		symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if drawer:symbol.custom_minimum_size=Vector2(20,20)
 		content.add_child(symbol)
-	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),10 if drawer else 11,Color("eee3c2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),12,Tokens.INK);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	rail_labels[id]=label
 	var badge:=Label.new()
 	badge.visible=false
@@ -312,7 +315,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_font_size_override("font_size",9)
+	badge.add_theme_font_size_override("font_size",12)
 	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
 	# Rail width is fixed, so a plain top-left offset lands the pill at the
 	# button's top-right corner (button content width = rail - 2*8 padding).
@@ -344,14 +347,14 @@ func _make_drawer_button()->Button:
 	button.add_child(content)
 	var mark:=TextureRect.new()
 	mark.name="DrawerMark"
-	mark.texture=preload("res://scripts/resource_icons.gd").moment_texture("hearth_count",Color("e1cc91"),56)
+	mark.texture=preload("res://scripts/resource_icons.gd").moment_texture("hearth_count",_rail_ink(),56)
 	mark.custom_minimum_size=Vector2(26,26)
 	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	mark.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	content.add_child(mark)
-	drawer_label=Tokens.make_label("",11,Color("eee3c2"));drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
+	drawer_label=Tokens.make_label("",12,Tokens.INK);drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
 	drawer_button=button
 	_style_drawer_label()
 	return button
@@ -400,8 +403,8 @@ func _make_court_button()->Button:
 	# The heart of the game gets the largest place on the rail.
 	button.custom_minimum_size=Vector2(0,64)
 	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
-	var gold:=Tokens.flat(Color(.79,.64,.29,.16),Color("c9a24a"),1,3)
-	var gold_hover:=Tokens.flat(Color(.79,.64,.29,.28),Color("e8c35a"),1,3)
+	var gold:=Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
+	var gold_hover:=Tokens.flat(Tokens.GOLD_WASH.lerp(Tokens.GOLD,.12),Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
 	button.add_theme_stylebox_override("normal",gold)
 	button.add_theme_stylebox_override("hover",gold_hover)
 	button.add_theme_stylebox_override("pressed",gold_hover)
@@ -416,15 +419,16 @@ func _make_court_button()->Button:
 	var symbol:=ApprovedArt.symbol(Rect2(15,7,46,47),38,38)
 	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	symbol.self_modulate=_rail_icon_tint()
 	content.add_child(symbol)
-	var label:=Tokens.make_label("Court",12,Color("f3dfa2"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label("Court",13,Tokens.GOLD);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
 	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_font_size_override("font_size",9)
+	badge.add_theme_font_size_override("font_size",12)
 	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
 	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
 	button.add_child(badge)
@@ -511,7 +515,7 @@ func _build_time_pill()->void:
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
 	pause_button.custom_minimum_size=Vector2(28,26)
-	pause_button.add_theme_font_size_override("font_size",11)
+	pause_button.add_theme_font_size_override("font_size",12)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
 	speed_row.add_child(pause_button)
@@ -532,7 +536,7 @@ func _build_time_pill()->void:
 		button.name="Speed%d"%speed
 		button.text=["","½h","2h","8h","1d","3d"][speed]
 		button.custom_minimum_size=Vector2(32,26)
-		button.add_theme_font_size_override("font_size",10)
+		button.add_theme_font_size_override("font_size",12)
 		button.pressed.connect(_on_speed_pressed.bind(speed))
 		speed_row.add_child(button)
 		speed_buttons.append(button)
@@ -603,7 +607,7 @@ const KPI_DEFS:Array[Dictionary]=[
 const KPI_GUTTER:=10.0
 ## Caption, value and its note stack in three short lines inside the 56 px top
 ## frame, so a value never shares its line with (or is cut off by) a note.
-const KPI_HEIGHT:=46.0
+const KPI_HEIGHT:=54.0
 
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
@@ -653,17 +657,18 @@ func _build_kpi_strip()->void:
 		text_column.alignment=BoxContainer.ALIGNMENT_CENTER
 		text_column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		inner.add_child(text_column)
-		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),9,Tokens.MUTED,0.12)
+		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),12,Tokens.INK_MUTED,0.12)
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(caption)
-		var value:=Tokens.make_label("—",15,Tokens.INK)
+		# The value is the loudest line of the chip: SemiBold ink over a quiet kicker.
+		var value:=Tokens.text(Tokens.make_label("—",20,Tokens.INK),"value",Tokens.INK) as Label
 		# Widths are sized for the longest real value; the ellipsis is only a
 		# last guard against a runaway string pushing the strip over the clock.
 		value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		value.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(value)
 		# The note (who went hungry, babes lost, keepers) sits on its own line.
-		var delta:=Tokens.make_label("",10,Tokens.MUTED)
+		var delta:=Tokens.make_label("",12,Tokens.INK_MUTED)
 		delta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(delta)
@@ -738,7 +743,7 @@ func _rebuild_queue(items:Array)->void:
 	var council_link:=Button.new()
 	council_link.flat=true
 	council_link.text="COUNCIL"
-	council_link.add_theme_font_size_override("font_size",10)
+	council_link.add_theme_font_size_override("font_size",12)
 	council_link.add_theme_color_override("font_color",Tokens.GOLD)
 	council_link.add_theme_color_override("font_hover_color",Tokens.GOLD_BRIGHT)
 	council_link.tooltip_text="Open the council ledger."
@@ -781,7 +786,7 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 	var decide:=Button.new()
 	decide.text="DECIDE"
 	decide.custom_minimum_size=Vector2(0,26)
-	decide.add_theme_font_size_override("font_size",10)
+	decide.add_theme_font_size_override("font_size",12)
 	decide.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
 	decide.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
@@ -807,7 +812,8 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 func _build_toolbar()->void:
 	toolbar=PanelContainer.new()
 	toolbar.name="MapToolbar"
-	var style:=Tokens.flat(Tokens.TOOLBAR_BG,Tokens.BORDER_SOFT,1,6,4.0)
+	var style:=Tokens.paper_panel_style(false,Tokens.RADIUS_CARD,4.0)
+	style.content_margin_left=8.0;style.content_margin_right=8.0
 	toolbar.add_theme_stylebox_override("panel",style)
 	add_child(toolbar)
 	var row:=HBoxContainer.new()
@@ -815,17 +821,20 @@ func _build_toolbar()->void:
 	toolbar.add_child(row)
 	city_selector=OptionButton.new()
 	city_selector.name="CitySelector"
-	city_selector.custom_minimum_size=Vector2(150,28)
+	city_selector.custom_minimum_size=Vector2(150,32)
+	city_selector.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
+	city_selector.add_theme_color_override("font_color",Tokens.INK)
+	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
 	row.add_child(city_selector)
-	for action in [["settle","＋ FOUND",true],["scouts","⌖ SCOUT",false],["diplomat","◇ ENVOY",false],["convoy","⌂ CONVOY",false]]:
+	for action in [["settle","＋ Found",true],["scouts","⌖ Scout",false],["diplomat","◇ Envoy",false],["convoy","⌂ Convoy",false]]:
 		var button:=Button.new()
 		button.name="Toolbar"+String(action[0]).capitalize()
 		button.text=String(action[1])
-		button.custom_minimum_size=Vector2(0,28)
-		button.add_theme_font_size_override("font_size",10)
+		button.custom_minimum_size=Vector2(0,32)
+		button.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if bool(action[2]) else Tokens.BODY)
 		button.add_theme_color_override("font_disabled_color",Tokens.DISABLED)
 		button.add_theme_stylebox_override("normal",Tokens.action_button_style(bool(action[2])))
@@ -849,16 +858,16 @@ func _build_toolbar()->void:
 	scale_box.add_child(scale_line)
 	scale_label=Tokens.make_label("",10,Tokens.MUTED)
 	scale_box.add_child(scale_label)
-	compass_label=Button.new()
-	compass_label.text="N ↑"
-	compass_label.add_theme_font_size_override("font_size",10)
-	compass_label.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
+	compass_label=MapCompass.new()
 	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
 	compass_label.tooltip_text="Click to reset north-up (N). Rotate with Q/E or Shift + middle-drag; drag vertically to tilt."
 	scale_box.add_child(compass_label)
 	distance_selector=OptionButton.new();distance_selector.name="MapDistanceLevel"
 	distance_selector.fit_to_longest_item=false
-	distance_selector.custom_minimum_size=Vector2(104,28)
+	distance_selector.custom_minimum_size=Vector2(104,32)
+	distance_selector.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
+	distance_selector.add_theme_color_override("font_color",Tokens.INK)
+	distance_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	for index:int in terrain.CAMERA_DISTANCE_LEVELS.size():distance_selector.add_item(String(EraWords.DISTANCE_WORDS[mini(index,EraWords.DISTANCE_WORDS.size()-1)]))
 	distance_selector.tooltip_text="How far the map looks: close by, the valley, the region, the far lands. Scroll or pinch changes one step; Shift-scroll makes gentle fine adjustments."
 	# The map speaks in the people's distances; a metric scale bar ("SITE ·
@@ -870,6 +879,16 @@ func _build_toolbar()->void:
 
 	toolbar.reset_size()
 	_position_toolbar()
+
+## The toolbar speaks in one case: sentence case. Labels that arrive shouted
+## (all capitals) from older code or data are lowered, keeping the first word.
+static func toolbar_case(value:String)->String:
+	if value!=value.to_upper() or value==value.to_lower():return value
+	var lowered:=value.to_lower()
+	for position in lowered.length():
+		if lowered[position]!=lowered[position].to_upper():
+			return lowered.substr(0,position)+lowered[position].to_upper()+lowered.substr(position+1)
+	return lowered
 
 func _toolbar_divider()->ColorRect:
 	var divider:=ColorRect.new()
@@ -898,7 +917,7 @@ func update_scale(pixel_width:float,distance_text:String,band:String,north:Strin
 	_scale_signature=signature
 	scale_line.custom_minimum_size=Vector2(clampf(pixel_width,48.0,110.0),2)
 	scale_label.text="%s · %s" % [band,distance_text]
-	compass_label.text="N %s" % north
+	(compass_label as MapCompass).set_north(north)
 	toolbar.reset_size()
 	_position_toolbar()
 
@@ -1222,26 +1241,26 @@ func _refresh_toolbar()->void:
 	if not bool(diplomatic_status.get("active",false)):
 		for thread:Dictionary in WorldSimulation.dialogue.threads.values():
 			if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
-				returned_reply="ENVOYS HOME · RETRY REPLY" if bool(thread.get("retryable",false)) else "ENVOYS HOME · REPLY PENDING"
+				returned_reply="Envoys home · retry reply" if bool(thread.get("retryable",false)) else "Envoys home · reply pending"
 				break
 	var settle_text:String
 	var settle_tooltip:String
 	var settle_disabled:=false
 	if not GameState.settlement_site_committed:
-		settle_text="REVIEW FOUNDING SITE"
+		settle_text="Review founding site"
 		settle_tooltip="Check drinking water and nearby suitable ground on the map before committing to a settlement."
 	elif terrain.settlement_convoy_targeting:
-		settle_text="CANCEL SITE SELECTION"
+		settle_text="Cancel site selection"
 		settle_tooltip="Leave destination-selection mode without paying any cost."
 	elif convoy_active:
-		settle_text="FOCUS SETTLEMENT CONVOY"
+		settle_text="Find the settlers"
 		settle_tooltip="Move the camera to the active settlement convoy."
 	elif "Hearth Circle" not in GameState.settlement_completed:
-		settle_text="FOUNDING COMMITTED"
+		settle_text="Founding committed"
 		settle_tooltip="The first settlement is already committed here. Complete the Hearth Circle before organizing another founding convoy."
 		settle_disabled=true
 	else:
-		settle_text="FOUND NEW SETTLEMENT"
+		settle_text="Found a new settlement"
 		settle_tooltip="Enter temporary destination-selection mode. Route and cost are reviewed before anything is committed."
 	# An action that can neither be taken nor report anything does not earn a
 	# toolbar slot; it appears when it becomes possible. Away-mission states
@@ -1257,11 +1276,11 @@ func _refresh_toolbar()->void:
 	settle.disabled=settle_disabled
 	settle.visible=settle_visible
 	# Keep the allocation visible even between departures.
-	scouts.text=String(scout_presentation.label)
+	scouts.text=toolbar_case(String(scout_presentation.label))
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)
 	scouts.visible=scouts_visible
-	diplomat.text="◇ SEND ENVOYS" if not bool(diplomatic_status.get("active",false)) else "◇ ENVOYS OUT · %d DAYS" % int(diplomatic_status.get("days_remaining",0))
+	diplomat.text="◇ Send envoys" if not bool(diplomatic_status.get("active",false)) else "◇ Envoys out · %d days" % int(diplomatic_status.get("days_remaining",0))
 	diplomat.disabled=bool(diplomat_presentation.disabled)
 	diplomat.tooltip_text=String(diplomat_presentation.tooltip)
 	if returned_reply!="":
@@ -1284,7 +1303,7 @@ func _refresh_city_selector()->void:
 	city_selector.clear()
 	city_selector.visible=not settlements.is_empty()
 	for city in settlements:
-		city_selector.add_item(String(city.get("name","Settlement")))
+		city_selector.add_item(toolbar_case(String(city.get("name","Settlement"))))
 		var index:=city_selector.item_count-1
 		city_selector.set_item_metadata(index,String(city.id))
 		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)
@@ -1293,7 +1312,7 @@ func show_action_feedback(message:String)->void:
 	if message.is_empty():return
 	if action_feedback==null:
 		action_feedback=PanelContainer.new();action_feedback.name="ActionFeedback";action_feedback.z_index=100;action_feedback.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var style:=Tokens.flat(Color("172c32"),Tokens.GOLD,1,6)
+		var style:=Tokens.paper_panel_style(true,Tokens.RADIUS_CARD);style.border_color=Tokens.GOLD
 		for edge in ["left","right","top","bottom"]:style.set("content_margin_"+edge,12.0)
 		action_feedback.add_theme_stylebox_override("panel",style);add_child(action_feedback)
 		var label:=Label.new();label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.add_theme_font_size_override("font_size",14);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;action_feedback.add_child(label)
@@ -1311,5 +1330,14 @@ func show_action_feedback(message:String)->void:
 	get_tree().create_timer(9.0).timeout.connect(func():if is_instance_valid(action_feedback) and sequence==feedback_sequence:action_feedback.hide())
 
 func _approved_rail_style(active:bool,hover:bool=false)->StyleBoxFlat:
-	var style:=Tokens.flat(Color("66643b") if active else Color("3e4738") if hover else Color("29332c"),Color("ab9357"),0,0)
-	style.border_color=Color("ab9357");style.border_width_left=2 if active else 0;return style
+	## Paper rail entries: a warm wash when lit and a 2 px gold tab on the left.
+	var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Tokens.HOVER_BG if hover else Color(0,0,0,0),Tokens.GOLD,0,0)
+	style.border_color=Tokens.GOLD if active else Tokens.RULE_STRONG
+	style.border_width_left=2 if active or hover else 0
+	return style
+
+## Rail glyph ink: dark brown ink on light paper, warm gold on night paper.
+func _rail_ink()->Color:return Tokens.INK_MUTED if Tokens.is_light() else Color("e1cc91")
+
+## The atlas glyphs are light gold pigment; on light paper they are inked darker.
+func _rail_icon_tint()->Color:return Color(.42,.33,.22) if Tokens.is_light() else Color.WHITE

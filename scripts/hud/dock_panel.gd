@@ -144,7 +144,7 @@ func rebuild()->void:
 	title_label.text=String(meta.get("title",""))
 	title_label.add_theme_font_size_override("font_size",int(meta.get("title_size",24)))
 	if bool(meta.get("serif",false)):
-		var face:=SystemFont.new();face.font_names=PackedStringArray(["Georgia","serif"]);title_label.add_theme_font_override("font",face)
+		title_label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font())
 	else:title_label.remove_theme_font_override("font")
 	var subtabs:Array=meta.get("subtabs",[])
 	tabs_row.visible=subtabs.size()>1
@@ -152,7 +152,7 @@ func rebuild()->void:
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
 		tab.custom_minimum_size=Vector2(0,28)
-		tab.add_theme_font_size_override("font_size",10)
+		tab.add_theme_font_size_override("font_size",12)
 		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		tab.pressed.connect(_on_tab_pressed.bind(tab_buttons.size()))
 		tabs_row.add_child(tab)
@@ -174,7 +174,7 @@ func rebuild()->void:
 			style.border_width_bottom=3 if active else 1
 			style.border_color=Tokens.GOLD if active else Tokens.BORDER_SOFT
 			tab.add_theme_font_size_override("font_size",12)
-		else:tab.add_theme_font_size_override("font_size",10)
+		else:tab.add_theme_font_size_override("font_size",12)
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
@@ -336,7 +336,7 @@ func _rebuild_brief(brief:Dictionary)->void:
 		action.text=String(brief.action_label)
 		action.custom_minimum_size=Vector2(0,28)
 		action.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		action.add_theme_font_size_override("font_size",10)
+		action.add_theme_font_size_override("font_size",12)
 		action.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
 		action.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 		action.add_theme_stylebox_override("hover",Tokens.gold_outline_style())

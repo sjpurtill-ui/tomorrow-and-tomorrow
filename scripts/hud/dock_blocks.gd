@@ -120,8 +120,7 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 		var definition:=DiscoverySystem.discovery_definition(discovery_id)
 		if not definition.is_empty():ResearchVisuals.paint_discovery(column,definition,120)
 	var title:=Tokens.make_label(String(block.get("title","A new discovery")),23,Tokens.INK)
-	var serif:=SystemFont.new()
-	serif.font_names=PackedStringArray(["Georgia","Noto Serif","serif"])
+	var serif:Font=Tokens.voice_font()
 	title.add_theme_font_override("font",serif)
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(title)
@@ -558,7 +557,7 @@ static func _render_conversation(parent:VBoxContainer,block:Dictionary)->void:
 			button.custom_minimum_size=Vector2(0,27)
 			button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			button.tooltip_text=String(action.get("tip",""))
-			button.add_theme_font_size_override("font_size",9)
+			button.add_theme_font_size_override("font_size",12)
 			button.add_theme_color_override("font_color",action.get("color",Tokens.BODY_2))
 			button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.BUTTON_BG,Tokens.BORDER_2,1,3))
 			button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,action.get("color",Tokens.GOLD),1,3))
@@ -645,7 +644,7 @@ static func _render_conversation_composer(parent:VBoxContainer,block:Dictionary)
 	send.text="SEND"
 	send.custom_minimum_size=Vector2(62,38)
 	send.disabled=not field.editable
-	send.add_theme_font_size_override("font_size",10)
+	send.add_theme_font_size_override("font_size",12)
 	send.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
 	send.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	send.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
@@ -712,7 +711,7 @@ static func _render_order(parent:VBoxContainer,block:Dictionary)->void:
 	issue.name="SovereignOrderIssue"
 	issue.text=String(block.get("button_label","ISSUE"))
 	issue.custom_minimum_size=Vector2(0,38)
-	issue.add_theme_font_size_override("font_size",11)
+	issue.add_theme_font_size_override("font_size",12)
 	issue.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
 	issue.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	issue.add_theme_stylebox_override("hover",Tokens.gold_outline_style())

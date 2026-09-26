@@ -57,7 +57,7 @@ func frame(parent:Node,color:Color=T.BORDER,padding:int=6)->VBoxContainer:
 	var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",T.flat(Color("15272c"),color,1,5,padding));parent.add_child(panel)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);panel.add_child(column);return column
 func button(parent:Node,title:String)->Button:
-	var node:=Button.new();node.text=title;node.add_theme_font_size_override("font_size",10);node.custom_minimum_size.y=24
+	var node:=Button.new();node.text=title;node.add_theme_font_size_override("font_size",12);node.custom_minimum_size.y=24
 	node.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,4,3));parent.add_child(node);return node
 
 func show_survey(entries:Array,surface:Dictionary,advice:Dictionary={})->void:

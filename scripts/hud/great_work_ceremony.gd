@@ -48,8 +48,8 @@ var result_box:VBoxContainer
 var suggestion_row:HFlowContainer
 var envoy_cards:Array[Control]=[]
 var intro_tweens:Array[Tween]=[]
-var _serif:SystemFont
-var _italic:SystemFont
+var _serif:Font
+var _italic:Font
 
 ## Opens the ceremony on its own canvas layer; returns the ceremony control.
 static func open(host:Node,terrain_node:Node,voice_node:Node,entry:Dictionary)->Control:
@@ -66,8 +66,8 @@ func _ready()->void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter=Control.MOUSE_FILTER_STOP
 	pause.acquire(terrain if is_instance_valid(terrain) else get_tree().current_scene)
-	_serif=SystemFont.new();_serif.font_names=PackedStringArray(["Georgia","Noto Serif","Times New Roman","serif"])
-	_italic=SystemFont.new();_italic.font_names=_serif.font_names;_italic.font_italic=true
+	_serif=preload("res://scripts/hud/hud_tokens.gd").voice_font()
+	_italic=preload("res://scripts/hud/hud_tokens.gd").voice_font(true)
 	work_id=String(ceremony.get("work_id",""))
 	city_id=String(ceremony.get("city_id",""))
 	record=Bridge.api_dict("site",[city_id,work_id])

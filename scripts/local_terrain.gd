@@ -12877,16 +12877,17 @@ func _build_map_help(layer:CanvasLayer)->void:
 	var viewport_size:=get_viewport().get_visible_rect().size
 	map_help_button=Button.new()
 	map_help_button.name="MapHelpButton"
-	map_help_button.position=Vector2(24,viewport_size.y-130)
-	map_help_button.size=Vector2(112,30)
-	map_help_button.text="MAP HELP  •  ?"
+	# Clear of the command rail, which is drawn above this layer.
+	map_help_button.position=Vector2(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH+16.0,viewport_size.y-130)
+	map_help_button.size=Vector2(112,32)
+	map_help_button.text="?  Map help"
 	map_help_button.tooltip_text="Show map movement, inspection, scale, and the next contextual action."
-	map_help_button.add_theme_font_size_override("font_size",10)
+	map_help_button.add_theme_font_size_override("font_size",14)
 	map_help_button.pressed.connect(_toggle_map_help)
 	layer.add_child(map_help_button)
 	map_help_panel=PanelContainer.new()
 	map_help_panel.name="MapFirstUseHelp"
-	map_help_panel.position=Vector2(24,viewport_size.y-234)
+	map_help_panel.position=Vector2(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH+16.0,viewport_size.y-234)
 	map_help_panel.size=Vector2(390,96)
 	map_help_panel.z_index=45
 	map_help_panel.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d")))
@@ -12902,7 +12903,7 @@ func _build_map_help(layer:CanvasLayer)->void:
 	heading_row.add_child(map_help_title)
 	var hide:=Button.new()
 	hide.text="CLOSE ×"
-	hide.tooltip_text="Close this tip, or click the map. Reopen with MAP HELP."
+	hide.tooltip_text="Close this tip, or click the map. Reopen with Map help."
 	hide.custom_minimum_size=Vector2(72,30)
 	hide.add_theme_font_size_override("font_size",9)
 	hide.pressed.connect(_dismiss_map_help)

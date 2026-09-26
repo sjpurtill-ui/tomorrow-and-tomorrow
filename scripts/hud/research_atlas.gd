@@ -57,9 +57,9 @@ func _ready()->void:
 	# This overlay lives under a CanvasLayer, outside the dock theme hierarchy.
 	theme=T.control_theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var dismiss:=ColorRect.new();dismiss.color=Color(0,0,0,.25);dismiss.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dismiss)
+	var dismiss:=ColorRect.new();dismiss.color=T.SCRIM;dismiss.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dismiss)
 	dismiss.gui_input.connect(func(event:InputEvent)->void:if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:_close())
-	panel=PanelContainer.new();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG,T.BORDER,1,8,16));add_child(panel)
+	panel=PanelContainer.new();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.paper_panel_style(false,T.RADIUS_CARD,16));add_child(panel)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",10);panel.add_child(box)
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",10);box.add_child(header)
 	Art.label(header,"RESEARCH · PEOPLE & IDEAS",23,T.INK).size_flags_horizontal=Control.SIZE_EXPAND_FILL

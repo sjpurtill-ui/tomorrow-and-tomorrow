@@ -80,7 +80,7 @@ func _fill()->void:
 
 func _serif(text:String,size:int,color:Color)->Label:
 	var label:=T.make_label(text,size,color)
-	var serif:=SystemFont.new();serif.font_names=PackedStringArray(["Georgia","Noto Serif","serif"])
+	var serif:Font=preload("res://scripts/hud/hud_tokens.gd").voice_font()
 	label.add_theme_font_override("font",serif);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
 

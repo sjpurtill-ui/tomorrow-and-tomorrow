@@ -43,7 +43,7 @@ func setup(block:Dictionary)->void:
 	if bool(data.priorities) and bool(data.can_direct):
 		var choices:=HBoxContainer.new();add_child(choices);_button(choices,"Logistics",func():data.on_focus.call("logistics"),"Prioritize hauling");_button(choices,"Return to leader",func():data.on_focus.call(""),"Restore automatic management")
 func _serif(value:String,font_size:int)->Label:
-	var label:=T.make_label(value,font_size,T.INK);var font:=SystemFont.new();font.font_names=PackedStringArray(["Georgia"]);label.add_theme_font_override("font",font);return label
+	var label:=T.make_label(value,font_size,T.INK);label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font());return label
 func _gauge(parent:Node,title:String,ratio:float,tip:String)->void:
 	var box:=VBoxContainer.new();box.custom_minimum_size.x=125;box.size_flags_vertical=Control.SIZE_SHRINK_CENTER;box.tooltip_text=tip;parent.add_child(box)
 	box.add_child(T.make_label(title,12,T.BODY));box.add_child(_serif("%d%%" % roundi(ratio*100) if ratio>=0 else "—",22));_bar(box,clampf(ratio,0,1),T.GREEN)
