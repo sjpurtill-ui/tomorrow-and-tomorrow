@@ -15053,6 +15053,24 @@ func _ensure_map_selection_marker()->void:
 	material.render_priority=12
 	material.albedo_color=Color(0.88,0.75,0.39,0.90)
 	map_selection_marker.material_override=material
+	# A fine ink keyline just outside the gold ring keeps it legible on pale
+	# chart paper and bright ground alike.
+	var keyline:=MeshInstance3D.new()
+	keyline.name="InkKeyline"
+	var key_ring:=TorusMesh.new()
+	key_ring.inner_radius=1.0
+	key_ring.outer_radius=1.07
+	key_ring.rings=40
+	key_ring.ring_segments=5
+	keyline.mesh=key_ring
+	var key_material:=StandardMaterial3D.new()
+	key_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	key_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	key_material.no_depth_test=true
+	key_material.render_priority=11
+	key_material.albedo_color=Color(TERRITORY_INK,0.80)
+	keyline.material_override=key_material
+	map_selection_marker.add_child(keyline)
 	map_selection_marker.visible=false
 	add_child(map_selection_marker)
 
@@ -15072,6 +15090,10 @@ func _show_map_selection(position:Vector3)->void:
 	if not bool(surface_assessment.get("valid",false)): color=Color(0.92,0.30,0.23,0.90)
 	(map_selection_marker.material_override as StandardMaterial3D).albedo_color=color
 	map_selection_marker.visible=true
+	# The ring settles onto the spot, so the click reads as answered at once.
+	map_selection_marker.scale=Vector3.ONE*radius*1.45
+	var settle:=create_tween()
+	settle.tween_property(map_selection_marker,"scale",Vector3.ONE*radius,0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	get_tree().create_timer(2.5).timeout.connect(_hide_map_selection.bind(generation))
 
 
