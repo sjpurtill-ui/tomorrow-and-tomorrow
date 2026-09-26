@@ -56,7 +56,7 @@ func test_unstaffed_investigations_are_explicit_and_do_not_invent_people()->void
 	var view:=fixture()
 	for item:Dictionary in view.records:
 		assert_str(Art.status(item)).is_equal("Waiting for workers")
-		assert_str(view.bindings[item.id].team.text).contains("No researchers")
+		assert_str(view.bindings[item.id].lead.text.to_lower()).contains("no one")
 	# Before printing the header counts keepers of lore, not "SCIENCE".
 	assert_str(view.stats.text).contains("0 keeping the lore").not_contains("SCIENCE")
 func test_office_vacancy_and_acting_lead_agree_with_execution_authority()->void:

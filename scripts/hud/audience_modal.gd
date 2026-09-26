@@ -28,6 +28,7 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
+const Motion:=preload("res://scripts/hud/motion.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
@@ -145,6 +146,8 @@ func _ready()->void:
 	if not audience_id.is_empty():show_audience(audience_id)
 	elif not start_focus.is_empty():focus(start_focus)
 	else:show_court()
+	# The court fades in over its scrim (SLOW) rather than popping.
+	Motion.fade_in(self)
 
 func _exit_tree()->void:
 	pause.release()
@@ -173,6 +176,8 @@ func _reset_card(next_mode:String)->void:
 	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
 	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null
 	weigh_clock=-1.0
+	# A different view of the court cross-fades in (BASE); a refresh does not.
+	if next_mode!=mode and is_inside_tree():Motion.cross_fade.call_deferred(card)
 	mode=next_mode
 	if next_mode!="audience":audience_id=""
 	if next_mode!="foreign":foreign_civ=""
@@ -185,6 +190,9 @@ func _add_backdrop(parent:Control)->Control:
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	parent.add_child(scene)
 	scene.configure(court_tier,not Tokens.is_light())
+	# When the court has grown into a new stage since it was last seen, the old
+	# setting dissolves into the new one.
+	scene.cross_fade_from_last.call_deferred()
 	backdrop=scene
 	return scene
 
@@ -1257,17 +1265,22 @@ func _line_note(line:Dictionary)->String:
 		return String((audience.get("speaker",{}) as Dictionary).get("title","")) if String(audience.get("origin",""))=="court" else "envoy of "+String(audience.get("civ_name",""))
 	return ""
 
+## One painting per person within this scene; nobody shares another's picture.
+var scene_portraits:Dictionary={}
+func _scene_picture(person:Dictionary,width:float,height:float)->TextureRect:
+	return Portrait.picture_slot(person,Portrait.claim(scene_portraits,person),width,height)
+
 func _avatar(line:Dictionary)->Control:
 	var frame:=PanelContainer.new();frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),_line_color(line),1,6,2))
 	var role:=String(line.get("role",""))
 	var person_id:=int(line.get("person_id",0))
 	if role=="official" and person_id>0:
-		frame.add_child(Portrait.picture(GovernmentPeopleSystem.person_snapshot(person_id),44,52))
+		frame.add_child(_scene_picture(GovernmentPeopleSystem.person_snapshot(person_id),44,52))
 	elif role=="official" and speaker_person_id==0 and String(line.get("speaker",""))==String((Hall.find(audience_id).get("speaker",{}) as Dictionary).get("name","")):
-		frame.add_child(Portrait.picture(_speaker_person(Hall.find(audience_id)),44,52))
+		frame.add_child(_scene_picture(_speaker_person(Hall.find(audience_id)),44,52))
 	elif role=="envoy":
-		frame.add_child(Portrait.picture(_speaker_person(Hall.find(audience_id)),44,52))
+		frame.add_child(_scene_picture(_speaker_person(Hall.find(audience_id)),44,52))
 	else:
 		var flag:=TextureRect.new();flag.texture=Identity.foreign(String(line.get("civ_id",""))).texture;flag.custom_minimum_size=Vector2(44,52)
 		flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;frame.add_child(flag)
@@ -1428,7 +1441,8 @@ func _envoy_figure(audience:Dictionary)->Control:
 	speaker_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),envoy_color,2,8,4))
 	figure.add_child(speaker_frame)
 	var holder:=Control.new();holder.custom_minimum_size=Vector2(width-8,180);holder.clip_contents=true;speaker_frame.add_child(holder)
-	var portrait:=Portrait.picture(_speaker_person(audience),width-8,180);portrait.custom_minimum_size=Vector2.ZERO;portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
+	scene_portraits.clear()
+	var portrait:=_scene_picture(_speaker_person(audience),width-8,180);portrait.custom_minimum_size=Vector2.ZERO;portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
 	var regard:=_build_regard(audience,width-8,180)
 	_place(regard,Vector4(0,1,1,1),Vector4(0,-52,0,0))
 	holder.add_child(regard)

@@ -157,6 +157,44 @@ static func label(parent:Node,text:String,font:int=13,ink:Color=T.BODY,wrap:bool
 static func button(parent:Node,text:String,callback:Callable)->Button:
 	var b:=Button.new();b.text=text;b.custom_minimum_size.y=34;b.add_theme_font_size_override("font_size",13)
 	b.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,5,8));b.add_theme_stylebox_override("hover",T.flat(Color("253940"),T.TEAL,1,5,8));b.pressed.connect(callback);parent.add_child(b);return b
+## Display (carved titles) and Voice (names, sentences) faces from ART_DIRECTION.
+## Voice prefers the bundled Garamond once it lands under assets/fonts/serif/.
+const VOICE_CANDIDATES:=["res://assets/fonts/serif/EBGaramond-Regular.ttf","res://assets/fonts/serif/EBGaramond.ttf","res://assets/fonts/serif/CormorantGaramond-Regular.ttf"]
+const VOICE_ITALIC_CANDIDATES:=["res://assets/fonts/serif/EBGaramond-Italic.ttf","res://assets/fonts/serif/CormorantGaramond-Italic.ttf"]
+static var _fonts:Dictionary={}
+static func display_font()->Font:
+	if not _fonts.has("display"):_fonts["display"]=load("res://assets/fonts/cinzel/Cinzel.ttf")
+	return _fonts["display"]
+static func voice_font(italic:bool=false)->Font:
+	var key:="voice_italic" if italic else "voice"
+	if _fonts.has(key):return _fonts[key]
+	var font:Font=null
+	for path:String in (VOICE_ITALIC_CANDIDATES if italic else VOICE_CANDIDATES):
+		if ResourceLoader.exists(path):font=load(path);break
+	if font==null:
+		var system:=SystemFont.new();system.font_names=PackedStringArray(["Georgia","Noto Serif","serif"]);system.font_italic=italic;font=system
+	_fonts[key]=font;return font
+## The team at work, as the people would say it: who leads, and how many hands.
+static func team_sentence(item:Dictionary)->String:
+	var words:GDScript=preload("res://scripts/hud/era_words.gd")
+	var amount:=team(item)
+	var leader:Dictionary=item.get("assignment",{}).get("leader",{})
+	var who:=""
+	if not leader.is_empty() and not bool(leader.get("vacant",false)):who=String(leader.get("name",""))
+	if bool(words.call("reckoned")):
+		var count:=workforce(amount)
+		return (who+" leads "+count.to_lower() if who!="" else count)+"."
+	if amount<=0:return (who+" waits; no one is free to help yet." if who!="" else "No one is working on it yet.")
+	var hands:="a pair of hands, now and then" if amount<.75 else "a few hands, most days" if amount<1.6 else "a few hands, every day" if amount<3.5 else "a small band, every day" if amount<9 else "many hands, every day"
+	return (who+" and "+hands if who!="" else hands.left(1).to_upper()+hands.substr(1))+"."
+## How far the evidence has come, in era words ("half the way").
+static func evidence_sentence(item:Dictionary)->String:
+	var words:GDScript=preload("res://scripts/hud/era_words.gd")
+	var progress:=clampf(float(item.get("progress",0)),0,1)
+	if bool(words.call("hearth")):
+		var phrase:=String(words.call("way_along",progress))
+		return phrase.left(1).to_upper()+phrase.substr(1)+"."
+	return "%d%% of the evidence gathered." % roundi(progress*100)
 static func initials(name:String)->String:
 	var words:=name.split(" ",false);var result:=""
 	for word in words:

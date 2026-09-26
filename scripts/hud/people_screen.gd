@@ -51,6 +51,8 @@ var left:VBoxContainer
 var right:VBoxContainer
 var parts:Dictionary={}
 var prints:Dictionary={}
+## Face id -> distinct painting slot, so no painting repeats on this screen.
+var face_slots:Dictionary={}
 ## Parts rebuilt since setup (tests read this to prove in-place updates).
 var rebuilds:=0
 
@@ -87,6 +89,7 @@ func update_block(block:Dictionary)->bool:
 
 func apply(block:Dictionary)->void:
 	data=block
+	_assign_face_slots(block.get("faces",[]),block.get("scene",{}))
 	_fill_scene(block.get("scene",{}))
 	_rebuild_if_changed("faces",block.get("faces",[]),_fill_faces)
 	_rebuild_if_changed("card",[selected_id,_face(selected_id)],_fill_card)
@@ -159,7 +162,7 @@ func _fill_scene(scene:Dictionary)->void:
 		voice_face.set_meta("face_id",key)
 		for child in voice_face.get_children():child.queue_free()
 		if not face.is_empty():
-			var picture:=Portrait.picture(face.get("person",{}),40,48);picture.set_anchors_preset(Control.PRESET_FULL_RECT);voice_face.add_child(picture)
+			var picture:=_face_picture(face,40,48);picture.set_anchors_preset(Control.PRESET_FULL_RECT);voice_face.add_child(picture)
 
 
 # ---------------------------------------------------------------------------
@@ -181,13 +184,33 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		parent.add_child(button)
 		var column:=VBoxContainer.new();column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,5)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",2);button.add_child(column)
-		var picture:=Portrait.picture(face.get("person",{}),82,82);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+		var picture:=_face_picture(face,82,82);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 		column.add_child(picture)
 		var tag:=T.make_label(String(face.get("tag","")),8,T.GOLD if bool(face.get("alive",true)) else T.MUTED,0.06);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tag.clip_text=true;column.add_child(tag)
 		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),12,T.INK);given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;given.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		given.clip_text=true;column.add_child(given)
+
+
+func _assign_face_slots(faces:Array,scene:Dictionary)->void:
+	# Everyone on the screen at once: the faces row and the voice at the fire.
+	var shown:Array=[];var people:Array=[]
+	for face_variant in faces:
+		if face_variant is Dictionary and not shown.has(String(face_variant.get("id",""))):
+			shown.append(String(face_variant.get("id","")));people.append(face_variant.get("person",{}))
+	var voice_face_data:Dictionary=(scene.get("voice",{}) as Dictionary).get("face",{}) if scene.get("voice",{}) is Dictionary else {}
+	if not voice_face_data.is_empty() and not shown.has(String(voice_face_data.get("id",""))):
+		shown.append(String(voice_face_data.get("id","")));people.append(voice_face_data.get("person",{}))
+	var slots:=Portrait.distinct_slots(people)
+	face_slots.clear()
+	for i in shown.size():face_slots[shown[i]]=slots[i]
+
+
+func _face_picture(face:Dictionary,width:float,height:float)->TextureRect:
+	var person:Dictionary=face.get("person",{}) if face.get("person",{}) is Dictionary else {}
+	var slot:Array=face_slots.get(String(face.get("id","")),[])
+	return Portrait.picture_slot(person,slot,width,height)
 
 
 func _select(id:String)->void:
@@ -208,7 +231,7 @@ func _fill_card(parent:Control,value:Array)->void:
 	card.visible=not face.is_empty()
 	if face.is_empty():return
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);parent.add_child(row)
-	var picture:=Portrait.picture(face.get("person",{}),96,116)
+	var picture:=_face_picture(face,96,116)
 	if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 	row.add_child(picture)
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",4);row.add_child(body)

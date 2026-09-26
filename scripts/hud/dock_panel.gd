@@ -354,6 +354,5 @@ func _on_tab_pressed(index:int)->void:
 	sub=index
 	rebuild()
 	tab_changed.emit(sub)
-	# 100 ms content crossfade per the design spec.
-	body_scroll.modulate=Color(1,1,1,0)
-	create_tween().tween_property(body_scroll,"modulate:a",1.0,0.1)
+	# Tab change: the new content cross-fades in (Motion.BASE, cubic ease-out).
+	preload("res://scripts/hud/motion.gd").cross_fade(body_scroll)

@@ -963,11 +963,12 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	_dock_signature=(providers[section] as Object).signature().duplicate(true)+[sub]
 	dock.visible=true
 	if not was_open:
-		# Slide in from the rail edge over 160 ms.
+		# Slide in from the rail edge and fade up (Motion.BASE, cubic ease-out).
 		var target_x:=Tokens.DOCK_X
-		dock.position.x=Tokens.RAIL_WIDTH
-		var tween:=create_tween()
-		tween.tween_property(dock,"position:x",target_x,0.16).set_ease(Tween.EASE_OUT)
+		dock.position.x=Tokens.RAIL_WIDTH;dock.modulate.a=0.0
+		var tween:=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).set_parallel(true)
+		var slide:=preload("res://scripts/hud/motion.gd").duration(preload("res://scripts/hud/motion.gd").BASE)
+		tween.tween_property(dock,"position:x",target_x,slide);tween.tween_property(dock,"modulate:a",1.0,slide)
 
 func close_dock()->void:
 	dock.visible=false

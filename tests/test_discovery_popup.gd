@@ -96,5 +96,5 @@ func test_full_illustration_and_footer_fit_after_resizing_to_phone_width()->void
 		assert_bool(popup.panel.get_global_rect().encloses(popup.dismiss_button.get_global_rect())).is_true()
 		assert_float(popup.body.get_combined_minimum_size().x).is_less_equal(popup.scroll.size.x+.1)
 		assert_bool(popup.hero is Control).is_true()
-		assert_bool(popup.introduction.vertical).is_equal(width<628)
+		assert_bool(popup.introduction.vertical).is_true()
 	popup.close()

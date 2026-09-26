@@ -98,6 +98,25 @@ func configure(t:int,dark_mode:bool,stage:String="")->void:
 	if _texture==null and TIER_STAGES.find(stage_id)==tier: _texture=override_texture(tier)
 	queue_redraw()
 
+## The court stage last shown in the Court, so a stage change can dissolve.
+static var _last_court_stage:=""
+static var _last_court_tier:=0
+const STAGE_DISSOLVE:=1.5
+
+## Called by the Court after configure(): if the stage differs from the one
+## last shown there, lay the old stage over this one and dissolve it (one tween).
+func cross_fade_from_last()->void:
+	var old:=_last_court_stage;var old_tier:=_last_court_tier
+	_last_court_stage=stage_id;_last_court_tier=tier
+	if old=="" or old==stage_id or not is_inside_tree():return
+	var ghost:Control=(get_script() as GDScript).new()
+	ghost.name="StageBefore";ghost.animate=false
+	add_child(ghost);ghost.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	ghost.configure(old_tier,dark,old)
+	var tween:=ghost.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(ghost,"modulate:a",0.0,preload("res://scripts/hud/motion.gd").duration(STAGE_DISSOLVE))
+	tween.tween_callback(ghost.queue_free)
+
 func has_painting()->bool:
 	return _texture!=null
 

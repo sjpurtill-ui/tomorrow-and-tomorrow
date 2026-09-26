@@ -7,9 +7,13 @@ const TreePlot=preload("res://scripts/hud/research_tree_plot.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
-const CARD_WIDTH:=220.0
-const CARD_IMAGE_HEIGHT:=92.0
-const CARD_GAP:=10.0
+const Motion=preload("res://scripts/hud/motion.gd")
+const Portrait=preload("res://scripts/hud/person_portrait.gd")
+const EraWords=preload("res://scripts/hud/era_words.gd")
+# The painting leads each card, full width; text below always wraps.
+const CARD_WIDTH:=236.0
+const CARD_IMAGE_HEIGHT:=138.0
+const CARD_GAP:=12.0
 var mode:="inquiry"
 var terrain:Node
 var hud:Node
@@ -60,31 +64,39 @@ func _ready()->void:
 	var dismiss:=ColorRect.new();dismiss.color=T.SCRIM;dismiss.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(dismiss)
 	dismiss.gui_input.connect(func(event:InputEvent)->void:if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:_close())
 	panel=PanelContainer.new();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.paper_panel_style(false,T.RADIUS_CARD,16));add_child(panel)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",10);panel.add_child(box)
-	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",10);box.add_child(header)
-	Art.label(header,"RESEARCH · PEOPLE & IDEAS",23,T.INK).size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	Art.button(header,"Research staffing",_staffing)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",12);panel.add_child(box)
+	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",12);box.add_child(header)
+	var titles:=VBoxContainer.new();titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL;titles.add_theme_constant_override("separation",2);header.add_child(titles)
+	Art.label(titles,"THE PEOPLE & THEIR IDEAS",12,T.MUTED)
+	var heading:=Art.label(titles,"What the people are learning" if EraWords.hearth() else "Research",28,T.INK,true)
+	heading.add_theme_font_override("font",Art.display_font())
+	stats=Art.label(titles,"",14,T.TEXT_SOFT,true)
+	Art.button(header,"Who does the work",_staffing).tooltip_text="Research staffing: who works on each question"
 	var close:=Art.button(header,"×",_close);close.custom_minimum_size.x=38;close.tooltip_text="Close · Escape or click outside"
-	var notification_row:=HBoxContainer.new();box.add_child(notification_row)
-	Art.label(notification_row,"Discovery pauses",12,T.TEXT_SOFT)
-	announcements=OptionButton.new();notification_row.add_child(announcements)
+	# One quiet row: the three views as text tabs, then the filters, lightly drawn.
+	var notification_row:=HBoxContainer.new();notification_row.add_theme_constant_override("separation",6)
+	Art.label(notification_row,"TELL ME OF",12,T.MUTED)
+	announcements=OptionButton.new();_quiet(announcements);notification_row.add_child(announcements)
 	for spec:Array in [["milestones","Major milestones"],["all","Every discovery"],["quiet","Digest only"]]:
 		announcements.add_item(spec[1]);announcements.set_item_metadata(announcements.item_count-1,spec[0])
 		if GameState.research_notification_mode==spec[0]:announcements.select(announcements.item_count-1)
 	announcements.item_selected.connect(func(index:int)->void:GameState.research_notification_mode=String(announcements.get_item_metadata(index)))
-	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8);box.add_child(navigation)
-	for spec:Array in [["active","Being researched"],["tree","Knowledge tree"],["known","Established"]]:
-		var id:=String(spec[0]);tabs[id]=Art.button(navigation,spec[1],func()->void:set_view(id))
-	stats=Art.label(navigation,"",13,T.TEXT_SOFT);stats.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stats.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);box.add_child(controls)
-	filter=OptionButton.new();filter.add_item("All fields");filter.custom_minimum_size=Vector2(192,34);filter.add_theme_font_size_override("font_size",13);controls.add_child(filter)
+	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",4);box.add_child(navigation)
+	for spec:Array in [["active","Being learned"],["tree","What could come next" if EraWords.hearth() else "Knowledge tree"],["known","What we know"]]:
+		var id:=String(spec[0]);tabs[id]=Art.button(navigation,spec[1],func()->void:set_view(id));tabs[id].flat=true
+	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(spacer)
+	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);navigation.add_child(controls)
+	filter=OptionButton.new();filter.add_item("All fields");filter.custom_minimum_size=Vector2(140,30);_quiet(filter);controls.add_child(filter)
 	for id:String in Art.NAMES:filter.add_item(Art.name_for(id));filter.set_item_metadata(filter.item_count-1,id)
 	filter.item_selected.connect(func(index:int)->void:domain="" if index==0 else String(filter.get_item_metadata(index));refresh(true))
-	leaders=OptionButton.new();leaders.custom_minimum_size=Vector2(176,34);leaders.clip_text=true;leaders.add_theme_font_size_override("font_size",13);controls.add_child(leaders)
+	leaders=OptionButton.new();leaders.custom_minimum_size=Vector2(140,30);leaders.clip_text=true;_quiet(leaders);controls.add_child(leaders)
 	leaders.item_selected.connect(func(index:int)->void:leader_filter="" if index==0 else String(leaders.get_item_metadata(index));refresh(true))
-	search=LineEdit.new();search.placeholder_text="Find a subject or leader";search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;search.add_theme_font_size_override("font_size",13);controls.add_child(search)
+	search=LineEdit.new();search.placeholder_text="Find…";search.custom_minimum_size=Vector2(150,30);search.flat=true;search.add_theme_font_size_override("font_size",14)
+	search.add_theme_stylebox_override("normal",_hairline());search.add_theme_stylebox_override("focus",_hairline(T.GOLD));controls.add_child(search)
+	controls.add_child(notification_row)
 	search.text_changed.connect(func(value:String)->void:query=value;refresh(true))
-	legend=Art.label(box,"",12,T.TEXT_SOFT,true)
+	var rule:=ColorRect.new();rule.color=T.BORDER;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
+	legend=Art.label(box,"",13,T.TEXT_SOFT,true)
 	tree_controls=HBoxContainer.new();box.add_child(tree_controls)
 	Art.button(tree_controls,"−",func()->void:plot.zoom_at(1/1.15,plot.size*.5));Art.button(tree_controls,"+",func()->void:plot.zoom_at(1.15,plot.size*.5));Art.button(tree_controls,"Fit",func()->void:plot.fit());Art.button(tree_controls,"Find selected",func()->void:plot.center_selected())
 	tree_scope_selector=OptionButton.new();tree_scope_selector.add_item("Frontier & branches");tree_scope_selector.set_item_metadata(0,"frontier");tree_scope_selector.add_item("Entire knowledge map");tree_scope_selector.set_item_metadata(1,"all");tree_scope_selector.tooltip_text="Frontier keeps current investigations, their foundations, and their immediate possibilities readable. Entire map shows every matching question."
@@ -102,6 +114,17 @@ func _ready()->void:
 	detail_body=VBoxContainer.new();detail_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_body.add_theme_constant_override("separation",9);detail_scroll.add_child(detail_body)
 	panel.minimum_size_changed.connect(_layout.call_deferred)
 	resized.connect(_layout);_layout();refresh(true)
+	# The sheet fades in over the scrim and rises 8 px into place (SLOW).
+	Motion.fade_in(self);Motion.rise_in.call_deferred(panel)
+## A filter drawn quietly: flat, a hairline underneath, small readable text.
+func _quiet(button:OptionButton)->void:
+	# Sized to the row, not to the longest name in the list.
+	button.fit_to_longest_item=false;button.clip_text=true
+	button.flat=true;button.add_theme_font_size_override("font_size",14);button.add_theme_color_override("font_color",T.TEXT_SOFT)
+	button.add_theme_stylebox_override("normal",_hairline());button.add_theme_stylebox_override("hover",_hairline(T.GOLD));button.add_theme_stylebox_override("pressed",_hairline(T.GOLD))
+func _hairline(ink:Color=T.BORDER)->StyleBoxFlat:
+	var line:=StyleBoxFlat.new();line.bg_color=Color(0,0,0,0);line.border_color=ink;line.border_width_bottom=1
+	line.content_margin_left=6;line.content_margin_right=6;line.content_margin_top=4;line.content_margin_bottom=4;return line
 func _layout()->void:
 	if panel==null:return
 	var size:=get_viewport_rect().size
@@ -116,14 +139,17 @@ func _layout()->void:
 	detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if narrow else Control.SIZE_FILL
 	grid.columns=maxi(1,floori((size.x-(90 if narrow else 416))/(CARD_WIDTH+CARD_GAP)))
 	_update_grid_columns.call_deferred()
-	if size.x<900:stats.hide();filter.custom_minimum_size.x=170;leaders.custom_minimum_size.x=145
-	else:stats.show();filter.custom_minimum_size.x=192;leaders.custom_minimum_size.x=176
+	# Narrow windows keep the three views; the filters give way to them.
+	(filter.get_parent() as Control).visible=size.x>=1180
 	plot.queue_redraw()
 func _update_grid_columns()->void:
 	if not is_instance_valid(scroll) or not is_instance_valid(grid):return
 	grid.columns=maxi(1,floori((scroll.size.x+CARD_GAP)/(CARD_WIDTH+CARD_GAP)))
 func set_view(value:String)->void:
+	var changed:=value!=view_mode
 	view_mode=value;narrow_details=false;_layout();refresh(true)
+	# Tabs cross-fade (BASE) rather than snapping.
+	if changed:Motion.cross_fade(main)
 func _close()->void:
 	if is_instance_valid(layer):layer.queue_free()
 	else:queue_free()
@@ -164,14 +190,17 @@ func refresh(refit:bool)->void:
 	var science:=Indicators.science()
 	var era_words:GDScript=preload("res://scripts/hud/era_words.gd")
 	if bool(era_words.call("reckoned")):stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
-	else:stats.text="%d keeping the lore  ·  taught %s  ·  %d staffed / %d projects" % [roundi(float(science.minds)),String(era_words.call("teaching",float(science.education))),staffed,active]
-	tabs.active.text="Being researched · %d" % active;tabs.known.text="Established · %d" % known
+	else:stats.text="%d keeping the lore, taught %s. %s of %s questions have hands on them." % [roundi(float(science.minds)),String(era_words.call("teaching",float(science.education))),String(era_words.call("count_word",staffed)).capitalize(),String(era_words.call("count_word",active))]
+	tabs.active.text="Being learned · %d" % active;tabs.known.text="What we know · %d" % known
 	for id:String in tabs:
 		var tab:Button=tabs[id]
 		tab.modulate=Color.WHITE
-		tab.add_theme_stylebox_override("normal",T.action_button_style(id==view_mode))
-		tab.add_theme_stylebox_override("hover",T.action_button_style(id==view_mode,true))
-		tab.add_theme_color_override("font_color",T.INK)
+		# Text tabs: the chosen one carries a 2 px gold rule beneath it.
+		var mark:=StyleBoxFlat.new();mark.bg_color=Color(0,0,0,0);mark.border_color=T.GOLD if id==view_mode else Color(0,0,0,0);mark.border_width_bottom=2
+		mark.content_margin_left=8;mark.content_margin_right=8;mark.content_margin_top=4;mark.content_margin_bottom=6
+		for state:String in ["normal","hover","pressed","focus"]:tab.add_theme_stylebox_override(state,mark)
+		tab.add_theme_font_size_override("font_size",15)
+		tab.add_theme_color_override("font_color",T.INK if id==view_mode else T.TEXT_SOFT);tab.add_theme_color_override("font_hover_color",T.INK)
 	records.clear()
 	var hidden:=0
 	for item:Dictionary in all_records:
@@ -211,16 +240,17 @@ func _build_cards()->void:
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);frame.add_child(box)
 		var painting:=Art.paint_discovery(box,item,CARD_IMAGE_HEIGHT,scroll)
 		var margin:=MarginContainer.new()
-		for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,10)
+		for edge:String in ["left","right"]:margin.add_theme_constant_override("margin_"+edge,14)
+		margin.add_theme_constant_override("margin_top",10);margin.add_theme_constant_override("margin_bottom",14)
 		box.add_child(margin)
-		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",5);margin.add_child(body)
-		var name:=Art.label(body,String(item.name),17,T.INK,true)
-		var status:=Art.label(body,"",11,Art.text_color(item.domain))
-		var date:=Art.label(body,"",10,T.GOLD)
-		var lead:=Art.label(body,"",12,T.BODY,true)
-		var team:=Art.label(body,"",13,T.BODY)
+		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",4);margin.add_child(body)
+		var status:=Art.label(body,"",12,Art.text_color(item.domain),true)
+		var name:=Art.label(body,String(item.name),20,T.INK,true);name.add_theme_font_override("font",Art.voice_font())
+		var date:=Art.label(body,"",12,T.GOLD,true)
+		var lead:=Art.label(body,"",14,T.BODY,true)
+		var team:=Art.label(body,"",14,T.TEXT_SOFT,true)
 		var meter:ProgressBar=Gauge.new();meter.ink=Art.color(item.domain);body.add_child(meter)
-		var note:=Art.label(body,"",11,T.TEXT_SOFT,true)
+		var note:=Art.label(body,"",12,T.TEXT_SOFT,true)
 		# PASS preserves card clicks while allowing wheel/trackpad scrolling to
 		# bubble to the Established-page ScrollContainer.
 		frame.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -233,14 +263,21 @@ func _update_cards()->void:
 	for item:Dictionary in records:
 		if not bindings.has(item.id):continue
 		var card:Dictionary=bindings[item.id]
-		card.frame.add_theme_stylebox_override("panel",T.flat(Color("172830"),T.GOLD if item.id==selected_id else T.BORDER,2 if item.id==selected_id else 1,6,1))
-		card.status.text=Art.status(item).to_upper()+" · "+Art.name_for(item.domain)
+		# Selection: a 1 px gold edge with a gold tab on top, never a heavy outline.
+		var chosen:bool=item.id==selected_id
+		var face:=T.flat(Color("172830"),T.GOLD if chosen else T.BORDER,1,4,0)
+		if chosen:face.border_width_top=3
+		card.frame.add_theme_stylebox_override("panel",face)
+		card.status.text=Art.name_for(item.domain).to_upper()
 		card.date.text=_discovery_date(item)
 		card.date.visible=bool(item.known)
-		card.lead.text="Supervised by "+Art.lead(item) if not Art.lead(item).is_empty() else String(item.subcategory).capitalize()
-		card.team.text=Art.workforce(Art.team(item))+" · %d%% evidence" % roundi(float(item.progress)*100)
-		card.team.visible=item.assignment.get("active",false);card.meter.visible=card.team.visible;card.meter.value=clampf(float(item.progress),0,1)*100
-		card.note.text=Art.phase(item) if card.team.visible else "Select for findings and effects"
+		var active:bool=item.assignment.get("active",false)
+		# One era sentence: who leads, and how many hands help them.
+		card.lead.text=Art.team_sentence(item) if active else (Art.lead(item) if not Art.lead(item).is_empty() else String(item.subcategory).capitalize())
+		card.team.text=Art.evidence_sentence(item)+(" "+Art.phase(item)+"." if not Art.phase(item).is_empty() else "")
+		card.team.visible=active;card.meter.visible=active;card.meter.value=clampf(float(item.progress),0,1)*100
+		card.note.text=Art.status(item) if not active and not bool(item.known) else ""
+		card.note.visible=not card.note.text.is_empty()
 func select(id:String,open_detail:bool=false)->void:
 	if open_detail and main.vertical:narrow_details=true;_layout()
 	selected_id=id;plot.queue_redraw();_update_cards()
@@ -255,10 +292,10 @@ func select(id:String,open_detail:bool=false)->void:
 	for item:Dictionary in records:
 		if item.id!=id:continue
 		Art.paint_discovery(detail_body,item,180 if not main.vertical else 150)
-		Art.label(detail_body,Art.name_for(item.domain).to_upper(),11,Art.text_color(item.domain))
-		Art.label(detail_body,item.name,21,T.INK,true)
-		Art.label(detail_body,Art.status(item),13,Art.text_color(item.domain))
-		if item.known:Art.label(detail_body,_discovery_date(item).capitalize(),11,T.GOLD)
+		Art.label(detail_body,Art.name_for(item.domain).to_upper(),12,Art.text_color(item.domain),true)
+		Art.label(detail_body,item.name,26,T.INK,true).add_theme_font_override("font",Art.voice_font())
+		Art.label(detail_body,Art.status(item),14,Art.text_color(item.domain),true)
+		if item.known:Art.label(detail_body,_discovery_date(item).capitalize(),12,T.GOLD,true)
 		if item.known:
 			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
 			operations.subject=String(item.id);detail_body.add_child(operations)
@@ -276,19 +313,25 @@ func select(id:String,open_detail:bool=false)->void:
 				grain_panel.subject=String(item.id);detail_body.add_child(grain_panel)
 		if item.exposed:
 			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
-			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty() or not definition.get("agronomy_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),11,T.TEXT_SOFT,true)
+			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty() or not definition.get("agronomy_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),12,T.TEXT_SOFT,true)
 		var assignment:Dictionary=item.assignment
 		if not assignment.is_empty():
 			var leader:Dictionary=assignment.leader
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);detail_body.add_child(row)
-			var badge:=Art.label(row,"—" if leader.vacant else Art.initials(leader.name),20,Art.text_color(item.domain));badge.custom_minimum_size=Vector2(40,42);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-			var who:=VBoxContainer.new();who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(who)
-			Art.label(who,"SUPERVISING LEADER",9,T.MUTED);Art.label(who,leader.name,16,T.INK,true)
-			Art.label(who,String(leader.office)+(" · acting for "+String(leader.requested_office) if leader.acting else ""),11,T.TEXT_SOFT,true)
+			if not bool(leader.vacant):
+				# The leader's own painted portrait, never initials.
+				var person:Dictionary={}
+				if int(leader.get("person_id",0))>0:person=GovernmentPeopleSystem.person_snapshot(int(leader.person_id))
+				if person.is_empty():person={"name":String(leader.name),"person_id":int(leader.get("person_id",0))}
+				var face_frame:=PanelContainer.new();face_frame.add_theme_stylebox_override("panel",T.flat(Color("172830"),T.BORDER,1,2,2));row.add_child(face_frame)
+				face_frame.add_child(Portrait.picture(person,64,76))
+			var who:=VBoxContainer.new();who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;who.alignment=BoxContainer.ALIGNMENT_CENTER;row.add_child(who)
+			Art.label(who,"WHO LEADS IT",12,T.MUTED);Art.label(who,leader.name,18,T.INK,true).add_theme_font_override("font",Art.voice_font())
+			Art.label(who,String(leader.office)+(" · acting for "+String(leader.requested_office) if leader.acting else ""),12,T.TEXT_SOFT,true)
 			Art.label(detail_body,"Relevant skills: "+", ".join(leader.skills),12,T.TEXT_SOFT,true)
 			if assignment.active:
-				Art.label(detail_body,Art.workforce(Art.team(item)),20,T.INK)
-				Art.label(detail_body,"%.1f%% of the civilization’s shared research effort" % (float(assignment.capacity.workforce_share)*100),11,T.MUTED,true)
+				Art.label(detail_body,Art.team_sentence(item),18,T.INK,true).add_theme_font_override("font",Art.voice_font())
+				Art.label(detail_body,"%.1f%% of the civilization’s shared research effort" % (float(assignment.capacity.workforce_share)*100),12,T.MUTED,true)
 				var bar:ProgressBar=Gauge.new();bar.ink=Art.color(item.domain);detail_body.add_child(bar);bar.value=clampf(float(item.progress),0,1)*100
 				Art.label(detail_body,"%d%% evidence · %s" % [roundi(float(item.progress)*100),Art.phase(item)],13,T.BODY,true)
 				Art.label(detail_body,String(assignment.bottleneck).replace(" — ","\n"),12,T.TEXT_SOFT,true)
@@ -309,8 +352,8 @@ func select(id:String,open_detail:bool=false)->void:
 				var choices:Array[String]=[]
 				for req:String in group:choices.append(_foundation_name(req))
 				requirements.append("("+" or ".join(choices)+")")
-			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),11,T.TEXT_SOFT,true)
-			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),11,T.TEXT_SOFT,true)
+			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),12,T.TEXT_SOFT,true)
+			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),12,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
 		if item.exposed and not item.known and preload("res://scripts/reverse_engineering.gd").available():
 			for specimen:String in preload("res://scripts/reverse_engineering.gd").specimens(String(item.id)):
@@ -330,7 +373,7 @@ func select(id:String,open_detail:bool=false)->void:
 			purchase.subject=String(item.id);detail_body.add_child(purchase)
 		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
 		if not item.requires.is_empty():
-			Art.label(detail_body,"BUILDS ON",10,T.MUTED)
+			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:
 				var title:="Unexplored prerequisite"
 				for previous:Dictionary in all_records:
@@ -346,7 +389,7 @@ func select(id:String,open_detail:bool=false)->void:
 			Art.label(detail_body,"ONE OF: "+" or ".join(options),12,T.TEXT_SOFT,true)
 		var possibilities:=_branching_possibilities(item)
 		if not possibilities.is_empty():
-			Art.label(detail_body,"BRANCHING POSSIBILITIES",10,T.GOLD)
+			Art.label(detail_body,"BRANCHING POSSIBILITIES",12,T.GOLD)
 			for possibility:Dictionary in possibilities:
 				Art.label(detail_body,String(possibility.marker)+" "+String(possibility.name)+" · "+String(possibility.relation),12,possibility.color,true)
 		if not item.missing.is_empty():Art.label(detail_body,"Needs: "+", ".join(item.missing),12,T.AMBER,true)
