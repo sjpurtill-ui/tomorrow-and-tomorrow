@@ -4572,7 +4572,9 @@ func _refresh_undertaking_visuals(force:bool=false)->void:
 	visual.render(GameState.player_settlements,undertaking_visual_root,_close_surface_height_at)
 
 func _refresh_settlement_network(force:=false)->void:
+	var undertaking_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	_refresh_undertaking_visuals(force)
+	preload("res://scripts/performance_trace.gd").mark("network_undertakings",undertaking_stamp)
 	if "Hearth Circle" not in GameState.settlement_completed:
 		if settlement_border_root: settlement_border_root.visible=false
 		if settlement_network_marker_root: settlement_network_marker_root.visible=false
@@ -4603,7 +4605,9 @@ func _refresh_settlement_network(force:=false)->void:
 	# The coarse signature above also moves for records that draw nothing (daily
 	# labour allocations, monthly drift). Rebuild meshes only when what is drawn
 	# changed; secondary town designs still get their own per-town check.
-	var geometry_key:=_settlement_network_geometry_key(network,[network_view_key])
+	var key_stamp:int=preload("res://scripts/performance_trace.gd").start()
+	var geometry_key:=_settlement_network_geometry_key(network,_settlement_network_visibility_key(network))
+	preload("res://scripts/performance_trace.gd").mark("network_geometry_key",key_stamp)
 	if not force and geometry_key==rendered_settlement_network_geometry_key and is_instance_valid(settlement_border_root):
 		var unchanged_secondary:Array[Dictionary]=[]
 		for settlement in network.settlements:
@@ -4638,7 +4642,8 @@ func _refresh_settlement_network(force:=false)->void:
 	var ownership_triangle_count:=0
 	var visible_secondary_settlements:Array[Dictionary]=[]
 	# One exact height sample set serves fills and both border ribbons.
-	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
+	var borders_stamp:int=preload("res://scripts/performance_trace.gd").start()
+	var samples:=_territory_height_samples()
 	for settlement in network.settlements:
 		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): visible_secondary_settlements.append(settlement)
 		if not _settlement_boundary_in_current_view(settlement): continue
@@ -4662,13 +4667,19 @@ func _refresh_settlement_network(force:=false)->void:
 		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
 		var edge_wash:=wash_color
 		edge_wash.a=0.15 if primary else 0.10
+		# Mitred bands (territory_border_band.gd): the wash pools at the ink line
+		# and fades inward; the hairline takes its heights from the boundary.
 		var wash_band:=ink_pixel*2.5
-		halo_segment_count+=_append_settlement_boundary_ribbon(border_halo_surface,_inset_boundary(boundary,wash_band),wash_band,edge_wash,0.0045,samples)
+		var subdivisions:=_border_ribbon_subdivisions()
+		var inner_wash:=TERRITORY_BAND.offset(boundary,-wash_band*2.0)
+		var faded_wash:=edge_wash;faded_wash.a=0.0
+		edge_wash.a*=1.5
+		halo_segment_count+=TERRITORY_BAND.append(border_halo_surface,boundary,inner_wash,boundary,inner_wash,edge_wash,faded_wash,0.0045,samples,subdivisions)
 		var ink:=TERRITORY_INK
 		ink.a=(0.85 if primary else 0.62)*clampf(float(visual_profile.border_alpha)/0.7,0.8,1.2)
-		segment_count+=_append_settlement_boundary_ribbon(border_surface,boundary,core_width,ink,0.0065,samples)
+		segment_count+=TERRITORY_BAND.append(border_surface,TERRITORY_BAND.offset(boundary,core_width),TERRITORY_BAND.offset(boundary,-core_width),boundary,boundary,ink,ink,0.0065,samples,subdivisions)
 	var trace=preload("res://scripts/performance_trace.gd")
-	var stamp:int=trace.start()
+	var stamp:int=trace.mark("network_borders",borders_stamp)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
 	stamp=trace.mark("network_markers",stamp)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
@@ -4715,7 +4726,9 @@ func _refresh_settlement_network(force:=false)->void:
 		material.roughness=1.0
 		border_instance.material_override=material
 		settlement_border_root.add_child(border_instance)
+	stamp=trace.mark("network_meshes",stamp)
 	_update_scale_lod()
+	trace.mark("network_scale_lod",stamp)
 
 
 ## Everything the border, claim-wash and marker meshes read, and nothing else.
@@ -4916,6 +4929,37 @@ func _settlement_network_lod_band()->int:
 	if camera.size<=600.0: return 2
 	if camera.size<=2600.0: return 3
 	return 4
+
+## Territory outlines sample the fixed planet height field. The same boundary
+## points recur on every rebuild (pan culling, zoom buckets, daily claim ticks),
+## so their heights are kept for this world instead of resampled each time.
+var territory_height_cache:RefCounted
+var territory_height_cache_world:=""
+
+func _territory_height_samples()->RefCounted:
+	var world:="%d:%d" % [GameState.world_seed,GameState.active_province]
+	if territory_height_cache==null or territory_height_cache_world!=world or int(territory_height_cache.misses)>40000:
+		territory_height_cache=preload("res://scripts/settlement_surface_samples.gd").new(_height_at,func(_point:Vector2)->bool:return true)
+		territory_height_cache_world=world
+	return territory_height_cache
+
+## Render tessellation per boundary edge, chosen by view scale only.
+func _border_ribbon_subdivisions()->int:
+	if camera==null: return 8
+	return 10 if camera.size<4.0 else (6 if camera.size<180.0 else (3 if camera.size<2600.0 else 1))
+
+## What the network meshes depend on from the view: which settlements are culled
+## in, and the zoom-driven widths and tessellation. The pan position itself is
+## not keyed, so panning over unchanged territory never rebuilds a mesh.
+func _settlement_network_visibility_key(network:Dictionary)->Array:
+	var borders:=PackedStringArray()
+	var markers:=PackedStringArray()
+	for settlement:Dictionary in network.settlements:
+		var id:=String(settlement.get("id",""))
+		if _settlement_boundary_in_current_view(settlement): borders.append(id)
+		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): markers.append(id)
+	var zoom_bucket:=roundi(log(maxf(0.10,camera.size))/log(1.8)) if camera else 0
+	return [_settlement_network_lod_band(),zoom_bucket,camera.size<=3.0 if camera else false,_border_ribbon_subdivisions(),borders,markers]
 
 func _settlement_network_view_key()->String:
 	if camera==null: return "0:0:0"
@@ -7747,6 +7791,7 @@ func _update_settlement_claim_opacity()->void:
 	material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
 
 const TERRITORY_WASH:=Color("#A8782A")
+const TERRITORY_BAND:=preload("res://scripts/territory_border_band.gd")
 const TERRITORY_INK:=Color("#3A2E22")
 
 ## One screen pixel in kilometres at the current zoom bucket (the same bucket
@@ -7790,9 +7835,7 @@ func _append_settlement_boundary_ribbon(surface:SurfaceTool,boundary:PackedVecto
 		# border remains the fixed 32-point aggregate polygon. Subdivision is selected by
 		# view scale, never claim radius or population: a billion-person civilization must
 		# not allocate more border vertices simply because its territory is physically vast.
-		var subdivisions:=8
-		if camera!=null:
-			subdivisions=10 if camera.size<4.0 else (6 if camera.size<180.0 else (3 if camera.size<2600.0 else 1))
+		var subdivisions:=_border_ribbon_subdivisions()
 		for subdivision in subdivisions:
 			var segment_a:=a.lerp(b,float(subdivision)/float(subdivisions))
 			var segment_b:=a.lerp(b,float(subdivision+1)/float(subdivisions))
