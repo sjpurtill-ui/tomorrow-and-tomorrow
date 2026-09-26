@@ -49,6 +49,15 @@ func test_selected_city_resources_do_not_leak_into_primary()->void:
 	assert_str(data.value).is_equal("7.3")
 	assert_float(data.meter).is_equal(0.875)
 	assert_float(float(GameState.water_metrics.days)).is_equal(9.0)
+func test_population_panel_says_who_went_hungry()->void:
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":10.0}
+	var fed_all:=Data.snapshot("population")
+	assert_str(fed_all.status).contains("Everyone ate")
+	assert_float(fed_all.meter).is_equal(1.0)
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":5.0}
+	var short:=Data.snapshot("population")
+	assert_str(short.tone).is_equal("warning")
+	assert_str(short.status).contains("went hungry")
 func test_topbar_compiles_with_custom_chips()->void:
 	assert_object(load("res://scripts/hud/command_rail_hud.gd")).is_not_null()
 
@@ -93,7 +102,7 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	GameState.elapsed_days=1.0
 	header._process(.75)
 	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
-	assert_str(header.kpi_chips.water.value.text).is_equal("5.0 days")
+	assert_str(header.kpi_chips.water.value.text).is_equal("5 days")
 	assert_str(header.time_text.text).contains("Day 2")
 	GameState.simulation_metrics.food_days=9.0
 	GameState.water_metrics.days=3.0
@@ -102,8 +111,8 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	header._process(.25)
 	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
 	header._process(.5)
-	assert_str(header.kpi_chips.food.value.text).is_equal("9.0 days")
-	assert_str(header.kpi_chips.water.value.text).is_equal("3.0 days")
+	assert_str(header.kpi_chips.food.value.text).is_equal("9 days")
+	assert_str(header.kpi_chips.water.value.text).is_equal("3 days")
 	assert_str(header.time_text.text).contains("Day 3")
 
 

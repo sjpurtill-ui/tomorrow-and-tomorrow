@@ -153,10 +153,15 @@ func _layout()->void:
 		# Before writing, tools and gear are told in the People view, not the strip.
 		var goods_shown:=not compact_top and not EraWords.hearth()
 		(kpi_chips.get("goods",{}).get("chip") as Control).visible=goods_shown
-		if kpi_separators.size()>=3:
+		# Before writing, who ate today is told in the PEOPLE chip itself; a
+		# separate "bellies filled" count only repeated the head count.
+		var gdp_shown:=not EraWords.hearth()
+		(kpi_chips.get("gdp",{}).get("chip") as Control).visible=gdp_shown
+		if kpi_separators.size()>=6:
 			kpi_separators[0].visible=not compact_top
 			kpi_separators[1].visible=not compact_top
 			kpi_separators[2].visible=goods_shown
+			kpi_separators[5].visible=gdp_shown
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
 	if queue_root:
@@ -568,6 +573,9 @@ const KPI_DEFS:Array[Dictionary]=[
 ]
 
 const KPI_GUTTER:=10.0
+## Caption, value and its note stack in three short lines inside the 56 px top
+## frame, so a value never shares its line with (or is cut off by) a note.
+const KPI_HEIGHT:=46.0
 
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
@@ -588,7 +596,7 @@ func _build_kpi_strip()->void:
 		# Reserve one stable width for every state. In particular, the longer
 		# shortage wording must not make the whole strip collide with the clock
 		# and jump from the first row to the second while the simulation runs.
-		chip.custom_minimum_size=Vector2(_kpi_width(String(def.id),float(def.width)),Tokens.CHIP_HEIGHT)
+		chip.custom_minimum_size=Vector2(_kpi_width(String(def.id),float(def.width)),KPI_HEIGHT)
 		chip.clip_contents=true
 		chip.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 		chip.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG))
@@ -619,23 +627,18 @@ func _build_kpi_strip()->void:
 		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),9,Tokens.MUTED,0.12)
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(caption)
-		var value_row:=HBoxContainer.new()
-		value_row.add_theme_constant_override("separation",6)
-		value_row.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		text_column.add_child(value_row)
 		var value:=Tokens.make_label("—",15,Tokens.INK)
+		# Widths are sized for the longest real value; the ellipsis is only a
+		# last guard against a runaway string pushing the strip over the clock.
 		value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		value_row.add_child(value)
+		text_column.add_child(value)
+		# The note (who went hungry, babes lost, keepers) sits on its own line.
 		var delta:=Tokens.make_label("",10,Tokens.MUTED)
 		delta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		delta.custom_minimum_size.x=52
-		delta.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
-		value_row.add_child(delta)
-		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption}
+		text_column.add_child(delta)
+		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption,"accent":accent,"accent_color":def.accent}
 
 func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,_tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
@@ -643,25 +646,22 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	(parts.value as Label).text=value_text
 	var delta:Label=parts.delta
 	delta.text=delta_text
-	# Words need their own width; an empty delta gives its room to the value.
-	if EraWords.reckoned():delta.custom_minimum_size.x=52.0
-	elif delta_text=="":delta.custom_minimum_size.x=0.0
-	else:
-		# Never so wide that the value itself is squeezed out of its chip.
-		var room:=_kpi_width(id,float(parts.width))-17.0-56.0-KPI_GUTTER
-		var wanted:=ceilf(delta.get_theme_font("font").get_string_size(delta_text,HORIZONTAL_ALIGNMENT_LEFT,-1,delta.get_theme_font_size("font_size")).x)+2.0
-		delta.custom_minimum_size.x=clampf(wanted,52.0,maxf(52.0,room))
+	delta.visible=delta_text!=""
 	delta.add_theme_color_override("font_color",delta_color)
+	# A warning note tints the chip's accent bar too, so it reads at a glance.
+	if parts.has("accent"):(parts.accent as ColorRect).color=Tokens.RED if delta_color==Tokens.RED else parts.accent_color
 	var chip:Button=parts.chip
 	chip.tooltip_text="View details"
 	# Width is intentionally independent of live text so a deficit cannot move
 	# the complete top bar. Hover details read fresh state when opened.
-	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),Tokens.CHIP_HEIGHT)
+	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),KPI_HEIGHT)
 
 ## Stable widths per era: the people's words are longer than the acronyms.
 func _kpi_width(id:String,base:float)->float:
 	if EraWords.reckoned():return base
-	return float({"population":120.0,"food":100.0,"water":96.0,"goods":130.0,"health":194.0,"science":142.0,"gdp":112.0}.get(id,base))
+	# Value and note each have a full line: widths fit "1,240 souls",
+	# "2 hearths · all fed", "28 in 100 babes lost" and "115 ways".
+	return float({"population":132.0,"food":112.0,"water":112.0,"goods":120.0,"health":138.0,"science":104.0,"gdp":116.0}.get(id,base))
 
 # --- Decision queue ---------------------------------------------------------
 
@@ -1089,18 +1089,30 @@ func _refresh_kpis()->void:
 	if signature==_kpi_signature:return
 	_kpi_signature=signature
 	# Every number in the strip is told in the people's own counting
-	# (era_words.gd): souls, winters, bellies filled, before GDP and IMR.
+	# (era_words.gd): souls, winters, who went hungry, before GDP and IMR.
 	var modern:=EraWords.reckoned()
 	# Before writing the strip stays short: a delta is shown only when it says
 	# something (a second hearth, a hungry one).
+	# PEOPLE carries who ate today: a separate "bellies filled" chip only
+	# repeated the head count whenever everyone ate.
+	var population:=int(t.population)
+	var fed:=EraWords.fed(population,float(t.food_eaten),float(t.food_need))
+	var hungry:=population-fed if fed>=0 else 0
 	var place_note:=EraWords.places(t.cities.size()) if modern or t.cities.size()>1 else ""
-	_update_kpi("population",EraWords.people(int(t.population)) if not modern else str(t.population),place_note,Tokens.MUTED,"Civilization population and city breakdown")
+	var people_note:=EraWords.went_without(hungry,"hungry") if hungry>0 else ((place_note+" · " if place_note!="" else "")+"all fed" if fed>=0 else place_note)
+	_update_kpi("population",EraWords.people(population) if not modern else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else Tokens.MUTED,"")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
 		var days:=float(t[id+"_days"])
-		var short_word:="%d short" % shortage if modern else ("%d %s" % [shortage,"hungry" if id=="food" else "thirsty"])
-		_update_kpi(id,EraWords.days(days),short_word if shortage>0 else ("partial" if pending else "civ total") if modern else "",Tokens.RED if shortage>0 else Tokens.MUTED,"Civilization reserves and city production")
+		var note:String
+		if id=="water" and shortage>0:
+			var drank:=EraWords.fed(population,float(t.water_eaten),float(t.water_need))
+			note=EraWords.went_without(population-drank,"thirsty") if drank>=0 and drank<population else "running short"
+		elif shortage>0:note="%d short" % shortage if modern else ("running short" if t.cities.size()<=1 else "%s short" % EraWords.places(shortage))
+		elif pending:note="partial"
+		else:note="civ total" if modern else ("of food" if id=="food" else "of drinking water")
+		_update_kpi(id,EraWords.days(days),note,Tokens.RED if shortage>0 else Tokens.MUTED,"")
 	var goods_short:=int(t.goods_shortages)
 	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
 	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost_short(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
@@ -1110,11 +1122,8 @@ func _refresh_kpis()->void:
 	else:
 		var keepers:=roundi(float(t.minds))
 		_update_kpi("science","%d ways" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
-		if EraWords.hearth():
-			var fed:=EraWords.fed(int(t.population),float(t.food_eaten),float(t.food_need))
-			# The hands at work are told in the chip's detail, keeping the strip short.
-			_update_kpi("gdp","%d of %d" % [fed,int(t.population)] if fed>=0 else "—","",Tokens.BLUE,"")
-		else:
+		# Before writing the gdp chip is hidden (who ate is in PEOPLE).
+		if not EraWords.hearth():
 			_update_kpi("gdp","%d hands" % roundi(float(t.output)),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
 	kpi_strip.reset_size()
 	_layout()

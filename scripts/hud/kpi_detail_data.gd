@@ -12,9 +12,19 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 			var vitals:=GameState.rolling_vital_balance(365)
 			if modern:r.merge({"title":"Population","value":str(t.population),"unit":"people","status":"%+d natural change · last 12 months" % int(vitals.get("net",0))},true)
 			else:r.merge({"title":"The People","value":EraWords.grouped(int(t.population)),"unit":"souls" if hearth else "people","status":"%s born than buried since this time last year" % ("%d more" % int(vitals.get("net",0)) if int(vitals.get("net",0))>=0 else "%d fewer" % -int(vitals.get("net",0)))},true)
+			# The chip's note: how many were fed in full today, and who went hungry.
+			var fed:=EraWords.fed(int(t.population),float(t.food_eaten),float(t.food_need))
+			if fed>=0:
+				var hungry:=int(t.population)-fed
+				r.rows.append({"label":"Fed in full today" if not modern else "Fully fed today","value":"%s of %s" % [EraWords.grouped(fed),EraWords.grouped(int(t.population))]})
+				r.meter=float(fed)/maxf(1.0,float(t.population));r.meter_label="Fed in full today"
+				if hungry>0:
+					r.tone="warning"
+					r.status="%s went hungry today: the food eaten fell short of what everyone needs. %s" % [EraWords.grouped(hungry),r.status]
+				else:r.status="Everyone ate their fill today. %s" % r.status
 		"food","water":
 			var food:=id=="food";var days:=float(t[id+"_days"]);var shortages:=int(t[id+"_shortages"])
-			r.merge({"title":("Food reserves" if modern else "Stores of food") if food else "Drinking water","value":"%.1f" % days if days>=0 else "Awaiting report","unit":"days · total stores / daily need" if modern else "days, eating as we eat today","status":"%d cities have a shortfall" % shortages if shortages>0 else "Reserves are held locally; city breakdown below.","tone":"warning" if shortages>0 else "neutral"},true)
+			r.merge({"title":("Food reserves" if modern else "Stores of food") if food else "Drinking water","value":"%.1f" % days if days>=0 else "Awaiting report","unit":"days · total stores / daily need" if modern else ("days, eating as we eat today" if food else "days, drinking as we drink today"),"status":"%d cities have a shortfall" % shortages if shortages>0 else "Reserves are held locally; city breakdown below.","tone":"warning" if shortages>0 else "neutral"},true)
 			r.rows.append({"label":"Produced today" if food else "Collected today","value":"%.1f" % float(t[id+"_produced"])})
 			r.rows.append({"label":"Required today","value":"%.1f" % float(t[id+"_need"])})
 			if food:r.rows.append({"label":"Net reserve change","value":"%+.1f rations/day" % float(t.food_net)})

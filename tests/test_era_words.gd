@@ -24,6 +24,19 @@ class RailOnly extends "res://scripts/hud/command_rail_hud.gd":
 	func _layout()->void:pass
 	func _position_toolbar()->void:pass
 
+class WideHeader extends "res://scripts/hud/command_rail_hud.gd":
+	func _ready()->void:
+		_build_time_pill()
+		_build_kpi_strip()
+	func _layout()->void:
+		if time_pill:time_pill.position=Vector2(Tokens.DOCK_X,6)
+		var view:=get_viewport_rect().size
+		for id in ["population","water"]:(kpi_chips[id].chip as Control).visible=view.x>=1280
+		(kpi_chips.goods.chip as Control).visible=not EraWords.hearth()
+		(kpi_chips.gdp.chip as Control).visible=not EraWords.hearth()
+		kpi_strip.reset_size()
+		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),6)
+
 class LiveHeader extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:
 		_build_time_pill()
@@ -62,7 +75,10 @@ func test_the_people_count_in_their_own_words()->void:
 	assert_str(EraWords.babes_lost(173.0)).is_equal("17 in 100 babes die")
 	assert_str(EraWords.babes_lost_sentence(173.0)).contains("before their first winter")
 	assert_str(EraWords.days(48.3)).is_equal("48 days")
-	assert_str(EraWords.word("kpi.gdp")).is_equal("BELLIES FILLED")
+	assert_str(EraWords.days(5.0)).is_equal("5 days")
+	assert_str(EraWords.days(4.5)).is_equal("4.5 days")
+	assert_str(EraWords.babes_lost_short(283.0)).is_equal("28 in 100 babes lost")
+	assert_str(EraWords.went_without(12,"hungry")).is_equal("12 went hungry")
 	assert_int(EraWords.fed(120,45.0,60.0)).is_equal(90)
 	GameState.known_discoveries.append("printing_process")
 	await _next_frame()
@@ -112,9 +128,45 @@ func test_the_top_strip_uses_no_modern_statistics_before_writing()->void:
 		shown.append((parts.caption as Label).text);shown.append((parts.value as Label).text);shown.append((parts.delta as Label).text)
 	var text:=" | ".join(shown)
 	for word in MODERN:assert_str(text).not_contains(word)
-	assert_str((header.kpi_chips.gdp.caption as Label).text).is_equal("BELLIES FILLED")
-	# Short enough to sit beside the lifespan without running into LORE.
-	assert_str((header.kpi_chips.health.delta as Label).text).contains("in 100 lost")
+	# Who ate is told under PEOPLE; there is no second head count.
+	for id in header.kpi_chips:assert_str((header.kpi_chips[id].caption as Label).text).is_not_equal("BELLIES FILLED")
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("all fed")
+	assert_str((header.kpi_chips.water.value as Label).text).is_equal("5 days")
+	assert_str((header.kpi_chips.health.delta as Label).text).contains("in 100 babes lost")
+	# Some went hungry: the note says how many and the chip turns to a warning.
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":7.5}
+	header._refresh_kpis()
+	var hungry:=GameState.population_total-EraWords.fed(GameState.population_total,7.5,10.0)
+	assert_int(hungry).is_greater(0)
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("%d went hungry" % hungry)
+	assert_object((header.kpi_chips.population.accent as ColorRect).color).is_equal(Rail.Tokens.RED)
+
+func test_every_top_strip_value_fits_in_full_at_1280()->void:
+	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1280,720);add_child(canvas)
+	var header=auto_free(WideHeader.new())
+	header.terrain=auto_free(HeaderTerrain.new())
+	canvas.add_child(header)
+	header.set_process(false)
+	header.size=Vector2(1280,720)
+	GameState.known_discoveries.clear()
+	for i in 115:GameState.known_discoveries.append("lore_%d" % i)
+	GameState.simulation_metrics={"food_days":124.0,"food_consumption":10.0,"food_eaten":8.0}
+	GameState.water_metrics={"days":5.0,"required_today":10.0,"stored":50.0,"intake_ratio":0.8}
+	header._refresh_words()
+	header._refresh_kpis()
+	for i in 3:await _next_frame()
+	header._layout()
+	for i in 2:await _next_frame()
+	assert_bool((header.kpi_chips.gdp.chip as Control).visible).is_false()
+	assert_str((header.kpi_chips.science.value as Label).text).is_equal("115 ways")
+	assert_float(header.kpi_strip.position.x).is_greater_equal(header.time_pill.position.x+header.time_pill.size.x+8.0)
+	for id in header.kpi_chips:
+		var parts:Dictionary=header.kpi_chips[id]
+		if not (parts.chip as Control).visible:continue
+		for key in ["caption","value","delta"]:
+			var label:Label=parts[key]
+			var need:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
+			assert_float(need).override_failure_message("%s %s '%s' needs %.0f, has %.0f" % [id,key,label.text,need,label.size.x]).is_less_equal(label.size.x+0.5)
 
 func test_the_rail_leads_with_the_fantasy_and_folds_the_ledgers()->void:
 	var rail=auto_free(RailOnly.new())

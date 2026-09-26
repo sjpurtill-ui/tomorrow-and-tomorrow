@@ -83,12 +83,12 @@ func test_hud_retains_overall_and_selected_counts()->void:
 	# is selected (city breakdowns live in its tooltip and city cards). Before
 	# writing the count is told in souls and hearths (era_words.gd).
 	assert_str(hud.kpi_chips.population.value.text).is_equal("1,000 souls")
-	assert_str(hud.kpi_chips.population.delta.text).is_equal("2 hearths")
+	assert_str(hud.kpi_chips.population.delta.text).starts_with("2 hearths")
 	assert_int(GameState.population_total).is_equal(1000)
 	GameState.selected_player_settlement_id=String(GameState.player_settlements[0].id)
 	hud._refresh_kpis()
 	assert_str(hud.kpi_chips.population.value.text).is_equal("1,000 souls")
-	assert_str(hud.kpi_chips.population.delta.text).is_equal("2 hearths")
+	assert_str(hud.kpi_chips.population.delta.text).starts_with("2 hearths")
 	assert_int(GameState.population_total).is_equal(1000)
 
 func test_local_demography_changes_only_its_city_and_national_total()->void:

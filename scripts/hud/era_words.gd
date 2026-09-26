@@ -4,6 +4,7 @@ extends RefCounted
 ## A band that cannot write does not know "GDP", "IMR", "per mille" or "life
 ## expectancy". It knows how many bellies were filled today, how many winters
 ## a person lives, and how many children are lost before their first winter.
+## Who went hungry today is told under PEOPLE, not as a second head count.
 ## Every place the HUD shows a vital statistic asks this layer for the words.
 ##
 ## Stages (from what the player's people know):
@@ -81,7 +82,7 @@ const WORDS:={
 	"hearth":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Tallies",
 		"rail.government":"Chiefs","rail.inquiry":"Lore","rail.production":"Crafts","rail.military":"Warriors","rail.wealth":"Exchange",
-		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIVES","kpi.science":"LORE","kpi.gdp":"BELLIES FILLED",
+		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIVES","kpi.science":"LORE","kpi.gdp":"HANDS AT WORK",
 		"scope":"All our hearths","place":"hearth","places":"hearths",
 	},
 	"lettered":{
@@ -119,7 +120,11 @@ static func days(value:float)->String:
 	if value<0.0:return "—"
 	if reckoned():return "%.1f d" % value
 	if value>=10.0:return "%d days" % roundi(value)
-	return "%.1f days" % value if value>=1.0 else "under a day"
+	if value<1.0:return "under a day"
+	# "5 days", not "5.0 days"; a half day still matters when it is short.
+	var tenths:=roundi(value*10.0)
+	if tenths%10==0:return "%d day%s" % [roundi(tenths/10.0),"" if tenths==10 else "s"]
+	return "%.1f days" % value
 
 
 ## How long the stores last, in the way the people count time: moons before
@@ -164,11 +169,11 @@ static func babes_lost(per_1000:float)->String:
 	return "IMR %.0f‰" % per_1000
 
 
-## The same, short enough to sit beside the lifespan in the LIVES chip.
+## The same, short enough for the note line under the lifespan in LIVES.
 static func babes_lost_short(per_1000:float)->String:
 	match stage():
-		"hearth":return "%d in 100 lost" % roundi(per_1000/10.0)
-		"lettered":return "%d in 1,000 lost" % roundi(per_1000)
+		"hearth":return "%d in 100 babes lost" % roundi(per_1000/10.0)
+		"lettered":return "%d in 1,000 infants lost" % roundi(per_1000)
 	return "IMR %.0f‰" % per_1000
 
 
@@ -197,10 +202,16 @@ static func babes_title()->String:
 	return "INFANT MORTALITY"
 
 
-## Bellies filled today: the people fed in full, from today's eating.
+## How many were fed in full today, from today's eating (-1 when not yet told).
 static func fed(people_count:int,eaten:float,need:float)->int:
 	if need<=0.0:return -1
 	return clampi(roundi(float(people_count)*clampf(eaten/need,0.0,1.0)),0,people_count)
+
+
+## The note under PEOPLE (or WATER) when some went without today.
+static func went_without(count:int,want:String)->String:
+	if reckoned():return "%s %s" % [grouped(count),want]
+	return "%s went %s" % [grouped(count),want]
 
 
 ## Tools and gear against what households expect, in words before writing.
