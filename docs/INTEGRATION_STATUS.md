@@ -1,3 +1,13 @@
+## September 26 — second early key-threshold art batch: INTEGRATED
+
+Worker `375e7a860941ab42728b63e8493a046717605c25`, branch `codex/research-art-bronze-key2`, based on `7d2231e9`. Twelve additional paintings/provenance records and subject-manifest assignments; selected crop sheet and prompts are in `art_source/research-bronze-key2/README.md`. Includes drainage, resettlement, village self-rule, weighed wages, merchant shipping, citizenship, leavening, shrine leagues, caravans, physicians, oracle consultation and household registers.
+
+Combined scene validation initially caught Dough Leavening resolving to its older first300 atlas painting. The integrator removed only that obsolete entry from `assets/ui/research/paper/first300-card-bindings.json`, allowing the new subject image and focal point to resolve; the old art resource itself remains preserved. No global precedence or simulation rule changed.
+
+Godot 4.7.2 combined import logged no errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --key2` passes all twelve live catalogue IDs, actual research lookup, manifest precedence, distinct Texture2D/provenance hashes, hidden gating and crop bounds. Reviewed the shared renderer's 1440x900 capture. Evidence in `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/key2-fixed-runtime.log` and `key2-research-in-game-crops.png`; initial failing log `key2-runtime.log` is retained. Whole-game play and the historical full subject-art suite were not rerun for this focused asset delivery.
+
+No simulation/save changes, unrelated import churn or rejected artwork included. Player PID50648 remains untouched; normal relaunch is needed to reliably load updated cached art. This delivers another twelve paintings, not the complete research catalogue.
+
 ## September 26 — twelve early key-threshold research paintings: INTEGRATED
 
 Worker `48b70a2b7909f2f790f365c26eaf81a9ec157448`, branch `codex/research-art-bronze-priority`, base `385ac929`, merged without conflicts with main `0385b37c` as `c1f2ceac`. Twelve subjects in `y600_1200`, one per direction, now have distinct mature handmade paintings. The manifest is the only shared art assignment file. Prompt/provenance and selected crop sheet: `art_source/research-bronze-priority/README.md`. Prior approved later-research paintings remain included; rejected pilot branch remains excluded.
