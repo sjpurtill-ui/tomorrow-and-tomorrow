@@ -2,6 +2,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const INTEL:=preload("res://scripts/city_intelligence.gd")
 const V:=preload("res://scripts/hud/city_report_visuals.gd")
 const Dossier:=preload("res://scripts/hud/city_dossier.gd")
+const Orders:=preload("res://scripts/hud/city_watch_orders.gd")
 var city_id:String
 func _init(world:Node,shell:Control,id:String)->void:
 	super(world,shell);city_id=id
@@ -40,5 +41,12 @@ func tab(_sub:int)->Dictionary:
 		"account":Dossier.account(city,own_values,home_name,today),"source":String(city.get("source","Unknown")),
 		"fresh_level":int(fresh.level),"fresh_status":String(fresh.status),"fresh_age":"" if seen_day<0 else Dossier.ago(today-seen_day).to_upper(),
 		"caption":"Held by "+controller}
-	return {"blocks":[dossier,{"type":"actions","items":[{"label":"FULL REPORT & ACTIONS","sub":"Reconnaissance, diplomacy and military options","on_press":func()->void:CivilizationSystem.city_intelligence.open(city_id)}]}]}
-func signature()->Array:return [report()]
+	var blocks:Array=[dossier]
+	var scouting:=Orders.dock_items(city_id)
+	if not scouting.is_empty():
+		blocks.append({"type":"actions","heading":"SCOUT THIS CITY","items":scouting})
+		var status:=Orders.dock_status(city_id)
+		if not status.is_empty():blocks.append({"type":"text","text":status})
+	blocks.append({"type":"actions","items":[{"label":"FULL REPORT & ACTIONS","sub":"Reconnaissance, diplomacy and military options","on_press":func()->void:CivilizationSystem.city_intelligence.open(city_id)}]})
+	return {"blocks":blocks}
+func signature()->Array:return [report(),CivilizationSystem.scouting_staff.city_watch(city_id),Orders.party_away(city_id).get("mission_id",-1),int(GameState.elapsed_days)]
