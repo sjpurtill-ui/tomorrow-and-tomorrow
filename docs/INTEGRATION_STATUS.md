@@ -1,3 +1,11 @@
+## September 26 — final thirteen early-priority paintings: INTEGRATED
+
+Worker `b8a3aa5aa9b9c20912d155f9a6936fec31c58ed9`, branch `codex/research-art-bronze-key3`, base `9508d53b`, merged with current main `c4876463` as `370f35d8`. Thirteen more subject paintings, provenance and manifest entries complete the selected 37-painting Late Bronze / Iron Age priority set (12 + 12 + 13); this is not the complete research catalogue. Prompts and review sheet: `art_source/research-bronze-key3/README.md`.
+
+Combined Godot 4.7.2 import completed without logged errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --key3` passes thirteen live catalogue lookups, manifest precedence, unique textures/provenance hashes, hidden-art gating and crop bounds. Reviewed actual shared-renderer capture at 1440x1120. The same normal-scene probe run headless with `--all-early` also passes all 37 selected early-priority paintings together, including the earlier Dough Leavening precedence fix. No additional assignment conflicts were found. Evidence in `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/key3-runtime.log`, `key3-research-in-game-crops.png` and `all-early-art-runtime.log`.
+
+No simulation/save changes or unrelated generated import churn included. Full campaign play and unrelated historical test suites were not repeated. Player PID50648 was preserved; no forced restart. Normal relaunch reliably loads the new cached resources. Earlier approved batches remain included and the rejected pilot branch remains excluded.
+
 ## September 26 — second early key-threshold art batch: INTEGRATED
 
 Worker `375e7a860941ab42728b63e8493a046717605c25`, branch `codex/research-art-bronze-key2`, based on `7d2231e9`. Twelve additional paintings/provenance records and subject-manifest assignments; selected crop sheet and prompts are in `art_source/research-bronze-key2/README.md`. Includes drainage, resettlement, village self-rule, weighed wages, merchant shipping, citizenship, leavening, shrine leagues, caravans, physicians, oracle consultation and household registers.

@@ -3374,5 +3374,18 @@
   "camel_caravans": {"path": "res://assets/ui/research/subjects/camel_caravans-v1.png", "focus": [0.5, 0.5]},
   "town_physicians": {"path": "res://assets/ui/research/subjects/town_physicians-v1.png", "focus": [0.5, 0.5]},
   "oracle_consultation": {"path": "res://assets/ui/research/subjects/oracle_consultation-v1.png", "focus": [0.5, 0.5]},
-  "household_tax_registers": {"path": "res://assets/ui/research/subjects/household_tax_registers-v1.png", "focus": [0.5, 0.5]}
+  "household_tax_registers": {"path": "res://assets/ui/research/subjects/household_tax_registers-v1.png", "focus": [0.5, 0.5]},
+  "iron_spear_levy": {"path": "res://assets/ui/research/subjects/iron_spear_levy-v1.png", "focus": [0.5, 0.5]},
+  "cataract_couching": {"path": "res://assets/ui/research/subjects/cataract_couching-v1.png", "focus": [0.5, 0.5]},
+  "shrine_festival_games": {"path": "res://assets/ui/research/subjects/shrine_festival_games-v1.png", "focus": [0.5, 0.5]},
+  "annual_elected_magistrates": {"path": "res://assets/ui/research/subjects/annual_elected_magistrates-v1.png", "focus": [0.5, 0.5]},
+  "free_threshing_wheat": {"path": "res://assets/ui/research/subjects/free_threshing_wheat-v1.png", "focus": [0.5, 0.5]},
+  "citizen_heavy_infantry": {"path": "res://assets/ui/research/subjects/citizen_heavy_infantry-v1.png", "focus": [0.5, 0.5]},
+  "written_epic": {"path": "res://assets/ui/research/subjects/written_epic-v1.png", "focus": [0.5, 0.5]},
+  "public_work_tenders": {"path": "res://assets/ui/research/subjects/public_work_tenders-v1.png", "focus": [0.5, 0.5]},
+  "town_consolidation": {"path": "res://assets/ui/research/subjects/town_consolidation-v1.png", "focus": [0.5, 0.5]},
+  "columned_stone_temple": {"path": "res://assets/ui/research/subjects/columned_stone_temple-v1.png", "focus": [0.5, 0.5]},
+  "fluid_balance_theory": {"path": "res://assets/ui/research/subjects/fluid_balance_theory-v1.png", "focus": [0.5, 0.5]},
+  "two_ended_tunnels": {"path": "res://assets/ui/research/subjects/two_ended_tunnels-v1.png", "focus": [0.5, 0.5]},
+  "three_banked_warships": {"path": "res://assets/ui/research/subjects/three_banked_warships-v1.png", "focus": [0.5, 0.5]}
 }
