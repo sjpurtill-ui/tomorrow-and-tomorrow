@@ -2,7 +2,18 @@ extends Control
 ## Observation only: no troop orders or visible tactical grid.
 var front_cache:Dictionary={}
 func _ready()->void:mouse_filter=MOUSE_FILTER_IGNORE
-func _process(_delta:float)->void:queue_redraw()
+## The campaign moves in simulated steps; redraw when its state or the map size
+## changes, checked four times a second, never every frame.
+var check_elapsed:=0.0
+var drawn_signature:=0
+func _process(delta:float)->void:
+	check_elapsed+=delta
+	if check_elapsed<0.25: return
+	check_elapsed=0.0
+	var signature:=hash([size,WorldSimulation.campaign.state.hash(),WorldSimulation.campaign.army().hash() if not WorldSimulation.campaign.state.is_empty() else 0])
+	if signature==drawn_signature: return
+	drawn_signature=signature
+	queue_redraw()
 func point(cell:Vector2i)->Vector2:
 	return size*.5+Vector2(cell)*minf(size.x,size.y)/float(GeneralCampaign.RADIUS*2+4)
 func _draw()->void:

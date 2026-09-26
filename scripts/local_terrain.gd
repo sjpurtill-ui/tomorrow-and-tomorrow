@@ -251,6 +251,10 @@ var settlement_border_root:Node3D
 var settlement_network_marker_root:Node3D
 var settlement_network_fabric_root:Node3D
 var rendered_settlement_network_signature:=""
+## Hash of what the network meshes draw; see _settlement_network_geometry_key.
+var rendered_settlement_network_geometry_key:=0
+## Border/claim mesh rebuilds since load (probes read it; never saved).
+var settlement_border_rebuilds:=0
 var undertaking_visual_root:Node3D
 var undertaking_visual_signature:String=""
 var sampled_settlement_territory_signature:=""
@@ -4476,6 +4480,19 @@ func _refresh_settlement_network(force:=false)->void:
 	var snapshot_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	var network:Dictionary=_settlement_model().settlement_network_snapshot()
 	preload("res://scripts/performance_trace.gd").mark("network_snapshot",snapshot_stamp)
+	# The coarse signature above also moves for records that draw nothing (daily
+	# labour allocations, monthly drift). Rebuild meshes only when what is drawn
+	# changed; secondary town designs still get their own per-town check.
+	var geometry_key:=_settlement_network_geometry_key(network,[network_view_key])
+	if not force and geometry_key==rendered_settlement_network_geometry_key and is_instance_valid(settlement_border_root):
+		var unchanged_secondary:Array[Dictionary]=[]
+		for settlement in network.settlements:
+			if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): unchanged_secondary.append(settlement)
+		_create_secondary_settlement_footprints(unchanged_secondary,false)
+		_refresh_secondary_settlement_label_counts(network)
+		return
+	rendered_settlement_network_geometry_key=geometry_key
+	settlement_border_rebuilds+=1
 	if settlement_border_root: settlement_border_root.queue_free()
 	if settlement_network_marker_root: settlement_network_marker_root.queue_free()
 
@@ -4570,6 +4587,49 @@ func _refresh_settlement_network(force:=false)->void:
 		settlement_border_root.add_child(border_instance)
 	_update_scale_lod()
 
+
+## Everything the border, claim-wash and marker meshes read, and nothing else.
+## Claim outlines drift a few metres a day with population; they are keyed at
+## about one screen pixel of the current view, so a sub-pixel drift redraws
+## nothing and a zoom (a new view key) redraws the exact outline.
+func _settlement_network_geometry_key(network:Dictionary,view_inputs:Array)->int:
+	var parts:Array=[view_inputs]
+	var pixel:=maxf(0.00001,(camera.size if camera else 1.0)/900.0)
+	for settlement:Dictionary in network.settlements:
+		var profile:=_settlement_expansion_visual_profile(settlement)
+		# An outline is its shape (fixed by site and access axes) scaled by the
+		# claim radius; key the shape exactly and the radius in screen pixels.
+		var radius:=maxf(0.000001,float(settlement.get("claim_radius_km",0.0)))
+		var position_value:Variant=settlement.get("position",Vector2.ZERO)
+		var center:Vector2=position_value if position_value is Vector2 else Vector2.ZERO
+		var shape:=PackedInt32Array()
+		for point:Vector2 in settlement.get("boundary",PackedVector2Array()):
+			var unit:=(point-center)/radius
+			shape.append(roundi(unit.x*200.0));shape.append(roundi(unit.y*200.0))
+		parts.append([String(settlement.get("id","")),bool(settlement.get("primary",false)),position_value,
+			hash(shape),roundi(radius*1.3/pixel),
+			str(profile),String(settlement.get("name","")),String(settlement.get("occupied_by",""))])
+	# Label counts are refreshed in place; only which towns carry labels is keyed.
+	var ranked:Array=network.settlements.filter(func(settlement:Dictionary)->bool:return not bool(settlement.get("primary",false)))
+	ranked.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var a_stage:=int(_settlement_expansion_visual_profile(a).get("stage",0))
+		var b_stage:=int(_settlement_expansion_visual_profile(b).get("stage",0))
+		if a_stage!=b_stage: return a_stage>b_stage
+		return int(a.get("population",0))>int(b.get("population",0)))
+	parts.append(ranked.slice(0,24).map(func(settlement:Dictionary)->String:return String(settlement.get("id",""))))
+	return hash(parts)
+
+## Secondary town labels show a live count; retext them without a mesh rebuild.
+func _refresh_secondary_settlement_label_counts(network:Dictionary)->void:
+	if not is_instance_valid(settlement_network_marker_root): return
+	var by_id:Dictionary={}
+	for settlement:Dictionary in network.settlements: by_id[String(settlement.get("id",""))]=settlement
+	for child in settlement_network_marker_root.get_children():
+		if not child is Label3D or not child.has_meta("city_map_id"): continue
+		var settlement:Dictionary=by_id.get(String(child.get_meta("city_map_id")),{})
+		if settlement.is_empty(): continue
+		var text:=_city_map_label(String(settlement.get("name","Settlement")),int(settlement.get("population",0)))
+		if (child as Label3D).text!=text: (child as Label3D).text=text
 
 ## Per-settlement geography sample keys (seed and position); see
 ## _sync_settlement_territory_contexts.

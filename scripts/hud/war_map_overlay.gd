@@ -33,6 +33,14 @@ var layout_signature:=""
 var collect_elapsed:=COLLECT_EVERY
 var hover_id:=""
 var pinned_id:=""
+## Inputs of the last collect(); the ledger is re-read only when they move.
+var collect_key:=-1
+## Hash of the last collected marks, and of everything the last drawing read.
+var marks_signature:=-1
+var drawn_signature:=-1
+## Counters for probes (never saved).
+var collects:=0
+var redraw_requests:=0
 
 
 func _ready()->void:
@@ -41,12 +49,48 @@ func _ready()->void:
 
 
 func _process(delta:float)->void:
+	# Wars, feuds, raids and sightings move with the simulated day, contact and
+	# charted ground; nothing between days changes them. Re-read the ledger only
+	# when one of those inputs moved, and at most COLLECT_EVERY.
 	collect_elapsed+=delta
 	if collect_elapsed>=COLLECT_EVERY:
 		collect_elapsed=0.0
-		marks=collect()
+		var key:=_collect_key()
+		if key!=collect_key:
+			collect_key=key
+			collects+=1
+			var fresh:=collect()
+			var fresh_signature:=hash(fresh)
+			if fresh_signature!=marks_signature:
+				marks=fresh
+				marks_signature=fresh_signature
+	# Projection and drawing follow the camera, the marks and the pointer only.
+	var signature:=_view_signature()
+	if signature==drawn_signature: return
+	drawn_signature=signature
 	_project()
+	redraw_requests+=1
 	queue_redraw()
+
+
+func _collect_key()->int:
+	var ledger:Variant=WarLoop.state().get("fronts",{})
+	var at_war:=0
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): at_war+=1
+	var last_day:Variant=terrain.get("last_discovery_day") if is_instance_valid(terrain) else 0
+	return hash([int(GameState.elapsed_days),last_day,GameState.settlement_site_committed,at_war,hash(ledger),
+		CivilizationSystem.fog_revision,CivilizationSystem.observation_revision,GameState.known_discoveries.size()])
+
+
+func _view_signature()->int:
+	if marks.is_empty() and screen.is_empty() and tags.is_empty(): return 0
+	var camera:=_camera()
+	var view:Array=[marks_signature,get_viewport_rect().size,hover_id,pinned_id]
+	if camera!=null: view.append_array([camera.global_transform,camera.size,camera.fov])
+	var cities:Variant=terrain.get("city_labels") if is_instance_valid(terrain) else null
+	if cities is Control and is_instance_valid(cities): view.append((cities as Control).get("cards").size())
+	return hash(view)
 
 
 # --- Reading the world --------------------------------------------------------

@@ -119,7 +119,24 @@ func handle_map_input(event:InputEvent)->bool:
 	# Bare-map clicks are handled by the terrain controller as dismissal.
 	return false
 
-func _process(_delta:float)->void:
+## Regions, claims and fronts follow the camera, the pointer and selection at
+## once; forces and contacts move with simulated time, which a quarter-second
+## refresh keeps up with. Nothing redraws while all of those stand still.
+const STATE_REFRESH_SECONDS:=0.25
+var state_elapsed:=0.0
+var drawn_signature:=0
+var redraw_requests:=0
+func _process(delta:float)->void:
+	state_elapsed+=delta
+	var camera:Camera3D=terrain.camera if is_instance_valid(terrain) else null
+	var view:Array=[size,domain,selected.get("id",""),selected_force,drawing,vertices.size(),boundary_title]
+	if camera!=null: view.append_array([camera.global_transform,camera.size])
+	if drawing: view.append(get_local_mouse_position())
+	var signature:=hash(view)
+	if signature==drawn_signature and state_elapsed<STATE_REFRESH_SECONDS: return
+	drawn_signature=signature
+	state_elapsed=0.0
+	redraw_requests+=1
 	queue_redraw()
 
 func _line(points:Array,color:Color,closed:bool=false)->void:
