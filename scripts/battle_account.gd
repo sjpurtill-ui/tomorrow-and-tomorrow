@@ -379,6 +379,12 @@ static func _days(days:int)->String:
 static func _advice(kind:String,ours:Dictionary,theirs:Dictionary,town:String,state:Dictionary,defending:bool)->String:
 	var present:=int(ours.present)
 	var their_left:=maxi(0,int(theirs.seen_high)-int(theirs.fell)-int(theirs.fled)-int(theirs.taken))
+	var marching:Dictionary=state.get("marching_to",{})
+	var shaken:=float(ours.morale)<0.42
+	if kind in ["won","uncontested","nobody"] and not marching.is_empty() and String(marching.get("kind",""))!="home" and present>0:
+		var dest:=String(marching.get("name","the town"))
+		if shaken: return "Our people are badly shaken. Let me rest them a day before we try %s, or call us home." % dest
+		return "The road to %s is open. We go on unless you call us back." % dest
 	match kind:
 		"taken": return "Leave enough here to keep the gate, and let the hurt go home to heal."
 		"uncontested","nobody": return "Their band is broken. We can go on, or come home."

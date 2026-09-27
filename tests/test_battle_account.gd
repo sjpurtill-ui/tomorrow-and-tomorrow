@@ -317,3 +317,40 @@ func test_report_panel_shows_the_account_and_three_plain_actions()->void:
 	await get_tree().process_frame
 	assert_bool(host.has_meta(ReportPanel.META)).is_false()
 	host.queue_free()
+
+# ---------------------------------------------------------------------------
+# War planning, the war chart and the army card
+# ---------------------------------------------------------------------------
+
+func test_war_planning_speaks_plainly_and_shows_the_last_fight()->void:
+	var army_id:=_army_at_the_town(20)
+	MilitaryCampaign.order_city_operation(army_id,civ_id,city_id)
+	_fight_to_the_end()
+	MilitaryCampaign.pending_aftermath.clear()
+	var content:RefCounted=load("res://scripts/hud/content/dock_detail_war_planning.gd").new(null,null)
+	var tab:Dictionary=content.tab(0)
+	var text:=JSON.stringify(tab.get("kpis",[]))+JSON.stringify(tab.get("brief",{}))
+	for block:Dictionary in tab.get("blocks",[]):
+		text+=String(block.get("heading",""))+String(block.get("text",""))
+		for item:Dictionary in block.get("items",[]): text+=String(item.get("label",""))+String(item.get("name",""))+String(item.get("sub",""))
+	for word in ["Mercy 0","Fear 0","Grievance","PRAGMATIC","BALANCED","\"none\"","prisoners","REPUTATION"]:
+		assert_bool(text.contains(word)).override_failure_message("War planning still says '%s'" % word).is_false()
+	assert_str(text).contains("THE LAST FIGHT")
+	assert_str(text).contains("Watch the battle")
+
+func test_a_finished_fight_stays_on_the_war_chart_for_days()->void:
+	var Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
+	var record:=_ditch_battle()
+	assert_array(Overlay.recent_battles([record],34826+3)).has_size(1)
+	assert_array(Overlay.recent_battles([record],34826+Overlay.RECENT_BATTLE_DAYS+1)).is_empty()
+
+func test_army_card_says_what_the_army_is_doing()->void:
+	var army_id:=_army_at_the_town(20)
+	var index:=MilitaryCampaign._field_army_index(army_id)
+	MilitaryCampaign.field_armies[index]["position"]={"x":city.x+15.0,"z":city.y}
+	var order:=MilitaryCampaign.order_city_operation(army_id,civ_id,city_id)
+	assert_bool(bool(order.get("queued",false))).override_failure_message(str(order)).is_true()
+	index=MilitaryCampaign._field_army_index(army_id)
+	var words:=Account.doing(MilitaryCampaign.field_armies[index])
+	assert_str(words).starts_with("marching to attack Tsaren")
+	_assert_plain(words)

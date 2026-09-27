@@ -83,7 +83,11 @@ func _build()->void:
 	var scroll:=ScrollContainer.new(); scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size=Vector2(0,minf(560.0,get_viewport_rect().size.y-360.0))
 	column.add_child(scroll)
-	var body:=VBoxContainer.new(); body.size_flags_horizontal=SIZE_EXPAND_FILL; body.add_theme_constant_override("separation",18); scroll.add_child(body)
+	# A scroll box gives its child no width of its own: set it, or prose
+	# wraps one letter to a line. The margin keeps figures clear of the bar.
+	var inset:=MarginContainer.new(); inset.add_theme_constant_override("margin_right",20); inset.size_flags_horizontal=SIZE_EXPAND_FILL; scroll.add_child(inset)
+	var body:=VBoxContainer.new(); body.size_flags_horizontal=SIZE_EXPAND_FILL; body.add_theme_constant_override("separation",18); inset.add_child(body)
+	body.custom_minimum_size.x=card.custom_minimum_size.x-64.0-28.0
 	# Both sides, before and after.
 	var sides:=HBoxContainer.new(); sides.add_theme_constant_override("separation",32); body.add_child(sides)
 	_side_block(sides,"OUR SIDE",_our_rows(),String(account.ours.morale_words),BattleAccount.sent_line(account.ours))
@@ -154,7 +158,8 @@ func _fate_words(fate:String)->String:
 
 
 func _side_block(parent:Node,title:String,rows:Array,morale:String,note:String)->void:
-	var box:=VBoxContainer.new(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.add_theme_constant_override("separation",6); parent.add_child(box)
+	var box:=VBoxContainer.new(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.size_flags_stretch_ratio=1.0; box.add_theme_constant_override("separation",6); parent.add_child(box)
+	box.custom_minimum_size.x=330.0
 	box.name=title.replace(" ","").capitalize()
 	var heading:=_label(box,title,"kicker",T.INK_MUTED); heading.name="Title"
 	var grid:=GridContainer.new(); grid.columns=2; grid.add_theme_constant_override("h_separation",16); grid.add_theme_constant_override("v_separation",4); box.add_child(grid)
@@ -164,7 +169,9 @@ func _side_block(parent:Node,title:String,rows:Array,morale:String,note:String)-
 		# Optional rows appear only when something happened.
 		if not bool(row[2]) and value is int and int(value)<=0: continue
 		var name:=_label(grid,String(row[0]),"body",T.BODY); name.size_flags_horizontal=SIZE_EXPAND_FILL
+		name.autowrap_mode=TextServer.AUTOWRAP_OFF
 		var number:=_label(grid,("none" if int(value)<=0 else str(value)) if value is int else String(value),"value",T.INK)
+		number.autowrap_mode=TextServer.AUTOWRAP_OFF
 		number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	if morale!="": _label(box,"They are %s." % morale,"small",T.BODY)
 	if note!="": _label(box,note,"small",T.INK_MUTED)
