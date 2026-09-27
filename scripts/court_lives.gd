@@ -452,7 +452,8 @@ static func _on_figure_death(figure:Dictionary)->void:
 ## work, and the work in plain words.
 const FIGURE_WORK:={"General":"the young spears followed them","Scholar":"they were the one people asked when no one else knew","Physician":"they sat with the sick",
 	"Engineer":"they made roofs and walls that stood","Agronomist":"they knew what grew where, and when to gather it","Organizer":"they settled who did what work and who got what share",
-	"Artist":"their songs and painted marks were the people's own","Explorer":"they walked the far paths and came back to tell them","Architect":"they raised what will outlast us"}
+	"Artist":"their songs and painted marks were the people's own","Explorer":"they walked the far paths and came back to tell them","Architect":"they raised what will outlast us",
+	"Admiral":"they kept the ships at sea and brought the crews home","Air Commander":"they sent the aircraft out and counted them home"}
 
 static func _figure_obituary(figure:Dictionary,age:int,title:String)->String:
 	var name:=String(figure.get("name",""))

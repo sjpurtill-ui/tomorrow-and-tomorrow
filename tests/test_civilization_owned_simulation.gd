@@ -332,7 +332,11 @@ func test_air_contacts_with_matching_local_ids_damage_the_correct_owners()->void
 			var op=WorldSimulation.military.joint_operations
 			var remaining:=int(op.state.forces[0].units.fighter)
 			assert_int(remaining).is_less(20)
-			assert_int(WorldSimulation.state.population_total).is_equal(4000-(20-remaining)*int(op.C.UNITS.fighter.crew))
+			# Pilots of lost fighters are killed, wounded, rescued or captured
+			# (air_naval_consequences.gd): only the killed leave the population.
+			var dead:=4000-int(WorldSimulation.state.population_total)
+			assert_int(dead).is_greater(0)
+			assert_int(dead).is_less_equal(20*int(op.C.UNITS.fighter.crew))
 			assert_bool(op.state.contacts.has(("beta" if id=="alpha" else "alpha")+":"+str(op.state.forces[0].id))).is_true()
 		)
 

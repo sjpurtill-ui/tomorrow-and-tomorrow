@@ -30,6 +30,8 @@ static func quote(access:float,domestic:float)->Dictionary:
 	var budget:=0.0
 	if s.economy_stage!=economy.STAGE_SUBSISTENCE and s.external_trade_policy!="closed" and access>=.28:
 		budget=maxf(s.population_exact*.015,domestic)*clampf((access-.24)/.76,0,1)*(.42 if s.economy_stage==economy.STAGE_METAL else .72)
+		# Enemy blockades and commerce raiders cut the trade that goes by sea.
+		budget*=float(WorldSimulation.military.joint_operations.sea_trade_factor())
 		for key:String in economy.BASE_VALUES:
 			if key in ["Coin","Transport Carts"]:continue
 			var stock:=maxf(0,float(s.resource_stockpiles.get(key,0)))

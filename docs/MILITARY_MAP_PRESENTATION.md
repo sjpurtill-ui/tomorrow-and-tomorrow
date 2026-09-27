@@ -372,7 +372,7 @@ The save is still at the hearth. The fixture sets the presentation to a staffed 
 
 - **The captures use a fixture.** The mature save has no war, so the enemy side is supplied through the overlay's test-only `extra_inputs`. Our armies are real field armies in the private copy. Enemy counters for the fixture hosts are therefore absent. The Alderford plate is the authored war itself.
 - **Army counters crowd the ground.** At regional and continental zoom, the terrain's army counters and their 3D labels still cover much of a small front. (Resolved in round three, section 9.)
-- **The fleet and air arm answer through the Marshal.** They have no named commanders of their own yet.
+- **The fleet and air arm answer through the Marshal.** Each fleet and wing now has a named admiral or air commander (section 10), but map notes still summon the Marshal.
 - **Rival fleets' zones are not observed**, so sea fronts between fleets remain designed only.
 - **Fixture change.** The "before" fixture had the second host at 9,000; the "after" fixture has it at 30,000, so that two corps form the army group.
 
@@ -450,3 +450,20 @@ The fixture gives two armies named generals, puts one army's runner three days b
 - **Terrain features are not named yet.** "Holding the ford" needs a terrain-feature lookup; the card says "holding at <place>" or "holding its ground".
 - **Enemy wear** is shown only in the presentation labels, not yet on the chart's cards.
 - **At continental zoom, city cards sit above the war ink.** Marks of forces standing at a town can hide under its card, which is the layering round two chose.
+
+## 10. What the air and sea war costs (`scripts/air_naval_consequences.gd`)
+
+Branch `codex/air-naval-consequences`. Consequences run in the live world model through each civilization's own systems.
+
+- **Blockades reach the blockaded.** `civilization_joint_contact.share_sea_pressure` mirrors each fleet's blockade into the target's own ledger every day (entries marked `mirrored`, keyed by the target's city). The target's fish, sea trade (`civilization_exchange` budget), field-army supply and its own harbour on the map read it.
+- **Commerce raiding.** Raiders with zones near a people's ports cut its sea trade by at most half, blunted by its convoy escorts, and drown a few merchant crews. Both sides get one plain event.
+- **Striking towns.** Bombing, port strikes and shelling from the sea need the ruler's word: the Court for the human (`naval_bombardment` is a new restricted practice), a council decision for a rival (`MilitaryCampaign.record_ruler_decision`, refused in the human scope). Without it, bombers hold and ships fire only on defences.
+- **The cost to a struck town.** Deaths are bounded by era (early aircraft, heavy bombers, jets, ships' guns). People are driven out when there is another town to go to. Buildings are damaged and stay so until builders repair them; ruins are rebuilt after a year or more. Stores burn, fear rises, and cohesion and morale fall. The grudge and war-weariness land on both sides. Zone tactics change a raid's weight.
+- **Crews.** Crews of lost ships and aircraft are killed, wounded, rescued or captured, by branch, era and whether they came down over home. Hits short of a loss wound crews too. The wounded recover in the service's pool (counted in its strength), prisoners reach the captor, and crews short after hits are made up at base.
+- **Defences and carriers.** Guns and walls over a target bring down raiders (at most 0.7% of a wing a day). Close-support aircraft over a battle take ground fire. A sunk carrier takes most of its wings, and an overloaded deck loses the overflow. Interceptors hunt air transports.
+- **Landings.** An invasion convoy fights an opposed landing on arrival. Naval and air support lower its cost, and a beach held too strongly throws it back.
+- **Repairs.** Struck airfields (weeks) and harbours (months) are repaired for materials and builders; one knocked out is rebuilt.
+- **Commanders.** Admirals and air commanders are HistoricalFigures with the realm's own names. They gain renown, and can fall, be wounded or be taken when their ships go down.
+- **Record and Chronicle.** Air and sea losses reach each war's record monthly and raise war exhaustion. The Chronicle tells big sinkings, bad days in the air, bombed towns and drowned transports, and folds the rest into the year's entry.
+- **Rivals.** At war, rival commanders aim zones at known enemy towns, harbours and fleets, and can order landings. They obey their own ruler's decision.
+- **Tests.** `tests/test_air_naval_consequences.gd` covers these in the live model, including a three-year two-civilization war check.
