@@ -1,0 +1,12 @@
+{
+  "id": "sickness_pattern_memory",
+  "line": "health",
+  "game_year": 3,
+  "approx_historical_year": -4980,
+  "prompt": "c. 4980 BCE: caregivers recall a repeated seasonal illness while gently checking a sick persons brow beside dried herbs. Mature transparent sage and celadon watercolor with spare ink, flat angular figures and open paper; no written record, later medical equipment or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0f98a52a-b387-4e60-9d92-e6807d2ebed4.png",
+  "asset": "res://assets/ui/research/subjects/sickness_pattern_memory-v1.png",
+  "sha256": "97b032bb7176ec01344b448e3749fd456c65d1198616676fd696b76765ca2e2a",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+}

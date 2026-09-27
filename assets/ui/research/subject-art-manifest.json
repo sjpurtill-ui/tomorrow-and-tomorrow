@@ -3669,5 +3669,14 @@
   "common_ground_marking": {"path": "res://assets/ui/research/subjects/common_ground_marking-v1.png", "focus": [0.5, 0.5]},
   "household_task_division": {"path": "res://assets/ui/research/subjects/household_task_division-v1.png", "focus": [0.5, 0.5]},
   "lactational_spacing_awareness": {"path": "res://assets/ui/research/subjects/lactational_spacing_awareness-v1.png", "focus": [0.5, 0.5]},
-  "seasonal_duty_rosters": {"path": "res://assets/ui/research/subjects/seasonal_duty_rosters-v1.png", "focus": [0.5, 0.5]}
+  "seasonal_duty_rosters": {"path": "res://assets/ui/research/subjects/seasonal_duty_rosters-v1.png", "focus": [0.5, 0.5]},
+  "alarm_relay_signals": {"path": "res://assets/ui/research/subjects/alarm_relay_signals-v1.png", "focus": [0.5, 0.5]},
+  "council_messenger_duty": {"path": "res://assets/ui/research/subjects/council_messenger_duty-v1.png", "focus": [0.5, 0.5]},
+  "dawn_task_briefings": {"path": "res://assets/ui/research/subjects/dawn_task_briefings-v1.png", "focus": [0.5, 0.5]},
+  "edge_testing_by_feel": {"path": "res://assets/ui/research/subjects/edge_testing_by_feel-v1.png", "focus": [0.5, 0.5]},
+  "hazard_landmark_memory": {"path": "res://assets/ui/research/subjects/hazard_landmark_memory-v1.png", "focus": [0.5, 0.5]},
+  "labor_position_customs": {"path": "res://assets/ui/research/subjects/labor_position_customs-v1.png", "focus": [0.5, 0.5]},
+  "landmark_route_naming": {"path": "res://assets/ui/research/subjects/landmark_route_naming-v1.png", "focus": [0.5, 0.5]},
+  "named_descent_lines": {"path": "res://assets/ui/research/subjects/named_descent_lines-v1.png", "focus": [0.5, 0.4]},
+  "sickness_pattern_memory": {"path": "res://assets/ui/research/subjects/sickness_pattern_memory-v1.png", "focus": [0.5, 0.4]}
 }
