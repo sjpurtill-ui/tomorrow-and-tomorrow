@@ -1,3 +1,11 @@
+## September 26 — earliest-first year 3 art, batch 2: INTEGRATED
+
+Worker `183d03efe6b135cada19f46ffe33108ea23268ad`, branch `codex/research-art-earliest-02`, base `27d48512`, merged with main `c42dd1c2` as `979a0127`. Nine year3 subjects gain dedicated paintings: alarm_relay_signals, council_messenger_duty, dawn_task_briefings, edge_testing_by_feel, hazard_landmark_memory, labor_position_customs, landmark_route_naming, named_descent_lines and sickness_pattern_memory. Newer test fixes remain preserved. Classical Other batch10 stays HELD/excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for early materials, dress, shelters and subject clarity. Combined Godot 4.7.2 import has no logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-02` passes nine catalogue lookups, distinct texture/provenance hashes, hidden gating and crop bounds. Each lookup also passes at years1,2,3,299,300,600, including both sides of early-art expiry. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest02-runtime.log` and `earliest-02-research-in-game-crops.png`.
+
+Reproduced early audit:1122 rows,380 own effective paintings,742 borrowed/line,zero missing files. Counts use proposed-year lookup and filename ownership, not artistic-quality certification. Next gaps are year4 aptitude_trials,dawn_readiness_drill,dissenting_voice_custom. No simulation/save changes or import churn committed; full campaign/unrelated suites not repeated. No active canonical player found; no player/editor stopped or restarted.
+
 ## September 26 — earliest-first years 1–2 art, batch 1: INTEGRATED
 
 Worker `3d2df6949cad863dea2485b4cb6a232483293fe4`, branch `codex/research-art-earliest-01`, base `b9419562`, merged with main `ce41a0fa` as `1d565972`. Six earliest uncovered subjects now have dedicated paintings: raw_material_prestaging, carried_load_balancing, common_ground_marking, household_task_division, lactational_spacing_awareness and seasonal_duty_rosters. Preserves newer paper-button work. Classical Other batch 10 remains HELD and is not included.
