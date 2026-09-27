@@ -353,6 +353,11 @@ func collect()->Dictionary:
 	var command:Variant=MilitaryCampaign.get("command_hierarchy")
 	for battle in battles_to_draw(MilitaryCampaign.engagement_snapshot(),command.data.get("battles",[]) if command!=null else []):
 		engagements.append(_engagement_input(battle,friendly,enemy,home))
+	# Fights of the last days stay on the chart where they were fought, with
+	# how they went; a click reads the report or watches it again.
+	for record in recent_battles(MilitaryCampaign.battle_history,today):
+		if engagements.size()>=Model.MAX_CLASHES: break
+		engagements.append(_finished_input(record,friendly,enemy,home,today))
 	var sieges:Array=[]
 	var siege:Dictionary=MilitaryCampaign.active_siege
 	if not siege.is_empty():
@@ -521,6 +526,42 @@ func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vec
 	return {"pos":pos,"axis":axis,"ours":String((plan.get(home_side,{}) as Dictionary).get("id",Tactics.BASELINE)),"theirs":String((plan.get(enemy_side,{}) as Dictionary).get("id",Tactics.BASELINE)),
 		"rounds":int(engagement.get("round",0)),"phase_ours":String(last.get(home_side+"_tactic_phase","hold")),"phase_theirs":String(last.get(enemy_side+"_tactic_phase","hold")),"event":String(last.get("tactic_event","")),
 		"army_id":int(force_id),"commanded":bool(engagement.get("commander_managed",false)),"objective":String(engagement.get("command_objective",""))}
+
+
+## Our finished fights from the last RECENT_BATTLE_DAYS, newest first.
+const RECENT_BATTLE_DAYS:=12
+static func recent_battles(history:Array,today:int)->Array:
+	var out:Array=[]
+	for record_variant in history:
+		if not record_variant is Dictionary: continue
+		var record:Dictionary=record_variant
+		if today-int(record.get("day",-9999))>RECENT_BATTLE_DAYS: continue
+		if String(record.get("home_force_kind",""))=="occupation" and (record.get("rounds",[]) as Array).is_empty(): continue
+		out.append(record)
+		if out.size()>=4: break
+	return out
+
+
+func _finished_input(record:Dictionary,friendly:Array,enemy:Array,home:Vector2,today:int)->Dictionary:
+	var entry:=_engagement_input(record,friendly,enemy,home)
+	var threat:Dictionary=record.get("threat",{})
+	var at:=_v2(threat.get("target_position",{}))
+	var target:=String(record.get("target_region_id",threat.get("target_region_id","")))
+	if target!="":
+		var city:Dictionary=CivilizationSystem.city_intelligence.known("player",target)
+		if not city.is_empty(): at=_v2(city.get("position",{}))
+	if at.is_finite(): entry["pos"]=at
+	var BattleAccount:=preload("res://scripts/battle_account.gd")
+	var account:=BattleAccount.build(record,{"stage":EraWords.stage()})
+	var word:=String({"won":"Won","taken":"Taken","lost":"Beaten back","withdrew":"Pulled back","held":"Undecided","mutual":"Both drew off","uncontested":"They fled","nobody":"Nobody fought"}.get(String(account.kind),"Fought"))
+	var hurt:=int(account.ours.killed)+int(account.ours.wounded)
+	entry["finished"]=true
+	entry["seed"]=int(record.get("seed",0))
+	entry["age"]=maxi(0,today-int(record.get("day",today)))
+	entry["rounds"]=(record.get("rounds",[]) as Array).size()
+	entry["result"]="%s · %s" % [word,("%s hurt or killed" % BattleAccount.count_words(hurt)) if hurt>0 else "none of ours hurt"]
+	entry["headline"]=String(account.headline)
+	return entry
 
 
 func _raid_inputs(today:int,home:Vector2)->Array:
@@ -743,7 +784,8 @@ static func compose(inputs:Dictionary)->Dictionary:
 		out.clashes.append({"pos":engagement.pos,"axis":engagement.get("axis",Vector2.RIGHT),"ours":ours_id,"theirs":theirs_id,
 			"shape_ours":Tactics.shape(ours_id,rounds,String(engagement.get("phase_ours","hold"))),"shape_theirs":Tactics.shape(theirs_id,rounds,String(engagement.get("phase_theirs","hold"))),
 			"label":_cap(Tactics.name_of(ours_id,stage)) if ours_id!=Tactics.BASELINE else _cap(Tactics.name_of(theirs_id,stage)) if theirs_id!=Tactics.BASELINE else "","event":String(engagement.get("event","")),
-			"army_id":int(engagement.get("army_id",0)),"rounds":rounds,"commanded":bool(engagement.get("commanded",false))})
+			"army_id":int(engagement.get("army_id",0)),"rounds":rounds,"commanded":bool(engagement.get("commanded",false)),
+			"finished":bool(engagement.get("finished",false)),"seed":int(engagement.get("seed",0)),"age":int(engagement.get("age",0)),"result":String(engagement.get("result","")),"headline":String(engagement.get("headline",""))})
 	for siege in (inputs.get("sieges",[]) as Array).slice(0,4):
 		out.sieges.append({"pos":siege.pos,"pressure":clampf(float(siege.get("pressure",0.0)),0.0,1.0),"works":String(siege.get("works","blockade_camp")),"ours":bool(siege.get("ours",true)),"label":_cap(Tactics.name_of(String(siege.get("works","blockade_camp")),stage)),"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	for raid in (inputs.get("raids",[]) as Array).slice(0,Model.MAX_CLASHES):
@@ -1334,6 +1376,14 @@ func _draw_siege(siege:Dictionary,wide:bool)->void:
 func _draw_clash(clash:Dictionary,band:String)->void:
 	var at:=_screen(clash.pos)
 	if not at.is_finite(): return
+	if bool(clash.get("finished",false)):
+		# A fight already over: a quiet mark fading with the days, and how it went.
+		var fade:=clampf(1.0-float(clash.get("age",0))/float(RECENT_BATTLE_DAYS+1),0.35,1.0)
+		_crossed_strokes(at,5.0,Color(THEIRS,0.85*fade))
+		draw_arc(at,9.0,0.0,TAU,24,Color(INK,0.55*fade),1.2,true)
+		if band!="world": _request_caption("battle:%d" % int(clash.get("seed",0)),clash.pos,String(clash.get("result","")),INK,5,14.0)
+		hits.append({"kind":"clash","centre":at,"radius":14.0,"army_id":int(clash.get("army_id",0)),"clash":clash})
+		return
 	# The diagram is sized to the fighting it shows: about half the gap
 	# between the two sides on screen, never larger than a local close-up.
 	var sigma:=float(scene.get("sigma",1.0))
@@ -1816,6 +1866,7 @@ func note_content(hit:Dictionary)->Dictionary:
 			return content
 		"clash":
 			var clash:Dictionary=hit.get("clash",{})
+			if bool(clash.get("finished",false)): return _finished_note(clash)
 			var content:=_army_content(int(clash.get("army_id",0)),stage)
 			var lines:Array=[]
 			var ours:=String(clash.get("ours",Tactics.BASELINE)); var theirs:=String(clash.get("theirs",Tactics.BASELINE))
@@ -1828,9 +1879,31 @@ func note_content(hit:Dictionary)->Dictionary:
 		"siege":
 			var content:=_army_content(int(hit.get("army_id",0)),stage)
 			content.kicker="SIEGE"
+			var siege:Dictionary=MilitaryCampaign.siege_public_snapshot()
+			if not siege.is_empty():
+				content.lines=["Day %d of the siege of %s." % [maxi(1,int(siege.get("days",0))),String(siege.get("target_name","the town"))]]+(content.lines as Array)
+				content["second"]={"label":"Watch the siege","kind":"siege","id":String(siege.get("id",""))}
 			return content
 		_:
 			return _army_content(int(hit.get("army_id",0)),stage)
+
+
+## The note on a fight already over: what happened, and two plain actions.
+func _finished_note(clash:Dictionary)->Dictionary:
+	var seed:=int(clash.get("seed",0))
+	var record:Dictionary={}
+	for past_variant in MilitaryCampaign.battle_history:
+		if past_variant is Dictionary and int((past_variant as Dictionary).get("seed",-1))==seed: record=past_variant; break
+	var BattleAccount:=preload("res://scripts/battle_account.gd")
+	var account:=BattleAccount.build(record,BattleAccount.gather(record)) if not record.is_empty() else {}
+	var age:=int(clash.get("age",0))
+	var lines:Array=[]
+	if not account.is_empty():
+		lines.append(BattleAccount.ledger_line(account.ours))
+		lines.append(String(account.now))
+	var watch:={"label":"Watch the battle","kind":"watch","seed":seed} if int(clash.get("rounds",0))>0 else {}
+	return {"kicker":"BATTLE · %s" % ("TODAY" if age==0 else ("YESTERDAY" if age==1 else "%d DAYS AGO" % age)),"title":String(clash.get("headline","A fight")),"lines":lines,
+		"action":{"label":"Read the report","kind":"report","seed":seed},"second":watch}
 
 
 func _army_record(army_id:int)->Dictionary:
@@ -1853,6 +1926,10 @@ func _army_content(army_id:int,stage:String)->Dictionary:
 	var word:=String(mark.get("noun","host"))
 	var doing:=String(mark.get("doing",""))
 	lines.append("Leads %s %s of %s%s." % [ArmyMarks._article(word),word,ArmyMarks.about(int(army.get("troops",0))),(", "+doing) if doing!="" else ""])
+	# What it is doing now, from the campaign itself (fighting, besieging,
+	# marching to attack, waiting after a fight).
+	var now:=preload("res://scripts/battle_account.gd").doing(army)
+	if now!="": lines.append(_cap(now)+".")
 	for f in (scene.get("friendly_seen",[]) as Array):
 		if int(f.get("army_id",0))!=army_id: continue
 		if f.has("fallback"):
@@ -1915,6 +1992,11 @@ func open_note(hit:Dictionary,at:Vector2)->void:
 	button.visible=not action.is_empty()
 	button.text=String(action.get("label",""))
 	button.set_meta("action",action)
+	var second:Dictionary=content.get("second",{})
+	var other:=box.get_node("Actions/Second") as Button
+	other.visible=not second.is_empty()
+	other.text=String(second.get("label",""))
+	other.set_meta("action",second)
 	note.reset_size()
 	note.show()
 	var extent:=note.get_combined_minimum_size()
@@ -1937,6 +2019,8 @@ func _build_note()->void:
 	var actions:=HBoxContainer.new(); actions.name="Actions"; actions.add_theme_constant_override("separation",8); box.add_child(actions)
 	var speak:=Button.new(); speak.name="Speak"; T.text(speak,"small",T.INK); actions.add_child(speak)
 	speak.pressed.connect(func(): _act(speak.get_meta("action",{})))
+	var second:=Button.new(); second.name="Second"; T.text(second,"small",T.INK); second.visible=false; actions.add_child(second)
+	second.pressed.connect(func(): _act(second.get_meta("action",{})))
 	var close:=Button.new(); close.name="Close"; close.text="Close"; T.text(close,"small",T.INK_MUTED); close.flat=true; actions.add_child(close)
 	close.pressed.connect(close_note)
 
@@ -1945,6 +2029,11 @@ func _act(action:Dictionary)->void:
 	close_note()
 	match String(action.get("kind","")):
 		"campaign": GeneralCampaign.open_screen()
+		"report": preload("res://scripts/hud/battle_report_panel.gd").open(get_tree().current_scene,int(action.get("seed",0)))
+		"watch":
+			var ui:Node=get_tree().root.get_node_or_null("MilitaryCommandUI")
+			if ui!=null: ui.call_deferred("_open_battle_graphics",0,int(action.get("seed",0)))
+		"siege": preload("res://scripts/hud/siege_screen.gd").open(String(action.get("id","")))
 		"summon":
 			var director:Node=preload("res://scripts/audience_director.gd").court_node()
 			if director!=null and director.has_method("summon"): director.call("summon",action.get("target",{}))

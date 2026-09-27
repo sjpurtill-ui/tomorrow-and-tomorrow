@@ -13353,7 +13353,14 @@ func _on_battle_attention(result:Dictionary)->void:
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
 		_set_game_speed(0);return
-	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"BATTLE REPORT",MilitaryCampaign.battle_report_text(result))
+	# The war leader's report card (hud/battle_report_panel.gd) pauses time
+	# itself and resumes it on Continue. Opened deferred so the town taken and
+	# the garrison left behind are already on the battle's record.
+	var event_id:="battle_%s" % str(result.get("seed",GameState.elapsed_days))
+	if military_attention_seen.has(event_id): return
+	military_attention_seen[event_id]=true
+	GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
+	Callable(preload("res://scripts/hud/battle_report_panel.gd"),"open").call_deferred(self,int(result.get("seed",0)),result)
 
 func _pause_for_military_attention(event_id:String,title:String,body:String,truncate_batch:bool=true)->void:
 	if military_attention_seen.has(event_id): return

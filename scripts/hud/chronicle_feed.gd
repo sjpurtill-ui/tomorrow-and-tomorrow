@@ -100,6 +100,7 @@ func _moment(entry:Dictionary,voice:Dictionary)->void:
 	copy.add_child(_serif(String(entry.get("title","")),20,T.INK))
 	if String(entry.get("text",""))!="":
 		var text:=T.make_label(String(entry.text),13,T.BODY);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;copy.add_child(text)
+	_battle_links(copy,entry)
 
 
 func _notice(entry:Dictionary)->void:
@@ -114,6 +115,29 @@ func _notice(entry:Dictionary)->void:
 	head.add_child(T.make_label(Chronicle.date_label(int(entry.get("day",0))).get_slice(" · ",1),10,T.MUTED))
 	if String(entry.get("text",""))!="":
 		var text:=T.make_label(String(entry.text),12,T.TEXT_SOFT);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;copy.add_child(text)
+	_battle_links(copy,entry)
+
+
+## A battle's entry offers its report and its replay (battle_account.gd,
+## battle_graphics_screen.gd). Watching never fights it again.
+func _battle_links(copy:VBoxContainer,entry:Dictionary)->void:
+	var action:Dictionary=entry.get("action",{}) if entry.get("action") is Dictionary else {}
+	if String(action.get("kind",""))!="battle": return
+	var seed:=int(action.get("seed",0))
+	var row:=HBoxContainer.new();row.name="BattleLinks";row.add_theme_constant_override("separation",12);copy.add_child(row)
+	for link in [["Read the report","report"],["Watch the battle","watch"]]:
+		var button:=Button.new();button.text=String(link[0]);button.flat=true;button.name=String(link[1]).capitalize()
+		button.add_theme_color_override("font_color",T.GOLD);button.add_theme_font_size_override("font_size",13)
+		button.pressed.connect(_open_battle.bind(String(link[1]),seed))
+		row.add_child(button)
+
+
+func _open_battle(what:String,seed:int)->void:
+	var host:Node=get_tree().current_scene
+	if what=="watch":
+		var ui:Node=get_tree().root.get_node_or_null("MilitaryCommandUI")
+		if ui!=null:ui.call_deferred("_open_battle_graphics",0,seed)
+	else:preload("res://scripts/hud/battle_report_panel.gd").open(host,seed)
 
 
 ## The year's own entry (chronicle_annals.gd): the name the people give the

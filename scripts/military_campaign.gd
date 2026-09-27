@@ -27,6 +27,8 @@ const RUNNER_INTERVAL_DAYS:=5
 const RUNNER_SPEED_KM_DAY:=30.0
 const RUNNERS_PER_ARMY:=2
 const MAP_ENGAGEMENT_RANGE_KM:=6.0
+## Morale at or below which a side is broken (combat_simulator.gd _outcome).
+const MORALE_BREAK:=0.15
 const ABSOLUTE_MAX_PRODUCTION_LINES:=12
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const FORTIFIED_STORES_MAX_PROTECTION:=0.60
@@ -1216,6 +1218,7 @@ func order_field_army_intercept(army_id:int,formation_id:String)->Dictionary:
 	if index>=0:
 		field_armies[index]["target_formation_id"]=formation_id
 		field_armies[index]["order_kind"]="intercept"
+		_begin_operation(index,"formation:"+formation_id)
 		result["army"]=field_armies[index].duplicate(true)
 	result["underway"]=true
 	result["message"]="INTERCEPT ORDER UNDERWAY â€” %s is tracking %s. If contact holds, battle begins automatically at close range." % [String((result.get("army",{}) as Dictionary).get("name","The army")),String(sighting.get("label","the foreign formation"))]
@@ -1238,6 +1241,8 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 	var incident:Dictionary=WorldSimulation.world.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
 	if incident.has("error"): return incident
 	incident["field_army_id"]=army_id
+	var operation_index:=_field_army_index(army_id)
+	if operation_index>=0 and (field_armies[operation_index].get("operation",{}) as Dictionary).is_empty(): _begin_operation(operation_index,"formation:"+formation_id)
 	_create_civilization_threat(incident,"offensive")
 	active_threat["field_encounter"]=true
 	active_threat["formation_id"]=formation_id
@@ -2099,6 +2104,14 @@ func begin_threat_engagement()->Dictionary:
 	var threat:=active_threat.duplicate(true)
 	threat["routine_raid"]=preload("res://scripts/raid_policy.gd").routine(threat,local_defense)
 	var home_force:Dictionary=occupation_forces[occupation_index].duplicate(true) if defending_occupation else (field_armies[field_army_index].duplicate(true) if field_army_index>=0 else local_defense)
+	# A band already broken, or with nobody left under arms, cannot be fought
+	# again. The old code staged a battle with no exchanges and reported a
+	# victory with nothing lost, day after day, against the same beaten band.
+	# Field contacts only: an undefended town still falls through its battle.
+	var foe:Dictionary=threat.get("enemy_force",{})
+	if offensive and bool(threat.get("field_encounter",false)) and (int(foe.get("troops",0))<=0 or float(foe.get("morale",1.0))<=MORALE_BREAK):
+		active_threat.clear(); threat_changed.emit({})
+		return {"error":"Their band is already broken and scattering; there is nobody left there to fight.","nobody_to_fight":true}
 	var attacker:Dictionary=home_force if offensive else threat.enemy_force.duplicate(true)
 	var defender:Dictionary=threat.enemy_force.duplicate(true) if offensive else home_force
 	var battle_ground:=float(threat.get("terrain_defense",1.0)) if offensive or defending_occupation else _terrain_defense()
@@ -2204,6 +2217,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	final_result["tactics"]=(engagement.get("tactics",{}) as Dictionary).duplicate(true)
 	final_result["command_participants"]=engagement.get("command_participants",[]).duplicate(true)
 	var committed:=_commit_campaign_battle(final_result)
+	var troops_after_fight:=_force_troops(String(final_result.home_force_kind),int(final_result.home_force_id))
 	if retreated and bool(final_result.commander_managed):
 		var recovering:Array=final_result.get("command_participants",[])
 		if recovering.is_empty():recovering=[{"army_id":final_result.home_force_id}]
@@ -2232,6 +2246,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 				strategic_outcome["message"]=String(occupation.error)
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
 		committed["strategic_outcome"]=strategic_outcome
+	_record_battle_consequences(final_result,committed.get("strategic_outcome",{}),troops_after_fight)
 	# The battle report is directly known, including the soldiers just detached
 	# to hold the city. Do not keep presenting a pre-battle runner headcount.
 	if String(final_result.home_force_kind)=="field_army":
@@ -2406,12 +2421,17 @@ func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:boo
 		var result:=move_field_army(army_id,region_id)
 		if result.has("error"):return result
 		field_armies[index]["city_operation"]={"civ_id":civ_id,"region_id":region_id,"besiege":besiege,"raid":raid}
+		_begin_operation(index,region_id)
 		return {"ok":true,"queued":true,"distance_km":float(quote.distance_km),"days":int(quote.days),"message":"%s: marching %.1f km, about %d days, then %s. War starts on hostile contact, not departure." % [String(field_armies[index].name),float(quote.distance_km),int(quote.days),"raiding its fields and stores" if raid else ("besieging the city" if besiege else "attacking the city")]}
 	var old_location:=String(field_armies[index].get("location_id",""));var old_status:=String(field_armies[index].get("status","stationed"))
+	var old_location_name:=String(field_armies[index].get("location_name",""))
+	_begin_operation(index,region_id)
 	field_armies[index]["location_id"]=region_id;field_armies[index]["status"]="stationed";field_armies[index].erase("city_operation")
+	var town_report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region_id)
+	if String(town_report.get("name",""))!="": field_armies[index]["location_name"]=String(town_report.name)
 	var result:=launch_raid(civ_id,region_id) if raid else (start_offensive_siege(civ_id,region_id,army_id) if besiege else launch_offensive(civ_id,region_id,army_id))
 	if result.has("error"):
-		field_armies[index]["location_id"]=old_location;field_armies[index]["status"]=old_status
+		field_armies[index]["location_id"]=old_location;field_armies[index]["status"]=old_status;field_armies[index]["location_name"]=old_location_name
 	return result
 
 func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
@@ -4741,20 +4761,57 @@ func _mark_engaged_force_prisoners(force_kind:String,force_id:int,civ_id:String,
 	_mark_home_prisoners(requested)
 
 
+## The battle told plainly (battle_account.gd): headline, both sides'
+## losses, how each fought, where things stand and what happens next.
 func battle_report_text(result:Dictionary)->String:
-	var home_side:=String(result.get("home_side","attacker"))
-	var home:Dictionary=result.get(home_side,{})
-	var enemy:Dictionary=result.get("defender" if home_side=="attacker" else "attacker",{})
-	var threat:Dictionary=result.get("threat",{})
-	var opponent:=String(threat.get("source_name",enemy.get("name","an unidentified force")))
-	var place:=String(result.get("target_region_name",threat.get("target_region_name",WorldSimulation.state.settlement_name)))
-	if place.is_empty(): place="the settlement"
-	var losses:=maxi(0,int(home.get("initial_troops",home.get("troops",0)))-int(home.get("remaining_troops",0)))
-	return "%s at %s against %s. Our force: %d remaining; %d lost or removed from the field; morale %.0f%%. %s" % [String(result.get("outcome","inconclusive")).replace("_"," ").capitalize(),place,opponent,int(home.get("remaining_troops",0)),losses,float(home.get("morale",0.0))*100.0,"We defended against an approaching attack." if home_side=="defender" else "Our force was conducting an offensive operation."]+_tactic_report(result,home_side)
+	var BattleAccount:=preload("res://scripts/battle_account.gd")
+	return BattleAccount.text(BattleAccount.build(result,BattleAccount.gather(result)))
 
 func _tactic_report(result:Dictionary,home_side:String)->String:
 	var sentence:=preload("res://scripts/battle_tactics.gd").report_sentence(result.get("tactics",{}),home_side,preload("res://scripts/hud/era_words.gd").stage())
 	return "" if sentence=="" else " "+sentence
+
+## An operation's starting headcount, so each report can say what became of
+## everyone who set out. A new objective starts a new ledger; the same
+## objective keeps the one it has.
+func _begin_operation(index:int,objective:String)->void:
+	if index<0 or index>=field_armies.size(): return
+	var current:Dictionary=field_armies[index].get("operation",{})
+	if String(current.get("objective",""))==objective and not current.is_empty(): return
+	field_armies[index]["operation"]={"objective":objective,"sent":int(field_armies[index].get("troops",0)),"day":int(WorldSimulation.state.elapsed_days)}
+
+
+func _force_troops(kind:String,army_id:int)->int:
+	if kind=="field_army":
+		var index:=_field_army_index(army_id)
+		return int(field_armies[index].get("troops",0)) if index>=0 else 0
+	if kind=="field": return int(home_army.get("troops",0))
+	return 0
+
+
+## What the battle led to, written back onto its record so the report,
+## the Chronicle and the replay tell the same story: the town taken and how
+## many stayed behind to hold it.
+func _record_battle_consequences(result:Dictionary,strategic:Dictionary,troops_after_fight:int)->void:
+	var detached:=maxi(0,troops_after_fight-_force_troops(String(result.get("home_force_kind","field")),int(result.get("home_force_id",0))))
+	if String(result.get("home_force_kind",""))!="field_army": detached=0
+	var seed:=int(result.get("seed",0))
+	for index in battle_history.size():
+		var record:Dictionary=battle_history[index]
+		if int(record.get("seed",-1))!=seed or int(record.get("home_force_id",0))!=int(result.get("home_force_id",0)): continue
+		record["strategic_outcome"]=strategic.duplicate(true)
+		record["detached"]=detached
+		battle_history[index]=record
+		if WorldSimulation.enabled and WorldSimulation.actor_id!="player": break
+		var BattleAccount:=preload("res://scripts/battle_account.gd")
+		var account:=BattleAccount.build(record,BattleAccount.gather(record))
+		for matter_variant in WorldSimulation.state.council_inbox:
+			var matter:Dictionary=matter_variant
+			if int(matter.get("battle_seed",-1))==seed: matter["text"]=BattleAccount.text(account); matter["advisor"]="WAR LEADER"
+		preload("res://scripts/chronicle.gd").record({"key":"battle:%d:%d" % [seed,int(record.get("day",0))],"title":String(account.headline).trim_suffix(".").substr(0,70),
+			"text":String(account.now),"tier":"notice","kind":"war","domain":"security","action":{"kind":"battle","seed":seed}})
+		break
+
 
 func _record_council_battle(result:Dictionary)->void:
 	WorldSimulation.state.council_inbox.push_front({"id":"battle_%d_%d" % [int(WorldSimulation.state.elapsed_days),int(result.seed)],"advisor":"FIELD COMMAND","office":"Marshal","topic":"security","act":{"type":"warn"},"text":battle_report_text(result),"urgency":1.0,"severity":"critical","day":int(WorldSimulation.state.elapsed_days),"status":"unread","battle_seed":int(result.seed)})
