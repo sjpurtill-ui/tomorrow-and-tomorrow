@@ -1,0 +1,14 @@
+{
+  "id": "figured_floor_mosaics",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-acc1248e-ac31-4b92-befd-54f3397188de.png",
+  "source_file": "exec-acc1248e-ac31-4b92-befd-54f3397188de.png",
+  "creative_brief": "Floors of small set stones show hunts, sea creatures and scenes from the plays. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/figured_floor_mosaics-v1.png",
+  "sha256": "a5f6a01dee173a1a57be78a180875e6b866af99865b7705622b720ad310cc03f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

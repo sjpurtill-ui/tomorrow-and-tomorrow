@@ -1,0 +1,14 @@
+{
+  "id": "water_lifting_wheels",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2f834aec-5515-462c-9a9e-fbff1eba4c72.png",
+  "source_file": "exec-2f834aec-5515-462c-9a9e-fbff1eba4c72.png",
+  "creative_brief": "The river turns a great wheel hung with clay pots, and each pot empties into the channel at the top of its turn. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/water_lifting_wheels-v1.png",
+  "sha256": "9f159fbaf786864216f9b9e2d762d545069c4de4e7793cc94206263b4ed3779d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

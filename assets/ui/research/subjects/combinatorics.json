@@ -1,0 +1,14 @@
+{
+  "id": "combinatorics",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5e26fb61-e2bb-4f42-a13e-e325359bfef0.png",
+  "source_file": "exec-5e26fb61-e2bb-4f42-a13e-e325359bfef0.png",
+  "creative_brief": "Scholars count how many ways letters, verses or lots can be arranged and chosen. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/combinatorics-v1.png",
+  "sha256": "b903ed5221772dc65d6619337abee7600dca35eaae23f2717d4dc00f47eea0e5",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

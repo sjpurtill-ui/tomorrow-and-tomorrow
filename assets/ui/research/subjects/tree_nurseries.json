@@ -1,0 +1,14 @@
+{
+  "id": "tree_nurseries",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e2e5b3ce-dd18-4200-a005-9effb88da0fc.png",
+  "source_file": "exec-e2e5b3ce-dd18-4200-a005-9effb88da0fc.png",
+  "creative_brief": "Seedlings raised in nursery beds are planted out on cleared ground and fenced until they stand. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/tree_nurseries-v1.png",
+  "sha256": "3f3544f652378b6d28a3d56abdea61db83d7db7b1c318e312a60ed840d638302",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
