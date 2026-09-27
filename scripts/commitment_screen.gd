@@ -23,6 +23,7 @@ const Rivals:=preload("res://scripts/rival_rulers.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
+const Pacts:=preload("res://scripts/trade_pacts.gd")
 
 const DESIGN_SIZE:=Vector2(1320,900)
 const LEDGER_SHOWN:=8
@@ -33,6 +34,7 @@ const LEAGUE_TERMS:="Members answer a siege on any one of them with whatever hel
 const PROTECTION_TERMS:="If either people is besieged, the other sends what help it can spare. It does not cover wars either of you starts."
 const BOND_WORDS:={"inlaw":"Marriage","hunting":"Hunting leave","dependent":"In your debt","frontier":"Agreed border","recognised":"You named their ruler rightful","hostage":"Kin held as pledges","pilgrimage":"Leave to visit","no_scouts":"Your word on scouts","rites":"Shared rites","cairn":"A cairn raised","hunt_partner":"Hunted together","passage":"Leave to cross"}
 const RELIEF_WORDS:={"outbound":"on the road to you","delivered":"arrived at the siege","camped":"camped at the siege","returning":"going home"}
+const EXCHANGE_OUTCOMES:={"sealed":"sealed","delivered":"delivered","partial":"partly delivered","skipped":"skipped","suspended":"suspended by war","cancelled":"ended","lapsed":"lapsed","completed":"completed"}
 const OBLIGATION_WORDS:={"dispatched":"help was sent","food_aid_delivered":"food was delivered","expired":"the call lapsed","declined":"they declined"}
 
 ## Set by the opener before add_child.
@@ -50,6 +52,7 @@ var card:PanelContainer
 var peoples_box:VBoxContainer
 var league_box:VBoxContainer
 var called_box:VBoxContainer
+var exchange_box:VBoxContainer
 var ledger_box:VBoxContainer
 var offers_row:HFlowContainer
 var detail_box:VBoxContainer
@@ -275,6 +278,8 @@ func _build_middle()->Control:
 	league_box=VBoxContainer.new();league_box.name="LeagueRoster";league_box.add_theme_constant_override("separation",6);league.add_child(league_box)
 	var called:=_section(parts[1],"CalledUpon","Promises called upon")
 	called_box=VBoxContainer.new();called_box.name="Calls";called_box.add_theme_constant_override("separation",8);called.add_child(called_box)
+	var exchanges:=_section(parts[1],"Exchanges","Standing exchanges")
+	exchange_box=VBoxContainer.new();exchange_box.name="ExchangeRows";exchange_box.add_theme_constant_override("separation",8);exchanges.add_child(exchange_box)
 	return parts[0]
 
 func _build_right()->Control:
@@ -331,6 +336,8 @@ func ties(id:String,state:Dictionary)->Array[Dictionary]:
 	var league:Dictionary=state.get("league",{})
 	if not league.is_empty() and id in league.get("members",[]):
 		out.append({"text":"In your league","icon":Icons.moment_texture("court",Tokens.GOLD,56),"tone":Tokens.GOLD,"tip":LEAGUE_TERMS})
+	for pact:Dictionary in Pacts.pacts(id):
+		out.append({"text":"Trade: %s" % Pacts.short_words(pact.terms),"icon":Icons.domain_texture("wealth",Tokens.GREEN),"tone":Tokens.GREEN,"tip":exchange_tip(pact)})
 	var pacts:Dictionary=model().state.get("pacts",{})
 	if pacts.has(id):
 		out.append({"text":"Protection since %s" % when(int((pacts[id] as Dictionary).get("since",0))),"icon":Icons.domain_texture("security",Tokens.TEAL),"tone":Tokens.TEAL,"tip":PROTECTION_TERMS})
@@ -456,6 +463,42 @@ func _fill_called(state:Dictionary)->void:
 		called_box.add_child(_label("%s · %s: %s." % [when(int(obligation.get("day",0))),name_of(String(obligation.get("beneficiary",""))),String(OBLIGATION_WORDS.get(String(obligation.get("status","")),"settled"))],"small",Tokens.INK_MUTED))
 	if shown==0 and answered.is_empty():
 		called_box.add_child(_quiet("No one has called on a promise, and no one owes you help in arms."))
+
+func exchange_tip(pact:Dictionary)->String:
+	## Next delivery and the latest history of one exchange, in calendar words.
+	var lines:PackedStringArray=[Pacts.describe(pact.terms),Pacts.next_words(pact)+"."]
+	for entry:Dictionary in (pact.get("log",[]) as Array).slice(0,4):
+		lines.append("%s · %s: %s" % [when(int(entry.get("d",0))),String(EXCHANGE_OUTCOMES.get(String(entry.get("o","")),String(entry.get("o","")))),first_sentence(String(entry.get("n","")))])
+	return "\n".join(lines)
+
+func _fill_exchanges()->void:
+	_clear(exchange_box)
+	var shown:=0
+	for pact:Dictionary in Pacts.pacts("",false):
+		var active:=String(pact.status)=="active"
+		if not active and int(pact.get("ended",0))<int(GameState.elapsed_days)-730:continue
+		var tone:=Tokens.GREEN if active else Tokens.RULE_STRONG
+		var item:=_call_row("Exchange_"+String(pact.id),Icons.domain_texture("wealth",tone),tone,
+			"%s: %s, for %s." % [name_of(String(pact.civ)),Pacts.short_words(pact.terms),Pacts.span_words(pact.terms)],
+			"%s. %d of %d portions carried." % [Pacts.next_words(pact),int(pact.done),int(pact.terms.portions)])
+		var stack:=item.get_meta("stack") as VBoxContainer
+		for entry:Dictionary in (pact.get("log",[]) as Array).slice(0,3):
+			var line:=_label("%s · %s" % [when(int(entry.get("d",0))),first_sentence(String(entry.get("n","")))],"small",Tokens.INK_MUTED)
+			line.name="ExchangeHistory";line.tooltip_text=String(entry.get("n",""));line.mouse_filter=MOUSE_FILTER_PASS;stack.add_child(line)
+		if active:
+			var end:=Button.new();end.name="EndExchange_"+String(pact.id);end.text="End this exchange";_style_button(end,false);end.size_flags_horizontal=SIZE_SHRINK_BEGIN
+			end.tooltip_text="Ending it while they keep their side is a broken word, and they will remember it."
+			end.pressed.connect(end_exchange.bind(String(pact.id)))
+			stack.add_child(end)
+		exchange_box.add_child(item);shown+=1
+	if shown==0:
+		exchange_box.add_child(_quiet("No goods pass between you and another people on a schedule. Agree one in talk with their ruler."))
+
+func end_exchange(pact_id:String)->Dictionary:
+	var result:=Pacts.cancel(pact_id,"player")
+	_say(String(result.get("error","The exchange is ended. Their traders will not come again.")),result.has("error"))
+	refresh(true)
+	return result
 
 func _call_row(node_name:String,texture:Texture2D,tone:Color,head:String,sub:String)->PanelContainer:
 	var row:=PanelContainer.new();row.name=node_name
@@ -681,12 +724,13 @@ func refresh(force:bool=false)->void:
 	var state:Dictionary=model().public_snapshot(focus_id)
 	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
 	var signature:=JSON.stringify([state.get("protection"),state.get("league"),state.get("obligations"),state.get("relief"),state.get("history"),model().state.get("pacts",{}),
-		String(mission.get("civ_id","")),int(mission.get("return_day",0)),roundi(WorldSimulation.food.total_stored()/5.0),focus_id,sel_action,sel_goal,sel_target,sel_siege])
+		String(mission.get("civ_id","")),int(mission.get("return_day",0)),roundi(WorldSimulation.food.total_stored()/5.0),focus_id,sel_action,sel_goal,sel_target,sel_siege,Pacts.store().get("pacts",[])])
 	if not force and signature==_signature:return
 	_signature=signature
 	_fill_peoples(state)
 	_fill_league(state)
 	_fill_called(state)
+	_fill_exchanges()
 	_fill_ledger(state)
 	_fill_proposal(state)
 
