@@ -1,0 +1,12 @@
+{
+  "id": "kohl_eye_paint",
+  "line": "health",
+  "game_year": 102,
+  "approx_historical_year": -4320,
+  "prompt": "c. 4320 BCE: Caregiver applies green mineral eye paint against flies and glare; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3ed070f3-3e21-49de-9bf0-3ce0d9b3dc47.png",
+  "asset": "res://assets/ui/research/subjects/kohl_eye_paint-v1.png",
+  "sha256": "0a2b67da574afca907a4d4918d8a696ffd797076bb59fa2f1b3d8441ab533de9",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first looked too realistic or weakly styled. Selected stronger flat medium and clear action."
+}

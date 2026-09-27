@@ -25,20 +25,33 @@ static var LAYER_ON_BORDER:=Color("537d76")
 static var INK:=Color("20231f")
 static var BODY:=Color("30352f")
 static var BODY_2:=Color("3e443d")
-static var TEXT_SOFT:=Color("4c554e")
-static var TEXT_DIM:=Color("566058")
-static var MUTED:=Color("4c554e")
+static var TEXT_SOFT:=Color("49524b")
+static var TEXT_DIM:=Color("49524b")
+static var MUTED:=Color("49524b")
 static var DISABLED:=Color("6b6e68")
 static var LAYER_ON_FG:=Color("343b37")
 static var GOLD:=Color("8a6118")
-static var GOLD_BRIGHT:=Color("704b0d")
+static var GOLD_BRIGHT:=Color("6c480c")
 static var GOLD_WASH:=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.12)
-static var GREEN:=Color("647a3e")
-static var RED:=Color("a64f40")
-static var AMBER:=Color("8c6d28")
-static var TEAL:=Color("427c73")
-static var BLUE:=Color("596d91")
-static var VIOLET:=Color("735f92")
+static var GREEN:=Color("536d32")
+static var RED:=Color("a34435")
+static var AMBER:=Color("805d1d")
+static var TEAL:=Color("356f66")
+static var BLUE:=Color("4d6389")
+static var VIOLET:=Color("695587")
+## Text-safe accents. The plain accents above are for bars, rules, stripes and
+## icons; they fall near 3.3:1 on paper. Any accent that colours TEXT uses its
+## *_TEXT twin, which reads at 4.5:1 or better on every paper ground (PANEL_BG,
+## DOCK_BG, TILE_BG, ROW_BG, PAPER, PAPER_RAISED, PAPER_SUNK, ACTIVE_BG) in
+## light mode and on every night ground in dark mode. tests/test_button_contrast.gd
+## checks each pair. text_for(accent) maps an accent to its twin.
+static var GREEN_TEXT:=Color("425627")
+static var RED_TEXT:=Color("84372b")
+static var AMBER_TEXT:=Color("664a17")
+static var TEAL_TEXT:=Color("295750")
+static var BLUE_TEXT:=Color("3e506f")
+static var VIOLET_TEXT:=Color("584771")
+static var GOLD_TEXT:=Color("694a12")
 static var DARK_INK:=Color("111111")
 static var GLYPH_DARK:=Color("f4efe5")
 static var WARN_BG:=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10)
@@ -76,7 +89,7 @@ static var PAPER_RAISED:=Color("f6efe1")
 static var PAPER_SUNK:=Color("e3d7c0")
 static var RULE:=Color("b7a383")
 static var RULE_STRONG:=Color("8c7757")
-static var INK_MUTED:=Color("6b5e4e")
+static var INK_MUTED:=Color("594e41")
 static var SCRIM:=Color(31.0/255.0,26.0/255.0,20.0/255.0,0.55)
 static var _fonts:Dictionary={}
 
@@ -84,7 +97,7 @@ static func _set_chrome_palette()->void:
 	if color_mode=="dark":
 		PAPER=Color("0c1518");PAPER_RAISED=Color("111c1f");PAPER_SUNK=Color("0a1214");RULE=Color("2a3538");RULE_STRONG=Color("3e5256");INK_MUTED=Color("a0937e");SCRIM=Color(0,0,0,0.65)
 	else:
-		PAPER=Color("efe6d4");PAPER_RAISED=Color("f6efe1");PAPER_SUNK=Color("e3d7c0");RULE=Color("b7a383");RULE_STRONG=Color("8c7757");INK_MUTED=Color("6b5e4e");SCRIM=Color(31.0/255.0,26.0/255.0,20.0/255.0,0.55)
+		PAPER=Color("efe6d4");PAPER_RAISED=Color("f6efe1");PAPER_SUNK=Color("e3d7c0");RULE=Color("b7a383");RULE_STRONG=Color("8c7757");INK_MUTED=Color("594e41");SCRIM=Color(31.0/255.0,26.0/255.0,20.0/255.0,0.55)
 
 static func font(face:String)->Font:
 	## Shared font resources, one per face; never a SystemFont.
@@ -138,14 +151,71 @@ static func set_color_mode(mode:String)->void:
 		BORDER=Color("2a3538");BORDER_2=Color("2f3b3e");BORDER_SOFT=Color("223034");LAYER_ON_BORDER=Color("7ca39d")
 		INK=Color("f0e6d1");BODY=Color("e4dfd2");BODY_2=Color("d8d3c6");TEXT_SOFT=Color("b6bdb7");TEXT_DIM=Color("a9b0ab");MUTED=Color("8a948f");DISABLED=Color("6f7a77");LAYER_ON_FG=Color("d7d0bf")
 		GOLD=Color("c9a95a");GOLD_BRIGHT=Color("ead078");GOLD_WASH=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.12);GREEN=Color("8fa26a");RED=Color("c67462");AMBER=Color("d0b46f");TEAL=Color("79a8a0");BLUE=Color("8798b5");VIOLET=Color("a897c9");GLYPH_DARK=Color("0d1416")
+		GREEN_TEXT=Color("9bae76");RED_TEXT=Color("d58672");AMBER_TEXT=Color("d0b46f");TEAL_TEXT=Color("86b4ac");BLUE_TEXT=Color("97a7c2");VIOLET_TEXT=Color("b4a5d3");GOLD_TEXT=Color("d4b466")
 		WARN_BG=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.08);WARN_BORDER=Color("7d6a3a");DANGER_BG=Color(198.0/255.0,116.0/255.0,98.0/255.0,0.12);DANGER_BORDER=Color("8a4f44");INFO_BG=Color(121.0/255.0,168.0/255.0,160.0/255.0,0.10);INFO_BORDER=Color("3e5f5a")
 	else:
 		PANEL_BG=Color("e9dfcf");PANEL_BG_SOLID=Color("eee5d6");DOCK_BG=Color("f2eadc");TILE_BG=Color("dfd2be");ROW_BG=Color("e8dece");ACTIVE_BG=Color("d3c1a5");HOVER_BG=Color("ddd0bd");CLOSE_HOVER_BG=Color("dfc8bd");BUTTON_BG=Color("e0d4c2");FIELD_BG=Color("f7f1e7");SPEED_IDLE_BG=Color("ded2c0");TRACK=Color("c9baa4");TOOLBAR_BG=Color("ebe1d2f2");MAP_LABEL_BG=Color("eee5d7e8")
-		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("4c554e");TEXT_DIM=Color("566058");MUTED=Color("4c554e");DISABLED=Color("6b6e68");LAYER_ON_FG=Color("30362f")
-		GOLD=Color("8a6118");GOLD_BRIGHT=Color("704b0d");GOLD_WASH=Color(138.0/255.0,97.0/255.0,24.0/255.0,0.13);GREEN=Color("536d32");RED=Color("a34435");AMBER=Color("805d1d");TEAL=Color("356f66");BLUE=Color("4d6389");VIOLET=Color("695587");GLYPH_DARK=Color("f4efe5")
+		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("49524b");TEXT_DIM=Color("49524b");MUTED=Color("49524b");DISABLED=Color("6b6e68");LAYER_ON_FG=Color("30362f")
+		GOLD=Color("8a6118");GOLD_BRIGHT=Color("6c480c");GOLD_WASH=Color(138.0/255.0,97.0/255.0,24.0/255.0,0.13);GREEN=Color("536d32");RED=Color("a34435");AMBER=Color("805d1d");TEAL=Color("356f66");BLUE=Color("4d6389");VIOLET=Color("695587");GLYPH_DARK=Color("f4efe5")
+		GREEN_TEXT=Color("425627");RED_TEXT=Color("84372b");AMBER_TEXT=Color("664a17");TEAL_TEXT=Color("295750");BLUE_TEXT=Color("3e506f");VIOLET_TEXT=Color("584771");GOLD_TEXT=Color("694a12")
 		WARN_BG=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10);WARN_BORDER=Color("8d6c20");DANGER_BG=Color(166.0/255.0,79.0/255.0,64.0/255.0,0.10);DANGER_BORDER=Color("a64f40");INFO_BG=Color(66.0/255.0,124.0/255.0,115.0/255.0,0.10);INFO_BORDER=Color("427c73")
 
 static func is_light()->bool:return color_mode=="light"
+
+## The grounds text sits on, for the current palette. Contrast tests and
+## legible() judge text against every one of them.
+static func text_grounds()->Array[Color]:
+	return [PANEL_BG,PANEL_BG_SOLID,DOCK_BG,TILE_BG,ROW_BG,HOVER_BG,BUTTON_BG,FIELD_BG,ACTIVE_BG,PAPER,PAPER_RAISED,PAPER_SUNK]
+
+## The text twin of an accent: GREEN -> GREEN_TEXT and so on. Colours that are
+## already text colours come back unchanged; any other colour is darkened (or
+## lightened at night) until it reads on TILE_BG.
+static func text_for(accent:Color)->Color:
+	if accent==GREEN or accent==GREEN_TEXT:return GREEN_TEXT
+	if accent==RED or accent==DANGER_BORDER or accent==RED_TEXT:return RED_TEXT
+	if accent==AMBER or accent==WARN_BORDER or accent==AMBER_TEXT:return AMBER_TEXT
+	if accent==TEAL or accent==INFO_BORDER or accent==TEAL_TEXT:return TEAL_TEXT
+	if accent==BLUE or accent==BLUE_TEXT:return BLUE_TEXT
+	if accent==VIOLET or accent==VIOLET_TEXT:return VIOLET_TEXT
+	if accent==GOLD or accent==GOLD_TEXT:return GOLD_TEXT
+	return legible(accent)
+
+## WCAG relative luminance and contrast ratio (sRGB colours).
+static func relative_luminance(color:Color)->float:
+	var channels:=[color.r,color.g,color.b]
+	for i in 3:channels[i]=channels[i]/12.92 if channels[i]<=0.03928 else pow((channels[i]+0.055)/1.055,2.4)
+	return 0.2126*channels[0]+0.7152*channels[1]+0.0722*channels[2]
+
+static func contrast(a:Color,b:Color)->float:
+	var high:=maxf(relative_luminance(a),relative_luminance(b));var low:=minf(relative_luminance(a),relative_luminance(b))
+	return (high+0.05)/(low+0.05)
+
+## Any colour made readable as text: on the given ground, or on every paper
+## ground of the current palette when none is given. Keeps the hue and only
+## moves lightness toward ink (light grounds) or toward cream (night grounds).
+static func legible(color:Color,ground:Color=Color(0,0,0,0),ratio:float=4.5)->Color:
+	var grounds:Array[Color]=text_grounds()
+	if ground.a>0.0:grounds=[ground]
+	var result:=Color(color.r,color.g,color.b,1.0)
+	var toward_dark:=relative_luminance(grounds[0])>0.18
+	for step in 60:
+		var worst:=INF
+		for bg:Color in grounds:worst=minf(worst,contrast(result,bg))
+		if worst>=ratio:break
+		result=result.darkened(0.05) if toward_dark else result.lightened(0.05)
+	result.a=color.a
+	return result
+
+## Sentence case for labels that arrive shouted from older code or data:
+## "SEND THE CARAVAN" -> "Send the caravan". Mixed-case text is left alone, so
+## names and deliberate capitals survive. Only 12 px kickers may stay in caps.
+static func sentence_case(value:String)->String:
+	if value!=value.to_upper() or value==value.to_lower():return value
+	var lowered:=value.to_lower()
+	for position in lowered.length():
+		if lowered[position]!=lowered[position].to_upper():
+			return lowered.substr(0,position)+lowered[position].to_upper()+lowered.substr(position+1)
+	return lowered
 
 static func control_theme()->Theme:
 	if _control_theme:return _control_theme
@@ -264,6 +334,12 @@ static func delta_color(direction:int,attention:bool=false)->Color:
 	if direction>0: return GREEN
 	if direction<0: return RED
 	return AMBER if attention else MUTED
+
+## delta_color() for text: the same meaning in the readable twins.
+static func delta_text_color(direction:int,attention:bool=false)->Color:
+	if direction>0: return GREEN_TEXT
+	if direction<0: return RED_TEXT
+	return AMBER_TEXT if attention else MUTED
 
 static func capacity_color(value:float)->Color:
 	if value<40.0: return RED

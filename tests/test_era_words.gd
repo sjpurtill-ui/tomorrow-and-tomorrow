@@ -236,3 +236,10 @@ func test_the_air_is_felt_until_a_thermometer()->void:
 	assert_str(Hud.temperature_words(-12.0,"→",[])).is_equal("Bitter cold →")
 	assert_str(Hud.temperature_words(40.0,"↓",[])).is_equal("Scorching ↓")
 	assert_str(Hud.temperature_words(14.2,"↑",["precision_thermometry"])).is_equal("14°C ↑")
+
+func test_one_date_phrase_is_the_chronicles_year_and_season()->void:
+	for day:int in [0,211,365*11+200,34844]:
+		assert_str(EraWords.when(day)).is_equal(Chronicle.date_label(day))
+		assert_str(EraWords.when(day)).not_contains("Day")
+	assert_str(EraWords.when(34844)).starts_with("Year 96 · ")
+	assert_str(EraWords.when(-1)).is_equal("some time ago")
