@@ -1,0 +1,12 @@
+{
+  "id": "household_labor_borrowing",
+  "line": "labor",
+  "game_year": 140,
+  "approx_historical_year": -4067,
+  "prompt": "c. 4067 BCE: Neighbor households lend adult harvest workers reciprocally; charcoal over ochre wash. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-912c8b5a-1a70-41e0-9fbf-44c3ea23c10c.png",
+  "asset": "res://assets/ui/research/subjects/household_labor_borrowing-v1.png",
+  "sha256": "721140bc938de7225d47aafd5d9ca101d77d63b6cc5e1b5dcd4fe34d6c102074",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "elder_instruction_days",
+  "line": "labor",
+  "game_year": 135,
+  "approx_historical_year": -4100,
+  "prompt": "c. 4100 BCE: Elders teach adult apprentices practical reed work; charcoal over ochre wash. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ebc744e0-806f-4188-be3f-5944e524e9d1.png",
+  "asset": "res://assets/ui/research/subjects/elder_instruction_days-v1.png",
+  "sha256": "c8e55bd54e1ee48a3eab5b6080e8f6109d9bb5d8cee0be5aae6687aa1ae97059",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

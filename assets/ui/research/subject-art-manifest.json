@@ -3952,5 +3952,21 @@
   "offering_keepers": {"path": "res://assets/ui/research/subjects/offering_keepers-v1.png", "focus": [0.5, 0.5]},
   "reed_bed_rotation": {"path": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png", "focus": [0.5, 0.5]},
   "newcomer_intermarriage": {"path": "res://assets/ui/research/subjects/newcomer_intermarriage-v1.png", "focus": [0.5, 0.5]},
-  "communal_meal_variety_rules": {"path": "res://assets/ui/research/subjects/communal_meal_variety_rules-v1.png", "focus": [0.5, 0.5]}
+  "communal_meal_variety_rules": {"path": "res://assets/ui/research/subjects/communal_meal_variety_rules-v1.png", "focus": [0.5, 0.5]},
+  "elder_instruction_days": {"path": "res://assets/ui/research/subjects/elder_instruction_days-v1.png", "focus": [0.5, 0.5]},
+  "flood_levees": {"path": "res://assets/ui/research/subjects/flood_levees-v1.png", "focus": [0.5, 0.5]},
+  "head_shaving_lice": {"path": "res://assets/ui/research/subjects/head_shaving_lice-v1.png", "focus": [0.5, 0.5]},
+  "intervillage_tribute_reconciliation": {"path": "res://assets/ui/research/subjects/intervillage_tribute_reconciliation-v1.png", "focus": [0.5, 0.5]},
+  "ox_drawn_sledges": {"path": "res://assets/ui/research/subjects/ox_drawn_sledges-v1.png", "focus": [0.5, 0.5]},
+  "paired_veteran_mentoring": {"path": "res://assets/ui/research/subjects/paired_veteran_mentoring-v1.png", "focus": [0.5, 0.5]},
+  "household_labor_borrowing": {"path": "res://assets/ui/research/subjects/household_labor_borrowing-v1.png", "focus": [0.5, 0.5]},
+  "lead_smelting": {"path": "res://assets/ui/research/subjects/lead_smelting-v1.png", "focus": [0.5, 0.5]},
+  "long_distance_axe_trade": {"path": "res://assets/ui/research/subjects/long_distance_axe_trade-v1.png", "focus": [0.5, 0.5]},
+  "paramount_chiefdom": {"path": "res://assets/ui/research/subjects/paramount_chiefdom-v1.png", "focus": [0.5, 0.5]},
+  "satellite_hamlets": {"path": "res://assets/ui/research/subjects/satellite_hamlets-v1.png", "focus": [0.5, 0.5]},
+  "cast_copper_weapons": {"path": "res://assets/ui/research/subjects/cast_copper_weapons-v1.png", "focus": [0.5, 0.5]},
+  "mediated_restitution_custom": {"path": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png", "focus": [0.5, 0.5]},
+  "paired_ox_yoke": {"path": "res://assets/ui/research/subjects/paired_ox_yoke-v1.png", "focus": [0.5, 0.5]},
+  "runner_relays_between_work_sites": {"path": "res://assets/ui/research/subjects/runner_relays_between_work_sites-v1.png", "focus": [0.5, 0.5]},
+  "sickbed_distance_norms": {"path": "res://assets/ui/research/subjects/sickbed_distance_norms-v1.png", "focus": [0.5, 0.5]}
 }
