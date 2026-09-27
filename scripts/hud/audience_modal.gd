@@ -203,6 +203,16 @@ func _add_backdrop(parent:Control)->Control:
 	backdrop=scene
 	return scene
 
+## Narration of what happens in the hall: dark ink on a parchment slip, set
+## apart from speech bubbles by its fainter paper and thin sepia rules.
+const NARRATION_INK:=Color("3b2f22")
+static func _narration_plate()->StyleBoxFlat:
+	var style:=_plate(Color(0.93,0.88,0.77,0.94),6,0.0)
+	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=7;style.content_margin_bottom=8
+	style.border_color=Color("8a6d45");style.border_width_top=1;style.border_width_bottom=1
+	style.shadow_color=Color(0,0,0,.22);style.shadow_size=5
+	return style
+
 static func _plate(bg:Color,radius:int=0,pad:float=0.0)->StyleBoxFlat:
 	## A raw box (no light-mode translation): dark plates must stay dark where
 	## they sit on the painting.
@@ -1430,8 +1440,8 @@ func _build_envoy_stage(audience:Dictionary)->Control:
 	speech_box.add_theme_constant_override("separation",8);speech_box.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_place(speech_box,Vector4(0,0,1,1),Vector4(318,86,-(OFFER_W+52.0) if not offer.is_empty() else -36.0,-58))
 	stage.add_child(speech_box)
-	thinking=Tokens.make_label("",15,CREAM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false
-	thinking.add_theme_color_override("font_outline_color",Color(0,0,0,.85));thinking.add_theme_constant_override("outline_size",5)
+	thinking=Tokens.make_label("",15,NARRATION_INK);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false
+	thinking.add_theme_stylebox_override("normal",_narration_plate())
 	_place(thinking,Vector4(0,1,1,1),Vector4(322,-50,-(OFFER_W+52.0) if not offer.is_empty() else -36.0,-18))
 	stage.add_child(thinking)
 	stage.add_child(_envoy_transcript_popover())
@@ -1711,11 +1721,13 @@ func _speech_bubble(line:Dictionary,animate:bool,older:bool)->Control:
 	if older:wrap.modulate.a=.78
 	var body_label:Label
 	if role=="narrator":
-		# What happens in the hall, told plainly across the scene.
-		var said:=Tokens.make_label(text.trim_prefix("[").trim_suffix("]"),15,CREAM);said.add_theme_font_override("font",_italic)
-		said.add_theme_color_override("font_outline_color",Color(0,0,0,.85));said.add_theme_constant_override("outline_size",5)
+		# What happens in the hall, told on a parchment slip in dark ink: pale
+		# outlined type laid straight on the painted hall could not be read.
+		var said:=Tokens.make_label(text.trim_prefix("[").trim_suffix("]"),16,NARRATION_INK);said.add_theme_font_override("font",_italic)
+		said.add_theme_stylebox_override("normal",_narration_plate())
+		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		wrap.add_theme_constant_override("margin_left",12);wrap.add_child(said);body_label=said
+		wrap.add_theme_constant_override("margin_left",40);wrap.add_theme_constant_override("margin_right",40);wrap.add_child(said);body_label=said
 	else:
 		var ruler:=role=="ruler"
 		wrap.add_theme_constant_override("margin_left",90 if ruler else 0);wrap.add_theme_constant_override("margin_right",0 if ruler else 50)
