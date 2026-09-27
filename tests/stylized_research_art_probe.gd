@@ -26,18 +26,18 @@ func _ready()->void:
 			selected=selection.keys();batch=classical_batch
 			assert(selected.size()==(21 if classical_batch in ["classical-04","classical-other-01","classical-other-02","classical-other-03","classical-other-04","classical-other-05","classical-other-06","classical-other-07","classical-other-08","classical-other-09"] else 22))
 			get_window().size=Vector2i(1440,1720)
-	for early_batch:String in ["earliest-01","earliest-02","earliest-03","earliest-04","earliest-05","earliest-06","earliest-07"]:
+	for early_batch:String in ["earliest-01","earliest-02","earliest-03","earliest-04","earliest-05","earliest-06","earliest-07","earliest-08"]:
 		if "--"+early_batch in OS.get_cmdline_user_args():
 			batch=early_batch;selected=[]
 			var selection:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-"+early_batch+"/selected.json"))
 			for row:Dictionary in selection:selected.append(row.id)
-			assert(selected.size()==({"earliest-01":6,"earliest-02":9,"earliest-03":8,"earliest-04":7,"earliest-05":7,"earliest-06":7,"earliest-07":4}[early_batch]))
+			assert(selected.size()==({"earliest-01":6,"earliest-02":9,"earliest-03":8,"earliest-04":7,"earliest-05":7,"earliest-06":7,"earliest-07":4,"earliest-08":9}[early_batch]))
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true
 		var expected:String=Art.manifest()[id].path
 		if batch.begins_with("earliest-"):
-			for year:float in [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,299.0,300.0,600.0]:
+			for year:float in [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,299.0,300.0,600.0]:
 				GameState.elapsed_days=year*365.0
 				assert(Art.subject_art_key(item)==expected,"Early art overridden at year %s: %s" % [year,id])
 			GameState.elapsed_days=365.0

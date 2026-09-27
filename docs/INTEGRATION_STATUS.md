@@ -1,3 +1,10 @@
+## September 27 — earliest-first year 10 art, batch 8: INTEGRATED
+
+Worker `e1264d70bcb7598760ebcfc12d8a929072ce03f9`, branch `codex/research-art-earliest-08`, based on main `e543b911`. Nine year-10 subjects gain dedicated paintings: carrying_poles, hide_smoke_curing, household_task_ledgers, infant_carrying_slings, midden_siting_away_from_water, seasonal_work_round, sparring_customs, splint_and_bracing_technique and varied_forage_rotation. Household task tallies use pebbles without writing. Classical Other batch 10 remains HELD and excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for subject clarity and obvious period mismatches in tools, clothing, shelters and materials. Combined Godot 4.7.2 import exited 0 without logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-08` exited 0 and passed all nine live catalogue lookups, manifest precedence, unique texture/provenance hashes, hidden gating and crop bounds. Every lookup passed at years 1–10, 299, 300 and 600. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest08-runtime.log` and `earliest-08-research-in-game-crops.png`.
+
+Reproduced early audit: 1,122 rows, 422 own effective paintings, 700 borrowed/line, zero missing files. Counts classify filename ownership at each proposed year; they do not certify historical accuracy. Next gaps are year 11 batch_task_grouping, dietary_healing_regimens and topsoil_depth_reading. No simulation/save changes or generated import churn committed. Full campaign and unrelated suites were not rerun. No active canonical player found; no player/editor stopped or restarted.
 ## September 27 — earliest-first year 9 art, batch 7: INTEGRATED
 
 Worker `b960a600257296de2ad46f81fb1d51ce53cbb88e`, branch `codex/research-art-earliest-07`, based on main `9990ff83`. Four year-9 subjects gain dedicated paintings: contagion_avoidance_customs, fallow_thicket_regrowth, notched_measuring_rods and seasonal_protein_sourcing. Classical Other batch 10 remains HELD and excluded.
