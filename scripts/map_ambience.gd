@@ -30,6 +30,9 @@ const BIRDS_PER_FLOCK:=7
 const MAX_ANIMALS:=12
 const ANIMALS_PER_HERD:=6
 const MAX_FLOCKS:=3
+const MAX_BUILDERS:=12
+const BUILDERS_PER_WORK:=4
+const BUILDER_MAX_VIEW:=2.2       ## the living map's figure band
 const MAX_BOATS:=3
 const MAX_DROPS:=1400
 const CLOUD_FULL_BELOW:=18.0      ## camera.size (km): full cloud shadow at and below
@@ -61,6 +64,9 @@ var drops:MultiMeshInstance3D
 var birds:MultiMeshInstance3D
 var herd:MultiMeshInstance3D
 var boats:MultiMeshInstance3D
+var builders:MultiMeshInstance3D
+var builder_signature:=""
+var builder_sites:Array[Vector3]=[]
 var life_signature:=""
 var frame_usec:=0.0
 var last_report:Dictionary={}
@@ -109,6 +115,11 @@ func _ready()->void:
 	birds=_batch("Birds",_bird_mesh(),bird_material(),MAX_BIRDS,false)
 	herd=_batch("Herd",_animal_mesh(),herd_material(),MAX_ANIMALS,true)
 	boats=_batch("Boats",_boat_mesh(),boat_material(),MAX_BOATS,true)
+	# Builders at rising great works share the living map's people.
+	var living_script:=preload("res://scripts/living_map.gd")
+	builders=_batch("GreatWorkBuilders",living_script.figure_mesh(),living_script.figure_material(),MAX_BUILDERS,true)
+	# Placed in world coordinates at any work: shown only near one, never culled.
+	builders.custom_aabb=AABB(Vector3(-40000,-100,-40000),Vector3(80000,200,80000))
 	_seed_drops()
 	day_tick()
 
@@ -116,6 +127,7 @@ func day_tick()->void:
 	if terrain==null or not is_instance_valid(terrain):return
 	_refresh_weather(true)
 	_refresh_life()
+	_refresh_builders()
 
 func _home()->Vector3:
 	if GameState.settlement_site_committed and GameState.settlement_founded_at!=Vector3.ZERO:return GameState.settlement_founded_at
@@ -201,6 +213,7 @@ func _frame(delta:float)->void:
 	var life:=size<=LIFE_MAX_VIEW and near_home
 	var legible:=clampf(size/0.55,1.0,2.6)
 	birds.visible=life and not reduced and birds.multimesh.visible_instance_count>0
+	builders.visible=size<=BUILDER_MAX_VIEW and builders.multimesh.visible_instance_count>0 and _near_any(builder_sites,target,maxf(2.0,size*2.0))
 	herd.visible=life and herd.multimesh.visible_instance_count>0
 	boats.visible=life and boats.multimesh.visible_instance_count>0
 	if birds.visible or herd.visible or boats.visible:
@@ -353,6 +366,51 @@ func _channel_tangent(site:Vector3)->Vector2:
 	var g:=Vector2(gx,gz)
 	if g.length()<0.000001:return Vector2(1,0)
 	return Vector2(-g.y,g.x).normalized()
+
+static func _near_any(points:Array[Vector3],target:Vector3,reach:float)->bool:
+	for point in points:
+		if Vector2(point.x-target.x,point.z-target.z).length()<=reach:return true
+	return false
+
+## People at work around each rising great work: a few hammering at the
+## courses, one bent to the stone heap. Bounded; re-read once a day.
+func _refresh_builders()->void:
+	var root:Node=terrain.get("undertaking_visual_root") if "undertaking_visual_root" in terrain else null
+	var sites:Array[Dictionary]=[]
+	if is_instance_valid(root):
+		for child in root.get_children():
+			if not child.has_meta("map_mark"):continue
+			var mark:Dictionary=child.get_meta("map_mark")
+			if String(mark.get("state",""))!="building":continue
+			sites.append({"at":(child as Node3D).position,"radius":float(mark.get("radius",0.015))})
+			if sites.size()*BUILDERS_PER_WORK>=MAX_BUILDERS:break
+	var signature:=str(sites)
+	if signature==builder_signature:return
+	builder_signature=signature
+	builder_sites.clear()
+	builders.position=Vector3.ZERO
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("builders|%s" % signature)
+	var index:=0
+	var cloth:Array=preload("res://scripts/living_map.gd").CLOTH
+	for site in sites:
+		var at:Vector3=site.at
+		builder_sites.append(at)
+		var reach:=float(site.radius)*1.05+0.003
+		for k in BUILDERS_PER_WORK:
+			var angle:=float(k)/float(BUILDERS_PER_WORK)*TAU+rng.randf_range(-0.4,0.4)
+			var spot:=Vector2(at.x,at.z)+Vector2.from_angle(angle)*reach
+			var ground:=float(terrain.call("_height_at",spot.x,spot.y)) if terrain.has_method("_height_at") else at.y
+			var facing:=Vector3(at.x-spot.x,0,at.z-spot.y).normalized()
+			var basis:=Basis.looking_at(facing,Vector3.UP).scaled(Vector3.ONE*UNIT*1.6)
+			builders.multimesh.set_instance_transform(index,Transform3D(basis,Vector3(spot.x,maxf(ground,at.y)+0.00012,spot.y)))
+			# The living map's poses: 2 hammering/chopping, 1 bent to lift.
+			var pose:=1 if k==BUILDERS_PER_WORK-1 else 2
+			builders.multimesh.set_instance_custom_data(index,Color(rng.randf(),float(pose),0.0,1.0))
+			builders.multimesh.set_instance_color(index,cloth[rng.randi_range(0,cloth.size()-1)])
+			index+=1
+	builders.multimesh.visible_instance_count=index
+	last_report["builders"]=index
 
 func ambience_report()->Dictionary:
 	var report:=last_report.duplicate()

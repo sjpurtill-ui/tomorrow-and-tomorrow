@@ -2,7 +2,7 @@ extends Node
 ## Map motion capture: short frame sequences for reviewing animation.
 ##   -- --out=<absolute dir> [--prefix=name] [--size=2.8] [--frames=10] [--every=6]
 ##      [--saved] [--weather=rain|snow|clear|cloud] [--pan] [--zoom-to=<km>] [--speed=1]
-##      [--measure=<frames>] [--hide-ui]
+##      [--measure=<frames>] [--hide-ui] [--great-works] [--reveal]
 ## Writes <prefix>_f00.png ... and prints MAP_MOTION_CAPTURE lines. `--pan`
 ## releases a drag and records the coast; `--zoom-to` records a distance glide.
 ## `--measure` records CPU frame times while panning (p50/p95) and idle.
@@ -93,6 +93,18 @@ func _ready()->void:
 		for i in 90:await get_tree().process_frame
 		await _measure(measure)
 	terrain._set_game_speed(speed)
+	if "--great-works" in args:
+		var helper:Node=load("res://tests/map_art_capture.gd").new()
+		helper.set("terrain",terrain)
+		helper.call("_seed_great_works",target)
+		helper.free()
+		terrain._refresh_undertaking_visuals(true)
+		if ambience:ambience.day_tick()
+	if "--reveal" in args:
+		# Chart new ground just beyond the known edge and watch it ink in.
+		var toward:Vector3=terrain._camera_ground_screen_right()
+		var point:Vector2=Vector2(target.x,target.z)+Vector2(toward.x,toward.z)*float(terrain.camera.size)*0.3
+		CivilizationSystem._add_revealed_area(point,float(terrain.camera.size)*0.12,"capture")
 	if "--pan" in args:
 		terrain.pan_coast_velocity=preload("res://scripts/map_motion.gd").release_velocity(terrain._camera_ground_screen_right()*size*3.0,terrain.camera.size)
 	if zoom_to>0.0:

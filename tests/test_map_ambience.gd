@@ -180,3 +180,36 @@ func test_wind_reaches_bound_materials()->void:
 	var packed:Vector4=material.get_shader_parameter("map_wind")
 	assert_float(Vector2(packed.x,packed.y).length()).is_equal_approx(1.0,0.01)
 	assert_float(packed.z).is_between(0.0,1.0)
+
+class WorksHost extends Host:
+	var undertaking_visual_root:=Node3D.new()
+	func _init()->void:
+		super._init()
+		add_child(undertaking_visual_root)
+
+func test_builders_work_only_at_rising_works_and_are_bounded()->void:
+	var host:WorksHost=auto_free(WorksHost.new())
+	add_child(host)
+	host.camera.position=GameState.settlement_founded_at+Vector3(0,0.3,0.1)
+	host.camera_target=GameState.settlement_founded_at
+	for i in 5:
+		var work:=Node3D.new()
+		work.position=GameState.settlement_founded_at+Vector3(0.1*i,0,0.05)
+		work.set_meta("map_mark",{"state":"building" if i!=2 else "dedicated","radius":0.02})
+		host.undertaking_visual_root.add_child(work)
+	Living.open_on_people(host)
+	var layer:Node=host.get_node("MapAmbience")
+	layer.day_tick()
+	var count:int=layer.builders.multimesh.visible_instance_count
+	assert_int(count).is_less_equal(Ambience.MAX_BUILDERS)
+	assert_int(count).is_equal(Ambience.MAX_BUILDERS)  # three rising works shown, four hands each
+	host.camera.size=1.0
+	layer._frame(1.0/60.0)
+	assert_bool(layer.builders.visible).is_true()
+	host.camera.size=40.0
+	layer._frame(1.0/60.0)
+	assert_bool(layer.builders.visible).is_false()
+	# A day with nothing changed keeps the same people at the same places.
+	var signature:String=layer.builder_signature
+	layer.day_tick()
+	assert_str(layer.builder_signature).is_equal(signature)

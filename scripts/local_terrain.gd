@@ -2198,7 +2198,10 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	if discovery_mask_texture==null:
 		discovery_mask_texture=ImageTexture.create_from_image(image)
 	else:
-		discovery_mask_texture.update(image)
+		# codex/map-motion: newly charted ground inks in over about a second.
+		var reveal:=preload("res://scripts/discovery_reveal.gd")
+		var changed:=reveal.areas_rect(areas.slice(first_new),_discovery_mask_pixel,Vector2i(width,height),maxf(float(width)/world_width,float(height)/world_depth)*1.25) if first_new>0 else Rect2i()
+		if not reveal.present(self,discovery_mask_texture,image,changed,force):discovery_mask_texture.update(image)
 	rendered_fog_revision=revision
 	terrain_fog_materials.update(discovery_mask_texture,origin)
 	vegetation_fog_materials.update(discovery_mask_texture,origin)
