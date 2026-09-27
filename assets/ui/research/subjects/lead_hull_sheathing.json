@@ -1,0 +1,14 @@
+{
+  "id": "lead_hull_sheathing",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3efff0bf-9d9f-46c1-84c5-61ddffc33c5d.png",
+  "source_file": "exec-3efff0bf-9d9f-46c1-84c5-61ddffc33c5d.png",
+  "creative_brief": "Thin lead sheets nailed over the hull keep the shipworm out and the planks sound for many seasons. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/lead_hull_sheathing-v1.png",
+  "sha256": "8356f3dda243ff401d2550a6119fb9faab8753703c527ad9f5c60f2a92d112cf",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

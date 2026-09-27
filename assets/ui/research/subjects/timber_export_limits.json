@@ -1,0 +1,14 @@
+{
+  "id": "timber_export_limits",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b13ef2d-5f16-4f07-ab71-f4e4a6cabb48.png",
+  "source_file": "exec-1b13ef2d-5f16-4f07-ab71-f4e4a6cabb48.png",
+  "creative_brief": "Building timber may no longer be sold abroad; the forest's beams are kept for the realm's own halls and ships. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/timber_export_limits-v1.png",
+  "sha256": "9f2632a26fbf3834a53f207c3717320e03f31b756822278f3d7445e67554e4ca",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

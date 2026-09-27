@@ -1,0 +1,14 @@
+{
+  "id": "breast_strap_harness",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-772ee17e-728f-47fd-a4cd-6f61b32d749c.png",
+  "source_file": "exec-772ee17e-728f-47fd-a4cd-6f61b32d749c.png",
+  "creative_brief": "A strap across the chest instead of the throat lets a horse pull hard without choking. Paint it as a classical antiquity scene.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/breast_strap_harness-v1.png",
+  "sha256": "ef57732184aea4bf3201a7054eba85f1916896c5d9c12c3cff59704cca649a5c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
