@@ -375,3 +375,78 @@ The save is still at the hearth. The fixture sets the presentation to a staffed 
 - **The fleet and air arm answer through the Marshal.** They have no named commanders of their own yet.
 - **Rival fleets' zones are not observed**, so sea fronts between fleets remain designed only.
 - **Fixture change.** The "before" fixture had the second host at 9,000; the "after" fixture has it at 30,000, so that two corps form the army group.
+
+
+## 9. Round three: forces as inked marks
+
+Branch `codex/war-fronts-3`. The real-map captures of round two showed the terrain's own 3D army counters dominating the chart:
+- large teal hexagons with plus marks;
+- bold white world-space text ("Our band · 30000 fighters", "LAST REPORT · 0 DAYS OLD", "6.0K").
+
+They covered small fronts at regional and continental zoom. The words were wrong too: 30,000 fighters is not a band, and the report line was staff jargon.
+
+### What changed
+
+- **The 3D counter is gone.** `local_terrain` keeps only a position node per force, its occupied ground up close, and a close-view label in plain words. The plate, glyph meshes, echelon bars, readiness tab, supply stripe, scars, selection torus and count label were removed, along with their mesh builders.
+- **The war chart inks each force** (`hud/war_front_overlay.gd` with the new pure `hud/army_marks.gd`). Marks come from the procedural icon engine (`resource_icons.army_texture`), with no image assets. Each is drawn in iron-gall ink with a paper halo. Owner colour appears only on a streamer, a tally's tie, or a wash on the cloth.
+
+  | Mark | When | Drawn |
+  |---|---|---|
+  | Spear tally | under 250 | 2 to 5 spears bound by one tally stroke; more spears for a bigger band |
+  | Leader's standard | hosts; every force before writing | pole, finial, crossbar and streamer |
+  | Framed standard | 5,000 or more in the lettered and printed ages | a hung cloth with the arm's sign (crossed spears, horse, bow, gun wheel) |
+  | Staff-map box | rifles, machine guns, motors or armour (or staffs and 1,000 or more) | branch symbol (X foot, / horse, dot guns, oval armour, X with wheels for motors, bracket for engineers) with X, XX, XXX or XXXX strokes above |
+
+- **Screen-space size per band:**
+  - local 22 to 30 px;
+  - regional four fifths of that;
+  - continental about half, never below 12 px;
+  - nothing at world scale.
+
+  A force keeps the same size on screen however far the camera is within a band.
+- **Crowding** (`ArmyMarks.layout`, pure over screen positions):
+  - Overlapping marks of one side become one mark with a count roundel.
+  - A mark on the front steps back toward its own side, with a hairline to where it stands.
+  - Opposing marks are pushed apart.
+  - Armies under a drawn corps or army-group mark give way to it, unless selected.
+  - At most 12 of ours and 24 of theirs are drawn.
+- **Paper cards.** Cards are placed with the city labels' placement test, and dropped rather than overlapped. They are budgeted: 6 local, 4 regional, none wider. The selected force always gets one. Each card has two lines, for example "Arno's army, about 30,000" above "Marching on Tsaren · reported three days ago". A card carries:
+  - the noun by size and era: band, war party, host, great host, army before print; regiment, army or corps with powder; battalion, brigade, division, corps and army with rifles;
+  - the strength rounded as a clerk would say it;
+  - the general's first name (a placeholder staff is never named);
+  - what the force is doing, from its status and the staff's own notes, said plainly: "marching on Tsaren", "marching west", "going after Cedar League", "holding the line, asking for help", "laying siege", "falling back home";
+  - its wear ("worn", "badly mauled");
+  - the report's age, only from two days old.
+- **Their marks** come only from dated sightings: the hostile ones seen now and recently, and strangers in sight. They sit exactly where the host was seen. A mark fades with the sighting's age, never below a third. From 20 days it is ringed with dashes, as the front's stale stretches are. Before writing, strangers are left to the feud marks, and only a general's own dated sightings (the Alderford board) are marked.
+- **Clicks.**
+  - A click on our mark still selects the army, through the chart's own hit test (`mark_at`, used by `local_terrain`), and opens the general's note.
+  - A host in sight opens the contact card as before.
+  - An older sighting opens a note about what was seen.
+  - The general's note now reads "Leads an army of about 6,000, marching west", and "The last runner came three days ago".
+- **The 3D labels** that remain (close view only) and the presentation's aggregate labels use the same plain words. `counter_strength`, "LAST REPORT", "6.0K", "READY 78%" and "CLICK TO INTERCEPT" are gone.
+
+### Cost
+
+Measured on the real renderer with the round-two fixture:
+- **Draw:** a full draw with five armies, six sightings, two battles, a siege, zones and cards took 2.8 ms with the camera still (3.2 ms before). There were 0 redraws over 120 still frames. While easing, the worst draw was 5.7 ms.
+- **Baking:** each mark texture bakes once, in about 6 ms at 64 px (`_render_boxed` evaluates each stroke only inside its bounds). The 35 kinds and branches together took under 0.25 s headless.
+
+### Captures (real renderer, not committed)
+
+The fixture gives two armies named generals, puts one army's runner three days behind, and selects one army.
+- `mature_*_before`: round-two code.
+- `mature_regional_after`, `mature_local_after`, `mature_continental_after`: the new marks and cards.
+- `mature_early_local_after`: the raid age with spear tallies.
+- `mature_modern_local_after`, `mature_modern_regional_after`: rifles and armour as staff boxes with echelon strokes.
+
+### Tests
+
+- `tests/test_army_marks.gd` (13 cases): nouns by size and era; marks by era; strength rounding; report age; plain doing words; jargon-free cards across every age, size and age of report; presentation labels at every band and stage; screen-space size; stacking and card budgets; giving way to the front and army groups; bounds; observation honesty and fading; selection and notes.
+- `test_warfare_map_presentation.gd` and `test_war_map_marks.gd` now expect plain words.
+- `warfare_map_runtime_probe` checks that no 3D counter geometry survives, that the chart draws the mark at its band size, and that clicking it selects the army.
+
+### Limits
+
+- **Terrain features are not named yet.** "Holding the ford" needs a terrain-feature lookup; the card says "holding at <place>" or "holding its ground".
+- **Enemy wear** is shown only in the presentation labels, not yet on the chart's cards.
+- **At continental zoom, city cards sit above the war ink.** Marks of forces standing at a town can hide under its card, which is the layering round two chose.
