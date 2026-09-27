@@ -1,0 +1,12 @@
+{
+  "id": "shared_labor_registers",
+  "line": "institutions",
+  "game_year": 150,
+  "approx_historical_year": -4000,
+  "prompt": "c. 4000 BCE: Villagers account for communal work using physical notched wooden tally sticks; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e22418d2-3f7b-4652-9b35-5fa4e9d686c7.png",
+  "asset": "res://assets/ui/research/subjects/shared_labor_registers-v1.png",
+  "sha256": "7e4f6c064f38d13ee887044665aa87ee8d5aadc000d739c5190aadf8cf327c57",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
