@@ -38,6 +38,8 @@ const KINDS:=["attack","siege","raid","intercept","recall","defend"]
 const MIN_FORCE:=5
 ## Below this share of the enemy's estimated strength, a general objects.
 const OBJECT_RATIO:=0.8
+## Below this average drill, a general will not lead them at walls unasked.
+const UNDRILLED:=0.2
 ## The home watch a general keeps back unless told to send everything.
 const WATCH_SHARE:=0.2
 const LEDGER_MAX:=24
@@ -185,6 +187,29 @@ static func read_live(object:String,text:String,context_civ:String="")->Dictiona
 	# The model says it is a war order but neither text names what: ask.
 	return {"kind":"attack","target":find_target(object+" "+text,context_civ),"full":false,"insist":false,"place":"","army_words":true,"text":text.substr(0,300),"vague":true}
 
+static func offline_choices()->Array[Dictionary]:
+	## Offline the court offers war orders as choices built from real state
+	## (known towns, armies away, enemies seen); each is the same words the
+	## god could type, so both reach perform() through court_commands.hear().
+	var out:Array[Dictionary]=[]
+	if WorldSimulation.military==null or WorldSimulation.world==null: return out
+	var places:=known_places()
+	var home:Vector2=WorldSimulation.world.player_world_origin
+	places.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return home.distance_squared_to(Vector2(float(a.position.x),float(a.position.z)))<home.distance_squared_to(Vector2(float(b.position.x),float(b.position.z))))
+	for p:Dictionary in places.slice(0,3):
+		var name:=String(p.name).trim_prefix("Reported home of ")
+		out.append({"group":"war","label":"March on %s" % name,"action":"command","params":{"command_text":"March our army on %s" % name}})
+		out.append({"group":"war","label":"Lay siege to %s" % name,"action":"command","params":{"command_text":"Lay siege to %s" % name}})
+		out.append({"group":"war","label":"Raid the fields of %s" % name,"action":"command","params":{"command_text":"Raid the fields of %s" % name}})
+	for formation in WorldSimulation.world.foreign_formations:
+		if String((formation as Dictionary).get("kind",""))!="scout" and not WorldSimulation.world.visible_formation_sighting(String(formation.get("id",""))).is_empty():
+			out.append({"group":"war","label":"Go after %s's army" % Hall._civ_name(String(formation.get("civ_id",""))),"action":"command","params":{"command_text":"Attack their army, the %s" % Hall._civ_name(String(formation.get("civ_id","")))}})
+			break
+	if not (forces().away as Array).is_empty():
+		out.append({"group":"war","label":"Bring the army home","action":"command","params":{"command_text":"Bring the army home"}})
+	out.append({"group":"war","label":"Keep the soldiers home on watch","action":"command","params":{"command_text":"Defend our home with the soldiers"}})
+	return out
+
 # --------------------------------------------------------------------------
 # What there is to send
 # --------------------------------------------------------------------------
@@ -199,6 +224,14 @@ static func _strength(formations:Array)->float:
 		var gear:=clampf(float(f.get("equipment",0))/maxf(1.0,float(f.get("equipment_required",count))),0.0,1.0)
 		total+=count*(0.35+0.65*clampf(float(f.get("training",0.3)),0.0,1.0))*(0.45+0.55*gear)
 	return total
+
+static func _drill(formations:Array)->float:
+	## Head-weighted drill (training) of a force, 0..1.
+	var heads:=0; var drill:=0.0
+	for f in formations:
+		var count:=maxi(0,int((f as Dictionary).get("count",0)))
+		heads+=count; drill+=count*clampf(float(f.get("training",0.0)),0.0,1.0)
+	return drill/float(heads) if heads>0 else 0.0
 
 static func forces()->Dictionary:
 	## Plain numbers the war leader answers from.
@@ -244,7 +277,16 @@ static func _enemy_estimate(city_id:String)->Dictionary:
 # --------------------------------------------------------------------------
 
 static func war_leader()->Dictionary:
-	return Hall._relevant_official(["Marshal"])
+	## The Marshal (war leader office); else a living war leader of renown
+	## (HistoricalFigures General) who leads our bands.
+	var marshal:=Hall._relevant_official(["Marshal"])
+	if not marshal.is_empty(): return marshal
+	var figures:Variant=Engine.get_main_loop().root.get_node_or_null("HistoricalFigures") if Engine.get_main_loop() is SceneTree else null
+	if figures!=null:
+		for figure in figures.people:
+			if figure is Dictionary and String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead":
+				return {"name":String(figure.get("name","")),"person_id":0,"figure_id":String(figure.get("id",""))}
+	return {}
 
 static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})->Dictionary:
 	## The engine's answer: {verdict:"act"|"object"|"impossible", kind,
@@ -313,6 +355,7 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		if int(idle[0].troops)>=send: use_army=idle[0]; send=0
 	var going:=int(use_army.get("troops",0))+send
 	var going_strength:=_strength(use_army.get("formations",[])) if not use_army.is_empty() else float(f.home_strength)*(float(send)/maxf(1.0,float(trained)))
+	var drilled:=_drill(use_army.get("formations",[]) if not use_army.is_empty() else _mc().home_army.get("formations",[]))
 	var drill_words:=""
 	if int(f.drilling)>0: drill_words=" %d more are in their first drill, about %d days from done." % [int(f.drilling),int(f.drill_days)]
 	if going<=0:
@@ -329,6 +372,8 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	if bool(enemy.known) and ratio<OBJECT_RATIO and not insist:
 		var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
 		return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %d%s. I would lose them for nothing." % [name,their,going,", most of them half-drilled" if ratio<0.5 else ""],("Let the drill finish first, about %d days." % int(f.drill_days)) if int(f.drilling)>0 else "Give me more trained soldiers first.")
+	if drilled<UNDRILLED and not insist:
+		return _object(out,"undrilled","%d who have never drilled together, against %s's walls? They would break at the first charge." % [going,name],("Give me the rest of their drill first, about %d days." % int(f.drill_days)) if int(f.drilling)>0 else "Give me a season to drill them first.")
 	if kind=="siege" and going<MIN_FORCE*3 and not insist:
 		return _object(out,"siege_too_small","A siege needs enough of us to ring %s and still feed ourselves; %d cannot do it." % [name,going],"Let me storm it instead, or give me more soldiers.")
 	# Act: the force is formed from the real formations and set on the road.

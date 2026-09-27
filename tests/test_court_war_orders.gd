@@ -309,3 +309,36 @@ func test_war_orders_never_become_directives()->void:
 	var plan:={"summary":"Go attack Tsaren now!","natures":[]}
 	var applied:=CustomDirective.apply(plan,30.0,"test",{},1.0)
 	assert_bool(bool(applied.get("applied",true))).is_false()
+
+func test_offline_choices_reach_the_same_core()->void:
+	_train(400)
+	_set_garrison(20.0)
+	var choices:=WO.offline_choices()
+	var march:={}
+	for c:Dictionary in choices:
+		if String(c.label)=="March on Tsaren": march=c
+	assert_dict(march).is_not_empty()
+	var id:=_marshal_audience()
+	var r:=CC.hear(id,String(march.params.command_text))
+	assert_str(String(r.verb)).is_equal("war")
+	assert_str(String(r.war.verdict)).is_equal("act")
+	# Once an army is away, the court offers to bring it home.
+	var labels:Array=[]
+	for c:Dictionary in WO.offline_choices(): labels.append(String(c.label))
+	assert_bool("Bring the army home" in labels).is_true()
+
+func test_undrilled_levy_band_gets_an_objection_then_goes_if_the_god_insists()->void:
+	# The user's roster: a Levy band of 20 at home that has never drilled, 2 in reserve.
+	_train(20)
+	MilitaryCampaign.create_field_army(20,"Levy band")
+	for f in MilitaryCampaign.field_armies[0].formations: f["training"]=0.05
+	_train(2)
+	var id:=_marshal_audience()
+	var r:=CC.hear(id,"Send our full forces into battle on Tsaren")
+	assert_str(String(r.war.verdict)).is_equal("object")
+	assert_str(String(r.war.reason)).is_equal("undrilled")
+	assert_str(String(r.actor_says)).contains("never drilled")
+	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("stationed")
+	var again:=CC.hear(id,"I demand it")
+	assert_str(String(again.war.verdict)).is_equal("act")
+	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("moving")

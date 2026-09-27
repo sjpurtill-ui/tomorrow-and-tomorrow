@@ -1004,7 +1004,8 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	if reading.is_empty(): reading=WarOrders.read(text,String(audience.get("civ_id","")))
 	# The war leader carries it, whoever it was spoken to.
 	var general:=WarOrders.war_leader()
-	var carrier:=_entry(list,"person:%d" % int(general.get("person_id",0))) if not general.is_empty() else {}
+	var general_key:=("person:%d" % int(general.get("person_id",0))) if int(general.get("person_id",0))>0 else ("figure:"+String(general.get("figure_id","")) if String(general.get("figure_id",""))!="" else "")
+	var carrier:=_entry(list,general_key) if general_key!="" else {}
 	if carrier.is_empty(): carrier=actor if not actor.is_empty() else _speaker_entry(list)
 	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
 	r.verb="war"
@@ -1013,8 +1014,10 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
 	r["actor_says"]=String(decision.get("says",""))
 	var verdict:=String(decision.get("verdict","impossible"))
-	var passed:=not carrier.is_empty() and not bool(carrier.get("speaker",false)) and not general.is_empty()
-	var relay:="Word goes to %s. " % String(carrier.get("name","")) if passed else ""
+	# Spoken to someone else (the steward, the court at large): it goes to the war leader.
+	var passed:=not general.is_empty() and String(carrier.get("key",""))!=general_key
+	var relay:="Word goes to %s. " % String(general.get("name","the war leader")) if passed else ""
+	if passed and String(r.actor_says)!="": r.actor_says="%s sends back word: \"%s\"" % [WarOrders._given(String(general.get("name",""))),String(r.actor_says)]
 	match verdict:
 		"act":
 			r.stage="war_march"; r.executed=true; r.reaction="grave"

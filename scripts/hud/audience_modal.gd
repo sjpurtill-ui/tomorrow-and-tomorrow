@@ -613,7 +613,7 @@ func _build_options()->void:
 	_build_divine_row()
 	_build_persons_row()
 
-const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"]]
+const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"]]
 
 func _persons_live()->bool:
 	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
@@ -630,7 +630,11 @@ func _build_persons_row()->void:
 	var audience:=Hall.find(audience_id)
 	persons_row.visible=not _persons_live() and resolved_result.is_empty() and String(audience.get("origin",""))=="court" and String(audience.get("status",""))=="waiting"
 	if not persons_row.visible:return
-	_fill_persons_menus(persons_row,persons_choices())
+	# Offline war orders: the same words the god could type, built from real
+	# state, reaching the same engine (court_war_orders.gd).
+	var offered:=persons_choices()
+	offered.append_array(WarOrders.offline_choices())
+	_fill_persons_menus(persons_row,offered)
 
 func _fill_persons_menus(row:HBoxContainer,all:Array[Dictionary])->void:
 	for pair in PERSONS_GROUPS:
