@@ -387,7 +387,59 @@ func _refresh_life()->void:
 			placed+=1
 	boats.multimesh.visible_instance_count=placed
 	last_report["boats"]=placed
+	_refresh_landing(anchor,water_site if settled else Vector3.ZERO,hulls)
 	last_report["animals"]=animal_count
+
+## The landing place at the water's edge (codex/beauty-5): where the people
+## fish, their boats lie hauled up on the bank, bows to the water; a fish
+## weir stands in the stream once weirs are known; a plank landing stage,
+## then a stone quay, once landings are built. One mesh, rebuilt only when
+## the site or what is known changes (with the rest of the life here).
+var landing:MeshInstance3D
+func _refresh_landing(anchor:Vector3,water_site:Vector3,hulls:int)->void:
+	if landing==null:
+		landing=MeshInstance3D.new();landing.name="LandingPlace"
+		landing.material_override=preload("res://scripts/settlement_ink.gd").material()
+		add_child(landing)
+	landing.mesh=null
+	if water_site==Vector3.ZERO or terrain==null or not terrain.has_method("_river_distance_at"):return
+	var known:Dictionary=preload("res://scripts/early_settlement_ground.gd").known_crafts()
+	var boats_here:=hulls
+	if boats_here<=0 and not (bool(known.weirs) or bool(known.landing)):return
+	var site:=Vector2(water_site.x,water_site.z)
+	var inland:=Vector2(anchor.x,anchor.z)-site
+	if inland.length()<0.001:inland=Vector2(0,-1)
+	inland=inland.normalized()
+	var bank:=Vector2.INF
+	for step in 80:
+		var p:=site+inland*float(step)*0.004
+		if float(terrain.call("_river_distance_at",p.x,p.y))>0.014 and float(terrain.call("_height_at",p.x,p.y))>0.015:
+			bank=p;break
+	if bank==Vector2.INF:return
+	var along:=_channel_tangent(water_site)
+	var out:=-inland
+	var shapes:=preload("res://scripts/settlement_kit_shapes.gd")
+	var surface:=SurfaceTool.new()
+	var placed:=[0]
+	var put:=func(name:String,at:Vector2,forward:Vector2,y:float)->void:
+		var mesh:ArrayMesh=shapes.prop(name)
+		if mesh==null:return
+		var basis:=Basis(Vector3.UP,atan2(forward.x,forward.y)).scaled(Vector3.ONE*0.001)
+		surface.append_from(mesh,0,Transform3D(basis,Vector3(at.x-anchor.x,y-anchor.y,at.y-anchor.z)))
+		placed[0]+=1
+	var hull:="coracle" if bool(known.hide_boats) and not bool(known.landing) else "dugout"
+	for k in mini(maxi(boats_here,1 if bool(known.landing) else 0),3):
+		var at:=bank+along*(float(k)-1.0)*0.0034-out*0.0026
+		put.call(hull,at,out.rotated(0.18*float(k-1)),float(terrain.call("_height_at",at.x,at.y))+0.00005)
+	if bool(known.landing):
+		var name:="quay" if bool(known.quay) else "jetty"
+		var at:=bank+along*0.0075-out*(0.0005 if name=="jetty" else 0.0008)
+		put.call(name,at,out,float(terrain.call("_height_at",at.x,at.y)))
+	if bool(known.weirs):
+		var at:=bank+out*0.009+along*0.028
+		put.call("weir",at,along,water_site.y-0.0035)
+	landing.position=anchor
+	if int(placed[0])>0:landing.mesh=surface.commit()
 
 var _water_cache_key:=""
 var _water_cache:=Vector3.ZERO
@@ -398,8 +450,20 @@ func _water_site(anchor:Vector3)->Vector3:
 	_water_cache=Vector3.ZERO
 	if terrain.has_method("_surface_water_site_near"):
 		var site:Vector3=terrain.call("_surface_water_site_near",anchor)
-		if site!=Vector3.ZERO and Vector2(site.x-anchor.x,site.z-anchor.z).length()<=0.6:_water_cache=site
+		if site!=Vector3.ZERO and Vector2(site.x-anchor.x,site.z-anchor.z).length()<=0.6 and _open_water(site):_water_cache=site
 	return _water_cache
+
+## Water that shows on the map (codex/beauty-5): a river, a tributary or the
+## sea. A dry swale the ground only tints is no place for boats or a landing.
+func _open_water(site:Vector3)->bool:
+	var p:=Vector2(site.x,site.z)
+	if terrain.has_method("_main_river_distance_at") and float(terrain.call("_main_river_distance_at",p.x,p.y))<0.25:return true
+	if terrain.has_method("_nearest_tributary_distance_at") and float(terrain.call("_nearest_tributary_distance_at",p))<0.12:return true
+	if terrain.has_method("_height_at"):
+		for k in 12:
+			var q:=p+Vector2.from_angle(TAU*float(k)/12.0)*0.04
+			if float(terrain.call("_height_at",q.x,q.y))<=0.0:return true
+	return not terrain.has_method("_main_river_distance_at")
 
 func _channel_tangent(site:Vector3)->Vector2:
 	## Along the river: perpendicular to the direction in which distance grows.

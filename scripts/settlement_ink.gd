@@ -36,6 +36,17 @@ static func material()->ShaderMaterial:
 	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_material)
 	return _material
 
+static var _ground_material:ShaderMaterial
+## The same paint without the silhouette pass, for flat worked ground laid
+## on the land (kitchen beds): an outline would print it as a dark slab.
+static func ground_material()->ShaderMaterial:
+	if _ground_material and is_instance_valid(_ground_material):return _ground_material
+	_ground_material=material().duplicate() as ShaderMaterial
+	_ground_material.next_pass=null
+	_ground_material.set_shader_parameter("ink_strength",0.0)
+	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_ground_material)
+	return _ground_material
+
 static var _outline_material:ShaderMaterial
 static var _pixel_km:=0.0
 ## One screen pixel in world km at the current zoom (the map sets it when
@@ -69,6 +80,7 @@ static func set_hearth(at:Vector3,power:float)->void:
 	var m:=material()
 	m.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 	if _srgb_material:_srgb_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
+	if _ground_material:_ground_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 
 ## Soft cool shadows on the ground under a batch of buildings, cast a little
 ## away from the sun: each building sits on the land instead of floating on
@@ -212,11 +224,12 @@ void fragment() {
 	if (hearth.w > 0.0) {
 		vec3 to_fire = hearth.xyz-world_position;
 		float d = length(to_fire)*1000.0;
-		float reach = 1.0-smoothstep(3.0, 26.0, d);
+		// The fire reaches the nearer roofs round the hearth (codex/beauty-5).
+		float reach = 1.0-smoothstep(3.0, 40.0, d);
 		if (reach > 0.0) {
 			float turned = 0.45+0.55*max(dot(n, to_fire/max(length(to_fire), 1e-6)), 0.0);
 			float flicker = 0.86+0.09*sin(anim_clock*11.0)+0.05*sin(anim_clock*29.0+1.3);
-			glow += base*vec3(1.0, 0.56, 0.24)*hearth.w*reach*reach*turned*flicker*0.9;
+			glow += base*vec3(1.0, 0.56, 0.24)*hearth.w*pow(reach, 1.6)*turned*flicker*0.75;
 		}
 	}
 	EMISSION = glow;

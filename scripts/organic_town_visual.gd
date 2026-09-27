@@ -248,13 +248,15 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 			var record := visible[index]
 			var point: Vector2 = record.position + Vector2(center.x, center.z)
 			var base: float = height.call(point.x, point.y)
-			var transform := Transform3D(Basis(Vector3.UP, float(record.angle)).scaled(Vector3.ONE * 0.001), Vector3(point.x, base + 0.0004, point.y))
+			# Each house a little its own size and lean (settlement_kit_shapes.gd).
+			var transform := Transform3D(preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle), hash(Vector2(record.position))), Vector3(point.x, base + 0.0004, point.y))
 			transforms.append(transform)
 			batch.set_instance_transform(index, transform)
 			var plot: Dictionary = record.plot
 			var wear := 1.0 - clampf(float(plot.get("condition", 1.0)), 0.0, 1.0)
 			var fire := clampf(float(plot.get("damage", {}).get("fire", 0.0)), 0.0, 1.0)
-			batch.set_instance_color(index, Color.WHITE.lerp(Color(0.30, 0.27, 0.23), maxf(wear * 0.55, fire)))
+			# Weathering greys the straw and daub; only fire blackens (codex/beauty-5).
+			batch.set_instance_color(index, Color.WHITE.lerp(Color(0.70, 0.66, 0.60), wear * 0.35).lerp(Color(0.30, 0.27, 0.23), fire))
 		var node := MultiMeshInstance3D.new()
 		node.name = "OrganicTown_%s" % KIT[variant]
 		node.set_meta("source_transforms", transforms)
@@ -273,12 +275,17 @@ static func _render_gardens(plan: Dictionary, center: Vector3, height: Callable,
 		if not record.has("garden") or String(record.plot.get("status", "active")) not in ["active", "stressed", "damaged"]: continue
 		if float(record.plot.get("damage", {}).get("structural", 0.0)) > 0.65: continue
 		var garden: PackedVector2Array = record.garden
-		for row in 5:
-			var start := float(row) / 5.0
-			var end := float(row + 1) / 5.0
+		# Tilled beds (codex/beauty-5): rows of crop between strips of warm dug
+		# loam, each bed a little further on than the next; never a dark slab.
+		var rows := 9
+		var bed_seed := absi(hash(Vector2(record.position)))
+		for row in rows:
+			var start := float(row) / float(rows)
+			var end := float(row + 1) / float(rows)
 			var corners := PackedVector2Array([garden[0].lerp(garden[1], start), garden[0].lerp(garden[1], end), garden[3].lerp(garden[2], end), garden[3].lerp(garden[2], start)])
-			var color := Color("#646e42") if row % 2 == 0 else Color("#796347")
-			color = color.lerp(Color("#74674f"), 1.0 - clampf(float(record.plot.get("condition", 1.0)), 0.0, 1.0))
+			var grown := float((bed_seed >> (row % 12)) % 7) / 6.0
+			var color := Color("#8e9a52").lerp(Color("#a9a45c"), grown * 0.6) if row % 2 == 0 else Color("#9c7d58").lerp(Color("#8a6c4a"), grown * 0.5)
+			color = color.lerp(Color("#8a7c62"), 1.0 - clampf(float(record.plot.get("condition", 1.0)), 0.0, 1.0))
 			for index in [0,2,1,0,3,2]:
 				var point := corners[index] + Vector2(center.x, center.z)
 				surface.set_color(color)
@@ -289,5 +296,7 @@ static func _render_gardens(plan: Dictionary, center: Vector3, height: Callable,
 	var node := MeshInstance3D.new()
 	node.name = "OrganicHouseholdGardens"
 	node.mesh = surface.commit()
-	node.material_override = material
+	# Painted like the houses but with no drawn silhouette: a bed is ground.
+	node.material_override = preload("res://scripts/settlement_ink.gd").ground_material()
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(node)

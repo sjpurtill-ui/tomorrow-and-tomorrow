@@ -91,12 +91,23 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		plot.material_family = "organic"; plot.roof_plan = "timber_ridge"
 		plot.form = "timber_household"; plot.land_use = "residential_compound"
 	var plan := TOWN.layout(proxies,routes,land)
+	# Round huts and tents turn their doors to the hearth (codex/beauty-5): a
+	# round footprint is the same whichever way it faces, so the solver's
+	# clearances still hold.
+	var hearth := Vector2.ZERO
+	for plot in plots:
+		if String(plot.get("form","")) in ["open_hearth_yard","maintained_gathering_ground"] and String(plot.get("status","active")) not in ["vacant","reclaimed","ruin"]:
+			var c: Variant = plot.get("centroid",Vector2.ZERO)
+			if c is Vector2: hearth = c; break
 	for record in plan.buildings:
 		var original: Dictionary = originals[int(record.plot_id)]
 		record.plot = original.duplicate(true)
 		record["early_kind"] = kind(original)
 		if String(record.early_kind) in KIT:
 			record.erase("garden")
+		if String(record.early_kind) in ["round_household","carried_round"]:
+			var to_hearth: Vector2 = hearth-Vector2(record.position)
+			if to_hearth.length() > .004: record.angle = atan2(to_hearth.x,to_hearth.y)
 	return plan
 
 static func remember_layout(plan:Dictionary,plots:Array[Dictionary])->void:
@@ -175,12 +186,14 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		var transforms: Array[Transform3D] = []
 		for i in visible.size():
 			var record := visible[i]; var point: Vector2 = record.position + Vector2(center.x,center.z)
-			var transform := Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
+			# Each dwelling a little its own size and lean (settlement_kit_shapes.gd).
+			var transform := Transform3D(preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle),hash(Vector2(record.position))),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
 			transforms.append(transform); batch.set_instance_transform(i,transform)
 			var plot: Dictionary = record.plot
 			var wear := 1-clampf(float(plot.get("condition",1)),0,1)
 			var fire := clampf(float(plot.get("damage",{}).get("fire",0)),0,1)
-			batch.set_instance_color(i,Color.WHITE.lerp(Color(.3,.27,.23),maxf(wear*.55,fire)))
+			# Weathering greys the straw and daub; only fire blackens (codex/beauty-5).
+			batch.set_instance_color(i,Color.WHITE.lerp(Color(.70,.66,.60),wear*.35).lerp(Color(.3,.27,.23),fire))
 		var node := MultiMeshInstance3D.new(); node.name = "EarlySettlement_"+name
 		node.multimesh = batch; node.material_override = material
 		node.set_meta("source_transforms",transforms); parent.add_child(node)
