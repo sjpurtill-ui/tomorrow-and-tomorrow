@@ -1881,7 +1881,7 @@ func _build_environment() -> void:
 	# The fill is the open sky: a little cooler than the key, so shade reads
 	# blue-grey against warm sunlit ground (world_beauty.gdshaderinc).
 	settings.ambient_light_color = Color("#97a3ab")
-	settings.ambient_light_energy = 0.30 if SEAMLESS_WORLD else 0.36
+	settings.ambient_light_energy = 0.36 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
@@ -1898,6 +1898,9 @@ func _build_environment() -> void:
 	# kilometre-long bands on ridge crests. A modest penumbra preserves the relief
 	# while removing the low-poly-looking shadow edge.
 	sun.shadow_blur=2.4
+	# Painted shade is never black: hill shadows keep some sky light, so a cast
+	# shadow reads as cool shade across the land rather than a hole in it.
+	sun.shadow_opacity=0.70
 	sun.directional_shadow_max_distance = 900.0 if SEAMLESS_WORLD else 180.0
 	add_child(sun)
 
@@ -2592,10 +2595,6 @@ void fragment() {
 	float chart_scale=smoothstep(0.02,0.30,pixel_world);
 	forest_surface=mix(forest_surface,vec3(0.18,0.22,0.12),smoothstep(0.01,0.20,pixel_world)*0.70);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
-	// Woodland as a mass with volume (world_beauty.gdshaderinc): the stand edge
-	// facing the low sun catches warm light, the far edge falls into shade
-	// that spills a little onto the open ground beside it.
-	earth = wb_canopy_edges(earth,forest_mask,relative_position.xz,pixel_world);
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
 	// Seeded intermittent swales bridge the visual scale between a continental
@@ -2675,6 +2674,14 @@ void fragment() {
 	vec3 wb_palette=wb_biome_palette(wb_rain,wb_warmth,forest_mask,world_position.y,smoothstep(0.25,0.75,biome_patch*0.55+soil_patch*0.45));
 	earth = wb_paint(earth,wb_palette,wb_reference,0.85);
 	earth = wb_brushwork(earth,wb_brush(world_position.xz,CAMERA_POSITION_WORLD.y),1.0);
+	// Woodland as stands of crowns (world_beauty.gdshaderinc), from the same
+	// woodland density and clearing as resource access. The stand edge facing
+	// the low sun catches warm light; the far edge falls into shade that
+	// spills a little onto the open ground beside it.
+	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.30,0.72,slope));
+	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch)*(1.0-rock_mask*0.8);
+	earth = wb_woodland(earth,wb_stand_cover,wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5),world_position.xz,pixel_world);
+	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2734,6 +2741,9 @@ void fragment() {
 	// Grade to the map palette first, then haze toward parchment: mild at
 	// valley height, stronger at regional and continental footprints, and a
 	// little more along oblique rays, like the margin of a painted map.
+	// Engraved contours over the painted relief at chart zoom.
+	float wb_contour=wb_contours(world_position.y,height_px,pixel_world)*smoothstep(0.012,0.05,pixel_world);
+	earth=mix(earth,MAP_SEPIA*1.15,wb_contour*0.28);
 	earth=wb_grade(earth);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
@@ -2753,6 +2763,7 @@ void fragment() {
 		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,coast_height);
 		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
 	}
+	earth = wb_frontier_wash(earth,discovered,world_position.xz,pixel_world,smoothstep(0.015,0.20,pixel_world));
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;

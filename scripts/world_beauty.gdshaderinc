@@ -32,9 +32,9 @@ const vec3 WB_MEADOW = vec3(0.530, 0.560, 0.380);  // #878F61 grassland
 const vec3 WB_STEPPE = vec3(0.640, 0.600, 0.440);  // #A39970 dry grass
 const vec3 WB_DRYLAND = vec3(0.720, 0.640, 0.500);  // #B8A380 sun-scoured
 const vec3 WB_WETLAND = vec3(0.400, 0.470, 0.390);  // #667863 wet meadows
-const vec3 WB_WOOD = vec3(0.270, 0.340, 0.250);  // #455740 broadleaf
-const vec3 WB_WOOD_COLD = vec3(0.220, 0.290, 0.260);  // #384A42 conifer
-const vec3 WB_WOOD_DRY = vec3(0.380, 0.400, 0.280);  // #616647 open woodland
+const vec3 WB_WOOD = vec3(0.310, 0.400, 0.270);  // #4F6645 broadleaf
+const vec3 WB_WOOD_COLD = vec3(0.250, 0.340, 0.290);  // #40574A conifer
+const vec3 WB_WOOD_DRY = vec3(0.420, 0.440, 0.300);  // #6B704D open woodland
 const vec3 WB_TUNDRA = vec3(0.570, 0.570, 0.520);  // #919185 cold barrens
 const vec3 WB_UPLAND = vec3(0.560, 0.540, 0.500);  // #8F8A80 bare upland
 
@@ -175,4 +175,125 @@ vec3 wb_brushwork(vec3 c, float stroke, float amount) {
 	vec3 cool = vec3(0.95, 0.99, 1.05);
 	vec3 shifted = c*mix(cool, warm, stroke*0.5+0.5)*(1.0+stroke*0.05);
 	return mix(c, shifted, clamp(amount, 0.0, 1.0));
+}
+
+// Chart contours: fine sepia lines of equal height, as an engraved survey
+// sheet draws them, over the painted relief. The interval doubles as the view
+// widens so lines stay a comfortable distance apart; each fourth line is an
+// index contour, a little heavier. Returns ink coverage (0-1).
+// `height_px` is fwidth(height) (take it before any discard).
+float wb_contours(float height, float height_px, float pixel_world) {
+	if (height <= 0.004) { return 0.0; }
+	float octave = log2(max(pixel_world, 0.000001)/0.012);
+	float level = floor(octave);
+	float blend = fract(octave);
+	float coverage = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float interval = 0.025*exp2(level+float(k));
+		float weight = k == 0 ? 1.0-blend : blend;
+		float u = height/interval;
+		float px = max(height_px/interval, 0.00001);
+		float d = abs(fract(u+0.5)-0.5)/px;
+		float line = 1.0-smoothstep(0.35, 1.05, d);
+		float index = 1.0-step(0.5, abs(mod(floor(u+0.5), 4.0)));
+		// Where contours crowd (steep ground) they would merge into a smear.
+		float crowd = smoothstep(0.40, 0.18, px);
+		coverage = max(coverage, line*weight*crowd*mix(0.55, 1.0, index));
+	}
+	return coverage;
+}
+
+// The known world's edge as a watercolour wash: the land's paint thins toward
+// the frontier ink, raggedly, and pigment pools in a slightly darker rim just
+// inside it, the way a wash dries on paper. `discovered` is the raw charted
+// mask (the frontier ink sits at 0.30); `scale` fades it in at chart zoom.
+vec3 wb_frontier_wash(vec3 earth, float discovered, vec2 world_xz, float pixel_world, float scale) {
+	if (scale <= 0.0 || discovered >= 0.75) { return earth; }
+	float blot = map_paper_noise(world_xz/max(pixel_world*55.0, 0.00001))*0.7
+		+map_paper_noise(world_xz/max(pixel_world*14.0, 0.00001)+vec2(3.1, -7.7))*0.3;
+	float d = discovered+(blot-0.5)*0.16;
+	float thin = 1.0-smoothstep(0.31, 0.66, d);
+	float rim = (1.0-smoothstep(0.0, 0.035, abs(d-0.345)))*step(0.30, discovered);
+	vec3 paper = MAP_VELLUM*0.62;
+	earth = mix(earth, earth*0.55+paper*0.45, thin*0.62*scale);
+	earth *= 1.0-rim*0.16*scale;
+	return earth;
+}
+
+// -- Woodland as canopy ------------------------------------------------------
+// Woodland density used to shade open ground a little darker, so a forest read
+// as dark grass. Here it becomes stands: an organic edge where density passes
+// about one half, small groves scattered in half-wooded country, and inside a
+// canopy of crowns, each lit on its north-west side with shaded gaps between.
+// The crowns are held at a constant size on screen (individual trees close up,
+// clumps and then a stippled wash further out), blended across octaves so the
+// canopy never pops while zooming.
+
+vec2 wb_cell_jitter(vec2 cell) {
+	return vec2(map_paper_hash(cell+vec2(17.0, 31.0)), map_paper_hash(cell+vec2(-5.0, 11.0)));
+}
+
+// One octave of crowns at `p` (in crown units): round crowns of varied size,
+// each lit on its sunward side, with shaded understory showing between.
+// Returns (brightness, gap).
+vec2 wb_crown_octave(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	float cover = 0.0;
+	float bright = 0.0;
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			vec2 g = vec2(float(x), float(y));
+			vec2 cell = i+g;
+			vec2 jitter = wb_cell_jitter(cell);
+			vec2 r = f-(g+0.1+jitter*0.8);       // from crown centre to pixel
+			float radius = 0.42+map_paper_hash(cell+vec2(9.0, 3.0))*0.34;
+			float d = length(r)/radius;
+			float crown = 1.0-smoothstep(0.70, 1.0, d);
+			if (crown <= cover) { continue; }
+			float lit = clamp(dot(r/radius, WB_SUN_XZ)*1.25, -1.0, 1.0)*(1.0-d*0.35);
+			float tone = map_paper_hash(cell+vec2(41.0, -23.0));
+			cover = crown;
+			bright = 0.84+lit*0.36+(tone-0.5)*0.20;
+		}
+	}
+	return vec2(mix(0.62, bright, cover), 1.0-cover);
+}
+
+// Canopy tone at `world_xz` for a pixel `pixel_world` km wide. Returns
+// (brightness multiplier, gap darkness 0-1, per-crown warm/cool 0-1).
+vec3 wb_canopy(vec2 world_xz, float pixel_world) {
+	float crown_km = max(pixel_world*9.0, 0.009);
+	float level = log2(crown_km/0.009);
+	float scale = 0.009*exp2(floor(level));
+	float blend = fract(level);
+	vec2 a = wb_crown_octave(world_xz/scale);
+	vec2 b = wb_crown_octave(world_xz/(scale*2.0)+vec2(7.3, -2.9));
+	vec2 m = mix(a, b, blend);
+	float hue = map_paper_noise(world_xz/(scale*3.0)+vec2(-11.0, 5.0));
+	return vec3(m.x, m.y, hue);
+}
+
+// Stand coverage from woodland density (0-1) and two broad world noises (0-1).
+float wb_stand(float woodland, float noise_a, float noise_b) {
+	float edge_noise = (noise_a-0.5)*0.34+(noise_b-0.5)*0.16;
+	float stand = smoothstep(0.40, 0.50, woodland+edge_noise);
+	// Groves: clumps in half-wooded and parkland country.
+	float grove = smoothstep(0.64, 0.74, noise_b*0.7+noise_a*0.3)*smoothstep(0.12, 0.32, woodland);
+	return max(stand, grove*0.9);
+}
+
+// Paint the stand. `wood` is the palette's woodland colour for this climate
+// (linear), `reference` the typical luma of its ground.
+vec3 wb_woodland(vec3 earth, float stand, vec3 wood, vec2 world_xz, float pixel_world) {
+	if (stand <= 0.001) { return earth; }
+	vec3 canopy = wb_canopy(world_xz, pixel_world);
+	// Canopy detail softens into a stippled wash at chart zoom.
+	float detail = 1.0-smoothstep(0.08, 0.6, pixel_world)*0.55;
+	// Canopy is painted a little lighter than its ground's palette: a forest
+	// on a painted map is a rich mass of green, never a black stain.
+	vec3 c = wood*1.9*mix(1.0, canopy.x, detail);
+	c = mix(c, c*vec3(0.62, 0.70, 0.82), canopy.y*0.50*detail);
+	c *= mix(vec3(1.05, 1.03, 0.90), vec3(0.93, 1.0, 1.07), canopy.z);
+	return mix(earth, c, clamp(stand, 0.0, 1.0));
 }

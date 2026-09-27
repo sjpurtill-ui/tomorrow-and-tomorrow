@@ -1,7 +1,7 @@
 extends Node
 ## Map art capture: one world, several zooms, one run. For before/after map
 ## art reviews at the settlement and regional views.
-##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river]
+##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river] [--woodland] [--timing]
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -53,6 +53,13 @@ func _ready()->void:
 		target=Vector3(terrain._world_river_x(river_z),0.0,river_z)
 		target.y=terrain._height_at(target.x,target.z)
 		CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+	if "--woodland" in args:
+		# Look at the nearest dense woodland instead (charted for this capture only).
+		var found:=_find_woodland(target)
+		if found!=Vector3.INF:
+			target=found
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+			print("MAP_ART_CAPTURE: woodland at ",target)
 	for size in sizes:
 		terrain.camera.size=size
 		terrain.zoom_target_size=-1.0
@@ -72,6 +79,7 @@ func _ready()->void:
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
+		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	get_tree().quit(0)
 
 ## `--great-works`: several works of different shapes, materials and stages
@@ -104,3 +112,33 @@ func _seed_great_works(center:Vector3)->void:
 	city.undertakings=list
 	print("MAP_ART_CAPTURE: seeded ",list.size()," great works around ",home)
 	terrain._refresh_undertaking_visuals(true)
+
+## Nearest point with dense woodland, searched on widening rings.
+func _find_woodland(center:Vector3)->Vector3:
+	for ring in range(1,60):
+		var radius:=float(ring)*12.0
+		for step in 24:
+			var angle:=TAU*float(step)/24.0
+			var x:=center.x+cos(angle)*radius
+			var z:=center.z+sin(angle)*radius
+			var biome:Dictionary=terrain._biome_at(x,z)
+			if float(biome.get("woodland",0.0))>0.62:
+				return Vector3(x,terrain._height_at(x,z),z)
+	return Vector3.INF
+
+## `--timing`: median and p95 frame times (vsync off) and GPU render time at
+## this view, for before/after cost comparisons of the map shaders.
+func _frame_timing()->Dictionary:
+	var viewport:=get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(viewport,true)
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps=0
+	for i in 20:await RenderingServer.frame_post_draw
+	var frames:Array[float]=[];var gpu:Array[float]=[]
+	var previous:=Time.get_ticks_usec()
+	for i in 120:
+		await RenderingServer.frame_post_draw
+		var now:=Time.get_ticks_usec();frames.append(float(now-previous)/1000.0);previous=now
+		gpu.append(RenderingServer.viewport_get_measured_render_time_gpu(viewport))
+	frames.sort();gpu.sort()
+	return {"frame_median_ms":snappedf(frames[60],0.01),"frame_p95_ms":snappedf(frames[114],0.01),"gpu_median_ms":snappedf(gpu[60],0.01),"gpu_p95_ms":snappedf(gpu[114],0.01)}

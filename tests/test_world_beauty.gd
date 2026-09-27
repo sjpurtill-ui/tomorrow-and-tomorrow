@@ -30,7 +30,7 @@ func test_woodland_is_darker_than_open_ground()->void:
 	for rain in [0.45,0.65,0.85]:
 		var open:=BEAUTY.biome_colour(rain,0.6,0.0,0.3)
 		var wood:=BEAUTY.biome_colour(rain,0.6,1.0,0.3)
-		assert_float(wood.get_luminance()).is_less(open.get_luminance()*0.75)
+		assert_float(wood.get_luminance()).is_less(open.get_luminance()*0.85)
 
 
 func test_hot_drylands_are_the_palest_and_warmest()->void:
