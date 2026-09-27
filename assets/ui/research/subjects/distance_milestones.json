@@ -1,0 +1,14 @@
+{
+  "id": "distance_milestones",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0a4a719b-7c9f-4ff5-aadb-76002300f7e7.png",
+  "source_file": "exec-0a4a719b-7c9f-4ff5-aadb-76002300f7e7.png",
+  "creative_brief": "Every thousand paces a stone post gives the distance to the capital, and couriers reckon their days by them. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/distance_milestones-v1.png",
+  "sha256": "55fb47ed374009e9ce1fac1f902dd189abb80c47295bcaaa8e7d2057980d90df",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

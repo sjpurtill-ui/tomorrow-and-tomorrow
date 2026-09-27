@@ -1,0 +1,14 @@
+{
+  "id": "portrait_likeness_sculpture",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9bcce48b-e75b-4f09-9f0a-37284b5474e1.png",
+  "source_file": "exec-9bcce48b-e75b-4f09-9f0a-37284b5474e1.png",
+  "creative_brief": "Sculptors carve rulers and thinkers as they truly look, wrinkles and all. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/portrait_likeness_sculpture-v1.png",
+  "sha256": "936fbf5cb3c70c62a010d1698f022706349966e43469820abea84997dd4d7faa",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
