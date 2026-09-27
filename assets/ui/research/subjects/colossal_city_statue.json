@@ -1,0 +1,14 @@
+{
+  "id": "colossal_city_statue",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cb32b0b0-0f4a-4434-9e2f-ce2eb7c6b5c7.png",
+  "source_file": "exec-cb32b0b0-0f4a-4434-9e2f-ce2eb7c6b5c7.png",
+  "creative_brief": "A bronze giant of the town's patron stands over the harbour, cast in sections over twelve years. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/colossal_city_statue-v1.png",
+  "sha256": "dd89005bd9fd000222508b1b34251cba551cd569c58510684998ff274c6e9e27",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "olive_pruning_rules",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d4f4d285-b6d5-4a80-b9b2-c9f661a9510a.png",
+  "source_file": "exec-d4f4d285-b6d5-4a80-b9b2-c9f661a9510a.png",
+  "creative_brief": "Groves are planted at measured spacing and pruned to open the crown, so every tree bears in its turn. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/olive_pruning_rules-v1.png",
+  "sha256": "f6c3c4bc60263d3ef551e04c663ec73fc754435b31e98f7b13b91d260c5f6ec4",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

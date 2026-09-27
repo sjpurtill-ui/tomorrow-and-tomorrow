@@ -6,18 +6,20 @@ const MISSIONS:Dictionary={
 	"navy":{"hold":"Hold in port","patrol":"Patrol","strike_force":"Strike force","convoy_raiding":"Convoy raiding","convoy_escort":"Convoy escort","invasion_support":"Naval invasion support","transport":"Transport troops or supplies"},
 	"air":{"hold":"Stand down","air_superiority":"Air superiority","interception":"Interception","close_air_support":"Close air support","logistics_strike":"Logistics strike","strategic_bombing":"Strategic bombing","naval_strike":"Naval strike","port_strike":"Port strike","reconnaissance":"Reconnaissance","air_supply":"Air supply","transport":"Transport troops"}}
 const R=preload("res://scripts/joint_regions.gd")
+const G=preload("res://scripts/joint_geography.gd")
 const Dock=preload("res://scripts/naval_dock_service.gd")
+const Blockade=preload("res://scripts/naval_blockade.gd")
 const MAX_FORCES:=128
 var geography=preload("res://scripts/joint_geography.gd").new()
 var logistics=preload("res://scripts/joint_logistics.gd").new(self)
 var effects=preload("res://scripts/joint_effects.gd").new(self)
 var rival=preload("res://scripts/joint_rivals.gd").new(self)
 var host:Node
-var state:Dictionary={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"next_id":1,"last_day":-1}
+var state:Dictionary={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"next_id":1,"last_day":-1}
 func _init(campaign:Node)->void:host=campaign
 func reset()->void:
 	geography.route_cache.clear()
-	state={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"next_id":1,"last_day":-1}
+	state={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"next_id":1,"last_day":-1}
 func personnel()->int:
 	var total:=0
 	for force:Dictionary in state.forces:
@@ -242,6 +244,27 @@ func _power(record:Dictionary,key:String)->float:
 func _event(message:String,domain:String="")->void:
 	state.events.push_front({"day":int(state.last_day),"text":message,"domain":domain})
 	if state.events.size()>80:state.events.resize(80)
+## The fleet or air commander decides how to work the force's drawn zone
+## (battle_tactics.gd ZONE_TACTICS): gated by the hulls and airframes the
+## force has and, for the player, the player's discoveries. A change is
+## reported once, in plain words.
+func _choose_zone_tactic(record:Dictionary)->void:
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var owner:=String(record.get("owner",""))
+	var known:=Tactics.zone_known(record,C.UNITS,Tactics.known_for_player() if owner=="player" else [])
+	var context:={"port":false,"escort":false}
+	var region:Dictionary=record.get("region",{})
+	if record.domain=="navy" and not region.is_empty() and record.mission in ["patrol","strike_force"]:
+		for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities(owner,"",false):
+			if _hostile(owner,String(city.get("controller",city.get("civ_id","")))) and R.contains(region,G.unpack(city.position)):context.port=true;break
+	if record.domain=="air" and record.mission=="strategic_bombing" and not region.is_empty():
+		for other:Dictionary in state.forces:
+			if other.owner==owner and other.domain=="air" and other.mission in ["air_superiority","interception"] and not other.region.is_empty() and R.overlap(other.region,region)>0:context.escort=true;break
+	var chosen:=Tactics.zone_choose(record,known,context)
+	if chosen==String(record.get("tactic","")):return
+	record["tactic"]=chosen
+	if chosen!="" and owner=="player":
+		_event("%s: %s." % [String(record.get("name","The force")),Tactics.name_of(chosen,preload("res://scripts/hud/era_words.gd").stage())],String(record.domain))
 func _losses(record:Dictionary,damage:float)->void:
 	record.damage=float(record.damage)+maxf(0,damage)
 	record.condition=maxf(.1,float(record.condition)-damage*.015)
@@ -490,6 +513,7 @@ func advance(day:int)->void:
 				if Dock.building(record):Dock.construct(record,share,day)))
 	for record:Dictionary in state.forces:
 		record.efficiency=0.0;record.fuel_used=0
+		_choose_zone_tactic(record)
 		var origin:=base(int(record.base_id))
 		var carrier:=force(int(record.get("carrier_id",0)))
 		if int(record.get("carrier_id",0))>0 and (carrier.is_empty() or carrier_capacity(carrier)<=0):
@@ -570,8 +594,43 @@ func advance(day:int)->void:
 	_detect_and_fight()
 	effects.advance(day)
 	logistics.advance(day)
+	_advance_blockades(day)
 	for key in state.contacts.keys():
 		if day-int(state.contacts[key].day)>5:state.contacts.erase(key)
+## Fleets whose commanders chose a close or distant blockade squeeze every
+## hostile port inside their zone (naval_blockade.gd): the strongest fleet on
+## a port sets the pace, scaled by how firmly the zone is held.
+func _advance_blockades(day:int)->void:
+	var pressure:Dictionary={}
+	for record:Dictionary in state.forces:
+		var pace:=Blockade.rate_and_cap(String(record.get("tactic","")))
+		if pace==Vector2.ZERO or float(record.get("efficiency",0))<=0 or record.domain!="navy" or record.mission not in ["patrol","strike_force"] or record.get("region",{}).is_empty():continue
+		var owner:=String(record.owner)
+		var held:=clampf(effects.control(owner,record.region),0.0,1.0)*clampf(float(record.efficiency),0.0,1.0)
+		for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities(owner,"",false):
+			var civ_id:=String(city.get("controller",city.get("civ_id","")))
+			if not _hostile(owner,civ_id) or not R.contains(record.region,G.unpack(city.position)):continue
+			var id:=String(city.get("city_id",city.get("id","")))
+			if id=="" or float(pressure.get(id,{}).get("rate",0.0))*float(pressure.get(id,{}).get("control",0.0))>=pace.x*held:continue
+			pressure[id]={"rate":pace.x,"cap":pace.y,"control":held,"civ_id":civ_id,"owner":owner,"tactic":String(record.tactic),"name":String(city.get("name",""))}
+	var before:Dictionary=state.get("blockades",{})
+	state["blockades"]=Blockade.step(before,pressure,day)
+	for id in pressure:
+		if not before.has(id) and String(pressure[id].owner)=="player":
+			_event("%s is under blockade." % String(pressure[id].get("name","A hostile port")),"navy")
+func blockade_level(city_id:String)->float:
+	return float((state.get("blockades",{}) as Dictionary).get(city_id,{}).get("level",0.0))
+## A civilization's exposure to blockade, weighted by the people at each port.
+func blockade_closure(civ_id:String)->float:
+	var ledger:Dictionary=state.get("blockades",{})
+	if ledger.is_empty():return 0.0
+	return Blockade.closure(ledger,civ_id,func(city_id:String)->float:
+		if civ_id=="player":return 1.0 if city_id==WorldSimulation.world.city_intelligence.primary_id("player") else 0.3
+		var location:Dictionary=WorldSimulation.world._region_location(city_id)
+		if location.is_empty():return 0.0
+		var civ:Dictionary=WorldSimulation.world.civilizations[int(location.owner_index)]
+		var region:Dictionary=civ.strategic_regions[int(location.region_index)]
+		return clampf(float(region.get("population",0))/maxf(1,float(civ.get("population",1))),0,1))
 func latest_naval_contact(record:Dictionary)->Dictionary:
 	var newest:Dictionary={}
 	for contact:Dictionary in state.contacts.values():
@@ -694,6 +753,7 @@ func validate(payload:Variant)->String:
 	for key in ["bases","forces","events","convoys"]:
 		if not payload.get(key,[]) is Array:return "Invalid joint-force list."
 	if not payload.contacts is Dictionary:return "Invalid contact reports."
+	if payload.has("blockades") and (not payload.blockades is Dictionary or payload.blockades.size()>Blockade.MAX_PORTS):return "Invalid blockade ledger."
 	if not _whole_number(payload.next_id,1) or not _whole_number(payload.last_day,-1):return "Invalid joint-force clock or identifier."
 	if payload.bases.size()>256 or payload.contacts.size()>MAX_FORCES*MAX_FORCES or payload.events.size()>80:return "Joint-force state exceeds bounded limits."
 	if payload.get("forces",[]).size()>MAX_FORCES:return "Too many joint forces."

@@ -1,0 +1,14 @@
+{
+  "id": "translated_foreign_drama",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-18bd02b2-df4c-4108-89e5-141b71c11acf.png",
+  "source_file": "exec-18bd02b2-df4c-4108-89e5-141b71c11acf.png",
+  "creative_brief": "Foreign plays and epics are translated into the home tongue and staged at the festivals. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/translated_foreign_drama-v1.png",
+  "sha256": "93de8a2eb9962284346ce670c4c092bbad9733538cd0d3e2b1b9c68f3356e719",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

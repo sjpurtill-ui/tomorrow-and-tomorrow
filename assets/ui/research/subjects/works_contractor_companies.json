@@ -1,0 +1,14 @@
+{
+  "id": "works_contractor_companies",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e9f1a9e5-6036-4cbc-849f-5e7b3b088205.png",
+  "source_file": "exec-e9f1a9e5-6036-4cbc-849f-5e7b3b088205.png",
+  "creative_brief": "Partners pool their money and their slaves to bid on the harbor works, and share whatever the contract clears. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/works_contractor_companies-v1.png",
+  "sha256": "6bf6120c428939e5431a596f9a6e618a77f537593ca2f4e5bc7211bfb133a63f",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

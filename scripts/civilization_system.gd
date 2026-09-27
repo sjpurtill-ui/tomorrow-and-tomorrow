@@ -3565,6 +3565,8 @@ func _process_intercivilization_relations(day:int)->void:
 			var treaty:=String(relation.get("treaty","none"))
 			if treaty=="trade" and opinion>0.10 and proximity_distance<1.55:
 				trade=minf(float(first.population),float(second.population))*(0.0008+opinion*0.0018)*(0.35+minf(float(first.logistics),float(second.logistics)))
+				# A blockaded port trades less by sea (naval_blockade.gd, bounded).
+				trade*=WorldSimulation.military.blockade_trade_factor(String(first.id))*WorldSimulation.military.blockade_trade_factor(String(second.id))
 				first["production"]=clampf(float(first.production)+trade/maxf(1.0,float(first.population))*0.004,0.0,1.0)
 				second["production"]=clampf(float(second.production)+trade/maxf(1.0,float(second.population))*0.004,0.0,1.0)
 				first["trade_total"]=float(first.trade_total)+trade
@@ -3719,6 +3721,7 @@ func _process_player_relations(day:int)->void:
 			continue
 		if String(relation.get("treaty","none"))=="trade" and not bool(relation.get("at_war",false)):
 			var trade:=minf(WorldSimulation.state.population_exact,float(civ.population))*(0.001+maxf(0.0,opinion)*0.002)*(0.4+float(civ.logistics)*0.6)
+			trade*=WorldSimulation.military.blockade_trade_factor("player")*WorldSimulation.military.blockade_trade_factor(String(civ.id))
 			relation["trade"]=trade
 			civ["trade_total"]=float(civ.trade_total)+trade
 			opinion=clampf(opinion+0.002,-1.0,1.0)

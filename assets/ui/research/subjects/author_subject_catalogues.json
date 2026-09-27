@@ -1,0 +1,14 @@
+{
+  "id": "author_subject_catalogues",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-83b85860-0f94-4cb8-a85e-a7d257c385b5.png",
+  "source_file": "exec-83b85860-0f94-4cb8-a85e-a7d257c385b5.png",
+  "creative_brief": "Every roll in the collection is listed by author and subject, with its opening words and its length. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/author_subject_catalogues-v1.png",
+  "sha256": "23c388a20dfa57c5b267fad8e63297dea941bf1f6059e5fc2d56bf4aa1bdfd5c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

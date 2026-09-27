@@ -161,6 +161,11 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	if WorldSimulation.state.resource_settlement_id.is_empty() and not traveling:
 		var access:=WorldSimulation.military.siege_home_food_access()
 		for source in harvest: harvest[source]*=access
+	if not traveling and harvest.has("Fish") and WorldSimulation.military.blockade_trade_factor("player")<1.0:
+		# A rival fleet blockading this port keeps the boats in (naval_blockade.gd).
+		var port:=WorldSimulation.state.resource_settlement_id if not WorldSimulation.state.resource_settlement_id.is_empty() else WorldSimulation.world.city_intelligence.primary_id("player")
+		var level:=WorldSimulation.military.port_blockade_level(port)
+		if level>0.0: harvest["Fish"]=float(harvest["Fish"])*preload("res://scripts/naval_blockade.gd").sea_food_factor(level)
 	stocks[FRESH]=float(stocks.get(FRESH,0.0))+float(harvest["Fresh plants"])+float(harvest["Fresh meat"])+float(harvest["Fish"])
 	stocks[STORED]=float(stocks.get(STORED,0.0))+float(harvest["Dry staples"])+float(harvest.get("Transferred",0.0))
 	stamp=trace.mark("food_harvest",stamp)

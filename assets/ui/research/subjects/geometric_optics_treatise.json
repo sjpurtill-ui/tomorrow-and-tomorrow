@@ -1,0 +1,14 @@
+{
+  "id": "geometric_optics_treatise",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-62a036b8-9534-4f5b-a5d4-81d9d4e90d5a.png",
+  "source_file": "exec-62a036b8-9534-4f5b-a5d4-81d9d4e90d5a.png",
+  "creative_brief": "A treatise shows that sight runs in straight lines, and works out shadows and the angles of mirrors by geometry. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/geometric_optics_treatise-v1.png",
+  "sha256": "b429b637e990d735da2cc5b3e75764f6c2f680b103b5c8be39393a4908ec898e",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

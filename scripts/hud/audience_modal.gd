@@ -21,6 +21,8 @@ const Persons:=preload("res://scripts/court_persons.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
 const EnvoyRequests:=preload("res://scripts/envoy_requests.gd")
+const Pacts:=preload("res://scripts/trade_pacts.gd")
+const Chronicle:=preload("res://scripts/chronicle.gd")
 ## Typed words that are about people (asked, summoned, questioned, accused or
 ## judged) go to the live persons exchange; offline the Court offers choices.
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
@@ -2676,6 +2678,7 @@ func show_foreign(civ_id:String)->bool:
 	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
 	column.add_child(_build_brief_row(civ_id))
 	column.add_child(_build_offline_briefs())
+	column.add_child(_build_exchange_panel(civ_id))
 	column.add_child(_build_terms_row(civ_id))
 	body.add_child(_build_foreign_footer())
 	if not ForeignDialogue.changed.is_connected(_on_foreign_changed):ForeignDialogue.changed.connect(_on_foreign_changed)
@@ -2764,6 +2767,8 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 		if not bonds.is_empty():rows.append(["Bound by",String((bonds[0] as Dictionary).get("text","")),Tokens.GREEN])
 		var lineage:Array=character.get("lineage",[])
 		if not lineage.is_empty():rows.append(["Before them",String((lineage[0] as Dictionary).get("name","")),Tokens.BODY])
+	for pact:Dictionary in Pacts.pacts(civ_id):
+		rows.append(["Exchange",Pacts.short_words(pact.terms),Tokens.GREEN])
 	var goals:Array=leader.get("goals",[]) if leader.get("goals") is Array else []
 	for index in mini(goals.size(),2):
 		if goals[index] is Dictionary:rows.append(["They want",String((goals[index] as Dictionary).get("title","")),Tokens.BODY])
@@ -2837,6 +2842,63 @@ func _refresh_offline_briefs(civ_id:String,show:bool,away:bool)->void:
 			foreign_refs["message"]="Your envoy sets out with your brief. The answer comes back with them." if sent else String(ForeignDialogue.thread(civ_id).get("status",""))
 			_refresh_foreign())
 		box.add_child(button)
+
+func _build_exchange_panel(civ_id:String)->Control:
+	## The standing exchange on the table: the concrete terms, who agreed to
+	## what, and the seal once the other ruler has agreed or made an offer.
+	var panel:=PanelContainer.new();panel.name="ExchangeTerms";panel.visible=false
+	var style:=Tokens.flat(Tokens.TILE_BG,Tokens.GOLD,1,8,0);style.border_width_left=4
+	style.content_margin_left=14;style.content_margin_right=10;style.content_margin_top=8;style.content_margin_bottom=8
+	panel.add_theme_stylebox_override("panel",style)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);panel.add_child(row)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",2);row.add_child(words)
+	var kicker:=Tokens.make_label("",11,Tokens.TEXT_DIM,.12);kicker.name="ExchangeKicker";words.add_child(kicker)
+	var terms:=Tokens.make_label("",15,Tokens.BODY);terms.name="ExchangeWords";terms.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(terms)
+	var note:=Tokens.make_label("",12,Tokens.TEXT_SOFT);note.name="ExchangeNote";note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(note)
+	var seal:=Button.new();seal.name="SealExchange";seal.text="Seal this agreement";seal.custom_minimum_size=Vector2(190,38)
+	seal.add_theme_stylebox_override("normal",Tokens.gold_outline_style());seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	seal.pressed.connect(func()->void:
+		var result:=ForeignDialogue.seal(civ_id)
+		foreign_refs["message"]=String(result.get("error",String(ForeignDialogue.thread(civ_id).get("status",""))))
+		_refresh_foreign())
+	row.add_child(seal)
+	var drop:=Button.new();drop.name="SetAsideExchange";drop.text="Set aside";drop.custom_minimum_size=Vector2(0,38);drop.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	drop.tooltip_text="Put these terms aside. Nothing is agreed."
+	drop.pressed.connect(func()->void:ForeignDialogue.set_aside_terms(civ_id);foreign_refs["message"]="";_refresh_foreign())
+	row.add_child(drop)
+	foreign_refs["exchange"]=panel;foreign_refs["exchange_kicker"]=kicker;foreign_refs["exchange_words"]=terms;foreign_refs["exchange_note"]=note;foreign_refs["exchange_seal"]=seal
+	return panel
+
+func _refresh_exchange(id:String,leader:Dictionary)->void:
+	var panel:=foreign_refs.get("exchange") as PanelContainer
+	if panel==null:return
+	var thread:Dictionary=ForeignDialogue.thread(id)
+	var draft:Dictionary=thread.get("draft",{}) if thread.get("draft") is Dictionary else {}
+	panel.visible=draft.has("exchange")
+	if not panel.visible:return
+	var council:Dictionary=thread.get("council",{}) if thread.get("council") is Dictionary else {}
+	var who:=String(leader.get("name","Their ruler")).get_slice(" ",0)
+	var stance:=String(draft.get("stance",""))
+	var kicker:="STANDING EXCHANGE · %s %s" % [who.to_upper(),Pacts.stance_word(stance).to_upper()]
+	if stance=="counter" and bool(draft.get("final",false)):kicker+=" · THEIR LAST OFFER"
+	(foreign_refs.exchange_kicker as Label).text=kicker
+	(foreign_refs.exchange_words as Label).text=Pacts.describe(draft.exchange)
+	var notes:PackedStringArray=PackedStringArray()
+	match stance:
+		"accept":notes.append("Both sides' last words agree. Seal it and it binds.")
+		"counter","propose":notes.append("These are their terms. Seal them to agree, or send your envoy back with others.")
+		"refuse":notes.append("Refused: %s." % String(draft.get("reason","they gave no reason")))
+		"consult":notes.append("Their council is weighing it and will have decided by about %s. Your next envoy brings back the answer." % Chronicle.date_label(int(council.get("ready",GameState.elapsed_days))))
+	for extra in draft.get("notes",[]):notes.append(String(extra))
+	(foreign_refs.exchange_note as Label).text=" ".join(notes)
+	var seal:=foreign_refs.get("exchange_seal") as Button
+	if seal!=null:
+		var ready:=ForeignDialogue.sealable(id)
+		var blocker:=Pacts.seal_blocker(id,draft.exchange) if ready else ""
+		seal.visible=ready
+		seal.disabled=not blocker.is_empty()
+		seal.text="Seal this agreement" if stance=="accept" else "Accept their terms and seal"
+		seal.tooltip_text=blocker if not blocker.is_empty() else "Your consent binds both peoples. Traders carry each portion; keeping it or breaking it is remembered."
 
 func _build_terms_row(civ_id:String)->Control:
 	## Terms the envoys can carry, with the council's reading of their reception.
@@ -2950,7 +3012,7 @@ func _refresh_foreign()->void:
 		status_lines.append("Your envoys are home; the reply is being set down." if not bool(thread.get("retryable",false)) else "Your envoys are home, but the reply was lost. Retry it, or set it aside.")
 	elif bool(thread.get("in_transit",false)):
 		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
-		status_lines.append("Your envoy is on the road · %s · home about day %d." % [String(mission_status.get("phase","travelling")).to_lower(),int(mission_status.get("return_day",0))])
+		status_lines.append("Your envoy is on the road · %s · home about %s." % [String(mission_status.get("phase","travelling")).to_lower(),Chronicle.date_label(int(mission_status.get("return_day",0)))])
 	else:
 		var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
 		if quote.has("error"):status_lines.append(String(quote.error))
@@ -2981,7 +3043,8 @@ func _refresh_foreign()->void:
 	var set_aside:=foreign_refs.get("set_aside") as Button
 	if set_aside!=null:set_aside.visible=bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false))
 	var draft:=foreign_refs.get("draft") as Button
-	if draft!=null:draft.visible=not (thread.get("draft",{}) as Dictionary).is_empty()
+	if draft!=null:draft.visible=not (thread.get("draft",{}) as Dictionary).is_empty() and not (thread.get("draft",{}) as Dictionary).has("exchange")
+	_refresh_exchange(id,leader)
 	var connection:=foreign_refs.get("connection") as Button
 	if connection!=null:connection.text="Connect AI…" if not connection_issue.is_empty() else "Connection settings…"
 	# Terms and their likely reception.
@@ -3023,7 +3086,7 @@ func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)-
 	var who:="You · your brief" if ruler else ("Your envoy" if role=="envoy" else leader_name)
 	var name_label:=Tokens.make_label(who,14,colour);name_label.add_theme_font_override("font",_bold);head.add_child(name_label)
 	var day:=int(turn.get("day",-1))
-	head.add_child(Tokens.make_label("earlier" if day<0 else "day %d" % (day+1),12,Tokens.TEXT_DIM))
+	head.add_child(Tokens.make_label("earlier" if day<0 else Chronicle.date_label(day),12,Tokens.TEXT_DIM))
 	var text:=Tokens.make_label(String(turn.get("content","")),16,Tokens.BODY);text.name="LineText";text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	if ruler:text.add_theme_font_override("font",_italic)
 	stack.add_child(text)

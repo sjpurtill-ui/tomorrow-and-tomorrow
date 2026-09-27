@@ -1,0 +1,14 @@
+{
+  "id": "engine_proof_walls",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-270126cb-f428-45e9-bef8-6085d23aec8d.png",
+  "source_file": "exec-270126cb-f428-45e9-bef8-6085d23aec8d.png",
+  "creative_brief": "Walls built thick enough to take the stone throwers' blows carry towers with engines of their own. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/engine_proof_walls-v1.png",
+  "sha256": "832a7a39aa36e4ee6cdca05fa255bde5b157ddd750d4e661d7cb27b7243072d9",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "standing_running_rigging",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b1d576a7-f5d7-476a-9ac5-b843b64c3771.png",
+  "source_file": "exec-b1d576a7-f5d7-476a-9ac5-b843b64c3771.png",
+  "creative_brief": "Standing and running rigging separated. Show the people, tools and materials of this practice in a road, quay or storehouse with goods on the move, classical antiquity.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/standing_running_rigging-v1.png",
+  "sha256": "af4cda91e68a2425a402f67bf5475bcb7f0834045db9815345018beec6a3c7ef",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

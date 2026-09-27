@@ -1,0 +1,14 @@
+{
+  "id": "learned_allusive_poetry",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1966b657-3b94-4e07-abd0-0fc5db914f6c.png",
+  "source_file": "exec-1966b657-3b94-4e07-abd0-0fc5db914f6c.png",
+  "creative_brief": "Court poets write short, learned verse full of rare myths that only scholars catch. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/learned_allusive_poetry-v1.png",
+  "sha256": "524e675e6de531ef9850d7e3c8be2a938282a66c0c01a42cf42f04ba91c5e3eb",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

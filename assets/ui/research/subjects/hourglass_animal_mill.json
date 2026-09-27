@@ -1,0 +1,14 @@
+{
+  "id": "hourglass_animal_mill",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bf3e0ff9-5d97-4c87-863a-7f7639e87f14.png",
+  "source_file": "exec-bf3e0ff9-5d97-4c87-863a-7f7639e87f14.png",
+  "creative_brief": "A donkey walking in a circle turns a tall stone like two cups upon a cone, and a bakery grinds its own flour. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/hourglass_animal_mill-v1.png",
+  "sha256": "3ca59aacb50cdbb178694b5ad7dd096c94d0e1138a822570d057045750dddc6c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

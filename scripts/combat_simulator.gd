@@ -7,6 +7,7 @@ extends RefCounted
 ## attack, defense, morale, readiness. All ratings use 1.0 as the baseline.
 
 const MAX_ROUNDS := 12
+const BattleTactics:=preload("res://scripts/battle_tactics.gd")
 const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
 
@@ -261,6 +262,10 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var attacker_morale := float(attacking_force.morale)
 	var defender_morale := float(defending_force.morale)
 	var rounds: Array[Dictionary] = []
+	# The generals' chosen tactics (battle_tactics.gd) shape each round's
+	# exposure within fixed bounds. Absent a plan nothing changes.
+	var tactics:Dictionary=options.get("tactics",{}) if options.get("tactics") is Dictionary else {}
+	var round_offset:=maxi(0,int(options.get("round_offset",0)))
 
 	for round_number in range(1, round_limit + 1):
 		if attacker_troops <= 0 or defender_troops <= 0:
@@ -278,13 +283,14 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		var attacker_share := attacker_power / total_power
 		var defender_share := defender_power / total_power
 		var engagement:=_engagement_context(rng,attacker_share,defender_share,attacker_morale,defender_morale,effective_terrain_defense)
+		var tactic_round:Dictionary=BattleTactics.round_effects(tactics,round_number+round_offset,attacker_share,attacker_morale,defender_morale)
 		var attacker_variance := _casualty_variance(rng)
 		var defender_variance := _casualty_variance(rng)
 
 		# Casualties are based on the opposing force's share of power. They are
 		# calculated before either side is reduced, so each round is simultaneous.
-		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier)))
-		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier / effective_terrain_defense)))
+		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity))))
+		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
 		# A force in contact usually suffers at least one loss; true lulls may be bloodless.
 		if attacker_losses==0 and float(engagement.intensity)>=0.65: attacker_losses=1
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
@@ -324,6 +330,9 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			"intensity":engagement.label,
 			"order_intensity":casualty_intensity,
 			"event":engagement.event,
+			"tactic_event":String(tactic_round.event),
+			"attacker_tactic_phase":String(tactic_round.attacker_phase),
+			"defender_tactic_phase":String(tactic_round.defender_phase),
 			"attacker_cohort_losses":attacker_cohort_result.losses,
 			"defender_cohort_losses":defender_cohort_result.losses,
 			"attacker_cohort_equipment_losses":attacker_cohort_result.equipment_losses,
@@ -347,6 +356,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		"terrain_defense": terrain_defense,
 		"effective_terrain_defense":effective_terrain_defense,
 		"siege_terrain_reduction":siege_reduction,
+		"tactics":tactics.duplicate(true),
 		"termination":termination
 	}
 

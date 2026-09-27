@@ -1,0 +1,14 @@
+{
+  "id": "pastoral_poetry",
+  "line": "culture",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1e90c772-ffc1-41d9-91db-e9c5373a8a0f.png",
+  "source_file": "exec-1e90c772-ffc1-41d9-91db-e9c5373a8a0f.png",
+  "creative_brief": "Poets sing of shepherds, flocks and love in a gentle, idealized countryside. Paint it as a classical antiquity scene.",
+  "medium": "Tapestry-inspired painting",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/pastoral_poetry-v1.png",
+  "sha256": "a32d1e05b5d865af09a7022bb1b859ba3a779aa21049b78107cf199e51d37ff4",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

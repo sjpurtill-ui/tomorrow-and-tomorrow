@@ -69,6 +69,19 @@ func tab(_sub:int)->Dictionary:
 			"sub":"day %d of contact" % maxi(1,int(GameState.elapsed_days)-int(engagement.get("started_day",GameState.elapsed_days))+1),
 			"value":"","accent":Tokens.RED,"tip":"Each day of contact costs both sides personnel and supply",
 		}]})
+		# How each general is fighting, in the era's words (battle_tactics.gd).
+		var plan:Dictionary=engagement.get("tactics",{})
+		if not plan.is_empty():
+			var Tactics:=preload("res://scripts/battle_tactics.gd")
+			var words:=preload("res://scripts/hud/era_words.gd").stage()
+			var home_side:=String(engagement.get("home_side","attacker"))
+			var enemy_side:="defender" if home_side=="attacker" else "attacker"
+			var rounds:Array=engagement.get("rounds",[])
+			var event:=String((rounds[-1] as Dictionary).get("tactic_event","")) if not rounds.is_empty() else ""
+			blocks.append({"type":"rows","heading":"HOW THEY FIGHT","items":[
+				{"name":Tactics.name_of(String((plan.get(home_side,{}) as Dictionary).get("id",Tactics.BASELINE)),words),"sub":event if event!="" else "our general's choice","value":"","accent":Tokens.RED,"tip":"The general chose this from our troops, what our people know and the ground. Ask him about it in the Court."},
+				{"name":Tactics.name_of(String((plan.get(enemy_side,{}) as Dictionary).get("id",Tactics.BASELINE)),words),"sub":"the enemy","value":"","accent":Tokens.RED,"tip":"What their general is doing, as our people read it from the field."},
+			]})
 		blocks.append({"type":"actions","items":[
 			{"label":"HOLD","sub":"keep the line","primary":true,"on_press":func()->void: MilitaryCampaign.advance_engagement("hold"),"tip":"Maintain contact without forcing a decision"},
 			{"label":"PUSH","sub":"force a decision","on_press":func()->void: MilitaryCampaign.advance_engagement("push"),"tip":"Accept losses to break them"},

@@ -1,0 +1,14 @@
+{
+  "id": "harbor_silting_link",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a3b5da68-dc41-4c4b-a1a4-61bd94a8e997.png",
+  "source_file": "exec-a3b5da68-dc41-4c4b-a1a4-61bd94a8e997.png",
+  "creative_brief": "The harbor mouth that once took deep ships is now a marsh, and the silt is traced to the hills cleared upriver. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/harbor_silting_link-v1.png",
+  "sha256": "d802bb3eb1714ad71cbacb428c7fb452757da536b80b4dd38ddd4cbced00c266",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

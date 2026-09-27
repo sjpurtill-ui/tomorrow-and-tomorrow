@@ -1,0 +1,14 @@
+{
+  "id": "fetal_position_knowledge",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b27442b6-08ab-4085-9977-794c928541de.png",
+  "source_file": "exec-b27442b6-08ab-4085-9977-794c928541de.png",
+  "creative_brief": "Healers and midwives describe how the child lies in the womb and which presentations will not deliver. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/fetal_position_knowledge-v1.png",
+  "sha256": "632c479d7274d329fb75c4faf1792db547c67c12dde8c8fda02fa9a11c2a0bdd",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

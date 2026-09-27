@@ -1,0 +1,14 @@
+{
+  "id": "mine_drainage_screws",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-65343e16-6f81-4b44-902f-8e941fb49da4.png",
+  "source_file": "exec-65343e16-6f81-4b44-902f-8e941fb49da4.png",
+  "creative_brief": "Men tread long wooden screws set in a chain up the gallery, and the water climbs from one to the next to the drain. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mine_drainage_screws-v1.png",
+  "sha256": "22c1fdceb9b3b78e3eab557d016108ef94ab97996046857896971f31754b1641",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

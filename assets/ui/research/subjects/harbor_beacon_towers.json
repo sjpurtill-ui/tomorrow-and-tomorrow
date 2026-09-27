@@ -1,0 +1,14 @@
+{
+  "id": "harbor_beacon_towers",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9f76be3e-eab2-4167-8782-b9017e96955c.png",
+  "source_file": "exec-9f76be3e-eab2-4167-8782-b9017e96955c.png",
+  "creative_brief": "A fire kept burning all night on the harbor tower guides ships through the reefs to the entrance. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/harbor_beacon_towers-v1.png",
+  "sha256": "e38726a1dd540108c42235cde7df6fa062fef931813c39724cdfbca44674fab9",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
