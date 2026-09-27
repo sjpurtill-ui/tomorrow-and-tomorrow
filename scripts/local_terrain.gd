@@ -2368,12 +2368,15 @@ void fragment() {
 	// frontier of the known world inked where the chart ends.
 	vec3 unknown_ground=map_chart_paper(world_position.xz,CAMERA_POSITION_WORLD.y,pixel_world,fog_current_origin,SCREEN_UV);
 	float reveal=smoothstep(0.06,0.62,discovered);
+	// Screen pixels inland from the frontier ink (world_beauty's wash).
+	float wb_frontier_px=1000000.0;
 	if (discovered>0.02 && discovered<0.75) {
 		// One mask texel is ~39 km; the mask is linear inside it, so a forward
 		// difference over half a texel gives its exact local slope.
 		float step_km=fog_world_size.x/2048.0;
 		vec2 slope_per_km=vec2(charted_at(world_position.xz+vec2(step_km,0.0))-discovered,charted_at(world_position.xz+vec2(0.0,step_km))-discovered)/step_km;
 		vec3 frontier=map_frontier(discovered,1.0/max(length(slope_per_km)*pixel_world,0.00001));
+		wb_frontier_px=(discovered-0.30)/max(length(slope_per_km)*pixel_world,0.00001);
 		float frontier_scale=smoothstep(0.015,0.20,pixel_world);
 		unknown_ground=mix(unknown_ground,MAP_SEPIA,frontier.y*frontier_scale*0.38);
 		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
@@ -2763,7 +2766,7 @@ void fragment() {
 		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,coast_height);
 		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
 	}
-	earth = wb_frontier_wash(earth,discovered,world_position.xz,pixel_world,smoothstep(0.015,0.20,pixel_world));
+	earth = wb_frontier_wash(earth,wb_frontier_px,world_position.xz,pixel_world,smoothstep(0.015,0.20,pixel_world));
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;

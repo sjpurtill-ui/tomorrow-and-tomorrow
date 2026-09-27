@@ -204,19 +204,20 @@ float wb_contours(float height, float height_px, float pixel_world) {
 }
 
 // The known world's edge as a watercolour wash: the land's paint thins toward
-// the frontier ink, raggedly, and pigment pools in a slightly darker rim just
-// inside it, the way a wash dries on paper. `discovered` is the raw charted
-// mask (the frontier ink sits at 0.30); `scale` fades it in at chart zoom.
-vec3 wb_frontier_wash(vec3 earth, float discovered, vec2 world_xz, float pixel_world, float scale) {
-	if (scale <= 0.0 || discovered >= 0.75) { return earth; }
-	float blot = map_paper_noise(world_xz/max(pixel_world*55.0, 0.00001))*0.7
-		+map_paper_noise(world_xz/max(pixel_world*14.0, 0.00001)+vec2(3.1, -7.7))*0.3;
-	float d = discovered+(blot-0.5)*0.16;
-	float thin = 1.0-smoothstep(0.31, 0.66, d);
-	float rim = (1.0-smoothstep(0.0, 0.035, abs(d-0.345)))*step(0.30, discovered);
+// the frontier ink over a ragged band a few dozen pixels wide, and pigment
+// pools in a faint darker rim right at the edge, the way a wash dries on
+// paper. `inland_px` is the distance in screen pixels inland from the ink;
+// `scale` fades the effect in at chart zoom.
+vec3 wb_frontier_wash(vec3 earth, float inland_px, vec2 world_xz, float pixel_world, float scale) {
+	if (scale <= 0.0 || inland_px > 60.0) { return earth; }
+	float blot = map_paper_noise(world_xz/max(pixel_world*38.0, 0.00001))*0.7
+		+map_paper_noise(world_xz/max(pixel_world*9.0, 0.00001)+vec2(3.1, -7.7))*0.3;
+	float d = inland_px+(blot-0.5)*26.0;
+	float thin = 1.0-smoothstep(2.0, 34.0, d);
+	float rim = 1.0-smoothstep(0.0, 2.5, abs(d-3.0));
 	vec3 paper = MAP_VELLUM*0.62;
-	earth = mix(earth, earth*0.55+paper*0.45, thin*0.62*scale);
-	earth *= 1.0-rim*0.16*scale;
+	earth = mix(earth, earth*0.50+paper*0.50, thin*0.55*scale);
+	earth *= 1.0-rim*0.12*scale;
 	return earth;
 }
 
