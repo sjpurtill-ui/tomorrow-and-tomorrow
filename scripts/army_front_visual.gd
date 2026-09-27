@@ -5,6 +5,9 @@ extends Node3D
 const MAX_SECTIONS := 24
 const SAMPLES := 24
 const TRANSITION_SECONDS := 0.35
+## A handful of people is not a deployed line: it stands as a loose knot and
+## gets no occupied-ground band (war_front_model.gd TINY_PARTY).
+const TINY_PARTY := 8
 var sections: Array[Dictionary] = []
 var previous: Array[Dictionary] = []
 var elapsed := TRANSITION_SECONDS
@@ -57,7 +60,8 @@ static func layout(force: Dictionary, deployment: float = 1.0, facing: float = 0
 	var strength_ratio := minf(1.0, float(total)/recorded_total)
 	var result: Array[Dictionary] = []
 	var cursor := 0.0
-	var aspect := lerpf(0.45, 10.0, clampf(deployment,0,1))
+	var tiny := total <= TINY_PARTY
+	var aspect := 1.3 if tiny else lerpf(0.45, 10.0, clampf(deployment,0,1))
 	for index in forms.size():
 		var form: Dictionary = forms[index]
 		var count := float(maxi(0,int(form.get("count",0))))*strength_ratio
@@ -89,7 +93,7 @@ static func layout(force: Dictionary, deployment: float = 1.0, facing: float = 0
 		for i in polygon.size():
 			polygon[i].y *= correction
 			polygon[i] = polygon[i].rotated(-angle) + center
-		result.append({"id":str(form.get("id",index))+":"+str(index), "index":index, "center":center, "polygon":polygon, "area_m2":area, "count":count, "unit":unit, "located":located, "status":String(form.get("status",force.get("status","active")))})
+		result.append({"id":str(form.get("id",index))+":"+str(index), "index":index, "center":center, "polygon":polygon, "area_m2":area, "count":count, "unit":unit, "located":located, "status":String(form.get("status",force.get("status","active"))), "tiny":tiny})
 		cursor += width + 0.5
 	for section in result:
 		if section.located: continue
@@ -134,6 +138,7 @@ func redraw() -> void:
 	var surface := SurfaceTool.new(); surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var triangles := 0
 	for section in displayed_sections():
+		if bool(section.get("tiny",false)): continue
 		var polygon: PackedVector2Array = section.polygon
 		var indices := Geometry2D.triangulate_polygon(polygon)
 		for i in range(0,indices.size(),3):

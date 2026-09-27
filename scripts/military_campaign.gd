@@ -1251,9 +1251,13 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 	if index>=0:
 		field_armies[index].erase("target_formation_id")
 		field_armies[index].erase("order_kind")
-	var engagement:=begin_threat_engagement()
+	var engagement:=begin_threat_engagement(false)
 	if engagement.has("error"):return engagement
 	active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
+	if bool(active_engagement.get("overrun_expected",false)):
+		var settled:=settle_overrun_now()
+		settled["message"]="%s overran %s." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy party"))]
+		return settled
 	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
@@ -2085,7 +2089,7 @@ func _home_defense_force(allocate_id:bool=true)->Dictionary:
 	return assembled
 
 
-func begin_threat_engagement()->Dictionary:
+func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	if not active_siege.is_empty(): return {"error":"Use the siege assault or sortie order to begin combat."}
 	if not active_engagement.is_empty(): return engagement_snapshot()
 	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
@@ -2120,9 +2124,51 @@ func begin_threat_engagement()->Dictionary:
 	active_engagement["commander_managed"]=command_hierarchy.executing
 	if command_hierarchy.executing:command_hierarchy.battle.attach(active_engagement,command_hierarchy.battle_candidates)
 	active_engagement["tactics"]=_engagement_tactics(active_engagement)
+	# A hopeless fight (tests/test_battle_scale.gd): the small side is overrun
+	# in one exchange, settled the day it starts, with no battle to sit through.
+	if simulator.overrun_expected(active_engagement.attacker,active_engagement.defender,battle_ground)!="": active_engagement["overrun_expected"]=true
 	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
+	if bool(active_engagement.get("overrun_expected",false)):
+		return settle_overrun_now() if settle_overrun else engagement_snapshot()
 	battle_started.emit(active_engagement.duplicate(true))
 	return engagement_snapshot()
+
+
+## Fights the active engagement's single overrun exchange at once and files
+## its report today. Returns the resolved battle.
+func settle_overrun_now()->Dictionary:
+	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
+	var order:String=String(command_hierarchy.land.battle_order()) if bool(active_engagement.get("commander_managed",false)) else "hold"
+	var guard:=0
+	var outcome:Dictionary={}
+	while not active_engagement.is_empty() and guard<3:
+		outcome=advance_engagement(order); guard+=1
+	var settled:Dictionary=outcome.duplicate(true)
+	settled["ok"]=true; settled["resolved"]=true; settled["overrun"]=true
+	return settled
+
+
+## A day of fighting: one exchange, or, where one side is badly outmatched or
+## both are only a handful, exchanges until it is decided (bounded), so a
+## lopsided or tiny fight does not drag across days.
+func fight_engagement_day(order:String)->void:
+	var exchanges:=0
+	while not active_engagement.is_empty() and exchanges<DAY_EXCHANGE_LIMIT:
+		var quick:=_quick_fight(active_engagement)
+		advance_engagement(order); exchanges+=1
+		if not quick or bool(active_engagement.get("awaiting_player_view",false)): break
+
+
+const DAY_EXCHANGE_LIMIT:=8
+const QUICK_FIGHT_ODDS:=2.5
+const QUICK_FIGHT_BAND:=12
+
+
+func _quick_fight(engagement:Dictionary)->bool:
+	if engagement.is_empty(): return false
+	var a:Dictionary=engagement.get("attacker",{}); var d:Dictionary=engagement.get("defender",{})
+	if mini(int(a.get("troops",0)),int(d.get("troops",0)))<=QUICK_FIGHT_BAND: return true
+	return simulator.odds_of(a,d,float(engagement.get("terrain_defense",1.0)))>=QUICK_FIGHT_ODDS
 
 
 func set_battle_formation_order(index:int,kind:String,target:int=-1)->Dictionary:
@@ -2440,9 +2486,10 @@ func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictiona
 	if availability.has("error"): return availability
 	var incident:Dictionary=availability.incident
 	_create_civilization_threat(incident,"offensive")
-	var result:=begin_threat_engagement()
+	var result:=begin_threat_engagement(false)
 	if not result.has("error"):
 		active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
+		if bool(active_engagement.get("overrun_expected",false)): return settle_overrun_now()
 	return result
 
 
@@ -2480,7 +2527,7 @@ func _process_threat_day()->void:
 	if not active_siege.is_empty(): return
 	if not active_engagement.is_empty():
 		if bool(active_engagement.get("awaiting_player_view",false)):return
-		advance_engagement(command_hierarchy.land.battle_order() if bool(active_engagement.get("commander_managed",false)) else "hold")
+		fight_engagement_day(command_hierarchy.land.battle_order() if bool(active_engagement.get("commander_managed",false)) else "hold")
 		return
 	if not active_threat.is_empty():
 		if int(WorldSimulation.state.elapsed_days)>int(active_threat.get("deadline_day",WorldSimulation.state.elapsed_days)) and pending_aftermath.is_empty():
@@ -5067,11 +5114,14 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 		if troops<=0 or not pending_aftermath.is_empty() or not active_engagement.is_empty(): return {"error":"No available local force can enter battle; the siege orders remain in place."}
 		_end_siege("The forces leave siege positions for battle.",false,false)
 		active_threat=(saved.threat as Dictionary).duplicate(true)
-		var result:=begin_threat_engagement()
+		var result:=begin_threat_engagement(false)
 		if result.has("error"): return result
 		active_engagement["terrain_defense"]=1+(float(active_engagement.terrain_defense)-1)*(1-float(saved.pressure)*.65)
 		var besieger_key:="attacker"
 		active_engagement[besieger_key]["readiness"]=float(active_engagement[besieger_key].get("readiness",.5))*(1-float(saved.fatigue)*.45)
+		if bool(active_engagement.get("overrun_expected",false)):
+			var settled:=settle_overrun_now(); settled["message"]="The assault overran them at once."
+			return settled
 		return {"ok":true,"message":"The assault or sortie begins from current siege conditions.","engagement":engagement_snapshot()}
 	if order=="withdraw":
 		_end_siege("The player orders withdrawal from the siege.",true,String(saved.mode)=="offensive")

@@ -88,10 +88,12 @@ func test_a_court_ordered_attack_is_told_once_in_the_war_leaders_voice()->void:
 	assert_str(String(decided.verdict)).override_failure_message(String(decided.get("says",""))).is_equal("act")
 	var army_id:=int(decided.objective.army_id)
 	for day in 200:
-		if not MilitaryCampaign.active_engagement.is_empty() or MilitaryCampaign._field_army_index(army_id)<0: break
+		if not MilitaryCampaign.active_engagement.is_empty() or not MilitaryCampaign.battle_history.is_empty() or MilitaryCampaign._field_army_index(army_id)<0: break
 		GameState.elapsed_days+=1
 		MilitaryCampaign._process_field_army_movement_day()
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	# Forty against eight is overrun on arrival and settled at once
+	# (tests/test_battle_scale.gd); a closer fight is still under way.
+	assert_bool(not MilitaryCampaign.active_engagement.is_empty() or not MilitaryCampaign.battle_history.is_empty()).is_true()
 	var record:=_fight_to_the_end()
 	var seed:=int(record.seed)
 	var filed:=WO.daily(int(GameState.elapsed_days))

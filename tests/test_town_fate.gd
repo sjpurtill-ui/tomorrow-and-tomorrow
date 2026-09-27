@@ -252,7 +252,9 @@ func test_a_besieging_band_can_be_told_to_storm_and_objects_first()->void:
 	assert_str(String(again.war.verdict)).override_failure_message(String(again.get("actor_says",""))).is_equal("act")
 	assert_str(String(again.objective.kind)).is_equal("storm")
 	assert_dict(MilitaryCampaign.active_siege).is_empty()
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	# Two hundred against a small town are over the walls at once and the
+	# fight is settled on the spot (tests/test_battle_scale.gd).
+	assert_bool(not MilitaryCampaign.active_engagement.is_empty() or not MilitaryCampaign.battle_history.is_empty()).is_true()
 
 
 func test_each_fate_reads_from_plain_words()->void:

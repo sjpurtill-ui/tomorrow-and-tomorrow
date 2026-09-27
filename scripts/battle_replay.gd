@@ -38,7 +38,9 @@ static func frames(record:Dictionary,stage:String="hearth")->Array:
 		var caption:="The %s exchange: %s. We lost %s; they lost %s." % [Account._ordinal(index),Account._intensity_words(String(r.get("intensity",""))),Account._loss_words(our_lost),Account._loss_words(their_lost)]
 		if event!="": caption+=" "+_cap(event)
 		var last:=index==rounds.size()-1
-		if last and not phases.is_empty(): caption+=" "+String(phases[-1])
+		# An overrun is one short beat: the account's own line, nothing more.
+		if last and Account.overrun(record) and not phases.is_empty(): caption=String(account.headline)+" "+String(phases[-1])
+		elif last and not phases.is_empty(): caption+=" "+String(phases[-1])
 		out.append({"index":index+1,"ours":our_count,"theirs":their_count,"our_lost":our_lost,"their_lost":their_lost,
 			"our_morale":float(r.get(home+"_morale",1.0)),"their_morale":float(r.get(foe+"_morale",1.0)),
 			"caption":caption,"event":event,"phase":"ending" if last else "fighting"})

@@ -41,6 +41,40 @@ const STALE_DAYS:=20
 const CONTACT:=0.22
 
 
+## A party too small to hold a line: a handful of people, or a small fraction
+## of the force it faces. It is drawn as its own small inked mark
+## (hud/army_marks.gd), never given a front, a face-off line or a battle line.
+const TINY_PARTY:=8
+const TINY_SHARE:=0.2
+## Beyond this a force is a host in its own right, however large its foe.
+const PARTY_CAP:=60
+
+
+static func tiny(strength:float,facing_strength:float=0.0)->bool:
+	if strength<float(TINY_PARTY): return true
+	return strength<float(PARTY_CAP) and facing_strength>0.0 and strength<facing_strength*TINY_SHARE
+
+
+## The sources that can hold a line of contact: each is compared with the
+## nearest force on the other side (the one it actually faces).
+static func substantial(sources:Array,opposing:Array)->Array:
+	var out:Array=[]
+	for s in sources:
+		var nearest:=INF; var facing:=0.0
+		for o in opposing:
+			var d:=(s.pos as Vector2).distance_to(o.pos)
+			if d<nearest: nearest=d; facing=float(o.get("strength",0.0))
+		if not tiny(float(s.get("strength",0.0)),facing): out.append(s)
+	return out
+
+
+## A fight in which one side is only a handful, or hopelessly outnumbered:
+## drawn as a skirmish mark, not as two opposed battle lines.
+static func skirmish(ours:int,theirs:int)->bool:
+	if ours<=0 or theirs<=0: return false
+	return tiny(float(theirs),float(ours)) or tiny(float(ours),float(theirs))
+
+
 ## Presentation stage from what the people know and field, not the calendar.
 static func mode(stage:String,known:Array,largest_force:int,armies:int,theatre_troops:int)->String:
 	var drilled:=known.has("formation_drill")
