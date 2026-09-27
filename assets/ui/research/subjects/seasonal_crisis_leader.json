@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_crisis_leader",
+  "line": "institutions",
+  "game_year": 24,
+  "approx_historical_year": -4840,
+  "prompt": "c. 4840 BCE: Community selects temporary leader to coordinate reed shelter repairs during hard storm season; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bb4168b0-c8d2-42ba-9fd1-f5bb822fd991.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png",
+  "sha256": "24ee9b0d06eb8a4b3123d3fa8350e624fada3f46ec864f3b5118764f868103f5",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; community decision and crisis work clear in crop, no crown."
+}

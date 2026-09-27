@@ -1,0 +1,12 @@
+{
+  "id": "fish_weirs_and_traps",
+  "line": "nutrition",
+  "game_year": 23,
+  "approx_historical_year": -4847,
+  "prompt": "c. 4847 BCE: River fishers tend V-shaped wicker weir, basket traps and stone-sinker fiber net for fish and fowl; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-15c1b218-2f90-478c-8f79-53e62ced29a0.png",
+  "asset": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png",
+  "sha256": "bc1729d8fd61495c0da66a75eb2ff75e0e44f662246f64bdc8424332e2972e09",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; weir, basket trap, stone sinkers and distant waterfowl clear in crop."
+}

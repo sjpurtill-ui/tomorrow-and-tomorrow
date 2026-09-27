@@ -1,0 +1,122 @@
+[
+  {
+    "id": "fish_weirs_and_traps",
+    "line": "nutrition",
+    "game_year": 23,
+    "approx_historical_year": -4847,
+    "prompt": "c. 4847 BCE: River fishers tend V-shaped wicker weir, basket traps and stone-sinker fiber net for fish and fowl; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-15c1b218-2f90-478c-8f79-53e62ced29a0.png",
+    "asset": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png",
+    "sha256": "bc1729d8fd61495c0da66a75eb2ff75e0e44f662246f64bdc8424332e2972e09",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; weir, basket trap, stone sinkers and distant waterfowl clear in crop."
+  },
+  {
+    "id": "grain_moisture_watch",
+    "line": "nutrition",
+    "game_year": 24,
+    "approx_historical_year": -4840,
+    "prompt": "c. 4840 BCE: Adults spread and turn grain to dry on woven mats while inspecting baskets for damp under reed granary; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-45c36ba7-e597-4717-b986-cdeb51ccabb8.png",
+    "asset": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png",
+    "sha256": "d62b996475ee27bff63de7b9a5825b0e4d0aab95f236279816a2656fe86dfe33",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; drying, turning and moisture watch clear in crop."
+  },
+  {
+    "id": "patrilocal_residence",
+    "line": "demography",
+    "game_year": 24,
+    "approx_historical_year": -4840,
+    "prompt": "c. 4840 BCE: Newly married adult woman joins husbands extended kin household as family welcomes her and own kin wave farewell; chalk pastel cut-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4f468e4e-957b-4501-a29b-b58ab96230ed.png",
+    "asset": "res://assets/ui/research/subjects/patrilocal_residence-v1.png",
+    "sha256": "7da9202eef47c075428211b4f4eaa1a4738e2b735c46ef098d31de8e426d222d",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; move between family shelters clear in crop."
+  },
+  {
+    "id": "seasonal_crisis_leader",
+    "line": "institutions",
+    "game_year": 24,
+    "approx_historical_year": -4840,
+    "prompt": "c. 4840 BCE: Community selects temporary leader to coordinate reed shelter repairs during hard storm season; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bb4168b0-c8d2-42ba-9fd1-f5bb822fd991.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png",
+    "sha256": "24ee9b0d06eb8a4b3123d3fa8350e624fada3f46ec864f3b5118764f868103f5",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; community decision and crisis work clear in crop, no crown."
+  },
+  {
+    "id": "spawning_calendar",
+    "line": "ecology",
+    "game_year": 24,
+    "approx_historical_year": -4840,
+    "prompt": "c. 4840 BCE: Adults watch dense spawning fish run and flowering riverside plants as natural seasonal sign to prepare trap; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b87f1250-3363-4dc1-81df-4b3cb1011686.png",
+    "asset": "res://assets/ui/research/subjects/spawning_calendar-v1.png",
+    "sha256": "7f754ef9249e0043d666ea1f4614d4cbcefdce5fd9fe58e2aca52d2070bae851",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; fish run and seasonal plants clear; no written calendar."
+  },
+  {
+    "id": "herd_recovery_pursuit",
+    "line": "security",
+    "game_year": 25,
+    "approx_historical_year": -4833,
+    "prompt": "c. 4833 BCE: Neolithic group follows hoof tracks at dawn toward goats taken from communal herd; restrained hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-63aea1c3-358c-459f-8c1f-d80889cb4174.png",
+    "asset": "res://assets/ui/research/subjects/herd_recovery_pursuit-v1.png",
+    "sha256": "dffc40e190546aba8512c9a22067605dff8730fa39caba077523190114b3265f",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; tracks, pursuit and distant herd clear, no injury."
+  },
+  {
+    "id": "herding_rotas",
+    "line": "labor",
+    "game_year": 25,
+    "approx_historical_year": -4833,
+    "prompt": "c. 4833 BCE: Herders hand communal sheep and goats to next pair for pasture duty at settlement edge; charcoal and red ochre drawing. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9716a6c8-57ec-4d8c-b52e-4395699e8e14.png",
+    "asset": "res://assets/ui/research/subjects/herding_rotas-v1.png",
+    "sha256": "ce98869981ef63f1ed4a1c53aafd31ab9fcb1eda47db38243db4b33afcc3a5f0",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; handoff and shared flock clear in crop."
+  },
+  {
+    "id": "milking",
+    "line": "nutrition",
+    "game_year": 25,
+    "approx_historical_year": -4833,
+    "prompt": "c. 4833 BCE: Adults milk goat, sheep and early solid-brown domestic cow into clay bowls; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-921aed09-c5ef-4d62-9826-87fe43e8b904.png",
+    "asset": "res://assets/ui/research/subjects/milking-v1.png",
+    "sha256": "3bcdbce4398b743cd2025da118ec95139eb1d3745cced39320d46848f4a8eecd",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; rejected first for modern Holstein-like spotted cow; selected primitive solid-brown cattle and milking actions clear."
+  },
+  {
+    "id": "route_food_caches",
+    "line": "logistics",
+    "game_year": 25,
+    "approx_historical_year": -4833,
+    "prompt": "c. 4833 BCE: Travelers place covered dried-food baskets at plain stone cairns along familiar river route for later journeys; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-844d246f-5cdc-4b8f-ad09-8a95c4c61cdc.png",
+    "asset": "res://assets/ui/research/subjects/route_food_caches-v1.png",
+    "sha256": "fff3d463775043baf5c9d15ada3f890eab68a979a29654ccd1579605a4922606",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; two caches and route travelers clear in crop, no writing."
+  },
+  {
+    "id": "sweat_baths",
+    "line": "health",
+    "game_year": 25,
+    "approx_historical_year": -4833,
+    "prompt": "c. 4833 BCE: Adults heat rounded stones outdoors and carry them into small reed-and-hide sweat hut where steam rises; watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f7b634c2-b6fc-4ec7-9a85-73c7ec25cec2.png",
+    "asset": "res://assets/ui/research/subjects/sweat_baths-v1.png",
+    "sha256": "b175102102313db163091d826c51d752fcd7681dacd34e02c6a2bb0eabdd6f27",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; heated stones, hut and steam clear in crop."
+  }
+]
