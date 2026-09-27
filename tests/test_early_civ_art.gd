@@ -131,8 +131,11 @@ func test_early_research_keeps_subject_identity_visibility_and_later_mapping()->
 		assert_bool(focus.x>=0 and focus.x<=1 and focus.y>=0 and focus.y<=1).is_true()
 		item.exposed=false
 		assert_str(research.subject_art_key(item)).is_empty()
+	# Past the early years a subject takes its later painting: the
+	# discovery-600 set first, then the older manifest.
 	GameState.elapsed_days=300*365
-	assert_str(research.subject_art_key({"id":"oral_epics"})).is_equal(String(research.manifest().oral_epics.path))
+	var later:=String(research.art600_manifest().oral_epics.path) if research.art600_manifest().has("oral_epics") else String(research.manifest().oral_epics.path)
+	assert_str(research.subject_art_key({"id":"oral_epics"})).is_equal(later)
 	GameState.elapsed_days=saved
 
 func test_first300_research_cards_are_distinct_and_era_scoped()->void:
@@ -143,7 +146,8 @@ func test_first300_research_cards_are_distinct_and_era_scoped()->void:
 	assert_bool(bindings.size()>=36).is_true()
 	for id:String in bindings:
 		var path:=research.subject_art_key({"id":id,"exposed":true})
-		assert_str(path).is_equal(String(bindings[id]))
+		# A discovery-600 painting, where one exists, takes precedence over the card.
+		assert_str(path).is_equal(String(research.art600_manifest()[id].path) if research.art600_manifest().has(id) else String(bindings[id]))
 		assert_bool(ResourceLoader.exists(path)).is_true()
 		var texture:=research.for_discovery({"id":id,"exposed":true})
 		assert_object(texture).is_not_null()

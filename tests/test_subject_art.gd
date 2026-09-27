@@ -23,12 +23,16 @@ func test_storytelling_stone_and_pottery_have_different_subjects_and_preserve_di
 	var stone:=Art.for_discovery({"id":"stone_sorting"})
 	var clay:=Art.for_discovery({"id":"clay_shaping"})
 	var oral:=Art.for_discovery({"id":"oral_epics"})
-	assert_str(stone.resource_path).ends_with("stone-selection-v1.png")
+	# Stone and clay keep their early paper paintings; oral epics now shows its
+	# discovery-600 painting. Three different subjects, three different images.
+	assert_str(stone.resource_path).ends_with("paper/stone_sorting.png")
 	assert_str(clay.resource_path).ends_with("paper/clay_shaping.png")
-	assert_str(oral.resource_path).ends_with("paper/oral_epics.png")
+	assert_str(oral.resource_path).ends_with("discovery-600/oral_epics.png")
+	# The art mapping leaves the discovery data as authored (research_600
+	# rebalanced values).
 	assert_str(DiscoverySystem.catalog_by_id.oral_epics.name).is_equal("Oral Epics")
-	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.knowledge_preservation)).is_equal(.05)
-	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.cohesion)).is_equal(.04)
+	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.knowledge_preservation)).is_equal(.0111)
+	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.cohesion)).is_equal(.0112)
 func test_subject_crop_preserves_aspect_and_stays_inside_the_image()->void:
 	var item:={"id":"oral_epics"};var texture:=Art.for_discovery(item)
 	for target:Vector2 in [Vector2(708,210),Vector2(250,104),Vector2(264,70),Vector2(120,220)]:

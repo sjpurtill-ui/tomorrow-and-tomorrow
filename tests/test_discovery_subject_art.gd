@@ -20,12 +20,14 @@ func test_hidden_subjects_and_unknown_ids_get_no_category_fallback()->void:
 		assert_str(Art.subject_art_key(hidden)).is_empty();assert_object(Art.for_discovery(hidden)).is_null()
 	assert_object(Art.for_discovery({"id":"not_authored","domain":"culture","exposed":true})).is_null()
 func test_storytelling_stone_and_pottery_are_distinct_without_changing_discovery_data()->void:
-	assert_str(Art.for_discovery({"id":"stone_sorting"}).resource_path).ends_with("stone-selection-v1.png")
-	assert_str(Art.for_discovery({"id":"clay_shaping"}).resource_path).ends_with("clay_shaping-v1.png")
-	assert_str(Art.for_discovery({"id":"oral_epics"}).resource_path).ends_with("oral_epics-v2.png")
+	# Stone and clay keep their early paper paintings; oral epics now shows its
+	# discovery-600 painting.
+	assert_str(Art.for_discovery({"id":"stone_sorting"}).resource_path).ends_with("paper/stone_sorting.png")
+	assert_str(Art.for_discovery({"id":"clay_shaping"}).resource_path).ends_with("paper/clay_shaping.png")
+	assert_str(Art.for_discovery({"id":"oral_epics"}).resource_path).ends_with("discovery-600/oral_epics.png")
 	assert_str(DiscoverySystem.catalog_by_id.oral_epics.name).is_equal("Oral Epics")
-	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.knowledge_preservation)).is_equal(.05)
-	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.cohesion)).is_equal(.04)
+	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.knowledge_preservation)).is_equal(.0111)
+	assert_float(float(DiscoverySystem.catalog_by_id.oral_epics.effects.cohesion)).is_equal(.0112)
 func test_subject_crop_keeps_target_aspect_inside_portrait_and_landscape_images()->void:
 	var texture:=Art.for_discovery({"id":"oral_epics"})
 	var source:=Rect2(Vector2.ZERO,texture.get_size())

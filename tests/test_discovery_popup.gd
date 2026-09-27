@@ -70,7 +70,8 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 	var f:=fixture();GameState.known_discoveries.append("stone_sorting")
 	var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"stone_sorting","day":1129}])
 	assert_str(popup.heading.text).is_equal("Stone Selection")
-	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/stone-selection-v1.png")
+	# Early subjects show their paper painting (research_visuals EARLY_SUBJECTS).
+	assert_str(Art.source_texture(popup.hero.texture).resource_path).is_equal("res://assets/ui/research/paper/stone_sorting.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	var sorting:Dictionary=DiscoverySystem.discovery_definition("stone_sorting").effects
 	assert_str(popup.effect_cards.survey_speed.value.text).is_equal(DiscoveryPopup.percent(float(sorting.survey_speed)))
@@ -79,12 +80,12 @@ func test_stone_selection_has_its_own_art_and_original_effects()->void:
 func test_subject_art_is_specific_and_hidden_questions_do_not_reveal_it()->void:
 	var Art=preload("res://scripts/hud/research_visuals.gd")
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12}])
-	assert_str(popup.hero.texture.resource_path).ends_with("food_drying-v1.png")
+	assert_str(popup.hero.texture.resource_path).ends_with("paper/food_drying.png")
 	assert_object(popup.hero.get_node_or_null("FieldIllustrationCaption")).is_null()
 	var hidden:={"id":"stone_sorting","domain":"production","exposed":false}
 	assert_str(Art.subject_art_key(hidden)).is_empty()
 	assert_object(Art.for_discovery(hidden)).is_null()
-	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).ends_with("clay_shaping-v1.png")
+	assert_str(Art.for_discovery({"id":"clay_shaping","domain":"production","exposed":true}).resource_path).ends_with("paper/clay_shaping.png")
 	popup.close()
 func test_full_illustration_and_footer_fit_after_resizing_to_phone_width()->void:
 	var f:=fixture();var popup:=DiscoveryPopup.announce(f.host,f.hud,[{"id":"food_drying","day":12},{"id":"drainage","day":12}])
