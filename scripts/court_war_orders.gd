@@ -437,13 +437,18 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 	## The engine's answer: {verdict:"act"|"object"|"impossible", kind,
 	## outcome (one short plain note), says (the war leader's own words, which
 	## carry the answer), reason, fix, objective:{army_id,...} when acted}.
-	## context.general: the war leader who was spoken to. Pure of any UI.
+	## context.general: the war leader who was spoken to.
+	## context.army_id: a band the god chose (the Army command screen); the
+	##   same checks, objections and insistence apply, aimed at that band.
+	## context.home_only: send from the home reserve (and recruits) only.
+	## Pure of any UI.
 	var kind:=String(reading.get("kind","attack"))
 	insist=insist or bool(reading.get("insist",false))
 	var given:Variant=context.get("general",{})
 	var general:Dictionary=given if given is Dictionary and not (given as Dictionary).is_empty() else war_leader()
 	var gname:=_given(String(general.get("name","The war leader")))
-	var out:={"kind":kind,"general":gname,"general_pid":int(general.get("person_id",0)),"general_ref":general.duplicate(),"verdict":"impossible","outcome":"","says":"","reason":"","fix":"","objective":{}}
+	var out:={"kind":kind,"general":gname,"general_pid":int(general.get("person_id",0)),"general_ref":general.duplicate(),"verdict":"impossible","outcome":"","says":"","reason":"","fix":"","objective":{},
+		"chosen":maxi(0,int(context.get("army_id",0))),"home_only":bool(context.get("home_only",false))}
 	if WorldSimulation.military==null or WorldSimulation.world==null:
 		return _no(out,"no_military","We have nothing organised to fight with yet.","Raise and drill a levy first.")
 	match kind:
@@ -517,16 +522,22 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var band:Dictionary=f.band
 	var use_army:Dictionary={}
 	var own_band:=false
-	if not band.is_empty() and (int(band.troops)>=trained or not _at_home(band)):
+	var chosen:=int(out.chosen)
+	if chosen>0:
+		var picked:=_army(chosen)
+		if picked.is_empty(): return _no(out,"no_band","That band is no longer on our rolls.","")
+		if not _available(picked): return _no(out,"band_busy","%s cannot take a new order now: %s." % [String(picked.get("name","That band")),_busy_words(picked)],"Call it home first, or wait until it is free.")
+		use_army=picked; own_band=not band.is_empty() and int(band.army_id)==chosen
+	elif not bool(out.home_only) and not band.is_empty() and (int(band.troops)>=trained or not _at_home(band)):
 		use_army=band; own_band=true
 	var keep:=0 if full else (ceili(trained*WATCH_SHARE) if trained>=MIN_FORCE*2 else 0)
 	var send:=trained-keep
-	if use_army.is_empty():
+	if use_army.is_empty() and not bool(out.home_only):
 		var idle:Array=f.idle
 		if not idle.is_empty():
 			idle.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.troops)>int(b.troops))
 			if int(idle[0].troops)>=send: use_army=idle[0]
-	if use_army.is_empty() and send<MIN_FORCE and int(t.heads)==0:
+	if use_army.is_empty() and not bool(out.home_only) and send<MIN_FORCE and int(t.heads)==0:
 		var largest:Dictionary={}
 		for a:Dictionary in f.away:
 			if _available(a) and int(a.troops)>send and (largest.is_empty() or int(a.troops)>int(largest.troops)): largest=a
@@ -623,7 +634,7 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var at_war:=_at_war(String(target.civ_id))
 	army["court_order"]={"kind":kind,"civ_id":String(target.civ_id),"city_id":String(target.city_id),"city_name":name,"day":day,"general":String(out.general),"general_pid":int(out.general_pid),"going":going}
-	if not own_band and not formed and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
+	if not own_band and not formed and chosen<=0 and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
 	mc.field_armies[index]=army
 	mc.army_changed.emit(mc.home_army.duplicate(true))
 	days=int(order.get("days",days))
@@ -707,9 +718,11 @@ static func _recall(out:Dictionary)->Dictionary:
 	var sent:Array[String]=[]
 	var longest:=0
 	var blocked:Array[String]=[]
+	var chosen:=int(out.get("chosen",0))
 	for a in mc.field_armies.duplicate():
 		var army:Dictionary=a
 		if int(army.get("troops",0))<=0: continue
+		if chosen>0 and int(army.army_id)!=chosen: continue
 		if String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home": continue
 		if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))=="player_home": continue
 		var r:Dictionary=mc.return_field_army(int(army.army_id))
@@ -767,11 +780,13 @@ static func _defend(out:Dictionary,reading:Dictionary)->Dictionary:
 static func _intercept(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var target:Dictionary=reading.get("target",{})
 	var civ_id:=String(target.get("civ_id",""))
+	var only:=String(target.get("formation_id",""))
 	var mc:=_mc()
 	var seen:Array[Dictionary]=[]
 	for formation in WorldSimulation.world.foreign_formations:
 		var rec:Dictionary=formation
 		if String(rec.get("kind",""))=="scout": continue
+		if only!="" and String(rec.get("id",""))!=only: continue
 		if civ_id!="" and String(rec.get("civ_id",""))!=civ_id: continue
 		var sighting:Dictionary=WorldSimulation.world.visible_formation_sighting(String(rec.get("id","")))
 		if not sighting.is_empty(): seen.append({"id":String(rec.id),"sighting":sighting})
@@ -781,9 +796,15 @@ static func _intercept(out:Dictionary,reading:Dictionary,insist:bool)->Dictionar
 	var f:=forces()
 	if String(f.busy)!="": return _no(out,"busy","We cannot start another fight while %s." % String(f.busy),"")
 	var going:=int(f.trained)
-	if not (f.idle as Array).is_empty(): going=maxi(going,int((f.idle as Array)[0].troops))
-	if going<MIN_FORCE: return _no(out,"too_few","%d trained fighters cannot meet an army in the field." % going,"Let the levy finish its drill first.")
-	var army_id:=int((f.idle as Array)[0].army_id) if not (f.idle as Array).is_empty() and int((f.idle as Array)[0].troops)>=int(f.trained) else 0
+	var chosen:=int(out.get("chosen",0))
+	var picked:=_army(chosen) if chosen>0 else {}
+	if chosen>0:
+		if picked.is_empty(): return _no(out,"no_band","That band is no longer on our rolls.","")
+		if not _available(picked): return _no(out,"band_busy","%s cannot take a new order now: %s." % [String(picked.get("name","That band")),_busy_words(picked)],"Call it home first, or wait until it is free.")
+		going=int(picked.troops)
+	elif not (f.idle as Array).is_empty(): going=maxi(going,int((f.idle as Array)[0].troops))
+	if going<MIN_FORCE and not insist: return _no(out,"too_few","%d trained fighters cannot meet an army in the field." % going,"Let the levy finish its drill first.")
+	var army_id:=chosen if chosen>0 else (int((f.idle as Array)[0].army_id) if not (f.idle as Array).is_empty() and int((f.idle as Array)[0].troops)>=int(f.trained) else 0)
 	var formed:=false
 	if army_id==0:
 		var made:Dictionary=mc.create_field_army(int(f.trained),"Host against %s" % Hall._civ_name(civ_id if civ_id!="" else String(seen[0].get("sighting",{}).get("civ_id",""))))
@@ -798,6 +819,32 @@ static func _intercept(out:Dictionary,reading:Dictionary,insist:bool)->Dictionar
 	out.says="We go after them: %d of us, toward where they were last seen." % going
 	out.outcome="%d fighters set out to catch %s in the open." % [going,String((seen[0].sighting as Dictionary).get("label","their army"))]
 	return out
+
+static func _army(army_id:int)->Dictionary:
+	if army_id<=0: return {}
+	var index:int=_mc()._field_army_index(army_id)
+	return {} if index<0 else _mc().field_armies[index]
+
+static func _busy_words(army:Dictionary)->String:
+	var mc:=_mc()
+	if mc.command_hierarchy.battle.engaged(int(army.army_id)): return "it is fighting"
+	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==int(army.army_id): return "it is laying siege"
+	if bool(army.get("embarked",false)): return "it is at sea"
+	if army.has("court_order"): return "it is marching on %s" % String((army.court_order as Dictionary).get("city_name","a town"))
+	return "it is not free"
+
+# --------------------------------------------------------------------------
+# Plain readings for other screens (the Army command screen). Public, so
+# callers never reach into the private helpers above.
+# --------------------------------------------------------------------------
+
+static func strength_of(formations:Array)->float: return _strength(formations)
+static func drill_of(formations:Array)->float: return _drill(formations)
+static func enemy_estimate(city_id:String)->Dictionary: return _enemy_estimate(city_id)
+static func at_war(civ_id:String)->bool: return _at_war(civ_id)
+static func given_name(name:String)->String: return _given(name)
+static func civ_name(civ_id:String)->String: return Hall._civ_name(civ_id)
+static func available(army:Dictionary)->bool: return _available(army)
 
 static func _given(name:String)->String:
 	return preload("res://scripts/era_names.gd").given_of(name) if name!="" else "The war leader"
