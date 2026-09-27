@@ -76,6 +76,14 @@ func _ready()->void:
 		while Time.get_ticks_msec()<settle_deadline and (frames<45 or terrain.terrain_patch_job!=null or terrain.regional_patch_resolution!=lod.resolution_for(terrain.regional_patch_span)):
 			await get_tree().process_frame
 			frames+=1
+		# Let streamed close crowns finish growing and fading in (bounded).
+		var woods:Node=terrain.get_node_or_null("CloseWoods")
+		var woods_deadline:=Time.get_ticks_msec()+20000
+		while woods and Time.get_ticks_msec()<woods_deadline and (not woods.queue.is_empty()):
+			await get_tree().process_frame
+		if woods:
+			for i in 50:await get_tree().process_frame
+			print("MAP_ART_CAPTURE: close woods ",JSON.stringify(woods.report()))
 		if "--hide-ui" in args:
 			for layer in get_tree().root.find_children("*","CanvasLayer",true,false):(layer as CanvasLayer).visible=false
 		for i in 6:await get_tree().process_frame

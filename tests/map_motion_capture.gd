@@ -2,7 +2,7 @@ extends Node
 ## Map motion capture: short frame sequences for reviewing animation.
 ##   -- --out=<absolute dir> [--prefix=name] [--size=2.8] [--frames=10] [--every=6]
 ##      [--saved] [--weather=rain|snow|clear|cloud] [--pan] [--zoom-to=<km>] [--speed=1]
-##      [--measure=<frames>] [--hide-ui] [--great-works] [--reveal]
+##      [--measure=<frames>] [--hide-ui] [--great-works] [--reveal] [--woodland]
 ## Writes <prefix>_f00.png ... and prints MAP_MOTION_CAPTURE lines. `--pan`
 ## releases a drag and records the coast; `--zoom-to` records a distance glide.
 ## `--measure` records CPU frame times while panning (p50/p95) and idle.
@@ -77,6 +77,15 @@ func _ready()->void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	var lod=preload("res://scripts/terrain_lod.gd")
 	var target:Vector3=GameState.settlement_founded_at
+	if "--woodland" in args:
+		# Record over the nearest dense woodland instead (charted for this run).
+		var helper:Node=load("res://tests/map_art_capture.gd").new()
+		helper.set("terrain",terrain)
+		var found:Vector3=helper.call("_find_woodland",target)
+		helper.free()
+		if found!=Vector3.INF:
+			target=found
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
 	terrain.camera.size=size
 	terrain.zoom_target_size=-1.0
 	terrain.camera_target=target
@@ -123,6 +132,8 @@ func _ready()->void:
 	if ambience:print("MAP_MOTION_CAPTURE: ambience ",JSON.stringify(ambience.ambience_report()))
 	var living:Node=terrain.get_node_or_null("LivingMap")
 	if living:print("MAP_MOTION_CAPTURE: living frame_usec=",living.activity_report().get("frame_usec"))
+	var woods:Node=terrain.get_node_or_null("CloseWoods")
+	if woods:print("MAP_MOTION_CAPTURE: close woods ",JSON.stringify(woods.report()))
 	get_tree().quit(0)
 
 ## CPU time of the map's own frame work (terrain, plus the living map and
@@ -139,6 +150,8 @@ func _measure(count:int)->void:
 		if ambience_pan:ambience_pan._process(1.0/60.0)
 		var living_pan:Node=terrain.get_node_or_null("LivingMap")
 		if living_pan:living_pan._process(1.0/60.0)
+		var woods_pan:Node=terrain.get_node_or_null("CloseWoods")
+		if woods_pan:woods_pan._process(1.0/60.0)
 		pan.append(float(Time.get_ticks_usec()-began)/1000.0)
 		await get_tree().process_frame
 	for i in count:
@@ -148,6 +161,8 @@ func _measure(count:int)->void:
 		if ambience_node:ambience_node._process(1.0/60.0)
 		var living_node:Node=terrain.get_node_or_null("LivingMap")
 		if living_node:living_node._process(1.0/60.0)
+		var woods_node:Node=terrain.get_node_or_null("CloseWoods")
+		if woods_node:woods_node._process(1.0/60.0)
 		idle.append(float(Time.get_ticks_usec()-began)/1000.0)
 		await get_tree().process_frame
 	var ambience:Node=terrain.get_node_or_null("MapAmbience")

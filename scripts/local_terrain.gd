@@ -4630,8 +4630,11 @@ void fragment() {
 	float gap=smoothstep(0.68,0.92,filtered_vn(world_position.xz*780.0+vec2(91.0,7.0)));
 	vec3 base=COLOR.rgb*canopy_tint.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
 	if (vegetation_kind==0) {
-		if (atlas_variant>=0) {
-			vec2 cell=vec2(float(atlas_variant%4),float(atlas_variant/4));
+		// -2: each crown names its atlas cell in its colour's alpha
+		// (scripts/close_woods.gd streams crowns this way, one draw per chunk).
+		int crown_cell=atlas_variant==-2?int(COLOR.a*15.0+0.5):atlas_variant;
+		if (crown_cell>=0) {
+			vec2 cell=vec2(float(crown_cell%4),float(crown_cell/4));
 			vec2 atlas_uv=(cell+vec2(0.018)+UV*0.964)/4.0;
 			vec4 canopy=texture(canopy_atlas,atlas_uv);
 			// Preserve shaded crown interiors without letting the darkest source
@@ -4648,7 +4651,10 @@ void fragment() {
 			float edge_colour=smoothstep(0.08,0.60,canopy.a);
 			vec3 source_chroma=clamp(canopy.rgb/max(source_luma,0.035),vec3(0.45),vec3(1.75));
 			vec3 restrained_canopy=canopy_luma*mix(vec3(1.0),source_chroma,mix(0.08,0.38,edge_colour))*vec3(0.78,0.84,0.72);
-			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
+			// Take most of the hue from the crown's own tint (the biome's canopy
+			// greens), so round crowns agree with the painted woodland beneath
+			// instead of reading as grey-brown tufts (codex/beauty-2).
+			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.55)*1.08;
 			base*=0.82+crown*0.16;
 			// Keep texture coverage separate from the distance fade. Scissoring
 			// an already faded alpha left opaque black pinpricks at aerial scale.

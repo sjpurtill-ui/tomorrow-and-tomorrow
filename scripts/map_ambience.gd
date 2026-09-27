@@ -116,6 +116,9 @@ static func bind_wind_material(material:ShaderMaterial)->void:
 # --------------------------------------------------------------------------
 
 func _ready()->void:
+	# Trees in the round wherever the camera goes (codex/beauty-2), added
+	# beside this layer once the map has finished adding it.
+	if terrain!=null:(func()->void:preload("res://scripts/close_woods.gd").ensure(terrain)).call_deferred()
 	_build_clouds()
 	drops=_batch("Precipitation",_drop_quad(),drop_material(),MAX_DROPS,false)
 	# Birds, beasts and boats are drawn in ink on one quad each
