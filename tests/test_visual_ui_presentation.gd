@@ -321,16 +321,6 @@ func test_modal_screen_contract_caps_large_type_without_touching_map_sized_contr
 	assert_int(screen.theme.default_font_size).is_equal(11)
 
 
-func test_world_strategy_next_step_preserves_information_gates()->void:
-	var step:Dictionary=renderer._world_strategy_next_step({
-		"name":"Ashen Compact","intel_confidence":0.40,
-		"player_relation":{"home_location_known":false,"at_war":false}
-	})
-	assert_str(String(step.status)).contains("SETTLEMENT UNLOCATED")
-	assert_str(String(step.why)).contains("no returned report")
-	assert_str(String(step.next)).contains("Diplomats cannot depart")
-
-
 func test_live_report_refresh_is_bounded_and_state_driven()->void:
 	assert_float(RENDERER.LIVE_REPORT_REFRESH_INTERVAL_SECONDS).is_greater_equal(0.5)
 	var before:String=renderer._live_report_signature("population")

@@ -319,10 +319,6 @@ var world_seed_input: LineEdit
 var world_seed_status: Label
 var world_menu_previous_speed:=0.0
 var founding_focus_panel:Control
-var civilizations_panel:Control
-var civilization_report_panel:Control
-var civilization_detail_root:VBoxContainer
-var selected_civilization_id:=""
 var selected_civilization_region_id:=""
 var civilization_feedback_text:=""
 var capture_render_active:=false
@@ -523,7 +519,6 @@ func _capture_preview_if_requested() -> void:
 	var capture_world_menu := false
 	var capture_military_panel := false
 	var capture_materials_panel := false
-	var capture_civilizations_panel := false
 	var capture_diplomat_panel := false
 	var capture_audit_root:Control
 	var capture_travel := false
@@ -553,8 +548,6 @@ func _capture_preview_if_requested() -> void:
 			capture_military_panel = true
 		elif argument == "--capture-materials":
 			capture_materials_panel = true
-		elif argument == "--capture-civilizations":
-			capture_civilizations_panel = true
 		elif argument == "--capture-diplomats":
 			capture_diplomat_panel = true
 		elif argument == "--capture-travel":
@@ -756,9 +749,6 @@ func _capture_preview_if_requested() -> void:
 	if capture_materials_panel:
 		_open_materials_panel()
 		capture_audit_root=materials_panel
-	if capture_civilizations_panel:
-		_open_civilizations_panel()
-		capture_audit_root=civilizations_panel
 	if capture_diplomat_panel and not CivilizationSystem.civilizations.is_empty():
 		var capture_civ:Dictionary=CivilizationSystem.civilizations[0]
 		var capture_relation:Dictionary=capture_civ.get("player_relation",{})
@@ -1173,8 +1163,6 @@ func _process_live_report_refresh(delta:float)->void:
 func _refresh_live_reports()->void:
 	if live_report_refresh_in_progress or _live_report_global_interaction_active(): return
 	var kinds:Array[String]=["materials"]
-	if civilization_report_panel and is_instance_valid(civilization_report_panel): kinds.append("civilization_report")
-	else: kinds.append("civilizations")
 	for kind in kinds:
 		var panel:=_live_report_panel(kind)
 		if panel==null or not is_instance_valid(panel) or not panel.is_visible_in_tree(): continue
@@ -1196,16 +1184,12 @@ func _live_report_signature(kind:String)->String:
 	match kind:
 		"materials":
 			parts.append_array([GameState.resource_deposits.size(),GameState.resource_stockpiles.size(),GameState.material_history.size(),hash(GameState.resource_priorities)])
-		"civilizations","civilization_report":
-			parts.append_array([CivilizationSystem.observation_revision,CivilizationSystem.fog_revision,CivilizationSystem.scout_reports.size(),CivilizationSystem.diplomatic_history.size(),selected_civilization_id,selected_civilization_region_id])
 	return str(hash(parts))
 
 
 func _live_report_panel(kind:String)->Control:
 	match kind:
 		"materials": return materials_panel
-		"civilizations": return civilizations_panel
-		"civilization_report": return civilization_report_panel
 	return null
 
 
@@ -1284,15 +1268,11 @@ func _live_report_node_at_index_path(root:Node,index_path:Array)->Node:
 func _set_live_report_panel(kind:String,panel:Control)->void:
 	match kind:
 		"materials": materials_panel=panel
-		"civilizations": civilizations_panel=panel
-		"civilization_report": civilization_report_panel=panel
 
 
 func _build_live_report_replacement(kind:String)->Control:
 	match kind:
 		"materials": _open_materials_panel()
-		"civilizations": _open_civilizations_panel()
-		"civilization_report": _open_civilization_report(selected_civilization_id)
 	return _live_report_panel(kind)
 
 
@@ -12242,7 +12222,7 @@ func _arbitrate_notification_overlays()->void:
 
 func _blocking_modal_or_report_open()->bool:
 	if is_instance_valid(founding_site_guide) and founding_site_guide.is_visible_in_tree():return true
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,materials_panel,civilizations_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,materials_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible: return true
 	return false
@@ -14408,12 +14388,6 @@ func _retire_primary_screen(panel)->void:
 func _close_primary_destinations_except(destination:String)->void:
 	if destination!="economy":
 		_retire_primary_screen(materials_panel); materials_panel=null
-	if destination=="world":
-		_retire_primary_screen(civilization_report_panel); civilization_report_panel=null
-	else:
-		_retire_primary_screen(civilization_report_panel); civilization_report_panel=null
-		_retire_primary_screen(civilizations_panel); civilizations_panel=null
-		civilization_detail_root=null
 	if destination!="military" and MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
 
@@ -15011,667 +14985,6 @@ func _cancel_placement() -> void:
 	travel_status_label.text = ""
 
 
-func _open_civilizations_panel()->void:
-	_close_primary_destinations_except("world")
-	if civilizations_panel and is_instance_valid(civilizations_panel): return
-	CivilizationSystem.initialize()
-	var competition:Dictionary=CivilizationSystem.known_competition_snapshot()
-	var strategic_knowledge:Dictionary=competition.get("strategic_knowledge",CivilizationSystem.strategic_knowledge_snapshot())
-	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
-	civilizations_panel=Control.new()
-	civilizations_panel.size=get_viewport().get_visible_rect().size
-	civilizations_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(civilizations_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=civilizations_panel.size
-	dimmer.color=Color(0.004,0.008,0.010,0.90)
-	civilizations_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(1160.0,civilizations_panel.size.x-64.0),minf(650.0,civilizations_panel.size.y-48.0))
-	modal.position=(civilizations_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#091113"),Color("#8c7951"),1,4,20))
-	civilizations_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",9)
-	modal.add_child(root)
-	var heading_row:=HBoxContainer.new()
-	root.add_child(heading_row)
-	var heading:=Label.new()
-	heading.text="WORLD STRATEGY"
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	heading.add_theme_font_size_override("font_size",24)
-	heading.add_theme_color_override("font_color",Color("#efe1c3"))
-	heading_row.add_child(heading)
-	var standing:=Label.new()
-	standing.text="%d CONTACTS  •  %d FORMATIONS IN SIGHT" % [int(competition.get("contacted_count",0)),int(observation.get("visible_count",0))] if bool(competition.get("global_rank_hidden",false)) else "KNOWN RANK %d / %d  •  %d IN SIGHT" % [int(competition.player_rank),int(competition.contender_count),int(observation.get("visible_count",0))]
-	standing.add_theme_font_size_override("font_size",14)
-	standing.add_theme_color_override("font_color",Color("#cfb66f"))
-	heading_row.add_child(standing)
-	var knowledge_stage:=int(strategic_knowledge.get("stage",0))
-	var contract:=Label.new()
-	contract.text="What your people can currently verify from direct sight, contact, and returned reports."
-	contract.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	contract.add_theme_font_size_override("font_size",12)
-	contract.add_theme_color_override("font_color",Color("#9ea7a2"))
-	root.add_child(contract)
-	root.add_child(HSeparator.new())
-	var body:=HBoxContainer.new()
-	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",14)
-	root.add_child(body)
-	var rivals_frame:=PanelContainer.new(); rivals_frame.custom_minimum_size=Vector2(330,0); rivals_frame.size_flags_vertical=Control.SIZE_EXPAND_FILL; rivals_frame.add_theme_stylebox_override("panel",_knowledge_style(Color("#0c1517"),Color("#293b3b"),1,4,10)); body.add_child(rivals_frame)
-	var rivals:=VBoxContainer.new()
-	rivals.custom_minimum_size=Vector2(308,0)
-	rivals.add_theme_constant_override("separation",6)
-	rivals_frame.add_child(rivals)
-	var discovery_map:=WorldDiscoveryMapScript.new()
-	discovery_map.custom_minimum_size=Vector2(314,166)
-	discovery_map.set_snapshot(CivilizationSystem.discovery_map_snapshot())
-	discovery_map.map_point_selected.connect(_focus_known_world_point)
-	rivals.add_child(discovery_map)
-	var observation_heading:=Label.new()
-	observation_heading.text="NEARBY  •  %.0f KM" % float(observation.get("radius_km",0.0))
-	observation_heading.add_theme_font_size_override("font_size",12); observation_heading.add_theme_color_override("font_color",Color("#d19b6f")); rivals.add_child(observation_heading)
-	var visible_sightings:Array=observation.get("visible",[])
-	if visible_sightings.is_empty():
-		var quiet:=Label.new(); quiet.text="Nothing foreign is in local sight. This only means the lookout range is clear—not that the surrounding world is empty."; quiet.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; quiet.add_theme_font_size_override("font_size",11); quiet.add_theme_color_override("font_color",Color("#9ea7a2")); rivals.add_child(quiet)
-	else:
-		for sighting_variant in visible_sightings.slice(0,2):
-			var sighting:Dictionary=sighting_variant
-			var scout_suffix:="\nFAST • CONCEALED • CARRYING OBSERVATIONS HOME" if bool(sighting.get("carries_report",false)) else ""
-			var sighting_card:=Label.new(); sighting_card.text="%s\n~%s–%s PERSONNEL  •  %.0f KM AWAY%s%s" % [String(sighting.get("label","UNIDENTIFIED FOREIGN FORMATION")),_compact_population(int(sighting.get("strength_estimate_low",0))),_compact_population(int(sighting.get("strength_estimate_high",0))),float(sighting.get("distance_km",0.0)),"  •  HOSTILE" if bool(sighting.get("hostile",false)) else "",scout_suffix]; sighting_card.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; sighting_card.add_theme_font_size_override("font_size",11); sighting_card.add_theme_color_override("font_color",Color("#dc806f") if bool(sighting.get("hostile",false)) else Color("#d0b17b")); rivals.add_child(sighting_card)
-			if bool(sighting.get("carries_report",false)):
-				var interception:Dictionary=sighting.get("interception",{})
-				var intercept_actions:=HBoxContainer.new(); intercept_actions.add_theme_constant_override("separation",4); rivals.add_child(intercept_actions)
-				var capture_scouts:=Button.new(); capture_scouts.text="SEIZE & QUESTION • %d%%" % roundi(float(interception.get("capture",0.0))*100.0); capture_scouts.tooltip_text="ACTION  Attempt to catch this fast, concealed scout cohort before it leaves sight.\nCONSEQUENCE  Success denies its returning report and creates one aggregate captive cohort for questioning; failure lets it continue home."; capture_scouts.pressed.connect(_intercept_foreign_scout.bind(String(sighting.get("id","")),"capture")); intercept_actions.add_child(capture_scouts)
-				var destroy_scouts:=Button.new(); destroy_scouts.text="ATTACK • %d%%" % roundi(float(interception.get("destroy",0.0))*100.0); destroy_scouts.tooltip_text="ACTION  Pursue and attack this scout cohort before it leaves sight.\nCONSEQUENCE  Success kills the party and destroys its report, yields no prisoners or intelligence, and sharply raises foreign grievance."; destroy_scouts.pressed.connect(_intercept_foreign_scout.bind(String(sighting.get("id","")),"destroy")); intercept_actions.add_child(destroy_scouts)
-	var captive_scouts:Array=CivilizationSystem.captured_scouts_snapshot()
-	if not captive_scouts.is_empty():
-		var captive_heading:=Label.new(); captive_heading.text="CAPTURED SCOUT COHORTS  •  INFORMATION DEGRADES"; captive_heading.add_theme_font_size_override("font_size",12); captive_heading.add_theme_color_override("font_color",Color("#d19b6f")); rivals.add_child(captive_heading)
-		for cohort_variant in captive_scouts.slice(0,1):
-			var cohort:Dictionary=cohort_variant
-			var captive_status:=Label.new(); captive_status.text="%s  •  %d HELD  •  KNOWLEDGE REMAINING %d%%" % [String(cohort.get("source_name","STRANGERS")),int(cohort.get("count",0)),roundi(float(cohort.get("information_remaining",0.0))*100.0)]; captive_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; captive_status.add_theme_font_size_override("font_size",11); captive_status.add_theme_color_override("font_color",Color("#c9b48a")); rivals.add_child(captive_status)
-			var methods:=HBoxContainer.new(); methods.add_theme_constant_override("separation",3); rivals.add_child(methods)
-			for method in ["question","coerce","torture"]:
-				var interrogation:=Button.new(); interrogation.text={"question":"QUESTION","coerce":"COERCE","torture":"TORTURE"}[method]; interrogation.disabled=not bool(cohort.get("can_interrogate",false)); interrogation.tooltip_text=("BLOCKED  This captive cohort has no usable information remaining.\nNEXT  Intercept another returning scout cohort while it is still inside local lookout range." if interrogation.disabled else {"question":"ACTION  Question the cohort without coercion.\nCONSEQUENCE  Slow and comparatively reliable, with little diplomatic or domestic harm.","coerce":"ACTION  Coerce a statement.\nCONSEQUENCE  More likely to produce a statement but less reliable; raises grievance and harms legitimacy.","torture":"ACTION  Torture the captive cohort.\nCONSEQUENCE  Only 42% reliable; may kill prisoners, contaminate intelligence, inflame grievance, and damage legitimacy and cohesion."}[method]); interrogation.pressed.connect(_interrogate_captured_scouts.bind(String(cohort.get("civ_id","")),method)); methods.add_child(interrogation)
-	rivals.add_child(HSeparator.new())
-	var rival_heading:=Label.new()
-	rival_heading.text="KNOWN CONTACTS  •  %d" % int(competition.get("contacted_count",0))
-	rival_heading.add_theme_font_size_override("font_size",12)
-	rival_heading.add_theme_color_override("font_color",Color("#c8ad72"))
-	rivals.add_child(rival_heading)
-	var first_rival_id:=""
-	var contact_selector:=OptionButton.new()
-	contact_selector.name="KnownContactSelector"
-	contact_selector.fit_to_longest_item=false
-	contact_selector.custom_minimum_size=Vector2(0,42)
-	contact_selector.tooltip_text="Choose one directly known civilization. Unknown civilizations do not appear."
-	var selected_contact_index:=0
-	for profile_variant in competition.leaders:
-		var profile:Dictionary=profile_variant
-		if String(profile.id)=="player": continue
-		if first_rival_id=="": first_rival_id=String(profile.id)
-		var relation:Dictionary=profile.player_relation
-		var intel:=clampf(float(profile.get("intel_confidence",0.0)),0.0,1.0)
-		var threat_report:=String(profile.get("threat_level","UNCERTAIN")) if intel>=0.32 else "THREAT UNASSESSED"
-		contact_selector.add_item("%s  •  %s  •  %s  •  INTEL %d%%" % [String(profile.name),_foreign_relation_label(relation),threat_report,roundi(intel*100.0)])
-		var contact_index:=contact_selector.item_count-1
-		contact_selector.set_item_metadata(contact_index,String(profile.id))
-		contact_selector.set_item_tooltip(contact_index,"Identity and relationship are confirmed by contact. Other facts remain bounded by returned reports and current intelligence confidence.")
-		if String(profile.id)==selected_civilization_id: selected_contact_index=contact_index
-	if contact_selector.item_count>0:
-		contact_selector.select(selected_contact_index)
-		contact_selector.item_selected.connect(_select_civilization_from_option.bind(contact_selector))
-		rivals.add_child(contact_selector)
-	else:
-		var no_contacts:=Label.new(); no_contacts.text="None. Contact exists only after direct sight or a returned report."; no_contacts.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; no_contacts.add_theme_font_size_override("font_size",11); no_contacts.add_theme_color_override("font_color",Color("#929a95")); rivals.add_child(no_contacts)
-	var scouting_heading:=Label.new()
-	scouting_heading.text="SCOUT REPORTS"
-	scouting_heading.add_theme_font_size_override("font_size",12)
-	scouting_heading.add_theme_color_override("font_color",Color("#c8ad72"))
-	rivals.add_child(scouting_heading)
-	var exploration:Dictionary=competition.get("exploration",CivilizationSystem.exploration_status())
-	var scouting_status:=Label.new()
-	scouting_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	scouting_status.add_theme_font_size_override("font_size",11)
-	scouting_status.add_theme_color_override("font_color",Color("#aeb4ae"))
-	if bool(exploration.get("active",false)):
-		scouting_status.text="Party away  •  %d people  •  returns in %d days\nReport sealed until they return." % [int(exploration.get("personnel",0)),int(exploration.get("days_remaining",0))]
-	else:
-		var latest:Dictionary=exploration.get("latest_report",{})
-		scouting_status.text="No party currently away."
-		if not latest.is_empty():
-			var contact_names:Array=latest.get("contacts",[])
-			var recruit_suffix:="  •  +%d ARRIVALS" % int(latest.get("recruits",0)) if int(latest.get("recruits",0))>0 else ""
-			scouting_status.text+="\nLast report  •  %s km%s%s" % [_compact_population(int(latest.get("distance_km",0))),"  •  "+", ".join(contact_names) if not contact_names.is_empty() else "",recruit_suffix]
-	rivals.add_child(scouting_status)
-	if not bool(exploration.get("active",false)):
-		var action_hint:=Label.new()
-		action_hint.text="Send a party from ACTIONS."
-		action_hint.add_theme_font_size_override("font_size",11)
-		action_hint.add_theme_color_override("font_color",Color("#c8ad72"))
-		rivals.add_child(action_hint)
-	if selected_civilization_id=="" or CivilizationSystem.known_civilization_snapshot(selected_civilization_id).is_empty(): selected_civilization_id=first_rival_id
-	var detail_frame:=PanelContainer.new()
-	detail_frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	detail_frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	detail_frame.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1416"),Color("#334846"),1,4,14))
-	body.add_child(detail_frame)
-	civilization_detail_root=VBoxContainer.new()
-	civilization_detail_root.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	civilization_detail_root.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	civilization_detail_root.add_theme_constant_override("separation",5)
-	detail_frame.add_child(civilization_detail_root)
-	var selected_profile:=CivilizationSystem.known_civilization_snapshot(selected_civilization_id)
-	if selected_profile.is_empty():
-		var unknown:=Label.new()
-		unknown.text="THE WORLD BEYOND RETURNED REPORTS IS UNKNOWN\n\nSend a scout party and let time pass. The terrain it crossed, the route it survived, and any people it met become known only after its return."
-		unknown.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		unknown.add_theme_font_size_override("font_size",16)
-		unknown.add_theme_color_override("font_color",Color("#b9b19d"))
-		civilization_detail_root.add_child(unknown)
-	else:
-		_populate_civilization_detail(selected_profile,competition)
-	var footer:=HBoxContainer.new()
-	root.add_child(footer)
-	var rule:=Label.new()
-	rule.text="Unknown civilizations and unreturned journeys remain absent from this view."
-	rule.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	rule.add_theme_font_size_override("font_size",11)
-	rule.add_theme_color_override("font_color",Color("#929a95"))
-	footer.add_child(rule)
-	var close:=Button.new()
-	close.text="RETURN TO MAP"
-	close.custom_minimum_size=Vector2(145,38)
-	close.pressed.connect(_close_civilizations_panel)
-	footer.add_child(close)
-
-
-func _populate_civilization_detail(profile:Dictionary,competition:Dictionary)->void:
-	if profile.is_empty(): return
-	var relation:Dictionary=profile.get("player_relation",{})
-	var intel:=clampf(float(profile.get("intel_confidence",0.0)),0.0,1.0)
-	var title_row:=HBoxContainer.new()
-	title_row.add_theme_constant_override("separation",12)
-	civilization_detail_root.add_child(title_row)
-	var title:=Label.new()
-	title.text=String(profile.get("name","UNKNOWN CONTACT"))
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size",22)
-	title.add_theme_color_override("font_color",Color("#e2cf9d"))
-	title_row.add_child(title)
-	var relation_badge:=Label.new()
-	relation_badge.text=_foreign_relation_label(relation)
-	relation_badge.add_theme_font_size_override("font_size",13)
-	relation_badge.add_theme_color_override("font_color",Color("#d77d6f") if bool(relation.get("at_war",false)) else Color("#9fc3b2"))
-	title_row.add_child(relation_badge)
-
-	var contact_encounter:Dictionary={}
-	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-		var encounter:Dictionary=encounter_variant
-		if String(encounter.get("civ_id",""))==String(profile.get("id","")):
-			contact_encounter=encounter
-			break
-	var contact_summary:=Label.new()
-	contact_summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	contact_summary.add_theme_font_size_override("font_size",12)
-	contact_summary.add_theme_color_override("font_color",Color("#9ebdb6"))
-	if contact_encounter.is_empty():
-		contact_summary.text="CONTACT ORIGIN UNKNOWN\nNo defensible encounter location survives in your records."
-	else:
-		var met_day:=maxi(0,int(contact_encounter.get("day",0)))
-		var location_status:="Home settlement confirmed" if bool(relation.get("home_location_known",false)) else "Their homeland is still unlocated"
-		contact_summary.text="MET YEAR %d, DAY %d\n%s. %s." % [met_day/365+1,met_day%365+1,String(contact_encounter.get("source_description","Contact source unknown")),location_status]
-	civilization_detail_root.add_child(contact_summary)
-	_add_modal_action_brief(civilization_detail_root,_world_strategy_next_step(profile),Color("#8c7951"))
-
-	var facts:=PanelContainer.new()
-	facts.add_theme_stylebox_override("panel",_knowledge_style(Color("#0c1517"),Color("#334846"),1,4,12))
-	civilization_detail_root.add_child(facts)
-	var fact_text:=Label.new()
-	var population_report:="Population unknown"
-	if intel>=0.20:
-		population_report="Population %s–%s" % [_compact_population(roundi(float(profile.get("population_estimate_low",1.0)))),_compact_population(roundi(float(profile.get("population_estimate_high",1.0))))]
-	var armed_report:="Armed strength unknown"
-	if intel>=0.32:
-		armed_report="Armed %s–%s" % [_compact_population(roundi(float(profile.get("military_estimate_low",0.0)))),_compact_population(roundi(float(profile.get("military_estimate_high",0.0))))]
-	var territory_report:="Homeland unlocated"
-	if intel>=0.55:
-		territory_report="Home regions mapped %d/%d" % [int(profile.get("home_regions_controlled",0)),int(profile.get("home_regions_total",0))]
-	var assessment:="Too little evidence to judge intent."
-	if intel>=0.32:
-		assessment="%s threat  •  %s" % [String(profile.get("threat_level","UNCERTAIN")).capitalize(),String(profile.get("rival_intent","Intent uncertain"))]
-	fact_text.text="REPORT CONFIDENCE %d%%\n%s  •  %s\n%s\n\n%s" % [roundi(intel*100.0),population_report,armed_report,territory_report,assessment]
-	fact_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	fact_text.add_theme_font_size_override("font_size",13)
-	fact_text.add_theme_color_override("font_color",Color("#c8c7b7"))
-	facts.add_child(fact_text)
-
-	var report_actions:=HBoxContainer.new()
-	report_actions.add_theme_constant_override("separation",8)
-	civilization_detail_root.add_child(report_actions)
-	if not contact_encounter.is_empty():
-		var show_contact:=Button.new()
-		show_contact.text="LOCATE ENCOUNTER"
-		show_contact.tooltip_text="Center the map on where contact occurred. This is not necessarily their homeland."
-		show_contact.pressed.connect(_focus_contact_encounter.bind(String(profile.get("id",""))))
-		report_actions.add_child(show_contact)
-		if bool(contact_encounter.get("home_location_known",false)):
-			var show_home:=Button.new()
-			show_home.text="LOCATE SETTLEMENT"
-			show_home.tooltip_text="Center the terrain on the home settlement confirmed by a returned report."
-			show_home.pressed.connect(_focus_known_world_point.bind(String(profile.get("id","")),"settlement"))
-			report_actions.add_child(show_home)
-	var send_diplomat:=Button.new()
-	send_diplomat.text="SEND DIPLOMATS"
-	var home_known:=bool(relation.get("home_location_known",false))
-	send_diplomat.tooltip_text="Send a physical delegation to the confirmed settlement. Proposals, replies, route knowledge, and observations move only as fast as its people can travel." if home_known else "Their settlement is still unlocated. Send scouts to investigate the returned contact site before diplomats can depart."
-	send_diplomat.disabled=bool(CivilizationSystem.diplomatic_mission_status().get("active",false)) or not home_known
-	send_diplomat.pressed.connect(_open_diplomat_for_civ.bind(String(profile.get("id",""))))
-	report_actions.add_child(send_diplomat)
-	var full_report:=Button.new()
-	full_report.text="PLAN DIPLOMACY OR WAR"
-	full_report.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	full_report.tooltip_text="Open the full report, campaign map, and every available foreign-policy action."
-	full_report.pressed.connect(_open_civilization_report.bind(String(profile.get("id",""))))
-	report_actions.add_child(full_report)
-
-	if civilization_feedback_text!="":
-		var feedback:=Label.new()
-		feedback.text=civilization_feedback_text
-		feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		feedback.add_theme_font_size_override("font_size",11)
-		feedback.add_theme_color_override("font_color",Color("#d0a879"))
-		civilization_detail_root.add_child(feedback)
-
-
-func _world_strategy_next_step(profile:Dictionary)->Dictionary:
-	if profile.is_empty():
-		return {"status":"NO FOREIGN CIVILIZATION IS KNOWN","why":"No direct encounter or returned scout report has identified one.","next":"Open Actions, send scouts, and wait for the party to return with its report."}
-	var relation:Dictionary=profile.get("player_relation",{})
-	var confidence:=clampf(float(profile.get("intel_confidence",0.0)),0.0,1.0)
-	if bool(relation.get("at_war",false)):
-		return {"status":"AT WAR WITH %s" % String(profile.get("name","THIS CIVILIZATION")).to_upper(),"why":"Military orders and campaign regions now determine territory and casualties.","next":"Open Plan Diplomacy or War to select the current front, objective, and army order."}
-	if not bool(relation.get("home_location_known",false)):
-		return {"status":"CONTACT KNOWN; SETTLEMENT UNLOCATED","why":"A meeting identified this civilization, but no returned report confirms a diplomatic destination.","next":"Open Actions and send scouts to investigate the recorded contact area. Diplomats cannot depart until a settlement is located."}
-	if bool(CivilizationSystem.diplomatic_mission_status().get("active",false)):
-		return {"status":"A DIPLOMATIC PARTY IS ALREADY AWAY","why":"Its proposal, observations, and reply are still traveling with the envoys.","next":"Wait for the party to return; no new diplomatic mission can leave meanwhile."}
-	if confidence<0.55:
-		return {"status":"CONTACT ESTABLISHED; REPORTS STILL THIN","why":"Confidence is %d%%, so strength, intent, and territory remain estimates or unknown." % roundi(confidence*100.0),"next":"Send scouts to observe the known settlement or use diplomacy to bring back better information."}
-	return {"status":"CONTACT READY FOR A STRATEGIC CHOICE","why":"A physical destination is known and report confidence is %d%%." % roundi(confidence*100.0),"next":"Send diplomats for trade or non-aggression, or open Plan Diplomacy or War for the full report."}
-
-
-func _open_civilization_report(civ_id:String)->void:
-	if not civilizations_panel or not is_instance_valid(civilizations_panel): return
-	if civilization_report_panel and is_instance_valid(civilization_report_panel): return
-	var profile:=CivilizationSystem.known_civilization_snapshot(civ_id)
-	if profile.is_empty(): return
-	var competition:=CivilizationSystem.known_competition_snapshot()
-	civilization_report_panel=Control.new()
-	civilization_report_panel.size=civilizations_panel.size
-	civilization_report_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	civilization_report_panel.z_index=8
-	civilizations_panel.add_child(civilization_report_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=civilization_report_panel.size
-	dimmer.color=Color(0.003,0.007,0.009,0.92)
-	civilization_report_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(960.0,civilization_report_panel.size.x-96.0),minf(610.0,civilization_report_panel.size.y-64.0))
-	modal.position=(civilization_report_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#091113"),Color("#8c7951"),1,4,18))
-	civilization_report_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var heading_row:=HBoxContainer.new()
-	root.add_child(heading_row)
-	var heading:=Label.new()
-	heading.text="INTELLIGENCE & POLICY"
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	heading.add_theme_font_size_override("font_size",21)
-	heading.add_theme_color_override("font_color",Color("#efe1c3"))
-	heading_row.add_child(heading)
-	var close_report:=Button.new()
-	close_report.text="CLOSE"
-	close_report.custom_minimum_size=Vector2(92,34)
-	close_report.pressed.connect(_close_civilization_report)
-	heading_row.add_child(close_report)
-	root.add_child(HSeparator.new())
-	var report_scroll:=FIT_CONTENT_PANEL.new()
-	report_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	root.add_child(report_scroll)
-	civilization_detail_root=VBoxContainer.new()
-	civilization_detail_root.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	civilization_detail_root.add_theme_constant_override("separation",6)
-	report_scroll.add_child(civilization_detail_root)
-	_populate_civilization_full_report(profile,competition)
-
-
-func _close_civilization_report()->void:
-	if civilization_report_panel and is_instance_valid(civilization_report_panel): civilization_report_panel.queue_free()
-	civilization_report_panel=null
-
-
-func _populate_civilization_full_report(profile:Dictionary,competition:Dictionary)->void:
-	if profile.is_empty(): return
-	var relation:Dictionary=profile.player_relation
-	var strategic_knowledge:Dictionary=competition.get("strategic_knowledge",CivilizationSystem.strategic_knowledge_snapshot())
-	var knowledge_stage:=int(strategic_knowledge.get("stage",0))
-	var title:=Label.new()
-	title.text=String(profile.name)
-	title.add_theme_font_size_override("font_size",20)
-	title.add_theme_color_override("font_color",Color("#e2cf9d"))
-	civilization_detail_root.add_child(title)
-	var contact_encounter:Dictionary={}
-	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-		var encounter:Dictionary=encounter_variant
-		if String(encounter.get("civ_id",""))==String(profile.id): contact_encounter=encounter; break
-	var contact_record:=Label.new()
-	contact_record.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	contact_record.add_theme_font_size_override("font_size",12)
-	contact_record.add_theme_color_override("font_color",Color("#acd1c8"))
-	if contact_encounter.is_empty():
-		contact_record.text="FIRST CONTACT RECORD  •  ORIGIN NOT PRESERVED\nThis older contact has no defensible encounter location. The game will not invent a homeland or map position."
-	else:
-		var met_day:=maxi(0,int(contact_encounter.get("day",0)))
-		var home_status:="HOME SETTLEMENT CONFIRMED" if bool(relation.get("home_location_known",false)) else "HOME TERRITORY STILL UNLOCATED"
-		contact_record.text="FIRST CONTACT  •  YEAR %d, DAY %d\n%s.\nENCOUNTER SITE CHARTED  •  %s" % [met_day/365+1,met_day%365+1,String(contact_encounter.get("source_description","Contact source unknown")),home_status]
-	civilization_detail_root.add_child(contact_record)
-	if not contact_encounter.is_empty():
-		var show_contact:=Button.new()
-		show_contact.text="SHOW FIRST-CONTACT SITE ON MAP"
-		show_contact.tooltip_text="Close this report and center the map on the actual encounter location. This is not necessarily their homeland."
-		show_contact.pressed.connect(_focus_contact_encounter.bind(String(profile.id)))
-		civilization_detail_root.add_child(show_contact)
-		if bool(contact_encounter.get("home_location_known",false)):
-			var show_home:=Button.new()
-			show_home.text="SHOW CONFIRMED SETTLEMENT ON MAP"
-			show_home.tooltip_text="Center the terrain on the settlement location physically confirmed by a returned report."
-			show_home.pressed.connect(_focus_known_world_point.bind(String(profile.id),"settlement"))
-			civilization_detail_root.add_child(show_home)
-	var intel:=clampf(float(profile.get("intel_confidence",0.0)),0.0,1.0)
-	var partners_text:="UNKNOWN" if int(profile.get("diplomatic_partners",-1))<0 else str(int(profile.diplomatic_partners))
-	var rivals_text:="UNKNOWN" if int(profile.get("diplomatic_rivals",-1))<0 else str(int(profile.diplomatic_rivals))
-	var summary:=Label.new()
-	var summary_lines:Array[String]=[]
-	var contact_line:="DIRECT CONTACT  •  %s  •  INTELLIGENCE %d%%" % [_foreign_relation_label(relation),roundi(intel*100.0)]
-	if knowledge_stage>=4 and profile.has("score") and profile.has("known_rank"):
-		var score_error:=lerpf(0.24,0.04,intel)
-		contact_line="KNOWN-WORLD STANDING #%d  •  SCORE EST. %.0f–%.0f  •  %s  •  INTEL %d%%" % [int(profile.known_rank),float(profile.score)*(1.0-score_error),float(profile.score)*(1.0+score_error),_foreign_relation_label(relation),roundi(intel*100.0)]
-	summary_lines.append(contact_line)
-	var population_report:="POPULATION ESTIMATE UNAVAILABLE"
-	if intel>=0.20: population_report="POP EST. %s–%s" % [_compact_population(roundi(float(profile.get("population_estimate_low",1.0)))),_compact_population(roundi(float(profile.get("population_estimate_high",1.0))))]
-	var armed_report:="ARMED CAPACITY UNKNOWN"
-	if intel>=0.32: armed_report="ARMED EST. %s–%s" % [_compact_population(roundi(float(profile.get("military_estimate_low",0.0)))),_compact_population(roundi(float(profile.get("military_estimate_high",0.0))))]
-	var regions_report:="HOME TERRITORY UNMAPPED"
-	if intel>=0.55: regions_report="KNOWN HOME REGIONS %d/%d" % [int(profile.get("home_regions_controlled",0)),int(profile.get("home_regions_total",0))]
-	summary_lines.append("%s  •  %s  •  %s" % [population_report,armed_report,regions_report])
-	if intel>=0.48:
-		summary_lines.append("APPARENT PRIORITY %s  •  FOOD ROUGHLY %.0f DAYS  •  PARTNERS %s  •  RIVALS %s  •  KNOWN WARS %d" % [String(profile.get("strategy","uncertain")).to_upper(),float(profile.get("food_days",0.0)),partners_text,rivals_text,int(profile.get("wars",0))])
-	else:
-		summary_lines.append("PRIORITIES, RESERVES, AND FOREIGN NETWORKS REMAIN UNVERIFIED")
-	if intel>=0.58:
-		var founding_definition:=GameState.founding_focus_definition(String(profile.get("founding_focus","")))
-		if not founding_definition.is_empty(): summary_lines.append("INFERRED FOUNDING FOCUS  %s  •  %s" % [String(founding_definition.name),String(founding_definition.strengths)])
-		summary_lines.append("OBSERVED TRAINING %s  •  COMMAND READINESS %s" % [String(profile.get("training_focus","unknown")).replace("_"," ").to_upper(),_qualitative_foreign_capacity(float(profile.get("command_readiness",0.0)),intel)])
-	summary.text="\n".join(summary_lines)
-	summary.add_theme_font_size_override("font_size",13)
-	summary.add_theme_color_override("font_color",Color("#d1c4a6"))
-	civilization_detail_root.add_child(summary)
-	var intent:=Label.new()
-	intent.text="INTELLIGENCE ASSESSMENT  •  THREAT %s  •  INTENT: %s" % [String(profile.get("threat_level","UNCERTAIN")),String(profile.get("rival_intent","Insufficient returned intelligence")).to_upper()] if intel>=0.32 else "INTELLIGENCE ASSESSMENT  •  Too little evidence to infer threat or intent."
-	intent.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	intent.add_theme_font_size_override("font_size",11)
-	intent.add_theme_color_override("font_color",Color("#e1bd72") if String(profile.get("threat_level","")) in ["HIGH","CRITICAL","WAR"] else Color("#9fb9ad"))
-	civilization_detail_root.add_child(intent)
-	var meters:=GridContainer.new()
-	meters.columns=3
-	meters.add_theme_constant_override("h_separation",12)
-	meters.add_theme_constant_override("v_separation",4)
-	civilization_detail_root.add_child(meters)
-	for metric in [["HEALTH","health"],["COHESION","cohesion"],["KNOWLEDGE","knowledge"],["PRODUCTION","production"],["LOGISTICS","logistics"],["MILITARY READINESS","military_readiness"]]:
-		var metric_label:=Label.new()
-		metric_label.text="%s  %s" % [String(metric[0]),_qualitative_foreign_capacity(float(profile.get(String(metric[1]),0.0)),intel)]
-		metric_label.custom_minimum_size=Vector2(168,20)
-		metric_label.add_theme_font_size_override("font_size",11)
-		metric_label.add_theme_color_override("font_color",Color("#b9c0b9"))
-		meters.add_child(metric_label)
-	var rival_score_rule:=Label.new()
-	if knowledge_stage<3:
-		rival_score_rule.text="NO GENERAL SCORE EXISTS IN YOUR CIVILIZATION'S KNOWLEDGE. These observations are reports about another people, not universal domains."
-	elif knowledge_stage==3:
-		rival_score_rule.text="A SEVEN-DOMAIN COMPARATIVE MODEL HAS EMERGED, but your methods cannot yet defend exact scores or ranks."
-	elif intel>=0.70 and profile.has("score_breakdown"):
-		var domain_parts:Array[String]=[]
-		for domain in CivilizationSystem.SCORE_DOMAINS:
-			domain_parts.append("%s %d" % [String(domain).to_upper(),roundi(float((profile.get("score_breakdown",{}) as Dictionary).get(domain,0.0)))])
-		# No victory exists: the breakdown is comparative intelligence only.
-		rival_score_rule.text="ESTIMATED CAPACITIES  •  %s\nIntelligence about this people, not a contest to be won." % "  ·  ".join(domain_parts)
-	else:
-		rival_score_rule.text="THE FORMAL COMPARISON METHOD IS KNOWN, but this civilization's breakdown remains too poorly observed for a defensible estimate."
-	rival_score_rule.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	rival_score_rule.add_theme_font_size_override("font_size",10)
-	rival_score_rule.add_theme_color_override("font_color",Color("#9eaa9f"))
-	civilization_detail_root.add_child(rival_score_rule)
-	var relation_text:=Label.new()
-	if bool(relation.get("at_war",false)):
-		var objective:=CivilizationSystem.war_objective_status(String(profile.id))
-		relation_text.text="ACTIVE WAR  •  SCORE %+d  •  OUR EXHAUSTION %d%%  •  THEIR EXHAUSTION %d%%\nOBJECTIVE  %s  •  PROGRESS %d%%" % [roundi(float(relation.get("war_score",0.0))),roundi(float(relation.get("player_war_exhaustion",0.0))*100.0),roundi(float(relation.get("rival_war_exhaustion",0.0))*100.0),String(objective.get("description","DEFEND THE REALM")),roundi(float(objective.get("progress",0.0))*100.0)]
-	else:
-		var truce_days:=maxi(0,int(relation.get("truce_until_day",0))-int(GameState.elapsed_days))
-		relation_text.text="RELATION  %s  •  BORDER TENSION %s  •  STANCE %s%s" % [_foreign_relation_label(relation),_qualitative_tension(float(relation.get("border_tension",0.0))),String(relation.get("stance","watchful")).to_upper(),"  •  TRUCE %d DAYS" % truce_days if truce_days>0 else ""]
-	relation_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	relation_text.add_theme_font_size_override("font_size",12)
-	relation_text.add_theme_color_override("font_color",Color("#c6b98e"))
-	civilization_detail_root.add_child(relation_text)
-	var city_directory:=Button.new()
-	city_directory.text="CITY REPORTS · OBSERVED LOCATIONS ONLY"
-	city_directory.pressed.connect(func(): CivilizationSystem.city_intelligence.open("",String(profile.id)))
-	civilization_detail_root.add_child(city_directory)
-	var regions:Array=profile.get("strategic_regions",[])
-	if regions.is_empty():
-		var frontier_unknown:=Label.new()
-		frontier_unknown.text="STRATEGIC FRONT UNKNOWN  •  Maintain contact, trade, or reconnaissance to identify campaign regions and defensive estimates."
-		frontier_unknown.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		frontier_unknown.add_theme_font_size_override("font_size",11)
-		frontier_unknown.add_theme_color_override("font_color",Color("#a99672"))
-		civilization_detail_root.add_child(frontier_unknown)
-	if not regions.is_empty():
-		var selected_exists:=false
-		for region_variant in regions:
-			if String((region_variant as Dictionary).get("id",""))==selected_civilization_region_id: selected_exists=true
-		if not selected_exists:
-			selected_civilization_region_id=""
-			for region_variant in regions:
-				var region:Dictionary=region_variant
-				if bool(region.get("available",false)): selected_civilization_region_id=String(region.id); break
-			if selected_civilization_region_id=="": selected_civilization_region_id=String((regions[0] as Dictionary).id)
-		var region_heading:=Label.new()
-		region_heading.text="INDEPENDENTLY REPORTED CITIES"
-		region_heading.add_theme_font_size_override("font_size",11)
-		region_heading.add_theme_color_override("font_color",Color("#d3b66d"))
-		civilization_detail_root.add_child(region_heading)
-		var front_grid:=GridContainer.new()
-		front_grid.columns=mini(5,regions.size())
-		front_grid.add_theme_constant_override("h_separation",4)
-		front_grid.add_theme_constant_override("v_separation",4)
-		civilization_detail_root.add_child(front_grid)
-		var selected_region_index:=0
-		for region_index in regions.size():
-			var region:Dictionary=regions[region_index]
-			var held_by_player:=String(region.get("controller",""))=="player"
-			var state:="YOU CONTROL IT" if held_by_player else ("LIBERATE IT" if bool(region.get("foreign_holding",false)) else ("NEXT TARGET" if bool(region.get("available",false)) else "TAKE REGION %d FIRST" % region_index))
-			var region_button:=Button.new()
-			var selected_marker:="▶ " if String(region.id)==selected_civilization_region_id else ""
-			region_button.text="%s%s\nLAST REPORTED" % [selected_marker,String(region.name)]
-			region_button.custom_minimum_size=Vector2(112,50)
-			region_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			region_button.add_theme_font_size_override("font_size",9)
-			var region_accent:=Color("#79a994") if held_by_player else (Color("#79a8c4") if bool(region.get("foreign_holding",false)) else (Color("#c8a95c") if bool(region.get("available",false)) else Color("#4b5755")))
-			if String(region.id)==selected_civilization_region_id: region_accent=region_accent.lightened(0.22)
-			region_button.add_theme_stylebox_override("normal",_knowledge_style(Color("#0c1517"),region_accent.darkened(0.25),1,3,4))
-			region_button.add_theme_stylebox_override("hover",_knowledge_style(Color("#152226"),region_accent,1,3,4))
-			region_button.tooltip_text="%s\n%s\nOnly cities described by surviving reports appear here. Conditions may have changed." % [String(region.get("name","Strategic region")),String(region.get("availability_reason",""))]
-			region_button.pressed.connect(_select_campaign_region_button.bind(String(profile.id),String(region.id)))
-			front_grid.add_child(region_button)
-			if String(region.id)==selected_civilization_region_id: selected_region_index=region_index
-		var selected_region:Dictionary=regions[selected_region_index]
-		var occupation_force:Dictionary=MilitaryCampaign.occupation_force_for_region(String(profile.id),String(selected_region.id))
-		var region_detail:=Label.new()
-		var control_label:=String(selected_region.get("controller_label",profile.name))
-		var force_status:="GARRISON %s / %s" % [_compact_population(int(occupation_force.get("troops",0))),_compact_population(roundi(float(selected_region.get("occupation_required",0.0))))] if String(selected_region.get("controller",""))=="player" else "OCCUPATION NEED %s" % _compact_population(roundi(float(selected_region.get("occupation_required",0.0))))
-		region_detail.text=CivilizationSystem.city_intelligence.describe(selected_region.get("intelligence",{}))
-		region_detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		region_detail.add_theme_font_size_override("font_size",10)
-		region_detail.add_theme_color_override("font_color",Color("#acb5ae"))
-		civilization_detail_root.add_child(region_detail)
-		var planning_row:=HBoxContainer.new()
-		planning_row.add_theme_constant_override("separation",8)
-		civilization_detail_root.add_child(planning_row)
-		var goal_heading:=Label.new()
-		goal_heading.text="WAR OBJECTIVE"
-		goal_heading.custom_minimum_size=Vector2(105,0)
-		goal_heading.add_theme_font_size_override("font_size",10)
-		goal_heading.add_theme_color_override("font_color",Color("#d3b66d"))
-		planning_row.add_child(goal_heading)
-		var goal_selector:=OptionButton.new()
-		goal_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		goal_selector.add_theme_font_size_override("font_size",10)
-		goal_selector.disabled=bool(relation.get("at_war",false))
-		var goal_index:=0
-		var goal_options:Array=[]
-		if bool(relation.get("at_war",false)):
-			goal_options=[{"id":String(relation.get("war_goal","defend")),"label":String(CivilizationSystem.WAR_GOAL_LABELS.get(String(relation.get("war_goal","defend")),"ACTIVE OBJECTIVE")),"available":true,"description":"This objective is locked until the war ends."}]
-		else:
-			goal_options=CivilizationSystem.war_goal_options(String(profile.id),String(selected_region.id))
-		for option_index in goal_options.size():
-			var option:Dictionary=goal_options[option_index]
-			goal_selector.add_item(String(option.label))
-			goal_selector.set_item_metadata(option_index,String(option.id))
-			goal_selector.set_item_disabled(option_index,not bool(option.available))
-			goal_selector.set_item_tooltip(option_index,String(option.description))
-			if String(option.id)==String(relation.get("war_goal","limited")): goal_index=option_index
-		goal_selector.select(goal_index)
-		goal_selector.item_selected.connect(_select_war_goal.bind(goal_selector,String(profile.id)))
-		planning_row.add_child(goal_selector)
-		var assessment:=CivilizationSystem.strategic_assessment(String(profile.id),String(selected_region.id))
-		var operation:=PanelContainer.new()
-		var outlook_color:=Color("#83b39b") if String(assessment.get("outlook","")) in ["DECISIVE ADVANTAGE","FAVORABLE"] else (Color("#d1b66f") if String(assessment.get("outlook",""))=="CONTESTED" else Color("#ce806f"))
-		operation.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d1719"),outlook_color.darkened(0.25),1,3,6))
-		civilization_detail_root.add_child(operation)
-		var operation_text:=Label.new()
-		operation_text.text="OPERATIONAL FORECAST  %s  •  CASUALTY RISK %s  •  SUPPLY %s\nFIELD %s  •  DEFENDER EST. %s–%s  •  INTEL %d%%  •  READINESS %d%%\nWHY IT MATTERS  %s" % [String(assessment.get("outlook","UNKNOWN")),String(assessment.get("casualty_risk","UNKNOWN")),String(assessment.get("supply_label","UNKNOWN")),_compact_population(int(assessment.get("fielded",0))),("unknown" if int(assessment.get("enemy_estimate_low",-1))<0 else _compact_population(int(assessment.enemy_estimate_low))),("unknown" if int(assessment.get("enemy_estimate_high",-1))<0 else _compact_population(int(assessment.enemy_estimate_high))),roundi(float(assessment.get("intel_confidence",0.0))*100.0),roundi(float(assessment.get("player_readiness",0.0))*100.0),String(assessment.get("region_value",""))]
-		operation_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		operation_text.add_theme_font_size_override("font_size",10)
-		operation_text.add_theme_color_override("font_color",outlook_color.lightened(0.12))
-		operation.add_child(operation_text)
-		if bool(relation.get("at_war",false)):
-			var peace:=CivilizationSystem.peace_forecast(String(profile.id))
-			var peace_text:=Label.new()
-			peace_text.text="PEACE FORECAST  %s  •  leverage %d%%  •  objective %s" % [String(peace.get("label","WILL REFUSE")),roundi(float(peace.get("strategic_leverage",0.0))*100.0),"COMPLETE" if bool((peace.get("objective",{}) as Dictionary).get("complete",false)) else "INCOMPLETE"]
-			peace_text.add_theme_font_size_override("font_size",10)
-			peace_text.add_theme_color_override("font_color",Color("#bfc7bc"))
-			civilization_detail_root.add_child(peace_text)
-	var feedback:=Label.new()
-	feedback.text=civilization_feedback_text if civilization_feedback_text!="" else "Choose a standing action. Every action changes the relation and therefore trade access, security pressure, knowledge exchange, or war risk."
-	feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	feedback.add_theme_font_size_override("font_size",11)
-	feedback.add_theme_color_override("font_color",Color("#d0a879") if civilization_feedback_text!="" else Color("#949d98"))
-	civilization_detail_root.add_child(feedback)
-	var actions:=GridContainer.new()
-	actions.columns=3
-	actions.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	actions.add_theme_constant_override("h_separation",6)
-	actions.add_theme_constant_override("v_separation",6)
-	civilization_detail_root.add_child(actions)
-	if not CivilizationSystem.occupation_governance_snapshot(String(profile.id),selected_civilization_region_id).is_empty():
-		var administration:=Button.new()
-		administration.text="GOVERN OCCUPIED REGION"
-		administration.pressed.connect(func(): preload("res://scripts/hud/occupation_view.gd").open(String(profile.id),selected_civilization_region_id))
-		actions.add_child(administration)
-	var audience_button:=Button.new()
-	audience_button.text="SPEAK WITH THEIR LEADER"
-	audience_button.custom_minimum_size.y=38
-	audience_button.pressed.connect(func(): ForeignDiplomacy.open(String(profile.id)))
-	actions.add_child(audience_button)
-	var action_descriptions:={"open_trade":"Send a trade proposal. It can begin only after envoys reach them and carry acceptance home.","non_aggression":"Send a non-aggression proposal. No compact exists until the physical round trip is complete.","send_aid":"Send envoys carrying physical food aid; both travel rations and aid leave your reserve at departure.","contain":"End the current compact and adopt a hostile peacetime containment posture.","seek_peace":"Send peace envoys. Any response remains unknown until the delegation returns.","declare_war":"Send a physical declaration. War begins only when the message reaches them.","launch_raid":"Strike a known region for portable stores without attempting occupation; this sharply raises hostility and may begin a war.","launch_campaign":"Commit the existing aggregate field formation against this rival's simulated garrison.","reinforce_occupation":"Move trained field personnel into the selected occupation force. Coverage suppresses rebellion and supports integration.","evacuate_occupation":"Order the garrison to march home with its people and equipment. Control becomes exposed immediately; reserves receive nothing until arrival."}
-	var action_recoveries:={"open_trade":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","non_aggression":"Locate their settlement with a returned scout report, restore envoy rations, and finish any active diplomatic mission.","send_aid":"Locate their settlement, restore the required physical Food, and finish any active diplomatic mission.","contain":"Resolve the current war or incompatible treaty state, then choose containment again.","seek_peace":"Enter a war, then send peace envoys after locating the opponent's settlement.","declare_war":"Locate their settlement, choose a war objective, and finish any active diplomatic mission before sending the declaration.","launch_raid":"Select a known region, move a field army there, and ensure no truce or non-aggression compact is active.","launch_campaign":"Raise and train personnel, form a maneuver army, move it to this selected objective, and resolve any active battle.","reinforce_occupation":"March a field army to the controlled region before assigning reinforcements.","evacuate_occupation":"Select a controlled region with an occupation force still stationed there."}
-	var action_consequences:={"open_trade":"No trade begins until acceptance physically returns.","non_aggression":"No compact begins until acceptance physically returns.","send_aid":"Travel rations and the aid cargo leave physical stores at departure.","contain":"Trade and diplomatic access end immediately and tension rises.","seek_peace":"The war continues until an accepted response returns.","declare_war":"War begins when the declaration reaches them, not when it departs.","launch_raid":"The stationed army fights and may take portable stores, but cannot capture territory; reprisals become more likely.","launch_campaign":"The stationed army fights; military and civilian losses, damage, and control changes enter permanent history.","reinforce_occupation":"Personnel transfer from a field army already stationed here into the occupation garrison.","evacuate_occupation":"The return march takes time and supply. Resistance or recapture may end control while the column travels."}
-	action_descriptions["launch_siege"]="Invest this settlement with the army already stationed there. Food access, reserves and endurance change over time."
-	action_recoveries["launch_siege"]="Move a field army to a known enemy settlement and resolve the current military operation."
-	action_consequences["launch_siege"]="The army holds the approaches until relieved, withdrawn or ordered to assault. No territory transfers merely by starting a siege."
-	for action_entry in [["PROPOSE TRADE","open_trade"],["PROPOSE NON-AGGRESSION","non_aggression"],["SEND FOOD AID","send_aid"],["CONTAIN","contain"],["SEND PEACE ENVOYS","seek_peace"],["SEND WAR DECLARATION","declare_war"],["RAID REGION","launch_raid"],["LAUNCH CAMPAIGN","launch_campaign"],["BESIEGE SETTLEMENT","launch_siege"],["REINFORCE OCCUPATION","reinforce_occupation"],["EVACUATE OCCUPATION","evacuate_occupation"]]:
-		var action_button:=Button.new()
-		action_button.text=String(action_entry[0])
-		action_button.custom_minimum_size=Vector2(0,36)
-		action_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		action_button.add_theme_font_size_override("font_size",10)
-		var action_id:=String(action_entry[1])
-		var availability:Dictionary
-		if action_id=="launch_siege": availability=MilitaryCampaign.offensive_siege_availability(String(profile.id),selected_civilization_region_id)
-		elif action_id=="launch_campaign": availability=MilitaryCampaign.offensive_campaign_availability(String(profile.id),selected_civilization_region_id)
-		elif action_id=="launch_raid": availability=MilitaryCampaign.raid_campaign_availability(String(profile.id),selected_civilization_region_id)
-		elif action_id in ["reinforce_occupation","evacuate_occupation"]: availability=MilitaryCampaign.occupation_action_availability(String(profile.id),selected_civilization_region_id,action_id)
-		else: availability=CivilizationSystem.player_action_availability(String(profile.id),action_id)
-		if action_id in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS and not bool(relation.get("home_location_known",false)):
-			availability={"error":"Settlement unlocated. Investigate the known contact site and return with its position before sending diplomats."}
-		action_button.disabled=availability.has("error")
-		if availability.has("error"):
-			action_button.tooltip_text="BLOCKED  %s\nNEXT  %s" % [String(availability.error),String(action_recoveries.get(action_id,"Resolve the listed blocker, then return to this action."))]
-		else:
-			action_button.tooltip_text="ACTION  %s\nCONSEQUENCE  %s" % [String(action_descriptions.get(action_id,"Carry out this action.")),String(action_consequences.get(action_id,"The relationship and strategic state will change."))]
-			if availability.has("amount"): action_button.tooltip_text+="\nCOST  Transfer %.1f Food from physical stores; it cannot reappear after departure." % float(availability.amount)
-			if availability.has("incident"): action_button.tooltip_text+="\nCURRENT  Estimated aggregate garrison %s." % _compact_population(int((availability.incident as Dictionary).get("strength",0)))
-		action_button.pressed.connect(_conduct_civilization_action.bind(String(profile.id),String(action_entry[1])))
-		actions.add_child(action_button)
-
-
-func _foreign_relation_label(relation:Dictionary)->String:
-	if bool(relation.get("at_war",false)): return "AT WAR"
-	var treaty:=String(relation.get("treaty","none"))
-	if treaty!="none": return treaty.replace("_"," ").to_upper()
-	var opinion:=float(relation.get("opinion",0.0))
-	if opinion>=0.30: return "FRIENDLY"
-	if opinion>=-0.12: return "WATCHFUL"
-	if opinion>=-0.40: return "RIVAL"
-	return "HOSTILE"
-
-
-func _qualitative_foreign_capacity(value:float,intelligence:float)->String:
-	if intelligence<0.48 or value<0: return "UNKNOWN"
-	if value<0.22: return "FRAGILE"
-	if value<0.40: return "LIMITED"
-	if value<0.60: return "DEVELOPING"
-	if value<0.78: return "STRONG"
-	return "FORMIDABLE"
-
-
-func _qualitative_tension(value:float)->String:
-	if value<0.18: return "LOW"
-	if value<0.42: return "GUARDED"
-	if value<0.68: return "HIGH"
-	return "SEVERE"
-
-
-func _intercept_foreign_scout(formation_id:String,action:String)->void:
-	var result:Dictionary=CivilizationSystem.resolve_foreign_scout_interception(formation_id,action)
-	civilization_feedback_text=String(result.get("error",result.get("message","Interception resolved.")))
-	selected_civilization_id=String(result.get("civilization_id",selected_civilization_id))
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-	_update_time_interface()
-
-
-func _interrogate_captured_scouts(civ_id:String,method:String)->void:
-	var result:Dictionary=CivilizationSystem.interrogate_captured_scouts(civ_id,method)
-	civilization_feedback_text=String(result.get("error",result.get("message","Interrogation resolved.")))
-	selected_civilization_id=civ_id
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-	_update_time_interface()
-
-
 func _open_scout_dispatch_panel()->void:
 	if is_instance_valid(scout_dispatch_panel):scout_dispatch_panel.queue_free()
 	scout_dispatch_previous_speed=game_speed;_set_game_speed(0.0)
@@ -15706,28 +15019,6 @@ func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="")->Control:
 	return director.call("open_court",focus)
 
 
-func _open_diplomat_for_civ(civ_id:String,purpose:String="")->void:
-	_close_civilizations_panel()
-	_open_diplomat_dispatch_panel(civ_id,purpose)
-
-
-func _select_civilization(civ_id:String)->void:
-	selected_civilization_id=civ_id
-	selected_civilization_region_id=""
-	civilization_feedback_text=""
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-
-
-func _select_civilization_from_option(index:int,selector:OptionButton)->void:
-	if selector==null or index<0 or index>=selector.item_count: return
-	_select_civilization(String(selector.get_item_metadata(index)))
-
-
-func _focus_contact_encounter(civ_id:String)->void:
-	_focus_known_world_point(civ_id,"encounter")
-
-
 func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 	for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
 		var encounter:Dictionary=encounter_variant
@@ -15735,7 +15026,6 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 		var use_settlement:=point_kind=="settlement" and bool(encounter.get("home_location_known",false))
 		var position_data:Dictionary=encounter.get("home_position",{}) if use_settlement else encounter.get("position",{})
 		if not position_data.has("x") or not position_data.has("z"): return
-		_close_civilizations_panel()
 		var target:=Vector3(float(position_data.x),0.0,float(position_data.z))
 		zoom_target_size=-1.0
 		if camera:
@@ -15751,71 +15041,6 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 
 func _clear_transient_world_notice(expected_text:String)->void:
 	if travel_status_label and travel_status_label.text==expected_text: travel_status_label.text=""
-
-
-func _select_campaign_region_button(civ_id:String,region_id:String)->void:
-	selected_civilization_id=civ_id
-	selected_civilization_region_id=region_id
-	civilization_feedback_text=""
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-
-
-func _select_war_goal(index:int,selector:OptionButton,civ_id:String)->void:
-	var goal:=String(selector.get_item_metadata(index))
-	var result:=CivilizationSystem.set_player_war_goal(civ_id,goal,selected_civilization_region_id)
-	civilization_feedback_text=String(result.get("error",result.get("message","War objective updated.")))
-	selected_civilization_id=civ_id
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-
-
-func _conduct_civilization_action(civ_id:String,action:String)->void:
-	if action=="launch_siege":
-		var siege_result:=MilitaryCampaign.start_offensive_siege(civ_id,selected_civilization_region_id)
-		civilization_feedback_text=String(siege_result.get("error",siege_result.get("message","Siege orders issued.")))
-		selected_civilization_id=civ_id
-		_close_civilizations_panel()
-		if siege_result.has("error"): _open_civilizations_panel()
-		else: _open_war_planning()
-		return
-	if action in ["launch_campaign","launch_raid"]:
-		var campaign:Dictionary=MilitaryCampaign.launch_raid(civ_id,selected_civilization_region_id) if action=="launch_raid" else MilitaryCampaign.launch_offensive(civ_id,selected_civilization_region_id)
-		civilization_feedback_text=String(campaign.get("error","Campaign launched; issue round orders through Military Command."))
-		selected_civilization_id=civ_id
-		if campaign.has("error"):
-			_close_civilizations_panel()
-			_open_civilizations_panel()
-		else:
-			_close_civilizations_panel()
-			if not MilitaryCommandUI.modal.visible: MilitaryCommandUI._toggle()
-			MilitaryCommandUI._refresh()
-		return
-	if action in ["reinforce_occupation","evacuate_occupation"]:
-		var occupation_result:Dictionary=MilitaryCampaign.reinforce_occupation(civ_id,selected_civilization_region_id) if action=="reinforce_occupation" else MilitaryCampaign.evacuate_occupation(civ_id,selected_civilization_region_id)
-		civilization_feedback_text=String(occupation_result.get("error",occupation_result.get("message","Occupation order completed.")))
-		selected_civilization_id=civ_id
-		_close_civilizations_panel()
-		_open_civilizations_panel()
-		return
-	if action in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS:
-		selected_civilization_id=civ_id
-		_close_civilizations_panel()
-		_open_diplomat_dispatch_panel(civ_id,action)
-		return
-	var result:Dictionary=CivilizationSystem.conduct_player_action(civ_id,action)
-	civilization_feedback_text=String(result.get("error",result.get("message","Foreign policy updated.")))
-	selected_civilization_id=civ_id
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-	_update_time_interface()
-
-
-func _close_civilizations_panel()->void:
-	if civilizations_panel and is_instance_valid(civilizations_panel): civilizations_panel.queue_free()
-	civilizations_panel=null
-	civilization_report_panel=null
-	civilization_detail_root=null
 
 
 func _update_time_interface() -> void:
@@ -16032,14 +15257,8 @@ func _close_topmost_game_screen()->bool:
 		if overlay:
 			overlay.queue_free()
 			return true
-	if civilization_report_panel and is_instance_valid(civilization_report_panel):
-		_close_civilization_report()
-		return true
 	if materials_panel and is_instance_valid(materials_panel):
 		materials_panel.queue_free(); materials_panel=null
-		return true
-	if civilizations_panel and is_instance_valid(civilizations_panel):
-		_close_civilizations_panel()
 		return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
@@ -16093,10 +15312,6 @@ func _input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 			if _close_topmost_game_screen():
-				get_viewport().set_input_as_handled()
-				return
-			if civilizations_panel and is_instance_valid(civilizations_panel):
-				_close_civilizations_panel()
 				get_viewport().set_input_as_handled()
 				return
 			if world_menu_panel and is_instance_valid(world_menu_panel):
@@ -16179,7 +15394,7 @@ func _dismiss_report_backdrop(event:InputEvent)->bool:
 	if is_instance_valid(founding_focus_panel) or is_instance_valid(settlement_convoy_confirm_panel):return false
 	if _outside_report_body(world_menu_panel,event.position):_close_world_menu();return true
 	if _outside_report_body(scout_dispatch_panel,event.position):_close_scout_dispatch_panel();return true
-	for panel:Control in [civilization_report_panel,materials_panel,civilizations_panel]:
+	for panel:Control in [materials_panel]:
 		if _outside_report_body(panel,event.position):return _close_topmost_game_screen()
 	return false
 
@@ -16606,7 +15821,7 @@ func _focus_known_city(city_id:String)->void:
 	if report.is_empty():return
 	if hud:hud.close_detail();hud.close_dock()
 	if is_instance_valid(CivilizationSystem.city_intelligence.screen_layer):CivilizationSystem.city_intelligence.screen_layer.queue_free()
-	_close_civilizations_panel();zoom_target_size=-1
+	zoom_target_size=-1
 	set_camera_distance_level(0)
 	_set_camera_target(Vector3(float(report.position.x),0,float(report.position.z)))
 	_refresh_contact_encounter_markers()
