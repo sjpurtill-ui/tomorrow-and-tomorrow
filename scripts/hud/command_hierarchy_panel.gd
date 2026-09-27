@@ -56,11 +56,11 @@ func _ready()->void:
 	title.autowrap_mode=TextServer.AUTOWRAP_OFF;title.clip_text=true;title.tooltip_text=title.text
 	var close:=_button(heading,"×",queue_free);close.custom_minimum_size=Vector2(42,42);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.tooltip_text="Close command view"
 	var tabs:=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
-	var orders:=VBoxContainer.new();orders.name="Objectives";orders.add_theme_constant_override("separation",9);tabs.add_child(orders)
+	var orders:=VBoxContainer.new();orders.name="Objectives";orders.add_theme_constant_override("separation",8);tabs.add_child(orders)
 	_step_label(orders,"1", "SELECT YOUR FORCE", "Select a force or a headquarters and its subordinates")
 	tree=CommandTree.new();tree.service=domain;orders.add_child(tree);tree.custom_minimum_size.y=180;tree.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;tree.command_selected.connect(_selected)
 	var scroll:=ScrollContainer.new();orders_scroll=scroll;scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;orders.add_child(scroll)
-	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",8);scroll.add_child(controls)
+	var controls:=VBoxContainer.new();controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_theme_constant_override("separation",7);scroll.add_child(controls)
 	_step_label(controls,"2", "CHOOSE ITS OBJECTIVE", "A draft is not issued until you confirm below")
 	var selection_card:=_card(controls,"info")
 	selected_label=_label(selection_card,"No command selected",17)

@@ -34,7 +34,21 @@ func test_same_orders_and_daily_inputs_produce_identical_owned_state()->void:
 	var first:=WorldSimulation.capture_actor("alpha")
 	var second:=WorldSimulation.capture_actor("beta")
 	for name in ["GameState","MilitaryCampaign","DiscoverySystem","GovernmentPeopleSystem","EconomySystem","ProgressionSystem","society_model"]:
-		assert_bool(first[name]==second[name]).override_failure_message("Different owned state in "+name).is_true()
+		assert_bool(_simulated(first[name])==_simulated(second[name])).override_failure_message("Different owned state in "+name).is_true()
+
+## Each people names and draws its own folk (names, portraits keyed to the
+## civilization id); everything they simulate must still match exactly.
+const IDENTITY_KEYS:=["name","given","early_art_profile","appearance_civ_id","used"]
+func _simulated(value:Variant)->Variant:
+	if value is Dictionary:
+		var result:={}
+		for key:Variant in value:
+			if String(key) in IDENTITY_KEYS:continue
+			result[key]=_simulated(value[key])
+		return result
+	if value is Array:
+		return (value as Array).map(func(item:Variant)->Variant:return _simulated(item))
+	return value
 
 func test_save_continuation_preserves_rng_and_owned_balances()->void:
 	WorldSimulation.scoped("alpha",func()->void:
