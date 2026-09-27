@@ -1,0 +1,12 @@
+{
+  "id": "phenology_signs",
+  "line": "ecology",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Adults observe flowering wild tree and returning birds as signs to move seasonally; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-67966a66-55ba-41df-bee8-740c549d7881.png",
+  "asset": "res://assets/ui/research/subjects/phenology_signs-v1.png",
+  "sha256": "6873901e9f07660e30a5ea5a6eb514d4b2caad01c50bd4d1cd6533a59fd9d3b9",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; flowers, bird return and travelers clear in crop."
+}

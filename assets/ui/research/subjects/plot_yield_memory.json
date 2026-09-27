@@ -1,0 +1,12 @@
+{
+  "id": "plot_yield_memory",
+  "line": "nutrition",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Elder orally compares small and large baskets of grain from contrasting plots with younger adult; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9367537b-7e0f-4c7f-8b41-0674e8d581b5.png",
+  "asset": "res://assets/ui/research/subjects/plot_yield_memory-v1.png",
+  "sha256": "c16a656a4786e304ba79c576bf5c21f73f4a8a2116c1b55de75c7bb43d30a68c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; yield comparison and oral recollection clear, no record text."
+}
