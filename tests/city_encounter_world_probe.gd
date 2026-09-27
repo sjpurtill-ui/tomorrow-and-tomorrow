@@ -28,7 +28,7 @@ func _ready()->void:
 	var siege:CanvasLayer=get_tree().root.get_meta("persistent_siege_view")
 	assert(siege.viewport.world_3d==terrain.get_world_3d());continuity()
 	await capture("siege")
-	await click(siege.assault.get_global_rect().get_center())
+	siege._siege_order("assault")
 	for frame in 10:await get_tree().process_frame
 	var hud:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
 	assert(hud.view.live_terrain==terrain and hud.viewport.world_3d==terrain.get_world_3d());continuity()

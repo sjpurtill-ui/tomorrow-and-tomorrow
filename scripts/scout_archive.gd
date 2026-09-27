@@ -38,21 +38,23 @@ static func city_record(report:Dictionary)->Dictionary:
 		if String(city.get("city_id",""))==id:return city
 	return {}
 
+## The shared date phrase ("Year 12 · Summer"), never a raw day number.
 static func calendar_date(day:int)->String:
-	day=maxi(0,day)
-	return "Year %d, Day %d" % [day/365+1,day%365+1]
+	return preload("res://scripts/hud/era_words.gd").when(maxi(0,day))
 
 static func city_account(report:Dictionary)->String:
 	var city:=city_record(report)
 	var target:=String(city.get("name",String(report.get("target_label","the target city")).trim_prefix("OBSERVE ")))
-	var text:="Reconnaissance of %s: %d scouts returned after %d days away. " % [target,int(report.get("returned_personnel",report.get("personnel",0))),int(report.get("actual_days",report.get("duration_days",0)))]
-	if city.is_empty():text+="No usable observation of the target city was brought home. Its estimates were not refreshed."
+	var text:="Watching %s: %d scouts came home after %s away. " % [target,int(report.get("returned_personnel",report.get("personnel",0))),preload("res://scripts/hud/report_when.gd").span(int(report.get("actual_days",report.get("duration_days",0))))]
+	if city.is_empty():text+="They brought back nothing useful about the city, so what we know of it is unchanged."
 	else:
-		text+="%d days observing; evidence dated %s. " % [int(city.get("observation_days",1)),calendar_date(int(city.get("observed_day",0)))]
+		text+="%d days observing; what they saw dates from %s. " % [int(city.get("observation_days",1)),calendar_date(int(city.get("observed_day",0)))]
 		var visuals=preload("res://scripts/hud/city_report_visuals.gd")
-		for key:String in ["population","science_capacity","gdp","life_expectancy"]:
-			text+=String(visuals.LABELS[key])+": "+visuals.estimate(key,city.get("fields",{}).get(key,{}))+". "
-	if bool(report.get("continuous_watch",false)):text+="Standing order: repeat this city visit after return, subject to people, food and route availability."
+		for key:String in visuals.shown_keys():
+			var field:Dictionary=city.get("fields",{}).get(key,{})
+			if field.is_empty():continue
+			text+=String(visuals.label(key))+": "+String(visuals.words(key,field))+". "
+	if bool(report.get("continuous_watch",false)):text+="Standing order: they go back to watch it again once home, if people, food and the road allow."
 	return text.strip_edges()
 
 static func identity(report:Dictionary)->String:
@@ -96,7 +98,7 @@ static func summary(report:Dictionary)->Dictionary:
 		title="City reconnaissance · "+String(city_record(report).get("name",String(report.get("target_label","Reported city")).trim_prefix("OBSERVE ")))
 		detail=city_account(report);priority=maxi(priority,2)
 	if losses>0: title="%d scouts did not return" % losses; detail="%d returned · %d stayed elsewhere. %s" % [int(report.get("returned_personnel",0)),int(report.get("stayed_personnel",0)),detail]; priority=5
-	var party:="Party %s" % report.mission_id if int(report.get("mission_id",0))>0 else "Earlier expedition"
+	var party:=party_name(report)
 	var place:=String(report.get("target_label","Open exploration")).capitalize()
 	var route:Array=report.get("route",[])
 	if place.to_lower() in ["open exploration","open world"] and route.size()>1:
@@ -104,9 +106,19 @@ static func summary(report:Dictionary)->Dictionary:
 		var offset:=Vector2(float(end.get("x",0))-float(start.get("x",0)),float(end.get("z",0))-float(start.get("z",0)))
 		if offset.length()>1:
 			var directions:=["east","southeast","south","southwest","west","northwest","north","northeast"]
-			place="%s route · %d km out & back" % [directions[posmod(roundi(offset.angle()/(PI/4)),8)].capitalize(),int(report.get("distance_km",0))]
+			place="Out to the %s and back" % directions[posmod(roundi(offset.angle()/(PI/4)),8)]
 	var review:="UNREAD" if report.has("archive_reviewed") and not bool(report.archive_reviewed) else ("READ" if bool(report.get("archive_reviewed",false)) else "")
-	return {"id":identity(report),"title":title,"detail":detail,"party":party,"place":place,"day":int(report.get("day",0)),"priority":priority,"meaningful":meaningful,"losses":losses,"review":review,"kind":"LOSSES" if losses>0 else ("FINDINGS" if meaningful else "ROUTINE"),"report":report}
+	return {"id":identity(report),"title":title,"detail":detail,"party":party,"place":place,"day":int(report.get("day",0)),"priority":priority,"meaningful":meaningful,"losses":losses,"review":review,"kind":"Losses" if losses>0 else ("Findings" if meaningful else "Routine"),"report":report}
+
+## A name for a scouting party the player can recognise: how many went and
+## where they set out from, never a bare mission number.
+static func party_name(report:Dictionary)->String:
+	var count:=int(report.get("personnel",0))
+	var origin:=String(report.get("origin_label",""))
+	var who:="A scouting party" if count<=0 else ("One scout" if count==1 else "%d scouts" % count)
+	if origin==origin.to_upper():origin=origin.capitalize()
+	if origin!="" and origin.to_lower()!="home":who+=" from "+origin
+	return who
 
 static func select(reports:Array,query:String="",filter_index:int=0,important_first:bool=true)->Array:
 	var selected:Array=[]
@@ -120,7 +132,7 @@ static func select(reports:Array,query:String="",filter_index:int=0,important_fi
 		if filter_index==2 and (bool(item.meaningful) or int(item.losses)>0): continue
 		if filter_index==3 and int(item.losses)==0: continue
 		if filter_index==4 and item.review!="UNREAD": continue
-		var searchable:=(JSON.stringify(report)+" "+String(item.party)+" "+String(item.place)+" "+String(item.title)).to_lower()
+		var searchable:=(JSON.stringify(report)+" party %d " % int(report.get("mission_id",0))+String(item.party)+" "+String(item.place)+" "+String(item.title)).to_lower()
 		var matches:=true
 		for term in terms:
 			if not String(term) in searchable: matches=false; break

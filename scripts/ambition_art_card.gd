@@ -1,11 +1,13 @@
 extends Button
+## One direction card: a painting above, a paper caption below (paper and ink).
+const T:=preload("res://scripts/hud/hud_tokens.gd")
 var art_index:=0
 var caption:=""
 var subtitle:=""
 var accent:=Color("c5a55d")
 var chosen:=false
 var artwork:TextureRect
-var footer:ColorRect
+var footer:Panel
 var title_label:Label
 var sub_label:Label
 var outline:Panel
@@ -16,38 +18,39 @@ func _ready()->void:
 	clip_contents=true
 	mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	for state in ["normal","hover","pressed","focus","disabled"]:
-		var style:=StyleBoxFlat.new();style.bg_color=Color("eee7d8") if paper_art else Color("112126")
-		style.border_color=accent if state in ["hover","focus","pressed"] else Color("385052")
-		style.set_border_width_all(2 if state in ["hover","focus","pressed"] else 1)
+		var style:=StyleBoxFlat.new();style.bg_color=T.PAPER_RAISED
+		style.border_color=T.GOLD if state in ["hover","focus","pressed"] else T.RULE
+		style.set_border_width_all(1);style.set_corner_radius_all(T.RADIUS_CARD)
+		if state in ["hover","focus","pressed"]:style.border_width_top=3
 		add_theme_stylebox_override(state,style)
 	artwork=TextureRect.new();artwork.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	artwork.mouse_filter=Control.MOUSE_FILTER_IGNORE;artwork.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(artwork)
+	artwork.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(artwork)
 	artwork.texture=preload("res://scripts/hud/ambition_art.gd").texture(art_index)
 	artwork.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	if paper_art:
-		artwork.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-		artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	footer=ColorRect.new();footer.color=Color(.025,.055,.064,.9);footer.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(footer)
-	title_label=Label.new();title_label.text=caption;title_label.add_theme_color_override("font_color",Color("fff3d6"));title_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(title_label)
-	sub_label=Label.new();sub_label.text=subtitle;sub_label.add_theme_color_override("font_color",Color("c8d4cf"));sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(sub_label)
+	if paper_art:artwork.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	footer=Panel.new();footer.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var paper:=StyleBoxFlat.new();paper.bg_color=T.PAPER_RAISED;paper.border_color=T.RULE;paper.border_width_top=1;footer.add_theme_stylebox_override("panel",paper);add_child(footer)
+	title_label=Label.new();title_label.text=caption;T.text(title_label,"value",T.INK);title_label.clip_text=true;title_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(title_label)
+	sub_label=Label.new();sub_label.text=subtitle;T.text(sub_label,"small",T.INK_MUTED);sub_label.clip_text=true;sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(sub_label)
 	outline=Panel.new();outline.mouse_filter=Control.MOUSE_FILTER_IGNORE;outline.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var border:=StyleBoxFlat.new();border.bg_color=Color.TRANSPARENT;border.border_color=accent;border.set_border_width_all(3);outline.add_theme_stylebox_override("panel",border);add_child(outline);outline.visible=chosen
-	resized.connect(_fit);mouse_entered.connect(func():artwork.modulate=Color(1.12,1.12,1.12));mouse_exited.connect(func():artwork.modulate=Color.WHITE);_fit()
+	var border:=StyleBoxFlat.new();border.bg_color=Color.TRANSPARENT;border.border_color=T.GOLD;border.set_border_width_all(1);border.border_width_top=4;border.set_corner_radius_all(T.RADIUS_CARD);outline.add_theme_stylebox_override("panel",border);add_child(outline);outline.visible=chosen
+	resized.connect(_fit);mouse_entered.connect(func():artwork.modulate=Color(1.08,1.08,1.08));mouse_exited.connect(func():artwork.modulate=Color.WHITE);_fit()
 
 func _fit()->void:
 	if not is_instance_valid(footer):return
-	var compact:=size.y<180
-	footer.position=Vector2(0,size.y-(57 if compact else 70));footer.size=Vector2(size.x,70)
-	if paper_art:artwork.size=Vector2(size.x,maxf(0,footer.position.y))
-	title_label.position=footer.position+Vector2(12,5);title_label.size=Vector2(size.x-24,27);title_label.add_theme_font_size_override("font_size",16 if size.x<210 else 21)
-	sub_label.position=footer.position+Vector2(12,32);sub_label.size=Vector2(size.x-24,21);sub_label.add_theme_font_size_override("font_size",11 if size.x<210 else 13)
+	var footer_height:=60.0 if size.y<180 else 70.0
+	footer.position=Vector2(0,size.y-footer_height);footer.size=Vector2(size.x,footer_height)
+	artwork.position=Vector2.ZERO;artwork.size=Vector2(size.x,maxf(0,footer.position.y))
+	T.text(title_label,"body" if size.x<210 else "value",T.INK)
+	title_label.position=footer.position+Vector2(12,6);title_label.size=Vector2(size.x-24,26)
+	sub_label.position=footer.position+Vector2(12,34);sub_label.size=Vector2(size.x-24,20)
 	queue_redraw()
-
-func _draw()->void:
-	if chosen:draw_rect(Rect2(Vector2(1,1),size-Vector2(2,2)),accent,false,3)
 
 func select(value:bool)->void:
 	chosen=value
 	if is_instance_valid(outline):outline.visible=value
-	if is_instance_valid(title_label):title_label.text=("✓ " if value else "")+caption
+	if is_instance_valid(title_label):title_label.text=caption
+	if is_instance_valid(sub_label):
+		sub_label.text=("Chosen · "+subtitle) if value else subtitle
+		sub_label.add_theme_color_override("font_color",T.GOLD_TEXT if value else T.INK_MUTED)
 	queue_redraw()

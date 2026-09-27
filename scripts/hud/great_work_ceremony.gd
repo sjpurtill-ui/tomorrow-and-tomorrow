@@ -12,11 +12,12 @@ signal closed(work_id:String)
 const Bridge:=preload("res://scripts/great_works_audience.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
+const P:=preload("res://scripts/hud/paper_sheet.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const DISPLAY_FONT:=preload("res://assets/fonts/cinzel/Cinzel.ttf")
-const OUTCOME_WORDS:={"triumph":"A TRIUMPH BEYOND THE DRAWINGS","success":"IT STANDS","flawed":"FLAWED, BUT STANDING"}
+const OUTCOME_WORDS:={"triumph":"A triumph beyond the drawings","success":"It stands","flawed":"Flawed, but standing"}
 const LINE_GAP:=1.35
 
 var terrain:Node
@@ -126,79 +127,75 @@ func _lore()->String:
 
 func _build()->void:
 	stage=PanelContainer.new();stage.name="CeremonyStage"
-	var style:=Tokens.flat(Color(0,0,0,0),Color(0,0,0,0),0,0,0)
-	stage.add_theme_stylebox_override("panel",style);add_child(stage)
+	stage.add_theme_stylebox_override("panel",P.sheet_style(24));add_child(stage)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);stage.add_child(column)
-	var cream:=Color("f6ecd6");var gold:=Color("e8c46a")
-	var eyebrow:=_label("THE DEDICATION OF A GREAT WORK · %s" % String(ceremony.get("city_name",record.get("city_name",""))).to_upper(),13,Color("d9c79c"),.18)
+	var cream:=Tokens.INK;var gold:=Tokens.GOLD
+	var eyebrow:=_label("THE DEDICATION OF A GREAT WORK · %s" % String(ceremony.get("city_name",record.get("city_name",""))).to_upper(),12,Tokens.INK_MUTED,.18)
 	eyebrow.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(eyebrow)
 	title_label=_label(_title(),50,cream);title_label.name="CeremonyTitle";title_label.add_theme_font_override("font",DISPLAY_FONT)
 	title_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(title_label)
 	var sub:=HBoxContainer.new();sub.alignment=BoxContainer.ALIGNMENT_CENTER;sub.add_theme_constant_override("separation",14);column.add_child(sub)
-	var purpose:=_label(_purpose_line(),17,Color("e2d3b4"));purpose.add_theme_font_override("font",_italic);sub.add_child(purpose)
+	var purpose:=_label(_purpose_line(),17,Tokens.BODY);purpose.add_theme_font_override("font",_italic);sub.add_child(purpose)
 	var badge:=PanelContainer.new();var badge_style:=Tokens.flat(Color(gold,.16),gold,1,12,0);badge_style.content_margin_left=12;badge_style.content_margin_right=12;badge_style.content_margin_top=2;badge_style.content_margin_bottom=3
 	badge.add_theme_stylebox_override("panel",badge_style);badge.name="OutcomeBadge";sub.add_child(badge)
-	badge.add_child(_label(String(OUTCOME_WORDS[_outcome()]),12,gold,.14))
+	badge.add_child(_label(String(OUTCOME_WORDS[_outcome()]),14,Tokens.GOLD_TEXT))
 	column.add_child(Flourish.new())
 	var middle:=HBoxContainer.new();middle.size_flags_vertical=Control.SIZE_EXPAND_FILL;middle.add_theme_constant_override("separation",26);column.add_child(middle)
 	# The work itself and its lore.
 	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.size_flags_stretch_ratio=1.15;left.add_theme_constant_override("separation",10);middle.add_child(left)
 	var frame:=PanelContainer.new();frame.name="PlateFrame";frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	var frame_style:=Tokens.flat(Color("f3e7cc"),gold,2,6,6);frame_style.shadow_color=Color(1,.8,.35,.35);frame_style.shadow_size=26
+	var frame_style:=Tokens.flat(Tokens.PAPER_RAISED,gold,1,4,6);frame_style.shadow_color=Color(1,.8,.35,.25);frame_style.shadow_size=18
 	frame.add_theme_stylebox_override("panel",frame_style);left.add_child(frame)
 	var work_view:=record.duplicate(true)
 	work_view["work_id"]=work_id
 	work_view["dedicated_day"]=0
 	if not _concept().is_empty():work_view.merge(_concept(),false)
 	plate=Plate.make(work_view,340);plate.set("night",true);plate.name="WorkPlate";plate.size_flags_vertical=Control.SIZE_EXPAND_FILL;frame.add_child(plate)
-	var lore:=_label(_lore(),17,Color("eadfc6"));lore.name="Lore";lore.add_theme_font_override("font",_italic);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	var lore:=_label(_lore(),17,Tokens.BODY);lore.name="Lore";lore.add_theme_font_override("font",_italic);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	left.add_child(lore)
 	var architect:Dictionary=record.get("architect",{}) if record.get("architect") is Dictionary else {}
 	if not String(architect.get("name","")).is_empty():
-		var builder:=_label("Raised by the master builder %s%s" % [String(architect.name),(" · %s in style" % String(architect.get("style",""))) if not String(architect.get("style","")).is_empty() else ""],13,Color("cdbb92"),.04)
+		var builder:=_label("Raised by the master builder %s%s" % [String(architect.name),(", in the %s style" % String(architect.get("style",""))) if not String(architect.get("style","")).is_empty() else ""],13,Tokens.INK_MUTED,.04)
 		builder.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;left.add_child(builder)
 	# The assembly: envoys with flags and gifts, then the speeches.
 	var right:=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",10);middle.add_child(right)
-	right.add_child(_label("THE ASSEMBLY",12,Color("d9c79c"),.18))
+	right.add_child(_label("THE ASSEMBLY",12,Tokens.INK_MUTED,.18))
 	assembly=VBoxContainer.new();assembly.name="Assembly";assembly.add_theme_constant_override("separation",6);right.add_child(assembly)
 	var attendees:Array=ceremony.get("attendees",[])
 	if attendees.is_empty():
-		var alone:=_label("No foreign envoys came. Your own people crowd the square instead, and that is its own kind of praise.",14,Color("d8cbb0"));alone.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;alone.add_theme_font_override("font",_italic);assembly.add_child(alone)
+		var alone:=_label("No foreign envoys came. Your own people crowd the square instead.",14,Tokens.BODY);alone.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;alone.add_theme_font_override("font",_italic);assembly.add_child(alone)
 	for attendee in attendees:
 		if attendee is Dictionary:
 			var card:=_envoy_card(attendee)
 			assembly.add_child(card);envoy_cards.append(card)
-	right.add_child(_label("SPOKEN BEFORE THE CROWD",12,Color("d9c79c"),.18))
+	right.add_child(_label("SPOKEN BEFORE THE CROWD",12,Tokens.INK_MUTED,.18))
 	speech_scroll=ScrollContainer.new();speech_scroll.name="Speeches";speech_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	right.add_child(speech_scroll)
 	speeches=VBoxContainer.new();speeches.size_flags_horizontal=Control.SIZE_EXPAND_FILL;speeches.add_theme_constant_override("separation",9);speech_scroll.add_child(speeches)
 	# Naming, then the record.
 	naming_box=VBoxContainer.new();naming_box.name="Naming";naming_box.add_theme_constant_override("separation",8);column.add_child(naming_box)
 	var name_row:=HBoxContainer.new();name_row.add_theme_constant_override("separation",12);naming_box.add_child(name_row)
-	var ask:=_label("NAME IT FOR THE AGES",14,gold,.16);ask.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_row.add_child(ask)
+	var ask:=_label("Name it for the ages",20,Tokens.INK);ask.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_row.add_child(ask)
 	name_input=LineEdit.new();name_input.name="NameInput";name_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_input.max_length=60;name_input.custom_minimum_size.y=46
 	name_input.add_theme_font_size_override("font_size",20);name_input.add_theme_font_override("font",_serif)
 	var suggestions:Array=ceremony.get("name_suggestions",[])
 	name_input.placeholder_text=String(suggestions[0]) if not suggestions.is_empty() else _title()
 	name_input.text_submitted.connect(func(_t:String)->void:dedicate_with(name_input.text))
 	name_row.add_child(name_input)
-	dedicate_button=Button.new();dedicate_button.name="Dedicate";dedicate_button.text="DEDICATE";dedicate_button.custom_minimum_size=Vector2(190,46)
-	dedicate_button.add_theme_font_size_override("font_size",18);dedicate_button.add_theme_font_override("font",DISPLAY_FONT)
-	var gold_style:=Tokens.flat(Color("7a5412"),gold,2,6,0);var gold_hover:=Tokens.flat(Color("946818"),Color("ffe29a"),2,6,0)
-	dedicate_button.add_theme_stylebox_override("normal",gold_style);dedicate_button.add_theme_stylebox_override("hover",gold_hover);dedicate_button.add_theme_stylebox_override("pressed",gold_hover)
-	dedicate_button.add_theme_color_override("font_color",Color("fff3d2"));dedicate_button.add_theme_color_override("font_hover_color",Color("ffffff"))
-	dedicate_button.pressed.connect(func()->void:dedicate_with(name_input.text))
+	dedicate_button=P.button(null,"Dedicate with this name",func()->void:dedicate_with(name_input.text),true)
+	dedicate_button.name="Dedicate";dedicate_button.custom_minimum_size=Vector2(230,46);dedicate_button.size_flags_horizontal=Control.SIZE_SHRINK_END
+	dedicate_button.tooltip_text="Uses the name you typed, or the first suggestion if the box is empty."
 	name_row.add_child(dedicate_button)
 	suggestion_row=HFlowContainer.new();suggestion_row.add_theme_constant_override("h_separation",8);naming_box.add_child(suggestion_row)
-	suggestion_row.add_child(_label("The court suggests:",13,Color("cdbb92")))
+	suggestion_row.add_child(_label("Or take a name the court suggests:",14,Tokens.INK_MUTED))
 	for suggestion in suggestions:
-		var chip:=Button.new();chip.text=String(suggestion);chip.focus_mode=Control.FOCUS_NONE
-		chip.add_theme_stylebox_override("normal",Tokens.flat(Color(1,1,1,.08),Color(gold,.6),1,14,0));chip.add_theme_stylebox_override("hover",Tokens.flat(Color(1,1,1,.16),gold,1,14,0))
-		chip.add_theme_color_override("font_color",Color("f3e6c7"));chip.add_theme_font_override("font",_italic);chip.add_theme_font_size_override("font_size",15)
+		# One press names and dedicates the work: no second step.
 		var chosen:=String(suggestion)
-		chip.pressed.connect(func()->void:name_input.text=chosen)
+		var chip:=P.button(null,chosen,func()->void:dedicate_with(chosen))
+		chip.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;chip.focus_mode=Control.FOCUS_NONE;chip.add_theme_font_override("font",_italic)
+		chip.tooltip_text="Dedicate it as %s" % chosen
 		suggestion_row.add_child(chip)
-	var later:=Button.new();later.name="Later";later.text="Let the council name it later";later.flat=true;later.add_theme_color_override("font_color",Color("bca982"));later.add_theme_font_size_override("font_size",13)
+	var later:=P.button(null,"Name it later",Callable());later.name="Later";later.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	later.tooltip_text="Close the ceremony. If you never name it, the council dedicates it under the first suggestion."
 	later.pressed.connect(close);suggestion_row.add_child(later)
 	result_box=VBoxContainer.new();result_box.name="Result";result_box.visible=false;result_box.add_theme_constant_override("separation",8);column.add_child(result_box)
@@ -206,25 +203,25 @@ func _build()->void:
 func _envoy_card(attendee:Dictionary)->Control:
 	var card:=PanelContainer.new();card.name="Envoy_"+String(attendee.get("civ_id",""))
 	var colour:=Identity.banner_color(Identity.foreign(String(attendee.get("civ_id",""))).texture)
-	var style:=Tokens.flat(Color(0,0,0,.28),Color(colour,.8),1,6,0);style.border_width_left=5;style.content_margin_left=10;style.content_margin_right=12;style.content_margin_top=6;style.content_margin_bottom=6
+	var style:=Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,4,0);style.border_color=Color(colour,.9);style.border_width_left=4;style.content_margin_left=10;style.content_margin_right=12;style.content_margin_top=6;style.content_margin_bottom=6
 	card.add_theme_stylebox_override("panel",style)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 	var flag:=TextureRect.new();flag.texture=Identity.foreign(String(attendee.get("civ_id",""))).texture;flag.custom_minimum_size=Vector2(42,48)
 	flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
-	var who:=_label(String(attendee.get("name","A foreign people")),17,Color("f6ecd6"));who.add_theme_font_override("font",_serif);words.add_child(who)
+	var who:=_label(String(attendee.get("name","A foreign people")),17,Tokens.INK);who.add_theme_font_override("font",_serif);words.add_child(who)
 	var gift:Dictionary=attendee.get("gift",{}) if attendee.get("gift") is Dictionary else {}
 	if gift.is_empty() or float(gift.get("amount",0))<=0:
-		var plain:=_label("come in admiration, empty-handed",13,Color("cdbb92"));plain.add_theme_font_override("font",_italic);words.add_child(plain)
+		var plain:=_label("come in admiration, empty-handed",13,Tokens.INK_MUTED);plain.add_theme_font_override("font",_italic);words.add_child(plain)
 	else:
-		words.add_child(_label("bearing a gift for the work",13,Color("cdbb92")))
+		words.add_child(_label("bearing a gift for the work",13,Tokens.INK_MUTED))
 		var chip:=PanelContainer.new();chip.name="Gift";chip.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		chip.add_theme_stylebox_override("panel",Tokens.flat(Color("f6ecd6"),Color("e8c46a"),1,6,4))
+		chip.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PAPER,Tokens.GOLD,1,4,4))
 		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);chip.add_child(line)
 		var resource:=String(gift.get("resource",""))
 		var icon:=TextureRect.new();icon.texture=Icons.domain_texture("nutrition",Color("5f7f35")) if resource=="Food" else Icons.texture_for(resource)
 		icon.custom_minimum_size=Vector2(28,28);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;line.add_child(icon)
-		var amount:=_label("%d %s" % [roundi(float(gift.get("amount",0))),resource],16,Color("2a2217"));amount.name="GiftAmount";line.add_child(amount)
+		var amount:=_label("%d %s" % [roundi(float(gift.get("amount",0))),resource.to_lower()],16,Tokens.INK);amount.name="GiftAmount";line.add_child(amount)
 		row.add_child(chip)
 	return card
 
@@ -305,11 +302,11 @@ func _add_speech(line:Dictionary,animate:bool)->void:
 	var text:=String(line.get("text",""))
 	var row:Control
 	if role=="narrator":
-		var narration:=_label(text,16,Color("e8d9b8"));narration.add_theme_font_override("font",_italic);narration.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		var narration:=_label(text,16,Tokens.BODY);narration.add_theme_font_override("font",_italic);narration.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		narration.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;row=narration
 	else:
 		var box:=HBoxContainer.new();box.add_theme_constant_override("separation",10);row=box
-		var face:=PanelContainer.new();face.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;face.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color("e8c46a"),1,5,2));box.add_child(face)
+		var face:=PanelContainer.new();face.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;face.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PAPER_RAISED,Tokens.GOLD,1,4,2));box.add_child(face)
 		if role=="envoy":
 			var flag:=TextureRect.new();flag.texture=Identity.foreign(String(line.get("civ_id",""))).texture;flag.custom_minimum_size=Vector2(40,46)
 			flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;face.add_child(flag)
@@ -317,8 +314,8 @@ func _add_speech(line:Dictionary,animate:bool)->void:
 			var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(line.get("person_id",0))) if int(line.get("person_id",0))>0 else {"name":String(line.get("speaker","")),"person_id":0}
 			face.add_child(Portrait.picture(person,40,46))
 		var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);box.add_child(words)
-		var who:=_label("%s  ·  %s" % [String(line.get("speaker","")),String(line.get("title",""))],13,Color("e8c46a"),.04);words.add_child(who)
-		var said:=_label(text,17,Color("f6ecd6"));said.add_theme_font_override("font",_serif);said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.name="SpeechText";words.add_child(said)
+		var who:=_label("%s  ·  %s" % [String(line.get("speaker","")),String(line.get("title",""))],13,Tokens.GOLD_TEXT,.04);words.add_child(who)
+		var said:=_label(text,17,Tokens.INK);said.add_theme_font_override("font",_serif);said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.name="SpeechText";words.add_child(said)
 	speeches.add_child(row)
 	if animate:
 		row.modulate.a=0.0
@@ -336,7 +333,7 @@ func dedicate_with(text:String)->Dictionary:
 	if chosen.is_empty():chosen=String(suggestions[0]) if not suggestions.is_empty() else _title()
 	var answer:=Bridge.api_dict("dedicate",[city_id,work_id,chosen])
 	if answer.is_empty() or answer.has("error"):
-		var warn:=_label(String(answer.get("error","The work cannot be dedicated now.")),14,Color("f0a090"));suggestion_row.add_child(warn)
+		var warn:=_label(String(answer.get("error","The work cannot be dedicated now.")),14,Tokens.RED_TEXT);suggestion_row.add_child(warn)
 		return answer
 	result=answer
 	skip_reveal()
@@ -358,16 +355,14 @@ func _show_result(chosen:String)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",24);result_box.add_child(row)
 	var seal:=AllureBurst.new();seal.name="AllureBurst";seal.value=spike;seal.custom_minimum_size=Vector2(150,110);row.add_child(seal)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",4);row.add_child(words)
-	words.add_child(_label("SET DOWN IN THE CHRONICLE",12,Color("d9c79c"),.18))
-	var chronicle:=_label(String(result.get("message","")),18,Color("f6ecd6"));chronicle.name="ChronicleLine";chronicle.add_theme_font_override("font",_serif);chronicle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(chronicle)
+	words.add_child(_label("SET DOWN IN THE CHRONICLE",12,Tokens.INK_MUTED,.18))
+	var chronicle:=_label(String(result.get("message","")),18,Tokens.INK);chronicle.name="ChronicleLine";chronicle.add_theme_font_override("font",_serif);chronicle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(chronicle)
 	var gifts:Array=result.get("gifts",[])
 	if not gifts.is_empty():
-		var received:=_label("Gifts received: "+"; ".join(PackedStringArray(gifts.map(func(g:Variant)->String:return String(g)))),14,Color("cdbb92"));received.name="GiftsReceived";received.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(received)
-	words.add_child(_label("Our allure rises: +%.1f while the dedication is still talked about, fading over the years." % spike,14,Color("e8c46a")))
-	var close_button:=Button.new();close_button.name="CloseCeremony";close_button.text="Let the feast begin";close_button.custom_minimum_size=Vector2(220,46)
-	close_button.add_theme_font_override("font",DISPLAY_FONT);close_button.add_theme_font_size_override("font_size",16)
-	close_button.add_theme_stylebox_override("normal",Tokens.flat(Color("7a5412"),Color("e8c46a"),2,6,0));close_button.add_theme_color_override("font_color",Color("fff3d2"))
-	close_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;close_button.pressed.connect(close);row.add_child(close_button)
+		var received:=_label("Gifts received: "+"; ".join(PackedStringArray(gifts.map(func(g:Variant)->String:return String(g)))),14,Tokens.BODY);received.name="GiftsReceived";received.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(received)
+	words.add_child(_label("Other peoples will talk of this dedication for years, and admire us more while they do." if spike>0.0 else "The dedication is done.",14,Tokens.GOLD_TEXT))
+	var close_button:=P.button(null,"Let the feast begin",close,true);close_button.name="CloseCeremony";close_button.custom_minimum_size=Vector2(220,46)
+	close_button.size_flags_horizontal=Control.SIZE_SHRINK_END;close_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(close_button)
 
 func close()->void:
 	if is_queued_for_deletion():return
@@ -405,12 +400,12 @@ class Flourish extends Control:
 	func _init()->void:custom_minimum_size=Vector2(0,14)
 	func _draw()->void:
 		var y:=size.y*.5;var mid:=size.x*.5
-		draw_line(Vector2(mid-320,y),Vector2(mid-18,y),Color("e8c46a",.6),1.2,true)
-		draw_line(Vector2(mid+18,y),Vector2(mid+320,y),Color("e8c46a",.6),1.2,true)
-		draw_colored_polygon(PackedVector2Array([Vector2(mid,y-6),Vector2(mid+8,y),Vector2(mid,y+6),Vector2(mid-8,y)]),Color("e8c46a"))
+		draw_line(Vector2(mid-320,y),Vector2(mid-18,y),Color(HudTokens.GOLD,.6),1.0,true)
+		draw_line(Vector2(mid+18,y),Vector2(mid+320,y),Color(HudTokens.GOLD,.6),1.0,true)
+		draw_colored_polygon(PackedVector2Array([Vector2(mid,y-6),Vector2(mid+8,y),Vector2(mid,y+6),Vector2(mid-8,y)]),HudTokens.GOLD)
 
 class AllureBurst extends Control:
-	## The allure spike, shown as a radiant seal with its number.
+	## The rise in how we are admired, shown as a radiant seal (words, no number).
 	var value:=0.0
 	var clock:=0.0
 	func _process(delta:float)->void:
@@ -420,13 +415,11 @@ class AllureBurst extends Control:
 		var grow:=clampf(clock/.8,0,1)
 		for i in 16:
 			var a:=TAU*float(i)/16.0+clock*.15
-			draw_line(c+Vector2(cos(a),sin(a))*r*.7,c+Vector2(cos(a),sin(a))*r*(1.05+.12*sin(clock*2+i))*grow,Color(1,.82,.4,.55),2.0,true)
-		draw_circle(c,r*.72*grow,Color("7a5412"))
-		draw_arc(c,r*.72*grow,0,TAU,48,Color("ffe29a"),2.0,true)
+			draw_line(c+Vector2(cos(a),sin(a))*r*.7,c+Vector2(cos(a),sin(a))*r*(1.05+.12*sin(clock*2+i))*grow,Color(HudTokens.GOLD,.55),2.0,true)
+		draw_circle(c,r*.72*grow,HudTokens.PAPER_RAISED)
+		draw_arc(c,r*.72*grow,0,TAU,48,HudTokens.GOLD,2.0,true)
+		if grow<1.0:return
 		var font:=ThemeDB.fallback_font
-		var text:="+%.1f" % value
-		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_CENTER,-1,20).x
-		draw_string(font,c+Vector2(-width*.5,5),text,HORIZONTAL_ALIGNMENT_CENTER,-1,20,Color("fff3d2"))
-		var sub:="ALLURE"
-		var sub_width:=font.get_string_size(sub,HORIZONTAL_ALIGNMENT_CENTER,-1,11).x
-		draw_string(font,c+Vector2(-sub_width*.5,24),sub,HORIZONTAL_ALIGNMENT_CENTER,-1,11,Color("f3dfa8"))
+		var text:="Admired"
+		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
+		draw_string(font,c+Vector2(-width*.5,5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,HudTokens.GOLD_TEXT)

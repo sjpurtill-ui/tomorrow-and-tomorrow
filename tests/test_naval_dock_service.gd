@@ -134,7 +134,7 @@ func test_naval_summary_reports_dated_inspection_without_changing_condition()->v
 	var panel=load("res://scripts/hud/naval_command_panel.gd").new();auto_free(panel)
 	panel.op=op
 	var condition:=float(force.condition)
-	assert_str(panel._force_summary(force)).contains("Hull survey: day 0")
+	assert_str(panel._force_summary(force)).contains("Hull survey in")
 	assert_float(float(force.condition)).is_equal(condition)
 
 func test_actual_install_button_pays_for_selected_port()->void:

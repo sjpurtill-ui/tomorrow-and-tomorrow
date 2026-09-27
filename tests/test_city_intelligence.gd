@@ -222,7 +222,7 @@ func test_population_evidence_is_stable_and_ages_less_than_stores()->void:
 	assert_str(view.estimate("population",annual)).is_equal(view.estimate("population",old.fields.population))
 	var dock:=preload("res://scripts/hud/content/dock_detail_foreign_city.gd").new(null,null,region())
 	GameState.elapsed_days=375
-	assert_str(dock.tab(0).blocks[0].items[0].value).is_equal(view.estimate("population",annual)+" people")
+	assert_str(dock.tab(0).blocks[0].items[0].value).is_equal(view.words("population",annual))
 
 func test_days_physically_observing_sharpen_small_city_count_not_ticks_or_travel()->void:
 	civ().strategic_regions[0].population=58.0

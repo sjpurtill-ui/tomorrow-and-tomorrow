@@ -33,27 +33,23 @@ func _ready()->void:
 		var layer:=CanvasLayer.new();viewport.add_child(layer)
 		var screen:=Screen.new();screen.city_id=id;layer.add_child(screen)
 		for i in 6:await get_tree().process_frame
-		check(screen.cards.population.value.text=="46–70 residents","Observed population must match map")
-		check(screen.projection.text=="Unverified now: 35–81","Population projection is explicitly separate")
+		check(screen.cards.population.value.text=="45–70 people","Observed population must match map, rounded as a scout would say it")
+		check(screen.projection.text=="By now it could be 35–80 people.","Population projection is explicitly separate")
+		check(not screen.cards.has("gdp") and not screen.cards.has("infant_mortality"),"No statistical-age figures in an early report")
+		check(not "attack" in screen and screen.find_children("*","TabContainer",true,false).is_empty(),"A report, not an order form")
 		check(Rect2(Vector2.ZERO,shape).encloses(screen.panel.get_global_rect()),"Panel within viewport at "+str(shape))
 		check(screen.panel.get_global_rect().encloses(screen.selector.get_global_rect()),"Selector contained")
 		check(screen.grid.columns==(1 if shape.x<366 else 2),"Responsive metric columns")
-		if shape.y>=720:
-			var scroll:ScrollContainer=screen.tabs.get_child(0)
-			check(scroll.get_global_rect().encloses(screen.cards.damage.card.get_global_rect()),"All seven metrics visible at 720p")
+		var scroll:ScrollContainer=screen.find_child("Body",true,false)
+		scroll.ensure_control_visible(screen.cards.damage.card)
+		for i in 3:await get_tree().process_frame
+		check(scroll.get_global_rect().grow(2).encloses(screen.cards.damage.card.get_global_rect()),"Every figure reachable: %s in %s" % [screen.cards.damage.card.get_global_rect(),scroll.get_global_rect()])
+		check(screen.panel.get_global_rect().encloses(screen.talk_ruler.get_global_rect()),"Court action contained at "+str(shape))
 		if DisplayServer.get_name()!="headless":
 			await RenderingServer.frame_post_draw
 			var rendered:=viewport.get_texture().get_image()
 			rendered.save_png("res://artifacts/city-report/overview-%dx%d.png" % [shape.x,shape.y])
 			if shape==Vector2i(960,720):rendered.get_region(Rect2i(screen.panel.get_global_rect())).save_png("res://artifacts/city-report/compact-city-report.png")
-		for tab in [1,2]:
-			screen.tabs.current_tab=tab
-			if tab==1:screen.duration.select(1);screen.refresh()
-			for i in 4:await get_tree().process_frame
-			check(screen.panel.get_global_rect().encloses(screen.send.get_global_rect()) if tab==1 else screen.panel.get_global_rect().encloses(screen.attack.get_global_rect()),"Tab action contained at "+str(shape))
-			if DisplayServer.get_name()!="headless" and shape==Vector2i(960,720):
-				await RenderingServer.frame_post_draw
-				viewport.get_texture().get_image().save_png("res://artifacts/city-report/tab-%d.png" % tab)
 		# These are actual GUI events, not direct calls to the close handler.
 		if shape.x>448:
 			var event:=InputEventMouseButton.new();event.button_index=MOUSE_BUTTON_LEFT;event.pressed=true;event.position=Vector2(80,240)
@@ -71,7 +67,7 @@ func _ready()->void:
 	var layer:=CanvasLayer.new();viewport.add_child(layer)
 	var screen:=Screen.new();screen.city_id=id;layer.add_child(screen)
 	for i in 6:await get_tree().process_frame
-	check(screen.cards.population.value.text=="Unknown","Location only is not a fabricated zero")
+	check(screen.cards.population.value.text=="Not seen","Location only is not a fabricated zero")
 	check(screen.panel.get_global_rect().encloses(screen.selector.get_global_rect()),"Long name must fit")
 	check(Rect2(Vector2.ZERO,viewport.size).encloses(screen.panel.get_global_rect()),"Long name cannot widen panel past viewport")
 	if DisplayServer.get_name()!="headless":

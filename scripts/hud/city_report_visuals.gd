@@ -1,7 +1,15 @@
 extends RefCounted
 ## Shared presentation of dated evidence. Never reads the hidden city ledger.
 const T=preload("res://scripts/hud/hud_tokens.gd")
-const LABELS={"population":"Population","fortification":"Defenses","garrison":"Garrison","production":"Workshops","logistics":"Roads & transport","supply":"Food reserves","damage":"Damage","science":"Legacy science index","gdp":"GDP · worker-days/day","health":"Legacy health index","science_capacity":"Science · researcher-equivalents","education":"Average education","life_expectancy":"Health · life expectancy","infant_mortality":"Infant deaths / 1,000 births"}
+const LABELS={"population":"People","fortification":"Defences","garrison":"Fighters","production":"Workshops","logistics":"Roads and carrying","supply":"Food stores","damage":"Damage","science":"Learning","gdp":"Daily output","health":"Health","science_capacity":"Scholars","education":"Schooling","life_expectancy":"How long they live","infant_mortality":"Infants lost"}
+## What a scout of each age can put into words. A band that cannot write does
+## not count output, scholars or infant deaths per thousand; those figures are
+## only reported once the player's own people keep statistics.
+const HEARTH_LABELS={"population":"People","fortification":"Walls and fences","garrison":"Fighters","production":"Crafts at work","logistics":"Paths and carrying","supply":"Food put by","damage":"Damage","life_expectancy":"How long they live"}
+const LETTERED_LABELS={"population":"People","fortification":"Walls","garrison":"Fighters","production":"Workshops","logistics":"Roads and carrying","supply":"Food stores","damage":"Damage","life_expectancy":"How long they live"}
+const RECKONED_KEYS:=["science_capacity","education","gdp","infant_mortality"]
+## One plain line on what each figure means.
+const MEANINGS={"population":"How many live there, as our scouts counted.","garrison":"Armed people seen guarding the place.","fortification":"How hard the place would be to break into.","supply":"How long their food would last if cut off.","production":"How busy their crafts and workshops looked.","logistics":"How easily they move food and goods.","damage":"Harm from war, fire or neglect.","life_expectancy":"How long their people usually live.","science_capacity":"People working at learning and invention.","education":"How many of them are schooled.","gdp":"What their people produce in a day.","infant_mortality":"Infants who die before their first year."}
 static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN}
 const PATHS={
 	"science":'<path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10"/>',
@@ -57,7 +65,7 @@ static func freshness(record:Dictionary,today:int)->Dictionary:
 static func age_text(day:int,today:int)->String:
 	if day<0:return "Undated"
 	var age:=maxi(0,today-day)
-	return "Seen today" if age==0 else "Seen %dd ago" % age
+	return "Seen today" if age==0 else "Seen %s ago" % preload("res://scripts/hud/report_when.gd").span(age)
 
 class Band extends Control:
 	var field:Dictionary={}
@@ -70,3 +78,52 @@ class Band extends Control:
 		var low:=clampf(float(field.get("observed_low",field.get("low",0))),0,1)
 		var high:=clampf(float(field.get("observed_high",field.get("high",0))),0,1)
 		draw_style_box(T.flat(ink,Color.TRANSPARENT,0,2),Rect2(Vector2(size.x*low,0),Vector2(maxf(3,size.x*(high-low)),size.y)))
+
+
+## Which figures a report may show in the player's own era, in display order.
+static func shown_keys(stage:String="")->Array[String]:
+	if stage=="":stage=_stage()
+	var keys:Array[String]=["population","garrison","fortification","supply","production","logistics","damage","life_expectancy"]
+	if stage=="reckoned":keys.append_array(["science_capacity","education","gdp","infant_mortality"])
+	return keys
+
+static func _stage()->String:
+	return String(load("res://scripts/hud/era_words.gd").call("stage")) if Engine.get_main_loop()!=null else "hearth"
+
+static func label(key:String,stage:String="")->String:
+	if stage=="":stage=_stage()
+	var table:Dictionary=HEARTH_LABELS if stage=="hearth" else LETTERED_LABELS if stage=="lettered" else LABELS
+	return String(table.get(key,LABELS.get(key,key.capitalize())))
+
+## A figure the way a scout of this age would say it: rounded counts and plain
+## words before the statistical age, measured ranges after it.
+static func words(key:String,field:Dictionary,stage:String="")->String:
+	if field.is_empty():return "Not seen"
+	if stage=="":stage=_stage()
+	var range:=bounds(field)
+	var capacity:=key in ["fortification","production","logistics","damage","science","health","education"]
+	if capacity:
+		var mid:=(range.x+range.y)*0.5
+		if stage=="reckoned":return estimate(key,field)
+		if key=="damage":return "none seen" if mid<0.05 else "light" if mid<0.2 else "heavy" if mid<0.5 else "ruinous"
+		return "almost none" if mid<0.1 else "slight" if mid<0.3 else "fair" if mid<0.55 else "strong" if mid<0.8 else "very strong"
+	var text:=_rounded(range.x,range.y) if stage!="reckoned" else estimate(key,field).trim_suffix(" yr").trim_suffix(" d").trim_suffix("‰")
+	match key:
+		"population":return text+" people"
+		"garrison":return text+" fighters"
+		"supply":return text+" days"
+		"life_expectancy":return text+(" winters" if stage=="hearth" else " years")
+		"infant_mortality":return text+" in 1,000"
+		"science_capacity":return text+" at work"
+		"gdp":return text+" worker-days"
+	return text
+
+static func _rounded(low:float,high:float)->String:
+	var a:=_nice(low);var b:=maxi(a,_nice(high))
+	return "about %d" % a if a==b else "%d–%d" % [a,b]
+
+static func _nice(value:float)->int:
+	if value<20.0:return maxi(0,roundi(value))
+	if value<100.0:return roundi(value/5.0)*5
+	var step:=pow(10.0,floorf(log(value)/log(10.0))-1.0)
+	return roundi(value/step)*roundi(step)

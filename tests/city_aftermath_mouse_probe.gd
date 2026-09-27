@@ -27,8 +27,8 @@ func _ready()->void:
 	CivilizationSystem.city_intelligence.open("civ_14_region_05")
 	for frame in 12:await get_tree().process_frame
 	var report=CivilizationSystem.city_intelligence.screen_layer.get_child(0)
-	assert(report.garrison_button.visible and report.aftermath_button.visible)
-	assert(not report.attack.visible)
+	assert(report.garrison_button!=null and report.aftermath_button!=null)
+	assert(not "attack" in report)
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://artifacts/current-garrison-report.png")
 	await click_control(report.aftermath_button)

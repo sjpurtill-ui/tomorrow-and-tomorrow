@@ -36,18 +36,13 @@ func _ready()->void:
 		intel.open(id,String(civ.id))
 		for frame in 5:await get_tree().process_frame
 		var screen=intel.screen_layer.get_child(0)
-		var tabs:TabContainer=screen.find_children("*","TabContainer",true,false)[0]
-		check(tabs.current_tab==0,"report opens first")
-		check(get_viewport().get_visible_rect().encloses(tabs.get_global_rect()),"tabs inside viewport")
-		for page in tabs.get_tab_count():
-			tabs.current_tab=page
-			for frame in 4:await get_tree().process_frame
-			var scroll:ScrollContainer=tabs.get_child(page)
-			check(scroll.get_child(0).size.x<=scroll.size.x,"page has no horizontal overflow")
-			var target:Control=screen.cards.damage.note if page==0 else (screen.send if page==1 else screen.siege)
-			scroll.ensure_control_visible(target)
-			for frame in 3:await get_tree().process_frame
-			check(scroll.get_global_rect().encloses(target.get_global_rect()),"last action/report is reachable")
+		check(screen.find_children("*","TabContainer",true,false).is_empty(),"one report page, no tabs")
+		var scroll:ScrollContainer=screen.find_child("Body",true,false)
+		check(scroll.get_child(0).size.x<=scroll.size.x,"report has no horizontal overflow")
+		scroll.ensure_control_visible(screen.cards.damage.note)
+		for frame in 3:await get_tree().process_frame
+		check(scroll.get_global_rect().encloses(screen.cards.damage.note.get_global_rect()),"last figure is reachable")
+		check(get_viewport().get_visible_rect().encloses(screen.talk_ruler.get_global_rect()),"court action inside viewport")
 		check(get_viewport().get_visible_rect().encloses(screen.feedback.get_global_rect()),"feedback inside viewport")
 		screen._close();await get_tree().process_frame
 	check(intel.records==before,"rendering does not mutate evidence")
