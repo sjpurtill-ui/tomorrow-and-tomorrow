@@ -1,0 +1,12 @@
+{
+  "id": "route_food_caches",
+  "line": "logistics",
+  "game_year": 25,
+  "approx_historical_year": -4833,
+  "prompt": "c. 4833 BCE: Travelers place covered dried-food baskets at plain stone cairns along familiar river route for later journeys; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-844d246f-5cdc-4b8f-ad09-8a95c4c61cdc.png",
+  "asset": "res://assets/ui/research/subjects/route_food_caches-v1.png",
+  "sha256": "fff3d463775043baf5c9d15ada3f890eab68a979a29654ccd1579605a4922606",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; two caches and route travelers clear in crop, no writing."
+}

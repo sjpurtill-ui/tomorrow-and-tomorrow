@@ -1,0 +1,12 @@
+{
+  "id": "children_light_tasks",
+  "line": "labor",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Older children scare birds and glean loose stalks while adults supervise nearby; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-710c51e6-1a3b-4d0c-9625-4aaf08660023.png",
+  "asset": "res://assets/ui/research/subjects/children_light_tasks-v1.png",
+  "sha256": "45f7f538c87a9469aa762794273a7ea9861a0a3e54f56906cd6f72eff3b7b97f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; light tasks and adult supervision clear in crop; mature art style."
+}

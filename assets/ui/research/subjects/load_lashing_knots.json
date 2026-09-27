@@ -1,0 +1,12 @@
+{
+  "id": "load_lashing_knots",
+  "line": "logistics",
+  "game_year": 22,
+  "approx_historical_year": -4853,
+  "prompt": "c. 4853 BCE: Adults secure timber and baskets to hand-drawn travois with fiber knots and hitches; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-34ee5c14-a2b6-4cce-81d2-f0389b6a7a90.png",
+  "asset": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
+  "sha256": "45b5e4992ffc49081f4d9f7e691e213c6bc98b1616b9d954def3be167ea268c8",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; lashing and loaded travois clear, no wheels or animals."
+}
