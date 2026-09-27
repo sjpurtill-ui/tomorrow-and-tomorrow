@@ -23,7 +23,11 @@ func sites(include_player:bool=true)->Array[Dictionary]:
 			# The five existing urban regions already carry stable map coordinates.
 			# Anchor the capital at the existing home, preserving relative geography.
 			var offset:=Vector2((float(region.map_x)-float(capital.get("map_x",.5)))*220,(float(region.map_y)-float(capital.get("map_y",.5)))*180)
-			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(region.get("position",home+offset)),"primary":region.role=="capital"})
+			# A capital near the world's edge must not push its sibling cities off
+			# the finite map, where no scout, envoy or army could ever reach them.
+			var place:Vector2=region.get("position",home+offset)
+			var edge:=Vector2(system.CIVILIZATION_WORLD_RADIUS_X_KM,system.CIVILIZATION_WORLD_RADIUS_Z_KM)-Vector2.ONE
+			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(place.clamp(-edge,edge)),"primary":region.role=="capital"})
 	if include_player:
 		for city:Dictionary in WorldSimulation.state.player_settlements:
 			var position:Variant=city.get("position",Vector2.ZERO)

@@ -193,7 +193,10 @@ func collect()->Array[Dictionary]:
 # --- Screen layout --------------------------------------------------------------
 
 func _camera()->Camera3D:
-	return terrain.camera if is_instance_valid(terrain) and terrain.get("camera") is Camera3D else null
+	if not is_instance_valid(terrain): return null
+	# The terrain may outlive its camera (teardown, tests); never test a freed one.
+	var camera:Variant=terrain.get("camera")
+	return camera if is_instance_valid(camera) and camera is Camera3D else null
 
 
 func _project()->void:

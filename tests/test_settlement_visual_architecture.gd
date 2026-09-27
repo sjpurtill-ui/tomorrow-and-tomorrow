@@ -338,7 +338,11 @@ func test_secondary_settlement_symbols_use_one_batch_and_bounded_labels()->void:
 	assert_bool(marker_root.get_child(0) is MultiMeshInstance3D).is_true()
 	var blips:=marker_root.get_child(0) as MultiMeshInstance3D
 	assert_int(blips.multimesh.instance_count).is_equal(500)
-	assert_bool(blips.multimesh.use_colors).is_true()
+	# Each place carries its expansion stage as per-instance data that selects
+	# its inked chart glyph (map_glyph.gdshader); color no longer encodes it.
+	assert_bool(blips.multimesh.use_custom_data).is_true()
+	var profiles:Array=blips.get_meta("marker_profiles")
+	assert_int(profiles.size()).is_equal(500)
 
 
 func test_expansion_stage_is_readable_by_text_weight_and_scale_not_color_alone()->void:
@@ -608,7 +612,11 @@ func test_stage_aware_secondary_symbols_remain_one_batch()->void:
 	renderer._create_secondary_settlement_markers(settlements)
 	var blips:=marker_root.get_child(0) as MultiMeshInstance3D
 	assert_int(blips.multimesh.instance_count).is_equal(2)
-	assert_bool(blips.multimesh.use_colors).is_true()
+	# The stage reaches the glyph shader as per-instance data: city and camp differ.
+	# (Headless rendering keeps no instance buffers, so read the recorded profiles.)
+	assert_bool(blips.multimesh.use_custom_data).is_true()
+	var profiles:Array=blips.get_meta("marker_profiles")
+	assert_int(int(profiles[0].stage)).is_not_equal(int(profiles[1].stage))
 	assert_int(marker_root.get_child_count()).is_equal(3)
 
 

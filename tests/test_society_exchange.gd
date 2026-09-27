@@ -193,7 +193,8 @@ func test_imported_evidence_changes_timing_without_skipping_foundations()->void:
 	E.data().collections[record.id]=record;E.data().evidence.civic_games=record.id
 	var definition:=DiscoverySystem.discovery_definition("civic_games")
 	assert_bool(P.ready(definition,1)).is_false()
-	GameState.known_discoveries.assign(["festival_calendar","standard_measures"])
+	# The rebuilt 600-1200 block founds civic games on shrine festival games.
+	GameState.known_discoveries.assign(["shrine_festival_games"])
 	assert_bool(P.ready(definition,1)).is_true()
 	assert_str(P.chosen(definition).id).is_equal("exchange")
 	assert_float(P.multiplier(definition)).is_greater(1.0)

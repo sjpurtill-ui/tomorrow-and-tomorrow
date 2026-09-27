@@ -27,16 +27,18 @@ func test_unchanged_fog_skips_history_but_updates_origin_and_prunes_dead_materia
 	var shader:=Shader.new()
 	shader.code="shader_type spatial; uniform vec2 fog_current_origin; uniform sampler2D discovery_mask;"
 	var material:=ShaderMaterial.new();material.shader=shader
-	terrain.terrain_fog_materials.append(material)
-	terrain.vegetation_fog_materials.append(weakref(material))
-	var expired:=RefCounted.new();terrain.vegetation_fog_materials.append(weakref(expired));expired=null
+	# Materials are held by the fog registries as weak references only.
+	terrain.terrain_fog_materials.register(material,null,Vector2.ONE,Vector2.ZERO)
+	terrain.vegetation_fog_materials.register(material,null,Vector2.ONE,Vector2.ZERO)
+	var expired:=ShaderMaterial.new();expired.shader=shader
+	terrain.vegetation_fog_materials.register(expired,null,Vector2.ONE,Vector2.ZERO);expired=null
 	terrain.rendered_fog_revision=10
 	CivilizationSystem.player_world_origin=Vector2(3,7)
 	# If unchanged history is touched this valid-shaped trail would be painted.
 	CivilizationSystem.revealed_areas.append({"kind":"circle","x":1.0,"z":1.0,"radius":3.0})
 	terrain._refresh_discovery_mask()
 	assert_int(terrain.discs).is_equal(0)
-	assert_int(terrain.vegetation_fog_materials.size()).is_equal(1)
+	assert_int(terrain.vegetation_fog_materials.live_materials().size()).is_equal(1)
 	assert_vector(material.get_shader_parameter("fog_current_origin")).is_equal(Vector2(3,7))
 	CivilizationSystem.player_world_origin=Vector2(5,9)
 	terrain._refresh_discovery_mask()
@@ -52,11 +54,19 @@ func test_revision_and_force_still_repaint_circles_and_returned_trails()->void:
 	assert_int(terrain.rendered_fog_revision).is_equal(10)
 	terrain._refresh_discovery_mask()
 	assert_int(terrain.discs).is_equal(1)
+	# A new revision over the same records repaints only the latest record
+	# (a trail may have grown); earlier records stay on the painted mask.
 	CivilizationSystem.fog_revision+=1
 	terrain._refresh_discovery_mask()
-	assert_int(terrain.discs).is_equal(2);assert_int(terrain.segments).is_equal(4)
+	assert_int(terrain.discs).is_equal(1);assert_int(terrain.segments).is_equal(4)
+	# A newly returned record is painted by itself.
+	CivilizationSystem.revealed_areas.append({"kind":"circle","x":5.0,"z":5.0,"radius":2.0})
+	CivilizationSystem.fog_revision+=1
+	terrain._refresh_discovery_mask()
+	assert_int(terrain.discs).is_equal(2);assert_int(terrain.segments).is_equal(6)
+	# Force repaints every record from scratch.
 	terrain._refresh_discovery_mask(true)
-	assert_int(terrain.discs).is_equal(3);assert_int(terrain.segments).is_equal(6)
+	assert_int(terrain.discs).is_equal(4);assert_int(terrain.segments).is_equal(8)
 func test_completed_conversions_do_not_read_permanent_building_history()->void:
 	var model:CountedSettlement=auto_free(CountedSettlement.new())
 	GameState.settlement_completed=["Lean-to Shelters","Framed Hall"]

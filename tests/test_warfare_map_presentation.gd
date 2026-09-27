@@ -151,10 +151,14 @@ func test_visible_scout_label_tells_the_player_how_to_act()->void:
 	scout["identified"]=false
 	scout["civilization"]=""
 	scout["carries_report"]=true
+	scout["last_seen_day"]=14
 	var view:=PRESENTATION.foreign_marker(scout,48.0)
-	assert_str(String(view.label)).contains("FOREIGN SCOUTS")
-	assert_str(String(view.label)).contains("CLICK TO INTERCEPT")
-	assert_int(String(view.label).split("\n").size()).is_equal(2)
+	# Who and how many, then the action, then how old the sighting is.
+	var lines:=String(view.label).split("\n")
+	assert_int(lines.size()).is_equal(3)
+	assert_str(lines[0]).contains("FOREIGN SCOUTS")
+	assert_str(lines[1]).is_equal("CLICK TO INTERCEPT")
+	assert_str(lines[2]).is_equal("OBSERVED DAY 14")
 
 
 func test_unknown_objectives_do_not_receive_invented_map_coordinates()->void:

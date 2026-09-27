@@ -115,14 +115,20 @@ func _test_rail_entry()->void:
 	if not is_instance_valid(court):return
 	_check(String(court.mode)=="rest","the court did not open at rest (mode %s)" % court.mode)
 	_check(terrain.game_speed==0.0,"the court did not pause the world")
-	# F12 closes and reopens it.
+	# F12 closes and reopens it. The world's first envoy arrives on day 1 and,
+	# with "summon immediately" on, is shown in the moment the court closes;
+	# hold that setting off so the toggle itself is what is measured.
+	var summon_setting:=bool(Hall.state().get("summon_immediately",true))
+	Hall.state()["summon_immediately"]=false
 	var key:=InputEventKey.new();key.keycode=KEY_F12;key.pressed=true
 	hud._unhandled_key_input(key)
 	await _frames(2)
-	_check(not is_instance_valid(director.modal),"F12 did not close the court")
+	_check(not is_instance_valid(court),"F12 did not close the court")
+	_check(not is_instance_valid(director.modal),"a modal replaced the court after F12 closed it")
 	hud._unhandled_key_input(key)
 	await _frames(3)
-	_check(is_instance_valid(director.modal),"F12 did not open the court")
+	_check(is_instance_valid(director.modal) and String(director.modal.mode)=="rest","F12 did not open the court")
+	Hall.state()["summon_immediately"]=summon_setting
 	print("COURT rail entry ok")
 
 func _test_rest_lists()->void:
