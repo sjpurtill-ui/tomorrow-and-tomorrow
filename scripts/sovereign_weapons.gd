@@ -27,6 +27,12 @@ const RESTRICTED:={
 	"aerial_bombardment":"bombing from the air",
 	"armed_remote_strike":"armed remote strikes",
 }
+## Practices of war that need no research of their own but are restricted in
+## the same way: a fleet may shell the enemy's defences, never the town itself,
+## without the ruler's word.
+const RESTRICTED_PRACTICES:={
+	"naval_bombardment":"shelling towns from the sea",
+}
 const HUMAN_SIGNOFF:={
 	"machine_assisted_targeting":"machine-assisted targeting",
 }
@@ -49,20 +55,21 @@ const NAME_PATTERNS:=[
 	["fission_weapon","(?i)\\b(fission|atom(ic)? bombs?|a-bombs?|nuclear (bombs?|weapons?)|the bomb)\\b"],
 	["chemical_gas_warfare","(?i)\\b(poison gas|war gas(es)?|the gas|gas (attack|shells?)|chlorine|mustard gas|nerve gas|chemical weapons?)\\b"],
 	["armed_remote_strike","(?i)\\b(drone strikes?|armed drones?|strike drones?|remote strikes?|the drones)\\b"],
+	["naval_bombardment","(?i)\\b(naval bombardment|shell(ing)? (the |their )?(towns?|city|cities|ports?|harbou?rs?|coast)|bombard (the |their )?(towns?|city|cities|ports?|harbou?rs?|coast) from the sea|(the |our )?(fleet|ships) (to |may |can )?(shell|bombard))\\b"],
 	["aerial_bombardment","(?i)\\b(bomb (the |their )?(city|cities|town|towns|capital)|bombers?|bombard(ment)? from the air|air raids?|aerial bombardment|bombing)\\b"],
 	["machine_assisted_targeting","(?i)\\b(machine[- ]assisted targeting|targeting machines?|machine targeting)\\b"],
 ]
-const USE_PATTERN:="(?i)\\b(use|loose|unleash|launch|drop|fire|release|deploy|employ|strike (them |it |\\w+ )?with|let (fly|loose)|i authori[sz]e|i permit|you may use|you have my leave|you are permitted|bomb)\\b"
+const USE_PATTERN:="(?i)\\b(use|loose|unleash|launch|drop|fire|release|deploy|employ|strike (them |it |\\w+ )?with|let (fly|loose)|i authori[sz]e|i permit|you may use|you have my leave|you are permitted|bomb|shell)\\b"
 const FORBID_PATTERN:="(?i)\\b(never|forbid|forbidden|do not|don't|must not|shall not|withhold|hold back|stand down|revoke|no one (may|shall))\\b"
 
 static func authority(means:String)->String:
 	if SOVEREIGN.has(means): return "sovereign"
-	if RESTRICTED.has(means): return "restricted"
+	if RESTRICTED.has(means) or RESTRICTED_PRACTICES.has(means): return "restricted"
 	if HUMAN_SIGNOFF.has(means): return "human_signoff"
 	return ""
 
 static func label(means:String)->String:
-	return String(SOVEREIGN.get(means,RESTRICTED.get(means,HUMAN_SIGNOFF.get(means,means))))
+	return String(SOVEREIGN.get(means,RESTRICTED.get(means,RESTRICTED_PRACTICES.get(means,HUMAN_SIGNOFF.get(means,means)))))
 
 static func means_of_equipment(item:String)->String:
 	return String(EQUIPMENT_MEANS.get(item,""))
@@ -97,7 +104,9 @@ static func check_use(means:String,decisions:Dictionary,context:Dictionary={})->
 	if kind=="": return {"ok":true}
 	var decided:Dictionary={}
 	if decisions.get(means) is Dictionary: decided=decisions[means]
-	var spoken:=not decided.is_empty() and String(decided.get("source",""))=="court" and String(decided.get("spoken","")).strip_edges()!=""
+	# The human ruler speaks in the Court; a rival ruler decides in its own
+	# council (MilitaryCampaign.record_ruler_decision, rivals only).
+	var spoken:=not decided.is_empty() and String(decided.get("source","")) in ["court","ruler"] and String(decided.get("spoken","")).strip_edges()!=""
 	match kind:
 		"sovereign":
 			if spoken: return {"ok":true,"authority":"sovereign","decision":decided.duplicate(true)}

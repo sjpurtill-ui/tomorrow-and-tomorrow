@@ -56,6 +56,7 @@ static func execute(order:Dictionary)->Dictionary:
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
+		"transport":return WorldSimulation.military.joint_operations.logistics.start(int(order.get("force",0)),String(order.get("destination","")),float(order.get("food",0.0)),int(order.get("army",0)))
 		"commission":return WorldSimulation.military.joint_operations.commission(int(order.get("base",0)),String(order.get("unit","")),int(order.get("count",0)),String(order.get("name","")))
 		# Great Works: the same undertaking functions the player's dock uses.
 		"great_work_commission":

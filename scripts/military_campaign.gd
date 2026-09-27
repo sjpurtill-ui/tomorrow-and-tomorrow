@@ -1734,6 +1734,15 @@ func record_sovereign_decision(means:String,decision:Dictionary)->Dictionary:
 	return {"ok":true,"means":means,"decision":record.duplicate(true)}
 
 
+## A rival ruler's own decision to strike towns (civilization_controller.gd).
+## Never available to the human ruler, whose word is spoken in the Court.
+func record_ruler_decision(means:String,reason:String)->Dictionary:
+	if String(WorldSimulation.actor_id)=="player": return {"error":"The ruler decides this in the Court.","kind":"sovereign"}
+	if SovereignWeapons.authority(means)!="restricted" or reason.strip_edges()=="": return {"error":"A ruler's council decides only restricted means, with a reason."}
+	sovereign_decisions[means]={"source":"ruler","spoken":reason.strip_edges().substr(0,400),"day":int(WorldSimulation.state.elapsed_days),"audience":"council"}
+	return {"ok":true,"means":means}
+
+
 func revoke_sovereign_decision(means:String)->Dictionary:
 	var had:=sovereign_decisions.has(means)
 	sovereign_decisions.erase(means)
@@ -5097,7 +5106,7 @@ func _complete_ready_build_batches()->void:
 				_complete_training(order);training_queue.remove_at(index)
 
 
-func apply_transport_casualties(army_id:int,fraction:float)->int:
+func apply_transport_casualties(army_id:int,fraction:float,enemy:String="")->int:
 	var index:=_field_army_index(army_id)
 	if index<0:return 0
 	var army:Dictionary=field_armies[index]
@@ -5107,7 +5116,18 @@ func apply_transport_casualties(army_id:int,fraction:float)->int:
 		formation.count=count-lost;losses+=lost
 		for key in ["equipment","ammunition"]:formation[key]=floori(float(formation.get(key,0))*(1-clampf(fraction,0,1)))
 	army.troops=maxi(0,int(army.get("troops",0))-losses)
-	if losses>0:WorldSimulation.state.register_population_deaths(losses,"Killed in battle")
+	# Soldiers aboard a lost transport drown, or are pulled from the water by
+	# escorts (they return to the depot) or by the enemy (air_naval_consequences.gd).
+	var fate:Dictionary=preload("res://scripts/air_naval_consequences.gd").transport_fates(losses,enemy)
+	if int(fate.killed)>0:
+		WorldSimulation.state.register_population_deaths(int(fate.killed),"Drowned at sea")
+		_record_aggregate_military_deaths(int(fate.killed),"Drowned at sea")
+	army["wounded_pool"]=int(army.get("wounded_pool",0))+int(fate.wounded)
+	aggregate_recruits+=int(fate.rescued)
+	if int(fate.captured)>0:
+		if not home_army.is_empty():home_army["captured_pool"]=int(home_army.get("captured_pool",0))+int(fate.captured)
+		else:joint_operations.state["captured_holding"]=int(joint_operations.state.get("captured_holding",0))+int(fate.captured)
+	preload("res://scripts/air_naval_consequences.gd").transport_lost(army,fate,enemy)
 	if int(army.troops)==0:army.embarked=false;army.status="stationed"
 	return losses
 
