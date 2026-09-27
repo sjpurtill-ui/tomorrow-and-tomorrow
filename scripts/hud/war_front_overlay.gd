@@ -391,8 +391,12 @@ func _draw()->void:
 	for front in scene.get("fronts",[]):
 		if not bool(front.get("stale",false)): continue
 		var ages:PackedFloat32Array=front.age
-		var at:=_screen((front.points as PackedVector2Array)[(front.points as PackedVector2Array).size()/2])
-		if at.is_finite() and ages.size()>0: _caption(at+Vector2(8,10),"Their line as last seen, %d days ago" % roundi(ages[ages.size()/2]),Color(THEIRS,0.9),font)
+		var oldest:=0
+		var where:=0
+		for k in ages.size():
+			if roundi(ages[k])>oldest: oldest=roundi(ages[k]); where=k
+		var at:=_screen((front.points as PackedVector2Array)[where])
+		if at.is_finite(): _caption(at+Vector2(14,10),"Their line here as last seen, %d days ago" % oldest,Color(THEIRS,0.9),font)
 
 
 func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:float)->void:
@@ -410,34 +414,49 @@ func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:fl
 			if carry>=(dash if drawing else gap)-0.001: carry=0.0; drawing=not drawing
 
 
-## The front: a paper halo, an ink line whose weight follows how massed the
-## two sides are, and small teeth pointing into the enemy (the push side).
+## The front: a soft wash of each side's colour either side of the line (the
+## ground each holds), a paper halo, an ink line whose weight follows how
+## massed the two sides are, and oxblood teeth pointing into the enemy.
+## Stretches derived from stale reports are dashed and paler.
 func _draw_front(points:PackedVector2Array,front:Dictionary)->void:
 	if points.size()<2: return
-	var stale:=bool(front.get("stale",false))
 	var widths:PackedFloat32Array=front.get("width",PackedFloat32Array())
-	draw_polyline(points,Color(PAPER,0.55),7.0,true)
-	if stale: _dashed(points,Color(INK,0.55),2.0,9.0,6.0)
-	else:
-		for i in range(1,points.size()):
-			var w:=2.2+2.6*(float(widths[i]) if i<widths.size() else 0.6)
-			draw_line(points[i-1],points[i],Color(INK,0.92),w,true)
-	# Teeth: every few points, a small triangle on the enemy side.
-	var pressure:PackedFloat32Array=front.get("pressure",PackedFloat32Array())
 	var ages:PackedFloat32Array=front.get("age",PackedFloat32Array())
-	var stride:=maxi(2,points.size()/14)
 	var toward:PackedVector2Array=front.get("toward",PackedVector2Array())
 	var world:PackedVector2Array=front.get("world",PackedVector2Array())
-	for i in range(stride/2,points.size()-1,stride):
-		var a:=points[i]; var b:=points[i+1]
+	var all_stale:=bool(front.get("stale",false)) and ages.is_empty()
+	# Screen normals toward the enemy, one per vertex.
+	var normals:=PackedVector2Array()
+	for i in points.size():
+		var a:=points[maxi(0,i-1)]; var b:=points[mini(points.size()-1,i+1)]
 		var normal:=(b-a).normalized().orthogonal()
 		if i<toward.size() and i<world.size():
 			var ahead:=_screen(world[i]+toward[i]*maxf(0.0001,float(scene.get("sigma",1.0))*0.05))
-			if ahead.is_finite() and normal.dot(ahead-a)<0.0: normal=-normal
-		var tooth:=5.0+3.0*absf(float(pressure[i]) if i<pressure.size() else 0.0)
-		var color:=Color(THEIRS,0.75 if not stale else 0.4)
-		if i<ages.size() and float(ages[i])>=float(Model.STALE_DAYS): color.a*=0.6
-		draw_colored_polygon(PackedVector2Array([a+(b-a).normalized()*-3.0,a+(b-a).normalized()*3.0,a+normal*tooth]),color)
+			if ahead.is_finite() and normal.dot(ahead-points[i])<0.0: normal=-normal
+		elif i>0 and normals[i-1].dot(normal)<0.0: normal=-normal
+		normals.append(normal)
+	var wash:=14.0
+	for i in range(1,points.size()):
+		var n0:=normals[i-1]; var n1:=normals[i]
+		var theirs_quad:=PackedVector2Array([points[i-1],points[i],points[i]+n1*wash,points[i-1]+n0*wash])
+		var ours_quad:=PackedVector2Array([points[i-1],points[i],points[i]-n1*wash,points[i-1]-n0*wash])
+		draw_colored_polygon(theirs_quad,Color(THEIRS,0.13))
+		draw_colored_polygon(ours_quad,Color(OURS_WASH,0.16))
+	draw_polyline(points,Color(PAPER,0.6),8.0,true)
+	for i in range(1,points.size()):
+		var stale:=all_stale or (i<ages.size() and float(ages[i])>=float(Model.STALE_DAYS))
+		var w:=2.4+3.0*(float(widths[i]) if i<widths.size() else 0.6)
+		if stale: _dashed(PackedVector2Array([points[i-1],points[i]]),Color(INK,0.5),2.0,6.0,5.0)
+		else: draw_line(points[i-1],points[i],Color(INK,0.92),w,true)
+	var pressure:PackedFloat32Array=front.get("pressure",PackedFloat32Array())
+	var stride:=maxi(2,points.size()/16)
+	for i in range(stride/2,points.size()-1,stride):
+		var a:=points[i]; var b:=points[i+1]
+		var along:=(b-a).normalized()
+		var tooth:=8.0+4.0*absf(float(pressure[i]) if i<pressure.size() else 0.0)
+		var color:=Color(THEIRS,0.9)
+		if all_stale or (i<ages.size() and float(ages[i])>=float(Model.STALE_DAYS)): color.a=0.45
+		draw_colored_polygon(PackedVector2Array([a-along*4.5,a+along*4.5,a+normals[i]*tooth]),color)
 
 
 func _draw_arrow(arrow:Dictionary)->void:
@@ -486,11 +505,12 @@ func _draw_raid(raid:Dictionary)->void:
 	var color:=Color(OURS if ours else THEIRS,0.85*float(raid.get("alpha",1.0)))
 	# A footpath of dots, like the scout charts, with a small head at the end.
 	for k in range(0,points.size(),1):
-		draw_circle(points[k],1.8,color)
+		draw_circle(points[k],4.0,Color(PAPER,0.5*color.a))
+		draw_circle(points[k],2.6,color)
 	var tip:=points[-1]; var back:=points[-2]
 	var direction:=(tip-back).normalized()
-	draw_line(tip,tip-direction.rotated(0.5)*8.0,color,1.6,true)
-	draw_line(tip,tip-direction.rotated(-0.5)*8.0,color,1.6,true)
+	draw_line(tip,tip-direction.rotated(0.5)*11.0,color,2.2,true)
+	draw_line(tip,tip-direction.rotated(-0.5)*11.0,color,2.2,true)
 	if bool(raid.get("fought",false)): _crossed_strokes(tip,7.0,Color(THEIRS,color.a))
 
 
@@ -519,7 +539,7 @@ func _draw_siege(siege:Dictionary,font:Font)->void:
 	else:
 		_dashed(ring,color,1.8,7.0,6.0)
 		for k in 6: draw_circle(centre+Vector2.from_angle(TAU*float(k)/6.0+0.3)*radius,3.0,color)
-	_caption(centre+Vector2(radius+6.0,-radius*0.5),String(siege.label),color,font)
+	_caption(centre+Vector2(-radius,radius+22.0),String(siege.label),color,font)
 
 
 ## A clash and the tactic being fought there, drawn in screen space around
@@ -530,7 +550,7 @@ func _draw_clash(clash:Dictionary,font:Font,band:String)->void:
 	var ahead:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*0.01)
 	var axis:=(ahead-at).normalized() if ahead.is_finite() and ahead.distance_to(at)>0.001 else Vector2.RIGHT
 	var across:=axis.orthogonal()
-	var r:=clampf(38.0 if band=="local" else 30.0,24.0,60.0)
+	var r:=56.0 if band=="local" else 46.0
 	var ours:Dictionary=clash.shape_ours
 	var theirs:Dictionary=clash.shape_theirs
 	var t:=smoothstep(0.0,1.0,blend)
@@ -547,13 +567,14 @@ func _draw_clash(clash:Dictionary,font:Font,band:String)->void:
 		var curl:=wings*r*0.6*s*s
 		line.append(at-axis*r*0.18+across*s*r+axis*(bow+curl))
 	draw_polyline(line,Color(PAPER,0.6),6.0,true)
-	draw_polyline(line,Color(OURS,0.95),2.4,true)
+	draw_polyline(line,Color(OURS,0.95),3.4,true)
 	# Their line opposite, straight unless their own tactic bends it.
 	var their_line:=PackedVector2Array()
 	for k in 9:
 		var s:=float(k)/8.0*2.0-1.0
 		their_line.append(at+axis*r*0.22+across*s*r*0.85-axis*float(theirs.bulge)*r*0.4*(1.0-s*s))
-	draw_polyline(their_line,Color(THEIRS,0.9),2.2,true)
+	draw_polyline(their_line,Color(PAPER,0.6),6.0,true)
+	draw_polyline(their_line,Color(THEIRS,0.9),3.0,true)
 	if int(ours.depth)>0:
 		for d in int(ours.depth): _dashed(PackedVector2Array([at-axis*r*(0.45+0.25*d)-across*r*0.8,at-axis*r*(0.45+0.25*d)+across*r*0.8]),Color(OURS,0.7),1.4,5.0,4.0)
 	if String(ours.shape) in ["trenches","camp"] or int(theirs.depth)>0:
@@ -682,7 +703,7 @@ func _draw_zone(zone:Dictionary,font:Font)->void:
 
 func _caption(at:Vector2,text:String,color:Color,font:Font)->void:
 	if text=="" or not Rect2(Vector2.ZERO,size).grow(40).has_point(at): return
-	var width:=minf(320.0,font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,LABEL_SIZE).x)
+	var width:=minf(560.0,font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,LABEL_SIZE).x)
 	var box:=Rect2(at+Vector2(-4,-14),Vector2(width+10,19))
 	draw_rect(box,Color(PAPER,0.82))
 	draw_line(box.position+Vector2(0,box.size.y),box.end,Color(color,0.6),1.0)

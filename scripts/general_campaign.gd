@@ -145,7 +145,19 @@ func rival(id:String)->Dictionary:
 func public_context()->Dictionary:
 	if not active:return {}
 	var a:=army()
-	return {"general":state.general_name,"authority":state.authority,"day":WorldSimulation.state.elapsed_days,"mission":state.mission,"proposal":state.proposal,"war":state.war,"outcome":state.outcome,"army":{"personnel":int(a.get("troops",0)),"food_days":food_days(),"exhaustion":float(state.exhaustion),"cohesion":"shaken" if float(a.get("morale",1))<.4 else "steady","equipment":equipment_ratio(a),"position":str(state.cell)},"known_rivals":state.seen.values(),"reports":state.reports.slice(-6),"treatment":state.treatment.slice(-4),"supported_actions":ACTIONS,"rules":"Generals execute. Questions never order. Approve refers only to the current proposal. Override confirms an existing objective, but obedience is judged by the engine. Relieve replaces command if captains support it. No psychological ratings are public."}
+	return {"ways_we_can_fight":tactics_context(),"general":state.general_name,"authority":state.authority,"day":WorldSimulation.state.elapsed_days,"mission":state.mission,"proposal":state.proposal,"war":state.war,"outcome":state.outcome,"army":{"personnel":int(a.get("troops",0)),"food_days":food_days(),"exhaustion":float(state.exhaustion),"cohesion":"shaken" if float(a.get("morale",1))<.4 else "steady","equipment":equipment_ratio(a),"position":str(state.cell)},"known_rivals":state.seen.values(),"reports":state.reports.slice(-6),"treatment":state.treatment.slice(-4),"supported_actions":ACTIONS,"rules":"Generals execute. Questions never order. Approve refers only to the current proposal. Override confirms an existing objective, but obedience is judged by the engine. Relieve replaces command if captains support it. No psychological ratings are public."}
+
+## Ways this army could fight today, for the general to discuss (he still
+## chooses on the day; the player never picks one).
+func tactics_context()->Array:
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var side:={"known":Tactics.known_for_player(),"profile":Tactics.profile(army()),"role":"attacker","character":state.get("character",{})}
+	var names:Array=[]
+	for kind in ["field","assault"]:
+		for id in Tactics.available_ids(side,{"kind":kind,"terrain":1.0,"ratio":1.0}):
+			var name:=Tactics.name_of(id,preload("res://scripts/hud/era_words.gd").stage())
+			if name not in names:names.append(name)
+	return names
 
 func food_days()->float:return float(state.get("food",0))/maxf(1,float(army().get("troops",0))*RATION)
 func equipment_ratio(a:Dictionary)->float:

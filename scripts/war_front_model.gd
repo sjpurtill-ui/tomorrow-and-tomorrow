@@ -38,7 +38,7 @@ const AGE_HALF_LIFE:=45.0
 ## Age beyond which the drawn line is shown as stale.
 const STALE_DAYS:=20
 ## A vertex needs both sides' normalised influence above this to be a front.
-const CONTACT:=0.12
+const CONTACT:=0.22
 
 
 ## Presentation stage from what the people know and field, not the calendar.
@@ -228,9 +228,11 @@ static func resample(points:PackedVector2Array,count:int)->PackedVector2Array:
 static func _contact_runs(points:PackedVector2Array,f:Dictionary)->Array:
 	var runs:Array=[]
 	var current:=PackedVector2Array()
+	# Contact: on the balance line both sides' influence is equal; it counts
+	# where that influence is a fair share of the weaker side's own peak.
+	var floor_value:=CONTACT*minf(float(f.max_ours),float(f.max_theirs))
 	for p in points:
-		var here:=presence(f,p)
-		if minf(here.x,here.y)>=CONTACT: current.append(p)
+		if minf(_sample(f.ours,f,p),_sample(f.theirs,f,p))>=floor_value: current.append(p)
 		elif current.size()>=2: runs.append(current); current=PackedVector2Array()
 		else: current=PackedVector2Array()
 	if current.size()>=2: runs.append(current)

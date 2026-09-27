@@ -1,255 +1,237 @@
 # Military presentation on the map
 
-Branch `codex/war-fronts`. How war looks on the map from the first feud to
-theatre-wide war, how fronts are derived, which real battle tactics generals
-use and when, and how sea and air zones fit in.
+Branch `codex/war-fronts`. This note covers three things: how war looks on the map from the first feud to theatre war, how fronts are derived, and how generals, fleet commanders and air commanders fight with real tactics gated by era.
 
-The governing rules do not change. Generals execute every battlefield decision
-in every era (docs/GENERAL_CAMPAIGN_DESIGN.md). The map shows what the generals
-are doing and what they intend, and what came of it. It never offers the player
-unit control or tactic picking. A click on a front, arrow or clash opens
-information or the conversation with the general who owns it. Population
-changes the numbers on a formation, never the number of map nodes. Enemy
-positions come only from dated observations.
+The governing rules do not change (docs/GENERAL_CAMPAIGN_DESIGN.md). Generals execute every battlefield decision in every era. The map shows what they are doing and what they intend, and what came of it. It never offers the player unit control or tactic picking. Population changes the numbers on a formation, never the number of map nodes. Enemy positions come only from dated observations.
 
-## 1. What the map shows today (survey of main 330d88c3)
+## 1. What the map shows today (survey of main `330d88c3`)
 
 | Layer | Source | What it draws |
 |---|---|---|
-| Formation counters | `local_terrain._refresh_player_field_army_markers` → `WarfareMapPresentation.build_snapshot` | A 3D plate per army (max 12 own, 24 foreign): role glyph, echelon bars, readiness pip, supply track, damage scars, selection ring. Away armies appear at their last runner report before signal-era communications. |
-| Occupied ground | `army_front_visual.gd` | An aggregate filled polygon under each counter (area from troops and equipment). It is per army; nothing joins two armies. |
-| March orders | `_create_player_field_army_path` | A straight two-point ribbon from the army to its destination, 3–5 chevrons and an objective ring. |
-| Front tokens | `front_marker` / `_refresh_warfare_front_markers` | Built every refresh, then **hidden** (`marker.visible=false`): the old diamond-and-percentages token was retired. |
-| Wars and feuds | `hud/war_map_overlay.gd` + `war_map_marks.gd` | One feud/war icon at the geometric midpoint between home and the nearest known enemy city, a short dashed "border" across that line, raid smoke icons near home (fading over 24 days) and our band icon sliding along the straight home→enemy line. Plain-words hover text. |
-| Battle close-up | `close_army_figures`, battle contact shader, battle screens | Figures and contact ground when zoomed to a battle; the round-by-round engagement card in the war-planning dock. |
-| Sea and air | `hud/service_world_overlay.gd`, `joint_operations.gd` | Player-drawn operating areas (polygons), bases, force positions and routes. Missions (patrol, convoy raiding, air superiority, close air support…) are assigned per area and resolved by `joint_effects.gd`. |
-| Authored campaign | `general_campaign_map.gd` | A separate 2D board for the Alderford War with dated enemy counters and the general's route. |
+| Formation counters | `local_terrain._refresh_player_field_army_markers` → `WarfareMapPresentation.build_snapshot` | A 3D plate per army, up to 12 own and 24 foreign. Each carries a role glyph, echelon bars, a readiness pip, a supply track, damage scars and a selection ring. Away armies appear at their last runner report until the people have signal-era communications. |
+| Occupied ground | `army_front_visual.gd` | An aggregate polygon under each counter. It is per army; nothing joins two armies. |
+| March orders | `_create_player_field_army_path` | A straight two-point ribbon to the destination, with chevrons and a ring. |
+| Front tokens | `_refresh_warfare_front_markers` | Built every refresh, then hidden (`marker.visible=false`). |
+| Wars and feuds | `hud/war_map_overlay.gd` + `war_map_marks.gd` | For each war:<br>- one feud icon at the midpoint between home and the enemy's nearest known town;<br>- a dashed "border" stub across that line;<br>- raid smoke, fading over 24 days;<br>- our band icon sliding along the straight line from home to the enemy;<br>- plain words on hover. |
+| Command fronts | `land_command._build_fronts`, `service_world_overlay.gd` | Three-point contact stubs, drawn only in the service planning view. |
+| Sea and air | `service_world_overlay.gd`, `joint_operations.gd` | Player-drawn operating zones with a mission each, plus bases, force dots and last sightings, all in the service view. Missions resolve daily in `joint_effects.gd`. |
+| Authored campaign | `general_campaign_map.gd` | The Alderford board: dated enemy counters and the general's route. |
 
-### What is weak
+**What is weak** (from the first draft of this note):
 
-1. **There is no front.** Two opposing armies are two separate counters with
-   two separate ground blobs. Nothing shows who holds what or where the
-   contact is, so a war has no shape.
-2. **The war mark sits in the wrong place.** It is drawn halfway between the
-   two capitals whatever the armies are doing, so the fighting and the mark
-   can be far apart.
-3. **Intent is a straight line to a point.** A march ribbon says "going
-   there". It never says "to take that crossing" or "to cut them off", and
-   there are no objective markers beyond the ring at the end of the line.
-4. **Battles have no shape and no tactics.** The resolver draws random local
-   events whose text hard-codes two force names ("River Host", "Hill Guard")
-   whoever is fighting. No general ever flanks, feigns or encircles.
-5. **Every era looks the same.** A stone-age band of twelve gets the same
-   plate, bars and pips as a mechanised corps.
-6. **Sieges** appear only in the siege screen, not on the map.
+1. **There is no front.** Two opposing armies are two separate counters, so a war has no shape.
+2. **The war mark is misplaced.** It sits halfway between the two capitals whatever the armies are doing.
+3. **Intent is a straight line to a point.** It never says "to take that town" or "to cut them off".
+4. **Battles have no shape and no tactics.** The resolver's random local events hard-code two force names ("River Host", "Hill Guard"). No general ever flanks, feigns or encircles.
+5. **Every era looks the same.** A stone-age band of twelve gets the same plate as a mechanised corps.
+6. **Sieges** are not on the map.
 
-## 2. Target presentation by era
+The "before" captures (section 7) reproduce these rules on fixed positions.
 
-The presentation stage is derived from what the civilization actually fields
-and knows (`WarFrontLines.stage`), not the calendar:
+## 2. The front "worm" (`scripts/war_front_model.gd`, pure and deterministic)
 
-| Stage | Chosen when | Land presentation |
+1. **Sources**
+   - Our armies, at the same reported positions the counters use.
+   - Enemy formations, from dated sightings only: those visible now plus the recent list (90 days or less).
+   - Each enemy report weighs `sqrt(strength) × (0.35 + 0.65·e^(−age/45 days))`. An enemy nobody has seen does not exist for the front.
+2. **Field.** Each source puts a Gaussian bump on a fixed 32×32 lattice over the theatre. Its reach follows the typical gap between the two sides and grows slowly with strength.
+3. **Line.** The front is the zero contour of ours − theirs, taken in raw strength. It is traced by marching squares and the pieces are chained into lines. The stronger side pushes the line toward the weaker, and that push is the **bulge**.
+4. **Contact.** A stretch is kept only where the equal influence on it is at least 22% of the weaker side's peak. Where the forces part, the front **breaks** into separate lines. When they close again it rejoins.
+5. **Per vertex.** Each point of the line carries four values:
+   - **width**: how massed both sides are there. A stretched line is drawn thin.
+   - **age**: the age of the reports behind it. Stale stretches are dashed and paler, with the caption "Their line here as last seen, N days ago".
+   - **toward**: the enemy side, which the teeth point into.
+   - **pressure**: which side is leaning on the line.
+6. **Bounds and cost.**
+   - At most 12 friendly and 24 enemy sources, 6 fronts, 96 points a front, 12 arrows and 8 clashes.
+   - Deriving a front from 200 and 400 input armies (clipped to those bounds) took 12–19 ms headless.
+   - Composing a full scene took 0.1–7 ms.
+   - The model reruns only when its inputs change, checked at most every 0.5 s.
+7. **Deformation.** When the inputs change, the old and new lines are resampled to the same count and eased over 0.9 s. There is no per-frame noise, so there is no jitter. Nothing redraws unless the camera moves or a morph is running.
+
+**Intent.**
+- **Offensive arrows** come from the general's actual objective: the army's `destination_position` while it marches, or the last point of its commanded route. An arrow starts at the nearest point of the front, or at the army if there is no front. It is a tapered, lightly filled war-map arrow with an inked edge, and ends at an objective mark.
+- **Enemy arrows** are drawn only for an observed moving formation. They are dashed, and stale ones fade.
+
+**Fallback and supply lines** appear in theatre mode only. The fallback line is the front offset toward home. Supply roads run from home to each army.
+
+**Siege works** are a ring around the invested town:
+- the ring tightens as the siege's pressure rises;
+- a loose blockade is a dashed ring of camps;
+- where the besieger knows field fortifications or siege engineering, the ring becomes lines with teeth facing inward and outward.
+
+## 3. Presentation by era
+
+The stage comes from what the people know and field, not the calendar: `WarFrontModel.mode(stage, known, largest force, armies, theatre troops)`.
+
+| Mode | When | Drawn |
 |---|---|---|
-| **skirmish** | largest force under 250, or before writing with no drilled formation | No front lines. Inked raid paths (dotted, from the raiders' side to what they struck), smoke where they struck, a small crossed-spears clash mark where bands met, our band's footpath out and back. |
-| **host** | forces under about 1,000, or no formation drill yet | Each host has a leader's standard and its marching route (a curved inked arrow to the general's objective). When two hosts are in contact a short facing line is drawn between them only; no continuous front exists. |
-| **field** | drilled forces of 1,000+ | Front segments where armies face each other, bulging toward the weaker side; offensive arrows from the front to the general's objective; objective marker; clash marks at engagements; siege rings around invested cities (arc = share of approaches held, ring tightens with pressure). |
-| **theatre** | military staffs known and 20,000+ in the field, or three or more field armies | Contacts join into one continuous front per enemy; a dashed fallback line behind our own front; several arrows (converging marches); pockets drawn when a breakthrough closes. |
-| **modern** | theatre plus radio and armour | As theatre, with breakthrough arrows, closing pockets and trench hardening (a second parallel line behind the front, a sign of defence in depth). |
+| **raid** | No formation drill and bands under 250 (or hearth-stage bands under 1,000 without drill) | No fronts and no plan arrows. Dotted raid tracks, like the scout charts: our band's path out, and their raid coming in and ending in a crossed-strokes clash. The existing feud marks and smoke stay. |
+| **host** | Drill or 250+, but under 1,000 or not drilled | A short face-off arc only where two hosts are within reach, sitting nearer the weaker. Plan arrows and objective marks. |
+| **front** | Drilled, 1,000+ | Continuous fronts:<br>- each side's wash either side of the line;<br>- oxblood teeth into the enemy;<br>- weight by massing, stale stretches dashed.<br>Plus plan arrows, dated enemy arrows, clashes with the tactic's shape, and siege works. |
+| **theatre** | Military staffs and 3+ armies or 20,000+ in the field | As front, plus fallback lines and supply roads. |
 
-Zoom bands (`WarfareMapPresentation.scale_band`): at **ground** the battle
-close-up owns the screen and the front layer draws only clash marks. At
-**local** and **regional** everything above is drawn with widths held in
-screen pixels. At **continental** fronts and arrows remain, and clash marks
-merge per front. At **world** only one line per war remains.
+**Zoom bands:**
+- **ground**: nothing is drawn. The close battle figures own the view.
+- **local**: fronts, clashes with their tactic shapes, and captions.
+- **regional**: all of the above, plus the naval and air zones.
+- **world**: fronts and arrows only, with no captions.
 
-### Art
+**Art.** Everything is iron-gall ink on the painted map with a paper halo (docs/ART_DIRECTION.md). Owner colour appears only as a thin wash and tint. Stale work is dashed. No image assets are used.
 
-Everything is ink on the painted map, per docs/ART_DIRECTION.md: a paper halo
-under an iron-gall ink stroke, and owner colour only as a thin tint on arrows
-and front teeth. Front lines carry the classic war-map teeth (small triangles
-on the side that is pushing). Arrows are tapered, filled with a light owner
-wash and outlined in ink. Stale enemy sections are dashed and faded. Glyphs
-(clash, objective, standard) come from `resource_icons.gd`; no image assets.
+## 4. Real tactics, chosen by generals (`scripts/battle_tactics.gd`)
 
-## 3. The front "worm" model
+A tactic is available only when all of the following hold:
+- every discovery in `requires_all` is known, and at least one in `requires_any`;
+- the force has the composition it needs, measured as equipment-weighted shares of missile, mobile, shock, pike, firearm, artillery, engineer, armour and assault troops;
+- the troop count, training, the general's command, the odds and the ground allow it.
 
-A front is derived, never authored. Inputs are what the map may honestly know:
+Rivals follow the same rules. Their knowledge comes only from the gates of the units they field plus their general level of knowledge (`known_from_force`).
 
-- **Own forces**: the same reported positions the counters use (runner
-  reports before signal-era communications), troops, status, destination and
-  the general's current objective.
-- **Enemy forces**: `local_observation_snapshot()` `visible` and `recent`
-  sightings only, each with a strength range and `last_seen_day`. An enemy
-  force that has not been observed does not exist for the front.
+The general's choice is weighted and deterministic for the battle's seed:
+- An unskilled general mostly fights head-on.
+- Bold, careful or cunning character shifts the weights.
+- A flank manoeuvre is more attractive against a rigid line the general can see.
 
-Derivation (`scripts/war_front_lines.gd`, pure static functions, coordinates
-in map km):
+Names are generic and plain, in the era's words: "hearth" before writing, then "lettered" and "reckoned".
 
-1. **Contacts.** Each own force is paired with every observed enemy force
-   within the stage's contact distance (3 km skirmish, 6 km host, 14 km field,
-   40 km theatre).
-2. **Where the line sits.** For a pair, the contact point sits between them at
-   `s = clamp(0.5 + 0.35·(own−enemy)/(own+enemy), 0.2, 0.8)` of the way from us
-   to them: the stronger side has pushed the line toward the weaker. This is
-   the **bulge**.
-3. **Frontage.** The line at a contact runs perpendicular to the pair axis for
-   a half-width that grows with the square root of the troops in contact,
-   bounded between 0.4 and 12 km. A larger army holds a wider front, but the
-   number of points does not grow.
-4. **Joining and breaking.** Contacts against one opponent are ordered along
-   the theatre axis. In the theatre stage, neighbours whose ends are within
-   the join gap become one line; otherwise each contact is its own segment. A
-   gap wider than the join gap is a **break**: the front is drawn as two lines
-   with open ends, the visible sign of a breakthrough or a hole.
-5. **Smoothing and bounds.** Two passes of corner cutting; each front is
-   resampled to at most 48 points; at most 8 fronts are drawn.
-6. **Observation age.** Each vertex takes the confidence of the enemy sighting
-   that shaped it: `1 − age/90 days`. Below 0.5 the stroke is dashed and faded;
-   this is "their line as last seen on day N".
-7. **Deformation.** When the derived line changes, the overlay resamples old
-   and new lines to the same count and eases between them over 0.8 s. There
-   is no per-frame wobble and no noise.
-8. **Tactic shape.** During an engagement, the active tactic adds a bounded
-   offset to the contact: wings curling forward (envelopment), a bulge that
-   sags back and snaps forward (feigned flight), a wedge (column assault), a
-   closing ring (pocket), a doubled line (defence in depth). The offset comes
-   from the round being resolved, so the shape follows the actual battle.
+| Tactic | First age | Requires | Needs | Effect (bounded exposure multipliers) | Map shape |
+|---|---|---|---|---|---|
+| Head-on (baseline) | stone | – | – | none | clash |
+| Dawn raid | stone | – | ≤800, attacker | round 1: them ×1.45, us ×0.75 | strike marks |
+| Ambush | stone | – | ground ≥1.08, ≤4,000 | round 1: them ×1.6, us ×0.7 | strike from the side |
+| Missile harassment / skirmish screen | stone | bow, sling or hafted weapons | 20% missile | rounds 1–2: us ×0.8, them ×1.2, lower intensity | dotted screen |
+| Shield wall | bronze | shield_wall | 35% shock | us ×0.82; rigid | shield line |
+| Deep line of spears | bronze | formation_drill + spear/pike/bronze/shield | 40% shock, 300+ | us ×0.9, them ×1.12; rigid | dense line |
+| Feigned retreat | bronze | mounts or drill | 20% mobile, or 30% missile with training ≥0.55 | round 1 yields (us ×1.15). Rounds 2–3: them ×1.55 if their training is lower; otherwise it fails (us ×1.2) | bulge back, then snap forward |
+| Flank attack | bronze | mounts or chariots | 15% mobile | from round 2: them ×1.22, more against a rigid line | hook |
+| Reserve held back | bronze | drill | 800+, command ≥0.5 | rounds 1–3 hold; then them ×1.25 | reserve block moving up |
+| Fortified camp / field works | bronze | field_fortifications | defender, odds ≤1.1 | us ×0.78, them ×1.1 | works hatching |
+| Escalade | bronze | – | assault on a town | us ×1.25 | storm |
+| Hammer and anvil | classical | drill + mounts | 30% shock, 15% mobile, 1,000+ | from round 3: them ×1.35 | hook to the rear |
+| Double envelopment | classical | drill + mounts or chariots | 18% mobile, 2,000+, command ≥0.62, odds ≥0.8 | rounds 1–2: the centre yields (us ×1.15). Then, at ≥46% power share, them ×1.55 (+0.15 vs a rigid line); otherwise the centre breaks (us ×1.3) | both wings curl, pocket closes |
+| Oblique order | classical | drill + professional_corps | 3,000+, training ≥0.6 | from round 2: them ×1.2 | one wing forward |
+| Breach and storm | classical | siege engineering, counterweights, powder artillery or field fortifications | 3% artillery or engineers | from round 3: them ×1.3 | breach |
+| Pike and shot | gunpowder | pike_drill + matchlock_drill | 15% pikes, 20% firearms | us ×0.88 (×0.8 vs cavalry); rigid | squares |
+| Firing line | gunpowder | drill + firearms | 40% firearms | us ×0.92, them ×1.18; rigid | volley line |
+| Attack in columns | gunpowder | professional_corps + firearms | 30% firearms, 2,000+ | both ×1.12–1.2, higher intensity | column |
+| Converging corps | gunpowder | military_staffs + optical, electrical or radio telegraphy | 20,000+ | from round 2: them ×1.28 | converging wings |
+| Trench lines | industrial | field_fortifications + cartridges or automatic weapons | 40% firearms, defender | us ×0.7, them ×1.25 | trench hatching thickening each round |
+| Defence in depth | industrial | staffs + indirect fire + field fortifications | 5,000+, defender | rounds 1–2 yield; then us ×0.85, them ×1.35 | staggered lines |
+| Infiltration | industrial | automatic_actions + indirect_fire | 8% assault troops, or firearms with artillery | them ×1.25 (more vs trenches) | thin arrows through |
+| Armoured breakthrough and pocket | modern | armored_vehicles + internal_combustion + radio | 12% armour | rounds 1–2 break in. Then, at ≥50% power share, them ×1.6 and the pocket closes; otherwise it stalls | spear, then ring |
+| Combined arms | modern | armour + indirect fire + radio | armour and artillery | us ×0.88, them ×1.2 | layered |
+| Pursuit (automatic, never chosen) | bronze | mounts | 15% mobile | their morale <0.38 from round 2: them ×1.3 | – |
+| Siege works | – | none (blockade camps); field fortifications or siege engineering (lines) | – | presentation only; the siege model owns pressure | ring |
 
-**Offensive arrows** come only from the general's structured intent: a field
-army's `destination_position` when moving, its `city_operation` (attack or
-besiege), or its intercept target. The arrow starts at the front contact
-nearest the army (or at the army when no front exists) and ends at the
-objective marker. Enemy arrows are drawn only for an observed moving
-formation, as a short dated "seen heading" arrow that fades with age.
+**Bounds.**
+- Each side's per-round multiplier stays within [0.6, 1.7]; the combined multiplier per side within [0.55, 1.9]; intensity within [0.8, 1.2].
+- A risky manoeuvre succeeds or fails by the fighting itself (the side's power share in the decisive round), never by a pre-rolled coin.
+- Without a plan, the resolver is unchanged; a test confirms this.
 
-**Fallback lines** (theatre stage) are a dashed line offset behind our front
-toward home. They show where the general will withdraw to; they do not
-command anything.
+**Tested outcome bound.** Over 40 seeded battles between equal armies, a double envelopment against a deep line may raise the attacker's wins by at most 18 of the 40. The defender's losses stay within 1.5 times the plain fight's.
 
-**Sieges**: a ring round the target city whose drawn arc is the blockade share
-from the siege model and whose radius tightens with pressure.
+**Multi-era check.** `test_tactics_appear_only_in_their_age` chose tactics for 300 seeds, both roles, with a typical force for each age. Shares are of battles:
 
-## 4. Real battle tactics, chosen by generals
+| Age | Chosen |
+|---|---|
+| stone | head-on 59%, missile harassment 21%, dawn raid 13%, ambush 7% |
+| bronze | head-on 45%, deep line 18%, shield wall 17%, reserve 13%, ambush 5%, fortified camp 3% |
+| classical | head-on 36%, deep line 18%, shield wall 13%, reserve 11%, flank attack 10%, hammer and anvil 6%, oblique 4%, camp 2% |
+| gunpowder | head-on 32%, pike and shot 11%, flank 11%, reserve 10%, shield wall 8%, firing line 8%, hammer and anvil 7%, columns 5%, converging corps 4%, oblique 3%, camp 3% |
+| industrial | head-on 38%, firing line 14%, reserve 12%, trenches 9%, infiltration 6%, columns 6%, oblique 5%, camp 4%, converging corps 4%, depth 4% |
+| modern | head-on 27%, combined arms 9%, firing line 9%, reserve 7%, flank 7%, trenches 6%, feigned retreat 5%, breakthrough 5%, oblique 4%, infiltration 4%, columns 4%, depth 4%, double envelopment 3%, camp 3%, converging corps 3% |
 
-`scripts/battle_tactics.gd` holds the catalogue. Each engagement records one
-tactic per side (`engagement.tactics`). The general chooses it from what his
-force can do, what the people know, the ground, the odds and his own traits.
-Rivals use the same rules; their knowledge is inferred from the units they
-field and their civilization's knowledge level. The player never picks a
-tactic. He can ask the general about it in conversation.
+- No tactic appeared before its age.
+- The plain fight stays the commonest in every age.
+- Double envelopment stays rare, as in the record. In the classical sample the cavalry share was just under what it needs.
 
-Tactic names are generic and plain, in the era's words. No real battle,
-commander or nation names are used.
+**Wired into:**
+- **`MilitaryCampaign.begin_threat_engagement`** records `active_engagement.tactics`. Ours come from the player's discoveries and troops. Theirs come from their troops and `threat.technology`, which is now recorded on the threat.
+- **`advance_engagement`** passes the plan and the round offset to `CombatSimulator.simulate(options.tactics)`. Every round record carries `tactic_event` and each side's phase. The final result carries `tactics`.
+- **The battle report** names both tactics in era words: "Our general chose a double envelopment. The enemy answered with a shield wall." Before writing, it reads "We fell on them at first light."
+- **The War Planning engagement card** shows "How they fight": our tactic with the round's event, and theirs.
+- **The Alderford general campaign** plans every battle from the general's character and prefixes the report with the tactic sentence. Its public context gives the conversation `ways_we_can_fight`, so the player can discuss tactics. The general still chooses on the day.
+- **Feud and raid clashes in `war_loop.gd`** plan from what each band fields.
+- **The player never picks a tactic.** The existing HOLD / PUSH / RETREAT round actions are unchanged.
 
-### Capabilities
+## 5. Navy and air: drawn zones, run by their commanders
 
-Derived from actual formations (surviving, equipped counts):
-`missile` (bows, slings, javelins, crossbows, horse archers), `dense_foot`
-(spear, pike, line, heavy foot), `pike`, `mounted` (cavalry of any kind,
-chariots, dragoons), `heavy_mounted`, `gunpowder_foot`, `rifles` (rifles,
-machine guns), `assault`, `artillery`, `armor` (tanks, mechanised and
-motorised), `engineers`. Knowledge gates: `formation_drill`,
-`domesticated_mounts`, `field_fortifications`, `military_staffs`,
-`electrical_telegraphy` or `radio_telegraphy`, `radio_telegraphy`.
+The user's rule is that naval and air forces stay drawn zones, the current mechanic, governed by the leaders of those branches. The player draws a zone and assigns a mission, as the service view already allows.
 
-### Catalogue
+Each day, inside the zone, the fleet or air commander chooses a zone tactic (`ZONE_TACTICS`):
+- **Gates.** The choice is limited by the gates of the hulls and airframes the force actually has, plus, for the player, the player's discoveries.
+- **Conditions.** A blockade needs a known hostile port inside the zone. Escorted day bombing needs friendly fighters working an overlapping zone.
+- **Stability.** The commander keeps a tactic while it still fits.
+- **Reporting.** A change is reported once in the joint events, for example "Home Fleet: a distant blockade, watching the approaches."
+- **Effects.** The tactic scales the existing damage, detection and damage-received factors in `joint_battle.gd` within [0.8, 1.25].
 
-| Tactic (plain name) | Earliest | Requires | Effect on resolution (bounded) | Map shape |
-|---|---|---|---|---|
-| Rush together | always | nothing | none; the default clash | clash mark |
-| Dawn raid | band era | attacker, 250 or fewer on either side | first round: enemy caught unready; then the raiders break off early | raid path + clash |
-| Ambush | band era | rough ground or small forces, general's tactics ≥ 0.5 | first two rounds: enemy exposure high; blunted by an enemy missile screen | hook round the road |
-| Harry with missiles | bows | missile troops ≥ 25% | first three rounds: low losses on both sides, then normal | dotted screen ahead of the line |
-| Shield wall | drill | dense foot ≥ 50% and formation drill (or pikes) | better defence, fewer own losses, slightly weaker attack; brittle against envelopment and flanking | thickened, straight line |
-| Feigned flight | mounts or veteran drill | mounted ≥ 20%, or drill with tactics ≥ 0.65 | rounds 1–2 give ground; round 3 the pursuers are caught. If readiness is under 0.55 the flight becomes real | bulge sags back, snaps forward |
-| Turn their flank | mounts | mounted ≥ 15% and domesticated mounts | from round 2 the enemy takes more losses; more so against a rigid line | one wing hooks forward |
-| Hold a reserve | drill | drill, 500+ troops | weaker early, stronger from round 4 | a second short line behind |
-| Hold them and strike from behind (hammer and anvil) | mounts + drill | dense foot ≥ 35% and heavy mounted ≥ 15% | hold two rounds, then heavy enemy losses | anvil line + hammer arrow |
-| Close both wings round them (double envelopment) | mounts + drill | mounted ≥ 20%, dense foot ≥ 35%, drill, tactics ≥ 0.7 | the centre gives and takes losses; from round 3 either the pocket closes (heavy enemy losses) or the centre breaks. More likely to close against a rigid line and with more mounted troops | both wings curl into a pocket |
-| Strengthen one wing (oblique order) | drill | drill, 1,000+ troops, tactics ≥ 0.65 | fewer own losses, more enemy losses from round 2 | the line angled, one end forward |
-| Fortified camp | earthworks | defender with field fortifications or engineers | better defence, fewer own losses | small square camp |
-| Siege lines | earthworks | a siege with engineers or field fortifications | presentation; the siege model already weighs starving against assault | ring round the city |
-| Pike and shot | gunpowder | pikes and gunpowder foot | strong against mounted attack, slightly better fire | chequer of squares |
-| Firing line | gunpowder + drill | gunpowder or rifles ≥ 40% and drill | better fire, a little more exposed | long thin line |
-| Attack in column | gunpowder + drill | attacker, drill, line or gunpowder foot | first two rounds: shock both ways | wedge |
-| Converging marches (corps) | staffs | military staffs and 20,000+ troops | the enemy is struck from several sides | several arrows meeting |
-| Defence in depth | trenches + wire | rifles or machine guns, field fortifications, telegraph or radio | far fewer own losses; the attacker pays | doubled line with trench teeth |
-| Infiltration | assault troops | attacker with assault infantry | rounds 2–4 hurt the enemy; weaker against defence in depth than a mass assault | thin arrows through gaps |
-| Break through and encircle | armour + radio | attacker, armour ≥ 20%, radio | rounds 1–2 costly, then a pocket; blunted by antitank troops | spearhead arrow, closing pocket |
-| Combined arms | armour + artillery + radio | armour, rifles or mechanised infantry, artillery and radio | steady advantage, fewer own losses | layered arrow |
+**Sea tactics:** coastal raiding (canoes and galleys), grapple and board, ramming in line abreast (galleys), close blockade (sail era), distant blockade (torpedo era), line of battle (naval gunnery), crossing the enemy's line (fire control), commerce raiding, submarine packs (radio), escorted convoys, fleet in being, carrier strike.
 
-Any tactic whose side has mounted troops adds a **pursuit**: when the enemy's
-morale falls under 0.35, it takes extra losses (cavalry pursuit).
+**Air tactics:** balloon observation, air reconnaissance, fighter sweeps, ground-directed interception (radio plus radio detection), close support, interdiction, escorted day bombing, night area bombing, airlift.
 
-Bounds: per round, attack and defence multipliers stay within 0.85–1.25 and
-exposure multipliers within 0.7–1.75 (the resolver clamps them again). The
-tests check that no tactic appears before its requirements and that casualty
-ratios over many seeded battles shift by bounded amounts.
+**On the main map (regional zoom and wider), drawn by `war_front_overlay.gd`:**
+- **Shading.** Each active player zone is shaded as contested water or air. Our wash deepens with `effects.control`; theirs shows where control is weak.
+- **Hatching.** Ink hatching grows denser the more firmly the zone is held. Interception zones are cross-hatched.
+- **Sortie arcs.** Air zones and carrier strikes get dashed sortie arcs from their base.
+- **Blockade cordons.** A blockade draws a cordon of pickets across the harbour mouth: tight for a close blockade, wide for a distant one.
+- **Contacts.** Dated contact rings fade over six days.
+- **Caption.** The commander's tactic labels the zone.
+- **Honesty.** Only our own zones and dated contacts are drawn.
 
-### How a general chooses
+**Designed only, not built:**
+- Convoy lanes drawn from `logistics` convoys, with escort ticks.
+- Air-defence belts, which need a layer showing where anti-air units are.
+- Sea fronts as contested water between two fleets' zones, which need rival zones to become public observations.
+- A blockade that cuts a port's supply over time; today the land siege model owns `blockade`.
 
-Scores start from each eligible tactic's fit (odds, terrain, what the enemy
-fields) and are weighted by the general's tactics skill and caution. Most
-battles are plain clashes or simple tactics; the elaborate ones need a skilled
-general and the right troops, which keeps them rare, as they were. The choice
-is deterministic from the engagement seed, so a replay shows the same battle.
+## 6. Implemented vs designed only
 
-### Where it is wired
+**Implemented (this branch):**
+- Front derivation, face-offs, fallback and supply lines.
+- Plan arrows and objective marks, and dated enemy arrows.
+- Clashes with the tactic's shape, which eases between rounds.
+- Siege works and raid tracks.
+- Naval and air zone shading, sortie arcs and cordons.
+- All of the above in `hud/war_front_overlay.gd`, attached beneath the war marks in `local_terrain._ensure_war_map_overlay`, a two-line edit.
+- The land tactic catalogue with gates, bounded resolution, reports, the engagement card, the general campaign context and war-loop raids.
+- Naval and air zone tactics with bounded effects and events.
 
-- `combat_simulator.gd`: `options.tactics` → per-round multipliers from
-  `BattleTactics.round_effects`; each round records `tactic_event`.
-- `military_campaign.gd`: the engagement chooses tactics when it begins and
-  passes them each round; the result carries `tactics`.
-- `war_loop.gd` (feud raids) and `general_campaign.gd` (Alderford) pass
-  tactics to their one-shot battles; the general's report names the tactic.
-- The war-planning engagement card names both sides' tactics.
+**Designed only:**
+- Clicking a front or clash to open its general. Clicks pass through today, and counters already open War Planning.
+- Clash marks for the command hierarchy's parallel battles (`command_hierarchy.data.battles`); only the active engagement is drawn.
+- A fallback line taken from a general's actual withdrawal plan rather than a fixed offset.
+- Corps and army-group marks at continental zoom.
+- The sea and air items listed in section 5.
 
-## 5. Sea and air: drawn zones, run by their commanders
+**Earlier draft.** A forked copy of this task wrote the first draft of this note and a first `battle_tactics.gd`. The final catalogue keeps three ideas from that draft:
+- equipment-weighted composition;
+- rigid lines being punished by flank attacks;
+- the map `shape()` keys.
 
-The user's rule: sea and air **stay drawn zones**, the current mechanic,
-governed by the leaders of those branches. They are never turned into land
-fronts, and no new control scheme is added.
+## 7. Captures
 
-Today the player draws an operating area (`joint_operations.create_region`),
-and a fleet or wing is assigned to it with a mission. Missions resolve daily
-(`joint_operations.advance`, `joint_effects.advance`): patrol routes are
-generated inside the area, contacts lead to fights, and air missions become
-`joint_air_support` / `joint_air_pressure` on land armies under that sky.
+`tests/war_fronts_capture.tscn` is a test scene, run only through `tools/run_isolated_gpu_probe.ps1`. It writes six 1600×900 plates to `artifacts/war_fronts/`; they are not committed. The plates use a flat painted ground and flat counter stand-ins, so they show the overlay's composition and ink rather than the full in-game frame.
 
-Target, inside each zone and chosen by the admiral or air commander:
+**Early raid** (`early_raid_before`, `early_raid_after`)
+- **Before:** a border stub, a feud mark, a band icon and raid smoke.
+- **After:** no front. Dotted raid tracks, their raid ending in a clash near our fields, and our band's dawn raid drawn as strike marks, captioned "Fell on them at first light".
 
-| Branch tactic | Era gate | Drawn inside the zone |
-|---|---|---|
-| Coastal patrol / search lines | boats | patrol tracks (the generated route) as a fine dotted wake |
-| Blockade cordon | sailing warships | a picket arc across the port approach; cuts the port city's supply (siege-style supply factor) |
-| Convoy and escort | naval logistics | convoy routes with escort ticks |
-| Commerce raiding | patrol + raiders; submarines later | dashed hunting tracks, sinking marks |
-| Line of battle / fleet action | naval gunnery | two short opposed lines at a fleet contact, clash mark |
-| Carrier strike | carriers | sortie arcs from the carrier |
-| Air superiority patrol | powered flight | contested-air hatching over the zone; densest where control is near 50% |
-| Close air support | bombers + radio | small strike ticks over the land front inside the zone |
-| Interdiction / logistics strike | bombers | broken supply chevrons on roads under the zone |
-| Air defence belt | antiaircraft | rings around defended points |
+**Mid campaign** (`mid_campaign_before`, `mid_campaign_after`): two armies, three dated sightings (one seen 25 days ago, one moving) and a siege.
+- **Before:** straight blue ribbons to two rings.
+- **After:**
+  - one inked front with our wash and their teeth;
+  - the stretch from the old sighting dashed and captioned with its age;
+  - tapered plan arrows from the front to the objective and to the town;
+  - a dashed enemy movement arrow;
+  - the hammer-and-anvil hook at the clash, captioned in lettered words;
+  - siege lines around the town.
 
-Bounded interactions with the land fronts (existing hooks, kept bounded):
-air control over a front raises the owner's support and the enemy's pressure
-(already capped at +30% / −25% attack); a blockade reduces a port's supply the
-way a land siege's blockade share does; logistics strikes reduce an army's
-supply by at most 0.1 a day. The front overlay hatches the stretch of a land
-front lying under contested air.
-
-## 6. Implemented in this branch vs designed only
-
-See the handoff report for the exact status. In short: the tactic catalogue,
-its gates, the general's choice and bounded resolution are implemented and
-wired into field engagements, feud raids and the authored campaign. The front
-derivation and the front overlay (fronts, bulges, breaks, stale dashing,
-arrows, objective markers, clash marks, siege rings, eased deformation, tactic
-shapes, era stages) are implemented. Early raids draw inked raid paths. Sea
-and air zone tactics are designed here and not implemented.
-
-## 7. Multi-era tactic check
-
-`tests/test_battle_tactics.gd::test_multi_era_tactic_table` builds a
-representative force for each era and prints the tactics a skilled and an
-average general would choose. The printed table is copied into the handoff.
+**Late theatre** (`late_theatre_before`, `late_theatre_after`): six armies against eight observed formations, an air-superiority zone and a sea blockade.
+- **Before:** counters only.
+- **After:**
+  - one continuous front with stale stretches;
+  - a fallback line and supply roads;
+  - the armoured-breakthrough pocket and their defence in depth, each named;
+  - the hatched air zone with its sortie arc;
+  - the blockade cordon of pickets offshore.
