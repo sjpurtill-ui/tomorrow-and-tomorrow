@@ -193,7 +193,8 @@ func _search()->void:
 	search_status.text="%d marked on the map" % sites.size()
 	if sites.is_empty():search_status.text="None found yet"
 	for index:int in sites.size():
-		var choose:=Kit.button(options,"Site %d, %.1f km" % [index+1,float(sites[index].travel_distance_km)],false,_select.bind(index),"Look at site %d on the map" % (index+1));choose.custom_minimum_size.y=34;choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_theme_font_size_override("font_size",14);choose.clip_text=true
+		var choose:=Kit.button(options,"Site %d
+%.1f km away" % [index+1,float(sites[index].travel_distance_km)],false,_select.bind(index),"Look at site %d on the map" % (index+1));choose.custom_minimum_size.y=48;choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_theme_font_size_override("font_size",14);choose.clip_text=true
 	queue_redraw()
 
 func _select(index:int)->void:
