@@ -1,30 +1,40 @@
 extends RefCounted
 ## WHAT BECOMES OF A TOWN WE HOLD.
 ##
-## After a town is taken, the god's words about it ("put the men to the
-## sword", "take the women and children back to Seanstone", "burn it to the
-## ground", "spare them", "take tribute and leave", "hold it") are not a new
-## attack. They are orders to the garrison that holds it, carried out with
-## the occupation machinery that already exists (civilization_system.gd:
-## rival civilian deaths, displacement, occupation governance and razing,
-## giving the town back; military_campaign.gd: war reputation, bringing the
-## garrison home).
+## After a town is taken, the god's words about it are not a new attack.
+## They are orders to the garrison that holds it, and the court is the only
+## place they are given (the occupation screen now only reports). Each order
+## goes through the occupation machinery that already exists:
+##   - how we rule it: civilization_system.set_occupation_policy (civil
+##     administration, self-rule, equal citizenship, rule by the spear,
+##     enslavement of the town), reconstruction, razing;
+##   - killing: civilization_system.occupation_resident_order kill_residents;
+##   - moving people home, free or bonded, and captives:
+##     military_campaign.occupation_transfers (they walk the road, eat
+##     travel rations and arrive later, into their own community record);
+##     freeing captives already home: occupation_transfers.emancipate;
+##   - giving it back: occupation_resident_order restore_self_rule (the
+##     garrison marches home);
+##   - the garrison's size: military_campaign.reinforce_occupation from a band
+##     standing at the town;
+##   - tribute: their stores, through civilization_exchange.
 ##
-## Everything is bounded by what the garrison can physically do and by the
-## town's real population, in the range of early warfare: a small band that
-## holds a village can kill the men who do not get away, drive home the
-## captives it can guard on the road (a few per fighter), and burn the
-## houses. Most people flee a sack; the rest are not counted twice.
+## A sack given as the town falls (kill, captives, burn) is bounded by what
+## the garrison can physically do, in the range of early warfare: a small
+## band that holds a village can kill the men who do not get away and drive
+## home the captives it can guard on the road, a few per fighter. Most
+## people flee a sack. The slower orders (rule by the spear, enslave the
+## town, move residents as citizens) keep the existing control checks.
 ##
 ## Consequences are real and bounded: deaths and captives move population,
 ## the town is burned or kept, dread and grudges reach the people who were
-## struck and, more faintly, every people that knows us; our own war
-## reputation (mercy, fear, grievance) and our court's dread of the god move;
-## one sober Chronicle entry tells it.
+## struck and, more faintly, every people that knows us; our war reputation
+## (mercy, fear, grievance) and our court's dread of the god move; one sober
+## Chronicle entry tells it.
 ##
 ## apply() -> {ok, outcome (one plain note), text (the sober account),
-##             killed, captives, displaced, burned, tribute, left, spared}
-##          | {error}.
+##             killed, captives, moved, burned, tribute, left, spared, policy,
+##             reinforced, freed} | {error}.
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
@@ -44,28 +54,53 @@ const ROUNDED_UP_SHARE:=0.6
 ## What one fighter can do: kill the men who stand, guard captives on the road.
 const KILLS_PER_FIGHTER:=5
 const CAPTIVES_PER_FIGHTER:=4
-## A home village can absorb captives up to this share of its own people.
-const CAPTIVES_MAX_SHARE:=0.2
 ## Food a band carries off as tribute, per fighter.
 const TRIBUTE_PER_FIGHTER:=40.0
 
-static func fate_words(lower:String)->Dictionary:
+const POLICY_WORDS:=[
+	["military_rule","\\b(military rule|rule [\\w' ]{0,20}by (the )?(spear|sword|force|fear)|by force of arms|under the spear|martial)"],
+	["self_rule","\\b(govern (themselves|itself)|rule themselves|self.rule|their own elders|let them rule|keep their own (ways|elders|chief))"],
+	["equal_citizenship","\\b(equal citizens|equal citizenship|make them (our own|our people|citizens|one of us)|full citizens|as equals)"],
+	["stewardship","\\b(civil administration|(govern|rule) [\\w' ]{0,20}(well|fairly|justly|kindly)|as a town of ours|administer it|steward|protect (it|them|the town))"],
+	["forced_labor","\\b(enslave (the |its |their )?(whole )?(town|people|them|everyone)|make (them|the town|its people) (our )?slaves|forced labou?r|work them as slaves)"],
+]
+
+static func _re(pattern:String,text:String)->RegExMatch:
+	var r:=RegEx.new(); r.compile(pattern); return r.search(text)
+
+static func _has(pattern:String,text:String)->bool:
+	return _re(pattern,text)!=null
+
+static func fate_words(lower:String,home_name:String="")->Dictionary:
 	## What the god's words decide about a town we hold. {} when nothing.
 	var out:={}
-	var re:=func(pattern:String)->bool:
-		var r:=RegEx.new(); r.compile(pattern); return r.search(lower)!=null
-	var kill:bool=re.call("\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)")
-	var everyone:bool=re.call("\\b(everyone|every soul|every one of them|all of them|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b")
-	var captive_people:bool=re.call("\\b(women|girls|wives|children|captives?|slaves?|bondservants?|young ones)\\b")
-	var carry:bool=re.call("\\b(take|bring|carry|lead|drive|march|send|haul|herd|enslave|make slaves)")
+	var home:=home_name.to_lower().strip_edges() if home_name!="" else String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
+	var kill:=_has("\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
+	var everyone:=_has("\\b(everyone|every soul|every one of them|all of them|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b",lower)
+	var people:=_has("\\b(women|girls|wives|children|captives?|slaves?|bondservants?|young ones|people|residents|families|them)\\b",lower)
+	var carry:=_has("\\b(take|bring|carry|lead|drive|march|send|haul|herd|move|settle|resettle)\\b",lower)
+	var homeward:=_has("\\b(home|back|with us|to our|captives?)\\b",lower) or (home!="" and home in lower)
+	var bonded:=_has("\\b(women|girls|wives|captives?|slaves?|bondservants?|bonded|as spoils)\\b",lower)
+	var count_match:=_re("\\b(\\d{1,4})\\b",lower)
+	if count_match!=null: out["count"]=int(count_match.get_string(1))
 	if kill: out["kill_men"]=true
 	if kill and everyone: out["kill_all"]=true
-	if captive_people and carry and not out.has("kill_all"): out["captives"]=true
-	if re.call("\\b(burn|raze|torch|set fire|to the ground|level it|flatten|tear [\\w' ]{0,12}down|destroy (it|the town|what))"): out["raze"]=true
-	if re.call("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them))\\b"): out["tribute"]=true
-	if re.call("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b") and not kill: out["spare"]=true
-	if re.call("\\b(hold|keep|garrison|govern|rule) (it|the town|the place|them)\\b"): out["hold"]=true
-	if re.call("\\b(give it back|hand it back|leave it|withdraw|come home|pull out|abandon it)\\b") and not out.has("hold"): out["leave"]=true
+	if carry and people and homeward and not out.has("kill_all"):
+		if _has("\\bas (our own|citizens|free|our people|equals|kin)\\b",lower) and not bonded: out["move"]="citizen"
+		elif _has("\\b(penal|to labou?r|to work)\\b",lower) and not bonded: out["move"]="penal"
+		else: out["captives"]=true
+	if _has("\\b(burn|raze|torch|set fire|to the ground|level it|flatten|tear [\\w' ]{0,12}down|destroy (it|the town|what))",lower): out["raze"]=true
+	if _has("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them|their stores))\\b",lower): out["tribute"]=true
+	if _has("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b",lower) and not kill: out["spare"]=true
+	if _has("\\b(hold|keep|garrison|govern|rule) (it|the town|the place|them)\\b",lower): out["hold"]=true
+	if _has("\\b(give it back|hand it back|return it|leave it|withdraw|come home|pull out|abandon it|let them have it back)\\b",lower) and not out.has("hold"): out["leave"]=true
+	if _has("\\b(rebuild|repair|reconstruct|build it (up|again))\\b",lower) and not out.has("raze"): out["reconstruct"]=true
+	if _has("\\b(strengthen|reinforce|more (soldiers|fighters|men|spears) (to|in|at|for)|send more|add [\\w' ]{0,12}to the garrison|bigger garrison)\\b",lower): out["reinforce"]=true
+	if _has("\\b(free|release|emancipate|unbind) (the )?(captives|slaves|bonded)",lower) and not kill: out["free"]=true
+	if not out.has("captives"):
+		for row in POLICY_WORDS:
+			if _has(String(row[1]),lower): out["policy"]=String(row[0]); break
+	if out.size()==1 and out.has("count"): return {}
 	return out
 
 
@@ -77,42 +112,78 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	if index<0: return {"error":"That town's people are no longer known to us."}
 	var region:Dictionary=world.region_snapshot(civ_id,region_id)
 	if region.is_empty() or String(region.get("controller",""))!="player": return {"error":"We do not hold that town."}
-	var force:Dictionary=mc.occupation_force_for_region(civ_id,region_id)
-	var garrison:=int(force.get("troops",0))
+	var garrison:=int(mc.occupation_force_for_region(civ_id,region_id).get("troops",0))
 	if garrison<=0: return {"error":"Nobody of ours is left in the town to carry out the order."}
 	var name:=String(region.get("name","the town"))
 	var home:=String(WorldSimulation.state.settlement_name)
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var population:=maxi(0,roundi(float(region.get("population",0.0))))
-	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"captives":0,"displaced":0,"burned":false,"tribute":0,"left":false,"spared":false}
+	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"captives":0,"moved":0,"move_status":"","burned":false,"tribute":0,"left":false,"spared":false,"policy":"","reinforced":0,"freed":0,"arrive_days":0}
 	var parts:PackedStringArray=PackedStringArray()
+	var refusals:PackedStringArray=PackedStringArray()
 	var harsh:=0.0
+	var asked:=int(fate.get("count",0))
+	# Strengthen the garrison from a band standing at the town.
+	if bool(fate.get("reinforce",false)):
+		var before:=garrison
+		var more:Dictionary=mc.reinforce_occupation(civ_id,region_id)
+		if more.has("error"): refusals.append(String(more.error))
+		else:
+			garrison=int(mc.occupation_force_for_region(civ_id,region_id).get("troops",garrison))
+			out.reinforced=maxi(0,garrison-before); out.garrison=garrison
+			parts.append("%s more join the garrison of %s; %s hold it now." % [_cap(_count(int(out.reinforced))),name,_count(garrison)])
 	# The men who stand, or everyone the band can catch.
 	if bool(fate.get("kill_men",false)):
-		var wanted:=roundi(float(population)*(MEN_SHARE if not bool(fate.get("kill_all",false)) else 1.0)*CAUGHT_SHARE)
-		var can:=mini(wanted,garrison*KILLS_PER_FIGHTER*(1 if not bool(fate.get("kill_all",false)) else 2))
+		var all:=bool(fate.get("kill_all",false))
+		var wanted:=roundi(float(population)*(1.0 if all else MEN_SHARE)*CAUGHT_SHARE)
+		if asked>0: wanted=mini(wanted,asked)
+		var can:=mini(wanted,garrison*KILLS_PER_FIGHTER*(2 if all else 1))
 		if can>0:
-			var civ:Dictionary=world.civilizations[index]
-			var deaths:Dictionary=world._apply_rival_civilian_deaths(civ,region_id,can)
-			world.civilizations[index]=deaths.civilization
-			out.killed=int(deaths.dead)
-			population=maxi(0,population-int(out.killed))
-			if bool(fate.get("kill_all",false)): parts.append("%s people of %s were put to the sword; the rest fled into the hills." % [_count(out.killed),name])
-			else: parts.append("%s men of %s were put to the sword; others got away in the dark." % [_count(out.killed),name])
-			harsh+=1.0
-	# Captives driven home: women and children, as many as the band can guard.
-	if bool(fate.get("captives",false)):
-		var ours:=int(WorldSimulation.state.population_total)
-		var wanted:=roundi(float(population)*WOMEN_CHILDREN_SHARE*ROUNDED_UP_SHARE)
-		var can:=mini(wanted,mini(garrison*CAPTIVES_PER_FIGHTER,maxi(1,roundi(float(ours)*CAPTIVES_MAX_SHARE))))
-		if can>0:
-			var taken:=_carry_off(index,region_id,can)
-			if taken>0:
-				WorldSimulation.state.register_population_arrivals(taken,"captives from %s" % name,{"children":0.46,"youth":0.22,"early_adults":0.22,"established_adults":0.08,"mature_adults":0.02})
-				out.captives=taken
-				population=maxi(0,population-taken)
-				parts.append("%s women and children were led away to %s as captives." % [_cap(_count(taken)),home])
+			var done:Dictionary=world.occupation_resident_order(civ_id,region_id,"kill_residents",can,true)
+			if done.has("error"): refusals.append(String(done.error))
+			else:
+				out.killed=int(done.get("dead",0))
+				population=maxi(0,population-int(out.killed))
+				if all: parts.append("%s people of %s were put to the sword; the rest fled into the hills." % [_cap(_count(int(out.killed))),name])
+				else: parts.append("%s men of %s were put to the sword; others got away in the dark." % [_cap(_count(int(out.killed))),name])
+				harsh+=1.0
+	# People walked home: captives in bonds, or residents as our own.
+	var status:=String(fate.get("move","enslaved" if bool(fate.get("captives",false)) else ""))
+	if status!="":
+		var sack:=status=="enslaved" and (bool(fate.get("kill_men",false)) or bool(fate.get("raze",false)) or bool(fate.get("captives",false)))
+		var wanted:=roundi(float(population)*WOMEN_CHILDREN_SHARE*ROUNDED_UP_SHARE) if status=="enslaved" else roundi(float(population)*0.3)
+		if asked>0 and not bool(fate.get("kill_men",false)): wanted=mini(wanted,asked)
+		var count:=mini(wanted,garrison*CAPTIVES_PER_FIGHTER)
+		var moved:Dictionary={}
+		var last_error:=""
+		# The road, the rations and the room at home set how many can go.
+		for attempt in 8:
+			if count<1: break
+			var tried:Dictionary=mc.occupation_transfers.depart(civ_id,region_id,count,status,sack)
+			if not tried.has("error"): moved=tried; break
+			last_error=String(tried.error)
+			count=count/2
+		if moved.is_empty():
+			refusals.append(last_error if last_error!="" else "There was nobody to take.")
+		else:
+			var transfer:Dictionary=(mc.occupation_transfers.data.transfers as Array).back()
+			out.arrive_days=int(transfer.get("days",0))
+			population=maxi(0,population-count)
+			if status=="enslaved":
+				out.captives=count
+				parts.append("%s women and children were led away toward %s as captives, about %s on the road." % [_cap(_count(count)),home,_days(int(out.arrive_days))])
 				harsh+=0.7
+			else:
+				out.moved=count; out.move_status=status
+				parts.append("%s people of %s set out for %s %s, about %s on the road." % [_cap(_count(count)),name,home,"as our own people" if status=="citizen" else "to labour for us",_days(int(out.arrive_days))])
+				if status=="penal": harsh+=0.4
+	# Freeing captives already brought home from this town.
+	if bool(fate.get("free",false)):
+		for group:Dictionary in mc.occupation_transfers.data.groups:
+			if String(group.get("origin_region",""))!=region_id or String(group.get("status",""))=="citizen": continue
+			if not mc.occupation_transfers.emancipate(int(group.id)).has("error"): out.freed=int(out.freed)+1
+		if int(out.freed)>0: parts.append("The captives from %s living among us are free people now, with our rights." % name)
+		else: refusals.append("Nobody from %s is held in bonds among us." % name)
 	# Tribute: what the band can carry of their stores.
 	if bool(fate.get("tribute",false)):
 		var stock:=Hall.foreign_stock(civ_id,"Food")
@@ -124,7 +195,22 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 			parts.append("The band carried off %d Food from their stores." % roundi(got))
 			harsh+=0.2
 		else:
-			parts.append("Their stores were already empty; there was nothing to take.")
+			refusals.append("Their stores are already empty; there is nothing to take.")
+	# How we rule it.
+	var policy:=String(fate.get("policy",""))
+	if policy!="" and not bool(fate.get("raze",false)):
+		var ruled:Dictionary=world.set_occupation_policy(civ_id,region_id,policy)
+		if ruled.has("error"): refusals.append(String(ruled.error))
+		else:
+			out.policy=policy
+			parts.append(String({"military_rule":"%s is ruled by the spear now: our fighters' word is law there.","self_rule":"%s keeps its own elders; we take little and ask little.",
+				"equal_citizenship":"The people of %s are counted as our own people now, with our rights.","stewardship":"%s is governed as a town of ours: its stores kept and its people protected.",
+				"forced_labor":"The people of %s are held as slaves and made to work for us."}.get(policy,"%s has a new order.")) % name)
+			if policy in ["military_rule","forced_labor"]: harsh+=0.5 if policy=="military_rule" else 0.8
+	if bool(fate.get("reconstruct",false)):
+		var built:Dictionary=world.set_occupation_policy(civ_id,region_id,"reconstruct")
+		if built.has("error"): refusals.append(String(built.error))
+		else: parts.append("Rebuilding begins at %s, as fast as our stores and their hands allow." % name)
 	# Burning: the houses go, the people left scatter to their other towns.
 	if bool(fate.get("raze",false)):
 		var civ:Dictionary=world.civilizations[index]
@@ -134,47 +220,48 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 			var changed:Dictionary=Governance.change(r,"raze",day)
 			if changed.has("error"):
 				# The administrative lock is for a governed town; a sack does not wait.
-				var data:=Governance.state(r) as Dictionary
+				var data:Dictionary=Governance.state(r)
 				data.ruined=true; data.reconstruction=false
 				data.grievance=clampf(float(data.grievance)+.25,0,1)
 				data.local_institutions=maxf(0,float(data.local_institutions)-.3)
+				data.last_coercive_day=day
 				r.governance=data; r.damage=1.0
 			else: r=changed.region
 			civ.strategic_regions[ri]=r
 			world.civilizations[index]=civ
 			if WorldSimulation.enabled: Combat.governance(civ_id,region_id,r)
 			if population>0:
-				var moved:Dictionary=world._apply_rival_displacement(world.civilizations[index],region_id,population)
-				world.civilizations[index]=moved.civilization
-				out.displaced=int(moved.get("displaced",0))
+				var scattered:Dictionary=world._apply_rival_displacement(world.civilizations[index],region_id,population)
+				world.civilizations[index]=scattered.civilization
 		out.burned=true
-		parts.append("%s was burned; %s" % [name,"its people scattered to their other towns." if int(out.displaced)>0 else "nothing is left standing."])
+		parts.append("%s was burned; what was left of its people scattered." % name)
 		harsh+=0.6
-	# A burned or stripped town is not held: the garrison comes home.
-	if bool(out.burned) or bool(fate.get("leave",false)) or (bool(fate.get("tribute",false)) and not bool(fate.get("hold",false))):
-		var back:Dictionary=mc.evacuate_occupation(civ_id,region_id)
+	# A burned or stripped town is not held: the town goes back and the garrison comes home.
+	if bool(out.burned) or bool(fate.get("leave",false)) or (bool(fate.get("tribute",false)) and not bool(fate.get("hold",false)) and policy==""):
+		var back:Dictionary=world.occupation_resident_order(civ_id,region_id,"restore_self_rule")
 		if not back.has("error"):
-			world.abandon_occupied_region(civ_id,region_id)
 			out.left=true
-			parts.append("The garrison marches home%s, about %d %s." % [" with the captives" if int(out.captives)>0 else "",int(back.get("days",0)),"day" if int(back.get("days",0))==1 else "days"])
+			parts.append("The garrison marches home%s." % (" behind the captives" if int(out.captives)>0 else ""))
 		else:
-			parts.append("The garrison stays: %s" % String(back.error))
-	if bool(fate.get("spare",false)) or (parts.is_empty() and bool(fate.get("hold",false))):
+			refusals.append("The garrison cannot leave yet: %s" % String(back.error))
+	if bool(fate.get("spare",false)) or (parts.is_empty() and refusals.is_empty() and bool(fate.get("hold",false))):
 		out.spared=true
 		var civ:Dictionary=world.civilizations[index]
 		var ri:int=world._region_index(civ,region_id)
 		if ri>=0:
 			var r:Dictionary=civ.strategic_regions[ri]
-			var data:=Governance.state(r) as Dictionary
+			var data:Dictionary=Governance.state(r)
 			data.grievance=clampf(float(data.grievance)-.1,0,1); data.trust=clampf(float(data.trust)+.1,0,1)
 			r.governance=data; civ.strategic_regions[ri]=r; world.civilizations[index]=civ
 			if WorldSimulation.enabled: Combat.governance(civ_id,region_id,r)
 		parts.append("%s is spared. %s of ours hold it, and nobody there is harmed." % [name,_cap(_count(garrison))])
-	if parts.is_empty(): return {"error":"Tell me what is to become of %s: spare it and hold it, take captives and burn it, put the men to the sword, or take tribute and leave." % name}
+	if parts.is_empty():
+		if not refusals.is_empty(): return {"error":" ".join(refusals)}
+		return {"error":"Tell me what is to become of %s: spare it and hold it, take captives and burn it, put the men to the sword, or take tribute and leave." % name}
 	_consequences(civ_id,name,out,harsh,general,day)
-	out["text"]=" ".join(parts)
+	out["text"]=" ".join(parts)+(" But "+_lower_first(" ".join(refusals)) if not refusals.is_empty() else "")
 	out["outcome"]=_note(name,out)
-	Chronicle.record({"key":"town_fate:%s:%d" % [region_id,day],"title":_title(name,out).substr(0,70),"text":String(out.text),
+	Chronicle.record({"key":"town_fate:%s:%d" % [region_id,day],"title":_title(name,out).substr(0,70),"text":" ".join(parts),
 		"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 	return out
 
@@ -184,17 +271,16 @@ static func _consequences(civ_id:String,name:String,out:Dictionary,harsh:float,g
 	var mc:Variant=WorldSimulation.military
 	var killed:=int(out.killed); var captives:=int(out.captives)
 	var weight:=clampf(float(killed+captives)/60.0,0.0,1.0)
-	if bool(out.spared):
+	if bool(out.spared) or int(out.freed)>0 or String(out.policy) in ["self_rule","equal_citizenship","stewardship"]:
 		Hall._shift_relation(civ_id,0.06,-0.04)
 		mc._adjust_war_reputation(0.08,0.0,-0.04)
-		return
 	if harsh<=0.0: return
-	var what:="the men of %s you put to the sword" % name if killed>0 else ("the women and children of %s you carried off" % name if captives>0 else ("%s, which you burned" % name if bool(out.burned) else "what you took from %s" % name))
+	var what:="the men of %s you put to the sword" % name if killed>0 else ("the women and children of %s you carried off" % name if captives>0 else ("%s, which you burned" % name if bool(out.burned) else "what you did to %s" % name))
 	# The people who were struck: hatred, dread and a grudge they keep.
 	Hall._shift_relation(civ_id,-clampf(0.12*harsh,0.05,0.4),clampf(0.1*harsh,0.05,0.3))
 	DIVINE.add_civ_dread(civ_id,clampf(0.06*harsh+0.12*weight,0.04,0.35))
 	preload("res://scripts/rival_rulers.gd").grudge(civ_id,what,clampf(0.5+0.5*harsh,0.5,1.5),"town_fate:%s:%d" % [name,day])
-	ForeignDiplomacy.remember(civ_id,"The god's people %s." % String({"kill":"put the men of %s to the sword","take":"carried off the women and children of %s","burn":"burned %s"}.get("kill" if killed>0 else ("take" if captives>0 else "burn"),"stripped %s")) % name)
+	ForeignDiplomacy.remember(civ_id,"The god's people did this to %s: %s." % [name,_memory(name,out)])
 	# Every people that knows us hears of it: dread, and a little less goodwill.
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		var other:=String(civ.get("id",""))
@@ -219,63 +305,45 @@ static func _consequences(civ_id:String,name:String,out:Dictionary,harsh:float,g
 		GovernmentPeopleSystem.record_person_memory(gpid,"At the god's word my fighters %s." % _memory(name,out),"divine",0.85,{"emotion":"duty","outcome":"town_fate"})
 
 
-static func _carry_off(index:int,region_id:String,count:int)->int:
-	## Captives leave their people alive: fewer of them, none recorded as dead.
-	var world:Variant=WorldSimulation.world
-	var civ:Dictionary=world.civilizations[index]
-	if WorldSimulation.enabled:
-		var id:=Combat.owner(String(civ.id))
-		var local:=Combat.local_city(String(civ.id),region_id)
-		if id=="player" or not WorldSimulation.actors.has(id): return 0
-		return int(WorldSimulation.scoped(id,func()->int:
-			return WorldSimulation.settlements.with_city_resources(local,func()->int:
-				return WorldSimulation.settlements.with_local_population(func()->int:
-					return int(WorldSimulation.state.register_population_departures(count,"carried off as captives",{"children":1.6,"youth":1.3,"early_adults":1.0,"established_adults":0.5,"mature_adults":0.2,"elders":0.05}).get("count",0)),true)
-			)
-		))
-	var ri:int=world._region_index(civ,region_id)
-	if ri<0: return 0
-	var regions:Array=(civ.get("strategic_regions",[]) as Array).duplicate(true)
-	var region:Dictionary=regions[ri]
-	var actual:=mini(count,mini(roundi(float(region.get("population",0.0))),maxi(0,roundi(float(civ.get("population",1.0))-1.0))))
-	if actual<=0: return 0
-	region["population"]=maxf(0.0,float(region.get("population",0.0))-float(actual))
-	regions[ri]=region
-	civ["strategic_regions"]=regions
-	civ["population"]=maxf(1.0,float(civ.get("population",1.0))-float(actual))
-	civ["cohorts"]=world._scaled_cohorts(world._remove_weighted_cohort_population(civ.get("cohorts",{}),float(actual),{"children":1.6,"youth":1.3,"early_adults":1.0,"established_adults":0.5,"mature_adults":0.2,"elders":0.05}),float(civ.population))
-	world.civilizations[index]=civ
-	return actual
-
-
 static func _note(name:String,out:Dictionary)->String:
+	if bool(out.spared) and int(out.killed)==0 and int(out.captives)==0: return "%s is spared and held." % name
 	var bits:PackedStringArray=PackedStringArray()
-	if int(out.killed)>0: bits.append("%s killed" % _count(out.killed))
-	if int(out.captives)>0: bits.append("%s captives led to %s" % [_count(out.captives),String(WorldSimulation.state.settlement_name)])
+	if int(out.killed)>0: bits.append("%s killed" % _count(int(out.killed)))
+	if int(out.captives)>0: bits.append("%s captives on the road to %s" % [_count(int(out.captives)),String(WorldSimulation.state.settlement_name)])
+	if int(out.moved)>0: bits.append("%s people on the road to %s" % [_count(int(out.moved)),String(WorldSimulation.state.settlement_name)])
 	if bool(out.burned): bits.append("the town burned")
 	if int(out.tribute)>0: bits.append("%d Food taken" % int(out.tribute))
-	if bool(out.spared): return "%s is spared and held." % name
-	if bits.is_empty(): return "The garrison leaves %s." % name
+	if String(out.policy)!="": bits.append(String({"military_rule":"ruled by the spear","self_rule":"left to its own elders","equal_citizenship":"its people made our own","stewardship":"governed as ours","forced_labor":"its people enslaved"}.get(String(out.policy),"a new order")))
+	if int(out.reinforced)>0: bits.append("the garrison now %s" % _count(int(out.garrison)))
+	if int(out.freed)>0: bits.append("the captives freed")
+	if bool(out.left) and not bool(out.burned): bits.append("the garrison coming home")
+	if bits.is_empty(): return "%s: the god's word is carried out." % name
 	return "%s: %s." % [name,", ".join(bits)]
 
 
 static func _title(name:String,out:Dictionary)->String:
-	if bool(out.spared): return "%s Spared" % name
 	if int(out.killed)>0 and bool(out.burned): return "The Sack of %s" % name
 	if int(out.killed)>0: return "The Men of %s Put to the Sword" % name
 	if int(out.captives)>0 and bool(out.burned): return "%s Burned, Its Women and Children Taken" % name
 	if bool(out.burned): return "%s Burned" % name
 	if int(out.captives)>0: return "Captives Taken From %s" % name
-	return "Tribute From %s" % name
+	if String(out.policy)=="forced_labor": return "%s Enslaved" % name
+	if String(out.policy)=="military_rule": return "%s Under the Spear" % name
+	if int(out.tribute)>0: return "Tribute From %s" % name
+	if int(out.moved)>0: return "People of %s Come to Live Among Us" % name
+	if bool(out.left): return "%s Given Back" % name
+	return "%s Spared" % name if bool(out.spared) else "The Order for %s" % name
 
 
 static func _memory(name:String,out:Dictionary)->String:
 	var bits:PackedStringArray=PackedStringArray()
-	if int(out.killed)>0: bits.append("killed %s men of %s" % [_count(out.killed),name])
-	if int(out.captives)>0: bits.append("drove %s captives home" % _count(out.captives))
+	if int(out.killed)>0: bits.append("killed %s of %s" % [_count(int(out.killed)),name])
+	if int(out.captives)>0: bits.append("drove %s captives home" % _count(int(out.captives)))
 	if bool(out.burned): bits.append("burned %s" % name)
 	if int(out.tribute)>0: bits.append("stripped its stores")
-	return " and ".join(bits) if not bits.is_empty() else "left %s" % name
+	if String(out.policy)=="forced_labor": bits.append("made its people slaves")
+	if String(out.policy)=="military_rule": bits.append("ruled it by the spear")
+	return " and ".join(bits) if not bits.is_empty() else "held %s" % name
 
 
 static func _count(n:int)->String:
@@ -283,5 +351,13 @@ static func _count(n:int)->String:
 	return preload("res://scripts/battle_account.gd").count_words(n) if n<=12 else str(n)
 
 
+static func _days(n:int)->String:
+	return "a day" if n<=1 else "%s days" % _count(n)
+
+
 static func _cap(text:String)->String:
 	return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
+
+
+static func _lower_first(text:String)->String:
+	return text if text.is_empty() else text.substr(0,1).to_lower()+text.substr(1)

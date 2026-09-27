@@ -4018,7 +4018,10 @@ func set_occupation_policy(civ_id:String,region_id:String,order:String)->Diction
 	_record_world_event("Occupation administration",String(region.name)+": "+String(result.message),"war",int(WorldSimulation.state.elapsed_days))
 	return result
 
-func occupation_resident_order(civ_id:String,region_id:String,order:String,count:int=0)->Dictionary:
+## sack: the order is given as the town falls (town_fate.gd), when the band
+## need not hold the whole town down for a month; the caller bounds the count
+## by what the garrison can physically do.
+func occupation_resident_order(civ_id:String,region_id:String,order:String,count:int=0,sack:bool=false)->Dictionary:
 	var index:=_civilization_index(civ_id)
 	if index<0:return {"error":"Unknown region owner."}
 	var civ:Dictionary=civilizations[index]
@@ -4034,8 +4037,9 @@ func occupation_resident_order(civ_id:String,region_id:String,order:String,count
 		if restored.has("error"):return restored
 		return {"ok":true,"message":"Local control returned to the people who held it before. The occupation force is returning physically; prior damage and grievance remain."}
 	if order!="kill_residents" or count<1:return {"error":"Choose a valid resident order and headcount."}
-	var ability:=occupation_coercion_availability(civ_id,region_id,count)
-	if ability.has("error"):return ability
+	if not sack:
+		var ability:=occupation_coercion_availability(civ_id,region_id,count)
+		if ability.has("error"):return ability
 	if count>floori(float(region.population)):return {"error":"The requested count exceeds the residents here."}
 	var deaths:=_apply_rival_civilian_deaths(civ,region_id,count)
 	civ=deaths.civilization

@@ -40,7 +40,9 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm"]
+## Storming a town our band already besieges.
+const STORM_WORDS:="(storm|assault|take the walls|scale the walls|over the walls|break (in|through)|attack now|attack (the|their) (walls|gate)|go in now|rush the gate|carry the walls)"
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
 const MIN_FORCE:=5
 ## Below this share of the enemy's estimated strength, a general objects.
@@ -205,6 +207,9 @@ static func read(text:String,context_civ:String="")->Dictionary:
 		if not fate.is_empty(): return {"kind":"fate","target":named,"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300)}
 		if not (_has(lower,SIEGE_WORDS) or _has(lower,RAID_WORDS) or _has(lower,ATTACK_WORDS) or army or _has(lower,LOOSE_ARMY_WORDS)): return {}
 		return {"kind":"held","target":named,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
+	var besieged:=_besieged()
+	if not besieged.is_empty() and (named.is_empty() or String(named.get("city_id",""))==String(besieged.city_id)) and (_has(lower,STORM_WORDS) or (String(named.get("city_id",""))==String(besieged.city_id) and _has(lower,ATTACK_WORDS))):
+		return {"kind":"storm","target":besieged,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300)}
 	if _has(lower,DRILL_WORDS): return {"kind":"drill","target":{},"full":false,"insist":false,"place":"","army_words":true,"text":clean.substr(0,300)}
 	if _has(lower,INTERCEPT_WORDS): kind="intercept"
 	elif _has(lower,SIEGE_WORDS): kind="siege"
@@ -258,12 +263,22 @@ static func offline_choices(audience_id:String="")->Array[Dictionary]:
 	if not pending.is_empty() and String(pending.get("verb",""))=="war" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
 		out.append({"group":"war","label":"Take them as they are","action":"command","params":{"command_text":"Take them as they are"}})
 		out.append({"group":"war","label":"Drill them first","action":"command","params":{"command_text":"Drill them first"}})
+	# A town we hold: every decision about it is made here (the occupation
+	# screen only reports). Each choice is words the god could type.
 	for town:Dictionary in held_towns().slice(0,2):
-		var held_name:=String(town.name)
-		out.append({"group":"war","label":"Spare %s and hold it" % held_name,"action":"command","params":{"command_text":"Spare %s and hold it" % held_name}})
-		out.append({"group":"war","label":"Take captives and burn %s" % held_name,"action":"command","params":{"command_text":"Take captives home and burn %s" % held_name}})
-		out.append({"group":"war","label":"Put the men of %s to the sword" % held_name,"action":"command","params":{"command_text":"Put the men of %s to the sword" % held_name}})
-		out.append({"group":"war","label":"Take tribute from %s and leave" % held_name,"action":"command","params":{"command_text":"Take tribute from %s and leave" % held_name}})
+		var n:=String(town.name)
+		for row in [["Spare %s and hold it","Spare %s and hold it"],["Take captives and burn %s","Take captives home and burn %s"],
+				["Put the men of %s to the sword","Put the men of %s to the sword"],["Take tribute from %s and leave","Take tribute from %s and leave"],
+				["Govern %s as ours","Govern %s well as a town of ours"],["Rule %s by the spear","Rule %s by the spear"],["Let %s keep its own elders","Let %s govern themselves"],
+				["Make %s's people our own","Make the people of %s our own, equal citizens"],["Enslave the people of %s","Enslave the people of %s"],
+				["Bring 20 of %s's people home as our own","Bring 20 people of %s home as our own"],["Rebuild %s","Rebuild %s"],
+				["Strengthen the garrison at %s","Strengthen the garrison at %s"],["Give %s back and come home","Give %s back and come home"]]:
+			out.append({"group":"war","label":String(row[0]) % n,"action":"command","params":{"command_text":String(row[1]) % n}})
+	# A siege of ours: storm it now, or keep them shut in.
+	var siege:Dictionary=WorldSimulation.military.active_siege
+	if not siege.is_empty() and String(siege.get("mode",""))=="offensive":
+		var walled:=String((siege.get("threat",{}) as Dictionary).get("target_region_name","the town"))
+		out.append({"group":"war","label":"Storm the walls of %s" % walled,"action":"command","params":{"command_text":"Storm the walls of %s" % walled}})
 	var places:=known_places()
 	var home:Vector2=WorldSimulation.world.player_world_origin
 	places.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return home.distance_squared_to(Vector2(float(a.position.x),float(a.position.z)))<home.distance_squared_to(Vector2(float(b.position.x),float(b.position.z))))
@@ -504,6 +519,7 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"intercept": return _intercept(out,reading,insist)
 		"drill": return _drill_first(out)
 		"fate": return _fate(out,reading)
+		"storm": return _storm(out,insist)
 		"held": return _held(out,reading.get("target",{}))
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
 	return _strike(out,reading,insist)
@@ -543,6 +559,41 @@ static func _fate(out:Dictionary,reading:Dictionary)->Dictionary:
 	out.says=(qualm+String(result.text)).strip_edges()
 	out.outcome=String(result.outcome)
 	out["fate"]=result
+	return out
+
+static func _besieged()->Dictionary:
+	## The town our band is besieging now: {city_id, civ_id, name, army_id}.
+	var mc:Variant=WorldSimulation.military
+	if mc==null or mc.active_siege.is_empty() or String(mc.active_siege.get("mode",""))!="offensive": return {}
+	var threat:Dictionary=mc.active_siege.get("threat",{})
+	return {"city_id":String(threat.get("target_region_id","")),"civ_id":String(mc.active_siege.get("defender_id",threat.get("source_civ_id",""))),
+		"name":String(threat.get("target_region_name","the town")),"army_id":int(mc.active_siege.get("army_id",0)),"besieged":true}
+
+static func _storm(out:Dictionary,insist:bool)->Dictionary:
+	## Storm a town our band is besieging: the war leader says how the siege
+	## stands; before the walls are worn down he objects, and goes if the god
+	## insists (military_campaign.siege_order "assault").
+	var mc:=_mc()
+	var town:=_besieged()
+	if town.is_empty(): return _no(out,"no_siege","We are not besieging anyone.","Name a town and I will look to it.")
+	out["target"]=town.duplicate(true)
+	var siege:Dictionary=mc.active_siege
+	var name:=String(town.name)
+	var days:=maxi(1,int(siege.get("days",0)))
+	var pressure:=float(siege.get("pressure",0.0))
+	var army:=_army(int(town.army_id))
+	var troops:=int(army.get("troops",0))
+	var worn:="their walls are breached and their people hungry" if pressure>=0.72 else ("their stores are running low" if pressure>=0.5 else "their walls are whole and their food is not gone")
+	if not insist and pressure<0.5:
+		var objected:=_object(out,"walls_whole","Day %d of the siege of %s, and %s. Storming now, my %s would lose many for little." % [days,name,worn,_fighters(troops)],"Give it more days, or say the word and we go over the walls.")
+		objected.outcome="Nobody goes at the walls yet."
+		return objected
+	var r:Dictionary=mc.siege_order(String(siege.id),"assault")
+	if r.has("error"): return _no(out,"assault_failed",String(r.error),"")
+	out.verdict="act"; out.reason="storm"
+	out.objective={"army_id":int(town.army_id),"kind":"storm","city_id":String(town.city_id),"civ_id":String(town.civ_id),"troops":troops,"days":0}
+	out.says="Day %d of the siege, and %s. We go over the walls of %s now with %s, from the lines we hold." % [days,worn,name,_fighters(troops)]
+	out.outcome="%s's band storms %s." % [String(out.general),name]
 	return out
 
 static func _number(n:int)->String:

@@ -9,7 +9,9 @@ var data:Dictionary={"next_id":1,"last_day":-1,"transfers":[],"groups":[],"histo
 func reset()->void:
 	data={"next_id":1,"last_day":-1,"transfers":[],"groups":[],"history":[]}
 
-func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
+## sack: captives driven off as the town falls (town_fate.gd); the caller
+## bounds the count by what the garrison can guard on the road.
+func preview(civ_id:String,region_id:String,count:int,status:String,sack:bool=false)->Dictionary:
 	if not STATUSES.has(status): return {"error":"Choose citizenship, slavery or coerced penal status."}
 	if WorldSimulation.settlements._primary_settlement_id().is_empty(): return {"error":"Establish a home settlement before moving residents there."}
 	if WorldSimulation.military.recovery.home_unavailable(): return {"error":"The destination is occupied."}
@@ -20,7 +22,7 @@ func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary
 	if region.is_empty() or String(region.controller)!="player": return {"error":"Select a region you occupy."}
 	var garrison:Dictionary=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
 	if int(garrison.get("troops",0))<=0: return {"error":"An unsupported occupation cannot organize a transfer."}
-	if status!="citizen":
+	if status!="citizen" and not sack:
 		var control:=WorldSimulation.world.occupation_coercion_availability(civ_id,region_id,count)
 		if control.has("error"):return control
 	if count>floori(float(region.population)): return {"error":"There are fewer residents here than requested."}
@@ -42,8 +44,8 @@ func preview(civ_id:String,region_id:String,count:int,status:String)->Dictionary
 	if float(civ.population)-count<1: return {"error":"This transfer would exceed the source population."}
 	return {"ok":true,"people":count,"status":status,"route":route,"distance":distance,"days":days,"food":food,"source":civ_id,"region":region_id,"destination":WorldSimulation.settlements._primary_settlement_id()}
 
-func depart(civ_id:String,region_id:String,count:int,status:String)->Dictionary:
-	var ready:=preview(civ_id,region_id,count,status)
+func depart(civ_id:String,region_id:String,count:int,status:String,sack:bool=false)->Dictionary:
+	var ready:=preview(civ_id,region_id,count,status,sack)
 	if ready.has("error"): return ready
 	var index:int=WorldSimulation.world._civilization_index(civ_id)
 	var civ:Dictionary=WorldSimulation.world.civilizations[index]
