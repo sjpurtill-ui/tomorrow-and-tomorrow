@@ -88,12 +88,12 @@
     "line": "production",
     "game_year": 140,
     "approx_historical_year": -4067,
-    "prompt": "c. 4067 BCE: Early metalworkers smelt lead-bearing ore in a small clay hearth; palette-knife impasto oil. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6f187128-17dc-44aa-8196-b8d242006689.png",
+    "prompt": "c. 4067 BCE: Adults experiment with lead smelting in a tiny open clay-charcoal hearth using wooden scoops and reed blow tube; tiny gray metal droplets cool in clay bowl. Palette-knife impasto oil. No tongs, hinge tool, bellows, large forge, text, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e17277d7-135a-4ef4-9823-7e3631614719.png",
     "asset": "res://assets/ui/research/subjects/lead_smelting-v1.png",
-    "sha256": "a0f414d7af921e585d4fbd270123e51373ccd56906c41ec6a2be655007472e00",
+    "sha256": "f20527cfcd8842a3d79f683601f4266f82859c35c3ff903ca820e88806ffa3a7",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+    "review": "Replacement selected after full-image and 3.37:1 crop review; primitive tools and impasto medium clear."
   },
   {
     "id": "long_distance_axe_trade",
@@ -158,14 +158,15 @@
   {
     "id": "paired_ox_yoke",
     "line": "logistics",
-    "game_year": 185,
-    "approx_historical_year": -3767,
-    "prompt": "c. 3767 BCE: Adults fit wooden yoke and fiber ropes to paired oxen; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "game_year": 145,
+    "approx_historical_year": -4033,
+    "prompt": "c. 4033 BCE: Adults fit a wooden yoke and fiber ropes to paired oxen before drawing a wooden sledge; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
     "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cffd46bf-dc85-4189-b325-b1c1abbffdb6.png",
     "asset": "res://assets/ui/research/subjects/paired_ox_yoke-v1.png",
     "sha256": "41b8f9807df3d3b71db0bf601f20530cbaa1d3252c1a2032a98eeff78e06fb1e",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+    "review": "Selected after 3.37:1 crop review; subject and direction medium clear.",
+    "target_year": 185
   },
   {
     "id": "runner_relays_between_work_sites",

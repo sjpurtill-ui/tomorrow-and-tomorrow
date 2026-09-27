@@ -1,12 +1,13 @@
 {
   "id": "paired_ox_yoke",
   "line": "logistics",
-  "game_year": 185,
-  "approx_historical_year": -3767,
-  "prompt": "c. 3767 BCE: Adults fit wooden yoke and fiber ropes to paired oxen; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "game_year": 145,
+  "approx_historical_year": -4033,
+  "prompt": "c. 4033 BCE: Adults fit a wooden yoke and fiber ropes to paired oxen before drawing a wooden sledge; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
   "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cffd46bf-dc85-4189-b325-b1c1abbffdb6.png",
   "asset": "res://assets/ui/research/subjects/paired_ox_yoke-v1.png",
   "sha256": "41b8f9807df3d3b71db0bf601f20530cbaa1d3252c1a2032a98eeff78e06fb1e",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear.",
+  "target_year": 185
 }
