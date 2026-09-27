@@ -1,0 +1,12 @@
+{
+  "id": "refuse_removal",
+  "line": "health",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Villagers sweep and carry household refuse beyond the settlement; sparse watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-820db856-11f9-4d5d-a251-a44a39210905.png",
+  "asset": "res://assets/ui/research/subjects/refuse_removal-v1.png",
+  "sha256": "c8b9b25f7a0642b903fd84d8b9dc99987284e7aab02cf7dafc11ff9afec5ddd3",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Refuse being carried away clear in crop."
+}

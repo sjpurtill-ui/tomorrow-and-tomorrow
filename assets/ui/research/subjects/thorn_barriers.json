@@ -1,0 +1,12 @@
+{
+  "id": "thorn_barriers",
+  "line": "security",
+  "game_year": 45,
+  "approx_historical_year": -4700,
+  "prompt": "c. 4700 BCE: Villagers construct a thorny brush barrier around a small reed camp; hand-cut woodblock print. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4f150e51-e57f-401b-96f9-deada40fcdf9.png",
+  "asset": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
+  "sha256": "16e0e20e7fde6512783ff8758e07e5ed3988efb4334a7fc4f8c330296b84b50d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Thorn barrier and settlement clear in crop."
+}

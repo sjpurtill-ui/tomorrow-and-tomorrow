@@ -1,0 +1,12 @@
+{
+  "id": "textile_laundering_practice",
+  "line": "production",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Adults wash woven cloth against river stones; matte impasto oil painting. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e22a987b-5a1e-4187-873b-3ff9ed66e400.png",
+  "asset": "res://assets/ui/research/subjects/textile_laundering_practice-v1.png",
+  "sha256": "a9b244b67ddb73d919d5499c047395a4df51b3ae0bddaf82e9ab59547da26f47",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Cloth washing on river stones clear in crop."
+}

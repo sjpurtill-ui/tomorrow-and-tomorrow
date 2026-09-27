@@ -1,0 +1,12 @@
+{
+  "id": "weapon_free_gatherings",
+  "line": "security",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Communal gathering shares a meal while simple stone weapons lie aside at the edge; hand-cut woodblock print. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-53ba84c4-bb21-44c2-b7c4-541eb019a4fa.png",
+  "asset": "res://assets/ui/research/subjects/weapon_free_gatherings-v1.png",
+  "sha256": "8a5b6d245ec07d7eadb8f4770b003db17d73464e9a86b8c2f1748d919ba0dd98",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Gathering and set-aside weapons clear in crop."
+}

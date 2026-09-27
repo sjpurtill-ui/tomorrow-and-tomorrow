@@ -1,0 +1,12 @@
+{
+  "id": "drive_hunts",
+  "line": "nutrition",
+  "game_year": 48,
+  "approx_historical_year": -4687,
+  "prompt": "c. 4687 BCE: Hunters gently drive game toward a brush fence funnel and pit; egg tempera illustration. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c25e7e98-2dc0-4d2b-8ddd-47742b5bbbb3.png",
+  "asset": "res://assets/ui/research/subjects/drive_hunts-v1.png",
+  "sha256": "9b71e65ae80b43879ea554634966ec0ece5cf0ff4ba265f35f374446f41ff9c1",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Group hunt and fence funnel clear in crop."
+}
