@@ -3671,46 +3671,83 @@ func _random_valid_site(rng: RandomNumberGenerator) -> Vector3:
 	return Vector3.ZERO
 
 func _create_forest_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
-	var shared_crown := SphereMesh.new()
-	shared_crown.radius = 0.011
-	shared_crown.height = 0.036
-	shared_crown.radial_segments = 6
-	shared_crown.rings = 3
-	for i in 42:
+	# A timber occurrence shows as a few copses of real-sized crowns (codex/
+	# beauty-4), drawn like every other tree (atlas crowns, seasons, wind, ink
+	# edge), one batch. It used to be forty-two lone spheres twenty metres
+	# across, each with its own material: dark specks on the grass.
+	var transforms:Array[Transform3D]=[]
+	var colors:Array[Color]=[]
+	for copse in 4:
 		var angle := rng.randf() * TAU
 		var distance := sqrt(rng.randf()) * 7.8
-		var x := center.x + cos(angle) * distance
-		var z := center.z + sin(angle) * distance
-		if not _inside_province(x / world_width + 0.5, z / world_depth + 0.5):
-			continue
-		var y := _height_at(x, z)
-		var biome:=_biome_at(x,z,y)
-		if y<=SEA_LEVEL or LandscapeCover.canopy_density(biome)<=0:continue
-		var tree := MeshInstance3D.new()
-		tree.mesh = shared_crown
-		var scale := rng.randf_range(0.72, 1.45)
-		tree.scale = Vector3(scale * rng.randf_range(0.78, 1.08), scale * rng.randf_range(1.35, 2.0), scale)
-		tree.position = Vector3(x, y + 0.014 * scale, z)
-		var material:=_vegetation_surface_material(0)
-		material.set_shader_parameter("canopy_tint",LandscapeCover.canopy_tint(biome,rng.randf()))
-		material.set_shader_parameter("fallback_climate",_vegetation_climate(Vector3(x,y,z)))
-		tree.material_override=material
-		add_child(tree)
+		var middle := Vector2(center.x + cos(angle) * distance, center.z + sin(angle) * distance)
+		for k in rng.randi_range(5, 9):
+			var point := middle + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(0.0, 0.012)
+			if not _inside_province(point.x / world_width + 0.5, point.y / world_depth + 0.5):
+				continue
+			var y := _height_at(point.x, point.y)
+			var biome:=_biome_at(point.x,point.y,y)
+			if y<=SEA_LEVEL or LandscapeCover.canopy_density(biome)<=0:continue
+			var scale := rng.randf_range(0.85, 1.45)
+			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.8, 1.1), scale * rng.randf_range(0.8, 1.2), scale))
+			transforms.append(Transform3D(basis, Vector3(point.x, y + 0.00125 * scale, point.y)))
+			var tint:Color=LandscapeCover.canopy_tint(biome,rng.randf())
+			tint.a=float(LandscapeCover.CROWN_ATLAS_CELLS[LandscapeCover.crown_variant(transforms[-1].origin)])/15.0
+			colors.append(tint)
+	if not transforms.is_empty():
+		var multi:=MultiMesh.new()
+		multi.transform_format=MultiMesh.TRANSFORM_3D
+		multi.use_colors=true
+		multi.use_custom_data=true
+		multi.mesh=_create_irregular_canopy_mesh(0.0037,0.00235)
+		multi.instance_count=transforms.size()
+		for i in transforms.size():
+			multi.set_instance_transform(i,transforms[i])
+			multi.set_instance_color(i,colors[i])
+			multi.set_instance_custom_data(i,_vegetation_climate(transforms[i].origin))
+		var copses:=MultiMeshInstance3D.new()
+		copses.name="TimberCopses"
+		copses.multimesh=multi
+		copses.material_override=_vegetation_surface_material(0,-2)
+		copses.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(copses)
 	_create_resource_marker("Timber", center)
 
 func _create_stone_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
+	# Boulders drawn in the settlement's ink (settlement_ink.gd): warm on the
+	# sunward side, cool in shade, one clean outline, a soft shadow; a few
+	# grouped where the rock breaks the turf. One batch.
+	var transforms:Array[Transform3D]=[]
+	var colors:Array[Color]=[]
 	for i in 9:
-		var rock := MeshInstance3D.new()
-		var mesh := SphereMesh.new()
-		mesh.radius = rng.randf_range(SURFACE_STONE_RADIUS_KM.x,SURFACE_STONE_RADIUS_KM.y)
-		mesh.height = mesh.radius * rng.randf_range(0.8,1.25)
-		rock.mesh = mesh
-		rock.scale = Vector3(rng.randf_range(0.8,1.35),rng.randf_range(0.45,0.8),rng.randf_range(0.75,1.25))
-		rock.position = center + Vector3(rng.randf_range(-1.6, 1.6), mesh.radius * 0.35, rng.randf_range(-1.6, 1.6))
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color("#686762")
-		rock.material_override = material
-		add_child(rock)
+		var radius := rng.randf_range(SURFACE_STONE_RADIUS_KM.x,SURFACE_STONE_RADIUS_KM.y)*0.55
+		var at := center + Vector3(rng.randf_range(-1.6, 1.6), 0.0, rng.randf_range(-1.6, 1.6))
+		for k in rng.randi_range(1, 3):
+			var point := at + Vector3(rng.randf_range(-0.004, 0.004), 0.0, rng.randf_range(-0.004, 0.004))
+			point.y = _height_at(point.x, point.z)
+			var r := radius * rng.randf_range(0.45, 1.0)
+			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(r * rng.randf_range(0.9, 1.4), r * rng.randf_range(0.45, 0.75), r * rng.randf_range(0.8, 1.2)))
+			transforms.append(Transform3D(basis, point + Vector3(0, r * 0.2, 0)))
+			colors.append(Color(0.58, 0.56, 0.51).darkened(rng.randf_range(0.0, 0.18)))
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.0; mesh.height = 2.0; mesh.radial_segments = 7; mesh.rings = 4
+	var multi:=MultiMesh.new()
+	multi.transform_format=MultiMesh.TRANSFORM_3D
+	multi.use_colors=true
+	multi.mesh=mesh
+	multi.instance_count=transforms.size()
+	for i in transforms.size():
+		multi.set_instance_transform(i,transforms[i])
+		multi.set_instance_color(i,colors[i])
+	var stones:=MultiMeshInstance3D.new()
+	stones.name="SurfaceStones"
+	stones.multimesh=multi
+	stones.material_override=preload("res://scripts/settlement_ink.gd").material()
+	stones.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(stones)
+	var in_metres:Array[Transform3D]=[]
+	for placed in transforms:in_metres.append(Transform3D(placed.basis.scaled(Vector3.ONE*0.001),placed.origin))
+	preload("res://scripts/settlement_ink.gd").add_ground_shadows(self,"SurfaceStoneShadows",in_metres,AABB(Vector3(-1000,-1000,-1000),Vector3(2000,2000,2000)))
 	_create_resource_marker("Stone", center)
 
 func _create_resource_marker(type: String, position: Vector3) -> void:
@@ -6286,6 +6323,23 @@ func _settlement_wall_envelope(plots:Array[Dictionary],segments:int,axis:float,f
 		# Vertex k lies between sectors k-1 and k; the wall never cuts a house.
 		var r:=maxf((sector[(k-1+segments)%segments]+sector[k])*0.5,maxf(raw[(k-1+segments)%segments],raw[k])*0.84)
 		out[k]=clampf(r+0.011,0.035,maxf(fallback*1.8,0.05))
+	# The line never runs through a house: where one straddles it, the stakes
+	# go round the outside of its yard.
+	for plot in plots:
+		var use:=String(plot.get("land_use",""))
+		if use in ["","field","pasture","water","waste","vacant","temporary_encampment","woodland"]:continue
+		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
+		var c:Variant=plot.get("centroid",Vector2.ZERO)
+		if not c is Vector2:continue
+		var at:Vector2=c
+		var reach:=sqrt(maxf(float(plot.get("area_ha",0.01)),0.0001)/100.0/PI)
+		var bearing:=fposmod(at.angle()-axis,TAU)/TAU*float(segments)
+		var k0:=int(bearing)%segments
+		var k1:=(k0+1)%segments
+		var line:=lerpf(out[k0],out[k1],bearing-floorf(bearing))
+		if at.length()-reach<line+0.004 and at.length()+reach>line-0.004:
+			var clear:=minf(at.length()+reach+0.007,maxf(fallback*1.8,0.05))
+			out[k0]=maxf(out[k0],clear);out[k1]=maxf(out[k1],clear)
 	return out
 
 ## Gate bearings (world angles) where the main streets cross the traced wall.

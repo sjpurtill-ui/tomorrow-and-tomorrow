@@ -249,21 +249,26 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 // where they overlap, the way wet strokes do. Returns (distance to the nearest
 // stroke's edge 0-1+, the blended tone 0-1, the nearest stroke's second tone
 // 0-1, how the nearest stroke's top faces the sun -1..1).
-vec4 sg_dabs(vec2 p) {
+// `wide` searches the 3 x 3 cells round the fragment; otherwise strokes sit
+// closer to their cells and only the 2 x 2 nearest are searched (cheaper, for
+// the broad wash that is also drawn from higher up).
+vec4 sg_dabs(vec2 p, bool wide) {
 	vec2 i = floor(p);
 	vec2 f = fract(p);
 	float best = 9.0;
 	vec4 out_dab = vec4(9.0, 0.5, 0.5, 0.0);
 	float weight = 0.0;
 	float tone = 0.0;
-	for (int y = -1; y <= 1; y++) {
-		for (int x = -1; x <= 1; x++) {
+	ivec2 lo = wide ? ivec2(-1) : ivec2(step(f, vec2(0.5)))*-1;
+	ivec2 hi = wide ? ivec2(1) : lo+ivec2(1);
+	for (int y = lo.y; y <= hi.y; y++) {
+		for (int x = lo.x; x <= hi.x; x++) {
 			vec2 g = vec2(float(x), float(y));
 			vec2 cell = i+g;
 			float h0 = map_paper_hash(cell);
 			float h1 = map_paper_hash(cell+vec2(17.0, -5.0));
 			float h2 = map_paper_hash(cell+vec2(-29.0, 13.0));
-			vec2 r = f-(g+0.5+(vec2(h0, h1)-0.5)*0.75);
+			vec2 r = f-(g+0.5+(vec2(h0, h1)-0.5)*(wide ? 0.75 : 0.5));
 			float a = 0.30+(h2-0.5)*0.9;
 			vec2 d = vec2(cos(a), sin(a));
 			vec2 q = vec2(dot(r, d), dot(r, vec2(-d.y, d.x)));
@@ -315,19 +320,21 @@ vec3 settlement_meadow(vec3 earth, vec2 surface_position_km, vec2 surface_origin
 	vec3 straw = mix(base, vec3(dot(base, vec3(0.2126, 0.7152, 0.0722)))*vec3(1.26, 1.12, 0.78), 0.55);
 	// Patches (3 m): broad dabs of related greens, a little straw on the rises.
 	vec3 c = base;
-	vec4 broad = sg_dabs(p/3.2);
-	{
+	// Strokes under two pixels only speckle: from higher up the washes carry it.
+	float stroke_w = near*(1.0-smoothstep(0.9, 1.7, pixel_m));
+	if (stroke_w > 0.0) {
+		vec4 broad = sg_dabs(p/3.2, false);
 		float t = clamp(broad.y*0.75+(1.0-moist)*0.5-0.12, 0.0, 1.0);
 		vec3 tone = t < 0.5 ? mix(deep, base, t*2.0) : mix(base, sage, t*2.0-1.0);
 		tone = mix(tone, straw, smoothstep(0.80, 0.95, broad.z)*smoothstep(0.45, 0.70, 1.0-moist));
 		float soft = 1.0-smoothstep(0.70, 1.30, broad.x);
-		c = mix(c, tone, (0.48+0.25*soft)*near);
+		c = mix(c, tone, (0.48+0.25*soft)*stroke_w);
 	}
 	// Clumps (1.3 m) and tussocks (0.45 m): each lit on its sunward side,
 	// shaded on the far side, dark where it meets the next.
 	float clump_w = (1.0-smoothstep(0.18, 0.40, pixel_m))*close;
 	if (clump_w > 0.0) {
-		vec4 clump = sg_dabs(p/1.3+vec2(3.7, -1.9));
+		vec4 clump = sg_dabs(p/1.3+vec2(3.7, -1.9), true);
 		float body = 1.0-smoothstep(0.55, 1.05, clump.x);
 		float lit = -clump.w*(1.0-clump.x*0.4);
 		vec3 tone = mix(c, clump.y < 0.3 ? deep : (clump.y > 0.88 ? straw : sage), 0.22);
@@ -336,7 +343,7 @@ vec3 settlement_meadow(vec3 earth, vec2 surface_position_km, vec2 surface_origin
 	}
 	float tuft_w = (1.0-smoothstep(0.07, 0.16, pixel_m))*close;
 	if (tuft_w > 0.0) {
-		vec4 tuft = sg_dabs(p/0.45+vec2(-8.1, 2.3));
+		vec4 tuft = sg_dabs(p/0.45+vec2(-8.1, 2.3), false);
 		float body = 1.0-smoothstep(0.50, 1.0, tuft.x);
 		float lit = -tuft.w*(1.0-tuft.x*0.5);
 		c *= 1.0+(body*(lit*0.16+0.02)-(1.0-body)*0.06)*tuft_w;

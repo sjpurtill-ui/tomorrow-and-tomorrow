@@ -237,6 +237,10 @@ void vertex() {
 	float grow = min(pixel_km*outline_px, 0.004)/model_scale;
 	vec2 radial = VERTEX.xz;
 	float reach = length(radial);
+	// A form only a few pixels across keeps its colour: the line thins away
+	// before it could turn a distant hut into an ink speck.
+	float reach_px = reach*model_scale/max(pixel_km, 1e-9);
+	grow *= clamp((reach_px-2.5)/5.0, 0.0, 1.0);
 	if (reach > 1e-6) { VERTEX.xz += radial/reach*grow; }
 	// A touch of height as well, so a flat roof edge seen from above keeps it.
 	VERTEX.y += grow*0.5*step(0.05, VERTEX.y);
@@ -254,6 +258,9 @@ void fragment() {
 	float d = length(q);
 	// A soft cool pool, deepest just under the eaves.
 	float a = (1.0-smoothstep(0.15, 1.0, d))*0.78;
+	// A pool only a few pixels wide would print a dark speck: it fades out.
+	float quad_px = 1.0/max(max(fwidth(UV.x), fwidth(UV.y)), 1e-5);
+	a *= smoothstep(5.0, 16.0, quad_px);
 	ALBEDO = mix(vec3(1.0), vec3(0.55, 0.59, 0.68), a);
 }
 """
