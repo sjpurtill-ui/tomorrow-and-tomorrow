@@ -1,3 +1,11 @@
+## September 27 — earliest-first year 5 art, batch 4: INTEGRATED
+
+Worker `f11b7c4c7411f2e2746cbf012f7560c73d284f7f`, branch `codex/research-art-earliest-04`, base `8ab5aa9c`, reconciled with newer main `981c08ad` in merge `b589c856`. The combined headless art probe passed again (`artifacts/earliest04-latest-runtime.log`); newer world and UI work is preserved. Seven year5 subjects gain dedicated paintings: common_path_alignment, edge_resharpening_rounds, emergency_food_caching, infant_swaddling_practice, leader_gift_redistribution, paired_task_assignment and turbidity_judging. Classical Other batch10 stays HELD/excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for early materials, dress, shelters and subject clarity. Combined Godot 4.7.2 import has no logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-04` passes seven catalogue lookups, distinct texture/provenance hashes, hidden gating and crop bounds. Every lookup also passes at years1,2,3,4,5,299,300,600, including emergency_food_caching and both sides of early-art expiry. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest04-runtime.log` and `earliest-04-research-in-game-crops.png`.
+
+Reproduced early audit:1122 rows,395 own effective paintings,727 borrowed/line,zero missing files. Counts use proposed-year lookup and filename ownership, not artistic-quality certification. Next gaps are year6 birth_spacing_customs,delousing,refuge_point_marking. No simulation/save changes or import churn committed; full campaign/unrelated suites not repeated. No active canonical player found; no player/editor stopped or restarted.
+
 ## September 27 — earliest-first year 4 art, batch 3: INTEGRATED
 
 Worker `925e0a7879d1f8aeaa36781e9afdb53b100ce4d1`, branch `codex/research-art-earliest-03`, base `c5855a94`, integrated by clean fast-forward. Eight year4 subjects gain dedicated paintings: aptitude_trials, dawn_readiness_drill, dissenting_voice_custom, fever_watch_customs, paired_carrier_balancing, sleeping_area_rotation, symptom_sharing_customs and tool_hazard_awareness. Classical Other batch10 stays HELD/excluded.
