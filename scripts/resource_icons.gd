@@ -464,3 +464,83 @@ static func _settlement_glyph(index:int)->Array:
 static func _ring_diamond(x:float,y:float,r:float,w:float,col:Color)->Array:
 	var top:=Vector2(x,y-r); var right:=Vector2(x+r,y); var bottom:=Vector2(x,y+r); var left:=Vector2(x-r,y)
 	return [_s(top.x,top.y,right.x,right.y,w,col),_s(right.x,right.y,bottom.x,bottom.y,w,col),_s(bottom.x,bottom.y,left.x,left.y,w,col),_s(left.x,left.y,top.x,top.y,w,col)]
+
+
+# -- Great works on the chart --------------------------------------------------
+
+static var _great_work_textures:Dictionary={}
+
+## A great work's chart emblem: its form (tower, colossus, hall, ring...) inked
+## on a small square paper plaque, set apart from the round settlement marks.
+## The plaque's edge tells the state: solid ink when standing, a gold outer
+## rule once dedicated, a broken edge with the upper part ghosted while it
+## rises, and a cracked, faded mark for a ruin. Drawn bare (no disc).
+static func great_work_texture(shape:String,state:String="standing",px:int=48)->Texture2D:
+	var key:="%s|%s|%d" % [shape,state,px]
+	if _great_work_textures.has(key): return _great_work_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(great_work_glyph(shape,state),px,false))
+	_great_work_textures[key]=texture
+	return texture
+
+
+static func great_work_glyph(shape:String,state:String="standing")->Array:
+	var ink:=Color("#2b2118")
+	var paper:=Color("#f1e7cf")
+	var gold:=Color("#a88a4a")
+	var faded:=Color("#7a6f60")
+	var halo:=Color(0.95,0.91,0.82,0.55)
+	var ruined:=state=="ruined"
+	var unfinished:=state in ["building","abandoned"]
+	var c:=faded if ruined or state=="abandoned" else ink
+	var parts:Array=[_rr(28,28,21,21,6,halo)]
+	if state=="dedicated": parts.append_array([_rr(28,28,20.5,20.5,5,gold),_rr(28,28,18.8,18.8,4.5,paper)])
+	if unfinished:
+		# A broken edge: the plaque is still being laid out.
+		parts.append(_rr(28,28,17,17,4,paper))
+		for side in 4:
+			for half:float in [-1.0,1.0]:
+				var along:=half*9.0
+				var a:Vector2;var b:Vector2
+				match side:
+					0: a=Vector2(28+along-5,11.8);b=Vector2(28+along+5,11.8)
+					1: a=Vector2(28+along-5,44.2);b=Vector2(28+along+5,44.2)
+					2: a=Vector2(11.8,28+along-5);b=Vector2(11.8,28+along+5)
+					_: a=Vector2(44.2,28+along-5);b=Vector2(44.2,28+along+5)
+				parts.append(_s(a.x,a.y,b.x,b.y,2.2,c))
+	else:
+		parts.append_array([_rr(28,28,17,17,4,c),_rr(28,28,15.2,15.2,3,paper)])
+	parts.append_array(_great_work_form(shape,c,paper))
+	if unfinished:
+		# The upper courses are not built yet: ghost them.
+		parts.append(_rr(28,20,14.4,7.5,0,Color(paper,0.66)))
+	if ruined:
+		parts.append_array([_s(18,15,38,42,2.6,paper),_c(19,40.5,1.6,c),_c(37.5,40.5,1.3,c)])
+	return parts
+
+
+static func _great_work_form(shape:String,c:Color,paper:Color)->Array:
+	match shape:
+		"tower": return [_rr(28,40,8,2,1,c),_rr(28,28,4.2,11,0.8,c),_rr(28,17,6,1.5,0.5,c),_t(28,9,22.5,15.5,33.5,15.5,c)]
+		"lighthouse": return [_rr(28,40,8,2,1,c),_t(28,18,23,38,33,38,c),_rr(28,16,4.5,1.5,0.5,c),_c(28,12,3,c),_s(20,11,17,9,1.6,c),_s(36,11,39,9,1.6,c)]
+		"colossus": return [_rr(28,40.5,9,2,1,c),_c(28,13,3.2,c),_rr(28,22.5,4.5,6,2,c),_s(26,28,24.5,37,3,c),_s(30,28,31.5,37,3,c),_s(32,18.5,37,11,2.4,c),_s(24,18.5,22,26,2.4,c)]
+		"ring":
+			var stones:Array=[]
+			for i in 8:
+				var a:=TAU*float(i)/8.0
+				stones.append(_rr(28+cos(a)*10.5,28+sin(a)*10.5,2.2,2.2,0.6,c))
+			stones.append(_c(28,28,2.2,c))
+			return stones
+		"mound","terrace": return [_rr(28,39,13,2.6,0.5,c),_rr(28,33.2,9.8,2.6,0.5,c),_rr(28,27.4,6.6,2.6,0.5,c),_rr(28,21.6,3.4,2.6,0.5,c)]
+		"basin": return [_rr(28,29,12.5,9,2,c),_rr(28,29,9.8,6.4,1.5,paper),_s(20.5,29.5,24,27.5,1.6,c),_s(24,27.5,28,30.5,1.6,c),_s(28,30.5,32,27.5,1.6,c),_s(32,27.5,35.5,29.5,1.6,c)]
+		"orchard": return [_c(19,23,5,c),_c(28,20,5.5,c),_c(37,23,5,c),_s(19,27,19,37,2.2,c),_s(28,25,28,37,2.2,c),_s(37,27,37,37,2.2,c),_s(14,38,42,38,2,c)]
+		"kilns": return [_c(19,35,6,c),_c(28,32,7,c),_c(37,35,6,c),_rr(28,40.5,14,2.5,0,paper),_s(14,38,42,38,2,c),_c(28,20,2,c),_c(30,15,1.5,c)]
+		"bridge": return [_s(13,23,43,23,3,c),_ring(20.5,33,7,3,c),_ring(35.5,33,7,3,c),_rr(28,39.8,14.4,3.8,0,paper),_s(15,41,41,41,1.6,c)]
+		"dam": return [_rr(31,28,3.5,12,0.5,c),_t(34,16,34,40,41,40,c),_s(15,21,25,21,1.6,c),_s(15,27,25,27,1.6,c),_s(15,33,25,33,1.6,c)]
+		"canal": return [_s(14,20,42,20,2.4,c),_s(14,36,42,36,2.4,c),_s(16,28,21,26,1.6,c),_s(21,26,26,30,1.6,c),_s(26,30,31,26,1.6,c),_s(31,26,36,30,1.6,c),_s(36,30,40,28,1.6,c)]
+		"causeway": return [_rr(28,26,14,2.6,1,c),_rr(18,32,1.4,4,0.4,c),_rr(25,32,1.4,4,0.4,c),_rr(31,32,1.4,4,0.4,c),_rr(38,32,1.4,4,0.4,c),_s(15,39,24,39,1.5,c),_s(30,39,41,39,1.5,c)]
+		"gate": return [_rr(20,30,4,10.5,0.5,c),_rr(36,30,4,10.5,0.5,c),_rr(28,17.5,13,3,0.5,c),_ring(28,29,5.2,2.4,c),_rr(28,34.5,4,5.5,0,paper)]
+		"observatory": return [_rr(28,40,13,2.4,0.5,c),_rr(28,35,9.5,2.4,0.5,c),_c(28,27.5,7,c),_rr(28,33.2,7.5,1,0,c),_s(27,25,34,19,1.8,paper)]
+		"amphitheatre": return [_ring(28,37,13.5,2.4,c),_ring(28,37,9,2.4,c),_ring(28,37,4.6,2.2,c),_rr(28,41.4,14.4,3.6,0,paper),_s(15,38.6,41,38.6,2,c)]
+		"granary": return [_s(20,33,20,40,2,c),_s(36,33,36,40,2,c),_rr(28,29,11,5,0.5,c),_t(28,13,13.5,25,42.5,25,c),_s(15,40.5,41,40.5,1.8,c)]
+	# A hall, archive or house: a long roof over a pillared front.
+	return [_t(28,13,13,25,43,25,c),_rr(28,32,11.5,6,0.5,c),_rr(28,34.5,2.5,3.5,0.5,paper),_s(14,39.5,42,39.5,2.2,c)]
