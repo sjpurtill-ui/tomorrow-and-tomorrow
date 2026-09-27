@@ -80,7 +80,7 @@ func _ready()->void:
 	set_aside_button=button(recovery,"Set aside unanswered reply",func():WorldSimulation.dialogue.set_aside_reply(civ_id);refresh())
 	draft_button=button(audience,"REVIEW PROPOSED TERMS",func():
 		var draft:Dictionary=WorldSimulation.dialogue.thread(civ_id).draft
-		if draft.is_empty():return
+		if draft.is_empty() or draft.has("exchange"):return
 		if draft.has("commitment"):open_commitments(draft.commitment);return
 		accord.select(ForeignDiplomacy.ACCORDS.keys().find(draft.accord));tone.select(ForeignDiplomacy.TONES.keys().find(draft.tone));generous.set_pressed_no_signal(draft.generous);show_section(1);refresh())
 	var terms:=sections[1]
