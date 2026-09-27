@@ -3711,5 +3711,14 @@
   "contagion_avoidance_customs": {"path": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png", "focus": [0.5, 0.5]},
   "fallow_thicket_regrowth": {"path": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png", "focus": [0.5, 0.5]},
   "notched_measuring_rods": {"path": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png", "focus": [0.5, 0.5]},
-  "seasonal_protein_sourcing": {"path": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png", "focus": [0.5, 0.5]}
+  "seasonal_protein_sourcing": {"path": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png", "focus": [0.5, 0.5]},
+  "carrying_poles": {"path": "res://assets/ui/research/subjects/carrying_poles-v1.png", "focus": [0.5, 0.5]},
+  "hide_smoke_curing": {"path": "res://assets/ui/research/subjects/hide_smoke_curing-v1.png", "focus": [0.5, 0.5]},
+  "household_task_ledgers": {"path": "res://assets/ui/research/subjects/household_task_ledgers-v1.png", "focus": [0.5, 0.5]},
+  "infant_carrying_slings": {"path": "res://assets/ui/research/subjects/infant_carrying_slings-v1.png", "focus": [0.5, 0.5]},
+  "midden_siting_away_from_water": {"path": "res://assets/ui/research/subjects/midden_siting_away_from_water-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_work_round": {"path": "res://assets/ui/research/subjects/seasonal_work_round-v1.png", "focus": [0.5, 0.5]},
+  "sparring_customs": {"path": "res://assets/ui/research/subjects/sparring_customs-v1.png", "focus": [0.5, 0.5]},
+  "splint_and_bracing_technique": {"path": "res://assets/ui/research/subjects/splint_and_bracing_technique-v1.png", "focus": [0.5, 0.5]},
+  "varied_forage_rotation": {"path": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png", "focus": [0.5, 0.5]}
 }

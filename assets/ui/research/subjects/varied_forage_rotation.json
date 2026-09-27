@@ -1,0 +1,12 @@
+{
+  "id": "varied_forage_rotation",
+  "line": "nutrition",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Adults compare seasonal baskets of berries, nuts, roots and leaves and gesture toward contrasting foraging habitats; flat egg tempera. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b47e12e-5ba4-43c9-b049-8a1ba5cd1299.png",
+  "asset": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png",
+  "sha256": "43dd324dec7122a1060aff1c84a50eac6299220cd4f12c96899fe5efd704443f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; varied foods and seasonal habitat gesture clear in wide crop."
+}
