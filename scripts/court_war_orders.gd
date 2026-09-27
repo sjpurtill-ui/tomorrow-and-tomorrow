@@ -41,7 +41,8 @@ const TownFate:=preload("res://scripts/town_fate.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep"]## Storming a town our band already besieges.
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep"]
+## Storming a town our band already besieges.
 const STORM_WORDS:="(storm|assault|take the walls|scale the walls|over the walls|break (in|through)|attack now|attack (the|their) (walls|gate)|go in now|rush the gate|carry the walls)"
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
 const MIN_FORCE:=5
