@@ -1,0 +1,12 @@
+{
+  "id": "lean_year_dispersal",
+  "line": "demography",
+  "game_year": 88,
+  "approx_historical_year": -4413,
+  "prompt": "c. 4413 BCE: Poor-harvest family leaves sparse fields for better-provisioned distant kin; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f58a34db-c12f-4978-b6ec-1c34657a267b.png",
+  "asset": "res://assets/ui/research/subjects/lean_year_dispersal-v1.png",
+  "sha256": "a7b3ce28c079be0bbd7f202774e0ff419a7984fc6935e6d594e2511859b55ec1",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}

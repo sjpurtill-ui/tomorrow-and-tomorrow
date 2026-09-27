@@ -1,0 +1,12 @@
+{
+  "id": "shared_vessel_avoidance",
+  "line": "health",
+  "game_year": 88,
+  "approx_historical_year": -4413,
+  "prompt": "c. 4413 BCE: Ill adult has dedicated clay cup by sleeping mat, healthy family drinks from other cups; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2c7b8757-961f-4350-8891-f21349793bc9.png",
+  "asset": "res://assets/ui/research/subjects/shared_vessel_avoidance-v1.png",
+  "sha256": "d0d40e559b20034aba13f38773f60b41d169ce94ccd084a792eace04bb466c96",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected more legible discovery mechanism in wide crop."
+}

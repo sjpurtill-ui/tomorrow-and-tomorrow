@@ -1,0 +1,12 @@
+{
+  "id": "frost_pocket_reading",
+  "line": "ecology",
+  "game_year": 85,
+  "approx_historical_year": -4433,
+  "prompt": "c. 4433 BCE: Growers compare frost-whitened low hollow with warm sun slope; plant-pigment naturalist illustration. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-edadbb44-fc20-43b4-9e35-9386c13c2864.png",
+  "asset": "res://assets/ui/research/subjects/frost_pocket_reading-v1.png",
+  "sha256": "5f72cd2f7fd0ba0f705afa29deb5fc1c73fc69c122c6298aefdc8574ae22a93f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

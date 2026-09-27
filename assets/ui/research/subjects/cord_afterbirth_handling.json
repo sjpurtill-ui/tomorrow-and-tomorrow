@@ -1,0 +1,12 @@
+{
+  "id": "cord_afterbirth_handling",
+  "line": "demography",
+  "game_year": 92,
+  "approx_historical_year": -4387,
+  "prompt": "c. 4387 BCE: Birth attendant ties plant-fiber cord by wrapped newborn and keeps afterbirth separate; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3405c6c8-bc48-4b89-9870-24d1cf8065eb.png",
+  "asset": "res://assets/ui/research/subjects/cord_afterbirth_handling-v1.png",
+  "sha256": "04ea5701687f9afcec8535742db73020ebdae52af742bee31c5844fe61ddf4c7",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}

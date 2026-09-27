@@ -1,0 +1,12 @@
+{
+  "id": "hauling_chants",
+  "line": "labor",
+  "game_year": 88,
+  "approx_historical_year": -4413,
+  "prompt": "c. 4413 BCE: Adults chant in rhythm to pull heavy stone with ropes together; charcoal and ochre. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bb41e1fb-0e8a-4af4-b20a-a9d7d13ebb4a.png",
+  "asset": "res://assets/ui/research/subjects/hauling_chants-v1.png",
+  "sha256": "f7f15dd965117b96ab799e78eff07d6fc31fa18f132af8760930cf9b0786d9c6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
