@@ -30,6 +30,7 @@ const CityLabels:=preload("res://scripts/hud/city_labels.gd")
 const Blockade:=preload("res://scripts/naval_blockade.gd")
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
+const Pursuit:=preload("res://scripts/pursuit.gd")
 
 const COLLECT_EVERY:=0.5
 ## Clash shapes and arrows blend over this long after a change.
@@ -292,8 +293,11 @@ func collect()->Dictionary:
 		if troops<=0: continue
 		var at_home:=ArmyMarks.at_home(army,home)
 		var shown:=army
+		# A band at a town we hold, or a detachment out of its garrison, is
+		# known: the garrison is ours and word comes in every day.
+		var near_hold:=army.get("pursuit") is Dictionary or (String(army.get("status",""))=="stationed" and not MilitaryCampaign.occupation_force_for_region(_region_civ(String(army.get("location_id",""))),String(army.get("location_id",""))).is_empty())
 		# Before signals the map knows only what the last runner reported.
-		if not live and not at_home:
+		if not live and not at_home and not near_hold:
 			shown=army.get("last_report",{})
 			if shown.is_empty(): continue
 		var pos:=_v2(shown.get("position",army.get("position",{})))
@@ -309,7 +313,7 @@ func collect()->Dictionary:
 		var strength:=int(shown.get("troops",troops))
 		largest=maxi(largest,strength); theatre+=strength
 		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
-			"report_age":0 if live or at_home else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+			"report_age":0 if live or at_home or near_hold else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
 		# The general's chosen land road (round bays and inlets), not a straight line.
 		if objective.is_finite() and String(shown.get("status",army.get("status","")))=="moving":
 			var road:=_road_ahead(army,pos)
@@ -325,7 +329,8 @@ func collect()->Dictionary:
 			"doing_context":{"status":String(shown.get("status",army.get("status",""))),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
 				"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":at_home,
 				"home_km":ArmyMarks.home_km(shown if shown.has("position") else army,home),
-				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0))}})
+				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0)),"pursuit":Pursuit.doing_words(army)}})
+		if army.get("pursuit") is Dictionary: entry["detachment_of"]=String((army.pursuit as Dictionary).get("town",""))
 		friendly.append(entry)
 	var enemy:Array=[]
 	# Strangers in sight who are not at war with us (scouts, passing hosts):
@@ -378,6 +383,14 @@ func collect()->Dictionary:
 
 ## Towns we hold, and who holds them: a small mark on the town with a card
 ## ("Held by us · 17").
+static func _region_civ(region_id:String)->String:
+	## Whose town a region is, for a force stationed there ("" when none).
+	if region_id=="" or region_id=="player_home" or MilitaryCampaign==null: return ""
+	for f in MilitaryCampaign.occupation_forces:
+		if String((f as Dictionary).get("region_id",""))==region_id: return String(f.get("civ_id",""))
+	return ""
+
+
 static func _garrison_inputs()->Array:
 	var out:Array=[]
 	var mc:Variant=WorldSimulation.military
@@ -388,11 +401,12 @@ static func _garrison_inputs()->Array:
 		var troops:=int(force.get("troops",0))
 		if troops<=0: continue
 		var rid:=String(force.get("region_id",""))
-		var site:Dictionary=world.city_intelligence.site(rid) if world.city_intelligence!=null else {}
-		var pos:=_v2(site.get("position",{})) if not (site.get("position",{}) as Dictionary).is_empty() else Vector2.INF
+		# On the town as our chart draws it (its label, and where our bands
+		# marched), not at a point the chart does not show.
+		var pos:=Pursuit.town_position(rid) if world.city_intelligence!=null else Vector2.INF
 		if not pos.is_finite(): continue
 		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name","")),
-			"fate_note":String(force.get("fate_note",""))})
+			"fate_note":String(force.get("fate_note","")),"away":Pursuit.away_from(rid)})
 		if out.size()>=6: break
 	return out
 
@@ -866,9 +880,10 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 		context["fighting"]=fighting.has(id) and id!=0
 		context["withdrawing"]=bool(f.get("withdrawing",false))
 		if besieging.has(id) and id!=0: context["besieging"]=String(besieging[id]) if String(besieging[id])!="" else "the town"
+		var detached:=String(f.get("detachment_of",""))
 		out.append({"id":"ours:%d" % id,"side":"ours","army_id":id,"pos":f.pos,"troops":troops,"era":era,"branch":String(f.get("branch","foot")),
-			"noun":ArmyMarks.noun(troops,stage,era,corps_known),"kind":ArmyMarks.kind(troops,stage,era,staffs_known),
-			"name":String(f.get("name","")),"general":String(f.get("general","")),"doing":ArmyMarks.doing(context),
+			"noun":ArmyMarks.noun(troops,stage,era,corps_known),"kind":ArmyMarks.kind(troops,stage,era,staffs_known),"detachment_of":detached,
+			"name":String(f.get("name","")),"general":"" if detached!="" else String(f.get("general","")),"doing":String(context.get("pursuit","")) if String(context.get("pursuit",""))!="" else ArmyMarks.doing(context),
 			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving"})
 	# Towns we hold: the garrison's mark stands on the town.
 	for g in (inputs.get("garrisons",[]) as Array):
@@ -876,7 +891,7 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 		if held<=0: continue
 		out.append({"id":"held:%s" % String(g.get("region_id","")),"side":"ours","army_id":0,"garrison":true,"pos":g.pos,"troops":held,"era":0,"branch":"foot",
 			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
-			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note",""))})
+			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note","")),"away":int(g.get("away",0))})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])

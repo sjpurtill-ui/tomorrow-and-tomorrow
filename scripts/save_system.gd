@@ -152,6 +152,9 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		var result:Variant=get_node("/root/"+system_name).import_state(payload.get("curated_%s" % system_name,{}))
 		if result is Dictionary and (result as Dictionary).has("error"): errors.append("%s: %s" % [system_name,String((result as Dictionary).error)])
 	if not errors.is_empty(): return {"error":"  ".join(errors),"partly_loaded":true}
+	# A detachment whose record no longer matches the world (a chase after
+	# fleeing men, a lost town) is sent back or rejoins its garrison.
+	preload("res://scripts/pursuit.gd").reconcile()
 	var message:="Loaded: %s, %d people." % [preload("res://scripts/hud/era_words.gd").when(int(GameState.elapsed_days)).to_lower(),GameState.population_total]
 	if direction_missing:message+=" This older save did not keep your people's direction; choose it again when the world opens."
 	if legacy_campaign:message+=" This older game keeps its old rules for other peoples. Start a new world to play with the current ones."

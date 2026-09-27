@@ -41,6 +41,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const Governance:=preload("res://scripts/occupation_governance.gd")
+const Pursuit:=preload("res://scripts/pursuit.gd")
 
 ## Adult men in a farming village's population (the rest are women,
 ## children and the old): roughly a quarter.
@@ -93,7 +94,7 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if _has("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them|their stores))\\b",lower): out["tribute"]=true
 	if _has("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b",lower) and not kill: out["spare"]=true
 	if _has("\\b(hold|keep|garrison|govern|rule) (it|the town|the place|them)\\b",lower): out["hold"]=true
-	if _has("\\b(give it back|hand it back|return it|leave it|withdraw|come home|pull out|abandon it|let them have it back)\\b",lower) and not out.has("hold"): out["leave"]=true
+	if _has("\\b(give it back|hand it back|(give|hand) [\\w' ]{1,20} back|return it|leave it|withdraw|come home|pull out|abandon|let them have it back)\\b",lower) and not out.has("hold"): out["leave"]=true
 	if _has("\\b(rebuild|repair|reconstruct|build it (up|again))\\b",lower) and not out.has("raze"): out["reconstruct"]=true
 	if _has("\\b(strengthen|reinforce|more (soldiers|fighters|men|spears) (to|in|at|for)|send more|add [\\w' ]{0,12}to the garrison|bigger garrison)\\b",lower): out["reinforce"]=true
 	if _has("\\b(free|release|emancipate|unbind) (the )?(captives|slaves|bonded)",lower) and not kill: out["free"]=true
@@ -136,7 +137,7 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	var home:=String(WorldSimulation.state.settlement_name)
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var population:=maxi(0,roundi(float(region.get("population",0.0))))
-	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"captives":0,"moved":0,"move_status":"","burned":false,"tribute":0,"left":false,"spared":false,"policy":"","reinforced":0,"freed":0,"arrive_days":0}
+	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"escaped":0,"captives":0,"moved":0,"move_status":"","burned":false,"tribute":0,"left":false,"spared":false,"policy":"","reinforced":0,"freed":0,"arrive_days":0}
 	var parts:PackedStringArray=PackedStringArray()
 	var refusals:PackedStringArray=PackedStringArray()
 	var harsh:=0.0
@@ -161,9 +162,14 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 			if done.has("error"): refusals.append(String(done.error))
 			else:
 				out.killed=int(done.get("dead",0))
+				# The men who were not caught got away (Pursuit: where they ran).
+				var men:=roundi(float(population)*MEN_SHARE)
+				out.escaped=maxi(0,roundi(float(population-int(out.killed))*MEN_SHARE) if all else men-int(out.killed))
 				population=maxi(0,population-int(out.killed))
-				if all: parts.append("%s people of %s were put to the sword; the rest fled into the hills." % [_cap(_count(int(out.killed))),name])
-				else: parts.append("%s men of %s were put to the sword; others got away in the dark." % [_cap(_count(int(out.killed))),name])
+				var ran:=Pursuit.toward_words(Pursuit.refuge(civ_id,region_id))
+				if all: parts.append("%s people of %s were put to the sword; the rest fled %s." % [_cap(_count(int(out.killed))),name,ran])
+				elif int(out.escaped)>0: parts.append("%s men of %s were put to the sword; about %s got away %s." % [_cap(_count(int(out.killed))),name,_count(int(out.escaped)),ran])
+				else: parts.append("%s men of %s were put to the sword; none got away." % [_cap(_count(int(out.killed))),name])
 				harsh+=1.0
 	# People walked home: captives in bonds, or residents as our own.
 	var status:=String(fate.get("move","enslaved" if bool(fate.get("captives",false)) else ""))
@@ -279,6 +285,8 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	_consequences(civ_id,name,out,harsh,general,day)
 	out["text"]=" ".join(parts)+(" But "+_lower_first(" ".join(refusals)) if not refusals.is_empty() else "")
 	out["outcome"]=_note(name,out)
+	# The men who got away are on the garrison's record: a chase can follow.
+	if int(out.escaped)>0 and not bool(out.left): out["fled"]=Pursuit.record_flight(civ_id,region_id,int(out.escaped))
 	# The garrison's card on the map says what was last done there.
 	var held_at:int=mc._occupation_force_index(civ_id,region_id)
 	if held_at>=0:
