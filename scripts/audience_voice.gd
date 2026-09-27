@@ -1528,6 +1528,7 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 	var sources:PackedStringArray=PackedStringArray([JSON.stringify(s.get("report",{})),JSON.stringify(s.get("scout_brief",{})),JSON.stringify(s.get("ctx",{})),String(s.get("fact","")),String(s.get("summary","")),String(s.get("amt","")),String(extra.get("player_text",""))])
 	var result:Dictionary=extra.get("result",{})
 	sources.append(String(result.get("outcome","")))
+	sources.append(String(result.get("actor_says","")))
 	var hist:Dictionary=s.get("history",{})
 	for entry in (hist.get("speaker",[]) as Array)+(hist.get("civ",[]) as Array): sources.append(String((entry as Dictionary).get("outcome","")))
 	var terms:Dictionary=(s.get("audience",{}) as Dictionary).get("terms",{})
@@ -2817,7 +2818,12 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	if String(actor.get("key",""))=="envoy" and not _envoy_may_speak(s,result): actor={}
 	var spoke:Dictionary={}
 	var key:=CC.actor_reaction_key(result)
-	if not actor.is_empty() and key!="":
+	var says:=String(result.get("actor_says",""))
+	if not actor.is_empty() and says!="":
+		# The war leader answers with the engine's own decision and numbers.
+		_append_if(out,_say(s,actor,[says],rng,{},false,[says]))
+		spoke[String(actor.key)]=true
+	elif not actor.is_empty() and key!="":
 		var bank:=CC.reaction_bank(key)
 		var regard:Dictionary=s.get("regard",{})
 		if key=="obey_task" and stage=="order":
@@ -2971,7 +2977,7 @@ func _divine_instruction(s:Dictionary,extra:Dictionary)->String:
 # Prompt craft
 # ---------------------------------------------------------------------------
 
-const COMMAND_CLASSIFY:=" Also fill command, reading the ruler's words: act is question, statement, command (an order for someone to do something, however phrased), threat or blessing; verb is the kind of order (kill, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take, send, or order for anything else) or none; actor_ref is who is told to do it exactly as the ruler referred to them ('Ansel', 'you', 'the guards') or ''; target_ref is who it is done to as referred to ('him', 'the war leader', 'Zuri') or ''; object is goods with amount, an office, a place or the task, or ''; confidence 0 to 1. If it is an order, keep the lines short and never refuse: the god's word is law and the court reacts once it is done."
+const COMMAND_CLASSIFY:=" Also fill command, reading the ruler's words: act is question, statement, command (an order for someone to do something, however phrased), threat or blessing; verb is the kind of order (kill, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take, send, war for any order to fight, attack, besiege, raid, intercept an army, defend a place or bring the soldiers home, or order for anything else) or none; for war, object is the kind and the place in plain words ('attack Tsaren', 'siege Tsaren', 'raid their fields', 'defend the ford', 'march home'); actor_ref is who is told to do it exactly as the ruler referred to them ('Ansel', 'you', 'the guards') or ''; target_ref is who it is done to as referred to ('him', 'the war leader', 'Zuri') or ''; object is goods with amount, an office, a place or the task, or ''; confidence 0 to 1. If it is an order, keep the lines short and never refuse: the god's word is law and the court reacts once it is done."
 
 static func response_format(keys:Array[String],divine:Array=[],command:bool=false)->Dictionary:
 	var format:={"type":"json_schema","json_schema":{"name":"audience_lines","strict":true,"schema":{

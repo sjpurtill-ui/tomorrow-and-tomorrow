@@ -32,9 +32,10 @@ const CV:=preload("res://scripts/character_voice.gd")
 const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
+const WarOrders:=preload("res://scripts/court_war_orders.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
-const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","order"]
+const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
 ## Acts done to a person by a person: the ones a gentle hand balks at.
 const CRUEL:=["kill","maim","detain","exile"]
 ## Acts on a body. Checked before goods and dispatch, so "cut his arms off" is
@@ -408,6 +409,13 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 			for h:String in HEADINGS:
 				if String(cls.heading)=="" and h in obj: cls.heading=h
 	var foreign:=String(audience.get("origin",""))=="foreign"
+	# A war order ("attack Tsaren", "march home", "raid their fields") goes to
+	# the war leader as a real objective, never to the generic directive path.
+	if not foreign and String(cls.act)!="question" and not bool(cls.insist):
+		var war_reading:=WarOrders.read_live(String(live.get("object","")),clean,String(audience.get("civ_id",""))) if from_live and String(cls.verb)=="war" else WarOrders.read(clean,String(audience.get("civ_id","")))
+		var named_place:=(war_reading.get("target",{}) as Dictionary).has("city_id") or (war_reading.get("target",{}) as Dictionary).has("unknown")
+		if not war_reading.is_empty() and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place):
+			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
 		# "Send him home": the envoy goes home, never made to lead a party nor
 		# sent as our own embassy. Driven out when said harshly; otherwise the
@@ -417,6 +425,12 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var insist:=bool(cls.insist)
 	if insist:
 		var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+		if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS and String(pending.get("verb",""))=="war":
+			# The god overrides the war leader's objection: the original order stands.
+			var again_war:=WarOrders.read(String(pending.get("text","")),String(audience.get("civ_id","")))
+			if not again_war.is_empty():
+				var insisted:=cls.duplicate(); insisted["war"]=again_war; insisted["verb"]="war"
+				return _perform(id,audience,list,"war",_entry(list,String(pending.get("actor",""))),{},clean,insisted,true,context)
 		if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
 			return _perform(id,audience,list,String(pending.verb),_entry(list,String(pending.get("actor",""))),_entry(list,String(pending.get("target",""))),clean,cls,true,context)
 		# No pending order: the god repeats the last command they gave here.
@@ -543,6 +557,7 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 		r.stage="prostrate"
 		_apply_court(id,"terrify",{},[])
 		return r
+	if verb=="war": return _war(id,audience,list,r,actor,text,cls,insist)
 	# The engine decides obedience before anything is done or voiced.
 	var person:=_person(actor)
 	var ob:=obedience(person,verb,insist,_roll(audience,verb+String(actor.get("key",""))))
@@ -981,6 +996,45 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 	r.verb="order"
 	return r
 
+static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,actor:Dictionary,text:String,cls:Dictionary,insist:bool)->Dictionary:
+	## A war order: the war leader weighs it against what is really there and
+	## either sets a real objective in motion or says plainly why not
+	## (court_war_orders.gd). Never "we will" followed by nothing.
+	var reading:Dictionary=cls.get("war",{}) if cls.get("war") is Dictionary else {}
+	if reading.is_empty(): reading=WarOrders.read(text,String(audience.get("civ_id","")))
+	# The war leader carries it, whoever it was spoken to.
+	var general:=WarOrders.war_leader()
+	var carrier:=_entry(list,"person:%d" % int(general.get("person_id",0))) if not general.is_empty() else {}
+	if carrier.is_empty(): carrier=actor if not actor.is_empty() else _speaker_entry(list)
+	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
+	r.verb="war"
+	var decision:=WarOrders.perform(reading,insist)
+	r["war"]=decision
+	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
+	r["actor_says"]=String(decision.get("says",""))
+	var verdict:=String(decision.get("verdict","impossible"))
+	var passed:=not carrier.is_empty() and not bool(carrier.get("speaker",false)) and not general.is_empty()
+	var relay:="Word goes to %s. " % String(carrier.get("name","")) if passed else ""
+	match verdict:
+		"act":
+			r.stage="war_march"; r.executed=true; r.reaction="grave"
+			r.obedience={"id":"obey","manner":"ready","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+		"object":
+			r.stage="war_object"; r.executed=false; r.reaction="troubled"
+			r.obedience={"id":"object","manner":"grim","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience["pending_command"]={"verb":"war","actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(reading.get("text",text)).substr(0,200)}
+		_:
+			r.stage="war_refuse"; r.executed=false; r.reaction="troubled"
+			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+	var pid:=int(carrier.get("person_id",0))
+	if pid>0:
+		GovernmentPeopleSystem.adjust_person_bonds(pid,{"obligation":0.02,"respect":0.01})
+		GovernmentPeopleSystem.record_person_memory(pid,"The god ordered war: %s. %s" % [text.substr(0,120),"We marched." if verdict=="act" else "I told the god why not."],"divine",0.6,{"emotion":"duty","outcome":verdict})
+	return r
+
 static func _strip_vocative(text:String,actor:Dictionary)->String:
 	var clean:=text.strip_edges()
 	if actor.is_empty() or not actor.has("name"): return clean
@@ -998,6 +1052,11 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	## universal custom-directive path (custom_directive.gd): bounded changes
 	## on DecreeStatistics parameters, real costs, side effects. Never refused.
 	## custom_directive_handler, when set, is asked first.
+	# Never let a war order fall into the generic directive path.
+	var war:=WarOrders.read(text,"")
+	if not war.is_empty():
+		var decided:=WarOrders.perform(war,false)
+		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":String(decided.get("outcome",""))}
 	if custom_directive_handler.is_valid():
 		var handled:Variant=custom_directive_handler.call(text,context)
 		if handled is Dictionary and bool((handled as Dictionary).get("ok",false)): return handled
@@ -1113,6 +1172,10 @@ const STAGE:={
 	"demote":["[{target}'s marks of office are taken from them before the whole court; they stand bare and silent.]"],
 	"send":["[{actor} bows, gathers their gear and strides out of the hall, already calling for companions.]",
 		"[{actor} touches their brow to the floor and is gone before the fire settles, shouting for packs and water skins.]"],
+	"war_march":["[{actor} is on their feet at once, calling for the fighters to gather their spears and food.]",
+		"[{actor} goes out to the drill ground; within the hour the fighters are being counted and loaded for the road.]"],
+	"war_object":["[{actor} does not move to the door. They stand where they are and answer you plainly.]"],
+	"war_refuse":["[{actor} stays where they are and tells you what stands in the way.]"],
 	"order":["[{actor} bows and goes out to see it done; word of the order runs ahead of them through the camp.]",
 		"[{actor} is on their feet at once and out through the door, calling names as they go.]"],
 	"hesitate":["[{actor} takes up {blade}, then freezes; the point trembles a hand's breadth from {target}, and every eye turns to you.]",
@@ -1207,7 +1270,7 @@ static func actor_reaction_key(result:Dictionary)->String:
 		"reluctant": return "reluctant_deed" if stage in ["kill","exile","detain","maim"] else "obey_task"
 	if stage in ["kill","exile","detain","maim"]: return "obey_deed"
 	if stage in ["send","order"]: return "obey_task"
-	return ""
+	return ""   # war_*: the war leader's own words (actor_says) answer
 
 ## What the voice is told: the engine's decision in plain words.
 static func decided_words(result:Dictionary)->String:
@@ -1220,5 +1283,11 @@ static func decided_words(result:Dictionary)->String:
 		"reluctant": parts.append("%s OBEYED, reluctantly: it cost them; they did it anyway." % actor)
 		"hesitate": parts.append("%s HESITATED: they have NOT done it yet; they plead once with the god. The god's word still stands; if the god insists they will do it." % actor)
 		"refuse": parts.append("%s REFUSED. %s" % [actor,"They fled the hall." if String(result.get("stage",""))=="refuse_flee" else "The court seized them; they kneel bound before the god."])
+	if String(result.get("verb",""))=="war":
+		var verdict:=String((result.get("war",{}) as Dictionary).get("verdict",""))
+		parts.append("THE WAR LEADER'S ANSWER, in substance (keep every number exactly): "+String(result.get("actor_says","")))
+		if verdict=="act": parts.append("The army HAS set out; say so plainly with the place and the days on the road.")
+		elif verdict=="object": parts.append("%s OBJECTS: nothing has marched. They explain why and what would fix it; if the god insists they will go." % actor)
+		else: parts.append("It CANNOT be done as ordered: nothing has marched. Say plainly why and what would change that. Never promise to go.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))
 	return " ".join(parts)

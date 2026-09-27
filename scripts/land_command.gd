@@ -75,46 +75,13 @@ func _known_enemies(day:int)->Array[Dictionary]:
 		if not WorldSimulation.world.visible_formation_sighting(String(enemy.id)).is_empty():result.append(enemy)
 	return result
 func route(start:Vector2,goal:Vector2)->Array:
+	# The same land road every march uses (army_land_route.gd): round bays,
+	# inlets and lakes, never refused because the straight line is wet.
 	if not is_land(start) or not is_land(goal):return []
-	if not host.field_route_availability(start,goal).has("error"):return [G.pack(goal)]
-	var step:=clampf(start.distance_to(goal)/24.0,.25,5.0)
-	var key:=str(WorldSimulation.state.world_seed)+str(start.snapped(Vector2.ONE*.1))+str(goal.snapped(Vector2.ONE*.1))
-	if route_cache.has(key):
-		var valid:=true;var previous:=start
-		for waypoint:Dictionary in route_cache[key]:
-			var next:=G.unpack(waypoint)
-			if host.field_route_availability(previous,next).has("error"):valid=false;break
-			previous=next
-		if valid:return route_cache[key].duplicate(true)
-		route_cache.erase(key)
-	# Bounded A* around the direct route. Every edge is checked for water;
-	# diagonals cannot cut across a coastline or river mouth.
-	var open:Array[Vector2i]=[Vector2i.ZERO];var cost:Dictionary={Vector2i.ZERO:0.0};var previous:Dictionary={}
-	var target:=Vector2i((goal-start)/step);var finish:=Vector2i.ZERO;var found:=false
-	var visited:=0
-	while not open.is_empty() and visited<1600:
-		var best:=0;var score:=INF
-		for index in open.size():
-			var value:=float(cost[open[index]])+Vector2(open[index]).distance_to(Vector2(target))
-			if value<score:score=value;best=index
-		var cell:Vector2i=open.pop_at(best);visited+=1
-		var at:=start+Vector2(cell)*step
-		if at.distance_to(goal)<=step*1.5 and not host.field_route_availability(at,goal).has("error"):finish=cell;found=true;break
-		for offset:Vector2i in [Vector2i(1,0),Vector2i(-1,0),Vector2i(0,1),Vector2i(0,-1),Vector2i(1,1),Vector2i(-1,1),Vector2i(1,-1),Vector2i(-1,-1)]:
-			var next:=cell+offset
-			if absi(next.x)>abs(target.x)+20 or absi(next.y)>abs(target.y)+20:continue
-			var next_at:=start+Vector2(next)*step
-			var next_cost:=float(cost[cell])+Vector2(offset).length()
-			if cost.has(next) and float(cost[next])<=next_cost:continue
-			if host.field_route_availability(at,next_at).has("error"):continue
-			cost[next]=next_cost;previous[next]=cell
-			if not next in open:open.append(next)
+	var path:=preload("res://scripts/army_land_route.gd").find(start,goal,Callable(WorldSimulation.world,"_scout_land_at"))
+	if path.has("error"):return []
 	var result:Array=[]
-	if found:
-		result.append(G.pack(goal))
-		while finish!=Vector2i.ZERO:result.push_front(G.pack(start+Vector2(finish)*step));finish=previous[finish]
-	if route_cache.size()>=24:route_cache.clear()
-	if not result.is_empty():route_cache[key]=result.duplicate(true)
+	for p:Vector2 in path.points:result.append(G.pack(p))
 	return result
 func _respond_rivals(day:int)->void:
 	if WorldSimulation.enabled:return # Their own leaders move their real formations.

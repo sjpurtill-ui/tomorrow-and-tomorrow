@@ -9,10 +9,22 @@ func before_test()->void:
 func after_test()->void:
 	CivilizationSystem.set_scout_geography_authority(Callable())
 
-func test_dry_destination_across_water_is_rejected_without_mutating_order()->void:
+func test_water_on_the_straight_line_is_walked_round_by_land()->void:
+	# The general chooses the road: an inlet on the straight line is no reason to refuse.
+	var result:=MilitaryCampaign.move_field_army_to_position(1,10,0)
+	assert_bool(result.has("ok")).override_failure_message(str(result)).is_true()
+	var prev:=Vector2.ZERO
+	for leg in MilitaryCampaign.field_armies[0].march_route:
+		var next:=Vector2(float(leg.x),float(leg.z))
+		assert_bool(preload("res://scripts/army_land_route.gd").segment_land(prev,next,Callable(CivilizationSystem,"_scout_land_at"),0.05,0.0)).is_true()
+		prev=next
+	assert_float(float(MilitaryCampaign.field_armies[0].distance_total_km)).is_greater(10.0)
+
+func test_destination_with_no_land_route_is_rejected_without_mutating_order()->void:
+	CivilizationSystem.set_scout_geography_authority(func(point:Vector2)->bool:return not(point.x>4 and point.x<6))
 	var before:=MilitaryCampaign.field_armies.duplicate(true)
 	var result:=MilitaryCampaign.move_field_army_to_position(1,10,0)
-	assert_str(String(result.error)).contains("Water blocks")
+	assert_str(String(result.error)).contains("no way there by land")
 	assert_array(MilitaryCampaign.field_armies).is_equal(before)
 	assert_bool(MilitaryCampaign.move_field_army_to_position(1,0,10).has("ok")).is_true()
 	assert_dict(MilitaryCampaign.field_armies[0].position).is_equal(before[0].position)
@@ -24,7 +36,7 @@ func test_route_obstruction_stops_before_water_and_sends_report()->void:
 	MilitaryCampaign._process_field_army_movement_day()
 	assert_str(MilitaryCampaign.field_armies[0].status).is_equal("stationed")
 	assert_float(float(MilitaryCampaign.field_armies[0].position.x)).is_equal(0.0)
-	assert_str(MilitaryCampaign.field_armies[0].movement_block_reason).contains("Water blocks")
+	assert_str(MilitaryCampaign.field_armies[0].movement_block_reason).contains("no way there by land")
 	assert_int(MilitaryCampaign.runner_messages.size()).is_greater(0)
 
 func test_supply_shortfall_slows_real_march_and_resupply_restores_pace()->void:

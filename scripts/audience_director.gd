@@ -69,6 +69,8 @@ func _process(delta:float)->void:
 				if String((arrival as Dictionary).get("origin",""))=="foreign" and voice.has_method("pick_request"): voice.pick_request(String((arrival as Dictionary).get("id","")))
 			# The Opening Arc marks the first years' real turning points as beats.
 			OpeningArc.daily(step_day,terrain)
+			# War orders given at court: the war leader's report comes back.
+			preload("res://scripts/court_war_orders.gd").daily(step_day)
 			if not arrivals.is_empty() and pending_summon.is_empty():pending_summon=String((arrivals[0] as Dictionary).get("id",""))
 		# Great works: stage gates, hard news, pitches, outcomes, forecasts.
 		var works:Array=Works.daily(day)

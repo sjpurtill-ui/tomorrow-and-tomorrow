@@ -236,9 +236,10 @@ func apply_directive(effect_id:String,requested_magnitude:float,duration_days:fl
 			modifier["until_day"]=WorldSimulation.state.elapsed_days-0.001
 		break
 	var consequence:=String(assessment.second_order_consequence)
-	var implementation_phrase:="Implementation is broad" if float(assessment.implementation_rate)>=0.72 else "Implementation is uneven" if float(assessment.implementation_rate)>=0.36 else "Implementation is narrow"
-	var resistance_phrase:="Open resistance is widespread" if float(assessment.resistance)>=0.60 else "Resistance is visible" if float(assessment.resistance)>=0.35 else "Little open resistance is yet visible"
-	_add_event("Directive Implemented","%s %s; %s. %s" % [source,implementation_phrase,resistance_phrase,consequence],String(assessment.domain),"danger" if float(assessment.resistance)>=0.60 else "warning" if float(assessment.resistance)>=0.35 else "notice")
+	# Plain words for what people are actually doing, not planning jargon.
+	var implementation_phrase:="Most people are doing it" if float(assessment.implementation_rate)>=0.72 else "Some people are doing it, many are not" if float(assessment.implementation_rate)>=0.36 else "Only a few people are doing it"
+	var resistance_phrase:="many refuse openly" if float(assessment.resistance)>=0.60 else "some grumble openly" if float(assessment.resistance)>=0.35 else "few complain openly"
+	_add_event("Your Order Is Being Carried Out","%s %s; %s. %s" % [source,implementation_phrase,resistance_phrase,consequence],String(assessment.domain),"danger" if float(assessment.resistance)>=0.60 else "warning" if float(assessment.resistance)>=0.35 else "notice")
 	return {"applied":true,"assessment":assessment,"direct_effects":direct_effects,"costs":costs}
 
 func _pronatalist_target_households()->int:

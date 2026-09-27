@@ -17,6 +17,7 @@ const Roster:=preload("res://scripts/hud/court_roster.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
+const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
@@ -966,6 +967,9 @@ func _speak()->void:
 		# more exactly first ("see that she never draws breath again").
 		var reading:=Commands.classify(text)
 		live_reads=String(reading.get("verb",""))=="order" and _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and "command_router" in voice and civic_settlement.is_empty()
+		# A war order is decided by the engine at once (a real march, or the
+		# war leader's plain no); the live voice then speaks to what happened.
+		if live_reads and not WarOrders.read(text,String(Hall.find(audience_id).get("civ_id",""))).is_empty(): live_reads=false
 	if resolved_result.is_empty() and not live_reads:
 		var heard:=Commands.hear(audience_id,text,{"terrain":terrain,"civic_settlement":civic_settlement})
 		if bool(heard.get("handled",false)):
@@ -2465,6 +2469,11 @@ func speak_to_court(text:String)->void:
 	## local leader; a foreign ruler's name sets them down as an envoy's brief.
 	var named:=Roster.find_by_words(text)
 	var foreign:=Roster.find_foreign_by_words(text)
+	# "Attack Tsaren" names a foreign people but is an order for our war
+	# leader, not a message for their envoy.
+	if named.is_empty() and not WarOrders.read(text).is_empty():
+		foreign={}
+		named=_war_leader_entry()
 	if named.is_empty() and not foreign.is_empty():
 		if show_foreign(String(foreign.civ_id)) and is_instance_valid(speech_input):
 			speech_input.text=text
@@ -2475,6 +2484,14 @@ func speak_to_court(text:String)->void:
 		_court_note("No one is at court to hear you yet.")
 		return
 	if summon(entry.get("target",{}) as Dictionary):pending_words=text
+
+func _war_leader_entry()->Dictionary:
+	var general:=WarOrders.war_leader()
+	for entry in Roster.people():
+		if int((entry.get("person",{}) as Dictionary).get("person_id",0))>0 and int(entry.person.person_id)==int(general.get("person_id",-1)): return entry
+	for entry in Roster.people():
+		if String(entry.get("group",""))=="generals": return entry
+	return {}
 
 func _deliver_pending_words()->void:
 	## Words spoken before the summoned person arrived are said once they stand

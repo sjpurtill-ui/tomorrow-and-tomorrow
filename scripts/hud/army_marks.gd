@@ -180,7 +180,8 @@ static func doing(context:Dictionary)->String:
 			var who:=target.get_slice("·",1).strip_edges() if "·" in target else ""
 			if who=="" or who.to_upper()=="FOREIGN FORMATION": return "going after a host that was seen"
 			return "going after %s" % place(who)
-		if not _generic_place(target): return "marching on %s" % place(target)
+		var days_left:=int(context.get("days_left",0))
+		if not _generic_place(target): return "marching on %s%s" % [place(target),", %d %s out" % [days_left,"day" if days_left==1 else "days"] if days_left>0 else ""]
 		var heading:=compass(context.get("delta",Vector2.ZERO))
 		return "marching %s" % heading if heading!="" else "on the march"
 	var plain:=_plain_status(status)

@@ -310,6 +310,12 @@ func collect()->Dictionary:
 		largest=maxi(largest,strength); theatre+=strength
 		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
 			"report_age":0 if live or at_home else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+		# The general's chosen land road (round bays and inlets), not a straight line.
+		if objective.is_finite() and String(shown.get("status",army.get("status","")))=="moving":
+			var road:=_road_ahead(army,pos)
+			if road.size()>=2: entry["road"]=road
+			var days_left:=int(army.get("arrival_day",-1))-today
+			if days_left>0: entry["days_left"]=days_left
 		if not at_home: entry.merge(_withdrawal(army,pos,home,id==campaign_army))
 		if bool(entry.get("withdrawing",false)): entry.offensive=false
 		# What its mark and card need: its arm, its era, its general, what it is doing.
@@ -318,7 +324,7 @@ func collect()->Dictionary:
 			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":String(Presentation.formation_visual_state(army).damage_state),
 			"doing_context":{"status":String(shown.get("status",army.get("status",""))),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
 				"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":at_home,
-				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO}})
+				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0))}})
 		friendly.append(entry)
 	var enemy:Array=[]
 	# Strangers in sight who are not at war with us (scouts, passing hosts):
@@ -378,6 +384,41 @@ static func battles_to_draw(active:Dictionary,commanded:Array)->Array:
 		if out.size()>=Model.MAX_CLASHES: break
 	return out
 
+
+## The land road still ahead of a marching army, from where it was last
+## known: its march_route legs (military_campaign.gd) after the leg it is on.
+static func _road_ahead(army:Dictionary,pos:Vector2)->PackedVector2Array:
+	var legs:Array=army.get("march_route",[]) if army.get("march_route") is Array else []
+	if legs.is_empty(): return PackedVector2Array()
+	var origin:=_v2(army.get("origin_position",{}))
+	var points:=PackedVector2Array([origin if origin.is_finite() else pos])
+	for leg in legs: points.append(_v2(leg))
+	var best:=0; var best_d:=INF
+	for k in points.size()-1:
+		var d:=pos.distance_to(Geometry2D.get_closest_point_to_segment(pos,points[k],points[k+1]))
+		if d<best_d: best_d=d; best=k
+	var road:=PackedVector2Array([pos])
+	for k in range(best+1,points.size()): road.append(points[k])
+	return road
+
+## A polyline resampled to n+1 evenly spaced points (bounded), so the plan
+## arrow's tapered body follows the road and its head sits on the goal.
+static func _resample(line:PackedVector2Array,n:int)->PackedVector2Array:
+	var out:=PackedVector2Array()
+	if line.size()<2: return out
+	var total:=0.0
+	for k in line.size()-1: total+=line[k].distance_to(line[k+1])
+	if total<=0.0: return out
+	var seg:=0; var into:=0.0
+	for i in n+1:
+		var want:=total*float(i)/float(n)
+		var walked:=0.0
+		seg=0
+		while seg<line.size()-2 and walked+line[seg].distance_to(line[seg+1])<want:
+			walked+=line[seg].distance_to(line[seg+1]); seg+=1
+		into=want-walked
+		out.append(line[seg].move_toward(line[seg+1],into))
+	return out
 
 ## The general's withdrawal intent: where he would fall back to, one day's
 ## march along the road he would take. Campaign generals use the board's road
@@ -647,14 +688,18 @@ static func compose(inputs:Dictionary)->Dictionary:
 		if out.arrows.size()>=Model.MAX_ARROWS: break
 		var objective:Vector2=f.get("objective",Vector2.INF)
 		if not objective.is_finite() or (f.pos as Vector2).distance_to(objective)<0.05 or bool(f.get("withdrawing",false)): continue
+		if mode=="raid" and (f.get("road",PackedVector2Array()) as PackedVector2Array).size()>=3:
+			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":int(f.get("army_id",0))})
+			continue
 		if mode=="raid":
 			var delta:=objective-(f.pos as Vector2)
 			var spec:=PackedVector2Array([f.pos,(f.pos as Vector2)+delta*0.5+delta.orthogonal()*0.12,objective])
 			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":int(f.get("army_id",0))})
 			continue
+		var road:PackedVector2Array=f.get("road",PackedVector2Array())
 		var spec:=Model.arrow(f.pos,objective,fronts,bias)
 		bias=-bias+0.05 if bias<=0.0 else -bias
-		out.arrows.append({"points":Model.arrow_points(spec),"ours":true,"offensive":bool(f.get("offensive",false)),"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":int(f.get("army_id",0))})
+		out.arrows.append({"points":_resample(road,20) if road.size()>=3 else Model.arrow_points(spec),"ours":true,"offensive":bool(f.get("offensive",false)),"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":int(f.get("army_id",0))})
 		out.objectives.append({"pos":objective,"ours":true,"offensive":bool(f.get("offensive",false))})
 	if mode!="raid":
 		# Enemy arrows only from observed movement, dated.

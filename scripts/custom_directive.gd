@@ -678,6 +678,10 @@ static func _deaths(plan:Dictionary,order_id:String,implementation:float)->Dicti
 	return {}
 
 static func apply(plan:Dictionary,duration_days:float,source:String,metadata:Dictionary,office_execution:float)->Dictionary:
+	# A war order is never a vague social directive: it belongs to the war
+	# leader and the real armies (court_war_orders.gd), or to an honest no.
+	if not (load("res://scripts/court_war_orders.gd").read(String(plan.get("summary",""))) as Dictionary).is_empty():
+		return {"applied":false,"war_order":true,"reason":"A war order goes to the war leader, not the council."}
 	var state:=WorldSimulation.state
 	var order_id:=String(metadata.get("source_order_id",""))
 	var assessed:=assessment(plan,duration_days,office_execution)
@@ -787,7 +791,8 @@ static func apply(plan:Dictionary,duration_days:float,source:String,metadata:Dic
 				if String(modifier.get("source_order_id",""))==order_id and String(modifier.get("id",""))==ID and modifier.has("custom_plan"):
 					modifier["custom_pending_deaths"]={"count":int(death.count),"cause":String(death.cause),"day":int(day)+int(death.delay_days)}
 					break
-	WorldSimulation.consequences._add_event("Directive Implemented","%s — %s." % [String(plan.get("summary","A custom order")),"implementation is broad" if implementation>=0.72 else "implementation is uneven" if implementation>=0.36 else "implementation is narrow"],"social","notice")
+	# Plain words for what actually happened, not planning jargon.
+	WorldSimulation.consequences._add_event("Your Order Is Being Carried Out","%s — %s." % [String(plan.get("summary","A custom order")).trim_suffix(".").trim_suffix("!"),"most people are doing it" if implementation>=0.72 else "some people are doing it, many are not" if implementation>=0.36 else "only a few people are doing it"],"social","notice")
 	assessed["costs"]=costs
 	assessed["direct_effects_applied"]=direct
 	return {"applied":true,"assessment":assessed,"direct_effects":direct,"costs":costs,"custom_realized":realized}
