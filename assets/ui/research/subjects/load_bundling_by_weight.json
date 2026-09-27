@@ -3,10 +3,10 @@
   "line": "logistics",
   "game_year": 152,
   "approx_historical_year": -3987,
-  "prompt": "c. 3987 BCE: Adults match carrying bundle weights before loading pack donkeys; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7f5310ef-da22-42a7-a3f7-b8a4238406a4.png",
+  "prompt": "c. 3987 BCE: Adults test two balanced grain-and-stone baskets by hand and load matching woven bundles onto pack donkeys on a dry inland footpath; panoramic travel watercolor. No water, boats, sails, wheels, text, photorealism, CGI or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f9de8679-4737-49eb-95ca-be44cce0363a.png",
   "asset": "res://assets/ui/research/subjects/load_bundling_by_weight-v1.png",
-  "sha256": "f16d055b073c1e3e4e40835276520a9803d878dbb7b23317ff1b363731efba03",
+  "sha256": "f9cc9a502245690f7b33d33ec435aac238fa459789dd4351bd5a94486fb4f4e5",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  "review": "Replacement selected after full-image and 3.37:1 crop review; inland load balance clear without sailing rigs."
 }
