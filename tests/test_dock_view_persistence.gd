@@ -55,6 +55,9 @@ func _open(provider:Object,sub:int=0)->void:
 	await _frames(8)
 
 func test_life_and_death_keeps_its_place_and_nodes_across_days()->void:
+	# The Health page is shorter since care of the sick became two sentences;
+	# a shorter dock keeps enough room to scroll.
+	panel.size=Vector2(560,420)
 	var provider:=Health.new(null,hud)
 	await _open(provider)
 	var middle:int=await _scroll_deep()
@@ -175,6 +178,7 @@ func test_population_ledger_keeps_its_place_and_tab_across_days()->void:
 	assert_int(panel.sections_built-before).is_less(block_count*4)
 
 func test_player_scroll_after_refresh_is_not_overridden()->void:
+	panel.size=Vector2(560,420)
 	await _open(Health.new(null,hud))
 	var middle:int=await _scroll_deep()
 	GameState.lifetime_deaths+=1

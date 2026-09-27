@@ -12,7 +12,7 @@ func _ready()->void:
 		get_window().size=size;await frames()
 		hud.open_dock("civ",0);await capture("society-%d"%size.x)
 		await click_label("PEOPLE IN GOVERNMENT");await capture("government-%d"%size.x)
-		await click_label("OFFICEHOLDERS");await capture("officeholders-%d"%size.x)
+		await click_label("Officials");await capture("officeholders-%d"%size.x)
 		await click_control(hud.detail_dock.close_button)
 		await click_label("Talk with our leader");await capture("civic-conversation-%d"%size.x)
 		var field:LineEdit=hud.find_child("CivicConversationInput",true,false)
