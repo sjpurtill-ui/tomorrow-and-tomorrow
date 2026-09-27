@@ -209,7 +209,7 @@ func _render(entry:Dictionary)->void:
 	banner.texture=texture if wide else null
 	picture.texture=null if wide else texture
 	var action:Dictionary=entry.get("action",{})
-	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","scout_report":"Hear the scouts' tale","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
+	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","scout_report":"Hear the scouts' tale","battle":"Read the battle report","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
 
 
 static func texture_for(entry:Dictionary)->Texture2D:
@@ -236,6 +236,8 @@ func _act()->void:
 			preload("res://scripts/audience_director.gd").open_court_for(action.get("focus",{}))
 		"scout_report":
 			open_scout_report(int(action.get("mission_id",0)))
+		"battle":
+			preload("res://scripts/hud/battle_report_panel.gd").open(terrain if is_instance_valid(terrain) else get_tree().current_scene,int(action.get("seed",0)))
 		"section":
 			if is_instance_valid(hud) and hud.has_signal("section_requested"):hud.emit_signal("section_requested",String(action.get("section","chronicle")),int(action.get("sub",0)))
 		_:

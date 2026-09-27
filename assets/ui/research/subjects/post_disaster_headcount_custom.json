@@ -1,0 +1,12 @@
+{
+  "id": "post_disaster_headcount_custom",
+  "line": "security",
+  "game_year": 105,
+  "approx_historical_year": -4300,
+  "prompt": "c. 4300 BCE: After flood villagers count survivors one pebble each at safe ground; woodblock print. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-05f694a0-bb2d-4cb0-b55b-81df59649d84.png",
+  "asset": "res://assets/ui/research/subjects/post_disaster_headcount_custom-v1.png",
+  "sha256": "a4d3ae44ac0919e9a80eead6a0e47d1b64fbf2b043054aa23f55c495e1f40eb2",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

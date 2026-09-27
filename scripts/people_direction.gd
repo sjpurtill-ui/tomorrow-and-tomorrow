@@ -236,9 +236,8 @@ func import_state(state:Dictionary)->Dictionary:
 	_ensure_cultural_memory()
 	return {"ok":true}
 
-func _unhandled_key_input(event:InputEvent)->void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F8:
-		open_direction(); get_viewport().set_input_as_handled()
+# F8 belongs to the command rail (command_rail_hud.gd HOTKEYS); this
+# screen opens from its own buttons.
 
 func open_direction()->void:
 	ensure()

@@ -91,29 +91,12 @@ func test_research_actions_refresh_the_open_tab_without_navigation()->void:
 	await get_tree().process_frame
 
 
-func test_civic_exchange_renders_as_wrapped_conversation_with_an_inline_reply()->void:
+func test_docks_offer_no_second_talk_box_outside_the_court()->void:
+	# One court screen: a dock never builds its own reply or order field.
 	var root:=auto_free(VBoxContainer.new()) as VBoxContainer
-	DOCK_BLOCKS.render(root,[{
-		"type":"conversation","leader_name":"Enna Yarrow","leader_title":"Hearth Speaker",
-		"disposition":"plain-spoken","state":"NEEDS YOUR DECISION","state_color":Color("#d0b46f"),
-		"items":[
-			{"speaker":"player","name":"YOU","text":"Kill every woman over 60","day":65},
-			{"speaker":"leader","name":"Enna Yarrow","text":"I understand the words. Before anything happens, tell me whether you truly mean every named elder in that group.","day":65},
-		],
-		"status":"Enna is waiting for your answer. Nothing is underway.",
-		"on_submit":func(_field:LineEdit)->void: pass,
-		"placeholder":"Reply to Enna Yarrow…",
-	}])
-	var messages:=root.find_children("CivicMessageText","Label",true,false)
-	assert_int(messages.size()).is_equal(2)
-	assert_int(int((messages[1] as Label).autowrap_mode)).is_not_equal(TextServer.AUTOWRAP_OFF)
-	assert_str((messages[1] as Label).text).contains("Before anything happens")
-	assert_int(root.find_children("CivicConversationInput","LineEdit",true,false).size()).is_equal(1)
-	assert_int(root.find_children("CivicConversationSend","Button",true,false).size()).is_equal(1)
-	assert_int(root.find_children("CivicTranscript","ScrollContainer",true,false).size()).is_equal(1)
-	var transcript:=root.find_child("CivicTranscript",true,false)
-	assert_bool(transcript.is_ancestor_of(root.find_child("CivicConversationInput",true,false))).is_false()
-	assert_bool(transcript.is_ancestor_of(root.find_child("CivicConversationSend",true,false))).is_false()
+	DOCK_BLOCKS.render(root,[{"type":"conversation","leader_name":"Enna Yarrow","on_submit":func(_field:LineEdit)->void: pass},
+		{"type":"order","on_submit":func(_field:LineEdit)->void: pass}])
+	assert_int(root.find_children("*","LineEdit",true,false).size()).is_equal(0)
 
 
 func test_civics_discloses_actual_ai_or_offline_interpreter_mode()->void:

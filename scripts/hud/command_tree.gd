@@ -10,7 +10,7 @@ var active_selection:Dictionary={}
 func _ready()->void:
 	command=MilitaryCampaign.command_hierarchy
 	columns=3;column_titles_visible=true;hide_root=true;select_mode=Tree.SELECT_MULTI
-	set_column_title(0,"COMMAND");set_column_title(1,"PEOPLE" if service=="army" else "CRAFT");set_column_title(2,"ORDER")
+	set_column_title(0,"Command");set_column_title(1,"People" if service=="army" else "Craft");set_column_title(2,"Orders")
 	add_theme_font_size_override("title_button_font_size",14)
 	var title_font:=get_theme_font("title_button_font")
 	var title_width:=title_font.get_string_size(get_column_title(1),HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+24
@@ -18,8 +18,8 @@ func _ready()->void:
 	set_column_clip_content(0,true);set_column_clip_content(2,true)
 	add_theme_font_size_override("font_size",14);add_theme_constant_override("v_separation",9)
 	add_theme_color_override("font_color",T.BODY_2);add_theme_color_override("font_selected_color",T.GOLD_BRIGHT)
-	add_theme_color_override("title_button_color",T.MUTED);add_theme_color_override("guide_color",T.BORDER_SOFT)
-	add_theme_stylebox_override("panel",T.flat(Color("091216"),T.BORDER_2,1,5,4))
+	add_theme_color_override("title_button_color",T.INK);add_theme_color_override("guide_color",T.BORDER_SOFT)
+	add_theme_stylebox_override("panel",T.flat(T.FIELD_BG,T.BORDER_2,1,5,4))
 	add_theme_stylebox_override("selected",T.flat(T.GOLD_WASH,T.GOLD,1,3))
 	add_theme_stylebox_override("selected_focus",T.flat(T.GOLD_WASH,T.GOLD_BRIGHT,1,3))
 	custom_minimum_size.y=180;size_flags_vertical=Control.SIZE_EXPAND_FILL
@@ -58,8 +58,8 @@ func _row(parent:TreeItem,entry:Dictionary)->TreeItem:
 	var item:=create_item(parent);item.set_metadata(0,entry)
 	item.set_text(0,String(entry.name));item.set_text(1,str(entry.count))
 	var mission:=String(entry.order.get("mission",""))
-	item.set_text(2,"NO OBJECTIVE" if mission=="" else "HOLDING" if mission=="cancelled" else mission.replace("_"," ").to_upper())
-	item.set_custom_color(2,T.MUTED if mission=="" else T.GOLD)
+	item.set_text(2,order_words(mission,service))
+	item.set_custom_color(2,T.TEXT_DIM if mission=="" else T.GOLD_BRIGHT)
 	item.set_tooltip_text(0,"%s · %s\nSelect a command to give its whole subtree an objective. Expand to inspect smaller formations." % [entry.name,entry.leader])
 	if not entry.parts.is_empty():
 		var placeholder:=create_item(item);placeholder.set_metadata(0,{"placeholder":true});placeholder.set_selectable(0,false);item.collapsed=true
@@ -80,6 +80,12 @@ func _expanded(item:TreeItem)->void:
 		var path:Array=entry.path.duplicate();path.append(index)
 		var child:Dictionary=command.preview(String(entry.id),path)
 		if not child.is_empty():_row(item,child)
+static func order_words(mission:String,service:String)->String:
+	## The orders column in plain words.
+	if mission=="":return "No orders"
+	if mission=="cancelled":return "Holding"
+	var catalog:Dictionary=MilitaryCampaign.command_hierarchy.LAND_MISSIONS if service=="army" else MilitaryCampaign.joint_operations.MISSIONS.get(service,{})
+	return String(catalog.get(mission,mission.replace("_"," ").capitalize())).get_slice(" /",0)
 func selections()->Array:
 	var result:Array=[];var current:=get_next_selected(null)
 	while current!=null:
@@ -113,8 +119,8 @@ func _update_counts(item:TreeItem)->void:
 			item.set_metadata(0,current)
 			item.set_text(1,str(current.count))
 			var mission:=String(current.order.get("mission",""))
-			item.set_text(2,"NO OBJECTIVE" if mission=="" else "HOLDING" if mission=="cancelled" else mission.replace("_"," ").to_upper())
-			item.set_custom_color(2,T.MUTED if mission=="" else T.GOLD)
+			item.set_text(2,order_words(mission,service))
+			item.set_custom_color(2,T.TEXT_DIM if mission=="" else T.GOLD_BRIGHT)
 			if int(command.node(String(current.id)).get("force_id",-1))>=0:_refresh_parts(item,current)
 	for child:TreeItem in item.get_children():_update_counts(child)
 func _refresh_parts(item:TreeItem,current:Dictionary)->void:

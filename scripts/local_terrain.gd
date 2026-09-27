@@ -13171,7 +13171,7 @@ func _on_city_aftermath(_aftermath:Dictionary)->void:
 func _restore_military_attention()->void:
 	if GeneralCampaign.active:return
 	if not MilitaryCampaign.pending_aftermath.is_empty():
-		_pause_for_military_attention("saved_aftermath","The battle is over","The last battle has ended. War planning shows who came through, who is missing and what your war leader means to do next.",false)
+		_pause_for_military_attention("saved_aftermath","Captives wait on your word","The last fight is over. Its captives and what we took wait on your word in war planning; no new attack can start until you decide.",false)
 		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
 	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","A battle is under way","Our people are fighting. War planning shows where, who is in it and what the general is doing.",false)
@@ -13188,7 +13188,14 @@ func _on_battle_attention(result:Dictionary)->void:
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
 		_set_game_speed(0);return
-	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"Battle report",MilitaryCampaign.battle_report_text(result))
+	# The war leader's report card (hud/battle_report_panel.gd) pauses time
+	# itself and resumes it on Continue. Opened deferred so the town taken and
+	# the garrison left behind are already on the battle's record.
+	var event_id:="battle_%s" % str(result.get("seed",GameState.elapsed_days))
+	if military_attention_seen.has(event_id): return
+	military_attention_seen[event_id]=true
+	GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
+	Callable(preload("res://scripts/hud/battle_report_panel.gd"),"open").call_deferred(self,int(result.get("seed",0)),result)
 
 func _pause_for_military_attention(event_id:String,title:String,body:String,truncate_batch:bool=true)->void:
 	if military_attention_seen.has(event_id): return

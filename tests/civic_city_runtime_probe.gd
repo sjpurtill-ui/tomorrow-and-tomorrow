@@ -55,8 +55,12 @@ func _ready()->void:
 	terrain.game_speed=5.0
 	MilitaryCampaign.battle_resolved.emit(battle)
 	await get_tree().process_frame
+	await get_tree().process_frame
 	_expect(terrain.game_speed==0.0,"Battle result must pause game")
-	_expect("14 remaining" in terrain.military_attention_dialog.dialog_text,"Battle dialog must expose troop result")
+	var report_layer:Node=terrain.get_meta("battle_report_panel") if terrain.has_meta("battle_report_panel") else null
+	var report_text:=str(report_layer.get_child(0).account) if report_layer!=null and report_layer.get_child_count()>0 else ""
+	_expect("14" in report_text and "Dawngate" in report_text,"Battle report must say how many are left and where")
+	if report_layer!=null:report_layer.get_child(0)._act("continue")
 	var content:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(terrain,hud)
 	var found:=false
 	for sub in 3:
