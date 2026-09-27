@@ -192,7 +192,7 @@ func refresh()->void:
 	var observed_days:=int(city.get("observation_days",0))
 	if observed<0:summary.text="We know where it is, but no one has looked inside yet."
 	else:
-		summary.text="Seen %s (%s); the word reached us %s." % [When.when(observed),When.ago(observed,today),When.ago(int(city.get("reported_day",observed)),today)]
+		summary.text="Seen in %s; the word reached us %s." % [When.when(observed),When.ago(int(city.get("reported_day",observed)))]
 		if int(freshness.level)<=2:summary.text+=" Much may have changed since."
 	detail_button.text="About this report"+(" (%s watching)" % When.span(observed_days) if observed_days>0 else "")
 	var how:="Our scouts watched it for %s. Time on the road does not sharpen the count; only time spent watching does." % When.span(observed_days) if observed_days>0 else "This older report did not say how long they watched."
@@ -211,7 +211,7 @@ func refresh()->void:
 		cards[key].name.text=V.label(key)
 		value.text=V.words(key,field)
 		var seen:=int(field.get("observed_day",-1))
-		note.text=String(V.MEANINGS.get(key,"")) if field.is_empty() or seen==observed else "%s Seen %s." % [String(V.MEANINGS.get(key,"")),When.ago(seen,today)]
+		note.text=String(V.MEANINGS.get(key,"")) if field.is_empty() or seen==observed else "%s Seen %s." % [String(V.MEANINGS.get(key,"")),When.ago(seen)]
 		cards[key].card.tooltip_text=String(INTEL.FIELDS[key].label)
 	var pop:Dictionary=fields.get("population",{})
 	projection.text=""
