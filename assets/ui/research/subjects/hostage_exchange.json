@@ -1,0 +1,12 @@
+{
+  "id": "hostage_exchange",
+  "line": "security",
+  "game_year": 55,
+  "approx_historical_year": -4633,
+  "prompt": "c. 4633 BCE: Two village groups exchange adult pledged guests across a boundary cairn to secure peace; hand-cut woodblock print. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3b42d920-3968-4a1c-9f86-142b3079cbc2.png",
+  "asset": "res://assets/ui/research/subjects/hostage_exchange-v1.png",
+  "sha256": "05cbabc71122eeba8924d01e692f5f47df48d0e6e474792ee60ae91cf4d827b3",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; reciprocal pledge crossing legible in crop."
+}

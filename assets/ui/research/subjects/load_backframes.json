@@ -1,0 +1,12 @@
+{
+  "id": "load_backframes",
+  "line": "logistics",
+  "game_year": 45,
+  "approx_historical_year": -4700,
+  "prompt": "c. 4700 BCE: Adults carry reed bundles on simple wooden backframes; travel watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5d36b353-1c52-446f-9221-38710a068c6d.png",
+  "asset": "res://assets/ui/research/subjects/load_backframes-v1.png",
+  "sha256": "9e48c0d95ed72e481e04758df046a95b53d5a802c820e431bc89bcf889980623",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Wooden backframes and carried loads clear in crop."
+}

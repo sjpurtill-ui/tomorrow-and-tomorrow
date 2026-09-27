@@ -1,0 +1,12 @@
+{
+  "id": "village_marriage_alliances",
+  "line": "demography",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: A couple joins the kin of two Neolithic villages in a marriage gathering; chalk pastel and cut paper. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-36cd682e-275f-4d8a-8019-31dcb6917d14.png",
+  "asset": "res://assets/ui/research/subjects/village_marriage_alliances-v1.png",
+  "sha256": "508acc6dc3659fbf4d25ad3df4233a860fe09a35c91830c369aca091b13bf925",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; rejected first for Egyptian-looking figures; selected clearer Neolithic dress and village setting in wide crop."
+}

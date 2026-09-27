@@ -609,6 +609,51 @@ func test_storage_growth_requires_storage_practice_and_logistics_pressure()->voi
 	assert_float(float(storage.storage_capacity)).is_greater(4.0)
 	assert_str(String(storage.growth_cause)).contains("logistics")
 
+func test_worked_stressed_field_keeps_its_year_and_recovers_by_farm_work_not_builders()->void:
+	GameState.known_discoveries.append("seed_selection")
+	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)
+	GameState.resource_deposits.append({"id":"fertile_stress_test","resource":"Fertile Soil","stage":"surveyed","position":GameState.settlement_founded_at+Vector3(1.0,0.0,0.5)})
+	GameState.population_allocations["Food"]=12
+	GameState.elapsed_days=60.0
+	model.process_month()
+	var field:Dictionary=GameState.settlement_plots.back()
+	assert_str(String(field.land_use)).is_equal("field")
+	# The year-88 save: the town's buildings are at the condition floor and a
+	# fully worked field copied that condition and sat "stressed".
+	model.city_form()["condition"]=0.05
+	field["status"]="stressed"; field["condition"]=0.05; field["worker_count"]=12
+	var phases:Dictionary={}
+	var peak_cover:=0.0
+	for day in range(0,365,15):
+		model.call("_update_field_seasons",day)
+		phases[String(field.cultivation_phase)]=true
+		peak_cover=maxf(peak_cover,float(field.crop_cover))
+	for phase in ["fallow","prepared","stressed","harvested"]: assert_bool(phases.has(phase)).override_failure_message("missing phase %s in %s" % [phase,phases.keys()]).is_true()
+	assert_float(peak_cover).is_between(0.30,0.46)
+	# Unworked and vacant ground still lies fallow.
+	field["worker_count"]=0
+	model.call("_update_field_seasons",210)
+	assert_str(String(field.cultivation_phase)).is_equal("fallow")
+	field["worker_count"]=12; field["status"]="vacant"
+	model.call("_update_field_seasons",210)
+	assert_str(String(field.cultivation_phase)).is_equal("fallow")
+	# People farming a vacant, overgrown field bring it straight back into use.
+	field["condition"]=0.0
+	var events:Array[Dictionary]=[]
+	model.call("_update_plot_workforce",390,events)
+	assert_int(int(field.worker_count)).is_equal(12)
+	assert_str(String(field.status)).is_equal("active")
+	# Farm work, not the builders' house upkeep, restores the field in about two seasons.
+	for month in range(14,40):
+		field["worker_count"]=12
+		model.call("_process_occupancy_and_maintenance",month*30,events)
+	assert_float(float(model.city_form().condition)).is_equal(0.05)
+	assert_str(String(field.status)).is_equal("active")
+	assert_float(float(field.condition)).is_greater(0.58)
+	model.call("_update_field_seasons",210)
+	assert_str(String(field.cultivation_phase)).is_equal("mature")
+	assert_float(float(field.crop_cover)).is_greater(0.85)
+
 func test_role_reallocation_visibly_idles_and_reopens_working_ground()->void:
 	GameState.known_discoveries.append("seed_selection")
 	preload("res://scripts/opening_opportunities.gd").data().programs.seed.retained=maxf(.5,GameState.population_exact*.01)

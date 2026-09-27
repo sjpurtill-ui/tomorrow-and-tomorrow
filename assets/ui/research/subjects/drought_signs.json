@@ -1,0 +1,12 @@
+{
+  "id": "drought_signs",
+  "line": "ecology",
+  "game_year": 55,
+  "approx_historical_year": -4633,
+  "prompt": "c. 4633 BCE: Family sees a weakened spring and drying pond with cracked edge; plant-pigment naturalist illustration. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f2e03025-81db-48de-9b85-9e415502847d.png",
+  "asset": "res://assets/ui/research/subjects/drought_signs-v1.png",
+  "sha256": "2474242150e6cceae772fb0c52a2c36dc79a4601538969f6f3d7b9d781c03f2c",
+  "mode": "built-in image_gen / new image",
+  "review": "Falling water and cracked shore clear."
+}

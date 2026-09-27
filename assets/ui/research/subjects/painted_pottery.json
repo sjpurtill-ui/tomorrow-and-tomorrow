@@ -1,0 +1,12 @@
+{
+  "id": "painted_pottery",
+  "line": "production",
+  "game_year": 64,
+  "approx_historical_year": -4573,
+  "prompt": "c. 4573 BCE: Potter applies mineral-pigment bands to clay pot beside kiln and finished painted wares; matte impasto oil. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a4885d69-620c-4fbe-b693-464533376daa.png",
+  "asset": "res://assets/ui/research/subjects/painted_pottery-v1.png",
+  "sha256": "e68616d59d6899a662e4737627177e9f94581635c0448148ffb53de82d0aac4e",
+  "mode": "built-in image_gen / new image",
+  "review": "Painting gesture, pigment and fired decorated wares clear."
+}

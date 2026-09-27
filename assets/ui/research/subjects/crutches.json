@@ -1,0 +1,12 @@
+{
+  "id": "crutches",
+  "line": "health",
+  "game_year": 62,
+  "approx_historical_year": -4587,
+  "prompt": "c. 4587 BCE: Injured adult moves using simple wooden staff with companion's support; sparse ink and watercolor. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-40a9b547-931e-4d8a-adac-dc700ea0e697.png",
+  "asset": "res://assets/ui/research/subjects/crutches-v1.png",
+  "sha256": "1720693617f1798e97fd260fbf3809a6cc7fcbf8fdad79d1d92d2372e6276141",
+  "mode": "built-in image_gen / new image",
+  "review": "Staff and assisted mobility clear."
+}

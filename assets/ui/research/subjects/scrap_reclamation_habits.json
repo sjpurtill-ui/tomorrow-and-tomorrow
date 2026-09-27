@@ -1,0 +1,12 @@
+{
+  "id": "scrap_reclamation_habits",
+  "line": "production",
+  "game_year": 53,
+  "approx_historical_year": -4647,
+  "prompt": "c. 4647 BCE: Workers sort broken pottery, stone flakes and wood offcuts and reshape a useful fragment; matte impasto oil. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-23fae6e0-ad76-498e-ba33-c7f3a3664dbe.png",
+  "asset": "res://assets/ui/research/subjects/scrap_reclamation_habits-v1.png",
+  "sha256": "6fa16c0841724efc05b02dc5809c4bcdda2bc32b9e4d6d1a83f2f1ac697f4663",
+  "mode": "built-in image_gen / new image",
+  "review": "Sorting and reclamation of scraps clear."
+}

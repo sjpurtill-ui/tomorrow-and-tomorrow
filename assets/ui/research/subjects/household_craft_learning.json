@@ -1,0 +1,12 @@
+{
+  "id": "household_craft_learning",
+  "line": "labor",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Parent teaches a child basket weaving beside household work; charcoal and ochre drawing. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-04d85e2a-5eba-440a-9797-7eef471f0c1e.png",
+  "asset": "res://assets/ui/research/subjects/household_craft_learning-v1.png",
+  "sha256": "eebe04391b8de6a037dbd6cf8e85dca1c3cc048a1c0a78344e98ce4ba8aa2d53",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Adult teaching child craft clear in crop."
+}

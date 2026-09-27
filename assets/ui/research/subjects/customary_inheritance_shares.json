@@ -1,0 +1,12 @@
+{
+  "id": "customary_inheritance_shares",
+  "line": "institutions",
+  "game_year": 60,
+  "approx_historical_year": -4600,
+  "prompt": "c. 4600 BCE: Elders divide grain, tools and goats into distinct shares among adult heirs; mineral-pigment civic fresco. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1f4652d6-5aed-4e6c-b51b-94200ada44f9.png",
+  "asset": "res://assets/ui/research/subjects/customary_inheritance_shares-v1.png",
+  "sha256": "48d7a567cc58efda934758e9cba8e27c6cb8f51e806c4c8849c9f5f3da16a557",
+  "mode": "built-in image_gen / new image",
+  "review": "Distinct customary shares and heirs clear."
+}

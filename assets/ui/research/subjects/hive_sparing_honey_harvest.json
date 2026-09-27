@@ -1,0 +1,12 @@
+{
+  "id": "hive_sparing_honey_harvest",
+  "line": "ecology",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Adult uses smoke to collect a small comb from a wild tree hive while sparing the hive; plant-pigment naturalist illustration. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-229b5b68-7f08-44e2-8b34-02425f3f3b23.png",
+  "asset": "res://assets/ui/research/subjects/hive_sparing_honey_harvest-v1.png",
+  "sha256": "e2e59b1038c187a729152c29b90fbeef1021643943cd04d173109f2fde84fea1",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Tree hive, smoke and limited honey collection clear in crop."
+}

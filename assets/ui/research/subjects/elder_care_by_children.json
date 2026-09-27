@@ -1,0 +1,12 @@
+{
+  "id": "elder_care_by_children",
+  "line": "demography",
+  "game_year": 55,
+  "approx_historical_year": -4633,
+  "prompt": "c. 4633 BCE: Grown children bring food and woven blanket to frail elder at home; chalk pastel and cut paper. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-dce199dc-2dab-4fee-9869-42a51bd2701e.png",
+  "asset": "res://assets/ui/research/subjects/elder_care_by_children-v1.png",
+  "sha256": "9afac9368712305098eb504080131449075ca0937059d012a0cccd1ecc99e848",
+  "mode": "built-in image_gen / new image",
+  "review": "Care by grown children clear."
+}

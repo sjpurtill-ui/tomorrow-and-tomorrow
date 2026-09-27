@@ -1,0 +1,12 @@
+{
+  "id": "boundary_markers_parallel_crews",
+  "line": "labor",
+  "game_year": 62,
+  "approx_historical_year": -4587,
+  "prompt": "c. 4587 BCE: Two crews hoe adjacent field strips separated by simple stone boundary markers; charcoal and ochre sketch. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a28326ae-9ad9-4abb-865d-321bc7e6fe07.png",
+  "asset": "res://assets/ui/research/subjects/boundary_markers_parallel_crews-v1.png",
+  "sha256": "3a11e2624de604c0a5fd2a4af02d43c3a9d3d0c444cf8374d215b810ad52afdb",
+  "mode": "built-in image_gen / new image",
+  "review": "Parallel crews and separating markers clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "boundary_exchange_sites",
+  "line": "logistics",
+  "game_year": 50,
+  "approx_historical_year": -4673,
+  "prompt": "c. 4673 BCE: Two village groups meet to exchange goods at a boundary cairn; travel watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0b15656e-4547-4df6-8148-e4c06d358d03.png",
+  "asset": "res://assets/ui/research/subjects/boundary_exchange_sites-v1.png",
+  "sha256": "b4e4c54edcb1e65346da3e852aeb483e4a276694871fb4a9c6124de94db07e48",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Separate groups, trade goods and boundary cairn clear in crop."
+}
