@@ -117,6 +117,12 @@ var distance_input_msec:=-1000
 var distance_gesture_steps:=0.0
 var zoom_preset_active:=false
 var zoom_target_size:float=-1.0
+## codex/map-motion: camera glide and coasting state (scripts/map_motion.gd).
+var zoom_log_velocity:=0.0
+var pan_coast_velocity:=Vector3.ZERO
+var drag_velocity:=Vector3.ZERO
+var drag_motion_usec:=0
+var key_pan_velocity:=Vector2.ZERO
 var zoom_pointer:=Vector2.ZERO
 var north_reset_active:=false
 var camera_input_msec:int=0
@@ -1878,21 +1884,29 @@ func _build_environment() -> void:
 	# Low warm key light (docs/ART_DIRECTION.md): a painted landscape in the
 	# first hours of the day. The sky fill is cooler and dimmer than the key so
 	# the shadowed side of every slope and crown reads as form, not flat green.
-	settings.ambient_light_color = Color("#a3a495")
-	settings.ambient_light_energy = 0.30 if SEAMLESS_WORLD else 0.36
+	# The fill is the open sky: a little cooler than the key, so shade reads
+	# blue-grey against warm sunlit ground (world_beauty.gdshaderinc).
+	settings.ambient_light_color = Color("#97a3ab")
+	settings.ambient_light_energy = 0.33 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
 
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-34, -38, 0)
-	sun.light_color = Color("#eed6ae")
+	# From the north-west, the cartographer's convention: north is up, so the
+	# light falls from the upper left and relief reads as raised, never sunken.
+	# The chart hillshade and canopy edges in the ground shader use the same sun.
+	sun.rotation_degrees = Vector3(-31, -138, 0)
+	sun.light_color = Color("#f4e4cc")
 	sun.light_energy = 1.12 if SEAMLESS_WORLD else 0.88
 	sun.shadow_enabled = bool(display_preferences.shadows) if display_preferences else true
 	# Oblique satellite views amplify one-pixel cascade stair-steps into bright
 	# kilometre-long bands on ridge crests. A modest penumbra preserves the relief
 	# while removing the low-poly-looking shadow edge.
 	sun.shadow_blur=2.4
+	# Painted shade is never black: hill shadows keep some sky light, so a cast
+	# shadow reads as cool shade across the land rather than a hole in it.
+	sun.shadow_opacity=0.70
 	sun.directional_shadow_max_distance = 900.0 if SEAMLESS_WORLD else 180.0
 	add_child(sun)
 
@@ -2168,6 +2182,7 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	var areas:Array=CivilizationSystem.revealed_areas
 	var first_new:=0
 	var image:=discovery_mask_image
+	var repainted:=image==null
 	if not force and image!=null and discovery_mask_painted>0 and areas.size()>=discovery_mask_painted \
 			and _discovery_area_key(areas[0])==discovery_mask_first_key \
 			and _discovery_area_key(areas[discovery_mask_painted-1])==discovery_mask_last_key:
@@ -2175,6 +2190,7 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	else:
 		image=Image.create(width,height,false,Image.FORMAT_L8)
 		image.fill(Color.BLACK)
+		repainted=true
 	for area_index in range(first_new,areas.size()):
 		var area:Dictionary=areas[area_index]
 		var radius:=maxf(1.0,float(area.get("radius",1.0)))
@@ -2189,10 +2205,14 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	discovery_mask_painted=areas.size()
 	discovery_mask_first_key=_discovery_area_key(areas[0]) if not areas.is_empty() else ""
 	discovery_mask_last_key=_discovery_area_key(areas[-1]) if not areas.is_empty() else ""
+	# codex/map-motion: newly charted ground inks in over about a second.
+	var reveal:=preload("res://scripts/discovery_reveal.gd")
 	if discovery_mask_texture==null:
 		discovery_mask_texture=ImageTexture.create_from_image(image)
+		reveal.present(self,discovery_mask_texture,image,Rect2i(),true)
 	else:
-		discovery_mask_texture.update(image)
+		var changed:=Rect2i() if repainted else reveal.areas_rect(areas.slice(first_new),_discovery_mask_pixel,Vector2i(width,height),maxf(float(width)/world_width,float(height)/world_depth)*1.25)
+		if not reveal.present(self,discovery_mask_texture,image,changed,force or repainted):discovery_mask_texture.update(image)
 	rendered_fog_revision=revision
 	terrain_fog_materials.update(discovery_mask_texture,origin)
 	vegetation_fog_materials.update(discovery_mask_texture,origin)
@@ -2283,6 +2303,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
+#include "res://scripts/world_beauty.gdshaderinc"
 
 // Charted ground: the discovery mask, plus the ground around the people now.
 float charted_at(vec2 xz) {
@@ -2359,12 +2380,15 @@ void fragment() {
 	// frontier of the known world inked where the chart ends.
 	vec3 unknown_ground=map_chart_paper(world_position.xz,CAMERA_POSITION_WORLD.y,pixel_world,fog_current_origin,SCREEN_UV);
 	float reveal=smoothstep(0.06,0.62,discovered);
+	// Screen pixels inland from the frontier ink (world_beauty's wash).
+	float wb_frontier_px=1000000.0;
 	if (discovered>0.02 && discovered<0.75) {
 		// One mask texel is ~39 km; the mask is linear inside it, so a forward
 		// difference over half a texel gives its exact local slope.
 		float step_km=fog_world_size.x/2048.0;
 		vec2 slope_per_km=vec2(charted_at(world_position.xz+vec2(step_km,0.0))-discovered,charted_at(world_position.xz+vec2(0.0,step_km))-discovered)/step_km;
 		vec3 frontier=map_frontier(discovered,1.0/max(length(slope_per_km)*pixel_world,0.00001));
+		wb_frontier_px=(discovered-0.30)/max(length(slope_per_km)*pixel_world,0.00001);
 		float frontier_scale=smoothstep(0.015,0.20,pixel_world);
 		unknown_ground=mix(unknown_ground,MAP_SEPIA,frontier.y*frontier_scale*0.38);
 		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
@@ -2648,6 +2672,31 @@ void fragment() {
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
 	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(surface_uv,surface_uv2));
+	// Repaint with the biome palette (world_beauty.gdshaderinc): the detail
+	// above stays, its hue comes from the climate.
+	float wb_warmth=surface_uv.x>=0.999?surface_uv.y:0.55;
+	// Local relief against the broad land (the macro height raster): hollows
+	// hold water and stay lush, crests and knolls dry to straw. Also shades
+	// the valleys below. Fades out once a pixel spans kilometres.
+	float wb_hollow=0.0;
+	if (coast_mask_ready() && world_position.y>0.0) {
+		wb_hollow=(coast_mask_height(world_position.xz)-world_position.y)*(1.0-smoothstep(0.35,2.5,pixel_world));
+	}
+	float wb_topo_wet=smoothstep(0.0,0.10,wb_hollow)-smoothstep(0.0,0.12,-wb_hollow)*0.6;
+	float wb_rain=clamp(precipitation+wb_topo_wet*0.16,0.0,1.0);
+	float wb_dry=1.0-smoothstep(0.26,0.50,wb_rain);
+	float wb_reference=mix(mix(0.180,0.250,wb_dry),0.085,clamp(forest_mask,0.0,1.0));
+	vec3 wb_palette=wb_biome_palette(wb_rain,wb_warmth,forest_mask,world_position.y,smoothstep(0.25,0.75,biome_patch*0.55+soil_patch*0.45));
+	earth = wb_paint(earth,wb_palette,wb_reference,0.85);
+	earth = wb_brushwork(earth,wb_brush(world_position.xz,CAMERA_POSITION_WORLD.y),1.0);
+	// Woodland as stands of crowns (world_beauty.gdshaderinc), from the same
+	// woodland density and clearing as resource access. The stand edge facing
+	// the low sun catches warm light; the far edge falls into shade that
+	// spills a little onto the open ground beside it.
+	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.30,0.72,slope));
+	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch,pixel_world)*(1.0-rock_mask*0.8);
+	earth = wb_woodland(earth,wb_stand_cover,wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5),world_position.xz,pixel_world);
+	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2682,6 +2731,11 @@ void fragment() {
 	// the valley reads as soft green blotches with no landform at all.
 	float map_relief = smoothstep(0.008,0.16,pixel_world);
 	earth *= mix(1.0, hillshade, map_relief * 0.90);
+	// Painted light at every zoom (world_beauty.gdshaderinc): the sunward
+	// side of each slope warms, the far side takes the cool sky, and ground
+	// lying below the broad land around it (valleys, river bottoms) is shaded.
+	float wb_valley=smoothstep(0.004,0.14,wb_hollow)*0.55;
+	earth = wb_light(earth,directional_slope*4.5,wb_valley,mix(0.62,0.32,map_relief));
 	// Actual elevation remains meaningful after fine texture has filtered away.
 	// A broad, non-banded upland exposure separates low basins, plateaus and the
 	// alpine shoulder in regional/continental imagery. It is exactly absent from
@@ -2694,7 +2748,7 @@ void fragment() {
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
 	// Close aerial imagery needs a different exposure than the shaded regional
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
-	earth *= mix(1.0, 1.32, close_detail);
+	earth *= mix(1.0, 1.16, close_detail);
 	earth = mix(earth, max(earth, vec3(0.105,0.112,0.072)), close_detail * 0.72);
 	// Thin aerial perspective replaces expensive volumetric fog. At country and
 	// continental footprints it gently compresses saturation like a real column
@@ -2702,14 +2756,17 @@ void fragment() {
 	// Grade to the map palette first, then haze toward parchment: mild at
 	// valley height, stronger at regional and continental footprints, and a
 	// little more along oblique rays, like the margin of a painted map.
-	earth=map_palette_grade(earth);
+	// Engraved contours over the painted relief at chart zoom.
+	float wb_contour=wb_contours(world_position.y,height_px,pixel_world)*smoothstep(0.012,0.05,pixel_world);
+	earth=mix(earth,MAP_SEPIA*1.15,wb_contour*0.28);
+	earth=wb_grade(earth);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
 	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.36;
 	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.002,0.35,pixel_world);
-	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.40);
-	earth=map_haze(earth,atmospheric_weight);
+	float atmospheric_weight=clamp(altitude_haze*0.62+slant_haze*0.14,0.0,0.30);
+	earth=wb_air(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
 	// The coast is inked, one to two pixels wide, where the ground rises out
@@ -2721,6 +2778,7 @@ void fragment() {
 		float coast_ink=(1.0-smoothstep(0.9,1.9,shore_px))*step(0.0,coast_height);
 		earth=mix(earth,MAP_INK*1.4,coast_ink*smoothstep(0.004,0.04,pixel_world)*0.75);
 	}
+	earth = wb_frontier_wash(earth,wb_frontier_px,world_position.xz,pixel_world,smoothstep(0.015,0.20,pixel_world));
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
 	ROUGHNESS = 0.96;
@@ -4017,9 +4075,11 @@ func _update_world_streaming() -> void:
 func _process_camera_navigation(delta: float) -> void:
 	if not SEAMLESS_WORLD or camera==null:
 		return
-	if is_instance_valid(world_menu_panel):return
+	if is_instance_valid(world_menu_panel):
+		key_pan_velocity=Vector2.ZERO;return
 	var focus:=get_viewport().gui_get_focus_owner()
-	if focus is LineEdit or focus is TextEdit: return
+	if focus is LineEdit or focus is TextEdit:
+		key_pan_velocity=Vector2.ZERO;return
 	var turn:=(1.0 if Input.is_physical_key_pressed(KEY_Q) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_E) else 0.0)
 	if turn!=0.0:
 		north_reset_active=false
@@ -4034,11 +4094,16 @@ func _process_camera_navigation(delta: float) -> void:
 		(1.0 if Input.is_physical_key_pressed(KEY_S) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_W) else 0.0)
 	)
 	if wasd.length_squared()>input.length_squared(): input=wasd.normalized() if wasd.length()>1.0 else wasd
-	if input.length_squared()<0.001:
+	# Held keys ease the camera up to speed and let it settle when released.
+	key_pan_velocity=preload("res://scripts/map_motion.gd").key_pan_step(key_pan_velocity,input,delta)
+	if key_pan_velocity.length_squared()<0.0001:
+		key_pan_velocity=Vector2.ZERO
 		return
+	if input.length_squared()>=0.001:pan_coast_velocity=Vector3.ZERO
 	var screen_right:=_camera_ground_screen_right()
 	var screen_up:=_camera_ground_screen_up()
-	var movement:=_camera_keyboard_movement(input,screen_right,screen_up,camera.size*0.28*delta)
+	var movement:=_camera_keyboard_movement(key_pan_velocity,screen_right,screen_up,camera.size*0.28*delta)
+	camera_input_msec=Time.get_ticks_msec()
 	_set_camera_target(camera_target+movement)
 
 
@@ -21017,8 +21082,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			var was_dragging:=dragging
 			dragging = event.pressed and not _pointer_over_ui()
 			rotating_camera = event.shift_pressed
+			if dragging:
+				pan_coast_velocity=Vector3.ZERO;drag_velocity=Vector3.ZERO
+			elif was_dragging and not rotating_camera and Time.get_ticks_usec()-drag_motion_usec<70000:
+				# A released grab coasts briefly, as a map slid across a table.
+				pan_coast_velocity=preload("res://scripts/map_motion.gd").release_velocity(drag_velocity,camera.size)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed and not _pointer_over_ui():
 			_queue_camera_zoom(event.position,-maxf(0.05,event.factor)) if event.shift_pressed else _step_camera_distance(event.position,-1.0)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed and not _pointer_over_ui():
@@ -21035,6 +21106,10 @@ func _input(event: InputEvent) -> void:
 			var screen_right:=_camera_ground_screen_right()
 			var screen_up:=_camera_ground_screen_up()
 			var movement:=_camera_grab_movement(event.relative,screen_right,screen_up,units_per_pixel)
+			var now_usec:=Time.get_ticks_usec()
+			var step_seconds:=clampf(float(now_usec-drag_motion_usec)/1000000.0,1.0/240.0,0.1)
+			drag_velocity=drag_velocity.lerp(movement/step_seconds,0.5) if now_usec-drag_motion_usec<100000 else movement/step_seconds
+			drag_motion_usec=now_usec
 			_set_camera_target(camera_target+movement)
 
 func _dismiss_map_panels()->bool:
@@ -21323,19 +21398,30 @@ func _reset_camera_north()->void:
 	camera_input_msec=Time.get_ticks_msec()
 
 func _camera_in_motion()->bool:
-	return zoom_target_size>0.0 or north_reset_active or dragging or Time.get_ticks_msec()-camera_input_msec<100
+	return zoom_target_size>0.0 or north_reset_active or dragging or pan_coast_velocity!=Vector3.ZERO or key_pan_velocity!=Vector2.ZERO or Time.get_ticks_msec()-camera_input_msec<100
 
 func _process_smooth_camera(delta:float)->void:
 	if camera==null: return
 	var blend:=1.0-exp(-8.0*maxf(0.0,delta))
+	var map_motion:=preload("res://scripts/map_motion.gd")
 	if zoom_target_size>0.0:
-		var log_step:=clampf((log(zoom_target_size)-log(camera.size))*blend,-2.8*delta,2.8*delta)
-		var next:=exp(log(camera.size)+log_step)
-		if absf(log(next/zoom_target_size))<0.001:
+		# A critically damped glide in log(size): eases in, eases out, never overshoots.
+		var glide:=map_motion.zoom_step(camera.size,zoom_log_velocity,zoom_target_size,maxf(0.0,delta))
+		var next:=glide.x
+		zoom_log_velocity=glide.y
+		if glide.z>0.5:
 			next=zoom_target_size
 			zoom_target_size=-1.0
 			zoom_preset_active=false
+			zoom_log_velocity=0.0
 		_zoom_camera_at_screen(zoom_pointer,next,false)
+	else:
+		zoom_log_velocity=0.0
+	if pan_coast_velocity!=Vector3.ZERO:
+		if dragging:pan_coast_velocity=Vector3.ZERO
+		else:
+			_set_camera_target(camera_target+pan_coast_velocity*maxf(0.0,delta))
+			pan_coast_velocity=map_motion.coast_step(pan_coast_velocity,maxf(0.0,delta),camera.size)
 	if north_reset_active:
 		camera_yaw=lerp_angle(camera_yaw,PI*0.5,blend)
 		if absf(wrapf(camera_yaw-PI*0.5,-PI,PI))<0.001:

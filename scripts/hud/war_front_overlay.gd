@@ -39,6 +39,9 @@ const MORPH_SECONDS:=0.9
 const EASE_SECONDS:=0.5
 ## While only the easing moves, the chart is redrawn at most this often.
 const EASE_REDRAW_SECONDS:=1.0/30.0
+## A new clash rings once, briefly, like ink dropped on the chart (codex/map-motion).
+const CLASH_PULSE_SECONDS:=1.3
+const MAX_CLASH_PULSES:=6
 ## Every drawn front is carried on this many points, so any two can morph.
 const FRONT_POINTS:=48
 const CAPTION_SIZE:=14
@@ -109,6 +112,8 @@ var composes:=0
 var redraws:=0
 var last_compose_usec:=0
 var last_draw_usec:=0
+## Newly joined battles: [{pos, t}] (bounded, visual only).
+var clash_pulses:Array[Dictionary]=[]
 
 
 func _ready()->void:
@@ -128,6 +133,13 @@ func _process(delta:float)->void:
 	if blend<1.0: blend=minf(1.0,blend+delta/MORPH_SECONDS)
 	settling=ease_fronts(delta)
 	var view:Array=[inputs_signature,size,blend,settling]
+	if not clash_pulses.is_empty():
+		var live:Array[Dictionary]=[]
+		for pulse in clash_pulses:
+			pulse["t"]=float(pulse.t)+delta
+			if float(pulse.t)<CLASH_PULSE_SECONDS:live.append(pulse)
+		clash_pulses=live
+		view.append(roundi(Time.get_ticks_msec()/33.0))
 	if settling:
 		ease_elapsed+=delta
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
@@ -145,6 +157,7 @@ func _process(delta:float)->void:
 
 func set_scene(next:Dictionary,immediate:bool=false)->void:
 	var start:=Time.get_ticks_usec()
+	if not immediate and not scene.is_empty():_note_new_clashes(scene,next)
 	previous=scene if not immediate else {}
 	scene=next
 	blend=1.0 if immediate or previous.is_empty() else 0.0
@@ -844,6 +857,7 @@ func _draw()->void:
 		for objective in scene.get("objectives",[]): _draw_objective(objective)
 	for siege in scene.get("sieges",[]): _draw_siege(siege,wide)
 	for clash in scene.get("clashes",[]): _draw_clash(clash,band)
+	for pulse in clash_pulses: _draw_clash_pulse(pulse,wide)
 	# Highest echelon first; a group's own corps give way to its mark where
 	# they would crowd it, and the armies under a drawn mark give way to it.
 	var echelons_drawn:Array=[]
@@ -1186,6 +1200,33 @@ func mark_screen_position(side:String,id:String)->Vector2:
 		if side=="theirs" and String(entry.get("enemy_id",""))==id: return entry.at
 	return Vector2.INF
 
+
+## Remember battles that were not in the last scene, to ring them once.
+func _note_new_clashes(before:Dictionary,after:Dictionary)->void:
+	if preload("res://scripts/hud/motion.gd").reduced():return
+	var known:={}
+	for clash in before.get("clashes",[]):known[_clash_key(clash.pos)]=true
+	for clash in after.get("clashes",[]):
+		if known.has(_clash_key(clash.pos)):continue
+		clash_pulses.append({"pos":clash.pos,"t":0.0})
+	while clash_pulses.size()>MAX_CLASH_PULSES:clash_pulses.pop_front()
+
+static func _clash_key(pos:Vector2)->Vector2i:
+	# Contacts drift a little day to day; the same battle keeps its key.
+	return Vector2i(roundi(pos.x/2.0),roundi(pos.y/2.0))
+
+## Two fine rings spreading from the contact and fading: brief and quiet.
+func _draw_clash_pulse(pulse:Dictionary,wide:bool)->void:
+	var at:=_screen(pulse.pos)
+	if not at.is_finite():return
+	var reach:=26.0 if wide else 44.0
+	for ring in 2:
+		var k:=clampf((float(pulse.t)-0.28*float(ring))/(CLASH_PULSE_SECONDS-0.28),0.0,1.0)
+		if k<=0.0 or k>=1.0:continue
+		var spread:=1.0-pow(1.0-k,3.0)
+		var fade:=(1.0-k)*(1.0-k)
+		draw_arc(at,lerpf(6.0,reach,spread),0.0,TAU,40,Color(PAPER,0.5*fade),3.2,true)
+		draw_arc(at,lerpf(6.0,reach,spread),0.0,TAU,40,Color(THEIRS,0.85*fade),1.4,true)
 
 func _crossed_strokes(at:Vector2,size_px:float,color:Color)->void:
 	draw_line(at+Vector2(-size_px,-size_px),at+Vector2(size_px,size_px),Color(PAPER,0.6*color.a),4.0,true)

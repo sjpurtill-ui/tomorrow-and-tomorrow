@@ -123,13 +123,18 @@ void fragment() {
 		+0.28*sin(dot(world_position.xz,vec2(0.0011,0.0003))+0.7)
 		+0.22*sin(dot(world_position.xz,vec2(-0.0004,0.0017))-1.1),0.0,1.0);
 	float polar_water=clamp(abs(world_position.z)/(fog_world_size.y*0.5),0.0,1.0);
-	// Map palette slate: deep #2F4A52 lifting to shallow #5E7F7A, never cyan.
-	vec3 deep = mix(vec3(0.070,0.125,0.140),vec3(0.088,0.150,0.160),basin_field);
-	deep=mix(deep,vec3(0.092,0.140,0.150),polar_water*0.16);
-	vec3 shelf = vec3(0.105,0.178,0.172);
-	vec3 shallows = vec3(0.111,0.200,0.184);
-	vec3 water = mix(deep,shelf,exp(-depth/0.19)*surveyed_surface);
-	water = mix(water,shallows,exp(-depth/0.018)*surveyed_surface);
+	// Painted water (world_beauty): a deep slate-blue sea lifting through a
+	// green-slate shelf to clear, pale shallows over a sandy bed, as a
+	// watercolourist lays a coast. Muted, never cyan.
+	vec3 deep = mix(vec3(0.072,0.122,0.150),vec3(0.086,0.140,0.162),basin_field);
+	deep=mix(deep,vec3(0.092,0.135,0.152),polar_water*0.16);
+	vec3 shelf = vec3(0.100,0.178,0.182);
+	vec3 shallows = vec3(0.180,0.300,0.270);
+	vec3 bed = vec3(0.330,0.330,0.245);
+	vec3 water = mix(deep,shelf,exp(-depth/0.16)*surveyed_surface);
+	water = mix(water,shallows,exp(-depth/0.022)*surveyed_surface);
+	// Only the last metres show the bed through clear water.
+	water = mix(water,bed,exp(-depth/0.0024)*surveyed_surface*0.35);
 	// Broad, static suspended-sediment variation gives shallow coasts the
 	// irregular mineral tint visible in aerial imagery without animating the bed.
 	float sediment = 0.0;
@@ -160,11 +165,29 @@ void fragment() {
 	// bank every faint undulation would otherwise draw its own ring.
 	water_lines *= smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
 	water = mix(water,vec3(0.34,0.37,0.31),water_lines*0.60);
+	// Surf: a thin broken pale line at the water's edge and a fainter second
+	// one a few pixels out where the swell first breaks, in screen pixels so it
+	// stays a painted line at every close zoom. Settlement and valley zooms only.
+	float surf_detail = (1.0-smoothstep(0.002,0.014,pixel_world))*surveyed_surface
+		*smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
+	if (surf_detail>0.0) {
+		float breakup = coast_feather_noise(world_position.xz/max(pixel_world*9.0,0.000001)+vec2(-13.0,29.0));
+		float swash = 1.0-smoothstep(0.6,2.2,shore_px);
+		float breaker = 1.0-smoothstep(0.35,1.2,abs(shore_px-6.5));
+		float foam = max(swash*smoothstep(0.12,0.40,breakup),breaker*smoothstep(0.40,0.70,breakup)*0.50);
+		water = mix(water,vec3(0.74,0.75,0.70),foam*surf_detail*0.85);
+	}
 	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
 	// The same parchment haze as the land, so the coast does not change key.
-	water = map_haze(water,clamp(altitude_haze+slant_haze*0.14,0.0,0.30));
+	water = map_haze(water,clamp(altitude_haze*0.55+slant_haze*0.14,0.0,0.22));
+	// At chart zoom the sea is a lighter slate wash on the page, not ink.
+	water = mix(water,vec3(0.150,0.225,0.228),smoothstep(0.20,1.2,pixel_world)*0.70);
+	// A gentle sheen, brightest toward the low north-west sun (upper left),
+	// in place of a specular glint a straight-down view can never see.
+	float sheen = smoothstep(0.95,0.0,length((SCREEN_UV-vec2(0.08,0.02))*vec2(1.0,1.25)));
+	water *= 1.0+sheen*0.16*vec3(1.05,1.0,0.90);
 	ALBEDO = water*visible;
 	// A chart's sea is a pale slate wash on the page, legible in any light:
 	// part of its colour is carried as emission so low sun cannot sink it to black.
