@@ -3700,5 +3700,12 @@
   "rest_break_timing": {"path": "res://assets/ui/research/subjects/rest_break_timing-v1.png", "focus": [0.5, 0.5]},
   "sightline_staking": {"path": "res://assets/ui/research/subjects/sightline_staking-v1.png", "focus": [0.5, 0.4]},
   "streambank_vegetation_watch": {"path": "res://assets/ui/research/subjects/streambank_vegetation_watch-v1.png", "focus": [0.5, 0.5]},
-  "vermin_deterrent_placement": {"path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png", "focus": [0.5, 0.5]}
+  "vermin_deterrent_placement": {"path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png", "focus": [0.5, 0.5]},
+  "postpartum_seclusion_care": {"path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v1.png", "focus": [0.5, 0.5]},
+  "witnessed_agreement_customs": {"path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png", "focus": [0.5, 0.5]},
+  "dry_cache_siting": {"path": "res://assets/ui/research/subjects/dry_cache_siting-v1.png", "focus": [0.5, 0.5]},
+  "elder_consultation_rites": {"path": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png", "focus": [0.5, 0.5]},
+  "hazard_memory_recitation": {"path": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png", "focus": [0.5, 0.5]},
+  "shared_work_signals": {"path": "res://assets/ui/research/subjects/shared_work_signals-v1.png", "focus": [0.5, 0.5]},
+  "site_clearing_assessment": {"path": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png", "focus": [0.5, 0.5]}
 }
