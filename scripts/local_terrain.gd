@@ -2174,6 +2174,7 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	var areas:Array=CivilizationSystem.revealed_areas
 	var first_new:=0
 	var image:=discovery_mask_image
+	var repainted:=image==null
 	if not force and image!=null and discovery_mask_painted>0 and areas.size()>=discovery_mask_painted \
 			and _discovery_area_key(areas[0])==discovery_mask_first_key \
 			and _discovery_area_key(areas[discovery_mask_painted-1])==discovery_mask_last_key:
@@ -2181,6 +2182,7 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	else:
 		image=Image.create(width,height,false,Image.FORMAT_L8)
 		image.fill(Color.BLACK)
+		repainted=true
 	for area_index in range(first_new,areas.size()):
 		var area:Dictionary=areas[area_index]
 		var radius:=maxf(1.0,float(area.get("radius",1.0)))
@@ -2195,13 +2197,14 @@ func _refresh_discovery_mask(force:bool=false)->void:
 	discovery_mask_painted=areas.size()
 	discovery_mask_first_key=_discovery_area_key(areas[0]) if not areas.is_empty() else ""
 	discovery_mask_last_key=_discovery_area_key(areas[-1]) if not areas.is_empty() else ""
+	# codex/map-motion: newly charted ground inks in over about a second.
+	var reveal:=preload("res://scripts/discovery_reveal.gd")
 	if discovery_mask_texture==null:
 		discovery_mask_texture=ImageTexture.create_from_image(image)
+		reveal.present(self,discovery_mask_texture,image,Rect2i(),true)
 	else:
-		# codex/map-motion: newly charted ground inks in over about a second.
-		var reveal:=preload("res://scripts/discovery_reveal.gd")
-		var changed:=reveal.areas_rect(areas.slice(first_new),_discovery_mask_pixel,Vector2i(width,height),maxf(float(width)/world_width,float(height)/world_depth)*1.25) if first_new>0 else Rect2i()
-		if not reveal.present(self,discovery_mask_texture,image,changed,force):discovery_mask_texture.update(image)
+		var changed:=Rect2i() if repainted else reveal.areas_rect(areas.slice(first_new),_discovery_mask_pixel,Vector2i(width,height),maxf(float(width)/world_width,float(height)/world_depth)*1.25)
+		if not reveal.present(self,discovery_mask_texture,image,changed,force or repainted):discovery_mask_texture.update(image)
 	rendered_fog_revision=revision
 	terrain_fog_materials.update(discovery_mask_texture,origin)
 	vegetation_fog_materials.update(discovery_mask_texture,origin)

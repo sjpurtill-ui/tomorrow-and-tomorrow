@@ -104,7 +104,8 @@ static func render(cities:Array,parent:Node3D,height:Callable)->void:
 				root.add_child(halo)
 			var folly:bool=state=="ruined" and String(r.get("outcome",""))=="collapse"
 			root.set_meta("map_mark",{"id":String(r.id),"city_id":String(city.get("id","")),"title":U.display_name(r),"shape":shape,"state":state,"progress":progress,
-				"status":status_line(state,progress,folly),"anchor":origin+Vector3(0,float(built.top)+float(built.height)*.5,0),"radius":plinth.size.length()*.5})
+				"status":status_line(state,progress,folly),"anchor":origin+Vector3(0,float(built.top)+float(built.height)*.5,0),"radius":plinth.size.length()*.5,
+				"plinth":plinth,"angle":angle,"plinth_top":origin.y+float(built.top)})
 
 ## The map mark a rendered work root carries (empty for anything else).
 static func map_mark(root:Node)->Dictionary:

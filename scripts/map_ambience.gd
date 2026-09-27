@@ -382,7 +382,8 @@ func _refresh_builders()->void:
 			if not child.has_meta("map_mark"):continue
 			var mark:Dictionary=child.get_meta("map_mark")
 			if String(mark.get("state",""))!="building":continue
-			sites.append({"at":(child as Node3D).position,"radius":float(mark.get("radius",0.015))})
+			sites.append({"at":(child as Node3D).position,"radius":float(mark.get("radius",0.015)),"top":float(mark.get("plinth_top",NAN)),
+				"plinth":mark.get("plinth",Rect2()),"angle":float(mark.get("angle",0.0))})
 			if sites.size()*BUILDERS_PER_WORK>=MAX_BUILDERS:break
 	var signature:=str(sites)
 	if signature==builder_signature:return
@@ -396,14 +397,25 @@ func _refresh_builders()->void:
 	for site in sites:
 		var at:Vector3=site.at
 		builder_sites.append(at)
-		var reach:=float(site.radius)*1.05+0.003
+		# On the dressed plinth, between the scaffold and its edge, where the
+		# work is done: the plinth's own level (undertaking_map_visual map mark).
+		var plinth:Rect2=site.plinth
+		if not plinth.has_area():plinth=Rect2(-Vector2.ONE*float(site.radius)*0.7,Vector2.ONE*float(site.radius)*1.4)
+		var inner:=plinth.grow(-minf(plinth.size.x,plinth.size.y)*0.12)
 		for k in BUILDERS_PER_WORK:
-			var angle:=float(k)/float(BUILDERS_PER_WORK)*TAU+rng.randf_range(-0.4,0.4)
-			var spot:=Vector2(at.x,at.z)+Vector2.from_angle(angle)*reach
-			var ground:=float(terrain.call("_height_at",spot.x,spot.y)) if terrain.has_method("_height_at") else at.y
+			# Along the plinth's inner edge: two on the near sides, one at a
+			# corner by the heap, one opposite (local x/z, then turned).
+			var u:float=[0.25,0.75,0.85,0.4][k%4]
+			var side:=k%4
+			var local:=Vector2(lerpf(inner.position.x,inner.end.x,u),inner.position.y if side%2==0 else inner.end.y)
+			if side>=2:local=Vector2(inner.position.x if side==3 else inner.end.x,lerpf(inner.position.y,inner.end.y,u))
+			# Same turn as the landmark (Vector3.rotated(UP,-angle) on x/z).
+			var turned:=local.rotated(float(site.angle))
+			var spot:=Vector2(at.x,at.z)+turned
+			var level:=float(site.top) if is_finite(float(site.top)) else at.y+0.0012
 			var facing:=Vector3(at.x-spot.x,0,at.z-spot.y).normalized()
 			var basis:=Basis.looking_at(facing,Vector3.UP).scaled(Vector3.ONE*UNIT*1.6)
-			builders.multimesh.set_instance_transform(index,Transform3D(basis,Vector3(spot.x,maxf(ground,at.y)+0.00012,spot.y)))
+			builders.multimesh.set_instance_transform(index,Transform3D(basis,Vector3(spot.x,level+0.00005,spot.y)))
 			# The living map's poses: 2 hammering/chopping, 1 bent to lift.
 			var pose:=1 if k==BUILDERS_PER_WORK-1 else 2
 			builders.multimesh.set_instance_custom_data(index,Color(rng.randf(),float(pose),0.0,1.0))
@@ -625,9 +637,9 @@ void vertex() {
 	vec3 axis = normalize((VIEW_MATRIX * vec4(wind.x, -1.0, wind.y, 0.0)).xyz);
 	vec3 side = normalize(cross(axis, vec3(0.0, 0.0, 1.0)) + vec3(1e-5, 0.0, 0.0));
 	if (snow > 0.5) {
-		VERTEX = view + vec3(VERTEX.xy * streak, 0.0);
+		VERTEX = view + vec3(VERTEX.xy * streak * (0.6 + 0.8 * r.w), 0.0);
 	} else {
-		VERTEX = view + axis * VERTEX.y * streak + side * VERTEX.x * streak * 0.035;
+		VERTEX = view + axis * VERTEX.y * streak + side * VERTEX.x * streak * 0.06;
 	}
 	NORMAL = vec3(0.0, 0.0, 1.0);
 	v_alpha = fade * intensity;
@@ -637,7 +649,7 @@ void fragment() {
 	vec2 q = v_uv * 2.0 - 1.0;
 	float shape = snow > 0.5 ? 1.0 - smoothstep(0.35, 1.0, length(q)) : (1.0 - abs(q.x)) * (1.0 - smoothstep(0.6, 1.0, abs(q.y)));
 	ALBEDO = snow > 0.5 ? vec3(0.97, 0.97, 0.99) : vec3(0.78, 0.82, 0.86);
-	ALPHA = shape * v_alpha * (snow > 0.5 ? 0.85 : 0.30);
+	ALPHA = shape * v_alpha * (snow > 0.5 ? 0.8 : 0.34);
 }
 """
 

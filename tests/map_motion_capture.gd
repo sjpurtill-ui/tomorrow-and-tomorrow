@@ -100,11 +100,14 @@ func _ready()->void:
 		helper.free()
 		terrain._refresh_undertaking_visuals(true)
 		if ambience:ambience.day_tick()
+		for work in terrain.undertaking_visual_root.get_children():
+			if work.has_meta("map_mark") and String(work.get_meta("map_mark").get("state",""))=="building":
+				terrain.camera_target=work.position;terrain._update_camera();break
 	if "--reveal" in args:
 		# Chart new ground just beyond the known edge and watch it ink in.
 		var toward:Vector3=terrain._camera_ground_screen_right()
-		var point:Vector2=Vector2(target.x,target.z)+Vector2(toward.x,toward.z)*float(terrain.camera.size)*0.3
-		CivilizationSystem._add_revealed_area(point,float(terrain.camera.size)*0.12,"capture")
+		var point:Vector2=Vector2(target.x,target.z)+Vector2(toward.x,toward.z)*float(terrain.camera.size)*0.62
+		CivilizationSystem._add_revealed_area(point,float(terrain.camera.size)*0.2,"capture")
 	if "--pan" in args:
 		terrain.pan_coast_velocity=preload("res://scripts/map_motion.gd").release_velocity(terrain._camera_ground_screen_right()*size*3.0,terrain.camera.size)
 	if zoom_to>0.0:
