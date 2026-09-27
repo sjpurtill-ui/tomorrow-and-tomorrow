@@ -14,6 +14,8 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const P:=preload("res://scripts/hud/paper_sheet.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const CULTURE_PATH:="res://scripts/artifact_culture.gd"
 const RIVALRY_PATH:="res://scripts/great_works_rivalry.gd"
@@ -57,17 +59,16 @@ func _ready()->void:
 	dim.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:close())
 	panel=PanelContainer.new();panel.name="WorksPanel";panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	var style:=T.flat(T.DOCK_BG,T.BORDER_2,1,6);style.content_margin_left=26;style.content_margin_right=26;style.content_margin_top=18;style.content_margin_bottom=16
-	style.shadow_color=Color(0,0,0,.4);style.shadow_size=20
+	var style:=P.sheet_style(20);style.content_margin_left=26;style.content_margin_right=26;style.content_margin_top=18;style.content_margin_bottom=16
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);panel.add_child(root)
 	_build_header(root)
 	root.add_child(Kit.Flourish.new())
 	var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",8);root.add_child(tabs)
-	for spec in [["ours","Our Great Works"],["foreign","Works of Other Peoples"]]:
+	for spec in [["ours","Our great works"],["foreign","Works of other peoples"]]:
 		var id:=String(spec[0])
 		var button:=Button.new();button.name="Tab_"+id;button.text=String(spec[1]);button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size.y=34
-		button.add_theme_font_size_override("font_size",14);button.pressed.connect(func()->void:tab=id;selected_key="";refresh())
+		T.text(button,"small");button.pressed.connect(func()->void:tab=id;selected_key="";refresh())
 		tabs.add_child(button);tab_buttons[id]=button
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tabs.add_child(spacer)
 	toast=Kit.label(tabs,"",13,T.TEXT_SOFT,false);toast.name="Toast"
@@ -111,10 +112,11 @@ func _unhandled_key_input(event:InputEvent)->void:
 func _build_header(root:VBoxContainer)->void:
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",24);root.add_child(header)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);header.add_child(words)
-	Kit.label(words,"WONDERS OF OUR MAKING · CULTURE",11,T.GOLD,false,.12)
-	Kit.display(words,"Our Great Works",34)
+	Kit.label(words,"WONDERS OF OUR MAKING",12,T.GOLD_TEXT,false,.12)
+	Kit.display(words,"Our great works",34)
 	var allure:=Bridge.api_dict("allure_contribution",["player"])
-	var summary:=Kit.serif(words,"Every work is our own idea, raised or failed by our own hands. Together they lend us %.1f allure." % float(allure.get("value",0)),16,T.BODY,true)
+	var admired:=float(allure.get("value",0))
+	var summary:=Kit.serif(words,"Every work is our own idea, raised or failed by our own hands. %s" % ("Other peoples admire us for them." if admired>0.0 else "None of them is yet admired by other peoples."),16,T.BODY,true)
 	summary.name="AllureSummary"
 	legacy_box=HBoxContainer.new();legacy_box.name="Legacy";legacy_box.add_theme_constant_override("separation",16);header.add_child(legacy_box)
 	_build_legacy()
@@ -128,9 +130,9 @@ func _build_header(root:VBoxContainer)->void:
 		builders+=1
 		var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
 		var held:=int(entry.get("matters",0))
-		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" · %d" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them before you in the court now")
+		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" (%d to tell you)" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them before you in the court now")
 		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,36)
-	var close_button:=Kit.action_button(actions,"Close",close,false,"Close · Escape")
+	var close_button:=Kit.action_button(actions,"Close",close,false,"Close (Esc)")
 	close_button.name="CloseWorks"
 
 func _record()->Dictionary:
@@ -146,11 +148,11 @@ func _build_legacy()->void:
 	for child in legacy_box.get_children():child.queue_free()
 	var h:=_record()
 	var col:=VBoxContainer.new();col.name="Record";col.add_theme_constant_override("separation",2);legacy_box.add_child(col)
-	Kit.label(col,"OUR RECORD OF GREAT WORKS",11,T.GOLD,false,.12)
-	Kit.label(col,"%d attempted · %d stood · %d fell as follies" % [int(h.get("attempted",0)),int(h.get("succeeded",0)),int(h.get("follies",0))],13,T.BODY,false)
-	Kit.label(col,"%d standing now · %d endured twenty years" % [int(h.get("standing",0)),int(h.get("enduring",0))],13,T.BODY,false)
-	Kit.label(col,"%d purposes served · known to %d foreign people%s" % [int(h.get("kinds",0)),int(h.get("known_by",0)),"" if int(h.get("known_by",0))==1 else "s"],13,T.TEXT_SOFT,false)
-	if int(h.get("costly",0))>0:Kit.label(col,"%d built through hardship, and remembered for it" % int(h.costly),13,T.AMBER,false)
+	Kit.label(col,"OUR RECORD OF GREAT WORKS",12,T.GOLD_TEXT,false,.12)
+	Kit.label(col,"Begun %d. Finished %d. Fell as follies %d." % [int(h.get("attempted",0)),int(h.get("succeeded",0)),int(h.get("follies",0))],13,T.BODY,false)
+	Kit.label(col,"Standing now %d. Stood twenty years or more %d." % [int(h.get("standing",0)),int(h.get("enduring",0))],13,T.BODY,false)
+	Kit.label(col,"Known to %d other people%s." % [int(h.get("known_by",0)),"" if int(h.get("known_by",0))==1 else "s"],13,T.TEXT_SOFT,false)
+	if int(h.get("costly",0))>0:Kit.label(col,"%d built through hardship, and remembered for it." % int(h.costly),13,T.AMBER_TEXT,false)
 
 # ---------------------------------------------------------------- data
 
@@ -161,7 +163,7 @@ func refresh()->void:
 		var button:Button=tab_buttons[id]
 		var on:=String(id)==tab
 		button.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH if on else T.BUTTON_BG,T.GOLD if on else T.BORDER_SOFT,1,3,6))
-		button.add_theme_color_override("font_color",T.GOLD_BRIGHT if on else T.BODY)
+		button.add_theme_color_override("font_color",T.GOLD_TEXT if on else T.BODY)
 	for child in list_box.get_children():child.queue_free()
 	var items:Array=works_list if tab=="ours" else foreign_list
 	if items.is_empty():
@@ -219,8 +221,8 @@ func _card(item:Dictionary,active:bool)->Control:
 		who=String(item.get("civ_name","an unknown people"))
 		var flag:=TextureRect.new();flag.texture=Identity.foreign(String(item.get("owner",""))).texture;flag.custom_minimum_size=Vector2(26,30);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(flag);row.move_child(flag,0)
 	var name_label:=Kit.serif(words,title,17,T.INK);name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var line:=_status_words(item) if tab=="ours" else "%s · as of day %d" % [who,int(item.get("day",0))]
-	var status:=Kit.label(words,line,12,_status_color(item) if tab=="ours" else T.TEXT_SOFT,false);status.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var line:=_status_words(item) if tab=="ours" else "%s · as of %s" % [who,EraWords.when(int(item.get("day",0)))]
+	var status:=Kit.label(words,line,12,T.text_for(_status_color(item)) if tab=="ours" else T.TEXT_SOFT,false);status.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var place:=Kit.label(words,String(item.get("city_name","")),12,T.TEXT_DIM,false);place.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	card.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:select(key))
@@ -234,7 +236,7 @@ func _definition(work_id:String)->Dictionary:
 	return value if value is Dictionary else {}
 
 func _section(text:String)->void:
-	var head:=Kit.label(detail,text,11,T.GOLD,false,.12)
+	var head:=Kit.label(detail,text,12,T.GOLD_TEXT,false,.12)
 	head.custom_minimum_size.y=18
 
 func _detail_ours(item:Dictionary)->void:
@@ -243,7 +245,7 @@ func _detail_ours(item:Dictionary)->void:
 	var site:=Bridge.api_dict("site",[city_id,work_id])
 	var d:=_definition(work_id)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",20);detail.add_child(top)
-	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(Color("f3e7cc"),T.GOLD,1,4,4));top.add_child(frame)
+	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.GOLD,1,4,4));top.add_child(frame)
 	var view:=item.duplicate(true);view.merge(site,false)
 	var art:=Plate.make(view,210);art.name="DetailPlate";art.custom_minimum_size=Vector2(320,210);frame.add_child(art)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",4);top.add_child(words)
@@ -253,7 +255,7 @@ func _detail_ours(item:Dictionary)->void:
 	if shape.is_empty() and not concept.is_empty():shape=Bridge.concept_form(concept)
 	var purpose:=Bridge.purpose_label(String(item.get("purpose","")))
 	Kit.serif(words,"A %s%s · %s ambition · %s" % [shape.replace("_"," "),(" raised to %s" % purpose) if not purpose.is_empty() else "",String(item.get("ambition","grand")).capitalize(),String(item.get("city_name",""))],15,T.BODY,true)
-	var status:=Kit.label(words,_status_words(item),14,_status_color(item),false,.04);status.name="StatusLine"
+	var status:=Kit.label(words,_status_words(item),14,T.text_for(_status_color(item)),false,.04);status.name="StatusLine"
 	var lore:=String(item.get("ruin_lore","")) if String(item.get("status",""))=="ruined" else ""
 	if lore.is_empty():lore=String(item.get("lore",""))
 	if not lore.is_empty():Kit.serif(words,lore,15,T.TEXT_SOFT,true)
@@ -284,9 +286,11 @@ func _detail_ours(item:Dictionary)->void:
 		_section("WHAT IT DOES FOR US")
 		var effect_text:=String(site.get("effect_text",""))
 		var reward:=String(site.get("reward_text",""))
-		if not reward.is_empty():Kit.label(detail,"◆  "+reward,14,T.BODY)
-		if not effect_text.is_empty() and not reward.contains(effect_text):Kit.label(detail,"◆  "+effect_text,14,T.BODY)
-		Kit.label(detail,"Condition %s · maintained %.1f years · known to %d other peoples" % [_condition_words(float(item.get("condition",1))),float(site.get("operating_days",0))/365.0,(site.get("heard_by",{}) as Dictionary).size() if site.get("heard_by") is Dictionary else 0],13,T.TEXT_SOFT)
+		if not reward.is_empty():Kit.label(detail,reward,14,T.BODY)
+		if not effect_text.is_empty() and not reward.contains(effect_text):Kit.label(detail,effect_text,14,T.BODY)
+		var kept_years:=int(float(site.get("operating_days",0))/365.0)
+		var heard:int=(site.get("heard_by",{}) as Dictionary).size() if site.get("heard_by") is Dictionary else 0
+		Kit.label(detail,"In %s repair. Kept up for %s. Known to %s." % [_condition_words(float(item.get("condition",1))),"less than a year" if kept_years<1 else ("a year" if kept_years==1 else "%d years" % kept_years),"no other people" if heard==0 else ("one other people" if heard==1 else "%d other peoples" % heard)],13,T.TEXT_SOFT)
 		var decree:Dictionary=d.get("decree",{}) if d.get("decree") is Dictionary else {}
 		if not decree.is_empty():
 			_section("ITS DECREE")
@@ -294,15 +298,15 @@ func _detail_ours(item:Dictionary)->void:
 			var decree_words:=VBoxContainer.new();decree_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;decree_row.add_child(decree_words)
 			Kit.serif(decree_words,String(decree.get("label","")),16,T.INK)
 			Kit.label(decree_words,String(decree.get("text","")),13,T.TEXT_SOFT)
-			var proclaim:=Kit.action_button(decree_row,"Proclaim",func()->void:_proclaim(String(decree.get("label","")),String(decree.get("text",""))),false,"Issue it to the civic council as a decree")
-			proclaim.name="ProclaimDecree"
-			proclaim.disabled=not (is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"))
+			# Decrees are spoken in the court, like every other order.
+			var to_court:=Kit.action_button(decree_row,"Proclaim it in the court",_open_court,false,"Opens the court, where you can proclaim this to your people")
+			to_court.name="ProclaimDecree"
 		_shrine(site,d,work_id,city_id)
 		_war_actions(item,site,work_id,city_id)
 	_history(site)
 
 func _condition_words(value:float)->String:
-	if value>=.9:return "excellent"
+	if value>=.9:return "fine"
 	if value>=.7:return "good"
 	if value>=.5:return "worn"
 	if value>=.3:return "failing"
@@ -319,7 +323,7 @@ func _history(site:Dictionary)->void:
 	for event in events:
 		if not event is Dictionary:continue
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);detail.add_child(row)
-		var when:=Kit.label(row,"Year %d · Day %d" % [int(float(event.get("day",0))/365.0)+1,int(event.get("day",0))%365+1],12,T.TEXT_DIM,false);when.custom_minimum_size.x=120
+		var when:=Kit.label(row,EraWords.when(int(event.get("day",0))),12,T.TEXT_DIM,false);when.custom_minimum_size.x=140
 		Kit.label(row,String(event.get("text","")),13,T.BODY)
 
 # ---------------------------------------------------------------- enshrining
@@ -343,7 +347,7 @@ func _shrine(site:Dictionary,d:Dictionary,work_id:String,city_id:String)->void:
 			if item.is_empty():item={"id":String(enshrined[index]),"name":"An enshrined object","rarity_index":0}
 			var plate_art:=Kit.mini_plate(item,96,Callable());plate_art.name="Enshrined_%d" % index;shelf.add_child(plate_art)
 		else:
-			var empty:=Button.new();empty.name="Enshrine_%d" % index;empty.text="+\nEnshrine";empty.custom_minimum_size=Vector2(96,96);empty.focus_mode=Control.FOCUS_NONE
+			var empty:=Button.new();empty.name="Enshrine_%d" % index;empty.text="Enshrine\na piece";T.text(empty,"small",T.INK);empty.custom_minimum_size=Vector2(96,96);empty.focus_mode=Control.FOCUS_NONE
 			empty.add_theme_stylebox_override("normal",T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,4,0));empty.add_theme_stylebox_override("hover",T.flat(T.GOLD_WASH,T.GOLD,1,4,0))
 			empty.tooltip_text="Place a studied artifact here; pilgrims will come to see it"
 			empty.pressed.connect(func()->void:open_enshrine_picker(work_id,city_id))
@@ -367,7 +371,7 @@ func enshrine_candidates()->Array:
 func open_enshrine_picker(work_id:String,city_id:String)->Control:
 	if is_instance_valid(picker):picker.queue_free()
 	var box:=PanelContainer.new();box.name="EnshrinePicker";picker=box
-	box.add_theme_stylebox_override("panel",T.flat(T.DOCK_BG,T.GOLD,2,6,14))
+	box.add_theme_stylebox_override("panel",T.flat(T.PAPER,T.GOLD,1,4,14))
 	add_child(box)
 	var col:=VBoxContainer.new();col.add_theme_constant_override("separation",8);box.add_child(col)
 	Kit.display(col,"Choose an object to enshrine",22)
@@ -379,7 +383,7 @@ func open_enshrine_picker(work_id:String,city_id:String)->Control:
 		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=112;grid.add_child(cell)
 		var id:=String((item as Dictionary).get("id",""))
 		cell.add_child(Kit.mini_plate(item,104,func(_id:String)->void:enshrine(work_id,city_id,id)))
-		var caption:=Kit.label(cell,String((item as Dictionary).get("name","")),11,T.BODY);caption.max_lines_visible=2
+		var caption:=Kit.label(cell,String((item as Dictionary).get("name","")),12,T.BODY);caption.max_lines_visible=2
 	Kit.action_button(col,"Cancel",func()->void:box.queue_free())
 	box.reset_size()
 	box.position=((get_viewport().get_visible_rect().size-box.get_combined_minimum_size())*.5).round()
@@ -414,7 +418,7 @@ func _war_actions(item:Dictionary,site:Dictionary,work_id:String,city_id:String)
 	for entry in rivalry.get("looted",[]):
 		if entry is Dictionary and not bool(entry.get("returned",false)):looted+=1
 	if looted>0:
-		var line:=Kit.label(detail,"%d enshrined treasure%s carried off by occupiers and not returned." % [looted,"" if looted==1 else "s"],13,T.RED)
+		var line:=Kit.label(detail,"%d enshrined treasure%s carried off by occupiers and not returned." % [looted,"" if looted==1 else "s"],13,T.RED_TEXT)
 		line.name="LootedNote"
 	if buttons.is_empty():return
 	_section("CARE AND CONFLICT")
@@ -463,6 +467,11 @@ func _holds_loot_from(civ_owner:String,work_id:String)->bool:
 				if entry is Dictionary and String(entry.get("by",""))=="player" and not bool(entry.get("returned",false)):return true
 	return false
 
+## Opens the court at rest: decrees are proclaimed there, not from this screen.
+func _open_court()->void:
+	close()
+	if not P.summon({}):preload("res://scripts/audience_director.gd").open_court_for({})
+
 func _proclaim(label_text:String,text:String)->void:
 	if is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text("%s: %s" % [label_text,text])
@@ -500,7 +509,7 @@ func conceive_work()->Dictionary:
 
 func _detail_foreign(item:Dictionary)->void:
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",20);detail.add_child(top)
-	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(Color("f3e7cc"),T.BORDER_2,1,4,4));top.add_child(frame)
+	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.BORDER_2,1,4,4));top.add_child(frame)
 	var art:=Plate.make(item,200);art.name="ForeignPlate";art.custom_minimum_size=Vector2(300,200);frame.add_child(art)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",5);top.add_child(words)
 	Kit.display(words,String(item.get("title",item.get("name","A great work"))),24)
@@ -508,18 +517,19 @@ func _detail_foreign(item:Dictionary)->void:
 	var flag:=TextureRect.new();flag.texture=Identity.foreign(String(item.get("owner",""))).texture;flag.custom_minimum_size=Vector2(28,32);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;who.add_child(flag)
 	Kit.serif(who,"%s · %s" % [String(item.get("civ_name","an unknown people")),String(item.get("city_name","a place we have not seen"))],16,T.BODY)
 	var age:=int(item.get("age_days",0))
-	var dated:=Kit.label(words,"As of day %d (%s) · %s · confidence %s" % [int(item.get("day",0)),"today" if age<=0 else "%d days old" % age,String(item.get("source","hearsay")),_confidence(float(item.get("confidence",.5)))],13,T.TEXT_SOFT)
+	var heard_day:=int(item.get("day",0))
+	var dated:=Kit.label(words,"As of %s (%s). Heard from %s; we are %s sure of it." % [EraWords.when(heard_day),"news of today" if age<=0 else EraWords.ago(heard_day),String(item.get("source","hearsay")),_confidence(float(item.get("confidence",.5)))],13,T.TEXT_SOFT)
 	dated.name="DatedLine"
-	if bool(item.get("stale",false)):Kit.label(words,"This word is old; the truth may have moved on.",13,T.AMBER)
+	if bool(item.get("stale",false)):Kit.label(words,"This word is old; the truth may have moved on.",13,T.AMBER_TEXT)
 	var status:=String(item.get("status",""))
 	if status in ["building","stalled"]:
 		Kit.label(words,"Perhaps %d–%d%% raised when last seen." % [roundi(float(item.get("progress_low",0))*100),roundi(float(item.get("progress_high",1))*100)],14,T.BODY)
 	Kit.serif(detail,String(item.get("text","")),15,T.INK,true)
 
 func _confidence(value:float)->String:
-	if value>=.75:return "high"
-	if value>=.55:return "fair"
-	return "low"
+	if value>=.75:return "fairly"
+	if value>=.55:return "somewhat"
+	return "hardly"
 
 # ---------------------------------------------------------------- drawn pieces
 
