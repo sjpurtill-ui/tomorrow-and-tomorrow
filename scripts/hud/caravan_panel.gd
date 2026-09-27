@@ -2,13 +2,14 @@ extends CanvasLayer
 ## Caravan UI for the Command Rail HUD:
 ## - the caravan status card (one row per caravan: leader, people, food/water
 ##   days, what the leader is doing now, and optional override buttons);
-## - the formation section used before and after choosing a destination
-##   (party size from real population, rations from real stores, leader from the
-##   government cast with a plain-words fit summary).
+## - the settler card shown once the ruler has picked land: who leads, how
+##   many go, what they carry and how long it takes, then "Send them". The
+##   leader chooses the party size and rations from real people and stores.
 ## The ruler never has to press anything on the card: the leader marches,
 ## camps and resumes by itself. Buttons are overrides only.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Systems:=preload("res://scripts/caravan_system.gd")
+const Kit:=preload("res://scripts/hud/paper_kit.gd")
 const EDGE:=16.0
 const CARD_WIDTH:=372.0
 const LEFT_CLEARANCE:=96.0
@@ -24,8 +25,8 @@ static func sync(terrain_node:Node,hud_node:Control)->CanvasLayer:
 	if not is_instance_valid(hud_node):return null
 	var existing:Variant=hud_node.get_meta("caravan_status_card") if hud_node.has_meta("caravan_status_card") else null
 	var cards:=Systems.status_cards()
-	# A modal decision (formation or review) has the ruler's attention.
-	if is_instance_valid(terrain_node) and (is_instance_valid(terrain_node.get("settlement_convoy_confirm_panel")) or is_instance_valid(terrain_node.get("caravan_formation_card"))):cards=[]
+	# The settler card has the ruler's attention.
+	if is_instance_valid(terrain_node) and is_instance_valid(terrain_node.get("settlement_convoy_confirm_panel")):cards=[]
 	if not is_instance_valid(existing):
 		if cards.is_empty():return null
 		existing=new()
@@ -40,7 +41,8 @@ func _ready()->void:
 	layer=70
 	card=PanelContainer.new()
 	card.name="CaravanCard"
-	card.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG,T.GOLD,1,6,10))
+	card.add_theme_stylebox_override("panel",Kit.card_style(12.0,T.GOLD))
+	card.theme=T.control_theme()
 	card.mouse_filter=Control.MOUSE_FILTER_STOP
 	add_child(card)
 	rows=VBoxContainer.new()
@@ -68,50 +70,53 @@ func _add_row(entry:Dictionary)->void:
 	if rows.get_child_count()>0:rows.add_child(HSeparator.new())
 	var box:=VBoxContainer.new()
 	box.name="Caravan_%s" % String(entry.id)
-	box.add_theme_constant_override("separation",3)
+	box.add_theme_constant_override("separation",4)
 	rows.add_child(box)
 	var top:=HBoxContainer.new()
 	top.add_theme_constant_override("separation",6)
 	box.add_child(top)
-	var eyebrow:=T.make_label(String(entry.title),10,T.GOLD,0.08)
+	var eyebrow:=Kit.label(top,_title_words(String(entry.title)),"kicker",Color(0,0,0,0),false)
 	eyebrow.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	eyebrow.clip_text=true
-	top.add_child(eyebrow)
-	top.add_child(T.make_label("%d%%" % roundi(float(entry.progress)*100.0),10,T.MUTED))
+	Kit.label(top,"%d%% of the way" % roundi(float(entry.progress)*100.0),"note",Color(0,0,0,0),false)
 	var reputation:=String(entry.reputation).get_slice(" • ",0)
-	var leader:=T.make_label("%s  ·  %s" % [String(entry.leader),reputation],12,T.INK)
+	var leader:=Kit.label(box,"%s leads · %s" % [String(entry.leader),reputation.to_lower()],"heading",Color(0,0,0,0),false)
 	leader.clip_text=true
 	leader.tooltip_text="%s\n%s" % [String(entry.reputation),String(entry.summary)]
-	box.add_child(leader)
-	var intent:=T.make_label(String(entry.intent) if String(entry.intent)!="" else "Preparing to march",13,T.BODY)
+	var intent:=Kit.label(box,String(entry.intent) if String(entry.intent)!="" else "Getting ready to set out.","body")
 	intent.name="Intent"
-	intent.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	intent.custom_minimum_size.x=CARD_WIDTH-24.0
-	box.add_child(intent)
+	intent.custom_minimum_size.x=CARD_WIDTH-32.0
 	var water_color:=T.RED if float(entry.water_days)<1.0 else (T.AMBER if float(entry.water_days)<2.0 else T.TEAL)
 	var food_color:=T.RED if float(entry.food_days)<4.0 else (T.AMBER if float(entry.food_days)<8.0 else T.GREEN)
 	var stats:=HBoxContainer.new()
-	stats.add_theme_constant_override("separation",10)
+	stats.add_theme_constant_override("separation",12)
 	box.add_child(stats)
-	stats.add_child(T.make_label("%d PEOPLE" % int(entry.people),11,T.TEXT_SOFT))
-	stats.add_child(T.make_label("FOOD %s" % _days(float(entry.food_days)),11,food_color))
-	stats.add_child(T.make_label("WATER %.1f d" % float(entry.water_days),11,water_color))
-	stats.add_child(T.make_label("%.0f km left" % float(entry.remaining_km),11,T.TEXT_SOFT))
+	Kit.label(stats,"%d people" % int(entry.people),"note",Color(0,0,0,0),false)
+	Kit.label(stats,"food for %s" % _days(float(entry.food_days)),"note",food_color,false)
+	Kit.label(stats,"water for %s" % _days(float(entry.water_days)),"note",water_color,false)
+	Kit.label(stats,"%.0f km to go" % float(entry.remaining_km),"note",Color(0,0,0,0),false)
 	var actions:=HBoxContainer.new()
 	actions.add_theme_constant_override("separation",6)
 	box.add_child(actions)
 	var id:=String(entry.id)
-	_button(actions,"FOCUS",func()->void:_act(id,"focus"),"Move the map to the caravan.")
-	if bool(entry.can_hold):_button(actions,"HALT",func()->void:_act(id,"hold"),"Override: the leader stops and holds (moving to water first if there is none).")
-	if bool(entry.can_resume):_button(actions,"MARCH ON",func()->void:_act(id,"resume"),"Override: break camp now and continue to the destination.")
-	if bool(entry.can_recall):_button(actions,"RECALL",func()->void:_act(id,"recall"),"Override: the caravan turns for home; people and stores return to the origin.")
+	_button(actions,"Show on map",func()->void:_act(id,"focus"),"Move the map to the caravan.")
+	if bool(entry.can_hold):_button(actions,"Halt",func()->void:_act(id,"hold"),"The leader stops and makes camp, moving to water first if there is none.")
+	if bool(entry.can_resume):_button(actions,"March on",func()->void:_act(id,"resume"),"Break camp now and carry on.")
+	if bool(entry.can_recall):_button(actions,"Call them home",func()->void:_act(id,"recall"),"The caravan turns back; its people and stores return home.")
+
+static func _title_words(title:String)->String:
+	if title.begins_with("SETTLER CARAVAN"):
+		var place:=title.get_slice("→",1).strip_edges()
+		return "Settlers bound for %s" % place.capitalize() if place!="" else "Settlers on the road"
+	return T.sentence_case(title)
 
 func _button(parent:Node,text_value:String,callback:Callable,tip:String)->Button:
 	var button:=Button.new()
 	button.text=text_value
 	button.tooltip_text=tip
-	button.custom_minimum_size=Vector2(0,26)
-	button.add_theme_font_size_override("font_size",12)
+	button.custom_minimum_size=Vector2(0,30)
+	button.add_theme_font_size_override("font_size",14)
+	button.add_theme_color_override("font_color",T.INK)
 	button.add_theme_stylebox_override("normal",T.action_button_style(false))
 	button.add_theme_stylebox_override("hover",T.action_button_style(true,true))
 	button.add_theme_stylebox_override("pressed",T.action_button_style(true,true))
@@ -134,152 +139,65 @@ func layout()->void:
 	card.position=Vector2(minf(LEFT_CLEARANCE,maxf(EDGE,extent.x-width-EDGE)),maxf(EDGE,extent.y-height-BOTTOM_CLEARANCE))
 
 static func _days(days:float)->String:
-	if days>=365.0:return "ample"
-	return "%.0f d" % days
+	if days>=365.0:return "a year or more"
+	if days<1.0:return "under a day"
+	return "%d day%s" % [roundi(days),"" if roundi(days)==1 else "s"]
 
-# --------------------------------------------------------------- formation
+# ------------------------------------------------------------ settler card
 
-## Party controls used in the destination review (dark modal palette) and the
-## pre-destination formation card. `values`: population, food, leader_person_id.
-## Returns the controls; `on_change` is called with the current values.
-static func build_formation(parent:Container,limits:Dictionary,candidates:Array[Dictionary],values:Dictionary,width:float,on_change:Callable,palette:Dictionary={})->Dictionary:
-	var text_color:Color=palette.get("text",T.BODY)
-	var muted:Color=palette.get("muted",T.TEXT_SOFT)
-	var accent:Color=palette.get("accent",T.GOLD)
-	var section:=VBoxContainer.new()
-	section.name="CaravanFormation"
-	section.add_theme_constant_override("separation",6)
-	parent.add_child(section)
-	var heading:=T.make_label("CARAVAN",11,accent,0.08)
-	section.add_child(heading)
-	var grid:=GridContainer.new()
-	grid.columns=2
-	grid.add_theme_constant_override("h_separation",10)
-	grid.add_theme_constant_override("v_separation",6)
-	section.add_child(grid)
-	var controls:={}
-	grid.add_child(T.make_label("Leader",12,muted))
-	var leader_choice:=OptionButton.new()
-	leader_choice.name="CaravanLeader"
-	leader_choice.custom_minimum_size=Vector2(maxf(160.0,width-150.0),30)
-	leader_choice.clip_text=true
-	var selected_id:=int(values.get("leader_person_id",0))
-	var selected_index:=0
-	for index in candidates.size():
-		var candidate:Dictionary=candidates[index]
-		leader_choice.add_item("%s — %s" % [String(candidate.get("name","")),String(candidate.get("summary",""))],index)
-		leader_choice.set_item_metadata(index,int(candidate.get("person_id",0)))
-		if int(candidate.get("person_id",0))==selected_id:selected_index=index
-	if candidates.is_empty():
-		leader_choice.add_item("A route organizer from among the settlers",0)
-		leader_choice.set_item_metadata(0,0)
-	leader_choice.select(selected_index)
-	grid.add_child(leader_choice)
-	controls["leader"]=leader_choice
-	grid.add_child(T.make_label("Settlers",12,muted))
-	var people:=SpinBox.new()
-	people.name="CaravanPeople"
-	people.min_value=float(limits.get("min_founders",40))
-	people.max_value=maxf(float(limits.get("min_founders",40)),float(limits.get("max_founders",40)))
-	people.step=5.0
-	people.rounded=true
-	people.value=clampf(float(values.get("population",limits.get("default_founders",40))),people.min_value,people.max_value)
-	people.suffix="people"
-	people.tooltip_text="Drawn from the origin's real population. At least %d people must remain behind." % 80
-	grid.add_child(people)
-	controls["people"]=people
-	if bool(limits.get("show_food",false)):
-		grid.add_child(T.make_label("Rations",12,muted))
-		var food:=SpinBox.new()
-		food.name="CaravanFood"
-		food.min_value=0.0
-		food.max_value=maxf(float(limits.get("food_available",0.0)),float(values.get("food",0.0)))
-		food.step=10.0
-		food.rounded=true
-		food.value=clampf(float(values.get("food",limits.get("suggested_food",0.0))),0.0,food.max_value)
-		food.suffix="person-days"
-		food.tooltip_text="Taken from the origin's real stores. The leader suggests travel rations plus a %d-day reserve for the new settlement." % roundi(Systems.ESTABLISHMENT_DAYS)
-		grid.add_child(food)
-		controls["food"]=food
-	var advice:=Label.new()
-	advice.name="CaravanAdvice"
-	advice.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	advice.custom_minimum_size.x=width
-	advice.add_theme_font_size_override("font_size",12)
-	advice.add_theme_color_override("font_color",text_color)
-	advice.text=String(limits.get("advice",""))
-	section.add_child(advice)
-	controls["advice"]=advice
-	var emit:=func(_value:Variant=null)->void:
-		if on_change.is_valid():on_change.call(formation_values(controls))
-	leader_choice.item_selected.connect(func(_index:int)->void:emit.call())
-	people.value_changed.connect(func(_value:float)->void:emit.call())
-	if controls.has("food"):(controls.food as SpinBox).value_changed.connect(func(_value:float)->void:emit.call())
-	return controls
-
-static func formation_values(controls:Dictionary)->Dictionary:
-	var result:={}
-	var leader_choice:OptionButton=controls.get("leader")
-	if is_instance_valid(leader_choice) and leader_choice.selected>=0:
-		result["leader_person_id"]=int(leader_choice.get_item_metadata(leader_choice.selected))
-	var people:SpinBox=controls.get("people")
-	if is_instance_valid(people):result["population"]=roundi(people.value)
-	var food:SpinBox=controls.get("food")
-	if is_instance_valid(food):result["food"]=food.value
-	return result
-
-## The pre-destination step: form the party, then choose where it goes.
-static func open_formation_card(host:Node,origin_name:String,limits:Dictionary,candidates:Array[Dictionary],values:Dictionary,on_choose:Callable,on_cancel:Callable)->Control:
-	var overlay:=Control.new()
-	overlay.name="CaravanFormationCard"
-	overlay.size=host.get_viewport().get_visible_rect().size
-	overlay.mouse_filter=Control.MOUSE_FILTER_STOP
-	host.add_child(overlay)
-	var dimmer:=ColorRect.new()
-	dimmer.size=overlay.size
-	dimmer.color=Color(0.0,0.0,0.0,0.45)
-	overlay.add_child(dimmer)
-	var panel:=PanelContainer.new()
-	var width:=minf(560.0,overlay.size.x-48.0)
-	panel.custom_minimum_size=Vector2(width,0)
-	panel.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG_SOLID,T.GOLD,1,6,18))
-	overlay.add_child(panel)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",10)
-	panel.add_child(root)
-	root.add_child(T.make_label("NEW SETTLEMENT • FORM A CARAVAN",11,T.GOLD,0.08))
-	var title:=T.make_label("Settlers from %s" % origin_name,22,T.INK)
-	root.add_child(title)
-	var explain:=T.make_label("Choose who leads and how many go. Then pick the destination on the map; the leader plans the route over water, suggests rations, and runs the march — camps, water stops and all.",12,T.TEXT_SOFT)
-	explain.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	explain.custom_minimum_size.x=width-36.0
-	root.add_child(explain)
-	var controls:=build_formation(root,limits,candidates,values,width-36.0,Callable())
+## The one card before settlers leave: where, who leads, how many, what they
+## carry, how long it takes, and one "Send them". The caravan leader has
+## already chosen the party size and the rations. `facts`:
+##   name, origin_name, leader, leader_summary, people, food_days, journey,
+##   distance_km, supplies, water_title, water_text, water_color,
+##   neighbour_text, ready, problem, advice.
+## Returns {overlay,name_input,status,send}.
+static func open_settler_card(host:Node,facts:Dictionary,on_send:Callable,on_back:Callable)->Dictionary:
+	var parts:=Kit.modal(host,560.0,T.GOLD,"SettlementConvoyConfirmation")
+	var overlay:Control=parts[0]
+	var column:VBoxContainer=parts[1]
+	Kit.label(column,"New settlement","kicker")
+	var name_input:=LineEdit.new()
+	name_input.name="NewSettlementName"
+	name_input.max_length=32
+	name_input.text=String(facts.get("name",""))
+	name_input.placeholder_text="Name the new settlement"
+	name_input.tooltip_text="The name on the map and in the Chronicle. You can change it later."
+	name_input.custom_minimum_size=Vector2(0,40)
+	name_input.add_theme_font_override("font",T.font("ui_strong"))
+	name_input.add_theme_font_size_override("font_size",20)
+	column.add_child(name_input)
+	var facts_box:=Kit.section(column,12.0)
+	_fact(facts_box,"Who goes","%s leads %d people from %s." % [String(facts.get("leader","A caravan leader")),int(facts.get("people",0)),String(facts.get("origin_name","home"))],String(facts.get("leader_summary","")))
+	_fact(facts_box,"Journey","About %s, %.1f km. The leader picks the camps and water stops." % [String(facts.get("journey","")),float(facts.get("distance_km",0.0))])
+	_fact(facts_box,"They carry","Food for about %d days, for the road and the first weeks, and %s for shelter and tools." % [roundi(float(facts.get("food_days",0.0))),String(facts.get("supplies","nothing"))],"Taken from %s's stores when they leave." % String(facts.get("origin_name","home")))
+	_fact(facts_box,"Water",String(facts.get("water_title","")),String(facts.get("water_text","")),facts.get("water_color",Color(0,0,0,0)))
+	if String(facts.get("neighbour_text",""))!="":
+		_fact(facts_box,"Neighbours",String(facts.neighbour_text),"",T.RED)
+	var ready:=bool(facts.get("ready",false))
+	var status:=Kit.label(column,String(facts.get("advice","")) if ready else "They cannot leave: %s" % String(facts.get("problem","something is missing.")),"body",Color(0,0,0,0) if ready else T.RED)
+	status.name="SettlerStatus"
+	status.custom_minimum_size.x=500
 	var footer:=HBoxContainer.new()
 	footer.alignment=BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation",8)
-	root.add_child(footer)
-	var cancel:=Button.new()
-	cancel.name="CancelFormation"
-	cancel.text="CANCEL"
-	cancel.custom_minimum_size=Vector2(120,38)
-	cancel.pressed.connect(func()->void:
-		overlay.queue_free()
-		if on_cancel.is_valid():on_cancel.call()
-	)
-	footer.add_child(cancel)
-	var choose:=Button.new()
-	choose.name="ChooseDestination"
-	choose.text="CHOOSE DESTINATION ON MAP"
-	choose.custom_minimum_size=Vector2(240,38)
-	choose.disabled=int(limits.get("max_founders",0))<int(limits.get("min_founders",40))
-	if choose.disabled:choose.tooltip_text="At least %d people must remain at %s after a %d-person party leaves." % [80,origin_name,int(limits.get("min_founders",40))]
-	choose.pressed.connect(func()->void:
-		var chosen:=formation_values(controls)
-		overlay.queue_free()
-		if on_choose.is_valid():on_choose.call(chosen)
-	)
-	footer.add_child(choose)
-	panel.reset_size()
-	panel.position=(overlay.size-panel.get_combined_minimum_size())*0.5
-	return overlay
+	footer.add_theme_constant_override("separation",10)
+	column.add_child(footer)
+	Kit.button(footer,"Choose other land",false,on_back)
+	var send:=Kit.button(footer,"Send them",true,on_send,"Nothing leaves until you press this.")
+	send.name="SendThem"
+	send.custom_minimum_size.x=150
+	send.disabled=not ready
+	return {"overlay":overlay,"name_input":name_input,"status":status,"send":send}
+
+static func _fact(parent:Node,what:String,text:String,note:String="",color:Color=Color(0,0,0,0))->void:
+	var row:=HBoxContainer.new()
+	row.add_theme_constant_override("separation",12)
+	parent.add_child(row)
+	var key:=Kit.label(row,what,"note",Color(0,0,0,0),false)
+	key.custom_minimum_size.x=92
+	var column:=VBoxContainer.new()
+	column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation",1)
+	row.add_child(column)
+	Kit.label(column,text,"body",color)
+	if note!="":Kit.label(column,note,"note")

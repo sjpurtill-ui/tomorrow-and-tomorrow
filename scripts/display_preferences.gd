@@ -89,16 +89,15 @@ func persist()->void:
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
 func add_navigation_controls(parent:Node)->void:
-	var heading:=Label.new();heading.text="MAP CONTROLS";heading.add_theme_font_size_override("font_size",16);parent.add_child(heading)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
-	var label:=Label.new();label.text="Map scroll speed · %.1f×"%map_scroll_speed
+	var label:=Label.new();label.text="Map panning speed: %.1f×"%map_scroll_speed
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(label)
 	var reset:=Button.new();reset.text="Default";reset.custom_minimum_size.y=38;row.add_child(reset)
 	var slider:=HSlider.new();slider.name="MapScrollSpeed"
 	slider.min_value=MIN_MAP_SCROLL_SPEED;slider.max_value=MAX_MAP_SCROLL_SPEED;slider.step=0.5
 	slider.value=map_scroll_speed;slider.custom_minimum_size.y=32
-	slider.tooltip_text="Two-finger map panning. Changes apply immediately and are remembered between games."
-	slider.value_changed.connect(func(value:float):map_scroll_speed=value;label.text="Map scroll speed · %.1f×"%value;persist())
+	slider.tooltip_text="How far a two-finger slide moves the map. Remembered between games."
+	slider.value_changed.connect(func(value:float):map_scroll_speed=value;label.text="Map panning speed: %.1f×"%value;persist())
 	reset.pressed.connect(func():slider.value=DEFAULT_MAP_SCROLL_SPEED)
 	parent.add_child(slider)
 
@@ -117,22 +116,23 @@ func set_color_theme(mode:String,reload_scene:bool=true)->void:
 	if reload_scene and is_inside_tree():get_tree().reload_current_scene.call_deferred()
 
 func add_controls(parent:Node)->void:
-	var heading:=Label.new();heading.text="DISPLAY & PERFORMANCE";heading.add_theme_font_size_override("font_size",16);parent.add_child(heading)
-	var appearance:=_choice(parent,"Interface colors",["Light","Dark"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
+	var heading:=Label.new();heading.text="DISPLAY";heading.add_theme_font_size_override("font_size",12);heading.add_theme_color_override("font_color",Tokens.INK_MUTED);parent.add_child(heading)
+	var appearance:=_choice(parent,"Paper colour (the map redraws when you change it)",["Light","Dark"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
 	appearance.name="ColorTheme"
+	appearance.tooltip_text="Changing it redraws the map and closes this menu. Your game carries on where it was."
 	_choice(parent,"Text & interface size",["100%","125%","150%","175%"],clampi(roundi((ui_scale-1)*4),0,3),func(index:int):ui_scale=1.0+index*.25;apply();persist())
-	_choice(parent,"3D resolution",["50% · fastest","75% · balanced","100% · native"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
-	_choice(parent,"Terrain shadows",["Off · faster","On"],1 if shadows else 0,func(index:int):shadows=index==1;apply();persist())
+	_choice(parent,"3D resolution",["50%, fastest","75%, balanced","100%, sharpest"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
+	_choice(parent,"Terrain shadows",["Off, faster","On"],1 if shadows else 0,func(index:int):shadows=index==1;apply();persist())
 	var motion:=_choice(parent,"Motion",["Full","Reduced"],1 if reduce_motion else 0,func(index:int):reduce_motion=index==1;apply();persist())
 	motion.name="ReduceMotion"
 	motion.tooltip_text="Reduced: quicker transitions, no camera coasting, and a stiller map (no weather, birds or drifting cloud shadows)."
-	_choice(parent,"Frame limit",["30 fps","60 fps","120 fps"],[30,60,120].find(frame_limit),func(index:int):frame_limit=[30,60,120][index];apply();persist())
-	var music_label:=Label.new();music_label.text="Music volume · %d%%"%roundi(music_volume*100);parent.add_child(music_label)
+	_choice(parent,"Frames per second, at most",["30","60","120"],[30,60,120].find(frame_limit),func(index:int):frame_limit=[30,60,120][index];apply();persist())
+	var music_label:=Label.new();music_label.text="Music volume: %d%%"%roundi(music_volume*100);parent.add_child(music_label)
 	var music:=HSlider.new();music.min_value=0;music.max_value=100;music.step=1;music.value=music_volume*100;music.custom_minimum_size.y=32
 	music.tooltip_text="Music only. Zero mutes music; other sounds are unchanged."
-	music.value_changed.connect(func(value:float):music_volume=value/100;music_label.text="Music volume · %d%%"%roundi(value);apply_music();persist())
+	music.value_changed.connect(func(value:float):music_volume=value/100;music_label.text="Music volume: %d%%"%roundi(value);apply_music();persist())
 	parent.add_child(music)
-	var hint:=Label.new();hint.text="Changes apply immediately. Lower 3D resolution keeps text sharp. UI size is limited on small windows to keep controls reachable. A frame limit is a ceiling, not a performance promise.";hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.add_theme_font_size_override("font_size",14);parent.add_child(hint)
+	var hint:=Label.new();hint.text="Changes take effect at once and are remembered. A lower 3D resolution runs faster and keeps text sharp.";hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.add_theme_font_size_override("font_size",14);parent.add_child(hint)
 
 func _theme_boundary(node:Node)->void:
 	# CanvasLayers and plain Nodes break Control theme inheritance.

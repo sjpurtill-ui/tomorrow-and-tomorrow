@@ -121,7 +121,7 @@ func _ready()->void:
 		CivilizationSystem.record_player_travel(Vector2(terrain.camera_target.x,terrain.camera_target.z))
 		terrain._inspect_location(terrain.camera_target)
 		assert(terrain.lens_panel!=null and terrain.lens_panel.visible,"Ground inspection must open its visible report")
-		assert("tree cover" in terrain.lens_body.text or "RIVER CHANNEL" in terrain.lens_body.text,"Ground inspection must describe woodland independently of deposits")
+		assert("tree cover" in terrain.lens_body.text or "River channel" in terrain.lens_body.text,"Ground inspection must describe woodland independently of deposits")
 		print("LAND_RESOURCE_AUDIT no icons; biome density matches terrain; catchment=",terrain._woodland_catchment(terrain.camera_target))
 	if "--surface-supplies" in OS.get_cmdline_user_args():
 		var fields:Dictionary=terrain._surface_material_catchments(terrain.camera_target)

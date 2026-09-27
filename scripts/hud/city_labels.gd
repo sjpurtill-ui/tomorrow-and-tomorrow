@@ -13,7 +13,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
 ## Cards and emblems ease in and out instead of popping (codex/map-motion).
 const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
-const MODERN_LABELS:={"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}
+const MODERN_LABELS:={"population":"PEOPLE","science_capacity":"LEARNING","gdp":"DAILY OUTPUT","life_expectancy":"LIFE EXPECTANCY"}
 ## What scouts can say of a stranger town before anyone keeps statistics.
 const EARLY_LABELS:={"population":"PEOPLE","science_capacity":"LORE-KEEPERS","gdp":"HANDS AT WORK","life_expectancy":"LIVES · WINTERS"}
 ## Once the people write, reports read like a register, still without statistics.
@@ -45,7 +45,7 @@ static func stat_detail(key:String,fields:Dictionary,stage:String)->String:
 	var extra:=String({"science_capacity":"education","life_expectancy":"infant_mortality"}.get(key,""))
 	if extra.is_empty() or fields.get(extra,{}).is_empty():return ""
 	var field:Dictionary=fields[extra]
-	if stage=="reckoned":return ("Edu " if key=="science_capacity" else "IMR ")+REPORT.estimate(extra,field)
+	if stage=="reckoned":return ("schooling " if key=="science_capacity" else "infant deaths ")+REPORT.estimate(extra,field)
 	var range:=REPORT.bounds(field)
 	if key=="science_capacity":
 		var taught:=(range.x+range.y)*.5
@@ -778,12 +778,12 @@ func _draw_card(card:Dictionary,box:Rect2,solid:bool=false)->void:
 		var stats:Array=card.summary.stats
 		for i in stats.size():
 			var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*42)
-			draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.MUTED)
+			draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 			draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK if stats[i].value!="Unknown" else T.DISABLED)
-			draw_string(font,cell+Vector2(0,27),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.TEXT_SOFT)
+			draw_string(font,cell+Vector2(0,29),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,(box.size.x-20)*.5-6,12,T.TEXT_SOFT)
 		var level:=int(card.summary.level)
-		var freshness_color:=Color("78bba4") if level>=4 else Color("d4ae68") if level>=2 else Color("b88270")
-		draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","REPORT"))+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
+		var freshness_color:=T.TEAL_TEXT if level>=4 else T.AMBER_TEXT if level>=2 else T.RED_TEXT
+		draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","REPORT")).capitalize()+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-90,12,freshness_color)
 		for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else T.TRACK)
 		return
 	var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0

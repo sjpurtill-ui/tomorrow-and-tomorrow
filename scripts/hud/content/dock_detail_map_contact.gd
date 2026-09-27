@@ -1,11 +1,12 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## Direct map interaction for every observed mobile foreign formation. A
-## counter is a target, not decoration: click it, understand the contact, and
-## issue the next valid action without hunting through unrelated reports.
+## Strangers in sight: a band clicked on the map. The card says what our
+## lookouts see and what our nearest general is doing about it, and offers
+## one thing to do: ask that general in court. Generals run every march,
+## pursuit and battle (docs/GENERAL_CAMPAIGN_DESIGN.md); there are no
+## numbered steps and no direct orders here.
 
-const Orders:=preload("res://scripts/hud/city_watch_orders.gd")
+const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 var formation_id:String=""
-var last_outcome:Dictionary={}
 
 func _init(terrain_node:Node,hud_node:Control,target_formation_id:String="")->void:
 	super._init(terrain_node,hud_node)
@@ -14,136 +15,91 @@ func _init(terrain_node:Node,hud_node:Control,target_formation_id:String="")->vo
 func _sighting()->Dictionary:
 	return CivilizationSystem.visible_formation_sighting(formation_id)
 
-func _selected_army()->Dictionary:
-	var selected_id:=int(terrain.selected_army_id)
-	if selected_id<0: return {}
-	for army_variant in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
-		var army:Dictionary=army_variant
-		if int(army.get("army_id",0))==selected_id: return army
-	return {}
-
 func meta()->Dictionary:
 	var sighting:=_sighting()
 	return {
-		"eyebrow":"MAP CONTACT · CLICKED TARGET",
-		"title":String(sighting.get("label","Contact lost")),
-		"subtabs":["ENGAGEMENT"],
+		"eyebrow":"Strangers in sight",
+		"title":String(sighting.get("label","Out of sight")),
+		"subtabs":["What we see"],
 	}
+
+## Our army nearest the sighting, with the general who leads it.
+func _nearest_army(point:Vector2)->Dictionary:
+	var best:Dictionary={}
+	var best_distance:=INF
+	for army_variant in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
+		var army:Dictionary=army_variant
+		if int(army.get("troops",0))<=0: continue
+		var position_data:Dictionary=army.get("position",{})
+		var distance:=Vector2(float(position_data.get("x",0.0)),float(position_data.get("z",0.0))).distance_to(point)
+		if distance<best_distance:
+			best_distance=distance
+			best=army.duplicate()
+			best["distance_km"]=distance
+	return best
+
+## Who answers for this: the army's own general, else the Marshal, else the
+## war council. Returns {name, target} for the court.
+func _who_answers(army:Dictionary)->Dictionary:
+	var commander:Dictionary=army.get("commander",{}) if not army.is_empty() else {}
+	var name:=ArmyMarks._named(String(commander.get("name","")))
+	if String(commander.get("figure_id",""))!="" and name!="":
+		return {"name":name,"target":{"figure_id":String(commander.figure_id)}}
+	var holder:Dictionary=GovernmentPeopleSystem.officeholder("Marshal") if GovernmentPeopleSystem.has_method("officeholder") else {}
+	if int(holder.get("person_id",0))>0:
+		return {"name":String(holder.get("name","the Marshal")),"target":{"person_id":int(holder.person_id)}}
+	return {"name":"","target":{}}
+
+func _ask(target:Dictionary)->void:
+	var director:Node=preload("res://scripts/audience_director.gd").court_node()
+	if not target.is_empty() and director!=null and director.has_method("summon") and director.call("summon",target)!=null:return
+	preload("res://scripts/audience_director.gd").open_court_for({})
 
 func tab(_sub:int)->Dictionary:
 	var sighting:=_sighting()
 	if sighting.is_empty():
-		if not last_outcome.is_empty():
-			return {
-				"kpis":[],
-				"brief":{"tone":"info" if bool(last_outcome.get("success",false)) else "warn","title":"Interception resolved" if bool(last_outcome.get("ok",false)) else "No action taken","why":String(last_outcome.get("message",last_outcome.get("error","The contact ended.")))},
-				"blocks":[{"type":"text","heading":"STATUS","text":"The scout marker has left the map because this immediate attempt is over. The result above is now part of the world state."}],
-			}
 		return {
 			"kpis":[],
-			"brief":{"tone":"warn","title":"Contact lost","why":"The formation is no longer under reliable observation. No action was taken."},
-			"blocks":[{"type":"text","heading":"WHAT NOW","text":"Watch the map for a new sighting. A moving target must remain visible until pursuit or an army makes contact."}],
+			"brief":{"tone":"info","title":"Out of sight","why":"Our lookouts can no longer see them. If they come back into view, they will show on the map again."},
+			"blocks":[],
 		}
-	var scout:=bool(sighting.get("carries_report",false))
+	var scouts:=bool(sighting.get("carries_report",false))
 	var hostile:=bool(sighting.get("hostile",false))
 	var low:=int(sighting.get("strength_estimate_low",0))
 	var high:=int(sighting.get("strength_estimate_high",low))
-	var distance:=float(sighting.get("distance_km",0.0))
+	var from_home:=float(sighting.get("distance_km",0.0))
+	var point_data:Dictionary=sighting.get("position",{})
+	var point:=Vector2(float(point_data.get("x",0.0)),float(point_data.get("z",0.0)))
 	var kpis:Array=[
-		{"label":"CONTACT","value":"SCOUTS" if scout else "FORMATION","delta":"visible now","accent":Tokens.RED if hostile else Tokens.AMBER,"tip":"Seen by our lookouts now; where they go next, no one can say"},
-		{"label":"EST. SIZE","value":"%d–%d" % [low,high],"delta":"uncertain","accent":Tokens.AMBER,"tip":"The public estimate stays a range; exact rival strength remains hidden"},
-		{"label":"FROM HOME","value":"%.0f km" % distance,"delta":"","accent":Tokens.MUTED,"tip":"Distance from your primary settlement"},
-		{"label":"STATUS","value":"ENEMY" if hostile else "OBSERVED","delta":"","accent":Tokens.RED if hostile else Tokens.TEAL,"tip":"Only a band from a people already at war with you is an enemy army"},
+		{"label":"Who","value":"Scouts" if scouts else ("A war band" if hostile else "A band"),"delta":"at war with us" if hostile else "not at war with us","accent":Tokens.RED if hostile else Tokens.AMBER,"tip":"Only a band from a people at war with us is an enemy."},
+		{"label":"How many","value":"about %d" % roundi((low+high)*0.5),"delta":"a guess, %d to %d" % [low,high] if high>low else "a guess","accent":Tokens.AMBER,"tip":"Our lookouts can only guess their number."},
+		{"label":"How far","value":"%.0f km" % from_home,"delta":"from our first hearth","accent":Tokens.MUTED,"tip":"How far they are from our first settlement."},
 	]
-	if scout: return _scout_tab(sighting,kpis)
-	return _formation_tab(sighting,kpis)
-
-func _scout_tab(sighting:Dictionary,kpis:Array)->Dictionary:
-	var interception:Dictionary=sighting.get("interception",{})
-	var capture_chance:=roundi(float(interception.get("capture",0.0))*100.0)
-	var attack_chance:=roundi(float(interception.get("destroy",0.0))*100.0)
 	var blocks:Array=[]
-	var point:Dictionary=sighting.get("position",{})
-	var nearby:Dictionary=terrain._contact_encounter_at(Vector3(float(point.get("x",0)),0,float(point.get("z",0))),0.3)
+	var seen:="%s: %s, %s, %.0f km from home." % ["Scouts" if scouts else "A band",String(sighting.get("label","strangers")),"%d to %d strong" % [low,high] if high>low else "about %d strong" % low,from_home]
+	if scouts:seen+=" They are taking what they learned of us back to their people."
+	blocks.append({"type":"text","heading":"What our lookouts see","text":seen})
+	var army:=_nearest_army(point)
+	var answers:=_who_answers(army)
+	var first_name:=String(answers.name).get_slice(" ",0)
+	var general_words:=""
+	if army.is_empty():
+		general_words="We have no army in the field. %s" % ("%s answers for war; ask them what should be done." % String(answers.name) if first_name!="" else "The war council can say what should be done.")
+	else:
+		var doing:=ArmyMarks.doing({"status":String(army.get("status","")),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":String(army.get("location_id",""))=="player_home"})
+		var leader:=String(answers.name) if first_name!="" else "Its general"
+		general_words="%s leads %s, %.0f km from them, and is %s. The general chooses the road and whether to fight; say what you want and they will see to it their own way." % [leader,String(army.get("name","our nearest army")),float(army.get("distance_km",0.0)),doing]
+	if not hostile:general_words+=" Attacking them would start a war with their people."
+	blocks.append({"type":"text","heading":"What our general intends","text":general_words})
+	var ask_label:=("Ask %s" % first_name) if first_name!="" else "Ask the war council"
+	blocks.append({"type":"actions","items":[{"label":ask_label,"sub":"in court","primary":true,"on_press":_ask.bind(answers.target),"tip":"Open the court with the person who answers for this."}]})
+	var nearby:Dictionary=terrain._contact_encounter_at(Vector3(point.x,0,point.y),0.3)
 	if nearby.has("city_id"):
 		var nearby_id:=String(nearby.city_id)
-		blocks.append({"type":"actions","heading":"THIS COUNTER IS A SCOUT PARTY","items":[{"label":"OPEN NEARBY CITY REPORT","sub":"city movement, attack and siege orders","on_press":func()->void:CivilizationSystem.city_intelligence.open(nearby_id)}]})
-		# The nearby city can be scouted from this card without another screen.
-		var scouting:Array=Orders.dock_items(nearby_id)
-		if not scouting.is_empty():
-			blocks.append({"type":"actions","heading":"SCOUT THIS CITY","items":scouting})
-			var status:=Orders.dock_status(nearby_id)
-			if not status.is_empty():blocks.append({"type":"text","text":status})
-
-	if not last_outcome.is_empty():
-		blocks.append({"type":"text","heading":"RESULT","text":String(last_outcome.get("message",last_outcome.get("error","No interception occurred.")))})
-	blocks.append({"type":"text","heading":"PURSUIT","text":"Select a fast field army and order it to pursue. Cavalry can close on foot scouts; infantry and siege baggage slow a mixed force. Capturing scouts can provoke their people. The local watch can also attempt an immediate interception below."})
-	var army:=_selected_army()
-	if army.is_empty():
-		blocks.append({"type":"actions","items":[{"label":"SELECT NEAREST FIELD ARMY","on_press":_select_nearest_army}]})
-	else:
-		var availability:Dictionary=MilitaryCampaign.map_engagement_availability(int(army.get("army_id",0)),formation_id)
-		blocks.append({"type":"text","heading":"SELECTED PURSUERS","text":"%s · %.1f km/day sustained march" % [String(army.get("name","Army")),MilitaryCampaign._field_army_speed(army)]})
-		if bool(availability.get("can_order",false)):
-			blocks.append({"type":"actions","items":[{"label":"PURSUE AND CAPTURE","primary":true,"on_press":_order_engagement.bind(bool(availability.get("can_engage",false)))}]})
-		else:
-			blocks.append({"type":"text","heading":"PURSUIT BLOCKED","text":String(availability.get("error","Contact lost"))})
-	blocks.append({"type":"actions","heading":"INTERCEPT NOW","items":[
-		{"label":"CAPTURE SCOUTS · %d%%" % capture_chance,"sub":"prisoners + carried notes","primary":true,"on_press":_resolve_scout.bind("capture"),"tip":"One immediate pursuit. Success stops the report and creates a captive cohort for questioning; failure loses contact."},
-		{"label":"ATTACK SCOUTS · %d%%" % attack_chance,"sub":"higher chance · no intelligence","on_press":_resolve_scout.bind("destroy"),"tip":"One immediate lethal pursuit. Success destroys the report but yields no prisoners or notes and sharply raises grievance."},
-	]})
-	return {
-		"kpis":kpis,
-		"brief":{"tone":"danger","title":"A foreign report is leaving your territory","why":"Choose CAPTURE or ATTACK now. Either attempt is explicit; nothing happens merely because this card is open."},
-		"blocks":blocks,
-	}
-
-func _formation_tab(sighting:Dictionary,kpis:Array)->Dictionary:
-	var hostile:=bool(sighting.get("hostile",false))
-	var army:=_selected_army()
-	var blocks:Array=[]
-	if not last_outcome.is_empty():
-		blocks.append({"type":"text","heading":"ORDER STATUS","text":String(last_outcome.get("message",last_outcome.get("error","No order was issued.")))})
-	if not hostile:
-		blocks.append({"type":"text","heading":"ATTACKING STARTS A WAR","text":"You may attack without a declaration. War begins when your army makes battle contact; simply viewing or approaching this force does not start war."})
-	if army.is_empty():
-		blocks.append({"type":"text","heading":"HOW BATTLE STARTS","text":"1. Select a field army.  2. Click this red enemy counter.  3. Order MOVE TO INTERCEPT.  4. If sight is maintained, battle opens automatically when the forces make contact."})
-		blocks.append({"type":"actions","items":[{"label":"SELECT NEAREST FIELD ARMY","sub":"make it the active map command","primary":true,"on_press":_select_nearest_army,"tip":"Select the field army closest to this visible enemy"}]})
-		return {"kpis":kpis,"brief":{"tone":"danger","title":"Enemy in sight — no army selected","why":"Select a field army here, then issue the intercept order from this same contact card."},"blocks":blocks}
-	var availability:Dictionary=MilitaryCampaign.map_engagement_availability(int(army.get("army_id",0)),formation_id)
-	var can_engage:=bool(availability.get("can_engage",false))
-	var can_order:=bool(availability.get("can_order",false))
-	var army_distance:=float(availability.get("distance_km",0.0))
-	blocks.append({"type":"rows","heading":"YOUR SELECTED FORCE","items":[{
-		"name":String(army.get("name","FIELD ARMY")),
-		"sub":"%d personnel · supply %d%%" % [int(army.get("troops",0)),roundi(float(army.get("supply_level",0.0))*100.0)],
-		"value":"%.0f km" % army_distance,"value_color":Tokens.GOLD,"accent":Tokens.BLUE,
-		"tip":"Distance from the selected army's last reported position to this observed target",
-	}]})
-	if can_order:
-		blocks.append({"type":"actions","heading":"ENGAGEMENT ORDER","items":[{
-			"label":"ENGAGE NOW" if can_engage else "MOVE TO INTERCEPT",
-			"sub":"battle contact" if can_engage else "track the moving target · %.0f km" % army_distance,
-			"primary":true,"on_press":_order_engagement.bind(can_engage),
-			"tip":"Open battle now" if can_engage else "The army tracks this target while it remains visible. At close range, battle opens automatically.",
-		}]})
-	else:
-		blocks.append({"type":"text","heading":"ORDER BLOCKED","text":String(availability.get("error","No engagement order is currently possible."))})
-	blocks.append({"type":"text","heading":"ON CONTACT","text":"Battle is not an instant dice roll. WAR PLANNING opens with HOLD, PUSH, and RETREAT. Casualties, prisoners, supply, readiness, and aftermath then enter the simulation."})
-	return {"kpis":kpis,"brief":{"tone":"danger","title":"Enemy formation in sight","why":"%s is selected. %s" % [String(army.get("name","Your army")),"It is close enough to engage." if can_engage else "Order it to intercept this moving target."]},"blocks":blocks}
-
-func _resolve_scout(action:String)->void:
-	last_outcome=terrain._resolve_map_scout_interception(formation_id,action)
-
-func _select_nearest_army()->void:
-	last_outcome=terrain._select_nearest_field_army_to_sighting(formation_id)
-
-func _order_engagement(engage_now:bool)->void:
-	last_outcome=terrain._resolve_map_formation_engagement(formation_id,engage_now)
-
-func _open_foreign_record(civ_id:String)->void:
-	hud.open_detail(preload("res://scripts/hud/content/dock_detail_civ_report.gd").new(terrain,hud,civ_id))
+		blocks.append({"type":"actions","heading":"Nearby","items":[{"label":"What we know of %s" % String(nearby.get("name","the town nearby")),"on_press":func()->void:terrain._show_city_intel_summary(nearby_id)}]})
+	var brief_title:="Their scouts are heading home with news of us" if scouts else ("An enemy band is in sight" if hostile else "Strangers are in sight")
+	return {"kpis":kpis,"brief":{"tone":"danger" if hostile or scouts else "info","title":brief_title,"why":"Ask %s what they mean to do." % (first_name if first_name!="" else "the war council")},"blocks":blocks}
 
 func signature()->Array:
 	var sighting:=_sighting()
-	return [formation_id,int(CivilizationSystem.observation_revision),int(terrain.selected_army_id),String((last_outcome.get("message",last_outcome.get("error","")))),String(sighting.get("position",{})),MilitaryCampaign.field_armies_snapshot().hash(),MilitaryCampaign.engagement_snapshot().size()]
+	return [formation_id,int(CivilizationSystem.observation_revision),String(sighting.get("position",{})),MilitaryCampaign.field_armies_snapshot().hash()]

@@ -26,11 +26,8 @@ class Map extends "res://scripts/local_terrain.gd":
 
 class CommitMap extends Map:
 	func _retire_founding_expedition_visuals()->void:pass
-	func _update_resource_proximity()->void:pass
 	func _refresh_settlement_footprint(_force:=false)->void:pass
-	func _update_settlement_progress_text()->void:pass
 	func _issue_travel_council_report(_stage:String,_progress:float,_reason:="")->void:pass
-	func _open_people_panel()->void:pass
 	func _update_time_interface()->void:pass
 	func _open_settlement_naming_panel(_settlement_id:String="")->void:pass
 
@@ -53,7 +50,7 @@ func test_six_kilometer_access_is_a_labor_warning_not_a_safe_site()->void:
 	var site:=world._founding_site_advice(Vector3(6,1,0),true)
 	assert_bool(site.valid).is_true()
 	assert_bool(site.recommended).is_false()
-	assert_str(site.title).is_equal("LONG WATER CARRY")
+	assert_str(site.title).is_equal("A long carry for water")
 	assert_str(site.reason).contains("38%")
 	assert_float(site.household_ratio).is_equal_approx(.38,.00001)
 	assert_bool(world._founding_site_advice(Vector3(6.001,1,0),true).valid).is_false()
@@ -72,7 +69,7 @@ func test_hidden_water_does_not_leak_into_advice_or_recommendations()->void:
 func test_uncharted_ground_is_unknown_without_querying_hidden_geography()->void:
 	world.charted_to=0
 	var site:=world._founding_site_advice(Vector3(1,1,0),true)
-	assert_str(site.title).is_equal("WATER SUPPLY UNKNOWN")
+	assert_str(site.title).is_equal("Water supply unknown")
 	assert_int(world.water_queries).is_equal(0)
 
 func test_recommendations_are_known_dry_near_water_and_reachable()->void:
@@ -160,8 +157,11 @@ func test_later_city_quote_keeps_water_warning_and_send_button_visible()->void:
 	map._open_settlement_convoy_confirmation(point,{"distance_km":15},{"ok":true,"suggested_name":"Waterford","population":60,"duration_days":2,"food":300,"materials":{"Timber":40}})
 	await await_idle_frame();await await_idle_frame()
 	assert_bool(map.settlement_convoy_confirm_button.disabled).is_false()
-	assert_str(map.settlement_convoy_confirm_status.text).contains("water-hauling")
-	assert_str(map.settlement_convoy_confirm_status.text).contains("resentment")
+	var card_text:=_visible_text(map.settlement_convoy_confirm_panel)
+	assert_str(card_text).contains("water-hauling")
+	assert_str(card_text).contains("resentment")
+	assert_str(card_text).contains("Who goes")
+	assert_str(map.settlement_convoy_confirm_button.text).is_equal("Send them")
 	assert_float(map.settlement_convoy_confirm_button.get_global_rect().end.y).is_less_equal(624.0)
 	assert_float(map.settlement_convoy_confirm_status.get_global_rect().end.y).is_less_equal(map.settlement_convoy_confirm_button.get_global_rect().position.y)
 	assert_float(map.settlement_convoy_confirm_button.get_global_rect().end.x).is_less_equal(1008.0)
@@ -211,12 +211,12 @@ func test_review_fits_small_canvas_and_map_click_closes_without_moving()->void:
 	assert_float(guide.panel.get_global_rect().end.y).is_less_equal(584.0)
 	assert_float(guide.action.get_global_rect().end.y).is_less_equal(guide.panel.get_global_rect().end.y)
 	assert_bool(guide.action.disabled).is_false()
-	assert_str(guide.action.text).contains("WATER HAULING")
+	assert_str(guide.action.text).contains("water must be carried")
 	CivilizationSystem.city_intelligence.records={"player":{"neighbor":_neighbor_report()}}
 	CivilizationSystem.fog_revision+=1
 	guide.update_site(Vector3(.5,1,0));guide._search()
 	await await_idle_frame();await await_idle_frame()
-	assert_str(guide.action.text).contains("PROVOKE NEIGHBOR")
+	assert_str(guide.action.text).contains("anger a neighbour")
 	assert_float(guide.panel.get_global_rect().end.y).is_less_equal(584.0)
 	assert_bool(map._dismiss_map_panels()).is_true()
 	assert_bool(GameState.settlement_site_committed).is_false()
@@ -232,7 +232,7 @@ func test_site_review_is_visual_and_only_lists_reported_nearby_resources()->void
 	var map:Map=auto_free(Map.new());viewport.add_child(map)
 	var guide:Control=auto_free(Guide.new());viewport.add_child(guide);guide.setup(map,Vector3(.5,1,0),false)
 	await await_idle_frame();await await_idle_frame()
-	assert_str(guide.heading.text).is_equal("WATER NEARBY")
+	assert_str(guide.heading.text).is_equal("Water nearby")
 	assert_str(guide.meter_label.text).is_equal("100%")
 	assert_str(guide.neighbor_label.text).is_equal("None reported within 30 km")
 	assert_int(guide.resource_cards.size()).is_equal(1)
@@ -264,7 +264,7 @@ func test_submerged_drainage_is_not_drinking_water_in_either_daily_math_or_site_
 	assert_str(site.source_text).contains("Open water nearby")
 	assert_str(site.reason).contains("not a confirmed drinking source")
 	coast.charted_to=-1
-	assert_str(coast._founding_site_advice(position,true).title).is_equal("WATER SUPPLY UNKNOWN")
+	assert_str(coast._founding_site_advice(position,true).title).is_equal("Water supply unknown")
 
 func test_compact_review_keeps_close_and_action_visible_on_resize()->void:
 	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1024,640);add_child(viewport)
