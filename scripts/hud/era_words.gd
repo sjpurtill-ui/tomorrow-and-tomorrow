@@ -106,6 +106,34 @@ static func word(key:String,fallback:String="")->String:
 	return String((WORDS[stage()] as Dictionary).get(key,fallback))
 
 
+## THE date phrase. Every date the player reads is the Chronicle's own
+## year-and-season phrase, "Year 12 · Summer", never an absolute day number
+## ("Day 34844") or "Year 3, Day 211". Pass the absolute simulation day (the
+## same day GameState.elapsed_days counts). A negative day reads as unknown.
+static func when(day:int)->String:
+	if day<0:return "some time ago"
+	return preload("res://scripts/chronicle.gd").date_label(day)
+
+
+## when() for the current day.
+static func today()->String:
+	return when(int(floor(GameState.elapsed_days)) if Engine.get_main_loop()!=null else 0)
+
+
+## How long ago something happened, in seasons and years rather than a count
+## of days: "this season", "last season", "three seasons ago", "two years ago".
+static func ago(day:int)->String:
+	if day<0:return "some time ago"
+	var now:=int(floor(GameState.elapsed_days)) if Engine.get_main_loop()!=null else day
+	var chronicle:=preload("res://scripts/chronicle.gd")
+	var seasons:int=chronicle.season_of(now)-chronicle.season_of(day)
+	if seasons<=0:return "this season"
+	if seasons==1:return "last season"
+	if seasons<4:return "%s seasons ago" % count_word(seasons)
+	var years:=roundi(seasons/4.0)
+	return "a year ago" if years<=1 else "%s years ago" % count_word(years)
+
+
 static func places(count:int)->String:
 	return "%d %s" % [count,word("place") if count==1 else word("places")]
 
