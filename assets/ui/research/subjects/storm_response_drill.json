@@ -1,0 +1,12 @@
+{
+  "id": "storm_response_drill",
+  "line": "infrastructure",
+  "game_year": 125,
+  "approx_historical_year": -4167,
+  "prompt": "c. 4167 BCE: Adults secure thatch, shutters and runoff channel before a storm; architectural casein gouache. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3a9a4325-1027-4e45-8deb-411637abcc3e.png",
+  "asset": "res://assets/ui/research/subjects/storm_response_drill-v1.png",
+  "sha256": "fc7c9383ad8ec290528c4b3a4cfd0715a6125442de3c1bc2a44b196751ad4a02",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
