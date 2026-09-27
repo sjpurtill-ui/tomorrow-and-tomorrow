@@ -43,7 +43,7 @@ func build(report:Dictionary,height_at:Callable)->void:
 	var lane_count:=clampi(2+building_count/24,2,5) if String(style.name)!="hide_camp" else 0
 	# Lanes only as long as the houses along them need (a hamlet is a knot of
 	# houses round its yard, not a spider of empty tracks).
-	var lane_length:=spacing*(1.6+float(building_count)/float(maxi(lane_count,1))*0.62*float(style.frontage))
+	var lane_length:=spacing*(1.6+float(building_count)/float(maxi(lane_count,1))*0.26*float(style.frontage))
 	var lane_paths:Array[PackedVector2Array]=[]
 	for lane in lane_count:
 		# Each lane leaves the meeting ground on its own bearing and bends as
@@ -84,15 +84,18 @@ func build(report:Dictionary,height_at:Callable)->void:
 				if point==Vector2.INF:continue
 				var ahead:=_along(lane,distance+0.002)
 				if ahead==Vector2.INF:ahead=point+(point-_along(lane,distance-0.002))
-				var side:=(ahead-point).normalized().orthogonal()*(1.0 if reach%2==0 else -1.0)
-				var at:=point+side*spacing*rng.randf_range(0.62,0.80)
-				if plan.buildings.size()<building_count and _free(at,placed,spacing,clear):_add(plan,placed,at,point,spacing)
+				var across:=(ahead-point).normalized().orthogonal()
+				var side:=across*(1.0 if reach%2==0 else -1.0)
+				# A house on each side of the lane, facing it, a little staggered.
+				for flip in [1.0,-1.0]:
+					var at:Vector2=point+side*float(flip)*spacing*rng.randf_range(0.62,0.80)+(ahead-point).normalized()*spacing*rng.randf_range(-0.2,0.2)
+					if plan.buildings.size()<building_count and _free(at,placed,spacing,clear):_add(plan,placed,at,point,spacing,lane_paths.find(lane)+1)
 				if bool(style.yards) and reach%3==1 and plan.buildings.size()<building_count:
 					# A kin yard behind the frontage house.
 					var yard:=point+side*spacing*2.1
 					for k in 3:
 						var around:=yard+Vector2.from_angle(TAU*float(k)/3.0+rng.randf())*spacing*0.72
-						if plan.buildings.size()<building_count and _free(around,placed,spacing,clear):_add(plan,placed,around,yard,spacing)
+						if plan.buildings.size()<building_count and _free(around,placed,spacing,clear):_add(plan,placed,around,yard,spacing,lane_paths.find(lane)+1)
 			reach+=1
 	# Any left over fill in near the meeting ground, facing it.
 	var tries:=0
@@ -109,7 +112,7 @@ func build(report:Dictionary,height_at:Callable)->void:
 	# (settlement_grounds.gd). Visual only.
 	var ground_routes:Array[Dictionary]=[]
 	for index in lanes_drawn.size():
-		ground_routes.append({"id":index+1,"active":true,"points":lanes_drawn[index],"width_m":2.2,"traffic":0.85,"hierarchy":"lane","kind":"street"})
+		ground_routes.append({"id":index+1,"active":true,"points":lanes_drawn[index],"width_m":1.6,"traffic":0.55,"hierarchy":"path","kind":"street"})
 	var ground_plots:Array[Dictionary]=[{"id":1,"form":"maintained_gathering_ground","land_use":"communal","status":"active","centroid":Vector2.ZERO,"area_ha":0.05}]
 	preload("res://scripts/settlement_grounds.gd").request("foreign:"+String(report.city_id),plan,ground_plots,ground_routes,Vector3(origin.x,0.0,origin.y))
 	# Buildings and earth are batched, with no per-resident nodes or gameplay state.
@@ -141,10 +144,11 @@ static func _free(at:Vector2,placed:Array[Vector2],spacing:float,clear:float)->b
 		if other.distance_to(at)<clear:return false
 	return true
 
-static func _add(plan:Dictionary,placed:Array[Vector2],at:Vector2,facing:Vector2,spacing:float)->void:
+static func _add(plan:Dictionary,placed:Array[Vector2],at:Vector2,facing:Vector2,spacing:float,lane:=-1)->void:
 	var forward:=(facing-at).normalized() if facing.distance_to(at)>0.0001 else Vector2(0,1)
 	placed.append(at)
-	plan.buildings.append({"position":at,"angle":atan2(forward.x,forward.y),"variant":0,"radius":spacing*0.32,"plot":{}})
+	# The door's own path runs to the lane it fronts (the ground painter).
+	plan.buildings.append({"position":at,"angle":atan2(forward.x,forward.y),"variant":0,"radius":spacing*0.32,"plot":{"frontage_route_id":lane}})
 
 ## The point `distance` km along a path, or INF past its end.
 static func _along(path:PackedVector2Array,distance:float)->Vector2:

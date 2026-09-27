@@ -177,6 +177,10 @@ func _ready()->void:
 					var tint:=batch.get_instance_color(0).to_html(false) if batch.use_colors and batch.instance_count>0 else ""
 					drawn.append("%s=%d%s" % [node.name,batch.instance_count,(" #"+tint) if tint!="" else ""])
 			print("MAP_ART_INVENTORY: ",", ".join(drawn))
+			var meshes:={}
+			for node in terrain.find_children("*","MeshInstance3D",true,false):
+				if (node as MeshInstance3D).is_visible_in_tree() and not node is MultiMeshInstance3D:meshes[String(node.get_parent().name)+"/"+String(node.name).get_slice("@",0)]=true
+			print("MAP_ART_MESHES: ",", ".join(PackedStringArray(meshes.keys())))
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	get_tree().quit(0)
 

@@ -101,13 +101,16 @@ vec4 settlement_halo(vec2 surface_position_km, vec2 surface_origin_km, float pix
 		// Furlongs (blocks about 150 m across, each laid its own way) found on
 		// a jittered grid; within each, strips a couple of dozen metres wide,
 		// each worked by its own household. Wild land between some furlongs.
+		// (Only the 2 x 2 cells nearest are searched: the jitter is kept
+		// small enough that the nearest centre is always among them.)
 		vec2 p = m/150.0;
 		vec2 ip = floor(p);
+		ivec2 lo = ivec2(step(fract(p), vec2(0.5)))*-1;
 		float f1 = 9.0; float f2 = 9.0; vec2 id = vec2(0.0);
-		for (int y = -1; y <= 1; y++) {
-			for (int x = -1; x <= 1; x++) {
+		for (int y = lo.y; y <= lo.y+1; y++) {
+			for (int x = lo.x; x <= lo.x+1; x++) {
 				vec2 c = ip+vec2(float(x), float(y));
-				vec2 jitter = vec2(sg_hash(c+vec2(float(s)*13.0, 1.0)), sg_hash(c+vec2(7.0, float(s)*5.0)))*0.7+0.15;
+				vec2 jitter = vec2(sg_hash(c+vec2(float(s)*13.0, 1.0)), sg_hash(c+vec2(7.0, float(s)*5.0)))*0.5+0.25;
 				vec2 r = c+jitter-p;
 				float dd = dot(r, r);
 				if (dd < f1) { f2 = f1; f1 = dd; id = c; } else if (dd < f2) { f2 = dd; }
@@ -143,7 +146,7 @@ vec3 settlement_halo_paint(vec3 earth, vec4 halo, float orchard, vec2 surface_po
 	float view = smoothstep(0.15, 0.55, pixel_m)*(1.0-smoothstep(9.0, 22.0, pixel_m));
 	float w = halo.x*view*open;
 	if (w <= 0.0) { return earth; }
-	float L = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.14, 0.50);
+	float L = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.10, 0.85);
 	vec3 stubble = vec3(1.28, 1.10, 0.64)*L;
 	vec3 crop = vec3(0.86, 1.00, 0.44)*L;
 	vec3 pasture = earth*vec3(1.02, 1.07, 0.94);
@@ -247,14 +250,17 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float layer = float(slot);
 	// Most ground is not worked: one plain look before any noise.
 	if (textureLod(settlement_fields, vec3(uv, layer), 0.0).r < 0.001) { return earth; }
-	vec2 warp = (vec2(sg_noise(local_m*0.13+vec2(3.0, 9.0)), sg_noise(local_m*0.13+vec2(-5.0, 1.0)))-0.5)*0.5/size_m;
+	// Field edges wander a metre or two, the way a hedge or a ploughed
+	// headland does, never ruled straight (codex/beauty-5).
+	vec2 warp = (vec2(sg_noise(local_m*0.07+vec2(3.0, 9.0)), sg_noise(local_m*0.07+vec2(-5.0, 1.0)))-0.5)*2.0/size_m
+		+(vec2(sg_noise(local_m*0.31+vec2(1.0, -4.0)), sg_noise(local_m*0.31+vec2(-8.0, 2.0)))-0.5)*0.5/size_m;
 	// Four half-texel taps: a smooth edge, never the texels' staircase.
 	vec2 half_texel = 0.5/vec2(textureSize(settlement_fields, 0).xy);
 	float cover = 0.25*(texture(settlement_fields, vec3(uv+warp+half_texel, layer)).r+texture(settlement_fields, vec3(uv+warp-half_texel, layer)).r
 		+texture(settlement_fields, vec3(uv+warp+vec2(half_texel.x, -half_texel.y), layer)).r+texture(settlement_fields, vec3(uv+warp+vec2(-half_texel.x, half_texel.y), layer)).r);
 	if (cover < 0.02) { return earth; }
 	ivec2 dims = textureSize(settlement_fields, 0).xy;
-	ivec2 texel = clamp(ivec2(uv*vec2(dims)), ivec2(0), dims-ivec2(1));
+	ivec2 texel = clamp(ivec2((uv+warp)*vec2(dims)), ivec2(0), dims-ivec2(1));
 	vec4 code = texelFetch(settlement_fields, ivec3(texel, slot), 0);
 	if (code.r < 0.5) {
 		// A border texel: borrow the field's code from a neighbour inside it.
@@ -291,7 +297,9 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	// (Mostly the region's light, only a little of the meadow's own mottle.)
 	// (codex/beauty-5: a touch lighter than the meadow, so a worked field
 	// reads as tilled ground in the sun, never a dark slab.)
-	float L = mix(clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.16, 0.55), 0.36, 0.5);
+	// The meadow's own value (the land is lit afterwards, so a fixed value
+	// here printed fields darker than the grass round them).
+	float L = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.10, 0.85)*1.04;
 	vec3 furrow = vec3(1.02, 0.84, 0.62)*L;
 	vec3 crest = vec3(1.24, 1.05, 0.78)*L;
 	vec3 soil = mix(furrow, crest, ridge)*(0.93+0.14*strip);
@@ -336,7 +344,8 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float inside = smoothstep(0.45, 0.62, cover);
 	float edge = smoothstep(0.30, 0.45, cover)*(1.0-smoothstep(0.50, 0.66, cover));
 	earth = mix(earth, field, inside*strength);
-	earth *= 1.0-edge*0.22*strength*(1.0-smoothstep(1.5, 4.0, pixel_m));
+	// The headland: a darker, greener line of rough grass and scrub.
+	earth = mix(earth, earth*vec3(0.80, 0.88, 0.76), edge*0.55*strength*(1.0-smoothstep(1.5, 6.0, pixel_m)));
 	return earth;
 }
 
