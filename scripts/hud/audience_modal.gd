@@ -1240,6 +1240,8 @@ func _process(delta:float)->void:
 		_sync_civic()
 	_pump()
 	if not pending_words.is_empty():_deliver_pending_words()
+	if not pending_matter.is_empty() and mode=="audience" and is_instance_valid(speech_input):
+		speech_input.placeholder_text=pending_matter;pending_matter=""
 	if mode!="audience":return
 	var busy:bool=_voice_ok() and voice.busy(audience_id)
 	if is_instance_valid(thinking):
@@ -2134,7 +2136,11 @@ func focus(target:Dictionary)->bool:
 			show_court();_court_note("No one leads that settlement just now; government will appoint someone.")
 			return false
 		return summon({"person_id":int(leader.person_id)})
-	return summon(target)
+	var summoned:=summon(target)
+	# The matter the ruler came about (a town we hold, say) is named in the
+	# speaking line; nothing is said for them.
+	if summoned and String(target.get("matter",""))!="":pending_matter=String(target.matter)
+	return summoned
 
 ## Calls someone before you, here and now.
 func summon(target:Dictionary)->bool:
@@ -2166,6 +2172,7 @@ func _court_note(text:String)->void:
 const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4,"folk":5}
 const MAX_SEATED:=7
 var pending_words:=""
+var pending_matter:=""
 
 func show_court()->void:
 	## The whole court gathered in its setting, nobody yet before you.
