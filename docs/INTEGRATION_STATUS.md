@@ -1,3 +1,11 @@
+## September 26 — earliest-first years 1–2 art, batch 1: INTEGRATED
+
+Worker `3d2df6949cad863dea2485b4cb6a232483293fe4`, branch `codex/research-art-earliest-01`, base `b9419562`, merged with main `ce41a0fa` as `1d565972`. Six earliest uncovered subjects now have dedicated paintings: raw_material_prestaging, carried_load_balancing, common_ground_marking, household_task_division, lactational_spacing_awareness and seasonal_duty_rosters. Preserves newer paper-button work. Classical Other batch 10 remains HELD and is not included.
+
+Reviewed the source crop sheet and actual shared-renderer 3.37:1 capture for early materials, dress, shelters and subject clarity. Combined Godot 4.7.2 import completed without logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-01` passes six actual catalogue lookups, unique loaded textures/provenance hashes, hidden gating and crop bounds. Each lookup also passes at game years 1, 2, 299, 300 and 600, confirming earlier-art precedence cannot mask these paintings across the year-300 transition. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest01-runtime.log` and `earliest-01-research-in-game-crops.png`.
+
+Reproduced `tools/research/audit_early_discovery_art.py --list 3`: 1,122 year0–600 rows; 371 own effective paintings and 751 borrowed/line, all files present. Counts evaluate each discovery at its proposed year and classify ownership by filename, not artistic quality. Next missing subjects start at year3: alarm_relay_signals, council_messenger_duty, dawn_task_briefings. No simulation/save changes or generated import churn committed. Full campaign/unrelated suites not repeated. No active canonical player found; no player/editor stopped or restarted.
+
 ## September 26 — chronological art correction: Classical Other batch 10 HELD
 
 User requires earliest eras first, not priority thresholds across eras followed by later non-priority batches. Stop later-era expansion until actual coverage is audited from the earliest game discoveries onward, including years 0-600 omitted by the September 25 inventory. That inventory listed 319 Late Bronze/Iron discoveries needing art, of which only 37 were priority; finishing those 37 did not establish complete early coverage. Current remaining counts require a fresh effective-lookup audit.

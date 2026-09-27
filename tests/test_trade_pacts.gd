@@ -319,15 +319,17 @@ func test_offline_choices_reach_the_same_core()->void:
 	assert_str(String((t.messages as Array).back().content)).is_not_empty()
 	if stance!="refuse":assert_bool(ForeignDialogue.seal(id).get("ok",false)).is_true()
 
-func test_council_of_nations_shows_the_exchange_as_a_tie()->void:
-	var first:=preload("res://tests/commitment_ui_probe.gd").build_fixture()
+func test_court_shows_the_exchange_as_a_tie_and_in_pacts()->void:
+	var first:=preload("res://tests/diplomacy_fixture.gd").build_fixture()
 	var sealed:=Pacts.seal(first,_terms("Food",100,"Timber",10,"year",10,true,false),20)
 	assert_bool(sealed.get("ok",false)).is_true()
-	var screen:Control=auto_free(preload("res://scripts/commitment_screen.gd").new())
-	screen.set("civ_id",first)
+	var screen:Control=auto_free(preload("res://scripts/hud/audience_modal.gd").new())
 	add_child(screen)
 	await await_idle_frame()
-	var card:Node=screen.peoples_box.get_child(0)
+	assert_bool(screen.show_foreign(first)).is_true()
+	screen.show_foreign_view("pacts")
+	await await_idle_frame()
+	var card:Node=screen.find_child("Ties",true,false)
 	var chips:=""
 	for label in card.find_children("*","Label",true,false): chips+=(label as Label).text+"\n"
 	assert_str(chips).contains("Trade: 100 Food for 10 Timber a year")

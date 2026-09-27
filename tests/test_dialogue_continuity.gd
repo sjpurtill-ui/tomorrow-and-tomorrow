@@ -30,20 +30,25 @@ func _return_envoys()->void:
 func test_next_envoy_brief_is_editable_saved_and_unlocked_by_setting_aside_reply()->void:
 	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
 	ForeignDialogue.ask(id,"Let us discuss shared waystations.");_return_envoys()
-	var screen=auto_free(preload("res://scripts/foreign_leader_screen.gd").new())
-	screen.civ_id=id;add_child(screen)
-	assert_bool(screen.entry.editable).is_true()
-	assert_bool(screen.ask_button.disabled).is_true()
-	screen.entry.text="A different proposal."
-	screen.entry.text_changed.emit(screen.entry.text)
+	# The court's compose area is the one place to brief the next envoy.
+	var court:Control=auto_free(preload("res://scripts/hud/audience_modal.gd").new())
+	add_child(court)
+	await await_idle_frame()
+	assert_bool(court.show_foreign(id)).is_true()
+	var compose=court.compose
+	compose.choose("leader_parley")
+	assert_bool(compose.words_edit.editable).is_true()
+	# The unanswered reply blocks the next envoy until it is retried or set aside.
+	assert_bool(compose.send_button.disabled).is_true()
+	assert_bool(compose.aside_button.visible).is_true()
+	compose.words_edit.text="A different proposal."
+	compose.words_edit.text_changed.emit()
 	assert_str(ForeignDialogue.export_state()[id].next_brief).is_equal("A different proposal.")
 	assert_bool(ForeignDialogue.set_aside_reply(id)).is_true()
-	screen.refresh()
-	assert_bool(screen.ask_button.disabled).is_true() # AI remains off; drafting is independent.
-	assert_bool(screen.retry_button.disabled).is_true()
-	assert_str(screen.access_note.text).contains("AI CONNECTION REQUIRED")
-	assert_str(screen.entry.text).is_equal("A different proposal.")
-	assert_bool(ForeignDialogue.ask(id,screen.entry.text)).is_true()
+	compose.refresh(true)
+	assert_bool(compose.aside_button.visible).is_false()
+	assert_str(compose.words_edit.text).is_equal("A different proposal.")
+	assert_bool(ForeignDialogue.ask(id,compose.words_edit.text)).is_true()
 	assert_str(ForeignDialogue.thread(id).next_brief).is_empty()
 
 func test_failed_reply_does_not_extend_journey_and_can_resolve_after_return()->void:

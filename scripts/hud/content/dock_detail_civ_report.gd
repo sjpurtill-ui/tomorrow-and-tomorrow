@@ -66,7 +66,7 @@ func tab(_sub:int)->Dictionary:
 			hud.close_detail(); hud.close_dock()
 			terrain._focus_known_world_point(civ_id,"settlement"),
 		"tip":"Uses the reported home location; surrounding unknown terrain remains hidden."},
-		{"label":"SEND DIPLOMAT","sub":"goodwill delegation","primary":true,
+		{"label":"SEND ENVOYS","sub":"in the court, to their ruler","primary":true,
 		"disabled":mission_active or not bool(relation.get("home_location_known",false)),
 		"on_press":func()->void: terrain._open_diplomat_dispatch_panel(civ_id),
 		"tip":"A physical delegation travels to the located settlement" if bool(relation.get("home_location_known",false)) else "Find where this people lives first"},
