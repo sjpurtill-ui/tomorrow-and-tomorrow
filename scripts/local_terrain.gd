@@ -13336,7 +13336,7 @@ func _on_city_aftermath(_aftermath:Dictionary)->void:
 func _restore_military_attention()->void:
 	if GeneralCampaign.active:return
 	if not MilitaryCampaign.pending_aftermath.is_empty():
-		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.",false)
+		_pause_for_military_attention("saved_aftermath","CAPTIVES WAIT ON YOUR WORD","The last fight is over. Its captives and what we took wait on your word in War Planning; no new attack can start until you decide.",false)
 		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
 	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
