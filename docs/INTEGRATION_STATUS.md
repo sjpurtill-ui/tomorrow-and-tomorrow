@@ -1,3 +1,11 @@
+## September 26 — Classical other discoveries, batch 7: INTEGRATED
+
+Worker `e643caae2c51fd6414b86b954adb138f1148963a`, branch `codex/research-art-classical-other-07`, base `330d88c3`, merged with current main `3017c86c` as `2b8cdfe2`. Adds 21 subject paintings, provenance sidecars, reviewed crop sheets/source scripts and manifest entries. Earlier approved paintings and intervening foreign-trade changes remain included. No lookup assignment collision was found. This is the seventh non-priority Classical batch, not the complete inventory.
+
+Combined Godot 4.7.2 import completed without logged errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --classical-other-07` passes all 21 actual catalogue IDs, manifest precedence, distinct loaded textures/provenance hashes, hidden gating and banner crop bounds. Reviewed both source sheets and actual shared-renderer 3.37:1 crops. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/classical-other07-runtime.log` and `classical-other-07-research-in-game-crops.png`.
+
+No simulation/save changes or generated import churn committed. Full campaign play and unrelated historical suites were not repeated. No active canonical player was found; no player/editor was stopped or restarted.
+
 ## September 26 — Classical other discoveries, batch 6: INTEGRATED
 
 Worker `e67122c474a069bae5593ee3b0927cfed7b6f6aa`, branch `codex/research-art-classical-other-06`, originally based on `98a982ff` and reconciled with `27a8a9b6`, merged with current main `85799cd2` as `e1e2afb9`. Adds 21 subject paintings, provenance sidecars, reviewed crop sheets/source scripts and manifest entries. Earlier approved paintings and intervening map changes remain included. This is the sixth non-priority Classical batch, not the complete inventory.
