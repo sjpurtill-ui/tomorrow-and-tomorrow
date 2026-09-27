@@ -10,6 +10,8 @@ const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
 const Motion=preload("res://scripts/hud/motion.gd")
 const Portrait=preload("res://scripts/hud/person_portrait.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
+const Words=preload("res://scripts/hud/home_plain.gd")
+const Plain=preload("res://scripts/hud/production_plain.gd")
 # The painting leads each card, full width; text below always wraps.
 const CARD_WIDTH:=236.0
 ## About 2:1, between the wide banner paintings (about 2.7:1) and the older
@@ -39,14 +41,17 @@ var detail_scroll:ScrollContainer
 var detail_body:VBoxContainer
 var detail:Label
 var action:Button
-var filter:OptionButton
-var leaders:OptionButton
+## Field chips (domain id -> Button; "" is every field), view-scope chips and
+## the notification chips. Plain text toggles; the chosen one is underlined.
+var field_chips:Dictionary={}
+var scope_chips:Dictionary={}
+var notify_chips:Dictionary={}
+var fields_row:HFlowContainer
 var search:LineEdit
 var legend:Label
 var stats:Label
-var locked_toggle:CheckButton
-var tree_controls:HBoxContainer
-var tree_scope_selector:OptionButton
+var locked_toggle:Button
+var tree_controls:HFlowContainer
 var tabs:Dictionary={}
 var bindings:Dictionary={}
 var last_layout:=""
@@ -57,7 +62,6 @@ var detail_selected:=""
 var leader_options:Array=[]
 var detail_revision:=""
 var narrow_details:=false
-var announcements:OptionButton
 var detail_back:Button
 func _ready()->void:
 	# This overlay lives under a CanvasLayer, outside the dock theme hierarchy.
@@ -73,38 +77,29 @@ func _ready()->void:
 	var heading:=Art.label(titles,"What the people are learning" if EraWords.hearth() else "Research",28,T.INK,true)
 	heading.add_theme_font_override("font",Art.display_font())
 	stats=Art.label(titles,"",14,T.TEXT_SOFT,true)
-	Art.button(header,"Who does the work",_staffing).tooltip_text="Research staffing: who works on each question"
-	var close:=Art.button(header,"×",_close);close.custom_minimum_size.x=38;close.tooltip_text="Close · Escape or click outside"
-	# One quiet row: the three views as text tabs, then the filters, lightly drawn.
-	var notification_row:=HBoxContainer.new();notification_row.add_theme_constant_override("separation",6)
-	Art.label(notification_row,"TELL ME OF",12,T.MUTED)
-	announcements=OptionButton.new();_quiet(announcements);notification_row.add_child(announcements)
-	for spec:Array in [["milestones","Major milestones"],["all","Every discovery"],["quiet","Digest only"]]:
-		announcements.add_item(spec[1]);announcements.set_item_metadata(announcements.item_count-1,spec[0])
-		if GameState.research_notification_mode==spec[0]:announcements.select(announcements.item_count-1)
-	announcements.item_selected.connect(func(index:int)->void:GameState.research_notification_mode=String(announcements.get_item_metadata(index)))
+	Art.button(header,"Who does the work",_staffing).tooltip_text="Who works on each question, and how much attention each field gets"
+	var close:=Art.button(header,"Close",_close);close.tooltip_text="Close · Escape or click outside"
+	# One quiet row: the three views as text tabs, then a search box. Fields are
+	# a row of plain chips below; nothing hides behind a dropdown.
 	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",4);box.add_child(navigation)
 	for spec:Array in [["active","Being learned"],["tree","What could come next" if EraWords.hearth() else "Knowledge tree"],["known","What we know"]]:
 		var id:=String(spec[0]);tabs[id]=Art.button(navigation,spec[1],func()->void:set_view(id));tabs[id].flat=true
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;navigation.add_child(spacer)
-	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);navigation.add_child(controls)
-	filter=OptionButton.new();filter.add_item("All fields");filter.custom_minimum_size=Vector2(140,30);_quiet(filter);controls.add_child(filter)
-	for id:String in Art.NAMES:filter.add_item(Art.name_for(id));filter.set_item_metadata(filter.item_count-1,id)
-	filter.item_selected.connect(func(index:int)->void:domain="" if index==0 else String(filter.get_item_metadata(index));refresh(true))
-	leaders=OptionButton.new();leaders.custom_minimum_size=Vector2(140,30);leaders.clip_text=true;_quiet(leaders);controls.add_child(leaders)
-	leaders.item_selected.connect(func(index:int)->void:leader_filter="" if index==0 else String(leaders.get_item_metadata(index));refresh(true))
-	search=LineEdit.new();search.placeholder_text="Find…";search.custom_minimum_size=Vector2(150,30);search.flat=true;search.add_theme_font_size_override("font_size",14)
-	search.add_theme_stylebox_override("normal",_hairline());search.add_theme_stylebox_override("focus",_hairline(T.GOLD));controls.add_child(search)
-	controls.add_child(notification_row)
+	search=LineEdit.new();search.placeholder_text="Find a discovery or a person";search.custom_minimum_size=Vector2(240,30);search.flat=true;search.add_theme_font_size_override("font_size",14)
+	search.add_theme_stylebox_override("normal",_hairline());search.add_theme_stylebox_override("focus",_hairline(T.GOLD));navigation.add_child(search)
 	search.text_changed.connect(func(value:String)->void:query=value;refresh(true))
+	fields_row=HFlowContainer.new();fields_row.name="FieldChips";fields_row.add_theme_constant_override("h_separation",2);fields_row.add_theme_constant_override("v_separation",2);box.add_child(fields_row)
+	for id:String in [""]+Art.NAMES.keys():
+		var field:=id
+		field_chips[id]=_chip(fields_row,"Every field" if id.is_empty() else Art.name_for(id),func()->void:domain=field;refresh(true))
 	var rule:=ColorRect.new();rule.color=T.BORDER;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
 	legend=Art.label(box,"",13,T.TEXT_SOFT,true)
-	tree_controls=HBoxContainer.new();box.add_child(tree_controls)
-	Art.button(tree_controls,"−",func()->void:plot.zoom_at(1/1.15,plot.size*.5));Art.button(tree_controls,"+",func()->void:plot.zoom_at(1.15,plot.size*.5));Art.button(tree_controls,"Fit",func()->void:plot.fit());Art.button(tree_controls,"Find selected",func()->void:plot.center_selected())
-	tree_scope_selector=OptionButton.new();tree_scope_selector.add_item("Frontier & branches");tree_scope_selector.set_item_metadata(0,"frontier");tree_scope_selector.add_item("Entire knowledge map");tree_scope_selector.set_item_metadata(1,"all");tree_scope_selector.tooltip_text="Frontier keeps current investigations, their foundations, and their immediate possibilities readable. Entire map shows every matching question."
-	tree_scope_selector.item_selected.connect(func(index:int)->void:tree_scope=String(tree_scope_selector.get_item_metadata(index));refresh(true));tree_controls.add_child(tree_scope_selector)
-	locked_toggle=CheckButton.new();locked_toggle.text="Show next questions";locked_toggle.add_theme_font_size_override("font_size",12);tree_controls.add_child(locked_toggle)
-	locked_toggle.toggled.connect(func(on:bool)->void:show_locked=on;refresh(true))
+	tree_controls=HFlowContainer.new();tree_controls.add_theme_constant_override("h_separation",6);box.add_child(tree_controls)
+	Art.button(tree_controls,"Zoom out",func()->void:plot.zoom_at(1/1.15,plot.size*.5));Art.button(tree_controls,"Zoom in",func()->void:plot.zoom_at(1.15,plot.size*.5));Art.button(tree_controls,"Fit to window",func()->void:plot.fit());Art.button(tree_controls,"Show the chosen one",func()->void:plot.center_selected())
+	var gap:=Control.new();gap.custom_minimum_size.x=12;tree_controls.add_child(gap)
+	scope_chips["frontier"]=_chip(tree_controls,"Near what we are learning",func()->void:tree_scope="frontier";refresh(true))
+	scope_chips["all"]=_chip(tree_controls,"Everything we could learn",func()->void:tree_scope="all";refresh(true))
+	locked_toggle=_chip(tree_controls,"Show questions not yet open",func()->void:show_locked=not show_locked;refresh(true))
 	detail_back=Art.button(box,"← Back to research",func()->void:narrow_details=false;_layout())
 	main=BoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",14);box.add_child(main)
 	content=VBoxContainer.new();content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;content.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(content)
@@ -114,16 +109,32 @@ func _ready()->void:
 	empty=VBoxContainer.new();content.add_child(empty)
 	detail_scroll=ScrollContainer.new();detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(detail_scroll)
 	detail_body=VBoxContainer.new();detail_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_body.add_theme_constant_override("separation",9);detail_scroll.add_child(detail_body)
+	var notify:=HFlowContainer.new();notify.name="NotifyChips";notify.add_theme_constant_override("h_separation",2);box.add_child(notify)
+	var notify_label:=T.make_label("Tell me about new discoveries:",13,T.TEXT_SOFT);notify_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;notify.add_child(notify_label)
+	for spec:Array in [["milestones","Only the big ones"],["all","Every one"],["quiet","Only in the season's digest"]]:
+		var mode_id:=String(spec[0])
+		notify_chips[mode_id]=_chip(notify,spec[1],func()->void:GameState.research_notification_mode=mode_id;_update_chips())
 	panel.minimum_size_changed.connect(_layout.call_deferred)
 	resized.connect(_layout);_layout();refresh(true)
 	# The sheet fades in over the scrim and rises 8 px into place (SLOW).
 	Motion.fade_in(self);Motion.rise_in.call_deferred(panel)
-## A filter drawn quietly: flat, a hairline underneath, small readable text.
-func _quiet(button:OptionButton)->void:
-	# Sized to the row, not to the longest name in the list.
-	button.fit_to_longest_item=false;button.clip_text=true
-	button.flat=true;button.add_theme_font_size_override("font_size",14);button.add_theme_color_override("font_color",T.TEXT_SOFT)
-	button.add_theme_stylebox_override("normal",_hairline());button.add_theme_stylebox_override("hover",_hairline(T.GOLD));button.add_theme_stylebox_override("pressed",_hairline(T.GOLD))
+## A chip: a plain text toggle. The chosen one carries a gold rule beneath it.
+func _chip(parent:Node,text:String,callback:Callable)->Button:
+	var chip:=Button.new();chip.text=text;chip.focus_mode=Control.FOCUS_NONE
+	chip.add_theme_font_size_override("font_size",13);chip.custom_minimum_size.y=30
+	chip.pressed.connect(callback);parent.add_child(chip);_style_chip(chip,false);return chip
+func _style_chip(chip:Button,on:bool)->void:
+	var mark:=StyleBoxFlat.new();mark.bg_color=T.ACTIVE_BG if on else Color(0,0,0,0);mark.border_color=T.GOLD if on else Color(0,0,0,0);mark.border_width_bottom=2
+	mark.content_margin_left=8;mark.content_margin_right=8;mark.content_margin_top=3;mark.content_margin_bottom=4
+	for state:String in ["normal","hover","pressed","focus"]:chip.add_theme_stylebox_override(state,mark)
+	chip.add_theme_color_override("font_color",T.INK if on else T.BODY);chip.add_theme_color_override("font_hover_color",T.INK)
+func _update_chips()->void:
+	for id:String in field_chips:_style_chip(field_chips[id],id==domain)
+	for id:String in scope_chips:_style_chip(scope_chips[id],id==tree_scope)
+	for id:String in notify_chips:_style_chip(notify_chips[id],id==String(GameState.research_notification_mode))
+	if is_instance_valid(locked_toggle):
+		_style_chip(locked_toggle,show_locked)
+		locked_toggle.text="Hide questions not yet open" if show_locked else "Show questions not yet open"
 func _hairline(ink:Color=T.BORDER)->StyleBoxFlat:
 	var line:=StyleBoxFlat.new();line.bg_color=Color(0,0,0,0);line.border_color=ink;line.border_width_bottom=1
 	line.content_margin_left=6;line.content_margin_right=6;line.content_margin_top=4;line.content_margin_bottom=4;return line
@@ -141,8 +152,6 @@ func _layout()->void:
 	detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if narrow else Control.SIZE_FILL
 	grid.columns=maxi(1,floori((size.x-(90 if narrow else 416))/(CARD_WIDTH+CARD_GAP)))
 	_update_grid_columns.call_deferred()
-	# Narrow windows keep the three views; the filters give way to them.
-	(filter.get_parent() as Control).visible=size.x>=1180
 	plot.queue_redraw()
 func _update_grid_columns()->void:
 	if not is_instance_valid(scroll) or not is_instance_valid(grid):return
@@ -170,10 +179,8 @@ func _process(delta:float)->void:
 	var next:=str(hash([int(GameState.elapsed_days),GameState.discovery_progress,GameState.active_investigations,GameState.known_discoveries,GameState.research_subcategory_allocations,GameState.population_allocations,GameState.leadership_positions,GameState.food_security,GameState.society_capacities]))
 	if next!=revision:revision=next;refresh(false)
 func refresh(refit:bool)->void:
-	locked_toggle.set_pressed_no_signal(show_locked)
 	all_records=Data.inquiry()
-	for index in filter.item_count:
-		if (index==0 and domain=="") or (index>0 and String(filter.get_item_metadata(index))==domain):filter.select(index)
+	_update_chips()
 	var active:=0;var staffed:=0;var known:=0;var people:Dictionary={}
 	for item:Dictionary in all_records:
 		if item.known:known+=1
@@ -181,17 +188,12 @@ func refresh(refit:bool)->void:
 		if assignment.get("active",false):active+=1;staffed+=1 if Art.team(item)>0 else 0
 		var lead:=Art.lead(item)
 		if not lead.is_empty():people[lead]=true
-	var chosen:=leader_filter
-	var names:=people.keys();names.sort()
-	if names!=leader_options:
-		leader_options=names.duplicate();leaders.clear();leaders.add_item("All leaders")
-		for name:String in names:leaders.add_item(name);leaders.set_item_metadata(leaders.item_count-1,name)
-	leader_filter="" if chosen!="" and not people.has(chosen) else chosen
-	for index in leaders.item_count:
-		if (index==0 and leader_filter=="") or (index>0 and String(leaders.get_item_metadata(index))==leader_filter):leaders.select(index)
+	# Leaders are found through the search box; a leader filter set in code
+	# (tests, links) is dropped once that leader no longer leads anything.
+	if leader_filter!="" and not people.has(leader_filter):leader_filter=""
 	var science:=Indicators.science()
 	var era_words:GDScript=preload("res://scripts/hud/era_words.gd")
-	if bool(era_words.call("reckoned")):stats.text="SCIENCE %.1f  ·  %.1f minds × %d%% education  ·  %d staffed / %d projects" % [float(science.capacity),float(science.minds),roundi(float(science.education)*100.0),staffed,active]
+	if bool(era_words.call("reckoned")):stats.text="About %s people work at learning, and about %d in 10 of what they learn is kept and taught. %d of %d questions have people on them." % [Plain.number(float(science.minds)),roundi(float(science.education)*10.0),staffed,active]
 	else:stats.text="%d keeping the lore, taught %s. %s of %s questions have hands on them." % [roundi(float(science.minds)),String(era_words.call("teaching",float(science.education))),String(era_words.call("count_word",staffed)).capitalize(),String(era_words.call("count_word",active))]
 	tabs.active.text="Being learned · %d" % active;tabs.known.text="What we know · %d" % known
 	for id:String in tabs:
@@ -216,13 +218,13 @@ func refresh(refit:bool)->void:
 		records.append(item)
 	if view_mode=="tree" and tree_scope=="frontier" and query.is_empty():records=_frontier_records(records)
 	if view_mode=="active":records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Art.lead(a)+String(a.name)<Art.lead(b)+String(b.name))
-	legend.text="Named leaders supervise shared teams. Team sizes show equivalent full-time effort; evidence builds as people investigate." if view_mode=="active" else _tree_legend(hidden) if view_mode=="tree" else "Discoveries your civilization has established. Select a card for its effects."
+	legend.text="Each question has a leader and a few helpers. Pick a card to see who works on it and how far they have come." if view_mode=="active" else _tree_legend(hidden) if view_mode=="tree" else "What your people already know. Pick a card to see what it changed."
 	tree_controls.visible=view_mode=="tree";plot.visible=view_mode=="tree" and not records.is_empty();scroll.visible=view_mode!="tree" and not records.is_empty();empty.visible=records.is_empty()
 	if records.is_empty():
 		for child in empty.get_children():empty.remove_child(child);child.queue_free()
 		Art.paint(empty,domain if domain!="" else "knowledge",125)
 		Art.label(empty,"No matching investigations" if query!="" or domain!="" or leader_filter!="" else "No active investigation yet" if view_mode=="active" else "No discoveries in this view",20,T.INK,true)
-		Art.label(empty,"Choose a field or clear the filters. The knowledge tree shows questions that can be investigated with current evidence.",13,T.TEXT_SOFT,true)
+		Art.label(empty,"Pick \"Every field\" or clear the search. The knowledge tree shows the questions your people could take up next.",13,T.TEXT_SOFT,true)
 		if view_mode=="active":Art.button(empty,"Explore the knowledge tree",func()->void:set_view("tree"))
 	var ids:Array=[]
 	for item:Dictionary in records:ids.append(item.id)
@@ -248,7 +250,7 @@ func _build_cards()->void:
 		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",4);margin.add_child(body)
 		var status:=Art.label(body,"",12,Art.text_color(item.domain),true)
 		var name:=Art.label(body,String(item.name),20,T.INK,true);name.add_theme_font_override("font",Art.voice_font())
-		var date:=Art.label(body,"",12,T.GOLD,true)
+		var date:=Art.label(body,"",12,T.GOLD_TEXT,true)
 		var lead:=Art.label(body,"",14,T.BODY,true)
 		var team:=Art.label(body,"",14,T.TEXT_SOFT,true)
 		var meter:ProgressBar=Gauge.new();meter.ink=Art.color(item.domain);body.add_child(meter)
@@ -267,7 +269,7 @@ func _update_cards()->void:
 		var card:Dictionary=bindings[item.id]
 		# Selection: a 1 px gold edge with a gold tab on top, never a heavy outline.
 		var chosen:bool=item.id==selected_id
-		var face:=T.flat(Color("172830"),T.GOLD if chosen else T.BORDER,1,4,0)
+		var face:=T.flat(T.PAPER_RAISED,T.GOLD if chosen else T.BORDER,1,4,0)
 		if chosen:face.border_width_top=3
 		card.frame.add_theme_stylebox_override("panel",face)
 		card.status.text=Art.name_for(item.domain).to_upper()
@@ -297,7 +299,7 @@ func select(id:String,open_detail:bool=false)->void:
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),12,Art.text_color(item.domain),true)
 		Art.label(detail_body,item.name,26,T.INK,true).add_theme_font_override("font",Art.voice_font())
 		Art.label(detail_body,Art.status(item),14,Art.text_color(item.domain),true)
-		if item.known:Art.label(detail_body,_discovery_date(item).capitalize(),12,T.GOLD,true)
+		if item.known:Art.label(detail_body,_discovery_sentence(item),12,T.GOLD_TEXT,true)
 		if item.known:
 			var operations:VBoxContainer=preload("res://scripts/hud/technology_operations_panel.gd").new()
 			operations.subject=String(item.id);detail_body.add_child(operations)
@@ -325,21 +327,21 @@ func select(id:String,open_detail:bool=false)->void:
 				var person:Dictionary={}
 				if int(leader.get("person_id",0))>0:person=GovernmentPeopleSystem.person_snapshot(int(leader.person_id))
 				if person.is_empty():person={"name":String(leader.name),"person_id":int(leader.get("person_id",0))}
-				var face_frame:=PanelContainer.new();face_frame.add_theme_stylebox_override("panel",T.flat(Color("172830"),T.BORDER,1,2,2));row.add_child(face_frame)
+				var face_frame:=PanelContainer.new();face_frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK,T.BORDER,1,2,2));row.add_child(face_frame)
 				face_frame.add_child(Portrait.picture(person,64,76))
 			var who:=VBoxContainer.new();who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;who.alignment=BoxContainer.ALIGNMENT_CENTER;row.add_child(who)
 			Art.label(who,"WHO LEADS IT",12,T.MUTED);Art.label(who,leader.name,18,T.INK,true).add_theme_font_override("font",Art.voice_font())
 			Art.label(who,String(leader.office)+(" · acting for "+String(leader.requested_office) if leader.acting else ""),12,T.TEXT_SOFT,true)
-			Art.label(detail_body,"Relevant skills: "+", ".join(leader.skills),12,T.TEXT_SOFT,true)
+			Art.label(detail_body,"Good at: "+", ".join(leader.skills).to_lower(),12,T.TEXT_SOFT,true)
 			if assignment.active:
 				Art.label(detail_body,Art.team_sentence(item),18,T.INK,true).add_theme_font_override("font",Art.voice_font())
-				Art.label(detail_body,"%.1f%% of the civilization’s shared research effort" % (float(assignment.capacity.workforce_share)*100),12,T.MUTED,true)
+				Art.label(detail_body,"About %d in every 100 hours our people spend on learning go to this." % maxi(1,roundi(float(assignment.capacity.workforce_share)*100)),12,T.MUTED,true)
 				var bar:ProgressBar=Gauge.new();bar.ink=Art.color(item.domain);detail_body.add_child(bar);bar.value=clampf(float(item.progress),0,1)*100
-				Art.label(detail_body,"%d%% evidence · %s" % [roundi(float(item.progress)*100),Art.phase(item)],13,T.BODY,true)
-				Art.label(detail_body,String(assignment.bottleneck).replace(" — ","\n"),12,T.TEXT_SOFT,true)
+				Art.label(detail_body,_first_upper(Words.evidence(float(item.progress)))+("; "+Art.phase(item).to_lower() if not Art.phase(item).is_empty() else "")+".",13,T.BODY,true)
+				Art.label(detail_body,Art.plain_bottleneck(String(assignment.bottleneck)),12,T.TEXT_SOFT,true)
 				Art.label(detail_body,assignment.method,12,T.TEXT_SOFT,true)
 			else:
-				Art.label(detail_body,"Team if selected: "+Art.workforce(float(assignment.capacity.researchers)),13,T.BODY,true)
+				Art.label(detail_body,"If you choose it: "+Words.researchers(float(assignment.capacity.researchers)).to_lower()+" would work on it.",13,T.BODY,true)
 				var current_id:=String(assignment.current_target)
 				for current:Dictionary in all_records:
 					if current.id==current_id and current.exposed:Art.label(detail_body,"This team is currently investigating "+String(current.name)+". Focusing here redirects that team's attention.",12,T.TEXT_SOFT,true)
@@ -347,15 +349,16 @@ func select(id:String,open_detail:bool=false)->void:
 		if not String(item.get("operating_summary","")).is_empty():Art.label(detail_body,String(item.operating_summary),12,T.TEXT_SOFT,true)
 		Art.label(detail_body,String(item.get("pathway_description","")),13,T.TEAL,true)
 		for route:Dictionary in item.get("pathways",[]):
-			Art.label(detail_body,("● " if bool(route.ready) else "○ ")+String(route.label),12,T.GREEN if bool(route.ready) else T.MUTED,true)
+			Art.label(detail_body,String(route.label)+(" (open now)" if bool(route.ready) else " (not yet open)"),12,T.GREEN_TEXT if bool(route.ready) else T.MUTED,true)
 			var requirements:Array[String]=[]
 			for req:String in route.get("requires_all",route.requires):requirements.append(_foundation_name(req))
 			for group:Array in route.get("requires_any",[]):
 				var choices:Array[String]=[]
 				for req:String in group:choices.append(_foundation_name(req))
 				requirements.append("("+" or ".join(choices)+")")
-			if not requirements.is_empty():Art.label(detail_body,"Requires "+" + ".join(requirements),12,T.TEXT_SOFT,true)
-			if float(route.get("progress_multiplier",1.0))!=1.0:Art.label(detail_body,"Research pace: %.2f× local baseline" % float(route.progress_multiplier),12,T.TEXT_SOFT,true)
+			if not requirements.is_empty():Art.label(detail_body,"Needs "+" and ".join(requirements),12,T.TEXT_SOFT,true)
+			var pace:=float(route.get("progress_multiplier",1.0))
+			if not is_equal_approx(pace,1.0):Art.label(detail_body,"This way is about %d%% %s." % [roundi(absf(pace-1.0)*100),"faster" if pace>1.0 else "slower"],12,T.TEXT_SOFT,true)
 		Art.button(detail_body,"Objects, knowledge & culture",func():preload("res://scripts/hud/exchange_collection_panel.gd").open())
 		if item.exposed and not item.known and preload("res://scripts/reverse_engineering.gd").available():
 			for specimen:String in preload("res://scripts/reverse_engineering.gd").specimens(String(item.id)):
@@ -371,37 +374,38 @@ func select(id:String,open_detail:bool=false)->void:
 		var license_note:=preload("res://scripts/research_licenses.gd").describe(String(item.id))
 		if not license_note.is_empty():Art.label(detail_body,license_note,12,T.TEXT_SOFT,true)
 		if preload("res://scripts/hud/research_purchase_panel.gd").visible_for(String(item.id), bool(item.exposed), bool(item.known)):
-			var purchase:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
-			purchase.subject=String(item.id);detail_body.add_child(purchase)
-		for effect:String in item.effects:Art.label(detail_body,"%+.1f%%  %s" % [float(item.effects[effect])*100,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," "))],14,T.AMBER if effect in ["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure"] and float(item.effects[effect])>0 else T.GREEN,true)
+			# Help from abroad is asked for in the court, never through a form here.
+			var abroad:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
+			abroad.subject=String(item.id);detail_body.add_child(abroad)
+		for effect:String in item.effects:Art.label(detail_body,Art.effect_sentence(effect,float(item.effects[effect])),14,T.AMBER_TEXT if Art.effect_is_cost(effect,float(item.effects[effect])) else T.GREEN_TEXT,true)
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:
 				var title:="Unexplored prerequisite"
 				for previous:Dictionary in all_records:
 					if previous.id==req and previous.exposed:title=String(previous.name)
-				Art.label(detail_body,("✓ " if req in GameState.known_discoveries else "○ ")+title,12,T.TEXT_SOFT,true)
+				Art.label(detail_body,title+(" (known)" if req in GameState.known_discoveries else " (not yet known)"),12,T.TEXT_SOFT,true)
 		for group:Array in item.get("requires_any",[]):
 			var options:Array[String]=[]
 			for req:String in group:
 				var title:="Unexplored prerequisite"
 				for previous:Dictionary in all_records:
 					if previous.id==req and previous.exposed:title=String(previous.name)
-				options.append(("✓ " if req in GameState.known_discoveries else "○ ")+title)
-			Art.label(detail_body,"ONE OF: "+" or ".join(options),12,T.TEXT_SOFT,true)
+				options.append(title+(" (known)" if req in GameState.known_discoveries else ""))
+			Art.label(detail_body,"And any one of: "+" or ".join(options),12,T.TEXT_SOFT,true)
 		var possibilities:=_branching_possibilities(item)
 		if not possibilities.is_empty():
-			Art.label(detail_body,"BRANCHING POSSIBILITIES",12,T.GOLD)
+			Art.label(detail_body,"WHAT IT CAN LEAD TO",12,T.GOLD_TEXT)
 			for possibility:Dictionary in possibilities:
-				Art.label(detail_body,String(possibility.marker)+" "+String(possibility.name)+" · "+String(possibility.relation),12,possibility.color,true)
-		if not item.missing.is_empty():Art.label(detail_body,"Needs: "+", ".join(item.missing),12,T.AMBER,true)
-		action=Art.button(detail_body,"Team already investigating" if assignment.get("active",false) else "Established knowledge" if item.known else "Focus this team here" if item.ready else "More evidence needed",_act)
+				Art.label(detail_body,String(possibility.name)+": "+String(possibility.relation),12,T.text_for(possibility.color),true)
+		if not item.missing.is_empty():Art.label(detail_body,"Still needed: "+", ".join(item.missing),12,T.AMBER_TEXT,true)
+		action=Art.button(detail_body,"Being worked on now" if assignment.get("active",false) else "Already known" if item.known else "Put this team on it" if item.ready else "Not open yet: more is needed first",_act)
 		action.disabled=not item.ready or assignment.get("active",false)
-		Art.button(detail_body,"Research staffing",_staffing)
+		Art.button(detail_body,"Who does the work",_staffing)
 		# Re-applied until the rebuilt detail has laid out; a single deferred
 		# assignment is clamped to the empty pane and snaps to the top.
 		preload("res://scripts/hud/view_state.gd").restore(detail_scroll,view);return
-	detail=Art.label(detail_body,"Select a discovery to see its team, supervising leader and findings.",14,T.TEXT_SOFT,true)
+	detail=Art.label(detail_body,"Pick a card to see who works on it and what it would bring.",14,T.TEXT_SOFT,true)
 	action=null
 
 func _frontier_records(source:Array[Dictionary])->Array[Dictionary]:
@@ -447,21 +451,25 @@ func _tree_legend(hidden:int)->String:
 	for item:Dictionary in records:
 		forks+=(item.get("requires_any",[]) as Array).size()
 		approaches+=maxi(0,(item.get("pathways",[]) as Array).size()-1)
-	var scope:="active frontier" if tree_scope=="frontier" and query.is_empty() else "matching map"
-	return "%s · %d questions · %d choice forks · %d alternate approaches. Solid: every foundation. Teal fork: one of several. Dotted: another inquiry route. Drag to pan; wheel to zoom. %d further questions beyond." %[scope.capitalize(),records.size(),forks,approaches,hidden]
+	var scope:="Near what we are learning" if tree_scope=="frontier" and query.is_empty() else "Every matching question"
+	var parts:Array[String]=["%s: %d question%s." % [scope,records.size(),"" if records.size()==1 else "s"]]
+	parts.append("A solid line means one question needs the other first; a teal dashed line means any one of several will do; a dotted line is another way to the same knowledge.")
+	parts.append("Drag to move around; scroll to zoom.")
+	if hidden>0:parts.append("%d further questions beyond these open later." % hidden)
+	return " ".join(parts)
 
 func _branching_possibilities(item:Dictionary)->Array[Dictionary]:
 	var result:Array[Dictionary]=[];var id:=String(item.id)
 	for candidate:Dictionary in all_records:
 		if candidate.id==id:continue
 		var relation:="";var marker:=""
-		if id in candidate.get("requires",[]):relation="required foundation";marker="→"
+		if id in candidate.get("requires",[]):relation="needs this first";marker="→"
 		else:
 			for group:Array in candidate.get("requires_any",[]):
-				if id in group:relation="one possible foundation";marker="◇";break
+				if id in group:relation="this is one of several ways in";marker="◇";break
 		if relation.is_empty():
 			for route:Dictionary in candidate.get("pathways",[]):
-				if id in preload("res://scripts/technology_requirements.gd").parents(route):relation="supports another approach";marker="⋯";break
+				if id in preload("res://scripts/technology_requirements.gd").parents(route):relation="helps another way to reach it";marker="⋯";break
 		if relation.is_empty():continue
 		result.append({"name":String(candidate.name),"relation":relation,"marker":marker,"color":T.TEAL if marker=="◇" else T.GREEN if marker=="⋯" else T.TEXT_SOFT,"exposed":bool(candidate.exposed)})
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return ("0" if a.exposed else "1")+String(a.name)<("0" if b.exposed else "1")+String(b.name))
@@ -470,12 +478,18 @@ func _branching_possibilities(item:Dictionary)->Array[Dictionary]:
 
 func _discovery_date(item:Dictionary)->String:
 	var absolute_day:=int(item.get("discovered_day",-1))
-	if absolute_day<0:return "ESTABLISHED · DATE NOT RECORDED"
-	return "DISCOVERED · YEAR %d, DAY %d" % [absolute_day/365+1,absolute_day%365+1]
+	if absolute_day<0:return "KNOWN SINCE BEFORE WE SET OUT"
+	return "LEARNED · "+EraWords.when(absolute_day).to_upper()
+static func _first_upper(text:String)->String:
+	return text.left(1).to_upper()+text.substr(1)
+func _discovery_sentence(item:Dictionary)->String:
+	var absolute_day:=int(item.get("discovered_day",-1))
+	if absolute_day<0:return "Known since before we set out."
+	return "Learned in %s (%s)." % [EraWords.when(absolute_day),EraWords.ago(absolute_day)]
 func _act()->void:
 	var result:=DiscoverySystem.select_research_target(selected_id)
 	refresh(false)
-	if not result.get("ok",false):detail.text=String(result.get("reason","This question is not available."))
+	if not result.get("ok",false):detail.text=String(result.get("reason","This question cannot be taken up yet."))
 func step(direction:int)->void:
 	if records.is_empty():return
 	var index:=0

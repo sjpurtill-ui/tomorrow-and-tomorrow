@@ -13,7 +13,7 @@ func setup(value:Dictionary)->void:
 	add_child(controls)
 	for index in RANGES.size():
 		var button:=Button.new()
-		button.text=["1 YEAR","10 YEARS","100 YEARS","ALL"][index]
+		button.text=["Last year","Last 10 years","Last 100 years","Everything"][index]
 		button.toggle_mode=true
 		button.add_theme_font_size_override("font_size",12)
 		button.pressed.connect(_select.bind(index))
@@ -24,8 +24,8 @@ func setup(value:Dictionary)->void:
 	var legend:=HFlowContainer.new()
 	legend.add_theme_constant_override("h_separation",14)
 	add_child(legend)
-	for line in data.series: legend.add_child(Tokens.make_label("● "+String(line.label),11,line.color))
-	var note:=Tokens.make_label(String(data.get("description","")),11,Tokens.MUTED)
+	for line in data.series: legend.add_child(Tokens.make_label("● "+String(line.label),12,Tokens.text_for(line.color)))
+	var note:=Tokens.make_label(String(data.get("description","")),12,Tokens.MUTED)
 	note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	add_child(note)
 	_select(int(selected_ranges.get(data.id,1)))
