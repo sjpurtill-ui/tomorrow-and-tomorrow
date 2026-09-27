@@ -19,8 +19,20 @@ func _activate_project(discovery_id:String,observers:int=2)->Dictionary:
 	return discovery
 
 
+## An unknown question open now that no investigation is already pursuing.
+## (Seasonal patterns is founding knowledge since the fire-circle opening.)
+func _open_question()->String:
+	var active:=GameState.active_investigations.values()
+	for entry:Dictionary in DiscoverySystem.technology_catalog:
+		if String(entry.id) in active:continue
+		if DiscoverySystem._discovery_is_eligible(entry,int(GameState.elapsed_days)):return String(entry.id)
+	return ""
+
+
 func test_active_project_explains_question_method_unlock_and_bottleneck()->void:
-	var discovery:=_activate_project("seasonal_patterns")
+	var question:=_open_question()
+	assert_str(question).is_not_empty()
+	var discovery:=_activate_project(question)
 	var records:=DiscoverySystem.active_investigation_records()
 	var matches:=records.filter(func(record:Dictionary)->bool: return String(record.id)==String(discovery.id))
 	assert_int(matches.size()).is_equal(1)
