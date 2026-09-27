@@ -1,0 +1,98 @@
+[
+  {
+    "id": "clay_lined_storage_pits",
+    "line": "infrastructure",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Adults smooth wet clay along storage pit walls and lower dried food in reed basket into completed adjacent pit; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2ccb52ee-63b8-494b-96b1-4f7124bed488.png",
+    "asset": "res://assets/ui/research/subjects/clay_lined_storage_pits-v1.png",
+    "sha256": "0b19a67ea4b6e4b084d4437e87c12597e71da43d78af5396f24025b10ae78e2a",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; clay lining and food pit clear in wide crop."
+  },
+  {
+    "id": "cookfire_smoke_venting_habit",
+    "line": "ecology",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Adults tend cookfire at edge of reed shelter while smoke escapes through open high roof gap; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c7184c00-54a7-4f95-8080-ffcdba659031.png",
+    "asset": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v1.png",
+    "sha256": "dd2cafd60df4680395f3c196be24bee9e41ae7abe4096ffaf0fcdcea4b845e0e",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; smoke plume and vent gap visible in crop."
+  },
+  {
+    "id": "extended_family_room_division",
+    "line": "demography",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Extended household lays separate sleeping mats in two zones divided by woven screens around shared hearth; chalk pastel and torn-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-74591f52-eaaa-4eec-a77a-d079d2341b72.png",
+    "asset": "res://assets/ui/research/subjects/extended_family_room_division-v1.png",
+    "sha256": "7bdabb48e540139004b7e6412cb428d1a55dceddb24acacb02f760c364854673",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; partitions and distinct sleeping zones clear in crop."
+  },
+  {
+    "id": "midday_heat_rest",
+    "line": "labor",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Adults set down timber and stone tools, rest in shade and drink during hot midday; charcoal and red ochre on rough paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c23cecc1-aca3-49d0-9808-dac5ecc26608.png",
+    "asset": "res://assets/ui/research/subjects/midday_heat_rest-v1.png",
+    "sha256": "66240616e5bf6cfc4cc2642f4e755a50f8c010dbc2792596e964e83fc9229a5c",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; shaded pause, water and short hot-season shadow clear in crop."
+  },
+  {
+    "id": "seasonal_tribute_counts",
+    "line": "institutions",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Households bring grain, reed bundles and baskets to communal store while adults count plain pebbles by contribution; archaic mineral fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a585e999-3e14-4069-b21b-ad0e5764f450.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png",
+    "sha256": "cb55ebafc4222f44401d8bc35555ad920b43adb1f9aedd54f3fbf84bf4ff73ac",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; household goods and pebble tally clear; no writing in crop."
+  },
+  {
+    "id": "snakebite_treatment",
+    "line": "health",
+    "game_year": 14,
+    "approx_historical_year": -4907,
+    "prompt": "c. 4907 BCE: Adults tend another persons ankle bite with simple plant-fiber binding while snake recedes; sparse watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e539c2fe-fcf0-4fcb-9e93-196dc1dafb0b.png",
+    "asset": "res://assets/ui/research/subjects/snakebite_treatment-v1.png",
+    "sha256": "a0f5cef816c201de5b608ce22375f071e6ca38077496080e7f60b200a8d08245",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; period care custom depicted without instructional graphic; crop reviewed."
+  },
+  {
+    "id": "flood_mark_reading",
+    "line": "infrastructure",
+    "game_year": 15,
+    "approx_historical_year": -4900,
+    "prompt": "c. 4900 BCE: Adults point to old high-water debris stripe above current low river level and assess higher shelter ground; flat matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2bc1ccf2-7cd9-46eb-8fa9-93b372ba1fca.png",
+    "asset": "res://assets/ui/research/subjects/flood_mark_reading-v1.png",
+    "sha256": "8aef17e0c2cfa05b156372d884ff621304f977967848c9975665acd605aee13e",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too scenic/lifelike; high-water mark and low water visibly distinct in crop."
+  },
+  {
+    "id": "hide_wicker_shields",
+    "line": "security",
+    "game_year": 15,
+    "approx_historical_year": -4900,
+    "prompt": "c. 4900 BCE: Adults weave wicker frames and bind stretched hide over them for protective round shields; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aee9cc3f-fbd5-4cf4-a7b7-63850ef81fc0.png",
+    "asset": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png",
+    "sha256": "482319a01af11f0b40be1ac0c8aeae68e8b6a3ebbcfc342ef3476075dac8c42a",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; wicker frame, hide covering and restrained practice clear in crop."
+  }
+]

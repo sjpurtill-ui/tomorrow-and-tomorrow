@@ -3730,5 +3730,13 @@
   "war_slings": {"path": "res://assets/ui/research/subjects/war_slings-v1.png", "focus": [0.5, 0.5]},
   "burn_scar_regrowth_tracking": {"path": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v1.png", "focus": [0.5, 0.5]},
   "household_water_boiling": {"path": "res://assets/ui/research/subjects/household_water_boiling-v1.png", "focus": [0.5, 0.5]},
-  "pest_deterrent_storage_herbs": {"path": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png", "focus": [0.5, 0.5]}
+  "pest_deterrent_storage_herbs": {"path": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png", "focus": [0.5, 0.5]},
+  "clay_lined_storage_pits": {"path": "res://assets/ui/research/subjects/clay_lined_storage_pits-v1.png", "focus": [0.5, 0.5]},
+  "cookfire_smoke_venting_habit": {"path": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v1.png", "focus": [0.5, 0.5]},
+  "extended_family_room_division": {"path": "res://assets/ui/research/subjects/extended_family_room_division-v1.png", "focus": [0.5, 0.5]},
+  "midday_heat_rest": {"path": "res://assets/ui/research/subjects/midday_heat_rest-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_tribute_counts": {"path": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png", "focus": [0.5, 0.5]},
+  "snakebite_treatment": {"path": "res://assets/ui/research/subjects/snakebite_treatment-v1.png", "focus": [0.5, 0.5]},
+  "flood_mark_reading": {"path": "res://assets/ui/research/subjects/flood_mark_reading-v1.png", "focus": [0.5, 0.5]},
+  "hide_wicker_shields": {"path": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png", "focus": [0.5, 0.5]}
 }
