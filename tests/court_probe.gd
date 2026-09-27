@@ -430,7 +430,7 @@ func _test_old_entry_points()->void:
 	WorldSimulation.diplomacy.open(civ_id)
 	await _expect_court("the community network's SPEAK WITH THEIR LEADER",foreign_ok)
 	var report:Object=load("res://scripts/hud/content/dock_detail_civ_report.gd").new(terrain,hud,civ_id)
-	var speak:=_find_action(report.tab(0),"SPEAK WITH THEIR LEADER")
+	var speak:=_find_action(report.tab(0),String(report.talk_label()))
 	_check(speak.is_valid(),"the civ report lost SPEAK WITH THEIR LEADER")
 	if speak.is_valid():
 		speak.call();await _expect_court("the civ report's SPEAK WITH THEIR LEADER",foreign_ok)

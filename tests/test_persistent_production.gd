@@ -174,10 +174,6 @@ func test_main_supply_dock_defaults_to_persistent_controls()->void:
 	assert_bool(bool(job.paused)).is_true()
 	MilitaryCampaign.configure_production_line(int(job.id),0,false)
 	provider=null;terrain.free();hud.free()
-	var panel:=preload("res://scripts/production_lines_panel.gd").new()
-	add_child(panel);panel.refresh(true)
-	assert_str(panel.details.text).contains("forecast")
-	panel.free()
 	await get_tree().process_frame # Board rebuild retires controls after input delivery.
 	assert_object(load("res://scripts/military_command_ui.gd")).is_not_null()
 

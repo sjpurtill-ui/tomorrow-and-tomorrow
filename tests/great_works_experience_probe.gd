@@ -442,7 +442,7 @@ func _works_screen()->void:
 	atlas.refresh()
 	await _frames(2)
 	if not _text_of(atlas).contains("Secret Spire"):_fail("a foreign work heard of from travelers is missing")
-	if not _text_of(atlas).contains("As of day"):_fail("the foreign work is not dated")
+	if not _text_of(atlas).contains("As of Year"):_fail("the foreign work is not dated")
 	if capture:await _capture("works-foreign-light")
 	# Enshrine from the screen.
 	atlas.tab="ours";atlas.select(colossus_key)

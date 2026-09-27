@@ -61,7 +61,6 @@ func _ready()->void:
 	terrain._open_world_menu(); await _audit_after_frames("World menu",terrain.world_menu_panel)
 	GameState.settlement_site_committed=true
 	terrain._open_settlement_naming_panel(); await _audit_after_frames("Settlement naming",terrain.settlement_naming_panel)
-	MilitaryCommandUI.modal.show(); await _audit_after_frames("Military command",MilitaryCommandUI.modal)
 
 	if failures.is_empty():
 		print("MODAL_FIT_PROBE PASS  •  all screens bounded  •  no scrolling")

@@ -5,19 +5,13 @@ func _init()->void:
 
 func _build_service()->void:
 	var wings:=_page("Wings")
-	_label(wings,"WINGS & AIR MISSIONS",17)
-	_force_controls(wings,"Stand down sorties")
-	_label(wings,"Wings fly missions from their airbase or carrier. Range coverage, weather, training and base crowding determine mission efficiency.",13)
-	var bases:=_page("Airbases")
-	_production_controls(bases,"airbase","Form air wing from reserve")
-	organization_controls=VBoxContainer.new();bases.add_child(organization_controls)
-	companion_picker=_option(organization_controls)
-	_button(organization_controls,"Ferry wing to selected carrier",func():_report(op.attach_carrier(selected_id,int(_selected(companion_picker)))))
-	_button(organization_controls,"Combine wings at airbase",func():_report(op.merge_forces(selected_id,int(_selected(companion_picker)))))
-	_button(organization_controls,"Split air wing at base",func():_report(op.split_force(selected_id)))
-	_button(organization_controls,"Disband wing at base",func():_report(op.disband(selected_id)))
+	_label(wings,"Wings and where they fly",17)
+	_force_controls(wings,"Keep them on the ground")
+	_label(wings,"Wings fly from their airfield or carrier. How far they reach, the weather, their training and a crowded airfield decide how much they get done. How the wings are grouped and how they fight is for their commanders.",13)
+	var bases:=_page("Airfields")
+	_production_controls(bases,"airfield","Form a wing from our stores")
 	var airlift:=_page("Airlift")
-	_transport_controls(airlift,"Transport aircraft carry supplies or eligible airborne troops. Hostile drops require air control, preparation and range. Air supply missions sustain field armies in the assigned region.")
+	_transport_controls(airlift,"Transport aircraft carry supplies, or soldiers trained to drop from the air. A drop on enemy ground needs control of the air there. Supply flights keep our armies in that area fed.")
 	reports=_label(_page("Reports"),"",13)
 
 func _force_summary(force:Dictionary)->String:
@@ -26,4 +20,4 @@ func _force_summary(force:Dictionary)->String:
 	if origin.is_empty():origin=base
 	var coverage:=0.0
 	if not force.get("region",{}).is_empty():coverage=op.R.coverage(force.region,op.point(origin),op.range_km(force))
-	return "%s\n%d aircraft · %d personnel\nBased at: %s\nRange %d km · region coverage %d%%\nMission efficiency %d%% · training %d%%\n%s\nFlight fuel: %d used today · %d/day on mission\nFuel reserve: %d" % [force.name,op.hardware(force),op.crew(force),origin.get("name","Unavailable"),op.range_km(force),roundi(coverage*100),roundi(float(force.get("efficiency",0))*100),roundi(float(force.training)*100),force.status,int(force.get("fuel_used",0)),op.fuel_cost(force),int(MilitaryCampaign.military_consumables.get("fuel",0))]
+	return "%s: %d aircraft, %d crew, flying from %s.\nThey reach %d km and cover %d%% of their area. They get %d%% of their best done; training %d%%.\n%s\nFlight fuel: %d used today, %d a day on a mission, %d in our stores." % [force.name,op.hardware(force),op.crew(force),origin.get("name","nowhere yet"),op.range_km(force),roundi(coverage*100),roundi(float(force.get("efficiency",0))*100),roundi(float(force.training)*100),String(force.status),int(force.get("fuel_used",0)),op.fuel_cost(force),int(MilitaryCampaign.military_consumables.get("fuel",0))]

@@ -49,7 +49,7 @@ func access(id:String)->Dictionary:
 		if String(record.get("civ_id",""))==id and record.has("returned_day"): known_day=maxi(known_day,int(record.returned_day))
 	if known_day>=0: return {"ok":true,"day":known_day,"reason":"Your peoples know where to send delegates. Each exchange still requires an outward and return journey."}
 	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
-	if String(mission.get("civ_id",""))==id: return {"ok":false,"reason":"Your delegates are traveling. The exchange opens when they return, around day %d." % int(mission.get("return_day",0))}
+	if String(mission.get("civ_id",""))==id: return {"ok":false,"reason":"Your delegates are traveling. The talk can go on when they return, around %s." % preload("res://scripts/hud/era_words.gd").when(int(mission.get("return_day",0)))}
 	return {"ok":false,"reason":"Send delegates to establish an audience. Further exchanges still travel with envoys until a real long-distance diplomatic link exists."}
 
 func ask(id:String,message:String)->bool:
@@ -232,7 +232,7 @@ func _last_user_message(id:String)->String:
 	return ""
 
 func _failure(id:String,reason:String)->void:
-	var t:=thread(id); t.status=reason+" No agreement or game action was made."; t.retryable=true
+	var t:=thread(id); t.status=reason+" Nothing was agreed and nothing has changed."; t.retryable=true
 	changed.emit(id)
 
 func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArray,id:String,http:HTTPRequest,repairing:bool=false,traveling:bool=false)->void:
@@ -242,16 +242,16 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 	var value:Variant=null
 	var problem:=PronouncementInterpreter.connection_response_problem(code,result)
 	if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:
-		problem="The service returned an unreadable response envelope."
+		problem="The envoys came back with an answer no one could make sense of."
 		var envelope:Variant=JSON.parse_string(body.get_string_from_utf8())
 		if envelope is Dictionary:
 			var choices:Variant=envelope.get("choices",[])
 			if choices is Array and not choices.is_empty() and choices[0] is Dictionary:
 				var msg:Variant=choices[0].get("message",{})
 				if msg is Dictionary:
-					problem="The leader's reply failed the game's dialogue validation after a repair attempt."
-					if str(choices[0].get("finish_reason",""))=="length":problem="The service cut off the reply at its output limit."
-					elif msg.get("refusal") is String and not String(msg.get("refusal")).is_empty():problem="The service declined to generate this reply."
+					problem="The envoys could not bring back a clear answer, even after asking twice."
+					if str(choices[0].get("finish_reason",""))=="length":problem="The answer was cut off before it was finished."
+					elif msg.get("refusal") is String and not String(msg.get("refusal")).is_empty():problem="No answer came back to this message."
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
 					var parser:=JSON.new()
 					if parser.parse(content.trim_prefix("```json").trim_suffix("```").strip_edges())==OK:value=parser.data
@@ -276,7 +276,7 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 
 func resolve_returned(id:String)->Dictionary:
 	var t:=thread(id)
-	if not bool(t.in_transit):return {"error":"No traveling discussion is awaiting return."}
+	if not bool(t.in_transit):return {"error":"No envoys are on their way back."}
 	if pending.has(id):return {"pending_reply":true,"message":"The envoys have arrived home, but their account is still being prepared."}
 	if (t.staged_result as Dictionary).is_empty() and String(t.get("offline_choice",""))!="":
 		# An offline brief: the ruler answers from what they remember, now.
@@ -287,7 +287,7 @@ func resolve_returned(id:String)->Dictionary:
 		if not bool(t.retryable):_failure(id,"The conversation report is unavailable. Retry to request it again.")
 		return {"pending_reply":true,"message":"The envoys have arrived home, but no usable account is ready yet."}
 	var value:Dictionary=t.staged_result.duplicate(true)
-	if not accept(id,value):return {"error":"The returned account could not be verified."}
+	if not accept(id,value):return {"error":"The envoys' account could not be trusted."}
 	t.in_transit=false;t.private_brief="";t.staged_result={};t["returned_home"]=false
 	return {"ok":true,"message":"Your envoy reports: “%s”\n\n%s answered: “%s”" % [String(value.get("envoy_words","")),String(WorldSimulation.diplomacy.leader(id).name),String(value.reply)]}
 

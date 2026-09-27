@@ -53,7 +53,7 @@ func _build_aims()->void:
 	var frame:=PanelContainer.new();frame.name="AimsSheet";frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	frame.add_theme_stylebox_override("panel",sheet_style());add_child(frame)
 	var stack:=VBoxContainer.new();stack.name="Aims";stack.add_theme_constant_override("separation",8);frame.add_child(stack)
-	heading(stack,"WHAT WE STRIVE FOR",String(live.get("by","")) if not live.is_empty() else "")
+	heading(stack,"What we strive for",String(live.get("by","")) if not live.is_empty() else "")
 	if not live.is_empty():
 		var title:=Kit.serif(stack,String(live.get("title","")),24,T.INK,true);title.name="AimTitle"
 		var bar:=AimBar.new();bar.name="AimProgress";bar.progress=float(live.get("progress",0.0));bar.marks=live.get("milestones",[]);bar.custom_minimum_size=Vector2(0,18);stack.add_child(bar)
@@ -61,7 +61,7 @@ func _build_aims()->void:
 		var said:=String(live.get("words",""))
 		var line:=Kit.label(stack,"%s · %s left" % [said.substr(0,1).to_upper()+said.substr(1),String(live.get("left",""))],13,T.BODY,false);line.name="AimWords"
 		if String(live.get("clash",""))!="":
-			Kit.label(stack,"%s have sworn against it." % String(live.clash),12,T.GOLD,false)
+			Kit.label(stack,"%s have sworn against it." % String(live.clash),12,T.GOLD_TEXT,false)
 	elif waiting!="":
 		Kit.serif(stack,"The people want an aim. Summon %s to hear it." % waiting,16,T.INK,true).name="AimWaiting"
 	for rival:Dictionary in rivals:
@@ -71,7 +71,7 @@ func _build_aims()->void:
 			var why:=Kit.serif(stack,String(rival.why),12,T.MUTED,true);why.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			why.name="VowWhy_"+String(rival.get("civ_id","")).validate_node_name()
 	for legacy:Dictionary in legacies:
-		var remembered:=Kit.serif(stack,"Remembered: %s, year %d" % [String(legacy.get("name","")),int(int(legacy.get("day",0))/365.0)+1],13,T.BODY,true)
+		var remembered:=Kit.serif(stack,"Remembered: %s, %s" % [String(legacy.get("name","")),preload("res://scripts/hud/era_words.gd").when(int(legacy.get("day",0)))],13,T.BODY,true)
 		remembered.name="Legacy_%d" % int(legacy.get("day",0))
 
 class AimBar extends Control:
@@ -115,7 +115,7 @@ func _sheet(parent:Node,node_name:String)->VBoxContainer:
 
 static func heading(parent:Node,text:String,note:String="")->HBoxContainer:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
-	var title:=Kit.label(row,text,11,T.GOLD,false,.14);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var title:=Kit.label(row,text,12,T.GOLD_TEXT,false,.06);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	if not note.is_empty():
 		var aside:=Kit.serif(row,note,12,T.TEXT_SOFT,true);aside.size_flags_horizontal=Control.SIZE_SHRINK_END;aside.autowrap_mode=TextServer.AUTOWRAP_OFF
 	return row
@@ -134,9 +134,9 @@ func _build_counters()->void:
 	var people_note:="only smoke on the horizon" if peoples==0 else ("%d hearth%s found" % [located,"" if located==1 else "s"] if located>0 else "no hearth yet found")
 	var walker_note:="all are home by the fire" if away==0 else ("every party is out" if away>=capacity else "%d more could go" % (capacity-away))
 	var tale_note:="%d not yet told" % unread if unread>0 else ("all have been heard" if reports>0 else "none yet")
-	_counter("PEOPLES MET",str(peoples),people_note,"tent",T.AMBER)
-	_counter("WALKERS ABROAD","%d/%d" % [away,capacity],walker_note,"walker",T.TEAL)
-	_counter("TALES CARRIED HOME",str(reports),tale_note,"spiral",T.GOLD)
+	_counter("Peoples met",str(peoples),people_note,"tent",T.AMBER)
+	_counter("Walkers abroad","%d of %d" % [away,capacity],walker_note,"walker",T.TEAL)
+	_counter("Tales carried home",str(reports),tale_note,"spiral",T.GOLD)
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;counters_row.add_child(spacer)
 	var actions:Dictionary=model.get("actions",{})
 	plan_button=_action(counters_row,"Plan an expedition",actions.get("plan"),true,"Choose where the walkers go, how many, how long, and what they carry.")
@@ -150,7 +150,7 @@ func _build_counters()->void:
 
 func _counter(caption:String,value:String,note:String,glyph:String,tint:Color)->void:
 	var counter:=Counter.new();counter.name="Counter_"+caption.replace(" ","_");counter.caption=caption;counter.value=value;counter.note=note;counter.glyph=glyph;counter.tint=tint
-	counter.tooltip_text="%s · %s" % [caption.capitalize(),note]
+	counter.tooltip_text="%s · %s" % [caption,note]
 	counters_row.add_child(counter)
 
 func _build_peoples(stack:VBoxContainer)->void:
@@ -158,14 +158,14 @@ func _build_peoples(stack:VBoxContainer)->void:
 	var leads:Array=model.get("leads",[])
 	var actions:Dictionary=model.get("actions",{})
 	if peoples.is_empty():
-		heading(stack,"BEYOND THE SMOKE","%d telling%s" % [leads.size(),"" if leads.size()==1 else "s"] if not leads.is_empty() else "")
+		heading(stack,"Beyond the smoke","%d telling%s" % [leads.size(),"" if leads.size()==1 else "s"] if not leads.is_empty() else "")
 		var ask:=Kit.serif(stack,"Who lives beyond the smoke?",24,T.INK,true);ask.name="BeyondTheSmoke"
 		Kit.label(stack,"No other people has been met. The walkers bring home only what they saw, and what strangers told them on the road.",13,T.TEXT_SOFT)
 		if leads.is_empty():
-			Kit.serif(stack,"No one has yet spoken of other peoples.",14,T.MUTED,true)
+			Kit.serif(stack,"No one has yet spoken of other peoples.",14,T.INK_MUTED,true)
 		for lead:Dictionary in leads:stack.add_child(_lead_slip(lead))
 	else:
-		heading(stack,"PEOPLES WE HAVE MET","%d known" % peoples.size())
+		heading(stack,"Peoples we have met","%d known" % peoples.size())
 		for people:Dictionary in peoples:stack.add_child(_people_card(people))
 		if not leads.is_empty():
 			var names:PackedStringArray=[]
@@ -175,25 +175,20 @@ func _build_peoples(stack:VBoxContainer)->void:
 	var map_button:=_action(row,"Map of hearsay",actions.get("rumor_map"),false,"Where travelers' accounts place peoples we have not seen.");map_button.name="RumorMap"
 	if not leads.is_empty():
 		var follow:=_action(row,"Follow a telling",actions.get("plan"),false,"Plan an expedition toward one of the leads.");follow.name="FollowLead"
-	var envoys:Dictionary=actions.get("envoys",{})
-	if not peoples.is_empty() or not bool(envoys.get("disabled",true)):
-		var envoy_button:=_action(row,String(envoys.get("label","Send envoys")),envoys.get("on_press"),false,String(envoys.get("tip","")))
-		envoy_button.name="SendEnvoys";envoy_button.disabled=bool(envoys.get("disabled",false))
 
 func _lead_slip(lead:Dictionary)->Control:
 	var slip:=PanelContainer.new();slip.name="Lead_"+String(lead.get("name","")).validate_node_name()
-	var paper:=Color("efe3c8") if T.is_light() else Color("1c2322")
-	var style:=T.flat(paper,Color(T.GOLD,.45),1,3);style.content_margin_left=16;style.content_margin_right=14;style.content_margin_top=10;style.content_margin_bottom=10
+	var style:=T.flat(T.PAPER_RAISED,T.RULE,1,3);style.content_margin_left=16;style.content_margin_right=14;style.content_margin_top=10;style.content_margin_bottom=10
 	style.shadow_color=Color(0,0,0,.14);style.shadow_size=3;style.shadow_offset=Vector2(1,2)
 	slip.add_theme_stylebox_override("panel",style)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);slip.add_child(column)
 	Kit.serif(column,"“%s”" % String(lead.get("text","")),14,T.BODY,true)
 	var meta:=HBoxContainer.new();meta.add_theme_constant_override("separation",8);column.add_child(meta)
-	Kit.label(meta,String(lead.get("word","")),11,T.GOLD,false)
+	Kit.label(meta,String(lead.get("word","")),12,T.GOLD_TEXT,false)
 	var dots:=Dots.new();dots.amount=clampf(float(lead.get("confidence",0.0))/.5,0,1);meta.add_child(dots)
 	var searched:=int(lead.get("searched",0))
-	if searched>0:Kit.label(meta,"searched %d time%s, not found" % [searched,"" if searched==1 else "s"],11,T.MUTED,false)
-	if bool(lead.get("stale",false)):Kit.label(meta,"an old telling",11,T.MUTED,false)
+	if searched>0:Kit.label(meta,"searched %s, not found" % ("once" if searched==1 else "%d times" % searched),12,T.INK_MUTED,false)
+	if bool(lead.get("stale",false)):Kit.label(meta,"an old telling",12,T.INK_MUTED,false)
 	return slip
 
 func _people_card(people:Dictionary)->Control:
@@ -211,30 +206,30 @@ func _people_card(people:Dictionary)->Control:
 	meter.tooltip_text=Divine.meter_words(float(people.get("love",.5)),float(people.get("dread",0.0)));regard_row.add_child(meter)
 	var regard:=Kit.serif(regard_row,"They "+String(people.get("regard","are undecided about you")),14,regard_color(String(people.get("regard_id",""))),true);regard.name="Regard"
 	var where:=String(people.get("where",""))
-	if not where.is_empty():Kit.label(words,where+(" · "+String(people.get("met","")) if not String(people.get("met","")).is_empty() else ""),11,T.TEXT_SOFT)
+	if not where.is_empty():Kit.label(words,where+(" · "+String(people.get("met","")) if not String(people.get("met","")).is_empty() else ""),12,T.TEXT_SOFT)
 	var last:=String(people.get("last_word","")).strip_edges()
-	var quote:=Kit.serif(words,("“%s”" % (last if last.length()<=150 else last.substr(0,147)+"…")) if not last.is_empty() else "No word has yet passed between you.",13,T.BODY if not last.is_empty() else T.MUTED,true)
+	var quote:=Kit.serif(words,("“%s”" % (last if last.length()<=150 else last.substr(0,147)+"…")) if not last.is_empty() else "No word has yet passed between you.",13,T.BODY if not last.is_empty() else T.INK_MUTED,true)
 	quote.name="LastWord"
 	var vow:Dictionary=people.get("aim",{})
 	if not vow.is_empty():
-		var sworn:=Kit.label(words,"%s has sworn to %s" % [String(vow.get("leader","Their chief")),String(vow.get("phrase",""))],12,T.GOLD,false);sworn.name="RivalAim"
+		var sworn:=Kit.label(words,"%s has sworn to %s" % [String(vow.get("leader","Their chief")),String(vow.get("phrase",""))],12,T.GOLD_TEXT,false);sworn.name="RivalAim"
 		sworn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var buttons:=HBoxContainer.new();buttons.add_theme_constant_override("separation",8);words.add_child(buttons)
-	var speak:=_action(buttons,"Send word",people.get("on_speak"),true,"Their leader is heard in the court.");speak.name="SendWord"
+	var speak:=_action(buttons,"Send word",people.get("on_speak"),true,"Speak with %s in the court; your envoys carry the words." % (String(people.get("leader_name","")) if not String(people.get("leader_name","")).is_empty() else "their leader"));speak.name="SendWord"
 	var record:=_action(buttons,"What we know",people.get("on_record"),false,"Everything that has returned about them.");record.name="KnownRecord"
 	return card
 
 static func regard_color(id:String)->Color:
 	match id:
-		"war","fear":return T.RED
-		"awe","honor":return T.GOLD_BRIGHT if T.is_light() else T.GOLD
-		"scorn","wary":return T.AMBER
+		"war","fear":return T.RED_TEXT
+		"awe","honor":return T.GOLD_TEXT
+		"scorn","wary":return T.AMBER_TEXT
 	return T.TEXT_SOFT
 
 func _build_walkers(stack:VBoxContainer)->void:
 	var parties:Array=model.get("parties",[])
 	var counts:Dictionary=model.get("counters",{})
-	heading(stack,"WALKERS ABROAD","%d of %d parties out" % [int(counts.get("away",0)),maxi(1,int(counts.get("capacity",1)))])
+	heading(stack,"Walkers abroad","%d of %d parties out" % [int(counts.get("away",0)),maxi(1,int(counts.get("capacity",1)))])
 	if parties.is_empty():
 		var home:=Kit.serif(stack,"Every walker is home by the fire.",20,T.INK,true);home.name="AllHome"
 		Kit.label(stack,"A party carries food and a few strong walkers into country no one has named. What they see comes home only with them.",13,T.TEXT_SOFT)
@@ -244,15 +239,15 @@ func _build_walkers(stack:VBoxContainer)->void:
 		var path:=PartyPath.new();path.progress=float(party.get("progress",0.0));path.overdue=int(party.get("overdue",0))>0;path.turning=bool(party.get("turning_back",false));path.custom_minimum_size.y=58;path.tooltip_text=String(party.get("tip",""));card.add_child(path)
 		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);card.add_child(line)
 		Kit.label(line,"%d walker%s%s" % [int(party.get("personnel",0)),"" if int(party.get("personnel",0))==1 else "s",(" from "+String(party.get("from",""))) if not String(party.get("from","")).is_empty() else ""],12,T.TEXT_SOFT,false).size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		var when:=Kit.serif(line,String(party.get("when","")),13,T.RED if int(party.get("overdue",0))>0 else T.TEAL,true);when.autowrap_mode=TextServer.AUTOWRAP_OFF;when.size_flags_horizontal=Control.SIZE_SHRINK_END;when.name="When"
-	Kit.label(stack,"Nothing they see is known until they walk back in; the day of return is only a reckoning.",11,T.MUTED)
+		var when:=Kit.serif(line,String(party.get("when","")),13,T.RED_TEXT if int(party.get("overdue",0))>0 else T.TEAL_TEXT,true);when.autowrap_mode=TextServer.AUTOWRAP_OFF;when.size_flags_horizontal=Control.SIZE_SHRINK_END;when.name="When"
+	Kit.label(stack,"Nothing they see is known until they walk back in; the day of return is only a guess.",12,T.INK_MUTED)
 
 func _build_finds()->void:
 	var stack:=_sheet(self,"Finds")
 	var groups:Array=model.get("finds",[])
 	var counts:Dictionary=model.get("counters",{})
 	var unread:=int(counts.get("unread",0))
-	heading(stack,"CARRIED HOME","● %d telling%s not yet heard" % [unread,"" if unread==1 else "s"] if unread>0 else "")
+	heading(stack,"Carried home","● %d telling%s not yet heard" % [unread,"" if unread==1 else "s"] if unread>0 else "")
 	if groups.is_empty():
 		Kit.serif(stack,"Nothing has been carried home yet. The first walkers back will lay their finds here.",15,T.TEXT_SOFT,true)
 	else:
@@ -274,16 +269,16 @@ func _find_group(group:Dictionary)->Control:
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);column.add_child(top)
 	var title:=Kit.serif(top,String(group.get("party","")),15);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.autowrap_mode=TextServer.AUTOWRAP_OFF
 	if bool(group.get("unread",false)):
-		var mark:=Kit.label(top,"● not yet told",10,T.GOLD,false);mark.name="UnreadMark";mark.tooltip_text="The Chief Scout has not yet told this one."
-	var sub:=Kit.label(column,"%s · %s" % [String(group.get("date","")),String(group.get("place",""))],11,T.TEXT_SOFT,false);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.custom_minimum_size.x=40
+		var mark:=Kit.label(top,"Not yet told",12,T.GOLD_TEXT,false);mark.name="UnreadMark";mark.tooltip_text="The Chief Scout has not yet told this one."
+	var sub:=Kit.label(column,"%s · %s" % [String(group.get("date","")),String(group.get("place",""))],12,T.TEXT_SOFT,false);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.custom_minimum_size.x=40
 	var shelf:=HBoxContainer.new();shelf.add_theme_constant_override("separation",6);column.add_child(shelf)
 	for item:Dictionary in group.get("items",[]):shelf.add_child(FindTile.make(item))
 	if int(group.get("more",0))>0:
-		var more:=Kit.label(shelf,"+%d" % int(group.more),13,T.MUTED,false);more.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var more:=Kit.label(shelf,"%d more" % int(group.more),13,T.INK_MUTED,false);more.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var open:=Kit.action_button(column,"Read the telling",group.get("on_open",Callable()),false,"The full returned report.")
 	open.name="ReadTelling";open.custom_minimum_size.y=28;open.add_theme_font_size_override("font_size",12);open.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	var flat:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,3);flat.content_margin_left=4;flat.content_margin_right=4
-	open.add_theme_stylebox_override("normal",flat);open.add_theme_color_override("font_color",T.GOLD_BRIGHT if T.is_light() else T.GOLD)
+	open.add_theme_stylebox_override("normal",flat);open.add_theme_color_override("font_color",T.GOLD_TEXT)
 	return frame
 
 # ================================================================ palette
@@ -467,8 +462,8 @@ class Counter extends Control:
 		var fs:=28
 		draw_string(DISPLAY_FONT,Vector2(x,31),value,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,T.INK)
 		var vw:=DISPLAY_FONT.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
-		var font:=ThemeDB.fallback_font
-		draw_string(font,Vector2(x+vw+8,22),caption,HORIZONTAL_ALIGNMENT_LEFT,maxf(10,size.x-x-vw-8),9,T.GOLD)
+		var font:=T.font("ui_strong")
+		draw_string(font,Vector2(x+vw+8,22),caption,HORIZONTAL_ALIGNMENT_LEFT,maxf(10,size.x-x-vw-8),12,T.GOLD_TEXT)
 		draw_string(Kit.italic_font(),Vector2(x,52),note,HORIZONTAL_ALIGNMENT_LEFT,size.x-x,12,T.TEXT_SOFT)
 
 class Dots extends Control:
@@ -540,8 +535,8 @@ class PartyPath extends Control:
 		draw_circle(p,11,Color(Kit.plate_color(),.95));draw_arc(p,11,0,TAU,24,done,1.4,true)
 		KnownWorld.glyph(self,"walker",p,7.5,done,1.5)
 		var font:=Kit.italic_font()
-		draw_string(font,Vector2(40,12),"outward",HORIZONTAL_ALIGNMENT_LEFT,-1,10,T.MUTED)
-		draw_string(font,Vector2(40,size.y-2),"homeward" if not turning else "turned back",HORIZONTAL_ALIGNMENT_LEFT,-1,10,T.RED if turning else T.MUTED)
+		draw_string(font,Vector2(40,13),"outward",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+		draw_string(font,Vector2(40,size.y-2),"homeward" if not turning else "turned back",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.RED_TEXT if turning else T.INK_MUTED)
 
 class FindTile extends VBoxContainer:
 	var item:Dictionary={}
@@ -562,7 +557,7 @@ class FindTile extends VBoxContainer:
 			art.material=Kit.veil_material(Kit.veil_for({"state":String(item.get("state","")),"study_progress":float(item.get("study",0.0))}),.2);frame.add_child(art)
 		else:
 			var mark:=GlyphBox.new();mark.kind=KnownWorld.resource_glyph(String(item.get("resource","")),String(item.get("kind","")));mark.tone=T.RED if String(item.get("kind",""))=="losses" else T.GOLD;frame.add_child(mark)
-		var caption:=Kit.label(self,String(item.get("title","")),11,T.BODY);caption.max_lines_visible=2;caption.custom_minimum_size=Vector2(80,32);caption.size_flags_horizontal=Control.SIZE_FILL;caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var caption:=Kit.label(self,String(item.get("title","")),12,T.BODY);caption.max_lines_visible=2;caption.custom_minimum_size=Vector2(80,32);caption.size_flags_horizontal=Control.SIZE_FILL;caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		gui_input.connect(_on_input)
 	func _on_input(event:InputEvent)->void:

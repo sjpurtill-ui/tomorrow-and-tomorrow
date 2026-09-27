@@ -15,6 +15,8 @@ const Divine:=preload("res://scripts/divine_regard.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
+const When:=preload("res://scripts/hud/report_when.gd")
 const CULTURE_PATH:="res://scripts/artifact_culture.gd"
 const GALLERY_PATH:="res://scripts/hud/artifact_gallery.gd"
 const COMPASS:=["east","southeast","south","southwest","west","northwest","north","northeast"]
@@ -25,10 +27,10 @@ const FIND_ITEMS:=3
 
 func meta()->Dictionary:
 	return {
-		"eyebrow":"WORLD · AS OUR PEOPLE KNOW IT",
+		"eyebrow":"The world as our people know it",
 		"title":"The Known World",
 		"serif":true,"title_size":26,
-		"subtabs":["THE KNOWN WORLD","EXPEDITIONS","STANDING"],
+		"subtabs":["The known world","Expeditions","Standing"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -38,22 +40,20 @@ func tab(sub:int)->Dictionary:
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
 	var contacts:=int(competition.get("contacted_count",0))
 	var visible_foreign:=int(observation.get("visible_count",0))
-	var rank_hidden:=bool(competition.get("global_rank_hidden",true))
 	var kpis:Array=[
-		{"label":"CONTACTS","value":str(contacts),"delta":"of ? polities","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"Confirmed by sight or returned report"},
-		{"label":"IN SIGHT","value":str(visible_foreign),"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Foreign formations currently observed"},
-		{"label":"REPORTS","value":str(int(exploration.get("report_count",0))),"delta":"returned","delta_color":Tokens.MUTED,"accent":Tokens.GREEN,"tip":"Scout reports that physically returned"},
-		{"label":"RANK","value":"hidden" if rank_hidden else "#%d" % int(competition.get("player_rank",0)),"delta":"need contact" if rank_hidden else "of %d" % int(competition.get("contender_count",0)),"delta_color":Tokens.MUTED,"accent":Tokens.MUTED if rank_hidden else Tokens.GOLD,"tip":"Revealed only with sustained contact and comparison"},
+		{"label":"Peoples met","value":str(contacts),"delta":"there may be more","delta_color":Tokens.INK_MUTED,"accent":Tokens.AMBER,"tip":"Seen with our own eyes or told of by scouts who came home"},
+		{"label":"In sight","value":str(visible_foreign),"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.INK_MUTED,"accent":Tokens.TEAL,"tip":"Strangers our lookouts can see right now"},
+		{"label":"Tellings","value":str(int(exploration.get("report_count",0))),"delta":"brought home","delta_color":Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Accounts our scouts carried home"},
 	]
 	var brief:Dictionary
 	if bool(exploration.get("active",false)):
-		brief={"tone":"info","title":"A scout party is away","why":String(exploration.get("message",""))}
+		brief={"tone":"info","title":"A scouting party is away","why":String(exploration.get("message",""))}
 	elif contacts==0:
-		brief={"tone":"warn","title":"No other people have been met","why":"Only a returned scout report reveals new ground or contacts."}
+		brief={"tone":"warn","title":"We have met no other people","why":"Only scouts who come home can tell us of new land or new peoples."}
 	else:
-		brief={"tone":"info","title":"%d polit%s known" % [contacts,"y is" if contacts==1 else "ies are"],"why":"Knowledge is only what physically returned; estimates decay as reports age."}
+		brief={"tone":"info","title":"We know of %s" % ("one other people" if contacts==1 else "%d other peoples" % contacts),"why":"We know only what our people brought home, and older word grows less certain."}
 	match sub:
-		1: return {"kpis":[kpis[2]],"brief":{"title":"Scouts are away" if bool(exploration.get("active",false)) else "Read what returned, then choose your next expedition","why":"Return dates are estimates. An overdue party is still on the road until a report or loss is confirmed." if bool(exploration.get("active",false)) else "Recent returns below open the findings. Every retained report remains in the Expedition Archive."},"blocks":_scouting_blocks(exploration)}
+		1: return {"kpis":[kpis[2]],"brief":{"title":"Scouts are away" if bool(exploration.get("active",false)) else "Read what came home, then send the next party","why":"The day they come home is only a guess. A late party is still on the road until word or loss comes back." if bool(exploration.get("active",false)) else "Recent returns are below. Every telling holds all the rest."},"blocks":_scouting_blocks(exploration)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
 	return {"blocks":[{"type":"known_world","model":known_world_model(exploration)}]}
 
@@ -65,18 +65,18 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 		var overdue:=int(party.get("overdue_days",0))
 		party_items.append({
 			"name":String(party.get("target_label","Scout party away")),
-			"sub":"%d people · OVERDUE %d day%s" % [int(party.get("personnel",0)),overdue,"" if overdue==1 else "s"] if overdue>0 else "%d people · %d days remaining" % [int(party.get("personnel",0)),int(party.get("days_remaining",0))],
-			"value":"Overdue" if overdue>0 else preload("res://scripts/scout_archive.gd").calendar_date(int(party.get("return_day",0))),"value_color":Tokens.AMBER if overdue>0 else Tokens.TEAL,
+			"sub":"%d people · late by %s" % [int(party.get("personnel",0)),When.span(overdue)] if overdue>0 else "%d people · home in about %s" % [int(party.get("personnel",0)),When.span(int(party.get("days_remaining",0)))],
+			"value":"Late" if overdue>0 else preload("res://scripts/scout_archive.gd").calendar_date(int(party.get("return_day",0))),"value_color":Tokens.AMBER_TEXT if overdue>0 else Tokens.TEAL_TEXT,
 			"accent":Tokens.AMBER if overdue>0 else Tokens.TEAL,
-			"tip":"The road decides the true return day; an overdue party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","Observations remain aboard the party until it returns.")),
+			"tip":"The road decides when they come home; a late party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","What they see stays with them until they come home.")),
 		})
 	if party_items.is_empty():
 		var latest:Dictionary=exploration.get("latest_report",{})
 		var latest_sub:="no party is away"
 		if not latest.is_empty():
-			latest_sub="Last return · " + preload("res://scripts/scout_archive.gd").calendar_date(int(latest.get("day",0)))
-		party_items.append({"name":"No party away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
-	blocks.append({"type":"rows","heading":"PARTIES","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
+			latest_sub="Last came home " + preload("res://scripts/scout_archive.gd").calendar_date(int(latest.get("day",0)))
+		party_items.append({"name":"No party is away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
+	blocks.append({"type":"rows","heading":"Parties","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
 	var archive_model:=preload("res://scripts/scout_archive.gd")
 	var archive_provider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
 	var highlights:Array=[]
@@ -84,27 +84,25 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 	newest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.priority)>int(b.priority))
 	for item:Dictionary in newest.slice(0,3):
 		var saved_report:Dictionary=item.report
-		highlights.append({"name":String(item.title),"sub":"%s · %s · %s" % [archive_model.calendar_date(int(item.day)),item.party,item.place],"value":String(item.review),"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
-	blocks.append({"type":"actions","items":[{"label":"EXPEDITION ARCHIVE","sub":"Search, filter and read %d retained reports" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
-	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"RECENT RETURNS","note":"highlights from the latest eight","items":highlights})
-	blocks.append({"type":"actions","items":[{"label":"PLAN EXPEDITION","sub":"Review target, duration, people and provisions","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
-	blocks.append({"type":"text","text":"Nothing is revealed while a party is away. Personnel and provisions leave at departure; interception can erase an entire report. Up to %d parties can range at once; logistics, travel knowledge, and mounts determine their range." % int(exploration.get("capacity",1))})
+		highlights.append({"name":String(item.title),"sub":"%s · %s · %s" % [archive_model.calendar_date(int(item.day)),item.party,item.place],"value":"Not yet read" if String(item.review)=="UNREAD" else "","value_color":Tokens.GOLD_TEXT,"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
+	blocks.append({"type":"actions","items":[{"label":"Every telling","sub":"Search and read all %d kept tellings" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
+	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"Recent returns","note":"the most telling of the last eight","items":highlights})
+	blocks.append({"type":"actions","items":[{"label":"Plan an expedition","sub":"Where they go, how many, how long, and what they carry","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
+	blocks.append({"type":"text","text":"What a party sees stays with them until they come home. The people and food they take go with them, and a party that is caught may never come back. Up to %d parties can be out at once; knowing the roads, and having mounts and supplies, lets them go further." % int(exploration.get("capacity",1))})
 	return blocks
 
 func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 	var blocks:Array=[
-		{"type":"text","heading":String(knowledge.get("title","NO COMPARATIVE FRAMEWORK")),"text":String(knowledge.get("summary",""))},
-		{"type":"text","heading":"NEXT","text":String(knowledge.get("next_step",""))},
+		{"type":"text","heading":Tokens.sentence_case(String(knowledge.get("title","We cannot yet compare ourselves to others"))),"text":String(knowledge.get("summary",""))},
+		{"type":"text","heading":"What would tell us more","text":String(knowledge.get("next_step",""))},
 	]
 	var history:Dictionary=CivilizationSystem.chronicle.snapshot(int(GameState.elapsed_days))
-	blocks.push_front({"type":"text","heading":String(history.title).to_upper(),"text":"Year %d · %s\n\n%s"%[int(history.year),String(history.summary),String(history.next)]})
+	blocks.push_front({"type":"text","heading":Tokens.sentence_case(String(history.title)),"text":"%s · %s\n\n%s"%[EraWords.today(),String(history.summary),String(history.next)]})
 	var records:Array=[]
 	for item:Dictionary in history.recent:
-		records.append({"name":String(item.kind),"sub":"Year %d"%(int(item.day)/365),"detail":String(item.text)})
-	if not records.is_empty():blocks.append({"type":"rows","heading":"WHAT ENDURED AND CHANGED","items":records})
-	if bool(history.review_available):
-		blocks.append({"type":"actions","items":[{"label":"REVIEW OUR LEGACY","sub":"Record a closing account; you may continue playing","on_press":func():CivilizationSystem.chronicle.reckon(int(GameState.elapsed_days));hud.request_immediate_dock_refresh()}]})
-	if not history.reckonings.is_empty():blocks.append({"type":"text","heading":"LEGACY ACCOUNT","text":String(history.reckonings[-1].text)})
+		records.append({"name":Tokens.sentence_case(String(item.kind)),"sub":EraWords.when(int(item.day)),"detail":String(item.text)})
+	if not records.is_empty():blocks.append({"type":"rows","heading":"What endured and what changed","items":records})
+	if not history.reckonings.is_empty():blocks.append({"type":"text","heading":"The chroniclers' account","text":String(history.reckonings[-1].text)})
 
 	return blocks
 
@@ -136,14 +134,10 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 		if report.has("archive_reviewed") and not bool(report.archive_reviewed):unread+=1
 	var chief:Dictionary=GovernmentPeopleSystem.officeholder("ChiefScout")
 	var matters:=chief_scout_matters()
-	var presentation:Dictionary={"label":"Send envoys","disabled":located==0,"tooltip":"Envoys need a located hearth to walk to."}
-	if is_instance_valid(terrain) and terrain.has_method("_diplomat_action_presentation"):
-		presentation=terrain._diplomat_action_presentation(CivilizationSystem.diplomatic_mission_status(),located)
 	var chief_name:=String(chief.get("name",""))
 	var summon_label:=("Summon %s, your Chief Scout, to hear it" % chief_name) if not chief_name.is_empty() else "Call in the returned walkers to hear it"
 	var summon_tip:="Call them into the audience hall; they will tell what the walkers saw."
 	if matters>0:summon_tip="%s holds %d matter%s from the road. Returned findings are told in the audience hall." % [chief_name if not chief_name.is_empty() else "The Chief Scout",matters,"" if matters==1 else "s"]
-	var envoys:={"label":"Send envoys" if located>0 else "Envoys need a found hearth","disabled":bool(presentation.get("disabled",located==0)),"tip":String(presentation.get("tooltip","")),"on_press":open_envoys}
 	return {
 		"tier":tier,
 		"settlement":_settlement_name(),
@@ -156,7 +150,7 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 		"chief_name":chief_name,
 		# What the people strive for, and what rivals have sworn (legacy_aims.gd).
 		"aims":preload("res://scripts/legacy_aims.gd").board_model(),
-		"actions":{"plan":plan_expedition,"archive":open_archive,"rumor_map":open_rumor_map,"summon":summon_chief_scout,"summon_label":summon_label,"summon_tip":summon_tip,"envoys":envoys},
+		"actions":{"plan":plan_expedition,"archive":open_archive,"rumor_map":open_rumor_map,"summon":summon_chief_scout,"summon_label":summon_label,"summon_tip":summon_tip},
 	}
 
 func plan_expedition()->void:
@@ -299,9 +293,9 @@ func _chart_model(home:Vector2,encounters:Array,leads:Array,reports:Array,explor
 
 static func route_phrase(report:Dictionary,route:PackedVector2Array)->String:
 	var far:=farthest(route)
-	var days:=int(report.get("actual_days",report.get("duration_days",0)))
-	if route.is_empty() or far.distance_to(route[0])<=1.0:return "a walk near home, %d days" % days
-	return "%sward, %d days away" % [compass(route[0],far).capitalize(),days]
+	var days:=When.span(int(report.get("actual_days",report.get("duration_days",0))))
+	if route.is_empty() or far.distance_to(route[0])<=1.0:return "a walk near home, %s" % days
+	return "%sward, %s away" % [compass(route[0],far).capitalize(),days]
 
 static func party_title(label:String,heading:String)->String:
 	var upper:=label.to_upper()
@@ -366,9 +360,9 @@ func _parties_model(exploration:Dictionary)->Array:
 	for party:Dictionary in exploration.get("parties",[]):
 		var overdue:=int(party.get("overdue_days",0))
 		var days:=int(party.get("days_remaining",0))
-		var when:="Home in about %d days" % days
+		var when:="Home in about %s" % When.span(days)
 		if days<=1:when="Home any day now"
-		if overdue>0:when="Overdue %d day%s — not yet mourned" % [overdue,"" if overdue==1 else "s"]
+		if overdue>0:when="Late by %s, not yet mourned" % When.span(overdue)
 		var reason:=String(party.get("turnback_reason",""))
 		result.append({"id":int(party.get("mission_id",0)),"title":party_title(String(party.get("target_label","")),String(party.get("planned_heading",""))),"personnel":int(party.get("personnel",0)),
 			"days":days,"overdue":overdue,"progress":float(party.get("progress",0.0)),"when":when,"from":String(party.get("origin_label","")),
@@ -414,8 +408,7 @@ func _finds_model(reports:Array)->Array:
 		if int(report.get("lost_personnel",0))>0:items.append({"kind":"losses","title":"%d did not come home" % int(report.lost_personnel),"sub":"lost on the road","on_open":on_report})
 		if items.is_empty():continue
 		var route:=points(report.get("route",[]))
-		var mission:=int(report.get("mission_id",0))
-		groups.append({"party":("Party %d" % mission) if mission>0 else "An earlier party","date":Archive.calendar_date(int(report.get("day",0))),
+		groups.append({"party":Archive.party_name(report),"date":Archive.calendar_date(int(report.get("day",0))),
 			"place":route_phrase(report,route) if route.size()>=2 else title_case(String(report.get("target_label","Open exploration"))),
 			"unread":report.has("archive_reviewed") and not bool(report.archive_reviewed),"items":items.slice(0,FIND_ITEMS),"more":maxi(0,items.size()-FIND_ITEMS),"on_open":on_report})
 	return groups

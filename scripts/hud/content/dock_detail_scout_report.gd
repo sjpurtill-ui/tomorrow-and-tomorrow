@@ -1,9 +1,9 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 ## Detail dock: one returned scout expedition's full report. Opened
-## on demand after a party comes home — the report can
-## be read without changing simulation speed.
+## on demand after a party comes home.
 
 const Archive:=preload("res://scripts/scout_archive.gd")
+const When:=preload("res://scripts/hud/report_when.gd")
 var report:Dictionary={}
 var return_provider:Object
 
@@ -17,9 +17,9 @@ func _init(terrain_node:Node,hud_node:Control,report_record:Dictionary={},archiv
 func meta()->Dictionary:
 	var title:=String(Archive.summary(report).title)
 	return {
-		"eyebrow":("CITY RECONNAISSANCE" if String(report.get("mission_kind",""))=="observe_city" else "THE EXPEDITION CHRONICLES")+" · "+Archive.calendar_date(int(report.get("day",0))).to_upper(),
+		"eyebrow":("Watching a city" if String(report.get("mission_kind",""))=="observe_city" else "A scouting party's telling")+" · "+Archive.calendar_date(int(report.get("day",0))),
 		"title":title,
-		"subtabs":["CITY FINDINGS" if String(report.get("mission_kind",""))=="observe_city" else "DISCOVERIES","JOURNEY & ACCOUNTS"],
+		"subtabs":["What they saw of the city" if String(report.get("mission_kind",""))=="observe_city" else "What they found","The journey"],
 	}
 
 func tab(_sub:int)->Dictionary:
@@ -32,10 +32,10 @@ func tab(_sub:int)->Dictionary:
 	var is_recruitment:=not recruitment.is_empty() or String(report.get("mission_kind","")) in ["recruit_people","recruit_nomads","recruit_people_visit"]
 	var contacts:Array=report.get("contacts",[])
 	var kpis:Array=[
-		{"label":"RETURNED","value":"%d of %d" % [returned,personnel],"delta":"%d lost · %d stayed" % [lost,stayed] if lost+stayed>0 else "all came home","delta_color":Tokens.RED if lost>0 else (Tokens.AMBER if stayed>0 else Tokens.GREEN),"accent":Tokens.RED if lost>0 else Tokens.GREEN,"tip":"The party that left against the party that came home"},
-		{"label":"DAYS AWAY","value":str(int(report.get("actual_days",report.get("duration_days",0)))),"delta":"from "+String(report.get("origin_label","home")),"delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Elapsed days from departure to return, when recorded"},
-		{"label":"JOURNEY","value":"%d km" % int(report.get("distance_km",0)),"delta":"out & back","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Total route distance, including the journey home"},
-		{"label":"NEWCOMERS","value":"+%d" % recruits if recruits>0 else "0","delta":"joined","delta_color":Tokens.GREEN if recruits>0 else Tokens.MUTED,"accent":Tokens.GREEN,"tip":"Wanderers who threw in their lot with the settlement"},
+		{"label":"Came home","value":"%d of %d" % [returned,personnel],"delta":"%d lost · %d stayed" % [lost,stayed] if lost+stayed>0 else "all came home","delta_color":Tokens.RED_TEXT if lost>0 else (Tokens.AMBER_TEXT if stayed>0 else Tokens.GREEN_TEXT),"accent":Tokens.RED if lost>0 else Tokens.GREEN,"tip":"How many set out, and how many came back"},
+		{"label":"Time away","value":When.span(int(report.get("actual_days",report.get("duration_days",0)))),"delta":"from "+String(report.get("origin_label","home")),"delta_color":Tokens.INK_MUTED,"accent":Tokens.TEAL,"tip":"From the day they left to the day they came home"},
+		{"label":"Distance walked","value":"%d km" % int(report.get("distance_km",0)),"delta":"there and back","delta_color":Tokens.INK_MUTED,"accent":Tokens.BLUE,"tip":"The whole road, including the way home"},
+		{"label":"Newcomers","value":"+%d" % recruits if recruits>0 else "None","delta":"joined us" if recruits>0 else "","delta_color":Tokens.GREEN_TEXT if recruits>0 else Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Wanderers who chose to come and live with us"},
 	]
 	var brief:Dictionary
 	if lost>0:
@@ -55,46 +55,47 @@ func tab(_sub:int)->Dictionary:
 	var blocks:Array=[]
 	if String(report.get("mission_kind",""))=="observe_city":
 		var city:=Archive.city_record(report)
-		kpis[3]={"label":"OBSERVING","value":"%d d" % int(city.get("observation_days",0)),"delta":"at target city","accent":Tokens.TEAL}
+		kpis[3]={"label":"Time watching","value":When.span(int(city.get("observation_days",0))),"delta":"at the city","accent":Tokens.TEAL}
 		brief={"tone":"warn" if lost>0 or city.is_empty() else "info","title":String(Archive.summary(report).title),"why":Archive.city_account(report)}
 		if _sub==0:
 			var visuals=preload("res://scripts/hud/city_report_visuals.gd")
 			var rows:Array=[]
-			for key:String in ["population","science_capacity","education","gdp","life_expectancy","infant_mortality","garrison","fortification","supply"]:
-				rows.append({"name":String(visuals.LABELS[key]),"value":visuals.estimate(key,city.get("fields",{}).get(key,{})),"sub":"Returned observation" if city.get("fields",{}).has(key) else "Not observed","accent":Tokens.TEAL})
-			blocks.append({"type":"rows","heading":"TARGET CITY · DATED FINDINGS","items":rows})
-			blocks.append({"type":"text","text":"This is the report carried home, not live intelligence. Journey & Accounts retains the travel route and incidental finds."})
-			if return_provider!=null:blocks.append({"type":"actions","items":[{"label":"BACK TO ARCHIVE","on_press":func()->void:hud.open_detail(return_provider)}]})
+			for key:String in visuals.shown_keys():
+				var field:Dictionary=city.get("fields",{}).get(key,{})
+				rows.append({"name":String(visuals.label(key)),"value":String(visuals.words(key,field)),"sub":"Seen by the scouts" if not field.is_empty() else "Not seen","accent":Tokens.TEAL})
+			blocks.append({"type":"rows","heading":"The target city, as they saw it","items":rows})
+			blocks.append({"type":"text","text":"This is what they saw then; the city may have changed since. The journey tab has their road and anything else they found."})
+			if return_provider!=null:blocks.append({"type":"actions","items":[{"label":"Back to every telling","on_press":func()->void:hud.open_detail(return_provider)}]})
 			return {"kpis":kpis,"brief":brief,"blocks":blocks}
 	if return_provider!=null:
-		blocks.append({"type":"actions","items":[{"label":"BACK TO ARCHIVE","sub":"keep search, filter and page","on_press":func()->void: hud.open_detail(return_provider)}]})
+		blocks.append({"type":"actions","items":[{"label":"Back to every telling","sub":"Where you left off","on_press":func()->void: hud.open_detail(return_provider)}]})
 	if is_recruitment:
-		blocks.append({"type":"text","heading":"RECRUITMENT OUTCOME","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
+		blocks.append({"type":"text","heading":"Who came back with them","text":String(recruitment.get("summary","The party returned without a detailed account of whom it approached."))})
 		var encountered:=int(recruitment.get("encountered",0))
 		if encountered>0 or bool(recruitment.get("met_community",false)):
 			var declined:=int(recruitment.get("declined",0))
-			blocks.append({"type":"rows","heading":"WHO THEY MET","items":[{
-				"name":String(recruitment.get("group","People on the road")).capitalize(),
+			blocks.append({"type":"rows","heading":"Who they met","items":[{
+				"name":_first_up(String(recruitment.get("group","People on the road"))),
 				"sub":"%d joined · %d declined" % [recruits,declined] if declined>0 else ("%d traveling · %d joined" % [encountered,recruits] if encountered>0 else "community visited · no household transfer"),
-				"value":"%d JOINED" % recruits if recruits>0 else "NONE","value_color":Tokens.GREEN if recruits>0 else Tokens.AMBER,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
+				"value":"%d joined" % recruits if recruits>0 else "None joined","value_color":Tokens.GREEN_TEXT if recruits>0 else Tokens.AMBER_TEXT,"accent":Tokens.GREEN if recruits>0 else Tokens.AMBER,
 			}]})
 		var reason_lines:Array[String]=[]
 		for reason_variant in recruitment.get("reasons",[]): reason_lines.append("• "+String(reason_variant))
-		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"WHY THEY DECIDED","text":"\n".join(reason_lines)})
+		if not reason_lines.is_empty(): blocks.append({"type":"text","heading":"Why they decided","text":"\n".join(reason_lines)})
 		var diplomatic_response:=String(recruitment.get("diplomatic_response",""))
-		if not diplomatic_response.is_empty():blocks.append({"type":"text","heading":"POLITICAL CONSEQUENCE","text":diplomatic_response})
+		if not diplomatic_response.is_empty():blocks.append({"type":"text","heading":"What their leaders made of it","text":diplomatic_response})
 	if _sub==0:
 		var discoveries:Array=report.get("discoveries",[])
 
 		if not contacts.is_empty():
-			blocks.append({"type":"discovery","kind":"encounter","title":"Other people, beyond our horizon","description":"Direct contact with %s." % ", ".join(PackedStringArray(contacts)),"consequence":"Their encounter sites are marked on the returned route. Contact is a beginning; it does not reveal their homeland."})
+			blocks.append({"type":"discovery","kind":"encounter","title":"Other people, beyond our horizon","description":"Direct contact with %s." % ", ".join(PackedStringArray(contacts)),"consequence":"Where they met is marked on the route. That is not where they live."})
 		for finding in discoveries:
 			if Archive.routine_finding(finding): continue
 			var card:Dictionary=finding.duplicate(true)
 			card["type"]="discovery"
 			blocks.append(card)
 		if not discoveries.is_empty() and Archive.significant_findings(report).is_empty():
-			blocks.append({"type":"text","heading":"SURVEY NOTES","text":"No additional findings recorded. Route sketches and routine evidence remain in Journey & Accounts."})
+			blocks.append({"type":"text","heading":"Nothing new","text":"They found nothing else worth telling. The journey tab has their road."})
 		if discoveries.is_empty():
 			# Old saves retain their real outcomes; a new design must not invent rewards.
 			var roadside_notes:=false
@@ -108,42 +109,40 @@ func tab(_sub:int)->Dictionary:
 					blocks.append({"type":"discovery","kind":"knowledge","title":"Routes worth remembering","description":"The party's charts and observations are being studied at home.","consequence":account})
 				else: blocks.append({"type":"discovery","kind":"field note","title":"From the returning party","description":account})
 			if roadside_notes:
-				blocks.append({"type":"discovery","kind":"roadside supplies","title":"What sustained the journey","description":"The party recorded ordinary materials along the road and any supplies it carried home.","consequence":"These are useful local resupply notes, not distant treasure. The original locations and quantities are preserved in Journey & Accounts."})
-			if report.get("windfalls",[]).is_empty(): blocks.append({"type":"text","text":"The route is the discovery. No additional finds were recorded on this journey."})
-		blocks.append({"type":"text","text":"Read Journey & Accounts for the road, encounters and supplies. Reading a report leaves your chosen simulation speed unchanged."})
+				blocks.append({"type":"discovery","kind":"roadside supplies","title":"What sustained the journey","description":"The party recorded ordinary materials along the road and any supplies it carried home.","consequence":"These are useful local resupply notes, not distant treasure. Where and how much is written in the journey tab."})
+			if report.get("windfalls",[]).is_empty(): blocks.append({"type":"text","text":"The road itself is what they found. Nothing else was brought home."})
+		blocks.append({"type":"text","text":"The journey tab tells the road, who they met and what fed them."})
 		return {"kpis":kpis,"brief":brief,"blocks":blocks}
 	for finding:Dictionary in report.get("discoveries",[]):
 		if Archive.routine_finding(finding) and String(finding.get("kind",""))!="landmark":
-			blocks.append({"type":"text","heading":String(finding.get("title","FIELD NOTES")),"text":String(finding.get("description",""))+" "+String(finding.get("consequence",""))})
+			blocks.append({"type":"text","heading":String(finding.get("title","Field notes")),"text":String(finding.get("description",""))+" "+String(finding.get("consequence",""))})
 	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
 	var journal:Array=report.get("journal",[])
 	if not journal.is_empty():
 		var journal_lines:Array[String]=[]
 		for entry in journal: journal_lines.append(String(entry))
-		blocks.append({"type":"text","heading":"THE JOURNEY","text":"\n".join(journal_lines)})
+		blocks.append({"type":"text","heading":"The journey","text":"\n".join(journal_lines)})
 	var turnback:=String(report.get("turnback_reason",""))
 	if turnback!="":
-		blocks.append({"type":"text","heading":"THE ROUTE","text":turnback})
+		blocks.append({"type":"text","heading":"Why they turned back","text":turnback})
 	if not contacts.is_empty():
 		var contact_items:Array=[]
 		for contact_name in contacts:
-			contact_items.append({"name":String(contact_name),"sub":"direct contact · encounter site marked on the route","value":"","accent":Tokens.AMBER,"tip":"An encounter site is not a homeland; investigate it to find routes onward"})
-		blocks.append({"type":"rows","heading":"FIRST CONTACT","items":contact_items})
+			contact_items.append({"name":String(contact_name),"sub":"Met face to face · the place is marked on the route","value":"","accent":Tokens.AMBER,"tip":"Where we met them is not where they live."})
+		blocks.append({"type":"rows","heading":"People they met","items":contact_items})
 	var targeted:=String(report.get("target_finding",""))
 	if targeted!="":
-		blocks.append({"type":"text","heading":"THE MISSION'S QUESTION","text":targeted})
+		blocks.append({"type":"text","heading":"What they were sent to learn","text":targeted})
 	var windfalls:Array=report.get("windfalls",[])
 	if windfalls.is_empty() and contacts.is_empty() and targeted=="" and not is_recruitment and Archive.significant_findings(report).is_empty() and (report.get("city_observations",[]) as Array).is_empty():
-		blocks.append({"type":"text","heading":"FINDINGS","text":"No additional findings were recorded. The returned route and survey notes remain available."})
+		blocks.append({"type":"text","heading":"What they found","text":"Nothing beyond the road itself."})
 	else:
 		var findings:Array[String]=[]
 		for windfall in windfalls: findings.append("• "+String(windfall))
 		if not findings.is_empty():
-			blocks.append({"type":"text","heading":"FINDINGS","text":"\n".join(findings)})
+			blocks.append({"type":"text","heading":"What they found","text":"\n".join(findings)})
 	if not _cover_path().is_empty():
-		blocks.append({"type":"image","path":_cover_path(),"height":112,"cover":true,"tip":"Illustration inspired by recorded terrain; not evidence of a particular landmark."})
-		blocks.append({"type":"text","text":"Illustration inspired by the saved terrain account. The route chart above is the recorded evidence."})
-	blocks.append({"type":"text","text":"Reports stay available here; pause or change speed whenever you choose."})
+		blocks.append({"type":"image","path":_cover_path(),"height":112,"cover":true,"tip":"The kind of country they walked through."})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
 
 func signature()->Array:
@@ -151,3 +150,6 @@ func signature()->Array:
 
 func _cover_path()->String:
 	return Archive.artwork(report)
+
+static func _first_up(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)

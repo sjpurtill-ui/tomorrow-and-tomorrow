@@ -9,7 +9,7 @@ func _ready()->void:
 	var id:=String(contact.civ_id)
 	await click_control(hud.rail_buttons.world)
 	hud.open_detail(preload("res://scripts/hud/content/dock_detail_civ_report.gd").new(terrain,hud,id));await frames();await capture("contact-evidence")
-	await click_label("SPEAK WITH THEIR LEADER")
+	await click_label(preload("res://scripts/hud/content/dock_detail_civ_report.gd").new(terrain,hud,id).talk_label())
 	var ui:=ForeignDiplomacy.panel
 	assert(is_instance_valid(ui));await capture("contact-audience-quote")
 	await click_control(ui.audience_button)

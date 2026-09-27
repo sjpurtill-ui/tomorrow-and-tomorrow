@@ -25,11 +25,13 @@ func _text(node:Node)->String:
 func test_services_have_distinct_controls_and_no_secondary_map_camera()->void:
 	var navy:CanvasLayer=auto_free(Navy.new());add_child(navy)
 	var air:CanvasLayer=auto_free(Air.new());add_child(air)
-	assert_str(_text(navy)).contains("Join selected companion's fleet").not_contains("Ferry wing")
-	assert_str(_text(air)).contains("Ferry wing to selected carrier").not_contains("Join selected companion's fleet")
+	# Grouping, merging and splitting forces is for their commanders, not a form.
+	for text in ["Join selected companion's fleet","Ferry wing","Merge task forces","Split"]:
+		assert_str(_text(navy)).not_contains(text);assert_str(_text(air)).not_contains(text)
+	assert_str(_text(navy)).contains("Fleets and where they sail");assert_str(_text(air)).contains("Wings and where they fly")
 	assert_str(navy.domain).is_equal("navy");assert_str(air.domain).is_equal("air")
 	assert_int(navy.pages.get_tab_count()).is_equal(4)
-	assert_str(air.pages.get_tab_title(1)).is_equal("Airbases")
+	assert_str(air.pages.get_tab_title(1)).is_equal("Airfields")
 	assert_int(air.map.mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_bool("camera" in air.map).is_false()
 

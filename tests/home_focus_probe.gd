@@ -21,7 +21,7 @@ func _ready()->void:
 	for block:Dictionary in provider.tab(0).blocks:
 		if block.get("type")=="actions":
 			for action:Dictionary in block.items:
-				if action.label=="SHOW HOME ON MAP": action.on_press.call(); clicked=true
+				if action.label=="Show their home on the map": action.on_press.call(); clicked=true
 	assert(clicked)
 	terrain._refresh_contact_encounter_markers()
 	assert(terrain.camera.size<=18 and terrain.zoom_target_size<0)

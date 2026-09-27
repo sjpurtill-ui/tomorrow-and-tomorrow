@@ -152,7 +152,7 @@ func test_foreign_city_dock_offers_both_orders()->void:
 	var blocks:Array=provider.tab(0).blocks
 	var scouting:Dictionary={}
 	for block:Dictionary in blocks:
-		if String(block.get("heading",""))=="SCOUT THIS CITY":scouting=block
+		if String(block.get("heading",""))=="Keep an eye on it":scouting=block
 	assert_dict(scouting).is_not_empty()
 	var labels:Array=scouting.items.map(func(item:Dictionary)->String:return String(item.label))
 	assert_array(labels).is_equal(["Send scouts once","Keep watching"])
@@ -160,7 +160,7 @@ func test_foreign_city_dock_offers_both_orders()->void:
 	assert_bool(bool(CivilizationSystem.scouting_staff.city_watch("near").enabled)).is_true()
 	blocks=provider.tab(0).blocks
 	for block:Dictionary in blocks:
-		if String(block.get("heading",""))=="SCOUT THIS CITY":scouting=block
+		if String(block.get("heading",""))=="Keep an eye on it":scouting=block
 	assert_str(String(scouting.items[1].label)).is_equal("Stop watching")
 	(scouting.items[0].on_press as Callable).call()
 	assert_int(CivilizationSystem.scout_missions.size()).is_equal(1)
