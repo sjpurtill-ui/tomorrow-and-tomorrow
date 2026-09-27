@@ -503,3 +503,134 @@ func test_new_state_saves_and_bad_fields_are_rejected_old_saves_load()->void:
 			for key in ["crew_shortfall","commander","strike_carry","held_by_ruler"]:force.erase(key)
 		assert_str(op.validate(old)).override_failure_message(op.validate(old)).is_equal("")
 	)
+
+# --- A fast multi-year war check -------------------------------------------------
+## Two owned civilizations at war run their fleets and air wings day by day
+## through the ordinary joint-operations day, the shared contact step and their
+## rulers' monthly service orders (whole civilization days are not run: the
+## fast surrogate). Prints both sides' losses and checks they stay in bounds.
+const YEARS:=3
+
+func _coast(point:Vector2)->bool:return point.x<25.0
+
+func _setup_sides()->void:
+	for id in ["alpha","beta"]:
+		WorldSimulation.actors[id].systems.CivilizationSystem.scout_land_authority=func(point:Vector2)->bool:return _coast(point)
+		WorldSimulation.scoped(id,func()->void:
+			var military=WorldSimulation.military
+			military.joint_operations.geography.land_query=func(point:Vector2)->bool:return _coast(point)
+			military.military_consumables["fuel"]=10000000
+			# A declared war, so air and sea losses reach its record monthly.
+			var enemy:="beta" if id=="alpha" else "alpha"
+			AN.relation(enemy)["war_id"]=WorldSimulation.world._start_war("player",enemy,"limited","",0,"test")
+			# Repair yards stocked with everything the hulls and airframes are built of.
+			for type_id:String in military.joint_operations.C.UNITS:
+				for material:String in preload("res://scripts/goods_bills.gd").flatten(military.joint_operations.C.UNITS[type_id].materials):WorldSimulation.state.resource_stockpiles[material]=1000000.0
+			WorldSimulation.state.known_discoveries.append("submersible_hulls");WorldSimulation.state.discovery_adoption["submersible_hulls"]=1.0
+			military.home_army=military.simulator.create_formation_force(id.capitalize(),[{"id":1,"unit":"levy","weapon":"improvised","count":300,"equipment":300,"equipment_required":300},{"id":2,"unit":"anti_air","weapon":"anti_air_gun","count":60 if id=="beta" else 20,"equipment":60,"equipment_required":60}],.8,.8)
+		)
+	for spec in [["alpha","air","tactical_bomber",30],["alpha","air","fighter",20],["alpha","navy","destroyer",6],["alpha","navy","submarine",4],
+			["beta","air","fighter",24],["beta","air","tactical_bomber",12],["beta","navy","destroyer",6]]:
+		var id:=_force(String(spec[0]),String(spec[1]),String(spec[2]),int(spec[3]),"hold")
+		WorldSimulation.scoped(String(spec[0]),func()->void:
+			var op=WorldSimulation.military.joint_operations
+			var record:Dictionary=op.force(id)
+			record.region={};record.regions=[]
+			if record.domain=="navy":
+				var harbour:Dictionary=op.base(int(record.base_id))
+				harbour.position={"x":26.0,"z":0.0};record.position={"x":26.0,"z":0.0}
+		)
+
+func test_three_years_of_war_at_sea_and_in_the_air_stay_in_bounds()->void:
+	_setup_sides()
+	var plans:={"alpha":{"personality":{"empathy":.1,"openness":.3,"discipline":.6,"assertiveness":.9},"at_war":true,"offensive":true},
+		"beta":{"personality":{"empathy":.55,"openness":.5,"discipline":.6,"assertiveness":.4},"at_war":true,"offensive":false}}
+	var start:={}
+	for id in ["alpha","beta"]:start[id]=int(WorldSimulation.actors[id].systems.GameState.population_total)
+	var missions_seen:={"alpha":{},"beta":{}}
+	var blockade_peak:={"alpha":0.0,"beta":0.0}
+	var raiding_peak:={"alpha":0.0,"beta":0.0}
+	for day in range(1,YEARS*365+1):
+		for id in ["alpha","beta"]:
+			WorldSimulation.scoped(id,func()->void:
+				WorldSimulation.state.elapsed_days=day
+				if day%30==1:Controller.service_orders(id,plans[id])
+				var op=WorldSimulation.military.joint_operations
+				op.advance(day)
+				for force:Dictionary in op.state.forces:
+					if String(force.mission)!="hold":missions_seen[id][String(force.mission)]=true
+			)
+		Contact.advance(day)
+		for id in ["alpha","beta"]:
+			var op=WorldSimulation.actors[id].systems.MilitaryCampaign.joint_operations
+			blockade_peak[id]=maxf(float(blockade_peak[id]),float(op.blockade_closure("player")))
+			raiding_peak[id]=maxf(float(raiding_peak[id]),float(op.merchant_loss()))
+	var summary:=PackedStringArray()
+	var totals:={}
+	for id in ["alpha","beta"]:
+		var state=WorldSimulation.actors[id].systems.GameState
+		var military=WorldSimulation.actors[id].systems.MilitaryCampaign
+		var op=military.joint_operations
+		var civilians:=0;var crew:=0;var wounds:=0
+		for entry:Dictionary in state.demographic_ledger:
+			if String(entry.get("kind",""))!="death":continue
+			match String(entry.get("cause","")):
+				"Civilian deaths in war","Lost at sea":civilians+=int(entry.get("count",0))
+				"Lost at sea (crew)":crew+=int(entry.get("count",0))
+		var war:Dictionary=WorldSimulation.actors[id].systems.CivilizationSystem.war_history[0]
+		var ours:Dictionary=(war.get("casualties",{}) as Dictionary).get("player",{})
+		var theirs:Dictionary=(war.get("casualties",{}) as Dictionary).get("beta" if id=="alpha" else "alpha",{})
+		summary.append("%s war record: ours %s; theirs %s; %d monthly air and sea entries" % [id,str(ours),str(theirs),int(war.get("battle_count",0))])
+		var hardware:=0
+		for force:Dictionary in op.state.forces:hardware+=op.hardware(force)
+		var damaged:=0
+		for plot:Dictionary in state.settlement_plots:
+			if String(plot.get("status","")) in ["damaged","ruin"]:damaged+=1
+		var commanders:=PackedStringArray()
+		for person:Dictionary in WorldSimulation.actors[id].systems.HistoricalFigures.people:
+			if String(person.role) in ["Admiral","Air Commander"]:commanders.append("%s %s (%s)" % [person.role,person.name,person.status])
+		totals[id]={"civilians":int(ours.get("civilian_dead",0)),"crew_dead":int(ours.get("military_dead",0)),"dead":int(start[id])-int(state.population_total),"wounded_pool":op.wounded_count(),"captured":int(military.home_army.get("captured_pool",0))+int(op.state.get("captured_holding",0)),"prisoners_held":int(military.foreign_prisoners),"hardware":hardware,"damaged_plots":damaged}
+		summary.append("%s: people dead %d of %d; wounded crews recovering %d; crews held by the enemy %d; enemy prisoners held %d; hulls and airframes left %d; buildings damaged or ruined %d; peak blockade closure %.2f; peak raiding loss %.2f; sea trade now %.2f; missions flown %s; commanders %s; war exhaustion %.3f; opinion of the enemy %.2f" % [id,int(totals[id].dead),int(start[id]),int(totals[id].wounded_pool),int(totals[id].captured),int(totals[id].prisoners_held),hardware,damaged,float(blockade_peak[id]),float(raiding_peak[id]),float(op.sea_trade_factor()),", ".join(PackedStringArray((missions_seen[id] as Dictionary).keys())),"; ".join(commanders),float(_relation(id).get("player_war_exhaustion",0.0)),float(_relation(id).get("opinion",0.0))])
+		for force:Dictionary in op.state.forces:summary.append("  %s: %s, %s, %d left, condition %.2f" % [String(force.name),String(force.mission),String(force.status),op.hardware(force),float(force.condition)])
+		var events:=PackedStringArray()
+		for event:Dictionary in (op.state.events as Array).slice(0,12):events.append("  day %d: %s" % [int(event.day),String(event.text)])
+		summary.append("\n".join(events))
+	print("AIR-NAVAL WAR CHECK\n"+"\n".join(summary))
+	# Both sides lost crews and townspeople; civilian deaths from bombing and
+	# shelling stay inside the heaviest historical campaigns (about 3% of a city
+	# a year at the worst); every death is a real person gone from the people.
+	for id in ["alpha","beta"]:
+		assert_int(int(totals[id].dead)).is_greater(0)
+		assert_int(int(totals[id].civilians)).is_less_equal(roundi(float(start[id])*.03*YEARS))
+		assert_int(int(totals[id].crew_dead)+int(totals[id].civilians)).is_less_equal(int(totals[id].dead))
+	assert_int(int(totals.alpha.crew_dead)+int(totals.beta.crew_dead)).is_greater(0)
+	assert_int(int(totals.alpha.captured)+int(totals.beta.captured)).is_greater(0)
+	assert_int(int(totals.alpha.captured)).is_equal(int(totals.beta.prisoners_held))
+	# The hard ruler's commanders took the war to the enemy's towns and waters.
+	assert_bool((missions_seen.alpha as Dictionary).has("strategic_bombing")).is_true()
+	assert_bool((missions_seen.alpha as Dictionary).has("convoy_raiding") or (missions_seen.alpha as Dictionary).has("patrol")).is_true()
+	# The gentler ruler struck back at the towns only after its own burned.
+	var beta_decision:Dictionary=WorldSimulation.actors.beta.systems.MilitaryCampaign.sovereign_decisions.get("aerial_bombardment",{})
+	if not beta_decision.is_empty():assert_str(String(beta_decision.spoken)).contains("burned")
+	assert_float(float(raiding_peak.beta)).is_less_equal(AN.MERCHANT_LOSS_CAP)
+
+func _relation(id:String)->Dictionary:
+	return WorldSimulation.scoped(id,func()->Dictionary:return AN.relation("beta" if id=="alpha" else "alpha"))
+
+func test_air_transports_are_hunted_by_interceptors_and_ai_can_order_a_landing()->void:
+	var hunters:=_force("beta","air","fighter",20,"interception")
+	var lift:=_force("alpha","air","transport_aircraft",10,"transport")
+	WorldSimulation.scoped("alpha",func()->void:
+		var op=WorldSimulation.military.joint_operations
+		var record:Dictionary=op.force(lift)
+		record.region=op.region_at(Vector2.ZERO,"air")
+		op.state.convoys.append({"id":op._id(),"owner":"player","force_id":lift,"source_base":int(record.base_id),"destination_id":"x","destination_owner":"player","destination_position":{"x":500.0,"z":0.0},"position":{"x":0.0,"z":0.0},"route":[{"x":500.0,"z":0.0}],"food":100.0,"army_id":0,"status":"outbound","depart_day":0,"initial_hardware":10,"last_hardware":10,"invasion":false,"delivered":0.0})
+		for day in 30:
+			record.efficiency=1.0;record.position={"x":0.0,"z":0.0};op.state.convoys.back().position={"x":0.0,"z":0.0}
+			op.logistics.advance(day+1)
+		assert_int(op.hardware(record)).is_less(10)
+		# The rival's validated order reaches the same transport rules as the player's.
+		var refused:=preload("res://scripts/civilization_orders.gd").execute({"kind":"transport","force":lift,"destination":"nowhere","army":0})
+		assert_bool(refused.has("error")).is_true()
+	)
+	assert_int(hunters).is_greater(0)
