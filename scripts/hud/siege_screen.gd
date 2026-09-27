@@ -136,7 +136,7 @@ func _refresh()->void:
 	title.text=("Our siege of %s" if offensive else "%s under siege") % String(snapshot.name)
 	var active:=bool(snapshot.active);var in_battle:=bool(snapshot.battle_active);var days:=int(live.get("days",_operation().get("days",0)))
 	var paused:=not is_instance_valid(terrain) or float(terrain.game_speed)==0
-	status.text=("Storming the walls now" if in_battle else ("Besieged for %s%s" % [When.span(days)," · time is paused" if paused else ""] if active else "Ended"))
+	status.text=("Storming the walls now" if in_battle else (("Besieged since today" if days<=0 else "Besieged for %s" % When.span(days))+(" · time is paused" if paused else "") if active else "Ended"))
 	for key in time_buttons:
 		time_buttons[key].disabled=not active or not is_instance_valid(terrain)
 		time_buttons[key].add_theme_stylebox_override("normal",T.button_pressed_style() if is_instance_valid(terrain) and int(terrain.game_speed)==int(key) else T.action_button_style(false))
@@ -176,7 +176,7 @@ static func _outcome_words(outcome:String)->String:
 		"defender_victory":return "The defenders held."
 		"draw","stalemate":return "Neither side broke."
 		"":return ""
-	return outcome.replace("_"," ").capitalize()+"."
+	return P.first_up(outcome.replace("_"," "))+"."
 
 static func _pressure_words(pressure:float,offensive:bool)->String:
 	var share:="barely touched" if pressure<.15 else "somewhat worn" if pressure<.4 else "badly worn" if pressure<STORM_PRESSURE else "ready to be stormed"
@@ -199,7 +199,7 @@ func _briefing(general:Dictionary,pressure:float,managed:bool)->void:
 	P.label(theirs,String(live.get("civilian_hardship","")),"small",T.BODY)
 	var walls:=P.card(briefing_box,T.GOLD)
 	P.label(walls,"The walls","value",T.INK)
-	P.label(walls,_pressure_words(pressure,offensive).capitalize()+".","body",T.BODY)
+	P.label(walls,P.first_up(_pressure_words(pressure,offensive))+".","body",T.BODY)
 	var ring:=float(last_snapshot.get("blockade",0))
 	P.label(walls,("We hold %s of the roads in." if offensive else "They hold %s of the roads in.") % ("almost none" if ring<.15 else "a few" if ring<.4 else "most" if ring<.8 else "nearly all"),"small",T.BODY)
 	P.kicker(briefing_box,"What %s means to do" % (gname if gname!="" else "the general"))
@@ -227,7 +227,7 @@ func _enemy_report()->String:
 	if last_snapshot.mode=="offensive":
 		var city:Dictionary=CivilizationSystem.city_intelligence.known("player",String(last_snapshot.region_id));var report:Dictionary=city.get("fields",{}).get("garrison",{})
 		if report.is_empty():return "No one has counted their fighters."
-		return "%s, as counted in %s." % [preload("res://scripts/hud/city_report_visuals.gd").words("garrison",report).capitalize(),EraWords.when(int(report.observed_day))]
+		return "About %s, as counted in %s." % [preload("res://scripts/hud/city_report_visuals.gd").words("garrison",report),EraWords.when(int(report.observed_day))]
 	var threat:Dictionary=_operation().get("threat",{});var estimate:=int(threat.get("estimated_strength",0))
 	return "Roughly %s of them, by our lookouts' count." % EraWords.grouped(estimate) if estimate>0 else "We do not know how many they are."
 func _event(text:String)->void:

@@ -40,7 +40,7 @@ func _metric(parent:Node,key:String,hero:bool=false)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);card.add_child(row)
 	var icon:=TextureRect.new();icon.texture=V.icon(key);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(20,20);row.add_child(icon)
 	var name:=P.label(row,V.label(key),"small",T.INK_MUTED);name.size_flags_horizontal=SIZE_EXPAND_FILL
-	var value:=P.label(card,"Not seen","value" if not hero else "title",T.INK)
+	var value:=P.label(card,"Not seen","value" if not hero else "voice",T.INK)
 	var note:=P.label(card,String(V.MEANINGS.get(key,"")),"small",T.INK_MUTED)
 	cards[key]={"value":value,"note":note,"card":card.get_parent(),"name":name}
 	if hero:projection=P.label(card,"","small",T.BODY)

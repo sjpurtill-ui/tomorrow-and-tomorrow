@@ -36,7 +36,7 @@ const MODE_VERBS:={"gift":"Give it","sell":"Sell it","trade":"Swap it"}
 
 static func open()->void:
 	var root:=CivilizationSystem
-	var previous:Variant=root.get_meta("exchange_collection_panel",null)
+	var previous:Variant=root.get_meta("exchange_collection_panel") if root.has_meta("exchange_collection_panel") else null
 	if is_instance_valid(previous):previous.queue_free()
 	var layer:=CanvasLayer.new();layer.layer=96;root.add_child(layer)
 	root.set_meta("exchange_collection_panel",layer);layer.add_child(new())

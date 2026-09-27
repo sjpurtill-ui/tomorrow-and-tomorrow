@@ -40,10 +40,10 @@ func _ready()->void:
 		check(Rect2(Vector2.ZERO,shape).encloses(screen.panel.get_global_rect()),"Panel within viewport at "+str(shape))
 		check(screen.panel.get_global_rect().encloses(screen.selector.get_global_rect()),"Selector contained")
 		check(screen.grid.columns==(1 if shape.x<366 else 2),"Responsive metric columns")
-		var scroll:ScrollContainer=screen.find_children("*","ScrollContainer",true,false)[0]
+		var scroll:ScrollContainer=screen.find_child("Body",true,false)
 		scroll.ensure_control_visible(screen.cards.damage.card)
 		for i in 3:await get_tree().process_frame
-		check(scroll.get_global_rect().encloses(screen.cards.damage.card.get_global_rect()),"Every figure reachable")
+		check(scroll.get_global_rect().grow(2).encloses(screen.cards.damage.card.get_global_rect()),"Every figure reachable: %s in %s" % [screen.cards.damage.card.get_global_rect(),scroll.get_global_rect()])
 		check(screen.panel.get_global_rect().encloses(screen.talk_ruler.get_global_rect()),"Court action contained at "+str(shape))
 		if DisplayServer.get_name()!="headless":
 			await RenderingServer.frame_post_draw

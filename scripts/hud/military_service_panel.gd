@@ -67,6 +67,14 @@ func _ready()->void:
 	talk.tooltip_text="Our commanders decide how the ships and flyers fight in each area. Tell them in court what you want."
 	pages=TabContainer.new();pages.size_flags_vertical=Control.SIZE_EXPAND_FILL;root.add_child(pages)
 	T.text(pages,"small",T.INK)
+	pages.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CARD,10))
+	for state in ["tab_selected","tab_unselected","tab_hovered","tab_focus"]:
+		var tab:=T.flat(T.PAPER_RAISED if state=="tab_selected" else T.PAPER if state!="tab_hovered" else T.HOVER_BG,T.RULE,1,2)
+		tab.content_margin_left=12;tab.content_margin_right=12;tab.content_margin_top=6;tab.content_margin_bottom=6
+		if state=="tab_selected":tab.border_color=T.GOLD;tab.border_width_top=2
+		pages.add_theme_stylebox_override(state,tab)
+	for color in ["font_selected_color","font_hovered_color","font_focus_color"]:pages.add_theme_color_override(color,T.INK)
+	pages.add_theme_color_override("font_unselected_color",T.BODY)
 	_build_service()
 	_button(root,"All our forces",func():MilitaryCampaign.open_roster(domain,true))
 	feedback=_label(root,"",13)

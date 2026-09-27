@@ -99,7 +99,7 @@ func _refresh()->void:
 	for child in rows.get_children():rows.remove_child(child);child.queue_free()
 	var rules:Dictionary=MODEL.POLICIES.get(String(data.policy),{})
 	_row("How we rule it","%s. %s" % [String(rules.get("label","Our own way")),String(rules.get("description",""))],float(rules.get("rights",.5)),T.GOLD)
-	_row("Resistance","%s. Hunger, a weak garrison and harm done to them feed it; order and fair rule calm it over time." % _level(float(data.get("resistance",0)),["They accept us","A few grumble","Many resent us","They resist openly","They are close to rising"]).capitalize(),float(data.get("resistance",0)),T.RED)
+	_row("Resistance","%s. Hunger, a weak garrison and harm done to them feed it; order and fair rule calm it over time." % _level(float(data.get("resistance",0)),["They accept us","A few grumble","Many resent us","They resist openly","They are close to rising"]),float(data.get("resistance",0)),T.RED)
 	_row("How its people fare","%s. They %s us." % [_level(float(data.get("welfare",0)),["They suffer badly","They go without","They get by","They live well"]),_level(float(data.get("trust",0)),["do not trust","barely trust","somewhat trust","trust"])],float(data.get("welfare",0)),T.TEAL)
 	_row("Old wrongs","%s. Old wrongs fade slowly, over lifetimes." % _level(float(data.get("grievance",0)),["Few grudges are held","Some grudges are held","Deep grudges are held","Bitter hatred runs deep"]),float(data.get("grievance",0)),T.AMBER)
 	_row("Damage","%s. %s" % [_level(float(data.get("damage",0)),["The city stands whole","Some of it is damaged","Much of it lies broken","Most of it is in ruins"]),"Repairs are under way." if bool(data.get("reconstruction",false)) else "No one is rebuilding it."],float(data.get("damage",0)),T.BLUE)

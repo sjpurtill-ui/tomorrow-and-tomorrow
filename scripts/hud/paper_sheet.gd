@@ -52,7 +52,9 @@ static func button(parent:Node,text:String,callback:Callable,primary:bool=false)
 	result.text=text
 	result.custom_minimum_size.y=38
 	result.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	# Wrapped text has no minimum width, so in a flowing row it would squeeze
+	# to a sliver; there the button keeps its words on one line.
+	result.autowrap_mode=TextServer.AUTOWRAP_OFF if parent is FlowContainer else TextServer.AUTOWRAP_WORD_SMART
 	T.text(result,"small",T.INK)
 	result.add_theme_color_override("font_hover_color",T.INK)
 	result.add_theme_color_override("font_pressed_color",T.INK)
@@ -117,6 +119,7 @@ static func modal(owner:Control,title:String,kicker_text:String,max_size:Vector2
 ## A scrolling body that fills the rest of a sheet.
 static func scroll_body(parent:Node,separation:int=12)->VBoxContainer:
 	var scroll:=ScrollContainer.new()
+	scroll.name="Body"
 	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	parent.add_child(scroll)
@@ -145,6 +148,10 @@ static func general_for(army:Dictionary)->Dictionary:
 	if String(commander.get("figure_id",""))!="":
 		return {"name":String(commander.get("name","the general")),"target":{"figure_id":String(commander.figure_id)}}
 	return war_leader()
+
+## "their defences are worn" -> "Their defences are worn": only the first letter.
+static func first_up(text:String)->String:
+	return text.left(1).to_upper()+text.substr(1) if text!="" else text
 
 static func first_name(name:String)->String:
 	return name.get_slice(" ",0) if name.strip_edges()!="" else name

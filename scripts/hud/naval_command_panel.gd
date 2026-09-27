@@ -17,7 +17,7 @@ func _build_service()->void:
 
 func _force_summary(force:Dictionary)->String:
 	var base:Dictionary=op.base(int(force.base_id))
-	var summary:="%s: %d ships, %d crew, home port %s.\nTraining %d%%, hulls %d%% sound. %s" % [force.name,op.hardware(force),op.crew(force),base.get("name","none"),roundi(float(force.training)*100),roundi(float(force.condition)*100),String(force.status).capitalize()]
+	var summary:="%s: %d ships, %d crew, home port %s.\nTraining %d%%, hulls %d%% sound. %s" % [force.name,op.hardware(force),op.crew(force),base.get("name","none"),roundi(float(force.training)*100),roundi(float(force.condition)*100),P.first_up(String(force.status))]
 	if op.fuel_cost(force)>0:summary+="\nThey burn %d fuel a day; %d is in our stores." % [op.fuel_cost(force),int(MilitaryCampaign.military_consumables.get("fuel",0))]
 
 	var survey:Dictionary=force.get("hull_survey",{})

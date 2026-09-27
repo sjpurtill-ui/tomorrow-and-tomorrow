@@ -120,7 +120,7 @@ func _city_actions(entries:Array)->void:
 		var gov:Dictionary=entry.region.governance
 		if bool(entry.get("liberated",false)):
 			P.label(card,"It is ours again.","body",T.BODY);continue
-		P.label(card,"%s of its people want us back. The occupiers are %s, and their hand is %s. Last word from there came in %s." % [_share_words(float(gov.support)).capitalize(),"deeply suspicious" if float(gov.suspicion)>.6 else "watchful" if float(gov.suspicion)>.3 else "at ease","heavy" if float(gov.repression)>.6 else "firm" if float(gov.repression)>.3 else "light",EraWords.when(int(entry.last_report_day))],"body",T.BODY)
+		P.label(card,"%s of its people want us back. The occupiers are %s, and their hand is %s. Last word from there came in %s." % [P.first_up(_share_words(float(gov.support))),"deeply suspicious" if float(gov.suspicion)>.6 else "watchful" if float(gov.suspicion)>.3 else "at ease","heavy" if float(gov.repression)>.6 else "firm" if float(gov.repression)>.3 else "light",EraWords.when(int(entry.last_report_day))],"body",T.BODY)
 		if not (entry.order as Dictionary).is_empty():
 			P.label(card,"Our people there are at work on what we asked; it cannot be done before %s." % EraWords.when(int(entry.order.resolve_day)),"small",T.BODY);continue
 		var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",6);grid.add_theme_constant_override("v_separation",6);card.add_child(grid)

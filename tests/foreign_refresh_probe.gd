@@ -37,7 +37,7 @@ func _ready()->void:
 		for frame in 5:await get_tree().process_frame
 		var screen=intel.screen_layer.get_child(0)
 		check(screen.find_children("*","TabContainer",true,false).is_empty(),"one report page, no tabs")
-		var scroll:ScrollContainer=screen.find_children("*","ScrollContainer",true,false)[0]
+		var scroll:ScrollContainer=screen.find_child("Body",true,false)
 		check(scroll.get_child(0).size.x<=scroll.size.x,"report has no horizontal overflow")
 		scroll.ensure_control_visible(screen.cards.damage.note)
 		for frame in 3:await get_tree().process_frame
