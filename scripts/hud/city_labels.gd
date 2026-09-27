@@ -391,24 +391,73 @@ static func arrange_works(entries:Array[Dictionary],bounds:Rect2,city_cards:Arra
 			anchor+Vector2(-extent.x*.5,clear),anchor+Vector2(-extent.x*.5,-extent.y-clear),
 			anchor+Vector2(clear*.7,clear*.7),anchor+Vector2(-extent.x-clear*.7,clear*.7),
 			anchor+Vector2(clear*.7,-extent.y-clear*.7),anchor+Vector2(-extent.x-clear*.7,-extent.y-clear*.7)])
-		for pos:Vector2 in candidates:
-			var rect:=Rect2(pos,extent)
-			if not bounds.encloses(rect):continue
-			var grown:=rect.grow(GAP*.5)
-			var free:=true
-			# Every emblem, its own included, is in `blocked`.
-			for obstacle:Rect2 in blocked:
-				if grown.intersects(obstacle):free=false;break
-			if free:
-				for pin:Dictionary in pins:
-					if rect.grow(maxf(8.0,float(pin.clear)-2.0)).has_point(pin.at):free=false;break
-			if not free:continue
-			work.rect=rect
-			blocked.append(grown)
-			memory[work.id]=rect.position-anchor
-			if bool(work.get("compact",false)):chart_cards[city]=int(chart_cards.get(city,0))+1
-			break
+		# Every emblem, its own included, is in `blocked`.
+		var rect:=free_spot(candidates,extent,bounds,blocked,pins)
+		if not rect.has_area():continue
+		work.rect=rect
+		blocked.append(rect.grow(GAP*.5))
+		memory[work.id]=rect.position-anchor
+		if bool(work.get("compact",false)):chart_cards[city]=int(chart_cards.get(city,0))+1
 	return {"works":placed,"memory":memory}
+
+## The one placement test for everything lettered on the chart beside a mark
+## (great-work cards, war captions): the first candidate position where a box
+## of `extent` lies inside `bounds`, clear of every blocked rect (grown by half
+## a gap) and of every pin {at, clear}. An empty rect when none is free.
+static func free_spot(candidates:Array[Vector2],extent:Vector2,bounds:Rect2,blocked:Array[Rect2],pins:Array)->Rect2:
+	for pos:Vector2 in candidates:
+		var rect:=Rect2(pos,extent)
+		if not bounds.encloses(rect):continue
+		var grown:=rect.grow(GAP*.5)
+		var free:=true
+		for obstacle:Rect2 in blocked:
+			if grown.intersects(obstacle):free=false;break
+		if free:
+			for pin:Dictionary in pins:
+				if rect.grow(maxf(8.0,float(pin.clear)-2.0)).has_point(pin.at):free=false;break
+		if free:return rect
+	return Rect2()
+
+## Short notes beside marks (a war caption, a tactic's name), placed around
+## what the chart already letters. Highest priority first; each tries its
+## remembered offset, then the eight spots round its anchor, then a wider
+## ring. A note that finds no clear spot is dropped, never overlapped.
+## notes: [{id, anchor, extent, priority, clear}]. Returns {notes, memory, dropped}.
+static func place_notes(notes:Array,bounds:Rect2,blocked:Array[Rect2],pins:Array,old:Dictionary={})->Dictionary:
+	var ordered:=notes.duplicate()
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if int(a.get("priority",0))!=int(b.get("priority",0)):return int(a.get("priority",0))>int(b.get("priority",0))
+		return String(a.id)<String(b.id))
+	var taken:Array[Rect2]=blocked.duplicate()
+	var placed:Array[Dictionary]=[];var memory:Dictionary={};var dropped:Array[String]=[]
+	for note:Dictionary in ordered:
+		var anchor:Vector2=note.anchor;var extent:Vector2=note.extent;var clear:=float(note.get("clear",10.0))
+		var candidates:Array[Vector2]=[]
+		if old.has(note.id):candidates.append(anchor+Vector2(old[note.id]))
+		for ring:float in [1.0,2.2]:
+			var c:=clear*ring
+			candidates.append_array([anchor+Vector2(c,-extent.y*.5),anchor+Vector2(-extent.x-c,-extent.y*.5),
+				anchor+Vector2(-extent.x*.5,c),anchor+Vector2(-extent.x*.5,-extent.y-c),
+				anchor+Vector2(c*.7,c*.7),anchor+Vector2(-extent.x-c*.7,c*.7),
+				anchor+Vector2(c*.7,-extent.y-c*.7),anchor+Vector2(-extent.x-c*.7,-extent.y-c*.7)])
+		var rect:=free_spot(candidates,extent,bounds,taken,pins)
+		if not rect.has_area():dropped.append(String(note.id));continue
+		var done:=note.duplicate();done.rect=rect;placed.append(done)
+		taken.append(rect.grow(GAP*.5))
+		memory[note.id]=rect.position-anchor
+	return {"notes":placed,"memory":memory,"dropped":dropped}
+
+## What the chart already letters, for other layers to keep clear of: every
+## city card and pin, and every great-work emblem and card.
+func chart_obstacles()->Dictionary:
+	var rects:Array[Rect2]=[];var pins:Array=[]
+	for card:Dictionary in cards:
+		rects.append(card.rect);pins.append({"at":card.anchor,"clear":float(card.get("clearance",GLYPH_CLEARANCE))})
+	for entry:Dictionary in overflow:pins.append({"at":entry.anchor,"clear":float(entry.get("clearance",GLYPH_CLEARANCE))})
+	for work:Dictionary in works:
+		rects.append(work.mark)
+		if (work.rect as Rect2).has_area():rects.append(work.rect)
+	return {"rects":rects,"pins":pins,"bounds":last_bounds}
 
 func _draw_works()->void:
 	var voice:=T.voice_font();var ui:=T.font("ui")

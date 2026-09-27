@@ -1,43 +1,69 @@
 extends Control
 ## WAR AS AN INKED CHART: living front lines, the generals' arrows and
-## objectives, clashes and the shape of the tactic being fought, siege works,
-## raid tracks, and the fleets' and air arms' drawn zones.
+## objectives, clashes and the shape of the tactic being fought, pockets,
+## fallback lines from the generals' own withdrawal plans, siege works, raid
+## tracks, corps and army-group marks at continental scale, and the fleets'
+## and air arms' drawn zones (with blockade cordons, convoy lanes and
+## air-defence belts).
 ##
-## Everything here is observation: clicks pass through to the map (a click
-## on an army or battle already opens its general and the war planning
-## card). Nothing is ordered from this layer.
+## Observation and conversation only. A click on a front, an arrow, a clash,
+## a zone, a lane or a formation mark opens a small note about it with one
+## way to talk to the general or branch commander who runs it. Nothing is
+## ordered from this layer; tactics are the commanders' own.
 ##
 ## Pipeline: collect() reads the ledgers (bounded, dated, honest) into plain
 ## inputs; compose() (pure, static) turns them into world-space primitives
-## via war_front_model.gd and battle_tactics.gd; _draw() projects and inks
-## them. Inputs are re-read at most every COLLECT_EVERY seconds and only
-## rebuilt when they changed; drawing happens only when the camera, the
-## scene or a transition moves. A change of front morphs over MORPH_SECONDS.
+## via war_front_model.gd and battle_tactics.gd; the motion state eases the
+## drawn fronts toward each new composition; _draw() projects, drapes and
+## inks them, and letters the captions around what the chart already shows
+## (city_labels.gd placement). Inputs are re-read at most every
+## COLLECT_EVERY seconds and only rebuilt when they changed; drawing happens
+## only when the camera, the scene or the easing moves.
 
 const Model:=preload("res://scripts/war_front_model.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Marks:=preload("res://scripts/war_map_marks.gd")
 const Presentation:=preload("res://scripts/warfare_map_presentation.gd")
+const T:=preload("res://scripts/hud/hud_tokens.gd")
+const CityLabels:=preload("res://scripts/hud/city_labels.gd")
+const Blockade:=preload("res://scripts/naval_blockade.gd")
 
 const COLLECT_EVERY:=0.5
+## Clash shapes and arrows blend over this long after a change.
 const MORPH_SECONDS:=0.9
-const LABEL_SIZE:=13
+## The fronts chase their newest derivation with this time constant: control
+## shifting over days reads as a line that eases, never one that jumps.
+const EASE_SECONDS:=0.8
+## Every drawn front is carried on this many points, so any two can morph.
+const FRONT_POINTS:=48
+const CAPTION_SIZE:=14
+const MAX_ECHELONS:=12
+const MAX_LANES:=8
+## Army-tree levels (command_hierarchy.gd LEVELS.army): 7 corps, 8 army.
+const CORPS_LEVEL:=7
 
 ## One ink family; owner colour only as a thin accent.
 const INK:=Color("#2b2118")
 const PAPER:=Color("#efe3c2")
 const OURS:=Color("#2f5d6b")
-const OURS_WASH:=Color("#67b4cf")
+const OURS_WASH:=Color("#4f9bb8")
 const THEIRS:=Color("#8e3b2e")
-const SEA:=Color("#2f4a52")
-const SKY:=Color("#5b6b3a")
+const THEIRS_WASH:=Color("#b5503c")
+## Fleet ink reads on dark water; the air arm's is a cool slate that the
+## olive and ochre ground never matches.
+const SEA:=Color("#16475a")
+const SEA_LIGHT:=Color("#cfe3e0")
+const SKY:=Color("#3b4a78")
 
 var terrain:Node
 ## Injected by tests and the capture scene: func(Vector2 world)->Vector2 screen.
 var project:Callable
 ## Injected zoom band (tests/captures); otherwise from the camera.
 var band_override:=""
+## TEST HOOK (captures and tests only): extra inputs merged into collect():
+## arrays are appended, other values replace.
+var extra_inputs:Dictionary={}
 var scene:Dictionary={}
 var previous:Dictionary={}
 var blend:=1.0
@@ -45,10 +71,31 @@ var inputs_signature:=0
 var drawn_signature:=0
 var collect_elapsed:=COLLECT_EVERY
 var height_cache:Dictionary={}
+## Motion: the fronts as drawn, easing toward the scene's fronts.
+## [{points, target, alpha, target_alpha, data, centre}]
+var live_fronts:Array=[]
+## Pocket closure as drawn, keyed by the front it belongs to.
+var live_closure:Dictionary={}
+var settling:=false
+## Screen hit shapes of the last drawing, for clicks.
+var hits:Array=[]
+## Captions requested by the last drawing, and their placement memory.
+var caption_requests:Array=[]
+var caption_memory:Dictionary={}
+var caption_extent:Dictionary={}
+var placed_captions:Array=[]
+var dropped_captions:=0
+## Per-army withdrawal routes, cached by where the army stands.
+var withdrawal_cache:Dictionary={}
+## The open note, and what it is about.
+var note_layer:CanvasLayer
+var note:PanelContainer
+var note_about:Dictionary={}
 ## Probe counters (never saved).
 var composes:=0
 var redraws:=0
 var last_compose_usec:=0
+var last_draw_usec:=0
 
 
 func _ready()->void:
@@ -66,9 +113,13 @@ func _process(delta:float)->void:
 			inputs_signature=signature
 			set_scene(compose(inputs))
 	if blend<1.0: blend=minf(1.0,blend+delta/MORPH_SECONDS)
-	var view:Array=[inputs_signature,size,blend]
+	settling=ease_fronts(delta)
+	var view:Array=[inputs_signature,size,blend,settling]
+	if settling: view.append(Time.get_ticks_msec())
 	var camera:=_camera()
 	if camera!=null: view.append_array([camera.global_transform,camera.size])
+	var cities:=_city_labels()
+	if cities!=null: view.append(cities.get("layout_signature"))
 	var signature:=hash(view)
 	if signature==drawn_signature: return
 	drawn_signature=signature
@@ -81,15 +132,107 @@ func set_scene(next:Dictionary,immediate:bool=false)->void:
 	previous=scene if not immediate else {}
 	scene=next
 	blend=1.0 if immediate or previous.is_empty() else 0.0
+	retarget_fronts(scene.get("fronts",[]),immediate)
 	composes+=1
 	last_compose_usec=Time.get_ticks_usec()-start
 	queue_redraw()
+
+
+# --- Motion -------------------------------------------------------------------
+
+static func _centre(points:PackedVector2Array)->Vector2:
+	var total:=Vector2.ZERO
+	for p in points: total+=p
+	return total/float(maxi(1,points.size()))
+
+
+## New fronts are matched to the drawn ones by where they lie; a matched
+## front eases from its drawn line to the new one, a new front unrolls from
+## its middle, and a front that is gone fades where it was.
+func retarget_fronts(fronts:Array,immediate:bool=false)->void:
+	var sigma:=maxf(0.001,float(scene.get("sigma",1.0)))
+	var claimed:Dictionary={}
+	var next_live:Array=[]
+	for front in fronts:
+		var target:=Model.resample(front.points,FRONT_POINTS)
+		var centre:=_centre(target)
+		var best:=-1
+		var best_distance:=sigma*2.5
+		for index in live_fronts.size():
+			if claimed.has(index) or float(live_fronts[index].target_alpha)<=0.0: continue
+			var d:=(live_fronts[index].centre as Vector2).distance_to(centre)
+			if d<best_distance: best_distance=d; best=index
+		var entry:Dictionary
+		if best>=0:
+			claimed[best]=true
+			entry=live_fronts[best]
+			var drawn:PackedVector2Array=entry.points
+			# Keep the two lines running the same way round.
+			if drawn[0].distance_squared_to(target[0])+drawn[-1].distance_squared_to(target[-1])>drawn[0].distance_squared_to(target[-1])+drawn[-1].distance_squared_to(target[0]):
+				drawn.reverse(); entry.points=drawn
+		else:
+			var middle:=target[FRONT_POINTS/2]
+			var start:=PackedVector2Array()
+			for k in FRONT_POINTS: start.append(middle)
+			entry={"points":start,"alpha":0.0}
+		entry.target=target
+		entry.target_alpha=1.0
+		entry.centre=centre
+		entry.data=front
+		if immediate: entry.points=target.duplicate(); entry.alpha=1.0
+		next_live.append(entry)
+	for index in live_fronts.size():
+		if claimed.has(index): continue
+		var gone:Dictionary=live_fronts[index]
+		gone.target_alpha=0.0
+		if immediate: continue
+		next_live.append(gone)
+	live_fronts=next_live
+	settling=true
+
+
+## One easing step. Returns true while anything is still moving.
+func ease_fronts(delta:float)->bool:
+	if live_fronts.is_empty() and live_closure.is_empty(): return false
+	var k:=1.0-exp(-maxf(0.0,delta)/EASE_SECONDS)
+	var sigma:=maxf(0.001,float(scene.get("sigma",1.0)))
+	var moving:=false
+	var kept:Array=[]
+	for entry in live_fronts:
+		var points:PackedVector2Array=entry.points
+		var target:PackedVector2Array=entry.target
+		var worst:=0.0
+		for i in points.size():
+			var step:=(target[i]-points[i])*k
+			worst=maxf(worst,step.length())
+			points[i]+=step
+		entry.points=points
+		entry.alpha=lerpf(float(entry.alpha),float(entry.target_alpha),k)
+		if worst<sigma*0.0004 and absf(float(entry.alpha)-float(entry.target_alpha))<0.01:
+			entry.points=target.duplicate(); entry.alpha=float(entry.target_alpha)
+		else: moving=true
+		if float(entry.target_alpha)>0.0 or float(entry.alpha)>0.01: kept.append(entry)
+	live_fronts=kept
+	for pocket in scene.get("pockets",[]):
+		var key:=int(pocket.front)
+		var goal:=float(pocket.closure)
+		var now:=float(live_closure.get(key,0.0))
+		now=lerpf(now,goal,k)
+		if absf(now-goal)<0.002: now=goal
+		else: moving=true
+		live_closure[key]=now
+	return moving
 
 
 # --- Reading the world (bounded, dated) -----------------------------------------
 
 func _camera()->Camera3D:
 	return terrain.camera if is_instance_valid(terrain) and terrain.get("camera") is Camera3D else null
+
+
+func _city_labels()->Control:
+	var cities:Variant=terrain.get("city_labels") if is_instance_valid(terrain) else null
+	return cities as Control if cities is Control and is_instance_valid(cities) else null
 
 
 static func _v2(position:Variant)->Vector2:
@@ -109,6 +252,7 @@ func collect()->Dictionary:
 	var live:=bool(snapshot.get("live_reports",true))
 	var largest:=0
 	var theatre:=0
+	var campaign_army:=int(GeneralCampaign.state.get("army_id",-1)) if GeneralCampaign.active else -1
 	for army_variant in snapshot.get("armies",[]):
 		var army:Dictionary=army_variant
 		var troops:=int(army.get("troops",0))
@@ -128,8 +272,14 @@ func collect()->Dictionary:
 			offensive=String(army.get("destination_id",""))!="player_home"
 		elif not (army.get("command_route",[]) as Array).is_empty():
 			objective=_v2((army.command_route as Array)[-1]); offensive=true
-		largest=maxi(largest,int(shown.get("troops",troops))); theatre+=int(shown.get("troops",troops))
-		friendly.append({"id":str(int(army.get("army_id",0))),"pos":pos,"strength":float(shown.get("troops",troops)),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),"report_age":0 if live or at_home else maxi(0,today-int(shown.get("day",today)))})
+		var id:=int(army.get("army_id",0))
+		var strength:=int(shown.get("troops",troops))
+		largest=maxi(largest,strength); theatre+=strength
+		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
+			"report_age":0 if live or at_home else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+		if not at_home: entry.merge(_withdrawal(army,pos,home,id==campaign_army))
+		if bool(entry.get("withdrawing",false)): entry.offensive=false
+		friendly.append(entry)
 	var enemy:Array=[]
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 	for list_name in ["visible","recent"]:
@@ -140,20 +290,91 @@ func collect()->Dictionary:
 			var seen:=int(sighting.get("last_seen_day",sighting.get("observed_day",today)))
 			var pos:=_v2(sighting.get("position",{}))
 			if not pos.is_finite(): continue
-			enemy.append({"id":String(sighting.get("id","")),"pos":pos,"strength":float(low+high)*0.5,"age_days":maxi(0,today-seen),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"seen_day":seen})
+			enemy.append({"id":String(sighting.get("id","")),"pos":pos,"strength":float(low+high)*0.5,"low":low,"high":high,"age_days":maxi(0,today-seen),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"seen_day":seen})
+	enemy.append_array(_campaign_sightings(today))
 	var engagements:Array=[]
-	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
-	if not engagement.is_empty():
-		engagements.append(_engagement_input(engagement,friendly,enemy,home))
+	var command:Variant=MilitaryCampaign.get("command_hierarchy")
+	for battle in battles_to_draw(MilitaryCampaign.engagement_snapshot(),command.data.get("battles",[]) if command!=null else []):
+		engagements.append(_engagement_input(battle,friendly,enemy,home))
 	var sieges:Array=[]
 	var siege:Dictionary=MilitaryCampaign.active_siege
 	if not siege.is_empty():
 		var offensive:=String(siege.get("mode",""))=="offensive"
 		var works:="circumvallation" if (known.has("field_fortifications") or known.has("siege_engineering")) and offensive else ("circumvallation" if not offensive and float((siege.get("threat",{}) as Dictionary).get("technology",0.0))>=0.45 else "blockade_camp")
-		sieges.append({"pos":_v2(siege.get("target_position",{})) if offensive else home,"pressure":float(siege.get("pressure",0.0)),"works":works,"ours":offensive,"days":int(siege.get("days",0))})
+		sieges.append({"pos":_v2(siege.get("target_position",{})) if offensive else home,"pressure":float(siege.get("pressure",0.0)),"works":works,"ours":offensive,"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	var raids:=_raid_inputs(today,home)
-	return {"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
-		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today)}
+	var inputs:={"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
+		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today)}
+	for key in extra_inputs:
+		var value:Variant=extra_inputs[key]
+		inputs[key]=(inputs.get(key,[]) as Array)+(value as Array) if value is Array and inputs.get(key) is Array else value
+	return inputs
+
+
+## The battles on the map: the one being watched, and the command
+## hierarchy's own battles fought at the same time (bounded, each once).
+static func battles_to_draw(active:Dictionary,commanded:Array)->Array:
+	var out:Array=[]
+	var seen:Dictionary={}
+	for battle in [active]+commanded:
+		if not battle is Dictionary or (battle as Dictionary).is_empty(): continue
+		var key:=str(battle.get("seed",""))+":"+str(battle.get("home_force_id",""))
+		if seen.has(key): continue
+		seen[key]=true
+		out.append(battle)
+		if out.size()>=Model.MAX_CLASHES: break
+	return out
+
+
+## The general's withdrawal intent: where he would fall back to, one day's
+## march along the road he would take. Campaign generals use the board's road
+## home; commanded armies their commanded route when already withdrawing, or
+## the land route home; any other army the road home, as the engine retreats.
+func _withdrawal(army:Dictionary,pos:Vector2,home:Vector2,campaign:bool)->Dictionary:
+	var status:=String(army.get("command_status",""))
+	var withdrawing:="withdraw" in status.to_lower()
+	var route:=PackedVector2Array()
+	var how:="home"
+	if campaign and GeneralCampaign.active:
+		var cell:Vector2i=GeneralCampaign.state.get("cell",Vector2i.ZERO)
+		for c in GeneralCampaign.route(cell,Vector2i.ZERO): route.append(GeneralCampaign.world_position(c))
+		how="road"
+		withdrawing=withdrawing or String((GeneralCampaign.state.get("mission",{}) as Dictionary).get("action","")) in ["withdraw","recover"]
+	elif withdrawing and not (army.get("command_route",[]) as Array).is_empty():
+		for waypoint in army.command_route: route.append(_v2(waypoint))
+		how="road"
+	else:
+		var command:Variant=MilitaryCampaign.get("command_hierarchy")
+		if command!=null and command.controls_army(int(army.get("army_id",0))):
+			var key:="%d:%s" % [int(army.get("army_id",0)),str(pos.snapped(Vector2.ONE*0.5))]
+			if not withdrawal_cache.has(key):
+				if withdrawal_cache.size()>64: withdrawal_cache.clear()
+				var path:=PackedVector2Array()
+				for waypoint in command.land.route(pos,home): path.append(_v2(waypoint))
+				withdrawal_cache[key]=path
+			route=withdrawal_cache[key]
+			if not route.is_empty(): how="road"
+	if route.is_empty(): route=PackedVector2Array([home])
+	var day_march:=clampf(float(MilitaryCampaign._field_army_speed(army)) if MilitaryCampaign.has_method("_field_army_speed") else 12.0,1.0,60.0)
+	var depth:=minf(day_march,pos.distance_to(home)*0.5)
+	var troops:=int(army.get("troops",0))
+	return {"fallback":Model.withdrawal_point(pos,route,depth),"withdrawing":withdrawing,"fallback_how":how,"route_home":route.slice(0,24),
+		"frontage":clampf(sqrt(maxf(0,troops))*0.085,0.12,10.0),"day_march":day_march}
+
+
+## The Alderford war's rival hosts, as the general last saw them (dated).
+func _campaign_sightings(today:int)->Array:
+	var out:Array=[]
+	if not GeneralCampaign.active: return out
+	var seen:Dictionary=GeneralCampaign.state.get("seen",{})
+	for id in seen:
+		var s:Dictionary=seen[id]
+		if not s.get("cell") is Vector2i: continue
+		var troops:=int(s.get("troops",0))
+		if troops<=0: continue
+		out.append({"id":"campaign:"+String(id),"pos":GeneralCampaign.world_position(s.cell),"strength":float(troops),"low":troops,"high":troops,"age_days":maxi(0,today-int(s.get("day",today))),"moving":false,"heading":0.0,"seen_day":int(s.get("day",today)),"name":String(s.get("name",""))})
+	return out
 
 
 func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vector2)->Dictionary:
@@ -183,7 +404,8 @@ func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vec
 	var enemy_side:="defender" if home_side=="attacker" else "attacker"
 	var plan:Dictionary=engagement.get("tactics",{})
 	return {"pos":pos,"axis":axis,"ours":String((plan.get(home_side,{}) as Dictionary).get("id",Tactics.BASELINE)),"theirs":String((plan.get(enemy_side,{}) as Dictionary).get("id",Tactics.BASELINE)),
-		"rounds":int(engagement.get("round",0)),"phase_ours":String(last.get(home_side+"_tactic_phase","hold")),"phase_theirs":String(last.get(enemy_side+"_tactic_phase","hold")),"event":String(last.get("tactic_event",""))}
+		"rounds":int(engagement.get("round",0)),"phase_ours":String(last.get(home_side+"_tactic_phase","hold")),"phase_theirs":String(last.get(enemy_side+"_tactic_phase","hold")),"event":String(last.get("tactic_event","")),
+		"army_id":int(force_id),"commanded":bool(engagement.get("commander_managed",false)),"objective":String(engagement.get("command_objective",""))}
 
 
 func _raid_inputs(today:int,home:Vector2)->Array:
@@ -221,6 +443,7 @@ func _zone_inputs(today:int)->Array:
 	var out:Array=[]
 	var op:Variant=MilitaryCampaign.get("joint_operations")
 	if op==null: return out
+	var ledger:Dictionary=op.state.get("blockades",{})
 	for force:Dictionary in op.state.forces:
 		if String(force.get("owner",""))!="player" or String(force.get("mission","hold"))=="hold": continue
 		var region:Dictionary=force.get("region",{})
@@ -235,14 +458,87 @@ func _zone_inputs(today:int)->Array:
 			var at:=_v2(contact.get("position",{}))
 			if Geometry2D.is_point_in_polygon(at,vertices): contacts.append({"pos":at,"age":today-int(contact.get("day",today))})
 		var port:=Vector2.INF
+		var blockade:Dictionary={}
 		if String(force.get("tactic","")) in ["close_blockade","distant_blockade"]:
 			for city:Dictionary in CivilizationSystem.city_intelligence.known_cities():
 				var at:=_v2(city.get("position",{}))
-				if Geometry2D.is_point_in_polygon(at,vertices): port=at; break
+				if not Geometry2D.is_point_in_polygon(at,vertices): continue
+				var entry:Dictionary=ledger.get(String(city.get("city_id",city.get("id",""))),{})
+				if port.is_finite() and entry.is_empty(): continue
+				port=at; blockade=entry.duplicate()
+				if not blockade.is_empty(): blockade["text"]=Blockade.describe(entry,today)
+				if not entry.is_empty(): break
 		out.append({"domain":String(force.domain),"vertices":vertices,"control":float(op.effects.control("player",region)),"mission":String(force.mission),"tactic":String(force.get("tactic","")),
-			"base":_v2(base.get("position",{})) if not base.is_empty() else Vector2.INF,"port":port,"contacts":contacts.slice(0,6),"name":String(force.get("name",""))})
+			"base":_v2(base.get("position",{})) if not base.is_empty() else Vector2.INF,"port":port,"blockade":blockade,"contacts":contacts.slice(0,6),"name":String(force.get("name","")),"force_id":int(force.get("id",0)),"status":String(force.get("status",""))})
 		if out.size()>=16: break
 	return out
+
+
+## Convoys at sea or in the air: the lane still to run, whether escorts work
+## the water it crosses, and whether raiders do.
+func _lane_inputs(_today:int)->Array:
+	var out:Array=[]
+	var op:Variant=MilitaryCampaign.get("joint_operations")
+	if op==null: return out
+	for convoy:Dictionary in op.state.get("convoys",[]):
+		if String(convoy.get("owner",""))!="player" or not String(convoy.get("status","")) in ["preparing","outbound","returning"]: continue
+		var points:=PackedVector2Array([_v2(convoy.get("position",{}))])
+		for waypoint in convoy.get("route",[]): points.append(_v2(waypoint))
+		if points.size()<2: continue
+		var force:Dictionary=op.force(int(convoy.get("force_id",0)))
+		var domain:=String(force.get("domain","navy"))
+		var region:Dictionary=op.region_at(points[0],domain) if op.has_method("region_at") else {}
+		var escorted:=float(op.effects.mission_power("player",region,"convoy_escort",false))>0.0 if not region.is_empty() else false
+		var raided:=float(op.effects.mission_power("player",region,"convoy_raiding",true))>0.0 if not region.is_empty() else false
+		out.append({"points":points,"domain":domain,"escorted":escorted,"raided":raided,"status":String(convoy.status),"invasion":bool(convoy.get("invasion",false)),"convoy_id":int(convoy.get("id",0)),"name":String(force.get("name",""))})
+		if out.size()>=MAX_LANES: break
+	return out
+
+
+## Our own harbours a rival fleet is blockading: we feel it, so we know it.
+func _our_blockaded_ports(today:int)->Array:
+	var out:Array=[]
+	var op:Variant=MilitaryCampaign.get("joint_operations")
+	if op==null: return out
+	var ledger:Dictionary=op.state.get("blockades",{})
+	for city_id in ledger:
+		var entry:Dictionary=ledger[city_id]
+		if String(entry.get("civ_id",""))!="player": continue
+		var site:Dictionary=CivilizationSystem.city_intelligence.site(String(city_id))
+		if site.is_empty(): continue
+		out.append({"pos":_v2(site.get("position",{})),"level":float(entry.get("level",0.0)),"text":Blockade.describe(entry,today),"held":bool(entry.get("held",false))})
+	return out.slice(0,4)
+
+
+## Corps, armies and army groups the civilisation actually fields, placed
+## where their armies were last reported.
+func _echelon_inputs(friendly:Array)->Array:
+	return echelons_from(MilitaryCampaign.get("command_hierarchy"),friendly)
+
+
+## From the command tree (anything with data.nodes, children(), leaves(),
+## people()): corps and armies with troops, and organised groups of them.
+static func echelons_from(command:Variant,friendly:Array)->Array:
+	var out:Array=[]
+	if command==null: return out
+	var at:Dictionary={}
+	for f in friendly: at[int(f.get("army_id",0))]=f.pos
+	for record:Dictionary in command.data.get("nodes",{}).values():
+		if String(record.get("service",""))!="army" or String(record.get("parent",""))=="" or bool(record.get("retired",false)): continue
+		var level:=int(record.get("level",0))
+		var children:Array=command.children(String(record.id))
+		var group:=int(record.get("force_id",-1))<0 and children.size()>=2 and children.all(func(c:Dictionary)->bool: return int(c.get("level",0))>=CORPS_LEVEL)
+		if level<CORPS_LEVEL and not group: continue
+		var centre:=Vector2.ZERO
+		var count:=0
+		var armies:Array=[]
+		for leaf:Dictionary in command.leaves(String(record.id)):
+			var id:=int(leaf.get("force_id",-1))
+			if at.has(id): centre+=at[id]; count+=1; armies.append(id)
+		if count==0: continue
+		out.append({"id":String(record.id),"name":String(record.get("name","")),"level":level,"group":group,"pos":centre/float(count),"armies":armies,"troops":int(command.people(record))})
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return (int(a.level)+(3 if a.group else 0))>(int(b.level)+(3 if b.group else 0)) or ((int(a.level)+(3 if a.group else 0))==(int(b.level)+(3 if b.group else 0)) and String(a.id)<String(b.id)))
+	return out.slice(0,MAX_ECHELONS)
 
 
 # --- Composition (pure) -------------------------------------------------------------
@@ -251,37 +547,64 @@ func _zone_inputs(today:int)->Array:
 static func compose(inputs:Dictionary)->Dictionary:
 	var mode:=String(inputs.get("mode","front"))
 	var stage:=String(inputs.get("stage","reckoned"))
-	var friendly:Array=inputs.get("friendly",[])
-	var enemy:Array=inputs.get("enemy",[])
+	var friendly:Array=(inputs.get("friendly",[]) as Array).slice(0,Model.MAX_FRIENDLY)
+	var enemy:Array=(inputs.get("enemy",[]) as Array).slice(0,Model.MAX_ENEMY)
 	var home:Vector2=inputs.get("home",Vector2.ZERO)
-	var out:={"mode":mode,"stage":stage,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"sieges":[],"raids":[],"zones":[],"sigma":1.0}
+	var today:=int(inputs.get("today",0))
+	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sigma":1.0}
 	var fronts:Array=[]
 	if mode in ["front","theatre"]:
 		var derived:=Model.derive(friendly,enemy)
 		fronts=derived.fronts; out.sigma=float(derived.sigma) if float(derived.sigma)>0.0 else 1.0
+		# Who holds each front: the armies nearest its line.
+		for front in fronts:
+			var holders:Array=[]
+			for f in friendly:
+				var nearest:=INF
+				for p in (front.points as PackedVector2Array): nearest=minf(nearest,p.distance_to(f.pos))
+				if nearest<=float(out.sigma)*1.6: holders.append(f)
+			front["armies"]=holders.map(func(f:Dictionary)->int: return int(f.get("army_id",0)))
+			front["holders"]=holders
 		out.fronts=fronts
+		out.pockets=Model.pockets(fronts,friendly,enemy)
 	elif mode=="host":
 		var reach:=6.0
 		for f in friendly:
 			for e in enemy: reach=minf(reach,maxf(0.6,(f.pos as Vector2).distance_to(e.pos)*1.01))
 		out.faceoffs=Model.face_offs(friendly,enemy,maxf(reach,2.5))
 		out.sigma=1.0
+	# The generals' own fallback lines: from where each would withdraw to.
+	if mode in ["front","theatre"]:
+		for front in fronts:
+			var holders:Array=(front.get("holders",[]) as Array).filter(func(f:Dictionary)->bool: return f.has("fallback"))
+			if holders.is_empty(): continue
+			var line:=Model.fallback_from_intent(front,holders)
+			if line.size()>=2: out.fallbacks.append({"points":line,"armies":front.armies,"how":String(holders[0].get("fallback_how","home"))})
 	if mode=="theatre":
-		for front in fronts: out.fallbacks.append(Model.fallback_line(front,home,float(out.sigma)*0.8))
-		for f in friendly.slice(0,Model.MAX_FRIENDLY):
-			if (f.pos as Vector2).distance_to(home)>float(out.sigma)*0.5: out.supply.append(PackedVector2Array([home,f.pos]))
-	# The generals' intent: arrows to their objectives (not in the raid age,
-	# where a band's path is drawn as a raid track instead).
-	if mode!="raid":
-		var bias:=0.0
 		for f in friendly:
-			if out.arrows.size()>=Model.MAX_ARROWS: break
-			var objective:Vector2=f.get("objective",Vector2.INF)
-			if not objective.is_finite() or (f.pos as Vector2).distance_to(objective)<0.05: continue
-			var spec:=Model.arrow(f.pos,objective,fronts,bias)
-			bias=-bias+0.05 if bias<=0.0 else -bias
-			out.arrows.append({"points":Model.arrow_points(spec),"ours":true,"offensive":bool(f.get("offensive",false)),"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS})
-			out.objectives.append({"pos":objective,"ours":true,"offensive":bool(f.get("offensive",false))})
+			if (f.pos as Vector2).distance_to(home)>float(out.sigma)*0.5: out.supply.append(PackedVector2Array([home,f.pos]))
+	# A general who is withdrawing: his road back, dashed, in any age.
+	for f in friendly:
+		if bool(f.get("withdrawing",false)) and (f.get("route_home",PackedVector2Array()) as PackedVector2Array).size()>=1:
+			var road:=PackedVector2Array([f.pos]); road.append_array(f.route_home)
+			out.withdrawals.append({"points":road,"army_id":int(f.get("army_id",0))})
+	# The generals' intent: arrows to their objectives (in the raid age, a
+	# band's path is a dotted raid track instead).
+	var bias:=0.0
+	for f in friendly:
+		if out.arrows.size()>=Model.MAX_ARROWS: break
+		var objective:Vector2=f.get("objective",Vector2.INF)
+		if not objective.is_finite() or (f.pos as Vector2).distance_to(objective)<0.05 or bool(f.get("withdrawing",false)): continue
+		if mode=="raid":
+			var delta:=objective-(f.pos as Vector2)
+			var spec:=PackedVector2Array([f.pos,(f.pos as Vector2)+delta*0.5+delta.orthogonal()*0.12,objective])
+			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":int(f.get("army_id",0))})
+			continue
+		var spec:=Model.arrow(f.pos,objective,fronts,bias)
+		bias=-bias+0.05 if bias<=0.0 else -bias
+		out.arrows.append({"points":Model.arrow_points(spec),"ours":true,"offensive":bool(f.get("offensive",false)),"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":int(f.get("army_id",0))})
+		out.objectives.append({"pos":objective,"ours":true,"offensive":bool(f.get("offensive",false))})
+	if mode!="raid":
 		# Enemy arrows only from observed movement, dated.
 		for e in enemy:
 			if out.arrows.size()>=Model.MAX_ARROWS: break
@@ -291,16 +614,17 @@ static func compose(inputs:Dictionary)->Dictionary:
 			var length:=float(out.sigma)*1.2
 			var start:Vector2=e.pos
 			var spec:=PackedVector2Array([start,start+direction*length*0.5,start+direction*length])
-			out.arrows.append({"points":Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1))})
+			out.arrows.append({"points":Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1)),"enemy_id":String(e.get("id",""))})
 	for engagement in (inputs.get("engagements",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var ours_id:=String(engagement.get("ours",Tactics.BASELINE))
 		var theirs_id:=String(engagement.get("theirs",Tactics.BASELINE))
 		var rounds:=int(engagement.get("rounds",0))
 		out.clashes.append({"pos":engagement.pos,"axis":engagement.get("axis",Vector2.RIGHT),"ours":ours_id,"theirs":theirs_id,
 			"shape_ours":Tactics.shape(ours_id,rounds,String(engagement.get("phase_ours","hold"))),"shape_theirs":Tactics.shape(theirs_id,rounds,String(engagement.get("phase_theirs","hold"))),
-			"label":_cap(Tactics.name_of(ours_id,stage)) if ours_id!=Tactics.BASELINE else _cap(Tactics.name_of(theirs_id,stage)) if theirs_id!=Tactics.BASELINE else "","event":String(engagement.get("event",""))})
+			"label":_cap(Tactics.name_of(ours_id,stage)) if ours_id!=Tactics.BASELINE else _cap(Tactics.name_of(theirs_id,stage)) if theirs_id!=Tactics.BASELINE else "","event":String(engagement.get("event","")),
+			"army_id":int(engagement.get("army_id",0)),"rounds":rounds,"commanded":bool(engagement.get("commanded",false))})
 	for siege in (inputs.get("sieges",[]) as Array).slice(0,4):
-		out.sieges.append({"pos":siege.pos,"pressure":clampf(float(siege.get("pressure",0.0)),0.0,1.0),"works":String(siege.get("works","blockade_camp")),"ours":bool(siege.get("ours",true)),"label":_cap(Tactics.name_of(String(siege.get("works","blockade_camp")),stage))})
+		out.sieges.append({"pos":siege.pos,"pressure":clampf(float(siege.get("pressure",0.0)),0.0,1.0),"works":String(siege.get("works","blockade_camp")),"ours":bool(siege.get("ours",true)),"label":_cap(Tactics.name_of(String(siege.get("works","blockade_camp")),stage)),"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	for raid in (inputs.get("raids",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var from:Vector2=raid.from; var to:Vector2=raid.to
 		var delta:=to-from
@@ -310,7 +634,12 @@ static func compose(inputs:Dictionary)->Dictionary:
 		var entry:Dictionary=(zone as Dictionary).duplicate()
 		entry["label"]=_cap(Tactics.name_of(String(zone.get("tactic","")),stage)) if String(zone.get("tactic",""))!="" else ""
 		entry["shape"]=String((Tactics.ZONE_TACTICS.get(String(zone.get("tactic","")),{}) as Dictionary).get("shape",""))
+		# Interception zones are the air arm's defence: drawn as a belt.
+		entry["belt"]=String(zone.get("domain",""))=="air" and String(zone.get("mission",""))=="interception"
 		out.zones.append(entry)
+	out.lanes=(inputs.get("lanes",[]) as Array).slice(0,MAX_LANES)
+	out.harbours=(inputs.get("harbours",[]) as Array).slice(0,4)
+	out.echelons=(inputs.get("echelons",[]) as Array).slice(0,MAX_ECHELONS)
 	return out
 
 
@@ -321,7 +650,7 @@ static func _cap(text:String)->String:
 ## Primitive counts, for probes and tests (bounded regardless of armies).
 static func primitive_count(built:Dictionary)->int:
 	var total:=0
-	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","sieges","raids","zones"]: total+=(built.get(key,[]) as Array).size()
+	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals"]: total+=(built.get(key,[]) as Array).size()
 	return total
 
 
@@ -331,10 +660,11 @@ func _screen(p:Vector2)->Vector2:
 	if project.is_valid(): return project.call(p)
 	var camera:=_camera()
 	if camera==null: return Vector2.INF
-	if not height_cache.has(p):
-		if height_cache.size()>4096: height_cache.clear()
-		height_cache[p]=float(terrain._height_at(p.x,p.y)) if terrain.has_method("_height_at") else 0.0
-	var world:=Vector3(p.x,float(height_cache[p])+0.002,p.y)
+	var key:=p.snapped(Vector2.ONE*0.001)
+	if not height_cache.has(key):
+		if height_cache.size()>8192: height_cache.clear()
+		height_cache[key]=float(terrain._height_at(p.x,p.y)) if terrain.has_method("_height_at") else 0.0
+	var world:=Vector3(p.x,float(height_cache[key])+0.002,p.y)
 	if camera.is_position_behind(world): return Vector2.INF
 	return camera.unproject_position(world)
 
@@ -354,49 +684,93 @@ func _poly(points:PackedVector2Array)->PackedVector2Array:
 	return out
 
 
+## A world line draped over the ground: subdivided so long legs follow the
+## relief, and split where it passes behind the camera.
+func _drape(points:PackedVector2Array,step:float)->Array:
+	var runs:Array=[]
+	var current:=PackedVector2Array()
+	for p in Model.densify(points,step,96):
+		var s:=_screen(p)
+		if s.is_finite(): current.append(s)
+		elif current.size()>=2: runs.append(current); current=PackedVector2Array()
+		else: current=PackedVector2Array()
+	if current.size()>=2: runs.append(current)
+	return runs
+
+
+## World units per screen pixel near a point (for sizing marks per band).
+func _world_per_px(at:Vector2)->float:
+	var a:=_screen(at); var b:=_screen(at+Vector2(1.0,0.0))
+	if not a.is_finite() or not b.is_finite() or a.distance_to(b)<=0.0001: return 1.0
+	return 1.0/a.distance_to(b)
+
+
 # --- Drawing ------------------------------------------------------------------------------
 
 func _draw()->void:
-	if scene.is_empty(): return
+	var started:=Time.get_ticks_usec()
+	hits.clear()
+	caption_requests.clear()
+	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
-	if band=="ground": return
+	if band=="ground": placed_captions.clear(); return
+	var wide:=band in ["continental","world"]
 	var t:=smoothstep(0.0,1.0,blend)
-	var font:=ThemeDB.fallback_font
+	var font:=T.voice_font(true)
+	# How finely to drape: a few pixels per leg at any zoom.
+	var step:=_world_per_px(_centre_of_scene())*14.0
 	if band!="local":
-		for zone in scene.get("zones",[]): _draw_zone(zone,font)
-	for supply in scene.get("supply",[]):
-		_dashed(_poly(supply),Color(INK,0.35),1.0,3.0,6.0)
-	for index in (scene.get("fallbacks",[]) as Array).size():
-		_dashed(_poly(scene.fallbacks[index]),Color(OURS,0.55),1.2,10.0,6.0)
-	var old_fronts:Array=previous.get("fronts",[]) if blend<1.0 else []
-	for index in (scene.get("fronts",[]) as Array).size():
-		var front:Dictionary=scene.fronts[index]
-		var points:PackedVector2Array=front.points
-		if index<old_fronts.size():
-			var before:=Model.resample(old_fronts[index].points,points.size())
-			var morphed:=PackedVector2Array()
-			for k in points.size(): morphed.append(before[k].lerp(points[k],t))
-			points=morphed
-		var drawn:=front.duplicate(); drawn["world"]=points
-		_draw_front(_poly(points),drawn)
+		for zone in scene.get("zones",[]): _draw_zone(zone,band)
+	for lane in scene.get("lanes",[]): _draw_lane(lane,step)
+	for harbour in scene.get("harbours",[]): _draw_harbour(harbour)
+	if not wide:
+		for supply in scene.get("supply",[]):
+			for run in _drape(supply,step): _dashed(run,Color(INK,0.35),1.0,3.0,6.0)
+		for fallback in scene.get("fallbacks",[]):
+			for run in _drape(fallback.points,step):
+				_dashed(run,Color(PAPER,0.55),3.4,10.0,6.0)
+				_dashed(run,Color(OURS,0.8),1.6,10.0,6.0)
+				hits.append({"kind":"fallback","line":run,"armies":fallback.get("armies",[])})
+		for road in scene.get("withdrawals",[]):
+			for run in _drape(road.points,step):
+				_dashed(run,Color(OURS,0.75),2.0,5.0,5.0)
+				hits.append({"kind":"army","line":run,"army_id":int(road.army_id)})
+	for index in live_fronts.size():
+		var entry:Dictionary=live_fronts[index]
+		if float(entry.alpha)<=0.01: continue
+		_draw_front(entry,band,step)
+	for pocket in scene.get("pockets",[]): _draw_pocket(pocket,band)
 	for faceoff in scene.get("faceoffs",[]):
-		_draw_front(_poly(faceoff.points),{"stale":bool(faceoff.get("stale",false)),"width":PackedFloat32Array(),"pressure":PackedFloat32Array()})
+		_draw_front({"points":faceoff.points,"alpha":1.0,"data":{"stale":bool(faceoff.get("stale",false))}},band,step)
 	for raid in scene.get("raids",[]): _draw_raid(raid)
-	for arrow in scene.get("arrows",[]): _draw_arrow(arrow)
-	for objective in scene.get("objectives",[]): _draw_objective(objective)
-	for siege in scene.get("sieges",[]): _draw_siege(siege,font)
-	for clash in scene.get("clashes",[]): _draw_clash(clash,font,band)
-	if band=="world": return
+	for arrow in scene.get("arrows",[]): _draw_arrow(arrow,t,wide)
+	if not wide:
+		for objective in scene.get("objectives",[]): _draw_objective(objective)
+	for siege in scene.get("sieges",[]): _draw_siege(siege,wide)
+	for clash in scene.get("clashes",[]): _draw_clash(clash,band)
+	if wide:
+		for echelon in scene.get("echelons",[]): _draw_echelon(echelon,band)
 	# One small dated caption per stale front: the map says how old it is.
-	for front in scene.get("fronts",[]):
-		if not bool(front.get("stale",false)): continue
-		var ages:PackedFloat32Array=front.age
-		var oldest:=0
-		var where:=0
-		for k in ages.size():
-			if roundi(ages[k])>oldest: oldest=roundi(ages[k]); where=k
-		var at:=_screen((front.points as PackedVector2Array)[where])
-		if at.is_finite(): _caption(at+Vector2(14,10),"Their line here as last seen, %d days ago" % oldest,Color(THEIRS,0.9),font)
+	if not wide:
+		for entry in live_fronts:
+			var data:Dictionary=entry.data
+			if not bool(data.get("stale",false)) or float(entry.target_alpha)<=0.0: continue
+			var ages:PackedFloat32Array=data.age
+			var oldest:=0; var where:=0
+			for k in ages.size():
+				if roundi(ages[k])>oldest: oldest=roundi(ages[k]); where=k
+			_request_caption("stale:%d" % where,(data.points as PackedVector2Array)[where],"Their line as last seen, %d days ago" % oldest,THEIRS,2)
+	_letter_captions(font)
+	last_draw_usec=Time.get_ticks_usec()-started
+
+
+func _centre_of_scene()->Vector2:
+	for key in ["fronts","clashes","sieges","zones"]:
+		for item in scene.get(key,[]):
+			if item.has("pos"): return item.pos
+			if item.has("points"): return (item.points as PackedVector2Array)[0]
+			if item.has("vertices"): return (item.vertices as PackedVector2Array)[0]
+	return Vector2.ZERO
 
 
 func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:float)->void:
@@ -406,6 +780,7 @@ func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:fl
 	for i in range(1,points.size()):
 		var a:=points[i-1]; var b:=points[i]
 		var length:=a.distance_to(b)
+		if length<=0.0001: continue
 		var at:=0.0
 		while at<length:
 			var span:=minf((dash if drawing else gap)-carry,length-at)
@@ -414,57 +789,116 @@ func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:fl
 			if carry>=(dash if drawing else gap)-0.001: carry=0.0; drawing=not drawing
 
 
-## The front: a soft wash of each side's colour either side of the line (the
+static func _offset(points:PackedVector2Array,normals:PackedVector2Array,by:float)->PackedVector2Array:
+	var out:=PackedVector2Array()
+	for i in points.size(): out.append(points[i]+normals[i]*by)
+	return out
+
+
+## A polygon that the canvas can fill (non-degenerate, triangulable).
+static func _fillable(polygon:PackedVector2Array)->bool:
+	if polygon.size()<3: return false
+	var area:=0.0
+	for i in polygon.size(): area+=polygon[i].cross(polygon[(i+1)%polygon.size()])
+	return absf(area)>4.0 and Geometry2D.triangulate_polygon(polygon).size()>0
+
+
+## The front: a soft band of each side's colour either side of the line (the
 ## ground each holds), a paper halo, an ink line whose weight follows how
 ## massed the two sides are, and oxblood teeth pointing into the enemy.
 ## Stretches derived from stale reports are dashed and paler.
-func _draw_front(points:PackedVector2Array,front:Dictionary)->void:
+func _draw_front(entry:Dictionary,band:String,_step:float)->void:
+	var data:Dictionary=entry.get("data",{})
+	var world:PackedVector2Array=entry.points
+	var points:=_poly(world)
 	if points.size()<2: return
-	var widths:PackedFloat32Array=front.get("width",PackedFloat32Array())
-	var ages:PackedFloat32Array=front.get("age",PackedFloat32Array())
-	var toward:PackedVector2Array=front.get("toward",PackedVector2Array())
-	var world:PackedVector2Array=front.get("world",PackedVector2Array())
-	var all_stale:=bool(front.get("stale",false)) and ages.is_empty()
+	var alpha:=clampf(float(entry.get("alpha",1.0)),0.0,1.0)
+	var wide:=band in ["continental","world"]
+	var n:=points.size()
+	var source:PackedVector2Array=data.get("points",PackedVector2Array())
+	var map:=func(k:int)->int: return clampi(roundi(float(k)/float(maxi(1,n-1))*float(maxi(0,source.size()-1))),0,maxi(0,source.size()-1))
+	var widths:PackedFloat32Array=data.get("width",PackedFloat32Array())
+	var ages:PackedFloat32Array=data.get("age",PackedFloat32Array())
+	var toward:PackedVector2Array=data.get("toward",PackedVector2Array())
+	var pressure:PackedFloat32Array=data.get("pressure",PackedFloat32Array())
+	var all_stale:=bool(data.get("stale",false)) and ages.is_empty()
 	# Screen normals toward the enemy, one per vertex.
 	var normals:=PackedVector2Array()
-	for i in points.size():
-		var a:=points[maxi(0,i-1)]; var b:=points[mini(points.size()-1,i+1)]
+	for i in n:
+		var a:=points[maxi(0,i-1)]; var b:=points[mini(n-1,i+1)]
 		var normal:=(b-a).normalized().orthogonal()
-		if i<toward.size() and i<world.size():
-			var ahead:=_screen(world[i]+toward[i]*maxf(0.0001,float(scene.get("sigma",1.0))*0.05))
+		var j:int=map.call(i)
+		if j<toward.size():
+			var ahead:=_screen(world[i]+toward[j]*maxf(0.0001,float(scene.get("sigma",1.0))*0.05))
 			if ahead.is_finite() and normal.dot(ahead-points[i])<0.0: normal=-normal
 		elif i>0 and normals[i-1].dot(normal)<0.0: normal=-normal
 		normals.append(normal)
-	var wash:=14.0
-	for i in range(1,points.size()):
-		var n0:=normals[i-1]; var n1:=normals[i]
-		var theirs_quad:=PackedVector2Array([points[i-1],points[i],points[i]+n1*wash,points[i-1]+n0*wash])
-		var ours_quad:=PackedVector2Array([points[i-1],points[i],points[i]-n1*wash,points[i-1]-n0*wash])
-		draw_colored_polygon(theirs_quad,Color(THEIRS,0.13))
-		draw_colored_polygon(ours_quad,Color(OURS_WASH,0.16))
-	draw_polyline(points,Color(PAPER,0.6),8.0,true)
-	for i in range(1,points.size()):
-		var stale:=all_stale or (i<ages.size() and float(ages[i])>=float(Model.STALE_DAYS))
-		var w:=2.4+3.0*(float(widths[i]) if i<widths.size() else 0.6)
-		if stale: _dashed(PackedVector2Array([points[i-1],points[i]]),Color(INK,0.5),2.0,6.0,5.0)
-		else: draw_line(points[i-1],points[i],Color(INK,0.92),w,true)
-	var pressure:PackedFloat32Array=front.get("pressure",PackedFloat32Array())
-	var stride:=maxi(2,points.size()/16)
-	for i in range(stride/2,points.size()-1,stride):
+	if not wide:
+		# Each side's ground, as two soft bands (drawn as wide strokes: no
+		# polygon to fail when the line folds on screen).
+		var wash:=16.0 if band=="local" else 12.0
+		draw_polyline(_offset(points,normals,wash*0.5),Color(THEIRS_WASH,0.16*alpha),wash,true)
+		draw_polyline(_offset(points,normals,wash*0.25),Color(THEIRS_WASH,0.14*alpha),wash*0.5,true)
+		draw_polyline(_offset(points,normals,-wash*0.5),Color(OURS_WASH,0.20*alpha),wash,true)
+		draw_polyline(_offset(points,normals,-wash*0.25),Color(OURS_WASH,0.16*alpha),wash*0.5,true)
+	var base:=2.2 if wide else (2.8 if band=="regional" else 3.2)
+	draw_polyline(points,Color(PAPER,0.7*alpha),base+5.0,true)
+	for i in range(1,n):
+		var j:int=map.call(i)
+		var stale:=all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS))
+		var w:=base+(2.6 if not wide else 1.0)*(float(widths[j]) if j<widths.size() else 0.6)
+		if stale: _dashed(PackedVector2Array([points[i-1],points[i]]),Color(INK,0.5*alpha),2.0,6.0,5.0)
+		else: draw_line(points[i-1],points[i],Color(INK,0.92*alpha),w,true)
+	var stride:=maxi(2,n/(10 if wide else 16))
+	for i in range(stride/2,n-1,stride):
 		var a:=points[i]; var b:=points[i+1]
 		var along:=(b-a).normalized()
-		var tooth:=8.0+4.0*absf(float(pressure[i]) if i<pressure.size() else 0.0)
-		var color:=Color(THEIRS,0.9)
-		if all_stale or (i<ages.size() and float(ages[i])>=float(Model.STALE_DAYS)): color.a=0.45
-		draw_colored_polygon(PackedVector2Array([a-along*4.5,a+along*4.5,a+normals[i]*tooth]),color)
+		var j:int=map.call(i)
+		var tooth:=(6.0 if wide else 9.0)+4.0*absf(float(pressure[j]) if j<pressure.size() else 0.0)
+		var color:=Color(THEIRS,0.92*alpha)
+		if all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS)): color.a=0.45*alpha
+		var tri:=PackedVector2Array([a-along*5.0,a+along*5.0,a+normals[i]*tooth])
+		if _fillable(tri): draw_colored_polygon(tri,color)
+	hits.append({"kind":"front","line":points,"armies":data.get("armies",[]),"stale":bool(data.get("stale",false))})
 
 
-func _draw_arrow(arrow:Dictionary)->void:
+## A pocket: the ring closing on them, hatched inside, the gap still open
+## shown as a bracket; closure eases as the ring closes over days.
+func _draw_pocket(pocket:Dictionary,band:String)->void:
+	var index:=int(pocket.front)
+	if index>=live_fronts.size(): return
+	var ring:=_poly(live_fronts[index].points)
+	if ring.size()<3: return
+	var closure:=float(live_closure.get(index,pocket.closure))
+	if _fillable(ring): draw_colored_polygon(ring,Color(THEIRS,0.07+0.08*closure))
+	var box:=Rect2(ring[0],Vector2.ZERO)
+	for p in ring: box=box.expand(p)
+	var spacing:=lerpf(18.0,8.0,closure)
+	var x:=box.position.x-box.size.y
+	var lines:=0
+	while x<box.end.x and lines<48:
+		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),ring):
+			draw_polyline(piece,Color(THEIRS,0.28),1.0,true)
+		x+=spacing; lines+=1
+	var gap_at:=_screen(pocket.gap_at)
+	if closure<0.97 and gap_at.is_finite():
+		draw_arc(gap_at,10.0,0.0,TAU,20,Color(PAPER,0.7),4.0,true)
+		draw_arc(gap_at,10.0,0.0,TAU,20,Color(THEIRS,0.9),1.6,true)
+	var centre:=_screen(pocket.centre)
+	if centre.is_finite() and band!="world":
+		var thousands:=roundi(float(pocket.strength)/1000.0)
+		var who:=("about %s thousand" % EraWords.grouped(thousands)) if thousands>=1 else ("about %s" % EraWords.grouped(roundi(float(pocket.strength))))
+		var text:=("Pocket: %s cut off" % who) if closure>=0.97 else ("Pocket closing: %s, %s km gap" % [who,EraWords.grouped(maxi(1,roundi(float(pocket.gap))))])
+		_request_caption("pocket:%d" % index,pocket.centre,text,THEIRS,5)
+	hits.append({"kind":"pocket","poly":ring,"armies":(scene.fronts[index] as Dictionary).get("armies",[]) if index<(scene.get("fronts",[]) as Array).size() else []})
+
+
+func _draw_arrow(arrow:Dictionary,_t:float,wide:bool)->void:
 	var points:=_poly(arrow.points)
 	if points.size()<3: return
 	var ours:=bool(arrow.get("ours",true))
 	var stale:=bool(arrow.get("stale",false))
-	var base:=6.0+10.0*float(arrow.get("weight",0.5))
+	var base:=(5.0 if wide else 7.0)+(6.0 if wide else 11.0)*float(arrow.get("weight",0.5))
 	# A tapered body (HOI4-style plan arrow) with an inked edge.
 	var left:=PackedVector2Array(); var right:=PackedVector2Array()
 	var shaft_end:=points.size()-3
@@ -480,12 +914,14 @@ func _draw_arrow(arrow:Dictionary)->void:
 	var body:=left.duplicate()
 	body.append(back+wing); body.append(tip); body.append(back-wing)
 	right.reverse(); body.append_array(right)
-	var fill:=Color(OURS_WASH if ours else THEIRS,0.38 if ours and bool(arrow.get("offensive",false)) else 0.18)
-	if stale: fill.a*=0.5
-	if Geometry2D.triangulate_polygon(body).size()>0: draw_colored_polygon(body,fill)
 	var outline:=body.duplicate(); outline.append(body[0])
-	if stale or not ours: _dashed(outline,Color(OURS if ours else THEIRS,0.85),1.3,6.0,4.0)
-	else: draw_polyline(outline,Color(INK,0.85),1.3,true)
+	draw_polyline(outline,Color(PAPER,0.55),4.0,true)
+	var fill:=Color(OURS_WASH if ours else THEIRS_WASH,0.5 if ours and bool(arrow.get("offensive",false)) else 0.26)
+	if stale: fill.a*=0.5
+	if _fillable(body): draw_colored_polygon(body,fill)
+	if stale or not ours: _dashed(outline,Color(OURS if ours else THEIRS,0.9),1.4,6.0,4.0)
+	else: draw_polyline(outline,Color(INK,0.85),1.4,true)
+	hits.append({"kind":"arrow" if ours else "enemy_arrow","poly":body,"line":points,"army_id":int(arrow.get("army_id",0)),"enemy_id":String(arrow.get("enemy_id","")),"seen_day":int(arrow.get("seen_day",-1))})
 
 
 func _draw_objective(objective:Dictionary)->void:
@@ -512,18 +948,22 @@ func _draw_raid(raid:Dictionary)->void:
 	draw_line(tip,tip-direction.rotated(0.5)*11.0,color,2.2,true)
 	draw_line(tip,tip-direction.rotated(-0.5)*11.0,color,2.2,true)
 	if bool(raid.get("fought",false)): _crossed_strokes(tip,7.0,Color(THEIRS,color.a))
+	if raid.has("army_id"): hits.append({"kind":"arrow","line":points,"army_id":int(raid.army_id)})
 
 
 func _crossed_strokes(at:Vector2,size_px:float,color:Color)->void:
+	draw_line(at+Vector2(-size_px,-size_px),at+Vector2(size_px,size_px),Color(PAPER,0.6*color.a),4.0,true)
+	draw_line(at+Vector2(-size_px,size_px),at+Vector2(size_px,-size_px),Color(PAPER,0.6*color.a),4.0,true)
 	draw_line(at+Vector2(-size_px,-size_px),at+Vector2(size_px,size_px),color,2.2,true)
 	draw_line(at+Vector2(-size_px,size_px),at+Vector2(size_px,-size_px),color,2.2,true)
 
 
-func _draw_siege(siege:Dictionary,font:Font)->void:
+func _draw_siege(siege:Dictionary,wide:bool)->void:
 	var centre:=_screen(siege.pos)
 	if not centre.is_finite(): return
-	# The ring tightens as the siege bites.
-	var radius:=lerpf(46.0,24.0,float(siege.pressure))
+	# The ring tightens as the siege bites; it stays clear of the town's own
+	# pin (the city card owns the middle).
+	var radius:=lerpf(46.0,26.0,float(siege.pressure))*(0.55 if wide else 1.0)
 	var color:=Color(OURS if bool(siege.ours) else THEIRS,0.9)
 	var segments:=48
 	var ring:=PackedVector2Array()
@@ -539,18 +979,24 @@ func _draw_siege(siege:Dictionary,font:Font)->void:
 	else:
 		_dashed(ring,color,1.8,7.0,6.0)
 		for k in 6: draw_circle(centre+Vector2.from_angle(TAU*float(k)/6.0+0.3)*radius,3.0,color)
-	_caption(centre+Vector2(-radius,radius+22.0),String(siege.label),color,font)
+	if not wide: _request_caption("siege:%s" % str(siege.pos),siege.pos,"%s · day %d" % [String(siege.label),int(siege.get("days",0))] if int(siege.get("days",0))>0 else String(siege.label),color,4,radius+6.0)
+	hits.append({"kind":"siege","centre":centre,"radius":radius+6.0,"army_id":int(siege.get("army_id",0))})
 
 
 ## A clash and the tactic being fought there, drawn in screen space around
 ## the contact so it reads at every zoom. Shapes follow battle_tactics.shape.
-func _draw_clash(clash:Dictionary,font:Font,band:String)->void:
+func _draw_clash(clash:Dictionary,band:String)->void:
 	var at:=_screen(clash.pos)
 	if not at.is_finite(): return
+	if band in ["continental","world"]:
+		# Far out, a battle is a mark on the line, not a diagram.
+		_crossed_strokes(at,6.0,Color(THEIRS,0.95))
+		hits.append({"kind":"clash","centre":at,"radius":12.0,"army_id":int(clash.get("army_id",0)),"clash":clash})
+		return
 	var ahead:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*0.01)
 	var axis:=(ahead-at).normalized() if ahead.is_finite() and ahead.distance_to(at)>0.001 else Vector2.RIGHT
 	var across:=axis.orthogonal()
-	var r:=56.0 if band=="local" else 46.0
+	var r:=56.0 if band=="local" else 40.0
 	var ours:Dictionary=clash.shape_ours
 	var theirs:Dictionary=clash.shape_theirs
 	var t:=smoothstep(0.0,1.0,blend)
@@ -613,8 +1059,8 @@ func _draw_clash(clash:Dictionary,font:Font,band:String)->void:
 			var c:=at-axis*r*(0.7-0.5*clampf(float(ours.hardening)*1.5-0.5,0.0,1.0))
 			draw_rect(Rect2(c-Vector2(7,4),Vector2(14,8)),Color(OURS,0.85),false,1.6)
 	_crossed_strokes(at,6.0,Color(THEIRS,0.95))
-	if band in ["local","regional"] and String(clash.get("label",""))!="":
-		_caption(at+across*(r+10.0)+Vector2(4,-8),String(clash.label),Color(INK,0.95),font)
+	if String(clash.get("label",""))!="": _request_caption("clash:%s" % str(clash.pos),clash.pos,String(clash.label),INK,5,r+8.0)
+	hits.append({"kind":"clash","centre":at,"radius":r*0.8,"army_id":int(clash.get("army_id",0)),"clash":clash})
 
 
 func _previous_clash(clash:Dictionary)->Dictionary:
@@ -637,41 +1083,60 @@ func _hook(start:Vector2,axis:Vector2,side:Vector2,r:float,progress:float,alpha:
 	draw_polyline(points,Color(OURS,0.9*alpha),2.0,true)
 	var tip:=points[-1]; var back:=points[-2]
 	var direction:=(tip-back).normalized()
-	draw_colored_polygon(PackedVector2Array([tip+direction*6.0,tip+direction.orthogonal()*4.0,tip-direction.orthogonal()*4.0]),Color(OURS,0.9*alpha))
+	var head:=PackedVector2Array([tip+direction*6.0,tip+direction.orthogonal()*4.0,tip-direction.orthogonal()*4.0])
+	if _fillable(head): draw_colored_polygon(head,Color(OURS,0.9*alpha))
 
 
-func _draw_zone(zone:Dictionary,font:Font)->void:
-	var polygon:=_poly(zone.vertices)
+func _hatch(polygon:PackedVector2Array,color:Color,spacing:float,cross:bool)->void:
+	var box:=Rect2(polygon[0],Vector2.ZERO)
+	for p in polygon: box=box.expand(p)
+	var lines:=0
+	var x:=box.position.x-box.size.y
+	while x<box.end.x and lines<60:
+		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),polygon): draw_polyline(piece,color,1.1,true)
+		if cross:
+			for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.position.y),Vector2(x+box.size.y,box.end.y)]),polygon): draw_polyline(piece,Color(color,color.a*0.7),1.0,true)
+		x+=spacing; lines+=1
+
+
+func _draw_zone(zone:Dictionary,band:String)->void:
+	var polygon:=PackedVector2Array()
+	var vertices:PackedVector2Array=zone.vertices
+	var closed:=vertices.duplicate(); closed.append(vertices[0])
+	for run in _drape(closed,_world_per_px(vertices[0])*14.0): polygon.append_array(run)
 	if polygon.size()<3: return
 	var navy:=String(zone.domain)=="navy"
 	var own:=SEA if navy else SKY
+	var hatch_ink:=SEA_LIGHT if navy else SKY
 	var control:=clampf(float(zone.get("control",0.0)),0.0,1.0)
 	# Contested water or air: our wash where we hold it, theirs where we do not.
-	if Geometry2D.triangulate_polygon(polygon).size()>0:
-		draw_colored_polygon(polygon,Color(own,0.06+0.10*control))
-		if control<0.95: draw_colored_polygon(polygon,Color(THEIRS,0.05*(1.0-control)))
+	if _fillable(polygon):
+		draw_colored_polygon(polygon,Color(own,0.08+0.12*control))
+		if control<0.95: draw_colored_polygon(polygon,Color(THEIRS,0.06*(1.0-control)))
 	var outline:=polygon.duplicate(); outline.append(polygon[0])
-	_dashed(outline,Color(own,0.75),1.4,8.0,5.0)
-	# Hatching: air superiority and sea control shown as ink hatching whose
-	# density follows how firmly it is held.
-	if String(zone.get("shape","")) in ["hatch","interception","cordon","cordon_wide","pack","battle_line","convoy"] or not navy:
-		var box:=Rect2(polygon[0],Vector2.ZERO)
-		for p in polygon: box=box.expand(p)
-		var spacing:=lerpf(22.0,9.0,control)
-		var lines:=0
-		var x:=box.position.x-box.size.y
-		while x<box.end.x and lines<60:
-			var clipped:=Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),polygon)
-			for piece in clipped: draw_polyline(piece,Color(own,0.35),1.0,true)
-			if String(zone.get("shape",""))=="interception" and not navy:
-				var cross:=Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.position.y),Vector2(x+box.size.y,box.end.y)]),polygon)
-				for piece in cross: draw_polyline(piece,Color(own,0.25),1.0,true)
-			x+=spacing; lines+=1
-	var centre:=Vector2.ZERO
-	for p in polygon: centre+=p
-	centre/=float(polygon.size())
+	draw_polyline(outline,Color(PAPER,0.45),3.6,true)
+	_dashed(outline,Color(own,0.95),1.6,8.0,5.0)
+	var shape:=String(zone.get("shape",""))
+	# Hatching whose density follows how firmly the zone is held.
+	if shape in ["hatch","interception","cordon","cordon_wide","pack","battle_line","convoy","crossing"] or not navy:
+		_hatch(polygon,Color(hatch_ink,0.42 if navy else 0.38),lerpf(22.0,9.0,control),shape=="interception")
+	if bool(zone.get("belt",false)):
+		# The air-defence belt: a double rim with ticks facing out, where
+		# fighters meet raiders before they reach what lies inside.
+		var centre:=_centre(polygon)
+		var inner:=PackedVector2Array()
+		for p in outline: inner.append(p.lerp(centre,0.1))
+		draw_polyline(inner,Color(SKY,0.8),1.4,true)
+		var ticks:=0
+		for i in range(1,outline.size(),2):
+			var a:=outline[i-1]; var b:=outline[i]
+			var out_dir:=((a+b)*0.5-centre).normalized()
+			draw_line((a+b)*0.5,(a+b)*0.5+out_dir*7.0,Color(SKY,0.9),1.6,true)
+			ticks+=1
+			if ticks>=48: break
+	var centre:=_centre(polygon)
 	var base:Vector2=zone.get("base",Vector2.INF)
-	if base.is_finite() and String(zone.get("shape","")) in ["sortie_arc","bombing_route","support","interdiction","airlift","hatch","interception","watch"]:
+	if base.is_finite() and shape in ["sortie_arc","bombing_route","support","interdiction","airlift","hatch","interception","watch"]:
 		# Sortie arcs from the airfield to the zone.
 		var from:=_screen(base)
 		if from.is_finite():
@@ -680,31 +1145,418 @@ func _draw_zone(zone:Dictionary,font:Font)->void:
 			for k in 17:
 				var u:=float(k)/16.0
 				arc.append(from.lerp(centre,u)+delta.orthogonal().normalized()*sin(u*PI)*minf(60.0,delta.length()*0.2))
-			_dashed(arc,Color(own,0.8),1.4,6.0,5.0)
+			_dashed(arc,Color(own,0.85),1.4,6.0,5.0)
+			if shape=="interception":
+				# Watchers on the ground directing the fighters: rings at the base.
+				for k in 3: draw_arc(from,8.0+6.0*k,-0.9,0.9,10,Color(SKY,0.7-0.2*k),1.2,true)
 	var port:Vector2=zone.get("port",Vector2.INF)
+	var blockade:Dictionary=zone.get("blockade",{})
 	if port.is_finite():
-		# A blockade cordon across the harbour mouth.
+		# A blockade cordon across the harbour mouth, closing as it bites.
 		var at:=_screen(port)
 		if at.is_finite():
-			var reach:=28.0 if String(zone.get("shape",""))=="cordon" else 52.0
+			var level:=float(blockade.get("level",0.0))
+			var reach:=(26.0 if shape=="cordon" else 48.0)*(0.7 if band!="regional" else 1.0)
 			var facing:=(centre-at).angle()
-			draw_arc(at,reach,facing-1.1,facing+1.1,24,Color(PAPER,0.6),5.0,true)
-			for k in 9:
-				var angle:=facing-1.1+2.2*float(k)/8.0
-				draw_circle(at+Vector2.from_angle(angle)*reach,2.4,Color(own,0.95))
-			draw_arc(at,reach,facing-1.1,facing+1.1,24,Color(own,0.9),1.4,true)
+			var span:=1.1+0.9*clampf(level/Blockade.CLOSE_CAP,0.0,1.0)
+			draw_arc(at,reach,facing-span,facing+span,24,Color(PAPER,0.6),5.0,true)
+			var pickets:=9+int(8.0*clampf(level/Blockade.CLOSE_CAP,0.0,1.0))
+			for k in pickets:
+				var angle:=facing-span+2.0*span*float(k)/float(maxi(1,pickets-1))
+				draw_circle(at+Vector2.from_angle(angle)*reach,2.6,Color(PAPER,0.8))
+				draw_circle(at+Vector2.from_angle(angle)*reach,2.0,Color(own,0.95))
+			draw_arc(at,reach,facing-span,facing+span,24,Color(own,0.9),1.4,true)
+			if not blockade.is_empty(): _request_caption("blockade:%d" % int(zone.get("force_id",0)),port,String(blockade.get("text","")),own,3,reach+6.0)
 	for contact in zone.get("contacts",[]):
 		var at:=_screen(contact.pos)
 		if not at.is_finite(): continue
 		var alpha:=clampf(1.0-float(contact.age)/6.0,0.35,1.0)
+		draw_arc(at,6.0,0.0,TAU,16,Color(PAPER,0.5*alpha),3.0,true)
 		draw_arc(at,6.0,0.0,TAU,16,Color(THEIRS,alpha),1.6,true)
-	if String(zone.get("label",""))!="": _caption(centre+Vector2(-40,-6),String(zone.label),Color(own.darkened(0.3),0.95),font)
+	if String(zone.get("label",""))!="" and band!="world": _request_caption("zone:%d" % int(zone.get("force_id",0)),_unscreen_centre(vertices),String(zone.label),own.darkened(0.2),3,6.0)
+	hits.append({"kind":"zone","poly":polygon,"force_id":int(zone.get("force_id",0)),"zone":zone})
 
 
-func _caption(at:Vector2,text:String,color:Color,font:Font)->void:
-	if text=="" or not Rect2(Vector2.ZERO,size).grow(40).has_point(at): return
-	var width:=minf(560.0,font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,LABEL_SIZE).x)
-	var box:=Rect2(at+Vector2(-4,-14),Vector2(width+10,19))
-	draw_rect(box,Color(PAPER,0.82))
-	draw_line(box.position+Vector2(0,box.size.y),box.end,Color(color,0.6),1.0)
-	draw_string(font,at+Vector2(1,0),text,HORIZONTAL_ALIGNMENT_LEFT,width,LABEL_SIZE,color)
+static func _unscreen_centre(vertices:PackedVector2Array)->Vector2:
+	var total:=Vector2.ZERO
+	for p in vertices: total+=p
+	return total/float(maxi(1,vertices.size()))
+
+
+## A convoy lane: the water (or air) still to cross, with escort ticks where
+## escorts work it and a raider's warning where raiders do.
+func _draw_lane(lane:Dictionary,step:float)->void:
+	var navy:=String(lane.get("domain","navy"))=="navy"
+	var color:=Color(SEA if navy else SKY,0.9)
+	for run in _drape(lane.points,step):
+		draw_polyline(run,Color(PAPER,0.55),4.0,true)
+		_dashed(run,color,1.6,9.0,4.0)
+		if bool(lane.get("escorted",false)):
+			var walked:=0.0
+			for i in range(1,run.size()):
+				var a:Vector2=run[i-1]; var b:Vector2=run[i]
+				walked+=a.distance_to(b)
+				if walked>=26.0:
+					walked=0.0
+					var across:Vector2=(b-a).normalized().orthogonal()
+					draw_line(b-across*5.0,b+across*5.0,color,1.6,true)
+		var head:Vector2=run[0]
+		draw_circle(head,4.5,Color(PAPER,0.9)); draw_circle(head,3.2,color)
+		if bool(lane.get("raided",false)): _crossed_strokes(head+Vector2(10,-10),4.0,Color(THEIRS,0.9))
+		hits.append({"kind":"lane","line":run,"lane":lane})
+
+
+## Our own harbour under a rival's blockade: their cordon, in their ink.
+func _draw_harbour(harbour:Dictionary)->void:
+	var at:=_screen(harbour.pos)
+	if not at.is_finite(): return
+	var level:=float(harbour.get("level",0.0))
+	var reach:=34.0
+	var span:=0.9+1.2*clampf(level/Blockade.CLOSE_CAP,0.0,1.0)
+	draw_arc(at,reach,-PI*0.5-span,-PI*0.5+span,24,Color(PAPER,0.6),5.0,true)
+	_dashed(PackedVector2Array(range(25).map(func(k:int)->Vector2: return at+Vector2.from_angle(-PI*0.5-span+2.0*span*float(k)/24.0)*reach)),Color(THEIRS,0.9),1.6,5.0,4.0)
+	_request_caption("harbour:%s" % str(harbour.pos),harbour.pos,String(harbour.get("text","")),THEIRS,4,reach+6.0)
+	hits.append({"kind":"harbour","centre":at,"radius":reach,"harbour":harbour})
+
+
+## A corps, army or army group at continental scale: a small inked plate
+## with its echelon marks above, as on a staff map.
+func _draw_echelon(echelon:Dictionary,band:String)->void:
+	var at:=_screen(echelon.pos)
+	if not at.is_finite(): return
+	var plate:=Rect2(at-Vector2(15,10),Vector2(30,20))
+	draw_rect(plate.grow(2.0),Color(PAPER,0.85))
+	draw_rect(plate,Color(OURS_WASH,0.35))
+	draw_rect(plate,Color(INK,0.9),false,1.4)
+	draw_line(plate.position,plate.end,Color(INK,0.85),1.2,true)
+	draw_line(Vector2(plate.position.x,plate.end.y),Vector2(plate.end.x,plate.position.y),Color(INK,0.85),1.2,true)
+	var marks:=5 if bool(echelon.get("group",false)) else clampi(int(echelon.level)-4,2,4)
+	var mark_width:=6.0
+	var left:=at.x-float(marks)*mark_width*0.5
+	for k in marks:
+		var x:=left+float(k)*mark_width
+		draw_line(Vector2(x,plate.position.y-10),Vector2(x+4,plate.position.y-4),Color(INK,0.9),1.3,true)
+		draw_line(Vector2(x+4,plate.position.y-10),Vector2(x,plate.position.y-4),Color(INK,0.9),1.3,true)
+	if band!="world": _request_caption("echelon:%s" % String(echelon.id),echelon.pos,"%s · %s" % [String(echelon.name),EraWords.grouped(int(echelon.get("troops",0)))],INK,4,22.0)
+	hits.append({"kind":"echelon","centre":at,"radius":20.0,"echelon":echelon})
+
+
+# --- Captions: lettered around what the chart already shows -----------------------
+
+func _request_caption(id:String,world:Vector2,text:String,color:Color,priority:int,clear:float=10.0)->void:
+	if text=="": return
+	var at:=_screen(world)
+	if not at.is_finite(): return
+	caption_requests.append({"id":id,"anchor":at,"text":text,"color":color,"priority":priority,"clear":clear})
+
+
+func _caption_size(text:String,font:Font)->Vector2:
+	if not caption_extent.has(text):
+		if caption_extent.size()>256: caption_extent.clear()
+		caption_extent[text]=Vector2(ceilf(minf(420.0,font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,CAPTION_SIZE).x))+14.0,22.0)
+	return caption_extent[text]
+
+
+## Everything the captions must keep clear of: city cards and pins, great
+## works, the war tags, army and contact counters, and the open note.
+func _caption_obstacles()->Dictionary:
+	var rects:Array[Rect2]=[]
+	var pins:Array=[]
+	var bounds:=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
+	var cities:=_city_labels()
+	if cities!=null and cities.has_method("chart_obstacles"):
+		var chart:Dictionary=cities.chart_obstacles()
+		rects.append_array(chart.rects); pins.append_array(chart.pins)
+		if (chart.bounds as Rect2).has_area(): bounds=chart.bounds
+	var tags:Variant=get_parent().get_node_or_null("WarMapOverlay") if get_parent()!=null else null
+	if tags!=null:
+		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
+	var camera:=_camera()
+	if camera!=null and is_instance_valid(terrain):
+		for key in ["player_field_army_markers","foreign_formation_markers"]:
+			var markers:Variant=terrain.get(key)
+			if not markers is Dictionary: continue
+			for marker in (markers as Dictionary).values():
+				if not is_instance_valid(marker) or not (marker as Node3D).visible or camera.is_position_behind((marker as Node3D).global_position): continue
+				pins.append({"at":camera.unproject_position((marker as Node3D).global_position),"clear":30.0})
+	if note!=null and note.visible: rects.append(note.get_global_rect())
+	return {"rects":rects,"pins":pins,"bounds":bounds}
+
+
+func _letter_captions(font:Font)->void:
+	placed_captions.clear()
+	dropped_captions=0
+	if caption_requests.is_empty(): return
+	var notes:Array=[]
+	for request in caption_requests:
+		var entry:Dictionary=request.duplicate()
+		entry.extent=_caption_size(String(request.text),font)
+		notes.append(entry)
+	var obstacles:=_caption_obstacles()
+	var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
+	caption_memory=result.memory
+	placed_captions=result.notes
+	dropped_captions=(result.dropped as Array).size()
+	for caption in placed_captions:
+		var box:Rect2=caption.rect
+		var anchor:Vector2=caption.anchor
+		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
+		if end.distance_to(anchor)>float(caption.clear)+4.0:
+			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*0.6
+			draw_line(start,end,Color(PAPER,0.6),3.0,true)
+			draw_line(start,end,Color(INK,0.5),1.0,true)
+		draw_style_box(_caption_style(),box)
+		var color:Color=caption.color
+		draw_rect(Rect2(box.position+Vector2(0,3),Vector2(2,box.size.y-6)),Color(color,0.85))
+		draw_string(font,box.position+Vector2(7,16),String(caption.text),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CAPTION_SIZE,Color(INK,0.95))
+
+
+var _style:StyleBoxFlat
+func _caption_style()->StyleBoxFlat:
+	if _style==null:
+		_style=StyleBoxFlat.new(); _style.bg_color=Color(T.PAPER_RAISED,0.92); _style.border_color=Color(T.RULE,0.9)
+		_style.set_border_width_all(1); _style.set_corner_radius_all(T.RADIUS_CONTROL)
+		_style.shadow_color=Color(0,0,0,0.08); _style.shadow_size=2; _style.shadow_offset=Vector2(0,1)
+	return _style
+
+
+# --- Clicks: a note about the thing, and who to talk to -----------------------------
+
+static func _distance_to_line(point:Vector2,line:PackedVector2Array)->float:
+	var best:=INF
+	for i in range(1,line.size()): best=minf(best,Geometry2D.get_closest_point_to_segment(point,line[i-1],line[i]).distance_to(point))
+	return best
+
+
+## What the last drawing shows under a screen point (nearest wins).
+func hit_at(point:Vector2)->Dictionary:
+	var best:={}
+	var best_score:=INF
+	for hit in hits:
+		var score:=INF
+		if hit.has("centre"):
+			var d:=(hit.centre as Vector2).distance_to(point)
+			if d<=float(hit.radius): score=d*0.5
+		if hit.has("poly") and score==INF and Geometry2D.is_point_in_polygon(point,hit.poly): score=12.0 if String(hit.kind) in ["zone","pocket"] else 2.0
+		if hit.has("line") and score==INF:
+			var d:=_distance_to_line(point,hit.line)
+			if d<=9.0: score=d+(0.0 if String(hit.kind) in ["front","arrow"] else 3.0)
+		if score<best_score: best_score=score; best=hit
+	return best
+
+
+func _input(event:InputEvent)->void:
+	var press:bool=event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT
+	if not press:
+		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE and note!=null and note.visible: close_note()
+		return
+	if note!=null and note.visible and note.get_global_rect().has_point(event.position): return
+	if get_viewport().gui_get_hovered_control()!=null: return
+	# An army counter keeps its own click (selection); its general's note opens too.
+	var army_id:=_army_counter_at(event.position)
+	if army_id>0:
+		open_note({"kind":"army","army_id":army_id},event.position)
+		return
+	var hit:=hit_at(event.position)
+	if hit.is_empty():
+		if note!=null and note.visible: close_note()
+		return
+	open_note(hit,event.position)
+	get_viewport().set_input_as_handled()
+
+
+func _army_counter_at(point:Vector2)->int:
+	var camera:=_camera()
+	if camera==null or not is_instance_valid(terrain): return 0
+	var markers:Variant=terrain.get("player_field_army_markers")
+	if not markers is Dictionary: return 0
+	var best:=0; var best_distance:=30.0
+	for id in markers:
+		var marker:Node3D=markers[id]
+		if not is_instance_valid(marker) or not marker.visible or camera.is_position_behind(marker.global_position): continue
+		var d:=camera.unproject_position(marker.global_position).distance_to(point)
+		if d<best_distance: best_distance=d; best=int(String(id))
+	return best
+
+
+func close_note()->void:
+	if note!=null: note.hide()
+	note_about={}
+
+
+## Plain words about what was clicked, and whom to send for. Pure over the
+## live ledgers: {kicker, title, lines:[String], action:{label, kind, target}}.
+func note_content(hit:Dictionary)->Dictionary:
+	var stage:=String(scene.get("stage",EraWords.stage()))
+	match String(hit.get("kind","")):
+		"zone":
+			var zone:Dictionary=hit.get("zone",{})
+			var navy:=String(zone.get("domain",""))=="navy"
+			var lines:Array=[]
+			if String(zone.get("status",""))!="": lines.append(String(zone.status)+".")
+			lines.append("Holds about %d%% of this %s." % [roundi(float(zone.get("control",0.0))*100.0),"water" if navy else "sky"])
+			if String(zone.get("tactic",""))!="": lines.append("The commander's way of working it: %s." % Tactics.name_of(String(zone.tactic),stage))
+			var blockade:Dictionary=zone.get("blockade",{})
+			if not blockade.is_empty(): lines.append(String(blockade.get("text","")))
+			var contacts:=(zone.get("contacts",[]) as Array).size()
+			if contacts>0: lines.append("%s sighted there in the last six days." % ("One contact" if contacts==1 else "%d contacts" % contacts))
+			return {"kicker":("FLEET" if navy else "AIR ARM")+" · "+String(zone.get("mission","")).replace("_"," ").to_upper(),"title":String(zone.get("name","")),"lines":lines,"action":_branch_leader("navy" if navy else "air")}
+		"lane":
+			var lane:Dictionary=hit.get("lane",{})
+			var lines:=["%s, %s." % ["An invasion convoy" if bool(lane.get("invasion",false)) else "A supply convoy",String(lane.get("status","")).replace("_"," ")]]
+			lines.append("Escorts work these waters." if bool(lane.get("escorted",false)) else "No escort works these waters.")
+			if bool(lane.get("raided",false)): lines.append("Raiders have been reported on its lane.")
+			return {"kicker":"CONVOY","title":String(lane.get("name","Convoy")),"lines":lines,"action":_branch_leader(String(lane.get("domain","navy")))}
+		"harbour":
+			var harbour:Dictionary=hit.get("harbour",{})
+			return {"kicker":"OUR HARBOUR","title":"Blockaded","lines":[String(harbour.get("text",""))],"action":_branch_leader("navy")}
+		"echelon":
+			var echelon:Dictionary=hit.get("echelon",{})
+			var what:String="Army group" if bool(echelon.get("group",false)) else ["Corps","Army"][clampi(int(echelon.level)-CORPS_LEVEL,0,1)]
+			var armies:Array=echelon.get("armies",[])
+			var lines:=["%s under one command: %s hosts, about %s under arms." % [what,EraWords.grouped(armies.size()),EraWords.grouped(int(echelon.get("troops",0)))]]
+			return {"kicker":what.to_upper(),"title":String(echelon.name),"lines":lines,"action":_general_action(int(armies[0]) if not armies.is_empty() else 0)}
+		"enemy_arrow":
+			var ago:=maxi(0,int(scene.get("today",0))-int(hit.get("seen_day",0)))
+			return {"kicker":"THEIR MOVEMENT","title":"Seen marching","lines":["Seen on the move %s." % ("today" if ago==0 else ("%d days ago" % ago)),"Nothing newer has reached us."],"action":{}}
+		"front","fallback","pocket":
+			var armies:Array=hit.get("armies",[])
+			var lines:Array=[]
+			if String(hit.kind)=="front":
+				lines.append("Where our hosts and theirs meet, drawn from where each was last reported.")
+				if bool(hit.get("stale",false)): lines.append("Part of their line is known only from old reports.")
+			elif String(hit.kind)=="fallback":
+				lines.append("Where the generals would fall back if the line gives: a day's march along their road home.")
+			else:
+				lines.append("Their host is almost ringed by ours; the gap is what they can still escape through.")
+			var content:=_army_content(int(armies[0]) if not armies.is_empty() else 0,stage)
+			content.lines=lines+(content.lines as Array)
+			if armies.size()>1: content.kicker="FRONT · %d HOSTS" % armies.size()
+			return content
+		"clash":
+			var clash:Dictionary=hit.get("clash",{})
+			var content:=_army_content(int(clash.get("army_id",0)),stage)
+			var lines:Array=[]
+			var ours:=String(clash.get("ours",Tactics.BASELINE)); var theirs:=String(clash.get("theirs",Tactics.BASELINE))
+			lines.append(Tactics.report_sentence({"attacker":{"id":ours},"defender":{"id":theirs}},"attacker",stage))
+			if int(clash.get("rounds",0))>0: lines.append("%d exchanges fought so far." % int(clash.rounds))
+			if bool(clash.get("commanded",false)): lines.append("Fought under the command staff's plan, alongside the other battles.")
+			content.lines=lines+(content.lines as Array)
+			content.kicker="BATTLE"
+			return content
+		"siege":
+			var content:=_army_content(int(hit.get("army_id",0)),stage)
+			content.kicker="SIEGE"
+			return content
+		_:
+			return _army_content(int(hit.get("army_id",0)),stage)
+
+
+func _army_record(army_id:int)->Dictionary:
+	for army in MilitaryCampaign.field_armies:
+		if int((army as Dictionary).get("army_id",0))==army_id: return army
+	return {}
+
+
+func _army_content(army_id:int,stage:String)->Dictionary:
+	var army:=_army_record(army_id)
+	if army.is_empty(): return {"kicker":"WAR","title":"Our hosts","lines":[],"action":_general_action(0)}
+	var commander:Dictionary=army.get("commander",{})
+	var name:=String(commander.get("name","The field staff"))
+	var lines:Array=[]
+	lines.append("Leads %s. %s" % [EraWords.grouped(int(army.get("troops",0))),String(army.get("command_status",""))+"." if String(army.get("command_status",""))!="" else ""])
+	for f in (scene.get("friendly_seen",[]) as Array):
+		if int(f.get("army_id",0))!=army_id: continue
+		if f.has("fallback"):
+			var how:=String(f.get("fallback_how","home"))
+			lines.append(("Withdrawing along the road home." if bool(f.get("withdrawing",false)) else "If pressed, falls back a day's march (%s km) along %s." % [EraWords.grouped(roundi(float(f.get("day_march",0)))),"the road home" if how=="road" else "the way home"]))
+		var objective:Vector2=f.get("objective",Vector2.INF)
+		if objective.is_finite() and not bool(f.get("withdrawing",false)): lines.append("Marching on the marked ground, %s km off." % EraWords.grouped(roundi((f.pos as Vector2).distance_to(objective))))
+		if int(f.get("report_age",0))>0: lines.append("Last runner's report is %d days old." % int(f.report_age))
+	var nearest:Dictionary={}
+	var here:=_v2(army.get("position",{}))
+	for e in (scene.get("enemy_seen",[]) as Array):
+		if nearest.is_empty() or (e.pos as Vector2).distance_to(here)<(nearest.pos as Vector2).distance_to(here): nearest=e
+	if not nearest.is_empty():
+		var ago:=int(nearest.get("age_days",0))
+		lines.append("Their nearest host: about %s, seen %s." % [EraWords.grouped(roundi(float(nearest.strength))),"today" if ago==0 else "%d days ago" % ago])
+	return {"kicker":"WAR LEADER · "+String(army.get("name","")).to_upper(),"title":name,"lines":lines,"action":_general_action(army_id)}
+
+
+## Who answers for an army: the Alderford general in his own campaign screen,
+## a named war leader summoned into the court, or the Marshal's office.
+func _general_action(army_id:int)->Dictionary:
+	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):
+		return {"label":"Talk with %s" % String(GeneralCampaign.state.get("general_name","the general")),"kind":"campaign"}
+	var army:=_army_record(army_id)
+	var commander:Dictionary=army.get("commander",{}) if not army.is_empty() else {}
+	if String(commander.get("figure_id",""))!="":
+		return {"label":"Send for %s" % String(commander.get("name","the general")).get_slice(" ",0),"kind":"summon","target":{"figure_id":String(commander.figure_id)}}
+	return _marshal_action()
+
+
+## The branch commander of the fleet or air arm: the Marshal's office holds
+## command of every branch until a people names its own admirals.
+func _branch_leader(_domain:String)->Dictionary:
+	return _marshal_action()
+
+
+func _marshal_action()->Dictionary:
+	var holder:Dictionary=GovernmentPeopleSystem.officeholder("Marshal") if GovernmentPeopleSystem.has_method("officeholder") else {}
+	if int(holder.get("person_id",0))>0:
+		return {"label":"Send for %s" % String(holder.get("name","the Marshal")).get_slice(" ",0),"kind":"summon","target":{"person_id":int(holder.person_id)}}
+	return {"label":"Call the war council","kind":"court"}
+
+
+func open_note(hit:Dictionary,at:Vector2)->void:
+	note_about=hit
+	var content:=note_content(hit)
+	if note==null: _build_note()
+	var box:VBoxContainer=note.get_child(0)
+	(box.get_node("Kicker") as Label).text=String(content.get("kicker",""))
+	(box.get_node("Title") as Label).text=String(content.get("title",""))
+	var body:=box.get_node("Body") as VBoxContainer
+	for child in body.get_children(): body.remove_child(child); child.queue_free()
+	for line in content.get("lines",[]):
+		if String(line).strip_edges()=="": continue
+		var label:=Label.new(); label.text=String(line); label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; label.custom_minimum_size.x=300
+		T.text(label,"small",T.INK); body.add_child(label)
+	var action:Dictionary=content.get("action",{})
+	var button:=box.get_node("Actions/Speak") as Button
+	button.visible=not action.is_empty()
+	button.text=String(action.get("label",""))
+	button.set_meta("action",action)
+	note.reset_size()
+	note.show()
+	var extent:=note.get_combined_minimum_size()
+	var view:=get_viewport_rect().size
+	note.position=Vector2(clampf(at.x+18.0,96.0,maxf(96.0,view.x-extent.x-12.0)),clampf(at.y-extent.y*0.3,78.0,maxf(78.0,view.y-extent.y-80.0)))
+	queue_redraw()
+
+
+func _build_note()->void:
+	note_layer=CanvasLayer.new(); note_layer.name="WarNoteLayer"; note_layer.layer=2
+	add_child(note_layer)
+	note=PanelContainer.new(); note.name="WarNote"
+	note.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,14.0))
+	note.mouse_filter=Control.MOUSE_FILTER_STOP
+	note_layer.add_child(note)
+	var box:=VBoxContainer.new(); box.add_theme_constant_override("separation",6); note.add_child(box)
+	var kicker:=Label.new(); kicker.name="Kicker"; T.text(kicker,"kicker",T.INK_MUTED); box.add_child(kicker)
+	var title:=Label.new(); title.name="Title"; T.text(title,"voice_small",T.INK); box.add_child(title)
+	var body:=VBoxContainer.new(); body.name="Body"; body.add_theme_constant_override("separation",3); box.add_child(body)
+	var actions:=HBoxContainer.new(); actions.name="Actions"; actions.add_theme_constant_override("separation",8); box.add_child(actions)
+	var speak:=Button.new(); speak.name="Speak"; T.text(speak,"small",T.INK); actions.add_child(speak)
+	speak.pressed.connect(func(): _act(speak.get_meta("action",{})))
+	var close:=Button.new(); close.name="Close"; close.text="Close"; T.text(close,"small",T.INK_MUTED); close.flat=true; actions.add_child(close)
+	close.pressed.connect(close_note)
+
+
+func _act(action:Dictionary)->void:
+	close_note()
+	match String(action.get("kind","")):
+		"campaign": GeneralCampaign.open_screen()
+		"summon":
+			var director:Node=preload("res://scripts/audience_director.gd").court_node()
+			if director!=null and director.has_method("summon"): director.call("summon",action.get("target",{}))
+		_: preload("res://scripts/audience_director.gd").open_court_for({})

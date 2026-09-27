@@ -87,7 +87,8 @@ func test_presentation_follows_what_the_people_field()->void:
 	assert_array(early.fronts).is_empty()
 	assert_array(early.faceoffs).is_empty()
 	assert_array(early.arrows).is_empty()
-	assert_int((early.raids as Array).size()).is_equal(1)
+	# The band's own path out (from its general's objective) and the feud's raid.
+	assert_int((early.raids as Array).size()).is_equal(2)
 	# Hosts in touch get a short face-off line, not a continuous front.
 	var hosts:=Overlay.compose({"mode":"host","friendly":[{"id":"1","pos":Vector2.ZERO,"strength":600.0}],"enemy":[{"id":"a","pos":Vector2(1.5,0),"strength":500.0,"age_days":1}]})
 	assert_array(hosts.fronts).is_empty()

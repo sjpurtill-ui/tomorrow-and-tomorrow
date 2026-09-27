@@ -4822,7 +4822,21 @@ func siege_effects_for_civilization(civ_id:String)->Dictionary:
 			for region:Dictionary in civ.get("strategic_regions",[]):
 				if String(region.get("id",""))==String(active_siege.region_id): share=clampf(float(region.get("population",0))/maxf(1,float(civ.population)),0,1)
 	var closure:=float(active_siege.get("blockade",0))*share
-	return {"food_output_multiplier":clampf(1-closure*.8,.2,1),"logistics_multiplier":clampf(1-closure*.7,.3,1)}
+	# A fleet's blockade of their ports (naval_blockade.gd): bounded, and only
+	# in proportion to the people living at the blockaded ports.
+	var sea:=float(joint_operations.blockade_closure(civ_id)) if joint_operations!=null else 0.0
+	var Blockade:=preload("res://scripts/naval_blockade.gd")
+	return {"food_output_multiplier":clampf((1-closure*.8)*(1-sea*Blockade.CIV_FOOD_LOSS),.2,1),"logistics_multiplier":clampf((1-closure*.7)*(1-sea*Blockade.CIV_SUPPLY_LOSS),.3,1),
+		"trade_multiplier":Blockade.trade_factor(sea)}
+
+## Share of a civilization's sea trade still moving under blockade (1 = free).
+func blockade_trade_factor(civ_id:String)->float:
+	if joint_operations==null or (joint_operations.state.get("blockades",{}) as Dictionary).is_empty(): return 1.0
+	return preload("res://scripts/naval_blockade.gd").trade_factor(float(joint_operations.blockade_closure(civ_id)))
+
+## How firmly a rival fleet blockades one of our own ports (0 when free).
+func port_blockade_level(city_id:String)->float:
+	return float(joint_operations.blockade_level(city_id)) if joint_operations!=null else 0.0
 
 func _process_siege_day()->void:
 	if active_siege.is_empty() or active_siege.has("shared_source_actor"): return

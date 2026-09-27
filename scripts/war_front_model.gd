@@ -306,6 +306,76 @@ static func face_offs(friendly:Array,enemy:Array,reach:float)->Array:
 	return out
 
 
+## Pockets: a front that nearly closes on itself round an enemy they have
+## seen, with none of ours inside, is a pocket. closure is how much of the
+## ring is closed (1 = cut off); the gap is the distance still open.
+static func pockets(fronts:Array,friendly:Array,enemy:Array)->Array:
+	var out:Array=[]
+	for index in fronts.size():
+		var points:PackedVector2Array=fronts[index].points
+		if points.size()<6: continue
+		var length:=_length(points)
+		var gap:=points[0].distance_to(points[-1])
+		if length<=0.0 or gap>length*0.6: continue
+		var inside:Array=[]
+		for e in enemy:
+			if Geometry2D.is_point_in_polygon(e.pos,points): inside.append(e)
+		if inside.is_empty(): continue
+		var ours_inside:=false
+		for f in friendly:
+			if Geometry2D.is_point_in_polygon(f.pos,points): ours_inside=true; break
+		if ours_inside: continue
+		var strength:=0.0
+		var centre:=Vector2.ZERO
+		for e in inside: strength+=float(e.get("strength",0.0)); centre+=e.pos
+		centre/=float(inside.size())
+		out.append({"front":index,"closure":clampf(length/(length+gap*3.0),0.0,1.0) if gap>0.0 else 1.0,"gap":gap,"centre":centre,"strength":strength,
+			"gap_at":points[0].lerp(points[-1],0.5)})
+	return out
+
+
+## Where an army's general would fall back to, from his actual withdrawal
+## intent: a point one day's march along the route he would take (his
+## commanded route home, the campaign board's road home, or straight home).
+static func withdrawal_point(from:Vector2,route:PackedVector2Array,depth:float)->Vector2:
+	var walked:=0.0
+	var at:=from
+	for next in route:
+		var step:=at.distance_to(next)
+		if walked+step>=depth and step>0.0: return at.lerp(next,(depth-walked)/step)
+		walked+=step; at=next
+	return at
+
+
+## The fallback line behind a front, through the fallback points of the
+## armies holding it, in order along the front and smoothed. One army gives a
+## short line across its road back.
+static func fallback_from_intent(front:Dictionary,holders:Array)->PackedVector2Array:
+	var points:PackedVector2Array=front.points
+	if points.size()<2 or holders.is_empty(): return PackedVector2Array()
+	var along:=(points[-1]-points[0]).normalized()
+	if holders.size()==1:
+		var h:Dictionary=holders[0]
+		var back:Vector2=h.fallback
+		var road:=(back-(h.pos as Vector2)).normalized()
+		var across:=road.orthogonal() if road!=Vector2.ZERO else along
+		var half:=maxf(0.05,float(h.get("frontage",0.5)))
+		return PackedVector2Array([back-across*half,back,back+across*half])
+	var ordered:=holders.duplicate()
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return (a.fallback as Vector2).dot(along)<(b.fallback as Vector2).dot(along))
+	var line:=PackedVector2Array()
+	for h in ordered: line.append(h.fallback)
+	return _chaikin(_chaikin(line))
+
+
+## Evenly subdivide a polyline so it drapes over the ground when projected
+## (no segment longer than `step` world units; bounded to `limit` points).
+static func densify(points:PackedVector2Array,step:float,limit:int=64)->PackedVector2Array:
+	if points.size()<2 or step<=0.0: return points
+	var count:=clampi(int(ceilf(_length(points)/step))+1,points.size(),limit)
+	return resample(points,count) if count>points.size() else points
+
+
 ## The line the general would fall back to: the front offset toward our side.
 static func fallback_line(front:Dictionary,home:Vector2,depth:float)->PackedVector2Array:
 	var points:PackedVector2Array=front.points
