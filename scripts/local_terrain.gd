@@ -3692,7 +3692,7 @@ func _refresh_settlement_convoy_marker()->void:
 		position_2d=Vector2(float(position_value.get("x",0.0)),float(position_value.get("z",position_value.get("y",0.0))))
 	settlement_convoy_marker.position=Vector3(position_2d.x,_height_at(position_2d.x,position_2d.y)+0.002,position_2d.y)
 	if settlement_convoy_label:
-		settlement_convoy_label.text="SETTLER CARAVAN  •  %s  •  %d%%" % [_compact_population(int(convoy.get("population",0))),roundi(float(convoy.get("progress",0.0))*100.0)]
+		settlement_convoy_label.text="Settlers, %s · %d%% of the way" % [_compact_population(int(convoy.get("population",0))),roundi(float(convoy.get("progress",0.0))*100.0)]
 
 func _update_scale_lod() -> void:
 	if camera == null:
@@ -12001,7 +12001,7 @@ func _retire_founding_expedition_visuals()->void:
 func _analyze_convoy_route(from: Vector3,to: Vector3) -> Dictionary:
 	var distance_km:=Vector2(from.x,from.z).distance_to(Vector2(to.x,to.z))*KM_PER_WORLD_UNIT
 	if distance_km<0.25:
-		return {"valid":false,"reason":"DESTINATION TOO CLOSE  •  choose a point at least 250 m away"}
+		return {"valid":false,"reason":"That is too close; choose a place at least 250 m away"}
 	var samples:=clampi(ceili(distance_km/1.5),12,640)
 	var step_km:=distance_km/float(samples)
 	var wet_run:=0.0
