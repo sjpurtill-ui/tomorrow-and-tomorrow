@@ -56,8 +56,8 @@ vec3 settlement_ground_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	vec4 coarse = textureLod(settlement_ground, uv, 2.0);
 	if (max(max(coarse.r, coarse.g), coarse.b) < 0.003) { return earth; }
 	// Wander the edges a little (in metres, so they hold still as you zoom).
-	float wobble = sg_noise(local_m*0.55)*0.65+sg_noise(local_m*1.9+vec2(7.1, -3.3))*0.35;
-	vec2 warp = (vec2(sg_noise(local_m*0.21+vec2(3.0, 9.0)), sg_noise(local_m*0.21+vec2(-5.0, 1.0)))-0.5)*1.4/size_m;
+	float wobble = sg_noise(local_m*0.55);
+	vec2 warp = (vec2(sg_noise(local_m*0.21+vec2(3.0, 9.0)), wobble)-0.5)*1.4/size_m;
 	vec4 g = texture(settlement_ground, uv+warp);
 	float fade = smoothstep(0.0, 0.03, min(min(uv.x, uv.y), min(1.0-uv.x, 1.0-uv.y)));
 	g *= fade*strength;
@@ -74,13 +74,16 @@ vec3 settlement_ground_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	float ground_luma = clamp(luma, 0.16, 0.55);
 	vec3 soil = vec3(0.98, 0.83, 0.60)*ground_luma*mix(0.92, 1.10, heart);
 	// Foot marks and damp ruts close up, never a hard-edged grain.
-	float grit = sg_noise(local_m*3.1)*0.6+sg_noise(local_m*7.3+vec2(1.7, 4.2))*0.4;
+	float grit = sg_noise(local_m*3.1);
 	float close = 1.0-smoothstep(0.25, 0.9, pixel_m);
 	soil *= 1.0+(grit-0.5)*mix(0.08, 0.22, close);
-	float rut = smoothstep(0.62, 0.80, sg_noise(local_m*vec2(0.9, 0.35)+vec2(2.0, 8.0)))*heart*close;
-	soil *= 1.0-rut*0.12;
-	// A tuft of grass survives here and there at the edge of the bare ground.
-	float tuft = smoothstep(0.55, 0.75, sg_noise(local_m*1.3+vec2(11.0, 5.0)))*(1.0-heart);
+	float tuft = 0.0;
+	if (close > 0.0 && bare > 0.0) {
+		float rut = smoothstep(0.62, 0.80, sg_noise(local_m*vec2(0.9, 0.35)+vec2(2.0, 8.0)))*heart*close;
+		soil *= 1.0-rut*0.12;
+		// A tuft of grass survives here and there at the edge of the bare ground.
+		tuft = smoothstep(0.55, 0.75, sg_noise(local_m*1.3+vec2(11.0, 5.0)))*(1.0-heart);
+	}
 	earth = mix(earth, soil, bare*(1.0-tuft*0.55));
 	// The drawn edge: a faint iron-gall line where grass gives way to earth.
 	float edge = bare*(1.0-bare)*4.0;
@@ -161,7 +164,7 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	vec3 green = (crop == 1 ? vec3(0.42, 0.76, 0.14) : (crop == 3 ? vec3(0.42, 0.80, 0.34) : vec3(0.52, 0.86, 0.14)))*L;
 	if (crop == 4) {
 		float bed = sg_hash(vec2(floor(row), floor(along/3.0)));
-		green = mix(vec3(0.34, 0.66, 0.16), vec3(0.62, 0.78, 0.22), bed)*L;
+		green = mix(vec3(0.46, 0.76, 0.22), vec3(0.74, 0.86, 0.30), bed)*L;
 	}
 	vec3 ripe = (crop == 0 ? vec3(1.78, 1.26, 0.36) : (crop == 1 ? vec3(0.50, 0.80, 0.18) : (crop == 3 ? vec3(1.40, 1.22, 0.62) : vec3(1.30, 1.14, 0.46))))*L;
 	vec3 straw = vec3(1.55, 1.36, 0.86)*L;
@@ -203,7 +206,7 @@ vec3 settlement_meadow(vec3 earth, vec2 surface_position_km, vec2 surface_origin
 	p += cell;
 	float luma = dot(earth, vec3(0.2126, 0.7152, 0.0722));
 	// Drier patches a few metres across, lusher hollows between.
-	float patch = sg_noise(p*0.11)*0.6+sg_noise(p*0.37+vec2(4.0, 1.0))*0.4;
+	float patch = sg_noise(p*0.16);
 	vec3 straw = vec3(luma)*vec3(1.34, 1.16, 0.74);
 	earth = mix(earth, straw, smoothstep(0.52, 0.80, patch)*0.30*close);
 	earth *= 1.0-smoothstep(0.40, 0.15, patch)*0.10*close;

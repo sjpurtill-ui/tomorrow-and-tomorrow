@@ -265,7 +265,7 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 			for other in buildings:
 				if other!=record and Vector2(other.position).distance_to(middle)<float(other.get("radius",0.003))+0.004:clear=false;break
 			if not clear:continue
-			_fill_polygon(worked,corner,side/float(RES),bed,Color(1.0,fposmod(angle,PI)/PI,(2.0+8.0*4.0+64.0)/255.0,(4.0*16.0+10.0)/255.0))
+			_fill_polygon(worked,corner,side/float(RES),bed,Color(1.0,fposmod(angle,PI)/PI,(2.0+8.0*4.0+64.0)/255.0,(4.0*16.0+6.0)/255.0))
 			gardens+=1
 			if gardens>=48:break
 	if fields_texture==null or fields_texture.get_width()!=RES:fields_texture=ImageTexture.create_from_image(worked)
