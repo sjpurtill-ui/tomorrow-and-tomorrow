@@ -59,6 +59,9 @@ var snow:=0.0
 var clock:=0.0
 var wind_clock:=0.0
 var cloud_drift:=Vector2.ZERO
+## Cloud drift for shadows drawn on the land itself (map_cloud.gdshaderinc):
+## its noise does not tile, so it wraps only once every 40,000 km.
+var cloud_drift_land:=Vector2.ZERO
 var cloud_mesh:MeshInstance3D
 var drops:MultiMeshInstance3D
 var birds:MultiMeshInstance3D
@@ -73,6 +76,7 @@ var last_report:Dictionary={}
 var _cloud_material:ShaderMaterial
 var _legibility:=-1.0
 var _wind_targets:Array[WeakRef]=[]
+var _cloud_targets:Array[WeakRef]=[]
 var _wind_scan_key:=""
 var _drop_material:ShaderMaterial
 var _bird_material:ShaderMaterial
@@ -187,7 +191,9 @@ func _frame(delta:float)->void:
 	if not reduced:
 		cloud_drift+=wind_dir*wind*CLOUD_SPEED_KMH/3600.0*dt*8.0
 		var period:=289.0*_cloud_scale()
+		cloud_drift_land+=wind_dir*wind*CLOUD_SPEED_KMH/3600.0*dt*8.0
 		cloud_drift=Vector2(fposmod(cloud_drift.x,period),fposmod(cloud_drift.y,period))
+		cloud_drift_land=Vector2(fposmod(cloud_drift_land.x,40000.0),fposmod(cloud_drift_land.y,40000.0))
 	_push_wind(gust)
 	var target:Vector3=terrain.get("camera_target") if terrain.get("camera_target") is Vector3 else Vector3.ZERO
 	var home:=_home()
@@ -195,7 +201,16 @@ func _frame(delta:float)->void:
 	# Cloud shadows: a full-screen pass, only while they can be seen.
 	var cloud_fade:=1.0-smoothstep(CLOUD_FULL_BELOW,CLOUD_GONE_ABOVE,size)
 	var shadow:=cloud_fade*clampf(cloud*1.15,0.0,1.0)
-	cloud_mesh.visible=shadow>0.01
+	# Materials that draw cloud shadows on the land itself take them over from
+	# the flat screen pass, which cannot follow relief.
+	var land_clouds:=not _cloud_targets.is_empty()
+	var cloud_packed:=Vector4(cloud_drift_land.x,cloud_drift_land.y,clampf(cloud,0.0,0.9),cloud_fade*smoothstep(0.02,0.25,cloud))
+	for ref in _cloud_targets:
+		var material:=ref.get_ref() as ShaderMaterial
+		if material==null:continue
+		material.set_shader_parameter("map_cloud",cloud_packed)
+		material.set_shader_parameter("map_cloud_scale",_cloud_scale())
+	cloud_mesh.visible=shadow>0.01 and not land_clouds
 	if cloud_mesh.visible:
 		_cloud_material.set_shader_parameter("drift",cloud_drift)
 		_cloud_material.set_shader_parameter("ground_y",target.y)
@@ -251,6 +266,7 @@ func _rescan_wind_targets()->void:
 	if key==_wind_scan_key:return
 	_wind_scan_key=key
 	_wind_targets.clear()
+	_cloud_targets.clear()
 	var alive:Array[WeakRef]=[]
 	for ref in _wind_materials:
 		if ref.get_ref()!=null:alive.append(ref)
@@ -261,7 +277,9 @@ func _rescan_wind_targets()->void:
 		for ref in list:
 			var material:=(ref as WeakRef).get_ref() as ShaderMaterial if ref is WeakRef else null
 			if material==null or material.shader==null or not material.shader.code.contains("map_wind"):continue
-			if not _wind_targets.any(func(existing:WeakRef)->bool:return existing.get_ref()==material):_wind_targets.append(weakref(material))
+			if not _wind_targets.any(func(existing:WeakRef)->bool:return existing.get_ref()==material):
+				_wind_targets.append(weakref(material))
+				if material.shader.code.contains("map_cloud"):_cloud_targets.append(weakref(material))
 	_wind_scan_key="%d|%d" % [_wind_materials.size(),(seasonal as Array).size() if seasonal is Array else -1]
 
 # --------------------------------------------------------------------------

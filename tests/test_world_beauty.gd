@@ -74,9 +74,15 @@ func test_climate_changes_blend_without_jumps()->void:
 func test_shader_include_has_only_declarations_at_top_level()->void:
 	# A stray statement outside a function fails the whole terrain shader at
 	# run time (the land renders flat grey), and headless tests never compile
-	# shaders. Keep the include structurally sound: balanced braces, and only
-	# constants and function definitions at the top level.
-	var text:=FileAccess.get_file_as_string("res://scripts/world_beauty.gdshaderinc")
+	# shaders. Keep the includes structurally sound: balanced braces, and only
+	# constants, uniforms and function definitions at the top level.
+	for path in ["res://scripts/world_beauty.gdshaderinc","res://scripts/water_beauty.gdshaderinc","res://scripts/map_cloud.gdshaderinc"]:
+		_assert_declarations_only(path)
+
+
+func _assert_declarations_only(path:String)->void:
+	var text:=FileAccess.get_file_as_string(path)
+	assert_str(text).override_failure_message("missing %s" % path).is_not_empty()
 	var depth:=0
 	var allowed:=RegEx.new()
 	allowed.compile("^(const |uniform |#|}|//|(vec[234]|float|int|bool|mat[234]|void) [A-Za-z_0-9]+[(])")
@@ -85,7 +91,7 @@ func test_shader_include_has_only_declarations_at_top_level()->void:
 		line_number+=1
 		var line:=raw.strip_edges()
 		if depth==0 and line!="" and allowed.search(line)==null:
-			fail("top-level statement at line %d: %s" % [line_number,line])
+			fail("%s: top-level statement at line %d: %s" % [path,line_number,line])
 		depth+=line.count("{")-line.count("}")
 		assert_int(depth).override_failure_message("unbalanced braces at line %d" % line_number).is_greater_equal(0)
 	assert_int(depth).is_equal(0)
@@ -114,3 +120,18 @@ func test_fresh_snow_is_deterministic_and_bounded()->void:
 		var a:=BEAUTY.lying_snow(77,float(day),cold)
 		assert_float(a).is_equal(BEAUTY.lying_snow(77,float(day),cold))
 		assert_float(a).is_between(0.0,1.0)
+
+
+func test_round_two_shaders_are_wired_in()->void:
+	# The terrain paints woodland margins, strands and sky fill, and draws
+	# cloud shadows on the land; the sea recognises still ponds; the plants
+	# share the land's cloud shadows (codex/beauty-2).
+	var terrain:=FileAccess.get_file_as_string("res://scripts/local_terrain.gd")
+	for call in ["wb_stand_edge(","wb_fringe(","wb_strand(","wb_sky_fill(","map_cloud_shadow(","wb_macro_normal("]:
+		assert_bool(terrain.contains(call)).override_failure_message("terrain shader lacks %s" % call).is_true()
+	assert_int(terrain.count('#include "res://scripts/map_cloud.gdshaderinc"')).is_equal(2)
+	var sea:=FileAccess.get_file_as_string("res://scripts/coastal_water.gdshader")
+	assert_bool(sea.contains("wbw_enclosure(") and sea.contains("wbw_still_water(")).is_true()
+	# Ambience hands cloud shadows to materials that draw them on the land.
+	var ambience:=FileAccess.get_file_as_string("res://scripts/map_ambience.gd")
+	assert_bool(ambience.contains('"map_cloud"')).is_true()

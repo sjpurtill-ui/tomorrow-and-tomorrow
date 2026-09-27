@@ -44,6 +44,12 @@ func _ready()->void:
 	while not terrain.macro_render.ready() and Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
+	# Diagnosis: `--no-shadows` turns off the sun's cast shadows, `--sky=clear|cloud|rain|snow`
+	# forces the day's weather (cloud shadows, rain or snow).
+	if "--no-shadows" in args:
+		for light in terrain.find_children("*","DirectionalLight3D",true,false):(light as DirectionalLight3D).shadow_enabled=false
+	for argument in args:
+		if argument.begins_with("--sky="):_force_sky(argument.trim_prefix("--sky="))
 	var lod=preload("res://scripts/terrain_lod.gd")
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
@@ -75,7 +81,8 @@ func _ready()->void:
 		for i in 6:await get_tree().process_frame
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true,0.0)
-		var path:=out_dir.path_join("%s_z%d.png" % [prefix,int(size)])
+		var tag:=str(int(size)) if is_equal_approx(size,roundf(size)) else str(snappedf(size,0.01)).replace(".","p")
+		var path:=out_dir.path_join("%s_z%s.png" % [prefix,tag])
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
@@ -112,6 +119,20 @@ func _seed_great_works(center:Vector3)->void:
 	city.undertakings=list
 	print("MAP_ART_CAPTURE: seeded ",list.size()," great works around ",home)
 	terrain._refresh_undertaking_visuals(true)
+
+func _force_sky(kind:String)->void:
+	var ambience_script:=preload("res://scripts/map_ambience.gd")
+	var forced:={"cloud":0.0,"rain":0.0,"snow":0.0}
+	match kind:
+		"cloud":forced={"cloud":0.6,"rain":0.0,"snow":0.0,"wind":0.6}
+		"rain":forced={"cloud":0.8,"rain":0.9,"snow":0.0,"wind":0.7}
+		"snow":forced={"cloud":0.7,"rain":0.0,"snow":0.9,"wind":0.35}
+	ambience_script.forced_weather=forced
+	var ambience:Node=terrain.get_node_or_null("MapAmbience")
+	if ambience:
+		var sky:Dictionary=ambience.weather.duplicate();sky.merge(forced,true)
+		ambience.weather=sky
+		ambience.cloud=float(forced.cloud);ambience.rain=float(forced.rain);ambience.snow=float(forced.snow)
 
 ## Nearest point with dense woodland, searched on widening rings.
 func _find_woodland(center:Vector3)->Vector3:

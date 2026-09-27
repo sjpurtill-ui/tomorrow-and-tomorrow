@@ -89,11 +89,11 @@ vec3 wb_paint(vec3 earth, vec3 palette, float reference, float amount) {
 vec3 wb_light(vec3 earth, float relief, float valley, float strength) {
 	float lit = clamp(relief, -1.0, 1.0)*strength;
 	vec3 warm = vec3(1.10, 1.03, 0.88);
-	vec3 cool = vec3(0.74, 0.82, 0.98);
+	vec3 cool = vec3(0.82, 0.87, 0.98);
 	vec3 tint = lit >= 0.0 ? mix(vec3(1.0), warm, lit) : mix(vec3(1.0), cool, -lit);
 	earth *= tint;
 	// Valley shade: cool and soft, the way a painter deepens a hollow.
-	earth *= mix(vec3(1.0), vec3(0.80, 0.86, 0.96), clamp(valley, 0.0, 1.0));
+	earth *= mix(vec3(1.0), vec3(0.90, 0.93, 0.98), clamp(valley, 0.0, 1.0));
 	return earth;
 }
 
@@ -148,8 +148,8 @@ vec3 wb_canopy_edges(vec3 earth, float forest, vec2 ground_xz, float pixel_world
 	float spill = smoothstep(0.03, 0.30, forest)*(1.0-smoothstep(0.55, 0.85, forest));
 	float lit = max(facing, 0.0)*rim*edge;
 	float shade = max(-facing, 0.0)*max(rim, spill)*edge;
-	earth = mix(earth, earth*vec3(1.22, 1.14, 0.92), lit*0.55);
-	earth = mix(earth, earth*vec3(0.58, 0.64, 0.78), shade*0.60);
+	earth = mix(earth, earth*vec3(1.16, 1.10, 0.94), lit*0.40);
+	earth = mix(earth, earth*vec3(0.66, 0.72, 0.84), shade*0.50);
 	return earth;
 }
 
@@ -294,6 +294,11 @@ vec3 wb_woodland(vec3 earth, float stand, vec3 wood, vec2 world_xz, float pixel_
 	vec3 canopy = wb_canopy(world_xz, pixel_world);
 	// Canopy detail softens into a stippled wash at chart zoom.
 	float detail = 1.0-smoothstep(0.05, 0.5, pixel_world)*0.80;
+	// Crown-shaped margin: where the stand is part-covered, whole crowns are
+	// in or out, so a wood ends in a line of rounded trees, not a straight cut.
+	float resolved = 1.0-smoothstep(0.03, 0.30, pixel_world);
+	float margin = clamp(min(stand, 1.0-stand)*4.0, 0.0, 1.0)*resolved;
+	stand = mix(stand, smoothstep(0.2, 0.8, stand+(0.45-canopy.y)*1.3*margin), resolved);
 	// Canopy is painted a little lighter than its ground's palette: a forest
 	// on a painted map is a rich mass of green, never a black stain.
 	vec3 c = wood*1.9*mix(1.0, canopy.x, detail);
@@ -323,4 +328,77 @@ float wb_wind_waves(vec2 world_xz, float pixel_world, vec4 wind, float clock, fl
 	// Gusts come in patches a few hundred metres across, drifting with the wind.
 	float gust = smoothstep(0.35, 0.80, map_paper_noise((world_xz-dir*t*0.004)*3.2+vec2(-3.0, 7.0)));
 	return band*gust*strength*resolved;
+}
+
+// -- Round two (codex/beauty-2) ----------------------------------------------
+
+// Ragged edge noise held at a constant size on screen (cells about 40 and 12
+// pixels), blended across octaves so it never pops while zooming. Returns
+// about -0.5..0.5. Breaks straight chords where a field crosses a threshold.
+float wb_ragged(vec2 world_xz, float pixel_world) {
+	float octave = log2(max(pixel_world, 0.0000001)*40.0/0.01);
+	float scale = 0.01*exp2(floor(octave));
+	float blend = fract(octave);
+	vec2 p = world_xz/scale;
+	float a = map_paper_noise(p)*0.7+map_paper_noise(p*3.3+vec2(7.1, -3.7))*0.3;
+	float b = map_paper_noise(p*0.5)*0.7+map_paper_noise(p*1.65+vec2(7.1, -3.7))*0.3;
+	return mix(a, b, blend)-0.5;
+}
+
+// Woodland stand with a natural margin. Like wb_stand, plus `ragged`
+// (wb_ragged) so the edge wanders instead of following the terrain mesh's
+// straight chords. Returns (stand 0-1, fringe 0-1): the fringe is the scrub
+// and young growth just outside the trees, where the stand thins out.
+vec2 wb_stand_edge(float woodland, float noise_a, float noise_b, float ragged, float pixel_world) {
+	float close = 1.0-smoothstep(0.02, 0.12, pixel_world);
+	float w = woodland+ragged*0.26*close;
+	float stand = wb_stand(w, noise_a, noise_b, pixel_world);
+	// A close and valley-view detail: at chart zoom it would only speckle.
+	float fringe = smoothstep(0.16, 0.40, w+ragged*0.12)*(1.0-stand)*(1.0-smoothstep(0.012, 0.04, pixel_world));
+	return vec2(stand, fringe);
+}
+
+// Scrub, brambles and young trees along a wood's margin: a darker, warmer
+// stipple of small crowns that thins away from the trees.
+vec3 wb_fringe(vec3 earth, float fringe, vec3 wood, vec2 world_xz, float pixel_world) {
+	if (fringe <= 0.001) { return earth; }
+	vec2 shrub = wb_crown_octave(world_xz/max(pixel_world*9.0, 0.005)+vec2(-3.1, 8.3));
+	// Distinct bushes up close; a soft darker tone once they would only speckle.
+	float bushes = 1.0-smoothstep(0.0015, 0.006, pixel_world);
+	float cover = mix(0.35, 1.0-shrub.y, bushes)*smoothstep(0.0, 0.8, fringe);
+	vec3 scrub = mix(earth*vec3(0.80, 0.85, 0.72), wood*1.55*mix(0.9, shrub.x, bushes), 0.60);
+	return mix(earth*mix(1.0, 0.92, fringe), scrub, clamp(cover*0.80, 0.0, 1.0));
+}
+
+// A pale strand of sand or shingle along the shore, a few tens of metres
+// wide (never the whole flat coastal plain), ragged, and only where it can be
+// seen. `shore_km` horizontal distance inland from the waterline.
+vec3 wb_strand(vec3 earth, float shore_km, float ragged, float pixel_world) {
+	float visible = 1.0-smoothstep(0.02, 0.09, pixel_world);
+	float width = max(0.018+ragged*0.020, pixel_world*1.2);
+	if (visible <= 0.0 || shore_km > width*1.6) { return earth; }
+	float strand = (1.0-smoothstep(width*0.55, width, shore_km))*step(0.0, shore_km);
+	vec3 sand = wb_srgb(vec3(0.72, 0.69, 0.59));
+	return mix(earth, sand*(0.94+ragged*0.16), strand*visible*0.60);
+}
+
+// The broad landform's normal from the macro height raster (cells of a few
+// km), for calm lighting at chart zoom: big hills and valleys keep their
+// light and shade, the small wrinkles of the mesh stop crowding the sheet.
+// `step_km` the finite-difference step. Needs coast_mask_ready().
+vec3 wb_macro_normal(vec2 xz, float step_km) {
+	float hx = coast_mask_height(xz+vec2(step_km, 0.0))-coast_mask_height(xz-vec2(step_km, 0.0));
+	float hz = coast_mask_height(xz+vec2(0.0, step_km))-coast_mask_height(xz-vec2(0.0, step_km));
+	return normalize(vec3(-hx, 2.0*step_km, -hz));
+}
+
+// The scene sun (local_terrain.gd _build_environment: rotation -31, -138):
+// the direction toward it, in world space.
+const vec3 WB_SCENE_SUN = vec3(-0.573, 0.515, -0.637);
+
+// Cool sky fill for ground turned away from the low sun: an emission weight
+// (times albedo). Zero on sunlit slopes, rising where the sun only grazes.
+vec3 wb_sky_fill(vec3 normal) {
+	float ndl = dot(normal, WB_SCENE_SUN);
+	return vec3(0.72, 0.82, 1.0)*0.34*(1.0-smoothstep(-0.05, 0.55, ndl));
 }
