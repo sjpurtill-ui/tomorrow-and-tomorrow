@@ -1,0 +1,14 @@
+{
+  "id": "villa_press_rooms",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5eaa5492-d923-4be5-9444-53606bbe62e2.png",
+  "source_file": "exec-5eaa5492-d923-4be5-9444-53606bbe62e2.png",
+  "creative_brief": "Country estates gather press room, wine cellar, granary and workers' quarters under one roof. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/villa_press_rooms-v1.png",
+  "sha256": "eab0791f3313f40b3fefefd67f08c80589aecd98be98bd155c2ebd2750415162",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

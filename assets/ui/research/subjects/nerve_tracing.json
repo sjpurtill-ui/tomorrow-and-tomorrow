@@ -1,0 +1,14 @@
+{
+  "id": "nerve_tracing",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ebcfeafb-e5b8-43d8-9f10-1b9589fc7ef2.png",
+  "source_file": "exec-ebcfeafb-e5b8-43d8-9f10-1b9589fc7ef2.png",
+  "creative_brief": "Anatomists follow the white cords of the body back to brain and spine, and learn why a cut arm may lose its feeling. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/nerve_tracing-v1.png",
+  "sha256": "5dd6106ffcbb708027d6dce693f5d928b9f47f9b187308894d2f4d411df38a3d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

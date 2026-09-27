@@ -1,0 +1,14 @@
+{
+  "id": "standard_trigger_locks",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cb8fc1be-c5b6-44bd-8aaf-f16c4f102522.png",
+  "source_file": "exec-cb8fc1be-c5b6-44bd-8aaf-f16c4f102522.png",
+  "creative_brief": "Bronze trigger locks cast to one pattern fit every crossbow, and armorers swap them in the field. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/standard_trigger_locks-v1.png",
+  "sha256": "fc78ac34eb1831b251371e3d98254c9ccd6eb41c8cd194f0c50e2bb4089712b6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
