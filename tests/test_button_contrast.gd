@@ -79,3 +79,40 @@ func test_game_display_preferences_theme_popups_on_canvas_layers()->void:
 	check_button(popup.next_button,"discovery popup Continue")
 	popup.close()
 	window.theme=saved[0];window.content_scale_mode=saved[1];window.content_scale_aspect=saved[2];window.content_scale_size=saved[3];window.scaling_3d_mode=saved[4]
+
+## Every colour the HUD uses for TEXT, on every ground text sits on, in both
+## palettes. The plain accents (GREEN, AMBER, TEAL, RED, GOLD...) are for bars
+## and rules only; text uses their *_TEXT twins.
+static func text_tokens()->Dictionary:
+	return {"INK":T.INK,"BODY":T.BODY,"BODY_2":T.BODY_2,"TEXT_SOFT":T.TEXT_SOFT,"TEXT_DIM":T.TEXT_DIM,"MUTED":T.MUTED,"INK_MUTED":T.INK_MUTED,"GOLD_BRIGHT":T.GOLD_BRIGHT,
+		"GREEN_TEXT":T.GREEN_TEXT,"RED_TEXT":T.RED_TEXT,"AMBER_TEXT":T.AMBER_TEXT,"TEAL_TEXT":T.TEAL_TEXT,"BLUE_TEXT":T.BLUE_TEXT,"VIOLET_TEXT":T.VIOLET_TEXT,"GOLD_TEXT":T.GOLD_TEXT}
+
+func test_every_text_token_reads_on_every_paper_ground_in_both_palettes()->void:
+	for mode:String in ["light","dark"]:
+		T.set_color_mode(mode)
+		var grounds:={"PANEL_BG":T.PANEL_BG,"PANEL_BG_SOLID":T.PANEL_BG_SOLID,"DOCK_BG":T.DOCK_BG,"TILE_BG":T.TILE_BG,"ROW_BG":T.ROW_BG,"HOVER_BG":T.HOVER_BG,"BUTTON_BG":T.BUTTON_BG,"FIELD_BG":T.FIELD_BG,"ACTIVE_BG":T.ACTIVE_BG,"PAPER":T.PAPER,"PAPER_RAISED":T.PAPER_RAISED,"PAPER_SUNK":T.PAPER_SUNK}
+		assert_int(grounds.size()).is_equal(T.text_grounds().size())
+		var tokens:=text_tokens()
+		for token:String in tokens:
+			var ink:Color=tokens[token]
+			for ground_name:String in grounds:
+				var ratio:=contrast(ink,grounds[ground_name])
+				assert_float(ratio).override_failure_message("%s on %s is %.2f:1 in %s mode" % [token,ground_name,ratio,mode]).is_greater_equal(4.5)
+
+func test_text_for_maps_each_accent_to_a_readable_twin()->void:
+	for mode:String in ["light","dark"]:
+		T.set_color_mode(mode)
+		for accent:Color in [T.GREEN,T.RED,T.AMBER,T.TEAL,T.BLUE,T.VIOLET,T.GOLD,Color("8ed9ae"),Color("e9bf70")]:
+			var ink:=T.text_for(accent)
+			for ground:Color in T.text_grounds():
+				assert_float(contrast(ink,ground)).override_failure_message("text_for(%s) on %s = %.2f in %s" % [accent.to_html(false),ground.to_html(false),contrast(ink,ground),mode]).is_greater_equal(4.5)
+	# legible() reaches the ratio on the ground asked for.
+	T.set_color_mode("light")
+	assert_float(contrast(T.legible(Color("8ed9ae"),T.MAP_LABEL_BG),T.MAP_LABEL_BG)).is_greater_equal(4.5)
+	assert_float(T.contrast(Color.BLACK,Color.WHITE)).is_equal_approx(21.0,0.01)
+
+func test_sentence_case_lowers_shouted_labels_only()->void:
+	assert_str(T.sentence_case("SEND THE CARAVAN")).is_equal("Send the caravan")
+	assert_str(T.sentence_case("1 · COMPOSITION")).is_equal("1 · Composition")
+	assert_str(T.sentence_case("Known World")).is_equal("Known World")
+	assert_str(T.sentence_case("")).is_equal("")

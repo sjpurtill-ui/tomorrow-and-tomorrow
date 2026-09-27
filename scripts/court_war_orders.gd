@@ -9,16 +9,22 @@ extends RefCounted
 ##
 ## read()    the ruler's words -> {kind, target, full, insist, ...} or {}.
 ## perform() the war leader weighs it against what is really there: known
-##           place, a land road (army_land_route.gd), trained soldiers at home
-##           (keeping a sensible watch unless told "everything"), the drill of
-##           the levy, and the last estimate of the enemy garrison. Then:
-##           - act: forms the force from the actual home formations and sends
-##             it through MilitaryCampaign's field-army machinery (march along
-##             the land road, then attack, siege or raid on arrival; war begins
-##             on contact, and the rival's people hear of it as the army goes);
-##           - object: a general's objection with the real numbers and what
-##             would fix it; "I insist" (or "whatever the cost") overrides;
-##           - impossible: the real reason and what would change it.
+##           place, a land road (army_land_route.gd), every force he commands
+##           (his own band wherever it stands, the trained reserve at home,
+##           and the recruits still in drill, with their real drill and
+##           weapons), and the last estimate of the enemy garrison. Then:
+##           - act: sends his band from where it stands, or forms a host from
+##             the home formations, through MilitaryCampaign's field-army
+##             machinery (march along the land road, then attack, siege or
+##             raid on arrival; war begins on contact);
+##           - object: forces exist but are too few, half-drilled, unarmed or
+##             outnumbered. He says so with the real numbers and what would
+##             fix it; "I insist" / "take them as they are" overrides, and
+##             recruits still in drill then march with the drill they have;
+##           - impossible: only when nothing can go at all (nobody under arms
+##             or in drill, no land road, an unknown place, a fight already on).
+##           The war leader's words (says) carry the answer; outcome is one
+##           short plain note ("No one marches yet.").
 ##           No accepting answer is ever given without a created objective:
 ##           an accepting result always carries objective.army_id.
 ## daily()   follows ordered marches: the general's unsolicited report comes
@@ -33,7 +39,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill"]
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
 const MIN_FORCE:=5
 ## Below this share of the enemy's estimated strength, a general objects.
@@ -43,6 +49,10 @@ const UNDRILLED:=0.2
 ## The home watch a general keeps back unless told to send everything.
 const WATCH_SHARE:=0.2
 const LEDGER_MAX:=24
+## How long an objection stays open to 'take them as they are' (as court_commands).
+const PENDING_DAYS:=2
+## Share of a force without weapons at which a general objects.
+const UNARMED_SHARE:=0.25
 
 const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|levy|levies|war ?bands?|spearmen|column|everyone who can fight|every fighter|every spear)"
 ## Words that mean fighters only next to "against"/"on" ("send our men against them").
@@ -55,6 +65,9 @@ const RECALL_WORDS:="((march|come|go|bring|call|send|pull|get|fall)\\w* [\\w' ]{
 const DEFEND_WORDS:="(defend|hold|guard|protect|garrison|man the walls|stand guard)"
 const FULL_WORDS:="(full|whole|all (of )?(our|my|the)|every|everything|everyone|each and every|all we have|all you have|to the last)"
 const INSIST_WORDS:="(regardless|whatever the cost|no matter (what|the cost|the odds)|at any cost|at all costs|i don't care|i do not care|now!|at once|i insist|i command it|do it anyway|anyway)"
+## "Drill them first", "let them finish their drill": the god takes the war
+## leader's advice instead of insisting.
+const DRILL_WORDS:="((drill|train) (them|the band|the levy|your band|your men) (first|more|longer)|let them (finish|drill|train)|finish (their|the) (drill|training)|bring (them|the band|your band) home (to|and) (drill|train))"
 const PLACE_WORDS:="(ford|pass|bridge|crossing|river|border|hills?|gate|road|walls?|home|village|town|camp|fields)"
 
 static func _re(pattern:String)->RegEx:
@@ -154,6 +167,7 @@ static func read(text:String,context_civ:String="")->Dictionary:
 	var named:=find_target(clean,context_civ)
 	var named_town:=named.has("city_id") or named.has("unknown")
 	var kind:=""
+	if _has(lower,DRILL_WORDS): return {"kind":"drill","target":{},"full":false,"insist":false,"place":"","army_words":true,"text":clean.substr(0,300)}
 	if _has(lower,INTERCEPT_WORDS): kind="intercept"
 	elif _has(lower,SIEGE_WORDS): kind="siege"
 	elif _has(lower,RAID_WORDS): kind="raid"
@@ -190,25 +204,40 @@ static func read_live(object:String,text:String,context_civ:String="")->Dictiona
 	# The model says it is a war order but neither text names what: ask.
 	return {"kind":"attack","target":find_target(object+" "+text,context_civ),"full":false,"insist":false,"place":"","army_words":true,"text":text.substr(0,300),"vague":true}
 
-static func offline_choices()->Array[Dictionary]:
+static func offline_choices(audience_id:String="")->Array[Dictionary]:
 	## Offline the court offers war orders as choices built from real state
-	## (known towns, armies away, enemies seen); each is the same words the
-	## god could type, so both reach perform() through court_commands.hear().
+	## (known towns, the war leader's own band, armies away, enemies seen);
+	## each is the same words the god could type, so both reach perform()
+	## through court_commands.hear(). After an objection the god's two answers
+	## to it come first: take them as they are, or drill them first.
 	var out:Array[Dictionary]=[]
 	if WorldSimulation.military==null or WorldSimulation.world==null: return out
+	var audience:Dictionary=Hall.find(audience_id) if audience_id!="" else {}
+	var general:=war_leader(_speaker_of(audience))
+	var band:=_band_of(general)
+	var who:=_given(String(general.get("name","")))
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if not pending.is_empty() and String(pending.get("verb",""))=="war" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
+		out.append({"group":"war","label":"Take them as they are","action":"command","params":{"command_text":"Take them as they are"}})
+		out.append({"group":"war","label":"Drill them first","action":"command","params":{"command_text":"Drill them first"}})
 	var places:=known_places()
 	var home:Vector2=WorldSimulation.world.player_world_origin
 	places.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return home.distance_squared_to(Vector2(float(a.position.x),float(a.position.z)))<home.distance_squared_to(Vector2(float(b.position.x),float(b.position.z))))
 	for p:Dictionary in places.slice(0,3):
 		var name:=String(p.name).trim_prefix("Reported home of ")
-		out.append({"group":"war","label":"March on %s" % name,"action":"command","params":{"command_text":"March our army on %s" % name}})
+		if not band.is_empty():
+			out.append({"group":"war","label":"March %s's band on %s" % [who,name],"action":"command","params":{"command_text":"March your band on %s" % name}})
+		else:
+			out.append({"group":"war","label":"March on %s" % name,"action":"command","params":{"command_text":"March our army on %s" % name}})
 		out.append({"group":"war","label":"Lay siege to %s" % name,"action":"command","params":{"command_text":"Lay siege to %s" % name}})
 		out.append({"group":"war","label":"Raid the fields of %s" % name,"action":"command","params":{"command_text":"Raid the fields of %s" % name}})
 	for formation in WorldSimulation.world.foreign_formations:
 		if String((formation as Dictionary).get("kind",""))!="scout" and not WorldSimulation.world.visible_formation_sighting(String(formation.get("id",""))).is_empty():
 			out.append({"group":"war","label":"Go after %s's army" % Hall._civ_name(String(formation.get("civ_id",""))),"action":"command","params":{"command_text":"Attack their army, the %s" % Hall._civ_name(String(formation.get("civ_id","")))}})
 			break
-	if not (forces().away as Array).is_empty():
+	if not band.is_empty() and _drill(band.get("formations",[]))<UNDRILLED and pending.is_empty():
+		out.append({"group":"war","label":"Drill %s's band" % who,"action":"command","params":{"command_text":"Bring your band home to drill"}})
+	if not (forces(general).away as Array).is_empty():
 		out.append({"group":"war","label":"Bring the army home","action":"command","params":{"command_text":"Bring the army home"}})
 	out.append({"group":"war","label":"Keep the soldiers home on watch","action":"command","params":{"command_text":"Defend our home with the soldiers"}})
 	return out
@@ -236,23 +265,101 @@ static func _drill(formations:Array)->float:
 		heads+=count; drill+=count*clampf(float(f.get("training",0.0)),0.0,1.0)
 	return drill/float(heads) if heads>0 else 0.0
 
-static func forces()->Dictionary:
-	## Plain numbers the war leader answers from.
+static func _unarmed(formations:Array)->int:
+	## Heads in a force with no weapon of their own (equipment short of need).
+	var out:=0
+	for f in formations:
+		var count:=maxi(0,int((f as Dictionary).get("count",0)))
+		var need:=maxi(0,int(f.get("equipment_required",count)))
+		if count<=0 or need<=0: continue
+		var short:=maxi(0,need-int(f.get("equipment",0)))
+		out+=mini(count,ceili(float(short)*float(count)/float(need)))
+	return out
+
+## Camp drill (MilitaryCampaign.TRAINING_PROGRAMS.camp_drill): a levy at home
+## gains about this much drill over this many days.
+const CAMP_DRILL_GAIN:=0.065
+const CAMP_DRILL_DAYS:=84.0
+
+static func _drill_days_to_fit(formations:Array)->int:
+	## About how many days of camp drill at home before this force is fit to
+	## lead at walls (UNDRILLED). 0 when it already is.
+	var drill:=_drill(formations)
+	if formations.is_empty() or drill>=UNDRILLED: return 0
+	return maxi(1,ceili((UNDRILLED-drill)/CAMP_DRILL_GAIN*CAMP_DRILL_DAYS))
+
+static func _trainees()->Dictionary:
+	## Recruits still in their first drill at home, as they really stand:
+	## {heads, days (to the end of drill), drill (0..1 of the course), unarmed}.
+	var mc:=_mc()
+	var heads:=0; var days:=0; var share:=0.0; var unarmed:=0
+	var stock:Dictionary=(mc.military_inventory as Dictionary).duplicate()
+	for t in mc.training_queue:
+		var entry:Dictionary=t
+		var count:=maxi(0,int(entry.get("count",0)))
+		if count<=0: continue
+		heads+=count
+		var required:=maxf(1.0,float(entry.get("required_days",1)))
+		share+=count*clampf(float(entry.get("progress_days",0))/required,0.0,1.0)
+		days=maxi(days,ceili(maxf(0.0,required-float(entry.get("progress_days",0)))))
+		var need:int=mc._equipment_required_for(String(entry.get("unit","levy")),count)
+		var held:=int(entry.get("reserved_equipment",0))
+		if not entry.has("deployment_line"):
+			var weapon:=String(entry.get("weapon","improvised"))
+			var take:=mini(maxi(0,need-held),maxi(0,int(stock.get(weapon,0))))
+			stock[weapon]=int(stock.get(weapon,0))-take; held+=take
+		if need>0: unarmed+=mini(count,ceili(float(maxi(0,need-held))*float(count)/float(need)))
+	return {"heads":heads,"days":days,"drill":share/float(heads) if heads>0 else 0.0,"unarmed":unarmed}
+
+static func _available(army:Dictionary)->bool:
+	## A field army the war leader can give a new objective to now.
+	var mc:=_mc()
+	var id:=int(army.get("army_id",0))
+	if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): return false
+	if mc.command_hierarchy.battle.engaged(id): return false
+	if army.has("court_order") and String(army.get("status",""))=="moving": return false
+	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==id: return false
+	if WorldSimulation.campaign!=null and WorldSimulation.campaign.active and id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
+	return true
+
+static func _at_home(army:Dictionary)->bool:
+	return String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home"
+
+static func _band_of(general:Dictionary)->Dictionary:
+	## The field army this war leader leads himself (his own band), wherever
+	## it stands, when it can take an order. {} when he leads none.
+	if general.is_empty() or WorldSimulation.military==null: return {}
+	var fid:=String(general.get("figure_id",""))
+	var pid:=int(general.get("person_id",0))
+	var full_name:=String(general.get("name",""))
+	for a in _mc().field_armies:
+		var army:Dictionary=a
+		if not _available(army): continue
+		var c:Dictionary=army.get("commander",{}) if army.get("commander") is Dictionary else {}
+		if (fid!="" and String(c.get("figure_id",""))==fid) or (pid>0 and int(c.get("person_id",0))==pid) or (full_name!="" and String(c.get("name",""))==full_name): return army
+	return {}
+
+static func _where(army:Dictionary)->String:
+	## Where a force stands, in plain words.
+	if _at_home(army): return "at home"
+	var p:Dictionary=army.get("position",{}) if army.get("position") is Dictionary else {}
+	var km:=roundi(WorldSimulation.world.player_world_origin.distance_to(Vector2(float(p.get("x",0)),float(p.get("z",0)))))
+	if String(army.get("status",""))=="moving": return "on the march, about %d km from home" % km
+	return "camped about %d km from home" % km
+
+static func forces(general:Dictionary={})->Dictionary:
+	## Plain numbers the war leader answers from: the trained reserve at
+	## home, the recruits in drill, his own band, other armies.
 	var mc:=_mc()
 	var home:Dictionary=mc.home_army
 	var trained:=maxi(0,int(home.get("troops",0)))
-	var drilling:=0
-	var drill_days:=0
-	for t in mc.training_queue:
-		var entry:Dictionary=t
-		drilling+=maxi(0,int(entry.get("count",0)))
-		drill_days=maxi(drill_days,ceili(maxf(0.0,float(entry.get("required_days",0))-float(entry.get("progress_days",0)))))
+	var t:=_trainees()
 	var idle:Array[Dictionary]=[]
 	var away:Array[Dictionary]=[]
 	for a in mc.field_armies:
 		var army:Dictionary=a
 		if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): continue
-		var at_home:=String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home"
+		var at_home:=_at_home(army)
 		if at_home and not mc.command_hierarchy.battle.engaged(int(army.army_id)) and not army.has("court_order"): idle.append(army)
 		elif not at_home: away.append(army)
 	var busy:=""
@@ -260,7 +367,8 @@ static func forces()->Dictionary:
 	elif not mc.active_siege.is_empty(): busy="our soldiers are already besieging %s" % String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","a town"))
 	elif not mc.pending_aftermath.is_empty(): busy="the last battle's captives and spoils are not yet settled"
 	elif not mc.active_threat.is_empty() and String(mc.active_threat.get("campaign_mode",""))=="defensive": busy="an enemy force is already coming at us"
-	return {"trained":trained,"home_strength":_strength(home.get("formations",[])),"drilling":drilling,"drill_days":drill_days,"idle":idle,"away":away,"busy":busy,"marching":_marching_on()}
+	return {"trained":trained,"home_strength":_strength(home.get("formations",[])),"drilling":int(t.heads),"drill_days":int(t.days),"trainees":t,
+		"idle":idle,"away":away,"busy":busy,"marching":_marching_on(),"band":_band_of(general)}
 
 static func _marching_on()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
@@ -275,47 +383,86 @@ static func _enemy_estimate(city_id:String)->Dictionary:
 	var low:=float(field.get("low",0)); var high:=float(field.get("high",0))
 	return {"known":true,"low":roundi(low),"high":roundi(high),"mid":(low+high)*0.5,"age":int(field.get("age_days",report.get("age_days",0)))}
 
+static func _muster_trainees()->int:
+	## "Take them as they are": every recruit still in drill leaves the drill
+	## ground with the drill and weapons they have (MilitaryCampaign's own
+	## completion, scaled by progress) and joins the trained reserve at home.
+	var mc:=_mc()
+	var mustered:=0
+	var slots:Array=[]
+	for index in range(mc.training_queue.size()-1,-1,-1):
+		var order:Dictionary=mc.training_queue[index]
+		var count:=maxi(0,int(order.get("count",0)))
+		if count<=0: continue
+		if order.has("deployment_line"): slots.append([int(order.deployment_line),int(order.get("deployment_slot",-1))])
+		mc._complete_training(order)
+		mc.training_queue.remove_at(index)
+		mustered+=count
+	# A recruitment line's cohort is spent; the line does not raise it again.
+	for pair in slots:
+		var line:Dictionary=mc.recruit_deploy.line(int(pair[0]))
+		if not line.is_empty() and int(pair[1]) in (line.slots as Array):
+			(line.slots as Array).erase(int(pair[1])); line.deployed=int(line.deployed)+1
+	return mustered
+
 # --------------------------------------------------------------------------
 # Deciding and doing
 # --------------------------------------------------------------------------
 
-static func war_leader()->Dictionary:
-	## The Marshal (war leader office); else a living war leader of renown
-	## (HistoricalFigures General) who leads our bands.
+static func war_leader(speaker:Dictionary={})->Dictionary:
+	## The war leader who answers: a summoned war leader of renown answers for
+	## himself; otherwise the Marshal (war leader office); else a living war
+	## leader of renown (HistoricalFigures General) who leads our bands.
+	var figures:Variant=Engine.get_main_loop().root.get_node_or_null("HistoricalFigures") if Engine.get_main_loop() is SceneTree else null
+	var fid:=String(speaker.get("figure_id",""))
+	if fid!="" and figures!=null:
+		var figure:Dictionary=figures.by_id(fid)
+		if String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead":
+			return {"name":String(figure.get("name","")),"person_id":0,"figure_id":fid}
 	var marshal:=Hall._relevant_official(["Marshal"])
 	if not marshal.is_empty(): return marshal
-	var figures:Variant=Engine.get_main_loop().root.get_node_or_null("HistoricalFigures") if Engine.get_main_loop() is SceneTree else null
 	if figures!=null:
 		for figure in figures.people:
 			if figure is Dictionary and String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead":
 				return {"name":String(figure.get("name","")),"person_id":0,"figure_id":String(figure.get("id",""))}
 	return {}
 
+static func _speaker_of(audience:Dictionary)->Dictionary:
+	## {figure_id} of a summoned war leader of renown, from the audience.
+	var key:=String(audience.get("holder_key",""))
+	if key.begins_with("figure:"): return {"figure_id":key.trim_prefix("figure:")}
+	return {}
+
 static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})->Dictionary:
 	## The engine's answer: {verdict:"act"|"object"|"impossible", kind,
-	## outcome (plain narration), says (the war leader's own words), reason,
-	## fix, objective:{army_id,...} when acted}. Pure of any UI.
+	## outcome (one short plain note), says (the war leader's own words, which
+	## carry the answer), reason, fix, objective:{army_id,...} when acted}.
+	## context.general: the war leader who was spoken to. Pure of any UI.
 	var kind:=String(reading.get("kind","attack"))
 	insist=insist or bool(reading.get("insist",false))
-	var general:=war_leader()
+	var given:Variant=context.get("general",{})
+	var general:Dictionary=given if given is Dictionary and not (given as Dictionary).is_empty() else war_leader()
 	var gname:=_given(String(general.get("name","The war leader")))
-	var out:={"kind":kind,"general":gname,"general_pid":int(general.get("person_id",0)),"verdict":"impossible","outcome":"","says":"","reason":"","fix":"","objective":{}}
+	var out:={"kind":kind,"general":gname,"general_pid":int(general.get("person_id",0)),"general_ref":general.duplicate(),"verdict":"impossible","outcome":"","says":"","reason":"","fix":"","objective":{}}
 	if WorldSimulation.military==null or WorldSimulation.world==null:
 		return _no(out,"no_military","We have nothing organised to fight with yet.","Raise and drill a levy first.")
 	match kind:
 		"recall": return _recall(out)
 		"defend": return _defend(out,reading)
 		"intercept": return _intercept(out,reading,insist)
+		"drill": return _drill_first(out)
 	return _strike(out,reading,insist)
 
 static func _no(out:Dictionary,reason:String,says:String,fix:String)->Dictionary:
-	out.verdict="impossible"; out.reason=reason; out.says=says; out.fix=fix
-	out.outcome="No soldiers march. "+says+(" "+fix if fix!="" else "")
+	out.verdict="impossible"; out.reason=reason
+	out.says=says+(" "+fix if fix!="" else ""); out.fix=fix
+	out.outcome="No one marches."
 	return out
 
 static func _object(out:Dictionary,reason:String,says:String,fix:String)->Dictionary:
-	out.verdict="object"; out.reason=reason; out.says=says; out.fix=fix
-	out.outcome="No soldiers march yet: %s objects. %s %s Say it again and %s will go." % [String(out.general),says,fix,String(out.general)]
+	out.verdict="object"; out.reason=reason
+	out.says=says+(" "+fix if fix!="" else ""); out.fix=fix
+	out.outcome="No one marches yet."
 	return out
 
 static func _target_problem(out:Dictionary,target:Dictionary,kind:String)->Dictionary:
@@ -325,67 +472,147 @@ static func _target_problem(out:Dictionary,target:Dictionary,kind:String)->Dicti
 		return _no(out,"unknown_place","No scout has brought back where %s stands. I cannot march on a place nobody has seen." % String(target.unknown),"Send scouts toward it; once they are back, give the order again.")
 	return _no(out,"no_target","You have not told me where to %s." % {"attack":"strike","siege":"lay siege","raid":"raid"}.get(kind,"go"),"Name the town.")
 
+static func _drill_words(drill:float)->String:
+	if drill<0.08: return "have barely begun their drill"
+	if drill<UNDRILLED: return "are not half through their drill"
+	return "are drilled"
+
+static func _span(days:int)->String:
+	## "45 days", or "7 months" for a long stretch.
+	if days<=60: return "%d %s" % [days,"day" if days==1 else "days"]
+	return "%d months" % roundi(float(days)/30.4)
+
+static func _fighters(n:int)->String:
+	return "%d %s" % [n,"fighter" if n==1 else "fighters"]
+
+static func _home_extras(f:Dictionary,band_used:bool)->String:
+	## What else stands at home, when the band is elsewhere.
+	var t:Dictionary=f.trainees
+	var parts:PackedStringArray=PackedStringArray()
+	if band_used and int(f.trained)>0: parts.append("%d more %s trained" % [int(f.trained),"is" if int(f.trained)==1 else "are"])
+	if int(t.heads)>0: parts.append("%d %s in their first drill, about %d days from done" % [int(t.heads),"is" if int(t.heads)==1 else "are",int(t.days)])
+	if parts.is_empty(): return ""
+	return " At home %s." % " and ".join(parts)
+
 static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var kind:=String(out.kind)
 	var target:Dictionary=reading.get("target",{})
 	if target.is_empty() or not target.has("city_id"): return _target_problem(out,target,kind)
 	var name:=String(target.name).trim_prefix("Reported home of ")
 	out["target"]=target.duplicate(true)
-	var f:=forces()
+	var general:Dictionary=out.general_ref
+	var f:=forces(general)
+	var t:Dictionary=f.trainees
 	if String(f.busy)!="":
 		return _no(out,"busy","We cannot start another fight while %s." % String(f.busy),"When that is done, give the order again.")
 	for marching:Dictionary in f.marching:
 		if String((marching.court_order as Dictionary).get("city_id",""))==String(target.city_id):
 			return _no(out,"already_marching","%s is already on the road to %s, %d days out." % [String(marching.get("name","Our army")),name,maxi(0,int(marching.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))],"")
 	var mc:=_mc()
-	var home:Vector2=WorldSimulation.world.player_world_origin
+	var full:=bool(reading.get("full",false))
+	var trained:=int(f.trained)
+	# Who goes: his own band from where it stands; else an idle army at home;
+	# else a host formed from the home reserve (with the recruits still in
+	# drill if the god says take them as they are); else any army in the field.
+	var band:Dictionary=f.band
+	var use_army:Dictionary={}
+	var own_band:=false
+	if not band.is_empty() and (int(band.troops)>=trained or not _at_home(band)):
+		use_army=band; own_band=true
+	var keep:=0 if full else (ceili(trained*WATCH_SHARE) if trained>=MIN_FORCE*2 else 0)
+	var send:=trained-keep
+	if use_army.is_empty():
+		var idle:Array=f.idle
+		if not idle.is_empty():
+			idle.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.troops)>int(b.troops))
+			if int(idle[0].troops)>=send: use_army=idle[0]
+	if use_army.is_empty() and send<MIN_FORCE and int(t.heads)==0:
+		var largest:Dictionary={}
+		for a:Dictionary in f.away:
+			if _available(a) and int(a.troops)>send and (largest.is_empty() or int(a.troops)>int(largest.troops)): largest=a
+		use_army=largest
+	var with_recruits:=use_army.is_empty() and int(t.heads)>0 and (send<MIN_FORCE or full)
+	var going:=int(use_army.get("troops",0)) if not use_army.is_empty() else send+(int(t.heads) if with_recruits else 0)
+	if going<=0 and int(t.heads)<=0:
+		return _no(out,"no_forces","We have nobody under arms and nobody in drill.","Raise a levy and have it drilled; then I can go.")
+	var start:Vector2=WorldSimulation.world.player_world_origin
+	if not use_army.is_empty():
+		var p:Dictionary=use_army.get("position",{}) if use_army.get("position") is Dictionary else {}
+		if p.has_all(["x","z"]): start=Vector2(float(p.x),float(p.z))
 	var there:=Vector2(float(target.position.get("x",0)),float(target.position.get("z",0)))
-	var road:Dictionary=mc.field_route(home,there)
+	var road:Dictionary=mc.field_route(start,there) if start.distance_to(there)>=0.5 else {"ok":true,"length_km":start.distance_to(there),"direct":true}
 	if road.has("error"):
 		var why:=String(road.get("reason",""))
 		if why=="no_land_route":
 			return _no(out,"no_land_route","There is no way to %s on foot: open water lies between us and every shore we know of theirs, and we have no boats that can carry an army." % name,"If our people learn to build boats that carry more than a few, or scouts find a way round by land, we can go.")
 		return _no(out,why if why!="" else "no_route",String(road.error),"")
-	# Who goes: an idle army at home, or a force formed from the home reserve.
-	var full:=bool(reading.get("full",false))
-	var trained:=int(f.trained)
-	var keep:=0 if full else (ceili(trained*WATCH_SHARE) if trained>=MIN_FORCE*2 else 0)
-	var send:=trained-keep
-	var idle:Array=f.idle
-	var use_army:Dictionary={}
-	if not idle.is_empty():
-		idle.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.troops)>int(b.troops))
-		if int(idle[0].troops)>=send: use_army=idle[0]; send=0
-	var going:=int(use_army.get("troops",0))+send
-	var going_strength:=_strength(use_army.get("formations",[])) if not use_army.is_empty() else float(f.home_strength)*(float(send)/maxf(1.0,float(trained)))
-	var drilled:=_drill(use_army.get("formations",[]) if not use_army.is_empty() else _mc().home_army.get("formations",[]))
-	var drill_words:=""
-	if int(f.drilling)>0: drill_words=" %d more are in their first drill, about %d days from done." % [int(f.drilling),int(f.drill_days)]
-	if going<=0:
-		return _no(out,"no_trained","We have no trained fighters to send.%s" % drill_words,"Wait for the drill to finish, then give the order." if int(f.drilling)>0 else "Raise a levy and have it drilled first.")
-	if going<MIN_FORCE:
-		return _no(out,"too_few","%d trained %s cannot take a town. %s would shut the gate and laugh at us.%s" % [going,"fighter" if going==1 else "fighters",name,drill_words],("Give me those %d days of drill and I will take all of them." % int(f.drill_days)) if int(f.drilling)>0 else "Raise and drill a real levy first.")
-	var days:=ceili(float(road.length_km)/maxf(0.1,mc._field_army_speed(use_army if not use_army.is_empty() else mc.home_army)))
+	var who:="My band" if own_band else ("The host" if use_army.is_empty() else String(use_army.get("name","The host")))
+	var where:=_where(use_army) if not use_army.is_empty() else "at home"
+	# What the force really is: its numbers, drill and weapons.
+	var drilled:=0.0
+	var unarmed:=0
+	var going_strength:=0.0
+	if not use_army.is_empty():
+		drilled=_drill(use_army.get("formations",[])); unarmed=_unarmed(use_army.get("formations",[])); going_strength=_strength(use_army.get("formations",[]))
+	else:
+		var home_forms:Array=mc.home_army.get("formations",[])
+		var recruits:=int(t.heads) if with_recruits else 0
+		var recruit_drill:=float(mc._training_quality("levy"))*float(t.drill)
+		drilled=(_drill(home_forms)*send+recruit_drill*recruits)/maxf(1.0,float(send+recruits))
+		unarmed=(ceili(float(_unarmed(home_forms))*float(send)/float(trained)) if trained>0 else 0)+(int(t.unarmed) if with_recruits else 0)
+		going_strength=float(f.home_strength)*(float(send)/maxf(1.0,float(trained)))+recruits*(0.35+0.65*recruit_drill)*(0.45+0.55*(1.0-float(t.unarmed)/maxf(1.0,float(t.heads))))
+	var speed_force:Dictionary=use_army if not use_army.is_empty() else mc.home_army
+	var speed:float=mc._field_army_speed(speed_force) if not speed_force.is_empty() else 0.0
+	var days:=ceili(float(road.length_km)/maxf(2.0,speed))
 	var enemy:=_enemy_estimate(String(target.city_id))
 	var ratio:=going_strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
 	out["estimate"]=enemy
 	out["going"]=going
 	out["days"]=days
 	out["road_km"]=float(road.length_km)
-	if bool(enemy.known) and ratio<OBJECT_RATIO and not insist:
-		var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
-		return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %d%s. I would lose them for nothing." % [name,their,going,", most of them half-drilled" if ratio<0.5 else ""],("Let the drill finish first, about %d days." % int(f.drill_days)) if int(f.drilling)>0 else "Give me more trained soldiers first.")
-	if drilled<UNDRILLED and not insist:
-		return _object(out,"undrilled","%d who have never drilled together, against %s's walls? They would break at the first charge." % [going,name],("Give me the rest of their drill first, about %d days." % int(f.drill_days)) if int(f.drilling)>0 else "Give me a season to drill them first.")
-	if kind=="siege" and going<MIN_FORCE*3 and not insist:
-		return _object(out,"siege_too_small","A siege needs enough of us to ring %s and still feed ourselves; %d cannot do it." % [name,going],"Let me storm it instead, or give me more soldiers.")
-	# Act: the force is formed from the real formations and set on the road.
+	var take_word:="say the word and I take them as they are."
+	if not insist:
+		# Forces exist: the war leader objects with the real numbers, never "raise a levy".
+		if use_army.is_empty() and send<MIN_FORCE and int(t.heads)>0:
+			var armed_words:=", and %d of them have no weapons yet" % int(t.unarmed) if int(t.unarmed)>0 else ""
+			var have:="Nobody has finished drill yet" if send<=0 else "Only %d %s finished drill" % [send,"has" if send==1 else "have"]
+			return _object(out,"few_trained","%s. %d more are in their first drill, about %d days from done%s. Against %s's walls that is not enough." % [have,int(t.heads),int(t.days),armed_words,name],"Give me those %d days, or say the word and I take all %d as they are." % [int(t.days),send+int(t.heads)])
+		if going<MIN_FORCE:
+			return _object(out,"too_few","%s against a walled town? %s would shut the gate and wait us out." % [_fighters(going),name],"Give me more soldiers, or say the word and they go anyway.")
+		if bool(enemy.known) and ratio<OBJECT_RATIO:
+			var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
+			var ours:="my band of %d" % going if own_band else "%d" % going
+			return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %s%s. I would lose them for nothing." % [name,their,ours,", most of them half-drilled" if ratio<0.5 else ""],("Let the drill finish first, about %d days, or %s" % [int(t.days),take_word]) if int(t.heads)>0 else "Give me more trained soldiers first, or %s" % take_word)
+		var raw:=drilled<UNDRILLED
+		var bare:=unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE
+		if raw or bare:
+			var state:PackedStringArray=PackedStringArray()
+			if raw: state.append("they %s" % _drill_words(drilled))
+			if unarmed>0: state.append("%d still %s weapons" % [unarmed,"lacks" if unarmed==1 else "lack"])
+			var head:="%s is %d strong, but %s." % [who,going," and ".join(state)] if not use_army.is_empty() else "%d would go, but %s." % [going," and ".join(state)]
+			var away_now:=not use_army.is_empty() and not _at_home(use_army)
+			var place:=" They are %s." % where if away_now else ""
+			var fix_days:=_drill_days_to_fit(use_army.get("formations",[])) if not use_army.is_empty() else maxi(int(t.days),_drill_days_to_fit(mc.home_army.get("formations",[])))
+			var fix:=""
+			if raw:
+				fix=("Bring them home for about %s of drill, or %s" % [_span(fix_days),take_word]) if away_now else ("Give me about %s of drill, or %s" % [_span(fix_days),take_word])
+			else:
+				fix="Give me time to arm them, or %s" % take_word
+			return _object(out,"undrilled" if raw else "unarmed","%s%s Against %s's walls they would break.%s" % [head,place,name,_home_extras(f,not use_army.is_empty())],fix)
+		if kind=="siege" and going<MIN_FORCE*3:
+			return _object(out,"siege_too_small","A siege needs enough of us to ring %s and still feed ourselves; %d cannot do it." % [name,going],"Let me storm it instead, give me more soldiers, or say the word and we try.")
+	# Act: the force is his band, an idle army, or formed from the home reserve.
 	var formed:=false
 	var army_id:=int(use_army.get("army_id",0))
+	var mustered:=0
 	if use_army.is_empty():
-		var made:Dictionary=mc.create_field_army(send,_host_name(kind,name))
+		if with_recruits: mustered=_muster_trainees()
+		var ready:=maxi(0,int(mc.home_army.get("troops",0)))-keep
+		if ready<=0: return _no(out,"cannot_form","Nobody could be gathered to march.","")
+		var made:Dictionary=mc.create_field_army(ready,_host_name(kind,name))
 		if made.has("error"): return _no(out,"cannot_form",String(made.error),"")
 		army_id=int((made.army as Dictionary).army_id); formed=true
+		going=ready
 	var order:Dictionary=mc.order_city_operation(army_id,String(target.civ_id),String(target.city_id),kind=="siege",kind=="raid")
 	if order.has("error"):
 		if formed: mc.disband_field_army(army_id)
@@ -396,17 +623,62 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var at_war:=_at_war(String(target.civ_id))
 	army["court_order"]={"kind":kind,"civ_id":String(target.civ_id),"city_id":String(target.city_id),"city_name":name,"day":day,"general":String(out.general),"general_pid":int(out.general_pid),"going":going}
-	if not use_army.is_empty() and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
+	if not own_band and not formed and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
 	mc.field_armies[index]=army
 	mc.army_changed.emit(mc.home_army.duplicate(true))
 	days=int(order.get("days",days))
+	var km:=roundi(float(order.get("distance_km",road.length_km)))
 	var verb:String={"attack":"to attack","siege":"to lay siege to","raid":"to raid the fields and stores of"}.get(kind,"against")
 	var roundabout:="" if bool(road.get("direct",true)) else " going round the water by land"
+	var as_they_are:=insist and (drilled<UNDRILLED or (unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE) or going<MIN_FORCE)
 	out.verdict="act"
-	out.objective={"army_id":army_id,"army_name":String(army.get("name","")),"city_id":String(target.city_id),"civ_id":String(target.civ_id),"kind":kind,"days":days,"troops":going,"route_km":float(road.length_km)}
-	out.says="%d of us march %s %s. It is %d km%s, about %d days. %s" % [going,verb,name,roundi(float(road.length_km)),roundabout,days,"I keep %d at home to watch the approaches." % keep if keep>0 else "Nobody trained stays behind."]
-	out.outcome="%s leaves with %d %s for %s: %d km%s, about %d days on the road.%s" % [String(army.get("name","The army")),going,"fighter" if going==1 else "fighters",name,roundi(float(road.length_km)),roundabout,days,"" if at_war else " There has been no declaration; the war begins when they reach %s, and %s will hear of it before then." % [name,Hall._civ_name(String(target.civ_id))]]
+	out.objective={"army_id":army_id,"army_name":String(army.get("name","")),"city_id":String(target.city_id),"civ_id":String(target.civ_id),"kind":kind,"days":days,"troops":going,"route_km":km,"own_band":own_band,"mustered":mustered}
+	var declared:="" if at_war else " Nobody has declared war; it begins when we reach %s." % name
+	if own_band:
+		out.says="My band of %d marches %s %s from where it stands, %s. It is %d km%s, about %d days.%s%s" % [going,verb,name,where,km,roundabout,days," They go as they are." if as_they_are else "",declared]
+	else:
+		var left:="I keep %d at home to watch the approaches." % keep if keep>0 else "Nobody trained stays behind."
+		var raw_words:=(" %d of them come straight off the drill ground." % mustered) if mustered>0 else (" They go as they are." if as_they_are else "")
+		out.says="%d of us march %s %s. It is %d km%s, about %d days. %s%s%s" % [going,verb,name,km,roundabout,days,left,raw_words,declared]
+	var party:="%s's band" % String(out.general) if own_band else String(army.get("name","The host"))
+	out.outcome="%s sets out for %s, about %d %s by land." % [party,name,days,"day" if days==1 else "days"]
+	out["chronicle"]="%s leaves with %s for %s: %d km%s, about %d days on the road.%s" % [party,_fighters(going),name,km,roundabout,days,"" if at_war else " There was no declaration; the war begins when they reach %s, and %s will hear of it before then." % [name,Hall._civ_name(String(target.civ_id))]]
 	_on_departure(out,army,target,at_war)
+	return out
+
+static func _drill_first(out:Dictionary)->Dictionary:
+	## The god takes the war leader's advice: his band comes home (if away)
+	## and camp drill begins, or the recruits keep to their drill.
+	var mc:=_mc()
+	var general:Dictionary=out.general_ref
+	var f:=forces(general)
+	var band:Dictionary=f.band
+	var t:Dictionary=f.trainees
+	if band.is_empty() and int(t.heads)<=0 and int(f.trained)<=0:
+		return _no(out,"no_forces","There is nobody under arms or in drill to train.","Raise a levy first.")
+	var need:=_drill_days_to_fit(band.get("formations",[]) if not band.is_empty() else mc.home_army.get("formations",[]))
+	var started:=""
+	if mc.training_program.is_empty():
+		var began:Dictionary=mc.start_training_program("camp_drill")
+		if not began.has("error"): started="camp_drill"
+	out.verdict="act"
+	if not band.is_empty() and not _at_home(band):
+		var r:Dictionary=mc.return_field_army(int(band.army_id))
+		if r.has("error"): return _no(out,"cannot_recall","I cannot bring the band home yet. %s" % String(r.error),"")
+		var index:int=mc._field_army_index(int(band.army_id))
+		if index>=0: mc.field_armies[index].erase("court_order")
+		var home_days:=int(r.get("days",0))
+		out.objective={"army_id":int(band.army_id),"kind":"drill","days":home_days,"drill_days":need,"program":started}
+		out.says="Then I bring the band home: about %d %s on the road, and after that about %s of camp drill before I would lead them at walls." % [home_days,"day" if home_days==1 else "days",_span(need)]
+		out.outcome="%s's band turns for home to drill, about %d %s away." % [String(out.general),home_days,"day" if home_days==1 else "days"]
+		return out
+	var until:=need if not band.is_empty() else maxi(int(t.days),need)
+	out.objective={"army_id":int(band.get("army_id",0)),"kind":"drill","drill_days":until,"program":started}
+	if until<=0:
+		out.says="They are drilled well enough already. Give me the word when you want them to march."
+	else:
+		out.says="They keep to their drill at home. In about %s they will be fit to take into a fight, and I will tell you so." % _span(until)
+	out.outcome="The drill goes on."
 	return out
 
 static func _host_name(kind:String,place:String)->String:
@@ -425,7 +697,7 @@ static func _on_departure(out:Dictionary,army:Dictionary,target:Dictionary,at_wa
 	var day:=int(WorldSimulation.state.elapsed_days)
 	# The rival's people see an army on the road: opinion falls, the border tightens.
 	Hall._shift_relation(civ_id,-0.06 if not at_war else -0.02,0.12)
-	Chronicle.record({"key":"court_war:%s:%d:%d" % [name,day,int(out.objective.army_id)],"title":("%s Marches on %s" % [String(out.general),place]).substr(0,70),"text":String(out.outcome),"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
+	Chronicle.record({"key":"court_war:%s:%d:%d" % [name,day,int(out.objective.army_id)],"title":("%s Marches on %s" % [String(out.general),place]).substr(0,70),"text":String(out.get("chronicle",out.outcome)),"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 	_ledger_add({"day":day,"army_id":int(out.objective.army_id),"civ_id":civ_id,"city_id":String(target.city_id),"city_name":place,"kind":String(out.kind),"general":String(out.general),"status":"marching","going":int(out.objective.troops)})
 	if int(out.general_pid)>0:
 		GovernmentPeopleSystem.record_person_memory(int(out.general_pid),"The god sent me against %s with %d." % [place,int(out.objective.troops)],"divine",0.7,{"emotion":"duty","outcome":"marching"})
@@ -456,7 +728,7 @@ static func _recall(out:Dictionary)->Dictionary:
 	var be:="is" if sent.size()==1 else "are"
 	if longest<=0:
 		out.says="%s %s called back before %s had gone far; %s home again." % [names,be,"it" if sent.size()==1 else "they","it is" if sent.size()==1 else "they are"]
-		out.outcome=out.says
+		out.outcome="%s home again." % ("It is" if sent.size()==1 else "They are")
 	else:
 		out.says="I have sent runners: %s %s turning for home, about %d %s out." % [names,be,longest,"day" if longest==1 else "days"]
 		out.outcome="%s %s marching home, about %d %s away." % [names,be,longest,"day" if longest==1 else "days"]
@@ -489,7 +761,7 @@ static func _defend(out:Dictionary,reading:Dictionary)->Dictionary:
 	else:
 		out.says="%s is not a place on any chart we have, so I cannot post a guard there. I will keep all %d at %s, watching every approach, for half a year.%s" % [place.capitalize(),watchers,here,brought_words]
 		out.reason="unknown_place"
-	out.outcome=out.says
+	out.outcome="The watch is set for half a year."
 	return out
 
 static func _intercept(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
