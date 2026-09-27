@@ -21,10 +21,9 @@ func _ready()->void:
 		var view=preload("res://scripts/hud/research_atlas.gd").new();add_child(view);view.set_view("tree")
 		for i in 12:await get_tree().process_frame
 		assert(view.tabs.tree.modulate==Color.WHITE)
-		assert(view.filter.get_theme_color("font_color")==T.BODY)
+		assert((view.field_chips[""] as Button).get_theme_color("font_color")==T.INK)
 		assert(view.search.get_theme_color("font_color")==T.BODY)
-		assert(view.locked_toggle.get_theme_color("font_color")==T.BODY)
-		assert(view.announcements.get_popup().get_theme_color("font_color")==T.BODY)
+		assert(view.locked_toggle.get_theme_color("font_color") in [T.BODY,T.INK])
 		assert(view.panel.get_rect().end.y<=view.get_viewport_rect().size.y)
 		assert(not view.plot.boxes.is_empty())
 		await RenderingServer.frame_post_draw

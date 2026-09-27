@@ -71,17 +71,18 @@ static func state_color(value:String)->Color:
 	return Tokens.BODY_2
 
 static func status_text(value:String)->String:
+	## "Kicker · sentence": the court shows the sentence, the dock both.
 	match value:
-		"INTERPRETING": return "NOT YET UNDERWAY · The leader is interpreting the instruction; no policy has been applied."
-		"NEEDS YOUR DECISION": return "NEEDS YOUR DECISION · Discussion only; no policy has been applied."
-		"PROPOSAL RECORDED": return "PROPOSAL RECORDED · The leader has answered; no event or spending has been scheduled."
-		"DISCUSSION": return "DISCUSSION · Advice only; no order was given and no policy has been applied."
-		"REFUSED": return "REFUSED · No policy was applied. Revise the directive or change the leadership."
-		"BLOCKED": return "BLOCKED · No policy was applied; the instruction exceeded present means or was not concrete enough."
-		"WITHDRAWN": return "WITHDRAWN · The unresolved instruction was closed and no policy was applied."
-		"UNDERWAY": return "UNDERWAY · The leader committed; the outcome report will arrive later."
-		"REPORTED": return "REPORTED · The leader's outcome report is in this conversation."
-		"OBSERVING EFFECTS": return "ACTION COMPLETE · The counted result is recorded; wider effects are being reviewed."
+		"INTERPRETING": return "Not started · The leader is still working out what you meant; nothing has changed yet."
+		"NEEDS YOUR DECISION": return "Waiting for you · The leader objects; nothing has changed until you answer."
+		"PROPOSAL RECORDED": return "Answered · The leader has replied; nothing is planned or spent yet."
+		"DISCUSSION": return "Talk only · The leader gave advice; you gave no order, so nothing has changed."
+		"REFUSED": return "Refused · Nothing has changed. Ask differently, or replace the leader."
+		"BLOCKED": return "Cannot be done · Nothing has changed: we lack the people or stores, or the order was too vague."
+		"WITHDRAWN": return "Withdrawn · You took the order back; nothing was done."
+		"UNDERWAY": return "Under way · The leader has begun and will report when it is done."
+		"REPORTED": return "Done · The leader's report is in your conversation with them."
+		"OBSERVING EFFECTS": return "Done · The work is finished; the leader is watching what follows."
 	return ""
 
 static func headline(value:String,leader_name:String)->String:

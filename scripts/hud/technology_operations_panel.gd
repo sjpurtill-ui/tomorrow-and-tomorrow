@@ -12,7 +12,7 @@ func _ready()->void:
 		if spec.gate!=subject:continue
 		var label:=Label.new();label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(label)
 		var actions:=VBoxContainer.new();add_child(actions)
-		var build:=Button.new();build.text="Install "+String(spec.name);actions.add_child(build)
+		var build:=Button.new();build.text="Build a "+String(spec.name).to_lower();actions.add_child(build)
 		var pause:=Button.new();actions.add_child(pause)
 		var message:=Label.new();message.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(message)
 		rows[id]={"label":label,"build":build,"pause":pause,"message":message}
@@ -33,10 +33,10 @@ func refresh()->void:
 	for id:String in rows:
 		var row:Dictionary=rows[id];var spec:Dictionary=Ops.PLANTS[id]
 		var record:Dictionary=Ops.data().plants.get(id,{})
-		row.label.text="%s · %d installed · %d being commissioned. Requires %.1f Crafting operators per unit and %.1f power units per day." % [spec.name,int(record.get("installed",0)),int(record.get("building",0)),float(spec.workers),float(spec.power)]
+		row.label.text="%s: %d in use, %d being built. Each needs about %s makers to run it and %s units of power a day." % [spec.name,int(record.get("installed",0)),int(record.get("building",0)),preload("res://scripts/hud/production_plain.gd").number(float(spec.workers)),preload("res://scripts/hud/production_plain.gd").number(float(spec.power))]
 		if spec.has("storage"):
 			row.label.text="%s · %d installed · %d being commissioned. Up to %.2f Crafting operators per active unit. Each stores %.1f energy units, charges up to %.1f and supplies up to %.1f per day; charging and discharge incur losses." % [spec.name,int(record.get("installed",0)),int(record.get("building",0)),float(spec.workers),float(spec.storage.capacity),float(spec.storage.charge_rate),float(spec.storage.discharge_rate)]
-		if float(spec.services.get("electricity",0))>0:row.label.text+=" Nominal generation: %.1f power units per day." % float(spec.services.electricity)
+		if float(spec.services.get("electricity",0))>0:row.label.text+=" Each makes about %s units of power a day." % preload("res://scripts/hud/production_plain.gd").number(float(spec.services.electricity))
 		if id=="water_hammer":row.label.text+=" Requires a confirmed river within 0.75 km. All installed hammers share the site’s seasonal capacity; freezing or dry conditions stop the drive. Forging consumes its daily hammer work."
 		if spec.services.has("specimen_observation"):row.label.text+=" Uses slide supplies each operating day to help researchers examine returned physical specimens; ordinary study work is still required."
 		if spec.services.has("radio_records"):row.label.text+=" Sends agreed research records home from a physically reached partner with an operating station, up to 120 km. Both endpoints spend daily capacity; local study and physical return travel remain required."
@@ -45,4 +45,4 @@ func refresh()->void:
 		var terms:=Ops.quote(id)
 		row.build.disabled=terms.has("error")
 		row.build.tooltip_text=String(terms.get("message",terms.get("error","")))
-		row.pause.disabled=record.is_empty();row.pause.text="Pause next day" if record.get("enabled",true) else "Resume next day"
+		row.pause.disabled=record.is_empty();row.pause.text="Stop from tomorrow" if record.get("enabled",true) else "Start again tomorrow"

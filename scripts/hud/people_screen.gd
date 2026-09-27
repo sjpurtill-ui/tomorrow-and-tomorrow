@@ -125,7 +125,7 @@ func _build_scene()->void:
 	backdrop.configure(Backdrop.current_tier(),not T.is_light())
 	frame.add_child(backdrop)
 	var shade:=TextureRect.new();shade.name="Shade";shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var gradient:=Gradient.new();gradient.set_color(0,Color(0.04,0.03,0.02,0.10));gradient.set_color(1,Color(0.04,0.03,0.02,0.86))
+	var gradient:=Gradient.new();gradient.set_color(0,Color(0.04,0.03,0.02,0.45));gradient.set_color(1,Color(0.04,0.03,0.02,0.86))
 	var ramp:=GradientTexture2D.new();ramp.gradient=gradient;ramp.fill_from=Vector2(0,0);ramp.fill_to=Vector2(0,1);ramp.width=4;ramp.height=64
 	shade.texture=ramp;shade.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;shade.stretch_mode=TextureRect.STRETCH_SCALE
 	frame.add_child(shade)
@@ -134,8 +134,8 @@ func _build_scene()->void:
 	frame.add_child(pad)
 	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);pad.add_child(stack)
 	var top:=HBoxContainer.new();stack.add_child(top)
-	season_label=T.make_label("",11,Color("f1e3c4"),0.08);season_label.name="Season";season_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(season_label)
-	register_label=T.make_label("",10,Color("e0c27e"),0.12);register_label.name="Register";top.add_child(register_label)
+	season_label=T.make_label("",12,Color("f1e3c4"),0.08);season_label.name="Season";season_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(season_label)
+	register_label=T.make_label("",12,Color("e0c27e"),0.12);register_label.name="Register";top.add_child(register_label)
 	var spacer:=Control.new();spacer.size_flags_vertical=Control.SIZE_EXPAND_FILL;stack.add_child(spacer)
 	headline_label=T.make_label("",21,Color("fbf4e4"));headline_label.name="Headline"
 	headline_label.add_theme_font_override("font",_serif());headline_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -187,7 +187,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		var picture:=_face_picture(face,82,82);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 		column.add_child(picture)
-		var tag:=T.make_label(String(face.get("tag","")),8,T.GOLD if bool(face.get("alive",true)) else T.MUTED,0.06);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var tag:=T.make_label(String(face.get("tag","")),12,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED,0.06);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tag.clip_text=true;column.add_child(tag)
 		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),12,T.INK);given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;given.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		given.clip_text=true;column.add_child(given)
@@ -284,14 +284,14 @@ func _fill_vitals(parent:Control,vitals:Array)->void:
 		icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(icon)
 		var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",2);row.add_child(body)
 		var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);body.add_child(top)
-		var label:=T.make_label(String(vital.get("label","")),9,T.MUTED,0.1);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(label)
+		var label:=T.make_label(String(vital.get("label","")),12,T.MUTED,0.1);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(label)
 		var value:=T.make_label(String(vital.get("value","")),14,T.INK);value.add_theme_font_override("font",_serif());top.add_child(value)
 		var trend:=int(vital.get("trend",0))
-		var arrow:=T.make_label("▲" if trend>0 else ("▼" if trend<0 else "•"),11,T.GREEN if trend>0 else (T.RED if trend<0 else T.MUTED))
-		arrow.tooltip_text="Over the last season: "+("better" if trend>0 else ("worse" if trend<0 else "about the same"))
-		arrow.mouse_filter=Control.MOUSE_FILTER_PASS;top.add_child(arrow)
+		var arrow:=T.make_label("better this season" if trend>0 else ("worse this season" if trend<0 else "steady this season"),12,T.GREEN_TEXT if trend>0 else (T.RED_TEXT if trend<0 else T.MUTED))
+		arrow.tooltip_text="Compared with last season"
+		arrow.mouse_filter=Control.MOUSE_FILTER_PASS;body.add_child(arrow)
 		var meter:=Meter.new();meter.track=T.TRACK;meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;meter.set_value(fill,tint);body.add_child(meter)
-		var cause:=T.make_label(String(vital.get("cause","")),11,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
+		var cause:=T.make_label(String(vital.get("cause","")),12,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
 
 
 func _fill_labor(parent:Control,labor:Dictionary)->void:
