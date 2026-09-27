@@ -207,7 +207,7 @@ func test_scout_report_uses_plain_era_words_and_round_ranges_before_statistics()
 	GameState.known_discoveries=["printing_process"]
 	var modern:=Labels.report_summary(kusala_report(),20)
 	assert_str(modern.stats[1].value).is_equal("3.2–5.8")
-	assert_str(modern.stats[3].detail).contains("IMR")
+	assert_str(modern.stats[3].detail).contains("infant deaths")
 	GameState.known_discoveries=[]
 
 func hover_overlay()->Control:

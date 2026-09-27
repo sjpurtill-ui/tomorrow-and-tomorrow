@@ -62,7 +62,7 @@ func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		payload["curated_%s" % system_name]=get_node("/root/"+system_name).export_state()
 	var written:=_write_payload(slot_path(slot),payload)
 	if written.has("error"):return written
-	return {"ok":true,"message":"World saved — %s, day %d, population %d." % [GameState.settlement_name if GameState.settlement_name!="" else "the settlement",int(GameState.elapsed_days),GameState.population_total]}
+	return {"ok":true,"message":"Saved: %s, %s, %d people." % [GameState.settlement_name if GameState.settlement_name!="" else "your people",preload("res://scripts/hud/era_words.gd").when(int(GameState.elapsed_days)).to_lower(),GameState.population_total]}
 
 
 func _write_payload(path:String,payload:Dictionary)->Dictionary:
@@ -70,7 +70,7 @@ func _write_payload(path:String,payload:Dictionary)->Dictionary:
 	var temporary:=path+".tmp"
 	var file:=FileAccess.open(temporary,FileAccess.WRITE)
 	if file==null:
-		return {"error":"The save could not be written (%s)." % path}
+		return {"error":"The game could not be saved: the save file could not be written.","details":path}
 	file.store_line("TTWORLD2")
 	file.store_buffer(var_to_bytes(payload))
 	file.flush()
@@ -78,9 +78,9 @@ func _write_payload(path:String,payload:Dictionary)->Dictionary:
 	file.close()
 	if write_error!=OK:
 		DirAccess.remove_absolute(temporary)
-		return {"error":"The save could not be completed. The previous save is unchanged."}
+		return {"error":"The game could not be saved. Your earlier save is still there."}
 	if DirAccess.rename_absolute(temporary,path)!=OK:
-		return {"error":"The new save could not replace the previous save. The game remains open."}
+		return {"error":"The game could not be saved over the earlier one. Your earlier save is still there."}
 	return {"ok":true}
 
 
@@ -88,6 +88,20 @@ func _write_payload(path:String,payload:Dictionary)->Dictionary:
 ## the terrain scene afterwards so the rendered world rebuilds from the
 ## restored state (mirrors how _restart_world already works).
 func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
+	var result:=_load_game(slot)
+	if not result.has("error"):return result
+	# The player reads one plain sentence; the technical reason stays in details.
+	var reason:=String(result.error)
+	var plain:="The saved game could not be opened. Your current game is unchanged."
+	if reason.begins_with("No readable save"):plain="There is no saved game to open."
+	elif reason.begins_with("This save was written by an incompatible"):plain="That save comes from an older version of the game and cannot be opened. Your current game is unchanged."
+	elif bool(result.get("partly_loaded",false)):plain="The saved game could only be partly opened. Start a new world or load another save."
+	var answer:={"error":plain,"details":reason}
+	if result.has("details"):answer["details"]=reason+"  "+str(result.details)
+	push_warning("Load failed: "+reason)
+	return answer
+
+func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	# Finish the current world's day first; its steps must not run on loaded state.
 	WorldSimulation.flush_day()
 	var payload:=_read_payload(slot)
@@ -137,10 +151,10 @@ func load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 		if system_name=="ForeignDiplomacy" and not payload.has("curated_ForeignDiplomacy"): continue
 		var result:Variant=get_node("/root/"+system_name).import_state(payload.get("curated_%s" % system_name,{}))
 		if result is Dictionary and (result as Dictionary).has("error"): errors.append("%s: %s" % [system_name,String((result as Dictionary).error)])
-	if not errors.is_empty(): return {"error":"  ".join(errors)}
-	var message:="World restored — day %d, population %d." % [int(GameState.elapsed_days),GameState.population_total]
-	if direction_missing:message+=" This older save did not retain your civilization direction; choose it again when the world opens."
-	if legacy_campaign:message+=" This campaign keeps its original opponent model. Start a new world for equal civilization rules."
+	if not errors.is_empty(): return {"error":"  ".join(errors),"partly_loaded":true}
+	var message:="Loaded: %s, %d people." % [preload("res://scripts/hud/era_words.gd").when(int(GameState.elapsed_days)).to_lower(),GameState.population_total]
+	if direction_missing:message+=" This older save did not keep your people's direction; choose it again when the world opens."
+	if legacy_campaign:message+=" This older game keeps its old rules for other peoples. Start a new world to play with the current ones."
 	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
 

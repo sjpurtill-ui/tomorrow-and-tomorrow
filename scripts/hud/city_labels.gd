@@ -13,7 +13,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
 ## Cards and emblems ease in and out instead of popping (codex/map-motion).
 const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
-const MODERN_LABELS:={"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}
+const MODERN_LABELS:={"population":"PEOPLE","science_capacity":"LEARNING","gdp":"DAILY OUTPUT","life_expectancy":"LIFE EXPECTANCY"}
 ## What scouts can say of a stranger town before anyone keeps statistics.
 const EARLY_LABELS:={"population":"PEOPLE","science_capacity":"LORE-KEEPERS","gdp":"HANDS AT WORK","life_expectancy":"LIVES · WINTERS"}
 ## Once the people write, reports read like a register, still without statistics.
@@ -45,7 +45,7 @@ static func stat_detail(key:String,fields:Dictionary,stage:String)->String:
 	var extra:=String({"science_capacity":"education","life_expectancy":"infant_mortality"}.get(key,""))
 	if extra.is_empty() or fields.get(extra,{}).is_empty():return ""
 	var field:Dictionary=fields[extra]
-	if stage=="reckoned":return ("Edu " if key=="science_capacity" else "IMR ")+REPORT.estimate(extra,field)
+	if stage=="reckoned":return ("schooling " if key=="science_capacity" else "infant deaths ")+REPORT.estimate(extra,field)
 	var range:=REPORT.bounds(field)
 	if key=="science_capacity":
 		var taught:=(range.x+range.y)*.5
@@ -214,19 +214,22 @@ func refresh()->void:
 		var record:Dictionary={}
 		if bool(source.foreign):record=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
+		# Who holds it, in words, and our guard there (scripts/map_ownership.gd).
+		var ownership:Dictionary=label.get_meta("map_ownership",{})
+		if not String(ownership.get("line","")).is_empty():affiliation=String(ownership.line)
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
 		# The card's text and measured size change only with its label, report,
 		# day or era; the anchor moves every frame the camera does. Measure once.
-		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage()])
+		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage(),String(ownership.get("note","")),int(ownership.get("garrison",0))])
 		var text:Dictionary=measured.get(id,{})
 		if int(text.get("key",0))!=text_key:
-			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds)
+			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds,ownership)
 			text["key"]=text_key
 			measured[id]=text
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
 		var compact:=kind!="founding_convoy"
 		var detail:Vector2=text.detail
-		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE))})
+		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE)),"note":text.note,"badge":text.badge,"ours":String(ownership.get("kind",""))=="occupied"})
 		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
 		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	var work_entries:=_work_entries(camera,viewport_size)
@@ -242,7 +245,7 @@ func refresh()->void:
 	queue_redraw()
 
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
-static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2)->Dictionary:
+static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={})->Dictionary:
 	var parts:=label.text.split("  •  ",true,1)
 	var title:=chart_name(String(parts[0]));var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 	if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
@@ -258,9 +261,31 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	width=maxf(width,ui.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	var name_width:=54.0
 	for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if has_flag else 22))
-	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0))
-	if not summary.is_empty():detail=Vector2(maxf(260,width),float(lines.size())*20+130)
-	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail}
+	var note:=String(ownership.get("note",""))
+	var badge:=int(ownership.get("garrison",0))
+	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
+	# A town we hold carries its guard's count beside the name.
+	if badge>0:name_width+=badge_width(badge)+6
+	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
+	if not summary.is_empty():detail=Vector2(maxf(260,maxf(width,name_width)),float(lines.size())*20+130+(18 if not note.is_empty() else 0))
+	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge}
+
+## The width of the small garrison badge: a shield and the count holding it.
+static func badge_width(count:int)->float:
+	return T.font("ui").get_string_size(EraWords.grouped(count),HORIZONTAL_ALIGNMENT_LEFT,-1,12).x+19.0
+
+## A small shield in ink and the number of our fighters holding the town,
+## on a sunk paper chip with a gold rule: ours, and how well guarded.
+func _draw_badge(card:Dictionary,box:Rect2,fade:float)->void:
+	var count:=int(card.get("badge",0))
+	if count<=0 or fade<=0.01:return
+	var w:=badge_width(count)
+	var chip:=Rect2(Vector2(box.end.x-w-5,box.position.y+5),Vector2(w,16))
+	draw_rect(chip,Color(T.TRACK,.55*fade))
+	draw_rect(chip,Color(T.GOLD,.9*fade),false,1.0)
+	var o:=chip.position+Vector2(5,3)
+	draw_colored_polygon(PackedVector2Array([o,o+Vector2(8,0),o+Vector2(8,5),o+Vector2(4,10),o+Vector2(0,5)]),Color(T.INK,fade))
+	draw_string(T.font("ui"),Vector2(chip.position.x+15,chip.end.y-4),EraWords.grouped(count),HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(T.INK,fade))
 
 ## A place name as the chart letters it: names kept in capitals elsewhere
 ## ("SEANSTONE", "FOUNDING CAMP") are set in title case here.
@@ -649,7 +674,8 @@ func _update_overflow(viewport_size:Vector2)->void:
 	for entry:Dictionary in overflow:
 		var button:=Button.new();button.text=String(entry.title)+( "\n"+String(entry.affiliation) if not String(entry.get("affiliation","")).is_empty() else "")+"\n"+String(entry.population)+( "\n"+String(entry.get("status","")) if not String(entry.get("status","")).is_empty() else "")
 		if entry.has("summary"):
-			button.text=String(entry.title)+" · "+String(entry.affiliation)
+			button.text=String(entry.title)+" · "+String(entry.affiliation)+("
+"+String(entry.note) if not String(entry.get("note","")).is_empty() else "")
 			for stat:Dictionary in entry.summary.stats:button.text+="\n"+String(stat.label)+"  "+String(stat.value)
 			button.text+="\nIntel · "+String(entry.status)
 		button.icon=entry.flag;button.expand_icon=true;button.add_theme_constant_override("icon_max_width",28)
@@ -706,12 +732,14 @@ func _draw_frame(card:Dictionary,box:Rect2,solid:bool,fade:float=1.0)->void:
 	var x:=box.position.x+11
 	if card.flag!=null:
 		var flag_size:Vector2=card.flag.get_size()
-		flag_size*=minf(30.0/flag_size.x,20.0/flag_size.y)
-		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,3)+(Vector2(30,20)-flag_size)*.5,flag_size),false,Color(1,1,1,fade))
+		# The emblem as large as the name tag allows: its outline must read.
+		flag_size*=minf(30.0/flag_size.x,24.0/flag_size.y)
+		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,3)+(Vector2(30,24)-flag_size)*.5,flag_size),false,Color(1,1,1,fade))
 		x=box.position.x+46
 	var y:=box.position.y+20
 	for line:String in card.lines:
 		draw_string(font,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,Color(T.INK,T.INK.a*fade));y+=20
+	_draw_badge(card,box,fade)
 
 ## A fine ink leader from just outside the place glyph to its name.
 func _draw_leader(card:Dictionary,box:Rect2,anchor:Vector2,fade:float=1.0)->void:
@@ -739,21 +767,29 @@ func _draw_card(card:Dictionary,box:Rect2,solid:bool=false)->void:
 	_draw_frame(card,box,solid)
 	var y:=box.position.y+19+float(card.lines.size())*20
 	if card.has("summary"):
-		# Affiliation in body ink so it stays legible on the parchment ground.
-		draw_string(font,Vector2(box.position.x+10,y-3),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,12,T.TEXT_SOFT)
+		# Affiliation in body ink so it stays legible on the parchment ground;
+		# a town we hold says so in gold, with since when and who guards it.
+		var ours:=bool(card.get("ours",false))
+		draw_string(font,Vector2(box.position.x+10,y-3),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,12,T.GOLD_TEXT if ours else T.TEXT_SOFT)
+		if not String(card.get("note","")).is_empty():
+			y+=16
+			draw_string(font,Vector2(box.position.x+10,y-3),String(card.note),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,12,T.INK)
 		draw_line(Vector2(box.position.x+10,y+3),Vector2(box.end.x-10,y+3),Color(color,.18))
 		var stats:Array=card.summary.stats
 		for i in stats.size():
 			var cell:=Vector2(box.position.x+10+float(i%2)*(box.size.x-20)*.5,y+16+float(i/2)*42)
-			draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.MUTED)
+			draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 			draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK if stats[i].value!="Unknown" else T.DISABLED)
-			draw_string(font,cell+Vector2(0,27),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,-1,9,T.TEXT_SOFT)
+			draw_string(font,cell+Vector2(0,29),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,(box.size.x-20)*.5-6,12,T.TEXT_SOFT)
 		var level:=int(card.summary.level)
-		var freshness_color:=Color("78bba4") if level>=4 else Color("d4ae68") if level>=2 else Color("b88270")
-		draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","REPORT"))+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,10,freshness_color)
+		var freshness_color:=T.TEAL_TEXT if level>=4 else T.AMBER_TEXT if level>=2 else T.RED_TEXT
+		draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","REPORT")).capitalize()+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-90,12,freshness_color)
 		for i in 5:draw_rect(Rect2(Vector2(box.end.x-67+i*11,box.end.y-14),Vector2(8,5)),freshness_color if i<level else T.TRACK)
 		return
 	var status_height:=20.0 if not String(card.get("status","")).is_empty() else 0.0
 	if status_height>0:draw_string(font,Vector2(box.position.x+10,box.end.y-9),String(card.status),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.GOLD_BRIGHT)
+	if not String(card.get("note","")).is_empty():
+		status_height+=18.0
+		draw_string(font,Vector2(box.position.x+10,box.end.y-9-status_height+18.0),String(card.note),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK)
 	if not String(card.get("affiliation","")).is_empty():draw_string(font,Vector2(box.position.x+10,box.end.y-27-status_height),String(card.affiliation),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.TEXT_SOFT)
 	draw_string(font,Vector2(box.position.x+10,box.end.y-9-status_height),card.population,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK)

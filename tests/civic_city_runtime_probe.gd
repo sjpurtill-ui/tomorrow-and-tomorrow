@@ -48,7 +48,7 @@ func _ready()->void:
 	await get_tree().process_frame
 	_expect(terrain.military_attention_dialog!=null and terrain.military_attention_dialog.visible,"Attack dialog must be visible")
 	_expect("Dawngate" in terrain.military_attention_dialog.dialog_text,"Attack must identify location")
-	_expect(terrain.military_attention_dialog.ok_button_text=="OPEN WAR PLANNING","Attack must offer direct access to planning")
+	_expect(terrain.military_attention_dialog.ok_button_text=="Open war planning","Attack must offer direct access to planning")
 	terrain.military_attention_dialog.hide()
 	var battle:={"seed":9988,"outcome":"defender_victory","home_side":"defender","target_region_name":"Dawngate","threat":{"source_name":"Reedbank Confederacy"},"defender":{"initial_troops":20,"remaining_troops":14,"morale":0.48}}
 	MilitaryCampaign._record_council_battle(battle)

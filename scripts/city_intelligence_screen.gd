@@ -198,9 +198,12 @@ func refresh()->void:
 	var how:="Our scouts watched it for %s. Time on the road does not sharpen the count; only time spent watching does." % When.span(observed_days) if observed_days>0 else "This older report did not say how long they watched."
 	detail_text.text="Brought by %s. %s These figures are what they saw then, not what is true now." % [String(city.source).to_lower() if String(city.source)!="" else "our scouts",how]
 	var identity_id:=String(city.controller) if not String(city.controller).is_empty() else String(city.civ_id)
-	flag.texture=IDENTITY.foreign(identity_id).texture
+	flag.texture=IDENTITY.emblem(identity_id)
 	var owner:=owner_id()
 	control_label.text="Held by "+WorldSimulation.world.city_intelligence.controller_label(String(city.controller))
+	# A town we hold says so as the map does: whose it was, since when, who guards it.
+	var held:=preload("res://scripts/map_ownership.gd").status(city)
+	if String(held.kind)=="occupied":control_label.text="%s · %s" % [String(held.line),String(held.note)] if not String(held.note).is_empty() else String(held.line)
 	var owner_index:=WorldSimulation.world._civilization_index(owner)
 	if owner_index>=0:
 		var relation:Dictionary=WorldSimulation.world.civilizations[owner_index].player_relation

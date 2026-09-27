@@ -1264,6 +1264,8 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 	var ink:=INK if ours else THEIRS.darkened(0.25)
 	var accent:=OURS_WASH if ours else THEIRS_WASH
 	if not ours and not bool(entry.get("hostile",true)): accent=Color("#b89a5a")
+	# A known people's force wears their own colour, as their emblem does.
+	elif not ours and CivilizationSystem._civilization_index(String(entry.get("owner","")))>=0: accent=preload("res://scripts/city_map_identity.gd").foreign(String(entry.owner)).accent
 	var kind:=String(entry.kind)
 	if kind=="band": kind="band:%d" % ArmyMarks.tally(int(entry.get("troops",0)))
 	# Where it stepped off the front, a hairline back to where it stands.

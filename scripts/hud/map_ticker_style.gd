@@ -21,8 +21,8 @@ static func style(label:Label)->void:
 	slip.shadow_size=6;slip.shadow_offset=Vector2(0,2)
 	label.add_theme_stylebox_override("normal",slip)
 	label.add_theme_font_override("font",HudT.FONT_UI)
-	label.add_theme_font_size_override("font_size",13)
-	label.add_theme_color_override("font_color",HudT.BODY)
+	label.add_theme_font_size_override("font_size",14)
+	label.add_theme_color_override("font_color",HudT.INK)
 	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	label.clip_text=true
@@ -32,6 +32,9 @@ static func style(label:Label)->void:
 ## Sizes the slip to its text, centred over the map. Cheap when the text and
 ## width are unchanged; hides the slip when there is nothing to say.
 static func fit(label:Label,viewport_width:float)->void:
+	# Older systems still hand the ticker shouted text; it reads as a sentence.
+	var calm:=preload("res://scripts/hud/paper_kit.gd").calm_line(label.text)
+	if calm!=label.text.strip_edges() and calm!="":label.text=calm
 	var key:="%s|%d" % [label.text,roundi(viewport_width)]
 	if String(label.get_meta("ticker_fitted",""))==key:return
 	label.set_meta("ticker_fitted",key)
@@ -42,6 +45,6 @@ static func fit(label:Label,viewport_width:float)->void:
 	var font:Font=label.get_theme_font("font")
 	var width:=font.get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
 	var usable:=maxf(240.0,viewport_width-HudT.RAIL_WIDTH-48.0)
-	var box:=Vector2(minf(width+PAD.x*2.0+4.0,usable),24.0)
+	var box:=Vector2(minf(width+PAD.x*2.0+4.0,usable),28.0)
 	label.size=box
 	label.position=Vector2(HudT.RAIL_WIDTH+(viewport_width-HudT.RAIL_WIDTH-box.x)*0.5,TOP)

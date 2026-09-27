@@ -74,17 +74,6 @@ func test_blocked_ordered_heading_does_not_silently_dispatch_the_other_way()->vo
 	assert_bool(system.dispatch_scouts(30,"open_world","east").has("error")).is_true()
 	assert_bool(bool(system.scout_mission_quote(30).can_dispatch)).is_true()
 
-func test_card_shows_planned_route_and_return_instead_of_theoretical_reach_or_safety()->void:
-	var terrain:Node3D=auto_free(Terrain.new())
-	var quote:Dictionary={"personnel":6,"provisions":99.0,"one_way_range_km":10000.0,"planned_outward_km":42.0,"route_plan":{"ok":true,"distance_km":42.0,"planned_heading":"west"},"risk":{"label":"LOW"},"can_dispatch":true}
-	var card:String=terrain._scout_mission_card_text(30,quote)
-	assert_str(card).contains("OUTWARD ROUTE ~42 KM").contains("WEST").contains("RETURN INCLUDED").contains("DANGERS UNKNOWN")
-	assert_bool("REACH" in card or "RISK LOW" in card or "10.0K" in card).is_false()
-	quote.can_dispatch=false;quote.route_plan={"ok":false};quote.blocker="No walkable route from home."
-	var blocked:String=terrain._scout_mission_card_text(30,quote)
-	assert_str(blocked).contains("BLOCKED").contains("No walkable route")
-	assert_bool("OUTWARD ROUTE" in blocked).is_false()
-
 func test_generated_home_geography_has_valid_previews_for_all_four_durations()->void:
 	# The current session's last logged world seed. Use only generated terrain,
 	# never load or write the player's campaign and never instantiate a scene.

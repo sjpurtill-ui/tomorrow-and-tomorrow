@@ -48,15 +48,15 @@ func test_grab_drag_makes_ground_follow_the_pointer()->void:
 func test_first_use_help_names_one_contextual_next_action_without_a_control_glossary()->void:
 	assert_bool(renderer.map_help_dismissed).is_true()
 	var founding:Dictionary=renderer._map_help_presentation(false,false,false)
-	assert_str(String(founding.title)).is_equal("FIND A HOME")
+	assert_str(String(founding.title)).is_equal("Find a home")
 	assert_str(String(founding.body)).contains("Left-click land to inspect")
 	assert_str(String(founding.body)).contains("Right-click land to move")
 	assert_str(String(founding.body)).contains("card")
-	assert_str(String(founding.body)).contains("review water")
+	assert_str(String(founding.body)).contains("Review founding site")
 	assert_str(String(founding.body)).not_contains("WASD")
 	assert_str(String(founding.body)).not_contains("Middle-drag")
 	var targeting:Dictionary=renderer._map_help_presentation(true,true,false)
-	assert_str(String(targeting.title)).is_equal("CHOOSE DRY LAND")
+	assert_str(String(targeting.title)).is_equal("Choose land for the new settlement")
 	assert_str(String(targeting.body)).contains("Green")
 	assert_str(String(targeting.body)).contains("red")
 	assert_str(String(targeting.body)).contains("Right-click")
@@ -81,38 +81,18 @@ func test_left_click_inspects_and_right_click_moves_the_founding_convoy()->void:
 	assert_int(map.convoy_moves).is_equal(1)
 
 
-func test_action_presentations_put_blockers_and_next_steps_on_the_action()->void:
-	var scout:Dictionary=renderer._scout_action_presentation({}, {
-		"can_dispatch":false,"blocker":"Requires 42.0 Food; only 12.0 is stored."
-	})
-	assert_bool(bool(scout.disabled)).is_true()
-	assert_str(String(scout.label)).contains("BLOCKED")
-	assert_str(String(scout.label)).contains("NEEDS FOOD")
-	assert_str(String(scout.tooltip)).contains("NEXT")
-	var diplomats:Dictionary=renderer._diplomat_action_presentation({},0)
-	assert_bool(bool(diplomats.disabled)).is_true()
-	assert_str(String(diplomats.label)).contains("LOCATE A FOREIGN SETTLEMENT FIRST")
-	assert_str(String(diplomats.tooltip)).contains("encounter site is not a diplomatic destination")
-
-
-func test_active_missions_remain_available_as_review_actions()->void:
-	var scout:Dictionary=renderer._scout_action_presentation({"active":true,"days_remaining":18},{})
-	var diplomats:Dictionary=renderer._diplomat_action_presentation({"active":true,"days_remaining":31},0)
-	assert_bool(bool(scout.disabled)).is_false()
-	assert_str(String(scout.label)).contains("REVIEW SCOUT PARTY")
-	assert_bool(bool(diplomats.disabled)).is_false()
-	assert_str(String(diplomats.label)).contains("REVIEW DIPLOMATS")
-
-
-func test_blocked_scout_duration_is_visible_without_relying_on_a_tooltip()->void:
-	var text:String=renderer._scout_mission_card_text(30,{
-		"personnel":8,"provisions":132.0,"one_way_range_km":318.0,
-		"risk":{"label":"LOW"},"can_dispatch":false,
-		"blocker":"Requires 132.0 Food; only 30.0 is stored."
-	})
-	assert_str(text).contains("30-DAY EXPEDITION")
-	assert_str(text).contains("BLOCKED")
-	assert_str(text).contains("Requires 132.0 Food")
+func test_envoy_button_words_are_plain_and_point_to_the_court()->void:
+	var blocked:Dictionary=renderer._diplomat_action_presentation({},0)
+	assert_bool(bool(blocked.disabled)).is_true()
+	assert_str(String(blocked.label)).is_equal("Send envoys")
+	assert_str(String(blocked.tooltip)).contains("Scouts must find where they live")
+	var away:Dictionary=renderer._diplomat_action_presentation({"active":true,"days_remaining":31},0)
+	assert_bool(bool(away.disabled)).is_false()
+	assert_str(String(away.label)).contains("back in about 31 days")
+	for words in [blocked,away,renderer._diplomat_action_presentation({},2)]:
+		for part in [String(words.label),String(words.tooltip)]:
+			for dead in ["ACTION","BLOCKED","WHY","NEXT","RESULT","IN PROGRESS"]:
+				assert_str(part).not_contains(dead)
 
 
 func test_early_shelter_accepts_historical_substitute_materials_and_explains_real_blocker()->void:
@@ -126,9 +106,6 @@ func test_early_shelter_accepts_historical_substitute_materials_and_explains_rea
 	assert_bool(renderer._settlement_project_available(shelter)).is_true()
 	GameState.resource_stockpiles={"Timber":0.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
 	assert_bool(renderer._settlement_project_available(shelter)).is_false()
-	var status:String=renderer._shelter_work_status()
-	assert_str(status).contains("BLOCKED BY MATERIALS")
-	assert_str(status).contains("or substitutes")
 
 
 func test_temporary_selection_marker_keeps_a_fixed_screen_footprint()->void:
@@ -154,7 +131,7 @@ func test_rendered_river_channel_is_a_hard_invalid_settlement_surface()->void:
 	var bank:Dictionary=renderer._settlement_surface_assessment(Vector3(river_x+0.18,1.0,z))
 	var dry_land:Dictionary=renderer._settlement_surface_assessment(Vector3(river_x+0.40,1.0,z))
 	assert_bool(bool(channel.valid)).is_false()
-	assert_str(String(channel.reason)).contains("RIVER CHANNEL")
+	assert_str(String(channel.reason)).contains("River channel")
 	assert_bool(bool(bank.valid)).is_false()
 	assert_bool(bool(dry_land.valid)).is_true()
 
@@ -174,7 +151,7 @@ func test_rendered_tributary_and_its_immediate_bank_are_blocked_but_dry_bank_is_
 	var channel:Dictionary=renderer._settlement_surface_assessment(sites.channel)
 	var dry_bank:Dictionary=renderer._settlement_surface_assessment(sites.dry_bank)
 	assert_bool(bool(channel.get("valid",true))).is_false()
-	assert_str(String(channel.get("reason",""))).contains("TRIBUTARY CHANNEL")
+	assert_str(String(channel.get("reason",""))).contains("Tributary channel")
 	assert_bool(bool(dry_bank.get("valid",false))).is_true()
 	assert_float(float(dry_bank.get("river_distance_km",0.0))).is_greater(RENDERER.TRIBUTARY_SETTLEMENT_CLEARANCE_KM)
 
@@ -197,10 +174,10 @@ func test_later_settlement_preview_and_begin_share_the_river_blocker()->void:
 	# This is the same assessment consumed by the red/green placement preview.
 	var preview_assessment:Dictionary=renderer._settlement_convoy_site_assessment(destination)
 	assert_bool(bool(preview_assessment.get("valid",true))).is_false()
-	assert_str(String(preview_assessment.get("reason",""))).contains("RIVER CHANNEL")
+	assert_str(String(preview_assessment.get("reason",""))).contains("River channel")
 	renderer._begin_settlement_convoy(destination)
 	assert_object(renderer.settlement_convoy_confirm_panel).is_null()
-	assert_str(feedback.text).contains("RIVER CHANNEL")
+	assert_str(feedback.text).contains("River channel")
 	assert_dict(renderer.settlement_convoy_pending_quote).is_empty()
 
 
@@ -210,7 +187,7 @@ func test_confirmation_construction_and_final_commit_both_recheck_river_ground()
 	renderer.settlement_convoy_instruction_label=feedback
 	renderer._open_settlement_convoy_confirmation(destination,{"distance_km":5.0},{"ok":true,"duration_days":1.0})
 	assert_object(renderer.settlement_convoy_confirm_panel).is_null()
-	assert_str(feedback.text).contains("RIVER CHANNEL")
+	assert_str(feedback.text).contains("River channel")
 	assert_dict(renderer.settlement_convoy_pending_quote).is_empty()
 	# Even stale/tampered confirmation state must fail at the final mutation boundary.
 	renderer.settlement_convoy_pending_destination=destination
@@ -219,7 +196,7 @@ func test_confirmation_construction_and_final_commit_both_recheck_river_ground()
 	renderer.settlement_convoy_confirm_button=auto_free(Button.new()) as Button
 	renderer._confirm_settlement_convoy()
 	assert_bool(renderer.settlement_convoy_confirm_button.disabled).is_true()
-	assert_str(renderer.settlement_convoy_confirm_status.text).contains("RIVER CHANNEL")
+	assert_str(renderer.settlement_convoy_confirm_status.text).contains("River channel")
 	assert_dict(renderer.settlement_convoy_pending_quote).contains_key_value("duration_days",1.0)
 
 

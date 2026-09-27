@@ -36,10 +36,11 @@ func tab(_sub:int)->Dictionary:
 	var fresh:=V.freshness(city,today)
 	var seen_day:=int(city.get("observed_day",-1))
 	var controller:=CivilizationSystem.city_intelligence.controller_label(String(city.get("controller","")))
+	var held:=preload("res://scripts/map_ownership.gd").status(city)
 	var dossier:={"type":"city_dossier","items":rows,"city_id":city_id,"fields":city.get("fields",{}),"home_name":home_name,
 		"account":Dossier.account(city,own_values,home_name,today),"source":String(city.get("source","Unknown")),
 		"fresh_level":int(fresh.level),"fresh_status":String(fresh.status),"fresh_age":"" if seen_day<0 else Dossier.ago(today-seen_day),
-		"caption":"Held by "+controller}
+		"caption":("%s · %s" % [String(held.line),String(held.note)]) if String(held.kind)=="occupied" else "Held by "+controller}
 	var blocks:Array=[dossier]
 	var scouting:=Orders.dock_items(city_id)
 	if not scouting.is_empty():

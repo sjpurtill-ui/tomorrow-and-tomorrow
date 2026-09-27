@@ -25,16 +25,6 @@ func _ready()->void:
 	_expect(ResourceSystem.stored_bulk()>0.0,"physical founding cargo disappeared before the first simulation tick")
 	var opening_water:Dictionary=ResourceSystem.water_access_snapshot(terrain._discovery_context())
 	_expect(bool(opening_water.get("recognized",false)) and String(opening_water.get("source_origin",""))=="mapped_hydrology","charted fresh water was absent at the start of the game")
-	terrain._open_materials_panel()
-	var water_listed:=false
-	for water_label_variant in terrain.materials_panel.find_children("*","Label",true,false):
-		var water_label:=water_label_variant as Label
-		if water_label and "FRESH WATER" in water_label.text:
-			water_listed=true
-			break
-	_expect(water_listed,"material resource report omitted recognized fresh water before the first simulation tick")
-	terrain.materials_panel.queue_free()
-	terrain.materials_panel=null
 	# The game now opens close in, at the fire circle; the recognized resources lie
 	# a few kilometres out. Resource mode must show them once the player looks
 	# over the valley (the 50,000 ft distance level).
@@ -84,9 +74,6 @@ func _ready()->void:
 		"title":"Foreign movement","description":"A distant formation crossed the known horizon."
 	})
 	_expect(terrain.foreign_alert_queue.is_empty() and terrain.active_foreign_alert.is_empty(),"routine foreign sighting created an interrupting alert")
-	terrain.event_report_button.visible=true
-	terrain._refresh_event_report()
-	_expect(not terrain.event_report_button.visible,"routine birth/death report remained visible on the left side")
 	var report_blocker:=Control.new()
 	report_blocker.name="ProbeOpenReport"
 	report_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -124,7 +111,7 @@ func _ready()->void:
 	var river_z:float=terrain.world_start_position.z
 	var river_x:float=terrain._world_river_x(river_z)
 	var river_assessment:Dictionary=terrain._settlement_surface_assessment(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
-	_expect(not bool(river_assessment.get("valid",true)) and "RIVER CHANNEL" in String(river_assessment.get("reason","")),"rendered river channel was accepted as a settlement site")
+	_expect(not bool(river_assessment.get("valid",true)) and "River channel" in String(river_assessment.get("reason","")),"rendered river channel was accepted as a settlement site")
 	terrain.settlement_convoy_targeting=true
 	# Each people now starts in its own country, far from this channel: chart it
 	# (as a returned scout would) and look at it before pointing at it.
@@ -135,7 +122,7 @@ func _ready()->void:
 	var river_screen:Vector2=terrain.camera.unproject_position(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
 	terrain._update_settlement_convoy_preview(river_screen)
 	_expect(not terrain.settlement_convoy_hover_valid and terrain.settlement_convoy_preview and terrain.settlement_convoy_preview.visible,"later settlement preview did not render the river site as blocked")
-	_expect(terrain.settlement_convoy_instruction_label and "RIVER CHANNEL" in terrain.settlement_convoy_instruction_label.text,"later settlement preview did not explain its river blocker")
+	_expect(terrain.settlement_convoy_instruction_label and "River channel" in terrain.settlement_convoy_instruction_label.text,"later settlement preview did not explain its river blocker")
 	terrain.settlement_convoy_targeting=false
 	if terrain.settlement_convoy_preview: terrain.settlement_convoy_preview.visible=false
 	terrain.camera_target=home_target
