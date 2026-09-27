@@ -163,6 +163,16 @@ func _frame(delta:float)->void:
 	var paused:=float(terrain.get("game_speed"))<=0.0
 	var reduced:=MapMotion.reduced()
 	var dt:=0.0 if paused else delta*_pace()
+	var camera:Camera3D=terrain.get("camera")
+	if camera==null:return
+	var size:=camera.size
+	if size>CLOUD_GONE_ABOVE and _wind_targets.is_empty() and _wind_materials.is_empty():
+		# Over the regional chart nothing here can be seen: keep the clocks
+		# running and do nothing else.
+		clock+=dt
+		if cloud_mesh.visible or drops.visible or birds.visible or herd.visible or boats.visible or builders.visible:
+			for node in [cloud_mesh,drops,birds,herd,boats,builders]:(node as Node3D).visible=false
+		return
 	_refresh_weather()
 	# Weather changes over a few seconds, never in one frame.
 	var target_dir:Vector2=weather.get("wind_dir",wind_dir)
@@ -179,9 +189,6 @@ func _frame(delta:float)->void:
 		var period:=289.0*_cloud_scale()
 		cloud_drift=Vector2(fposmod(cloud_drift.x,period),fposmod(cloud_drift.y,period))
 	_push_wind(gust)
-	var camera:Camera3D=terrain.get("camera")
-	if camera==null:return
-	var size:=camera.size
 	var target:Vector3=terrain.get("camera_target") if terrain.get("camera_target") is Vector3 else Vector3.ZERO
 	var home:=_home()
 	var near_home:=Vector2(target.x-home.x,target.z-home.z).length()<maxf(3.0,size*2.0)
