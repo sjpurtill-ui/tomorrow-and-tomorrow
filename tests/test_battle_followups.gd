@@ -186,3 +186,22 @@ func test_a_shaken_band_regroups_for_a_fortnight_and_the_memory_is_saved()->void
 	CivilizationSystem.formation_memory=memory.duplicate(true)
 	var saved:Dictionary=CivilizationSystem.export_state()
 	assert_dict(saved.get("formation_memory",{})).is_equal(memory)
+
+
+func test_replay_draws_era_figures_and_reads_like_paper_not_a_dev_tool()->void:
+	var Diorama:=preload("res://scripts/battle_diorama.gd")
+	assert_str(Diorama.figure_kind({"unit":"levy","weapon":"improvised"})).is_equal("club")
+	assert_str(Diorama.figure_kind({"unit":"line_infantry","weapon":"spear"})).is_equal("spear")
+	assert_str(Diorama.figure_kind({"unit":"skirmisher","weapon":"bow"})).is_equal("bow")
+	assert_str(Diorama.figure_kind({"unit":"cavalry","weapon":"spear"})).is_equal("horse")
+	assert_str(Diorama.figure_kind({"unit":"line_infantry","weapon":"musket"})).is_equal("musket")
+	# A small band is drawn one figure per person; a host in ranks.
+	assert_int(Diorama.per_figure(20)).is_equal(1)
+	assert_int(Diorama.per_figure(3000)).is_equal(50)
+	var icon:=preload("res://scripts/resource_icons.gd").battle_figure_texture("spear",Color("2b2118"),Color("295750"))
+	assert_object(icon).is_not_null()
+	assert_int(icon.get_height()).is_equal(64)
+	# The chrome speaks in words: no glyph controls, no all-caps status.
+	var source:=FileAccess.get_file_as_string("res://scripts/battle_graphics_screen.gd")
+	for glyph in ["→","½","\"×\"","\"‹\"","\"›\"","WATCHING","ROUND %d","RETURN TO MAP","YOUR FORMATIONS","Color(\"0b1013\")"]:
+		assert_str(source).override_failure_message(glyph).not_contains(glyph)
