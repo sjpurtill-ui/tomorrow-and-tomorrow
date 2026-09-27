@@ -3663,5 +3663,11 @@
   "vine_rootstock_grafting": {"path": "res://assets/ui/research/subjects/vine_rootstock_grafting-v1.png", "focus": [0.5, 0.5]},
   "conduit_maintenance_crews": {"path": "res://assets/ui/research/subjects/conduit_maintenance_crews-v1.png", "focus": [0.5, 0.5]},
   "learned_allusive_poetry": {"path": "res://assets/ui/research/subjects/learned_allusive_poetry-v1.png", "focus": [0.5, 0.5]},
-  "moulded_glass_gems": {"path": "res://assets/ui/research/subjects/moulded_glass_gems-v1.png", "focus": [0.5, 0.5]}
+  "moulded_glass_gems": {"path": "res://assets/ui/research/subjects/moulded_glass_gems-v1.png", "focus": [0.5, 0.5]},
+  "raw_material_prestaging": {"path": "res://assets/ui/research/subjects/raw_material_prestaging-v1.png", "focus": [0.5, 0.5]},
+  "carried_load_balancing": {"path": "res://assets/ui/research/subjects/carried_load_balancing-v1.png", "focus": [0.5, 0.4]},
+  "common_ground_marking": {"path": "res://assets/ui/research/subjects/common_ground_marking-v1.png", "focus": [0.5, 0.5]},
+  "household_task_division": {"path": "res://assets/ui/research/subjects/household_task_division-v1.png", "focus": [0.5, 0.5]},
+  "lactational_spacing_awareness": {"path": "res://assets/ui/research/subjects/lactational_spacing_awareness-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_duty_rosters": {"path": "res://assets/ui/research/subjects/seasonal_duty_rosters-v1.png", "focus": [0.5, 0.5]}
 }
