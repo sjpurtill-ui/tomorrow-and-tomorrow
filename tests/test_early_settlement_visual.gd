@@ -94,7 +94,8 @@ func test_mesh_envelopes_scale_and_ruin_respect_the_shared_placement_contract() 
 	var shadows:Node=parent.get_node("SettlementGroundShadows")
 	assert_int((shadows.get_child(0) as MultiMeshInstance3D).multimesh.instance_count).is_equal((parent.get_child(0) as MultiMeshInstance3D).multimesh.instance_count)
 	var transform:Transform3D=parent.get_child(0).get_meta("source_transforms")[0]
-	assert_float(transform.basis.x.length()).is_equal_approx(.001,.000001)
+	# Each dwelling a little smaller than its envelope by its own measure, never larger.
+	assert_float(transform.basis.x.length()).is_between(.00084,.001)
 	assert_float(transform.origin.y).is_equal_approx(.5001,.000001)
 	assert_dict(data).is_equal(saved)
 	data.plots[0].status="ruin"

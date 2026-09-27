@@ -27,45 +27,90 @@ func build(report:Dictionary,height_at:Callable)->void:
 	building_count=clampi(roundi(sqrt(float(population))*1.6),12,MAX_BUILDINGS) if population>=0 else 28
 	footprint_radius=framing_size(report)*.27
 	set_meta("representative_layout",true)
-	var lanes:=SurfaceTool.new();lanes.begin(Mesh.PRIMITIVE_TRIANGLES);surfaces["EarthAndLanes"]=lanes
 	var rng:=RandomNumberGenerator.new();rng.seed=hash(String(report.city_id))^WorldSimulation.state.world_seed
+	# Round five (codex/beauty-5): a stranger's town grows the way a place
+	# does, not on a grid. Lanes wander out from a meeting ground, houses
+	# stand along them facing the lane and gather in kin yards off them, and
+	# every people builds in its own way (style_for: round thatch, long
+	# houses, packed mud brick, or a camp of painted hides), in its own
+	# colours. Representative households only: nothing here is a census.
+	var style:=style_for(report)
+	people_style=String(style.name)
 	var heading:=rng.randf_range(-PI,PI)
 	var plan:Dictionary={"buildings":[],"replaced":{}}
-	var courts:=ceili(float(building_count)/4.0)
-	var columns:=ceili(sqrt(float(courts)))
-	var rows:=ceili(float(courts)/columns)
-	var centers:Array[Vector2]=[]
 	var lanes_drawn:Array[PackedVector2Array]=[]
-	for court in courts:
-		var center:=Vector2((court%columns-(columns-1)*.5)*.038,(court/columns-(rows-1)*.5)*.038)
-		center+=Vector2(rng.randf_range(-.002,.002),rng.randf_range(-.002,.002))
-		center=center.rotated(heading);centers.append(center)
-		if court>0:
-			var previous:=court-columns if court>=columns else court-1
-			_lane(centers[previous],center,.0011,Color(0.52,0.45,0.36,0.45))
-			lanes_drawn.append(PackedVector2Array([centers[previous],center]))
-		for slot in mini(4,building_count-court*4):
-			var direction:=Vector2.from_angle(heading+float(slot)*TAU/4+PI/4)
-			var local:=center+direction*.011
-			footprint_radius=maxf(footprint_radius,local.length()+.006)
-			var forward:=-direction
-			plan.buildings.append({"position":local,"angle":atan2(forward.x,forward.y),"variant":(court+slot)%4,"plot":{}})
-			# Doors share a court; no parcel mats or cross-street ladder paths.
-			_lane(center,local-direction*.0045,.00065,Color(0.57,0.51,0.42,0.35))
-			lanes_drawn.append(PackedVector2Array([center,local-direction*.0045]))
-	# Shared authored assets, at their physical scale. These are representative
-	# households, not fabricated foreign construction records or a hidden census.
-	preload("res://scripts/organic_town_visual.gd").render(plan,Vector3.ZERO,func(x:float,z:float)->float:return _height(Vector2(x,z)),self)
-	# Their worn ground: yards round the houses and the lanes between the
-	# courts, painted into the land when the camera comes near
+	var spacing:=float(style.spacing)
+	var lane_count:=clampi(2+building_count/24,2,5) if String(style.name)!="hide_camp" else 0
+	# Lanes only as long as the houses along them need (a hamlet is a knot of
+	# houses round its yard, not a spider of empty tracks).
+	var lane_length:=spacing*(1.6+float(building_count)/float(maxi(lane_count,1))*0.62*float(style.frontage))
+	var lane_paths:Array[PackedVector2Array]=[]
+	for lane in lane_count:
+		# Each lane leaves the meeting ground on its own bearing and bends as
+		# the ground and the old footpaths had it.
+		var bearing:=heading+TAU*float(lane)/float(lane_count)+rng.randf_range(-0.35,0.35)
+		var bend:=rng.randf_range(-0.9,0.9)
+		var path:=PackedVector2Array([Vector2.from_angle(bearing)*spacing*0.9])
+		var steps:=6
+		for k in range(1,steps+1):
+			var t:=float(k)/float(steps)
+			var angle:=bearing+bend*t*t*0.8+sin(t*5.0+float(lane))*0.08
+			path.append(path[path.size()-1]+Vector2.from_angle(angle)*lane_length/float(steps)*rng.randf_range(0.85,1.15))
+		lane_paths.append(path)
+		lanes_drawn.append(path)
+	var placed:Array[Vector2]=[]
+	var clear:=spacing*0.78
+	if String(style.name)=="hide_camp":
+		# Tents in loose rings round the meeting ground, doors inward.
+		var ring:=0
+		while plan.buildings.size()<building_count and ring<14:
+			var radius:=spacing*(1.4+float(ring)*1.05)
+			var around:=maxi(5,int(TAU*radius/(spacing*1.05)))
+			for k in around:
+				if plan.buildings.size()>=building_count:break
+				var angle:=heading+TAU*(float(k)+rng.randf_range(-0.25,0.25))/float(around)+float(ring)*0.4
+				var at:=Vector2.from_angle(angle)*radius*rng.randf_range(0.93,1.07)
+				if _free(at,placed,spacing,clear):_add(plan,placed,at,Vector2.ZERO,spacing)
+			ring+=1
+	else:
+		# Houses along the lanes, alternate sides, facing the lane; then kin
+		# yards (a few houses round a shared yard) set back behind them.
+		var along:=spacing*float(style.frontage)
+		var reach:=0
+		while plan.buildings.size()<building_count and reach<40:
+			for lane in lane_paths:
+				var distance:=spacing*1.2+float(reach)*along
+				var point:=_along(lane,distance)
+				if point==Vector2.INF:continue
+				var ahead:=_along(lane,distance+0.002)
+				if ahead==Vector2.INF:ahead=point+(point-_along(lane,distance-0.002))
+				var side:=(ahead-point).normalized().orthogonal()*(1.0 if reach%2==0 else -1.0)
+				var at:=point+side*spacing*rng.randf_range(0.62,0.80)
+				if plan.buildings.size()<building_count and _free(at,placed,spacing,clear):_add(plan,placed,at,point,spacing)
+				if bool(style.yards) and reach%3==1 and plan.buildings.size()<building_count:
+					# A kin yard behind the frontage house.
+					var yard:=point+side*spacing*2.1
+					for k in 3:
+						var around:=yard+Vector2.from_angle(TAU*float(k)/3.0+rng.randf())*spacing*0.72
+						if plan.buildings.size()<building_count and _free(around,placed,spacing,clear):_add(plan,placed,around,yard,spacing)
+			reach+=1
+	# Any left over fill in near the meeting ground, facing it.
+	var tries:=0
+	while plan.buildings.size()<building_count and tries<building_count*16:
+		tries+=1
+		var at:=Vector2.from_angle(rng.randf()*TAU)*spacing*sqrt(rng.randf())*(2.5+sqrt(float(building_count))*1.2)
+		if _free(at,placed,spacing,clear):_add(plan,placed,at,Vector2.ZERO,spacing)
+	# Everything placed is drawn (the batches hold exactly building_count).
+	building_count=plan.buildings.size()
+	for record in plan.buildings:footprint_radius=maxf(footprint_radius,Vector2(record.position).length()+spacing*0.5)
+	_render_people(plan,style)
+	# Their worn ground: yards round the houses, the meeting ground and the
+	# lanes, painted into the land when the camera comes near
 	# (settlement_grounds.gd). Visual only.
 	var ground_routes:Array[Dictionary]=[]
 	for index in lanes_drawn.size():
-		var link:=lanes_drawn[index][0].distance_to(lanes_drawn[index][1])>0.02
-		# Worn the way people walk, bending a little, not ruled straight.
-		var walked:=preload("res://scripts/settlement_grounds.gd")._wander(lanes_drawn[index][0],lanes_drawn[index][1],hash([String(report.city_id),index]))
-		ground_routes.append({"id":index+1,"active":true,"points":walked,"width_m":2.4 if link else 1.2,"traffic":0.9 if link else 0.7,"hierarchy":"lane" if link else "path","kind":"street"})
-	var ground_plots:Array[Dictionary]=[]
+		ground_routes.append({"id":index+1,"active":true,"points":lanes_drawn[index],"width_m":2.2,"traffic":0.85,"hierarchy":"lane","kind":"street"})
+	var ground_plots:Array[Dictionary]=[{"id":1,"form":"maintained_gathering_ground","land_use":"communal","status":"active","centroid":Vector2.ZERO,"area_ha":0.05}]
 	preload("res://scripts/settlement_grounds.gd").request("foreign:"+String(report.city_id),plan,ground_plots,ground_routes,Vector3(origin.x,0.0,origin.y))
 	# Buildings and earth are batched, with no per-resident nodes or gameplay state.
 	for key:String in surfaces:
@@ -76,6 +121,75 @@ func build(report:Dictionary,height_at:Callable)->void:
 		material.roughness=.94;material.cull_mode=BaseMaterial3D.CULL_DISABLED
 		instance.material_override=material;add_child(instance)
 	set_meta("building_count",building_count)
+## How a people builds, from who they are (their identity is what the report
+## gives; nothing hidden is read): house form, colours, how closely they
+## build and whether kin share yards. Era-true for the early world.
+const STYLES:=[
+	{"name":"round_thatch","kinds":["round_household","round_household","round_household","raised_store"],"tint":Color(1.04,0.98,0.86),"spacing":0.0105,"frontage":1.25,"yards":true},
+	{"name":"long_house","kinds":["house_narrow","house_compact","house_narrow","house_medium","raised_store"],"tint":Color(0.86,0.84,0.80),"spacing":0.0135,"frontage":1.35,"yards":false},
+	{"name":"mud_brick","kinds":["earthen_household","earthen_household","earthen_household","covered_workshop"],"tint":Color(1.08,1.0,0.90),"spacing":0.0082,"frontage":1.0,"yards":true},
+	{"name":"hide_camp","kinds":["carried_round","carried_round","carried_ridge"],"tint":Color(1.02,0.84,0.70),"spacing":0.0090,"frontage":1.0,"yards":false}]
+var people_style:=""
+static func style_for(report:Dictionary)->Dictionary:
+	var who:=String(report.get("civ_id",""))
+	if who=="":who=String(report.get("city_id",""))
+	return STYLES[absi(hash(who+":builds"))%STYLES.size()]
+
+static func _free(at:Vector2,placed:Array[Vector2],spacing:float,clear:float)->bool:
+	if at.length()<spacing*1.05:return false
+	for other in placed:
+		if other.distance_to(at)<clear:return false
+	return true
+
+static func _add(plan:Dictionary,placed:Array[Vector2],at:Vector2,facing:Vector2,spacing:float)->void:
+	var forward:=(facing-at).normalized() if facing.distance_to(at)>0.0001 else Vector2(0,1)
+	placed.append(at)
+	plan.buildings.append({"position":at,"angle":atan2(forward.x,forward.y),"variant":0,"radius":spacing*0.32,"plot":{}})
+
+## The point `distance` km along a path, or INF past its end.
+static func _along(path:PackedVector2Array,distance:float)->Vector2:
+	if distance<0.0:return Vector2.INF
+	var left:=distance
+	for i in range(1,path.size()):
+		var step:=path[i-1].distance_to(path[i])
+		if left<=step:return path[i-1].lerp(path[i],left/maxf(step,0.000001))
+		left-=step
+	return Vector2.INF
+
+## The houses in the people's own form and colours, batched per form, each
+## a little its own size and lean, standing on their soft ground shadows.
+func _render_people(plan:Dictionary,style:Dictionary)->void:
+	var early:=preload("res://scripts/early_settlement_visual.gd")
+	var town:=preload("res://scripts/organic_town_visual.gd")
+	var shapes:=preload("res://scripts/settlement_kit_shapes.gd")
+	var ink:=preload("res://scripts/settlement_ink.gd")
+	var kinds:Array=style.kinds
+	var groups:Dictionary={}
+	for record:Dictionary in plan.buildings:
+		var name:String=kinds[absi(hash(Vector2(record.position)))%kinds.size()]
+		record["early_kind"]=name
+		if not groups.has(name):groups[name]=[]
+		groups[name].append(record)
+	var names:=groups.keys();names.sort()
+	for name:String in names:
+		var records:Array=groups[name]
+		var mesh:Mesh=town.kit_mesh(town.KIT.find(name)) if name.begins_with("house_") else early.kit_mesh(name)
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
+		batch.mesh=mesh;batch.instance_count=records.size()
+		var transforms:Array[Transform3D]=[]
+		for i in records.size():
+			var record:Dictionary=records[i]
+			var at:Vector2=record.position
+			var transform:=Transform3D(shapes.lived_basis(float(record.angle),hash(at)),Vector3(at.x,_height(at)+0.0002,at.y))
+			transforms.append(transform);batch.set_instance_transform(i,transform)
+			# The people's colours, each house a little weathered its own way.
+			var weather:=float(absi(hash(at+Vector2(3,7)))%100)/100.0
+			batch.set_instance_color(i,(style.tint as Color).lerp(Color(0.80,0.76,0.70),weather*0.18))
+		var node:=MultiMeshInstance3D.new();node.name="ForeignHouses_"+name
+		node.multimesh=batch;node.material_override=ink.material()
+		node.set_meta("source_transforms",transforms);add_child(node)
+		ink.add_ground_shadows(self,"GroundShadow_"+name,transforms,mesh.get_aabb())
+
 func _height(p:Vector2)->float:return float(ground.call(origin.x+p.x,origin.y+p.y))
 func _tri(surface:SurfaceTool,a:Vector3,b:Vector3,c:Vector3,color:Color)->void:
 	for v in [a,b,c]:surface.set_color(color);surface.add_vertex(v)

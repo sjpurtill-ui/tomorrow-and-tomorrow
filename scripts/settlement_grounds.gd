@@ -44,6 +44,8 @@ static var slot_signatures:PackedInt64Array=PackedInt64Array([0,0,0,0])
 static var slot_centers:PackedVector2Array=PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
 static var slot_origins:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
 static var slot_frames:PackedVector4Array=PackedVector4Array([Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0)])
+## Each slot's cultivated halo: radius km, strength, worked share, orchards.
+static var slot_halos:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
 static var slot_reports:Array[Dictionary]=[{},{},{},{}]
 static var _materials:Array[WeakRef]=[]
 static var _brushes:Dictionary={}
@@ -63,6 +65,7 @@ static func bind(material:ShaderMaterial)->void:
 
 static func _apply(material:ShaderMaterial)->void:
 	material.set_shader_parameter("sg_frames",slot_frames)
+	material.set_shader_parameter("sg_halos",slot_halos)
 	if ground_layers==null:return
 	material.set_shader_parameter("settlement_ground",ground_layers)
 	material.set_shader_parameter("settlement_fields",field_layers)
@@ -82,7 +85,7 @@ static func clear()->void:
 	texture=null;fields_texture=null;strength=0.0;signature=0;report={}
 	_requests.clear();_served_at=Vector2.INF
 	for slot in SLOTS:
-		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={}
+		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={};slot_halos[slot]=Vector4.ZERO
 	_apply_all()
 
 ## The home settlement's position (world km, x and z).
@@ -161,13 +164,39 @@ static func build_other(key:String,plan:Dictionary,plots:Array[Dictionary],route
 ## Cheap when nothing changed.
 static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	slot_keys[0]="home"
+	_home_args=[plan,plots,routes,center]
 	_paint(0,plan,plots,routes,center)
+
+static var _home_args:Array=[]
+## Where roads between places leave each town (settlement_roads.gd): world
+## centre and bearings. Each town's ground wears an approach track out along
+## them, so the road runs on into its streets.
+static var approaches:Dictionary={}
+static func set_approaches(value:Dictionary)->void:
+	if hash(value)==hash(approaches):return
+	approaches=value
+	for slot in range(1,SLOTS):
+		if slot_keys[slot]!="":slot_signatures[slot]=-1
+	_served_at=Vector2.INF
+	if not _home_args.is_empty():
+		var plots:Array[Dictionary]=[];plots.assign(_home_args[1])
+		var routes:Array[Dictionary]=[];routes.assign(_home_args[2])
+		_paint(0,_home_args[0],plots,routes,_home_args[3])
+
+## Road bearings leaving the town at `center` (world km).
+static func _approach_bearings(center:Vector2)->Array:
+	var out:Array=[]
+	for key in approaches:
+		var entry:Dictionary=approaches[key]
+		if Vector2(entry.center).distance_to(center)<0.4:out.append_array(entry.bearings)
+	return out
 
 static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	var buildings:Array=plan.get("buildings",[])
 	var works:Array[Dictionary]=[]
 	if slot==0:works=_works_near(center)
-	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_building_key(buildings),works])
+	var bearings:=_approach_bearings(Vector2(center.x,center.z))
+	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_building_key(buildings),works,bearings])
 	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
 	slot_signatures[slot]=key
 	var began:=Time.get_ticks_usec()
@@ -292,6 +321,15 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 		var start:=_nearest_point(all_points,target)
 		if start.distance_to(target)<0.004 or start.distance_to(target)>0.4:continue
 		_line(painter,_wander(start,target,int(plot.get("seed",7))),0.0009,wear,Color(1,0,0))
+	# The roads to other places: a worn approach from the lived ground out
+	# to the edge of the painted square, where the road's ink takes over.
+	for index in bearings.size():
+		var out_dir:=Vector2.from_angle(float(bearings[index]))
+		var start:=_nearest_point(all_points,out_dir*0.05) if not all_points.is_empty() else Vector2.ZERO
+		var finish:=mid+out_dir*side*0.75
+		var track:=_wander(start,finish,index*131+7)
+		_line(painter,track,0.0012,0.78,Color(1,0,0))
+		_line(painter,track,0.0030,0.22,Color(0,1,0))
 	for work in works:
 		var at:Vector2=work.at
 		var building:=String(work.state)=="building"
@@ -355,6 +393,14 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	slot_centers[slot]=Vector2(center.x,center.z)
 	slot_origins[slot]=Vector4(hi.x,hi.y,lo.x,lo.y)
 	slot_frames[slot]=Vector4(side,1.0,0.0,0.0)
+	# The cultivated halo: wider for a bigger, longer-farmed place; mostly
+	# pasture and clearings where nobody farms yet.
+	var farmed:=field_count>0 or float(shares.get("farm",0.0))>0.0
+	var halo_km:=clampf(0.26+sqrt(float(maxi(buildings.size(),1)))*0.035+sqrt(float(field_count))*0.06,0.30,1.4)
+	var orchards:=0.0
+	for entry in GameState.discovery_log:
+		if entry is Dictionary and String(entry.get("id","")) in ["fruit_tree_grafting","terraced_orchards","orchard","nut_orchards","citrus_orchards"]:orchards=1.0;break
+	slot_halos[slot]=Vector4(halo_km,1.0 if slot==0 else 0.85,0.65 if farmed else 0.2,orchards if slot==0 else 0.0)
 	slot_reports[slot]={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began,"slot":slot}
 	if slot==0:
 		if texture==null:texture=ImageTexture.create_from_image(image)

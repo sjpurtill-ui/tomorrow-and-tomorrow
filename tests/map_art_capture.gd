@@ -7,6 +7,7 @@ extends Node
 ##      [--midwinter] [--fresh-snow] (the settlement in winter, snow lying)
 ##      [--foreign] (the nearest known foreign city) [--second-town]
 ##      [--hide=Name,Other] (hide nodes whose names contain these, to diagnose)
+##      [--inventory] (list the settlement batches drawn, with a tint)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -137,6 +138,14 @@ func _ready()->void:
 		if woods:
 			for i in 50:await get_tree().process_frame
 			print("MAP_ART_CAPTURE: close woods ",JSON.stringify(woods.report()))
+		# Let the roads between places finish routing (bounded).
+		var roads:Node=terrain.get("settlement_roads")
+		var roads_deadline:=Time.get_ticks_msec()+25000
+		while roads and Time.get_ticks_msec()<roads_deadline and (not (roads.get("pending") as Array).is_empty() or not (roads.get("working") as Dictionary).is_empty()):
+			await get_tree().process_frame
+		if roads:
+			for i in 12:await get_tree().process_frame
+			print("MAP_ART_CAPTURE: roads links=",(roads.get("edges") as Array).size()," drawn=",roads.get_meta("roads_drawn",0)," knowledge=",JSON.stringify(roads.knowledge())," places=",roads.call("_places").map(func(p:Array)->String:return "%s@%.1f,%.1f" % [p[2],(p[0] as Vector2).x,(p[0] as Vector2).y]))
 		if "--hide-ui" in args:
 			for layer in get_tree().root.find_children("*","CanvasLayer",true,false):(layer as CanvasLayer).visible=false
 		# Diagnosis: `--hide=Name,Other` hides every node whose name contains one.
@@ -153,7 +162,21 @@ func _ready()->void:
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
 		var living:Node=terrain.get_node_or_null("LivingMap")
+		var ambience:Node=terrain.get_node_or_null("MapAmbience")
+		if living and ambience and size==sizes[0]:
+			var site:Vector3=ambience.call("_water_site",living.get("anchor"))
+			var landing:MeshInstance3D=ambience.get("landing")
+			print("MAP_ART_CAPTURE: water site ",site," from settlement km ",Vector2(site.x-target.x,site.z-target.z) if site!=Vector3.ZERO else Vector2.INF," landing=",landing!=null and landing.mesh!=null)
 		if living:print("MAP_ART_CAPTURE: life visible=",living.get("figures_visible")," workers=",(living.get("workers") as Array).size()," anchor=",living.get("anchor")," grounds=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").report)," slots=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").slot_keys))
+		if "--inventory" in args and size==sizes[0]:
+			# What the settlement kits drew: batch names and instance counts.
+			var drawn:=PackedStringArray()
+			for node in terrain.find_children("*","MultiMeshInstance3D",true,false):
+				var batch:=(node as MultiMeshInstance3D).multimesh
+				if batch and not String(node.name).begins_with("GroundShadow"):
+					var tint:=batch.get_instance_color(0).to_html(false) if batch.use_colors and batch.instance_count>0 else ""
+					drawn.append("%s=%d%s" % [node.name,batch.instance_count,(" #"+tint) if tint!="" else ""])
+			print("MAP_ART_INVENTORY: ",", ".join(drawn))
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	get_tree().quit(0)
 
