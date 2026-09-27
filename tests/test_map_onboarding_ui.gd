@@ -81,38 +81,18 @@ func test_left_click_inspects_and_right_click_moves_the_founding_convoy()->void:
 	assert_int(map.convoy_moves).is_equal(1)
 
 
-func test_action_presentations_put_blockers_and_next_steps_on_the_action()->void:
-	var scout:Dictionary=renderer._scout_action_presentation({}, {
-		"can_dispatch":false,"blocker":"Requires 42.0 Food; only 12.0 is stored."
-	})
-	assert_bool(bool(scout.disabled)).is_true()
-	assert_str(String(scout.label)).contains("BLOCKED")
-	assert_str(String(scout.label)).contains("NEEDS FOOD")
-	assert_str(String(scout.tooltip)).contains("NEXT")
-	var diplomats:Dictionary=renderer._diplomat_action_presentation({},0)
-	assert_bool(bool(diplomats.disabled)).is_true()
-	assert_str(String(diplomats.label)).contains("LOCATE A FOREIGN SETTLEMENT FIRST")
-	assert_str(String(diplomats.tooltip)).contains("encounter site is not a diplomatic destination")
-
-
-func test_active_missions_remain_available_as_review_actions()->void:
-	var scout:Dictionary=renderer._scout_action_presentation({"active":true,"days_remaining":18},{})
-	var diplomats:Dictionary=renderer._diplomat_action_presentation({"active":true,"days_remaining":31},0)
-	assert_bool(bool(scout.disabled)).is_false()
-	assert_str(String(scout.label)).contains("REVIEW SCOUT PARTY")
-	assert_bool(bool(diplomats.disabled)).is_false()
-	assert_str(String(diplomats.label)).contains("REVIEW DIPLOMATS")
-
-
-func test_blocked_scout_duration_is_visible_without_relying_on_a_tooltip()->void:
-	var text:String=renderer._scout_mission_card_text(30,{
-		"personnel":8,"provisions":132.0,"one_way_range_km":318.0,
-		"risk":{"label":"LOW"},"can_dispatch":false,
-		"blocker":"Requires 132.0 Food; only 30.0 is stored."
-	})
-	assert_str(text).contains("30-DAY EXPEDITION")
-	assert_str(text).contains("BLOCKED")
-	assert_str(text).contains("Requires 132.0 Food")
+func test_envoy_button_words_are_plain_and_point_to_the_court()->void:
+	var blocked:Dictionary=renderer._diplomat_action_presentation({},0)
+	assert_bool(bool(blocked.disabled)).is_true()
+	assert_str(String(blocked.label)).is_equal("Send envoys")
+	assert_str(String(blocked.tooltip)).contains("Scouts must find where they live")
+	var away:Dictionary=renderer._diplomat_action_presentation({"active":true,"days_remaining":31},0)
+	assert_bool(bool(away.disabled)).is_false()
+	assert_str(String(away.label)).contains("back in about 31 days")
+	for words in [blocked,away,renderer._diplomat_action_presentation({},2)]:
+		for part in [String(words.label),String(words.tooltip)]:
+			for dead in ["ACTION","BLOCKED","WHY","NEXT","RESULT","IN PROGRESS"]:
+				assert_str(part).not_contains(dead)
 
 
 func test_early_shelter_accepts_historical_substitute_materials_and_explains_real_blocker()->void:

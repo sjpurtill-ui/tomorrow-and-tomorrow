@@ -84,9 +84,6 @@ func _ready()->void:
 		"title":"Foreign movement","description":"A distant formation crossed the known horizon."
 	})
 	_expect(terrain.foreign_alert_queue.is_empty() and terrain.active_foreign_alert.is_empty(),"routine foreign sighting created an interrupting alert")
-	terrain.event_report_button.visible=true
-	terrain._refresh_event_report()
-	_expect(not terrain.event_report_button.visible,"routine birth/death report remained visible on the left side")
 	var report_blocker:=Control.new()
 	report_blocker.name="ProbeOpenReport"
 	report_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

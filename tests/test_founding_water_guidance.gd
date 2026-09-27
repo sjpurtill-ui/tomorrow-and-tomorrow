@@ -26,11 +26,8 @@ class Map extends "res://scripts/local_terrain.gd":
 
 class CommitMap extends Map:
 	func _retire_founding_expedition_visuals()->void:pass
-	func _update_resource_proximity()->void:pass
 	func _refresh_settlement_footprint(_force:=false)->void:pass
-	func _update_settlement_progress_text()->void:pass
 	func _issue_travel_council_report(_stage:String,_progress:float,_reason:="")->void:pass
-	func _open_people_panel()->void:pass
 	func _update_time_interface()->void:pass
 	func _open_settlement_naming_panel(_settlement_id:String="")->void:pass
 

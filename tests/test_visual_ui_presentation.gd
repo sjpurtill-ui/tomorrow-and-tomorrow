@@ -22,18 +22,6 @@ func before_test()->void:
 	renderer=auto_free(RENDERER.new())
 
 
-func test_population_notice_uses_demographic_conditions_not_food_duplication()->void:
-	var text:String=renderer._demographic_notice_condition_text({
-		"health":0.83,"water_intake_ratio":0.91,"housing_ratio":1.04,
-		"food_days":42.0,"production_ratio":1.18
-	})
-	assert_str(text).contains("HEALTH 83%")
-	assert_str(text).contains("WATER 91%")
-	assert_str(text).contains("SHELTER 104%")
-	assert_str(text.to_lower()).not_contains("food")
-	assert_str(text.to_lower()).not_contains("stores")
-
-
 func test_discovery_mask_paints_a_scout_corridor_without_filling_its_bounding_region()->void:
 	var image:=Image.create(200,100,false,Image.FORMAT_L8)
 	image.fill(Color.BLACK)
@@ -50,24 +38,6 @@ func test_compass_arrows_match_screen_direction()->void:
 	assert_str(renderer._screen_direction_arrow(Vector2(10.0,0.0))).is_equal("→")
 	assert_str(renderer._screen_direction_arrow(Vector2(0.0,10.0))).is_equal("↓")
 	assert_str(renderer._screen_direction_arrow(Vector2(-10.0,0.0))).is_equal("←")
-
-
-func test_population_notice_is_transient_and_old_records_stay_hidden()->void:
-	var record:={"day":100,"end_day":100}
-	assert_bool(renderer._demographic_notice_is_current(record,100)).is_true()
-	assert_bool(renderer._demographic_notice_is_current(record,101)).is_true()
-	assert_bool(renderer._demographic_notice_is_current(record,102)).is_false()
-	assert_int(renderer._demographic_notice_duration_msec("birth")).is_equal(12000)
-	assert_int(renderer._demographic_notice_duration_msec("death")).is_equal(18000)
-
-
-func test_knowledge_header_stat_returns_the_live_value_label()->void:
-	var row:HBoxContainer=auto_free(HBoxContainer.new()) as HBoxContainer
-	var value:Label=renderer._make_knowledge_stat(row,"DIRECTED","4",Color("#c8a862"))
-	assert_str(value.text).is_equal("4")
-	value.text="3"
-	assert_str(value.text).is_equal("3")
-	assert_int(row.get_child_count()).is_equal(1)
 
 
 func test_research_actions_refresh_the_open_tab_without_navigation()->void:
@@ -294,44 +264,6 @@ func test_resource_overlay_keeps_active_supply_nodes_ahead_of_passive_hints()->v
 	assert_str(String(selected[0].visual_stage)).is_equal("active")
 
 
-func test_established_discovery_explains_evidence_capacity_and_social_cause()->void:
-	var summary:String=renderer._discovery_cause_summary({
-		"id":"fixture_discovery",
-		"causal_mechanism":"Covered grain stays dry when raised above wet ground.",
-		"evidence_method":"Repeated side-by-side storage trials",
-		"operating_capability":"Build dependable raised granaries",
-		"ability_reason":"Because the raised floor can be copied, reserve losses fall.",
-		"social_consequence":"Communities begin expecting keepers to account for communal reserves."
-	})
-	assert_str(summary).contains("FOUND  •  Covered grain stays dry")
-	assert_str(summary).contains("EVIDENCE  •  Repeated side-by-side storage trials")
-	assert_str(summary).contains("WHY CAPACITY CHANGED  •  Because the raised floor can be copied")
-	assert_str(summary).contains("SOCIAL EFFECT  •  Communities begin expecting keepers")
-
-
-func test_small_discovery_effects_keep_precision_and_show_actual_direction()->void:
-	var full_effect:String=renderer._effect_ripple_text({"food_output":0.0035,"ecological_pressure":-0.0018})
-	var partial_effect:String=renderer._effect_ripple_text({"food_output":0.0035},0.5)
-	assert_str(full_effect).contains("+0.4% food output")
-	assert_str(full_effect).contains("−0.2% land pressure")
-	assert_str(full_effect).not_contains("0%")
-	assert_str(partial_effect).contains("+0.2% food output")
-
-
-func test_research_library_filters_concrete_discoveries_by_macro_field()->void:
-	GameState.discovery_log=[
-		{"id":"food_measure","dynamic":"nutrition","name":"WEIGHED DAILY RATIONS","effects":{"food_output":0.01}},
-		{"id":"shelter_span","dynamic":"demography","name":"SUPPORTED ROOF SPANS","effects":{"housing":0.01}},
-		{"id":"soil_cover","dynamic":"ecology","name":"SEASONAL SOIL COVER","effects":{"ecology":0.01}}
-	]
-	var all_records:Array[Dictionary]=renderer._knowledge_records_for_mode("discoveries","all")
-	var nutrition:Array[Dictionary]=renderer._knowledge_records_for_mode("discoveries","nutrition")
-	assert_int(all_records.size()).is_equal(3)
-	assert_int(nutrition.size()).is_equal(1)
-	assert_str(String(nutrition[0].name)).is_equal("WEIGHED DAILY RATIONS")
-	assert_int(RENDERER.KNOWLEDGE_RECORD_PAGE_SIZE).is_equal(5)
-
-
 func test_non_scrolling_fit_host_keeps_finite_modal_content_inside_its_viewport()->void:
 	var host:=auto_free(preload("res://scripts/viewport_fit_panel.gd").new()) as Control
 	host.size=Vector2(400,200)
@@ -389,64 +321,6 @@ func test_modal_screen_contract_caps_large_type_without_touching_map_sized_contr
 	assert_int(screen.theme.default_font_size).is_equal(11)
 
 
-func test_compact_discovery_rows_lead_with_current_effect_and_hide_explanation_until_details()->void:
-	var event:Dictionary={
-		"name":"Compared Regional Ration Weight Schedules","dynamic":"nutrition",
-		"effects":{"food_output":0.0035,"diet_quality":0.0020},
-		"causal_mechanism":"A deliberately long mechanism that belongs in the detail view.",
-		"evidence_method":"A deliberately long evidence account that belongs in the detail view."
-	}
-	var effect:String=renderer._compact_discovery_effect_text(event,1.0)
-	assert_str(effect).starts_with("NOW  •")
-	assert_str(effect).contains("+0.4% FOOD OUTPUT")
-	var list:=VBoxContainer.new()
-	renderer._make_discovery_card(list,event)
-	var visible_text:=""
-	for label in list.find_children("*","Label",true,false): visible_text+=String(label.text)+"\n"
-	assert_str(visible_text).contains("COMPARED REGIONAL RATION WEIGHT SCHEDULES")
-	assert_str(visible_text).contains("NOW  •")
-	assert_str(visible_text).not_contains("deliberately long mechanism")
-	assert_str(visible_text).not_contains("deliberately long evidence")
-	assert_int(list.find_children("*","Button",true,false).size()).is_equal(1)
-	list.free()
-
-
-func test_population_function_display_is_fixed_conserved_and_contains_no_food_dashboard_data()->void:
-	var records:Array[Dictionary]=renderer._population_function_display({
-		"total":1_000_000,"productive":520_000,"support":110_000,
-		"mobilized":70_000,"dependent":280_000,"absent":20_000
-	})
-	assert_int(records.size()).is_equal(5)
-	var ids:Array[String]=[]
-	var accounted:=0
-	var display_text:=""
-	for record in records:
-		ids.append(String(record.id))
-		accounted+=int(record.count)
-		display_text+="%s %s " % [String(record.label),String(record.note)]
-	assert_array(ids).is_equal(["productive","support","mobilized","dependent","absent"])
-	assert_int(accounted).is_equal(1_000_000)
-	assert_str(display_text.to_lower()).not_contains("food")
-	assert_str(display_text.to_lower()).not_contains("rations")
-	assert_float(float(records[4].share)).is_equal_approx(0.02,0.0001)
-
-
-func test_major_ledgers_explain_status_reason_and_next_action()->void:
-	var provisions:Dictionary=renderer._provisions_decision_brief({"food_intake_ratio":1.0,"food_net":-12.0,"food_forecast_90":{"first_shortage_day":-1}},{"intake_ratio":1.0},4.0)
-	assert_str(String(provisions.status)).contains("FOOD RESERVE FELL")
-	assert_str(String(provisions.why)).contains("issued for missions")
-	assert_str(String(provisions.next)).contains("Mission Issues")
-	var materials:Dictionary=renderer._material_constraint_brief({"at_source":40.0,"delivered_today":8.0,"extracted_today":12.0},3,100.0,20.0)
-	assert_str(String(materials.status)).contains("CARRYING")
-	assert_str(String(materials.next)).contains("Logistics")
-	var population:Dictionary=renderer._population_attention_brief({"total":1_000_000,"productive":610_000,"absent":100_000,"mobilized":20_000},{"health":0.90,"housing_ratio":1.05})
-	assert_str(String(population.status)).contains("AWAY")
-	assert_str(String(population.next)).contains("missions")
-	var society:Dictionary=renderer._society_attention_brief({"nutrition":0.72,"health":0.68,"knowledge":0.21,"production":0.64})
-	assert_str(String(society.status)).contains("KNOWLEDGE")
-	assert_str(String(society.next)).contains("Research Priorities")
-
-
 func test_world_strategy_next_step_preserves_information_gates()->void:
 	var step:Dictionary=renderer._world_strategy_next_step({
 		"name":"Ashen Compact","intel_confidence":0.40,
@@ -455,56 +329,6 @@ func test_world_strategy_next_step_preserves_information_gates()->void:
 	assert_str(String(step.status)).contains("SETTLEMENT UNLOCATED")
 	assert_str(String(step.why)).contains("no returned report")
 	assert_str(String(step.next)).contains("Diplomats cannot depart")
-
-
-func test_council_policy_copy_keeps_decision_visible_and_audit_jargon_in_details()->void:
-	var copy:Dictionary=renderer._council_active_policy_copy({
-		"id":"route_priority","remaining_days":40.0,"execution_factor":0.82,
-		"magnitude":0.6,"effects":{"logistics":0.10},"office":"Steward",
-		"executor":"Route office","action_source":"deterministic enact reading of player clause",
-		"parameter_basis":"catalog defaults","interpretation_basis":"improve routes",
-		"interpretation_confidence":0.94,"description":"Move more labor into maintained routes."
-	},{"summary":"Deliveries rose after the order.","disclaimer":"This is an observed movement."})
-	assert_str(String(copy.visible)).contains("ROUTE PRIORITY")
-	assert_str(String(copy.visible)).contains("CHANGES")
-	assert_str(String(copy.visible)).contains("LATEST OBSERVED")
-	assert_str(String(copy.visible)).not_contains("ACTION SOURCE")
-	assert_str(String(copy.visible)).not_contains("TERMS")
-	assert_str(String(copy.details)).contains("ACTION SOURCE")
-	assert_str(String(copy.details)).contains("GROUNDED READING")
-
-
-func test_council_pronouncement_copy_is_compact_but_auditable()->void:
-	var copy:Dictionary=renderer._council_pronouncement_copy({
-		"issued_day":12,"status":"active","parameters":{"text":"Improve routes.","interpretation":{"source":"local","policies":[{
-			"id":"route_priority","action":"enact","days":90.0,"execution_factor":0.8,
-			"magnitude":0.5,"effects":{"logistics":0.1},"basis":"improve routes",
-			"action_source":"deterministic player-clause reading","parameter_basis":"catalog defaults",
-			"observation":{"summary":"Deliveries improved."}
-		}]}}
-	})
-	assert_str(String(copy.visible)).contains("ENACT ROUTE PRIORITY")
-	assert_str(String(copy.visible)).contains("Deliveries improved")
-	assert_str(String(copy.visible)).not_contains("catalog defaults")
-	assert_str(String(copy.details)).contains("TERMS")
-	assert_str(String(copy.details)).contains("VARIABLES")
-
-
-func test_action_brief_and_council_empty_state_follow_what_why_next_hierarchy()->void:
-	var container:VBoxContainer=auto_free(VBoxContainer.new()) as VBoxContainer
-	var brief:Label=renderer._add_modal_action_brief(container,{"status":"STORES FALLING","why":"A mission left today.","next":"Review mission issues."},Color("#b99369"))
-	assert_str(brief.text).starts_with("STATUS  •  STORES FALLING")
-	assert_str(brief.text).contains("\nWHY  •  A mission left today.")
-	assert_str(brief.text).contains("\nNEXT  •  Review mission issues.")
-	var council:VBoxContainer=auto_free(VBoxContainer.new()) as VBoxContainer
-	var no_decisions:Array[Dictionary]=[]
-	renderer._add_council_decisions_section(council,no_decisions,2)
-	var combined:=""
-	for child in council.get_children():
-		if child is Label: combined+=String((child as Label).text)+"\n"
-	assert_str(combined).contains("NO DECISION REQUIRED")
-	assert_str(combined).contains("routine updates")
-	assert_str(combined).contains("Issue a standing policy")
 
 
 func test_live_report_refresh_is_bounded_and_state_driven()->void:
@@ -538,23 +362,6 @@ func test_deferred_live_report_commit_ignores_a_panel_closed_during_composition(
 	renderer.live_report_pending_replacements={"materials":{"stable":closed_panel,"replacement":offscreen_replacement}}
 	renderer._commit_live_report_replacements()
 	assert_bool(is_instance_valid(offscreen_replacement)).is_false()
-
-
-func test_provisions_dashboard_exposes_consumers_armies_and_prepaid_missions_without_main_scroll()->void:
-	var summary:String=renderer._provisions_consumer_summary({
-		"food_demand_breakdown":{"children":18.0,"adults":70.0,"elders":8.0,"labor":6.0,"army_field":12.0}
-	},114.0)
-	assert_str(summary).contains("Children")
-	assert_str(summary).contains("Adults")
-	assert_str(summary).contains("Field armies")
-	var dashboard:=HBoxContainer.new()
-	var column:VBoxContainer=renderer._make_provision_dashboard_column(dashboard,"WHO USES FOOD","Daily and prepaid")
-	renderer._add_compact_provision_text(column,"DAILY MEALS",summary,Color.WHITE)
-	assert_int(dashboard.find_children("*","ScrollContainer",true,false).size()).is_equal(0)
-	assert_str(renderer._provisions_commitment_summary().to_lower()).contains("scout")
-	assert_str(renderer._provisions_commitment_summary().to_lower()).contains("diplomat")
-	assert_str(renderer._provisions_commitment_summary().to_lower()).contains("convoy")
-	dashboard.free()
 
 
 func test_foreign_alert_arbitration_defers_without_losing_active_or_queued_events()->void:

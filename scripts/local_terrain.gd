@@ -154,8 +154,6 @@ var grid_x := 80
 var grid_z := 80
 var world_width := 100.0
 var world_depth := 100.0
-var settler_panel: Control
-var choice_status: Label
 var settler_marker: Area3D
 var terrain_body: StaticBody3D
 var province_terrain_mesh: MeshInstance3D
@@ -164,17 +162,7 @@ var regional_patch_center := Vector2.INF
 var regional_patch_span := 420.0
 var world_start_position := Vector3.ZERO
 var resource_sites: Array[Dictionary] = []
-var nearby_resources_label: Label
-var resource_action_button: Button
-var building_buttons: Dictionary = {}
-var nearest_resource_type := ""
-var leader_panel: Control
-var leader_dossier: VBoxContainer
-var leader_candidate_list: VBoxContainer
-var leader_explanation: Label
 var leader_candidates: Array[Dictionary] = []
-var inspected_leader := 0
-var appoint_button: Button
 var placement_building := ""
 var placement_preview: MeshInstance3D
 var placement_valid := false
@@ -182,30 +170,9 @@ var construction_projects: Array[Dictionary] = []
 var hearth_established := false
 var interface_layer: CanvasLayer
 var hud: Control  # CommandRailHud shell: rail, time pill, KPI strip, queue, toolbar.
-var government_panel: Control
-var leader_heading: Label
-var pending_advisor_office := ""
 var last_discovery_day := 0
-var knowledge_panel: Control
-var knowledge_record_container:VBoxContainer
-var knowledge_record_signature:=""
-var knowledge_investigation_widgets:Dictionary={}
-var knowledge_discovery_widgets:Dictionary={}
-var knowledge_record_mode:="discoveries"
-var knowledge_record_category:="all"
-var knowledge_record_page:=0
-var knowledge_mode_buttons:Dictionary={}
-var knowledge_category_selector:OptionButton
 const KNOWLEDGE_RECORD_PAGE_SIZE:=5
-var allocation_value_labels: Dictionary = {}
-var population_value_labels: Dictionary = {}
-var research_total_label: Label
-var council_panel: Control
 var pending_pronouncement_inputs: Dictionary={}
-var pronouncement_status_label: Label
-var date_label: Label
-var world_header_label:Label
-var time_speed_buttons: Dictionary = {}
 var travel_status_label: Label
 var route_mesh: MeshInstance3D
 var river_course := PackedFloat32Array()
@@ -247,16 +214,13 @@ var convoy_map_label: Label3D
 var convoy_detail_root: Node3D
 var settler_map_ring: MeshInstance3D
 var settler_click_shape: CollisionShape3D
-var settlement_progress_label: Label
 var discovered_resource_overlays: Dictionary = {}
 var resource_overlay_root:Node3D
 var rendered_resource_overlay_zoom_key:=""
 var resource_view_enabled:=true
-var resource_view_toggle:Button
 const RESOURCE_OVERLAY_MAX_CLUSTERS:=256
 const RESOURCE_OVERLAY_MAX_LABELS:=18
 const ResourceIcons:=preload("res://scripts/resource_icons.gd")
-var settlement_footprint: MeshInstance3D
 var settlement_blip: MeshInstance3D
 var settlement_map_label:Label3D
 var settlement_border_root:Node3D
@@ -306,34 +270,13 @@ var cached_morphology_visual_signatures:Dictionary={}
 var active_architecture_profile:Dictionary={}
 var rendered_settlement_aerial_lod:=-1.0
 var rendered_settlement_stage_radius:=0.0
-var population_summary_label: Button
-var provisions_button: Button
-var provisions_panel: Control
-var materials_button: Button
 var materials_panel: Control
-var people_summary_label: Label
-var people_panel_title: Label
-var age_distribution_bar: HBoxContainer
-var age_distribution_title: Label
-var age_distribution_summary: Label
-var age_distribution_segments: Array[ColorRect]=[]
-var age_distribution_segment_labels: Array[Label]=[]
-var settlement_name_button: Button
-var event_report_button: Button
-var event_report_signature:=""
-var event_report_visible_until_msec:=0
-var population_ledger_panel: Control
 var settlement_naming_panel: Control
 var settlement_name_input: LineEdit
 var settlement_name_confirm: Button
 var naming_previous_speed := 0.0
 var settlement_naming_target_id:=""
 var suppress_naming_prompt := false
-var scale_bar_root: Control
-var scale_bar_line: ColorRect
-var scale_bar_right_tick: ColorRect
-var scale_bar_label: Label
-var scale_compass_label: Label
 var map_help_button:Button
 var map_help_panel:PanelContainer
 var map_help_title:Label
@@ -348,18 +291,13 @@ var foreign_alert_body:Label
 var foreign_alert_world_button:Button
 var foreign_alert_queue:Array[Dictionary]=[]
 var active_foreign_alert:Dictionary={}
-var start_settlement_button: Button
-var actions_menu_button:Button
-var actions_menu_panel:PanelContainer
-var actions_menu_status:Label
-var actions_menu_settlement_button:Button
-var actions_menu_scout_button:Button
-var actions_menu_diplomat_button:Button
 var scout_dispatch_panel:Control
-var scout_dispatch_status:Label
-var scout_dispatch_previous_speed:=0.0
+## Scout target and heading chosen from other screens (the rumor map sets them).
 var pending_scout_target_id:="open_world"
 var pending_scout_heading:=""
+## Scout target and heading chosen from other screens (the rumor map sets them).
+var scout_dispatch_status:Label
+var scout_dispatch_previous_speed:=0.0
 var travel_reported_milestones: Dictionary = {}
 var travel_active := false
 var travel_start := Vector3.ZERO
@@ -381,21 +319,12 @@ var world_seed_input: LineEdit
 var world_seed_status: Label
 var world_menu_previous_speed:=0.0
 var founding_focus_panel:Control
-var founding_focus_selection:=""
-var founding_focus_detail:Label
-var founding_focus_confirm:Button
-var founding_focus_buttons:Dictionary={}
-var settlement_dashboard_panel:Control
-var systems_hub_panel:Control
-var society_panel:Control
-var progression_panel:Control
 var civilizations_panel:Control
 var civilization_report_panel:Control
 var civilization_detail_root:VBoxContainer
 var selected_civilization_id:=""
 var selected_civilization_region_id:=""
 var civilization_feedback_text:=""
-var world_competition_button:Button
 var capture_render_active:=false
 var discovery_mask_texture:ImageTexture
 var seasonal_materials:Array[WeakRef]=[]
@@ -429,8 +358,6 @@ var live_report_refresh_elapsed:=0.0
 var live_report_refresh_signatures:Dictionary={}
 var live_report_refresh_in_progress:=false
 var live_report_pending_replacements:Dictionary={}
-var society_panel_mode:="overview"
-var active_progression_domain:="demography"
 # Visual-audit override only. Gameplay leaves this at -1 and derives one of the eight
 # aggregate neighborhood conditions from authoritative civilization/settlement state.
 var district_condition_visual_override:=-1
@@ -591,19 +518,11 @@ func _configure_seamless_world() -> void:
 func _capture_preview_if_requested() -> void:
 	var capture_path := ""
 	var capture_days := 0
-	var capture_people_panel := false
 	var capture_dock := ""
-	var capture_population_ledger := false
 	var capture_naming_panel := false
-	var capture_knowledge_panel := false
 	var capture_world_menu := false
-	var capture_society_panel := false
 	var capture_military_panel := false
-	var capture_provisions_panel := false
 	var capture_materials_panel := false
-	var capture_council_panel := false
-	var capture_government_panel := false
-	var capture_candidates_panel := false
 	var capture_civilizations_panel := false
 	var capture_diplomat_panel := false
 	var capture_audit_root:Control
@@ -624,32 +543,16 @@ func _capture_preview_if_requested() -> void:
 			capture_path = argument.trim_prefix("--capture=")
 		elif argument.begins_with("--capture-days="):
 			capture_days = maxi(0, int(argument.trim_prefix("--capture-days=")))
-		elif argument == "--capture-people":
-			capture_people_panel = true
 		elif argument.begins_with("--capture-dock="):
 			capture_dock = argument.trim_prefix("--capture-dock=")
-		elif argument == "--capture-ledger":
-			capture_population_ledger = true
 		elif argument == "--capture-naming":
 			capture_naming_panel = true
-		elif argument == "--capture-knowledge":
-			capture_knowledge_panel = true
 		elif argument == "--capture-world-menu":
 			capture_world_menu = true
-		elif argument == "--capture-society":
-			capture_society_panel = true
 		elif argument == "--capture-military":
 			capture_military_panel = true
-		elif argument == "--capture-provisions":
-			capture_provisions_panel = true
 		elif argument == "--capture-materials":
 			capture_materials_panel = true
-		elif argument == "--capture-council":
-			capture_council_panel = true
-		elif argument == "--capture-government":
-			capture_government_panel = true
-		elif argument == "--capture-candidates":
-			capture_candidates_panel = true
 		elif argument == "--capture-civilizations":
 			capture_civilizations_panel = true
 		elif argument == "--capture-diplomats":
@@ -731,7 +634,6 @@ func _capture_preview_if_requested() -> void:
 			_update_time_interface()
 			if capture_travel and not travel_active:
 				break
-		_refresh_event_report()
 	if capture_population > 0:
 		GameState.ensure_population_total(capture_population)
 		GameState.housing_capacity = maxi(GameState.housing_capacity,capture_population + capture_population / 5)
@@ -841,50 +743,19 @@ func _capture_preview_if_requested() -> void:
 		# Captures draw synchronously before the deferred container sort runs;
 		# force the dock's layout so its content is arranged in the screenshot.
 		hud.force_dock_layout()
-	if capture_people_panel:
-		settler_panel.visible = true
-		if lens_panel: lens_panel.visible = false
-		_refresh_population_allocations()
-		capture_audit_root=settler_panel
-	if capture_population_ledger:
-		_open_population_ledger()
-		capture_audit_root=population_ledger_panel
 	if capture_naming_panel:
 		_open_settlement_naming_panel()
 		capture_audit_root=settlement_naming_panel
-	if capture_knowledge_panel:
-		_open_knowledge_panel()
-		capture_audit_root=knowledge_panel
 	if capture_world_menu:
 		_open_world_menu()
 		capture_audit_root=world_menu_panel
-	if capture_society_panel:
-		_open_society_panel()
-		capture_audit_root=society_panel
 	if capture_military_panel:
 		if not MilitaryCommandUI.modal.visible:
 			MilitaryCommandUI._toggle()
 		capture_audit_root=MilitaryCommandUI.modal
-	if capture_provisions_panel:
-		# Exercise the worst-case provision view: an active long scout commitment
-		# plus its immediate stock withdrawal and recent-issue audit row.
-		if not bool(CivilizationSystem.exploration_status().get("active",false)):
-			CivilizationSystem.dispatch_scouts(365)
-		_open_provisions_panel()
-		capture_audit_root=provisions_panel
 	if capture_materials_panel:
 		_open_materials_panel()
 		capture_audit_root=materials_panel
-	if capture_council_panel:
-		_open_council_panel()
-		capture_audit_root=council_panel
-	if capture_government_panel:
-		_open_government_panel()
-		capture_audit_root=government_panel
-	if capture_candidates_panel:
-		_open_advisor_candidates("Steward")
-		_inspect_leader(0)
-		capture_audit_root=leader_panel
 	if capture_civilizations_panel:
 		_open_civilizations_panel()
 		capture_audit_root=civilizations_panel
@@ -1103,8 +974,6 @@ func _process(delta: float) -> void:
 		var card:Variant=hud.get_meta("chronicle_card") if hud and hud.has_meta("chronicle_card") else null
 		travel_status_label.visible=not ((travel_council_notice!=null and travel_council_notice.visible) or (is_instance_valid(card) and bool(card.showing)))
 		if travel_status_label.visible:preload("res://scripts/hud/map_ticker_style.gd").fit(travel_status_label,get_viewport().get_visible_rect().size.x)
-	if event_report_button and event_report_button.visible and Time.get_ticks_msec()>event_report_visible_until_msec:
-		event_report_button.visible=false
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
 	if not pending_hud_section.is_empty():
@@ -1233,7 +1102,6 @@ func _commit_world_day(day_result:Dictionary)->void:
 	if not discoveries.is_empty() or not resource_events.is_empty():footprint_population=-1
 	AdvisorSystem.refresh_pronouncement_statuses()
 	_refresh_population_allocations()
-	_refresh_event_report()
 	for consequence in simulation_events:
 		if String(consequence.get("severity","")) in ["danger","critical","warning"]:
 			AdvisorSystem.generate_consequence_item(consequence)
@@ -1266,7 +1134,6 @@ func _after_world_time(days_advanced:float)->void:
 		if not led:_check_travel_milestone_reports(progress)
 		if was_traveling and not travel_active:
 			travel_reported_milestones.erase("forage_ready")
-			_update_resource_proximity()
 			# A caravan leader explains its own camps and arrival (below).
 			if not led:
 				if route_mesh:route_mesh.visible=false
@@ -1284,7 +1151,6 @@ func _after_world_time(days_advanced:float)->void:
 			project_label.text = project.name.to_upper()
 			if project.name == "Communal Hearth":
 				hearth_established = true
-			_update_building_buttons()
 	time_interface_between_days=true
 	_update_time_interface()
 	time_interface_between_days=false
@@ -1306,7 +1172,7 @@ func _process_live_report_refresh(delta:float)->void:
 
 func _refresh_live_reports()->void:
 	if live_report_refresh_in_progress or _live_report_global_interaction_active(): return
-	var kinds:Array[String]=["provisions","materials","research","council","population","society","progression"]
+	var kinds:Array[String]=["materials"]
 	if civilization_report_panel and is_instance_valid(civilization_report_panel): kinds.append("civilization_report")
 	else: kinds.append("civilizations")
 	for kind in kinds:
@@ -1328,51 +1194,28 @@ func _refresh_live_reports()->void:
 func _live_report_signature(kind:String)->String:
 	var parts:Array=[int(floor(GameState.elapsed_days)),GameState.population_total,GameState.known_discoveries.size(),GameState.discovery_log.size()]
 	match kind:
-		"provisions":
-			parts.append_array([roundi(float(GameState.resource_stockpiles.get("Food",0.0))*10.0),roundi(float(GameState.simulation_metrics.get("food_net",0.0))*10.0),roundi(float(GameState.water_metrics.get("stored",0.0))*10.0),GameState.food_issue_history.size()])
 		"materials":
 			parts.append_array([GameState.resource_deposits.size(),GameState.resource_stockpiles.size(),GameState.material_history.size(),hash(GameState.resource_priorities)])
-		"research":
-			parts.append_array([GameState.active_investigations.size(),hash(GameState.research_subcategory_allocations)])
-		"council":
-			parts.append_array([GameState.council_inbox.size(),GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size()])
-			for order_index in mini(6,GameState.sovereign_orders.size()):
-				var order:Dictionary=GameState.sovereign_orders[order_index]
-				parts.append("%s:%s" % [String(order.get("id","")),String(order.get("status",""))])
 		"civilizations","civilization_report":
 			parts.append_array([CivilizationSystem.observation_revision,CivilizationSystem.fog_revision,CivilizationSystem.scout_reports.size(),CivilizationSystem.diplomatic_history.size(),selected_civilization_id,selected_civilization_region_id])
-		"population":
-			parts.append_array([GameState.lifetime_births,GameState.lifetime_deaths,roundi(GameState.population_health*1000.0),GameState.demographic_ledger.size()])
-		"society":
-			parts.append_array([society_panel_mode,hash(GameState.society_capacities),hash(GameState.societal_values)])
-		"progression":
-			parts.append_array([active_progression_domain,hash(GameState.society_capacities)])
 	return str(hash(parts))
 
 
 func _live_report_panel(kind:String)->Control:
 	match kind:
-		"provisions": return provisions_panel
 		"materials": return materials_panel
-		"research": return knowledge_panel
-		"council": return council_panel
 		"civilizations": return civilizations_panel
 		"civilization_report": return civilization_report_panel
-		"population": return population_ledger_panel
-		"society": return society_panel
-		"progression": return progression_panel
 	return null
 
 
 func _live_report_global_interaction_active()->bool:
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	return false
 
 
 func _live_report_interaction_active(kind:String,panel:Control)->bool:
-	if kind=="research" and panel.find_child("InvestigationDetailOverlay",true,false): return true
-	if kind=="provisions" and panel.find_child("ProvisionsDetailOverlay",true,false): return true
 	if kind=="materials" and panel.find_child("MaterialsDetailOverlay",true,false): return true
 	for editor_variant in panel.find_children("*","LineEdit",true,false):
 		var editor:=editor_variant as LineEdit
@@ -1440,36 +1283,16 @@ func _live_report_node_at_index_path(root:Node,index_path:Array)->Node:
 
 func _set_live_report_panel(kind:String,panel:Control)->void:
 	match kind:
-		"provisions": provisions_panel=panel
 		"materials": materials_panel=panel
-		"research": knowledge_panel=panel
-		"council": council_panel=panel
 		"civilizations": civilizations_panel=panel
 		"civilization_report": civilization_report_panel=panel
-		"population": population_ledger_panel=panel
-		"society": society_panel=panel
-		"progression": progression_panel=panel
 
 
 func _build_live_report_replacement(kind:String)->Control:
 	match kind:
-		"provisions": _open_provisions_panel()
 		"materials": _open_materials_panel()
-		"research":
-			knowledge_record_container=null
-			knowledge_investigation_widgets.clear()
-			knowledge_discovery_widgets.clear()
-			knowledge_mode_buttons.clear()
-			knowledge_category_selector=null
-			_open_knowledge_panel()
-		"council": _open_council_panel()
 		"civilizations": _open_civilizations_panel()
 		"civilization_report": _open_civilization_report(selected_civilization_id)
-		"population": _open_population_ledger()
-		"society":
-			if society_panel_mode=="values": _open_values_panel()
-			else: _open_society_panel()
-		"progression": _open_progression_panel(active_progression_domain)
 	return _live_report_panel(kind)
 
 
@@ -4034,7 +3857,7 @@ func _update_scale_lod() -> void:
 	for river_overlay in river_overlays:
 		if is_instance_valid(river_overlay): river_overlay.visible=camera.size<=420.0
 	if lens_panel:
-		lens_panel.visible=lens_requested_visible and camera.size<=1600.0 and (settler_panel==null or not settler_panel.visible)
+		lens_panel.visible=lens_requested_visible and camera.size<=1600.0
 	if settler_map_ring:
 		settler_map_ring.visible = not close_view and GameState.founding_expedition_active()
 		settler_map_ring.scale = Vector3.ONE * maxf(0.006, camera.size * 0.0058)
@@ -11398,53 +11221,9 @@ func _create_land_route(start: Vector3, finish: Vector3, width: float, color: Co
 	route.material_override = material
 	parent.add_child(route)
 
-func _change_population_allocation(role: String, change: int) -> void:
-	GameState.adjust_population_role_percentage(role,float(change))
-	_refresh_population_allocations()
-	if research_total_label:
-		_refresh_research_allocations()
 
 func _refresh_population_allocations() -> void:
 	GameState.synchronize_population_allocations()
-	_refresh_age_distribution_meter()
-	var assigned := 0
-	for role in GameState.population_allocations:
-		var amount: int = int(GameState.population_allocations[role])
-		assigned += amount
-		if population_value_labels.has(role):
-			population_value_labels[role].text = "%.1f%%  •  %s" % [float(GameState.population_allocation_percentages.get(role,0.0)),_compact_population(amount)]
-	if choice_status and not travel_active:
-		_update_settlement_progress_text()
-	if nearby_resources_label:
-		nearby_resources_label.text = "AUTO  •  %s of %s labor assigned" % [_compact_population(assigned),_compact_population(_able_population())]
-
-func _refresh_age_distribution_meter() -> void:
-	if age_distribution_bar==null or age_distribution_summary==null: return
-	var profile:=GameState.population_age_profile()
-	var bands:Array=profile.bands
-	var productive_colors:=[Color("#9b7252"),Color("#779a67"),Color("#5e9d70"),Color("#4f916d"),Color("#6f8f65"),Color("#766d72")]
-	for index in mini(age_distribution_segments.size(),bands.size()):
-		var segment:=age_distribution_segments[index]
-		var band:Dictionary=bands[index]
-		var count:=int(band.count)
-		var share:=float(band.share)
-		var is_working_age:=index>=1 and index<=4
-		var labor_status:="PRODUCTIVE-AGE COHORT\nCounts toward the civilization's available labor." if is_working_age else "DEPENDENT COHORT\nSupported by the civilization's available labor."
-		segment.tooltip_text="%s • ages %s\n%s\n%d people • %.1f%% of the living population" % [String(band.label).capitalize(),String(band.range),labor_status,count,share*100.0]
-		segment.color=productive_colors[index]
-		segment.color.a=lerpf(0.78,1.0,clampf(share/0.25,0.0,1.0))
-		if index<age_distribution_segment_labels.size():
-			age_distribution_segment_labels[index].text="%s\n%s" % [String(band.range),_compact_population(count)]
-			age_distribution_segment_labels[index].tooltip_text=segment.tooltip_text
-	if age_distribution_title:
-		age_distribution_title.text="AGE PROFILE   •   LIFE EXPECTANCY %.1f YEARS" % float(profile.projected_life_expectancy)
-		var observed_note:=""
-		if int(profile.recorded_deaths)>0:
-			observed_note="\nObserved mean age at death: %.1f years across %d recorded deaths." % [float(profile.observed_age_at_death),int(profile.recorded_deaths)]
-		age_distribution_title.tooltip_text="Projected average at birth under current age-specific health, nutrition, shelter, and mortality conditions—not a maximum attainable age.%s" % observed_note
-	var working_share:=100.0*float(profile.working_age)/maxf(1.0,float(profile.total))
-	age_distribution_summary.text="GREEN PRODUCTIVE-AGE %.0f%%   •   DEPENDENCY %d / 100" % [working_share,roundi(float(profile.dependents_per_100_workers))]
-	age_distribution_summary.tooltip_text="Green bands are productive-age cohorts (14–59). Warm and grey bands are dependents: children under 14 and elders 60 or older. Median age is %.1f." % float(profile.median_age)
 
 func _settlement_definitions() -> Array[Dictionary]:
 	return preload("res://scripts/settlement_construction.gd")._settlement_definitions()
@@ -11500,29 +11279,7 @@ func _process_local_settlement_day()->void:
 			if settlement_visual_root:settlement_visual_root.position=GameState.settlement_founded_at
 		_spawn_settlement_structure(String(event.kind))
 		if travel_status_label:travel_status_label.text="The people's work has made %s." % String(event.kind).replace("_"," ").to_lower()
-	_update_settlement_progress_text()
 
-func _update_settlement_progress_text() -> void:
-	if choice_status == null:
-		return
-	if not GameState.settlement_site_committed:
-		choice_status.text = "MOBILE COMMUNITIES\nChoose START SETTLEMENT before lasting work can emerge."
-		return
-	var project := _current_settlement_project()
-	if project.is_empty():
-		if GameState.settlement_completed.is_empty():
-			choice_status.text = "MOBILE COMMUNITIES\nNo lasting work can emerge from the present allocation."
-		else:
-			choice_status.text = "THE CAMP ENDURES\nNew forms will emerge as knowledge, labor, and materials change."
-		return
-	var progress := float(GameState.settlement_projects.get(project.name, 0.0))
-	var percent := clampi(roundi(progress / float(project.days) * 100.0), 0, 100)
-	var builders := float(GameState.population_allocations.get("Construction",0))
-	var carriers := float(GameState.population_allocations.get("Logistics",0))
-	var makers := float(GameState.population_allocations.get("Crafting",0))
-	var work_rate := (builders/8.0)*(0.82+carriers/30.0+makers/50.0)*float(GameState.simulation_metrics.get("labor_efficiency",0.72))
-	var days_left := (float(project.days)-progress)/maxf(0.01,work_rate)
-	choice_status.text = "EMERGING FROM PRESENT LABOR\n%s  •  %d%%  •  ~%.0f days\n%s" % [String(project.name).to_upper(),percent,days_left,String(project.get("effect",""))]
 
 func _spawn_settlement_structure(structure_name: String) -> void:
 	# Household shelters are rendered from saved plots, never a second camp ring.
@@ -11720,30 +11477,6 @@ func _on_settler_clicked(_camera: Node, event: InputEvent, _position: Vector3, _
 			travel_status_label.text="%s. The card on the right shows the ground around them." % ("The travellers are here" if not GameState.settlement_site_committed else _settlement_display_name())
 		get_viewport().set_input_as_handled()
 
-func _toggle_people_panel() -> void:
-	if settler_panel and settler_panel.visible:
-		_close_people_panel()
-	else:
-		_open_people_panel()
-
-func _open_people_panel() -> void:
-	if hud:
-		_close_people_panel()
-		_on_hud_section_requested("settlement",0)
-		return
-	if settler_panel==null:
-		return
-	settler_panel.visible=true
-	if lens_panel:
-		lens_panel.visible=false
-	_refresh_population_allocations()
-	_update_resource_proximity()
-
-func _close_people_panel() -> void:
-	if settler_panel:
-		settler_panel.visible=false
-	if lens_panel:
-		lens_panel.visible=lens_requested_visible
 
 func _move_settlers_to_screen(screen_position: Vector2) -> void:
 	if settler_marker == null:
@@ -11766,7 +11499,6 @@ func _move_settlers_to(destination:Vector3)->void:
 		if settlement_convoy_targeting:
 			_begin_settlement_convoy(destination)
 			return
-		settler_panel.visible = false
 		_inspect_location(destination)
 		return
 	var accepted:=WorldSimulation.submit("player",{"kind":"move","destination":Vector2(destination.x,destination.z)})
@@ -11781,7 +11513,6 @@ func _move_settlers_to(destination:Vector3)->void:
 	travel_active=bool(GameState.founding_journey.get("active",true))
 	travel_reported_milestones.clear()
 	_draw_route(travel_start, travel_target, accepted.get("path",[]))
-	settler_panel.visible = false
 	_inspect_location(destination)
 	_present_caravan_reports()
 	_update_time_interface()
@@ -11796,7 +11527,6 @@ func _halt_founding_convoy_to_forage()->void:
 	var point:Vector2=result.get("position",CivilizationSystem.player_world_origin)
 	if settler_marker:settler_marker.position=Vector3(point.x,_height_at(point.x,point.y)+.002,point.y)
 	if route_mesh:route_mesh.visible=false
-	_update_resource_proximity()
 	_refresh_discovered_resource_overlays()
 	var event:={"id":"convoy_forage_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),"title":"Founding Convoy Camps to Forage","description":String(result.message),"domain":"food","severity":"notice"}
 	GameState.simulation_events.push_front(event)
@@ -11900,111 +11630,6 @@ func _on_settlement_action_pressed()->void:
 func _open_caravan_formation()->void:
 	caravan_formation={}
 	_enter_settlement_convoy_targeting()
-
-func _toggle_actions_menu()->void:
-	if actions_menu_panel==null:
-		return
-	actions_menu_panel.visible=not actions_menu_panel.visible
-	if actions_menu_panel.visible:
-		_refresh_actions_menu()
-
-func _close_actions_menu()->void:
-	if actions_menu_panel:
-		actions_menu_panel.visible=false
-
-func _on_actions_settlement_pressed()->void:
-	_close_actions_menu()
-	_on_settlement_action_pressed()
-
-
-func _on_actions_scout_pressed()->void:
-	_close_actions_menu()
-	_open_scout_dispatch_panel()
-
-
-func _on_actions_diplomat_pressed()->void:
-	_close_actions_menu()
-	_open_diplomat_dispatch_panel()
-
-
-func _refresh_actions_menu()->void:
-	if actions_menu_settlement_button==null or actions_menu_status==null:
-		return
-	actions_menu_settlement_button.disabled=false
-	if not GameState.settlement_site_committed:
-		var advice:=_founding_site_advice(settler_marker.position) if settler_marker else {"title":"CONVOY UNAVAILABLE","reason":"Locate the founding convoy."}
-		actions_menu_status.text="%s  •  %s" % [String(advice.title),String(advice.reason)]
-		actions_menu_settlement_button.text="REVIEW FOUNDING SITE"
-		actions_menu_settlement_button.tooltip_text="Review drinking water and nearby suitable ground on the map before founding."
-	elif bool(GameState.settlement_convoy.get("active",false)):
-		actions_menu_status.text="IN PROGRESS  A paid founding convoy is physically traveling to its selected site."
-		actions_menu_settlement_button.text="FOCUS SETTLEMENT CONVOY"
-		actions_menu_settlement_button.tooltip_text="Move the camera to the active settlement convoy."
-	elif settlement_convoy_targeting:
-		actions_menu_status.text="SITE SELECTION  No people or cargo are committed until you approve the route and cost."
-		actions_menu_settlement_button.text="CANCEL SITE SELECTION"
-		actions_menu_settlement_button.tooltip_text="Leave destination-selection mode without paying any cost."
-	elif "Hearth Circle" not in GameState.settlement_completed:
-		actions_menu_status.text="FOUNDING UNDERWAY  Assigned roles are creating the Hearth Circle; the site is already permanent."
-		actions_menu_settlement_button.text="FOUNDING SITE COMMITTED"
-		actions_menu_settlement_button.disabled=true
-		actions_menu_settlement_button.tooltip_text="The first settlement is already committed here. Complete the Hearth Circle before organizing another founding convoy."
-	else:
-		actions_menu_status.text="Choose one physical map command. New ground, observations, and replies arrive only when people return."
-		actions_menu_settlement_button.text="FOUND NEW SETTLEMENT"
-		actions_menu_settlement_button.tooltip_text="Enter temporary destination-selection mode. Route and cost are reviewed before anything is committed."
-		actions_menu_settlement_button.disabled=false
-	if actions_menu_scout_button:
-		var scouting:Dictionary=CivilizationSystem.scouting_staff.snapshot()
-		actions_menu_scout_button.text=preload("res://scripts/hud/era_words.gd").scouts_out(int(scouting.away))
-		actions_menu_scout_button.disabled=false
-		actions_menu_scout_button.tooltip_text="Set a standing population allocation and focus. Leaders organize the parties and future departures."
-	if actions_menu_diplomat_button:
-		var diplomatic_status:=CivilizationSystem.diplomatic_mission_status()
-		var known_destinations:=0
-		for encounter_variant in CivilizationSystem.contact_encounters_snapshot():
-			if bool((encounter_variant as Dictionary).get("home_location_known",false)): known_destinations+=1
-		var diplomatic_presentation:=_diplomat_action_presentation(diplomatic_status,known_destinations)
-		actions_menu_diplomat_button.text=String(diplomatic_presentation.label)
-		actions_menu_diplomat_button.disabled=bool(diplomatic_presentation.disabled)
-		actions_menu_diplomat_button.tooltip_text=String(diplomatic_presentation.tooltip)
-	if actions_menu_button:
-		var active_count:=int(bool(GameState.settlement_convoy.get("active",false)))+int(bool(CivilizationSystem.exploration_status().get("active",false)))+int(bool(CivilizationSystem.diplomatic_mission_status().get("active",false)))
-		actions_menu_button.text="ACTIONS • NEXT" if not GameState.settlement_site_committed else ("ACTIONS • %d" % active_count if active_count>0 else "ACTIONS")
-		actions_menu_button.tooltip_text="Open the next founding action." if not GameState.settlement_site_committed else ("Open map actions and review %d active mission%s." % [active_count,"" if active_count==1 else "s"] if active_count>0 else "Open settlement founding, scouting, and diplomatic map actions.")
-
-
-func _scout_action_presentation(exploration:Dictionary,quote:Dictionary)->Dictionary:
-	var worst_overdue:=0
-	for party_variant in (exploration.get("parties",[]) as Array):
-		worst_overdue=maxi(worst_overdue,int((party_variant as Dictionary).get("overdue_days",0)))
-	var soonest_text:String="OVERDUE %dD" % worst_overdue if worst_overdue>0 else "~%dD" % int(exploration.get("days_remaining",0))
-	if bool(exploration.get("active",false)) and bool(exploration.get("can_begin",false)):
-		return {
-			"label":"SEND SCOUTS  •  %d AWAY  •  %s" % [int(exploration.get("active_count",1)),soonest_text],
-			"disabled":false,
-			"tooltip":"IN PROGRESS  %d of %d parties are away; the soonest is %s.\nACTION  The population can still organize another party.\nNEXT  Review targets, durations, and cost before it departs." % [int(exploration.get("active_count",1)),int(exploration.get("capacity",1)),"overdue — the road decides the true return day" if worst_overdue>0 else "due in about %d days" % int(exploration.get("days_remaining",0))]
-		}
-	if bool(exploration.get("active",false)):
-		return {
-			"label":"REVIEW SCOUT PARTY  •  %s" % soonest_text,
-			"disabled":false,
-			"tooltip":"IN PROGRESS  The party is away.\nWHY  Its observations remain physically with it.\nNEXT  Review personnel, issued provisions, risk, and return time."
-		}
-	if bool(quote.get("can_dispatch",false)):
-		return {
-			"label":"SEND SCOUT PARTY",
-			"disabled":false,
-			"tooltip":"ACTION  Choose a 30, 90, 180, or 365-day aggregate scouting mission.\nRESULT  Charted ground and encounters become knowledge only if the party returns."
-		}
-	var blocker:=String(quote.get("blocker",quote.get("error","No viable scout mission is available.")))
-	var next:="Open FOOD and rebuild the minimum travel issue." if "Food" in blocker or "stored" in blocker else ("Increase the available population before dispatching a party." if "population" in blocker else "Review the scout mission to choose a reachable target or longer duration.")
-	var short_reason:="NEEDS FOOD" if "Food" in blocker or "stored" in blocker else ("NEEDS AVAILABLE PEOPLE" if "population" in blocker else ("TARGET OUT OF RANGE" if "reach" in blocker or "away" in blocker else "REQUIREMENTS NOT MET"))
-	return {
-		"label":"SEND SCOUT PARTY  •  BLOCKED\n%s" % short_reason,
-		"disabled":true,
-		"tooltip":"BLOCKED  %s\nNEXT  %s" % [blocker,next]
-	}
 
 
 ## The envoy button's words (toolbar and Known World). Talking happens in the court.
@@ -12334,7 +11959,6 @@ func _start_settlement_here() -> void:
 	if not bool(site_assessment.get("valid",false)):
 		if travel_status_label:
 			travel_status_label.text="Not founded here: %s." % PaperKit.sentence(String(site_assessment.get("reason","choose dry land"))).trim_suffix(".")
-		_refresh_actions_menu()
 		return
 	var water:=_founding_site_advice(settler_marker.position,true)
 	if not bool(water.valid):
@@ -12359,9 +11983,7 @@ func _start_settlement_here() -> void:
 		route_mesh.visible=false
 	if settlement_visual_root:
 		settlement_visual_root.position=GameState.settlement_founded_at
-	_update_resource_proximity()
 	_refresh_settlement_footprint(true)
-	_update_settlement_progress_text()
 	var absolute_hour:=int(floor(GameState.elapsed_days*24.0))
 	var event:={
 		"id":"settlement_site_%d" % absolute_hour,
@@ -12620,9 +12242,8 @@ func _arbitrate_notification_overlays()->void:
 
 func _blocking_modal_or_report_open()->bool:
 	if is_instance_valid(founding_site_guide) and founding_site_guide.is_visible_in_tree():return true
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel,provisions_panel,materials_panel,knowledge_panel,council_panel,government_panel,population_ledger_panel,society_panel,progression_panel,civilizations_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,materials_panel,civilizations_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
-	if leader_panel and is_instance_valid(leader_panel) and leader_panel.visible: return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible: return true
 	return false
 
@@ -12896,18 +12517,6 @@ func _build_interface() -> void:
 	# The Command Rail shell replaces the legacy 46px top bar: navigation now
 	# lives in the left rail, time/speed in the top-center pill, and status
 	# numbers in the top-right KPI strip.
-	event_report_button=Button.new()
-	event_report_button.position=Vector2(18,105)
-	event_report_button.size=Vector2(400,58)
-	event_report_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	event_report_button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	event_report_button.add_theme_font_size_override("font_size",11)
-	event_report_button.add_theme_color_override("font_color",Color("#eadfca"))
-	event_report_button.tooltip_text="Open the full population and consequence ledger."
-	event_report_button.pressed.connect(func()->void:
-		if hud: hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(self,hud)))
-	event_report_button.visible=false
-	layer.add_child(event_report_button)
 	travel_status_label = Label.new()
 	travel_status_label.position = Vector2(viewport_width * 0.5 - 390, 66)
 	travel_status_label.size = Vector2(780, 20)
@@ -12932,23 +12541,6 @@ func _build_interface() -> void:
 	foreign_alert_title=alert.title
 	foreign_alert_body=alert.body
 	foreign_alert_world_button=alert.world_button
-	start_settlement_button=Button.new()
-	start_settlement_button.position=Vector2(viewport_width*0.5-165,get_viewport().get_visible_rect().size.y-112)
-	start_settlement_button.size=Vector2(330,64)
-	start_settlement_button.text="START SETTLEMENT\nFound at the convoy's current location"
-	start_settlement_button.tooltip_text="Halt the convoy at its exact current location and begin founding a permanent settlement."
-	start_settlement_button.add_theme_font_size_override("font_size",14)
-	start_settlement_button.add_theme_color_override("font_color",Color("#f1e4c8"))
-	start_settlement_button.add_theme_color_override("font_hover_color",Color("#fff1cb"))
-	start_settlement_button.add_theme_stylebox_override("normal",_population_report_style(Color("#b99b5d")))
-	start_settlement_button.add_theme_stylebox_override("hover",_population_report_style(Color("#d2b56e"),true))
-	start_settlement_button.add_theme_stylebox_override("pressed",_population_report_style(Color("#ead078"),true))
-	start_settlement_button.pressed.connect(_on_settlement_action_pressed)
-	# Founding is a map command, not persistent chrome. Keep the legacy control as
-	# a compatibility target for older saves/captures, but the actual command is
-	# exposed through ACTIONS alongside scouts, diplomats, and later convoys.
-	start_settlement_button.visible=false
-	layer.add_child(start_settlement_button)
 	settlement_convoy_instruction_panel=PanelContainer.new()
 	settlement_convoy_instruction_panel.position=Vector2(viewport_width*0.5-300,get_viewport().get_visible_rect().size.y-176)
 	settlement_convoy_instruction_panel.size=Vector2(600,62)
@@ -12964,168 +12556,10 @@ func _build_interface() -> void:
 	settlement_convoy_instruction_panel.add_child(settlement_convoy_instruction_label)
 	settlement_convoy_instruction_panel.visible=false
 	layer.add_child(settlement_convoy_instruction_panel)
-	layer.move_child(start_settlement_button,layer.get_child_count()-1)
-	settler_panel = Control.new()
-	settler_panel.visible = false
-	layer.add_child(settler_panel)
-	_refresh_event_report()
-	var choice_panel := ColorRect.new()
-	choice_panel.position = Vector2(viewport_width - 376, 72)
-	choice_panel.size = Vector2(358, 600)
-	choice_panel.color = Color(0.055, 0.07, 0.075, 0.96)
-	settler_panel.add_child(choice_panel)
-	people_panel_title = Label.new()
-	people_panel_title.position = choice_panel.position + Vector2(22, 18)
-	people_panel_title.size=Vector2(138,34)
-	people_panel_title.clip_text=true
-	people_panel_title.text = "FOUNDING CONVOY"
-	people_panel_title.add_theme_font_size_override("font_size", 14)
-	people_panel_title.add_theme_color_override("font_color", Color("#eadfca"))
-	settler_panel.add_child(people_panel_title)
-	settlement_name_button=Button.new()
-	settlement_name_button.position=choice_panel.position+Vector2(164,12)
-	settlement_name_button.size=Vector2(48,34)
-	settlement_name_button.text="NAME"
-	settlement_name_button.tooltip_text="Name the permanent settlement site."
-	settlement_name_button.add_theme_font_size_override("font_size",10)
-	settlement_name_button.pressed.connect(_open_settlement_naming_panel)
-	settler_panel.add_child(settlement_name_button)
-	var ledger_button:=Button.new()
-	ledger_button.position=choice_panel.position+Vector2(216,12)
-	ledger_button.size=Vector2(84,34)
-	ledger_button.text="LEDGER"
-	ledger_button.tooltip_text="Every birth, death, cause, location, and wider consequence."
-	ledger_button.add_theme_font_size_override("font_size",11)
-	ledger_button.pressed.connect(_open_population_ledger)
-	settler_panel.add_child(ledger_button)
-	var people_close:=Button.new()
-	people_close.position=choice_panel.position+Vector2(306,12)
-	people_close.size=Vector2(32,34)
-	people_close.text="×"
-	people_close.tooltip_text="Close population management"
-	people_close.pressed.connect(_close_people_panel)
-	settler_panel.add_child(people_close)
-	people_summary_label = Label.new()
-	people_summary_label.position = choice_panel.position + Vector2(22, 58)
-	people_summary_label.size = Vector2(314, 70)
-	people_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	people_summary_label.add_theme_font_size_override("font_size", 13)
-	people_summary_label.add_theme_color_override("font_color", Color("#cfc8b9"))
-	settler_panel.add_child(people_summary_label)
-	age_distribution_title=Label.new()
-	age_distribution_title.position=choice_panel.position+Vector2(22,122)
-	age_distribution_title.size=Vector2(314,18)
-	age_distribution_title.add_theme_font_size_override("font_size",10)
-	age_distribution_title.add_theme_color_override("font_color",Color("#d2b870"))
-	settler_panel.add_child(age_distribution_title)
-	age_distribution_bar=HBoxContainer.new()
-	age_distribution_bar.position=choice_panel.position+Vector2(22,142)
-	age_distribution_bar.size=Vector2(314,34)
-	age_distribution_bar.add_theme_constant_override("separation",2)
-	settler_panel.add_child(age_distribution_bar)
-	# Green is reserved for cohorts that contribute to productive labor;
-	# warm/grey bands are dependents supported by that labor.
-	var cohort_colors:=[Color("#9b7252"),Color("#779a67"),Color("#5e9d70"),Color("#4f916d"),Color("#6f8f65"),Color("#766d72")]
-	for cohort_color in cohort_colors:
-		var segment:=ColorRect.new()
-		segment.custom_minimum_size=Vector2(40,34)
-		segment.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		segment.size_flags_stretch_ratio=1.0
-		segment.color=cohort_color
-		segment.mouse_filter=Control.MOUSE_FILTER_STOP
-		age_distribution_bar.add_child(segment)
-		age_distribution_segments.append(segment)
-		var segment_label:=Label.new()
-		segment_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		segment_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		segment_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-		segment_label.add_theme_font_size_override("font_size",9)
-		segment_label.add_theme_color_override("font_color",Color("#101716"))
-		segment_label.mouse_filter=Control.MOUSE_FILTER_PASS
-		segment.add_child(segment_label)
-		age_distribution_segment_labels.append(segment_label)
-	age_distribution_summary=Label.new()
-	age_distribution_summary.position=choice_panel.position+Vector2(22,178)
-	age_distribution_summary.size=Vector2(314,18)
-	age_distribution_summary.add_theme_font_size_override("font_size",10)
-	age_distribution_summary.add_theme_color_override("font_color",Color("#aeb5ae"))
-	settler_panel.add_child(age_distribution_summary)
-	var allocation_title := Label.new()
-	allocation_title.position = choice_panel.position + Vector2(22, 202)
-	allocation_title.text = "STANDING AUTO-ALLOCATION"
-	allocation_title.add_theme_font_size_override("font_size", 12)
-	allocation_title.add_theme_color_override("font_color", Color("#bda870"))
-	settler_panel.add_child(allocation_title)
-	var auto_note:=Label.new()
-	auto_note.position=choice_panel.position+Vector2(22,220)
-	auto_note.size=Vector2(314,22)
-	auto_note.text="Percentages persist as the population changes."
-	auto_note.add_theme_font_size_override("font_size",11)
-	auto_note.add_theme_color_override("font_color",Color("#96988f"))
-	settler_panel.add_child(auto_note)
-	var roles := [
-		["Food", "SUSTENANCE","Produces food immediately. Heavy local gathering can exhaust the surrounding ecology."],
-		["Survey", "SURVEY PARTIES","Creates clues, recognizes deposits, and measures their quality. Survey speed depends on health and knowledge."],
-		["Extraction", "GATHERERS","Works accessible timber, stone, clay, fiber, and later deposits. Extraction pressure changes ecology."],
-		["Construction", "BUILDERS","Causes needed communal works and access routes to emerge. Output falls with illness and low cohesion."],
-		["Crafting", "MAKERS","Improves tools and material capacity, accelerating extraction, construction, and later production."],
-		["Logistics", "CARRIERS","Moves food and materials, supports storage, and determines whether distant resources are truly usable."],
-		["Knowledge", "RESEARCHERS","The aggregate research workforce. Its distribution across inquiry fields determines the civilization's path; broader programs divide that capacity."],
-		["Administration", "STEWARDS","Coordinates labor and material reserves while strengthening cohesion and legitimacy."],
-		["Defense", "WATCH","Raises security and readiness, but every watcher is absent from food and construction work."]
-	]
-	for i in roles.size():
-		var role_key: String = roles[i][0]
-		var role_name := Label.new()
-		role_name.position = choice_panel.position + Vector2(22, 244 + i * 28)
-		role_name.size = Vector2(142, 27)
-		role_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		role_name.text = roles[i][1]
-		role_name.tooltip_text=roles[i][2]
-		role_name.add_theme_font_size_override("font_size", 13)
-		settler_panel.add_child(role_name)
-		var minus := Button.new()
-		minus.position = choice_panel.position + Vector2(168, 244 + i * 28)
-		minus.size = Vector2(34, 27)
-		minus.text = "−"
-		minus.tooltip_text=roles[i][2]
-		minus.pressed.connect(_change_population_allocation.bind(role_key, -2))
-		settler_panel.add_child(minus)
-		var amount := Label.new()
-		amount.position = choice_panel.position + Vector2(205, 244 + i * 28)
-		amount.size = Vector2(75, 27)
-		amount.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		amount.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		amount.add_theme_font_size_override("font_size", 12)
-		settler_panel.add_child(amount)
-		population_value_labels[role_key] = amount
-		var plus := Button.new()
-		plus.position = choice_panel.position + Vector2(284, 244 + i * 28)
-		plus.size = Vector2(34, 27)
-		plus.text = "+"
-		plus.tooltip_text=roles[i][2]
-		plus.pressed.connect(_change_population_allocation.bind(role_key, 2))
-		settler_panel.add_child(plus)
-	nearby_resources_label = Label.new()
-	nearby_resources_label.position = choice_panel.position + Vector2(22, 558)
-	nearby_resources_label.size = Vector2(314, 26)
-	nearby_resources_label.add_theme_font_size_override("font_size", 13)
-	nearby_resources_label.add_theme_color_override("font_color", Color("#cfc8b9"))
-	settler_panel.add_child(nearby_resources_label)
-	choice_status = Label.new()
-	choice_status.position = choice_panel.position + Vector2(22, 500)
-	choice_status.size = Vector2(314, 54)
-	choice_status.text = "MOBILE COMMUNITIES\nNo permanent works have emerged."
-	choice_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	choice_status.add_theme_font_size_override("font_size", 13)
-	choice_status.add_theme_color_override("font_color", Color("#aaa99f"))
-	settler_panel.add_child(choice_status)
 	_refresh_population_allocations()
-	_update_resource_proximity()
 	_build_command_rail_hud(layer)
 	_update_time_interface()
 	_refresh_discovered_resource_overlays()
-	_build_leader_selection(layer)
 
 func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud=preload("res://scripts/hud/command_rail_hud.gd").new()
@@ -13265,8 +12699,7 @@ func _report_military_action(result:Dictionary)->void:
 func _on_hud_section_requested(section:String,sub:int)->void:
 	if settlement_convoy_targeting:_cancel_settlement_convoy_targeting()
 	else:_close_founding_site_guide()
-	# Sections with a dock provider open in the slide-out dock beside the rail;
-	# the rest still route to their legacy destinations until they migrate.
+	# Every section opens in the slide-out dock beside the rail.
 	if section=="":
 		hud.close_dock()
 		_close_primary_destinations_except("none")
@@ -13276,67 +12709,10 @@ func _on_hud_section_requested(section:String,sub:int)->void:
 		hud.open_dock(section,sub)
 		return
 	hud.close_dock()
-	match section:
-		"civ":
-			if sub==2: _open_council_panel()
-			else: _open_systems_hub()
-		"inquiry": _open_knowledge_panel()
-		"world": _open_civilizations_panel()
-		"military":
-			var military:=get_node_or_null("/root/MilitaryCommandUI")
-			if military: military._toggle()
 
 func _on_hud_escape()->void:
 	_close_primary_destinations_except("none")
 	if hud: hud.set_active_section("")
-
-func _build_scale_bar(layer: CanvasLayer) -> void:
-	var viewport_size:=get_viewport().get_visible_rect().size
-	scale_bar_root=Control.new()
-	scale_bar_root.position=Vector2(24,viewport_size.y-92)
-	scale_bar_root.size=Vector2(200,42)
-	scale_bar_root.mouse_filter=Control.MOUSE_FILTER_PASS
-	scale_bar_root.tooltip_text="Current map scale. F7 descends to 10,000 feet above the terrain. NORTH always means true geographic north; its arrow rotates when you rotate the map."
-	layer.add_child(scale_bar_root)
-	var backing:=ColorRect.new()
-	backing.size=Vector2(196,40)
-	backing.color=Color(0.025,0.034,0.036,0.78)
-	backing.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(backing)
-	scale_bar_label=Label.new()
-	scale_bar_label.position=Vector2(10,2)
-	scale_bar_label.size=Vector2(178,18)
-	scale_bar_label.add_theme_font_size_override("font_size",11)
-	scale_bar_label.add_theme_color_override("font_color",Color("#d7d0bf"))
-	scale_bar_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(scale_bar_label)
-	scale_compass_label=Label.new()
-	scale_compass_label.position=Vector2(112,1)
-	scale_compass_label.size=Vector2(76,20)
-	scale_compass_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	scale_compass_label.add_theme_font_size_override("font_size",12)
-	scale_compass_label.add_theme_color_override("font_color",Color("#e2c66f"))
-	scale_compass_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(scale_compass_label)
-	scale_bar_line=ColorRect.new()
-	scale_bar_line.position=Vector2(10,27)
-	scale_bar_line.size=Vector2(120,2)
-	scale_bar_line.color=Color("#d7d0bf")
-	scale_bar_line.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(scale_bar_line)
-	var left_tick:=ColorRect.new()
-	left_tick.position=Vector2(10,22)
-	left_tick.size=Vector2(2,12)
-	left_tick.color=Color("#d7d0bf")
-	left_tick.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(left_tick)
-	scale_bar_right_tick=ColorRect.new()
-	scale_bar_right_tick.position=Vector2(128,22)
-	scale_bar_right_tick.size=Vector2(2,12)
-	scale_bar_right_tick.color=Color("#d7d0bf")
-	scale_bar_right_tick.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	scale_bar_root.add_child(scale_bar_right_tick)
-	_update_scale_bar()
 
 
 func _build_map_help(layer:CanvasLayer)->void:
@@ -13418,12 +12794,6 @@ func _update_scale_bar() -> void:
 	if hud:
 		hud.update_scale(pixel_width,distance_text,_camera_scale_band(),_north_screen_arrow())
 		if hud.scale_label: hud.scale_label.tooltip_text="About %s feet above the land. The scale is measured at the middle of the view." % EraWordsMap.grouped(roundi(aerial_altitude_feet()))
-	if scale_bar_root and scale_bar_line:
-		scale_bar_line.size.x=pixel_width
-		scale_bar_right_tick.position.x=10.0+pixel_width-2.0
-		scale_bar_label.text="%s  •  %s" % [_camera_scale_band(),distance_text]
-		if scale_compass_label:
-			scale_compass_label.text="NORTH %s" % _north_screen_arrow()
 
 func _camera_scale_band() -> String:
 	if camera==null: return "WORLD"
@@ -13574,26 +12944,7 @@ func _set_resource_view_enabled(enabled:bool)->void:
 		if not is_instance_valid(river_overlay) or not String(river_overlay.name).ends_with("Water"): continue
 		if river_overlay.material_override is ShaderMaterial:
 			(river_overlay.material_override as ShaderMaterial).set_shader_parameter("resource_emphasis",1.0 if enabled else 0.0)
-	_update_resource_view_toggle()
 	_update_scale_lod()
-
-
-func _update_resource_view_toggle()->void:
-	if resource_view_toggle==null: return
-	var known_types:Dictionary={}
-	for deposit_variant in ResourceSystem.visible_deposits():
-		var deposit:Dictionary=deposit_variant
-		known_types[String(deposit.get("resource","RESOURCE"))]=true
-	resource_view_toggle.text="LAND RESOURCES  •  %s" % ("ON" if resource_view_enabled else "OFF")
-	var water_note:=""
-	if settler_marker:
-		var water_distance:=_river_distance_at(settler_marker.position.x,settler_marker.position.z)*KM_PER_WORLD_UNIT
-		water_note="\nNearest visible river or drainage: %.1f km. Within 6 km it directly supports water collection." % water_distance if water_distance<INF else "\nNo recognized surface water is currently within the charted area."
-	resource_view_toggle.tooltip_text="Green canopy: woodland and timber. Pale exposed ground: stone. Warm open ground: productive soils. Click any charted ground to inspect it. Your civilization currently recognizes %d local resource types; unknown deposits remain invisible. Rivers are continuous water sources, not deposit dots; blue emphasis follows their actual channels.%s" % [known_types.size(),water_note]
-	var accent:=Color("#79a47c") if resource_view_enabled else Color("#65706b")
-	resource_view_toggle.add_theme_stylebox_override("normal",_hud_chip_style(accent))
-	resource_view_toggle.add_theme_stylebox_override("hover",_hud_chip_style(accent.lightened(0.12),true))
-	resource_view_toggle.add_theme_color_override("font_color",Color("#e9e1ce") if resource_view_enabled else Color("#aab0ac"))
 
 
 func _refresh_discovered_resource_overlays() -> void:
@@ -15055,26 +14406,8 @@ func _retire_primary_screen(panel)->void:
 # stay inside their destination; switching destinations retires the old tree
 # before the new one is shown, so notifications and dashboards cannot stack.
 func _close_primary_destinations_except(destination:String)->void:
-	if actions_menu_panel and actions_menu_panel.visible: _close_actions_menu()
-	if destination!="settlement":
-		_retire_primary_screen(settlement_dashboard_panel); settlement_dashboard_panel=null
-	_retire_primary_screen(population_ledger_panel); population_ledger_panel=null
 	if destination!="economy":
-		_retire_primary_screen(provisions_panel); provisions_panel=null
 		_retire_primary_screen(materials_panel); materials_panel=null
-	if destination=="civilization":
-		_retire_primary_screen(knowledge_panel); knowledge_panel=null
-		_retire_primary_screen(council_panel); council_panel=null
-		_retire_primary_screen(government_panel); government_panel=null
-		_retire_primary_screen(society_panel); society_panel=null
-		_retire_primary_screen(progression_panel); progression_panel=null
-	else:
-		_retire_primary_screen(systems_hub_panel); systems_hub_panel=null
-		_retire_primary_screen(knowledge_panel); knowledge_panel=null
-		_retire_primary_screen(council_panel); council_panel=null
-		_retire_primary_screen(government_panel); government_panel=null
-		_retire_primary_screen(society_panel); society_panel=null
-		_retire_primary_screen(progression_panel); progression_panel=null
 	if destination=="world":
 		_retire_primary_screen(civilization_report_panel); civilization_report_panel=null
 	else:
@@ -15084,127 +14417,6 @@ func _close_primary_destinations_except(destination:String)->void:
 	if destination!="military" and MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
 
-
-func _open_provisions_panel() -> void:
-	_close_primary_destinations_except("economy")
-	if provisions_panel:
-		provisions_panel.queue_free()
-	provisions_panel=Control.new()
-	provisions_panel.size=get_viewport().get_visible_rect().size
-	provisions_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(provisions_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=provisions_panel.size
-	dimmer.color=Color(0.006,0.011,0.012,0.91)
-	provisions_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.position=Vector2(24,20)
-	modal.size=provisions_panel.size-Vector2(48,40)
-	var frame:=StyleBoxFlat.new()
-	frame.bg_color=Color("#0a1213")
-	frame.border_color=Color("#7f7452")
-	frame.set_border_width_all(1)
-	frame.set_content_margin_all(18)
-	modal.add_theme_stylebox_override("panel",frame)
-	provisions_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,68)
-	header.add_theme_constant_override("separation",10)
-	root.add_child(header)
-	var title_box:=VBoxContainer.new()
-	title_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(title_box)
-	var eyebrow:=Label.new()
-	eyebrow.text="SURVIVAL, STORAGE & THE LAND"
-	eyebrow.add_theme_font_size_override("font_size",11)
-	eyebrow.add_theme_color_override("font_color",Color("#b9a66c"))
-	title_box.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="ECONOMY — PROVISIONS & WATER"
-	title.add_theme_font_size_override("font_size",27)
-	title.add_theme_color_override("font_color",Color("#f0e4cd"))
-	title_box.add_child(title)
-	var subtitle:=Label.new()
-	subtitle.text="Who eats each day, what missions took at departure, and why the stored total changed."
-	subtitle.add_theme_font_size_override("font_size",12)
-	subtitle.add_theme_color_override("font_color",Color("#9ca39d"))
-	title_box.add_child(subtitle)
-	var metrics:=GameState.simulation_metrics
-	var produced:=float(metrics.get("food_production",0.0))
-	var required:=float(metrics.get("food_consumption",maxf(1.0,GameState.population_exact)))
-	var eaten:=float(metrics.get("food_eaten",required))
-	var spoiled:=float(metrics.get("food_spoilage",0.0))
-	var net:=float(metrics.get("food_net",produced-eaten-spoiled))
-	var issued_today:=FoodSystem.issued_on_day(int(GameState.elapsed_days))
-	var stock_change:=net-issued_today
-	var days:=float(metrics.get("food_days",0.0))
-	var projected:=float(metrics.get("food_projected_days",days))
-	var forecast_30:Dictionary=metrics.get("food_forecast_30",{})
-	var forecast_90:Dictionary=metrics.get("food_forecast_90",{})
-	var shortage_90:=int(forecast_90.get("first_shortage_day",-1))
-	var water:=GameState.water_metrics
-	var outlook_text:="shortage %dd" % shortage_90 if shortage_90>0 else ("30d %.0f • 90d %.0f" % [float(forecast_30.get("ending_days",days)),float(forecast_90.get("ending_days",days))] if not forecast_90.is_empty() else ("stable" if projected>=999.0 else "%.0f days" % projected))
-	_make_provision_stat(header,"FOOD RESERVE","%.1f days" % days,Color("#d0b46f"))
-	_make_provision_stat(header,"STOCK CHANGE","%+.1f today" % stock_change,Color("#78a77d") if stock_change>=0.0 else Color("#c67462"))
-	_make_provision_stat(header,"INTAKE","%d%%" % roundi(float(metrics.get("food_intake_ratio",1.0))*100.0),Color("#83a6a0"))
-	_make_provision_stat(header,"DRINKING WATER","%.1f days • %d%%" % [float(water.get("days",0.0)),roundi(float(water.get("intake_ratio",0.0))*100.0)],Color("#6f9eaa") if float(water.get("intake_ratio",0.0))>=0.98 else Color("#c67462"))
-	_make_provision_stat(header,"SEASONAL OUTLOOK",outlook_text,Color("#c67661") if shortage_90>0 else Color("#b99369"))
-	root.add_child(HSeparator.new())
-	_add_modal_action_brief(root,_provisions_decision_brief(metrics,water,issued_today),Color("#b99369"))
-	var columns:=HBoxContainer.new()
-	columns.name="ProvisionDashboardColumns"
-	columns.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	columns.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	columns.add_theme_constant_override("separation",12)
-	root.add_child(columns)
-	var stores:=_make_provision_dashboard_column(columns,"RESERVES NOW","Immediate food reserves and bodily condition")
-	_add_provision_bar(stores,"FOOD RESERVE","%.1f days  •  %.1f rations" % [days,float(GameState.resource_stockpiles.get("Food",0.0))],clampf(days/90.0,0.0,1.0),Color("#d0b46f"))
-	_add_provision_bar(stores,"DRINKING WATER","%.1f days  •  %d%% of today’s need" % [float(water.get("days",0.0)),roundi(float(water.get("intake_ratio",0.0))*100.0)],float(water.get("stored",0.0))/maxf(0.01,float(water.get("capacity",1.0))),Color("#6f9eaa"))
-	var stock_data:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
-	var spoilage_data:Dictionary=metrics.get("food_spoilage_by_type",{})
-	var stock_lines:Array[String]=[]
-	for food_type in FoodSystemScript.FOOD_TYPES:
-		var amount:=float(stock_data.get(food_type,0.0))
-		var daily_loss:=float(spoilage_data.get(food_type,0.0))
-		stock_lines.append("%s  %.1f  •  %.1f lost" % [String(food_type).capitalize(),amount,daily_loss])
-	_add_compact_provision_text(stores,"BY KIND","\n".join(stock_lines),Color("#aaa897"))
-	stores.add_child(HSeparator.new())
-	_add_compact_provision_text(stores,"NUTRITION","Diet %d%%  •  Body reserve %d%%  •  Malnutrition %d%%" % [roundi(float(metrics.get("food_diet_quality",0.0))*100.0),roundi(GameState.nutrition_reserve*100.0),roundi(GameState.malnutrition_burden*100.0)],Color("#a99a75"))
-	var flow:=_make_provision_dashboard_column(columns,"TODAY'S FLOW","Adult-equivalent rations; issued missions leave the reserve once")
-	_add_provision_bar(flow,"PRODUCED","%+.1f" % produced,produced/maxf(required,produced),Color("#729b6e"))
-	_add_provision_bar(flow,"MEALS EATEN","−%.1f of %.1f required" % [eaten,required],eaten/maxf(0.01,required),Color("#779ca0"))
-	_add_provision_bar(flow,"SPOILAGE","−%.1f" % spoiled,spoiled/maxf(1.0,required),Color("#a56e5f"))
-	_add_provision_bar(flow,"MISSIONS / EXTERNAL","−%.1f issued today" % issued_today,issued_today/maxf(1.0,required),Color("#c48462"))
-	_add_provision_bar(flow,"NET STORE CHANGE","%+.1f" % stock_change,absf(stock_change)/maxf(1.0,required),Color("#789c72") if stock_change>=0.0 else Color("#c46f60"))
-	flow.add_child(HSeparator.new())
-	_add_compact_provision_text(flow,"MAIN SOURCES",_provisions_source_summary(metrics),Color("#9daa91"))
-	var consumers:=_make_provision_dashboard_column(columns,"WHO USES FOOD","Daily consumers plus prepaid parties currently away")
-	_add_compact_provision_text(consumers,"DAILY MEALS",_provisions_consumer_summary(metrics,required),Color("#c6c1af"))
-	consumers.add_child(HSeparator.new())
-	_add_compact_provision_text(consumers,"MISSIONS & CONVOYS",_provisions_commitment_summary(),Color("#c09a70"))
-	var footer:=HBoxContainer.new()
-	footer.alignment=BoxContainer.ALIGNMENT_END
-	root.add_child(footer)
-	var detail_button:=Button.new()
-	detail_button.text="OPEN DETAILS & HISTORY"
-	detail_button.custom_minimum_size=Vector2(210,38)
-	detail_button.tooltip_text="Open perishable stock detail, the 30-day trend, active mission issues, and the recent withdrawal ledger."
-	detail_button.pressed.connect(_open_provisions_detail_overlay)
-	footer.add_child(detail_button)
-	var materials_view:=Button.new()
-	materials_view.text="MATERIAL FLOW"
-	materials_view.custom_minimum_size=Vector2(160,38)
-	materials_view.tooltip_text="Open recognized material sources, extraction, hauling, losses, and storage."
-	materials_view.pressed.connect(_switch_economy_to_materials)
-	footer.add_child(materials_view)
-	var close:=Button.new()
-	close.text="RETURN TO MAP"
-	close.custom_minimum_size=Vector2(150,40)
-	close.pressed.connect(func(): provisions_panel.queue_free(); provisions_panel=null)
-	footer.add_child(close)
 
 func _open_materials_panel() -> void:
 	_close_primary_destinations_except("economy")
@@ -15269,23 +14481,10 @@ func _open_materials_panel() -> void:
 			var grouped:=Label.new(); grouped.text="+ %d additional material systems grouped in Details" % (rows.size()-visible_row_count); grouped.add_theme_font_size_override("font_size",10); grouped.add_theme_color_override("font_color",Color("#858e88")); source_list.add_child(grouped)
 	var footer:=HBoxContainer.new(); root.add_child(footer)
 	var note:=Label.new(); note.text="%d known resource systems  •  %d point occurrences%s  •  attention-needed rows first" % [rows.size(),material_sources.size()," + continuous water" if bool(water_access.get("recognized",false)) else ""]; note.size_flags_horizontal=Control.SIZE_EXPAND_FILL; note.add_theme_font_size_override("font_size",10); note.add_theme_color_override("font_color",Color("#888f89")); footer.add_child(note)
-	var provisions_view:=Button.new(); provisions_view.text="PROVISIONS & WATER"; provisions_view.custom_minimum_size=Vector2(170,38); provisions_view.tooltip_text="Open food reserves, water, consumption, missions, and the seasonal outlook."; provisions_view.pressed.connect(_switch_economy_to_provisions); footer.add_child(provisions_view)
 	var details_button:=Button.new(); details_button.text="SOURCE DETAILS"; details_button.custom_minimum_size=Vector2(150,38); details_button.pressed.connect(_open_materials_detail_overlay.bind(rows,water_access)); footer.add_child(details_button)
 	var map_button:=Button.new(); map_button.text="SHOW RESOURCE MAP"; map_button.custom_minimum_size=Vector2(170,38); map_button.tooltip_text="Close this report and enable the map layer for resources your civilization can actually recognize."; map_button.pressed.connect(_open_resource_map_from_materials); footer.add_child(map_button)
 	var close:=Button.new(); close.text="RETURN TO MAP"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(func(): materials_panel.queue_free(); materials_panel=null); footer.add_child(close)
 	_constrain_modal_labels(root)
-
-
-func _switch_economy_to_materials()->void:
-	if provisions_panel and is_instance_valid(provisions_panel): provisions_panel.queue_free()
-	provisions_panel=null
-	call_deferred("_open_materials_panel")
-
-
-func _switch_economy_to_provisions()->void:
-	if materials_panel and is_instance_valid(materials_panel): materials_panel.queue_free()
-	materials_panel=null
-	call_deferred("_open_provisions_panel")
 
 
 func _open_resource_map_from_materials()->void:
@@ -15410,377 +14609,6 @@ func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictiona
 		_add_compact_provision_text(detail,"LOST · "+ResourceSystem.display_name(String(resource_variant)).to_upper(),"%.2f bulk lost today to decay, exposure, or the required storage type being full." % float(losses[resource_variant]),Color("#b77761"))
 
 
-func _open_materials_panel_legacy() -> void:
-	if materials_panel: materials_panel.queue_free()
-	materials_panel=Control.new()
-	materials_panel.size=get_viewport().get_visible_rect().size
-	materials_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(materials_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=materials_panel.size
-	dimmer.color=Color(0.006,0.009,0.010,0.92)
-	materials_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.position=Vector2(24,20)
-	modal.size=materials_panel.size-Vector2(48,40)
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1112"),Color("#806c4c"),1,3,18))
-	materials_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,70)
-	header.add_theme_constant_override("separation",9)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="KNOWLEDGE, LABOR & PHYSICAL FLOW"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#baa164"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="MATERIALS & ACCESS"
-	title.add_theme_font_size_override("font_size",26)
-	title.add_theme_color_override("font_color",Color("#eee1c9"))
-	heading.add_child(title)
-	var subtitle:=Label.new()
-	subtitle.text="A deposit is not a stockpile. It must be recognized, understood, reached, worked, carried, and kept."
-	subtitle.add_theme_font_size_override("font_size",12)
-	subtitle.add_theme_color_override("font_color",Color("#9ca29d"))
-	heading.add_child(subtitle)
-	var metrics:=GameState.material_metrics
-	_make_provision_stat(header,"EXTRACTED","%.1f today" % float(metrics.get("extracted_today",0.0)),Color("#b68d56"))
-	_make_provision_stat(header,"DELIVERED","%.1f today" % float(metrics.get("delivered_today",0.0)),Color("#78977f"))
-	_make_provision_stat(header,"IN TRANSIT","%.1f units" % float(metrics.get("in_transit",0.0)),Color("#718d99"))
-	var live_capacity:=float(metrics.get("storage_capacity",0.0))
-	if live_capacity<=0.0:
-		for capacity in ResourceSystem.storage_capacities().values(): live_capacity+=float(capacity)
-	var live_stored:=ResourceSystem.stored_bulk()
-	_make_provision_stat(header,"STORAGE","%.0f / %.0f bulk" % [live_stored,live_capacity],Color("#a58b67"))
-	root.add_child(HSeparator.new())
-	var economy_row:=HBoxContainer.new()
-	economy_row.add_theme_constant_override("separation",9)
-	root.add_child(economy_row)
-	var economy_metrics:=GameState.economy_metrics
-	_make_provision_stat(economy_row,"ALLOCATION",String(economy_metrics.get("stage_name","Direct allocation & reciprocity")),Color("#c1a56b"))
-	_make_provision_stat(economy_row,"DISTRIBUTION REACH","%d%%" % roundi(float(economy_metrics.get("distribution_reach",economy_metrics.get("market_access",0.0)))*100.0),Color("#7f9b91"))
-	var observed_index:=float(economy_metrics.get("price_index",0.0))
-	_make_provision_stat(economy_row,"RECORDED COMPARISONS",("%.2f  %+.1f%%" % [observed_index,float(economy_metrics.get("inflation",0.0))*100.0]) if observed_index>0.0 else "No shared value record",Color("#aa8c68"))
-	_make_provision_stat(economy_row,"RECIPROCAL SURPLUS","%.1f today" % float(economy_metrics.get("reciprocal_surplus",economy_metrics.get("trade_volume",0.0))),Color("#75939c"))
-	if GameState.economy_stage==EconomySystem.STAGE_CURRENCY:
-		_make_provision_stat(economy_row,"TREASURY","%.1f / %.1f supply" % [GameState.public_treasury,GameState.currency_supply],Color("#c5b36f"))
-		_make_provision_stat(economy_row,"CREDIT","%.1f  •  %d%% GINI" % [GameState.credit_outstanding,roundi(float(economy_metrics.get("inequality",0.0))*100.0)],Color("#9c7f91"))
-	else:
-		_make_provision_stat(economy_row,"SETTLEMENT",EconomySystem.settlement_medium(),Color("#968a72"))
-	root.add_child(HSeparator.new())
-	var scroll:=FIT_CONTENT_PANEL.new()
-	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
-	var columns:=HBoxContainer.new()
-	columns.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	columns.add_theme_constant_override("separation",12)
-	scroll.add_child(columns)
-	var deposits_column:=VBoxContainer.new()
-	deposits_column.custom_minimum_size=Vector2(390,0)
-	deposits_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	deposits_column.add_theme_constant_override("separation",7)
-	columns.add_child(deposits_column)
-	_add_provision_section_title(deposits_column,"KNOWN OCCURRENCES","Confidence and access grow through observation and repeated work.")
-	var visible:=ResourceSystem.visible_deposits()
-	if visible.is_empty():
-		_make_knowledge_empty_state(deposits_column,"Nothing has been recognized yet. Surveyors, local work, and directed inquiry create evidence; the map will not reveal what the people do not know.")
-	for deposit_variant in visible:
-		var deposit:Dictionary=deposit_variant
-		var card:=PanelContainer.new()
-		card.add_theme_stylebox_override("panel",_knowledge_style(Color("#12191a"),_material_stage_color(String(deposit.stage)).darkened(0.32),1,3,9))
-		deposits_column.add_child(card)
-		var content:=VBoxContainer.new()
-		content.add_theme_constant_override("separation",3)
-		card.add_child(content)
-		var top:=HBoxContainer.new()
-		content.add_child(top)
-		var name:=Label.new()
-		name.text=String(deposit.resource).to_upper()
-		name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		name.add_theme_font_size_override("font_size",14)
-		name.add_theme_color_override("font_color",Color("#e7dcc8"))
-		top.add_child(name)
-		var stage:=Label.new()
-		stage.text=String(deposit.stage).to_upper()
-		stage.add_theme_font_size_override("font_size",10)
-		stage.add_theme_color_override("font_color",_material_stage_color(String(deposit.stage)))
-		top.add_child(stage)
-		var knowledge:=Label.new()
-		knowledge.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		knowledge.add_theme_font_size_override("font_size",11)
-		knowledge.add_theme_color_override("font_color",Color("#a8afa8"))
-		knowledge.text=_material_knowledge_text(deposit)
-		content.add_child(knowledge)
-		if String(deposit.stage) in ["accessible","developed"] and ResourceSystem.material_profile(String(deposit.resource)).size()>0 and String(deposit.resource) not in ["Freshwater","Fertile Soil","Game"]:
-			var flow:=Label.new()
-			flow.text="%.1f km  •  %d workers  •  %.1f extracted  •  %.1f awaiting carriers  •  %.1f moving" % [float(deposit.get("distance_km",0.0)),int(deposit.get("workers",0)),float(deposit.get("extracted_today",0.0)),float(deposit.get("stock_at_source",0.0)),ResourceSystem.in_transit_for(deposit)]
-			flow.add_theme_font_size_override("font_size",10)
-			flow.add_theme_color_override("font_color",Color("#8fa39f"))
-			content.add_child(flow)
-			var bottom:=HBoxContainer.new()
-			content.add_child(bottom)
-			var bottleneck:=Label.new()
-			bottleneck.text="STATUS  •  %s" % String(deposit.get("bottleneck","Awaiting first work"))
-			bottleneck.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			bottleneck.add_theme_font_size_override("font_size",9)
-			bottleneck.add_theme_color_override("font_color",Color("#c18469") if String(deposit.get("bottleneck",""))!="Flowing" else Color("#7fa27c"))
-			bottom.add_child(bottleneck)
-			var priority:=Button.new()
-			var priority_value:=float(GameState.resource_priorities.get(String(deposit.resource),1.0))
-			priority.text="%s PRIORITY" % ("LOW" if priority_value<0.8 else ("HIGH" if priority_value>1.2 else "NORMAL"))
-			priority.custom_minimum_size=Vector2(112,25)
-			priority.tooltip_text="Changes where extractors and carriers concentrate. It does not create labor or material."
-			priority.pressed.connect(_cycle_material_priority.bind(String(deposit.resource)))
-			bottom.add_child(priority)
-	var flow_column:=VBoxContainer.new()
-	flow_column.custom_minimum_size=Vector2(330,0)
-	flow_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	flow_column.add_theme_constant_override("separation",7)
-	columns.add_child(flow_column)
-	_add_provision_section_title(flow_column,"TODAY'S MATERIAL CHAIN","Every break in the chain leaves a visible backlog.")
-	var extracted:=float(metrics.get("extracted_today",0.0))
-	var at_source:=float(metrics.get("at_source",0.0))
-	var moving:=float(metrics.get("in_transit",0.0))
-	var delivered:=float(metrics.get("delivered_today",0.0))
-	var lost:=float(metrics.get("lost_today",0.0))
-	var scale:=maxf(1.0,maxf(extracted,maxf(at_source,maxf(moving,delivered))))
-	_add_provision_bar(flow_column,"1  EXTRACTED","%.1f units today" % extracted,extracted/scale,Color("#b88d55"))
-	_add_provision_bar(flow_column,"2  AT SOURCE","%.1f waiting for carriers" % at_source,at_source/scale,Color("#b86f59"))
-	_add_provision_bar(flow_column,"3  IN TRANSIT","%.1f physically moving" % moving,moving/scale,Color("#6f919e"))
-	_add_provision_bar(flow_column,"4  DELIVERED","%.1f reached storage today" % delivered,delivered/scale,Color("#719a78"))
-	_add_provision_bar(flow_column,"5  LOST","%.1f exposure / damage / overflow" % lost,lost/scale,Color("#a75e52"))
-	flow_column.add_child(HSeparator.new())
-	_add_provision_section_title(flow_column,"LABOR BEHIND THE FLOW","Automatic allocation divides numeric labor cohorts by priority, scarcity, quality, and distance.")
-	_add_provision_bar(flow_column,"EXTRACTORS","%d people" % int(GameState.population_allocations.get("Extraction",0)),float(GameState.population_allocations.get("Extraction",0))/maxf(1.0,GameState.population_exact),Color("#b18a5d"))
-	_add_provision_bar(flow_column,"CARRIERS","%d people" % int(GameState.population_allocations.get("Logistics",0)),float(GameState.population_allocations.get("Logistics",0))/maxf(1.0,GameState.population_exact),Color("#718f94"))
-	var doctrine:=Label.new()
-	doctrine.text="Practical knowledge compounds: experienced workers recognize related materials faster, lose less usable material, and teach later generations. New practices can improve food preservation, health, building, trade, administration, or war—but some also bring pollution and danger."
-	doctrine.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	doctrine.add_theme_font_size_override("font_size",11)
-	doctrine.add_theme_color_override("font_color",Color("#adb1a8"))
-	flow_column.add_child(doctrine)
-	flow_column.add_child(HSeparator.new())
-	_add_provision_section_title(flow_column,"ALLOCATION & VALUE","Internal distribution is not foreign trade. Comparable values appear only after repeated exchange can be recorded.")
-	var exchange_metrics:=GameState.economy_metrics
-	var exchange_summary:=Label.new()
-	exchange_summary.text="%s\n%s\nInternal distribution %d%%  •  Monetized %d%%  •  Shortage pressure %d%%" % [String(exchange_metrics.get("stage_name","Direct allocation & reciprocity")).to_upper(),EconomySystem.settlement_medium(),roundi(float(exchange_metrics.get("distribution_reach",exchange_metrics.get("market_access",0.0)))*100.0),roundi(float(exchange_metrics.get("monetization",0.0))*100.0),roundi(float(exchange_metrics.get("shortage_pressure",0.0))*100.0)]
-	exchange_summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	exchange_summary.add_theme_font_size_override("font_size",10)
-	exchange_summary.add_theme_color_override("font_color",Color("#c9b889"))
-	flow_column.add_child(exchange_summary)
-	var real_economy:Dictionary=exchange_metrics.get("real_economy",{})
-	if not real_economy.is_empty():
-		var real_label:=Label.new()
-		real_label.text="ESSENTIAL COVERAGE %d%%  •  FOOD %d%%  •  MATERIALS %d%%  •  COLLECTIVE LABOR %d%%\nEXCHANGEABLE SURPLUS %.1f value  •  REAL OUTPUT %.2f / person  •  LABOR RETURN %.2f× basket%s" % [roundi(float(real_economy.get("essential_coverage",0.0))*100.0),roundi(float(real_economy.get("food_coverage",0.0))*100.0),roundi(float(real_economy.get("material_coverage",0.0))*100.0),roundi(float(real_economy.get("collective_labor_share",0.0))*100.0),float(real_economy.get("exchangeable_surplus_value",0.0)),float(real_economy.get("output_per_capita",0.0)),float(real_economy.get("labor_return_index",0.0)),"  •  PRIVATE LIQUIDITY %.1f days" % float(real_economy.get("private_liquidity_days",0.0)) if GameState.economy_stage==EconomySystem.STAGE_CURRENCY else ""]
-		real_label.tooltip_text="Physical adequacy and labor burden remain decisive in every exchange stage. These are observational accounts; the economy does not consume food or materials a second time."
-		real_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		real_label.add_theme_font_size_override("font_size",9)
-		real_label.add_theme_color_override("font_color",Color("#9eab8c"))
-		flow_column.add_child(real_label)
-	var public_obligations:Dictionary=exchange_metrics.get("public_obligations",{})
-	if not public_obligations.is_empty():
-		var obligation_label:=Label.new()
-		obligation_label.text="PUBLIC DUES  %s  •  ASSESSED REACH %d%%  •  IN-KIND SHARE %d%%\nLABOR %.1f / %.1f rendered  •  %d%% covered  •  %.1f days carried\nMATERIAL %.1f / %.1f value rendered  •  %d%% covered  •  %.1f value carried" % [String(public_obligations.get("regime","customary obligations")).to_upper(),roundi(float(public_obligations.get("assessment_reach",0.0))*100.0),roundi(float(public_obligations.get("in_kind_share",1.0))*100.0),float(public_obligations.get("labor_fulfilled",0.0)),float(public_obligations.get("labor_outstanding",0.0)),roundi(float(public_obligations.get("labor_coverage",0.0))*100.0),float(public_obligations.get("labor_arrears",0.0)),float(public_obligations.get("material_fulfilled",0.0)),float(public_obligations.get("material_outstanding",0.0)),roundi(float(public_obligations.get("material_coverage",0.0))*100.0),float(public_obligations.get("material_arrears",0.0))]
-		obligation_label.tooltip_text="Collective labor and material deliveries can satisfy public obligations. These accounts classify work and goods already handled by their owning systems; they never consume a second unit. Scheduled levies preserve unpaid claims, while currency commutes most dues into the exchange levy."
-		obligation_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		obligation_label.add_theme_font_size_override("font_size",9)
-		obligation_label.add_theme_color_override("font_color",Color("#aa9675"))
-		flow_column.add_child(obligation_label)
-	var reserve_summary:=Label.new()
-	reserve_summary.text="AVAILABLE METAL %.1f  •  WEIGHED EXCHANGE %.1f  •  TODAY'S METAL TURNOVER %.1f  •  COMMITTED RESERVE %.1f  •  RESERVE RATIO %d%%" % [float(exchange_metrics.get("metal_available",EconomySystem._available_metal_value())),GameState.weighed_metal_circulation,float(exchange_metrics.get("metal_trade_turnover",0.0)),float(exchange_metrics.get("metal_reserve",EconomySystem._monetary_reserve_value())),roundi(float(exchange_metrics.get("reserve_ratio",0.0))*100.0)]
-	reserve_summary.tooltip_text="Available metal remains in ordinary stores. Weighed exchange metal is physical standardized metal held in circulation. Committed reserve is sequestered backing. One unit cannot occupy more than one account."
-	reserve_summary.add_theme_font_size_override("font_size",9)
-	reserve_summary.add_theme_color_override("font_color",Color("#a9976f"))
-	flow_column.add_child(reserve_summary)
-	var reserve_composition:Dictionary=exchange_metrics.get("reserve_composition",GameState.monetary_reserve_metals)
-	if not reserve_composition.is_empty():
-		var reserve_parts:Array[String]=[]
-		for reserve_material in reserve_composition:
-			reserve_parts.append("%s %.1f" % [String(reserve_material),float(reserve_composition[reserve_material])])
-		reserve_parts.sort()
-		var composition_label:=Label.new()
-		composition_label.text="Backing: "+"  •  ".join(reserve_parts)
-		composition_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		composition_label.add_theme_font_size_override("font_size",9)
-		composition_label.add_theme_color_override("font_color",Color("#8e8778"))
-		flow_column.add_child(composition_label)
-	var exchange_metal_composition:Dictionary=exchange_metrics.get("weighed_metal_composition",GameState.weighed_metal_composition)
-	if not exchange_metal_composition.is_empty():
-		var exchange_metal_parts:Array[String]=[]
-		for exchange_material in exchange_metal_composition:
-			exchange_metal_parts.append("%s %.1f" % [String(exchange_material),float(exchange_metal_composition[exchange_material])])
-		exchange_metal_parts.sort()
-		var exchange_metal_label:=Label.new()
-		exchange_metal_label.text="Weighed circulation: %s  •  cumulative wear %.2f" % ["  •  ".join(exchange_metal_parts),GameState.weighed_metal_losses]
-		exchange_metal_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		exchange_metal_label.add_theme_font_size_override("font_size",9)
-		exchange_metal_label.add_theme_color_override("font_color",Color("#a58f70"))
-		flow_column.add_child(exchange_metal_label)
-	if GameState.economy_stage!=EconomySystem.STAGE_SUBSISTENCE:
-		var metal_policy_row:=HBoxContainer.new()
-		metal_policy_row.add_theme_constant_override("separation",4)
-		flow_column.add_child(metal_policy_row)
-		for metal_policy_variant in [["METAL TO TRADE",maxf(1.0,GameState.population_exact*0.04)],["WITHDRAW TRADE METAL",maxf(1.0,GameState.population_exact*0.04)]]:
-			var metal_policy:Array=metal_policy_variant
-			var metal_policy_button:=Button.new()
-			metal_policy_button.text=String(metal_policy[0])
-			metal_policy_button.tooltip_text=_economy_policy_preview_text(String(metal_policy[0]),float(metal_policy[1]))
-			metal_policy_button.pressed.connect(_apply_economy_policy.bind(String(metal_policy[0]),float(metal_policy[1])))
-			metal_policy_row.add_child(metal_policy_button)
-	var accounting_audit:Dictionary=exchange_metrics.get("accounting_audit",{})
-	if not accounting_audit.is_empty():
-		var audit_label:=Label.new()
-		audit_label.text="ACCOUNTS VERIFIED" if bool(accounting_audit.get("ok",false)) else "ACCOUNT WARNING  "+"; ".join(accounting_audit.get("violations",[]))
-		audit_label.add_theme_font_size_override("font_size",9)
-		audit_label.add_theme_color_override("font_color",Color("#71977d") if bool(accounting_audit.get("ok",false)) else Color("#bd6558"))
-		flow_column.add_child(audit_label)
-	if GameState.economy_stage!=EconomySystem.STAGE_SUBSISTENCE and EconomySystem.active_external_trade_partner_count()>0:
-		var external_trade:Dictionary=exchange_metrics.get("external_trade",{})
-		var trade_label:=Label.new()
-		trade_label.text="FOREIGN CONTRACTS %d  •  %s  •  CLAIMS %.1f / %.1f limit  •  TODAY +%.1f exports / −%.1f imports\nCUMULATIVE %.1f export claims / %.1f import spending / %.1f losses  •  FOOD IMPORT DEPENDENCE %d%%" % [EconomySystem.active_external_trade_partner_count(),GameState.external_trade_policy.replace("_"," ").to_upper(),GameState.external_trade_credit,float(external_trade.get("claim_limit",0.0)),float(external_trade.get("exports",0.0)),float(external_trade.get("imports",0.0)),GameState.external_trade_exports,GameState.external_trade_imports,GameState.external_trade_losses,roundi(float(GameState.simulation_metrics.get("food_import_share",0.0))*100.0)]
-		trade_label.tooltip_text="Regional imports must be funded by prior or same-day exports. Trade friction reduces export proceeds; domestic currency is not assumed to be foreign money."
-		trade_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		trade_label.add_theme_font_size_override("font_size",9)
-		trade_label.add_theme_color_override("font_color",Color("#829da1"))
-		flow_column.add_child(trade_label)
-		var trade_policy_button:=Button.new()
-		trade_policy_button.text="TRADE: "+GameState.external_trade_policy.replace("_"," ").to_upper()
-		trade_policy_button.tooltip_text=_economy_policy_preview_text("TRADE",0.0)
-		trade_policy_button.pressed.connect(_apply_economy_policy.bind("TRADE",0.0))
-		flow_column.add_child(trade_policy_button)
-	var exchange_mix:Dictionary=exchange_metrics.get("exchange_mix",{})
-	if not exchange_mix.is_empty():
-		var mix_parts:Array[String]=[]
-		for channel in ["public_allocation","reciprocity","barter","weighed_metal","recorded_credit","currency"]:
-			var share:=float(exchange_mix.get(channel,0.0))
-			if share<0.005: continue
-			mix_parts.append("%s %d%%" % [String(channel).replace("_"," ").capitalize(),roundi(share*100.0)])
-		var mix_label:=Label.new()
-		mix_label.text="  •  ".join(mix_parts)
-		mix_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		mix_label.add_theme_font_size_override("font_size",9)
-		mix_label.add_theme_color_override("font_color",Color("#8fa19c"))
-		flow_column.add_child(mix_label)
-	for quote_variant in EconomySystem.known_market_snapshot():
-		var market_quote:Dictionary=quote_variant
-		var price_change:=(float(market_quote.unit_value)/maxf(0.001,float(market_quote.base_value))-1.0)*100.0
-		var price_line:=Label.new()
-		price_line.text="%s  •  %.2f / unit  •  %+.0f%% vs reference  •  %+.1f%% / 30d  •  %.1f stored" % [String(market_quote.resource).to_upper(),float(market_quote.unit_value),price_change,float(market_quote.get("trend_30d",0.0))*100.0,float(market_quote.stock)]
-		price_line.add_theme_font_size_override("font_size",10)
-		price_line.add_theme_color_override("font_color",Color("#b9b4a7"))
-		flow_column.add_child(price_line)
-	var benchmark:=EconomySystem.benchmark_status()
-	_add_provision_section_title(flow_column,"NEXT BENCHMARK",String(benchmark.next_stage))
-	for requirement_variant in benchmark.requirements:
-		var requirement:Dictionary=requirement_variant
-		var met:=float(requirement.value)>=float(requirement.target)
-		var requirement_line:=Label.new()
-		requirement_line.text="%s  %s  %.2f / %.2f" % ["✓" if met else "○",String(requirement.name),float(requirement.value),float(requirement.target)]
-		requirement_line.add_theme_font_size_override("font_size",10)
-		requirement_line.add_theme_color_override("font_color",Color("#7fa27c") if met else Color("#a39a89"))
-		flow_column.add_child(requirement_line)
-	if GameState.economy_stage==EconomySystem.STAGE_CURRENCY:
-		var military_upkeep:=float(exchange_metrics.get("military_upkeep_due",0.0))
-		var currency_liquidity:Dictionary=exchange_metrics.get("currency_liquidity",{})
-		var liquidity_label:=Label.new()
-		liquidity_label.text="CURRENCY CONFIDENCE %d%%  •  ACTIVE HOUSEHOLD %.1f / %.1f issued (%d%%)\nTREASURY %.1f  •  HOARDS %.1f (%d%%)  •  MUTUAL AID %.1f  •  TODAY +%.2f hoarded / −%.2f released" % [roundi(float(currency_liquidity.get("confidence",0.0))*100.0),float(exchange_metrics.get("transactional_money",GameState.private_currency)),GameState.currency_supply,roundi(float(currency_liquidity.get("transactional_share",0.0))*100.0),GameState.public_treasury,GameState.currency_hoards,roundi(float(currency_liquidity.get("hoard_share",0.0))*100.0),GameState.mutual_aid_reserve,float(currency_liquidity.get("hoarded_today",0.0)),float(currency_liquidity.get("released_today",0.0))]
-		liquidity_label.tooltip_text="Only active household currency currently funds purchases, taxes, and private lending. Treasury balances enter circulation when spent; hoards return when confidence improves; mutual-aid reserves return through relief. All four accounts remain part of conserved supply."
-		liquidity_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		liquidity_label.add_theme_font_size_override("font_size",9)
-		liquidity_label.add_theme_color_override("font_color",Color("#a68d72"))
-		flow_column.add_child(liquidity_label)
-		var credit_label:=Label.new()
-		credit_label.text="PRIVATE CREDIT %.2f / %.2f capacity  •  DEFAULT RATE %.2f%%  •  WEALTH GINI %d%%" % [GameState.credit_outstanding,float(exchange_metrics.get("credit_limit",0.0)),float(exchange_metrics.get("default_rate",0.0))*100.0,roundi(float(exchange_metrics.get("inequality",0.0))*100.0)]
-		credit_label.add_theme_font_size_override("font_size",9)
-		credit_label.add_theme_color_override("font_color",Color("#9c879b"))
-		flow_column.add_child(credit_label)
-		var mutual_aid:Dictionary=exchange_metrics.get("mutual_aid",{})
-		if bool(mutual_aid.get("active",false)):
-			var aid_label:=Label.new()
-			aid_label.text="MUTUAL AID %.2f / %.2f capacity  •  +%.2f contributions  •  −%.2f relief" % [GameState.mutual_aid_reserve,float(mutual_aid.get("capacity",0.0)),float(mutual_aid.get("contribution",0.0)),float(mutual_aid.get("payout",0.0))]
-			aid_label.add_theme_font_size_override("font_size",9)
-			aid_label.add_theme_color_override("font_color",Color("#839f8b"))
-			flow_column.add_child(aid_label)
-		var fiscal_outlook:Dictionary=exchange_metrics.get("fiscal_outlook",{})
-		var fiscal_label:=Label.new()
-		fiscal_label.text="LEVY %.0f%%  •  EFFECTIVE %.1f%%  •  COMPLIANCE %d%%  •  REVENUE %.2f  •  COLLECTION GAP %.2f\nCIVIL DUE %.2f  •  MILITARY DUE %.2f  •  ARREARS %.2f  •  BALANCE %+.2f\nPUBLIC DEBT %.2f / %.2f capacity  •  BORROWED %.2f  •  DEBT SERVICE %.2f\nFISCAL %s  •  PRIORITY %s  •  30-DAY COVER %d%%  •  CIV/MIL %d%%/%d%%\nFREE HEADROOM %.2f  •  14-DAY BUFFER %.2f  •  RUNWAY %.0f days" % [GameState.tax_rate*100.0,float(exchange_metrics.get("effective_tax_rate",0.0))*100.0,roundi(float(exchange_metrics.get("tax_compliance",0.0))*100.0),float(exchange_metrics.get("tax_revenue",0.0)),float(exchange_metrics.get("tax_noncompliance_gap",0.0))+float(exchange_metrics.get("tax_liquidity_gap",0.0)),float(exchange_metrics.get("civil_upkeep_due",0.0)),military_upkeep,float(exchange_metrics.get("public_arrears",0.0)),float(exchange_metrics.get("fiscal_balance",0.0)),GameState.public_debt,float(exchange_metrics.get("debt_capacity",0.0)),float(exchange_metrics.get("public_borrowing",0.0)),float(exchange_metrics.get("debt_service",0.0)),String(fiscal_outlook.get("status","unmeasured")).to_upper(),String(fiscal_outlook.get("spending_priority",GameState.public_spending_priority)).replace("_"," ").to_upper(),roundi(float(fiscal_outlook.get("coverage_ratio",0.0))*100.0),roundi(float(fiscal_outlook.get("civil_coverage",1.0))*100.0),roundi(float(fiscal_outlook.get("military_coverage",1.0))*100.0),float(fiscal_outlook.get("discretionary_headroom",0.0)),float(fiscal_outlook.get("protected_buffer",0.0)),float(fiscal_outlook.get("runway_days",0.0))]
-		fiscal_label.tooltip_text="Statutory levy is filtered through administrative reach, legitimacy, institutions, records, inequality, arrears, high-rate resistance, and available household currency. The fiscal outlook then projects visible receipts and obligations. The protected buffer is fourteen days of gross obligations; it is guidance, not money removed from the treasury.\n%s" % String(fiscal_outlook.get("warning","No forecast is available yet."))
-		fiscal_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		fiscal_label.add_theme_font_size_override("font_size",9)
-		fiscal_label.add_theme_color_override("font_color",Color("#b6a978"))
-		flow_column.add_child(fiscal_label)
-		var policy_row:=HBoxContainer.new()
-		policy_row.add_theme_constant_override("separation",4)
-		flow_column.add_child(policy_row)
-		for policy_variant in [["LEVY −",-0.01],["LEVY +",0.01],["SPENDING",0.0],["BACK METAL",maxf(1.0,GameState.population_exact*0.05)],["RELEASE METAL",maxf(1.0,GameState.population_exact*0.05)],["ISSUE",maxf(1.0,GameState.population_exact*0.10)],["RETIRE",-maxf(1.0,GameState.population_exact*0.05)]]:
-			var policy:Array=policy_variant
-			var policy_button:=Button.new()
-			policy_button.text=String(policy[0])
-			policy_button.tooltip_text=_economy_policy_preview_text(String(policy[0]),float(policy[1]))
-			policy_button.pressed.connect(_apply_economy_policy.bind(String(policy[0]),float(policy[1])))
-			policy_row.add_child(policy_button)
-	var stores_column:=VBoxContainer.new()
-	stores_column.custom_minimum_size=Vector2(340,0)
-	stores_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	stores_column.add_theme_constant_override("separation",7)
-	columns.add_child(stores_column)
-	_add_provision_section_title(stores_column,"MATERIAL STORAGE CAPACITY","Different materials need different physical storage.")
-	var capacities:Dictionary=metrics.get("capacities",ResourceSystem.storage_capacities())
-	var used_by_store:={"yard":0.0,"dry":0.0,"covered":0.0,"sealed":0.0,"secure":0.0}
-	for resource_name_variant in GameState.resource_stockpiles:
-		var resource_name:=String(resource_name_variant)
-		if resource_name=="Food" or resource_name in ["Freshwater","Fertile Soil","Game"]: continue
-		var amount:=float(GameState.resource_stockpiles[resource_name])
-		if amount<=0.005: continue
-		var profile:=ResourceSystem.material_profile(resource_name)
-		var store:=String(profile.store)
-		used_by_store[store]=float(used_by_store[store])+amount*float(profile.bulk)
-		var line:=Label.new()
-		line.text="%s  •  %.1f units  •  %s" % [resource_name.to_upper(),amount,store.replace("_"," ")]
-		line.add_theme_font_size_override("font_size",11)
-		line.add_theme_color_override("font_color",Color("#c8c1b1"))
-		stores_column.add_child(line)
-	for store_name in capacities:
-		_add_provision_bar(stores_column,String(store_name).replace("_"," ").to_upper(),"%.0f / %.0f bulk used" % [float(used_by_store.get(store_name,0.0)),float(capacities[store_name])],float(used_by_store.get(store_name,0.0))/maxf(1.0,float(capacities[store_name])),Color("#9a825e"))
-	stores_column.add_child(HSeparator.new())
-	_add_provision_section_title(stores_column,"RECENT MATERIAL INSIGHT","Only discoveries that survived testing enter the record.")
-	var shown:=0
-	for event_variant in GameState.discovery_log:
-		var event:Dictionary=event_variant
-		var effects:Dictionary=event.get("effects",{})
-		if effects.is_empty(): continue
-		var insight:=Label.new()
-		insight.text="%s\n%s" % [String(event.get("name","Discovery")).to_upper(),_effect_ripple_text(effects)]
-		insight.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		insight.add_theme_font_size_override("font_size",10)
-		insight.add_theme_color_override("font_color",Color("#bca873"))
-		stores_column.add_child(insight)
-		shown+=1
-		if shown>=4: break
-	if shown==0: _make_knowledge_empty_state(stores_column,"No material practice has yet become dependable collective knowledge.")
-	var footer:=HBoxContainer.new()
-	root.add_child(footer)
-	var note:=Label.new()
-	note.text="The hidden possibility graph remains invisible. This ledger shows only what your civilization currently knows, attempts, moves, and loses."
-	note.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	note.add_theme_font_size_override("font_size",10)
-	note.add_theme_color_override("font_color",Color("#888f89"))
-	footer.add_child(note)
-	var close:=Button.new()
-	close.text="CLOSE"
-	close.custom_minimum_size=Vector2(150,38)
-	close.pressed.connect(func(): materials_panel.queue_free(); materials_panel=null)
-	footer.add_child(close)
-	_constrain_modal_labels(root)
-
-
 func _constrain_modal_labels(root:Node)->void:
 	# Long live-data strings must wrap inside their assigned column instead of
 	# increasing the container's minimum width and pushing controls off-screen.
@@ -15791,16 +14619,6 @@ func _constrain_modal_labels(root:Node)->void:
 			label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		_constrain_modal_labels(child)
 
-func _material_stage_color(stage:String)->Color:
-	return {"recognized":Color("#9a835b"),"surveyed":Color("#7c9291"),"accessible":Color("#789a78"),"developed":Color("#c2a15e")}.get(stage,Color("#777d79"))
-
-func _material_knowledge_text(deposit:Dictionary)->String:
-	match String(deposit.get("stage","unknown")):
-		"recognized": return "INDICATED  •  identity plausible; quality, extent, and retrieval remain unknown"
-		"surveyed": return "%s quality  •  %s  •  access work and practical knowledge still determine retrieval" % [ResourceSystem._quality_label(float(deposit.get("quality",0.0))),ResourceSystem._abundance_label(deposit)]
-		"accessible": return "%s quality  •  retrievable, but no dependable production history yet" % ResourceSystem._quality_label(float(deposit.get("quality",0.0)))
-		"developed": return "%s quality  •  repeated work is accumulating practical knowledge" % ResourceSystem._quality_label(float(deposit.get("quality",0.0)))
-	return "Unknown"
 
 func _cycle_material_priority(resource_name:String)->void:
 	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _cycle_material_priority_local(resource_name))
@@ -15813,70 +14631,6 @@ func _cycle_material_priority_local(resource_name:String)->void:
 	else: GameState.resource_priorities[resource_name]=1.0
 	_open_materials_panel.call_deferred()
 
-func _apply_economy_policy(action:String,amount:float)->void:
-	if action.begins_with("LEVY"):
-		EconomySystem.set_tax_rate(GameState.tax_rate+amount)
-	elif action=="ISSUE":
-		EconomySystem.issue_currency(amount,"Sovereign issue")
-	elif action=="RETIRE":
-		EconomySystem.retire_currency(absf(amount),"Sovereign retirement")
-	elif action=="BACK METAL":
-		EconomySystem.commit_metal_to_reserve(amount,"Sovereign reserve commitment")
-	elif action=="RELEASE METAL":
-		EconomySystem.release_surplus_reserve(amount,"Sovereign surplus reserve release")
-	elif action=="METAL TO TRADE":
-		EconomySystem.place_weighed_metal_in_circulation(amount,"Sovereign weighed-metal placement")
-	elif action=="WITHDRAW TRADE METAL":
-		EconomySystem.withdraw_weighed_metal(amount,"Sovereign weighed-metal withdrawal")
-	elif action=="SPENDING":
-		EconomySystem.cycle_public_spending_priority()
-	elif action=="TRADE":
-		EconomySystem.cycle_external_trade_policy()
-	_open_materials_panel.call_deferred()
-
-func _economy_policy_preview_text(action:String,amount:float)->String:
-	var preview:Dictionary=EconomySystem.preview_policy(action,amount)
-	var after:Dictionary=preview.get("after",{})
-	var fiscal_outlook:Dictionary=after.get("fiscal_outlook",{})
-	return "%s\nAccepted now: %.1f. After action — uncommitted metal %.1f value; weighed exchange %.1f; reserve %.1f (%.1f issue ceiling); supply %.1f; active household %.1f (%d%%); treasury %.1f; levy %.0f%%; trade %s.\nFiscal %s, %s priority: %.1f free above the 14-day buffer; %d%% total coverage; civil %d%% / military %d%%; %d%% tax compliance and %.1f%% effective levy.\n%s" % [
-		String(preview.get("reason","No forecast available.")),
-		float(preview.get("accepted",0.0)),
-		float(after.get("available_metal",0.0)),
-		float(after.get("circulating_metal",0.0)),
-		float(after.get("reserve",0.0)),
-		float(after.get("issue_ceiling",0.0)),
-		float(after.get("money_supply",0.0)),
-		float(after.get("transactional_money",0.0)),
-		roundi(float(after.get("transactional_share",0.0))*100.0),
-		float(after.get("treasury",0.0)),
-		float(after.get("tax_rate",0.0))*100.0,
-		String(after.get("trade_policy",GameState.external_trade_policy)).replace("_"," "),
-		String(fiscal_outlook.get("status","unmeasured")),
-		String(fiscal_outlook.get("spending_priority",GameState.public_spending_priority)).replace("_"," "),
-		float(fiscal_outlook.get("discretionary_headroom",0.0)),
-		roundi(float(fiscal_outlook.get("coverage_ratio",0.0))*100.0),
-		roundi(float(fiscal_outlook.get("civil_coverage",1.0))*100.0),
-		roundi(float(fiscal_outlook.get("military_coverage",1.0))*100.0),
-		roundi(float(fiscal_outlook.get("tax_compliance",0.0))*100.0),
-		float(fiscal_outlook.get("effective_tax_rate",0.0))*100.0,
-		String(preview.get("warning",""))
-	]
-
-func _effect_ripple_text(effects:Dictionary,realization:float=1.0)->String:
-	var names={"tool_quality":"tool quality","construction_rate":"construction","food_output":"food output","foraging_yield":"foraging","hunting_yield":"hunting","cultivation_yield":"cultivation","food_spoilage":"spoilage","food_storage":"food stores","nutrition_quality":"diet quality","soil_productivity":"soil fertility","health_protection":"health","water_safety":"water safety","disease_exposure":"disease exposure","maternal_safety":"maternal safety","neonatal_survival":"newborn survival","conception_support":"birth conditions","injury_risk":"injury risk","labor_efficiency":"labor efficiency","labor_demand":"labor burden","task_coordination":"coordination","haul_capacity":"carrying","route_speed":"travel","trade_capacity":"trade","state_capacity":"governance","legitimacy":"legitimacy","cohesion":"cohesion","warfare_readiness":"military power","security_efficiency":"security","knowledge_rate":"discovery","knowledge_preservation":"memory","observation_rate":"observation","adoption_rate":"spread of practice","ecology_recovery":"land recovery","ecological_pressure":"land pressure","pollution":"pollution","disaster_risk":"accident risk","mine_safety":"mine safety","craft_output":"workshops","housing_output":"housing","repair_capacity":"repair","standardization":"standards","fuel_efficiency":"fuel efficiency","metal_yield":"metal output","timber_yield":"timber output","stone_yield":"stone output"}
-	var ripples:Array[String]=[]
-	for effect_name in effects:
-		if not names.has(effect_name): continue
-		var amount:=float(effects[effect_name])*clampf(realization,0.0,1.0)
-		var percent:=absf(amount)*100.0
-		var percent_text:=("<0.1%" if percent<0.05 and percent>0.0 else ("%.1f%%" % percent if percent<9.95 else "%d%%" % roundi(percent)))
-		# The sign describes the actual quantity. The old good/bad triangle displayed a
-		# reduction in land pressure as an upward arrow, then rounded 0.18% to 0%, making
-		# a useful discovery look both backwards and inert.
-		var sign_text:="+" if amount>0.0 else ("−" if amount<0.0 else "±")
-		ripples.append("%s%s %s" % [sign_text,percent_text,String(names[effect_name])])
-		if ripples.size()>=4: break
-	return "  •  ".join(ripples) if not ripples.is_empty() else "Practical consequences are still being measured"
 
 func _make_provision_stat(parent: Container,label_text: String,value_text: String,accent: Color) -> void:
 	var card:=PanelContainer.new()
@@ -15902,20 +14656,6 @@ func _make_provision_stat(parent: Container,label_text: String,value_text: Strin
 	stack.add_child(value)
 
 
-func _make_provision_dashboard_column(parent:Container,title_text:String,note_text:String)->VBoxContainer:
-	var panel:=PanelContainer.new()
-	panel.custom_minimum_size=Vector2(280,0)
-	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#0e1718"),Color("#2f3b37"),1,3,10))
-	parent.add_child(panel)
-	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",5)
-	panel.add_child(column)
-	_add_provision_section_title(column,title_text,note_text)
-	return column
-
-
 func _add_compact_provision_text(parent:Container,title_text:String,body_text:String,color:Color)->Label:
 	var title:=Label.new()
 	title.text=title_text
@@ -15931,117 +14671,6 @@ func _add_compact_provision_text(parent:Container,title_text:String,body_text:St
 	parent.add_child(body)
 	return body
 
-
-func _provisions_source_summary(metrics:Dictionary)->String:
-	var lines:Array[String]=[]
-	for source_variant in (metrics.get("food_sources",[]) as Array):
-		var source:Dictionary=source_variant
-		lines.append("%s  +%.1f  •  %s" % [String(source.get("name","Source")).capitalize(),float(source.get("produced",0.0)),String(source.get("access","unknown"))])
-		if lines.size()>=4: break
-	return "\n".join(lines) if not lines.is_empty() else "No production report yet — advance the clock."
-
-
-func _provisions_consumer_summary(metrics:Dictionary,required:float)->String:
-	var demand:Dictionary=metrics.get("food_demand_breakdown",{})
-	var entries:Array[Array]=[
-		["Children",float(demand.get("children",0.0))],
-		["Adults",float(demand.get("adults",0.0))],
-		["Elders",float(demand.get("elders",0.0))],
-		["Physical work",float(demand.get("labor",0.0))],
-		["Pregnancy & infant care",float(demand.get("pregnancy",0.0))+float(demand.get("lactation",0.0))],
-		["Founding convoy",float(demand.get("travel",0.0))],
-		["Field armies",float(demand.get("army_field",metrics.get("army_provisions_required",0.0)))],
-		["Prisoners / occupied relief",float(demand.get("prisoner_custody",0.0))+float(demand.get("occupation_relief",0.0))],
-		["Cold-season need",float(demand.get("climate",0.0))]
-	]
-	var lines:Array[String]=[]
-	for entry in entries:
-		var amount:=float(entry[1])
-		if amount<=0.001 and String(entry[0]) not in ["Children","Adults","Elders"]: continue
-		lines.append("%s  %.1f  •  %d%%" % [String(entry[0]),amount,roundi(amount/maxf(0.01,required)*100.0)])
-	return "\n".join(lines)
-
-
-func _provisions_commitment_summary()->String:
-	var account:Dictionary=FoodSystem.food_account_snapshot(365)
-	var active:Array=account.get("active_mission_provisions",[])
-	if active.is_empty(): return "No prepaid scout, diplomat, army, or settlement-convoy provisions are currently away."
-	var lines:Array[String]=[]
-	for issue_variant in active:
-		var issue:Dictionary=issue_variant
-		var days_remaining:=maxi(0,int(issue.get("end_day",GameState.elapsed_days))-int(GameState.elapsed_days))
-		lines.append("%s  %.1f  •  %d people  •  %dd left" % [String(issue.get("label","Mission")).capitalize(),float(issue.get("amount",0.0)),maxi(0,int(issue.get("personnel",0))),days_remaining])
-		if lines.size()>=5: break
-	if active.size()>lines.size(): lines.append("+ %d more prepaid commitments" % (active.size()-lines.size()))
-	return "\n".join(lines)+"\nWithdrawn once at departure; not charged again daily."
-
-
-func _open_provisions_detail_overlay()->void:
-	if provisions_panel==null or not is_instance_valid(provisions_panel): return
-	if provisions_panel.find_child("ProvisionsDetailOverlay",true,false): return
-	var overlay:=Control.new()
-	overlay.name="ProvisionsDetailOverlay"
-	overlay.size=provisions_panel.size
-	overlay.mouse_filter=Control.MOUSE_FILTER_STOP
-	overlay.z_index=8
-	provisions_panel.add_child(overlay)
-	var dimmer:=ColorRect.new()
-	dimmer.size=overlay.size
-	dimmer.color=Color(0.003,0.007,0.008,0.94)
-	overlay.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(980.0,overlay.size.x-56.0),minf(610.0,overlay.size.y-44.0))
-	modal.position=(overlay.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0a1213"),Color("#7f7452"),1,4,16))
-	overlay.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",7)
-	modal.add_child(root)
-	var heading_row:=HBoxContainer.new()
-	root.add_child(heading_row)
-	var heading:=Label.new()
-	heading.text="PROVISION DETAILS & HISTORY"
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	heading.add_theme_font_size_override("font_size",21)
-	heading.add_theme_color_override("font_color",Color("#f0e4cd"))
-	heading_row.add_child(heading)
-	var close:=Button.new()
-	close.text="BACK TO DASHBOARD"
-	close.custom_minimum_size=Vector2(180,36)
-	close.pressed.connect(overlay.queue_free)
-	heading_row.add_child(close)
-	var scroll:=FIT_CONTENT_PANEL.new()
-	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
-	var details:=VBoxContainer.new()
-	details.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	details.add_theme_constant_override("separation",7)
-	scroll.add_child(details)
-	var metrics:=GameState.simulation_metrics
-	var required:=maxf(0.01,float(metrics.get("food_consumption",GameState.population_exact)))
-	_add_provision_section_title(details,"FOOD RESERVES BY KIND","Shelf life and current spoilage; perishables are consumed first.")
-	var stock_data:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
-	var spoilage_data:Dictionary=metrics.get("food_spoilage_by_type",{})
-	var stored_total:=maxf(0.01,float(GameState.resource_stockpiles.get("Food",0.0)))
-	for food_type in FoodSystemScript.FOOD_TYPES:
-		var amount:=float(stock_data.get(food_type,0.0))
-		_add_provision_bar(details,String(food_type).to_upper(),"%.1f rations  •  %.1f days  •  %.1f lost today" % [amount,amount/required,float(spoilage_data.get(food_type,0.0))],amount/stored_total,_food_color(String(food_type)))
-	details.add_child(HSeparator.new())
-	_add_provision_section_title(details,"30-DAY MOVEMENT","Daily net after meals and spoilage; departure issues are separately identified below.")
-	_add_food_trend_chart(details)
-	details.add_child(HSeparator.new())
-	_add_provision_section_title(details,"ACTIVE PREPAID MISSIONS","These rations left the reserve once at departure.")
-	_add_active_food_commitments(details,required)
-	details.add_child(HSeparator.new())
-	_add_provision_section_title(details,"RECENT WITHDRAWALS","Mission, convoy, diplomatic, military, tribute, and trade issues.")
-	var issue_history:Array=GameState.food_issue_history
-	if issue_history.is_empty():
-		_add_compact_provision_text(details,"NO WITHDRAWALS","No external food issue has been recorded yet.",Color("#777f7a"))
-	else:
-		var first_issue:=maxi(0,issue_history.size()-12)
-		for issue_index in range(issue_history.size()-1,first_issue-1,-1):
-			var issue:Dictionary=issue_history[issue_index]
-			_add_food_consumer_row(details,String(issue.get("label","External issue")),float(issue.get("amount",0.0)),required,"DAY %d  •  reserve %.1f → %.1f" % [int(issue.get("day",0))+1,float(issue.get("stock_before",0.0)),float(issue.get("stock_after",0.0))])
 
 func _add_provision_section_title(parent: Container,title_text: String,note_text: String) -> void:
 	var title:=Label.new()
@@ -16074,24 +14703,6 @@ func _add_modal_action_brief(parent:Container,brief:Dictionary,accent:Color)->La
 	return label
 
 
-func _provisions_decision_brief(metrics:Dictionary,water:Dictionary,issued_today:float=0.0)->Dictionary:
-	var intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.2)
-	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.2)
-	var stock_change:=float(metrics.get("food_net",0.0))-maxf(0.0,issued_today)
-	var forecast:Dictionary=metrics.get("food_forecast_90",{})
-	var shortage_day:=int(forecast.get("first_shortage_day",-1))
-	if water_intake<0.98:
-		return {"status":"DRINKING WATER SHORTFALL","why":"Collection met only %d%% of today’s need." % roundi(water_intake*100.0),"next":"Assign more water collection or secure a recognized river, spring, or stored supply."}
-	if intake<0.98:
-		return {"status":"FOOD INTAKE SHORTFALL","why":"People received only %d%% of today’s ration need." % roundi(intake*100.0),"next":"Raise food production, reduce external issues, or enact rationing before body reserves fail."}
-	if shortage_day>0:
-		return {"status":"SHORTAGE FORECAST IN %d DAYS" % shortage_day,"why":"Seasonal production and current use are projected to exhaust the food reserve.","next":"Increase supply or reduce demand now; the forecast worsens before the reserve reaches zero."}
-	if stock_change<-0.05:
-		var issue_note:=" including %.1f issued for missions or obligations" % issued_today if issued_today>0.0 else ""
-		return {"status":"FOOD RESERVE FELL TODAY","why":"The reserve fell by %.1f rations%s." % [absf(stock_change),issue_note],"next":"Check Today’s Supply and Mission Issues below to identify the largest draw."}
-	return {"status":"PROVISIONS STABLE","why":"Food and water needs are met and no shortage appears in the 90-day forecast.","next":"No immediate order is required; watch seasonal supply and mission departures."}
-
-
 func _material_constraint_brief(metrics:Dictionary,accessible_count:int,capacity:float,stored_bulk:float)->Dictionary:
 	var extracted:=float(metrics.get("extracted_today",0.0))
 	var waiting:=float(metrics.get("at_source",0.0))
@@ -16115,354 +14726,6 @@ func _material_constraint_brief(metrics:Dictionary,accessible_count:int,capacity
 	return {"status":"MATERIAL FLOW BALANCED","why":"No single extraction, transport, or storage constraint currently dominates.","next":"Set material priorities only when a construction or production need changes."}
 
 
-func _add_food_consumer_row(parent:Container,label_text:String,amount:float,daily_total:float,note_text:String="")->void:
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",8)
-	parent.add_child(row)
-	var identity:=Label.new()
-	identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	identity.text=label_text if note_text=="" else "%s  •  %s" % [label_text,note_text]
-	identity.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	identity.add_theme_font_size_override("font_size",11)
-	identity.add_theme_color_override("font_color",Color("#c7c3b6") if absf(amount)>0.0001 else Color("#686f6b"))
-	row.add_child(identity)
-	var value:=Label.new()
-	value.custom_minimum_size=Vector2(112,0)
-	value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	value.text="%+.1f  •  %d%%" % [amount,roundi(absf(amount)/maxf(0.01,daily_total)*100.0)] if amount<0.0 else "%.1f  •  %d%%" % [amount,roundi(amount/maxf(0.01,daily_total)*100.0)]
-	value.tooltip_text="Adult-equivalent rations • share of one current settlement day"
-	value.add_theme_font_size_override("font_size",11)
-	value.add_theme_color_override("font_color",Color("#c47662") if amount<0.0 else (Color("#d0b46f") if amount>0.0001 else Color("#686f6b")))
-	row.add_child(value)
-
-
-func _add_active_food_commitments(parent:Container,daily_total:float)->void:
-	# Read the same one-time issue ledger that removed the food. This includes
-	# scout rations, every envoy's travel provisions regardless of gift type,
-	# settlement convoys, and any later aggregate mission category without a
-	# second hand-maintained UI path.
-	var account:Dictionary=FoodSystem.food_account_snapshot(365)
-	var active:Array=account.get("active_mission_provisions",[])
-	for issue_variant in active:
-		var issue:Dictionary=issue_variant
-		var personnel:=maxi(0,int(issue.get("personnel",0)))
-		var end_day:=int(issue.get("end_day",GameState.elapsed_days))
-		var days_remaining:=maxi(0,end_day-int(GameState.elapsed_days))
-		var note_parts:Array[String]=[]
-		if personnel>0: note_parts.append("%s people" % _compact_population(personnel))
-		note_parts.append("%d days remain" % days_remaining)
-		note_parts.append("withdrawn once at departure")
-		_add_food_consumer_row(parent,String(issue.get("label","ACTIVE FOOD-BEARING MISSION")).to_upper(),float(issue.get("amount",0.0)),daily_total," • ".join(note_parts))
-	if active.is_empty():
-		var none:=Label.new()
-		none.text="No prepaid food-bearing mission is currently away."
-		none.add_theme_font_size_override("font_size",11)
-		none.add_theme_color_override("font_color",Color("#777f7a"))
-		parent.add_child(none)
-
-
-func _add_provision_bar(parent: Container,title_text: String,note_text: String,ratio: float,color: Color) -> void:
-	var row:=VBoxContainer.new()
-	row.add_theme_constant_override("separation",2)
-	parent.add_child(row)
-	var line:=Label.new()
-	line.text="%s\n%s" % [title_text,note_text]
-	line.add_theme_font_size_override("font_size",11)
-	line.add_theme_color_override("font_color",Color("#d3cdbf"))
-	row.add_child(line)
-	var bar:=ProgressBar.new()
-	bar.custom_minimum_size=Vector2(0,7)
-	bar.show_percentage=false
-	bar.value=clampf(ratio,0.0,1.0)*100.0
-	var background:=StyleBoxFlat.new()
-	background.bg_color=Color("#1b2525")
-	bar.add_theme_stylebox_override("background",background)
-	var fill:=StyleBoxFlat.new()
-	fill.bg_color=color
-	bar.add_theme_stylebox_override("fill",fill)
-	row.add_child(bar)
-
-func _add_food_trend_chart(parent: Container) -> void:
-	var chart:=Control.new()
-	chart.custom_minimum_size=Vector2(0,88)
-	parent.add_child(chart)
-	var history:Array=GameState.food_history
-	if history.size()<2:
-		var waiting:=Label.new()
-		waiting.text="Advance the clock to build a daily history."
-		waiting.position=Vector2(0,24)
-		waiting.add_theme_color_override("font_color",Color("#777f7a"))
-		chart.add_child(waiting)
-		return
-	var count:=mini(30,history.size())
-	var values:Array[float]=[]
-	var max_abs:=1.0
-	for index in range(history.size()-count,history.size()):
-		var history_entry:Dictionary=history[index]
-		var value:=float(history_entry.get("net",0.0))-FoodSystem.issued_on_day(int(history_entry.get("day",-1)))
-		values.append(value)
-		max_abs=maxf(max_abs,absf(value))
-	var zero:=ColorRect.new()
-	zero.position=Vector2(0,43)
-	zero.size=Vector2(330,1)
-	zero.color=Color("#4c5550")
-	chart.add_child(zero)
-	var line:=Line2D.new()
-	line.width=2.0
-	line.default_color=Color("#a9bc7b") if values[values.size()-1]>=0.0 else Color("#bd6d5d")
-	for i in values.size():
-		line.add_point(Vector2(float(i)/maxf(1.0,float(values.size()-1))*330.0,43.0-values[i]/max_abs*35.0))
-	chart.add_child(line)
-
-func _food_color(food_type: String) -> Color:
-	return {
-		"Fresh plants":Color("#7f9e67"),"Fresh meat":Color("#a75f54"),"Fish":Color("#648b98"),
-		"Dry staples":Color("#b79958"),"Preserved food":Color("#8f7661"),
-		"Fresh food":Color("#7f9e67"),"Stored food":Color("#b79958")
-	}.get(food_type,Color("#888888"))
-
-func _compact_food_number(value: float) -> String:
-	if value>=1000000.0: return "%.2f M" % (value/1000000.0)
-	if value>=1000.0: return "%.1f K" % (value/1000.0)
-	return "%.0f" % value
-
-func _open_knowledge_panel() -> void:
-	if knowledge_panel:
-		knowledge_panel.queue_free()
-	allocation_value_labels.clear()
-	knowledge_record_mode="discoveries" if not GameState.discovery_log.is_empty() else "active"
-	knowledge_record_category="all"
-	knowledge_record_page=0
-	knowledge_mode_buttons.clear()
-	knowledge_discovery_widgets.clear()
-	knowledge_panel = Control.new()
-	knowledge_panel.size = get_viewport().get_visible_rect().size
-	knowledge_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(knowledge_panel)
-	var dimmer := ColorRect.new()
-	dimmer.size = knowledge_panel.size
-	dimmer.color = Color(0.008,0.012,0.014,0.90)
-	knowledge_panel.add_child(dimmer)
-	var modal := PanelContainer.new()
-	modal.position = Vector2(24,20)
-	modal.size = knowledge_panel.size-Vector2(48,40)
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1215"),Color("#817353"),1,3,18))
-	knowledge_panel.add_child(modal)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,72)
-	header.add_theme_constant_override("separation",18)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	heading.add_theme_constant_override("separation",3)
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="CHOOSE BROAD PROBLEMS  •  PROJECTS RUN AUTOMATICALLY"
-	eyebrow.add_theme_font_size_override("font_size",11)
-	eyebrow.add_theme_color_override("font_color",Color("#b9a56c"))
-	heading.add_child(eyebrow)
-	var title := Label.new()
-	title.text = "RESEARCH PRIORITIES"
-	title.add_theme_font_size_override("font_size",26)
-	title.add_theme_color_override("font_color",Color("#f0e5cf"))
-	heading.add_child(title)
-	var subtitle := Label.new()
-	subtitle.text = "Use + and − to divide the aggregate research workforce. You choose the emphasis; evidence, place, prior findings, and chance determine the discovery."
-	subtitle.add_theme_font_size_override("font_size",13)
-	subtitle.add_theme_color_override("font_color",Color("#9fa7a2"))
-	heading.add_child(subtitle)
-	var header_stats:=HBoxContainer.new()
-	header_stats.alignment=BoxContainer.ALIGNMENT_END
-	header_stats.add_theme_constant_override("separation",8)
-	header.add_child(header_stats)
-	var assigned:=_research_allocation_total()
-	var program_summary:Dictionary=DiscoverySystem.research_program_summary()
-	var observers:=int(program_summary.get("researchers",0))
-	allocation_value_labels["__observers_stat"]=_make_knowledge_stat(header_stats,"RESEARCHERS",_knowledge_workforce_text(float(observers)),Color("#78a9b2"))
-	allocation_value_labels["__committed_stat"]=_make_knowledge_stat(header_stats,"ACTIVE LINES",str(int(program_summary.get("active_lines",0))),Color("#c8a862"))
-	allocation_value_labels["__established_stat"]=_make_knowledge_stat(header_stats,"KNOWLEDGE LINES",str(DiscoverySystem.established_knowledge_threads().size()),Color("#7fa47c"))
-	allocation_value_labels["__mind_stat"]=_make_knowledge_stat(header_stats,"RESEARCH SPEED","%.1f×" % float(program_summary.get("average_line_capacity",0.0)),Color("#9a82b8"))
-	root.add_child(HSeparator.new())
-	var body := HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",14)
-	root.add_child(body)
-	var directions_frame:=PanelContainer.new()
-	directions_frame.custom_minimum_size=Vector2(590,0)
-	directions_frame.add_theme_stylebox_override("panel",_knowledge_style(Color("#0e171a"),Color("#283539"),1,3,14))
-	body.add_child(directions_frame)
-	var directions_column:=VBoxContainer.new()
-	directions_column.add_theme_constant_override("separation",7)
-	directions_frame.add_child(directions_column)
-	var directions_title:=Label.new()
-	directions_title.text="SET RESEARCH PRIORITIES"
-	directions_title.add_theme_font_size_override("font_size",17)
-	directions_title.add_theme_color_override("font_color",Color("#e4dbc8"))
-	directions_column.add_child(directions_title)
-	research_total_label = Label.new()
-	research_total_label.add_theme_font_size_override("font_size",12)
-	research_total_label.add_theme_color_override("font_color",Color("#96a9ad"))
-	directions_column.add_child(research_total_label)
-	var attention_meter:=ProgressBar.new()
-	attention_meter.name="AttentionMeter"
-	attention_meter.max_value=48
-	attention_meter.value=int(program_summary.get("active_lines",0))
-	attention_meter.show_percentage=false
-	attention_meter.custom_minimum_size=Vector2(0,7)
-	attention_meter.add_theme_stylebox_override("background",_knowledge_style(Color("#182226"),Color.TRANSPARENT,0,3,0))
-	attention_meter.add_theme_stylebox_override("fill",_knowledge_style(Color("#b99c58"),Color.TRANSPARENT,0,3,0))
-	directions_column.add_child(attention_meter)
-	var direction_scroll:=FIT_CONTENT_PANEL.new()
-	direction_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	directions_column.add_child(direction_scroll)
-	var grid:=GridContainer.new()
-	grid.columns=3
-	grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation",8)
-	grid.add_theme_constant_override("v_separation",8)
-	direction_scroll.add_child(grid)
-	for dynamic_id in SOCIETY_DYNAMICS:
-		var accent:=_knowledge_direction_color(dynamic_id)
-		var card:=PanelContainer.new()
-		card.custom_minimum_size=Vector2(186,88)
-		card.tooltip_text=_dynamic_definition(dynamic_id)
-		card.add_theme_stylebox_override("panel",_knowledge_style(Color("#121c1f"),accent.darkened(0.38),1,3,9))
-		grid.add_child(card)
-		var card_content:=VBoxContainer.new()
-		card_content.add_theme_constant_override("separation",2)
-		card.add_child(card_content)
-		var card_header:=HBoxContainer.new()
-		card_header.add_theme_constant_override("separation",3)
-		card_content.add_child(card_header)
-		var icon_badge:=PanelContainer.new()
-		icon_badge.custom_minimum_size=Vector2(28,25)
-		icon_badge.add_theme_stylebox_override("panel",_knowledge_style(accent.darkened(0.52),accent,1,3,0))
-		card_header.add_child(icon_badge)
-		var icon:=Label.new()
-		icon.text=_knowledge_direction_icon(dynamic_id)
-		icon.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		icon.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-		icon.add_theme_font_size_override("font_size",11)
-		icon.add_theme_color_override("font_color",accent.lightened(0.25))
-		icon_badge.add_child(icon)
-		var name_label:=Label.new()
-		name_label.text=String(dynamic_id).to_upper()
-		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		name_label.add_theme_font_size_override("font_size",9)
-		name_label.add_theme_color_override("font_color",Color("#ddd8ca"))
-		card_header.add_child(name_label)
-		var value:=Label.new()
-		value.custom_minimum_size=Vector2(28,0)
-		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		value.add_theme_font_size_override("font_size",13)
-		value.add_theme_color_override("font_color",accent.lightened(0.28))
-		card_header.add_child(value)
-		var domain_minus:=Button.new()
-		domain_minus.text="−"
-		domain_minus.custom_minimum_size=Vector2(28,25)
-		domain_minus.tooltip_text="Reduce this broad research emphasis"
-		domain_minus.pressed.connect(_change_research_domain_allocation.bind(dynamic_id,-1))
-		card_header.add_child(domain_minus)
-		var domain_plus:=Button.new()
-		domain_plus.text="+"
-		domain_plus.custom_minimum_size=Vector2(28,25)
-		domain_plus.tooltip_text="Increase this broad research emphasis; programs allocate researchers automatically"
-		domain_plus.pressed.connect(_change_research_domain_allocation.bind(dynamic_id,1))
-		card_header.add_child(domain_plus)
-		var bar:=ProgressBar.new()
-		bar.max_value=maxi(1,assigned)
-		bar.show_percentage=false
-		bar.custom_minimum_size=Vector2(0,6)
-		bar.add_theme_stylebox_override("background",_knowledge_style(Color("#1a2528"),Color.TRANSPARENT,0,3,0))
-		bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,3,0))
-		card_content.add_child(bar)
-		var auto_summary:=Label.new()
-		auto_summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		auto_summary.max_lines_visible=1
-		auto_summary.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		auto_summary.add_theme_font_size_override("font_size",8)
-		auto_summary.add_theme_color_override("font_color",Color("#9aa5a0"))
-		card_content.add_child(auto_summary)
-		allocation_value_labels["dynamic::"+dynamic_id]={"value":value,"card":card,"accent":accent,"bar":bar,"auto_summary":auto_summary}
-		var subcategories:Dictionary=GameState.research_subcategory_allocations.get(dynamic_id,{})
-		auto_summary.tooltip_text="Programs automatically choose among: %s" % ", ".join(PackedStringArray(subcategories.keys()))
-	var reports_frame:=PanelContainer.new()
-	reports_frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	reports_frame.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d1518"),Color("#283539"),1,3,14))
-	body.add_child(reports_frame)
-	var reports := VBoxContainer.new()
-	reports.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	reports.add_theme_constant_override("separation",6)
-	reports_frame.add_child(reports)
-	var report_title := Label.new()
-	report_title.text = "RESEARCH LIBRARY"
-	report_title.add_theme_font_size_override("font_size",17)
-	report_title.add_theme_color_override("font_color",Color("#e4dbc8"))
-	reports.add_child(report_title)
-	var report_subtitle:=Label.new()
-	report_subtitle.text="Browse current work or proven discoveries. The list stays compact; open one record only when you want its evidence and full explanation."
-	report_subtitle.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	report_subtitle.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	report_subtitle.add_theme_font_size_override("font_size",11)
-	report_subtitle.add_theme_color_override("font_color",Color("#87938f"))
-	reports.add_child(report_subtitle)
-	var mode_row:=HBoxContainer.new()
-	mode_row.add_theme_constant_override("separation",6)
-	reports.add_child(mode_row)
-	var active_mode:=Button.new()
-	active_mode.custom_minimum_size=Vector2(150,32)
-	active_mode.pressed.connect(_set_knowledge_record_mode.bind("active"))
-	mode_row.add_child(active_mode)
-	knowledge_mode_buttons["active"]=active_mode
-	var discovery_mode:=Button.new()
-	discovery_mode.custom_minimum_size=Vector2(170,32)
-	discovery_mode.pressed.connect(_set_knowledge_record_mode.bind("discoveries"))
-	mode_row.add_child(discovery_mode)
-	knowledge_mode_buttons["discoveries"]=discovery_mode
-	var category_label:=Label.new()
-	category_label.text="FIELD"
-	category_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	category_label.add_theme_font_size_override("font_size",10)
-	category_label.add_theme_color_override("font_color",Color("#8d9893"))
-	mode_row.add_child(category_label)
-	knowledge_category_selector=OptionButton.new()
-	knowledge_category_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	knowledge_category_selector.custom_minimum_size=Vector2(180,32)
-	_populate_knowledge_category_selector()
-	knowledge_category_selector.item_selected.connect(_select_knowledge_record_category)
-	mode_row.add_child(knowledge_category_selector)
-	_update_knowledge_mode_buttons()
-	var report_scroll := FIT_CONTENT_PANEL.new()
-	report_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	reports.add_child(report_scroll)
-	knowledge_record_container=VBoxContainer.new()
-	knowledge_record_container.custom_minimum_size=Vector2(0,0)
-	knowledge_record_container.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	knowledge_record_container.add_theme_constant_override("separation",8)
-	report_scroll.add_child(knowledge_record_container)
-	knowledge_record_signature=""
-	_refresh_knowledge_record()
-	var footer := HBoxContainer.new()
-	footer.add_theme_constant_override("separation",12)
-	root.add_child(footer)
-	var footer_note:=Label.new()
-	footer_note.text="NO DISCOVERY MICROMANAGEMENT  •  Programs choose viable projects and continue on their own. Change only the broad priority weights when you want a different path."
-	footer_note.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	footer_note.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	footer_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	footer_note.add_theme_font_size_override("font_size",11)
-	footer_note.add_theme_color_override("font_color",Color("#8d948f"))
-	footer.add_child(footer_note)
-	var close := Button.new()
-	close.text = "BACK TO CIVILIZATION"
-	close.custom_minimum_size=Vector2(130,38)
-	close.pressed.connect(_back_to_civilization_from_research)
-	footer.add_child(close)
-	_refresh_research_allocations()
-
 func _knowledge_style(background: Color,border: Color,border_width: int,radius: int,padding: int) -> StyleBoxFlat:
 	var style:=StyleBoxFlat.new()
 	style.bg_color=background
@@ -16478,548 +14741,6 @@ func _knowledge_style(background: Color,border: Color,border_width: int,radius: 
 	style.set_content_margin_all(padding)
 	return style
 
-func _knowledge_direction_color(direction: String) -> Color:
-	return _dynamic_accent(direction.to_lower())
-
-func _knowledge_direction_icon(direction: String) -> String:
-	return {"demography":"DE","nutrition":"NU","health":"HE","labor":"LA","knowledge":"KN","production":"PR","infrastructure":"IN","logistics":"LO","ecology":"EC","institutions":"IS","security":"SE","culture":"CU"}.get(direction.to_lower(),"?")
-
-func _knowledge_consequence_text(direction: String) -> String:
-	return _dynamic_definition(direction.to_lower()).get_slice("\n",0)
-
-func _make_knowledge_stat(parent: Container,label_text: String,value_text: String,accent: Color) -> Label:
-	var panel:=PanelContainer.new()
-	panel.custom_minimum_size=Vector2(82,52)
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#111a1d"),accent.darkened(0.40),1,3,7))
-	parent.add_child(panel)
-	var content:=VBoxContainer.new()
-	content.add_theme_constant_override("separation",0)
-	panel.add_child(content)
-	var value:=Label.new()
-	value.text=value_text
-	value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	value.add_theme_font_size_override("font_size",20)
-	value.add_theme_color_override("font_color",accent.lightened(0.18))
-	content.add_child(value)
-	var label:=Label.new()
-	label.text=label_text
-	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size",9)
-	label.add_theme_color_override("font_color",Color("#929b97"))
-	content.add_child(label)
-	return value
-
-
-func _knowledge_horizon_phrase(estimated_days:int)->String:
-	## Discovery is chance and evidence, never a countdown. The UI speaks in
-	## pace bands; a precise day estimate both leaks the future and lies.
-	if estimated_days<90: return "RIPENING"
-	if estimated_days<365: return "SEASONS OF WORK"
-	if estimated_days<3650: return "YEARS OF WORK"
-	return "GENERATIONS OF WORK"
-
-func _knowledge_workforce_text(value:float)->String:
-	if value>=1_000_000_000.0: return "%.2fB" % (value/1_000_000_000.0)
-	if value>=1_000_000.0: return "%.2fM" % (value/1_000_000.0)
-	if value>=10_000.0: return "%.1fK" % (value/1_000.0)
-	if value>=100.0: return "%d" % roundi(value)
-	if value>=10.0: return "%.1f" % value
-	return "%.2f" % value if value<1.0 else "%.1f" % value
-
-func _knowledge_section_heading(title_text: String,count_text: String,accent: Color) -> Control:
-	var row:=HBoxContainer.new()
-	row.custom_minimum_size=Vector2(0,27)
-	var marker:=ColorRect.new()
-	marker.color=accent
-	marker.custom_minimum_size=Vector2(4,18)
-	row.add_child(marker)
-	var title:=Label.new()
-	title.text=title_text
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size",12)
-	title.add_theme_color_override("font_color",Color("#ddd6c8"))
-	row.add_child(title)
-	var count:=Label.new()
-	count.text=count_text
-	count.add_theme_font_size_override("font_size",12)
-	count.add_theme_color_override("font_color",accent.lightened(0.22))
-	row.add_child(count)
-	return row
-
-func _make_observation_card(parent: Container,investigation: Dictionary) -> void:
-	var investigation_id:=String(investigation.get("id",""))
-	var direction:=String(investigation.get("dynamic",investigation.get("direction","knowledge")))
-	var subcategory:=String(investigation.get("subcategory","Directed attention"))
-	var progress:=clampf(float(investigation.get("progress",0.0)),0.0,1.0)
-	var emphasis:=int(investigation.get("observer_allocation",0))
-	var research_workforce:=float(investigation.get("research_workforce",0.0))
-	var accent:=_knowledge_direction_color(direction)
-	var panel:=PanelContainer.new()
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#111b1e"),accent.darkened(0.50),1,3,10))
-	panel.tooltip_text="METHOD  •  %s\n\nON SUCCESS  •  %s" % [String(investigation.get("project_method","Observers compare repeated cases.")),String(investigation.get("unlock_summary","Unlocks a practical method."))]
-	parent.add_child(panel)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",10)
-	panel.add_child(row)
-	var signal_column:=VBoxContainer.new()
-	signal_column.custom_minimum_size=Vector2(46,0)
-	row.add_child(signal_column)
-	var glyph:=Label.new()
-	glyph.text=_knowledge_direction_icon(direction)
-	glyph.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	glyph.add_theme_font_size_override("font_size",16)
-	glyph.add_theme_color_override("font_color",accent.lightened(0.20))
-	signal_column.add_child(glyph)
-	var pulse:=ProgressBar.new()
-	pulse.max_value=1.0
-	pulse.value=progress
-	pulse.show_percentage=false
-	pulse.custom_minimum_size=Vector2(40,5)
-	pulse.add_theme_stylebox_override("background",_knowledge_style(Color("#1c282b"),Color.TRANSPARENT,0,2,0))
-	pulse.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,2,0))
-	signal_column.add_child(pulse)
-	var text_column:=VBoxContainer.new()
-	text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	row.add_child(text_column)
-	var meta:=Label.new()
-	meta.text="%s  /  %s  •  EVIDENCE %d%%  •  WEIGHT %d  •  ~%s RESEARCHERS" % [direction.to_upper(),subcategory.to_upper(),roundi(progress*100.0),emphasis,_knowledge_workforce_text(research_workforce)]
-	meta.clip_text=true
-	meta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	meta.add_theme_font_size_override("font_size",9)
-	meta.add_theme_color_override("font_color",accent.lightened(0.15))
-	text_column.add_child(meta)
-	knowledge_investigation_widgets[investigation_id]={"progress":pulse,"meta":meta}
-	var question:=Label.new()
-	question.text=String(investigation.get("name","Unresolved question")).to_upper()
-	question.clip_text=true
-	question.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	question.add_theme_font_size_override("font_size",13)
-	question.add_theme_color_override("font_color",Color("#eee3cd"))
-	text_column.add_child(question)
-	var goal:=Label.new()
-	goal.text="QUESTION  •  "+String(investigation.get("project_goal","What practical result can repeated evidence establish?"))
-	goal.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	goal.add_theme_font_size_override("font_size",11)
-	goal.add_theme_color_override("font_color",Color("#d8d5ca"))
-	text_column.add_child(goal)
-	var unlock:=Label.new()
-	unlock.text="IF PROVEN  •  "+String(investigation.get("unlock_summary","A concrete practice is not known until the evidence holds."))
-	unlock.clip_text=true
-	unlock.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	unlock.add_theme_font_size_override("font_size",10)
-	unlock.add_theme_color_override("font_color",accent.lightened(0.22))
-	text_column.add_child(unlock)
-	var controls:=HBoxContainer.new()
-	controls.add_theme_constant_override("separation",6)
-	text_column.add_child(controls)
-	var bottleneck:=Label.new()
-	bottleneck.text="WAITING ON  •  %s  •  %s" % [String(investigation.get("bottleneck","EVIDENCE")),_knowledge_horizon_phrase(maxi(1,int(investigation.get("estimated_days",1))))]
-	bottleneck.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	bottleneck.clip_text=true
-	bottleneck.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	bottleneck.add_theme_font_size_override("font_size",9)
-	bottleneck.add_theme_color_override("font_color",Color("#c4ad79"))
-	controls.add_child(bottleneck)
-	var details:=Button.new()
-	details.text="DETAILS"
-	details.custom_minimum_size=Vector2(68,24)
-	details.add_theme_font_size_override("font_size",9)
-	details.tooltip_text="Open the question, method, likely result, current limit, and horizon."
-	details.pressed.connect(_open_knowledge_investigation_detail.bind(investigation))
-	controls.add_child(details)
-	var less:=Button.new()
-	less.text="− 1"
-	less.disabled=emphasis<=0
-	less.custom_minimum_size=Vector2(48,24)
-	less.add_theme_font_size_override("font_size",9)
-	less.tooltip_text="Reduce this line's priority weight. At zero, it pauses but keeps its validation progress."
-	less.pressed.connect(_change_research_allocation.bind(direction,subcategory,-1))
-	controls.add_child(less)
-	var more:=Button.new()
-	more.text="+ 1"
-	more.custom_minimum_size=Vector2(48,24)
-	more.add_theme_font_size_override("font_size",9)
-	more.tooltip_text="Increase this line's priority weight and its share of the civilization's aggregate research workforce."
-	more.pressed.connect(_change_research_allocation.bind(direction,subcategory,1))
-	controls.add_child(more)
-
-func _open_knowledge_investigation_detail(investigation:Dictionary)->void:
-	if knowledge_panel==null or not is_instance_valid(knowledge_panel): return
-	var existing:=knowledge_panel.find_child("InvestigationDetailOverlay",false,false)
-	if existing: existing.queue_free()
-	var overlay:=Control.new()
-	overlay.name="InvestigationDetailOverlay"
-	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	overlay.mouse_filter=Control.MOUSE_FILTER_STOP
-	knowledge_panel.add_child(overlay)
-	var dimmer:=ColorRect.new()
-	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dimmer.color=Color(0.004,0.007,0.009,0.78)
-	dimmer.mouse_filter=Control.MOUSE_FILTER_STOP
-	overlay.add_child(dimmer)
-	var direction:=String(investigation.get("dynamic",investigation.get("direction","knowledge")))
-	var accent:=_knowledge_direction_color(direction)
-	var view_size:=get_viewport().get_visible_rect().size
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(760.0,view_size.x-120.0),minf(520.0,view_size.y-90.0))
-	modal.position=(view_size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d1518"),accent.darkened(0.18),1,4,20))
-	overlay.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",9)
-	modal.add_child(root)
-	var heading_row:=HBoxContainer.new()
-	root.add_child(heading_row)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	heading_row.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="%s  /  %s" % [direction.to_upper(),String(investigation.get("subcategory","Directed attention")).to_upper()]
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",accent.lightened(0.18))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text=String(investigation.get("name","Unresolved question")).to_upper()
-	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override("font_size",21)
-	title.add_theme_color_override("font_color",Color("#efe3cc"))
-	heading.add_child(title)
-	var close_x:=Button.new()
-	close_x.text="×"
-	close_x.custom_minimum_size=Vector2(38,34)
-	close_x.pressed.connect(overlay.queue_free)
-	heading_row.add_child(close_x)
-	root.add_child(HSeparator.new())
-	_add_knowledge_detail_section(root,"QUESTION",String(investigation.get("project_goal","What practical result can repeated evidence establish?")),Color("#d8d5ca"))
-	_add_knowledge_detail_section(root,"HOW THEY ARE TESTING IT",String(investigation.get("project_method","Observers compare repeated cases.")),Color("#aeb8b3"))
-	_add_knowledge_detail_section(root,"WHAT THIS LINE MAY YIELD",String(investigation.get("unlock_summary","A concrete practice is not known until the evidence holds.")),accent.lightened(0.22))
-	var progress:=clampf(float(investigation.get("progress",0.0)),0.0,1.0)
-	var emphasis:=int(investigation.get("observer_allocation",0))
-	var research_workforce:=float(investigation.get("research_workforce",0.0))
-	var status:=Label.new()
-	status.text="EVIDENCE %d%%  •  WEIGHT %d  •  ~%s RESEARCHERS  •  %.1f× SPEED  •  WAITING ON %s  •  %s" % [roundi(progress*100.0),emphasis,_knowledge_workforce_text(research_workforce),float(investigation.get("research_capacity_multiplier",0.0)),String(investigation.get("bottleneck","EVIDENCE")),_knowledge_horizon_phrase(maxi(1,int(investigation.get("estimated_days",1))))]
-	status.add_theme_font_size_override("font_size",11)
-	status.add_theme_color_override("font_color",Color("#c4ad79"))
-	root.add_child(status)
-	var progress_bar:=ProgressBar.new()
-	progress_bar.max_value=1.0
-	progress_bar.value=progress
-	progress_bar.show_percentage=false
-	progress_bar.custom_minimum_size=Vector2(0,9)
-	progress_bar.add_theme_stylebox_override("background",_knowledge_style(Color("#1b272a"),Color.TRANSPARENT,0,4,0))
-	progress_bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,4,0))
-	root.add_child(progress_bar)
-	var autonomy_note:=Label.new()
-	autonomy_note.text="This project advances automatically. Population and support set its research scale; your priority weight determines its share of that capacity."
-	autonomy_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	autonomy_note.add_theme_font_size_override("font_size",11)
-	autonomy_note.add_theme_color_override("font_color",Color("#87938f"))
-	root.add_child(autonomy_note)
-	var close:=Button.new()
-	close.text="RETURN TO THE PROGRAM"
-	close.custom_minimum_size=Vector2(210,36)
-	close.size_flags_horizontal=Control.SIZE_SHRINK_END
-	close.pressed.connect(overlay.queue_free)
-	root.add_child(close)
-
-func _add_knowledge_detail_section(parent:Container,heading_text:String,body_text:String,color:Color)->void:
-	var heading:=Label.new()
-	heading.text=heading_text
-	heading.add_theme_font_size_override("font_size",10)
-	heading.add_theme_color_override("font_color",Color("#b9a56c"))
-	parent.add_child(heading)
-	var body:=Label.new()
-	body.text=body_text
-	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	body.add_theme_font_size_override("font_size",12)
-	body.add_theme_color_override("font_color",color)
-	parent.add_child(body)
-
-
-func _knowledge_record_direction(record:Dictionary)->String:
-	return String(record.get("dynamic",record.get("direction","knowledge"))).to_lower()
-
-
-func _knowledge_records_for_mode(mode:String,category:String)->Array[Dictionary]:
-	var source:Array=DiscoverySystem.active_investigation_records() if mode=="active" else DiscoverySystem.established_knowledge_threads()
-	var records:Array[Dictionary]=[]
-	for record_variant in source:
-		if not record_variant is Dictionary: continue
-		var record:Dictionary=record_variant
-		if category!="all" and _knowledge_record_direction(record)!=category: continue
-		records.append(record)
-	return records
-
-
-func _populate_knowledge_category_selector()->void:
-	if knowledge_category_selector==null or not is_instance_valid(knowledge_category_selector): return
-	knowledge_category_selector.clear()
-	var source:Array=DiscoverySystem.active_investigation_records() if knowledge_record_mode=="active" else DiscoverySystem.established_knowledge_threads()
-	var counts:Dictionary={}
-	for record_variant in source:
-		if not record_variant is Dictionary: continue
-		var direction:=_knowledge_record_direction(record_variant)
-		counts[direction]=int(counts.get(direction,0))+1
-	knowledge_category_selector.add_item("ALL FIELDS  •  %d" % source.size())
-	knowledge_category_selector.set_item_metadata(0,"all")
-	var selected_index:=0
-	for dynamic_id in SOCIETY_DYNAMICS:
-		var count:=int(counts.get(dynamic_id,0))
-		if count<=0: continue
-		var index:=knowledge_category_selector.item_count
-		knowledge_category_selector.add_item("%s  %s  •  %d" % [_knowledge_direction_icon(dynamic_id),String(dynamic_id).to_upper(),count])
-		knowledge_category_selector.set_item_metadata(index,dynamic_id)
-		if knowledge_record_category==dynamic_id: selected_index=index
-	if knowledge_record_category!="all" and selected_index==0: knowledge_record_category="all"
-	knowledge_category_selector.select(selected_index)
-
-
-func _update_knowledge_mode_buttons()->void:
-	if knowledge_mode_buttons.has("active") and is_instance_valid(knowledge_mode_buttons.active):
-		(knowledge_mode_buttons.active as Button).text=("●  " if knowledge_record_mode=="active" else "")+"ACTIVE  •  %d" % DiscoverySystem.active_investigation_records().size()
-	if knowledge_mode_buttons.has("discoveries") and is_instance_valid(knowledge_mode_buttons.discoveries):
-		(knowledge_mode_buttons.discoveries as Button).text=("●  " if knowledge_record_mode=="discoveries" else "")+"KNOWLEDGE  •  %d LINES" % DiscoverySystem.established_knowledge_threads().size()
-
-
-func _set_knowledge_record_mode(mode:String)->void:
-	if mode not in ["active","discoveries"]: return
-	knowledge_record_mode=mode
-	knowledge_record_category="all"
-	knowledge_record_page=0
-	knowledge_record_signature=""
-	_update_knowledge_mode_buttons()
-	_populate_knowledge_category_selector()
-	_refresh_knowledge_record()
-
-
-func _select_knowledge_record_category(index:int)->void:
-	if knowledge_category_selector==null or index<0 or index>=knowledge_category_selector.item_count: return
-	knowledge_record_category=String(knowledge_category_selector.get_item_metadata(index))
-	knowledge_record_page=0
-	knowledge_record_signature=""
-	_refresh_knowledge_record()
-
-
-func _change_knowledge_record_page(delta:int)->void:
-	var count:=_knowledge_records_for_mode(knowledge_record_mode,knowledge_record_category).size()
-	var max_page:=maxi(0,ceili(float(count)/float(KNOWLEDGE_RECORD_PAGE_SIZE))-1)
-	knowledge_record_page=clampi(knowledge_record_page+delta,0,max_page)
-	knowledge_record_signature=""
-	_refresh_knowledge_record()
-
-
-func _add_knowledge_record_pager(parent:Container,total:int)->void:
-	if total<=KNOWLEDGE_RECORD_PAGE_SIZE: return
-	var max_page:=maxi(0,ceili(float(total)/float(KNOWLEDGE_RECORD_PAGE_SIZE))-1)
-	knowledge_record_page=clampi(knowledge_record_page,0,max_page)
-	var start:=knowledge_record_page*KNOWLEDGE_RECORD_PAGE_SIZE
-	var finish:=mini(total,start+KNOWLEDGE_RECORD_PAGE_SIZE)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",8)
-	parent.add_child(row)
-	var status:=Label.new()
-	status.text="SHOWING %d–%d OF %d  •  PAGE %d/%d" % [start+1,finish,total,knowledge_record_page+1,max_page+1]
-	status.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	status.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	status.add_theme_font_size_override("font_size",10)
-	status.add_theme_color_override("font_color",Color("#8e9994"))
-	row.add_child(status)
-	var previous:=Button.new(); previous.text="PREVIOUS"; previous.disabled=knowledge_record_page<=0; previous.pressed.connect(_change_knowledge_record_page.bind(-1)); row.add_child(previous)
-	var next:=Button.new(); next.text="NEXT"; next.disabled=knowledge_record_page>=max_page; next.pressed.connect(_change_knowledge_record_page.bind(1)); row.add_child(next)
-
-func _refresh_knowledge_record()->void:
-	if knowledge_record_container==null or not is_instance_valid(knowledge_record_container): return
-	var active_investigations:=DiscoverySystem.active_investigation_records()
-	var active_ids:Array[String]=[]
-	for investigation in active_investigations: active_ids.append(String(investigation.get("id","")))
-	var filtered_records:=_knowledge_records_for_mode(knowledge_record_mode,knowledge_record_category)
-	var max_page:=maxi(0,ceili(float(filtered_records.size())/float(KNOWLEDGE_RECORD_PAGE_SIZE))-1)
-	knowledge_record_page=clampi(knowledge_record_page,0,max_page)
-	var signature:="%s|%d|%s|%s|%s|%d|%d" % [",".join(active_ids),GameState.discovery_log.size(),JSON.stringify(GameState.research_subcategory_allocations),knowledge_record_mode,knowledge_record_category,knowledge_record_page,filtered_records.size()]
-	if signature!=knowledge_record_signature:
-		knowledge_record_signature=signature
-		# Keep the compact navigation truthful while research continues behind an
-		# open report. This updates counts and available fields without rebuilding
-		# the surrounding modal or disturbing the player's selected mode.
-		_update_knowledge_mode_buttons()
-		_populate_knowledge_category_selector()
-		knowledge_investigation_widgets.clear()
-		knowledge_discovery_widgets.clear()
-		for child in knowledge_record_container.get_children():
-			knowledge_record_container.remove_child(child)
-			child.queue_free()
-		var heading_text:="ACTIVE PROJECTS" if knowledge_record_mode=="active" else "PROVEN DISCOVERIES"
-		var heading_color:=Color("#77a6ae") if knowledge_record_mode=="active" else Color("#c2a45e")
-		knowledge_record_container.add_child(_knowledge_section_heading(heading_text,str(filtered_records.size()),heading_color))
-		if filtered_records.is_empty():
-			var empty_text:="No active project matches this field. Set a broad priority or choose ALL FIELDS; viable programs begin and continue automatically." if knowledge_record_mode=="active" else "No proven discovery matches this field yet. Research continues from broad priorities; completed concrete findings appear here automatically."
-			_make_knowledge_empty_state(knowledge_record_container,empty_text)
-		else:
-			var start:=knowledge_record_page*KNOWLEDGE_RECORD_PAGE_SIZE
-			var finish:=mini(filtered_records.size(),start+KNOWLEDGE_RECORD_PAGE_SIZE)
-			for record_index in range(start,finish):
-				if knowledge_record_mode=="active": _make_observation_card(knowledge_record_container,filtered_records[record_index])
-				else: _make_discovery_card(knowledge_record_container,filtered_records[record_index])
-			_add_knowledge_record_pager(knowledge_record_container,filtered_records.size())
-	else:
-		if knowledge_record_mode=="active":
-			for investigation in active_investigations:
-				var id:=String(investigation.get("id",""))
-				if not knowledge_investigation_widgets.has(id): continue
-				var progress:=clampf(float(investigation.get("progress",0.0)),0.0,1.0)
-				var widgets:Dictionary=knowledge_investigation_widgets[id]
-				(widgets.progress as ProgressBar).value=progress
-				var emphasis:=int(investigation.get("observer_allocation",0))
-				var research_workforce:=float(investigation.get("research_workforce",0.0))
-				(widgets.meta as Label).text="%s  /  %s  •  EVIDENCE %d%%  •  WEIGHT %d  •  ~%s RESEARCHERS" % [String(investigation.get("dynamic",investigation.get("direction","knowledge"))).to_upper(),String(investigation.get("subcategory","Directed attention")).to_upper(),roundi(progress*100.0),emphasis,_knowledge_workforce_text(research_workforce)]
-		else:
-			for event in filtered_records:
-				var id:=String(event.get("id",""))
-				if not knowledge_discovery_widgets.has(id): continue
-				var adoption:=DiscoverySystem.adoption(id)
-				var widgets:Dictionary=knowledge_discovery_widgets[id]
-				(widgets.adoption as Label).text="ADOPTION %d%%" % roundi(adoption*100.0)
-				(widgets.bar as ProgressBar).value=adoption
-				(widgets.effect as Label).text=_compact_discovery_effect_text(event,adoption)
-
-func _make_discovery_card(parent: Container,event: Dictionary) -> void:
-	var direction:=String(event.get("dynamic",event.get("direction","knowledge")))
-	var accent:=_knowledge_direction_color(direction)
-	var card:=PanelContainer.new()
-	card.custom_minimum_size=Vector2(0,78)
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#141d20"),accent.darkened(0.42),1,3,9))
-	parent.add_child(card)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",10)
-	card.add_child(row)
-	var dot:=PanelContainer.new()
-	dot.custom_minimum_size=Vector2(36,36)
-	dot.add_theme_stylebox_override("panel",_knowledge_style(accent.darkened(0.48),accent,1,18,0))
-	row.add_child(dot)
-	var icon:=Label.new()
-	icon.text=_knowledge_direction_icon(direction)
-	icon.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	icon.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	icon.add_theme_font_size_override("font_size",10)
-	icon.add_theme_color_override("font_color",accent.lightened(0.28))
-	dot.add_child(icon)
-	var content:=VBoxContainer.new()
-	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation",2)
-	row.add_child(content)
-	var meta:=Label.new()
-	var event_day:=int(event.get("day",0))+1
-	var year:=event_day/365+1
-	var day_of_year:=(event_day-1)%365+1
-	var breakthrough_count:=maxi(1,int(event.get("breakthrough_count",1)))
-	meta.text="%s  /  %s  •  %d BREAKTHROUGH%s  •  LATEST YEAR %d, DAY %d" % [direction.to_upper(),String(event.get("subcategory","Established practice")).to_upper(),breakthrough_count,"" if breakthrough_count==1 else "S",year,day_of_year]
-	meta.add_theme_font_size_override("font_size",9)
-	meta.add_theme_color_override("font_color",accent.lightened(0.18))
-	content.add_child(meta)
-	var name:=Label.new()
-	name.text=String(event.get("name","Unnamed discovery")).to_upper()
-	name.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	name.add_theme_font_size_override("font_size",14)
-	name.add_theme_color_override("font_color",Color("#eee3cd"))
-	content.add_child(name)
-	var discovery_id:=String(event.get("id",""))
-	var adoption:=DiscoverySystem.adoption(discovery_id)
-	var consequence:=Label.new()
-	consequence.text=_compact_discovery_effect_text(event,adoption)
-	consequence.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	consequence.add_theme_font_size_override("font_size",10)
-	consequence.add_theme_color_override("font_color",Color("#aeb7b1"))
-	content.add_child(consequence)
-	var status:=VBoxContainer.new()
-	status.custom_minimum_size=Vector2(118,0)
-	status.add_theme_constant_override("separation",4)
-	row.add_child(status)
-	var adoption_label:=Label.new()
-	adoption_label.text="ADOPTION %d%%" % roundi(adoption*100.0)
-	adoption_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	adoption_label.add_theme_font_size_override("font_size",9)
-	adoption_label.add_theme_color_override("font_color",accent.lightened(0.18))
-	status.add_child(adoption_label)
-	var adoption_bar:=ProgressBar.new()
-	adoption_bar.max_value=1.0
-	adoption_bar.value=adoption
-	adoption_bar.show_percentage=false
-	adoption_bar.custom_minimum_size=Vector2(0,6)
-	adoption_bar.add_theme_stylebox_override("background",_knowledge_style(Color("#202a2c"),Color.TRANSPARENT,0,3,0))
-	adoption_bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,3,0))
-	status.add_child(adoption_bar)
-	var details:=Button.new()
-	details.text="DETAILS"
-	details.custom_minimum_size=Vector2(92,28)
-	details.tooltip_text="Open the evidence, mechanism, and social consequence for this discovery."
-	details.pressed.connect(_open_discovery_detail.bind(event.duplicate(true)))
-	status.add_child(details)
-	if discovery_id!="": knowledge_discovery_widgets[discovery_id]={"adoption":adoption_label,"bar":adoption_bar,"effect":consequence}
-
-
-func _compact_discovery_effect_text(event:Dictionary,adoption:float)->String:
-	var discovery_id:=String(event.get("id",""))
-	var effects:Dictionary=event.get("effects",{})
-	if effects.is_empty() and discovery_id!="": effects=DiscoverySystem.discovery_definition(discovery_id).get("effects",{})
-	if effects.is_empty(): return "RECORDED PRACTICE  •  NO DIRECT CAPACITY MODIFIER"
-	return "NOW  •  %s" % _effect_ripple_text(effects,adoption).to_upper()
-
-
-func _open_discovery_detail(event:Dictionary)->void:
-	if knowledge_panel==null or not is_instance_valid(knowledge_panel): return
-	var direction:=_knowledge_record_direction(event)
-	var accent:=_knowledge_direction_color(direction)
-	var overlay:=Control.new()
-	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	overlay.mouse_filter=Control.MOUSE_FILTER_STOP
-	overlay.z_index=12
-	knowledge_panel.add_child(overlay)
-	var dimmer:=ColorRect.new(); dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); dimmer.color=Color(0.003,0.008,0.010,0.88); dimmer.mouse_filter=Control.MOUSE_FILTER_STOP; overlay.add_child(dimmer)
-	var view_size:=get_viewport().get_visible_rect().size
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(850.0,view_size.x-100.0),minf(650.0,view_size.y-80.0))
-	modal.position=(view_size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d1518"),accent.darkened(0.18),1,4,20))
-	overlay.add_child(modal)
-	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",8); modal.add_child(root)
-	var heading_row:=HBoxContainer.new(); root.add_child(heading_row)
-	var heading:=VBoxContainer.new(); heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL; heading_row.add_child(heading)
-	var eyebrow:=Label.new(); eyebrow.text="%s  /  %s" % [direction.to_upper(),String(event.get("subcategory","ESTABLISHED PRACTICE")).to_upper()]; eyebrow.add_theme_font_size_override("font_size",10); eyebrow.add_theme_color_override("font_color",accent.lightened(0.18)); heading.add_child(eyebrow)
-	var title:=Label.new(); title.text=String(event.get("name","UNNAMED DISCOVERY")).to_upper(); title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; title.add_theme_font_size_override("font_size",21); title.add_theme_color_override("font_color",Color("#efe3cc")); heading.add_child(title)
-	var close_x:=Button.new(); close_x.text="×"; close_x.custom_minimum_size=Vector2(38,34); close_x.pressed.connect(overlay.queue_free); heading_row.add_child(close_x)
-	root.add_child(HSeparator.new())
-	var discovery_id:=String(event.get("id",""))
-	var definition:Dictionary=DiscoverySystem.discovery_definition(discovery_id) if discovery_id!="" else {}
-	var adoption:=DiscoverySystem.adoption(discovery_id)
-	_add_knowledge_detail_section(root,"WHAT IT CHANGES NOW",_compact_discovery_effect_text(event,adoption).trim_prefix("NOW  •  "),accent.lightened(0.22))
-	_add_knowledge_detail_section(root,"WHAT WAS DISCOVERED",String(event.get("causal_mechanism",definition.get("causal_mechanism",event.get("description",definition.get("observation","A repeatable practical relationship was established."))))),Color("#d8d5ca"))
-	var evidence:=String(event.get("evidence_method",definition.get("evidence_method","Repeated observations established the result."))).strip_edges()
-	if evidence!="": _add_knowledge_detail_section(root,"HOW THEY KNOW",evidence,Color("#aeb8b3"))
-	var ability:=String(event.get("ability_reason",definition.get("ability_reason",event.get("operating_capability",definition.get("operating_capability",""))))).strip_edges()
-	if ability!="": _add_knowledge_detail_section(root,"WHY THIS IMPROVES CAPABILITY",ability,Color("#bdc4bb"))
-	var social:=String(event.get("social_consequence",definition.get("social_consequence",""))).strip_edges()
-	if social!="": _add_knowledge_detail_section(root,"SOCIAL CONSEQUENCE",social,Color("#bba77d"))
-	var adoption_row:=HBoxContainer.new(); adoption_row.add_theme_constant_override("separation",10); root.add_child(adoption_row)
-	var adoption_text:=Label.new(); adoption_text.text="ADOPTION  %d%%" % roundi(adoption*100.0); adoption_text.custom_minimum_size=Vector2(120,0); adoption_text.add_theme_color_override("font_color",accent.lightened(0.20)); adoption_row.add_child(adoption_text)
-	var adoption_bar:=ProgressBar.new(); adoption_bar.max_value=1.0; adoption_bar.value=adoption; adoption_bar.show_percentage=false; adoption_bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL; adoption_bar.custom_minimum_size=Vector2(0,8); adoption_bar.add_theme_stylebox_override("background",_knowledge_style(Color("#202a2c"),Color.TRANSPARENT,0,3,0)); adoption_bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,3,0)); adoption_row.add_child(adoption_bar)
-	var close:=Button.new(); close.text="BACK TO LIBRARY"; close.custom_minimum_size=Vector2(170,36); close.size_flags_horizontal=Control.SIZE_SHRINK_END; close.pressed.connect(overlay.queue_free); root.add_child(close)
-
-
-func _discovery_cause_summary(event:Dictionary)->String:
-	var discovery_id:=String(event.get("id",""))
-	var definition:Dictionary=DiscoverySystem.discovery_definition(discovery_id) if discovery_id!="" else {}
-	var mechanism:=String(event.get("causal_mechanism",definition.get("causal_mechanism",""))).strip_edges()
-	var evidence:=String(event.get("evidence_method",definition.get("evidence_method",""))).strip_edges()
-	var capability:=String(event.get("operating_capability",definition.get("operating_capability",""))).strip_edges()
-	var ability_reason:=String(event.get("ability_reason",definition.get("ability_reason",""))).strip_edges()
-	var social_consequence:=String(event.get("social_consequence",definition.get("social_consequence",""))).strip_edges()
-	if mechanism=="": mechanism=String(event.get("description",definition.get("observation","A repeatable practical relationship was established."))).strip_edges()
-	var lines:Array[String]=["FOUND  •  %s" % mechanism]
-	if evidence!="": lines.append("EVIDENCE  •  %s" % evidence)
-	if ability_reason!="": lines.append("WHY CAPACITY CHANGED  •  %s" % ability_reason)
-	elif capability!="": lines.append("NEW CAPABILITY  •  %s" % capability)
-	if social_consequence!="": lines.append("SOCIAL EFFECT  •  %s" % social_consequence)
-	return "\n".join(lines)
 
 func _make_knowledge_empty_state(parent: Container,message: String) -> void:
 	var panel:=PanelContainer.new()
@@ -17032,351 +14753,22 @@ func _make_knowledge_empty_state(parent: Container,message: String) -> void:
 	label.add_theme_color_override("font_color",Color("#8d9793"))
 	panel.add_child(label)
 
-func _direction_for_observation(observation: String) -> String:
-	for event in GameState.discovery_log:
-		if String(event.get("description",""))==observation:
-			return String(event.get("direction","Information"))
-	var lower:=observation.to_lower()
-	if "plant" in lower or "animal" in lower or "soil" in lower: return "Nature"
-	if "stone" in lower or "fiber" in lower or "container" in lower: return "Materials"
-	if "wound" in lower or "illness" in lower or "water" in lower: return "Health"
-	if "work" in lower or "founder" in lower: return "Society"
-	return "Information"
-
-func _research_allocation_total() -> int:
-	var total:=0
-	for dynamic_id in GameState.research_subcategory_allocations:
-		for value in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary).values(): total+=int(value)
-	return total
 
 func _change_research_domain_allocation(dynamic_id:String,change:int)->void:
 	PeopleDirection.auto_research=false
 	var current:=maxi(0,int(GameState.research_allocations.get(dynamic_id,0)))
 	DiscoverySystem.set_domain_research_priority(dynamic_id,current+change)
 	_refresh_research_allocations()
-	_refresh_knowledge_record()
 	if hud: hud.request_immediate_dock_refresh()
 
-func _change_research_allocation(dynamic_id:String,subcategory:String,change:int)->void:
-	PeopleDirection.auto_research=false
-	# Legacy save/test adapter. The playable UI exposes only macro domains; changing a
-	# domain immediately lets the automatic program redistribute its researchers.
-	var subcategories:Dictionary=GameState.research_subcategory_allocations.get(dynamic_id,{})
-	var current:=int(subcategories.get(subcategory,0))
-	subcategories[subcategory]=maxi(0,current+change)
-	GameState.research_subcategory_allocations[dynamic_id]=subcategories
-	var dynamic_total:=0
-	for value in subcategories.values(): dynamic_total+=int(value)
-	GameState.research_allocations[dynamic_id]=dynamic_total
-	DiscoverySystem.refresh_investigations()
-	_refresh_research_allocations()
-	_refresh_knowledge_record()
-	if hud: hud.request_immediate_dock_refresh()
 
 func _refresh_research_allocations() -> void:
-	var total:=_research_allocation_total()
-	var program_summary:Dictionary=DiscoverySystem.research_program_summary()
-	var observers:=int(program_summary.get("researchers",0))
-	if allocation_value_labels.has("__observers_stat"):
-		(allocation_value_labels["__observers_stat"] as Label).text=_knowledge_workforce_text(float(observers))
-	if allocation_value_labels.has("__committed_stat"):
-		(allocation_value_labels["__committed_stat"] as Label).text=str(int(program_summary.get("active_lines",0)))
-	if allocation_value_labels.has("__established_stat"):
-		(allocation_value_labels["__established_stat"] as Label).text=str(DiscoverySystem.established_knowledge_threads().size())
-	if allocation_value_labels.has("__mind_stat"):
-		(allocation_value_labels["__mind_stat"] as Label).text="%.1f×" % float(program_summary.get("average_line_capacity",0.0))
+	## Broad research emphasis is the sum of its automatic lines.
 	for dynamic_id in GameState.research_subcategory_allocations:
 		var dynamic_total:=0
 		var subcategories:Dictionary=GameState.research_subcategory_allocations[dynamic_id]
-		var automatic_lines:Array[String]=[]
-		for subcategory in subcategories:
-			var subvalue:=int(subcategories[subcategory]); dynamic_total+=subvalue
-			if subvalue>0: automatic_lines.append("%s%s" % [String(subcategory)," ×%d" % subvalue if subvalue>1 else ""])
-			var channel:="%s::%s" % [dynamic_id,subcategory]
-			if allocation_value_labels.has(channel):
-				var sublabel:=allocation_value_labels[channel].value as Label
-				var active_id:=String(GameState.active_investigations.get(channel,""))
-				sublabel.text=str(subvalue)
-				sublabel.add_theme_color_override("font_color",Color("#9fa8a4") if subvalue>0 and active_id=="" else Color("#d5d2c8"))
-				sublabel.tooltip_text="This research priority is waiting through a genuine evidence drought and will redirect automatically when a supported line appears." if subvalue>0 and active_id=="" else "An automatically selected investigation is accumulating evidence." if active_id!="" else "No research capacity is currently emphasizing this subcondition."
+		for subcategory in subcategories:dynamic_total+=int(subcategories[subcategory])
 		GameState.research_allocations[dynamic_id]=dynamic_total
-		var dynamic_key:="dynamic::"+String(dynamic_id)
-		if allocation_value_labels.has(dynamic_key):
-			var widgets:Dictionary=allocation_value_labels[dynamic_key]
-			(widgets.value as Label).text=str(dynamic_total)
-			(widgets.bar as ProgressBar).max_value=maxi(1,total)
-			(widgets.bar as ProgressBar).value=dynamic_total
-			(widgets.auto_summary as Label).text=("AUTO • %s" % "  •  ".join(automatic_lines)) if not automatic_lines.is_empty() else "AUTO • Not emphasized"
-			(widgets.card as PanelContainer).modulate=Color.WHITE if dynamic_total>0 else Color(0.68,0.71,0.70,1.0)
-	if research_total_label:
-		var active_lines:=int(program_summary.get("active_lines",0))
-		research_total_label.text="%s aggregate researchers  •  %d automatic programs  •  %d broad emphasis points  •  %.1f× average program capacity" % [_knowledge_workforce_text(float(observers)),active_lines,total,float(program_summary.get("average_line_capacity",0.0))]
-		var meter:=knowledge_panel.find_child("AttentionMeter",true,false) as ProgressBar if knowledge_panel else null
-		if meter:
-			meter.max_value=48
-			meter.value=active_lines
-
-func _open_council_panel() -> void:
-	AdvisorSystem.refresh_pronouncement_statuses()
-	if council_panel:
-		council_panel.queue_free()
-	council_panel = Control.new()
-	council_panel.size = get_viewport().get_visible_rect().size
-	council_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(council_panel)
-	var dimmer := ColorRect.new()
-	dimmer.size = council_panel.size
-	dimmer.color = Color(0.01,0.015,0.018,0.86)
-	council_panel.add_child(dimmer)
-	var modal := PanelContainer.new()
-	modal.position = Vector2(70,45)
-	modal.size = council_panel.size - Vector2(140,90)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.045,0.06,0.065,0.99)
-	style.set_content_margin_all(22)
-	modal.add_theme_stylebox_override("panel",style)
-	council_panel.add_child(modal)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation",10)
-	modal.add_child(root)
-	var title := Label.new()
-	title.text = "COUNCIL DIRECTIVES & DECISIONS"
-	title.add_theme_font_size_override("font_size",25)
-	root.add_child(title)
-	var subtitle := Label.new()
-	subtitle.text = "Make consequential choices and issue standing policies. Routine updates stay in their population, economy, military, and world records."
-	subtitle.add_theme_color_override("font_color",Color("#aaa99f"))
-	root.add_child(subtitle)
-	var interpreter_config:=PronouncementInterpreter.configuration_status()
-	var interpreter_config_label:=Label.new()
-	interpreter_config_label.name="InterpreterConfigLabel"
-	if bool(interpreter_config.get("configured",false)):
-		interpreter_config_label.text="POLICY INTERPRETATION  •  ASSISTED"
-		interpreter_config_label.add_theme_color_override("font_color",Color("#82a69a"))
-	else:
-		interpreter_config_label.text="POLICY INTERPRETATION  •  LOCAL RULES"
-		interpreter_config_label.add_theme_color_override("font_color",Color("#a89a7e"))
-	interpreter_config_label.tooltip_text="%s interpretation is active. Every freeform directive remains bounded by simulated institutions and known policy effects. Credentials are never displayed or stored in a directive." % ("Assisted" if bool(interpreter_config.get("configured",false)) else "Local deterministic")
-	interpreter_config_label.add_theme_font_size_override("font_size",10)
-	root.add_child(interpreter_config_label)
-	root.add_child(HSeparator.new())
-	var scroll := FIT_CONTENT_PANEL.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
-	var reports := VBoxContainer.new()
-	reports.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	reports.add_theme_constant_override("separation",12)
-	scroll.add_child(reports)
-	var decision_items:Array[Dictionary]=AdvisorSystem.council_decision_items()
-	var routine_count:=AdvisorSystem.routine_report_count()
-	_add_council_decisions_section(reports,decision_items,routine_count)
-	reports.add_child(HSeparator.new())
-	var active_heading:=Label.new()
-	active_heading.text="POLICIES IN FORCE"
-	active_heading.add_theme_font_size_override("font_size",13)
-	active_heading.add_theme_color_override("font_color",Color("#c8ad72"))
-	reports.add_child(active_heading)
-	var governance_metrics:Dictionary=ConsequenceEngine.governance_metrics()
-	var governance_line:=Label.new()
-	governance_line.text="ADMINISTRATION USED %d%%  •  RECENT POLICY CHANGES %d%%  •  COUNCIL SUPPORT %d%%  •  %d IN FORCE" % [roundi(float(governance_metrics.administrative_load)*100.0),roundi(float(governance_metrics.policy_churn)*100.0),roundi(float(governance_metrics.council_support)*100.0),int(governance_metrics.active_policy_count)]
-	governance_line.tooltip_text="Each standing policy occupies administrative capacity. Replacing or rescinding policy early creates churn. Council institutions react from their established priorities; institutional trust, respect, and resentment shape council support and future office execution."
-	governance_line.add_theme_font_size_override("font_size",11)
-	governance_line.add_theme_color_override("font_color",Color("#9da49c") if float(governance_metrics.policy_churn)<=0.0 else Color("#d19b75"))
-	reports.add_child(governance_line)
-	var active_policies:Array[Dictionary]=ConsequenceEngine.active_policies()
-	if active_policies.is_empty():
-		var no_policy:=Label.new()
-		no_policy.text="No standing policy is in force because none has been issued or earlier policies have expired. Describe a policy in the field at the bottom to enact one."
-		no_policy.add_theme_font_size_override("font_size",13)
-		no_policy.add_theme_color_override("font_color",Color("#858c87"))
-		reports.add_child(no_policy)
-	else:
-		for active_policy in active_policies:
-			var policy_card:=PanelContainer.new()
-			policy_card.add_theme_stylebox_override("panel",_knowledge_style(Color("#10191a"),Color("#31403d"),1,3,10))
-			reports.add_child(policy_card)
-			var policy_label:=Label.new()
-			var observation:=ConsequenceEngine.policy_observation(active_policy)
-			var policy_copy:=_council_active_policy_copy(active_policy,observation)
-			policy_label.text=String(policy_copy.visible)
-			policy_label.tooltip_text=String(policy_copy.details)
-			policy_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-			policy_label.add_theme_font_size_override("font_size",12)
-			policy_label.add_theme_color_override("font_color",Color("#c7c4b9"))
-			policy_card.add_child(policy_label)
-	reports.add_child(HSeparator.new())
-	var pronouncement_count:=0
-	for order_variant in GameState.sovereign_orders:
-		var order:Dictionary=order_variant
-		if String(order.get("type",""))!="pronouncement": continue
-		if pronouncement_count==0:
-			var record_heading:=Label.new()
-			record_heading.text="RECENT POLICY DIRECTIVES"
-			record_heading.add_theme_font_size_override("font_size",13)
-			record_heading.add_theme_color_override("font_color",Color("#c8ad72"))
-			reports.add_child(record_heading)
-		var record:=Label.new()
-		var record_copy:Dictionary=_council_pronouncement_copy(order)
-		record.text=String(record_copy.visible)
-		record.tooltip_text=String(record_copy.details)
-		record.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		record.add_theme_font_size_override("font_size",13)
-		record.add_theme_color_override("font_color",Color("#c7c4b9"))
-		reports.add_child(record)
-		if String(order.get("status",""))=="interpreting":
-			var cancel_pending:=Button.new()
-			cancel_pending.text="WITHDRAW PENDING POLICY"
-			cancel_pending.tooltip_text="Withdraw this pronouncement before interpretation applies any standing policy."
-			cancel_pending.pressed.connect(_cancel_pending_pronouncement.bind(String(order.get("id","")),String(order.get("request_id",""))))
-			reports.add_child(cancel_pending)
-		pronouncement_count+=1
-		if pronouncement_count>=3: break
-	if pronouncement_count>0: reports.add_child(HSeparator.new())
-	pronouncement_status_label=Label.new()
-	pronouncement_status_label.text="Describe a policy in plain language. The Council will show what changed, how long it lasts, and the first observed result."
-	pronouncement_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	pronouncement_status_label.add_theme_font_size_override("font_size",11)
-	pronouncement_status_label.add_theme_color_override("font_color",Color("#9fa59d"))
-	root.add_child(pronouncement_status_label)
-	for pending_request_id in pending_pronouncement_inputs:
-		var pending_progress:=PronouncementInterpreter.request_progress(String(pending_request_id))
-		if not pending_progress.is_empty(): _on_pronouncement_progress(String(pending_request_id),pending_progress)
-		break
-	var order_row := HBoxContainer.new()
-	root.add_child(order_row)
-	var order_input := LineEdit.new()
-	order_input.placeholder_text = "Describe a policy to enact, change, or end…"
-	order_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	order_row.add_child(order_input)
-	var send := Button.new()
-	send.text = "INTERPRET & ISSUE POLICY"
-	send.pressed.connect(_issue_freeform_order.bind(order_input))
-	order_input.text_submitted.connect(func(_submitted:String): _issue_freeform_order(order_input))
-	order_row.add_child(send)
-	var close := Button.new()
-	close.text = "BACK TO CIVILIZATION"
-	close.pressed.connect(_back_to_civilization_from_council)
-	order_row.add_child(close)
-
-
-func _add_council_decisions_section(parent:Container,decision_items:Array[Dictionary],routine_count:int)->void:
-	var heading:=Label.new()
-	heading.text="DECIDE NOW  •  %d" % decision_items.size() if not decision_items.is_empty() else "NO DECISION REQUIRED"
-	heading.add_theme_font_size_override("font_size",15)
-	heading.add_theme_color_override("font_color",Color("#d6b66f") if not decision_items.is_empty() else Color("#8da095"))
-	parent.add_child(heading)
-	if decision_items.is_empty():
-		var empty:=Label.new()
-		var routine_suffix:="; %d routine update%s %s already logged there" % [routine_count,"" if routine_count==1 else "s","is" if routine_count==1 else "are"] if routine_count>0 else ""
-		empty.text="Nothing here needs a directive because the Council has no consequential choice to offer. Conditions continue in their system records%s. Issue a standing policy below only if you want to change them." % routine_suffix
-		empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		empty.add_theme_font_size_override("font_size",12)
-		empty.add_theme_color_override("font_color",Color("#9ca49e"))
-		parent.add_child(empty)
-		return
-	for item in decision_items:
-		var card:=PanelContainer.new()
-		card.custom_minimum_size=Vector2(0,92)
-		card.add_theme_stylebox_override("panel",_knowledge_style(Color("#121a1c"),Color("#7c6849"),1,3,10))
-		parent.add_child(card)
-		var content:=VBoxContainer.new()
-		content.add_theme_constant_override("separation",5)
-		card.add_child(content)
-		var is_answered:=String(item.get("status",""))=="answered"
-		var recurrence:="  •  UPDATED %d TIMES" % int(item.get("occurrences",1)) if int(item.get("occurrences",1))>1 else ""
-		var report:=Label.new()
-		report.text="%s  •  %s%s\n%s" % [String(item.get("office","Council")).to_upper(),String(item.get("advisor","Council office")),recurrence,String(item.get("text","A decision is required."))]
-		report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		report.add_theme_font_size_override("font_size",13)
-		report.add_theme_color_override("font_color",Color("#d8d3c5"))
-		content.add_child(report)
-		var response_options:Array=item.get("responses",[])
-		if not is_answered:
-			var actions:=HBoxContainer.new()
-			actions.add_theme_constant_override("separation",6)
-			content.add_child(actions)
-			for option_variant in response_options:
-				var option:Dictionary=option_variant
-				var response:=String(option.get("label","Record no policy change"))
-				var button:=Button.new()
-				button.text="RECORD NO POLICY CHANGE" if response.to_lower() in ["acknowledge","acknowledge the report"] else response.to_upper()
-				button.tooltip_text="WHAT CHANGES  •  %s" % String(option.get("ripple","The decision is recorded without a standing policy change."))
-				button.pressed.connect(_answer_council.bind(String(item.get("id","")),response))
-				actions.add_child(button)
-		else:
-			var recorded:=Label.new()
-			recorded.text="DECISION RECORDED  •  %s" % String(item.get("response",""))
-			recorded.add_theme_font_size_override("font_size",11)
-			recorded.add_theme_color_override("font_color",Color("#8fa88e"))
-			content.add_child(recorded)
-
-
-func _council_active_policy_copy(policy:Dictionary,observation:Dictionary)->Dictionary:
-	var remaining:=maxi(0,ceili(float(policy.get("remaining_days",0.0))))
-	var execution:=roundi(float(policy.get("execution_factor",1.0))*100.0)
-	var effect_text:=GovernmentPolicyCatalog.formatted_effects(policy.get("effects",{}),float(policy.get("magnitude",0.0)))
-	var name:=String(policy.get("id","policy")).replace("_"," ").to_upper()
-	var visible:="%s  •  %d DAY%s LEFT  •  %d%% EFFECTIVE\nCHANGES  •  %s\nLATEST OBSERVED  •  %s" % [name,remaining,"" if remaining==1 else "S",execution,effect_text,String(observation.get("summary","A baseline is still being established."))]
-	var details:Array[String]=[
-		"OFFICE  •  %s" % String(policy.get("office","Council")),
-		"EXECUTION  •  %s" % String(policy.get("executor","Council execution")),
-		"STRENGTH  •  %d%%" % roundi(float(policy.get("magnitude",0.0))*100.0),
-		"ACTION SOURCE  •  %s" % String(policy.get("action_source","deterministic enact reading")),
-		"TERMS  •  %s" % String(policy.get("parameter_basis","catalog defaults"))
-	]
-	if not String(policy.get("interpretation_basis","")).is_empty():
-		details.append("GROUNDED READING  •  %d%%  •  “%s”" % [roundi(float(policy.get("interpretation_confidence",1.0))*100.0),String(policy.get("interpretation_basis",""))])
-	if not String(policy.get("description","")).is_empty(): details.append("WHY  •  %s" % String(policy.description))
-	details.append(String(observation.get("disclaimer","Observed movement is not an isolated causal estimate.")))
-	return {"visible":visible,"details":"\n".join(details)}
-
-
-func _council_pronouncement_copy(order:Dictionary)->Dictionary:
-	var parameters:Dictionary=order.get("parameters",{})
-	var interpretation:Dictionary=parameters.get("interpretation",{})
-	var policies:Array=interpretation.get("policies",[])
-	var visible_results:Array[String]=[]
-	var detail_lines:Array[String]=[]
-	for policy_index in policies.size():
-		var policy:Dictionary=policies[policy_index]
-		var action:=String(policy.get("action","enact")).to_upper()
-		var policy_name:=String(policy.get("id","policy")).replace("_"," ").to_upper()
-		var changes:=GovernmentPolicyCatalog.formatted_effects(policy.get("effects",{}),float(policy.get("magnitude",0.0))) if action=="ENACT" else "standing effects end"
-		var observation:Dictionary=policy.get("observation",{})
-		if policy_index<2:
-			var observed:="  •  %s" % String(observation.get("summary","")) if not observation.is_empty() else ""
-			visible_results.append("%s %s  •  %s%s" % [action,policy_name,changes,observed])
-		detail_lines.append("%s  •  %s  •  %d DAYS  •  %d%% EFFECTIVE" % [action,policy_name,roundi(float(policy.get("days",0.0))),roundi(float(policy.get("execution_factor",1.0))*100.0)])
-		detail_lines.append("VARIABLES  •  %s" % changes)
-		detail_lines.append("ACTION SOURCE  •  %s" % String(policy.get("action_source","deterministic player-clause reading")))
-		detail_lines.append("TERMS  •  %s" % String(policy.get("parameter_basis","catalog defaults")))
-		if not String(policy.get("basis","")).is_empty(): detail_lines.append("GROUNDED READING  •  %d%%  •  “%s”" % [roundi(float(policy.get("confidence",1.0))*100.0),String(policy.basis)])
-		if not String(policy.get("ripple","")).is_empty(): detail_lines.append("WHY  •  %s" % String(policy.ripple))
-	if policies.size()>2: visible_results.append("+%d further policy changes; hover for details" % (policies.size()-2))
-	var reactions:Array=order.get("political_reactions",interpretation.get("political_reactions",[]))
-	if not reactions.is_empty():
-		visible_results.append("COUNCIL RESPONSE  •  %s" % String((reactions[0] as Dictionary).get("summary","Council response recorded.")))
-	for reaction_variant in reactions:
-		var reaction:Dictionary=reaction_variant
-		detail_lines.append("COUNCIL  •  %s  •  trust %+.1f  respect %+.1f  resentment %+.1f" % [String(reaction.get("summary","Response recorded.")),float(reaction.get("trust_delta",0.0))*100.0,float(reaction.get("respect_delta",0.0))*100.0,float(reaction.get("resentment_delta",0.0))*100.0])
-	var unresolved:=String(interpretation.get("unresolved",""))
-	if not unresolved.is_empty():
-		var origin:="PROVIDER INTERPRETATION — NO DIRECT EFFECT" if String(interpretation.get("source",""))=="generative API" else "BOUNDED LOCAL INTERPRETATION"
-		visible_results.append("UNRESOLVED  •  %s" % unresolved)
-		detail_lines.append("UNRESOLVED  •  %s  •  %s" % [origin,unresolved])
-	if visible_results.is_empty() and String(order.get("status",""))=="interpreting":
-		var progress:=PronouncementInterpreter.request_progress(String(order.get("request_id","")))
-		visible_results.append("RETRY SCHEDULED  •  No policy has been applied yet." if bool(progress.get("retry_scheduled",false)) else "AWAITING BOUNDED INTERPRETATION…")
-	var source_text:=String(interpretation.get("source","recorded")).to_upper()
-	if String(interpretation.get("source_detail","")).strip_edges()!="": source_text+="  •  "+String(interpretation.source_detail).to_upper()
-	detail_lines.push_front("INTERPRETATION  •  %s" % source_text)
-	var visible:="DAY %d  •  %s\n“%s”\n%s" % [int(order.get("issued_day",0))+1,String(order.get("status","recorded")).replace("_"," ").to_upper(),String(parameters.get("text","")),"\n".join(visible_results)]
-	return {"visible":visible,"details":"\n".join(detail_lines)}
-
-
-func _answer_council(item_id: String, response: String) -> void:
-	AdvisorSystem.respond_to_council_item(item_id,response)
-	_open_council_panel()
 
 func _civic_settlement()->Dictionary:
 	var settlement:Dictionary=_settlement_model().selected_settlement_snapshot()
@@ -17394,10 +14786,7 @@ func _perform_civic_leader_removal(settlement_id:String,action:String,player_tex
 	var result:=GovernmentPeopleSystem.remove_settlement_leader(settlement_id,action)
 	AdvisorSystem.record_civic_leadership_change(settlement_id,player_text,result)
 	var message:=String(result.get("message",result.get("reason","Leadership did not change.")))
-	if travel_status_label: travel_status_label.text="LEADERSHIP  •  "+message
-	if pronouncement_status_label:
-		pronouncement_status_label.text=message
-		pronouncement_status_label.add_theme_color_override("font_color",Color("#c98272") if action=="arrest" else Color("#c8ad72"))
+	if travel_status_label: travel_status_label.text=PaperKit.sentence(message)
 	if hud:
 		hud._queue_signature="__stale__"
 		hud.refresh()
@@ -17422,9 +14811,6 @@ func _issue_freeform_order(input: LineEdit) -> void:
 	var settlement_id:=String(settlement.get("id",""))
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)
 	if settlement.is_empty() or leader.is_empty():
-		if pronouncement_status_label:
-			pronouncement_status_label.text="NO APPOINTED LEADER • Open the settlement's Local Leadership view and appoint one person before issuing a civic directive."
-			pronouncement_status_label.add_theme_color_override("font_color",Color("#c98272"))
 		return
 	var leadership_action:=AdvisorSystem.civic_leadership_action(text,String(leader.get("name","")))
 	if not leadership_action.is_empty():
@@ -17437,10 +14823,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		input.text=""
 		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)
 		var withdrawal_message:=String(withdrawn.get("message",withdrawn.get("reason","There is no unresolved directive to withdraw.")))
-		if travel_status_label: travel_status_label.text="CIVIC RESPONSE  •  "+withdrawal_message.split("\n")[0]
-		if pronouncement_status_label:
-			pronouncement_status_label.text=withdrawal_message
-			pronouncement_status_label.add_theme_color_override("font_color",Color("#9fa59d"))
+		if travel_status_label: travel_status_label.text=PaperKit.sentence(withdrawal_message.split("\n")[0])
 		if hud:
 			hud._queue_signature="__stale__"
 			hud.refresh()
@@ -17480,8 +14863,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 	# The dock is rebuilt immediately below, which destroys its LineEdit. Pending
 	# network state must therefore contain data only, never a transient UI node.
 	pending_pronouncement_inputs[request_id]=_pending_civic_request_record(text,pending_order,settlement_id,int(leader.get("person_id",0)))
-	if travel_status_label: travel_status_label.text="COUNCIL INTERPRETING PRONOUNCEMENT…"
-	if pronouncement_status_label: pronouncement_status_label.text="%s IS CONSIDERING YOUR DIRECTIVE…" % String(leader.get("name","The leader")).to_upper()
+	if travel_status_label: travel_status_label.text="%s is thinking over what you said." % String(leader.get("name","The leader"))
 	var initial_progress:=PronouncementInterpreter.request_progress(request_id)
 	if not initial_progress.is_empty(): _on_pronouncement_progress(request_id,initial_progress)
 	_refresh_council_dock()
@@ -17495,23 +14877,9 @@ func _pending_civic_request_record(text:String,order:Dictionary,settlement_id:St
 		"leader_person_id":leader_person_id,
 	}
 
-func _on_pronouncement_progress(request_id:String,status:Dictionary)->void:
-	if not pending_pronouncement_inputs.has(request_id): return
-	if not pronouncement_status_label or not is_instance_valid(pronouncement_status_label): return
-	var stage:=String(status.get("stage","interpreting"))
-	match stage:
-		"local": pronouncement_status_label.text="UNDERSTOOD LOCALLY  •  clear directive language; no API call needed"
-		"cached": pronouncement_status_label.text="UNDERSTOOD  •  reused a validated reading; no API call needed"
-		"requesting":
-			pronouncement_status_label.text="INTERPRETING POLICY  •  attempt %d of %d" % [int(status.get("attempt",1)),int(status.get("max_attempts",2))]
-		"retrying":
-			pronouncement_status_label.text="INTERPRETATION RETRY  •  attempt %d did not complete  •  trying %d of %d" % [int(status.get("attempt",1)),int(status.get("next_attempt",2)),int(status.get("max_attempts",2))]
-		"offline": pronouncement_status_label.text="USING LOCAL RULES  •  No online interpreter is configured; a bounded local reading is in progress."
-		"fallback": pronouncement_status_label.text="USING LOCAL RULES  •  The assisted reading failed safely; only the bounded local result can apply."
-		"accepted": pronouncement_status_label.text="POLICY UNDERSTOOD  •  validating the bounded effects before they apply…"
-		"cancelled": pronouncement_status_label.text="CANCELLED • No standing policy was applied."
-		_: pronouncement_status_label.text="INTERPRETING • The council is translating language into bounded policy…"
-	pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72") if stage in ["accepted","requesting","local","cached"] else Color("#bca47d") if stage in ["retrying","fallback"] else Color("#9fa59d"))
+func _on_pronouncement_progress(_request_id:String,_status:Dictionary)->void:
+	## Progress of a spoken directive is shown in the court conversation.
+	pass
 
 func _on_pronouncement_interpreted(request_id:String,result:Dictionary)->void:
 	var pending:Dictionary=pending_pronouncement_inputs.get(request_id,{})
@@ -17528,10 +14896,7 @@ func _on_pronouncement_interpreted(request_id:String,result:Dictionary)->void:
 	var message:=String(order.get("leader_reply",""))
 	if message.is_empty(): message="  ".join(ripples)
 	if message.is_empty(): message=String(result.get("unresolved","The pronouncement was recorded without an executable simulation effect."))
-	if travel_status_label: travel_status_label.text="CIVIC RESPONSE  •  %s" % message
-	if pronouncement_status_label:
-		pronouncement_status_label.text="%s • INTERPRETED VIA %s • %s" % [String(order.get("addressed_to","LEADER")).to_upper(),String(interpretation.get("source","interpreter")).to_upper(),message]
-		pronouncement_status_label.add_theme_color_override("font_color",Color("#c8ad72"))
+	if travel_status_label: travel_status_label.text=PaperKit.sentence(message)
 	_refresh_council_dock.call_deferred()
 
 func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
@@ -17547,9 +14912,6 @@ func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
 		order["cancelled_day"]=int(GameState.elapsed_days)
 		order["parameters"]={"text":String(order.get("parameters",{}).get("text","Sovereign pronouncement")),"interpretation":{"source":"cancelled","source_detail":"Cancelled by Sovereign","summary":"The pronouncement was withdrawn before interpretation.","policies":[],"unresolved":"No standing policy was applied."}}
 		break
-	if pronouncement_status_label:
-		pronouncement_status_label.text="CANCELLED • No standing policy was applied."
-		pronouncement_status_label.add_theme_color_override("font_color",Color("#b78c72"))
 	_refresh_council_dock.call_deferred()
 
 func _refresh_council_dock()->void:
@@ -17561,103 +14923,6 @@ func _refresh_council_dock()->void:
 		# their interaction guard; this action path deliberately bypasses it.
 		hud.request_immediate_dock_refresh()
 
-func _build_leader_selection(layer: CanvasLayer) -> void:
-	_generate_leader_candidates("Steward")
-	# Government is a bounded cast of actual people. Ordinary residents remain
-	# aggregate, but officeholders retain age, skills, traits, relationships and life.
-	leader_panel = Control.new()
-	leader_panel.size = get_viewport().get_visible_rect().size
-	leader_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	leader_panel.visible = false
-	layer.add_child(leader_panel)
-	var viewport_size := get_viewport().get_visible_rect().size
-	var dimmer := ColorRect.new()
-	dimmer.size = viewport_size
-	dimmer.color = Color(0.01, 0.015, 0.018, 0.82)
-	leader_panel.add_child(dimmer)
-	var modal := PanelContainer.new()
-	modal.position = Vector2(28, 24)
-	modal.size = viewport_size - Vector2(56, 48)
-	var modal_style := StyleBoxFlat.new()
-	modal_style.bg_color = Color(0.045, 0.06, 0.065, 0.99)
-	modal_style.border_color = Color("#35434a")
-	modal_style.set_border_width_all(1)
-	modal_style.set_content_margin_all(22)
-	modal.add_theme_stylebox_override("panel", modal_style)
-	leader_panel.add_child(modal)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 10)
-	modal.add_child(root)
-	leader_heading = Label.new()
-	leader_heading.text = "SELECT AN OFFICEHOLDER"
-	leader_heading.add_theme_font_size_override("font_size", 24)
-	leader_heading.add_theme_color_override("font_color", Color("#ede2cd"))
-	root.add_child(leader_heading)
-	leader_explanation = Label.new()
-	leader_explanation.text = "Choose a living person. Skill, temperament, experience, age, and the evolving form of government shape how the office is carried."
-	leader_explanation.add_theme_font_size_override("font_size", 14)
-	leader_explanation.add_theme_color_override("font_color", Color("#aaa99f"))
-	root.add_child(leader_explanation)
-	var divider := HSeparator.new()
-	root.add_child(divider)
-	var body := HBoxContainer.new()
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 18)
-	root.add_child(body)
-	var candidate_scroll := FIT_CONTENT_PANEL.new()
-	candidate_scroll.custom_minimum_size = Vector2(340, 0)
-	body.add_child(candidate_scroll)
-	leader_candidate_list = VBoxContainer.new()
-	leader_candidate_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	leader_candidate_list.add_theme_constant_override("separation", 10)
-	candidate_scroll.add_child(leader_candidate_list)
-	_rebuild_leader_candidate_list()
-	var dossier_scroll := FIT_CONTENT_PANEL.new()
-	dossier_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	dossier_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_child(dossier_scroll)
-	leader_dossier = VBoxContainer.new()
-	leader_dossier.custom_minimum_size = Vector2(610, 700)
-	leader_dossier.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	leader_dossier.add_theme_constant_override("separation",8)
-	dossier_scroll.add_child(leader_dossier)
-	var footer_divider := HSeparator.new()
-	root.add_child(footer_divider)
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation", 12)
-	root.add_child(footer)
-	var close_button := Button.new()
-	close_button.custom_minimum_size = Vector2(150, 44)
-	close_button.text = "CLOSE"
-	close_button.pressed.connect(_close_leadership_panel)
-	footer.add_child(close_button)
-	appoint_button = Button.new()
-	appoint_button.custom_minimum_size = Vector2(310, 44)
-	appoint_button.text = "APPOINT THIS PERSON"
-	appoint_button.add_theme_font_size_override("font_size", 15)
-	appoint_button.pressed.connect(_appoint_leader)
-	footer.add_child(appoint_button)
-	_inspect_leader(0)
-
-func _rebuild_leader_candidate_list() -> void:
-	if leader_candidate_list==null: return
-	for child in leader_candidate_list.get_children(): child.queue_free()
-	for i in leader_candidates.size():
-		var candidate:Dictionary=leader_candidates[i]
-		var button:=Button.new()
-		button.custom_minimum_size=Vector2(320,92)
-		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		var focus:Array=OFFICE_DYNAMICS.get(pending_advisor_office,["institutions","culture"])
-		var strongest:=String(focus[0])
-		for dynamic_id in focus:
-			if float(candidate.dynamic_profile.get(dynamic_id,0.0))>float(candidate.dynamic_profile.get(strongest,0.0)): strongest=String(dynamic_id)
-		button.text="%s\n%s\n%s • strongest in %s" % [candidate.name,candidate.background,"  /  ".join(candidate.traits),strongest.capitalize()]
-		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		button.add_theme_font_size_override("font_size",13)
-		button.tooltip_text="An aggregate governing arrangement. Open the dossier to compare system-wide consequences."
-		button.pressed.connect(_inspect_leader.bind(i))
-		leader_candidate_list.add_child(button)
 
 func _generate_leader_candidates(office:String) -> void:
 	leader_candidates.clear()
@@ -17666,296 +14931,6 @@ func _generate_leader_candidates(office:String) -> void:
 		leader_candidates.append(person)
 	AdvisorSystem.register_advisors(leader_candidates)
 
-func _institutional_slates_for_office(office:String)->Array:
-	# Every office offers the same five structural doctrines under local names.
-	# The doctrine, not a hidden aptitude scalar, decides how the portfolio
-	# executes (see SocietyModel.doctrine_execution_strength).
-	var slates:Dictionary={
-		"Steward":[["CIVIC SECRETARIAT","Central administrative service","directive"],["DISTRICT ASSEMBLIES","Federated local administration","federated"],["CENSUS AND WORKS BOARD","Measured population and public works","measured"],["ROTATING CIVIC COUNCIL","Representative rotating authority","representative"],["PROVINCIAL STEWARDSHIP","Territorial administrative network","territorial"]],
-		"Quartermaster":[["CENTRAL STOREHOUSE BOARD","Centralized provisioning authority","directive"],["DISTRIBUTION GUILDS","Federated supply organizations","federated"],["LOGISTICS DIRECTORATE","Route and inventory administration","measured"],["PROVISIONING COUNCIL","Representative allocation authority","representative"],["REGIONAL DEPOT NETWORK","Distributed material coordination","territorial"]],
-		"Scholar":[["INQUIRY COLLEGIUM","Expert research institution","directive"],["PUBLIC LEARNING COUNCIL","Distributed education authority","federated"],["ARCHIVE AND SURVEY OFFICE","Evidence and records administration","measured"],["PRACTICAL ARTS ACADEMY","Production-linked knowledge network","representative"],["OBSERVATORIES LEAGUE","Federated scientific institutions","territorial"]],
-		"Marshal":[["GENERAL STAFF","Central strategic command","directive"],["DEFENSE COUNCIL","Civil-military oversight body","federated"],["READINESS DIRECTORATE","Training and logistics command","measured"],["CIVIC DEFENSE BOARD","Representative mobilization authority","representative"],["REGIONAL COMMANDS","Distributed territorial defense","territorial"]],
-		"Envoy":[["FOREIGN OFFICE","Central diplomatic service","directive"],["TREATY COUNCIL","Representative negotiation authority","federated"],["EXCHANGE MISSIONS","Trade-linked diplomatic network","measured"],["CIVIC DELEGATION","Broad public diplomatic mandate","representative"],["BORDER COMMISSIONS","Regional external-relations bodies","territorial"]]
-	}
-	return slates.get(office,[["CIVIC COUNCIL","General administrative institution","directive"],["REGIONAL ASSEMBLIES","Federated representative authority","federated"],["PUBLIC SECRETARIAT","Professional administrative service","measured"],["ROTATING DELEGATION","Temporary collective authority","representative"],["SPECIALIST BOARD","Expert governing body","territorial"]])
-
-func _candidate_from_institution(institution_name:String,structure:String,office:String,doctrine:String="")->Dictionary:
-	var traits_pool:=["Centralized","Distributed","Representative","Expert-led","Transparent","Disciplined","Adaptive","Localist","Consensus-driven","Directive"]
-	var seed:=hash("%d:%s:%s" % [GameState.world_seed,office,institution_name])
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=seed
-	var profile:Dictionary={}
-	var subcategory_profile:Dictionary={}
-	for dynamic_id in SOCIETY_DYNAMICS:
-		var current_capacity:=float(GameState.society_capacities.get(dynamic_id,0.5))
-		profile[dynamic_id]=clampf(rng.randf_range(0.30,0.78)+current_capacity*0.08,0.18,0.94)
-		var subs:Dictionary={}
-		for subcategory in SOCIETY_SUBCATEGORY_NAMES[dynamic_id]:
-			subs[subcategory]=clampf(float(profile[dynamic_id])+rng.randf_range(-0.15,0.15),0.12,0.97)
-		subcategory_profile[dynamic_id]=subs
-	var focus:Array=OFFICE_DYNAMICS.get(office,["institutions","culture"])
-	var fit:=0.0
-	for dynamic_id in focus: fit+=float(profile.get(dynamic_id,0.0))
-	fit/=maxf(1.0,float(focus.size()))
-	var trait_a:=String(traits_pool[posmod(seed,traits_pool.size())])
-	var trait_b:=String(traits_pool[posmod(seed/17+5,traits_pool.size())])
-	if trait_b==trait_a: trait_b=String(traits_pool[(traits_pool.find(trait_a)+3)%traits_pool.size()])
-	var skills:=_legacy_skills_from_dynamics(profile)
-	var current_culture:=float(GameState.society_capacities.get("culture",0.5))
-	var support:=roundi(clampf(0.22+float(profile.culture)*0.34+float(profile.institutions)*0.24+current_culture*0.20,0.18,0.88)*100.0)
-	return {"institution_id":"%s:%s" % [office.to_lower(),institution_name.to_lower().replace(" ","_")],"name":institution_name,
-		"background":structure,"institutional":true,"traits":[trait_a,trait_b],"doctrine":doctrine,
-		"dynamic_profile":profile,"subcategory_profile":subcategory_profile,"skills":skills,"support":support,"office_fit":fit}
-
-func _legacy_skills_from_dynamics(profile:Dictionary)->Dictionary:
-	var map:={"Administration":"institutions","Law":"institutions","Public Order":"security","Crisis Management":"security","Agriculture":"nutrition","Construction":"infrastructure","Manufacturing":"production","Trade":"logistics","Logistics":"logistics","Research":"knowledge","Engineering":"infrastructure","Medicine":"health","Education":"knowledge","Natural Science":"ecology","Strategy":"security","Tactics":"security","Fortification":"infrastructure","Intelligence":"knowledge","Oratory":"culture","Diplomacy":"culture","Negotiation":"institutions","Empathy":"demography","Coalition Building":"culture","Judgment":"institutions","Creativity":"knowledge","Discipline":"labor","Delegation":"labor","Stress Tolerance":"health"}
-	var result:Dictionary={}
-	for skill in map: result[skill]=roundi(float(profile.get(map[skill],0.4))*100.0)
-	return result
-
-func _inspect_leader(index: int) -> void:
-	if leader_candidates.is_empty() or leader_dossier==null: return
-	inspected_leader = index
-	for child in leader_dossier.get_children(): child.queue_free()
-	var candidate:Dictionary=leader_candidates[index]
-	var identity:=Label.new()
-	identity.text="%s\n%s\n%s  /  %s" % [String(candidate.name).to_upper(),candidate.background,candidate.traits[0],candidate.traits[1]]
-	identity.add_theme_font_size_override("font_size",16)
-	identity.add_theme_color_override("font_color",Color("#eee2ca"))
-	leader_dossier.add_child(identity)
-	var support_bar:=ProgressBar.new()
-	support_bar.max_value=100.0; support_bar.value=float(candidate.support); support_bar.show_percentage=false
-	support_bar.custom_minimum_size=Vector2(0,9)
-	support_bar.tooltip_text="Political support reflects Culture and Institutions—not a separate arbitrary stat."
-	support_bar.add_theme_stylebox_override("fill",_knowledge_style(Color("#b89a5d"),Color.TRANSPARENT,0,3,0))
-	leader_dossier.add_child(support_bar)
-	var support_label:=Label.new()
-	support_label.text="POLITICAL BASE  •  %s" % _capacity_band(float(candidate.support)/100.0)
-	support_label.add_theme_font_size_override("font_size",10)
-	support_label.add_theme_color_override("font_color",Color("#b7ad98"))
-	leader_dossier.add_child(support_label)
-	var intro:=Label.new()
-	intro.text="PROJECTED INFLUENCE ON THE 12 SOCIETY DYNAMICS"
-	intro.add_theme_font_size_override("font_size",12)
-	intro.add_theme_color_override("font_color",Color("#9fb7c3"))
-	leader_dossier.add_child(intro)
-	var grid:=GridContainer.new(); grid.columns=2; grid.add_theme_constant_override("h_separation",8); grid.add_theme_constant_override("v_separation",7)
-	leader_dossier.add_child(grid)
-	for dynamic_id in SOCIETY_DYNAMICS: _make_candidate_dynamic_card(grid,candidate,dynamic_id)
-
-func _make_candidate_dynamic_card(parent:Container,candidate:Dictionary,dynamic_id:String)->void:
-	var value:=clampf(float(candidate.dynamic_profile.get(dynamic_id,0.0)),0.0,1.0)
-	var accent:=_dynamic_accent(dynamic_id)
-	var panel:=PanelContainer.new()
-	panel.custom_minimum_size=Vector2(286,58)
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#121a1c"),accent.darkened(0.45),1,3,7))
-	parent.add_child(panel)
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",2); panel.add_child(column)
-	var line:=HBoxContainer.new(); column.add_child(line)
-	var title:=Label.new(); title.text=dynamic_id.to_upper(); title.size_flags_horizontal=Control.SIZE_EXPAND_FILL; title.add_theme_font_size_override("font_size",10); title.add_theme_color_override("font_color",Color("#ddd5c6")); line.add_child(title)
-	var band:=Label.new(); band.text=_capacity_band(value).to_upper(); band.add_theme_font_size_override("font_size",9); band.add_theme_color_override("font_color",accent.lightened(0.18)); line.add_child(band)
-	var bar:=ProgressBar.new(); bar.max_value=1.0; bar.value=value; bar.show_percentage=false; bar.custom_minimum_size=Vector2(0,6)
-	bar.add_theme_stylebox_override("background",_knowledge_style(Color("#20292b"),Color.TRANSPARENT,0,3,0)); bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,3,0)); column.add_child(bar)
-	var breakdown:Dictionary=candidate.get("subcategory_profile",{}).get(dynamic_id,{})
-	var strongest:=""; var weakest:=""
-	for key in breakdown:
-		if strongest=="" or float(breakdown[key])>float(breakdown[strongest]): strongest=String(key)
-		if weakest=="" or float(breakdown[key])<float(breakdown[weakest]): weakest=String(key)
-	var detail:=Label.new(); detail.text="Strength: %s  •  Risk: %s" % [strongest,weakest]; detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; detail.add_theme_font_size_override("font_size",8); detail.add_theme_color_override("font_color",Color("#7f8b87")); detail.tooltip_text=_dynamic_definition(dynamic_id); column.add_child(detail)
-
-func _capacity_band(value:float)->String:
-	if value>=0.78: return "Exceptional"
-	if value>=0.64: return "Strong"
-	if value>=0.48: return "Capable"
-	if value>=0.34: return "Limited"
-	return "Weak"
-
-func _appoint_leader() -> void:
-	if pending_advisor_office == "" or inspected_leader<0 or inspected_leader>=leader_candidates.size():
-		return
-	var candidate: Dictionary = leader_candidates[inspected_leader]
-	var result:=AdvisorSystem.appoint_person(int(candidate.get("person_id",0)),pending_advisor_office)
-	if not bool(result.get("ok",false)):
-		leader_explanation.text=String(result.get("error","Appointment could not be completed."))
-		return
-	var topics := {"Steward":"population","Quartermaster":"food","Scholar":"knowledge","Marshal":"security","Envoy":"resources"}
-	AdvisorSystem.generate_council_item(pending_advisor_office,topics.get(pending_advisor_office,"construction"),0.58)
-	leader_panel.visible = false
-	choice_status.text = "%s commissioned for the %s portfolio." % [candidate.name,pending_advisor_office]
-	pending_advisor_office = ""
-	_open_government_panel()
-
-func _open_leadership_panel() -> void:
-	leader_panel.visible = true
-	settler_panel.visible = false
-
-func _open_government_panel() -> void:
-	if government_panel:
-		government_panel.queue_free()
-	government_panel = Control.new()
-	government_panel.size = get_viewport().get_visible_rect().size
-	government_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(government_panel)
-	var dimmer := ColorRect.new()
-	dimmer.size = government_panel.size
-	dimmer.color = Color(0.01, 0.015, 0.018, 0.86)
-	government_panel.add_child(dimmer)
-	var modal := PanelContainer.new()
-	modal.position = Vector2(34, 28)
-	modal.size = government_panel.size - Vector2(68, 56)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.045, 0.06, 0.065, 0.99)
-	style.border_color = Color("#35434a")
-	style.set_border_width_all(1)
-	style.set_content_margin_all(22)
-	modal.add_theme_stylebox_override("panel", style)
-	government_panel.add_child(modal)
-	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 12)
-	modal.add_child(root)
-	var heading := Label.new()
-	heading.text = "LEADERSHIP"
-	heading.add_theme_font_size_override("font_size", 27)
-	heading.add_theme_color_override("font_color", Color("#ede2cd"))
-	root.add_child(heading)
-	var subtitle := Label.new()
-	subtitle.text = "Offices, authority, political support, and the institutions responsible for executing policy"
-	subtitle.add_theme_font_size_override("font_size", 14)
-	subtitle.add_theme_color_override("font_color", Color("#aaa99f"))
-	root.add_child(subtitle)
-	root.add_child(HSeparator.new())
-	var scroll := FIT_CONTENT_PANEL.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
-	var grid := GridContainer.new()
-	grid.columns = 3
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
-	scroll.add_child(grid)
-	var offices := [
-		["Sovereign", "The player: final authority over every civilizational order"],
-		["Steward", "Administration, population, and construction"],
-		["Quartermaster", "Supply, stockpiles, and logistics"],
-		["Scholar", "Research, education, and knowledge"],
-		["Marshal", "Defense, training, and military command"],
-		["Envoy", "Diplomacy, trade, and foreign relations"]
-	]
-	for i in offices.size():
-		_create_office_card(grid, offices[i][0], offices[i][1], i)
-	var footer := HBoxContainer.new()
-	footer.alignment = BoxContainer.ALIGNMENT_END
-	root.add_child(footer)
-	var close := Button.new()
-	close.custom_minimum_size = Vector2(170, 44)
-	close.text = "BACK TO CIVILIZATION"
-	close.pressed.connect(_back_to_civilization_from_government)
-	footer.add_child(close)
-
-func _create_office_card(parent: Control, office: String, responsibility: String, portrait_index: int) -> void:
-	var focus:Array=OFFICE_DYNAMICS.get(office,["institutions"])
-	var accent:=_dynamic_accent(String(focus[0])) if office!="Sovereign" else Color("#c2a45e")
-	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(350, 252)
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color("#111719")
-	style.border_color = accent.darkened(0.35)
-	style.set_border_width_all(1)
-	style.set_content_margin_all(14)
-	card.add_theme_stylebox_override("panel", style)
-	parent.add_child(card)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 7)
-	card.add_child(column)
-	var office_label := Label.new()
-	office_label.text = office.to_upper()
-	office_label.add_theme_font_size_override("font_size", 17)
-	office_label.add_theme_color_override("font_color", accent.lightened(0.18))
-	column.add_child(office_label)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
-	column.add_child(row)
-	var occupied := office == "Sovereign" or GameState.leadership_positions.has(office)
-	var seal:=PanelContainer.new()
-	seal.custom_minimum_size=Vector2(96,116)
-	seal.add_theme_stylebox_override("panel",_knowledge_style(Color("#20282b"),accent.darkened(0.22),1,4,8))
-	row.add_child(seal)
-	var seal_label:=Label.new()
-	seal_label.text=("YOU" if office=="Sovereign" else office.left(3).to_upper()) if occupied else "—"
-	seal_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	seal_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	seal_label.add_theme_font_size_override("font_size",20)
-	seal_label.add_theme_color_override("font_color",accent.lightened(0.18) if occupied else Color("#626d70"))
-	seal.add_child(seal_label)
-	var details := Label.new()
-	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if occupied:
-		if office == "Sovereign":
-			details.text = "YOU\nEssential Sovereign\n\nIssues final orders and receives all counsel. Cannot be replaced or overruled."
-		else:
-			var leader: Dictionary = GameState.leadership_positions[office]
-			details.text = "%s\n%s\n\n%s • %s\nPolitical base: %s" % [leader.name, leader.background, leader.traits[0], leader.traits[1],_capacity_band(float(leader.support)/100.0)]
-	else:
-		details.text = "VACANT\n\n%s\n\nNo institution is executing this portfolio." % responsibility
-	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	details.add_theme_font_size_override("font_size", 14)
-	row.add_child(details)
-	if office!="Sovereign":
-		var mandate:=Label.new()
-		mandate.text="INFLUENCES  •  "+"  /  ".join(focus).to_upper()
-		mandate.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		mandate.add_theme_font_size_override("font_size",9)
-		mandate.add_theme_color_override("font_color",accent.lightened(0.08))
-		mandate.tooltip_text="This office directly modifies these canonical society dynamics and their subcategories."
-		column.add_child(mandate)
-		var appoint := Button.new()
-		var available:=int(GovernmentPeopleSystem.office_definition(office).get("unlock_stage",99))<=GovernmentPeopleSystem.government_stage
-		appoint.text = ("REVIEW PEOPLE" if occupied else "APPOINT OFFICEHOLDER") if available else "OFFICE NOT YET AVAILABLE"
-		appoint.disabled=not available
-		appoint.tooltip_text = "Choose a living person to hold this office." if available else "This portfolio opens as your government develops. Your steward handles the founding administration."
-		appoint.pressed.connect(_open_advisor_candidates.bind(office))
-		column.add_child(appoint)
-
-func _open_advisor_candidates(office: String) -> void:
-	if int(GovernmentPeopleSystem.office_definition(office).get("unlock_stage",99))>GovernmentPeopleSystem.government_stage:
-		return
-	pending_advisor_office = office
-	if GameState.society_subcategories.is_empty():
-		GameState.society_subcategories=DiscoverySystem.society_model.evaluate_subcategories(_discovery_context())
-	_generate_leader_candidates(office)
-	_rebuild_leader_candidate_list()
-	leader_heading.text = "APPOINT %s" % office.to_upper()
-	leader_explanation.text="Choose a living officeholder. Reputation is incomplete; service will reveal their strengths and shortcomings."
-	appoint_button.text = "COMMISSION FOR %s" % office.to_upper()
-	appoint_button.disabled = leader_candidates.is_empty()
-	if not leader_candidates.is_empty():_inspect_leader(0)
-	leader_panel.visible = true
-	if government_panel:
-		government_panel.queue_free()
-
-func _close_leadership_panel() -> void:
-	leader_panel.visible = false
-
-func _on_building_choice(building: String) -> void:
-	placement_building = building
-	settler_panel.visible = false
-	if placement_preview:
-		placement_preview.queue_free()
-	placement_preview = MeshInstance3D.new()
-	var preview_mesh := CylinderMesh.new()
-	preview_mesh.top_radius = 3.2
-	preview_mesh.bottom_radius = 3.2
-	preview_mesh.height = 0.18
-	preview_mesh.radial_segments = 32
-	placement_preview.mesh = preview_mesh
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.25, 0.72, 0.88, 0.48)
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	placement_preview.material_override = material
-	placement_preview.visible = false
-	add_child(placement_preview)
-	travel_status_label.text = "PLACING %s  •  Left-click valid terrain  •  Right-click cancels" % building.to_upper()
 
 func _terrain_hit(screen_position: Vector2) -> Dictionary:
 	if SEAMLESS_WORLD:
@@ -18035,91 +15010,6 @@ func _cancel_placement() -> void:
 		placement_preview = null
 	travel_status_label.text = ""
 
-func _update_resource_proximity() -> void:
-	if nearby_resources_label == null or settler_marker == null:
-		return
-	var nearest_distance:=_river_distance_at(settler_marker.position.x,settler_marker.position.z)
-	var nearest_type:="River water" if nearest_distance<INF else ""
-	for site in ResourceSystem.visible_deposits():
-		if String(site.get("resource",""))=="Freshwater": continue
-		var site_position: Vector3 = site.position
-		var distance := Vector2(settler_marker.position.x, settler_marker.position.z).distance_to(Vector2(site_position.x, site_position.z))
-		if distance < nearest_distance:
-			nearest_distance = distance
-			nearest_type = site.resource
-	if nearest_type == "":
-		nearby_resources_label.text = "Known nearby resources: none"
-		nearest_resource_type = ""
-		_update_building_buttons()
-		return
-	nearby_resources_label.text = "Nearest known: %s  •  %.1f km" % [nearest_type, nearest_distance * KM_PER_WORLD_UNIT]
-	var in_range := nearest_distance <= 13.0
-	nearest_resource_type = nearest_type if in_range else ""
-	_update_building_buttons()
-
-func _update_building_buttons() -> void:
-	for building in building_buttons:
-		var entry: Dictionary = building_buttons[building]
-		var button: Button = entry.button
-		var requirement: String = entry.requirement
-		if requirement == "Foundation":
-			button.disabled = hearth_established
-		elif requirement == "Resource":
-			button.disabled = not hearth_established or nearest_resource_type == ""
-		else:
-			button.disabled = not hearth_established
-
-func _population_report_style(accent: Color,hover := false) -> StyleBoxFlat:
-	var style:=StyleBoxFlat.new()
-	style.bg_color=Color(0.045,0.058,0.060,0.97) if not hover else Color(0.075,0.086,0.084,0.99)
-	style.border_color=accent
-	style.border_width_left=3
-	style.border_width_top=1
-	style.border_width_right=1
-	style.border_width_bottom=1
-	style.corner_radius_top_left=3
-	style.corner_radius_top_right=3
-	style.corner_radius_bottom_left=3
-	style.corner_radius_bottom_right=3
-	style.content_margin_left=14
-	style.content_margin_right=12
-	style.content_margin_top=8
-	style.content_margin_bottom=8
-	return style
-
-
-func _hud_chip_style(accent:Color,hover:=false)->StyleBoxFlat:
-	var style:=StyleBoxFlat.new()
-	style.bg_color=Color(0.035,0.047,0.050,0.98) if not hover else Color(0.070,0.082,0.080,0.99)
-	style.border_color=accent
-	style.border_width_left=2
-	style.border_width_top=1
-	style.border_width_right=1
-	style.border_width_bottom=1
-	style.corner_radius_top_left=3
-	style.corner_radius_top_right=3
-	style.corner_radius_bottom_left=3
-	style.corner_radius_bottom_right=3
-	style.content_margin_left=8
-	style.content_margin_right=6
-	style.content_margin_top=4
-	style.content_margin_bottom=4
-	return style
-
-func _refresh_event_report() -> void:
-	# Births and deaths remain in the population ledger and are summarized by
-	# the rolling B − D KPI. Routine demographic changes are not interruptions.
-	if event_report_button: event_report_button.visible=false
-
-func _demographic_notice_is_current(record:Dictionary,current_day:int)->bool:
-	var record_day:=int(record.get("end_day",record.get("day",0)))
-	return current_day-record_day<=1
-
-func _demographic_notice_duration_msec(kind:String)->int:
-	return 18000 if kind=="death" else 12000
-
-func _demographic_notice_condition_text(record:Dictionary)->String:
-	return "HEALTH %d%%  •  WATER %d%%  •  SHELTER %d%%" % [roundi(float(record.get("health",0.0))*100.0),roundi(float(record.get("water_intake_ratio",0.0))*100.0),roundi(float(record.get("housing_ratio",0.0))*100.0)]
 
 func _open_civilizations_panel()->void:
 	_close_primary_destinations_except("world")
@@ -18409,20 +15299,6 @@ func _world_strategy_next_step(profile:Dictionary)->Dictionary:
 	if confidence<0.55:
 		return {"status":"CONTACT ESTABLISHED; REPORTS STILL THIN","why":"Confidence is %d%%, so strength, intent, and territory remain estimates or unknown." % roundi(confidence*100.0),"next":"Send scouts to observe the known settlement or use diplomacy to bring back better information."}
 	return {"status":"CONTACT READY FOR A STRATEGIC CHOICE","why":"A physical destination is known and report confidence is %d%%." % roundi(confidence*100.0),"next":"Send diplomats for trade or non-aggression, or open Plan Diplomacy or War for the full report."}
-
-
-func _add_compact_civilization_action(container:GridContainer,profile:Dictionary,action_id:String,label_text:String)->void:
-	var action_button:=Button.new()
-	action_button.text=label_text
-	action_button.custom_minimum_size=Vector2(0,38)
-	action_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var availability:=CivilizationSystem.player_action_availability(String(profile.get("id","")),action_id)
-	if action_id in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS and not bool((profile.get("player_relation",{}) as Dictionary).get("home_location_known",false)):
-		availability={"error":"Settlement unlocated. A returned scout report must confirm a physical destination first."}
-	action_button.disabled=availability.has("error")
-	action_button.tooltip_text=String(availability.get("error","Issue this order."))
-	action_button.pressed.connect(_conduct_civilization_action.bind(String(profile.get("id","")),action_id))
-	container.add_child(action_button)
 
 
 func _open_civilization_report(civ_id:String)->void:
@@ -18778,10 +15654,6 @@ func _qualitative_tension(value:float)->String:
 	return "SEVERE"
 
 
-func _campaign_region_label(role:String)->String:
-	return String({"frontier":"BORDER REGION","granary":"FOOD REGION","market":"TRADE HUB","works":"INDUSTRIAL REGION","capital":"CAPITAL"}.get(role,"STRATEGIC REGION"))
-
-
 func _intercept_foreign_scout(formation_id:String,action:String)->void:
 	var result:Dictionary=CivilizationSystem.resolve_foreign_scout_interception(formation_id,action)
 	civilization_feedback_text=String(result.get("error",result.get("message","Interception resolved.")))
@@ -18816,63 +15688,6 @@ func _close_scout_dispatch_panel()->void:
 	_set_game_speed(scout_dispatch_previous_speed)
 
 
-func _select_scout_target(index:int,selector:OptionButton,duration_grid:GridContainer,heading_selector:OptionButton)->void:
-	if is_instance_valid(scout_dispatch_status):scout_dispatch_status.text=""
-	pending_scout_target_id=String(selector.get_item_metadata(index))
-	var directional_target:=pending_scout_target_id in ["open_world","recruit_people"]
-	heading_selector.disabled=not directional_target
-	heading_selector.tooltip_text="Dictate the outward search sector. The route may bend around terrain, but its endpoint remains in that sector." if directional_target else "This mission has a fixed known destination; its route follows the land to that place."
-	for child in duration_grid.get_children(): child.queue_free()
-	_populate_scout_duration_buttons(duration_grid,pending_scout_target_id)
-
-
-func _select_scout_heading(index:int,selector:OptionButton,duration_grid:GridContainer,target_selector:OptionButton)->void:
-	if is_instance_valid(scout_dispatch_status):scout_dispatch_status.text=""
-	pending_scout_heading=String(selector.get_item_metadata(index))
-	for child in duration_grid.get_children(): child.queue_free()
-	_populate_scout_duration_buttons(duration_grid,String(target_selector.get_item_metadata(target_selector.selected)))
-
-
-func _populate_scout_duration_buttons(duration_grid:GridContainer,target_id:String)->void:
-	for duration in CivilizationSystem.SCOUT_DURATIONS:
-		var directional_target:=target_id in ["open_world","recruit_people"]
-		var quote:=CivilizationSystem.scout_mission_quote(int(duration),target_id,pending_scout_heading if directional_target else "")
-		var mission:=Button.new(); mission.custom_minimum_size=Vector2(0,106); mission.size_flags_horizontal=Control.SIZE_EXPAND_FILL; mission.alignment=HORIZONTAL_ALIGNMENT_LEFT; mission.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; mission.add_theme_font_size_override("font_size",11)
-		mission.text=_scout_mission_card_text(int(duration),quote)
-		mission.disabled=not bool(quote.get("can_dispatch",false))
-		var heading_note:=" toward %s" % pending_scout_heading.to_upper() if directional_target and pending_scout_heading!="" else ""
-		mission.tooltip_text=("BLOCKED  %s" % String(quote.get("blocker","This mission cannot depart."))) if mission.disabled else "Dispatch %d scouts for %d days%s, including surveying and return travel.\n%.1f Food and %d absent people are committed at departure. A shorter route leaves more time to survey nearby land.\nThe planned route remains visible while the party is away. Unknown terrain and patrols can delay or endanger the party; this is not a guarantee of safe passage. Findings become known only on return." % [int(quote.get("personnel",0)),int(duration),heading_note,float(quote.get("provisions",0.0)),int(quote.get("personnel",0))]
-		mission.pressed.connect(_dispatch_scout_from_actions.bind(int(duration),target_id)); duration_grid.add_child(mission)
-
-
-func _scout_mission_card_text(duration:int,quote:Dictionary)->String:
-	var text:="%d-DAY EXPEDITION\n%d SCOUTS  •  %.1f FOOD" % [int(quote.get("duration_days",duration)),int(quote.get("personnel",0)),float(quote.get("provisions",0.0))]
-	if bool(quote.get("shortened",false)):text+="\nLOCAL SURVEY · shorter route, lower cost"
-	var plan:Dictionary=quote.get("route_plan",{})
-	if bool(plan.get("ok",false)):
-		text+="\nOUTWARD ROUTE ~%s KM" % _compact_population(roundi(float(quote.get("planned_outward_km",plan.get("distance_km",0.0)))))
-		if String(plan.get("planned_heading",""))!="":text+="  •  "+String(plan.planned_heading).to_upper()
-		text+="\nSURVEYING + RETURN INCLUDED  •  DANGERS UNKNOWN"
-	if String(quote.get("ordered_heading",""))!="": text+="\nORDERED %s" % String(quote.ordered_heading).to_upper()
-	if not bool(quote.get("can_dispatch",false)):
-		var blocker:=String(quote.get("blocker",quote.get("error","Mission unavailable."))).replace("\n"," ")
-		text+="\nBLOCKED  •  %s" % blocker
-	return text
-
-
-func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world")->void:
-	# A one-off party leaves the Pathfinder's standing delegation as it was.
-	var result:=CivilizationSystem.dispatch_scouts(duration_days,target_id,pending_scout_heading if target_id in ["open_world","recruit_people"] else "")
-	if result.has("error"):
-		if scout_dispatch_status:
-			scout_dispatch_status.text=String(result.error)
-			scout_dispatch_status.add_theme_color_override("font_color",Color("#d77a68"))
-		return
-	if travel_status_label: travel_status_label.text=String(result.get("message","SCOUT PARTY DEPARTED  •  REPORT DUE ONLY ON RETURN"))
-	_close_scout_dispatch_panel()
-	_update_time_interface()
-
-
 func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="")->Control:
 	## Word to another people is sent from the court, in the conversation with
 	## their ruler (one-court-screen). Every envoy button lands here.
@@ -18896,16 +15711,6 @@ func _open_diplomat_for_civ(civ_id:String,purpose:String="")->void:
 	_open_diplomat_dispatch_panel(civ_id,purpose)
 
 
-func _dispatch_scouts(duration_days:int)->void:
-	var result:Dictionary=CivilizationSystem.dispatch_scouts(duration_days)
-	civilization_feedback_text=String(result.get("error",result.get("message","Scout party dispatched.")))
-	selected_civilization_id=""
-	selected_civilization_region_id=""
-	_close_civilizations_panel()
-	_open_civilizations_panel()
-	_update_time_interface()
-
-
 func _select_civilization(civ_id:String)->void:
 	selected_civilization_id=civ_id
 	selected_civilization_region_id=""
@@ -18917,7 +15722,6 @@ func _select_civilization(civ_id:String)->void:
 func _select_civilization_from_option(index:int,selector:OptionButton)->void:
 	if selector==null or index<0 or index>=selector.item_count: return
 	_select_civilization(String(selector.get_item_metadata(index)))
-
 
 
 func _focus_contact_encounter(civ_id:String)->void:
@@ -18947,14 +15751,6 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 
 func _clear_transient_world_notice(expected_text:String)->void:
 	if travel_status_label and travel_status_label.text==expected_text: travel_status_label.text=""
-
-
-func _select_campaign_region(index:int,selector:OptionButton,civ_id:String)->void:
-	selected_civilization_id=civ_id
-	selected_civilization_region_id=String(selector.get_item_metadata(index))
-	civilization_feedback_text=""
-	_close_civilizations_panel()
-	_open_civilizations_panel()
 
 
 func _select_campaign_region_button(civ_id:String,region_id:String)->void:
@@ -19022,421 +15818,6 @@ func _close_civilizations_panel()->void:
 	civilization_detail_root=null
 
 
-func _open_settlement_dashboard()->void:
-	_close_primary_destinations_except("settlement")
-	if settlement_dashboard_panel and is_instance_valid(settlement_dashboard_panel): return
-	settlement_dashboard_panel=Control.new()
-	settlement_dashboard_panel.name="SettlementDashboard"
-	settlement_dashboard_panel.size=get_viewport().get_visible_rect().size
-	settlement_dashboard_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(settlement_dashboard_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=settlement_dashboard_panel.size
-	dimmer.color=Color(0.006,0.010,0.011,0.90)
-	settlement_dashboard_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(1060.0,settlement_dashboard_panel.size.x-48.0),minf(620.0,settlement_dashboard_panel.size.y-40.0))
-	modal.position=(settlement_dashboard_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1213"),Color("#77806b"),1,4,18))
-	settlement_dashboard_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",9)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,72)
-	header.add_theme_constant_override("separation",10)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="SETTLEMENT  •  PEOPLE, WORK & LOCAL CONDITION"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#aeb382"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text=_settlement_display_name().to_upper()
-	title.add_theme_font_size_override("font_size",25)
-	title.add_theme_color_override("font_color",Color("#eee2cc"))
-	heading.add_child(title)
-	var classification:=String(_settlement_model().classification()).to_upper() if GameState.settlement_site_committed else "FOUNDING EXPEDITION"
-	var subtitle:=Label.new()
-	subtitle.text="%s  •  One local dashboard; histories and allocation controls are optional details." % classification
-	subtitle.add_theme_font_size_override("font_size",11)
-	subtitle.add_theme_color_override("font_color",Color("#98a19c"))
-	heading.add_child(subtitle)
-	var metrics:=GameState.simulation_metrics
-	var function_profile:=CivilizationSystem.player_population_function_profile()
-	_make_provision_stat(header,"POPULATION",_compact_population(GameState.population_total),Color("#9caf9a"))
-	_make_provision_stat(header,"HEALTH","%d%%" % roundi(GameState.population_health*100.0),Color("#80a394"))
-	_make_provision_stat(header,"PRODUCTIVE","%s" % _compact_population(int(function_profile.get("productive",0))),Color("#78a276"))
-	_make_provision_stat(header,"HOUSING","%d%%" % roundi(float(metrics.get("housing_ratio",1.0))*100.0),Color("#a9946e"))
-	root.add_child(HSeparator.new())
-	_add_modal_action_brief(root,_population_attention_brief(function_profile,{"health":GameState.population_health,"housing_ratio":float(metrics.get("housing_ratio",1.0))}),Color("#8fa28e"))
-	var cards:=HBoxContainer.new()
-	cards.name="SettlementSummaryCards"
-	cards.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	cards.add_theme_constant_override("separation",10)
-	root.add_child(cards)
-	var pregnancy:=GameState.pregnancy_summary()
-	_settlement_dashboard_card(cards,"PEOPLE",Color("#8fa28e"),"%s productive  •  %s support  •  %s dependents\n%s active pregnancies  •  health %d%%" % [_compact_population(int(function_profile.get("productive",0))),_compact_population(int(function_profile.get("support",0))),_compact_population(int(function_profile.get("dependent",0))),_compact_population(int(pregnancy.get("active",0))),roundi(GameState.population_health*100.0)])
-	_settlement_dashboard_card(cards,"WORK & SHELTER",Color("#b39a68"),"Labor efficiency %d%%  •  housing %d%%\nConstruction %s  •  completed works %d" % [roundi(float(metrics.get("labor_efficiency",0.0))*100.0),roundi(float(metrics.get("housing_ratio",1.0))*100.0),_compact_population(int(GameState.population_allocations.get("Construction",0))),GameState.settlement_completed.size()])
-	var defense:=MilitaryCampaign.settlement_defense_snapshot()
-	_settlement_dashboard_card(cards,"COMMITMENTS & DEFENSE",Color("#8c9bab"),"%s away  •  %s mobilized\n%s  •  integrity %d%%  •  lookout %.0f km" % [_compact_population(int(function_profile.get("absent",0))),_compact_population(int(function_profile.get("mobilized",0))),String(defense.get("short","OPEN GROUND")).to_upper(),roundi(float(defense.get("integrity",0.0))*100.0),float(defense.get("observation_radius_km",0.0))])
-	var footer:=HBoxContainer.new()
-	footer.alignment=BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation",8)
-	root.add_child(footer)
-	var ledger:=Button.new()
-	ledger.text="POPULATION HISTORY"
-	ledger.custom_minimum_size=Vector2(180,40)
-	ledger.tooltip_text="Open aggregate cohorts, births, deaths, and the consequence chronicle."
-	ledger.pressed.connect(_open_population_from_settlement_dashboard)
-	footer.add_child(ledger)
-	var labor:=Button.new()
-	labor.text="MANAGE LABOR"
-	labor.custom_minimum_size=Vector2(150,40)
-	labor.tooltip_text="Return to the map with the compact labor-allocation panel open."
-	labor.pressed.connect(_open_people_from_settlement_dashboard)
-	footer.add_child(labor)
-	var close:=Button.new()
-	close.text="RETURN TO MAP"
-	close.custom_minimum_size=Vector2(150,40)
-	close.pressed.connect(_close_settlement_dashboard)
-	footer.add_child(close)
-
-
-func _settlement_dashboard_card(parent:HBoxContainer,title_text:String,accent:Color,body_text:String)->void:
-	var card:=PanelContainer.new()
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#10191a"),accent,1,4,14))
-	parent.add_child(card)
-	var body:=VBoxContainer.new()
-	body.add_theme_constant_override("separation",8)
-	card.add_child(body)
-	var title:=Label.new()
-	title.text=title_text
-	title.add_theme_font_size_override("font_size",17)
-	title.add_theme_color_override("font_color",accent)
-	body.add_child(title)
-	var detail:=Label.new()
-	detail.text=body_text
-	detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	detail.max_lines_visible=7
-	detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	detail.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	detail.add_theme_font_size_override("font_size",13)
-	detail.add_theme_color_override("font_color",Color("#d4d3c9"))
-	body.add_child(detail)
-
-
-func _close_settlement_dashboard()->void:
-	if settlement_dashboard_panel and is_instance_valid(settlement_dashboard_panel): settlement_dashboard_panel.queue_free()
-	settlement_dashboard_panel=null
-
-
-func _open_population_from_settlement_dashboard()->void:
-	_close_settlement_dashboard()
-	call_deferred("_open_population_ledger")
-
-
-func _open_people_from_settlement_dashboard()->void:
-	_close_settlement_dashboard()
-	call_deferred("_open_people_panel")
-
-
-func _open_population_ledger() -> void:
-	if population_ledger_panel:
-		population_ledger_panel.queue_free()
-	population_ledger_panel=Control.new()
-	population_ledger_panel.size=get_viewport().get_visible_rect().size
-	population_ledger_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(population_ledger_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=population_ledger_panel.size
-	dimmer.color=Color(0.008,0.013,0.015,0.90)
-	population_ledger_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.position=Vector2(56,34)
-	modal.size=population_ledger_panel.size-Vector2(112,68)
-	var modal_style:=StyleBoxFlat.new()
-	modal_style.bg_color=Color(0.035,0.048,0.052,0.995)
-	modal_style.border_color=Color("#75684d")
-	modal_style.set_border_width_all(1)
-	modal_style.set_content_margin_all(22)
-	modal.add_theme_stylebox_override("panel",modal_style)
-	population_ledger_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",10)
-	modal.add_child(root)
-	var heading:=Label.new()
-	heading.text="POPULATION"
-	heading.add_theme_font_size_override("font_size",24)
-	heading.add_theme_color_override("font_color",Color("#ecdfc4"))
-	root.add_child(heading)
-	var summary:=Label.new()
-	var pregnancy_summary:=GameState.pregnancy_summary()
-	summary.text="%s PEOPLE  •  HEALTH %d%%  •  LIFE EXPECTANCY %.1f YEARS\n%s ACTIVE PREGNANCIES  •  ~%s LIVE BIRTHS EXPECTED NEXT 12 MONTHS  •  %s BIRTHS / %s DEATHS RECORDED" % [_compact_population(GameState.population_total),roundi(GameState.population_health*100.0),GameState.projected_life_expectancy(),_compact_population(int(pregnancy_summary.active)),_compact_population(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",pregnancy_summary.due_within_year)))),_compact_population(GameState.lifetime_births),_compact_population(GameState.lifetime_deaths)]
-	summary.tooltip_text="Pregnancy losses %s  •  stillbirths %s  •  maternal deaths %s  •  neonatal deaths %s" % [_compact_population(GameState.lifetime_pregnancy_losses),_compact_population(GameState.lifetime_stillbirths),_compact_population(GameState.lifetime_maternal_deaths),_compact_population(GameState.lifetime_neonatal_deaths)]
-	summary.add_theme_font_size_override("font_size",15)
-	summary.add_theme_color_override("font_color",Color("#cfbd8c"))
-	root.add_child(summary)
-	var model:=Label.new()
-	model.text="Numeric cohorts change through births, deaths, health, shelter, work, travel, policy, and war. No individual people are simulated."
-	model.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	model.add_theme_font_size_override("font_size",13)
-	model.add_theme_color_override("font_color",Color("#aeb0a8"))
-	root.add_child(model)
-	var function_profile:=CivilizationSystem.player_population_function_profile()
-	var function_title:=Label.new()
-	function_title.text="WHERE THE POPULATION IS COMMITTED  •  %s ACCOUNTED FOR" % _compact_population(int(function_profile.get("accounted",0)))
-	function_title.tooltip_text="These five mutually exclusive totals always add to the living population. People away on scouts, envoys, or settlement convoys are removed from their former function until they return or arrive."
-	function_title.add_theme_font_size_override("font_size",12)
-	function_title.add_theme_color_override("font_color",Color("#cfbd8c"))
-	root.add_child(function_title)
-	var function_row:=HBoxContainer.new()
-	function_row.add_theme_constant_override("separation",7)
-	root.add_child(function_row)
-	for function_variant in _population_function_display(function_profile):
-		var function_record:Dictionary=function_variant
-		var function_card:=PanelContainer.new()
-		function_card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		function_card.add_theme_stylebox_override("panel",_population_report_style(function_record.color))
-		function_card.tooltip_text=String(function_record.note)
-		function_row.add_child(function_card)
-		var function_body:=VBoxContainer.new()
-		function_body.add_theme_constant_override("separation",1)
-		function_card.add_child(function_body)
-		var function_label:=Label.new()
-		function_label.text=String(function_record.label)
-		function_label.add_theme_font_size_override("font_size",9)
-		function_label.add_theme_color_override("font_color",function_record.color)
-		function_body.add_child(function_label)
-		var function_value:=Label.new()
-		function_value.text=_compact_population(int(function_record.count))
-		function_value.add_theme_font_size_override("font_size",16)
-		function_value.add_theme_color_override("font_color",Color("#eee2cb"))
-		function_body.add_child(function_value)
-		var function_share:=Label.new()
-		function_share.text="%.1f%%" % (float(function_record.share)*100.0)
-		function_share.add_theme_font_size_override("font_size",9)
-		function_share.add_theme_color_override("font_color",Color("#9da59f"))
-		function_body.add_child(function_share)
-	_add_modal_action_brief(root,_population_attention_brief(function_profile,{"health":GameState.population_health,"housing_ratio":float(GameState.simulation_metrics.get("housing_ratio",1.0))}),Color("#8fa28e"))
-	root.add_child(HSeparator.new())
-	var population_tabs:=TabContainer.new()
-	population_tabs.name="PopulationDetailPages"
-	population_tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	population_tabs.add_theme_font_size_override("font_size",11)
-	root.add_child(population_tabs)
-	_build_population_detail_pages(population_tabs,pregnancy_summary)
-	var footer:=HBoxContainer.new()
-	footer.alignment=BoxContainer.ALIGNMENT_END
-	root.add_child(footer)
-	var close:=Button.new()
-	close.text="RETURN TO MAP"
-	close.custom_minimum_size=Vector2(150,40)
-	close.pressed.connect(func(): population_ledger_panel.queue_free(); population_ledger_panel=null)
-	footer.add_child(close)
-
-
-func _build_population_detail_pages(tabs:TabContainer,pregnancy_summary:Dictionary)->void:
-	var cohorts:=VBoxContainer.new()
-	cohorts.name="CURRENT COHORTS"
-	cohorts.add_theme_constant_override("separation",7)
-	tabs.add_child(cohorts)
-	var cohort_grid:=GridContainer.new()
-	cohort_grid.columns=2
-	cohort_grid.add_theme_constant_override("h_separation",8)
-	cohort_grid.add_theme_constant_override("v_separation",8)
-	cohorts.add_child(cohort_grid)
-	for cohort_entry in [["FIRST TRIMESTER","first_trimester"],["SECOND TRIMESTER","second_trimester"],["THIRD TRIMESTER","third_trimester"],["POSTPARTUM / EARLY CARE","postpartum"]]:
-		var cohort_card:=PanelContainer.new()
-		cohort_card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		cohort_card.add_theme_stylebox_override("panel",_population_report_style(Color("#8fa28e")))
-		cohort_grid.add_child(cohort_card)
-		var cohort_body:=Label.new()
-		cohort_body.text="%s  •  %s PEOPLE\nShared care demand and risk" % [cohort_entry[0],_compact_population(int(pregnancy_summary.get(cohort_entry[1],0)))]
-		cohort_body.add_theme_font_size_override("font_size",11)
-		cohort_body.add_theme_color_override("font_color",Color("#d8ddcf"))
-		cohort_card.add_child(cohort_body)
-	var cohort_note:=Label.new()
-	cohort_note.text="Pregnancy, birth, maternal, neonatal, and early-care risk are simulated as numeric cohorts."
-	cohort_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	cohort_note.add_theme_font_size_override("font_size",11)
-	cohort_note.add_theme_color_override("font_color",Color("#9b9e98"))
-	cohorts.add_child(cohort_note)
-
-	var demographic_page:=VBoxContainer.new()
-	demographic_page.name="BIRTHS & DEATHS"
-	demographic_page.add_theme_constant_override("separation",6)
-	tabs.add_child(demographic_page)
-	_build_population_history_page(demographic_page,"demographic")
-	var deaths_page:=VBoxContainer.new();deaths_page.name="DATED DEATHS";tabs.add_child(deaths_page)
-	_build_population_history_page(deaths_page,"death_details")
-
-	var consequence_page:=VBoxContainer.new()
-	consequence_page.name="CONSEQUENCES"
-	consequence_page.add_theme_constant_override("separation",6)
-	tabs.add_child(consequence_page)
-	_build_population_history_page(consequence_page,"consequence")
-	if not GameState.demographic_ledger.is_empty(): tabs.current_tab=1
-
-
-func _build_population_history_page(page:VBoxContainer,kind:String)->void:
-	var pager:=HBoxContainer.new()
-	pager.alignment=BoxContainer.ALIGNMENT_END
-	pager.add_theme_constant_override("separation",6)
-	page.add_child(pager)
-	var previous:=Button.new()
-	previous.text="‹ PREVIOUS"
-	previous.custom_minimum_size=Vector2(88,28)
-	pager.add_child(previous)
-	var page_label:=Label.new()
-	page_label.custom_minimum_size=Vector2(70,28)
-	page_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	page_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	page_label.add_theme_font_size_override("font_size",11)
-	pager.add_child(page_label)
-	var next:=Button.new()
-	next.text="NEXT ›"
-	next.custom_minimum_size=Vector2(72,28)
-	pager.add_child(next)
-	var body:=VBoxContainer.new()
-	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",6)
-	body.set_meta("history_page",0)
-	page.add_child(body)
-	previous.pressed.connect(_change_population_history_page.bind(body,page_label,previous,next,kind,-1))
-	next.pressed.connect(_change_population_history_page.bind(body,page_label,previous,next,kind,1))
-	_refresh_population_history_page(body,page_label,previous,next,kind)
-
-
-func _population_history_records(kind:String)->Array[Dictionary]:
-	var result:Array[Dictionary]=[]
-	if kind in ["demographic","death_details"]:
-		var model:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd")
-		var grouped:Array=model.death_summary(GameState.demographic_ledger) if kind=="demographic" else model.grouped_deaths(GameState.demographic_ledger)
-		if kind=="death_details":grouped.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
-		for row:Dictionary in grouped:result.append({"kind":"death","compact":true,"title":String(row.name),"description":String(row.sub),"count_label":String(row.value),"detail":String(row.get("tip","Totals cover retained records; open Dated Deaths for places and dates."))})
-		for record_variant in GameState.demographic_ledger:
-			if kind=="demographic" and String(record_variant.get("kind",""))!="death":result.append(record_variant.duplicate(true))
-
-	else:
-		for event_variant in GameState.simulation_events:
-			var event:Dictionary=event_variant
-			if String(event.get("domain",""))!="population": result.append(event.duplicate(true))
-	return result
-
-
-func _change_population_history_page(body:VBoxContainer,page_label:Label,previous:Button,next:Button,kind:String,delta:int)->void:
-	body.set_meta("history_page",maxi(0,int(body.get_meta("history_page",0))+delta))
-	_refresh_population_history_page(body,page_label,previous,next,kind)
-
-
-func _refresh_population_history_page(body:VBoxContainer,page_label:Label,previous:Button,next:Button,kind:String)->void:
-	for child in body.get_children():
-		body.remove_child(child)
-		child.queue_free()
-	var records:=_population_history_records(kind)
-	var page_size:=8 if kind=="demographic" else 5
-	var page_count:=maxi(1,ceili(float(records.size())/float(page_size)))
-	var page:=clampi(int(body.get_meta("history_page",0)),0,page_count-1)
-	body.set_meta("history_page",page)
-	page_label.text="%d / %d" % [page+1,page_count]
-	previous.disabled=page<=0
-	next.disabled=page>=page_count-1
-	if records.is_empty():
-		var quiet:=Label.new()
-		quiet.text="No %s have been recorded yet." % ("births or deaths" if kind=="demographic" else "wider consequences")
-		quiet.add_theme_font_size_override("font_size",12)
-		quiet.add_theme_color_override("font_color",Color("#9b9e98"))
-		body.add_child(quiet)
-		return
-	var start:=page*page_size
-	var finish:=mini(records.size(),start+page_size)
-	for index in range(start,finish):
-		var record:Dictionary=records[index]
-		if kind=="demographic": _add_population_demographic_record(body,record)
-		else: _add_population_consequence_record(body,record)
-
-
-func _add_population_demographic_record(parent:VBoxContainer,record:Dictionary)->void:
-	if bool(record.get("compact",false)):
-		var row:=Label.new();row.text="%s · %s · %s" % [String(record.count_label),String(record.title),String(record.description)];row.tooltip_text=String(record.detail);row.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_theme_font_size_override("font_size",14);parent.add_child(row);return
-	var record_kind:=String(record.get("kind","death"))
-	var count:=int(record.get("count",1))
-	var start_day:=int(record.get("start_day",record.get("day",0)))+1
-	var end_day:=int(record.get("end_day",record.get("day",0)))+1
-	var period:="DAY %d" % end_day if start_day==end_day else "DAYS %d–%d" % [start_day,end_day]
-	var cause:=String(record.get("cause","Unknown"))
-	var cause_label:="SUPPORTED BY CURRENT CONDITIONS" if record_kind=="birth" and cause=="Births" else cause.to_upper()
-	var card:=PanelContainer.new()
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_population_report_style(Color("#b8a36d") if record_kind=="birth" else Color("#a95f52")))
-	parent.add_child(card)
-	var text:=Label.new()
-	text.text="%s  •  %d %s%s  •  %s\n%s  •  POPULATION AFTER %s\n%s  •  WATER %d%%  HEALTH %d%%  SHELTER %d%%" % [period,count,"BIRTH" if record_kind=="birth" else "DEATH","" if count==1 else "S",cause_label,String(record.get("location","Unknown location")),_compact_population(int(record.get("population_after",GameState.population_total))),String(record.get("description","No causal record was preserved.")),roundi(float(record.get("water_intake_ratio",0.0))*100.0),roundi(float(record.get("health",0.0))*100.0),roundi(float(record.get("housing_ratio",0.0))*100.0)]
-	text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	text.add_theme_font_size_override("font_size",11)
-	text.add_theme_color_override("font_color",Color("#d6d2c7"))
-	card.add_child(text)
-
-
-func _add_population_consequence_record(parent:VBoxContainer,event:Dictionary)->void:
-	var card:=PanelContainer.new()
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_population_report_style(Color("#82949a")))
-	parent.add_child(card)
-	var text:=Label.new()
-	text.text="DAY %d  •  %s\n%s" % [int(event.get("day",0))+1,String(event.get("title","Event")).to_upper(),String(event.get("description",""))]
-	text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	text.add_theme_font_size_override("font_size",11)
-	text.add_theme_color_override("font_color",Color("#c7c7bf"))
-	card.add_child(text)
-
-
-# Fixed display metadata for the conserved population-function profile. Keeping
-# this separate from age cohorts prevents "working age" from being confused
-# with actual availability: a working-age scout is shown as away, a trained
-# formation as mobilized, and research/administration as support rather than
-# productive extraction. No food figures belong in this view.
-func _population_function_display(profile:Dictionary)->Array[Dictionary]:
-	var total:=maxi(1,int(profile.get("total",GameState.population_total)))
-	var definitions:Array[Dictionary]=[
-		{"id":"productive","label":"PRODUCTIVE","color":Color("#72a477"),"note":"Direct production, survey, extraction, construction, craft, and logistics labor currently available to the civilization."},
-		{"id":"support","label":"SUPPORT","color":Color("#72a0aa"),"note":"Researchers and administrators building knowledge, coordination, and public capacity."},
-		{"id":"mobilized","label":"MOBILIZED","color":Color("#bd7770"),"note":"Population committed to defense, training, field forces, and occupation rather than ordinary civilian work."},
-		{"id":"dependent","label":"DEPENDENT","color":Color("#b89b6b"),"note":"Children, elders, and other aggregate cohorts supported by the available workforce."},
-		{"id":"absent","label":"AWAY","color":Color("#c57c5f"),"note":"Scouts, envoys, missing parties, and settlement convoys physically absent from owned settlements."}
-	]
-	var result:Array[Dictionary]=[]
-	for definition_variant in definitions:
-		var record:Dictionary=definition_variant.duplicate(true)
-		record["count"]=maxi(0,int(profile.get(String(record.id),0)))
-		record["share"]=float(record.count)/float(total)
-		result.append(record)
-	return result
-
-
-func _population_attention_brief(profile:Dictionary,conditions:Dictionary)->Dictionary:
-	var total:=maxf(1.0,float(profile.get("total",GameState.population_total)))
-	var health:=clampf(float(conditions.get("health",1.0)),0.0,1.0)
-	var housing:=maxf(0.0,float(conditions.get("housing_ratio",1.0)))
-	var absent_share:=float(profile.get("absent",0))/total
-	var mobilized_share:=float(profile.get("mobilized",0))/total
-	var productive_share:=float(profile.get("productive",0))/total
-	if health<0.70:
-		return {"status":"POPULATION HEALTH IS THE MAIN PRESSURE","why":"Average health is %d%%, reducing survival and useful work." % roundi(health*100.0),"next":"Open Provisions & Water, then improve intake, water safety, shelter, or care."}
-	if housing<0.95:
-		return {"status":"SHELTER IS BELOW POPULATION NEED","why":"Housing covers only %d%% of the living population." % roundi(housing*100.0),"next":"Assign Construction labor and secure the materials required for housing."}
-	if absent_share>0.08:
-		return {"status":"MANY PEOPLE ARE AWAY","why":"%.1f%% are committed to scouts, envoys, missing parties, or settlement convoys." % (absent_share*100.0),"next":"Review active missions before committing more population away from settlements."}
-	if mobilized_share>0.12:
-		return {"status":"MILITARY COMMITMENTS ARE DISPLACING CIVILIAN WORK","why":"%.1f%% of the population is mobilized." % (mobilized_share*100.0),"next":"Review armies, garrisons, and occupation needs before expanding mobilization."}
-	return {"status":"POPULATION COMMITMENTS ARE SUSTAINABLE","why":"%.1f%% remain in direct productive roles and no dominant demographic pressure is visible." % (productive_share*100.0),"next":"No immediate change is required; watch health, shelter, dependents, and people away."}
-
 func _update_time_interface() -> void:
 	# The clock reads every frame. Everything else reads simulation state that
 	# only changes when a day completes, so between days it refreshes at 10 Hz.
@@ -19450,80 +15831,17 @@ func _update_time_interface() -> void:
 			CaravanPanel.sync(self,hud)
 	if interface_layer == null:
 		return
-	if date_label:
-		var absolute_hour:=int(floor(GameState.elapsed_days*24.0))
-		var absolute_day:=absolute_hour/24
-		var year := absolute_day / 365 + 1
-		var day_of_year := absolute_day % 365 + 1
-		var hour_of_day:=absolute_hour%24
-		date_label.text = "Y%d  •  D%d  •  %02d:00" % [year, day_of_year,hour_of_day]
 	if not full:
 		return
-	if world_header_label:
-		var focus:=GameState.founding_focus_definition()
-		world_header_label.text=GameState.province_name.to_upper()
-		world_header_label.tooltip_text="%s\n%s\n\nFOUNDING FOCUS  •  %s\n%s\nPermanent strengths: %s\nTradeoff: %s" % [GameState.province_name.to_upper(),_settlement_display_name() if GameState.settlement_site_committed else "FOUNDING EXPEDITION",String(focus.get("name","Not yet chosen")),String(focus.get("creed","Choose before time begins.")),String(focus.get("strengths","")),String(focus.get("tradeoff",""))]
-	if world_competition_button:
-		var competition:Dictionary=CivilizationSystem.known_competition_snapshot()
-		var exploration:Dictionary=competition.get("exploration",{})
-		var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
-		if int(observation.get("visible_count",0))>0:
-			world_competition_button.text="WORLD  •  %d" % int(observation.visible_count)
-			world_competition_button.tooltip_text="%d band%s of strangers within %.0f km of our lookouts." % [int(observation.visible_count),"" if int(observation.visible_count)==1 else "s",float(observation.radius_km)]
-		elif bool(exploration.get("active",false)):
-			world_competition_button.text="SCOUT  %dD" % int(exploration.get("days_remaining",0))
-			world_competition_button.tooltip_text="Scout party away for %d more days. Its observations remain physically with the party; interception or capture before return destroys the report." % int(exploration.get("days_remaining",0))
-		elif bool(competition.get("global_rank_hidden",false)):
-			world_competition_button.text="WORLD  •  %d" % int(competition.get("contacted_count",0))
-			world_competition_button.tooltip_text="%d known foreign civilization%s. Global standing remains unknown. Open scouting, returned reports, diplomacy, and estimated competition." % [int(competition.get("contacted_count",0)),"" if int(competition.get("contacted_count",0))==1 else "s"]
-		else:
-			world_competition_button.text="WORLD  #%d" % int(competition.player_rank)
-			world_competition_button.tooltip_text="Known competitive standing: rank %d of %d, led by %s." % [int(competition.player_rank),int(competition.contender_count),String((competition.leader as Dictionary).name)]
-	_refresh_knowledge_record()
-	for speed_key in time_speed_buttons:
-		var speed_button:Button=time_speed_buttons[speed_key]
-		speed_button.button_pressed=int(game_speed)==int(speed_key)
-	if population_summary_label:
-		var balance := float(GameState.simulation_metrics.get("food_balance",-1.0))
-		var balance_mark := "▲" if balance>=0.0 else "▼"
-		population_summary_label.text = "SETTLEMENT"
-		population_summary_label.tooltip_text = "Population %s  •  Health %d%%  •  Projected life expectancy %.1f years.\nOpen population, cohorts, births, deaths, health, and labor allocation." % [_compact_population(GameState.population_total),roundi(GameState.population_health*100.0),GameState.projected_life_expectancy()]
-		if provisions_button:
-			var net:=float(GameState.simulation_metrics.get("food_net",0.0))
-			var food_days:=float(GameState.simulation_metrics.get("food_days",30.0))
-			provisions_button.text="ECONOMY"
-			provisions_button.tooltip_text="Food %.1f days  •  %s  •  %+.1f today.\nOpen provisions, water, material flow, storage, and bottlenecks." % [food_days,balance_mark,net]
-		if materials_button:
-			var known_count:=ResourceSystem.visible_deposits().size()
-			var material_bulk:=ResourceSystem.stored_bulk()
-			materials_button.text="MATERIALS %.0f" % material_bulk
-			materials_button.tooltip_text="%.1f bulk of carried and settled materials  •  %d recognized occurrences.\nThis is physical inventory, not a market value. Foreign trade does not exist without a returned emissary contract.\nOpen recognized sources, extraction, hauling, losses, and storage." % [material_bulk,known_count]
 	if convoy_map_label:
 		var title:="Founding convoy" if not GameState.settlement_site_committed else (GameState.settlement_name.strip_edges() if not GameState.settlement_name.strip_edges().is_empty() else "Founding site")
 		convoy_map_label.text=_city_map_label(title,GameState.population_total)
 		convoy_map_label.set_meta("map_status",_convoy_water_readout() if not GameState.settlement_site_committed else "Establishing home · View progress")
 		_update_city_flag(convoy_map_label)
-	if people_panel_title:
-		people_panel_title.text=_settlement_display_name()
-	if people_summary_label:
-		var settlement_status := "Traveling convoy" if travel_active else ("Founding settlement" if GameState.settlement_site_committed and GameState.settlement_completed.is_empty() else ("Halted convoy" if GameState.settlement_completed.is_empty() else "Growing settlement"))
-		var pregnancy_summary:=GameState.pregnancy_summary()
-		people_summary_label.text = "POP %s  •  LABOR %s  •  EFF %d%%\n%s\nPREGNANT %s  •  BIRTHS/12M %s" % [_compact_population(GameState.population_total),_compact_population(_able_population()),roundi(float(GameState.simulation_metrics.get("labor_efficiency",0.72))*100.0),settlement_status.to_upper(),_compact_population(int(pregnancy_summary.active)),_compact_population(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",pregnancy_summary.due_within_year))))]
 	if travel_status_label:
 		# One calm sentence for the journey and the founding (map_ticker_words.gd).
 		var journey_line:=MapTickerWords.journey(travel_active,maxf(0.0,travel_days_total-travel_days_elapsed),GameState.settlement_convoy,GameState.convoy_emergency_halt_reason,GameState.settlement_site_committed,bool(GameState.founding_journey.get("camped_foraging",false)),"Hearth Circle" in GameState.settlement_completed,settlement_convoy_targeting,placement_building!="",GameState.settlement_founded_day if GameState.settlement_site_committed else -1,GameState.elapsed_days)
 		if journey_line!="" or placement_building=="":travel_status_label.text=journey_line
-	if start_settlement_button:
-		# All map commands now live together under ACTIONS. The contextual status
-		# above provides onboarding without a modal-sized permanent map obstruction.
-		start_settlement_button.visible=false
-		start_settlement_button.disabled=false
-		if not GameState.settlement_site_committed and travel_active:
-			start_settlement_button.text="START SETTLEMENT\nHalt the moving convoy here and begin"
-		else:
-			start_settlement_button.text="START SETTLEMENT\nFound at the convoy's current location"
-	_update_resource_view_toggle()
-	_refresh_actions_menu()
 	_refresh_map_help()
 
 func _settlement_display_name() -> String:
@@ -19554,13 +15872,6 @@ func _set_game_speed(speed: float) -> void:
 func _speed_hours_per_second() -> float:
 	return float(SPEED_HOURS_PER_REAL_SECOND.get(int(game_speed),0.0))
 
-func _format_game_duration(days: float) -> String:
-	var total_hours:=maxi(0,ceili(days*24.0))
-	if total_hours<48:
-		return "%d hours" % total_hours
-	var whole_days:=total_hours/24
-	var hours:=total_hours%24
-	return "%d days %d hours" % [whole_days,hours]
 
 func _compact_population(value: int) -> String:
 	if value >= 1000000000000:
@@ -19573,916 +15884,6 @@ func _compact_population(value: int) -> String:
 		return "%.1fK" % (float(value) / 1000.0)
 	return str(value)
 
-
-func _open_systems_hub()->void:
-	_close_primary_destinations_except("civilization")
-	if systems_hub_panel and is_instance_valid(systems_hub_panel): return
-	systems_hub_panel=Control.new()
-	systems_hub_panel.name="CivilizationHub"
-	systems_hub_panel.size=get_viewport().get_visible_rect().size
-	systems_hub_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(systems_hub_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=systems_hub_panel.size
-	dimmer.color=Color(0.84,0.81,0.74,0.72) if HudT.is_light() else Color(0.006,0.009,0.011,0.88)
-	systems_hub_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.name="CivilizationDashboard"
-	modal.size=Vector2(minf(1120.0,systems_hub_panel.size.x-48.0),minf(650.0,systems_hub_panel.size.y-40.0))
-	modal.position=(systems_hub_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1215"),Color("#817353"),1,4,20))
-	systems_hub_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",10)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,64)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="CIVILIZATION  •  DEVELOPMENT, SOCIETY & GOVERNMENT"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#c6ad6b"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="CIVILIZATION OVERVIEW"
-	title.add_theme_font_size_override("font_size",24)
-	title.add_theme_color_override("font_color",Color("#eee2cc"))
-	heading.add_child(title)
-	var focus:=GameState.founding_focus_definition()
-	var summary:=Label.new()
-	summary.text="%s  •  Population %s  •  Founding focus: %s" % [_settlement_display_name(),_compact_population(GameState.population_total),String(focus.get("name","not chosen"))]
-	summary.add_theme_font_size_override("font_size",11)
-	summary.add_theme_color_override("font_color",Color("#9fa8a3"))
-	heading.add_child(summary)
-	var return_to_map:=Button.new()
-	return_to_map.text="RETURN TO MAP"
-	return_to_map.custom_minimum_size=Vector2(150,38)
-	return_to_map.pressed.connect(_close_systems_hub)
-	header.add_child(return_to_map)
-	root.add_child(HSeparator.new())
-	_add_modal_action_brief(root,_civilization_overview_brief(),Color("#9b8660"))
-	var cards:=HBoxContainer.new()
-	cards.name="CivilizationSummaryCards"
-	cards.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	cards.add_theme_constant_override("separation",10)
-	root.add_child(cards)
-	var development:=ProgressionSystem.tree_snapshot()
-	_civilization_dashboard_card(cards,"DEVELOPMENT",Color("#8798b5"),"%d established  •  %d active lines" % [int(development.get("known_discoveries",GameState.known_discoveries.size())),int(development.get("active_inquiries",GameState.active_investigations.size()))],"Set broad research priorities; evidence, place, prior findings, and chance determine the concrete discoveries that follow.","SET RESEARCH PRIORITIES","_open_knowledge_panel","VIEW ESTABLISHED DEVELOPMENT","_open_progression_panel")
-	var identity:=SocietalValuesModel.identity_snapshot(GameState.societal_values)
-	var average_capacity:=_civilization_average_capacity()
-	_civilization_dashboard_card(cards,"SOCIETY",Color("#70a8a0"),"%s  •  capacity %d%%" % [String(identity.get("name","FORMING ORDER")),roundi(average_capacity*100.0)],"See the twelve capacities the civilization can actually sustain, plus the values and institutions shaping how it organizes itself.","OPEN SOCIETY","_open_society_panel","VALUES & INSTITUTIONS","_open_values_panel")
-	var active_policies:=ConsequenceEngine.active_policies().size()
-	_civilization_dashboard_card(cards,"GOVERNMENT",Color("#b99b62"),"%d active policies  •  %d directives" % [active_policies,GameState.sovereign_orders.size()],"Offices, administrative reach, standing policy, and directives belong here. Directives change only what the simulation can physically and institutionally carry out.","OPEN GOVERNMENT","_open_government_panel","DIRECTIVES & COUNCIL","_open_council_panel")
-	var footer_note:=Label.new()
-	footer_note.text="Three systems, one civilization. Open a section only when you need to change or inspect it."
-	footer_note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	footer_note.add_theme_font_size_override("font_size",10)
-	footer_note.add_theme_color_override("font_color",Color("#858f8a"))
-	root.add_child(footer_note)
-
-
-func _civilization_average_capacity()->float:
-	if GameState.society_capacities.is_empty(): return 0.0
-	var total:=0.0
-	for value in GameState.society_capacities.values(): total+=float(value)
-	return total/float(GameState.society_capacities.size())
-
-
-func _civilization_overview_brief()->Dictionary:
-	if not GameState.council_inbox.is_empty():
-		return {"status":"%d COUNCIL REPORTS AWAIT REVIEW" % GameState.council_inbox.size(),"why":"The council has recorded pressures or consequences that may require a directive.","next":"Open Directives & Council if you want to respond; reports do not pause the simulation."}
-	var weakest:=""
-	var weakest_value:=2.0
-	for domain_variant in GameState.society_capacities:
-		var domain:=String(domain_variant)
-		var value:=float(GameState.society_capacities[domain])
-		if value<weakest_value:
-			weakest=domain
-			weakest_value=value
-	if weakest!="" and weakest_value<0.55:
-		return {"status":"MAIN CIVILIZATION CONSTRAINT: %s %d%%" % [weakest.to_upper(),roundi(weakest_value*100.0)],"why":"This is the weakest of the twelve aggregate capacities and is limiting what the civilization can sustain.","next":"Open Society for its drivers, then Development or Government only if a specific change is required."}
-	return {"status":"NO CIVILIZATION-WIDE DECISION IS URGENT","why":"No unread council pressure or failing systemic capacity currently dominates.","next":"Let time run, or open one of the three sections when you want to change direction."}
-
-
-func _civilization_dashboard_card(parent:HBoxContainer,title_text:String,accent:Color,status_text:String,description:String,primary_text:String,primary_method:StringName,secondary_text:String,secondary_method:StringName)->void:
-	var card:=PanelContainer.new()
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#0d171a"),accent,1,4,14))
-	parent.add_child(card)
-	var body:=VBoxContainer.new()
-	body.add_theme_constant_override("separation",8)
-	card.add_child(body)
-	var title:=Label.new()
-	title.text=title_text
-	title.add_theme_font_size_override("font_size",18)
-	title.add_theme_color_override("font_color",accent)
-	body.add_child(title)
-	var status:=Label.new()
-	status.text=status_text
-	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	status.max_lines_visible=2
-	status.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	status.add_theme_font_size_override("font_size",13)
-	status.add_theme_color_override("font_color",Color("#e3ddcf"))
-	body.add_child(status)
-	var explanation:=Label.new()
-	explanation.text=description
-	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	explanation.max_lines_visible=5
-	explanation.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	explanation.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	explanation.add_theme_font_size_override("font_size",11)
-	explanation.add_theme_color_override("font_color",Color("#9fa8a3"))
-	body.add_child(explanation)
-	var primary:=Button.new()
-	primary.text=primary_text
-	primary.custom_minimum_size=Vector2(0,42)
-	primary.pressed.connect(_open_from_systems_hub.bind(primary_method))
-	body.add_child(primary)
-	var secondary:=Button.new()
-	secondary.text=secondary_text
-	secondary.custom_minimum_size=Vector2(0,34)
-	secondary.pressed.connect(_open_from_systems_hub.bind(secondary_method))
-	body.add_child(secondary)
-
-
-func _open_from_systems_hub(method_name:StringName)->void:
-	_close_systems_hub()
-	call_deferred(method_name)
-
-
-func _close_systems_hub()->void:
-	if systems_hub_panel and is_instance_valid(systems_hub_panel): systems_hub_panel.queue_free()
-	systems_hub_panel=null
-
-
-func _back_to_civilization_from_research()->void:
-	if knowledge_panel and is_instance_valid(knowledge_panel): knowledge_panel.queue_free()
-	knowledge_panel=null
-	knowledge_record_container=null
-	knowledge_investigation_widgets.clear()
-	knowledge_discovery_widgets.clear()
-	knowledge_mode_buttons.clear()
-	knowledge_category_selector=null
-	call_deferred("_open_systems_hub")
-
-
-func _back_to_civilization_from_council()->void:
-	if council_panel and is_instance_valid(council_panel): council_panel.queue_free()
-	council_panel=null
-	call_deferred("_open_systems_hub")
-
-
-func _back_to_civilization_from_government()->void:
-	if government_panel and is_instance_valid(government_panel): government_panel.queue_free()
-	government_panel=null
-	call_deferred("_open_systems_hub")
-
-
-func _back_to_civilization_from_society()->void:
-	if society_panel and is_instance_valid(society_panel): society_panel.queue_free()
-	society_panel=null
-	call_deferred("_open_systems_hub")
-
-
-func _back_to_civilization_from_progression()->void:
-	if progression_panel and is_instance_valid(progression_panel): progression_panel.queue_free()
-	progression_panel=null
-	call_deferred("_open_systems_hub")
-
-
-func _open_society_panel()->void:
-	society_panel_mode="overview"
-	if society_panel and is_instance_valid(society_panel): society_panel.queue_free()
-	if GameState.society_subcategories.is_empty():
-		GameState.society_subcategories=DiscoverySystem.society_model.evaluate_subcategories(_discovery_context())
-	society_panel=Control.new()
-	society_panel.size=get_viewport().get_visible_rect().size
-	society_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(society_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=society_panel.size
-	dimmer.color=Color(0.006,0.009,0.011,0.91)
-	society_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.position=Vector2(18,14)
-	modal.size=society_panel.size-Vector2(36,28)
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1215"),Color("#75694f"),1,4,14))
-	society_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,58)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="THE STATE OF THE CIVILIZATION"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#b9a56c"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="SOCIETY"
-	title.add_theme_font_size_override("font_size",24)
-	title.add_theme_color_override("font_color",Color("#f0e5cf"))
-	heading.add_child(title)
-	var subtitle:=Label.new()
-	subtitle.text="Values describe what should happen. Institutions describe how power works. Capacities describe what society can do."
-	subtitle.add_theme_font_size_override("font_size",11)
-	subtitle.add_theme_color_override("font_color",Color("#929d98"))
-	heading.add_child(subtitle)
-	var average:=0.0
-	for dynamic_id in GameState.society_capacities: average+=float(GameState.society_capacities[dynamic_id])
-	average/=maxf(1.0,float(GameState.society_capacities.size()))
-	var overall:=VBoxContainer.new()
-	overall.custom_minimum_size=Vector2(170,0)
-	header.add_child(overall)
-	var overall_label:=Label.new()
-	overall_label.text="SYSTEMIC CAPACITY"
-	overall_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	overall_label.add_theme_font_size_override("font_size",10)
-	overall_label.add_theme_color_override("font_color",Color("#8f9994"))
-	overall.add_child(overall_label)
-	var overall_value:=Label.new()
-	overall_value.text="%d%%" % roundi(average*100.0)
-	overall_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	overall_value.add_theme_font_size_override("font_size",24)
-	overall_value.add_theme_color_override("font_color",_dynamic_score_color(average))
-	overall.add_child(overall_value)
-	var progression_button:=Button.new()
-	progression_button.text="OPEN DEVELOPMENT\nPATHS & BLOCKERS"
-	progression_button.custom_minimum_size=Vector2(148,50)
-	progression_button.tooltip_text="See what this civilization has actually established, where attention is concentrated, and which frontiers are beginning to surface."
-	progression_button.pressed.connect(func(): society_panel.queue_free(); society_panel=null; _open_progression_panel())
-	header.add_child(progression_button)
-	var identity:Dictionary=SocietalValuesModel.identity_snapshot(GameState.societal_values)
-	var values_button:=Button.new()
-	values_button.text="VIEW VALUES & INSTITUTIONS\n%s" % String(identity.get("name","FORMING SOCIAL ORDER"))
-	values_button.custom_minimum_size=Vector2(210,50)
-	values_button.tooltip_text="%s\nAlignment %d%% • tension %d%%\nOpen the lived, official, and institutional value system." % [String(identity.get("summary","Values still forming")),roundi(float(identity.get("alignment",1.0))*100.0),roundi(float(identity.get("tension",0.0))*100.0)]
-	values_button.pressed.connect(func(): society_panel.queue_free(); society_panel=null; _open_values_panel())
-	header.add_child(values_button)
-	root.add_child(HSeparator.new())
-	_add_modal_action_brief(root,_society_attention_brief(GameState.society_capacities),Color("#70a8a0"))
-	var scroll:=FIT_CONTENT_PANEL.new()
-	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	root.add_child(scroll)
-	var grid:=GridContainer.new()
-	grid.columns=4
-	grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation",8)
-	grid.add_theme_constant_override("v_separation",8)
-	scroll.add_child(grid)
-	for dynamic_id in ["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]:
-		_make_dynamic_card(grid,dynamic_id)
-	var footer:=HBoxContainer.new()
-	root.add_child(footer)
-	var note:=Label.new()
-	note.text="▲ improving  •  ▼ declining  •  Hover any ? for its definition, drivers, and consequences."
-	note.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	note.add_theme_font_size_override("font_size",10)
-	note.add_theme_color_override("font_color",Color("#87918c"))
-	footer.add_child(note)
-	var close:=Button.new()
-	close.text="BACK TO CIVILIZATION"
-	close.custom_minimum_size=Vector2(150,36)
-	close.pressed.connect(_back_to_civilization_from_society)
-	footer.add_child(close)
-
-
-func _society_attention_brief(capacities:Dictionary)->Dictionary:
-	if capacities.is_empty():
-		return {"status":"SOCIETY HAS NOT BEEN MEASURED YET","why":"No capacity record exists before the first simulation update.","next":"Advance time once to establish the first twelve-system baseline."}
-	var weakest:=""
-	var weakest_value:=2.0
-	for domain_variant in capacities:
-		var domain:=String(domain_variant)
-		var value:=clampf(float(capacities[domain]),0.0,1.0)
-		if value<weakest_value:
-			weakest=domain
-			weakest_value=value
-	var next_by_domain:Dictionary={
-		"nutrition":"Open Provisions & Water to find the supply, reserve, or intake constraint.",
-		"health":"Check Population and Provisions & Water for health, water, shelter, and care pressures.",
-		"knowledge":"Open Research Priorities and concentrate more of the aggregate research workforce.",
-		"production":"Open Material Flow, then assign labor or priorities where supply is blocked.",
-		"infrastructure":"Open Development Paths to see the next housing, works, and material blockers.",
-		"logistics":"Open Material Flow and improve carrying or routes where goods wait at sources.",
-		"security":"Open Military to review training, readiness, garrisons, and field commitments."
-	}
-	var next_text:=String(next_by_domain.get(weakest,"Open Development Paths to see which evidence, adoption, population, or supporting system is holding this capacity back."))
-	if weakest_value>=0.65:
-		return {"status":"NO SYSTEM IS IN IMMEDIATE FAILURE","why":"The lowest current capacity is %s at %d%%." % [weakest.capitalize(),roundi(weakest_value*100.0)],"next":"Use Development Paths for long-term blockers or Values & Institutions for social tension."}
-	return {"status":"WEAKEST SYSTEM: %s %d%%" % [weakest.to_upper(),roundi(weakest_value*100.0)],"why":_dynamic_definition(weakest).get_slice("\n",0),"next":next_text}
-
-
-func _open_values_panel()->void:
-	society_panel_mode="values"
-	if society_panel and is_instance_valid(society_panel): society_panel.queue_free()
-	GameState.societal_values=SocietalValuesModel.normalize_state(GameState.societal_values)
-	var identity:Dictionary=SocietalValuesModel.identity_snapshot(GameState.societal_values)
-	society_panel=Control.new()
-	society_panel.name="SocietalValues"
-	society_panel.size=get_viewport().get_visible_rect().size
-	society_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(society_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=society_panel.size
-	dimmer.color=Color(0.004,0.007,0.009,0.94)
-	society_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.position=Vector2(18,14)
-	modal.size=society_panel.size-Vector2(36,28)
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#091215"),Color("#8a7548"),1,4,14))
-	society_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",8)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,70)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="EMERGENT IDENTITY  •  NOT A SELECTED IDEOLOGY"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#c5ad6e"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text=String(identity.get("name","FORMING SOCIAL ORDER"))
-	title.add_theme_font_size_override("font_size",24)
-	title.add_theme_color_override("font_color",Color("#f0e5cf"))
-	heading.add_child(title)
-	var subtitle:=Label.new()
-	subtitle.text="%s  •  Founding focus: %s" % [String(identity.get("summary","No dominant value yet")),String(GameState.founding_focus_definition().get("name","UNDECIDED"))]
-	subtitle.add_theme_font_size_override("font_size",10)
-	subtitle.add_theme_color_override("font_color",Color("#929d98"))
-	heading.add_child(subtitle)
-	var alignment_box:=VBoxContainer.new()
-	alignment_box.custom_minimum_size=Vector2(210,0)
-	header.add_child(alignment_box)
-	var alignment_title:=Label.new()
-	alignment_title.text="SOCIAL ALIGNMENT"
-	alignment_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	alignment_title.add_theme_font_size_override("font_size",10)
-	alignment_title.add_theme_color_override("font_color",Color("#8f9994"))
-	alignment_box.add_child(alignment_title)
-	var alignment_value:=Label.new()
-	alignment_value.text="%d%%" % roundi(float(identity.get("alignment",1.0))*100.0)
-	alignment_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	alignment_value.add_theme_font_size_override("font_size",24)
-	alignment_value.add_theme_color_override("font_color",_dynamic_score_color(float(identity.get("alignment",1.0))))
-	alignment_value.tooltip_text="Agreement between lived values, official claims, and institutions. Misalignment reduces legitimacy and cohesion and can drive reform or unrest."
-	alignment_box.add_child(alignment_value)
-	root.add_child(HSeparator.new())
-	var built_expression:=Label.new()
-	built_expression.text="SETTLEMENT DESIGN  •  %s" % _architecture_expression_text(SocietalValuesModel.architecture_snapshot(GameState.societal_values)).to_upper()
-	built_expression.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	built_expression.tooltip_text="This is how the civilization's aggregate values currently influence settlement alignment, public space, massing, lanes, enclosure, and response to terrain. It does not create individual building records."
-	built_expression.add_theme_font_size_override("font_size",9)
-	built_expression.add_theme_color_override("font_color",Color("#a99c79"))
-	root.add_child(built_expression)
-	var body:=HBoxContainer.new()
-	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",12)
-	root.add_child(body)
-	var values_column:=VBoxContainer.new()
-	values_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body.add_child(values_column)
-	var values_title:=Label.new()
-	values_title.text="LIVED VALUES  •  OFFICIAL CLAIMS  •  INSTITUTIONAL REALITY"
-	values_title.add_theme_font_size_override("font_size",11)
-	values_title.add_theme_color_override("font_color",Color("#d8c89e"))
-	values_column.add_child(values_title)
-	var values_scroll:=FIT_CONTENT_PANEL.new()
-	values_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	values_column.add_child(values_scroll)
-	var values_grid:=GridContainer.new()
-	values_grid.columns=2
-	values_grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	values_grid.add_theme_constant_override("h_separation",8)
-	values_grid.add_theme_constant_override("v_separation",8)
-	values_scroll.add_child(values_grid)
-	for axis in SocietalValuesModel.VALUE_ORDER: _make_societal_value_card(values_grid,axis)
-	var institutions_column:=VBoxContainer.new()
-	institutions_column.custom_minimum_size=Vector2(395,0)
-	body.add_child(institutions_column)
-	var institutions_title:=Label.new()
-	institutions_title.text="ORGANIZATIONAL FORMS"
-	institutions_title.add_theme_font_size_override("font_size",11)
-	institutions_title.add_theme_color_override("font_color",Color("#d8c89e"))
-	institutions_column.add_child(institutions_title)
-	var institutions_note:=Label.new()
-	institutions_note.text="Discoveries open possibilities. Existing values determine which form spreads; lived results then change those values."
-	institutions_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	institutions_note.add_theme_font_size_override("font_size",9)
-	institutions_note.add_theme_color_override("font_color",Color("#8c9994"))
-	institutions_column.add_child(institutions_note)
-	var institution_scroll:=FIT_CONTENT_PANEL.new()
-	institution_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	institutions_column.add_child(institution_scroll)
-	var institution_list:=VBoxContainer.new()
-	institution_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	institution_list.add_theme_constant_override("separation",7)
-	institution_scroll.add_child(institution_list)
-	var institutions:=SocietalValuesModel.active_institutions(GameState.societal_values)
-	if institutions.is_empty():
-		var empty:=Label.new()
-		empty.text="No formal organization has spread yet because the relevant social discoveries are not established or adopted. Set broad research priorities in Inquiry, then allow evidence and social use to develop over time."
-		empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		empty.add_theme_color_override("font_color",Color("#7f8d88"))
-		institution_list.add_child(empty)
-	else:
-		for institution in institutions: _make_societal_institution_card(institution_list,institution)
-	var footer:=HBoxContainer.new()
-	root.add_child(footer)
-	var note:=Label.new()
-	note.text="Values drift from real outcomes over generations. They are not direct bonuses and cannot be switched instantly."
-	note.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	note.add_theme_font_size_override("font_size",10)
-	note.add_theme_color_override("font_color",Color("#87918c"))
-	footer.add_child(note)
-	var back:=Button.new()
-	back.text="BACK TO SOCIETY"
-	back.custom_minimum_size=Vector2(180,36)
-	back.pressed.connect(func(): society_panel.queue_free(); society_panel=null; call_deferred("_open_society_panel"))
-	footer.add_child(back)
-	var close:=Button.new()
-	close.text="RETURN TO MAP"
-	close.custom_minimum_size=Vector2(130,36)
-	close.pressed.connect(func(): society_panel.queue_free(); society_panel=null)
-	footer.add_child(close)
-
-
-func _make_societal_value_card(parent:Container,axis:String)->void:
-	var definition:=SocietalValuesModel.value_definition(axis)
-	var lived:=clampf(float(GameState.societal_values.lived.get(axis,0.5)),0.0,1.0)
-	var official:=clampf(float(GameState.societal_values.official.get(axis,0.5)),0.0,1.0)
-	var institutional:=clampf(float(GameState.societal_values.institutional_orientation.get(axis,0.5)),0.0,1.0)
-	var card:=PanelContainer.new()
-	card.custom_minimum_size=Vector2(305,88)
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#111a1d"),Color("#536b68"),1,3,8))
-	card.tooltip_text=String(definition.get("meaning",""))
-	parent.add_child(card)
-	var content:=VBoxContainer.new()
-	content.add_theme_constant_override("separation",3)
-	card.add_child(content)
-	var title:=Label.new()
-	title.text=String(definition.get("name",axis.to_upper()))
-	title.add_theme_font_size_override("font_size",10)
-	title.add_theme_color_override("font_color",Color("#e4dccb"))
-	content.add_child(title)
-	var poles:=Label.new()
-	poles.text="%s   ↔   %s" % [String(definition.get("low","LOW")),String(definition.get("high","HIGH"))]
-	poles.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	poles.add_theme_font_size_override("font_size",8)
-	poles.add_theme_color_override("font_color",Color("#87938e"))
-	content.add_child(poles)
-	var bar:=ProgressBar.new()
-	bar.max_value=1.0
-	bar.value=lived
-	bar.show_percentage=false
-	bar.custom_minimum_size=Vector2(0,7)
-	bar.add_theme_stylebox_override("background",_knowledge_style(Color("#202a2c"),Color.TRANSPARENT,0,3,0))
-	bar.add_theme_stylebox_override("fill",_knowledge_style(Color("#75a9a1"),Color.TRANSPARENT,0,3,0))
-	content.add_child(bar)
-	var readings:=Label.new()
-	readings.text="LIVED %d  •  OFFICIAL %d  •  INSTITUTIONS %d" % [roundi(lived*100.0),roundi(official*100.0),roundi(institutional*100.0)]
-	readings.add_theme_font_size_override("font_size",8)
-	readings.add_theme_color_override("font_color",Color("#a9b2ad"))
-	content.add_child(readings)
-
-
-func _make_societal_institution_card(parent:Container,institution:Dictionary)->void:
-	var adoption:=clampf(float(institution.get("adoption",0.0)),0.0,1.0)
-	var card:=PanelContainer.new()
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#111a1d"),Color("#75694f"),1,3,8))
-	parent.add_child(card)
-	var content:=VBoxContainer.new()
-	content.add_theme_constant_override("separation",3)
-	card.add_child(content)
-	var heading:=Label.new()
-	heading.text=String(institution.get("name","INSTITUTION"))
-	heading.add_theme_font_size_override("font_size",9)
-	heading.add_theme_color_override("font_color",Color("#b8a66f"))
-	content.add_child(heading)
-	var form:=Label.new()
-	form.text=String(institution.get("form","Emerging practice")).to_upper()
-	form.add_theme_font_size_override("font_size",11)
-	form.add_theme_color_override("font_color",Color("#e4dccb"))
-	content.add_child(form)
-	var spread:=ProgressBar.new()
-	spread.max_value=1.0
-	spread.value=adoption
-	spread.show_percentage=false
-	spread.custom_minimum_size=Vector2(0,6)
-	content.add_child(spread)
-	var status:=Label.new()
-	status.text="ADOPTION %d%%  •  ESTABLISHED YEAR %d" % [roundi(adoption*100.0),int(floor(float(institution.get("discovered_day",0))/365.0))+1]
-	status.add_theme_font_size_override("font_size",8)
-	status.add_theme_color_override("font_color",Color("#89958f"))
-	content.add_child(status)
-
-
-func _open_progression_panel(selected_domain:="demography")->void:
-	if selected_domain not in ProgressionSystem.domains(): selected_domain="demography"
-	active_progression_domain=selected_domain
-	if progression_panel and is_instance_valid(progression_panel): progression_panel.queue_free()
-	if society_panel and is_instance_valid(society_panel): society_panel.queue_free(); society_panel=null
-	ProgressionSystem.process_day(int(floor(GameState.elapsed_days)))
-	var snapshot:Dictionary=ProgressionSystem.tree_snapshot()
-	progression_panel=Control.new()
-	progression_panel.name="EmergentDevelopment"
-	progression_panel.size=get_viewport().get_visible_rect().size
-	progression_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(progression_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=progression_panel.size
-	dimmer.color=Color(0.004,0.007,0.009,0.94)
-	progression_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.name="DevelopmentModal"
-	modal.position=Vector2(18,14)
-	modal.size=progression_panel.size-Vector2(36,28)
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#091215"),Color("#8a7548"),1,4,14))
-	progression_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",7)
-	modal.add_child(root)
-	var header:=HBoxContainer.new()
-	header.custom_minimum_size=Vector2(0,64)
-	root.add_child(header)
-	var heading:=VBoxContainer.new()
-	heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	header.add_child(heading)
-	var eyebrow:=Label.new()
-	eyebrow.text="THOUSANDS OF LATENT POSSIBILITIES  •  NO UNIVERSAL ORDER  •  HISTORY CHOOSES THE PATH"
-	eyebrow.add_theme_font_size_override("font_size",10)
-	eyebrow.add_theme_color_override("font_color",Color("#c5ad6e"))
-	heading.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="CIVILIZATIONAL DEVELOPMENT"
-	title.add_theme_font_size_override("font_size",24)
-	title.add_theme_color_override("font_color",Color("#f0e5cf"))
-	heading.add_child(title)
-	var subtitle:=Label.new()
-	subtitle.text="Attention, daily practice, leadership, materials, place, chance, and prior findings determine what becomes discoverable. Unencountered possibilities remain unnamed."
-	subtitle.add_theme_font_size_override("font_size",10)
-	subtitle.add_theme_color_override("font_color",Color("#929d98"))
-	heading.add_child(subtitle)
-	var scale_summary:=VBoxContainer.new()
-	scale_summary.custom_minimum_size=Vector2(270,0)
-	header.add_child(scale_summary)
-	var scale_label:=Label.new()
-	scale_label.text="%d ESTABLISHED  •  %d ACTIVE" % [int(snapshot.known_discoveries),int(snapshot.active_inquiries)]
-	scale_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	scale_label.add_theme_font_size_override("font_size",15)
-	scale_label.add_theme_color_override("font_color",Color("#e1c777"))
-	scale_summary.add_child(scale_label)
-	var population_scale:=Label.new()
-	population_scale.text="POP %s  •  WORLD REACH %d%%" % [_compact_population(GameState.population_total),roundi(float(snapshot.world_reach)*100.0)]
-	population_scale.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	population_scale.add_theme_font_size_override("font_size",10)
-	population_scale.add_theme_color_override("font_color",Color("#9da8a3"))
-	scale_summary.add_child(population_scale)
-	root.add_child(HSeparator.new())
-	var body:=HBoxContainer.new()
-	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",10)
-	root.add_child(body)
-	var domain_scroll:=FIT_CONTENT_PANEL.new()
-	domain_scroll.custom_minimum_size=Vector2(246,0)
-	body.add_child(domain_scroll)
-	var domain_list:=VBoxContainer.new()
-	domain_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	domain_list.add_theme_constant_override("separation",5)
-	domain_scroll.add_child(domain_list)
-	for domain in ProgressionSystem.domains():
-		var summary:=ProgressionSystem.domain_summary(domain)
-		var domain_button:=Button.new()
-		domain_button.name="Development_%s" % domain
-		domain_button.text="%s\n%s  •  %d ESTABLISHED" % [domain.to_upper(),String(summary.name),int(summary.known_count)]
-		domain_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		domain_button.custom_minimum_size=Vector2(230,43)
-		domain_button.toggle_mode=true
-		domain_button.button_pressed=domain==selected_domain
-		domain_button.add_theme_font_size_override("font_size",10)
-		domain_button.tooltip_text="%s\nCurrent coordinated scale: %s\nOnly established findings are counted." % [String(summary.purpose),String(summary.name)]
-		domain_button.pressed.connect(_open_progression_panel.bind(domain))
-		domain_list.add_child(domain_button)
-	var detail:=VBoxContainer.new()
-	detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	detail.add_theme_constant_override("separation",6)
-	body.add_child(detail)
-	var selected_summary:=ProgressionSystem.domain_summary(selected_domain)
-	var frontier:Dictionary=selected_summary.frontier
-	var domain_header:=HBoxContainer.new()
-	detail.add_child(domain_header)
-	var domain_heading:=VBoxContainer.new()
-	domain_heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	domain_header.add_child(domain_heading)
-	var domain_title:=Label.new()
-	domain_title.text=selected_domain.to_upper()
-	domain_title.add_theme_font_size_override("font_size",18)
-	domain_title.add_theme_color_override("font_color",_dynamic_accent(selected_domain).lightened(0.24))
-	domain_heading.add_child(domain_title)
-	var domain_purpose:=Label.new()
-	domain_purpose.text="%s\nCurrent capability: %s" % [String(selected_summary.purpose),String(selected_summary.name)]
-	domain_purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	domain_purpose.add_theme_font_size_override("font_size",10)
-	domain_purpose.add_theme_color_override("font_color",Color("#96a19c"))
-	domain_heading.add_child(domain_purpose)
-	var tier_label:=Label.new()
-	tier_label.text="CAPACITY %d%%\n%s FRONTIER" % [roundi(float(GameState.society_capacities.get(selected_domain,0.0))*100.0),String(frontier.opportunity_signal)]
-	tier_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	tier_label.add_theme_font_size_override("font_size",11)
-	tier_label.add_theme_color_override("font_color",Color("#d8bd72"))
-	domain_header.add_child(tier_label)
-	var development_scroll:=FIT_CONTENT_PANEL.new()
-	development_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	detail.add_child(development_scroll)
-	var development:=VBoxContainer.new()
-	development.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	development.add_theme_constant_override("separation",8)
-	development_scroll.add_child(development)
-	var trajectory:=PanelContainer.new()
-	trajectory.add_theme_stylebox_override("panel",_knowledge_style(Color("#111b1e"),_dynamic_accent(selected_domain).darkened(0.35),1,3,9))
-	development.add_child(trajectory)
-	var trajectory_content:=VBoxContainer.new()
-	trajectory_content.add_theme_constant_override("separation",4)
-	trajectory.add_child(trajectory_content)
-	var trajectory_title:=Label.new()
-	trajectory_title.text="CURRENT TRAJECTORY  •  %d FINDINGS  •  DEEPEST PROVEN METHOD %d / 12" % [int(selected_summary.known_count),int(selected_summary.maturity)]
-	trajectory_title.tooltip_text="This is the deepest evidence method established in this domain—from first field mapping through replicated practice, standards, prediction, formal disciplines, and integrated science. It is not a count of predetermined technologies."
-	trajectory_title.add_theme_font_size_override("font_size",11)
-	trajectory_title.add_theme_color_override("font_color",_dynamic_accent(selected_domain).lightened(0.24))
-	trajectory_content.add_child(trajectory_title)
-	var emphasis_parts:Array[String]=[]
-	for emphasis_variant in (frontier.get("emphasis",[]) as Array):
-		var emphasis:Dictionary=emphasis_variant
-		emphasis_parts.append("%s (%d)" % [String(emphasis.name),int(emphasis.observers)])
-	var tradition_parts:Array[String]=[]
-	for tradition in (frontier.get("traditions",[]) as Array): tradition_parts.append(String(tradition))
-	var trajectory_text:=Label.new()
-	trajectory_text.text="RESEARCH PRIORITY  %s\nESTABLISHED TRADITIONS  %s\n\nChanging these weights redistributes the civilization's aggregate researchers and strongly shapes which lines surface. Work performed, materials, leadership, geography, and chance determine the exact result inside that emphasis." % [", ".join(emphasis_parts) if not emphasis_parts.is_empty() else "UNSTAFFED — no directed inquiry in this domain",", ".join(tradition_parts) if not tradition_parts.is_empty() else "None yet"]
-	trajectory_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	trajectory_text.add_theme_font_size_override("font_size",10)
-	trajectory_text.add_theme_color_override("font_color",Color("#a9b2ad"))
-	trajectory_content.add_child(trajectory_text)
-	var active_title:=Label.new()
-	active_title.text="LIVE LINES OF INQUIRY"
-	active_title.add_theme_font_size_override("font_size",12)
-	active_title.add_theme_color_override("font_color",Color("#d8c89e"))
-	development.add_child(active_title)
-	var active:Array=frontier.get("active",[])
-	if active.is_empty():
-		var no_active:=Label.new()
-		no_active.text="No research capacity is currently directed into this domain. Give one of its subfields a priority weight to make latent possibilities begin to surface."
-		no_active.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		no_active.add_theme_color_override("font_color",Color("#7f8d88"))
-		development.add_child(no_active)
-	else:
-		for investigation_variant in active:
-			var investigation:Dictionary=investigation_variant
-			var card:=PanelContainer.new()
-			card.add_theme_stylebox_override("panel",_knowledge_style(Color("#10191c"),Color("#526b70"),1,3,8))
-			development.add_child(card)
-			var card_content:=VBoxContainer.new()
-			card_content.add_theme_constant_override("separation",3)
-			card.add_child(card_content)
-			var inquiry_heading:=Label.new()
-			inquiry_heading.text="%s  •  %s  •  PRIORITY %d  •  ~%s RESEARCHERS" % [String(investigation.subcategory).to_upper(),String(investigation.get("lens","PRACTICAL INQUIRY")).to_upper(),int(investigation.observer_allocation),_knowledge_workforce_text(float(investigation.get("research_workforce",0.0)))]
-			inquiry_heading.add_theme_font_size_override("font_size",9)
-			inquiry_heading.add_theme_color_override("font_color",Color("#89b3bb"))
-			card_content.add_child(inquiry_heading)
-			var inquiry_name:=Label.new()
-			inquiry_name.text=String(investigation.name).to_upper()
-			inquiry_name.add_theme_font_size_override("font_size",11)
-			inquiry_name.add_theme_color_override("font_color",Color("#e4dccb"))
-			card_content.add_child(inquiry_name)
-			var inquiry_goal:=Label.new()
-			inquiry_goal.text=String(investigation.project_goal)
-			inquiry_goal.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-			inquiry_goal.add_theme_font_size_override("font_size",9)
-			inquiry_goal.add_theme_color_override("font_color",Color("#9da8a3"))
-			card_content.add_child(inquiry_goal)
-			var inquiry_progress:=ProgressBar.new()
-			inquiry_progress.max_value=1.0
-			inquiry_progress.value=float(investigation.progress)
-			inquiry_progress.show_percentage=false
-			inquiry_progress.custom_minimum_size=Vector2(0,7)
-			card_content.add_child(inquiry_progress)
-			var bottleneck:=Label.new()
-			bottleneck.text=String(investigation.bottleneck)
-			bottleneck.add_theme_font_size_override("font_size",8)
-			bottleneck.add_theme_color_override("font_color",Color("#c5a66d"))
-			card_content.add_child(bottleneck)
-	var recent_title:=Label.new()
-	recent_title.text="RECENTLY ESTABLISHED"
-	recent_title.add_theme_font_size_override("font_size",12)
-	recent_title.add_theme_color_override("font_color",Color("#d8c89e"))
-	development.add_child(recent_title)
-	var recent:Array=frontier.get("recent",[])
-	if recent.is_empty():
-		var no_recent:=Label.new()
-		no_recent.text="Nothing in this domain has yet survived investigation strongly enough to become established knowledge."
-		no_recent.add_theme_color_override("font_color",Color("#7f8d88"))
-		development.add_child(no_recent)
-	else:
-		for event_variant in recent:
-			var event:Dictionary=event_variant
-			var discovery:=Label.new()
-			var causal_summary:=_discovery_cause_summary(event).replace("\n","\n  ")
-			discovery.text="• %s\n  %s\n  CAPACITY EFFECT  •  %s" % [String(event.get("name","Established finding")).to_upper(),causal_summary,String(event.get("effect_summary",""))]
-			discovery.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-			discovery.add_theme_font_size_override("font_size",9)
-			discovery.add_theme_color_override("font_color",Color("#aab4ae"))
-			development.add_child(discovery)
-	var footer:=HBoxContainer.new()
-	root.add_child(footer)
-	var note:=Label.new()
-	note.text="Broad scale is descriptive, not a shopping list. It rises only when discoveries, adoption, population, material capacity, connected settlements, and supporting systems converge."
-	note.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	note.add_theme_font_size_override("font_size",9)
-	note.add_theme_color_override("font_color",Color("#87918c"))
-	footer.add_child(note)
-	var inquiry_button:=Button.new()
-	inquiry_button.text="DIRECT EMPHASIS"
-	inquiry_button.custom_minimum_size=Vector2(150,36)
-	inquiry_button.pressed.connect(func(): progression_panel.queue_free(); progression_panel=null; call_deferred("_open_knowledge_panel"))
-	footer.add_child(inquiry_button)
-	var capacity_button:=Button.new()
-	capacity_button.text="CAPACITY SCORES"
-	capacity_button.custom_minimum_size=Vector2(150,36)
-	capacity_button.pressed.connect(func(): progression_panel.queue_free(); progression_panel=null; _open_society_panel())
-	footer.add_child(capacity_button)
-	var close:=Button.new()
-	close.text="BACK TO CIVILIZATION"
-	close.custom_minimum_size=Vector2(170,36)
-	close.pressed.connect(_back_to_civilization_from_progression)
-	footer.add_child(close)
-
-
-func _make_progression_node_card(parent:Container,status:Dictionary,current_tier:int)->void:
-	var tier:=int(status.tier)
-	var unlocked:=bool(status.unlocked)
-	var is_current:=unlocked and tier==current_tier
-	var is_next:=not unlocked and tier==current_tier+1
-	var accent:=_dynamic_accent(String(status.domain))
-	var border:=accent if is_current else (accent.darkened(0.18) if unlocked else (Color("#927c4d") if is_next else Color("#354247")))
-	var background:=Color("#162327") if is_current else (Color("#101a1d") if unlocked else Color("#0b1316"))
-	var card:=PanelContainer.new()
-	card.name=String(status.id)
-	card.custom_minimum_size=Vector2(272,142)
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_knowledge_style(background,border,2 if is_current or is_next else 1,3,8))
-	parent.add_child(card)
-	var content:=VBoxContainer.new()
-	content.add_theme_constant_override("separation",3)
-	card.add_child(content)
-	var eyebrow:=Label.new()
-	eyebrow.text="CURRENT" if is_current else ("ESTABLISHED" if unlocked else ("NEXT" if is_next else "LOCKED"))
-	eyebrow.add_theme_font_size_override("font_size",8)
-	eyebrow.add_theme_color_override("font_color",border.lightened(0.22))
-	content.add_child(eyebrow)
-	var title:=Label.new()
-	title.text=String(status.name).to_upper()
-	title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	title.add_theme_font_size_override("font_size",11)
-	title.add_theme_color_override("font_color",Color("#ece1cc") if unlocked else Color("#aeb5b0"))
-	content.add_child(title)
-	var outcome:=Label.new()
-	outcome.text=String(status.outcome)
-	outcome.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	outcome.custom_minimum_size=Vector2(0,43)
-	outcome.add_theme_font_size_override("font_size",8)
-	outcome.add_theme_color_override("font_color",Color("#9ca7a1"))
-	content.add_child(outcome)
-	var progress:=ProgressBar.new()
-	progress.max_value=1.0
-	progress.value=float(status.progress)
-	progress.show_percentage=false
-	progress.custom_minimum_size=Vector2(0,6)
-	progress.add_theme_stylebox_override("background",_knowledge_style(Color("#20292c"),Color.TRANSPARENT,0,2,0))
-	progress.add_theme_stylebox_override("fill",_knowledge_style(accent if unlocked else border,Color.TRANSPARENT,0,2,0))
-	content.add_child(progress)
-	var blockers:Array=status.get("blockers",[])
-	var state:=Label.new()
-	if unlocked:
-		state.text="ACTIVE CIVILIZATION CAPABILITY" if is_current else "FOUNDATION RETAINED"
-	elif blockers.is_empty():
-		state.text="READY TO ESTABLISH"
-	else:
-		state.text=String(blockers[0])
-	state.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	state.add_theme_font_size_override("font_size",8)
-	state.add_theme_color_override("font_color",Color("#8fb28d") if unlocked else (Color("#d0ad65") if is_next else Color("#7f8b87")))
-	content.add_child(state)
-	var requirement_text:="No remaining blockers." if blockers.is_empty() else "BLOCKERS\n• "+"\n• ".join(PackedStringArray(blockers))
-	card.tooltip_text="%s\n\n%s\n\n%s" % [String(status.name),String(status.outcome),requirement_text]
-
-
-func _make_dynamic_card(parent:Container,dynamic_id:String)->void:
-	var score:=clampf(float(GameState.society_capacities.get(dynamic_id,0.0)),0.0,1.0)
-	var accent:=_dynamic_accent(dynamic_id)
-	var card:=PanelContainer.new()
-	card.custom_minimum_size=Vector2(276,184)
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	card.add_theme_stylebox_override("panel",_knowledge_style(Color("#111a1d"),accent.darkened(0.42),1,3,9))
-	card.tooltip_text=_dynamic_definition(dynamic_id)
-	parent.add_child(card)
-	var content:=VBoxContainer.new()
-	content.add_theme_constant_override("separation",3)
-	card.add_child(content)
-	var heading:=HBoxContainer.new()
-	content.add_child(heading)
-	var name:=Label.new()
-	name.text=dynamic_id.to_upper()+"  ?"
-	name.tooltip_text=_dynamic_definition(dynamic_id)
-	name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	name.add_theme_font_size_override("font_size",12)
-	name.add_theme_color_override("font_color",Color("#e4dccb"))
-	heading.add_child(name)
-	var trend:=float(GameState.simulation_trends.get("society_"+dynamic_id,0.0))
-	var trend_label:=Label.new()
-	trend_label.text=("▲ " if trend>0.0005 else ("▼ " if trend<-0.0005 else ""))+"%d%%" % roundi(score*100.0)
-	trend_label.add_theme_font_size_override("font_size",14)
-	trend_label.add_theme_color_override("font_color",_dynamic_score_color(score))
-	heading.add_child(trend_label)
-	var definition:=Label.new()
-	definition.text=_dynamic_definition(dynamic_id).get_slice("\n",0)
-	definition.custom_minimum_size=Vector2(0,26)
-	definition.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	definition.add_theme_font_size_override("font_size",9)
-	definition.add_theme_color_override("font_color",Color("#84908b"))
-	definition.tooltip_text=_dynamic_definition(dynamic_id)
-	content.add_child(definition)
-	var progression:=ProgressionSystem.domain_summary(dynamic_id)
-	var progression_label:=Label.new()
-	progression_label.text=String(progression.name).to_upper()
-	progression_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	progression_label.add_theme_font_size_override("font_size",8)
-	progression_label.add_theme_color_override("font_color",accent.lightened(0.16))
-	progression_label.tooltip_text="Current progression capability. Open PROGRESSION for the complete nine-tier tree and its blockers."
-	content.add_child(progression_label)
-	var main_bar:=ProgressBar.new()
-	main_bar.max_value=1.0
-	main_bar.value=score
-	main_bar.show_percentage=false
-	main_bar.custom_minimum_size=Vector2(0,7)
-	main_bar.add_theme_stylebox_override("background",_knowledge_style(Color("#202a2c"),Color.TRANSPARENT,0,3,0))
-	main_bar.add_theme_stylebox_override("fill",_knowledge_style(accent,Color.TRANSPARENT,0,3,0))
-	content.add_child(main_bar)
-	var breakdown:Dictionary=GameState.society_subcategories.get(dynamic_id,{})
-	for subcategory in breakdown:
-		var sub_score:=clampf(float(breakdown[subcategory]),0.0,1.0)
-		var sub_definition:=_subcategory_definition(dynamic_id,String(subcategory))
-		var subcategory_display:="Resource sustainability" if dynamic_id=="ecology" and String(subcategory)=="Resource pressure" else String(subcategory)
-		var row:=HBoxContainer.new()
-		row.add_theme_constant_override("separation",6)
-		row.tooltip_text=sub_definition
-		content.add_child(row)
-		var sub_name:=Label.new()
-		sub_name.text=subcategory_display+"  ?"
-		sub_name.tooltip_text=sub_definition
-		sub_name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		sub_name.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		sub_name.add_theme_font_size_override("font_size",9)
-		sub_name.add_theme_color_override("font_color",Color("#9ba39e"))
-		row.add_child(sub_name)
-		var sub_bar:=ProgressBar.new()
-		sub_bar.max_value=1.0
-		sub_bar.value=sub_score
-		sub_bar.show_percentage=false
-		sub_bar.tooltip_text=sub_definition
-		sub_bar.custom_minimum_size=Vector2(70,4)
-		sub_bar.add_theme_stylebox_override("background",_knowledge_style(Color("#20292b"),Color.TRANSPARENT,0,2,0))
-		sub_bar.add_theme_stylebox_override("fill",_knowledge_style(accent.darkened(0.12),Color.TRANSPARENT,0,2,0))
-		row.add_child(sub_bar)
-		var sub_value:=Label.new()
-		sub_value.text="%d" % roundi(sub_score*100.0)
-		sub_value.tooltip_text=sub_definition
-		sub_value.custom_minimum_size=Vector2(24,0)
-		sub_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		sub_value.add_theme_font_size_override("font_size",9)
-		sub_value.add_theme_color_override("font_color",Color("#c5c8bd"))
-		row.add_child(sub_value)
-
-func _dynamic_accent(dynamic_id:String)->Color:
-	return {"demography":Color("#bd8b72"),"nutrition":Color("#a7a75f"),"health":Color("#70a58d"),"labor":Color("#b58b61"),"knowledge":Color("#719eae"),"production":Color("#ae855f"),"infrastructure":Color("#9a8d78"),"logistics":Color("#7b969d"),"ecology":Color("#719269"),"institutions":Color("#9a82a6"),"security":Color("#a66f67"),"culture":Color("#b19a6f")}.get(dynamic_id,Color("#8c9691"))
-
-func _dynamic_score_color(score:float)->Color:
-	if score<0.30: return Color("#d87867")
-	if score<0.55: return Color("#d2ae68")
-	return Color("#83ad82")
 
 func _dynamic_definition(dynamic_id:String)->String:
 	return {
@@ -20500,85 +15901,6 @@ func _dynamic_definition(dynamic_id:String)->String:
 		"culture":"The shared identity and memory that make collective action possible.\nDriven by cohesion, accepted authority, intellectual breadth, and memory. It shapes legitimacy, cooperation, and the directions society pursues."
 	}.get(dynamic_id,"A major capacity produced by the interacting population, environment, resources, institutions, and knowledge systems.")
 
-func _subcategory_definition(dynamic_id:String,subcategory:String)->String:
-	var definitions:Dictionary={
-		"demography":{
-			"Fertility conditions":"Readiness for family formation and conception. Raised by secure food, adequate shelter, good health, and supportive discoveries. It changes conception frequency and future population growth.",
-			"Maternal safety":"Protection during pregnancy and childbirth. Raised by health and learned maternal practices. It lowers pregnancy loss and maternal death.",
-			"Child survival":"A newborn or child’s chance of reaching working age. Raised by health, nutrition, shelter, and neonatal knowledge. It changes mortality and the future workforce.",
-			"Shelter capacity":"Housing spaces compared with the living population. Shortfalls increase exposure and suppress health and fertility; surplus allows safe growth."
-		},
-		"nutrition":{
-			"Daily supply":"The share of current food needs being met each day. Labor, accessible food sources, season, travel, and ecology alter it. Deficits consume reserves and cause malnutrition.",
-			"Diet quality":"The nutritional variety and value of what people eat, beyond raw calories. Diverse sources and food knowledge raise it; poor diets reduce health and pregnancy outcomes.",
-			"Stored reserve":"How long preserved food can absorb a production failure. Storage capacity and preservation raise it; consumption, spoilage, and travel drain it.",
-			"Land productivity":"The landscape’s ability to keep yielding food. Ecology, soil, season, and cultivation knowledge raise it; overuse and degradation lower it."
-		},
-		"health":{
-			"General health":"The population-wide physical condition produced by food, shelter, disease, exposure, and care. It affects mortality, fertility, work, travel, and life expectancy.",
-			"Water & sanitation":"Safety of drinking water and waste handling. Water and sanitation discoveries raise it; contamination lowers it. It strongly changes disease and child survival.",
-			"Disease control":"Capacity to prevent and contain infection. Health practices and sanitation raise it; crowding and exposure undermine it. It reduces illness mortality and labor loss.",
-			"Injury safety":"Protection from work, travel, building, and extraction accidents. Safer techniques and tools raise it; hazardous industry lowers it."
-		},
-		"labor":{
-			"Able workforce":"The share of living people aged 14–59 who can hold assigned roles. Children and elders remain population but are not included in allocatable labor.",
-			"Work efficiency":"Useful output from each assigned worker. Health, food, housing, tools, and cohesion raise it; illness, hunger, and exhaustion lower it.",
-			"Coordination":"How effectively separate workers combine their effort. Cohesion, administration, communication, and task knowledge raise it.",
-			"Workload balance":"Whether labor demands remain sustainable. A high score means duties are manageable; excessive construction, extraction, or fatigue lowers it."
-		},
-		"knowledge":{
-			"Observers":"The aggregate population assigned to research. A larger, better-supported research workforce sustains more parallel inquiry and advances each funded line faster without simulating individuals.",
-			"Directed attention":"How the research workforce is divided among active inquiry directions. Priority weights determine a line's share; broad programs gain variety while concentrated programs gain speed and depth.",
-			"Preserved knowledge":"How reliably learning survives individuals and generations. Records, teaching, memory practices, and existing knowledge raise it; loss slows adoption and later discovery.",
-			"Communication":"How quickly information moves and becomes shared practice. Routes, standards, institutions, and communication discoveries raise it."
-		},
-		"production":{
-			"Material supply":"The usable timber, stone, clay, fibers, metals, and other inputs reaching workers. Discovery, access, extraction, and delivery all matter.",
-			"Tool quality":"The effectiveness and durability of working implements. Better tools multiply extraction, construction, farming, and craft output.",
-			"Craft capacity":"The society’s ability to turn raw materials into useful goods. It requires makers, materials, tools, knowledge, and work space.",
-			"Standardization":"Consistency of measurements, parts, and methods. It reduces waste and coordination errors while enabling increasingly complex production."
-		},
-		"infrastructure":{
-			"Housing":"Permanent shelter compared with population need. It supports health, fertility, storage, and resilience while unchecked growth can create shortages.",
-			"Construction":"Current capacity to complete durable works. Builders, labor efficiency, materials, tools, and construction knowledge determine it.",
-			"Public works":"The breadth of completed shared facilities such as storage, gathering yards, roads, water works, and civic spaces.",
-			"Resilience":"How well buildings and systems withstand weather, fire, flood, failure, and disaster. Robust design and redundancy raise it."
-		},
-		"logistics":{
-			"Carrying capacity":"How much can be transported by available people, containers, animals, vehicles, and handling systems. It limits resource throughput.",
-			"Route quality":"The speed and reliability of movement across known paths. Terrain, roads, bridges, navigation, and maintenance determine it.",
-			"Storage system":"Capacity to preserve and account for food and materials. A high score means greater capacity and lower loss to spoilage, weather, and theft.",
-			"Trade reach":"The distance and volume over which regular exchange can operate. Routes, transport, security, surplus, and institutions expand it."
-		},
-		"ecology":{
-			"Land health":"The present condition of soil, vegetation, water, and wildlife. Extraction, settlement, pollution, and recovery continually change it.",
-			"Natural recovery":"How quickly used ecosystems replenish themselves. Healthy land and ecological knowledge raise it; repeated intensive use can exceed it.",
-			"Pollution control":"Ability to prevent or contain harmful waste in land, air, and water. A high score means lower exposure and ecological damage.",
-			"Resource sustainability":"The safety margin between extraction and natural renewal. A high score means current use is sustainable; overharvest lowers it."
-		},
-		"institutions":{
-			"Administration":"Steward staffing relative to the population’s coordination burden. It improves allocation, records, stores, and implementation of orders.",
-			"Legitimacy":"How broadly people accept the society’s authority and decisions. Food, health, security, cohesion, fairness, and outcomes alter it.",
-			"State capacity":"The ability to turn collective decisions into consistent action across people and territory. Organization and administrative discoveries raise it.",
-			"Institutional flexibility":"Ability to adapt rules and offices when conditions change. A high score supports reform; rigidity can preserve order but obstruct adaptation."
-		},
-		"security":{
-			"Public safety":"Everyday protection from violence, disorder, and predation. Watch staffing, legitimacy, cohesion, and institutions support it.",
-			"Organized defense":"Ability to coordinate defenders, fortifications, supplies, and command beyond individual readiness.",
-			"Military readiness":"Preparedness to mobilize for organized conflict. Training, weapons, intelligence, logistics, and relevant discoveries raise it.",
-			"Crisis resilience":"Ability to maintain order and essential functions through disaster or attack. Cohesion, resilient infrastructure, reserves, and planning raise it."
-		},
-		"culture":{
-			"Social cohesion":"Trust and willingness to cooperate across the population. Security, shared success, manageable hardship, and institutions shape it.",
-			"Shared legitimacy":"Cultural acceptance of common authority and collective decisions. It converts formal institutions into willing cooperation.",
-			"Inquiry breadth":"How many broad questions receive research capacity. Breadth creates diverse possibilities, but spreading a finite research workforce too widely reduces each line's share.",
-			"Collective memory":"The society’s ability to retain stories, techniques, decisions, and identity across generations. Teaching and preservation raise it."
-		}
-	}
-	var display_name:="Resource sustainability" if dynamic_id=="ecology" and subcategory=="Resource pressure" else subcategory
-	var dynamic_definitions:Dictionary=definitions.get(dynamic_id,{})
-	return String(dynamic_definitions.get(display_name,"A contributing measure inside %s. Higher values represent greater social capacity or safety." % dynamic_id.capitalize()))
-
 
 func _open_founding_focus_panel()->void:
 	if GameState.founding_focus!="" or is_instance_valid(founding_focus_panel): return
@@ -20593,45 +15915,6 @@ func _open_founding_focus_panel()->void:
 			if convoy_banner_sprite: convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
 			_set_game_speed(DEFAULT_PLAY_SPEED)
 			_sync_map_help_overlay_visibility())
-
-
-func _select_founding_focus_card(focus_id:String)->void:
-	if focus_id not in GameState.FOUNDING_FOCUS_ORDER: return
-	founding_focus_selection=focus_id
-	var definition:=GameState.founding_focus_definition(focus_id)
-	founding_focus_detail.text="%s  •  %s\n%s\n\nSTRENGTHS  %s    TRADEOFF  %s" % [String(definition.name),String(definition.creed),String(definition.description),String(definition.strengths),String(definition.tradeoff)]
-	founding_focus_confirm.text="ESTABLISH  •  %s" % String(definition.name)
-	founding_focus_confirm.disabled=false
-	_refresh_founding_focus_cards()
-
-
-func _refresh_founding_focus_cards()->void:
-	for focus_id in founding_focus_buttons:
-		var button:Button=founding_focus_buttons[focus_id]
-		var definition:=GameState.founding_focus_definition(String(focus_id))
-		var accent:=Color(String(definition.get("color","#8c8064")))
-		var selected:=String(focus_id)==founding_focus_selection
-		button.add_theme_color_override("font_color",accent.lightened(0.18) if selected else Color("#d4d1c6"))
-		button.add_theme_stylebox_override("normal",_knowledge_style(Color("#172226") if selected else Color("#0d1619"),accent if selected else Color("#354448"),2 if selected else 1,3,10))
-		button.add_theme_stylebox_override("hover",_knowledge_style(Color("#172226"),accent,1,3,10))
-		button.add_theme_stylebox_override("pressed",_knowledge_style(Color("#1c292c"),accent.lightened(0.15),2,3,10))
-
-
-func _confirm_founding_focus()->void:
-	if founding_focus_selection=="": return
-	var result:=GameState.select_founding_focus(founding_focus_selection)
-	if result.has("error"):
-		founding_focus_detail.text=String(result.error)
-		founding_focus_detail.add_theme_color_override("font_color",Color("#da8874"))
-		return
-	if convoy_banner_sprite: convoy_banner_sprite.texture=_founding_banner_texture(GameState.founding_banner_index)
-	if founding_focus_panel and is_instance_valid(founding_focus_panel): founding_focus_panel.queue_free()
-	founding_focus_panel=null
-	founding_focus_detail=null
-	founding_focus_confirm=null
-	founding_focus_buttons.clear()
-	_update_time_interface()
-	_sync_map_help_overlay_visibility()
 
 
 func _open_world_menu()->void:
@@ -20744,49 +16027,16 @@ func _restart_random_world()->void:
 # second dashboard or the pause menu from appearing behind an existing modal.
 func _close_topmost_game_screen()->bool:
 	if is_instance_valid(GeneralCampaign.screen) and GeneralCampaign.screen.visible:GeneralCampaign.screen.hide();return true
-	for overlay_entry in [
-		[knowledge_panel,"InvestigationDetailOverlay"],
-		[provisions_panel,"ProvisionsDetailOverlay"],
-		[materials_panel,"MaterialsDetailOverlay"]
-	]:
-		var owner:=overlay_entry[0] as Control
-		if owner and is_instance_valid(owner):
-			var overlay:=owner.find_child(String(overlay_entry[1]),true,false)
-			if overlay:
-				overlay.queue_free()
-				return true
+	if materials_panel and is_instance_valid(materials_panel):
+		var overlay:=materials_panel.find_child("MaterialsDetailOverlay",true,false)
+		if overlay:
+			overlay.queue_free()
+			return true
 	if civilization_report_panel and is_instance_valid(civilization_report_panel):
 		_close_civilization_report()
 		return true
-	if settlement_dashboard_panel and is_instance_valid(settlement_dashboard_panel):
-		_close_settlement_dashboard()
-		return true
-	if provisions_panel and is_instance_valid(provisions_panel):
-		provisions_panel.queue_free(); provisions_panel=null
-		return true
 	if materials_panel and is_instance_valid(materials_panel):
 		materials_panel.queue_free(); materials_panel=null
-		return true
-	if population_ledger_panel and is_instance_valid(population_ledger_panel):
-		population_ledger_panel.queue_free(); population_ledger_panel=null
-		return true
-	if knowledge_panel and is_instance_valid(knowledge_panel):
-		_back_to_civilization_from_research()
-		return true
-	if council_panel and is_instance_valid(council_panel):
-		_back_to_civilization_from_council()
-		return true
-	if government_panel and is_instance_valid(government_panel):
-		_back_to_civilization_from_government()
-		return true
-	if society_panel and is_instance_valid(society_panel):
-		_back_to_civilization_from_society()
-		return true
-	if progression_panel and is_instance_valid(progression_panel):
-		_back_to_civilization_from_progression()
-		return true
-	if systems_hub_panel and is_instance_valid(systems_hub_panel):
-		_close_systems_hub()
 		return true
 	if civilizations_panel and is_instance_valid(civilizations_panel):
 		_close_civilizations_panel()
@@ -20845,22 +16095,8 @@ func _input(event: InputEvent) -> void:
 			if _close_topmost_game_screen():
 				get_viewport().set_input_as_handled()
 				return
-			if systems_hub_panel and is_instance_valid(systems_hub_panel):
-				_close_systems_hub()
-				get_viewport().set_input_as_handled()
-				return
-			if progression_panel and is_instance_valid(progression_panel):
-				progression_panel.queue_free()
-				progression_panel=null
-				get_viewport().set_input_as_handled()
-				return
 			if civilizations_panel and is_instance_valid(civilizations_panel):
 				_close_civilizations_panel()
-				get_viewport().set_input_as_handled()
-				return
-			if society_panel and is_instance_valid(society_panel):
-				society_panel.queue_free()
-				society_panel=null
 				get_viewport().set_input_as_handled()
 				return
 			if world_menu_panel and is_instance_valid(world_menu_panel):
@@ -20943,7 +16179,7 @@ func _dismiss_report_backdrop(event:InputEvent)->bool:
 	if is_instance_valid(founding_focus_panel) or is_instance_valid(settlement_convoy_confirm_panel):return false
 	if _outside_report_body(world_menu_panel,event.position):_close_world_menu();return true
 	if _outside_report_body(scout_dispatch_panel,event.position):_close_scout_dispatch_panel();return true
-	for panel:Control in [civilization_report_panel,settlement_dashboard_panel,provisions_panel,materials_panel,population_ledger_panel,knowledge_panel,council_panel,government_panel,society_panel,progression_panel,systems_hub_panel,civilizations_panel]:
+	for panel:Control in [civilization_report_panel,materials_panel,civilizations_panel]:
 		if _outside_report_body(panel,event.position):return _close_topmost_game_screen()
 	return false
 
@@ -20995,8 +16231,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_reset_camera_north()
 		get_viewport().set_input_as_handled()
 		return
-	if actions_menu_panel and actions_menu_panel.visible and event is InputEventMouseButton and event.pressed:
-		_close_actions_menu()
 	if placement_building != "":
 		if event is InputEventMouseMotion:
 			_update_placement_preview(event.position)
