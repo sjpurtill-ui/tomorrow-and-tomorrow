@@ -1,0 +1,12 @@
+{
+  "id": "load_carrying_posture",
+  "line": "health",
+  "game_year": 94,
+  "approx_historical_year": -4373,
+  "prompt": "c. 4373 BCE: Adult demonstrates balanced load carrying on head and back to learner; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-545c7236-aaa5-448a-b1dd-f68a6a8d196b.png",
+  "asset": "res://assets/ui/research/subjects/load_carrying_posture-v1.png",
+  "sha256": "a7cc9072ceb2f0ed6e0e178daa272ce4a0c7755c65aadc36f7e6805e6806d0b6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

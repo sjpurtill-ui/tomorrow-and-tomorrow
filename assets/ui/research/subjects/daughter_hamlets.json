@@ -1,0 +1,12 @@
+{
+  "id": "daughter_hamlets",
+  "line": "demography",
+  "game_year": 82,
+  "approx_historical_year": -4453,
+  "prompt": "c. 4453 BCE: Crowded parent village sends grown families to establish a daughter hamlet; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5a26dda0-e0c3-4f24-868c-e0f53736290b.png",
+  "asset": "res://assets/ui/research/subjects/daughter_hamlets-v1.png",
+  "sha256": "875a58daedf8097bc60d4f0999d980ed2284f905e3eec8512be45eaf899623e2",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}

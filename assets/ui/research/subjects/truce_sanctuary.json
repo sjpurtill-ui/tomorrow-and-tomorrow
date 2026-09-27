@@ -1,0 +1,12 @@
+{
+  "id": "truce_sanctuary",
+  "line": "security",
+  "game_year": 85,
+  "approx_historical_year": -4433,
+  "prompt": "c. 4433 BCE: Rival groups lay down spears outside sacred grove and meet peacefully by stone; hand-cut woodblock print. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-82fa216f-8fe4-4cd9-b3a2-5ebae9b5e549.png",
+  "asset": "res://assets/ui/research/subjects/truce_sanctuary-v1.png",
+  "sha256": "d3b9a0895404e0e5c9d66e9980b3a7f682f6f7a2519000fab5761525e1bb73bb",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected more legible discovery mechanism in wide crop."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "ditch_palisades",
+  "line": "security",
+  "game_year": 90,
+  "approx_historical_year": -4400,
+  "prompt": "c. 4400 BCE: Workers plant upright timber stakes along fresh defensive ditch bank; hand-cut woodblock print. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-83d5ed74-a3db-430a-89bf-3fa64a444900.png",
+  "asset": "res://assets/ui/research/subjects/ditch_palisades-v1.png",
+  "sha256": "c74673997ee0e77e2940f01d6604341326937c192f841f0756f4c19935611e6c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

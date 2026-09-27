@@ -1,0 +1,12 @@
+{
+  "id": "infant_feeding_schedules",
+  "line": "demography",
+  "game_year": 90,
+  "approx_historical_year": -4400,
+  "prompt": "c. 4400 BCE: Household feeds and cares for same infant at dawn, midday and evening; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-53f93dff-2236-4bec-b510-35c35c1f1704.png",
+  "asset": "res://assets/ui/research/subjects/infant_feeding_schedules-v1.png",
+  "sha256": "91985c31d10c8b5698e4d541560c3f007e3c1218c8af238213b71777c759a856",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "public_praise_assemblies",
+  "line": "institutions",
+  "game_year": 90,
+  "approx_historical_year": -4400,
+  "prompt": "c. 4400 BCE: Village assembly praises an adult for faithful communal work; civic fresco. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d3ce0114-c08c-4c16-bc89-6970de9bd5dc.png",
+  "asset": "res://assets/ui/research/subjects/public_praise_assemblies-v1.png",
+  "sha256": "86c96771558f89f42549274e9664a3a729a693629ff8a78f79921325343ee4f1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

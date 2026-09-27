@@ -1,0 +1,12 @@
+{
+  "id": "pest_swarm_watch",
+  "line": "ecology",
+  "game_year": 90,
+  "approx_historical_year": -4400,
+  "prompt": "c. 4400 BCE: Field watchers spot approaching locust swarm and prepare to protect grain; plant pigments. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-58fde91d-5a33-40c1-8593-5b773daccced.png",
+  "asset": "res://assets/ui/research/subjects/pest_swarm_watch-v1.png",
+  "sha256": "c18344ff42815db950006b52188f865b9b5242a9da866c1d63624fa5fb8acb8b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

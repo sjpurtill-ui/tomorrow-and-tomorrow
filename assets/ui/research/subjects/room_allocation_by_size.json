@@ -1,0 +1,12 @@
+{
+  "id": "room_allocation_by_size",
+  "line": "demography",
+  "game_year": 93,
+  "approx_historical_year": -4380,
+  "prompt": "c. 4380 BCE: Longhouse sleeping mats allocated in proportion to household size; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9632da67-492f-44d7-b8ac-ef4de45e6de6.png",
+  "asset": "res://assets/ui/research/subjects/room_allocation_by_size-v1.png",
+  "sha256": "76d691bd6f166841795e49feff3b5bc47e62f289e3333c786299ad62606f83d2",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}

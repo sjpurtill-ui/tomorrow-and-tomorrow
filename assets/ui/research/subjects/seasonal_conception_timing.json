@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_conception_timing",
+  "line": "demography",
+  "game_year": 91,
+  "approx_historical_year": -4393,
+  "prompt": "c. 4393 BCE: Couple sits by full harvest stores consulting elder about starting a family; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0f7b4f07-5b22-4cee-9540-a314bbe8ee47.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_conception_timing-v1.png",
+  "sha256": "77818a483878e5cfb026464ff66549cfdd19665a0c71dc5727fc4c25b4a9e946",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger chalk-and-cut-paper treatment after rejecting painterly first attempt."
+}
