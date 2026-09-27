@@ -1,0 +1,12 @@
+{
+  "id": "bride_wealth_gifts",
+  "line": "demography",
+  "game_year": 65,
+  "approx_historical_year": -4567,
+  "prompt": "c. 4567 BCE: Kin offer goat, grain and cloth as marriage gifts; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0fdd693f-b682-48b9-88e2-fc525248c99f.png",
+  "asset": "res://assets/ui/research/subjects/bride_wealth_gifts-v1.png",
+  "sha256": "3de2cf1120892eca6601fd9593f023966d90c322d633c0c881233b02dd59618a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "resin_sealed_wine",
+  "line": "nutrition",
+  "game_year": 65,
+  "approx_historical_year": -4567,
+  "prompt": "c. 4567 BCE: Family processes grapes and seals wine in clay jars with dark tree resin; egg tempera. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-daa197d5-76e1-423f-8f80-b93739abd95b.png",
+  "asset": "res://assets/ui/research/subjects/resin_sealed_wine-v1.png",
+  "sha256": "9c646b4a46a7c5db95a04c96bd2a7d7d4ba95c811c914d116ffcc5b44961583e",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

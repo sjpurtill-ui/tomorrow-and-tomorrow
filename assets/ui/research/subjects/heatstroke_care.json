@@ -1,0 +1,12 @@
+{
+  "id": "heatstroke_care",
+  "line": "health",
+  "game_year": 66,
+  "approx_historical_year": -4560,
+  "prompt": "c. 4560 BCE: Workers carry heat-struck adult to shade and offer water and rest; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-21c92d24-52a1-43fe-a01a-75449abdac43.png",
+  "asset": "res://assets/ui/research/subjects/heatstroke_care-v1.png",
+  "sha256": "fbf20cfa9ef5577d5ea16f358f9f9159680ad66f67b44d47e9bce6d835c52dd7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

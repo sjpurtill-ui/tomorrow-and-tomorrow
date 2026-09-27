@@ -1,0 +1,12 @@
+{
+  "id": "horizontal_ground_loom",
+  "line": "production",
+  "game_year": 78,
+  "approx_historical_year": -4480,
+  "prompt": "c. 4480 BCE: Weavers use horizontal ground loom with warp stretched between low pegs; matte impasto oil. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3949be73-e399-41a5-8f02-5fbd664a6cea.png",
+  "asset": "res://assets/ui/research/subjects/horizontal_ground_loom-v1.png",
+  "sha256": "6bf1277206ba1002811c6af29ae5b88a9e82fcd19ccb59d3f7167bb90c01a9c2",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "native_copper_working",
+  "line": "production",
+  "game_year": 68,
+  "approx_historical_year": -4547,
+  "prompt": "c. 4547 BCE: Artisan cold-hammers native copper nugget with stone hammer and anneals second piece in open hearth; impasto oil. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42d9f8b3-80eb-4ddf-a411-4a528c73dbaa.png",
+  "asset": "res://assets/ui/research/subjects/native_copper_working-v1.png",
+  "sha256": "6be0e8f203a3b3b401ab423821b2f1b994244fc5931f16965f76d3e18b160aa8",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first looked overly realistic. Selected closer material/process view in mature handmade 2D."
+}

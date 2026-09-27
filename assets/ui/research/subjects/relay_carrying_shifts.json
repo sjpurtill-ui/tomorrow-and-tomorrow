@@ -1,0 +1,12 @@
+{
+  "id": "relay_carrying_shifts",
+  "line": "logistics",
+  "game_year": 78,
+  "approx_historical_year": -4480,
+  "prompt": "c. 4480 BCE: Tired team hands heavy basket to fresh carriers at trail rest point; travel watercolor and ink. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-69c1bd13-5d51-4e7a-9a7f-eb20460a1207.png",
+  "asset": "res://assets/ui/research/subjects/relay_carrying_shifts-v1.png",
+  "sha256": "d716b6815544dd6a1b086fede0c1305d7673235fb7e8cf81997b2be5e308b4a1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

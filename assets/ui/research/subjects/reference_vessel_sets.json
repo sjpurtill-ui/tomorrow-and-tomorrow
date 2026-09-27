@@ -1,0 +1,12 @@
+{
+  "id": "reference_vessel_sets",
+  "line": "production",
+  "game_year": 72,
+  "approx_historical_year": -4520,
+  "prompt": "c. 4520 BCE: Potters compare matching reference bowls and jars while shaping new vessels; matte impasto oil. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-294b6860-3344-4462-8224-794ded275ff1.png",
+  "asset": "res://assets/ui/research/subjects/reference_vessel_sets-v1.png",
+  "sha256": "3212209f05135b0571e5efe8fb496134a45c4a50ceeb00cb8be3a6b7d109147f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

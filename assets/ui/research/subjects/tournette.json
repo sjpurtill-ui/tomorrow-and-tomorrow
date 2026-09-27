@@ -1,0 +1,12 @@
+{
+  "id": "tournette",
+  "line": "production",
+  "game_year": 75,
+  "approx_historical_year": -4500,
+  "prompt": "c. 4500 BCE: Potter slowly turns low hand turntable while smoothing clay vessel; matte impasto oil. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e9cc8853-2002-4a6a-b38d-096daa43463f.png",
+  "asset": "res://assets/ui/research/subjects/tournette-v1.png",
+  "sha256": "1730802f45d7de4d1925c27f1714c7253a6f39dc39cf907e34b9e114ab7a92a6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

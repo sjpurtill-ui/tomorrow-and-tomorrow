@@ -1,0 +1,12 @@
+{
+  "id": "megalith_raising",
+  "line": "infrastructure",
+  "game_year": 80,
+  "approx_historical_year": -4467,
+  "prompt": "c. 4467 BCE: Crew raises unworked megalith using earth ramp, wooden levers and fiber ropes; casein gouache. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7b3584e0-d43a-4f0d-9eb9-8e180ffee775.png",
+  "asset": "res://assets/ui/research/subjects/megalith_raising-v1.png",
+  "sha256": "2c533cd2f00d0dfcd7e5fa6697600dc8ac341b131789f364250b9e72e00e4397",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

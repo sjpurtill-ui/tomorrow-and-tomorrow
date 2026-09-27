@@ -1,0 +1,12 @@
+{
+  "id": "task_captains",
+  "line": "labor",
+  "game_year": 80,
+  "approx_historical_year": -4467,
+  "prompt": "c. 4467 BCE: Experienced worker directs two field crews with open-hand gestures; charcoal and ochre. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-23c58918-787e-469a-be02-e9d01274bec8.png",
+  "asset": "res://assets/ui/research/subjects/task_captains-v1.png",
+  "sha256": "9f9000b4d0bb618b25953e32f8a3c989f0e9f46486c05eed7681406ec3c498d1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
