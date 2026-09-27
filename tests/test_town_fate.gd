@@ -312,3 +312,163 @@ func test_a_band_camped_out_of_town_is_not_at_home()->void:
 	assert_bool(Marks.at_home(at,home)).is_true()
 	assert_str(Marks.doing({"status":"stationed","location_name":"Home settlement","at_home":true,"home_km":0.3})).is_equal("at home")
 	assert_str(Marks.doing({"status":"moving","destination_name":"Tsaren","days_left":3})).is_equal("marching on Tsaren, 3 days out")
+
+
+# --------------------------------------------------------------------------
+# The user's live order, which named no town (September 27): "kill all the
+# males and bring all the females back to Seanstone". The court answered
+# "Your order ... is being carried out unevenly" and nothing happened.
+# --------------------------------------------------------------------------
+
+const USERS_UNNAMED_ORDER:="kill all the males and bring all the females back to Seanstone"
+
+func _second_town(name:String,population:float,troops:int)->String:
+	## Another town of the same people, held by a band of `troops`.
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+troops+2
+	MilitaryCampaign.raise_recruits(troops+2)
+	MilitaryCampaign.start_training("levy","improvised",troops+2)
+	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
+	MilitaryCampaign.training_queue.clear()
+	var made:=MilitaryCampaign.create_field_army(troops+2,"LEVY BAND 2")
+	var army_id:=int((made.army as Dictionary).army_id)
+	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
+	army["supply_level"]=1.0; army["readiness"]=1.0
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	var ri:=-1
+	for i in (civ.strategic_regions as Array).size():
+		if String(civ.strategic_regions[i].id)!=city_id: ri=i; break
+	var region:Dictionary=civ.strategic_regions[ri]
+	region["name"]=name; region["population"]=population; region["controller"]="player"; region["settlement_founded"]=true
+	var factor:=maxf(.05,float(army.get("supply_level",1.0))*(.5+.5*clampf(float(army.get("readiness",.45))*.9,.15,1.0)))
+	var held:=MilitaryCampaign.establish_occupation_force(civ_id,region,floorf(float(troops)*factor),army_id)
+	assert_int(int(held.get("troops",0))).override_failure_message(str(held)).is_greater(0)
+	return String(region.id)
+
+func test_the_users_unnamed_order_is_carried_out_on_the_one_town_we_hold()->void:
+	var band:=_captured_tsaren()
+	var id:=_audience(band)
+	var reading:=WO.read(USERS_UNNAMED_ORDER)
+	assert_str(String(reading.get("kind",""))).is_equal("fate")
+	assert_str(String((reading.target as Dictionary).get("name",""))).is_equal("Tsaren")
+	var fate:Dictionary=reading.fate
+	assert_bool(bool(fate.get("kill_men",false))).override_failure_message(str(fate)).is_true()
+	assert_bool(bool(fate.get("kill_all",false))).override_failure_message(str(fate)).is_false()
+	assert_bool(bool(fate.get("captives",false))).override_failure_message(str(fate)).is_true()
+	var r:=CC.hear(id,USERS_UNNAMED_ORDER)
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("fate")
+	assert_bool(bool(r.executed)).is_true()
+	var o:Dictionary=r.objective
+	assert_int(int(o.killed)).is_greater(0)
+	assert_int(int(o.captives)).is_greater(0)
+	# The court's reply says what was done, with the town and the numbers.
+	assert_str(String(r.outcome)).contains("Tsaren")
+	assert_str(String(r.outcome)).contains("killed")
+	assert_str(String(r.outcome)).contains("captives on the road to Seanstone")
+	assert_str(String(r.outcome)).not_contains("carried out")
+	assert_str(String(r.actor_says)).contains("men of Tsaren were put to the sword")
+	assert_str(String(r.actor_says)).contains("led away toward Seanstone")
+	# The captives are on the road home.
+	var walking:Array=(MilitaryCampaign.occupation_transfers.data.transfers as Array).filter(func(t:Dictionary)->bool: return String(t.region)==city_id)
+	assert_int(walking.size()).is_equal(1)
+	assert_int(int(walking[0].people)).is_equal(int(o.captives))
+	# One Chronicle entry.
+	var told:=(GameState.chronicle.get("entries",[]) as Array).filter(func(e:Dictionary)->bool: return String(e.get("key","")).begins_with("town_fate:"))
+	assert_int(told.size()).is_equal(1)
+	# Not burned or given back: the garrison holds it, and its card on the map says what was done.
+	assert_int(int(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("troops",0))).is_equal(17)
+	var garrisons:=Overlay._garrison_inputs()
+	assert_int(garrisons.size()).is_equal(1)
+	var marks:=Overlay._marks({"stage":"hearth","garrisons":garrisons},[],[],{"clashes":[],"sieges":[]})
+	var held:Array=marks.filter(func(m:Dictionary)->bool: return bool(m.get("garrison",false)))
+	var card:=Marks.card_garrison(held[0])
+	assert_int(card.size()).is_equal(3)
+	assert_str(card[2]).contains("killed")
+	assert_str(card[2]).contains("captives on the road")
+
+
+func test_the_unnamed_order_given_to_another_official_is_relayed_to_the_garrison()->void:
+	_captured_tsaren()
+	var steward:=GovernmentPeopleSystem.officeholder("Steward")
+	if steward.is_empty():
+		for person in Hall._officials():
+			if String(person.get("office_key",""))!="Marshal": steward=person; break
+	assert_dict(steward).is_not_empty()
+	var audience:=Hall.summon({"person_id":int(steward.person_id)})
+	assert_dict(audience).is_not_empty()
+	var r:=CC.hear(String(audience.id),USERS_UNNAMED_ORDER)
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("outcome",""))).is_equal("fate")
+	assert_int(int(r.objective.captives)).is_greater(0)
+	# Nobody in the hall was struck down in the town's place.
+	assert_str(String(r.get("stage",""))).is_equal("war_fate")
+	assert_bool(bool(r.get("removed",false))).is_false()
+
+
+func test_with_two_towns_held_the_war_leader_asks_which_and_the_answer_carries_it()->void:
+	var band:=_captured_tsaren()
+	var other:=_second_town("Varo",120.0,10)
+	assert_int(WO.held_towns().size()).is_equal(2)
+	var id:=_audience(band)
+	var r:=CC.hear(id,USERS_UNNAMED_ORDER)
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).is_equal("ask")
+	assert_str(String(r.actor_says)).contains("Which town")
+	assert_str(String(r.actor_says)).contains("Tsaren")
+	assert_str(String(r.actor_says)).contains("Varo")
+	assert_str(String(r.outcome)).is_equal("Nothing is done until you name the town.")
+	assert_bool(bool(r.executed)).is_false()
+	assert_array(MilitaryCampaign.occupation_transfers.data.transfers as Array).is_empty()
+	# Offline, the towns are the answers offered.
+	var labels:Array=[]
+	for c:Dictionary in WO.offline_choices(id): labels.append(String(c.label))
+	assert_bool("Tsaren" in labels and "Varo" in labels).override_failure_message(str(labels)).is_true()
+	# The god names it: the order given before is carried out there.
+	var done:=CC.hear(id,"Tsaren")
+	assert_str(String(done.war.verdict)).override_failure_message(String(done.get("actor_says",""))).is_equal("fate")
+	assert_str(String(done.objective.city_id)).is_equal(city_id)
+	assert_int(int(done.objective.killed)).is_greater(0)
+	assert_int(int(done.objective.captives)).is_greater(0)
+	# Varo untouched.
+	assert_float(float(CivilizationSystem.region_snapshot(civ_id,other).get("population",0.0))).is_equal(120.0)
+
+
+func test_a_town_spoken_of_in_this_audience_is_the_one_meant()->void:
+	var band:=_captured_tsaren()
+	_second_town("Varo",120.0,10)
+	var id:=_audience(band)
+	CC.hear(id,"Attack Tsaren")
+	var r:=CC.hear(id,USERS_UNNAMED_ORDER)
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("fate")
+	assert_str(String(r.objective.city_id)).is_equal(city_id)
+
+
+func test_holding_no_town_the_order_is_answered_plainly_and_nobody_here_dies()->void:
+	# At war, nothing taken: there is nobody of theirs in our hands.
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+10
+	MilitaryCampaign.raise_recruits(10)
+	MilitaryCampaign.start_training("levy","improvised",10)
+	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
+	MilitaryCampaign.training_queue.clear()
+	MilitaryCampaign.create_field_army(10,"LEVY BAND 1")
+	var id:=_audience(MilitaryCampaign.field_armies[0])
+	var r:=CC.hear(id,USERS_UNNAMED_ORDER)
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).is_equal("impossible")
+	assert_str(String(r.actor_says)).contains("We hold no town of theirs")
+	assert_str(String(r.outcome)).not_contains("carried out")
+	assert_bool(bool(r.get("removed",false))).is_false()
+	assert_str(String(Hall.find(id).get("status",""))).is_equal("waiting")
+
+
+func test_words_about_one_person_are_never_a_towns_fate()->void:
+	_captured_tsaren()
+	for words in ["Kill him","Take them home","Bring him back to Seanstone","kill the traitor"]:
+		assert_str(String(WO.read(words).get("kind",""))).override_failure_message(words).is_not_equal("fate")
+	for words in ["put the men to the sword","bring the women and girls back home as captives","burn the town to the ground","free the captives"]:
+		assert_str(String(WO.read(words).get("kind",""))).override_failure_message(words).is_equal("fate")
+
+
+func test_the_generic_directive_never_says_an_order_is_being_carried_out()->void:
+	var routed:=CC.custom_order("Plant more flax along the river",{})
+	assert_str(String(routed.get("outcome",""))).not_contains("is being carried out")
