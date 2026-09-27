@@ -41,9 +41,9 @@ var expanded_domains:Dictionary={}
 
 func meta()->Dictionary:
 	return {
-		"eyebrow":"INQUIRY · THE COLLECTIVE MIND",
-		"title":"Knowledge & Inquiry",
-		"subtabs":["DIRECT ATTENTION","TECH TREE","ESTABLISHED"],
+		"eyebrow":"What the people know and are learning",
+		"title":"Research",
+		"subtabs":["Where we look","Knowledge tree","What we know"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -55,19 +55,19 @@ func tab(sub:int)->Dictionary:
 	var established_threads:=DiscoverySystem.established_knowledge_threads()
 	var established:=established_threads.size()
 	var kpis:Array=[
-		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":"%.1f" % float(science.capacity) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"%.1f minds" % float(science.minds) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Researcher-equivalent minds currently doing science × their average education level"},
+		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":preload("res://scripts/hud/production_plain.gd").number(float(science.capacity)) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"about %s people at it" % preload("res://scripts/hud/production_plain.gd").number(float(science.minds)) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"How much learning is done: the people at it, weighted by how well they were taught"},
 		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"Average usable education among the research workforce, based on preserved learning and the ability to communicate it"},
-		{"label":"EMPHASIS","value":str(emphasis_total),"delta":"total weight","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"Sum of domain weights; each domain receives its share of the observers"},
-		{"label":"ACTIVE","value":str(lines),"delta":"projects","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Viable investigations under way"},
-		{"label":"KNOWLEDGE LINES","value":str(established),"delta":"","accent":Tokens.GREEN,"tip":"Concrete bodies of knowledge. Each line consolidates its surveys, tests, standards, and later refinements."},
+		{"label":"FIELDS WATCHED","value":str(emphasis_total),"delta":"steps of attention","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"All the attention you have given out across the fields; each field gets its share of the people"},
+		{"label":"BEING LEARNED","value":str(lines),"delta":"questions","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now"},
+		{"label":"THINGS WE KNOW","value":str(established),"delta":"kinds of knowledge","accent":Tokens.GREEN,"tip":"Each is one body of knowledge, with the tests and refinements that followed it"},
 	]
 	var brief:Dictionary
 	if observers==0:
-		brief={"tone":"warn","title":"No observers are assigned","why":"Local leaders allocate research work. Review their priority to make room for observation.","action_label":"RESEARCH WORK","on_action":func():_open_report("RESEARCH WORK",_research_work_report)}
+		brief={"tone":"warn","title":"No one is set to learning","why":"Local leaders decide who works at learning. Ask them for more hands on learning.","action_label":"Who does the work","on_action":func():_open_report("RESEARCH WORK",_research_work_report)}
 	elif lines==0:
-		brief={"tone":"warn","title":"No investigation is under way","why":"Attention needs evidence and prior knowledge. Open a direction to review its current investigations."}
+		brief={"tone":"warn","title":"No question is being worked on","why":"Attention alone is not enough: the people need clues and earlier knowledge first. Open a field to see what it is waiting for."}
 	else:
-		brief={"tone":"info","title":"Inquiry is under way","why":"Evidence, place, prior findings, and chance decide what completes first."}
+		brief={"tone":"info","title":"The people are learning","why":"What they find first depends on clues, place, what they already know, and luck."}
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
@@ -147,7 +147,7 @@ func _investigation_blocks(domain_filter:String="")->Array:
 func _established_blocks()->Array:
 	var log:Array=DiscoverySystem.established_knowledge_threads()
 	if log.is_empty():
-		return [{"type":"text","heading":"ESTABLISHED KNOWLEDGE","text":"No discovery has yet survived testing, use, and collective memory."}]
+		return [{"type":"text","heading":"ESTABLISHED KNOWLEDGE","text":"Nothing has yet been tried, used and remembered long enough to count as known."}]
 	# Group by domain, newest finding first inside each group. Domains collapse
 	# to one aggregate row so fifty findings read as a dozen lines.
 	var by_domain:Dictionary={}
@@ -165,11 +165,11 @@ func _established_blocks()->Array:
 		var accent:Color=DOMAIN_COLORS.get(domain,Tokens.GREEN)
 		var domain_open:bool=expanded_domains.has(domain)
 		items.append({
-			"name":domain.capitalize().to_upper(),
-			"sub":"%d knowledge line%s · latest day %d" % [events.size(),"" if events.size()==1 else "s",int((events[0] as Dictionary).get("day",0))],
+			"name":preload("res://scripts/hud/research_visuals.gd").name_for(domain),
+			"sub":"%d thing%s known · latest %s" % [events.size(),"" if events.size()==1 else "s",EraWords.ago(int((events[0] as Dictionary).get("day",0)))],
 			"detail":_domain_aggregate_text(events),
 			"icon":ResourceIcons.domain_texture(domain,accent),
-			"value":"▾" if domain_open else "▸","value_color":Tokens.MUTED,
+			"value":"Hide" if domain_open else "Show","value_color":Tokens.MUTED,
 			"accent":accent,
 			"on_click":_toggle_domain.bind(domain),
 			"tip":"Click to %s this domain's findings." % ("collapse" if domain_open else "list"),
@@ -188,14 +188,14 @@ func _established_blocks()->Array:
 				"name":"    %s" % String(event.get("name","Discovery")),
 				"sub":"    "+String(event.get("record_summary","Discovered once")),
 				"detail":"\n".join(detail_lines),
-				"value":"▾" if expanded else "▸","value_color":Tokens.MUTED,
+				"value":"Less" if expanded else "More","value_color":Tokens.MUTED,
 				"accent":Color(accent,0.35),
 				"on_click":_toggle_discovery.bind(entry_key),
 				"tip":"Click to %s the full account." % ("collapse" if expanded else "read"),
 			})
 	var breakthrough_total:=0
 	for thread_variant in log: breakthrough_total+=int((thread_variant as Dictionary).get("breakthrough_count",1))
-	return [{"type":"rows","heading":"ESTABLISHED KNOWLEDGE","note":"%d technologies & archived practices · %d domains" % [log.size(),domain_order.size()],"items":items}]
+	return [{"type":"rows","heading":"ESTABLISHED KNOWLEDGE","note":"%d things known, in %d fields" % [log.size(),domain_order.size()],"items":items}]
 
 func _domain_aggregate_text(events:Array)->String:
 	# Sum every finding's effects into the domain's standing contribution, so a
@@ -209,15 +209,15 @@ func _domain_aggregate_text(events:Array)->String:
 		for effect_id in effects:
 			totals[effect_id]=float(totals.get(effect_id,0.0))+float(effects[effect_id])
 	if totals.is_empty():
-		return "No direct capacity changes — this domain unlocked prerequisites for later methods."
+		return "Changes nothing by itself; it opens the way to later knowledge."
 	var effect_ids:Array=totals.keys()
 	effect_ids.sort_custom(func(a,b)->bool: return absf(float(totals[b]))<absf(float(totals[a])))
 	var parts:Array[String]=[]
 	for effect_id in effect_ids.slice(0,5):
 		var display:=String(DiscoverySystem.EFFECT_DISPLAY_NAMES.get(String(effect_id),String(effect_id).replace("_"," ")))
-		parts.append("%s %+.1f%%" % [display.capitalize(),float(totals[effect_id])*100.0])
-	var text:=" · ".join(parts)
-	if effect_ids.size()>5: text+=" · +%d more" % (effect_ids.size()-5)
+		parts.append(preload("res://scripts/hud/research_visuals.gd").effect_sentence(String(effect_id),float(totals[effect_id])))
+	var text:="; ".join(parts)
+	if effect_ids.size()>5: text+="; and %d more" % (effect_ids.size()-5)
 	return text
 
 func _toggle_domain(domain:String)->void:
@@ -235,12 +235,12 @@ func _established_effect_text(event:Dictionary)->String:
 	if effects.is_empty():
 		effects=DiscoverySystem.discovery_definition(String(event.get("id",""))).get("effects",{})
 	if effects.is_empty():
-		return "No direct capacity change — unlocks prerequisites for later methods."
+		return "Changes nothing by itself; it opens the way to later knowledge."
 	var parts:Array[String]=[]
 	for effect_id in effects:
 		var display:=String(DiscoverySystem.EFFECT_DISPLAY_NAMES.get(String(effect_id),String(effect_id).replace("_"," ")))
-		parts.append("%s %+.1f%%" % [display.capitalize(),float(effects[effect_id])*100.0])
-	return " · ".join(parts)
+		parts.append(preload("res://scripts/hud/research_visuals.gd").effect_sentence(String(effect_id),float(effects[effect_id])))
+	return "; ".join(parts)
 
 func signature()->Array:
 	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
@@ -315,12 +315,12 @@ func _domain_report(id:String)->Dictionary:
 	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
 	var share:=float(weight)/maxf(1,total)
 	var observers:=int(GameState.population_allocations.get("Knowledge",0))
-	return {"blocks":[{"type":"text","heading":"PURPOSE","text":String(DOMAIN_GOALS.get(id,""))},{"type":"text","heading":"CURRENT ATTENTION","text":"%d%% of research attention: about %.1f of %d observers. Weight %d is a relative preference, not a headcount or a success chance."%[roundi(share*100),share*observers,observers,weight]},{"type":"actions","items":[{"label":"MORE ATTENTION","sub":"Shift one preference step here","on_press":terrain._change_research_domain_allocation.bind(id,1)},{"label":"LESS ATTENTION","sub":"Free attention for other directions","disabled":weight<=0,"on_press":terrain._change_research_domain_allocation.bind(id,-1)},focused_action("CURRENT INVESTIGATIONS","Progress and actual bottlenecks",func()->Dictionary:return {"blocks":_investigation_blocks(id)}),focused_action("RESEARCH WORK","Local leadership allocates observers",_research_work_report)]},{"type":"text","text":"Changing attention reallocates existing observers. It creates no discovery, people or resources, and cannot bypass missing evidence or prior knowledge."}]}
+	return {"blocks":[{"type":"text","heading":"PURPOSE","text":String(DOMAIN_GOALS.get(id,""))},{"type":"text","heading":"CURRENT ATTENTION","text":"About %d in every 100 of our lore keepers' hours go to this field: roughly %s of our %d people at learning. More attention speeds the work here but cannot replace missing clues."%[roundi(share*100),preload("res://scripts/hud/production_plain.gd").number(share*observers),observers]},{"type":"actions","items":[{"label":"More attention here","sub":"Move one step of attention to this field","on_press":terrain._change_research_domain_allocation.bind(id,1)},{"label":"Less attention here","sub":"Give one step of attention back to the others","disabled":weight<=0,"on_press":terrain._change_research_domain_allocation.bind(id,-1)},focused_action("CURRENT INVESTIGATIONS","Progress and actual bottlenecks",func()->Dictionary:return {"blocks":_investigation_blocks(id)}),focused_action("RESEARCH WORK","Local leadership allocates observers",_research_work_report)]},{"type":"text","text":"Changing attention reallocates existing observers. It creates no discovery, people or resources, and cannot bypass missing evidence or prior knowledge."}]}
 func _research_work_report()->Dictionary:
 	var id:=SettlementModel._primary_settlement_id()
 	var state:=GovernmentPeopleSystem.settlement_management(id)
 	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
-	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people currently work in Knowledge. Local leaders allocate their time alongside food, water and other needs. Current priority: %s."%[int(GameState.population_allocations.get("Knowledge",0)),String(state.get("focus_label","Delegated"))]},{"type":"actions","items":[{"label":"PRIORITIZE RESEARCH","sub":"Use local recovery while occupied" if occupied else "Ask the leader to shift local work","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"DELEGATE PRIORITY","sub":"Use local recovery while occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}
+	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people work at learning now. The local leader shares out their time with food, water and other needs, and is putting extra hands on %s."%[int(GameState.population_allocations.get("Knowledge",0)),String({"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up"}.get(String(state.get("focus","")),"everyday needs"))]},{"type":"actions","items":[{"label":"More hands on learning","sub":"Not while the place is occupied" if occupied else "Ask the leader to move some people to learning","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"Let the leader decide","sub":"Not while the place is occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}
 
 func _discovery_board()->Dictionary:
 	var fields:Array=[]
@@ -333,7 +333,7 @@ func _discovery_board()->Dictionary:
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
 		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
-	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("RESEARCH WORK",_research_work_report),"on_domain":open_domain}
+	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
 
 ## Artifact study is a research-team role inside the same attention budget.
 func _artifact_study_item(total_weight:int,observers:int)->Dictionary:

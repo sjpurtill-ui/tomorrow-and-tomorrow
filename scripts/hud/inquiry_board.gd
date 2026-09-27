@@ -9,20 +9,20 @@ func setup(block:Dictionary)->void:
 	intro.add_child(_serif("At the edge of what we know",27))
 	_note(intro,"Follow the work underway, or give your people a new question to pursue.")
 	_button(heading,"Explore the discovery tree",data.on_tree,"Explore known methods and their prerequisites")
-	add_child(T.make_label("INVESTIGATIONS UNDERWAY",12,T.GOLD))
+	add_child(T.make_label("BEING LEARNED NOW",12,T.GOLD_TEXT))
 	projects_grid=GridContainer.new();projects_grid.columns=2;projects_grid.add_theme_constant_override("h_separation",16);projects_grid.add_theme_constant_override("v_separation",14);add_child(projects_grid)
 	for record:Dictionary in data.investigations:
 		_investigation(record)
 	if data.investigations.is_empty():
 		var empty:=_card(projects_grid);Visuals.paint(empty,"knowledge",130)
 		empty.add_child(_serif("The next question is still open",22))
-		_note(empty,"Research needs observers, evidence and earlier knowledge. Explore the tree to choose an available question, or ask your leader to prioritize research work.")
-		_button(empty,"Review research work",data.on_work,"Review the leader’s local research priority")
+		_note(empty,"Learning needs people to do it, clues to follow and earlier knowledge. Open the knowledge tree to choose a question, or ask your leader for more hands on learning.")
+		_button(empty,"Who does the work",data.on_work,"How many people the local leaders set to learning")
 	_rule(self)
 	var field_heading:=HBoxContainer.new();add_child(field_heading)
-	var field_title:=T.make_label("WHERE SHOULD WE LOOK NEXT?",12,T.GOLD);field_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;field_heading.add_child(field_title)
-	_button(field_heading,"Research workforce",data.on_work,"Review how local leaders assign research work")
-	_note(self,"Attention divides your existing observers between fields. More attention helps pursue a question; it cannot replace missing evidence.")
+	var field_title:=T.make_label("WHERE SHOULD WE LOOK NEXT?",12,T.GOLD_TEXT);field_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;field_heading.add_child(field_title)
+	_button(field_heading,"Who does the work",data.on_work,"How many people the local leaders set to learning")
+	_note(self,"Your lore keepers share their time between these fields. Giving a field more attention speeds its questions, but it cannot make up for clues the people have not found.")
 	fields_grid=GridContainer.new();fields_grid.columns=3;fields_grid.add_theme_constant_override("h_separation",16);fields_grid.add_theme_constant_override("v_separation",18);add_child(fields_grid)
 	for field:Dictionary in data.fields:
 		var outer:=_card(fields_grid);var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);outer.add_child(row)
@@ -34,11 +34,11 @@ func setup(block:Dictionary)->void:
 		var goal:=String(field.goal).left(1).to_upper()+String(field.goal).substr(1);_clamped(card,goal,12,T.TEXT_SOFT);outer.get_parent().tooltip_text=goal
 		_meter(card,float(field.share),Visuals.color(String(field.id)))
 		var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",6);card.add_child(controls)
-		var share:=T.make_label("%d%% attention · %d active"%[roundi(float(field.share)*100),int(field.active)],12,T.BODY);share.size_flags_horizontal=Control.SIZE_EXPAND_FILL;share.clip_text=true;controls.add_child(share)
-		_button(controls,"−",field.on_less,"Reduce relative attention by one step")
-		(controls.get_child(1) as Button).disabled=int(field.weight)<=0
-		_button(controls,"+",field.on_more,"Increase relative attention by one step")
-		_button(controls,"Explore",field.on_open,"Review this field’s purpose and investigations")
+		var share_words:="No attention" if float(field.share)<=0.0 else "About %d in 100 of our attention" % maxi(1,roundi(float(field.share)*100))
+		var share:=T.make_label("%s; %s"%[share_words,"%d question%s being worked on" % [int(field.active),"" if int(field.active)==1 else "s"] if int(field.active)>0 else "nothing being worked on"],12,T.BODY);share.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_child(share);card.move_child(share,controls.get_index())
+		_button(controls,"Less",field.on_less,"Give one step of this field's attention to the others").disabled=int(field.weight)<=0
+		_button(controls,"More",field.on_more,"Move one step of attention to this field")
+		_button(controls,"Open",field.on_open,"What this field is for, and what is being worked on")
 	resized.connect(_arrange);_arrange()
 func _investigation(record:Dictionary)->void:
 	# Wide banner paintings head the card at full width, shown whole; older
@@ -72,8 +72,9 @@ func _investigation(record:Dictionary)->void:
 	var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",5);text.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(text)
 	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",10);head.mouse_filter=Control.MOUSE_FILTER_PASS;text.add_child(head)
-	var eyebrow:=T.make_label(Visuals.name_for(domain).to_upper(),11,T.GOLD);eyebrow.size_flags_horizontal=Control.SIZE_EXPAND_FILL;eyebrow.clip_text=true;head.add_child(eyebrow)
-	head.add_child(T.make_label("%d%% · %s"%[roundi(progress*100),Visuals.workforce(researchers)],12,Visuals.text_color(domain)))
+	var eyebrow:=T.make_label(Visuals.name_for(domain).to_upper(),12,T.GOLD_TEXT);eyebrow.size_flags_horizontal=Control.SIZE_EXPAND_FILL;eyebrow.clip_text=true;head.add_child(eyebrow)
+	var Words:=preload("res://scripts/hud/home_plain.gd")
+	head.add_child(T.make_label("%s; %s"%[Words.researchers(researchers),Words.evidence(progress)],12,Visuals.text_color(domain)))
 	text.add_child(_serif(String(record.get("name","An open question")),19))
 	_meter(text,progress,accent)
 	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
@@ -81,7 +82,7 @@ func _investigation(record:Dictionary)->void:
 	var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
 	if phase.is_empty():phase=reason[0].left(1)+reason[0].substr(1).to_lower()
 	_clamped(text,phase,13,T.BODY,1)
-	if reason.size()>1:_clamped(text,reason[1].left(1).to_upper()+reason[1].substr(1)+".",12,T.TEXT_SOFT)
+	_clamped(text,Visuals.plain_bottleneck(bottleneck),12,T.TEXT_SOFT)
 	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))
 	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+"Click to review this field and its current investigations."
 func _clamped(parent:Node,value:String,font:int,ink:Color,lines:int=2)->void:

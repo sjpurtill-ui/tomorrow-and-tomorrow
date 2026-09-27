@@ -114,3 +114,42 @@ func test_water_works_offers_are_plain_and_start_the_real_work()->void:
 		assert_bool(bool(result.get("ok",false))).is_true()
 		assert_str(Works.progress_lines()[0]).contains("being built"))
 	WorldSimulation.clear()
+
+func _prepare_settled()->void:
+	GameState.reset_for_new_world(771204);GovernmentPeopleSystem.reset_for_new_world()
+	GameState.initialize_population_model();GameState.ensure_population_total(120)
+	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded();GovernmentPeopleSystem.initialize()
+
+class SubHolder extends Node:
+	var sub:=0
+
+class FakeHud extends Control:
+	var dock:Node=null
+	func request_immediate_dock_refresh()->void:pass
+
+func test_health_and_research_docks_build_plain_pages()->void:
+	_prepare_settled()
+	var hud:=FakeHud.new();auto_free(hud)
+	var health=preload("res://scripts/hud/content/dock_detail_health.gd").new(null,hud)
+	var page:Dictionary=health.tab(0)
+	var text:=JSON.stringify(page)
+	assert_str(text).contains("Care of the sick").not_contains("Care duty:").not_contains("population equivalents")
+	var inquiry=preload("res://scripts/hud/content/dock_content_inquiry.gd").new(null,hud)
+	assert_array(inquiry.meta().subtabs).contains_exactly(["Where we look","Knowledge tree","What we know"])
+	var board:VBoxContainer=auto_free(preload("res://scripts/hud/inquiry_board.gd").new())
+	board.setup({"fields":[{"id":"health","goal":"keeping people well","weight":2,"share":0.25,"active":1,"on_open":func():pass,"on_more":func():pass,"on_less":func():pass}],
+		"investigations":[{"name":"Wound cleaning","dynamic":"health","progress":0.5,"research_workforce":0.5,"bottleneck":"RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"}],
+		"on_tree":func():pass,"on_work":func():pass,"on_domain":func(_d:String):pass})
+	var words:=_texts(board)
+	assert_str(words).contains("About 25 in 100 of our attention").contains("One person, part of the time").contains("about half proven").contains("Fewer than one person's full time")
+	assert_str(words).not_contains("−").not_contains("% attention ·").not_contains("researchers")
+
+func test_economy_dock_titles_follow_the_rail()->void:
+	_prepare_settled()
+	var hud:=FakeHud.new();auto_free(hud)
+	var economy=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,hud)
+	assert_str(String(economy.meta().title)).is_equal("Food")
+	assert_array(economy.meta().subtabs).contains_exactly(["Food & water","Materials","Wealth"])
+	var dock:=SubHolder.new();auto_free(dock);dock.sub=2;hud.dock=dock
+	assert_str(String(economy.meta().title)).is_equal("Wealth")
