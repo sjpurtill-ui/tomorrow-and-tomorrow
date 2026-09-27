@@ -33,7 +33,7 @@ func _ready()->void:
 	terrain=load("res://local_terrain.tscn").instantiate()
 	add_child(terrain)
 	await get_tree().process_frame
-	terrain.game_speed=0
+	terrain.game_speed=0.0
 	if not GameState.settlement_site_committed or "Hearth Circle" not in GameState.settlement_completed:
 		GameState.settlement_site_committed=true
 		GameState.settlement_founded_at=terrain.settler_marker.position

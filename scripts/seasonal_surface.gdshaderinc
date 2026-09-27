@@ -40,14 +40,14 @@ vec3 seasonal_ground(vec3 base,float warmth,float rain,float amplitude,float lat
 	// Spring flush: warming, mild country greens before full summer.
 	float mild=smoothstep(4.0,10.0,temperature)*(1.0-smoothstep(20.0,27.0,temperature));
 	float flush=smoothstep(0.2,0.8,turn)*mild*cover*0.50;
-	ground=mix(ground,ground*vec3(0.84,1.26,0.70),flush*season_contrast);
+	ground=mix(ground,ground*vec3(0.90,1.13,0.86),flush*season_contrast);
 	// High summer on open, drier ground: grass cures to straw. Deep woodland
 	// and wet country stay green.
 	float heat=smoothstep(15.0,24.0,temperature)*clamp(warm_half*1.5,0.0,1.0);
 	float dryness=1.0-smoothstep(0.40,0.80,rain);
 	float cured=heat*dryness*(1.0-woodland*0.75)*smoothstep(0.08,0.30,rain)*0.60;
 	float g_luma=dot(ground,vec3(0.28,0.57,0.15));
-	ground=mix(ground,vec3(1.30,1.10,0.66)*g_luma,cured*season_contrast);
+	ground=mix(ground,vec3(1.22,1.08,0.78)*g_luma,cured*season_contrast);
 	return ground;
 }
 

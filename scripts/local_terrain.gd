@@ -1878,15 +1878,20 @@ func _build_environment() -> void:
 	# Low warm key light (docs/ART_DIRECTION.md): a painted landscape in the
 	# first hours of the day. The sky fill is cooler and dimmer than the key so
 	# the shadowed side of every slope and crown reads as form, not flat green.
-	settings.ambient_light_color = Color("#a3a495")
+	# The fill is the open sky: a little cooler than the key, so shade reads
+	# blue-grey against warm sunlit ground (world_beauty.gdshaderinc).
+	settings.ambient_light_color = Color("#97a3ab")
 	settings.ambient_light_energy = 0.30 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
 
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-34, -38, 0)
-	sun.light_color = Color("#eed6ae")
+	# From the north-west, the cartographer's convention: north is up, so the
+	# light falls from the upper left and relief reads as raised, never sunken.
+	# The chart hillshade and canopy edges in the ground shader use the same sun.
+	sun.rotation_degrees = Vector3(-31, -138, 0)
+	sun.light_color = Color("#f4e4cc")
 	sun.light_energy = 1.12 if SEAMLESS_WORLD else 0.88
 	sun.shadow_enabled = bool(display_preferences.shadows) if display_preferences else true
 	# Oblique satellite views amplify one-pixel cascade stair-steps into bright
@@ -2283,6 +2288,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
+#include "res://scripts/world_beauty.gdshaderinc"
 
 // Charted ground: the discovery mask, plus the ground around the people now.
 float charted_at(vec2 xz) {
@@ -2586,6 +2592,10 @@ void fragment() {
 	float chart_scale=smoothstep(0.02,0.30,pixel_world);
 	forest_surface=mix(forest_surface,vec3(0.18,0.22,0.12),smoothstep(0.01,0.20,pixel_world)*0.70);
 	vec3 earth = mix(ground_surface, forest_surface, clamp(forest_mask, 0.0, 0.96));
+	// Woodland as a mass with volume (world_beauty.gdshaderinc): the stand edge
+	// facing the low sun catches warm light, the far edge falls into shade
+	// that spills a little onto the open ground beside it.
+	earth = wb_canopy_edges(earth,forest_mask,relative_position.xz,pixel_world);
 	earth = mix(earth, vertex_tint, mix(0.30, 0.10, max(regional_detail,local_detail)));
 	float climate_green=smoothstep(-0.018,0.065,surface_color.g-surface_color.r);
 	// Seeded intermittent swales bridge the visual scale between a continental
@@ -2648,6 +2658,23 @@ void fragment() {
 	// altitude multiplier disguised steep lowland faces as grassy ground.
 	float rock_mask = smoothstep(0.13,0.43,slope);
 	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(surface_uv,surface_uv2));
+	// Repaint with the biome palette (world_beauty.gdshaderinc): the detail
+	// above stays, its hue comes from the climate.
+	float wb_warmth=surface_uv.x>=0.999?surface_uv.y:0.55;
+	// Local relief against the broad land (the macro height raster): hollows
+	// hold water and stay lush, crests and knolls dry to straw. Also shades
+	// the valleys below. Fades out once a pixel spans kilometres.
+	float wb_hollow=0.0;
+	if (coast_mask_ready() && world_position.y>0.0) {
+		wb_hollow=(coast_mask_height(world_position.xz)-world_position.y)*(1.0-smoothstep(0.35,2.5,pixel_world));
+	}
+	float wb_topo_wet=smoothstep(0.0,0.10,wb_hollow)-smoothstep(0.0,0.12,-wb_hollow);
+	float wb_rain=clamp(precipitation+wb_topo_wet*0.16,0.0,1.0);
+	float wb_dry=1.0-smoothstep(0.26,0.50,wb_rain);
+	float wb_reference=mix(mix(0.180,0.250,wb_dry),0.085,clamp(forest_mask,0.0,1.0));
+	vec3 wb_palette=wb_biome_palette(wb_rain,wb_warmth,forest_mask,world_position.y,smoothstep(0.25,0.75,biome_patch*0.55+soil_patch*0.45));
+	earth = wb_paint(earth,wb_palette,wb_reference,0.85);
+	earth = wb_brushwork(earth,wb_brush(world_position.xz,CAMERA_POSITION_WORLD.y),1.0);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2682,6 +2709,11 @@ void fragment() {
 	// the valley reads as soft green blotches with no landform at all.
 	float map_relief = smoothstep(0.008,0.16,pixel_world);
 	earth *= mix(1.0, hillshade, map_relief * 0.90);
+	// Painted light at every zoom (world_beauty.gdshaderinc): the sunward
+	// side of each slope warms, the far side takes the cool sky, and ground
+	// lying below the broad land around it (valleys, river bottoms) is shaded.
+	float wb_valley=smoothstep(0.004,0.14,wb_hollow)*0.55;
+	earth = wb_light(earth,directional_slope*4.5,wb_valley,mix(0.62,0.32,map_relief));
 	// Actual elevation remains meaningful after fine texture has filtered away.
 	// A broad, non-banded upland exposure separates low basins, plateaus and the
 	// alpine shoulder in regional/continental imagery. It is exactly absent from
@@ -2702,14 +2734,14 @@ void fragment() {
 	// Grade to the map palette first, then haze toward parchment: mild at
 	// valley height, stronger at regional and continental footprints, and a
 	// little more along oblique rays, like the margin of a painted map.
-	earth=map_palette_grade(earth);
+	earth=wb_grade(earth);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
 	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.36;
 	float view_slant=length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze=smoothstep(0.15,1.2,view_slant)*smoothstep(0.002,0.35,pixel_world);
-	float atmospheric_weight=clamp(altitude_haze+slant_haze*0.14,0.0,0.40);
-	earth=map_haze(earth,atmospheric_weight);
+	float atmospheric_weight=clamp(altitude_haze*0.62+slant_haze*0.14,0.0,0.30);
+	earth=wb_air(earth,atmospheric_weight);
 	// Unexplored land and water share one unlit veil. Normals must not reveal
 	// unseen mountain ranges or coastlines as geometric detail improves.
 	// The coast is inked, one to two pixels wide, where the ground rises out
