@@ -1,0 +1,12 @@
+{
+  "id": "leader_feast_obligations",
+  "line": "institutions",
+  "game_year": 75,
+  "approx_historical_year": -4500,
+  "prompt": "c. 4500 BCE: Village leader serves communal feast to followers from shared baskets; civic fresco. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ce029a10-f36d-4efa-b1a1-35c7ae1de69b.png",
+  "asset": "res://assets/ui/research/subjects/leader_feast_obligations-v1.png",
+  "sha256": "cec032d202e210001da44182abac8a9978ba555de2a0393397f74c91cbcfddef",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

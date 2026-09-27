@@ -1,0 +1,12 @@
+{
+  "id": "batch_labeling_by_harvest",
+  "line": "nutrition",
+  "game_year": 75,
+  "approx_historical_year": -4500,
+  "prompt": "c. 4500 BCE: Keep separate grain baskets from successive harvests with plain cord and wooden tags; egg tempera. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fa4ee151-5c6d-4211-8e80-c35e649ecb86.png",
+  "asset": "res://assets/ui/research/subjects/batch_labeling_by_harvest-v1.png",
+  "sha256": "13e4790cfbb74b81dae6263d9f8bd2b7f932801af20b9492cf2cf10189c8a32f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

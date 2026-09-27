@@ -1,0 +1,12 @@
+{
+  "id": "spawning_ground_avoidance",
+  "line": "ecology",
+  "game_year": 80,
+  "approx_historical_year": -4467,
+  "prompt": "c. 4467 BCE: Gatherers leave egg-rich fish spawning pool untouched and walk downstream; plant-pigment naturalist illustration. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0cb6c843-922b-4340-ba1b-a4f0a4ffd9da.png",
+  "asset": "res://assets/ui/research/subjects/spawning_ground_avoidance-v1.png",
+  "sha256": "a30ddddef22377be6bf15a02d15bdb3650fed430fd59b812686df23a338e4205",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first lacked subject clarity or was overly realistic. Selected clearer mature handmade 2D crop."
+}
