@@ -2736,7 +2736,7 @@ void fragment() {
 	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
 	// Close aerial imagery needs a different exposure than the shaded regional
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
-	earth *= mix(1.0, 1.32, close_detail);
+	earth *= mix(1.0, 1.16, close_detail);
 	earth = mix(earth, max(earth, vec3(0.105,0.112,0.072)), close_detail * 0.72);
 	// Thin aerial perspective replaces expensive volumetric fog. At country and
 	// continental footprints it gently compresses saturation like a real column
