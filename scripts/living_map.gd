@@ -28,6 +28,10 @@ const NODE_NAME:="LivingMap"
 const UNIT:=0.001                  ## one metre in map units (km)
 const FIGURE_SCALE:=1.6            ## people read at 200 m without looking like giants
 const MAX_WORKERS:=40
+## Children playing about the homes (codex/beauty-3): about one visible child
+## for every fourteen real children, never more than this.
+const MAX_CHILDREN:=6
+const CHILD_SCALE:=0.64
 const MAX_EVENT_FIGURES:=18
 const MAX_PLUMES:=8
 const PUFFS_PER_PLUME:=8
@@ -68,6 +72,9 @@ var burial:=Vector2.ZERO
 var labor_signature:=""
 var site_signature:=""
 var worker_mm:MultiMeshInstance3D
+var child_mm:MultiMeshInstance3D
+var children:Array[Dictionary]=[]
+var waters:Array[Vector2]=[]
 var event_mm:MultiMeshInstance3D
 var smoke_mm:MultiMeshInstance3D
 var hearth_root:Node3D
@@ -141,6 +148,7 @@ static func tick_clock(delta:float)->float:
 func _ready()->void:
 	rng.seed=hash("living_map|%d" % int(GameState.world_seed))
 	worker_mm=_figure_batch("Workers",MAX_WORKERS)
+	child_mm=_figure_batch("Children",MAX_CHILDREN)
 	event_mm=_figure_batch("Processions",MAX_EVENT_FIGURES)
 	_build_smoke()
 	_build_hearth()
@@ -180,6 +188,7 @@ func _day()->void:
 		return
 	_refresh_site()
 	_refresh_workers()
+	_refresh_children()
 	_refresh_smoke()
 	_watch_hearth_tally()
 
@@ -211,6 +220,7 @@ func _refresh_site()->void:
 	var workshops:Array[Vector2]=[]
 	var stores:Array[Vector2]=[]
 	var fields:Array[Vector2]=[]
+	waters.clear()
 	if settled:
 		# Nearest plots first: a large city keeps its figures in the old heart.
 		var ordered:Array[Dictionary]=[]
@@ -234,6 +244,7 @@ func _refresh_site()->void:
 				"workshop": workshops.append(door)
 				"storage": stores.append(door)
 				"field": fields.append(at)
+				"water": waters.append(at)
 	if homes.is_empty():
 		# The camp: shelters in a loose ring around the fire.
 		for i in 7:
@@ -262,6 +273,7 @@ func _refresh_site()->void:
 	spots["build"]=builds if not builds.is_empty() else homes.slice(0,4)
 	spots["craft"]=workshops if not workshops.is_empty() else homes.slice(0,3)
 	spots["carry"]=stores if not stores.is_empty() else [Vector2(0.006,-0.004)]
+	spots["water"]=waters.duplicate()
 	var ring:Array[Vector2]=[]
 	for i in 6: ring.append(Vector2(cos(float(i)*TAU/6.0),sin(float(i)*TAU/6.0))*0.0045)
 	spots["fire"]=ring
@@ -403,6 +415,9 @@ func _start_leg(worker:Dictionary,stage:int,duration:float=-1.0)->void:
 	match stage:
 		0:
 			var spot:=_pick(act)
+			# Carriers fetch water from the water point as often as they
+			# carry to the stores.
+			if act=="carry" and not (spots.get("water",[]) as Array).is_empty() and rng.randf()<0.5: spot=_pick("water")
 			worker["spot"]=spot
 			_set_path(worker,at,spot)
 			worker["pose"]=POSES.walk
@@ -528,6 +543,7 @@ func _frame(delta:float)->void:
 	var near:=camera!=null and Vector2(camera.position.x-anchor.x,camera.position.z-anchor.z).length()<maxf(3.0,size*3.0)
 	figures_visible=size<=FIGURE_MAX_VIEW and near
 	worker_mm.visible=figures_visible
+	child_mm.visible=figures_visible and not children.is_empty()
 	event_mm.visible=figures_visible and not events.is_empty()
 	smoke_mm.visible=size<=SMOKE_MAX_VIEW and near
 	# From 10,000 ft a real 35 m plume is a few pixels; let it swell (bounded).
@@ -562,6 +578,51 @@ func _frame(delta:float)->void:
 		var moving:=pose==POSES.walk
 		mm.set_instance_custom_data(i,Color(float(worker.phase),float(pose),1.0 if bool(worker.carry) or traveling else 0.0,pace*(1.0 if moving else 0.8)))
 	_draw_events()
+	_draw_children(delta if not paused else 0.0)
+
+# --------------------------------------------------------------------------
+# Children at play (bounded; never one per child)
+# --------------------------------------------------------------------------
+
+func _refresh_children()->void:
+	var real:=float(GameState.population_cohorts.get("children",0.0)) if GameState.population_cohorts is Dictionary else 0.0
+	var wanted:=clampi(roundi(real/14.0),0,MAX_CHILDREN) if settled and not homes.is_empty() else 0
+	while children.size()>wanted: children.pop_back()
+	while children.size()<wanted:
+		var home:Vector2=homes[(children.size()*3+1)%homes.size()]
+		var child:={"home":home,"from":home,"to":home,"t":0.0,"dur":0.1,"phase":rng.randf(),"cloth":Color(0.72,0.58,0.40).lerp(Color(0.64,0.52,0.46),rng.randf())}
+		children.append(child)
+	child_mm.multimesh.visible_instance_count=children.size()
+	for i in children.size(): child_mm.multimesh.set_instance_color(i,children[i].cloth)
+
+func _draw_children(delta:float)->void:
+	child_mm.visible=figures_visible and not children.is_empty()
+	if not child_mm.visible: return
+	var mm:=child_mm.multimesh
+	var pace:=_pace()
+	for i in children.size():
+		var child:Dictionary=children[i]
+		child.t=float(child.t)+delta
+		if float(child.t)>=float(child.dur):
+			# Run to a new spot near home, or stop a moment and play there.
+			var home:Vector2=child.home
+			child.from=child.to
+			child.t=0.0
+			if rng.randf()<0.35:
+				child.dur=rng.randf_range(1.5,4.0);child["still"]=true
+			else:
+				child.to=home+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.002,0.009)
+				child.dur=maxf(0.4,Vector2(child.from).distance_to(child.to)/(WALK_MPS*1.35*UNIT*pace))
+				child["still"]=false
+			child["h"]=_local_height(child.to)
+		var k:=clampf(float(child.t)/maxf(0.001,float(child.dur)),0.0,1.0)
+		var at:Vector2=Vector2(child.from).lerp(child.to,k)
+		var facing:Vector2=Vector2(child.to)-Vector2(child.from)
+		if facing.length()<0.0001: facing=Vector2(0,1)
+		var basis:=Basis.looking_at(Vector3(facing.x,0,facing.y).normalized(),Vector3.UP).scaled(Vector3.ONE*UNIT*FIGURE_SCALE*CHILD_SCALE)
+		mm.set_instance_transform(i,Transform3D(basis,Vector3(at.x,float(child.get("h",_local_height(at))),at.y)))
+		var still:=bool(child.get("still",false))
+		mm.set_instance_custom_data(i,Color(float(child.phase),float(POSES.talk if still else POSES.walk),2.0,pace*1.4))
 
 # --------------------------------------------------------------------------
 # Hearth, firelight and smoke
@@ -806,6 +867,7 @@ func activity_report()->Dictionary:
 	report["workers"]=workers.size()
 	report["animated"]=moving
 	report["event_walkers"]=events.size()
+	report["children"]=children.size()
 	report["flares"]=flares.size()
 	report["figures_drawn"]=figures_visible
 	report["frame_usec"]=snappedf(frame_usec,0.1)

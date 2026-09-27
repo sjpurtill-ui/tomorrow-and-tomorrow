@@ -112,6 +112,8 @@ func _ready()->void:
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
+		var living:Node=terrain.get_node_or_null("LivingMap")
+		if living:print("MAP_ART_CAPTURE: life visible=",living.get("figures_visible")," workers=",(living.get("workers") as Array).size()," anchor=",living.get("anchor")," grounds=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").report))
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	get_tree().quit(0)
 

@@ -117,10 +117,15 @@ void vertex() {
 	vec3 facing = normalize((MODEL_MATRIX*vec4(0.0, 0.0, -1.0, 0.0)).xyz+vec3(1e-6));
 	v_flip = dot(facing, INV_VIEW_MATRIX[0].xyz) >= 0.0 ? 1.0 : -1.0;
 	float px_world = 2.0*max(-feet.z, 0.001)/(PROJECTION_MATRIX[1][1]*VIEWPORT_SIZE.y);
-	float swell = clamp(min_px*px_world/(1.8*scale), 1.0, max_swell);
+	// Children (INSTANCE_CUSTOM.z of 2) keep a smaller least size than adults.
+	float child = step(1.5, INSTANCE_CUSTOM.z);
+	float swell = clamp(min_px*(1.0-0.34*child)*px_world/(1.8*scale), 1.0, max_swell);
 	float s = scale*swell;
 	v_p = vec2(mix(-1.15, 1.15, UV.x), mix(2.15, -0.40, UV.y));
-	vec3 at = feet.xyz+normalize(-feet.xyz)*0.0004;
+	// Stand the drawing a little toward the eye, by its own height: seen from
+	// high above, a swelled figure lies almost along the ground and the land
+	// behind its feet would otherwise swallow it (codex/beauty-3).
+	vec3 at = feet.xyz+normalize(-feet.xyz)*(0.0004+s*2.4);
 	VERTEX = at+vec3(v_p.x*s, v_p.y*s, 0.0);
 	NORMAL = vec3(0.0, 0.0, 1.0);
 	v_custom = INSTANCE_CUSTOM;
@@ -133,7 +138,8 @@ void fragment() {
 	float code = v_custom.y;
 	float still = code > 99.5 ? 1.0 : 0.0;
 	float pose = floor(mod(code, 100.0)+0.5);
-	float carry = v_custom.z;
+	float child = step(1.5, v_custom.z);
+	float carry = v_custom.z*(1.0-child);
 	float t = v_time;
 	float stride = 0.0; float arm_b = 0.0; float arm_f = 0.0; float bend = 0.0;
 	float crouch = 0.0; float bob = 0.0; float tool_len = 0.0;
@@ -191,9 +197,11 @@ void fragment() {
 	// Tunic: a tapered body, wider at the hem.
 	float body = sd_seg2(p, hip-up*0.12, shoulder, 0.22, 0.16);
 	ink_layer(acc, body, cloth, px);
-	ink_layer(acc, sd_circle(p, head, 0.14), skin, px);
+	// A child's head is larger for its body.
+	float head_r = 0.14*(1.0+0.28*child);
+	ink_layer(acc, sd_circle(p, head, head_r), skin, px);
 	// Hair or a hood, on the back of the head.
-	ink_layer(acc, sd_circle(p, head+vec2(-0.05, 0.05), 0.105), vec3(0.24, 0.19, 0.14), px);
+	ink_layer(acc, sd_circle(p, head+vec2(-0.05, 0.05)*(1.0+0.28*child), 0.105*(1.0+0.28*child)), vec3(0.24, 0.19, 0.14), px);
 	ink_layer(acc, sd_seg(p, shoulder, hand_f, 0.075), cloth*0.95, px);
 	if (tool_len > 0.0) {
 		vec2 dir = swing_tool ? rot2(rot2(vec2(1.0, 0.0), arm_f), bend) : tool_dir;
@@ -265,7 +273,7 @@ void vertex() {
 	float scale = 0.0016;
 	float s = scale*clamp(min_px*px_world/(2.2*scale), 1.0, max_swell);
 	v_p = vec2(mix(-1.45, 1.55, UV.x), mix(1.85, -0.35, UV.y));
-	vec3 at = feet.xyz+normalize(-feet.xyz)*0.0004;
+	vec3 at = feet.xyz+normalize(-feet.xyz)*(0.0004+s*2.0);
 	VERTEX = at+vec3(v_p.x*s, v_p.y*s, 0.0);
 	NORMAL = vec3(0.0, 0.0, 1.0);
 	v_custom = vec4(r.xy, walking, 0.0);
@@ -315,7 +323,7 @@ void vertex() {
 	float scale = 0.0016;
 	float s = scale*clamp(min_px*px_world/(4.4*scale), 1.0, max_swell);
 	v_p = vec2(mix(-2.8, 2.8, UV.x), mix(1.75, -0.55, UV.y));
-	vec3 at = center.xyz+normalize(-center.xyz)*0.0004;
+	vec3 at = center.xyz+normalize(-center.xyz)*(0.0004+s*1.5);
 	VERTEX = at+vec3(v_p.x*s, v_p.y*s, 0.0);
 	NORMAL = vec3(0.0, 0.0, 1.0);
 	v_custom = r;

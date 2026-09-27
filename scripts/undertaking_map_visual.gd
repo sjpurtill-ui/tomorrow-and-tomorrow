@@ -9,7 +9,7 @@ const C=preload("res://scripts/undertaking_catalog.gd")
 const U=preload("res://scripts/undertaking_system.gd")
 const SHAPE_ALIASES:={"stair":"terrace","cistern":"basin","garden":"orchard","archive":"hall","library":"hall"}
 const MATERIAL_TINTS:={"stone":Color("9b917a"),"brick":Color("9a5f45"),"timber":Color("72553a"),"earth":Color("a07f55"),"iron":Color("575c60"),"concrete":Color("b3b0a6")}
-const WOOD:=Color("6d5236")
+const WOOD:=Color("86674a")
 const WEATHERED:=Color("6f675a")
 ## How far the plinth reaches past the work's own footprint (km).
 const PLINTH_MARGIN:=.006
@@ -69,11 +69,10 @@ static func _halo()->QuadMesh:
 		_ruin_material=_halo_material.duplicate() as StandardMaterial3D;_ruin_material.blend_mode=BaseMaterial3D.BLEND_MODE_MIX;_ruin_material.albedo_color=Color(.18,.16,.14,.55)
 	return _halo_mesh
 
-static func _landmark_material()->StandardMaterial3D:
-	if _material==null:
-		_material=StandardMaterial3D.new();_material.vertex_color_use_as_albedo=true;_material.vertex_color_is_srgb=true
-		_material.roughness=.92;_material.specular_mode=BaseMaterial3D.SPECULAR_DISABLED
-	return _material
+## Painted in the settlement's ink (settlement_ink.gd): the same light, shade,
+## drawn edges and cloud shadows as the homes around it (codex/beauty-3).
+static func _landmark_material()->Material:
+	return preload("res://scripts/settlement_ink.gd").material_srgb()
 
 static func render(cities:Array,parent:Node3D,height:Callable)->void:
 	for city:Dictionary in cities:
@@ -125,9 +124,9 @@ static func build(pieces:Array,state:String,progress:float,angle:float,origin:Ve
 	var tone:Color=pieces[0].color if not pieces.is_empty() else Color("9b917a")
 	# The plinth: an earthen bank down into the slope, in the map's own soil
 	# tone so it reads as levelled ground, then a dressed top course.
-	var bank:=Color("6f6a48").lerp(tone,.2)
+	var bank:=Color("8a8058").lerp(tone,.15)
 	append_piece(surface,piece(Vector3(plinth.get_center().x,bottom,plinth.get_center().y),Vector3(plinth.size.x,top-bottom-.0006,plinth.size.y),bank),angle)
-	append_piece(surface,piece(Vector3(plinth.get_center().x,top-.0006,plinth.get_center().y),Vector3(plinth.size.x-.0016,.0006,plinth.size.y-.0016),tone.lerp(Color("c8b98f"),.45)),angle)
+	append_piece(surface,piece(Vector3(plinth.get_center().x,top-.0006,plinth.get_center().y),Vector3(plinth.size.x-.0016,.0006,plinth.size.y-.0016),tone.lerp(Color("c8b98f"),.70)),angle)
 	var design_height:=0.0
 	for part:Dictionary in pieces:
 		if part.kind!="water":design_height=maxf(design_height,float(part.position.y)+float(part.size.y))
@@ -143,6 +142,18 @@ static func build(pieces:Array,state:String,progress:float,angle:float,origin:Ve
 				part.size.y=level-base
 				part.kind="box"
 			if state=="abandoned":part.color=(part.color as Color).lerp(WEATHERED,.5)
+			# A large body rises as walls round an open floor, never as a solid
+			# block (codex/beauty-3).
+			var body:Vector3=part.size
+			if part.kind=="box" and body.x>.012 and body.z>.012:
+				var wall:=.0014
+				var at:Vector3=part.position;at.y=base+top
+				var floor_color:=Color("b09a70")
+				append_piece(surface,piece(Vector3(at.x,top,at.z),Vector3(body.x-wall,.0004,body.z-wall),floor_color),angle)
+				for side in [-1.0,1.0]:
+					append_piece(surface,piece(at+Vector3(side*(body.x-wall)*.5,0,0),Vector3(wall,body.y,body.z),part.color),angle)
+					append_piece(surface,piece(at+Vector3(0,0,side*(body.z-wall)*.5),Vector3(body.x-wall*2.0,body.y,wall),part.color),angle)
+				continue
 		elif state=="ruined":
 			if part.kind=="water":continue
 			# Everything above the break has fallen. Pieces through the break end in
@@ -206,7 +217,7 @@ static func _ground_span(rect:Rect2,angle:float,origin:Vector3,height:Callable)-
 
 static func forms(id:String,shape:String,material_key:String="")->Array:
 	var result:Array=[]
-	var stone:=Color("9b917a");var clay:=Color("ac8054");var wood:=Color("72553a");var thatch:=Color("a99b64")
+	var stone:=Color("9b917a");var clay:=Color("ac8054");var wood:=Color("8a6a4a");var thatch:=Color("b8a66a")
 	if MATERIAL_TINTS.has(material_key):stone=MATERIAL_TINTS[material_key]
 	var water:=Color("5f8e9a")
 	match shape:

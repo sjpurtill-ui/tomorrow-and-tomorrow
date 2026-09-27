@@ -98,7 +98,7 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	if (strength <= 0.0) { return earth; }
 	vec2 uv = local_m/size_m;
 	if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) { return earth; }
-	vec2 warp = (vec2(sg_noise(local_m*0.13+vec2(3.0, 9.0)), sg_noise(local_m*0.13+vec2(-5.0, 1.0)))-0.5)*0.9/size_m;
+	vec2 warp = (vec2(sg_noise(local_m*0.13+vec2(3.0, 9.0)), sg_noise(local_m*0.13+vec2(-5.0, 1.0)))-0.5)*0.5/size_m;
 	float cover = texture(settlement_fields, uv+warp).r;
 	if (cover < 0.02) { return earth; }
 	ivec2 dims = textureSize(settlement_fields, 0);
@@ -129,12 +129,14 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	float parcel = sg_hash(vec2(floor(along/9.0), floor(across/(w*6.0))));
 	float row = across/w;
 	float ridge_amp = smoothstep(1.4, 3.5, w/max(pixel_m, 0.001));
-	float ridge = mix(0.5, 0.5+0.5*cos(row*6.2831853), ridge_amp*0.8);
+	float ridge = mix(0.5, 0.5+0.5*cos(row*6.2831853), ridge_amp*(pattern == 4 ? 1.0 : 0.8));
 	// Tilled loam in the local light: furrows in shade, crests catching it.
 	float field_luma = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.16, 0.55);
 	vec3 furrow = vec3(0.98, 0.80, 0.58)*field_luma;
 	vec3 crest = vec3(1.22, 1.02, 0.74)*field_luma;
 	vec3 soil = mix(furrow, crest, ridge)*(0.92+0.16*parcel);
+	// Kitchen gardens are dug deep and dark, and kept.
+	if (pattern == 4) { soil *= 0.74; }
 	if (pattern == 1) {
 		// Beds with a damp channel between them.
 		float channel = 1.0-smoothstep(0.0, 0.10, abs(fract(row)-0.5)-0.38);
@@ -145,7 +147,7 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	vec3 green = (crop == 1 ? vec3(0.62, 0.92, 0.40) : (crop == 3 ? vec3(0.66, 0.88, 0.70) : vec3(0.78, 0.98, 0.42)))*field_luma;
 	if (crop == 4) {
 		float bed = sg_hash(vec2(floor(row), floor(along/3.0)));
-		green = mix(vec3(0.62, 0.95, 0.42), vec3(0.95, 0.98, 0.50), bed)*field_luma;
+		green = mix(vec3(0.46, 0.80, 0.30), vec3(0.78, 0.86, 0.36), bed)*field_luma;
 	}
 	vec3 ripe = (crop == 0 ? vec3(1.30, 1.05, 0.52) : (crop == 3 ? vec3(0.80, 0.88, 1.00) : vec3(0.95, 0.92, 0.48)))*field_luma;
 	vec3 straw = vec3(1.20, 1.05, 0.72)*field_luma;

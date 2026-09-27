@@ -84,7 +84,7 @@ static func build_if_home(plan:Dictionary,plots:Array[Dictionary],routes:Array[D
 ## Cheap when nothing changed.
 static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	var buildings:Array=plan.get("buildings",[])
-	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size()])
+	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_works_near(center)])
 	if key==signature and texture!=null:return
 	signature=key
 	var began:=Time.get_ticks_usec()
@@ -99,6 +99,10 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		var c:=_v2(plot.get("centroid",Vector2.ZERO))
 		if c.length()>MAX_SIZE_KM*0.5:continue
 		box=box.expand(c)
+	# Great works of this settlement (sites in world km): each stands in a
+	# worked yard with a path to it.
+	var works:Array[Dictionary]=_works_near(center)
+	for work in works:box=box.expand(Vector2(work.at))
 	# Routes widen the square only near what is lived in (not the long
 	# tracks out to far fields).
 	var lived:=box.grow(0.04)
@@ -120,6 +124,8 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		if String(plot.get("status","active")) in ["reclaimed"]:continue
 		var reach:=maxf(float(record.get("radius",0.003))*4.5,0.013)
 		_disc(painter,Vector2(record.position),reach,0.34,Color(0,1,0))
+		# The broad clearing a village wears into its meadow, read from afar.
+		_disc(painter,Vector2(record.position),0.03,0.14,Color(0,1,0))
 	for plot in plots:
 		if String(plot.get("form","")) in HEARTH_FORMS and _alive(plot):
 			_disc(painter,_v2(plot.get("centroid",Vector2.ZERO)),0.024,0.42,Color(0,1,0))
@@ -199,6 +205,14 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		var start:=_nearest_point(all_points,target)
 		if start.distance_to(target)<0.004 or start.distance_to(target)>0.4:continue
 		_line(painter,_wander(start,target,int(plot.get("seed",7))),0.0009,wear,Color(1,0,0))
+	for work in works:
+		var at:Vector2=work.at
+		var building:=String(work.state)=="building"
+		_disc(painter,at,0.030,0.30 if building else 0.18,Color(1,0,0))
+		if building:_disc(painter,at+Vector2(0.018,0.012),0.008,0.75,Color(1,0,0))
+		var start:=_nearest_point(all_points,at)
+		if start.distance_to(at)>0.012 and start.distance_to(at)<0.5:
+			_line(painter,_wander(start,at,hash(work.id)),0.0012,0.80 if building else 0.55,Color(1,0,0))
 	# --- B: ash, midden, burnt ground ----------------------------------------
 	if hearth_found:
 		_disc(painter,hearth,0.0014,0.80,Color(0,0,1))
@@ -305,6 +319,27 @@ static func _fill_polygon(image:Image,corner:Vector2,texel:float,polygon:PackedV
 			var x0:=maxi(0,roundi((crossings[k]-corner.x)/texel))
 			var x1:=mini(RES,roundi((crossings[k+1]-corner.x)/texel))
 			if x1>x0:image.fill_rect(Rect2i(x0,row,x1-x0,1),code)
+
+## The home settlement's great works near `center`: site (settlement-local
+## km), id and whether it is still rising.
+static func _works_near(center:Vector3)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var home:=Vector2(center.x,center.z)
+	for city in GameState.player_settlements:
+		if not city is Dictionary:continue
+		var point:=_v2(city.get("position",Vector2.INF))
+		if point.distance_to(home)>0.25:continue
+		var index:=0
+		for r in city.get("undertakings",[]):
+			if not r is Dictionary:continue
+			var site:Dictionary=r.get("site",{"position":point+Vector2(0.18+index*0.12,0.16)})
+			index+=1
+			var at:=_v2(site.get("position",point))-home
+			if at.length()>MAX_SIZE_KM*0.45:continue
+			var status:=String(r.get("status",""))
+			out.append({"at":at,"id":String(r.get("id","")),"state":"building" if status in ["building","stalled"] else status})
+			if out.size()>=8:return out
+	return out
 
 static func _alive(plot:Dictionary)->bool:
 	return String(plot.get("status","active")) not in ["vacant","reclaimed","ruin"]

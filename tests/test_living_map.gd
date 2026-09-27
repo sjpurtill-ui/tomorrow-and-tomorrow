@@ -124,3 +124,19 @@ func test_seasonal_shader_learns_the_direction_of_the_year()->void:
 	GameState.elapsed_days=190.0
 	Living.refresh(host)
 	assert_float(float(material.get_shader_parameter("season_turn"))).is_less(-0.9)
+
+func test_a_few_children_play_about_the_homes_bounded_by_the_real_count()->void:
+	# codex/beauty-3: about one visible child per fourteen real children.
+	GameState.population_cohorts={"children":56.0,"youth":20.0,"early_adults":20.0,"established_adults":14.0,"mature_adults":8.0,"elders":2.0}
+	var host:=_host()
+	Living.refresh(host)
+	var layer:=host.get_node_or_null(Living.NODE_NAME)
+	var report:Dictionary=layer.activity_report()
+	assert_int(int(report.children)).is_equal(4)
+	var batch:MultiMeshInstance3D=layer.get("child_mm")
+	assert_int(batch.multimesh.instance_count).is_equal(Living.MAX_CHILDREN)
+	GameState.population_cohorts["children"]=4000.0
+	layer.call("_refresh_children")
+	assert_int(int(layer.activity_report().children)).is_equal(Living.MAX_CHILDREN)
+	# Children never add to the working figures.
+	assert_int(int(layer.activity_report().workers)).is_equal(24)

@@ -17,6 +17,7 @@ extends RefCounted
 ## Visual only; one material, no per-frame rebuilds.
 
 static var _material:ShaderMaterial
+static var _srgb_material:ShaderMaterial
 static var _shadow_material:ShaderMaterial
 static var _shadow_quad:QuadMesh
 ## Away from the low north-west sun, in the ground plane (world x, z).
@@ -32,10 +33,22 @@ static func material()->ShaderMaterial:
 	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_material)
 	return _material
 
+## The same ink for meshes whose vertex colours are authored in sRGB (the
+## great works' landmarks): converted to linear before painting.
+static func material_srgb()->ShaderMaterial:
+	if _srgb_material and is_instance_valid(_srgb_material):return _srgb_material
+	_srgb_material=material().duplicate() as ShaderMaterial
+	_srgb_material.set_shader_parameter("vertex_srgb",true)
+	# Large walls seen edge-on must not all turn to ink.
+	_srgb_material.set_shader_parameter("ink_strength",0.3)
+	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_srgb_material)
+	return _srgb_material
+
 ## Where the home hearth burns (world position) and how strongly (0-1).
 static func set_hearth(at:Vector3,power:float)->void:
 	var m:=material()
 	m.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
+	if _srgb_material:_srgb_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 
 ## Soft cool shadows on the ground under a batch of buildings, cast a little
 ## away from the sun: each building sits on the land instead of floating on
@@ -74,6 +87,7 @@ static func add_ground_shadows(parent:Node3D,name:String,transforms:Array[Transf
 ## The flicker clock (seconds); living_map.gd advances it with the fire.
 static func set_clock(seconds:float)->void:
 	if _material:_material.set_shader_parameter("anim_clock",seconds)
+	if _srgb_material:_srgb_material.set_shader_parameter("anim_clock",seconds)
 	for i in range(_timed.size()-1,-1,-1):
 		var timed:=_timed[i].get_ref() as ShaderMaterial
 		if timed==null:_timed.remove_at(i)
@@ -91,6 +105,8 @@ render_mode diffuse_burley, specular_disabled, cull_disabled;
 #include "res://scripts/map_cloud.gdshaderinc"
 uniform vec4 hearth = vec4(0.0);
 uniform float anim_clock = 0.0;
+uniform bool vertex_srgb = false;
+uniform float ink_strength = 1.0;
 uniform vec4 map_wind = vec4(1.0, 0.0, 0.0, 0.0);
 varying vec3 world_position;
 varying vec3 world_normal;
@@ -110,6 +126,7 @@ void fragment() {
 	vec3 n = normalize(world_normal);
 	if (!FRONT_FACING) { n = -n; }
 	vec3 base = COLOR.rgb;
+	if (vertex_srgb) { base = mix(base/12.92, pow((base+0.055)/1.055, vec3(2.4)), step(0.04045, base)); }
 	float roof = smoothstep(0.25, 0.60, n.y)*(1.0-smoothstep(0.93, 0.99, n.y));
 	// Thatch and hide roofs read as warm straw from above, not dark wood.
 	vec3 straw = vec3(0.62, 0.52, 0.34);
@@ -134,18 +151,19 @@ void fragment() {
 	base *= 1.0+(strand-0.5)*0.22*roof*(1.0-smoothstep(0.35, 0.9, stroke_px));
 	// Warm light, cool shade: the painted key light shared with the land.
 	float ndl = dot(n, SUN);
-	base *= mix(vec3(0.84, 0.88, 0.98), vec3(1.06, 1.02, 0.94), smoothstep(-0.2, 0.6, ndl));
+	base *= mix(vec3(0.90, 0.89, 0.94), vec3(1.06, 1.02, 0.94), smoothstep(-0.2, 0.6, ndl));
 	base = map_palette_grade(base);
 	base *= map_cloud_shadow(world_position.xz, world_position.y, map_cloud, map_cloud_scale);
 	// A fine ink line where the form turns away from the eye.
 	float facing = abs(dot(NORMAL, VIEW));
-	float ink = (1.0-smoothstep(0.10, 0.34, facing))*0.55;
+	float ink = (1.0-smoothstep(0.10, 0.34, facing))*0.55*ink_strength;
 	base = mix(base, vec3(0.105, 0.080, 0.055), ink);
 	ALBEDO = base;
 	ROUGHNESS = 0.95;
 	// Sky fill on the shaded side, then firelight near the hearth.
 	// A painter's shade stays warm and open: never a grey hole.
-	vec3 glow = base*vec3(0.86, 0.88, 0.98)*0.52*(1.0-smoothstep(-0.05, 0.55, ndl));
+	// Light bounced up from the sunlit ground, warm, fills the shaded side.
+	vec3 glow = base*vec3(1.0, 0.90, 0.78)*0.55*(1.0-smoothstep(-0.05, 0.55, ndl));
 	if (hearth.w > 0.0) {
 		vec3 to_fire = hearth.xyz-world_position;
 		float d = length(to_fire)*1000.0;
