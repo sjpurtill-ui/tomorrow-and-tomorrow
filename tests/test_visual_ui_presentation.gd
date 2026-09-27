@@ -116,43 +116,15 @@ func test_civic_exchange_renders_as_wrapped_conversation_with_an_inline_reply()-
 	assert_bool(transcript.is_ancestor_of(root.find_child("CivicConversationSend",true,false))).is_false()
 
 
-func test_civics_discloses_actual_ai_or_offline_interpreter_mode()->void:
+func test_culture_council_has_no_ai_settings_or_second_summon_list()->void:
 	var hud:Variant=auto_free(COMMAND_RAIL.new())
 	var provider:Variant=CIVILIZATION_CONTENT.new(renderer,hud)
-	var online:Dictionary=provider._interpreter_status_block({
-		"configured":true,"structured_output":true,"model":"gpt-5.6-terra",
-		"endpoint_host":"api.openai.com","transport_security":"HTTPS","always_use_ai":true,
-	})
-	var online_item:Dictionary=(online.items as Array)[0]
-	assert_str(String(online_item.name)).is_equal("AI · TERRA")
-	assert_str(String(online_item.value)).is_equal("READY")
-	assert_str(String(online_item.tip)).contains("local fast replies")
-	assert_str(String(online_item.tip)).contains("bypassed")
-	assert_str(JSON.stringify(online)).not_contains("api_key")
-	var routing_item:Dictionary=(online.items as Array)[1]
-	assert_str(String(routing_item.name)).is_equal("ROUTING · ALWAYS ASK AI")
-	assert_str(String(routing_item.sub)).contains("local shortcuts")
-	GameState.civic_always_use_ai=false
-	provider._toggle_interpreter_routing()
-	assert_bool(GameState.civic_always_use_ai).is_true()
-	provider._toggle_interpreter_routing()
-	assert_bool(GameState.civic_always_use_ai).is_false()
-
-	var offline:Dictionary=provider._interpreter_status_block({
-		"configured":false,"structured_output":false,
-		"missing":["OPENAI_API_KEY"],"issues":[],
-	})
-	var offline_item:Dictionary=(offline.items as Array)[0]
-	assert_str(String(offline_item.name)).is_equal("LOCAL · OFFLINE")
-	assert_str(String(offline_item.value)).is_equal("OFFLINE")
-
-	var player_disabled:Dictionary=provider._interpreter_status_block({
-		"enabled":false,"configured":false,"structured_output":false,"missing":[],"issues":[],
-	})
-	var disabled_item:Dictionary=(player_disabled.items as Array)[0]
-	assert_str(String(disabled_item.name)).is_equal("LOCAL · AI OFF")
-	assert_str(String(disabled_item.value)).is_equal("OFF")
-	assert_str(String(disabled_item.tip)).contains("zero API requests")
+	# AI configuration lives in the game menu; people are summoned in the court.
+	assert_bool(provider.has_method("_interpreter_status_block")).is_false()
+	assert_bool(provider.has_method("_summon_block")).is_false()
+	var council:=JSON.stringify(provider.tab(1))
+	assert_str(council).not_contains("DIRECTIVE INTERPRETER").not_contains("CONVERSATION SETTINGS").not_contains("SUMMON TO THE COURT")
+	assert_str(council).contains("Open the court")
 
 
 func test_recruitment_report_leads_with_people_choices_instead_of_generic_scout_copy()->void:

@@ -450,27 +450,20 @@ func _test_old_entry_points()->void:
 	_check(talk.is_valid(),"the council dock lost its local leader row")
 	if talk.is_valid():
 		talk.call();await _expect_court("the council dock's local leader",leader_ok)
-	var open_court:=_find_action(council,"OPEN THE COURT")
-	_check(open_court.is_valid(),"the council dock has no OPEN THE COURT")
+	var open_court:=_find_action(council,"Open the court")
+	_check(open_court.is_valid(),"the council dock has no Open the court")
 	if open_court.is_valid():
 		open_court.call();await _expect_court("the council dock's OPEN THE COURT",func(court:Control)->bool:return String(court.mode)=="rest")
-	var talk_leader:=_find_action(civ_dock._government_overview(),"TALK TO OUR LEADER")
+	var talk_leader:=_find_action(civ_dock._government_overview(),"Talk with our leader")
 	if talk_leader.is_valid():
 		talk_leader.call();await _expect_court("TALK TO OUR LEADER",leader_ok)
-	for entry:Dictionary in Hall.summonable():
-		var row:=_find_action(civ_dock._summon_block(),"%s · %s" % [String(entry.get("title","")),String(entry.get("name",""))])
-		if not row.is_valid():_fail("no summon row for %s" % entry.name);continue
-		var wanted:=String(entry.get("name",""))
-		row.call()
-		await _expect_court("the council's summon row for %s" % wanted,func(court:Control)->bool:return String(court.mode)=="audience")
-		break
 	var settlement_dock:Object=hud.providers.get("settlement")
 	var on_leader:Variant=_find_key(settlement_dock.tab(0),"on_leader")
 	_check(on_leader is Callable,"the settlement overview lost its leader link")
 	if on_leader is Callable:
 		(on_leader as Callable).call();await _expect_court("the settlement overview's leader",leader_ok)
-	var local_leader:=_find_action(settlement_dock._people_blocks(40,120,1.0,GameState.player_settlements[0],{}),"LOCAL LEADER")
-	_check(local_leader.is_valid(),"the settlement people view lost LOCAL LEADER")
+	var local_leader:=_find_action(settlement_dock._people_blocks(40,120,1.0,GameState.player_settlements[0],{}),"Talk with the leader")
+	_check(local_leader.is_valid(),"the settlement people view lost Talk with the leader")
 	if local_leader.is_valid():
 		local_leader.call();await _expect_court("the settlement dock's LOCAL LEADER",leader_ok)
 	var economy:Object=hud.providers.get("economy")
