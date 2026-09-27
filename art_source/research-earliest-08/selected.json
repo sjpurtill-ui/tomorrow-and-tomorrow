@@ -1,0 +1,110 @@
+[
+  {
+    "id": "carrying_poles",
+    "line": "logistics",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: One adult balances a long wooden shoulder pole with two reed baskets tied at opposite ends while another adjusts a load; sparse travel watercolor. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7a6273a2-724b-4106-ae67-b0a5d453f9f9.png",
+    "asset": "res://assets/ui/research/subjects/carrying_poles-v1.png",
+    "sha256": "4db29e5c29aa6c3d68f6c9407ab4631beb269ba3a72d5f3040dbe283b94114fd",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected over retry with more later-looking attire; pole and two loads clear in wide crop."
+  },
+  {
+    "id": "hide_smoke_curing",
+    "line": "production",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Adults scrape a stretched hide with stone and smoke-cure another hide over low hearth; thick matte impasto oil painting. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be5bad19-5cca-466d-9f00-b102f0424de0.png",
+    "asset": "res://assets/ui/research/subjects/hide_smoke_curing-v1.png",
+    "sha256": "c869884a161baea8c16bb63af2c724157d3c72ff1f0f6ef6969f9151fa0f4bc6",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; scraping, stretched hide and smoke clear in wide crop."
+  },
+  {
+    "id": "household_task_ledgers",
+    "line": "institutions",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Household adults allocate work by grouped plain pebbles and unmarked tally sticks on flat stone amid weaving, carrying and cooking; archaic mineral fresco. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0c09a556-4e13-49cb-83c4-f227f0c4b4f5.png",
+    "asset": "res://assets/ui/research/subjects/household_task_ledgers-v1.png",
+    "sha256": "c1c1dd531aefb4fafccd4c7a788eff191a3689d84c9ef68bfc4b3ea98bf18e59",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; no writing or later ledger; tactile tally and household work clear in wide crop."
+  },
+  {
+    "id": "infant_carrying_slings",
+    "line": "demography",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Caregiver carries infant in woven sling while another adult prepares a reed cradleboard with cordage; mature chalk pastel and torn cut-paper. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7534e0dd-1c84-4e82-baca-faf6dca2164b.png",
+    "asset": "res://assets/ui/research/subjects/infant_carrying_slings-v1.png",
+    "sha256": "c12cfdba398288103e4dfec6dac117120f2e4e27851fe92da7f580e98df3411f",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; sling and cradleboard construction visible in wide crop."
+  },
+  {
+    "id": "midden_siting_away_from_water",
+    "line": "ecology",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Adults carry kitchen waste in baskets to dry raised midden far from clear drinking-water stream; plant-pigment naturalist illustration. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b3361e93-4134-423a-aae0-7b31aa689aa0.png",
+    "asset": "res://assets/ui/research/subjects/midden_siting_away_from_water-v1.png",
+    "sha256": "397a38e3460c296ce0a218a23e1302fa80030b62488e165e4f6f9fd5a8c60f88",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too scenic and lifelike; water and distant midden separation clear in wide crop."
+  },
+  {
+    "id": "seasonal_work_round",
+    "line": "labor",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Adults plant seeds and stack timber as elder points to bare and leafing trees, coordinating seasonal work; expressive charcoal and red ochre. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f4ee04ee-2743-4372-8edd-64897a7a88fe.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_work_round-v1.png",
+    "sha256": "789a25f0f8aa214e3654629f6c48f060dca2fee1d16dc39550e95c69c653bde5",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too fresco-like; labor-direction charcoal style and two seasonal tasks clear in crop."
+  },
+  {
+    "id": "sparring_customs",
+    "line": "security",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Two adults practice controlled sparring with blunt wooden staffs while others watch; hand-cut woodblock print. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a31833b2-6dce-482e-bd6b-3be324d69c31.png",
+    "asset": "res://assets/ui/research/subjects/sparring_customs-v1.png",
+    "sha256": "963d30ad4dc4b2c2f581e766d5b8f0c6388434ea79607ddc44ad0cbda5510b7d",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; staff practice reads clearly as training rather than battle in crop."
+  },
+  {
+    "id": "splint_and_bracing_technique",
+    "line": "health",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Healer binds straight wooden splints around another adults injured lower leg with plain cordage as helper steadies them; watercolor and sparse ink. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-20cc90f6-a139-4b89-b5aa-f49b76eb6661.png",
+    "asset": "res://assets/ui/research/subjects/splint_and_bracing_technique-v1.png",
+    "sha256": "c380a0bc6fe3e350984844d7d42646e2ad66cf8977b1c4e44349a73ed5c5fbb9",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; splints and binding clear in crop."
+  },
+  {
+    "id": "varied_forage_rotation",
+    "line": "nutrition",
+    "game_year": 10,
+    "approx_historical_year": -4933,
+    "prompt": "c. 4933 BCE: Adults compare seasonal baskets of berries, nuts, roots and leaves and gesture toward contrasting foraging habitats; flat egg tempera. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b47e12e-5ba4-43c9-b049-8a1ba5cd1299.png",
+    "asset": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png",
+    "sha256": "43dd324dec7122a1060aff1c84a50eac6299220cd4f12c96899fe5efd704443f",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; varied foods and seasonal habitat gesture clear in wide crop."
+  }
+]

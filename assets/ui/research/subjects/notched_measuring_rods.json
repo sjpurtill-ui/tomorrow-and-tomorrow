@@ -1,0 +1,12 @@
+{
+  "id": "notched_measuring_rods",
+  "line": "production",
+  "game_year": 9,
+  "approx_historical_year": -4940,
+  "prompt": "c. 4940 BCE: Two adults align plain notched wooden rods against shelter timber; one adds a notch with stone flake; thick matte impasto oil paint. No text, photorealism, CGI or childlike style.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-46276f6e-fd90-4748-acee-7105a379fd82.png",
+  "asset": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png",
+  "sha256": "a5031651806d71d6c4cd70f8d45cd245aa59e2454b66660e3cb17f40288cbbf4",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; rods, notches and hands clear in crop."
+}

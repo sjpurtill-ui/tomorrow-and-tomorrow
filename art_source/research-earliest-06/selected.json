@@ -1,0 +1,86 @@
+[
+  {
+    "id": "postpartum_seclusion_care",
+    "line": "demography",
+    "game_year": 7,
+    "approx_historical_year": -4953,
+    "prompt": "New parent rests quietly on reed mat after birth while adult helpers bring water and care for infant; mature chalk pastel and cut-paper collage.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-566b7d94-cd90-49b7-b2a4-919e3837c106.png",
+    "asset": "res://assets/ui/research/subjects/postpartum_seclusion_care-v1.png",
+    "sha256": "ff70540f2e078cf02c6589392a055fec652daad0f817f78c5999e96a4eef7b69",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; care action and infant clear; mature handmade 2D; 3.37:1 crop reviewed."
+  },
+  {
+    "id": "witnessed_agreement_customs",
+    "line": "institutions",
+    "game_year": 7,
+    "approx_historical_year": -4953,
+    "prompt": "Two Neolithic household representatives make an oral agreement in front of adult witnesses, hands on shoulders; archaic mineral fresco on plaster.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-61d3b134-4493-48c1-9585-9503f02a3061.png",
+    "asset": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png",
+    "sha256": "92831b473168400ee64af3c777e5b8c3ecd54b687c50963493062c1e03be2c80",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; rejected first for lifelike/classical faces; oral agreement and witnesses clear; crop reviewed."
+  },
+  {
+    "id": "dry_cache_siting",
+    "line": "logistics",
+    "game_year": 8,
+    "approx_historical_year": -4947,
+    "prompt": "Adults select a raised dry cache site above damp marshy ground in a Neolithic landscape; mature travel watercolor on paper.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a27ac3f9-eec6-4736-b7a2-c1542f01bf17.png",
+    "asset": "res://assets/ui/research/subjects/dry_cache_siting-v1.png",
+    "sha256": "d5d6a02ed8010f82e8c6267418c2efc9cfb9411b5c93a020dda7f64337902b19",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; raised dry land and marsh context clear; crop reviewed."
+  },
+  {
+    "id": "elder_consultation_rites",
+    "line": "institutions",
+    "game_year": 8,
+    "approx_historical_year": -4947,
+    "prompt": "An elder seated on stone advises adult community members on where to place shelters by river; stylized archaic civic fresco.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4afdc4f3-bc92-4eab-9a8d-de4939a6e62c.png",
+    "asset": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png",
+    "sha256": "cd6e215534700537e72446958740a2dff5c3748a937d2b47cf5a4d81706fea2b",
+    "mode": "built-in image_gen / new image",
+    "review": "Later flat fresco generation selected; rejected lifelike prior version; gesture, listeners and river visible in crop."
+  },
+  {
+    "id": "hazard_memory_recitation",
+    "line": "security",
+    "game_year": 8,
+    "approx_historical_year": -4947,
+    "prompt": "Elder orally recounts a remembered river hazard to younger adults beside low hearth; hand-cut woodblock print in black and ochre.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5362e1b7-97f7-436b-87a0-e9a97853c76e.png",
+    "asset": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png",
+    "sha256": "f425f7bfea649cee30c086143927f586d2db38c5d63b52818e405eb0c11f05e7",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; oral recitation and hazardous bank clear; crop reviewed."
+  },
+  {
+    "id": "shared_work_signals",
+    "line": "labor",
+    "game_year": 8,
+    "approx_historical_year": -4947,
+    "prompt": "Adults move heavy timber together as central caller claps and others answer with raised hands; expressive charcoal and red ochre on rough paper.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be299dba-3355-417f-b051-0188ca651c71.png",
+    "asset": "res://assets/ui/research/subjects/shared_work_signals-v1.png",
+    "sha256": "68d1bdee02984a13faa7ead08e604b88c14dfa480e7860a4dcacdbd68b98764c",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; coordinated work and clap visible; crop reviewed."
+  },
+  {
+    "id": "site_clearing_assessment",
+    "line": "infrastructure",
+    "game_year": 8,
+    "approx_historical_year": -4947,
+    "prompt": "Adults examine slope, stones, brush and drainage before clearing a new shelter site; flat matte casein gouache in muted earth colors.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8f76a9a3-0e8d-4b3c-a26f-16632b16cb14.png",
+    "asset": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png",
+    "sha256": "119d3c10aa725a22a0a1a1d45948c5d17daed373fdb9a5898d67e9e2eab24c5b",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first was too lifelike; ground assessment clear in wide crop."
+  }
+]

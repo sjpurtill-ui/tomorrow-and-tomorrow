@@ -1,0 +1,12 @@
+{
+  "id": "midden_siting_away_from_water",
+  "line": "ecology",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Adults carry kitchen waste in baskets to dry raised midden far from clear drinking-water stream; plant-pigment naturalist illustration. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b3361e93-4134-423a-aae0-7b31aa689aa0.png",
+  "asset": "res://assets/ui/research/subjects/midden_siting_away_from_water-v1.png",
+  "sha256": "397a38e3460c296ce0a218a23e1302fa80030b62488e165e4f6f9fd5a8c60f88",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too scenic and lifelike; water and distant midden separation clear in wide crop."
+}
