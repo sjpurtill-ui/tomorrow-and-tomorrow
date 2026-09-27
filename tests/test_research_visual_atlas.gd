@@ -117,15 +117,16 @@ func test_cards_stay_compact_and_use_the_available_row_for_more_discoveries()->v
 		assert_float(card.frame.size.x).is_equal_approx(view.CARD_WIDTH,0.5)
 		assert_float(card.painting.custom_minimum_size.y).is_equal(view.CARD_IMAGE_HEIGHT)
 		assert_int(card.frame.mouse_filter).is_equal(Control.MOUSE_FILTER_PASS)
-func test_established_cards_show_the_recorded_discovery_year_and_day()->void:
+func test_established_cards_show_the_recorded_discovery_season_and_year()->void:
 	# Only the recorded discovery, so the inherited founding practices (which have
 	# no discovery date) do not come first in the established view.
 	GameState.known_discoveries.assign(["stone_sorting"])
 	GameState.discovery_log.push_front({"id":"stone_sorting","day":730})
 	var view:=fixture();view.set_view("known")
 	assert_int(view.records[0].discovered_day).is_equal(730)
-	assert_str(view.bindings.stone_sorting.date.text).is_equal("DISCOVERED · YEAR 3, DAY 1")
-	assert_str(view.detail_body.get_child(4).text).is_equal("Discovered · Year 3, Day 1")
+	var when:=preload("res://scripts/hud/era_words.gd").when(730)
+	assert_str(view.bindings.stone_sorting.date.text).is_equal("LEARNED · "+when.to_upper())
+	assert_str(view.detail_body.get_child(4).text).starts_with("Learned in "+when)
 func test_established_grid_scrolls_through_a_long_catalogue()->void:
 	var ids:Array[String]=[]
 	for entry:Dictionary in DiscoverySystem.technology_tree():
@@ -197,3 +198,35 @@ func _expected_art(id:String)->String:
 	if early and Art.first300_manifest().has(id):return String(Art.first300_manifest()[id])
 	if early and Art.EARLY_SUBJECTS.has(id):return "res://assets/ui/research/paper/%s.png" % Art.EARLY_SUBJECT_FILES.get(id,id)
 	return String(Art.manifest()[id].path)
+
+
+func test_filters_are_plain_chips_not_dropdowns()->void:
+	var view:=fixture()
+	for i in 3:await get_tree().process_frame
+	assert_int(view.find_children("*","OptionButton",true,false).size()).is_equal(0)
+	assert_int(view.find_children("*","CheckButton",true,false).size()).is_equal(0)
+	assert_int(view.field_chips.size()).is_equal(Art.NAMES.size()+1)
+	(view.field_chips["health"] as Button).pressed.emit()
+	assert_str(view.domain).is_equal("health")
+	for item:Dictionary in view.records:assert_str(String(item.domain)).is_equal("health")
+	(view.notify_chips["all"] as Button).pressed.emit()
+	assert_str(String(GameState.research_notification_mode)).is_equal("all")
+
+func test_tree_text_never_draws_below_twelve_pixels()->void:
+	var plot=preload("res://scripts/hud/research_tree_plot.gd")
+	assert_int(plot.MIN_TEXT).is_equal(12)
+	var source:=FileAccess.get_file_as_string("res://scripts/hud/research_tree_plot.gd")
+	assert_str(source).not_contains("maxi(8,")
+	var view:=fixture();view.set_view("tree")
+	for i in 3:await get_tree().process_frame
+	view.plot.zoom_at(0.2,view.plot.size*.5)
+	assert_float(view.plot.zoom_level).is_less(plot.DETAIL_ZOOM)
+	view.plot.queue_redraw()
+	await get_tree().process_frame
+
+func test_team_and_evidence_read_as_words()->void:
+	assert_str(Art.workforce(0.5)).is_equal("One person, part of the time")
+	assert_str(Art.plain_bottleneck("RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher")).contains("Fewer than one person's full time")
+	assert_str(Art.effect_sentence("food_storage",0.03)).ends_with("up about 3%")
+	assert_bool(Art.effect_is_cost("pollution",0.02)).is_true()
+	assert_bool(Art.effect_is_cost("food_storage",0.02)).is_false()

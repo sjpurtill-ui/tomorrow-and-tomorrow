@@ -1,13 +1,16 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 ## Government is a first-class destination. Offices fill themselves; the player
-## evaluates conduct and results, then dismisses or executes officeholders.
+## reads how each official suits their office, then summons them to the court
+## to question, order, dismiss or punish them. Nothing consequential happens
+## from this screen with one click.
+const Words:=preload("res://scripts/hud/home_plain.gd")
 
 func meta()->Dictionary:
 	var government:=GovernmentPeopleSystem.structure_snapshot()
 	return {
-		"eyebrow":"GOVERNMENT · %s" % String(government.get("scope","founding council")).to_upper(),
+		"eyebrow":"Government · %s" % String(government.get("scope","founding council")).to_lower(),
 		"title":String(government.get("name","Forming Order")).capitalize(),
-		"subtabs":["OFFICEHOLDERS","POLICY"],
+		"subtabs":["Officials","Standing orders"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -30,7 +33,7 @@ func _office_blocks(legitimacy:float,support:float)->Array:
 		var traits:Array=holder.get("traits",[])
 		var top_skills:Array=_top_skills(holder)
 		var disposition:=GovernmentPeopleSystem.leader_disposition(holder)
-		items.append({"office_key":key,"office_title":String(office.title),"name":String(holder.get("name","Unknown")),"person_id":int(holder.get("person_id",1)),"appearance_civ_id":holder.get("appearance_civ_id","player"),"appearance_world_seed":holder.get("appearance_world_seed",GameState.world_seed),"early_art_index":holder.get("early_art_index",0),"early_art_profile":holder.get("early_art_profile",""),"traits":traits,"skills":top_skills,"fit":GovernmentPeopleSystem.office_competency(holder,key),"accent":_office_color(key),"tip":"Age %d · %s · %s" % [int(holder.get("age",0)),String(holder.get("background","Public figure")),String(disposition.get("label","pragmatic")).capitalize()],"on_dismiss":_remove.bind(key,"dismiss"),"on_execute":_remove.bind(key,"execute"),"dismiss_tip":"Dismiss %s; a successor is appointed immediately." % String(holder.get("name","officeholder")),"execute_tip":"Execute %s; severe political cost." % String(holder.get("name","officeholder"))})
+		items.append({"office_key":key,"office_title":String(office.title),"name":String(holder.get("name","Unknown")),"person_id":int(holder.get("person_id",1)),"appearance_civ_id":holder.get("appearance_civ_id","player"),"appearance_world_seed":holder.get("appearance_world_seed",GameState.world_seed),"early_art_index":holder.get("early_art_index",0),"early_art_profile":holder.get("early_art_profile",""),"traits":traits,"skills":top_skills,"fit":GovernmentPeopleSystem.office_competency(holder,key),"fit_words":Words.fit_words(GovernmentPeopleSystem.office_competency(holder,key)),"accent":_office_color(key),"tip":"Age %d · %s · %s" % [int(holder.get("age",0)),String(holder.get("background","Public figure")),String(disposition.get("label","pragmatic")).capitalize()],"on_summon":court({"person_id":int(holder.get("person_id",0))}),"summon_tip":"Call %s to the court to question them, give orders, or dismiss or punish them." % String(holder.get("name","them"))})
 	return [{"type":"cabinet","legitimacy":legitimacy,"support":support,"items":items}]
 
 func _top_skills(person:Dictionary)->Array:
@@ -42,7 +45,7 @@ func _top_skills(person:Dictionary)->Array:
 	var colors:Array[Color]=[Tokens.GOLD,Tokens.TEAL,Tokens.BLUE]
 	for index in mini(3,ranked.size()):
 		var skill_name:=String(ranked[index].name)
-		result.append({"name":skill_name,"short":skill_name.substr(0,3).to_upper(),"value":int(ranked[index].value),"color":colors[index]})
+		result.append({"name":skill_name,"words":Words.skill_words(float(ranked[index].value)),"value":int(ranked[index].value),"color":colors[index]})
 	return result
 
 func _office_color(key:String)->Color:
@@ -54,23 +57,20 @@ func _office_color(key:String)->Color:
 		"envoy":return Tokens.VIOLET
 	return Tokens.GOLD
 
-func _remove(office_key:String,action:String)->void:
-	var result:=GovernmentPeopleSystem.remove_central_officeholder(office_key,action)
-	terrain._report_military_action(result)
-	hud.request_immediate_dock_refresh()
-
 func _policy_brief(governance:Dictionary)->Dictionary:
 	var policies:=ConsequenceEngine.active_policies()
-	if policies.is_empty(): return {"tone":"info","title":"No standing policy","why":"Civic dialogue and council decisions create enforceable commitments."}
-	return {"tone":"info","title":"%d standing polic%s" % [policies.size(),"y" if policies.size()==1 else "ies"],"why":"Execution depends on officeholder ability, administrative load, and political support."}
+	if policies.is_empty(): return {"tone":"info","title":"No standing orders","why":"Orders you give in the court become standing orders here while they are being carried out."}
+	return {"tone":"info","title":"%d standing order%s" % [policies.size(),"" if policies.size()==1 else "s"],"why":"How well an order is carried out depends on the official in charge, how much else they have to do, and how much the people back it."}
 
 func _policy_blocks(governance:Dictionary)->Array:
 	var items:Array=[]
 	for policy_variant in ConsequenceEngine.active_policies():
 		var policy:Dictionary=policy_variant
-		items.append({"name":String(policy.get("name",policy.get("id","Policy"))).capitalize(),"sub":"%s · %d days remain" % [String(policy.get("office","Council")),ceili(float(policy.get("remaining_days",0.0)))],"value":"%d%%" % roundi(float(policy.get("execution_factor",0.62))*100.0),"accent":Tokens.BLUE})
-	if items.is_empty(): return [{"type":"text","text":"No standing policy is in force."}]
-	return [{"type":"rows","heading":"STANDING POLICY","note":"execution","items":items}]
+		var done:=float(policy.get("execution_factor",0.62))
+		var how:="carried out well" if done>=0.8 else "carried out fairly" if done>=0.55 else "carried out badly"
+		items.append({"name":String(policy.get("name",policy.get("id","Policy"))).capitalize(),"sub":"%s is in charge; %s left" % [String(policy.get("office","The council")),preload("res://scripts/hud/production_plain.gd").span_text(float(policy.get("remaining_days",0.0)))],"value":how.capitalize(),"value_color":Tokens.GREEN_TEXT if done>=0.8 else Tokens.AMBER_TEXT if done>=0.55 else Tokens.RED_TEXT,"accent":Tokens.BLUE,"tip":"About %d in every 10 parts of this order are actually done." % roundi(done*10.0)})
+	if items.is_empty(): return [{"type":"text","text":"No standing orders are in force. Give orders to your officials in the court."},{"type":"actions","items":[{"label":"Open the court","sub":"Summon an official and give an order","primary":true,"on_press":court({})}]}]
+	return [{"type":"rows","heading":"Standing orders","note":"how well each is carried out","items":items}]
 
 func signature()->Array:
 	return [GovernmentPeopleSystem.revision,GameState.leadership_positions.duplicate(true),ConsequenceEngine.active_policies().size(),roundi(float(GameState.simulation_metrics.get("legitimacy",0.7))*100.0)]

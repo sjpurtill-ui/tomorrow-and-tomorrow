@@ -290,7 +290,7 @@ func collect()->Dictionary:
 		var army:Dictionary=army_variant
 		var troops:=int(army.get("troops",0))
 		if troops<=0: continue
-		var at_home:=String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"
+		var at_home:=ArmyMarks.at_home(army,home)
 		var shown:=army
 		# Before signals the map knows only what the last runner reported.
 		if not live and not at_home:
@@ -324,6 +324,7 @@ func collect()->Dictionary:
 			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":String(Presentation.formation_visual_state(army).damage_state),
 			"doing_context":{"status":String(shown.get("status",army.get("status",""))),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
 				"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":at_home,
+				"home_km":ArmyMarks.home_km(shown if shown.has("position") else army,home),
 				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0))}})
 		friendly.append(entry)
 	var enemy:Array=[]
@@ -365,7 +366,7 @@ func collect()->Dictionary:
 		var works:="circumvallation" if (known.has("field_fortifications") or known.has("siege_engineering")) and offensive else ("circumvallation" if not offensive and float((siege.get("threat",{}) as Dictionary).get("technology",0.0))>=0.45 else "blockade_camp")
 		sieges.append({"pos":_v2(siege.get("target_position",{})) if offensive else home,"pressure":float(siege.get("pressure",0.0)),"works":works,"ours":offensive,"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	var raids:=_raid_inputs(today,home)
-	var inputs:={"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+	var inputs:={"garrisons":_garrison_inputs(),"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
 		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today)}
@@ -373,6 +374,26 @@ func collect()->Dictionary:
 		var value:Variant=extra_inputs[key]
 		inputs[key]=(inputs.get(key,[]) as Array)+(value as Array) if value is Array and inputs.get(key) is Array else value
 	return inputs
+
+
+## Towns we hold, and who holds them: a small mark on the town with a card
+## ("Held by us · 17").
+static func _garrison_inputs()->Array:
+	var out:Array=[]
+	var mc:Variant=WorldSimulation.military
+	var world:Variant=WorldSimulation.world
+	if mc==null or world==null: return out
+	for f in mc.occupation_forces:
+		var force:Dictionary=f
+		var troops:=int(force.get("troops",0))
+		if troops<=0: continue
+		var rid:=String(force.get("region_id",""))
+		var site:Dictionary=world.city_intelligence.site(rid) if world.city_intelligence!=null else {}
+		var pos:=_v2(site.get("position",{})) if not (site.get("position",{}) as Dictionary).is_empty() else Vector2.INF
+		if not pos.is_finite(): continue
+		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name",""))})
+		if out.size()>=6: break
+	return out
 
 
 ## The battles on the map: the one being watched, and the command
@@ -837,6 +858,13 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"noun":ArmyMarks.noun(troops,stage,era,corps_known),"kind":ArmyMarks.kind(troops,stage,era,staffs_known),
 			"name":String(f.get("name","")),"general":String(f.get("general","")),"doing":ArmyMarks.doing(context),
 			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving"})
+	# Towns we hold: the garrison's mark stands on the town.
+	for g in (inputs.get("garrisons",[]) as Array):
+		var held:=int(g.get("troops",0))
+		if held<=0: continue
+		out.append({"id":"held:%s" % String(g.get("region_id","")),"side":"ours","army_id":0,"garrison":true,"pos":g.pos,"troops":held,"era":0,"branch":"foot",
+			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
+			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])
@@ -931,7 +959,13 @@ func _draw()->void:
 	caption_requests.clear()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
-	if band=="ground": placed_captions.clear(); return
+	if band=="ground":
+		# Up close only the forces' small paper cards stay, placed clear of
+		# the town cards; the front and its ink stand aside for the ground.
+		_draw_marks(band,[])
+		_letter_captions(T.voice_font(true))
+		last_draw_usec=Time.get_ticks_usec()-started
+		return
 	var wide:=band in ["continental","world"]
 	var t:=smoothstep(0.0,1.0,blend)
 	var font:=T.voice_font(true)
@@ -1270,7 +1304,8 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		draw_string(font,badge+Vector2(-width*0.5,4.5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(ink,0.95))
 	if bool(entry.get("card",false)): _request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5 if bool(entry.get("selected",false)) else (3 if ours else 2),px*0.62+4.0,at)
-	if ours: hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.6),"army_id":int(entry.army_id),"mark":true})
+	if bool(entry.get("garrison",false)): pass
+	elif ours: hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.6),"army_id":int(entry.army_id),"mark":true})
 	else:
 		var sighting:Dictionary=(entry.get("sighting",{}) as Dictionary).duplicate()
 		sighting["noun"]=String(entry.get("noun","host"))
@@ -1281,6 +1316,7 @@ func _card_lines(entry:Dictionary)->PackedStringArray:
 	var members:=(entry.get("members",[]) as Array).size()
 	var data:=entry.duplicate()
 	data.members=members
+	if bool(entry.get("garrison",false)) and members<=1: return ArmyMarks.card_garrison(data)
 	if String(entry.side)=="ours": return ArmyMarks.card_ours(data)
 	if members>1:
 		data.low=int(entry.get("members_low",entry.get("low",0))); data.high=int(entry.get("members_high",entry.get("high",0)))

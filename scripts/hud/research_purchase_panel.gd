@@ -1,15 +1,31 @@
 extends VBoxContainer
+## Help from abroad with one question: a licence, a finished study, a visiting
+## scholar, a joint study or trial materials. This is not a form. The atlas
+## shows, in one sentence, the best help a known people could give, and one
+## link that opens the court on that people: every dealing with a foreign
+## people happens in the court (one-court-screen).
+##
+## The static offers()/send() API is what the court's envoy conversation calls
+## to carry the request; it quotes and dispatches through the same live
+## actions the old form used.
+const T=preload("res://scripts/hud/hud_tokens.gd")
 const Licenses=preload("res://scripts/research_licenses.gd")
 const Purchase=preload("res://scripts/research_purchase.gd")
 const Partnerships=preload("res://scripts/research_partnerships.gd")
 const Materials=preload("res://scripts/research_materials.gd")
 const Scholars=preload("res://scripts/scholar_visits.gd")
-var modes:OptionButton
+const PAYMENTS:=["Food","Timber","Fiber Plants","Clay","Stone"]
+const MODE_WORDS:={
+	"license":"let us make it under their licence for a year",
+	"purchase":"sell us a finished study of it",
+	"scholar":"send a scholar to teach us for about two months",
+	"partnership":"study it with us and share what they find",
+	"materials":"sell us the materials we need to try it",
+}
 var subject:=""
-var sources:OptionButton
-var resources:OptionButton
 var summary:Label
-var send:Button
+var ask:Button
+var offer:Dictionary={}
 
 static func visible_for(topic:String, exposed:bool, known:bool)->bool:
 	if not exposed:return false
@@ -18,42 +34,62 @@ static func visible_for(topic:String, exposed:bool, known:bool)->bool:
 	if known and not Partnerships.pending(topic) and not (topic=="size_exclusion_chromatography" and Materials.available(topic)):return false
 	return Purchase.available() or Scholars.available() or Partnerships.available() or Materials.available(topic)
 
-func _ready()->void:
-	var title:=Label.new();title.text="Arrange foreign research support";add_child(title)
-	modes=OptionButton.new();add_child(modes)
-	if Licenses.available() and subject in Licenses.subjects():modes.add_item("Negotiate one-year production license");modes.set_item_metadata(modes.item_count-1,"license")
-	if Purchase.available():modes.add_item("Purchase a validated study");modes.set_item_metadata(modes.item_count-1,"purchase")
-	if Scholars.available():modes.add_item("Invite a scholar for 60 days");modes.set_item_metadata(modes.item_count-1,"scholar")
-	if Partnerships.available():modes.add_item("Joint investigation and findings exchange");modes.set_item_metadata(modes.item_count-1,"partnership")
-	if Materials.available(subject):modes.add_item("Purchase experimental materials");modes.set_item_metadata(modes.item_count-1,"materials")
-	modes.item_selected.connect(func(_index:int)->void:refresh())
-	sources=OptionButton.new();sources.size_flags_horizontal=SIZE_EXPAND_FILL;sources.clip_text=true;add_child(sources)
-	for civ:Dictionary in WorldSimulation.world.civilizations:
-		var relation:Dictionary=civ.get("player_relation",{})
-		if int(relation.get("contact_level",0))<2:continue
-		sources.add_item(String(civ.name));sources.set_item_metadata(sources.item_count-1,String(civ.id))
-	resources=OptionButton.new();resources.size_flags_horizontal=SIZE_EXPAND_FILL;add_child(resources)
-	for resource:String in ["Food","Timber","Fiber Plants","Clay","Stone"]:resources.add_item(resource)
-	summary=Label.new();summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;summary.add_theme_font_size_override("font_size",12);add_child(summary)
-	send=Button.new();send.text="Send research proposal";add_child(send)
-	sources.item_selected.connect(func(_index:int)->void:refresh())
-	resources.item_selected.connect(func(_index:int)->void:refresh())
-	send.pressed.connect(func()->void:
-		var result:Dictionary=support().dispatch(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
-		summary.text=String(result.get("message",result.get("error","The proposal could not depart.")))
-		send.disabled=result.get("ok",false))
-	refresh()
+## The kinds of help open for this question, in the order they are offered.
+static func modes(topic:String)->Array[String]:
+	var result:Array[String]=[]
+	if Licenses.available() and topic in Licenses.subjects():result.append("license")
+	if Purchase.available():result.append("purchase")
+	if Scholars.available():result.append("scholar")
+	if Partnerships.available():result.append("partnership")
+	if Materials.available(topic):result.append("materials")
+	return result
 
-func refresh()->void:
-	if sources.item_count==0 or modes.item_count==0:summary.text="A located foreign settlement and direct contact are needed.";send.disabled=true;return
-	var terms:Dictionary=support().quote(String(sources.get_selected_metadata()),subject,resources.get_item_text(resources.selected))
-	summary.text=String(terms.get("message",terms.get("error","No proposal available.")))
-	send.disabled=terms.has("error")
-
-func support()->Script:
-	match modes.get_selected_metadata():
+static func module(mode:String)->Script:
+	match mode:
 		"license":return Licenses
 		"materials":return Materials
 		"scholar":return Scholars
 		"partnership":return Partnerships
 	return Purchase
+
+## Peoples we know well enough to ask (direct contact).
+static func contacts()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if int(civ.get("player_relation",{}).get("contact_level",0))>=2:result.append({"id":String(civ.id),"name":String(civ.name)})
+	return result
+
+## Every help a known people could give now, with its real quote.
+static func offers(topic:String)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for mode:String in modes(topic):
+		for civ:Dictionary in contacts():
+			for payment:String in PAYMENTS:
+				var terms:Dictionary=module(mode).quote(String(civ.id),topic,payment)
+				if terms.has("error"):continue
+				result.append({"mode":mode,"civ_id":civ.id,"civ_name":civ.name,"payment":payment,"message":String(terms.get("message",""))})
+				break
+	return result
+
+## Sends the request through the live action; the court calls this.
+static func send(mode:String,civ_id:String,topic:String,payment:String)->Dictionary:
+	return module(mode).dispatch(civ_id,topic,payment)
+
+func _ready()->void:
+	name="HelpFromAbroad";add_theme_constant_override("separation",6)
+	var kicker:=T.make_label("HELP FROM ABROAD",12,T.GOLD_TEXT);add_child(kicker)
+	summary=T.make_label("",13,T.BODY);summary.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(summary)
+	ask=Button.new();ask.name="AskInCourt";ask.text="Ask them in court";ask.add_theme_font_size_override("font_size",13);add_child(ask)
+	ask.pressed.connect(func()->void:load("res://scripts/audience_director.gd").open_court_for({"civ_id":String(offer.get("civ_id",""))}))
+	refresh()
+
+func refresh()->void:
+	var found:Array=offers(subject) if not subject.is_empty() else []
+	offer=found[0] if not found.is_empty() else {}
+	if offer.is_empty():
+		summary.text="None of the peoples we know well can help with this yet. We need direct contact with a people who knows it."
+		ask.disabled=true;return
+	summary.text="%s could %s. Send your envoy to ask in the court." % [String(offer.civ_name),String(MODE_WORDS.get(String(offer.mode),"help us"))]
+	if found.size()>1:summary.text+=" %d other kinds of help are possible." % (found.size()-1)
+	ask.disabled=false
+	ask.tooltip_text=String(offer.message)

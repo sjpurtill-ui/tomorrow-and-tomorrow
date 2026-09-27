@@ -1,0 +1,12 @@
+{
+  "id": "workplace_hazard_awareness",
+  "line": "health",
+  "game_year": 123,
+  "approx_historical_year": -4180,
+  "prompt": "c. 4180 BCE: Experienced craftworker warns adults about hot kiln and pit; loose watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-30876ad7-0534-4766-8e27-12a9317c126a.png",
+  "asset": "res://assets/ui/research/subjects/workplace_hazard_awareness-v1.png",
+  "sha256": "e0078666abd4241d0af4e8df100f9998bd8a1bbf58da95948ea77d47d2e52fe6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

@@ -145,16 +145,16 @@ func test_food_report_displays_actual_meals_and_preservation_fuel()->void:
 	var found_fuel:=false
 	var found_fire:=false
 	for block:Dictionary in view._food_blocks(report):
-		if block.get("heading","")=="HEARTH FIRE":
+		if block.get("heading","")=="Hearth fire":
 			found_fire=true
 			assert_str(block.items[0].value).is_equal("75%")
 			assert_str(block.items[0].tip).contains("Friction")
-		if block.get("heading","")=="MEAL PREPARATION":
+		if block.get("heading","")=="Meal preparation":
 			found_meals=true
 			assert_str(block.items[0].name).is_equal("Hearth Roasting Control")
 			assert_str(block.items[0].value).is_equal("3.0 rations")
 			assert_str(block.items[0].sub).contains("0.09 Timber")
-		if block.get("heading","")=="SMOKING FUEL":found_fuel=true
+		if block.get("heading","")=="Smoking fuel":found_fuel=true
 	assert_bool(found_meals).is_true()
 	assert_bool(found_fuel).is_true()
 	assert_bool(found_fire).is_true()

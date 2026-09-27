@@ -28,7 +28,7 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const MAX_OURS:=12
 const MAX_THEIRS:=24
 ## Card budgets per zoom band (cards beyond these are left to the note).
-const CARDS:={"local":6,"regional":4}
+const CARDS:={"ground":6,"local":6,"regional":4}
 ## Reports younger than this are fresh and say nothing about their age.
 const FRESH_DAYS:=2
 ## Reports this old are drawn as stale: faded, with a dashed ring, as the
@@ -36,6 +36,9 @@ const FRESH_DAYS:=2
 const STALE_DAYS:=20
 ## Placeholder commander names that are not a person.
 const UNNAMED:=["","field staff","the field staff","commander","staff"]
+## A force is at home only when it stands at the home settlement, whatever
+## its record says (a band camped 25 km out once kept location "player_home").
+const HOME_RADIUS_KM:=2.0
 const GENERIC_PLACES:=["","marked ground","commanded ground","destination","field position","the field","home","objective"]
 
 
@@ -155,6 +158,28 @@ static func _generic_place(name:String)->bool:
 	return GENERIC_PLACES.has(name.strip_edges().to_lower())
 
 
+## How far a force stands from home, in km, or -1 when it has no position.
+static func home_km(record:Dictionary,home:Vector2)->float:
+	var p:Variant=record.get("position",null)
+	if not p is Dictionary or not (p as Dictionary).has_all(["x","z"]) or not home.is_finite(): return -1.0
+	return Vector2(float(p.x),float(p.z)).distance_to(home)
+
+
+## Stationed at the home settlement itself.
+static func at_home(record:Dictionary,home:Vector2)->bool:
+	if String(record.get("status","stationed"))!="stationed": return false
+	var km:=home_km(record,home)
+	if km<0.0: return String(record.get("location_id",""))=="player_home"
+	return km<HOME_RADIUS_KM
+
+
+## "about 25 km" for a camp's distance from home.
+static func km_words(km:float)->String:
+	var n:=roundi(km)
+	if n>=20: n=roundi(km/5.0)*5
+	return "about %s km" % EraWords.grouped(n)
+
+
 ## Compass words for a heading on the map (+x east, +z south).
 static func compass(delta:Vector2)->String:
 	if delta.length_squared()<0.000001: return ""
@@ -187,7 +212,10 @@ static func doing(context:Dictionary)->String:
 	var plain:=_plain_status(status)
 	if plain!="": return plain
 	var where:=String(context.get("location_name",""))
-	if bool(context.get("at_home",false)) or where.strip_edges().to_lower()=="home": return "at home"
+	var km:=float(context.get("home_km",-1.0))
+	var homely:=_generic_place(where) or where.strip_edges().to_lower() in ["home settlement","home"]
+	if bool(context.get("at_home",false)) or (homely and km>=0.0 and km<HOME_RADIUS_KM) or (km<0.0 and where.strip_edges().to_lower()=="home"): return "at home"
+	if homely and km>=HOME_RADIUS_KM: return "camped %s from home" % km_words(km)
 	if not _generic_place(where): return "holding at %s" % place(where)
 	return "holding its ground"
 
@@ -217,6 +245,14 @@ static func _named(general:String)->String:
 
 static func _article(word:String)->String:
 	return "an" if word.substr(0,1) in ["a","e","i","o","u"] else "a"
+
+
+## The card for a town we hold: "Held by us · 17" over whose garrison it is.
+static func card_garrison(mark:Dictionary)->PackedStringArray:
+	var troops:=int(mark.get("troops",0))
+	var general:=_named(String(mark.get("general","")))
+	var town:=place(String(mark.get("town","the town")))
+	return PackedStringArray(["Held by us · %s" % (str(troops) if troops<1000 else about(troops)),("%s's garrison in %s" % [general,town]) if general!="" else "our garrison in %s" % town])
 
 
 ## The paper card for one of our forces: [title, detail].
@@ -297,7 +333,7 @@ static func fade(days:int)->float:
 static func size_px(band:String,mark_kind:String)->float:
 	var base:float={"band":22.0,"host":26.0,"army":30.0,"formation":28.0}.get(mark_kind,24.0)
 	match band:
-		"local": return base
+		"ground","local": return base
 		"regional": return roundf(base*0.8)
 		"continental": return maxf(12.0,roundf(base*0.55))
 	return 0.0
@@ -312,7 +348,7 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 	var band:=String(context.get("band","local"))
 	var hidden:Dictionary={}
 	var drawn:Array=[]
-	if band in ["ground","world"]:
+	if band=="world":
 		for mark in marks: hidden[String(mark.id)]="band"
 		return {"drawn":drawn,"hidden":hidden}
 	var bounds:Rect2=context.get("bounds",Rect2(-1e6,-1e6,2e6,2e6))

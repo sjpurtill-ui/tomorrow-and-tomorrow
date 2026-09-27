@@ -1031,6 +1031,18 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			r.obedience={"id":"object","manner":"grim","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
 			audience["pending_command"]={"verb":"war","actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(reading.get("text",text)).substr(0,200)}
+		"fate":
+			# What becomes of a town we hold (town_fate.gd): carried out.
+			r.stage="war_fate"; r.executed=true; r.reaction="grave"
+			r.obedience={"id":"obey","manner":"grim","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
+		"held":
+			# An attack on a town we already hold: the plain truth, no march.
+			r.stage="war_held"; r.executed=false; r.reaction="neutral"
+			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
 		_:
 			r.stage="war_refuse"; r.executed=false; r.reaction="troubled"
 			r.obedience={"id":"object","manner":"plain","chance":0.0}
@@ -1183,6 +1195,7 @@ const STAGE:={
 		"[{actor} goes out to the drill ground; within the hour the fighters are being counted and loaded for the road.]"],
 	"war_object":["[{actor} does not move to the door. They stand where they are and answer you plainly.]"],
 	"war_refuse":["[{actor} stays where they are and tells you what stands in the way.]"],
+	"war_fate":["[{actor} bows and sends a runner to the garrison with your word.]","[{actor} goes out to send your word to the garrison; the court is very quiet.]"],
 	"order":["[{actor} bows and goes out to see it done; word of the order runs ahead of them through the camp.]",
 		"[{actor} is on their feet at once and out through the door, calling names as they go.]"],
 	"hesitate":["[{actor} takes up {blade}, then freezes; the point trembles a hand's breadth from {target}, and every eye turns to you.]",
@@ -1294,6 +1307,8 @@ static func decided_words(result:Dictionary)->String:
 		var verdict:=String((result.get("war",{}) as Dictionary).get("verdict",""))
 		parts.append("THE WAR LEADER'S ANSWER, in substance (keep every number exactly): "+String(result.get("actor_says","")))
 		if verdict=="act": parts.append("The army HAS set out; say so plainly with the place and the days on the road.")
+		elif verdict=="fate": parts.append("The god's word about the town we hold HAS been carried out; tell it soberly, keeping every number, with no gore.")
+		elif verdict=="held": parts.append("The town is ALREADY OURS; nobody marches against it. Say who holds it and ask what is to become of it.")
 		elif verdict=="object": parts.append("%s OBJECTS: nothing has marched. They explain why and what would fix it; if the god insists they will go." % actor)
 		else: parts.append("It CANNOT be done as ordered: nothing has marched. Say plainly why and what would change that. Never promise to go.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))

@@ -165,7 +165,7 @@ static func downscale(texture:Texture2D,max_width:int)->Texture2D:
 	small.set_meta("source_path",texture.resource_path)
 	return small
 static func color(domain:String)->Color:return COLORS.get(domain,T.TEAL)
-static func text_color(domain:String)->Color:return color(domain).darkened(.48) if T.is_light() else color(domain)
+static func text_color(domain:String)->Color:return T.legible(color(domain),T.PAPER_RAISED)
 static func name_for(domain:String)->String:
 	# Before sown fields the people gather and hunt; "farming" waits for them.
 	if domain=="nutrition" and not preload("res://scripts/character_voice.gd").era_tags("player").has("farming"):return "Food & foraging"
@@ -174,8 +174,37 @@ static func team(item:Dictionary)->float:
 	var assignment:Dictionary=item.get("assignment",{})
 	return float(assignment.get("capacity",{}).get("researchers",0)) if assignment.get("active",false) else 0.0
 static func workforce(amount:float)->String:
-	if amount<=0:return "No researchers"
-	return "~%.1f researchers" % amount if amount<10 else "~%d researchers" % roundi(amount)
+	return preload("res://scripts/hud/home_plain.gd").researchers(amount)
+
+## What holds an investigation back, in one plain sentence.
+const BOTTLENECK_WORDS:={
+	"NO RESEARCH":"No attention is given to this field just now, so the work has stopped.",
+	"RESEARCH WORKFORCE":"Fewer than one person's full time goes to this; more lore keepers, or more attention to this field, would speed it.",
+	"MATERIAL BASIS":"They need to find or work the material this depends on first.",
+	"AHEAD OF ITS AGE":"This is ahead of its time: other knowledge must grow before it can be answered quickly.",
+	"LEADERSHIP":"The official in charge is weak, or the office is empty.",
+	"RESEARCH SUPPORT":"Short food, tools, records or order are slowing the work.",
+	"EARLY EVIDENCE":"Nothing holds it back; they are still gathering early cases.",
+	"REPLICATION":"Nothing holds it back; they are testing the method case after case.",
+	"VALIDATION":"Nothing holds it back; the result is nearly proven.",
+}
+static func plain_bottleneck(text:String)->String:
+	for key:String in BOTTLENECK_WORDS:
+		if text.begins_with(key):return String(BOTTLENECK_WORDS[key])
+	var reason:=text.get_slice(" — ",1) if " — " in text else text
+	return reason.left(1).to_upper()+reason.substr(1)+("" if reason.ends_with(".") else ".")
+
+## Costs a discovery brings rather than gains, when they go up.
+const COST_EFFECTS:=["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure","storage_loss","food_spoilage","institutional_rigidity"]
+static func effect_is_cost(effect:String,value:float)->bool:
+	return (effect in COST_EFFECTS)==(value>0.0)
+
+## "Food storage up about 3 in 100" rather than "+3.0%  food storage".
+static func effect_sentence(effect:String,value:float)->String:
+	var name:=String(DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," ")))
+	var amount:=absf(value)*100.0
+	var size:="about %d%%" % roundi(amount) if amount>=1.0 else "a little"
+	return "%s %s %s" % [name.left(1).to_upper()+name.substr(1),"up" if value>0.0 else "down",size]
 static func status(item:Dictionary)->String:
 	if item.get("known",false):return "Established"
 	var assignment:Dictionary=item.get("assignment",{})
@@ -207,7 +236,7 @@ static func label(parent:Node,text:String,font:int=13,ink:Color=T.BODY,wrap:bool
 	parent.add_child(value);return value
 static func button(parent:Node,text:String,callback:Callable)->Button:
 	var b:=Button.new();b.text=text;b.custom_minimum_size.y=34;b.add_theme_font_size_override("font_size",13)
-	b.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,5,8));b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG if T.is_light() else Color("253940"),T.TEAL,1,5,8));b.pressed.connect(callback);parent.add_child(b);return b
+	b.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,2,8));b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,8));b.pressed.connect(callback);parent.add_child(b);return b
 ## Display (carved titles) and Voice (names, sentences) faces from ART_DIRECTION.
 ## Voice prefers the bundled Garamond once it lands under assets/fonts/serif/.
 const VOICE_CANDIDATES:=["res://assets/fonts/serif/EBGaramond-Regular.ttf","res://assets/fonts/serif/EBGaramond.ttf","res://assets/fonts/serif/CormorantGaramond-Regular.ttf"]
@@ -234,7 +263,8 @@ static func team_sentence(item:Dictionary)->String:
 	if not leader.is_empty() and not bool(leader.get("vacant",false)):who=String(leader.get("name",""))
 	if bool(words.call("reckoned")):
 		var count:=workforce(amount)
-		return (who+" leads "+count.to_lower() if who!="" else count)+"."
+		if amount<=0.05:return (who+" leads; no one is free to help yet." if who!="" else "No one is working on it yet.")
+		return (who+" leads: "+count.to_lower() if who!="" else count)+"."
 	if amount<=0:return (who+" waits; no one is free to help yet." if who!="" else "No one is working on it yet.")
 	var hands:="a pair of hands, now and then" if amount<.75 else "a few hands, most days" if amount<1.6 else "a few hands, every day" if amount<3.5 else "a small band, every day" if amount<9 else "many hands, every day"
 	return (who+" and "+hands if who!="" else hands.left(1).to_upper()+hands.substr(1))+"."
@@ -245,7 +275,8 @@ static func evidence_sentence(item:Dictionary)->String:
 	if bool(words.call("hearth")):
 		var phrase:=String(words.call("way_along",progress))
 		return phrase.left(1).to_upper()+phrase.substr(1)+"."
-	return "%d%% of the evidence gathered." % roundi(progress*100)
+	var words_text:=preload("res://scripts/hud/home_plain.gd").evidence(progress)
+	return words_text.left(1).to_upper()+words_text.substr(1)+"."
 static func initials(name:String)->String:
 	var words:=name.split(" ",false);var result:=""
 	for word in words:

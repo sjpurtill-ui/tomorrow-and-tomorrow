@@ -32,7 +32,7 @@ func _draw()->void:
 	plot=Rect2(Vector2(61,24),Vector2(maxf(1,size.x-76),maxf(1,size.y-60)))
 	if points.is_empty():
 		draw_string(ThemeDB.fallback_font,Vector2(16,64),"No recorded history yet.",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Tokens.MUTED)
-		draw_string(ThemeDB.fallback_font,Vector2(16,86),"Recording begins as the simulation advances.",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Tokens.MUTED)
+		draw_string(ThemeDB.fallback_font,Vector2(16,86),"The first count comes as time passes.",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Tokens.MUTED)
 		return
 	first_day=int(points[0].day)
 	last_day=maxi(first_day+1,int(points[-1].day))
@@ -42,12 +42,12 @@ func _draw()->void:
 		for line in series:
 			if row.has(line.key) and is_finite(float(row[line.key])): high=maxf(high,float(row[line.key]))
 	high*=1.12
-	draw_string(ThemeDB.fallback_font,Vector2(9,15),unit,HORIZONTAL_ALIGNMENT_LEFT,-1,10,Tokens.MUTED)
+	draw_string(ThemeDB.fallback_font,Vector2(9,15),unit,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Tokens.MUTED)
 	for index in 4:
 		var ratio:=float(index)/3.0
 		var y:=plot.end.y-plot.size.y*ratio
 		draw_line(Vector2(plot.position.x,y),Vector2(plot.end.x,y),Tokens.BORDER_2)
-		draw_string(ThemeDB.fallback_font,Vector2(5,y+4),number(high*ratio),HORIZONTAL_ALIGNMENT_LEFT,54,10,Tokens.MUTED)
+		draw_string(ThemeDB.fallback_font,Vector2(5,y+5),number(high*ratio),HORIZONTAL_ALIGNMENT_LEFT,54,12,Tokens.MUTED)
 	var has_values:=false
 	for line in series:
 		var segment:=PackedVector2Array()
@@ -59,13 +59,13 @@ func _draw()->void:
 			has_values=true
 			segment.append(position_for(row,line.key))
 		_draw_segment(segment,line.color)
-	if not has_values: draw_string(ThemeDB.fallback_font,plot.position+Vector2(8,48),"No observations for these measures in this range.",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Tokens.MUTED)
+	if not has_values: draw_string(ThemeDB.fallback_font,plot.position+Vector2(8,48),"Nothing was counted in this stretch of time.",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Tokens.MUTED)
 	for index in 3:
 		var ratio:=float(index)/2.0
 		var day:=roundi(lerpf(first_day,last_day,ratio))
-		var label:="Y%d · d%d" % [day/365+1,day%365+1]
-		var width:=ThemeDB.fallback_font.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x
-		draw_string(ThemeDB.fallback_font,Vector2(plot.position.x+plot.size.x*ratio-width*ratio,size.y-12),label,HORIZONTAL_ALIGNMENT_LEFT,-1,10,Tokens.MUTED)
+		var label:=preload("res://scripts/hud/era_words.gd").when(day)
+		var width:=ThemeDB.fallback_font.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+		draw_string(ThemeDB.fallback_font,Vector2(plot.position.x+plot.size.x*ratio-width*ratio,size.y-10),label,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Tokens.MUTED)
 	if hover_index>=0 and hover_index<points.size():
 		var row:Dictionary=points[hover_index]
 		var x:=plot.position.x+plot.size.x*float(int(row.day)-first_day)/maxf(1,last_day-first_day)
@@ -83,6 +83,6 @@ func _gui_input(event:InputEvent)->void:
 		var candidate:=absf(float(points[index].day)-day)
 		if candidate<distance: distance=candidate;hover_index=index
 	var row:Dictionary=points[hover_index]
-	tooltip_text="Year %d, day %d · recorded snapshot" % [int(row.day)/365+1,int(row.day)%365+1]
+	tooltip_text="Counted in %s" % preload("res://scripts/hud/era_words.gd").when(int(row.day))
 	for line in series: tooltip_text+="\n%s: %s %s" % [line.label,number(float(row[line.key])) if row.has(line.key) else "not recorded",unit]
 	queue_redraw()

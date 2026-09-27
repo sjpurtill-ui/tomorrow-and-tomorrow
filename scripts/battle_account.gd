@@ -207,6 +207,11 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var headline:=_headline(kind,band,enemy_name,where,town,defending,their_tactic,raid,home_place)
 	var phases:=_phases(record,s,band,enemy_name,kind,termination)
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
+	var first:=String(state.get("voice",""))=="first"
+	if first:
+		# The war leader tells it himself: the same account, his own voice.
+		headline=_spoken(headline,band,general,noun)
+		now={"now":_spoken(String(now.now),band,general,noun),"next":_spoken(String(now.next),band,general,noun)}
 	var advice:=_advice(kind,ledger,theirs_ledger,town,state,defending)
 	var actions:Array=[]
 	if not (record.get("rounds",[]) as Array).is_empty(): actions.append({"id":"watch","label":"Watch the battle"})
@@ -215,7 +220,18 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	return {"kind":kind,"headline":headline,"where":where,"town":town,"band":band,"general":general,"general_full":general_full,
 		"enemy":enemy_name,"ours":ledger,"theirs":theirs_ledger,"tactics":tactics,"phases":phases,
 		"exchanges":(record.get("rounds",[]) as Array).size(),"duration":duration_words((record.get("rounds",[]) as Array).size()),
-		"now":now.now,"next":now.next,"advice":advice,"actions":actions,"seed":int(record.get("seed",0)),"day":int(record.get("day",state.get("today",0)))}
+		"now":now.now,"next":now.next,"advice":advice,"actions":actions,"seed":int(record.get("seed",0)),"day":int(record.get("day",state.get("today",0))),"voice":"first" if first else ""}
+
+
+## One of the account's sentences in the war leader's own voice: his band is
+## "my band", his name is "I" or "me".
+static func _spoken(text:String,band:String,general:String,noun:String)->String:
+	var out:=text.replace(_cap(band),"My "+noun).replace(band,"my "+noun)
+	if general=="": return out
+	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "]]:
+		out=out.replace(general+String(pair[0]),"I"+String(pair[1]))
+	out=out.replace("with "+general,"with me")
+	return out
 
 
 static func _tactic_line(id:String,stage:String,ours:bool)->String:
@@ -446,7 +462,8 @@ static func text(account:Dictionary)->String:
 	if String(tactics.ours)!="": lines.append(String(tactics.ours)+(" "+String(tactics.theirs) if String(tactics.theirs)!="" else ""))
 	lines.append(String(account.now))
 	lines.append(String(account.next))
-	if String(account.advice)!="": lines.append("%s says: \"%s\"" % [String(account.general) if String(account.general)!="" else "The war leader",String(account.advice)])
+	if String(account.advice)!="" and String(account.get("voice",""))=="first": lines.append(String(account.advice))
+	elif String(account.advice)!="": lines.append("%s says: \"%s\"" % [String(account.general) if String(account.general)!="" else "The war leader",String(account.advice)])
 	return " ".join(lines)
 
 
@@ -562,7 +579,7 @@ static func doing(army:Dictionary)->String:
 		var verb:=String({"siege":"lay siege to","raid":"raid"}.get(String(marching.kind),"attack"))
 		return "marching to %s %s, %s out" % [verb,String(marching.name) if String(marching.name)!="" else "the town",_days(int(marching.days))]
 	if String(army.get("status",""))=="moving": return "marching to %s" % (_place_name(String(army.get("destination_name",""))) if _place_name(String(army.get("destination_name","")))!="" else "the marked ground")
-	if String(army.get("location_id",""))=="player_home": return "at home"
+	if Marks.at_home(army,WorldSimulation.world.player_world_origin): return "at home"
 	for past_variant in mc.battle_history:
 		var past:Dictionary=past_variant
 		if int(past.get("home_force_id",-1))!=id or String(past.get("home_force_kind",""))!="field_army": continue
@@ -571,4 +588,6 @@ static func doing(army:Dictionary)->String:
 			return "waiting for your word after the fight%s" % ((" at "+where) if where!="" else "")
 		break
 	var here:=_place_name(String(army.get("location_name","")))
+	var km:=Marks.home_km(army,WorldSimulation.world.player_world_origin)
+	if (here=="" or Marks._generic_place(here) or here.to_lower()=="home settlement") and km>=Marks.HOME_RADIUS_KM: return "camped %s from home" % Marks.km_words(km)
 	return ("holding "+here) if here!="" and here!="Commanded ground" else "waiting where you sent it"

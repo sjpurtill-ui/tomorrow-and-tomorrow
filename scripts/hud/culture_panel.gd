@@ -10,16 +10,16 @@ func setup(block:Dictionary)->void:
 	if Portrait.Early.active():
 		image.texture=Portrait.Early.civic_scene(data.get("lived_values",{}))
 		image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		image.tooltip_text="Illustration of current lived values; not a recorded event or a trait of ancestry."
+		image.tooltip_text="A picture of how the people live now."
 	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.size_flags_stretch_ratio=1.15;identity.add_theme_constant_override("separation",9);opening.add_child(identity)
-	identity.add_child(T.make_label("THE SOCIETY WE ARE BECOMING",11,T.GOLD))
+	identity.add_child(T.make_label("THE SOCIETY WE ARE BECOMING",12,T.GOLD_TEXT))
 	identity.add_child(_serif(String(data.identity.name).capitalize(),28))
 	_note(identity,String(data.identity.summary))
 	_note(identity,"Values grow from everyday life and the choices remembered across generations.")
 	_rule(self)
 	var direction:=HBoxContainer.new();direction.add_theme_constant_override("separation",18);add_child(direction)
 	var purpose:=VBoxContainer.new();purpose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;direction.add_child(purpose)
-	purpose.add_child(T.make_label("THIS GENERATION’S DIRECTION",11,T.GOLD));purpose.add_child(_serif(String(data.direction.get("name","A direction still to be chosen")),23))
+	purpose.add_child(T.make_label("THIS GENERATION’S DIRECTION",12,T.GOLD_TEXT));purpose.add_child(_serif(String(data.direction.get("name","A direction still to be chosen")),23))
 	_note(purpose,String(data.direction.get("vision","Choose the purpose this generation will pursue.")))
 	_button(direction,"Review direction",data.on_direction,"Review your chosen ambition and its consequences")
 	(direction.get_child(direction.get_child_count()-1) as Control).size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -27,7 +27,7 @@ func setup(block:Dictionary)->void:
 	if data.has("artifacts"):
 		add_child(preload("res://scripts/hud/artifact_gallery.gd").showcase(data.artifacts))
 		_rule(self)
-	add_child(T.make_label("VALUES IN EVERYDAY LIFE",11,T.GOLD))
+	add_child(T.make_label("VALUES IN EVERYDAY LIFE",12,T.GOLD_TEXT))
 	values_grid=GridContainer.new();values_grid.columns=3;values_grid.add_theme_constant_override("h_separation",18);values_grid.add_theme_constant_override("v_separation",18);add_child(values_grid)
 	for value:Dictionary in data.values:
 		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",7);values_grid.add_child(card)
@@ -35,14 +35,14 @@ func setup(block:Dictionary)->void:
 		card.add_child(_serif(String(value.label).capitalize(),20));_note(card,String(value.meaning))
 		var spectrum:=ProgressBar.new();spectrum.name="ValueSpectrum";spectrum.show_percentage=false;spectrum.custom_minimum_size.y=5;spectrum.value=float(value.value)*100;card.add_child(spectrum)
 		spectrum.add_theme_stylebox_override("background",T.flat(T.TRACK));spectrum.add_theme_stylebox_override("fill",T.flat(T.GREEN))
-		_note(card,String(value.low).capitalize()+"  ↔  "+String(value.high).capitalize())
+		_note(card,_leaning(float(value.value),String(value.low),String(value.high)))
 	_rule(self)
-	add_child(T.make_label("HOW CULTURE SHAPES PLAY",11,T.GOLD))
+	add_child(T.make_label("WHAT OUR WAYS CHANGE",12,T.GOLD_TEXT))
 	memory_grid=GridContainer.new();memory_grid.columns=3;memory_grid.add_theme_constant_override("h_separation",22);memory_grid.add_theme_constant_override("v_separation",18);add_child(memory_grid)
 	for effect:Dictionary in data.get("effects",[]):
 		_effect_card(memory_grid,effect)
 	_rule(self)
-	add_child(T.make_label("REPUTATION FROM OUR CONDUCT",11,T.GOLD))
+	add_child(T.make_label("REPUTATION FROM OUR CONDUCT",12,T.GOLD_TEXT))
 	_note(self,"Built by treatment of prisoners and conquered people. Different neighbors also remember their own dealings with us.")
 	var reputation_grid:=GridContainer.new();reputation_grid.name="ReputationGrid";reputation_grid.columns=3;reputation_grid.add_theme_constant_override("h_separation",22);reputation_grid.add_theme_constant_override("v_separation",18);add_child(reputation_grid)
 	for reputation:Dictionary in data.get("reputation",[]):
@@ -53,7 +53,7 @@ func setup(block:Dictionary)->void:
 	# The provider owns view state so daily body rebuilds preserve the disclosure.
 	var view_state:Dictionary=data.get("view_state",{})
 	var roots:=VBoxContainer.new();roots.name="CulturalRoots";roots.visible=bool(view_state.get("roots_open",false));roots.add_theme_constant_override("separation",12)
-	var toggle:=Button.new();toggle.name="CulturalRootsToggle";toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸"
+	var toggle:=Button.new();toggle.name="CulturalRootsToggle";toggle.text="Hide our cultural roots" if roots.visible else "Show our cultural roots"
 	toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	toggle.add_theme_color_override("font_color",T.INK)
 	toggle.add_theme_color_override("font_hover_color",T.INK)
@@ -65,19 +65,19 @@ func setup(block:Dictionary)->void:
 	toggle.pressed.connect(func():
 		roots.visible=not roots.visible
 		view_state["roots_open"]=roots.visible
-		toggle.text="Cultural roots ▾" if roots.visible else "Cultural roots ▸")
+		toggle.text="Hide our cultural roots" if roots.visible else "Show our cultural roots")
 	roots_grid=GridContainer.new();roots_grid.columns=3;roots_grid.add_theme_constant_override("h_separation",22);roots_grid.add_theme_constant_override("v_separation",18);roots.add_child(roots_grid)
 	for memory:Dictionary in data.memories:
 		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",6);roots_grid.add_child(card)
-		card.add_child(T.make_label(String(memory.domain).to_upper(),11,T.GOLD))
+		card.add_child(T.make_label(Visuals.name_for(String(memory.domain)).to_upper(),12,T.GOLD_TEXT))
 		card.add_child(_serif(String(memory.current),19))
-		if String(memory.inherited)!=String(memory.current):_note(card,"Earlier · "+String(memory.inherited))
+		if String(memory.inherited)!=String(memory.current):_note(card,"Our forebears leaned to "+String(memory.inherited).to_lower()+".")
 	if data.memories.is_empty():_note(roots,"No lasting traditions recorded yet.")
 	_rule(self)
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",10);add_child(actions)
-	_button(actions,"Speak with our leader",data.on_council,"Open the council conversation")
-	_button(actions,"Society’s strengths & needs",data.on_capacities,"See all twelve capacities")
-	_button(actions,"People in government",data.on_government,"Review officeholders and policies")
+	_button(actions,"Talk with our leader in court",data.on_council,"Call the local leader to the court")
+	_button(actions,"What we are good and poor at",data.on_capacities,"Twelve things a people needs, weakest first")
+	_button(actions,"Government",data.on_government,"Officials and standing orders")
 	resized.connect(_culture_layout);_culture_layout()
 func _culture_layout()->void:
 	var columns:=3 if size.x>=650 else 2 if size.x>=450 else 1
@@ -90,7 +90,13 @@ func _culture_layout()->void:
 
 func _effect_card(parent:Control,item:Dictionary)->VBoxContainer:
 	var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",8);parent.add_child(card)
-	card.add_child(T.make_label(String(item.label).to_upper(),11,T.GOLD))
+	card.add_child(T.make_label(String(item.label).to_upper(),12,T.GOLD_TEXT))
 	card.add_child(_serif(String(item.title),19))
 	_note(card,String(item.detail))
 	return card
+
+static func _leaning(value:float,low:String,high:String)->String:
+	var toward:=high if value>=0.5 else low
+	var strength:=absf(value-0.5)
+	if strength<0.08:return "Balanced between %s and %s." % [low.to_lower(),high.to_lower()]
+	return "%s toward %s." % ["Leans strongly" if strength>=0.3 else "Leans",toward.to_lower()]

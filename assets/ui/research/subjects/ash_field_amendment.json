@@ -1,0 +1,12 @@
+{
+  "id": "ash_field_amendment",
+  "line": "nutrition",
+  "game_year": 122,
+  "approx_historical_year": -4187,
+  "prompt": "c. 4187 BCE: Farmers spread cool hearth ash thinly across planted grain; opaque botanical egg tempera. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7f5e9c8a-a0da-4a5a-992c-ff7859a566e3.png",
+  "asset": "res://assets/ui/research/subjects/ash_field_amendment-v1.png",
+  "sha256": "130c0251df47534963178f1d3e995a7a05489b02a216637c5165c0336eb64bba",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

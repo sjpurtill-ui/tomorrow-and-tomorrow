@@ -1,5 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## Detail dock: the population ledger — births, deaths, causes, and the
 ## demographic record. Replaces the full-screen population ledger modal.
 
@@ -9,24 +10,24 @@ const PAGE_SIZE:=8
 
 func meta()->Dictionary:
 	return {
-		"eyebrow":"SETTLEMENT · FULL RECORD",
-		"title":"Population Ledger",
-		"subtabs":["OVERVIEW","DEATH RECORDS"],
+		"eyebrow":"All our people",
+		"title":"Births and deaths",
+		"subtabs":["Overview","Every death"],
 	}
 
 func tab(_sub:int)->Dictionary:
 	var pregnancy:Dictionary=GameState.pregnancy_summary()
 	var kpis:Array=[
-		{"label":"PEOPLE","value":str(GameState.population_total),"delta":"","accent":Tokens.GREEN,"tip":"Living population"},
-		{"label":"BIRTHS","value":str(GameState.lifetime_births),"delta":"recorded","accent":Tokens.GREEN,"tip":"Births since founding"},
-		{"label":"DEATHS","value":str(GameState.lifetime_deaths),"delta":"recorded","accent":Tokens.RED,"tip":"Deaths since founding"},
-		{"label":"LIFE EXP.","value":"%.1f y" % GameState.projected_life_expectancy(),"delta":"","accent":Tokens.TEAL,"tip":"Projected at birth under current conditions"},
+		{"label":"PEOPLE","value":str(GameState.population_total),"delta":"alive now","accent":Tokens.GREEN,"tip":"Everyone alive now"},
+		{"label":"BORN","value":str(GameState.lifetime_births),"delta":"since we set out","accent":Tokens.GREEN,"tip":"Every birth since the people set out"},
+		{"label":"DIED","value":str(GameState.lifetime_deaths),"delta":"since we set out","accent":Tokens.RED,"tip":"Every death since the people set out"},
+		{"label":"LIFE EXPECTANCY" if EraWords.reckoned() else "HOW LONG WE LIVE","value":"%.1f years" % GameState.projected_life_expectancy() if EraWords.reckoned() else EraWords.life(GameState.projected_life_expectancy()),"delta":"for a child born now","accent":Tokens.TEAL,"tip":"How long a child born now can hope to live, as things stand"},
 	]
 	var maternity_items:Array=[
-		{"label":"PREGNANCIES","value":str(int(pregnancy.get("active",0))),"note":"~%d births expected / 12 months" % roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0))),"note_color":Tokens.GREEN,"tip":"Currently active pregnancies"},
-		{"label":"PREGNANCY LOSSES","value":str(GameState.lifetime_pregnancy_losses),"note":"%d stillbirths" % GameState.lifetime_stillbirths,"note_color":Tokens.MUTED,"tip":"Losses before and at birth"},
-		{"label":"MATERNAL DEATHS","value":str(GameState.lifetime_maternal_deaths),"note":"","note_color":Tokens.RED,"tip":"Deaths in childbirth"},
-		{"label":"NEONATAL DEATHS","value":str(GameState.lifetime_neonatal_deaths),"note":"first month of life","note_color":Tokens.RED,"tip":"Deaths in the first month"},
+		{"label":"WITH CHILD","value":str(int(pregnancy.get("active",0))),"note":"about %d births in the next year" % roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0))),"note_color":Tokens.GREEN_TEXT,"tip":"Women carrying a child now"},
+		{"label":"LOST BEFORE BIRTH","value":str(GameState.lifetime_pregnancy_losses),"note":"%d born dead" % GameState.lifetime_stillbirths,"note_color":Tokens.MUTED,"tip":"Children lost before or at birth, since the people set out"},
+		{"label":"MOTHERS DIED","value":str(GameState.lifetime_maternal_deaths),"note":"in childbirth","note_color":Tokens.RED_TEXT,"tip":"Mothers who died giving birth, since the people set out"},
+		{"label":"NEWBORNS DIED","value":str(GameState.lifetime_neonatal_deaths),"note":"in their first month","note_color":Tokens.RED_TEXT,"tip":"Babies who died in their first month, since the people set out"},
 	]
 	var mortality:Dictionary=GameState.simulation_metrics.get("mortality_components",{})
 	var mortality_items:Array=[]
@@ -35,10 +36,10 @@ func tab(_sub:int)->Dictionary:
 	for cause in mortality:
 		var amount:=float(mortality[cause])
 		if amount<=0.0: continue
-		mortality_items.append({"name":String(cause).capitalize().replace("_"," "),"value":"%.2f%% / yr" % (amount*100.0),"ratio":amount/top,"color":Tokens.RED,"tip":"Modeled contribution to mortality under current conditions; this is not a lifetime death count"})
+		mortality_items.append({"name":String(cause).replace("_"," ").capitalize(),"value":preload("res://scripts/hud/content/dock_detail_health.gd")._per_year_words(amount),"ratio":amount/top,"color":Tokens.RED,"tip":"How many people this cause kills each year at the present rate"})
 	var blocks:Array=[
 		Charts.population("civilization"),
-		{"type":"tiles","heading":"MATERNITY & INFANCY","items":maternity_items},
+		{"type":"tiles","heading":"Mothers and babies","items":maternity_items},
 	]
 	var records:=grouped_deaths(GameState.demographic_ledger)
 	if _sub==1:
@@ -46,16 +47,16 @@ func tab(_sub:int)->Dictionary:
 		return {"kpis":kpis,"brief":{},"blocks":_death_pages(records,false)}
 	blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
 	if not mortality_items.is_empty():
-		blocks.append({"type":"bars","heading":"CURRENT MORTALITY RISK","note":"annual pressure now · not historical totals","items":mortality_items})
+		blocks.append({"type":"bars","heading":"What is killing people now","note":"deaths each year, at the present rate","items":mortality_items})
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	blocks.append({"type":"tiles","heading":"WHERE EVERYONE IS","items":[
-		{"label":"PRODUCTIVE","value":str(int(profile.get("productive",0))),"note":"direct work","note_color":Tokens.GREEN,"tip":"People in direct productive roles"},
-		{"label":"SUPPORT","value":str(int(profile.get("support",0))),"note":"care and coordination","note_color":Tokens.MUTED,"tip":"People sustaining others"},
-		{"label":"DEPENDENT","value":str(int(profile.get("dependent",0))),"note":"children and elders","note_color":Tokens.MUTED,"tip":"People supported by the rest"},
-		{"label":"AWAY","value":str(int(profile.get("absent",0))+int(profile.get("mobilized",0))),"note":"missions and arms","note_color":Tokens.AMBER,"tip":"Physically absent or mobilized"},
+	blocks.append({"type":"tiles","heading":"Where everyone is","items":[
+		{"label":"WORKING","value":str(int(profile.get("productive",0))),"note":"gathering, making, building","note_color":Tokens.GREEN_TEXT,"tip":"People doing the day's work"},
+		{"label":"TENDING OTHERS","value":str(int(profile.get("support",0))),"note":"care and keeping order","note_color":Tokens.MUTED,"tip":"People looking after others and keeping things running"},
+		{"label":"CHILDREN AND ELDERS","value":str(int(profile.get("dependent",0))),"note":"looked after by the rest","note_color":Tokens.MUTED,"tip":"People too young or too old for the day's work"},
+		{"label":"AWAY","value":str(int(profile.get("absent",0))+int(profile.get("mobilized",0))),"note":"on the road or under arms","note_color":Tokens.AMBER_TEXT,"tip":"People away on journeys or called to fight"},
 	]})
 	var workforce:=GameState.workforce_capacity_snapshot()
-	blocks.append({"type":"text","heading":"PEOPLE AND EFFECTIVE WORK","text":"%d assigned people provide %.1f effective workers across current jobs. %d returned veterans have lasting injuries. They remain living population; heavy carrying, construction and extraction lose more capacity than knowledge or administration. Temporary military wounds remain in recovery and are not counted twice here." % [int(workforce.people),float(workforce.effective_workers),int(workforce.lasting_injuries)]})
+	blocks.append({"type":"text","heading":"How much work gets done","text":"%d people are at work, and between them they get done what %s people at full strength would.%s" % [int(workforce.people),preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),(" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else ""]})
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
@@ -72,7 +73,7 @@ static func grouped_deaths(ledger:Array)->Array:
 		var group:Dictionary=groups[key];group.first=mini(int(group.first),day);group.last=maxi(int(group.last),day);group.count+=int(record.get("count",0));group.records+=1
 	var result:Array=[]
 	for group:Dictionary in groups.values():
-		result.append({"last_day":int(group.last),"name":group.place,"value":"%d death%s" % [int(group.count),"" if int(group.count)==1 else "s"],"sub":"%s · %s" % [String(group.cause),"Day %d" % int(group.first) if group.first==group.last else "Days %d–%d" % [int(group.first),int(group.last)]],"tip":"%d original records retained; grouped within 30-day periods." % int(group.records),"accent":Tokens.RED})
+		result.append({"last_day":int(group.last),"name":group.place,"value":"%d death%s" % [int(group.count),"" if int(group.count)==1 else "s"],"sub":"%s · %s" % [String(group.cause).capitalize(),EraWords.when(int(group.first)) if EraWords.when(int(group.first))==EraWords.when(int(group.last)) else "%s to %s" % [EraWords.when(int(group.first)),EraWords.when(int(group.last))]],"tip":"Deaths from this cause here, gathered by month.","accent":Tokens.RED})
 	return result
 
 static func death_summary(ledger:Array)->Array:
@@ -87,7 +88,7 @@ static func death_summary(ledger:Array)->Array:
 	var rows:Array=[]
 	for cause:String in groups:
 		var group:Dictionary=groups[cause]
-		rows.append({"name":cause,"value":"%d death%s"%[int(group.count),"" if int(group.count)==1 else "s"],"count":int(group.count),"sub":"%d locations · %d retained records"%[group.places.size(),int(group.records)],"accent":Tokens.RED})
+		rows.append({"name":cause,"value":"%d death%s"%[int(group.count),"" if int(group.count)==1 else "s"],"count":int(group.count),"sub":"in %d place%s" % [group.places.size(),"" if group.places.size()==1 else "s"],"accent":Tokens.RED})
 	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count) if a.count!=b.count else String(a.name)<String(b.name))
 	return rows
 
@@ -97,10 +98,10 @@ func _death_pages(rows:Array,summary:bool)->Array:
 	page=clampi(page,0,pages-1)
 	if summary:summary_page=page
 	else:death_page=page
-	var heading:="DEATHS BY CAUSE" if summary else "DATED DEATH RECORDS"
-	if rows.is_empty():return [{"type":"text","heading":heading,"text":"No deaths have been recorded."}]
-	var blocks:Array=[{"type":"rows","heading":heading,"items":rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE)},{"type":"text","text":"Totals here cover retained records. Lifetime deaths remain above. Open Death Records for dates and places." if summary else "Grouped by place, cause and 30-day period; newest first. Original records are retained."}]
-	if pages>1:blocks.append({"type":"actions","heading":"PAGE %d / %d"%[page+1,pages],"items":[{"label":"PREVIOUS","disabled":page==0,"on_press":func():_change_death_page(summary,-1)},{"label":"NEXT","disabled":page==pages-1,"on_press":func():_change_death_page(summary,1)}]})
+	var heading:="Deaths by cause" if summary else "Every death, newest first"
+	if rows.is_empty():return [{"type":"text","heading":heading,"text":"No one has died yet."}]
+	var blocks:Array=[{"type":"rows","heading":heading,"items":rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE)},{"type":"text","text":"Open \"Every death\" above for when and where." if summary else "Deaths from the same cause in the same place and month are listed together."}]
+	if pages>1:blocks.append({"type":"actions","heading":"Page %d of %d"%[page+1,pages],"items":[{"label":"Newer","disabled":page==0,"on_press":func():_change_death_page(summary,-1)},{"label":"Older","disabled":page==pages-1,"on_press":func():_change_death_page(summary,1)}]})
 	return blocks
 
 func _change_death_page(summary:bool,delta:int)->void:

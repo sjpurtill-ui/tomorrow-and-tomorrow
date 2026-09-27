@@ -2518,6 +2518,9 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 		var enemy_morale:=clampf(0.42+readiness*0.42+float(war_reputation.get("grievance",0.0))*0.08-float(war_reputation.get("fear",0.0))*0.07,0.32,0.92)
 		enemy=simulator.create_formation_force("%s FIELD HOST" % source_name,enemy_formations,enemy_morale,readiness)
 		enemy["commander"]=simulator.create_commander("%s FIELD STAFF" % source_name,rng.randf_range(0.38,0.72),rng.randf_range(0.38,0.72),rng.randf_range(0.30,0.68),rng.randf_range(0.42,0.78))
+	# A band still recovering from a beating brings only the morale it has
+	# regained (rival_stand_down.gd).
+	if incident.has("morale_cap") and not enemy.is_empty(): enemy["morale"]=minf(float(enemy.get("morale",1.0)),float(incident.morale_cap))
 	var offensive:=campaign_mode=="offensive"
 	var is_raid:=String(incident.get("incident_kind","campaign"))=="raid"
 	var target_name:=String(incident.get("target_region_name",""))

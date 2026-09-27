@@ -1,0 +1,12 @@
+{
+  "id": "offering_keepers",
+  "line": "institutions",
+  "game_year": 130,
+  "approx_historical_year": -4133,
+  "prompt": "c. 4133 BCE: Appointed adult custodian receives grain offerings at a simple shrine; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3977f619-d650-483b-beb7-d1b203007266.png",
+  "asset": "res://assets/ui/research/subjects/offering_keepers-v1.png",
+  "sha256": "77b7781a5973d67da4d6ba34ca0601bbb9d9bbc5b885a8a333f2acec15d1ce22",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

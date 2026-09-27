@@ -843,3 +843,37 @@ static func _great_work_form(shape:String,c:Color,paper:Color)->Array:
 		"granary": return [_s(20,33,20,40,2,c),_s(36,33,36,40,2,c),_rr(28,29,11,5,0.5,c),_t(28,13,13.5,25,42.5,25,c),_s(15,40.5,41,40.5,1.8,c)]
 	# A hall, archive or house: a long roof over a pillared front.
 	return [_t(28,13,13,25,43,25,c),_rr(28,32,11.5,6,0.5,c),_rr(28,34.5,2.5,3.5,0.5,paper),_s(14,39.5,42,39.5,2.2,c)]
+
+
+# -- Battle figures ---------------------------------------------------------
+
+static var _figure_textures:Dictionary={}
+
+## One fighter for the battle replay, inked on a paper halo, weapon by era
+## and arm: "club" (a hearth band's clubs and sharpened sticks), "spear",
+## "bow", "sword" (sword and shield), "musket", "rifle", "horse" (a rider),
+## and "fallen" (a fighter down). The owner's colour touches only a sash.
+static func battle_figure_texture(kind:String,ink:Color,accent:Color,px:int=64)->Texture2D:
+	var key:="%s|%s|%s|%d" % [kind,ink.to_html(),accent.to_html(),px]
+	if _figure_textures.has(key): return _figure_textures[key]
+	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(battle_figure_glyph(kind,ink,accent),Color(0.95,0.91,0.80,0.9),2.2),px))
+	_figure_textures[key]=texture
+	return texture
+
+
+static func battle_figure_glyph(kind:String,ink:Color,accent:Color)->Array:
+	if kind=="fallen":
+		return [_c(11,45,4.0,ink),_rr(24,45.5,9,3.6,2.4,ink),_s(33,45,47,47,3.0,ink),_s(33,46,45,50,2.6,ink),_s(6,51,44,51,1.4,ink),_s(20,43,28,45,1.8,accent)]
+	if kind=="horse":
+		return [_rr(27,35,13,5.5,5,ink),_s(38,33,45,22,4.0,ink),_rr(46,21,4.5,2.6,1.5,ink),_s(17,39,15,52,2.4,ink),_s(21,39,21,52,2.4,ink),
+			_s(33,39,34,52,2.4,ink),_s(37,39,39,52,2.4,ink),_s(15,33,9,40,1.8,ink),
+			_c(27,12,3.8,ink),_rr(27,22,4.2,6.5,2.6,ink),_s(27,27,31,34,2.6,ink),_s(24,19,32,24,1.8,accent),_s(31,19,46,3,1.6,ink)]
+	var body:=[_c(28,10,4.6,ink),_rr(28,23,5.2,8.5,3.5,ink),_s(26,31,23.5,49,3.2,ink),_s(30,31,32.5,49,3.2,ink),_s(24,18,32,26,2.0,accent)]
+	match kind:
+		"club": body.append_array([_s(31,19,36,12,2.6,ink),_s(36,14,40,2,3.6,ink),_s(25,19,21,29,2.4,ink)])
+		"bow": body.append_array([_s(31,19,40,19,2.4,ink),_s(25,19,31,20,2.2,ink),_s(40,6,43,19,1.7,ink),_s(43,19,40,32,1.7,ink),_s(40,6,40,32,0.9,ink)])
+		"sword": body.append_array([_rr(21,24,5.5,8,2.5,ink),_rr(21,24,3.6,6,1.6,Color(0.95,0.91,0.80,1.0)),_s(32,21,40,11,2.0,ink),_s(30,21,34,23,2.4,ink)])
+		"musket": body.append_array([_s(21,33,42,8,2.2,ink),_s(31,20,35,22,2.4,ink),_rr(28,5,6,1.4,0.6,ink)])
+		"rifle": body.append_array([_s(22,32,40,12,2.0,ink),_s(31,20,34,22,2.4,ink),_rr(28,7,5.6,2.4,2.2,ink)])
+		_: body.append_array([_s(31,19,35,26,2.6,ink),_s(36,2,36,52,1.8,ink),_t(36,-1,33.4,7,38.6,7,ink)])
+	return body
