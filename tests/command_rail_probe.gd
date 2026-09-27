@@ -28,10 +28,19 @@ func _ready()->void:
 	if hud==null:
 		_finish()
 		return
+	# A headless window is tiny, which DisplayPreferences expands to a 640x640
+	# canvas: narrower than any supported screen. Judge layout in the smallest
+	# supported window, 1280x720, as a real player's window would present it.
+	if DisplayServer.get_name()=="headless":
+		get_window().size=Vector2i(1280,720)
+		hud.refresh()
+		await get_tree().process_frame
+		await get_tree().process_frame
 	var viewport_rect:Rect2=terrain.get_viewport().get_visible_rect()
 
-	# Rail: six sections + menu, all inside the viewport.
-	for rail_name in ["RailSettlement","RailEconomy","RailCivilization","RailInquiry","RailWorld","RailMilitary","RailMenu"]:
+	# Rail: the main sections + menu, all inside the viewport. The settlement
+	# overview is the rail's first entry, "The People" (RailOverview).
+	for rail_name in ["RailOverview","RailEconomy","RailCivilization","RailInquiry","RailWorld","RailMilitary","RailMenu"]:
 		var button:=hud.find_child(rail_name,true,false) as Control
 		_expect(button!=null,"missing %s" % rail_name)
 		if button:
