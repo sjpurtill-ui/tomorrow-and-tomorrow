@@ -22,7 +22,7 @@ func tab(sub:int)->Dictionary:
 		block.techniques=_technique_list()
 	if mode!="civilian":
 		var snapshot:=MilitaryCampaign.production_lines_snapshot()
-		var lines:Array=snapshot.lines
+		var lines:Array=with_staff_plans(snapshot.lines)
 		block.merge({"lines":lines,"capacity":snapshot.capacity,"context":line_context(snapshot),"stores":_stores(lines),
 			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":MilitaryCampaign.workshop.owner(),"status":MilitaryCampaign.workshop.data.status,
 			"repairs":_repair_list(),"recipes":recipe_list(lines),"start_target":START_TARGET,
@@ -31,6 +31,23 @@ func tab(sub:int)->Dictionary:
 			"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
 			"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press})
 	return {"blocks":[block]}
+
+## Hook for codex/auto-arm: if the workshop steward exposes
+## line_plan(id)->{count,reason,officer}, attach it to the line as "staff_plan"
+## unless the snapshot already carries one. The screen then says, e.g., "The
+## Quartermaster is making 22 simple levy weapons for the new levy (about 40
+## days; short of timber)."
+static func with_staff_plans(lines:Array)->Array:
+	var steward=MilitaryCampaign.workshop
+	if steward==null or not steward.has_method("line_plan"):return lines
+	var result:Array=[]
+	for line:Dictionary in lines:
+		var copy:=line
+		if not line.has("staff_plan"):
+			var plan:Variant=steward.line_plan(int(line.get("id",-1)))
+			if plan is Dictionary and not (plan as Dictionary).is_empty():copy=line.duplicate();copy["staff_plan"]=plan
+		result.append(copy)
+	return result
 
 static func line_context(snapshot:Dictionary)->Dictionary:
 	## What line_story needs to name a slow line's real limit, and the material

@@ -100,6 +100,10 @@ func _pq_line(parent:Node,line:Dictionary,count:int)->void:
 	var runner:=(("%s runs this line" % boss) if boss!="Staff" else "Staff run this line") if bool(line.get("planner_managed",false)) else "You run this line"
 	if not persistent:runner="One-off order"
 	var who:=_pq_label("· "+runner,"small",T.INK_MUTED);who.autowrap_mode=TextServer.AUTOWRAP_OFF;who.size_flags_horizontal=Control.SIZE_FILL;who.name="Runner";tag.add_child(who)
+	# What staff are making this line for, when a staff plan exists.
+	var plan:=Plain.plan_text(line,story,String(data.get("owner","")),P.product_name(String(line.item)))
+	if not plan.is_empty():
+		var plan_label:=_pq_label(plan,"body",T.INK);plan_label.name="StaffPlan";column.add_child(plan_label)
 	# One progress readout.
 	var progress:=VBoxContainer.new();progress.add_theme_constant_override("separation",4);column.add_child(progress)
 	var caption:=_pq_label(String(story.progress_text),"small",T.BODY);caption.name="Progress";progress.add_child(caption)

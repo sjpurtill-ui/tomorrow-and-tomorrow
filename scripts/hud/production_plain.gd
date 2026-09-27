@@ -283,3 +283,27 @@ static func repair_text(status:String)->String:
 	if status=="Staff will schedule repairs automatically":return "staff will repair them soon"
 	if status.begins_with("Staff waiting · "):return "waiting: "+blocker_text(status.trim_prefix("Staff waiting · ")).to_lower()
 	return status.to_lower()
+
+## Hook for staff plans (codex/auto-arm). A line may carry "staff_plan":
+##   {"count":int items staff are making for this reason,
+##    "reason":String such as "for the new levy",
+##    "officer":String optional, defaults to the workshop officeholder}
+## Returns "" when there is no plan.
+static func plan_text(line:Dictionary,story:Dictionary,owner:String,product:String)->String:
+	var plan:Variant=line.get("staff_plan",{})
+	if not plan is Dictionary or (plan as Dictionary).is_empty():return ""
+	var count:=int(plan.get("count",0))
+	var who:=String(plan.get("officer",""))
+	if who.is_empty():
+		var person:=officer(owner)
+		who=("The "+String(person.office)) if not person.is_empty() else "Staff"
+	var what:=("%d %s" % [count,product.to_lower()]) if count>0 else product.to_lower()
+	var text:="%s %s making %s" % [who,"are" if who=="Staff" else "is",what]
+	var reason:=String(plan.get("reason","")).strip_edges()
+	if not reason.is_empty():text+=" "+reason
+	var notes:Array[String]=[]
+	var rate:=float(story.get("rate",0.0))
+	if count>0 and rate>0.0:notes.append(duration_text(count/rate))
+	if String(story.get("tone",""))=="bad" and not String(story.get("short","")).is_empty():notes.append(String(story.short).to_lower())
+	if not notes.is_empty():text+=" ("+"; ".join(notes)+")"
+	return text+"."

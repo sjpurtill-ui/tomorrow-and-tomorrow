@@ -148,3 +148,15 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	assert_bool(bool(MilitaryCampaign.equipment_queue[0].planner_managed)).is_true()
 	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("civilian")
 	assert_bool(provider.tab(1).blocks[0].has("lines")).is_false()
+
+func test_staff_plan_is_said_plainly_when_present()->void:
+	var line:=starved_line();line.planner_managed=true
+	line.staff_plan={"count":22,"reason":"for the new levy"}
+	var story:=Plain.line_story(line,CONTEXT)
+	var text:=Plain.plan_text(line,story,"Mahun of the High Camp · Quartermaster","Simple levy weapons")
+	assert_str(text).is_equal("The Quartermaster is making 22 simple levy weapons for the new levy (about 3 years; short of timber).")
+	assert_str(Plain.plan_text(starved_line(),story,"","Spears")).is_empty()
+	var panel:Control=auto_free(Queue.new());add_child(panel)
+	panel.setup({"mode":"military","owner":"Mahun of the High Camp · Quartermaster","managed":true,"capacity":1,"context":CONTEXT,"lines":[line]})
+	assert_str((panel.find_child("StaffPlan",true,false) as Label).text).is_equal(text)
+	assert_str((panel.find_child("Runner",true,false) as Label).text).is_equal("· Mahun of the High Camp runs this line")
