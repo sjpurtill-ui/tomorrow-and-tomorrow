@@ -4666,6 +4666,9 @@ void fragment() {
 		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
 	}
 	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
+	// Crowns and bushes are drawn with a soft ink edge where they turn away
+	// from the eye, like the painted canopy's outlined trees (codex/beauty-2).
+	if(vegetation_kind!=2) { float turned=1.0-abs(dot(NORMAL,VIEW)); base=mix(base,base*vec3(0.46,0.48,0.42),smoothstep(0.62,0.95,turned)*0.55); }
 	ALPHA*=lod_fade*boundary;
 	if(ALPHA<0.001) discard;
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);

@@ -60,7 +60,9 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		if not bool(land.call(p)): continue
 		patch(ground,p,.004 if form=="open_hearth_yard" else .0025,soil,center,height,land,counts)
 		if form=="open_hearth_yard":
-			patch(ground,p,.0008,Color(.12,.10,.075,.85),center,height,land,counts)
+			# Ash and trampled earth at the fire: warm and soft-edged, not a black hole.
+			patch(ground,p,.0012,Color(.26,.20,.14,.70),center,height,land,counts)
+			patch(ground,p,.0005,Color(.17,.13,.10,.80),center,height,land,counts)
 			for i in 10:
 				var point := p+Vector2.from_angle(i*TAU/10)*.00065
 				box(props,point,Vector3(.00024,.00019,.00022),.0001,Color(.35,.34,.29),center,height,counts)
