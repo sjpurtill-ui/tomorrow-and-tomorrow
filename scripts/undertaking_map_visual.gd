@@ -122,10 +122,11 @@ static func build(pieces:Array,state:String,progress:float,angle:float,origin:Ve
 	var top:=ground.y+PLINTH_RISE
 	var bottom:=ground.x-.003
 	var tone:Color=pieces[0].color if not pieces.is_empty() else Color("9b917a")
-	var ground_tone:=Color("7a6d52").lerp(tone,.35)
-	# The plinth: a dark footing down into the slope, then a dressed top course.
-	append_piece(surface,piece(Vector3(plinth.get_center().x,bottom,plinth.get_center().y),Vector3(plinth.size.x,top-bottom-.0006,plinth.size.y),ground_tone.darkened(.12)),angle)
-	append_piece(surface,piece(Vector3(plinth.get_center().x,top-.0006,plinth.get_center().y),Vector3(plinth.size.x-.0016,.0006,plinth.size.y-.0016),ground_tone.lightened(.12)),angle)
+	# The plinth: an earthen bank down into the slope, in the map's own soil
+	# tone so it reads as levelled ground, then a dressed top course.
+	var bank:=Color("6f6a48").lerp(tone,.2)
+	append_piece(surface,piece(Vector3(plinth.get_center().x,bottom,plinth.get_center().y),Vector3(plinth.size.x,top-bottom-.0006,plinth.size.y),bank),angle)
+	append_piece(surface,piece(Vector3(plinth.get_center().x,top-.0006,plinth.get_center().y),Vector3(plinth.size.x-.0016,.0006,plinth.size.y-.0016),tone.lerp(Color("c8b98f"),.45)),angle)
 	var design_height:=0.0
 	for part:Dictionary in pieces:
 		if part.kind!="water":design_height=maxf(design_height,float(part.position.y)+float(part.size.y))

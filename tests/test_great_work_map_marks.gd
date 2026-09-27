@@ -136,6 +136,17 @@ func test_work_cards_give_way_to_city_cards_and_pins()->void:
 	var again:=Labels.arrange_works(moved,bounds,cities.cards,[city],[],result.memory)
 	assert_vector(again.works[0].rect.position-Vector2(905,461)).is_equal(result.memory["east"])
 
+func test_chart_view_names_only_a_few_works_per_city()->void:
+	var bounds:=Rect2(0,0,1600,900)
+	var entries:Array[Dictionary]=[]
+	for i in 5:
+		var work:=_work("w%d" % i,Vector2(500+i*160,300+(i%2)*200),"standing",3.0)
+		work.compact=true;work.city_id="home";work.extent=Vector2(120,24)
+		entries.append(work)
+	var result:=Labels.arrange_works(entries,bounds,[],[])
+	assert_int(result.works.size()).is_equal(5)
+	assert_int((result.works as Array).filter(func(w):return (w.rect as Rect2).has_area()).size()).is_equal(Labels.WORK_CHART_CARDS)
+
 func test_card_measure_wraps_long_names_and_keeps_status()->void:
 	var voice:=preload("res://scripts/hud/hud_tokens.gd").voice_font();var ui:=preload("res://scripts/hud/hud_tokens.gd").font("ui")
 	var short:=Labels.measure_work("The Ring","",voice,ui)
@@ -144,3 +155,6 @@ func test_card_measure_wraps_long_names_and_keeps_status()->void:
 	assert_int((long.lines as Array).size()).is_greater(1)
 	assert_float((long.extent as Vector2).x).is_less_equal(Labels.WORK_CARD_WIDTH+1)
 	assert_float((long.extent as Vector2).y).is_greater((short.extent as Vector2).y)
+	# The chart form is the name alone, on as few lines as fit.
+	assert_float((long.chart_extent as Vector2).y).is_less((long.extent as Vector2).y)
+	assert_float((long.chart_extent as Vector2).x).is_less_equal(Labels.WORK_CHART_WIDTH+1)

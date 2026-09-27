@@ -89,6 +89,9 @@ const WORK_NAME_SIZE:=14
 const WORK_STATUS_SIZE:=12
 const WORK_EMBLEM_PX:=22.0
 const WORK_CARD_WIDTH:=190.0
+## On the chart a card is the name alone, and a city lends room to only a few.
+const WORK_CHART_WIDTH:=250.0
+const WORK_CHART_CARDS:=2
 var works:Array[Dictionary]=[]
 var work_marks:Array[Dictionary]=[]
 var work_root_id:=0
@@ -309,31 +312,45 @@ func _work_entries(camera:Camera3D,viewport_size:Vector2)->Array[Dictionary]:
 			text=measure_work(String(mark.title),String(mark.status),voice,ui)
 			text.key=key
 			work_measured[mark.id]=text
-		result.append({"id":String(mark.id),"city_id":String(mark.get("city_id","")),"title":String(mark.title),"lines":text.lines,"status":String(mark.status),
-			"state":String(mark.state),"shape":String(mark.shape),"progress":float(mark.progress),"anchor":anchor,"radius_px":radius_px,
-			"emblem_alpha":work_emblem_alpha(radius_px),"extent":text.extent})
+		var alpha:=work_emblem_alpha(radius_px)
+		# On the chart (the emblem showing) a card is just the name: the emblem's
+		# edge already tells how the work stands.
+		var chart:=alpha>=.5
+		result.append({"id":String(mark.id),"city_id":String(mark.get("city_id","")),"title":String(mark.title),"status":"" if chart else String(mark.status),
+			"lines":text.chart_lines if chart else text.lines,"extent":text.chart_extent if chart else text.extent,"compact":chart,
+			"state":String(mark.state),"shape":String(mark.shape),"progress":float(mark.progress),"anchor":anchor,"radius_px":radius_px,"emblem_alpha":alpha})
 	return result
 
 ## A work card's wrapped name and size: icon, name in the book serif, and a
-## short status line in the UI face.
+## short status line in the UI face; and its chart form, the name alone.
 static func measure_work(title:String,status:String,voice:Font,ui:Font)->Dictionary:
-	var lines:Array[String]=[];var line:=""
-	for word:String in chart_name(title).split(" "):
-		var next:=word if line.is_empty() else line+" "+word
-		if not line.is_empty() and voice.get_string_size(next,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE).x>WORK_CARD_WIDTH-36:lines.append(line);line=word
-		else:line=next
-	if not line.is_empty():lines.append(line)
+	var name:=chart_name(title)
+	var lines:=_wrap_work(name,voice,WORK_CARD_WIDTH-36)
 	var width:=0.0
 	for text:String in lines:width=maxf(width,voice.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE).x)
 	if not status.is_empty():width=maxf(width,ui.get_string_size(status,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_STATUS_SIZE).x)
 	var height:=float(lines.size())*17.0+9.0+(15.0 if not status.is_empty() else 0.0)
-	return {"lines":lines,"extent":Vector2(ceilf(width)+36.0,ceilf(maxf(height,26.0)))}
+	var chart_lines:=_wrap_work(name,voice,WORK_CHART_WIDTH-16)
+	var chart_width:=0.0
+	for text:String in chart_lines:chart_width=maxf(chart_width,voice.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE).x)
+	return {"lines":lines,"extent":Vector2(ceilf(width)+36.0,ceilf(maxf(height,26.0))),
+		"chart_lines":chart_lines,"chart_extent":Vector2(ceilf(chart_width)+16.0,float(chart_lines.size())*17.0+7.0)}
 
-## Places the works around the already placed city cards. A work sitting on a
-## city pin is dropped (its city speaks for it at that scale); emblems never
-## overlap one another; a card goes only where it covers no city card, pin,
-## emblem or other card, close to its own work, else the work keeps only its
-## emblem. Dedicated works are placed first.
+static func _wrap_work(name:String,voice:Font,width:float)->Array[String]:
+	var lines:Array[String]=[];var line:=""
+	for word:String in name.split(" "):
+		var next:=word if line.is_empty() else line+" "+word
+		if not line.is_empty() and voice.get_string_size(next,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE).x>width:lines.append(line);line=word
+		else:line=next
+	if not line.is_empty():lines.append(line)
+	return lines
+
+## Places the works around the already placed city cards, in two passes.
+## Emblems first: a work sitting on a city pin is dropped (its city speaks
+## for it at that scale) and emblems never overlap. Then cards, dedicated
+## works first: a card goes only right beside its own work, covering no city
+## card, pin, emblem or other card, else the work keeps only its emblem. On
+## the chart a city lends its free room to at most WORK_CHART_CARDS names.
 static func arrange_works(entries:Array[Dictionary],bounds:Rect2,city_cards:Array,city_entries:Array,reserved:Array[Rect2]=[],old:Dictionary={})->Dictionary:
 	var order:={"dedicated":0,"standing":1,"building":2,"abandoned":3,"ruined":4}
 	var ordered:=entries.duplicate()
@@ -341,57 +358,56 @@ static func arrange_works(entries:Array[Dictionary],bounds:Rect2,city_cards:Arra
 		var ra:=int(order.get(a.state,5));var rb:=int(order.get(b.state,5))
 		if ra!=rb:return ra<rb
 		return String(a.id)<String(b.id))
-	var placed:Array[Dictionary]=[];var memory:Dictionary={}
-	var blocked:Array[Rect2]=reserved.duplicate()
-	for card:Dictionary in city_cards:blocked.append((card.rect as Rect2).grow(GAP*.5))
 	var pins:Array[Dictionary]=[]
 	for city:Dictionary in city_entries:pins.append({"at":city.anchor,"clear":float(city.get("clearance",GLYPH_CLEARANCE))})
+	var placed:Array[Dictionary]=[]
+	var marks:Array[Rect2]=[]
 	for entry:Dictionary in ordered:
 		var anchor:Vector2=entry.anchor
 		var merged:=false
 		for pin:Dictionary in pins:
 			if anchor.distance_to(pin.at)<float(pin.clear)+WORK_EMBLEM_PX*.5+6.0:merged=true;break
 		if merged:continue
-		var alpha:=float(entry.emblem_alpha)
 		var mark:=Rect2(anchor-Vector2.ONE*WORK_EMBLEM_PX*.5,Vector2.ONE*WORK_EMBLEM_PX)
 		var clash:=false
-		for other:Dictionary in placed:
-			if (other.mark as Rect2).grow(2).intersects(mark):clash=true;break
+		for other:Rect2 in marks:
+			if other.grow(2).intersects(mark):clash=true;break
 		if clash:continue
+		var work:=entry.duplicate();work.mark=mark;work.rect=Rect2()
 		# The card keeps clear of the work itself: its emblem, or the model.
-		var clear:=maxf(WORK_EMBLEM_PX*.5 if alpha>.05 else 0.0,minf(float(entry.radius_px)*.8,70.0))+6.0
-		var extent:Vector2=entry.extent
+		work.clear=maxf(WORK_EMBLEM_PX*.5 if float(entry.emblem_alpha)>.05 else 0.0,minf(float(entry.radius_px)*.8,70.0))+6.0
+		placed.append(work);marks.append(mark)
+	var blocked:Array[Rect2]=reserved.duplicate()
+	for card:Dictionary in city_cards:blocked.append((card.rect as Rect2).grow(GAP*.5))
+	for mark:Rect2 in marks:blocked.append(mark.grow(2))
+	var memory:Dictionary={};var chart_cards:Dictionary={}
+	for work:Dictionary in placed:
+		var city:=String(work.get("city_id",""))
+		if bool(work.get("compact",false)) and int(chart_cards.get(city,0))>=WORK_CHART_CARDS:continue
+		var anchor:Vector2=work.anchor;var extent:Vector2=work.extent;var clear:=float(work.clear)
 		var candidates:Array[Vector2]=[]
-		if old.has(entry.id):candidates.append(anchor+Vector2(old[entry.id]))
-		for row in 3:
-			var step:=float(row)*(extent.y+GAP)
-			candidates.append(anchor+Vector2(clear,-extent.y*.5+step))
-			candidates.append(anchor+Vector2(-extent.x-clear,-extent.y*.5+step))
-			candidates.append(anchor+Vector2(-extent.x*.5,clear+step))
-			candidates.append(anchor+Vector2(-extent.x*.5,-extent.y-clear-step))
-			candidates.append(anchor+Vector2(clear,-extent.y*.5-step))
-			candidates.append(anchor+Vector2(-extent.x-clear,-extent.y*.5-step))
-		var chosen:=Rect2()
+		if old.has(work.id):candidates.append(anchor+Vector2(old[work.id]))
+		candidates.append_array([anchor+Vector2(clear,-extent.y*.5),anchor+Vector2(-extent.x-clear,-extent.y*.5),
+			anchor+Vector2(-extent.x*.5,clear),anchor+Vector2(-extent.x*.5,-extent.y-clear),
+			anchor+Vector2(clear*.7,clear*.7),anchor+Vector2(-extent.x-clear*.7,clear*.7),
+			anchor+Vector2(clear*.7,-extent.y-clear*.7),anchor+Vector2(-extent.x-clear*.7,-extent.y-clear*.7)])
 		for pos:Vector2 in candidates:
 			var rect:=Rect2(pos,extent)
-			if not bounds.encloses(rect) or rect.grow(2).intersects(mark):continue
+			if not bounds.encloses(rect):continue
 			var grown:=rect.grow(GAP*.5)
 			var free:=true
+			# Every emblem, its own included, is in `blocked`.
 			for obstacle:Rect2 in blocked:
 				if grown.intersects(obstacle):free=false;break
 			if free:
 				for pin:Dictionary in pins:
 					if rect.grow(maxf(8.0,float(pin.clear)-2.0)).has_point(pin.at):free=false;break
-			if free:
-				for other:Dictionary in placed:
-					if grown.intersects((other.mark as Rect2).grow(2)):free=false;break
-			if free:chosen=rect;break
-		var work:=entry.duplicate();work.mark=mark;work.rect=chosen;work.clear=clear
-		placed.append(work)
-		blocked.append(mark.grow(2))
-		if chosen.has_area():
-			blocked.append(chosen.grow(GAP*.5))
-			memory[entry.id]=chosen.position-anchor
+			if not free:continue
+			work.rect=rect
+			blocked.append(grown)
+			memory[work.id]=rect.position-anchor
+			if bool(work.get("compact",false)):chart_cards[city]=int(chart_cards.get(city,0))+1
+			break
 	return {"works":placed,"memory":memory}
 
 func _draw_works()->void:
@@ -426,9 +442,12 @@ func _draw_work_card(work:Dictionary,box:Rect2,voice:Font,ui:Font)->void:
 	draw_style_box(styles[key],box)
 	var state:=String(work.state)
 	if state=="dedicated":draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),T.GOLD)
-	var icon:=RESOURCE_ICONS.great_work_texture(String(work.shape),state,48)
-	draw_texture_rect(icon,Rect2(box.position+Vector2(5,5),Vector2(20,20)),false)
-	var x:=box.position.x+29;var y:=box.position.y+17
+	var x:=box.position.x+8;var y:=box.position.y+17
+	if not bool(work.get("compact",false)):
+		# Close in, the emblem is off the map and the card carries it instead.
+		var icon:=RESOURCE_ICONS.great_work_texture(String(work.shape),state,48)
+		draw_texture_rect(icon,Rect2(box.position+Vector2(5,5),Vector2(20,20)),false)
+		x=box.position.x+29
 	var ink:=T.INK if state!="ruined" else T.INK_MUTED
 	for line:String in work.lines:
 		draw_string(voice,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE,ink);y+=17
