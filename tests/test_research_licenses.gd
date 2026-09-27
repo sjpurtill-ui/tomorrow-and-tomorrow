@@ -159,14 +159,16 @@ func paper_license_need()->void:
 	study.id="unfinished";study.study=0.0;study.discovery_id="clay_shaping";study.work=240.0
 	E.data().collections.unfinished=study
 func test_ai_license_dispatch_pays_without_instant_contract_or_discovery()->void:
-	fertilizer_license_need()
+	# An active operating line the people cannot yet run on their own knowledge
+	# is the demand that buys a licence (fertilizer licences were retired).
+	active_operating_line()
 	var before:=float(GameState.resource_stockpiles.Stone)
 	assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
 	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_mode",""))).is_equal("license")
-	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_subject",""))).is_equal("mineral_nitrate_dressing")
+	assert_str(String(CivilizationSystem.diplomatic_mission.get("research_subject",""))).is_equal("compressed_air_systems")
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
-	assert_bool(L.active("mineral_nitrate_dressing")).is_false()
-	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
+	assert_bool(L.active("compressed_air_systems")).is_false()
+	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
 	assert_dict(AI.recommendation()).is_empty()
 func test_ai_license_requires_real_need_inputs_staff_and_reserves()->void:
 	paper_license_need()
@@ -189,41 +191,25 @@ func fertilizer_license_need()->void:
 	for id:String in ["mineral_nitrate_dressing","phosphate_dressing"]:
 		E.owner_state("neighbor").known_discoveries.append(id);E.owner_state("neighbor").discovery_adoption[id]=1.0
 		E.data().collections[id]={"id":id,"kind":"knowledge","name":"Examined fertilizer account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":id,"study":1.0,"work":90.0,"signals":["food"]}
-func test_ai_fertilizer_licenses_use_examined_prospects_for_both_nutrients()->void:
+func test_fertilizer_needs_no_longer_buy_licences()->void:
+	# Fertilizer and plant operating inputs are raw materials and Civilian Goods
+	# now, not licensed workshop lines, so an unmet nutrient need buys nothing.
 	fertilizer_license_need()
-	var order:=AI.recommendation()
-	assert_str(String(order.get("subject",""))).is_equal("mineral_nitrate_dressing")
-	E.owner_state("neighbor").known_discoveries.erase("mineral_nitrate_dressing")
-	assert_dict(AI.recommendation()).is_equal(order)
-	E.data().collections.phosphate_dressing.study=.5
 	assert_dict(AI.recommendation()).is_empty()
-	E.data().collections.phosphate_dressing.study=1.0;E.data().collections.phosphate_dressing.returned_day=100001
-	assert_dict(AI.recommendation()).is_empty()
-func test_ai_fertilizer_license_refuses_missing_complement_or_absent_cultivation()->void:
-	fertilizer_license_need()
-	GameState.resource_stockpiles["Phosphate Rock"]=0.0
-	assert_dict(AI.recommendation()).is_empty()
-	GameState.resource_stockpiles["Soluble Phosphate"]=5.0
-	assert_str(String(AI.recommendation().subject)).is_equal("mineral_nitrate_dressing")
-	GameState.population_allocations.Food=0;assert_dict(AI.recommendation()).is_empty();GameState.population_allocations.Food=30
-	GameState.convoy_traveling=true;assert_dict(AI.recommendation()).is_empty();GameState.convoy_traveling=false
-	GameState.simulation_metrics.cultivation_base_harvest=0.0;assert_dict(AI.recommendation()).is_empty()
-func test_two_paid_fertilizer_licenses_arrive_without_local_invention()->void:
-	fertilizer_license_need()
+	assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_false()
+	assert_dict(CivilizationSystem.diplomatic_mission).is_empty()
+func test_paid_operating_license_arrives_without_local_invention()->void:
+	active_operating_line()
 	var before:=float(GameState.resource_stockpiles.Stone)
-	for expected:String in ["mineral_nitrate_dressing","phosphate_dressing"]:
-		assert_str(String(AI.recommendation().subject)).is_equal(expected)
-		assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
-		var mission:Dictionary=CivilizationSystem.diplomatic_mission
-		assert_bool(L.active(expected)).is_false()
-		E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
-		GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
-		assert_bool(L.active(expected)).is_true()
-		assert_bool(GameState.known_discoveries.has(expected)).is_false()
-		CivilizationSystem.diplomatic_mission={}
+	assert_str(String(AI.recommendation().subject)).is_equal("compressed_air_systems")
+	assert_bool(preload("res://scripts/civilization_controller.gd").license_acquisition_orders("player",{})).is_true()
+	var mission:Dictionary=CivilizationSystem.diplomatic_mission
+	assert_bool(L.active("compressed_air_systems")).is_false()
+	E.envoy_arrived(CivilizationSystem,mission,int(mission.arrival_day));Purchase.prepare_return(mission)
+	GameState.elapsed_days=int(mission.return_day);E.returned(mission,int(mission.return_day))
+	assert_bool(L.active("compressed_air_systems")).is_true()
+	assert_bool(GameState.known_discoveries.has("compressed_air_systems")).is_false()
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_less(before)
-	assert_bool(GameState.known_discoveries.has("mineral_nitrate_dressing")).is_false()
-	assert_bool(GameState.known_discoveries.has("phosphate_dressing")).is_false()
 func operating_license_need()->void:
 	prepare();GameState.population_allocations.Knowledge=0
 	GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
@@ -235,6 +221,9 @@ func operating_license_need()->void:
 	var id:="compressed_air_systems"
 	E.owner_state("neighbor").known_discoveries.append(id);E.owner_state("neighbor").discovery_adoption[id]=1.0
 	E.data().collections[id]={"id":id,"kind":"knowledge","name":"Examined compressor account","source_id":"neighbor","source_name":"Neighbor","position":{"x":30.0,"z":0.0},"observed_day":99990,"returned_day":100000,"discovery_id":id,"study":1.0,"work":90.0,"signals":["crafting"]}
+func active_operating_line()->void:
+	operating_license_need()
+	MilitaryCampaign.equipment_queue.append({"persistent":true,"paused":false,"item":"compressed_air"})
 func test_operating_license_needs_power_tooling_active_machinery_and_no_domestic_route()->void:
 	operating_license_need()
 	const Ops=preload("res://scripts/technology_operations.gd")

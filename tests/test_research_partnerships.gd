@@ -50,6 +50,10 @@ func joint_prepare()->void:
 	prepare();WorldSimulation.enabled=true
 	var peer:=E.owner_state("neighbor")
 	peer.known_discoveries.assign(["public_schools","experimental_controls"])
+	# Both peoples stand on clay shaping's live foundations (clay testing since
+	# the research rebuild), so the joint question is open to both.
+	for parent:String in DiscoverySystem.discovery_definition("clay_shaping").get("requires_all",[]):
+		GameState.known_discoveries.append(parent);peer.known_discoveries.append(parent)
 	peer.elapsed_days=GameState.elapsed_days
 
 func complete_trip()->Dictionary:
