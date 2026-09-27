@@ -36,8 +36,10 @@ func test_early_practices_are_live_unique_and_dated_to_their_age()->void:
 	for entry:Dictionary in DiscoverySystem.technology_catalog:names[String(entry.name).to_lower()]=int(names.get(String(entry.name).to_lower(),0))+1
 	for entry:Dictionary in Early.entries():
 		var id:=String(entry.id)
-		if DiscoverySystem.discovery_definition(id).is_empty():problems.append(id+" missing from live catalog")
-		if int(names.get(String(entry.name).to_lower(),0))!=1:problems.append(id+" duplicate name")
+		var live:=DiscoverySystem.discovery_definition(id)
+		if live.is_empty():problems.append(id+" missing from live catalog");continue
+		# The research blocks may rename a practice; its live name must be unique.
+		if int(names.get(String(live.name).to_lower(),0))!=1:problems.append(id+" duplicate name")
 		if not Eras.HISTORICAL_YEAR.has(id):problems.append(id+" undated");continue
 		var year:=int(Eras.HISTORICAL_YEAR[id])
 		if year<-6500 or year>-2300:problems.append(id+" outside the early window")
