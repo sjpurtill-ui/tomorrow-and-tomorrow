@@ -1,0 +1,12 @@
+{
+  "id": "paired_measure_checking",
+  "line": "production",
+  "game_year": 38,
+  "approx_historical_year": -4747,
+  "prompt": "c. 4747 BCE: Two trusted keepers independently pour grain into matching clay cups and compare equal levels before storing; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-81b5c144-e396-4d0e-af37-129616605b70.png",
+  "asset": "res://assets/ui/research/subjects/paired_measure_checking-v1.png",
+  "sha256": "223809cb88d9ab9a4834b65738f47bd5976a5f0776c1f326e97d764f4e0689bc",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; paired cups and checking gesture clear, no numerals."
+}

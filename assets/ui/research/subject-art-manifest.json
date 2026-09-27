@@ -3789,5 +3789,19 @@
   "festival_rest_days": {"path": "res://assets/ui/research/subjects/festival_rest_days-v1.png", "focus": [0.5, 0.5]},
   "lined_well_shafts": {"path": "res://assets/ui/research/subjects/lined_well_shafts-v1.png", "focus": [0.5, 0.5]},
   "saddle_quern_grinding": {"path": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png", "focus": [0.5, 0.5]},
-  "skis_snowshoes": {"path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png", "focus": [0.5, 0.5]}
+  "skis_snowshoes": {"path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png", "focus": [0.5, 0.5]},
+  "boil_lancing": {"path": "res://assets/ui/research/subjects/boil_lancing-v1.png", "focus": [0.5, 0.5]},
+  "grip_wrapping_practice": {"path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png", "focus": [0.5, 0.5]},
+  "breeding_stock_sparing": {"path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png", "focus": [0.5, 0.5]},
+  "clay_sling_bullets": {"path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png", "focus": [0.5, 0.5]},
+  "deliberate_milk_souring": {"path": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png", "focus": [0.5, 0.5]},
+  "flood_house_mounds": {"path": "res://assets/ui/research/subjects/flood_house_mounds-v1.png", "focus": [0.5, 0.5]},
+  "part_time_specialists": {"path": "res://assets/ui/research/subjects/part_time_specialists-v1.png", "focus": [0.5, 0.5]},
+  "disability_care": {"path": "res://assets/ui/research/subjects/disability_care-v1.png", "focus": [0.5, 0.5]},
+  "paired_measure_checking": {"path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png", "focus": [0.5, 0.5]},
+  "brushwood_trackways": {"path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png", "focus": [0.5, 0.5]},
+  "raid_scouting": {"path": "res://assets/ui/research/subjects/raid_scouting-v1.png", "focus": [0.5, 0.5]},
+  "slack_season_building": {"path": "res://assets/ui/research/subjects/slack_season_building-v1.png", "focus": [0.5, 0.5]},
+  "stone_wall_footings": {"path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png", "focus": [0.5, 0.5]},
+  "swidden_cycle": {"path": "res://assets/ui/research/subjects/swidden_cycle-v1.png", "focus": [0.5, 0.5]}
 }
