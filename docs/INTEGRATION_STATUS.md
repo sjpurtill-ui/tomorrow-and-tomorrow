@@ -1,3 +1,11 @@
+## September 26 — Classical other discoveries, batch 6: INTEGRATED
+
+Worker `e67122c474a069bae5593ee3b0927cfed7b6f6aa`, branch `codex/research-art-classical-other-06`, originally based on `98a982ff` and reconciled with `27a8a9b6`, merged with current main `85799cd2` as `e1e2afb9`. Adds 21 subject paintings, provenance sidecars, reviewed crop sheets/source scripts and manifest entries. Earlier approved paintings and intervening map changes remain included. This is the sixth non-priority Classical batch, not the complete inventory.
+
+Combined Godot 4.7.2 import completed without logged errors. Private-desktop GPU `tests/stylized_research_art_probe.tscn -- --classical-other-06` passes all 21 actual catalogue IDs, manifest precedence, distinct loaded textures/provenance hashes, hidden gating and banner crop bounds. Reviewed both source sheets and actual shared-renderer 3.37:1 crops. Because the worker resolved overlapping manifest edits, reran batch 5 against the combined result headlessly: all 21 pass, confirming all 42 lookups remain intact. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/classical-other06-runtime.log`, `classical-other06-previous-batch.log` and `classical-other-06-research-in-game-crops.png`.
+
+No simulation/save changes or generated import churn committed. Full campaign play and unrelated historical suites were not repeated. Canonical player PID 23472 was left running; no player/editor was stopped or restarted. A normal relaunch loads the updated resources reliably.
+
 ## September 26 — Classical other discoveries, batch 5: INTEGRATED
 
 Worker `dbac41652a458c8905a8e1c6318567384584c456`, branch `codex/research-art-classical-other-05`, base `98a982ff`, integrated from that main without conflicts. Adds 21 subject paintings, provenance sidecars, reviewed crop sheets/source scripts and manifest entries. Earlier approved paintings remain included. No lookup assignment collision was found. This is the fifth non-priority Classical batch, not the complete inventory.

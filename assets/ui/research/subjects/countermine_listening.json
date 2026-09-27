@@ -1,0 +1,14 @@
+{
+  "id": "countermine_listening",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-98621113-c0f2-4705-991d-b18aee8e2270.png",
+  "source_file": "exec-98621113-c0f2-4705-991d-b18aee8e2270.png",
+  "creative_brief": "Bronze jars set in the ground ring when sappers dig nearby, and the defenders tunnel out to meet them. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/countermine_listening-v1.png",
+  "sha256": "7152e274325482b6b2d7696b414be8838d9de46d8cb8c3cacbd9f76eea926882",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

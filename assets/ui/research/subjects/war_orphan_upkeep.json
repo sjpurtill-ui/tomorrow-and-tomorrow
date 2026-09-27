@@ -1,0 +1,14 @@
+{
+  "id": "war_orphan_upkeep",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-77cbe21c-1ec6-4a8c-82e8-05794166ded7.png",
+  "source_file": "exec-77cbe21c-1ec6-4a8c-82e8-05794166ded7.png",
+  "creative_brief": "Sons of men killed in war are raised at public cost and given armour when they come of age. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/war_orphan_upkeep-v1.png",
+  "sha256": "ce16fa7f0b6801e03a3465563ba5392418202de29ae4156a30296d467741258b",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

@@ -3,6 +3,8 @@ signal close_requested
 const T = preload("res://scripts/hud/hud_tokens.gd")
 const Art = preload("res://scripts/hud/scouting_window_art.gd")
 const E = preload("res://scripts/society_exchange.gd")
+const Orders = preload("res://scripts/hud/city_watch_orders.gd")
+const WARN = Color("d9b26a")
 var panel: PanelContainer
 var slider: HSlider
 var allocation: Label
@@ -39,6 +41,13 @@ var close_button: Button
 var done_button: Button
 var origin_selector: OptionButton
 var ancient := true
+var cities_box: VBoxContainer
+var cities_note: Label
+var cities_empty: Label
+var city_rows: Dictionary = {}
+var city_choice: Dictionary = {}
+var city_feedback: Dictionary = {}
+var cities_rendered := ""
 
 func label(parent: Node, text: String, font_size := 14, color: Color = Art.INK) -> Label:
 	var node := T.make_label(text, font_size, color)
@@ -159,6 +168,7 @@ func _ready() -> void:
 	origin_selector.item_selected.connect(func(index:int):
 		CivilizationSystem.scouting_staff.set_origin(String(origin_selector.get_item_metadata(index))); refresh())
 	focus_hint = label(focuses, "", 12, Art.SOFT)
+	_build_cities(body)
 	var summary_card := _card(body); var summary_body := _stack(summary_card, 5)
 	var summary_top := HBoxContainer.new(); summary_body.add_child(summary_top)
 	party_heading = label(summary_top,"",16,Art.INK)
@@ -260,6 +270,144 @@ func refresh() -> void:
 		rendered = signature
 		_update_parties()
 	_update_latest_find()
+	_update_cities()
+
+# Foreign cities: every reported rival city with its orders on the row itself.
+func _build_cities(parent: Node) -> void:
+	var section := _stack(parent, 6); section.name = "ForeignCities"
+	var top := HBoxContainer.new(); section.add_child(top)
+	label(top, "FOREIGN CITIES", 11, Art.GOLD)
+	cities_note = label(top, "", 12, Art.SOFT); cities_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cities_empty = label(section, "No foreign city has been reported yet. When a party finds one and returns, it appears here with its orders.", 13, Art.SOFT)
+	cities_box = _stack(section, 6)
+
+func _city_signature(cities: Array) -> String:
+	var parts: Array = [int(GameState.elapsed_days), CivilizationSystem.scouting_staff.data.get("city_watches",{}), city_choice, city_feedback, CivilizationSystem.scouting_staff.data.get("origin_city_id","")]
+	for mission: Dictionary in CivilizationSystem.scout_missions: parts.append([mission.get("mission_id",0),mission.get("target_id","")])
+	for city: Dictionary in cities: parts.append([city.city_id, city.get("reported_day",0), city.get("name","")])
+	return str(parts)
+
+func _update_cities() -> void:
+	if not is_instance_valid(cities_box): return
+	var cities: Array[Dictionary] = Orders.rival_cities()
+	var signature := _city_signature(cities)
+	if signature == cities_rendered: return
+	cities_rendered = signature
+	cities_empty.visible = cities.is_empty()
+	cities_note.text = "" if cities.is_empty() else "%d of %d watched" % [Orders.watch_count(), Orders.MAX_WATCHES]
+	var present: Dictionary = {}
+	for index in cities.size():
+		var city: Dictionary = cities[index]
+		var id := String(city.city_id); present[id] = true
+		if not city_choice.has(id):
+			var chosen: Dictionary = Orders.defaults(id, city)
+			city_choice[id] = {"days": int(chosen.days), "personnel": int(chosen.personnel)}
+		if not city_rows.has(id): _make_city_row(id)
+		cities_box.move_child(city_rows[id].card, index)
+		_fill_city_row(id, Orders.row(city, int(city_choice[id].days), int(city_choice[id].personnel)))
+	for id: String in city_rows.keys():
+		if not present.has(id):
+			var node: Control = city_rows[id].card; cities_box.remove_child(node); node.queue_free(); city_rows.erase(id)
+
+func _small(parent: Node, text: String, action: Callable, width := 0) -> Button:
+	var node := button(parent, text, action)
+	node.custom_minimum_size = Vector2(width, 30); node.add_theme_font_size_override("font_size", 13)
+	node.size_flags_horizontal = SIZE_SHRINK_BEGIN if width > 0 else SIZE_EXPAND_FILL
+	return node
+
+func _make_city_row(id: String) -> void:
+	var card := _card(cities_box); card.name = "City_" + id.validate_node_name()
+	var stack := _stack(card, 5)
+	var top := HBoxContainer.new(); top.add_theme_constant_override("separation", 8); stack.add_child(top)
+	var name_label := label(top, "", 17)
+	var status_label := label(top, "", 12, Art.GREEN); status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	status_label.size_flags_horizontal = SIZE_SHRINK_END; status_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var meta := label(stack, "", 12, Art.SOFT)
+	var controls := HBoxContainer.new(); controls.add_theme_constant_override("separation", 4); stack.add_child(controls)
+	var party_caption := label(controls, "Party", 12, Art.SOFT); party_caption.size_flags_horizontal = SIZE_SHRINK_BEGIN
+	party_caption.autowrap_mode = TextServer.AUTOWRAP_OFF; party_caption.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var minus := _small(controls, "−", func(): _choose(id, "personnel", int(city_choice[id].personnel) - 1), 30)
+	minus.name = "FewerScouts"; minus.tooltip_text = "One scout fewer (at least 2)"
+	var count := label(controls, "", 14); count.size_flags_horizontal = SIZE_SHRINK_BEGIN
+	count.custom_minimum_size.x = 72; count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	count.autowrap_mode = TextServer.AUTOWRAP_OFF; count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var plus := _small(controls, "+", func(): _choose(id, "personnel", int(city_choice[id].personnel) + 1), 30)
+	plus.name = "MoreScouts"; plus.tooltip_text = "One scout more (at most 8)"
+	var gap := Control.new(); gap.custom_minimum_size.x = 10; controls.add_child(gap)
+	var duration_buttons: Dictionary = {}
+	for days: int in CivilizationSystem.SCOUT_DURATIONS:
+		var choice := _small(controls, "1 year" if days == 365 else "%d days" % days, func(): _choose(id, "days", days))
+		choice.toggle_mode = true; choice.name = "Days%d" % days
+		choice.tooltip_text = "Whole journey: out, watching and back"
+		duration_buttons[days] = choice
+	var cost_label := label(stack, "", 13)
+	var risk_label := label(stack, "", 12, Art.SOFT)
+	var actions := HBoxContainer.new(); actions.add_theme_constant_override("separation", 6); stack.add_child(actions)
+	var once := button(actions, "Send once", func(): _order(id, "once"), true); once.name = "SendOnce"
+	var keep := button(actions, "Keep watching", func(): _order(id, "watch")); keep.name = "KeepWatching"
+	var stop := button(actions, "Stop watching", func(): _order(id, "stop")); stop.name = "StopWatching"
+	var report := button(actions, "Report", func(): close_requested.emit(); CivilizationSystem.city_intelligence.open(id))
+	report.name = "OpenReport"; report.size_flags_horizontal = SIZE_SHRINK_END; report.custom_minimum_size.x = 84
+	report.tooltip_text = "Full city report, diplomacy and military options"
+	var note := label(stack, "", 12, WARN)
+	# The shared window style draws disabled buttons like live ones; these must read as unavailable.
+	for control: Button in [minus, plus, once, keep]:
+		control.add_theme_color_override("font_disabled_color", Color(Art.SOFT, .45))
+		control.add_theme_stylebox_override("disabled", Art.flat(Color(Art.TILE, .5), Color(Art.BORDER, .5), 1, 4, 8))
+	city_rows[id] = {"card": card, "name": name_label, "status": status_label, "meta": meta, "count": count, "minus": minus, "plus": plus,
+		"days": duration_buttons, "cost": cost_label, "risk": risk_label, "once": once, "keep": keep, "stop": stop, "note": note}
+
+func _fill_city_row(id: String, model: Dictionary) -> void:
+	var row: Dictionary = city_rows[id]
+	row.name.text = String(model.name)
+	row.status.text = "Watched" if bool(model.watching) else "Party away" if bool(model.away) else ""
+	row.status.add_theme_color_override("font_color", Art.GREEN if bool(model.watching) else Art.GOLD)
+	row.meta.text = "%s · %.0f km away · %s" % [String(model.people), float(model.distance_km), String(model.seen)]
+	var personnel := int(model.personnel)
+	row.count.text = "%d scouts" % personnel
+	row.minus.disabled = personnel <= Orders.MIN_PARTY; row.plus.disabled = personnel >= Orders.MAX_PARTY
+	for days: int in row.days: row.days[days].set_pressed_no_signal(days == int(model.days))
+	var once_blocked := String(model.once_blocked)
+	row.cost.text = String(model.cost) if once_blocked.is_empty() else ""
+	row.cost.visible = not row.cost.text.is_empty()
+	row.risk.text = String(model.risk); row.risk.visible = once_blocked.is_empty() and not row.risk.text.is_empty()
+	row.once.disabled = not once_blocked.is_empty()
+	row.once.tooltip_text = once_blocked if not once_blocked.is_empty() else "One party goes, watches and comes home. " + String(model.risk)
+	var watch: Dictionary = model.watch
+	var changed := bool(model.watching) and (int(watch.get("duration_days",0)) != int(model.days) or int(watch.get("personnel",0)) != personnel)
+	row.keep.visible = not bool(model.watching) or changed
+	row.keep.text = "Update watch" if changed else "Keep watching"
+	row.keep.disabled = not String(model.watch_blocked).is_empty()
+	row.keep.tooltip_text = String(model.watch_blocked) if row.keep.disabled else "Staff send one party at a time and the next after each return. Reports still travel home; there is no live view."
+	row.stop.visible = bool(model.watching)
+	var lines: Array[String] = []
+	var warn := city_feedback.has(id) and bool(city_feedback[id].error)
+	if city_feedback.has(id): lines.append(String(city_feedback[id].text))
+	elif not String(model.status).is_empty(): lines.append(String(model.status).trim_prefix("Watched · "))
+	var watch_blocked := String(model.watch_blocked) if row.keep.disabled and not bool(model.watching) else ""
+	if not once_blocked.is_empty() and once_blocked == watch_blocked: lines.append(once_blocked); warn = true
+	else:
+		if not once_blocked.is_empty(): lines.append("Send once: " + once_blocked); warn = true
+		if not watch_blocked.is_empty(): lines.append("Keep watching: " + watch_blocked); warn = true
+	row.note.text = "\n".join(lines); row.note.visible = not lines.is_empty()
+	row.note.add_theme_color_override("font_color", WARN if warn else Art.SOFT)
+
+func _choose(id: String, key: String, value: int) -> void:
+	city_choice[id][key] = Orders.clamp_party(value) if key == "personnel" else value
+	city_feedback.erase(id)
+	_update_cities()
+
+func _order(id: String, kind: String) -> void:
+	var choice: Dictionary = city_choice.get(id, {})
+	var result: Dictionary
+	if kind == "once": result = Orders.send_once(id, int(choice.days), int(choice.personnel))
+	elif kind == "watch": result = Orders.keep_watching(id, int(choice.days), int(choice.personnel))
+	else: result = Orders.stop_watching(id)
+	if result.has("error"): city_feedback[id] = {"text": String(result.error), "error": true}
+	elif kind == "once": city_feedback[id] = {"text": "%d scouts have left. Their report arrives when they come home." % int(choice.personnel), "error": false}
+	else: city_feedback[id] = {"text": String(result.get("message", "")), "error": false}
+	cities_rendered = ""; rendered = ""
+	refresh()
 
 func _update_parties() -> void:
 	# Retain controls and expansion while days advance, so refresh cannot swallow clicks.

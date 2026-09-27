@@ -1,0 +1,14 @@
+{
+  "id": "harvest_gang_contracts",
+  "line": "labor",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f8e8dffc-bdd4-4eb6-9cf3-59589ffcac31.png",
+  "source_file": "exec-f8e8dffc-bdd4-4eb6-9cf3-59589ffcac31.png",
+  "creative_brief": "A gang boss contracts to bring forty reapers on the first day of harvest, sealed and paid half in advance. Paint it as a classical antiquity scene.",
+  "medium": "Charcoal and ochre",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/harvest_gang_contracts-v1.png",
+  "sha256": "3ef7bbf9ec1ab54980b57c69d56bf56585eb992af18c464b3573baa1085e0d4d",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

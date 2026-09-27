@@ -3,6 +3,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## counter is a target, not decoration: click it, understand the contact, and
 ## issue the next valid action without hunting through unrelated reports.
 
+const Orders:=preload("res://scripts/hud/city_watch_orders.gd")
 var formation_id:String=""
 var last_outcome:Dictionary={}
 
@@ -67,6 +68,12 @@ func _scout_tab(sighting:Dictionary,kpis:Array)->Dictionary:
 	if nearby.has("city_id"):
 		var nearby_id:=String(nearby.city_id)
 		blocks.append({"type":"actions","heading":"THIS COUNTER IS A SCOUT PARTY","items":[{"label":"OPEN NEARBY CITY REPORT","sub":"city movement, attack and siege orders","on_press":func()->void:CivilizationSystem.city_intelligence.open(nearby_id)}]})
+		# The nearby city can be scouted from this card without another screen.
+		var scouting:Array=Orders.dock_items(nearby_id)
+		if not scouting.is_empty():
+			blocks.append({"type":"actions","heading":"SCOUT THIS CITY","items":scouting})
+			var status:=Orders.dock_status(nearby_id)
+			if not status.is_empty():blocks.append({"type":"text","text":status})
 
 	if not last_outcome.is_empty():
 		blocks.append({"type":"text","heading":"RESULT","text":String(last_outcome.get("message",last_outcome.get("error","No interception occurred.")))})
