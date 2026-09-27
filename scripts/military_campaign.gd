@@ -40,6 +40,7 @@ const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
+const FieldRations:=preload("res://scripts/field_rations.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
 const TRAINING_PROGRAMS:Dictionary={
 	"route_rehearsal":{"label": "ROUTE & SUPPLY PRACTICE", "duration_days": 108.0, "food_per_participant": 0.28, "training_gain": 0.03, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.00045, "wear_rate": 0.00048, "command_gain": {"logistics": 0.04, "resolve": 0.01}, "description": "Practice load distribution, route finding, and resupply. Builds logistics and resolve across unit types.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
@@ -2641,7 +2642,11 @@ func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary=
 		remaining-=credit
 		accessible+=(share-credit)*_force_provision_access(force)
 	for force:Dictionary in occupation_forces:
-		accessible+=need*float(maxi(0,int(force.get("troops",0))))/float(total)*_field_transport_delivery_ratio()
+		var held_share:=need*float(maxi(0,int(force.get("troops",0))))/float(total)
+		# The held town feeds its garrison (field_rations.gd); only the rest travels.
+		var local:=clampf(float(air_delivery.get("by_occupation",{}).get(FieldRations.occupation_key(force),0.0)),0.0,held_share)
+		remaining-=local
+		accessible+=(held_share-local)*_field_transport_delivery_ratio()
 	return clampf(accessible/remaining,0.0,1.0) if remaining>0.0 else 1.0
 
 
@@ -2677,9 +2682,15 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
 		var field_received:=minf(need*share,field_credit+maxf(0,need*share-field_credit)*_force_provision_access(force)*delivery_ratio)
-		provision_ratio=clampf(field_received/maxf(.01,need*share),0,1) if need*share>0 else 1.0
+		# A band away from home forages for part of what the carriers did not
+		# bring. What is still missing is the band's own hunger, not the home's.
+		var foraged:=0.0
+		if not _army_is_home(force):foraged=maxf(0.0,need*share-field_received)*FieldRations.forage_share(force)
+		provision_ratio=clampf((field_received+foraged)/maxf(.01,need*share),0,1) if need*share>0 else 1.0
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=field_received
+		force["provisions_foraged_today"]=foraged
+		FieldRations.mark_day(force,provision_ratio,float(WorldSimulation.span))
 		force["provision_ratio"]=provision_ratio
 		force["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.055 if String(force.get("status","stationed"))=="stationed" else 0.025)
@@ -2691,10 +2702,16 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 	for force_index in occupation_forces.size():
 		var force:Dictionary=occupation_forces[force_index]
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
-		provision_ratio=clampf(_field_transport_delivery_ratio()*delivery_ratio,0.0,1.0)
-		force["provisions_required_today"]=need*share
-		force["provisions_delivered_today"]=need*share*provision_ratio
+		# The held town's own food comes first; home sends only the rest.
+		var held_need:=need*share
+		var local:=clampf(float(air_delivery.get("by_occupation",{}).get(FieldRations.occupation_key(force),0.0)),0.0,held_need)
+		var sent:=maxf(0.0,held_need-local)*clampf(_field_transport_delivery_ratio()*delivery_ratio,0.0,1.0)
+		provision_ratio=clampf((local+sent)/held_need,0.0,1.0) if held_need>0.0 else 1.0
+		force["provisions_required_today"]=held_need
+		force["provisions_delivered_today"]=sent
+		force["provisions_local_today"]=local
 		force["provision_ratio"]=provision_ratio
+		FieldRations.mark_day(force,provision_ratio,float(WorldSimulation.span))
 		force["provision_day"]=int(WorldSimulation.state.elapsed_days)
 		force["supply_level"]=move_toward(float(force.get("supply_level",0.5)),provision_ratio,0.08)
 		var occupation_condition:=clampf(WorldSimulation.state.population_health*0.48+WorldSimulation.state.food_security*0.17+provision_ratio*0.35,0.0,1.0)
@@ -5327,4 +5344,11 @@ func draw_delivered_field_rations(required:float)->Dictionary:
 		var amount:=minf(needed,maxf(0,float(army.get("delivered_field_food",0))))
 		army.delivered_field_food=maxf(0,float(army.get("delivered_field_food",0))-amount)
 		result.by_army[int(army.get("army_id",0))]=amount;result.total+=amount
+	# A garrison eats mostly from the town it holds; that share never leaves
+	# home stores (field_rations.gd).
+	result["by_occupation"]={}
+	for force:Dictionary in occupation_forces:
+		var held_need:=maxf(0,required)*int(force.get("troops",0))/active
+		var local:=held_need*FieldRations.occupation_local_share(WorldSimulation.world.region_snapshot(String(force.get("civ_id","")),String(force.get("region_id",""))) if WorldSimulation.world!=null else {})
+		result.by_occupation[FieldRations.occupation_key(force)]=local;result.total+=local
 	return result

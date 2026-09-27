@@ -41,6 +41,8 @@ const CV:=preload("res://scripts/character_voice.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const CHRONICLE_PATH:="res://scripts/chronicle.gd"
+## A beaten people's business (town back, captives, pleas, vows).
+const Aftermath:=preload("res://scripts/envoy_aftermath.gd")
 
 const RECENT_MAX:=40
 const PLEDGES_MAX:=16
@@ -142,13 +144,14 @@ static func valid_state(data:Variant)->bool:
 	return true
 
 static func handles(situation_type:String)->bool:
-	return TYPES.has(situation_type)
+	return TYPES.has(situation_type) or Aftermath.handles(situation_type)
 
 static func is_help(situation_type:String)->bool:
 	return bool((TYPES.get(situation_type,{}) as Dictionary).get("help",false))
 
 static func family(situation_type:String)->String:
 	if TYPES.has(situation_type): return String(TYPES[situation_type].family)
+	if Aftermath.handles(situation_type): return Aftermath.family(situation_type)
 	return String(HALL_FAMILY.get(situation_type,situation_type))
 
 static func brings_sequel(situation_type:String,option_id:String)->bool:
@@ -321,6 +324,7 @@ static func _destination(civ:Dictionary)->Dictionary:
 	return best
 
 static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rng:RandomNumberGenerator,used:Dictionary,day:int)->Dictionary:
+	if Aftermath.handles(situation_type): return Aftermath.candidate(situation_type,civ_id,occasion,rng,used,day)
 	if not enabled or not TYPES.has(situation_type): return {}
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	if not _civ_ok(civ) or _at_war(civ): return {}
@@ -602,6 +606,7 @@ static func _n(value:Variant)->int:
 
 static func options(audience:Dictionary)->Array[Dictionary]:
 	var type:=Hall._situation_type(audience)
+	if Aftermath.handles(type): return Aftermath.options(audience)
 	var p:=_req(audience)
 	var civ_id:=String(audience.get("civ_id",""))
 	var name:=String(audience.get("civ_name",Hall._civ_name(civ_id)))
@@ -792,6 +797,7 @@ static func _pledge(civ_id:String,res:String,amount:float,due_in:int,text:String
 
 static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	var type:=Hall._situation_type(audience)
+	if Aftermath.handles(type): return Aftermath.resolve(audience,option_id)
 	var p:=_req(audience)
 	var civ_id:=String(audience.civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
@@ -1586,6 +1592,8 @@ static func attach_followup(audience:Dictionary)->void:
 	## unless their ruler is already raising an older grudge, debt or bond.
 	if String(audience.get("origin",""))!="foreign": return
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	# A beaten people does not come to talk over old tribute (envoy_aftermath.gd).
+	if bool(situation.get("no_followup",false)): return
 	var old:Dictionary=situation.get("recall",{}) if situation.get("recall") is Dictionary else {}
 	# An old grudge their envoys have already named yields to how the god
 	# answered this people last (fresher, and not yet said); other memories stand.
@@ -1758,6 +1766,7 @@ static func open_lines(audience:Dictionary)->Array:
 	## Opening lines for the envoy, filled from the facts; the voice uses the
 	## first one not yet said (and one the AI wrote first, when it did).
 	var type:=Hall._situation_type(audience)
+	if Aftermath.handles(type): return Aftermath.open_lines(audience)
 	if not TYPES.has(type): return []
 	var s:=Hall._situation(audience)
 	var p:=_req(audience)

@@ -76,11 +76,11 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	var out:={}
 	var home:=home_name.to_lower().strip_edges() if home_name!="" else String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
 	var kill:=_has("\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
-	var everyone:=_has("\\b(everyone|every soul|every one of them|all of them|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b",lower)
-	var people:=_has("\\b(women|girls|wives|children|captives?|slaves?|bondservants?|young ones|people|residents|families|them)\\b",lower)
+	var everyone:=_has("\\b(everyone|everybody|every soul|every one of them|all of them|them all|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b",lower)
+	var people:=_has("\\b(women|womenfolk|females?|girls|wives|daughters|children|captives?|slaves?|bondservants?|young ones|people|residents|families|them|villagers|townsfolk|townspeople|inhabitants)\\b",lower)
 	var carry:=_has("\\b(take|bring|carry|lead|drive|march|send|haul|herd|move|settle|resettle)\\b",lower)
 	var homeward:=_has("\\b(home|back|with us|to our|captives?)\\b",lower) or (home!="" and home in lower)
-	var bonded:=_has("\\b(women|girls|wives|captives?|slaves?|bondservants?|bonded|as spoils)\\b",lower)
+	var bonded:=_has("\\b(women|womenfolk|females?|girls|wives|daughters|captives?|slaves?|bondservants?|bonded|as spoils)\\b",lower)
 	var count_match:=_re("\\b(\\d{1,4})\\b",lower)
 	if count_match!=null: out["count"]=int(count_match.get_string(1))
 	if kill: out["kill_men"]=true
@@ -100,8 +100,26 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if not out.has("captives"):
 		for row in POLICY_WORDS:
 			if _has(String(row[1]),lower): out["policy"]=String(row[0]); break
-	if out.size()==1 and out.has("count"): return {}
+	if out.is_empty() or (out.size()==1 and out.has("count")): return {}
+	if _has(GROUP_WORDS,lower): out["group"]=true
 	return out
+
+
+## Words for the people of a town as a body: the men, the women, everyone.
+## An order that names no town is about a town only when it names them.
+const GROUP_WORDS:="\\b(males?|men|menfolk|boys|sons|fighting men|grown men|every man|females?|women|womenfolk|girls|wives|daughters|children|everyone|everybody|every soul|all of them|them all|villagers|townsfolk|townspeople|inhabitants|residents|population|families|captives|its people|their people|the people)\\b"
+## Words that point at a town without naming it.
+const TOWN_REF:="\\b((the|that|this|their|our new|the captured|the taken|the conquered) (town|village|city|settlement|capital|place|stronghold)|the garrison|the captives)\\b"
+
+static func implicit(fate:Dictionary,lower:String)->bool:
+	## Is this fate order about a town we hold even though it names none?
+	## Violence to, or carrying off of, the people as a body; freeing its
+	## captives; or any other fate (burn, tribute, rule, give back) with words
+	## pointing at the town. "Kill him" and "take them home" never are.
+	if fate.is_empty(): return false
+	var group:=bool(fate.get("group",false))
+	if group and (bool(fate.get("kill_men",false)) or bool(fate.get("captives",false)) or String(fate.get("move",""))!="" or bool(fate.get("free",false))): return true
+	return _has(TOWN_REF,lower)
 
 
 static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Dictionary={})->Dictionary:
@@ -261,6 +279,11 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	_consequences(civ_id,name,out,harsh,general,day)
 	out["text"]=" ".join(parts)+(" But "+_lower_first(" ".join(refusals)) if not refusals.is_empty() else "")
 	out["outcome"]=_note(name,out)
+	# The garrison's card on the map says what was last done there.
+	var held_at:int=mc._occupation_force_index(civ_id,region_id)
+	if held_at>=0:
+		var brief:=_note(name,out).trim_prefix(name+": ").trim_suffix(".")
+		mc.occupation_forces[held_at]["fate_note"]=_cap(brief).substr(0,80)
 	Chronicle.record({"key":"town_fate:%s:%d" % [region_id,day],"title":_title(name,out).substr(0,70),"text":" ".join(parts),
 		"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 	return out

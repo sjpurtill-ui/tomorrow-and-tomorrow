@@ -252,7 +252,11 @@ static func card_garrison(mark:Dictionary)->PackedStringArray:
 	var troops:=int(mark.get("troops",0))
 	var general:=_named(String(mark.get("general","")))
 	var town:=place(String(mark.get("town","the town")))
-	return PackedStringArray(["Held by us · %s" % (str(troops) if troops<1000 else about(troops)),("%s's garrison in %s" % [general,town]) if general!="" else "our garrison in %s" % town])
+	var out:=PackedStringArray(["Held by us · %s" % (str(troops) if troops<1000 else about(troops)),("%s's garrison in %s" % [general,town]) if general!="" else "our garrison in %s" % town])
+	# The last order carried out there ("36 killed, 80 captives on the road").
+	var note:=String(mark.get("fate_note","")).strip_edges()
+	if note!="": out.append(note)
+	return out
 
 
 ## The paper card for one of our forces: [title, detail].

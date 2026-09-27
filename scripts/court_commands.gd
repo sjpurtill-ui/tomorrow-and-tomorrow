@@ -411,10 +411,16 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var foreign:=String(audience.get("origin",""))=="foreign"
 	# A war order ("attack Tsaren", "march home", "raid their fields") goes to
 	# the war leader as a real objective, never to the generic directive path.
-	if not foreign and String(cls.act)!="question" and not bool(cls.insist):
-		var war_reading:=WarOrders.read_live(String(live.get("object","")),clean,String(audience.get("civ_id",""))) if from_live and String(cls.verb)=="war" else WarOrders.read(clean,String(audience.get("civ_id","")))
+	if not foreign and not bool(cls.insist):
+		var war_reading:=WarOrders.read_live(String(live.get("object","")),clean,String(audience.get("civ_id","")),id) if from_live and String(cls.verb)=="war" else WarOrders.read(clean,String(audience.get("civ_id","")),id)
+		# The answer to "Which town?": the order given before, at the town named now.
+		var answered:=_which_town_answer(audience,clean)
+		if not answered.is_empty() and String(war_reading.get("kind",""))!="fate": war_reading=answered
 		var named_place:=(war_reading.get("target",{}) as Dictionary).has("city_id") or (war_reading.get("target",{}) as Dictionary).has("unknown")
-		if not war_reading.is_empty() and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place):
+		# What becomes of a people in our hands is never a court punishment
+		# ("kill all the males" is not "kill him") nor a vague directive.
+		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town"]
+		if not war_reading.is_empty() and String(cls.act)!="question" and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
 			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
 		# "Send him home": the envoy goes home, never made to lead a party nor
@@ -459,6 +465,20 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if String(cls.verb)=="order" and String(context.get("civic_settlement",""))!="" and (actor.is_empty() or String(actor.key)==String(speaker.get("key",""))):
 		return {"handled":false,"act":"command","verb":"order"}   # the settlement leader's civic conversation carries it
 	return _perform(id,audience,list,String(cls.verb),actor,target,clean,cls,false,context)
+
+static func _which_town_answer(audience:Dictionary,clean:String)->Dictionary:
+	## After the war leader asked "Which town?", a reply naming a held town
+	## carries the order that was given, at that town. {} otherwise.
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if not bool(pending.get("which_town",false)) or Hall._day()-int(pending.get("day",-99))>PENDING_DAYS: return {}
+	var lower:=clean.to_lower()
+	for town:Dictionary in WarOrders.held_towns():
+		if WarOrders._name_hit(lower,String(town.name)):
+			var said:=String(pending.get("text",""))
+			var fate:=preload("res://scripts/town_fate.gd").fate_words(said.to_lower())
+			if fate.is_empty(): return {}
+			return {"kind":"fate","target":town,"fate":fate,"full":false,"insist":false,"place":"","army_words":false,"text":said.substr(0,300)}
+	return {}
 
 static func live_verb_allowed(verb:String,text:String)->bool:
 	## The live reading may sharpen an order, never turn a punishment into
@@ -1001,7 +1021,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	## either sets a real objective in motion or says plainly why not
 	## (court_war_orders.gd). Never "we will" followed by nothing.
 	var reading:Dictionary=cls.get("war",{}) if cls.get("war") is Dictionary else {}
-	if reading.is_empty(): reading=WarOrders.read(text,String(audience.get("civ_id","")))
+	if reading.is_empty(): reading=WarOrders.read(text,String(audience.get("civ_id","")),id)
 	# The war leader carries it, whoever it was spoken to; a summoned war
 	# leader of renown answers for himself and his own band.
 	var speaker:=_speaker_entry(list)
@@ -1037,6 +1057,13 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			r.obedience={"id":"obey","manner":"grim","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
 			audience.erase("pending_command")
+		"ask":
+			# Which town? Nothing is done until the god names it; the next
+			# words that name a town we hold carry this order there.
+			r.stage="war_ask"; r.executed=false; r.reaction="neutral"
+			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience["pending_command"]={"verb":"war","which_town":true,"actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(reading.get("text",text)).substr(0,200)}
 		"held":
 			# An attack on a town we already hold: the plain truth, no march.
 			r.stage="war_held"; r.executed=false; r.reaction="neutral"
@@ -1104,9 +1131,11 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 			return {"ok":true,"route":"civic","outcome":"It goes out to the council to be carried out."}
 		return {"ok":true,"route":"recorded","outcome":"It is remembered, to be carried out."}
 	var rate:=float((applied.get("assessment",{}) as Dictionary).get("implementation_rate",0.5))
-	var words:="broadly" if rate>=0.72 else ("unevenly" if rate>=0.36 else "only narrowly")
+	# Only a standing effort was set: say so, never that a concrete deed was done.
+	var words:="well" if rate>=0.72 else ("unevenly" if rate>=0.36 else "only a little")
+	var lacking:=String(plan.get("source",""))=="attempt"
 	return {"ok":true,"route":"custom_directive","order_id":order_id,"plan":plan,"applied":applied,
-		"outcome":"Your order %s is being carried out %s." % [CustomDirective.display_name(plan),words]}
+		"outcome":("We lack the means for most of it; the council will try %s as a standing order, and it will take hold %s." if lacking else "The council takes up %s as a standing order; it will take hold %s, and the reports will show what comes of it.") % [CustomDirective.display_name(plan),words]}
 
 static func _refusal(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,person:Dictionary,verb:String)->Dictionary:
 	## Rare and consequential: the brave, unafraid and embittered say no, and

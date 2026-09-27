@@ -2473,6 +2473,13 @@ func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 			if business.is_empty(): business=_business_fallback(s)
 			_append_if(out,business)
 	while out.size()>2: out.pop_front()
+	# A beaten people's envoy first says plainly what they lost ("Tsaren is in
+	# your hands, and Temba leads the Esurai from Stonefield now"); their own
+	# business lines (envoy_aftermath.gd) already carry it.
+	var fall:=String(((s.audience as Dictionary).get("situation",{}) as Dictionary).get("fall_line","")) if (s.audience as Dictionary).get("situation") is Dictionary else ""
+	if fall!="" and String(s.get("origin",""))=="foreign" and not bool((load("res://scripts/envoy_aftermath.gd") as GDScript).call("handles",String(s.get("sit_type","")))):
+		out.push_front({"key":"envoy","text":fall,"aside":false,"fact":true})
+		while out.size()>2: out.pop_back()
 	# The ruler behind a foreign envoy: what they remember, then the string
 	# their business carries, in the tone of that ruler's signature trait.
 	var rival:=_rival_lines(s)

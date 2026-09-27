@@ -391,7 +391,8 @@ static func _garrison_inputs()->Array:
 		var site:Dictionary=world.city_intelligence.site(rid) if world.city_intelligence!=null else {}
 		var pos:=_v2(site.get("position",{})) if not (site.get("position",{}) as Dictionary).is_empty() else Vector2.INF
 		if not pos.is_finite(): continue
-		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name",""))})
+		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name","")),
+			"fate_note":String(force.get("fate_note",""))})
 		if out.size()>=6: break
 	return out
 
@@ -875,7 +876,7 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 		if held<=0: continue
 		out.append({"id":"held:%s" % String(g.get("region_id","")),"side":"ours","army_id":0,"garrison":true,"pos":g.pos,"troops":held,"era":0,"branch":"foot",
 			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
-			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false})
+			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note",""))})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])

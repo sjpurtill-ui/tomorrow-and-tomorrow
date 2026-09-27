@@ -52,6 +52,8 @@ func tab(_sub:int)->Dictionary:
 		{"name":"What they intend","value":"At war with us" if bool(relation.get("at_war",false)) else "Uncertain","detail":"We judge by what their ruler says and does; we cannot see their minds."},
 	]
 	var blocks:Array=[{"type":"rows","heading":"What the reports say","items":estimate_items}]
+	var towns:=towns_block(civ_id)
+	if not towns.is_empty(): blocks.append(towns)
 	var source:=String(relation.get("contact_source",""))
 	var provenance:="Our scouts brought back word of them." if source=="returned_scout_report" else ("Our lookouts met them directly." if source=="local_formation" else "An earlier account tells of this meeting.")
 	if met_day>=0:provenance+=" We first met them in %s." % EraWords.when(met_day)
@@ -75,6 +77,43 @@ func tab(_sub:int)->Dictionary:
 	]})
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
+## Their towns as we know them: the ones we hold, the ones burned, the ones
+## our people have seen that they still hold, and a plain line saying where
+## they still live. {} when we know of none.
+static func towns_block(target_civ_id:String)->Dictionary:
+	var world:Variant=WorldSimulation.world
+	if world==null: return {}
+	var index:int=world._civilization_index(target_civ_id)
+	if index<0: return {}
+	var civ:Dictionary=world.civilizations[index]
+	var items:Array=[]
+	var still:PackedStringArray=PackedStringArray()
+	var unseen:=0
+	for r in civ.get("strategic_regions",[]):
+		var region:Dictionary=r
+		var name:=String(region.get("name",""))
+		var capital:=String(region.get("role",""))=="capital"
+		var held:=String(region.get("controller",""))=="player"
+		var governance:Dictionary=region.get("governance",{}) if region.get("governance") is Dictionary else {}
+		var burned:=bool(governance.get("ruined",false)) and float(region.get("damage",0.0))>=1.0
+		var town:=bool(region.get("settlement_founded",true)) and float(region.get("population",0.0))>=1.0
+		var known:=world.city_intelligence!=null and not (world.city_intelligence.known("player",String(region.get("id",""))) as Dictionary).is_empty()
+		if not held and not burned and not town: continue
+		if not held and not burned and not known:
+			unseen+=1
+			continue
+		var status:="Ours: our garrison holds it" if held else ("Burned" if burned and not town else "Theirs")
+		if not held and town: still.append(name)
+		items.append({"name":name,"value":status,"detail":"Their chief town." if capital else ""})
+	if items.is_empty() and unseen==0: return {}
+	var civ_name:=String(civ.get("name","They"))
+	var line:=""
+	if not still.is_empty(): line="%s still holds %s." % [civ_name,", ".join(still)]
+	elif unseen>0: line="%s still lives in a town we have not seen." % civ_name if unseen==1 else "%s still lives in towns we have not seen." % civ_name
+	else: line="%s holds no town that we know of." % civ_name
+	if unseen>0 and not still.is_empty(): line+=" They hold %s more our people have not seen." % ("one" if unseen==1 else str(unseen))
+	return {"type":"rows","heading":"Their towns","items":items+[{"name":"Where they live now","value":"","detail":line}]}
+
 func _reported_range(civ:Dictionary,prefix:String)->String:
 	if not civ.has(prefix+"_estimate_low") or not civ.has(prefix+"_estimate_high"):return "Not yet observed"
 	return "%s–%s"%[_compact(int(civ[prefix+"_estimate_low"])),_compact(int(civ[prefix+"_estimate_high"]))]
@@ -86,7 +125,7 @@ func _compact(amount:int)->String:
 func signature()->Array:
 	var civ:=_civ()
 	var relation:Dictionary=civ.get("player_relation",{})
-	return [int(GameState.elapsed_days),civ_id,investigation_result.hash(),CivilizationSystem.scout_missions.size(),bool(relation.get("home_location_known",false)),float(relation.get("contact_intelligence",0.0)),float(relation.get("opinion",0.0)),bool(CivilizationSystem.diplomatic_mission_status().get("active",false))]
+	return [int(GameState.elapsed_days),civ_id,investigation_result.hash(),CivilizationSystem.scout_missions.size(),bool(relation.get("home_location_known",false)),float(relation.get("contact_intelligence",0.0)),float(relation.get("opinion",0.0)),bool(CivilizationSystem.diplomatic_mission_status().get("active",false)),towns_block(civ_id).hash()]
 
 static func _first_up(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)

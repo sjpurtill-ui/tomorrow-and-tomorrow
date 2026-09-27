@@ -231,6 +231,7 @@ static func _swap(audience:Dictionary,alt_index:int)->bool:
 	(audience.speaker as Dictionary)["title"]=String(fresh.get("title",(audience.speaker as Dictionary).get("title","")))
 	# The ruler behind the envoy dresses the new business (string, bluff).
 	Hall._rivals().call("dress",audience,{"type":String(occasion.get("type","")),"key":"revised","data":{"text":String(occasion.get("text",""))}},int(GameState.elapsed_days))
+	(load("res://scripts/envoy_aftermath.gd") as GDScript).call("dress",audience)
 	Hall._requests().call("note_arrival",audience)
 	return true
 
