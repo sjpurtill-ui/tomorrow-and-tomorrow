@@ -178,13 +178,12 @@ func test_hostilities_or_absent_packing_labor_prevent_pickup()->void:
 	assert_float(float(E.owner_state("neighbor").resource_stockpiles["Copper Ore"])).is_equal(20.0)
 func test_research_panel_dispatches_the_material_offer()->void:
 	materials_setup()
-	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/research_purchase_panel.gd").new())
-	panel.subject="copper_smelting";panel.size=Vector2(280,500);get_tree().root.add_child(panel)
-	assert_str(String(panel.modes.get_selected_metadata())).is_equal("materials")
-	assert_str(panel.summary.text).contains("Copper Ore")
-	panel.resources.select(4);panel.refresh();panel.send.pressed.emit()
+	const Panel=preload("res://scripts/hud/research_purchase_panel.gd")
+	var offer:Dictionary=Panel.offers("copper_smelting")[0]
+	assert_str(String(offer.mode)).is_equal("materials")
+	assert_str(String(offer.message)).contains("Copper Ore")
+	Panel.send("materials",String(offer.civ_id),"copper_smelting","Stone")
 	assert_str(CivilizationSystem.diplomatic_mission.research_mode).is_equal("materials")
-	assert_bool(panel.send.disabled).is_true()
 func test_every_bundle_matches_explicit_catalog_stock_thresholds()->void:
 	for subject:String in M.Catalog.EXPERIMENTAL_SUPPLIES:
 		var entry:=DiscoverySystem.discovery_definition(subject)

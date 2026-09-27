@@ -1,0 +1,12 @@
+{
+  "id": "reed_bed_rotation",
+  "line": "ecology",
+  "game_year": 130,
+  "approx_historical_year": -4133,
+  "prompt": "c. 4133 BCE: Reed cutters harvest one wetland section while leaving the other to regrow; layered plant-pigment naturalist field painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3d9c3526-2fcf-4d1c-934f-8e7513327e75.png",
+  "asset": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png",
+  "sha256": "a665e6f53d590581166082c5293856050f0c25ef2b40da325f34d9e7f57a6d70",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

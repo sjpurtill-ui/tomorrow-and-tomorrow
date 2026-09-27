@@ -38,7 +38,7 @@ func _draw()->void:
 		var y:=plot_rect.position.y+plot_rect.size.y*ratio
 		draw_line(Vector2(plot_rect.position.x,y),Vector2(plot_rect.end.x,y),Tokens.BORDER_2,1.0)
 		var label_value:=lerpf(high,low,ratio)
-		draw_string(ThemeDB.fallback_font,Vector2(7,y+4),"%.0f" % label_value,HORIZONTAL_ALIGNMENT_LEFT,32,10,Tokens.MUTED)
+		draw_string(ThemeDB.fallback_font,Vector2(6,y+5),"%.0f" % label_value,HORIZONTAL_ALIGNMENT_LEFT,34,12,Tokens.MUTED)
 	var line:=PackedVector2Array()
 	for index in points.size():
 		var point:Dictionary=points[index]
@@ -59,8 +59,9 @@ func _draw()->void:
 			draw_circle(marker_position,5.0,Tokens.RED if float(point.get("delta",0.0))<0.0 else Tokens.BLUE)
 	var first_day:=int((points[0] as Dictionary).get("day",0))
 	var last_day:=int((points[-1] as Dictionary).get("day",first_day))
-	draw_string(ThemeDB.fallback_font,Vector2(plot_rect.position.x,size.y-10),"Y%d" % (first_day/365+1),HORIZONTAL_ALIGNMENT_LEFT,50,10,Tokens.MUTED)
-	draw_string(ThemeDB.fallback_font,Vector2(plot_rect.end.x-50,size.y-10),"Y%d" % (last_day/365+1),HORIZONTAL_ALIGNMENT_RIGHT,50,10,Tokens.MUTED)
+	var Era:=preload("res://scripts/hud/era_words.gd")
+	draw_string(ThemeDB.fallback_font,Vector2(plot_rect.position.x,size.y-8),Era.when(first_day),HORIZONTAL_ALIGNMENT_LEFT,plot_rect.size.x*0.5,12,Tokens.MUTED)
+	draw_string(ThemeDB.fallback_font,Vector2(plot_rect.end.x-plot_rect.size.x*0.5,size.y-8),Era.when(last_day),HORIZONTAL_ALIGNMENT_RIGHT,plot_rect.size.x*0.5,12,Tokens.MUTED)
 
 func _gui_input(event:InputEvent)->void:
 	var motion:=event as InputEventMouseMotion
@@ -68,6 +69,6 @@ func _gui_input(event:InputEvent)->void:
 	var ratio:=clampf((motion.position.x-plot_rect.position.x)/maxf(1.0,plot_rect.size.x),0.0,1.0)
 	var index:=clampi(roundi(ratio*float(points.size()-1)),0,points.size()-1)
 	var point:Dictionary=points[index]
-	var text:="Year %d, day %d · %.1f years" % [int(point.get("day",0))/365+1,int(point.get("day",0))%365+1,float(point.get("life_expectancy",0.0))]
+	var text:="%s: a newborn could hope for %.1f years" % [preload("res://scripts/hud/era_words.gd").when(int(point.get("day",0))),float(point.get("life_expectancy",0.0))]
 	if String(point.get("marker_label",""))!="": text+="\n"+String(point.marker_label)
 	tooltip_text=text

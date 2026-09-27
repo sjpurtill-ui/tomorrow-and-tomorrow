@@ -58,9 +58,9 @@ static func targets()->Dictionary:
 	var people:=minf(maxf(1,F.outstanding(data())),staff()*2)
 	# Care cloth is held as raw materials and Civilian Goods so trade can move it.
 	return preload("res://scripts/bill_stock.gd").add_scaled({"Clay":people*F.RECORD_CLAY*14},F.CLOTH_UNIT,people*14)
+## Two plain sentences for the Health dock: who looks after the sick, and
+## whether anyone is waiting. The detailed daily record stays in data().report.
 static func describe()->String:
-	var report:Dictionary=data().report
-	var continuing:=0.0
-	for episode:Dictionary in data().episodes:
-		if int(episode.care_day)==int(WorldSimulation.state.elapsed_days) and int(episode.prior_observation_day)>=0 and int(episode.prior_observation_day)==int(WorldSimulation.state.elapsed_days)-1:continuing+=float(episode.cared)
-	return "Care duty: %.2f Knowledge workers (%.0f%% of available local Knowledge labor).\nObserved today: %.2f · supported: %.2f · waiting: %.2f population equivalents.\nSupplies spent: %.3f clay, %.2f water, %.3f wrappings.\nContinuing care: %.2f · additional recovery: %.3f population equivalents.\n%s" % [staff(),float(data().staff_share)*100,float(report.get("observed",0)),float(report.get("supported",0)),F.outstanding(data()),float(report.get("record_clay_used",0)),float(report.get("water_used",0)),float(report.get("cloth_used",0)),continuing,float(report.get("additional_recovery",0)),String(report.get("blocker","No daily care record yet."))]
+	var state=WorldSimulation.state
+	var words:=preload("res://scripts/hud/home_plain.gd").care(float(data().staff_share),staff(),data().report,F.outstanding(data()),bool(methods(state).get("rounds",false)))
+	return String(words.first)+" "+String(words.second)

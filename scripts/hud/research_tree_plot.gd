@@ -64,11 +64,18 @@ func _gui_input(event:InputEvent)->void:
 			accept_event()
 	elif event is InputEventMouseMotion and dragging:center-=event.relative/zoom_level;moved=moved or event.position.distance_to(press)>4;queue_redraw();accept_event()
 	elif event is InputEventKey and event.pressed and event.keycode in [KEY_RIGHT,KEY_LEFT]:owner_view.step(1 if event.keycode==KEY_RIGHT else -1);accept_event()
+## Smallest drawn text, whatever the zoom (ART_DIRECTION type floor).
+const MIN_TEXT:=12
+## Below this zoom a node shows only its name: smaller text would be unreadable.
+const DETAIL_ZOOM:=0.85
 func words(text:String,point:Vector2,font:int,color:Color,width:float=CARD.x-22)->void:
+	# Text is never drawn under 12 px; it is trimmed to the node's drawn width.
+	var size:=maxi(MIN_TEXT,roundi(font*zoom_level))
+	var room:=width*zoom_level
 	var shown:=text
-	while shown.length()>2 and UI_FONT.get_string_size(shown,HORIZONTAL_ALIGNMENT_LEFT,-1,font).x>width:shown=shown.left(-2)
+	while shown.length()>2 and UI_FONT.get_string_size(shown,HORIZONTAL_ALIGNMENT_LEFT,-1,size).x>room:shown=shown.left(-2)
 	if shown!=text:shown=shown.trim_suffix(" ")+"…"
-	draw_string(UI_FONT,at(point),shown,HORIZONTAL_ALIGNMENT_LEFT,width*zoom_level,maxi(8,roundi(font*zoom_level)),color)
+	draw_string(UI_FONT,at(point),shown,HORIZONTAL_ALIGNMENT_LEFT,room,size,color)
 func _draw()->void:
 	draw_rect(Rect2(Vector2.ZERO,size),T.FIELD_BG)
 	# Every required foundation.
@@ -106,7 +113,7 @@ func _draw()->void:
 		if not rect.intersects(Rect2(Vector2.ZERO,size)):continue
 		var active:bool=item.get("assignment",{}).get("active",false)
 		var color:=Art.color(item.domain) if item.get("exposed",false) else T.MUTED
-		draw_style_box(T.flat(Color("182a31"),T.GOLD if item.id==owner_view.selected_id else color.darkened(.25),2 if item.id==owner_view.selected_id else 1,6,0),rect)
+		draw_style_box(T.flat(T.PAPER_RAISED,T.GOLD if item.id==owner_view.selected_id else color.darkened(.25),2 if item.id==owner_view.selected_id else 1,4,0),rect)
 		draw_rect(Rect2(at(origin+Vector2(0,0)),Vector2(5,CARD.y)*zoom_level),color)
 		var picture:Texture2D=Art.thumbnail_for(item) if bool(item.get("exposed",false)) else null
 		var image_rect:=Rect2(at(origin+Vector2(14,10)),IMAGE*zoom_level)
@@ -114,17 +121,21 @@ func _draw()->void:
 			draw_texture_rect_region(picture,image_rect,Art.crop_region(picture,IMAGE,Art.focus_for(item)))
 		else:
 			draw_rect(image_rect,T.TILE_BG)
-			words("FIELD INVESTIGATION" if bool(item.get("exposed",false)) else "BEYOND CURRENT KNOWLEDGE",origin+Vector2(24,56),12,T.MUTED)
+			if zoom_level>=DETAIL_ZOOM:words("No picture yet" if bool(item.get("exposed",false)) else "Not yet imagined",origin+Vector2(24,56),12,T.MUTED)
 		origin+=Vector2(0,IMAGE_SHIFT)
-		words(Art.name_for(String(item.domain)).to_upper(),origin+Vector2(14,102),11,Art.text_color(item.domain))
+		if zoom_level<DETAIL_ZOOM:
+			# Zoomed out: the name alone, large enough to read.
+			words(String(item.name),origin+Vector2(14,128),17,T.INK)
+			continue
+		words(Art.name_for(String(item.domain)).to_upper(),origin+Vector2(14,102),12,Art.text_color(item.domain))
 		words(String(item.name),origin+Vector2(14,128),17,T.INK)
-		words(Art.status(item),origin+Vector2(14,150),11,Art.text_color(item.domain))
+		words(Art.status(item),origin+Vector2(14,150),12,Art.text_color(item.domain))
 		var choice_count:=(item.get("requires_any",[]) as Array).size()
 		var route_count:=maxi(0,(item.get("pathways",[]) as Array).size()-1)
-		var branch_text:="%d choice fork%s" % [choice_count,"" if choice_count==1 else "s"] if choice_count>0 else "%d alternate approach%s" % [route_count,"" if route_count==1 else "es"] if route_count>0 else String(item.get("subcategory","")).capitalize()
-		words(branch_text,origin+Vector2(14,173),11,T.TEAL if choice_count+route_count>0 else T.TEXT_SOFT)
+		var branch_text:=("Several ways in" if choice_count>0 else "Another way to reach it") if choice_count+route_count>0 else String(item.get("subcategory","")).capitalize()
+		words(branch_text,origin+Vector2(14,173),12,T.TEAL_TEXT if choice_count+route_count>0 else T.TEXT_SOFT)
 		if active:
-			words(Art.workforce(Art.team(item))+" · %d%% evidence" % roundi(float(item.progress)*100),origin+Vector2(14,195),11,T.BODY)
-			var bar:=Rect2(at(origin+Vector2(14,206)),Vector2(CARD.x-28,5)*zoom_level);draw_rect(bar,Color("30434a"));bar.size.x*=clampf(float(item.progress),0,1);draw_rect(bar,color)
+			words(preload("res://scripts/hud/home_plain.gd").researchers(Art.team(item))+", "+preload("res://scripts/hud/home_plain.gd").evidence(float(item.progress)),origin+Vector2(14,195),12,T.BODY)
+			var bar:=Rect2(at(origin+Vector2(14,206)),Vector2(CARD.x-28,5)*zoom_level);draw_rect(bar,T.TRACK);bar.size.x*=clampf(float(item.progress),0,1);draw_rect(bar,color)
 		else:
-			words("Select for findings" if item.known else "Select to direct this team" if item.ready else "Earlier knowledge needed",origin+Vector2(14,199),11,T.MUTED)
+			words("Pick it to see what it brought" if item.known else "Pick it to put a team on it" if item.ready else "Needs earlier knowledge first",origin+Vector2(14,199),12,T.MUTED)

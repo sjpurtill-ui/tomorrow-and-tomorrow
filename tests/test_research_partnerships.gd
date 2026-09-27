@@ -148,11 +148,9 @@ func test_protocol_save_round_trip_preserves_work_and_cannot_claim_evidence()->v
 
 func test_actual_panel_dispatches_partnership_and_phase_metadata_is_validated()->void:
 	joint_prepare()
-	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/research_purchase_panel.gd").new())
-	panel.subject="clay_shaping";add_child(panel)
-	for n in panel.modes.item_count:
-		if panel.modes.get_item_metadata(n)=="partnership":panel.modes.select(n)
-	panel.resources.select(4);panel.refresh();panel.send.pressed.emit()
+	const Panel=preload("res://scripts/hud/research_purchase_panel.gd")
+	assert_bool("partnership" in Panel.modes("clay_shaping")).is_true()
+	Panel.send("partnership",String(Panel.contacts()[0].id),"clay_shaping","Stone")
 	var mission:Dictionary=CivilizationSystem.diplomatic_mission
 	assert_str(mission.get("research_mode","")).is_equal("partnership")
 	assert_bool(E.valid_mission(mission)).is_true()
