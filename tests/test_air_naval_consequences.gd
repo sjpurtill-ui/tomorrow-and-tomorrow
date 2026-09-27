@@ -634,3 +634,23 @@ func test_air_transports_are_hunted_by_interceptors_and_ai_can_order_a_landing()
 		assert_bool(refused.has("error")).is_true()
 	)
 	assert_int(hunters).is_greater(0)
+
+func test_soldiers_on_a_lost_transport_drown_or_are_saved_and_the_chronicle_tells_it()->void:
+	var military=MilitaryCampaign
+	var saved_armies:Array=military.field_armies.duplicate(true)
+	var recruits:=int(military.aggregate_recruits)
+	var population:=int(GameState.population_total)
+	military.field_armies.append({"army_id":9901,"name":"The Second Host","troops":200,"embarked":true,"status":"embarked","formations":[{"count":200,"equipment":200,"ammunition":0}],"position":{"x":0.0,"z":0.0}})
+	var lost:int=military.apply_transport_casualties(9901,.5,"")
+	var army:Dictionary=military.field_armies[military._field_army_index(9901)]
+	assert_int(lost).is_equal(100)
+	var drowned:=population-int(GameState.population_total)
+	assert_int(drowned).is_between(40,50)
+	assert_int(int(army.get("wounded_pool",0))).is_equal(10)
+	assert_int(int(military.aggregate_recruits)-recruits).is_equal(100-drowned-10)
+	var told:=false
+	for entry:Dictionary in preload("res://scripts/chronicle.gd").entries("notice"):
+		if String(entry.title)=="Transports Went Down":told=true
+	assert_bool(told).is_true()
+	military.field_armies.assign(saved_armies)
+	military.aggregate_recruits=recruits

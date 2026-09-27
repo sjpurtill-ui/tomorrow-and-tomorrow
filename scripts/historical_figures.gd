@@ -12,6 +12,8 @@ const TEMPERAMENTS:=["patient and exacting","bold and impatient","generous but p
 const MOTIVES:=["make useful knowledge available beyond a privileged few","prove that inherited methods can be improved","protect communities from the failures witnessed in youth","build a tradition that can survive its founder","earn recognition through work that others can verify","train successors capable of questioning their teacher"]
 ## Roles that appear only when a society commissions them (never by emergence).
 const COMMISSIONED_ROLES:=["Architect","Admiral","Air Commander"]
+## Living admirals or air commanders at most; more forces share them.
+const BRANCH_COMMANDERS:=2
 var people:Array[Dictionary]=[]
 var used:Dictionary={}
 var assignments:Dictionary={}
@@ -194,6 +196,17 @@ func branch_commander(role:String,slot:String)->Dictionary:
 	if role not in ["Admiral","Air Commander"]: return {}
 	var p:=by_id(String(assignments.get(slot,"")))
 	if not p.is_empty() and p.status in ["living","wounded"]: return p
+	# Few enough to stay exceptional: at most two of each branch alive, and
+	# never the last places of the roster. Beyond that one of them takes
+	# several task forces or wings, as a fleet or air-group commander.
+	var serving:Array=[]
+	for candidate in people:
+		if candidate.role==role and candidate.status=="living": serving.append(candidate)
+	if serving.size()>=BRANCH_COMMANDERS or living_count()>=MAX_LIVING-2:
+		if serving.is_empty(): return {}
+		p=serving[posmod(hash(slot),serving.size())]
+		assignments[slot]=p.id
+		return p
 	p=_create(role,int(WorldSimulation.state.elapsed_days))
 	if p.is_empty(): return {}
 	assignments[slot]=p.id
