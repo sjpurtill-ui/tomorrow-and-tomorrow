@@ -784,7 +784,7 @@ static func summon(target:Dictionary)->Dictionary:
 	var audience:=_new_audience("court","summons",day)
 	audience.speaker=speaker
 	var name:=String(speaker.name)
-	audience.petition={"topic":"summons","summary":"%s answers your summons with nothing of their own to raise." % name,"suggested_decree":""}
+	audience.petition={"topic":"summons","summary":"You sent for %s." % name,"suggested_decree":""}
 	audience.situation={"type":"summons","ask":"summons:%d" % day,"headline":"answers your summons","summary":"%s answers your summons." % name,"occasion":{"type":"summons","text":"the ruler sent for them","day":day,"crisis":false}}
 	audience["summoned"]=true
 	audience["holder_key"]=keys[0]
