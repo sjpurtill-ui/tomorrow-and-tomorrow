@@ -1,0 +1,12 @@
+{
+  "id": "dawn_readiness_drill",
+  "line": "security",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: at dawn adults practice quickly gathering flint-tipped spears from a reed shelter. Mature flat hand-cut woodblock print, black and vermilion ink, rough carved silhouettes; no helmets, armor, metal, writing or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-73b9e0ee-e527-4a57-965e-725f3fecac69.png",
+  "asset": "res://assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+  "sha256": "f3f9c0ca819e56dd5f499fd90eb0b70306ca92e4f33ad021988217bc4986ec90",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first cropped action and used comic-like radiating marks. Accepted after visual 3.37:1 crop and subject/period check."
+}
