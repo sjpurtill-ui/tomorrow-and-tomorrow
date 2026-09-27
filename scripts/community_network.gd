@@ -98,9 +98,8 @@ func import_state(data:Dictionary)->Dictionary:
 		if not event is Dictionary or not event.has_all(["day","text"]): return {"error":"Invalid network event."}
 	active=pending; progress=float(data.get("progress",0)); completed.assign(data.completed); history.assign(data.history.duplicate(true)); last_day=int(data.get("last_day",0)); world_seed=WorldSimulation.state.world_seed
 	return {"ok":true}
-func _unhandled_key_input(event:InputEvent)->void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F9:
-		open_network(); get_viewport().set_input_as_handled()
+# F9 belongs to the command rail (command_rail_hud.gd HOTKEYS); this
+# screen opens from its own buttons.
 func open_network()->void:
 	ensure()
 	if is_instance_valid(panel): panel.queue_free(); return

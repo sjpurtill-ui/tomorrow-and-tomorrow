@@ -38,9 +38,9 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 		"health":r.merge({"title":EraWords.life_title(),"value":"%.1f" % t.life if modern else str(roundi(float(t.life))),"unit":EraWords.life_unit(),"status":"Population-weighted projection under current conditions" if modern else EraWords.babes_lost_sentence(float(t.infant))},true)
 		"science":
 			if modern:r.merge({"title":"Research capacity","value":"%.1f" % t.science,"unit":"effective research capacity","status":"Sum of each city's research effort × its education"},true)
-			else:r.merge({"title":"Lore" if hearth else "Learning","value":str(GameState.known_discoveries.size()),"unit":"ways the people know" if hearth else "practices the people know","status":"%d %s keep, test and teach what is known." % [roundi(float(t.minds)),"people" if roundi(float(t.minds))!=1 else "person"]},true)
+			else:r.merge({"title":"Lore" if hearth else "Learning","value":str(GameState.known_discoveries.size()),"unit":"things the people know" if hearth else "practices the people know","status":"%d %s keep, test and teach what is known." % [roundi(float(t.minds)),"people" if roundi(float(t.minds))!=1 else "person"]},true)
 		"gdp":
-			if modern:r.merge({"title":"Daily economic output","value":"%.1f" % t.output,"unit":"output-equivalent units / day","status":"%.2f per person · all city output combined" % (float(t.output)/maxi(1,int(t.population)))},true)
+			if modern:r.merge({"title":"Daily economic output","value":"%.1f" % t.output,"unit":"units of output a day","status":"%.2f per person · all city output combined" % (float(t.output)/maxi(1,int(t.population)))},true)
 			elif hearth:
 				var fed:=EraWords.fed(int(t.population),float(t.food_eaten),float(t.food_need))
 				r.merge({"title":"Bellies filled","value":str(fed) if fed>=0 else "—","unit":"of %d fed in full today" % int(t.population),"status":"The work of about %d hands keeps the hearths fed, clothed and sheltered." % roundi(float(t.output))},true)
@@ -51,7 +51,7 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 			"population":value="%d residents" % city.population if modern else EraWords.people(int(city.population))
 			"food","water":
 				var need:=float(city[id+"_need"])
-				value="Awaiting report" if not bool(city[id+"_report"]) else "%.1f made / %.1f needed\n%.1f reserve days%s" % [city[id+"_produced"],need,float(city[id+"_stock"])/maxf(.01,need)," · SHORTFALL" if float(city[id+"_eaten"])<need*.995 else ""]
+				value="Awaiting report" if not bool(city[id+"_report"]) else "%.1f made / %.1f needed\n%.1f days in store%s" % [city[id+"_produced"],need,float(city[id+"_stock"])/maxf(.01,need)," · falling short" if float(city[id+"_eaten"])<need*.995 else ""]
 			"health":value="%.1f years · %.0f‰ infant mortality" % [city.life,city.infant] if modern else "%s · %s" % [EraWords.life(float(city.life)),EraWords.babes_lost(float(city.infant))]
 			"science":value="%.1f capacity\n%.1f minds × %.0f%% education" % [city.science,city.minds,float(city.education)*100] if modern else "%d keeping the lore" % roundi(float(city.minds))
 			"gdp":

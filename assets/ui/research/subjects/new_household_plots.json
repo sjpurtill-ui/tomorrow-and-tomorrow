@@ -1,0 +1,12 @@
+{
+  "id": "new_household_plots",
+  "line": "demography",
+  "game_year": 104,
+  "approx_historical_year": -4307,
+  "prompt": "c. 4307 BCE: Village elders grant young household a stone-marked house plot; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8ac8228b-c1af-456c-bc58-69d942e50049.png",
+  "asset": "res://assets/ui/research/subjects/new_household_plots-v1.png",
+  "sha256": "4243d175fe4f8c16bd4d4f2a60c0cb8565abc34d2dba77ca58d7e0802303df9a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

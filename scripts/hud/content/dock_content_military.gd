@@ -55,7 +55,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"ARMY COMMAND", "sub":"Hierarchy, battle zones and objectives on the main map", "on_press":func():MilitaryCampaign.joint_operations.open_hierarchy("army")},{"label":"ALL FORCES & TRAINING STRATEGY","sub":"Large roster, skills and staff-managed training","on_press":func():MilitaryCampaign.open_roster()},{"label":"UNITS & EQUIPMENT MAP","sub":"Every kind of fighting band, from the first spears onward","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},]+_service_actions()}]+_campaign_entry()+_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"ARMY COMMAND", "sub":"Send a band to attack, raid, guard a place or come home", "on_press":func():MilitaryCampaign.joint_operations.open_hierarchy("army")},{"label":"ALL FORCES & TRAINING STRATEGY","sub":"Large roster, skills and staff-managed training","on_press":func():MilitaryCampaign.open_roster()},{"label":"UNITS & EQUIPMENT MAP","sub":"Every kind of fighting band, from the first spears onward","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},]+_service_actions()}]+_campaign_entry()+_forces_overview()}
 
 ## Fleets and air wings appear only once the people have boats or flight.
 func _service_actions()->Array:
@@ -100,7 +100,8 @@ func _formation_blocks(army:Dictionary)->Array:
 			status_text="reported %s" % ("marching on %s" % String(report.get("destination_name","its objective")) if String(report.get("status",""))=="moving" else "holding %s" % String(report.get("location_name","the field")))
 			status_text+=" · runner %dd old" % report_age
 		else:
-			status_text="moving to %s" % String(force.get("destination_name","")) if String(force.get("status",""))=="moving" else "holding %s" % String(force.get("location_name",""))
+			# What it is doing, in plain words (fighting, besieging, marching to attack).
+			status_text=preload("res://scripts/battle_account.gd").doing(force)
 		var selected:bool=int(terrain.selected_army_id)==army_id
 		var known:Dictionary=report if use_report else force
 		if selected and not String(known.get("movement_block_reason","")).is_empty():blocks.append({"type":"text","heading":"REPORTED ROUTE BLOCK","text":String(known.movement_block_reason)})

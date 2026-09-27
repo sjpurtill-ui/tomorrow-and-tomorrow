@@ -304,9 +304,9 @@ static func way_along(progress:float)->String:
 
 ## The scouts on the map toolbar: who is out walking, never a staffing share.
 static func scouts_out(away:int)->String:
-	if away<=0:return "⌖ SEND SCOUTS"
-	if hearth():return "⌖ %s OUT" % ("ONE WALKER" if away==1 else "%s WALKERS" % count_word(away).to_upper())
-	return "⌖ %d SCOUT%s OUT" % [away,"" if away==1 else "S"]
+	if away<=0:return "Send scouts"
+	if hearth():return "%s out" % ("One walker" if away==1 else "%s walkers" % count_word(away).capitalize())
+	return "%d scout%s out" % [away,"" if away==1 else "s"]
 
 
 ## How far the map looks, in the people's words (the four map distances).

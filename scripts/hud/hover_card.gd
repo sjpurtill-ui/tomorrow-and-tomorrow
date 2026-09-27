@@ -173,7 +173,7 @@ static func content(spec:Dictionary)->VBoxContainer:
 	column.name="HoverCardContent"
 	column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	column.add_theme_constant_override("separation",6)
-	var kicker:=_label(String(spec.get("kicker","")).to_upper(),10,accent,0.12)
+	var kicker:=_label(String(spec.get("kicker","")).to_upper(),12,T.text_for(accent),0.12)
 	column.add_child(kicker)
 	var hero:=HBoxContainer.new();hero.mouse_filter=Control.MOUSE_FILTER_IGNORE;hero.add_theme_constant_override("separation",8);column.add_child(hero)
 	hero.add_child(_label(String(spec.get("value","")),20,T.INK))
@@ -194,23 +194,23 @@ static func content(spec:Dictionary)->VBoxContainer:
 			if fact.has("trend"):
 				var trend:=int(fact.trend)
 				glyph.text=trend_glyph(trend)
-				glyph.add_theme_color_override("font_color",T.MUTED if trend==0 else (T.GREEN if bool(fact.get("good",true)) else T.RED))
+				glyph.add_theme_color_override("font_color",T.MUTED if trend==0 else (T.GREEN_TEXT if bool(fact.get("good",true)) else T.RED_TEXT))
 			row.add_child(glyph)
 			var text:=_label(String(fact.get("text","")),12,T.BODY);text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.custom_minimum_size.x=INNER-18.0
 			row.add_child(text)
 	var spark:Array=spec.get("spark",[])
 	if spark.size()>=3:
 		var line:=Spark.new();line.values=spark;line.color=accent;line.custom_minimum_size=Vector2(0,26);column.add_child(line)
-		if String(spec.get("spark_label",""))!="":column.add_child(_label(String(spec.spark_label),10,T.MUTED))
+		if String(spec.get("spark_label",""))!="":column.add_child(_label(String(spec.spark_label),12,T.MUTED))
 	elif float(spec.get("meter",-1.0))>=0.0:
 		var bar:=ProgressBar.new();bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;bar.custom_minimum_size.y=6;bar.show_percentage=false;bar.value=clampf(float(spec.meter),0.0,1.0)*100.0
 		bar.add_theme_stylebox_override("background",T.flat(T.TRACK,Color(0,0,0,0),0,3));bar.add_theme_stylebox_override("fill",T.flat(accent,Color(0,0,0,0),0,3))
 		column.add_child(bar)
-		if String(spec.get("meter_label",""))!="":column.add_child(_label(String(spec.meter_label),10,T.MUTED))
+		if String(spec.get("meter_label",""))!="":column.add_child(_label(String(spec.meter_label),12,T.MUTED))
 	var action:=String(spec.get("action",""))
 	if action!="":
 		var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(rule)
-		var act:=_label(action,11,T.GOLD_BRIGHT if T.is_light() else T.GOLD);act.name="Action";act.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;act.custom_minimum_size.x=INNER
+		var act:=_label(action,12,T.GOLD_TEXT);act.name="Action";act.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;act.custom_minimum_size.x=INNER
 		column.add_child(act)
 	return column
 
