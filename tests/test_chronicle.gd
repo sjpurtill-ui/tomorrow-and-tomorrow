@@ -129,7 +129,8 @@ func test_moment_card_replaces_the_research_popup_and_never_pauses()->void:
 	assert_object(card).is_not_null()
 	assert_bool(card.showing).is_true()
 	assert_str(card.title_label.text).is_not_empty()
-	assert_object(card.picture.texture).is_not_null()
+	# Wide paintings lead as the banner; other art keeps the side picture.
+	assert_object(card.banner.texture if card.banner.visible else card.picture.texture).is_not_null()
 	assert_float(host.game_speed).is_equal(3.0)
 
 func test_moments_are_capped_per_month_and_extra_ones_are_kept_as_notices()->void:

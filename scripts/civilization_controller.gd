@@ -414,13 +414,32 @@ static func campaign_objective(id:String,enemy:String,plan:Dictionary)->void:
 static func service_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var op=WorldSimulation.military.joint_operations
+	var enemies:=war_enemies()
+	if not enemies.is_empty():ruler_strike_decision(id,plan)
 	for force:Dictionary in op.state.forces:
 		if force.owner!="player":continue
 		var base:Dictionary=op.base(int(force.base_id))
 		if base.is_empty():continue
 		var at:Vector2=op.point(base)
 		var missions:Array=op.missions_for(force)
+		# At war the fleet and air commanders take the fight to the enemy:
+		# their towns, harbours and fleets, as far as range and the ruler allow.
+		if not enemies.is_empty() and float(force.training)>=1.0 and force.get("route",[]).is_empty() and not op.logistics.busy(int(force.id)):
+			if "transport" in missions and invasion_order(id,op,force,enemies,plan):continue
+			var offensive:=offensive_target(op,force,missions,enemies)
+			if not offensive.is_empty():
+				if String(force.mission)==String(offensive.mission) and not force.region.is_empty() and op.point(force.region).distance_to(offensive.center)<=float(offensive.half):continue
+				var old_region:=String((force.region as Dictionary).get("id",""))
+				var created:Dictionary=op.create_region(String(force.domain),op.R.rectangle(offensive.center,float(offensive.half)),String(offensive.name))
+				if not created.has("error"):
+					var response:=WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":created.region,"mission":String(offensive.mission)})
+					if response.has("error"):op.remove_region(String(created.region.id))
+					else:
+						if old_region!="":op.remove_region(old_region)
+						continue
 		var mission:=STRATEGY.preferred_mission(String(force.domain),missions,plan)
+		# Striking towns waits for the ruler's own decision.
+		if mission in ["strategic_bombing","port_strike"] and preload("res://scripts/air_naval_consequences.gd").city_gate(force).has("error"):mission="hold"
 		if not force.region.is_empty():
 			if String(force.mission)!=mission:WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":force.region,"mission":mission})
 			continue
@@ -433,6 +452,88 @@ static func service_orders(id:String,plan:Dictionary={})->void:
 			var response:=WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":created.region,"mission":mission})
 			if not response.has("error"):break
 			op.remove_region(String(created.region.id))
+
+## Civilizations this ruler is at war with (ids as this ruler's world names them).
+static func war_enemies()->Array[String]:
+	var result:Array[String]=[]
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)):result.append(String(civ.id))
+	return result
+
+## A rival ruler decides, in council, whether its bombers and ships may strike
+## enemy towns: a hard, unfeeling ruler does; a gentler one only in reprisal
+## after its own towns have been struck. The decision is the ruler's alone,
+## as the human's is spoken in the Court (sovereign_weapons.gd).
+static func ruler_strike_decision(_id:String,plan:Dictionary)->void:
+	var campaign=WorldSimulation.military
+	var p:Dictionary=plan.get("personality",{})
+	var empathy:=float(p.get("empathy",.5));var assertiveness:=float(p.get("assertiveness",.5))
+	var struck:=float(WorldSimulation.state.simulation_metrics.get("war_fear",0.0))>.05
+	var hard:=empathy<.35 and assertiveness>.55
+	if not (hard or (struck and empathy<.7)):return
+	var reason:="Their towns feed and arm the armies that march on us." if hard else "They burned our towns; let them feel it in theirs."
+	for means in ["aerial_bombardment","naval_bombardment"]:
+		if not campaign.sovereign_decisions.has(means):campaign.record_ruler_decision(means,reason)
+
+## Where a commander takes a force at war: the nearest enemy fleet seen for
+## striking forces and naval bombers; the nearest enemy harbour for patrols
+## (a blockade where the commander chooses it) and raiders; the nearest enemy
+## town for bombers (or its supply roads when the ruler withholds the town).
+## Reads dated city and contact reports only: no omniscient lookup.
+static func offensive_target(op,force:Dictionary,missions:Array,enemies:Array[String])->Dictionary:
+	var G:=preload("res://scripts/joint_geography.gd")
+	var home:Vector2=op.point(op.base(int(force.base_id)))
+	var reach:=float(op.range_km(force))*.8
+	var nearest:Dictionary={};var best:=INF
+	for enemy in enemies:
+		for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities("player",enemy,false):
+			var distance:float=op.point(city).distance_to(home)
+			if distance<best and distance<=reach:best=distance;nearest=city
+	var fleet:Dictionary={}
+	for contact:Dictionary in op.state.contacts.values():
+		if String(contact.get("domain",""))!="navy" or not String(contact.get("owner","")) in enemies:continue
+		var seen:Vector2=G.unpack(contact.get("position",{}))
+		if seen.distance_to(home)<=reach and (fleet.is_empty() or int(contact.day)>int(fleet.day)):fleet=contact
+	var half:=clampf(float(op.range_km(force))*.15,15.0,60.0)
+	var gate:Dictionary=preload("res://scripts/air_naval_consequences.gd").city_gate(force)
+	if force.domain=="navy":
+		var boats:=int(force.units.get("submarine",0))+int(force.units.get("nuclear_submarine",0))
+		if "convoy_raiding" in missions and (boats>0 or String(force.mission)=="convoy_raiding") and not nearest.is_empty():
+			return {"mission":"convoy_raiding","center":op.point(nearest),"half":half*2.0,"name":"Raiding their sea lanes"}
+		if "strike_force" in missions and not fleet.is_empty():
+			return {"mission":"strike_force","center":G.unpack(fleet.position),"half":half,"name":"After their fleet"}
+		if "patrol" in missions and not nearest.is_empty():
+			return {"mission":"patrol","center":op.point(nearest),"half":half,"name":"Off %s" % String(nearest.get("name","their harbour"))}
+		return {}
+	if "naval_strike" in missions and not fleet.is_empty():
+		return {"mission":"naval_strike","center":G.unpack(fleet.position),"half":half,"name":"Strike on their fleet"}
+	if nearest.is_empty():return {}
+	if "strategic_bombing" in missions:
+		return {"mission":"strategic_bombing" if not gate.has("error") else "logistics_strike","center":op.point(nearest),"half":half,"name":"Over %s" % String(nearest.get("name","their town"))}
+	if "port_strike" in missions and not gate.has("error"):
+		return {"mission":"port_strike","center":op.point(nearest),"half":half,"name":"Over the harbour of %s" % String(nearest.get("name","their town"))}
+	if "air_superiority" in missions:
+		return {"mission":"air_superiority","center":op.point(nearest),"half":half,"name":"The sky over %s" % String(nearest.get("name","their town"))}
+	return {}
+
+## A trained transport and an army waiting at its port go against the nearest
+## known enemy coastal town, once the fleet holds the water off it
+## (joint_logistics.start checks control, range and capacity).
+static func invasion_order(id:String,op,force:Dictionary,enemies:Array[String],plan:Dictionary)->bool:
+	if not bool(plan.get("offensive",false)) or not op.organized_at_home(force):return false
+	var home:Vector2=op.point(op.base(int(force.base_id)))
+	var army_id:=0
+	for army:Dictionary in WorldSimulation.military.field_armies:
+		if bool(army.get("embarked",false)) or int(army.get("troops",0))<20:continue
+		if preload("res://scripts/joint_geography.gd").unpack(army.get("position",{})).distance_to(home)<=10.0:army_id=int(army.army_id);break
+	if army_id<=0:return false
+	var target:="";var nearest:=INF
+	for enemy in enemies:
+		for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities("player",enemy,false):
+			var distance:float=op.point(city).distance_to(home)
+			if distance<nearest and distance<=float(op.range_km(force)):nearest=distance;target=String(city.city_id)
+	if target=="":return false
+	return not WorldSimulation.submit(id,{"kind":"transport","force":int(force.id),"destination":target,"army":army_id}).has("error")
 
 ## Monthly Great Works review. A wonder is conceived when something the people
 ## live through moves this ruler (triumph, grief, a famine survived, an

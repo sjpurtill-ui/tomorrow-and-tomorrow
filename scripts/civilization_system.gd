@@ -40,7 +40,11 @@ const SCOUT_LAND_SAMPLE_KM:=8.0
 const SCOUT_ROUTE_GRID_LIMIT:=96
 const DIPLOMATIC_HISTORY_LIMIT:=24
 const CARRIED_DIPLOMATIC_ACTIONS:=["open_trade","non_aggression","send_aid","seek_peace","declare_war","leader_parley"]
+## Messages of menace (scripts/envoy_messages.gd decides how they are received).
+const HOSTILE_DIPLOMATIC_ACTIONS:=["warn","threaten","demand","ultimatum"]
+const ENVOY_MESSAGES_PATH:="res://scripts/envoy_messages.gd"
 const DIPLOMATIC_PURPOSE_LABELS:={
+	"warn":"WARN THEM OFF","threaten":"CARRY A THREAT","demand":"MAKE A DEMAND","ultimatum":"DELIVER AN ULTIMATUM",
 	"leader_parley":"NEGOTIATE WITH LEADER",
 	"goodwill":"GOODWILL MISSION","open_trade":"PROPOSE TRADE","non_aggression":"PROPOSE NON-AGGRESSION",
 	"send_aid":"DELIVER FOOD AID","seek_peace":"SEEK PEACE","declare_war":"CARRY DECLARATION OF WAR"
@@ -1505,8 +1509,12 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 	if not target_position.has("x") or not target_position.has("z"):
 		return {"error":"The settlement report has no usable map position. A returned scouting report must confirm the route before diplomats can depart."}
 	var normalized_purpose:=purpose.strip_edges().to_lower().replace(" ","_")
-	if normalized_purpose!="goodwill" and normalized_purpose not in CARRIED_DIPLOMATIC_ACTIONS: return {"error":"Unknown diplomatic purpose."}
-	if normalized_purpose in CARRIED_DIPLOMATIC_ACTIONS:
+	if normalized_purpose!="goodwill" and normalized_purpose not in CARRIED_DIPLOMATIC_ACTIONS and normalized_purpose not in HOSTILE_DIPLOMATIC_ACTIONS: return {"error":"Unknown diplomatic purpose."}
+	if normalized_purpose in HOSTILE_DIPLOMATIC_ACTIONS:
+		var menace_gate:Dictionary=load(ENVOY_MESSAGES_PATH).call("availability",civ_id,normalized_purpose)
+		if menace_gate.has("error"): return menace_gate
+		if gift_resource!="": return {"error":"A message of menace carries no gift."}
+	elif normalized_purpose in CARRIED_DIPLOMATIC_ACTIONS:
 		var availability:=player_action_availability(civ_id,normalized_purpose)
 		if availability.has("error"): return availability
 	elif bool(relation.get("at_war",false)):
@@ -1579,7 +1587,7 @@ func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goo
 		if city_intelligence.vector(known.position).distance_to(city_intelligence.vector(quote.target_position))<1.0:
 			diplomatic_mission.destination=String(known.name);break
 	rumor_network.prepare(diplomatic_mission,"player",day)
-	var gift_phrase:=" with no material gift" if delivered<=0.0 else " carrying %.1f %s" % [delivered,String(gift.resource)]
+	var gift_phrase:=("" if String(quote.purpose) in HOSTILE_DIPLOMATIC_ACTIONS else " with no material gift") if delivered<=0.0 else " carrying %.1f %s" % [delivered,String(gift.resource)]
 	var message:="%d envoys depart for %s to %s%s. The proposal does not take effect until they travel there and carry a response home; %.1f travel rations were issued." % [int(quote.personnel),String(quote.civilization),String(quote.purpose_label).to_lower(),gift_phrase,provisions]
 	_record_world_event("Diplomatic mission departs",message,"diplomacy",day)
 	return {"ok":true,"message":message,"status":diplomatic_mission_status()}
@@ -1625,6 +1633,13 @@ func _process_diplomatic_mission(day:int)->void:
 			diplomatic_mission["reception"]="The declaration has reached its destination; the state of war begins now. The envoys are returning with their observations."
 			civ=civilizations[index]
 			relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
+		elif String(diplomatic_mission.get("purpose","")) in HOSTILE_DIPLOMATIC_ACTIONS:
+			# The receiving ruler answers menace at once; the answer travels home.
+			civ["player_relation"]=relation; civilizations[index]=civ
+			load(ENVOY_MESSAGES_PATH).call("arrive",diplomatic_mission,day)
+			civ=civilizations[index]
+			relation=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
+			diplomatic_mission["reception"]="The message was delivered. Its answer remains with the returning envoys."
 		else:
 			diplomatic_mission["reception"]="The delegation reached its destination. Its answer remains with the returning envoys."
 	if bool(diplomatic_mission.get("arrival_resolved",false)) and day>=int(diplomatic_mission.get("return_day",day+1)):
@@ -1644,6 +1659,7 @@ func _process_diplomatic_mission(day:int)->void:
 		civ["player_relation"]=relation
 		civilizations[index]=civ
 		var purpose:=String(diplomatic_mission.get("purpose","goodwill"))
+		if purpose in HOSTILE_DIPLOMATIC_ACTIONS: load(ENVOY_MESSAGES_PATH).call("homecoming",diplomatic_mission,day)
 		var proposal_result:Dictionary={"ok":bool(diplomatic_mission.get("accepted",true)),"message":String(diplomatic_mission.get("outcome","The goodwill delegation was received."))}
 		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)): proposal_result=conduct_player_action(civ_id,purpose,true)
 		elif purpose=="send_aid": proposal_result={"ok":gift_resource=="Food" and gift_amount>0.0,"message":"The food aid reached %s and improved its reserves." % String(civ.name) if gift_resource=="Food" and gift_amount>0.0 else "The aid proposal arrived without food and was refused."}
@@ -5826,7 +5842,8 @@ func validate_state()->Array[String]:
 		if int(diplomatic_mission.get("arrival_day",-1))<=int(diplomatic_mission.get("depart_day",-1)): errors.append("Diplomatic mission arrival must follow departure.")
 		if int(diplomatic_mission.get("return_day",-1))<=int(diplomatic_mission.get("arrival_day",-1)): errors.append("Diplomatic mission return must follow arrival.")
 		var diplomatic_purpose:=String(diplomatic_mission.get("purpose","goodwill"))
-		if diplomatic_purpose!="goodwill" and diplomatic_purpose not in CARRIED_DIPLOMATIC_ACTIONS: errors.append("Diplomatic mission purpose is invalid.")
+		if diplomatic_purpose!="goodwill" and diplomatic_purpose not in CARRIED_DIPLOMATIC_ACTIONS and diplomatic_purpose not in HOSTILE_DIPLOMATIC_ACTIONS: errors.append("Diplomatic mission purpose is invalid.")
+		if diplomatic_mission.has("menace") and not bool(load(ENVOY_MESSAGES_PATH).call("valid_mission",diplomatic_mission.menace)): errors.append("Diplomatic message record is invalid.")
 		if not is_finite(float(diplomatic_mission.get("gift_amount",0.0))) or float(diplomatic_mission.get("gift_amount",0.0))<0.0: errors.append("Diplomatic mission gift cannot be negative or non-finite.")
 		if diplomatic_purpose=="goodwill" and float(diplomatic_mission.get("gift_amount",0.0))<=0.0: errors.append("A goodwill mission must carry a physical gift.")
 		if not is_finite(float(diplomatic_mission.get("provisions",0.0))) or float(diplomatic_mission.get("provisions",0.0))<=0.0: errors.append("Diplomatic mission must carry positive travel provisions.")

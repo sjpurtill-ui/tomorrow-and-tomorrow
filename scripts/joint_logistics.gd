@@ -79,14 +79,21 @@ func advance(day:int)->void:
 			convoy.status="outbound"
 		if float(force.efficiency)<=0:continue
 		var region:Dictionary=op.region_at(G.unpack(convoy.position),String(force.domain))
-		var raiding=op.effects.mission_power(String(convoy.owner),region,"convoy_raiding",true)
-		var escorts=op.effects.mission_power(String(convoy.owner),region,"convoy_escort",false)
-		if force.domain=="navy" and raiding>0:op._losses(force,raiding/(1+escorts)*.5)
+		var enemy:=_enemy_of(convoy)
+		if force.domain=="navy":
+			var raiding=op.effects.mission_power(String(convoy.owner),region,"convoy_raiding",true)
+			var escorts=op.effects.mission_power(String(convoy.owner),region,"convoy_escort",false)
+			if raiding>0:op._losses(force,raiding/(1+escorts)*.5,enemy,"navy")
+		else:
+			# Transport aircraft are easy prey for interceptors unless fighters cover them.
+			var hunters=op.effects.mission_power(String(convoy.owner),region,"interception",true)+op.effects.mission_power(String(convoy.owner),region,"air_superiority",true)
+			var cover=op.effects.mission_power(String(convoy.owner),region,"air_superiority",false)
+			if hunters>0:op._losses(force,hunters/(1+cover)*.4,enemy,"air")
 		var hulls=int(op.hardware(force));var previous=maxi(1,int(convoy.last_hardware))
 		if hulls<previous:
 			var lost_fraction=float(previous-hulls)/previous
 			convoy.food=float(convoy.food)*(1-lost_fraction)
-			if int(convoy.army_id)>0:op.host.apply_transport_casualties(int(convoy.army_id),lost_fraction)
+			if int(convoy.army_id)>0:op.host.apply_transport_casualties(int(convoy.army_id),lost_fraction,enemy)
 			convoy.last_hardware=hulls
 		if hulls<=0:
 			convoy.status="lost";force.mission="hold";force.region={};force.position=op.base(int(force.base_id)).position.duplicate(true)
@@ -112,8 +119,19 @@ func advance(day:int)->void:
 				convoy.delivered=convoy.food;convoy.food=0.0
 			_disembark(convoy,convoy.destination_position)
 			if bool(convoy.invasion) and index>=0:
+				# The landing is fought on the beach before any siege.
+				var support:float=op.effects.mission_power(String(convoy.owner),op.region_at(G.unpack(convoy.destination_position),"navy"),"invasion_support",false)+op.effects.mission_power(String(convoy.owner),op.region_at(G.unpack(convoy.destination_position),"air"),"close_air_support",false)
+				var landing:Dictionary=preload("res://scripts/air_naval_consequences.gd").opposed_landing(op.host.field_armies[index],convoy,clampf(support/maxf(1.0,support+50.0)*2.0,0.0,1.0))
+				var fought:="The landing was opposed: %d of ours killed and %d wounded on the beach; about %d defenders hit." % [int(landing.attacker_killed),int(landing.attacker_wounded),int(landing.defender_hit)]
+				if bool(landing.repulsed) or int(op.host.field_armies[index].get("troops",0))<=0:
+					op._event(fought+" The beach could not be held; the army is re-embarking.","navy")
+					op.host.field_armies[index].embarked=true;op.host.field_armies[index].status="embarked"
+					convoy.status="outbound"
+					var back=recall(int(convoy.id))
+					if back.has("error"):force.status=String(back.error)
+					continue
 				var order:Dictionary=op.host.order_city_operation(int(convoy.army_id),String(convoy.destination_owner),String(convoy.destination_id),true)
-				op._event("Landing completed. "+String(order.get("message",order.get("error","The general has the army ashore."))))
+				op._event(fought+" "+String(order.get("message",order.get("error","The general has the army ashore."))),"navy")
 			convoy.army_id=0
 			var result=recall(int(convoy.id))
 			if result.has("error"):force.status=String(result.error)
@@ -122,6 +140,14 @@ func advance(day:int)->void:
 		for convoy:Dictionary in op.state.convoys:
 			if convoy.status not in ["preparing","outbound","returning"]:op.state.convoys.erase(convoy);removed=true;break
 		if not removed:break
+
+## The civilization a convoy is going against (global owner), or "".
+func _enemy_of(convoy:Dictionary)->String:
+	if not bool(convoy.get("invasion",false)):return ""
+	var view:=String(convoy.get("destination_owner",""))
+	if not WorldSimulation.enabled:return view if view!="player" else ""
+	var owner:=preload("res://scripts/civilization_combat.gd").owner(view)
+	return owner if owner=="player" or WorldSimulation.actors.has(owner) else ""
 
 func _disembark(convoy:Dictionary,position:Dictionary)->void:
 	var index=int(op.host._field_army_index(int(convoy.army_id)))

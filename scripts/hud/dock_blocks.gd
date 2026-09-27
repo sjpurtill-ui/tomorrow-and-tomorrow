@@ -120,7 +120,8 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	var discovery_id:=String(block.get("discovery_id",""))
 	if discovery_id!="":
 		var definition:=DiscoverySystem.discovery_definition(discovery_id)
-		if not definition.is_empty():ResearchVisuals.paint_discovery(column,definition,120)
+		# Full width at the painting's own proportions: wide banners show whole.
+		if not definition.is_empty():ResearchVisuals.paint_hero(column,definition,110,220)
 	var title:=Tokens.make_label(String(block.get("title","A new discovery")),23,Tokens.INK)
 	var serif:Font=Tokens.voice_font()
 	title.add_theme_font_override("font",serif)

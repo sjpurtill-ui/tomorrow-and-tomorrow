@@ -12,7 +12,9 @@ const Portrait=preload("res://scripts/hud/person_portrait.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 # The painting leads each card, full width; text below always wraps.
 const CARD_WIDTH:=236.0
-const CARD_IMAGE_HEIGHT:=138.0
+## About 2:1, between the wide banner paintings (about 2.7:1) and the older
+## 3:2 and square plates, so every kind keeps most of its picture in a card.
+const CARD_IMAGE_HEIGHT:=120.0
 const CARD_GAP:=12.0
 var mode:="inquiry"
 var terrain:Node
@@ -291,7 +293,7 @@ func select(id:String,open_detail:bool=false)->void:
 	for child in detail_body.get_children():detail_body.remove_child(child);child.queue_free()
 	for item:Dictionary in records:
 		if item.id!=id:continue
-		Art.paint_discovery(detail_body,item,180 if not main.vertical else 150)
+		Art.paint_hero(detail_body,item,100,200 if not main.vertical else 180)
 		Art.label(detail_body,Art.name_for(item.domain).to_upper(),12,Art.text_color(item.domain),true)
 		Art.label(detail_body,item.name,26,T.INK,true).add_theme_font_override("font",Art.voice_font())
 		Art.label(detail_body,Art.status(item),14,Art.text_color(item.domain),true)

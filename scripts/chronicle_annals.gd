@@ -54,7 +54,7 @@ const ROUTINE_SCOUT:=["turned the party back","hurt on the road","who kept movin
 const REGARD_WORDS:={"worships":"speak of the god with love and fear together","reveres":"speak of the god with reverence","fearless_love":"speak of the god warmly and without fear",
 	"terror":"lower their voices when they speak of the god","hates_dread":"fear the god, and some curse the god in whispers","resents":"grumble about the god when they think no one hears",
 	"wary":"keep a careful distance from the god","cold":"speak of the god less and less","dutiful":"do what the god asks, without much feeling"}
-const ROLE_PLAIN:={"engineer":"builder","physician":"healer","scholar":"one who asked why things are so","agronomist":"grower","organizer":"one who ordered the common work","artist":"carver and painter","explorer":"pathfinder","general":"war leader","architect":"master builder"}
+const ROLE_PLAIN:={"engineer":"builder","physician":"healer","scholar":"one who asked why things are so","agronomist":"grower","organizer":"one who ordered the common work","artist":"carver and painter","explorer":"pathfinder","general":"war leader","architect":"master builder","admiral":"fleet commander","air commander":"air commander"}
 const DIVINE_WORDS:={"terrify":"The god's fury fell on %s before the court.","penance":"%s was made to fast and keep vigil for the god.","cast_out":"%s was cast out at the god's word.",
 	"strike_down":"%s was put to death at the god's word.","bless":"The god blessed %s before everyone.","boon":"The god gave %s a gift from the stores.","raise_up":"The god raised %s above the others.",
 	"flight":"%s fled beyond the god's reach."}
@@ -587,6 +587,17 @@ const MILD_PER_YEAR:=12
 static func note_mild(c:Dictionary,fact:Dictionary)->void:
 	var list:=_list_of(acc(c,int(fact.get("end",-1))),"mild")
 	if list.size()<MILD_PER_YEAR:list.append(fact.duplicate(true))
+
+
+## Losses in the war at sea and in the air (air_naval_consequences.gd): the
+## routine ones are counted here and told once, in the year's entry.
+const WAR_LOSS_KEYS:=["sunk","downed","crew_dead","civilians","raids","drowned","enemy_sunk","enemy_downed","enemy_civilians","enemy_raids"]
+static func note_war_losses(c:Dictionary,fact:Dictionary)->void:
+	var a:=acc(c,int(fact.get("day",-1)))
+	if not a.get("war_losses") is Dictionary:a["war_losses"]={}
+	var totals:Dictionary=a.war_losses
+	for key in WAR_LOSS_KEYS:
+		if int(fact.get(key,0))>0:totals[key]=int(totals.get(key,0))+int(fact[key])
 
 
 static func note_learned(c:Dictionary,name:String,day:int)->void:

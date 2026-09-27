@@ -1,3 +1,9 @@
+## September 26 — chronological art correction: Classical Other batch 10 HELD
+
+User requires earliest eras first, not priority thresholds across eras followed by later non-priority batches. Stop later-era expansion until actual coverage is audited from the earliest game discoveries onward, including years 0-600 omitted by the September 25 inventory. That inventory listed 319 Late Bronze/Iron discoveries needing art, of which only 37 were priority; finishing those 37 did not establish complete early coverage. Current remaining counts require a fresh effective-lookup audit.
+
+Worker `11de2e22bb610524b85d92b3ddd78fb60862f226` and tested integration branch `codex/integrate-classical-other-10` at `64be427a4176e712eada240126957c4d6cc5db29` are preserved and pushed, NOT integrated. All 21 technical card lookup/crop checks passed, but technical validation does not establish period accuracy. Review later-looking rural clothing in `common_pasture_fees` and `field_vole_control`, and audit comparable earlier ecology paintings. Preserve installed work; do not bulk-revert or overwrite it. Art worker has been directed to stop further generation and report chronological coverage before selecting the earliest missing batch.
+
 ## September 26 — Classical other discoveries, batch 9: INTEGRATED
 
 Worker `9d0c81dea9438b60a1cb5675a024b1448827dbb1`, branch `codex/research-art-classical-other-09`, base `478580e3`, merged with current main `365d11c0` as `52208e91`. Adds 21 subject paintings, provenance sidecars, reviewed crop sheets/source scripts and manifest entries. Earlier approved paintings and intervening war-front changes remain included. No lookup assignment collision was found. This is the ninth non-priority Classical batch, not the complete inventory.

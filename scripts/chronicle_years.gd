@@ -55,7 +55,7 @@ const DIVINE_WORDS:={"terrify":"The god's fury fell on %s before the court.","pe
 	"maim_envoy":"%s, an envoy, was maimed at the god's word.","shame_envoy":"%s, an envoy, was shamed and sent home."}
 ## Figures' callings in the people's own words.
 const ROLE_WORDS:={"General":"war leader","Scholar":"one who asks why things are so","Physician":"healer","Engineer":"builder","Agronomist":"grower who compares the harvests","Organizer":"one who orders the common work",
-	"Artist":"carver and painter","Explorer":"pathfinder","Architect":"master builder"}
+	"Artist":"carver and painter","Explorer":"pathfinder","Architect":"master builder","Admiral":"fleet commander","Air Commander":"air commander"}
 ## How the god answered an envoy, in the third person, by request and answer.
 ## {civ} is the people ("the Esurai"); other slots come from the kept facts.
 const ENVOY_WORDS:={
@@ -162,6 +162,7 @@ static func items(a:Dictionary,annals:Array,ctx:Dictionary)->Array:
 	_dead(a,annals,ctx,out)
 	_learning(a,annals,ctx,out,last_sig)
 	_abroad(a,annals,ctx,out)
+	_war_at_sea_and_air(a,ctx,out)
 	_people(a,annals,ctx,out,last_sig)
 	_aims_and_works(a,ctx,out)
 	_roads(a,annals,ctx,out)
@@ -539,6 +540,30 @@ static func _lowered(names:Array)->Array:
 ## this year is told.
 const ABROAD_YEARS:=8
 const VOW_RANK:={"known":1,"warn":2,"heir":2,"fulfilled":3}
+## The year's losses at sea and in the air, told plainly in one or two lines
+## (the notable ones were told as they happened).
+static func _war_at_sea_and_air(a:Dictionary,ctx:Dictionary,out:Array)->void:
+	var w:Dictionary=a.get("war_losses",{}) if a.get("war_losses") is Dictionary else {}
+	if w.is_empty():return
+	var boats:="boats" if String(ctx.get("era",""))=="tally" else "ships"
+	var sunk:=int(w.get("sunk",0));var downed:=int(w.get("downed",0));var dead:=int(w.get("crew_dead",0))
+	var parts:PackedStringArray=[]
+	if sunk>0:parts.append("%d %s" % [sunk,boats if sunk!=1 else boats.trim_suffix("s")])
+	if downed>0:parts.append("%d aircraft" % downed)
+	if not parts.is_empty():
+		var enemy:=int(w.get("enemy_sunk",0))+int(w.get("enemy_downed",0))
+		var text:="The people lost %s in the fighting, and %d of the crews died." % [" and ".join(parts),dead]
+		if enemy>0:text+=" The enemy lost %d." % enemy
+		out.append({"t":"war_losses","w":5.0+minf(4.0,float(dead)/50.0),"sig":"","text":text})
+	elif int(w.get("enemy_sunk",0))+int(w.get("enemy_downed",0))>0:
+		out.append({"t":"war_losses","w":4.0,"sig":"","text":say(ctx,"war_losses",["Our %s and aircraft sank or brought down %d of the enemy's without loss." % [boats,int(w.get("enemy_sunk",0))+int(w.get("enemy_downed",0))],"The enemy lost %d of their %s and aircraft to ours; we lost none." % [int(w.get("enemy_sunk",0))+int(w.get("enemy_downed",0)),boats]])})
+	if int(w.get("drowned",0))>0:out.append({"t":"war_losses","w":6.0,"sig":"","text":"%d soldiers drowned when their transports went down." % int(w.drowned)})
+	if int(w.get("raids",0))>0:
+		out.append({"t":"war_losses","w":5.0+minf(4.0,float(int(w.get("civilians",0)))/100.0),"sig":"","text":"Enemy raiders struck our towns on %d days and killed %d people in them." % [int(w.raids),int(w.get("civilians",0))]})
+	if int(w.get("enemy_raids",0))>0:
+		out.append({"t":"war_losses","w":4.0,"sig":"","text":"Our bombers struck the enemy's towns on %d days; about %d of their people died." % [int(w.enemy_raids),int(w.get("enemy_civilians",0))]})
+
+
 static func _abroad(a:Dictionary,annals:Array,ctx:Dictionary,out:Array)->void:
 	var before:={}
 	for m in annals.slice(maxi(0,annals.size()-ABROAD_YEARS)):

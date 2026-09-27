@@ -353,7 +353,6 @@ var scout_dispatch_previous_speed:=0.0
 var pending_scout_target_id:="open_world"
 var pending_scout_heading:=""
 var diplomat_dispatch_panel:Control
-var diplomat_dispatch_status:Label
 var diplomat_dispatch_previous_speed:=0.0
 var pending_diplomat_civ_id:=""
 var pending_diplomat_action:="goodwill"
@@ -18815,118 +18814,41 @@ func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world
 	_update_time_interface()
 
 
-func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="goodwill")->void:
+func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="")->void:
+	# The sheet itself lives in scripts/hud/envoy_dispatch_screen.gd.
 	var replacing:=is_instance_valid(diplomat_dispatch_panel)
-	if replacing: diplomat_dispatch_panel.queue_free()
+	if replacing:
+		diplomat_dispatch_panel.tree_exited.disconnect(_on_diplomat_dispatch_closed)
+		diplomat_dispatch_panel.queue_free()
 	if civ_id!="": pending_diplomat_civ_id=civ_id
-	pending_diplomat_action=purpose.strip_edges().to_lower().replace(" ","_")
-	if pending_diplomat_action!="goodwill" and pending_diplomat_action not in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS: pending_diplomat_action="goodwill"
+	pending_diplomat_action=purpose
 	if not replacing:diplomat_dispatch_previous_speed=game_speed
 	_set_game_speed(0.0)
-	diplomat_dispatch_panel=Control.new()
-	diplomat_dispatch_panel.name="DiplomatDispatchModal"
-	diplomat_dispatch_panel.size=get_viewport().get_visible_rect().size
-	diplomat_dispatch_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	diplomat_dispatch_panel.z_index=72
-	interface_layer.add_child(diplomat_dispatch_panel)
-	var dimmer:=ColorRect.new(); dimmer.size=diplomat_dispatch_panel.size; dimmer.color=Color(0.005,0.010,0.012,0.88); dimmer.mouse_filter=Control.MOUSE_FILTER_STOP; diplomat_dispatch_panel.add_child(dimmer)
-	dimmer.gui_input.connect(func(event:InputEvent):
-		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed:_close_diplomat_dispatch_panel())
-	var modal:=PanelContainer.new(); modal.mouse_filter=Control.MOUSE_FILTER_STOP; modal.size=Vector2(minf(720.0,diplomat_dispatch_panel.size.x-80.0),minf(530.0,diplomat_dispatch_panel.size.y-64.0)); modal.position=(diplomat_dispatch_panel.size-modal.size)*0.5; modal.add_theme_stylebox_override("panel",_population_report_style(Color("#9b8761"))); diplomat_dispatch_panel.add_child(modal)
-	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",9); modal.add_child(root)
-	var purpose_label:=String(CivilizationSystem.DIPLOMATIC_PURPOSE_LABELS.get(pending_diplomat_action,"SEND DIPLOMATS"))
-	var heading:=Label.new(); heading.text=purpose_label; heading.add_theme_font_size_override("font_size",22); heading.add_theme_color_override("font_color",Color("#e4d3ac")); root.add_child(heading)
-	var explanation:=Label.new(); explanation.text="Choose a destination and send a delegation. When their reply comes home, the game pauses and opens your conversation."; explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.add_theme_font_size_override("font_size",12); explanation.add_theme_color_override("font_color",Color("#aeb6b1")); root.add_child(explanation)
-	var status:=CivilizationSystem.diplomatic_mission_status()
-	if bool(status.get("active",false)):
-		var journey=preload("res://scripts/hud/diplomatic_journey_card.gd").new()
-		journey.status=status;root.add_child(journey)
-		var actions:=HBoxContainer.new();root.add_child(actions)
-		var show:=Button.new();show.text="Show destination on map";actions.add_child(show)
-		show.pressed.connect(func():
-			_close_diplomat_dispatch_panel();_focus_known_world_point(String(status.civ_id),"settlement"))
-		var talk:=Button.new();talk.text="View leader & conversation";actions.add_child(talk)
-		talk.pressed.connect(func():
-			_close_diplomat_dispatch_panel();ForeignDiplomacy.open(String(status.civ_id)))
-	else:
-		var contacts:Array[Dictionary]=[]
-		for profile_variant in CivilizationSystem.known_competition_snapshot().get("leaders",[]):
-			var profile:Dictionary=profile_variant
-			if String(profile.get("id",""))!="player" and bool((profile.get("player_relation",{}) as Dictionary).get("home_location_known",false)): contacts.append(profile)
-		if contacts.is_empty():
-			var none:=Label.new(); none.text="NO CONFIRMED DIPLOMATIC DESTINATION\nKnowing a people exists does not reveal its home. Send scouts to investigate a returned contact site; only their returned location report permits a diplomatic journey."; none.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; none.size_flags_vertical=Control.SIZE_EXPAND_FILL; none.add_theme_font_size_override("font_size",16); none.add_theme_color_override("font_color",Color("#9ea7a2")); root.add_child(none)
-		else:
-			var latest:Dictionary=status.get("latest",{})
-			var latest_observations:Array=latest.get("observations",[])
-			if not latest.is_empty():
-				var returned_report:=Label.new(); returned_report.text="REPLY FROM %s\n%s" % [String(latest.get("civilization","STRANGERS")),String(latest.get("outcome","Your envoys returned."))]; returned_report.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; returned_report.add_theme_font_size_override("font_size",10); returned_report.add_theme_color_override("font_color",Color("#9fc1b8")); root.add_child(returned_report)
-			var selector:=OptionButton.new(); selector.custom_minimum_size=Vector2(0,38); root.add_child(selector)
-			var selected_index:=0
-			for contact_index in contacts.size():
-				var profile:Dictionary=contacts[contact_index]
-				selector.add_item(String(profile.get("name","STRANGERS")))
-				selector.set_item_metadata(contact_index,String(profile.get("id","")))
-				if String(profile.get("id",""))==pending_diplomat_civ_id: selected_index=contact_index
-			selector.select(selected_index)
-			pending_diplomat_civ_id=String(selector.get_item_metadata(selected_index))
-			var gift_grid:=GridContainer.new(); gift_grid.columns=2; gift_grid.size_flags_vertical=Control.SIZE_EXPAND_FILL; gift_grid.add_theme_constant_override("h_separation",8); gift_grid.add_theme_constant_override("v_separation",8); root.add_child(gift_grid)
-			_populate_diplomatic_gift_buttons(gift_grid,pending_diplomat_civ_id,pending_diplomat_action)
-			selector.item_selected.connect(_select_diplomat_target.bind(selector,gift_grid,pending_diplomat_action))
-	diplomat_dispatch_status=Label.new(); diplomat_dispatch_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; diplomat_dispatch_status.add_theme_font_size_override("font_size",11); diplomat_dispatch_status.add_theme_color_override("font_color",Color("#aeb6b2")); root.add_child(diplomat_dispatch_status)
-	var footer:=HBoxContainer.new(); footer.alignment=BoxContainer.ALIGNMENT_END; root.add_child(footer)
-	var close:=Button.new(); close.text="CLOSE"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(_close_diplomat_dispatch_panel); footer.add_child(close)
+	var sheet:=preload("res://scripts/hud/envoy_dispatch_screen.gd").new()
+	sheet.civ_id=pending_diplomat_civ_id; sheet.purpose=purpose
+	sheet.z_index=72
+	sheet.sent.connect(func(message:String)->void:
+		if travel_status_label: travel_status_label.text=message
+		_update_time_interface())
+	sheet.show_on_map.connect(func(id:String)->void:_focus_known_world_point(id,"settlement"))
+	sheet.tree_exited.connect(_on_diplomat_dispatch_closed)
+	diplomat_dispatch_panel=sheet
+	interface_layer.add_child(sheet)
 
 
-func _select_diplomat_target(index:int,selector:OptionButton,gift_grid:GridContainer,purpose:String)->void:
-	pending_diplomat_civ_id=String(selector.get_item_metadata(index))
-	for child in gift_grid.get_children(): child.queue_free()
-	_populate_diplomatic_gift_buttons(gift_grid,pending_diplomat_civ_id,purpose)
+func _on_diplomat_dispatch_closed()->void:
+	diplomat_dispatch_panel=null
+	_set_game_speed(diplomat_dispatch_previous_speed)
 
 
-func _populate_diplomatic_gift_buttons(gift_grid:GridContainer,civ_id:String,purpose:String="goodwill")->void:
-	var choices:Array[Dictionary]=[]
-	if purpose in CivilizationSystem.CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid":
-		choices.append({"resource":"","amount":0.0,"available":0.0,"can_send":true,"label":"NO GIFT","reception":"PROPOSAL ONLY"})
-	for gift_variant in CivilizationSystem.diplomatic_gift_options(civ_id):
-		var gift:Dictionary=gift_variant
-		if purpose=="declare_war": continue
-		if purpose=="send_aid" and String(gift.resource)!="Food": continue
-		choices.append(gift)
-	for gift in choices:
-		var gift_resource:=String(gift.get("resource",""))
-		var quote:=CivilizationSystem.diplomatic_mission_quote(civ_id,gift_resource,purpose)
-		var button:=Button.new(); button.custom_minimum_size=Vector2(0,84); button.size_flags_horizontal=Control.SIZE_EXPAND_FILL; button.alignment=HORIZONTAL_ALIGNMENT_LEFT; button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; button.add_theme_font_size_override("font_size",11)
-		var choice_detail:="PROPOSAL ONLY" if gift_resource=="" else "AVAILABLE %.1f  •  %s" % [float(gift.get("available",0.0)),String(gift.get("reception","gift")).to_upper()]
-		if quote.has("error"): choice_detail="BLOCKED  •  %s" % String(quote.error).replace("\n"," ").left(76)
-		button.text="%s\n%s" % [String(gift.get("label","NO GIFT")).to_upper(),choice_detail]
-		button.disabled=quote.has("error")
-		button.tooltip_text=("BLOCKED  %s\nNEXT  Restore the missing destination, people, food, or gift stock and finish any active delegation." % String(quote.error)) if button.disabled else "ACTION  Send %d envoys on a %.0f km physical journey.\nCOST  %.1f Food travel rations%s.\nCONSEQUENCE  The proposal, reply, route observations, and settlement intelligence become known only after the %d-day round trip." % [int(quote.get("personnel",0)),float(quote.get("distance_km",0.0)),float(quote.get("provisions",0.0)),(" plus the selected gift" if gift_resource!="" else ""),int(quote.get("total_days",0))]
-		button.pressed.connect(_dispatch_diplomat_from_actions.bind(civ_id,gift_resource,purpose)); gift_grid.add_child(button)
-
-
-func _dispatch_diplomat_from_actions(civ_id:String,gift_resource:String,purpose:String="goodwill")->void:
-	var result:=CivilizationSystem.dispatch_diplomat(civ_id,gift_resource,purpose)
-	if result.has("error"):
-		if diplomat_dispatch_status:
-			diplomat_dispatch_status.text=String(result.error)
-			diplomat_dispatch_status.add_theme_color_override("font_color",Color("#d77a68"))
-		return
-	if travel_status_label: travel_status_label.text="DIPLOMATS DEPARTED  •  %s  •  RESPONSE DUE ONLY ON RETURN" % String(CivilizationSystem.DIPLOMATIC_PURPOSE_LABELS.get(purpose,"MISSION"))
-	_open_diplomat_dispatch_panel(civ_id,purpose)
-	if diplomat_dispatch_status:diplomat_dispatch_status.text=String(result.get("message","Delegation dispatched."))
-	_update_time_interface()
-
-
-func _open_diplomat_for_civ(civ_id:String,purpose:String="goodwill")->void:
+func _open_diplomat_for_civ(civ_id:String,purpose:String="")->void:
 	_close_civilizations_panel()
 	_open_diplomat_dispatch_panel(civ_id,purpose)
 
 
 func _close_diplomat_dispatch_panel()->void:
+	# Speed is restored when the sheet leaves the tree.
 	if diplomat_dispatch_panel and is_instance_valid(diplomat_dispatch_panel): diplomat_dispatch_panel.queue_free()
-	diplomat_dispatch_panel=null
-	diplomat_dispatch_status=null
-	_set_game_speed(diplomat_dispatch_previous_speed)
 
 
 func _dispatch_scouts(duration_days:int)->void:

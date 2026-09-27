@@ -29,8 +29,11 @@ func _page()->void:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);records.add_child(row)
 		var date:=VBoxContainer.new();date.custom_minimum_size.x=72;row.add_child(date)
 		date.add_child(_serif("%d" % (int(event.day)/365+1),24));date.add_child(T.make_label("Year · day %d" % (posmod(int(event.day),365)+1),10,T.MUTED))
-		var picture:=TextureRect.new();picture.custom_minimum_size=Vector2(104,92);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		picture.texture=Buildings.texture(int(event.get("art",0))) if event.kind in ["Founding","Building"] else Visuals.for_discovery(event)
+		# Each picture sits whole on the paper at its own proportions, like a
+		# plate in a ledger: a wide banner painting spans the slot, a square one
+		# keeps paper either side. The slot is wide enough that banners read.
+		var picture:=TextureRect.new();picture.custom_minimum_size=Vector2(172,92);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		picture.texture=Buildings.texture(int(event.get("art",0))) if event.kind in ["Founding","Building"] else Visuals.thumbnail_for(event)
 		if picture.texture==null:picture.texture=Visuals.art("knowledge")
 		row.add_child(picture)
 		var description:=VBoxContainer.new();description.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(description)

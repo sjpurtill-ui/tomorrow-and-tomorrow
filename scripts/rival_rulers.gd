@@ -421,6 +421,11 @@ static func _succeed(civ_id:String,day:int)->void:
 # --------------------------------------------------------------------------
 
 static func weight(situation_type:String,civ_id:String)->float:
+	## Your own threats tilt what their envoys bring (envoy_messages.gd): a
+	## cowed people demands less, a defiant or emboldened one tests you more.
+	return _weight(situation_type,civ_id)*float((load("res://scripts/envoy_messages.gd") as GDScript).call("rival_weight",situation_type,civ_id))
+
+static func _weight(situation_type:String,civ_id:String)->float:
 	## Grudges make hostile business likelier and warm business rarer; kinship
 	## the reverse. A people whose envoys were harmed brings no gifts at all,
 	## only terrified tribute (when dread rules them) or demands.

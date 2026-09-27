@@ -155,8 +155,8 @@ func test_stone_art_is_consistent_in_research_card_and_inspector()->void:
 	# paper painting inside that art window (EarlyCivArt.active), else the subject art.
 	var expected:=Art.source_texture(Art.for_discovery({"id":"stone_sorting"})).resource_path
 	if not preload("res://scripts/hud/early_civ_art.gd").active():expected="res://assets/ui/research/stone-selection-v1.png"
-	assert_str(Art.source_texture(view.bindings.stone_sorting.painting.texture).resource_path).is_equal(expected)
-	assert_str(Art.source_texture(view.detail_body.get_child(0).texture).resource_path).is_equal(expected)
+	assert_str(Art.source_path(view.bindings.stone_sorting.painting.texture)).is_equal(expected)
+	assert_str(Art.source_path(view.detail_body.get_child(0).texture)).is_equal(expected)
 
 func test_reviewed_images_resolve_their_explicit_assignments()->void:
 	var parent:VBoxContainer=auto_free(VBoxContainer.new());add_child(parent)
@@ -166,7 +166,7 @@ func test_reviewed_images_resolve_their_explicit_assignments()->void:
 		assert_object(picture.texture).is_not_null()
 		# research_600 paintings (data/research/art_600.json) take precedence over reviewed subject art;
 		# in the early-civilization window the early paper paintings do too.
-		assert_str(picture.texture.resource_path).is_equal(_expected_art(id))
+		assert_str(Art.source_path(picture.texture)).is_equal(_expected_art(id))
 		assert_int(Art.textures.size()).is_less_equal(Art.CACHE_LIMIT)
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()

@@ -15,20 +15,21 @@ var logistics=preload("res://scripts/joint_logistics.gd").new(self)
 var effects=preload("res://scripts/joint_effects.gd").new(self)
 var rival=preload("res://scripts/joint_rivals.gd").new(self)
 var host:Node
-var state:Dictionary={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"next_id":1,"last_day":-1}
+var state:Dictionary={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"wounded":[],"captured_holding":0,"raiding":{},"raids_out":{},"war_ledger":{},"next_id":1,"last_day":-1}
 func _init(campaign:Node)->void:host=campaign
 func reset()->void:
 	geography.route_cache.clear()
-	state={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"next_id":1,"last_day":-1}
+	state={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"wounded":[],"captured_holding":0,"raiding":{},"raids_out":{},"war_ledger":{},"next_id":1,"last_day":-1}
 func personnel()->int:
 	var total:=0
 	for force:Dictionary in state.forces:
 		if String(force.owner)=="player":total+=crew(force)
-	return total
+	# Wounded crews recovering and prisoners not yet counted with the army.
+	return total+wounded_count()+int(state.get("captured_holding",0))
 func crew(force:Dictionary)->int:
 	var total:=0
 	for id:String in force.units:total+=int(force.units[id])*int(C.UNITS[id].crew)
-	return total
+	return maxi(0,total-int(force.get("crew_shortfall",0)))
 func base(id:int)->Dictionary:
 	for value:Dictionary in state.bases:
 		if int(value.id)==id:return value
@@ -172,6 +173,10 @@ func assign(id:int,region:Dictionary,mission:String)->Dictionary:
 	if mission not in missions_for(record):return {"error":"This force is not equipped for that mission."}
 	if logistics.busy(id):return {"error":"This force is carrying a convoy. Complete or recall that operation first."}
 	if mission=="transport":return {"error":"Choose a destination and cargo through Transport; crews need a concrete embarkation order."}
+	# Striking a city is the ruler's decision, not the commander's (sovereign_weapons.gd).
+	if mission in ["strategic_bombing","port_strike"]:
+		var gate:Dictionary=preload("res://scripts/air_naval_consequences.gd").city_gate(record)
+		if gate.has("error"):return {"error":String(gate.error),"kind":"authority"}
 	if not _valid_position(region.get("position",{})) and mission!="hold":return {"error":"Choose a valid region on the world map."}
 	if mission!="hold":
 		if region.get("domain","")!=record.domain or not region.has("position"):return {"error":"Choose the matching sea or air region."}
@@ -240,6 +245,8 @@ func _hostile(a:String,b:String)->bool:
 func _power(record:Dictionary,key:String)->float:
 	var value:=0.0
 	for id:String in record.units:value+=float(C.UNITS[id].get(key,0))*int(record.units[id])
+	var shortfall:=int(record.get("crew_shortfall",0))
+	if shortfall>0:value*=clampf(1.0-float(shortfall)/maxf(1.0,float(full_crew(record))),.3,1.0)
 	return value*float(record.condition)*(.5+.5*float(record.training))*(.7+.3*float(record.get("proficiency",.45)))*float(record.efficiency)
 func _event(message:String,domain:String="")->void:
 	state.events.push_front({"day":int(state.last_day),"text":message,"domain":domain})
@@ -251,7 +258,7 @@ func _event(message:String,domain:String="")->void:
 func _choose_zone_tactic(record:Dictionary)->void:
 	var Tactics:=preload("res://scripts/battle_tactics.gd")
 	var owner:=String(record.get("owner",""))
-	var known:=Tactics.zone_known(record,C.UNITS,Tactics.known_for_player() if owner=="player" else [])
+	var known:=Tactics.zone_known(record,C.UNITS,(WorldSimulation.state.known_discoveries as Array) if owner=="player" else [])
 	var context:={"port":false,"escort":false}
 	var region:Dictionary=record.get("region",{})
 	if record.domain=="navy" and not region.is_empty() and record.mission in ["patrol","strike_force"]:
@@ -265,22 +272,170 @@ func _choose_zone_tactic(record:Dictionary)->void:
 	record["tactic"]=chosen
 	if chosen!="" and owner=="player":
 		_event("%s: %s." % [String(record.get("name","The force")),Tactics.name_of(chosen,preload("res://scripts/hud/era_words.gd").stage())],String(record.domain))
-func _losses(record:Dictionary,damage:float)->void:
+## Damage taken by a force. Whole hulls or airframes are lost as damage
+## accumulates; their crews are killed, wounded, rescued or captured
+## (air_naval_consequences.gd), and damage short of a loss wounds and kills
+## some crew too. `source` is the global owner who did it ("" if unknown).
+func _losses(record:Dictionary,damage:float,source:String="",by_domain:String="")->void:
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var strength_before:=0.0
+	for id:String in record.units:strength_before+=maxf(1.0,float(C.UNITS[id].defense)*3.0)*int(record.units[id])
+	var hardware_before:=hardware(record)
 	record.damage=float(record.damage)+maxf(0,damage)
 	record.condition=maxf(.1,float(record.condition)-damage*.015)
+	var home:=base(int(record.base_id))
+	var own_ground:=source=="" or home.is_empty() or force_position(record).distance_to(point(home))<=maxf(150.0,range_km(record)*.35)
+	var totals:={"killed":0,"wounded":0,"captured":0,"rescued":0}
+	var story:={"sunk":0,"downed":0,"crew":0,"force":String(record.get("name","")),"type_label":"","by":"aircraft" if by_domain=="air" else ("guns" if by_domain=="ground" else "ships")}
+	var died_share:=0.0
 	for id:String in record.units:
 		var durability:=maxf(1.0,float(C.UNITS[id].defense)*3.0)
 		var lost:=mini(int(record.units[id]),floori(float(record.damage)/durability))
 		if lost<=0:continue
 		record.units[id]-=lost;record.damage-=lost*durability
-		var deaths:=0 if id in ["recon_drone","strike_drone"] else lost*int(C.UNITS[id].crew)
-		if record.owner=="player":WorldSimulation.state.register_population_deaths(deaths,"Killed in battle")
-		else:
-			var index:=WorldSimulation.world._civilization_index(String(record.owner))
-			if index>=0:WorldSimulation.world.civilizations[index]=WorldSimulation.world._remove_foreign_scout_population(WorldSimulation.world.civilizations[index],deaths,true)
-		if record.owner=="player" or state.contacts.has("player:%d" % int(record.id)):_event("%s lost %d %s." % [record.name,lost,C.UNITS[id].label],String(record.domain))
+		var fate:=AN.crew_casualties(id,lost,own_ground,hash("%s:%d:%d:%d:%s" % [String(WorldSimulation.actor_id),int(record.id),int(state.last_day),hardware_before,id]))
+		if source=="":fate.rescued=int(fate.rescued)+int(fate.captured);fate.captured=0
+		for key in totals:totals[key]=int(totals[key])+int(fate[key])
+		died_share=maxf(died_share,float(AN.DIED_OF_WOUNDS.get(AN.profile(id),.1)))
+		if record.domain=="navy":story.sunk=int(story.sunk)+lost
+		else:story.downed=int(story.downed)+lost
+		story.crew=int(story.crew)+int(fate.people);story.type_label=String(C.UNITS[id].label)
+		if record.owner=="player" or state.contacts.has("player:%d" % int(record.id)):
+			var crew_note:=""
+			if int(fate.people)>0:crew_note=" %d of the crew killed, %d wounded, %d picked up%s." % [int(fate.killed),int(fate.wounded),int(fate.rescued),", %d taken prisoner" % int(fate.captured) if int(fate.captured)>0 else ""]
+			_event("%s lost %d %s.%s" % [record.name,lost,C.UNITS[id].label,crew_note],String(record.domain))
+	# Hits short of a loss still kill and wound crews aboard.
+	if damage>0.0 and hardware(record)>0 and strength_before>0.0:
+		var hurt:=AN.damaged_crew_casualties(crew(record),damage/strength_before,hash("%s:%d:%d:%f:hit" % [String(WorldSimulation.actor_id),int(record.id),int(state.last_day),float(record.damage)]))
+		totals.killed=int(totals.killed)+int(hurt.killed);totals.wounded=int(totals.wounded)+int(hurt.wounded)
+		record["crew_shortfall"]=mini(int(record.get("crew_shortfall",0))+int(hurt.killed)+int(hurt.wounded),full_crew(record))
+		if died_share<=0.0:died_share=float(AN.DIED_OF_WOUNDS.get(AN.profile(String(record.units.keys()[0])),.1)) if not record.units.is_empty() else .1
+	record["crew_shortfall"]=mini(int(record.get("crew_shortfall",0)),full_crew(record))
+	var lost_hulls:=hardware_before-hardware(record)
+	if int(totals.killed)+int(totals.wounded)+int(totals.captured)+int(totals.rescued)<=0 and lost_hulls<=0:return
+	_commit_crew_casualties(record,source,totals,died_share,story)
+	if lost_hulls>0:_commander_losses(record,float(lost_hulls)/maxf(1,hardware_before),hardware(record)==0,source)
+
+## The crew's fates reach the people: the dead are buried, the wounded wait in
+## the service's recovery pool, the rescued return to the depot, prisoners go
+## to the enemy's cages and wait for an exchange.
+func _commit_crew_casualties(record:Dictionary,source:String,totals:Dictionary,died_share:float,story:Dictionary)->void:
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var killed:=int(totals.killed);var wounded:=int(totals.wounded);var captured:=int(totals.captured);var rescued:=int(totals.rescued)
+	var victim:=String(WorldSimulation.actor_id) if record.owner=="player" else String(record.owner)
+	if record.owner=="player":
+		if killed>0:
+			WorldSimulation.state.register_population_deaths(killed,"Killed in battle")
+			host._record_aggregate_military_deaths(killed,"Lost at sea" if record.domain=="navy" else "Killed in the air")
+		_add_wounded(wounded,died_share)
+		host.aggregate_recruits=int(host.aggregate_recruits)+rescued
+		if captured>0:
+			if not host.home_army.is_empty():host.home_army["captured_pool"]=int(host.home_army.get("captured_pool",0))+captured
+			else:state["captured_holding"]=int(state.get("captured_holding",0))+captured
+	else:
+		var index:=WorldSimulation.world._civilization_index(String(record.owner))
+		if index>=0 and killed>0:WorldSimulation.world.civilizations[index]=WorldSimulation.world._remove_foreign_scout_population(WorldSimulation.world.civilizations[index],killed,true)
+	if captured>0 and source!="":
+		if WorldSimulation.enabled:
+			if source=="player" or WorldSimulation.actors.has(source):WorldSimulation.scoped(source,func()->void:WorldSimulation.military.receive_scout_captives(captured))
+		elif source=="player":host.receive_scout_captives(captured)
+	AN.note_losses(victim,source,{"military_dead":killed,"wounded":wounded,"captured":captured},story)
+
+func full_crew(record:Dictionary)->int:
+	var total:=0
+	for id:String in record.units:total+=int(record.units[id])*int(C.UNITS[id].crew)
+	return total
+
+## Wounded crews recover in the service's own pool, counted in its strength:
+## after RECOVERY_DAYS some have died of their wounds, a fifth never return,
+## the rest go back to the depot.
+func _add_wounded(count:int,died_share:float)->void:
+	if count<=0:return
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var due:=int(WorldSimulation.state.elapsed_days)+AN.RECOVERY_DAYS
+	var pool:Array=state.get_or_add("wounded",[])
+	var fatal:=roundi(float(count)*clampf(died_share,0.0,1.0))
+	if not pool.is_empty() and int(pool.back().due)==due or pool.size()>=AN.MAX_WOUNDED_COHORTS:
+		var last:Dictionary=pool.back();last.count=int(last.count)+count;last.fatal=int(last.fatal)+fatal
+	else:pool.append({"due":due,"count":count,"fatal":fatal})
+
+func wounded_count()->int:
+	var total:=0
+	for cohort:Dictionary in state.get("wounded",[]):total+=int(cohort.count)
+	return total
+
+func _advance_wounded(day:int)->void:
+	var pool:Array=state.get("wounded",[])
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	while not pool.is_empty() and int(pool[0].due)<=day:
+		var cohort:Dictionary=pool.pop_front()
+		var fatal:=mini(int(cohort.fatal),int(cohort.count))
+		if fatal>0:
+			WorldSimulation.state.register_population_deaths(fatal,"Died of wounds")
+			host._record_aggregate_military_deaths(fatal,"Died of wounds")
+		var survivors:=int(cohort.count)-fatal
+		host.aggregate_recruits=int(host.aggregate_recruits)+survivors-roundi(float(survivors)*AN.DISABLED_SHARE)
+	var held:=int(state.get("captured_holding",0))
+	if held>0 and not host.home_army.is_empty():
+		host.home_army["captured_pool"]=int(host.home_army.get("captured_pool",0))+held;state.erase("captured_holding")
+
+## The force's named commander: an admiral or an air commander from the
+## realm's own names (HistoricalFigures), who runs the drawn zone.
+func ensure_commander(record:Dictionary)->void:
+	if record.owner!="player" or hardware(record)<=0:return
+	var current:Dictionary=record.get("commander",{})
+	var person:Dictionary=WorldSimulation.figures.by_id(String(current.get("figure_id","")))
+	if not person.is_empty() and String(person.get("status",""))=="living":return
+	if not person.is_empty() and String(person.get("status",""))=="wounded":return
+	var role:="Admiral" if record.domain=="navy" else "Air Commander"
+	var found:Dictionary=WorldSimulation.figures.branch_commander(role,"%s_%d" % [String(record.domain),int(record.id)])
+	record["commander"]={} if found.is_empty() else {"figure_id":String(found.id),"name":String(found.name)}
+	if not found.is_empty():_event("%s takes command of %s." % [String(found.name),String(record.get("name",""))],String(record.domain))
+
+## A commander whose ships went down or whose aircraft were shot down may
+## fall, be wounded or be taken; HistoricalFigures.record_battle keeps it.
+func _commander_losses(record:Dictionary,fraction:float,destroyed:bool,source:String)->void:
+	var current:Dictionary=record.get("commander",{})
+	if current.is_empty() or record.owner!="player":return
+	var rng:=RandomNumberGenerator.new();rng.seed=hash("%s:%d:%d:commander" % [String(WorldSimulation.actor_id),int(record.id),int(state.last_day)])
+	var roll:=rng.randf();var fate:="escaped"
+	if destroyed:fate="killed" if roll<.4 else ("captured" if roll<.6 and source!="" else ("wounded" if roll<.75 else "escaped"))
+	elif roll<fraction*.12:fate="killed"
+	elif roll<fraction*.3:fate="wounded"
+	var day:=int(state.last_day)
+	WorldSimulation.figures.record_battle({"seed":hash("%d:%d" % [int(record.id),day]),"round_count":1,"outcome":"losses at sea" if record.domain=="navy" else "losses in the air",
+		"attacker":{"name":String(record.name),"commander":{"figure_id":String(current.get("figure_id",""))},"remaining_troops":crew(record)},"defender":{},
+		"termination":{"defeated":String(record.name) if fate!="escaped" else "","commander_fate":fate}})
+	if fate in ["killed","captured"]:
+		_event("%s was %s when %s was %s." % [String(current.get("name","The commander")),"killed" if fate=="killed" else "taken prisoner",String(record.name),"sunk" if record.domain=="navy" and destroyed else ("destroyed" if destroyed else "hit")],String(record.domain))
+		record["commander"]={}
+
+## Renown for the commander whose force sank or shot down enemy craft.
+func commander_victory(force_id:int,sunk:int)->void:
+	var record:=force(force_id)
+	var current:Dictionary=record.get("commander",{})
+	if current.is_empty() or sunk<=0:return
+	WorldSimulation.figures.record_battle({"seed":hash("%d:%d:win" % [force_id,int(state.last_day)]),"round_count":1,"outcome":"sank %d enemy %s" % [sunk,"ships" if record.domain=="navy" else "aircraft"],
+		"attacker":{"name":String(record.name),"commander":{"figure_id":String(current.get("figure_id",""))},"remaining_troops":crew(record)},"defender":{},"termination":{}})
+
+## Brings down a share of a force's airframes or hulls (ground fire over a
+## target or a battle). `share` of the force's hardware, by damage.
+func ground_fire(record:Dictionary,share:float,source:String)->void:
+	if share<=0.0 or hardware(record)<=0:return
+	var damage:=0.0
+	for id:String in record.units:damage+=maxf(1.0,float(C.UNITS[id].defense)*3.0)*int(record.units[id])*share
+	_losses(record,damage*preload("res://scripts/battle_tactics.gd").zone_factor(String(record.get("tactic","")),"taken"),source,"ground")
 func _replace(record:Dictionary)->void:
-	if record.owner!="player" or not bool(record.auto_replace):return
+	if record.owner!="player":return
+	# Crews short after hits are made up from the depot, then new recruits.
+	var shortfall:=int(record.get("crew_shortfall",0))
+	if shortfall>0:
+		var from_depot:=mini(shortfall,int(host.aggregate_recruits))
+		host.aggregate_recruits=int(host.aggregate_recruits)-from_depot
+		var fresh:=mini(shortfall-from_depot,maxi(0,host.recruitment_capacity()-host._mobilized_count()))
+		record["crew_shortfall"]=shortfall-from_depot-fresh
+		if int(record.crew_shortfall)<=0:record.erase("crew_shortfall")
+	if not bool(record.auto_replace):return
 	for id:String in record.authorized:
 		var unit:Dictionary=C.UNITS[id]
 		var count:=mini(maxi(0,int(record.authorized[id])-int(record.units.get(id,0))),int(host.military_inventory.get(String(unit.equipment),0)))
@@ -294,8 +449,67 @@ func construction_share(city_id:String="")->float:
 		for city:Dictionary in WorldSimulation.state.player_settlements:
 			if bool(city.get("primary",false)):selected=String(city.id);break
 	for record:Dictionary in state.bases:
-		if record.owner=="player" and record.city_id==selected and base_owned(record) and (float(record.construction_work)<float(record.required_work) or Dock.building(record)):return .25
+		if record.owner=="player" and record.city_id==selected and base_owned(record) and (float(record.construction_work)<float(record.required_work) or Dock.building(record) or base_repairing(record)):return .25
 	return 0.0
+
+## A struck airfield or port is repaired by the city's builders and paid for
+## in the materials that built it: an airfield in weeks, a harbour in months.
+## One knocked out entirely is rebuilt the same way.
+const BASE_COSTS:={"navy":{"Timber":50.0,"Stone":30.0},"air":{"Timber":30.0,"Stone":60.0,"Iron Ore":10.0}}
+const BASE_REPAIR_CAP:={"navy":.015,"air":.06}
+func base_repairing(record:Dictionary)->bool:
+	return String(record.get("owner",""))=="player" and float(record.construction_work)>=float(record.required_work) and float(record.condition)<.999
+func _repair_base(record:Dictionary,work:float)->void:
+	var domain:=String(record.domain)
+	var rate:=minf(float(BASE_REPAIR_CAP.get(domain,.015)),work/(30.0 if domain=="air" else 60.0))
+	rate=minf(rate,1.0-float(record.condition))
+	if rate<=0.0:return
+	var costs:Dictionary=BASE_COSTS.get(domain,{})
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	var affordable:=1.0
+	for material:String in costs:
+		var need:=float(costs[material])*rate
+		if need>0.0:affordable=minf(affordable,maxf(0.0,float(stocks.get(material,0.0)))/need)
+	rate*=clampf(affordable,0.0,1.0)
+	if rate<=0.0:return
+	for material:String in costs:stocks[material]=maxf(0.0,float(stocks.get(material,0.0))-float(costs[material])*rate)
+	var was_down:=float(record.condition)<=.1
+	record.condition=minf(1.0,float(record.condition)+rate)
+	if was_down and float(record.condition)>.1:_event("%s is working again after repairs." % String(record.name),domain)
+
+## Wings aboard a sunk carrier: the few aircraft already aloft within reach
+## of land divert there; the rest go down with the ship or ditch.
+func _deck_lost(wing:Dictionary,share:float)->void:
+	if hardware(wing)<=0:return
+	var airborne:=.3 if String(wing.get("mission","hold"))!="hold" and float(wing.get("efficiency",0))>0 else .1
+	var home:=base(int(wing.base_id))
+	var reach:=not home.is_empty() and force_position(wing).distance_to(point(home))<=range_km(wing)
+	var lost_share:=clampf(share*(1.0-(airborne if reach else 0.0)),0.0,1.0)
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var totals:={"killed":0,"wounded":0,"captured":0,"rescued":0};var lost_total:=0;var died:=.1
+	for id:String in wing.units:
+		var lost:=mini(int(wing.units[id]),roundi(float(wing.units[id])*lost_share))
+		if lost<=0:continue
+		wing.units[id]-=lost;lost_total+=lost
+		var fate:=AN.crew_casualties(id,lost,true,hash("%d:%d:deck" % [int(wing.id),int(state.last_day)]))
+		for key in totals:totals[key]=int(totals[key])+int(fate[key])
+		died=float(AN.DIED_OF_WOUNDS.get(AN.profile(id),.1))
+	if lost_total<=0:return
+	wing["crew_shortfall"]=mini(int(wing.get("crew_shortfall",0)),full_crew(wing))
+	_event("%s lost %d aircraft with its carrier; the rest diverted ashore." % [String(wing.name),lost_total],"air")
+	_commit_crew_casualties(wing,"",totals,died,{"downed":lost_total,"crew":0,"force":String(wing.name),"type_label":"aircraft"})
+
+## A carrier that lost hulls cannot hold all its aircraft: the overflow is lost.
+func _overloaded_decks()->void:
+	for carrier:Dictionary in state.forces:
+		var capacity:=carrier_capacity(carrier)
+		if carrier.domain!="navy" or capacity<=0:continue
+		var aboard:=0;var wings:Array=[]
+		for wing:Dictionary in state.forces:
+			if int(wing.get("carrier_id",0))==int(carrier.id):aboard+=hardware(wing);wings.append(wing)
+		if aboard<=capacity:continue
+		var share:=float(aboard-capacity)/float(aboard)
+		for wing:Dictionary in wings:_deck_lost(wing,share)
 
 func force_position(record:Dictionary)->Vector2:
 	var carrier:=force(int(record.get("carrier_id",0)))
@@ -494,14 +708,17 @@ func advance(day:int)->void:
 		if carrier_id<=0:carrier_id=int(wing.get("pending_carrier_id",0))
 		if carrier_id<=0:continue
 		var carrier:=force(carrier_id)
+		if not carrier.is_empty() and carrier_capacity(carrier)<=0 and int(wing.get("carrier_id",0))==carrier_id:_deck_lost(wing,1.0)
 		if carrier.is_empty() or carrier_capacity(carrier)<=0:
 			var origin:=force_position(wing)
 			wing.carrier_id=0;wing.pending_carrier_id=0;wing.position=preload("res://scripts/joint_geography.gd").pack(origin);wing.mission="hold";wing.region={}
 			set_route(wing,point(base(int(wing.base_id))))
+	_overloaded_decks()
+	_advance_wounded(day)
 	var projects:Dictionary={}
 	for record:Dictionary in state.bases:
 		if record.owner!="player" or not base_owned(record):continue
-		var count:=int(float(record.construction_work)<float(record.required_work))+int(Dock.building(record))
+		var count:=int(float(record.construction_work)<float(record.required_work))+int(Dock.building(record))+int(base_repairing(record))
 		projects[record.city_id]=int(projects.get(record.city_id,0))+count
 	for record:Dictionary in state.bases:
 		if record.owner!="player" or not base_owned(record) or int(projects.get(record.city_id,0))<=0:continue
@@ -510,6 +727,7 @@ func advance(day:int)->void:
 				var share:=WorldSimulation.state.effective_workers("Construction",true)*.25*.1/int(projects[record.city_id])
 				if float(record.construction_work)<float(record.required_work):
 					record.construction_work=minf(float(record.required_work),float(record.construction_work)+share)
+				elif base_repairing(record):_repair_base(record,share)
 				if Dock.building(record):Dock.construct(record,share,day)))
 	for record:Dictionary in state.forces:
 		record.efficiency=0.0;record.fuel_used=0
@@ -591,10 +809,12 @@ func advance(day:int)->void:
 		record.efficiency=float(factors.efficiency)*(1.0-float(record.get("training_attending",0))/maxf(1,crew(record))*.5)
 		record.status="%s · %d%% efficiency" % ["On mission" if naval_activity.is_empty() else naval_activity,roundi(float(record.efficiency)*100)]
 		record.experience=minf(1,float(record.experience)+.001)
+		ensure_commander(record)
 	_detect_and_fight()
 	effects.advance(day)
 	logistics.advance(day)
 	_advance_blockades(day)
+	preload("res://scripts/air_naval_consequences.gd").flush_war_ledger(self,day)
 	for key in state.contacts.keys():
 		if day-int(state.contacts[key].day)>5:state.contacts.erase(key)
 ## Fleets whose commanders chose a close or distant blockade squeeze every
@@ -614,10 +834,31 @@ func _advance_blockades(day:int)->void:
 			if id=="" or float(pressure.get(id,{}).get("rate",0.0))*float(pressure.get(id,{}).get("control",0.0))>=pace.x*held:continue
 			pressure[id]={"rate":pace.x,"cap":pace.y,"control":held,"civ_id":civ_id,"owner":owner,"tactic":String(record.tactic),"name":String(city.get("name",""))}
 	var before:Dictionary=state.get("blockades",{})
-	state["blockades"]=Blockade.step(before,pressure,day)
+	# Blockades of our own ports by another civilization's fleet are mirrored
+	# here each day by civilization_joint_contact.gd; the blockader's ledger
+	# owns their level, so they are kept as they are, not eased.
+	var own:Dictionary={};var mirrored:Dictionary={}
+	for id in before:
+		if bool((before[id] as Dictionary).get("mirrored",false)):mirrored[id]=before[id]
+		else:own[id]=before[id]
+	var stepped:=Blockade.step(own,pressure,day)
+	for id in mirrored:
+		if stepped.size()>=Blockade.MAX_PORTS:break
+		if not stepped.has(id):stepped[id]=mirrored[id]
+	state["blockades"]=stepped
 	for id in pressure:
 		if not before.has(id) and String(pressure[id].owner)=="player":
 			_event("%s is under blockade." % String(pressure[id].get("name","A hostile port")),"navy")
+## The share of this civilization's sea trade still moving (1 = free): enemy
+## blockades of its ports and enemy raiders on its sea lanes, both bounded.
+func sea_trade_factor()->float:
+	var factor:=1.0
+	if not (state.get("blockades",{}) as Dictionary).is_empty():factor*=Blockade.trade_factor(blockade_closure("player"))
+	return clampf(factor*(1.0-merchant_loss()),0.0,1.0)
+## Share of this civilization's sea trade lost to enemy commerce raiders
+## (mirrored daily by civilization_joint_contact.gd; see air_naval_consequences.gd).
+func merchant_loss()->float:
+	return clampf(float((state.get("raiding",{}) as Dictionary).get("level",0.0)),0.0,preload("res://scripts/air_naval_consequences.gd").MERCHANT_LOSS_CAP)
 func blockade_level(city_id:String)->float:
 	return float((state.get("blockades",{}) as Dictionary).get(city_id,{}).get("level",0.0))
 ## A civilization's exposure to blockade, weighted by the people at each port.
@@ -668,6 +909,7 @@ func can_attack_contact(observer:Dictionary,target:Dictionary,target_position:Ve
 func _detect_and_fight()->void:
 	if WorldSimulation.enabled:return
 	var damage:Dictionary={}
+	var sources:Dictionary={}
 	for observer:Dictionary in state.forces:
 		if float(observer.efficiency)<=0 or observer.region.is_empty():continue
 		for target:Dictionary in state.forces:
@@ -683,10 +925,16 @@ func _detect_and_fight()->void:
 			state.contacts["%s:%d" % [observer.owner,target.id]]={"observer":observer.owner,"target":target.id,"region":observer.region.id,"day":state.last_day,"name":target.name,"position":preload("res://scripts/joint_geography.gd").pack(target_position),"owner":target.owner,"domain":target.domain}
 			if not can_attack(observer,target):continue
 			var defense:=maxf(1,_power(target,"defense")/maxi(1,hardware(target)))
-			damage[target.id]=float(damage.get(target.id,0))+_power(observer,"attack")/defense*.12*rng.randf_range(.7,1.3)*overlap*B.damage_multiplier(observer,target)
+			var amount:=_power(observer,"attack")/defense*.12*rng.randf_range(.7,1.3)*overlap*B.damage_multiplier(observer,target)
+			damage[target.id]=float(damage.get(target.id,0))+amount
+			if amount>float(sources.get(target.id,{}).get("amount",0.0)):sources[target.id]={"owner":String(observer.owner),"force":int(observer.id),"domain":String(observer.domain),"amount":amount}
 	for id in damage:
 		var target:=force(int(id))
-		if not target.is_empty():_losses(target,float(damage[id]))
+		if target.is_empty():continue
+		var by:Dictionary=sources.get(id,{})
+		var before:=hardware(target)
+		_losses(target,float(damage[id]),String(by.get("owner","")),String(by.get("domain","")))
+		if before>hardware(target) and String(by.get("owner",""))=="player":commander_victory(int(by.get("force",0)),before-hardware(target))
 
 var screen:CanvasLayer
 func open_service(domain:String)->void:
@@ -754,6 +1002,15 @@ func validate(payload:Variant)->String:
 		if not payload.get(key,[]) is Array:return "Invalid joint-force list."
 	if not payload.contacts is Dictionary:return "Invalid contact reports."
 	if payload.has("blockades") and (not payload.blockades is Dictionary or payload.blockades.size()>Blockade.MAX_PORTS):return "Invalid blockade ledger."
+	for city_id in payload.get("blockades",{}):
+		var entry:Variant=payload.blockades[city_id]
+		if not city_id is String or not entry is Dictionary:return "Invalid blockade entry."
+		var level:Variant=entry.get("level",0.0)
+		if not (level is int or level is float) or not is_finite(float(level)) or float(level)<0 or float(level)>Blockade.CLOSE_CAP+.0001:return "Invalid blockade level."
+		for key in ["civ_id","owner","tactic","name"]:
+			if not entry.get(key,"") is String:return "Invalid blockade entry."
+		if not _whole_number(entry.get("since",0),-1) or not _whole_number(entry.get("day",0),-1):return "Invalid blockade date."
+		if not entry.get("held",false) is bool or not entry.get("mirrored",false) is bool:return "Invalid blockade entry."
 	if not _whole_number(payload.next_id,1) or not _whole_number(payload.last_day,-1):return "Invalid joint-force clock or identifier."
 	if payload.bases.size()>256 or payload.contacts.size()>MAX_FORCES*MAX_FORCES or payload.events.size()>80:return "Joint-force state exceeds bounded limits."
 	if payload.get("forces",[]).size()>MAX_FORCES:return "Too many joint forces."
@@ -827,6 +1084,12 @@ func _validate_extended(payload:Dictionary,bases:Dictionary,ids:Dictionary)->Str
 			if not _whole_number(record.get(key,0),0):return "Invalid force attachment."
 		for key in ["fuel_used","loss_fraction"]:
 			if not _finite_nonnegative(record.get(key,0)):return "Invalid force expenditure."
+		if not record.get("tactic","") is String or (String(record.get("tactic",""))!="" and not preload("res://scripts/battle_tactics.gd").ZONE_TACTICS.has(String(record.tactic))):return "Invalid zone tactic."
+		if record.has("mission_destination") and not _valid_position(record.mission_destination):return "Invalid mission destination."
+		if not _whole_number(record.get("crew_shortfall",0),0) or not _finite_nonnegative(record.get("strike_carry",0.0)) or float(record.get("strike_carry",0.0))>50.0:return "Invalid crew or strike record."
+		if not record.get("held_by_ruler",false) is bool or not record.get("commander",{}) is Dictionary:return "Invalid force command record."
+		for key in (record.get("commander",{}) as Dictionary):
+			if not key in ["figure_id","name"] or not record.commander[key] is String:return "Invalid force commander."
 		for key in ["carrier_id","pending_carrier_id"]:
 			var carrier_id:=int(record.get(key,0))
 			if carrier_id==0:continue
@@ -849,12 +1112,45 @@ func _validate_extended(payload:Dictionary,bases:Dictionary,ids:Dictionary)->Str
 		for key in ["owner","destination_id","destination_owner"]:
 			if not convoy.get(key,null) is String:return "Invalid transport ownership."
 		if not convoy.get("invasion",null) is bool or not _whole_number(convoy.get("depart_day",null),-1):return "Invalid transport departure."
+	var extra:=_validate_consequences(payload)
+	if extra!="":return extra
 	var orders:Variant=payload.get("rival_orders",{})
 	if not orders is Dictionary or orders.size()>256:return "Invalid rival production."
 	for owner in orders:
 		var order:Variant=orders[owner]
 		if not owner is String or not order is Dictionary or not C.UNITS.has(order.get("unit","")) or not bases.has(order.get("base_id",0)) or not _finite_nonnegative(order.get("progress",null)):return "Invalid rival production order."
 	return ""
+## Optional state from air_naval_consequences.gd; older saves have none of it.
+func _validate_consequences(payload:Dictionary)->String:
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var pool:Variant=payload.get("wounded",[])
+	if not pool is Array or pool.size()>AN.MAX_WOUNDED_COHORTS:return "Invalid wounded crews."
+	for cohort in pool:
+		if not cohort is Dictionary or not _whole_number(cohort.get("due",null),0) or not _whole_number(cohort.get("count",null),0) or not _whole_number(cohort.get("fatal",null),0) or int(cohort.fatal)>int(cohort.count):return "Invalid wounded crews."
+	if not _whole_number(payload.get("captured_holding",0),0):return "Invalid captured crews."
+	var raiding:Variant=payload.get("raiding",{})
+	if not raiding is Dictionary:return "Invalid raiding report."
+	if not raiding.is_empty():
+		var level:Variant=raiding.get("level",null)
+		if not _finite_nonnegative(level) or float(level)>AN.MERCHANT_LOSS_CAP+.0001 or not _finite_nonnegative(raiding.get("carry",0.0)):return "Invalid raiding report."
+		if not raiding.get("by",[]) is Array or raiding.get("by",[]).size()>4 or not _whole_number(raiding.get("day",0),0) or not _whole_number(raiding.get("since",0),0):return "Invalid raiding report."
+		for id in raiding.get("by",[]):
+			if not id is String:return "Invalid raiding report."
+	var out:Variant=payload.get("raids_out",{})
+	if not out is Dictionary or out.size()>64:return "Invalid raiding report."
+	for key in out:
+		if not key is String or not _finite_nonnegative(out[key]):return "Invalid raiding report."
+	var ledger:Variant=payload.get("war_ledger",{})
+	if not ledger is Dictionary or ledger.size()>32:return "Invalid war ledger."
+	for key in ledger:
+		var entry:Variant=ledger[key]
+		if not key is String or not entry is Dictionary or not _whole_number(entry.get("since",null),0):return "Invalid war ledger."
+		for side in ["ours","theirs"]:
+			if not entry.get(side,{}) is Dictionary:return "Invalid war ledger."
+			for field in entry.get(side,{}):
+				if not field in ["military_dead","civilian_dead","wounded","captured","displaced"] or not _whole_number(entry[side][field],0):return "Invalid war ledger."
+	return ""
+
 func _valid_route(route:Variant)->bool:
 	if not route is Array or route.size()>8192:return false
 	for position in route:

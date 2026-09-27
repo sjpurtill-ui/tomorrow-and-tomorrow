@@ -45,37 +45,57 @@ func advance(day:int)->void:
 		friendly.joint_air_support=float(supporting.get("joint_air_support",0))
 		friendly.joint_air_pressure=float(supporting.get("joint_air_pressure",0))
 		enemy.joint_air_pressure=friendly.joint_air_support*.6
+	# A blockaded people cannot bring supplies to its armies by sea: their
+	# supply sinks toward a floor set by how closed its ports are.
+	var closure:=float(op.blockade_closure("player")) if not (op.state.get("blockades",{}) as Dictionary).is_empty() else 0.0
+	if closure>0.0:
+		var floor_level:=1.0-closure*preload("res://scripts/naval_blockade.gd").CIV_SUPPLY_LOSS
+		for army:Dictionary in op.host.field_armies:
+			var supply:=float(army.get("supply_level",1))
+			if supply>floor_level:army.supply_level=maxf(floor_level,supply-.01)
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	var fighting:bool=not op.host.active_engagement.is_empty() or not (op.host.command_hierarchy.data.get("battles",[]) as Array).is_empty()
 	for force:Dictionary in op.state.forces:
 		if float(force.efficiency)<=0:continue
 		if force.mission=="air_supply":_supply(force);continue
 		if force.mission=="reconnaissance":
 			for city:Dictionary in WorldSimulation.world.city_intelligence.sites():
 				if same_region(op.region_at(G.unpack(city.position),"air"),force.region):WorldSimulation.world.city_intelligence.publish(String(force.owner),WorldSimulation.world.city_intelligence.capture(String(force.owner),String(city.city_id),.65,day,"air reconnaissance",str(force.id)),day)
-		if force.mission not in ["strategic_bombing","logistics_strike","invasion_support"]:continue
+		# Aircraft over a battle are shot at from the ground.
+		if force.mission=="close_air_support" and force.owner=="player" and fighting:
+			op.ground_fire(force,AN.GROUND_FIRE_LOSS,"")
+			continue
+		if force.mission not in ["strategic_bombing","logistics_strike","invasion_support","port_strike"]:continue
+		# Striking the town itself is the ruler's decision (sovereign_weapons.gd):
+		# without it, bombers stand down and ships fire only on defences.
+		var civilian:=false
+		if force.mission in ["strategic_bombing","port_strike","invasion_support"]:
+			var gate:Dictionary=AN.city_gate(force) if force.owner=="player" else _rival_gate(force)
+			civilian=not gate.has("error") and force.mission!="port_strike"
+			if gate.has("error") and force.mission!="invasion_support":
+				if not bool(force.get("held_by_ruler",false)):op._event("%s is holding: %s" % [String(force.name),String(gate.error)],String(force.domain))
+				force["held_by_ruler"]=true
+				force.status="Holding · striking a town needs the ruler's word"
+				continue
+			force.erase("held_by_ruler")
 		var targets:Array=WorldSimulation.world.city_intelligence.known_cities(String(force.owner),"",false)
 		for city:Dictionary in targets:
 			if not op._hostile(String(force.owner),String(city.get("controller",city.civ_id))) or not same_region(op.region_at(G.unpack(city.position),String(force.domain)),force.region):continue
-			var damage=minf(.025,op._power(force,"attack")*.00025)
-			if WorldSimulation.enabled:
-				preload("res://scripts/civilization_combat.gd").damage_city(String(city.civ_id),String(city.city_id),damage)
-				continue
-			if String(city.civ_id)=="player":
-				WorldSimulation.settlements.with_city_resources(String(city.city_id),func():
-					for plot:Dictionary in WorldSimulation.state.settlement_plots:
-						if String(plot.get("land_use","")) in ["workshop","mixed_household","storehouse"]:plot.condition=maxf(.05,float(plot.get("condition",1))-damage)
-					WorldSimulation.state.morphology_revision+=1
-					WorldSimulation.settlements.damage_city_form(damage)
-					WorldSimulation.settlements.rebuild_summary())
-			else:
-				var location:Dictionary=WorldSimulation.world._region_location(String(city.city_id))
-				if location.is_empty():continue
-				var civ:Dictionary=WorldSimulation.world.civilizations[int(location.owner_index)]
-				var region:Dictionary=civ.strategic_regions[int(location.region_index)]
-				if force.mission=="invasion_support":region.fortification=maxf(0,float(region.fortification)-damage)
-				else:region.damage=minf(1,float(region.damage)+damage)
-				if force.mission=="logistics_strike":civ.logistics=maxf(.02,float(civ.logistics)-damage*.2)
-			for base:Dictionary in op.state.bases:
-				if base.city_id==city.city_id:base.condition=maxf(0,float(base.condition)-damage)
+			var damage=minf(AN.MAX_STRIKE,op._power(force,"attack")*.00025)
+			AN.strike_city(force,city,damage,String(force.mission),civilian)
+			# Guns and walls over the target shoot back at the aircraft.
+			if force.domain=="air":
+				var target_owner:=String(city.get("controller",city.civ_id))
+				op.ground_fire(force,AN.ground_fire_share(city),preload("res://scripts/civilization_combat.gd").owner(target_owner) if WorldSimulation.enabled else target_owner)
+			if op.hardware(force)<=0:break
+
+## A rival's fleet or wing in the older (legacy) world model obeys its own
+## ruler: only an aggressive ruler turns bombers on towns.
+func _rival_gate(force:Dictionary)->Dictionary:
+	var index:=WorldSimulation.world._civilization_index(String(force.owner))
+	if index<0:return {"error":"no ruler has spoken"}
+	if float(WorldSimulation.world.civilizations[index].get("aggression",0.0))>=.6:return {"ok":true}
+	return {"error":"their ruler has not ordered the towns struck"}
 
 func _supply(force:Dictionary)->void:
 	if force.owner!="player":return
