@@ -2696,10 +2696,12 @@ func show_foreign(civ_id:String)->bool:
 	var council_frame:=PanelContainer.new();council_frame.name="PactsPane";council_frame.size_flags_vertical=Control.SIZE_EXPAND_FILL;council_frame.visible=false
 	council_frame.add_theme_stylebox_override("panel",hall_style.duplicate());council_frame.add_child(council_panel);center.add_child(council_frame)
 	foreign_refs["pacts"]=council_frame
-	column.add_child(_build_exchange_panel(civ_id))
+	# The terms on the table and the compose area sit under the conversation;
+	# the ruler's portrait and what you know keep the full height beside them.
+	center.add_child(_build_exchange_panel(civ_id))
 	compose=preload("res://scripts/hud/court_envoy_compose.gd").new();compose.civ_id=civ_id
 	compose.sent.connect(func(message:String)->void:foreign_refs["message"]=message;_refresh_foreign())
-	column.add_child(compose)
+	center.add_child(compose)
 	body.add_child(_build_foreign_footer())
 	show_foreign_view("conversation")
 	if not ForeignDialogue.changed.is_connected(_on_foreign_changed):ForeignDialogue.changed.connect(_on_foreign_changed)
@@ -2802,7 +2804,12 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 	var goals:Array=leader.get("goals",[]) if leader.get("goals") is Array else []
 	for index in mini(goals.size(),2):
 		if goals[index] is Dictionary:rows.append(["They want",String((goals[index] as Dictionary).get("title","")),Tokens.BODY])
-	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",3);column.add_child(box)
+	# What you know and what binds you scroll within the column, so a long
+	# history never pushes the court off the screen.
+	var facts_scroll:=ScrollContainer.new();facts_scroll.name="Facts";facts_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	facts_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(facts_scroll)
+	var facts:=VBoxContainer.new();facts.size_flags_horizontal=Control.SIZE_EXPAND_FILL;facts.add_theme_constant_override("separation",8);facts_scroll.add_child(facts)
+	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",3);facts.add_child(box)
 	box.visible=not _compact()
 	box.add_child(Tokens.make_label("WHAT YOU KNOW",11,Tokens.TEXT_DIM,.1))
 	for row:Array in rows:
@@ -2813,7 +2820,7 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 	# What binds you (the old Council of Nations ties) and what menace set moving.
 	var ties:Array=preload("res://scripts/hud/court_council_panel.gd").ties(civ_id)
 	if not ties.is_empty():
-		var tie_box:=VBoxContainer.new();tie_box.name="Ties";tie_box.add_theme_constant_override("separation",3);column.add_child(tie_box)
+		var tie_box:=VBoxContainer.new();tie_box.name="Ties";tie_box.add_theme_constant_override("separation",3);facts.add_child(tie_box)
 		tie_box.add_child(Tokens.make_label("WHAT BINDS YOU",11,Tokens.TEXT_DIM,.1))
 		for tie:Dictionary in ties:
 			var tone:Color={"danger":Tokens.RED,"good":Tokens.GREEN,"gold":Tokens.GOLD}.get(String(tie.get("tone","")),Tokens.BODY)

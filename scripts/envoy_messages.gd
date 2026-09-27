@@ -436,7 +436,6 @@ static func send(civ_id:String,purpose:String,choice:Dictionary)->Dictionary:
 	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
 	menace["brief"]=brief(civ_id,menace)
 	mission["menace"]=menace
-	ForeignDiplomacy.remember(civ_id,"Envoys set out to %s." % String(PURPOSES[purpose].line).to_lower().trim_suffix("."))
 	# Your own words open the exchange in the conversation with their ruler.
 	var dialogue=WorldSimulation.dialogue
 	if dialogue!=null and dialogue.has_method("_append"):
@@ -853,6 +852,14 @@ static func _band(value:float)->String:
 	if value<0.75: return "strong"
 	return "overwhelming"
 
+static func _their(text:String)->String:
+	## A grudge is kept in their own words ("what we were made to give"); the
+	## note tells it from your side.
+	var out:=text
+	for pair:Array in [["\\bwe\\b","they"],["\\bour\\b","their"],["\\bus\\b","them"]]:
+		var rule:=RegEx.new();rule.compile(String(pair[0]));out=rule.sub(out,String(pair[1]),true)
+	return out
+
 static func consequence_note(civ_id:String,menace:Dictionary)->String:
 	## What is now in motion, in plain words.
 	var result:Dictionary=menace.get("result",{})
@@ -870,7 +877,7 @@ static func consequence_note(civ_id:String,menace:Dictionary)->String:
 		if absf(rv)>=0.02: moved.append("their reverence is %s (%s)" % [_band(float(after.love)),"up" if rv>0 else "down"])
 		if not moved.is_empty(): lines.append(("; ".join(moved)).substr(0,1).to_upper()+("; ".join(moved)).substr(1)+".")
 	var top:=Rivals._top_grudge(Rivals.character(civ_id)) if not Rivals.character(civ_id).is_empty() else {}
-	if not top.is_empty() and int(top.get("day",-1))>=int(result.get("day",0)): lines.append("They will remember %s." % String(top.text))
+	if not top.is_empty() and int(top.get("day",-1))>=int(result.get("day",0)): lines.append("They will remember %s." % _their(String(top.text)))
 	if String(menace.purpose)=="ultimatum" and String(result.answer) in ["defy","harm"]:
 		var due:=int(result.get("day",_day()))+int(menace.get("deadline",182))
 		if String(menace.get("consequence","war"))=="war":

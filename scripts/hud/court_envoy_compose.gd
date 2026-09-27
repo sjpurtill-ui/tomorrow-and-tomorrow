@@ -352,7 +352,7 @@ func _fit_options()->void:
 	if not is_inside_tree():return
 	await get_tree().process_frame
 	if not is_instance_valid(options):return
-	options_scroll.custom_minimum_size.y=clampf(options.get_combined_minimum_size().y,0.0,176.0)
+	options_scroll.custom_minimum_size.y=clampf(options.get_combined_minimum_size().y,0.0,190.0)
 
 func _fill_talk()->bool:
 	var dialogue=WorldSimulation.dialogue
