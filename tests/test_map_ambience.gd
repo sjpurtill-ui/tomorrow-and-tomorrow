@@ -213,3 +213,26 @@ func test_builders_work_only_at_rising_works_and_are_bounded()->void:
 	var signature:String=layer.builder_signature
 	layer.day_tick()
 	assert_str(layer.builder_signature).is_equal(signature)
+
+func test_land_that_draws_cloud_shadows_replaces_the_screen_pass()->void:
+	# Terrain and plants draw cloud shadows on the land itself (map_cloud),
+	# so they climb hills; the flat screen pass then stands down.
+	var host:=_host()
+	var layer:Node=host.get_node_or_null("MapAmbience")
+	var shader:=Shader.new()
+	shader.code="shader_type spatial;\nuniform vec4 map_wind;\nuniform float map_wind_clock;\nuniform vec4 map_cloud;\nuniform float map_cloud_scale;\nvoid fragment(){ALBEDO=vec3(map_cloud.w+map_wind.z*0.0+map_wind_clock*0.0+map_cloud_scale*0.0);}\n"
+	var land:=ShaderMaterial.new();land.shader=shader
+	host.seasonal_materials.append(weakref(land))
+	Ambience.forced_weather={"rain":0.0,"snow":0.0,"cloud":0.8}
+	layer._refresh_weather(true)
+	layer.cloud=0.8
+	host.camera.size=2.8
+	layer._frame(1.0/60.0)
+	assert_bool(layer.cloud_mesh.visible).is_false()
+	var packed:Vector4=land.get_shader_parameter("map_cloud")
+	assert_float(packed.w).is_greater(0.1)
+	assert_float(packed.z).is_greater(0.5)
+	# Far out over the chart the land's cloud shadows fade away too.
+	host.camera.size=900.0
+	layer._frame(1.0/60.0)
+	assert_float((land.get_shader_parameter("map_cloud") as Vector4).w).is_less(0.01)

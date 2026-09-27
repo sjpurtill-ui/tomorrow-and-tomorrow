@@ -84,7 +84,8 @@ func test_imported_dimensions_vertex_colors_and_batched_condition() -> void:
 		var transform: Transform3D = node.get_meta("source_transforms")[0]
 		assert_float(transform.basis.x.length()).is_equal_approx(0.001, 0.000001)
 		assert_float(transform.origin.y).is_equal_approx(0.2504, 0.00001)
-		assert_bool(node.material_override.vertex_color_use_as_albedo).is_true()
+		# Painted in the map's ink (settlement_ink.gd), keeping the kit's colours.
+		assert_str((node.material_override as ShaderMaterial).shader.code).contains("COLOR.rgb")
 	assert_int(count).is_equal(plan.buildings.size())
 	for plot in data.plots: plot.status = "ruin"
 	var ruin_parent: Node3D = auto_free(Node3D.new())

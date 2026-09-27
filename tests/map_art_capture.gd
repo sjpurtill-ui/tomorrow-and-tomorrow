@@ -44,6 +44,12 @@ func _ready()->void:
 	while not terrain.macro_render.ready() and Time.get_ticks_msec()<deadline:
 		await get_tree().process_frame
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
+	# Diagnosis: `--no-shadows` turns off the sun's cast shadows, `--sky=clear|cloud|rain|snow`
+	# forces the day's weather (cloud shadows, rain or snow).
+	if "--no-shadows" in args:
+		for light in terrain.find_children("*","DirectionalLight3D",true,false):(light as DirectionalLight3D).shadow_enabled=false
+	for argument in args:
+		if argument.begins_with("--sky="):_force_sky(argument.trim_prefix("--sky="))
 	var lod=preload("res://scripts/terrain_lod.gd")
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
@@ -53,6 +59,22 @@ func _ready()->void:
 		target=Vector3(terrain._world_river_x(river_z),0.0,river_z)
 		target.y=terrain._height_at(target.x,target.z)
 		CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+	if "--winter" in args:
+		# A cold region in the depth of its winter (charted for this capture).
+		var cold:=_find_cold(target)
+		if cold!=Vector3.INF:
+			target=cold
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+			print("MAP_ART_CAPTURE: cold ground at ",target," ",JSON.stringify(PlanetEnvironment.profile_at(Vector2(target.x,target.z)).get("mean_temperature_c")))
+		# Midwinter for that hemisphere (season_wave is -1).
+		GameState.elapsed_days=91.0 if target.z>0.0 else 274.0
+		terrain._refresh_seasonal_visuals()
+	if "--fresh-snow" in args:
+		# As if it snowed there yesterday: fresh snow lying on the ground.
+		for reference in terrain.seasonal_materials:
+			var material:=(reference as WeakRef).get_ref() as ShaderMaterial
+			if material:material.set_shader_parameter("weather_snow",0.85)
+		terrain.seasonal_snow=0.85
 	if "--woodland" in args:
 		# Look at the nearest dense woodland instead (charted for this capture only).
 		var found:=_find_woodland(target)
@@ -70,12 +92,21 @@ func _ready()->void:
 		while Time.get_ticks_msec()<settle_deadline and (frames<45 or terrain.terrain_patch_job!=null or terrain.regional_patch_resolution!=lod.resolution_for(terrain.regional_patch_span)):
 			await get_tree().process_frame
 			frames+=1
+		# Let streamed close crowns finish growing and fading in (bounded).
+		var woods:Node=terrain.get_node_or_null("CloseWoods")
+		var woods_deadline:=Time.get_ticks_msec()+20000
+		while woods and Time.get_ticks_msec()<woods_deadline and (not woods.queue.is_empty()):
+			await get_tree().process_frame
+		if woods:
+			for i in 50:await get_tree().process_frame
+			print("MAP_ART_CAPTURE: close woods ",JSON.stringify(woods.report()))
 		if "--hide-ui" in args:
 			for layer in get_tree().root.find_children("*","CanvasLayer",true,false):(layer as CanvasLayer).visible=false
 		for i in 6:await get_tree().process_frame
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true,0.0)
-		var path:=out_dir.path_join("%s_z%d.png" % [prefix,int(size)])
+		var tag:=str(int(size)) if is_equal_approx(size,roundf(size)) else str(snappedf(size,0.01)).replace(".","p")
+		var path:=out_dir.path_join("%s_z%s.png" % [prefix,tag])
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
@@ -112,6 +143,38 @@ func _seed_great_works(center:Vector3)->void:
 	city.undertakings=list
 	print("MAP_ART_CAPTURE: seeded ",list.size()," great works around ",home)
 	terrain._refresh_undertaking_visuals(true)
+
+func _force_sky(kind:String)->void:
+	var ambience_script:=preload("res://scripts/map_ambience.gd")
+	var forced:={"cloud":0.0,"rain":0.0,"snow":0.0}
+	match kind:
+		"cloud":forced={"cloud":0.6,"rain":0.0,"snow":0.0,"wind":0.6}
+		"rain":forced={"cloud":0.8,"rain":0.9,"snow":0.0,"wind":0.7}
+		"snow":forced={"cloud":0.7,"rain":0.0,"snow":0.9,"wind":0.35}
+	ambience_script.forced_weather=forced
+	var ambience:Node=terrain.get_node_or_null("MapAmbience")
+	if ambience:
+		var sky:Dictionary=ambience.weather.duplicate();sky.merge(forced,true)
+		ambience.weather=sky
+		ambience.cloud=float(forced.cloud);ambience.rain=float(forced.rain);ambience.snow=float(forced.snow)
+
+## The coldest land found poleward of `center` (cold all year if any is).
+func _find_cold(center:Vector3)->Vector3:
+	var pole:=signf(center.z) if absf(center.z)>1.0 else -1.0
+	var best:=Vector3.INF
+	var best_c:=INF
+	for step in range(1,70):
+		for offset in [0.0,120.0,-120.0,260.0,-260.0]:
+			var x:=center.x+float(offset)
+			var z:=center.z+pole*float(step)*140.0
+			if absf(z)>9500.0:continue
+			var h:float=terrain._height_at(x,z)
+			if h<0.05:continue
+			var c:=float(PlanetEnvironment.profile_at(Vector2(x,z)).get("mean_temperature_c",99.0))
+			if c<best_c:
+				best_c=c;best=Vector3(x,h,z)
+			if c<-3.0:return best
+	return best
 
 ## Nearest point with dense woodland, searched on widening rings.
 func _find_woodland(center:Vector3)->Vector3:

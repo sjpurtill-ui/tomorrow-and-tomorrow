@@ -60,7 +60,9 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		if not bool(land.call(p)): continue
 		patch(ground,p,.004 if form=="open_hearth_yard" else .0025,soil,center,height,land,counts)
 		if form=="open_hearth_yard":
-			patch(ground,p,.0008,Color(.12,.10,.075,.85),center,height,land,counts)
+			# Ash and trampled earth at the fire: warm and soft-edged, not a black hole.
+			patch(ground,p,.0012,Color(.26,.20,.14,.70),center,height,land,counts)
+			patch(ground,p,.0005,Color(.17,.13,.10,.80),center,height,land,counts)
 			for i in 10:
 				var point := p+Vector2.from_angle(i*TAU/10)*.00065
 				box(props,point,Vector3(.00024,.00019,.00022),.0001,Color(.35,.34,.29),center,height,counts)
@@ -126,7 +128,13 @@ static func box(surface: SurfaceTool, p: Vector2, size: Vector3, y: float, color
 static func commit(surface: SurfaceTool, name: String, transparent: bool, count: int, parent: Node3D) -> void:
 	if count==0: return
 	var node := MeshInstance3D.new();node.name=name;node.mesh=surface.commit()
-	var material := StandardMaterial3D.new();material.vertex_color_use_as_albedo=true
-	material.roughness=1;material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	if transparent: material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	var material:Material
+	if transparent:
+		var ground:=StandardMaterial3D.new();ground.vertex_color_use_as_albedo=true
+		ground.roughness=1;ground.cull_mode=BaseMaterial3D.CULL_DISABLED
+		ground.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+		material=ground
+	else:
+		# Hearth stones, racks and stores painted like the huts (settlement_ink.gd).
+		material=preload("res://scripts/settlement_ink.gd").material()
 	node.material_override=material;parent.add_child(node)

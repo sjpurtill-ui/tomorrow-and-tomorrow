@@ -16,6 +16,7 @@ uniform vec2 ripple_phase = vec2(0.0);
 #include "res://scripts/coast_mask.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
+#include "res://scripts/water_beauty.gdshaderinc"
 
 float charted_at(vec2 xz) {
 	vec2 uv = clamp(xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
@@ -134,7 +135,8 @@ void fragment() {
 	vec3 water = mix(deep,shelf,exp(-depth/0.16)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.022)*surveyed_surface);
 	// Only the last metres show the bed through clear water.
-	water = mix(water,bed,exp(-depth/0.0024)*surveyed_surface*0.35);
+	// Muted and a little green, so a shallow lagoon never reads as grey sand.
+	water = mix(water,mix(bed,shallows,0.35),exp(-depth/0.0024)*surveyed_surface*0.26);
 	// Broad, static suspended-sediment variation gives shallow coasts the
 	// irregular mineral tint visible in aerial imagery without animating the bed.
 	float sediment = 0.0;
@@ -147,11 +149,19 @@ void fragment() {
 		sediment = exp(-depth/0.034)*surveyed_surface*smoothstep(0.30,0.75,sediment_field)
 			*(1.0-smoothstep(0.03,0.12,pixel_world));
 	}
+	// Ponds, meres and closed lagoons (water_beauty.gdshaderinc) are still
+	// water: no bed glare, sediment, surf or water-lines of an open shore.
+	float pond = 0.0;
+	if (over_patch && patch_weight>0.0 && patch_depth<0.03) {
+		pond = wbw_enclosure(point-local_grid, pixel_world, sea_level)*patch_weight;
+	}
+	float open_shore = 1.0-pond;
+	sediment *= open_shore;
 	water = mix(water,vec3(0.315,0.335,0.245),sediment*0.42);
 	// Only an actual shallow bed can produce a narrow wash. Filter it out before
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
-	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20);
+	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20*open_shore);
 	// Engraved water-lines, as old charts drew them: three fine pale lines
 	// following the shore at widening screen-pixel spacing, fading seaward.
 	float shore_px = depth/max(fwidth(depth),0.0000001);
@@ -164,12 +174,13 @@ void fragment() {
 	// Only where the bed actually shelves toward a shore: over a flat shallow
 	// bank every faint undulation would otherwise draw its own ring.
 	water_lines *= smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
+	water_lines *= open_shore;
 	water = mix(water,vec3(0.34,0.37,0.31),water_lines*0.60);
 	// Surf: a thin broken pale line at the water's edge and a fainter second
 	// one a few pixels out where the swell first breaks, in screen pixels so it
 	// stays a painted line at every close zoom. Settlement and valley zooms only.
 	float surf_detail = (1.0-smoothstep(0.002,0.014,pixel_world))*surveyed_surface
-		*smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
+		*smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001))*open_shore;
 	if (surf_detail>0.0) {
 		float breakup = coast_feather_noise(world_position.xz/max(pixel_world*9.0,0.000001)+vec2(-13.0,29.0));
 		float swash = 1.0-smoothstep(0.6,2.2,shore_px);
@@ -177,8 +188,14 @@ void fragment() {
 		float foam = max(swash*smoothstep(0.12,0.40,breakup),breaker*smoothstep(0.40,0.70,breakup)*0.50);
 		water = mix(water,vec3(0.74,0.75,0.70),foam*surf_detail*0.85);
 	}
-	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
+	if (pond>0.0) {
+		// Distance from the pond's own edge, in screen pixels, from the
+		// streamed surface (the water's depth there is only a metre or two).
+		float pond_px = patch_depth/max(fwidth(patch_depth),0.0000001);
+		water = mix(water,wbw_still_water(pond_px,view_slant,SCREEN_UV,1.0-smoothstep(0.004,0.03,pixel_world)),pond);
+	}
+	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
 	// The same parchment haze as the land, so the coast does not change key.
 	water = map_haze(water,clamp(altitude_haze*0.55+slant_haze*0.14,0.0,0.22));

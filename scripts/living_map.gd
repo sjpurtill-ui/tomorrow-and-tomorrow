@@ -48,7 +48,7 @@ const CLOTH:=[Color(0.46,0.35,0.24),Color(0.55,0.47,0.33),Color(0.38,0.33,0.27),
 
 ## Probes compare before/after in one build; the player never changes it.
 static var enabled:=true
-static var _figure_mesh:ArrayMesh
+static var _figure_mesh:Mesh
 static var _figure_material:ShaderMaterial
 static var _smoke_material:ShaderMaterial
 static var _glow_material:ShaderMaterial
@@ -131,6 +131,7 @@ static func tick_clock(delta:float)->float:
 		if _figure_material: _figure_material.set_shader_parameter("anim_clock",_clock)
 		if _smoke_material: _smoke_material.set_shader_parameter("anim_clock",_clock)
 		if _glow_material: _glow_material.set_shader_parameter("anim_clock",_clock)
+		preload("res://scripts/settlement_ink.gd").set_clock(_clock)
 	return _clock
 
 # --------------------------------------------------------------------------
@@ -578,13 +579,16 @@ func _build_hearth()->void:
 	var core:=CylinderMesh.new(); core.top_radius=0.0; core.bottom_radius=0.5*UNIT; core.height=1.7*UNIT; core.radial_segments=6
 	_mesh(flame,outer,_emissive(Color(1.0,0.52,0.14),2.6),Vector3(0,1.3*UNIT,0))
 	_mesh(flame,core,_emissive(Color(1.0,0.84,0.42),3.4),Vector3(0,0.85*UNIT,0),0.5)
-	var disc:=PlaneMesh.new(); disc.size=Vector2(14.0,14.0)*UNIT
+	# Firelight pools about 15 m out from the hearth, brightest at the stones.
+	var disc:=PlaneMesh.new(); disc.size=Vector2(30.0,30.0)*UNIT
 	glow=_mesh(hearth_root,disc,glow_material(),Vector3(0,0.35*UNIT,0))
 	hearth_root.visible=false
 
 func _place_hearth()->void:
 	if hearth_root==null: return
 	hearth_root.position=Vector3(0,_local_height(Vector2.ZERO)-0.00012,0)
+	# Huts near the fire take its warm light (scripts/settlement_ink.gd).
+	preload("res://scripts/settlement_ink.gd").set_hearth(anchor+hearth_root.position+Vector3(0,1.2*UNIT,0),1.0 if settled else 0.6)
 
 func _emissive(color:Color,energy:float)->StandardMaterial3D:
 	var m:=StandardMaterial3D.new()
@@ -841,48 +845,22 @@ func _figure_batch(label:String,count:int)->MultiMeshInstance3D:
 	add_child(node)
 	return node
 
-static func figure_mesh()->ArrayMesh:
-	## A low-poly person in metres, feet at the origin, facing -Z. UV.x names
-	## the part the shader moves: 0 body, 1/2 legs, 3/4 arms, 5 load, 6 tool.
-	## UV.y picks the colour; cloth takes the figure's instance colour.
+static func figure_mesh()->Mesh:
+	## One quad per person: the figure is drawn in ink by its shader
+	## (scripts/map_life_ink.gd), feet at the instance origin, facing -Z.
 	if _figure_mesh: return _figure_mesh
-	var st:=SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	# UV.y picks the colour: 0 cloth (the figure's own colour), 1 skin,
-	# 2 hair and leggings, 3 a carried bundle, 4 wood.
-	_box(st,Vector3(0,1.17,0),Vector3(0.36,0.56,0.22),0,0,0.78)     # tunic
-	_box(st,Vector3(0,0.93,0),Vector3(0.40,0.12,0.25),0,0,1.0)      # hem
-	_box(st,Vector3(0,1.58,0),Vector3(0.20,0.24,0.21),1,0)            # head
-	_box(st,Vector3(0,1.71,0.01),Vector3(0.22,0.07,0.23),2,0)         # hair
-	_box(st,Vector3(-0.10,0.45,0),Vector3(0.13,0.90,0.14),2,1)        # legs
-	_box(st,Vector3(0.10,0.45,0),Vector3(0.13,0.90,0.14),2,2)
-	_box(st,Vector3(-0.25,1.14,0),Vector3(0.10,0.56,0.11),0,3,0.85)  # arms
-	_box(st,Vector3(0.25,1.14,0),Vector3(0.10,0.56,0.11),0,4,0.85)
-	_box(st,Vector3(-0.25,0.83,0),Vector3(0.09,0.09,0.09),1,3)        # hands
-	_box(st,Vector3(0.25,0.83,0),Vector3(0.09,0.09,0.09),1,4)
-	_box(st,Vector3(0,1.30,0.22),Vector3(0.44,0.40,0.28),3,5)         # bundle
-	_box(st,Vector3(0,0.5,0),Vector3(0.035,1.0,0.035),4,6)            # tool: unit length along +Y
-	st.generate_normals()
-	_figure_mesh=st.commit()
+	_figure_mesh=preload("res://scripts/map_life_ink.gd").quad()
 	return _figure_mesh
 
-static func _box(st:SurfaceTool,center:Vector3,size:Vector3,colour:int,part:int,taper:float=1.0)->void:
-	var h:=size*0.5
-	var top:=Vector2(h.x*taper,h.z*taper)
-	var c:=[Vector3(-h.x,-h.y,-h.z),Vector3(h.x,-h.y,-h.z),Vector3(h.x,-h.y,h.z),Vector3(-h.x,-h.y,h.z),
-		Vector3(-top.x,h.y,-top.y),Vector3(top.x,h.y,-top.y),Vector3(top.x,h.y,top.y),Vector3(-top.x,h.y,top.y)]
-	var faces:=[[0,1,2,3],[7,6,5,4],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]]
-	for face in faces:
-		for index in [0,2,1,0,3,2]:
-			st.set_uv(Vector2(float(part),float(colour)))
-			st.add_vertex(center+(c[face[index]] as Vector3))
-
 static func figure_material()->ShaderMaterial:
+	## Hand-drawn people in the map's ink (scripts/map_life_ink.gd): the same
+	## instance data as ever (phase, pose, carrying, pace; colour = cloth).
 	if _figure_material: return _figure_material
-	var shader:=Shader.new()
-	shader.code=FIGURE_SHADER
-	_figure_material=ShaderMaterial.new(); _figure_material.shader=shader
+	_figure_material=preload("res://scripts/map_life_ink.gd").material("person")
 	_figure_material.set_shader_parameter("anim_clock",_clock)
+	# Tall enough on screen for the pose to read (never more than 4x life).
+	_figure_material.set_shader_parameter("min_px",22.0)
+	_figure_material.set_shader_parameter("max_swell",4.0)
 	return _figure_material
 
 static func smoke_material()->ShaderMaterial:
@@ -900,84 +878,6 @@ static func glow_material()->ShaderMaterial:
 static func birth_mark_texture()->Texture2D:
 	## Gold (the sacred colour: a new soul) on the icon engine's dark disc.
 	return preload("res://scripts/resource_icons.gd").moment_texture("birth",Color("#D4AE5C"),56)
-
-const FIGURE_SHADER:="""
-shader_type spatial;
-render_mode cull_disabled, specular_disabled;
-uniform float anim_clock = 0.0;
-varying vec3 v_color;
-
-mat3 rot_x(float a) { float c = cos(a); float s = sin(a); return mat3(vec3(1.0,0.0,0.0), vec3(0.0,c,s), vec3(0.0,-s,c)); }
-
-void vertex() {
-	float part = floor(UV.x + 0.5);
-	float code = INSTANCE_CUSTOM.y;
-	float still = code > 99.5 ? 1.0 : 0.0;   // a mourner who has arrived stands bowed
-	float pose = floor(mod(code, 100.0) + 0.5);
-	float carry = INSTANCE_CUSTOM.z;
-	float t = anim_clock * max(INSTANCE_CUSTOM.w, 0.2) + INSTANCE_CUSTOM.x * 6.2831;
-	float leg = 0.0; float arm_l = 0.0; float arm_r = 0.0; float bend = 0.0;
-	float lower = 0.0; float bob = 0.0; float tool_len = 0.0;
-	vec3 tool_dir = vec3(0.0, 1.0, 0.0);
-	if (pose < 0.5 || pose == 6.0) {
-		float w = pose == 6.0 ? 0.55 : 1.0;
-		float s = sin(t * 7.0) * (1.0 - still);
-		leg = 0.55 * w * s; arm_l = -0.45 * w * s; arm_r = -arm_l;
-		bob = 0.035 * abs(cos(t * 7.0)) * (1.0 - still);
-		if (pose == 6.0) { bend = -0.30 - 0.15 * still; arm_l = 0.25 + 0.2 * still; arm_r = 0.25 + 0.2 * still; }
-		if (carry > 0.5) { arm_l = 0.95; arm_r = 0.95; }
-	} else if (pose == 1.0) {
-		bend = -0.95 + 0.12 * sin(t * 1.7);
-		arm_l = 1.15 + 0.35 * sin(t * 3.1); arm_r = 1.0 + 0.35 * sin(t * 3.1 + 1.9);
-	} else if (pose == 2.0) {
-		float s = sin(t * 5.0);
-		bend = -0.22; arm_r = 1.5 + 1.3 * max(s, -0.4); arm_l = 1.2 + 0.9 * max(s, -0.4); tool_len = 0.7;
-	} else if (pose == 3.0) {
-		bend = -0.06; arm_l = 1.0; arm_r = 1.1 + 0.06 * sin(t * 1.3); tool_len = 2.8;
-		tool_dir = normalize(vec3(0.0, 0.55, -0.85));
-	} else if (pose == 4.0) {
-		lower = 0.26; leg = -0.8; bend = -0.30; arm_l = 1.0 + 0.25 * sin(t * 1.1); arm_r = 0.9 + 0.25 * sin(t * 1.4 + 1.0);
-	} else if (pose == 5.0) {
-		arm_r = 0.4 + 0.6 * max(0.0, sin(t * 1.3)); bend = 0.03 * sin(t * 0.7);
-	} else if (pose == 7.0) {
-		arm_r = 0.35; tool_len = 2.1; tool_dir = vec3(0.0, 1.0, 0.0);
-	} else {
-		lower = 0.26; leg = -0.8; bend = -0.45; arm_r = 1.2 + 0.7 * max(sin(t * 6.0), -0.3); arm_l = 1.0; tool_len = 0.35;
-	}
-	vec3 v = VERTEX;
-	vec3 n = NORMAL;
-	vec3 hip = vec3(0.0, 0.88, 0.0);
-	if (part == 1.0 || part == 2.0) {
-		float a = (pose == 4.0 || pose == 8.0) ? leg : (part == 1.0 ? leg : -leg);
-		mat3 r = rot_x(a); v = r * (v - hip) + hip; n = r * n;
-	}
-	if (part == 3.0 || part == 4.0 || part == 6.0) {
-		vec3 shoulder = vec3(part == 3.0 ? -0.25 : 0.25, 1.40, 0.0);
-		mat3 r = rot_x(part == 3.0 ? arm_l : arm_r);
-		if (part == 6.0) {
-			vec3 hand = r * (vec3(0.25, 0.83, 0.0) - shoulder) + shoulder;
-			vec3 dir = pose == 2.0 || pose == 8.0 ? r * vec3(0.0, 0.0, -1.0) : tool_dir;
-			v = hand + dir * (v.y * tool_len) + vec3(v.x, 0.0, v.z) * step(0.01, tool_len);
-		} else {
-			v = r * (v - shoulder) + shoulder; n = r * n;
-		}
-	}
-	if (part == 5.0) { v = mix(vec3(0.0, 1.3, 0.12), v, step(0.5, carry)); }
-	if (part != 1.0 && part != 2.0) {
-		mat3 r = rot_x(bend); v = r * (v - hip) + hip; n = r * n;
-	}
-	v.y += bob - lower;
-	VERTEX = v;
-	NORMAL = normalize(n);
-	float colour = floor(UV.y + 0.5);
-	v_color = colour < 0.5 ? COLOR.rgb : (colour < 1.5 ? vec3(0.62, 0.46, 0.34) : (colour < 2.5 ? vec3(0.28, 0.23, 0.18) : (colour < 3.5 ? vec3(0.55, 0.45, 0.29) : vec3(0.36, 0.27, 0.18))));
-}
-
-void fragment() {
-	ALBEDO = v_color;
-	ROUGHNESS = 0.9;
-}
-"""
 
 const SMOKE_SHADER:="""
 shader_type spatial;
@@ -1018,8 +918,9 @@ void fragment() {
 	// Firelight pooled on the ground around the hearth, flickering.
 	float d = length(UV - vec2(0.5)) * 2.0;
 	float flicker = 0.85 + 0.10 * sin(anim_clock * 11.0) + 0.05 * sin(anim_clock * 29.0);
-	float fall = pow(clamp(1.0 - d, 0.0, 1.0), 3.0);
-	ALBEDO = vec3(1.0, 0.50, 0.18) * fall * 0.38 * flicker;
+	float fall = pow(clamp(1.0 - d, 0.0, 1.0), 2.4);
+	float core = pow(clamp(1.0 - d * 2.2, 0.0, 1.0), 2.0);
+	ALBEDO = (vec3(1.0, 0.52, 0.20) * fall * 0.30 + vec3(1.0, 0.72, 0.36) * core * 0.22) * flicker;
 }
 """
 

@@ -1890,7 +1890,9 @@ func _build_environment() -> void:
 	# The fill is the open sky: a little cooler than the key, so shade reads
 	# blue-grey against warm sunlit ground (world_beauty.gdshaderinc).
 	settings.ambient_light_color = Color("#97a3ab")
-	settings.ambient_light_energy = 0.33 if SEAMLESS_WORLD else 0.36
+	# Raised in round two (codex/beauty-2): shaded slopes and cast shadows at
+	# close and valley views read as cool shade, not dark blots.
+	settings.ambient_light_energy = 0.46 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
@@ -1909,7 +1911,7 @@ func _build_environment() -> void:
 	sun.shadow_blur=2.4
 	# Painted shade is never black: hill shadows keep some sky light, so a cast
 	# shadow reads as cool shade across the land rather than a hole in it.
-	sun.shadow_opacity=0.70
+	sun.shadow_opacity=0.52
 	sun.directional_shadow_max_distance = 900.0 if SEAMLESS_WORLD else 180.0
 	add_child(sun)
 
@@ -2313,6 +2315,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
 #include "res://scripts/world_beauty.gdshaderinc"
+#include "res://scripts/map_cloud.gdshaderinc"
 
 // Charted ground: the discovery mask, plus the ground around the people now.
 float charted_at(vec2 xz) {
@@ -2485,7 +2488,8 @@ void fragment() {
 		// Preserve the orthophoto's resolved escarpments, drainage fans and cover
 		// boundaries instead of reducing them to a faint grey wash. This is an
 		// albedo cue only; the actual normal and height still come from this world.
-		float regional_tone=clamp(1.0+(regional_luma/0.49-1.0)*1.68,0.50,1.50);
+		// Calmer toward chart zoom, where its mottling only made the sheet busy.
+		float regional_tone=clamp(1.0+(regional_luma/0.49-1.0)*mix(1.68,0.95,smoothstep(0.012,0.06,pixel_world)),0.50,1.50);
 		ground_map*=mix(1.0,regional_tone,regional_photo_detail*0.96);
 		forest_map*=mix(1.0,regional_tone,regional_photo_detail*0.72);
 		// Retain a little source chroma so mineral ground, dry cover and darker
@@ -2592,8 +2596,18 @@ void fragment() {
 		// lattice. Reconstruct the climate-owned mean until that field resolves.
 		filtered_woodland=mix(climate_woodland_mean,filtered_woodland,country_detail);
 	}
+	// Across a streamed patch's outer margin its woodland eases to the planet
+	// layer's value beside it, so no wood ends in a straight line at the seam.
+	if (!far_layer && patch_feather.w>0.5 && coast_mask_ready()) {
+		float wb_seam=smoothstep(0.60,0.82,coast_patch_edge(world_position.xz,patch_feather));
+		if (wb_seam>0.0) {
+			vec4 wb_far_color=surface_color; vec2 wb_far_uv=surface_uv; vec2 wb_far_uv2=surface_uv2;
+			coast_far_surface(world_position.xz,wb_far_color,wb_far_uv,wb_far_uv2);
+			filtered_woodland=mix(filtered_woodland,clamp(wb_far_color.a,0.0,1.0),wb_seam);
+		}
+	}
 	float forest_mask=woodland_channel?filtered_woodland:smoothstep(0.025,0.105,surface_color.g-max(surface_color.r,surface_color.b*0.82));
-	forest_mask*=1.0-smoothstep(0.30,0.72,slope);
+	forest_mask*=1.0-smoothstep(0.42,0.82,slope);
 	// surface_color.a is the authoritative woodland density. Resolve that density into
 	// irregular stands instead of rendering it as one airbrushed green wash.
 	// Zero density remains zero, while dense forest retains connected mass.
@@ -2679,7 +2693,9 @@ void fragment() {
 	if (surface_uv.x>=0.999) { exposed_rock=geological_rock(surface_position,surface_origin,world_position.y,pixel_world,surface_uv2); }
 	// Rock exposure follows steepness, including low coastal cliffs. The old
 	// altitude multiplier disguised steep lowland faces as grassy ground.
-	float rock_mask = smoothstep(0.13,0.43,slope);
+	// Crags on genuinely steep faces, broken into outcrops rather than a
+	// smooth pale smear along every ridge line.
+	float rock_mask = smoothstep(0.22,0.55,slope+(soil_patch-0.5)*0.16+(broad-0.5)*0.10);
 	earth = apply_climate_surface(earth,surface_position,surface_origin,pixel_world,forest_mask,vec4(surface_uv,surface_uv2));
 	// Repaint with the biome palette (world_beauty.gdshaderinc): the detail
 	// above stays, its hue comes from the climate.
@@ -2695,16 +2711,33 @@ void fragment() {
 	float wb_rain=clamp(precipitation+wb_topo_wet*0.16,0.0,1.0);
 	float wb_dry=1.0-smoothstep(0.26,0.50,wb_rain);
 	float wb_reference=mix(mix(0.180,0.250,wb_dry),0.085,clamp(forest_mask,0.0,1.0));
-	vec3 wb_palette=wb_biome_palette(wb_rain,wb_warmth,forest_mask,world_position.y,smoothstep(0.25,0.75,biome_patch*0.55+soil_patch*0.45));
+	// Open ground under thin woodland is only a little darker and greener:
+	// the trees themselves are painted by wb_woodland where stands grow.
+	// (Painting all woodland density as wood colour left dark stains.)
+	vec3 wb_palette=wb_biome_palette(wb_rain,wb_warmth,forest_mask*0.45,world_position.y,smoothstep(0.25,0.75,biome_patch*0.55+soil_patch*0.45));
 	earth = wb_paint(earth,wb_palette,wb_reference,0.85);
 	earth = wb_brushwork(earth,wb_brush(world_position.xz,CAMERA_POSITION_WORLD.y),1.0);
 	// Woodland as stands of crowns (world_beauty.gdshaderinc), from the same
 	// woodland density and clearing as resource access. The stand edge facing
 	// the low sun catches warm light; the far edge falls into shade that
 	// spills a little onto the open ground beside it.
-	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.30,0.72,slope));
-	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch,pixel_world)*(1.0-rock_mask*0.8);
-	earth = wb_woodland(earth,wb_stand_cover,wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5),world_position.xz,pixel_world);
+	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.42,0.82,slope));
+	// A natural margin (round two): the edge wanders on screen-sized noise, a
+	// fringe of scrub stands outside it, trees stop short of the tide line,
+	// and a pale strand runs along the shore.
+	float wb_rag=wb_ragged(world_position.xz,pixel_world);
+	// Horizontal distance (km) inland from the waterline, from the height's
+	// own screen-space rate: a steep shore is a few metres, a flat one wide.
+	// The rate is floored at a gentle 3% grade: on flat, low ground the
+	// per-quad rate is noise, and its steps would print the mesh grid.
+	float wb_shore_km=coast_height/max(coast_height_px/max(pixel_world,0.0000001),0.03);
+	wb_wood_density*=smoothstep(0.00005,0.0005,coast_height+wb_rag*0.0004);
+	vec2 wb_edge=wb_stand_edge(wb_wood_density,regional,soil_patch,wb_rag,pixel_world);
+	float wb_stand_cover=wb_edge.x*(1.0-rock_mask*0.8);
+	vec3 wb_wood_colour=wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5);
+	earth = wb_strand(earth,wb_shore_km,wb_rag,pixel_world);
+	earth = wb_fringe(earth,wb_edge.y*(1.0-rock_mask),wb_wood_colour,world_position.xz,pixel_world);
+	earth = wb_woodland(earth,wb_stand_cover,wb_wood_colour,world_position.xz,pixel_world);
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
 	// Gusts rolling through the grass, a fainter shimmer over the canopy.
 	float wb_gust=wb_wind_waves(world_position.xz,pixel_world,map_wind,map_wind_clock,wb_motion);
@@ -2736,10 +2769,22 @@ void fragment() {
 	// A fixed north-west sun gives the orthographic world the same readable relief
 	// cues as satellite hillshade. Keep the effect restrained at close range where
 	// the scene lights and metre-scale texture already carry the form.
-	float hill_light = dot(normalize(world_normal), normalize(vec3(-0.46, 0.78, -0.42)));
+	// At chart zoom the light follows the broad landform (the macro height
+	// raster) more than the mesh's small wrinkles: hills and valleys keep
+	// their form, the sheet stops crawling (world_beauty wb_macro_normal).
+	vec3 wb_light_normal=normalize(world_normal);
+	float wb_calm=0.0;
+	if (coast_mask_ready()) {
+		wb_calm=smoothstep(0.008,0.06,pixel_world)*0.78;
+		if (wb_calm>0.0) {
+			float wb_step=max(coast_grid1.z>0.0?coast_grid1.z:coast_grid0.z,pixel_world*18.0);
+			wb_light_normal=normalize(mix(wb_light_normal,wb_macro_normal(world_position.xz,wb_step),wb_calm));
+		}
+	}
+	float hill_light = dot(wb_light_normal, normalize(vec3(-0.46, 0.78, -0.42)));
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
-	float directional_slope = dot(normalize(world_normal), horizontal_sun);
-	float hillshade = clamp(1.0 + directional_slope * 3.20 - slope * 0.16, 0.66, 1.24);
+	float directional_slope = dot(wb_light_normal, horizontal_sun);
+	float hillshade = clamp(1.0 + directional_slope * 2.80 - slope * 0.12, 0.74, 1.20);
 	// The scene sun already shades resolvable terrain. Applying this cartographic
 	// hillshade at the same time doubled broad shadows into soft dark blobs at the
 	// 50,000-foot tier. Fade the map-only cue in once pixels cover country-scale
@@ -2755,7 +2800,7 @@ void fragment() {
 	// Painted light at every zoom (world_beauty.gdshaderinc): the sunward
 	// side of each slope warms, the far side takes the cool sky, and ground
 	// lying below the broad land around it (valleys, river bottoms) is shaded.
-	float wb_valley=smoothstep(0.004,0.14,wb_hollow)*0.55;
+	float wb_valley=smoothstep(0.004,0.14,wb_hollow)*0.35;
 	earth = wb_light(earth,directional_slope*4.5,wb_valley,mix(0.62,0.32,map_relief));
 	// Actual elevation remains meaningful after fine texture has filtered away.
 	// A broad, non-banded upland exposure separates low basins, plateaus and the
@@ -2766,7 +2811,7 @@ void fragment() {
 	vec3 upland_surface=mix(earth*vec3(1.10,1.03,0.84),vec3(0.42,0.41,0.38),mapped_alpine);
 	earth=mix(earth,upland_surface,mapped_upland*0.36);
 	float ridge_glint = smoothstep(0.12, 0.62, slope) * smoothstep(0.25, 0.82, hill_light) * map_relief;
-	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.20);
+	earth = mix(earth, vec3(0.48,0.46,0.40), ridge_glint * 0.10);
 	// Close aerial imagery needs a different exposure than the shaded regional
 	// relief map. Without this lift the settlement-scale ground fell nearly black.
 	earth *= mix(1.0, 1.16, close_detail);
@@ -2779,8 +2824,10 @@ void fragment() {
 	// little more along oblique rays, like the margin of a painted map.
 	// Engraved contours over the painted relief at chart zoom.
 	float wb_contour=wb_contours(world_position.y,height_px,pixel_world)*smoothstep(0.012,0.05,pixel_world);
-	earth=mix(earth,MAP_SEPIA*1.15,wb_contour*0.28);
+	earth=mix(earth,MAP_SEPIA*1.15,wb_contour*0.20);
 	earth=wb_grade(earth);
+	// Cloud shadows lie on the land itself, following its relief.
+	earth*=map_cloud_shadow(world_position.xz,world_position.y,map_cloud,map_cloud_scale);
 	// Log-scaled with footprint: none at the camp, a veil at 50,000 ft, and
 	// most of the way to parchment by the continental view.
 	float altitude_haze=clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.36;
@@ -2802,7 +2849,11 @@ void fragment() {
 	earth = wb_frontier_wash(earth,wb_frontier_px,world_position.xz,pixel_world,smoothstep(0.015,0.20,pixel_world));
 	ALBEDO = earth*reveal;
 	EMISSION = unknown_ground*(1.0-reveal);
+	// Sky fill (round two): slopes turned from the low sun keep a cool share
+	// of their colour, so shade reads as shade and never as a dark blot.
+	EMISSION += earth*reveal*wb_sky_fill(wb_light_normal);
 	ROUGHNESS = 0.96;
+	if (wb_calm>0.0) { NORMAL = normalize((VIEW_MATRIX*vec4(wb_light_normal,0.0)).xyz); }
 	}
 }
 """
@@ -4526,6 +4577,7 @@ uniform vec4 fallback_climate=vec4(0.0);
 varying vec4 plant_climate;
 #include "res://scripts/seasonal_surface.gdshaderinc"
 #include "res://scripts/map_palette.gdshaderinc"
+#include "res://scripts/map_cloud.gdshaderinc"
 uniform vec4 canopy_tint : source_color = vec4(1.0);
 uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
@@ -4578,8 +4630,11 @@ void fragment() {
 	float gap=smoothstep(0.68,0.92,filtered_vn(world_position.xz*780.0+vec2(91.0,7.0)));
 	vec3 base=COLOR.rgb*canopy_tint.rgb*(0.70+crown*0.38+(leaf-0.5)*0.15);
 	if (vegetation_kind==0) {
-		if (atlas_variant>=0) {
-			vec2 cell=vec2(float(atlas_variant%4),float(atlas_variant/4));
+		// -2: each crown names its atlas cell in its colour's alpha
+		// (scripts/close_woods.gd streams crowns this way, one draw per chunk).
+		int crown_cell=atlas_variant==-2?int(COLOR.a*15.0+0.5):atlas_variant;
+		if (crown_cell>=0) {
+			vec2 cell=vec2(float(crown_cell%4),float(crown_cell/4));
 			vec2 atlas_uv=(cell+vec2(0.018)+UV*0.964)/4.0;
 			vec4 canopy=texture(canopy_atlas,atlas_uv);
 			// Preserve shaded crown interiors without letting the darkest source
@@ -4596,7 +4651,10 @@ void fragment() {
 			float edge_colour=smoothstep(0.08,0.60,canopy.a);
 			vec3 source_chroma=clamp(canopy.rgb/max(source_luma,0.035),vec3(0.45),vec3(1.75));
 			vec3 restrained_canopy=canopy_luma*mix(vec3(1.0),source_chroma,mix(0.08,0.38,edge_colour))*vec3(0.78,0.84,0.72);
-			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.16);
+			// Take most of the hue from the crown's own tint (the biome's canopy
+			// greens), so round crowns agree with the painted woodland beneath
+			// instead of reading as grey-brown tufts (codex/beauty-2).
+			base=restrained_canopy*mix(vec3(1.0),COLOR.rgb/tint_luma,0.55)*1.08;
 			base*=0.82+crown*0.16;
 			// Keep texture coverage separate from the distance fade. Scissoring
 			// an already faded alpha left opaque black pinpricks at aerial scale.
@@ -4608,11 +4666,16 @@ void fragment() {
 		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
 	}
 	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
+	// Crowns and bushes are drawn with a soft ink edge where they turn away
+	// from the eye, like the painted canopy's outlined trees (codex/beauty-2).
+	if(vegetation_kind!=2) { float turned=1.0-abs(dot(NORMAL,VIEW)); base=mix(base,base*vec3(0.46,0.48,0.42),smoothstep(0.62,0.95,turned)*0.55); }
 	ALPHA*=lod_fade*boundary;
 	if(ALPHA<0.001) discard;
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
 	// Same map palette as the ground: olive and slate canopy, not neon blobs.
 	base=map_palette_grade(base);
+	// The same drifting cloud shadows as the ground beneath (map_cloud).
+	base*=map_cloud_shadow(world_position.xz,world_position.y,map_cloud,map_cloud_scale);
 	ALBEDO=base*smoothstep(0.06,0.62,revealed);
 	EMISSION=MAP_VELLUM*(1.0-smoothstep(0.06,0.62,revealed));
 	ROUGHNESS=1.0;

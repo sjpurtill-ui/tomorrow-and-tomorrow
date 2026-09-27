@@ -4,7 +4,7 @@ extends RefCounted
 const FAMILIES := ["masonry", "industrial", "modern"]
 const TYPES := ["terrace", "courtyard", "corner", "villa", "arcade", "hall", "workshop", "warehouse"]
 static var cache:Dictionary={}
-static var material:StandardMaterial3D
+static var material:Material
 
 static func kind(plot:Dictionary)->String:
 	var generation:=int(plot.get("fabric_generation",0))
@@ -110,7 +110,7 @@ static func _roof(s:SurfaceTool,base:Vector3,size:Vector2,rise:float,color:Color
 
 static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)->void:
 	if material==null:
-		material=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.roughness=.78;material.cull_mode=BaseMaterial3D.CULL_DISABLED
+		material=preload("res://scripts/settlement_ink.gd").material()
 	var groups:Dictionary={}
 	for record:Dictionary in plan.buildings:
 		var name:=kind(record.plot)
@@ -123,13 +123,18 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var group:Array=groups[key];var first:Dictionary=group[0]
 		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
 		batch.mesh=mesh_for_plot(first.plot);batch.instance_count=group.size()
+		var placed:Array[Transform3D]=[]
 		for i in group.size():
 			var record:Dictionary=group[i];var point:Vector2=record.position+Vector2(center.x,center.z)
-			batch.set_instance_transform(i,Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y)))
+			var placement:=Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
+			placed.append(placement)
+			batch.set_instance_transform(i,placement)
 			var wear:=1-clampf(float(record.plot.get("condition",1)),0,1)
 			var tint:Color=[Color("fff7e8"),Color("e8eee6"),Color("e7e1d9"),Color("eedbd0")][posmod(int(record.plot.get("seed",1)),4)]
 			batch.set_instance_color(i,tint.lerp(Color("554b40"),wear*.6))
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
+		# Soft shadows where each building stands (settlement_ink.gd).
+		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+key.replace(":","_"),placed,batch.mesh.get_aabb())
 
 static func installed_features(plot:Dictionary)->int:
 	var installed:Variant=plot.get("fabric_components",{})

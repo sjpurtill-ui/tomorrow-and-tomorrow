@@ -9,7 +9,7 @@ const KIT := ["carried_ridge", "carried_round", "rooted_lean_to", "round_househo
 const HOUSEHOLD_FORMS := ["timber_household", "timber_and_fibre_household", "earthen_household", "dry_stone_household", "durable_household_cluster", "joined_kin_compound", "courtyard_household_compound"]
 const MARKET_FORMS := ["covered_exchange_court", "periodic_market_court", "maintained_gathering_ground", "customary_precinct", "durable_assembly_compound"]
 static var meshes: Dictionary = {}
-static var material: StandardMaterial3D
+static var material: Material
 
 static func kind(plot: Dictionary) -> String:
 	var late:=LATE.kind(plot)
@@ -147,8 +147,8 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 	LATE.render(plan,center,height,parent)
 	_render_installed_early_details(plan,center,height,parent)
 	if material == null:
-		material = StandardMaterial3D.new(); material.vertex_color_use_as_albedo = true
-		material.roughness = .95; material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		# Painted in the map's ink (scripts/settlement_ink.gd), vertex colours kept.
+		material = preload("res://scripts/settlement_ink.gd").material()
 	for name in KIT:
 		var visible: Array[Dictionary] = []
 		for record in plan.buildings:
@@ -172,6 +172,8 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		var node := MultiMeshInstance3D.new(); node.name = "EarlySettlement_"+name
 		node.multimesh = batch; node.material_override = material
 		node.set_meta("source_transforms",transforms); parent.add_child(node)
+		# Soft shadows where each building stands (settlement_ink.gd).
+		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+name,transforms,kit_mesh(name).get_aabb())
 
 static func _render_installed_early_details(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)->void:
 	var groups:Dictionary={}
@@ -192,7 +194,7 @@ static func _render_installed_early_details(plan:Dictionary,center:Vector3,heigh
 		if not groups.has(key):groups[key]={"mesh":mesh,"records":[]}
 		groups[key].records.append(record)
 	if material==null:
-		material=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.roughness=.95;material.cull_mode=BaseMaterial3D.CULL_DISABLED
+		material=preload("res://scripts/settlement_ink.gd").material()
 	for key:String in groups:
 		var group:Dictionary=groups[key]
 		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.mesh=group.mesh;batch.instance_count=group.records.size()

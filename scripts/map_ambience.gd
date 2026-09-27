@@ -23,6 +23,7 @@ extends Node3D
 
 const MapWeather:=preload("res://scripts/map_weather.gd")
 const MapMotion:=preload("res://scripts/map_motion.gd")
+const Ink:=preload("res://scripts/map_life_ink.gd")
 const NODE_NAME:="MapAmbience"
 const UNIT:=0.001                 ## one metre in map units (km)
 const MAX_BIRDS:=21
@@ -59,6 +60,9 @@ var snow:=0.0
 var clock:=0.0
 var wind_clock:=0.0
 var cloud_drift:=Vector2.ZERO
+## Cloud drift for shadows drawn on the land itself (map_cloud.gdshaderinc):
+## its noise does not tile, so it wraps only once every 40,000 km.
+var cloud_drift_land:=Vector2.ZERO
 var cloud_mesh:MeshInstance3D
 var drops:MultiMeshInstance3D
 var birds:MultiMeshInstance3D
@@ -73,6 +77,8 @@ var last_report:Dictionary={}
 var _cloud_material:ShaderMaterial
 var _legibility:=-1.0
 var _wind_targets:Array[WeakRef]=[]
+var _cloud_targets:Array[WeakRef]=[]
+var _land_clouds:=false            ## the land itself (terrain) draws cloud shadows
 var _wind_scan_key:=""
 var _drop_material:ShaderMaterial
 var _bird_material:ShaderMaterial
@@ -110,11 +116,16 @@ static func bind_wind_material(material:ShaderMaterial)->void:
 # --------------------------------------------------------------------------
 
 func _ready()->void:
+	# Trees in the round wherever the camera goes (codex/beauty-2), added
+	# beside this layer once the map has finished adding it.
+	if terrain!=null:(func()->void:preload("res://scripts/close_woods.gd").ensure(terrain)).call_deferred()
 	_build_clouds()
 	drops=_batch("Precipitation",_drop_quad(),drop_material(),MAX_DROPS,false)
-	birds=_batch("Birds",_bird_mesh(),bird_material(),MAX_BIRDS,false)
-	herd=_batch("Herd",_animal_mesh(),herd_material(),MAX_ANIMALS,true)
-	boats=_batch("Boats",_boat_mesh(),boat_material(),MAX_BOATS,true)
+	# Birds, beasts and boats are drawn in ink on one quad each
+	# (scripts/map_life_ink.gd), animated in their shaders.
+	birds=_batch("Birds",Ink.quad(),bird_material(),MAX_BIRDS,true)
+	herd=_batch("Herd",Ink.quad(),herd_material(),MAX_ANIMALS,true)
+	boats=_batch("Boats",Ink.quad(),boat_material(),MAX_BOATS,true)
 	# Builders at rising great works share the living map's people.
 	var living_script:=preload("res://scripts/living_map.gd")
 	builders=_batch("GreatWorkBuilders",living_script.figure_mesh(),living_script.figure_material(),MAX_BUILDERS,true)
@@ -187,7 +198,9 @@ func _frame(delta:float)->void:
 	if not reduced:
 		cloud_drift+=wind_dir*wind*CLOUD_SPEED_KMH/3600.0*dt*8.0
 		var period:=289.0*_cloud_scale()
+		cloud_drift_land+=wind_dir*wind*CLOUD_SPEED_KMH/3600.0*dt*8.0
 		cloud_drift=Vector2(fposmod(cloud_drift.x,period),fposmod(cloud_drift.y,period))
+		cloud_drift_land=Vector2(fposmod(cloud_drift_land.x,40000.0),fposmod(cloud_drift_land.y,40000.0))
 	_push_wind(gust)
 	var target:Vector3=terrain.get("camera_target") if terrain.get("camera_target") is Vector3 else Vector3.ZERO
 	var home:=_home()
@@ -195,7 +208,16 @@ func _frame(delta:float)->void:
 	# Cloud shadows: a full-screen pass, only while they can be seen.
 	var cloud_fade:=1.0-smoothstep(CLOUD_FULL_BELOW,CLOUD_GONE_ABOVE,size)
 	var shadow:=cloud_fade*clampf(cloud*1.15,0.0,1.0)
-	cloud_mesh.visible=shadow>0.01
+	# Materials that draw cloud shadows on the land itself take them over from
+	# the flat screen pass, which cannot follow relief.
+	var land_clouds:=_land_clouds
+	var cloud_packed:=Vector4(cloud_drift_land.x,cloud_drift_land.y,clampf(cloud,0.0,0.9),cloud_fade*smoothstep(0.02,0.25,cloud))
+	for ref in _cloud_targets:
+		var material:=ref.get_ref() as ShaderMaterial
+		if material==null:continue
+		material.set_shader_parameter("map_cloud",cloud_packed)
+		material.set_shader_parameter("map_cloud_scale",_cloud_scale())
+	cloud_mesh.visible=shadow>0.01 and not land_clouds
 	if cloud_mesh.visible:
 		_cloud_material.set_shader_parameter("drift",cloud_drift)
 		_cloud_material.set_shader_parameter("ground_y",target.y)
@@ -251,17 +273,26 @@ func _rescan_wind_targets()->void:
 	if key==_wind_scan_key:return
 	_wind_scan_key=key
 	_wind_targets.clear()
+	_cloud_targets.clear()
+	_land_clouds=false
 	var alive:Array[WeakRef]=[]
 	for ref in _wind_materials:
 		if ref.get_ref()!=null:alive.append(ref)
 	_wind_materials=alive
 	var lists:Array=[_wind_materials]
 	if seasonal is Array:lists.append(seasonal)
-	for list in lists:
+	for list_index in lists.size():
+		var list:Array=lists[list_index]
 		for ref in list:
 			var material:=(ref as WeakRef).get_ref() as ShaderMaterial if ref is WeakRef else null
 			if material==null or material.shader==null or not material.shader.code.contains("map_wind"):continue
-			if not _wind_targets.any(func(existing:WeakRef)->bool:return existing.get_ref()==material):_wind_targets.append(weakref(material))
+			if not _wind_targets.any(func(existing:WeakRef)->bool:return existing.get_ref()==material):
+				_wind_targets.append(weakref(material))
+				if material.shader.code.contains("map_cloud"):
+					_cloud_targets.append(weakref(material))
+					# Only the map's own seasonal materials (the land) replace the
+					# screen pass; a bound building material alone does not.
+					if list_index>0:_land_clouds=true
 	_wind_scan_key="%d|%d" % [_wind_materials.size(),(seasonal as Array).size() if seasonal is Array else -1]
 
 # --------------------------------------------------------------------------
@@ -317,11 +348,17 @@ func _refresh_life()->void:
 	var index:=0
 	for f in flocks:
 		var center:Vector2=centers[f%centers.size()]
+		# Gulls over the water are pale, rooks over the woods dark, the small
+		# birds about home a warm brown.
+		var over_water:=water_site!=Vector3.ZERO and f%centers.size()==0
+		var over_woods:=not woods.is_empty() and center==_v2(woods[0])
+		var plumage:=Color(0.90,0.88,0.82) if over_water else (Color(0.26,0.24,0.22) if over_woods else Color(0.56,0.46,0.36))
 		var ground:=float(living.call("_local_height",center)) if living.has_method("_local_height") else 0.0
 		for b in BIRDS_PER_FLOCK:
 			birds.multimesh.set_instance_transform(index,Transform3D(Basis.IDENTITY,Vector3(center.x,ground+0.045+rng.randf()*0.03,center.y)))
 			# phase along the circle, radius share, speed share, flap phase
 			birds.multimesh.set_instance_custom_data(index,Color(float(f)*0.31+float(b)*0.035+rng.randf()*0.01,0.75+rng.randf()*0.5,0.9+rng.randf()*0.2,rng.randf()))
+			birds.multimesh.set_instance_color(index,plumage)
 			index+=1
 	birds.multimesh.visible_instance_count=index
 	# The herd: on open ground beyond the fields (the hunters' ground).
@@ -496,18 +533,24 @@ func drop_material()->ShaderMaterial:
 
 func bird_material()->ShaderMaterial:
 	if _bird_material:return _bird_material
-	_bird_material=_material(BIRD_SHADER)
+	_bird_material=_ink_material("bird",16.0)
 	return _bird_material
 
 func herd_material()->ShaderMaterial:
 	if _herd_material:return _herd_material
-	_herd_material=_material(HERD_SHADER)
+	_herd_material=_ink_material("beast",15.0)
 	return _herd_material
 
 func boat_material()->ShaderMaterial:
 	if _boat_material:return _boat_material
-	_boat_material=_material(BOAT_SHADER)
+	_boat_material=_ink_material("boat",24.0)
 	return _boat_material
+
+## Each layer gets its own copy of the ink shader's material (its own clock).
+static func _ink_material(kind:String,min_px:float)->ShaderMaterial:
+	var material:=Ink.material(kind).duplicate() as ShaderMaterial
+	material.set_shader_parameter("min_px",min_px)
+	return material
 
 static func _material(code:String)->ShaderMaterial:
 	var shader:=Shader.new();shader.code=code
@@ -517,51 +560,6 @@ static func _material(code:String)->ShaderMaterial:
 static func _drop_quad()->Mesh:
 	var quad:=QuadMesh.new();quad.size=Vector2.ONE
 	return quad
-
-static func _bird_mesh()->ArrayMesh:
-	## A gull-wing chevron in metres, nose toward +Z. UV.x is the distance
-	## from the body (the shader lifts the wingtips).
-	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var nose:=Vector3(0,0,0.28);var tail:=Vector3(0,0,-0.18)
-	var left_elbow:=Vector3(-0.42,0.05,0.02);var right_elbow:=Vector3(0.42,0.05,0.02)
-	var left_tip:=Vector3(-1.0,0,-0.24);var right_tip:=Vector3(1.0,0,-0.24)
-	for tri in [[nose,left_elbow,tail],[left_elbow,left_tip,tail],[nose,tail,right_elbow],[right_elbow,tail,right_tip]]:
-		for v:Vector3 in tri:
-			st.set_uv(Vector2(absf(v.x),0));st.set_normal(Vector3.UP);st.add_vertex(v)
-	return st.commit()
-
-static func _box(st:SurfaceTool,center:Vector3,size:Vector3,part:int)->void:
-	var h:=size*0.5
-	var c:=[Vector3(-h.x,-h.y,-h.z),Vector3(h.x,-h.y,-h.z),Vector3(h.x,-h.y,h.z),Vector3(-h.x,-h.y,h.z),
-		Vector3(-h.x,h.y,-h.z),Vector3(h.x,h.y,-h.z),Vector3(h.x,h.y,h.z),Vector3(-h.x,h.y,h.z)]
-	for face in [[0,1,2,3],[7,6,5,4],[0,4,5,1],[1,5,6,2],[2,6,7,3],[3,7,4,0]]:
-		for index in [0,2,1,0,3,2]:
-			st.set_uv(Vector2(float(part),0));st.add_vertex(center+(c[face[index]] as Vector3))
-
-static func _animal_mesh()->ArrayMesh:
-	## A grazing beast in metres, facing +Z: 0 body, 1 neck and head, 2/3 the
-	## diagonal leg pairs (a walking gait swings them in opposition).
-	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_box(st,Vector3(0,0.95,0),Vector3(0.42,0.44,1.25),0)
-	_box(st,Vector3(0,1.20,0.70),Vector3(0.16,0.42,0.18),1)
-	_box(st,Vector3(0,1.38,0.86),Vector3(0.18,0.20,0.36),1)
-	_box(st,Vector3(-0.14,0.38,0.48),Vector3(0.09,0.76,0.09),2)
-	_box(st,Vector3(0.14,0.38,-0.48),Vector3(0.09,0.76,0.09),2)
-	_box(st,Vector3(0.14,0.38,0.48),Vector3(0.09,0.76,0.09),3)
-	_box(st,Vector3(-0.14,0.38,-0.48),Vector3(0.09,0.76,0.09),3)
-	st.generate_normals()
-	return st.commit()
-
-static func _boat_mesh()->ArrayMesh:
-	## A dugout with one paddler, in metres, bow toward +Z: 0 hull, 1 paddler.
-	var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	_box(st,Vector3(0,0.18,0),Vector3(0.7,0.36,4.2),0)
-	_box(st,Vector3(0,0.20,2.3),Vector3(0.36,0.30,0.5),0)
-	_box(st,Vector3(0,0.20,-2.3),Vector3(0.36,0.30,0.5),0)
-	_box(st,Vector3(0,0.70,-0.6),Vector3(0.34,0.70,0.26),1)
-	_box(st,Vector3(0,1.18,-0.6),Vector3(0.20,0.22,0.20),1)
-	st.generate_normals()
-	return st.commit()
 
 # --------------------------------------------------------------------------
 # Shaders
@@ -657,103 +655,5 @@ void fragment() {
 	float shape = snow > 0.5 ? 1.0 - smoothstep(0.35, 1.0, length(q)) : (1.0 - abs(q.x)) * (1.0 - smoothstep(0.6, 1.0, abs(q.y)));
 	ALBEDO = snow > 0.5 ? vec3(0.97, 0.97, 0.99) : vec3(0.78, 0.82, 0.86);
 	ALPHA = shape * v_alpha * (snow > 0.5 ? 0.8 : 0.34);
-}
-"""
-
-## Birds wheeling in loose circles, flapping and gliding.
-const BIRD_SHADER:="""
-shader_type spatial;
-render_mode unshaded, cull_disabled, shadows_disabled, fog_disabled;
-uniform float clock = 0.0;
-uniform float legibility = 1.0;
-void vertex() {
-	vec4 r = INSTANCE_CUSTOM;
-	float radius = 0.05 * r.y;
-	float t = clock * 0.23 * r.z + r.x * 6.2831;
-	vec3 at = vec3(cos(t) * radius, 0.0, sin(t) * radius * 0.72);
-	at.x += sin(t * 2.3 + r.w * 9.0) * radius * 0.16;
-	at.y += sin(t * 1.7 + r.w * 5.0) * 0.004;
-	vec2 heading = normalize(vec2(-sin(t), cos(t) * 0.72));
-	// Flap in bursts, then glide.
-	float burst = step(0.1, sin(clock * 0.9 + r.w * 11.0));
-	float flap = sin(clock * 16.0 + r.w * 40.0) * burst;
-	vec3 v = VERTEX;
-	v.y += UV.x * UV.x * (0.55 * flap + 0.12);
-	float span = 4.0 * 0.001 * legibility;
-	float c = heading.y; float s = heading.x;
-	v = vec3(v.x * c + v.z * s, v.y, -v.x * s + v.z * c);
-	VERTEX = at + v * span;
-}
-void fragment() {
-	ALBEDO = vec3(0.21, 0.18, 0.15);
-}
-"""
-
-## A grazing herd: heads down most of the time, drifting slowly across the
-## ground, legs swinging when an animal walks on.
-const HERD_SHADER:="""
-shader_type spatial;
-render_mode cull_disabled, specular_disabled;
-uniform float clock = 0.0;
-uniform float legibility = 1.0;
-varying vec3 v_color;
-mat3 rot_x(float a) { float c = cos(a); float s = sin(a); return mat3(vec3(1.0,0.0,0.0), vec3(0.0,c,s), vec3(0.0,-s,c)); }
-void vertex() {
-	vec4 r = INSTANCE_CUSTOM;
-	float t = clock * 0.06 + r.x * 6.2831;
-	// Wander a few metres, facing the way it goes.
-	vec2 path = vec2(sin(t) + 0.4 * sin(t * 2.7 + r.y * 7.0), cos(t * 0.8 + r.y * 3.0)) * 0.006;
-	vec2 step_dir = vec2(cos(t) + 1.08 * cos(t * 2.7 + r.y * 7.0), -0.8 * sin(t * 0.8 + r.y * 3.0));
-	float walking = smoothstep(0.35, 0.8, sin(clock * 0.21 + r.y * 12.0));
-	float yaw = atan(step_dir.x, step_dir.y);
-	float part = floor(UV.x + 0.5);
-	vec3 v = VERTEX;
-	if (part > 1.5) {
-		float swing = sin(clock * 6.0 + r.x * 20.0) * 0.45 * walking * (part > 2.5 ? -1.0 : 1.0);
-		vec3 hip = vec3(v.x, 0.76, v.z > 0.0 ? 0.48 : -0.48);
-		v = rot_x(swing) * (v - hip) + hip;
-	}
-	if (part > 0.5 && part < 1.5) {
-		// Graze: the head goes down to the grass and nods.
-		float down = (1.0 - walking) * (1.05 + 0.12 * sin(clock * 2.2 + r.x * 30.0));
-		vec3 neck = vec3(0.0, 1.05, 0.58);
-		v = rot_x(down) * (v - neck) + neck;
-	}
-	float c = cos(yaw); float s = sin(yaw);
-	v = vec3(v.x * c + v.z * s, v.y, -v.x * s + v.z * c);
-	float scale = 0.001 * 1.6 * legibility;
-	VERTEX = vec3(path.x, 0.0, path.y) * mix(0.35, 1.0, walking) + v * scale;
-	v_color = COLOR.rgb * (part > 0.5 && part < 1.5 ? 0.85 : 1.0);
-}
-void fragment() {
-	ALBEDO = v_color;
-	ROUGHNESS = 0.95;
-}
-"""
-
-## Boats riding the water: a gentle bob and roll, working slowly along the
-## channel and back, a paddler's stroke.
-const BOAT_SHADER:="""
-shader_type spatial;
-render_mode cull_disabled, specular_disabled;
-uniform float clock = 0.0;
-uniform float legibility = 1.0;
-varying vec3 v_color;
-void vertex() {
-	vec4 r = INSTANCE_CUSTOM;
-	float t = clock * 0.05 + r.x * 6.2831;
-	float along = sin(t) * 0.018;
-	float part = floor(UV.x + 0.5);
-	vec3 v = VERTEX;
-	float roll = sin(clock * 1.7 + r.y * 9.0) * 0.06;
-	v = vec3(v.x * cos(roll) - v.y * sin(roll), v.x * sin(roll) + v.y * cos(roll), v.z);
-	if (part > 0.5) { v.x += sin(clock * 2.6 + r.y * 4.0) * 0.08 * step(1.0, v.y); }
-	float scale = 0.001 * 1.6 * legibility;
-	VERTEX = vec3(0.0, sin(clock * 1.2 + r.x * 11.0) * 0.0002, along) + v * scale;
-	v_color = part > 0.5 ? vec3(0.46, 0.36, 0.26) : COLOR.rgb;
-}
-void fragment() {
-	ALBEDO = v_color;
-	ROUGHNESS = 0.9;
 }
 """
