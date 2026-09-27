@@ -2186,12 +2186,38 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d
+	var ruins_rebuilt:=0
 	for plot in WorldSimulation.state.settlement_plots:
 		var status:=String(plot.get("status","active"))
+		# Buildings wrecked by war, fire or flood are cleared and rebuilt after
+		# a year or more, a few a month while builders are at work: about three
+		# years on average, as bombed and burned towns were rebuilt.
+		if status=="ruin" and String(plot.get("pre_damage_use",""))!="" and int(plot.get("damaged_day",-1))>=0 and day-int(plot.damaged_day)>=365 and builders>=1.0 and ruins_rebuilt<2 and rng.randf()<1.0/24.0:
+			ruins_rebuilt+=1
+			plot["status"]="under_construction";plot["construction_progress"]=0.0;plot["condition"]=0.0;plot["repair_state"]="rebuilding"
+			plot["land_use"]=String(plot.pre_damage_use);plot["growth_cause"]="rebuilding what was destroyed"
+			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"rebuilding","new_state":"under_construction","cause":"builders cleared the ruin and began again"})
+			WorldSimulation.state.morphology_revision+=1
+			continue
 		if status in ["under_construction","ruin","reclaimed"]: continue
 		var temporary_ground:=String(plot.get("land_use",""))=="temporary_encampment"
 		var previous_condition:=float(plot.get("condition",1.0))
 		var exposure:=float(plot.get("hazard_exposure",0.1))
+		# A damaged building keeps its damage until builders repair it: months
+		# of work, faster with more builders (not reset to the city's average).
+		if status=="damaged" and not temporary_ground:
+			if previous_condition<0.14:
+				plot["status"]="ruin";plot["repair_state"]="unrepairable"
+				WorldSimulation.state.morphology_revision+=1
+				continue
+			var repair:=clampf(0.03+maintenance_per_plot*8.0,0.03,0.15) if builders>=1.0 else 0.0
+			plot["condition"]=clampf(previous_condition+repair,0.0,1.0)
+			plot["repair_state"]="repairing" if repair>0.0 else "awaiting_assessment"
+			if float(plot.condition)>=0.6:
+				plot["status"]="active";plot["repair_state"]="maintained"
+				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"repaired","new_state":"active","cause":"builders repaired the damage"})
+				WorldSimulation.state.morphology_revision+=1
+			continue
 		# Drawn buildings show the city's condition; empty ones decay toward ruin.
 		var decay:=0.0018*(1.0+exposure) if status=="vacant" else 0.0
 		plot["condition"]=clampf(float(city_form().condition),0.0,1.0) if status!="vacant" else clampf(previous_condition-decay,0.0,1.0)
