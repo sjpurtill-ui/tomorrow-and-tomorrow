@@ -1899,7 +1899,9 @@ func _update_field_seasons(day:int)->void:
 		var previous_cover:=float(plot.get("crop_cover",0.0))
 		var phase:="fallow"
 		var cover:=0.08
-		if int(plot.get("worker_count",0))>0 and String(plot.get("status","active"))=="active":
+		# A worked field goes through its real year even when stressed or damaged;
+		# poor condition thins the crop. Vacant or unworked ground lies fallow.
+		if int(plot.get("worker_count",0))>0 and String(plot.get("status","active")) in ["active","stressed","damaged"]:
 			var local_day:=fposmod(float(day+(absi(int(plot.get("seed",1)))%29)-14),365.0)
 			if local_day<48.0:
 				phase="fallow"; cover=0.10
@@ -1914,7 +1916,7 @@ func _update_field_seasons(day:int)->void:
 			else:
 				phase="fallow"; cover=0.09
 			if float(plot.get("condition",1.0))<0.46:
-				phase="stressed"
+				if phase in ["growing","mature"]: phase="stressed"
 				cover*=0.46
 		plot["cultivation_phase"]=phase
 		plot["crop_cover"]=clampf(cover,0.0,1.0)
@@ -1948,7 +1950,9 @@ func _update_plot_workforce(day:int,events:Array[Dictionary])->void:
 					plot["reoccupation_state"]="temporary_use" if idle_months<36 else "permanently_abandoned"
 			else:
 				plot["idle_months"]=0
-				if previous_status=="vacant" and float(plot.get("condition",0.0))>=0.28:
+				# Idle ground decays while empty; a field is back in use as soon as
+				# people farm it again, however overgrown (its condition then recovers).
+				if previous_status=="vacant" and (land_use=="field" or float(plot.get("condition",0.0))>=0.28):
 					plot["status"]="active"
 					plot["reoccupation_state"]="reoccupied"
 			if String(plot.get("status",""))!=previous_status:
@@ -2221,6 +2225,12 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		# Drawn buildings show the city's condition; empty ones decay toward ruin.
 		var decay:=0.0018*(1.0+exposure) if status=="vacant" else 0.0
 		plot["condition"]=clampf(float(city_form().condition),0.0,1.0) if status!="vacant" else clampf(previous_condition-decay,0.0,1.0)
+		# Fields are kept by the people who farm them (weeding, ditches, banks),
+		# not by the builders who keep up houses: a fully worked field recovers
+		# over about two seasons and a neglected one slowly runs to weeds.
+		if String(plot.get("land_use",""))=="field" and status!="vacant":
+			var tended:=clampf(float(plot.get("worker_count",0))/maxf(1.0,float(plot.get("worker_capacity",12))),0.0,1.0)
+			plot["condition"]=clampf(previous_condition+0.04*tended-0.01,0.0,0.92)
 		plot["maintenance_debt"]=0.0
 		if status=="vacant":
 			plot["reclamation"]=clampf(float(plot.get("reclamation",0.0))+0.012+float(plot.get("vacant_months",0))*0.00012,0.0,1.0)
