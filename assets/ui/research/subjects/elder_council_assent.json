@@ -1,0 +1,12 @@
+{
+  "id": "elder_council_assent",
+  "line": "institutions",
+  "game_year": 12,
+  "approx_historical_year": -4920,
+  "prompt": "c. 4920 BCE: Two elders publicly assent to settlement decision before younger adults and witnesses; archaic mineral fresco on plaster. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7aafd7b6-1dfa-4ee7-9feb-abdc9cfca8fa.png",
+  "asset": "res://assets/ui/research/subjects/elder_council_assent-v1.png",
+  "sha256": "bc12ac656aaf1d068213d3253f9326f337611cafbc1a651090ff0478d549e412",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; visible assent and witnesses, no writing, crop reviewed."
+}
