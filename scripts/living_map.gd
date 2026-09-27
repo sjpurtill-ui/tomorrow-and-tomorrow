@@ -954,14 +954,16 @@ void vertex() {
 	float strength = INSTANCE_CUSTOM.y;
 	float rate = 0.075 + 0.02 * INSTANCE_CUSTOM.z;
 	float age = fract(anim_clock * rate + INSTANCE_CUSTOM.x);
-	vec3 offset = vec3(wind.x * age * age * strength, plume_height * age * (0.55 + 0.45 * strength), wind.y * age * age);
+	// The plume leans off downwind from the first metres, so the fire itself
+	// stays in view beneath it (codex/beauty-4).
+	vec3 offset = vec3(wind.x * (age * age + 0.35 * age) * strength, plume_height * age * (0.55 + 0.45 * strength), wind.y * (age * age + 0.35 * age));
 	offset.xz += vec2(sin(anim_clock * 0.7 + INSTANCE_CUSTOM.z * 6.0), cos(anim_clock * 0.5 + INSTANCE_CUSTOM.x * 9.0)) * 0.0012 * age;
 	offset *= legibility;
 	float size = (0.0022 + 0.0085 * age) * (0.65 + 0.5 * strength) * legibility;
 	vec4 center = MODELVIEW_MATRIX * vec4(offset, 1.0);
 	VERTEX = center.xyz + vec3(VERTEX.xy * size, 0.0);
 	NORMAL = vec3(0.0, 0.0, 1.0);
-	v_alpha = smoothstep(0.0, 0.10, age) * (1.0 - smoothstep(0.45, 1.0, age)) * clamp(strength, 0.0, 1.2);
+	v_alpha = smoothstep(0.04, 0.24, age) * (1.0 - smoothstep(0.45, 1.0, age)) * clamp(strength, 0.0, 1.2);
 	v_age = age;
 }
 void fragment() {

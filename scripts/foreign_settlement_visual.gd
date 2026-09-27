@@ -35,13 +35,15 @@ func build(report:Dictionary,height_at:Callable)->void:
 	var columns:=ceili(sqrt(float(courts)))
 	var rows:=ceili(float(courts)/columns)
 	var centers:Array[Vector2]=[]
+	var lanes_drawn:Array[PackedVector2Array]=[]
 	for court in courts:
 		var center:=Vector2((court%columns-(columns-1)*.5)*.038,(court/columns-(rows-1)*.5)*.038)
 		center+=Vector2(rng.randf_range(-.002,.002),rng.randf_range(-.002,.002))
 		center=center.rotated(heading);centers.append(center)
 		if court>0:
 			var previous:=court-columns if court>=columns else court-1
-			_lane(centers[previous],center,.0011,Color("84745c"))
+			_lane(centers[previous],center,.0011,Color(0.52,0.45,0.36,0.45))
+			lanes_drawn.append(PackedVector2Array([centers[previous],center]))
 		for slot in mini(4,building_count-court*4):
 			var direction:=Vector2.from_angle(heading+float(slot)*TAU/4+PI/4)
 			var local:=center+direction*.011
@@ -49,10 +51,22 @@ func build(report:Dictionary,height_at:Callable)->void:
 			var forward:=-direction
 			plan.buildings.append({"position":local,"angle":atan2(forward.x,forward.y),"variant":(court+slot)%4,"plot":{}})
 			# Doors share a court; no parcel mats or cross-street ladder paths.
-			_lane(center,local-direction*.0045,.00065,Color("91836b"))
+			_lane(center,local-direction*.0045,.00065,Color(0.57,0.51,0.42,0.35))
+			lanes_drawn.append(PackedVector2Array([center,local-direction*.0045]))
 	# Shared authored assets, at their physical scale. These are representative
 	# households, not fabricated foreign construction records or a hidden census.
 	preload("res://scripts/organic_town_visual.gd").render(plan,Vector3.ZERO,func(x:float,z:float)->float:return _height(Vector2(x,z)),self)
+	# Their worn ground: yards round the houses and the lanes between the
+	# courts, painted into the land when the camera comes near
+	# (settlement_grounds.gd). Visual only.
+	var ground_routes:Array[Dictionary]=[]
+	for index in lanes_drawn.size():
+		var link:=lanes_drawn[index][0].distance_to(lanes_drawn[index][1])>0.02
+		# Worn the way people walk, bending a little, not ruled straight.
+		var walked:=preload("res://scripts/settlement_grounds.gd")._wander(lanes_drawn[index][0],lanes_drawn[index][1],hash([String(report.city_id),index]))
+		ground_routes.append({"id":index+1,"active":true,"points":walked,"width_m":2.4 if link else 1.2,"traffic":0.9 if link else 0.7,"hierarchy":"lane" if link else "path","kind":"street"})
+	var ground_plots:Array[Dictionary]=[]
+	preload("res://scripts/settlement_grounds.gd").request("foreign:"+String(report.city_id),plan,ground_plots,ground_routes,Vector3(origin.x,0.0,origin.y))
 	# Buildings and earth are batched, with no per-resident nodes or gameplay state.
 	for key:String in surfaces:
 		var surface:SurfaceTool=surfaces[key];surface.generate_normals()
@@ -79,5 +93,5 @@ func _lane(a:Vector2,b:Vector2,width:float,color:Color)->void:
 		var points_fade:Array[Vector2]=[inner_a,inner_b,outer_b,inner_a,outer_b,outer_a]
 		for index in 6:
 			var p:=points_fade[index]
-			var tint:=color;tint.a=0.0 if index in [2,4,5] else 1.0
+			var tint:=color;tint.a=0.0 if index in [2,4,5] else color.a
 			surfaces.EarthAndLanes.set_color(tint);surfaces.EarthAndLanes.add_vertex(Vector3(p.x,_height(p)+.0016,p.y))

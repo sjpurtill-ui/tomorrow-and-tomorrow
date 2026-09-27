@@ -172,6 +172,7 @@ func _build_step(record:Dictionary,began:int,budget_usec:int)->bool:
 		record["transforms"]=[];record["colors"]=[]
 		var candidates:=LandscapeCover.candidates(middle,CHUNK_KM*0.5-0.00001,SPACING_KM,int(GameState.world_seed))
 		record["candidates"]=candidates
+		record["clearings"]=_clearings_near(middle)
 		return false
 	var candidates:Array=record.candidates
 	var transforms:Array=record.transforms
@@ -195,6 +196,9 @@ func _build_step(record:Dictionary,began:int,budget_usec:int)->bool:
 		# The home patch keeps its own crowns; these fade in where its fade out.
 		if home_active:
 			keep*=smoothstep(LandscapeCover.PATCH_INNER_KM,LandscapeCover.PATCH_RADIUS_KM,point.distance_to(home))
+		# Other towns and foreign cities stand in their own clearings.
+		for clearing:Vector3 in record.clearings:
+			keep*=smoothstep(clearing.z*0.75,clearing.z*1.3,point.distance_to(Vector2(clearing.x,clearing.y)))
 		if rng.randf()>=keep:continue
 		var height:float=terrain.call("_close_surface_height_at",point.x,point.y)
 		if height<=sea+0.0004:continue
@@ -208,6 +212,27 @@ func _build_step(record:Dictionary,began:int,budget_usec:int)->bool:
 		colors.append(tint)
 	record["cursor"]=cursor
 	return true
+
+## Clearings round the places people live near a chunk (x, z, radius km):
+## the player's other towns, and the foreign cities the people know. People
+## fell the trees for building, fuel and fields before they build (codex/beauty-4).
+func _clearings_near(middle:Vector2)->Array[Vector3]:
+	var out:Array[Vector3]=[]
+	var reach:=CHUNK_KM+0.4
+	for settlement in GameState.player_settlements:
+		if not settlement is Dictionary or bool(settlement.get("primary",false)):continue
+		var at:Variant=settlement.get("position",Vector2.INF)
+		if not at is Vector2 or (at as Vector2).distance_to(middle)>reach:continue
+		var people:=float(settlement.get("population",60))
+		out.append(Vector3((at as Vector2).x,(at as Vector2).y,clampf(0.07+sqrt(maxf(people,1.0))*0.004,0.08,0.28)))
+	var intelligence:Variant=CivilizationSystem.get("city_intelligence")
+	if intelligence!=null:
+		for city:Dictionary in intelligence.known_cities("player","",false,middle,reach):
+			var location:Dictionary=city.get("position",{})
+			var at:=Vector2(float(location.get("x",INF)),float(location.get("z",INF)))
+			if at.distance_to(middle)>reach:continue
+			out.append(Vector3(at.x,at.y,0.10))
+	return out
 
 var _sea:=NAN
 func _sea_level()->float:

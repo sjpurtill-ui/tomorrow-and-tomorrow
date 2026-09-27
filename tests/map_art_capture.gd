@@ -4,6 +4,9 @@ extends Node
 ##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river] [--woodland] [--timing]
 ##      [--town] (a later-era walled town fixture in place of the new camp)
 ##      [--look=dx,dz] (aim the camera this far from the settlement, km)
+##      [--midwinter] [--fresh-snow] (the settlement in winter, snow lying)
+##      [--foreign] (the nearest known foreign city) [--second-town]
+##      [--hide=Name,Other] (hide nodes whose names contain these, to diagnose)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -63,6 +66,26 @@ func _ready()->void:
 			if parts.size()==2:
 				target+=Vector3(float(parts[0]),0.0,float(parts[1]))
 				target.y=terrain._height_at(target.x,target.z)
+	if "--foreign" in args:
+		# Look at the nearest foreign city the people know of.
+		var nearest:=INF
+		var found:=Vector3.INF
+		for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false,Vector2(target.x,target.z),INF):
+			var at:=Vector3(float(city.position.x),0.0,float(city.position.z))
+			var d:=Vector2(at.x-target.x,at.z-target.z).length()
+			if d<nearest:nearest=d;found=at
+		if found!=Vector3.INF:
+			target=Vector3(found.x,terrain._height_at(found.x,found.z),found.z)
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),30.0,"capture")
+			print("MAP_ART_CAPTURE: foreign city at ",target," ",snappedf(nearest,0.1)," km away")
+	if "--second-town" in args:
+		# Look at the player's second town.
+		for settlement in GameState.player_settlements:
+			if settlement is Dictionary and not bool(settlement.get("primary",false)):
+				var at:Vector2=settlement.get("position",Vector2.ZERO)
+				target=Vector3(at.x,terrain._height_at(at.x,at.y),at.y)
+				print("MAP_ART_CAPTURE: second town at ",target)
+				break
 	if "--river" in args:
 		# Look at the world river instead (charted here for this capture only).
 		var river_z:=clampf(target.z,-600.0,600.0)
@@ -78,6 +101,10 @@ func _ready()->void:
 			print("MAP_ART_CAPTURE: cold ground at ",target," ",JSON.stringify(PlanetEnvironment.profile_at(Vector2(target.x,target.z)).get("mean_temperature_c")))
 		# Midwinter for that hemisphere (season_wave is -1).
 		GameState.elapsed_days=91.0 if target.z>0.0 else 274.0
+		terrain._refresh_seasonal_visuals()
+	if "--midwinter" in args:
+		# The home settlement in the depth of its own winter (paths in snow).
+		GameState.elapsed_days=floorf(float(GameState.elapsed_days)/365.0)*365.0+(91.0 if target.z>0.0 else 274.0)
 		terrain._refresh_seasonal_visuals()
 	if "--fresh-snow" in args:
 		# As if it snowed there yesterday: fresh snow lying on the ground.
@@ -112,6 +139,11 @@ func _ready()->void:
 			print("MAP_ART_CAPTURE: close woods ",JSON.stringify(woods.report()))
 		if "--hide-ui" in args:
 			for layer in get_tree().root.find_children("*","CanvasLayer",true,false):(layer as CanvasLayer).visible=false
+		# Diagnosis: `--hide=Name,Other` hides every node whose name contains one.
+		for argument in args:
+			if argument.begins_with("--hide="):
+				for part in argument.trim_prefix("--hide=").split(","):
+					for node in terrain.find_children("*"+part+"*","Node3D",true,false):(node as Node3D).visible=false
 		for i in 6:await get_tree().process_frame
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true,0.0)
@@ -121,7 +153,7 @@ func _ready()->void:
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
 		var living:Node=terrain.get_node_or_null("LivingMap")
-		if living:print("MAP_ART_CAPTURE: life visible=",living.get("figures_visible")," workers=",(living.get("workers") as Array).size()," anchor=",living.get("anchor")," grounds=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").report))
+		if living:print("MAP_ART_CAPTURE: life visible=",living.get("figures_visible")," workers=",(living.get("workers") as Array).size()," anchor=",living.get("anchor")," grounds=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").report)," slots=",JSON.stringify(preload("res://scripts/settlement_grounds.gd").slot_keys))
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	get_tree().quit(0)
 
@@ -171,6 +203,9 @@ func _seed_town()->void:
 	if campaign:
 		campaign.settlement_defense["stage"]=3
 		campaign.settlement_defense["integrity"]=1.0
+	# A town of this age builds carts and trades in its market.
+	for known in ["solid_wheel_assembly","cart_running_gear","pottery","plain_weaving","animal_taming","herding_rotas","well_siting"]:
+		GameState.discovery_log.append({"id":known})
 	GameState.morphology_revision+=1
 	print("MAP_ART_CAPTURE: seeded a town of ",town.plots.size()," plots and ",town.routes.size()," routes")
 

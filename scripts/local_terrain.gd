@@ -2724,6 +2724,11 @@ void fragment() {
 	// the low sun catches warm light; the far edge falls into shade that
 	// spills a little onto the open ground beside it.
 	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.42,0.82,slope));
+	// A lived-in place stands in its own clearing: the settlement's painted
+	// ground (settlement_ground.gdshaderinc) opens the painted wood round it.
+	vec2 sg_local;
+	int sg_slot=settlement_ground_slot(surface_position,surface_origin,sg_local);
+	wb_wood_density*=1.0-settlement_clearing(sg_slot,sg_local,pixel_world*1000.0);
 	// A natural margin (round two): the edge wanders on screen-sized noise, a
 	// fringe of scrub stands outside it, trees stop short of the tide line,
 	// and a pale strand runs along the shore.
@@ -2741,12 +2746,12 @@ void fragment() {
 	earth = wb_fringe(earth,wb_edge.y*(1.0-rock_mask),wb_wood_colour,world_position.xz,pixel_world);
 	earth = wb_woodland(earth,wb_stand_cover,wb_wood_colour,world_position.xz,pixel_world);
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
-	// Close meadow, then the worn ground of the home settlement
+	// Close meadow, then the worn ground of the settlement under the camera
 	// (settlement_ground.gdshaderinc, scripts/settlement_grounds.gd).
-	earth = settlement_meadow(earth,surface_position,surface_origin,pixel_world*1000.0,(1.0-wb_stand_cover)*(1.0-rock_mask));
-	vec2 sg_local=sg_local_m(surface_position,surface_origin);
-	earth = settlement_fields_paint(earth,sg_local,pixel_world*1000.0);
-	earth = settlement_ground_paint(earth,sg_local,pixel_world*1000.0);
+	earth = settlement_meadow(earth,surface_position,surface_origin,pixel_world*1000.0,(1.0-wb_stand_cover)*(1.0-rock_mask),wb_palette);
+	float sg_trodden=0.0;
+	earth = settlement_fields_paint(earth,sg_slot,sg_local,pixel_world*1000.0);
+	earth = settlement_ground_paint(earth,sg_slot,sg_local,pixel_world*1000.0,sg_trodden);
 	// Gusts rolling through the grass, a fainter shimmer over the canopy.
 	float wb_gust=wb_wind_waves(world_position.xz,pixel_world,map_wind,map_wind_clock,wb_motion);
 	earth*=1.0+wb_gust*mix(0.038,0.020,wb_stand_cover);
@@ -2764,6 +2769,7 @@ void fragment() {
 	// with existing regional fields breaking up the edge like satellite imagery.
 	if (surface_uv.x>=0.999 && world_position.y>0.0) {
 		float cryosphere_pattern=regional*0.62+soil_patch*0.38;
+		vec3 sg_unfrozen=earth;
 		earth=seasonal_terrain(earth,surface_uv.y,surface_uv.x-1.0,seasonal_amplitude,world_position.z,forest_mask,slope,cryosphere_pattern);
 		// Fresh snow from the weather sky lies wherever the ground is cold
 		// enough today, heaviest on sheltered open ground.
@@ -2773,6 +2779,8 @@ void fragment() {
 				*smoothstep(0.25,0.60,cryosphere_pattern*0.6+0.4);
 			earth=mix(earth,vec3(0.86,0.88,0.90),clamp(wb_fresh*mix(0.85,0.45,wb_stand_cover),0.0,0.9));
 		}
+		// Trodden paths stay open through snow and frost (settlement_ground).
+		earth=settlement_winter_paths(sg_unfrozen,earth,sg_trodden,sg_local,pixel_world*1000.0);
 	}
 	// A fixed north-west sun gives the orthographic world the same readable relief
 	// cues as satellite hillshade. Keep the effect restrained at close range where
@@ -3663,46 +3671,83 @@ func _random_valid_site(rng: RandomNumberGenerator) -> Vector3:
 	return Vector3.ZERO
 
 func _create_forest_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
-	var shared_crown := SphereMesh.new()
-	shared_crown.radius = 0.011
-	shared_crown.height = 0.036
-	shared_crown.radial_segments = 6
-	shared_crown.rings = 3
-	for i in 42:
+	# A timber occurrence shows as a few copses of real-sized crowns (codex/
+	# beauty-4), drawn like every other tree (atlas crowns, seasons, wind, ink
+	# edge), one batch. It used to be forty-two lone spheres twenty metres
+	# across, each with its own material: dark specks on the grass.
+	var transforms:Array[Transform3D]=[]
+	var colors:Array[Color]=[]
+	for copse in 4:
 		var angle := rng.randf() * TAU
 		var distance := sqrt(rng.randf()) * 7.8
-		var x := center.x + cos(angle) * distance
-		var z := center.z + sin(angle) * distance
-		if not _inside_province(x / world_width + 0.5, z / world_depth + 0.5):
-			continue
-		var y := _height_at(x, z)
-		var biome:=_biome_at(x,z,y)
-		if y<=SEA_LEVEL or LandscapeCover.canopy_density(biome)<=0:continue
-		var tree := MeshInstance3D.new()
-		tree.mesh = shared_crown
-		var scale := rng.randf_range(0.72, 1.45)
-		tree.scale = Vector3(scale * rng.randf_range(0.78, 1.08), scale * rng.randf_range(1.35, 2.0), scale)
-		tree.position = Vector3(x, y + 0.014 * scale, z)
-		var material:=_vegetation_surface_material(0)
-		material.set_shader_parameter("canopy_tint",LandscapeCover.canopy_tint(biome,rng.randf()))
-		material.set_shader_parameter("fallback_climate",_vegetation_climate(Vector3(x,y,z)))
-		tree.material_override=material
-		add_child(tree)
+		var middle := Vector2(center.x + cos(angle) * distance, center.z + sin(angle) * distance)
+		for k in rng.randi_range(5, 9):
+			var point := middle + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(0.0, 0.012)
+			if not _inside_province(point.x / world_width + 0.5, point.y / world_depth + 0.5):
+				continue
+			var y := _height_at(point.x, point.y)
+			var biome:=_biome_at(point.x,point.y,y)
+			if y<=SEA_LEVEL or LandscapeCover.canopy_density(biome)<=0:continue
+			var scale := rng.randf_range(0.85, 1.45)
+			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(scale * rng.randf_range(0.8, 1.1), scale * rng.randf_range(0.8, 1.2), scale))
+			transforms.append(Transform3D(basis, Vector3(point.x, y + 0.00125 * scale, point.y)))
+			var tint:Color=LandscapeCover.canopy_tint(biome,rng.randf())
+			tint.a=float(LandscapeCover.CROWN_ATLAS_CELLS[LandscapeCover.crown_variant(transforms[-1].origin)])/15.0
+			colors.append(tint)
+	if not transforms.is_empty():
+		var multi:=MultiMesh.new()
+		multi.transform_format=MultiMesh.TRANSFORM_3D
+		multi.use_colors=true
+		multi.use_custom_data=true
+		multi.mesh=_create_irregular_canopy_mesh(0.0037,0.00235)
+		multi.instance_count=transforms.size()
+		for i in transforms.size():
+			multi.set_instance_transform(i,transforms[i])
+			multi.set_instance_color(i,colors[i])
+			multi.set_instance_custom_data(i,_vegetation_climate(transforms[i].origin))
+		var copses:=MultiMeshInstance3D.new()
+		copses.name="TimberCopses"
+		copses.multimesh=multi
+		copses.material_override=_vegetation_surface_material(0,-2)
+		copses.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(copses)
 	_create_resource_marker("Timber", center)
 
 func _create_stone_patch(center: Vector3, rng: RandomNumberGenerator) -> void:
+	# Boulders drawn in the settlement's ink (settlement_ink.gd): warm on the
+	# sunward side, cool in shade, one clean outline, a soft shadow; a few
+	# grouped where the rock breaks the turf. One batch.
+	var transforms:Array[Transform3D]=[]
+	var colors:Array[Color]=[]
 	for i in 9:
-		var rock := MeshInstance3D.new()
-		var mesh := SphereMesh.new()
-		mesh.radius = rng.randf_range(SURFACE_STONE_RADIUS_KM.x,SURFACE_STONE_RADIUS_KM.y)
-		mesh.height = mesh.radius * rng.randf_range(0.8,1.25)
-		rock.mesh = mesh
-		rock.scale = Vector3(rng.randf_range(0.8,1.35),rng.randf_range(0.45,0.8),rng.randf_range(0.75,1.25))
-		rock.position = center + Vector3(rng.randf_range(-1.6, 1.6), mesh.radius * 0.35, rng.randf_range(-1.6, 1.6))
-		var material := StandardMaterial3D.new()
-		material.albedo_color = Color("#686762")
-		rock.material_override = material
-		add_child(rock)
+		var radius := rng.randf_range(SURFACE_STONE_RADIUS_KM.x,SURFACE_STONE_RADIUS_KM.y)*0.55
+		var at := center + Vector3(rng.randf_range(-1.6, 1.6), 0.0, rng.randf_range(-1.6, 1.6))
+		for k in rng.randi_range(1, 3):
+			var point := at + Vector3(rng.randf_range(-0.004, 0.004), 0.0, rng.randf_range(-0.004, 0.004))
+			point.y = _height_at(point.x, point.z)
+			var r := radius * rng.randf_range(0.45, 1.0)
+			var basis := Basis().rotated(Vector3.UP, rng.randf() * TAU).scaled(Vector3(r * rng.randf_range(0.9, 1.4), r * rng.randf_range(0.45, 0.75), r * rng.randf_range(0.8, 1.2)))
+			transforms.append(Transform3D(basis, point + Vector3(0, r * 0.2, 0)))
+			colors.append(Color(0.58, 0.56, 0.51).darkened(rng.randf_range(0.0, 0.18)))
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.0; mesh.height = 2.0; mesh.radial_segments = 7; mesh.rings = 4
+	var multi:=MultiMesh.new()
+	multi.transform_format=MultiMesh.TRANSFORM_3D
+	multi.use_colors=true
+	multi.mesh=mesh
+	multi.instance_count=transforms.size()
+	for i in transforms.size():
+		multi.set_instance_transform(i,transforms[i])
+		multi.set_instance_color(i,colors[i])
+	var stones:=MultiMeshInstance3D.new()
+	stones.name="SurfaceStones"
+	stones.multimesh=multi
+	stones.material_override=preload("res://scripts/settlement_ink.gd").material()
+	stones.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(stones)
+	var in_metres:Array[Transform3D]=[]
+	for placed in transforms:in_metres.append(Transform3D(placed.basis.scaled(Vector3.ONE*0.001),placed.origin))
+	preload("res://scripts/settlement_ink.gd").add_ground_shadows(self,"SurfaceStoneShadows",in_metres,AABB(Vector3(-1000,-1000,-1000),Vector3(2000,2000,2000)))
 	_create_resource_marker("Stone", center)
 
 func _create_resource_marker(type: String, position: Vector3) -> void:
@@ -3897,6 +3942,8 @@ func _update_scale_lod() -> void:
 		settlement_network_fabric_root.visible=camera.size<=2600.0
 	_update_settlement_surface_lod_materials()
 	_update_settlement_claim_opacity()
+	# The settlement's ink outline is held at about one screen pixel.
+	preload("res://scripts/settlement_ink.gd").set_pixel(camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y))
 	if settlement_blip:
 		# Never lay a bright game token over visible physical settlement fabric. The
 		# locator exists only after roofs and occupied ground have collapsed below the
@@ -3952,6 +3999,10 @@ func _update_scale_lod() -> void:
 	var foliage_fade:=_close_vegetation_lod_strength()
 	if foliage_fade>0.001 and settler_marker and not _camera_in_motion():
 		_rebuild_close_vegetation(GameState.settlement_founded_at if "Hearth Circle" in GameState.settlement_completed else settler_marker.position)
+	# The worn ground of other towns and seen foreign cities, painted once the
+	# camera settles near them (settlement_grounds.gd; one at most per frame).
+	if camera.size<=4.0 and not _camera_in_motion():
+		preload("res://scripts/settlement_grounds.gd").serve(Vector2(camera_target.x,camera_target.z),maxf(camera.size*1.2,0.6))
 	if close_vegetation_root:
 		close_vegetation_root.visible=foliage_fade>0.001
 		if not is_equal_approx(foliage_fade,close_vegetation_fade):
@@ -3961,6 +4012,8 @@ func _update_scale_lod() -> void:
 			for child:Node in close_vegetation_root.get_children():
 				if child is GeometryInstance3D and child.material_override is ShaderMaterial:
 					child.material_override.set_shader_parameter("lod_fade",foliage_fade)
+				# Bush shadows go with the bushes as they fade.
+				elif String(child.name)=="SettlementGroundShadows":(child as Node3D).visible=foliage_fade>0.6
 	if province_terrain_mesh:
 		# The streamed regional mesh is the same planet at higher sampling density.
 		# Rendering both layers together causes kilometre-scale diagonal z seams.
@@ -4445,6 +4498,10 @@ func _rebuild_close_vegetation(center: Vector3) -> void:
 		woodland_chance*=clampf(LandscapeCover.canopy_density(biome)*2.0,0.0,1.0)
 		var is_canopy := rng.randf() < woodland_chance
 		var scrub_chance:=LandscapeCover.scrub_density(biome)*clampf(.65+maxf(0.0,woodland_field),.5,1.4)
+		# Brush near a settlement is cut for kindling and grazed down: fewer
+		# bushes close in, thickening toward the wild (codex/beauty-4).
+		if "Hearth Circle" in GameState.settlement_completed:
+			scrub_chance*=lerpf(0.35,1.0,smoothstep(0.08,0.40,local_point.length()))
 		if not is_canopy and rng.randf() > scrub_chance:
 			continue
 		var height := _close_surface_height_at(world_x, world_z)
@@ -4545,6 +4602,17 @@ func _create_close_vegetation_multimesh(node_name: String, transforms: Array[Tra
 			_spawn_vegetation_multimesh("%s_%d" % [node_name,variant],mesh,variant_transforms,variant_colors,0,LandscapeCover.CROWN_ATLAS_CELLS[variant])
 		return
 	_spawn_vegetation_multimesh(node_name,mesh,transforms,colors,1,-1)
+	# Each bush sits on its own soft shadow (settlement_ink.gd), one batch.
+	if node_name=="ShrubAndGrassPatches" and close_vegetation_root!=null:
+		# (The shadow batch works in metres, as the settlement kits are built.)
+		var in_metres:Array[Transform3D]=[]
+		for placed in transforms:
+			# Only where the bushes stand at full strength: past the patch's
+			# inner radius they feather out, and a shadow must not outlive them.
+			if Vector2(placed.origin.x,placed.origin.z).distance_to(close_vegetation_center)>LandscapeCover.PATCH_INNER_KM:continue
+			in_metres.append(Transform3D(placed.basis.scaled(Vector3.ONE*0.001),placed.origin))
+		var bounds:=mesh.get_aabb()
+		preload("res://scripts/settlement_ink.gd").add_ground_shadows(close_vegetation_root,"ShrubShadows",in_metres,AABB(bounds.position*1000.0,bounds.size*1000.0))
 
 func _spawn_vegetation_multimesh(node_name:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],kind:int,atlas_variant:int)->void:
 	if transforms.is_empty(): return
@@ -4602,6 +4670,7 @@ uniform float wb_motion = 1.0;
 varying float tree_keep;
 varying vec3 world_position;
 varying vec2 patch_position;
+varying vec3 plant_normal;
 float vh(vec2 p) {
 	p=fract(p*vec2(123.34,456.21));
 	p+=dot(p,p+45.32);
@@ -4627,6 +4696,7 @@ void vertex() {
 		vec3 push=vec3(dir.x,0.0,dir.y)*0.00045*map_wind.z*lean*reach*reach*wb_motion;
 		VERTEX+=inverse(mat3(MODEL_MATRIX))*push;
 	}
+	plant_normal=normalize((MODEL_MATRIX*vec4(NORMAL,0.0)).xyz);
 	plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
@@ -4673,12 +4743,23 @@ void fragment() {
 		base=mix(base,base*vec3(0.64,0.78,0.61),gap*0.42);
 		base=mix(base,base*vec3(1.08,1.12,0.78),smoothstep(0.76,0.94,leaf)*0.18);
 	} else {
-		base=mix(base,base*vec3(1.12,1.02,0.69),gap*0.36);
+		// A bush drawn as one (codex/beauty-4): leafy lumps a hand across, lit
+		// warm on the side toward the low north-west sun and cool in its own
+		// shade, closed by one crisp ink line at the silhouette. It used to read
+		// as a dark round speck on the grass.
+		vec3 bush_n=normalize(plant_normal);
+		float sun=dot(bush_n,vec3(-0.573,0.515,-0.637));
+		float lumps=filtered_vn(world_position.xz*2400.0+vec2(5.0,-9.0));
+		base=COLOR.rgb*0.92*mix(0.72,1.12,smoothstep(-0.35,0.75,sun+(lumps-0.5)*0.6));
+		base=mix(base*vec3(0.82,0.90,1.02),base*vec3(1.05,1.02,0.92),smoothstep(-0.2,0.5,sun));
+		base=mix(base,base*vec3(1.10,1.04,0.80),gap*0.20);
 	}
 	if(vegetation_kind==2) { base=COLOR.rgb; ALPHA=COLOR.a*woodland_retained(world_position.xz)*smoothstep(0.06,0.62,revealed); }
-	// Crowns and bushes are drawn with a soft ink edge where they turn away
-	// from the eye, like the painted canopy's outlined trees (codex/beauty-2).
-	if(vegetation_kind!=2) { float turned=1.0-abs(dot(NORMAL,VIEW)); base=mix(base,base*vec3(0.46,0.48,0.42),smoothstep(0.62,0.95,turned)*0.55); }
+	// Crowns are drawn with a soft ink edge where they turn away from the eye,
+	// like the painted canopy's outlined trees (codex/beauty-2); bushes with a
+	// thinner, crisper line.
+	if(vegetation_kind==0) { float turned=1.0-abs(dot(NORMAL,VIEW)); base=mix(base,base*vec3(0.46,0.48,0.42),smoothstep(0.62,0.95,turned)*0.55); }
+	if(vegetation_kind==1) { float turned=1.0-abs(dot(NORMAL,VIEW)); base=mix(base,MAP_INK*1.4,smoothstep(0.80,0.94,turned)*0.75); }
 	ALPHA*=lod_fade*boundary;
 	if(ALPHA<0.001) discard;
 	base=seasonal_ground(base,plant_climate.r,plant_climate.g,plant_climate.b,world_position.z,vegetation_kind==1?0.0:1.0);
@@ -4688,6 +4769,8 @@ void fragment() {
 	base*=map_cloud_shadow(world_position.xz,world_position.y,map_cloud,map_cloud_scale);
 	ALBEDO=base*smoothstep(0.06,0.62,revealed);
 	EMISSION=MAP_VELLUM*(1.0-smoothstep(0.06,0.62,revealed));
+	// Bushes keep a cool sky fill on their shaded side, never a black blot.
+	if(vegetation_kind==1) { EMISSION+=base*vec3(0.72,0.82,1.0)*0.12*smoothstep(0.06,0.62,revealed); }
 	ROUGHNESS=1.0;
 	AO=0.84+crown*0.14;
 }
@@ -6130,7 +6213,7 @@ func _settlement_defense_segment_breached(index:int,segments:int,integrity:float
 	return false
 
 
-func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:SurfaceTool,center:Vector3,local_origin:Vector2,radius:float,axis:float,defense_stage:int,integrity:float,completion:float,constructing:bool,color:Color,layout_seed:int,segments:int,gate_angles:Array[float]=[],angular_form:=false)->Dictionary:
+func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:SurfaceTool,center:Vector3,local_origin:Vector2,radius:float,axis:float,defense_stage:int,integrity:float,completion:float,constructing:bool,color:Color,layout_seed:int,segments:int,gate_angles:Array[float]=[],angular_form:=false,envelope:=PackedFloat32Array())->Dictionary:
 	var flat_count:=0
 	var mass_count:=0
 	var ellipse:=0.76+0.045*float((absi(layout_seed)+defense_stage*7)%4)
@@ -6156,6 +6239,13 @@ func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:Surfa
 			wobble_b*=1.0+(0.045 if (index+1)%2==0 else -0.025)
 		var point_a:=local_origin+Vector2(cos(local_angle_a)*radius*wobble_a,sin(local_angle_a)*radius*ellipse*wobble_a).rotated(axis)
 		var point_b:=local_origin+Vector2(cos(local_angle_b)*radius*wobble_b,sin(local_angle_b)*radius*ellipse*wobble_b).rotated(axis)
+		if envelope.size()==segments:
+			# The wall follows the real edge of the built town (codex/beauty-4),
+			# wandering a little as a line of stakes set by hand does.
+			var jitter_a:=1.0+0.018*sin(local_angle_a*7.0+seed_phase)
+			var jitter_b:=1.0+0.018*sin(local_angle_b*7.0+seed_phase)
+			point_a=local_origin+Vector2.from_angle(axis+local_angle_a)*envelope[index]*jitter_a
+			point_b=local_origin+Vector2.from_angle(axis+local_angle_b)*envelope[(index+1)%segments]*jitter_b
 		var world_middle:=Vector2(center.x,center.z)+(point_a+point_b)*0.5
 		if not _settlement_stage_land_at(world_middle): continue
 		if defense_stage<=2:
@@ -6178,6 +6268,110 @@ func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:Surfa
 			else:mass_count+=_append_settlement_defense_wall_segment(mass_surface,center,point_a,point_b,wall_width,wall_height,color)
 	return {"flat":flat_count,"mass":mass_count}
 
+
+## The built town's edge, as a radius (settlement km) at each of `segments`
+## bearings from the settlement's centre (local angles after `axis`): the
+## ground most of its houses, yards and stores stand within, smoothed as a
+## wall line would run, a few metres beyond the last eaves. Empty when the
+## fabric is too thin to trace.
+func _settlement_wall_envelope(plots:Array[Dictionary],segments:int,axis:float,fallback:float)->PackedFloat32Array:
+	var buckets:Array=[]
+	for k in segments:buckets.append([])
+	var built:=0
+	for plot in plots:
+		var use:=String(plot.get("land_use",""))
+		if use in ["","field","pasture","water","waste","vacant","temporary_encampment","woodland"]:continue
+		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
+		var c:Variant=plot.get("centroid",Vector2.ZERO)
+		if not c is Vector2:continue
+		var at:Vector2=c
+		var reach:=sqrt(maxf(float(plot.get("area_ha",0.01)),0.0001)/100.0/PI)
+		var d:=at.length()+reach*0.8
+		if d>fallback*2.2:continue
+		var k:=int(fposmod(at.angle()-axis,TAU)/TAU*float(segments))%segments
+		(buckets[k] as Array).append(d)
+		built+=1
+	if built<6:return PackedFloat32Array()
+	var sector:=PackedFloat32Array();sector.resize(segments)
+	for k in segments:
+		var list:Array=buckets[k]
+		if list.is_empty():
+			sector[k]=-1.0
+			continue
+		list.sort()
+		# The outer houses of the sector, not a lone outlier down the road.
+		sector[k]=float(list[mini(list.size()-1,int(float(list.size())*0.8))])
+	# Fill bearings with nothing built from their neighbours.
+	for k in segments:
+		if sector[k]>=0.0:continue
+		var left:=-1.0;var right:=-1.0;var dl:=0;var dr:=0
+		for step in range(1,segments):
+			if left<0.0 and sector[(k-step+segments)%segments]>=0.0:
+				left=sector[(k-step+segments)%segments];dl=step
+			if right<0.0 and sector[(k+step)%segments]>=0.0:
+				right=sector[(k+step)%segments];dr=step
+			if left>=0.0 and right>=0.0:break
+		sector[k]=lerpf(left,right,float(dl)/float(dl+dr)) if left>=0.0 and right>=0.0 else maxf(left,right)
+	var raw:=sector.duplicate()
+	for pass_index in 8:
+		var next:=sector.duplicate()
+		for k in segments:
+			next[k]=(sector[(k-1+segments)%segments]+sector[k]*2.0+sector[(k+1)%segments])*0.25
+		sector=next
+	var out:=PackedFloat32Array();out.resize(segments)
+	for k in segments:
+		# Vertex k lies between sectors k-1 and k; the wall never cuts a house.
+		var r:=maxf((sector[(k-1+segments)%segments]+sector[k])*0.5,maxf(raw[(k-1+segments)%segments],raw[k])*0.84)
+		out[k]=clampf(r+0.011,0.035,maxf(fallback*1.8,0.05))
+	# The line never runs through a house: where one straddles it, the stakes
+	# go round the outside of its yard.
+	for plot in plots:
+		var use:=String(plot.get("land_use",""))
+		if use in ["","field","pasture","water","waste","vacant","temporary_encampment","woodland"]:continue
+		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
+		var c:Variant=plot.get("centroid",Vector2.ZERO)
+		if not c is Vector2:continue
+		var at:Vector2=c
+		var reach:=sqrt(maxf(float(plot.get("area_ha",0.01)),0.0001)/100.0/PI)
+		var bearing:=fposmod(at.angle()-axis,TAU)/TAU*float(segments)
+		var k0:=int(bearing)%segments
+		var k1:=(k0+1)%segments
+		var line:=lerpf(out[k0],out[k1],bearing-floorf(bearing))
+		if at.length()-reach<line+0.004 and at.length()+reach>line-0.004:
+			var clear:=minf(at.length()+reach+0.007,maxf(fallback*1.8,0.05))
+			out[k0]=maxf(out[k0],clear);out[k1]=maxf(out[k1],clear)
+	return out
+
+## Gate bearings (world angles) where the main streets cross the traced wall.
+func _settlement_wall_gates(envelope:PackedFloat32Array,axis:float)->Array[float]:
+	var gates:Array[float]=[]
+	var segments:=envelope.size()
+	for route in GameState.settlement_routes:
+		if not bool(route.get("active",true)):continue
+		var major:=String(route.get("hierarchy","")) in ["main_approach","lane","street"] or int(route.get("surface_tier",0))>=2 or float(route.get("width_m",0.0))>=2.5
+		if not major:continue
+		var raw:Variant=route.get("points",PackedVector2Array())
+		var points:=PackedVector2Array()
+		if raw is PackedVector2Array:points=raw
+		elif raw is Array:
+			for p in raw:
+				if p is Vector2:points.append(p)
+		for i in range(1,points.size()):
+			var a:Vector2=points[i-1];var b:Vector2=points[i]
+			var ra:=envelope[int(fposmod(a.angle()-axis,TAU)/TAU*float(segments))%segments]
+			var rb:=envelope[int(fposmod(b.angle()-axis,TAU)/TAU*float(segments))%segments]
+			var da:=a.length()-ra;var db:=b.length()-rb
+			if signf(da)==signf(db) or is_zero_approx(da-db):continue
+			var crossing:=a.lerp(b,da/(da-db))
+			var bearing:=crossing.angle()
+			var near:=false
+			for g in gates:
+				if absf(wrapf(g-bearing,-PI,PI))<0.35:
+					near=true
+					break
+			if not near:gates.append(bearing)
+			if gates.size()>=6:return gates
+	return gates
 
 func _append_settlement_modern_defense_network(flat_surface:SurfaceTool,mass_surface:SurfaceTool,center:Vector3,layout:Dictionary,network_radius:float,integrity:float,completion:float,constructing:bool,color:Color,layout_seed:int)->Dictionary:
 	# A late defensive network protects approaches and strategic nodes. It is neither a
@@ -6231,9 +6425,21 @@ func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:Su
 	primary_radius=maxf(0.09,primary_radius)
 	var gate_angles:=_settlement_defense_gate_angles(layout,3)
 	var ring_specs:Array[Dictionary]=[]
+	# Ditches and palisades enclose the built town as it really lies: the
+	# wall runs just outside its houses, yards and stores, and its gates open
+	# where the main streets leave (codex/beauty-4). The legacy circle stays
+	# for fabric too thin to trace.
+	var traced:=PackedFloat32Array()
+	if defense_stage in [2,3]:
+		traced=_settlement_wall_envelope(plots,30 if defense_stage==2 else 36,float(layout.axis),primary_radius)
+		if not traced.is_empty():
+			var street_gates:=_settlement_wall_gates(traced,float(layout.axis))
+			if not street_gates.is_empty():gate_angles=street_gates
+			primary_radius=0.0
+			for r in traced:primary_radius=maxf(primary_radius,r)
 	match defense_stage:
-		2: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius*0.90,"segments":30,"gates":gate_angles,"angular":false})
-		3: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius,"segments":24,"gates":gate_angles,"angular":false})
+		2: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius*0.90,"segments":30,"gates":gate_angles,"angular":false,"envelope":traced})
+		3: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius,"segments":36 if not traced.is_empty() else 24,"gates":gate_angles,"angular":false,"envelope":traced})
 		4:
 			var district_anchors:=_settlement_stage_function_anchors(plots,["communal","civic","sacred","market","storage"],3)
 			if district_anchors.is_empty():
@@ -6257,7 +6463,8 @@ func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:Su
 					ring_specs.append({"origin":Vector2(cores[core_index]),"radius":maxf(0.075,minf(primary_radius*0.27,radius*0.065)),"segments":8,"gates":gate_angles,"angular":true})
 	for ring_index in ring_specs.size():
 		var spec:Dictionary=ring_specs[ring_index]
-		var counts:=_append_settlement_defense_ring(flat_surface,mass_surface,center,Vector2(spec.origin),float(spec.radius),axis+float(ring_index)*0.07,defense_stage,integrity,completion,constructing,color,layout_seed+ring_index*131,int(spec.segments),spec.get("gates",[]),bool(spec.get("angular",false)))
+		var ring_envelope:PackedFloat32Array=spec.get("envelope",PackedFloat32Array())
+		var counts:=_append_settlement_defense_ring(flat_surface,mass_surface,center,Vector2(spec.origin),float(spec.radius),axis+(float(ring_index)*0.07 if ring_envelope.is_empty() else 0.0),defense_stage,integrity,completion,constructing,color,layout_seed+ring_index*131,int(spec.segments),spec.get("gates",[]),bool(spec.get("angular",false)),ring_envelope)
 		flat_count+=int(counts.flat)
 		mass_count+=int(counts.mass)
 	# Watch posts, gate towers and bastions are strategic proxies, never one object
@@ -6271,6 +6478,9 @@ func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:Su
 		if post_index<gate_angles.size(): angle=float(gate_angles[post_index])
 		else: angle=axis+2.39996323*float(post_index)+0.17*sin(float(layout_seed%41)+float(post_index))
 		var post_radius:=primary_radius*(0.78 if defense_stage<=2 else 1.01)
+		if not traced.is_empty():
+			var local_angle:=fposmod(angle-float(layout.axis),TAU)
+			post_radius=traced[int(local_angle/TAU*float(traced.size()))%traced.size()]*(0.97 if defense_stage<=2 else 1.0)
 		var post_offset:=_settlement_stage_resolve_land_offset(center,Vector2.from_angle(angle)*post_radius)
 		if post_offset==Vector2.ZERO and not _settlement_stage_land_at(Vector2(center.x,center.z)): continue
 		var post_width:=clampf(primary_radius*0.014,0.0022,0.014)
@@ -14610,7 +14820,14 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var discoveries:Array=mission.get("discoveries",[])
 	var end_caption:="Turning point · %s" % String(mission.get("target_label","planned")).capitalize() if active else "Turned for home here"
 	if not discoveries.is_empty(): end_caption="Find · %s" % String((discoveries[0] as Dictionary).get("title","Something worth reporting"))
-	var end_mark:=_scout_chart_mark("find" if not discoveries.is_empty() else "camp",ink,chart[chart.size()-1],clearance*1.2,mark_size)
+	# A party that came home ends its chart at the hearth: its find or turning
+	# point belongs where it turned, not on top of the fire (codex/beauty-4).
+	var end_at:Vector2=chart[chart.size()-1]
+	if end_at.distance_to(chart[0])<0.08:
+		var reach:=-1.0
+		for point:Vector2 in chart:
+			if point.distance_to(chart[0])>reach:reach=point.distance_to(chart[0]);end_at=point
+	var end_mark:=_scout_chart_mark("find" if not discoveries.is_empty() else "camp",ink,end_at,clearance*1.2,mark_size)
 	marks_root.add_child(end_mark)
 	placed.append([end_mark,end_caption])
 	for contact_variant in mission.get("contact_records",[]):

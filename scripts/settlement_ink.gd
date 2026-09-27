@@ -9,8 +9,10 @@ extends RefCounted
 ## - warm light and cool shade from the same low north-west sun as the land,
 ##   never black on the shaded side;
 ## - thatch and timber texture laid along each roof's slope;
-## - a fine ink line where a form turns away from the eye, the way an
-##   illustrated plan draws its buildings;
+## - one clean ink line round each form's silhouette, about a screen pixel
+##   wide at every zoom (an outline pass: the form drawn again, a pixel larger,
+##   in ink, behind itself), the way an illustrated plan draws its buildings.
+##   It replaced a line taken from faces turned edge-on, which broke into dots;
 ## - firelight: faces near the hearth glow warm and flicker (the hearth is
 ##   placed by living_map.gd with set_hearth());
 ## - the land's drifting cloud shadows (map_cloud.gdshaderinc).
@@ -29,9 +31,27 @@ static func material()->ShaderMaterial:
 	shader.code=SHADER
 	_material=ShaderMaterial.new()
 	_material.shader=shader
+	_material.next_pass=outline_material()
 	# Cloud shadows and the live wind reach it like any other map material.
 	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_material)
 	return _material
+
+static var _outline_material:ShaderMaterial
+static var _pixel_km:=0.0
+## One screen pixel in world km at the current zoom (the map sets it when
+## the zoom changes; the outline is held at about a pixel).
+static func set_pixel(km:float)->void:
+	if absf(km-_pixel_km)<=_pixel_km*0.01:return
+	_pixel_km=km
+	outline_material().set_shader_parameter("pixel_km",km)
+## The outline pass shared by every inked form.
+static func outline_material()->ShaderMaterial:
+	if _outline_material and is_instance_valid(_outline_material):return _outline_material
+	var shader:=Shader.new()
+	shader.code=OUTLINE_SHADER
+	_outline_material=ShaderMaterial.new()
+	_outline_material.shader=shader
+	return _outline_material
 
 ## The same ink for meshes whose vertex colours are authored in sRGB (the
 ## great works' landmarks): converted to linear before painting.
@@ -135,7 +155,11 @@ void fragment() {
 	// already straw; fired tile, red and far redder than it is green, keeps
 	// its colour).
 	float tile = smoothstep(1.45, 1.85, base.r/max(base.g, 0.01));
-	base = mix(base, straw*clamp(luma/0.20, 0.55, 1.35), roof*0.45*(1.0-tile)*(1.0-smoothstep(0.30, 0.45, luma)));
+	// Roofs the later kit marks by vertex alpha (settlement_architecture_kit:
+	// 0.98 tile, 0.96 shingle, 0.94 packed earth, 0.92 slate) keep their own
+	// colour and get their own laid texture below instead of straw strokes.
+	float laid = step(COLOR.a, 0.985)*step(0.90, COLOR.a);
+	base = mix(base, straw*clamp(luma/0.20, 0.55, 1.35), roof*0.45*(1.0-tile)*(1.0-laid)*(1.0-smoothstep(0.30, 0.45, luma)));
 	// Thatch, bark and hide: fine strokes running down each roof's slope,
 	// broken so they read as laid material rather than stripes.
 	vec2 fall = normalize(kit_normal.xz+vec2(1e-5));
@@ -148,15 +172,36 @@ void fragment() {
 	// Strokes only where the screen can hold them: finer than a pixel they
 	// would shimmer into swirls.
 	float stroke_px = fwidth(along);
-	base *= 1.0+(strand-0.5)*0.22*roof*(1.0-smoothstep(0.35, 0.9, stroke_px));
+	base *= 1.0+(strand-0.5)*0.22*roof*(1.0-laid)*(1.0-smoothstep(0.35, 0.9, stroke_px));
+	if (laid > 0.5 && roof > 0.0) {
+		// Tile and shingle: courses a hand apart down the slope, each piece
+		// butting the next, alternate courses offset; packed earth is only
+		// mottled. Faded before a course is under two pixels.
+		float course_m = COLOR.a > 0.97 ? 0.34 : (COLOR.a > 0.95 ? 0.26 : 0.30);
+		float down_m = dot(local, fall);
+		float across_m = dot(local, vec2(-fall.y, fall.x));
+		float row = down_m/course_m;
+		float piece = across_m/(course_m*(COLOR.a > 0.97 ? 0.75 : 1.1))+0.5*floor(row);
+		float course_px = fwidth(row);
+		float visible = 1.0-smoothstep(0.25, 0.5, course_px);
+		float lap = smoothstep(0.70, 0.98, fract(row));
+		float joint = 1.0-smoothstep(0.0, 0.10, abs(fract(piece)-0.5)*2.0-0.8);
+		float piece_tone = map_paper_hash(vec2(floor(piece), floor(row)));
+		if (COLOR.a < 0.95 && COLOR.a > 0.93) {
+			base *= 1.0+(map_paper_noise(local*1.7)-0.5)*0.18;
+		} else {
+			base *= mix(1.0, (1.0-lap*0.28)*(1.0-joint*0.20)*(0.92+0.16*piece_tone), visible*roof);
+		}
+	}
 	// Warm light, cool shade: the painted key light shared with the land.
 	float ndl = dot(n, SUN);
 	base *= mix(vec3(0.90, 0.89, 0.94), vec3(1.06, 1.02, 0.94), smoothstep(-0.2, 0.6, ndl));
 	base = map_palette_grade(base);
 	base *= map_cloud_shadow(world_position.xz, world_position.y, map_cloud, map_cloud_scale);
-	// A fine ink line where the form turns away from the eye.
+	// Faces seen nearly edge-on darken a little (the silhouette line itself
+	// is the outline pass, clean at any zoom).
 	float facing = abs(dot(NORMAL, VIEW));
-	float ink = (1.0-smoothstep(0.10, 0.34, facing))*0.55*ink_strength;
+	float ink = (1.0-smoothstep(0.02, 0.22, facing))*0.22*ink_strength;
 	base = mix(base, vec3(0.105, 0.080, 0.055), ink);
 	ALBEDO = base;
 	ROUGHNESS = 0.95;
@@ -178,6 +223,33 @@ void fragment() {
 }
 """
 
+## The silhouette line: the form again, grown outward in the ground plane by
+## about `outline_px` screen pixels from its own vertical axis (low forms read
+## from above as near-convex), back faces only, in iron-gall ink. The map's
+## pixel's size in world km comes from the map (set_pixel).
+const OUTLINE_SHADER:="""
+shader_type spatial;
+render_mode unshaded, cull_front, shadows_disabled, fog_disabled;
+uniform float outline_px = 1.15;
+uniform float pixel_km = 0.0002;
+void vertex() {
+	float model_scale = max(length(MODEL_MATRIX[0].xyz), 1e-9);
+	float grow = min(pixel_km*outline_px, 0.004)/model_scale;
+	vec2 radial = VERTEX.xz;
+	float reach = length(radial);
+	// A form only a few pixels across keeps its colour: the line thins away
+	// before it could turn a distant hut into an ink speck.
+	float reach_px = reach*model_scale/max(pixel_km, 1e-9);
+	grow *= clamp((reach_px-2.5)/5.0, 0.0, 1.0);
+	if (reach > 1e-6) { VERTEX.xz += radial/reach*grow; }
+	// A touch of height as well, so a flat roof edge seen from above keeps it.
+	VERTEX.y += grow*0.5*step(0.05, VERTEX.y);
+}
+void fragment() {
+	ALBEDO = vec3(0.105, 0.080, 0.055);
+}
+"""
+
 const SHADOW_SHADER:="""
 shader_type spatial;
 render_mode unshaded, blend_mul, depth_draw_never, cull_disabled, shadows_disabled, fog_disabled;
@@ -186,6 +258,9 @@ void fragment() {
 	float d = length(q);
 	// A soft cool pool, deepest just under the eaves.
 	float a = (1.0-smoothstep(0.15, 1.0, d))*0.78;
+	// A pool only a few pixels wide would print a dark speck: it fades out.
+	float quad_px = 1.0/max(max(fwidth(UV.x), fwidth(UV.y)), 1e-5);
+	a *= smoothstep(5.0, 16.0, quad_px);
 	ALBEDO = mix(vec3(1.0), vec3(0.55, 0.59, 0.68), a);
 }
 """

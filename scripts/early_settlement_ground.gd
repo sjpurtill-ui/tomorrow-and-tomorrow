@@ -54,6 +54,7 @@ static func known_crafts() -> Dictionary:
 		"herding": any.call(["herding_rotas", "herd_size_limits"]),
 		"stone_walls": any.call(["dry_stone_walls"]),
 		"grinding": any.call(["flour_sifting", "grain_grinding", "saddle_quern", "mixed_grain_legume_meals"]),
+		"carts": any.call(["solid_wheel_assembly", "spoked_wheel_assembly", "cart_running_gear", "cart_bed_framing", "transport_cart", "sleeved_cart_assembly", "wheel"]),
 	}
 
 static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dictionary], center: Vector3, height: Callable, land: Callable, parent: Node3D) -> void:
@@ -139,6 +140,35 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 			if crafts.weaving: put.call("loom", c - Vector2.from_angle(angle) * .005, angle, .0011)
 		elif form in ["guarded_cache", "lined_storage_pits"]:
 			put.call("pots", c, angle, .0008)
+	# Market days (codex/beauty-4): stalls round the market ground and along
+	# the plaza, their awnings turned to the trade; baskets between them.
+	var market_count := 0
+	for plot in plots:
+		if String(plot.get("land_use", "")) != "market" or String(plot.get("status", "active")) in ["vacant", "ruin", "reclaimed", "under_construction"]: continue
+		var c: Vector2 = plot.get("centroid", Vector2.ZERO)
+		var base := float(absi(int(plot.get("seed", 1))) % 628) * .01
+		var ring := clampf(sqrt(maxf(float(plot.get("area_ha", .05)), .005) / 100.0 / PI) * 1.05, .007, .016)
+		for k in 7:
+			var a := base + TAU * float(k) / 7.0
+			var at := c + Vector2.from_angle(a) * ring
+			if put.call("stall", at, atan2(-(c - at).x, -(c - at).y) + PI, .0016): market_count += 1
+			if k % 2 == 0: put.call("baskets", c + Vector2.from_angle(a + .45) * ring * .82, a, .0007)
+	if market_count > 0 and hearth != Vector2.INF:
+		for k in 5:
+			var a := float(k) * 1.2566 + .3
+			var at := hearth + Vector2.from_angle(a) * .0105
+			put.call("stall", at, atan2(-(hearth - at).x, -(hearth - at).y) + PI, .0016)
+	# Carts stand by the stores and workshops on made streets, once the
+	# people build them.
+	if crafts.carts:
+		var carts := 0
+		for record in plan.buildings:
+			if carts >= 6: break
+			var plot: Dictionary = record.plot
+			if String(plot.get("land_use", "")) not in ["storage", "workshop", "market"]: continue
+			var forward := Vector2(sin(float(record.angle)), cos(float(record.angle)))
+			var at: Vector2 = Vector2(record.position) + forward * (maxf(float(record.get("radius", .003)), .0018) + .0028) + forward.orthogonal() * .0022
+			if put.call("cart", at, float(record.angle) + PI * .5 + float(carts % 3) * .3, .0015): carts += 1
 	for plot in plots:
 		if String(plot.get("form", "")) == "refuse_and_latrine_ground" and String(plot.get("status", "")) == "ruin":
 			put.call("midden", plot.get("centroid", Vector2.ZERO), 0.4, .0017)
