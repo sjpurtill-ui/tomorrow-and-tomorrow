@@ -3707,5 +3707,9 @@
   "elder_consultation_rites": {"path": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png", "focus": [0.5, 0.5]},
   "hazard_memory_recitation": {"path": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png", "focus": [0.5, 0.5]},
   "shared_work_signals": {"path": "res://assets/ui/research/subjects/shared_work_signals-v1.png", "focus": [0.5, 0.5]},
-  "site_clearing_assessment": {"path": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png", "focus": [0.5, 0.5]}
+  "site_clearing_assessment": {"path": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png", "focus": [0.5, 0.5]},
+  "contagion_avoidance_customs": {"path": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png", "focus": [0.5, 0.5]},
+  "fallow_thicket_regrowth": {"path": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png", "focus": [0.5, 0.5]},
+  "notched_measuring_rods": {"path": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_protein_sourcing": {"path": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png", "focus": [0.5, 0.5]}
 }

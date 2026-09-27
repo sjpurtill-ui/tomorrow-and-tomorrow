@@ -1,0 +1,50 @@
+[
+  {
+    "id": "contagion_avoidance_customs",
+    "line": "health",
+    "game_year": 9,
+    "approx_historical_year": -4940,
+    "prompt": "c. 4940 BCE: Adults leave water near an ill person in a separate reed shelter while another guides neighbors to keep respectful distance; flat watercolor and black ink on fibrous paper. No text, photorealism, CGI or childlike style.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-012bb71a-220c-4457-9484-5784142579e3.png",
+    "asset": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png",
+    "sha256": "17571c680e082de4dc29aaede44712fc6a147079a3b06cfba1453fead4ccf695",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; practical spacing and care read in 3.37:1 crop."
+  },
+  {
+    "id": "fallow_thicket_regrowth",
+    "line": "ecology",
+    "game_year": 9,
+    "approx_historical_year": -4940,
+    "prompt": "c. 4940 BCE: Adults identify tender shoots and berry shrubs regrowing in a fallow clearing; hand-ground plant pigments and fine ink on paper. No text, photorealism, CGI or childlike style.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-04b3aa21-1dee-4eae-bb79-e9cec25de4ba.png",
+    "asset": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png",
+    "sha256": "adbf7f3fc0e229e2bd171133c10f2573145df032b9676df520c94057f35b4c8d",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; plant regrowth and observation clear in crop."
+  },
+  {
+    "id": "notched_measuring_rods",
+    "line": "production",
+    "game_year": 9,
+    "approx_historical_year": -4940,
+    "prompt": "c. 4940 BCE: Two adults align plain notched wooden rods against shelter timber; one adds a notch with stone flake; thick matte impasto oil paint. No text, photorealism, CGI or childlike style.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-46276f6e-fd90-4748-acee-7105a379fd82.png",
+    "asset": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png",
+    "sha256": "a5031651806d71d6c4cd70f8d45cd245aa59e2454b66660e3cb17f40288cbbf4",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; rods, notches and hands clear in crop."
+  },
+  {
+    "id": "seasonal_protein_sourcing",
+    "line": "nutrition",
+    "game_year": 9,
+    "approx_historical_year": -4940,
+    "prompt": "c. 4940 BCE: Adults compare gathered river fish and mussels with legumes and nuts at seasonal hearth; flat egg tempera on wood panel. No text, photorealism, CGI or childlike style.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fbfe5cea-844e-47dd-8427-5581911ca4a0.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png",
+    "sha256": "41b7e310da5e6f84d755c6c5335996cbf5fa05243ac24f70e7b265f87a8f6a06",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; food sources and dry landscape clear in crop."
+  }
+]
