@@ -1,7 +1,14 @@
 extends "res://tests/ground_surface_probe.gd"
 ## Capture-only: real streaming/camera path, old geometry comparison, and hidden
 ## geography controls. No main player scene, saves, or interactive audit window.
+## Headless (no renderer) it still runs every streaming, coverage, pan-reuse and
+## cancellation check, and reports the pixel checks as skipped; run it through
+## tools/run_isolated_gpu_probe.ps1 for the captures and pixel comparisons.
 const LOD:=preload("res://scripts/terrain_lod.gd")
+var headless:=DisplayServer.get_name()=="headless"
+func capture(canvas:SubViewport,file:String)->Image:
+	if headless:return null
+	var image:=canvas.get_texture().get_image();image.save_png(output+file);return image
 func _ready()->void:
 	output="res://artifacts/terrain-lod/"
 	get_window().title="TEST — Terrain distance audit"
@@ -55,25 +62,37 @@ func run()->void:
 			else:
 				terrain.province_terrain_mesh.material_override.set_shader_parameter("streamed_cutout",Vector4.ZERO)
 				if terrain.regional_terrain_patch:terrain.regional_terrain_patch.visible=false
-			await settle();canvas.get_texture().get_image().save_png(output+"distance-"+str(index)+"-before.png")
+			await settle();capture(canvas,"distance-"+str(index)+"-before.png")
 			# Restore the prior continental view after the old-region comparison so
 			# the live pipeline must supply every new regional refinement stage.
 			if index==2:terrain._install_regional_patch(terrain.terrain_patch_cache[0])
 		await stream(terrain,"distance-"+str(index));await settle()
 		if errors>0:
 			canvas.queue_free();WorldSimulation.clear();get_tree().quit(errors);return
-		canvas.get_texture().get_image().save_png(output+"distance-"+str(index)+"-after.png")
-	# A covered pan should preserve the finished mesh while the shared sample
-	# lattice supplies the next fine patch. Exercise the real request/install path.
+		capture(canvas,"distance-"+str(index)+"-after.png")
+	# A pan the finished patch still covers keeps it: no rebuild is requested.
 	var old_mesh:MeshInstance3D=terrain.regional_terrain_patch
-	terrain.camera_target.x+=terrain.regional_patch_span/12.0
+	var pan_span:=terrain.regional_patch_span
+	var pan_resolution:=terrain.regional_patch_resolution
+	terrain.camera_target.x+=pan_span/12.0
 	terrain._update_camera();terrain._update_world_streaming()
-	check(terrain.terrain_patch_job!=null and terrain.terrain_patch_job.resolution==terrain.regional_patch_resolution,"covered pan requests full detail without a coarse replacement")
+	check(terrain.terrain_patch_job==null and terrain.regional_terrain_patch==old_mesh,"a covered pan keeps the finished patch without rebuilding")
+	# Pan on until the view leaves that patch while still overlapping it. The
+	# finished mesh stays up while the shared sample lattice supplies the next
+	# fine patch. Exercise the real request/install path.
+	var moved:=pan_span/12.0
+	while terrain._regional_patch_covers_camera() and moved<pan_span*.5:
+		terrain.camera_target.x+=pan_span/24.0;moved+=pan_span/24.0;terrain._update_camera()
+	terrain._update_world_streaming()
+	check(terrain.terrain_patch_job!=null and terrain.terrain_patch_job.resolution==pan_resolution,"uncovered pan requests full detail without a coarse replacement")
 	terrain._advance_terrain_patch()
 	check(terrain.regional_terrain_patch==old_mesh,"finished terrain stays visible during pan refinement")
 	await stream(terrain,"pan-close");await settle()
-	check(terrain.terrain_patch_last_reused_vertices>130000,"live pan reuses the overlapping completed samples")
-	canvas.get_texture().get_image().save_png(output+"pan-close-after.png")
+	# Samples of the old patch that the new one overlaps are reused, not rebuilt.
+	var overlap:=float(pan_resolution*pan_resolution)*maxf(0.0,1.0-moved/pan_span)
+	print("LOD_PAN ",JSON.stringify({"moved_fraction":moved/pan_span,"reused":terrain.terrain_patch_last_reused_vertices,"overlap_estimate":overlap}))
+	check(terrain.terrain_patch_last_reused_vertices>overlap*.8,"live pan reuses the overlapping completed samples")
+	capture(canvas,"pan-close-after.png")
 	# Cached and cancelled requests must still leave the real fallback behind.
 	terrain.set_camera_distance_level(3);camera.size=terrain.zoom_target_size;terrain.zoom_target_size=-1;terrain._update_camera()
 	terrain._update_world_streaming();terrain._advance_terrain_patch()
@@ -81,6 +100,9 @@ func run()->void:
 	check(terrain.province_terrain_mesh.visible,"global fallback remains during a cancelled/uncached view")
 	check(terrain.terrain_patch_cancellations>0,"stale view job was cancelled")
 	canvas.queue_free();await settle()
+	if headless:
+		print("TERRAIN_LOD_CAPTURE SKIPPED fog concealment and planet-edge pixel checks: no renderer (use tools/run_isolated_gpu_probe.ps1)")
+		WorldSimulation.clear();print("TERRAIN_LOD_CAPTURE ","PASS (headless)" if errors==0 else "FAIL");get_tree().quit(errors);return
 	# Same unlit fog must conceal land shape AND the shoreline, not only tint.
 	canvas=view();terrain=setup(873421);canvas.add_child(terrain)
 	var black:=Image.create(2,2,false,Image.FORMAT_RGBA8);black.fill(Color.BLACK);terrain.discovery_mask_texture=ImageTexture.create_from_image(black)

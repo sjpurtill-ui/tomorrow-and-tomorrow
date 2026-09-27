@@ -146,6 +146,10 @@ func _ready()->void:
 	army["distance_total_km"]=13.4
 	army["distance_remaining_km"]=9.2
 	army["arrival_day"]=18
+	# Before signal-era communications an away army is drawn where its last
+	# runner reported it; an army with no report is not on the map at all.
+	if not bool(MilitaryCampaign.field_armies_snapshot().get("live_reports",true)):
+		army["last_report"]={"day":int(GameState.elapsed_days),"position":army.position.duplicate(true),"status":"moving","troops":int(army.troops),"supply_level":float(army.supply_level),"readiness":float(army.readiness),"distance_remaining_km":float(army.distance_remaining_km)}
 	MilitaryCampaign.field_armies[0]=army
 	terrain._refresh_player_field_army_markers()
 	_expect(terrain.player_field_army_paths.size()==1,"moving army has no bounded movement path")
@@ -159,6 +163,9 @@ func _ready()->void:
 		terrain.camera.size=zoom
 		terrain._refresh_player_field_army_markers()
 		var scaled_path:Node3D=terrain.player_field_army_paths.get("1")
+		if scaled_path==null:
+			_expect(false,"moving army path disappears at zoom %.0f" % zoom)
+			break
 		var path_id:=scaled_path.get_instance_id()
 		_expect(path_id!=previous_path_id,"army path retains a different zoom's width")
 		previous_path_id=path_id
@@ -270,6 +277,10 @@ func _ready()->void:
 	MilitaryCampaign.field_armies.clear()
 	for army_id in 24: MilitaryCampaign.field_armies.append(_army(army_id+1,origin))
 	terrain.camera.size=320.0
+	# The map camera is a perspective aerial view: place it over the stack at this
+	# height, as the running map does every frame, before judging label space.
+	terrain.camera_target=origin
+	terrain._update_camera()
 	terrain._refresh_player_field_army_markers()
 	_expect(terrain.player_field_army_markers.size()==PRESENTATION.MAX_PLAYER_MARKERS,"renderer exceeded the fixed player-army marker budget")
 	var stacked_labels:=0
@@ -297,16 +308,22 @@ func _ready()->void:
 	terrain.game_speed=0.0
 	_expect(not bool(MilitaryCampaign.field_armies_snapshot().get("live_reports",true)),"report fixture unexpectedly has live military signals")
 	terrain._refresh_player_field_army_markers()
-	var reported_figures:Node3D=terrain.close_army_figures.get("71",null)
+	terrain._update_camera()
+	terrain._refresh_player_field_army_markers()
 	var grounded_counter:Node3D=terrain.player_field_army_markers.get("71",null)
+	# Field armies draw their occupied ground on the counter itself; the separate
+	# close-figure layer now serves occupation garrisons only.
+	var reported_figures:ArmyFrontVisual=grounded_counter.get_node_or_null("OccupiedArmyGround") if grounded_counter else null
 	if grounded_counter:
 		var lift:float=grounded_counter.position.y-terrain._height_at(grounded_counter.position.x,grounded_counter.position.z)
 		_expect(lift>0.0 and lift<0.002,"close army counter is floating metres above its formation")
 	_expect(reported_figures!=null,"reported army lost its close formation")
 	if reported_figures:
-		_expect(is_equal_approx(reported_figures.position.x,origin.x) and is_equal_approx(reported_figures.position.z,origin.z),"close figures expose live coordinates instead of the runner report")
-		_expect(reported_figures.represented_troops==600,"close figures ignore reported strength")
-		_expect(reported_figures.clip=="idle","a stationary report animates as a live moving army")
+		_expect(reported_figures.visible,"reported army's close formation is hidden at close zoom")
+		_expect(is_equal_approx(reported_figures.global_position.x,origin.x) and is_equal_approx(reported_figures.global_position.z,origin.z),"close figures expose live coordinates instead of the runner report")
+		var formed:Array=bytes_to_var(reported_figures.signature)
+		_expect(int((formed[0] as Dictionary).get("troops",0))==600,"close figures ignore reported strength")
+		_expect(is_equal_approx(float(formed[2]),1.0),"a stationary report is drawn as a live moving army")
 	_expect(MilitaryCampaign.field_armies[0].position.x==origin.x+0.5,"visual report handling mutated the real army")
 	if grounded_counter and terrain.hud:
 		terrain._update_camera()

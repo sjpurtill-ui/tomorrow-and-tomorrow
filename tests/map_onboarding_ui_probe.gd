@@ -19,7 +19,8 @@ func _ready()->void:
 	_expect(terrain.map_help_button!=null and terrain.map_help_panel!=null,"normal play did not construct compact map help")
 	var visible_surface_resources:=ResourceSystem.visible_deposits()
 	_expect(visible_surface_resources.size()>=4,"founding expedition recognized no practical surface resources")
-	_expect(terrain.hud and terrain.hud.find_child("RailSettlement",true,false)!=null,"command rail did not expose Settlement as a direct destination")
+	# The settlement overview is the rail's first entry, "The People" (overview).
+	_expect(terrain.hud and terrain.hud.find_child("RailOverview",true,false)!=null,"command rail did not expose the settlement overview as a direct destination")
 	_expect(terrain.hud and terrain.hud.find_child("RailEconomy",true,false)!=null,"command rail did not expose Economy as a direct destination")
 	_expect(ResourceSystem.stored_bulk()>0.0,"physical founding cargo disappeared before the first simulation tick")
 	var opening_water:Dictionary=ResourceSystem.water_access_snapshot(terrain._discovery_context())
@@ -34,8 +35,12 @@ func _ready()->void:
 	_expect(water_listed,"material resource report omitted recognized fresh water before the first simulation tick")
 	terrain.materials_panel.queue_free()
 	terrain.materials_panel=null
-	var opening_resource_clusters:Array[Dictionary]=terrain._bounded_resource_overlay_selection(visible_surface_resources,Vector2(terrain.camera_target.x,terrain.camera_target.z),terrain.camera.size,func(position:Vector3)->bool: return terrain._world_position_is_revealed(position))
-	_expect(not opening_resource_clusters.is_empty(),"resource mode showed no recognized resource on the opening regional map")
+	# The game now opens close in, at the fire circle; the recognized resources lie
+	# a few kilometres out. Resource mode must show them once the player looks
+	# over the valley (the 50,000 ft distance level).
+	var valley_zoom:=float(terrain.CAMERA_DISTANCE_LEVELS[1].width_km)
+	var opening_resource_clusters:Array[Dictionary]=terrain._bounded_resource_overlay_selection(visible_surface_resources,Vector2(terrain.camera_target.x,terrain.camera_target.z),valley_zoom,func(position:Vector3)->bool: return terrain._world_position_is_revealed(position))
+	_expect(not opening_resource_clusters.is_empty(),"resource mode showed no recognized resource over the opening valley")
 	if terrain.map_help_panel:
 		_expect(not terrain.map_help_panel.visible,"map help opened automatically over a normal new game")
 		_expect(terrain.map_help_panel.position.x>=0.0 and terrain.map_help_panel.position.y>=46.0,"map help began outside the usable viewport")
@@ -44,7 +49,8 @@ func _ready()->void:
 	_expect(terrain.map_help_body and "Left-click" in terrain.map_help_body.text and "Right-click" in terrain.map_help_body.text,"on-demand map help did not explain inspect versus convoy movement")
 	_expect(terrain.map_help_body and "WASD" not in terrain.map_help_body.text and "Middle-drag" not in terrain.map_help_body.text,"first-use help dumped camera controls into the primary instruction")
 	var settle_button:=terrain.hud.find_child("ToolbarSettle",true,false) as Button
-	_expect(settle_button and "FOUND SETTLEMENT" in settle_button.text and not settle_button.disabled,"founding action was not explicit on the map toolbar")
+	# Before founding, the toolbar's founding action reviews the site first.
+	_expect(settle_button and "founding site" in settle_button.text.to_lower() and settle_button.visible and not settle_button.disabled,"founding action was not explicit on the map toolbar")
 	var diplomat_button:=terrain.hud.find_child("ToolbarDiplomat",true,false) as Button
 	_expect(diplomat_button and diplomat_button.disabled and "foreign settlement" in diplomat_button.tooltip_text,"diplomacy did not expose its physical-destination blocker")
 	for retired in ["LayerResources","LayerBorders","LayerCharted"]:
@@ -53,7 +59,11 @@ func _ready()->void:
 	var toolbar_node:=terrain.hud.find_child("MapToolbar",true,false) as Control
 	_expect(toolbar_node and toolbar_node.get_global_rect().end.x<=viewport_size.x and toolbar_node.get_global_rect().end.y<=viewport_size.y,"map toolbar was not a bounded lower map control")
 	terrain._inspect_location(terrain.world_start_position)
-	_expect(terrain.lens_panel==null,"retired Lens was constructed during normal inspection")
+	# Left-click on open land shows the ground inspection card (the former Lens).
+	_expect(terrain.lens_panel!=null and terrain.lens_panel.visible,"left-click land inspection showed no ground inspection card")
+	if terrain.lens_panel:
+		var inspection_rect:Rect2=terrain.lens_panel.get_global_rect()
+		_expect(inspection_rect.position.x>=0.0 and inspection_rect.position.y>=0.0 and inspection_rect.end.x<=viewport_size.x and inspection_rect.end.y<=viewport_size.y,"ground inspection card was not inside the viewport: %s" % inspection_rect)
 	_expect(terrain.map_selection_marker and terrain.map_selection_marker.visible,"normal land inspection produced no temporary visual marker")
 	if terrain.map_selection_marker:
 		_expect(is_equal_approx(terrain.map_selection_marker.scale.x,terrain.map_selection_marker.scale.y) and is_equal_approx(terrain.map_selection_marker.scale.y,terrain.map_selection_marker.scale.z),"temporary ground locator was stretched into a vertical capsule")
@@ -116,12 +126,20 @@ func _ready()->void:
 	var river_assessment:Dictionary=terrain._settlement_surface_assessment(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
 	_expect(not bool(river_assessment.get("valid",true)) and "RIVER CHANNEL" in String(river_assessment.get("reason","")),"rendered river channel was accepted as a settlement site")
 	terrain.settlement_convoy_targeting=true
+	# Each people now starts in its own country, far from this channel: chart it
+	# (as a returned scout would) and look at it before pointing at it.
+	CivilizationSystem._add_revealed_area(Vector2(river_x,river_z),3.0,"probe survey")
+	var home_target:Vector3=terrain.camera_target
+	terrain.camera_target=Vector3(river_x,terrain._height_at(river_x,river_z),river_z)
+	terrain._update_camera()
 	var river_screen:Vector2=terrain.camera.unproject_position(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
 	terrain._update_settlement_convoy_preview(river_screen)
 	_expect(not terrain.settlement_convoy_hover_valid and terrain.settlement_convoy_preview and terrain.settlement_convoy_preview.visible,"later settlement preview did not render the river site as blocked")
 	_expect(terrain.settlement_convoy_instruction_label and "RIVER CHANNEL" in terrain.settlement_convoy_instruction_label.text,"later settlement preview did not explain its river blocker")
 	terrain.settlement_convoy_targeting=false
 	if terrain.settlement_convoy_preview: terrain.settlement_convoy_preview.visible=false
+	terrain.camera_target=home_target
+	terrain._update_camera()
 	var original_marker_position:Vector3=terrain.settler_marker.position
 	terrain.settler_marker.position=Vector3(river_x,terrain._height_at(river_x,river_z)+0.002,river_z)
 	terrain._start_settlement_here()
