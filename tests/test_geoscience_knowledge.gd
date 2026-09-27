@@ -66,14 +66,27 @@ func test_prospecting_cannot_bypass_special_recognition_or_invent_occurrences()-
 func test_earlier_catalog_remains_reachable_without_geoscience_methods()->void:
 	var excluded:Array=[]
 	for entry:Dictionary in G.entries():excluded.append(entry.id)
-	var known:Array=[];var changed:=true
+	var without:=_reachable(excluded)
+	# With the methods, the whole catalog is reachable.
+	assert_int(_reachable([]).size()).is_equal(DiscoverySystem.technology_catalog.size())
+	# Without them, only later knowledge that builds on geology waits: nothing
+	# older than the first geoscience method is ever blocked by its absence.
+	var first_method:=INF
+	for id:String in excluded:first_method=minf(first_method,DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition(id)))
+	var blocked:Array[String]=[]
+	for entry:Dictionary in DiscoverySystem.technology_catalog:
+		if not without.has(entry.id) and entry.id not in excluded and DiscoverySystem.research_600_earliest_year(entry)<first_method:blocked.append(entry.id)
+	assert_array(blocked).is_empty()
+
+func _reachable(excluded:Array)->Dictionary:
+	var known:Dictionary={};var changed:=true
 	while changed:
 		changed=false
 		for entry:Dictionary in DiscoverySystem.technology_catalog:
-			if entry.id in known or entry.id in excluded:continue
-			for route:Dictionary in P.routes_for(entry,known,{}):
-				if route.ready:known.append(entry.id);changed=true;break
-	assert_int(known.size()).is_equal(DiscoverySystem.technology_catalog.size()-16)
+			if known.has(entry.id) or entry.id in excluded:continue
+			for route:Dictionary in P.routes_for(entry,known.keys(),{}):
+				if route.ready:known[entry.id]=true;changed=true;break
+	return known
 func test_invalid_profiles_are_rejected_and_inspector_explains_limits()->void:
 	var entry:Dictionary=G.entries()[0].duplicate(true)
 	entry.prospecting_profile.resources=["Unobtainium"]

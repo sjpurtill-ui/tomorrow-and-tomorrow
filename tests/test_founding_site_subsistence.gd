@@ -18,7 +18,7 @@ func test_generated_starts_remain_viable_after_real_ground_sampling()->void:
 	for seed:int in [91420,9241,777]:
 		GameState.reset_for_new_world(seed)
 		var terrain=preload("res://scripts/local_terrain.gd").new()
-		terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
+		terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 		for seat in 16:
 			var point:Vector2=terrain._civilization_start(S.candidate(seed,seat))
 			var context:Dictionary=terrain._civilization_geography(point)

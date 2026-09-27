@@ -828,8 +828,13 @@ func test_deceased_roster_does_not_exhaust_future_government_successors()->void:
 	assert_bool(government.officeholder("Steward").is_empty()).is_false()
 	assert_bool(government.settlement_leader(settlement_id).is_empty()).is_false()
 	assert_int(GameState.population_total).is_equal(population_before)
+	# Archived lives keep every recorded field; initialization only assigns a
+	# portrait (early art profile and index) to records created without one.
 	for record:Dictionary in archived:
-		assert_dict(government._person_record(int(record.person_id))).is_equal(record)
+		var kept:Dictionary=government._person_record(int(record.person_id))
+		for key:String in record:assert_str(str(kept.get(key))).is_equal(str(record[key]))
+		for key:String in kept:
+			if not record.has(key):assert_array(["early_art_profile","early_art_index"]).contains([key])
 	var count:=government.people.size()
 	government.initialize()
 	assert_int(government.people.size()).is_equal(count)
