@@ -96,7 +96,8 @@ static func material(stock:float,delivered:float,loss:float,points:Array,blocked
 	else:cause="nothing is being brought in"
 	if loss>0.05:cause+="; %s a day spoils or is lost" % Plain.number(loss)
 	elif trend=="falling" and delivered>0.05:cause+=", but more is used"
-	return {"trend":trend,"cause":cause,"since":"since last month" if previous_day>=0 else "","tone":"bad" if trend=="falling" and stock<5.0 else "warn" if trend=="falling" else "good"}
+	var tone:="bad" if trend=="falling" and stock<5.0 else "warn" if trend=="falling" else "good" if trend=="rising" or delivered>0.05 else "muted"
+	return {"trend":trend,"cause":cause,"since":"since last month" if previous_day>=0 else "","tone":tone}
 
 ## One sentence for the store and the carriers: what, if anything, slows supply.
 static func supply(stored:float,capacity:float,hauling:Variant)->Dictionary:

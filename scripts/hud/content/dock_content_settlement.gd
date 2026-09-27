@@ -137,7 +137,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	var works_city:="" if bool(settlement.get("primary",false)) else id
 	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
-		"metrics":[{"label":"People living here","value":EraWords.people(population)},{"label":"Settled","value":_since(age)},{"label":EraWords.life_title().capitalize() if not EraWords.reckoned() else "Life expectancy","value":"%.1f years" % GameState.projected_life_expectancy() if EraWords.reckoned() else EraWords.life(GameState.projected_life_expectancy())}],
+		"metrics":[{"label":"People living here","value":EraWords.people(population)},{"label":"Settled","value":_since(age)},{"label":EraWords.life_title(),"value":"%.1f years" % GameState.projected_life_expectancy() if EraWords.reckoned() else EraWords.life(GameState.projected_life_expectancy())}],
 		"cards":[
 			{"kind":"building","art":1,"title":"Homes and shelter","show_art":shelter.built,"empty_label":shelter.empty_label,"detail":shelter.detail,"action":"Buildings","on_press":jump("construction",0)},
 			{"kind":"food","art":0,"title":"Food and water","detail":String(food_reading.sentence),"action":"Food","on_press":jump("economy",0)},

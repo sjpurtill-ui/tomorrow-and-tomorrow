@@ -110,7 +110,7 @@ func _ready()->void:
 	detail_scroll=ScrollContainer.new();detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_child(detail_scroll)
 	detail_body=VBoxContainer.new();detail_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_body.add_theme_constant_override("separation",9);detail_scroll.add_child(detail_body)
 	var notify:=HFlowContainer.new();notify.name="NotifyChips";notify.add_theme_constant_override("h_separation",2);box.add_child(notify)
-	Art.label(notify,"Tell me about new discoveries:",13,T.TEXT_SOFT)
+	var notify_label:=T.make_label("Tell me about new discoveries:",13,T.TEXT_SOFT);notify_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;notify.add_child(notify_label)
 	for spec:Array in [["milestones","Only the big ones"],["all","Every one"],["quiet","Only in the season's digest"]]:
 		var mode_id:=String(spec[0])
 		notify_chips[mode_id]=_chip(notify,spec[1],func()->void:GameState.research_notification_mode=mode_id;_update_chips())
@@ -120,7 +120,7 @@ func _ready()->void:
 	Motion.fade_in(self);Motion.rise_in.call_deferred(panel)
 ## A chip: a plain text toggle. The chosen one carries a gold rule beneath it.
 func _chip(parent:Node,text:String,callback:Callable)->Button:
-	var chip:=Button.new();chip.text=text;chip.flat=true;chip.focus_mode=Control.FOCUS_NONE
+	var chip:=Button.new();chip.text=text;chip.focus_mode=Control.FOCUS_NONE
 	chip.add_theme_font_size_override("font_size",13);chip.custom_minimum_size.y=30
 	chip.pressed.connect(callback);parent.add_child(chip);_style_chip(chip,false);return chip
 func _style_chip(chip:Button,on:bool)->void:
@@ -337,7 +337,7 @@ func select(id:String,open_detail:bool=false)->void:
 				Art.label(detail_body,Art.team_sentence(item),18,T.INK,true).add_theme_font_override("font",Art.voice_font())
 				Art.label(detail_body,"About %d in every 100 hours our people spend on learning go to this." % maxi(1,roundi(float(assignment.capacity.workforce_share)*100)),12,T.MUTED,true)
 				var bar:ProgressBar=Gauge.new();bar.ink=Art.color(item.domain);detail_body.add_child(bar);bar.value=clampf(float(item.progress),0,1)*100
-				Art.label(detail_body,Words.evidence(float(item.progress)).capitalize()+("; "+Art.phase(item).to_lower() if not Art.phase(item).is_empty() else "")+".",13,T.BODY,true)
+				Art.label(detail_body,_first_upper(Words.evidence(float(item.progress)))+("; "+Art.phase(item).to_lower() if not Art.phase(item).is_empty() else "")+".",13,T.BODY,true)
 				Art.label(detail_body,Art.plain_bottleneck(String(assignment.bottleneck)),12,T.TEXT_SOFT,true)
 				Art.label(detail_body,assignment.method,12,T.TEXT_SOFT,true)
 			else:
@@ -480,6 +480,8 @@ func _discovery_date(item:Dictionary)->String:
 	var absolute_day:=int(item.get("discovered_day",-1))
 	if absolute_day<0:return "KNOWN SINCE BEFORE WE SET OUT"
 	return "LEARNED · "+EraWords.when(absolute_day).to_upper()
+static func _first_upper(text:String)->String:
+	return text.left(1).to_upper()+text.substr(1)
 func _discovery_sentence(item:Dictionary)->String:
 	var absolute_day:=int(item.get("discovered_day",-1))
 	if absolute_day<0:return "Known since before we set out."

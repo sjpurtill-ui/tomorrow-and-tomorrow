@@ -71,7 +71,7 @@ func _add_office(item:Dictionary)->void:
 	var summon:=Button.new();summon.name="CabinetSummon";summon.text="Summon to court";summon.tooltip_text=String(item.get("summon_tip","Call them to the court"))
 	summon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;summon.custom_minimum_size=Vector2(0,32)
 	summon.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT,Tokens.BORDER_SOFT,1,2,10));summon.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,Tokens.GOLD,1,2,10))
-	summon.add_theme_font_size_override("font_size",13);row.add_child(summon)
+	summon.add_theme_font_size_override("font_size",13);summon.add_theme_color_override("font_color",Tokens.BODY);summon.add_theme_color_override("font_hover_color",Tokens.INK);summon.add_theme_color_override("font_disabled_color",Tokens.MUTED);row.add_child(summon)
 	var callback:Variant=item.get("on_summon",Callable())
 	summon.disabled=not callback is Callable or not (callback as Callable).is_valid()
 	if not summon.disabled:summon.pressed.connect(callback as Callable)
