@@ -199,7 +199,9 @@ func _build_header()->Control:
 func _fit()->void:
 	if not is_instance_valid(card):return
 	var view:=get_viewport_rect().size
-	var target:=Vector2(minf(DESIGN_SIZE.x,view.x-32),minf(DESIGN_SIZE.y,view.y-32))
+	# Nothing to choose (envoys away, nobody known): a shorter sheet.
+	var tall:=DESIGN_SIZE.y if people_box!=null else 560.0
+	var target:=Vector2(minf(DESIGN_SIZE.x,view.x-32),minf(tall,view.y-32))
 	if card.size!=target:card.size=target
 	var place:=((view-card.size)*.5).round()
 	if card.position!=place:card.position=place
@@ -294,12 +296,10 @@ func _away(status:Dictionary)->Control:
 
 func _purpose_words(kind:String,status:Dictionary)->String:
 	var gift:=float(status.get("gift_amount",0.0))
-	var base:=String((Messages.PURPOSES.get(kind,{}) as Dictionary).get("label","a message")).to_lower()
-	if kind in Messages.HOSTILE:base="your "+{"warn":"warning","threaten":"threat","demand":"demand","ultimatum":"ultimatum"}[kind]
-	elif kind=="leader_parley":base="your words to their ruler"
-	elif kind=="declare_war":base="your declaration of war"
-	else:base="your offer: "+base
-	if gift>0.0:base+=", with about %s %s" % [about(gift),String(status.get("gift_resource",""))]
+	var base:=String({"goodwill":"good words","open_trade":"an offer of trade","non_aggression":"a promise of peace","send_aid":"food for a people in need",
+		"seek_peace":"a plea for peace","declare_war":"your declaration of war","leader_parley":"your words to their ruler",
+		"warn":"your warning","threaten":"your threat","demand":"your demand","ultimatum":"your ultimatum"}.get(kind,"your message"))
+	if gift>0.0:base+=" and about %s %s" % [about(gift),String(status.get("gift_resource",""))]
 	return base
 
 # --- Content --------------------------------------------------------------------
@@ -426,7 +426,7 @@ func _fill_menace()->void:
 	if purpose=="ultimatum":
 		var arrive:=_arrival_day()
 		var deadlines:Array=[]
-		for days:int in Messages.DEADLINES:deadlines.append([str(days),String(Messages.DEADLINE_WORDS[days]).capitalize(),"About %s, counted from the day they hear it." % Chronicle.date_label(arrive+days)])
+		for days:int in Messages.DEADLINES:deadlines.append([str(days),_first_up(String(Messages.DEADLINE_WORDS[days])),"About %s, counted from the day they hear it." % Chronicle.date_label(arrive+days)])
 		extras_box.add_child(_choice_row("Deadline","How long they have",deadlines,str(int(sel.deadline)),pick_deadline))
 		var consequences:Array=[]
 		for id:String in Messages.CONSEQUENCES:consequences.append([id,String(Messages.CONSEQUENCES[id].label),String(Messages.CONSEQUENCES[id].line)])
@@ -499,6 +499,9 @@ func _answer_of(outcome_text:String)->String:
 	var found:=cut.search(outcome_text)
 	return found.get_string(1) if found!=null else outcome_text.substr(0,200)
 
+static func _first_up(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)
+
 func _today()->int:
 	return int(WorldSimulation.state.elapsed_days)
 
@@ -563,12 +566,20 @@ func _fill_cost()->void:
 	send_button.tooltip_text=problem if problem!="" else "Your envoys leave now. Their answer comes home with them."
 	send_button.text="Send the envoys" if purpose!="leader_parley" or bool(WorldSimulation.dialogue.access(civ_id).get("ok",false)) else "Send envoys to find their ruler"
 
+static func _reasons(why:Array)->String:
+	## "They dread you, and your fighters outnumber theirs."
+	if why.is_empty():return ""
+	var parts:=PackedStringArray(why)
+	var text:=", ".join(parts.slice(0,parts.size()-1))+(", and " if parts.size()>2 else " and ")+parts[parts.size()-1] if parts.size()>1 else parts[0]
+	var first:=text.get_slice(" ",0)
+	var start:=text.substr(0,1).to_upper()+text.substr(1) if first=="they" or first=="their" or first=="your" else text
+	return start+"."
+
 func reception_words()->String:
 	if purpose=="":return "Choose whom to send to, and what they will say."
 	if purpose in Messages.HOSTILE:
 		var f:=Messages.forecast(civ_id,Messages.build(purpose,sel))
-		var why:Array=f.get("why",[])
-		return String(f.words)+(" (%s.)" % ", ".join(PackedStringArray(why)) if not why.is_empty() else "")
+		return String(f.words)+" "+_reasons(f.get("why",[]))
 	match purpose:
 		"goodwill":
 			for gift:Dictionary in WorldSimulation.world.diplomatic_gift_options(civ_id):

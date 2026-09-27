@@ -348,7 +348,7 @@ static func demand_words(civ_id:String,menace:Dictionary)->String:
 	match String(menace.get("demand","tribute")):
 		"tribute":
 			var t:Dictionary=menace.get("tribute",tribute_terms(civ_id))
-			return "%d %s from your stores" % [roundi(float(t.amount)),String(t.resource)]
+			return "%d %s from your stores" % [roundi(float(t.amount)),String(t.resource).to_lower()]
 		"ground": return "the ground at the border between our peoples"
 		"hostage": return "one of your ruler's own kin, to live among us as a pledge"
 		"withdraw": return "that your fighters leave our border and go home"
