@@ -1,0 +1,12 @@
+{
+  "id": "sickroom_isolation_practice",
+  "line": "health",
+  "game_year": 117,
+  "approx_historical_year": -4220,
+  "prompt": "c. 4220 BCE: Ill adult stays in separate reed-partitioned room from healthy family; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4ee2a96a-38ec-4014-bdf1-53444e073c2a.png",
+  "asset": "res://assets/ui/research/subjects/sickroom_isolation_practice-v1.png",
+  "sha256": "99efd71f9be76f1ad4d03e53b042f5b700c7936cbed54b4ca5d8f711622302ae",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
