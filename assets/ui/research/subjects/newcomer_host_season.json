@@ -1,0 +1,12 @@
+{
+  "id": "newcomer_host_season",
+  "line": "demography",
+  "game_year": 112,
+  "approx_historical_year": -4253,
+  "prompt": "c. 4253 BCE: Newcomers work a season beside host household and share its hearth meal; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-614db11a-242d-4be8-a497-9625cfb83f1f.png",
+  "asset": "res://assets/ui/research/subjects/newcomer_host_season-v1.png",
+  "sha256": "4877d6d3fcca4dcde9eb58a74b2438c938b40b66f1be5e624c08474b95de0802",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first looked too realistic or weakly styled. Selected stronger flat medium and clear action."
+}
