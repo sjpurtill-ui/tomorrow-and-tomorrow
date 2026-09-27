@@ -19,7 +19,7 @@ signal escape_pressed
 const SECTIONS:Array[Dictionary]=[
 	{"id":"overview","label":"The People","icon":0,"tooltip":"The people: how many, how fed, how long they live · F1"},
 	{"id":"world","label":"Known World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
-	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies"},
+	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 	{"id":"government","label":"Government","icon":1,"drawer":true,"tooltip":"Chiefs, officeholders and their duties · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
 	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"drawer":true,"tooltip":"Material stores and supply"},
@@ -32,7 +32,8 @@ const SECTIONS:Array[Dictionary]=[
 ]
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
-const SPEED_TOOLTIPS:Array[String]=["Pause · 0","0.5 h/s","2 h/s","8 h/s","1 day/s","3 days/s"]
+## Time controls speak in words: Pause, then five paces from slowest to fastest.
+const SPEED_LABELS:Array[String]=["Pause","Slowest","Slow","Normal","Fast","Fastest"]
 const MAX_QUEUE_CARDS:=3
 
 var city_selector:OptionButton
@@ -58,7 +59,6 @@ var _words_signature:=""
 var time_pill:PanelContainer
 var time_text:RichTextLabel
 var pause_button:Button
-var speed_selector:OptionButton
 var speed_buttons:Array[Button]=[]
 var last_running_speed:=1
 var kpi_strip:PanelContainer
@@ -265,9 +265,9 @@ func _build_rail()->void:
 	var menu_button:=Button.new()
 	menu_button.name="RailMenu"
 	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
-	menu_button.text="•••"
-	menu_button.tooltip_text="Pause, view controls, restart, or begin a new world."
-	menu_button.add_theme_font_size_override("font_size",15)
+	menu_button.text="Menu"
+	menu_button.tooltip_text="Save, load, settings, or a new world (Esc)."
+	menu_button.add_theme_font_size_override("font_size",13)
 	menu_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	menu_button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	menu_button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
@@ -316,7 +316,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	badge.add_theme_font_size_override("font_size",12)
-	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
+	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
 	# Rail width is fixed, so a plain top-left offset lands the pill at the
 	# button's top-right corner (button content width = rail - 2*8 padding).
 	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
@@ -355,12 +355,45 @@ func _make_drawer_button()->Button:
 	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	content.add_child(mark)
 	drawer_label=Tokens.make_label("",12,Tokens.INK);drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
+	# Alerts inside a closed drawer show on the drawer button itself.
+	var badge:=Label.new()
+	badge.name="DrawerBadge"
+	badge.visible=false
+	badge.custom_minimum_size=Vector2(16,16)
+	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	badge.add_theme_font_size_override("font_size",12)
+	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
+	button.add_child(badge)
+	rail_badges["drawer"]=badge
 	drawer_button=button
 	_style_drawer_label()
 	return button
 
 func _style_drawer_label()->void:
-	if drawer_label:drawer_label.text=EraWords.word("rail.drawer","Ledgers")+(" ▾" if drawer_box and drawer_box.visible else " ▸")
+	var open:=drawer_box!=null and drawer_box.visible
+	var word:=EraWords.word("rail.drawer","Ledgers")
+	if drawer_label:drawer_label.text=word
+	if drawer_button:drawer_button.tooltip_text=("Hide the %s" if open else "Show the %s: food, materials, wealth, buildings, crafts, culture, warriors, learning and chiefs") % word.to_lower()
+	_sync_drawer_badge()
+
+## Drawer alerts, summed onto the drawer button while the drawer is closed.
+var _drawer_alerts:Dictionary={}
+
+func _sync_drawer_badge()->void:
+	var badge:Label=rail_badges.get("drawer")
+	if badge==null:return
+	var open:=drawer_box!=null and drawer_box.visible
+	var count:=0;var urgent:=false
+	for id in _drawer_alerts:
+		var alert:Dictionary=_drawer_alerts[id]
+		if String(alert.text)=="":continue
+		count+=int(alert.text) if String(alert.text).is_valid_int() else 1
+		urgent=urgent or alert.color==Tokens.RED
+	var tint:=Tokens.RED if urgent else Tokens.AMBER
+	_set_badge("drawer","" if open or count==0 else str(count),tint)
 
 func _in_drawer(id:String)->bool:
 	for spec in SECTIONS:
@@ -384,13 +417,19 @@ func _sync_drawer()->void:
 
 ## Rail labels and top-strip captions follow what the people know.
 func _refresh_words()->void:
-	var signature:=EraWords.stage()
+	var signature:="%s|%s|%s" % [EraWords.stage(),EraWords.has_boats(),EraWords.has_flight()]
 	if signature==_words_signature:return
 	_words_signature=signature
 	for spec in SECTIONS:
 		var label:Label=rail_labels.get(String(spec.id))
 		if label:label.text=EraWords.word("rail."+String(spec.id),String(spec.label))
 	_style_drawer_label()
+	var military:Button=rail_buttons.get("military")
+	if military:
+		var extra:=""
+		if EraWords.has_boats():extra+=" · Shift+F5 the boats"
+		if EraWords.has_flight():extra+=" · Shift+F6 the air service"
+		military.tooltip_text="Warriors, training and command · F8"+extra
 	for def in KPI_DEFS:
 		var parts:Dictionary=kpi_chips.get(String(def.id),{})
 		if parts.has("caption"):(parts.caption as Label).text=EraWords.word("kpi."+String(def.id),String(def.label))
@@ -421,7 +460,7 @@ func _make_court_button()->Button:
 	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	symbol.self_modulate=_rail_icon_tint()
 	content.add_child(symbol)
-	var label:=Tokens.make_label("Court",13,Tokens.GOLD);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label("Court",13,Tokens.GOLD_TEXT);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -429,7 +468,7 @@ func _make_court_button()->Button:
 	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	badge.add_theme_font_size_override("font_size",12)
-	badge.add_theme_color_override("font_color",Tokens.DARK_INK)
+	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
 	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
 	button.add_child(badge)
 	rail_badges["court"]=badge
@@ -462,6 +501,9 @@ func set_active_section(id:String)->void:
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:
+	if id!="drawer" and _in_drawer(id):
+		_drawer_alerts[id]={"text":text,"color":color}
+		_sync_drawer_badge()
 	var badge:Label=rail_badges.get(id)
 	if badge==null: return
 	badge.visible=text!=""
@@ -510,32 +552,21 @@ func _build_time_pill()->void:
 	time_text.add_theme_font_size_override("bold_font_size",15)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
-	speed_row.add_theme_constant_override("separation",1)
+	speed_row.add_theme_constant_override("separation",2)
 	row.add_child(speed_row)
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
-	pause_button.custom_minimum_size=Vector2(28,26)
+	pause_button.custom_minimum_size=Vector2(64,26)
 	pause_button.add_theme_font_size_override("font_size",12)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
 	speed_row.add_child(pause_button)
 	speed_buttons=[pause_button]
-	speed_selector=OptionButton.new()
-	speed_selector.name="TimeSpeed"
-	speed_selector.fit_to_longest_item=false
-	speed_selector.visible=false
-	speed_selector.add_theme_font_size_override("font_size",12)
-	for speed in 6:
-		speed_selector.add_item("Paused" if speed==0 else SPEED_TOOLTIPS[speed],speed)
-		speed_selector.get_popup().set_item_tooltip(speed,"Keyboard: %d" % speed)
-	speed_selector.tooltip_text="Simulation speed · shortcuts 0–5"
-	speed_selector.item_selected.connect(_on_speed_pressed)
-	add_child(speed_selector)
 	for speed:int in range(1,6):
 		var button:=Button.new()
 		button.name="Speed%d"%speed
-		button.text=["","½h","2h","8h","1d","3d"][speed]
-		button.custom_minimum_size=Vector2(32,26)
+		button.text=SPEED_LABELS[speed]
+		button.custom_minimum_size=Vector2(0,26)
 		button.add_theme_font_size_override("font_size",12)
 		button.pressed.connect(_on_speed_pressed.bind(speed))
 		speed_row.add_child(button)
@@ -555,7 +586,7 @@ func _hover_host()->CanvasLayer:
 func _time_card()->Dictionary:
 	if terrain==null:return {}
 	var day:=int(floor(GameState.elapsed_days))
-	return {"kicker":"The day","value":"Year %d · Day %d" % [day/365+1,day%365+1],
+	return {"kicker":"Today","value":EraWords.when(day),
 		"headline":"%s at the hearth today. The year's warm and cold decide how much the land yields and how much the people must eat." % _temperature_text().rstrip(" →↑↓"),
 		"facts":[{"text":"Warming day by day" if _temperature_text().ends_with("↑") else "Cooling day by day" if _temperature_text().ends_with("↓") else "Much like yesterday","trend":1 if _temperature_text().ends_with("↑") else -1 if _temperature_text().ends_with("↓") else 0,"good":true}],
 		"action":"Keys 0–5 stop time or set its pace"}
@@ -568,7 +599,7 @@ func _speed_card(index:int)->Dictionary:
 		return {"kicker":"Resume" if paused else "Stop time","value":"Paused" if paused else "Stop",
 			"headline":"The world waits while you look and think." if not paused else "Time waits for you; press to let it run again at %s." % SPEED_WORDS[last_running_speed].to_lower(),
 			"action":"Key 0"}
-	return {"kicker":"Pace","value":SPEED_WORDS[index],"headline":"How fast the days pass while you watch; slower paces let you follow each day's work.","action":"Key %d" % index}
+	return {"kicker":"Pace: %s" % SPEED_LABELS[index].to_lower(),"value":SPEED_WORDS[index],"headline":"How fast the days pass while you watch; slower paces let you follow each day's work.","action":"Key %d" % index}
 
 func _on_speed_pressed(speed:int)->void:
 	if terrain and terrain.has_method("_set_game_speed"):
@@ -577,19 +608,20 @@ func _on_speed_pressed(speed:int)->void:
 func _style_speed_controls(selected:int)->void:
 	selected=clampi(selected,0,5)
 	if selected>0:last_running_speed=selected
-	speed_selector.select(selected)
 	var paused:=selected==0
-	pause_button.text="▶" if paused else "Ⅱ"
+	pause_button.text="Resume" if paused else "Pause"
+	pause_button.tooltip_text="Let time run again (key 0)" if paused else "Stop time (key 0)"
 	for index:int in speed_buttons.size():
 		var button:=speed_buttons[index]
 		var active:=index==selected
 		var normal:=Tokens.flat(Tokens.GOLD_WASH if active else Color.TRANSPARENT)
 		if active:normal.border_color=Tokens.GOLD;normal.border_width_bottom=2
 		var hover:=Tokens.flat(Tokens.HOVER_BG)
+		for box:StyleBoxFlat in [normal,hover]:box.content_margin_left=8.0;box.content_margin_right=8.0
 		button.add_theme_stylebox_override("normal",normal)
 		button.add_theme_stylebox_override("hover",hover)
 		button.add_theme_stylebox_override("pressed",normal)
-		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if active else Tokens.TEXT_DIM)
+		button.add_theme_color_override("font_color",Tokens.GOLD_TEXT if active else Tokens.TEXT_DIM)
 		button.add_theme_color_override("font_hover_color",Tokens.INK)
 
 # --- KPI strip --------------------------------------------------------------
@@ -681,7 +713,7 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	var delta:Label=parts.delta
 	delta.text=delta_text
 	delta.visible=delta_text!=""
-	delta.add_theme_color_override("font_color",delta_color)
+	delta.add_theme_color_override("font_color",Tokens.text_for(delta_color))
 	# A warning note tints the chip's accent bar too, so it reads at a glance.
 	if parts.has("accent"):(parts.accent as ColorRect).color=Tokens.RED if delta_color==Tokens.RED else parts.accent_color
 	var chip:Button=parts.chip
@@ -693,8 +725,8 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 func _kpi_width(id:String,base:float)->float:
 	if EraWords.reckoned():return base
 	# Value and note each have a full line: widths fit "1,240 souls",
-	# "2 hearths · all fed", "28 in 100 babes lost" and "115 ways".
-	return float({"population":132.0,"food":112.0,"water":112.0,"goods":120.0,"health":138.0,"science":104.0,"gdp":116.0}.get(id,base))
+	# "2 hearths · all fed", "28 in 100 babes lost" and "115 known".
+	return float({"population":132.0,"food":112.0,"water":112.0,"goods":120.0,"health":138.0,"science":112.0,"gdp":116.0}.get(id,base))
 
 # --- Decision queue ---------------------------------------------------------
 
@@ -733,22 +765,22 @@ func _rebuild_queue(items:Array)->void:
 		var item:Dictionary=item_variant
 		queue_root.add_child(_make_queue_card(item))
 		shown+=1
-	var merged:int=AdvisorSystem.routine_report_count() if typeof(AdvisorSystem)!=TYPE_NIL else 0
-	var footer_row:=HBoxContainer.new()
-	footer_row.alignment=BoxContainer.ALIGNMENT_END
-	footer_row.add_theme_constant_override("separation",4)
-	queue_root.add_child(footer_row)
-	var counts:=Tokens.make_label("%d DECISION%s%s · " % [items.size(),"" if items.size()==1 else "S"," · %d MERGED" % merged if merged>0 else ""],10,Tokens.MUTED,0.12)
-	footer_row.add_child(counts)
-	var council_link:=Button.new()
-	council_link.flat=true
-	council_link.text="COUNCIL"
-	council_link.add_theme_font_size_override("font_size",12)
-	council_link.add_theme_color_override("font_color",Tokens.GOLD)
-	council_link.add_theme_color_override("font_hover_color",Tokens.GOLD_BRIGHT)
-	council_link.tooltip_text="Open the council ledger."
-	council_link.pressed.connect(func()->void: section_requested.emit("civ",1))
-	footer_row.add_child(council_link)
+	# One way to answer: each card's Answer opens the court. The footer only
+	# counts; it is not a second door to the same matters.
+	# Only worth saying when some are not shown; it sits on paper, not the map.
+	var waiting:=items.size()
+	if waiting>MAX_QUEUE_CARDS:
+		var footer_row:=HBoxContainer.new()
+		footer_row.alignment=BoxContainer.ALIGNMENT_END
+		queue_root.add_child(footer_row)
+		var plate:=PanelContainer.new()
+		var plate_style:=Tokens.paper_panel_style(false,Tokens.RADIUS_CONTROL,0.0)
+		plate_style.content_margin_left=8.0;plate_style.content_margin_right=8.0;plate_style.content_margin_top=2.0;plate_style.content_margin_bottom=2.0
+		plate.add_theme_stylebox_override("panel",plate_style)
+		footer_row.add_child(plate)
+		var counts:=Tokens.make_label("%s more wait%s after these" % [EraWords.count_word(waiting-MAX_QUEUE_CARDS).capitalize(),"s" if waiting-MAX_QUEUE_CARDS==1 else ""],12,Tokens.MUTED)
+		counts.name="QueueCount"
+		plate.add_child(counts)
 	queue_root.reset_size()
 	_layout()
 
@@ -775,7 +807,8 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 	title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	title.max_lines_visible=1
 	text_column.add_child(title)
-	var subline:=Tokens.make_label("%s · %s · Day %d" % [String(item.get("office","Council")),String(item.get("advisor","")),int(item.get("day",0))],11,Tokens.MUTED)
+	var who:=String(item.get("advisor",""))
+	var subline:=Tokens.make_label("%s%s · %s" % [who+", " if who!="" else "",String(item.get("office","Council")).to_lower() if who!="" else String(item.get("office","Council")),EraWords.when(int(item.get("day",0)))],12,Tokens.MUTED)
 	subline.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	subline.max_lines_visible=1
 	text_column.add_child(subline)
@@ -784,28 +817,43 @@ func _make_queue_card(item:Dictionary)->PanelContainer:
 	actions.alignment=BoxContainer.ALIGNMENT_CENTER
 	row.add_child(actions)
 	var decide:=Button.new()
-	decide.text="DECIDE"
+	decide.name="QueueAnswer"
+	decide.text="Answer"
 	decide.custom_minimum_size=Vector2(0,26)
 	decide.add_theme_font_size_override("font_size",12)
-	decide.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
+	decide.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
+	decide.add_theme_color_override("font_hover_color",Tokens.INK)
 	decide.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
 	decide.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	decide.tooltip_text="Answer it in the court."
-	decide.pressed.connect(func()->void: open_court())
+	decide.tooltip_text="Hear %s in the court and give your answer." % (who if who!="" else "this matter")
+	decide.pressed.connect(answer_in_court.bind(item))
 	actions.add_child(decide)
 	var dismiss:=Button.new()
-	dismiss.text="×"
-	dismiss.custom_minimum_size=Vector2(26,26)
+	dismiss.name="QueueLater"
+	dismiss.text="Later"
+	dismiss.custom_minimum_size=Vector2(0,26)
 	dismiss.add_theme_font_size_override("font_size",12)
 	dismiss.add_theme_color_override("font_color",Tokens.MUTED)
-	dismiss.add_theme_stylebox_override("normal",Tokens.flat(Color(0,0,0,0),Tokens.BORDER_2,1,3))
-	dismiss.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,3))
+	dismiss.add_theme_stylebox_override("normal",Tokens.flat(Color(0,0,0,0),Tokens.BORDER_2,1,3,0.0))
+	dismiss.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,3,0.0))
+	for state:String in ["normal","hover"]:
+		var box:=dismiss.get_theme_stylebox(state) as StyleBoxFlat
+		box.content_margin_left=10.0;box.content_margin_right=10.0
 	dismiss.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	dismiss.tooltip_text="Dismiss (stays in council record)"
+	dismiss.tooltip_text="Set it aside. It comes back if the matter grows worse."
 	dismiss.pressed.connect(dismiss_alert.bind(String(item.get("id",""))))
 	actions.add_child(dismiss)
 	return card
+
+## The one path from a waiting matter to an answer: the court, turned to the
+## official who raised it (or at rest when no one holds that office).
+func answer_in_court(item:Dictionary)->void:
+	var focus:={}
+	var positions:Dictionary=GameState.leadership_positions
+	var holder:Variant=positions.get(String(item.get("office","")))
+	if holder is Dictionary and int((holder as Dictionary).get("person_id",0))>0:focus={"person_id":int(holder.person_id)}
+	if not preload("res://scripts/audience_director.gd").open_court_for(focus):open_court()
 
 # --- Map toolbar ------------------------------------------------------------
 
@@ -829,13 +877,17 @@ func _build_toolbar()->void:
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
 	row.add_child(city_selector)
-	for action in [["settle","＋ Found",true],["scouts","⌖ Scout",false],["diplomat","◇ Envoy",false],["convoy","⌂ Convoy",false]]:
+	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
+	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:
 		var button:=Button.new()
 		button.name="Toolbar"+String(action[0]).capitalize()
 		button.text=String(action[1])
+		button.icon=_toolbar_icon(String(action[0]))
+		button.add_theme_constant_override("icon_max_width",20)
+		button.add_theme_constant_override("h_separation",6)
 		button.custom_minimum_size=Vector2(0,32)
 		button.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
-		button.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT if bool(action[2]) else Tokens.BODY)
+		button.add_theme_color_override("font_color",Tokens.GOLD_TEXT if bool(action[2]) else Tokens.BODY)
 		button.add_theme_color_override("font_disabled_color",Tokens.DISABLED)
 		button.add_theme_stylebox_override("normal",Tokens.action_button_style(bool(action[2])))
 		button.add_theme_stylebox_override("hover",Tokens.action_button_style(bool(action[2]),true))
@@ -856,7 +908,7 @@ func _build_toolbar()->void:
 	scale_line.custom_minimum_size=Vector2(56,2)
 	scale_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	scale_box.add_child(scale_line)
-	scale_label=Tokens.make_label("",10,Tokens.MUTED)
+	scale_label=Tokens.make_label("",12,Tokens.MUTED)
 	scale_box.add_child(scale_label)
 	compass_label=MapCompass.new()
 	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
@@ -881,15 +933,18 @@ func _build_toolbar()->void:
 	toolbar.reset_size()
 	_position_toolbar()
 
+func _toolbar_icon(id:String)->Texture2D:
+	var Icons:=preload("res://scripts/resource_icons.gd")
+	match id:
+		"settle":return Icons.moment_texture("settlement",_rail_ink(),40)
+		"scouts":return Icons.moment_texture("scout",_rail_ink(),40)
+		"diplomat":return Icons.moment_texture("contact",_rail_ink(),40)
+	return Icons.people_texture("carry",_rail_ink(),40,false)
+
 ## The toolbar speaks in one case: sentence case. Labels that arrive shouted
 ## (all capitals) from older code or data are lowered, keeping the first word.
 static func toolbar_case(value:String)->String:
-	if value!=value.to_upper() or value==value.to_lower():return value
-	var lowered:=value.to_lower()
-	for position in lowered.length():
-		if lowered[position]!=lowered[position].to_upper():
-			return lowered.substr(0,position)+lowered[position].to_upper()+lowered.substr(position+1)
-	return lowered
+	return Tokens.sentence_case(value)
 
 func _toolbar_divider()->ColorRect:
 	var divider:=ColorRect.new()
@@ -1048,10 +1103,15 @@ func _unhandled_key_input(event:InputEvent)->void:
 	if key.keycode==KEY_F12:
 		open_court()
 		get_viewport().set_input_as_handled();return
-	var keys:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F8:"military",KEY_F7:"construction",KEY_F9:"production"}
+	# One owner per key. The rail owns F1-F9, F11 and F12; F10 stays with the
+	# people-and-legacies screen (historical_figures.gd). Every key here is
+	# named in its rail tooltip.
+	var keys:=HOTKEYS
 	if keys.has(key.keycode):
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()
+
+const HOTKEYS:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F7:"construction",KEY_F8:"military",KEY_F9:"production",KEY_F11:"chronicle"}
 
 func _dock_interaction_active(panel:Control)->bool:
 	## Hovering must not freeze progress. Protect an active click or text edit only.
@@ -1111,20 +1171,19 @@ func refresh()->void:
 func _refresh_time()->void:
 	# Hot script reload can retain an already-built bar from the previous HUD.
 	# Rebuild just this small control, preserving the running campaign.
-	if not is_instance_valid(speed_selector):
+	if not is_instance_valid(pause_button):
 		if is_instance_valid(time_pill):time_pill.queue_free()
 		_build_time_pill()
 		_time_signature=""
 	var absolute_hour:=int(floor(GameState.elapsed_days*24.0))
 	var absolute_day:=absolute_hour/24
-	var year:=absolute_day/365+1
-	var day_of_year:=absolute_day%365+1
+	var date:=EraWords.when(absolute_day)
 	var speed:=int(terrain.game_speed)
 	var temperature_text:=_temperature_text()
-	var signature:="%d|%d|%d|%s" % [year,day_of_year,speed,temperature_text]
+	var signature:="%s|%d|%s" % [date,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	time_text.text="[b][color=#%s]Year %d · Day %d[/color][/b][color=#%s] · %s[/color]" % [Tokens.INK.to_html(false),year,day_of_year,Tokens.TEXT_SOFT.to_html(false),temperature_text]
+	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [Tokens.INK.to_html(false),date,Tokens.TEXT_SOFT.to_html(false),temperature_text]
 	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()
@@ -1165,11 +1224,11 @@ func _refresh_kpis()->void:
 	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
 	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost_short(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
 	if modern:
-		_update_kpi("science","%.1f" % t.science,"%.0f%% edu" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
-		_update_kpi("gdp","%.1f" % t.output,"%.2f / person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
+		_update_kpi("science","%.1f" % t.science,"%.0f%% schooled" % (float(t.education)*100),Tokens.GOLD,"Combined research capacity; population-weighted education")
+		_update_kpi("gdp","%.1f" % t.output,"%.2f per person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
 	else:
 		var keepers:=roundi(float(t.minds))
-		_update_kpi("science","%d ways" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
+		_update_kpi("science","%d known" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
 		# Before writing the gdp chip is hidden (who ate is in PEOPLE).
 		if not EraWords.hearth():
 			_update_kpi("gdp","%d hands" % roundi(float(t.output)),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
@@ -1233,7 +1292,7 @@ func _refresh_toolbar()->void:
 	var scouting:Dictionary=CivilizationSystem.scouting_staff.toolbar_counts()
 	# The toolbar reports standing orders. Route planning belongs to departures,
 	# never to a HUD refresh.
-	var scout_presentation:Dictionary={"label":EraWords.scouts_out(int(scouting.away)),"disabled":false,"tooltip":"Choose how many of the people walk out as scouts, and where they look (%.1f%% of the people now)." % (float(scouting.share)*100)}
+	var scout_presentation:Dictionary={"label":EraWords.scouts_out(int(scouting.away)),"disabled":false,"tooltip":"Choose how many of the people walk out as scouts, and where they look."}
 	var diplomatic_status:Dictionary=CivilizationSystem.diplomatic_mission_status()
 	var known_destinations:=CivilizationSystem.known_home_destination_count()
 	var diplomat_presentation:Dictionary=terrain._diplomat_action_presentation(diplomatic_status,known_destinations)
@@ -1241,7 +1300,7 @@ func _refresh_toolbar()->void:
 	if not bool(diplomatic_status.get("active",false)):
 		for thread:Dictionary in WorldSimulation.dialogue.threads.values():
 			if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
-				returned_reply="Envoys home · retry reply" if bool(thread.get("retryable",false)) else "Envoys home · reply pending"
+				returned_reply="Envoys home · send again" if bool(thread.get("retryable",false)) else "Envoys home · awaiting word"
 				break
 	var settle_text:String
 	var settle_tooltip:String
@@ -1280,14 +1339,19 @@ func _refresh_toolbar()->void:
 	scouts.disabled=bool(scout_presentation.disabled)
 	scouts.tooltip_text=String(scout_presentation.tooltip)
 	scouts.visible=scouts_visible
-	diplomat.text="◇ Send envoys" if not bool(diplomatic_status.get("active",false)) else "◇ Envoys out · %d days" % int(diplomatic_status.get("days_remaining",0))
+	var envoys_out:=bool(diplomatic_status.get("active",false))
+	diplomat.text="Send envoys" if not envoys_out else "Envoys away · %s" % EraWords.days(float(diplomatic_status.get("days_remaining",0)))
 	diplomat.disabled=bool(diplomat_presentation.disabled)
-	diplomat.tooltip_text=String(diplomat_presentation.tooltip)
+	# Plain words here, not the removed menu's "result / why / next" text.
+	diplomat.tooltip_text=("Our envoys are on the road. You will hear what they bring back in the court." if envoys_out
+		else "We know no other people to send envoys to yet. Scouts must find a foreign settlement first." if diplomat.disabled
+		else "Open the court and choose which people to send word to.")
 	if returned_reply!="":
 		diplomat.text=returned_reply
-		diplomat.tooltip_text="The envoys have returned. Open the foreign leader conversation to read its status or retry the reply."
+		diplomat.tooltip_text="The envoys are back. Open the court to hear them, or send them again."
 	diplomat.visible=diplomat_visible
-	convoy.visible=convoy_active
+	# "Find the settlers" already sits on the first button while they travel.
+	convoy.visible=convoy_active and settle_text!="Find the settlers"
 	convoy.tooltip_text="Center the camera on the traveling settlement convoy."
 	var actions_divider:=toolbar.find_child("ToolbarActionsDivider",true,false)
 	if actions_divider: actions_divider.visible=settle_visible or scouts_visible or diplomat_visible or convoy_active

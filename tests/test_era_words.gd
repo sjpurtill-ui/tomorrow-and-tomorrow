@@ -158,7 +158,7 @@ func test_every_top_strip_value_fits_in_full_at_1280()->void:
 	header._layout()
 	for i in 2:await _next_frame()
 	assert_bool((header.kpi_chips.gdp.chip as Control).visible).is_false()
-	assert_str((header.kpi_chips.science.value as Label).text).is_equal("115 ways")
+	assert_str((header.kpi_chips.science.value as Label).text).is_equal("115 known")
 	assert_float(header.kpi_strip.position.x).is_greater_equal(header.time_pill.position.x+header.time_pill.size.x+8.0)
 	for id in header.kpi_chips:
 		var parts:Dictionary=header.kpi_chips[id]

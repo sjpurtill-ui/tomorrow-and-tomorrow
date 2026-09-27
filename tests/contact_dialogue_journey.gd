@@ -16,10 +16,10 @@ func _ready()->void:
 	assert(not CivilizationSystem.diplomatic_mission.is_empty())
 	for button in ui.find_children("*","Button",true,false):
 		if button.text=="RETURN":await click_control(button);break
-	hud.close_detail();hud.close_dock();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()
+	hud.close_detail();hud.close_dock();hud._on_speed_pressed(5);await frames()
 	var deadline:=Time.get_ticks_msec()+90000
 	while not CivilizationSystem.diplomatic_mission.is_empty() and Time.get_ticks_msec()<deadline:await get_tree().process_frame
-	hud.speed_selector.select(0);hud.speed_selector.item_selected.emit(0);await frames()
+	hud._on_speed_pressed(0);await frames()
 	assert(ForeignDialogue.access(id).ok,"Actual delegates must return to establish the channel")
 	ForeignDiplomacy.open(id);await frames();ui=ForeignDiplomacy.panel
 	await capture("contact-audience-returned")

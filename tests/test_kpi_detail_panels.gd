@@ -132,7 +132,7 @@ func test_totals_are_independent_of_selection_and_show_both_cities()->void:
 	assert_float(first.science).is_equal(float(first.cities[0].science)+float(first.cities[1].science))
 	var detail:=Data.from_totals("food",first)
 	assert_str(detail.rows[-1].label).is_equal("Rivermeet")
-	assert_str(detail.rows[-1].value).contains("SHORTFALL")
+	assert_str(detail.rows[-1].value).contains("falling short")
 	assert_float(float(GameState.simulation_metrics.food_days)).is_equal(10.0)
 
 func test_food_batch_subset_cannot_zero_out_total_reserves()->void:
@@ -156,16 +156,18 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	header._process(.75)
 	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
 	assert_str(header.kpi_chips.water.value.text).is_equal("5 days")
-	assert_str(header.time_text.text).contains("Day 2")
+	# The clock tells the Chronicle's season phrase, never a raw day number.
+	assert_str(header.time_text.text).contains(preload("res://scripts/hud/era_words.gd").when(1))
+	assert_str(header.time_text.text).not_contains("Day ")
 	GameState.simulation_metrics.food_days=9.0
 	GameState.water_metrics.days=3.0
 	GameState.water_metrics.stored=30.0
-	GameState.elapsed_days=2.0
+	GameState.elapsed_days=100.0
 	header._process(.25)
 	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
 	header._process(.5)
 	assert_str(header.kpi_chips.food.value.text).is_equal("9 days")
 	assert_str(header.kpi_chips.water.value.text).is_equal("3 days")
-	assert_str(header.time_text.text).contains("Day 3")
+	assert_str(header.time_text.text).contains(preload("res://scripts/hud/era_words.gd").when(100))
 
 

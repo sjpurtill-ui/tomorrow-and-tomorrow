@@ -1,5 +1,5 @@
 extends PanelContainer
-## The reusable Dock: header (eyebrow/title/ESC/close), provider sub-tabs, a
+## The reusable Dock: header (eyebrow/title/Close), provider sub-tabs, a
 ## four-tile KPI row, a decision brief with one direct action, and a scrolling
 ## body of DockBlocks. One instance serves all six sections; a second instance
 ## serves deep-detail views at x:652.
@@ -59,19 +59,18 @@ func _ready()->void:
 	title_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title_column.add_theme_constant_override("separation",2)
 	header_row.add_child(title_column)
-	eyebrow_label=Tokens.make_label("",10,Tokens.GOLD,0.14)
+	eyebrow_label=Tokens.make_label("",12,Tokens.GOLD_TEXT,0.06)
 	title_column.add_child(eyebrow_label)
 	title_label=Tokens.make_label("",21,Tokens.INK)
 	title_column.add_child(title_label)
-	var esc_hint:=Tokens.make_label("ESC",10,Tokens.DISABLED)
-	esc_hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	header_row.add_child(esc_hint)
 	var close:=Button.new()
 	close_button=close
 	close.name="DockClose"
-	close.text="Back" if back_mode else "Map"
-	close.custom_minimum_size=Vector2(52,32)
-	close.tooltip_text="Return to the previous screen · Esc" if back_mode else "Return to the map · Esc"
+	# One clear control: "Back" in the detail dock, "Close" in the main dock.
+	# Esc does the same; the tooltip says so, so no separate ESC label.
+	close.text="Back" if back_mode else "Close"
+	close.custom_minimum_size=Vector2(64,32)
+	close.tooltip_text="Back to the previous page (Esc)" if back_mode else "Close and return to the map (Esc)"
 	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	close.add_theme_font_size_override("font_size",14)
 	close.add_theme_color_override("font_color",Tokens.TEXT_DIM)
@@ -140,8 +139,10 @@ func present(new_provider:Object,new_sub:int=0)->void:
 func rebuild()->void:
 	if provider==null: return
 	var meta:Dictionary=provider.meta()
-	eyebrow_label.text=String(meta.get("eyebrow",""))
-	title_label.text=String(meta.get("title",""))
+	# Providers still pass shouted text; the dock speaks in sentence case.
+	eyebrow_label.text=Tokens.sentence_case(String(meta.get("eyebrow","")))
+	eyebrow_label.visible=eyebrow_label.text!=""
+	title_label.text=Tokens.sentence_case(String(meta.get("title","")))
 	title_label.add_theme_font_size_override("font_size",int(meta.get("title_size",24)))
 	if bool(meta.get("serif",false)):
 		title_label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font())
@@ -160,7 +161,7 @@ func rebuild()->void:
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()
-		if index<subtabs.size(): tab.text=String(subtabs[index])
+		if index<subtabs.size(): tab.text=Tokens.sentence_case(String(subtabs[index]))
 		var active:=index==sub
 		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL if bool(meta.get("spread_tabs",false)) else Control.SIZE_FILL
 		var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Color(0,0,0,0),Tokens.BORDER,1,3)
@@ -178,7 +179,7 @@ func rebuild()->void:
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
-		tab.add_theme_color_override("font_color",Tokens.INK if active else Tokens.MUTED)
+		tab.add_theme_color_override("font_color",Tokens.INK if active else Tokens.TEXT_DIM)
 		tab.add_theme_color_override("font_hover_color",Tokens.INK)
 	rebuild_body()
 
@@ -199,21 +200,13 @@ func rebuild_body()->void:
 		_brief_print=brief_print
 		_rebuild_brief(data.get("brief",{}))
 	_render_sections(data.get("blocks",[]))
+	# Every dock, the recruiting board included, is paper and ink.
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
-	var dock_skin:=Tokens.dock_style()
-	if military_board:dock_skin.bg_color=Color("151e19");dock_skin.border_color=Color("69715b");dock_skin.set_corner_radius_all(0)
-	add_theme_stylebox_override("panel",dock_skin)
-	if military_board:title_label.text="Recruit & Deploy"
-	title_label.add_theme_color_override("font_color",Color("e8e9df") if military_board else Tokens.INK)
-	eyebrow_label.add_theme_color_override("font_color",Color("d9b772") if military_board else Tokens.GOLD)
-	close_button.add_theme_color_override("font_color",Color("e8e9df") if military_board else Tokens.TEXT_DIM)
-	for index in tab_buttons.size():
-		if military_board:
-			tab_buttons[index].add_theme_stylebox_override("normal",Tokens.flat(Color("47533a") if index==sub else Color("26302b"),Color("69715b"),1,0,10))
-			tab_buttons[index].add_theme_color_override("font_color",Color("e8e9df"))
-			for state:String in ["hover","pressed"]:
-				tab_buttons[index].add_theme_stylebox_override(state,tab_buttons[index].get_theme_stylebox("normal"))
-			tab_buttons[index].add_theme_color_override("font_hover_color",Color("ffffff"))
+	add_theme_stylebox_override("panel",Tokens.dock_style())
+	if military_board:title_label.text="Recruit and deploy"
+	title_label.add_theme_color_override("font_color",Tokens.INK)
+	eyebrow_label.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
+	close_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	ViewState.restore(body_scroll,view)
 
 
@@ -298,7 +291,7 @@ func _rebuild_kpis(kpis:Array)->void:
 		var column:=VBoxContainer.new()
 		column.add_theme_constant_override("separation",1)
 		tile.add_child(column)
-		column.add_child(Tokens.make_label(String(kpi.get("label","")),9,Tokens.MUTED,0.1))
+		column.add_child(Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06))
 		var value_row:=HBoxContainer.new()
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
@@ -306,10 +299,19 @@ func _rebuild_kpis(kpis:Array)->void:
 		value_row.add_child(value_label)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="":
-			var delta:=Tokens.make_label(String(kpi.delta),10,kpi.get("delta_color",Tokens.MUTED))
+			var delta:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
 			delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			value_row.add_child(delta)
 			preload("res://scripts/hud/live_value_binding.gd").attach(delta,"text",kpi.get("live_delta"))
+		# What the number means is written on the tile, not hidden in a tooltip.
+		var tip:=String(kpi.get("tip",""))
+		if tip!="":
+			var note:=Tokens.make_label(tip,12,Tokens.TEXT_DIM)
+			note.name="KpiNote"
+			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+			note.custom_minimum_size.x=0
+			note.max_lines_visible=2
+			column.add_child(note)
 
 
 func _rebuild_brief(brief:Dictionary)->void:
@@ -326,18 +328,18 @@ func _rebuild_brief(brief:Dictionary)->void:
 	text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	text_column.add_theme_constant_override("separation",2)
 	row.add_child(text_column)
-	text_column.add_child(Tokens.make_label(String(brief.get("title","")),12,Tokens.INK))
-	var why:=Tokens.make_label(String(brief.get("why","")),11,Tokens.TEXT_SOFT)
+	text_column.add_child(Tokens.make_label(Tokens.sentence_case(String(brief.get("title",""))),13,Tokens.INK))
+	var why:=Tokens.make_label(String(brief.get("why","")),12,Tokens.TEXT_SOFT)
 	why.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	text_column.add_child(why)
 	if String(brief.get("action_label",""))!="":
 		var action:=Button.new()
 		action.name="BriefAction"
-		action.text=String(brief.action_label)
+		action.text=Tokens.sentence_case(String(brief.action_label))
 		action.custom_minimum_size=Vector2(0,28)
 		action.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		action.add_theme_font_size_override("font_size",12)
-		action.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
+		action.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
 		action.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 		action.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
 		action.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
