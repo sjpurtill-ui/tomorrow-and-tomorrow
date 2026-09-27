@@ -371,7 +371,7 @@ The save is still at the hearth. The fixture sets the presentation to a staffed 
 ### Limits
 
 - **The captures use a fixture.** The mature save has no war, so the enemy side is supplied through the overlay's test-only `extra_inputs`. Our armies are real field armies in the private copy. Enemy counters for the fixture hosts are therefore absent. The Alderford plate is the authored war itself.
-- **Army counters crowd the ground.** At regional and continental zoom, the terrain's army counters and their 3D labels still cover much of a small front. Their scale belongs to `local_terrain`, and this round did not change it.
+- **Army counters crowd the ground.** At regional and continental zoom, the terrain's army counters and their 3D labels still cover much of a small front. (Resolved in round three, section 9.)
 - **The fleet and air arm answer through the Marshal.** They have no named commanders of their own yet.
 - **Rival fleets' zones are not observed**, so sea fronts between fleets remain designed only.
 - **Fixture change.** The "before" fixture had the second host at 9,000; the "after" fixture has it at 30,000, so that two corps form the army group.
