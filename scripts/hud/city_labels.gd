@@ -100,6 +100,12 @@ var work_root_id:=0
 var work_memory:Dictionary={}
 var work_measured:Dictionary={}
 var card_fades:Dictionary={}
+## A newly founded settlement is ringed in gold once, briefly (codex/map-motion).
+const FOUNDING_RING_SECONDS:=2.2
+var known_settlements:Dictionary={}
+var settlements_seeded:=false
+var settlement_check_elapsed:=1.0
+var founding_rings:Array[Dictionary]=[]
 var work_fades:Dictionary={}
 var fades_moving:=false
 
@@ -517,12 +523,59 @@ func _draw_work_card(work:Dictionary,box:Rect2,voice:Font,ui:Font,fade:float=1.0
 		draw_rect(track,Color(T.RULE,.6*fade))
 		draw_rect(Rect2(track.position,Vector2(track.size.x*clampf(float(work.progress),0,1),2)),Color(T.INK,.6*fade))
 
+## Settlement ids that were not known before (and remembers them).
+static func new_foundings(known:Dictionary,settlements:Array)->Array[String]:
+	var found:Array[String]=[]
+	for city in settlements:
+		if not city is Dictionary:continue
+		var id:=String((city as Dictionary).get("id",""))
+		if id.is_empty() or known.has(id):continue
+		known[id]=true
+		found.append(id)
+	return found
+
+func _watch_foundings(delta:float)->void:
+	settlement_check_elapsed+=delta
+	if settlement_check_elapsed>=0.5:
+		settlement_check_elapsed=0.0
+		var found:=new_foundings(known_settlements,GameState.player_settlements)
+		# What stood when the chart opened (a new game or a loaded save) is not news.
+		if settlements_seeded and not preload("res://scripts/hud/motion.gd").reduced():
+			for id in found:founding_rings.append({"id":id,"t":0.0})
+		settlements_seeded=true
+	if founding_rings.is_empty():return
+	var live:Array[Dictionary]=[]
+	for ring in founding_rings:
+		ring["t"]=float(ring.t)+delta
+		if float(ring.t)<FOUNDING_RING_SECONDS:live.append(ring)
+	founding_rings=live
+	queue_redraw()
+
+## Three fine rings, gold then ink, spreading from the new place's pin.
+func _draw_founding_rings()->void:
+	var camera:Camera3D=terrain.camera if is_instance_valid(terrain) else null
+	if camera==null:return
+	for ring in founding_rings:
+		if not sources.has(ring.id):continue
+		var anchor_3d:Vector3=sources[ring.id].anchor
+		if camera.is_position_behind(anchor_3d):continue
+		var at:=camera.unproject_position(anchor_3d)
+		for k in 3:
+			var p:=clampf((float(ring.t)-0.35*float(k))/(FOUNDING_RING_SECONDS-0.7),0.0,1.0)
+			if p<=0.0 or p>=1.0:continue
+			var spread:=1.0-pow(1.0-p,3.0)
+			var fade:=(1.0-p)*(1.0-p)
+			var tone:Color=T.GOLD if k<2 else T.INK
+			draw_arc(at,lerpf(10.0,70.0,spread),0.0,TAU,48,Color(T.PAPER_RAISED,0.45*fade),3.0,true)
+			draw_arc(at,lerpf(10.0,70.0,spread),0.0,TAU,48,Color(tone,0.9*fade),1.3,true)
+
 func _process(delta:float)->void:
 	var waiting:=not hover_id.is_empty() and hover_elapsed<HOVER_DELAY
 	hover_elapsed+=delta
 	if waiting and hover_elapsed>=HOVER_DELAY:queue_redraw()
 	var before:=layout_signature
 	refresh()
+	_watch_foundings(delta)
 	# Presence fades advance only while something appears, leaves or slides;
 	# a settled map costs nothing here and draws nothing new.
 	if before!=layout_signature or fades_moving:
@@ -612,6 +665,7 @@ func _update_overflow(viewport_size:Vector2)->void:
 func _draw()->void:
 	# Works first: the cities' own cards and leaders always sit above them.
 	_draw_works()
+	if not founding_rings.is_empty():_draw_founding_rings()
 	# Names leaving the chart fade where they stood beside their pins.
 	var present:={}
 	for card:Dictionary in cards:present[String(card.id)]=true
