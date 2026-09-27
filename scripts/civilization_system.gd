@@ -3,6 +3,7 @@ extends Node
 const OCCUPATION_GOVERNANCE=preload("res://scripts/occupation_governance.gd")
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
+const RivalLandRoutes:=preload("res://scripts/rival_land_routes.gd")
 
 signal world_changed(snapshot:Dictionary)
 signal diplomatic_event(event:Dictionary)
@@ -595,6 +596,8 @@ func advance_to_day(target_day:int)->void:
 	city_intelligence.sample_missions(target_day)
 	Exchange.sample_missions(self,target_day)
 	rumor_network.sample(target_day)
+	# A few rival marches have their land road planned each day (bounded).
+	RivalLandRoutes.advance(foreign_formations,target_day)
 	_process_foreign_scout_reports(target_day)
 	_complete_due_scout_missions(target_day)
 	scouting_staff.advance(target_day)
@@ -1924,11 +1927,15 @@ func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
 	var progress:=cycle/leg
 	if progress>1.0: progress=2.0-progress
 	if not formation.get("route",[]).is_empty(): return city_intelligence.route_position(formation.route,clampf(progress,0.0,1.0))
+	# Rival marches follow the land road (rival_land_routes.gd), never the sea.
+	var on_road:=RivalLandRoutes.position(formation,progress)
+	if on_road.is_finite(): return on_road
 	return a.lerp(b,clampf(progress,0.0,1.0))
 
 
 func _formation_route_distance_to(formation:Dictionary,point:Vector2)->float:
 	if not formation.get("route",[]).is_empty(): return _route_distance_to_point(formation.route,point)
+	if RivalLandRoutes.managed(formation) and String(formation.get("land_route_state",""))=="ok" and not RivalLandRoutes.pending(formation): return _route_distance_to_point(formation.land_route,point)
 	var a:=Vector2(formation.get("point_a",Vector2.ZERO))
 	var b:=Vector2(formation.get("point_b",a))
 	return point.distance_to(Geometry2D.get_closest_point_to_segment(point,a,b))
@@ -2103,6 +2110,8 @@ func _process_local_observation(day:int,force:bool=false)->void:
 		var first_sighting:=sighting_index<0 or day-int(foreign_sightings[sighting_index].get("last_seen_day",-9999))>30
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.kind),"last_seen_day":day,"position":{"x":position.x,"z":position.y},"distance_km":distance,"strength":strength,"readiness":float(formation.readiness),"visible":true}
 		if String(formation.get("kind",""))=="scout": sighting["interception"]=_foreign_scout_interception_chances(formation,position)
+		# Seen on the march: its heading and the land road it is plausibly on.
+		sighting.merge(RivalLandRoutes.motion_at(formation,float(day)),true)
 		if sighting_index<0:
 			foreign_sightings.push_front(sighting)
 			if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT: foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
@@ -2141,7 +2150,7 @@ func _public_formation_sighting(sighting:Dictionary)->Dictionary:
 	var readiness_error:=lerpf(0.32,0.10,confidence)
 	var kind:=String(sighting.get("kind","movement"))
 	var unidentified_label:="UNIDENTIFIED SCOUT PARTY" if kind=="scout" else "UNIDENTIFIED FOREIGN FORMATION"
-	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true)}
+	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"road_ahead":(sighting.get("road_ahead",[]) as Array).duplicate(true)}
 
 
 func local_observation_snapshot()->Dictionary:
@@ -5877,6 +5886,8 @@ func validate_state()->Array[String]:
 			var commanded:Variant=formation.command_position
 			if not commanded is Dictionary or not is_finite(float(commanded.get("x",NAN))) or not is_finite(float(commanded.get("z",NAN))):errors.append("Invalid foreign command position.")
 		if not is_finite(leg_days) or leg_days<=0.0: errors.append("Foreign formation travel duration must be finite and positive.")
+		var road_error:=RivalLandRoutes.valid(formation)
+		if road_error!="": errors.append(road_error)
 		if not is_finite(share) or share<=0.0 or share>1.0: errors.append("Foreign formation strength share must be normalized and positive.")
 		# Shared forces retain the combat simulator's preparation range (0–1.5).
 		# A prepared opponent must not make an otherwise valid world unloadable.

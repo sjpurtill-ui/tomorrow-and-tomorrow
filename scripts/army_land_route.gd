@@ -28,7 +28,9 @@ const MAX_EXPANDED:=30000
 const FORD_KM:=0.3
 ## Straight-leg sampling step (km).
 const SAMPLE_KM:=0.25
-const CACHE_MAX:=48
+const CACHE_MAX:=96
+## Samples along a straight line beyond which long lines are sampled coarser.
+const LONG_SAMPLES:=2000.0
 
 static var _cache:Dictionary={}
 static var last_stats:Dictionary={}
@@ -141,7 +143,9 @@ static func _search(start:Vector2,goal:Vector2,land:Callable)->Dictionary:
 	if s==Vector2.INF: return {"error":"The army is not standing on land.","reason":"start_water"}
 	var g:=_snap_to_land(goal,land,1.5)
 	if g==Vector2.INF: return {"error":"The destination is not on land.","reason":"goal_water"}
-	if dist<0.05 or segment_land(start,goal,land):
+	# Long (continental) marches sample the straight line more coarsely: the
+	# cost of one search stays bounded whatever the distance.
+	if dist<0.05 or segment_land(start,goal,land,maxf(SAMPLE_KM,dist/LONG_SAMPLES)):
 		return {"ok":true,"points":[goal],"length_km":dist,"direct":true,"expanded":0,"cells":0}
 	# The lattice covers start and goal with room to go round on either side.
 	var cell:=clampf(dist/CELLS_ACROSS,MIN_CELL_KM,MAX_CELL_KM)
@@ -203,7 +207,7 @@ static func _search(start:Vector2,goal:Vector2,land:Callable)->Dictionary:
 	# reachable by a straight dry leg (galloping, then back off).
 	var legs:Array[Vector2]=[]
 	var anchor:=0
-	var fine:=minf(SAMPLE_KM,cell*0.5)
+	var fine:=maxf(minf(SAMPLE_KM,cell*0.5),cell*0.1)
 	var last_index:=raw.size()-1
 	while anchor<last_index:
 		var best:=anchor+1

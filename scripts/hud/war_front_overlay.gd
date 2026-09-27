@@ -344,7 +344,7 @@ func collect()->Dictionary:
 			var identified:=bool(sighting.get("identified",false))
 			var entry:={"id":sighting_id,"pos":pos,"strength":float(low+high)*0.5,"low":low,"high":high,"age_days":maxi(0,today-seen),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"seen_day":seen,
 				"observed":list_name=="visible","owner":String(sighting.get("civilization","")) if identified else "","era":clampi(int(sighting.get("formation_era",0)),0,3) if identified else 0,
-				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false))}
+				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false)),"road":_road_of(sighting.get("road_ahead",[]))}
 			var hostile:=bool(sighting.get("hostile",false)) and not bool(entry.scout)
 			if hostile: enemy.append(entry); listed[sighting_id]=true
 			elif list_name=="visible": strangers.append(entry); listed[sighting_id]=true
@@ -400,6 +400,28 @@ static func _road_ahead(army:Dictionary,pos:Vector2)->PackedVector2Array:
 	var road:=PackedVector2Array([pos])
 	for k in range(best+1,points.size()): road.append(points[k])
 	return road
+
+static func _road_of(points:Variant)->PackedVector2Array:
+	var out:=PackedVector2Array()
+	if points is Array:
+		for p in (points as Array).slice(0,12): out.append(_v2(p))
+	return out
+
+static func _length(line:PackedVector2Array)->float:
+	var total:=0.0
+	for k in line.size()-1: total+=line[k].distance_to(line[k+1])
+	return total
+
+## The road from `start`, no longer than `reach`.
+static func _clip(line:PackedVector2Array,start:Vector2,reach:float)->PackedVector2Array:
+	if line.size()<2: return PackedVector2Array()
+	var out:=PackedVector2Array([start])
+	var left:=reach
+	for k in range(1,line.size()):
+		var d:=out[-1].distance_to(line[k])
+		if d>=left: out.append(out[-1].move_toward(line[k],left)); break
+		out.append(line[k]); left-=d
+	return out
 
 ## A polyline resampled to n+1 evenly spaced points (bounded), so the plan
 ## arrow's tapered body follows the road and its head sits on the goal.
@@ -711,7 +733,9 @@ static func compose(inputs:Dictionary)->Dictionary:
 			var length:=float(out.sigma)*1.2
 			var start:Vector2=e.pos
 			var spec:=PackedVector2Array([start,start+direction*length*0.5,start+direction*length])
-			out.arrows.append({"points":Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1)),"enemy_id":String(e.get("id",""))})
+			# The road they were seen on (round the water), cut to the arrow's reach.
+			var seen_road:=_clip(e.get("road",PackedVector2Array()) as PackedVector2Array,start,length)
+			out.arrows.append({"points":_resample(seen_road,10) if seen_road.size()>=2 and _length(seen_road)>length*0.3 else Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1)),"enemy_id":String(e.get("id",""))})
 	for engagement in (inputs.get("engagements",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var ours_id:=String(engagement.get("ours",Tactics.BASELINE))
 		var theirs_id:=String(engagement.get("theirs",Tactics.BASELINE))

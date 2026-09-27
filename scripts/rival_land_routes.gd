@@ -1,0 +1,153 @@
+extends RefCounted
+## RIVAL ARMIES MARCH BY LAND TOO.
+##
+## A rival's aggregate field formations (patrols, expeditions, exploring
+## scouts: CivilizationSystem.foreign_formations) used to slide on the straight
+## line point_a -> point_b, across bays and seas alike. Each one now follows
+## the same land road the player's armies take (army_land_route.gd: bounded
+## A*, taut dry legs, wading small streams, cached), and its march time grows
+## with the real length of that road.
+##
+## - Planning is spread over days: at most PLANS_PER_DAY searches a day, in a
+##   fixed order (deterministic for a seed), never from a per-frame getter.
+## - Until its road is planned a formation holds at its own home (point_a).
+## - With no land road at all (another landmass, no way round) it stays home;
+##   it never walks on water. (Rival sea transport is not modelled here.)
+## - Formations with their own planned route (rumour-led scouts, whose route
+##   comes from the scout planner) or a commanded position (live rivals moved
+##   by land_command.gd) are left alone.
+## - Without a terrain survey (headless tools, early boot) the old straight
+##   line stands: there is no ground to plan over.
+##
+## Fields added to a formation (additive; saved with it):
+##   land_route        [{x,z},...] from point_a to point_b along the road
+##   land_route_key    which point_a/point_b the road was planned for
+##   land_route_state  "ok" | "none"
+##   land_route_km     the road's length
+##   land_leg_base     the scheduler's straight-line leg_days, before scaling
+## Static helpers; preload.
+
+const Route:=preload("res://scripts/army_land_route.gd")
+
+const PLANS_PER_DAY:=3
+const MAX_ROUTE_POINTS:=96
+## How far along the road a sighting's plausible way ahead reaches (km).
+const ROAD_AHEAD_KM:=40.0
+
+static func land()->Callable:
+	return Route.world_land()
+
+static func key(f:Dictionary)->String:
+	var a:=Vector2(f.get("point_a",Vector2.ZERO)); var b:=Vector2(f.get("point_b",a))
+	return "%.2f,%.2f>%.2f,%.2f" % [a.x,a.y,b.x,b.y]
+
+static func managed(f:Dictionary)->bool:
+	## Formations whose movement this module owns.
+	return not f.has("command_position") and (f.get("route",[]) as Array).is_empty()
+
+static func pending(f:Dictionary)->bool:
+	return managed(f) and String(f.get("land_route_key",""))!=key(f)
+
+static func plan(f:Dictionary,ground:Callable=Callable())->Dictionary:
+	## Plans one formation's road in place. Returns the search result.
+	if not ground.is_valid(): ground=land()
+	if not ground.is_valid(): return {"error":"no survey"}
+	var a:=Vector2(f.get("point_a",Vector2.ZERO)); var b:=Vector2(f.get("point_b",a))
+	var fresh:=String(f.get("land_route_key",""))!=key(f)
+	if fresh or not f.has("land_leg_base"): f["land_leg_base"]=float(f.get("leg_days",30.0))
+	var straight:=a.distance_to(b)
+	var found:=Route.find(a,b,ground)
+	f["land_route_key"]=key(f)
+	if found.has("error"):
+		f["land_route_state"]="none"
+		f["land_route"]=[]
+		f["land_route_km"]=0.0
+		f["leg_days"]=float(f.land_leg_base)
+		return found
+	var points:Array=[{"x":a.x,"z":a.y}]
+	for p:Vector2 in found.points:
+		if points.size()>=MAX_ROUTE_POINTS: break
+		points.append({"x":p.x,"z":p.y})
+	points[-1]={"x":b.x,"z":b.y}
+	f["land_route_state"]="ok"
+	f["land_route"]=points
+	f["land_route_km"]=float(found.length_km)
+	# March time grows with the real road: a detour round a bay takes longer.
+	var ratio:=float(found.length_km)/straight if straight>0.05 else 1.0
+	f["leg_days"]=clampf(float(f.land_leg_base)*maxf(1.0,ratio),1.0,1800.0)
+	return found
+
+static func advance(formations:Array,day:int,ground:Callable=Callable(),budget:int=PLANS_PER_DAY)->int:
+	## Plans up to `budget` pending roads, in formation order. Returns how many.
+	if not ground.is_valid(): ground=land()
+	if not ground.is_valid(): return 0
+	var done:=0
+	for index in formations.size():
+		if done>=budget: break
+		var f:Variant=formations[index]
+		if not f is Dictionary or not pending(f): continue
+		plan(f,ground)
+		done+=1
+	return done
+
+static func position(f:Dictionary,progress:float)->Vector2:
+	## Where a managed formation stands at this fraction of its leg, or INF when
+	## the old straight line applies (not managed, or no survey).
+	if not managed(f): return Vector2.INF
+	var a:=Vector2(f.get("point_a",Vector2.ZERO))
+	if pending(f): return a if land().is_valid() else Vector2.INF
+	if String(f.get("land_route_state",""))!="ok": return a
+	var road:=Route.unpack(f.get("land_route",[]))
+	if road.size()<2: return a
+	var total:=0.0
+	for k in road.size()-1: total+=road[k].distance_to(road[k+1])
+	return Route.point_along(road[0],road.slice(1),total*clampf(progress,0.0,1.0))
+
+static func phase(f:Dictionary,day:float)->Dictionary:
+	## The same out-and-back timing CivilizationSystem uses: {progress, outbound}.
+	var leg:=maxf(1.0,float(f.get("leg_days",90.0)))
+	var cycle:=fposmod(maxf(0.0,day-float(f.get("depart_day",0))),leg*2.0)
+	var t:=cycle/leg
+	return {"progress":clampf(t if t<=1.0 else 2.0-t,0.0,1.0),"outbound":t<=1.0}
+
+static func motion_at(f:Dictionary,day:float)->Dictionary:
+	var ph:=phase(f,day)
+	return motion(f,float(ph.progress),bool(ph.outbound))
+
+static func motion(f:Dictionary,progress:float,outbound:bool)->Dictionary:
+	## What an observer sees of a marching formation: whether it moves, its
+	## heading (the war map's convention) and the plausible road ahead,
+	## bounded to ROAD_AHEAD_KM. {} when it is not moving on a planned road.
+	if not managed(f) or pending(f) or String(f.get("land_route_state",""))!="ok": return {}
+	var road:=Route.unpack(f.get("land_route",[]))
+	if road.size()<2: return {}
+	if not outbound: road.reverse()
+	var total:=0.0
+	for k in road.size()-1: total+=road[k].distance_to(road[k+1])
+	if total<0.1: return {}
+	var walked:=total*clampf(progress if outbound else 1.0-progress,0.0,1.0)
+	var here:=Route.point_along(road[0],road.slice(1),walked)
+	var ahead:=PackedVector2Array([here])
+	var reach:=walked
+	while ahead.size()<8 and reach<total:
+		reach=minf(total,reach+ROAD_AHEAD_KM/6.0)
+		ahead.append(Route.point_along(road[0],road.slice(1),reach))
+		if reach-walked>=ROAD_AHEAD_KM: break
+	if ahead.size()<2: return {}
+	var direction:=(ahead[1]-ahead[0])
+	if direction.length()<0.0001: return {}
+	var heading:=-Vector2(0,-1).angle_to(direction)
+	var packed:Array=[]
+	for p in ahead: packed.append({"x":p.x,"z":p.y})
+	return {"moving":true,"heading":heading,"road_ahead":packed}
+
+static func valid(f:Dictionary)->String:
+	## Save validation for the added fields; "" when fine.
+	if not f.has("land_route"): return ""
+	var road:Variant=f.get("land_route")
+	if not road is Array or (road as Array).size()>MAX_ROUTE_POINTS: return "Foreign formation land route is malformed."
+	for p in road:
+		if not p is Dictionary or not is_finite(float(p.get("x",NAN))) or not is_finite(float(p.get("z",NAN))): return "Foreign formation land route has an invalid point."
+	if String(f.get("land_route_state","ok")) not in ["ok","none"]: return "Foreign formation land route state is invalid."
+	if not is_finite(float(f.get("land_route_km",0.0))) or not is_finite(float(f.get("land_leg_base",1.0))): return "Foreign formation land route length is invalid."
+	return ""
