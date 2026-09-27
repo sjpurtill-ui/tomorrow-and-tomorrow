@@ -133,6 +133,7 @@ static func forces()->Array[Dictionary]:
 		parts.append(doing)
 		parts.append(drill_words(WO.drill_of(record.get("formations",[]))))
 		if not home and pos.is_finite() and pos.distance_to(_home())>=1.0: parts.append(distance_words(pos))
+		if preload("res://scripts/field_rations.gd").is_hungry(record): parts.append("going hungry" if float(record.get("provision_ratio",1.0))<0.45 else "short of food")
 		out.append({"id":int(record.army_id),"title":title,"detail":_sentence(" · ".join(parts)),"troops":troops,"at_home":home,"position":pos,"name":name})
 	return out
 

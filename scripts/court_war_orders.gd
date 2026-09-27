@@ -1148,6 +1148,12 @@ static func daily(day:int)->Array:
 				entry["status"]="halted"
 			elif String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home" and day>int(entry.day)+1:
 				entry["status"]="home"
+			# Short of food in the field: said once per hungry spell, in plain words.
+			var hungry:=preload("res://scripts/field_rations.gd").is_hungry(army) and not _at_home(army)
+			if hungry and text=="" and not bool(entry.get("hunger_reported",false)):
+				entry["hunger_reported"]=true
+				text="We are short of food, %s. Too little of what is sent reaches us, and the country here does not feed us all. Send more out to us or call us home." % _where(army)
+			elif not hungry: entry.erase("hunger_reported")
 		if text!="":
 			var matter:=_file_report(entry,text,day)
 			if not matter.is_empty(): filed.append(matter)
