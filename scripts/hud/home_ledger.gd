@@ -9,17 +9,12 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Words:=preload("res://scripts/hud/home_plain.gd")
 var data:Dictionary
 
-## Text-safe accents: the accent tokens are tuned for bars and fills; as
-## words on paper they need to be darker to stay readable.
-static func ink(color:Color)->Color:
-	if not T.is_light():return color
-	return color.darkened(0.32)
-
+## Accents used as words take their text-safe twins (HudTokens *_TEXT).
 static func tone_color(tone:String)->Color:
 	match tone:
-		"bad":return ink(T.RED)
-		"warn":return ink(T.AMBER)
-		"good":return ink(T.GREEN)
+		"bad":return T.RED_TEXT
+		"warn":return T.AMBER_TEXT
+		"good":return T.GREEN_TEXT
 	return T.MUTED
 
 static func trend_word(trend:String)->String:
