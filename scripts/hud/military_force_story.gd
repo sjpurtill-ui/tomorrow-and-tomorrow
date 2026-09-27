@@ -181,7 +181,7 @@ static func describe(row:Dictionary,ctx:Dictionary)->Dictionary:
 		var armed:="None of the %s are armed yet." % number(need) if have<=0 else "%s of %s armed; %s still %s %s." % [number(have),number(need),number(missing),"waits for" if missing==1 else "wait for",item]
 		if have<=0:armed="None of the %s are armed yet; they wait for %s." % [number(need),item]
 		var stores:=int(supply.get("stores",0));var per_day:=float(supply.get("per_day",0))
-		var waiting:="%s still %s" % [number(missing),"waits for a weapon" if missing==1 else "wait for weapons"]
+		var waiting:="%s still %s" % [number(missing),"waiting for a weapon" if missing==1 else "waiting for weapons"]
 		var from:="";var brief:=""
 		if place in ["field","report","garrison"] and kind=="formation":
 			from=" Weapons reach them only at home."
@@ -189,10 +189,14 @@ static func describe(row:Dictionary,ctx:Dictionary)->Dictionary:
 		elif stores>=missing:
 			from=" They are in stores and will be handed out within days."
 			brief="%s %s in stores and will be handed out within days." % [number(missing),"weapon is" if missing==1 else "weapons are"]
-		elif bool(supply.get("making",false)) and per_day>0:
-			var pace:=about_days(float(missing-stores)/per_day)
-			from=" The workshop is making them: %s at the current pace." % pace
-			brief="%s; the workshop needs %s." % [waiting,pace]
+		elif bool(supply.get("covered",false)) or (bool(supply.get("making",false)) and per_day>0):
+			# Someone is already covering the gap: say who and how long, and ask nothing.
+			var maker:=String(supply.get("maker","")) if not String(supply.get("maker","")).is_empty() else String(supply.get("steward_title","the workshop"))
+			var days:=float(supply.get("days",-1.0))
+			if days<0 and per_day>0:days=float(missing-stores)/per_day
+			var pace:=", %s" % about_days(days) if days>=0 else ""
+			from=" %s is making them%s." % [maker.substr(0,1).to_upper()+maker.substr(1),pace]
+			brief="%s; %s is making them%s." % [waiting,maker,pace]
 		elif bool(supply.get("making",false)):
 			from=" The workshop line for them is stopped (%s)." % String(supply.get("state","no one at work")).to_lower()
 			brief=waiting+", and the workshop line for them is stopped."
@@ -202,9 +206,10 @@ static func describe(row:Dictionary,ctx:Dictionary)->Dictionary:
 			brief=waiting+", and no one is making them: there is no steward to order them. Start %s in Production." % item
 			action=action if not action.is_empty() else {"id":"production","label":"Order weapons"}
 		else:
-			from=" No one is making them yet; %s orders them from the workshop." % String(supply.steward)
-			brief="%s; %s orders them from the workshop." % [waiting,String(supply.steward)]
-			action=action if not action.is_empty() else {"id":"production","label":"Order weapons"}
+			# The steward or quartermaster schedules them from army demand each day.
+			var steward:=String(supply.steward)
+			from=" %s orders them from the workshop." % (steward.substr(0,1).to_upper()+steward.substr(1))
+			brief="%s; %s is ordering them from the workshop." % [waiting,String(supply.get("steward_title",supply.steward))]
 		weapons_line=armed+from
 		result.arms_brief=brief
 		result.arms_count=armed
@@ -298,7 +303,17 @@ static func supply_for(campaign:Object,item:String)->Dictionary:
 	if bool(campaign.workshop.data.get("enabled",true)):
 		for office:String in ["Quartermaster","Steward"]:
 			var person:Dictionary=WorldSimulation.government.officeholder(office)
-			if not person.is_empty():result.steward="your %s %s" % [office.to_lower(),String(person.get("name",""))];break
+			if not person.is_empty():
+				result.steward="your %s %s" % [office.to_lower(),String(person.get("name",""))];result.steward_title="the "+office;break
+	# Hook for the quartermaster's arming plan (codex/auto-arm). When the
+	# workshop exposes gear_plan(item) -> {covered:bool, days:float, maker:String},
+	# its answer replaces the estimate above; without it, nothing changes.
+	if campaign.workshop.has_method("gear_plan"):
+		var plan:Variant=campaign.workshop.call("gear_plan",item)
+		if plan is Dictionary and not (plan as Dictionary).is_empty():
+			if plan.has("covered"):result.covered=bool(plan.covered)
+			if plan.has("days"):result.days=float(plan.days)
+			if plan.has("maker"):result.maker=String(plan.maker)
 	return result
 
 static func captain_for(row:Dictionary,campaign:Object)->Dictionary:

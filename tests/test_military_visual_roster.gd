@@ -14,7 +14,7 @@ func test_roster_has_service_artwork_actual_counts_and_distinct_portraits_withou
 	assert_str(screen.hero_values.attention.text).starts_with("1 needs you: Home reserve lacks 3 weapons")
 	assert_str(screen.bindings[0].headline.text).starts_with("Home reserve is at home: 15 warriors, every place filled.")
 	assert_str(screen.bindings[0].arms.text).starts_with("12 of 15 armed; 3 still wait for simple levy weapons.")
-	assert_str(screen.bindings[0].action.text).is_equal("Order weapons")
+	assert_str(screen.bindings[0].headline.text).contains("3 still waiting for weapons")
 	assert_bool(screen.bindings[0].activity_bar.visible).is_false()
 	assert_object(screen.bindings[0].portrait.texture).is_not_null()
 	assert_str(Art.illustration_path("levy")).ends_with("levy-v1.png")
