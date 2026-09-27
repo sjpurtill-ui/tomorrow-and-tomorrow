@@ -2820,8 +2820,11 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	var key:=CC.actor_reaction_key(result)
 	var says:=String(result.get("actor_says",""))
 	if not actor.is_empty() and says!="":
-		# The war leader answers with the engine's own decision and numbers.
-		_append_if(out,_say(s,actor,[says],rng,{},false,[says]))
+		# The war leader answers with the engine's own decision and numbers,
+		# whole: the short-line cap for banked lines must not drop it.
+		var said:=_say(s,actor,[says],rng,{},false,[says])
+		if said.is_empty() and line_ok(says,_era_for(s,actor)): said={"key":String(actor.key),"text":says,"aside":false,"tkey":"","fact":true}
+		_append_if(out,said)
 		spoke[String(actor.key)]=true
 	elif not actor.is_empty() and key!="":
 		var bank:=CC.reaction_bank(key)

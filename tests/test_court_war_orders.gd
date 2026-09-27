@@ -17,6 +17,7 @@ const Voice:=preload("res://scripts/audience_voice.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
+const Modal:=preload("res://scripts/hud/audience_modal.gd")
 
 var home:=Vector2.ZERO
 var city:=Vector2.ZERO
@@ -88,6 +89,8 @@ func after_test()->void:
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
 func _train(count:int)->void:
+	# Armed, as the auto-arming now leaves a finished levy.
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+count
 	MilitaryCampaign.raise_recruits(count)
 	MilitaryCampaign.start_training("levy","improvised",count)
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
@@ -201,27 +204,39 @@ func test_users_words_form_an_army_that_marches_on_tsaren()->void:
 	assert_bool(CivilizationSystem.civilizations[0].player_relation.at_war).is_true()
 
 func test_the_users_actual_levy_is_told_the_truth()->void:
-	# Home reserve 2; a levy band of 20 in its first drill.
+	# Home reserve 2; a levy of 20 in its first drill. They exist, so the war
+	# leader objects with the real numbers; he never says "raise a levy".
 	_train(2)
 	_levy_in_drill(20)
 	var id:=_marshal_audience()
 	var modifiers:=GameState.active_modifiers.size()
 	var r:=CC.hear(id,"Send our full forces into battle on Tsaren")
-	assert_str(String(r.war.verdict)).is_equal("impossible")
-	assert_str(String(r.war.reason)).is_equal("too_few")
-	assert_str(String(r.outcome)).contains("No soldiers march")
-	assert_str(String(r.actor_says)).contains("2 trained")
+	assert_str(String(r.war.verdict)).is_equal("object")
+	assert_str(String(r.war.reason)).is_equal("few_trained")
+	assert_str(String(r.outcome)).is_equal("No one marches yet.")
+	assert_str(String(r.actor_says)).contains("Only 2 have finished drill")
 	assert_str(String(r.actor_says)).contains("20 more are in their first drill")
+	assert_str(String(r.actor_says)).contains("say the word and I take all 22 as they are")
+	assert_str(String(r.actor_says).to_lower()).not_contains("raise")
 	assert_bool(bool(r.executed)).is_false()
 	assert_array(MilitaryCampaign.field_armies).is_empty()
 	assert_int(GameState.active_modifiers.size()).is_equal(modifiers)
+	# "Take them as they are": the recruits leave the drill ground with the
+	# drill they have, and all 22 march.
+	var again:=CC.hear(id,"Take them as they are")
+	assert_str(String(again.war.verdict)).override_failure_message(String(again.get("actor_says",""))).is_equal("act")
+	assert_int(int(again.objective.troops)).is_equal(22)
+	assert_int(int(again.objective.mustered)).is_equal(20)
+	assert_array(MilitaryCampaign.training_queue).is_empty()
+	assert_str(String(again.actor_says)).contains("straight off the drill ground")
 
 func test_unknown_place_and_no_road_are_refused_with_the_reason()->void:
 	_train(200)
 	var id:=_marshal_audience()
 	var r:=CC.hear(id,"Attack Qarthane at once")
 	assert_str(String(r.war.reason)).is_equal("unknown_place")
-	assert_str(String(r.outcome)).contains("scouts")
+	assert_str(String(r.actor_says)).contains("scouts")
+	assert_str(String(r.outcome)).is_equal("No one marches.")
 	land_mode="islands"
 	Route.clear_cache()
 	var id2:=_marshal_audience()
@@ -359,8 +374,170 @@ func test_undrilled_levy_band_gets_an_objection_then_goes_if_the_god_insists()->
 	var r:=CC.hear(id,"Send our full forces into battle on Tsaren")
 	assert_str(String(r.war.verdict)).is_equal("object")
 	assert_str(String(r.war.reason)).is_equal("undrilled")
-	assert_str(String(r.actor_says)).contains("never drilled")
+	assert_str(String(r.actor_says)).contains("Levy band is 20 strong")
+	assert_str(String(r.actor_says)).contains("barely begun their drill")
+	assert_str(String(r.actor_says)).contains("say the word and I take them as they are")
 	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("stationed")
 	var again:=CC.hear(id,"I demand it")
 	assert_str(String(again.war.verdict)).is_equal("act")
 	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("moving")
+
+# ---------------------------------------------------------------------------
+# The war leader's own band (live report: "There's a band of 20 soldiers
+# literally called 'Rovik's band'.")
+# ---------------------------------------------------------------------------
+
+## The user's roster: the war leader's own band of 20, camped about 25 km
+## from home, barely begun its drill with 3 still unarmed; 2 trained at home;
+## 20 more recruits in their first drill.
+func _users_band()->Dictionary:
+	_train(20)
+	MilitaryCampaign.create_field_army(20,"LEVY BAND 1")
+	var army:Dictionary=MilitaryCampaign.field_armies[0]
+	var first:=true
+	for f in army.formations:
+		f["training"]=0.04
+		f["equipment_required"]=int(f.count)
+		f["equipment"]=int(f.count)-3 if first else int(f.count)
+		first=false
+	var camp:=home+Vector2(0.0,25.0)
+	army["position"]={"x":camp.x,"z":camp.y}
+	army["location_id"]="field_camp"; army["location_name"]="FIELD POSITION"; army["status"]="stationed"
+	_train(2)
+	_levy_in_drill(20)
+	return army
+
+func _band_audience(army:Dictionary)->String:
+	var figure:=String((army.commander as Dictionary).get("figure_id",""))
+	assert_str(figure).is_not_empty()
+	var audience:=Hall.summon({"figure_id":figure})
+	assert_dict(audience).is_not_empty()
+	return String(audience.id)
+
+func test_war_leader_speaks_for_his_own_band_and_marches_it_when_the_god_insists()->void:
+	var army:=_users_band()
+	var army_id:=int(army.army_id)
+	var given:=WO._given(String(army.commander.name))
+	var id:=_band_audience(army)
+	var r:=CC.hear(id,"Go attack Tsaren!")
+	assert_str(String(r.verb)).is_equal("war")
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("object")
+	var says:=String(r.actor_says)
+	assert_str(says).contains("My band is 20 strong")
+	assert_str(says).contains("barely begun their drill")
+	assert_str(says).contains("3 still lack weapons")
+	assert_str(says).contains("about 25 km from home")
+	assert_str(says).contains("2 more are trained")
+	assert_str(says).contains("20 are in their first drill")
+	assert_str(says).contains("say the word and I take them as they are")
+	assert_str(says.to_lower()).not_contains("raise")
+	assert_str(String(r.outcome)).is_equal("No one marches yet.")
+	# Nothing moved.
+	var index:=MilitaryCampaign._field_army_index(army_id)
+	assert_str(String(MilitaryCampaign.field_armies[index].status)).is_equal("stationed")
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(2)
+	# Offline, the court offers the god's answers to the objection.
+	var labels:Array=[]
+	for c:Dictionary in WO.offline_choices(id): labels.append(String(c.label))
+	assert_bool("Take them as they are" in labels).override_failure_message(str(labels)).is_true()
+	assert_bool("Drill them first" in labels).is_true()
+	# The god insists: his band marches from where it stands, by the land road.
+	var again:=CC.hear(id,"Take them as they are")
+	assert_str(String(again.war.verdict)).override_failure_message(String(again.get("actor_says",""))).is_equal("act")
+	assert_int(int(again.objective.army_id)).is_equal(army_id)
+	assert_bool(bool(again.objective.own_band)).is_true()
+	index=MilitaryCampaign._field_army_index(army_id)
+	var band:Dictionary=MilitaryCampaign.field_armies[index]
+	assert_str(String(band.status)).is_equal("moving")
+	assert_str(String(band.destination_id)).is_equal(city_id)
+	assert_float(float(band.origin_position.z)).is_equal_approx(home.y+25.0,0.01)
+	assert_array(band.march_route).is_not_empty()
+	# Days pass: the band walks only on land, from its camp to Tsaren.
+	for day in 400:
+		if String(MilitaryCampaign.field_armies[index].status)!="moving": break
+		GameState.elapsed_days+=1
+		MilitaryCampaign._process_field_army_movement_day()
+		index=MilitaryCampaign._field_army_index(army_id)
+		if index<0: break
+		var p:Dictionary=MilitaryCampaign.field_armies[index].position
+		assert_bool(_land(Vector2(float(p.x),float(p.z)))).override_failure_message("band stood in water on day %d" % day).is_true()
+	# The home reserve and the recruits stayed where they were.
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(2)
+	assert_str(String(again.actor_says)).contains("from where it stands")
+	assert_str(String(again.actor_says)).contains("They go as they are")
+	assert_str(String(again.outcome)).is_equal("%s's band sets out for Tsaren, about %d days by land." % [given,int(again.objective.days)])
+
+func test_insisting_in_plain_words_also_marches_the_band()->void:
+	var army:=_users_band()
+	var id:=_band_audience(army)
+	assert_str(String(CC.hear(id,"Attack Tsaren").war.verdict)).is_equal("object")
+	var r:=CC.hear(id,"Go anyway")
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).is_equal("act")
+	assert_int(int(r.objective.army_id)).is_equal(int(army.army_id))
+
+func test_drill_them_first_brings_the_band_home_to_drill()->void:
+	var army:=_users_band()
+	var id:=_band_audience(army)
+	CC.hear(id,"Go attack Tsaren!")
+	var r:=CC.hear(id,"Drill them first")
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("act")
+	assert_str(String(r.objective.kind)).is_equal("drill")
+	var band:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(army.army_id))]
+	assert_str(String(band.destination_id)).is_equal("player_home")
+	assert_str(String(r.actor_says)).contains("of camp drill")
+
+func test_offline_war_menu_names_his_band()->void:
+	var army:=_users_band()
+	var id:=_band_audience(army)
+	var given:=WO._given(String(army.commander.name))
+	var labels:Array=[]
+	for c:Dictionary in WO.offline_choices(id): labels.append(String(c.label))
+	assert_bool(("March %s's band on Tsaren" % given) in labels).override_failure_message(str(labels)).is_true()
+	assert_bool(("Drill %s's band" % given) in labels).is_true()
+	for c:Dictionary in WO.offline_choices(id):
+		if String(c.label)==("March %s's band on Tsaren" % given):
+			var r:=CC.hear(id,String(c.params.command_text))
+			assert_str(String(r.war.verdict)).is_equal("object")
+			assert_str(String(r.actor_says)).contains("My band is 20 strong")
+
+func test_one_answer_said_once_in_the_hall()->void:
+	var army:=_users_band()
+	var id:=_band_audience(army)
+	var voice:Node=auto_free(Voice.new())
+	voice.force_offline=true
+	var before:=(Hall.find(id).get("lines",[]) as Array).size()
+	var r:=CC.hear(id,"Go attack Tsaren!")
+	voice.command_reaction(id,r)
+	var lines:Array=(Hall.find(id).get("lines",[]) as Array).slice(before)
+	var seen:={}
+	var band_lines:=0
+	var notes:=0
+	var day_number:=RegEx.new(); day_number.compile("(?i)\\bday \\d{3,}")
+	for line:Dictionary in lines:
+		var text:=String(line.text)
+		assert_bool(seen.has(text)).override_failure_message("said twice: "+text).is_false()
+		seen[text]=true
+		if text.contains("20 strong"): band_lines+=1
+		if text=="No one marches yet.": notes+=1
+		assert_object(day_number.search(text)).is_null()
+	assert_int(band_lines).override_failure_message(str(lines)).is_equal(1)
+	assert_int(notes).override_failure_message(str(lines)).is_equal(1)
+	# The war leader's words arrive whole, ending on a full stop.
+	for line:Dictionary in lines:
+		if String(line.text).contains("20 strong"): assert_bool(String(line.text).strip_edges().ends_with(".")).is_true()
+	# The header reads naturally, on the Chronicle's calendar.
+	var audience:=Hall.find(id)
+	assert_str(String((audience.petition as Dictionary).summary)).starts_with("You sent for ")
+	audience["expires_day"]=int(GameState.elapsed_days)+30
+	var timing:=Modal.timing_words(audience)
+	assert_str(timing).contains("Year ")
+	assert_object(day_number.search(timing)).is_null()
+
+func test_no_forces_at_all_is_the_only_raise_a_levy()->void:
+	var id:=_marshal_audience()
+	var r:=CC.hear(id,"Attack Tsaren")
+	assert_str(String(r.war.verdict)).is_equal("impossible")
+	assert_str(String(r.war.reason)).is_equal("no_forces")
+	assert_str(String(r.actor_says)).contains("nobody under arms and nobody in drill")
