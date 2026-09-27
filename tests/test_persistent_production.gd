@@ -89,9 +89,15 @@ func test_health_and_destroyed_workplaces_reduce_real_output()->void:
 	GameState.population_health=.5
 	assert_float(MilitaryCampaign._production_rate()).is_equal_approx(healthy*.5,.000001)
 	GameState.population_health=1
-	GameState.settlement_plots[0].damage={"structural":1.0}
-	assert_float(MilitaryCampaign._production_rate()).is_equal(0.0)
-	GameState.settlement_plots[0].damage={}
+	# Workplace capacity follows the city's condition (not individual plots)
+	# since 2026-09-23; heavy damage leaves only a small working remnant.
+	var form:Dictionary=SettlementModel.city_form()
+	var intact:=float(form.condition)
+	SettlementModel.damage_city_form(1.0);SettlementModel.rebuild_summary()
+	assert_float(MilitaryCampaign._production_rate()).is_equal_approx(healthy*float(form.condition)/intact,.000001)
+	assert_float(MilitaryCampaign._production_rate()).is_less(healthy*.1)
+	form.condition=intact;SettlementModel.rebuild_summary()
+	assert_float(MilitaryCampaign._production_rate()).is_equal_approx(healthy,.000001)
 	GameState.population_allocations.Logistics=0
 	assert_float(MilitaryCampaign._production_rate()).is_less(healthy)
 

@@ -7,15 +7,19 @@ func allocation(production:float,intake:float=1.0)->Dictionary:
 	GameState.simulation_metrics={"food_consumption":120.0,"food_production":production,"food_labor_share":.4,"food_intake_ratio":intake}
 	return GovernmentPeopleSystem._allocations_for_focus("research",{},false)
 func test_low_local_yield_moves_existing_labor_to_food_without_erasing_other_roles()->void:
+	# The founding era keeps about 62% of labor on food regardless of yield
+	# (FOOD_LABOR_FLOOR); a poor site must still move labor above that floor.
 	var fertile:=allocation(180)
-	var poor:=allocation(90,.75)
+	var poor:=allocation(60,.75)
 	assert_float(float(poor.Food)).is_greater(55.0)
 	assert_float(float(poor.Food)).is_greater(float(fertile.Food))
 	var sum:=0.0
 	for role in poor:sum+=float(poor[role]);assert_float(float(poor[role])).is_greater(0.0)
 	assert_float(sum).is_equal_approx(100.0,.00001)
 func test_recovery_preserves_subsistence_floor_and_better_yields_release_labor()->void:
-	var recovered:=allocation(110)
+	# A site that barely feeds itself needs more than the era floor; better
+	# yields release labor back down to the floor.
+	var recovered:=allocation(70)
 	var productive:=allocation(220)
 	assert_float(float(recovered.Food)).is_greater(44.0)
 	assert_float(float(productive.Knowledge)).is_greater(float(recovered.Knowledge))
