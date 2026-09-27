@@ -1,0 +1,12 @@
+{
+  "id": "tool_hazard_awareness",
+  "line": "health",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: adult guides an adolescent to hold a flint edge safely away from fingers and body. Mature watercolor and ink with flat sage/celadon washes, hand-drawn contours, no injury, metal knife, written warning or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-08ac240e-956c-4c73-9068-37e85db9e68f.png",
+  "asset": "res://assets/ui/research/subjects/tool_hazard_awareness-v1.png",
+  "sha256": "57f9172208d4b492ab211957a7b391cb467c1675467fff8029cb88cf59afbaa2",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected for clearer, less realistic safety gesture. Accepted after visual 3.37:1 crop and subject/period check."
+}
