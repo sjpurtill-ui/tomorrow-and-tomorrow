@@ -40,6 +40,7 @@ func _capture()->void:
 	var home:Vector2=CivilizationSystem.player_world_origin
 	CivilizationSystem.city_intelligence.records.player[city_id]["position"]={"x":home.x-22.0,"z":home.y+9.0}
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_land"))
+	MilitaryCampaign.military_inventory["improvised"]=22
 	MilitaryCampaign.raise_recruits(22);MilitaryCampaign.start_training("levy","improvised",22)
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true));MilitaryCampaign.training_queue.clear()
 	var band:Dictionary=MilitaryCampaign.create_field_army(20,"Levy band 1")

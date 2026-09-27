@@ -79,6 +79,8 @@ func after_test()->void:
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
 func _train(count:int)->void:
+	# Armed, as the auto-arming leaves a finished levy (same as the court suite).
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+count
 	MilitaryCampaign.raise_recruits(count)
 	MilitaryCampaign.start_training("levy","improvised",count)
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
@@ -117,13 +119,13 @@ func _army_shape(army_id:int)->Dictionary:
 func test_attack_from_home_gives_the_courts_objective()->void:
 	_train(400);_set_garrison(40.0)
 	var spoken:=_court("Attack Tsaren")
-	assert_str(String(spoken.war.verdict)).is_equal("act")
+	assert_str(String(spoken.war.verdict)).override_failure_message(String(spoken.war.says)).is_equal("act")
 	var said:Dictionary=spoken.objective
 	var said_army:=_army_shape(int(said.army_id))
 	before_test()
 	_train(400);_set_garrison(40.0)
 	var given:=Orders.give(Orders.HOME,"attack",_tsaren())
-	assert_str(String(given.verdict)).override_failure_message(String(given.outcome)).is_equal("act")
+	assert_str(String(given.verdict)).override_failure_message(String(given.says)).is_equal("act")
 	for key in ["kind","city_id","civ_id","troops","days","route_km"]:
 		assert_str(str(given.objective[key])).override_failure_message(key).is_equal(str(said[key]))
 	assert_dict(_army_shape(int(given.objective.army_id))).is_equal(said_army)
@@ -188,6 +190,18 @@ func test_the_chosen_band_goes_and_the_general_objects_then_obeys()->void:
 	for e in GameState.chronicle.get("entries",[]):
 		if String((e as Dictionary).get("key","")).begins_with("court_war:"):chronicled=true
 	assert_bool(chronicled).is_true()
+
+func test_recruits_in_drill_go_as_they_are_only_when_the_god_insists()->void:
+	MilitaryCampaign.military_inventory["improvised"]=20
+	MilitaryCampaign.raise_recruits(20);MilitaryCampaign.start_training("levy","improvised",20)
+	_set_garrison(4.0)
+	assert_str(Orders.unavailable(Orders.HOME,"attack")).is_empty()
+	var first:=Orders.give(Orders.HOME,"attack",_tsaren())
+	assert_str(String(first.verdict)).is_equal("object")
+	assert_array(MilitaryCampaign.field_armies).is_empty()
+	var again:=Orders.give(Orders.HOME,"attack",_tsaren(),true)
+	assert_str(String(again.verdict)).override_failure_message(String(again.says)).is_equal("act")
+	assert_int(int(again.objective.mustered)).is_equal(20)
 
 func test_guard_and_go_to_use_the_clicked_ground()->void:
 	_train(60)

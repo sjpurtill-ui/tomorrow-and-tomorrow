@@ -70,11 +70,11 @@ static func general_name(record:Dictionary)->String:
 	## A band's own leader's given name, or "" for a nameless staff.
 	var name:=String((record.get("commander",{}) as Dictionary).get("name","")).strip_edges()
 	if name=="" or name==name.to_upper() or "staff" in name.to_lower() or name.to_lower() in Marks.UNNAMED: return ""
-	return WO._given(name)
+	return WO.given_name(name)
 
 static func war_leader_name()->String:
 	var leader:=WO.war_leader()
-	return WO._given(String(leader.get("name",""))) if not leader.is_empty() else ""
+	return WO.given_name(String(leader.get("name",""))) if not leader.is_empty() else ""
 
 static func drill_words(training:float)->String:
 	if training<0.2: return "barely drilled"
@@ -104,13 +104,13 @@ static func forces()->Array[Dictionary]:
 	var f:=WO.forces()
 	var leader:=war_leader_name()
 	var noun:=Marks.noun(maxi(1,int(f.trained)),EraWords.stage())
-	var drilled:=WO._drill(mc.home_army.get("formations",[]))
+	var drilled:=WO.drill_of(mc.home_army.get("formations",[]))
 	var home_detail:=PackedStringArray()
 	if int(f.trained)>0: home_detail.append(drill_words(drilled))
 	if int(f.drilling)>0: home_detail.append("%d more in their first drill, about %d %s to go" % [int(f.drilling),int(f.drill_days),"day" if int(f.drill_days)==1 else "days"])
 	if int(f.trained)<=0 and int(f.drilling)<=0: home_detail.append("nobody trained yet")
 	var home_title:=("%s's %s at home, %d" % [leader,"levy" if noun=="band" else noun,int(f.trained)]) if leader!="" else ("The levy at home, %d" % int(f.trained))
-	out.append({"id":HOME,"title":home_title,"detail":Marks._sentence(" · ".join(home_detail)),"troops":int(f.trained),"at_home":true,"position":_home(),"drilling":int(f.drilling)})
+	out.append({"id":HOME,"title":home_title,"detail":_sentence(" · ".join(home_detail)),"troops":int(f.trained),"at_home":true,"position":_home(),"drilling":int(f.drilling)})
 	for a in mc.field_armies:
 		var record:Dictionary=a
 		var troops:=int(record.get("troops",0))
@@ -131,9 +131,9 @@ static func forces()->Array[Dictionary]:
 			"besieging":String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","")) if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==int(record.army_id) else "",
 			"fighting":mc.command_hierarchy.battle.engaged(int(record.army_id)),"days_left":maxi(0,int(record.get("arrival_day",0))-_today())})
 		parts.append(doing)
-		parts.append(drill_words(WO._drill(record.get("formations",[]))))
+		parts.append(drill_words(WO.drill_of(record.get("formations",[]))))
 		if not home and pos.is_finite() and pos.distance_to(_home())>=1.0: parts.append(distance_words(pos))
-		out.append({"id":int(record.army_id),"title":title,"detail":Marks._sentence(" · ".join(parts)),"troops":troops,"at_home":home,"position":pos,"name":name})
+		out.append({"id":int(record.army_id),"title":title,"detail":_sentence(" · ".join(parts)),"troops":troops,"at_home":home,"position":pos,"name":name})
 	return out
 
 # --------------------------------------------------------------------------
@@ -162,7 +162,7 @@ static func hosts()->Array[Dictionary]:
 		var seen:Dictionary=WorldSimulation.world.visible_formation_sighting(String(rec.get("id","")))
 		if seen.is_empty(): continue
 		var civ:=String(rec.get("civ_id",seen.get("civ_id","")))
-		out.append({"formation_id":String(rec.id),"civ_id":civ,"label":"The %s host" % WO.Hall._civ_name(civ),"position":(seen.get("position",{}) as Dictionary).duplicate(true)})
+		out.append({"formation_id":String(rec.id),"civ_id":civ,"label":"The %s host" % WO.civ_name(civ),"position":(seen.get("position",{}) as Dictionary).duplicate(true)})
 	return out
 
 static func target_title(target:Dictionary)->String:
@@ -200,12 +200,13 @@ static func unavailable(force_id:int,verb_id:String)->String:
 		var f:=WO.forces()
 		if verb_id=="recall":
 			return "" if not (f.away as Array).is_empty() else "Everyone is already at home."
-		if int(f.trained)<=0 and verb_id!="defend":
-			return "Nobody at home is trained yet." if int(f.drilling)<=0 else "Nobody at home has finished drilling yet."
+		if int(f.trained)<=0 and int(f.drilling)<=0 and verb_id!="defend": return "Nobody at home is trained or in drill yet."
+		if int(f.trained)<=0 and verb_id in ["guard","goto"]: return "Nobody at home has finished drilling yet."
 		return ""
 	var record:=army(force_id)
 	if record.is_empty(): return "That band is no longer on the rolls."
 	if verb_id=="recall" and (at_home(record) or String(record.get("destination_id",""))=="player_home"): return "Already home or on the way."
+	if verb_id in ["attack","siege","raid"] and not WO.available(record): return "Not free for a new order now. Call it home first, or wait."
 	return ""
 
 static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
@@ -240,12 +241,6 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		going=trained-keep
 		formations=mc.home_army.get("formations",[])
 		speed_force=mc.home_army
-		var idle:Array=f.idle
-		if not idle.is_empty() and verb_id in ["attack","siege","raid"]:
-			idle.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.troops)>int(b.troops))
-			if int(idle[0].troops)>=going:
-				going=int(idle[0].troops); keep=0; formations=idle[0].get("formations",[]); speed_force=idle[0]
-				out.lines.append("%s goes: they are the band already standing ready at home." % String(idle[0].get("name","The band at home")))
 	match verb_id:
 		"defend":
 			var away:=(f.away as Array).size()
@@ -272,6 +267,10 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		out.lines.append(String(road.error)); out.likely="impossible"; return out
 	var speed:float=mc._field_army_speed(speed_force) if not (speed_force.get("formations",[]) as Array).is_empty() else 12.0
 	_road_lines(out,road,speed,target_title(target))
+	if going<=0 and force_id==HOME and int(f.drilling)>0 and verb_id in ["attack","siege","raid"]:
+		var leads:=leader if leader!="" else "The war leader"
+		out.lines.append("Nobody has finished drill. %s will want to wait, about %d days, unless you insist and he takes the %d recruits as they are." % [leads,int(f.drill_days),int(f.drilling)])
+		out.likely="object"; return out
 	if going<=0:
 		out.lines.append("Nobody trained is free to go."); out.likely="impossible"; return out
 	if keep>0: out.lines.append("%d go; %d stay home to keep watch." % [going,keep])
@@ -282,15 +281,15 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 	if verb_id in ["attack","siege","raid"] and String(target.get("type",""))=="place":
 		var p:Dictionary=target.place
 		var name:=place_name(p)
-		var enemy:=WO._enemy_estimate(String(p.city_id))
+		var enemy:=WO.enemy_estimate(String(p.city_id))
 		if bool(enemy.known):
 			var age:=Marks.age_words(int(enemy.age),"counted")
 			out.lines.append("%s keeps %s under arms%s." % [name,Marks.about_range(int(enemy.low),int(enemy.high)),(", "+age) if age!="" else ""])
 		else:
 			out.lines.append("Nobody has counted the fighters in %s." % name)
-		var strength:=WO._strength(formations)*(float(going)/maxf(1.0,float(_heads(formations))))
+		var strength:=WO.strength_of(formations)*(float(going)/maxf(1.0,float(_heads(formations))))
 		var ratio:=strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
-		var drill:=WO._drill(formations)
+		var drill:=WO.drill_of(formations)
 		var who_objects:=leader if leader!="" else "The war leader"
 		if going<WO.MIN_FORCE:
 			out.likely="impossible"; out.lines.append("%d cannot take a town; %s will refuse." % [going,who_objects])
@@ -300,11 +299,14 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			out.likely="object"; out.lines.append("%s will probably object: they have hardly drilled." % who_objects)
 		elif verb_id=="siege" and going<WO.MIN_FORCE*3:
 			out.likely="object"; out.lines.append("%s will probably object: too few to ring the town." % who_objects)
-		if not WO._at_war(String(p.civ_id)):
-			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.Hall._civ_name(String(p.civ_id)),name])
+		if not WO.at_war(String(p.civ_id)):
+			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
 	elif verb_id=="guard":
 		out.lines.append("They hold about %s km around it and fight anyone hostile who comes into it." % EraWords.grouped(roundi(guard_radius(going))))
 	return out
+
+static func _sentence(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1)
 
 static func _heads(formations:Array)->int:
 	var n:=0
@@ -341,23 +343,20 @@ static func give(force_id:int,verb_id:String,target:Dictionary,insist:bool=false
 		return _answer("impossible",verb_id,"unavailable",blocked,"")
 	match verb_id:
 		"defend": return WO.perform({"kind":"defend","place":"","target":{},"full":false,"insist":insist},insist)
-		"recall":
-			if force_id==HOME: return WO.perform({"kind":"recall","target":{},"full":false,"insist":insist},insist)
-			return _recall_one(force_id)
+		"recall": return WO.perform({"kind":"recall","target":{},"full":false,"insist":insist},insist,{} if force_id==HOME else {"army_id":force_id})
 		"guard": return _guard(force_id,target)
 		"goto": return _go_to(force_id,target)
 	var kind:=verb_id
-	if String(target.get("type",""))=="host":
-		kind="intercept"
-	elif String(target.get("type",""))!="place":
-		return _answer("impossible",verb_id,"no_target","You have not shown me where.","Click a town on the map, or pick one from the list.")
-	if force_id==HOME:
-		if kind=="intercept":
-			return WO.perform({"kind":"intercept","target":{"civ_id":String(target.get("civ_id",""))},"full":false,"insist":insist},insist)
-		return WO.perform({"kind":kind,"target":(target.place as Dictionary).duplicate(true),"full":false,"insist":insist,"place":""},insist)
+	var reading:={"kind":kind,"target":{},"full":false,"insist":insist,"place":""}
+	match String(target.get("type","")):
+		"host":
+			reading.kind="intercept"
+			reading.target={"civ_id":String(target.get("civ_id","")),"formation_id":String(target.get("formation_id",""))}
+		"place": reading.target=(target.place as Dictionary).duplicate(true)
+		_: return _answer("impossible",verb_id,"no_target","You have not shown me where.","Click a town on the map, or pick one from the list.")
+	if force_id==HOME: return WO.perform(reading,insist,{"home_only":true})
 	_release_from_zone(force_id)
-	if kind=="intercept": return _intercept_with(force_id,target)
-	return _strike_with(force_id,kind,target.place,insist)
+	return WO.perform(reading,insist,{"army_id":force_id})
 
 static func _answer(verdict:String,kind:String,reason:String,says:String,fix:String)->Dictionary:
 	var leader:=war_leader_name()
@@ -376,98 +375,6 @@ static func _release_from_zone(army_id:int)->void:
 		if entry.service=="army" and int(entry.force_id)==army_id:
 			command.cancel(String(entry.id),[])
 			return
-
-static func _strike_with(army_id:int,kind:String,target:Dictionary,insist:bool)->Dictionary:
-	## WO._strike() for one chosen band: same checks, same objections, same
-	## MilitaryCampaign calls, same court_order tag, ledger and Chronicle.
-	var mc:=_mc()
-	var leader:=WO.war_leader()
-	var out:={"kind":kind,"general":WO._given(String(leader.get("name","The war leader"))),"general_pid":int(leader.get("person_id",0)),"verdict":"impossible","outcome":"","says":"","reason":"","fix":"","objective":{}}
-	var record:=army(army_id)
-	if record.is_empty(): return WO._no(out,"cannot_form","That band is no longer on the rolls.","")
-	var name:=place_name(target)
-	out["target"]=target.duplicate(true)
-	var f:=WO.forces()
-	if String(f.busy)!="": return WO._no(out,"busy","We cannot start another fight while %s." % String(f.busy),"When that is done, give the order again.")
-	var ordered:Dictionary=record.get("court_order",{})
-	if String(ordered.get("city_id",""))==String(target.city_id) and String(ordered.get("kind",""))==kind and String(record.get("status",""))=="moving":
-		return WO._no(out,"already_marching","%s is already on the road to %s." % [String(record.get("name","That band")),name],"")
-	var quote:Dictionary=mc.city_operation_quote(army_id,String(target.civ_id),String(target.city_id))
-	if quote.has("error"):
-		var why:=String(quote.get("reason",""))
-		if why=="no_land_route":
-			return WO._no(out,"no_land_route","There is no way to %s on foot: open water lies between us, and we have no boats that can carry an army." % name,"If our people learn to build boats that carry more than a few, or scouts find a way round by land, we can go.")
-		return WO._no(out,why if why!="" else "order_failed",String(quote.error),"")
-	var going:=int(record.get("troops",0))
-	var formations:Array=record.get("formations",[])
-	if going<WO.MIN_FORCE:
-		return WO._no(out,"too_few","%d %s cannot take a town. %s would shut the gate and laugh at us." % [going,"fighter" if going==1 else "fighters",name],"Send a bigger band, or let the levy finish its drill.")
-	var enemy:=WO._enemy_estimate(String(target.city_id))
-	var ratio:=WO._strength(formations)/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
-	var drilled:=WO._drill(formations)
-	out["estimate"]=enemy
-	out["going"]=going
-	out["days"]=int(quote.days)
-	out["road_km"]=float(quote.distance_km)
-	if bool(enemy.known) and ratio<WO.OBJECT_RATIO and not insist:
-		var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
-		return WO._object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %d%s. I would lose them for nothing." % [name,their,going,", most of them half-drilled" if ratio<0.5 else ""],"Give me more trained soldiers first.")
-	if drilled<WO.UNDRILLED and not insist:
-		return WO._object(out,"undrilled","%d who have never drilled together, against %s's walls? They would break at the first charge." % [going,name],"Give me a season to drill them first.")
-	if kind=="siege" and going<WO.MIN_FORCE*3 and not insist:
-		return WO._object(out,"siege_too_small","A siege needs enough of us to ring %s and still feed ourselves; %d cannot do it." % [name,going],"Let me storm it instead, or give me more soldiers.")
-	var order:Dictionary=mc.order_city_operation(army_id,String(target.civ_id),String(target.city_id),kind=="siege",kind=="raid")
-	if order.has("error"): return WO._no(out,"order_failed",String(order.error),"")
-	var index:int=mc._field_army_index(army_id)
-	if index<0: return WO._no(out,"order_failed","The band could not be set on the road.","")
-	var marching:Dictionary=mc.field_armies[index]
-	var at_war:=WO._at_war(String(target.civ_id))
-	marching["court_order"]={"kind":kind,"civ_id":String(target.civ_id),"city_id":String(target.city_id),"city_name":name,"day":_today(),"general":String(out.general),"general_pid":int(out.general_pid),"going":going}
-	mc.field_armies[index]=marching
-	mc.army_changed.emit(mc.home_army.duplicate(true))
-	var days:=int(order.get("days",quote.days))
-	var km:=float(order.get("distance_km",quote.distance_km))
-	var verb_words:String={"attack":"to attack","siege":"to lay siege to","raid":"to raid the fields and stores of"}.get(kind,"against")
-	var roundabout:="" if bool(quote.get("direct",true)) else " going round the water by land"
-	out.verdict="act"
-	out.objective={"army_id":army_id,"army_name":String(marching.get("name","")),"city_id":String(target.city_id),"civ_id":String(target.civ_id),"kind":kind,"days":days,"troops":going,"route_km":km}
-	out.says=("%d of us march %s %s. It is %d km%s, about %d days." % [going,verb_words,name,roundi(km),roundabout,days]) if km>0.5 else ("We are at %s already; we go in now." % name)
-	out.outcome="%s leaves with %d %s for %s: %d km%s, about %d days on the road.%s" % [String(marching.get("name","The band")),going,"fighter" if going==1 else "fighters",name,roundi(km),roundabout,days,"" if at_war else " There has been no declaration; the war begins when they reach %s, and %s will hear of it before then." % [name,WO.Hall._civ_name(String(target.civ_id))]]
-	WO._on_departure(out,marching,target,at_war)
-	return out
-
-static func _intercept_with(army_id:int,target:Dictionary)->Dictionary:
-	var mc:=_mc()
-	var out:=_answer("impossible","intercept","","","")
-	var result:Dictionary=mc.order_field_army_intercept(army_id,String(target.get("formation_id","")))
-	if result.has("error"):
-		out.reason="order_failed"; out.says=String(result.error); out.outcome="No soldiers march. "+out.says
-		return out
-	var record:=army(army_id)
-	out.verdict="act"
-	out.objective={"army_id":army_id,"kind":"intercept","formation_id":String(target.get("formation_id","")),"troops":int(record.get("troops",0))}
-	out.says="We go after %s, toward where they were last seen." % String(target.get("label","their host")).to_lower()
-	out.outcome="%s sets out to catch %s in the open." % [String(record.get("name","The band")),String(target.get("label","their host")).to_lower()]
-	return out
-
-static func _recall_one(army_id:int)->Dictionary:
-	## WO._recall() for one band: the same MilitaryCampaign call.
-	var mc:=_mc()
-	var record:=army(army_id)
-	var name:=String(record.get("name","The band"))
-	var r:Dictionary=mc.return_field_army(army_id)
-	if r.has("error"): return _answer("impossible","recall","cannot_recall","I cannot bring them back yet. "+String(r.error),"")
-	var index:int=mc._field_army_index(army_id)
-	if index>=0: mc.field_armies[index].erase("court_order")
-	var days:=int(r.get("days",0))
-	var out:=_answer("act","recall","","","")
-	out.objective={"army_id":-1,"recalled":[name],"days":days,"kind":"recall"}
-	if days<=0:
-		out.says="%s is home again." % name
-	else:
-		out.says="I have sent runners: %s is turning for home, about %d %s out." % [name,days,"day" if days==1 else "days"]
-	out.outcome=out.says if days<=0 else "%s is marching home, about %d %s away." % [name,days,"day" if days==1 else "days"]
-	return out
 
 static func _form_from_home(label:String)->Dictionary:
 	## The levy at home becomes a band for a march: {army_id} or {error}.
@@ -527,7 +434,7 @@ static func _guard(force_id:int,target:Dictionary)->Dictionary:
 		var p:=at+Vector2.from_angle(TAU*float(i)/8.0)*radius
 		vertices.append({"x":p.x,"z":p.y})
 	var where:=spot_words(at)
-	var made:Dictionary=command.create_region("army",vertices,Marks._sentence(where.trim_prefix("the ")))
+	var made:Dictionary=command.create_region("army",vertices,_sentence(where.trim_prefix("the ")))
 	if made.has("error"): return _answer("impossible","guard","no_zone",String(made.error),"")
 	var region:Dictionary=made.region
 	var result:Dictionary=command.assign(node_id,[],region,"defend","","")
