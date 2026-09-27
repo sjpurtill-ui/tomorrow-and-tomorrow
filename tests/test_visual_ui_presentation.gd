@@ -170,9 +170,9 @@ func test_recruitment_report_leads_with_people_choices_instead_of_generic_scout_
 	var page:Dictionary=provider.tab(0)
 	assert_str(String(page.brief.title)).is_equal("3 people chose to join")
 	var serialized:=JSON.stringify(page)
-	assert_str(serialized).contains("RECRUITMENT OUTCOME")
-	assert_str(serialized).contains("WHO THEY MET")
-	assert_str(serialized).contains("WHY THEY DECIDED")
+	assert_str(serialized).contains("Who came back with them")
+	assert_str(serialized).contains("Who they met")
+	assert_str(serialized).contains("Why they decided")
 	assert_str(serialized).contains("3 joined · 6 declined")
 	assert_str(serialized).not_contains("found only ground")
 

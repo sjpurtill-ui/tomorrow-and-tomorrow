@@ -39,7 +39,7 @@ func _ready()->void:
 	var back:Button
 	for button:Button in dock.body.find_children("*","Button",true,false):
 		for label:Label in button.find_children("*","Label",true,false):
-			if label.text=="BACK TO ARCHIVE": back=button; break
+			if label.text=="Back to every telling": back=button; break
 	assert(back!=null)
 	back.pressed.emit()
 	await get_tree().process_frame

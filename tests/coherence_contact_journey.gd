@@ -43,7 +43,7 @@ func _ready()->void:
 	var known_id:=String(contacts[0].civ_id)
 	hud.open_detail(preload("res://scripts/hud/content/dock_detail_civ_report.gd").new(terrain,hud,known_id));await frames()
 	await capture("coherence-investigate-proposal")
-	await click_label("ASK SCOUTS TO FIND THEIR SETTLEMENT")
+	await click_label("Ask scouts to find their home")
 	assert(not CivilizationSystem.scout_missions.is_empty())
 	await capture("coherence-investigate-underway")
 	hud.close_detail();hud.close_dock();hud.speed_selector.select(5);hud.speed_selector.item_selected.emit(5);await frames()

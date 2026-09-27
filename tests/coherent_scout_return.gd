@@ -15,7 +15,7 @@ func after_scout_departure()->void:
 	await click_control(hud.rail_buttons.world);await capture("continuous-first-return-contacts")
 	await click_control(hud.dock.tab_buttons[1]);await capture("continuous-first-return-scouting")
 	print("SCOUT_RETURN_ACTUAL day=",GameState.elapsed_days," exploration=",JSON.stringify(CivilizationSystem.exploration_status()))
-	await click_label("EXPEDITION ARCHIVE");await capture("continuous-first-return-archive")
+	await click_label("Every telling");await capture("continuous-first-return-archive")
 	print("COHERENT_SCOUT_RETURN_PASS first real expedition returns in same new world; World Scouting and archive reached through UI")
 	var results:Node=hud.detail_dock.find_child("ReportResults",true,false)
 	assert(results!=null and results.get_child_count()>0)
