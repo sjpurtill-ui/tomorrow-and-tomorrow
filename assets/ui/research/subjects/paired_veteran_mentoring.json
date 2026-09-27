@@ -1,0 +1,12 @@
+{
+  "id": "paired_veteran_mentoring",
+  "line": "security",
+  "game_year": 135,
+  "approx_historical_year": -4100,
+  "prompt": "c. 4100 BCE: Experienced defender teaches adult apprentice safe spear hold; layered woodblock print. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-18f69a97-d46e-4c42-806a-f7994c95353d.png",
+  "asset": "res://assets/ui/research/subjects/paired_veteran_mentoring-v1.png",
+  "sha256": "3ee31de7dcfbea41c54d0efe21a1a88d255bcceef51889dd8f5c920649084b19",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

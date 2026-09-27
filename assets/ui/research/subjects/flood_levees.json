@@ -1,0 +1,12 @@
+{
+  "id": "flood_levees",
+  "line": "infrastructure",
+  "game_year": 135,
+  "approx_historical_year": -4100,
+  "prompt": "c. 4100 BCE: Adults build a low earth levee along river, protecting village behind; matte architectural casein gouache. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a70de563-7b84-42be-9116-07faf3b01f4b.png",
+  "asset": "res://assets/ui/research/subjects/flood_levees-v1.png",
+  "sha256": "a6c2a3d65f8b773849610622445152e9e8f9dd90b8a6f96c7d9a32e285e02f56",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

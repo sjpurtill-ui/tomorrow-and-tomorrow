@@ -1,0 +1,12 @@
+{
+  "id": "cast_copper_weapons",
+  "line": "security",
+  "game_year": 145,
+  "approx_historical_year": -4033,
+  "prompt": "c. 4033 BCE: Metalworkers cast copper points in open stone molds; hand-cut woodblock print. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e37b3832-4a37-4b80-a736-97b4eb443464.png",
+  "asset": "res://assets/ui/research/subjects/cast_copper_weapons-v1.png",
+  "sha256": "dc96a0ed71cf4398fa532f505b8f316d81a76b7ea3af2d1fcce99280b2ff3c05",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

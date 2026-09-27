@@ -1,0 +1,12 @@
+{
+  "id": "mediated_restitution_custom",
+  "line": "institutions",
+  "game_year": 145,
+  "approx_historical_year": -4033,
+  "prompt": "c. 4033 BCE: Mediator oversees returning a goat after village dispute; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-460e0911-1f7d-466c-b910-64000140642a.png",
+  "asset": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png",
+  "sha256": "b0d5da0a37fceb9e6d8adaca48503a07d7ca743174bc4b43e19e2afec2b2f5e7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
