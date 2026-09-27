@@ -129,7 +129,7 @@ void fragment() {
 	vec3 deep = mix(vec3(0.072,0.122,0.150),vec3(0.086,0.140,0.162),basin_field);
 	deep=mix(deep,vec3(0.092,0.135,0.152),polar_water*0.16);
 	vec3 shelf = vec3(0.100,0.178,0.182);
-	vec3 shallows = vec3(0.165,0.265,0.235);
+	vec3 shallows = vec3(0.180,0.300,0.270);
 	vec3 bed = vec3(0.330,0.330,0.245);
 	vec3 water = mix(deep,shelf,exp(-depth/0.16)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.022)*surveyed_surface);
@@ -152,16 +152,6 @@ void fragment() {
 	// it becomes a flickering white coastline at distant map scales.
 	float wash = (1.0-smoothstep(0.00025,0.0012,depth))*surveyed_surface*ripple_detail;
 	water = mix(water,vec3(0.49,0.50,0.41),wash*0.20);
-	// Surf: a broken pale line along the shore, and a fainter second one
-	// seaward where the swell first breaks. Settlement and valley zooms only.
-	float surf_detail = (1.0-smoothstep(0.0015,0.012,pixel_world))*surveyed_surface;
-	if (surf_detail>0.0) {
-		float breakup = coast_feather_noise(world_position.xz*180.0+vec2(-13.0,29.0));
-		float swash = (1.0-smoothstep(0.0,0.0009,depth))*smoothstep(0.00002,0.00012,depth);
-		float breaker = 1.0-smoothstep(0.0,0.0007,abs(depth-0.0032));
-		float foam = max(swash*smoothstep(0.25,0.55,breakup),breaker*smoothstep(0.45,0.80,breakup)*0.55);
-		water = mix(water,vec3(0.72,0.73,0.68),foam*surf_detail*0.62);
-	}
 	// Engraved water-lines, as old charts drew them: three fine pale lines
 	// following the shore at widening screen-pixel spacing, fading seaward.
 	float shore_px = depth/max(fwidth(depth),0.0000001);
@@ -175,6 +165,18 @@ void fragment() {
 	// bank every faint undulation would otherwise draw its own ring.
 	water_lines *= smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
 	water = mix(water,vec3(0.34,0.37,0.31),water_lines*0.60);
+	// Surf: a thin broken pale line at the water's edge and a fainter second
+	// one a few pixels out where the swell first breaks, in screen pixels so it
+	// stays a painted line at every close zoom. Settlement and valley zooms only.
+	float surf_detail = (1.0-smoothstep(0.002,0.014,pixel_world))*surveyed_surface
+		*smoothstep(0.0015,0.006,fwidth(depth)/max(pixel_world,0.000001));
+	if (surf_detail>0.0) {
+		float breakup = coast_feather_noise(world_position.xz/max(pixel_world*9.0,0.000001)+vec2(-13.0,29.0));
+		float swash = 1.0-smoothstep(0.6,2.2,shore_px);
+		float breaker = 1.0-smoothstep(0.35,1.2,abs(shore_px-6.5));
+		float foam = max(swash*smoothstep(0.12,0.40,breakup),breaker*smoothstep(0.40,0.70,breakup)*0.50);
+		water = mix(water,vec3(0.74,0.75,0.70),foam*surf_detail*0.85);
+	}
 	float altitude_haze = clamp(log(max(pixel_world,0.004)/0.004)/log(250.0),0.0,1.0)*0.26;
 	float view_slant = length(relative_position.xz)/max(abs(relative_position.y),0.001);
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
