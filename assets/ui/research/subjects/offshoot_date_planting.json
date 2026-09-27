@@ -1,0 +1,12 @@
+{
+  "id": "offshoot_date_planting",
+  "line": "nutrition",
+  "game_year": 112,
+  "approx_historical_year": -4253,
+  "prompt": "c. 4253 BCE: Growers separate and plant living date-palm offshoot beside parent palm; egg tempera. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-178f238f-cab4-4499-ab28-fb263cacedcc.png",
+  "asset": "res://assets/ui/research/subjects/offshoot_date_planting-v1.png",
+  "sha256": "6a3a525cbc6bc3b7b7eb3f4d752819061c6870ad54099e2e39392f1e1c45217f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

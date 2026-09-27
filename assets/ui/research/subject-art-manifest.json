@@ -3903,5 +3903,22 @@
   "harvest_headcount": {"path": "res://assets/ui/research/subjects/harvest_headcount-v1.png", "focus": [0.5, 0.5]},
   "mixed_grain_legume_meals": {"path": "res://assets/ui/research/subjects/mixed_grain_legume_meals-v1.png", "focus": [0.5, 0.5]},
   "river_landings": {"path": "res://assets/ui/research/subjects/river_landings-v1.png", "focus": [0.5, 0.5]},
-  "sacred_grove_protection": {"path": "res://assets/ui/research/subjects/sacred_grove_protection-v1.png", "focus": [0.5, 0.5]}
+  "sacred_grove_protection": {"path": "res://assets/ui/research/subjects/sacred_grove_protection-v1.png", "focus": [0.5, 0.5]},
+  "kohl_eye_paint": {"path": "res://assets/ui/research/subjects/kohl_eye_paint-v1.png", "focus": [0.5, 0.5]},
+  "manure_field_spreading": {"path": "res://assets/ui/research/subjects/manure_field_spreading-v1.png", "focus": [0.5, 0.5]},
+  "new_household_plots": {"path": "res://assets/ui/research/subjects/new_household_plots-v1.png", "focus": [0.5, 0.5]},
+  "contour_terrace_reading": {"path": "res://assets/ui/research/subjects/contour_terrace_reading-v1.png", "focus": [0.5, 0.5]},
+  "post_disaster_headcount_custom": {"path": "res://assets/ui/research/subjects/post_disaster_headcount_custom-v1.png", "focus": [0.5, 0.5]},
+  "rotating_stewardship": {"path": "res://assets/ui/research/subjects/rotating_stewardship-v1.png", "focus": [0.5, 0.5]},
+  "reserve_allocation_priority": {"path": "res://assets/ui/research/subjects/reserve_allocation_priority-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_hunting_closures": {"path": "res://assets/ui/research/subjects/seasonal_hunting_closures-v1.png", "focus": [0.5, 0.5]},
+  "bracket_fungus_vermifuge": {"path": "res://assets/ui/research/subjects/bracket_fungus_vermifuge-v1.png", "focus": [0.5, 0.5]},
+  "hide_covered_boats": {"path": "res://assets/ui/research/subjects/hide_covered_boats-v1.png", "focus": [0.5, 0.5]},
+  "hilltop_refuges": {"path": "res://assets/ui/research/subjects/hilltop_refuges-v1.png", "focus": [0.5, 0.5]},
+  "mentored_task_learning": {"path": "res://assets/ui/research/subjects/mentored_task_learning-v1.png", "focus": [0.5, 0.5]},
+  "probationary_appointment_custom": {"path": "res://assets/ui/research/subjects/probationary_appointment_custom-v1.png", "focus": [0.5, 0.5]},
+  "selective_deadwood_gathering": {"path": "res://assets/ui/research/subjects/selective_deadwood_gathering-v1.png", "focus": [0.5, 0.5]},
+  "newcomer_host_season": {"path": "res://assets/ui/research/subjects/newcomer_host_season-v1.png", "focus": [0.5, 0.5]},
+  "offshoot_date_planting": {"path": "res://assets/ui/research/subjects/offshoot_date_planting-v1.png", "focus": [0.5, 0.5]},
+  "tannery_waste_channeling": {"path": "res://assets/ui/research/subjects/tannery_waste_channeling-v1.png", "focus": [0.5, 0.5]}
 }

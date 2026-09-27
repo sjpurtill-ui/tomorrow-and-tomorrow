@@ -1,0 +1,12 @@
+{
+  "id": "mentored_task_learning",
+  "line": "labor",
+  "game_year": 110,
+  "approx_historical_year": -4267,
+  "prompt": "c. 4267 BCE: Experienced adult guides learner's hands shaping wooden tool, then learner repeats; charcoal and ochre. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-52ed2e41-8e0b-40ef-b252-82849a536387.png",
+  "asset": "res://assets/ui/research/subjects/mentored_task_learning-v1.png",
+  "sha256": "9eb7bdbe692d8c55f4e2bd663bbed8b0bc1f405940f78797aaaf18777ceaf157",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first looked too realistic or weakly styled. Selected stronger flat medium and clear action."
+}
