@@ -14575,8 +14575,10 @@ func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
 		# itself, does the force keep a label in the world (plain words).
 		var close:=camera!=null and WarfareMapPresentation.scale_band(camera.size)=="ground"
 		label.text=String(view.get("label",""))
-		label.visible=close and bool(view.get("show_label",false))
-		if label.visible: label.visible=_warfare_label_has_clear_space(label)
+		# The war chart letters every force as a small paper card at every
+		# zoom, clear of the town cards; the old world label drew large
+		# outlined words over them.
+		label.visible=false
 		label.position=marker.global_basis.inverse()*(camera.global_basis.y*camera.size*.18) if close and view.has("troops") and camera.size<0.35 else Vector3(0,7.6 if view.has("troops") else 7.0,-4.8)
 	_apply_physical_army_front(marker, view)
 

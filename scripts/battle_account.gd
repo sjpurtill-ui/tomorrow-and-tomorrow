@@ -562,7 +562,7 @@ static func doing(army:Dictionary)->String:
 		var verb:=String({"siege":"lay siege to","raid":"raid"}.get(String(marching.kind),"attack"))
 		return "marching to %s %s, %s out" % [verb,String(marching.name) if String(marching.name)!="" else "the town",_days(int(marching.days))]
 	if String(army.get("status",""))=="moving": return "marching to %s" % (_place_name(String(army.get("destination_name",""))) if _place_name(String(army.get("destination_name","")))!="" else "the marked ground")
-	if String(army.get("location_id",""))=="player_home": return "at home"
+	if Marks.at_home(army,WorldSimulation.world.player_world_origin): return "at home"
 	for past_variant in mc.battle_history:
 		var past:Dictionary=past_variant
 		if int(past.get("home_force_id",-1))!=id or String(past.get("home_force_kind",""))!="field_army": continue
@@ -571,4 +571,6 @@ static func doing(army:Dictionary)->String:
 			return "waiting for your word after the fight%s" % ((" at "+where) if where!="" else "")
 		break
 	var here:=_place_name(String(army.get("location_name","")))
+	var km:=Marks.home_km(army,WorldSimulation.world.player_world_origin)
+	if (here=="" or Marks._generic_place(here) or here.to_lower()=="home settlement") and km>=Marks.HOME_RADIUS_KM: return "camped %s from home" % Marks.km_words(km)
 	return ("holding "+here) if here!="" and here!="Commanded ground" else "waiting where you sent it"

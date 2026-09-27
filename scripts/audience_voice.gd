@@ -1720,7 +1720,7 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		var outcome:=String((extra.get("result",{}) as Dictionary).get("outcome",""))
 		var already:=false
 		for line in (h.find(String(s.id)) as Dictionary).get("lines",[]):
-			if String((line as Dictionary).get("text","")).strip_edges()==outcome.strip_edges(): already=true
+			if String((line as Dictionary).get("text","")).strip_edges().trim_prefix("[").trim_suffix("]").strip_edges()==outcome.strip_edges(): already=true
 		if not outcome.is_empty() and not already: h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
@@ -2795,10 +2795,9 @@ func _stage_line(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Dict
 		unsaid.append(template)
 		if not said.has(_template_key(String(template))): fresh.append(template)
 	var pool:Array=fresh if not fresh.is_empty() else unsaid
-	if pool.is_empty():
-		# Every wording is spent: the plain fact, staged.
-		var plain:=stage_direction(String(result.get("outcome","")).get_slice(". ",0))
-		return {"key":"narrator","text":plain,"tkey":""} if not plain.is_empty() and not said.has(_text_key(plain)) else {}
+	# Every wording is spent: no stage line. The plain outcome note is
+	# appended once on delivery; staging it too said it twice.
+	if pool.is_empty(): return {}
 	var chosen:=String(pool[rng.randi_range(0,pool.size()-1)])
 	return {"key":"narrator","text":_fill(chosen,tokens),"tkey":_template_key(chosen)}
 

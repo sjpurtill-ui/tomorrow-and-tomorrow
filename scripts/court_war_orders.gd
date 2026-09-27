@@ -37,9 +37,10 @@ extends RefCounted
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
+const TownFate:=preload("res://scripts/town_fate.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held"]
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
 const MIN_FORCE:=5
 ## Below this share of the enemy's estimated strength, a general objects.
@@ -83,13 +84,40 @@ static func _has(text:String,pattern:String)->bool:
 
 static func known_places()->Array[Dictionary]:
 	## Known foreign towns: {city_id, civ_id, name, civ_name, position}.
+	## Towns we hold are not among them (held_towns()).
 	var out:Array[Dictionary]=[]
 	var world:Variant=WorldSimulation.world
 	if world==null or not "city_intelligence" in world or world.city_intelligence==null: return out
+	var held:={}
+	for town:Dictionary in held_towns(): held[String(town.city_id)]=true
 	for city:Dictionary in world.city_intelligence.known_cities("player","",false):
 		var controller:=String(city.get("controller",city.get("civ_id","")))
-		if controller in ["","player"] or String(city.get("civ_id",""))=="player": continue
+		if controller in ["","player"] or String(city.get("civ_id",""))=="player" or held.has(String(city.city_id)): continue
 		out.append({"city_id":String(city.city_id),"civ_id":String(city.get("civ_id","")),"controller":controller,"name":String(city.get("name","")),"civ_name":Hall._civ_name(String(city.get("civ_id",""))),"position":(city.get("position",{}) as Dictionary).duplicate(true)})
+	return out
+
+static func held_towns()->Array[Dictionary]:
+	## Towns we have taken and still hold, with who holds them:
+	## {city_id, civ_id, name, civ_name, garrison, commander, population,
+	## position, held:true}.
+	var out:Array[Dictionary]=[]
+	var mc:Variant=WorldSimulation.military
+	var world:Variant=WorldSimulation.world
+	if mc==null or world==null: return out
+	for f in mc.occupation_forces:
+		var force:Dictionary=f
+		var troops:=int(force.get("troops",0))
+		if troops<=0: continue
+		var civ_id:=String(force.get("civ_id",""))
+		var rid:=String(force.get("region_id",""))
+		var region:Dictionary=world.region_snapshot(civ_id,rid)
+		if not region.is_empty() and String(region.get("controller",""))!="player": continue
+		var known:Dictionary=world.city_intelligence.known("player",rid) if "city_intelligence" in world and world.city_intelligence!=null else {}
+		var name:=String(region.get("name",force.get("region_name","")))
+		if name=="": name=String(known.get("name","")).trim_prefix("Reported home of ")
+		var position:Dictionary=(known.get("position",{}) as Dictionary).duplicate(true)
+		out.append({"city_id":rid,"civ_id":civ_id,"name":name,"civ_name":Hall._civ_name(civ_id),"garrison":troops,
+			"commander":String((force.get("commander",{}) as Dictionary).get("name","")),"population":roundi(float(region.get("population",0.0))),"position":position,"held":true})
 	return out
 
 static func _name_hit(lower:String,name:String)->bool:
@@ -113,6 +141,9 @@ static func find_target(text:String,context_civ:String="")->Dictionary:
 	## {"ambiguous":[names]} when "their" could be several peoples;
 	## {"unknown":"Name"} when a capitalised name matches nothing we know.
 	var lower:=text.to_lower()
+	# A town we already hold is named as ours, never as a place to attack.
+	for town:Dictionary in held_towns():
+		if _name_hit(lower,String(town.name)): return town
 	var places:=known_places()
 	for p:Dictionary in places:
 		if _name_hit(lower,String(p.name)): return p
@@ -167,6 +198,13 @@ static func read(text:String,context_civ:String="")->Dictionary:
 	var named:=find_target(clean,context_civ)
 	var named_town:=named.has("city_id") or named.has("unknown")
 	var kind:=""
+	if bool(named.get("held",false)):
+		# A town we hold: what becomes of it and its people is the god's to
+		# say (town_fate.gd); an attack on it is answered with the truth.
+		var fate:=TownFate.fate_words(lower)
+		if not fate.is_empty(): return {"kind":"fate","target":named,"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300)}
+		if not (_has(lower,SIEGE_WORDS) or _has(lower,RAID_WORDS) or _has(lower,ATTACK_WORDS) or army or _has(lower,LOOSE_ARMY_WORDS)): return {}
+		return {"kind":"held","target":named,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
 	if _has(lower,DRILL_WORDS): return {"kind":"drill","target":{},"full":false,"insist":false,"place":"","army_words":true,"text":clean.substr(0,300)}
 	if _has(lower,INTERCEPT_WORDS): kind="intercept"
 	elif _has(lower,SIEGE_WORDS): kind="siege"
@@ -220,6 +258,12 @@ static func offline_choices(audience_id:String="")->Array[Dictionary]:
 	if not pending.is_empty() and String(pending.get("verb",""))=="war" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
 		out.append({"group":"war","label":"Take them as they are","action":"command","params":{"command_text":"Take them as they are"}})
 		out.append({"group":"war","label":"Drill them first","action":"command","params":{"command_text":"Drill them first"}})
+	for town:Dictionary in held_towns().slice(0,2):
+		var held_name:=String(town.name)
+		out.append({"group":"war","label":"Spare %s and hold it" % held_name,"action":"command","params":{"command_text":"Spare %s and hold it" % held_name}})
+		out.append({"group":"war","label":"Take captives and burn %s" % held_name,"action":"command","params":{"command_text":"Take captives home and burn %s" % held_name}})
+		out.append({"group":"war","label":"Put the men of %s to the sword" % held_name,"action":"command","params":{"command_text":"Put the men of %s to the sword" % held_name}})
+		out.append({"group":"war","label":"Take tribute from %s and leave" % held_name,"action":"command","params":{"command_text":"Take tribute from %s and leave" % held_name}})
 	var places:=known_places()
 	var home:Vector2=WorldSimulation.world.player_world_origin
 	places.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return home.distance_squared_to(Vector2(float(a.position.x),float(a.position.z)))<home.distance_squared_to(Vector2(float(b.position.x),float(b.position.z))))
@@ -323,7 +367,7 @@ static func _available(army:Dictionary)->bool:
 	return true
 
 static func _at_home(army:Dictionary)->bool:
-	return String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home"
+	return preload("res://scripts/hud/army_marks.gd").at_home(army,WorldSimulation.world.player_world_origin)
 
 static func _band_of(general:Dictionary)->Dictionary:
 	## The field army this war leader leads himself (his own band), wherever
@@ -367,8 +411,11 @@ static func forces(general:Dictionary={})->Dictionary:
 	elif not mc.active_siege.is_empty(): busy="our soldiers are already besieging %s" % String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","a town"))
 	elif not mc.pending_aftermath.is_empty(): busy="the last battle's captives and spoils are not yet settled"
 	elif not mc.active_threat.is_empty() and String(mc.active_threat.get("campaign_mode",""))=="defensive": busy="an enemy force is already coming at us"
+	var garrisons:=held_towns()
+	var holding:=0
+	for town:Dictionary in garrisons: holding+=int(town.garrison)
 	return {"trained":trained,"home_strength":_strength(home.get("formations",[])),"drilling":int(t.heads),"drill_days":int(t.days),"trainees":t,
-		"idle":idle,"away":away,"busy":busy,"marching":_marching_on(),"band":_band_of(general)}
+		"idle":idle,"away":away,"busy":busy,"marching":_marching_on(),"band":_band_of(general),"garrisons":garrisons,"holding":holding}
 
 static func _marching_on()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
@@ -456,7 +503,53 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"defend": return _defend(out,reading)
 		"intercept": return _intercept(out,reading,insist)
 		"drill": return _drill_first(out)
+		"fate": return _fate(out,reading)
+		"held": return _held(out,reading.get("target",{}))
+	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
 	return _strike(out,reading,insist)
+
+static func _held_words(town:Dictionary)->String:
+	var who:=_given(String(town.get("commander","")))
+	var holder:=("%s's garrison" % who) if String(town.get("commander",""))!="" else "our garrison"
+	return "%s is already ours. %s of %s hold%s it." % [String(town.name),_cap(_number(int(town.garrison))),holder,"s" if int(town.garrison)==1 else ""]
+
+static func _held(out:Dictionary,town:Dictionary)->Dictionary:
+	## An attack on a town we hold: the war leader says so, with who holds it,
+	## and asks what is to become of it.
+	var band:Dictionary=forces(out.general_ref).band
+	var mine:=" I have %s with me." % _number(int(band.troops)) if not band.is_empty() else ""
+	out.verdict="held"; out.reason="already_ours"; out["target"]=town.duplicate(true)
+	out.says="%s%s Tell me what is to become of it and its people: spare it and hold it, take captives and burn it, put the men to the sword, or take tribute and leave." % [_held_words(town),mine]
+	out.fix=""
+	out.outcome="%s is already ours." % String(town.name)
+	return out
+
+static func _fate(out:Dictionary,reading:Dictionary)->Dictionary:
+	## The god decides what becomes of a town we hold (town_fate.gd). The war
+	## leader may say what he thinks of it; a clear order is carried out.
+	var town:Dictionary=reading.get("target",{})
+	var fate:Dictionary=reading.get("fate",{})
+	out["target"]=town.duplicate(true)
+	var result:=TownFate.apply(String(town.civ_id),String(town.city_id),fate,out.general_ref)
+	if result.has("error"): return _no(out,"fate_failed",String(result.error),"")
+	var harsh:=bool(fate.get("kill_men",false)) or bool(fate.get("captives",false)) or bool(fate.get("raze",false))
+	var qualm:=""
+	if harsh:
+		var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(out.general_pid)) if int(out.general_pid)>0 else {}
+		var empathy:=float((person.get("personality",{}) as Dictionary).get("empathy",0.5)) if not person.is_empty() else 0.5
+		qualm="I would not have chosen it, but it is done. " if empathy>=0.6 else ("It is done. " if empathy>=0.35 else "It is done, and they will remember us for it. ")
+	out.verdict="fate"; out.reason="town_fate"
+	out.objective={"army_id":0,"kind":"fate","city_id":String(town.city_id),"civ_id":String(town.civ_id),"killed":int(result.killed),"captives":int(result.captives),"burned":bool(result.burned),"left":bool(result.left),"spared":bool(result.spared)}
+	out.says=(qualm+String(result.text)).strip_edges()
+	out.outcome=String(result.outcome)
+	out["fate"]=result
+	return out
+
+static func _number(n:int)->String:
+	return preload("res://scripts/battle_account.gd").count_words(n) if n<=12 else str(n)
+
+static func _cap(text:String)->String:
+	return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
 
 static func _no(out:Dictionary,reason:String,says:String,fix:String)->Dictionary:
 	out.verdict="impossible"; out.reason=reason
@@ -589,7 +682,9 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 			var have:="Nobody has finished drill yet" if send<=0 else "Only %d %s finished drill" % [send,"has" if send==1 else "have"]
 			return _object(out,"few_trained","%s. %d more are in their first drill, about %d days from done%s. Against %s's walls that is not enough." % [have,int(t.heads),int(t.days),armed_words,name],"Give me those %d days, or say the word and I take all %d as they are." % [int(t.days),send+int(t.heads)])
 		if going<MIN_FORCE:
-			return _object(out,"too_few","%s against a walled town? %s would shut the gate and wait us out." % [_fighters(going),name],"Give me more soldiers, or say the word and they go anyway.")
+			var held_note:=""
+			for town:Dictionary in f.garrisons: held_note+=" %s more hold %s and cannot leave it unguarded." % [_cap(_number(int(town.garrison))),String(town.name)]
+			return _object(out,"too_few","%s against a walled town? %s would shut the gate and wait us out.%s" % [_fighters(going),name,held_note],"Give me more soldiers, or say the word and they go anyway.")
 		if bool(enemy.known) and ratio<OBJECT_RATIO:
 			var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
 			var ours:="my band of %d" % going if own_band else "%d" % going

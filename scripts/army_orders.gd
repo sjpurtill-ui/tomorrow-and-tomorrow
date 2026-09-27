@@ -60,7 +60,7 @@ static func army(army_id:int)->Dictionary:
 	return {} if index<0 else _mc().field_armies[index]
 
 static func at_home(record:Dictionary)->bool:
-	return String(record.get("status",""))=="stationed" and String(record.get("location_id",""))=="player_home"
+	return Marks.at_home(record,_home())
 
 # --------------------------------------------------------------------------
 # Words
@@ -127,7 +127,7 @@ static func forces()->Array[Dictionary]:
 		var ordered:Dictionary=record.get("court_order",{})
 		if destination=="" and not ordered.is_empty(): destination=String(ordered.get("city_name",""))
 		var doing:=Marks.doing({"status":String(record.get("status","")),"destination_name":destination,"destination_id":String(record.get("destination_id","")),
-			"location_name":String(record.get("location_name","")),"command_status":String(record.get("command_status","")),"at_home":home,
+			"location_name":String(record.get("location_name","")),"command_status":String(record.get("command_status","")),"at_home":home,"home_km":Marks.home_km(shown,_home()),
 			"besieging":String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","")) if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==int(record.army_id) else "",
 			"fighting":mc.command_hierarchy.battle.engaged(int(record.army_id)),"days_left":maxi(0,int(record.get("arrival_day",0))-_today())})
 		parts.append(doing)
