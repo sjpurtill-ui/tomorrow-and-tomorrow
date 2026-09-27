@@ -19,11 +19,11 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 		if String(block.get("heading",""))!="":
 			var heading_row:=HBoxContainer.new()
 			section.add_child(heading_row)
-			var heading:=Tokens.make_label(String(block.heading),10,Tokens.GOLD,0.1)
+			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),12,Tokens.GOLD_TEXT,0.06)
 			heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			heading_row.add_child(heading)
 			if String(block.get("note",""))!="":
-				var note:=Tokens.make_label(String(block.note),10,Tokens.MUTED)
+				var note:=Tokens.make_label(String(block.note),12,Tokens.MUTED)
 				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
@@ -97,8 +97,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"rows": _render_rows(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
-			"conversation": _render_conversation(section,block)
-			"order": _render_order(section,block)
+			# No talk or order boxes in a dock: every conversation happens in the
+			# court (one-court-screen). Old "conversation"/"order" blocks render
+			# as their plain text only.
 			"image": _render_image(section,block)
 			_: _render_text(section,block)
 
@@ -106,7 +107,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	var accent:Color=Tokens.TEAL if String(block.get("kind",""))=="resource" else Tokens.BLUE
 	var frame:=PanelContainer.new()
-	var style:=Tokens.flat(Color("#111e20"),accent.darkened(0.5),1,6)
+	# Paper and ink, with the accent as a top rule (never a dark card).
+	var style:=Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CARD)
+	style.border_color=accent;style.border_width_top=3
 	style.content_margin_left=20; style.content_margin_right=20
 	style.content_margin_top=16; style.content_margin_bottom=18
 	frame.add_theme_stylebox_override("panel",style)
@@ -114,9 +117,9 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",9)
 	frame.add_child(column)
-	var heading:=String(block.get("kind","discovery")).to_upper()
-	if block.has("distance_km"): heading+="   /   %s KM FROM HOME" % str(int(block.distance_km))
-	column.add_child(Tokens.make_label(heading,10,accent))
+	var heading:=String(block.get("kind","discovery")).capitalize()
+	if block.has("distance_km"): heading+=" · %s km from home" % str(int(block.distance_km))
+	column.add_child(Tokens.make_label(heading,12,Tokens.text_for(accent),0.06))
 	var discovery_id:=String(block.get("discovery_id",""))
 	if discovery_id!="":
 		var definition:=DiscoverySystem.discovery_definition(discovery_id)
@@ -130,7 +133,7 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	for key in ["description","consequence"]:
 		var text:=String(block.get(key,""))
 		if text.is_empty(): continue
-		if key=="consequence": text="WHAT THIS OPENS UP\n"+text
+		if key=="consequence": text="What this opens up: "+text
 		var label:=Tokens.make_label(text,13 if key=="description" else 12,Tokens.BODY if key=="description" else Tokens.TEXT_SOFT)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		column.add_child(label)
@@ -143,41 +146,51 @@ static func _render_line_chart(parent:VBoxContainer,block:Dictionary)->void:
 	var legend:=HBoxContainer.new()
 	legend.add_theme_constant_override("separation",14)
 	parent.add_child(legend)
-	legend.add_child(Tokens.make_label("◆ health discovery",10,Tokens.GOLD))
-	legend.add_child(Tokens.make_label("● conditions changed",10,Tokens.MUTED))
+	legend.add_child(Tokens.make_label("◆ a health discovery",12,Tokens.GOLD_TEXT))
+	legend.add_child(Tokens.make_label("● living conditions changed",12,Tokens.MUTED))
 
 
 static func _render_segments(parent:VBoxContainer,block:Dictionary)->void:
 	var bar:=HBoxContainer.new()
-	bar.custom_minimum_size=Vector2(0,36)
+	bar.custom_minimum_size=Vector2(0,14)
 	bar.add_theme_constant_override("separation",2)
 	parent.add_child(bar)
+	var captions:=HBoxContainer.new()
+	captions.add_theme_constant_override("separation",2)
+	parent.add_child(captions)
 	for item_variant in (block.get("items",[]) as Array):
 		var item:Dictionary=item_variant
 		var segment:=ColorRect.new()
 		segment.color=item.get("color",Tokens.MUTED)
-		segment.custom_minimum_size=Vector2(24,36)
+		segment.custom_minimum_size=Vector2(24,14)
 		segment.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		segment.size_flags_stretch_ratio=maxf(0.05,float(item.get("share",1.0)))
 		segment.tooltip_text=String(item.get("tip",""))
 		segment.mouse_filter=Control.MOUSE_FILTER_STOP
 		bar.add_child(segment)
-		var stack:=VBoxContainer.new()
-		stack.set_anchors_preset(Control.PRESET_FULL_RECT)
-		stack.alignment=BoxContainer.ALIGNMENT_CENTER
-		stack.add_theme_constant_override("separation",0)
-		stack.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		segment.add_child(stack)
-		var count:=Tokens.make_label(String(item.get("value","")),12,Tokens.GLYPH_DARK)
+		# The count and caption sit on paper under their colour, in ink: cream
+		# text on the cohort greens read at under 3.3:1.
+		var key:=VBoxContainer.new()
+		key.custom_minimum_size=Vector2(24,0)
+		key.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		key.size_flags_stretch_ratio=segment.size_flags_stretch_ratio
+		key.add_theme_constant_override("separation",0)
+		key.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		captions.add_child(key)
+		var count:=Tokens.make_label(String(item.get("value","")),12,Tokens.INK)
 		count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		count.clip_text=true
 		count.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		stack.add_child(count)
-		var caption:=Tokens.make_label(String(item.get("label","")),9,Tokens.GLYPH_DARK)
+		key.add_child(count)
+		var caption:=Tokens.make_label(String(item.get("label","")),12,Tokens.MUTED)
 		caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		caption.clip_text=true
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		stack.add_child(caption)
+		key.add_child(caption)
 	if String(block.get("legend",""))!="":
-		parent.add_child(Tokens.make_label(String(block.legend),10,Tokens.MUTED))
+		var legend:=Tokens.make_label(String(block.legend),12,Tokens.MUTED)
+		legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		parent.add_child(legend)
 
 
 static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
@@ -217,7 +230,7 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 		name_label.tooltip_text=String(item.get("tip",""))
 		row.add_child(name_label)
 		if String(item.get("pct",""))!="":
-			var pct_label:=Tokens.make_label(String(item.pct),10,Tokens.MUTED)
+			var pct_label:=Tokens.make_label(String(item.pct),12,Tokens.MUTED)
 			row.add_child(pct_label)
 			Live.attach(pct_label,"text",item.get("live_pct"))
 		var count_label:=Tokens.make_label(String(item.count_text) if item.has("count_text") else str(int(item.get("count",0))),13,Tokens.INK)
@@ -225,14 +238,14 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 		count_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(count_label)
 		if item.get("on_minus") is Callable or item.get("on_plus") is Callable:
-			row.add_child(_step_button("−",item.get("on_minus"),String(item.get("tip",""))))
-			row.add_child(_step_button("+",item.get("on_plus"),String(item.get("tip",""))))
+			row.add_child(_step_button("Fewer",item.get("on_minus"),String(item.get("tip",""))))
+			row.add_child(_step_button("More",item.get("on_plus"),String(item.get("tip",""))))
 
 
 static func _step_button(glyph:String,action:Variant,tip:String)->Button:
 	var button:=Button.new()
 	button.text=glyph
-	button.custom_minimum_size=Vector2(26,24)
+	button.custom_minimum_size=Vector2(0,24)
 	button.tooltip_text=tip
 	button.add_theme_font_size_override("font_size",12)
 	button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
@@ -271,7 +284,7 @@ static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
 		row.add_theme_constant_override("separation",10)
 		row.tooltip_text=String(item.get("tip",""))
 		parent.add_child(row)
-		var name_label:=Tokens.make_label(String(item.get("name","")),11,Tokens.BODY_2)
+		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
 		name_label.custom_minimum_size=Vector2(130,0)
 		name_label.clip_text=true
 		row.add_child(name_label)
@@ -287,7 +300,7 @@ static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
 		fill.anchor_bottom=1.0
 		fill.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		track.add_child(fill)
-		var value_label:=Tokens.make_label(String(item.get("value","")),12,color)
+		var value_label:=Tokens.make_label(String(item.get("value","")),12,Tokens.text_for(color))
 		value_label.custom_minimum_size=Vector2(72,0)
 		value_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(value_label)
@@ -310,10 +323,10 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 		var column:=VBoxContainer.new()
 		column.add_theme_constant_override("separation",2)
 		tile.add_child(column)
-		column.add_child(Tokens.make_label(String(item.get("label","")),9,Tokens.MUTED,0.1))
+		column.add_child(Tokens.make_label(String(item.get("label","")),12,Tokens.MUTED,0.06))
 		column.add_child(Tokens.make_label(String(item.get("value","")),18,Tokens.INK))
 		if String(item.get("note",""))!="":
-			var note:=Tokens.make_label(String(item.note),11,item.get("note_color",Tokens.MUTED))
+			var note:=Tokens.make_label(String(item.note),12,Tokens.text_for(item.get("note_color",Tokens.MUTED)))
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			column.add_child(note)
 
@@ -351,17 +364,17 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		text_column.add_child(name_label)
 		Live.attach(name_label,"text",item.get("live_name"))
 		if String(item.get("sub",""))!="":
-			var sub_label:=Tokens.make_label(String(item.sub),11,Tokens.MUTED)
+			var sub_label:=Tokens.make_label(String(item.sub),12,Tokens.MUTED)
 			sub_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			text_column.add_child(sub_label)
 			Live.attach(sub_label,"text",item.get("live_sub"))
 		if String(item.get("detail",""))!="":
-			var detail_label:=Tokens.make_label(String(item.detail),11,Tokens.TEXT_SOFT)
+			var detail_label:=Tokens.make_label(String(item.detail),12,Tokens.TEXT_SOFT)
 			detail_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			text_column.add_child(detail_label)
 			Live.attach(detail_label,"text",item.get("live_detail"))
 		if String(item.get("value",""))!="":
-			var value_label:=Tokens.make_label(String(item.value),12,item.get("value_color",Tokens.BODY_2))
+			var value_label:=Tokens.make_label(String(item.value),12,Tokens.text_for(item.get("value_color",Tokens.BODY_2)))
 			value_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 			inner.add_child(value_label)
 			Live.attach(value_label,"text",item.get("live_value"))
@@ -400,14 +413,16 @@ static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:
 		var top:=HBoxContainer.new()
 		top.add_theme_constant_override("separation",6)
 		cell.add_child(top)
-		var name_label:=Tokens.make_label(String(item.get("name","")),11,Tokens.BODY_2)
+		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
 		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		name_label.tooltip_text=String(item.get("tip",""))
 		top.add_child(name_label)
+		# The trend in a word, not a bare arrow.
 		var trend:=String(item.get("trend","—"))
-		var trend_color:=Tokens.GREEN if trend=="▲" else (Tokens.RED if trend=="▼" else Tokens.MUTED)
-		top.add_child(Tokens.make_label(trend,10,trend_color))
-		var pct_label:=Tokens.make_label("%d%%" % roundi(pct),13,color)
+		var trend_word:="rising" if trend in ["▲","↑","up"] else "falling" if trend in ["▼","↓","down"] else ""
+		if trend_word!="":
+			top.add_child(Tokens.make_label(trend_word,12,Tokens.GREEN_TEXT if trend_word=="rising" else Tokens.RED_TEXT))
+		var pct_label:=Tokens.make_label("%d%%" % roundi(pct),13,Tokens.text_for(color))
 		pct_label.custom_minimum_size=Vector2(34,0)
 		pct_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		top.add_child(pct_label)
@@ -457,16 +472,16 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 			var plate:=TextureRect.new();plate.texture=item.texture;plate.custom_minimum_size.y=160
 			plate.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;plate.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			plate.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(plate)
-		var fg:=Tokens.DISABLED if disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY)
-		var label:=Tokens.make_label(String(item.get("label","")),11,fg,0.06)
+		var fg:=Tokens.DISABLED if disabled else (Tokens.GOLD_TEXT if primary else Tokens.BODY)
+		var label:=Tokens.make_label(Tokens.sentence_case(String(item.get("label",""))),13,fg)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		column.add_child(label)
 		Live.attach(label,"text",item.get("live_label"))
 		if item.has("live_disabled"):
-			Live.attach(label,"theme_override_colors/font_color",func()->Color: return Tokens.DISABLED if button.disabled else (Tokens.GOLD_BRIGHT if primary else Tokens.BODY))
+			Live.attach(label,"theme_override_colors/font_color",func()->Color: return Tokens.DISABLED if button.disabled else (Tokens.GOLD_TEXT if primary else Tokens.BODY))
 		if String(item.get("sub",""))!="":
-			var sub_label:=Tokens.make_label(String(item.sub),10,Tokens.MUTED)
+			var sub_label:=Tokens.make_label(String(item.sub),12,Tokens.MUTED)
 			sub_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			column.add_child(sub_label)
@@ -479,192 +494,6 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 				_request_rebuild(button))
 
 
-static func _render_conversation(parent:VBoxContainer,block:Dictionary)->void:
-	## A civic exchange is a conversation, not a ledger. Keep the leader, the
-	## current commitment state, the recent turns, and the reply field together.
-	var shell:=PanelContainer.new()
-	shell.name="CivicConversation"
-	shell.add_theme_stylebox_override("panel",Tokens.flat(Tokens.FIELD_BG,Tokens.BORDER_2,1,5,12.0))
-	parent.add_child(shell)
-	var stack:=VBoxContainer.new()
-	stack.add_theme_constant_override("separation",10)
-	shell.add_child(stack)
-	var header:=HBoxContainer.new()
-	header.add_theme_constant_override("separation",9)
-	stack.add_child(header)
-	var leader_name:=String(block.get("leader_name","Settlement leader"))
-	if not (block.get("leader",{}) as Dictionary).is_empty():
-		header.add_child(preload("res://scripts/hud/person_portrait.gd").picture(block.leader,48,60))
-	var identity:=VBoxContainer.new()
-	identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	identity.add_theme_constant_override("separation",0)
-	header.add_child(identity)
-	identity.add_child(Tokens.make_label(leader_name,13,Tokens.INK))
-	var role:=String(block.get("leader_title","Local leader"))
-	var temperament:=String(block.get("disposition",""))
-	identity.add_child(Tokens.make_label("%s%s" % [role," · "+temperament if temperament!="" else ""],10,Tokens.MUTED))
-	var state:=String(block.get("state",""))
-	if state!="":
-		var state_plate:=PanelContainer.new()
-		state_plate.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		var state_color:Color=block.get("state_color",Tokens.MUTED)
-		var state_bg:=Color(state_color.r,state_color.g,state_color.b,0.10)
-		var state_style:=Tokens.flat(state_bg,state_color,1,11)
-		state_style.content_margin_left=9.0
-		state_style.content_margin_right=9.0
-		state_style.content_margin_top=4.0
-		state_style.content_margin_bottom=4.0
-		state_plate.add_theme_stylebox_override("panel",state_style)
-		header.add_child(state_plate)
-		state_plate.add_child(Tokens.make_label(state,9,state_color,0.04))
-	var rule:=ColorRect.new()
-	rule.color=Tokens.BORDER_SOFT
-	rule.custom_minimum_size=Vector2(0,1)
-	stack.add_child(rule)
-	var messages:=VBoxContainer.new()
-	messages.name="CivicConversationMessages"
-	messages.add_theme_constant_override("separation",7)
-	var turns:Array=block.get("items",[])
-	if turns.is_empty():stack.add_child(messages)
-	else:
-		var transcript:=ScrollContainer.new()
-		transcript.name="CivicTranscript"
-		transcript.custom_minimum_size.y=clampf((parent.get_viewport_rect().size.y if parent.is_inside_tree() else 600)-440,120,260)
-		transcript.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-		messages.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		stack.add_child(transcript);transcript.add_child(messages)
-		transcript.get_v_scroll_bar().changed.connect(func():transcript.scroll_vertical=int(transcript.get_v_scroll_bar().max_value))
-	if turns.is_empty():
-		var opening:=Tokens.make_label(String(block.get("empty_text","Tell the leader what you want done.")),12,Tokens.TEXT_SOFT)
-		opening.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		messages.add_child(opening)
-	else:
-		for turn_variant in turns:
-			_render_conversation_turn(messages,turn_variant as Dictionary)
-	var status_text:=String(block.get("status",""))
-	if status_text!="":
-		var status:=Tokens.make_label(status_text,10,block.get("state_color",Tokens.MUTED))
-		status.name="CivicConversationStatus"
-		status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		stack.add_child(status)
-	var compact_actions:Array=block.get("actions",[])
-	if not compact_actions.is_empty():
-		var action_row:=HBoxContainer.new()
-		action_row.name="CivicConversationLeadershipActions"
-		action_row.add_theme_constant_override("separation",6)
-		stack.add_child(action_row)
-		for action_variant in compact_actions:
-			var action:Dictionary=action_variant
-			var button:=Button.new()
-			button.text=String(action.get("label","ACTION"))
-			button.custom_minimum_size=Vector2(0,27)
-			button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			button.tooltip_text=String(action.get("tip",""))
-			button.add_theme_font_size_override("font_size",12)
-			button.add_theme_color_override("font_color",action.get("color",Tokens.BODY_2))
-			button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.BUTTON_BG,Tokens.BORDER_2,1,3))
-			button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,action.get("color",Tokens.GOLD),1,3))
-			button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-			action_row.add_child(button)
-			var callback:Variant=action.get("on_press")
-			if callback is Callable:
-				button.pressed.connect(func()->void:
-					(callback as Callable).call()
-					_request_rebuild(button))
-	_render_conversation_composer(stack,block)
-
-
-static func _render_conversation_turn(parent:VBoxContainer,turn:Dictionary)->void:
-	var is_player:=String(turn.get("speaker","leader"))=="player"
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",8)
-	parent.add_child(row)
-	var spacer:=Control.new()
-	spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	spacer.size_flags_stretch_ratio=0.16
-	var bubble:=PanelContainer.new()
-	bubble.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	bubble.size_flags_stretch_ratio=0.84
-	var accent:=Tokens.BLUE if is_player else Tokens.GOLD
-	var background:=Tokens.ACTIVE_BG if is_player else Tokens.ROW_BG
-	var style:=Tokens.flat(background,accent,1,5)
-	style.content_margin_left=11.0
-	style.content_margin_right=11.0
-	style.content_margin_top=8.0
-	style.content_margin_bottom=8.0
-	bubble.add_theme_stylebox_override("panel",style)
-	if is_player:
-		row.add_child(spacer)
-		row.add_child(bubble)
-	else:
-		row.add_child(bubble)
-		row.add_child(spacer)
-	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",3)
-	bubble.add_child(column)
-	var speaker_row:=HBoxContainer.new()
-	column.add_child(speaker_row)
-	var speaker:=Tokens.make_label(String(turn.get("name","You" if is_player else "Leader")),9,accent,0.04)
-	speaker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	speaker_row.add_child(speaker)
-	if turn.has("day"):
-		speaker_row.add_child(Tokens.make_label("day %d" % int(turn.get("day",0)),9,Tokens.DISABLED))
-	var body:=Tokens.make_label(String(turn.get("text","")),12,Tokens.BODY)
-	body.name="CivicMessageText"
-	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	column.add_child(body)
-	var receipt:=String(turn.get("receipt",""))
-	if not receipt.is_empty():
-		var receipt_label:=Tokens.make_label(receipt,9,Tokens.DISABLED)
-		receipt_label.name="CivicMessageReceipt"
-		receipt_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		receipt_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		receipt_label.tooltip_text="What the engine changed, after feasibility and implementation."
-		column.add_child(receipt_label)
-
-
-static func _render_conversation_composer(parent:VBoxContainer,block:Dictionary)->void:
-	var submit:Variant=block.get("on_submit")
-	if not (submit is Callable): return
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",7)
-	parent.add_child(row)
-	var field:=LineEdit.new()
-	field.name="CivicConversationInput"
-	field.placeholder_text=String(block.get("placeholder","Reply to the leader…"))
-	field.custom_minimum_size=Vector2(0,38)
-	field.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	field.editable=not bool(block.get("disabled",false))
-	field.add_theme_font_size_override("font_size",12)
-	field.add_theme_color_override("font_color",Tokens.BODY)
-	field.add_theme_color_override("font_placeholder_color",Tokens.DISABLED)
-	field.add_theme_stylebox_override("normal",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.BORDER_2,1,4,8.0))
-	field.add_theme_stylebox_override("focus",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.GOLD,1,4,8.0))
-	row.add_child(field)
-	var send:=Button.new()
-	send.name="CivicConversationSend"
-	send.text="SEND"
-	send.custom_minimum_size=Vector2(62,38)
-	send.disabled=not field.editable
-	send.add_theme_font_size_override("font_size",12)
-	send.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
-	send.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	send.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
-	send.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	row.add_child(send)
-	send.pressed.connect(func()->void: (submit as Callable).call(field))
-	field.text_submitted.connect(func(_text:String)->void: (submit as Callable).call(field))
-
-
-static func _conversation_initials(name:String)->String:
-	var parts:=name.strip_edges().split(" ",false)
-	if parts.is_empty(): return "?"
-	var result:=String(parts[0]).substr(0,1)
-	if parts.size()>1: result+=String(parts[parts.size()-1]).substr(0,1)
-	return result.to_upper()
-
-
 static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 	## An illustration plate (expedition covers, portraits). Falls back to
 	## quiet text while the referenced image has not been produced yet.
@@ -672,7 +501,7 @@ static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 	var supplied:Texture2D=block.get("texture") as Texture2D
 	if supplied==null and (path=="" or not ResourceLoader.exists(path)):
 		if String(block.get("fallback",""))!="":
-			var fallback:=Tokens.make_label(String(block.fallback),11,Tokens.MUTED)
+			var fallback:=Tokens.make_label(String(block.fallback),12,Tokens.MUTED)
 			fallback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			parent.add_child(fallback)
 		return
@@ -691,45 +520,3 @@ static func _render_text(parent:VBoxContainer,block:Dictionary)->void:
 	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(body)
 	Live.attach(body,"text",block.get("live_text"))
-
-
-static func _render_order(parent:VBoxContainer,block:Dictionary)->void:
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",8)
-	parent.add_child(row)
-	var field:=LineEdit.new()
-	field.name="SovereignOrderInput"
-	field.placeholder_text=String(block.get("placeholder","Issue a sovereign order…"))
-	field.text=String(block.get("value",""))
-	field.max_length=int(block.get("max_length",0))
-	field.custom_minimum_size=Vector2(0,38)
-	field.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	field.add_theme_font_size_override("font_size",12)
-	field.add_theme_color_override("font_color",Tokens.BODY)
-	field.add_theme_color_override("font_placeholder_color",Tokens.DISABLED)
-	field.add_theme_stylebox_override("normal",Tokens.flat(Tokens.FIELD_BG,Tokens.BORDER_2,1,3,8.0))
-	field.add_theme_stylebox_override("focus",Tokens.flat(Tokens.FIELD_BG,Tokens.GOLD,1,3,8.0))
-	row.add_child(field)
-	var issue:=Button.new()
-	issue.name="SovereignOrderIssue"
-	issue.text=String(block.get("button_label","ISSUE"))
-	issue.custom_minimum_size=Vector2(0,38)
-	issue.add_theme_font_size_override("font_size",12)
-	issue.add_theme_color_override("font_color",Tokens.GOLD_BRIGHT)
-	issue.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	issue.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
-	issue.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	row.add_child(issue)
-	var submit:Variant=block.get("on_submit")
-	if submit is Callable:
-		issue.pressed.connect(func()->void: (submit as Callable).call(field))
-		field.text_submitted.connect(func(_text:String)->void: (submit as Callable).call(field))
-	if String(block.get("helper",""))!="":
-		var helper:=Tokens.make_label(String(block.helper),10,Tokens.MUTED)
-		helper.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		parent.add_child(helper)
-	if String(block.get("status",""))!="":
-		var status:=Tokens.make_label(String(block.status),10,block.get("status_color",Tokens.MUTED))
-		status.name="SovereignOrderStatus"
-		status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		parent.add_child(status)

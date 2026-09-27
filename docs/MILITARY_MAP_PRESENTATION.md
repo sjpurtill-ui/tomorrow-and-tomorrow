@@ -467,3 +467,22 @@ Branch `codex/air-naval-consequences`. Consequences run in the live world model 
 - **Record and Chronicle.** Air and sea losses reach each war's record monthly and raise war exhaustion. The Chronicle tells big sinkings, bad days in the air, bombed towns and drowned transports, and folds the rest into the year's entry.
 - **Rivals.** At war, rival commanders aim zones at known enemy towns, harbours and fleets, and can order landings. They obey their own ruler's decision.
 - **Tests.** `tests/test_air_naval_consequences.gd` covers these in the live model, including a three-year two-civilization war check.
+
+## 11. Battle reports and replays (`scripts/battle_account.gd`)
+
+Branch `codex/battle-clarity`. The user's first attack came back as "Attacker Victory at the field contact against Esurai. Our force: 15 remaining; 0 lost or removed from the field; morale 52%." It said nothing about the enemy, the fighting or what came next.
+
+- **One account per battle.** `battle_account.gd` builds it from the battle's record and the live operation state:
+  - a plain headline ("Rovik's band drove the Esurai from the ditch near Tsaren.");
+  - our side before and after: killed, wounded, ran off, taken captive, left to hold the town, still with the band;
+  - their side as our people saw it: counted when a dozen or fewer, a range otherwise, a guess when we did not hold the ground;
+  - how each side fought, in the era's words (`battle_tactics.gd`);
+  - the exchanges, each about half an hour;
+  - where things stand and what happens next, from the army's real state (marching on to the town, a siege and its day, the town taken and its garrison, beaten and pulled back, fighting again);
+  - the war leader's advice.
+- **Accounting.** `in_fight = killed + wounded + ran off + captured + left to hold + still with the band`, and `sent = in_fight + losses in the operation's earlier fights`. A field army records `operation.sent` when it is given a town or an enemy band to go after. The garrison detached after a capture and the strategic outcome are written back onto the battle's record.
+- **Where it is told.** A paper report card (`hud/battle_report_panel.gd`) replaces the old dialog, with Watch the battle, Talk to the general (the one court) and Continue, or Decide the captives. The council inbox and the Chronicle carry the same account; a Chronicle entry links to the report and the replay.
+- **Watching.** `battle_graphics_screen.gd`, opened on a recorded battle, plays every exchange from its record (`battle_replay.gd`) and never resolves it again. Its captions, side labels and result card use the same words. Field works a side fought from are drawn as a ditch, a bank and sharpened stakes.
+- **On the map.** A finished fight stays on the war chart for twelve days as a fading mark with how it went ("Won · none of ours hurt"). Its note offers the report and the replay. A siege's note gives its day; an army's note and the Military dock say what it is doing.
+- **Phantom battles.** A band already broken or empty can no longer be engaged: the old code staged a battle with no exchanges and reported a victory with nothing lost, again and again.
+- **Tests.** `tests/test_battle_account.gd`. Captures: `tests/battle_clarity_capture.tscn`, run only through `tools/run_isolated_gpu_probe.ps1`.

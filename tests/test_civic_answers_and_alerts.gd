@@ -53,7 +53,8 @@ func test_future_start_is_not_confused_with_policy_duration()->void:
 func test_battle_reports_name_opponent_place_and_outcome()->void:
 	var result:={"outcome":"defender_victory","home_side":"defender","target_region_name":"Dawngate","threat":{"source_name":"Reedbank Confederacy"},"defender":{"initial_troops":20,"remaining_troops":14,"morale":0.48}}
 	var text:=MilitaryCampaign.battle_report_text(result)
-	for required in ["Dawngate","Reedbank Confederacy","14 remaining","6 lost","defended"]: assert_str(text).contains(required)
+	# Plain words (battle_account.gd): who, where, how it went, how many are left.
+	for required in ["Dawngate","Reedbank Confederacy","drove off","14 still with the band","six out of the fight"]: assert_str(text).contains(required)
 
 func test_proposal_is_not_a_leader_refusal_or_an_order_underway()->void:
 	var content:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)

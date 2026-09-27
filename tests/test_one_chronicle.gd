@@ -103,9 +103,9 @@ func test_the_air_is_felt_before_a_thermometer_and_never_in_fahrenheit()->void:
 
 
 func test_toolbar_words_are_the_peoples()->void:
-	assert_str(EraWords.scouts_out(0)).is_equal("⌖ SEND SCOUTS")
-	assert_str(EraWords.scouts_out(2)).is_equal("⌖ TWO WALKERS OUT")
-	assert_str(EraWords.scouts_out(1)).is_equal("⌖ ONE WALKER OUT")
+	assert_str(EraWords.scouts_out(0)).is_equal("Send scouts")
+	assert_str(EraWords.scouts_out(2)).is_equal("Two walkers out")
+	assert_str(EraWords.scouts_out(1)).is_equal("One walker out")
 	for word in EraWords.DISTANCE_WORDS:
 		assert_str(String(word)).not_contains("ft")
 	assert_str(EraWords.babes_lost_short(300.0)).is_equal("30 in 100 babes lost")

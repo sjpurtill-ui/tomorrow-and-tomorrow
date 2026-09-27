@@ -103,6 +103,20 @@ var momentum_needle:ColorRect
 var momentum_center:ColorRect
 var momentum_ghost:ColorRect
 var previous_scale_size:Vector2i
+## Watching a recorded battle (from the report, the map or the Chronicle):
+## every exchange is played from its record in order, and nothing is
+## resolved again (battle_replay.gd).
+var replay_only:=false
+var full_records:Array=[]
+var final_forces:Array=[]
+var replay_outcome:=""
+var replay_frames:Array=[]
+var autoplay_index:=-1
+var round_duration:=DURATION
+var replay_close:=false
+var account:Dictionary={}
+var caption_panel:PanelContainer
+var caption_label:Label
 var previous_scale_aspect:int
 
 func style(color:Color,border:Color=Color("263237"),radius:int=8)->StyleBoxFlat:
@@ -219,7 +233,7 @@ func _build_controls()->void:
 	progress=ProgressBar.new();progress.show_percentage=false;progress.custom_minimum_size.y=6;progress.add_theme_stylebox_override("fill",style(GOLD,GOLD));center.add_child(progress)
 	var ends:=box(controls);skip_button=button(ends,"Skip to result →",_skip);retreat_button=button(ends,"Retreat whole army",_retreat,ORANGE);seed_label=label(ends,"",10,MUTED)
 func _initialize()->void:
-	context=WorldSimulation.military.active_engagement.duplicate(true)
+	context=WorldSimulation.military.active_engagement.duplicate(true) if history_seed<0 else {}
 	if context.is_empty() and not WorldSimulation.military.battle_history.is_empty():
 		context=WorldSimulation.military.battle_history.front().duplicate(true)
 		if history_seed>=0:
@@ -241,10 +255,85 @@ func _initialize()->void:
 	heading.text=String(context.get("target_region_name",context.get("threat",{}).get("target_region_name","BATTLEFIELD"))).to_upper()
 	city_button.disabled=String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))).is_empty()
 	seed_label.text="BATTLE SEED %s"%str(context.get("seed","—")) if OS.has_feature("editor") or ProjectSettings.get_setting("application/config/custom_user_dir_name","").contains("Test") else ""
-	if not WorldSimulation.military.active_engagement.is_empty():WorldSimulation.military.active_engagement["awaiting_player_view"]=true;phase="orders"
+	if not WorldSimulation.military.active_engagement.is_empty() and history_seed<0:WorldSimulation.military.active_engagement["awaiting_player_view"]=true;phase="orders"
 	else:phase="ended"
+	if phase=="ended":_begin_replay_mode()
 	_rebuild_orders();_rebuild_plates();_phase_ui()
 	if phase=="ended":_show_result()
+	if replay_only and not full_records.is_empty():
+		phase="drawn_up"
+		var start:=_forces_after(-1)
+		view.reset(start[0],start[1]);present(start[0],start[1],{},"",[])
+		# Small fights are watched from close by.
+		replay_close=_count(start[0])+_count(start[1])<400
+		if replay_close:_camera("frontline")
+		_phase_ui();_set_caption(String(replay_frames[0].caption))
+		get_tree().create_timer(2.4).timeout.connect(func()->void:if is_instance_valid(self) and phase=="drawn_up":_autoplay(0))
+
+
+func _begin_replay_mode()->void:
+	replay_only=true
+	var Account:=preload("res://scripts/battle_account.gd")
+	account=Account.build(context,Account.gather(context))
+	full_records=(context.get("rounds",[]) as Array).duplicate(true)
+	final_forces=cached_forces.duplicate(true)
+	replay_outcome=String(context.get("outcome",""))
+	replay_frames=preload("res://scripts/battle_replay.gd").frames(context,preload("res://scripts/hud/era_words.gd").stage())
+	round_duration=3.4
+	heading.text="The fight "+String(account.get("where","in the open country"))
+	seed_label.text=""
+	_build_caption()
+	_refresh_armies()
+	if is_instance_valid(view) and view.has_method("set_works"):view.set_works(context.get("tactics",{}),0 if String(context.get("home_side","attacker"))=="attacker" else 1)
+
+
+func _cap(text:String)->String:
+	return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
+
+
+## One exchange of the recorded battle, played from its record.
+func _autoplay(index:int)->void:
+	if index<0 or index>=full_records.size():return
+	autoplay_index=index;replaying=true;replay_return="ended";phase="resolving"
+	if index==0:
+		view.reset(initial_forces[0],initial_forces[1])
+		if replay_close:_camera("frontline")
+	var after:=_forces_after(index)
+	present(after[0],after[1],full_records[index],replay_outcome if index==full_records.size()-1 else "",full_records.slice(0,index+1))
+	_start_presentation()
+	var frame:Dictionary=replay_frames[index+1] if index+1<replay_frames.size() else {}
+	headline_title.text=_cap(preload("res://scripts/battle_account.gd")._intensity_words(String(full_records[index].get("intensity",""))))
+	headline_note.text="Exchange %d of %d · we lost %d, they lost %d"%[index+1,full_records.size(),int(frame.get("our_lost",0)),int(frame.get("their_lost",0))]
+	_set_caption(String(frame.get("caption","")))
+
+
+## The two sides as they stood after exchange `index` (-1: drawn up).
+func _forces_after(index:int)->Array:
+	var out:Array=final_forces.duplicate(true)
+	for side in 2:
+		var key:="attacker" if side==0 else "defender"
+		var forms:Array=out[side].get("formations",[])
+		for later in range(index+1,full_records.size()):
+			var losses:Array=full_records[later].get(key+"_cohort_losses",[])
+			for i in mini(losses.size(),forms.size()):forms[i]["count"]=int(forms[i].get("count",0))+int(losses[i])
+		_recount_display_force(out[side])
+		if index>=0:out[side]["morale"]=full_records[index].get(key+"_morale",out[side].get("morale",1))
+	return out
+
+
+func _build_caption()->void:
+	var T:=preload("res://scripts/hud/hud_tokens.gd")
+	caption_panel=PanelContainer.new();caption_panel.name="ReplayCaption";caption_panel.mouse_filter=MOUSE_FILTER_IGNORE
+	caption_panel.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,18.0))
+	add_child(caption_panel)
+	caption_label=Label.new();caption_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	T.text(caption_label,"voice_small",T.INK);caption_label.add_theme_font_override("font",T.voice_font())
+	caption_panel.add_child(caption_label)
+
+
+func _set_caption(text:String)->void:
+	if not is_instance_valid(caption_panel):return
+	caption_label.text=text;caption_panel.visible=text!="";_layout()
 
 func present(attacker:Dictionary,defender:Dictionary,record:Dictionary={},outcome:String="",records:Array=[])->void:
 	cached_forces=[attacker.duplicate(true),defender.duplicate(true)];current_record=record.duplicate(true);final_outcome=outcome;round_records=records.duplicate(true)
@@ -316,6 +405,11 @@ func _refresh_armies()->void:
 		var force:Dictionary=cached_forces[side];var losses:Dictionary=BattleLossSummary.from_rounds(round_records,side,_count(force))
 		force_labels[side].title.text=String(force.get("name","Your army" if side==home_side else "Enemy army")).to_upper()+(" · YOURS" if side==home_side else "")
 		force_labels[side].values.text="%d FIGHTING    %d OUT    %d%% MORALE"%[_count(force),int(losses.get("out_of_action",0)),roundi(float(force.get("morale",1))*100)]
+		if replay_only:
+			var start:=_count(initial_forces[side]) if initial_forces.size()==2 else _count(force)
+			force_labels[side].title.text=_cap(String(account.get("band","our band"))) if side==home_side else _cap(String(account.get("enemy","the enemy")))
+			force_labels[side].values.text="%d of %d still standing · %s"%[_count(force),start,preload("res://scripts/battle_account.gd").morale_words(float(force.get("morale",1)))]
+			if phase=="drawn_up":force_labels[side].values.text="%d drawn up"%start
 		force_labels[side].title.tooltip_text="Commander: %s" % String(force.get("commander",{}).get("name","Not recorded"))
 		force_labels[side].values.tooltip_text="Out of action: %d dead · %d wounded · %d fled / scattered. Lasting disabilities: %d. Unclassified: %d. Fighting is the remaining active personnel, not the number of decorative figures."%[int(losses.get("dead",0)),int(losses.get("wounded",0)),int(losses.get("scattered",0)),int(losses.get("disabled",0)),int(losses.get("unclassified",0))]
 	var a:Dictionary=WorldSimulation.military.combat_summary(cached_forces[0],cached_forces[1]);var d:Dictionary=WorldSimulation.military.combat_summary(cached_forces[1],cached_forces[0],float(context.get("terrain_defense",1)))
@@ -326,7 +420,8 @@ func _refresh_armies()->void:
 	momentum_label.add_theme_color_override("font_color",TEAL if momentum_value>=50 else ORANGE)
 	momentum_note.text="Strength share, not odds · Morale breaks at 15%" if current_record.is_empty() else "%s · Morale breaks at 15%%"%String(current_record.get("intensity","Contact"))
 func _resolve()->void:
-	if phase!="orders" or WorldSimulation.military.active_engagement.is_empty():return
+	# A replay never fights the battle again.
+	if replay_only or phase!="orders" or WorldSimulation.military.active_engagement.is_empty():return
 	phase="resolving";resolve_count+=1
 	var committed:Dictionary=WorldSimulation.military.advance_engagement("hold")
 	_capture_round(committed);_start_presentation()
@@ -340,7 +435,7 @@ func _capture_round(committed:Dictionary={})->void:
 	present(context.get("attacker",context.get("attacker_result",{})),context.get("defender",context.get("defender_result",{})),record,String(context.get("outcome","")),records)
 func _start_presentation()->void:
 	phase="resolving";elapsed=0;playback_paused=false
-	if view.live_terrain==null:_camera("director")
+	if view.live_terrain==null and not replay_only:_camera("director")
 	_spawn_losses();_phase_ui()
 	headline_title.text=_event_text(current_record).to_upper()
 	if headline_title.text.is_empty():headline_title.text="CONTACT ON THE LINE"
@@ -360,25 +455,31 @@ func _process(delta:float)->void:
 	view.playback_speed=0 if playback_paused else speed
 	if phase=="resolving":
 		if not playback_paused:elapsed+=delta*speed
-		progress.value=100*minf(1,elapsed/DURATION);progress_note.text="%s ROUND %d · %.1fs / %.0fs"%["REPLAYING" if replaying else "RESOLVING",_round(),minf(elapsed,DURATION),DURATION]
-		headline.visible=elapsed>1.1 and elapsed<DURATION-.4
-		if elapsed>=DURATION:_finish_presentation()
+		progress.value=100*minf(1,elapsed/round_duration);progress_note.text=("Exchange %d of %d · about half an hour of fighting"%[_round(),full_records.size()]) if replay_only else "%s ROUND %d · %.1fs / %.0fs"%["REPLAYING" if replaying else "RESOLVING",_round(),minf(elapsed,round_duration),round_duration]
+		headline.visible=elapsed>1.1 and elapsed<round_duration-.4
+		if elapsed>=round_duration:_finish_presentation()
 	_update_markers()
 	for item in floats:
-		if is_instance_valid(item.node):item.node.position=_formation_point(item.side,item.index)+Vector2(-20,44-elapsed*15);item.node.modulate.a=clampf(1-elapsed/DURATION,0,1)
+		if is_instance_valid(item.node):item.node.position=_formation_point(item.side,item.index)+Vector2(-20,44-elapsed*15);item.node.modulate.a=clampf(1-elapsed/round_duration,0,1)
 func _finish_presentation()->void:
 	if phase!="resolving":return
+	if replaying and replay_only:
+		replaying=false
+		if autoplay_index>=0 and autoplay_index<full_records.size()-1:_autoplay(autoplay_index+1);return
+		autoplay_index=-1;phase="ended";_show_result();_phase_ui();return
 	if replaying:
 		replaying=false;_capture_round();view.reset(initial_forces[0],initial_forces[1]);view.apply_snapshot(cached_forces[0],cached_forces[1],current_record,final_outcome);_rebuild_plates();phase=replay_return
 	else:phase="result" if not WorldSimulation.military.active_engagement.is_empty() else "ended"
 	_show_result();_phase_ui()
 func _skip()->void:
-	if phase=="resolving":elapsed=DURATION;_finish_presentation()
+	if phase=="resolving":elapsed=round_duration;_finish_presentation()
 func _pause()->void:
 	playback_paused=not playback_paused;pause_button.text="Resume" if playback_paused else "Pause"
 func _speed()->void:
 	speed=.5 if speed==1 else 1;speed_button.text="1×" if speed==.5 else "½×"
 func _show_result()->void:
+	if replay_only:
+		_show_replay_result();return
 	var ended:=phase=="ended"
 	result_title.text="ROUND %d COMPLETE"%_round()
 	if ended:result_title.text="VICTORY" if String(context.get("winner",""))==String(cached_forces[home_side].get("name","")) else ("WITHDRAWAL" if bool(context.get("orders",{}).get("retreated",false)) else ("DEFEAT" if not String(context.get("winner","")).is_empty() else "BATTLE ENDED"))
@@ -395,7 +496,27 @@ func _show_result()->void:
 	if not round_records.is_empty():history_choice.select(round_records.size()-1)
 	replay_button.disabled=round_records.is_empty();policy_box.hide();result_return.visible=not ended or not WorldSimulation.military.pending_aftermath.is_empty()
 	result_primary.text="REVIEW AFTERMATH →" if ended and not WorldSimulation.military.pending_aftermath.is_empty() else ("RETURN TO MAP" if ended else "NEXT ORDERS →")
+func _show_replay_result()->void:
+	result_title.text=String(account.get("headline","The battle"))
+	result_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	result_title.add_theme_font_size_override("font_size",26)
+	result_text.text="%s\n\n%s %s"%[preload("res://scripts/battle_account.gd").ledger_line(account.get("ours",{})),String(account.get("now","")),String(account.get("next",""))]
+	history_choice.hide();policy_box.hide();result_return.hide()
+	replay_button.text="Watch again";replay_button.disabled=full_records.is_empty();replay_button.show()
+	result_primary.text="Back to the map"
+	if not WorldSimulation.military.pending_aftermath.is_empty():result_primary.text="Decide the captives"
+
+
 func _continue()->void:
+	if replay_only:
+		if phase in ["ended","drawn_up"]:
+			if WorldSimulation.military.pending_aftermath.is_empty():_close()
+			else:_open_aftermath()
+		elif phase=="aftermath":
+			var chosen:Dictionary=WorldSimulation.military.resolve_aftermath(prisoner_choice.get_item_metadata(prisoner_choice.selected),spoils_choice.get_item_metadata(spoils_choice.selected),general_choice.get_item_metadata(general_choice.selected))
+			result_text.text=String(chosen.get("error",chosen.get("message","Decided.")))
+			if not chosen.has("error"):phase="ended";policy_box.hide();result_primary.text="Back to the map";_phase_ui()
+		return
 	if phase=="result":phase="orders";_rebuild_orders();_phase_ui()
 	elif phase=="ended":
 		if WorldSimulation.military.pending_aftermath.is_empty():_close()
@@ -416,6 +537,9 @@ func _recount_display_force(force:Dictionary)->void:
 	for formation in force.formations:total+=int(formation.get("count",0))
 	force["troops"]=total;force["remaining_troops"]=total
 func _replay()->void:
+	if replay_only:
+		if phase in ["ended","drawn_up"] and not full_records.is_empty():_autoplay(0)
+		return
 	if phase not in ["result","ended"] or round_records.is_empty():return
 	replay_return=phase;replaying=true
 	var index:=history_choice.selected;var historical:Array=cached_forces.duplicate(true)
@@ -474,6 +598,8 @@ func _refresh_log()->void:
 		lines.append("[color=#f2c14e]ROUND %d[/color] · %s\nYour losses: %d · Enemy losses: %d"%[i+1,String(r.get("intensity","Contact")),int(r.get(own+"_losses",0)),int(r.get(enemy+"_losses",0))])
 	log_text.text="\n\n".join(lines) if not lines.is_empty() else "Contact has not begun.\nThe general commands the next exchange."
 func _phase_ui()->void:
+	if replay_only:
+		_replay_phase_ui();return
 	phase_label.text="● ROUND %d · "%(_round()+1 if phase=="orders" else _round())+{"orders":"GENERAL IN COMMAND","resolving":"REPLAY" if replaying else "RESOLVING","result":"ROUND RESULT","ended":"BATTLE ENDED","aftermath":"AFTERMATH"}.get(phase,phase.to_upper())+" · SCHEMATIC DEPLOYMENT"
 	resolve_button.visible=phase=="orders";resolve_button.disabled=false;resolve_button.text="WATCH NEXT EXCHANGE →"
 	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";retreat_button.visible=false
@@ -482,6 +608,19 @@ func _phase_ui()->void:
 	progress_note.text="General-led combat · schematic deployment; cohort positions are not recorded"
 	if phase!="orders" and phase!="resolving":progress_note.text="Simulation paused · every number comes from the battle record"
 	_layout()
+func _replay_phase_ui()->void:
+	var exchange:=autoplay_index+1 if autoplay_index>=0 else full_records.size()
+	phase_label.text={"drawn_up":"DRAWN UP","resolving":"WATCHING · EXCHANGE %d OF %d"%[exchange,full_records.size()],"ended":"THE FIGHT IS OVER","aftermath":"CAPTIVES AND SPOILS"}.get(phase,"WATCHING")
+	resolve_button.visible=false;retreat_button.visible=false
+	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";skip_button.text="Next exchange →"
+	result_panel.visible=phase in ["ended","aftermath"];log_panel.visible=false
+	momentum_panel.visible=false;momentum_back.visible=false
+	vignette.visible=phase=="resolving";headline.hide();pause_button.text="Resume" if playback_paused else "Pause"
+	progress_note.text="Each exchange is about half an hour of fighting · replayed from the record"
+	if is_instance_valid(caption_panel):caption_panel.visible=phase in ["drawn_up","resolving"] and caption_label.text!=""
+	_layout()
+
+
 func _layout()->void:
 	if not is_instance_valid(bottom):return
 	var w:=size.x;var h:=size.y;var compact:=w<1150;var narrow:=w<960
@@ -509,6 +648,9 @@ func _layout()->void:
 	if phase in ["result","ended","aftermath"] and w<1250:log_panel.hide()
 	momentum_back.position=momentum_panel.position-Vector2(12,8);momentum_back.size=momentum_panel.size+Vector2(24,16)
 	bottom.size=Vector2(w-24,0);bottom.position=Vector2(12,h-bottom.get_combined_minimum_size().y-12)
+	if is_instance_valid(caption_panel):
+		var cw:=minf(760.0,w-48.0);caption_panel.size=Vector2(cw,0)
+		caption_panel.position=Vector2((w-cw)*.5,bottom.position.y-caption_panel.get_combined_minimum_size().y-16)
 func _formation_point(side:int,index:int)->Vector2:
 	var forms:=_forms(side)
 	if index<0 or index>=forms.size():return Vector2(-1000,-1000)
@@ -527,7 +669,9 @@ func _rebuild_plates()->void:
 	for side in 2:
 		for i in mini(12,_forms(side).size()):
 			if int(_forms(side)[i].get("count",0))<=0:continue
-			var b:=button(marker_layer,"%s · %s · %d"%["YOUR" if side==home_side else "ENEMY",_name(side,i),int(_forms(side)[i].get("count",0))],_select.bind(i) if side==home_side else _target.bind(i),TEAL if side==home_side else ORANGE)
+			var plate:="%s · %s · %d"%["YOUR" if side==home_side else "ENEMY",_name(side,i),int(_forms(side)[i].get("count",0))]
+			if replay_only:plate="%s %s · %d"%["Our" if side==home_side else String(account.get("enemy","their")).trim_prefix("the ").trim_prefix("The "),String(_forms(side)[i].get("unit","band")).replace("_"," "),int(_forms(side)[i].get("count",0))]
+			var b:=button(marker_layer,plate,_select.bind(i) if side==home_side else _target.bind(i),TEAL if side==home_side else ORANGE)
 			b.custom_minimum_size=Vector2(0,26);b.add_theme_font_size_override("font_size",11);b.add_theme_stylebox_override("normal",style(Color(INK,.82),TEAL if side==home_side else ORANGE,4));plates.append({"node":b,"side":side,"index":i})
 	for group in view.groups:group.banner.visible=false
 	for general in view.generals:

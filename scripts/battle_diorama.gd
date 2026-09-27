@@ -168,3 +168,55 @@ func set_landscape(engagement:Dictionary)->void:
 		city_center=to_local(Vector3(at.x,live_terrain._close_surface_height_at(at.x,at.y),at.y))
 		landscape.live_height=local_ground
 	else:landscape.build(BattleLandscape.encounter_position(engagement),WorldSimulation.world.ground_survey_authority)
+
+
+## Field works a side fought from, drawn in front of its line: a ditch with
+## an earth bank and a row of sharpened stakes (battle_tactics.gd
+## "fortified_camp", in the hearth age "a ditch and stakes"), or dug
+## trenches. Presentation only; the record owns every number.
+var works: Node3D
+
+func set_works(plan: Dictionary, _home_index: int = 0) -> void:
+	if is_instance_valid(works): works.queue_free()
+	works = Node3D.new(); works.name = "FieldWorks"; add_child(works)
+	for side in 2:
+		var key := "attacker" if side == 0 else "defender"
+		var id := String((plan.get(key, {}) as Dictionary).get("id", ""))
+		if id in ["fortified_camp", "entrenched_defence"] and side < armies.size():
+			_build_ditch(side, id == "fortified_camp")
+
+func _build_ditch(side: int, stakes: bool) -> void:
+	var front: ArmyFrontVisual = armies[side]
+	var depth := 0.0; var span := 12.0
+	for section in front.sections:
+		for point in section.polygon:
+			depth = maxf(depth, absf(point.y)); span = maxf(span, absf(point.x) * 2.0)
+	var toward := -1.0 if side == 1 else 1.0
+	var holder := Node3D.new(); holder.name = "Works_%d" % side; front.add_child(holder)
+	var earth := StandardMaterial3D.new(); earth.albedo_color = Color("3d3024"); earth.roughness = 1.0
+	var bank := StandardMaterial3D.new(); bank.albedo_color = Color("7a6446"); bank.roughness = 1.0
+	var wood := StandardMaterial3D.new(); wood.albedo_color = Color("5b4630"); wood.roughness = 0.9
+	var pieces := maxi(4, int(span / 1.5))
+	var width := span * 0.95 / float(pieces)
+	for index in pieces:
+		var x := -span * 0.475 + width * (float(index) + 0.5)
+		for part in [[depth + 0.55, 0.7, 0.16, earth, -0.1], [depth + 0.1, 0.35, 0.28, bank, 0.05]]:
+			var z: float = toward * float(part[0])
+			var box := MeshInstance3D.new(); var mesh := BoxMesh.new()
+			mesh.size = Vector3(width * 1.02, float(part[2]), float(part[1])); box.mesh = mesh
+			box.material_override = part[3]
+			box.position = Vector3(x, float(front.ground.call(Vector2(x, z))) + float(part[4]), z)
+			holder.add_child(box)
+	if not stakes: return
+	var spacing := 0.7
+	var count := maxi(6, int(span * 0.9 / spacing))
+	for index in count:
+		var x := -span * 0.45 + span * 0.9 * float(index) / float(maxi(1, count - 1))
+		var z := toward * (depth + 1.05)
+		var stake := MeshInstance3D.new(); var mesh := CylinderMesh.new()
+		mesh.top_radius = 0.01; mesh.bottom_radius = 0.05; mesh.height = 1.1; mesh.radial_segments = 5
+		stake.mesh = mesh; stake.material_override = wood
+		stake.position = Vector3(x, float(front.ground.call(Vector2(x, z))) + 0.35, z)
+		# Leaning out toward the enemy.
+		stake.rotation = Vector3(deg_to_rad(-38.0) * -toward, 0.0, 0.0)
+		holder.add_child(stake)
