@@ -2708,7 +2708,7 @@ void fragment() {
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
 	// Gusts rolling through the grass, a fainter shimmer over the canopy.
 	float wb_gust=wb_wind_waves(world_position.xz,pixel_world,map_wind,map_wind_clock,wb_motion);
-	earth*=1.0+wb_gust*mix(0.055,0.025,wb_stand_cover);
+	earth*=1.0+wb_gust*mix(0.038,0.020,wb_stand_cover);
 	earth=mix(earth,earth*vec3(1.05,1.05,0.96),max(wb_gust,0.0)*(1.0-wb_stand_cover)*0.5);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
