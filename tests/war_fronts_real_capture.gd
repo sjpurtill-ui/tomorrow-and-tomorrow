@@ -74,6 +74,10 @@ func _run()->void:
 	if alderford: await _alderford()
 	else: await _fixture_war()
 	print("REAL CAPTURE PASS stage=%s dir=%s" % [stage,directory])
+	# Let the terrain's background bakes finish before the scene is freed.
+	var render:Variant=terrain.get("macro_render")
+	var deadline:=Time.get_ticks_msec()+10000
+	while render!=null and render.has_method("ready") and not render.ready() and Time.get_ticks_msec()<deadline: await get_tree().process_frame
 	get_tree().quit(0)
 
 

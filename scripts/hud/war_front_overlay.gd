@@ -79,6 +79,9 @@ var live_fronts:Array=[]
 ## Pocket closure as drawn, keyed by the front it belongs to.
 var live_closure:Dictionary={}
 var settling:=false
+## What the camera shows, for caching drawn geometry between redraws.
+var view_key:=0
+var zone_cache:Dictionary={}
 var ease_elapsed:=0.0
 var ease_frame:=0
 ## Screen hit shapes of the last drawing, for clicks.
@@ -728,6 +731,8 @@ func _draw()->void:
 	var wide:=band in ["continental","world"]
 	var t:=smoothstep(0.0,1.0,blend)
 	var font:=T.voice_font(true)
+	var camera:=_camera()
+	view_key=hash([size,band,camera.global_transform if camera!=null else Transform3D(),camera.size if camera!=null else 0.0,project.is_valid()])
 	# How finely to drape: a few pixels per leg at any zoom.
 	var step:=_world_per_px(_centre_of_scene())*14.0
 	if band!="local":
@@ -801,16 +806,19 @@ func _dashed(points:PackedVector2Array,color:Color,width:float,dash:float,gap:fl
 	if points.size()<2: return
 	var carry:=0.0
 	var drawing:=true
+	var segments:=PackedVector2Array()
 	for i in range(1,points.size()):
 		var a:=points[i-1]; var b:=points[i]
 		var length:=a.distance_to(b)
 		if length<=0.0001: continue
 		var at:=0.0
-		while at<length:
+		while at<length and segments.size()<4096:
 			var span:=minf((dash if drawing else gap)-carry,length-at)
-			if drawing: draw_line(a.lerp(b,at/length),a.lerp(b,(at+span)/length),color,width,true)
+			if drawing: segments.append(a.lerp(b,at/length)); segments.append(a.lerp(b,(at+span)/length))
 			at+=span; carry+=span
 			if carry>=(dash if drawing else gap)-0.001: carry=0.0; drawing=not drawing
+	# One draw call for the whole dashed line.
+	if segments.size()>=2: draw_multiline(segments,color,width,true)
 
 
 static func _offset(points:PackedVector2Array,normals:PackedVector2Array,by:float)->PackedVector2Array:
@@ -840,21 +848,28 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var wide:=band in ["continental","world"]
 	var n:=points.size()
 	var source:PackedVector2Array=data.get("points",PackedVector2Array())
-	var map:=func(k:int)->int: return clampi(roundi(float(k)/float(maxi(1,n-1))*float(maxi(0,source.size()-1))),0,maxi(0,source.size()-1))
+	var last_source:=maxi(0,source.size()-1)
+	var to_source:=float(last_source)/float(maxi(1,n-1))
 	var widths:PackedFloat32Array=data.get("width",PackedFloat32Array())
 	var ages:PackedFloat32Array=data.get("age",PackedFloat32Array())
 	var toward:PackedVector2Array=data.get("toward",PackedVector2Array())
 	var pressure:PackedFloat32Array=data.get("pressure",PackedFloat32Array())
 	var all_stale:=bool(data.get("stale",false)) and ages.is_empty()
-	# Screen normals toward the enemy, one per vertex.
+	# Screen normals toward the enemy, one per vertex. The world "toward" is
+	# carried to the screen by the local projection (two samples per front).
+	var eps:=maxf(0.0001,float(scene.get("sigma",1.0))*0.05)
+	var mid:=world[n/2]
+	var origin:=_screen(mid)
+	var ex:=(_screen(mid+Vector2(eps,0.0))-origin)/eps
+	var ey:=(_screen(mid+Vector2(0.0,eps))-origin)/eps
+	var projectable:=origin.is_finite() and ex.is_finite() and ey.is_finite()
 	var normals:=PackedVector2Array()
 	for i in n:
 		var a:=points[maxi(0,i-1)]; var b:=points[mini(n-1,i+1)]
 		var normal:=(b-a).normalized().orthogonal()
-		var j:int=map.call(i)
-		if j<toward.size():
-			var ahead:=_screen(world[i]+toward[j]*maxf(0.0001,float(scene.get("sigma",1.0))*0.05))
-			if ahead.is_finite() and normal.dot(ahead-points[i])<0.0: normal=-normal
+		var j:=clampi(roundi(float(i)*to_source),0,last_source)
+		if j<toward.size() and projectable:
+			if normal.dot(ex*toward[j].x+ey*toward[j].y)<0.0: normal=-normal
 		elif i>0 and normals[i-1].dot(normal)<0.0: normal=-normal
 		normals.append(normal)
 	if not wide:
@@ -868,7 +883,7 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var base:=2.2 if wide else (2.8 if band=="regional" else 3.2)
 	draw_polyline(points,Color(PAPER,0.7*alpha),base+5.0,true)
 	for i in range(1,n):
-		var j:int=map.call(i)
+		var j:=clampi(roundi(float(i)*to_source),0,last_source)
 		var stale:=all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS))
 		var w:=base+(2.6 if not wide else 1.0)*(float(widths[j]) if j<widths.size() else 0.6)
 		if stale: _dashed(PackedVector2Array([points[i-1],points[i]]),Color(INK,0.5*alpha),2.0,6.0,5.0)
@@ -877,7 +892,7 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	for i in range(stride/2,n-1,stride):
 		var a:=points[i]; var b:=points[i+1]
 		var along:=(b-a).normalized()
-		var j:int=map.call(i)
+		var j:=clampi(roundi(float(i)*to_source),0,last_source)
 		var tooth:=(6.0 if wide else 9.0)+4.0*absf(float(pressure[j]) if j<pressure.size() else 0.0)
 		var color:=Color(THEIRS,0.92*alpha)
 		if all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS)): color.a=0.45*alpha
@@ -895,15 +910,7 @@ func _draw_pocket(pocket:Dictionary,band:String)->void:
 	if ring.size()<3: return
 	var closure:=float(live_closure.get(index,pocket.closure))
 	if _fillable(ring): draw_colored_polygon(ring,Color(THEIRS,0.07+0.08*closure))
-	var box:=Rect2(ring[0],Vector2.ZERO)
-	for p in ring: box=box.expand(p)
-	var spacing:=lerpf(18.0,8.0,closure)
-	var x:=box.position.x-box.size.y
-	var lines:=0
-	while x<box.end.x and lines<48:
-		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),ring):
-			draw_polyline(piece,Color(THEIRS,0.28),1.0,true)
-		x+=spacing; lines+=1
+	_hatch(ring,Color(THEIRS,0.28),lerpf(18.0,8.0,closure),false)
 	var gap_at:=_screen(pocket.gap_at)
 	if closure<0.97 and gap_at.is_finite():
 		draw_arc(gap_at,10.0,0.0,TAU,20,Color(PAPER,0.7),4.0,true)
@@ -1133,28 +1140,50 @@ func _hook(start:Vector2,axis:Vector2,side:Vector2,r:float,progress:float,alpha:
 	if _fillable(head): draw_colored_polygon(head,Color(OURS,0.9*alpha))
 
 
-func _hatch(polygon:PackedVector2Array,color:Color,spacing:float,cross:bool)->void:
+## Hatching as one batch of segments (drawn with a single call).
+static func _hatch_segments(polygon:PackedVector2Array,spacing:float,cross:bool)->Array:
+	var main:=PackedVector2Array(); var other:=PackedVector2Array()
 	var box:=Rect2(polygon[0],Vector2.ZERO)
 	for p in polygon: box=box.expand(p)
 	var lines:=0
 	var x:=box.position.x-box.size.y
 	while x<box.end.x and lines<60:
-		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),polygon): draw_polyline(piece,color,1.1,true)
+		for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.end.y),Vector2(x+box.size.y,box.position.y)]),polygon):
+			for i in range(1,piece.size()): main.append(piece[i-1]); main.append(piece[i])
 		if cross:
-			for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.position.y),Vector2(x+box.size.y,box.end.y)]),polygon): draw_polyline(piece,Color(color,color.a*0.7),1.0,true)
+			for piece in Geometry2D.intersect_polyline_with_polygon(PackedVector2Array([Vector2(x,box.position.y),Vector2(x+box.size.y,box.end.y)]),polygon):
+				for i in range(1,piece.size()): other.append(piece[i-1]); other.append(piece[i])
 		x+=spacing; lines+=1
+	return [main,other]
+
+
+func _hatch(polygon:PackedVector2Array,color:Color,spacing:float,cross:bool)->void:
+	var segments:=_hatch_segments(polygon,spacing,cross)
+	if (segments[0] as PackedVector2Array).size()>=2: draw_multiline(segments[0],color,1.1)
+	if (segments[1] as PackedVector2Array).size()>=2: draw_multiline(segments[1],Color(color,color.a*0.7),1.0)
 
 
 func _draw_zone(zone:Dictionary,band:String)->void:
-	var polygon:=PackedVector2Array()
 	var vertices:PackedVector2Array=zone.vertices
-	var closed:=vertices.duplicate(); closed.append(vertices[0])
-	for run in _drape(closed,_world_per_px(vertices[0])*14.0): polygon.append_array(run)
-	if polygon.size()<3: return
 	var navy:=String(zone.domain)=="navy"
 	var own:=SEA if navy else SKY
 	var hatch_ink:=SEA_LIGHT if navy else SKY
 	var control:=clampf(float(zone.get("control",0.0)),0.0,1.0)
+	var shape:=String(zone.get("shape",""))
+	# The zone's draped outline and hatching change only with the camera or
+	# the zone; while a front eases they are drawn from this cache.
+	var key:=hash([view_key,vertices,snappedf(control,0.02),shape])
+	if not zone_cache.has(key):
+		if zone_cache.size()>32: zone_cache.clear()
+		var draped:=PackedVector2Array()
+		var closed:=vertices.duplicate(); closed.append(vertices[0])
+		for run in _drape(closed,_world_per_px(vertices[0])*14.0): draped.append_array(run)
+		var cached:={"polygon":draped,"hatch":[]}
+		if draped.size()>=3 and (shape in ["hatch","interception","cordon","cordon_wide","pack","battle_line","convoy","crossing"] or not navy):
+			cached.hatch=_hatch_segments(draped,lerpf(22.0,9.0,control),shape=="interception")
+		zone_cache[key]=cached
+	var polygon:PackedVector2Array=zone_cache[key].polygon
+	if polygon.size()<3: return
 	# Contested water or air: our wash where we hold it, theirs where we do not.
 	if _fillable(polygon):
 		draw_colored_polygon(polygon,Color(own,0.08+0.12*control))
@@ -1162,10 +1191,12 @@ func _draw_zone(zone:Dictionary,band:String)->void:
 	var outline:=polygon.duplicate(); outline.append(polygon[0])
 	draw_polyline(outline,Color(PAPER,0.45),3.6,true)
 	_dashed(outline,Color(own,0.95),1.6,8.0,5.0)
-	var shape:=String(zone.get("shape",""))
 	# Hatching whose density follows how firmly the zone is held.
-	if shape in ["hatch","interception","cordon","cordon_wide","pack","battle_line","convoy","crossing"] or not navy:
-		_hatch(polygon,Color(hatch_ink,0.42 if navy else 0.38),lerpf(22.0,9.0,control),shape=="interception")
+	var hatch:Array=zone_cache[key].hatch
+	if not hatch.is_empty():
+		var ink:=Color(hatch_ink,0.42 if navy else 0.38)
+		if (hatch[0] as PackedVector2Array).size()>=2: draw_multiline(hatch[0],ink,1.1)
+		if (hatch[1] as PackedVector2Array).size()>=2: draw_multiline(hatch[1],Color(ink,ink.a*0.7),1.0)
 	if bool(zone.get("belt",false)):
 		# The air-defence belt: a double rim with ticks facing out, where
 		# fighters meet raiders before they reach what lies inside.

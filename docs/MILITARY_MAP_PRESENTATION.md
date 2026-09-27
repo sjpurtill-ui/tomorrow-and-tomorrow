@@ -179,11 +179,9 @@ Each day, inside the zone, the fleet or air commander chooses a zone tactic (`ZO
 - **Caption.** The commander's tactic labels the zone.
 - **Honesty.** Only our own zones and dated contacts are drawn.
 
-**Designed only, not built:**
-- Convoy lanes drawn from `logistics` convoys, with escort ticks.
-- Air-defence belts, which need a layer showing where anti-air units are.
-- Sea fronts as contested water between two fleets' zones, which need rival zones to become public observations.
-- A blockade that cuts a port's supply over time; today the land siege model owns `blockade`.
+**Built in round two (section 8):** convoy lanes, air-defence belts and a blockade that squeezes a port's supply and trade over time.
+
+**Still designed only:** sea fronts as contested water between two fleets' zones. They need rival zones to become public observations first.
 
 ## 6. Implemented vs designed only
 
@@ -197,12 +195,14 @@ Each day, inside the zone, the fleet or air commander chooses a zone tactic (`ZO
 - The land tactic catalogue with gates, bounded resolution, reports, the engagement card, the general campaign context and war-loop raids.
 - Naval and air zone tactics with bounded effects and events.
 
-**Designed only:**
-- Clicking a front or clash to open its general. Clicks pass through today, and counters already open War Planning.
-- Clash marks for the command hierarchy's parallel battles (`command_hierarchy.data.battles`); only the active engagement is drawn.
-- A fallback line taken from a general's actual withdrawal plan rather than a fixed offset.
+**Designed in round one, built in round two (section 8):**
+- Clicking a front, arrow, clash, zone, lane or formation mark to open a note and talk to its general or the Marshal.
+- Clash marks for the command hierarchy's parallel battles.
+- A fallback line taken from each general's own withdrawal route.
 - Corps and army-group marks at continental zoom.
-- The sea and air items listed in section 5.
+- Convoy lanes, air-defence belts and blockades that bite.
+
+**Still designed only:** sea fronts between rival fleets (section 5).
 
 **Earlier draft.** A forked copy of this task wrote the first draft of this note and a first `battle_tactics.gd`. The final catalogue keeps three ideas from that draft:
 - equipment-weighted composition;
@@ -235,3 +235,143 @@ Each day, inside the zone, the fleet or air commander chooses a zone tactic (`ZO
   - the armoured-breakthrough pocket and their defence in depth, each named;
   - the hatched air zone with its sortie arc;
   - the blockade cordon of pickets offshore.
+
+
+## 8. Round two: the real map, captions, conversation and blockades
+
+Branch `codex/war-fronts-2`. Round one was checked on a flat stand-in. This round was checked on the real renderer: the real terrain, city cards, great works, borders, army counters and HUD, using a copy of a mature save (day 30,162, "Seanstone") and the authored Alderford war.
+
+### What was wrong on the real map (the "before" plates)
+
+- **Captions collided.** They landed on city cards, on each other and on the army counters. The siege caption and the objective mark covered the besieged town's card.
+- **War ink sat above the city cards.** The overlay shared canvas layer 0 with the cards and was added later, so it drew on top.
+- **Zones were invisible on real ground.** The air arm's olive ink matched the olive terrain, and the fleet's slate matched dark water.
+- **Continental zoom collapsed.** Every caption and clash diagram piled into one knot. The front washes produced "triangulation failed" errors when the line folded on screen.
+- **The Alderford war did not appear.** The coalition's two hosts were missing from the main map; the only mark was a straight march ribbon.
+- **A new report restarted the morph.** The front jumped back to its last target before easing again.
+
+### What changed
+
+- **Captions** use the city labels' placement test. A new shared `CityLabels.free_spot` is used by the great-work cards and by `CityLabels.place_notes`.
+  - Captions are placed highest priority first: battle and pocket, then siege, harbour and formation mark, then zone and sighting, then stale-report age.
+  - They keep clear of city cards and pins, great-work emblems and cards, the feud tags, army and contact counters, and the open note.
+  - A caption with no clear spot is dropped, never overlapped. Each keeps its spot between frames.
+  - Captions use the book serif in italic, as the chart letters places.
+- **Layering.** War ink moved to canvas layer -1, beneath the city cards and above the 3D map. The note is on its own layer above.
+- **Contrast.** Fleet ink is a deep sea blue with pale hatching, which reads on dark water. The air arm uses a cool slate that no ground matches. Zone outlines have a paper halo.
+- **Washes and arrows.** Each side's ground is drawn as two soft strokes, not as polygons, so a folded line cannot fail. Plan arrows have a paper halo and a stronger fill.
+- **Scale per zoom band.**
+  - Battle diagrams are sized to the gap between the two sides on screen, capped at 56 px close up and 40 px regionally.
+  - A battle smaller than 20 px, or any battle at continental scale, becomes a crossed-strokes mark with its caption.
+  - At continental scale the front loses its washes, and captions show only formation marks.
+  - Long lines (supply roads, fallback lines, lanes, zone edges) are subdivided before projection, so they drape over hills and split where they pass behind the camera.
+
+### Newly built
+
+- **Talk from the map.** A click on a front, a plan arrow, a battle, a pocket, a siege, a fallback line, a zone, a convoy lane, a blockaded harbour, a formation mark or a dated sighting opens a small paper note.
+  - The note says in plain words:
+    - who holds that stretch;
+    - what the general is doing (his own `command_status`);
+    - the tactic being fought;
+    - where he would fall back;
+    - how old the reports are.
+  - It offers one conversation, never an order:
+    - a named war leader is summoned into the court by `figure_id`;
+    - the Alderford general opens his own campaign screen;
+    - otherwise the Marshal's office holder is summoned, or the court opens. The Marshal's office commands the fleet and air arm, because no admiral office exists yet.
+  - A click on an army counter still selects it, as before, and its general's note opens too.
+- **Parallel battles.** `battles_to_draw` draws the watched engagement plus every battle in `command_hierarchy.data.battles`, each once, up to 8. Each carries its own tactic shape and caption. Its note says it was fought under the command staff's plan.
+- **Fallback from withdrawal intent.** Each general's fallback point is one day's march (`_field_army_speed`) along the road he would actually take:
+  - the Alderford board's road home (`GeneralCampaign.route`);
+  - his commanded route, when he is already withdrawing;
+  - for a commanded army, the land route home (`land_command.route`, cached by position);
+  - otherwise, the road home, which is where the engine sends a beaten army.
+
+  The fallback line runs through the holders' points in order along the front. A single army gets a short line across its road back. A general who is withdrawing shows his road home, dashed, in place of an attack arrow.
+- **Corps and army groups.** `echelons_from` reads the command tree:
+  - corps (level 7) and armies (level 8) with troops;
+  - organised headquarters whose children are all corps or larger, drawn as army groups.
+
+  Each sits where its armies were last reported. At continental and world zoom it is drawn as an inked plate with its echelon crosses (XXX corps, XXXX army, XXXXX army group). A group's own corps give way to its mark when they would crowd it.
+- **Pockets.** A front that closes round a seen enemy host, with none of ours inside, is a pocket. It is hatched inside. While a gap remains it has a ring at the gap and the caption "Pocket closing: about N thousand, K km gap". Once the ring closes, the caption reads "cut off". The closure eases.
+- **Dated sightings without counters.** The Alderford coalition's hosts are drawn where the general last saw them (`state.seen`), fading with age, e.g. "Bracken Hold: about 160, seen today". Nothing newer is shown.
+- **Convoy lanes.** Each player convoy (`joint_operations.state.convoys`) is drawn as a dashed lane for the route still to run:
+  - escort ticks where `convoy_escort` power works that water;
+  - a raider's warning where hostile `convoy_raiding` power does;
+  - a note naming the branch commander.
+- **Air-defence belts.** An air zone on `interception` is drawn as a belt: a double rim with ticks facing out. Under ground-directed interception, watchers' rings appear at the airfield.
+- **Blockades that bite** (`scripts/naval_blockade.gd`, run daily from `joint_operations._advance_blockades`).
+  - **Level.** A fleet whose commander chose a close or distant blockade raises the level of every hostile port inside its zone. The rate is 1/90 a day for a close blockade and 1/180 for a distant one, times how firmly the zone is held. The level caps at 0.6 (close) or 0.4 (distant). Once the fleet leaves it eases by 1/30 a day.
+  - **Trade.** A port loses at most 0.8 × level of its sea trade, about half at the close cap. This applies to AI–AI and player–AI trade in `civilization_system`.
+  - **Fish.** Our own blockaded port loses at most 0.5 × level of its fish harvest (`food_system`).
+  - **A whole people.** A blockaded civilisation's food output falls by up to 0.35 × exposure and its supply by up to 0.3 × exposure, through `siege_effects_for_civilization`. Exposure is the level weighted by the share of its people at that port.
+  - **Calibration.** Blockades of the sail and steam eras cut a port's sea trade by a half to four fifths within months. Runners still got through, and food fell far less than trade because most food came overland.
+  - **Map.** The cordon closes and gains pickets as the level rises. The port's caption reads "Blockaded N days: sea trade X% down". Our own blockaded harbour shows their cordon in their ink.
+  - **Saves.** The ledger is saved as `joint_operations.state.blockades` (bounded to 64 ports and validated). Older saves load with an empty ledger.
+- **Motion.** The fronts no longer restart a 0.9 s morph on each report.
+  - Every drawn front is carried on 48 points and chases its newest derivation with a 0.5 s time constant, so control shifting over days reads as a line that eases.
+  - A new report mid-ease continues from where the line is drawn, with no jump.
+  - A new front unrolls from its middle, and one that is gone fades where it was.
+  - A test caps any one frame's movement at a small share of the change.
+  - Pocket closure and battle shapes ease the same way.
+
+### Cost (measured on the real renderer, 1600×900, fixture war with 5 armies, 6 sightings, 2 battles, a siege, 2 zones, a lane and a harbour)
+
+| Measure | Value |
+|---|---|
+| Compose | 21–62 µs |
+| Full draw with the camera still | 2.2 ms, and 0 redraws over 120 still frames |
+| While a front eases | redrawn at most 30 times a second (61 redraws in 120 frames), worst draw 5.2 ms, settled within 2 s |
+
+The costs are bounded as follows:
+- Zone outlines and hatching are cached per camera view.
+- Hatching and dashes are drawn as one batch per line.
+- Heights are cached on a 50 m grid.
+- A headless compose of 200 against 400 armies stays under 60 ms, with fewer than 120 primitives.
+
+### Captures (real renderer, not committed)
+
+The plates are written to `artifacts/war_fronts_real/` by `tests/war_fronts_real_capture.tscn`, run only through `tools/run_isolated_gpu_probe.ps1`. That run used a test-only `override.cfg` pointing `user://` at a private copy of the quicksave.
+
+The save is still at the hearth. The fixture sets the presentation to a staffed theatre war (`mode: theatre`, `stage: reckoned`) near the real home and its nearest known foreign town, Tsaren.
+
+**Before** (round-one code, same fixture):
+- `mature_regional_before`: captions over the fronts and cards.
+- `mature_local_before`: a readable front; the zone ink is invisible.
+- `mature_continental_before`: everything piled into one knot, plus triangulation errors in the log.
+- `alderford_local_before`: one march ribbon and no enemy at all.
+
+**After:**
+- `mature_regional_after` (200 km) and `mature_regional-wide_after` (453 km): captions clear of cards and counters; the air-defence belt in slate; battle diagrams scaled.
+- `mature_local_after`: the front with both washes, the stale stretch, plan and enemy arrows, and the fallback line from the generals' roads.
+- `mature_continental_after`: the "Northern Group · 54,000" army-group mark in place of its two corps; the harbour cordon.
+- `mature_local_note_after`: the note opened on the front.
+- `mature_local_motion0/1/2_after`: the line easing as their hosts are pushed back, a third of a second apart.
+- `alderford_local_after`: the expedition's dotted track and the two coalition hosts as dated marks.
+
+### Tests
+
+`tests/test_war_fronts_round_two.gd` (16 cases) covers:
+- caption placement: no overlap, drop order, stability, and the shared test with great works;
+- the front note and its conversation-only action;
+- summoning a named general;
+- parallel battles;
+- fallback along the road, and a withdrawing general's road;
+- corps and army groups;
+- the blockade over a year (slow, capped, eases away, bounded effects) and its campaign wiring;
+- save validation of the ledger;
+- belts and bounded lanes;
+- easing without jumps;
+- pocket detection and closure easing;
+- theatre-scale cost;
+- dated marks for hosts with no counter.
+
+`tests/test_war_front_model.gd` now expects the raid-age band's own track.
+
+### Limits
+
+- **The captures use a fixture.** The mature save has no war, so the enemy side is supplied through the overlay's test-only `extra_inputs`. Our armies are real field armies in the private copy. Enemy counters for the fixture hosts are therefore absent. The Alderford plate is the authored war itself.
+- **Army counters crowd the ground.** At regional and continental zoom, the terrain's army counters and their 3D labels still cover much of a small front. Their scale belongs to `local_terrain`, and this round did not change it.
+- **The fleet and air arm answer through the Marshal.** They have no named commanders of their own yet.
+- **Rival fleets' zones are not observed**, so sea fronts between fleets remain designed only.
+- **Fixture change.** The "before" fixture had the second host at 9,000; the "after" fixture has it at 30,000, so that two corps form the army group.
