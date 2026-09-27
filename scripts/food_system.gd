@@ -191,9 +191,15 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	for pool in storage_loss:
 		spoilage[pool]=float(spoilage.get(pool,0.0))+float(storage_loss[pool])
 	var eaten:=float(consumed[FRESH])+float(consumed[STORED])
-	var intake_ratio:=clampf(eaten/maxf(0.01,demand),0.0,1.0)
 	var accessible_intake:=clampf(eaten/maxf(0.01,accessible_demand),0.0,1.0)
 	var army_delivered:=army_accessible*accessible_intake
+	# The people at home eat from home stores; soldiers' rations that never
+	# reached the field are the soldiers' hunger (record_daily_provisions), not
+	# a shortfall at the home fires. When stores truly run short, home folk and
+	# the rations being carried out share the shortage alike.
+	var home_need:=maxf(0.0,accessible_demand-army_accessible)
+	var home_eaten:=home_need*accessible_intake
+	var intake_ratio:=accessible_intake if home_need>0.001 else 1.0
 	if military_campaign!=null and military_campaign.has_method("record_daily_provisions"):
 		military_campaign.record_daily_provisions(army_original,army_delivered,credited)
 	var diet_quality:=_diet_quality(consumed,eaten,harvest)
@@ -203,7 +209,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		# The report, forecast and history describe one representative day.
 		for record:Dictionary in [harvest,consumed,spoilage,preserved]:
 			for key in record:record[key]=float(record[key])/span
-		demand/=span;eaten/=span;army_required/=span;army_delivered/=span;workers/=span
+		demand/=span;eaten/=span;army_required/=span;army_delivered/=span;workers/=span;home_need/=span;home_eaten/=span
 		initial_stock=_stock_total()-(_stock_total()-initial_stock)/span
 	var total:=_stock_total()
 	var spoilage_total:=0.0
@@ -230,7 +236,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_production":production_total,
 		"food_consumption":demand,
 		"food_eaten":eaten,
-		"food_shortfall":maxf(0.0,demand-eaten),
+		"food_shortfall":maxf(0.0,home_need-home_eaten),
+		"food_home_need":home_need,
+		"food_home_eaten":home_eaten,
 		"food_intake_ratio":intake_ratio,
 		"food_balance":production_total/maxf(0.01,demand)-1.0,
 		"food_net":net,
@@ -254,6 +262,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_techniques":_technique_levers().duplicate(),
 		"army_provisions_required":army_required,
 		"army_provisions_delivered":army_delivered,
+		"army_provisions_short":maxf(0.0,army_required-army_delivered),
 		"army_provision_delivery_ratio":provision_delivery_ratio,
 		"food_sources":sources,
 		"food_kcal_required":demand*KCAL_PER_RATION,
