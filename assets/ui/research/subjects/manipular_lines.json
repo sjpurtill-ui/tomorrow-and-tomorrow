@@ -1,0 +1,14 @@
+{
+  "id": "manipular_lines",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9e662afd-12a3-46f6-b67f-586e1105dfd4.png",
+  "source_file": "exec-9e662afd-12a3-46f6-b67f-586e1105dfd4.png",
+  "creative_brief": "Small blocks of men in three lines, with gaps between, can relieve a tired front and close around the enemy. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/manipular_lines-v1.png",
+  "sha256": "976d152aac0bc69bc75169aebc50190d065f42c1413f1381e251dbd6fffe49b0",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
