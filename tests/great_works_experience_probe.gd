@@ -504,8 +504,7 @@ func _map_glow()->void:
 	var scars:=0
 	for root in parent.get_children():
 		if root.get_node_or_null("Halo")==null:continue
-		var label:=root.get_node_or_null("Name") as Label3D
-		if label!=null and label.text.contains("Dedicated"):halos+=1
+		if String(MapVisual.map_mark(root).get("state",""))=="dedicated":halos+=1
 		else:scars+=1
 	if halos<1:_fail("no dedicated work glows on the map")
 	if scars<1:_fail("the ruin has no subdued marker")

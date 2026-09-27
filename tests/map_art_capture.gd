@@ -46,6 +46,7 @@ func _ready()->void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	var lod=preload("res://scripts/terrain_lod.gd")
 	var target:Vector3=GameState.settlement_founded_at
+	if "--great-works" in args:_seed_great_works(target)
 	if "--river" in args:
 		# Look at the world river instead (charted here for this capture only).
 		var river_z:=clampf(target.z,-600.0,600.0)
@@ -72,3 +73,34 @@ func _ready()->void:
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
 		print("MAP_ART_CAPTURE: ",path," frames=",frames," patch=",terrain.regional_patch_span,"/",terrain.regional_patch_resolution)
 	get_tree().quit(0)
+
+## `--great-works`: several works of different shapes, materials and stages
+## around the home settlement (one without a surveyed site, as older saves have).
+func _seed_great_works(center:Vector3)->void:
+	var city:Dictionary={}
+	for settlement:Dictionary in GameState.player_settlements:
+		if bool(settlement.get("primary",false)) or city.is_empty():city=settlement
+	if city.is_empty():return
+	var home:Vector2=city.get("position",Vector2(center.x,center.z))
+	var concept:=preload("res://scripts/wonder_concept.gd")
+	var catalog:=preload("res://scripts/undertaking_catalog.gd")
+	var works:=[["tower","honor_dead","grand","stone","functioning",1.0,Vector2(.34,-.22),true],
+		["colossus","honor_dead","audacious","brick","building",.55,Vector2(-.36,-.18),false],
+		["hall","bind_tribes","modest","timber","building",.15,Vector2(.05,.42),false],
+		["mound","honor_dead","grand","earth","ruined",.9,Vector2(-.30,.30),false],
+		["ring","bind_tribes","grand","stone","functioning",1.0,Vector2(.44,.20),false]]
+	var list:Array=[]
+	for i in works.size():
+		var w:Array=works[i]
+		var id:String=concept.make_id(w[0],w[1],w[2],w[3],1,"cap%d" % i)
+		var d:Dictionary=catalog.get_definition(id)
+		var record:={"id":id,"policy":"careful","status":w[4],"progress":float(d.work)*float(w[5]),"condition":.4 if w[4]=="ruined" else 1.0,"site":{"position":home+Vector2(w[6]),"angle":.4*i}}
+		if bool(w[7]):record.dedicated_day=1
+		if w[4]=="ruined":record.outcome="collapse"
+		list.append(record)
+	# An older record without a surveyed site sits at the default offset.
+	var legacy_id:String=concept.make_id("tower","honor_dead","modest","stone",1,"capold")
+	list.append({"id":legacy_id,"policy":"careful","status":"building","progress":float(catalog.get_definition(legacy_id).work)*.08,"condition":1.0})
+	city.undertakings=list
+	print("MAP_ART_CAPTURE: seeded ",list.size()," great works around ",home)
+	terrain._refresh_undertaking_visuals(true)

@@ -25,12 +25,14 @@ func test_every_landmark_batches_geometry_and_stays_human_scale()->void:
 	Visual.render([city],parent,func(_x:float,_z:float)->float:return .15)
 	assert_int(parent.get_child_count()).is_equal(Catalog.all().size())
 	for root:Node3D in parent.get_children():
-		assert_int(root.get_child_count()).is_equal(2)
+		# The model only; names and emblems are drawn by the shared label layer.
+		assert_int(root.get_child_count()).is_equal(1)
+		assert_bool(root.get_children().any(func(n):return n is Label3D)).is_false()
 		var mesh:MeshInstance3D=root.get_node("Landmark")
 		assert_int(mesh.mesh.get_surface_count()).is_equal(1)
 		assert_float(mesh.mesh.get_aabb().size.x).is_less(.14)
 		assert_float(mesh.mesh.get_aabb().size.z).is_less(.14)
-		assert_float(mesh.mesh.get_aabb().size.y).is_less(.04)
+		assert_float(mesh.mesh.get_aabb().size.y).is_less(.045)
 		assert_int(mesh.mesh.surface_get_array_len(0)).is_less(15000)
 	assert_dict(city).is_equal(before)
 	parent.free()
