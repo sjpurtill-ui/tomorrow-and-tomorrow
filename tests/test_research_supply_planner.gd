@@ -11,15 +11,22 @@ func source(stage:String="surveyed",stock:float=0)->Dictionary:
 	WorldSimulation.state.resource_deposits.clear();WorldSimulation.state.resource_deposits.append(item)
 	WorldSimulation.state.resource_stockpiles.Stone=stock
 	WorldSimulation.state.population_allocations.Extraction=5
+	# Year 10: joinery, stone's processing method, is open by then.
+	WorldSimulation.state.elapsed_days=3650
 	return item
-func test_alternative_route_finds_eligible_stone_foundation_without_unlocking_joinery()->void:
+func test_stone_shortage_points_to_its_open_processing_method_without_unlocking_it()->void:
+	# The founding kit now includes cordage, joinery's only foundation, so a
+	# stone shortage points straight at joinery once its age has come.
 	WorldSimulation.scoped("supply_ruler",func()->void:
 		source()
-		var result:=P.frontier("joinery")
-		assert_bool(result.has("stone_sorting")).is_true()
-		assert_bool(result.has("joinery")).is_false()
-		assert_bool(P.recommendation().id=="stone_sorting").is_true()
+		assert_dict(P.frontier("joinery")).is_equal({"joinery":0})
+		var order:=P.recommendation()
+		assert_str(String(order.id)).is_equal("joinery")
+		assert_str(String(order.resource)).is_equal("Stone")
 		assert_bool("joinery" in WorldSimulation.state.known_discoveries).is_false()
+		# Before its age the planner suggests nothing it could not start.
+		WorldSimulation.state.elapsed_days=0
+		assert_dict(P.recommendation()).is_empty()
 	)
 func test_hidden_unsurveyed_exhausted_or_supplied_sources_do_not_drive_research()->void:
 	WorldSimulation.scoped("supply_ruler",func()->void:
@@ -31,11 +38,12 @@ func test_hidden_unsurveyed_exhausted_or_supplied_sources_do_not_drive_research(
 	)
 func test_learned_foundation_moves_frontier_forward_and_still_respects_material_basis()->void:
 	WorldSimulation.scoped("supply_ruler",func()->void:
-		source();WorldSimulation.state.known_discoveries.append("stone_sorting")
-		var timber:=WorldSimulation.resources._deposit("Timber",Vector3.ZERO,.8,1000,1);timber.stage="accessible";WorldSimulation.state.resource_deposits.append(timber)
-		assert_bool(P.frontier("joinery").has("joinery")).is_false()
-		WorldSimulation.discovery.latest_context["timber"]=1.0
-		WorldSimulation.discovery.latest_context["construction"]=1.0
+		# Without cordage the frontier is cordage, one step before joinery.
+		source();WorldSimulation.state.known_discoveries.erase("cordage")
+		var before:=P.frontier("joinery")
+		assert_bool(before.has("joinery")).is_false()
+		assert_int(int(before.get("cordage",-1))).is_equal(1)
+		WorldSimulation.state.known_discoveries.append("cordage")
 		assert_bool(P.frontier("joinery").has("joinery")).is_true()
 		WorldSimulation.state.known_discoveries.append("joinery")
 		assert_dict(P.frontier("joinery")).is_empty()
@@ -44,6 +52,7 @@ func test_controller_redirects_one_existing_point_and_selects_actual_investigati
 	var player_before:=GameState.research_allocations.duplicate(true)
 	WorldSimulation.scoped("supply_ruler",func()->void:
 		source()
+		var known_before:int=WorldSimulation.state.known_discoveries.size()
 		var weights:Dictionary={}
 		for domain:String in S.DOMAINS:
 			weights[domain]=.1
@@ -54,8 +63,8 @@ func test_controller_redirects_one_existing_point_and_selects_actual_investigati
 		var total:=0
 		for value in WorldSimulation.state.research_allocations.values():total+=int(value)
 		assert_int(total).is_equal(3)
-		assert_bool("stone_sorting" in WorldSimulation.state.active_investigations.values()).is_true()
-		assert_int(WorldSimulation.state.known_discoveries.size()).is_equal(0)
+		assert_bool("joinery" in WorldSimulation.state.active_investigations.values()).is_true()
+		assert_int(WorldSimulation.state.known_discoveries.size()).is_equal(known_before)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Stone)).is_equal(0.0)
 	)
 	assert_dict(GameState.research_allocations).is_equal(player_before)
