@@ -1,0 +1,14 @@
+{
+  "id": "trough_leveling_table",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e57c6e63-a0ad-45ea-8926-a2e3ed180924.png",
+  "source_file": "exec-e57c6e63-a0ad-45ea-8926-a2e3ed180924.png",
+  "creative_brief": "A long table with a water-filled groove along its top shows true level where a plumb line alone is fooled by the wind. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/trough_leveling_table-v1.png",
+  "sha256": "8502d927690898c9a74ca5169c984d996c5003382e94caa0c13f11710f5a87bf",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

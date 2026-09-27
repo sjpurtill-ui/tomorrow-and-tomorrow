@@ -1,0 +1,14 @@
+{
+  "id": "mineral_specific_gravity",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8df27500-61f6-45f3-a55f-36972b83b4d4.png",
+  "source_file": "exec-8df27500-61f6-45f3-a55f-36972b83b4d4.png",
+  "creative_brief": "Weighed in air and then in water, an ingot shows whether its gold has been thinned with silver. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/mineral_specific_gravity-v1.png",
+  "sha256": "fb8100a64ee94a4bca1db76432399b04196c69eb8259a7b752349a9f4d4d0ced",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

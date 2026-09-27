@@ -1,0 +1,14 @@
+{
+  "id": "stamped_eye_salves",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-92a9af65-7baf-408b-9f7a-71fe972e9650.png",
+  "source_file": "exec-92a9af65-7baf-408b-9f7a-71fe972e9650.png",
+  "creative_brief": "Eye salves are rolled into sticks and stamped with the maker's name and the ailment they treat. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/stamped_eye_salves-v1.png",
+  "sha256": "ce85ef143d50882b3933078e91cbde16b5415f3061f3f124ae88f1d99aa69864",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

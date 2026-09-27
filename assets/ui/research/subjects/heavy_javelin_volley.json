@@ -1,0 +1,14 @@
+{
+  "id": "heavy_javelin_volley",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b7c923c8-4160-439b-9c23-6ed878a5cdca.png",
+  "source_file": "exec-b7c923c8-4160-439b-9c23-6ed878a5cdca.png",
+  "creative_brief": "Each man throws two heavy javelins that pin the enemy's shields together, then draws his sword and charges. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/heavy_javelin_volley-v1.png",
+  "sha256": "3ff57b41c2eaa172a873e1f1f0bbd7e5917f506573c90a23bd8ec0196c8f1ab6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

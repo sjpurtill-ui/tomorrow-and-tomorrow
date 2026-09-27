@@ -1,0 +1,14 @@
+{
+  "id": "birthing_chair",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-757478d2-a258-4ee7-8c99-9466df9df47c.png",
+  "source_file": "exec-757478d2-a258-4ee7-8c99-9466df9df47c.png",
+  "creative_brief": "A chair with hand grips and a cut-out seat helps the mother push while the midwife receives the child. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/birthing_chair-v1.png",
+  "sha256": "b31ed0c56e02e95e0d7dea61e15f3c9643b3b23e3749c640d411756a30ef8b22",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

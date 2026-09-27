@@ -1,0 +1,14 @@
+{
+  "id": "collated_critical_editions",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7a17f98f-13bf-47c2-97e0-540b1bbefd3e.png",
+  "source_file": "exec-7a17f98f-13bf-47c2-97e0-540b1bbefd3e.png",
+  "creative_brief": "Editors compare many copies of an old poem line by line, and mark every reading they doubt. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/collated_critical_editions-v1.png",
+  "sha256": "2c7c363a25cb4989ef81528a4030ab9b48393bdee0a00c3eb572154c8118275a",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

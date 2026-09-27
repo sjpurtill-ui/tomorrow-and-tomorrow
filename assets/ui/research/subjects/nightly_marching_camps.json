@@ -1,0 +1,14 @@
+{
+  "id": "nightly_marching_camps",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3bd47009-7d6c-443a-8dd9-f27b3e4f9e7c.png",
+  "source_file": "exec-3bd47009-7d6c-443a-8dd9-f27b3e4f9e7c.png",
+  "creative_brief": "Every evening the army digs a ditch and rampart to the same plan, and sleeps safe in enemy country. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/nightly_marching_camps-v1.png",
+  "sha256": "6c1f11584d661b71b8e7327c55d50f50fccc7667c8d00cf04e1dc270a5066bb1",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

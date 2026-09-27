@@ -1,0 +1,14 @@
+{
+  "id": "compound_antidotes",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-063009d5-1345-4acc-aea3-6e2c7d28a2b7.png",
+  "source_file": "exec-063009d5-1345-4acc-aea3-6e2c7d28a2b7.png",
+  "creative_brief": "Antidotes of dozens of ingredients are compounded against poison and snakebite and sold dear to the wealthy. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/compound_antidotes-v1.png",
+  "sha256": "9bd1561593c037e93ea13a9dd271066b3fecc36e05bb09660b6efe12bbe9f15c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

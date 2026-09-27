@@ -1,0 +1,14 @@
+{
+  "id": "exhaustion_area_method",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-389045c8-3295-47a1-83b8-266bd3c6a0ce.png",
+  "source_file": "exec-389045c8-3295-47a1-83b8-266bd3c6a0ce.png",
+  "creative_brief": "Curved areas and volumes are hemmed in by ever finer straight-sided figures until no gap remains. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/exhaustion_area_method-v1.png",
+  "sha256": "51371a8c1078ff7c865de39a6e9ea2e1188fddcbc64be013be39ba8077bc0d7b",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

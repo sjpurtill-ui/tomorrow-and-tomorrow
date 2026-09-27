@@ -1,0 +1,14 @@
+{
+  "id": "piston_force_pumps",
+  "line": "infrastructure",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-847ac152-adf2-428b-80e2-e802dc6bb684.png",
+  "source_file": "exec-847ac152-adf2-428b-80e2-e802dc6bb684.png",
+  "creative_brief": "Two bronze cylinders with pistons force water up a pipe in spurts, enough to throw it onto a burning roof. Paint it as a classical antiquity scene.",
+  "medium": "Casein gouache",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/piston_force_pumps-v1.png",
+  "sha256": "0c0ee3455896801381312c4a55c67f96009931f09257f86e1febea1fe8e5de81",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
