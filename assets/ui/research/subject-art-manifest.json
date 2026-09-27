@@ -3835,5 +3835,21 @@
   "winter_herder_return": {"path": "res://assets/ui/research/subjects/winter_herder_return-v1.png", "focus": [0.5, 0.5]},
   "boundary_markers_parallel_crews": {"path": "res://assets/ui/research/subjects/boundary_markers_parallel_crews-v1.png", "focus": [0.5, 0.5]},
   "crutches": {"path": "res://assets/ui/research/subjects/crutches-v1.png", "focus": [0.5, 0.5]},
-  "painted_pottery": {"path": "res://assets/ui/research/subjects/painted_pottery-v1.png", "focus": [0.5, 0.5]}
+  "painted_pottery": {"path": "res://assets/ui/research/subjects/painted_pottery-v1.png", "focus": [0.5, 0.5]},
+  "bride_wealth_gifts": {"path": "res://assets/ui/research/subjects/bride_wealth_gifts-v1.png", "focus": [0.5, 0.5]},
+  "field_boundary_markers": {"path": "res://assets/ui/research/subjects/field_boundary_markers-v1.png", "focus": [0.5, 0.5]},
+  "resin_sealed_wine": {"path": "res://assets/ui/research/subjects/resin_sealed_wine-v1.png", "focus": [0.5, 0.5]},
+  "rollers_and_runners": {"path": "res://assets/ui/research/subjects/rollers_and_runners-v1.png", "focus": [0.5, 0.5]},
+  "shellfish_bed_recovery": {"path": "res://assets/ui/research/subjects/shellfish_bed_recovery-v1.png", "focus": [0.5, 0.5]},
+  "cross_training_circuits": {"path": "res://assets/ui/research/subjects/cross_training_circuits-v1.png", "focus": [0.5, 0.5]},
+  "heatstroke_care": {"path": "res://assets/ui/research/subjects/heatstroke_care-v1.png", "focus": [0.5, 0.5]},
+  "native_copper_working": {"path": "res://assets/ui/research/subjects/native_copper_working-v1.png", "focus": [0.5, 0.5]},
+  "captive_adoption": {"path": "res://assets/ui/research/subjects/captive_adoption-v1.png", "focus": [0.5, 0.5]},
+  "defensive_ditch_siting": {"path": "res://assets/ui/research/subjects/defensive_ditch_siting-v1.png", "focus": [0.5, 0.5]},
+  "labor_debt_tallies": {"path": "res://assets/ui/research/subjects/labor_debt_tallies-v1.png", "focus": [0.5, 0.5]},
+  "paired_signal_confirmation": {"path": "res://assets/ui/research/subjects/paired_signal_confirmation-v1.png", "focus": [0.5, 0.5]},
+  "pressed_cheese": {"path": "res://assets/ui/research/subjects/pressed_cheese-v1.png", "focus": [0.5, 0.5]},
+  "footing_soil_judging": {"path": "res://assets/ui/research/subjects/footing_soil_judging-v1.png", "focus": [0.5, 0.5]},
+  "honey_wound_dressing": {"path": "res://assets/ui/research/subjects/honey_wound_dressing-v1.png", "focus": [0.5, 0.5]},
+  "reference_vessel_sets": {"path": "res://assets/ui/research/subjects/reference_vessel_sets-v1.png", "focus": [0.5, 0.5]}
 }

@@ -1,0 +1,12 @@
+{
+  "id": "captive_adoption",
+  "line": "demography",
+  "game_year": 70,
+  "approx_historical_year": -4533,
+  "prompt": "c. 4533 BCE: Household welcomes displaced young adult at hearth with food and cloak; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-52ee670a-3f62-4ea1-97ac-eafe3116dbad.png",
+  "asset": "res://assets/ui/research/subjects/captive_adoption-v1.png",
+  "sha256": "dea42ccfbd913d15ee9e48093e9cbe00ccccb8ca50de6293466030021420636e",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

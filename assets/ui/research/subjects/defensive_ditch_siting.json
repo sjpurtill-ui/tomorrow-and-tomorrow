@@ -1,0 +1,12 @@
+{
+  "id": "defensive_ditch_siting",
+  "line": "security",
+  "game_year": 70,
+  "approx_historical_year": -4533,
+  "prompt": "c. 4533 BCE: Villagers site and dig shallow defensive ditch across settlement approach; hand-cut woodblock print. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a6f10534-2f7a-492f-9d7d-bc162973a817.png",
+  "asset": "res://assets/ui/research/subjects/defensive_ditch_siting-v1.png",
+  "sha256": "022537b6a153b7d531741d9633be1cdeb370a420293f9533daaa1097521817a5",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
