@@ -3920,5 +3920,21 @@
   "selective_deadwood_gathering": {"path": "res://assets/ui/research/subjects/selective_deadwood_gathering-v1.png", "focus": [0.5, 0.5]},
   "newcomer_host_season": {"path": "res://assets/ui/research/subjects/newcomer_host_season-v1.png", "focus": [0.5, 0.5]},
   "offshoot_date_planting": {"path": "res://assets/ui/research/subjects/offshoot_date_planting-v1.png", "focus": [0.5, 0.5]},
-  "tannery_waste_channeling": {"path": "res://assets/ui/research/subjects/tannery_waste_channeling-v1.png", "focus": [0.5, 0.5]}
+  "tannery_waste_channeling": {"path": "res://assets/ui/research/subjects/tannery_waste_channeling-v1.png", "focus": [0.5, 0.5]},
+  "bracing_inspection_rounds": {"path": "res://assets/ui/research/subjects/bracing_inspection_rounds-v1.png", "focus": [0.5, 0.5]},
+  "fire_setting_mining": {"path": "res://assets/ui/research/subjects/fire_setting_mining-v1.png", "focus": [0.5, 0.5]},
+  "stock_layering_method": {"path": "res://assets/ui/research/subjects/stock_layering_method-v1.png", "focus": [0.5, 0.5]},
+  "temple_common_storehouse": {"path": "res://assets/ui/research/subjects/temple_common_storehouse-v1.png", "focus": [0.5, 0.5]},
+  "sickroom_isolation_practice": {"path": "res://assets/ui/research/subjects/sickroom_isolation_practice-v1.png", "focus": [0.5, 0.5]},
+  "weaning_food_softening": {"path": "res://assets/ui/research/subjects/weaning_food_softening-v1.png", "focus": [0.5, 0.5]},
+  "assistant_task_offloading": {"path": "res://assets/ui/research/subjects/assistant_task_offloading-v1.png", "focus": [0.5, 0.5]},
+  "boundary_marker_surveys": {"path": "res://assets/ui/research/subjects/boundary_marker_surveys-v1.png", "focus": [0.5, 0.5]},
+  "communal_upkeep_scheduling": {"path": "res://assets/ui/research/subjects/communal_upkeep_scheduling-v1.png", "focus": [0.5, 0.5]},
+  "interval_weaning_practice": {"path": "res://assets/ui/research/subjects/interval_weaning_practice-v1.png", "focus": [0.5, 0.5]},
+  "joint_hamlet_defense_pacts": {"path": "res://assets/ui/research/subjects/joint_hamlet_defense_pacts-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_labor_pooling": {"path": "res://assets/ui/research/subjects/seasonal_labor_pooling-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_route_assessment": {"path": "res://assets/ui/research/subjects/seasonal_route_assessment-v1.png", "focus": [0.5, 0.5]},
+  "seed_scatter_after_gathering": {"path": "res://assets/ui/research/subjects/seed_scatter_after_gathering-v1.png", "focus": [0.5, 0.5]},
+  "staggered_meal_timing": {"path": "res://assets/ui/research/subjects/staggered_meal_timing-v1.png", "focus": [0.5, 0.5]},
+  "symptom_triage_customs": {"path": "res://assets/ui/research/subjects/symptom_triage_customs-v1.png", "focus": [0.5, 0.5]}
 }

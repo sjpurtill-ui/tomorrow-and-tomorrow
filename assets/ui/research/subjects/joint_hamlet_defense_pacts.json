@@ -1,0 +1,12 @@
+{
+  "id": "joint_hamlet_defense_pacts",
+  "line": "security",
+  "game_year": 120,
+  "approx_historical_year": -4200,
+  "prompt": "c. 4200 BCE: Leaders of nearby hamlets pledge mutual defense at boundary stone; woodblock print. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e2f144fa-4668-4170-8a1b-8543834f52ec.png",
+  "asset": "res://assets/ui/research/subjects/joint_hamlet_defense_pacts-v1.png",
+  "sha256": "aebc6255d22c063237e9a5c6eb24cadaca99626b4641de49fe3314623c03c69b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

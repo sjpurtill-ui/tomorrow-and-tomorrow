@@ -1,0 +1,12 @@
+{
+  "id": "bracing_inspection_rounds",
+  "line": "infrastructure",
+  "game_year": 115,
+  "approx_historical_year": -4233,
+  "prompt": "c. 4233 BCE: Builders inspect wooden diagonal braces and repair loose fiber lashings; casein gouache. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6f2943b8-235c-432f-9e60-249716181176.png",
+  "asset": "res://assets/ui/research/subjects/bracing_inspection_rounds-v1.png",
+  "sha256": "86595406d47daa7d816526a81efa14d211a1c2883c0469867611e5e36393ddbe",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

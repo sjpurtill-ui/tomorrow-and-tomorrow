@@ -1,0 +1,12 @@
+{
+  "id": "symptom_triage_customs",
+  "line": "health",
+  "game_year": 120,
+  "approx_historical_year": -4200,
+  "prompt": "c. 4200 BCE: Caregivers attend feverish weak adult before another with minor scrape; ink and watercolor. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-36432aa3-cbe6-4392-8afa-03ac0c3e6f03.png",
+  "asset": "res://assets/ui/research/subjects/symptom_triage_customs-v1.png",
+  "sha256": "0000c83bcf493ec6afd2322300471541f9d5ab9e1edac0e22a3bcdc75b1af62f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
