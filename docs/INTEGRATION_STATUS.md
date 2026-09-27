@@ -1,3 +1,10 @@
+## September 27 — earliest-first years 7–8 art, batch 6: INTEGRATED
+
+Worker `db6ffb675b3849737e2fa033e14b5d069caff199`, branch `codex/research-art-earliest-06`, based on main `d43f025b`. Seven subjects gain dedicated paintings in chronological order: year 7 postpartum_seclusion_care and witnessed_agreement_customs; year 8 dry_cache_siting, elder_consultation_rites, hazard_memory_recitation, shared_work_signals and site_clearing_assessment. Classical Other batch 10 remains HELD and excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for subject clarity and obvious period mismatches in tools, clothing, shelters and materials. Combined Godot 4.7.2 import exited 0 without logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-06` exited 0 and passed all seven live catalogue lookups, manifest precedence, unique texture/provenance hashes, hidden gating and crop bounds. Every lookup passed at years 1–8, 299, 300 and 600, including dry_cache_siting. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest06-runtime.log` and `earliest-06-research-in-game-crops.png`.
+
+Reproduced early audit: 1,122 rows, 409 own effective paintings, 713 borrowed/line, zero missing files. Counts classify filename ownership at each proposed year; they do not certify historical accuracy. Next gaps are year 9 contagion_avoidance_customs, fallow_thicket_regrowth, notched_measuring_rods and seasonal_protein_sourcing. No simulation/save changes or generated import churn committed. Full campaign and unrelated suites were not rerun. No active canonical player found; no player/editor stopped or restarted.
 ## September 27 — earliest-first year 6 art, batch 5: INTEGRATED
 
 Worker `a336b45895fb46b3bf0350d0eb8f25a3ae0e93e1`, branch `codex/research-art-earliest-05`, based on main `cba6ebc9`. Seven year-6 subjects gain dedicated paintings: birth_spacing_customs, delousing, refuge_point_marking, rest_break_timing, sightline_staking, streambank_vegetation_watch and vermin_deterrent_placement. Classical Other batch 10 remains HELD and excluded.
