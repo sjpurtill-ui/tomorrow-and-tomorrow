@@ -166,7 +166,9 @@ func test_reviewed_images_resolve_their_explicit_assignments()->void:
 		assert_object(picture.texture).is_not_null()
 		# research_600 paintings (data/research/art_600.json) take precedence over reviewed subject art;
 		# in the early-civilization window the early paper paintings do too.
-		assert_str(Art.source_path(picture.texture)).is_equal(_expected_art(id))
+		# Atlas cards (first-300 .tres) resolve to the sheet they are cut from.
+		assert_str(Art.subject_art_key(item)).is_equal(_expected_art(id))
+		assert_str(Art.source_path(picture.texture)).is_equal(Art.source_path(Art.texture_at(_expected_art(id))))
 		assert_int(Art.textures.size()).is_less_equal(Art.CACHE_LIMIT)
 		item.exposed=false
 		assert_str(Art.subject_art_key(item)).is_empty()
