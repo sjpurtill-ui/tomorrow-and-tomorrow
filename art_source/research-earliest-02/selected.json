@@ -1,0 +1,110 @@
+[
+  {
+    "id": "alarm_relay_signals",
+    "line": "security",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: alarm calls relayed by three adults between separate reed huts, without visual sound symbols. Mature handmade 2D layered woodblock print, vermilion and charcoal, rough ink and flat silhouettes, no later technology or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b34579bf-aaa7-466e-a638-3525e6e7bf9a.png",
+    "asset": "res://assets/ui/research/subjects/alarm_relay_signals-v1.png",
+    "sha256": "36ebf0dffed7594bd41a153807fb29f6df1cdcbc67017c226b159f5d6e829040",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; earlier variants cropped caller or used comic sound marks. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "council_messenger_duty",
+    "line": "institutions",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: a messenger summons households to a council gathering beneath a tree. Flat 2D mineral-pigment civic fresco on coarse plaster, dusty plum, limestone and muted gold; early Neolithic hide and fiber wraps, no written messages, classical robes or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0d914918-6fb6-409d-8869-26f2b5513ee9.png",
+    "asset": "res://assets/ui/research/subjects/council_messenger_duty-v1.png",
+    "sha256": "0c3e73c0c30511db55c225e8add4d8d3d5dd970d33c24623a5106503c4f8bd30",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first had Classical-looking clothing. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "dawn_task_briefings",
+    "line": "labor",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: at dawn a leader assigns separate groups to food gathering and shelter repair. Mature expressive charcoal drawing over flat ochre wash, angular figures and coarse grain; simple early Neolithic materials, no metal, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c629dcaf-e0e3-4909-b3fc-55b3eb63b7d1.png",
+    "asset": "res://assets/ui/research/subjects/dawn_task_briefings-v1.png",
+    "sha256": "3b3fe540b5ed3c95751f8a81c44c1e5de47d2fb522df651915efeb74b56ebf14",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; task assignment clear in wide crop. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "edge_testing_by_feel",
+    "line": "production",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: hands carefully judge a flaked flint edge by touch. Mature flat 2D palette-knife impasto, thick ochre and umber paint blocks, scraped edges; no metal blade, lifelike skin, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e2f047e3-9626-48c1-b86f-ad465c7a368e.png",
+    "asset": "res://assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+    "sha256": "4e5fc25a4e04ffccd9c4c3413bed611e21eb5e9ff9fff6e220a9bbbced3c9925",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected for flatter, more clearly painted hands. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "hazard_landmark_memory",
+    "line": "infrastructure",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: a guide points travelers away from a dangerous river ford using a split boulder and bent tree as memorable landmarks. Flat matte architectural casein gouache, mineral blue and slate planar shapes; no map, sign, bridge or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-32fc6c94-ddd8-4efc-b28f-28ad1db930e5.png",
+    "asset": "res://assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+    "sha256": "eb3f533970414c028af6761dac38e14dfce4e7b3856c6da2fd3b26c8b9b6670e",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "labor_position_customs",
+    "line": "demography",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: respectful non-graphic birth support, a clothed laboring adult in supported squat holds both helpers hands. Mature 2D chalk pastel and cut-paper collage, angular terracotta and ivory figures; full posture and heads in 3.37:1 crop, no later costume or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6dacc0b9-16bf-42ce-8fe8-62a04f5c437a.png",
+    "asset": "res://assets/ui/research/subjects/labor_position_customs-v1.png",
+    "sha256": "164301400d59a0e2f704e247d63a7e36999c9fa86ab8c91b4f5d517a625233d5",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; earlier card crops cut the posture or heads. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "landmark_route_naming",
+    "line": "logistics",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: travelers orally identify their path by a notched ridge and river bend as a guide points. Panoramic travel watercolor on rough paper, broad indigo and sand-gold washes and small flat figures; no written map, sign, wheel or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d4cc797c-8eb3-4dc7-96ed-794d83d4c5ee.png",
+    "asset": "res://assets/ui/research/subjects/landmark_route_naming-v1.png",
+    "sha256": "9fccd1800e265362ba5b55fdf085943ba43a5da59f6a19228b88396013bb1b76",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first had camera-like detailed landscape. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "named_descent_lines",
+    "line": "demography",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: an elder orally names how three generations are related, pointing from grandparent to parent to child. Mature chalk pastel and torn-paper collage, flat angular terracotta, rust and ivory shapes; early Neolithic wraps, no lineage diagram or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e5b98587-1552-4306-b53c-02ebfa3737f0.png",
+    "asset": "res://assets/ui/research/subjects/named_descent_lines-v1.png",
+    "sha256": "fa854f48d814527588be3328bedc9aa117f241f12dd9467f9350901ef5d2c2c9",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; upper crop focus preserves heads and pointing gestures. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "sickness_pattern_memory",
+    "line": "health",
+    "game_year": 3,
+    "approx_historical_year": -4980,
+    "prompt": "c. 4980 BCE: caregivers recall a repeated seasonal illness while gently checking a sick persons brow beside dried herbs. Mature transparent sage and celadon watercolor with spare ink, flat angular figures and open paper; no written record, later medical equipment or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0f98a52a-b387-4e60-9d92-e6807d2ebed4.png",
+    "asset": "res://assets/ui/research/subjects/sickness_pattern_memory-v1.png",
+    "sha256": "97b032bb7176ec01344b448e3749fd456c65d1198616676fd696b76765ca2e2a",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+  }
+]
