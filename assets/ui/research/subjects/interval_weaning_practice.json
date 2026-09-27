@@ -1,0 +1,12 @@
+{
+  "id": "interval_weaning_practice",
+  "line": "demography",
+  "game_year": 120,
+  "approx_historical_year": -4200,
+  "prompt": "c. 4200 BCE: Parent holds infant close at first feeding then offers soft grain gruel later; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-48d35c42-5770-4037-a1ac-ef9836aec229.png",
+  "asset": "res://assets/ui/research/subjects/interval_weaning_practice-v1.png",
+  "sha256": "18a34dae11167ce50489c94c84aa54f0cc573c351f532d7f3b0db69b7b769d77",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected stronger mature cut-paper treatment over painterly first scene."
+}

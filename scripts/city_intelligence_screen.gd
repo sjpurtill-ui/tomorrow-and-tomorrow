@@ -1,304 +1,235 @@
 extends Control
+## The report on a foreign city: what our scouts saw, when, and who to talk to
+## about it. It gives no orders of its own. Talking to their ruler or to our
+## war leader happens in the court; watching the city belongs to the scouts.
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const V=preload("res://scripts/hud/city_report_visuals.gd")
+const P=preload("res://scripts/hud/paper_sheet.gd")
+const When=preload("res://scripts/hud/report_when.gd")
+const Orders=preload("res://scripts/hud/city_watch_orders.gd")
 const IDENTITY=preload("res://scripts/city_map_identity.gd")
 const INTEL=preload("res://scripts/city_intelligence.gd")
 var city_id:=""
 var civ_id:=""
 var selector:OptionButton
-var duration:OptionButton
-var costs:Label
-var send:Button
-var continuous:CheckBox
-var party_size:SpinBox
-var watch_status:Label
-var stop_watch:Button
-var title:Label
 var flag:TextureRect
 var panel:PanelContainer
-var tabs:TabContainer
-var detail_text:Label
-var projection:Label
-var provenance_button:Button
-var grid:GridContainer
-var journey:HBoxContainer
-var journey_values:Array[Label]=[]
-var scouting_hint:Label
-var summary:Label
-var provenance:Label
+var title:Label
 var control_label:Label
-var army_choice:OptionButton
-var military_note:Label
-var feedback:Label
-var march:Button
-var attack:Button
-var siege:Button
+var summary:Label
+var projection:Label
+var grid:GridContainer
+var detail_button:Button
+var detail_text:Label
+var talk_ruler:Button
+var talk_general:Button
+var scouting_box:VBoxContainer
+var war_box:VBoxContainer
+var siege_button:Button
 var garrison_button:Button
 var aftermath_button:Button
+var feedback:Label
 var cards:Dictionary={}
 var timer:=0.0
-
-func _label(parent:Node,text:String,size:int=15,color:Color=T.BODY)->Label:
-	var label:=Label.new();label.text=text;label.add_theme_font_size_override("font_size",size);label.add_theme_color_override("font_color",color)
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(label);return label
-func _box(parent:Node)->VBoxContainer:
-	var panel:=PanelContainer.new();panel.size_flags_horizontal=SIZE_EXPAND_FILL;parent.add_child(panel)
-	var style:=StyleBoxFlat.new();style.bg_color=T.TILE_BG;style.border_color=T.BORDER;style.set_border_width_all(1);style.set_corner_radius_all(5)
-	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=8;style.content_margin_bottom=8;panel.add_theme_stylebox_override("panel",style)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",5);panel.add_child(box);return box
-func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Button:
-	var button:=Button.new();button.text=text;button.clip_text=true;button.size_flags_horizontal=SIZE_EXPAND_FILL;button.custom_minimum_size.y=34;button.add_theme_font_size_override("font_size",13)
-	var style:=T.flat(T.GOLD_WASH if primary else T.BUTTON_BG,T.GOLD if primary else T.BORDER,1,5)
-	style.content_margin_left=10;style.content_margin_right=10
-	button.add_theme_stylebox_override("normal",style)
-	var hover:=style.duplicate();hover.bg_color=T.HOVER_BG;hover.border_color=T.GOLD if primary else T.TEAL
-	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover)
-	button.add_theme_stylebox_override("focus",T.flat(Color.TRANSPARENT,T.TEAL,1,5))
-	button.add_theme_font_size_override("font_size",13)
-	button.pressed.connect(callback);parent.add_child(button);return button
+var _scouting_signature:=""
+var _war_signature:=""
 
 func _metric(parent:Node,key:String,hero:bool=false)->void:
-	var card:=_box(parent);card.add_theme_constant_override("separation",3)
+	var card:=P.card(parent)
+	card.add_theme_constant_override("separation",2)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);card.add_child(row)
-	var icon:=TextureRect.new();icon.texture=V.icon(key);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(22,22);row.add_child(icon)
-	var label:=_label(row,String(V.LABELS[key]),12,T.TEXT_SOFT);label.size_flags_horizontal=SIZE_EXPAND_FILL
-	var value:=_label(card,"Unknown",30 if hero else 20,T.INK)
-	var note:=_label(card,"Not observed",11,T.MUTED)
-	cards[key]={"value":value,"note":note,"card":card}
-	if key in ["fortification","production","logistics","damage","education"]:
-		var band:=V.Band.new();band.ink=V.COLORS[key];card.add_child(band);cards[key]["band"]=band
-	if hero:
-		projection=_label(card,"",12,T.TEXT_SOFT)
+	var icon:=TextureRect.new();icon.texture=V.icon(key);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(20,20);row.add_child(icon)
+	var name:=P.label(row,V.label(key),"small",T.INK_MUTED);name.size_flags_horizontal=SIZE_EXPAND_FILL
+	var value:=P.label(card,"Not seen","value" if not hero else "voice",T.INK)
+	var note:=P.label(card,String(V.MEANINGS.get(key,"")),"small",T.INK_MUTED)
+	cards[key]={"value":value,"note":note,"card":card.get_parent(),"name":name}
+	if hero:projection=P.label(card,"","small",T.BODY)
 
 func _layout()->void:
 	if not is_instance_valid(panel):return
-	var width:=minf(448,maxf(280,size.x-16))
+	var width:=minf(460,maxf(280,size.x-16))
 	panel.offset_left=-width-8;panel.offset_right=-8
 	panel.offset_top=8;panel.offset_bottom=-8
-	grid.columns=2 if width>=350 else 1
-
-func _page(tabs:TabContainer,caption:String)->VBoxContainer:
-	var scroll:=ScrollContainer.new();scroll.name=caption
-	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	tabs.add_child(scroll)
-	var box:=VBoxContainer.new();box.size_flags_horizontal=SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation",10);scroll.add_child(box)
-	return box
+	grid.columns=2 if width>=366 else 1
 
 func _ready()->void:
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	mouse_filter=MOUSE_FILTER_IGNORE
+	theme=T.control_theme()
 	# A map click dismisses this sheet and is consumed before map orders run.
 	var dismiss:=Control.new();dismiss.set_anchors_and_offsets_preset(PRESET_FULL_RECT);add_child(dismiss)
 	dismiss.gui_input.connect(func(event:InputEvent):
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:dismiss.accept_event();_close())
 	panel=PanelContainer.new();panel.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);add_child(panel)
-	var shell:=T.flat(Color("0b1418"),T.BORDER_2,1,10)
-	shell.content_margin_left=16;shell.content_margin_right=16;shell.content_margin_top=12;shell.content_margin_bottom=12
-	panel.add_theme_stylebox_override("panel",shell)
+	panel.add_theme_stylebox_override("panel",P.sheet_style(16))
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",8);panel.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
-	var eyebrow:=_label(top,"SETTLEMENT  /  INTELLIGENCE",11,T.GOLD);eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL
-	var close:=_button(top,"×",_close);close.name="Close";close.clip_text=false;close.size_flags_horizontal=SIZE_SHRINK_END;close.custom_minimum_size=Vector2(30,28);close.tooltip_text="Close · Escape or click the map";close.add_theme_font_size_override("font_size",22)
+	var eyebrow:=P.kicker(top,"City report");eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL;eyebrow.size_flags_vertical=SIZE_SHRINK_CENTER
+	var close:=P.button(top,"Close",_close);close.name="Close";close.size_flags_horizontal=SIZE_SHRINK_END;close.custom_minimum_size=Vector2(88,34);close.tooltip_text="Close (Esc, or click the map)"
 	var identity:=HBoxContainer.new();identity.add_theme_constant_override("separation",10);root.add_child(identity)
-	flag=TextureRect.new();flag.custom_minimum_size=Vector2(52,44);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;identity.add_child(flag)
+	flag=TextureRect.new();flag.custom_minimum_size=Vector2(48,42);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;identity.add_child(flag)
 	var names:=VBoxContainer.new();names.size_flags_horizontal=SIZE_EXPAND_FILL;names.add_theme_constant_override("separation",0);identity.add_child(names)
-	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.clip_text=true;selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;selector.custom_minimum_size.y=34;selector.add_theme_font_size_override("font_size",24);selector.add_theme_color_override("font_color",T.INK)
-	selector.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT,Color.TRANSPARENT,0,4));selector.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color.TRANSPARENT,0,4));names.add_child(selector)
-	title=_label(names,"",14,T.INK);title.hide()
-	control_label=_label(names,"",12,T.TEXT_SOFT)
+	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.clip_text=true;selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;selector.custom_minimum_size.y=38
+	T.text(selector,"voice",T.INK)
+	selector.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT,Color.TRANSPARENT,0,2));selector.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color.TRANSPARENT,0,2))
+	selector.tooltip_text="Other cities of theirs our scouts have reported"
+	names.add_child(selector)
+	title=P.label(names,"","value",T.INK);title.hide()
+	control_label=P.label(names,"","small",T.BODY)
 	for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities("player",civ_id):
 		selector.add_item(String(city.name));selector.set_item_metadata(selector.item_count-1,String(city.city_id))
 		if city.city_id==city_id:selector.select(selector.item_count-1)
-	selector.item_selected.connect(func(_i:int):_load_watch_controls();refresh())
-	var ribbon:=HBoxContainer.new();root.add_child(ribbon)
-	summary=_label(ribbon,"",12,T.AMBER);summary.size_flags_horizontal=SIZE_EXPAND_FILL
-	provenance=_label(ribbon,"",11,T.MUTED);provenance.autowrap_mode=TextServer.AUTOWRAP_OFF;provenance.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	var badge:=T.flat(T.GOLD_WASH,Color.TRANSPARENT,0,4);badge.content_margin_left=8;badge.content_margin_right=8;badge.content_margin_top=4;badge.content_margin_bottom=4;provenance.add_theme_stylebox_override("normal",badge)
-	tabs=TabContainer.new();tabs.size_flags_vertical=SIZE_EXPAND_FILL;root.add_child(tabs)
-	tabs.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
-	for state in ["tab_selected","tab_unselected","tab_hovered"]:
-		var style:=T.flat(T.ACTIVE_BG if state=="tab_selected" else Color.TRANSPARENT,Color.TRANSPARENT,0,4)
-		style.content_margin_left=14;style.content_margin_right=14;style.content_margin_top=8;style.content_margin_bottom=8
-		if state=="tab_selected":style.border_color=T.GOLD;style.border_width_bottom=2
-		tabs.add_theme_stylebox_override(state,style)
-	tabs.add_theme_font_size_override("font_size",13)
-	var left:=_page(tabs,"Overview")
-	_metric(left,"population",true)
-	grid=GridContainer.new();grid.columns=2;grid.size_flags_horizontal=SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);left.add_child(grid)
-	for key:String in ["science_capacity","education","gdp","life_expectancy","infant_mortality","garrison","fortification","supply","production","logistics","damage"]:_metric(grid,key)
-	provenance_button=_button(left,"Report details  ›",func():detail_text.visible=not detail_text.visible)
-	detail_text=_label(left,"",12,T.TEXT_SOFT);detail_text.hide()
-	var actions:=HBoxContainer.new();left.add_child(actions)
-	_button(actions,"Focus on map",_show_map)
-	_button(actions,"Refresh intelligence",func():tabs.current_tab=1,true)
-	var recon:=_page(tabs,"Scouting")
-	_label(recon,"Request a fresh report",18,T.INK)
-	_label(recon,"Scouts must travel, observe, and return before this report changes.",14,T.TEXT_SOFT)
-	continuous=CheckBox.new();continuous.text="Continuous city scouting";recon.add_child(continuous)
-	_label(recon,"One limited party revisits this city after each return. No live vision; reports still travel home. Stop at any time to prevent further departures.",12,T.TEXT_SOFT)
-	var people_row:=HBoxContainer.new();recon.add_child(people_row)
-	_label(people_row,"Party size · scouts",13,T.TEXT_SOFT)
-	party_size=SpinBox.new();party_size.min_value=2;party_size.max_value=8;party_size.step=1;party_size.value=4;people_row.add_child(party_size)
-	party_size.value_changed.connect(func(_value:float):refresh())
-	continuous.toggled.connect(func(_value:bool):refresh())
-	duration=OptionButton.new();duration.custom_minimum_size.y=36;recon.add_child(duration)
-	for days:int in CivilizationSystem.SCOUT_DURATIONS:duration.add_item("%d-day reconnaissance" % days);duration.set_item_metadata(duration.item_count-1,days)
-	duration.item_selected.connect(func(_i:int):refresh())
-	journey=HBoxContainer.new();journey.add_theme_constant_override("separation",6);recon.add_child(journey)
-	for caption:String in ["OUTBOUND","OBSERVING","RETURN"]:
-		var cell:=_box(journey);_label(cell,caption,10,T.TEAL if caption=="OBSERVING" else T.MUTED)
-		journey_values.append(_label(cell,"",20,T.INK))
-	scouting_hint=_label(recon,"Longer stays sharpen the population count. Travel days do not. Arrival and return can vary.",12,T.TEXT_SOFT)
-	costs=_label(recon,"",14,T.BODY)
-	send=_button(recon,"SEND SCOUTS",_send_scouts,true)
-	watch_status=_label(recon,"",12,T.TEAL)
-	stop_watch=_button(recon,"STOP CONTINUOUS SCOUTING",func():
-		var result:Dictionary=WorldSimulation.world.scouting_staff.set_city_watch(city_id,false)
-		continuous.button_pressed=false;feedback.show();feedback.text=String(result.message);refresh())
-	var military:=_page(tabs,"Military")
-	_label(military,"Approach this settlement",20,T.INK)
-	army_choice=OptionButton.new();army_choice.fit_to_longest_item=false;army_choice.custom_minimum_size.y=34;military.add_child(army_choice)
-	for force:Dictionary in WorldSimulation.military.field_armies:
-		if int(force.get("troops",0))<=0:continue
-		army_choice.add_item(String(force.name));army_choice.set_item_metadata(army_choice.item_count-1,int(force.army_id))
-	var terrain_scene:=CityEncounterWorld.terrain(get_tree().root)
-	if terrain_scene and "selected_army_id" in terrain_scene:
-		for i in army_choice.item_count:
-			if int(army_choice.get_item_metadata(i))==int(terrain_scene.selected_army_id):army_choice.select(i)
-	army_choice.item_selected.connect(func(_i:int):refresh())
-	march=_button(military,"MOVE ONLY",_march)
-	march.visible=false
-	_label(military,"Attack or besiege with one order. Your army approaches automatically if needed.",13,T.TEXT_SOFT)
-	military_note=_label(military,"",14,T.AMBER)
-	var combat_row:=HBoxContainer.new();military.add_child(combat_row)
-	attack=_button(combat_row,"ATTACK",func():_operate(false));attack.size_flags_horizontal=SIZE_EXPAND_FILL
-	siege=_button(combat_row,"BESIEGE",func():_operate(true));siege.size_flags_horizontal=SIZE_EXPAND_FILL
-	_button(military,"DIPLOMACY",_diplomacy)
-	garrison_button=_button(military,"MANAGE GARRISON",func():
-		for force:Dictionary in WorldSimulation.military.occupation_forces:
-			if String(force.get("region_id",""))==city_id:_close();preload("res://scripts/hud/occupation_view.gd").open(String(force.civ_id),city_id);return)
-	aftermath_button=_button(military,"REVIEW BATTLE AFTERMATH",func():
-		var scene:=get_tree().current_scene
-		if scene and scene.has_method("_open_war_planning"):_close();scene._open_war_planning())
-
-	tabs.current_tab=0
-	feedback=_label(root,"",12,T.AMBER);feedback.hide()
+	selector.item_selected.connect(func(_i:int):_scouting_signature="";refresh())
+	summary=P.label(root,"","small",T.BODY)
+	var body:=P.scroll_body(root,10)
+	_metric(body,"population",true)
+	grid=GridContainer.new();grid.columns=2;grid.size_flags_horizontal=SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);body.add_child(grid)
+	for key:String in V.shown_keys():
+		if key!="population":_metric(grid,key)
+	detail_button=P.button(body,"About this report",func():detail_text.visible=not detail_text.visible)
+	detail_text=P.label(body,"","small",T.BODY);detail_text.hide()
+	P.rule(root)
+	var actions:=VBoxContainer.new();actions.name="Actions";actions.add_theme_constant_override("separation",6);root.add_child(actions)
+	P.kicker(actions,"Talk it over in court")
+	var talk_row:=HBoxContainer.new();talk_row.add_theme_constant_override("separation",6);actions.add_child(talk_row)
+	talk_ruler=P.button(talk_row,"Talk to their ruler",_talk_to_ruler,true);talk_ruler.name="TalkRuler"
+	talk_general=P.button(talk_row,"Talk to our war leader",_talk_to_general);talk_general.name="TalkGeneral"
+	war_box=VBoxContainer.new();war_box.add_theme_constant_override("separation",6);actions.add_child(war_box)
+	P.kicker(actions,"Keep an eye on it")
+	scouting_box=VBoxContainer.new();scouting_box.name="Scouting";scouting_box.add_theme_constant_override("separation",6);actions.add_child(scouting_box)
+	var more:=HBoxContainer.new();more.add_theme_constant_override("separation",6);actions.add_child(more)
+	P.button(more,"Show on the map",_show_map)
+	P.button(more,"Open scouting",_open_scouting)
+	feedback=P.label(root,"","small",T.BODY);feedback.hide()
 	resized.connect(_layout);_layout()
 	var world:=CityEncounterWorld.terrain(get_tree().root)
 	var known:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
 	if world!=null and not known.is_empty() and WorldSimulation.military.active_engagement.is_empty():
 		world.camera.size=maxf(.22,preload("res://scripts/foreign_settlement_visual.gd").framing_size(known))
 		world._set_camera_target(Vector3(known.position.x,0,known.position.z));world._refresh_contact_encounter_markers()
-	_load_watch_controls();refresh()
+	refresh()
 
-func _load_watch_controls()->void:
-	if selector.item_count==0:return
-	var watch:Dictionary=WorldSimulation.world.scouting_staff.city_watch(String(selector.get_selected_metadata()))
-	continuous.set_pressed_no_signal(bool(watch.get("enabled",false)))
-	party_size.set_value_no_signal(int(watch.get("personnel",4)))
-	for i in duration.item_count:
-		if int(duration.get_item_metadata(i))==int(watch.get("duration_days",30)):duration.select(i);break
-
-func _close()->void:get_parent().queue_free()
+func _close()->void:
+	if get_parent()!=null and get_parent() is CanvasLayer:get_parent().queue_free()
+	else:queue_free()
 func _show_map()->void:
 	var scene:=get_tree().current_scene
 	if scene and scene.has_method("_focus_known_city"):scene._focus_known_city(city_id)
-func _send_scouts()->void:
-	var result:Dictionary=WorldSimulation.world.scouting_staff.set_city_watch(city_id,true,int(duration.get_selected_metadata()),int(party_size.value)) if continuous.button_pressed else WorldSimulation.world.dispatch_scouts(int(duration.get_selected_metadata()),"city:"+city_id,"",int(party_size.value))
-	feedback.show();feedback.text=String(result.get("error",result.get("message","Scouts departed. Evidence will update after their return.")));refresh()
-func _march()->void:
-	if army_choice.item_count==0:return
-	var result:=WorldSimulation.military.move_field_army(int(army_choice.get_selected_metadata()),city_id)
-	feedback.show();feedback.text=String(result.get("error",result.get("message","Movement ordered.")));refresh()
-func _diplomacy()->void:
-	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
-	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
-	if owner=="":feedback.show();feedback.text="Who holds this place is not yet known. Return a better report first.";return
+func _open_scouting()->void:
 	var scene:=get_tree().current_scene
-	if scene and scene.has_method("_open_civilizations_panel"):
-		scene.selected_civilization_id=owner;scene.selected_civilization_region_id=city_id;_close();scene._open_civilizations_panel()
-func _operate(besiege:bool)->void:
-	if not WorldSimulation.military.active_siege.is_empty() and String(WorldSimulation.military.active_siege.region_id)==city_id:
-		_close();preload("res://scripts/hud/siege_screen.gd").open();return
-	if not WorldSimulation.military.active_engagement.is_empty():
-		_close();MilitaryCommandUI._open_battle_graphics();return
+	if scene and scene.has_method("_open_scout_dispatch_panel"):_close();scene._open_scout_dispatch_panel()
+func owner_id()->String:
 	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
-	var owner:=String(city.get("controller",""));if owner=="":owner=String(city.get("civ_id",""))
-	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
-	var result:=WorldSimulation.military.order_city_operation(chosen,owner,city_id,besiege)
-	if result.has("error"):feedback.show();feedback.text=String(result.error);refresh();return
-	if bool(result.get("queued",false)):feedback.show();feedback.text=String(result.message);_close();return
-	var scene:=get_tree().current_scene
-	_close()
-	if besiege:preload("res://scripts/hud/siege_screen.gd").open()
-	elif not WorldSimulation.military.active_engagement.is_empty():MilitaryCommandUI.call_deferred("_open_battle_graphics")
+	var owner:=String(city.get("controller",""))
+	return owner if owner!="" else String(city.get("civ_id",""))
+func _talk_to_ruler()->void:
+	var owner:=owner_id()
+	if owner=="" or owner=="player":_say("Who holds this place is not yet known. A fresh report may tell us.");return
+	_close();P.talk_to_ruler(owner)
+func _talk_to_general()->void:
+	var leader:=P.war_leader()
+	_close();P.summon(leader.get("target",{}))
+func _say(text:String)->void:
+	feedback.text=text;feedback.visible=text!=""
+
+func _war_actions(_city:Dictionary)->void:
+	var m:=WorldSimulation.military
+	var signature:=city_id+str(m.active_siege.get("region_id",""))+str(m.active_engagement.get("status",""))+str(m.pending_aftermath.size())+JSON.stringify(m.occupation_forces.map(func(f:Dictionary)->String:return "%s:%d" % [f.get("region_id",""),int(f.get("troops",0))]))
+	if signature==_war_signature:return
+	_war_signature=signature
+	for child in war_box.get_children():war_box.remove_child(child);child.queue_free()
+	siege_button=null;garrison_button=null;aftermath_button=null
+	var military:=WorldSimulation.military
+	if not military.active_siege.is_empty() and String(military.active_siege.get("region_id",""))==city_id:
+		P.label(war_box,"Our army is besieging this city. Its general runs the siege; the briefing shows how it stands.","small",T.BODY)
+		siege_button=P.button(war_box,"Siege briefing",func():_close();preload("res://scripts/hud/siege_screen.gd").open())
+	elif not military.active_engagement.is_empty() and String((military.active_engagement.get("threat",{}) as Dictionary).get("target_region_id",""))==city_id:
+		P.label(war_box,"Our soldiers are fighting here now.","small",T.BODY)
+		P.button(war_box,"Watch the battle",func():_close();MilitaryCommandUI.call_deferred("_open_battle_graphics"))
+	for force:Dictionary in military.occupation_forces:
+		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:
+			P.label(war_box,"We hold this city. %d of our soldiers keep it as a garrison." % int(force.troops),"small",T.BODY)
+			var civ:=String(force.civ_id)
+			garrison_button=P.button(war_box,"Garrison briefing",func():_close();preload("res://scripts/hud/occupation_view.gd").open(civ,city_id))
+			break
+	if not military.pending_aftermath.is_empty():
+		aftermath_button=P.button(war_box,"Review the last battle",func():
+			var scene:=get_tree().current_scene
+			_close()
+			if scene and scene.has_method("_open_war_planning"):scene._open_war_planning())
+	war_box.visible=war_box.get_child_count()>0
+
+func _scouting_actions()->void:
+	var watch:Dictionary=WorldSimulation.world.scouting_staff.city_watch(city_id)
+	var signature:=city_id+JSON.stringify(watch)+str(Orders.party_away(city_id).get("mission_id",-1))+str(int(WorldSimulation.state.elapsed_days))
+	if signature==_scouting_signature:return
+	_scouting_signature=signature
+	for child in scouting_box.get_children():child.queue_free()
+	var items:=Orders.dock_items(city_id,func():_scouting_signature="";_say(Orders.dock_status(city_id));refresh())
+	if items.is_empty():
+		P.label(scouting_box,"Our scouts cannot be sent to this place.","small",T.BODY)
+		return
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",6);scouting_box.add_child(row)
+	for item:Dictionary in items:
+		var button:=P.button(row,String(item.label),item.on_press,bool(item.get("primary",false)))
+		button.disabled=bool(item.get("disabled",false))
+		button.tooltip_text=String(item.get("tip",""))
+	var status:=Orders.dock_status(city_id)
+	if status=="":status=String(items[0].get("sub",""))
+	if status!="":P.label(scouting_box,status,"small",T.BODY)
+
 func refresh()->void:
 	if selector.item_count==0:
-		title.show();title.text="No reported settlements";summary.text="A returned report must first identify a city.";send.disabled=true;march.disabled=true;attack.disabled=true;siege.disabled=true;return
+		title.show();title.text="No reported cities";summary.text="A scout must first come home with word of a city.";talk_ruler.disabled=true;war_box.hide();return
 	city_id=String(selector.get_selected_metadata())
 	var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",city_id)
+	var today:=int(WorldSimulation.state.elapsed_days)
 	title.text=String(city.name).trim_prefix("Reported home of ").capitalize()
 	selector.tooltip_text=String(city.name)
 	var fields:Dictionary=city.fields
-	var freshness:=V.freshness(city,int(WorldSimulation.state.elapsed_days))
-	summary.text="Report · "+String(freshness.status)
-	summary.add_theme_color_override("font_color",T.AMBER if int(freshness.level)<4 else T.TEAL)
-	provenance.text=String(freshness.status).to_upper()
-	var source:=String(city.source)
+	var freshness:=V.freshness(city,today)
+	var observed:=int(city.get("observed_day",-1))
 	var observed_days:=int(city.get("observation_days",0))
-	provenance_button.text="Report details  ·  %s  ›" % ("%d days observing" % observed_days if observed_days>0 else "earlier report")
-	detail_text.text="%s\nObserved day %d · received day %d\n%s\nThe meter tracks delivered-report freshness, with 90 days before aging. Observation dates remain unchanged; this is not live vision. Science and health use the same measures as your dashboard. GDP is labor-equivalent daily output. Original estimates are shown above; projections allow for unobserved change." % [source.capitalize(),int(city.observed_day),int(city.reported_day),"%d actual days observing this city. Travel days do not improve the count." % observed_days if observed_days>0 else "This earlier report did not record time observing the city."]
-	detail_text.tooltip_text="Report reference: "+String(city.reference)
+	if observed<0:summary.text="We know where it is, but no one has looked inside yet."
+	else:
+		summary.text="Seen in %s; the word reached us %s." % [When.when(observed),When.ago(int(city.get("reported_day",observed)))]
+		if int(freshness.level)<=2:summary.text+=" Much may have changed since."
+	detail_button.text="About this report"+(" (%s watching)" % When.span(observed_days) if observed_days>0 else "")
+	var how:="Our scouts watched it for %s. Time on the road does not sharpen the count; only time spent watching does." % When.span(observed_days) if observed_days>0 else "This older report did not say how long they watched."
+	detail_text.text="Brought by %s. %s These figures are what they saw then, not what is true now." % [String(city.source).to_lower() if String(city.source)!="" else "our scouts",how]
 	var identity_id:=String(city.controller) if not String(city.controller).is_empty() else String(city.civ_id)
 	flag.texture=IDENTITY.foreign(identity_id).texture
-	control_label.text=WorldSimulation.world.city_intelligence.controller_label(String(city.controller))
-	control_label.add_theme_color_override("font_color",IDENTITY.foreign(identity_id).color)
-	for key:String in cards:
-		var field:Dictionary=fields.get(key,{})
-		var value:Label=cards[key].value;var note:Label=cards[key].note
-		value.text=V.estimate(key,field)+( " residents" if key=="population" and not field.is_empty() else "")
-		note.text="Not observed" if field.is_empty() else (("Last observed estimate" if key=="population" else "Last observed") if int(field.observed_day)==int(city.observed_day) else V.age_text(int(field.observed_day),int(WorldSimulation.state.elapsed_days)))
-		note.visible=key=="population" or field.is_empty() or int(field.observed_day)!=int(city.observed_day)
-		cards[key].card.tooltip_text=String(INTEL.FIELDS[key].label)+(" · capacity range on a 0–100% scale" if INTEL.FIELDS[key].unit=="capacity" else "")
-		if cards[key].has("band"):cards[key].band.field=field;cards[key].band.queue_redraw()
-	var pop:Dictionary=fields.get("population",{})
-	projection.text="Unverified now: "+V.estimate("population",pop,false) if not pop.is_empty() and int(pop.get("age_days",0))>0 else ""
-	if int(pop.get("age_days",0))>1095:projection.text="Current population unknown · new observation needed"
-	projection.visible=not projection.text.is_empty() and int(freshness.received_age)>90
-	var quote:=WorldSimulation.world.scout_mission_quote(int(duration.get_selected_metadata()),"city:"+city_id,"",int(party_size.value))
-	send.disabled=not bool(quote.get("can_dispatch",false)) and not continuous.button_pressed
-	send.text="ORDER CONTINUOUS SCOUTING" if continuous.button_pressed else "SEND SCOUTS"
-	var watch:Dictionary=WorldSimulation.world.scouting_staff.city_watch(city_id)
-	watch_status.text=String(watch.get("status",""));watch_status.visible=not watch.is_empty();stop_watch.visible=not watch.is_empty()
-	journey.visible=bool(quote.get("can_dispatch",false));scouting_hint.visible=journey.visible
-	if bool(quote.get("can_dispatch",false)):
-		journey_values[0].text="%dd" % int(quote.travel_leg_days);journey_values[1].text="%dd" % int(quote.observation_days);journey_values[2].text=journey_values[0].text
-	costs.text=String(quote.get("error",quote.get("blocker",""))) if not bool(quote.get("can_dispatch",false)) else "%d scouts  ·  %.0f food per trip  ·  %d days planned" % [int(quote.personnel),float(quote.provisions),int(quote.duration_days)]
-	var owner:=String(city.controller);if owner=="":owner=String(city.civ_id)
+	var owner:=owner_id()
+	control_label.text="Held by "+WorldSimulation.world.city_intelligence.controller_label(String(city.controller))
 	var owner_index:=WorldSimulation.world._civilization_index(owner)
 	if owner_index>=0:
 		var relation:Dictionary=WorldSimulation.world.civilizations[owner_index].player_relation
-		control_label.text+="  ·  "+("At war" if bool(relation.get("at_war",false)) else "At peace")
-	attack.tooltip_text="Attacking a city at peace starts a war on arrival.";siege.tooltip_text=attack.tooltip_text
-	var chosen:=int(army_choice.get_selected_metadata()) if army_choice.item_count>0 else -1
-	var availability:=WorldSimulation.military.city_operation_quote(chosen,owner,city_id)
-	attack.disabled=availability.has("error");siege.disabled=attack.disabled
-	var same_siege:=not WorldSimulation.military.active_siege.is_empty() and String(WorldSimulation.military.active_siege.region_id)==city_id
-	if same_siege:attack.disabled=false;siege.disabled=false
-	garrison_button.visible=false
-	for force:Dictionary in WorldSimulation.military.occupation_forces:
-		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:garrison_button.visible=true
-	aftermath_button.visible=not WorldSimulation.military.pending_aftermath.is_empty()
-	attack.visible=not garrison_button.visible;siege.visible=not garrison_button.visible
-
-	var here:=bool(availability.get("at_target",false))
-	attack.text="ATTACK NOW" if here else "MARCH & ATTACK"
-	siege.text="BESIEGE NOW" if here else "MARCH & BESIEGE"
-	military_note.text=String(availability.get("error","Army is at this city. Your order starts hostilities immediately." if here else "Approach takes about %d days. Hostilities begin on arrival." % int(availability.get("days",0))))
-
-	if same_siege:attack.text="RETURN TO SIEGE";siege.visible=false;military_note.text="Your army is maintaining this siege. Return to its orders and supply situation."
-	if garrison_button.visible:military_note.text=WorldSimulation.military.city_force_summary(city_id)
+		control_label.text+=" · "+("at war with us" if bool(relation.get("at_war",false)) else "at peace with us")
+	for key:String in cards:
+		var field:Dictionary=fields.get(key,{})
+		var value:Label=cards[key].value;var note:Label=cards[key].note
+		cards[key].name.text=V.label(key)
+		value.text=V.words(key,field)
+		var seen:=int(field.get("observed_day",-1))
+		note.text=String(V.MEANINGS.get(key,"")) if field.is_empty() or seen==observed else "%s Seen %s." % [String(V.MEANINGS.get(key,"")),When.ago(seen)]
+		cards[key].card.tooltip_text=String(INTEL.FIELDS[key].label)
+	var pop:Dictionary=fields.get("population",{})
+	projection.text=""
+	if not pop.is_empty() and int(pop.get("age_days",0))>0:
+		var now:=V.bounds(pop,false)
+		projection.text="By now it could be %s." % V.words("population",{"low":now.x,"high":now.y})
+	if int(pop.get("age_days",0))>1095:projection.text="After this long, no one can say how many live there now."
+	projection.visible=not projection.text.is_empty() and int(freshness.received_age)>90
+	var ruler:=P.ruler_name(owner) if owner!="player" else ""
+	talk_ruler.text="Talk to "+P.first_name(ruler) if ruler!="" else "Send word to their ruler"
+	talk_ruler.disabled=owner=="" or owner=="player"
+	talk_ruler.tooltip_text="Opens the court, where your envoys carry your words to them." if not talk_ruler.disabled else "Who holds this place is not yet known."
+	var leader:=P.war_leader()
+	talk_general.visible=not leader.is_empty()
+	talk_general.text="Talk to %s" % P.first_name(String(leader.get("name",""))) if not leader.is_empty() else "Talk to our war leader"
+	talk_general.tooltip_text="Your war leader decides how to fight. Tell them in court what you want done about this city."
+	_war_actions(city)
+	_scouting_actions()
 
 func _process(delta:float)->void:
 	timer+=delta

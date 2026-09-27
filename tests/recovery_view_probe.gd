@@ -13,15 +13,14 @@ func _ready()->void:
 		preload("res://scripts/hud/recovery_screen.gd").open()
 		await get_tree().process_frame;await get_tree().process_frame
 		var view:CanvasLayer=get_tree().root.get_meta("recovery_view")
-		for index in 3:
-			view.tabs.current_tab=index
-			await get_tree().process_frame;await get_tree().process_frame
-			for child:Node in view.find_children("*","Button",true,false):
-				if child.is_visible_in_tree():assert(get_viewport().get_visible_rect().encloses(child.get_global_rect()))
-			assert(get_viewport().get_visible_rect().encloses(view.feedback.get_global_rect()))
-			if DisplayServer.get_name()!="headless":
-				await RenderingServer.frame_post_draw
-				get_viewport().get_texture().get_image().save_png("res://artifacts/recovery-%d-%d.png" % [index,dimensions.x])
+		await get_tree().process_frame;await get_tree().process_frame
+		for child:Node in view.find_children("*","Button",true,false):
+			if child.is_visible_in_tree() and not child.get_parent() is GridContainer:assert(get_viewport().get_visible_rect().encloses(child.get_global_rect()))
+		assert(get_viewport().get_visible_rect().encloses(view.feedback.get_global_rect()))
+		assert(view.find_children("*","SpinBox",true,false).is_empty(),"Plain choices, no number fields")
+		if DisplayServer.get_name()!="headless":
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("res://artifacts/recovery-%d.png" % dimensions.x)
 		view._prepare();assert(MilitaryCampaign.recovery.data.preparation.is_empty())
 		view.decision_commit.pressed.emit();assert(not MilitaryCampaign.recovery.data.preparation.is_empty())
 		view._cancel();assert(MilitaryCampaign.recovery.data.preparation.is_empty())
@@ -30,7 +29,6 @@ func _ready()->void:
 	preload("res://scripts/hud/recovery_screen.gd").open()
 	await get_tree().process_frame;await get_tree().process_frame
 	var occupied_view:CanvasLayer=get_tree().root.get_meta("recovery_view")
-	occupied_view.tabs.current_tab=2
 	occupied_view._resistance("protect")
 	assert(MilitaryCampaign.recovery.data.occupied[0].order.is_empty())
 	occupied_view.decision_commit.pressed.emit()
@@ -41,5 +39,5 @@ func _ready()->void:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://artifacts/recovery-occupied.png")
 	occupied_view.queue_free();await get_tree().process_frame
-	print("RECOVERY_VIEW_PASS three tabs at two sizes, real prepare/cancel actions")
+	print("RECOVERY_VIEW_PASS one briefing at two sizes, real prepare/cancel actions")
 	get_tree().quit()

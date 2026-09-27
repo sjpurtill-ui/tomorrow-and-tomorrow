@@ -8,7 +8,7 @@ func test_unknown_reports_never_get_bars_or_live_population_estimates()->void:
 	var provider=Provider.new(null,null,String(civ.id))
 	var tab:Dictionary=provider.tab(0)
 	for block:Dictionary in tab.blocks:assert_str(String(block.type)).is_not_equal("bars")
-	assert_str(String(tab.kpis[1].value)).is_equal("Day 46")
+	assert_str(String(tab.kpis[1].value)).is_equal(preload("res://scripts/hud/era_words.gd").when(45))
 	var known:=provider._civ()
 	assert_bool(known.has("population")).is_false()
 	assert_str(provider._reported_range(known,"population")).is_equal("Not yet observed")

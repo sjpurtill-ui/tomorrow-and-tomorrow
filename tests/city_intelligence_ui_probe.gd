@@ -24,7 +24,7 @@ func _ready()->void:
 	await RenderingServer.frame_post_draw
 	var screen=intel.screen_layer.get_child(0)
 	assert(screen.selector.item_count==3)
-	assert(get_viewport().get_visible_rect().encloses(screen.send.get_global_rect()))
+	assert(get_viewport().get_visible_rect().encloses(screen.talk_ruler.get_global_rect()))
 	get_viewport().get_texture().get_image().save_png("res://artifacts/city-intelligence-ui.png")
 	print("CITY_INTELLIGENCE_UI_PASS: three independent map hit targets and selector records; controls inside viewport")
 	get_tree().quit()

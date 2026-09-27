@@ -29,8 +29,10 @@ func setup(block:Dictionary)->void:
 		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);quote.add_child(stack)
 		var words:=Label.new();words.text=String(block.account);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		T.text(words,"voice_small",T.BODY);words.add_theme_font_override("font",T.voice_font(true));stack.add_child(words)
-		stack.add_child(T.text(Label.new(),"kicker",T.INK_MUTED))
-		(stack.get_child(1) as Label).text="SOURCE · "+String(block.get("source","unknown")).to_upper()
+		var source:=T.text(Label.new(),"small",T.INK_MUTED) as Label
+		source.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		source.text="Brought home by "+(String(block.get("source","")).to_lower().replace("_"," ") if String(block.get("source",""))!="" else "our scouts")
+		stack.add_child(source)
 	var unknown:Array[String]=[]
 	var legend_shown:=false
 	for group:Array in GROUPS:
@@ -45,7 +47,7 @@ func setup(block:Dictionary)->void:
 		var kicker:=T.text(Label.new(),"kicker",T.INK_MUTED) as Label;kicker.text=String(group[0]);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 		if String(block.get("home_name",""))!="" and not legend_shown:
 			legend_shown=true
-			var legend:=T.text(Label.new(),"kicker",T.GOLD) as Label;legend.text="▮ "+String(block.home_name).to_upper();head.add_child(legend)
+			var legend:=T.text(Label.new(),"small",T.INK_MUTED) as Label;legend.text="Gold mark: "+String(block.home_name);head.add_child(legend)
 		var rows:=VBoxContainer.new();rows.add_theme_constant_override("separation",2);add_child(rows)
 		for item:Dictionary in shown:rows.add_child(_row(item))
 	if not unknown.is_empty():

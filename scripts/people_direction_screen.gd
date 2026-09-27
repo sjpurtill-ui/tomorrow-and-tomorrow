@@ -1,4 +1,9 @@
 extends Control
+## Our course and our character: the century choice and the inheritance it
+## leaves. Paper and ink. Advice about the choice is heard in the court.
+const T:=preload("res://scripts/hud/hud_tokens.gd")
+const P:=preload("res://scripts/hud/paper_sheet.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 var opening:=false
 var ambition_buttons:Array[Button]=[]
 var pages:Array[Control]=[]
@@ -17,35 +22,34 @@ var more_choices:Button
 var choice_help:Label
 var review_back:Button
 
-const CARD_TITLES:=["Know the world","Build to last","Bring us together","Seek knowledge","Build strength","Create abundance","Care for people","Trade & connect","Found new horizons","Rule & extract","Chosen people","Entrench a dynasty","Rule through fear","One official truth"]
-const CARD_TAGS:=["LOGISTICS · ECOLOGY","CRAFT · BUILDING","CULTURE · INSTITUTIONS","KNOWLEDGE · HEALTH","SECURITY · LOGISTICS","NUTRITION · ECOLOGY","HEALTH · DEMOGRAPHY","PRODUCTION · LOGISTICS","LOGISTICS · DEMOGRAPHY","SECURITY · INSTITUTIONS","CULTURE · SECURITY","INSTITUTIONS · BUILDING","SECURITY · INSTITUTIONS","INSTITUTIONS · CULTURE"]
+const CARD_TITLES:=["Know the world","Build to last","Bring us together","Seek knowledge","Build strength","Create abundance","Care for people","Trade and connect","Found new horizons","Rule and extract","Chosen people","Entrench a dynasty","Rule through fear","One official truth"]
+## Plain words for what each course favours; true in every era.
+const CARD_TAGS:=["Travel and the land","Craft and building","Customs and belonging","Learning and healing","Defence and supply","Food and the land","Health and families","Making and carrying goods","New homes and families","Force and order","Kin and defence","Rank and building","Force and order","Belief and order"]
 const CARD_COLORS:=["71bcb3","d8996a","d9b978","9ba7d6","cc7c68","b8c480","81c5ac","dbb57a","c7ac69","b27256","ac9a7b","bd985e","a46658","95859f"]
 var title:Label
 var layout:VBoxContainer
 
 func _ready()->void:
-	theme=Theme.new()
-	theme.default_font=load("res://assets/fonts/battle/Barlow-Medium.ttf")
-	theme.set_color("font_color","Label",Color("343d34"))
-	preload("res://scripts/hud/hud_tokens.gd").add_tooltip_style(theme)
+	theme=T.control_theme()
 	opening=WorldSimulation.state.founding_focus==""
 	if not WorldSimulation.direction.needs_century_choice():selected_focus=WorldSimulation.direction.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var background:=ColorRect.new();background.color=Color("eee9dd");background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(background)
+	var background:=ColorRect.new();background.color=T.PAPER;background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(background)
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,18)
+	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,20)
 	add_child(margin)
-	layout=VBoxContainer.new();layout.add_theme_constant_override("separation",9);margin.add_child(layout)
-	var top:=HBoxContainer.new();layout.add_child(top)
-	title=_label(top,"YOUR PEOPLE’S STORY BEGINS",30);title.size_flags_horizontal=SIZE_EXPAND_FILL
-	_button(top,"RETURN · F8",func():queue_free()).visible=not WorldSimulation.direction.needs_century_choice()
-	summary=_label(layout,"",14)
-	var tabs:=HBoxContainer.new();layout.add_child(tabs)
-	for index in 3:
+	layout=VBoxContainer.new();layout.add_theme_constant_override("separation",10);margin.add_child(layout)
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",12);layout.add_child(top)
+	title=_label(top,"A people takes shape","title");title.size_flags_horizontal=SIZE_EXPAND_FILL
+	var close:=_button(top,"Close",func():queue_free());close.name="Close";close.visible=not WorldSimulation.direction.needs_century_choice()
+	summary=_label(layout,"","body")
+	var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",8);layout.add_child(tabs)
+	for index in 2:
 		var tab_index:=index
-		_button(tabs,["Direction","Council","National character"][index],func():_show_page(tab_index))
+		_button(tabs,["Our course","Our character"][index],func():_show_page(tab_index))
+	P.rule(layout)
 	var body:=VBoxContainer.new();body.size_flags_vertical=SIZE_EXPAND_FILL;layout.add_child(body)
-	var focus_page:=VBoxContainer.new();focus_page.size_flags_vertical=SIZE_EXPAND_FILL;body.add_child(focus_page);pages.append(focus_page)
+	var focus_page:=VBoxContainer.new();focus_page.size_flags_vertical=SIZE_EXPAND_FILL;focus_page.add_theme_constant_override("separation",8);body.add_child(focus_page);pages.append(focus_page)
 	var cards_scroll:=ScrollContainer.new();cards_scroll.size_flags_vertical=SIZE_EXPAND_FILL;focus_page.add_child(cards_scroll)
 	grid=GridContainer.new();grid.columns=4;grid.size_flags_vertical=SIZE_EXPAND_FILL;grid.size_flags_horizontal=SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);cards_scroll.add_child(grid)
@@ -57,47 +61,36 @@ func _ready()->void:
 		card.set_meta("ambition",id);card.tooltip_text=String(PeopleDirection.AMBITIONS[id].vision)
 		card.pressed.connect(func():selected_focus=id;reviewing=true;_refresh())
 		grid.add_child(card);ambition_buttons.append(card);focus_cards.append(card);index+=1
-	choice_help=_label(focus_page,"",14)
-	var detail:=_label(focus_page,"",14);detail.name="SelectionDetail";detail.custom_minimum_size.y=24
-	var confirm:=_button(focus_page,"CHOOSE A DIRECTION ABOVE",func():
+	choice_help=_label(focus_page,"","small")
+	var detail:=_label(focus_page,"","body",T.INK);detail.name="SelectionDetail";detail.custom_minimum_size.y=24
+	var confirm:=P.button(focus_page,"Choose a course above",Callable(),true)
+	confirm.pressed.connect(func():
 		var result:Dictionary=WorldSimulation.direction.choose(selected_focus)
-		status.text=String(result.get("error","Focus chosen. Resume time when ready."))
+		status.text=String(result.get("error","Course chosen. Resume time when ready."))
 		if not result.has("error"):queue_free())
-	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=43
-	var commit_style:=StyleBoxFlat.new();commit_style.bg_color=Color("c7a55f");commit_style.set_corner_radius_all(3);confirm.add_theme_stylebox_override("normal",commit_style);confirm.add_theme_color_override("font_color",Color("112126"));confirm.add_theme_font_size_override("font_size",16)
-	confirm.add_theme_color_override("font_disabled_color",Color("586052"))
-	council=VBoxContainer.new();body.add_child(council);pages.append(council)
-	var traditions_scroll:=ScrollContainer.new();traditions_scroll.size_flags_vertical=SIZE_EXPAND_FILL;body.add_child(traditions_scroll);pages.append(traditions_scroll)
+	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=44;T.text(confirm,"body",T.INK)
+	council=null
+	var traditions_scroll:=ScrollContainer.new();traditions_scroll.size_flags_vertical=SIZE_EXPAND_FILL;traditions_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;body.add_child(traditions_scroll);pages.append(traditions_scroll)
 	traditions=VBoxContainer.new();traditions.size_flags_horizontal=SIZE_EXPAND_FILL;traditions_scroll.add_child(traditions)
-	status=_label(layout,"",13);status.visible=false
-	resized.connect(_refresh);_show_page(0 if WorldSimulation.direction.needs_century_choice() else 2)
+	status=_label(layout,"","small");status.visible=false
+	resized.connect(_refresh);_show_page(0 if WorldSimulation.direction.needs_century_choice() else 1)
 	print("DIRECTION_SCREEN_READY: day=",WorldSimulation.state.elapsed_days,"; opening=",opening,"; settlement=",WorldSimulation.state.settlement_name,"; seed=",WorldSimulation.state.world_seed)
 	_capture_opening.call_deferred()
 
-func _label(parent:Node,text:String,font_size:int)->Label:
-	var label:=Label.new(); label.text=text
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size",font_size)
-	if font_size>=24:label.add_theme_font_override("font",load("res://assets/fonts/cinzel/Cinzel.ttf"))
-	parent.add_child(label)
-	return label
+## Roles: "title", "voice", "value", "body", "small", "kicker" (12 px floor).
+func _label(parent:Node,text:String,role:String,color:Color=Color(0,0,0,0))->Label:
+	return P.label(parent,text,role,color)
 
 func _button(parent:Node,text:String,action:Callable)->Button:
-	var button:=Button.new(); button.text=text
-	button.custom_minimum_size.y=34
-	for kind in ["normal","hover","pressed","disabled","focus"]:
-		var style:=StyleBoxFlat.new();style.bg_color=Color("e1dbc9") if kind=="normal" else Color("cec4aa")
-		style.content_margin_left=14;style.content_margin_right=14;style.set_corner_radius_all(3)
-		button.add_theme_stylebox_override(kind,style)
-	button.add_theme_color_override("font_color",Color("343d34"))
-	button.pressed.connect(action); parent.add_child(button)
+	var button:=P.button(parent,text,action)
+	button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	button.custom_minimum_size=Vector2(120,36)
 	return button
 
 func _show_page(index:int)->void:
-	page_index=index
-	for i in pages.size(): pages[i].visible=i==index
-	if index==1: _council_page()
-	if index==2: _traditions_page()
+	page_index=clampi(index,0,pages.size()-1)
+	for i in pages.size(): pages[i].visible=i==page_index
+	if page_index==1: _traditions_page()
 	_refresh()
 
 func _process(delta:float)->void:
@@ -110,39 +103,27 @@ func _refresh()->void:
 	if not is_instance_valid(grid):return
 	var century:=WorldSimulation.direction.century_at(int(WorldSimulation.state.elapsed_days))
 	var pending:=WorldSimulation.direction.needs_century_choice()
-	title.text="A people takes shape" if opening else "The character of a nation"
-	title.add_theme_font_size_override("font_size",24 if size.x<1000 else 32)
-	summary.text="Choose a founding purpose" if opening else "Years %d–%d  /  Century %d"%[century*100+1,(century+1)*100,century+1]
+	title.text="A people takes shape" if opening else "The character of a people"
+	summary.text="Choose what your people will strive for first." if opening else ("Years %d to %d of our story. Choose the course for this century." if pending else "Years %d to %d of our story.") % [century*100+1,(century+1)*100]
 	grid.columns=2 if size.x<1000 else 4
 	for card in ambition_buttons:
 		card.disabled=not pending;card.select(String(card.get_meta("ambition"))==selected_focus)
 	choice_help.visible=false
 	var detail:=pages[0].get_node("SelectionDetail") as Label
-	if selected_focus=="":detail.text="Every choice leaves a mark."
+	if selected_focus=="":detail.text="Pick a card to see what it would change. Every choice leaves a mark on later generations."
 	else:
-		var imprints:Array[String]=[]
-		for domain in PeopleDirection.Culture.PROFILES[selected_focus]:
-			for pole in PeopleDirection.Culture.PROFILES[selected_focus][domain]:imprints.append(String(pole).replace("_"," ").capitalize())
-		detail.text="  ·  ".join(imprints)
-		detail.tooltip_text=String(PeopleDirection.AMBITIONS[selected_focus].vision)
-	detail.add_theme_font_size_override("font_size",14 if size.y<700 else 16)
+		var ambition:Dictionary=PeopleDirection.AMBITIONS[selected_focus]
+		detail.text="%s %s" % [String(ambition.vision),String(ambition.get("effect",""))]
+		detail.tooltip_text=""
 	var confirm:=pages[0].get_node("ConfirmFocus") as Button
 	confirm.disabled=not pending or selected_focus==""
-	confirm.text="CHOOSE A DIRECTION ABOVE" if selected_focus=="" else ("BEGIN · " if opening else "COMMIT · ")+CARD_TITLES[PeopleDirection.AMBITIONS.keys().find(selected_focus)].to_upper()
+	var chosen_title:String=CARD_TITLES[PeopleDirection.AMBITIONS.keys().find(selected_focus)] if selected_focus!="" else ""
+	if selected_focus=="":confirm.text="Choose a course above"
+	elif not pending:confirm.text="This century's course is set: %s" % chosen_title
+	else:confirm.text=("Begin: %s" if opening else "Commit to this course: %s") % chosen_title
 
 func _clear(parent:Node)->void:
 	for child in parent.get_children(): parent.remove_child(child); child.queue_free()
-
-func _council_page()->void:
-	_clear(council)
-	_label(council,"ADVICE, NOT ORDERS",20)
-	_label(council,"Only serving officeholders speak here. More perspectives become available as your government grows. Unknown countries and hidden plans are not evidence.",14)
-	var recommendations:=WorldSimulation.direction.advisor_recommendations()
-	if recommendations.is_empty():
-		_label(council,"No appointed advisor is available yet. You can still choose any focus.",16)
-	for advice in recommendations:
-		_label(council,"%s · %s — %s" % [advice.name,advice.title,PeopleDirection.AMBITIONS[advice.focus].name],16)
-		_label(council,advice.reason,14)
 
 const VALUE_COLORS:=[Color("8b9b76"),Color("ba945b"),Color("688b91"),Color("ac7564")]
 
@@ -155,11 +136,13 @@ func _art(parent:Node,index:int,height:float)->TextureRect:
 	parent.add_child(rect);return rect
 
 func _box(parent:Node)->VBoxContainer:
-	var panel:=PanelContainer.new();panel.size_flags_horizontal=SIZE_EXPAND_FILL
-	var style:=StyleBoxFlat.new();style.bg_color=Color("f7f3e9");style.border_color=Color("d6cfbb");style.set_border_width_all(1)
-	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=14;style.content_margin_bottom=14
-	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
-	var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10);panel.add_child(content);return content
+	var content:=P.card(parent)
+	content.add_theme_constant_override("separation",10)
+	(content.get_parent() as PanelContainer).add_theme_stylebox_override("panel",P.card_style(Color(0,0,0,0),16))
+	return content
+
+func _plain(id:String)->String:
+	return id.replace("_"," ").capitalize()
 
 func _traditions_page()->void:
 	_clear(traditions)
@@ -170,70 +153,70 @@ func _traditions_page()->void:
 	var focus:=String(state.ambition)
 	var focus_index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(focus))
 	_art(portrait,focus_index,265)
-	_label(portrait,"OUR PRESENT COURSE",12).add_theme_color_override("font_color",Color("8c764d"))
-	_label(portrait,CARD_TITLES[focus_index] if focus!="" else "An unwritten story",26)
-	_label(portrait,"Shaped by every generation",14)
+	P.kicker(portrait,"Our present course")
+	_label(portrait,CARD_TITLES[focus_index] if focus!="" else "Not yet chosen","title")
+	if focus!="":_label(portrait,String(PeopleDirection.AMBITIONS[focus].get("effect","")),"small")
 	var spacer:=Control.new();spacer.size_flags_vertical=SIZE_EXPAND_FILL;portrait.add_child(spacer)
+	P.kicker(portrait,"Who decides day to day")
 	for area in ["scouting","settlement","research"]:
 		var delegated:bool=state.get("auto_"+area)
-		var control:=HBoxContainer.new();portrait.add_child(control)
-		var label:=_label(control,{"scouting":"Exploration","settlement":"Settlements","research":"Research"}[area],15);label.size_flags_horizontal=SIZE_EXPAND_FILL
-		var toggle:=_button(control,"Leader" if delegated else "Manual",func():state.set_delegated(area,not delegated);_traditions_page())
-		toggle.custom_minimum_size.x=105
-		toggle.tooltip_text="Click to take control" if delegated else "Click to restore automatic orders shaped by your culture"
+		var control:=HBoxContainer.new();control.add_theme_constant_override("separation",8);portrait.add_child(control)
+		var area_name:String={"scouting":"Where scouts go","settlement":"Where new homes are built","research":"What people study"}[area]
+		var label:=_label(control,"%s: %s" % [area_name,"our leaders decide" if delegated else "you decide"],"body");label.size_flags_horizontal=SIZE_EXPAND_FILL
+		var toggle:=_button(control,"I will decide" if delegated else "Let leaders decide",func():state.set_delegated(area,not delegated);_traditions_page())
+		toggle.custom_minimum_size.x=150
 	var values:=_box(spread);values.add_theme_constant_override("separation",6)
-	_label(values,"Cultural inheritance",25)
-	var key:=_label(values,"Color: today   /   Markers: inherited weight",12);key.tooltip_text="Each domain has four independent poles. Hover a segment for its current and inherited share. Recent choices matter more today; earlier choices remain in the inheritance."
+	_label(values,"What we inherit","title")
+	_label(values,"Each bar shows how the people lean today. The dark mark shows what earlier generations handed down. Hover a part of a bar for its share.","small")
 	for domain:Dictionary in state.cultural_tendencies():
 		var head:=HBoxContainer.new();values.add_child(head)
-		var label:=_label(head,String(domain.domain).capitalize(),14);label.size_flags_horizontal=SIZE_EXPAND_FILL
+		var label:=_label(head,_plain(String(domain.domain)),"body",T.INK);label.size_flags_horizontal=SIZE_EXPAND_FILL
 		var strongest:="";var best:=0.0
 		for pole in domain.current:
 			if float(domain.current[pole])>best:strongest=String(pole);best=float(domain.current[pole])
-		var dominant:=_label(head,strongest.replace("_"," ").capitalize() if best>0 else "Unformed",14)
-		dominant.autowrap_mode=TextServer.AUTOWRAP_OFF;dominant.add_theme_color_override("font_color",Color("8c764d"))
+		var dominant:=_label(head,_plain(strongest) if best>0 else "Not yet formed","body",T.GOLD_TEXT)
+		dominant.autowrap_mode=TextServer.AUTOWRAP_OFF
 		var track:=HBoxContainer.new();track.custom_minimum_size.y=15;track.add_theme_constant_override("separation",3);values.add_child(track)
 		var i:=0
 		for pole in domain.current:
 			var segment:=Control.new();segment.size_flags_horizontal=SIZE_EXPAND_FILL;segment.custom_minimum_size.y=15;segment.mouse_filter=Control.MOUSE_FILTER_STOP
 			var current:=float(domain.current[pole]);var inherited:=float(domain.inheritance[pole]);var color:Color=VALUE_COLORS[i];i+=1
-			segment.tooltip_text="%s\nToday %.0f%% · Inherited %.0f%%"%[String(pole).replace("_"," ").capitalize(),current*100,inherited*100]
+			segment.tooltip_text="%s\nToday %.0f%% · handed down %.0f%%"%[_plain(String(pole)),current*100,inherited*100]
 			segment.draw.connect(func():
-				segment.draw_rect(Rect2(Vector2.ZERO,segment.size),Color("e5dfd0"))
+				segment.draw_rect(Rect2(Vector2.ZERO,segment.size),T.PAPER_SUNK)
 				segment.draw_rect(Rect2(Vector2.ZERO,Vector2(segment.size.x*current,15)),color)
-				if inherited>0:segment.draw_line(Vector2(segment.size.x*inherited,2),Vector2(segment.size.x*inherited,13),Color("404b3b"),2))
+				if inherited>0:segment.draw_line(Vector2(segment.size.x*inherited,2),Vector2(segment.size.x*inherited,13),T.INK,2))
 			segment.resized.connect(segment.queue_redraw);track.add_child(segment)
 	var history:=_box(traditions)
-	var history_title:=HBoxContainer.new();history.add_child(history_title)
-	_label(history_title,"The choices we carry",22).size_flags_horizontal=SIZE_EXPAND_FILL
-	_label(history_title,"Permanent inheritance",12).autowrap_mode=TextServer.AUTOWRAP_OFF
+	_label(history,"The choices we carry","title")
 	var timeline_scroll:=ScrollContainer.new();timeline_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;history.add_child(timeline_scroll)
 	var timeline:=HBoxContainer.new();timeline.add_theme_constant_override("separation",12);timeline_scroll.add_child(timeline)
 	var commitments:Array=[]
 	for event:Dictionary in state.cultural_memory.events:
 		if String(event.id).begins_with("century:") or String(event.id).begins_with("legacy:"):commitments.append(event)
 	for event:Dictionary in commitments:
-		var tile:=VBoxContainer.new();tile.custom_minimum_size.x=145;timeline.add_child(tile)
+		var tile:=VBoxContainer.new();tile.custom_minimum_size.x=160;timeline.add_child(tile)
 		var index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(String(event.choice)))
 		var art:=_art(tile,index,70);art.tooltip_text=CARD_TITLES[index]
-		_label(tile,"Y%d · %s"%[int(event.day)/365+1,String(PeopleDirection.AMBITIONS[event.choice].name)],12)
+		_label(tile,String(PeopleDirection.AMBITIONS[event.choice].name),"small",T.INK)
+		_label(tile,EraWords.when(int(event.day)),"small")
 	if commitments.is_empty():
 		timeline_scroll.hide()
-		_label(history,"Your first choice begins the story.",14)
+		_label(history,"Your first choice begins the story.","body")
 	# The one-shot visions have become generational aims (legacy_aims.gd):
 	# the court proposes them and the god takes one up in the Court.
 	var aims:=preload("res://scripts/legacy_aims.gd").board_model()
 	var aim_row:=_box(traditions)
 	var live:Dictionary=aims.get("active",{})
 	if not live.is_empty():
-		_label(aim_row,"What we strive for: %s" % String(live.title),20)
-		_label(aim_row,"%s · %s left · %s" % [String(live.words).substr(0,1).to_upper()+String(live.words).substr(1),String(live.left),String(live.by)],14)
+		_label(aim_row,"What we strive for: %s" % String(live.title),"value",T.INK)
+		_label(aim_row,"%s · %s left · %s" % [String(live.words).substr(0,1).to_upper()+String(live.words).substr(1),String(live.left),String(live.by)],"body")
 	elif String(aims.get("waiting",""))!="":
-		_label(aim_row,"The people want an aim. Summon %s in the Court to hear it." % String(aims.waiting),16)
+		_label(aim_row,"The people want an aim. Summon %s in the court to hear it." % String(aims.waiting),"body",T.INK)
 	else:
-		_label(aim_row,"No aim is sworn. The court will speak of one when the time comes.",14)
+		_label(aim_row,"No aim is sworn. The court will speak of one when the time comes.","body")
 	for legacy:Dictionary in aims.get("legacies",[]):
-		_label(aim_row,"Remembered: %s (year %d)" % [String(legacy.name),int(legacy.day)/365+1],13)
+		_label(aim_row,"Remembered: %s (%s)" % [String(legacy.name),EraWords.when(int(legacy.day))],"small")
 
 func _capture_opening()->void:
 	if "--capture-opening" not in OS.get_cmdline_user_args() or get_tree().root.has_meta("opening_captured"):return

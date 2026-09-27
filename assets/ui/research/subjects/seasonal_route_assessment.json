@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_route_assessment",
+  "line": "logistics",
+  "game_year": 120,
+  "approx_historical_year": -4200,
+  "prompt": "c. 4200 BCE: Travelers compare flooded low path with passable higher route after rain; travel watercolor and ink. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1fa36117-0107-489c-969f-d22473a3c328.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_route_assessment-v1.png",
+  "sha256": "6b3d50e044869f730a8550dd7d99253e889d97b7ea1844d49e370deddf75b2c2",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
