@@ -15,7 +15,7 @@ func test_pause_changes_only_local_lab_and_releases_reserved_workers()->void:
 		state.known_discoveries.append("laboratory_notebooks");state.population_allocations.Knowledge=8
 		var before:Dictionary=state.population_allocations.duplicate(true)
 		var panel:=fixture();var workers:float=state.effective_workers("Knowledge")
-		assert_str(panel.details.text).contains("reserved after absences and clinical care")
+		assert_str(panel.details.text).contains("set aside for it, after those who are away or caring for the sick")
 		panel.toggle.pressed.emit()
 		assert_bool(state.microscopy.enabled).is_false()
 		assert_float(state.effective_workers("Knowledge")).is_greater(workers)
@@ -28,7 +28,7 @@ func test_panel_reports_retained_measurement_without_exposing_latent_changes()->
 		var panel:=fixture();var before:String=panel.details.text
 		sample.cells=10000;sample.viability=.01;panel.refresh()
 		assert_str(panel.details.text).is_equal(before)
-		assert_str(before).contains("observed day 2, 1.00 visible cells")
+		assert_str(before).contains("1 living cell seen")
 		assert_str(before).contains("Bench awaiting"))
 func test_every_microscopy_identity_has_panel_and_unrelated_ids_do_not()->void:
 	for entry:Dictionary in preload("res://scripts/microscopy_knowledge.gd").entries():assert_bool(LabPanel.supports(entry.id)).is_true()

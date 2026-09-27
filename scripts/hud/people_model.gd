@@ -391,7 +391,7 @@ static func when(day:int)->String:
 	if ago==1:return "yesterday"
 	if ago<SEASON_DAYS and HearthCount.season_key(day)==HearthCount.season_key(int(GameState.elapsed_days)):return "this "+season_word()
 	if EraWords.hearth():return "%s ago" % ("a season" if ago<SEASON_DAYS*2 else "%s seasons" % EraWords.count_word(mini(12,ago/SEASON_DAYS)))
-	return "year %d, day %d" % [day/365+1,day%365+1]
+	return EraWords.ago(day)
 
 
 # ---------------------------------------------------------------------------

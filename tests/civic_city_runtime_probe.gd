@@ -36,9 +36,9 @@ func _ready()->void:
 	_expect(GameState.resource_stockpiles==primary_stores,"City selection must not alter first city stores")
 	var economy:RefCounted=load("res://scripts/hud/content/dock_content_economy.gd").new(terrain,hud)
 	var economy_data:Dictionary=economy.tab(1)
-	_expect("Dawngate" in String(economy.meta().title),"Economy must name selected city")
+	_expect("Dawngate" in str(economy_data.blocks),"Economy must name selected city")
 	_expect(not "777" in str(economy_data.blocks),"Dawngate materials must not show first city timber")
-	_expect("INTERCITY TRADE" in str(economy_data.blocks),"Economy must expose deliveries")
+	_expect(economy_data.blocks[0].has("on_trade"),"Economy must expose deliveries")
 	terrain._process_other_city_resources()
 	_expect(GameState.resource_stockpiles==primary_stores,"Dawngate daily production must not spend first city stores")
 	terrain.game_speed=5.0

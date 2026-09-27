@@ -1,68 +1,75 @@
-extends "res://scripts/hud/production_queue.gd"
+extends "res://scripts/hud/home_ledger.gd"
+## The Wealth dock: what the day's work yields, which way it is going and what
+## holds it back, then the stores of money or exchange metal once they exist.
 const Approved:=preload("res://scripts/hud/approved_ui_art.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Spark:=preload("res://scripts/hud/material_stock_spark.gd")
+const Plain:=preload("res://scripts/hud/production_plain.gd")
 const PALETTE:=[Color("6b7d50"),Color("497c96"),Color("93958a"),Color("b89339")]
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;add_theme_constant_override("separation",8)
+	theme=T.control_theme();data=block;name="WealthLedger";add_theme_constant_override("separation",8)
 	var money:=String(data.stage)=="currency";var metal:=String(data.stage)=="weighed_metal"
-	var status:=HBoxContainer.new();add_child(status);var stage:=_serif("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth in things held",16);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage);status.add_child(T.make_label(String(data.city),12,T.MUTED))
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);add_child(head)
-	if not data.leader.is_empty():head.add_child(Portrait.picture(data.leader,80,100))
-	var manager:=VBoxContainer.new();manager.size_flags_horizontal=Control.SIZE_EXPAND_FILL;manager.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(manager)
-	var name_label:=_serif(String(data.leader.get("name","Founding camp")),16);name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;manager.add_child(name_label);manager.add_child(T.make_label("Leader managed" if bool(data.managed) else "Directed priorities",12,T.MUTED))
-	for spec in [["%.1f" % float(data.economy.gdp),"Output / day"],["%.2f" % float(data.economy.gdp_per_capita),"Output / person"],["%d%%" % roundi(float(data.economy.productivity)*100),"Productivity"]]:
-		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=100;cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER;cell.tooltip_text="The day's useful work, not stored wealth";head.add_child(cell);cell.add_child(_serif(spec[0],23));cell.add_child(T.make_label(spec[1],11,T.MUTED))
+	var status:=HBoxContainer.new();add_child(status)
+	var stage:=_voice("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth is what we hold and owe one another",18);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage)
+	status.add_child(T.make_label(String(data.city),13,T.MUTED))
+	# The day's work, as an equivalent number of people working at their best.
+	var work:=HBoxContainer.new();work.add_theme_constant_override("separation",14);add_child(work)
+	if not data.leader.is_empty():work.add_child(Portrait.picture(data.leader,80,100))
+	var reading:=Words.output(data.economy,data.get("history",[]),data.get("conditions",{}))
+	var equivalent:=float(data.economy.get("gdp",0.0))
+	var headline:="The day's work equals about %s people working at their best" % Plain.number(equivalent)
+	if equivalent<0.5:headline="Almost no useful work is being done"
+	var box:=_reading(work,headline,String(reading.trend),String(reading.cause),String(reading.tone));box.name="OutputReading"
+	if float(data.economy.get("gdp_per_capita",0.0))>0.0:_line(box,"That is %s of a full day's work for each person, children and elders included." % Plain.number(float(data.economy.gdp_per_capita)),13,T.BODY)
+	if bool(data.show_work):
+		_line(self,"This counts useful work only. It does not count land, buildings, belongings or coin.",13,T.MUTED)
 	_rule(self)
 	if not money and not metal:
-		add_child(_serif("Direct allocation & reciprocity",19))
-		var note:=T.make_label("Wealth is held in useful goods and in gifts owed and given.",12,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(note)
-		_button(self,"View material stores",data.on_stores,"Physical reserves are tracked by material, without invented monetary values")
+		add_child(_voice("Gifts and shared stores",19))
+		_line(self,"There is no money yet. Wealth is the food and materials in store, and the gifts and favours households owe one another.",13,T.BODY)
+		_button(self,"See the material stores",data.on_stores,"Wood, stone, clay and fibre in store")
 	else:
-		var labels:=HBoxContainer.new();labels.add_theme_constant_override("separation",16);add_child(labels)
-		var heading:=_serif("MONEY ACCOUNTS" if money else "EXCHANGE METAL",16);heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;labels.add_child(heading)
-		var balance:=T.make_label("BALANCE",11,T.MUTED);balance.custom_minimum_size.x=105;labels.add_child(balance)
-		var trend:=T.make_label("RECORDED TREND",11,T.MUTED);trend.custom_minimum_size.x=160;labels.add_child(trend);var spacer:=Control.new();spacer.custom_minimum_size.x=28;labels.add_child(spacer)
+		add_child(T.make_label("MONEY HELD" if money else "EXCHANGE METAL",12,T.MUTED))
 		for item:Dictionary in data.accounts:
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);add_child(row)
 			if int(item.art)>=0:row.add_child(Approved.account(int(item.art)))
-			var account_label:=_serif(String(item.name),20);account_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;account_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(account_label)
-			var amount:=_serif("%.0f" % float(item.balance),23);amount.custom_minimum_size.x=105;row.add_child(amount)
+			var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(text)
+			text.add_child(_voice("%s: %s" % [String(item.name),Plain.number(float(item.balance))],19))
+			var change:=_account_change(item.points,float(item.balance))
+			_line(text,change,13,T.BODY)
 			var chart:=Spark.new();chart.points=item.points;chart.custom_minimum_size=Vector2(160,55);row.add_child(chart)
-			_button(row,"▴" if data.selected==item.key else "⌄",func():data.on_select.call(String(item.key)),"Account details")
-			for child in row.get_children():child.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-			if data.selected==item.key:
-				var note:=T.make_label("%.2f %s · recorded holdings, not daily income" % [float(item.balance),"currency units" if money else "metal-value units"],12,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(note)
+			var open:bool=data.selected==item.key
+			_button(row,"Hide" if open else "Details",func():data.on_select.call(String(item.key)),"What this account holds").size_flags_vertical=Control.SIZE_SHRINK_CENTER
+			if open:
+				_line(self,"%s %s held now. This is what is held, not what comes in each day." % [Plain.number(float(item.balance)),"coins" if money else "measures of metal"],13,T.MUTED)
 			_rule(self)
 		if money:_composition()
-	var work:=HBoxContainer.new();work.add_theme_constant_override("separation",14);add_child(work)
-	if preload("res://scripts/hud/early_civ_art.gd").active():
-		var activity:=TextureRect.new();activity.texture=preload("res://scripts/hud/ambition_art.gd").texture(1)
-		activity.custom_minimum_size=Vector2(150,150);activity.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-		activity.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;activity.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-		activity.mouse_filter=Control.MOUSE_FILTER_IGNORE;work.add_child(activity)
-	else:work.add_child(Approved.picture(Rect2(105,810,520,139),310,84))
-	var brief:=VBoxContainer.new();brief.size_flags_horizontal=Control.SIZE_EXPAND_FILL;brief.size_flags_vertical=Control.SIZE_SHRINK_CENTER;work.add_child(brief);brief.add_child(_serif("Work & productivity",20))
-	var formula:=T.make_label("%.1f effective worker-days × %.0f%% = %.1f output" % [float(data.economy.effective_workers),float(data.economy.productivity)*100,float(data.economy.gdp)],11,T.MUTED);formula.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;brief.add_child(formula)
-	_button(work,"⌄",data.on_work,"Economic output calculation")
-	if bool(data.show_work):
-		var note:=T.make_label("Output measures current effective labor and productivity. It does not value land, buildings, possessions, or coin balances.",12,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(note)
-	_rule(self)
-	var footer:=HBoxContainer.new();footer.add_theme_constant_override("separation",14);add_child(footer)
-	if money or metal:_button(footer,"Account history",data.on_history,"Recorded balances over time")
-	_button(footer,"Economic policy",data.on_policy,"Government and policy");_button(footer,"Material stores",data.on_stores,"Physical reserves")
+	var footer:=HFlowContainer.new();footer.add_theme_constant_override("h_separation",8);add_child(footer)
+	if money or metal:_button(footer,"Past balances",data.on_history,"How these holdings changed over past months")
+	_button(footer,"Hide the note" if bool(data.show_work) else "What this counts",data.on_work,"What the day's work measures")
+	_button(footer,"Government and policy",data.on_policy,"Officials and standing policy")
+	_button(footer,"Material stores",data.on_stores,"Wood, stone, clay and fibre in store")
+
+func _account_change(points:Array,balance:float)->String:
+	var known:Array=[]
+	for point:Dictionary in points:
+		if point.get("value")!=null:known.append(point)
+	if known.size()<1:return "No earlier count to compare with."
+	var before:=float(known[-2].value) if known.size()>=2 else float(known[-1].value)
+	var trend:=Words.direction(balance-before,before*5.0)
+	if trend=="steady":return "Steady since the last count."
+	return "%s since the last count (%s %s)." % [trend_word(trend),"up" if balance>before else "down",Plain.number(absf(balance-before))]
+
 func _composition()->void:
-	add_child(_serif("Where money is held",16))
+	add_child(T.make_label("WHERE THE MONEY IS",12,T.MUTED))
 	var total:=0.0
 	for account:Dictionary in data.accounts:total+=maxf(0,float(account.balance))
-	if total<=0:add_child(T.make_label("No currency balances recorded.",12,T.MUTED));return
+	if total<=0:_line(self,"No money is recorded yet.",13,T.MUTED);return
 	var bar:=HBoxContainer.new();bar.add_theme_constant_override("separation",1);bar.custom_minimum_size.y=18;add_child(bar)
 	var legend:=HFlowContainer.new();legend.add_theme_constant_override("h_separation",16)
 	for index in data.accounts.size():
 		var account:Dictionary=data.accounts[index];var share:=maxf(0,float(account.balance))/total
 		if share<=0:continue
 		var segment:=ColorRect.new();segment.color=PALETTE[index];segment.size_flags_horizontal=Control.SIZE_EXPAND_FILL;segment.size_flags_stretch_ratio=share;segment.tooltip_text=String(account.name);bar.add_child(segment)
-		legend.add_child(T.make_label("%d%%  %s" % [roundi(share*100),String(account.name)],11,PALETTE[index]))
+		legend.add_child(T.make_label("%s: %d in every 100" % [String(account.name),roundi(share*100)],13,T.BODY))
 	add_child(legend)
-func _serif(text:String,font_size:int)->Label:
-	var label:=T.make_label(text,font_size,T.INK);label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font());return label
