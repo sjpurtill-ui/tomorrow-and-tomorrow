@@ -88,12 +88,12 @@
     "line": "institutions",
     "game_year": 125,
     "approx_historical_year": -4167,
-    "prompt": "c. 4167 BCE: Adults air a grievance before a seated village assembly; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cb075f7c-0461-46df-ad87-1aadf03cec8e.png",
+    "prompt": "c. 4167 BCE: Village adults in plain woven tunics bring a livestock-boundary grievance before neighbors on reed mats; rough Neolithic civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-464813bd-20ea-4f41-87c4-4e6f743deee5.png",
     "asset": "res://assets/ui/research/subjects/public_dispute_airing-v1.png",
-    "sha256": "68c42f3316be39cc0761e36da328796a81cf5b898904609a793364b0bf27e68a",
+    "sha256": "390a59a2023d60f5b4e6f14dae0112cb8604cb13c2b414df310d3079ef796f19",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+    "review": "Replacement chosen after full-image and 3.37:1 crop review for early clothing and clean edges."
   },
   {
     "id": "signal_command_drill",
@@ -124,12 +124,12 @@
     "line": "health",
     "game_year": 126,
     "approx_historical_year": -4160,
-    "prompt": "c. 4160 BCE: Adults lead used household water down shallow channel to reed bed; transparent watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-edb01615-16cc-40c0-bb77-8b789fdb9f80.png",
+    "prompt": "c. 4160 BCE: Adults lead household wash water through earth channel away from mudbrick homes toward reeds; full-bleed watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-34177f5b-b157-4759-a880-b1f3f5bce5a0.png",
     "asset": "res://assets/ui/research/subjects/greywater_diversion_practice-v1.png",
-    "sha256": "0880d2f3866fdf91c118d0332a0ffae400ab828db45c50cb5f4b64ca4099bf54",
+    "sha256": "ba2efb4a257fdee61966c829cb150a5913abe4bc0caf33bd15e3b8a0332bb7b4",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+    "review": "Replacement chosen after full-image and 3.37:1 crop review for early clothing and clean edges."
   },
   {
     "id": "batch_sizing_by_fatigue",
