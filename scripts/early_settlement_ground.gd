@@ -54,6 +54,10 @@ static func known_crafts() -> Dictionary:
 		"herding": any.call(["herding_rotas", "herd_size_limits"]),
 		"stone_walls": any.call(["dry_stone_walls"]),
 		"grinding": any.call(["flour_sifting", "grain_grinding", "saddle_quern", "mixed_grain_legume_meals"]),
+		"weirs": any.call(["fish_weirs_and_traps", "weir_fish_gaps", "fish_run_weir_opening", "licensed_estuary_weirs"]),
+		"landing": any.call(["river_landings", "plank_extended_dugouts", "stone_quays", "stone_jetty_harbors"]),
+		"quay": any.call(["stone_quays", "stone_jetty_harbors"]),
+		"hide_boats": any.call(["hide_covered_boats", "reed_bundle_boats"]),
 		"carts": any.call(["solid_wheel_assembly", "spoked_wheel_assembly", "cart_running_gear", "cart_bed_framing", "transport_cart", "sleeved_cart_assembly", "wheel"]),
 	}
 
