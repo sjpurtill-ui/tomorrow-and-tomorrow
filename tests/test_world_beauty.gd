@@ -69,3 +69,23 @@ func test_climate_changes_blend_without_jumps()->void:
 		var jump:=absf(c.r-previous.r)+absf(c.g-previous.g)+absf(c.b-previous.b)
 		assert_float(jump).is_less(0.05)
 		previous=c
+
+
+func test_shader_include_has_only_declarations_at_top_level()->void:
+	# A stray statement outside a function fails the whole terrain shader at
+	# run time (the land renders flat grey), and headless tests never compile
+	# shaders. Keep the include structurally sound: balanced braces, and only
+	# constants and function definitions at the top level.
+	var text:=FileAccess.get_file_as_string("res://scripts/world_beauty.gdshaderinc")
+	var depth:=0
+	var allowed:=RegEx.new()
+	allowed.compile("^(const |uniform |#|}|//|(vec[234]|float|int|bool|mat[234]|void) [A-Za-z_0-9]+[(])")
+	var line_number:=0
+	for raw in text.split("\n"):
+		line_number+=1
+		var line:=raw.strip_edges()
+		if depth==0 and line!="" and allowed.search(line)==null:
+			fail("top-level statement at line %d: %s" % [line_number,line])
+		depth+=line.count("{")-line.count("}")
+		assert_int(depth).override_failure_message("unbalanced braces at line %d" % line_number).is_greater_equal(0)
+	assert_int(depth).is_equal(0)
