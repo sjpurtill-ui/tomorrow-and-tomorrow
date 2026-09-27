@@ -8,17 +8,18 @@ func before_test()->void:
 func after_test()->void:
 	CivilizationSystem.ground_survey_authority=Callable()
 
-func test_annual_expedition_creates_a_strategic_find()->void:
+func test_annual_expedition_route_alone_invents_no_strategic_find()->void:
+	# Since scouting and prospecting became physical, a returning party brings
+	# back only what it actually carried or studied: walking a route over good
+	# ground neither invents a deposit nor adds stock.
 	var route:Array=[{"x":0.0,"z":0.0},{"x":500.0,"z":100.0},{"x":1200.0,"z":300.0},{"x":2000.0,"z":500.0}]
 	var mission:={"mission_id":12,"duration_days":365}
 	var salt_before:=float(GameState.resource_stockpiles.get("Salt",0))
+	var deposits_before:=GameState.resource_deposits.size()
 	CivilizationSystem._resolve_scout_windfalls(mission,route,1524)
-	var deposits:Array=mission.discoveries.filter(func(item:Dictionary)->bool: return String(item.kind)=="resource")
-	assert_int(deposits.size()).is_greater_equal(1)
-	assert_str(String(deposits[0].resource)).is_equal("Salt")
-	assert_bool(GameState.resource_deposits.any(func(item:Dictionary)->bool: return String(item.id)==String(deposits[0].deposit_id) and String(item.stage)=="recognized")).is_true()
+	assert_bool(mission.discoveries.any(func(item:Dictionary)->bool: return String(item.get("kind",""))=="resource")).is_false()
+	assert_int(GameState.resource_deposits.size()).is_equal(deposits_before)
 	assert_float(float(GameState.resource_stockpiles.get("Salt",0))).is_equal(salt_before)
-	assert_bool(mission.discoveries.any(func(item:Dictionary)->bool: return String(item.get("resource",""))=="Fiber Plants")).is_false()
 
 func test_terrain_and_recognition_gate_the_resource_reward()->void:
 	var rng:=RandomNumberGenerator.new()
@@ -49,6 +50,10 @@ func test_older_reports_gain_the_design_without_new_rewards()->void:
 
 func test_return_pipeline_persists_discoveries_and_actual_journey_length()->void:
 	var mission:={"mission_id":55,"start_day":1100,"duration_days":365,"personnel":6,"target_kind":"explore","route":[{"x":0,"z":0},{"x":500,"z":200},{"x":1100,"z":400},{"x":1700,"z":700}]}
+	# What the party physically carried home becomes the report's findings.
+	mission["carried_collections"]=[
+		{"id":"expedition_test:knots","kind":"knowledge","name":"Knotted cord records","source_id":"expedition_test","source_name":"River folk","position":{"x":500.0,"z":200.0},"observed_day":1300,"discovery_id":"tallies","signals":["research"]},
+		{"id":"expedition_test:pots","kind":"specimen","name":"Fired clay vessels","source_id":"expedition_test","source_name":"River folk","position":{"x":1100.0,"z":400.0},"observed_day":1400,"discovery_id":"pit_firing","signals":["clay"]}]
 	CivilizationSystem.scout_missions.append(mission)
 	CivilizationSystem._complete_scout_mission(mission,1524)
 	assert_int(CivilizationSystem.scout_reports.size()).is_equal(1)

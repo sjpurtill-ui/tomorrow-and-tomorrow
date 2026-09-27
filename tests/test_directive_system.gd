@@ -37,8 +37,16 @@ func test_one_example_is_one_worker_with_a_conserved_population_and_receipt()->v
 	assert_str(String(report.outcome)).is_equal("success")
 	assert_str(String(report.qualitative_evidence)).contains("1 person")
 	var ledger_ui:RefCounted=load("res://scripts/hud/content/dock_detail_population_ledger.gd").new(null,null)
+	# The ledger record keeps its title; the Population Ledger groups deaths by
+	# cause (summary) and by place, cause and 30-day period (dated records).
+	assert_str(String(GameState.demographic_ledger[0].title)).is_equal("1 executed by decree")
+	var cause:=String(GameState.demographic_ledger[0].cause)
 	var ledger_view:Dictionary=ledger_ui.tab(0)
-	assert_str(JSON.stringify(ledger_view)).contains("1 executed by decree")
+	assert_str(JSON.stringify(ledger_view)).contains(cause)
+	assert_str(JSON.stringify(ledger_view)).contains("\"1 death\"")
+	var dated:=JSON.stringify(ledger_ui.tab(1))
+	assert_str(dated).contains("Civilization under directive")
+	assert_str(dated).contains("\"1 death\"")
 	var council_ui:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)
 	assert_str(council_ui._directive_state({"status":"active","implementation_followup":{"state":"reported"}})).is_equal("REPORTED")
 

@@ -97,8 +97,11 @@ func test_life_and_death_refresh_keeps_focus()->void:
 	assert_bool(panel.body.is_ancestor_of(owner)).is_true()
 
 func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
+	# Seventy distinct tales: the Chronicle folds a line whose words (digits
+	# aside) were told recently into the tallies, so each needs its own words.
 	for i in 70:
-		Chronicle.record({"key":"test:%d" % i,"title":"The people remember %d" % i,"text":"A line long enough to wrap in the chronicle feed so the view has height.","tier":"notice","kind":"story","day":i})
+		var place:=char(97+i%26)+char(97+(i/26)%26)
+		Chronicle.record({"key":"test:%d" % i,"title":"The people remember %d" % i,"family":"test_tale_"+place,"text":"At the %s ford, a line long enough to wrap in the chronicle feed so the view has height." % place,"tier":"notice","kind":"story","day":i})
 	await _open(ChronicleDock.new(null,hud))
 	var feed:Node=panel.body.find_child("ChronicleFeed",true,false)
 	assert_object(feed).is_not_null()

@@ -87,7 +87,7 @@ static func death_summary(ledger:Array)->Array:
 	var rows:Array=[]
 	for cause:String in groups:
 		var group:Dictionary=groups[cause]
-		rows.append({"name":cause,"value":"%d deaths"%int(group.count),"count":int(group.count),"sub":"%d locations · %d retained records"%[group.places.size(),int(group.records)],"accent":Tokens.RED})
+		rows.append({"name":cause,"value":"%d death%s"%[int(group.count),"" if int(group.count)==1 else "s"],"count":int(group.count),"sub":"%d locations · %d retained records"%[group.places.size(),int(group.records)],"accent":Tokens.RED})
 	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count) if a.count!=b.count else String(a.name)<String(b.name))
 	return rows
 
