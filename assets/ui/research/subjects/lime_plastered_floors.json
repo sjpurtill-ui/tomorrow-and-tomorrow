@@ -1,0 +1,12 @@
+{
+  "id": "lime_plastered_floors",
+  "line": "infrastructure",
+  "game_year": 52,
+  "approx_historical_year": -4653,
+  "prompt": "c. 4653 BCE: Adults smooth pale lime plaster across a house floor and lower walls; casein gouache. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f826888e-263d-4a94-b17d-ad2005a7616d.png",
+  "asset": "res://assets/ui/research/subjects/lime_plastered_floors-v1.png",
+  "sha256": "8408c34a9904ee348ef7b1fc5f530805d50ddb1ade72c9e4d7f00b3b5b99579c",
+  "mode": "built-in image_gen / new image",
+  "review": "White plaster and floor application clear."
+}

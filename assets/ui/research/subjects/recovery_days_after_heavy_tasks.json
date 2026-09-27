@@ -1,0 +1,12 @@
+{
+  "id": "recovery_days_after_heavy_tasks",
+  "line": "labor",
+  "game_year": 58,
+  "approx_historical_year": -4613,
+  "prompt": "c. 4613 BCE: After heavy stone hauling, adults rest in shade beside idle rope and sled; charcoal and ochre drawing. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-10e9abfe-f0f2-48be-ba03-cec791d091a1.png",
+  "asset": "res://assets/ui/research/subjects/recovery_days_after_heavy_tasks-v1.png",
+  "sha256": "4b50f114a451314fed5ea8426ca9b4713265be37a46f109be703843325a512e1",
+  "mode": "built-in image_gen / new image",
+  "review": "Workers rest beside heavy-hauling equipment."
+}

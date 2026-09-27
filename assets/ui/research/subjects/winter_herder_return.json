@@ -1,0 +1,12 @@
+{
+  "id": "winter_herder_return",
+  "line": "demography",
+  "game_year": 60,
+  "approx_historical_year": -4600,
+  "prompt": "c. 4600 BCE: Herders and flock return to village in winter with rolled camp bedding, family welcomes them; chalk pastel and cut paper. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b765c7bb-c5c5-4cc2-b1d6-8a7be1d61396.png",
+  "asset": "res://assets/ui/research/subjects/winter_herder_return-v1.png",
+  "sha256": "b329fda36aef19fe82b920b9ddd941aa43595141f1c96996682d077728098112",
+  "mode": "built-in image_gen / new image",
+  "review": "Winter return and homecoming clear."
+}

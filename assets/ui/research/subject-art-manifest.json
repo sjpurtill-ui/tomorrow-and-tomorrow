@@ -3818,5 +3818,22 @@
   "refuse_removal": {"path": "res://assets/ui/research/subjects/refuse_removal-v1.png", "focus": [0.5, 0.5]},
   "textile_laundering_practice": {"path": "res://assets/ui/research/subjects/textile_laundering_practice-v1.png", "focus": [0.5, 0.5]},
   "village_marriage_alliances": {"path": "res://assets/ui/research/subjects/village_marriage_alliances-v1.png", "focus": [0.5, 0.5]},
-  "weapon_free_gatherings": {"path": "res://assets/ui/research/subjects/weapon_free_gatherings-v1.png", "focus": [0.5, 0.5]}
+  "weapon_free_gatherings": {"path": "res://assets/ui/research/subjects/weapon_free_gatherings-v1.png", "focus": [0.5, 0.5]},
+  "lime_plastered_floors": {"path": "res://assets/ui/research/subjects/lime_plastered_floors-v1.png", "focus": [0.5, 0.5]},
+  "scrap_reclamation_habits": {"path": "res://assets/ui/research/subjects/scrap_reclamation_habits-v1.png", "focus": [0.5, 0.5]},
+  "drought_signs": {"path": "res://assets/ui/research/subjects/drought_signs-v1.png", "focus": [0.5, 0.5]},
+  "elder_care_by_children": {"path": "res://assets/ui/research/subjects/elder_care_by_children-v1.png", "focus": [0.5, 0.5]},
+  "exculpatory_oath": {"path": "res://assets/ui/research/subjects/exculpatory_oath-v1.png", "focus": [0.5, 0.5]},
+  "hostage_exchange": {"path": "res://assets/ui/research/subjects/hostage_exchange-v1.png", "focus": [0.5, 0.5]},
+  "motion_economy_habits": {"path": "res://assets/ui/research/subjects/motion_economy_habits-v1.png", "focus": [0.5, 0.5]},
+  "trepanation": {"path": "res://assets/ui/research/subjects/trepanation-v1.png", "focus": [0.5, 0.5]},
+  "workshop_space_sharing": {"path": "res://assets/ui/research/subjects/workshop_space_sharing-v1.png", "focus": [0.5, 0.5]},
+  "recovery_days_after_heavy_tasks": {"path": "res://assets/ui/research/subjects/recovery_days_after_heavy_tasks-v1.png", "focus": [0.5, 0.5]},
+  "reed_bundle_boats": {"path": "res://assets/ui/research/subjects/reed_bundle_boats-v1.png", "focus": [0.5, 0.5]},
+  "customary_inheritance_shares": {"path": "res://assets/ui/research/subjects/customary_inheritance_shares-v1.png", "focus": [0.5, 0.5]},
+  "transhumance": {"path": "res://assets/ui/research/subjects/transhumance-v1.png", "focus": [0.5, 0.5]},
+  "winter_herder_return": {"path": "res://assets/ui/research/subjects/winter_herder_return-v1.png", "focus": [0.5, 0.5]},
+  "boundary_markers_parallel_crews": {"path": "res://assets/ui/research/subjects/boundary_markers_parallel_crews-v1.png", "focus": [0.5, 0.5]},
+  "crutches": {"path": "res://assets/ui/research/subjects/crutches-v1.png", "focus": [0.5, 0.5]},
+  "painted_pottery": {"path": "res://assets/ui/research/subjects/painted_pottery-v1.png", "focus": [0.5, 0.5]}
 }
