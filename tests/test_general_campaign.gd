@@ -12,6 +12,9 @@ func before_test()->void:
 
 func after_test()->void:
 	GeneralCampaign.reset_for_new_world();CivilizationSystem.set_scout_geography_authority(Callable())
+	# Release the 240-strong test army; left mobilized it takes every worker
+	# from the next suite's 120-person world (geoscience survey staff read 0).
+	MilitaryCampaign.reset_for_new_world()
 
 func test_questions_and_hypotheticals_never_become_local_orders()->void:
 	for text in ["Could we attack Bracken Hold?","What if we attack Bracken Hold?","Do not attack Bracken Hold","They said attack Bracken Hold","Why did you withdraw?"]:

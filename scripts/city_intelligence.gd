@@ -26,7 +26,8 @@ func sites(include_player:bool=true)->Array[Dictionary]:
 			# A capital near the world's edge must not push its sibling cities off
 			# the finite map, where no scout, envoy or army could ever reach them.
 			var place:Vector2=region.get("position",home+offset)
-			var edge:=Vector2(system.CIVILIZATION_WORLD_RADIUS_X_KM,system.CIVILIZATION_WORLD_RADIUS_Z_KM)-Vector2.ONE
+			# The owner may be another society node; the world's bounds are shared.
+			var edge:=Vector2(CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)-Vector2.ONE
 			result.append({"city_id":String(region.id),"civ_id":String(civ.id),"name":String(region.name),"position":point(place.clamp(-edge,edge)),"primary":region.role=="capital"})
 	if include_player:
 		for city:Dictionary in WorldSimulation.state.player_settlements:
