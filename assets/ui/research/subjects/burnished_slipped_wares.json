@@ -1,0 +1,12 @@
+{
+  "id": "burnished_slipped_wares",
+  "line": "production",
+  "game_year": 48,
+  "approx_historical_year": -4687,
+  "prompt": "c. 4687 BCE: Potter applies clay slip and burnishes ceramic vessels by hand; matte impasto oil painting. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c6fba138-93a1-4185-86ce-8ccf1070fb1d.png",
+  "asset": "res://assets/ui/research/subjects/burnished_slipped_wares-v1.png",
+  "sha256": "404d354073ad74b1ed43fd4f5df618c5bd13c0a59c416070c9913322ffee9c67",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Slip-coated vessels and burnishing gesture clear in crop."
+}
