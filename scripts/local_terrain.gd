@@ -270,7 +270,6 @@ var cached_morphology_visual_signatures:Dictionary={}
 var active_architecture_profile:Dictionary={}
 var rendered_settlement_aerial_lod:=-1.0
 var rendered_settlement_stage_radius:=0.0
-var materials_panel: Control
 var settlement_naming_panel: Control
 var settlement_name_input: LineEdit
 var settlement_name_confirm: Button
@@ -351,9 +350,6 @@ var war_map_overlay:Control
 var rendered_observation_revision:=-1
 const LIVE_REPORT_REFRESH_INTERVAL_SECONDS:=0.75
 var live_report_refresh_elapsed:=0.0
-var live_report_refresh_signatures:Dictionary={}
-var live_report_refresh_in_progress:=false
-var live_report_pending_replacements:Dictionary={}
 # Visual-audit override only. Gameplay leaves this at -1 and derives one of the eight
 # aggregate neighborhood conditions from authoritative civilization/settlement state.
 var district_condition_visual_override:=-1
@@ -518,7 +514,6 @@ func _capture_preview_if_requested() -> void:
 	var capture_naming_panel := false
 	var capture_world_menu := false
 	var capture_military_panel := false
-	var capture_materials_panel := false
 	var capture_diplomat_panel := false
 	var capture_audit_root:Control
 	var capture_travel := false
@@ -546,8 +541,6 @@ func _capture_preview_if_requested() -> void:
 			capture_world_menu = true
 		elif argument == "--capture-military":
 			capture_military_panel = true
-		elif argument == "--capture-materials":
-			capture_materials_panel = true
 		elif argument == "--capture-diplomats":
 			capture_diplomat_panel = true
 		elif argument == "--capture-travel":
@@ -746,9 +739,6 @@ func _capture_preview_if_requested() -> void:
 		if not MilitaryCommandUI.modal.visible:
 			MilitaryCommandUI._toggle()
 		capture_audit_root=MilitaryCommandUI.modal
-	if capture_materials_panel:
-		_open_materials_panel()
-		capture_audit_root=materials_panel
 	if capture_diplomat_panel and not CivilizationSystem.civilizations.is_empty():
 		var capture_civ:Dictionary=CivilizationSystem.civilizations[0]
 		var capture_relation:Dictionary=capture_civ.get("player_relation",{})
@@ -1157,193 +1147,12 @@ func _process_live_report_refresh(delta:float)->void:
 	live_report_refresh_elapsed=fmod(live_report_refresh_elapsed,LIVE_REPORT_REFRESH_INTERVAL_SECONDS)
 	if hud and not _live_report_global_interaction_active():
 		hud.live_refresh_dock()
-	_refresh_live_reports()
-
-
-func _refresh_live_reports()->void:
-	if live_report_refresh_in_progress or _live_report_global_interaction_active(): return
-	var kinds:Array[String]=["materials"]
-	for kind in kinds:
-		var panel:=_live_report_panel(kind)
-		if panel==null or not is_instance_valid(panel) or not panel.is_visible_in_tree(): continue
-		var signature:=_live_report_signature(kind)
-		if not live_report_refresh_signatures.has(kind):
-			live_report_refresh_signatures[kind]=signature
-			continue
-		if String(live_report_refresh_signatures[kind])==signature: continue
-		if _live_report_interaction_active(kind,panel): continue
-		if live_report_pending_replacements.has(kind): continue
-		var view_state:=_capture_live_report_view_state(panel)
-		live_report_refresh_in_progress=true
-		_rebuild_live_report(kind,view_state,signature)
-		live_report_refresh_in_progress=false
-
-
-func _live_report_signature(kind:String)->String:
-	var parts:Array=[int(floor(GameState.elapsed_days)),GameState.population_total,GameState.known_discoveries.size(),GameState.discovery_log.size()]
-	match kind:
-		"materials":
-			parts.append_array([GameState.resource_deposits.size(),GameState.resource_stockpiles.size(),GameState.material_history.size(),hash(GameState.resource_priorities)])
-	return str(hash(parts))
-
-
-func _live_report_panel(kind:String)->Control:
-	match kind:
-		"materials": return materials_panel
-	return null
 
 
 func _live_report_global_interaction_active()->bool:
 	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	return false
-
-
-func _live_report_interaction_active(kind:String,panel:Control)->bool:
-	if kind=="materials" and panel.find_child("MaterialsDetailOverlay",true,false): return true
-	for editor_variant in panel.find_children("*","LineEdit",true,false):
-		var editor:=editor_variant as LineEdit
-		if editor and (editor.has_focus() or not editor.text.strip_edges().is_empty()): return true
-	for editor_variant in panel.find_children("*","TextEdit",true,false):
-		var editor:=editor_variant as TextEdit
-		if editor and (editor.has_focus() or not editor.text.strip_edges().is_empty()): return true
-	for selector_variant in panel.find_children("*","OptionButton",true,false):
-		var selector:=selector_variant as OptionButton
-		if selector and (selector.has_focus() or selector.get_popup().visible): return true
-	return false
-
-
-func _capture_live_report_view_state(panel:Control)->Dictionary:
-	var state:Dictionary={"scrolls":[]}
-	for scroll_variant in panel.find_children("*","ScrollContainer",true,false):
-		var scroll:=scroll_variant as ScrollContainer
-		(state.scrolls as Array).append({"horizontal":scroll.scroll_horizontal,"vertical":scroll.scroll_vertical})
-	var focus:=get_viewport().gui_get_focus_owner()
-	if focus and panel.is_ancestor_of(focus):
-		state["focus_path"]=panel.get_path_to(focus)
-		state["focus_index_path"]=_live_report_child_index_path(panel,focus)
-	return state
-
-
-func _restore_live_report_view_state(kind:String,state:Dictionary)->void:
-	var panel:=_live_report_panel(kind)
-	if panel==null or not is_instance_valid(panel): return
-	var prior_scrolls:Array=state.get("scrolls",[])
-	var scrolls:=panel.find_children("*","ScrollContainer",true,false)
-	for index in mini(prior_scrolls.size(),scrolls.size()):
-		var scroll:=scrolls[index] as ScrollContainer
-		var prior:Dictionary=prior_scrolls[index]
-		scroll.scroll_horizontal=int(prior.get("horizontal",0))
-		scroll.scroll_vertical=int(prior.get("vertical",0))
-	var focus_path:NodePath=state.get("focus_path",NodePath(""))
-	var replacement:Control=null
-	if not focus_path.is_empty():
-		replacement=panel.get_node_or_null(focus_path) as Control
-	if replacement==null:
-		replacement=_live_report_node_at_index_path(panel,state.get("focus_index_path",[])) as Control
-	if replacement and replacement.focus_mode!=Control.FOCUS_NONE: replacement.grab_focus()
-
-
-func _live_report_child_index_path(root:Node,target:Node)->Array[int]:
-	var result:Array[int]=[]
-	var cursor:=target
-	while cursor and cursor!=root:
-		# Tabs, option menus, and other compound controls may focus an internal
-		# child. Preserve that path explicitly instead of asking Godot for the
-		# public-child index of an internal node (which emits every refresh).
-		result.push_front(cursor.get_index(true))
-		cursor=cursor.get_parent()
-	return result if cursor==root else []
-
-
-func _live_report_node_at_index_path(root:Node,index_path:Array)->Node:
-	var cursor:=root
-	for index_variant in index_path:
-		var index:=int(index_variant)
-		if index<0 or index>=cursor.get_child_count(true): return null
-		cursor=cursor.get_child(index,true)
-	return cursor
-
-
-func _set_live_report_panel(kind:String,panel:Control)->void:
-	match kind:
-		"materials": materials_panel=panel
-
-
-func _build_live_report_replacement(kind:String)->Control:
-	match kind:
-		"materials": _open_materials_panel()
-	return _live_report_panel(kind)
-
-
-func _adopt_live_report_contents(stable_root:Control,replacement_root:Control)->void:
-	# The replacement has already completed one offscreen layout pass. Detaching the
-	# old children and adopting the new children happens at a frame boundary, so the
-	# visible root is never empty in a rendered frame.
-	stable_root.size=replacement_root.size
-	var retired_children:=stable_root.get_children()
-	for child in retired_children: stable_root.remove_child(child)
-	var incoming_children:=replacement_root.get_children()
-	for child in incoming_children:
-		replacement_root.remove_child(child)
-		stable_root.add_child(child)
-	for child in retired_children: child.free()
-	replacement_root.free()
-	_apply_modal_screen_contract.call_deferred(stable_root)
-
-
-func _rebuild_live_report(kind:String,view_state:Dictionary={},signature:String="")->void:
-	if live_report_pending_replacements.has(kind): return
-	var stable_root:=_live_report_panel(kind)
-	if stable_root==null or not is_instance_valid(stable_root): return
-	var was_visible:=stable_root.visible
-	var root_id:=stable_root.get_instance_id()
-	# Builders still own report composition. Temporarily clearing only the
-	# reference prevents their legacy open guards from deleting the mounted root.
-	_set_live_report_panel(kind,null)
-	var replacement_root:=_build_live_report_replacement(kind)
-	if replacement_root==null or replacement_root==stable_root:
-		_set_live_report_panel(kind,stable_root)
-		return
-	# Keep the fully composed replacement in-tree for layout but far outside the
-	# viewport. The mounted report remains the only visible/interactable root.
-	replacement_root.position=Vector2(-maxf(4096.0,replacement_root.size.x*4.0),-maxf(4096.0,replacement_root.size.y*4.0))
-	replacement_root.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	_set_live_report_panel(kind,stable_root)
-	live_report_pending_replacements[kind]={"stable":stable_root,"replacement":replacement_root,"view_state":view_state,"was_visible":was_visible,"root_id":root_id,"signature":signature}
-	var commit:=Callable(self,"_commit_live_report_replacements")
-	if not get_tree().process_frame.is_connected(commit):
-		get_tree().process_frame.connect(commit,CONNECT_ONE_SHOT)
-
-
-func _commit_live_report_replacements()->void:
-	var pending:=live_report_pending_replacements.duplicate(false)
-	live_report_pending_replacements.clear()
-	for kind_variant in pending:
-		var kind:=String(kind_variant)
-		var record:Dictionary=pending[kind_variant]
-		# A player can close a report during the one-frame offscreen composition pass.
-		# Validate the untyped object before casting it; casting an already-freed Godot
-		# object itself raises an error and was responsible for repeated modal flashes.
-		var replacement_value:Variant=record.get("replacement")
-		if not is_instance_valid(replacement_value): continue
-		var replacement_root:=replacement_value as Control
-		if replacement_root==null: continue
-		var stable_value:Variant=record.get("stable")
-		if not is_instance_valid(stable_value):
-			replacement_root.free()
-			continue
-		var stable_root:=stable_value as Control
-		if stable_root==null or stable_root.is_queued_for_deletion():
-			replacement_root.free()
-			continue
-		_adopt_live_report_contents(stable_root,replacement_root)
-		_set_live_report_panel(kind,stable_root)
-		stable_root.visible=bool(record.get("was_visible",true))
-		_restore_live_report_view_state(kind,record.get("view_state",{}))
-		call_deferred("_restore_live_report_view_state",kind,record.get("view_state",{}))
-		live_report_refresh_signatures[kind]=String(record.get("signature",_live_report_signature(kind)))
-		assert(stable_root.get_instance_id()==int(record.get("root_id",0)))
 
 
 func _cached_civilization_geography(origin:Vector2)->Dictionary:
@@ -11214,34 +11023,6 @@ func _settlement_project_available(project: Dictionary) -> bool:
 func _settlement_project_material_plan(project:Dictionary)->Dictionary:
 	return preload("res://scripts/settlement_construction.gd")._settlement_project_material_plan(project)
 
-func _shelter_work_status()->String:
-	var population:=maxf(1.0,GameState.population_exact)
-	var coverage:=clampf(float(GameState.housing_capacity)/population,0.0,1.2)
-	if "Lean-to Shelters" not in GameState.settlement_completed:
-		if "Hearth Circle" not in GameState.settlement_completed:
-			return "BLOCKED · Establish the Hearth Circle before permanent shelter work can begin."
-		var shelter_project:Dictionary={}
-		for definition in _settlement_definitions():
-			if String(definition.get("name",""))=="Lean-to Shelters": shelter_project=definition; break
-		var plan:=_settlement_project_material_plan(shelter_project)
-		if plan.is_empty():
-			return "BLOCKED BY MATERIALS · Need 18 Timber + 12 Fiber, or substitutes: 25 Timber; 15 Timber + 10 Clay; or 14 Timber + 14 Stone. Shelter focus is assigning extraction and carrying labor, but it cannot build from empty stores."
-		var progress:=float(GameState.settlement_projects.get("Lean-to Shelters",0.0))
-		return "UNDERWAY · Lean-to Shelters %d%% · using %s." % [clampi(roundi(progress/9.0*100.0),0,100),_material_cost_text(plan)]
-	if coverage>=0.98:
-		return "CURRENT CAPACITY COVERS %d%% · builders continue ordinary maintenance and growth." % roundi(coverage*100.0)
-	var builders:=float(GameState.population_allocations.get("Construction",0))
-	var efficiency:=float(GameState.simulation_metrics.get("labor_efficiency",0.72))
-	var work_per_day:=builders/8.0*efficiency
-	var remaining:=maxf(0.0,28.0-float(GameState.housing_progress))
-	var days:=ceili(remaining/maxf(0.01,work_per_day))
-	return "UNDERWAY · %d builders · next shelter capacity in about %d day%s." % [roundi(builders),days,"" if days==1 else "s"]
-
-
-func _material_cost_text(cost:Dictionary)->String:
-	var parts:Array[String]=[]
-	for resource_name in cost: parts.append("%.0f %s" % [float(cost[resource_name]),String(resource_name)])
-	return " + ".join(parts)
 
 func _current_settlement_project() -> Dictionary:
 	return preload("res://scripts/settlement_construction.gd")._current_settlement_project()
@@ -12222,7 +12003,7 @@ func _arbitrate_notification_overlays()->void:
 
 func _blocking_modal_or_report_open()->bool:
 	if is_instance_valid(founding_site_guide) and founding_site_guide.is_visible_in_tree():return true
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,materials_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible: return true
 	return false
@@ -14376,356 +14157,12 @@ func _inspect_location_local(position: Vector3) -> void:
 	card.show_ground("Ground survey",where_text,entries,surface,survey_advice)
 
 
-func _retire_primary_screen(panel)->void:
-	if panel!=null and is_instance_valid(panel):
-		panel.visible=false
-		panel.queue_free()
-
-
 # Only one primary destination may own the interaction layer. Detail screens
 # stay inside their destination; switching destinations retires the old tree
 # before the new one is shown, so notifications and dashboards cannot stack.
 func _close_primary_destinations_except(destination:String)->void:
-	if destination!="economy":
-		_retire_primary_screen(materials_panel); materials_panel=null
 	if destination!="military" and MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
-
-
-func _open_materials_panel() -> void:
-	_close_primary_destinations_except("economy")
-	if materials_panel: materials_panel.queue_free()
-	materials_panel=Control.new()
-	materials_panel.size=get_viewport().get_visible_rect().size
-	materials_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(materials_panel)
-	var dimmer:=ColorRect.new(); dimmer.size=materials_panel.size; dimmer.color=Color(0.006,0.009,0.010,0.92); materials_panel.add_child(dimmer)
-	var modal:=PanelContainer.new(); modal.size=Vector2(minf(1080.0,materials_panel.size.x-64.0),minf(640.0,materials_panel.size.y-48.0)); modal.position=(materials_panel.size-modal.size)*0.5; modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1112"),Color("#806c4c"),1,3,18)); materials_panel.add_child(modal)
-	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",9); modal.add_child(root)
-	var header:=HBoxContainer.new(); header.add_theme_constant_override("separation",10); root.add_child(header)
-	var heading:=VBoxContainer.new(); heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL; header.add_child(heading)
-	var title:=Label.new(); title.text="ECONOMY — MATERIAL FLOW"; title.add_theme_font_size_override("font_size",24); title.add_theme_color_override("font_color",Color("#eee1c9")); heading.add_child(title)
-	var visible:=ResourceSystem.visible_deposits()
-	var material_sources:Array=[]
-	for source_variant in visible:
-		var source:Dictionary=source_variant
-		if String(source.get("resource",""))!="Freshwater": material_sources.append(source)
-	var water_access:Dictionary=ResourceSystem.water_access_snapshot(_discovery_context())
-	var max_distance:=0.0
-	var accessible_count:=0
-	var developed_count:=0
-	for deposit_variant in material_sources:
-		var deposit:Dictionary=deposit_variant
-		max_distance=maxf(max_distance,float(deposit.get("distance_km",0.0)))
-		if String(deposit.get("stage","")) in ["accessible","developed"] and not ResourceSystem.deposit_exhausted(deposit):accessible_count+=1
-		if String(deposit.get("stage",""))=="developed": developed_count+=1
-	var scale_label:="SETTLEMENT" if max_distance<80.0 else ("REGIONAL" if max_distance<500.0 else ("CONTINENTAL" if max_distance<3500.0 else "INTERCONTINENTAL"))
-	var subtitle:=Label.new(); subtitle.text="%s REACH  •  %d known material sources%s  •  See what is moving and what to fix next" % [scale_label,material_sources.size()," + mapped water" if bool(water_access.get("recognized",false)) else ""]; subtitle.add_theme_font_size_override("font_size",11); subtitle.add_theme_color_override("font_color",Color("#9ca29d")); heading.add_child(subtitle)
-	var metrics:=GameState.material_metrics
-	_make_provision_stat(header,"REACH","%s km" % _compact_population(roundi(max_distance)),Color("#8b9f98"))
-	_make_provision_stat(header,"WORKING","%d / %d sites" % [accessible_count,material_sources.size()],Color("#78977f"))
-	_make_provision_stat(header,"DELIVERED TODAY","%.1f bulk" % float(metrics.get("delivered_today",0.0)),Color("#78977f"))
-	var live_capacity:=float(metrics.get("storage_capacity",0.0))
-	if live_capacity<=0.0:
-		for capacity in ResourceSystem.storage_capacities().values(): live_capacity+=float(capacity)
-	_make_provision_stat(header,"STORAGE","%.0f / %.0f bulk" % [ResourceSystem.stored_bulk(),live_capacity],Color("#a58b67"))
-	root.add_child(HSeparator.new())
-	_add_modal_action_brief(root,_material_constraint_brief(metrics,accessible_count,live_capacity,ResourceSystem.stored_bulk()),Color("#a58b67"))
-	var source_list:=VBoxContainer.new(); source_list.name="MaterialFlowTable"; source_list.size_flags_vertical=Control.SIZE_EXPAND_FILL; source_list.add_theme_constant_override("separation",4); root.add_child(source_list)
-	var rows:Array[Dictionary]=_material_flow_rows(material_sources)
-	if bool(water_access.get("recognized",false)):
-		var collection_workers:=float(water_access.get("collection_workers",0.0))
-		if collection_workers<=0.0:
-			collection_workers=float(GameState.population_allocations.get("Logistics",0))+float(GameState.population_allocations.get("Food",0))*0.22
-		var required_water:=float(water_access.get("required_today",0.0))
-		var water_flow_text:="Collection begins when time starts" if required_water<=0.0 else "%.1f collected / %.1f needed  •  %d%% met" % [float(water_access.get("collected_today",0.0)),required_water,roundi(float(water_access.get("intake_ratio",0.0))*100.0)]
-		rows.push_front({
-			"material":"Fresh Water","occurrences":1,"reachable":1 if bool(water_access.get("accessible",false)) else 0,"developed":0,
-			"workers":roundi(collection_workers),"extracted":0.0,"at_source":0.0,"moving":0.0,"distance":maxf(0.0,float(water_access.get("distance_km",0.0))),
-			"bottlenecks":{},"status":"REACHABLE" if bool(water_access.get("accessible",false)) else "MAPPED","status_detail":"Visible river / drainage","attention_rank":-1,
-			"flow_text":water_flow_text,"is_surface_water":true
-		})
-	if rows.is_empty():
-		_make_knowledge_empty_state(source_list,"No material occurrence has been recognized. Surveying and returned travel reports can add regions to this network.")
-	else:
-		_add_material_flow_header(source_list)
-		var visible_row_count:=mini(9,rows.size())
-		for row_index in visible_row_count: _add_material_flow_row(source_list,rows[row_index])
-		if rows.size()>visible_row_count:
-			var grouped:=Label.new(); grouped.text="+ %d additional material systems grouped in Details" % (rows.size()-visible_row_count); grouped.add_theme_font_size_override("font_size",10); grouped.add_theme_color_override("font_color",Color("#858e88")); source_list.add_child(grouped)
-	var footer:=HBoxContainer.new(); root.add_child(footer)
-	var note:=Label.new(); note.text="%d known resource systems  •  %d point occurrences%s  •  attention-needed rows first" % [rows.size(),material_sources.size()," + continuous water" if bool(water_access.get("recognized",false)) else ""]; note.size_flags_horizontal=Control.SIZE_EXPAND_FILL; note.add_theme_font_size_override("font_size",10); note.add_theme_color_override("font_color",Color("#888f89")); footer.add_child(note)
-	var details_button:=Button.new(); details_button.text="SOURCE DETAILS"; details_button.custom_minimum_size=Vector2(150,38); details_button.pressed.connect(_open_materials_detail_overlay.bind(rows,water_access)); footer.add_child(details_button)
-	var map_button:=Button.new(); map_button.text="SHOW RESOURCE MAP"; map_button.custom_minimum_size=Vector2(170,38); map_button.tooltip_text="Close this report and enable the map layer for resources your civilization can actually recognize."; map_button.pressed.connect(_open_resource_map_from_materials); footer.add_child(map_button)
-	var close:=Button.new(); close.text="RETURN TO MAP"; close.custom_minimum_size=Vector2(140,38); close.pressed.connect(func(): materials_panel.queue_free(); materials_panel=null); footer.add_child(close)
-	_constrain_modal_labels(root)
-
-
-func _open_resource_map_from_materials()->void:
-	if materials_panel and is_instance_valid(materials_panel): materials_panel.queue_free()
-	materials_panel=null
-	_set_resource_view_enabled(true)
-	if travel_status_label: travel_status_label.text="Showing the resources our people know of."
-
-
-func _material_flow_rows(material_sources:Array)->Array[Dictionary]:
-	var groups:Dictionary={}
-	for deposit_variant in material_sources:
-		var deposit:Dictionary=deposit_variant
-		var resource_name:=String(deposit.get("resource","Unknown"))
-		var group:Dictionary=groups.get(resource_name,{"material":resource_name,"occurrences":0,"reachable":0,"workable":0,"exhausted":0,"developed":0,"workers":0,"extracted":0.0,"at_source":0.0,"moving":0.0,"distance":0.0,"bottlenecks":{}})
-		group.occurrences=int(group.occurrences)+1
-		if String(deposit.get("stage","")) in ["accessible","developed"]:
-			group.reachable=int(group.reachable)+1
-			if ResourceSystem.deposit_exhausted(deposit):group.exhausted=int(group.exhausted)+1
-			else:group.workable=int(group.workable)+1
-		if String(deposit.get("stage",""))=="developed": group.developed=int(group.developed)+1
-		group.workers=int(group.workers)+int(deposit.get("workers",0))
-		group.extracted=float(group.extracted)+float(deposit.get("extracted_today",0.0))
-		group.at_source=float(group.at_source)+float(deposit.get("stock_at_source",0.0))
-		group.moving=float(group.moving)+ResourceSystem.in_transit_for(deposit)
-		group.distance=maxf(float(group.distance),maxf(0.0,float(deposit.get("distance_km",0.0))))
-		var bottleneck:=String(deposit.get("bottleneck",""))
-		if String(deposit.get("stage",""))=="surveyed" and not (deposit.get("blockers",[]) as Array).is_empty():bottleneck=String((deposit.blockers as Array)[0])
-		if bottleneck!="" and bottleneck!="Flowing": (group.bottlenecks as Dictionary)[bottleneck]=int((group.bottlenecks as Dictionary).get(bottleneck,0))+1
-		groups[resource_name]=group
-	var rows:Array[Dictionary]=[]
-	for resource_name_variant in groups:
-		var row:Dictionary=groups[resource_name_variant]
-		var bottlenecks:Dictionary=row.bottlenecks
-		if int(row.workable)<=0 and int(row.exhausted)>0:
-			row["status"]="EXHAUSTED"
-			row["status_detail"]="No material remains at %d known site%s" % [int(row.exhausted),"" if int(row.exhausted)==1 else "s"]
-			row["attention_rank"]=0
-		elif not bottlenecks.is_empty():
-			row["status"]="BLOCKED"
-			row["status_detail"]=String(bottlenecks.keys()[0])
-			row["attention_rank"]=0
-		elif int(row.reachable)<=0 or int(row.workers)<=0:
-			row["status"]="UNSTAFFED" if int(row.workable)>0 else "UNORGANIZED"
-			row["status_detail"]="Reachable source has no assigned workers" if int(row.workable)>0 else "No workable source"
-			row["attention_rank"]=1
-		else:
-			row["status"]="FLOWING"
-			row["status_detail"]="Material is entering the network"
-			row["attention_rank"]=2
-		rows.append(row)
-	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
-		if int(a.attention_rank)!=int(b.attention_rank): return int(a.attention_rank)<int(b.attention_rank)
-		return String(a.material)<String(b.material))
-	return rows
-
-
-func _add_material_flow_header(parent:Container)->void:
-	var header:=HBoxContainer.new(); header.add_theme_constant_override("separation",6); parent.add_child(header)
-	for definition in [["RESOURCE",145],["STATUS",170],["REACH",120],["WORKERS",70],["ACTUAL FLOW",220],["ACTION",105]]:
-		var label:=Label.new(); label.text=String(definition[0]); label.custom_minimum_size=Vector2(float(definition[1]),22); label.add_theme_font_size_override("font_size",9); label.add_theme_color_override("font_color",Color("#9d9275")); header.add_child(label)
-
-
-func _add_material_flow_row(parent:Container,row_data:Dictionary)->void:
-	var panel:=PanelContainer.new()
-	var status:=String(row_data.get("status","UNORGANIZED"))
-	var accent:=Color("#78977f") if status in ["FLOWING","REACHABLE"] else Color("#6e939d") if status=="MAPPED" else Color("#b77761") if status=="BLOCKED" else Color("#a58b67")
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#11191a"),accent.darkened(0.32),1,2,5))
-	parent.add_child(panel)
-	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",6); panel.add_child(row)
-	_add_material_flow_cell(row,ResourceSystem.display_name(String(row_data.get("material","Unknown"))).to_upper(),145,Color("#d4cfbf"))
-	_add_material_flow_cell(row,"%s  •  %s" % [status,String(row_data.get("status_detail",""))],170,accent)
-	var distance:=float(row_data.get("distance",0.0))
-	var reach_text:="LOCAL  •  %d reachable" % int(row_data.get("reachable",0)) if distance<0.05 else "%s km  •  %d reachable" % [_compact_population(roundi(distance)),int(row_data.get("reachable",0))]
-	_add_material_flow_cell(row,reach_text,120,Color("#9ba7a1"))
-	_add_material_flow_cell(row,_compact_population(int(row_data.get("workers",0))),70,Color("#c2b58d"))
-	var flow_parts:Array[String]=[]
-	if float(row_data.get("extracted",0.0))>0.001: flow_parts.append("%.1f extracted" % float(row_data.extracted))
-	if float(row_data.get("at_source",0.0))>0.001: flow_parts.append("%.1f waiting" % float(row_data.at_source))
-	if float(row_data.get("moving",0.0))>0.001: flow_parts.append("%.1f moving" % float(row_data.moving))
-	var flow_text:=String(row_data.get("flow_text","  •  ".join(flow_parts) if not flow_parts.is_empty() else "No material moving"))
-	_add_material_flow_cell(row,flow_text,220,Color("#aeb3aa") if not flow_parts.is_empty() or bool(row_data.get("is_surface_water",false)) else Color("#777f7a"))
-	var resource_name:=String(row_data.get("material",""))
-	if bool(row_data.get("is_surface_water",false)):
-		var show_river:=Button.new(); show_river.text="SHOW RIVER"; show_river.custom_minimum_size=Vector2(105,30); show_river.add_theme_font_size_override("font_size",9); show_river.tooltip_text="Return to the map with recognized river and drainage channels emphasized."; show_river.pressed.connect(_open_resource_map_from_materials); row.add_child(show_river)
-	elif ResourceSystem.material_profile(resource_name).size()>0 and resource_name not in ["Freshwater","Fertile Soil","Game"]:
-		var priority:=Button.new(); var priority_value:=float(GameState.resource_priorities.get(resource_name,1.0)); priority.text="SET %s" % ("LOW" if priority_value>1.2 else ("NORMAL" if priority_value<0.8 else "HIGH")); priority.custom_minimum_size=Vector2(105,30); priority.add_theme_font_size_override("font_size",9); priority.tooltip_text="Cycle this material's aggregate extraction and carrier priority."; priority.pressed.connect(_cycle_material_priority.bind(resource_name)); row.add_child(priority)
-	else:
-		_add_material_flow_cell(row,"No priority",105,Color("#6f7772"))
-
-
-func _add_material_flow_cell(parent:Container,text_value:String,width:float,color:Color)->Label:
-	var label:=Label.new(); label.text=text_value; label.custom_minimum_size=Vector2(width,30); label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER; label.add_theme_font_size_override("font_size",9); label.add_theme_color_override("font_color",color); parent.add_child(label); return label
-
-
-func _open_materials_detail_overlay(rows:Array[Dictionary],water_access:Dictionary)->void:
-	if materials_panel==null or not is_instance_valid(materials_panel) or materials_panel.find_child("MaterialsDetailOverlay",true,false): return
-	var overlay:=Control.new(); overlay.name="MaterialsDetailOverlay"; overlay.size=materials_panel.size; overlay.mouse_filter=Control.MOUSE_FILTER_STOP; overlay.z_index=8; materials_panel.add_child(overlay)
-	var dimmer:=ColorRect.new(); dimmer.size=overlay.size; dimmer.color=Color(0.003,0.006,0.007,0.94); overlay.add_child(dimmer)
-	var modal:=PanelContainer.new(); modal.size=Vector2(minf(900.0,overlay.size.x-56.0),minf(600.0,overlay.size.y-44.0)); modal.position=(overlay.size-modal.size)*0.5; modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0b1112"),Color("#806c4c"),1,4,16)); overlay.add_child(modal)
-	var root:=VBoxContainer.new(); root.add_theme_constant_override("separation",7); modal.add_child(root)
-	var heading_row:=HBoxContainer.new(); root.add_child(heading_row)
-	var heading:=Label.new(); heading.text="SOURCE & STORAGE DETAILS"; heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL; heading.add_theme_font_size_override("font_size",21); heading_row.add_child(heading)
-	var close:=Button.new(); close.text="BACK TO FLOW"; close.custom_minimum_size=Vector2(150,36); close.pressed.connect(overlay.queue_free); heading_row.add_child(close)
-	var scroll:=FIT_CONTENT_PANEL.new(); scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL; root.add_child(scroll)
-	var detail:=VBoxContainer.new(); detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL; detail.add_theme_constant_override("separation",7); scroll.add_child(detail)
-	preload("res://scripts/hud/water_conveyance_controls.gd").build_all(detail,_discovery_context())
-	if bool(water_access.get("recognized",false)): _add_compact_provision_text(detail,"CONTINUOUS SURFACE WATER","Mapped river/drainage access is tracked separately from deposits. %.1f collected / %.1f needed today." % [float(water_access.get("collected_today",0.0)),float(water_access.get("required_today",0.0))],Color("#8fb2b6"))
-	for row_data in rows:
-		var text:="%d known occurrences  •  %d reachable  •  %d developed\n%d workers  •  %.1f extracted  •  %.1f waiting  •  %.1f moving\n%s" % [int(row_data.occurrences),int(row_data.reachable),int(row_data.developed),int(row_data.workers),float(row_data.extracted),float(row_data.at_source),float(row_data.moving),String(row_data.status_detail)]
-		var material_name:=String(row_data.material)
-		var explanation:=ResourceSystem.plain_language_description(material_name)
-		if explanation!="": text=explanation+"\n"+text
-		_add_compact_provision_text(detail,ResourceSystem.display_name(material_name).to_upper()+"  •  "+String(row_data.status),text,Color("#b8bab0"))
-	detail.add_child(HSeparator.new())
-	_add_provision_section_title(detail,"STORAGE BY SYSTEM","Each material needs its own physical storage type; spare yard space cannot hold covered or sealed stock.")
-	var capacities:=ResourceSystem.storage_capacities()
-	var used_by_type:Dictionary=GameState.material_metrics.get("storage_used_by_type",{})
-	for store_name in capacities: _add_compact_provision_text(detail,String(store_name).replace("_"," ").to_upper(),"%.0f / %.0f bulk used" % [float(used_by_type.get(store_name,0.0)),float(capacities[store_name])],Color("#a58b67"))
-	var losses:Dictionary=GameState.material_metrics.get("losses_by_resource",{})
-	for resource_variant in losses:
-		_add_compact_provision_text(detail,"LOST · "+ResourceSystem.display_name(String(resource_variant)).to_upper(),"%.2f bulk lost today to decay, exposure, or the required storage type being full." % float(losses[resource_variant]),Color("#b77761"))
-
-
-func _constrain_modal_labels(root:Node)->void:
-	# Long live-data strings must wrap inside their assigned column instead of
-	# increasing the container's minimum width and pushing controls off-screen.
-	for child in root.get_children():
-		if child is Label:
-			var label:=child as Label
-			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-			label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		_constrain_modal_labels(child)
-
-
-func _cycle_material_priority(resource_name:String)->void:
-	SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->void: _cycle_material_priority_local(resource_name))
-
-func _cycle_material_priority_local(resource_name:String)->void:
-	var current:=float(GameState.resource_priorities.get(resource_name,1.0))
-	GameState.resource_priorities[resource_name]=1.0 if current>1.2 else (2.0 if current>=0.8 else 1.0)
-	if current>=0.8 and current<=1.2: GameState.resource_priorities[resource_name]=2.0
-	elif current>1.2: GameState.resource_priorities[resource_name]=0.5
-	else: GameState.resource_priorities[resource_name]=1.0
-	_open_materials_panel.call_deferred()
-
-
-func _make_provision_stat(parent: Container,label_text: String,value_text: String,accent: Color) -> void:
-	var card:=PanelContainer.new()
-	card.custom_minimum_size=Vector2(128,56)
-	var style:=StyleBoxFlat.new()
-	style.bg_color=Color("#101a1b")
-	style.border_color=accent.darkened(0.24)
-	style.border_width_bottom=2
-	style.set_content_margin_all(8)
-	card.add_theme_stylebox_override("panel",style)
-	parent.add_child(card)
-	var stack:=VBoxContainer.new()
-	card.add_child(stack)
-	var label:=Label.new()
-	label.text=label_text
-	label.add_theme_font_size_override("font_size",10)
-	label.add_theme_color_override("font_color",Color("#89928d"))
-	stack.add_child(label)
-	var value:=Label.new()
-	value.text=value_text
-	value.add_theme_font_size_override("font_size",16)
-	value.add_theme_color_override("font_color",accent)
-	stack.add_child(value)
-
-
-func _add_compact_provision_text(parent:Container,title_text:String,body_text:String,color:Color)->Label:
-	var title:=Label.new()
-	title.text=title_text
-	title.add_theme_font_size_override("font_size",10)
-	title.add_theme_color_override("font_color",Color("#d8c99f"))
-	parent.add_child(title)
-	var body:=Label.new()
-	body.text=body_text
-	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body.add_theme_font_size_override("font_size",10)
-	body.add_theme_color_override("font_color",color)
-	parent.add_child(body)
-	return body
-
-
-func _add_provision_section_title(parent: Container,title_text: String,note_text: String) -> void:
-	var title:=Label.new()
-	title.text=title_text
-	title.add_theme_font_size_override("font_size",15)
-	title.add_theme_color_override("font_color",Color("#e3d7bd"))
-	parent.add_child(title)
-	var note:=Label.new()
-	note.text=note_text
-	note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	note.add_theme_font_size_override("font_size",11)
-	note.add_theme_color_override("font_color",Color("#8f9691"))
-	parent.add_child(note)
-
-
-# Every major ledger begins with the same three-line reading order: current
-# state, the evidence behind it, and the next useful action. Detail remains in
-# the body below instead of competing with the decision at the top.
-func _add_modal_action_brief(parent:Container,brief:Dictionary,accent:Color)->Label:
-	var panel:=PanelContainer.new()
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#10191b"),accent.darkened(0.25),1,3,8))
-	parent.add_child(panel)
-	var label:=Label.new()
-	label.name="ModalActionBrief"
-	label.text="STATUS  •  %s\nWHY  •  %s\nNEXT  •  %s" % [String(brief.get("status","No urgent change")),String(brief.get("why","Current records show no dominant pressure.")),String(brief.get("next","No immediate order is required."))]
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size",10)
-	label.add_theme_color_override("font_color",Color("#c9c6b8"))
-	panel.add_child(label)
-	return label
-
-
-func _material_constraint_brief(metrics:Dictionary,accessible_count:int,capacity:float,stored_bulk:float)->Dictionary:
-	var extracted:=float(metrics.get("extracted_today",0.0))
-	var waiting:=float(metrics.get("at_source",0.0))
-	var delivered:=float(metrics.get("delivered_today",0.0))
-	var lost:=float(metrics.get("lost_today",0.0))
-	if lost>0.05:
-		var losses:Dictionary=metrics.get("losses_by_resource",{})
-		var top_resource:="materials"
-		var top_loss:=0.0
-		for resource_variant in losses:
-			if float(losses[resource_variant])>top_loss:top_resource=ResourceSystem.display_name(String(resource_variant));top_loss=float(losses[resource_variant])
-		return {"status":"STORAGE IS LOSING MATERIAL","why":"%.1f bulk was lost today; %s accounts for %.1f." % [lost,top_resource,top_loss],"next":"Open Source Details to compare used and available capacity by storage type."}
-	if waiting>maxf(5.0,delivered*1.5):
-		return {"status":"CARRYING IS THE BOTTLENECK","why":"%.1f bulk waits at sources while only %.1f arrived today." % [waiting,delivered],"next":"Increase Logistics labor, route capacity, or material carriers before adding extraction."}
-	if capacity>0.0 and stored_bulk/capacity>0.82:
-		return {"status":"STORAGE IS NEAR CAPACITY","why":"%.0f of %.0f aggregate bulk capacity is occupied." % [stored_bulk,capacity],"next":"Build the required storage system or lower extraction priorities until space exists."}
-	if accessible_count>0 and extracted<0.1:
-		return {"status":"REACHABLE SOURCES ARE IDLE","why":"Known reachable sites produced almost nothing today.","next":"Assign Extraction labor or raise the priority of the material you need."}
-	if accessible_count<=0:
-		return {"status":"NO SOURCE CAN BE WORKED YET","why":"Known occurrences are not yet reachable or understood well enough to extract.","next":"Survey recognized sources and improve access before assigning extraction labor."}
-	return {"status":"MATERIAL FLOW BALANCED","why":"No single extraction, transport, or storage constraint currently dominates.","next":"Set material priorities only when a construction or production need changes."}
-
-
-func _knowledge_style(background: Color,border: Color,border_width: int,radius: int,padding: int) -> StyleBoxFlat:
-	var style:=StyleBoxFlat.new()
-	style.bg_color=background
-	style.border_color=border
-	style.border_width_left=border_width
-	style.border_width_top=border_width
-	style.border_width_right=border_width
-	style.border_width_bottom=border_width
-	style.corner_radius_top_left=radius
-	style.corner_radius_top_right=radius
-	style.corner_radius_bottom_left=radius
-	style.corner_radius_bottom_right=radius
-	style.set_content_margin_all(padding)
-	return style
-
-
-func _make_knowledge_empty_state(parent: Container,message: String) -> void:
-	var panel:=PanelContainer.new()
-	panel.add_theme_stylebox_override("panel",_knowledge_style(Color("#10181b"),Color("#273236"),1,3,14))
-	parent.add_child(panel)
-	var label:=Label.new()
-	label.text=message
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size",12)
-	label.add_theme_color_override("font_color",Color("#8d9793"))
-	panel.add_child(label)
 
 
 func _change_research_domain_allocation(dynamic_id:String,change:int)->void:
@@ -15252,14 +14689,6 @@ func _restart_random_world()->void:
 # second dashboard or the pause menu from appearing behind an existing modal.
 func _close_topmost_game_screen()->bool:
 	if is_instance_valid(GeneralCampaign.screen) and GeneralCampaign.screen.visible:GeneralCampaign.screen.hide();return true
-	if materials_panel and is_instance_valid(materials_panel):
-		var overlay:=materials_panel.find_child("MaterialsDetailOverlay",true,false)
-		if overlay:
-			overlay.queue_free()
-			return true
-	if materials_panel and is_instance_valid(materials_panel):
-		materials_panel.queue_free(); materials_panel=null
-		return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
 		return true
@@ -15394,8 +14823,6 @@ func _dismiss_report_backdrop(event:InputEvent)->bool:
 	if is_instance_valid(founding_focus_panel) or is_instance_valid(settlement_convoy_confirm_panel):return false
 	if _outside_report_body(world_menu_panel,event.position):_close_world_menu();return true
 	if _outside_report_body(scout_dispatch_panel,event.position):_close_scout_dispatch_panel();return true
-	for panel:Control in [materials_panel]:
-		if _outside_report_body(panel,event.position):return _close_topmost_game_screen()
 	return false
 
 func _pointer_over_ui()->bool:

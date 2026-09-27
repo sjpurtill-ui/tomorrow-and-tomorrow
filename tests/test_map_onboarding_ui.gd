@@ -106,9 +106,6 @@ func test_early_shelter_accepts_historical_substitute_materials_and_explains_rea
 	assert_bool(renderer._settlement_project_available(shelter)).is_true()
 	GameState.resource_stockpiles={"Timber":0.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
 	assert_bool(renderer._settlement_project_available(shelter)).is_false()
-	var status:String=renderer._shelter_work_status()
-	assert_str(status).contains("BLOCKED BY MATERIALS")
-	assert_str(status).contains("or substitutes")
 
 
 func test_temporary_selection_marker_keeps_a_fixed_screen_footprint()->void:

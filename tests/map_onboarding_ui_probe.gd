@@ -25,16 +25,6 @@ func _ready()->void:
 	_expect(ResourceSystem.stored_bulk()>0.0,"physical founding cargo disappeared before the first simulation tick")
 	var opening_water:Dictionary=ResourceSystem.water_access_snapshot(terrain._discovery_context())
 	_expect(bool(opening_water.get("recognized",false)) and String(opening_water.get("source_origin",""))=="mapped_hydrology","charted fresh water was absent at the start of the game")
-	terrain._open_materials_panel()
-	var water_listed:=false
-	for water_label_variant in terrain.materials_panel.find_children("*","Label",true,false):
-		var water_label:=water_label_variant as Label
-		if water_label and "FRESH WATER" in water_label.text:
-			water_listed=true
-			break
-	_expect(water_listed,"material resource report omitted recognized fresh water before the first simulation tick")
-	terrain.materials_panel.queue_free()
-	terrain.materials_panel=null
 	# The game now opens close in, at the fire circle; the recognized resources lie
 	# a few kilometres out. Resource mode must show them once the player looks
 	# over the valley (the 50,000 ft distance level).

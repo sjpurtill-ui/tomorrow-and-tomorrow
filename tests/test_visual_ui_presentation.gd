@@ -271,17 +271,6 @@ func test_fit_host_pages_a_growing_ledger_instead_of_miniaturizing_it()->void:
 	assert_int(host.find_children("ViewportPager","HBoxContainer",true,false).size()).is_equal(1)
 
 
-func test_live_report_focus_path_supports_internal_tab_controls()->void:
-	var panel:=auto_free(Control.new()) as Control
-	var tabs:=TabContainer.new()
-	panel.add_child(tabs)
-	var page:=Control.new(); page.name="PAGE"; tabs.add_child(page)
-	var internal_tab_bar:=tabs.get_tab_bar()
-	var index_path:Array[int]=renderer._live_report_child_index_path(panel,internal_tab_bar)
-	assert_bool(index_path.is_empty()).is_false()
-	assert_object(renderer._live_report_node_at_index_path(panel,index_path)).is_same(internal_tab_bar)
-
-
 func test_modal_screen_contract_caps_large_type_without_touching_map_sized_controls()->void:
 	var screen:=auto_free(Control.new()) as Control
 	screen.size=Vector2(1920,1080)
@@ -293,73 +282,19 @@ func test_modal_screen_contract_caps_large_type_without_touching_map_sized_contr
 	assert_int(screen.theme.default_font_size).is_equal(11)
 
 
-func test_live_report_refresh_is_bounded_and_state_driven()->void:
-	assert_float(RENDERER.LIVE_REPORT_REFRESH_INTERVAL_SECONDS).is_greater_equal(0.5)
-	var before:String=renderer._live_report_signature("population")
-	renderer._process_live_report_refresh(RENDERER.LIVE_REPORT_REFRESH_INTERVAL_SECONDS*0.40)
-	assert_float(renderer.live_report_refresh_elapsed).is_greater(0.0)
-	GameState.elapsed_days+=1.0
-	var after:String=renderer._live_report_signature("population")
-	assert_str(after).is_not_equal(before)
-
-
-func test_live_report_refresh_never_rebuilds_active_text_or_choice_workflows()->void:
-	var panel:Control=auto_free(Control.new()) as Control
-	var input:=LineEdit.new()
-	input.text="Keep this unfinished policy text"
-	panel.add_child(input)
-	assert_bool(renderer._live_report_interaction_active("council",panel)).is_true()
-	input.text=""
-	var selector:=OptionButton.new()
-	selector.add_item("Unfinished choice")
-	panel.add_child(selector)
-	selector.get_popup().visible=true
-	assert_bool(renderer._live_report_interaction_active("civilization_report",panel)).is_true()
-
-
-func test_deferred_live_report_commit_ignores_a_panel_closed_during_composition()->void:
-	var closed_panel:=Control.new()
-	closed_panel.free()
-	var offscreen_replacement:=Control.new()
-	renderer.live_report_pending_replacements={"materials":{"stable":closed_panel,"replacement":offscreen_replacement}}
-	renderer._commit_live_report_replacements()
-	assert_bool(is_instance_valid(offscreen_replacement)).is_false()
-
-
 func test_foreign_alert_arbitration_defers_without_losing_active_or_queued_events()->void:
 	renderer.foreign_alert_panel=auto_free(PanelContainer.new()) as PanelContainer
-	renderer.materials_panel=auto_free(Control.new()) as Control
+	renderer.settlement_naming_panel=auto_free(Control.new()) as Control
 	add_child(renderer.foreign_alert_panel)
-	add_child(renderer.materials_panel)
+	add_child(renderer.settlement_naming_panel)
 	renderer.active_foreign_alert={"alert_key":"first","kind":"first_contact"}
 	renderer.foreign_alert_queue.clear()
 	renderer.foreign_alert_queue.append({"alert_key":"second","kind":"unit_sighting"})
 	renderer.foreign_alert_panel.visible=true
-	renderer.materials_panel.visible=true
+	renderer.settlement_naming_panel.visible=true
 	assert_bool(renderer._blocking_modal_or_report_open()).is_true()
 	renderer._arbitrate_notification_overlays()
 	assert_bool(renderer.foreign_alert_panel.visible).is_false()
 	assert_str(String(renderer.active_foreign_alert.alert_key)).is_equal("first")
 	assert_int(renderer.foreign_alert_queue.size()).is_equal(1)
 
-
-func test_material_flow_rows_put_blockers_first_and_suppress_meaningless_zero_copy()->void:
-	var rows:Array[Dictionary]=renderer._material_flow_rows([
-		{"resource":"Timber","stage":"developed","workers":8,"extracted_today":4.0,"stock_at_source":2.0,"distance_km":12.0,"bottleneck":"Flowing"},
-		{"resource":"Stone","stage":"recognized","workers":0,"extracted_today":0.0,"stock_at_source":0.0,"distance_km":0.0,"bottleneck":""},
-		{"resource":"Clay","stage":"accessible","workers":4,"extracted_today":0.0,"stock_at_source":8.0,"distance_km":4.0,"bottleneck":"carriers unavailable"}
-	])
-	assert_int(rows.size()).is_equal(3)
-	assert_str(String(rows[0].material)).is_equal("Clay")
-	assert_str(String(rows[0].status)).is_equal("BLOCKED")
-	assert_str(String(rows[1].status)).is_equal("UNORGANIZED")
-	assert_str(String(rows[2].status)).is_equal("FLOWING")
-	var table:=VBoxContainer.new()
-	renderer._add_material_flow_header(table)
-	for row in rows: renderer._add_material_flow_row(table,row)
-	var visible_text:=""
-	for label in table.find_children("*","Label",true,false): visible_text+=String(label.text)+"\n"
-	assert_str(visible_text.to_lower()).not_contains("farthest 0")
-	assert_str(visible_text.to_lower()).not_contains("0.0 extracted  •  0.0 waiting  •  0.0 moving")
-	assert_int(table.find_children("*","ScrollContainer",true,false).size()).is_equal(0)
-	table.free()
