@@ -3,13 +3,13 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 var points:Array=[]
 func _ready()->void:
 	custom_minimum_size=Vector2(95,36);mouse_filter=Control.MOUSE_FILTER_PASS
-	tooltip_text="Recorded stock history; missing observations are gaps."
+	tooltip_text="The stock at each monthly count. Gaps are months with no count."
 func _draw()->void:
 	var known:Array=[]
 	for p:Dictionary in points:
 		if p.value!=null:known.append(p)
 	if known.size()<2:
-		draw_string(ThemeDB.fallback_font,Vector2(3,22),"No history",HORIZONTAL_ALIGNMENT_LEFT,-1,10,T.MUTED);return
+		draw_string(ThemeDB.fallback_font,Vector2(3,22),"No record yet",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED);return
 	var low:=INF;var high:=-INF
 	for p:Dictionary in known:low=minf(low,float(p.value));high=maxf(high,float(p.value))
 	var first:=float(points[0].day);var span:=maxf(1,float(points[-1].day)-first)
