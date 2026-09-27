@@ -93,6 +93,7 @@ static func capture(civ:Dictionary,region_id:String,force:Dictionary)->Dictionar
 	var region:=WorldSimulation.world.region_snapshot(String(civ.id),region_id).duplicate(true)
 	if result.has("error"):return {"civilization":civ,"outcome":{"region_captured":false,"message":result.error}}
 	region.controller="player"
+	_set_controller(civ,region_id,"player")
 	return {"civilization":civ,"outcome":{"region_captured":true,"occupation_required":float(result.get("occupation_required",0)),"region":region,"territory_transferred":0.0,"message":result.get("message","The city is occupied.")}}
 static func restore(civ:Dictionary,region_id:String)->Dictionary:
 	var city_id:=local_city(String(civ.id),region_id)
@@ -103,7 +104,17 @@ static func restore(civ:Dictionary,region_id:String)->Dictionary:
 			if String(entry.city_id)==city_id:entry.liberated=true
 	)
 	var region:=WorldSimulation.world.region_snapshot(String(civ.id),region_id).duplicate(true);region.controller=civ.id
+	_set_controller(civ,region_id,String(civ.id))
 	return {"civilization":civ,"outcome":{"region_recaptured":true,"region":region,"territory_transferred":0.0,"message":"The city is free of occupation."}}
+## The world's own record of who holds the town changes the moment it falls,
+## as the projection will say at the next day's sync: the field report that
+## follows the battle, the map and the court must not see the old holder.
+static func _set_controller(civ:Dictionary,region_id:String,controller:String)->void:
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("id",""))!=region_id:continue
+		region["controller"]=controller
+		region["last_control_change_day"]=int(WorldSimulation.state.elapsed_days)
+		return
 static func same_force(a:Dictionary,b:Dictionary)->bool:
 	if a.is_empty() or b.is_empty():return false
 	if String(a.get("actor",""))!=String(b.get("actor","")) or int(a.get("field_id",0))!=int(b.get("field_id",0)):return false

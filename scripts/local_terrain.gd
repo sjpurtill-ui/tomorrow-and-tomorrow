@@ -13587,6 +13587,7 @@ func _refresh_map_help()->void:
 	var presentation:=_map_help_presentation(GameState.settlement_site_committed,settlement_convoy_targeting,bool(GameState.settlement_convoy.get("active",false)))
 	map_help_title.text=String(presentation.title)
 	map_help_body.text=String(presentation.body)
+	preload("res://scripts/hud/map_legend.gd").attach(map_help_panel,map_help_button,GameState.settlement_site_committed)
 
 
 func _map_help_available_on_map()->bool:
@@ -14155,8 +14156,9 @@ func _refresh_contact_encounter_markers()->void:
 			var existing_label:=previous.get_node_or_null("SettlementLabel") as Label3D
 			if existing_label:
 				existing_label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
-				existing_label.set_meta("city_civilization_id",String(site.report.get("controller","")) if String(site.report.get("controller",""))!="" else String(site.civ_id))
-			if previous.get_meta("appearance",[])==appearance:continue
+			if previous.get_meta("appearance",[])==appearance:
+				_apply_city_ownership(previous,site.report)
+				continue
 			# queue_free is deferred; hide the old mesh now to avoid an overlapping frame.
 			previous.hide();previous.queue_free()
 		var marker:=Node3D.new()
@@ -14178,7 +14180,6 @@ func _refresh_contact_encounter_markers()->void:
 			footprint_radius=fabric.footprint_radius
 		var label:=Label3D.new();label.name="SettlementLabel";label.text=_city_map_label(String(site.name),-1,site.report.get("fields",{}).get("population",{}))
 		label.set_meta("city_map_id",String(site.city_id));label.set_meta("city_map_foreign",true)
-		label.set_meta("city_civilization_id",String(site.report.get("controller","")) if String(site.report.get("controller",""))!="" else String(site.civ_id))
 		label.font_size=11;label.outline_size=5;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 		label.fixed_size=true;label.no_depth_test=true;label.modulate=Color("#e4d7b4")
 		label.outline_modulate=Color(0.018,0.026,0.028,0.97);label.render_priority=11
@@ -14187,7 +14188,7 @@ func _refresh_contact_encounter_markers()->void:
 		marker.add_child(label)
 		var pin:=Label3D.new();pin.name="RegionalCityPin";pin.text="◆";pin.font_size=15;pin.outline_size=5
 		pin.billboard=BaseMaterial3D.BILLBOARD_ENABLED;pin.fixed_size=true;pin.no_depth_test=true
-		pin.modulate=Color("d9cba3",0.0);pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
+		pin.modulate=Color("d9cba3",0.0);pin.outline_modulate=Color(0,0,0,0);pin.position=Vector3(0,_height_at(site.x,site.z)+.015,0);marker.add_child(pin)
 		# The pin stays the (invisible) anchor and click target; the chart shows
 		# a stranger's town as an open inked diamond.
 		var glyph:=MeshInstance3D.new();glyph.name="RegionalCityGlyph";glyph.mesh=QuadMesh.new()
@@ -14195,6 +14196,7 @@ func _refresh_contact_encounter_markers()->void:
 		glyph.material_override=_map_glyph_material(false,16.0)
 		glyph.set_instance_shader_parameter("glyph_index",float(RESOURCE_ICONS.SETTLEMENT_GLYPH_FOREIGN))
 		glyph.position=pin.position;marker.add_child(glyph)
+		_apply_city_ownership(marker,site.report)
 
 		add_child(marker)
 		contact_encounter_markers[String(site.city_id)]=marker
@@ -14203,6 +14205,29 @@ func _refresh_contact_encounter_markers()->void:
 		if marker==null or not is_instance_valid(marker): continue
 		marker.visible=camera!=null # A reported city location is known even when surrounding terrain is not surveyed.
 		_update_foreign_city_annotation(marker)
+
+## Who holds a known town decides its card's emblem, its mark on the chart and
+## the words beside it (scripts/map_ownership.gd). Checked with every map
+## snapshot, so a town that falls changes on the chart at once.
+func _apply_city_ownership(marker:Node3D,report:Dictionary)->void:
+	var ownership:=preload("res://scripts/map_ownership.gd").status(report)
+	var label:=marker.get_node_or_null("SettlementLabel") as Label3D
+	if label:
+		label.set_meta("city_civilization_id",String(ownership.emblem))
+		label.set_meta("map_ownership",ownership)
+		# Name tags keep clear of the (larger) mark.
+		label.set_meta("glyph_clearance",float(ownership.mark_px)*0.32+2.0)
+	var glyph:=marker.get_node_or_null("RegionalCityGlyph") as GeometryInstance3D
+	if glyph==null:return
+	if int(glyph.get_meta("glyph",-1))!=int(ownership.glyph):
+		glyph.set_meta("glyph",int(ownership.glyph))
+		glyph.set_instance_shader_parameter("glyph_index",float(ownership.glyph))
+		glyph.material_override=_map_glyph_material(false,float(ownership.mark_px))
+	var accent:Color=ownership.accent
+	if glyph.get_meta("accent",Color(0,0,0,0))!=accent:
+		glyph.set_meta("accent",accent)
+		var linear:=accent.srgb_to_linear()
+		glyph.set_instance_shader_parameter("accent",Vector4(linear.r,linear.g,linear.b,accent.a))
 
 func _update_foreign_city_annotation(marker:Node3D)->void:
 	var label:=marker.get_node_or_null("SettlementLabel") as Label3D

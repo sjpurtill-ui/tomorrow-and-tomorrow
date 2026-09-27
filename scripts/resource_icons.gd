@@ -551,9 +551,14 @@ static func _figure_small(x:float,c:Color)->Array:
 
 const SETTLEMENT_GLYPH_PX:=64
 ## Glyph cells in `settlement_atlas()`: settlement stages 0-6 (camp to
-## megalopolis), then a stranger's reported town.
+## megalopolis), then a stranger's reported town, a stranger's town we hold,
+## a rival people's chief town, a town under siege, and a burned or ruined one.
 const SETTLEMENT_GLYPH_FOREIGN:=7
-const SETTLEMENT_GLYPH_COUNT:=8
+const SETTLEMENT_GLYPH_OCCUPIED:=8
+const SETTLEMENT_GLYPH_RIVAL_CAPITAL:=9
+const SETTLEMENT_GLYPH_BESIEGED:=10
+const SETTLEMENT_GLYPH_RUINED:=11
+const SETTLEMENT_GLYPH_COUNT:=12
 static var _settlement_atlas:Texture2D
 
 ## Chart marks for places, as an engraver sets them: a small ringed dot for a
@@ -577,7 +582,7 @@ static func settlement_atlas()->Texture2D:
 ## How far a settlement glyph reaches from its centre, as a fraction of its
 ## cell (the halo radius on the 56px grid), for marks drawn around it.
 static func settlement_glyph_extent(index:int)->float:
-	return float([14.0,16.0,18.0,20.0,22.0,24.4,27.1,22.0][clampi(index,0,SETTLEMENT_GLYPH_COUNT-1)])/float(ICON_PX)
+	return float([14.0,16.0,18.0,20.0,22.0,24.4,27.1,22.0,26.0,24.0,27.0,22.0][clampi(index,0,SETTLEMENT_GLYPH_COUNT-1)])/float(ICON_PX)
 
 static func _settlement_glyph(index:int)->Array:
 	var ink:=Color("#2b2118")
@@ -590,6 +595,25 @@ static func _settlement_glyph(index:int)->Array:
 		3: return [_c(28,28,20,halo),_c(28,28,17.5,paper),_ring(28,28,16.5,3.2,ink),_ring(28,28,9.8,2.2,ink),_c(28,28,4.2,ink)]
 		SETTLEMENT_GLYPH_FOREIGN:
 			return [_d(28,28,22,halo),_d(28,28,19,paper)]+_ring_diamond(28,28,17,2.8,ink)+[_c(28,28,3.6,ink)]
+		SETTLEMENT_GLYPH_OCCUPIED:
+			# Their town inside our gold band: taken and held, not yet our own.
+			return [_c(28,28,26,halo),_c(28,28,24,paper),_ring(28,28,21.5,5.2,Color("#a88a4a")),_ring(28,28,24.4,1.1,ink),_ring(28,28,18.6,0.9,ink)]+_ring_diamond(28,28,14,2.6,ink)+[_c(28,28,3.4,ink)]
+		SETTLEMENT_GLYPH_RIVAL_CAPITAL:
+			# A people's chief town: the stranger's diamond doubled, its heart filled.
+			return [_d(28,28,24,halo),_d(28,28,21.5,paper)]+_ring_diamond(28,28,19.5,2.6,ink)+_ring_diamond(28,28,12,2.2,ink)+[_d(28,28,5.5,ink)]
+		SETTLEMENT_GLYPH_BESIEGED:
+			# Siege lines drawn round the town in oxblood.
+			var siege:Array=[_c(28,28,27,halo),_d(28,28,17,paper)]+_ring_diamond(28,28,15,2.6,ink)+[_c(28,28,3.2,ink)]
+			for tick in 12:
+				var a:=TAU*float(tick)/12.0+PI/12.0
+				siege.append(_s(28+cos(a)*20.0,28+sin(a)*20.0,28+cos(a)*25.0,28+sin(a)*25.0,2.4,Color("#8e3b2e")))
+			return siege
+		SETTLEMENT_GLYPH_RUINED:
+			# Broken walls in faded ink, with the scorch of a fire across them.
+			var faded:=Color("#6b5e4e")
+			return [_d(28,28,22,halo),_d(28,28,19,Color(paper,0.8)),
+				_s(28,11,36,19,2.6,faded),_s(45,28,37,36,2.6,faded),_s(28,45,20,37,2.6,faded),_s(11,28,19,20,2.6,faded),
+				_s(19,19,37,37,2.2,Color("#8e3b2e")),_s(37,19,19,37,2.2,Color("#8e3b2e"))]
 	# Cities: a walled ring with towers, then outer rings for greater cities.
 	var parts:Array=[_c(28,28,22,halo),_c(28,28,19,paper)]
 	for tower in 8:
@@ -604,6 +628,141 @@ static func _settlement_glyph(index:int)->Array:
 static func _ring_diamond(x:float,y:float,r:float,w:float,col:Color)->Array:
 	var top:=Vector2(x,y-r); var right:=Vector2(x+r,y); var bottom:=Vector2(x,y+r); var left:=Vector2(x-r,y)
 	return [_s(top.x,top.y,right.x,right.y,w,col),_s(right.x,right.y,bottom.x,bottom.y,w,col),_s(bottom.x,bottom.y,left.x,left.y,w,col),_s(left.x,left.y,top.x,top.y,w,col)]
+
+
+# -- Peoples' emblems -------------------------------------------------------------
+
+static var _emblem_textures:Dictionary={}
+
+## Outlines a stranger people's emblem can take. The round seal is kept for
+## our own people alone, so ours never reads as anyone else's.
+const EMBLEM_SHAPES:=["shield","lozenge","banner","arch","cushion","pennon","quatrefoil","cartouche"]
+const EMBLEM_SIGIL_COUNT:=12
+const EMBLEM_INK:=Color("#2b2118")
+const EMBLEM_PAPER:=Color("#f1e7cf")
+const EMBLEM_GOLD:=Color("#c9a14e")
+
+## A people's emblem, drawn once and cached: their outline (`shape`), their
+## sign (`sigil`, 0-11) in `ink` on a `field` of their colour, inside a band
+## of `accent`, with an iron-gall keyline and a paper halo so it reads over
+## any ground at card size. `shape` "seal" is our own people's mark: a round
+## seal of ink with a gold band, gold sign and a gold star above.
+static func emblem_texture(shape:String,sigil:int,field:Color,accent:Color,ink:Color,px:int=96)->Texture2D:
+	var key:="%s|%d|%s|%s|%s|%d" % [shape,sigil,field.to_html(),accent.to_html(),ink.to_html(),px]
+	if _emblem_textures.has(key):return _emblem_textures[key]
+	var texture:=ImageTexture.create_from_image(_render_boxed(emblem_glyph(shape,sigil,field,accent,ink),px))
+	if _emblem_textures.size()>=160:_emblem_textures.clear()
+	_emblem_textures[key]=texture
+	return texture
+
+
+## The emblem's primitives on the 56 px grid (see emblem_texture).
+static func emblem_glyph(shape:String,sigil:int,field:Color,accent:Color,ink:Color)->Array:
+	var outline:=_emblem_outline(shape)
+	var parts:Array=[]
+	parts.append_array(_grown(outline,2.6,Color(EMBLEM_PAPER,0.9)))
+	parts.append_array(_grown(outline,0.0,EMBLEM_INK))
+	parts.append_array(_grown(outline,-1.7,accent))
+	parts.append_array(_grown(outline,-4.0,field))
+	var centre:=_emblem_centre(shape)
+	parts.append_array(_sigil(posmod(sigil,EMBLEM_SIGIL_COUNT),centre.x,centre.y,_emblem_sigil_scale(shape),ink,field))
+	if shape=="seal":
+		# The home star, set on the band at the top of the seal.
+		parts.append_array(_star(28,6.5,6.2,Color(EMBLEM_PAPER,0.95),1.4))
+		parts.append_array(_star(28,6.5,6.2,EMBLEM_GOLD,0.0))
+	return parts
+
+
+## One outline as primitives, filling most of the 56 px cell.
+static func _emblem_outline(shape:String)->Array:
+	var c:=Color.WHITE
+	match shape:
+		"seal": return [_c(28,30,23,c)]
+		"shield": return [_rr(28,17,19,10,3,c),_t(9,20,47,20,28,53,c),_c(18,26,9,c),_c(38,26,9,c)]
+		"lozenge": return [_d(28,28,26,c)]
+		"banner": return [_rr(28,22,18,16,1.5,c),_t(10,30,28,30,10,53,c),_t(28,30,46,30,46,53,c),_rr(28,34,18,4,0,c)]
+		"arch": return [_rr(28,36,19,15,2,c),_c(28,24,19,c)]
+		"cushion": return [_rr(28,28,22,22,9,c)]
+		"pennon": return [_t(4,6,52,6,28,54,c),_rr(28,9,22,4,2,c)]
+		"quatrefoil": return [_c(28,15,11.5,c),_c(28,41,11.5,c),_c(15,28,11.5,c),_c(41,28,11.5,c),_c(28,28,13,c)]
+		"cartouche": return [_rr(28,28,17,25,14,c)]
+	return [_c(28,28,23,c)]
+
+
+## Where the sign sits inside each outline, and how large.
+static func _emblem_centre(shape:String)->Vector2:
+	match shape:
+		"shield": return Vector2(28,25)
+		"banner": return Vector2(28,24)
+		"pennon": return Vector2(28,20)
+		"arch": return Vector2(28,32)
+		"seal": return Vector2(28,31)
+	return Vector2(28,28)
+
+static func _emblem_sigil_scale(shape:String)->float:
+	match shape:
+		"pennon": return 0.72
+		"lozenge": return 0.82
+		"shield","banner": return 0.86
+	return 1.0
+
+
+## Primitives recoloured and grown (negative: inset) as a whole.
+static func _grown(primitives:Array,grow:float,col:Color)->Array:
+	var out:Array=[]
+	for primitive_variant in primitives:
+		var primitive:Dictionary=(primitive_variant as Dictionary).duplicate()
+		primitive.col=col
+		primitive["g"]=grow
+		out.append(primitive)
+	return out
+
+
+## A five-pointed star of radius r, as five blades round a hub.
+static func _star(x:float,y:float,r:float,col:Color,grow:float)->Array:
+	var out:Array=[]
+	var inner:=r*0.42
+	for k in 5:
+		var a:=-PI*0.5+TAU*float(k)/5.0
+		var tip:=Vector2(x,y)+Vector2(cos(a),sin(a))*r
+		var left:=Vector2(x,y)+Vector2(cos(a-PI/5.0),sin(a-PI/5.0))*inner
+		var right:=Vector2(x,y)+Vector2(cos(a+PI/5.0),sin(a+PI/5.0))*inner
+		var blade:=_t(tip.x,tip.y,left.x,left.y,right.x,right.y,col);blade["g"]=grow;out.append(blade)
+	var hub:=_c(x,y,inner,col);hub["g"]=grow;out.append(hub)
+	return out
+
+
+## Twelve signs, one per people's lineage: tree, sun, waves, peaks, star,
+## crescent, crossed spears, tower, birds, eye, fish, key. Drawn in `c` at
+## (x, y); `ground` paints what a sign cuts away (the crescent's shadow).
+static func _sigil(index:int,x:float,y:float,k:float,c:Color,ground:Color)->Array:
+	var w:=3.0*k
+	match index:
+		0: return [_s(x,y+11*k,x,y+2*k,w,c),_t(x,y-12*k,x-9*k,y+4*k,x+9*k,y+4*k,c)]
+		1:
+			var sun:Array=[_c(x,y,5.5*k,c)]
+			for r in 8:
+				var a:=TAU*float(r)/8.0
+				sun.append(_s(x+cos(a)*8.5*k,y+sin(a)*8.5*k,x+cos(a)*12*k,y+sin(a)*12*k,2.2*k,c))
+			return sun
+		2:
+			var waves:Array=[]
+			for row:float in [-5.0,5.0]:
+				for seg in 4:
+					var x0:=x-12*k+6*k*float(seg)
+					var up:=-3.0*k if seg%2==0 else 3.0*k
+					waves.append(_s(x0,y+row*k+up*0.5,x0+6*k,y+row*k-up*0.5,2.4*k,c))
+			return waves
+		3: return [_t(x-4*k,y-10*k,x-14*k,y+9*k,x+6*k,y+9*k,c),_t(x+6*k,y-5*k,x-2*k,y+9*k,x+14*k,y+9*k,c)]
+		4: return [_t(x,y-13*k,x-3.5*k,y,x+3.5*k,y,c),_t(x,y+13*k,x-3.5*k,y,x+3.5*k,y,c),_t(x-13*k,y,x,y-3.5*k,x,y+3.5*k,c),_t(x+13*k,y,x,y-3.5*k,x,y+3.5*k,c)]
+		5: return [_c(x,y,11*k,c),_c(x+5.5*k,y-3*k,9.5*k,ground)]
+		6: return [_s(x-10*k,y+11*k,x+9*k,y-8*k,w,c),_s(x+10*k,y+11*k,x-9*k,y-8*k,w,c),_t(x+12*k,y-12*k,x+6*k,y-10*k,x+10*k,y-6*k,c),_t(x-12*k,y-12*k,x-6*k,y-10*k,x-10*k,y-6*k,c)]
+		7: return [_rr(x,y+3*k,6.5*k,9*k,0.5,c),_rr(x-5*k,y-8*k,1.8*k,2.5*k,0.3,c),_rr(x,y-8*k,1.8*k,2.5*k,0.3,c),_rr(x+5*k,y-8*k,1.8*k,2.5*k,0.3,c),_rr(x,y+8*k,2*k,3.5*k,1.5*k,ground)]
+		8: return [_s(x-12*k,y-4*k,x-5*k,y+1*k,w,c),_s(x-5*k,y+1*k,x+2*k,y-4*k,w,c),_s(x-2*k,y+4*k,x+5*k,y+9*k,w,c),_s(x+5*k,y+9*k,x+12*k,y+4*k,w,c)]
+		9: return [_s(x-13*k,y,x,y-8*k,2.4*k,c),_s(x,y-8*k,x+13*k,y,2.4*k,c),_s(x-13*k,y,x,y+8*k,2.4*k,c),_s(x,y+8*k,x+13*k,y,2.4*k,c),_c(x,y,4.2*k,c)]
+		10: return [_rr(x-2*k,y,9*k,5.5*k,5*k,c),_t(x+6*k,y,x+13*k,y-7*k,x+13*k,y+7*k,c),_c(x-6*k,y-1.5*k,1.4*k,ground)]
+		11: return [_ring(x,y-6*k,5*k,2.6*k,c),_s(x,y-1*k,x,y+13*k,w,c),_s(x,y+8*k,x+5*k,y+8*k,2.4*k,c),_s(x,y+12*k,x+4*k,y+12*k,2.4*k,c)]
+	return [_c(x,y,5*k,c)]
 
 
 # -- Great works on the chart --------------------------------------------------

@@ -166,7 +166,7 @@ func publish(observer:String,observation:Dictionary,day:int)->void:
 func known(observer:String,city_id:String,day:int=-1)->Dictionary:
 	var value:Dictionary=records.get(observer,{}).get(city_id,{})
 	if value.is_empty(): return {}
-	var result:=value.duplicate(true)
+	var result:=own_control(observer,value.duplicate(true))
 	var today:=int(WorldSimulation.state.elapsed_days) if day<0 else day
 	result["age_days"]=maxi(0,today-int(value.observed_day)) if int(value.observed_day)>=0 else -1
 	result["freshness"]="date unknown" if int(value.observed_day)<0 else ("recent" if int(result.age_days)<=30 else ("aging" if int(result.age_days)<=180 else "stale"))
@@ -198,8 +198,27 @@ func known_cities(observer:String="player",civ_id:String="",age_estimates:bool=t
 			var location:Dictionary=value.get("position",{})
 			if Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_squared_to(center)>radius*radius:continue
 		if civ_id=="" or value.civ_id==civ_id or value.controller==civ_id:
-			result.append(known(observer,id) if age_estimates else value.duplicate(true))
+			result.append(known(observer,id) if age_estimates else own_control(observer,value.duplicate(true)))
 	return result
+
+## Our own people always know what they hold. A town we took shows us as its
+## holder in our book, and one we lost shows who holds it now, whatever the
+## last scout saw; every other holder stays as last reported.
+func own_control(observer:String,record:Dictionary)->Dictionary:
+	if observer!="player" or record.is_empty():return record
+	var live:=live_controller(String(record.get("city_id","")))
+	var recorded:=String(record.get("controller",""))
+	if live=="player" and recorded!="player":record["controller"]="player"
+	elif recorded=="player" and live!="" and live!="player":record["controller"]=live
+	return record
+
+## Who holds a stranger's town in the world itself: "" when it is not a
+## stranger's town the world knows.
+func live_controller(city_id:String)->String:
+	var location:Dictionary=system._region_location(city_id)
+	if location.is_empty():return ""
+	var civ:Dictionary=system.civilizations[int(location.owner_index)]
+	return String((civ.strategic_regions[int(location.region_index)] as Dictionary).get("controller",civ.id))
 
 func public_regions(civ_id:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]

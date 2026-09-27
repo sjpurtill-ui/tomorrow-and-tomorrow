@@ -26,6 +26,9 @@ uniform float fixed_diameter_px = 0.0;
 uniform bool home_ring = false;
 instance uniform float home_ring_radius = 0.0;
 instance uniform float mark_alpha = 1.0;
+// A people's colour washed into the paper of their town's mark (linear RGB;
+// alpha is the strength, zero for none). Ink, halo and gold stay as drawn.
+instance uniform vec4 accent = vec4(0.0);
 varying float cell;
 varying float diameter;
 
@@ -50,6 +53,10 @@ void fragment() {
 	vec4 mark = texture(glyphs, uv);
 	ALBEDO = mark.rgb;
 	ALPHA = mark.a*COLOR.a;
+	if (accent.a > 0.0) {
+		float paper = step(0.9, mark.a)*smoothstep(0.5, 0.75, dot(mark.rgb, vec3(0.3333)));
+		ALBEDO = mix(ALBEDO, ALBEDO*accent.rgb, paper*accent.a);
+	}
 	if (home_ring && home_ring_radius > 0.0) {
 		float from_ring_px = abs(length(UV-vec2(0.5))-home_ring_radius)*diameter;
 		float keyline = (1.0-smoothstep(1.2, 2.2, from_ring_px))*0.55;

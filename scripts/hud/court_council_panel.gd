@@ -219,7 +219,7 @@ func _fill_league(state:Dictionary)->void:
 		var row:=PanelContainer.new();row.name="Member_"+member
 		row.add_theme_stylebox_override("panel",_box(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CONTROL,10,5))
 		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);row.add_child(line)
-		line.add_child(_icon(Identity.player_crest(maxi(0,int(GameState.founding_banner_index))) if member=="player" else Identity.foreign(member).texture,24))
+		line.add_child(_icon(Identity.emblem(member),24))
 		var who:=_label(name_of(member),"body",Tokens.INK,false);who.size_flags_horizontal=SIZE_EXPAND_FILL;line.add_child(who)
 		if votes.has(member):
 			var agrees:=bool((votes[member] as Dictionary).get("accept",false))
