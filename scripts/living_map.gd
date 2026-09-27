@@ -98,6 +98,7 @@ static func open_on_people(host:Node3D)->void:
 	## The first frame of a new game: about 200 m above the travelling people.
 	var layer:=ensure(host)
 	if layer==null: return
+	preload("res://scripts/map_ambience.gd").ensure(host)
 	layer.set_season(GameState.elapsed_days)
 	if GameState.settlement_site_committed or GameState.elapsed_days>1.0: return
 	var camera:Camera3D=host.get("camera")
@@ -108,6 +109,8 @@ static func refresh(host:Node3D)->void:
 	## Once per committed day. Cheap when nothing changed.
 	var layer:=ensure(host)
 	if layer!=null: layer.day_tick()
+	# Weather, birds, herds and boats follow the same day (codex/map-motion).
+	preload("res://scripts/map_ambience.gd").refresh(host)
 
 static func ensure(host:Node3D)->Node3D:
 	if not enabled or host==null or not is_instance_valid(host): return null

@@ -11,6 +11,8 @@ const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
+## Cards and emblems ease in and out instead of popping (codex/map-motion).
+const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
 const MODERN_LABELS:={"population":"POP · PEOPLE","science_capacity":"SCIENCE · MIND-EQ.","gdp":"GDP · WORK-DAYS/D","life_expectancy":"HEALTH · LIFE EXP."}
 ## What scouts can say of a stranger town before anyone keeps statistics.
 const EARLY_LABELS:={"population":"PEOPLE","science_capacity":"LORE-KEEPERS","gdp":"HANDS AT WORK","life_expectancy":"LIVES · WINTERS"}
@@ -97,6 +99,15 @@ var work_marks:Array[Dictionary]=[]
 var work_root_id:=0
 var work_memory:Dictionary={}
 var work_measured:Dictionary={}
+var card_fades:Dictionary={}
+## A newly founded settlement is ringed in gold once, briefly (codex/map-motion).
+const FOUNDING_RING_SECONDS:=2.2
+var known_settlements:Dictionary={}
+var settlements_seeded:=false
+var settlement_check_elapsed:=1.0
+var founding_rings:Array[Dictionary]=[]
+var work_fades:Dictionary={}
+var fades_moving:=false
 
 func _ready()->void:
 	theme=T.control_theme()
@@ -463,7 +474,8 @@ func _draw_works()->void:
 	var voice:=T.voice_font();var ui:=T.font("ui")
 	for work:Dictionary in works:
 		var anchor:Vector2=work.anchor
-		var alpha:=float(work.emblem_alpha)
+		var fade:=PresenceFade.alpha(work_fades,String(work.id))
+		var alpha:=float(work.emblem_alpha)*fade
 		if alpha>.02:
 			var emblem:=RESOURCE_ICONS.great_work_texture(String(work.shape),String(work.state),48)
 			draw_texture_rect(emblem,work.mark,false,Color(1,1,1,alpha))
@@ -474,46 +486,107 @@ func _draw_works()->void:
 		var clear:=float(work.clear)-4.0
 		if reach.length()>clear+3.0:
 			var start:=anchor+reach.normalized()*clear
-			draw_line(start,end,Color(T.PAPER_RAISED,.5),2.5,true)
-			draw_line(start,end,Color(T.INK,.45),1,true)
-		_draw_work_card(work,box,voice,ui)
+			draw_line(start,end,Color(T.PAPER_RAISED,.5*fade),2.5,true)
+			draw_line(start,end,Color(T.INK,.45*fade),1,true)
+		_draw_work_card(work,box,voice,ui,fade)
 
 ## A work's name card: the chart's paper in a quieter weight than a city's,
 ## its emblem at the left, the name in the book serif, and while it rises a
 ## fine rule that fills with the work done.
-func _draw_work_card(work:Dictionary,box:Rect2,voice:Font,ui:Font)->void:
-	var key:="work"+str(T.PAPER_RAISED)
-	if not styles.has(key):
-		var style:=StyleBoxFlat.new();style.bg_color=Color(T.PAPER_RAISED,.9);style.border_color=Color(T.RULE,.9)
-		style.set_border_width_all(1);style.set_corner_radius_all(T.RADIUS_CONTROL)
-		style.shadow_color=Color(0,0,0,.08);style.shadow_size=2;style.shadow_offset=Vector2(0,1)
-		styles[key]=style
-	draw_style_box(styles[key],box)
+func _draw_work_card(work:Dictionary,box:Rect2,voice:Font,ui:Font,fade:float=1.0)->void:
+	if fade<=0.01:return
+	var style:=_faded_style("work"+str(T.PAPER_RAISED),fade,func()->StyleBoxFlat:
+		var built:=StyleBoxFlat.new();built.bg_color=Color(T.PAPER_RAISED,.9);built.border_color=Color(T.RULE,.9)
+		built.set_border_width_all(1);built.set_corner_radius_all(T.RADIUS_CONTROL)
+		built.shadow_color=Color(0,0,0,.08);built.shadow_size=2;built.shadow_offset=Vector2(0,1)
+		return built)
+	draw_style_box(style,box)
 	var state:=String(work.state)
-	if state=="dedicated":draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),T.GOLD)
+	if state=="dedicated":draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),Color(T.GOLD,fade))
 	var x:=box.position.x+8;var y:=box.position.y+17
 	if not bool(work.get("compact",false)):
 		# Close in, the emblem is off the map and the card carries it instead.
 		var icon:=RESOURCE_ICONS.great_work_texture(String(work.shape),state,48)
-		draw_texture_rect(icon,Rect2(box.position+Vector2(5,5),Vector2(20,20)),false)
+		draw_texture_rect(icon,Rect2(box.position+Vector2(5,5),Vector2(20,20)),false,Color(1,1,1,fade))
 		x=box.position.x+29
-	var ink:=T.INK if state!="ruined" else T.INK_MUTED
+	var ink:Color=T.INK if state!="ruined" else T.INK_MUTED
+	ink.a*=fade
 	for line:String in work.lines:
 		draw_string(voice,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_NAME_SIZE,ink);y+=17
 	var status:=String(work.status)
 	if status.is_empty():return
-	var tone:=T.GOLD if state=="dedicated" else T.INK_MUTED
+	var tone:Color=T.GOLD if state=="dedicated" else T.INK_MUTED
+	tone.a*=fade
 	draw_string(ui,Vector2(x,y-1),status,HORIZONTAL_ALIGNMENT_LEFT,-1,WORK_STATUS_SIZE,tone)
 	if state in ["building","abandoned"]:
 		var track:=Rect2(Vector2(x,box.end.y-5),Vector2(box.end.x-x-8,2))
-		draw_rect(track,Color(T.RULE,.6))
-		draw_rect(Rect2(track.position,Vector2(track.size.x*clampf(float(work.progress),0,1),2)),Color(T.INK,.6))
+		draw_rect(track,Color(T.RULE,.6*fade))
+		draw_rect(Rect2(track.position,Vector2(track.size.x*clampf(float(work.progress),0,1),2)),Color(T.INK,.6*fade))
+
+## Settlement ids that were not known before (and remembers them).
+static func new_foundings(known:Dictionary,settlements:Array)->Array[String]:
+	var found:Array[String]=[]
+	for city in settlements:
+		if not city is Dictionary:continue
+		var id:=String((city as Dictionary).get("id",""))
+		if id.is_empty() or known.has(id):continue
+		known[id]=true
+		found.append(id)
+	return found
+
+func _watch_foundings(delta:float)->void:
+	settlement_check_elapsed+=delta
+	if settlement_check_elapsed>=0.5:
+		settlement_check_elapsed=0.0
+		var found:=new_foundings(known_settlements,GameState.player_settlements)
+		# What stood when the chart opened (a new game or a loaded save) is not news.
+		if settlements_seeded and not preload("res://scripts/hud/motion.gd").reduced():
+			for id in found:founding_rings.append({"id":id,"t":0.0})
+		settlements_seeded=true
+	if founding_rings.is_empty():return
+	var live:Array[Dictionary]=[]
+	for ring in founding_rings:
+		ring["t"]=float(ring.t)+delta
+		if float(ring.t)<FOUNDING_RING_SECONDS:live.append(ring)
+	founding_rings=live
+	queue_redraw()
+
+## Three fine rings, gold then ink, spreading from the new place's pin.
+func _draw_founding_rings()->void:
+	var camera:Camera3D=terrain.camera if is_instance_valid(terrain) else null
+	if camera==null:return
+	for ring in founding_rings:
+		if not sources.has(ring.id):continue
+		var anchor_3d:Vector3=sources[ring.id].anchor
+		if camera.is_position_behind(anchor_3d):continue
+		var at:=camera.unproject_position(anchor_3d)
+		for k in 3:
+			var p:=clampf((float(ring.t)-0.35*float(k))/(FOUNDING_RING_SECONDS-0.7),0.0,1.0)
+			if p<=0.0 or p>=1.0:continue
+			var spread:=1.0-pow(1.0-p,3.0)
+			var fade:=(1.0-p)*(1.0-p)
+			var tone:Color=T.GOLD if k<2 else T.INK
+			draw_arc(at,lerpf(10.0,70.0,spread),0.0,TAU,48,Color(T.PAPER_RAISED,0.45*fade),3.0,true)
+			draw_arc(at,lerpf(10.0,70.0,spread),0.0,TAU,48,Color(tone,0.9*fade),1.3,true)
 
 func _process(delta:float)->void:
 	var waiting:=not hover_id.is_empty() and hover_elapsed<HOVER_DELAY
 	hover_elapsed+=delta
 	if waiting and hover_elapsed>=HOVER_DELAY:queue_redraw()
+	var before:=layout_signature
 	refresh()
+	_watch_foundings(delta)
+	# Presence fades advance only while something appears, leaves or slides;
+	# a settled map costs nothing here and draws nothing new.
+	if before!=layout_signature or fades_moving:
+		var present:={}
+		for card:Dictionary in cards:present[String(card.id)]=card
+		var present_works:={}
+		for work:Dictionary in works:present_works[String(work.id)]={"rect":Rect2(work.anchor,Vector2.ONE),"anchor":work.anchor}
+		var moving:=PresenceFade.advance(card_fades,present,delta)
+		moving=PresenceFade.advance(work_fades,present_works,delta) or moving
+		if moving or fades_moving:queue_redraw()
+		fades_moving=moving
 
 ## The city whose full card is showing: a pinned (clicked/tapped) city, else the hovered one.
 func expanded_id()->String:
@@ -592,20 +665,27 @@ func _update_overflow(viewport_size:Vector2)->void:
 func _draw()->void:
 	# Works first: the cities' own cards and leaders always sit above them.
 	_draw_works()
+	if not founding_rings.is_empty():_draw_founding_rings()
+	# Names leaving the chart fade where they stood beside their pins.
+	var present:={}
+	for card:Dictionary in cards:present[String(card.id)]=true
+	for ghost:Dictionary in PresenceFade.leaving(card_fades,present):
+		var old:Dictionary=ghost.card
+		if old.is_empty() or not bool(old.get("compact",false)) or not sources.has(ghost.id):continue
+		var camera:Camera3D=terrain.camera if is_instance_valid(terrain) else null
+		var anchor_3d:Vector3=sources[ghost.id].anchor
+		if camera==null or camera.is_position_behind(anchor_3d):continue
+		var at:=camera.unproject_position(anchor_3d)
+		var ghost_box:=PresenceFade.drawn_rect(card_fades,ghost.id,old.rect,at)
+		_draw_leader(old,ghost_box,at,float(ghost.a))
+		_draw_frame(old,ghost_box,false,float(ghost.a))
 	for card:Dictionary in cards:
-		var box:Rect2=card.rect;var anchor:Vector2=card.anchor
-		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		# A fine ink leader from just outside the place's glyph to its name.
-		var reach:=end-anchor
-		var clearance:=float(card.get("clearance",GLYPH_CLEARANCE))
-		if reach.length()>clearance+2.0:
-			var start:=anchor+reach.normalized()*clearance
-			draw_line(start,end,Color(T.PAPER_RAISED,.55),3,true)
-			draw_line(start,end,Color(T.INK,.55),1,true)
+		var box:=PresenceFade.drawn_rect(card_fades,String(card.id),card.rect,card.anchor)
+		_draw_leader(card,box,card.anchor,PresenceFade.alpha(card_fades,String(card.id)))
 	var open:=expanded_id();var opened:={}
 	for card:Dictionary in cards:
 		if bool(card.get("compact",false)):
-			_draw_frame(card,card.rect,false)
+			_draw_frame(card,PresenceFade.drawn_rect(card_fades,String(card.id),card.rect,card.anchor),false,PresenceFade.alpha(card_fades,String(card.id)))
 			if String(card.id)==open:opened=card
 		else:_draw_card(card,card.rect)
 	# The open card draws last, over its neighbours, on a solid ground.
@@ -613,25 +693,46 @@ func _draw()->void:
 
 ## A name tag in the chart's paper: raised paper, a hairline rule, and the
 ## owner's colour only as a fine rule along the top (never a fill).
-func _draw_frame(card:Dictionary,box:Rect2,solid:bool)->void:
+func _draw_frame(card:Dictionary,box:Rect2,solid:bool,fade:float=1.0)->void:
+	if fade<=0.01:return
 	var font:=T.voice_font();var color:Color=card.color
-	var key:=str(solid)+str(T.PAPER_RAISED)
-	if not styles.has(key):
-		var style:=StyleBoxFlat.new();style.bg_color=Color(T.PAPER_RAISED,1.0 if solid else .93);style.border_color=T.RULE
-		style.set_border_width_all(1);style.set_corner_radius_all(T.RADIUS_CONTROL)
-		style.shadow_color=Color(0,0,0,.22 if solid else .10);style.shadow_size=4 if solid else 2;style.shadow_offset=Vector2(0,1)
-		styles[key]=style
-	draw_style_box(styles[key],box)
-	draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),Color(color,.85))
+	var style:=_faded_style(str(solid)+str(T.PAPER_RAISED),fade,func()->StyleBoxFlat:
+		var built:=StyleBoxFlat.new();built.bg_color=Color(T.PAPER_RAISED,1.0 if solid else .93);built.border_color=T.RULE
+		built.set_border_width_all(1);built.set_corner_radius_all(T.RADIUS_CONTROL)
+		built.shadow_color=Color(0,0,0,.22 if solid else .10);built.shadow_size=4 if solid else 2;built.shadow_offset=Vector2(0,1)
+		return built)
+	draw_style_box(style,box)
+	draw_rect(Rect2(box.position+Vector2(3,0),Vector2(box.size.x-6,2)),Color(color,.85*fade))
 	var x:=box.position.x+11
 	if card.flag!=null:
 		var flag_size:Vector2=card.flag.get_size()
 		flag_size*=minf(30.0/flag_size.x,20.0/flag_size.y)
-		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,3)+(Vector2(30,20)-flag_size)*.5,flag_size),false)
+		draw_texture_rect(card.flag,Rect2(box.position+Vector2(9,3)+(Vector2(30,20)-flag_size)*.5,flag_size),false,Color(1,1,1,fade))
 		x=box.position.x+46
 	var y:=box.position.y+20
 	for line:String in card.lines:
-		draw_string(font,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,T.INK);y+=20
+		draw_string(font,Vector2(x,y),line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE,Color(T.INK,T.INK.a*fade));y+=20
+
+## A fine ink leader from just outside the place glyph to its name.
+func _draw_leader(card:Dictionary,box:Rect2,anchor:Vector2,fade:float=1.0)->void:
+	var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
+	var reach:=end-anchor
+	var clearance:=float(card.get("clearance",GLYPH_CLEARANCE))
+	if reach.length()>clearance+2.0 and fade>0.01:
+		var start:=anchor+reach.normalized()*clearance
+		draw_line(start,end,Color(T.PAPER_RAISED,.55*fade),3,true)
+		draw_line(start,end,Color(T.INK,.55*fade),1,true)
+
+## The paper style for a card at a given fade, cached in tenths.
+func _faded_style(base_key:String,fade:float,build:Callable)->StyleBoxFlat:
+	var step:=clampi(roundi(fade*10.0),0,10)
+	var key:=base_key+"|"+str(step)
+	if not styles.has(key):
+		var style:StyleBoxFlat=build.call()
+		var k:=float(step)/10.0
+		style.bg_color.a*=k;style.border_color.a*=k;style.shadow_color.a*=k
+		styles[key]=style
+	return styles[key]
 
 func _draw_card(card:Dictionary,box:Rect2,solid:bool=false)->void:
 	var font:=T.font("ui");var color:Color=card.color

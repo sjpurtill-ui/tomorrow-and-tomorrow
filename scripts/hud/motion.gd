@@ -11,15 +11,23 @@ const SLOW:=0.36
 const SCENE:=0.90
 const RISE:=8.0
 
-## Honour a reduce_motion preference (a GameState field or project setting)
-## by capping every duration at FAST.
-static func duration(value:float)->float:
-	var reduced:=bool(ProjectSettings.get_setting("application/config/reduce_motion",false))
+## The player's machine-local choice (DisplayPreferences sets it at start-up
+## and whenever the setting changes).
+static var reduce_motion:=false
+
+## Reduced motion: the player's setting, a project setting, or a GameState field.
+static func reduced()->bool:
+	if reduce_motion:return true
+	if bool(ProjectSettings.get_setting("application/config/reduce_motion",false)):return true
 	var main_loop:=Engine.get_main_loop()
 	if main_loop is SceneTree:
 		var state:Node=(main_loop as SceneTree).root.get_node_or_null("GameState")
-		if state!=null and "reduce_motion" in state:reduced=reduced or bool(state.get("reduce_motion"))
-	return minf(value,FAST) if reduced else value
+		if state!=null and "reduce_motion" in state:return bool(state.get("reduce_motion"))
+	return false
+
+## Honour reduced motion by capping every duration at FAST.
+static func duration(value:float)->float:
+	return minf(value,FAST) if reduced() else value
 
 static func _tween(node:Node)->Tween:
 	if node==null or not node.is_inside_tree():return null
