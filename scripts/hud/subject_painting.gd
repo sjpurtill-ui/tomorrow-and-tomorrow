@@ -1,12 +1,23 @@
 extends Control
 ## Subject-aware framing shared by discovery announcements, research cards and unit portraits.
-var texture:Texture2D
+var texture:Texture2D:
+	set(value):
+		texture=value
+		if fit_whole_width:_fit()
+		queue_redraw()
 var focus:=Vector2(.5,.5)
+## Hero mode: the control takes the painting's own height for its width, so a
+## wide banner painting is shown whole. min/max bound the height; only when a
+## bound bites is the painting cropped, around its focus point.
+var fit_whole_width:=false
+var min_height:=0.0
+var max_height:=0.0
 var contain:bool=false
 var fetch:Callable
 var scroll:ScrollContainer
 func _ready()->void:
 	clip_contents=true;resized.connect(queue_redraw)
+	if fit_whole_width:resized.connect(_fit);_fit()
 	if is_instance_valid(scroll):
 		resized.connect(refresh)
 		visibility_changed.connect(refresh)
@@ -17,6 +28,22 @@ func _ready()->void:
 		call_deferred("refresh")
 func _notification(what:int)->void:
 	if what==NOTIFICATION_TRANSFORM_CHANGED and texture==null:refresh()
+## Height the painting needs to show its full width at this width, within the bounds.
+static func whole_width_height(source_texture:Texture2D,width:float,low:float,high:float)->float:
+	if source_texture==null or source_texture.get_width()<=0 or width<=0:return low
+	var natural:=width*source_texture.get_height()/float(source_texture.get_width())
+	return clampf(natural,low,high if high>0 else natural)
+## Deferred, once per frame: changing the height inside a resize would re-enter
+## container sorting (a scrollbar appearing can narrow the width again).
+var _fit_queued:=false
+func _fit()->void:
+	if not fit_whole_width or _fit_queued:return
+	_fit_queued=true;_apply_fit.call_deferred()
+func _apply_fit()->void:
+	_fit_queued=false
+	if texture==null or size.x<=0:return
+	var wanted:=roundf(whole_width_height(texture,size.x,min_height,max_height))
+	if absf(custom_minimum_size.y-wanted)>=1.0:custom_minimum_size.y=wanted
 func refresh()->void:
 	if not is_instance_valid(scroll) or not fetch.is_valid():return
 	if is_visible_in_tree() and size.y>0 and scroll.get_global_rect().intersects(get_global_rect()):

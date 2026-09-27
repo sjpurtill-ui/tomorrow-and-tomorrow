@@ -9,6 +9,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 ## wipes in left to right like ink drying (SCENE), then the carved title, a gold
 ## hairline drawn beneath it, and one line of story.
 const HERO_HEIGHT:=300.0
+const HERO_MIN_HEIGHT:=150.0
 const COSTS=["food_spoilage","labor_demand","fuel_demand","pollution","timber_pressure","ecological_pressure","disease_exposure","injury_risk","disaster_risk","health_risk","institutional_rigidity","fatigue"]
 var terrain:Node
 var hud:Node
@@ -55,7 +56,9 @@ func _ready()->void:
 	var top:=HBoxContainer.new();column.add_child(top)
 	counter=Art.label(top,"SOMETHING NEW IS KNOWN",12,T.GOLD);counter.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.button(top,"×",close).tooltip_text="Dismiss all · Escape or click outside"
-	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
+	# Reserve the scrollbar gutter: a bar that appears and vanishes as wrapped
+	# text reflows can flip the layout back and forth and crash the engine.
+	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_RESERVE;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",12);scroll.add_child(body)
 	footer=BoxContainer.new();footer.add_theme_constant_override("separation",8);column.add_child(footer)
 	Art.button(footer,"View in research",open_research).size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -72,7 +75,11 @@ func layout()->void:
 	if is_instance_valid(introduction):introduction.vertical=true
 	if is_instance_valid(discovery_summary):discovery_summary.custom_minimum_size.x=0
 	if is_instance_valid(hero):
-		hero.custom_minimum_size=Vector2(0,minf(HERO_HEIGHT,maxf(150.0,(target.x-48)*.46)) if not narrow else minf(200,(target.x-48)*.62))
+		# A banner painting shows whole across the card; a taller one is cropped
+		# to the banner around its focus point.
+		hero.min_height=HERO_MIN_HEIGHT if not narrow else 110.0
+		hero.max_height=HERO_HEIGHT if not narrow else minf(200,(target.x-48)*.62)
+		hero._fit()
 	if is_instance_valid(benefits):benefits.columns=1 if narrow else 2
 	panel.size=target;panel.position=(extent-target)*.5
 func enqueue(events:Array[Dictionary])->void:
@@ -96,7 +103,7 @@ func render()->void:
 	benefits=null
 	var domain:=String(current.get("dynamic","knowledge"))
 	introduction=BoxContainer.new();introduction.vertical=true;introduction.add_theme_constant_override("separation",16);body.add_child(introduction)
-	hero=Art.paint_discovery(introduction,current,HERO_HEIGHT);hero.size_flags_horizontal=Control.SIZE_EXPAND_FILL;hero.clip_contents=true
+	hero=Art.paint_hero(introduction,current,HERO_MIN_HEIGHT,HERO_HEIGHT);hero.clip_contents=true
 	# The ink veil: dark paper over the painting that draws back to the right.
 	veil=Control.new();veil.name="InkVeil";veil.mouse_filter=Control.MOUSE_FILTER_IGNORE;veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);hero.add_child(veil)
 	var dark:=ColorRect.new();dark.color=Color("101e25") if not T.is_light() else T.PANEL_BG;dark.color.a=1.0;dark.mouse_filter=Control.MOUSE_FILTER_IGNORE;dark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);dark.offset_left=64;veil.add_child(dark)

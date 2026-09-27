@@ -24,6 +24,8 @@ const Motion:=preload("res://scripts/hud/motion.gd")
 const FADE_SECONDS:=Motion.BASE
 const SLIDE:=24.0
 const CARD_WIDTH:=430.0
+const BANNER_MAX_HEIGHT:=180.0
+const Painting:=preload("res://scripts/hud/subject_painting.gd")
 const TOP:=70.0
 const ACCENTS:={"discovery":Color("9db9d7"),"birth":Color("e0b88a"),"death":Color("b9ada0"),"contact":Color("d8a56a"),"settlement":Color("c7b27a"),"founding":Color("f0b25a"),"ceremony":Color("e8c35a"),"milestone":Color("f0c96a"),"war":Color("d0735f"),"omen":Color("a9b7e0"),"court":Color("e1b765")}
 
@@ -33,6 +35,7 @@ var queue:Array[Dictionary]=[]
 var current:Dictionary={}
 var panel:PanelContainer
 var picture:TextureRect
+var banner:Control
 var eyebrow:Label
 var title_label:Label
 var caption:Label
@@ -70,7 +73,11 @@ func _ready()->void:
 	# Near-black surfaces follow the light/dark HUD palette (HudTokens.flat).
 	panel.add_theme_stylebox_override("panel",T.flat(Color("0d1a1ef6"),T.GOLD,2,9,12))
 	add_child(panel)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);panel.add_child(row)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);panel.add_child(stack)
+	# Wide discovery paintings lead the card as a full-width banner, shown whole.
+	banner=Painting.new();banner.name="Banner";banner.fit_whole_width=true;banner.min_height=96.0;banner.max_height=BANNER_MAX_HEIGHT
+	banner.mouse_filter=Control.MOUSE_FILTER_IGNORE;banner.visible=false;stack.add_child(banner)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);stack.add_child(row)
 	picture=TextureRect.new();picture.custom_minimum_size=Vector2(112,112);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(picture)
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",4);row.add_child(copy)
@@ -195,7 +202,12 @@ func _render(entry:Dictionary)->void:
 	title_label.text=String(entry.get("title",""))
 	caption.text=String(entry.get("text",""))
 	caption.visible=caption.text!=""
-	picture.texture=texture_for(entry)
+	var texture:=texture_for(entry)
+	var wide:=Art.is_wide(texture) and String(art.get("discovery_id",""))!=""
+	banner.visible=wide;picture.visible=not wide
+	banner.focus=Art.focus_for({"id":String(art.get("discovery_id",""))})
+	banner.texture=texture if wide else null
+	picture.texture=null if wide else texture
 	var action:Dictionary=entry.get("action",{})
 	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","scout_report":"Hear the scouts' tale","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
 

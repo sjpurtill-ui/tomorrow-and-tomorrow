@@ -72,3 +72,7 @@ The integrator records source and integrated hashes, combined validation, and th
 Read docs/GENERAL_CAMPAIGN_DESIGN.md before military or leader work. Generals execute battlefield operations in every era; the player observes consequences and gives objectives through conversation. Do not revive the discarded direct-cohort-control design or make routine logistics a mandatory form-filling flow.
 
 The user considers the current development campaign a disposable test and prioritizes playable implementation and behavioral quality. Do not center progress reports on preserving that test save. This preference is scoped to this development campaign, not permission to delete arbitrary user data or interrupt other sessions.
+
+## Discovery art chronology
+
+The user requires work by era, starting with the earliest discoveries. Audit actual effective art coverage beginning at game year 0. Finish missing earlier-era art before advancing to later eras; completing an era's priority thresholds alone is not completion. Keep internal historical grouping separate from player-facing progression. Every painting must match its discovery's technological and historical context, including clothing, tools, architecture, vessels and materials. A style reference supplies medium and palette, not permission to import later-period subject matter. Technical texture/crop checks do not certify historical accuracy. Hold later batches until earlier gaps and suspected anachronisms are resolved; preserve existing work instead of bulk replacement.
