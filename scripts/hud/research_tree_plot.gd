@@ -3,7 +3,11 @@ const Art=preload("res://scripts/hud/research_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const UI_FONT:=preload("res://assets/fonts/battle/Barlow-Medium.ttf")
 # Illustrated nodes show the visible frontier; unknown outcomes stay unnamed.
-const CARD:=Vector2(280,220)
+const CARD:=Vector2(280,232)
+## The painting band across the top of a node: 3:1, close to the wide banner
+## paintings, so they lose little; older plates are cropped around their focus.
+const IMAGE:=Vector2(252,84)
+const IMAGE_SHIFT:=IMAGE.y-72.0
 var owner_view:Control
 var boxes:Dictionary={}
 var center:=Vector2.ZERO
@@ -27,7 +31,7 @@ func arrange()->void:
 		if not changed:break
 	for item:Dictionary in owner_view.records:
 		var col:=int(depths[item.id]);var row:=int(rows.get(col,0));rows[col]=row+1
-		boxes[item.id]=Rect2(Vector2(col*344,row*246),CARD)
+		boxes[item.id]=Rect2(Vector2(col*344,row*258),CARD)
 	queue_redraw()
 func fit()->void:
 	if boxes.is_empty():return
@@ -104,13 +108,14 @@ func _draw()->void:
 		var color:=Art.color(item.domain) if item.get("exposed",false) else T.MUTED
 		draw_style_box(T.flat(Color("182a31"),T.GOLD if item.id==owner_view.selected_id else color.darkened(.25),2 if item.id==owner_view.selected_id else 1,6,0),rect)
 		draw_rect(Rect2(at(origin+Vector2(0,0)),Vector2(5,CARD.y)*zoom_level),color)
-		var picture:Texture2D=Art.for_discovery(item) if bool(item.get("exposed",false)) else null
-		var image_rect:=Rect2(at(origin+Vector2(14,10)),Vector2(CARD.x-28,72)*zoom_level)
+		var picture:Texture2D=Art.thumbnail_for(item) if bool(item.get("exposed",false)) else null
+		var image_rect:=Rect2(at(origin+Vector2(14,10)),IMAGE*zoom_level)
 		if picture:
-			draw_texture_rect_region(picture,image_rect,Art.crop_region(picture,Vector2(CARD.x-28,72),Art.focus_for(item)))
+			draw_texture_rect_region(picture,image_rect,Art.crop_region(picture,IMAGE,Art.focus_for(item)))
 		else:
 			draw_rect(image_rect,T.TILE_BG)
-			words("FIELD INVESTIGATION" if bool(item.get("exposed",false)) else "BEYOND CURRENT KNOWLEDGE",origin+Vector2(24,50),12,T.MUTED)
+			words("FIELD INVESTIGATION" if bool(item.get("exposed",false)) else "BEYOND CURRENT KNOWLEDGE",origin+Vector2(24,56),12,T.MUTED)
+		origin+=Vector2(0,IMAGE_SHIFT)
 		words(Art.name_for(String(item.domain)).to_upper(),origin+Vector2(14,102),11,Art.text_color(item.domain))
 		words(String(item.name),origin+Vector2(14,128),17,T.INK)
 		words(Art.status(item),origin+Vector2(14,150),11,Art.text_color(item.domain))

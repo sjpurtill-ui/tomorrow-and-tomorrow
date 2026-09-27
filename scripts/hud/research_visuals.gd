@@ -108,11 +108,62 @@ static func for_discovery(item:Dictionary)->Texture2D:
 static func crop_region(texture:Texture2D,target:Vector2,focus:Vector2)->Rect2:
 	return Painting.crop_region(texture,target,focus)
 static func paint_discovery(parent:Node,item:Dictionary,height:float=96,scroll:ScrollContainer=null)->Control:
+	# Fixed-height slots (list cards) crop around the focus point; they draw a
+	# downscaled copy so long lists never hold full banner paintings.
 	var image:=Painting.new();image.focus=focus_for(item)
-	if scroll:image.fetch=for_discovery.bind(item);image.scroll=scroll
-	else:image.texture=for_discovery(item)
+	if scroll:image.fetch=thumbnail_for.bind(item);image.scroll=scroll
+	else:image.texture=thumbnail_for(item)
 	image.custom_minimum_size.y=height;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	parent.add_child(image);return image
+## Hero slots (the discovery announcement, the atlas inspector, a dock
+## discovery block, the chronicle banner): the painting takes the full width at
+## its own proportions, so today's wide banner paintings show whole. Older,
+## taller paintings reach max_height and are cropped around their focus point.
+static func paint_hero(parent:Node,item:Dictionary,min_height:float,max_height:float)->Control:
+	var image:=Painting.new();image.focus=focus_for(item)
+	image.fit_whole_width=true;image.min_height=min_height;image.max_height=max_height
+	image.texture=for_discovery(item)
+	image.custom_minimum_size.y=max_height if image.texture==null else min_height
+	image.size_flags_horizontal=Control.SIZE_EXPAND_FILL;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	parent.add_child(image);return image
+## A painting is "wide" when it is a banner rather than a classic 3:2 plate.
+const WIDE_ASPECT:=2.0
+static func aspect(texture:Texture2D)->float:
+	return texture.get_width()/float(texture.get_height()) if texture and texture.get_height()>0 else 1.0
+static func is_wide(texture:Texture2D)->bool:return texture!=null and aspect(texture)>=WIDE_ASPECT
+## Fraction of a painting's width (x) and height (y) visible when it covers a slot.
+static func visible_fraction(source:Vector2,slot:Vector2)->Vector2:
+	if source.x<=0 or source.y<=0 or slot.x<=0 or slot.y<=0:return Vector2.ZERO
+	var ratio:=(slot.x/slot.y)/(source.x/source.y)
+	return Vector2(minf(1.0,ratio),minf(1.0,1.0/ratio))
+## Downscaled copies for thumbnails. Banner paintings are about 2100 px wide
+## and imported without mipmaps; drawing them into a 250 px card shimmers and
+## keeps megabytes resident per card. Halving (a box filter) keeps the ink clean.
+const THUMB_WIDTH:=512
+const THUMB_LIMIT:=96
+static var thumbs:Dictionary={}
+static func thumbnail_for(item:Dictionary,max_width:int=THUMB_WIDTH)->Texture2D:
+	var path:=subject_art_key(item)
+	if path.is_empty() or not ResourceLoader.exists(path):return null
+	var key:="%s@%d" % [path,max_width]
+	if thumbs.has(key):
+		var existing:Texture2D=thumbs[key];thumbs.erase(key);thumbs[key]=existing;return existing
+	var full:Texture2D=textures[path] if textures.has(path) else load(path)
+	var small:=downscale(full,max_width)
+	if thumbs.size()>=THUMB_LIMIT:thumbs.erase(thumbs.keys()[0])
+	thumbs[key]=small;return small
+static func downscale(texture:Texture2D,max_width:int)->Texture2D:
+	if texture==null or texture is AtlasTexture or texture.get_width()<=max_width*1.5:return texture
+	var image:=texture.get_image()
+	# Headless and some drivers cannot read texture data back; draw the original.
+	if image==null or image.is_empty():return texture
+	image=image.duplicate()
+	if image.is_compressed() and image.decompress()!=OK:return texture
+	if image.has_mipmaps():image.clear_mipmaps()
+	while image.get_width()>max_width*1.5:image.shrink_x2()
+	var small:=ImageTexture.create_from_image(image)
+	small.set_meta("source_path",texture.resource_path)
+	return small
 static func color(domain:String)->Color:return COLORS.get(domain,T.TEAL)
 static func text_color(domain:String)->Color:return color(domain).darkened(.48) if T.is_light() else color(domain)
 static func name_for(domain:String)->String:
@@ -203,3 +254,8 @@ static func initials(name:String)->String:
 
 static func source_texture(texture:Texture2D)->Texture2D:
 	return texture.atlas if texture is AtlasTexture else texture
+## The painting file a displayed texture came from (thumbnails keep it as meta).
+static func source_path(texture:Texture2D)->String:
+	if texture==null:return ""
+	if texture.has_meta("source_path"):return String(texture.get_meta("source_path"))
+	return source_texture(texture).resource_path

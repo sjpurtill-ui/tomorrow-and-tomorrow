@@ -41,7 +41,8 @@ func setup(block:Dictionary)->void:
 		_button(controls,"Explore",field.on_open,"Review this field’s purpose and investigations")
 	resized.connect(_arrange);_arrange()
 func _investigation(record:Dictionary)->void:
-	# The subject paintings are square, so a square thumbnail beside the text shows the whole scene in a compact row.
+	# Wide banner paintings head the card at full width, shown whole; older
+	# square and 3:2 paintings keep the square thumbnail beside the text.
 	var domain:=String(record.get("dynamic","knowledge"));var accent:=Visuals.color(domain)
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	panel.tooltip_text="Review this field and its current investigations";projects_grid.add_child(panel)
@@ -52,11 +53,18 @@ func _investigation(record:Dictionary)->void:
 	var review:Callable=data.on_domain.bind(domain)
 	panel.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:review.call())
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);row.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(row)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);stack.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(stack)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);row.mouse_filter=Control.MOUSE_FILTER_PASS
 	const SIDE:=124.0
-	if Visuals.for_discovery(record)!=null:
+	var painting:=Visuals.for_discovery(record)
+	if Visuals.is_wide(painting):
+		Visuals.paint_hero(stack,record,84,168)
+		stack.add_child(row)
+	elif painting!=null:
+		stack.add_child(row)
 		Visuals.paint_discovery(row,record,SIDE).custom_minimum_size.x=SIDE
 	else:
+		stack.add_child(row)
 		var tile:=PanelContainer.new();tile.custom_minimum_size=Vector2(SIDE,SIDE);tile.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.BORDER_SOFT,1,0,0));row.add_child(tile)
 		var glyph:=TextureRect.new();glyph.texture=preload("res://scripts/resource_icons.gd").domain_texture(domain,accent);glyph.custom_minimum_size=Vector2(56,56)

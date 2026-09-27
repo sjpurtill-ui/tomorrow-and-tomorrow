@@ -114,11 +114,16 @@ func refresh(force:bool)->void:
 			icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			var artifact_size:=72.0 if size.x<480 else 160.0
 			icon.custom_minimum_size=Vector2(artifact_size,artifact_size) if artifact_texture!=null else Vector2(36,36)
+		elif not definition.is_empty() and ResearchVisuals.thumbnail_for(definition)!=null:
+			# A landscape thumbnail cropped around the painting's focus point:
+			# wide banner paintings keep two thirds of their width.
+			ResearchVisuals.paint_discovery(row,definition,84).custom_minimum_size.x=148
 		else:
-			icon.texture=ResearchVisuals.for_discovery(definition) if not definition.is_empty() else V.icon("population" if item.kind=="culture" else "production" if item.kind=="specimen" else "logistics")
-			icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if not definition.is_empty() else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			icon.custom_minimum_size=Vector2(112,84) if not definition.is_empty() else Vector2(36,36)
-		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;row.add_child(icon)
+			icon.texture=V.icon("population" if item.kind=="culture" else "production" if item.kind=="specimen" else "logistics")
+			icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			icon.custom_minimum_size=Vector2(36,36)
+		if icon.texture!=null:icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;row.add_child(icon)
+		else:icon.free()
 		var content:=VBoxContainer.new();content.size_flags_horizontal=SIZE_EXPAND_FILL;row.add_child(content)
 		label(content,"PREHISTORIC FIND" if presented.get("artifact_origin","")=="prehistoric" else "CIVILIZATION-MADE" if presented.get("artifact_origin","")=="civilization" else String(item.kind).to_upper(),10,T.GOLD);label(content,String(presented.get("name",item.name)),18,T.INK)
 		label(content,"%s · encountered day %d · home day %d" % [item.source_name,int(item.observed_day),int(item.returned_day)],12,T.TEXT_SOFT)
