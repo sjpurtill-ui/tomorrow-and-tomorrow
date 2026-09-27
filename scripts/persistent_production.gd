@@ -207,6 +207,7 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
 	result["licensed"]=preload("res://scripts/research_licenses.gd").uses_license(String(job.item))
 	result["daily_work"]=rate*share*float(job.efficiency)*(.65 if result.licensed else 1.0)
+	if result.state=="Working":result.daily_work=float(result.daily_work)+host.workshop.muster_hands_work(job)
 	var repairing:bool=result.state=="Repairing equipment"
 	if repairing:
 		result.work_per_item=float(job.work_per_item)*preload("res://scripts/managed_weapon_repair.gd").WORK_FACTOR

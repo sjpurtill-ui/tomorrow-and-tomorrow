@@ -3940,6 +3940,8 @@ func _process_equipment_production_day()->void:
 	for job:Dictionary in ordered:
 		var work:=crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency)
 		if PersistentProduction.eligible(self,job):work=preload("res://scripts/managed_weapon_repair.gd").advance(self,job,work)
+		# Soldiers waiting for simple gear help make their own (workshop steward).
+		if PersistentProduction.eligible(self,job):work+=workshop.muster_hands_work(job)*WorldSimulation.span
 		var before:Dictionary=workshop.output_stocks(job)
 		PersistentProduction.advance(self,job,work)
 		workshop.record(job,before)

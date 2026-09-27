@@ -1451,6 +1451,8 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		WorldSimulation.direction._ensure_cultural_memory()
 		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
 		for role in bias:weights[role]=float(weights.get(role,0))+float(bias[role])
+	# The workshop officer asks for gatherers while soldiers' gear lacks materials.
+	if WorldSimulation.military!=null:weights.Extraction=float(weights.get("Extraction",0))+float(WorldSimulation.military.workshop.extraction_request().get("weight",0.0))
 	_apply_survival_guard(weights)
 	_apply_food_labor_floor(weights) # research_600 balance
 	if not leader.is_empty():

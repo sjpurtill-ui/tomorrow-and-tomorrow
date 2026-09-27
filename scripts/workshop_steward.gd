@@ -80,7 +80,11 @@ func advance(day:int)->void:
 	for demand:Dictionary in demands:
 		var result:=schedule(demand)
 		data.status=String(result.get("message",result.get("error",data.status)))
-		if bool(result.get("changed",false)):return
+		if bool(result.get("changed",false)):break
+	for job:Dictionary in host.equipment_queue:
+		if bool(job.get("planner_managed",false)) and bool(job.get("persistent",false)) and String(job.get("job_type",""))=="production":_set_muster_priority(job)
+	var request:=extraction_request()
+	if not request.is_empty():data.status+=" "+_shortage_note(request)
 func army_demands()->Array[Dictionary]:
 	var totals:Dictionary={}
 	# Supply initial instruction before staff take more people out of civilian work.
@@ -124,7 +128,9 @@ func army_demands()->Array[Dictionary]:
 			if float(WorldSimulation.state.resource_stockpiles.get(material,0))<float(recipe.materials[material]):
 				upstream=Planner.supply(material,ceili(float(recipe.materials[material])*int(totals[item])),{})
 				if not upstream.is_empty():break
-		result.append(upstream if not upstream.is_empty() else {"item":item,"target":int(totals[item])})
+		result.append(upstream if not upstream.is_empty() else {"item":item,"target":int(totals[item]),"gear":true})
+	# Gear for soldiers who already exist comes before stock for future intake.
+	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _waiting_total(String(a.get("item","")))>_waiting_total(String(b.get("item",""))))
 	return result
 func schedule(demand:Dictionary)->Dictionary:
 	if String(demand.get("kind",""))=="plant_install":
@@ -135,6 +141,7 @@ func schedule(demand:Dictionary)->Dictionary:
 	for job:Dictionary in host.equipment_queue:
 		if String(job.item)!=item:continue
 		if not bool(job.get("planner_managed",false)) or (bool(job.get("paused",false)) and not bool(job.get("staff_idle",false))):
+			if bool(demand.get("gear",false)):return _top_up_player_line(job,target)
 			return {"message":"%s is under your control; staff have left its order unchanged." % P.product_name(item)}
 		if job.has("ai_turnover"):return {"message":"Finishing the current batch before the scheduled product change."}
 		if int(job.target_stock)==target and not bool(job.get("staff_idle",false)):return {"message":"Supplying %s · target %d in stores." % [P.product_name(item),target]}
@@ -166,6 +173,186 @@ func schedule(demand:Dictionary)->Dictionary:
 	for job:Dictionary in host.equipment_queue:
 		if int(job.id)==int(result.get("job_id",-1)):job.planner_managed=true
 	return {"changed":true,"message":"Scheduled %s · replenish to %d in stores." % [P.product_name(item),target]}
+## Arming soldiers. Soldiers who lack simple gear help make it: shaping a club
+## or hardening a stave point is a few hours' work for anyone, so a waiting
+## soldier gives a quarter day to his own weapon. Stores still pay every input;
+## skilled gear (bows, metal, carts) stays with the craftspeople.
+const MUSTER_WORK_PER_SOLDIER:=0.25
+const MUSTER_SIMPLE_WORK:=0.6
+const MUSTER_PRIORITY:=2.0
+## Most extra weight the workshop officer may ask settlement leaders to put on
+## gathering (the base Extraction weight is 11 of about 100).
+const EXTRACTION_REQUEST_MAX:=6.0
+
+## Gear still missing for `item`: recruits in training, soldiers at home, and
+## soldiers away in the field.
+func waiting_for(item:String)->Dictionary:
+	var result:={"recruits":0,"serving":0,"away":0}
+	for order:Dictionary in host.training_queue:
+		if String(order.get("weapon","improvised"))!=item:continue
+		result.recruits+=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
+	for formation:Dictionary in host.home_army.get("formations",[]):
+		if String(formation.get("weapon","improvised"))==item:result.serving+=_formation_missing(formation)
+	for force:Dictionary in host.field_armies+host.occupation_forces:
+		# An army standing at home draws gear from the same stores and hands.
+		var key:="serving" if host.field_armies.has(force) and host._army_is_home(force) else "away"
+		for formation:Dictionary in force.get("formations",[]):
+			if String(formation.get("weapon","improvised"))==item:result[key]+=_formation_missing(formation)
+	return result
+static func _formation_missing(formation:Dictionary)->int:
+	return maxi(0,maxi(0,int(formation.get("equipment_required",formation.get("count",0))))-int(formation.get("equipment",0)))
+func _waiting_total(item:String)->int:
+	if item.is_empty():return 0
+	var waiting:=waiting_for(item)
+	return int(waiting.recruits)+int(waiting.serving)+int(waiting.away)
+
+## Daily work the soldiers at home add to a line making their own simple gear.
+func muster_hands_work(job:Dictionary)->float:
+	if not bool(job.get("persistent",false)) or String(job.get("job_type",""))!="production" or bool(job.get("paused",false)):return 0.0
+	if float(job.get("work_per_item",1.0))>MUSTER_SIMPLE_WORK or WorldSimulation.state.convoy_traveling:return 0.0
+	var waiting:=waiting_for(String(job.get("item","")))
+	var still:=int(waiting.recruits)+int(waiting.serving)-P.stock(host,job)
+	if still<=0:return 0.0
+	return still*MUSTER_WORK_PER_SOLDIER*clampf(float(WorldSimulation.state.population_health),.2,1.0)
+
+## Staff lines making gear for waiting soldiers get high priority, and return
+## to normal priority once everyone is armed.
+func _set_muster_priority(job:Dictionary)->void:
+	if _waiting_total(String(job.get("item","")))>0:
+		if float(job.get("allocation",1.0))<MUSTER_PRIORITY:
+			job.allocation=MUSTER_PRIORITY;job["muster_priority"]=true
+	elif bool(job.get("muster_priority",false)):
+		job.allocation=1.0;job.erase("muster_priority")
+
+## A line the player runs keeps its owner, priority and pause. When soldiers are
+## missing gear the officer only raises a too-low stock target, says so, and
+## leaves pausing the line as the player's way to stop him.
+func _top_up_player_line(job:Dictionary,target:int)->Dictionary:
+	var name:=P.product_name(String(job.item))
+	var waiting:=_waiting_total(String(job.item))
+	if bool(job.get("paused",false)):
+		return {"message":"%s is paused on your order while %d soldiers wait for them. Resume the line or hand it to the %s." % [name,waiting,_office()]}
+	var current:=int(job.target_stock)
+	if current==0 or current>=target:return {"message":"%s: your order already covers the soldiers' missing gear." % name}
+	if not job.has("quartermaster_top_up"):job["quartermaster_top_up"]={"from":current}
+	job.quartermaster_top_up["to"]=target
+	job.target_stock=target
+	return {"changed":true,"message":"The %s raised your %s order from %d to %d so %d waiting soldiers are armed. Pause the line to stop this." % [_office(),name.to_lower(),current,target,waiting]}
+
+func _office()->String:
+	return "Quartermaster" if not WorldSimulation.government.officeholder("Quartermaster").is_empty() else "Steward"
+func _has_officer()->bool:
+	return not (WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty())
+
+## Materials that stores cannot cover for the gear soldiers still lack:
+## {resource:{"needed","stored","missing"}}.
+func material_shortfalls()->Dictionary:
+	var needed:Dictionary={}
+	var items:Dictionary={}
+	for order:Dictionary in host.training_queue:items[String(order.get("weapon","improvised"))]=true
+	for force:Dictionary in [host.home_army]+host.field_armies+host.occupation_forces:
+		for formation:Dictionary in force.get("formations",[]):items[String(formation.get("weapon","improvised"))]=true
+	for item:String in items:
+		var recipe:=P.recipe(host,item)
+		if recipe.has("error"):continue
+		var to_make:=_waiting_total(item)-P.stock(host,recipe)
+		if to_make<=0:continue
+		for resource:String in recipe.materials:needed[resource]=float(needed.get(resource,0))+float(recipe.materials[resource])*to_make
+	var result:Dictionary={}
+	for resource:String in needed:
+		var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
+		if stored+.0001<float(needed[resource]):result[resource]={"needed":float(needed[resource]),"stored":stored,"missing":float(needed[resource])-stored}
+	return result
+
+## Extra Extraction weight the workshop officer asks settlement leaders for
+## while soldiers' gear is short of materials. GovernmentPeopleSystem reads it
+## and still owns the labor split, the food floor and the survival guards.
+func extraction_request()->Dictionary:
+	if WorldSimulation.actor_id!="player" or not bool(data.enabled) or not WorldSimulation.state.settlement_site_committed or not _has_officer():return {}
+	var short:=material_shortfalls()
+	if short.is_empty():return {}
+	var worst:=0.0
+	for resource:String in short:worst=maxf(worst,float(short[resource].missing)/maxf(.001,float(short[resource].needed)))
+	return {"weight":EXTRACTION_REQUEST_MAX*clampf(.4+worst,.4,1.0),"materials":short.keys(),"shortfalls":short}
+
+func _shortage_note(request:Dictionary)->String:
+	var parts:Array[String]=[]
+	for resource:String in request.shortfalls:
+		var short:Dictionary=request.shortfalls[resource]
+		parts.append("%s (%d needed, %d in store)" % [WorldSimulation.resources.display_name(resource).to_lower(),ceili(float(short.needed)),floori(float(short.stored))])
+	return "Short of %s for soldiers' gear; the %s has asked the settlement leaders for more hands to gather it." % [", ".join(parts),_office()]
+
+static func _gather_phrase(resource:String)->String:
+	match resource:
+		"Timber":return "cut timber"
+		"Stone":return "quarry stone"
+		"Fiber Plants":return "gather fibre"
+	return "gather "+WorldSimulation.resources.display_name(resource).to_lower()
+
+static func _plan_reason(waiting:Dictionary)->String:
+	var parts:Array[String]=[]
+	if int(waiting.recruits)>0:parts.append("the new recruits")
+	if int(waiting.serving)>0:parts.append("soldiers at home")
+	if int(waiting.away)>0:parts.append("the army in the field")
+	if parts.size()==3:return "for the new recruits, soldiers at home and the army in the field"
+	return "for "+" and ".join(parts)
+
+## Line `id`'s job while it makes gear someone is waiting for, else {}.
+func _gear_job(id:int)->Dictionary:
+	for job:Dictionary in host.equipment_queue:
+		if int(job.get("id",-1))!=id:continue
+		if String(job.get("job_type",""))!="production" or not bool(job.get("persistent",false)) or bool(job.get("paused",false)):return {}
+		return job
+	return {}
+
+## Production-screen hook: what the workshop officer is making on line `id`,
+## for whom, and what he has done about materials. {} when no soldier waits.
+## {"count":items still to make,"reason":String,"waiting":soldiers,
+##  "soldiers_helping":bool,"short":[resources],"raised_from":int (player lines)}
+func line_plan(id:int)->Dictionary:
+	var job:=_gear_job(id)
+	if job.is_empty() or not _has_officer():return {}
+	var waiting:=waiting_for(String(job.item))
+	var total:=int(waiting.recruits)+int(waiting.serving)+int(waiting.away)
+	var count:=total-P.stock(host,job)
+	if count<=0:return {}
+	var managed:=bool(job.get("planner_managed",false))
+	var plan:={"count":count,"reason":_plan_reason(waiting),"waiting":total,"soldiers_helping":muster_hands_work(job)>0,"short":[]}
+	if not managed:
+		# The player runs this line; the officer at most raised its target.
+		plan["officer"]="Your workshop"
+		var raised:Dictionary=job.get("quartermaster_top_up",{})
+		if not raised.is_empty():
+			plan["raised_from"]=int(raised.get("from",0))
+			plan.reason+=", after the %s raised your order from %d" % [_office(),int(raised.get("from",0))]
+	var request:=extraction_request()
+	for resource:String in job.get("materials",{}):
+		if (request.get("materials",[]) as Array).has(resource):
+			plan.short.append(resource)
+			plan.reason+=(" and has asked for more hands to " if managed else "; the %s has asked for more hands to " % _office())+_gather_phrase(resource)
+	return plan
+
+## Forces-screen hook: who covers the soldiers' missing `item` and how long it
+## takes until all of them are armed. {} when nothing covers the gap.
+## {"covered":true,"days":float (absent before a line exists),"maker":String}
+func gear_plan(item:String)->Dictionary:
+	var waiting:=_waiting_total(item)
+	if waiting<=0:return {}
+	var recipe:=P.recipe(host,item)
+	if recipe.has("error"):return {}
+	var to_make:=waiting-P.stock(host,recipe)
+	if to_make<=0:return {}
+	for line:Dictionary in host.production_lines_snapshot().lines:
+		if String(line.get("item",""))!=item or not bool(line.get("persistent",false)) or bool(line.get("paused",false)):continue
+		var rate:=float(line.get("forecast_output_per_day",0.0))
+		if rate<=0.0:return {}
+		var maker:=("the "+_office()) if bool(line.get("planner_managed",false)) and _has_officer() else "your workshop line"
+		return {"covered":true,"days":to_make/rate,"maker":maker}
+	# No line yet: the officer opens one at the next daily review when he can.
+	if bool(data.enabled) and _has_officer() and host.equipment_queue.size()<host.production_line_capacity() and P.startup_blockers(host,item).is_empty():
+		return {"covered":true,"maker":"the "+_office()}
+	return {}
+
 func output_stocks(job:Dictionary)->Dictionary:
 	return {String(job.item):float(P.stock(host,job))}
 func record(job:Dictionary,before:Dictionary)->void:
