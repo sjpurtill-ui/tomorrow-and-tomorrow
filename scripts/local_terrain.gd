@@ -1089,6 +1089,7 @@ func _process(delta: float) -> void:
 	if map_network_elapsed>=0.1:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
+		_refresh_settlement_roads()
 		if not pending_city_designs.is_empty():_advance_pending_city_designs()
 		stamp=trace.mark("frame_map_settlement_network",stamp)
 		_refresh_settlement_convoy_marker()
@@ -2729,6 +2730,10 @@ void fragment() {
 	vec2 sg_local;
 	int sg_slot=settlement_ground_slot(surface_position,surface_origin,sg_local);
 	wb_wood_density*=1.0-settlement_clearing(sg_slot,sg_local,pixel_world*1000.0);
+	// The worked land round each place (codex/beauty-5) is cleared of wood.
+	float sg_orchard=0.0;
+	vec4 sg_halo=settlement_halo(surface_position,surface_origin,pixel_world*1000.0,sg_orchard);
+	wb_wood_density*=1.0-sg_halo.w*0.85;
 	// A natural margin (round two): the edge wanders on screen-sized noise, a
 	// fringe of scrub stands outside it, trees stop short of the tide line,
 	// and a pale strand runs along the shore.
@@ -2749,6 +2754,7 @@ void fragment() {
 	// Close meadow, then the worn ground of the settlement under the camera
 	// (settlement_ground.gdshaderinc, scripts/settlement_grounds.gd).
 	earth = settlement_meadow(earth,surface_position,surface_origin,pixel_world*1000.0,(1.0-wb_stand_cover)*(1.0-rock_mask),wb_palette);
+	earth = settlement_halo_paint(earth,sg_halo,sg_orchard,surface_position,pixel_world*1000.0,(1.0-wb_stand_cover)*(1.0-rock_mask));
 	float sg_trodden=0.0;
 	earth = settlement_fields_paint(earth,sg_slot,sg_local,pixel_world*1000.0);
 	earth = settlement_ground_paint(earth,sg_slot,sg_local,pixel_world*1000.0,sg_trodden);
@@ -3944,6 +3950,7 @@ func _update_scale_lod() -> void:
 	_update_settlement_claim_opacity()
 	# The settlement's ink outline is held at about one screen pixel.
 	preload("res://scripts/settlement_ink.gd").set_pixel(camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y))
+	if settlement_roads:settlement_roads.update_view(camera.size,camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y))
 	if settlement_blip:
 		# Never lay a bright game token over visible physical settlement fabric. The
 		# locator exists only after roofs and occupied ground have collapsed below the
@@ -4912,6 +4919,19 @@ func _refresh_undertaking_visuals(force:bool=false)->void:
 	if is_instance_valid(undertaking_visual_root):undertaking_visual_root.queue_free()
 	undertaking_visual_root=Node3D.new();undertaking_visual_root.name="GreatUndertakings";add_child(undertaking_visual_root)
 	visual.render(GameState.player_settlements,undertaking_visual_root,_close_surface_height_at)
+
+## Roads between the places (codex/beauty-5, scripts/settlement_roads.gd):
+## routed a little at a time on the network tick, drawn in one mesh.
+var settlement_roads:Node3D
+
+func _refresh_settlement_roads()->void:
+	if "Hearth Circle" not in GameState.settlement_completed or camera==null:return
+	if settlement_roads==null:
+		settlement_roads=preload("res://scripts/settlement_roads.gd").new()
+		settlement_roads.setup(self)
+		add_child(settlement_roads)
+	settlement_roads.refresh()
+	settlement_roads.update_view(camera.size,camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y))
 
 func _refresh_settlement_network(force:=false)->void:
 	var undertaking_stamp:int=preload("res://scripts/performance_trace.gd").start()
@@ -6340,6 +6360,34 @@ func _settlement_wall_envelope(plots:Array[Dictionary],segments:int,axis:float,f
 		if at.length()-reach<line+0.004 and at.length()+reach>line-0.004:
 			var clear:=minf(at.length()+reach+0.007,maxf(fallback*1.8,0.05))
 			out[k0]=maxf(out[k0],clear);out[k1]=maxf(out[k1],clear)
+	return _settlement_wall_hull(out,axis)
+
+## A defensive line is laid out to be held (codex/beauty-5): it runs straight
+## across the pockets between a cross-shaped town's arms instead of doubling
+## back into them, so the traced line is pulled most of the way out to its
+## convex hull and then eased into gentle bends. It only ever moves outward,
+## so it still clears every house the trace cleared.
+func _settlement_wall_hull(envelope:PackedFloat32Array,axis:float)->PackedFloat32Array:
+	var segments:=envelope.size()
+	if segments<6:return envelope
+	var points:=PackedVector2Array()
+	for k in segments:points.append(Vector2.from_angle(axis+TAU*float(k)/float(segments))*envelope[k])
+	var hull:=Geometry2D.convex_hull(points)
+	if hull.size()<4:return envelope
+	var out:=envelope.duplicate()
+	for k in segments:
+		var direction:=Vector2.from_angle(axis+TAU*float(k)/float(segments))
+		var reach:=envelope[k]
+		for i in hull.size()-1:
+			var hit:Variant=Geometry2D.segment_intersects_segment(Vector2.ZERO,direction*envelope[k]*4.0,hull[i],hull[i+1])
+			if hit is Vector2:reach=maxf(reach,(hit as Vector2).length())
+		# Most of the way to the hull: a held line, a little give left in it.
+		out[k]=lerpf(envelope[k],reach,0.82)
+	for pass_index in 3:
+		var next:=out.duplicate()
+		for k in segments:
+			next[k]=maxf(envelope[k],(out[(k-1+segments)%segments]+out[k]*2.0+out[(k+1)%segments])*0.25)
+		out=next
 	return out
 
 ## Gate bearings (world angles) where the main streets cross the traced wall.

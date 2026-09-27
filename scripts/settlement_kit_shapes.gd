@@ -15,6 +15,9 @@ extends RefCounted
 ## Vertex colours only (one surface); meshes are cached.
 
 const STRAW:=Color(0.70,0.58,0.36)
+## Fresh thatch on the domes and loaves (codex/beauty-5), a warm gold that
+## still reads as straw after weathering and the map's grade.
+const THATCH:=Color(0.82,0.69,0.43)
 const STRAW_DARK:=Color(0.52,0.41,0.25)
 const WATTLE:=Color(0.60,0.50,0.37)
 const DAUB:=Color(0.70,0.60,0.45)
@@ -50,6 +53,18 @@ static func mesh(name:String,envelope:AABB)->ArrayMesh:
 	var fitted:=_fit(built,envelope)
 	cache[key]=fitted
 	return fitted
+
+## How one dwelling stands (codex/beauty-5): turned to `angle`, a little
+## smaller than its plot allows by its own measure (never larger, so no
+## footprint grows), and leaning a degree or two the way a hand-built house
+## settles. Deterministic from `seed`; `unit` scales metres to world km.
+static func lived_basis(angle:float,seed:int,unit:=0.001)->Basis:
+	var h:=absi(hash(seed*7919+13))
+	var size:=0.86+0.115*float(h%1000)/999.0
+	var stretch:=1.0+0.05*(float((h>>10)%1000)/999.0-0.5)
+	var lean_axis:=Vector3(cos(float((h>>20)%628)/100.0),0.0,sin(float((h>>20)%628)/100.0))
+	var lean:=deg_to_rad(0.6+1.6*float((h>>5)%100)/99.0)
+	return Basis(lean_axis,lean)*Basis(Vector3.UP,angle)*Basis.from_scale(Vector3(size*stretch,size*(0.94+0.12*float((h>>15)%100)/99.0),size/stretch)*unit)
 
 ## The furniture of daily life, in metres (door or front toward +Z):
 ## woodpile, drying_rack, hide_frame, hearth_ring, bench, pots, quern, well,
@@ -196,6 +211,50 @@ static func prop(name:String)->ArrayMesh:
 				var at:Vector3=[Vector3(0,0,0),Vector3(0.5,0,0.1),Vector3(0.2,0,0.5),Vector3(-0.35,0,0.35)][k]
 				_frustum(s,at,0.18,0.24,0.30,8,STRAW_DARK if k%2==0 else STRAW,0.08)
 				_frustum(s,at+Vector3(0,0.30,0),0.2,0.15,0.05,8,[Color(0.60,0.30,0.20),Color(0.70,0.62,0.30),Color(0.42,0.46,0.26),Color(0.66,0.50,0.30)][k],0.0)
+		"dugout":
+			# A log boat hauled up on the bank (codex/beauty-5): a long dark
+			# hull, pointed at both ends, hollowed; a paddle laid across it.
+			var hull:=[Vector2(0,-2.6),Vector2(0.28,-2.0),Vector2(0.40,-0.8),Vector2(0.42,0.6),Vector2(0.34,1.9),Vector2(0,2.5)]
+			for side in [-1.0,1.0]:
+				for k in hull.size()-1:
+					var a:Vector2=hull[k];var b:Vector2=hull[k+1]
+					_quad(s,Vector3(a.x*side,0.02,a.y),Vector3(b.x*side,0.02,b.y),Vector3(b.x*side,0.42,b.y),Vector3(a.x*side,0.42,a.y),TIMBER.darkened(0.05),Vector3(side,0.2,0))
+					_quad(s,Vector3(a.x*side*0.72,0.18,a.y*0.92),Vector3(b.x*side*0.72,0.18,b.y*0.92),Vector3(b.x*side,0.42,b.y),Vector3(a.x*side,0.42,a.y),TIMBER_DARK.darkened(0.2),Vector3(-side,1,0))
+			# The hollowed floor, dark with old water.
+			for k in hull.size()-1:
+				var a:Vector2=hull[k];var b:Vector2=hull[k+1]
+				_quad(s,Vector3(-a.x*0.72,0.18,a.y*0.92),Vector3(a.x*0.72,0.18,a.y*0.92),Vector3(b.x*0.72,0.18,b.y*0.92),Vector3(-b.x*0.72,0.18,b.y*0.92),TIMBER_DARK.darkened(0.35),Vector3.UP)
+			_beam(s,Vector3(-0.7,0.46,0.3),Vector3(0.8,0.46,-0.2),0.04,TIMBER)
+			_box(s,Vector3(0.95,0.46,-0.28),Vector3(0.34,0.03,0.16),TIMBER)
+		"coracle":
+			# A round boat of hide on a woven frame, turned over to dry.
+			_cone_roof(s,Vector3.ZERO,0.85,0.45,0.42,12,HIDE_DARK,0.06)
+			_frustum(s,Vector3(0,0.42,0),0.45,0.0,0.02,12,HIDE_DARK.darkened(0.1),0.0)
+		"weir":
+			# A fish weir: a V of stakes and woven wattle across the stream,
+			# its point downstream (+Z) where the trap basket sits.
+			for side in [-1.0,1.0]:
+				var a:=Vector3(side*5.5,0,-3.5);var b:=Vector3(0,0,1.5)
+				for k in 10:
+					var p:=a.lerp(b,float(k)/9.0)
+					_beam(s,p+Vector3(0,-0.4,0),p+Vector3(0,0.9,0),0.06,TIMBER_DARK)
+				_beam(s,a+Vector3(0,0.45,0),b+Vector3(0,0.45,0),0.09,BARK.lerp(STRAW_DARK,0.3))
+			_frustum(s,Vector3(0,0.0,2.1),0.45,0.30,0.7,8,STRAW_DARK,0.05)
+		"jetty":
+			# A landing stage: planks on posts, running out from the bank (-Z)
+			# over the water (+Z), a mooring post at its end.
+			for k in 4:
+				var z:=float(k)*2.4
+				for x in [-0.8,0.8]:_beam(s,Vector3(x,-0.6,z),Vector3(x,0.55,z),0.09,TIMBER_DARK)
+			for k in 9:
+				_box(s,Vector3(0,0.52,-0.5+float(k)*0.95),Vector3(1.9,0.07,0.85),TIMBER.lightened(0.04*float(k%2)))
+			_beam(s,Vector3(0.7,0.2,8.0),Vector3(0.7,1.2,8.0),0.1,TIMBER_DARK)
+		"quay":
+			# A stone landing: dressed blocks along the bank, steps down to the water.
+			for k in 7:
+				_box(s,Vector3(float(k)*1.2-3.6,0.35,0),Vector3(1.15,0.7,1.6),Color(0.60,0.57,0.51).darkened(0.05*float(k%3)))
+			for step in 3:
+				_box(s,Vector3(0,0.55-float(step)*0.22,1.0+float(step)*0.45),Vector3(1.6,0.2,0.45),Color(0.55,0.52,0.47))
 		"timber_stack":
 			for layer in 2:
 				for k in 5:
@@ -218,26 +277,31 @@ static func _box_between(s:SurfaceTool,p0:Vector3,p1:Vector3,h:float,t:float,col
 
 # --- Buildings ---------------------------------------------------------------
 
+## Round five (codex/beauty-5): the early dwellings are drawn to be read from
+## above. A round house is a bellied dome of thatch laid in courses, patched
+## where it was mended, bound at a thick cut eave, with a dark smoke hole at
+## its crown and a small hooded porch over the door (a nub on the circle that
+## shows which way the door looks). A timber house is a long loaf of thatch
+## with rounded hips, the ridge bound and vented at both ends, a porch at its
+## gable door. The wattle wall shows below the eave on the side toward the
+## viewer. Smooth-shaded so the thatch reads as a soft mass, not facets.
 static func _round_house(s:SurfaceTool)->void:
-	var sides:=18
-	# Wattle wall: stakes and daub, alternating a little in tone.
-	_ring_wall(s,1.50,0.0,1.28,sides,WATTLE,0.07)
-	# Doorway with a timber frame, toward +Z.
-	_box(s,Vector3(0,0.56,1.515),Vector3(0.78,1.12,0.05),DOORWAY)
-	_box(s,Vector3(-0.44,0.6,1.52),Vector3(0.1,1.2,0.08),TIMBER)
-	_box(s,Vector3(0.44,0.6,1.52),Vector3(0.1,1.2,0.08),TIMBER)
-	_box(s,Vector3(0,1.18,1.53),Vector3(1.0,0.1,0.1),TIMBER)
-	# Deep thatch: a bound eave band, then the cone to a smoke hole.
-	_frustum(s,Vector3(0,1.08,0),1.95,1.90,0.20,sides,STRAW_DARK,0.05)
-	_cone_roof(s,Vector3(0,1.28,0),1.90,0.20,1.62,sides,STRAW,0.06)
-	# Smoke hole collar and the binding at the top.
-	_frustum(s,Vector3(0,2.88,0),0.22,0.10,0.14,8,TIMBER_DARK,0.0)
-	# Two thatch courses show as darker rings.
-	_frustum(s,Vector3(0,1.82,0),1.30,1.26,0.05,sides,STRAW_DARK,0.0)
-	_frustum(s,Vector3(0,2.32,0),0.75,0.71,0.05,sides,STRAW_DARK,0.0)
+	var sides:=28
+	# Wattle wall: stakes and daub, alternating a little in tone; a line of
+	# upright stakes shows through the daub.
+	_ring_wall(s,1.50,0.0,1.05,sides,WATTLE,0.10)
+	for k in 14:
+		var a:=TAU*(float(k)+0.5)/14.0
+		if absf(wrapf(a,-PI,PI))<0.45:continue
+		_box(s,Vector3(sin(a)*1.52,0.52,cos(a)*1.52),Vector3(0.07,1.04,0.07),TIMBER.lerp(WATTLE,0.35))
+	# The thatch dome: eave at 1.05 m, crown at 3.0 m, bellied, with a smoke
+	# hole at the top and a thick cut edge at the eave.
+	_thatch_dome(s,1.02,3.05,Vector2(1.92,1.92),0.0,sides,7,THATCH,0.30,1.0)
+	# The hooded porch over the door, toward +Z.
+	_porch(s,Vector3(0,0,1.40),1.05,0.95,1.35,STRAW)
 
 static func _thatched_house(s:SurfaceTool,variant:String)->void:
-	# A timber-framed, wattle-walled house under a steep hipped thatch.
+	# A timber-framed, wattle-walled house under a long loaf of thatch.
 	var length:=7.0
 	var width:=4.0
 	match variant:
@@ -246,54 +310,175 @@ static func _thatched_house(s:SurfaceTool,variant:String)->void:
 		"house_medium":length=5.6;width=4.8
 		"house_wide":length=5.0;width=5.4
 		"house_small":length=4.2;width=3.6
-	var wall_h:=1.7
+	var wall_h:=1.45
 	# Walls (long axis along Z), a darker sill course and corner posts.
 	_box(s,Vector3(0,wall_h*0.5,0),Vector3(width-0.5,wall_h,length-0.5),WATTLE)
 	_box(s,Vector3(0,0.12,0),Vector3(width-0.42,0.24,length-0.42),TIMBER)
 	for x in [-1,1]:
 		for z in [-1,1]:
 			_box(s,Vector3(x*(width*0.5-0.25),wall_h*0.5,z*(length*0.5-0.25)),Vector3(0.16,wall_h,0.16),TIMBER)
-	# Door on the gable toward +Z, a second on the long side.
-	_box(s,Vector3(0,0.6,length*0.5-0.23),Vector3(0.9,1.2,0.06),DOORWAY)
+	# A second door on the long side.
 	_box(s,Vector3(width*0.5-0.23,0.6,0.4),Vector3(0.06,1.15,0.8),DOORWAY)
-	# Hipped thatch with deep eaves.
-	var eave:=Vector2(width*0.5+0.35,length*0.5+0.35)
-	var ridge_half:=maxf(length*0.5-width*0.45,0.4)
-	var top:=wall_h+width*0.62+0.6
-	_hipped_roof(s,wall_h-0.05,top,eave,ridge_half,STRAW)
-	# Eave band (the cut thatch edge) and the ridge.
-	_box(s,Vector3(0,wall_h-0.12,0),Vector3(eave.x*2.0,0.16,eave.y*2.0),STRAW_DARK)
-	_box(s,Vector3(0,top+0.06,0),Vector3(0.22,0.16,ridge_half*2.0+0.5),TIMBER_DARK)
-	# Gablet smoke vents at the ridge ends.
-	for z in [-1,1]:
-		_box(s,Vector3(0,top-0.28,z*(ridge_half+0.1)),Vector3(0.5,0.36,0.12),DOORWAY)
+	# The thatch: a long rounded loaf over deep eaves, the ridge along Z.
+	var eave:=Vector2(width*0.5+0.40,length*0.5+0.40)
+	var ridge_half:=maxf(eave.y-eave.x*0.95,0.25)
+	var top:=wall_h+width*0.55+0.75
+	_thatch_dome(s,wall_h-0.05,top,eave,ridge_half,32,6,THATCH.darkened(0.03),0.0,1.6)
+	# The ridge bound with a roll of darker straw; smoke vents at both ends.
+	_beam(s,Vector3(0,top+0.02,-ridge_half-0.2),Vector3(0,top+0.02,ridge_half+0.2),0.13,STRAW_DARK)
+	for z in [-1.0,1.0]:
+		_box(s,Vector3(0,top-0.10,z*(ridge_half+0.30)),Vector3(0.46,0.26,0.30),DOORWAY)
+	# A porch over the gable door, toward +Z.
+	_porch(s,Vector3(0,0,length*0.5-0.30),1.15,1.0,1.40,STRAW)
+
+## A dome (or, with `ridge_half` > 0, a loaf along Z) of thatch from eave
+## height `y0` to crown `y1` over half-extents `eave` (x, z). Rounded-square
+## in plan (a superellipse), bellied in section, laid in `rings` courses that
+## alternate a little in tone, with mended patches. `hole` > 0 leaves a smoke
+## hole of that radius at the crown, ringed by a collar. `belly` shapes the
+## section (1 a dome, higher a fuller loaf). Smooth normals.
+static func _thatch_dome(s:SurfaceTool,y0:float,y1:float,eave:Vector2,ridge_half:float,sides:int,rings:int,color:Color,hole:float,belly:float)->void:
+	var n:=2.5 if ridge_half>0.0 else 2.0
+	var ez:=maxf(eave.y-ridge_half,0.1)
+	var t0:=hole/maxf(eave.x,0.1) if hole>0.0 else 0.0
+	var grid:Array=[]
+	var normals:Array=[]
+	var tones:Array=[]
+	var count:=rings+2
+	for r in count:
+		var row:=PackedVector3Array();var shade:=PackedColorArray()
+		# The last ring is the cut lip: a little out and down from the eave.
+		var lip:=r==count-1
+		var t:=1.05 if lip else lerpf(t0,1.0,float(r)/float(rings))
+		var profile:=pow(maxf(1.0-minf(t,1.0)*minf(t,1.0),0.0),0.55/belly)
+		var y:=(y0-0.16) if lip else y0+(y1-y0)*profile
+		for k in sides:
+			var a:=TAU*float(k)/float(sides)
+			var c:=sin(a);var d:=cos(a)
+			var sx:=signf(c)*pow(absf(c),2.0/n);var sz:=signf(d)*pow(absf(d),2.0/n)
+			# A little uneven, the way hand-laid straw lies.
+			var wobble:=1.0+0.028*sin(a*3.0+1.3)+0.016*sin(a*7.0-0.4)
+			var p:=Vector3(eave.x*t*sx*wobble,y,ez*t*sz*wobble+ridge_half*clampf(d*2.5,-1.0,1.0))
+			row.append(p)
+			# Courses alternate in tone; a mended sector is paler and fresher.
+			var tone:=color.darkened(0.07 if r%2==1 else 0.0)
+			var mend:=smoothstep(0.55,0.95,sin(a*2.0+0.7)*0.5+0.5)*(0.5+0.5*sin(float(r)*1.7))
+			tone=tone.lerp(color.lightened(0.12),mend*0.55)
+			if lip:tone=STRAW_DARK.darkened(0.08)
+			elif r==count-2:tone=STRAW_DARK
+			shade.append(tone)
+		grid.append(row);tones.append(shade)
+	# Smooth normals from the neighbouring rings and sides.
+	for r in count:
+		var row:PackedVector3Array=grid[r];var nrow:=PackedVector3Array()
+		for k in sides:
+			var along:Vector3=row[(k+1)%sides]-row[(k-1+sides)%sides]
+			var up_row:PackedVector3Array=grid[maxi(r-1,0)];var down_row:PackedVector3Array=grid[mini(r+1,count-1)]
+			var down:Vector3=down_row[k]-up_row[k]
+			var normal:=along.cross(down).normalized()
+			if normal.y<0.0 and r<count-1:normal=-normal
+			var outward:=Vector3(row[k].x,0.0,row[k].z-ridge_half*clampf(row[k].z,-1.0,1.0))
+			if normal.dot(outward)<0.0 and normal.y<0.2:normal=-normal
+			nrow.append(normal)
+		normals.append(nrow)
+	for r in count-1:
+		var a_row:PackedVector3Array=grid[r];var b_row:PackedVector3Array=grid[r+1]
+		var na:PackedVector3Array=normals[r];var nb:PackedVector3Array=normals[r+1]
+		var ca:PackedColorArray=tones[r];var cb:PackedColorArray=tones[r+1]
+		for k in sides:
+			var j:=(k+1)%sides
+			_tri_smooth(s,a_row[k],a_row[j],b_row[j],na[k],na[j],nb[j],ca[k],ca[j],cb[j])
+			_tri_smooth(s,a_row[k],b_row[j],b_row[k],na[k],nb[j],nb[k],ca[k],cb[j],cb[k])
+	# Courses of thatch: a few crisp darker lines where one course laps the
+	# next, just proud of the surface, so the dome reads as laid straw.
+	for r in range(2,count-2,2):
+		var row:PackedVector3Array=grid[r];var below:PackedVector3Array=grid[r+1]
+		var nrow:PackedVector3Array=normals[r]
+		for k in sides:
+			var j:=(k+1)%sides
+			var a0:Vector3=row[k]+nrow[k]*0.03;var a1:Vector3=row[j]+nrow[j]*0.03
+			var b0:Vector3=row[k].lerp(below[k],0.22)+nrow[k]*0.03;var b1:Vector3=row[j].lerp(below[j],0.22)+nrow[j]*0.03
+			var line:=color.darkened(0.24)
+			_tri_smooth(s,a0,a1,b1,nrow[k],nrow[j],nrow[j],line,line,line)
+			_tri_smooth(s,a0,b1,b0,nrow[k],nrow[j],nrow[k],line,line,line)
+	# The underside of the lip, in shade.
+	var lip_row:PackedVector3Array=grid[count-1]
+	for k in sides:
+		var j:=(k+1)%sides
+		var inner_a:=Vector3(lip_row[k].x*0.82,y0-0.10,lip_row[k].z*0.82)
+		var inner_b:=Vector3(lip_row[j].x*0.82,y0-0.10,lip_row[j].z*0.82)
+		_quad(s,lip_row[k],lip_row[j],inner_b,inner_a,DOORWAY.lerp(STRAW_DARK,0.35),Vector3.DOWN)
+	if hole>0.0:
+		# The smoke hole: a dark mouth ringed by a bound collar.
+		var crown:PackedVector3Array=grid[0]
+		var middle:=Vector3(0,crown[0].y-0.05,0)
+		for k in sides:
+			_tri(s,crown[k],crown[(k+1)%sides],middle,Color(0.07,0.055,0.045),Vector3.UP)
+		for k in sides:
+			var a:=TAU*float(k)/float(sides);var b:=TAU*float(k+1)/float(sides)
+			var r0:=hole*1.0;var r1:=hole*1.45
+			var y:=crown[0].y
+			_quad(s,Vector3(sin(a)*r0,y+0.10,cos(a)*r0),Vector3(sin(b)*r0,y+0.10,cos(b)*r0),Vector3(sin(b)*r1,y+0.02,cos(b)*r1),Vector3(sin(a)*r1,y+0.02,cos(a)*r1),TIMBER_DARK.lerp(STRAW_DARK,0.4),Vector3.UP)
+
+## A small hooded porch standing out from a wall at `at` (its back), toward
+## +Z: two posts, a steep little gable of thatch, a dark doorway under it.
+static func _porch(s:SurfaceTool,at:Vector3,depth:float,width:float,height:float,color:Color)->void:
+	var front:=at.z+depth
+	for x in [-width*0.42,width*0.42]:
+		_beam(s,Vector3(x,0,front-0.08),Vector3(x,height,front-0.08),0.05,TIMBER)
+	_box(s,Vector3(0,height*0.46,at.z+0.10),Vector3(width*0.62,height*0.92,0.10),DOORWAY)
+	var hw:=width*0.62
+	var ridge:=height+0.55
+	var e0:=Vector3(-hw,height,at.z-0.1);var e1:=Vector3(-hw,height,front+0.12)
+	var e2:=Vector3(hw,height,front+0.12);var e3:=Vector3(hw,height,at.z-0.1)
+	var r0:=Vector3(0,ridge,at.z-0.3);var r1:=Vector3(0,ridge,front+0.12)
+	_quad(s,e0,e1,r1,r0,color.darkened(0.04),Vector3(-1,1,0))
+	_quad(s,e3,e2,r1,r0,color,Vector3(1,1,0))
+	_tri(s,e1,e2,r1,DOORWAY.lerp(color,0.25),Vector3.BACK)
+	_beam(s,r0,r1,0.06,STRAW_DARK)
+
+## One smooth-shaded triangle: the face is turned outward (its own normals'
+## sum) and wound clockwise as seen from that side, as _tri does.
+static func _tri_smooth(s:SurfaceTool,a:Vector3,b:Vector3,c:Vector3,na:Vector3,nb:Vector3,nc:Vector3,ca:Color,cb:Color,cc:Color)->void:
+	var face:=(b-a).cross(c-a)
+	if face.length_squared()<1e-12:return
+	var hint:=na+nb+nc
+	if face.dot(hint)>0.0:
+		var t:=b;b=c;c=t
+		var tn:=nb;nb=nc;nc=tn
+		var tc:=cb;cb=cc;cc=tc
+	s.set_color(ca);s.set_normal(na);s.add_vertex(a)
+	s.set_color(cb);s.set_normal(nb);s.add_vertex(b)
+	s.set_color(cc);s.set_normal(nc);s.add_vertex(c)
 
 static func _granary(s:SurfaceTool)->void:
-	# A store on stilts, out of reach of damp and vermin.
-	for x in [-1,1]:
-		for z in [-1,1]:
-			_box(s,Vector3(x*1.05,0.45,z*1.15),Vector3(0.16,0.9,0.16),TIMBER_DARK)
-			# Rat stones: flat caps on the stilts.
-			_frustum(s,Vector3(x*1.05,0.86,z*1.15),0.26,0.22,0.08,8,Color(0.55,0.52,0.46),0.0)
-	_box(s,Vector3(0,0.98,0),Vector3(2.6,0.14,2.8),TIMBER)
-	_box(s,Vector3(0,1.55,0),Vector3(2.3,1.0,2.5),WATTLE)
-	_box(s,Vector3(0,1.5,1.26),Vector3(0.6,0.7,0.05),DOORWAY)
-	# Ladder up to the door.
+	# A round store on stilts, out of reach of damp and vermin: a woven drum
+	# plastered with daub under a little cap of thatch with a knot at its top.
+	for k in 5:
+		var a:=TAU*float(k)/5.0+0.3
+		var at:=Vector3(sin(a)*0.95,0,cos(a)*0.95)
+		_box(s,at+Vector3(0,0.45,0),Vector3(0.16,0.9,0.16),TIMBER_DARK)
+		# Rat stones: flat caps on the stilts.
+		_frustum(s,at+Vector3(0,0.86,0),0.26,0.22,0.08,8,Color(0.55,0.52,0.46),0.0)
+	_frustum(s,Vector3(0,0.94,0),1.25,1.25,0.12,14,TIMBER,0.0)
+	_ring_wall(s,1.08,1.06,2.02,16,WATTLE.lerp(DAUB,0.5),0.10)
+	_box(s,Vector3(0,1.55,1.06),Vector3(0.55,0.6,0.06),DOORWAY)
+	# Ladder up to the hatch.
 	for x in [-0.25,0.25]:
-		_beam(s,Vector3(x,0.0,2.0),Vector3(x,1.05,1.36),0.06,TIMBER)
+		_beam(s,Vector3(x,0.0,1.9),Vector3(x,1.2,1.12),0.06,TIMBER)
 	for k in 4:
 		var t:=(float(k)+0.6)/4.6
-		_box(s,Vector3(0,t*1.05,lerpf(2.0,1.36,t)),Vector3(0.56,0.05,0.07),TIMBER)
-	_hipped_roof(s,2.0,3.12,Vector2(1.55,1.65),0.35,STRAW)
-	_box(s,Vector3(0,1.96,0),Vector3(3.1,0.12,3.3),STRAW_DARK)
+		_box(s,Vector3(0,t*1.2,lerpf(1.9,1.12,t)),Vector3(0.56,0.05,0.07),TIMBER)
+	_thatch_dome(s,1.96,3.05,Vector2(1.45,1.45),0.0,20,4,THATCH,0.0,0.9)
+	# The top knot.
+	_frustum(s,Vector3(0,2.98,0),0.20,0.05,0.34,8,STRAW_DARK,0.0)
 
 static func _work_shelter(s:SurfaceTool)->void:
-	# Posts under a thatched roof, open on every side, a work log beneath.
+	# Posts under a loaf of thatch, open on every side, a work log beneath.
 	for x in [-1,1]:
 		for z in [-1,0,1]:
 			_box(s,Vector3(x*1.25,0.85,z*1.25),Vector3(0.13,1.7,0.13),TIMBER)
-	_gable_roof(s,1.65,2.5,Vector2(1.55,1.70),STRAW)
-	_box(s,Vector3(0,1.62,0),Vector3(3.1,0.1,3.4),STRAW_DARK)
+	_thatch_dome(s,1.62,2.75,Vector2(1.60,1.75),0.35,24,4,THATCH.darkened(0.05),0.0,1.4)
 	_beam(s,Vector3(-0.8,0.2,0.3),Vector3(0.7,0.2,-0.2),0.2,BARK)
 	_box(s,Vector3(0.5,0.18,0.9),Vector3(0.5,0.36,0.5),Color(0.50,0.48,0.42))
 	_box(s,Vector3(-0.6,0.12,-0.8),Vector3(0.8,0.24,0.5),TIMBER)
@@ -317,14 +502,34 @@ static func _ridge_tent(s:SurfaceTool)->void:
 
 static func _pole_tent(s:SurfaceTool)->void:
 	# Hides round a cone of poles, the pole tips crossing above.
-	var sides:=12
+	var sides:=16
 	_cone_roof(s,Vector3.ZERO,1.55,0.0,2.45,sides,HIDE,0.07)
-	_box(s,Vector3(0,0.5,1.33),Vector3(0.62,0.95,0.30),DOORWAY)
-	for k in 6:
-		var a:=TAU*float(k)/6.0+0.3
-		_beam(s,Vector3(cos(a)*0.55,1.75,sin(a)*0.55),Vector3(-cos(a)*0.28,3.1,-sin(a)*0.28),0.04,TIMBER_DARK)
+	# Sewn seams between the hides, running from the ground to the crown.
+	for k in 7:
+		var a:=TAU*(float(k)+0.35)/7.0
+		if absf(wrapf(a,-PI,PI))<0.4:continue
+		var dir:=Vector3(sin(a),0,cos(a))
+		for j in 4:
+			# Follow the hides' belly (as _cone_roof lays them), just proud of it.
+			var t0:=float(j)/4.0;var t1:=float(j+1)/4.0
+			var p0:=dir*(lerpf(1.55,0.0,t0)+sin(t0*PI)*0.10+0.03)+Vector3(0,2.45*t0,0)
+			var p1:=dir*(lerpf(1.55,0.0,t1)+sin(t1*PI)*0.10+0.03)+Vector3(0,2.45*t1,0)
+			_beam(s,p0,p1,0.035,HIDE_DARK.darkened(0.28))
+	# The door flap turned back: a dark opening, the flap's lighter underside.
+	_tri(s,Vector3(-0.42,0.02,1.45),Vector3(0.42,0.02,1.45),Vector3(0,1.25,0.95),DOORWAY,Vector3.BACK)
+	_tri(s,Vector3(0.42,0.02,1.47),Vector3(0.80,0.10,1.25),Vector3(0.05,1.22,0.99),HIDE.lightened(0.12),Vector3(1,0.3,1))
+	# The smoke flaps at the crown, open to the wind, and the pole tips above.
+	_tri(s,Vector3(-0.30,2.05,0.20),Vector3(0.0,2.55,0.05),Vector3(-0.55,2.55,0.40),HIDE_DARK,Vector3(-1,0.5,1))
+	_tri(s,Vector3(0.30,2.05,0.20),Vector3(0.0,2.55,0.05),Vector3(0.55,2.55,0.40),HIDE_DARK.darkened(0.1),Vector3(1,0.5,1))
+	for k in 7:
+		var a:=TAU*float(k)/7.0+0.3
+		_beam(s,Vector3(sin(a)*0.42,1.95,cos(a)*0.42),Vector3(-sin(a)*0.30,3.15,-cos(a)*0.30),0.04,TIMBER_DARK)
 	# A painted band round the hides.
 	_frustum(s,Vector3(0,0.55,0),1.22,1.16,0.12,sides,HIDE_DARK,0.0)
+	# Pegs round the foot.
+	for k in 10:
+		var a:=TAU*(float(k)+0.5)/10.0
+		_box(s,Vector3(sin(a)*1.66,0.06,cos(a)*1.66),Vector3(0.08,0.12,0.08),TIMBER_DARK)
 
 static func _lean_to(s:SurfaceTool)->void:
 	# Branches and bark laid on a pole frame, open toward +Z.
