@@ -27,17 +27,24 @@ func test_legacy_refinements_cannot_be_researched_again()->void:
 	for entry in DiscoverySystem.catalog:
 		if bool(entry.get("frontier",false)): assert_bool(DiscoverySystem._discovery_is_eligible(entry,2000000)).is_false()
 func test_random_difficulty_is_bounded_reproducible_and_balanced()->void:
+	# Difficulty is a per-civilization draw (0.85-1.15) times deterministic
+	# factors shared by every seed (era cost, precedents, early start). The
+	# draw is judged relative to the mean, which carries those shared factors.
 	var tech:=DiscoverySystem.discovery_definition("copper_smelting")
 	var values:Dictionary={}
+	var list:Array[float]=[]
 	var sum:=0.0
 	for seed_value in 500:
 		var value:=DiscoverySystem.research_difficulty(tech,seed_value)
-		assert_float(value).is_between(0.85,1.15)
 		assert_float(value).is_equal(DiscoverySystem.research_difficulty(tech,seed_value))
 		values[value]=true
+		list.append(value)
 		sum+=value
 	assert_int(values.size()).is_greater(400)
-	assert_float(sum/500.0).is_between(0.97,1.03)
+	var mean:=sum/500.0
+	for value:float in list:assert_float(value/mean).is_between(0.84,1.16)
+	assert_float(list.max()/list.min()).is_less_equal(1.15/0.85+0.0001)
+	assert_float(list.max()/list.min()).is_greater(1.25)
 func test_randomness_cannot_bypass_metallurgy_prerequisites_or_materials()->void:
 	GameState.elapsed_days=100000.0
 	var tech:=DiscoverySystem.discovery_definition("bronze_alloying")
