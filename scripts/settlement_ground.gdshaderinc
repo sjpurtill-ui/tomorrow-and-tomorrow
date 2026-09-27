@@ -27,6 +27,9 @@ uniform sampler2DArray settlement_fields : filter_linear, repeat_disable;
 uniform vec4 sg_origins[4];
 // size (km), strength (0 disables), -, -
 uniform vec4 sg_frames[4];
+// Each slot's cultivated halo (codex/beauty-5): radius (km), strength (0
+// none), worked share (fields rather than pasture), orchards known (0/1).
+uniform vec4 sg_halos[4];
 
 float sg_hash(vec2 p) {
 	vec3 q = fract(vec3(p.xyx)*0.1031);
@@ -68,6 +71,98 @@ float settlement_clearing(int slot, vec2 local_m, float pixel_m) {
 	float ragged = sg_noise(local_m*0.045+vec2(3.0, -1.0))*0.7+sg_noise(local_m*0.13)*0.3;
 	float fade = smoothstep(0.02, 0.18, min(min(uv.x, uv.y), min(1.0-uv.x, 1.0-uv.y))+(ragged-0.5)*0.10);
 	return smoothstep(0.03, 0.18, lived+(ragged-0.5)*0.16)*fade*sg_frames[slot].y;
+}
+
+// The cultivated halo round a settlement (codex/beauty-5), seen from the
+// valley and country views: a patchwork of fields, pasture and fallow (and
+// orchards once they are known), each parcel a few tens of metres across
+// with a darker balk or hedge between, thinning out raggedly into the wild.
+// Returns (weight 0-1 of worked land here, parcel kind 0-1, hedge 0-1, the
+// halo's own clearing of woods 0-1). Pure arithmetic and hashes; nothing
+// when the fragment is beyond every halo.
+vec4 settlement_halo(vec2 surface_position_km, vec2 surface_origin_km, float pixel_m, out float orchard) {
+	orchard = 0.0;
+	vec4 best = vec4(0.0);
+	// Up close the real fields and the painted square carry the ground.
+	if (pixel_m < 0.14) { return best; }
+	for (int s = 0; s < 4; s++) {
+		if (sg_frames[s].y <= 0.0 || sg_halos[s].y <= 0.0) { continue; }
+		vec2 cells = surface_origin_km-sg_origins[s].xy;
+		vec2 m = (surface_position_km+cells-sg_origins[s].zw)*1000.0-vec2(sg_frames[s].x*500.0);
+		float radius_m = sg_halos[s].x*1000.0;
+		float d = length(m);
+		if (d > radius_m*1.35) { continue; }
+		// Ragged: the worked land reaches out along some bearings and not others.
+		float bearing_reach = sg_noise(m/max(d, 1.0)*2.4+vec2(float(s)*7.0, 3.0))*0.55+sg_noise(m*0.004+vec2(5.0, -2.0))*0.45;
+		float reach = radius_m*(0.72+0.55*bearing_reach);
+		float core = sg_frames[s].x*1000.0*0.30;
+		float ring = smoothstep(core*0.55, core, d)*(1.0-smoothstep(reach*0.62, reach, d));
+		if (ring <= 0.0) { continue; }
+		// Furlongs (blocks about 150 m across, each laid its own way) found on
+		// a jittered grid; within each, strips a couple of dozen metres wide,
+		// each worked by its own household. Wild land between some furlongs.
+		// (Only the 2 x 2 cells nearest are searched: the jitter is kept
+		// small enough that the nearest centre is always among them.)
+		vec2 p = m/150.0;
+		vec2 ip = floor(p);
+		ivec2 lo = ivec2(step(fract(p), vec2(0.5)))*-1;
+		float f1 = 9.0; float f2 = 9.0; vec2 id = vec2(0.0);
+		for (int y = lo.y; y <= lo.y+1; y++) {
+			for (int x = lo.x; x <= lo.x+1; x++) {
+				vec2 c = ip+vec2(float(x), float(y));
+				vec2 jitter = vec2(sg_hash(c+vec2(float(s)*13.0, 1.0)), sg_hash(c+vec2(7.0, float(s)*5.0)))*0.5+0.25;
+				vec2 r = c+jitter-p;
+				float dd = dot(r, r);
+				if (dd < f1) { f2 = f1; f1 = dd; id = c; } else if (dd < f2) { f2 = dd; }
+			}
+		}
+		float furlong_edge_m = (sqrt(f2)-sqrt(f1))*150.0*0.5;
+		float h = sg_hash(id+vec2(float(s)*3.1, 17.0));
+		// Nearer the houses almost every furlong is worked; farther out fewer.
+		float density = mix(0.95, 0.30, smoothstep(core, reach, d));
+		float worked = step(h, density)*ring*sg_halos[s].y;
+		if (worked > best.x) {
+			float angle = sg_hash(id+vec2(5.0, -3.0))*3.14159;
+			vec2 axis = vec2(cos(angle), sin(angle));
+			float across_m = dot(m, vec2(-axis.y, axis.x));
+			float strip_w = 18.0+10.0*sg_hash(id+vec2(-2.0, 9.0));
+			float strip = floor(across_m/strip_w);
+			// A whole furlong is pasture or fallow now and then; otherwise its
+			// strips vary one from the next.
+			float block = sg_hash(id+vec2(-9.0, float(s)*2.3));
+			float kind = block < 1.0-sg_halos[s].z*0.8 ? mix(0.55, 0.79, sg_hash(id+vec2(1.0, 1.0))) : sg_hash(vec2(strip, block*97.0));
+			float to_strip = strip_w*(0.5-abs(fract(across_m/strip_w)-0.5));
+			float balk = (1.0-smoothstep(0.0, max(0.9*pixel_m, 1.0), to_strip))*(1.0-smoothstep(1.2, 3.0, pixel_m))*step(kind, 0.53);
+			float hedge = (1.0-smoothstep(0.0, max(1.2*pixel_m, 2.0), furlong_edge_m))*(1.0-smoothstep(4.0, 10.0, pixel_m));
+			best = vec4(worked, kind, max(hedge, balk*0.6), ring*sg_halos[s].y);
+			orchard = sg_halos[s].w*step(0.93, block);
+		}
+	}
+	return best;
+}
+
+// Paints the halo's parcels over `earth` (after the meadow wash).
+vec3 settlement_halo_paint(vec3 earth, vec4 halo, float orchard, vec2 surface_position_km, float pixel_m, float open) {
+	float view = smoothstep(0.15, 0.55, pixel_m)*(1.0-smoothstep(9.0, 22.0, pixel_m));
+	float w = halo.x*view*open;
+	if (w <= 0.0) { return earth; }
+	float L = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.10, 0.85);
+	vec3 stubble = vec3(1.28, 1.10, 0.64)*L;
+	vec3 crop = vec3(0.86, 1.00, 0.44)*L;
+	vec3 pasture = earth*vec3(1.02, 1.07, 0.94);
+	vec3 fallow = vec3(1.06, 0.93, 0.68)*L*0.94;
+	float k = halo.y;
+	vec3 parcel = k < 0.30 ? stubble : (k < 0.52 ? crop : (k < 0.80 ? pasture : fallow));
+	if (orchard > 0.5) {
+		// Rows of small round crowns over grass.
+		vec2 q = fract(surface_position_km*1000.0/7.0)-0.5;
+		float crown = 1.0-smoothstep(0.22, 0.34, length(q));
+		parcel = mix(pasture, earth*vec3(0.62, 0.74, 0.55), crown*(1.0-smoothstep(1.2, 2.5, pixel_m)));
+	}
+	vec3 c = mix(earth, parcel, 0.42);
+	// Balks and hedges between parcels, darker and a touch greener.
+	c = mix(c, earth*vec3(0.78, 0.84, 0.74), halo.z*0.32);
+	return mix(earth, c, w);
 }
 
 // The worn ground over `earth`. `slot` and `local_m` from
@@ -155,14 +250,17 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float layer = float(slot);
 	// Most ground is not worked: one plain look before any noise.
 	if (textureLod(settlement_fields, vec3(uv, layer), 0.0).r < 0.001) { return earth; }
-	vec2 warp = (vec2(sg_noise(local_m*0.13+vec2(3.0, 9.0)), sg_noise(local_m*0.13+vec2(-5.0, 1.0)))-0.5)*0.5/size_m;
+	// Field edges wander a metre or two, the way a hedge or a ploughed
+	// headland does, never ruled straight (codex/beauty-5).
+	vec2 warp = (vec2(sg_noise(local_m*0.07+vec2(3.0, 9.0)), sg_noise(local_m*0.07+vec2(-5.0, 1.0)))-0.5)*2.0/size_m
+		+(vec2(sg_noise(local_m*0.31+vec2(1.0, -4.0)), sg_noise(local_m*0.31+vec2(-8.0, 2.0)))-0.5)*0.5/size_m;
 	// Four half-texel taps: a smooth edge, never the texels' staircase.
 	vec2 half_texel = 0.5/vec2(textureSize(settlement_fields, 0).xy);
 	float cover = 0.25*(texture(settlement_fields, vec3(uv+warp+half_texel, layer)).r+texture(settlement_fields, vec3(uv+warp-half_texel, layer)).r
 		+texture(settlement_fields, vec3(uv+warp+vec2(half_texel.x, -half_texel.y), layer)).r+texture(settlement_fields, vec3(uv+warp+vec2(-half_texel.x, half_texel.y), layer)).r);
 	if (cover < 0.02) { return earth; }
 	ivec2 dims = textureSize(settlement_fields, 0).xy;
-	ivec2 texel = clamp(ivec2(uv*vec2(dims)), ivec2(0), dims-ivec2(1));
+	ivec2 texel = clamp(ivec2((uv+warp)*vec2(dims)), ivec2(0), dims-ivec2(1));
 	vec4 code = texelFetch(settlement_fields, ivec3(texel, slot), 0);
 	if (code.r < 0.5) {
 		// A border texel: borrow the field's code from a neighbour inside it.
@@ -197,12 +295,16 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float balk = (1.0-smoothstep(0.0, 0.35, to_balk))*(1.0-smoothstep(0.6, 1.4, pixel_m));
 	// Tilled loam in the local light: furrows in shade, crests catching it.
 	// (Mostly the region's light, only a little of the meadow's own mottle.)
-	float L = mix(clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.16, 0.55), 0.34, 0.6);
-	vec3 furrow = vec3(0.98, 0.80, 0.58)*L;
-	vec3 crest = vec3(1.22, 1.02, 0.74)*L;
+	// (codex/beauty-5: a touch lighter than the meadow, so a worked field
+	// reads as tilled ground in the sun, never a dark slab.)
+	// The meadow's own value (the land is lit afterwards, so a fixed value
+	// here printed fields darker than the grass round them).
+	float L = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.10, 0.85)*1.04;
+	vec3 furrow = vec3(1.02, 0.84, 0.62)*L;
+	vec3 crest = vec3(1.24, 1.05, 0.78)*L;
 	vec3 soil = mix(furrow, crest, ridge)*(0.93+0.14*strip);
 	// Kitchen gardens are dug deep and dark, and kept.
-	if (pattern == 4) { soil *= 0.74; }
+	if (pattern == 4) { soil *= 0.86; }
 	if (pattern == 1) {
 		// Beds with a damp channel between them.
 		float channel = 1.0-smoothstep(0.0, 0.10, abs(fract(row)-0.5)-0.38);
@@ -210,10 +312,12 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	}
 	// The crop of the season (colours in the local light; a crop field reads
 	// deeper and more even than the meadow round it, ripe grain gold).
-	vec3 green = (crop == 1 ? vec3(0.42, 0.76, 0.14) : (crop == 3 ? vec3(0.42, 0.80, 0.34) : vec3(0.52, 0.86, 0.14)))*L;
+	// Young crops are a fresh, light green (sprouting grain toward yellow),
+	// as bright as the grass round them or brighter.
+	vec3 green = (crop == 1 ? vec3(0.62, 0.90, 0.30) : (crop == 3 ? vec3(0.60, 0.92, 0.46) : vec3(0.80, 0.98, 0.34)))*L*1.02;
 	if (crop == 4) {
 		float bed = sg_hash(vec2(floor(row), floor(along/3.0)));
-		green = mix(vec3(0.46, 0.76, 0.22), vec3(0.74, 0.86, 0.30), bed)*L;
+		green = mix(vec3(0.62, 0.90, 0.36), vec3(0.88, 0.96, 0.40), bed)*L;
 	}
 	vec3 ripe = (crop == 0 ? vec3(1.78, 1.26, 0.36) : (crop == 1 ? vec3(0.50, 0.80, 0.18) : (crop == 3 ? vec3(1.40, 1.22, 0.62) : vec3(1.30, 1.14, 0.46))))*L;
 	vec3 straw = vec3(1.55, 1.36, 0.86)*L;
@@ -240,7 +344,8 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float inside = smoothstep(0.45, 0.62, cover);
 	float edge = smoothstep(0.30, 0.45, cover)*(1.0-smoothstep(0.50, 0.66, cover));
 	earth = mix(earth, field, inside*strength);
-	earth *= 1.0-edge*0.22*strength*(1.0-smoothstep(1.5, 4.0, pixel_m));
+	// The headland: a darker, greener line of rough grass and scrub.
+	earth = mix(earth, earth*vec3(0.80, 0.88, 0.76), edge*0.55*strength*(1.0-smoothstep(1.5, 6.0, pixel_m)));
 	return earth;
 }
 
@@ -295,7 +400,12 @@ vec4 sg_dabs(vec2 p, bool wide) {
 vec3 settlement_meadow(vec3 earth, vec2 surface_position_km, vec2 surface_origin_km, float pixel_m, float open, vec3 palette) {
 	// Fades in below a few metres a pixel (the valley view keeps its wash).
 	float near = (1.0-smoothstep(1.2, 4.0, pixel_m))*open;
-	if (near <= 0.0) { return earth; }
+	// The calm itself reaches farther out than the strokes (codex/beauty-5):
+	// from the valley view up to the wide country (about 20 km across) the
+	// grass keeps the same quieter, olive value, fading only where the
+	// regional relief map takes over, so every zoom reads as one painting.
+	float calm_w = (1.0-smoothstep(4.5, 16.0, pixel_m))*open;
+	if (calm_w <= 0.0) { return earth; }
 	float close = (1.0-smoothstep(0.35, 1.6, pixel_m))*open;
 	// A precise local frame: metres from the camera's 64 km cell.
 	vec2 p = surface_position_km*1000.0;
@@ -307,10 +417,11 @@ vec3 settlement_meadow(vec3 earth, vec2 surface_position_km, vec2 surface_origin
 	// photograph's colour mottle goes), a little greener than lime and a
 	// value lower, the way a painter lays grass under warm light.
 	vec3 calm = palette/pal_luma*luma;
-	vec3 base = mix(earth, calm, 0.70*near);
+	vec3 base = mix(earth, calm, 0.70*calm_w);
 	float base_luma = dot(base, vec3(0.2126, 0.7152, 0.0722));
-	base = mix(vec3(base_luma), base, mix(1.0, 0.88, near))*vec3(0.96, 1.0, 0.98);
-	base *= mix(1.0, 0.80, near);
+	base = mix(vec3(base_luma), base, mix(1.0, 0.84, calm_w))*mix(vec3(1.0), vec3(0.96, 1.0, 0.98), calm_w);
+	base *= mix(1.0, 0.80, calm_w);
+	if (near <= 0.0) { return mix(earth, base, open); }
 	// Moisture a dozen metres across: lusher, cooler hollows and drier,
 	// warmer rises, laid as broad washes under the strokes.
 	float moist = sg_noise(p*0.075+vec2(5.0, -3.0))*0.65+sg_noise(p*0.19)*0.35;

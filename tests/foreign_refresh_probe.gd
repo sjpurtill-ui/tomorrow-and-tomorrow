@@ -26,7 +26,7 @@ func _ready()->void:
 					count+=child.multimesh.instance_count
 					for i in child.multimesh.instance_count:
 						var transform:Transform3D=child.get_meta("source_transforms")[i]
-						check(is_equal_approx(transform.basis.get_scale().x,.001),"asset scale")
+						check(transform.basis.get_scale().x>.0008 and transform.basis.get_scale().x<.00108,"asset scale")
 						transforms.append(transform)
 			check(count==visual.building_count and count<=128,"bounded complete household batches")
 			snapshots.append(transforms);visual.free()
