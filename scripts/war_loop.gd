@@ -204,11 +204,14 @@ static func _band(label:String,count:int,tech:float,readiness:float,leader:Strin
 static func _clash(attacker:Dictionary,defender:Dictionary,terrain:float,key:String)->Dictionary:
 	## One fight, resolved by the shared combat simulator. Deaths are the share
 	## of casualties who do not come home; the rest are wounded or scattered.
-	var result:Dictionary=WorldSimulation.military.simulator.simulate(attacker,defender,{"seed":hash(key),"terrain_defense":terrain,"max_rounds":6,"casualty_intensity":0.8})
+	# Raids and feuds: each war leader fights as his band can (battle_tactics.gd).
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var tactics:Dictionary=Tactics.plan({"attacker":{"force":attacker,"known":Tactics.known_from_force(attacker,0.2)},"defender":{"force":defender,"known":Tactics.known_from_force(defender,0.2)}},{"kind":"raid","terrain":terrain},hash(key))
+	var result:Dictionary=WorldSimulation.military.simulator.simulate(attacker,defender,{"seed":hash(key),"terrain_defense":terrain,"max_rounds":6,"casualty_intensity":0.8,"tactics":tactics})
 	var a:Dictionary=result.get("attacker",{}); var d:Dictionary=result.get("defender",{})
 	var outcome:=String(result.get("outcome","inconclusive"))
 	var rng:=_rng("clash:"+key)
-	return {"outcome":outcome,"won":outcome=="attacker_victory" or (outcome=="inconclusive" and rng.randf()<0.4),
+	return {"outcome":outcome,"tactics":tactics,"won":outcome=="attacker_victory" or (outcome=="inconclusive" and rng.randf()<0.4),
 		"att_dead":roundi(float(a.get("casualties",0))*rng.randf_range(0.3,0.5)),"def_dead":roundi(float(d.get("casualties",0))*rng.randf_range(0.3,0.5))}
 
 static func _cap_dead(n:int,pop:float)->int:

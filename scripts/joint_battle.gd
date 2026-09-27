@@ -15,7 +15,12 @@ static func mean_stat(force:Dictionary,stat:String)->float:
 	for id:String in force.units:
 		total+=float(C.UNITS[id].get(stat,0))*int(force.units[id]);count+=int(force.units[id])
 	return total/maxi(1,count)
+const Tactics=preload("res://scripts/battle_tactics.gd")
+## The commanders' zone tactics shift damage and detection within
+## Tactics.ZONE_MIN..ZONE_MAX; the base multipliers below are unchanged.
 static func damage_multiplier(attacker:Dictionary,defender:Dictionary)->float:
+	return _base_damage_multiplier(attacker,defender)*Tactics.zone_factor(String(attacker.get("tactic","")),"damage")*Tactics.zone_factor(String(defender.get("tactic","")),"taken")
+static func _base_damage_multiplier(attacker:Dictionary,defender:Dictionary)->float:
 	if attacker.domain=="air" and defender.domain=="air":
 		# A fast interceptor can bring guns to bear and break contact more readily.
 		var speed_ratio:=mean_stat(attacker,"speed_km_day")/maxf(1,mean_stat(defender,"speed_km_day"))
@@ -26,6 +31,8 @@ static func damage_multiplier(attacker:Dictionary,defender:Dictionary)->float:
 		if attacker.domain=="air":return 1.0-protected*.35
 	return 1.0
 static func detection_multiplier(observer:Dictionary,target:Dictionary)->float:
+	return _base_detection_multiplier(observer,target)*Tactics.zone_factor(String(observer.get("tactic","")),"detection")
+static func _base_detection_multiplier(observer:Dictionary,target:Dictionary)->float:
 	if target.domain=="navy" and count(target,SUBMARINES)>0:
 		return .65 if count(observer,SCREENS)>0 or observer.domain=="air" else .15
 	return 1.0

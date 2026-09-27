@@ -426,7 +426,10 @@ func _battle(id:String)->void:
 	enemy.readiness=float(enemy.get("readiness",.8))*clampf(float(r.food)/maxf(1,int(enemy.troops)*RATION*2),.25,1)*(1-float(r.get("exhaustion",0))*.6)
 	var ground:=float(r.fortification) if r.cell==r.home else 1.05
 	var defensive:bool=state.mission.get("action","")=="defend"
-	var result:Dictionary=WorldSimulation.military.simulator.simulate(our,enemy,{"seed":int(state.seed)+int(state.turn)*7919,"max_rounds":8,"terrain_defense":ground,"attacker_exposure_modifier":.65 if defensive else 1.0})
+	# The general chooses how to fight; the rival chooses from what it fields.
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var tactics:Dictionary=Tactics.plan({"attacker":{"force":our,"known":Tactics.known_for_player(),"character":state.get("character",{})},"defender":{"force":enemy,"known":Tactics.known_from_force(enemy,0.3)}},{"kind":"assault" if r.cell==r.home else "field","terrain":ground},int(state.seed)+int(state.turn)*7919)
+	var result:Dictionary=WorldSimulation.military.simulator.simulate(our,enemy,{"seed":int(state.seed)+int(state.turn)*7919,"max_rounds":8,"terrain_defense":ground,"attacker_exposure_modifier":.65 if defensive else 1.0,"tactics":tactics})
 	# Every exchange consumes thirty in-world minutes, including during viewing.
 	var extra:=maxf(0,(int(result.round_count)-1)*30.0/1440.0)
 	_advance_campaign_interval(extra,id)
@@ -475,6 +478,8 @@ func _battle(id:String)->void:
 	state.events.append({"day":WorldSimulation.state.elapsed_days,"result":result.outcome,"our":int(army().troops),"enemy":int(r.force.troops)})
 	if state.events.size()>40:state.events.pop_front()
 	var text:="%s against %s. %d of our soldiers and %d of theirs are out of action. We have %d fit soldiers, %.1f days of food. %s"%[String({"attacker_victory":"Victory","defender_victory":"Defeat","inconclusive":"Neither army broke","mutual_collapse":"Both armies broke"}.get(String(result.outcome),String(result.outcome))),String(r.name),int(our.troops)-int(result.attacker.remaining_troops),int(enemy.troops)-int(r.force.troops),int(army().troops),food_days(),"The approach is secured; its guard is detached from our field army." if r.control=="secured" else "I have kept the army together and await your next objective."]
+	var how:=Tactics.report_sentence(tactics,"attacker",preload("res://scripts/hud/era_words.gd").stage())
+	if how!="":text=how+" "+text
 	if state.rivals.all(func(other:Dictionary)->bool:return other.control=="secured"):
 		state.outcome="The coalition concedes the approaches. Alderford has won this war."
 		text+=" "+String(state.outcome)

@@ -1962,6 +1962,22 @@ func engagement_snapshot()->Dictionary:
 	return active_engagement.duplicate(true)
 
 
+## Both generals choose how to fight (battle_tactics.gd). Ours from what our
+## people know and field; theirs only from what they field and their
+## general level of knowledge. Recorded on the engagement for resolution,
+## the map and the report.
+func _engagement_tactics(engagement:Dictionary)->Dictionary:
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var threat:Dictionary=engagement.get("threat",{})
+	var home_side:=_engagement_home_side(engagement)
+	var enemy_side:=_engagement_enemy_side(engagement)
+	var kind:="raid" if String(threat.get("incident_kind",""))=="raid" else ("assault" if home_side=="attacker" and String(threat.get("target_region_id",""))!="" and not bool(threat.get("field_encounter",false)) else "field")
+	var sides:={}
+	sides[home_side]={"force":engagement.get(home_side,{}),"known":Tactics.known_for_player()}
+	sides[enemy_side]={"force":engagement.get(enemy_side,{}),"known":Tactics.known_from_force(engagement.get(enemy_side,{}),float(threat.get("technology",0.2)))}
+	return Tactics.plan(sides,{"kind":kind,"terrain":float(engagement.get("terrain_defense",1.0))},int(engagement.get("seed",1)))
+
+
 func _engagement_home_side(engagement:Dictionary)->String:
 	return String(engagement.get("home_side","attacker"))
 
@@ -2013,6 +2029,7 @@ func begin_threat_engagement()->Dictionary:
 	active_engagement={"threat":threat,"campaign_mode":String(threat.get("campaign_mode","defensive")),"home_side":"attacker" if offensive else "defender","home_force_kind":"occupation" if defending_occupation else ("field_army" if field_army_index>=0 else "field"),"home_force_id":field_army_id if field_army_index>=0 else 0,"home_force_civ_id":target_civ_id if defending_occupation else "","home_force_region_id":target_region_id if defending_occupation else "","attacker":attacker,"defender":defender,"attacker_initial":int(attacker.troops),"defender_initial":int(defender.troops),"round":0,"rounds":[],"seed":int(threat.seed),"terrain_defense":battle_ground,"status":"active","last_order":"hold"}
 	active_engagement["commander_managed"]=command_hierarchy.executing
 	if command_hierarchy.executing:command_hierarchy.battle.attach(active_engagement,command_hierarchy.battle_candidates)
+	active_engagement["tactics"]=_engagement_tactics(active_engagement)
 	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
 	battle_started.emit(active_engagement.duplicate(true))
 	return engagement_snapshot()
@@ -2060,6 +2077,7 @@ func advance_engagement(order:String="hold")->Dictionary:
 		round_options["casualty_intensity"]=float(round_options.get("casualty_intensity",1))*float(orders_context.intensity)
 		round_options[("defender" if home_side=="attacker" else "attacker")+"_ordered_targets"]=orders_context.targets
 	var next_round:=int(active_engagement.round)+1
+	round_options["tactics"]=active_engagement.get("tactics",{}); round_options["round_offset"]=int(active_engagement.round)
 	var result:Dictionary=simulator.simulate(attacker,defender,round_options)
 	BattleRoundOrders.clear_transient(result.attacker);BattleRoundOrders.clear_transient(result.defender)
 	if (result.get("rounds",[]) as Array).is_empty(): return _finish_active_engagement(false,result)
@@ -2107,6 +2125,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	var source_civ_id:=String((engagement.get("threat",{}) as Dictionary).get("source_civ_id",""))
 	active_engagement.clear(); threats_resolved+=1
 	final_result["commander_managed"]=bool(engagement.get("commander_managed",false))
+	final_result["tactics"]=(engagement.get("tactics",{}) as Dictionary).duplicate(true)
 	final_result["command_participants"]=engagement.get("command_participants",[]).duplicate(true)
 	var committed:=_commit_campaign_battle(final_result)
 	if retreated and bool(final_result.commander_managed):
@@ -2401,6 +2420,7 @@ func _create_civilization_threat(incident:Dictionary,campaign_mode:String="defen
 	var threat_title:="Raid on %s" % target_name if is_raid and offensive else ("%s raiders approaching" % source_name if is_raid else ("Campaign for %s" % target_name if offensive and target_name!="" else ("Campaign against %s" % source_name if offensive else ("%s moves to recapture %s" % [source_name,target_name] if target_name!="" else "%s campaign approaching" % source_name))))
 	var report_text:="The raiding column is committed against %s: scouts estimate about %d defenders. Victory may seize portable stores but will not occupy the region." % [target_name,strength] if is_raid and offensive else ("Watchers report roughly %d %s raiders moving toward local stores. Muster the garrison, pay them off, or yield before they arrive." % [strength,source_name] if is_raid else ("The field host is committed against %s: scouts estimate an aggregate defending capacity of %d." % [target_name if target_name!="" else source_name,strength] if offensive else ("%s is moving roughly %d personnel to retake %s. Its occupation force will defend within seven days." % [source_name,strength,target_name] if target_name!="" else "Scouts identify an organized %s field host of roughly %d. A response is required within seven days." % [source_name,strength])))
 	active_threat={"id":"threat_%d_%d" % [int(WorldSimulation.state.elapsed_days),threats_resolved],"title":threat_title,"incident_kind":String(incident.get("incident_kind","campaign")),"campaign_mode":campaign_mode,"source_civ_id":String(incident.get("source_civ_id","")),"source_name":source_name,"field_encounter":bool(incident.get("field_encounter",false)),"formation_id":String(incident.get("formation_id","")),"target_region_id":String(incident.get("target_region_id","")),"target_position":incident.get("target_position",{}).duplicate(true),"target_region_name":String(incident.get("target_region_name","")),"target_region_role":String(incident.get("target_region_role","")),"target_population":float(incident.get("target_population",0.0)),"occupation_required":float(incident.get("occupation_required",0.0)),"recapture_campaign":bool(incident.get("recapture_campaign",false)),"field_army_id":int(incident.get("field_army_id",0)),"discovered_day":int(WorldSimulation.state.elapsed_days),"deadline_day":int(WorldSimulation.state.elapsed_days)+(9999 if offensive else 7),"terrain_defense":float(incident.get("terrain_defense",_terrain_defense())),"enemy_force":enemy,"estimated_strength":strength,"tribute_food":maxf(5.0,float(strength)*2.5),"plunder_fraction":rng.randf_range(0.08,0.18),"seed":rng.randi()}
+	active_threat["technology"]=technology
 	if enemy.has("owned_target"):active_threat["owned_target"]=enemy.owned_target.duplicate(true)
 	active_threat["routine_raid"]=preload("res://scripts/raid_policy.gd").routine(active_threat,_home_defense_force(false))
 	if bool(active_threat.routine_raid): report_text="Watchers report roughly %d %s raiders. The local defense has the advantage and will handle their approach; you can inspect the report in War Planning." % [strength,source_name]
@@ -4644,7 +4664,11 @@ func battle_report_text(result:Dictionary)->String:
 	var place:=String(result.get("target_region_name",threat.get("target_region_name",WorldSimulation.state.settlement_name)))
 	if place.is_empty(): place="the settlement"
 	var losses:=maxi(0,int(home.get("initial_troops",home.get("troops",0)))-int(home.get("remaining_troops",0)))
-	return "%s at %s against %s. Our force: %d remaining; %d lost or removed from the field; morale %.0f%%. %s" % [String(result.get("outcome","inconclusive")).replace("_"," ").capitalize(),place,opponent,int(home.get("remaining_troops",0)),losses,float(home.get("morale",0.0))*100.0,"We defended against an approaching attack." if home_side=="defender" else "Our force was conducting an offensive operation."]
+	return "%s at %s against %s. Our force: %d remaining; %d lost or removed from the field; morale %.0f%%. %s" % [String(result.get("outcome","inconclusive")).replace("_"," ").capitalize(),place,opponent,int(home.get("remaining_troops",0)),losses,float(home.get("morale",0.0))*100.0,"We defended against an approaching attack." if home_side=="defender" else "Our force was conducting an offensive operation."]+_tactic_report(result,home_side)
+
+func _tactic_report(result:Dictionary,home_side:String)->String:
+	var sentence:=preload("res://scripts/battle_tactics.gd").report_sentence(result.get("tactics",{}),home_side,preload("res://scripts/hud/era_words.gd").stage())
+	return "" if sentence=="" else " "+sentence
 
 func _record_council_battle(result:Dictionary)->void:
 	WorldSimulation.state.council_inbox.push_front({"id":"battle_%d_%d" % [int(WorldSimulation.state.elapsed_days),int(result.seed)],"advisor":"FIELD COMMAND","office":"Marshal","topic":"security","act":{"type":"warn"},"text":battle_report_text(result),"urgency":1.0,"severity":"critical","day":int(WorldSimulation.state.elapsed_days),"status":"unread","battle_seed":int(result.seed)})
