@@ -3889,5 +3889,19 @@
   "seasonal_conception_timing": {"path": "res://assets/ui/research/subjects/seasonal_conception_timing-v1.png", "focus": [0.5, 0.5]},
   "cord_afterbirth_handling": {"path": "res://assets/ui/research/subjects/cord_afterbirth_handling-v1.png", "focus": [0.5, 0.5]},
   "room_allocation_by_size": {"path": "res://assets/ui/research/subjects/room_allocation_by_size-v1.png", "focus": [0.5, 0.5]},
-  "load_carrying_posture": {"path": "res://assets/ui/research/subjects/load_carrying_posture-v1.png", "focus": [0.5, 0.5]}
+  "load_carrying_posture": {"path": "res://assets/ui/research/subjects/load_carrying_posture-v1.png", "focus": [0.5, 0.5]},
+  "central_hall_houses": {"path": "res://assets/ui/research/subjects/central_hall_houses-v1.png", "focus": [0.5, 0.5]},
+  "cutting_propagation": {"path": "res://assets/ui/research/subjects/cutting_propagation-v1.png", "focus": [0.5, 0.5]},
+  "haft_fit_checking": {"path": "res://assets/ui/research/subjects/haft_fit_checking-v1.png", "focus": [0.5, 0.5]},
+  "paced_work_cycles": {"path": "res://assets/ui/research/subjects/paced_work_cycles-v1.png", "focus": [0.5, 0.5]},
+  "perimeter_patrol_customs": {"path": "res://assets/ui/research/subjects/perimeter_patrol_customs-v1.png", "focus": [0.5, 0.5]},
+  "trial_custom_periods": {"path": "res://assets/ui/research/subjects/trial_custom_periods-v1.png", "focus": [0.5, 0.5]},
+  "water_source_rotation": {"path": "res://assets/ui/research/subjects/water_source_rotation-v1.png", "focus": [0.5, 0.5]},
+  "barred_palisade_gates": {"path": "res://assets/ui/research/subjects/barred_palisade_gates-v1.png", "focus": [0.5, 0.5]},
+  "boundary_oath_rituals": {"path": "res://assets/ui/research/subjects/boundary_oath_rituals-v1.png", "focus": [0.5, 0.5]},
+  "great_work_parties": {"path": "res://assets/ui/research/subjects/great_work_parties-v1.png", "focus": [0.5, 0.5]},
+  "harvest_headcount": {"path": "res://assets/ui/research/subjects/harvest_headcount-v1.png", "focus": [0.5, 0.5]},
+  "mixed_grain_legume_meals": {"path": "res://assets/ui/research/subjects/mixed_grain_legume_meals-v1.png", "focus": [0.5, 0.5]},
+  "river_landings": {"path": "res://assets/ui/research/subjects/river_landings-v1.png", "focus": [0.5, 0.5]},
+  "sacred_grove_protection": {"path": "res://assets/ui/research/subjects/sacred_grove_protection-v1.png", "focus": [0.5, 0.5]}
 }

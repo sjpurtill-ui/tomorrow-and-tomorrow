@@ -1,0 +1,12 @@
+{
+  "id": "harvest_headcount",
+  "line": "demography",
+  "game_year": 100,
+  "approx_historical_year": -4333,
+  "prompt": "c. 4333 BCE: At harvest gathering elder counts assembled family members one pebble each; chalk pastel and cut paper. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b0207a92-272e-46ad-a086-6112d18cbb9c.png",
+  "asset": "res://assets/ui/research/subjects/harvest_headcount-v1.png",
+  "sha256": "8ea7b98258f02002bd457616fc433bd589116986e35e0a13a57b66f330c61ea9",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; selected clearer cut-paper headcount with one pebble per person."
+}

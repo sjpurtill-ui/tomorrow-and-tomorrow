@@ -1,0 +1,12 @@
+{
+  "id": "cutting_propagation",
+  "line": "nutrition",
+  "game_year": 95,
+  "approx_historical_year": -4367,
+  "prompt": "c. 4367 BCE: Gardener plants fig, olive and vine cuttings with parent plants nearby; egg tempera. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6283a6e5-2488-4f2f-ba7c-f26bb7d192d1.png",
+  "asset": "res://assets/ui/research/subjects/cutting_propagation-v1.png",
+  "sha256": "7a0695b5d87db45a23d94be7172d95c8bb7e3d8c6780e0279fdee1d6759b7328",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
