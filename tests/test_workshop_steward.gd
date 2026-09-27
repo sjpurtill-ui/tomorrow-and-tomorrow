@@ -6,6 +6,9 @@ func before_test()->void:
 	GameState.initialize_population_model()
 	GameState.population_allocations.Crafting=100
 	GameState.population_allocations.Logistics=100
+	# No standing watch: its Defense allocation now also asks the workshop for
+	# gear for new watch recruits, which these cases keep separate from.
+	GameState.population_allocations.Defense=0
 	GameState.settlement_name="Workshop Town"
 	GameState.settlement_site_committed=true
 	GameState.settlement_completed=["Hearth Circle"]
@@ -94,15 +97,17 @@ func test_daily_staff_review_is_idempotent_and_manual_mode_leaves_jobs()->void:
 	MilitaryCampaign.workshop.advance(2)
 	assert_dict(job).is_equal(before)
 	assert_int(int(MilitaryCampaign.workshop.data.last_day)).is_equal(2)
-func test_player_manager_handles_real_civilian_study_demand()->void:
+func test_study_demand_no_longer_opens_civilian_paper_lines()->void:
+	# Civilian workshop lines were retired (2026-09-23): study media are
+	# Civilian Goods drawn under adopted record techniques, so pending study
+	# makes the workshop steward open no paper line and spend no timber.
 	GameState.population_allocations.Knowledge=20
 	GameState.known_discoveries.append("paper_making");GameState.discovery_adoption.paper_making=1
 	GameState.resource_stockpiles.merge({"Paper Pulp":5.0,"Freshwater":5.0,"Timber":20.0,"Fiber Plants":20.0},true)
 	preload("res://scripts/society_exchange.gd").data().collections["test"]={"returned_day":0,"study":0.0,"work":240.0}
 	MilitaryCampaign.workshop.advance(1)
-	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
-	assert_str(String(MilitaryCampaign.equipment_queue[0].item)).is_equal("handmade_paper")
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(16.0)
+	assert_array(MilitaryCampaign.equipment_queue).is_empty()
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(20.0)
 
 func test_workshop_state_uses_existing_campaign_save_and_rejects_bad_receipts()->void:
 	start(3);MilitaryCampaign._process_equipment_production_day()
