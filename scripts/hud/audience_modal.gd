@@ -328,11 +328,9 @@ func _build_herald(audience:Dictionary)->Control:
 	if kind=="report":
 		byline="%s, %s" % [String(speaker.get("name","Your scout")),String(speaker.get("title","scout"))]
 		var observed:=int(report.get("observed_day",-1))
-		if observed>=0:byline+="  ·  seen day %d" % observed
+		if observed>=0:byline+="  ·  seen %s" % Chronicle.date_label(observed).replace(" · ",", ")
 	if kind in WORK_KINDS:byline=String(work_info.get("byline",byline))
-	var timing:="arrived today" if waited<=0 else "has waited %d day%s" % [waited,"" if waited==1 else "s"]
-	var expires:=int(audience.get("expires_day",0))
-	if expires>0 and String(audience.get("status",""))=="waiting":timing+=" · will leave after day %d" % expires
+	var timing:=timing_words(audience)
 	var sub:=Tokens.make_label(byline+"  ·  "+timing,14,cream_dim);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
 	var terms:Dictionary=audience.get("terms",{})
 	if kind in WORK_KINDS:
@@ -643,7 +641,7 @@ func _build_persons_row()->void:
 	# Offline war orders: the same words the god could type, built from real
 	# state, reaching the same engine (court_war_orders.gd).
 	var offered:=persons_choices()
-	offered.append_array(WarOrders.offline_choices())
+	offered.append_array(WarOrders.offline_choices(audience_id))
 	_fill_persons_menus(persons_row,offered)
 
 func _fill_persons_menus(row:HBoxContainer,all:Array[Dictionary])->void:
@@ -701,8 +699,9 @@ func _after_persons(result:Dictionary)->void:
 	if String(audience.get("status","waiting"))!="waiting":
 		_show_outcome({"ok":true,"outcome":String(result.get("outcome","")),"reaction":"furious" if String(result.get("action","")) in ["execute","exile"] else "neutral","terminal":true})
 	else:
+		# The outcome is already one plain note in the hall (the voice's staging
+		# or the narration above); a red copy of it would say it twice.
 		_build_options()
-		if not String(result.get("outcome","")).is_empty():_show_toast(String(result.outcome))
 	_pump()
 
 func _on_persons_done(id:String,result:Dictionary)->void:
@@ -1046,8 +1045,9 @@ func _after_command(result:Dictionary)->void:
 		shown["terminal"]=true
 		_show_outcome(shown)
 	else:
+		# The outcome is already one plain note in the hall (the voice's staging
+		# or the narration above); a red copy of it would say it twice.
 		_build_options()
-		if not String(result.get("outcome","")).is_empty():_show_toast(String(result.outcome))
 	_pump()
 
 ## The god's words named an answer: it is carried out exactly as the card.
@@ -1390,6 +1390,8 @@ const ArtifactStory:=preload("res://scripts/artifact_culture.gd")
 const ENVOY_STAGE_MIN_H:=400.0
 const OFFER_W:=292.0
 const SPEECH_SHOWN:=3
+## About what the scene's speech area holds before the stage clips it.
+const SPEECH_CHARS:=420
 const CREAM:=Color("f6ecd6")
 const CREAM_DIM:=Color("e2d3b4")
 const PAPER_INK:=Color("2a2217")
@@ -1598,6 +1600,16 @@ func _envoy_offer_plinth(offer:Dictionary)->Control:
 		history.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;history.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(history)
 	return plinth
 
+## When they came and how long they stay, on the Chronicle's calendar (never
+## a raw day count).
+static func timing_words(audience:Dictionary)->String:
+	var day:=int(GameState.elapsed_days)
+	var waited:=day-int(audience.get("arrived_day",day))
+	var timing:="arrived today" if waited<=0 else "has waited %d day%s" % [waited,"" if waited==1 else "s"]
+	var expires:=int(audience.get("expires_day",0))
+	if expires>0 and String(audience.get("status",""))=="waiting":timing+=" · stays until %s" % Chronicle.date_label(expires).replace(" · ",", ")
+	return timing
+
 func _envoy_business(audience:Dictionary)->String:
 	## Their business in plain words: what they offer or want, and the catch.
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
@@ -1708,9 +1720,16 @@ func _refresh_speech(animate:bool)->void:
 	var lines:Array=Hall.find(audience_id).get("lines",[])
 	var shown:Array=[]
 	var index:=mini(rendered_lines,lines.size())-1
+	# The newest words always show whole: older ones give way when the room
+	# would overflow (the stage clips, and a cut-off line reads as a fault).
+	var budget:=SPEECH_CHARS
 	while index>=0 and shown.size()<SPEECH_SHOWN:
 		var line:Dictionary=lines[index];index-=1
-		if not String(line.get("text","")).strip_edges().is_empty():shown.push_front(line)
+		var words:=String(line.get("text","")).strip_edges()
+		if words.is_empty():continue
+		if not shown.is_empty() and words.length()>budget:break
+		budget-=words.length()
+		shown.push_front(line)
 	for i in shown.size():
 		speech_box.add_child(_speech_bubble(shown[i],animate and i==shown.size()-1,i<shown.size()-1))
 
@@ -1896,7 +1915,7 @@ func _work_herald(audience:Dictionary)->Dictionary:
 				"chip":["THE DEAD","%d named" % dead.size() if not dead.is_empty() else "none named"],"plate":plate}
 		"news":
 			plate["status"]=String(gw.get("key","building"))
-			return {"eyebrow":"WORD OF ANOTHER PEOPLE'S WONDER","herald":"%s RAISE A WONDER" % String(gw.get("civ_name","A NEIGHBOR")).to_upper(),"byline":String(gw.get("text","")),"chip":["AS OF","day %d" % int(gw.get("as_of",0))],"plate":plate}
+			return {"eyebrow":"WORD OF ANOTHER PEOPLE'S WONDER","herald":"%s RAISE A WONDER" % String(gw.get("civ_name","A NEIGHBOR")).to_upper(),"byline":String(gw.get("text","")),"chip":["AS OF",Chronicle.date_label(int(gw.get("as_of",0))).replace(" · ",", ")],"plate":plate}
 		"forecast":
 			return {"eyebrow":"THE WATCHING SKY","herald":"THE SKY-WATCHERS WARN OF LEAN DAYS","byline":String(gw.get("text","")),"chip":["COMING IN","about %d days" % int(gw.get("in_days",0))]}
 	return {}
@@ -2404,7 +2423,7 @@ func _envoy_row(audience:Dictionary)->Control:
 	if headline.is_empty():headline=String((KINDS.get(String(audience.get("kind","news")),KINDS.news) as Dictionary).eyebrow).to_lower()
 	var waited:=int(GameState.elapsed_days)-int(audience.get("arrived_day",GameState.elapsed_days))
 	var leaves:=int(audience.get("expires_day",0))
-	var sub:="%s · %s%s" % [headline,"arrived today" if waited<=0 else "waited %d day%s" % [waited,"" if waited==1 else "s"]," · leaves after day %d" % leaves if leaves>0 else ""]
+	var sub:="%s · %s%s" % [headline,"arrived today" if waited<=0 else "waited %d day%s" % [waited,"" if waited==1 else "s"]," · stays until %s" % Chronicle.date_label(leaves).replace(" · ",", ") if leaves>0 else ""]
 	var row:=_simple_row("Receive_"+id,"Envoy of %s" % String(audience.get("civ_name","")),sub,"Receive",_ink(Identity.banner_color(Identity.foreign(String(audience.get("civ_id",""))).texture)),Identity.foreign(String(audience.get("civ_id",""))).texture)
 	(row.get_meta("button") as Button).pressed.connect(func()->void:receive(id))
 	return row

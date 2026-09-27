@@ -64,7 +64,7 @@ static var custom_directive_handler:Callable=Callable()
 # Lexicon
 # --------------------------------------------------------------------------
 
-const INSIST_PATTERN:="(?i)^\\s*(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|carry it out)\\b[\\s!.]*$"
+const INSIST_PATTERN:="(?i)^\\s*(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|carry it out|go anyway|march anyway|send them anyway|take them (anyway|as they are)|(let them )?go as they are|as they are|then go)\\b[\\s!.]*$"
 ## [verb, pattern]; checked in order. Patterns match the verb phrase only.
 const VERB_PATTERNS:=[
 	["kill","(?i)\\b(kill|kills|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them)|burn (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)( alive)?|bur(y|ied) [\\w' ]{0,30}?alive|feed [\\w' ]{0,30}?to (the |my )?(dogs|wolves|pigs|hounds|crows|ravens|fire|fish|river|beasts)|(throw|give|hand|toss) [\\w' ]{0,30}?to the (dogs|wolves|pigs|hounds)|drown (him|her|them|(?-i:[A-Z])\\w+)|impale|crucify|flay|skin [\\w' ]{0,20}?alive|boil [\\w' ]{0,20}?alive|stone (him|her|them|(?-i:[A-Z])\\w+)|(beat|whip|flog|club|stone|burn|kick|starve|bleed|torture) [\\w' ]{0,30}?to death|(send|return|ship) [\\w' ]{0,40}?in pieces|(chop|cut|hack) [\\w' ]{0,30}?(head off|into pieces|to pieces|in pieces|apart)|draw and quarter|quarter (him|her|them)|sacrifice (him|her|them|(?-i:[A-Z])\\w+)|slit (his|her|their) throat)\\b"],
@@ -1002,14 +1002,16 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	## (court_war_orders.gd). Never "we will" followed by nothing.
 	var reading:Dictionary=cls.get("war",{}) if cls.get("war") is Dictionary else {}
 	if reading.is_empty(): reading=WarOrders.read(text,String(audience.get("civ_id","")))
-	# The war leader carries it, whoever it was spoken to.
-	var general:=WarOrders.war_leader()
+	# The war leader carries it, whoever it was spoken to; a summoned war
+	# leader of renown answers for himself and his own band.
+	var speaker:=_speaker_entry(list)
+	var general:=WarOrders.war_leader({"figure_id":String(speaker.get("figure_id",""))} if String(speaker.get("kind",""))=="figure" else {})
 	var general_key:=("person:%d" % int(general.get("person_id",0))) if int(general.get("person_id",0))>0 else ("figure:"+String(general.get("figure_id","")) if String(general.get("figure_id",""))!="" else "")
 	var carrier:=_entry(list,general_key) if general_key!="" else {}
 	if carrier.is_empty(): carrier=actor if not actor.is_empty() else _speaker_entry(list)
 	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
 	r.verb="war"
-	var decision:=WarOrders.perform(reading,insist)
+	var decision:=WarOrders.perform(reading,insist,{"general":general})
 	r["war"]=decision
 	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
 	r["actor_says"]=String(decision.get("says",""))
@@ -1023,6 +1025,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			r.stage="war_march"; r.executed=true; r.reaction="grave"
 			r.obedience={"id":"obey","manner":"ready","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
 		"object":
 			r.stage="war_object"; r.executed=false; r.reaction="troubled"
 			r.obedience={"id":"object","manner":"grim","chance":0.0}
@@ -1059,7 +1062,8 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	var war:=WarOrders.read(text,"")
 	if not war.is_empty():
 		var decided:=WarOrders.perform(war,false)
-		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":String(decided.get("outcome",""))}
+		# No voice speaks here: the war leader's words and the note together.
+		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":(String(decided.get("says",""))+" "+String(decided.get("outcome",""))).strip_edges()}
 	if custom_directive_handler.is_valid():
 		var handled:Variant=custom_directive_handler.call(text,context)
 		if handled is Dictionary and bool((handled as Dictionary).get("ok",false)): return handled
