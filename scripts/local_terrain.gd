@@ -52,6 +52,10 @@ const CaravanLeader:=preload("res://scripts/caravan_leader.gd")
 const CaravanSystem:=preload("res://scripts/caravan_system.gd")
 const CivilizationTravel:=preload("res://scripts/civilization_travel.gd")
 const CaravanPanel:=preload("res://scripts/hud/caravan_panel.gd")
+const GroundLens:=preload("res://scripts/hud/ground_lens.gd")
+const MapTickerWords:=preload("res://scripts/hud/map_ticker_words.gd")
+const MapNotes:=preload("res://scripts/hud/map_notes.gd")
+const PaperKit:=preload("res://scripts/hud/paper_kit.gd")
 const MAIN_RIVER_WATER_HALF_WIDTH_KM := 0.125
 const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
@@ -286,8 +290,6 @@ var settlement_convoy_pending_route:Dictionary={}
 var settlement_convoy_pending_quote:Dictionary={}
 var settlement_convoy_confirmation_previous_speed:=0.0
 var caravan_formation:Dictionary={}
-var caravan_formation_controls:Dictionary={}
-var caravan_formation_card:Control
 var settlement_fabric_shader:Shader
 var settlement_wall_shader:Shader
 var vegetation_surface_shader:Shader
@@ -1243,14 +1245,9 @@ func _commit_world_day(day_result:Dictionary)->void:
 	_refresh_settlement_footprint()
 	preload("res://scripts/rite_marks.gd").refresh(self)
 	preload("res://scripts/living_map.gd").refresh(self)
-	if not progression_events.is_empty() and travel_status_label:
-		travel_status_label.text="CIVILIZATION MILESTONE: %s" % String(progression_events[0].name).to_upper()
-	elif not discoveries.is_empty() and travel_status_label:
-		travel_status_label.text = "DISCOVERY: %s" % discoveries[0].name.to_upper()
-	elif not resource_events.is_empty() and travel_status_label:
-		travel_status_label.text = "%s: %s" % [resource_events[0].title.to_upper(), resource_events[0].description]
-	elif not simulation_events.is_empty() and travel_status_label:
-		travel_status_label.text = "%s: %s" % [simulation_events[0].title.to_upper(), simulation_events[0].description]
+	if travel_status_label:
+		var news:=MapTickerWords.day_news(progression_events,discoveries,resource_events,simulation_events)
+		if news!="":travel_status_label.text=news
 	_evaluate_travel_survival()
 	if hud:preload("res://scripts/hud/chronicle_card.gd").flush(self,hud)
 
@@ -11069,18 +11066,18 @@ func _nearest_point_on_tributary(course_index:int,point:Vector2,bound:float)->Ve
 func _settlement_surface_assessment(destination:Vector3)->Dictionary:
 	var terrain_height:=_height_at(destination.x,destination.z)
 	if terrain_height<=SEA_LEVEL+0.02:
-		return {"valid":false,"kind":"open_water","reason":"OPEN WATER  •  settlements require dry land"}
+		return {"valid":false,"kind":"open_water","reason":"Open water. A settlement needs dry land"}
 	var main_distance:=_main_river_distance_at(destination.x,destination.z)
 	if main_distance<=MAIN_RIVER_SETTLEMENT_CLEARANCE_KM:
 		return {
 			"valid":false,"kind":"river","distance_km":main_distance,
-			"reason":"RIVER CHANNEL  •  this point is in the river or its immediate bank  •  choose dry ground at least %.0f m from the channel centre" % (MAIN_RIVER_SETTLEMENT_CLEARANCE_KM*1000.0)
+			"reason":"River channel. This is in the river or on its bank; choose dry ground at least %.0f m from the middle of the channel" % (MAIN_RIVER_SETTLEMENT_CLEARANCE_KM*1000.0)
 		}
 	var tributary_distance:=_nearest_tributary_distance_at(Vector2(destination.x,destination.z))
 	if tributary_distance<=TRIBUTARY_SETTLEMENT_CLEARANCE_KM:
 		return {
 			"valid":false,"kind":"river","distance_km":tributary_distance,
-			"reason":"TRIBUTARY CHANNEL  •  this point is in moving water or its immediate bank  •  choose dry ground beyond the bank"
+			"reason":"Tributary channel. This is in moving water or on its bank; choose dry ground beyond the bank"
 		}
 	return {"valid":true,"kind":"land","river_distance_km":minf(main_distance,tributary_distance)}
 
@@ -11502,7 +11499,7 @@ func _process_local_settlement_day()->void:
 			hearth_established=true
 			if settlement_visual_root:settlement_visual_root.position=GameState.settlement_founded_at
 		_spawn_settlement_structure(String(event.kind))
-		if travel_status_label:travel_status_label.text="%s EMERGED FROM THE PEOPLE'S WORK" % String(event.kind).to_upper()
+		if travel_status_label:travel_status_label.text="The people's work has made %s." % String(event.kind).replace("_"," ").to_lower()
 	_update_settlement_progress_text()
 
 func _update_settlement_progress_text() -> void:
@@ -11720,7 +11717,7 @@ func _on_settler_clicked(_camera: Node, event: InputEvent, _position: Vector3, _
 			_update_camera()
 		_inspect_location(settler_marker.position)
 		if travel_status_label:
-			travel_status_label.text="%s SELECTED  •  Open POPULATION in the top bar to manage roles" % _settlement_display_name()
+			travel_status_label.text="%s. The card on the right shows the ground around them." % ("The travellers are here" if not GameState.settlement_site_committed else _settlement_display_name())
 		get_viewport().set_input_as_handled()
 
 func _toggle_people_panel() -> void:
@@ -11763,7 +11760,7 @@ func _move_settlers_to(destination:Vector3)->void:
 	if not bool(surface_assessment.get("valid",false)):
 		_inspect_location(destination)
 		if travel_status_label:
-			travel_status_label.text=String(surface_assessment.get("reason","SETTLEMENT SITE BLOCKED"))
+			travel_status_label.text=PaperKit.sentence(String(surface_assessment.get("reason","That ground cannot hold a settlement")))+"."
 		return
 	if GameState.settlement_site_committed or hearth_established or "Hearth Circle" in GameState.settlement_completed:
 		if settlement_convoy_targeting:
@@ -11774,7 +11771,7 @@ func _move_settlers_to(destination:Vector3)->void:
 		return
 	var accepted:=WorldSimulation.submit("player",{"kind":"move","destination":Vector2(destination.x,destination.z)})
 	if accepted.has("error"):
-		if travel_status_label:travel_status_label.text=String(accepted.error)
+		if travel_status_label:travel_status_label.text=PaperKit.sentence(String(accepted.error))
 		if bool(accepted.get("refused",false)):_show_caravan_notice({"leader":String(accepted.get("leader","The caravan leader")),"title":"The caravan leader advises against this","text":String(accepted.error).trim_prefix(String(accepted.get("leader",""))+": "),"severity":"warning"})
 		return
 	travel_start=settler_marker.position
@@ -11792,7 +11789,7 @@ func _move_settlers_to(destination:Vector3)->void:
 func _halt_founding_convoy_to_forage()->void:
 	var result:Dictionary=preload("res://scripts/civilization_travel.gd").camp_to_forage()
 	if result.has("error"):
-		if travel_status_label:travel_status_label.text=String(result.error)
+		if travel_status_label:travel_status_label.text=PaperKit.sentence(String(result.error))
 		return
 	travel_active=false
 	travel_reported_milestones.erase("forage_ready")
@@ -11843,7 +11840,7 @@ func _on_caravan_override(id:String,action:String)->void:
 				var from:Vector2=path[0]
 				var to:Vector2=path[-1]
 				_draw_route(Vector3(from.x,0,from.y),Vector3(to.x,0,to.y),path)
-	if result.has("error") and travel_status_label:travel_status_label.text=String(result.error)
+	if result.has("error") and travel_status_label:travel_status_label.text=PaperKit.sentence(String(result.error))
 	_present_caravan_reports()
 	_update_time_interface()
 
@@ -11863,14 +11860,11 @@ func _present_caravan_reports()->void:
 func _show_caravan_notice(entry:Dictionary)->void:
 	if travel_council_notice==null:return
 	var danger:=String(entry.get("severity",""))=="danger" or String(entry.get("severity",""))=="warning"
-	var accent:=Color("#b46452") if danger else Color("#b59b5d")
-	travel_council_notice.text="CARAVAN LEADER  •  %s\n%s — %s\nOPEN COUNCIL" % [String(entry.get("leader","")),String(entry.get("title","")),String(entry.get("text",""))]
+	travel_council_notice.text=MapNotes.caravan_words(entry)
+	MapNotes.style_notice(travel_council_notice,danger)
 	_place_travel_council_notice()
-	travel_council_notice.add_theme_stylebox_override("normal",_population_report_style(accent))
-	travel_council_notice.add_theme_stylebox_override("hover",_population_report_style(accent,true))
-	travel_council_notice.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
 	travel_council_notice.visible=true
-	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if danger else 9000)
+	travel_council_notice_until_msec=Time.get_ticks_msec()+(24000 if danger else 16000)
 
 ## Cheap geography for caravan route planning: the same authored surface water
 ## the daily water ledger uses, and dry-land height.
@@ -11900,27 +11894,12 @@ func _on_settlement_action_pressed()->void:
 	else:
 		_open_caravan_formation()
 
-## Form the settler caravan in the source settlement, then pick its destination.
+## Found a new settlement: pick the land first. The caravan leader chooses
+## the party and the rations; one card then shows who goes, the cost and the
+## time, with one "Send them".
 func _open_caravan_formation()->void:
-	if is_instance_valid(caravan_formation_card):return
-	var origin:Dictionary=_settlement_model().selected_settlement_snapshot()
-	if origin.is_empty():
-		var settlements:Array=_settlement_model().settlement_network_snapshot().get("settlements",[])
-		if not settlements.is_empty():origin=settlements[0]
-	var available:=float(origin.get("population",GameState.population_total))
-	var limits:=CaravanSystem.formation(Vector2.ZERO,Vector2.ZERO,available,caravan_formation)
-	limits["advice"]="Once you choose the ground, the leader plans the route between water, judges the rations and tells you plainly if the journey is unsafe."
-	var candidates:=CaravanLeader.candidates(6)
-	if interface_layer==null:
-		_enter_settlement_convoy_targeting()
-		return
-	caravan_formation_card=CaravanPanel.open_formation_card(interface_layer,String(origin.get("name",_settlement_display_name())).capitalize(),limits,candidates,caravan_formation,func(chosen:Dictionary)->void:
-		caravan_formation=chosen
-		caravan_formation_card=null
-		_enter_settlement_convoy_targeting()
-	,func()->void:
-		caravan_formation_card=null
-	)
+	caravan_formation={}
+	_enter_settlement_convoy_targeting()
 
 func _toggle_actions_menu()->void:
 	if actions_menu_panel==null:
@@ -12047,6 +12026,8 @@ func _diplomat_action_presentation(status:Dictionary,known_destinations:int)->Di
 		"tooltip":"ACTION  Send a physical delegation to one confirmed foreign settlement.\nRESULT  Its proposal, response, route, and observations travel at the speed of the envoys."
 	}
 
+const CHOOSE_LAND_WORDS:="Move over the map and click known land to see who would go and what it costs. Right-click or Esc stops."
+
 func _enter_settlement_convoy_targeting()->void:
 	settlement_convoy_targeting=true
 	settlement_convoy_hover_valid=false
@@ -12055,7 +12036,7 @@ func _enter_settlement_convoy_targeting()->void:
 	if map_help_panel: map_help_panel.visible=false
 	_ensure_settlement_convoy_preview()
 	if settlement_convoy_instruction_panel: settlement_convoy_instruction_panel.visible=true
-	_set_settlement_convoy_feedback("MOVE OVER THE MAP  •  LEFT-CLICK CHARTED LAND TO REVIEW ROUTE + COST  •  RIGHT-CLICK OR ESC CANCELS",Color("#ead078"))
+	_set_settlement_convoy_feedback(CHOOSE_LAND_WORDS,HudT.INK)
 	_open_founding_site_guide(camera_target,true)
 	_update_time_interface()
 
@@ -12072,7 +12053,7 @@ func _cancel_settlement_convoy_targeting()->void:
 	if map_help_panel and not map_help_dismissed and not capture_render_active: map_help_panel.visible=true
 	_refresh_map_help()
 	_update_time_interface()
-	if travel_status_label: travel_status_label.text="NEW-SETTLEMENT SITE SELECTION CANCELLED  •  no people or cargo were committed"
+	if travel_status_label: travel_status_label.text="You stopped choosing land. Nobody has left."
 
 func _ensure_settlement_convoy_preview()->void:
 	if settlement_convoy_preview and is_instance_valid(settlement_convoy_preview): return
@@ -12095,12 +12076,12 @@ func _ensure_settlement_convoy_preview()->void:
 
 func _set_settlement_convoy_feedback(message:String,color:Color)->void:
 	if settlement_convoy_instruction_label:
-		settlement_convoy_instruction_label.text=message
-		settlement_convoy_instruction_label.add_theme_color_override("font_color",color)
+		settlement_convoy_instruction_label.text=PaperKit.sentence(message)
+		settlement_convoy_instruction_label.add_theme_color_override("font_color",PaperKit.text_color(color))
 
 func _settlement_convoy_site_assessment(destination:Vector3,fresh:bool=false)->Dictionary:
 	if not _world_position_is_revealed(destination):
-		return {"valid":false,"reason":"UNCHARTED LAND  •  a scout must return with this ground before a convoy can use it"}
+		return {"valid":false,"reason":"Nobody has seen this ground yet; scouts must come back from it before settlers can go"}
 	var surface_assessment:=_settlement_surface_assessment(destination)
 	if not bool(surface_assessment.get("valid",false)):
 		return surface_assessment
@@ -12109,7 +12090,7 @@ func _settlement_convoy_site_assessment(destination:Vector3,fresh:bool=false)->D
 	var network:Dictionary=_settlement_model().settlement_network_snapshot()
 	var settlements:Array=network.get("settlements",[])
 	if settlements.is_empty():
-		return {"valid":false,"reason":"NO ESTABLISHED ORIGIN  •  complete the first settlement before founding another"}
+		return {"valid":false,"reason":"Finish the first settlement before founding another"}
 	var destination_2d:=Vector2(destination.x,destination.z)
 	var origin:Dictionary={}
 	var origin_distance:=INF
@@ -12123,18 +12104,18 @@ func _settlement_convoy_site_assessment(destination:Vector3,fresh:bool=false)->D
 			origin=settlement
 	var origin_clearance:=maxf(2.0,float(origin.get("claim_radius_km",0.0))+0.75)
 	if origin_distance<origin_clearance:
-		return {"valid":false,"reason":"TOO CLOSE TO %s  •  choose land at least %.1f km from its centre" % [String(origin.get("name","THE ORIGIN")).to_upper(),origin_clearance]}
+		return {"valid":false,"reason":"Too close to %s; choose land at least %.1f km from its hearth" % [String(origin.get("name","home")),origin_clearance]}
 	for existing_variant in settlements:
 		var existing:Dictionary=existing_variant
 		var existing_position_value:Variant=existing.get("position",Vector2.ZERO)
 		var existing_center:Vector2=existing_position_value if existing_position_value is Vector2 else Vector2.ZERO
 		var required_clearance:=maxf(1.2,float(existing.get("claim_radius_km",0.0))+0.55)
 		if destination_2d.distance_to(existing_center)<required_clearance:
-			return {"valid":false,"reason":"INSIDE %s'S PRESENT TERRITORY  •  choose land at least %.1f km from its centre" % [String(existing.get("name","A SETTLEMENT")).to_upper(),required_clearance]}
+			return {"valid":false,"reason":"Inside the land of %s; choose ground at least %.1f km from its hearth" % [String(existing.get("name","one of our towns")),required_clearance]}
 	return {
 		"valid":true,"origin":origin,"distance_km":origin_distance,
 		"water":water,"recommended":water.recommended,
-		"reason":"%s  •  %s  •  LEFT-CLICK TO REVIEW CONVOY" % [String(water.title),String(water.source_text)]
+		"reason":"%s: %s. Click to see who would go." % [PaperKit.sentence(String(water.title)),String(water.source_text)]
 	}
 
 func _update_settlement_convoy_preview(screen_position:Vector2)->void:
@@ -12144,7 +12125,7 @@ func _update_settlement_convoy_preview(screen_position:Vector2)->void:
 	if hit.is_empty():
 		settlement_convoy_hover_valid=false
 		settlement_convoy_preview.visible=false
-		_set_settlement_convoy_feedback("POINTER IS OFF THE MAP  •  move onto visible terrain",Color("#d48672"))
+		_set_settlement_convoy_feedback("Move the pointer onto the map.",HudT.RED)
 		return
 	settlement_convoy_hover_position=hit.position+Vector3.UP*0.006
 	var assessment:=_settlement_convoy_site_assessment(settlement_convoy_hover_position)
@@ -12163,25 +12144,25 @@ func _update_settlement_convoy_preview(screen_position:Vector2)->void:
 func _select_settlement_convoy_site(screen_position:Vector2)->void:
 	_update_settlement_convoy_preview(screen_position)
 	if not settlement_convoy_hover_valid:
-		if travel_status_label: travel_status_label.text="SITE NOT SELECTED  •  read the reason above the placement button"
+		if travel_status_label: travel_status_label.text="That land will not do. The note at the bottom of the map says why."
 		return
 	_begin_settlement_convoy(settlement_convoy_hover_position)
 
 func _begin_settlement_convoy(destination:Vector3)->void:
 	var assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(assessment.get("valid",false)):
-		_set_settlement_convoy_feedback(String(assessment.get("reason","SITE NOT VALID")),Color("#e08b77"))
+		_set_settlement_convoy_feedback(String(assessment.get("reason","That ground will not do")),HudT.RED)
 		return
 	var origin:Dictionary=assessment.get("origin",{})
 	var destination_2d:=Vector2(destination.x,destination.z)
 	if origin.is_empty():
-		_set_settlement_convoy_feedback("NO ESTABLISHED ORIGIN  •  the first settlement must be completed",Color("#e08b77"))
+		_set_settlement_convoy_feedback("Finish the first settlement before founding another.",HudT.RED)
 		return
 	var origin_2d:Vector2=origin.get("position",Vector2.ZERO)
 	var origin_3d:=Vector3(origin_2d.x,_height_at(origin_2d.x,origin_2d.y)+0.002,origin_2d.y)
 	var route:=_analyze_convoy_route(origin_3d,destination)
 	if not bool(route.get("valid",false)):
-		_set_settlement_convoy_feedback(String(route.get("reason","ROUTE BLOCKED")),Color("#e08b77"))
+		_set_settlement_convoy_feedback(String(route.get("reason","There is no way there")),HudT.RED)
 		if settlement_convoy_preview_material: settlement_convoy_preview_material.albedo_color=Color(0.92,0.30,0.23,0.55)
 		return
 	var duration:=maxf(0.5,float(route.distance_km)/(CONVOY_KM_PER_DAY*float(route.terrain_modifier)))
@@ -12210,147 +12191,44 @@ func _open_settlement_convoy_confirmation(destination:Vector3,route:Dictionary,q
 	if settlement_convoy_confirm_panel and is_instance_valid(settlement_convoy_confirm_panel): return
 	var site_assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(site_assessment.get("valid",false)):
-		_set_settlement_convoy_feedback(String(site_assessment.get("reason","SITE NOT VALID")),Color("#e08b77"))
+		_set_settlement_convoy_feedback(String(site_assessment.get("reason","That ground will not do")),HudT.RED)
 		return
 	settlement_convoy_pending_destination=destination
 	settlement_convoy_pending_route=route.duplicate(true)
 	settlement_convoy_pending_quote=quote.duplicate(true)
 	settlement_convoy_confirmation_previous_speed=game_speed
 	_set_game_speed(0.0)
-	settlement_convoy_confirm_panel=Control.new()
-	settlement_convoy_confirm_panel.name="SettlementConvoyConfirmation"
-	settlement_convoy_confirm_panel.size=get_viewport().get_visible_rect().size
-	settlement_convoy_confirm_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(settlement_convoy_confirm_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=settlement_convoy_confirm_panel.size
-	dimmer.color=Color(0.006,0.010,0.011,0.90)
-	settlement_convoy_confirm_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(minf(650.0,settlement_convoy_confirm_panel.size.x-48.0),minf(520.0,settlement_convoy_confirm_panel.size.y-48.0))
-	modal.position=(settlement_convoy_confirm_panel.size-modal.size)*0.5
-	modal.add_theme_stylebox_override("panel",_knowledge_style(Color("#0a1213"),Color("#a58b55"),1,4,24))
-	settlement_convoy_confirm_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",10)
-	modal.add_child(root)
-	var eyebrow:=Label.new()
-	eyebrow.text="NEW SETTLEMENT • SETTLER CARAVAN"
-	eyebrow.add_theme_font_size_override("font_size",11)
-	eyebrow.add_theme_color_override("font_color",Color("#c8af6c"))
-	root.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="Review before anyone leaves"
-	title.add_theme_font_size_override("font_size",24)
-	title.add_theme_color_override("font_color",Color("#eee2cc"))
-	root.add_child(title)
-	var scroll:=ScrollContainer.new()
-	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.custom_minimum_size.y=100
-	root.add_child(scroll)
-	var body:=VBoxContainer.new()
-	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",10)
-	scroll.add_child(body)
-	var explanation:=Label.new()
-	explanation.text="Nothing has been spent. Review the water supply, journey and supplies before sending people to a permanent home."
-	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	explanation.add_theme_font_size_override("font_size",12)
-	explanation.add_theme_color_override("font_color",Color("#aeb4ae"))
-	explanation.custom_minimum_size=Vector2(modal.size.x-64.0,42)
-	explanation.size.x=modal.size.x-64.0
-	body.add_child(explanation)
-	settlement_convoy_name_input=LineEdit.new()
-	settlement_convoy_name_input.name="NewSettlementName"
-	settlement_convoy_name_input.max_length=32
-	settlement_convoy_name_input.placeholder_text="Name the new settlement"
-	settlement_convoy_name_input.text=String(quote.get("suggested_name",_settlement_model().suggested_settlement_name(Vector2(destination.x,destination.z),String(quote.get("origin_name","")))))
-	settlement_convoy_name_input.custom_minimum_size=Vector2(0,40)
-	settlement_convoy_name_input.tooltip_text="This is the permanent map and history name. It can be changed later from the selected settlement."
-	body.add_child(settlement_convoy_name_input)
 	var formation:Dictionary=quote.get("caravan_formation",{})
-	if not formation.is_empty():
-		var origin_stores:Dictionary=_settlement_model().city_resource_snapshot(String(quote.get("origin_id","")),false).get("stores",{}) if String(quote.get("origin_id",""))!="" else {}
-		var limits:=formation.duplicate()
-		limits["show_food"]=true
-		limits["food_available"]=float(origin_stores.get("Food",GameState.resource_stockpiles.get("Food",0.0)))
-		var values:=caravan_formation.duplicate()
-		values["population"]=int(quote.get("population",formation.founders))
-		values["food"]=float(quote.get("food",formation.suggested_food))
-		values["leader_person_id"]=int((formation.leader as Dictionary).get("person_id",0))
-		limits["advice"]=CaravanSystem.rations_comment(formation,int(values.population),float(values.food))
-		caravan_formation_controls=CaravanPanel.build_formation(body,limits,CaravanLeader.candidates(6),values,modal.size.x-64.0,_on_caravan_formation_changed,{"text":Color("#ded5c0"),"muted":Color("#aeb4ae"),"accent":Color("#c8af6c")})
-	body.add_child(HSeparator.new())
-	var origin_name:=String(quote.get("origin_name","NEAREST SETTLEMENT")).to_upper()
-	var distance_km:=float(route.get("distance_km",quote.get("distance_km",0.0)))
-	var duration_days:=float(quote.get("duration_days",0.0))
-	var founding_materials:Dictionary=quote.get("materials",{})
-	var details:=Label.new()
-	details.text="FROM  %s\nDESTINATION  CHARTED LAND • %.1f km away\nWATER  %s\nTRAVEL  %s\nFOUNDING PARTY  %s people\nTRAVEL RATIONS  %s\nFOUNDING SUPPLIES  %s" % [origin_name,distance_km,String((site_assessment.water as Dictionary).source_text),_format_game_duration(duration_days),_compact_population(int(quote.get("population",0))),_compact_population(roundi(float(quote.get("food",0.0)))),_founding_material_summary(founding_materials)]
-	details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	details.tooltip_text="Founding supplies cover portable shelter, cordage, containers, and tools. Timber, plant fiber, clay, and stone can substitute; heavier materials require more carrying capacity."
-	details.add_theme_font_size_override("font_size",14)
-	details.add_theme_color_override("font_color",Color("#ded5c0"))
-	details.custom_minimum_size=Vector2(modal.size.x-64.0,150)
-	details.size.x=modal.size.x-64.0
-	body.add_child(details)
-	settlement_convoy_confirm_status=Label.new()
+	var leader:Dictionary=formation.get("leader",{})
+	var water:Dictionary=site_assessment.water
+	var neighbors:Dictionary=water.get("neighbors",{})
+	var people:=int(quote.get("population",0))
 	var ready:=bool(quote.get("ok",false))
-	settlement_convoy_confirm_status.text=String((site_assessment.water as Dictionary).reason) if ready else "CANNOT SEND  •  %s" % String(quote.get("reason","requirements are not met"))
-	var neighbors:Dictionary=(site_assessment.water as Dictionary).neighbors
-	if ready and float(neighbors.penalty)>0:
-		settlement_convoy_confirm_status.text+="\n%s" % String(neighbors.text)
-	settlement_convoy_confirm_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	settlement_convoy_confirm_status.add_theme_font_size_override("font_size",12)
-	settlement_convoy_confirm_status.add_theme_color_override("font_color",(site_assessment.water as Dictionary).color if ready else Color("#e08b77"))
-	settlement_convoy_confirm_status.custom_minimum_size=Vector2(modal.size.x-48.0,38)
-	settlement_convoy_confirm_status.size.x=modal.size.x-48.0
-	root.add_child(settlement_convoy_confirm_status)
-	var footer:=HBoxContainer.new()
-	footer.alignment=BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation",10)
-	root.add_child(footer)
-	var choose_again:=Button.new()
-	choose_again.text="CHOOSE DIFFERENT LAND"
-	choose_again.custom_minimum_size=Vector2(210,42)
-	choose_again.pressed.connect(_dismiss_settlement_convoy_confirmation)
-	footer.add_child(choose_again)
-	settlement_convoy_confirm_button=Button.new()
-	settlement_convoy_confirm_button.text="SEND THE CARAVAN"
-	settlement_convoy_confirm_button.custom_minimum_size=Vector2(210,42)
-	settlement_convoy_confirm_button.disabled=not ready
-	settlement_convoy_confirm_button.pressed.connect(_confirm_settlement_convoy)
-	footer.add_child(settlement_convoy_confirm_button)
-
-## Party size, rations or leader changed in the review: the quote is repriced
-## from real stores and the leader re-plans before anything is spent.
-func _on_caravan_formation_changed(values:Dictionary)->void:
-	var previous_leader:=int(caravan_formation.get("leader_person_id",0))
-	caravan_formation.merge(values,true)
-	var quote:=settlement_convoy_pending_quote
-	var formation:Dictionary=quote.get("caravan_formation",{})
-	var destination_2d:=Vector2(settlement_convoy_pending_destination.x,settlement_convoy_pending_destination.z)
-	var origin_value:Variant=quote.get("origin",destination_2d)
-	var origin_2d:Vector2=origin_value if origin_value is Vector2 else destination_2d
-	if formation.is_empty() or int(caravan_formation.get("leader_person_id",0))!=previous_leader:
-		formation=CaravanSystem.formation(origin_2d,destination_2d,float(formation.get("max_founders",40))+float(CaravanSystem.REMAIN_AT_ORIGIN),caravan_formation)
-	var repriced:Dictionary=_settlement_model().settlement_convoy_quote(destination_2d,maxf(float(quote.get("duration_days",0.5)),float(formation.get("travel_days",0.5))),{},caravan_formation)
-	repriced["caravan_formation"]=formation
-	if not bool(formation.get("ok",false)):
-		repriced["ok"]=false
-		repriced["reason"]="%s refuses: %s" % [String((formation.get("leader",{}) as Dictionary).get("name","The caravan leader")),String(formation.get("advice",""))]
-	settlement_convoy_pending_quote=repriced
-	var advice:Label=caravan_formation_controls.get("advice")
-	if is_instance_valid(advice):advice.text=CaravanSystem.rations_comment(formation,int(repriced.get("population",0)),float(repriced.get("food",0.0)))
-	var ready:=bool(repriced.get("ok",false))
-	if settlement_convoy_confirm_status:
-		settlement_convoy_confirm_status.text="READY  •  %s people, %.0f rations" % [_compact_population(int(repriced.get("population",0))),float(repriced.get("food",0.0))] if ready else "CANNOT SEND  •  %s" % String(repriced.get("reason","requirements are not met"))
-		settlement_convoy_confirm_status.add_theme_color_override("font_color",Color("#8fc59a") if ready else Color("#e08b77"))
-	if settlement_convoy_confirm_button:settlement_convoy_confirm_button.disabled=not ready
+	var facts:={
+		"name":String(quote.get("suggested_name",_settlement_model().suggested_settlement_name(Vector2(destination.x,destination.z),String(quote.get("origin_name",""))))),
+		"origin_name":String(quote.get("origin_name","home")),
+		"leader":String(leader.get("name","A caravan leader")),
+		"leader_summary":String(leader.get("summary",CaravanLeader.fit_summary(leader) if not leader.is_empty() else "")),
+		"people":people,
+		"food_days":float(quote.get("food",0.0))/maxf(1.0,float(people)),
+		"journey":MapTickerWords.duration(float(quote.get("duration_days",0.0))),
+		"distance_km":float(route.get("distance_km",quote.get("distance_km",0.0))),
+		"supplies":_founding_material_summary(quote.get("materials",{})).to_lower(),
+		"water_title":PaperKit.sentence(String(water.get("title",""))),
+		"water_text":"%s. %s" % [String(water.get("source_text","")),String(water.get("reason",""))],
+		"water_color":water.get("color",HudT.TEAL),
+		"neighbour_text":String(neighbors.get("text","")) if float(neighbors.get("penalty",0.0))>0 else "",
+		"ready":ready,
+		"problem":String(quote.get("reason","something they need is missing")),
+		"advice":CaravanSystem.rations_comment(formation,people,float(quote.get("food",0.0))) if not formation.is_empty() else "",
+	}
+	var card:=CaravanPanel.open_settler_card(interface_layer,facts,_confirm_settlement_convoy,_dismiss_settlement_convoy_confirmation)
+	settlement_convoy_confirm_panel=card.overlay
+	settlement_convoy_name_input=card.name_input
+	settlement_convoy_confirm_status=card.status
+	settlement_convoy_confirm_button=card.send
 
 func _dismiss_settlement_convoy_confirmation()->void:
-	caravan_formation_controls={}
 	if settlement_convoy_confirm_panel and is_instance_valid(settlement_convoy_confirm_panel): settlement_convoy_confirm_panel.queue_free()
 	settlement_convoy_confirm_panel=null
 	settlement_convoy_confirm_status=null
@@ -12360,28 +12238,29 @@ func _dismiss_settlement_convoy_confirmation()->void:
 	settlement_convoy_pending_quote={}
 	_set_game_speed(settlement_convoy_confirmation_previous_speed)
 	if settlement_convoy_targeting:
-		_set_settlement_convoy_feedback("MOVE OVER THE MAP  •  LEFT-CLICK CHARTED LAND TO REVIEW ROUTE + COST  •  RIGHT-CLICK OR ESC CANCELS",Color("#ead078"))
+		_set_settlement_convoy_feedback(CHOOSE_LAND_WORDS,HudT.INK)
 
 func _confirm_settlement_convoy()->void:
 	var destination:=settlement_convoy_pending_destination
 	var site_assessment:=_settlement_convoy_site_assessment(destination,true)
 	if not bool(site_assessment.get("valid",false)):
 		if settlement_convoy_confirm_status:
-			settlement_convoy_confirm_status.text="CANNOT SEND  •  %s" % String(site_assessment.get("reason","the destination is no longer viable"))
-			settlement_convoy_confirm_status.add_theme_color_override("font_color",Color("#e08b77"))
+			settlement_convoy_confirm_status.text="They cannot leave: %s." % PaperKit.sentence(String(site_assessment.get("reason","that ground will no longer do"))).trim_suffix(".")
+			settlement_convoy_confirm_status.add_theme_color_override("font_color",HudT.RED_TEXT)
 		if settlement_convoy_confirm_button: settlement_convoy_confirm_button.disabled=true
 		return
 	var quote:=settlement_convoy_pending_quote.duplicate(true)
 	var chosen_name:=settlement_convoy_name_input.text.strip_edges() if settlement_convoy_name_input else String(quote.get("suggested_name",""))
 	var party:=caravan_formation.duplicate()
-	if not caravan_formation_controls.is_empty():party.merge(CaravanPanel.formation_values(caravan_formation_controls),true)
+	party["population"]=int(quote.get("population",party.get("population",0)))
+	party["food"]=float(quote.get("food",party.get("food",0.0)))
 	var formation:Dictionary=quote.get("caravan_formation",{})
 	if not formation.is_empty() and int(party.get("leader_person_id",0))==int((formation.leader as Dictionary).get("person_id",-1)):party["plan"]=formation.plan
 	var started:Dictionary=_settlement_model().begin_settlement_convoy(Vector2(destination.x,destination.z),float(quote.get("duration_days",0.5)),chosen_name,false,party)
 	if not bool(started.get("ok",false)):
 		if settlement_convoy_confirm_status:
-			settlement_convoy_confirm_status.text="CANNOT SEND  •  %s" % String(started.get("reason","the available provisions changed"))
-			settlement_convoy_confirm_status.add_theme_color_override("font_color",Color("#e08b77"))
+			settlement_convoy_confirm_status.text="They cannot leave: %s" % String(started.get("reason","the stores have changed."))
+			settlement_convoy_confirm_status.add_theme_color_override("font_color",HudT.RED_TEXT)
 		if settlement_convoy_confirm_button: settlement_convoy_confirm_button.disabled=true
 		return
 	var origin_2d:Vector2=started.get("origin",Vector2.ZERO)
@@ -12397,12 +12276,11 @@ func _confirm_settlement_convoy()->void:
 	if settlement_convoy_instruction_panel: settlement_convoy_instruction_panel.visible=false
 	_draw_route(origin_3d,destination,started.get("path",[]))
 	caravan_formation={}
-	caravan_formation_controls={}
 	_present_caravan_reports()
 	var event:={
 		"id":"settlement_convoy_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
-		"title":"New Settlement Convoy Departed",
-		"description":"%s people left %s with %.0f travel rations and %s in founding supplies for a %.1f km journey. The population remains aggregate; one convoy record represents the entire mission." % [_compact_population(int(started.population)),String(started.origin_name),float(started.food),_founding_material_summary(started.get("materials",{})),float(started.distance_km)],
+		"title":"Settlers set out",
+		"description":"%s people left %s for new land %.1f km away, carrying %.0f days' food each and %s for shelter and tools." % [_compact_population(int(started.population)),String(started.origin_name),float(started.distance_km),float(started.food)/maxf(1.0,float(started.population)),_founding_material_summary(started.get("materials",{})).to_lower()],
 		"domain":"settlement","severity":"major"
 	}
 	GameState.simulation_events.push_front(event)
@@ -12444,8 +12322,8 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		stamp=trace.mark("found_government",stamp)
 		var event:={
 			"id":"settlement_founded_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
-			"title":"New Settlement Seeded",
-			"description":"%s arrived and established %s. Its aggregate population, territory, and future growth now remain part of the same civilization totals." % [_compact_population(int(completed.population)),String(settlement.get("name","the new settlement"))],
+			"title":"A new settlement",
+			"description":"%s settlers arrived and founded %s. Its people and its growth count with the rest of our people." % [_compact_population(int(completed.population)),String(settlement.get("name","the new settlement"))],
 			"domain":"settlement","severity":"major"
 		}
 		GameState.simulation_events.push_front(event)
@@ -12462,12 +12340,12 @@ func _start_settlement_here() -> void:
 	var site_assessment:=_settlement_surface_assessment(settler_marker.position)
 	if not bool(site_assessment.get("valid",false)):
 		if travel_status_label:
-			travel_status_label.text="SETTLEMENT NOT STARTED  •  %s" % String(site_assessment.get("reason","choose dry land"))
+			travel_status_label.text="Not founded here: %s." % PaperKit.sentence(String(site_assessment.get("reason","choose dry land"))).trim_suffix(".")
 		_refresh_actions_menu()
 		return
 	var water:=_founding_site_advice(settler_marker.position,true)
 	if not bool(water.valid):
-		if travel_status_label:travel_status_label.text="SETTLEMENT NOT STARTED  •  %s" % String(water.reason)
+		if travel_status_label:travel_status_label.text="Not founded here. %s" % String(water.reason)
 		if is_instance_valid(founding_site_guide):founding_site_guide.update_site(settler_marker.position)
 		return
 	_close_founding_site_guide()
@@ -12549,7 +12427,7 @@ func _analyze_convoy_route(from: Vector3,to: Vector3) -> Dictionary:
 		else:
 			wet_run=0.0
 	if longest_wet_run>4.0:
-		return {"valid":false,"reason":"ROUTE CROSSES %.0f km OF OPEN WATER  •  boats and navigation have not been discovered" % longest_wet_run}
+		return {"valid":false,"reason":"The way crosses %.0f km of open water, and our people have no boats yet" % longest_wet_run}
 	var mean_relief:=elevation_total/maxf(1.0,float(samples))
 	var terrain_modifier:=clampf(1.02-mean_relief*0.045-elevation_change/maxf(1.0,distance_km)*0.12,0.42,1.0)
 	if longest_wet_run>0.0: terrain_modifier*=0.84
@@ -12631,14 +12509,11 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 	if item.is_empty() or travel_council_notice==null:
 		return
 	var urgency:=float(item.get("urgency",0.4))
-	var accent:=Color("#b46452") if urgency>0.7 else Color("#b59b5d")
-	travel_council_notice.text="WORD FROM THE ROAD  •  %s\n%s\nOPEN COUNCIL" % [String(item.get("advisor","the caravan's speakers")),String(item.get("text",""))]
+	travel_council_notice.text=MapNotes.road_words(String(item.get("advisor","")),String(item.get("text","")))
+	MapNotes.style_notice(travel_council_notice,urgency>0.7)
 	_place_travel_council_notice()
-	travel_council_notice.add_theme_stylebox_override("normal",_population_report_style(accent))
-	travel_council_notice.add_theme_stylebox_override("hover",_population_report_style(accent,true))
-	travel_council_notice.add_theme_stylebox_override("pressed",_population_report_style(accent,true))
 	travel_council_notice.visible=true
-	travel_council_notice_until_msec=Time.get_ticks_msec()+(13000 if urgency>0.7 else 8500)
+	travel_council_notice_until_msec=Time.get_ticks_msec()+(24000 if urgency>0.7 else 16000)
 
 ## Sizes the road notice to its words and keeps it clear of the Chronicle's
 ## moment card (top right): beside the card when there is room, else below it.
@@ -12649,7 +12524,7 @@ func _place_travel_council_notice()->void:
 	var font:Font=travel_council_notice.get_theme_font("font")
 	var font_size:=travel_council_notice.get_theme_font_size("font_size")
 	var text_height:=font.get_multiline_string_size(travel_council_notice.text,HORIZONTAL_ALIGNMENT_LEFT,width-36.0,font_size).y if font else 120.0
-	travel_council_notice.size=Vector2(width,ceilf(text_height)+30.0)
+	travel_council_notice.size=Vector2(width,ceilf(text_height)+36.0)
 	var card_width:=float(preload("res://scripts/hud/chronicle_card.gd").CARD_WIDTH)
 	var x:=view.x-card_width-32.0-width
 	var y:=84.0
@@ -12703,20 +12578,23 @@ func _render_active_foreign_alert()->void:
 	if foreign_alert_panel==null or active_foreign_alert.is_empty(): return
 	var first_contact:=String(active_foreign_alert.get("kind",""))=="first_contact"
 	var group_count:=int(active_foreign_alert.get("group_count",1))
-	foreign_alert_title.text=(("FIRST CONTACT" if first_contact else "FOREIGN UNIT SIGHTED") if group_count<=1 else "%d FOREIGN UNITS SIGHTED" % group_count)+"  •  DAY %d" % (int(active_foreign_alert.get("day",0))+1)
+	foreign_alert_title.text=MapNotes.alert_title(first_contact,group_count,int(active_foreign_alert.get("day",0)))
 	if group_count<=1:
-		var full_description:=String(active_foreign_alert.get("description","A foreign formation was observed."))
-		foreign_alert_body.text="%s\n%s" % [String(active_foreign_alert.get("title","Foreign observation")).to_upper(),_bounded_alert_copy(full_description)]
+		var full_description:=String(active_foreign_alert.get("description","Strangers were seen."))
+		var heading:=PaperKit.sentence(String(active_foreign_alert.get("title",""))).trim_suffix(".")
+		foreign_alert_body.text=("%s. %s" % [heading,_bounded_alert_copy(full_description)]) if heading!="" else _bounded_alert_copy(full_description)
 		foreign_alert_body.tooltip_text=full_description
 	else:
 		var descriptions:Array=active_foreign_alert.get("group_descriptions",[])
-		var first_description:=String(descriptions[0]) if not descriptions.is_empty() else String(active_foreign_alert.get("description","Foreign formations were observed."))
-		foreign_alert_body.text="SEVERAL SIGHTINGS\n%s\n%d bands of strangers are in sight; open World for the list." % [_bounded_alert_copy(first_description,170),group_count]
+		var first_description:=String(descriptions[0]) if not descriptions.is_empty() else String(active_foreign_alert.get("description","Strangers were seen."))
+		foreign_alert_body.text="%s\nThe Known World lists every band in sight." % _bounded_alert_copy(first_description,170)
 		foreign_alert_body.tooltip_text="\n\n".join(descriptions) if not descriptions.is_empty() else first_description
-	foreign_alert_panel.add_theme_stylebox_override("panel",_population_report_style(Color("#d5a54f") if first_contact else Color("#c77a56")))
+	MapNotes.style_alert(foreign_alert_panel,first_contact)
 	if foreign_alert_world_button:
-		foreign_alert_world_button.visible=String(active_foreign_alert.get("civ_id",""))!="" or group_count>1
-	foreign_alert_world_button.tooltip_text="Open the known world report and bounded local sighting list. Unidentified formations remain unnamed." if group_count>1 else "Open the known diplomatic record for this identified civilization."
+		var known_people:=String(active_foreign_alert.get("civ_id",""))!=""
+		foreign_alert_world_button.visible=known_people or group_count>1
+		foreign_alert_world_button.text="Speak with them" if known_people else "Open the Known World"
+		foreign_alert_world_button.tooltip_text="Open the court and send word to their people through our envoys." if known_people else "The Known World lists every band in sight."
 	_clamp_foreign_alert_to_viewport()
 	foreign_alert_panel.visible=not _blocking_modal_or_report_open()
 
@@ -12759,7 +12637,8 @@ func _blocking_modal_or_report_open()->bool:
 func _clamp_foreign_alert_to_viewport()->void:
 	if foreign_alert_panel==null: return
 	var viewport_size:=get_viewport().get_visible_rect().size
-	foreign_alert_panel.size=Vector2(minf(362.0,maxf(280.0,viewport_size.x-24.0)),minf(188.0,maxf(150.0,viewport_size.y-24.0)))
+	foreign_alert_panel.reset_size()
+	foreign_alert_panel.size.x=minf(380.0,maxf(280.0,viewport_size.x-24.0))
 	foreign_alert_panel.position=Vector2(clampf(viewport_size.x-foreign_alert_panel.size.x-16.0,12.0,maxf(12.0,viewport_size.x-foreign_alert_panel.size.x-12.0)),clampf(84.0,12.0,maxf(12.0,viewport_size.y-foreign_alert_panel.size.y-12.0)))
 
 
@@ -12780,13 +12659,15 @@ func _center_active_foreign_alert()->void:
 
 
 func _open_active_foreign_alert_world()->void:
+	## A known people: the court, to send word. Several unnamed bands: the
+	## Known World dock, which lists them. Never the old strategy panel.
 	var civ_id:=String(active_foreign_alert.get("civ_id",""))
 	var grouped:=int(active_foreign_alert.get("group_count",1))>1
 	_finish_active_foreign_alert()
-	if civ_id!="": selected_civilization_id=civ_id
-	elif not grouped: return
-	selected_civilization_region_id=""
-	_open_civilizations_panel()
+	if civ_id!="":
+		MapNotes.open_court({"civ_id":civ_id})
+	elif grouped and hud:
+		_on_hud_section_requested("world",0)
 
 
 func _dismiss_active_foreign_alert()->void:
@@ -13045,65 +12926,19 @@ func _build_interface() -> void:
 	travel_council_notice=Button.new()
 	travel_council_notice.position=Vector2(maxf(500.0,viewport_width-890.0),84)
 	travel_council_notice.size=Vector2(390,140)
-	travel_council_notice.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	travel_council_notice.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	travel_council_notice.add_theme_font_size_override("font_size",12)
-	travel_council_notice.add_theme_color_override("font_color",Color("#eadfc8"))
-	travel_council_notice.tooltip_text="Open the full council record."
-	travel_council_notice.pressed.connect(func()->void: _on_hud_section_requested("civ",1))
+	MapNotes.style_notice(travel_council_notice,false)
+	travel_council_notice.tooltip_text="Open the court to answer them."
+	travel_council_notice.pressed.connect(func()->void:
+		travel_council_notice.visible=false
+		MapNotes.open_court())
 	travel_council_notice.visible=false
 	layer.add_child(travel_council_notice)
-	foreign_alert_panel=PanelContainer.new()
-	foreign_alert_panel.name="ForeignObservationAlert"
-	foreign_alert_panel.position=Vector2(maxf(12.0,viewport_width-378.0),84)
-	foreign_alert_panel.size=Vector2(362,188)
-	foreign_alert_panel.custom_minimum_size=Vector2.ZERO
-	foreign_alert_panel.clip_contents=true
-	foreign_alert_panel.z_index=80
-	foreign_alert_panel.add_theme_stylebox_override("panel",_population_report_style(Color("#c77a56")))
-	var alert_root:=VBoxContainer.new()
-	alert_root.add_theme_constant_override("separation",7)
-	foreign_alert_panel.add_child(alert_root)
-	foreign_alert_title=Label.new()
-	foreign_alert_title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	foreign_alert_title.add_theme_font_size_override("font_size",15)
-	foreign_alert_title.add_theme_color_override("font_color",Color("#f0d49d"))
-	alert_root.add_child(foreign_alert_title)
-	foreign_alert_body=Label.new()
-	foreign_alert_body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	foreign_alert_body.custom_minimum_size=Vector2(0,64)
-	foreign_alert_body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	foreign_alert_body.max_lines_visible=5
-	foreign_alert_body.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	foreign_alert_body.clip_text=true
-	foreign_alert_body.add_theme_font_size_override("font_size",11)
-	foreign_alert_body.add_theme_color_override("font_color",Color("#ddd4c3"))
-	alert_root.add_child(foreign_alert_body)
-	var alert_actions:=HBoxContainer.new()
-	alert_actions.add_theme_constant_override("separation",5)
-	alert_root.add_child(alert_actions)
-	var center_alert:=Button.new()
-	center_alert.text="SHOW MAP"
-	center_alert.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	center_alert.add_theme_font_size_override("font_size",9)
-	center_alert.tooltip_text="Move the camera to the exact observed or reported encounter position."
-	center_alert.pressed.connect(_center_active_foreign_alert)
-	alert_actions.add_child(center_alert)
-	foreign_alert_world_button=Button.new()
-	foreign_alert_world_button.text="OPEN WORLD"
-	foreign_alert_world_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	foreign_alert_world_button.add_theme_font_size_override("font_size",9)
-	foreign_alert_world_button.tooltip_text="Open the known diplomatic record for an identified civilization."
-	foreign_alert_world_button.pressed.connect(_open_active_foreign_alert_world)
-	alert_actions.add_child(foreign_alert_world_button)
-	var dismiss_alert:=Button.new()
-	dismiss_alert.text="DISMISS"
-	dismiss_alert.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	dismiss_alert.add_theme_font_size_override("font_size",9)
-	dismiss_alert.pressed.connect(_dismiss_active_foreign_alert)
-	alert_actions.add_child(dismiss_alert)
-	foreign_alert_panel.visible=false
-	layer.add_child(foreign_alert_panel)
+	# First contact: a paper card whose talk button opens the court (map_notes.gd).
+	var alert:=MapNotes.build_alert(layer,get_viewport().get_visible_rect().size,_center_active_foreign_alert,_open_active_foreign_alert_world,_dismiss_active_foreign_alert)
+	foreign_alert_panel=alert.panel
+	foreign_alert_title=alert.title
+	foreign_alert_body=alert.body
+	foreign_alert_world_button=alert.world_button
 	start_settlement_button=Button.new()
 	start_settlement_button.position=Vector2(viewport_width*0.5-165,get_viewport().get_visible_rect().size.y-112)
 	start_settlement_button.size=Vector2(330,64)
@@ -13123,16 +12958,16 @@ func _build_interface() -> void:
 	layer.add_child(start_settlement_button)
 	settlement_convoy_instruction_panel=PanelContainer.new()
 	settlement_convoy_instruction_panel.position=Vector2(viewport_width*0.5-300,get_viewport().get_visible_rect().size.y-176)
-	settlement_convoy_instruction_panel.size=Vector2(600,56)
+	settlement_convoy_instruction_panel.size=Vector2(600,62)
 	settlement_convoy_instruction_panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var convoy_instruction_style:=HudT.flat(HudT.PANEL_BG_SOLID,HudT.GOLD,1,4,8)
-	settlement_convoy_instruction_panel.add_theme_stylebox_override("panel",convoy_instruction_style)
+	settlement_convoy_instruction_panel.add_theme_stylebox_override("panel",PaperKit.card_style(10.0,HudT.GOLD))
 	settlement_convoy_instruction_label=Label.new()
 	settlement_convoy_instruction_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	settlement_convoy_instruction_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	settlement_convoy_instruction_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	settlement_convoy_instruction_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	settlement_convoy_instruction_label.add_theme_font_size_override("font_size",11)
+	settlement_convoy_instruction_label.add_theme_font_size_override("font_size",15)
+	settlement_convoy_instruction_label.add_theme_color_override("font_color",HudT.INK)
 	settlement_convoy_instruction_panel.add_child(settlement_convoy_instruction_label)
 	settlement_convoy_instruction_panel.visible=false
 	layer.add_child(settlement_convoy_instruction_panel)
@@ -13336,10 +13171,10 @@ func _on_city_aftermath(_aftermath:Dictionary)->void:
 func _restore_military_attention()->void:
 	if GeneralCampaign.active:return
 	if not MilitaryCampaign.pending_aftermath.is_empty():
-		_pause_for_military_attention("saved_aftermath","BATTLE AFTERMATH AWAITS","The last battle ended. Review surviving soldiers, occupation assignments and scattered personnel in Military before issuing another operation.",false)
+		_pause_for_military_attention("saved_aftermath","The battle is over","The last battle has ended. War planning shows who came through, who is missing and what your war leader means to do next.",false)
 		return
 	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
-	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","BATTLE UNDERWAY","A battle is already underway. Open War Planning to review the forces, location, and orders.",false)
+	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","A battle is under way","Our people are fighting. War planning shows where, who is in it and what the general is doing.",false)
 
 func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->void:
 	if threat.is_empty(): return
@@ -13347,13 +13182,13 @@ func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->
 	if String(threat.get("campaign_mode","defensive"))=="offensive": return
 	var location:=String(threat.get("target_region_name",GameState.settlement_name))
 	if location.is_empty(): location=GameState.settlement_name
-	_pause_for_military_attention(String(threat.get("id","threat")),"ATTACK APPROACHING", "%s is approaching %s with roughly %d personnel. A response is due by day %d. Time is paused so you can review the threat before battle. If you resume without choosing a response, the garrison will defend or yield when the deadline passes." % [String(threat.get("source_name","An unidentified force")),location,int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",GameState.elapsed_days))],truncate_batch)
+	_pause_for_military_attention(String(threat.get("id","threat")),"An attack is coming", "%s is coming toward %s, perhaps %d strong, and could be there by %s. Time is paused. War planning shows what your war leader means to do; if you carry on without a word, the defenders will fight or give way when they arrive." % [String(threat.get("source_name","A band we cannot name")),location,int(threat.get("estimated_strength",0)),EraWordsMap.when(int(threat.get("deadline_day",GameState.elapsed_days))).to_lower()],truncate_batch)
 
 func _on_battle_attention(result:Dictionary)->void:
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
 	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
 		_set_game_speed(0);return
-	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"BATTLE REPORT",MilitaryCampaign.battle_report_text(result))
+	_pause_for_military_attention("battle_%s" % str(result.get("seed",GameState.elapsed_days)),"Battle report",MilitaryCampaign.battle_report_text(result))
 
 func _pause_for_military_attention(event_id:String,title:String,body:String,truncate_batch:bool=true)->void:
 	if military_attention_seen.has(event_id): return
@@ -13373,8 +13208,10 @@ func _show_military_attention(title:String,body:String)->void:
 	military_attention_dialog.title=title
 	military_attention_dialog.dialog_text=body
 	military_attention_dialog.min_size=Vector2i(650,260)
-	military_attention_dialog.ok_button_text="OPEN WAR PLANNING"
-	military_attention_dialog.cancel_button_text="STAY PAUSED"
+	military_attention_dialog.ok_button_text="Open war planning"
+	military_attention_dialog.cancel_button_text="Stay paused"
+	military_attention_dialog.get_label().add_theme_font_size_override("font_size",16)
+	military_attention_dialog.get_label().add_theme_color_override("font_color",HudT.INK)
 	add_child(military_attention_dialog)
 	military_attention_dialog.confirmed.connect(_open_war_planning)
 	military_attention_dialog.popup_centered()
@@ -13413,14 +13250,14 @@ func _select_army_and_focus(army_id:int)->void:
 		_set_camera_target(world_position)
 		_refresh_player_field_army_markers()
 		if travel_status_label:
-			travel_status_label.text="%s SELECTED  •  RIGHT-CLICK CHARTED LAND TO MARCH  •  ESC TO DESELECT" % String(army.get("name","FIELD ARMY")).to_upper()
+			travel_status_label.text="%s is selected. Its general chooses the road; tell them where to go through the court." % String(army.get("name","The army"))
 		break
 
 func _report_military_action(result:Dictionary)->void:
 	## Surface a campaign action's outcome in the status ticker and refresh
 	## the dock immediately so the change is visible.
 	if travel_status_label:
-		travel_status_label.text=String(result.get("message",result.get("error","")))
+		travel_status_label.text=PaperKit.sentence(String(result.get("message",result.get("error",""))))
 	if hud:
 		hud.show_action_feedback(String(result.get("message",result.get("error",""))))
 		hud.live_refresh_dock()
@@ -13503,76 +13340,22 @@ func _build_scale_bar(layer: CanvasLayer) -> void:
 
 
 func _build_map_help(layer:CanvasLayer)->void:
-	var viewport_size:=get_viewport().get_visible_rect().size
-	map_help_button=Button.new()
-	map_help_button.name="MapHelpButton"
-	# Clear of the command rail, which is drawn above this layer.
-	map_help_button.position=Vector2(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH+16.0,viewport_size.y-130)
-	map_help_button.size=Vector2(112,32)
-	map_help_button.text="?  Map help"
-	map_help_button.tooltip_text="Show map movement, inspection, scale, and the next contextual action."
-	map_help_button.add_theme_font_size_override("font_size",14)
-	map_help_button.pressed.connect(_toggle_map_help)
-	layer.add_child(map_help_button)
-	map_help_panel=PanelContainer.new()
-	map_help_panel.name="MapFirstUseHelp"
-	map_help_panel.position=Vector2(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH+16.0,viewport_size.y-234)
-	map_help_panel.size=Vector2(390,96)
-	map_help_panel.z_index=45
-	map_help_panel.add_theme_stylebox_override("panel",_population_report_style(Color("#7ca39d")))
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",5)
-	map_help_panel.add_child(root)
-	var heading_row:=HBoxContainer.new()
-	root.add_child(heading_row)
-	map_help_title=Label.new()
-	map_help_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	map_help_title.add_theme_font_size_override("font_size",13)
-	map_help_title.add_theme_color_override("font_color",Color("#e7d8b8"))
-	heading_row.add_child(map_help_title)
-	var hide:=Button.new()
-	hide.text="CLOSE ×"
-	hide.tooltip_text="Close this tip, or click the map. Reopen with Map help."
-	hide.custom_minimum_size=Vector2(72,30)
-	hide.add_theme_font_size_override("font_size",9)
-	hide.pressed.connect(_dismiss_map_help)
-	heading_row.add_child(hide)
-	map_help_body=Label.new()
-	map_help_body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	map_help_body.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	map_help_body.add_theme_font_size_override("font_size",11)
-	map_help_body.add_theme_color_override("font_color",Color("#c5cbc5"))
-	map_help_body.tooltip_text="Camera: two-finger slide or middle-drag to pan. Up zooms in; Down zooms out through four distances. N resets north-up."
-	root.add_child(map_help_body)
+	# The help button and its note are built in scripts/hud/map_notes.gd.
+	var help:=MapNotes.build_help(layer,get_viewport().get_visible_rect().size,_toggle_map_help,_dismiss_map_help)
+	map_help_button=help.button
+	map_help_panel=help.panel
+	map_help_title=help.title
+	map_help_body=help.body
 	# The founding-focus screen is deferred until after the interface is built.  Do
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
 	var available_on_map:=not capture_render_active and GameState.founding_focus!=""
 	map_help_button.visible=available_on_map
 	map_help_panel.visible=available_on_map and not map_help_dismissed
-	layer.add_child(map_help_panel)
 	_refresh_map_help()
 
 
 func _map_help_presentation(site_committed:bool,targeting:bool,settlement_convoy_active:bool)->Dictionary:
-	if targeting:
-		return {
-			"title":"CHOOSE DRY LAND",
-			"body":"Move over land. Green can be settled; red cannot.\nClick to review the trip. Right-click to cancel."
-		}
-	if not site_committed:
-		return {
-			"title":"FIND A HOME",
-			"body":"Left-click land to inspect it. Right-click land to move the convoy.\nClick its card to review water; use HALT & FORAGE between longer legs."
-		}
-	if settlement_convoy_active:
-		return {
-			"title":"CONVOY IN MOTION",
-			"body":"The settlement convoy is traveling.\nPress FOCUS CONVOY on the toolbar below to follow it."
-		}
-	return {
-		"title":"USE THE MAP",
-		"body":"Two-finger slide to move. Up zooms in; Down zooms out.\nClick a city for details; double-click to move closer.\nClick the map to close panels and this tip."
-	}
+	return MapNotes.help_words(site_committed,targeting,settlement_convoy_active)
 
 
 func _refresh_map_help()->void:
@@ -13580,6 +13363,7 @@ func _refresh_map_help()->void:
 	var presentation:=_map_help_presentation(GameState.settlement_site_committed,settlement_convoy_targeting,bool(GameState.settlement_convoy.get("active",false)))
 	map_help_title.text=String(presentation.title)
 	map_help_body.text=String(presentation.body)
+	MapNotes.place_help(map_help_panel,get_viewport().get_visible_rect().size)
 
 
 func _map_help_available_on_map()->bool:
@@ -13678,7 +13462,7 @@ func _screen_direction_arrow(delta:Vector2)->String:
 func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	if not GameState.settlement_site_committed:
 		if travel_status_label:
-			travel_status_label.text="Choose START SETTLEMENT before naming a permanent home"
+			travel_status_label.text="Found the first settlement before you name it."
 		return
 	if settlement_naming_panel:
 		return
@@ -13708,68 +13492,29 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 		settlement_name_confirm.pressed.connect(_commit_settlement_name)
 		fire.later_button.pressed.connect(_dismiss_settlement_naming_panel)
 		return
-	settlement_naming_panel=Control.new()
-	settlement_naming_panel.size=get_viewport().get_visible_rect().size
-	settlement_naming_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	interface_layer.add_child(settlement_naming_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.size=settlement_naming_panel.size
-	dimmer.color=Color(0.008,0.013,0.015,0.88)
-	settlement_naming_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.size=Vector2(620,330)
-	modal.position=(settlement_naming_panel.size-modal.size)*0.5
-	var style:=StyleBoxFlat.new()
-	style.bg_color=Color(0.04,0.052,0.055,0.995)
-	style.border_color=Color("#85734e")
-	style.set_border_width_all(1)
-	style.set_content_margin_all(26)
-	modal.add_theme_stylebox_override("panel",style)
-	settlement_naming_panel.add_child(modal)
-	var root:=VBoxContainer.new()
-	root.add_theme_constant_override("separation",12)
-	modal.add_child(root)
-	var heading:=Label.new()
-	heading.text="NAME THIS SETTLEMENT" if settlement_naming_target_id=="__founding__" else "RENAME %s" % String(target.get("name","SETTLEMENT")).to_upper()
-	heading.add_theme_font_size_override("font_size",24)
-	heading.add_theme_color_override("font_color",Color("#ecdfc4"))
-	root.add_child(heading)
-	var context:=Label.new()
-	context.text="This is an owned, governed place with its own population share, local leader, priorities, border, and history. Its name appears on the map and in reports."
-	context.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	context.custom_minimum_size=Vector2(0,52)
-	context.add_theme_font_size_override("font_size",15)
-	context.add_theme_color_override("font_color",Color("#b9b8af"))
-	root.add_child(context)
+	# A paper card over the dimmed map (paper_kit.gd): the name, Not now, Rename.
+	var parts:=PaperKit.modal(interface_layer,520.0,HudT.GOLD,"RenameSettlement")
+	settlement_naming_panel=parts[0]
+	var column:VBoxContainer=parts[1]
+	PaperKit.label(column,"Rename","kicker")
+	PaperKit.label(column,"A new name for %s" % String(target.get("name","this settlement")),"title")
+	PaperKit.label(column,"The name shows on the map, in the Chronicle and in what our people say.","body").custom_minimum_size.x=460
 	settlement_name_input=LineEdit.new()
-	settlement_name_input.placeholder_text="Settlement name"
+	settlement_name_input.placeholder_text="The new name"
 	settlement_name_input.max_length=32
 	settlement_name_input.text=String(target.get("name",""))
-	settlement_name_input.custom_minimum_size=Vector2(0,48)
+	settlement_name_input.custom_minimum_size=Vector2(0,44)
 	settlement_name_input.add_theme_font_size_override("font_size",18)
 	settlement_name_input.text_changed.connect(_on_settlement_name_changed)
 	settlement_name_input.text_submitted.connect(_on_settlement_name_submitted)
-	root.add_child(settlement_name_input)
-	var note:=Label.new()
-	note.text="The name can be changed later from this settlement's actions."
-	note.add_theme_font_size_override("font_size",12)
-	note.add_theme_color_override("font_color",Color("#8f928d"))
-	root.add_child(note)
+	column.add_child(settlement_name_input)
 	var footer:=HBoxContainer.new()
 	footer.alignment=BoxContainer.ALIGNMENT_END
 	footer.add_theme_constant_override("separation",10)
-	root.add_child(footer)
-	var later:=Button.new()
-	later.text="NOT YET"
-	later.custom_minimum_size=Vector2(130,42)
-	later.pressed.connect(_dismiss_settlement_naming_panel)
-	footer.add_child(later)
-	settlement_name_confirm=Button.new()
-	settlement_name_confirm.text="NAME SETTLEMENT"
-	settlement_name_confirm.custom_minimum_size=Vector2(190,42)
+	column.add_child(footer)
+	PaperKit.button(footer,"Not now",false,_dismiss_settlement_naming_panel)
+	settlement_name_confirm=PaperKit.button(footer,"Rename",true,_commit_settlement_name)
 	settlement_name_confirm.disabled=settlement_name_input.text.strip_edges()==""
-	settlement_name_confirm.pressed.connect(_commit_settlement_name)
-	footer.add_child(settlement_name_confirm)
 	settlement_name_input.grab_focus.call_deferred()
 
 func _on_settlement_name_changed(value: String) -> void:
@@ -13792,7 +13537,7 @@ func _commit_settlement_name() -> void:
 	else:
 		result=_settlement_model().rename_settlement(settlement_naming_target_id,chosen)
 	if not bool(result.get("ok",false)):
-		if travel_status_label: travel_status_label.text=String(result.get("reason","SETTLEMENT COULD NOT BE RENAMED")).to_upper()
+		if travel_status_label: travel_status_label.text=PaperKit.sentence(String(result.get("reason","That name could not be given")))
 		return
 	var final_name:=String(result.get("name",chosen))
 	var description:="The selected settlement is now known as %s." % final_name
@@ -13802,7 +13547,7 @@ func _commit_settlement_name() -> void:
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
 	if travel_status_label:
-		travel_status_label.text="%s HAS BEEN NAMED" % final_name.to_upper()
+		travel_status_label.text="The settlement is now called %s." % final_name
 	_update_time_interface()
 	_dismiss_settlement_naming_panel()
 
@@ -13984,12 +13729,10 @@ func _add_resource_outcrops(parent:Node3D,center:Vector3,style:Dictionary)->void
 
 func _surface_resource_report(position:Vector3)->String:
 	if _main_river_distance_at(position.x,position.z)<0.09:
-		return "[color=#a6c9d1][font_size=18]RIVER CHANNEL[/font_size][/color]\nSurface water follows this channel. Inspect dry ground beside it for woodland and soil. Drinking supply depends on access, collection, carrying and storage.\n\n"
+		return GroundLens.river_channel()
 	var biome:=_biome_at(position.x,position.z)
 	if String(biome.id)=="water": return ""
-	var cover:=_woodland_density_at(position.x,position.z)
-	var wood:="Dense woodland" if cover>=0.60 else ("Open woodland" if cover>=0.25 else ("Scattered trees" if cover>=0.08 else "Little usable tree cover"))
-	return "[color=#b8ca98][font_size=18]%s[/font_size][/color]\n%s; approximately %d%% tree cover. These trees can supply timber. Cutting and delivery depend on workers, tools, distance and remaining growth.\n\nSurface stone: %s. Soil productivity: %s. Plant fiber: %s.\n\n" % [String(biome.label).to_upper(),wood,roundi(cover*100.0),"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"]
+	return GroundLens.surface(String(biome.label),_woodland_density_at(position.x,position.z),"plenty" if float(biome.stone)>0.5 else "some" if float(biome.stone)>0.12 else "little","rich" if float(biome.fertility)>0.65 else "fair" if float(biome.fertility)>0.3 else "poor","plenty" if _surface_material_density(biome,"Fiber Plants")>0.4 else "some" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "little")
 
 func _surface_material_density(biome:Dictionary,resource:String)->float:
 	if String(biome.id)=="water": return 0.0
@@ -14332,7 +14075,7 @@ func _on_scout_report_returned(report:Dictionary)->void:
 	# The simulation owns report delivery and storage. Arrival is told by the
 	# Chronicle's card (chronicle.gd), never a pause or a second toast.
 	if travel_status_label:
-		travel_status_label.text="THE SCOUTS ARE HOME — their tale is in the Chronicle, and the full report in WORLD > SCOUTING"
+		travel_status_label.text="The scouts are home. Their tale is in the Chronicle."
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
@@ -14361,56 +14104,8 @@ func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
 		_on_hud_section_requested("military",0)
 		hud.open_detail(preload("res://scripts/hud/content/dock_detail_map_contact.gd").new(self,hud,String(best.get("id",""))))
 	if travel_status_label:
-		travel_status_label.text="MAP CONTACT SELECTED  •  choose the highlighted action in MILITARY"
+		travel_status_label.text="Strangers in sight. The card on the left says what we see and who to ask."
 	return true
-
-
-func _resolve_map_scout_interception(formation_id:String,action:String)->Dictionary:
-	var result:Dictionary=CivilizationSystem.resolve_foreign_scout_interception(formation_id,action)
-	if travel_status_label:
-		travel_status_label.text=String(result.get("error",result.get("message","No interception occurred.")))
-	_refresh_foreign_formation_markers()
-	_update_time_interface()
-	return result
-
-
-func _select_nearest_field_army_to_sighting(formation_id:String)->Dictionary:
-	var sighting:Dictionary=CivilizationSystem.visible_formation_sighting(formation_id)
-	if sighting.is_empty(): return {"error":"Contact was lost before an army could be selected."}
-	var target_data:Dictionary=sighting.get("position",{})
-	var target:=Vector2(float(target_data.get("x",0.0)),float(target_data.get("z",0.0)))
-	var best_id:=-1
-	var best_name:=""
-	var best_distance:=INF
-	for army_variant in MilitaryCampaign.field_armies_snapshot().get("armies",[]):
-		var army:Dictionary=army_variant
-		if int(army.get("troops",0))<=0: continue
-		var position_data:Dictionary=army.get("position",{})
-		var position:=Vector2(float(position_data.get("x",0.0)),float(position_data.get("z",0.0)))
-		var distance:=position.distance_to(target)
-		if distance<best_distance:
-			best_distance=distance
-			best_id=int(army.get("army_id",0))
-			best_name=String(army.get("name","FIELD ARMY"))
-	if best_id<0: return {"error":"No deployed field army is available. Build, train, and deploy one in MILITARY."}
-	selected_army_id=best_id
-	_refresh_player_field_army_markers()
-	var message:="%s SELECTED — %.0f km from the target. Choose MOVE TO INTERCEPT." % [best_name,best_distance]
-	if travel_status_label: travel_status_label.text=message
-	return {"ok":true,"selected":true,"army_id":best_id,"distance_km":best_distance,"message":message}
-
-
-func _resolve_map_formation_engagement(formation_id:String,engage_now:bool=false)->Dictionary:
-	if selected_army_id<0: return {"error":"Select one field army first."}
-	var result:Dictionary=MilitaryCampaign.launch_map_engagement(selected_army_id,formation_id) if engage_now else MilitaryCampaign.order_field_army_intercept(selected_army_id,formation_id)
-	if travel_status_label:
-		travel_status_label.text=String(result.get("error",result.get("message","No engagement order was issued.")))
-	_refresh_player_field_army_markers()
-	_refresh_foreign_formation_markers()
-	_update_time_interface()
-	if bool(result.get("engagement_started",false)) and hud:
-		hud.open_detail(preload("res://scripts/hud/content/dock_detail_war_planning.gd").new(self,hud))
-	return result
 
 
 func _select_field_army_from_screen(screen_position:Vector2)->bool:
@@ -14440,7 +14135,7 @@ func _select_field_army_from_screen(screen_position:Vector2)->bool:
 		var army:Dictionary=army_variant
 		if int(army.get("army_id",0))!=best_id: continue
 		if travel_status_label:
-			travel_status_label.text="%s SELECTED  •  RIGHT-CLICK CHARTED LAND TO MARCH  •  ESC TO DESELECT" % String(army.get("name","FIELD ARMY")).to_upper()
+			travel_status_label.text="%s is selected. Its general chooses the road; tell them where to go through the court." % String(army.get("name","The army"))
 		break
 	return true
 
@@ -14458,7 +14153,7 @@ func _war_chart_draws_marks()->bool:
 
 func _clear_army_selection()->void:
 	selected_army_id=-1
-	if travel_status_label and "SELECTED" in travel_status_label.text:
+	if travel_status_label and "is selected" in travel_status_label.text:
 		travel_status_label.text=""
 
 
@@ -15067,60 +14762,15 @@ func _create_warfare_front_marker(front_id:String)->Node3D:
 	return marker
 
 func _build_lens(layer: CanvasLayer) -> void:
-	var viewport_size := get_viewport().get_visible_rect().size
-	lens_panel = PanelContainer.new()
-	lens_panel.position = Vector2(viewport_size.x - 380.0, 104.0)
-	lens_panel.set_meta("responsive_scroll_layout",true)
-	lens_panel.size = Vector2(minf(360,viewport_size.x-40),minf(440,viewport_size.y-190))
-	lens_panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	lens_panel.theme=HudT.control_theme()
-	lens_panel.add_theme_stylebox_override("panel",HudT.flat(HudT.PANEL_BG_SOLID,HudT.BORDER,1,2,8))
-	layer.add_child(lens_panel)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
-	lens_panel.add_child(column)
-	var lens_header:=HBoxContainer.new()
-	column.add_child(lens_header)
-	var title := Label.new()
-	title.text = "GROUND SURVEY"
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_size_override("font_size", 14)
-	title.add_theme_color_override("font_color",HudT.GOLD)
-	lens_header.add_child(title)
-	var close_lens:=Button.new()
-	close_lens.text="×"
-	close_lens.tooltip_text="Close the map lens"
-	close_lens.custom_minimum_size=Vector2(26,24)
-	close_lens.flat=true
-	close_lens.pressed.connect(_close_lens)
-	lens_header.add_child(close_lens)
-	lens_location_label = Label.new()
-	lens_location_label.add_theme_font_size_override("font_size", 10)
-	lens_location_label.add_theme_color_override("font_color",HudT.MUTED)
-	lens_location_label.autowrap_mode=TextServer.AUTOWRAP_OFF
-	lens_location_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	column.add_child(lens_location_label)
-	var found_title := Label.new()
-	found_title.text = ""
-	found_title.visible=false
-	found_title.add_theme_font_size_override("font_size", 13)
-	found_title.add_theme_color_override("font_color",HudT.GOLD)
-	column.add_child(found_title)
-	lens_body = RichTextLabel.new()
-	lens_body.scroll_active=false
-	lens_body.bbcode_enabled = true
-	lens_body.fit_content = false
-	lens_body.scroll_active = true
-	lens_body.custom_minimum_size = Vector2(0, 160)
-	lens_body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	lens_body.add_theme_font_size_override("normal_font_size", 14)
-	lens_body.add_theme_color_override("default_color",HudT.BODY)
-	column.add_child(lens_body)
-	lens_survey=preload("res://scripts/hud/resource_survey_card.gd").new()
-	lens_survey.host_panel=lens_panel
-	column.add_child(lens_survey)
-	lens_survey.visible=false
-	lens_panel.visible=false
+	# The ground survey card lives in scripts/hud/ground_lens.gd.
+	var card:=GroundLens.new()
+	card.place(get_viewport().get_visible_rect().size)
+	card.closed.connect(_close_lens)
+	layer.add_child(card)
+	lens_panel=card
+	lens_body=card.body
+	lens_survey=card.survey
+	lens_location_label=card.location_label
 
 func _close_lens()->void:
 	lens_requested_visible=false
@@ -15142,35 +14792,6 @@ func _settlement_plot_at(position:Vector3)->Dictionary:
 	return nearest if nearest_distance<=0.008 else {}
 
 func _settlement_plot_lens_report(plot:Dictionary)->String:
-	var use_name:=String(plot.get("land_use","unknown")).replace("_"," ").to_upper()
-	var form_name:=String(plot.get("form","unknown form")).replace("_"," ").capitalize()
-	var status_name:=String(plot.get("status","unknown")).replace("_"," ").to_upper()
-	var status_color:="#8fb08a"
-	if status_name in ["DAMAGED","STRESSED","UNDER CONSTRUCTION"]: status_color="#d1a45f"
-	elif status_name in ["RUIN","VACANT"]: status_color="#c27f6c"
-	var report:="[font_size=18][color=#e1d5b8]%s[/color][/font_size]\n" % use_name
-	report+="[color=%s]%s[/color]  •  %s\n" % [status_color,status_name,form_name]
-	report+="Condition: [color=#ddd2b8]%d%%[/color]\n" % roundi(float(plot.get("condition",0.0))*100.0)
-	var morphology_era:=String(plot.get("morphology_era","founding")).replace("_"," ").capitalize()
-	var fabric_generation:=int(plot.get("fabric_generation",0))
-	report+="Inherited fabric: [color=#ddd2b8]%s[/color]  •  generation %d\n" % [morphology_era,fabric_generation]
-	if int(plot.get("storeys",1))>1: report+="Built height: [color=#ddd2b8]%d storeys[/color]\n" % int(plot.get("storeys",1))
-	var residents:=int(plot.get("resident_count",0))
-	var workers:=int(plot.get("worker_count",0))
-	if residents>0: report+="Residents: [color=#ddd2b8]%d / %d[/color]\n" % [residents,int(plot.get("resident_capacity",0))]
-	if int(plot.get("worker_capacity",0))>0: report+="Workers: [color=#ddd2b8]%d / %d[/color]\n" % [workers,int(plot.get("worker_capacity",0))]
-	var material_family:=String(plot.get("material_family","unknown")).capitalize()
-	var material_mix:Dictionary=plot.get("material_mix",{})
-	var mix_parts:Array[String]=[]
-	for material_name in material_mix:
-		var share:=float(material_mix[material_name])
-		if share>=0.01: mix_parts.append("%s %d%%" % [String(material_name),roundi(share*100.0)])
-	var roof_plan:=String(plot.get("roof_plan","unspecified")).replace("_"," ").capitalize()
-	var recipe:=String(plot.get("construction_recipe","unknown method")).replace("_"," ").capitalize()
-	report+="Material system: [color=#ddd2b8]%s[/color]" % material_family
-	if not mix_parts.is_empty(): report+="  •  %s" % ", ".join(mix_parts)
-	report+="\nRoof / cover: [color=#ddd2b8]%s[/color]\n" % roof_plan
-	report+="Construction method: [color=#ddd2b8]%s[/color]\n" % recipe
 	GameState.ensure_building_ledger()
 	var consumed:Dictionary={}
 	var lifecycle_events:=0
@@ -15181,21 +14802,7 @@ func _settlement_plot_lens_report(plot:Dictionary)->String:
 		if not bool(row.get("counts_materials",false)): continue
 		for material_name in (row.get("materials",{}) as Dictionary):
 			consumed[String(material_name)]=float(consumed.get(String(material_name),0.0))+float((row.get("materials",{}) as Dictionary)[material_name])
-	if not consumed.is_empty():
-		var consumed_parts:Array[String]=[]
-		for material_name in consumed: consumed_parts.append("%.1f %s" % [float(consumed[material_name]),String(material_name)])
-		report+="Recorded inputs: [color=#ddd2b8]%s[/color]\n" % " + ".join(consumed_parts)
-	if lifecycle_events>0: report+="Architectural record: [color=#999b91]%d event%s[/color]\n" % [lifecycle_events,"" if lifecycle_events==1 else "s"]
-	report+=preload("res://scripts/building_material_operations.gd").describe(plot)
-	if String(plot.get("status",""))=="under_construction": report+="Construction: [color=#d1a45f]%d%%[/color]\n" % roundi(float(plot.get("construction_progress",0.0))*100.0)
-	if String(plot.get("status",""))=="vacant": report+="Reclaimed by vegetation: [color=#8fb08a]%d%%[/color]\n" % roundi(float(plot.get("reclamation",0.0))*100.0)
-	report+="Established: [color=#999b91]YEAR %d • DAY %d[/color]\n" % [int(plot.get("created_day",0))/365+1,int(plot.get("created_day",0))%365+1]
-	if int(plot.get("converted_day",-1))>=0: report+="Last rebuilt: [color=#999b91]DAY %d[/color]\n" % int(plot.converted_day)
-	if int(plot.get("damaged_day",-1))>=0: report+="Last damaged: [color=#c27f6c]DAY %d[/color]\n" % int(plot.damaged_day)
-	if int(plot.get("abandoned_day",-1))>=0: report+="Vacated: [color=#c27f6c]DAY %d[/color]\n" % int(plot.abandoned_day)
-	var cause:=String(plot.get("growth_cause",plot.get("construction_recipe",""))).replace("_"," ")
-	if cause!="": report+="\n[color=#c4aa70]Why it exists[/color]\n%s\n" % cause.capitalize()
-	return report
+	return GroundLens.plot(plot,consumed,lifecycle_events,preload("res://scripts/building_material_operations.gd").describe(plot))
 
 func _show_city_intel_summary(city_id:String)->void:
 	if hud==null or CivilizationSystem.city_intelligence.known("player",city_id).is_empty():return
@@ -15340,31 +14947,20 @@ func _hide_map_selection(generation:int)->void:
 
 func _map_inspection_summary(position:Vector3)->String:
 	if not _world_position_is_revealed(position):
-		return "UNCHARTED LAND SELECTED  •  no returned report describes this ground  •  NEXT: ACTIONS → SCOUTING"
+		return MapTickerWords.inspection("uncharted",{})
 	var surface_assessment:=_settlement_surface_assessment(position)
 	if not bool(surface_assessment.get("valid",false)):
-		return "%s  •  SETTLEMENT BLOCKED  •  NEXT: choose dry ground beyond the visible bank" % String(surface_assessment.get("reason","WATER SELECTED"))
+		return MapTickerWords.inspection("blocked",{"reason":String(surface_assessment.get("reason",""))})
 	var contact:=_contact_encounter_at(position)
 	if not contact.is_empty():
 		if String(contact.get("point_kind","encounter"))=="settlement":
-			return "%s SETTLEMENT SELECTED  •  location confirmed, current conditions require another returned report  •  NEXT: open WORLD" % String(contact.get("name","FOREIGN")).to_upper()
-		var home_note:="home settlement known" if bool(contact.get("home_location_known",false)) else "home settlement still unlocated"
-		return "%s ENCOUNTER SITE SELECTED  •  %s  •  NEXT: ACTIONS → SCOUTING" % [String(contact.get("name","FOREIGN")).to_upper(),home_note]
+			return MapTickerWords.inspection("foreign_settlement",{"name":String(contact.get("name","Strangers"))})
+		return MapTickerWords.inspection("encounter",{"name":String(contact.get("name","strangers")),"home_known":bool(contact.get("home_location_known",false))})
 	if GameState.settlement_site_committed and "Hearth Circle" in GameState.settlement_completed:
 		var settlement:Dictionary=_settlement_model().settlement_at_world(Vector2(position.x,position.z))
 		if not settlement.is_empty() and bool(settlement.get("inside_border",false)):
-			return "%s GROUND SELECTED  •  %.1f KM FROM CENTRE  •  double-click the settlement marker to move one scale closer" % [String(settlement.get("name","SETTLEMENT")).to_upper(),float(settlement.get("distance_from_center_km",0.0))]
-	var resources:=ResourceSystem.lens_entries(position,18.0,KM_PER_WORLD_UNIT)
-	var names:Array[String]=[]
-	for entry_variant in resources:
-		var entry:Dictionary=entry_variant
-		var resource_name:=String(entry.get("resource",""))
-		if resource_name!="" and resource_name not in names: names.append(resource_name)
-		if names.size()>=3: break
-	var display_names:Array[String]=[]
-	for resource_name in names: display_names.append(ResourceSystem.display_name(resource_name))
-	var resource_note:="%s; click to inspect surface resources" % String(_biome_at(position.x,position.z).label)
-	return "CHARTED LAND SELECTED  •  %s  •  NEXT: ACTIONS → FOUND NEW SETTLEMENT" % resource_note
+			return MapTickerWords.inspection("inside",{"name":String(settlement.get("name","our town")),"km":float(settlement.get("distance_from_center_km",0.0))})
+	return MapTickerWords.inspection("open",{"ground":String(_biome_at(position.x,position.z).label),"site_committed":GameState.settlement_site_committed and "Hearth Circle" in GameState.settlement_completed})
 
 
 func _open_owned_settlement_at(position:Vector3)->bool:
@@ -15377,7 +14973,7 @@ func _open_owned_settlement_at(position:Vector3)->bool:
 	_close_lens()
 	_on_hud_section_requested("settlement",0)
 	if travel_status_label:
-		travel_status_label.text="%s SELECTED  •  settlement overview" % String(settlement.get("name","SETTLEMENT")).to_upper()
+		travel_status_label.text="%s: its people, stores and works are on the left." % String(settlement.get("name","Our settlement"))
 	return true
 
 func _inspect_location(position: Vector3) -> void:
@@ -15396,92 +14992,57 @@ func _inspect_location_local(position: Vector3) -> void:
 	if lens_panel == null or lens_body == null:
 		return
 	lens_requested_visible=true
-	lens_panel.visible = true
 	lens_world_position = position
+	var card:=lens_panel as GroundLens
 	var revealed:=_world_position_is_revealed(position)
-	var survey_advice:Dictionary={}
 	var settlement_context:Dictionary={}
 	if GameState.settlement_site_committed and "Hearth Circle" in GameState.settlement_completed:
 		settlement_context=_settlement_model().settlement_at_world(Vector2(position.x,position.z))
 	var contact_context:=_contact_encounter_at(position) if revealed else {}
-	if not revealed:
-		lens_location_label.text="BEYOND RETURNED MAP KNOWLEDGE"
-	elif not contact_context.is_empty():
-		lens_location_label.text=("CONFIRMED SETTLEMENT  •  %s" if String(contact_context.get("point_kind","encounter"))=="settlement" else "FIRST CONTACT SITE  •  %s") % String(contact_context.get("name","STRANGERS")).to_upper()
+	var inside:=not settlement_context.is_empty() and bool(settlement_context.get("inside_border",false))
+	# Where this is, in one short phrase.
+	var where:={}
+	if not revealed:where={"kind":"uncharted"}
+	elif not contact_context.is_empty():where={"kind":"foreign_settlement" if String(contact_context.get("point_kind","encounter"))=="settlement" else "encounter","name":String(contact_context.get("name","strangers"))}
+	elif inside:where={"kind":"inside","name":String(settlement_context.get("name","our town")),"km":float(settlement_context.get("distance_from_center_km",0.0))}
+	elif not settlement_context.is_empty():where={"kind":"beyond_border","name":String(settlement_context.get("name","our town")),"km":float(settlement_context.get("distance_from_border_km",0.0))}
 	elif bool(GameState.settlement_convoy.get("active",false)):
 		var convoy_position:Vector2=GameState.settlement_convoy.get("position",Vector2.ZERO)
 		var convoy_distance:=convoy_position.distance_to(Vector2(position.x,position.z))*KM_PER_WORLD_UNIT
-		if convoy_distance<0.15:
-			lens_location_label.text="SETTLEMENT CONVOY POSITION"
-		elif not settlement_context.is_empty() and bool(settlement_context.get("inside_border",false)):
-			lens_location_label.text="WITHIN %s  •  %.1f KM FROM CENTRE" % [String(settlement_context.get("name","SETTLEMENT")).to_upper(),float(settlement_context.get("distance_from_center_km",0.0))]
-		else:
-			lens_location_label.text="%.1f KM FROM THE SETTLEMENT CONVOY" % convoy_distance
-	elif not settlement_context.is_empty():
-		if bool(settlement_context.get("inside_border",false)):
-			lens_location_label.text="WITHIN %s  •  %.1f KM FROM CENTRE" % [String(settlement_context.get("name","SETTLEMENT")).to_upper(),float(settlement_context.get("distance_from_center_km",0.0))]
-		else:
-			lens_location_label.text="%.1f KM BEYOND %s'S BORDER" % [float(settlement_context.get("distance_from_border_km",0.0)),String(settlement_context.get("name","SETTLEMENT")).to_upper()]
-	else:
-		var founding_distance:=Vector2(settler_marker.position.x,settler_marker.position.z).distance_to(Vector2(position.x,position.z))*KM_PER_WORLD_UNIT if settler_marker else 0.0
-		if GameState.founding_expedition_active():
-			lens_location_label.text="FOUNDING CONVOY POSITION" if founding_distance<0.15 else "%.1f KM FROM THE FOUNDING CONVOY" % founding_distance
-		else:
-			lens_location_label.text="FOUNDING SITE" if founding_distance<0.15 else "%.1f KM FROM THE FOUNDING SITE" % founding_distance
+		where={"kind":"convoy"} if convoy_distance<0.15 else {"kind":"from_convoy","km":convoy_distance}
+	elif settler_marker:
+		var founding_distance:=Vector2(settler_marker.position.x,settler_marker.position.z).distance_to(Vector2(position.x,position.z))*KM_PER_WORLD_UNIT
+		if GameState.founding_expedition_active():where={"kind":"convoy"} if founding_distance<0.15 else {"kind":"from_convoy","km":founding_distance}
+		else:where={"kind":"site"} if founding_distance<0.15 else {"kind":"from_site","km":founding_distance}
+	var where_text:=GroundLens.where_words(where)
 	var entries: Array[Dictionary] = []
 	if revealed:
 		entries = ResourceSystem.lens_entries(position, 18.0, KM_PER_WORLD_UNIT)
 	var settlement_plot:=_settlement_plot_at(position) if revealed else {}
 	if not revealed:
-		var unknown_action:="Allocate people to scouting and wait for their reports before planning settlement here." if GameState.settlement_site_committed else "Travel here with the founding convoy or allocate people to scouting and wait for their reports."
-		lens_body.text="[color=#777f7c][font_size=18]UNCHARTED[/font_size][/color]\n\nNo returned traveler or scout report describes this ground. Terrain, water, resources, settlements, and foreign activity remain unknown.\n\n[color=#c4aa70]%s[/color]" % unknown_action
-	elif not contact_context.is_empty():
+		card.show_account("Unknown ground",where_text,GroundLens.uncharted(GameState.settlement_site_committed))
+		return
+	if not contact_context.is_empty():
 		if String(contact_context.get("point_kind","encounter"))=="settlement":
-			var observed_day:=maxi(0,int(contact_context.get("last_observed_day",0)))
-			lens_body.text="[font_size=18][color=#e1d08d]CONFIRMED FOREIGN SETTLEMENT[/color][/font_size]\n\n[color=#e1d5b8]%s[/color]\nLocation confirmed by %s. Last physically observed in Year %d, Day %d.\n\nThis aggregate footprint represents the observed occupied place without simulating every structure or inhabitant. Dispatch an observation mission for current population, activity, and defenses." % [String(contact_context.get("name","A foreign people")),String(contact_context.get("home_location_source","a returned report")),observed_day/365+1,observed_day%365+1]
+			card.show_account("A foreign settlement",where_text,GroundLens.foreign_settlement(String(contact_context.get("name","A foreign people")),String(contact_context.get("home_location_source","")),maxi(0,int(contact_context.get("last_observed_day",0)))))
 		else:
-			var met_day:=maxi(0,int(contact_context.get("day",0)))
-			var met_year:=met_day/365+1
-			var met_day_of_year:=met_day%365+1
-			lens_body.text="[font_size=18][color=#bde0d7]RECORDED ENCOUNTER[/color][/font_size]\n\n[color=#e1d5b8]%s[/color] was first identified here in Year %d, Day %d.\n\n[color=#c4aa70]HOW CONTACT HAPPENED[/color]\n%s.\n\n[color=#c27f6c]Their homeland is not known from this encounter.[/color] This marker shows where we met them, not where they live." % [String(contact_context.get("name","A foreign people")),met_year,met_day_of_year,String(contact_context.get("source_description","The surviving record does not say"))]
-	elif entries.is_empty() and settlement_plot.is_empty():
-		if not settlement_context.is_empty() and bool(settlement_context.get("inside_border",false)):
-			lens_body.text="[font_size=18][color=#dfd0aa]CONTROLLED SETTLEMENT GROUND[/color][/font_size]\n\nWithin [color=#e1d5b8]%s[/color]'s present border. The boundary covers approximately [color=#ddd2b8]%.1f km²[/color] and supports an aggregate population of [color=#ddd2b8]%s[/color].\n\nBorders expand when population, occupied fabric, routes, survey work, administration, logistics, and defense can sustain a wider claim.\n\n[color=#c4aa70]Surface resources follow the land cover described above. No additional deposit has been identified here.[/color]" % [String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))]
-		else:
-			lens_body.text = "[color=#c4aa70]SURVEY KNOWLEDGE[/color]\n\nVisible woodland, soil and exposed stone can be inspected directly. Survey work establishes quality, sustainable output, access routes and hidden deposits."
-	else:
-		var report := _settlement_plot_lens_report(settlement_plot) if not settlement_plot.is_empty() else ""
-		if not settlement_plot.is_empty() and not entries.is_empty(): report+="\n[color=#75694f]RECOGNIZED RESOURCES NEARBY[/color]\n\n"
-		for entry in entries:
-			var access_color := "#8fb08a" if entry.retrievable else "#c27f6c"
-			var access_title := "RETRIEVABLE" if entry.retrievable else "NOT RETRIEVABLE"
-			report += "[font_size=18][color=#e1d5b8]%s[/color][/font_size]\n" % ResourceSystem.display_name(String(entry.resource)).to_upper()
-			var resource_explanation:=ResourceSystem.plain_language_description(String(entry.resource))
-			if resource_explanation!="": report += "[color=#aeb3aa]%s[/color]\n" % resource_explanation
-			report += "[color=#96988f]%s  •  %.1f KM[/color]\n" % [String(entry.knowledge).to_upper(), float(entry.distance_km)]
-			report += "Abundance: [color=#ddd2b8]%s[/color]\n" % String(entry.abundance).capitalize()
-			report += "Quality: [color=#ddd2b8]%s[/color]\n" % String(entry.quality).capitalize()
-			report += "[color=%s]%s[/color]\n" % [access_color, access_title]
-			for blocker in entry.blockers:
-				report += "  • %s\n" % String(blocker).capitalize()
-			report += "\n"
-		lens_body.text = report
-	if revealed and contact_context.is_empty():
-		lens_body.text=_surface_resource_report(position)+lens_body.text
-		if settlement_context.is_empty() or not bool(settlement_context.get("inside_border",false)):
-			survey_advice=_founding_site_advice(position)
-			var advice:=survey_advice
-			var water_text:="[color=#%s][b]%s[/b][/color]\n%s\n%s\n\n" % [(advice.color as Color).to_html(false),String(advice.title),String(advice.get("source_text","No confirmed drinking source")),String(advice.reason)]
-			var neighbors:Dictionary=advice.neighbors
-			water_text+="[color=#e9bf70]%s[/color]\n%s\n\n" % [String(neighbors.title),String(neighbors.text)]
-			lens_body.text=water_text+lens_body.text
-	lens_body.text=preload("res://scripts/hud/hud_tokens.gd").readable_report(lens_body.text)
-	var graphical:=revealed and contact_context.is_empty() and settlement_plot.is_empty()
-	lens_survey.visible=graphical; lens_body.visible=not graphical
-	if graphical:
-		var biome:=_biome_at(position.x,position.z)
-		var surface:={"id":biome.id,"label":biome.label,"tree_cover":_woodland_density_at(position.x,position.z),"stone":"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","soil":"high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","fiber":"plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"}
-		lens_survey.show_survey(entries,surface,survey_advice)
+			card.show_account("Where we met strangers",where_text,GroundLens.encounter(String(contact_context.get("name","A foreign people")),maxi(0,int(contact_context.get("day",0))),String(contact_context.get("source_description",""))))
+		return
+	if not settlement_plot.is_empty():
+		var report:=_settlement_plot_lens_report(settlement_plot)
+		if not entries.is_empty():report+="\n\n[b]Known nearby[/b]\n\n"+GroundLens.resources(entries)
+		card.show_account("In the town",where_text,HudT.readable_report(report))
+		return
+	if inside and entries.is_empty():
+		card.show_account("Our own ground",where_text,_surface_resource_report(position)+GroundLens.inside_border(String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))))
+		return
+	var survey_advice:Dictionary={}
+	if not inside:survey_advice=_founding_site_advice(position)
+	# Written account kept in step with the card for probes and old readers.
+	lens_body.text=_surface_resource_report(position)+(GroundLens.water_advice(survey_advice) if not survey_advice.is_empty() else "")+(GroundLens.resources(entries) if not entries.is_empty() else GroundLens.unsurveyed())
+	var biome:=_biome_at(position.x,position.z)
+	var surface:={"id":biome.id,"label":biome.label,"tree_cover":_woodland_density_at(position.x,position.z),"stone":"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","soil":"high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","fiber":"plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"}
+	card.show_ground("Ground survey",where_text,entries,surface,survey_advice)
 
 
 func _retire_primary_screen(panel)->void:
@@ -15731,7 +15292,7 @@ func _open_resource_map_from_materials()->void:
 	if materials_panel and is_instance_valid(materials_panel): materials_panel.queue_free()
 	materials_panel=null
 	_set_resource_view_enabled(true)
-	if travel_status_label: travel_status_label.text="RESOURCE VIEW ON  •  ONLY RECOGNIZED OCCURRENCES ARE SHOWN"
+	if travel_status_label: travel_status_label.text="Showing the resources our people know of."
 
 
 func _material_flow_rows(material_sources:Array)->Array[Dictionary]:
@@ -19378,7 +18939,7 @@ func _focus_known_world_point(civ_id:String,point_kind:String)->void:
 			camera.size=preload("res://scripts/foreign_settlement_visual.gd").framing_size(report) if use_settlement else minf(camera.size,58.0)
 		_set_camera_target(target)
 		if travel_status_label:
-			var notice:="KNOWN HOME SETTLEMENT  •  %s" % String(encounter.get("name","STRANGERS")).to_upper() if use_settlement else "ENCOUNTER SITE  •  %s  •  THEIR HOMELAND REMAINS UNLOCATED" % String(encounter.get("name","STRANGERS")).to_upper()
+			var notice:="Where %s live." % String(encounter.get("name","the strangers")) if use_settlement else "Where we met %s. Where they live is still unknown." % String(encounter.get("name","the strangers"))
 			travel_status_label.text=notice
 			get_tree().create_timer(8.0).timeout.connect(_clear_transient_world_notice.bind(notice))
 		return
@@ -19948,36 +19509,10 @@ func _update_time_interface() -> void:
 		var settlement_status := "Traveling convoy" if travel_active else ("Founding settlement" if GameState.settlement_site_committed and GameState.settlement_completed.is_empty() else ("Halted convoy" if GameState.settlement_completed.is_empty() else "Growing settlement"))
 		var pregnancy_summary:=GameState.pregnancy_summary()
 		people_summary_label.text = "POP %s  •  LABOR %s  •  EFF %d%%\n%s\nPREGNANT %s  •  BIRTHS/12M %s" % [_compact_population(GameState.population_total),_compact_population(_able_population()),roundi(float(GameState.simulation_metrics.get("labor_efficiency",0.72))*100.0),settlement_status.to_upper(),_compact_population(int(pregnancy_summary.active)),_compact_population(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",pregnancy_summary.due_within_year))))]
-	if travel_active:
-		var remaining := maxf(0.0, travel_days_total - travel_days_elapsed)
-		var speed_factor:=roundi(float(GameState.simulation_metrics.get("travel_speed_factor",1.0))*100.0)
-		var moving_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
-		var leader_intent:=String(moving_advice.get("intent",""))
-		travel_status_label.text = ("%s: %s" % [String(moving_advice.get("leader","CARAVAN LEADER")).to_upper(),leader_intent.to_upper()] if leader_intent!="" else "ADVISOR: %s" % String(moving_advice.get("status","CONTINUE")))+"  •  %s remaining  •  pace %d%%  •  food %.1f days  •  water %.1f days" % [_format_game_duration(remaining),speed_factor,float(GameState.simulation_metrics.get("food_days",0.0)),float(GameState.water_metrics.get("days",0.0))]
-	elif bool(GameState.settlement_convoy.get("active",false)):
-		var colony_convoy:Dictionary=GameState.settlement_convoy
-		var colony_remaining:=maxf(0.0,float(colony_convoy.get("arrival_day",GameState.elapsed_days))-GameState.elapsed_days)
-		var colony_intent:=String((colony_convoy.get("caravan",{}) as Dictionary).get("intent",""))
-		travel_status_label.text="SETTLER CARAVAN  •  %s people  •  %s  •  about %s remaining  •  %d%% complete" % [_compact_population(int(colony_convoy.get("population",0))),colony_intent.to_upper() if colony_intent!="" else "EN ROUTE",_format_game_duration(colony_remaining),roundi(float(colony_convoy.get("progress",0.0))*100.0)]
-	elif GameState.convoy_emergency_halt_reason!="":
-		travel_status_label.text="CONVOY HALTED  •  %s  •  PAUSED" % GameState.convoy_emergency_halt_reason
-	elif not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)) and String(preload("res://scripts/civilization_travel.gd").advice().get("intent",""))!="":
-		var led_camp:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
-		travel_status_label.text="%s: %s  •  FOOD %+.1f TODAY  •  WATER %.1f DAYS" % [String(led_camp.get("leader","CARAVAN LEADER")).to_upper(),String(led_camp.get("intent","")).to_upper(),float(GameState.simulation_metrics.get("food_net",0.0)),float(GameState.water_metrics.get("days",0.0))]
-	elif not GameState.settlement_site_committed and bool(GameState.founding_journey.get("camped_foraging",false)):
-		var camp_advice:Dictionary=preload("res://scripts/civilization_travel.gd").advice()
-		travel_status_label.text="ADVISOR: %s  •  FORAGING IN PLACE  •  ~%.0f KM NEXT-LEG REACH  •  FOOD %+.1f TODAY" % [String(camp_advice.get("status","KEEP FORAGING")),float(camp_advice.get("approximate_reach_km",0.0)),float(GameState.simulation_metrics.get("food_net",0.0))]
-	elif GameState.settlement_site_committed and "Hearth Circle" not in GameState.settlement_completed:
-		travel_status_label.text="SETTLEMENT FOUNDING  •  HEARTH CIRCLE EMERGING FROM CURRENT ROLES"
-	elif settlement_convoy_targeting:
-		travel_status_label.text="SELECT KNOWN LAND FOR THE NEW SETTLEMENT  •  click a viable destination or press the button again to cancel"
-	elif placement_building == "":
-		# The control hint is for the first month; after it, the ticker keeps
-		# the latest thing worth telling from the Chronicle.
-		var headline:=preload("res://scripts/chronicle.gd").latest_headline() if GameState.settlement_site_committed and GameState.settlement_founded_day>=0 and GameState.elapsed_days-float(GameState.settlement_founded_day)>30.0 else ""
-		# No developer control strip over the map: pan and zoom live in the
-		# help pill's tooltip, and the ticker only carries the Chronicle.
-		travel_status_label.text = headline if headline!="" else ("FOUNDING CONVOY READY  •  RIGHT-CLICK VISIBLE OR BLACK LAND TO TRAVEL  •  CAMP TO FORAGE BETWEEN LEGS" if not GameState.settlement_site_committed else "")
+	if travel_status_label:
+		# One calm sentence for the journey and the founding (map_ticker_words.gd).
+		var journey_line:=MapTickerWords.journey(travel_active,maxf(0.0,travel_days_total-travel_days_elapsed),GameState.settlement_convoy,GameState.convoy_emergency_halt_reason,GameState.settlement_site_committed,bool(GameState.founding_journey.get("camped_foraging",false)),"Hearth Circle" in GameState.settlement_completed,settlement_convoy_targeting,placement_building!="",GameState.settlement_founded_day if GameState.settlement_site_committed else -1,GameState.elapsed_days)
+		if journey_line!="" or placement_building=="":travel_status_label.text=journey_line
 	if start_settlement_button:
 		# All map commands now live together under ACTIONS. The contextual status
 		# above provides onboarding without a modal-sized permanent map obstruction.
@@ -21103,165 +20638,10 @@ func _open_world_menu()->void:
 	if world_menu_panel and is_instance_valid(world_menu_panel): return
 	world_menu_previous_speed=game_speed
 	_set_game_speed(0.0)
-	world_menu_panel=Control.new()
-	world_menu_panel.z_index=100
-	world_menu_panel.set_meta("responsive_scroll_layout",true)
-	world_menu_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	world_menu_panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	world_menu_panel.theme=HudT.control_theme()
-	interface_layer.add_child(world_menu_panel)
-	var dimmer:=ColorRect.new()
-	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dimmer.color=Color(0.006,0.009,0.011,0.88)
-	world_menu_panel.add_child(dimmer)
-	var modal:=PanelContainer.new()
-	modal.name="PauseMenuBody"
-	modal.size=Vector2(680,minf(820,get_viewport().get_visible_rect().size.y-32))
-	modal.add_theme_stylebox_override("panel",HudT.flat(HudT.PANEL_BG_SOLID,HudT.BORDER,1,4,22))
-	world_menu_panel.add_child(modal)
-	var scroll:=ScrollContainer.new()
-	scroll.name="PauseMenuScroll"
-	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	modal.add_child(scroll)
-	var content:=VBoxContainer.new()
-	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation",8)
-	scroll.add_child(content)
-	var eyebrow:=Label.new()
-	eyebrow.text="GAME MENU · "+String(ProjectSettings.get_setting("application/config/version","development"))
-	eyebrow.add_theme_font_size_override("font_size",14)
-	eyebrow.add_theme_color_override("font_color",HudT.GOLD)
-	content.add_child(eyebrow)
-	var title:=Label.new()
-	title.text="PAUSED"
-	title.add_theme_font_size_override("font_size",26)
-	title.add_theme_color_override("font_color",HudT.INK)
-	content.add_child(title)
-	var explanation:=Label.new()
-	explanation.text="%s • Year %d, Day %d • Population %d" % [_settlement_display_name(),int(GameState.elapsed_days/365.0)+1,int(GameState.elapsed_days)%365+1,GameState.population_total]
-	explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	explanation.add_theme_font_size_override("font_size",15)
-	explanation.add_theme_color_override("font_color",HudT.TEXT_SOFT)
-	content.add_child(explanation)
-	if display_preferences:display_preferences.add_navigation_controls(content)
-	content.add_child(HSeparator.new())
-	var save_title:=Label.new()
-	save_title.text="SAVE, LOAD & CIVICS AI"
-	save_title.add_theme_font_size_override("font_size",14)
-	save_title.add_theme_color_override("font_color",HudT.GOLD)
-	content.add_child(save_title)
-	var save_status:=Label.new()
-	var existing_save:Dictionary=SaveSystem.save_metadata()
-	save_status.text="Saved world: %s · day %d · population %d" % [String(existing_save.get("settlement_name","the settlement")),int(existing_save.get("elapsed_days",0)),int(existing_save.get("population",0))] if not existing_save.is_empty() else "No saved world exists yet."
-	save_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	save_status.add_theme_font_size_override("font_size",14)
-	save_status.add_theme_color_override("font_color",HudT.MUTED)
-	content.add_child(save_status)
-	var save_row:=HBoxContainer.new()
-	save_row.add_theme_constant_override("separation",8)
-	content.add_child(save_row)
-	var save_button:=Button.new()
-	save_button.text="SAVE GAME"
-	save_button.custom_minimum_size=Vector2(0,38)
-	save_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	save_button.tooltip_text="Write this world — terrain seed, people, knowledge, wars, and history — to disk."
-	save_button.pressed.connect(func()->void:
-		var result:Dictionary=SaveSystem.save_game()
-		save_status.text=String(result.get("message",result.get("error","The save failed."))))
-	save_row.add_child(save_button)
-	var load_button:=Button.new()
-	load_button.text="LOAD GAME"
-	load_button.custom_minimum_size=Vector2(0,38)
-	load_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	load_button.disabled=existing_save.is_empty()
-	load_button.tooltip_text="Abandon the current session and restore the saved world." if not existing_save.is_empty() else "No saved world exists yet."
-	load_button.pressed.connect(_load_saved_world)
-	save_row.add_child(load_button)
-	var civic_ai_button:=Button.new()
-	civic_ai_button.custom_minimum_size=Vector2(0,38)
-	civic_ai_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	civic_ai_button.pressed.connect(_toggle_world_menu_civic_ai.bind(civic_ai_button))
-	save_row.add_child(civic_ai_button)
-	_refresh_world_menu_civic_ai_button(civic_ai_button)
-	var ai_settings:=Button.new();ai_settings.text="AI Connection…";ai_settings.custom_minimum_size.y=38;ai_settings.pressed.connect(PronouncementInterpreter.open_connection_settings);save_row.add_child(ai_settings)
-	content.add_child(HSeparator.new())
-	var seed_label:=Label.new()
-	seed_label.text="NEW GAME  •  WORLD SEED"
-	seed_label.add_theme_font_size_override("font_size",14)
-	seed_label.add_theme_color_override("font_color",HudT.GOLD)
-	content.add_child(seed_label)
-	world_seed_input=LineEdit.new()
-	world_seed_input.text=str(GameState.world_seed)
-	world_seed_input.placeholder_text="Enter a whole number"
-	world_seed_input.custom_minimum_size=Vector2(0,38)
-	world_seed_input.add_theme_font_size_override("font_size",15)
-	content.add_child(world_seed_input)
-	var opponent_label:=Label.new();opponent_label.text="OPPONENT CIVILIZATIONS · NEW GAMES";content.add_child(opponent_label)
-	var opponent_options:=OptionButton.new()
-	for count:int in [6,12,24,36]:
-		opponent_options.add_item("%d opponents%s" % [count," · standard" if count==12 else (" · dense" if count==36 else "")],count)
-		if count==GameState.opponent_count:opponent_options.select(opponent_options.item_count-1)
-	opponent_options.item_selected.connect(func(index:int)->void:GameState.opponent_count=opponent_options.get_item_id(index))
-	opponent_options.tooltip_text="Changes the number of starting opponents in the next new world. Everyone uses the same rules; current civilizations are unchanged."
-	content.add_child(opponent_options)
-	world_seed_status=Label.new()
-	world_seed_status.text="Seed %d defines terrain, resources, founders, and historical possibilities. Starting again permanently erases this civilization." % GameState.world_seed
-	world_seed_status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	world_seed_status.add_theme_font_size_override("font_size",14)
-	world_seed_status.add_theme_color_override("font_color",HudT.MUTED)
-	content.add_child(world_seed_status)
-	var same_seed:=Button.new()
-	same_seed.text="RESTART THIS WORLD"
-	same_seed.custom_minimum_size=Vector2(0,38)
-	same_seed.tooltip_text="Erase this civilization and recreate Day 1 with the current seed."
-	same_seed.pressed.connect(_restart_world.bind(GameState.world_seed))
-	content.add_child(same_seed)
-	var selected_seed:=Button.new()
-	selected_seed.text="START WITH ENTERED SEED"
-	selected_seed.custom_minimum_size=Vector2(0,38)
-	selected_seed.pressed.connect(_restart_with_entered_seed)
-	content.add_child(selected_seed)
-	var random_seed:=Button.new()
-	random_seed.text="GENERATE A NEW WORLD"
-	random_seed.custom_minimum_size=Vector2(0,40)
-	random_seed.add_theme_color_override("font_color",HudT.GOLD_BRIGHT)
-	random_seed.pressed.connect(_restart_random_world)
-	content.add_child(random_seed)
-	content.add_child(HSeparator.new())
-	if display_preferences: display_preferences.add_controls(content)
-	content.add_child(HSeparator.new())
-	var controls_title:=Label.new()
-	controls_title.text="CONTROLS"
-	controls_title.add_theme_font_size_override("font_size",14)
-	controls_title.add_theme_color_override("font_color",HudT.GOLD)
-	content.add_child(controls_title)
-	var controls:=Label.new()
-	controls.text="Left-click terrain  •  Inspect land\nRight-click terrain  •  Move the founding convoy\nTwo-finger slide / middle-drag / WASD  •  Move the map    Shift+middle  •  Rotate\nUp  •  Zoom in    Down  •  Zoom out    0–5  •  Pause and hourly time speeds    Esc  •  Menu"
-	controls.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	controls.add_theme_font_size_override("font_size",14)
-	controls.add_theme_color_override("font_color",HudT.TEXT_SOFT)
-	content.add_child(controls)
-	var cancel:=Button.new()
-	cancel.text="RESUME GAME"
-	cancel.custom_minimum_size=Vector2(0,42)
-	cancel.pressed.connect(_close_world_menu)
-	content.add_child(cancel)
-	var quit_button:=Button.new()
-	quit_button.text="QUIT GAME…"
-	quit_button.custom_minimum_size.y=42
-	quit_button.pressed.connect(_request_quit)
-	content.add_child(quit_button)
-	# Keep exit and resume discoverable without scrolling through settings.
-	var session_actions:=HBoxContainer.new()
-	session_actions.add_theme_constant_override("separation",8)
-	content.add_child(session_actions)
-	cancel.reparent(session_actions);quit_button.reparent(session_actions)
-	cancel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	quit_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	content.move_child(session_actions,3)
+	# The menu's words and layout live in scripts/hud/game_menu.gd.
+	world_menu_panel=preload("res://scripts/hud/game_menu.gd").open(self,interface_layer)
 	if not get_viewport().size_changed.is_connected(_fit_world_menu): get_viewport().size_changed.connect(_fit_world_menu)
 	_fit_world_menu.call_deferred()
-	cancel.grab_focus()
 
 func _fit_world_menu()->void:
 	if not is_instance_valid(world_menu_panel):return
@@ -21280,9 +20660,9 @@ func _request_quit()->void:
 	quit_dialog.theme=HudT.control_theme()
 	quit_dialog.title="Quit Tomorrow and Tomorrow?"
 	quit_dialog.dialog_text="Save your current progress before quitting?"
-	quit_dialog.ok_button_text="Save & Quit"
-	quit_dialog.cancel_button_text="Keep Playing"
-	quit_dialog.add_button("Quit Without Saving",false,"discard")
+	quit_dialog.ok_button_text="Save and quit"
+	quit_dialog.cancel_button_text="Keep playing"
+	quit_dialog.add_button("Quit without saving",false,"discard")
 	quit_dialog.confirmed.connect(_save_and_quit)
 	quit_dialog.custom_action.connect(func(action:String):
 		if action=="discard":_finish_quit())
@@ -21294,7 +20674,7 @@ func _request_quit()->void:
 func _save_and_quit()->void:
 	var result:Dictionary=_save_before_quit()
 	if result.has("error"):
-		quit_dialog.dialog_text="Save failed. The game is still open.\n"+String(result.error)
+		quit_dialog.dialog_text="The game could not be saved, so it is still open.\n"+String(result.error)
 		quit_dialog.popup_centered()
 		return
 	_finish_quit()
@@ -21313,41 +20693,27 @@ func _close_world_menu()->void:
 	_set_game_speed(world_menu_previous_speed)
 
 
-func _toggle_world_menu_civic_ai(button:Button)->void:
-	PronouncementInterpreter.set_api_enabled(not bool(GameState.civic_api_enabled))
-	_refresh_world_menu_civic_ai_button(button)
-	if hud and hud.has_method("request_immediate_dock_refresh"):
-		hud.request_immediate_dock_refresh()
-
-
-func _refresh_world_menu_civic_ai_button(button:Button)->void:
-	if button==null or not is_instance_valid(button): return
-	var status:Dictionary=PronouncementInterpreter.configuration_status()
-	var enabled:=bool(GameState.civic_api_enabled)
-	var configured:=bool(status.get("configured",false))
-	button.text="AI · ON" if enabled and configured else ("AI · NO KEY" if enabled else "AI · OFF")
-	button.tooltip_text="Civics AI is enabled and ready. Click to turn it off; OFF sends zero API requests." if enabled and configured else ("Civics AI is enabled, but this device has no usable API key. Open AI Connection to configure it." if enabled else "Civics AI is disabled by you. Click to turn it on; configured Terra interpretation will resume when credentials are available.")
-	button.add_theme_color_override("font_color",Color("#8fc28e") if enabled and configured else (Color("#d5ad58") if enabled else Color("#8f9994")))
-
 func _restart_with_entered_seed()->void:
 	if not world_seed_input or not world_seed_input.text.strip_edges().is_valid_int():
-		world_seed_status.text="Enter a valid whole-number seed."
-		world_seed_status.add_theme_color_override("font_color",Color("#d48672"))
+		if world_seed_status:
+			world_seed_status.text="Type a whole number, such as 184271."
+			world_seed_status.add_theme_color_override("font_color",HudT.RED_TEXT)
 		return
 	var selected:=int(world_seed_input.text.strip_edges())
 	selected=clampi(selected,-2147483647,2147483647)
 	if selected==0: selected=1
 	_restart_world(selected)
 
-func _load_saved_world()->void:
+func _load_saved_world()->String:
 	## Restores the quicksave into the autoload layer, then rebuilds the
 	## rendered world from it — the same scene-reload path a restart uses.
+	## Returns the player-facing problem, or "" when the world reloads.
 	var result:Dictionary=SaveSystem.load_game()
 	if result.has("error"):
-		if world_seed_status: world_seed_status.text=String(result.error)
-		return
+		return String(result.error)
 	pending_pronouncement_inputs.clear()
 	get_tree().reload_current_scene()
+	return ""
 
 func _restart_world(selected_seed:int)->void:
 	GameState.reset_for_new_world(selected_seed)
@@ -21756,7 +21122,7 @@ func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: b
 	# than introducing another permanent map panel.
 	if hud and not close_inspection: _on_hud_section_requested("settlement",0)
 	if travel_status_label:
-		travel_status_label.text="%s SELECTED  •  settlement management is open  •  double-click to move one scale closer" % String(selected.get("name","SETTLEMENT")).to_upper()
+		travel_status_label.text="%s: its people, stores and works are on the left. Double-click to move closer." % String(selected.get("name","Our settlement"))
 	return true
 
 func _update_camera() -> void:

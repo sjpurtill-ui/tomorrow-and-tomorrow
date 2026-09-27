@@ -36,7 +36,7 @@ func test_setting_changes_live_pan_distance_and_reopens_at_saved_value()->void:
 	assert_float(restored.map_scroll_speed).is_equal(7.5)
 	var reopened:VBoxContainer=auto_free(VBoxContainer.new());add_child(reopened);restored.add_navigation_controls(reopened)
 	assert_float((reopened.get_node("MapScrollSpeed") as HSlider).value).is_equal(7.5)
-	var row:=reopened.get_child(1)
+	var row:=reopened.get_child(0)
 	(row.get_child(1) as Button).pressed.emit()
 	assert_float(restored.map_scroll_speed).is_equal(4.0)
 	var saved:=ConfigFile.new();assert_int(saved.load(CONFIG_PATH)).is_equal(OK)

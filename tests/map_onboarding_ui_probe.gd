@@ -124,7 +124,7 @@ func _ready()->void:
 	var river_z:float=terrain.world_start_position.z
 	var river_x:float=terrain._world_river_x(river_z)
 	var river_assessment:Dictionary=terrain._settlement_surface_assessment(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
-	_expect(not bool(river_assessment.get("valid",true)) and "RIVER CHANNEL" in String(river_assessment.get("reason","")),"rendered river channel was accepted as a settlement site")
+	_expect(not bool(river_assessment.get("valid",true)) and "River channel" in String(river_assessment.get("reason","")),"rendered river channel was accepted as a settlement site")
 	terrain.settlement_convoy_targeting=true
 	# Each people now starts in its own country, far from this channel: chart it
 	# (as a returned scout would) and look at it before pointing at it.
@@ -135,7 +135,7 @@ func _ready()->void:
 	var river_screen:Vector2=terrain.camera.unproject_position(Vector3(river_x,terrain._height_at(river_x,river_z),river_z))
 	terrain._update_settlement_convoy_preview(river_screen)
 	_expect(not terrain.settlement_convoy_hover_valid and terrain.settlement_convoy_preview and terrain.settlement_convoy_preview.visible,"later settlement preview did not render the river site as blocked")
-	_expect(terrain.settlement_convoy_instruction_label and "RIVER CHANNEL" in terrain.settlement_convoy_instruction_label.text,"later settlement preview did not explain its river blocker")
+	_expect(terrain.settlement_convoy_instruction_label and "River channel" in terrain.settlement_convoy_instruction_label.text,"later settlement preview did not explain its river blocker")
 	terrain.settlement_convoy_targeting=false
 	if terrain.settlement_convoy_preview: terrain.settlement_convoy_preview.visible=false
 	terrain.camera_target=home_target

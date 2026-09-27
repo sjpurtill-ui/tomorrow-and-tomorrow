@@ -36,11 +36,11 @@ func assess(position:Vector3,fresh:bool=false)->Dictionary:
 func _assess(position:Vector3)->Dictionary:
 	var result:Dictionary={"valid":false,"recommended":false,"status":"blocked","color":BLOCKED,"position":position,"household_ratio":0.0,"distance_km":INF}
 	if not terrain._world_position_is_revealed(position):
-		result.merge({"title":"WATER SUPPLY UNKNOWN","reason":"Scout this ground first. No returned report confirms a water source here."},true)
+		result.merge({"title":"Water supply unknown","reason":"Scout this ground first. No returned report confirms a water source here."},true)
 		return result
 	var ground:Dictionary=terrain._settlement_surface_assessment(position)
 	if not bool(ground.get("valid",false)):
-		result.merge({"title":"CHOOSE DRY GROUND","reason":String(ground.get("reason","This ground cannot support a settlement."))},true)
+		result.merge({"title":"Choose dry ground","reason":String(ground.get("reason","This ground cannot support a settlement."))},true)
 		return result
 	var nearest:Dictionary={}
 	var distance:=INF
@@ -51,7 +51,7 @@ func _assess(position:Vector3)->Dictionary:
 		if candidate_distance<distance:
 			nearest=source;distance=candidate_distance
 	if nearest.is_empty() or distance>COLLECTION_LIMIT_KM:
-		result.merge({"title":"NO USABLE WATER CONFIRMED","reason":"No known fresh water within the 6 km collection limit. Choose a marked site or scout further."},true)
+		result.merge({"title":"No usable water found","reason":"No known fresh water within the 6 km collection limit. Choose a marked site or scout further."},true)
 		if _known_open_water_near(position):
 			result["source_text"]="Open water nearby · fresh water unconfirmed"
 			result["reason"]="The nearby open water is not a confirmed drinking source. Find fresh water on dry land within 6 km before founding."
@@ -64,7 +64,7 @@ func _assess(position:Vector3)->Dictionary:
 	if not nearby:
 		detail="Long daily carry. Households cover about %d%% of basic drinking needs; plan water-hauling labor." % roundi(minf(1.0,ratio)*100.0)
 		if ratio>=1.0:detail="Water is usable, but a longer daily carry. Moving closer leaves more time for other work."
-	result.merge({"valid":true,"recommended":nearby,"status":"good" if nearby else "caution","color":GOOD if nearby else CAUTION,"title":"NEARBY FRESH WATER" if nearby else "LONG WATER CARRY","reason":detail,"source_text":source_text,"source_position":nearest.position,"source_kind":nearest.kind,"distance_km":distance,"household_ratio":ratio},true)
+	result.merge({"valid":true,"recommended":nearby,"status":"good" if nearby else "caution","color":GOOD if nearby else CAUTION,"title":"Fresh water nearby" if nearby else "A long carry for water","reason":detail,"source_text":source_text,"source_position":nearest.position,"source_kind":nearest.kind,"distance_km":distance,"household_ratio":ratio},true)
 	return result
 
 func _known_open_water_near(origin:Vector3)->bool:
