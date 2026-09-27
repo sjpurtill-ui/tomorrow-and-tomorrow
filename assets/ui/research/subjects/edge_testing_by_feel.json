@@ -1,0 +1,12 @@
+{
+  "id": "edge_testing_by_feel",
+  "line": "production",
+  "game_year": 3,
+  "approx_historical_year": -4980,
+  "prompt": "c. 4980 BCE: hands carefully judge a flaked flint edge by touch. Mature flat 2D palette-knife impasto, thick ochre and umber paint blocks, scraped edges; no metal blade, lifelike skin, writing or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e2f047e3-9626-48c1-b86f-ad465c7a368e.png",
+  "asset": "res://assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+  "sha256": "4e5fc25a4e04ffccd9c4c3413bed611e21eb5e9ff9fff6e220a9bbbced3c9925",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected for flatter, more clearly painted hands. Accepted after visual 3.37:1 crop and subject/period check."
+}
