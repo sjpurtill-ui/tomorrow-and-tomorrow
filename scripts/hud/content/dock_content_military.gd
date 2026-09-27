@@ -100,7 +100,8 @@ func _formation_blocks(army:Dictionary)->Array:
 			status_text="reported %s" % ("marching on %s" % String(report.get("destination_name","its objective")) if String(report.get("status",""))=="moving" else "holding %s" % String(report.get("location_name","the field")))
 			status_text+=" · runner %dd old" % report_age
 		else:
-			status_text="moving to %s" % String(force.get("destination_name","")) if String(force.get("status",""))=="moving" else "holding %s" % String(force.get("location_name",""))
+			# What it is doing, in plain words (fighting, besieging, marching to attack).
+			status_text=preload("res://scripts/battle_account.gd").doing(force)
 		var selected:bool=int(terrain.selected_army_id)==army_id
 		var known:Dictionary=report if use_report else force
 		if selected and not String(known.get("movement_block_reason","")).is_empty():blocks.append({"type":"text","heading":"REPORTED ROUTE BLOCK","text":String(known.movement_block_reason)})
