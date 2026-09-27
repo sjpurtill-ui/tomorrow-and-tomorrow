@@ -1,6 +1,7 @@
 extends Node
 ## Machine-local display and input choices, separate from world saves.
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
+const Motion:=preload("res://scripts/hud/motion.gd")
 const SETTINGS_PATH:="user://display.cfg"
 const DEFAULT_MAP_SCROLL_SPEED:=4.0
 const MIN_MAP_SCROLL_SPEED:=0.5
@@ -12,6 +13,8 @@ var frame_limit:=60
 var music_volume:=1.0
 var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
 var color_theme:="light"
+## Shorter transitions, no camera coasting, no weather or bird motion.
+var reduce_motion:=false
 var config_path:=SETTINGS_PATH
 var applying:=false
 
@@ -25,6 +28,7 @@ func _ready()->void:
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
 		color_theme=String(config.get_value("display","color_theme","light"))
 		if color_theme not in ["light","dark"]:color_theme="light"
+		reduce_motion=bool(config.get_value("display","reduce_motion",false))
 		var saved_speed:Variant=config.get_value("camera","map_scroll_speed",DEFAULT_MAP_SCROLL_SPEED)
 		if (saved_speed is float or saved_speed is int) and is_finite(float(saved_speed)):
 			map_scroll_speed=clampf(float(saved_speed),MIN_MAP_SCROLL_SPEED,MAX_MAP_SCROLL_SPEED)
@@ -60,6 +64,7 @@ func apply()->void:
 	window.scaling_3d_mode=Viewport.SCALING_3D_MODE_BILINEAR
 	window.scaling_3d_scale=render_scale
 	Engine.max_fps=frame_limit
+	Motion.reduce_motion=reduce_motion
 	apply_music()
 	for child in get_parent().get_children():
 		if child is DirectionalLight3D:child.shadow_enabled=shadows
@@ -79,7 +84,7 @@ func apply_music()->void:
 
 func persist()->void:
 	var config:=ConfigFile.new()
-	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","color_theme"]:config.set_value("display",key,get(key))
+	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
 	config.set_value("camera","map_scroll_speed",map_scroll_speed)
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
@@ -118,6 +123,9 @@ func add_controls(parent:Node)->void:
 	_choice(parent,"Text & interface size",["100%","125%","150%","175%"],clampi(roundi((ui_scale-1)*4),0,3),func(index:int):ui_scale=1.0+index*.25;apply();persist())
 	_choice(parent,"3D resolution",["50% · fastest","75% · balanced","100% · native"],[0.5,0.75,1.0].find(render_scale),func(index:int):render_scale=[0.5,0.75,1.0][index];apply();persist())
 	_choice(parent,"Terrain shadows",["Off · faster","On"],1 if shadows else 0,func(index:int):shadows=index==1;apply();persist())
+	var motion:=_choice(parent,"Motion",["Full","Reduced"],1 if reduce_motion else 0,func(index:int):reduce_motion=index==1;apply();persist())
+	motion.name="ReduceMotion"
+	motion.tooltip_text="Reduced: quicker transitions, no camera coasting, and a stiller map (no weather, birds or drifting cloud shadows)."
 	_choice(parent,"Frame limit",["30 fps","60 fps","120 fps"],[30,60,120].find(frame_limit),func(index:int):frame_limit=[30,60,120][index];apply();persist())
 	var music_label:=Label.new();music_label.text="Music volume · %d%%"%roundi(music_volume*100);parent.add_child(music_label)
 	var music:=HSlider.new();music.min_value=0;music.max_value=100;music.step=1;music.value=music_volume*100;music.custom_minimum_size.y=32

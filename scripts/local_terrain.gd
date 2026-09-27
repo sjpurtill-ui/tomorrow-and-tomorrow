@@ -117,6 +117,12 @@ var distance_input_msec:=-1000
 var distance_gesture_steps:=0.0
 var zoom_preset_active:=false
 var zoom_target_size:float=-1.0
+## codex/map-motion: camera glide and coasting state (scripts/map_motion.gd).
+var zoom_log_velocity:=0.0
+var pan_coast_velocity:=Vector3.ZERO
+var drag_velocity:=Vector3.ZERO
+var drag_motion_usec:=0
+var key_pan_velocity:=Vector2.ZERO
 var zoom_pointer:=Vector2.ZERO
 var north_reset_active:=false
 var camera_input_msec:int=0
@@ -4017,9 +4023,11 @@ func _update_world_streaming() -> void:
 func _process_camera_navigation(delta: float) -> void:
 	if not SEAMLESS_WORLD or camera==null:
 		return
-	if is_instance_valid(world_menu_panel):return
+	if is_instance_valid(world_menu_panel):
+		key_pan_velocity=Vector2.ZERO;return
 	var focus:=get_viewport().gui_get_focus_owner()
-	if focus is LineEdit or focus is TextEdit: return
+	if focus is LineEdit or focus is TextEdit:
+		key_pan_velocity=Vector2.ZERO;return
 	var turn:=(1.0 if Input.is_physical_key_pressed(KEY_Q) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_E) else 0.0)
 	if turn!=0.0:
 		north_reset_active=false
@@ -4034,11 +4042,16 @@ func _process_camera_navigation(delta: float) -> void:
 		(1.0 if Input.is_physical_key_pressed(KEY_S) else 0.0)-(1.0 if Input.is_physical_key_pressed(KEY_W) else 0.0)
 	)
 	if wasd.length_squared()>input.length_squared(): input=wasd.normalized() if wasd.length()>1.0 else wasd
-	if input.length_squared()<0.001:
+	# Held keys ease the camera up to speed and let it settle when released.
+	key_pan_velocity=preload("res://scripts/map_motion.gd").key_pan_step(key_pan_velocity,input,delta)
+	if key_pan_velocity.length_squared()<0.0001:
+		key_pan_velocity=Vector2.ZERO
 		return
+	if input.length_squared()>=0.001:pan_coast_velocity=Vector3.ZERO
 	var screen_right:=_camera_ground_screen_right()
 	var screen_up:=_camera_ground_screen_up()
-	var movement:=_camera_keyboard_movement(input,screen_right,screen_up,camera.size*0.28*delta)
+	var movement:=_camera_keyboard_movement(key_pan_velocity,screen_right,screen_up,camera.size*0.28*delta)
+	camera_input_msec=Time.get_ticks_msec()
 	_set_camera_target(camera_target+movement)
 
 
@@ -21017,8 +21030,14 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			var was_dragging:=dragging
 			dragging = event.pressed and not _pointer_over_ui()
 			rotating_camera = event.shift_pressed
+			if dragging:
+				pan_coast_velocity=Vector3.ZERO;drag_velocity=Vector3.ZERO
+			elif was_dragging and not rotating_camera and Time.get_ticks_usec()-drag_motion_usec<70000:
+				# A released grab coasts briefly, as a map slid across a table.
+				pan_coast_velocity=preload("res://scripts/map_motion.gd").release_velocity(drag_velocity,camera.size)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed and not _pointer_over_ui():
 			_queue_camera_zoom(event.position,-maxf(0.05,event.factor)) if event.shift_pressed else _step_camera_distance(event.position,-1.0)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed and not _pointer_over_ui():
@@ -21035,6 +21054,10 @@ func _input(event: InputEvent) -> void:
 			var screen_right:=_camera_ground_screen_right()
 			var screen_up:=_camera_ground_screen_up()
 			var movement:=_camera_grab_movement(event.relative,screen_right,screen_up,units_per_pixel)
+			var now_usec:=Time.get_ticks_usec()
+			var step_seconds:=clampf(float(now_usec-drag_motion_usec)/1000000.0,1.0/240.0,0.1)
+			drag_velocity=drag_velocity.lerp(movement/step_seconds,0.5) if now_usec-drag_motion_usec<100000 else movement/step_seconds
+			drag_motion_usec=now_usec
 			_set_camera_target(camera_target+movement)
 
 func _dismiss_map_panels()->bool:
@@ -21323,19 +21346,30 @@ func _reset_camera_north()->void:
 	camera_input_msec=Time.get_ticks_msec()
 
 func _camera_in_motion()->bool:
-	return zoom_target_size>0.0 or north_reset_active or dragging or Time.get_ticks_msec()-camera_input_msec<100
+	return zoom_target_size>0.0 or north_reset_active or dragging or pan_coast_velocity!=Vector3.ZERO or key_pan_velocity!=Vector2.ZERO or Time.get_ticks_msec()-camera_input_msec<100
 
 func _process_smooth_camera(delta:float)->void:
 	if camera==null: return
 	var blend:=1.0-exp(-8.0*maxf(0.0,delta))
+	var map_motion:=preload("res://scripts/map_motion.gd")
 	if zoom_target_size>0.0:
-		var log_step:=clampf((log(zoom_target_size)-log(camera.size))*blend,-2.8*delta,2.8*delta)
-		var next:=exp(log(camera.size)+log_step)
-		if absf(log(next/zoom_target_size))<0.001:
+		# A critically damped glide in log(size): eases in, eases out, never overshoots.
+		var glide:=map_motion.zoom_step(camera.size,zoom_log_velocity,zoom_target_size,maxf(0.0,delta))
+		var next:=glide.x
+		zoom_log_velocity=glide.y
+		if glide.z>0.5:
 			next=zoom_target_size
 			zoom_target_size=-1.0
 			zoom_preset_active=false
+			zoom_log_velocity=0.0
 		_zoom_camera_at_screen(zoom_pointer,next,false)
+	else:
+		zoom_log_velocity=0.0
+	if pan_coast_velocity!=Vector3.ZERO:
+		if dragging:pan_coast_velocity=Vector3.ZERO
+		else:
+			_set_camera_target(camera_target+pan_coast_velocity*maxf(0.0,delta))
+			pan_coast_velocity=map_motion.coast_step(pan_coast_velocity,maxf(0.0,delta),camera.size)
 	if north_reset_active:
 		camera_yaw=lerp_angle(camera_yaw,PI*0.5,blend)
 		if absf(wrapf(camera_yaw-PI*0.5,-PI,PI))<0.001:
