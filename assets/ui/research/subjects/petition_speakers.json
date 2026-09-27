@@ -1,0 +1,12 @@
+{
+  "id": "petition_speakers",
+  "line": "institutions",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Chosen speakers carry household oral petitions to revered living spiritual leader seated on plain stone; archaic mineral civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cbf34ccd-206e-4504-92af-ea8baa73214e.png",
+  "asset": "res://assets/ui/research/subjects/petition_speakers-v1.png",
+  "sha256": "7bbf6724b6c783dc9d3145792e43c54e6e9bfeb15d67cb2e71d901760e65e29c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; speaker delegation, leader and households clear; no later temple/writing."
+}
