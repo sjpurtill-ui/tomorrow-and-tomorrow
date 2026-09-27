@@ -108,10 +108,10 @@ static func uncharted(site_committed:bool)->String:
 	return _heading("Nobody has seen this ground")+"No one who has come home has walked here, so its land, water and people are unknown.\n\n"+next
 
 static func foreign_settlement(name:String,source:String,observed_day:int)->String:
-	return _heading(name)+"We know where they live from %s. We last saw the place ourselves in %s.\n\n%s" % [source if source!="" else "a returned report",Kit.when(observed_day).to_lower(),"To learn how many live there now and how well they guard it, ask the chief scout in court to send watchers."]
+	return _heading(name)+"We know where they live from %s. We last saw the place ourselves in the %s.\n\n%s" % [source if source!="" else "a returned report",Kit.season_of_year(observed_day),"To learn how many live there now and how well they guard it, ask the chief scout in court to send watchers."]
 
 static func encounter(name:String,day:int,how:String)->String:
-	return _heading("We met %s here" % name)+"First met in %s. %s.\n\n%s" % [Kit.when(day).to_lower(),how if how!="" else "The telling does not say how",_note("This is where we met them, not where they live.")]
+	return _heading("We met %s here" % name)+"First met in the %s. %s.\n\n%s" % [Kit.season_of_year(day),how if how!="" else "The telling does not say how",_note("This is where we met them, not where they live.")]
 
 static func inside_border(name:String,area_km2:float,people:String)->String:
 	return _heading("Land of %s" % name)+"This ground lies inside %s. The town holds about %.1f km² and %s people live there.\n\nThe border grows as the town grows: more people, more fields and paths, and the strength to hold it.\n\n%s" % [name,area_km2,people,_note("Nothing beyond the ground's own cover has been found here yet.")]
@@ -124,7 +124,7 @@ static func river_channel()->String:
 
 static func surface(label:String,cover:float,stone:String,soil:String,fiber:String)->String:
 	var wood:="Thick woodland" if cover>=0.60 else ("Open woodland" if cover>=0.25 else ("A few scattered trees" if cover>=0.08 else "Hardly any trees"))
-	return _heading(label.capitalize())+"%s, about %d%% tree cover. Those trees can be cut for timber if there are hands and tools to spare.\n\nSurface stone: %s. Soil: %s. Fibre plants: %s.\n\n" % [wood,roundi(cover*100.0),stone,soil,fiber]
+	return _heading(Kit.first_capital(label))+"%s, about %d%% tree cover. Those trees can be cut for timber if there are hands and tools to spare.\n\nSurface stone: %s. Soil: %s. Fibre plants: %s.\n\n" % [wood,roundi(cover*100.0),stone,soil,fiber]
 
 static func water_advice(advice:Dictionary)->String:
 	var text:="[color=%s][b]%s[/b][/color]\n%s\n%s\n\n" % [_ink(advice.get("color",T.TEAL)),Kit.sentence(String(advice.get("title",""))),String(advice.get("source_text","No confirmed drinking water")),String(advice.get("reason",""))]
@@ -180,10 +180,10 @@ static func plot(plot:Dictionary,consumed:Dictionary,events:int,operations:Strin
 	if operations!="":text+=operations
 	if status=="under construction":text+="Building is %d%% done\n" % roundi(float(plot.get("construction_progress",0.0))*100.0)
 	if status=="vacant":text+="Weeds and brush have taken %d%% of it back\n" % roundi(float(plot.get("reclamation",0.0))*100.0)
-	text+="\n"+_note("Built %s" % Kit.when(int(plot.get("created_day",0))).to_lower())
-	if int(plot.get("converted_day",-1))>=0:text+="\n"+_note("Rebuilt %s" % Kit.when(int(plot.converted_day)).to_lower())
-	if int(plot.get("damaged_day",-1))>=0:text+="\n"+_note("Last damaged %s" % Kit.when(int(plot.damaged_day)).to_lower())
-	if int(plot.get("abandoned_day",-1))>=0:text+="\n"+_note("Left empty %s" % Kit.when(int(plot.abandoned_day)).to_lower())
+	text+="\n"+_note("Built in the %s" % Kit.season_of_year(int(plot.get("created_day",0))))
+	if int(plot.get("converted_day",-1))>=0:text+="\n"+_note("Rebuilt in the %s" % Kit.season_of_year(int(plot.converted_day)))
+	if int(plot.get("damaged_day",-1))>=0:text+="\n"+_note("Last damaged in the %s" % Kit.season_of_year(int(plot.damaged_day)))
+	if int(plot.get("abandoned_day",-1))>=0:text+="\n"+_note("Left empty in the %s" % Kit.season_of_year(int(plot.abandoned_day)))
 	if events>0:text+="\n"+_note("%d change%s recorded in the builders' tally" % [events,"" if events==1 else "s"])
 	var cause:=String(plot.get("growth_cause","")).replace("_"," ")
 	if cause!="":text+="\n\n[b]Why it is here[/b]\n%s" % cause.capitalize()

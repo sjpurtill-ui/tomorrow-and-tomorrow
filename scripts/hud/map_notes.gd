@@ -45,7 +45,7 @@ static func build_help(layer:CanvasLayer,view:Vector2,on_toggle:Callable,on_clos
 	var close:=Kit.quiet_button(header,"Close",on_close,"Close this note, or click the map. Map help opens it again.")
 	close.custom_minimum_size=Vector2(64,28)
 	var body:=Kit.label(column,"","body")
-	body.custom_minimum_size.x=390
+	body.custom_minimum_size.x=388
 	layer.add_child(panel)
 	return {"button":button,"panel":panel,"title":title,"body":body}
 
@@ -72,7 +72,9 @@ static func style_notice(button:Button,danger:bool)->void:
 
 ## "Word from the road": who speaks, what they say, and where to answer.
 static func road_words(speaker:String,text:String)->String:
-	return "Word from the road, from %s\n%s\n\nClick to answer them in court." % [speaker if speaker!="" else "the caravan's speakers",text.strip_edges()]
+	var who:=speaker.strip_edges() if speaker.strip_edges()!="" else "the caravan's speakers"
+	if who.begins_with("The "):who="the "+who.substr(4)
+	return "Word from the road, from %s\n%s\n\nClick to answer them in court." % [who,text.strip_edges()]
 
 static func caravan_words(entry:Dictionary)->String:
 	var title:=Kit.sentence(String(entry.get("title",""))).trim_suffix(".")
@@ -95,6 +97,7 @@ static func build_alert(layer:CanvasLayer,view:Vector2,on_show:Callable,on_speak
 	column.add_theme_constant_override("separation",8)
 	panel.add_child(column)
 	var title:=Kit.label(column,"","heading")
+	title.custom_minimum_size.x=348
 	var body:=Kit.label(column,"","body")
 	body.custom_minimum_size=Vector2(348,0)
 	body.max_lines_visible=7

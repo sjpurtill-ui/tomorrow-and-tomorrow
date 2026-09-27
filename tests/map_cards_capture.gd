@@ -29,7 +29,7 @@ func _ready()->void:
 		"site":
 			terrain._open_founding_site_guide(home)
 		"help":
-			if terrain.has_method("_refresh_map_help"):terrain._refresh_map_help()
+			terrain._toggle_map_help()
 		"road":
 			terrain._issue_travel_council_report("departure",0.0)
 		"alert":
@@ -38,6 +38,9 @@ func _ready()->void:
 			terrain._open_world_menu()
 		"uncharted":
 			terrain._inspect_location(home+Vector3(900,0,900))
+		"settler":
+			# The settler card with sample facts, as it looks over the map.
+			preload("res://scripts/hud/caravan_panel.gd").open_settler_card(terrain.interface_layer,{"name":"Waterford","origin_name":"Ashford","leader":"Tilla","leader_summary":"Seasoned on the road","people":40,"food_days":38.0,"journey":"6 days","distance_km":24.0,"supplies":"40.0 timber and 12.0 plant fiber","water_title":"Fresh water nearby","water_text":"Stream · 0.4 km W. Dry ground near known fresh water.","ready":true,"advice":"Tilla: two camps by the stream, then over the ridge. Enough for the march and about 30 days to establish the new home."},func():pass,func():pass)
 	for frame in 12:await get_tree().process_frame
 	RenderingServer.force_draw(true,0.0)
 	await get_tree().process_frame

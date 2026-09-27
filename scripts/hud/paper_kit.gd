@@ -123,6 +123,17 @@ static func sentence(text:String)->String:
 	if letters<4 or float(upper)/float(letters)<0.8:return clean
 	return T.sentence_case(clean)
 
+## "open grassland" -> "Open grassland" (not "Open Grassland").
+static func first_capital(text:String)->String:
+	var clean:=text.strip_edges().to_lower()
+	return clean.substr(0,1).to_upper()+clean.substr(1)
+
+## A date inside a sentence: "summer of year 12".
+static func season_of_year(day:int)->String:
+	var parts:=when(day).split(" · ")
+	if parts.size()<2:return when(day).to_lower()
+	return "%s of %s" % [parts[1].to_lower(),parts[0].to_lower()]
+
 ## Every date on these cards: season and year, never a raw day count.
 static func when(day:int)->String:
 	return preload("res://scripts/hud/era_words.gd").when(day)

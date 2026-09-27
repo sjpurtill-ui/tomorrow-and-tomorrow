@@ -98,7 +98,7 @@ static func inspection(kind:String,facts:Dictionary)->String:
 		"encounter":return "We met %s here. %s" % [String(facts.get("name","strangers")),"We know where they live." if bool(facts.get("home_known",false)) else "Where they live is still unknown."]
 		"inside":return "Inside %s, %.1f km from its hearth." % [String(facts.get("name","our town")),float(facts.get("km",0.0))]
 		"open":
-			var ground:=String(facts.get("ground","Open ground")).capitalize()
+			var ground:=Kit.first_capital(String(facts.get("ground","Open ground")))
 			if bool(facts.get("site_committed",false)):return "%s. To settle it, press Found on the toolbar." % ground
 			return "%s. Right-click to walk the travellers here." % ground
 	return ""

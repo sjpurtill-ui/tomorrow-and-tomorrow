@@ -36,7 +36,7 @@ static func open(terrain:Node,layer:Node)->Control:
 	scroll.add_child(content)
 
 	Kit.label(content,"Paused · version %s" % String(ProjectSettings.get_setting("application/config/version","in development")),"kicker")
-	Kit.label(content,String(terrain._settlement_display_name()),"title")
+	Kit.label(content,Kit.sentence(String(terrain._settlement_display_name())),"title")
 	Kit.label(content,"%s · %d people" % [Kit.when(int(GameState.elapsed_days)),GameState.population_total],"body")
 	var session:=HBoxContainer.new()
 	session.add_theme_constant_override("separation",8)
@@ -172,7 +172,7 @@ static func _say(label:Label,text:String,problem:bool=false)->void:
 
 static func saved_words(meta:Dictionary)->String:
 	if meta.is_empty():return "Nothing has been saved yet."
-	return "Last saved: %s, %s, %d people." % [String(meta.get("settlement_name","")) if String(meta.get("settlement_name",""))!="" else "your people",Kit.when(int(meta.get("elapsed_days",0))).to_lower(),int(meta.get("population",0))]
+	return "Last saved: %s in the %s, %d people." % [String(meta.get("settlement_name","")) if String(meta.get("settlement_name",""))!="" else "your people",Kit.season_of_year(int(meta.get("elapsed_days",0))),int(meta.get("population",0))]
 
 static func ai_words(enabled:bool,configured:bool)->Dictionary:
 	if enabled and configured:

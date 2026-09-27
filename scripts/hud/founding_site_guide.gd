@@ -57,7 +57,7 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	var water_row:=HBoxContainer.new();water_row.add_theme_constant_override("separation",9);water_column.add_child(water_row)
 	_icon(water_row,Icons.texture_for("Freshwater"),38)
 	var water_copy:=VBoxContainer.new();water_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;water_copy.add_theme_constant_override("separation",1);water_row.add_child(water_copy)
-	heading=_label(water_copy,16);heading.add_theme_font_override("font",T.font("ui_strong"));source=_label(water_copy,13)
+	heading=_label(water_copy,16);heading.add_theme_font_override("font",T.font("ui_strong"));source=_label(water_copy,13);source.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	meter_label=_label(water_row,18);meter_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;meter_label.custom_minimum_size.x=58;meter_label.add_theme_color_override("font_color",T.INK)
 	meter=ProgressBar.new();meter.custom_minimum_size.y=6;meter.show_percentage=false;water_column.add_child(meter)
 	meter_note=_label(water_column,13);meter_note.add_theme_color_override("font_color",T.INK_MUTED);meter_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -66,7 +66,7 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	_icon(neighbor_row,SurveyVisuals.symbol("flag",T.INK_MUTED),28)
 	var neighbor_copy:=VBoxContainer.new();neighbor_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;neighbor_copy.add_theme_constant_override("separation",1);neighbor_row.add_child(neighbor_copy)
 	neighbor_heading=_label(neighbor_copy,12);neighbor_heading.text="NEIGHBOURS";neighbor_heading.add_theme_color_override("font_color",T.INK_MUTED)
-	neighbor_label=_label(neighbor_copy,14)
+	neighbor_label=_label(neighbor_copy,14);neighbor_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	neighbor_badge=_label(neighbor_row,13);neighbor_badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;neighbor_badge.custom_minimum_size.x=78
 	var resource_header:=HBoxContainer.new();body.add_child(resource_header)
 	var resource_title:=_label(resource_header,12);resource_title.text="SEEN WITHIN %d KM" % roundi(RESOURCE_RADIUS_KM);resource_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;resource_title.add_theme_color_override("font_color",T.INK_MUTED)

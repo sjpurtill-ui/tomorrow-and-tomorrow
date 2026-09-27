@@ -52,7 +52,7 @@ func test_survey_card_uses_words_not_symbols_on_paper()->void:
 
 func test_ground_accounts_use_seasons_and_plain_words()->void:
 	var account:=Lens.foreign_settlement("The Reed People","a scout's telling",400)
-	assert_str(account).contains(preload("res://scripts/hud/era_words.gd").when(400).to_lower())
+	assert_str(account).contains(Kit.season_of_year(400))
 	assert_str(account).not_contains("Day ")
 	assert_str(account).not_contains("aggregate")
 	assert_str(Lens.uncharted(false)).not_contains("UNCHARTED")
@@ -102,7 +102,7 @@ func test_first_contact_alert_is_paper_and_opens_the_court()->void:
 func test_game_menu_words_are_plain_and_confirm_before_discarding_play()->void:
 	assert_str(Menu.saved_words({})).is_equal("Nothing has been saved yet.")
 	var saved:=Menu.saved_words({"settlement_name":"Ashford","elapsed_days":500,"population":140})
-	assert_str(saved).contains(preload("res://scripts/hud/era_words.gd").when(500).to_lower())
+	assert_str(saved).contains(Kit.season_of_year(500))
 	assert_str(saved).not_contains("day ")
 	for combo in [[true,true],[true,false],[false,false]]:
 		var words:=Menu.ai_words(combo[0],combo[1])
