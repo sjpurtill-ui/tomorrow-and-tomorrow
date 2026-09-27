@@ -9,7 +9,7 @@ func _init(world:Node,shell:Control,id:String)->void:
 func report()->Dictionary:return CivilizationSystem.city_intelligence.known("player",city_id)
 func meta()->Dictionary:
 	var city:=report()
-	return {"eyebrow":"CITY INTELLIGENCE","title":String(city.get("name","Reported city")),"subtabs":[]}
+	return {"eyebrow":"City report","title":String(city.get("name","Reported city")),"subtabs":[]}
 ## The player's own primary city, for the gold home marks. Own figures are
 ## the player's to know; the foreign side stays on returned estimates.
 func home(city:Dictionary)->Dictionary:
@@ -25,28 +25,34 @@ func tab(_sub:int)->Dictionary:
 	var own_values:Dictionary=own.get("values",{})
 	var home_name:=String(own.get("name",""))
 	var rows:Array=[]
-	for key in ["population","science_capacity","education","gdp","life_expectancy","infant_mortality","garrison","fortification","supply","damage","production","logistics"]:
+	for key in V.shown_keys():
 		var field:Dictionary=city.get("fields",{}).get(key,{})
-		var value:=V.estimate(key,field)
-		if key=="population" and not field.is_empty():value+=" people"
+		var value:=V.words(key,field)
 		var mine:=float(own_values.get(key,-1.0))
 		var own_text:=""
-		if mine>=0 and not field.is_empty():own_text="%s · %s" % [home_name.to_upper(),V.estimate(key,{"low":mine,"high":mine},false)]
+		if mine>=0 and not field.is_empty():own_text="%s: %s" % [home_name,V.words(key,{"low":mine,"high":mine})]
 		var seen:=int(field.get("observed_day",-1))
-		rows.append({"key":key,"name":String(V.LABELS[key]),"value":value,"field":field,"own":mine if not field.is_empty() else -1.0,"own_text":own_text,"tip":"Seen %s. Only returned observations are shown." % Dossier.ago(today-seen) if seen>=0 else "Only returned observations are shown."})
+		rows.append({"key":key,"name":V.label(key),"value":value,"field":field,"own":mine if not field.is_empty() else -1.0,"own_text":own_text,"tip":"Seen %s. Only returned observations are shown." % Dossier.ago(today-seen) if seen>=0 else "Only returned observations are shown."})
 	var fresh:=V.freshness(city,today)
 	var seen_day:=int(city.get("observed_day",-1))
 	var controller:=CivilizationSystem.city_intelligence.controller_label(String(city.get("controller","")))
 	var dossier:={"type":"city_dossier","items":rows,"city_id":city_id,"fields":city.get("fields",{}),"home_name":home_name,
 		"account":Dossier.account(city,own_values,home_name,today),"source":String(city.get("source","Unknown")),
-		"fresh_level":int(fresh.level),"fresh_status":String(fresh.status),"fresh_age":"" if seen_day<0 else Dossier.ago(today-seen_day).to_upper(),
+		"fresh_level":int(fresh.level),"fresh_status":String(fresh.status),"fresh_age":"" if seen_day<0 else Dossier.ago(today-seen_day),
 		"caption":"Held by "+controller}
 	var blocks:Array=[dossier]
 	var scouting:=Orders.dock_items(city_id)
 	if not scouting.is_empty():
-		blocks.append({"type":"actions","heading":"SCOUT THIS CITY","items":scouting})
+		blocks.append({"type":"actions","heading":"Keep an eye on it","items":scouting})
 		var status:=Orders.dock_status(city_id)
 		if not status.is_empty():blocks.append({"type":"text","text":status})
-	blocks.append({"type":"actions","items":[{"label":"FULL REPORT & ACTIONS","sub":"Reconnaissance, diplomacy and military options","on_press":func()->void:CivilizationSystem.city_intelligence.open(city_id)}]})
+	var owner:=String(city.get("controller",""))
+	if owner=="":owner=String(city.get("civ_id",""))
+	var talk:Array=[]
+	if owner!="" and owner!="player":
+		var ruler:=String(ForeignDiplomacy.leader(owner).get("name",""))
+		talk.append({"label":"Talk to %s" % ruler.get_slice(" ",0) if ruler!="" else "Send word to their ruler","sub":"In court, through your envoys","primary":true,"on_press":court({"civ_id":owner})})
+	talk.append({"label":"Full report","sub":"Everything our scouts saw, and who to talk to about it","on_press":func()->void:CivilizationSystem.city_intelligence.open(city_id)})
+	blocks.append({"type":"actions","items":talk})
 	return {"blocks":blocks}
 func signature()->Array:return [report(),CivilizationSystem.scouting_staff.city_watch(city_id),Orders.party_away(city_id).get("mission_id",-1),int(GameState.elapsed_days)]
