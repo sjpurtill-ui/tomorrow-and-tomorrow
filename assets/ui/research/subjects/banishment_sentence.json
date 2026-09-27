@@ -1,0 +1,12 @@
+{
+  "id": "banishment_sentence",
+  "line": "institutions",
+  "game_year": 30,
+  "approx_historical_year": -4800,
+  "prompt": "c. 4800 BCE: Community elders publicly cast out an adult who departs with bundle past boundary cairn while kin remain; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-60a157b0-d4a3-4105-85cc-f03b445b5eec.png",
+  "asset": "res://assets/ui/research/subjects/banishment_sentence-v1.png",
+  "sha256": "af0acc0f827320504dc9633e8e5da1ce17807fc0cf9271e67b45b6a30cb55099",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; social separation and nonviolent departure clear."
+}

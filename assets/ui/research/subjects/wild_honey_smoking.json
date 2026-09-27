@@ -1,0 +1,12 @@
+{
+  "id": "wild_honey_smoking",
+  "line": "nutrition",
+  "game_year": 30,
+  "approx_historical_year": -4800,
+  "prompt": "c. 4800 BCE: Adults use gentle smoke below wild tree-hollow bee hive and collect honeycomb into clay bowl; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-040f761d-cf66-4205-a448-427589c8ee80.png",
+  "asset": "res://assets/ui/research/subjects/wild_honey_smoking-v1.png",
+  "sha256": "0d3ec5fb5abdd87eede7895bbe0f173ccd66795ab76834c345ed5bf774f52753",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; wild hive, smoke and honey gathering clear in crop."
+}

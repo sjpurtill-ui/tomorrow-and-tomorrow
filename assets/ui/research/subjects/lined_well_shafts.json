@@ -1,0 +1,12 @@
+{
+  "id": "lined_well_shafts",
+  "line": "infrastructure",
+  "game_year": 32,
+  "approx_historical_year": -4787,
+  "prompt": "c. 4787 BCE: Adults line earthen well shaft with woven wattle and timber braces and lower clay vessel to water; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-650d5b2d-8e56-4eea-a5d3-f254a7445a1d.png",
+  "asset": "res://assets/ui/research/subjects/lined_well_shafts-v1.png",
+  "sha256": "f858e90cb65226436c41da2cb425df75c1094bd4fad375cdcee04809c6dc3d49",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; shaft lining and water vessel visible in wide cutaway crop."
+}

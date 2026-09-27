@@ -1,0 +1,12 @@
+{
+  "id": "skis_snowshoes",
+  "line": "logistics",
+  "game_year": 32,
+  "approx_historical_year": -4787,
+  "prompt": "c. 4787 BCE: Regional winter travelers cross snow on simple broad wooden skis and fiber-laced bent-wood snowshoes; sparse travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-92457ae0-6094-4c18-873e-accaf4a7edf6.png",
+  "asset": "res://assets/ui/research/subjects/skis_snowshoes-v1.png",
+  "sha256": "c3205e4b31a15c69cc4cd56b1e04e66fcefed2b277bcb31ea9166079f4504aed",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; skis, snowshoes and tracks clear in crop; regional winter setting."
+}

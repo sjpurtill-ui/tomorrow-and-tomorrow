@@ -1,0 +1,12 @@
+{
+  "id": "firebreaks",
+  "line": "ecology",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Adults clear broad fuel-free strip around reed camp and fields before distant grassfire; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b3e4481-337c-4565-8854-65ca985b8b2b.png",
+  "asset": "res://assets/ui/research/subjects/firebreaks-v1.png",
+  "sha256": "7fb109add319af1d5b93cd3df0dc18e29b9966c50acff38e8633076b81ad6898",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; bare-earth firebreak between huts and low fire clear."
+}
