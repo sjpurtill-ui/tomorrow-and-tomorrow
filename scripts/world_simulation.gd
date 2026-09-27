@@ -421,6 +421,7 @@ func _view_steps(timings:Dictionary={},label:String="views",next_day:int=-1)->Ar
 		))
 	result.append(S.step(label,timings,func()->void:
 		CivilizationSystem.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views("player",shared.troops))
+		CivilizationSystem.apply_formation_memory()
 	))
 	return result
 
@@ -444,6 +445,7 @@ func _refresh_observer_view(id:String,troops:Variant)->void:
 		_localize_controllers(human,id)
 		observer.civilizations.append(human)
 	observer.foreign_formations.assign(preload("res://scripts/civilization_combat.gd").troop_views(id,troops))
+	observer.apply_formation_memory()
 
 func _updated_observer_view(source:Dictionary,previous:Dictionary)->Dictionary:
 	var view:Dictionary={}

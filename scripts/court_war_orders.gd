@@ -1023,12 +1023,21 @@ static func daily(day:int)->Array:
 		var index:int=mc._field_army_index(int(entry.army_id))
 		var text:=""
 		var battle:Dictionary={}
+		var told:Array=entry.get("reported_seeds",[])
 		for b in mc.battle_history:
 			var rec:Dictionary=b
-			if int(rec.get("day",-1))>=int(entry.day) and String(rec.get("target_region_id",""))==String(entry.city_id): battle=rec; break
+			if int(rec.get("day",-1))<int(entry.day) or told.has(int(rec.get("seed",0))): continue
+			var ours:=int(rec.get("home_force_id",-1))==int(entry.army_id) and String(rec.get("home_force_kind",""))=="field_army"
+			if ours or String(rec.get("target_region_id",""))==String(entry.city_id): battle=rec; break
 		if not battle.is_empty():
-			text=_battle_words(entry,battle)
-			entry["status"]="reported"
+			# One battle, one account: the war leader's court matter carries
+			# the same account as the report card, in his own voice. The
+			# Chronicle's entry is the battle's own (military_campaign).
+			told.append(int(battle.get("seed",0))); entry["reported_seeds"]=told.slice(-8)
+			if String(battle.get("target_region_id",""))==String(entry.city_id) or index<0: entry["status"]="reported"
+			var matter:=_file_battle(entry,battle,day)
+			if not matter.is_empty(): filed.append(matter)
+			continue
 		elif not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==int(entry.army_id) and not bool(entry.get("siege_reported",false)):
 			entry["siege_reported"]=true
 			text="We are before %s and have ringed it. Nobody goes in or out with food while we hold." % String(entry.city_name)
@@ -1047,20 +1056,19 @@ static func daily(day:int)->Array:
 			if not matter.is_empty(): filed.append(matter)
 	return filed
 
-static func _battle_words(entry:Dictionary,battle:Dictionary)->String:
-	var side:=String(battle.get("home_side","attacker"))
-	var ours:Dictionary=battle.get(side,{})
-	var lost:=maxi(0,int(ours.get("initial_troops",ours.get("troops",0)))-int(ours.get("remaining_troops",0)))
-	var outcome:=String(battle.get("outcome",""))
-	var won:=outcome.begins_with(side) or String((battle.get("strategic_outcome",{}) as Dictionary).get("player_won",""))=="true"
-	var took:=bool((battle.get("strategic_outcome",{}) as Dictionary).get("region_captured",false))
-	var words:="We fought at %s. " % String(entry.city_name)
-	if took: words+="The town is ours; some of us stay to hold it. "
-	elif outcome.ends_with("retreat") and outcome.begins_with(side): words+="We could not break them and pulled back. "
-	elif won: words+="We had the better of it. "
-	else: words+="They held. "
-	words+="%d of the %d who went are dead, hurt or scattered; %d are still with me." % [lost,int(entry.get("going",lost)),int(ours.get("remaining_troops",0))]
-	return words
+## The battle's account (battle_account.gd), in the war leader's own voice.
+static func _battle_words(_entry:Dictionary,battle:Dictionary)->String:
+	var Account:=preload("res://scripts/battle_account.gd")
+	var state:=Account.gather(battle)
+	state["voice"]="first"
+	return Account.text(Account.build(battle,state))
+
+static func _file_battle(entry:Dictionary,battle:Dictionary,day:int)->Dictionary:
+	## The court matter for a battle: no Chronicle entry of its own.
+	var text:=_battle_words(entry,battle)
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
+	var matter:Variant=war_loop.call("_file",String(entry.civ_id),"report",text,day,{"battle_seed":int(battle.get("seed",0)),"account":text})
+	return matter if matter is Dictionary else {}
 
 static func _file_report(entry:Dictionary,text:String,day:int)->Dictionary:
 	var war_loop:GDScript=load(WAR_LOOP_PATH)

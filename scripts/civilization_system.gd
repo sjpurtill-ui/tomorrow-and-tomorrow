@@ -109,6 +109,10 @@ var _charted_area_cache:=RefCounted.new()
 var _revealed_chart_index:RefCounted
 var player_world_origin:=Vector2.ZERO
 var foreign_formations:Array[Dictionary]=[]
+## What this observer learned of each rival formation it fought (stand-down,
+## morale), kept across the daily rebuild of rival views (rival_stand_down.gd).
+var formation_memory:Dictionary={}
+const StandDown:=preload("res://scripts/rival_stand_down.gd")
 var foreign_sightings:Array[Dictionary]=[]
 ## Sightings of unaffiliated nomadic bands from returned scout reports. They
 ## are indicators, not contacts: nomads move, so each mark fades with seasons.
@@ -173,6 +177,7 @@ func reset_for_new_world()->void:
 	fog_revision=0
 	player_world_origin=Vector2.ZERO
 	foreign_formations.clear()
+	formation_memory.clear()
 	foreign_sightings.clear()
 	nomad_sightings.clear()
 	next_nomad_sighting_id=1
@@ -2069,9 +2074,15 @@ func _publish_observed_event(title:String,description:String,day:int,metadata:Di
 	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 
 
+## Lay remembered stand-downs and morale over freshly rebuilt rival views.
+func apply_formation_memory(day:int=-1)->void:
+	StandDown.apply(formation_memory,foreign_formations,day if day>=0 else int(WorldSimulation.state.elapsed_days))
+
+
 func _process_local_observation(day:int,force:bool=false)->void:
 	if not force and day==last_observation_day: return
 	last_observation_day=day
+	apply_formation_memory(day)
 	city_intelligence.observe_near_player(day)
 	var radius:=_local_observation_radius()
 	var visible_ids:Dictionary={}
@@ -2181,6 +2192,11 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 	## backend-only; the map continues to show the public estimate range.
 	initialize()
 	if fielded_strength<=0: return {"error":"The selected field army has no personnel able to fight."}
+	# A band beaten lately has pulled back out of reach, however it is seen.
+	var today:=int(WorldSimulation.state.elapsed_days)
+	var standing:=_foreign_formation_index(formation_id)
+	if StandDown.standing_down(formation_memory,formation_id,today) or (standing>=0 and today<int(foreign_formations[standing].get("disabled_until_day",0))):
+		return {"error":"That band was beaten and has pulled back out of reach; it will not stand to fight again for a while.","standing_down":true}
 	var public_sighting:=visible_formation_sighting(formation_id)
 	if public_sighting.is_empty(): return {"error":"Contact has been lost. Reacquire the formation before ordering battle."}
 	if bool(public_sighting.get("carries_report",false)): return {"error":"Use the local capture or attack pursuit against a scout party."}
@@ -2202,6 +2218,7 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,
 		"target_region_id":"","target_region_name":"the field contact",
 		"target_position":position.duplicate(true),"terrain_defense":1.04,
+		"morale_cap":StandDown.morale_cap(formation_memory,formation_id,today),
 	}
 
 
@@ -2221,8 +2238,13 @@ func resolve_foreign_formation_after_battle(formation_id:String,result:Dictionar
 	formation["strength_share"]=maxf(0.002,float(formation.get("strength_share",0.05))*maxf(0.10,remaining_ratio))
 	formation["readiness"]=clampf(float(formation.get("readiness",0.5))*lerpf(0.42,0.82,remaining_ratio),0.08,1.0)
 	var termination:Dictionary=result.get("termination",{})
+	var day:=int(WorldSimulation.state.elapsed_days)
 	if String(termination.get("type","continued"))!="continued":
-		formation["disabled_until_day"]=int(WorldSimulation.state.elapsed_days)+45
+		formation["disabled_until_day"]=day+StandDown.BEATEN_DAYS
+	# Remembered by its stable id: rival armies are rebuilt from sightings
+	# every day, and the stand-down must outlive that.
+	var remembered:=StandDown.remember(formation_memory,formation_id,day,rival_result,termination)
+	formation["disabled_until_day"]=maxi(int(formation.get("disabled_until_day",0)),int(remembered.get("until",0)))
 	foreign_formations[formation_index]=formation
 	_set_sighting_visibility(formation_id,false)
 	observation_revision+=1
@@ -5265,7 +5287,7 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"chronicle":chronicle.data.duplicate(true),"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"collapse_turns":collapse_turns,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"chronicle":chronicle.data.duplicate(true),"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"collapse_turns":collapse_turns,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"formation_memory":formation_memory.duplicate(true),"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
@@ -5657,6 +5679,8 @@ func _apply_state(payload:Dictionary)->void:
 	world_events.assign(world_events.filter(func(event:Dictionary)->bool: return String(event.get("title",""))!="Landmark named"))
 	pending_player_incidents.assign((payload.get("pending_player_incidents",[]) as Array).duplicate(true))
 	foreign_formations.assign((payload.get("foreign_formations",[]) as Array).duplicate(true))
+	var memory:Variant=payload.get("formation_memory",{})
+	formation_memory=(memory as Dictionary).duplicate(true) if StandDown.valid(memory) else {}
 	if foreign_formations.is_empty() and not civilizations.any(func(civ:Dictionary)->bool:return bool(civ.get("shared_rules",false))): _initialize_foreign_formations(last_world_seed)
 	for formation_index in foreign_formations.size():
 		var legacy_fixed_scout:=String(foreign_formations[formation_index].get("kind",""))=="scout" and not foreign_formations[formation_index].has("search_sequence")
