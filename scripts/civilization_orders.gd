@@ -36,7 +36,9 @@ static func execute(order:Dictionary)->Dictionary:
 			if not destination is Vector2:return {"error":"Choose a destination on the map."}
 			var context:=preload("res://scripts/civilization_day.gd").context(destination)
 			if not WorldSimulation.world._scout_land_at(destination) or not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return {"error":"The destination needs dry land and known reachable water."}
-			if not WorldSimulation.world._scout_segment_is_land(WorldSimulation.world.player_world_origin,destination):return {"error":"The founding route must cross traversable land."}
+			# The caravan leader plans the road (round bays and inlets); only a
+			# place with no land route at all is refused here.
+			if not WorldSimulation.world._scout_segment_is_land(WorldSimulation.world.player_world_origin,destination) and preload("res://scripts/army_land_route.gd").find(WorldSimulation.world.player_world_origin,destination,Callable(WorldSimulation.world,"_scout_land_at")).has("error"):return {"error":"The founding route must cross traversable land."}
 			return WorldSimulation.settlements.begin_settlement_convoy(destination,0.0,String(order.get("name","")),true)
 		"society_policy":return preload("res://scripts/society_exchange.gd").policy(String(order.get("migration","balanced")),String(order.get("sharing","selective")))
 		"scouting_policy":return WorldSimulation.world.scouting_staff.set_policy(float(order.get("share",0)),String(order.get("focus","exploration")),true)

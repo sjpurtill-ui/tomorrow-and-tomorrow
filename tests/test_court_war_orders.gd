@@ -283,6 +283,9 @@ func test_questions_are_not_orders()->void:
 	assert_dict(WO.read("Should we attack Tsaren?")).is_empty()
 	assert_dict(WO.read("Can we march on Tsaren")).is_empty()
 	assert_dict(WO.read("Strike him down")).is_empty()
+	# Everyday orders that only sound martial stay civic.
+	for words in ["Hold the feast at home","Send men to Tsaren to trade","Destroy the old granary","Guard the stores","Fight the fire in the long house","Send envoys to Tsaren"]:
+		assert_dict(WO.read(words)).override_failure_message(words).is_empty()
 
 func test_live_reading_reaches_the_same_core()->void:
 	_train(400)

@@ -44,13 +44,15 @@ const UNDRILLED:=0.2
 const WATCH_SHARE:=0.2
 const LEDGER_MAX:=24
 
-const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|levy|levies|war ?bands?|bands?|spear(s|men)|men|column|companies|everyone who can fight|every fighter|every spear)"
+const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|levy|levies|war ?bands?|spearmen|column|everyone who can fight|every fighter|every spear)"
+## Words that mean fighters only next to "against"/"on" ("send our men against them").
+const LOOSE_ARMY_WORDS:="(men|bands?|spears|companies|people)"
 const ATTACK_WORDS:="(attack|assault|storm|strike|fall (up)?on|march (on|against|to war|to battle|into battle)|go (to war|against|to battle)|make war|wage war|war on|battle|into battle|fight|take the (city|town|village|settlement)|capture|conquer|sack|crush|destroy|wipe out|invade|smash|raze|burn [\\w' ]{0,20}?to the ground|put [\\w' ]{0,20}? to the sword)"
 const SIEGE_WORDS:="(besiege|lay siege|siege|starve [\\w' ]{0,20}?out|surround (the|their) (city|town|walls|village))"
 const RAID_WORDS:="(raid|plunder|pillage|loot|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
 const INTERCEPT_WORDS:="(attack|fight|meet|catch|hunt down|destroy|engage|smash|crush|intercept|fall (up)?on|go after|chase|pursue) (their|the enemy'?s?|the) (army|host|war ?band|column|forces?|fighters|raiders|warriors|soldiers|troops|men)"
 const RECALL_WORDS:="((march|come|go|bring|call|send|pull|get|fall)\\w* [\\w' ]{0,30}?(home|back)\\b|withdraw|retreat|fall back|pull back|recall|disengage)"
-const DEFEND_WORDS:="(defend|hold|guard|protect|garrison|man the walls|watch the|keep watch|stand guard)"
+const DEFEND_WORDS:="(defend|hold|guard|protect|garrison|man the walls|stand guard)"
 const FULL_WORDS:="(full|whole|all (of )?(our|my|the)|every|everything|everyone|each and every|all we have|all you have|to the last)"
 const INSIST_WORDS:="(regardless|whatever the cost|no matter (what|the cost|the odds)|at any cost|at all costs|i don't care|i do not care|now!|at once|i insist|i command it|do it anyway|anyway)"
 const PLACE_WORDS:="(ford|pass|bridge|crossing|river|border|hills?|gate|road|walls?|home|village|town|camp|fields)"
@@ -157,8 +159,9 @@ static func read(text:String,context_civ:String="")->Dictionary:
 	elif _has(lower,RAID_WORDS): kind="raid"
 	elif _has(lower,RECALL_WORDS) and (army or _has(lower,"(march|come) home|withdraw|retreat|fall back|pull back|recall")): kind="recall"
 	elif _has(lower,ATTACK_WORDS): kind="attack"
-	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,PLACE_WORDS)): kind="defend"
-	elif army and _has(lower,"(send|march|lead|take|move)\\b") and _has(lower,"\\b(on|against|to|at|toward|towards)\\b"): kind="attack"
+	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,"(defend|hold|guard|protect|garrison) (the|our|my) "+PLACE_WORDS)): kind="defend"
+	elif army and _has(lower,"(send|march|lead|take|move)") and _has(lower,"(on|against|to|at|toward|towards)\\b"): kind="attack"
+	elif _has(lower,LOOSE_ARMY_WORDS) and _has(lower,"(send|march|lead|take)") and _has(lower,"(on|against)\\b") and named_town: kind="attack"
 	elif named_town and _has(lower,"(take|seize|win|burn|punish|humble|finish|end|go for|hit)"): kind="attack"
 	if kind=="": return {}
 	var target:={} if kind=="recall" else named
