@@ -11,8 +11,8 @@ func _ready()->void:
 		view.civ_id=String(civ.id);view.region_id=String(region.id);add_child(view)
 		for settle in 8:await get_tree().process_frame
 		assert(get_viewport().get_visible_rect().encloses(view.summary.get_global_rect()))
-		for button:Button in view.policy_buttons.values():
-			if button.is_visible_in_tree(): assert(get_viewport().get_visible_rect().encloses(button.get_global_rect()))
+		assert(get_viewport().get_visible_rect().encloses(view.talk.get_global_rect()))
+		assert(view.find_children("*","SpinBox",true,false).is_empty() and view.find_children("*","OptionButton",true,false).is_empty(),"A briefing, not a form")
 		if not get_viewport().get_visible_rect().encloses(view.feedback.get_global_rect()):
 			print("OCCUPATION_LAYOUT feedback=",view.feedback.get_global_rect()," viewport=",get_viewport().get_visible_rect()," panel=",view.panel.get_global_rect())
 			await RenderingServer.frame_post_draw
@@ -30,5 +30,5 @@ func _ready()->void:
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("res://artifacts/occupation-%d.png" % dimensions.x)
 		view.queue_free();await get_tree().process_frame
-	print("OCCUPATION_VIEW_PASS two sizes, bounded controls")
+	print("OCCUPATION_VIEW_PASS two sizes, bounded briefing, court action visible")
 	get_tree().quit()
