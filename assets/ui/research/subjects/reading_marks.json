@@ -1,0 +1,14 @@
+{
+  "id": "reading_marks",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b7c47f26-7bdc-45e1-9bf2-763394c75a71.png",
+  "source_file": "exec-b7c47f26-7bdc-45e1-9bf2-763394c75a71.png",
+  "creative_brief": "Small marks over the letters show stress, breath and pause, so a stranger reads the verse as its poet meant. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/reading_marks-v1.png",
+  "sha256": "b07261311342918d70a998bd36fc4ee1f05e4b3957b13c0e2e81b4f58427525c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

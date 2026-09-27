@@ -1,0 +1,14 @@
+{
+  "id": "field_vole_control",
+  "line": "ecology",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-839947a9-0d2c-4271-a202-2afc4ef00f8e.png",
+  "source_file": "exec-839947a9-0d2c-4271-a202-2afc4ef00f8e.png",
+  "creative_brief": "When the voles swarm, the fields are flooded and trapped until the burrows are empty. Paint it as a classical antiquity scene.",
+  "medium": "Naturalist plant pigments",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/field_vole_control-v1.png",
+  "sha256": "86c3b21cd827e7b2b4eb8e729387a7e3f4dc5853bb96601f6db4c648da116a4c",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

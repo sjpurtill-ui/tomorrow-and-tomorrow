@@ -1,0 +1,14 @@
+{
+  "id": "brackish_fish_farming",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0c1a003f-2e6e-4e5b-af89-7e156d47b5bc.png",
+  "source_file": "exec-0c1a003f-2e6e-4e5b-af89-7e156d47b5bc.png",
+  "creative_brief": "Sluices let the tide into lagoon ponds where eels and mullet fatten until they are wanted. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/brackish_fish_farming-v1.png",
+  "sha256": "3c1fb48f48d6723523a89fa1be947a15f42f504ead33f559b4c47209e36b73a6",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

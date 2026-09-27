@@ -1,0 +1,14 @@
+{
+  "id": "hired_child_minders",
+  "line": "demography",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-65b4e496-a8a1-40f6-91c2-6b957a3975db.png",
+  "source_file": "exec-65b4e496-a8a1-40f6-91c2-6b957a3975db.png",
+  "creative_brief": "Households hire nursemaids and child-minders, freeing mothers to work or keep house. Paint it as a classical antiquity scene.",
+  "medium": "Chalk pastel and cut-paper",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/hired_child_minders-v1.png",
+  "sha256": "f8024638064f3e500b9d69beb773ee186baaaafe73e574887c75da0fdc6dfae9",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

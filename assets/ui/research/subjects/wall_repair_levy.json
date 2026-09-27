@@ -1,0 +1,14 @@
+{
+  "id": "wall_repair_levy",
+  "line": "security",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ed884977-3b61-4794-aa1b-dd79afeb041a.png",
+  "source_file": "exec-ed884977-3b61-4794-aa1b-dd79afeb041a.png",
+  "creative_brief": "After an earthquake or flood every household owes days of labor until the breaches in the wall are closed. Paint it as a classical antiquity scene.",
+  "medium": "Woodblock print",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/wall_repair_levy-v1.png",
+  "sha256": "94a429b6e1cea12b901eff195d6e5b213e8453e4409c504b8487be9cf8e83f90",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

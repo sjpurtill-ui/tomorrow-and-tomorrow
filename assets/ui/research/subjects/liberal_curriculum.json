@@ -1,0 +1,14 @@
+{
+  "id": "liberal_curriculum",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8b82de70-d753-423e-a1c5-8ead9f45f55c.png",
+  "source_file": "exec-8b82de70-d753-423e-a1c5-8ead9f45f55c.png",
+  "creative_brief": "Free-born boys pass through a fixed course: grammar, speaking, number, music and the sky. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/liberal_curriculum-v1.png",
+  "sha256": "f62340d37c7deb1addd44e7d9babdba6c085c2b07fbe2f7bae525b07359ea535",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
