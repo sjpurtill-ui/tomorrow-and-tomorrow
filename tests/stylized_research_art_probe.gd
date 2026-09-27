@@ -26,10 +26,20 @@ func _ready()->void:
 			selected=selection.keys();batch=classical_batch
 			assert(selected.size()==(21 if classical_batch in ["classical-04","classical-other-01","classical-other-02","classical-other-03","classical-other-04","classical-other-05","classical-other-06","classical-other-07","classical-other-08","classical-other-09"] else 22))
 			get_window().size=Vector2i(1440,1720)
+	if "--earliest-01" in OS.get_cmdline_user_args():
+		batch="earliest-01";selected=[]
+		var selection:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-earliest-01/selected.json"))
+		for row:Dictionary in selection:selected.append(row.id)
+		assert(selected.size()==6)
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true
 		var expected:String=Art.manifest()[id].path
+		if batch=="earliest-01":
+			for year:float in [1.0,2.0,299.0,300.0,600.0]:
+				GameState.elapsed_days=year*365.0
+				assert(Art.subject_art_key(item)==expected,"Early art overridden at year %s: %s" % [year,id])
+			GameState.elapsed_days=365.0
 		assert(Art.subject_art_key(item)==expected,"Art lookup overridden: "+id)
 		var texture:=Art.for_discovery(item)
 		assert(texture is Texture2D and texture.resource_path==expected)

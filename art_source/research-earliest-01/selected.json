@@ -1,0 +1,74 @@
+[
+  {
+    "id": "raw_material_prestaging",
+    "line": "production",
+    "game_year": 1,
+    "approx_historical_year": -4993,
+    "prompt": "Early Neolithic workers sort flint, rough branches, reeds and clay into distinct ready-to-use piles. Mature flat handmade palette-knife impasto on coarse paper, umber and burnt orange, no later technology, no photorealism, no writing. Wide central card crop.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f473182d-35ca-45d2-a834-71ceb6ed5de5.png",
+    "asset": "res://assets/ui/research/subjects/raw_material_prestaging-v1.png",
+    "sha256": "2417213543f0ecc496f0ab385c67d70dfefac6cb3e8d56385db8bea60c83c071",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first rejected as photorealistic. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "carried_load_balancing",
+    "line": "logistics",
+    "game_year": 2,
+    "approx_historical_year": -4987,
+    "prompt": "Early Neolithic traveler adjusts a woven forehead tumpline attached to a broad back basket so two bundles balance. Mature hand-painted panoramic watercolor in sand gold and faded indigo, simple hide-and-fiber wrap. No shoulder pole, later technology, photorealism or writing. Very wide card crop with high focus.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-027ce1b4-023b-4769-93d8-7f7ed49a5cb0.png",
+    "asset": "res://assets/ui/research/subjects/carried_load_balancing-v1.png",
+    "sha256": "bc0ad1cb283f48b266ae4d5301d9a6c95e1513e30c4a1d885073023ae5ea541e",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected: simplified watercolor silhouette with visible tumpline in high-focused crop. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "common_ground_marking",
+    "line": "infrastructure",
+    "game_year": 2,
+    "approx_historical_year": -4987,
+    "prompt": "Early Neolithic builders lay fist-sized corner stones and stretch braided plant-fiber cord around a cleared shelter footprint. Flat matte architectural casein gouache on fibrous paper, mineral blue, slate and chalk ivory. No classical clothing, masonry, photorealism or writing. Very wide card crop.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-83eee744-2c9b-4287-9b75-def0d36e24ba.png",
+    "asset": "res://assets/ui/research/subjects/common_ground_marking-v1.png",
+    "sha256": "82dc7c5ee167e33c5aa5e88a5e1491c83e1209a0f6ff5a28e5c7bc70bd2c5760",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first had later-looking white tunics. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "household_task_division",
+    "line": "labor",
+    "game_year": 2,
+    "approx_historical_year": -4987,
+    "prompt": "Early Neolithic household divides tasks by age and season; older adult sorts food and fiber while another gathers kindling. Mature expressive charcoal over ochre wash, coarse grain and hand-drawn diagonals. Simple hide-and-fiber clothing, no metal, later architecture, photorealism or writing. Wide card crop.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-049d932b-9224-4c9f-9963-07d00c3064e4.png",
+    "asset": "res://assets/ui/research/subjects/household_task_division-v1.png",
+    "sha256": "96eaf5a885b08dd8d17fa8d099fb97a3599955406c3328c20c052e0770328edf",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected: graphic charcoal figures and clearer distinct tasks. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "lactational_spacing_awareness",
+    "line": "demography",
+    "game_year": 2,
+    "approx_historical_year": -4987,
+    "prompt": "Early Neolithic nursing mother with infant and older caregiver sharing experience about time between births, full seated figures contained within middle of wide card. Mature chalk pastel and torn cut-paper collage, terracotta and warm ivory, angular adult silhouettes. Respectful, no diagram, classical robes, photorealism or writing.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-efcf7285-7427-4eda-8698-4bd2cc473ee5.png",
+    "asset": "res://assets/ui/research/subjects/lactational_spacing_awareness-v1.png",
+    "sha256": "134dc098b6a8ca59d743cc2ce5fe639cff8fb1593404c0de46212c0a423713e3",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; prior crops cut the heads or nursing action. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "seasonal_duty_rosters",
+    "line": "institutions",
+    "game_year": 2,
+    "approx_historical_year": -4987,
+    "prompt": "Early Neolithic council hands off bundles of reeds for wet-season repairs and dry branches for fuel, assigning seasonal work without written records. Mature flat civic fresco on rough plaster, dusty plum and limestone, hand-brushed silhouettes. Simple undyed hide or fiber wraps, no togas, later architecture, photorealism or writing. Wide card crop.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d4a8e651-1d0a-4e22-bad4-98b2065409e4.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_duty_rosters-v1.png",
+    "sha256": "f3891ba0a2318087270853b57fd56636ec49d433ae29db373eeac95345446ee7",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first resembled Classical civic clothing. Accepted after visual 3.37:1 crop and subject/period check."
+  }
+]
