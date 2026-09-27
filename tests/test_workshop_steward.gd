@@ -240,3 +240,17 @@ func test_disabling_management_cancels_a_planned_switch()->void:
 	assert_bool(job.has("ai_turnover")).is_false()
 	assert_bool(job.paused).is_false()
 	assert_str(job.item).is_equal("improvised")
+
+func test_recruitment_line_missing_weapons_are_ordered_from_the_workshop()->void:
+	# A recruitment line holds only the sets it reserved. Its missing weapons must
+	# reach the steward, or drill stalls short of full arms with no one making them.
+	MilitaryCampaign.army_templates=[]
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Reserve",[],.8,.7)
+	MilitaryCampaign.military_inventory.improvised=0
+	MilitaryCampaign.training_queue=[{"id":5,"mode":"new","unit":"levy","weapon":"improvised","count":20,"initial_count":20,"progress_days":5.0,"required_days":7.0,"deployment_line":1,"deployment_slot":1,"entry_index":0,"target_count":20,"reserved_equipment":17}]
+	var demands:Array=MilitaryCampaign.workshop.army_demands()
+	assert_int(demands.size()).is_equal(1)
+	assert_str(String(demands[0].item)).is_equal("improvised")
+	assert_int(int(demands[0].target)).is_equal(3)
+	MilitaryCampaign.training_queue[0].reserved_equipment=20
+	assert_array(MilitaryCampaign.workshop.army_demands()).is_empty()

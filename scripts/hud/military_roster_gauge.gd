@@ -3,6 +3,9 @@ extends ProgressBar
 var ink:=Color("89bca9")
 var mode:="segments"
 var marks:=10
+## Unfilled marks and the badge ground; paper screens pass their own tokens.
+var track:=Color("30434a")
+var ground:=Color("101e25")
 func _ready()->void:
 	show_percentage=false;mouse_filter=Control.MOUSE_FILTER_IGNORE
 	add_theme_stylebox_override("background",StyleBoxEmpty.new());add_theme_stylebox_override("fill",StyleBoxEmpty.new())
@@ -12,17 +15,17 @@ func _ready()->void:
 func _draw()->void:
 	if mode=="patch":
 		var shield:=PackedVector2Array([Vector2(3,2),Vector2(41,2),Vector2(41,24),Vector2(22,31),Vector2(3,24)])
-		draw_colored_polygon(shield,Color("101e25"))
+		draw_colored_polygon(shield,ground)
 		var edge:=shield.duplicate();edge.append(shield[0]);draw_polyline(edge,ink,1.2,true)
 		var rank:=clampi(floori(value/20.0),0,4)
 		for index in rank+1:
 			var y:=7.0+index*4.5
-			draw_polyline(PackedVector2Array([Vector2(11,y+4),Vector2(22,y),Vector2(33,y+4)]),ink if rank>0 else Color("53686d"),2,true)
+			draw_polyline(PackedVector2Array([Vector2(11,y+4),Vector2(22,y),Vector2(33,y+4)]),ink if rank>0 else track,2,true)
 		return
 	var count:=maxi(1,marks);var step:=size.x/count
 	for index in count:
 		var fraction:=clampf(value/100.0*count-index,0,1)
-		var color:=Color("30434a").lerp(ink,fraction)
+		var color:=track.lerp(ink,fraction)
 		var x:=step*(index+.5)
 		if mode=="people":
 			draw_circle(Vector2(x,4),2.5,color)
