@@ -85,6 +85,7 @@ func reset(attacker: Dictionary, defender: Dictionary) -> void:
 			var form: Dictionary = forces[side].get("formations",[])[index] if index < forces[side].get("formations",[]).size() else {}
 			var banner := Label3D.new(); banner.visible = false; front.add_child(banner)
 			groups.append({"side":side,"index":index,"id":UnitVisualCatalog.model(form,"equipment",index),"center":Vector3(section.center.x,0,section.center.y),"remaining":int(section.count),"initial":int(section.count),"banner":banner})
+	for side in 2: _wash(armies[side])
 	zoom = maxf(90,span*1.3); target = Vector3.ZERO; _camera_update()
 	_build_figures()
 
@@ -242,6 +243,17 @@ func _wash(front: ArmyFrontVisual) -> void:
 	var material := front.surface_node.material_override as StandardMaterial3D
 	if material and material.transparency != BaseMaterial3D.TRANSPARENCY_ALPHA:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	# A skirmish is people, not two deployed lines: no ground wash at all.
+	front.surface_node.visible = not skirmish()
+
+
+## One side is only a handful, or hopelessly outnumbered (war_front_model.gd):
+## drawn as a knot of people caught by a loose band, not as a set piece.
+func skirmish() -> bool:
+	if groups.is_empty(): return false
+	var initial := [0, 0]
+	for group in groups: initial[int(group.side)] += int(group.initial)
+	return preload("res://scripts/war_front_model.gd").skirmish(initial[0], initial[1])
 
 
 ## The figure for a formation, by its arm and weapons (the era shows in them).
@@ -280,6 +292,7 @@ func _build_figures() -> void:
 		var accent: Color = faction_colors[side] if side < faction_colors.size() else Color.WHITE
 		accent.a = 1.0
 		var toward := 1.0 if side == 0 else -1.0
+		var loose := skirmish() and total > ArmyFrontVisual.TINY_PARTY
 		var forms: Array = forces[side].get("formations", [])
 		var fallen_drawn := 0
 		for section in front.sections:
@@ -302,6 +315,11 @@ func _build_figures() -> void:
 				# Front rank toward the enemy; the ranks behind step back.
 				var z := center.y + toward * (float(rows - 1) * 0.5 - float(row)) * 1.3
 				x += sin(float(i) * 12.9898 + float(side)) * 0.18
+				if loose:
+					# A loose band closing on a handful: ragged, its ends
+					# swinging forward round them.
+					var across := clampf((x - center.x) / maxf(0.6, width * 0.5), -1.0, 1.0)
+					z += toward * (across * across * minf(6.0, width * 0.22)) + cos(float(i) * 4.37 + float(side)) * 0.6
 				_place(layer, front, ICONS.battle_figure_texture(kind, figure_ink, accent), Vector2(x, z), side == 1)
 			# The fallen lie where the line stood.
 			var down := 0
@@ -313,6 +331,17 @@ func _build_figures() -> void:
 				var fz := center.y + toward * (float(rows) * 0.65 + 0.9) + cos(float(k) * 7.1) * 0.35
 				_place(layer, front, ICONS.battle_figure_texture("fallen", figure_ink, accent), Vector2(fx, fz), k % 2 == 1)
 			fallen_drawn += fallen_figures
+		# A side cut down to the last one has no line left: its fallen lie
+		# where it stood.
+		if front.sections.is_empty():
+			for group in groups:
+				if int(group.side) != side: continue
+				var gone := maxi(0, int(group.initial) - int(group.remaining))
+				var lying := mini(ceili(float(gone) / float(each)), MAX_FALLEN - fallen_drawn)
+				var at := Vector2(group.center.x, group.center.z)
+				for k in lying:
+					_place(layer, front, ICONS.battle_figure_texture("fallen", figure_ink, accent), at + Vector2((float(k) - float(lying - 1) * 0.5) * 1.6, sin(float(k) * 3.1) * 0.5), k % 2 == 1)
+				fallen_drawn += lying
 
 
 func _place(layer: Node3D, front: ArmyFrontVisual, texture: Texture2D, at: Vector2, flip: bool) -> void:

@@ -546,7 +546,13 @@ func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vec
 	var plan:Dictionary=engagement.get("tactics",{})
 	return {"pos":pos,"axis":axis,"ours":String((plan.get(home_side,{}) as Dictionary).get("id",Tactics.BASELINE)),"theirs":String((plan.get(enemy_side,{}) as Dictionary).get("id",Tactics.BASELINE)),
 		"rounds":int(engagement.get("round",0)),"phase_ours":String(last.get(home_side+"_tactic_phase","hold")),"phase_theirs":String(last.get(enemy_side+"_tactic_phase","hold")),"event":String(last.get("tactic_event","")),
-		"army_id":int(force_id),"commanded":bool(engagement.get("commander_managed",false)),"objective":String(engagement.get("command_objective",""))}
+		"army_id":int(force_id),"commanded":bool(engagement.get("commander_managed",false)),"objective":String(engagement.get("command_objective","")),
+		"our_troops":_side_troops(engagement.get(home_side,{})),"their_troops":_side_troops(engagement.get(enemy_side,{}))}
+
+
+static func _side_troops(side:Variant)->int:
+	if not side is Dictionary: return 0
+	return int((side as Dictionary).get("troops",(side as Dictionary).get("initial_troops",0)))
 
 
 ## Our finished fights from the last RECENT_BATTLE_DAYS, newest first.
@@ -730,25 +736,29 @@ static func compose(inputs:Dictionary)->Dictionary:
 	var today:=int(inputs.get("today",0))
 	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"sigma":1.0}
 	var fronts:Array=[]
+	# Only forces that can hold a line meet on one; a party of a handful keeps
+	# its own small mark (tests/test_battle_scale.gd).
+	var holding:=Model.substantial(friendly,enemy)
+	var facing:=Model.substantial(enemy,friendly)
 	if mode in ["front","theatre"]:
-		var derived:=Model.derive(friendly,enemy)
+		var derived:=Model.derive(holding,facing)
 		fronts=derived.fronts; out.sigma=float(derived.sigma) if float(derived.sigma)>0.0 else 1.0
 		# Who holds each front: the armies nearest its line.
 		for front in fronts:
 			var holders:Array=[]
-			for f in friendly:
+			for f in holding:
 				var nearest:=INF
 				for p in (front.points as PackedVector2Array): nearest=minf(nearest,p.distance_to(f.pos))
 				if nearest<=float(out.sigma)*1.6: holders.append(f)
 			front["armies"]=holders.map(func(f:Dictionary)->int: return int(f.get("army_id",0)))
 			front["holders"]=holders
 		out.fronts=fronts
-		out.pockets=Model.pockets(fronts,friendly,enemy)
+		out.pockets=Model.pockets(fronts,holding,facing)
 	elif mode=="host":
 		var reach:=6.0
-		for f in friendly:
-			for e in enemy: reach=minf(reach,maxf(0.6,(f.pos as Vector2).distance_to(e.pos)*1.01))
-		out.faceoffs=Model.face_offs(friendly,enemy,maxf(reach,2.5))
+		for f in holding:
+			for e in facing: reach=minf(reach,maxf(0.6,(f.pos as Vector2).distance_to(e.pos)*1.01))
+		out.faceoffs=Model.face_offs(holding,facing,maxf(reach,2.5))
 		out.sigma=1.0
 	# The generals' own fallback lines: from where each would withdraw to.
 	if mode in ["front","theatre"]:
@@ -802,7 +812,8 @@ static func compose(inputs:Dictionary)->Dictionary:
 		var ours_id:=String(engagement.get("ours",Tactics.BASELINE))
 		var theirs_id:=String(engagement.get("theirs",Tactics.BASELINE))
 		var rounds:=int(engagement.get("rounds",0))
-		out.clashes.append({"pos":engagement.pos,"axis":engagement.get("axis",Vector2.RIGHT),"ours":ours_id,"theirs":theirs_id,
+		var skirmish:=Model.skirmish(int(engagement.get("our_troops",0)),int(engagement.get("their_troops",0)))
+		out.clashes.append({"skirmish":skirmish,"pos":engagement.pos,"axis":engagement.get("axis",Vector2.RIGHT),"ours":ours_id,"theirs":theirs_id,
 			"shape_ours":Tactics.shape(ours_id,rounds,String(engagement.get("phase_ours","hold"))),"shape_theirs":Tactics.shape(theirs_id,rounds,String(engagement.get("phase_theirs","hold"))),
 			"label":_cap(Tactics.name_of(ours_id,stage)) if ours_id!=Tactics.BASELINE else _cap(Tactics.name_of(theirs_id,stage)) if theirs_id!=Tactics.BASELINE else "","event":String(engagement.get("event","")),
 			"army_id":int(engagement.get("army_id",0)),"rounds":rounds,"commanded":bool(engagement.get("commanded",false)),
@@ -1428,6 +1439,13 @@ func _draw_clash(clash:Dictionary,band:String)->void:
 	var reach:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*sigma)
 	var sigma_px:=reach.distance_to(at) if reach.is_finite() else 80.0
 	var r:=clampf(sigma_px*0.45,12.0,56.0 if band=="local" else 40.0)
+	if bool(clash.get("skirmish",false)):
+		# A handful caught by a band: a skirmish mark between the two inked
+		# marks, not two opposed battle lines.
+		_crossed_strokes(at,5.0,Color(THEIRS,0.95))
+		draw_arc(at,8.0,0.0,TAU,20,Color(INK,0.6),1.1,true)
+		hits.append({"kind":"clash","centre":at,"radius":12.0,"army_id":int(clash.get("army_id",0)),"clash":clash})
+		return
 	if band in ["continental","world"] or r<20.0:
 		# Far out, a battle is a mark on the line, not a diagram.
 		_crossed_strokes(at,6.0,Color(THEIRS,0.95))

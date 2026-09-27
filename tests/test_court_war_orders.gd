@@ -197,10 +197,11 @@ func test_users_words_form_an_army_that_marches_on_tsaren()->void:
 	assert_str(doing).contains("days out")
 	# Days pass: it arrives, the attack begins and war starts on contact.
 	for day in 400:
-		if not MilitaryCampaign.active_engagement.is_empty() or MilitaryCampaign._field_army_index(army_id)<0: break
+		if not MilitaryCampaign.active_engagement.is_empty() or not MilitaryCampaign.battle_history.is_empty() or MilitaryCampaign._field_army_index(army_id)<0: break
 		GameState.elapsed_days+=1
 		MilitaryCampaign._process_field_army_movement_day()
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	# A hopeless garrison is overrun and settled on arrival (test_battle_scale.gd).
+	assert_bool(not MilitaryCampaign.active_engagement.is_empty() or not MilitaryCampaign.battle_history.is_empty()).is_true()
 	assert_bool(CivilizationSystem.civilizations[0].player_relation.at_war).is_true()
 
 func test_the_users_actual_levy_is_told_the_truth()->void:

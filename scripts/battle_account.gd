@@ -206,6 +206,11 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 
 	var headline:=_headline(kind,band,enemy_name,where,town,defending,their_tactic,raid,home_place)
 	var phases:=_phases(record,s,band,enemy_name,kind,termination)
+	if overrun(record):
+		# One short beat: who overran whom, and what it cost.
+		if kind in ["won","lost"]: headline=_overrun_headline(kind,before,their_before,enemy_name,where,band)
+		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)]
+		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
 	var first:=String(state.get("voice",""))=="first"
 	if first:
@@ -258,6 +263,49 @@ static func _headline(kind:String,band:String,enemy:String,where:String,town:Str
 	return "%s drove %s %s %s." % [who,enemy,from,where]
 
 
+## An overrun: one side so outmatched it was cut down, taken or scattered in
+## a single exchange (combat_simulator.gd overrun_side).
+static func overrun(record:Dictionary)->bool:
+	return String((record.get("termination",{}) as Dictionary).get("type",""))=="overrun"
+
+
+static func _overrun_headline(kind:String,ours:int,theirs:int,enemy:String,where:String,band:String)->String:
+	var of_them:="%s of %s" % [count_words(theirs),enemy]
+	if kind=="lost": return "%s overran %s, %s strong, %s." % [_cap(of_them),band,count_words(ours),where]
+	return "%s, %s strong, overran %s %s." % [_cap(band),count_words(ours),of_them,where]
+
+
+## "both", "all three", "one", "two": n out of a group of total.
+static func _of_group(n:int,total:int,whose:String="them")->String:
+	if n==total and total==2: return "both of %s" % whose
+	if n==total and total>2: return "all %s of %s" % [count_words(total),whose]
+	return count_words(n)
+
+
+static func _overrun_line(kind:String,theirs:Dictionary,ours:Dictionary,their_before:int,termination:Dictionary)->String:
+	var won:=kind!="lost"
+	var beaten_total:=their_before if won else int(ours.in_fight)
+	var fell:=int(theirs.fell) if won else int(ours.killed)+int(ours.wounded)
+	var taken:=int(termination.get("prisoners",0))
+	var ran:=maxi(0,beaten_total-fell-taken)
+	var parts:Array[String]=[]
+	var whose:="them" if won else "ours"
+	if fell>0: parts.append("%s fell" % _of_group(fell,beaten_total,whose))
+	if taken>0: parts.append("%s %s taken" % [_of_group(taken,beaten_total,whose),"was" if taken==1 else "were"])
+	if ran>0: parts.append("%s got away" % _of_group(ran,beaten_total,whose))
+	var beaten:=", ".join(parts) if not parts.is_empty() else "they broke at once"
+	var hurt_killed:=int(theirs.killed) if not won else int(ours.killed)
+	var hurt_wounded:=int(theirs.wounded) if not won else int(ours.wounded)
+	var cost:=""
+	if hurt_killed<=0 and hurt_wounded<=0: cost="none of %s was hurt" % ("ours" if won else "theirs")
+	else:
+		var bits:Array[String]=[]
+		if hurt_killed>0: bits.append("%s of %s %s killed" % [count_words(hurt_killed),"ours" if won else "theirs","was" if hurt_killed==1 else "were"])
+		if hurt_wounded>0: bits.append("%s of %s %s" % [count_words(hurt_wounded),"ours" if won else "theirs","was cut" if hurt_wounded==1 else "were cut"])
+		cost=" and ".join(bits)
+	return "It was over at once: %s; %s." % [beaten,cost]
+
+
 ## A short account, exchange by exchange, from the recorded rounds.
 static func _phases(record:Dictionary,s:Dictionary,band:String,enemy:String,kind:String,termination:Dictionary)->Array:
 	var rounds:Array=record.get("rounds",[])
@@ -303,7 +351,7 @@ static func _phases(record:Dictionary,s:Dictionary,band:String,enemy:String,kind
 
 static func _intensity_words(label:String)->String:
 	return String({"Broken contact":"the lines barely touched","Skirmishing":"there was only skirmishing","Sustained combat":"the lines fought hard",
-		"Close engagement":"it came to close fighting","Violent crisis":"it turned savage"}.get(label,"the lines met"))
+		"Close engagement":"it came to close fighting","Violent crisis":"it turned savage","Overrun":"it was over at once"}.get(label,"the lines met"))
 
 
 static func _loss_words(n:int)->String:

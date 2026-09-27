@@ -132,7 +132,7 @@ func advance_all()->void:
 	host.command_hierarchy.data.battles=[]
 	for engagement:Dictionary in pending:
 		host.active_engagement=engagement
-		host.advance_engagement(host.command_hierarchy.land.battle_order())
+		host.fight_engagement_day(host.command_hierarchy.land.battle_order())
 		if not host.active_engagement.is_empty():host.command_hierarchy.data.battles.append(host.active_engagement.duplicate(true))
 	host.active_engagement=legacy
 static func validate(saved:Variant,forces:Array)->String:

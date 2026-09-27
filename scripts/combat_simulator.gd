@@ -10,6 +10,22 @@ const MAX_ROUNDS := 12
 const BattleTactics:=preload("res://scripts/battle_tactics.gd")
 const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
+## Overwhelming odds (tests/test_battle_scale.gd). At about five to one in
+## fighting power, with the numbers to match, the small side is overrun in
+## a single exchange: cut down, taken or sent running at once, while the big
+## side loses almost nobody. A band of a handful facing three times its
+## number is overrun the same way; it cannot hold a line at all.
+const OVERRUN_RATIO := 5.0
+const OVERRUN_MIN_NUMBERS := 1.5
+const OVERRUN_NUMBERS_ODDS := 1.25
+const DEFENDED_GROUND := 1.1
+const TINY_BAND := 8
+const TINY_BAND_RATIO := 3.0
+## Between even odds and an overrun, the weaker side is worn down faster and
+## the stronger side slower, so only comparable forces fight for long.
+const LOPSIDED_FROM := 1.5
+const LOPSIDED_CASUALTY_STEP := 0.30
+const LOPSIDED_MORALE_STEP := 0.05
 
 const UNIT_TYPES := {
 	"field_repair_company":{"name":"Field Repair Company","attack":0.0,"defense":0.5,"organization":1.0},
@@ -282,6 +298,39 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		var total_power := maxf(MIN_EFFECTIVE_STRENGTH, attacker_power + defender_power)
 		var attacker_share := attacker_power / total_power
 		var defender_share := defender_power / total_power
+		var overrun:=overrun_side(attacker_power,defender_power,attacker_troops,defender_troops,effective_terrain_defense)
+		if overrun!="":
+			var exchange:=_overrun_exchange(overrun,attacking_force,defending_force,attacker_troops,defender_troops,attacker_power,defender_power,rng)
+			attacker_troops=int(exchange.attacker_remaining); defender_troops=int(exchange.defender_remaining)
+			attacker_morale=float(exchange.attacker_morale) if overrun=="attacker" else attacker_morale
+			defender_morale=float(exchange.defender_morale) if overrun=="defender" else defender_morale
+			var overrun_record:Dictionary=exchange.record
+			overrun_record["round"]=round_number
+			overrun_record["attacker_morale"]=attacker_morale
+			overrun_record["defender_morale"]=defender_morale
+			overrun_record["order_intensity"]=casualty_intensity
+			rounds.append(overrun_record)
+			var overrun_outcome:="attacker_victory" if overrun=="defender" else "defender_victory"
+			var overrun_termination:=_termination_event(overrun_outcome,attacking_force,defending_force,attacker_troops,defender_troops,attacker_morale,defender_morale,rng,true)
+			return {
+				"seed": seed,
+				"outcome": overrun_outcome,
+				"winner": _winner_name(overrun_outcome, attacking_force, defending_force),
+				"round_count": rounds.size(),
+				"rounds": rounds,
+				"attacker": _force_result(attacking_force, attacker_initial, attacker_troops, attacker_morale),
+				"defender": _force_result(defending_force, defender_initial, defender_troops, defender_morale),
+				"terrain_defense": terrain_defense,
+				"effective_terrain_defense":effective_terrain_defense,
+				"siege_terrain_reduction":siege_reduction,
+				"tactics":tactics.duplicate(true),
+				"termination":overrun_termination,
+				"overrun":true
+			}
+		# Lopsided but not overwhelming: the weaker side bleeds and wavers faster.
+		var odds:=clampf(maxf(attacker_power,defender_power)/maxf(MIN_EFFECTIVE_STRENGTH,minf(attacker_power,defender_power)),1.0,OVERRUN_RATIO)
+		var crush:=1.0+maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_CASUALTY_STEP
+		var attacker_weaker:=attacker_power<defender_power
 		var engagement:=_engagement_context(rng,attacker_share,defender_share,attacker_morale,defender_morale,effective_terrain_defense)
 		var tactic_round:Dictionary=BattleTactics.round_effects(tactics,round_number+round_offset,attacker_share,attacker_morale,defender_morale)
 		var attacker_variance := _casualty_variance(rng)
@@ -291,6 +340,11 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		# calculated before either side is reduced, so each round is simultaneous.
 		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity))))
 		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
+		if crush>1.0:
+			if attacker_weaker:
+				attacker_losses=mini(attacker_troops,roundi(float(attacker_losses)*crush)); defender_losses=roundi(float(defender_losses)/crush)
+			else:
+				defender_losses=mini(defender_troops,roundi(float(defender_losses)*crush)); attacker_losses=roundi(float(attacker_losses)/crush)
 		# A force in contact usually suffers at least one loss; true lulls may be bloodless.
 		if attacker_losses==0 and float(engagement.intensity)>=0.65: attacker_losses=1
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
@@ -319,6 +373,10 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 
 		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)))
 		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)))
+		if crush>1.0:
+			var dread:=maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_MORALE_STEP
+			if attacker_weaker: attacker_morale=maxf(0.0,attacker_morale-dread)
+			else: defender_morale=maxf(0.0,defender_morale-dread)
 		rounds.append({
 			"round": round_number,
 			"attacker_losses": attacker_losses,
@@ -359,6 +417,119 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		"tactics":tactics.duplicate(true),
 		"termination":termination
 	}
+
+
+## Which side is overrun at these odds: "attacker", "defender" or "" (a real
+## fight). Power is fighting power (numbers, arms, morale, readiness,
+## command); the numbers must also be against the small side, so a few
+## well-armed people are never "overrun" by a larger rabble they outclass.
+static func overrun_side(attacker_power:float,defender_power:float,attacker_troops:int,defender_troops:int,terrain_defense:float=1.0)->String:
+	if attacker_troops<=0 or defender_troops<=0: return ""
+	var weak:="defender" if defender_power<=attacker_power else "attacker"
+	var weak_power:=minf(attacker_power,defender_power); var strong_power:=maxf(attacker_power,defender_power)
+	var weak_troops:=defender_troops if weak=="defender" else attacker_troops
+	var strong_troops:=attacker_troops if weak=="defender" else defender_troops
+	var odds:=strong_power/maxf(MIN_EFFECTIVE_STRENGTH,weak_power)
+	var numbers:=float(strong_troops)/float(maxi(1,weak_troops))
+	if odds>=OVERRUN_RATIO and numbers>=OVERRUN_MIN_NUMBERS: return weak
+	# Weight of numbers. Fighting power scales with drill and kit, and a
+	# green, half-armed band scores low on it; but at close quarters many
+	# bodies still count. Effective odds are the geometric mean of the power
+	# and head-count ratios, taken in favour of the more numerous side.
+	var few:="defender" if defender_troops<=attacker_troops else "attacker"
+	var few_troops:=mini(attacker_troops,defender_troops)
+	var many:=float(maxi(attacker_troops,defender_troops))/float(maxi(1,few_troops))
+	var effective:=effective_odds(attacker_power,defender_power,attacker_troops,defender_troops)
+	if few=="attacker": effective=1.0/maxf(0.0001,effective)
+	# Walls and ditches let a few hold against numbers: only fighting power
+	# (which counts the defended ground) overruns a defended position.
+	if few=="defender" and terrain_defense>DEFENDED_GROUND: return ""
+	if many>=OVERRUN_RATIO and effective>=OVERRUN_NUMBERS_ODDS: return few
+	if few_troops<=TINY_BAND and many>=TINY_BAND_RATIO and effective>=1.0: return few
+	return ""
+
+
+## Attacker's effective odds over the defender (above 1: the attacker is
+## the stronger): the geometric mean of fighting power and numbers.
+static func effective_odds(attacker_power:float,defender_power:float,attacker_troops:int,defender_troops:int)->float:
+	var a:=maxf(MIN_EFFECTIVE_STRENGTH,attacker_power)*float(maxi(1,attacker_troops))
+	var d:=maxf(MIN_EFFECTIVE_STRENGTH,defender_power)*float(maxi(1,defender_troops))
+	return sqrt(a/d)
+
+
+## The same test on two whole forces, before any exchange (the campaign uses
+## it to settle a hopeless fight the day it starts).
+func overrun_expected(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->String:
+	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
+	var ac:=evaluate_force(a,d,1.0); var dc:=evaluate_force(d,a,clampf(terrain_defense,0.5,2.0))
+	var ap:=_cohort_power(ac,float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
+	var dp:=_cohort_power(dc,float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)))
+	return overrun_side(ap,dp,int(a.troops),int(d.troops),terrain_defense)
+
+
+## Effective odds (stronger over weaker, at least 1) of two forces: fighting
+## power weighed with numbers (effective_odds).
+func odds_of(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->float:
+	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
+	var ap:=_cohort_power(evaluate_force(a,d,1.0),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
+	var dp:=_cohort_power(evaluate_force(d,a,clampf(terrain_defense,0.5,2.0)),float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)))
+	var odds:=effective_odds(ap,dp,int(a.troops),int(d.troops))
+	return odds if odds>=1.0 else 1.0/maxf(0.0001,odds)
+
+
+## One exchange in which the weak side is overrun. The weak side: most of a
+## small band is cut down on the spot (fewer of a large one, which breaks and
+## runs); the rest are left broken for the victors to take or chase off. The
+## strong side: a few hurt, in proportion to how many were there to resist.
+func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Dictionary,attacker_troops:int,defender_troops:int,attacker_power:float,defender_power:float,rng:RandomNumberGenerator)->Dictionary:
+	var strong:="attacker" if weak=="defender" else "defender"
+	var forces:={"attacker":attacking_force,"defender":defending_force}
+	var troops:={"attacker":attacker_troops,"defender":defender_troops}
+	var odds:=maxf(attacker_power,defender_power)/maxf(MIN_EFFECTIVE_STRENGTH,minf(attacker_power,defender_power))
+	var weak_troops:=int(troops[weak])
+	# Share cut down: nearly all of a handful, about a third of a large host.
+	var size_factor:=clampf(log(float(maxi(1,weak_troops)))/log(10.0)/3.0,0.0,1.0)
+	var down_share:=clampf(lerpf(0.85,0.30,size_factor)+rng.randf_range(-0.12,0.12),0.15,1.0)
+	var weak_down:=clampi(roundi(float(weak_troops)*down_share),mini(1,weak_troops),weak_troops)
+	var weak_killed:=clampi(roundi(float(weak_down)*rng.randf_range(0.45,0.70)),0,weak_down)
+	var weak_casualties:={"killed":weak_killed,"wounded":weak_down-weak_killed,"scattered":0,"disabled":floori(float(weak_down-weak_killed)*0.15),"severe_disability":0}
+	# The victors: about one hurt for every twenty who resisted, fewer the
+	# steeper the odds; a fraction becomes a chance, never a guaranteed loss.
+	var expected:=float(weak_troops)*0.05*clampf(OVERRUN_RATIO/odds,0.2,1.0)
+	var strong_losses:=floori(expected)+(1 if rng.randf()<expected-floorf(expected) else 0)
+	strong_losses=mini(strong_losses,maxi(0,int(troops[strong])-1))
+	var strong_killed:=0
+	for k in strong_losses:
+		if rng.randf()<0.2: strong_killed+=1
+	var strong_casualties:={"killed":strong_killed,"wounded":strong_losses-strong_killed,"scattered":0,"disabled":0,"severe_disability":0}
+	var losses:={weak:weak_down,strong:strong_losses}
+	var casualties:={weak:weak_casualties,strong:strong_casualties}
+	var result:={"record":{}}
+	var record:Dictionary={"intensity":"Overrun","event":"OVERRUN","tactic_event":"","overrun":weak,
+		"attacker_tactic_phase":"closing" if weak=="defender" else "hold","defender_tactic_phase":"closing" if weak=="attacker" else "hold"}
+	for side in ["attacker","defender"]:
+		var force:Dictionary=forces[side]
+		var cohorts:=evaluate_force(force,forces["defender" if side=="attacker" else "attacker"],1.0)
+		var applied:=_apply_cohort_losses(force.get("formations",[]),cohorts,int(losses[side]),rng)
+		var ammunition:=_consume_ammunition(applied.formations,0.5 if side==strong else 0.2,rng)
+		force["formations"]=applied.formations
+		var c:Dictionary=casualties[side]
+		force["wounded_pool"]=int(force.get("wounded_pool",0))+int(c.wounded)
+		force["disabled_pool"]=int(force.get("disabled_pool",0))+int(c.disabled)
+		force["dead"]=int(force.get("dead",0))+int(c.killed)
+		var remaining:=int(troops[side])-int(losses[side])
+		force["troops"]=remaining
+		result[side+"_remaining"]=remaining
+		record[side+"_losses"]=int(losses[side])
+		record[side+"_remaining"]=remaining
+		record[side+"_cohort_losses"]=applied.losses
+		record[side+"_cohort_equipment_losses"]=applied.equipment_losses
+		record[side+"_cohort_ammunition_used"]=ammunition
+		record[side+"_casualties"]=c
+	# The overrun side is broken; whoever is left is at the victors' mercy.
+	result[weak+"_morale"]=0.0
+	result["record"]=record
+	return result
 
 
 func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier := 1.0) -> Array[Dictionary]:
@@ -767,7 +938,25 @@ func _outcome(attacker_troops: int, defender_troops: int, attacker_morale: float
 	return "inconclusive"
 
 
-func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionary,attacker_remaining: int,defender_remaining: int,attacker_morale: float,defender_morale: float,rng: RandomNumberGenerator) -> Dictionary:
+func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionary,attacker_remaining: int,defender_remaining: int,attacker_morale: float,defender_morale: float,rng: RandomNumberGenerator,overrun:=false) -> Dictionary:
+	if overrun and outcome in ["attacker_victory","defender_victory"]:
+		# Overrun: the few left standing are taken where they are or run for it.
+		var beaten:Dictionary=defender if outcome=="attacker_victory" else attacker
+		var victors:Dictionary=attacker if outcome=="attacker_victory" else defender
+		var left:=defender_remaining if outcome=="attacker_victory" else attacker_remaining
+		var small:=left<=TINY_BAND
+		var taken:=clampi(roundi(float(left)*(rng.randf_range(0.4,1.0) if small else rng.randf_range(0.2,0.5))),0,left)
+		var beaten_commander:Dictionary=beaten.get("commander",{})
+		var fate_roll:=rng.randf()
+		var fate:="captured" if fate_roll<0.35 else ("killed" if fate_roll<0.5 else "escaped")
+		var spoils_taken:=_battle_spoils(beaten,victors,"surrender",rng)
+		var beaten_name:=String(beaten.get("name","Defeated force")); var victor_name:=String(victors.get("name","Victors"))
+		var summary:="%s overran %s" % [victor_name,beaten_name]
+		if taken>0: summary+=" and took %d prisoners" % taken
+		if left-taken>0: summary+="; %d got away" % (left-taken)
+		summary+="."
+		return {"type":"overrun","summary":summary,"prisoners":taken,"scattered":left-taken,"captor":victor_name,"defeated":beaten_name,"commander":String(beaten_commander.get("name","THE DEFEATED COMMAND GROUP")),
+			"commander_record":beaten_commander.duplicate(true),"commander_fate":fate,"captured_general":fate=="captured" and not beaten_commander.is_empty(),"spoils":spoils_taken}
 	if outcome=="inconclusive":
 		return {"type":"continued","summary":"Neither army yields the field.","prisoners":0,"commander_fate":"in command","captured_general":false,"spoils":{}}
 	if outcome=="mutual_collapse":
