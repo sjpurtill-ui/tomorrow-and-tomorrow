@@ -63,8 +63,10 @@ func study(days:int,both:bool=true)->void:
 
 
 func test_twelve_joint_investigations_require_both_studies_and_paid_returned_findings()->void:
-	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
+	for authored:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
 		before_test();prepare();WorldSimulation.enabled=true
+		# The live definition: the research blocks may rebuild its foundations.
+		var entry:=DiscoverySystem.discovery_definition(String(authored.id))
 		var subject:=String(entry.id)
 		var peer:=E.owner_state("neighbor")
 		peer.known_discoveries.assign(["public_schools","experimental_controls"])

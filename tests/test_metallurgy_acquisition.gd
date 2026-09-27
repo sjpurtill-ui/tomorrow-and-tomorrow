@@ -45,8 +45,10 @@ func prepare()->void:
 	CivilizationSystem.civilizations[0].strategic_regions=[{"id":"neighbor_city","role":"capital","name":"Neighbor city","map_x":.5,"map_y":.5,"position":Vector2(30,0),"controller":"neighbor","fortification":.2,"damage":0.0,"population":200,"strategic_weight":1.0}]
 
 func test_metallurgy_purchase_requires_paid_delivery_and_local_study_without_tools_or_mastery()->void:
-	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
+	for authored:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
 		before_test();prepare()
+		# The live definition: the research blocks may rebuild its foundations.
+		var entry:=DiscoverySystem.discovery_definition(String(authored.id))
 		var subject:=String(entry.id)
 		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
 		for alternatives:Array in entry.requires_any:
@@ -91,8 +93,10 @@ func test_all_foundations_and_each_alternative_survive_imported_evidence()->void
 
 func test_all_metallurgy_scholar_visits_pay_for_temporary_subject_specific_teaching()->void:
 	var scholars=preload("res://scripts/scholar_visits.gd")
-	for entry:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
+	for authored:Dictionary in preload("res://scripts/metallurgy_process_knowledge.gd").entries():
 		before_test();prepare()
+		# The live definition: the research blocks may rebuild its foundations.
+		var entry:=DiscoverySystem.discovery_definition(String(authored.id))
 		var subject:=String(entry.id)
 		assert_bool(scholars.quote("neighbor",subject,"Stone").has("error")).is_true()
 		for parent:String in entry.requires_all:GameState.known_discoveries.append(parent)
