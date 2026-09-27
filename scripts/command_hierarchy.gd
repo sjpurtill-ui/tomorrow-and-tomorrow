@@ -9,6 +9,7 @@ const LEVELS={
 	"air":[["Element",2,"Flight leader"],["Flight",6,"Flight commander"],["Squadron",24,"Squadron commander"],["Group",96,"Group commander"],["Wing",300,"Wing commander"],["Air force",1500,"Air commander"]]}
 const LAND_MISSIONS={"defend":"Defend / patrol zone","encircle":"Encircle enemy armies","defeat":"Defeat enemy armies","capture":"Capture city","occupy":"Besiege and occupy city","raze":"Capture and raze infrastructure","withdraw":"Withdraw home"}
 const MAX_NODES=1024
+const HOME_NAME:="Home guard"
 const MAX_LAND_FORCES=256
 var host:Node
 var data:Dictionary
@@ -55,6 +56,8 @@ func _add(service:String,parent:String,level:int,name:String,force_id:int=-1)->D
 func sync()->void:
 	var owned:Dictionary={}
 	for record:Dictionary in data.nodes.values():
+		# The home reserve reads as what it is, in saves from before this name too.
+		if record.service=="army" and int(record.force_id)==0:record.name=HOME_NAME
 		if int(record.force_id)>=0:
 			if force(record).is_empty():record.force_id=-1;record["retired"]=true
 			else:
@@ -76,7 +79,8 @@ func sync()->void:
 		if count<=0:continue
 		var level:=level_for(item.service,count)
 		var title:=String(item.actual.get("name",LEVELS[item.service][level][0]))
-		if item.service=="army" and (int(item.id)==0 or title.ends_with("FIELD Army")):title="%s · %d" % [LEVELS.army[level][0],int(item.id)+1]
+		if item.service=="army" and title.ends_with("FIELD Army"):title="%s · %d" % [LEVELS.army[level][0],int(item.id)+1]
+		if item.service=="army" and int(item.id)==0:title=HOME_NAME
 		_add(item.service,item.service,level,title,int(item.id))
 func children(id:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]

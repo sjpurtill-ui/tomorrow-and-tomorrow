@@ -55,7 +55,7 @@ func tab(sub:int)->Dictionary:
 		1: return {"blocks":_builds_blocks(capabilities)}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_training_blocks()}
 		3: return {"kpis":[kpis[3]],"blocks":_supply_overview()}
-	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"ARMY COMMAND", "sub":"Hierarchy, battle zones and objectives on the main map", "on_press":func():MilitaryCampaign.joint_operations.open_hierarchy("army")},{"label":"ALL FORCES & TRAINING STRATEGY","sub":"Large roster, skills and staff-managed training","on_press":func():MilitaryCampaign.open_roster()},{"label":"UNITS & EQUIPMENT MAP","sub":"Every kind of fighting band, from the first spears onward","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},]+_service_actions()}]+_campaign_entry()+_forces_overview()}
+	return {"kpis":[kpis[0],kpis[1]],"brief":brief,"blocks":[{"type":"actions","items":[{"label":"ARMY COMMAND", "sub":"Send a band to attack, raid, guard a place or come home", "on_press":func():MilitaryCampaign.joint_operations.open_hierarchy("army")},{"label":"ALL FORCES & TRAINING STRATEGY","sub":"Large roster, skills and staff-managed training","on_press":func():MilitaryCampaign.open_roster()},{"label":"UNITS & EQUIPMENT MAP","sub":"Every kind of fighting band, from the first spears onward","on_press":func():hud.open_detail(preload("res://scripts/hud/content/military_unit_map.gd").new(terrain,hud))},]+_service_actions()}]+_campaign_entry()+_forces_overview()}
 
 ## Fleets and air wings appear only once the people have boats or flight.
 func _service_actions()->Array:
