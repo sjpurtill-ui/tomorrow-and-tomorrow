@@ -145,7 +145,19 @@ func rival(id:String)->Dictionary:
 func public_context()->Dictionary:
 	if not active:return {}
 	var a:=army()
-	return {"general":state.general_name,"authority":state.authority,"day":WorldSimulation.state.elapsed_days,"mission":state.mission,"proposal":state.proposal,"war":state.war,"outcome":state.outcome,"army":{"personnel":int(a.get("troops",0)),"food_days":food_days(),"exhaustion":float(state.exhaustion),"cohesion":"shaken" if float(a.get("morale",1))<.4 else "steady","equipment":equipment_ratio(a),"position":str(state.cell)},"known_rivals":state.seen.values(),"reports":state.reports.slice(-6),"treatment":state.treatment.slice(-4),"supported_actions":ACTIONS,"rules":"Generals execute. Questions never order. Approve refers only to the current proposal. Override confirms an existing objective, but obedience is judged by the engine. Relieve replaces command if captains support it. No psychological ratings are public."}
+	return {"ways_we_can_fight":tactics_context(),"general":state.general_name,"authority":state.authority,"day":WorldSimulation.state.elapsed_days,"mission":state.mission,"proposal":state.proposal,"war":state.war,"outcome":state.outcome,"army":{"personnel":int(a.get("troops",0)),"food_days":food_days(),"exhaustion":float(state.exhaustion),"cohesion":"shaken" if float(a.get("morale",1))<.4 else "steady","equipment":equipment_ratio(a),"position":str(state.cell)},"known_rivals":state.seen.values(),"reports":state.reports.slice(-6),"treatment":state.treatment.slice(-4),"supported_actions":ACTIONS,"rules":"Generals execute. Questions never order. Approve refers only to the current proposal. Override confirms an existing objective, but obedience is judged by the engine. Relieve replaces command if captains support it. No psychological ratings are public."}
+
+## Ways this army could fight today, for the general to discuss (he still
+## chooses on the day; the player never picks one).
+func tactics_context()->Array:
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var side:={"known":Tactics.known_for_player(),"profile":Tactics.profile(army()),"role":"attacker","character":state.get("character",{})}
+	var names:Array=[]
+	for kind in ["field","assault"]:
+		for id in Tactics.available_ids(side,{"kind":kind,"terrain":1.0,"ratio":1.0}):
+			var name:=Tactics.name_of(id,preload("res://scripts/hud/era_words.gd").stage())
+			if name not in names:names.append(name)
+	return names
 
 func food_days()->float:return float(state.get("food",0))/maxf(1,float(army().get("troops",0))*RATION)
 func equipment_ratio(a:Dictionary)->float:
@@ -426,7 +438,10 @@ func _battle(id:String)->void:
 	enemy.readiness=float(enemy.get("readiness",.8))*clampf(float(r.food)/maxf(1,int(enemy.troops)*RATION*2),.25,1)*(1-float(r.get("exhaustion",0))*.6)
 	var ground:=float(r.fortification) if r.cell==r.home else 1.05
 	var defensive:bool=state.mission.get("action","")=="defend"
-	var result:Dictionary=WorldSimulation.military.simulator.simulate(our,enemy,{"seed":int(state.seed)+int(state.turn)*7919,"max_rounds":8,"terrain_defense":ground,"attacker_exposure_modifier":.65 if defensive else 1.0})
+	# The general chooses how to fight; the rival chooses from what it fields.
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var tactics:Dictionary=Tactics.plan({"attacker":{"force":our,"known":Tactics.known_for_player(),"character":state.get("character",{})},"defender":{"force":enemy,"known":Tactics.known_from_force(enemy,0.3)}},{"kind":"assault" if r.cell==r.home else "field","terrain":ground},int(state.seed)+int(state.turn)*7919)
+	var result:Dictionary=WorldSimulation.military.simulator.simulate(our,enemy,{"seed":int(state.seed)+int(state.turn)*7919,"max_rounds":8,"terrain_defense":ground,"attacker_exposure_modifier":.65 if defensive else 1.0,"tactics":tactics})
 	# Every exchange consumes thirty in-world minutes, including during viewing.
 	var extra:=maxf(0,(int(result.round_count)-1)*30.0/1440.0)
 	_advance_campaign_interval(extra,id)
@@ -475,6 +490,8 @@ func _battle(id:String)->void:
 	state.events.append({"day":WorldSimulation.state.elapsed_days,"result":result.outcome,"our":int(army().troops),"enemy":int(r.force.troops)})
 	if state.events.size()>40:state.events.pop_front()
 	var text:="%s against %s. %d of our soldiers and %d of theirs are out of action. We have %d fit soldiers, %.1f days of food. %s"%[String({"attacker_victory":"Victory","defender_victory":"Defeat","inconclusive":"Neither army broke","mutual_collapse":"Both armies broke"}.get(String(result.outcome),String(result.outcome))),String(r.name),int(our.troops)-int(result.attacker.remaining_troops),int(enemy.troops)-int(r.force.troops),int(army().troops),food_days(),"The approach is secured; its guard is detached from our field army." if r.control=="secured" else "I have kept the army together and await your next objective."]
+	var how:=Tactics.report_sentence(tactics,"attacker",preload("res://scripts/hud/era_words.gd").stage())
+	if how!="":text=how+" "+text
 	if state.rivals.all(func(other:Dictionary)->bool:return other.control=="secured"):
 		state.outcome="The coalition concedes the approaches. Alderford has won this war."
 		text+=" "+String(state.outcome)

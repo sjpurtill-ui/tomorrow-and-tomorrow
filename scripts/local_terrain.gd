@@ -14815,6 +14815,8 @@ func _ensure_war_map_overlay()->void:
 	## contested border, a short tag and plain words on hover.
 	if is_instance_valid(war_map_overlay) or not is_inside_tree(): return
 	var layer:=CanvasLayer.new(); layer.name="WarMapMarks"; layer.layer=0; add_child(layer)
+	# Fronts, the generals' arrows, clashes and zones are inked beneath the marks.
+	var fronts:=preload("res://scripts/hud/war_front_overlay.gd").new(); fronts.name="WarFrontOverlay"; fronts.terrain=self; layer.add_child(fronts)
 	war_map_overlay=preload("res://scripts/hud/war_map_overlay.gd").new(); war_map_overlay.name="WarMapOverlay"; war_map_overlay.terrain=self; layer.add_child(war_map_overlay)
 
 

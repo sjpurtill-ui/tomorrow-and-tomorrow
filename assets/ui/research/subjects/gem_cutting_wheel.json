@@ -1,0 +1,14 @@
+{
+  "id": "gem_cutting_wheel",
+  "line": "production",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-576aafd2-d565-457b-b0f8-bc78e27ac3d3.png",
+  "source_file": "exec-576aafd2-d565-457b-b0f8-bc78e27ac3d3.png",
+  "creative_brief": "A spinning copper wheel fed with emery grit cuts facets and seal designs into stones too hard for any graver. Paint it as a classical antiquity scene.",
+  "medium": "Palette-knife impasto oil",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/gem_cutting_wheel-v1.png",
+  "sha256": "6e320e0ad8da070ecdc785990cff5710ed7d28f31f100b11c553dd658574be0b",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

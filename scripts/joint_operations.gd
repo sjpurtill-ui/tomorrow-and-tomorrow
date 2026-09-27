@@ -6,6 +6,7 @@ const MISSIONS:Dictionary={
 	"navy":{"hold":"Hold in port","patrol":"Patrol","strike_force":"Strike force","convoy_raiding":"Convoy raiding","convoy_escort":"Convoy escort","invasion_support":"Naval invasion support","transport":"Transport troops or supplies"},
 	"air":{"hold":"Stand down","air_superiority":"Air superiority","interception":"Interception","close_air_support":"Close air support","logistics_strike":"Logistics strike","strategic_bombing":"Strategic bombing","naval_strike":"Naval strike","port_strike":"Port strike","reconnaissance":"Reconnaissance","air_supply":"Air supply","transport":"Transport troops"}}
 const R=preload("res://scripts/joint_regions.gd")
+const G=preload("res://scripts/joint_geography.gd")
 const Dock=preload("res://scripts/naval_dock_service.gd")
 const MAX_FORCES:=128
 var geography=preload("res://scripts/joint_geography.gd").new()
@@ -242,6 +243,27 @@ func _power(record:Dictionary,key:String)->float:
 func _event(message:String,domain:String="")->void:
 	state.events.push_front({"day":int(state.last_day),"text":message,"domain":domain})
 	if state.events.size()>80:state.events.resize(80)
+## The fleet or air commander decides how to work the force's drawn zone
+## (battle_tactics.gd ZONE_TACTICS): gated by the hulls and airframes the
+## force has and, for the player, the player's discoveries. A change is
+## reported once, in plain words.
+func _choose_zone_tactic(record:Dictionary)->void:
+	var Tactics:=preload("res://scripts/battle_tactics.gd")
+	var owner:=String(record.get("owner",""))
+	var known:=Tactics.zone_known(record,C.UNITS,Tactics.known_for_player() if owner=="player" else [])
+	var context:={"port":false,"escort":false}
+	var region:Dictionary=record.get("region",{})
+	if record.domain=="navy" and not region.is_empty() and record.mission in ["patrol","strike_force"]:
+		for city:Dictionary in WorldSimulation.world.city_intelligence.known_cities(owner,"",false):
+			if _hostile(owner,String(city.get("controller",city.get("civ_id","")))) and R.contains(region,G.unpack(city.position)):context.port=true;break
+	if record.domain=="air" and record.mission=="strategic_bombing" and not region.is_empty():
+		for other:Dictionary in state.forces:
+			if other.owner==owner and other.domain=="air" and other.mission in ["air_superiority","interception"] and not other.region.is_empty() and R.overlap(other.region,region)>0:context.escort=true;break
+	var chosen:=Tactics.zone_choose(record,known,context)
+	if chosen==String(record.get("tactic","")):return
+	record["tactic"]=chosen
+	if chosen!="" and owner=="player":
+		_event("%s: %s." % [String(record.get("name","The force")),Tactics.name_of(chosen,preload("res://scripts/hud/era_words.gd").stage())],String(record.domain))
 func _losses(record:Dictionary,damage:float)->void:
 	record.damage=float(record.damage)+maxf(0,damage)
 	record.condition=maxf(.1,float(record.condition)-damage*.015)
@@ -490,6 +512,7 @@ func advance(day:int)->void:
 				if Dock.building(record):Dock.construct(record,share,day)))
 	for record:Dictionary in state.forces:
 		record.efficiency=0.0;record.fuel_used=0
+		_choose_zone_tactic(record)
 		var origin:=base(int(record.base_id))
 		var carrier:=force(int(record.get("carrier_id",0)))
 		if int(record.get("carrier_id",0))>0 and (carrier.is_empty() or carrier_capacity(carrier)<=0):
