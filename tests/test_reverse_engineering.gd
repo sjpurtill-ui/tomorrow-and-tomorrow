@@ -68,8 +68,12 @@ func test_another_civilizations_specimen_does_not_supply_local_examination()->vo
 	assert_bool(R.begin("glassmaking","glass_batch").has("error")).is_true()
 	assert_float(float(WorldSimulation.scoped("specimen_owner",func()->float:return WorldSimulation.state.resource_stockpiles.Glass))).is_equal(10.0)
 
+## The crossbow mechanism's live foundations (the rebuilt 600-1200 block:
+## composite bow and lost-wax casting).
 func _crossbow_foundations()->void:
-	GameState.known_discoveries.append_array(["bow_craft","joinery"])
+	var entry:=DiscoverySystem.discovery_definition("crossbow_mechanism")
+	GameState.known_discoveries.append_array(entry.get("requires_all",[]))
+	for group:Array in entry.get("requires_any",[]):GameState.known_discoveries.append(String(group[0]))
 func test_military_example_consumes_only_unassigned_serviceable_inventory()->void:
 	_crossbow_foundations()
 	MilitaryCampaign.military_inventory.crossbow=2

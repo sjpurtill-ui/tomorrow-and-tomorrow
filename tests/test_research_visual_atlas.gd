@@ -68,7 +68,8 @@ func test_leader_and_known_subject_filters_do_not_expose_locked_outcomes()->void
 	var view:=fixture()
 	view.leader_filter=Art.lead(view.records[0]);view.refresh(true)
 	for item:Dictionary in view.records:assert_str(Art.lead(item)).is_equal(view.leader_filter)
-	view.leader_filter="";view.show_locked=false;view.set_view("tree")
+	# The whole tree, not the default frontier scope (which draws only open questions).
+	view.leader_filter="";view.show_locked=false;view.tree_scope="all";view.set_view("tree")
 	for item:Dictionary in view.records:assert_bool(item.exposed).is_true()
 	view.show_locked=true;view.refresh(true)
 	var locked:=0

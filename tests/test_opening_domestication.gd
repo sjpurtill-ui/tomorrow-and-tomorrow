@@ -18,6 +18,8 @@ func before_test()->void:
 	GameState.population_allocations.Food=10
 	GameState.food_stocks={"Fresh food":100.0,"Stored food":100.0}
 	GameState.known_discoveries.append("seasonal_patterns");GameState.discovery_adoption.seasonal_patterns=1.0
+	# An even research split: no line's specialization scales these effects.
+	for line:String in GameState.research_allocations:GameState.research_allocations[line]=1.0
 
 func after_test()->void:
 	WorldSimulation.clear()
@@ -46,6 +48,14 @@ func test_selective_planting_requires_two_real_seed_cycles()->void:
 	assert_float(float(Opportunities.program_report().seed.retained)).is_greater(0.0)
 
 func test_planting_cannot_bootstrap_without_fertile_ground_and_seed()->void:
+	# A people knows its home ground's farmland without a mapped deposit, and a
+	# new world's founders recognize fertile soil nearby; this case needs a
+	# place with neither.
+	GameState.resource_deposits=[]
+	var barren:={"biome":"rock","resource_potentials":{"Fertile Soil":0.0}}
+	if GameState.player_settlements.is_empty():GameState.player_settlements.append({"id":"barren_camp","environment_profile":barren})
+	for city:Dictionary in GameState.player_settlements:city["environment_profile"]=barren.duplicate(true)
+	assert_bool(Opportunities._recognized_resource("Fertile Soil")).is_false()
 	advance(0,200)
 	assert_bool(Opportunities.ready("seed_selection")).is_false()
 	assert_float(float(Opportunities.program_report().seed.retained)).is_equal(0.0)

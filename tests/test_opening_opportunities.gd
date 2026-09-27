@@ -19,6 +19,9 @@ func advance_days(count:int,context:Dictionary)->void:
 		O.advance(context)
 
 func test_root_questions_need_distinct_lived_evidence()->void:
+	# Seasonal patterns is founding knowledge since the fire-circle opening;
+	# take a people without it to see the lived evidence open the question.
+	GameState.known_discoveries.erase("seasonal_patterns")
 	for id:String in O.RULES:
 		assert_bool(O.ready(id)).is_false()
 		assert_bool(DiscoverySystem._discovery_is_eligible(DiscoverySystem.discovery_definition(id),0)).is_false()

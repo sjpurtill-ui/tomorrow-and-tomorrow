@@ -68,6 +68,8 @@ func test_aquifer_lifting_uses_drainage_knowledge_but_still_needs_specialists()-
 	assert_array(ResourceSystem._access_blockers(water,ResourceSystem.catalog["Deep Aquifer"],{})).contains(["specialist knowledge is unavailable"])
 
 func test_flint_access_uses_adopted_flaking_and_actual_extraction_labor()->void:
+	# Controlled flaking is founding knowledge now; take a people without it.
+	GameState.known_discoveries.erase("controlled_flaking");GameState.discovery_adoption.erase("controlled_flaking")
 	var flint:=deposit("Flint");flint.stage="surveyed";flint.route=1.0
 	GameState.population_allocations.Extraction=8;GameState.population_allocations.Logistics=8
 	var context:={"tools":1.0,"origin":Vector3.ZERO,"settled":false}
