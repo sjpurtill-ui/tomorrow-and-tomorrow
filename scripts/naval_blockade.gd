@@ -89,5 +89,5 @@ static func describe(entry:Dictionary,day:int)->String:
 	var level:=float(entry.get("level",0.0))
 	var days:=maxi(0,day-int(entry.get("since",day)))
 	var cut:=roundi((1.0-trade_factor(level))*100.0)
-	if not bool(entry.get("held",false)): return "The blockade has lifted; their sea trade is recovering (still about %d%% down)." % cut
-	return "Blockaded %d days: their sea trade is down about %d%%, and less food comes in by sea." % [days,cut]
+	if not bool(entry.get("held",false)): return "Blockade lifted; sea trade still %d%% down" % cut
+	return "Blockaded %d days: sea trade %d%% down" % [days,cut]

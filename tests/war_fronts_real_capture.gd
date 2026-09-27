@@ -103,7 +103,7 @@ func _army(id:int,at:Vector2,troops:int,objective:Vector2)->Dictionary:
 	var army:={"army_id":id,"name":"%s Host" % ["First","Second","Third","Fourth","Fifth","Sixth"][(id-900)%6],"troops":troops,"readiness":0.7,"supply_level":0.8,"morale":0.72,
 		"status":"moving" if objective.is_finite() else "stationed","location_id":"field_position","location_name":"Commanded ground","position":position,
 		"destination_id":"" if objective.is_finite() else "","destination_position":{"x":objective.x,"z":objective.y} if objective.is_finite() else {},"distance_remaining_km":at.distance_to(objective) if objective.is_finite() else 0.0,
-		"arrival_day":-1,"formations":[],"commander":{"name":"Field staff","command":0.6,"tactics":0.6,"logistics":0.6,"resolve":0.6}}
+		"arrival_day":-1,"formations":[{"id":1,"unit":"line_infantry","count":troops,"training":0.6,"personnel_condition":1.0}],"commander":{"name":"Field staff","command":0.6,"tactics":0.6,"logistics":0.6,"resolve":0.6}}
 	army["last_report"]={"position":position.duplicate(),"troops":troops,"status":army.status,"day":today}
 	return army
 
@@ -133,9 +133,17 @@ func _fixture_war()->void:
 		var objective:=Vector2.INF
 		if k==2: objective=target
 		elif k==0: objective=line+axis*spread*0.8+across*spread*-1.2
-		armies.append(_army(ids[k],at,[6000,9000,24000,8000,5000][k],objective))
+		armies.append(_army(ids[k],at,[6000,30000,24000,8000,5000][k],objective))
 	# Real armies so the real counters draw. Kept in the private copy only.
 	for army in armies: MilitaryCampaign.field_armies.append(army)
+	# Two of them are corps; group them under one army-group headquarters.
+	var command:Variant=MilitaryCampaign.get("command_hierarchy")
+	if command!=null:
+		command.sync()
+		var corps:Array=[]
+		for record:Dictionary in command.data.nodes.values():
+			if int(record.get("force_id",-1)) in [901,902]: corps.append(String(record.id))
+		print("REAL CAPTURE army group: ",command.organize(corps,8,"Northern Group"))
 	var enemy:Array=[]
 	var ages:=[0,1,3,28,34,0]
 	for k in 6:
@@ -147,8 +155,13 @@ func _fixture_war()->void:
 			{"pos":line+across*spread*0.95,"axis":axis,"ours":"feigned_retreat","theirs":"head_on","rounds":2,"phase_ours":"yield","phase_theirs":"hold","event":""}],
 		"sieges":[{"pos":target,"pressure":0.55,"works":"circumvallation","ours":true,"days":24}],
 		# The save is still at the hearth; this fixture shows a staffed war.
-		"mode":"theatre","stage":"reckoned","zones":_fixture_zones(line,axis,across,spread)}
-	await _plates([["regional",clampf(span*1.25,90.0,700.0),line],["local",clampf(span*0.5,30.0,80.0),clash_at],["continental",clampf(span*6.0,900.0,5000.0),line]])
+		"mode":"theatre","stage":"reckoned","zones":_fixture_zones(line,axis,across,spread),
+		# A rival fleet squeezing our own harbour, felt at home.
+		"harbours":[{"pos":home,"level":0.35,"held":true,"text":"Our harbour blockaded 40 days: sea trade 28% down"}]}
+	fixture["lanes"]=_fixture_lanes(fixture.zones)
+	await _plates([["regional",clampf(spread*5.0,90.0,700.0),line],["regional-wide",clampf(span*1.25,90.0,700.0),line],["local",clampf(span*0.5,30.0,80.0),clash_at],["continental",clampf(span*6.0,900.0,5000.0),line]])
+	await _extras(["local",clampf(span*0.5,30.0,80.0),line])
+	await _cost()
 
 
 ## An air zone over the front, and a fleet zone on the nearest real water.
@@ -167,9 +180,21 @@ func _fixture_zones(line:Vector2,axis:Vector2,across:Vector2,spread:float)->Arra
 		var sea:=PackedVector2Array()
 		for k in 7: sea.append(water+Vector2.from_angle(TAU*float(k)/7.0)*spread*0.8)
 		var port:=target if target.distance_to(water)<spread*1.6 else Vector2.INF
+		var lane:=PackedVector2Array([water+Vector2(-spread*0.5,spread*0.2),water+Vector2(spread*0.6,-spread*0.1),water+Vector2(spread*1.6,-spread*0.9)])
+		zones.append({"lane":lane})
 		zones.append({"domain":"navy","vertices":sea,"control":0.62,"mission":"patrol","tactic":"close_blockade" if port.is_finite() else "line_of_battle","base":home,"port":port,"contacts":[{"pos":water+Vector2(spread*0.3,0),"age":2}],"name":"Home Fleet"})
 		print("REAL CAPTURE water at %s (%.1f km from home)" % [water,water.distance_to(home)])
 	return zones
+
+
+## Split the fixture's convoy lane out of the zone list.
+func _fixture_lanes(zones:Array)->Array:
+	var lanes:Array=[]
+	for z in zones.duplicate():
+		if z.has("lane"):
+			lanes.append({"points":z.lane,"domain":"navy","escorted":true,"raided":true,"status":"outbound","invasion":false,"name":"Grain convoy"})
+			zones.erase(z)
+	return lanes
 
 
 func _alderford()->void:
@@ -193,6 +218,59 @@ func _alderford()->void:
 
 # --- Plates ---------------------------------------------------------------------
 
+## Steady-state cost with the camera still, and while the front eases.
+func _cost()->void:
+	if overlay==null or not ("extra_inputs" in overlay): return
+	await get_tree().create_timer(4.0).timeout
+	var redraws:=int(overlay.redraws)
+	await _frames(120)
+	print("REAL CAPTURE cost still: redraws over 120 frames=%d draw_us=%d compose_us=%d captions=%d dropped=%d" % [int(overlay.redraws)-redraws,int(overlay.last_draw_usec),int(overlay.last_compose_usec),(overlay.placed_captions as Array).size(),int(overlay.dropped_captions)])
+	var pushed:Dictionary=overlay.extra_inputs.duplicate(true)
+	for e in pushed.enemy: e.pos=(e.pos as Vector2)-(target-home).normalized()*home.distance_to(target)*0.05
+	overlay.set("extra_inputs",pushed); overlay.set("collect_elapsed",99.0)
+	redraws=int(overlay.redraws)
+	var worst:=0
+	for _k in 120:
+		await get_tree().process_frame
+		worst=maxi(worst,int(overlay.last_draw_usec))
+	print("REAL CAPTURE cost easing: redraws over 120 frames=%d worst_draw_us=%d settling=%s" % [int(overlay.redraws)-redraws,worst,str(overlay.settling)])
+
+
+func _save(name:String)->void:
+	RenderingServer.force_draw(true,0.0)
+	get_viewport().get_texture().get_image().save_png(directory.path_join(name))
+	print("REAL CAPTURE plate=",name)
+
+
+## After: a note opened by clicking the front, and the front easing as their
+## hosts are pushed back (three frames a third of a second apart).
+func _extras(view:Array)->void:
+	if overlay==null or not ("extra_inputs" in overlay) or fixture.is_empty(): return
+	terrain.camera_target=Vector3(view[2].x,terrain._height_at(view[2].x,view[2].y),view[2].y)
+	terrain.camera.size=float(view[1]); terrain._update_camera()
+	await _settle()
+	var live:Dictionary=overlay.collect()
+	overlay.set("inputs_signature",hash(live)); overlay.set_scene(Overlay.compose(live),true)
+	await _frames(4)
+	var fronts:Array=overlay.scene.get("fronts",[])
+	if not fronts.is_empty():
+		var pts:PackedVector2Array=fronts[0].points
+		var at:Vector2=overlay._screen(pts[pts.size()/2])
+		overlay.open_note(overlay.hit_at(at) if not overlay.hit_at(at).is_empty() else {"kind":"front","armies":fronts[0].get("armies",[])},at)
+		await _frames(4)
+		_save("mature_%s_note_%s.png" % [view[0],stage])
+		overlay.close_note()
+	# Their hosts fall back two fifths of the span: the line follows over days.
+	var pushed:=fixture.duplicate(true)
+	var axis:=(target-home).normalized()
+	for e in pushed.enemy: e.pos=(e.pos as Vector2)+axis*home.distance_to(target)*0.08
+	overlay.set("extra_inputs",pushed)
+	overlay.set("collect_elapsed",99.0)
+	for k in 3:
+		await get_tree().create_timer(0.35).timeout
+		_save("mature_%s_motion%d_%s.png" % [view[0],k,stage])
+
+
 func _plates(views:Array,prefix:String="mature")->void:
 	var has_hook:=overlay!=null and "extra_inputs" in overlay
 	if overlay!=null and has_hook: overlay.set("extra_inputs",fixture)
@@ -205,8 +283,10 @@ func _plates(views:Array,prefix:String="mature")->void:
 		await _settle()
 		if overlay!=null:
 			if has_hook:
-				overlay.set("collect_elapsed",99.0)
-				await _frames(4)
+				# Snap to the settled drawing (the easing is shown separately).
+				var live:Dictionary=overlay.collect()
+				overlay.set("inputs_signature",hash(live)); overlay.set("collect_elapsed",0.0)
+				overlay.set_scene(Overlay.compose(live),true)
 			else:
 				# Round-one code: the same real inputs plus the same fixture,
 				# composed by its own static compose().

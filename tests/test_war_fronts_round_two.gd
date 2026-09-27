@@ -290,3 +290,26 @@ func test_compose_and_draw_stay_cheap_at_theatre_scale()->void:
 	var ms:=float(Time.get_ticks_usec()-start)/1000.0
 	assert_float(ms).is_less(60.0)
 	assert_int(Overlay.primitive_count(built)).is_less(120)
+
+
+func test_a_blockade_reaches_trade_and_food_through_the_campaign()->void:
+	var op:RefCounted=MilitaryCampaign.joint_operations
+	var saved:Dictionary=(op.state.get("blockades",{}) as Dictionary).duplicate(true)
+	op.state.blockades={}
+	assert_float(MilitaryCampaign.blockade_trade_factor("player")).is_equal(1.0)
+	assert_float(float(MilitaryCampaign.siege_effects_for_civilization("nobody").trade_multiplier)).is_equal(1.0)
+	op.state.blockades={"some_port":{"level":Blockade.CLOSE_CAP,"civ_id":"player","held":true}}
+	var factor:=MilitaryCampaign.blockade_trade_factor("player")
+	assert_float(factor).is_less(1.0)
+	assert_float(factor).is_greater_equal(Blockade.trade_factor(Blockade.CLOSE_CAP))
+	assert_float(MilitaryCampaign.port_blockade_level("some_port")).is_equal_approx(Blockade.CLOSE_CAP,0.0001)
+	op.state.blockades=saved
+
+
+func test_hosts_without_counters_get_a_dated_mark()->void:
+	var inputs:=_front_inputs()
+	inputs.mode="host"
+	(inputs.enemy as Array).append({"id":"campaign:r1","pos":Vector2(9,9),"strength":160.0,"age_days":4,"marked":true,"name":"Bracken Hold"})
+	var built:=Overlay.compose(inputs)
+	assert_int((built.sightings as Array).size()).is_equal(1)
+	assert_int(int(built.sightings[0].age_days)).is_equal(4)

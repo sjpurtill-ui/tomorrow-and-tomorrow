@@ -34,7 +34,9 @@ const COLLECT_EVERY:=0.5
 const MORPH_SECONDS:=0.9
 ## The fronts chase their newest derivation with this time constant: control
 ## shifting over days reads as a line that eases, never one that jumps.
-const EASE_SECONDS:=0.8
+const EASE_SECONDS:=0.5
+## While only the easing moves, the chart is redrawn at most this often.
+const EASE_REDRAW_SECONDS:=1.0/30.0
 ## Every drawn front is carried on this many points, so any two can morph.
 const FRONT_POINTS:=48
 const CAPTION_SIZE:=14
@@ -77,6 +79,8 @@ var live_fronts:Array=[]
 ## Pocket closure as drawn, keyed by the front it belongs to.
 var live_closure:Dictionary={}
 var settling:=false
+var ease_elapsed:=0.0
+var ease_frame:=0
 ## Screen hit shapes of the last drawing, for clicks.
 var hits:Array=[]
 ## Captions requested by the last drawing, and their placement memory.
@@ -115,7 +119,10 @@ func _process(delta:float)->void:
 	if blend<1.0: blend=minf(1.0,blend+delta/MORPH_SECONDS)
 	settling=ease_fronts(delta)
 	var view:Array=[inputs_signature,size,blend,settling]
-	if settling: view.append(Time.get_ticks_msec())
+	if settling:
+		ease_elapsed+=delta
+		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
+		view.append(ease_frame)
 	var camera:=_camera()
 	if camera!=null: view.append_array([camera.global_transform,camera.size])
 	var cities:=_city_labels()
@@ -208,7 +215,7 @@ func ease_fronts(delta:float)->bool:
 			points[i]+=step
 		entry.points=points
 		entry.alpha=lerpf(float(entry.alpha),float(entry.target_alpha),k)
-		if worst<sigma*0.0004 and absf(float(entry.alpha)-float(entry.target_alpha))<0.01:
+		if worst<sigma*0.0015 and absf(float(entry.alpha)-float(entry.target_alpha))<0.01:
 			entry.points=target.duplicate(); entry.alpha=float(entry.target_alpha)
 		else: moving=true
 		if float(entry.target_alpha)>0.0 or float(entry.alpha)>0.01: kept.append(entry)
@@ -373,7 +380,7 @@ func _campaign_sightings(today:int)->Array:
 		if not s.get("cell") is Vector2i: continue
 		var troops:=int(s.get("troops",0))
 		if troops<=0: continue
-		out.append({"id":"campaign:"+String(id),"pos":GeneralCampaign.world_position(s.cell),"strength":float(troops),"low":troops,"high":troops,"age_days":maxi(0,today-int(s.get("day",today))),"moving":false,"heading":0.0,"seen_day":int(s.get("day",today)),"name":String(s.get("name",""))})
+		out.append({"id":"campaign:"+String(id),"pos":GeneralCampaign.world_position(s.cell),"strength":float(troops),"low":troops,"high":troops,"age_days":maxi(0,today-int(s.get("day",today))),"moving":false,"heading":0.0,"seen_day":int(s.get("day",today)),"name":String(s.get("name","")),"marked":true})
 	return out
 
 
@@ -506,7 +513,7 @@ func _our_blockaded_ports(today:int)->Array:
 		if String(entry.get("civ_id",""))!="player": continue
 		var site:Dictionary=CivilizationSystem.city_intelligence.site(String(city_id))
 		if site.is_empty(): continue
-		out.append({"pos":_v2(site.get("position",{})),"level":float(entry.get("level",0.0)),"text":Blockade.describe(entry,today),"held":bool(entry.get("held",false))})
+		out.append({"pos":_v2(site.get("position",{})),"level":float(entry.get("level",0.0)),"text":"Our harbour: "+Blockade.describe(entry,today).to_lower(),"held":bool(entry.get("held",false))})
 	return out.slice(0,4)
 
 
@@ -551,7 +558,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 	var enemy:Array=(inputs.get("enemy",[]) as Array).slice(0,Model.MAX_ENEMY)
 	var home:Vector2=inputs.get("home",Vector2.ZERO)
 	var today:=int(inputs.get("today",0))
-	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sigma":1.0}
+	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"sigma":1.0}
 	var fronts:Array=[]
 	if mode in ["front","theatre"]:
 		var derived:=Model.derive(friendly,enemy)
@@ -637,6 +644,10 @@ static func compose(inputs:Dictionary)->Dictionary:
 		# Interception zones are the air arm's defence: drawn as a belt.
 		entry["belt"]=String(zone.get("domain",""))=="air" and String(zone.get("mission",""))=="interception"
 		out.zones.append(entry)
+	# Hosts the map has no counter for (the Alderford war's coalition): a
+	# dated mark where they were last seen.
+	for e in enemy:
+		if bool(e.get("marked",false)): out.sightings.append(e)
 	out.lanes=(inputs.get("lanes",[]) as Array).slice(0,MAX_LANES)
 	out.harbours=(inputs.get("harbours",[]) as Array).slice(0,4)
 	out.echelons=(inputs.get("echelons",[]) as Array).slice(0,MAX_ECHELONS)
@@ -650,7 +661,7 @@ static func _cap(text:String)->String:
 ## Primitive counts, for probes and tests (bounded regardless of armies).
 static func primitive_count(built:Dictionary)->int:
 	var total:=0
-	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals"]: total+=(built.get(key,[]) as Array).size()
+	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings"]: total+=(built.get(key,[]) as Array).size()
 	return total
 
 
@@ -660,7 +671,7 @@ func _screen(p:Vector2)->Vector2:
 	if project.is_valid(): return project.call(p)
 	var camera:=_camera()
 	if camera==null: return Vector2.INF
-	var key:=p.snapped(Vector2.ONE*0.001)
+	var key:=p.snapped(Vector2.ONE*0.05)
 	if not height_cache.has(key):
 		if height_cache.size()>8192: height_cache.clear()
 		height_cache[key]=float(terrain._height_at(p.x,p.y)) if terrain.has_method("_height_at") else 0.0
@@ -722,7 +733,7 @@ func _draw()->void:
 	if band!="local":
 		for zone in scene.get("zones",[]): _draw_zone(zone,band)
 	for lane in scene.get("lanes",[]): _draw_lane(lane,step)
-	for harbour in scene.get("harbours",[]): _draw_harbour(harbour)
+	for harbour in scene.get("harbours",[]): _draw_harbour(harbour,wide)
 	if not wide:
 		for supply in scene.get("supply",[]):
 			for run in _drape(supply,step): _dashed(run,Color(INK,0.35),1.0,3.0,6.0)
@@ -743,13 +754,26 @@ func _draw()->void:
 	for faceoff in scene.get("faceoffs",[]):
 		_draw_front({"points":faceoff.points,"alpha":1.0,"data":{"stale":bool(faceoff.get("stale",false))}},band,step)
 	for raid in scene.get("raids",[]): _draw_raid(raid)
+	if band!="world":
+		for sighting in scene.get("sightings",[]): _draw_sighting(sighting)
 	for arrow in scene.get("arrows",[]): _draw_arrow(arrow,t,wide)
 	if not wide:
 		for objective in scene.get("objectives",[]): _draw_objective(objective)
 	for siege in scene.get("sieges",[]): _draw_siege(siege,wide)
 	for clash in scene.get("clashes",[]): _draw_clash(clash,band)
 	if wide:
-		for echelon in scene.get("echelons",[]): _draw_echelon(echelon,band)
+		# Highest echelon first; a group's own corps give way to its mark
+		# where they would crowd it.
+		var drawn:Array=[]
+		for echelon in scene.get("echelons",[]):
+			var at:=_screen(echelon.pos)
+			if not at.is_finite(): continue
+			var crowded:=false
+			for other in drawn:
+				if (other as Vector2).distance_to(at)<44.0: crowded=true; break
+			if crowded: continue
+			drawn.append(at)
+			_draw_echelon(echelon,band)
 	# One small dated caption per stale front: the map says how old it is.
 	if not wide:
 		for entry in live_fronts:
@@ -951,6 +975,22 @@ func _draw_raid(raid:Dictionary)->void:
 	if raid.has("army_id"): hits.append({"kind":"arrow","line":points,"army_id":int(raid.army_id)})
 
 
+## A host seen but not tracked by a counter: its mark where it was last seen,
+## fading as the report ages, with the date in words.
+func _draw_sighting(sighting:Dictionary)->void:
+	var at:=_screen(sighting.pos)
+	if not at.is_finite(): return
+	var age:=int(sighting.get("age_days",0))
+	var alpha:=clampf(1.0-float(age)/90.0,0.35,1.0)
+	var icon:=preload("res://scripts/resource_icons.gd").war_texture("band",THEIRS)
+	draw_texture_rect(icon,Rect2(at-Vector2(13,13),Vector2(26,26)),false,Color(1,1,1,alpha))
+	var who:=String(sighting.get("name",""))
+	var count:=EraWords.grouped(roundi(float(sighting.get("strength",0.0))))
+	var when:="seen today" if age==0 else ("seen %d days ago" % age)
+	_request_caption("sighting:%s" % String(sighting.id),sighting.pos,("%s: about %s, %s" % [who,count,when]) if who!="" else ("About %s, %s" % [count,when]),THEIRS,3,16.0)
+	hits.append({"kind":"sighting","centre":at,"radius":16.0,"sighting":sighting})
+
+
 func _crossed_strokes(at:Vector2,size_px:float,color:Color)->void:
 	draw_line(at+Vector2(-size_px,-size_px),at+Vector2(size_px,size_px),Color(PAPER,0.6*color.a),4.0,true)
 	draw_line(at+Vector2(-size_px,size_px),at+Vector2(size_px,-size_px),Color(PAPER,0.6*color.a),4.0,true)
@@ -988,15 +1028,21 @@ func _draw_siege(siege:Dictionary,wide:bool)->void:
 func _draw_clash(clash:Dictionary,band:String)->void:
 	var at:=_screen(clash.pos)
 	if not at.is_finite(): return
-	if band in ["continental","world"]:
+	# The diagram is sized to the fighting it shows: about half the gap
+	# between the two sides on screen, never larger than a local close-up.
+	var sigma:=float(scene.get("sigma",1.0))
+	var reach:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*sigma)
+	var sigma_px:=reach.distance_to(at) if reach.is_finite() else 80.0
+	var r:=clampf(sigma_px*0.45,12.0,56.0 if band=="local" else 40.0)
+	if band in ["continental","world"] or r<20.0:
 		# Far out, a battle is a mark on the line, not a diagram.
 		_crossed_strokes(at,6.0,Color(THEIRS,0.95))
+		if band!="world" and String(clash.get("label",""))!="": _request_caption("clash:%s" % str(clash.pos),clash.pos,String(clash.label),INK,5,12.0)
 		hits.append({"kind":"clash","centre":at,"radius":12.0,"army_id":int(clash.get("army_id",0)),"clash":clash})
 		return
 	var ahead:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*0.01)
 	var axis:=(ahead-at).normalized() if ahead.is_finite() and ahead.distance_to(at)>0.001 else Vector2.RIGHT
 	var across:=axis.orthogonal()
-	var r:=56.0 if band=="local" else 40.0
 	var ours:Dictionary=clash.shape_ours
 	var theirs:Dictionary=clash.shape_theirs
 	var t:=smoothstep(0.0,1.0,blend)
@@ -1166,7 +1212,7 @@ func _draw_zone(zone:Dictionary,band:String)->void:
 				draw_circle(at+Vector2.from_angle(angle)*reach,2.6,Color(PAPER,0.8))
 				draw_circle(at+Vector2.from_angle(angle)*reach,2.0,Color(own,0.95))
 			draw_arc(at,reach,facing-span,facing+span,24,Color(own,0.9),1.4,true)
-			if not blockade.is_empty(): _request_caption("blockade:%d" % int(zone.get("force_id",0)),port,String(blockade.get("text","")),own,3,reach+6.0)
+			if not blockade.is_empty() and band=="regional": _request_caption("blockade:%d" % int(zone.get("force_id",0)),port,String(blockade.get("text","")),own,3,reach+6.0)
 	for contact in zone.get("contacts",[]):
 		var at:=_screen(contact.pos)
 		if not at.is_finite(): continue
@@ -1207,7 +1253,7 @@ func _draw_lane(lane:Dictionary,step:float)->void:
 
 
 ## Our own harbour under a rival's blockade: their cordon, in their ink.
-func _draw_harbour(harbour:Dictionary)->void:
+func _draw_harbour(harbour:Dictionary,wide:bool=false)->void:
 	var at:=_screen(harbour.pos)
 	if not at.is_finite(): return
 	var level:=float(harbour.get("level",0.0))
@@ -1215,7 +1261,7 @@ func _draw_harbour(harbour:Dictionary)->void:
 	var span:=0.9+1.2*clampf(level/Blockade.CLOSE_CAP,0.0,1.0)
 	draw_arc(at,reach,-PI*0.5-span,-PI*0.5+span,24,Color(PAPER,0.6),5.0,true)
 	_dashed(PackedVector2Array(range(25).map(func(k:int)->Vector2: return at+Vector2.from_angle(-PI*0.5-span+2.0*span*float(k)/24.0)*reach)),Color(THEIRS,0.9),1.6,5.0,4.0)
-	_request_caption("harbour:%s" % str(harbour.pos),harbour.pos,String(harbour.get("text","")),THEIRS,4,reach+6.0)
+	if not wide: _request_caption("harbour:%s" % str(harbour.pos),harbour.pos,String(harbour.get("text","")),THEIRS,4,reach+6.0)
 	hits.append({"kind":"harbour","centre":at,"radius":reach,"harbour":harbour})
 
 
@@ -1416,6 +1462,10 @@ func note_content(hit:Dictionary)->Dictionary:
 			var armies:Array=echelon.get("armies",[])
 			var lines:=["%s under one command: %s hosts, about %s under arms." % [what,EraWords.grouped(armies.size()),EraWords.grouped(int(echelon.get("troops",0)))]]
 			return {"kicker":what.to_upper(),"title":String(echelon.name),"lines":lines,"action":_general_action(int(armies[0]) if not armies.is_empty() else 0)}
+		"sighting":
+			var seen:Dictionary=hit.get("sighting",{})
+			var ago:=int(seen.get("age_days",0))
+			return {"kicker":"THEIR HOST","title":String(seen.get("name","Their host")),"lines":["About %s under arms when last seen, %s." % [EraWords.grouped(roundi(float(seen.get("strength",0.0)))),"today" if ago==0 else "%d days ago" % ago],"Where they are now, no one here knows."],"action":_general_action(int(GeneralCampaign.state.get("army_id",-1)) if GeneralCampaign.active else 0)}
 		"enemy_arrow":
 			var ago:=maxi(0,int(scene.get("today",0))-int(hit.get("seen_day",0)))
 			return {"kicker":"THEIR MOVEMENT","title":"Seen marching","lines":["Seen on the move %s." % ("today" if ago==0 else ("%d days ago" % ago)),"Nothing newer has reached us."],"action":{}}
