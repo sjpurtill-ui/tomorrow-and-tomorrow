@@ -1,0 +1,12 @@
+{
+  "id": "boundary_marker_surveys",
+  "line": "institutions",
+  "game_year": 120,
+  "approx_historical_year": -4200,
+  "prompt": "c. 4200 BCE: Neighbors survey field stone markers and reset displaced boundary stone; civic fresco. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7aeb8130-4a38-4c3c-b6b3-6f8189ed2fe7.png",
+  "asset": "res://assets/ui/research/subjects/boundary_marker_surveys-v1.png",
+  "sha256": "c7dc18df7cbb2747cc9847e206a615446f2d66b4b72f09f0b876ce8f6a6296ad",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

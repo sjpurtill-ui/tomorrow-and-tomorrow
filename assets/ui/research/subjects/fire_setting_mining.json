@@ -1,0 +1,12 @@
+{
+  "id": "fire_setting_mining",
+  "line": "production",
+  "game_year": 115,
+  "approx_historical_year": -4233,
+  "prompt": "c. 4233 BCE: Workers heat copper-stained rock and crack cooled face with stone mauls; impasto oil. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3f477d19-4436-4db2-a465-b3f68b2644b9.png",
+  "asset": "res://assets/ui/research/subjects/fire_setting_mining-v1.png",
+  "sha256": "1f989f28dcaf63d7c4ba7019d78509302473adf10f00c9004699a0ef454ae23f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
