@@ -1,12 +1,16 @@
 class_name BattleGraphicsScreen
 extends Control
 ## Simulation commits once; pause, speed, skip and replay consume records.
-const INK:=Color("0b1013")
-const TEXT:=Color("e8ebe6")
-const MUTED:=Color("a3adaa")
-const TEAL:=Color("7fe3d8")
-const ORANGE:=Color("ff9f6b")
-const GOLD:=Color("f2c14e")
+## One art direction with the rest of the game (docs/ART_DIRECTION.md):
+## paper panels, iron-gall ink, the text-safe accents for the two sides.
+const T:=preload("res://scripts/hud/hud_tokens.gd")
+var INK:Color=T.INK
+var PAPER:Color=T.PAPER
+var TEXT:Color=T.INK
+var MUTED:Color=T.INK_MUTED
+var TEAL:Color=T.TEAL_TEXT
+var ORANGE:Color=T.RED_TEXT
+var GOLD:Color=T.GOLD_TEXT
 const DURATION:=5.0
 var campaign_mode:=true
 var inspected_army_id:=0
@@ -119,17 +123,24 @@ var caption_panel:PanelContainer
 var caption_label:Label
 var previous_scale_aspect:int
 
-func style(color:Color,border:Color=Color("263237"),radius:int=8)->StyleBoxFlat:
+func style(color:Color,border:Color=Color(0,0,0,0),radius:int=T.RADIUS_CONTROL)->StyleBoxFlat:
+	if border==Color(0,0,0,0): border=T.RULE
 	var s:=StyleBoxFlat.new();s.bg_color=color;s.border_color=border;s.set_border_width_all(1);s.set_corner_radius_all(radius)
 	for edge in ["left","right","top","bottom"]:s.set("content_margin_"+edge,12.0)
 	return s
-func label(parent:Node,text:String,size:int=14,color:Color=TEXT,display:bool=false)->Label:
-	var l:=Label.new();l.text=text;l.add_theme_font_size_override("font_size",size);l.add_theme_color_override("font_color",color);l.add_theme_font_override("font",display_font if display else ui_font);parent.add_child(l);return l
-func button(parent:Node,text:String,action:Callable,color:Color=TEXT)->Button:
-	var b:=Button.new();b.text=text;b.custom_minimum_size.y=36;b.add_theme_font_override("font",ui_font);b.add_theme_font_size_override("font_size",13);b.add_theme_color_override("font_color",color)
-	b.add_theme_stylebox_override("normal",style(Color("192226")));b.add_theme_stylebox_override("hover",style(Color("263438"),color));b.add_theme_stylebox_override("pressed",style(Color("31464b"),color));b.add_theme_stylebox_override("focus",style(Color(0,0,0,0),GOLD));b.pressed.connect(action);parent.add_child(b);return b
+func label(parent:Node,text:String,size:int=14,color:Color=Color(0,0,0,0),display:bool=false)->Label:
+	if color==Color(0,0,0,0): color=TEXT
+	var l:=Label.new();l.text=text;l.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));l.add_theme_color_override("font_color",color);l.add_theme_font_override("font",display_font if display else ui_font);parent.add_child(l);return l
+func button(parent:Node,text:String,action:Callable,color:Color=Color(0,0,0,0))->Button:
+	if color==Color(0,0,0,0): color=TEXT
+	var b:=Button.new();b.text=text;b.custom_minimum_size.y=36;b.add_theme_font_override("font",ui_font);b.add_theme_font_size_override("font_size",14);b.add_theme_color_override("font_color",color)
+	b.add_theme_color_override("font_hover_color",color);b.add_theme_color_override("font_pressed_color",color);b.add_theme_color_override("font_disabled_color",T.DISABLED)
+	b.add_theme_stylebox_override("normal",style(T.BUTTON_BG));b.add_theme_stylebox_override("hover",style(T.HOVER_BG,color));b.add_theme_stylebox_override("pressed",style(T.ACTIVE_BG,color));b.add_theme_stylebox_override("disabled",style(Color(T.BUTTON_BG,.6)));b.add_theme_stylebox_override("focus",style(Color(0,0,0,0),GOLD));b.pressed.connect(action);parent.add_child(b);return b
+func _bar(color:Color)->StyleBoxFlat:
+	var s:=StyleBoxFlat.new();s.bg_color=color;s.set_corner_radius_all(1)
+	return s
 func panel()->PanelContainer:
-	var p:=PanelContainer.new();p.add_theme_stylebox_override("panel",style(Color(INK,.92)));add_child(p);p.minimum_size_changed.connect(_layout.call_deferred);return p
+	var p:=PanelContainer.new();p.add_theme_stylebox_override("panel",style(Color(PAPER,.97),T.RULE,T.RADIUS_CARD));add_child(p);p.minimum_size_changed.connect(_layout.call_deferred);return p
 func box(parent:Node)->VBoxContainer:
 	var b:=VBoxContainer.new();b.add_theme_constant_override("separation",9);parent.add_child(b);return b
 func clear_children(parent:Node)->void:
@@ -138,8 +149,8 @@ func _ready()->void:
 	previous_scale_size=get_window().content_scale_size;previous_scale_aspect=get_window().content_scale_aspect
 	get_window().content_scale_size=Vector2i.ZERO;get_window().content_scale_aspect=Window.CONTENT_SCALE_ASPECT_IGNORE
 	set_anchors_and_offsets_preset(PRESET_FULL_RECT)
-	ui_font=load("res://assets/fonts/battle/Barlow-Medium.ttf")
-	display_font=load("res://assets/fonts/battle/BarlowCondensed-Bold.ttf")
+	ui_font=T.font("ui")
+	display_font=T.font("display")
 	stage=SubViewportContainer.new();stage.set_anchors_and_offsets_preset(PRESET_FULL_RECT);stage.stretch=true;add_child(stage)
 	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.size=Vector2i(1600,900);viewport.msaa_3d=Viewport.MSAA_8X;stage.add_child(viewport)
 	view=BattleDiorama.new()
@@ -156,7 +167,7 @@ func _ready()->void:
 	if view.live_terrain==null:viewport.own_world_3d=true
 	viewport.add_child(view);view.formation_selected.connect(_selected);stage.gui_input.connect(_view_input)
 	vignette=ColorRect.new();vignette.set_anchors_and_offsets_preset(PRESET_FULL_RECT);vignette.mouse_filter=MOUSE_FILTER_IGNORE
-	var shader:=Shader.new();shader.code="shader_type canvas_item; void fragment(){float d=length((UV-vec2(.55,.5))*vec2(1.15,1.0));COLOR=vec4(.03,.025,.015,smoothstep(.27,.72,d)*.38);}"
+	var shader:=Shader.new();shader.code="shader_type canvas_item; void fragment(){float d=length((UV-vec2(.55,.5))*vec2(1.15,1.0));COLOR=vec4(.36,.28,.18,smoothstep(.30,.78,d)*.30);}"
 	var material:=ShaderMaterial.new();material.shader=shader;vignette.material=material;add_child(vignette)
 	marker_layer=Control.new();marker_layer.set_anchors_and_offsets_preset(PRESET_FULL_RECT);marker_layer.mouse_filter=MOUSE_FILTER_IGNORE;add_child(marker_layer)
 	for i in 3:
@@ -168,54 +179,54 @@ func _ready()->void:
 	resized.connect(_layout);_initialize();_layout()
 func _build_header()->void:
 	chrome=panel();top_row=HBoxContainer.new();top_row.add_theme_constant_override("separation",14);chrome.add_child(top_row)
-	heading=label(top_row,"BATTLE",26,TEXT,true);heading.size_flags_horizontal=SIZE_EXPAND_FILL
-	phase_label=label(top_row,"GIVING ORDERS",12,GOLD);phase_label.add_theme_stylebox_override("normal",style(Color(ORANGE,.15),Color(0,0,0,0),18));city_button=button(top_row,"City report",_city_report)
-	button(top_row,"People & legacies",func():WorldSimulation.figures.open_chronicle());button(top_row,"×",_close)
+	heading=label(top_row,"Battle",26,TEXT,true);heading.size_flags_horizontal=SIZE_EXPAND_FILL
+	phase_label=label(top_row,"The general commands",14,GOLD);phase_label.add_theme_stylebox_override("normal",style(Color(T.GOLD,.10),T.RULE,T.RADIUS_CONTROL));city_button=button(top_row,"City report",_city_report)
+	button(top_row,"People & legacies",func():WorldSimulation.figures.open_chronicle());button(top_row,"Close",_close)
 	armies_strip=Control.new();armies_strip.mouse_filter=MOUSE_FILTER_IGNORE;add_child(armies_strip)
 	for side in 2:
-		var p:=PanelContainer.new();p.add_theme_stylebox_override("panel",style(Color(INK,.86),Color(0,0,0,0)));armies_strip.add_child(p);p.minimum_size_changed.connect(_layout.call_deferred);army_panels.append(p)
-		var b:=box(p);var n:=label(b,"ARMY",22,TEAL if side==0 else ORANGE,true);n.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		var p:=PanelContainer.new();p.add_theme_stylebox_override("panel",style(Color(PAPER,.95),T.RULE,T.RADIUS_CARD));armies_strip.add_child(p);p.minimum_size_changed.connect(_layout.call_deferred);army_panels.append(p)
+		var b:=box(p);var n:=label(b,"Army",22,TEAL if side==0 else ORANGE,false);n.add_theme_font_override("font",T.font("ui_strong"));n.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		var values:=label(b,"",16);values.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;force_labels.append({"title":n,"values":values})
-	momentum_back=PanelContainer.new();momentum_back.mouse_filter=MOUSE_FILTER_IGNORE;momentum_back.add_theme_stylebox_override("panel",style(Color(INK,.90),Color(0,0,0,0)));armies_strip.add_child(momentum_back)
+	momentum_back=PanelContainer.new();momentum_back.mouse_filter=MOUSE_FILTER_IGNORE;momentum_back.add_theme_stylebox_override("panel",style(Color(PAPER,.95),T.RULE,T.RADIUS_CARD));armies_strip.add_child(momentum_back)
 	momentum_panel=VBoxContainer.new();momentum_panel.mouse_filter=MOUSE_FILTER_IGNORE;armies_strip.add_child(momentum_panel)
-	momentum_label=label(momentum_panel,"MOMENTUM · COMBAT BALANCE",12)
+	momentum_label=label(momentum_panel,"Strength on each side",12)
 	momentum_bar=ProgressBar.new();momentum_bar.custom_minimum_size.y=18;momentum_bar.show_percentage=false;momentum_bar.add_theme_stylebox_override("background",style(ORANGE,ORANGE,9));momentum_bar.add_theme_stylebox_override("fill",style(TEAL,TEAL,9));momentum_panel.add_child(momentum_bar)
 	for kind in ["ghost","center","needle"]:
-		var marker:=ColorRect.new();marker.mouse_filter=MOUSE_FILTER_IGNORE;marker.color=Color(1,1,1,.35) if kind=="ghost" else Color(1,1,1,.9);momentum_bar.add_child(marker)
+		var marker:=ColorRect.new();marker.mouse_filter=MOUSE_FILTER_IGNORE;marker.color=Color(INK,.25) if kind=="ghost" else Color(INK,.85);momentum_bar.add_child(marker)
 		if kind=="ghost":momentum_ghost=marker
 		elif kind=="center":momentum_center=marker
 		else:momentum_needle=marker
-	momentum_note=label(momentum_panel,"Calculated strength · not victory odds",11,MUTED)
+	momentum_note=label(momentum_panel,"Calculated strength, not the odds of winning",12,MUTED)
 	momentum_bar.tooltip_text="Share of calculated fighting strength: troops, readiness, morale, equipment, leadership and defender terrain. Not a probability or forecast."
-	log_panel=panel();var logs:=box(log_panel);var row:=HBoxContainer.new();logs.add_child(row);label(row,"BATTLE LOG",15,TEXT,true).size_flags_horizontal=SIZE_EXPAND_FILL
-	button(row,"‹",func():log_page=mini(log_page+1,maxi(0,ceili(round_records.size()/4.0)-1));_refresh_log());button(row,"›",func():log_page=maxi(0,log_page-1);_refresh_log())
-	log_text=RichTextLabel.new();log_text.bbcode_enabled=true;log_text.fit_content=true;log_text.scroll_active=false;log_text.add_theme_font_override("normal_font",ui_font);log_text.add_theme_font_size_override("normal_font_size",13);logs.add_child(log_text)
+	log_panel=panel();var logs:=box(log_panel);var row:=HBoxContainer.new();logs.add_child(row);label(row,"What happened",16,TEXT,true).size_flags_horizontal=SIZE_EXPAND_FILL
+	button(row,"Earlier",func():log_page=mini(log_page+1,maxi(0,ceili(round_records.size()/4.0)-1));_refresh_log());button(row,"Later",func():log_page=maxi(0,log_page-1);_refresh_log())
+	log_text=RichTextLabel.new();log_text.bbcode_enabled=true;log_text.fit_content=true;log_text.scroll_active=false;log_text.add_theme_font_override("normal_font",ui_font);log_text.add_theme_font_size_override("normal_font_size",14);log_text.add_theme_color_override("default_color",INK);logs.add_child(log_text)
 	headline=VBoxContainer.new();headline.mouse_filter=MOUSE_FILTER_IGNORE;add_child(headline)
-	headline_title=label(headline,"",42,TEXT,true);headline_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;headline_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;headline_title.add_theme_constant_override("outline_size",6);headline_title.add_theme_color_override("font_outline_color",Color(INK,.7))
-	headline_note=label(headline,"",15,TEXT);headline_note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	headline_title=label(headline,"",38,INK,false);headline_title.add_theme_font_override("font",T.voice_font(true));headline_title.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;headline_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;headline_title.add_theme_constant_override("outline_size",10);headline_title.add_theme_color_override("font_outline_color",Color(PAPER,.9))
+	headline_note=label(headline,"",16,INK);headline_note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;headline_note.add_theme_constant_override("outline_size",8);headline_note.add_theme_color_override("font_outline_color",Color(PAPER,.9))
 func _build_orders()->void:
-	left_panel=panel();var left:=box(left_panel);label(left,"YOUR FORMATIONS",17,TEAL,true)
+	left_panel=panel();var left:=box(left_panel);label(left,"Our formations",17,TEAL,true)
 	formation_list=box(left);formation_list.size_flags_vertical=SIZE_EXPAND_FILL
-	var pages:=HBoxContainer.new();left.add_child(pages);button(pages,"‹",_formation_page.bind(-1));left_pager=label(pages,"",12,MUTED);left_pager.size_flags_horizontal=SIZE_EXPAND_FILL;button(pages,"›",_formation_page.bind(1))
-	button(left,"HOLD ALL",_hold_all,TEAL)
-	right_panel=panel();var right:=box(right_panel);selection_label=label(right,"SELECT A FORMATION",20,TEXT,true);selection_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	var pages:=HBoxContainer.new();left.add_child(pages);button(pages,"Previous",_formation_page.bind(-1));left_pager=label(pages,"",12,MUTED);left_pager.size_flags_horizontal=SIZE_EXPAND_FILL;button(pages,"Next",_formation_page.bind(1))
+	button(left,"Hold all",_hold_all,TEAL)
+	right_panel=panel();var right:=box(right_panel);selection_label=label(right,"Choose a formation",20,TEXT,true);selection_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var grid:=GridContainer.new();grid.columns=2;right.add_child(grid)
 	for kind:String in BattleRoundOrders.KINDS:
 		var b:=button(grid,String(BattleRoundOrders.KINDS[kind].label),_choose_order.bind(kind),TEAL);b.size_flags_horizontal=SIZE_EXPAND_FILL;order_buttons[kind]=b
-	var target_heading:=HBoxContainer.new();right.add_child(target_heading);target_caption=label(target_heading,"TARGET",12,ORANGE);target_caption.size_flags_horizontal=SIZE_EXPAND_FILL
-	button(target_heading,"‹",_target_page.bind(-1));button(target_heading,"›",_target_page.bind(1));targets=box(right)
+	var target_heading:=HBoxContainer.new();right.add_child(target_heading);target_caption=label(target_heading,"Target",12,ORANGE);target_caption.size_flags_horizontal=SIZE_EXPAND_FILL
+	button(target_heading,"Previous",_target_page.bind(-1));button(target_heading,"Next",_target_page.bind(1));targets=box(right)
 	order_note=label(right,"",13,MUTED);order_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;order_note.size_flags_vertical=SIZE_EXPAND_FILL
-	label(right,"Drag to pan · Right-drag to orbit\nWheel zooms at your cursor",11,MUTED)
+	label(right,"Drag to move the view, right-drag to turn it,\nthe wheel to come closer",12,MUTED)
 func _build_result()->void:
-	result_panel=panel();result_box=box(result_panel);result_title=label(result_box,"ROUND RESULT",30,GOLD,true);result_text=label(result_box,"",16);result_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	result_panel=panel();result_box=box(result_panel);result_title=label(result_box,"After the exchange",28,INK,true);result_text=label(result_box,"",16);result_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	history_choice=OptionButton.new();history_choice.custom_minimum_size.y=32;history_choice.add_theme_font_override("font",ui_font);result_box.add_child(history_choice)
 	policy_box=box(result_box);policy_box.visible=false
 	prisoner_choice=_policy(policy_box,"Prisoners",["hold","release","exchange","parole","ransom","execute","enslave"])
 	spoils_choice=_policy(policy_box,"Property & spoils",["return property","army stores","reward troops","state treasury","unrestricted plunder"])
 	general_choice=_policy(policy_box,"Captured command",["hold","release","ransom","execute"])
 	var actions:=HBoxContainer.new();result_box.add_child(actions);replay_button=button(actions,"Replay round",_replay)
-	result_primary=button(actions,"NEXT ORDERS →",_continue,GOLD);result_primary.size_flags_horizontal=SIZE_EXPAND_FILL
-	result_return=button(result_box,"RETURN TO MAP",_close)
+	result_primary=button(actions,"Next orders",_continue,GOLD);result_primary.size_flags_horizontal=SIZE_EXPAND_FILL
+	result_return=button(result_box,"Back to the map",_close)
 func _policy(parent:Node,title:String,options:Array)->OptionButton:
 	var row:=HBoxContainer.new();parent.add_child(row);label(row,title,13).custom_minimum_size.x=150
 	var select:=OptionButton.new();select.size_flags_horizontal=SIZE_EXPAND_FILL;select.custom_minimum_size.y=32
@@ -223,15 +234,15 @@ func _policy(parent:Node,title:String,options:Array)->OptionButton:
 	row.add_child(select);return select
 func _build_controls()->void:
 	bottom=panel();var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",10);bottom.add_child(controls)
-	var cameras:=box(controls);cameras.add_theme_constant_override("separation",4);label(cameras,"CAMERA",10,MUTED);var row:=HBoxContainer.new();cameras.add_child(row)
-	for mode in ["overview","frontline","director"]:camera_buttons[mode]=button(row,String(mode).capitalize(),_camera.bind(mode))
-	var playback:=HBoxContainer.new();cameras.add_child(playback);pause_button=button(playback,"Pause",_pause);speed_button=button(playback,"½×",_speed)
-	small_toggle=button(playback,"Orders / roster",func():narrow_orders=not narrow_orders;_layout())
+	var cameras:=box(controls);cameras.add_theme_constant_override("separation",4);label(cameras,"View",12,MUTED);var row:=HBoxContainer.new();cameras.add_child(row)
+	for mode in ["overview","frontline","director"]:camera_buttons[mode]=button(row,String({"overview":"Whole field","frontline":"Close to the line","director":"Follow the fight"}[mode]),_camera.bind(mode))
+	var playback:=HBoxContainer.new();cameras.add_child(playback);pause_button=button(playback,"Pause",_pause);speed_button=button(playback,"Half speed",_speed)
+	small_toggle=button(playback,"Orders and roster",func():narrow_orders=not narrow_orders;_layout())
 	var center:=box(controls);center.size_flags_horizontal=SIZE_EXPAND_FILL;progress_note=label(center,"",12,MUTED);progress_note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	resolve_button=button(center,"RESOLVE ROUND 1 →",_resolve,GOLD);resolve_button.custom_minimum_size.y=42
-	resolve_button.add_theme_stylebox_override("normal",style(GOLD,GOLD));resolve_button.add_theme_color_override("font_color",INK);resolve_button.add_theme_font_override("font",display_font);resolve_button.add_theme_font_size_override("font_size",21)
-	progress=ProgressBar.new();progress.show_percentage=false;progress.custom_minimum_size.y=6;progress.add_theme_stylebox_override("fill",style(GOLD,GOLD));center.add_child(progress)
-	var ends:=box(controls);skip_button=button(ends,"Skip to result →",_skip);retreat_button=button(ends,"Retreat whole army",_retreat,ORANGE);seed_label=label(ends,"",10,MUTED)
+	resolve_button=button(center,"Watch the first exchange",_resolve,GOLD);resolve_button.custom_minimum_size.y=42
+	resolve_button.add_theme_stylebox_override("normal",style(T.GOLD,T.GOLD));resolve_button.add_theme_color_override("font_color",PAPER);resolve_button.add_theme_color_override("font_hover_color",GOLD);resolve_button.add_theme_font_override("font",T.font("ui_strong"));resolve_button.add_theme_font_size_override("font_size",18)
+	progress=ProgressBar.new();progress.show_percentage=false;progress.custom_minimum_size.y=4;progress.add_theme_stylebox_override("fill",_bar(T.GOLD));progress.add_theme_stylebox_override("background",_bar(T.TRACK));center.add_child(progress)
+	var ends:=box(controls);skip_button=button(ends,"Skip to the result",_skip);retreat_button=button(ends,"Retreat whole army",_retreat,ORANGE);seed_label=label(ends,"",12,MUTED)
 func _initialize()->void:
 	context=WorldSimulation.military.active_engagement.duplicate(true) if history_seed<0 else {}
 	if context.is_empty() and not WorldSimulation.military.battle_history.is_empty():
@@ -248,13 +259,15 @@ func _initialize()->void:
 			var losses:Array=r.get(("attacker" if side==0 else "defender")+"_cohort_losses",[])
 			for i in mini(losses.size(),initial_forces[side].get("formations",[]).size()):initial_forces[side].formations[i]["count"]+=int(losses[i])
 	for force in initial_forces:_recount_display_force(force)
-	view.faction_colors=[Color("67b4cf"),Color("de513d")] if home_side==0 else [Color("de513d"),Color("67b4cf")]
+	# The ground each side stands on is a faint wash under its inked figures.
+	var ours_wash:=Color(T.TEAL,.22); var theirs_wash:=Color(T.RED,.22)
+	view.faction_colors=[ours_wash,theirs_wash] if home_side==0 else [theirs_wash,ours_wash]
 	view.set_landscape(context);view.reset(initial_forces[0],initial_forces[1])
 	if view.live_terrain!=null:view.live_terrain.set_meta("city_encounter_army",int(context.get("home_force_id",-1)))
 	present(a,d,{},String(context.get("outcome","")),context.get("rounds",[]))
-	heading.text=String(context.get("target_region_name",context.get("threat",{}).get("target_region_name","BATTLEFIELD"))).to_upper()
+	heading.text=String(context.get("target_region_name",context.get("threat",{}).get("target_region_name","the battlefield")))
 	city_button.disabled=String(context.get("target_region_id",context.get("threat",{}).get("target_region_id",""))).is_empty()
-	seed_label.text="BATTLE SEED %s"%str(context.get("seed","—")) if OS.has_feature("editor") or ProjectSettings.get_setting("application/config/custom_user_dir_name","").contains("Test") else ""
+	seed_label.text="Battle seed %s"%str(context.get("seed","—")) if OS.has_feature("editor") or ProjectSettings.get_setting("application/config/custom_user_dir_name","").contains("Test") else ""
 	if not WorldSimulation.military.active_engagement.is_empty() and history_seed<0:WorldSimulation.military.active_engagement["awaiting_player_view"]=true;phase="orders"
 	else:phase="ended"
 	if phase=="ended":_begin_replay_mode()
@@ -378,18 +391,18 @@ func _rebuild_orders()->void:
 	selected_index=clampi(selected_index,0,maxi(0,own.size()-1))
 	for i in range(formation_page*capacity,mini(own.size(),formation_page*capacity+capacity)):
 		var f:Dictionary=own[i];var order:Dictionary=_orders().get(str(i),{})
-		var b:=button(formation_list,"%s\n%d fighting · %s"%[_name(home_side,i),int(f.get("count",0)),String(order.get("kind","NO ORDER")).to_upper()],_select.bind(i),TEAL if i==selected_index else TEXT)
+		var b:=button(formation_list,"%s\n%d fighting · %s"%[_name(home_side,i),int(f.get("count",0)),String(order.get("kind","no order")).replace("_"," ")],_select.bind(i),TEAL if i==selected_index else TEXT)
 		b.tooltip_text="Morale: %d%% · %s"%[roundi(float(cached_forces[home_side].get("morale",1))*100),"Broken" if float(cached_forces[home_side].get("morale",1))<=.15 else ("Wavering" if float(cached_forces[home_side].get("morale",1))<.42 else "Steady")];b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.custom_minimum_size.y=50;b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;b.disabled=int(f.get("count",0))<=0
 	left_pager.text="%d / %d"%[formation_page+1,maxi(1,ceili(float(own.size())/capacity))]
 	selection_label.text=_name(home_side,selected_index)
 	for kind in order_buttons:
 		order_buttons[kind].tooltip_text=String(BattleRoundOrders.KINDS[kind].get("description",""))
 		var active_kind:=String(_orders().get(str(selected_index),{}).get("kind",""))
-		order_buttons[kind].add_theme_stylebox_override("normal",style(TEAL if kind==active_kind else Color("192226")))
-		order_buttons[kind].add_theme_color_override("font_color",INK if kind==active_kind else TEAL)
+		order_buttons[kind].add_theme_stylebox_override("normal",style(Color(T.TEAL,.14) if kind==active_kind else T.BUTTON_BG,TEAL if kind==active_kind else T.RULE))
+		order_buttons[kind].add_theme_color_override("font_color",TEAL)
 		order_buttons[kind].disabled=own.is_empty() or int(own[selected_index].get("count",0))<=0
 	var target_capacity:=_target_capacity();target_page=clampi(target_page,0,maxi(0,(enemy.size()-1)/target_capacity))
-	target_caption.text="TARGET · %d / %d"%[target_page+1,maxi(1,ceili(float(enemy.size())/target_capacity))]
+	target_caption.text="Target, page %d of %d"%[target_page+1,maxi(1,ceili(float(enemy.size())/target_capacity))]
 	for i in range(target_page*target_capacity,mini(enemy.size(),target_page*target_capacity+target_capacity)):
 		var b:=button(targets,"%s · %d"%[_name(1-home_side,i),int(enemy[i].get("count",0))],_target.bind(i),ORANGE if target_index==i else TEXT)
 		b.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;b.disabled=int(enemy[i].get("count",0))<=0
@@ -403,8 +416,8 @@ func _refresh_armies()->void:
 	if cached_forces.size()!=2:return
 	for side in 2:
 		var force:Dictionary=cached_forces[side];var losses:Dictionary=BattleLossSummary.from_rounds(round_records,side,_count(force))
-		force_labels[side].title.text=String(force.get("name","Your army" if side==home_side else "Enemy army")).to_upper()+(" · YOURS" if side==home_side else "")
-		force_labels[side].values.text="%d FIGHTING    %d OUT    %d%% MORALE"%[_count(force),int(losses.get("out_of_action",0)),roundi(float(force.get("morale",1))*100)]
+		force_labels[side].title.text=String(force.get("name","Our army" if side==home_side else "Their army"))+(" (ours)" if side==home_side else "")
+		force_labels[side].values.text="%d fighting · %d out of the fight · %s"%[_count(force),int(losses.get("out_of_action",0)),preload("res://scripts/battle_account.gd").morale_words(float(force.get("morale",1)))]
 		if replay_only:
 			var start:=_count(initial_forces[side]) if initial_forces.size()==2 else _count(force)
 			force_labels[side].title.text=_cap(String(account.get("band","our band"))) if side==home_side else _cap(String(account.get("enemy","the enemy")))
@@ -415,7 +428,7 @@ func _refresh_armies()->void:
 	var a:Dictionary=WorldSimulation.military.combat_summary(cached_forces[0],cached_forces[1]);var d:Dictionary=WorldSimulation.military.combat_summary(cached_forces[1],cached_forces[0],float(context.get("terrain_defense",1)))
 	var av:=float(a.get("effective_strength",0));var dv:=float(d.get("effective_strength",0));momentum_value=100*av/(av+dv) if av+dv>0 else 50;strength_history[_round()]=momentum_value;previous_momentum=float(strength_history.get(_round()-1,momentum_value))
 	var change:=roundi(momentum_value-previous_momentum)
-	momentum_label.text="STRENGTH · %s · %d%% / %d%%%s"%["Attackers lead" if momentum_value>52 else ("Defenders lead" if momentum_value<48 else "Even"),roundi(momentum_value),100-roundi(momentum_value),(" · %+d"%change) if not current_record.is_empty() and change!=0 else ""]
+	momentum_label.text="Strength: %s, %d%% to %d%%%s"%["Attackers lead" if momentum_value>52 else ("Defenders lead" if momentum_value<48 else "Even"),roundi(momentum_value),100-roundi(momentum_value),(", %+d since the last exchange"%change) if not current_record.is_empty() and change!=0 else ""]
 	momentum_label.tooltip_text="Percentages are the attacker / defender shares of calculated combat strength. The signed change is the attacker share change in percentage points since the preceding round."
 	momentum_label.add_theme_color_override("font_color",TEAL if momentum_value>=50 else ORANGE)
 	momentum_note.text="Strength share, not odds · Morale breaks at 15%" if current_record.is_empty() else "%s · Morale breaks at 15%%"%String(current_record.get("intensity","Contact"))
@@ -437,8 +450,8 @@ func _start_presentation()->void:
 	phase="resolving";elapsed=0;playback_paused=false
 	if view.live_terrain==null and not replay_only:_camera("director")
 	_spawn_losses();_phase_ui()
-	headline_title.text=_event_text(current_record).to_upper()
-	if headline_title.text.is_empty():headline_title.text="CONTACT ON THE LINE"
+	headline_title.text=_cap(_event_text(current_record))
+	if headline_title.text.is_empty():headline_title.text="Contact on the line"
 	headline_note.text="Round %d · %d of your troops and %d enemy troops out of action"%[_round(),_record_loss(home_side),_record_loss(1-home_side)]
 func _event_text(record:Dictionary)->String:
 	var event:=String(record.get("event",""))
@@ -455,7 +468,7 @@ func _process(delta:float)->void:
 	view.playback_speed=0 if playback_paused else speed
 	if phase=="resolving":
 		if not playback_paused:elapsed+=delta*speed
-		progress.value=100*minf(1,elapsed/round_duration);progress_note.text=("Exchange %d of %d · about half an hour of fighting"%[_round(),full_records.size()]) if replay_only else "%s ROUND %d · %.1fs / %.0fs"%["REPLAYING" if replaying else "RESOLVING",_round(),minf(elapsed,round_duration),round_duration]
+		progress.value=100*minf(1,elapsed/round_duration);progress_note.text=("Exchange %d of %d · about half an hour of fighting"%[_round(),full_records.size()]) if replay_only else "%s exchange %d"%["Watching again:" if replaying else "Fighting:",_round()]
 		headline.visible=elapsed>1.1 and elapsed<round_duration-.4
 		if elapsed>=round_duration:_finish_presentation()
 	_update_markers()
@@ -476,13 +489,13 @@ func _skip()->void:
 func _pause()->void:
 	playback_paused=not playback_paused;pause_button.text="Resume" if playback_paused else "Pause"
 func _speed()->void:
-	speed=.5 if speed==1 else 1;speed_button.text="1×" if speed==.5 else "½×"
+	speed=.5 if speed==1 else 1;speed_button.text="Full speed" if speed==.5 else "Half speed"
 func _show_result()->void:
 	if replay_only:
 		_show_replay_result();return
 	var ended:=phase=="ended"
-	result_title.text="ROUND %d COMPLETE"%_round()
-	if ended:result_title.text="VICTORY" if String(context.get("winner",""))==String(cached_forces[home_side].get("name","")) else ("WITHDRAWAL" if bool(context.get("orders",{}).get("retreated",false)) else ("DEFEAT" if not String(context.get("winner","")).is_empty() else "BATTLE ENDED"))
+	result_title.text="Exchange %d is over"%_round()
+	if ended:result_title.text="We won the field" if String(context.get("winner",""))==String(cached_forces[home_side].get("name","")) else ("We pulled back" if bool(context.get("orders",{}).get("retreated",false)) else ("We were beaten" if not String(context.get("winner","")).is_empty() else "The fighting has stopped"))
 	result_text.text="Your army: %d fighting · %d out this round\nEnemy army: %d fighting · %d out this round\n\n%s"%[_count(cached_forces[home_side]),_record_loss(home_side),_count(cached_forces[1-home_side]),_record_loss(1-home_side),("Review the aftermath before choosing the next operation." if not WorldSimulation.military.pending_aftermath.is_empty() else "The result is recorded in the campaign. Return to the map when ready.") if ended else "The battle is paused. Review losses, then give the next orders."]
 	if ended:
 		var termination:Dictionary=context.get("termination",{})
@@ -490,16 +503,18 @@ func _show_result()->void:
 		if not WorldSimulation.military.pending_aftermath.is_empty():result_text.text+="\nYour decisions about captives and property are still pending."
 		var strategic:Dictionary=context.get("strategic_outcome",{})
 		if strategic.get("region_captured",false):result_text.text+="\nCity captured. Occupation assignments are recorded in the campaign."
-		for side in 2:force_labels[side].values.text=force_labels[side].values.text.replace("FIGHTING","AT CONTACT END")
+		for side in 2:force_labels[side].values.text=force_labels[side].values.text.replace(" fighting ·"," still standing ·")
 	history_choice.clear()
-	for i in round_records.size():history_choice.add_item("Round %d"%(i+1),i)
+	for i in round_records.size():history_choice.add_item("Exchange %d"%(i+1),i)
 	if not round_records.is_empty():history_choice.select(round_records.size()-1)
 	replay_button.disabled=round_records.is_empty();policy_box.hide();result_return.visible=not ended or not WorldSimulation.military.pending_aftermath.is_empty()
-	result_primary.text="REVIEW AFTERMATH →" if ended and not WorldSimulation.military.pending_aftermath.is_empty() else ("RETURN TO MAP" if ended else "NEXT ORDERS →")
+	result_primary.text="Decide the captives" if ended and not WorldSimulation.military.pending_aftermath.is_empty() else ("Back to the map" if ended else "Next orders")
 func _show_replay_result()->void:
 	result_title.text=String(account.get("headline","The battle"))
 	result_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	result_title.add_theme_font_size_override("font_size",26)
+	# A sentence, set in the book face; the carved face is for short titles.
+	result_title.add_theme_font_override("font",T.voice_font(false))
 	result_text.text="%s\n\n%s %s"%[preload("res://scripts/battle_account.gd").ledger_line(account.get("ours",{})),String(account.get("now","")),String(account.get("next",""))]
 	history_choice.hide();policy_box.hide();result_return.hide()
 	replay_button.text="Watch again";replay_button.disabled=full_records.is_empty();replay_button.show()
@@ -524,13 +539,13 @@ func _continue()->void:
 	elif phase=="aftermath":
 		var result:Dictionary=WorldSimulation.military.resolve_aftermath(prisoner_choice.get_item_metadata(prisoner_choice.selected),spoils_choice.get_item_metadata(spoils_choice.selected),general_choice.get_item_metadata(general_choice.selected))
 		result_text.text=String(result.get("error",result.get("message","Aftermath recorded.")))
-		if not result.has("error"):phase="ended";policy_box.hide();result_return.hide();result_primary.text="RETURN TO MAP";_phase_ui()
+		if not result.has("error"):phase="ended";policy_box.hide();result_return.hide();result_primary.text="Back to the map";_phase_ui()
 func _open_aftermath()->void:
-	phase="aftermath";result_title.text="THE AFTERMATH";result_return.show()
+	phase="aftermath";result_title.text="The captives and what we took";result_return.show()
 	var pending:Dictionary=WorldSimulation.military.pending_aftermath
 	var home_won:=String(pending.get("captor",""))==String(pending.get("home_force_name",""))
 	result_text.text="%d captives · %s\n%s"%[int(pending.get("prisoners",0)),"Your army controls the captives and property." if home_won else "The enemy holds these prisoners.","Choose their treatment. Decisions enter the campaign record." if home_won else "Acknowledge the outcome to record your captured personnel."]
-	policy_box.visible=home_won;general_choice.disabled=not bool(pending.get("captured_general",false));replay_button.hide();history_choice.hide();result_primary.text="CONFIRM DECISIONS →" if home_won else "ACKNOWLEDGE →";_phase_ui()
+	policy_box.visible=home_won;general_choice.disabled=not bool(pending.get("captured_general",false));replay_button.hide();history_choice.hide();result_primary.text="Decide" if home_won else "We understand";_phase_ui()
 func _recount_display_force(force:Dictionary)->void:
 	if force.get("formations",[]).is_empty():return
 	var total:=0
@@ -559,7 +574,7 @@ func _replay()->void:
 		for i in mini(losses.size(),before[side].get("formations",[]).size()):before[side].formations[i]["count"]+=int(losses[i])
 	for force in before:_recount_display_force(force)
 	view.reset(before[0],before[1]);present(historical[0],historical[1],record,final_outcome if index==round_records.size()-1 else "",round_records.slice(0,index+1))
-	_start_presentation();headline_title.text="ROUND %d REPLAY"%(index+1)
+	_start_presentation();headline_title.text="Exchange %d, again"%(index+1)
 func _retreat()->void:
 	pass # Observation never submits legacy cohort or retreat orders.
 func _city_report()->void:
@@ -573,7 +588,8 @@ func _camera(mode:String)->void:
 	if mode=="overview":view.target=view.city_center*.65 if view.live_terrain!=null else Vector3(0,1,0);view.zoom=220 if view.live_terrain!=null else 85;view.elevation=.85
 	elif mode=="frontline":view.target=Vector3(0,1,0);view.zoom=32;view.elevation=.48
 	view._camera_update()
-	for key in camera_buttons:camera_buttons[key].modulate=TEAL if key==mode else TEXT
+	# The chosen view reads as pressed: a gold rule and a warmer ground.
+	for key in camera_buttons:camera_buttons[key].add_theme_stylebox_override("normal",style(T.ACTIVE_BG,T.GOLD) if key==mode else style(T.BUTTON_BG))
 func _view_input(event:InputEvent)->void:
 	var ratio:=Vector2(viewport.size)/stage.size
 	if event is InputEventMouseMotion:
@@ -595,13 +611,13 @@ func _refresh_log()->void:
 	var finish:=maxi(0,round_records.size()-log_page*4)
 	for i in range(finish-1,maxi(-1,finish-5),-1):
 		var r:Dictionary=round_records[i];var own:="attacker" if home_side==0 else "defender";var enemy:="defender" if home_side==0 else "attacker"
-		lines.append("[color=#f2c14e]ROUND %d[/color] · %s\nYour losses: %d · Enemy losses: %d"%[i+1,String(r.get("intensity","Contact")),int(r.get(own+"_losses",0)),int(r.get(enemy+"_losses",0))])
+		lines.append("[color=#"+GOLD.to_html(false)+"]Exchange %d[/color] · %s\nWe lost %d; they lost %d"%[i+1,String(r.get("intensity","Contact")),int(r.get(own+"_losses",0)),int(r.get(enemy+"_losses",0))])
 	log_text.text="\n\n".join(lines) if not lines.is_empty() else "Contact has not begun.\nThe general commands the next exchange."
 func _phase_ui()->void:
 	if replay_only:
 		_replay_phase_ui();return
-	phase_label.text="● ROUND %d · "%(_round()+1 if phase=="orders" else _round())+{"orders":"GENERAL IN COMMAND","resolving":"REPLAY" if replaying else "RESOLVING","result":"ROUND RESULT","ended":"BATTLE ENDED","aftermath":"AFTERMATH"}.get(phase,phase.to_upper())+" · SCHEMATIC DEPLOYMENT"
-	resolve_button.visible=phase=="orders";resolve_button.disabled=false;resolve_button.text="WATCH NEXT EXCHANGE →"
+	phase_label.text="Exchange %d: "%(_round()+1 if phase=="orders" else _round())+{"orders":"the general commands","resolving":"watching again" if replaying else "fighting","result":"over","ended":"the battle is over","aftermath":"the aftermath"}.get(phase,phase)
+	resolve_button.visible=phase=="orders";resolve_button.disabled=false;resolve_button.text="Watch the next exchange"
 	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";retreat_button.visible=false
 	result_panel.visible=phase in ["result","ended","aftermath"];log_panel.visible=phase in ["resolving","result","ended"]
 	vignette.visible=phase=="resolving";headline.hide();pause_button.text="Resume" if playback_paused else "Pause"
@@ -610,9 +626,9 @@ func _phase_ui()->void:
 	_layout()
 func _replay_phase_ui()->void:
 	var exchange:=autoplay_index+1 if autoplay_index>=0 else full_records.size()
-	phase_label.text={"drawn_up":"DRAWN UP","resolving":"WATCHING · EXCHANGE %d OF %d"%[exchange,full_records.size()],"ended":"THE FIGHT IS OVER","aftermath":"CAPTIVES AND SPOILS"}.get(phase,"WATCHING")
+	phase_label.text={"drawn_up":"Drawn up, before the first blow","resolving":"Exchange %d of %d"%[exchange,full_records.size()],"ended":"The fight is over","aftermath":"The captives and what we took"}.get(phase,"Watching")
 	resolve_button.visible=false;retreat_button.visible=false
-	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";skip_button.text="Next exchange →"
+	progress.visible=phase=="resolving";skip_button.visible=phase=="resolving";skip_button.text="Next exchange"
 	result_panel.visible=phase in ["ended","aftermath"];log_panel.visible=false
 	momentum_panel.visible=false;momentum_back.visible=false
 	vignette.visible=phase=="resolving";headline.hide();pause_button.text="Resume" if playback_paused else "Pause"
@@ -669,15 +685,15 @@ func _rebuild_plates()->void:
 	for side in 2:
 		for i in mini(12,_forms(side).size()):
 			if int(_forms(side)[i].get("count",0))<=0:continue
-			var plate:="%s · %s · %d"%["YOUR" if side==home_side else "ENEMY",_name(side,i),int(_forms(side)[i].get("count",0))]
-			if replay_only:plate="%s %s · %d"%["Our" if side==home_side else String(account.get("enemy","their")).trim_prefix("the ").trim_prefix("The "),String(_forms(side)[i].get("unit","band")).replace("_"," "),int(_forms(side)[i].get("count",0))]
+			var plate:="%s %s, %d"%["Our" if side==home_side else "Their",_name(side,i),int(_forms(side)[i].get("count",0))]
+			if replay_only:plate="%s %s, %d"%["Our" if side==home_side else String(account.get("enemy","their")).trim_prefix("the ").trim_prefix("The "),String(_forms(side)[i].get("unit","band")).replace("_"," "),int(_forms(side)[i].get("count",0))]
 			var b:=button(marker_layer,plate,_select.bind(i) if side==home_side else _target.bind(i),TEAL if side==home_side else ORANGE)
-			b.custom_minimum_size=Vector2(0,26);b.add_theme_font_size_override("font_size",11);b.add_theme_stylebox_override("normal",style(Color(INK,.82),TEAL if side==home_side else ORANGE,4));plates.append({"node":b,"side":side,"index":i})
+			b.custom_minimum_size=Vector2(0,26);b.add_theme_font_size_override("font_size",13);b.add_theme_stylebox_override("normal",style(Color(PAPER,.95),TEAL if side==home_side else ORANGE,T.RADIUS_CONTROL));plates.append({"node":b,"side":side,"index":i})
 	for group in view.groups:group.banner.visible=false
 	for general in view.generals:
 		general.label.visible=false
-		var detail:Dictionary=general.details();var b:=button(marker_layer,"%s GENERAL · %s\n%s"%["YOUR" if int(general.get_meta("side",-1))==home_side else "ENEMY",String(detail.name),String(detail.fate).to_upper()],WorldSimulation.figures.open_chronicle.bind(String(detail.figure_id)),GOLD)
-		b.add_theme_font_size_override("font_size",11);b.custom_minimum_size.y=30;b.disabled=String(detail.figure_id).is_empty();b.add_theme_stylebox_override("disabled",style(Color(INK,.85),GOLD,4));b.add_theme_color_override("font_disabled_color",GOLD);plates.append({"node":b,"general":general})
+		var detail:Dictionary=general.details();var b:=button(marker_layer,"%s general: %s\n%s"%["Our" if int(general.get_meta("side",-1))==home_side else "Their",String(detail.name),_cap(String(detail.fate))],WorldSimulation.figures.open_chronicle.bind(String(detail.figure_id)),GOLD)
+		b.add_theme_font_size_override("font_size",13);b.custom_minimum_size.y=30;b.disabled=String(detail.figure_id).is_empty();b.add_theme_stylebox_override("disabled",style(Color(PAPER,.95),GOLD,T.RADIUS_CONTROL));b.add_theme_color_override("font_disabled_color",GOLD);plates.append({"node":b,"general":general})
 func _update_markers()->void:
 	var occupied:Array[Rect2]=[]
 	for item in plates:
@@ -714,8 +730,9 @@ func _spawn_losses()->void:
 		var losses:Array=current_record.get(("attacker" if side==0 else "defender")+"_cohort_losses",[])
 		for i in mini(12,losses.size()):
 			if int(losses[i])<=0:continue
-			var node:=label(marker_layer,"−%d"%int(losses[i]),34,ORANGE if side==home_side else TEAL,true);node.mouse_filter=MOUSE_FILTER_IGNORE
-			node.add_theme_constant_override("outline_size",5);node.add_theme_color_override("font_outline_color",INK)
+			var node:=label(marker_layer,"%d down"%int(losses[i]),22,ORANGE if side==home_side else TEAL,false);node.mouse_filter=MOUSE_FILTER_IGNORE
+			node.add_theme_font_override("font",T.voice_font(true))
+			node.add_theme_constant_override("outline_size",8);node.add_theme_color_override("font_outline_color",Color(PAPER,.92))
 			floats.append({"node":node,"side":side,"index":i})
 func _selected(data:Dictionary)->void:
 	if data.has("figure_id"):WorldSimulation.figures.open_chronicle(String(data.figure_id));return

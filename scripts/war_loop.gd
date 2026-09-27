@@ -996,7 +996,9 @@ static func _drop_matters(civ_id:String)->void:
 	for m in list.duplicate():
 		if m is Dictionary and String(m.get("situation_type",""))=="war_campaign" and String((((m.get("audience",{}) as Dictionary).get("situation",{}) as Dictionary).get("war",{}) as Dictionary).get("civ_id",""))==civ_id: list.erase(m)
 
-static func _file(civ_id:String,mode:String,summary:String,day:int)->Dictionary:
+## extra: merged into the matter's war part (a battle's seed and the war
+## leader's whole account, which he speaks in full when summoned).
+static func _file(civ_id:String,mode:String,summary:String,day:int,extra:Dictionary={})->Dictionary:
 	var general:=_general()
 	if general.is_empty(): return {}
 	_drop_matters(civ_id)
@@ -1009,6 +1011,7 @@ static func _file(civ_id:String,mode:String,summary:String,day:int)->Dictionary:
 	audience.situation={"type":"war_campaign","ask":"war:%s:%s:%d" % [civ_id,mode,day],"headline":headline,"summary":text,
 		"occasion":{"type":"war_campaign","text":"%s and %s" % [mode,name],"day":day,"crisis":mode!="report"},
 		"war":{"civ_id":civ_id,"civ_name":name,"mode":mode,"filed":day}}
+	(audience.situation.war as Dictionary).merge(extra,true)
 	var entry:=Hall._file_matter(audience,[])
 	entry["urgency"]=0.95 if mode in ["war","terms"] else 0.85
 	front(civ_id)["matter_day"]=day
@@ -1086,12 +1089,16 @@ static func on_open(audience:Dictionary)->void:
 		"war":
 			said="%s is at war with us. They have about %d who can fight; we have about %d. Tell me what you want done, and I will see to it." % [name,theirs,band]
 		"report":
-			said=String((audience.get("petition",{}) as Dictionary).get("summary","")).substr(0,300)
-			said+=" What now?"
+			if String(part.get("account",""))!="":
+				# A battle: the war leader tells the whole account himself.
+				said=String(part.account)
+			else:
+				said=String((audience.get("petition",{}) as Dictionary).get("summary","")).substr(0,300)
+				said+=" What now?"
 		"terms":
 			var terms:Dictionary=(front(civ_id).war as Dictionary).get("terms",{})
 			said="%s's herald wants %d Food to end it. Our people are worn down. It is your word." % [name,int(float(terms.get("amount",0.0)))]
-	var advice:=_objective_for_general(civ_id,general,not (front(civ_id).war as Dictionary).is_empty())
+	var advice:="" if String(part.get("account",""))!="" else _objective_for_general(civ_id,general,not (front(civ_id).war as Dictionary).is_empty())
 	var advice_words:String={"war_guard":"If it were mine to say, I would hold the approaches and let them come to us.","war_burn":"If it were mine to say, I would burn their stores.",
 		"war_chief":"If it were mine to say, I would go for their chief.","war_pursue":"If it were mine to say, I would go after them now, while the trail is fresh.","war_parley":"If it were mine to say, I would send for a truce."}.get(advice,"")
 	if said!="": Hall.append_line(String(audience.id),{"speaker":String(general.get("name","")),"role":"official","person_id":int(general.get("person_id",0)),"civ_id":"player","text":said,"day":_day(),"aside":false})

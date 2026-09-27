@@ -88,7 +88,7 @@ func _formation_blocks(army:Dictionary)->Array:
 		var force:Dictionary=force_variant
 		if int(force.get("troops",0))<=0:continue
 		var army_id:=int(force.get("army_id",0))
-		var at_home:=String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))=="player_home"
+		var at_home:=preload("res://scripts/hud/army_marks.gd").at_home(force,CivilizationSystem.player_world_origin)
 		var report:Dictionary=force.get("last_report",{})
 		var use_report:=not live_reports and not at_home and not report.is_empty()
 		var shown_troops:=int(report.get("troops",force.get("troops",0))) if use_report else int(force.get("troops",0))
