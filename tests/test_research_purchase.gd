@@ -152,15 +152,16 @@ func test_ordinary_refused_embassy_returns_payment_without_paying_supplier()->vo
 
 func test_research_panel_dispatches_the_reviewed_offer_through_the_live_action()->void:
 	prepare()
-	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/research_purchase_panel.gd").new())
+	const Panel=preload("res://scripts/hud/research_purchase_panel.gd")
+	var panel:VBoxContainer=auto_free(Panel.new())
 	panel.subject="clay_shaping";panel.size=Vector2(280,500);get_tree().root.add_child(panel)
-	assert_bool(panel.send.disabled).is_false()
-	assert_str(panel.summary.text).contains("supplier may refuse")
-	panel.resources.select(4);panel.refresh()
-	panel.send.pressed.emit()
+	# The atlas no longer carries a deal form: one sentence and a link to the court.
+	assert_bool(panel.ask.disabled).is_false()
+	assert_str(panel.summary.text).contains("court")
+	assert_str(String(panel.offer.message)).contains("supplier may refuse")
+	Panel.send(String(panel.offer.mode),String(panel.offer.civ_id),"clay_shaping","Stone")
 	assert_str(CivilizationSystem.diplomatic_mission.research_subject).is_equal("clay_shaping")
 	assert_str(CivilizationSystem.diplomatic_mission.gift_resource).is_equal("Stone")
-	assert_bool(panel.send.disabled).is_true()
 
 const Planner=preload("res://scripts/research_acquisition_planner.gd")
 func examined_report()->void:

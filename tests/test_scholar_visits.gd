@@ -122,9 +122,9 @@ func test_early_gate_and_quote_do_not_read_hidden_supplier_knowledge()->void:
 func test_actual_panel_dispatches_scholar_invitation()->void:
 	prepare()
 	GameState.known_discoveries.assign(["apprentice_contracts","clay_testing"])
-	var panel:VBoxContainer=auto_free(preload("res://scripts/hud/research_purchase_panel.gd").new())
-	panel.subject="clay_shaping";add_child(panel)
-	panel.resources.select(4);panel.refresh();panel.send.pressed.emit()
+	const Panel=preload("res://scripts/hud/research_purchase_panel.gd")
+	var offer:Dictionary=Panel.offers("clay_shaping")[0]
+	Panel.send(String(offer.mode),String(offer.civ_id),"clay_shaping","Stone")
 	assert_str(CivilizationSystem.diplomatic_mission.get("research_mode","")).is_equal("scholar")
 
 func test_real_embassy_settles_payment_once_and_reserves_no_new_population()->void:
