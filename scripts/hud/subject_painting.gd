@@ -13,6 +13,8 @@ var fit_whole_width:=false
 var min_height:=0.0
 var max_height:=0.0
 var contain:bool=false
+## Ground behind a contained or missing painting; paper screens pass their own.
+var backdrop:=Color("102027")
 var fetch:Callable
 var scroll:ScrollContainer
 func _ready()->void:
@@ -58,10 +60,10 @@ static func crop_region(source_texture:Texture2D,target:Vector2,focal_point:Vect
 func _draw()->void:
 	if texture and contain:
 		var extent:=texture.get_size()*minf(size.x/texture.get_width(),size.y/texture.get_height())
-		draw_rect(Rect2(Vector2.ZERO,size),Color("102027"))
+		draw_rect(Rect2(Vector2.ZERO,size),backdrop)
 		draw_texture_rect(texture,Rect2((size-extent)*.5,extent),false)
 	elif texture:
 		draw_texture_rect_region(texture,Rect2(Vector2.ZERO,size),crop_region(texture,size,focus))
 	else:
-		draw_rect(Rect2(Vector2.ZERO,size),Color("102027"))
+		draw_rect(Rect2(Vector2.ZERO,size),backdrop)
 		draw_string(ThemeDB.fallback_font,Vector2(size.x*.5-8,size.y*.5+10),"?",HORIZONTAL_ALIGNMENT_LEFT,-1,28,Color("7a909a"))

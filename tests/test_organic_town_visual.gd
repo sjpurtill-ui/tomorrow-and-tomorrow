@@ -82,7 +82,8 @@ func test_imported_dimensions_vertex_colors_and_batched_condition() -> void:
 		if not node is MultiMeshInstance3D: continue
 		count += node.multimesh.instance_count
 		var transform: Transform3D = node.get_meta("source_transforms")[0]
-		assert_float(transform.basis.x.length()).is_equal_approx(0.001, 0.000001)
+		# Each house a little smaller than its envelope by its own measure, never larger.
+		assert_float(transform.basis.x.length()).is_between(0.00084, 0.001)
 		assert_float(transform.origin.y).is_equal_approx(0.2504, 0.00001)
 		# Painted in the map's ink (settlement_ink.gd), keeping the kit's colours.
 		assert_str((node.material_override as ShaderMaterial).shader.code).contains("COLOR.rgb")

@@ -13,9 +13,9 @@ var page:=0
 var slot_pages:Dictionary={}
 var live:Array[Dictionary]=[]
 const Art=preload("res://scripts/hud/military_roster_visuals.gd")
-const INK:=Color("e8e9df")
-const DIM:=Color("a5b1ac")
-const GOLD:=Color("d9b772")
+var INK:=T.INK
+var DIM:=T.INK_MUTED
+var GOLD:=T.GOLD
 var columns:GridContainer
 var templates_column:VBoxContainer
 var queue_column:VBoxContainer
@@ -27,12 +27,12 @@ func setup(block:Dictionary)->void:
 	var theme_skin:=Theme.new()
 	for kind in ["Button","OptionButton","CheckButton"]:
 		for state in ["normal","hover","pressed","disabled"]:
-			theme_skin.set_stylebox(state,kind,skin(Color("35413b") if state=="hover" else Color("26302b"),GOLD if state=="pressed" else Color("596052"),8))
+			theme_skin.set_stylebox(state,kind,skin(T.HOVER_BG if state=="hover" else T.ACTIVE_BG if state=="pressed" else T.BUTTON_BG,GOLD if state=="pressed" else T.BORDER_2,8))
 		for state in ["font_color","font_hover_color","font_pressed_color"]:theme_skin.set_color(state,kind,INK)
-		theme_skin.set_color("font_disabled_color",kind,Color("7c847b"));theme_skin.set_font_size("font_size",kind,13)
-	theme_skin.set_stylebox("normal","LineEdit",skin(Color("171e1b"),Color("596052"),7));theme_skin.set_color("font_color","LineEdit",INK)
+		theme_skin.set_color("font_disabled_color",kind,T.DISABLED);theme_skin.set_font_size("font_size",kind,13)
+	theme_skin.set_stylebox("normal","LineEdit",skin(T.FIELD_BG,T.BORDER_2,7));theme_skin.set_color("font_color","LineEdit",INK)
 	theme=theme_skin
-	var top:=PanelContainer.new();top.add_theme_stylebox_override("panel",skin(Color("202923"),Color("606652"),14));add_child(top)
+	var top:=PanelContainer.new();top.add_theme_stylebox_override("panel",skin(T.PAPER_SUNK,T.RULE,14));add_child(top)
 	var status:=VBoxContainer.new();status.add_theme_constant_override("separation",7);top.add_child(status)
 	status.add_child(label("ARMY RECRUITMENT COMMAND",12,GOLD))
 	workforce=label("",16,INK);workforce.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.add_child(workforce)
@@ -47,7 +47,7 @@ func setup(block:Dictionary)->void:
 	button(title,"+ New",func():
 		var result:=MilitaryCampaign.create_army_template()
 		if result.has("template"):edit.call(int(result.template.template_id)),"Create a formation template")
-	var settings:=PanelContainer.new();settings.add_theme_stylebox_override("panel",skin(Color("202923"),Color("465044"),10));templates_column.add_child(settings)
+	var settings:=PanelContainer.new();settings.add_theme_stylebox_override("panel",skin(T.PAPER_SUNK,T.RULE,10));templates_column.add_child(settings)
 	var settings_box:=VBoxContainer.new();settings_box.add_theme_constant_override("separation",8);settings.add_child(settings_box)
 	settings_box.add_child(label("NEW TRAINING ORDER",11,DIM))
 	var options:=HBoxContainer.new();options.add_theme_constant_override("separation",10);settings_box.add_child(options)
@@ -66,7 +66,7 @@ func layout_columns()->void:
 func build_templates()->void:
 	for item:Dictionary in MilitaryCampaign.army_template_snapshot().templates:
 		var id:=int(item.template_id)
-		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",skin(Color("26302b"),Color("5b6252"),12));template_cards.add_child(card)
+		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",skin(T.PAPER_RAISED,T.RULE,12));template_cards.add_child(card)
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);card.add_child(box)
 		var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);box.add_child(head)
 		var entries:Array=item.get("entries",[])
@@ -84,10 +84,10 @@ func build_templates()->void:
 		var actions:=HBoxContainer.new();box.add_child(actions)
 		var train:=button(actions,"Train",func():report(MilitaryCampaign.recruit_deploy.add(id,int(parallel.value),int(serial.value),repeat.button_pressed)),"Create a recruitment line using this template")
 		train.name="TrainTemplate"+str(id);train.size_flags_horizontal=Control.SIZE_EXPAND_FILL;train.disabled=entries.is_empty()
-		train.add_theme_stylebox_override("normal",skin(Color("47533a"),GOLD,9))
+		train.add_theme_stylebox_override("normal",skin(T.GOLD_WASH,GOLD,9))
 		button(actions,"Edit",func():edit.call(id),"Edit this formation's composition")
 func empty_queue()->void:
-	var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",skin(Color("1b241f"),Color("465044"),16));rows.add_child(panel)
+	var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",skin(T.PAPER_SUNK,T.RULE,16));rows.add_child(panel)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",15);panel.add_child(box)
 	var art:=TextureRect.new();art.texture=Art.artwork("army");art.custom_minimum_size.y=140;art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;box.add_child(art)
 	box.add_child(label("NO FORMATIONS IN TRAINING",17,INK))
@@ -116,7 +116,7 @@ func rebuild()->void:
 		button(paging,"›",func():page+=1;rebuild(),"Next lines")
 	for item:Dictionary in lines.slice(page*4,page*4+4):
 		var id:=int(item.id)
-		var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",skin(Color("26302b"),Color("5b6252"),12));rows.add_child(panel)
+		var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",skin(T.PAPER_RAISED,T.RULE,12));rows.add_child(panel)
 		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",5);panel.add_child(box)
 		var top:=HBoxContainer.new();box.add_child(top)
 		var title:=label(String(item.name),13,T.INK);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
@@ -151,7 +151,7 @@ func rebuild()->void:
 			for label in ["People","Equipment","Training"]:
 				var strip:=HBoxContainer.new();bars.add_child(strip)
 				var caption:=label(label,10,T.MUTED);caption.custom_minimum_size.x=68;strip.add_child(caption)
-				var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=10;bar.add_theme_stylebox_override("background",skin(Color("121a15"),Color("3c493a"),0));bar.add_theme_stylebox_override("fill",skin(Color("81945d"),Color("81945d"),0));bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strip.add_child(bar)
+				var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=10;bar.add_theme_stylebox_override("background",skin(T.TRACK,T.RULE,0));bar.add_theme_stylebox_override("fill",skin(T.GREEN,T.GREEN,0));bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strip.add_child(bar)
 				var value:=label("",10,T.BODY);value.custom_minimum_size.x=65;strip.add_child(value);controls.append({"bar":bar,"value":value})
 			var deploy:=button(row,"Deploy",func():report(MilitaryCampaign.recruit_deploy.deploy(id,slot_id,true)),"Deploy after 20% training. Incomplete training and equipment reduce fighting strength.")
 			live.append({"id":id,"slot":slot_id,"controls":controls,"deploy":deploy})

@@ -78,7 +78,7 @@ static func acc(c:Dictionary,day:int=-1)->Dictionary:
 static func _new_acc(year:int)->Dictionary:
 	return {"year":year,"pop0":_people(),"crises":[],"deaths":[],"learned":[],"firsts":[],"scouts":{"n":0,"km":0,"days":0,"hurt":0,"back":0,"news":0},
 		"contacts":[],"aims":[],"works":[],"wars":[],"heads":[],"milestones":[],"born":0,"buried":0,"folded":0,"regard":"",
-		"abroad":[],"births":[],"turnings":[],"mild":[]}
+		"abroad":[],"births":[],"turnings":[],"mild":[],"upkeep":[]}
 
 
 static func _list_of(c:Dictionary,key:String)->Array:
@@ -528,6 +528,12 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 				if title.ends_with(" Acts Alone"):cr.holder=title.trim_suffix(" Acts Alone")
 		return
 	if key.begins_with("learned:"):return
+	if key.begins_with("upkeep:") and tier!="whisper":
+		# The town's upkeep (upkeep_warnings.gd): only each change of stage is told.
+		var stage:=key.get_slice(":",1)
+		var list:=_list_of(a,"upkeep")
+		if list.size()<6:list.append({"stage":stage,"homes":"houses" if title.contains("Houses") else "huts"})
+		return
 	var abroad:=_abroad_note(key,title,String(entry.get("text","")),kind,tier)
 	if not abroad.is_empty():
 		var heard:Array=_list_of(a,"abroad")

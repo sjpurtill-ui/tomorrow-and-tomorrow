@@ -91,7 +91,10 @@ func army_demands()->Array[Dictionary]:
 		var quote:Dictionary=host.template_training_quote(int(template.template_id))
 		for item:String in quote.get("equipment",{}):totals[item]=int(totals.get(item,0))+int(quote.equipment[item])
 	for order:Dictionary in host.training_queue:
-		if order.has("deployment_line") or order.has("build_batch"):continue
+		# Template batches are covered by their quote above. Recruitment lines hold
+		# only reserved sets, so their missing weapons are ordered here like any
+		# other cohort; otherwise a line short of weapons could wait in drill indefinitely.
+		if order.has("build_batch"):continue
 		var item:=String(order.get("weapon","improvised"))
 		var needed:=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
 		totals[item]=int(totals.get(item,0))+needed

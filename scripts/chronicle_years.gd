@@ -166,6 +166,7 @@ static func items(a:Dictionary,annals:Array,ctx:Dictionary)->Array:
 	_people(a,annals,ctx,out,last_sig)
 	_aims_and_works(a,ctx,out)
 	_roads(a,annals,ctx,out)
+	_upkeep(a,out)
 	for item in out:item["y"]=y
 	return out
 
@@ -693,6 +694,26 @@ static func _roads(a:Dictionary,annals:Array,ctx:Dictionary,out:Array)->void:
 	if far>0 and annals.size()>=3 and float(km)>float(far)*1.2:road+=", farther than in any year before";w=4.0
 	if not hard.is_empty():road+="; "+" and ".join(hard);w=maxf(w,2.5)
 	out.append({"t":"roads","w":w,"sig":"","text":road+"."})
+
+
+## The town's upkeep (upkeep_warnings.gd): the worst it came to this year, and
+## whether it was made sound again, in one line.
+const UPKEEP_WORDS:={"slipping":"The %s began to wear out faster than they were mended","failing":"The %s fell into disrepair for want of builders","floor":"The %s were left nearly in ruins"}
+static func _upkeep(a:Dictionary,out:Array)->void:
+	var told:Array=a.get("upkeep",[]) if a.get("upkeep") is Array else []
+	if told.is_empty():return
+	var worst:="";var rank:=-1;var homes:="huts";var mended:=false
+	for entry in told:
+		var stage:=String((entry as Dictionary).get("stage",""))
+		homes=String((entry as Dictionary).get("homes",homes))
+		if stage=="sound":mended=true;continue
+		var r:=["slipping","failing","floor"].find(stage)
+		if r>rank:rank=r;worst=stage
+	if String((told.back() as Dictionary).get("stage",""))!="sound":mended=false
+	var text:=""
+	if worst=="":text="The %s were made sound again." % homes
+	else:text=(String(UPKEEP_WORDS[worst]) % homes)+(", and were made sound again." if mended else ".")
+	out.append({"t":"upkeep","w":2.0+float(maxi(rank,0)),"sig":"","text":text})
 
 
 static func _grouped(value:int)->String:

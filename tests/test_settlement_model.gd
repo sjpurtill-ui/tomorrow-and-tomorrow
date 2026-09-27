@@ -902,3 +902,54 @@ func test_population_alone_cannot_found_a_satellite_quarter()->void:
 	assert_array(events).is_empty()
 	assert_int(GameState.settlement_plots.size()).is_equal(original_plots)
 	assert_int(GameState.settlement_nuclei.size()).is_equal(original_nuclei)
+
+func test_vacant_buildings_can_be_used_again_after_builders_repair_them()->void:
+	# A workshop left empty long enough decays below the old reuse line (0.28)
+	# and could never be used again. Now crafters returning to it put it in
+	# the builders' hands, and it stands in use again once repaired.
+	var template:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) in ["residential_compound","mixed_household"]: template=plot; break
+	assert_bool(template.is_empty()).is_false()
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))=="workshop": plot["status"]="ruin"
+	var shop:Dictionary=template.duplicate(true)
+	shop["id"]=GameState.next_settlement_plot_id; GameState.next_settlement_plot_id+=1
+	shop.merge({"land_use":"workshop","worker_capacity":6,"worker_count":0,"resident_capacity":0,"resident_count":0,"status":"vacant","condition":0.05,"idle_months":40,"service_access":1.0},true)
+	GameState.settlement_plots.append(shop)
+	var events:Array[Dictionary]=[]
+	GameState.population_allocations["Crafting"]=6
+	model.call("_update_plot_workforce",600,events)
+	assert_int(int(shop.worker_count)).is_equal(6)
+	assert_str(String(shop.status)).is_equal("damaged")
+	assert_float(float(shop.condition)).is_equal_approx(0.14,0.0001)
+	# Without builders it waits; with them it is mended back into use.
+	GameState.population_allocations["Construction"]=0
+	model.call("_process_occupancy_and_maintenance",630,events)
+	assert_str(String(shop.status)).is_equal("damaged")
+	GameState.population_allocations["Construction"]=20
+	for month in range(22,60):
+		GameState.population_allocations["Crafting"]=6
+		model.call("_update_plot_workforce",month*30,events)
+		model.call("_process_occupancy_and_maintenance",month*30,events)
+		if String(shop.status)=="active": break
+	assert_str(String(shop.status)).is_equal("active")
+	# Ruins keep their own path: people are not sent to work in them.
+	shop["status"]="ruin"
+	model.call("_update_plot_workforce",1900,events)
+	assert_str(String(shop.status)).is_equal("ruin")
+
+func test_vacant_household_is_repaired_when_people_return()->void:
+	var home:Dictionary={}
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use","")) in ["residential_compound","mixed_household"] and int(plot.get("resident_capacity",0))>0: home=plot; break
+	assert_bool(home.is_empty()).is_false()
+	# The only household left standing, so the people come back to it.
+	for plot in GameState.settlement_plots:
+		if plot!=home and String(plot.get("land_use","")) in ["residential_compound","mixed_household"]: plot["status"]="ruin"
+	home.merge({"status":"vacant","condition":0.2,"vacant_months":30},true)
+	var events:Array[Dictionary]=[]
+	model.call("_process_occupancy_and_maintenance",600,events)
+	assert_int(int(home.resident_count)).is_greater(0)
+	assert_str(String(home.status)).is_equal("damaged")
+	assert_float(float(home.condition)).is_greater_equal(0.2)
