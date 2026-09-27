@@ -1881,7 +1881,7 @@ func _build_environment() -> void:
 	# The fill is the open sky: a little cooler than the key, so shade reads
 	# blue-grey against warm sunlit ground (world_beauty.gdshaderinc).
 	settings.ambient_light_color = Color("#97a3ab")
-	settings.ambient_light_energy = 0.36 if SEAMLESS_WORLD else 0.36
+	settings.ambient_light_energy = 0.33 if SEAMLESS_WORLD else 0.36
 	settings.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.environment = settings
 	add_child(environment)
@@ -2667,7 +2667,7 @@ void fragment() {
 	if (coast_mask_ready() && world_position.y>0.0) {
 		wb_hollow=(coast_mask_height(world_position.xz)-world_position.y)*(1.0-smoothstep(0.35,2.5,pixel_world));
 	}
-	float wb_topo_wet=smoothstep(0.0,0.10,wb_hollow)-smoothstep(0.0,0.12,-wb_hollow);
+	float wb_topo_wet=smoothstep(0.0,0.10,wb_hollow)-smoothstep(0.0,0.12,-wb_hollow)*0.6;
 	float wb_rain=clamp(precipitation+wb_topo_wet*0.16,0.0,1.0);
 	float wb_dry=1.0-smoothstep(0.26,0.50,wb_rain);
 	float wb_reference=mix(mix(0.180,0.250,wb_dry),0.085,clamp(forest_mask,0.0,1.0));
@@ -2679,7 +2679,7 @@ void fragment() {
 	// the low sun catches warm light; the far edge falls into shade that
 	// spills a little onto the open ground beside it.
 	float wb_wood_density=clamp(filtered_woodland,0.0,1.0)*retained_woodland*(1.0-smoothstep(0.30,0.72,slope));
-	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch)*(1.0-rock_mask*0.8);
+	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch,pixel_world)*(1.0-rock_mask*0.8);
 	earth = wb_woodland(earth,wb_stand_cover,wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5),world_position.xz,pixel_world);
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);

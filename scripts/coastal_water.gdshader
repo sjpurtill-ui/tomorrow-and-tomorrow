@@ -134,7 +134,7 @@ void fragment() {
 	vec3 water = mix(deep,shelf,exp(-depth/0.16)*surveyed_surface);
 	water = mix(water,shallows,exp(-depth/0.022)*surveyed_surface);
 	// Only the last metres show the bed through clear water.
-	water = mix(water,bed,exp(-depth/0.0024)*surveyed_surface*0.55);
+	water = mix(water,bed,exp(-depth/0.0024)*surveyed_surface*0.35);
 	// Broad, static suspended-sediment variation gives shallow coasts the
 	// irregular mineral tint visible in aerial imagery without animating the bed.
 	float sediment = 0.0;
@@ -180,6 +180,8 @@ void fragment() {
 	float slant_haze = smoothstep(0.15,1.2,view_slant)*smoothstep(0.03,0.35,pixel_world);
 	// The same parchment haze as the land, so the coast does not change key.
 	water = map_haze(water,clamp(altitude_haze*0.55+slant_haze*0.14,0.0,0.22));
+	// At chart zoom the sea is a lighter slate wash on the page, not ink.
+	water = mix(water,vec3(0.150,0.225,0.228),smoothstep(0.20,1.2,pixel_world)*0.70);
 	// A gentle sheen, brightest toward the low north-west sun (upper left),
 	// in place of a specular glint a straight-down view can never see.
 	float sheen = smoothstep(0.95,0.0,length((SCREEN_UV-vec2(0.08,0.02))*vec2(1.0,1.25)));

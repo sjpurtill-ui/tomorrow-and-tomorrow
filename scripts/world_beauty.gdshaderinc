@@ -275,11 +275,14 @@ vec3 wb_canopy(vec2 world_xz, float pixel_world) {
 }
 
 // Stand coverage from woodland density (0-1) and two broad world noises (0-1).
-float wb_stand(float woodland, float noise_a, float noise_b) {
-	float edge_noise = (noise_a-0.5)*0.34+(noise_b-0.5)*0.16;
-	float stand = smoothstep(0.40, 0.50, woodland+edge_noise);
-	// Groves: clumps in half-wooded and parkland country.
-	float grove = smoothstep(0.64, 0.74, noise_b*0.7+noise_a*0.3)*smoothstep(0.12, 0.32, woodland);
+// `pixel_world` smooths stands into broad masses at chart zoom, where the
+// fine edge noise would only speckle.
+float wb_stand(float woodland, float noise_a, float noise_b, float pixel_world) {
+	float chart = smoothstep(0.12, 0.8, pixel_world);
+	float edge_noise = ((noise_a-0.5)*0.34+(noise_b-0.5)*0.16)*(1.0-chart*0.8);
+	float stand = smoothstep(mix(0.40, 0.30, chart), mix(0.50, 0.62, chart), woodland+edge_noise);
+	// Groves: clumps in half-wooded and parkland country, close views only.
+	float grove = smoothstep(0.64, 0.74, noise_b*0.7+noise_a*0.3)*smoothstep(0.12, 0.32, woodland)*(1.0-chart);
 	return max(stand, grove*0.9);
 }
 
@@ -289,7 +292,7 @@ vec3 wb_woodland(vec3 earth, float stand, vec3 wood, vec2 world_xz, float pixel_
 	if (stand <= 0.001) { return earth; }
 	vec3 canopy = wb_canopy(world_xz, pixel_world);
 	// Canopy detail softens into a stippled wash at chart zoom.
-	float detail = 1.0-smoothstep(0.08, 0.6, pixel_world)*0.55;
+	float detail = 1.0-smoothstep(0.05, 0.5, pixel_world)*0.80;
 	// Canopy is painted a little lighter than its ground's palette: a forest
 	// on a painted map is a rich mass of green, never a black stain.
 	vec3 c = wood*1.9*mix(1.0, canopy.x, detail);
