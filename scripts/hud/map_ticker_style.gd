@@ -33,7 +33,7 @@ static func style(label:Label)->void:
 ## width are unchanged; hides the slip when there is nothing to say.
 static func fit(label:Label,viewport_width:float)->void:
 	# Older systems still hand the ticker shouted text; it reads as a sentence.
-	var calm:=preload("res://scripts/hud/paper_kit.gd").sentence(label.text)
+	var calm:=preload("res://scripts/hud/paper_kit.gd").calm_line(label.text)
 	if calm!=label.text.strip_edges() and calm!="":label.text=calm
 	var key:="%s|%d" % [label.text,roundi(viewport_width)]
 	if String(label.get_meta("ticker_fitted",""))==key:return

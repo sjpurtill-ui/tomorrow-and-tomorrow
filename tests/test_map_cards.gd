@@ -141,3 +141,26 @@ func test_map_contact_card_asks_the_general_without_direct_orders()->void:
 		assert_str(source).not_contains(forbidden)
 	var lost:=provider.tab(0)
 	assert_str(String(lost.brief.title)).is_equal("Out of sight")
+
+func test_chronicle_lines_on_the_ticker_are_calm_sentences()->void:
+	# The line the player saw: an era label and a shouted title.
+	var shouted:="HEARTH-TALE: ROVIK'S BAND TOOK TSAREN  •  Tsaren is ours. Rovik left 17 fighters to hold it. One more is still with Rovik."
+	var calm:=Kit.calm_line(shouted)
+	assert_str(calm).not_contains("HEARTH-TALE")
+	assert_str(calm).not_contains("•")
+	assert_str(calm).starts_with("Rovik's band took tsaren.")
+	assert_str(calm).contains("Tsaren is ours.")
+	# The ticker's own Chronicle line never carries the label in the first place.
+	var saved:Dictionary=GameState.chronicle
+	GameState.chronicle={"version":9999,"entries":[{"key":"t","day":10,"tier":"notice","kind":"story","title":"Rovik's band took Tsaren","text":"Tsaren is ours. Rovik left 17 fighters to hold it. One more is still with Rovik."}],"firsts":{},"keys":{},"moment_days":[],"moment_ids":{}}
+	var line:=Ticker.latest_telling()
+	GameState.chronicle=saved
+	assert_str(line).is_equal("Rovik's band took Tsaren: Tsaren is ours.")
+	# And the paper slip turns anything shouted into the calm line.
+	var label:Label=auto_free(Label.new())
+	preload("res://scripts/hud/map_ticker_style.gd").style(label)
+	label.text=shouted
+	preload("res://scripts/hud/map_ticker_style.gd").fit(label,1600.0)
+	assert_str(label.text).is_equal(calm)
+	assert_int(label.get_theme_font_size("font_size")).is_greater_equal(14)
+	assert_float(T.contrast(label.get_theme_color("font_color"),T.PANEL_BG_SOLID)).is_greater_equal(4.5)

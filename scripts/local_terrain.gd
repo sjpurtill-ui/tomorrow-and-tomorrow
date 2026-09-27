@@ -12007,24 +12007,17 @@ func _scout_action_presentation(exploration:Dictionary,quote:Dictionary)->Dictio
 	}
 
 
+## The envoy button's words (toolbar and Known World). Talking happens in the court.
 func _diplomat_action_presentation(status:Dictionary,known_destinations:int)->Dictionary:
 	if bool(status.get("active",false)):
-		return {
-			"label":"REVIEW DIPLOMATS  •  %d DAYS" % int(status.get("days_remaining",0)),
-			"disabled":false,
-			"tooltip":"IN PROGRESS  Envoys are physically away.\nWHY  Their response and observations travel with them.\nNEXT  Review the destination, cargo, stage, and return time."
-		}
+		var days:=int(status.get("days_remaining",0))
+		return {"label":"Envoys away, back in about %d day%s" % [days,"" if days==1 else "s"],"disabled":false,
+			"tooltip":"Our envoys are on the road. What they bring back will be heard in the court."}
 	if known_destinations<=0:
-		return {
-			"label":"SEND DIPLOMATS  •  BLOCKED\nLOCATE A FOREIGN SETTLEMENT FIRST",
-			"disabled":true,
-			"tooltip":"BLOCKED  No foreign settlement has been physically located.\nWHY  An encounter site is not a diplomatic destination.\nNEXT  Send scouts to investigate a returned contact site."
-		}
-	return {
-		"label":"SEND DIPLOMATS",
-		"disabled":false,
-		"tooltip":"ACTION  Send a physical delegation to one confirmed foreign settlement.\nRESULT  Its proposal, response, route, and observations travel at the speed of the envoys."
-	}
+		return {"label":"Send envoys","disabled":true,
+			"tooltip":"We know no other people's home yet. Scouts must find where they live before envoys can go."}
+	return {"label":"Send envoys","disabled":false,
+		"tooltip":"Envoys walk to a people whose home we know and speak for you there. You choose what they say in the court."}
 
 const CHOOSE_LAND_WORDS:="Move over the map and click known land to see who would go and what it costs. Right-click or Esc stops."
 
@@ -13424,7 +13417,7 @@ func _update_scale_bar() -> void:
 		distance_text="%d KM" % roundi(distance_km)
 	if hud:
 		hud.update_scale(pixel_width,distance_text,_camera_scale_band(),_north_screen_arrow())
-		if hud.scale_label: hud.scale_label.tooltip_text="%.0f feet above terrain. F7: inspect at 10,000 feet. Scale is measured at the center of this perspective view." % aerial_altitude_feet()
+		if hud.scale_label: hud.scale_label.tooltip_text="About %s feet above the land. The scale is measured at the middle of the view." % EraWordsMap.grouped(roundi(aerial_altitude_feet()))
 	if scale_bar_root and scale_bar_line:
 		scale_bar_line.size.x=pixel_width
 		scale_bar_right_tick.position.x=10.0+pixel_width-2.0
@@ -21000,10 +20993,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled();return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_N:
 		_reset_camera_north()
-		get_viewport().set_input_as_handled()
-		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F7:
-		_inspect_aerial_altitude()
 		get_viewport().set_input_as_handled()
 		return
 	if actions_menu_panel and actions_menu_panel.visible and event is InputEventMouseButton and event.pressed:

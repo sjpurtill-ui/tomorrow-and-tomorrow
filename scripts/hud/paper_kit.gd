@@ -123,6 +123,27 @@ static func sentence(text:String)->String:
 	if letters<4 or float(upper)/float(letters)<0.8:return clean
 	return T.sentence_case(clean)
 
+## One calm line for the map ticker from older, shouted text: drops an
+## all-caps label such as "HEARTH-TALE:" or "DISCOVERY:", sentence-cases any
+## all-caps part and joins "  •  " parts as sentences.
+## "HEARTH-TALE: ROVIK'S BAND TOOK TSAREN  •  Tsaren is ours."
+##   -> "Rovik's band took tsaren. Tsaren is ours."
+static func calm_line(text:String)->String:
+	var line:=text.strip_edges()
+	var prefix:=RegEx.create_from_string("^([A-Z][A-Z' -]{2,}):[ ]*")
+	var found:=prefix.search(line)
+	if found!=null and found.get_string(1)==found.get_string(1).to_upper():
+		line=line.substr(found.get_end()).strip_edges()
+	var parts:=PackedStringArray()
+	for part in line.split("•"):
+		var clean:=String(part).strip_edges()
+		if clean=="":continue
+		clean=sentence(clean)
+		if not clean.ends_with(".") and not clean.ends_with("?") and not clean.ends_with("!") and not clean.ends_with("…"):clean+="."
+		parts.append(clean)
+	if parts.size()<=1 and not text.contains("•") and found==null:return sentence(text.strip_edges())
+	return " ".join(parts)
+
 ## "open grassland" -> "Open grassland" (not "Open Grassland").
 static func first_capital(text:String)->String:
 	var clean:=text.strip_edges().to_lower()
