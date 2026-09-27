@@ -24,8 +24,8 @@ func test_production_reports_staff_managed_repairs()->void:
 	var provider=Production.new(null,null)
 	var report:=provider._repairs()
 	assert_int(report.blocks[0].items.size()).is_equal(1)
-	assert_str(report.blocks[0].heading).is_equal("STAFF-MANAGED REPAIRS")
-	assert_str(report.blocks[0].items[0].value).is_equal("3 sets in upkeep")
+	assert_str(report.blocks[0].heading).is_equal("Damaged equipment")
+	assert_str(report.blocks[0].items[0].value).is_equal("3 sets damaged")
 func test_logistics_reports_actual_reserve_and_damage()->void:
 	var provider=Military.new(null,null)
 	var blocks:=provider._supply_blocks({"military_inventory":{"improvised":7},"damaged_equipment":{"improvised":3}}, {})
