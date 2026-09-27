@@ -32,7 +32,12 @@ func _land(p:Vector2)->bool:
 	var mid:=(home+city)*0.5
 	return p.distance_to(mid)>home.distance_to(city)*0.3
 
+var _processing:Dictionary={}
+
 func before_test()->void:
+	# Remember which singletons were ticking so after_test can put them back.
+	if _processing.is_empty():
+		for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]: _processing[node]=node.is_processing()
 	WorldSimulation.clear()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.reset_for_new_world(74017);GameState.civic_api_enabled=false
@@ -65,8 +70,22 @@ func before_test()->void:
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_land"))
 
 func after_test()->void:
+	# Leave nothing behind for the next suite: the day jump to year 88 lets
+	# ProgressionSystem raise its domain tiers (more workshop lines), and the
+	# armies, officials, court matters and war ledger made here must not leak.
 	CivilizationSystem.set_scout_geography_authority(Callable())
 	Route.clear_cache()
+	GameState.elapsed_days=0
+	MilitaryCampaign.reset_for_new_world()
+	GovernmentPeopleSystem.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world()
+	CivilizationSystem.reset_for_new_world()
+	FoodSystem.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
+	GameState.reset_for_new_world(74017)
+	ProgressionSystem.reset_for_new_world()
+	WorldSimulation.clear()
+	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
 func _train(count:int)->void:
 	MilitaryCampaign.raise_recruits(count)

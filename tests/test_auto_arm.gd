@@ -8,6 +8,8 @@ const Story=preload("res://scripts/hud/military_force_story.gd")
 
 func before_test()->void:
 	GameState.reset_for_new_world(7511);MilitaryCampaign.reset_for_new_world()
+	# Workshop line capacity follows the domain tiers; start them from the new world.
+	ProgressionSystem.reset_for_new_world()
 	GameState.resource_stockpiles["Timber"]=100.0
 	GameState.population_health=1.0
 	GameState.simulation_metrics["labor_efficiency"]=1.0
