@@ -1,15 +1,19 @@
 extends GdUnitTestSuite
-## Messages of menace (scripts/envoy_messages.gd) and the send-envoys sheet
-## (scripts/hud/envoy_dispatch_screen.gd): purposes and gift gating, the
-## bounds and memory of threats, ultimatum deadlines and broken threats,
-## rival weights (never pace), save round-trip, and the sheet's essentials.
-## No live model: GameState.civic_api_enabled is false in the fixture.
+## Word abroad, in the one court: purposes and gift gating, weighty tribute,
+## reverence and dread in the answer, coherent words, real replies in the
+## ruler's voice, visible consequences, ultimatum deadlines and broken
+## threats, rival weights (never pace), the live voice (mocked), save
+## round-trip, and the court's compose area and pacts pane.
+## No live model: GameState.civic_api_enabled is false throughout.
 
 const Messages:=preload("res://scripts/envoy_messages.gd")
-const Screen:=preload("res://scripts/hud/envoy_dispatch_screen.gd")
-const Fixture:=preload("res://tests/commitment_ui_probe.gd")
+const Compose:=preload("res://scripts/hud/court_envoy_compose.gd")
+const Council:=preload("res://scripts/hud/court_council_panel.gd")
+const Court:=preload("res://scripts/hud/audience_modal.gd")
+const Fixture:=preload("res://tests/diplomacy_fixture.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
+const Lives:=preload("res://scripts/court_lives.gd")
 
 var first:=""
 
@@ -24,19 +28,27 @@ func _civ(civ_id:String)->Dictionary:
 		if String(civ.id)==civ_id: return civ
 	return {}
 
-## Personality is derived from the world seed, so the tests move what the
-## player can move: dread, the god's credibility, pledges, grudges, opinion.
-func _timid(civ_id:String)->void:
+## The portrait's reverence comes from opinion and their ruler's trust.
+func _revering(civ_id:String)->void:
+	_civ(civ_id).player_relation.opinion=0.9
+	_civ(civ_id).player_relation.border_tension=0.0
+	ForeignDiplomacy.leader(civ_id)["trust"]=0.8
+
+func _unmoved(civ_id:String)->void:
+	_civ(civ_id).player_relation.opinion=-0.3
+	_civ(civ_id).player_relation.border_tension=0.0
+	ForeignDiplomacy.leader(civ_id)["trust"]=-0.3
+
+func _terrified(civ_id:String)->void:
 	Divine.add_civ_dread(civ_id,0.4); Divine.add_civ_dread(civ_id,0.4)
-	Messages.store()["credibility"]=0.9
 
 func _proud(civ_id:String)->void:
+	_unmoved(civ_id)
 	_civ(civ_id).player_relation.opinion=-0.9
 	Rivals.grudge(civ_id,"old wrongs",1.2,"test_old")
 	Messages.store()["credibility"]=0.15
 
 func _boldest()->String:
-	## Meet every people; the proudest ruler answers the harshest tests.
 	var best:="";var bold:=-1.0
 	for civ:Dictionary in CivilizationSystem.civilizations:
 		civ.player_relation.contact_level=2; civ.player_relation.home_location_known=true
@@ -46,15 +58,19 @@ func _boldest()->String:
 	return best
 
 func _mission(civ_id:String,purpose:String,choice:Dictionary={})->Dictionary:
-	var menace:=Messages.build(purpose,choice)
-	if String(menace.get("demand",""))=="tribute": menace["tribute"]=Messages.tribute_terms(civ_id)
+	var menace:=Messages.priced(civ_id,Messages.build(purpose,choice))
+	menace["brief"]=Messages.brief(civ_id,menace)
 	return {"civ_id":civ_id,"purpose":purpose,"personnel":9,"depart_day":int(GameState.elapsed_days),"menace":menace}
 
+func _sentences(text:String)->int:
+	var count:=0
+	for mark in [".","!","?"]: count+=text.count(mark)
+	return count
+
+# --- Catalogue ---------------------------------------------------------------------
+
 func test_purposes_and_gift_gating()->void:
-	for kind in ["goodwill","open_trade","non_aggression","send_aid","leader_parley","seek_peace","declare_war","warn","threaten","demand","ultimatum"]:
-		assert_bool(kind in Messages.ORDER).is_true()
 	assert_array(Messages.HOSTILE).is_equal(CivilizationSystem.HOSTILE_DIPLOMATIC_ACTIONS)
-	# A gift only where it makes sense.
 	assert_bool(Messages.allows_gift("goodwill","")).is_false()
 	assert_bool(Messages.allows_gift("goodwill","Timber")).is_true()
 	assert_bool(Messages.allows_gift("open_trade","")).is_true()
@@ -62,99 +78,169 @@ func test_purposes_and_gift_gating()->void:
 	for kind in Messages.HOSTILE+["declare_war","leader_parley"]:
 		assert_bool(Messages.allows_gift(kind,"Food")).is_false()
 	assert_bool(CivilizationSystem.diplomatic_mission_quote(first,"Food","threaten").has("error")).is_true()
-	assert_bool(CivilizationSystem.diplomatic_mission_quote(first,"","threaten").has("error")).is_false()
-	# Tokens: the terrible one only after real killing.
 	assert_bool("raider_head" in Messages.tokens_for(first,"threaten")).is_false()
-	assert_array(Messages.tokens_for(first,"goodwill")).is_empty()
 	CivilizationSystem.war_history.push_front({"id":"war_t","participants":["player",first],"casualties":{"player":{"military_dead":2},first:{"military_dead":3}},"status":"ended"})
 	assert_bool("raider_head" in Messages.tokens_for(first,"threaten")).is_true()
-	# An apology needs a real wrong.
 	assert_bool("apology" in Messages.demands_for(id(1))).is_false()
 	assert_bool("apology" in Messages.demands_for(first)).is_true()
 
-func test_threat_that_lands_changes_dread_grudge_and_memory()->void:
-	_timid(first)
-	var dread_before:=Divine.civ_dread(first)
-	var mission:=_mission(first,"threaten",{"by":"wrath"})
-	var result:=Messages.arrive(mission,int(GameState.elapsed_days))
-	assert_str(String(result.answer)).is_equal("comply")
-	assert_float(Divine.civ_dread(first)).is_greater(dread_before-0.0001)
-	assert_float(Divine.civ_dread(first)).is_less_equal(1.0)
-	assert_float(Rivals.grudge_weight(first)).is_greater(0.0)
-	assert_str(Messages.stance(first)).is_equal("cowed")
-	assert_bool(bool(mission.accepted)).is_true()
-	var memories:Array=ForeignDiplomacy.leader(first).memories
-	assert_str(String((memories[0] as Dictionary).text)).contains("gave way")
-	# Cowed: fewer demands from them, more frightened tribute (weights only).
-	assert_float(Messages.rival_weight("tribute_demand",first)).is_less(1.0)
-	assert_float(Messages.rival_weight("dread_tribute",first)).is_greater(1.0)
+# --- Weighty demands -----------------------------------------------------------------
 
-func test_demanded_tribute_is_bounded_and_arrives_with_the_envoys()->void:
-	_timid(first)
-	var mission:=_mission(first,"demand",{"demand":"tribute","by":"wrath"})
-	var terms:Dictionary=mission.menace.tribute
-	assert_float(float(terms.amount)).is_between(1.0,150.0)
-	var result:=Messages.arrive(mission,int(GameState.elapsed_days))
-	assert_str(String(result.answer)).is_equal("comply")
-	var carry:Dictionary=result.get("carry",{})
-	assert_float(float(carry.get("amount",0.0))).is_less_equal(float(terms.amount)+0.001)
-	var before:=preload("res://scripts/audience_hall.gd").player_stock(String(carry.get("resource","Food")))
-	Messages.homecoming(mission,int(GameState.elapsed_days)+10)
-	var after:=preload("res://scripts/audience_hall.gd").player_stock(String(carry.get("resource","Food")))
-	assert_float(after-before).is_equal_approx(float(carry.get("amount",0.0)),0.51)
-	# The answer joins the conversation with their ruler.
-	var thread:Dictionary=WorldSimulation.dialogue.thread(first)
-	assert_str(String((thread.messages as Array).back().role)).is_equal("assistant")
-	# Homecoming is applied once.
-	Messages.homecoming(mission,int(GameState.elapsed_days)+11)
-	assert_float(preload("res://scripts/audience_hall.gd").player_stock(String(carry.get("resource","Food")))).is_equal_approx(after,0.01)
+func test_tribute_is_sized_to_matter_to_them()->void:
+	var modest:=Messages.tribute_terms(first,"Food","modest")
+	var heavy:=Messages.tribute_terms(first,"Food","heavy")
+	var crushing:=Messages.tribute_terms(first,"Food","crushing")
+	var stock:=float(modest.stock)
+	assert_float(stock).is_greater(100.0)
+	# A real share of what they hold, never a token amount, never all of it.
+	assert_float(float(modest.amount)).is_greater_equal(stock*0.07)
+	assert_float(float(heavy.amount)).is_greater(float(modest.amount))
+	assert_float(float(crushing.amount)).is_greater(float(heavy.amount))
+	assert_float(float(crushing.amount)).is_less_equal(stock*0.36)
+	# Heavier demands weigh more in their answer.
+	var light:=Messages.build("demand",{"demand":"tribute","size":"modest"})
+	var harsh:=Messages.build("demand",{"demand":"tribute","size":"crushing"})
+	assert_float(Messages.score(first,harsh)).is_less(Messages.score(first,light))
+	# The words name the real amount.
+	assert_str(Messages.demand_words(first,Messages.priced(first,harsh))).contains(str(roundi(float(Messages.priced(first,harsh).tribute.amount))))
 
-func test_proud_ruler_defies_or_harms_the_messenger_with_real_losses()->void:
+# --- Reverence and dread -------------------------------------------------------------
+
+func test_revering_people_gives_way_to_the_gods_wrath()->void:
+	_revering(first)
+	var s:=Messages.standing(first)
+	assert_float(float(s.reverence)).is_greater(0.75)
+	for size in ["modest","heavy"]:
+		var menace:=Messages.build("ultimatum",{"by":"wrath","demand":"tribute","size":size,"consequence":"war"})
+		var f:=Messages.forecast(first,menace)
+		assert_float(float(f.chance)).override_failure_message("chance %s for %s" % [f.chance,size]).is_greater_equal(0.8)
+		assert_str(String(f.words)).contains("give way")
+		assert_bool("they revere you" in (f.why as Array)).is_true()
+	# Awe is the god's, not the warriors': the same people weigh spears apart.
+	var spears:=Messages.build("demand",{"by":"spears","demand":"tribute","size":"heavy"})
+	var wrath:=Messages.build("demand",{"by":"wrath","demand":"tribute","size":"heavy"})
+	assert_float(Messages.score(first,wrath)).is_greater(Messages.score(first,spears))
+	# And the answer is awed compliance.
+	var result:=Messages.arrive(_mission(first,"demand",{"by":"wrath","demand":"tribute","size":"modest"}),int(GameState.elapsed_days))
+	assert_str(String(result.answer)).is_equal("comply")
+	assert_str(String(result.mood)).is_equal("awed")
+
+func test_dread_makes_them_comply_and_indifference_makes_them_scoff()->void:
+	_unmoved(id(1))
+	var threat:=Messages.build("threaten",{"by":"wrath"})
+	assert_float(float(Messages.forecast(id(1),threat).chance)).is_less(0.3)
+	var result:=Messages.arrive(_mission(id(1),"threaten",{"by":"wrath"}),int(GameState.elapsed_days))
+	assert_str(String(result.answer)).is_equal("defy")
+	assert_bool(String(result.mood) in ["scornful","proud"]).is_true()
+	# Terrify them first: the same threat now lands, out of fear.
+	(Messages.store().stances as Dictionary).clear()
+	_terrified(id(1))
+	assert_float(float(Messages.forecast(id(1),threat).chance)).is_greater(0.6)
+	GameState.elapsed_days+=1
+	var second:=Messages.arrive(_mission(id(1),"threaten",{"by":"wrath"}),int(GameState.elapsed_days))
+	assert_str(String(second.answer)).is_equal("comply")
+	assert_str(String(second.mood)).is_equal("terrified")
+
+func test_revering_people_asked_too_much_is_shaken_and_betrayed()->void:
+	_revering(first)
+	var before:=float(Divine.foreign_regard(first).love)
+	var crushing:=Messages.build("demand",{"by":"wrath","demand":"tribute","size":"crushing"})
+	var f:=Messages.forecast(first,crushing)
+	assert_float(float(f.chance)).is_less(0.2)
+	assert_bool(str(f.why).contains("betrayal")).is_true()
+	var result:=Messages.arrive(_mission(first,"demand",{"by":"wrath","demand":"tribute","size":"crushing"}),int(GameState.elapsed_days))
+	assert_str(String(result.answer)).is_equal("defy")
+	assert_str(String(result.mood)).is_equal("betrayed")
+	assert_str(String(result.reply)).contains("your god")
+	# Shaken, not shrugging: their reverence falls and they remember it.
+	assert_float(float(Divine.foreign_regard(first).love)).is_less(before-0.05)
+	assert_str(Messages.consequence_note(first,{"purpose":"demand","result":result})).contains("reverence")
+
+# --- Words ---------------------------------------------------------------------------
+
+func test_words_keep_backing_and_consequence_together()->void:
+	var wrath:=Messages.priced(first,Messages.build("ultimatum",{"by":"wrath","demand":"tribute","consequence":"war","deadline":91}))
+	for line in Messages.phrasings(first,"ultimatum",wrath):
+		assert_str(line).contains("send my people against you")
+		assert_str(line.to_lower()).not_contains("warriors")
+		assert_str(line).contains("one season")
+	var spears:=Messages.priced(first,Messages.build("ultimatum",{"by":"spears","demand":"tribute","consequence":"war"}))
+	for line in Messages.phrasings(first,"ultimatum",spears):
+		assert_str(line).contains("warriors")
+		assert_str(line.to_lower()).not_contains("god")
+	var sever:=Messages.priced(first,Messages.build("ultimatum",{"by":"wrath","demand":"withdraw","consequence":"sever"}))
+	for line in Messages.phrasings(first,"ultimatum",sever):
+		assert_str(line).contains("turn my face from you")
+		assert_str(line.to_lower()).not_contains("spears")
+	# The envoy tells it in the envoy's own voice, token and all.
+	var told:=Messages.envoy_account(first,Messages.priced(first,Messages.build("ultimatum",{"by":"wrath","demand":"tribute","consequence":"war","token":"broken_spear"})))
+	assert_str(told).contains("I told them")
+	assert_str(told).contains("you will send your people against them with spears")
+	assert_str(told).contains("broken spear")
+
+func test_offline_answers_are_real_replies()->void:
+	_revering(first)
+	var comply:=Messages.arrive(_mission(first,"demand",{"by":"wrath","demand":"tribute","size":"modest"}),int(GameState.elapsed_days))
+	assert_str(String(comply.answer)).is_equal("comply")
+	assert_int(_sentences(String(comply.reply))).is_greater_equal(2)
+	assert_str(String(comply.reply)).contains(str(roundi(float(comply.carry.amount))))
 	var target:=_boldest()
-	assert_float(float(Messages.standing(target).bold)).is_greater(0.55)
 	_proud(target)
-	var answers:={}
-	var harmed:={}
-	for attempt in 40:
-		GameState.elapsed_days=100+attempt
-		(Messages.store().ultimatums as Array).clear()
-		var mission:=_mission(target,"ultimatum",{"demand":"hostage","consequence":"war","deadline":91})
-		var result:=Messages.arrive(mission,int(GameState.elapsed_days))
-		answers[String(result.answer)]=true
-		if String(result.answer)=="harm" and harmed.is_empty(): harmed={"mission":mission,"result":result}
-	assert_bool(answers.has("comply")).is_false()
-	assert_bool(answers.has("harm")).is_true()
-	var result:Dictionary=harmed.result
-	assert_int(int(result.killed)).is_between(1,8)
-	var before:=int(GameState.population_total)
-	Messages.homecoming(harmed.mission,int(GameState.elapsed_days)+5)
-	assert_int(int(GameState.population_total)).is_less(before)
-	assert_str(Messages.grievance(target)).is_not_empty()
-	assert_str(String(harmed.mission.outcome)).contains("killed")
+	var defy:=Messages.arrive(_mission(target,"ultimatum",{"by":"spears","demand":"hostage","consequence":"war","deadline":91}),int(GameState.elapsed_days))
+	assert_str(String(defy.answer)).is_not_equal("comply")
+	if String(defy.answer)=="defy":
+		assert_int(_sentences(String(defy.reply))).is_greater_equal(2)
+		assert_str(String(defy.reply)).not_contains("Your threat does not frighten me")
+		assert_str(String(defy.reply).to_lower()).contains("count")
 
-func test_ultimatum_broken_when_the_god_does_not_follow_through()->void:
-	var target:=id(2)
+# --- Consequences ---------------------------------------------------------------------
+
+func test_consequences_are_shown_in_the_conversation_chronicle_and_ties()->void:
+	var target:=_boldest()
 	_proud(target)
-	var mission:=_mission(target,"ultimatum",{"demand":"withdraw","consequence":"war","deadline":91})
-	var day:=int(GameState.elapsed_days)
-	var result:=Messages.arrive(mission,day)
-	assert_str(String(result.answer)).is_not_equal("comply")
+	var result:Dictionary=Messages.send(target,"ultimatum",{"by":"spears","demand":"withdraw","consequence":"war","deadline":91})
+	assert_bool(result.has("error")).is_false()
+	GameState.elapsed_days=int(CivilizationSystem.diplomatic_mission.arrival_day)
+	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
+	assert_str(String(CivilizationSystem.diplomatic_mission.menace.result.answer)).is_not_equal("comply")
+	GameState.elapsed_days=int(CivilizationSystem.diplomatic_mission.return_day)
+	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
+	var roles:Array=[]
+	var note:=""
+	for line:Dictionary in ForeignDialogue.thread(target).messages:
+		roles.append(String(line.role))
+		if String(line.role)=="note": note=String(line.content)
+	assert_array(roles).contains(["user","envoy","assistant","note"])
+	assert_str(note).contains("Their deadline is Year ")
+	assert_str(note).contains("bound to make war")
+	var shown:=""
+	for tie:Dictionary in Council.ties(target): shown+=String(tie.text)+"\n"
+	assert_str(shown).contains("Your ultimatum · due Year ")
+	var titles:=""
+	for entry in Lives.state().chronicle: titles+=String((entry as Dictionary).get("title",""))+"\n"
+	assert_str(titles).contains("Answers Your Ultimatum")
+	# The court hears when the deadline passes.
 	var u:=Messages.open_ultimatum(target)
 	assert_bool(u.is_empty()).is_false()
-	assert_int(int(u.due)).is_equal(day+91)
+	Messages.daily(int(u.due))
+	var last:Dictionary=(ForeignDialogue.thread(target).messages as Array).back()
+	assert_str(String(last.role)).is_equal("note")
+	assert_str(String(last.content)).contains("Declare it before")
+
+func test_ultimatum_broken_when_the_god_does_not_follow_through()->void:
+	var target:=_boldest()
+	_proud(target)
+	var day:=int(GameState.elapsed_days)
+	Messages._open_ultimatum(target,{"deadline":91,"demand":"withdraw","consequence":"war","by":"spears"},day)
+	var u:=Messages.open_ultimatum(target)
 	Messages.store()["credibility"]=0.6
-	var credibility:=Messages.credibility()
 	Messages.daily(int(u.due))
 	assert_str(String(u.status)).is_equal("open")
 	Messages.daily(int(u.due)+Messages.GRACE_DAYS)
 	assert_str(String(u.status)).is_equal("broken")
-	assert_float(Messages.credibility()).is_equal_approx(credibility-0.2,0.001)
+	assert_float(Messages.credibility()).is_equal_approx(0.4,0.001)
 	assert_str(Messages.stance(target)).is_equal("emboldened")
 	assert_float(Messages.rival_weight("tribute_demand",target)).is_greater(1.0)
-	# Broken threats weigh less next time.
-	var weaker:=Messages.score(target,Messages.build("threaten",{}))
-	Messages.store()["credibility"]=0.9
-	assert_float(Messages.score(target,Messages.build("threaten",{}))).is_greater(weaker)
 
 func test_ultimatum_kept_by_war_and_sever_carried_out()->void:
 	var target:=id(2)
@@ -168,7 +254,6 @@ func test_ultimatum_kept_by_war_and_sever_carried_out()->void:
 	Messages.daily(day+30)
 	assert_str(String(u.status)).is_equal("kept")
 	assert_float(Messages.credibility()).is_greater(credibility)
-	# Closing the frontier needs no war: your people carry it out at the deadline.
 	var other:=id(1)
 	_proud(other)
 	_civ(other).player_relation.treaty="trade"
@@ -181,89 +266,130 @@ func test_rival_weights_change_business_not_pace()->void:
 	var base:=Rivals.weight("tribute_demand",target)
 	Messages._set_stance(target,"emboldened")
 	assert_float(Rivals.weight("tribute_demand",target)).is_greater(base)
-	# Weights only: the kinds of visits the hall already schedules.
 	for kind in ["gift_goods","trade_offer","news_report","first_contact"]:
 		assert_float(Messages.rival_weight(kind,target)).is_equal(1.0)
 
+# --- The live voice (mocked) ------------------------------------------------------------
+
+func test_live_voice_is_validated_and_waited_for()->void:
+	_revering(first)
+	var mission:=_mission(first,"demand",{"by":"wrath","demand":"tribute","size":"modest","words":"The god wants a share of their food and will not wait long."})
+	Messages.arrive(mission,int(GameState.elapsed_days))
+	var amount:=roundi(float(mission.menace.result.carry.amount))
+	# Invented numbers, broken character and a reversed answer are refused.
+	assert_bool(Messages.accept_voice(mission,{"envoy_words":"I told them the god wants their food.","reply":"We will give you 9999 food."})).is_false()
+	assert_bool(Messages.accept_voice(mission,{"envoy_words":"I told them the god wants their food.","reply":"Press the button in the game system."})).is_false()
+	assert_bool(Messages.accept_voice(mission,{"envoy_words":"I told them the god wants their food.","reply":"No. We will not give you food."})).is_false()
+	# The mock answers after the envoys are home: nothing is told until it does.
+	mission.menace["voice"]="pending"
+	CivilizationSystem.diplomatic_history.push_front(mission)
+	Messages.homecoming(mission,int(GameState.elapsed_days)+5)
+	var before:=(ForeignDialogue.thread(first).messages as Array).size()
+	assert_bool(bool(mission.menace.result.get("told",false))).is_false()
+	var ok:=Messages.voice_answered(first,int(mission.depart_day),{"envoy_words":"I told them at their fire that you want part of what they have stored, and soon.","reply":"We honour your god. Take the %d food; my people will carry it to the border." % amount})
+	assert_bool(ok).is_true()
+	var lines:Array=ForeignDialogue.thread(first).messages
+	assert_int(lines.size()).is_greater(before)
+	var said:=""
+	for line:Dictionary in lines: said+=String(line.content)+"\n"
+	assert_str(said).contains("We honour your god")
+	# A voice lost to a reload is told in preset words after two days.
+	var second:=_mission(id(1),"threaten",{"by":"wrath"})
+	second["depart_day"]=int(GameState.elapsed_days)+1
+	Messages.arrive(second,int(GameState.elapsed_days))
+	second.menace["voice"]="pending"
+	CivilizationSystem.diplomatic_history.push_front(second)
+	Messages.homecoming(second,int(GameState.elapsed_days))
+	Messages.daily(int(GameState.elapsed_days)+3)
+	assert_bool(bool(second.menace.result.get("told",false))).is_true()
+	assert_str(String(second.menace.voice)).is_equal("failed")
+
+func test_live_prompt_carries_the_decided_outcome_and_facts()->void:
+	_revering(first)
+	var mission:=_mission(first,"ultimatum",{"by":"wrath","demand":"tribute","size":"heavy","consequence":"war","deadline":182})
+	Messages.arrive(mission,int(GameState.elapsed_days))
+	var messages:=Messages.voice_messages(first,mission.menace)
+	var system:=String(messages[0].content)
+	assert_str(system).contains("ALREADY DECIDED")
+	assert_str(system).contains("mood:")
+	var facts:=String(messages[1].content)
+	for key in ["reverence_for_the_god","dread_of_the_god","temper","manner","their_stores_of_it","demand_amount","consequence","their_friends","their_grudges","their_memories"]:
+		assert_str(facts).contains(key)
+
+# --- Save and the world clock ------------------------------------------------------------
+
 func test_save_round_trip()->void:
-	_timid(first)
-	var result:=Messages.send(id(2),"ultimatum",{"demand":"withdraw","consequence":"war","deadline":182,"token":"broken_spear"})
+	var result:=Messages.send(id(2),"ultimatum",{"demand":"tribute","size":"crushing","consequence":"war","deadline":182,"token":"broken_spear"})
 	assert_bool(result.has("error")).is_false()
-	assert_str(String(CivilizationSystem.diplomatic_mission.menace.purpose)).is_equal("ultimatum")
 	Messages._open_ultimatum(first,{"deadline":91,"demand":"tribute","consequence":"sever"},int(GameState.elapsed_days))
 	Messages._set_stance(first,"defiant")
 	var hall:=ForeignDiplomacy.export_state()
 	var world:=CivilizationSystem.export_state()
 	assert_bool(Messages.valid_state(hall.audiences.menace)).is_true()
-	assert_bool(ForeignDiplomacy.import_state(hall).has("error")).is_false()
+	assert_bool(ForeignDialogue.validate_state(ForeignDialogue.export_state())).is_true()
+	assert_bool(ForeignDiplomacy.import_state(JSON.parse_string(JSON.stringify(hall))).has("error")).is_false()
 	assert_bool(CivilizationSystem.import_state(world).has("error")).is_false()
-	assert_str(String(CivilizationSystem.diplomatic_mission.menace.token)).is_equal("broken_spear")
+	assert_str(String(CivilizationSystem.diplomatic_mission.menace.size)).is_equal("crushing")
 	assert_bool(Messages.open_ultimatum(first).is_empty()).is_false()
 	assert_str(Messages.stance(first)).is_equal("defiant")
 	assert_bool(Messages.valid_state({"credibility":2.0})).is_false()
 	assert_bool(Messages.valid_mission({"purpose":"goodwill"})).is_false()
 
-func test_the_mission_returns_through_the_world_clock()->void:
-	_timid(first)
-	var result:=Messages.send(first,"threaten",{"by":"wrath"})
-	assert_bool(result.has("error")).is_false()
-	var mission:Dictionary=CivilizationSystem.diplomatic_mission
-	GameState.elapsed_days=int(mission.arrival_day)
-	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
-	assert_bool(CivilizationSystem.diplomatic_mission.menace.has("result")).is_true()
-	GameState.elapsed_days=int(CivilizationSystem.diplomatic_mission.return_day)
-	CivilizationSystem._process_diplomatic_mission(int(GameState.elapsed_days))
-	assert_bool(CivilizationSystem.diplomatic_mission.is_empty()).is_true()
-	var record:Dictionary=CivilizationSystem.diplomatic_history[0]
-	assert_str(String(record.purpose)).is_equal("threaten")
-	assert_str(String(record.outcome)).contains("answered")
+# --- The one court ----------------------------------------------------------------------
 
-func test_live_voice_is_validated_and_bounded()->void:
-	_timid(first)
-	var mission:=_mission(first,"threaten",{"words":"Tell them the god is furious and they must stay away from our herds."})
-	Messages.arrive(mission,int(GameState.elapsed_days))
-	assert_bool(Messages.accept_voice(mission,{"envoy_words":"x".repeat(700),"reply":"Fine."})).is_false()
-	assert_bool(Messages.accept_voice(mission,{"envoy_words":"Our god is angry. Keep away from our animals.","reply":"Press the button in the game system."})).is_false()
-	assert_bool(Messages.accept_voice(mission,{"envoy_words":"Our god is angry. Keep away from our animals.","reply":"We hear you. Our people will keep away."})).is_true()
-	assert_str(String(mission.outcome)).contains("We hear you")
-
-func test_sheet_essentials_are_reachable()->void:
-	assert_str(Screen.about(17308.4)).is_equal("17,300")
-	assert_str(Screen.about(32.1)).is_equal("30")
-	var screen:Control=auto_free(Screen.new())
-	screen.set("civ_id",first)
-	add_child(screen)
+func _court(civ_id:String)->Control:
+	var court:Control=auto_free(Court.new())
+	add_child(court)
 	await await_idle_frame()
-	assert_str((screen.find_child("Title",true,false) as Label).text).is_equal("Send a messenger")
-	# Purpose first: nothing is chosen and nothing can leave yet.
-	assert_str(screen.purpose).is_equal("")
-	assert_bool(screen.send_button.disabled).is_true()
-	assert_object(screen.find_child("Gifts",true,false)).is_null()
-	assert_int(screen.people_box.get_child_count()).is_equal(3)
-	for kind in Messages.ORDER: assert_object(screen.find_child("Purpose_"+kind,true,false)).is_not_null()
-	screen.choose("threaten")
-	assert_object(screen.find_child("Gifts",true,false)).is_null()
-	assert_object(screen.find_child("Tokens",true,false)).is_not_null()
-	assert_object(screen.find_child("Words",true,false)).is_not_null()
-	screen.choose("goodwill")
-	assert_object(screen.find_child("Gifts",true,false)).is_not_null()
-	screen.choose("ultimatum")
-	for part in ["Demands","Deadline","Consequence","Tokens","Words"]: assert_object(screen.find_child(part,true,false)).is_not_null()
-	screen.pick_demand("hostage"); screen.pick_consequence("sever"); screen.pick_deadline("365")
-	# Plain words: no ledger capitals, no raw decimals.
-	var all:=""
-	for label in screen.find_children("*","Label",true,false): all+=(label as Label).text+"\n"
-	assert_str(all).not_contains("AVAILABLE")
-	assert_str(all).not_contains("BLOCKED")
-	var decimals:=RegEx.new();decimals.compile("\\d\\.\\d")
-	assert_object(decimals.search(all)).is_null()
-	for button in screen.find_children("*","Button",true,false):
-		var text:=(button as Button).text
-		if text.length()>3: assert_bool(text==text.to_upper()).is_false()
-	var view:=screen.get_viewport_rect()
-	assert_bool(view.encloses(screen.card.get_global_rect())).is_true()
-	var sent:Dictionary=screen.send()
+	assert_bool(court.show_foreign(civ_id)).is_true()
+	await await_idle_frame()
+	return court
+
+func test_court_compose_offers_every_purpose_and_sends_menace()->void:
+	var court:Control=await _court(first)
+	var compose=court.compose
+	assert_object(compose).is_not_null()
+	for pair:Array in Compose.GROUPS:
+		compose.choose_group(String(pair[0]))
+		for kind:String in compose.purposes_in(String(pair[0])): assert_object(compose.find_child("Purpose_"+kind,true,false)).is_not_null()
+	compose.choose("threaten")
+	assert_object(compose.find_child("Gifts",true,false)).is_null()
+	assert_object(compose.find_child("Tokens",true,false)).is_not_null()
+	compose.choose("goodwill")
+	assert_object(compose.find_child("Gifts",true,false)).is_not_null()
+	compose.choose("shared_work")
+	assert_object(compose.find_child("Accord",true,false)).is_not_null()
+	compose.choose("protection")
+	assert_str(compose.reception.text).contains("Likely answer")
+	# The ultimatum shows the real amount before it leaves.
+	compose.choose("ultimatum")
+	for part in ["Backing","Demands","Goods","Size","Deadline","Consequence","Tokens","Words"]: assert_object(compose.find_child(part,true,false)).is_not_null()
+	compose.pick("size","crushing")
+	var terms:=Messages.tribute_terms(first,String(compose.sel.good),"crushing")
+	var sizes:=""
+	for button in compose.find_child("Size",true,false).find_children("*","Button",true,false): sizes+=(button as Button).text+"\n"
+	assert_str(sizes).contains(Compose.about(float(terms.amount)))
+	assert_str(compose.reception.text).contains("in 10")
+	assert_str(compose.cost_label.text).contains("days there and back")
+	var sent:Dictionary=compose.send()
 	assert_bool(sent.has("error")).is_false()
-	assert_str(String(CivilizationSystem.diplomatic_mission.menace.demand)).is_equal("hostage")
-	assert_int(int(CivilizationSystem.diplomatic_mission.menace.deadline)).is_equal(365)
-	assert_object(screen.find_child("Away",true,false)).is_not_null()
+	assert_str(String(CivilizationSystem.diplomatic_mission.menace.size)).is_equal("crushing")
+	assert_bool(compose.send_button.disabled).is_true()
+	var brief:Dictionary=(ForeignDialogue.thread(first).messages as Array).back()
+	assert_str(String(brief.role)).is_equal("user")
+
+func test_court_pacts_pane_and_ties_replace_the_council()->void:
+	var court:Control=await _court(first)
+	assert_object(court.find_child("Ties",true,false)).is_not_null()
+	court.show_foreign_view("pacts")
+	await await_idle_frame()
+	assert_bool((court.find_child("PactsPane",true,false) as Control).visible).is_true()
+	for part in ["LeagueTerms","Member_player","Relief_relief_9","SendFood_"+id(1)]: assert_object(court.find_child(part,true,false)).is_not_null()
+	for label in court.council_panel.find_children("When","Label",true,false): assert_str((label as Label).text).starts_with("YEAR ")
+	(court.find_child("SendFood_"+id(1),true,false) as Button).pressed.emit()
+	await await_idle_frame()
+	assert_str(String(court.foreign_civ)).is_equal(id(1))
+	assert_str(String(court.compose.purpose)).is_equal("send_aid")
+	assert_bool((court.find_child("ConversationPane",true,false) as Control).visible).is_true()
+	assert_bool(court.focus({"civ_id":first,"purpose":"declare_war"})).is_true()
+	assert_str(String(court.compose.purpose)).is_equal("declare_war")

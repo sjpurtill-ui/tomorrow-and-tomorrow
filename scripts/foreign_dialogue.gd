@@ -169,6 +169,8 @@ func _request(id:String,extra_system:String="",repairing:bool=false,traveling:bo
 	var messages:Array=[{"role":"system","content":PROMPT+" The Timber amounts are paid only by the player, not by each side. Do not invent an equal matching contribution or specific foreign stores. "+COMMITMENT_PROMPT+" "+EXCHANGE_PROMPT},{"role":"system","content":"KNOWN GAME DATA: "+JSON.stringify(known_context(id))}]
 	if not extra_system.is_empty():messages.append({"role":"system","content":extra_system})
 	for record:Dictionary in thread(id).messages:
+		# Court notes (what is in motion) are for the ruler's eyes, not the model's.
+		if String(record.role)=="note":continue
 		messages.append({"role":"user" if String(record.role) in ["user","envoy"] else "assistant","content":record.content})
 	var http:=HTTPRequest.new(); add_child(http); http.timeout=45; http.max_redirects=0; http.body_size_limit=131072
 	pending[id]=http; thread(id).status="The leader is choosing their words again…" if repairing else "Waiting for the leader's reply…"; thread(id).retryable=false
@@ -527,7 +529,7 @@ func validate_state(data:Variant)->bool:
 			if not t.staged_result is Dictionary:return false
 			if not t.staged_result.is_empty() and not _valid_response(t.staged_result,true,String(t.get("private_brief",""))):return false
 		for record in t.messages:
-			if not record is Dictionary or record.get("role","") not in ["user","envoy","assistant"] or not record.get("content") is String or record.content.length()>1800: return false
+			if not record is Dictionary or record.get("role","") not in ["user","envoy","assistant","note"] or not record.get("content") is String or record.content.length()>1800: return false
 			if not (record.get("day") is int or record.get("day") is float) or not is_finite(float(record.day)) or float(record.day)<-1: return false
 	return true
 

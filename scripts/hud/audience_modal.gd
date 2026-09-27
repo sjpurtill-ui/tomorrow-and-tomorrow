@@ -127,6 +127,9 @@ var _civic_clock:=0.0
 # The envoy channel to a foreign ruler.
 var foreign_civ:=""
 var foreign_refs:Dictionary={}
+## The one compose area for word abroad, and the pacts-and-leagues pane.
+var compose:PanelContainer
+var council_panel:ScrollContainer
 var foreign_count:=-1
 var _foreign_clock:=0.0
 
@@ -2079,7 +2082,11 @@ func focus(target:Dictionary)->bool:
 	if target.has("audience_id"):
 		if receive(String(target.audience_id)):return true
 		show_court();return false
-	if target.has("civ_id"):return show_foreign(String(target.civ_id))
+	if target.has("civ_id"):
+		var shown:=show_foreign(String(target.civ_id))
+		if shown and String(target.get("view",""))=="pacts":show_foreign_view("pacts")
+		if shown and String(target.get("purpose",""))!="" and is_instance_valid(compose):compose.choose(String(target.purpose),target.get("extra",{}) if target.get("extra") is Dictionary else {})
+		return shown
 	if target.has("settlement_id"):
 		var leader:=GovernmentPeopleSystem.settlement_leader(String(target.settlement_id))
 		if leader.is_empty():
@@ -2666,7 +2673,15 @@ func show_foreign(civ_id:String)->bool:
 	var center:=VBoxContainer.new();center.size_flags_horizontal=Control.SIZE_EXPAND_FILL;center.add_theme_constant_override("separation",6);stage.add_child(center)
 	var status:=Tokens.make_label("",13,Tokens.TEXT_SOFT);status.name="ForeignStatus";status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=3
 	center.add_child(status);foreign_refs["status"]=status
-	var hall_panel:=PanelContainer.new();hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	# One place for everything between you and them: the conversation, or the
+	# pacts and leagues that bind you (the old Council of Nations).
+	var tabs:=HBoxContainer.new();tabs.name="ForeignTabs";tabs.add_theme_constant_override("separation",6);center.add_child(tabs)
+	for pair:Array in [["conversation","Conversation"],["pacts","Pacts and leagues"]]:
+		var tab:=Button.new();tab.name="Tab_"+String(pair[0]);tab.text=String(pair[1]);tab.focus_mode=Control.FOCUS_NONE;tab.custom_minimum_size.y=30
+		tab.add_theme_font_size_override("font_size",14);tab.pressed.connect(show_foreign_view.bind(String(pair[0])));tabs.add_child(tab)
+		foreign_refs["tab_"+String(pair[0])]=tab
+	var hall_panel:=PanelContainer.new();hall_panel.name="ConversationPane";hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	foreign_refs["conversation"]=hall_panel
 	var hall_style:=Tokens.flat(Tokens.FIELD_BG if Tokens.is_light() else Color("0a1316"),Tokens.BORDER_SOFT,1,8,0)
 	hall_style.content_margin_left=14;hall_style.content_margin_right=10;hall_style.content_margin_top=12;hall_style.content_margin_bottom=10
 	hall_panel.add_theme_stylebox_override("panel",hall_style);center.add_child(hall_panel)
@@ -2676,11 +2691,17 @@ func show_foreign(civ_id:String)->bool:
 	transcript=VBoxContainer.new();transcript.size_flags_horizontal=Control.SIZE_EXPAND_FILL;transcript.add_theme_constant_override("separation",10)
 	transcript_scroll.add_child(transcript)
 	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
-	column.add_child(_build_brief_row(civ_id))
-	column.add_child(_build_offline_briefs())
+	council_panel=preload("res://scripts/hud/court_council_panel.gd").new();council_panel.civ_id=civ_id
+	council_panel.compose_request.connect(_on_compose_request)
+	var council_frame:=PanelContainer.new();council_frame.name="PactsPane";council_frame.size_flags_vertical=Control.SIZE_EXPAND_FILL;council_frame.visible=false
+	council_frame.add_theme_stylebox_override("panel",hall_style.duplicate());council_frame.add_child(council_panel);center.add_child(council_frame)
+	foreign_refs["pacts"]=council_frame
 	column.add_child(_build_exchange_panel(civ_id))
-	column.add_child(_build_terms_row(civ_id))
+	compose=preload("res://scripts/hud/court_envoy_compose.gd").new();compose.civ_id=civ_id
+	compose.sent.connect(func(message:String)->void:foreign_refs["message"]=message;_refresh_foreign())
+	column.add_child(compose)
 	body.add_child(_build_foreign_footer())
+	show_foreign_view("conversation")
 	if not ForeignDialogue.changed.is_connected(_on_foreign_changed):ForeignDialogue.changed.connect(_on_foreign_changed)
 	_fit()
 	_refresh_foreign()
@@ -2698,9 +2719,18 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 	flag.custom_minimum_size=Vector2(50,58);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
 	words.add_child(Tokens.make_label("THE ENVOY CHANNEL · YOU SEND WORD ABROAD",12,Tokens.INK_MUTED,.12))
-	var title:=Tokens.make_label(("WORD TO %s OF %s" % [String(leader.get("name","their ruler")),String(civ.get("name",civ_id))]).to_upper(),24 if _compact() else 30,Tokens.INK)
+	var title:=Tokens.make_label("Word to %s of %s" % [String(leader.get("name","their ruler")),String(civ.get("name",civ_id))],24 if _compact() else 30,Tokens.INK)
 	title.name="HeraldTitle";title.add_theme_font_override("font",Tokens.font("display"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
-	var sub:=Tokens.make_label("You set the brief; your envoy chooses the words and carries them there and back.",14,Tokens.BODY);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
+	var sub:=Tokens.make_label("Everything between you and them happens here: what you say, what you offer, and what you threaten.",14,Tokens.BODY);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
+	# Address another ruler without leaving the court.
+	var others:=HFlowContainer.new();others.name="OtherPeoples";others.add_theme_constant_override("h_separation",6);words.add_child(others)
+	for entry in Roster.foreign_peoples():
+		var other:=String(entry.civ_id)
+		var pick:=Button.new();pick.name="Address_"+other;pick.focus_mode=Control.FOCUS_NONE;pick.icon=Identity.foreign(other).texture;pick.expand_icon=true
+		pick.custom_minimum_size=Vector2(34,34);pick.tooltip_text="%s of %s" % [String(entry.leader),String(entry.name)];pick.disabled=other==civ_id
+		pick.add_theme_stylebox_override("normal",Tokens.flat(Tokens.PAPER_RAISED,Tokens.GOLD if other==civ_id else Tokens.RULE,1,2,2))
+		pick.add_theme_stylebox_override("disabled",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,2,2,2))
+		pick.pressed.connect(func()->void:show_foreign(other));others.add_child(pick)
 	# The court looks on from the scene here too.
 	var officials:Array=Hall._officials()
 	var seats:=VBoxContainer.new();seats.name="CourtBench";seats.add_theme_constant_override("separation",4);seats.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -2780,68 +2810,43 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 		var key:=Tokens.make_label(String(row[0]),12,Tokens.MUTED);key.custom_minimum_size.x=96;line.add_child(key)
 		var value:=Tokens.make_label(String(row[1]),13,row[2]);value.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value.clip_text=true;value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;value.tooltip_text=String(row[1]);value.mouse_filter=Control.MOUSE_FILTER_PASS;line.add_child(value)
+	# What binds you (the old Council of Nations ties) and what menace set moving.
+	var ties:Array=preload("res://scripts/hud/court_council_panel.gd").ties(civ_id)
+	if not ties.is_empty():
+		var tie_box:=VBoxContainer.new();tie_box.name="Ties";tie_box.add_theme_constant_override("separation",3);column.add_child(tie_box)
+		tie_box.add_child(Tokens.make_label("WHAT BINDS YOU",11,Tokens.TEXT_DIM,.1))
+		for tie:Dictionary in ties:
+			var tone:Color={"danger":Tokens.RED,"good":Tokens.GREEN,"gold":Tokens.GOLD}.get(String(tie.get("tone","")),Tokens.BODY)
+			var chip:=PanelContainer.new();chip.mouse_filter=Control.MOUSE_FILTER_PASS;chip.tooltip_text=String(tie.get("tip",""))
+			var chip_style:=Tokens.flat(Tokens.PAPER_RAISED,tone,0,2,0);chip_style.border_width_left=3;chip_style.content_margin_left=8;chip_style.content_margin_right=6;chip_style.content_margin_top=2;chip_style.content_margin_bottom=2
+			chip.add_theme_stylebox_override("panel",chip_style)
+			var words:=Tokens.make_label(String(tie.get("text","")),13,Tokens.INK);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(words)
+			tie_box.add_child(chip)
 	return column
 
-func _build_brief_row(civ_id:String)->Control:
-	var row:=HBoxContainer.new();row.name="SpeechRow";row.add_theme_constant_override("separation",8)
-	speech_input=LineEdit.new();speech_input.name="SpeechInput";speech_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	speech_input.custom_minimum_size.y=42;speech_input.max_length=1500;speech_input.add_theme_font_size_override("font_size",16)
-	speech_input.placeholder_text="Brief your envoy: what you want, what you will not give, how much they may bend…"
-	speech_input.text=String(ForeignDialogue.thread(civ_id).get("next_brief",""))
-	speech_input.text_changed.connect(func(value:String)->void:ForeignDialogue.thread(civ_id)["next_brief"]=value)
-	speech_input.text_submitted.connect(func(_t:String):_speak())
-	row.add_child(speech_input)
-	speak_button=Button.new();speak_button.name="Speak";speak_button.text="SEND ENVOY";speak_button.custom_minimum_size=Vector2(130,42)
-	speak_button.add_theme_font_size_override("font_size",15);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	speak_button.pressed.connect(_speak);row.add_child(speak_button)
-	var delegates:=Button.new();delegates.name="SendDelegates";delegates.text="SEND DELEGATES";delegates.custom_minimum_size=Vector2(150,42)
-	delegates.tooltip_text="A first journey to establish an audience. No agreement is proposed."
-	delegates.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	delegates.pressed.connect(func()->void:
-		var result:=WorldSimulation.diplomacy.send_audience(civ_id)
-		foreign_refs["message"]=String(result.get("error","Delegates depart to establish an audience."))
-		_refresh_foreign())
-	row.add_child(delegates);foreign_refs["delegates"]=delegates
-	var retry:=Button.new();retry.name="RetryReply";retry.text="Retry reply";retry.custom_minimum_size=Vector2(0,42)
-	retry.pressed.connect(func()->void:ForeignDialogue.retry(civ_id);_refresh_foreign())
-	row.add_child(retry);foreign_refs["retry"]=retry
-	var set_aside:=Button.new();set_aside.name="SetAsideReply";set_aside.text="Set aside";set_aside.custom_minimum_size=Vector2(0,42)
-	set_aside.tooltip_text="Set the unanswered exchange aside. No agreement was made."
-	set_aside.pressed.connect(func()->void:ForeignDialogue.set_aside_reply(civ_id);_refresh_foreign())
-	row.add_child(set_aside);foreign_refs["set_aside"]=set_aside
-	return row
+func show_foreign_view(view:String)->void:
+	## "conversation" or "pacts": the two panes of the one foreign view.
+	var conversation:=foreign_refs.get("conversation") as Control
+	var pacts:=foreign_refs.get("pacts") as Control
+	if conversation==null or pacts==null:return
+	conversation.visible=view!="pacts";pacts.visible=view=="pacts"
+	if is_instance_valid(council_panel) and view=="pacts":council_panel.refresh(true)
+	foreign_refs["view"]=view
+	for key:String in ["conversation","pacts"]:
+		var tab:=foreign_refs.get("tab_"+key) as Button
+		if tab==null:continue
+		var on:=key==view
+		var style:=Tokens.flat(Tokens.GOLD_WASH if on else Tokens.PAPER_RAISED,Tokens.GOLD if on else Tokens.RULE,1,2,0)
+		style.content_margin_left=14;style.content_margin_right=14
+		if on:style.border_width_bottom=3
+		for state:String in ["normal","hover","pressed"]:tab.add_theme_stylebox_override(state,style)
+		for key2:String in ["font_color","font_hover_color","font_pressed_color"]:tab.add_theme_color_override(key2,Tokens.GOLD_BRIGHT if on else Tokens.INK)
 
-func _build_offline_briefs()->Control:
-	## Without a live voice, briefs are chosen from what lies between the peoples.
-	var box:=HFlowContainer.new();box.name="OfflineBriefs";box.add_theme_constant_override("h_separation",8);box.add_theme_constant_override("v_separation",6)
-	box.visible=false;foreign_refs["offline"]=box
-	return box
-
-func _refresh_offline_briefs(civ_id:String,show:bool,away:bool)->void:
-	var box:=foreign_refs.get("offline") as HFlowContainer
-	if box==null:return
-	box.visible=show
-	var choices:Array[Dictionary]=[]
-	if show:choices.assign(ForeignDialogue.offline_choices(civ_id))
-	var signature:="%s|%s|%s" % [str(show),str(away),JSON.stringify(choices)]
-	if String(foreign_refs.get("offline_sig",""))==signature:return
-	foreign_refs["offline_sig"]=signature
-	for child in box.get_children():child.queue_free()
-	if not show:return
-	var lead:=Tokens.make_label("BRIEF YOUR ENVOY",11,Tokens.TEXT_DIM,.12);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;box.add_child(lead)
-	for choice:Dictionary in choices:
-		var button:=Button.new();button.name="Brief_"+String(choice.get("id",""));button.text=String(choice.get("label",""));button.custom_minimum_size=Vector2(0,34)
-		button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());button.focus_mode=Control.FOCUS_NONE
-		var cost:Dictionary=choice.get("cost",{}) if choice.get("cost") is Dictionary else {}
-		button.tooltip_text=("Your envoy carries %d %s." % [roundi(float(cost.amount)),String(cost.resource)]) if not cost.is_empty() else "Your envoy carries these words there and back."
-		button.disabled=away or not bool(choice.get("enabled",true))
-		if not bool(choice.get("enabled",true)):button.tooltip_text=String(choice.get("reason",""))
-		var id:=String(choice.get("id",""))
-		button.pressed.connect(func()->void:
-			var sent:=ForeignDialogue.ask_offline(civ_id,id)
-			foreign_refs["message"]="Your envoy sets out with your brief. The answer comes back with them." if sent else String(ForeignDialogue.thread(civ_id).get("status",""))
-			_refresh_foreign())
-		box.add_child(button)
+func _on_compose_request(civ_id:String,purpose:String,extra:Dictionary)->void:
+	## A promise called upon turns the compose area to the right ruler and purpose.
+	if civ_id!=foreign_civ and not show_foreign(civ_id):return
+	show_foreign_view("conversation")
+	if is_instance_valid(compose):compose.choose(purpose,extra)
 
 func _build_exchange_panel(civ_id:String)->Control:
 	## The standing exchange on the table: the concrete terms, who agreed to
@@ -2900,60 +2905,6 @@ func _refresh_exchange(id:String,leader:Dictionary)->void:
 		seal.text="Seal this agreement" if stance=="accept" else "Accept their terms and seal"
 		seal.tooltip_text=blocker if not blocker.is_empty() else "Your consent binds both peoples. Traders carry each portion; keeping it or breaking it is remembered."
 
-func _build_terms_row(civ_id:String)->Control:
-	## Terms the envoys can carry, with the council's reading of their reception.
-	var row:=HBoxContainer.new();row.name="TermsRow";row.add_theme_constant_override("separation",8)
-	var lead:=Tokens.make_label("TERMS",11,Tokens.TEXT_DIM,.12);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(lead)
-	var accord:=OptionButton.new();accord.name="Accord";accord.focus_mode=Control.FOCUS_NONE
-	for definition:Dictionary in ForeignDiplomacy.ACCORDS.values():accord.add_item(String(definition.name))
-	accord.select(maxi(0,ForeignDiplomacy.ACCORDS.keys().find(String(WorldSimulation.diplomacy.situation(civ_id).get("priority","")))))
-	row.add_child(accord);foreign_refs["accord"]=accord
-	var tone:=OptionButton.new();tone.name="Tone";tone.focus_mode=Control.FOCUS_NONE
-	for text in ForeignDiplomacy.TONES.values():tone.add_item(String(text))
-	row.add_child(tone);foreign_refs["tone"]=tone
-	var generous:=CheckBox.new();generous.name="Generous";generous.text="Larger offer";generous.tooltip_text="12 Timber instead of 4: better reception, smaller research benefit for you."
-	row.add_child(generous);foreign_refs["generous"]=generous
-	for choice:OptionButton in [accord,tone]:choice.item_selected.connect(func(_i:int)->void:_refresh_foreign())
-	generous.toggled.connect(func(_on:bool)->void:_refresh_foreign())
-	var forecast:=Tokens.make_label("",13,Tokens.BODY_2);forecast.name="Forecast";forecast.size_flags_horizontal=Control.SIZE_EXPAND_FILL;forecast.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	forecast.clip_text=true;forecast.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;forecast.mouse_filter=Control.MOUSE_FILTER_PASS
-	row.add_child(forecast);foreign_refs["forecast"]=forecast
-	var send:=Button.new();send.name="SendTerms";send.text="Send these terms";send.custom_minimum_size=Vector2(0,34);send.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	send.pressed.connect(func()->void:
-		var result:Dictionary=WorldSimulation.diplomacy.send(civ_id,_selected_accord(),_selected_tone(),generous.button_pressed)
-		foreign_refs["message"]=String(result.get("error","Proposal sent. Envoys must return with an answer before an agreement takes effect."))
-		_refresh_foreign())
-	row.add_child(send);foreign_refs["send"]=send
-	var draft:=Button.new();draft.name="ReviewDraft";draft.text="Their draft";draft.custom_minimum_size=Vector2(0,34)
-	draft.tooltip_text="Take up the terms drafted in your last exchange."
-	draft.pressed.connect(func()->void:
-		var proposed:Dictionary=ForeignDialogue.thread(civ_id).get("draft",{})
-		if proposed.is_empty():return
-		if proposed.has("commitment"):_open_commitments(civ_id,proposed.commitment as Dictionary);return
-		accord.select(maxi(0,ForeignDiplomacy.ACCORDS.keys().find(String(proposed.get("accord","")))))
-		tone.select(maxi(0,ForeignDiplomacy.TONES.keys().find(String(proposed.get("tone","")))))
-		generous.set_pressed_no_signal(bool(proposed.get("generous",false)))
-		_refresh_foreign())
-	row.add_child(draft);foreign_refs["draft"]=draft
-	var treaties:=Button.new();treaties.name="Treaties";treaties.text="Pacts & leagues";treaties.custom_minimum_size=Vector2(0,34)
-	treaties.tooltip_text="Protection, leagues and relief: the promises between peoples."
-	treaties.pressed.connect(func()->void:_open_commitments(civ_id,{}))
-	row.add_child(treaties)
-	return row
-
-func _open_commitments(civ_id:String,draft:Dictionary)->void:
-	var council:Control=preload("res://scripts/commitment_screen.gd").new()
-	council.set("civ_id",civ_id);council.set("draft",draft.duplicate(true))
-	add_child(council)
-
-func _selected_accord()->String:
-	var pick:=foreign_refs.get("accord") as OptionButton
-	return String(ForeignDiplomacy.ACCORDS.keys()[maxi(0,pick.selected)]) if pick!=null else String(ForeignDiplomacy.ACCORDS.keys()[0])
-
-func _selected_tone()->String:
-	var pick:=foreign_refs.get("tone") as OptionButton
-	return String(ForeignDiplomacy.TONES.keys()[maxi(0,pick.selected)]) if pick!=null else String(ForeignDiplomacy.TONES.keys()[0])
-
 func _build_foreign_footer()->Control:
 	var bar:=_footer_bar()
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bar.add_child(row)
@@ -2969,13 +2920,9 @@ func _build_foreign_footer()->Control:
 
 ## Sends the envoy with your brief (a real journey with provisions).
 func send_envoy_brief(text:String)->bool:
-	if mode!="foreign" or foreign_civ.is_empty():return false
-	var sent:=ForeignDialogue.ask(foreign_civ,text)
-	if sent:
-		if is_instance_valid(speech_input):speech_input.clear()
-		foreign_refs["message"]="Your envoy sets out with your brief. The answer comes back with them."
-	else:
-		foreign_refs["message"]=String(ForeignDialogue.thread(foreign_civ).get("status",""))
+	if mode!="foreign" or foreign_civ.is_empty() or not is_instance_valid(compose):return false
+	var sent:bool=compose.send_words(text)
+	if not sent:foreign_refs["message"]=String(ForeignDialogue.thread(foreign_civ).get("status",""))
 	_refresh_foreign()
 	return sent
 
@@ -2995,76 +2942,38 @@ func _refresh_foreign()->void:
 		for child in transcript.get_children():child.queue_free()
 		var person:=_foreign_leader_person(id,leader)
 		if messages.is_empty():
-			var empty:=Tokens.make_label("No word has passed between you yet. Write your envoy's brief below." if bool(gate.ok) else "Send delegates to establish an audience. You can prepare your brief now.",14,Tokens.TEXT_DIM)
+			var empty:=Tokens.make_label("No word has passed between you yet. Choose what your envoy carries below." if bool(gate.ok) else "Your envoys have not yet found their ruler. Send them below.",14,Tokens.TEXT_DIM)
 			empty.add_theme_font_override("font",_italic);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;empty.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;transcript.add_child(empty)
 		for turn in messages:
 			if turn is Dictionary:transcript.add_child(_foreign_line(turn as Dictionary,String(leader.get("name","")),person))
 		follow_scroll=.6
 	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
-	var away:=bool(thread.get("in_transit",false)) or not mission.is_empty()
 	var status_lines:PackedStringArray=PackedStringArray()
 	var message:=String(foreign_refs.get("message",""))
 	if not message.is_empty():status_lines.append(message)
-	if not connection_issue.is_empty() and not bool(gate.ok):status_lines.append("Your envoys cannot yet carry words: "+connection_issue)
-	elif bool(thread.get("retryable",false)):status_lines.append(String(thread.get("status","")))
-	elif not bool(gate.ok):status_lines.append(String(gate.reason))
+	if bool(thread.get("retryable",false)):status_lines.append(String(thread.get("status","")))
 	if bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false)):
 		status_lines.append("Your envoys are home; the reply is being set down." if not bool(thread.get("retryable",false)) else "Your envoys are home, but the reply was lost. Retry it, or set it aside.")
-	elif bool(thread.get("in_transit",false)):
+	elif not mission.is_empty():
 		var mission_status:=WorldSimulation.world.diplomatic_mission_status()
-		status_lines.append("Your envoy is on the road · %s · home about %s." % [String(mission_status.get("phase","travelling")).to_lower(),Chronicle.date_label(int(mission_status.get("return_day",0)))])
-	else:
-		var quote:Dictionary=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
-		if quote.has("error"):status_lines.append(String(quote.error))
-		else:status_lines.append("%s: %d delegates, %.1f food rations at departure, %d days there and back." % ["The journey to establish an audience" if not bool(gate.ok) else "The next exchange",int(quote.personnel),float(quote.provisions),int(quote.total_days)])
+		status_lines.append("Your envoys are on the road to %s · %s · home about %s." % [String(mission_status.get("civilization","")),String(mission_status.get("phase","travelling")).to_lower(),Chronicle.date_label(int(mission_status.get("return_day",0)))])
 	var status:=foreign_refs.get("status") as Label
 	if status!=null:
 		var joined:=" ".join(status_lines)
 		if status.text!=joined:status.text=joined
+		status.visible=not joined.is_empty()
 	if is_instance_valid(thinking):
 		thinking.visible=ForeignDialogue.pending.has(id) or bool(thread.get("in_transit",false))
 		thinking.text="Your envoy is away with your brief…" if bool(thread.get("in_transit",false)) else "The reply is being set down…"
-	if is_instance_valid(speak_button):
-		speak_button.visible=bool(gate.ok) and connection_issue.is_empty()
-		speak_button.disabled=not connection_issue.is_empty() or ForeignDialogue.pending.has(id) or not bool(gate.ok) or away
-		speak_button.tooltip_text="Envoys must return before another party departs." if away else ("Your envoys need a working connection to carry words." if not connection_issue.is_empty() else "Send your envoy with this brief.")
-	# Offline, the brief is chosen from what lies between you (rival_rulers.gd).
-	_refresh_offline_briefs(id,not connection_issue.is_empty() and bool(gate.ok),away or ForeignDialogue.pending.has(id))
-	if is_instance_valid(speech_input):speech_input.visible=connection_issue.is_empty() or not bool(gate.ok)
-	var delegates:=foreign_refs.get("delegates") as Button
-	if delegates!=null:
-		delegates.visible=not bool(gate.ok)
-		var quote_error:=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley").has("error")
-		delegates.disabled=not mission.is_empty() or quote_error
-	var retry:=foreign_refs.get("retry") as Button
-	if retry!=null:
-		retry.visible=bool(thread.get("retryable",false))
-		retry.disabled=not connection_issue.is_empty() or ForeignDialogue.pending.has(id) or not bool(gate.ok)
-	var set_aside:=foreign_refs.get("set_aside") as Button
-	if set_aside!=null:set_aside.visible=bool(thread.get("returned_home",false)) and bool(thread.get("in_transit",false))
-	var draft:=foreign_refs.get("draft") as Button
-	if draft!=null:draft.visible=not (thread.get("draft",{}) as Dictionary).is_empty() and not (thread.get("draft",{}) as Dictionary).has("exchange")
 	_refresh_exchange(id,leader)
 	var connection:=foreign_refs.get("connection") as Button
 	if connection!=null:connection.text="Connect AI…" if not connection_issue.is_empty() else "Connection settings…"
-	# Terms and their likely reception.
-	var generous:=foreign_refs.get("generous") as CheckBox
-	var forecast:Dictionary=WorldSimulation.diplomacy.forecast(id,_selected_accord(),_selected_tone(),generous.button_pressed if generous!=null else false)
-	var forecast_label:=foreign_refs.get("forecast") as Label
-	if forecast_label!=null and not forecast.is_empty():
-		forecast_label.text="%s · %s" % [String(forecast.get("label","")),String(forecast.get("reasons",""))]
-		forecast_label.tooltip_text=forecast_label.text+"\nCosts %d Timber, reserved and refunded if declined. The answer is settled when the envoys return." % int(forecast.get("cost",4))
-	var send:=foreign_refs.get("send") as Button
-	if send!=null:
-		var blocker:=String(forecast.get("blocker",""))
-		var quote2:Dictionary=WorldSimulation.world.diplomatic_mission_quote(id,"","leader_parley")
-		if blocker.is_empty() and quote2.has("error"):blocker=String(quote2.error)
-		if blocker.is_empty() and float(WorldSimulation.state.resource_stockpiles.get("Timber",0))<float(forecast.get("cost",4)):blocker="Not enough Timber for these terms."
-		send.disabled=not blocker.is_empty()
-		send.tooltip_text=blocker if not blocker.is_empty() else "Envoys carry these terms; nothing binds until they return with an answer."
+	if is_instance_valid(compose):compose.refresh()
+	if is_instance_valid(council_panel) and council_panel.is_visible_in_tree():council_panel.refresh()
 
 func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)->Control:
 	var role:=String(turn.get("role",""))
+	if role=="note":return _foreign_note(turn)
 	var ruler:=role=="user"
 	var colour:=_ink(Tokens.GOLD) if ruler else (_ink(Tokens.VIOLET) if role=="envoy" else envoy_color)
 	var line_row:=HBoxContainer.new();line_row.add_theme_constant_override("separation",10)
@@ -3091,6 +3000,19 @@ func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)-
 	if ruler:text.add_theme_font_override("font",_italic)
 	stack.add_child(text)
 	return line_row
+
+func _foreign_note(turn:Dictionary)->Control:
+	## What is now in motion: a plain paper note in the conversation.
+	var note:=PanelContainer.new();note.name="InMotion"
+	var style:=Tokens.flat(Tokens.PAPER_SUNK,Tokens.RULE_STRONG,1,4,0);style.border_width_left=3;style.border_color=Tokens.RED
+	style.content_margin_left=14;style.content_margin_right=12;style.content_margin_top=6;style.content_margin_bottom=8
+	note.add_theme_stylebox_override("panel",style)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);note.add_child(stack)
+	var day:=int(turn.get("day",-1))
+	stack.add_child(Tokens.make_label(("Now in motion · "+Chronicle.date_label(day)).to_upper() if day>=0 else "NOW IN MOTION",12,Tokens.INK_MUTED,.12))
+	var text:=Tokens.make_label(String(turn.get("content","")),15,Tokens.BODY);text.name="LineText";text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	stack.add_child(text)
+	return note
 
 # --- Colour helpers ---------------------------------------------------------
 

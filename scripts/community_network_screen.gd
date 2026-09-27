@@ -6,7 +6,6 @@ var status:Label
 var project_detail:Label
 var project_choice:OptionButton
 var project_button:Button
-var treaty:OptionButton
 var proposal:Button
 var selected:="player"
 var timer:=0.0
@@ -26,13 +25,10 @@ func _ready()->void:
 	map.selected.connect(func(id:String): selected=id; _refresh())
 	var sidebar:=VBoxContainer.new(); sidebar.custom_minimum_size.x=360; body.add_child(sidebar)
 	detail=_label(sidebar,18)
-	treaty=OptionButton.new(); treaty.add_item("Exchange through trade"); treaty.add_item("Mutual non-aggression"); sidebar.add_child(treaty)
-	treaty.item_selected.connect(func(_i:int): _refresh())
 	quote=_label(sidebar,15)
-	proposal=_button(sidebar,"SEND PROPOSAL BY ENVOY",func():
-		var result:Dictionary=WorldSimulation.communities.propose(selected,_purpose()); status.text=String(result.get("error",result.get("message","Delegation dispatched."))); _refresh())
-	_button(sidebar,"SPEAK WITH THEIR LEADER",func():
-		if selected!="player": WorldSimulation.diplomacy.open(selected))
+	# Proposals are made in the court, in the conversation with their ruler.
+	proposal=_button(sidebar,"Address their ruler in the court",func():
+		if selected!="player": queue_free(); WorldSimulation.diplomacy.open(selected))
 	var legend:=_label(layout,14); legend.text="Gold: trade · Green: non-aggression · Red: war · Grey: contact only. This is a relationship diagram, not a geographical map."
 	var row:=HBoxContainer.new(); layout.add_child(row)
 	project_choice=OptionButton.new(); project_choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL; row.add_child(project_choice)
@@ -48,8 +44,6 @@ func _label(parent:Node,font:int)->Label:
 	var l:=Label.new(); l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; l.add_theme_font_size_override("font_size",font); parent.add_child(l); return l
 func _button(parent:Node,text:String,action:Callable)->Button:
 	var b:=Button.new(); b.text=text; b.custom_minimum_size.y=36; b.pressed.connect(action); parent.add_child(b); return b
-func _purpose()->String:
-	return "open_trade" if treaty.selected==0 else "non_aggression"
 func _process(delta:float)->void:
 	timer+=delta
 	if timer>1: timer=0; _refresh()
@@ -62,14 +56,11 @@ func _refresh()->void:
 	if current.id=="player":
 		detail.text="YOUR PEOPLE\nChoose a shared project below. Select a known community to consider cooperation."
 		quote.text="Scouts and encounters reveal other communities. Their people decide whether to accept your proposals."
-		proposal.disabled=true; treaty.visible=false
+		proposal.disabled=true
 	else:
-		treaty.visible=true
 		detail.text="%s\nCurrent relationship: %s\nAutonomy: independent\nCommon opportunity: exchange or mutual security." % [current.name,"war" if current.war else String(current.treaty).replace("_"," ")]
-		var offer:Dictionary=WorldSimulation.world.diplomatic_mission_quote(selected,"",_purpose())
-		proposal.disabled=offer.has("error") or not bool(offer.get("can_dispatch",true))
-		quote.text=String(offer.error) if offer.has("error") else "%d envoys · %.1f Food for provisions · %d days round trip.\nYour envoys must return with an answer before an agreement takes effect." % [int(offer.personnel),float(offer.provisions),int(offer.total_days)]
-		quote.text+="\nAn accepted trade or non-aggression agreement replaces your current treaty with this community."
+		proposal.disabled=ForeignDiplomacy.leader(selected).is_empty()
+		quote.text="Trade, peace and every other word to them are sent from the court, in the conversation with their ruler."
 	var id:=String(project_choice.get_selected_metadata()); var definition:Dictionary=CommunityNetwork.PROJECTS[id]
 	var costs:Array[String]=[]
 	for item in definition.cost: costs.append("%d %s" % [int(definition.cost[item]),item])

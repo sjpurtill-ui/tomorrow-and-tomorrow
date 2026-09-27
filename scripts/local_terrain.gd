@@ -352,10 +352,6 @@ var scout_dispatch_status:Label
 var scout_dispatch_previous_speed:=0.0
 var pending_scout_target_id:="open_world"
 var pending_scout_heading:=""
-var diplomat_dispatch_panel:Control
-var diplomat_dispatch_previous_speed:=0.0
-var pending_diplomat_civ_id:=""
-var pending_diplomat_action:="goodwill"
 var travel_reported_milestones: Dictionary = {}
 var travel_active := false
 var travel_start := Vector3.ZERO
@@ -897,8 +893,7 @@ func _capture_preview_if_requested() -> void:
 		capture_civ["player_relation"]=capture_relation
 		CivilizationSystem.civilizations[0]=capture_civ
 		CivilizationSystem._rebuild_competition()
-		_open_diplomat_dispatch_panel(String(capture_civ.id),"open_trade")
-		capture_audit_root=diplomat_dispatch_panel
+		capture_audit_root=_open_diplomat_dispatch_panel(String(capture_civ.id),"open_trade")
 	if capture_zoom > 0.0:
 		camera_target = settler_marker.position
 		camera.size = capture_zoom
@@ -1362,7 +1357,7 @@ func _live_report_panel(kind:String)->Control:
 
 
 func _live_report_global_interaction_active()->bool:
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,diplomat_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	return false
 
@@ -12169,7 +12164,6 @@ func _place_travel_council_notice()->void:
 
 func _on_diplomatic_event(event:Dictionary)->void:
 	if String(event.get("kind",""))=="diplomatic_return":
-		if is_instance_valid(diplomat_dispatch_panel):_close_diplomat_dispatch_panel()
 		ForeignDiplomacy.open(String(event.get("civ_id","")))
 		return
 	# Routine formations already have persistent map counters and a World badge.
@@ -12258,7 +12252,7 @@ func _arbitrate_notification_overlays()->void:
 
 func _blocking_modal_or_report_open()->bool:
 	if is_instance_valid(founding_site_guide) and founding_site_guide.is_visible_in_tree():return true
-	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,diplomat_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel,provisions_panel,materials_panel,knowledge_panel,council_panel,government_panel,population_ledger_panel,society_panel,progression_panel,civilizations_panel]:
+	for overlay in [settlement_naming_panel,settlement_convoy_confirm_panel,scout_dispatch_panel,founding_focus_panel,world_menu_panel,settlement_dashboard_panel,systems_hub_panel,provisions_panel,materials_panel,knowledge_panel,council_panel,government_panel,population_ledger_panel,society_panel,progression_panel,civilizations_panel]:
 		if overlay and is_instance_valid(overlay) and overlay.is_visible_in_tree(): return true
 	if leader_panel and is_instance_valid(leader_panel) and leader_panel.visible: return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible: return true
@@ -18814,41 +18808,27 @@ func _dispatch_scout_from_actions(duration_days:int,target_id:String="open_world
 	_update_time_interface()
 
 
-func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="")->void:
-	# The sheet itself lives in scripts/hud/envoy_dispatch_screen.gd.
-	var replacing:=is_instance_valid(diplomat_dispatch_panel)
-	if replacing:
-		diplomat_dispatch_panel.tree_exited.disconnect(_on_diplomat_dispatch_closed)
-		diplomat_dispatch_panel.queue_free()
-	if civ_id!="": pending_diplomat_civ_id=civ_id
-	pending_diplomat_action=purpose
-	if not replacing:diplomat_dispatch_previous_speed=game_speed
-	_set_game_speed(0.0)
-	var sheet:=preload("res://scripts/hud/envoy_dispatch_screen.gd").new()
-	sheet.civ_id=pending_diplomat_civ_id; sheet.purpose=purpose
-	sheet.z_index=72
-	sheet.sent.connect(func(message:String)->void:
-		if travel_status_label: travel_status_label.text=message
-		_update_time_interface())
-	sheet.show_on_map.connect(func(id:String)->void:_focus_known_world_point(id,"settlement"))
-	sheet.tree_exited.connect(_on_diplomat_dispatch_closed)
-	diplomat_dispatch_panel=sheet
-	interface_layer.add_child(sheet)
-
-
-func _on_diplomat_dispatch_closed()->void:
-	diplomat_dispatch_panel=null
-	_set_game_speed(diplomat_dispatch_previous_speed)
+func _open_diplomat_dispatch_panel(civ_id:String="",purpose:String="")->Control:
+	## Word to another people is sent from the court, in the conversation with
+	## their ruler (one-court-screen). Every envoy button lands here.
+	var target:=civ_id
+	if target=="":
+		for civ:Dictionary in CivilizationSystem.civilizations:
+			if not ForeignDiplomacy.leader(String(civ.get("id",""))).is_empty():
+				if target=="":target=String(civ.id)
+				if bool((civ.get("player_relation",{}) as Dictionary).get("home_location_known",false)):target=String(civ.id);break
+	var focus:={}
+	if target!="":
+		focus["civ_id"]=target
+		if purpose!="":focus["purpose"]=purpose
+	var director:Node=get_tree().get_first_node_in_group("court_director")
+	if director==null or not director.has_method("open_court"):return null
+	return director.call("open_court",focus)
 
 
 func _open_diplomat_for_civ(civ_id:String,purpose:String="")->void:
 	_close_civilizations_panel()
 	_open_diplomat_dispatch_panel(civ_id,purpose)
-
-
-func _close_diplomat_dispatch_panel()->void:
-	# Speed is restored when the sheet leaves the tree.
-	if diplomat_dispatch_panel and is_instance_valid(diplomat_dispatch_panel): diplomat_dispatch_panel.queue_free()
 
 
 func _dispatch_scouts(duration_days:int)->void:
@@ -21083,7 +21063,6 @@ func _dismiss_report_backdrop(event:InputEvent)->bool:
 	if is_instance_valid(founding_focus_panel) or is_instance_valid(settlement_convoy_confirm_panel):return false
 	if _outside_report_body(world_menu_panel,event.position):_close_world_menu();return true
 	if _outside_report_body(scout_dispatch_panel,event.position):_close_scout_dispatch_panel();return true
-	if _outside_report_body(diplomat_dispatch_panel,event.position):_close_diplomat_dispatch_panel();return true
 	for panel:Control in [civilization_report_panel,settlement_dashboard_panel,provisions_panel,materials_panel,population_ledger_panel,knowledge_panel,council_panel,government_panel,society_panel,progression_panel,systems_hub_panel,civilizations_panel]:
 		if _outside_report_body(panel,event.position):return _close_topmost_game_screen()
 	return false

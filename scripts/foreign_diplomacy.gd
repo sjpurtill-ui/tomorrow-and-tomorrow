@@ -356,18 +356,19 @@ func complete_siege_relief(receipt_id:String,survivors:int,unused_food:float)->D
 	return commitments.complete_relief(receipt_id,survivors,unused_food)
 
 func open_relief(siege_id:String)->void:
+	## Calling on a promise is word to that ruler: the court, turned to it.
 	ensure()
-	if is_instance_valid(panel): panel.queue_free()
-	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=84; add_child(layer)
-	panel=preload("res://scripts/relief_request_screen.gd").new(); panel.siege_id=siege_id; layer.add_child(panel)
+	for obligation:Dictionary in commitments.state.obligations:
+		if String(obligation.get("siege_id",""))==siege_id and String(obligation.get("beneficiary",""))=="player" and commitments.covered(String(obligation.donor),"player",siege_id):
+			_court({"civ_id":String(obligation.donor),"purpose":"request_relief","extra":{"siege":siege_id}})
+			return
+	_court({})
 
 func open(id:String)->void:
 	if leader(id).is_empty(): return
 	# Every conversation with a foreign ruler happens inside the court.
+	_court({"civ_id":id})
+
+func _court(focus:Dictionary)->void:
 	var court:Node=get_tree().get_first_node_in_group("court_director") if is_inside_tree() else null
-	if court!=null and court.has_method("open_foreign"):
-		court.call("open_foreign",id)
-		return
-	if is_instance_valid(panel): panel.queue_free()
-	if not is_instance_valid(layer): layer=CanvasLayer.new(); layer.layer=84; add_child(layer)
-	panel=preload("res://scripts/foreign_leader_screen.gd").new(); panel.civ_id=id; layer.add_child(panel)
+	if court!=null and court.has_method("open_court"): court.call("open_court",focus)

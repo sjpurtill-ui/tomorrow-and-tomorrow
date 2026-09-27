@@ -352,16 +352,13 @@ func _test_foreign_brief()->void:
 	if send_word!=null:send_word.pressed.emit()
 	await _frames(3)
 	_check(String(court.mode)=="foreign" and String(court.foreign_civ)==civ_id,"sending word did not open the envoy channel in place")
-	_check(court.find_child("TermsRow",true,false)!=null,"terms are not offered in the court")
-	# With no connection the SEND ENVOY control is shut, as on the old screen.
+	_check(court.find_child("Compose",true,false)!=null,"the compose area is not offered in the court")
+	_check(court.find_child("PactsPane",true,false)!=null,"pacts and leagues are not in the court")
 	await _frames(2)
-	if not PronouncementInterpreter.connection_problem().is_empty():
-		_check(court.speak_button.disabled,"SEND ENVOY is open although your envoys cannot carry words")
 	# The court's send hands the brief to ForeignDialogue, which sets out.
 	var brief:="Offer them our friendship and ask for safe passage along the river; give nothing yet."
 	var thread:Dictionary=ForeignDialogue.thread(civ_id)
 	var before:=int((thread.messages as Array).size())
-	court.speech_input.text=brief
 	var sent:bool=court.send_envoy_brief(brief)
 	await _frames(2)
 	thread=ForeignDialogue.thread(civ_id)

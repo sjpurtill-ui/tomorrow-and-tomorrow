@@ -1,8 +1,8 @@
-extends Node
-## Isolated capture of the Council of Nations over a representative state:
-## a three-people league, a protection treaty, a marriage and a debt, a
-## called-upon promise, relief on the road, and a handful of dealings.
-## Saves artifacts/commitment-council.png and exits.
+extends RefCounted
+## A representative diplomatic state for tests and court captures: three
+## peoples met and located, a three-people league, a protection treaty, a
+## marriage and a debt, a called-upon promise, relief on the road, and a
+## handful of dated dealings.
 
 static func build_fixture()->String:
 	GameState.reset_for_new_world(424242)
@@ -46,19 +46,3 @@ static func build_fixture()->String:
 	rivals.debt(ids[1],"them","Food",40,300,"the food you lent us in the thin winter")
 	rivals.grudge(ids[2],"the hunters you turned back at the ford",.6,"fixture")
 	return ids[0]
-
-func _ready()->void:
-	DisplayServer.window_set_title("TEST CAPTURE · Council of Nations · closes automatically")
-	var id:=build_fixture()
-	var council=preload("res://scripts/commitment_screen.gd").new(); council.civ_id=id; add_child(council)
-	for frame in 4: await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://artifacts"))
-	get_viewport().get_texture().get_image().save_png("res://artifacts/commitment-council.png")
-	var view:=get_viewport().get_visible_rect()
-	var valid:bool=view.encloses(council.send_button.get_global_rect()) and view.encloses(council.card.get_global_rect())
-	valid=valid and council.peoples_box.get_child_count()==3 and council.find_child("LeagueTerms",true,false)!=null
-	valid=valid and council.find_child("Call_"+String(CivilizationSystem.civilizations[1].id),true,false)!=null
-	for date in council.ledger_box.find_children("When","Label",true,false): valid=valid and not "Day" in (date as Label).text
-	print("COMMITMENT_UI ","PASS" if valid else "FAIL")
-	get_tree().quit(0 if valid else 1)
