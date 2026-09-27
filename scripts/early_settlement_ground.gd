@@ -1,140 +1,227 @@
 extends RefCounted
 ## Human-scale working ground attached to recorded buildings and service parcels.
-## Geometry is in kilometres; no population, research or cultural style switches.
+## Geometry is in kilometres; no population, research or cultural style switches
+## of the recorded buildings themselves.
+##
+## (codex/beauty-3) The worn ground itself (paths, door yards, the hearth
+## ground, worked fields and kitchen gardens) is painted into the land by
+## settlement_grounds.gd. This file places the furniture of daily life on it,
+## as instanced low-poly props in the settlement ink (settlement_kit_shapes.gd):
+## - at every lived-in home: a woodpile, pots and a quern at the door, and a
+##   drying rack or a hide frame where the people know food drying, smoking or
+##   hide curing;
+## - at the hearth: the fire ring and log benches round it, and a woodpile;
+## - at work yards: a kiln, pots, a loom or a hide frame, by what is known;
+## - at the water point: a well once wells are known, water jars before;
+## - a midden at the refuse ground; a rising frame and stacked timber where a
+##   building is going up;
+## - pens with a few animals once animals are tamed (bounded).
+## Every prop respects the land (never in water) and the buildings' footprints.
 const EARLY := preload("res://scripts/early_settlement_visual.gd")
-const SERVICE_FORMS := ["open_hearth_yard", "guarded_cache", "lined_storage_pits", "open_work_yard", "carried_water_point", "refuse_and_latrine_ground"]
+const SHAPES := preload("res://scripts/settlement_kit_shapes.gd")
+const GROUNDS := preload("res://scripts/settlement_grounds.gd")
+const SERVICE_FORMS := ["open_hearth_yard", "guarded_cache", "lined_storage_pits", "open_work_yard", "carried_water_point", "refuse_and_latrine_ground", "maintained_gathering_ground"]
+const HEARTH_FORMS := ["open_hearth_yard", "maintained_gathering_ground"]
+const WORK_FORMS := ["open_work_yard", "covered_work_yard", "sheltered_work_area", "timber_work_shelter", "household_craft_yard"]
+const MAX_PROPS := 400
+const MAX_PENS := 2
+const ANIMALS_PER_PEN := 5
+const UNIT := 0.001
+
+static var _pen_material: ShaderMaterial
 
 static func handles(plot: Dictionary) -> bool:
-	return EARLY.supports(plot) or String(plot.get("form", "")) in SERVICE_FORMS
+	return EARLY.supports(plot) or String(plot.get("form", "")) in SERVICE_FORMS or String(plot.get("land_use", "")) == "field"
+
+## What the people know that shows on the ground (from the discovery log).
+static func known_crafts() -> Dictionary:
+	var ids: Dictionary = {}
+	for entry in GameState.discovery_log:
+		if entry is Dictionary: ids[String(entry.get("id", ""))] = true
+	for id in GameState.known_discoveries: ids[String(id)] = true
+	var any := func(list: Array) -> bool:
+		for id in list:
+			if ids.has(id): return true
+		return false
+	return {
+		"drying": any.call(["indirect_solar_food_drying", "smoking", "fish_drying", "meat_drying", "food_drying"]),
+		"hides": any.call(["hide_tanning", "hide_smoke_curing", "hide_scraping"]),
+		"pottery": any.call(["painted_pottery", "clay_shaping", "pottery", "coiled_pottery"]),
+		"kiln": any.call(["kiln_control", "kiln_firing"]),
+		"weaving": any.call(["plain_weaving", "horizontal_ground_loom", "warp_weighted_looms"]),
+		"well": any.call(["well_siting", "lined_well_shafts"]),
+		"tamed": any.call(["animal_taming", "herding_rotas", "herd_size_limits"]),
+		"herding": any.call(["herding_rotas", "herd_size_limits"]),
+		"stone_walls": any.call(["dry_stone_walls"]),
+		"grinding": any.call(["flour_sifting", "grain_grinding", "saddle_quern", "mixed_grain_legume_meals"]),
+	}
 
 static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dictionary], center: Vector3, height: Callable, land: Callable, parent: Node3D) -> void:
-	var ground := SurfaceTool.new(); ground.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var props := SurfaceTool.new(); props.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var counts := {"ground":0, "props":0}
-	var soil := Color(.29,.23,.14,.30)
-	for route in routes:
-		if not bool(route.get("active",true)): continue
-		var points: PackedVector2Array = route.get("points",PackedVector2Array())
-		var width := clampf(float(route.get("width_m",.8))*.0005,.00025,.0025)
-		for i in range(1,points.size()):
-			trail(ground,points[i-1],points[i],width,soil,center,height,land,counts)
-	# Footprint bounds let each footpath skip buildings it cannot cross.
-	var bounds: Array[Rect2] = []
-	for other in plan.buildings:
-		var footprint: PackedVector2Array = other.footprint
-		var rect := Rect2(footprint[0],Vector2.ZERO) if footprint.size()>0 else Rect2(Vector2.INF,Vector2.ZERO)
-		for corner in footprint: rect=rect.expand(corner)
-		bounds.append(rect)
+	# The worn ground of the home settlement (painted into the terrain).
+	GROUNDS.build_if_home(plan, plots, routes, center)
+	var crafts := known_crafts()
+	var placed: Dictionary = {}   # prop name -> Array[Transform3D]
+	var blocked: Array[Vector3] = [] # x, z, radius (km) of every footprint and prop
+	for record in plan.buildings:
+		var position: Vector2 = record.position
+		blocked.append(Vector3(position.x, position.y, maxf(float(record.get("radius", .003)), .0018)))
+	var total := [0]
+	var put := func(name: String, at: Vector2, yaw: float, radius: float) -> bool:
+		if total[0] >= MAX_PROPS: return false
+		if not bool(land.call(at)): return false
+		for other in blocked:
+			if Vector2(other.x, other.y).distance_to(at) < other.z + radius * 0.8: return false
+		blocked.append(Vector3(at.x, at.y, radius))
+		var world := at + Vector2(center.x, center.z)
+		var basis := Basis(Vector3.UP, yaw).scaled(Vector3.ONE * UNIT)
+		if not placed.has(name): placed[name] = []
+		placed[name].append(Transform3D(basis, Vector3(world.x, float(height.call(world.x, world.y)) + .00002, world.y)))
+		total[0] += 1
+		return true
+	# Homes: a woodpile beside, pots and a quern at the door, a rack behind.
 	for record in plan.buildings:
 		var plot: Dictionary = record.plot
-		if String(plot.get("status","active")) in ["vacant","reclaimed"]: continue
+		var status := String(plot.get("status", "active"))
+		var use := String(plot.get("land_use", ""))
 		var position: Vector2 = record.position
-		var forward := Vector2(sin(float(record.angle)),cos(float(record.angle)))
-		var door := position + forward * minf(float(record.radius)*.65,.0024)
-		var nearest := door; var distance := INF
-		for route in routes:
-			if not bool(route.get("active",true)) or int(route.id)!=int(plot.get("frontage_route_id",-1)): continue
-			var points: PackedVector2Array = route.points
-			for i in range(1,points.size()):
-				var point := Geometry2D.get_closest_point_to_segment(door,points[i-1],points[i])
-				if point.distance_squared_to(door)<distance: nearest=point;distance=point.distance_squared_to(door)
-		# Worn thresholds replace full-parcel polygon mats.
-		patch(ground,door,.0016,soil,center,height,land,counts)
-		var clear := true
-		var path := Rect2(door,Vector2.ZERO).expand(nearest)
-		for other_index in plan.buildings.size():
-			var other = plan.buildings[other_index]
-			if other.id==record.id: continue
-			if not bounds[other_index].grow(0.000001).intersects(path,true): continue
-			for i in 9:
-				if Geometry2D.is_point_in_polygon(door.lerp(nearest,float(i)/8),other.footprint): clear=false;break
-			if not clear: break
-		if clear: trail(ground,door,nearest,.00027,soil,center,height,land,counts)
-		if String(plot.get("status","active")) == "under_construction":
-			for corner in record.footprint:
-				box(props,corner,Vector3(.00012,.0015,.00012),.00075,Color(.27,.17,.075),center,height,counts)
+		var angle := float(record.angle)
+		var forward := Vector2(sin(angle), cos(angle))
+		var side := forward.orthogonal()
+		var radius := maxf(float(record.get("radius", .003)), .0018)
+		var roll := absi(int(plot.get("seed", 1)) + int(record.get("id", 0)) * 13) % 12
+		if status == "under_construction":
+			# The building's own footprint is free while it goes up.
+			for i in range(blocked.size() - 1, -1, -1):
+				if Vector2(blocked[i].x, blocked[i].y) == position: blocked.remove_at(i)
+			put.call("frame", position, angle, radius * .5)
+			put.call("timber_stack", position + side * (radius + .003), angle + PI * .5, .002)
+			continue
+		if status in ["vacant", "ruin", "reclaimed"]: continue
+		if use in ["residential_compound", "mixed_household"]:
+			if roll % 3 != 0: put.call("woodpile", position + side * (radius + .0012) * (1.0 if roll % 2 == 0 else -1.0) - forward * .0006, angle, .0011)
+			if roll % 2 == 0: put.call("pots", position + forward * (radius + .0010) + side * .0011, angle, .0006)
+			elif crafts.grinding: put.call("quern", position + forward * (radius + .0011) - side * .0010, angle, .0006)
+			if crafts.drying and roll % 3 == 1: put.call("drying_rack", position - forward * (radius + .0022) + side * .0008, angle, .0014)
+			elif crafts.hides and roll % 5 == 2: put.call("hide_frame", position - forward * (radius + .0018), angle, .0011)
+		elif use == "workshop":
+			if crafts.kiln and roll % 2 == 0: put.call("kiln", position + side * (radius + .0022), angle, .0014)
+			if crafts.pottery: put.call("pots", position + forward * (radius + .0012), angle, .0007)
+			if crafts.weaving and roll % 3 == 0: put.call("loom", position - side * (radius + .0015), angle + PI * .5, .0011)
+			if crafts.hides and roll % 4 == 1: put.call("hide_frame", position - forward * (radius + .0017), angle, .0011)
+			if roll % 2 == 1: put.call("woodpile", position + side * (radius + .0014), angle, .0011)
+	# Service grounds.
+	var hearth := Vector2.INF
 	for plot in plots:
-		var form := String(plot.get("form",""))
-		if form not in SERVICE_FORMS or String(plot.get("status","active")) in ["vacant","ruin","reclaimed","under_construction"]: continue
-		var p: Vector2 = plot.get("centroid",Vector2.ZERO)
-		if not bool(land.call(p)): continue
-		patch(ground,p,.004 if form=="open_hearth_yard" else .0025,soil,center,height,land,counts)
-		if form=="open_hearth_yard":
-			# Ash and trampled earth at the fire: warm and soft-edged, not a black hole.
-			patch(ground,p,.0012,Color(.26,.20,.14,.70),center,height,land,counts)
-			patch(ground,p,.0005,Color(.17,.13,.10,.80),center,height,land,counts)
-			for i in 10:
-				var point := p+Vector2.from_angle(i*TAU/10)*.00065
-				box(props,point,Vector3(.00024,.00019,.00022),.0001,Color(.35,.34,.29),center,height,counts)
-			box(props,p,Vector3(.0003,.00035,.0003),.00018,Color(.82,.34,.065),center,height,counts)
-			for i in 3:
-				var point := p+Vector2.from_angle(i*TAU/3+.4)*.0024
-				box(props,point,Vector3(.0016,.00028,.00032),.00019,Color(.24,.14,.06),center,height,counts)
-		elif form in ["guarded_cache","lined_storage_pits"]:
-			for i in 4:
-				var point := p+Vector2((i%2-.5)*.0012,(i/2-.5)*.0012)
-				patch(ground,point,.00048,Color(.13,.105,.07,.8),center,height,land,counts)
-				for j in 5:
-					box(props,point+Vector2(0,(j-2)*.00017),Vector3(.0009,.00008,.00012),.00004,Color(.36,.26,.12),center,height,counts)
-		elif form=="open_work_yard":
-			for i in 5:
-				box(props,p+Vector2(i*.00024-.0005,0),Vector3(.00017,.00019,.0018),.0001,Color(.30,.19,.085),center,height,counts)
-			box(props,p+Vector2(.0015,0),Vector3(.0011,.0006,.00055),.0003,Color(.26,.18,.095),center,height,counts)
-		elif form=="carried_water_point":
-			for i in 3:
-				box(props,p+Vector2(i*.0006,0),Vector3(.0004,.0005,.0004),.00025,Color(.40,.27,.14),center,height,counts)
-		elif form=="refuse_and_latrine_ground":
-			patch(ground,p,.0012,Color(.19,.16,.08,.55),center,height,land,counts)
-	commit(ground,"EarlyWorkingGround",true,counts.ground,parent)
-	commit(props,"EarlyCommunalObjects",false,counts.props,parent)
+		var form := String(plot.get("form", ""))
+		var status := String(plot.get("status", "active"))
+		if form not in SERVICE_FORMS and form not in WORK_FORMS: continue
+		var c: Vector2 = plot.get("centroid", Vector2.ZERO)
+		var angle := float(absi(int(plot.get("seed", 1))) % 628) * .01
+		if form in HEARTH_FORMS:
+			if hearth == Vector2.INF: hearth = c
+			if status in ["vacant", "reclaimed"]: continue
+			# The living map lights its own fire ring at the settlement's
+			# heart (living_map.gd); a second hearth gets its own stones.
+			if c.length() > .005: put.call("hearth_ring", c, angle, .0012)
+			else: blocked.append(Vector3(c.x, c.y, .0022))
+			for k in 4:
+				var a := angle + TAU * float(k) / 4.0 + .35
+				put.call("bench", c + Vector2.from_angle(a) * .0034, -a, .0012)
+			put.call("woodpile", c + Vector2.from_angle(angle + 2.3) * .0062, angle, .0011)
+		if status in ["vacant", "ruin", "reclaimed", "under_construction"]: continue
+		if form == "carried_water_point":
+			if crafts.well: put.call("well", c, angle, .0012)
+			else: put.call("water_jars", c, angle, .0008)
+		elif form == "refuse_and_latrine_ground":
+			put.call("midden", c, angle, .0017)
+		elif form in WORK_FORMS:
+			if crafts.kiln: put.call("kiln", c + Vector2.from_angle(angle) * .005, angle, .0014)
+			if crafts.weaving: put.call("loom", c - Vector2.from_angle(angle) * .005, angle, .0011)
+		elif form in ["guarded_cache", "lined_storage_pits"]:
+			put.call("pots", c, angle, .0008)
+	for plot in plots:
+		if String(plot.get("form", "")) == "refuse_and_latrine_ground" and String(plot.get("status", "")) == "ruin":
+			put.call("midden", plot.get("centroid", Vector2.ZERO), 0.4, .0017)
+	# Pens with animals, on open ground at the settlement's edge.
+	var pens: Array[Vector2] = []
+	if crafts.tamed and not plan.buildings.is_empty():
+		var home := hearth if hearth != Vector2.INF else Vector2.ZERO
+		var reach := 0.0
+		for record in plan.buildings: reach = maxf(reach, Vector2(record.position).distance_to(home))
+		reach = minf(reach, .12)
+		var wanted := mini(2 if crafts.herding else 1, MAX_PENS)
+		var route_points: Array[PackedVector2Array] = []
+		for route in routes: route_points.append(GROUNDS._points(route))
+		for step in 32:
+			if pens.size() >= wanted: break
+			var a := float(step) * 2.39996 + .7
+			var at := home + Vector2.from_angle(a) * (reach * .8 + .012 + float(step / 8) * .006)
+			var on_route := false
+			for points in route_points:
+				for i in range(1, points.size()):
+					if Geometry2D.get_closest_point_to_segment(at, points[i - 1], points[i]).distance_to(at) < .0065: on_route = true
+			if on_route: continue
+			if put.call("pen_stone" if crafts.stone_walls else "pen_wattle", at, a + PI * .5, .0052):
+				pens.append(at)
+	_commit_props(placed, parent)
+	if not pens.is_empty(): _add_animals(pens, center, height, parent)
 
-static func vertex(surface: SurfaceTool, p: Vector2, color: Color, center: Vector3, height: Callable) -> void:
-	var world := p+Vector2(center.x,center.z)
-	surface.set_color(color);surface.set_normal(Vector3.UP)
-	surface.add_vertex(Vector3(world.x,float(height.call(world.x,world.y))+.000035,world.y))
+static func _commit_props(placed: Dictionary, parent: Node3D) -> void:
+	if placed.is_empty(): return
+	var material := preload("res://scripts/settlement_ink.gd").material()
+	var root := Node3D.new(); root.name = "EarlyCommunalObjects"
+	parent.add_child(root)
+	for name in placed:
+		var mesh := SHAPES.prop(String(name))
+		if mesh == null: continue
+		var transforms: Array[Transform3D] = []
+		transforms.assign(placed[name])
+		var batch := MultiMesh.new(); batch.transform_format = MultiMesh.TRANSFORM_3D
+		batch.use_colors = true; batch.mesh = mesh; batch.instance_count = transforms.size()
+		for i in transforms.size():
+			batch.set_instance_transform(i, transforms[i]); batch.set_instance_color(i, Color.WHITE)
+		var node := MultiMeshInstance3D.new(); node.name = "Prop_" + String(name)
+		node.multimesh = batch; node.material_override = material
+		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		root.add_child(node)
+		if String(name) not in ["hearth_ring", "midden"]:
+			preload("res://scripts/settlement_ink.gd").add_ground_shadows(root, "PropShadow_" + String(name), transforms, mesh.get_aabb())
 
-static func patch(surface: SurfaceTool, p: Vector2, radius: float, color: Color, center: Vector3, height: Callable, land: Callable, counts: Dictionary) -> void:
-	for i in 20:
-		var a := p+Vector2.from_angle(i*TAU/20)*radius*(1+.07*sin(i*3.7))
-		var b := p+Vector2.from_angle((i+1)*TAU/20)*radius*(1+.07*sin((i+1)*3.7))
-		if not bool(land.call(a)) or not bool(land.call(b)) or not bool(land.call(p)): continue
-		vertex(surface,p,color,center,height)
-		vertex(surface,b,Color(color,0),center,height);vertex(surface,a,Color(color,0),center,height)
-		counts.ground+=1
+## A few animals in each pen, drawn in ink (map_life_ink.gd's beasts). The
+## instance is scaled down so the beasts' walk stays inside the fence; their
+## drawn size does not depend on it.
+static func _add_animals(pens: Array[Vector2], center: Vector3, height: Callable, parent: Node3D) -> void:
+	var batch := MultiMesh.new(); batch.transform_format = MultiMesh.TRANSFORM_3D
+	batch.use_colors = true; batch.use_custom_data = true
+	batch.mesh = preload("res://scripts/map_life_ink.gd").quad()
+	batch.instance_count = pens.size() * ANIMALS_PER_PEN
+	var rng := RandomNumberGenerator.new(); rng.seed = hash(pens)
+	var coats := [Color(0.80, 0.75, 0.62), Color(0.46, 0.34, 0.23), Color(0.30, 0.25, 0.20), Color(0.70, 0.62, 0.48)]
+	var index := 0
+	for pen in pens:
+		for k in ANIMALS_PER_PEN:
+			var at := pen + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(0.0, .0012)
+			var world := at + Vector2(center.x, center.z)
+			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * .42)
+			batch.set_instance_transform(index, Transform3D(basis, Vector3(world.x, float(height.call(world.x, world.y)), world.y)))
+			batch.set_instance_custom_data(index, Color(rng.randf(), rng.randf(), 0, 0))
+			batch.set_instance_color(index, coats[rng.randi_range(0, coats.size() - 1)])
+			index += 1
+	var node := MultiMeshInstance3D.new(); node.name = "PenAnimals"
+	node.multimesh = batch; node.material_override = pen_material()
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# The shader draws each beast away from its instance point: cull by the pens.
+	var bounds := AABB(Vector3(pens[0].x + center.x, center.y - .05, pens[0].y + center.z), Vector3.ZERO)
+	for pen in pens: bounds = bounds.expand(Vector3(pen.x + center.x, center.y, pen.y + center.z))
+	node.custom_aabb = bounds.grow(.02)
+	parent.add_child(node)
 
-static func trail(surface: SurfaceTool, a: Vector2, b: Vector2, width: float, color: Color, center: Vector3, height: Callable, land: Callable, counts: Dictionary) -> void:
-	if a.distance_to(b)<.0001: return
-	var steps := clampi(ceili(a.distance_to(b)/.0008),1,256)
-	var side := (b-a).orthogonal().normalized()*width
-	for i in steps:
-		var start := a.lerp(b,float(i)/steps);var end := a.lerp(b,float(i+1)/steps)
-		if not bool(land.call(start)) or not bool(land.call(end)): continue
-		for sign_value in [-1,1]:
-			var points := [start,end,end+side*sign_value,start+side*sign_value]
-			for index in [0,1,2,0,2,3]:
-				vertex(surface,points[index],color if index<2 else Color(color,0),center,height)
-			counts.ground+=2
-
-static func box(surface: SurfaceTool, p: Vector2, size: Vector3, y: float, color: Color, center: Vector3, height: Callable, counts: Dictionary) -> void:
-	var mesh := BoxMesh.new();mesh.size=size
-	var arrays := mesh.surface_get_arrays(0);var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL];var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-	var world := p+Vector2(center.x,center.z)
-	var origin := Vector3(world.x,float(height.call(world.x,world.y))+y,world.y)
-	for index in indices:
-		surface.set_color(color);surface.set_normal(normals[index]);surface.add_vertex(vertices[index]+origin)
-	counts.props+=1
-
-static func commit(surface: SurfaceTool, name: String, transparent: bool, count: int, parent: Node3D) -> void:
-	if count==0: return
-	var node := MeshInstance3D.new();node.name=name;node.mesh=surface.commit()
-	var material:Material
-	if transparent:
-		var ground:=StandardMaterial3D.new();ground.vertex_color_use_as_albedo=true
-		ground.roughness=1;ground.cull_mode=BaseMaterial3D.CULL_DISABLED
-		ground.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-		material=ground
-	else:
-		# Hearth stones, racks and stores painted like the huts (settlement_ink.gd).
-		material=preload("res://scripts/settlement_ink.gd").material()
-	node.material_override=material;parent.add_child(node)
+## The penned animals' own ink material; its clock runs with the fire
+## (settlement_ink.set_clock).
+static func pen_material() -> ShaderMaterial:
+	if _pen_material and is_instance_valid(_pen_material): return _pen_material
+	_pen_material = (preload("res://scripts/map_life_ink.gd").material("beast").duplicate() as ShaderMaterial)
+	_pen_material.set_shader_parameter("min_px", 12.0)
+	_pen_material.set_shader_parameter("max_swell", 2.5)
+	preload("res://scripts/settlement_ink.gd").keep_time(_pen_material)
+	return _pen_material

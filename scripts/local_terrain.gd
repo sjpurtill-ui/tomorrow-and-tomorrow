@@ -1099,6 +1099,7 @@ func _process(delta: float) -> void:
 		# The status strip never sits under the road notice or a moment card.
 		var card:Variant=hud.get_meta("chronicle_card") if hud and hud.has_meta("chronicle_card") else null
 		travel_status_label.visible=not ((travel_council_notice!=null and travel_council_notice.visible) or (is_instance_valid(card) and bool(card.showing)))
+		if travel_status_label.visible:preload("res://scripts/hud/map_ticker_style.gd").fit(travel_status_label,get_viewport().get_visible_rect().size.x)
 	if event_report_button and event_report_button.visible and Time.get_ticks_msec()>event_report_visible_until_msec:
 		event_report_button.visible=false
 	_arbitrate_notification_overlays()
@@ -2316,6 +2317,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/map_coast.gdshaderinc"
 #include "res://scripts/world_beauty.gdshaderinc"
 #include "res://scripts/map_cloud.gdshaderinc"
+#include "res://scripts/settlement_ground.gdshaderinc"
 
 // Charted ground: the discovery mask, plus the ground around the people now.
 float charted_at(vec2 xz) {
@@ -2739,6 +2741,12 @@ void fragment() {
 	earth = wb_fringe(earth,wb_edge.y*(1.0-rock_mask),wb_wood_colour,world_position.xz,pixel_world);
 	earth = wb_woodland(earth,wb_stand_cover,wb_wood_colour,world_position.xz,pixel_world);
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
+	// Close meadow, then the worn ground of the home settlement
+	// (settlement_ground.gdshaderinc, scripts/settlement_grounds.gd).
+	earth = settlement_meadow(earth,surface_position,surface_origin,pixel_world*1000.0,(1.0-wb_stand_cover)*(1.0-rock_mask));
+	vec2 sg_local=sg_local_m(surface_position,surface_origin);
+	earth = settlement_fields_paint(earth,sg_local,pixel_world*1000.0);
+	earth = settlement_ground_paint(earth,sg_local,pixel_world*1000.0);
 	// Gusts rolling through the grass, a fainter shimmer over the canopy.
 	float wb_gust=wb_wind_waves(world_position.xz,pixel_world,map_wind,map_wind_clock,wb_motion);
 	earth*=1.0+wb_gust*mix(0.038,0.020,wb_stand_cover);
@@ -2893,6 +2901,8 @@ func _terrain_seasonality_at(x:float,z:float,_height:float)->float:
 
 func _register_seasonal_material(material:ShaderMaterial)->void:
 	seasonal_materials.append(weakref(material))
+	# The worn ground of the home settlement (settlement_grounds.gd).
+	preload("res://scripts/settlement_grounds.gd").bind(material)
 	material.set_shader_parameter("season_phase",PlanetEnvironment.season_wave({},GameState.elapsed_days))
 	material.set_shader_parameter("weather_snow",seasonal_snow)
 	if seasonal_motion>=0.0:material.set_shader_parameter("wb_motion",seasonal_motion)
@@ -4802,6 +4812,8 @@ func _refresh_settlement_footprint(force := false) -> void:
 	var render_plots:Array[Dictionary]=_settlement_model().plots_for_lod(morphology_lod)
 	if morphology_lod==0: render_plots=_settlement_plots_in_current_detail_view(render_plots,center)
 	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root)
+	# The worn ground of a lived place, painted into the land (settlement_grounds.gd).
+	_paint_settlement_grounds(center)
 	# Plot fabric supplies the remembered street-by-street settlement. Mature urban
 	# systems also need a bounded, stage-specific silhouette that remains legible
 	# after billions of residents have collapsed into aggregate simulation records.
@@ -6128,8 +6140,9 @@ func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:Surfa
 			berm_color.a=0.82
 			flat_count+=_append_settlement_system_ribbon(flat_surface,center,PackedVector2Array([point_a,point_b]),earthwork_width*0.54,berm_color,0.00342,1)
 		else:
-			var wall_width:=clampf(radius*(0.0060 if defense_stage==3 else 0.0082),0.0018,0.020)
-			var wall_height:=clampf((0.007 if defense_stage==3 else (0.014 if defense_stage==4 else 0.020))*lerpf(0.78,1.0,integrity),0.004,0.028)
+			# A palisade is a line of stakes a few metres high, not a rampart.
+			var wall_width:=clampf(radius*0.0082,0.0018,0.020) if defense_stage>3 else clampf(radius*0.0020,0.00045,0.0008)
+			var wall_height:=clampf((0.0032 if defense_stage==3 else (0.014 if defense_stage==4 else 0.020))*lerpf(0.78,1.0,integrity),0.003,0.028)
 			mass_count+=_append_settlement_defense_wall_segment(mass_surface,center,point_a,point_b,wall_width,wall_height,color)
 	return {"flat":flat_count,"mass":mass_count}
 
@@ -6173,7 +6186,9 @@ func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:Su
 	var cores:Array=layout.cores
 	var flat_count:=0
 	var mass_count:=0
-	var colors:=[Color("#000000"),Color("#55472f"),Color("#675138"),Color("#33271d"),Color("#4b4a46"),Color("#50534f")]
+	# Weathered timber for a palisade and pale dressed stone for walls, in the
+	# settlement's painted palette rather than near-black slabs (codex/beauty-3).
+	var colors:=[Color("#000000"),Color("#55472f"),Color("#675138"),Color("#806a4c"),Color("#8e897d"),Color("#85857d")]
 	var color:Color=colors[defense_stage]
 	if constructing: color=color.lightened(0.12)
 	else: color=color.lerp(Color("#363331"),1.0-integrity)
@@ -10316,6 +10331,15 @@ func _organic_town_plan(center: Vector3, land: Callable, compute := true) -> Dic
 	organic_town_plans[center] = [var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes]), plan]
 	return plan
 
+## The home settlement's paths, yards and worn grass, rasterized from the
+## real fabric for the terrain shader (settlement_grounds.gd). Cheap when
+## nothing changed; visual only.
+func _paint_settlement_grounds(center: Vector3) -> void:
+	var plan: Dictionary = {}
+	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
+		plan = _organic_town_plan(center, func(_point: Vector2) -> bool: return true, false)
+	preload("res://scripts/settlement_grounds.gd").build_if_home(plan, GameState.settlement_plots, GameState.settlement_routes, center)
+
 ## Computes a missing early-town layout on its own, so the redraw that uses it
 ## can land in a later frame. True when it did the work.
 func _prime_organic_town_plan(center: Vector3) -> bool:
@@ -12723,8 +12747,8 @@ func _build_interface() -> void:
 	travel_status_label.position = Vector2(viewport_width * 0.5 - 390, 66)
 	travel_status_label.size = Vector2(780, 20)
 	travel_status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	travel_status_label.add_theme_font_size_override("font_size", 10)
-	travel_status_label.add_theme_color_override("font_color", Color("#ead078"))
+	# A paper slip under the top bar, legible over any ground (map_ticker_style.gd).
+	preload("res://scripts/hud/map_ticker_style.gd").style(travel_status_label)
 	layer.add_child(travel_status_label)
 	_build_map_help(layer)
 	travel_council_notice=Button.new()

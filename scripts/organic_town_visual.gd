@@ -190,6 +190,17 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 
 static func kit_mesh(index: int) -> Mesh:
 	if meshes.has(index): return meshes[index]
+	var imported := _imported_mesh(index)
+	# Thatched timber houses coded in settlement_kit_shapes.gd, fitted to the
+	# authored envelope (placement unchanged); the market hall stays authored.
+	var coded: Mesh = preload("res://scripts/settlement_kit_shapes.gd").mesh(KIT[index], imported.get_aabb())
+	meshes[index] = coded if coded != null else imported
+	return meshes[index]
+
+static var imported_meshes: Dictionary = {}
+
+static func _imported_mesh(index: int) -> Mesh:
+	if imported_meshes.has(index): return imported_meshes[index]
 	var scene: PackedScene = load("res://assets/buildings/organic_town/%s.glb" % KIT[index])
 	var root := scene.instantiate()
 	var source: MeshInstance3D = root.find_children("*", "MeshInstance3D", true, false)[0]
@@ -203,14 +214,14 @@ static func kit_mesh(index: int) -> Mesh:
 	if transform.is_equal_approx(Transform3D.IDENTITY):
 		# Preserve importer-generated LOD index buffers and shadow meshes. These
 		# simplify the SAME roof/framing geometry as its projected size decreases.
-		meshes[index] = source.mesh
+		imported_meshes[index] = source.mesh
 	else:
 		var surface := SurfaceTool.new()
 		for part in source.mesh.get_surface_count(): surface.append_from(source.mesh, part, transform)
-		meshes[index] = surface.commit()
+		imported_meshes[index] = surface.commit()
 
 	root.free()
-	return meshes[index]
+	return imported_meshes[index]
 
 static func render(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
 	if material == null:

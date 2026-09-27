@@ -74,6 +74,15 @@ static func add_ground_shadows(parent:Node3D,name:String,transforms:Array[Transf
 ## The flicker clock (seconds); living_map.gd advances it with the fire.
 static func set_clock(seconds:float)->void:
 	if _material:_material.set_shader_parameter("anim_clock",seconds)
+	for i in range(_timed.size()-1,-1,-1):
+		var timed:=_timed[i].get_ref() as ShaderMaterial
+		if timed==null:_timed.remove_at(i)
+		else:timed.set_shader_parameter("clock",seconds)
+
+static var _timed:Array[WeakRef]=[]
+## Settlement life drawn in ink (penned animals) runs on the same clock.
+static func keep_time(material:ShaderMaterial)->void:
+	if material:_timed.append(weakref(material))
 
 const SHADER:="""
 shader_type spatial;
@@ -105,7 +114,11 @@ void fragment() {
 	// Thatch and hide roofs read as warm straw from above, not dark wood.
 	vec3 straw = vec3(0.62, 0.52, 0.34);
 	float luma = dot(base, vec3(0.2126, 0.7152, 0.0722));
-	base = mix(base, straw*clamp(luma/0.20, 0.55, 1.35), roof*0.45);
+	// Only dark timber-coloured roofs take the straw (authored thatch is
+	// already straw; fired tile, red and far redder than it is green, keeps
+	// its colour).
+	float tile = smoothstep(1.45, 1.85, base.r/max(base.g, 0.01));
+	base = mix(base, straw*clamp(luma/0.20, 0.55, 1.35), roof*0.45*(1.0-tile)*(1.0-smoothstep(0.30, 0.45, luma)));
 	// Thatch, bark and hide: fine strokes running down each roof's slope,
 	// broken so they read as laid material rather than stripes.
 	vec2 fall = normalize(kit_normal.xz+vec2(1e-5));
@@ -115,7 +128,10 @@ void fragment() {
 	float along = dot(local, vec2(-fall.y, fall.x))*9.0;
 	float down = dot(local, fall)*2.2;
 	float strand = map_paper_noise(vec2(along, down*0.15));
-	base *= 1.0+(strand-0.5)*0.22*roof;
+	// Strokes only where the screen can hold them: finer than a pixel they
+	// would shimmer into swirls.
+	float stroke_px = fwidth(along);
+	base *= 1.0+(strand-0.5)*0.22*roof*(1.0-smoothstep(0.35, 0.9, stroke_px));
 	// Warm light, cool shade: the painted key light shared with the land.
 	float ndl = dot(n, SUN);
 	base *= mix(vec3(0.84, 0.88, 0.98), vec3(1.06, 1.02, 0.94), smoothstep(-0.2, 0.6, ndl));
@@ -128,7 +144,8 @@ void fragment() {
 	ALBEDO = base;
 	ROUGHNESS = 0.95;
 	// Sky fill on the shaded side, then firelight near the hearth.
-	vec3 glow = base*vec3(0.72, 0.82, 1.0)*0.30*(1.0-smoothstep(-0.05, 0.55, ndl));
+	// A painter's shade stays warm and open: never a grey hole.
+	vec3 glow = base*vec3(0.86, 0.88, 0.98)*0.52*(1.0-smoothstep(-0.05, 0.55, ndl));
 	if (hearth.w > 0.0) {
 		vec3 to_fire = hearth.xyz-world_position;
 		float d = length(to_fire)*1000.0;
@@ -149,7 +166,8 @@ render_mode unshaded, blend_mul, depth_draw_never, cull_disabled, shadows_disabl
 void fragment() {
 	vec2 q = (UV-vec2(0.5))*2.0;
 	float d = length(q);
-	float a = (1.0-smoothstep(0.20, 1.0, d))*0.70;
-	ALBEDO = mix(vec3(1.0), vec3(0.62, 0.66, 0.74), a);
+	// A soft cool pool, deepest just under the eaves.
+	float a = (1.0-smoothstep(0.15, 1.0, d))*0.78;
+	ALBEDO = mix(vec3(1.0), vec3(0.55, 0.59, 0.68), a);
 }
 """

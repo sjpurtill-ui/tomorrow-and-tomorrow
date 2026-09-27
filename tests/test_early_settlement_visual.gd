@@ -212,7 +212,9 @@ func test_neighborhood_ground_replaces_parcel_mats_and_service_monuments() -> vo
 	renderer._create_plot_fabric(Vector3.ZERO,GameState.settlement_plots,0,parent)
 	assert_bool(parent.has_node("PersistentPlotGround")).is_false()
 	assert_bool(parent.has_node("PersistentDesirePaths")).is_false()
-	assert_bool(parent.has_node("EarlyWorkingGround")).is_true()
+	# The worn ground is painted into the terrain (settlement_grounds.gd); the
+	# furniture of daily life stands on it as instanced props.
+	assert_bool(parent.has_node("EarlyWorkingGround")).is_false()
 	assert_bool(parent.has_node("EarlyCommunalObjects")).is_true()
 
 func test_working_ground_respects_water_and_does_not_mutate_history() -> void:

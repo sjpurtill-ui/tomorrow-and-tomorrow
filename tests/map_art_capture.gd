@@ -2,6 +2,7 @@ extends Node
 ## Map art capture: one world, several zooms, one run. For before/after map
 ## art reviews at the settlement and regional views.
 ##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river] [--woodland] [--timing]
+##      [--town] (a later-era walled town fixture in place of the new camp)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -53,6 +54,7 @@ func _ready()->void:
 	var lod=preload("res://scripts/terrain_lod.gd")
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
+	if "--town" in args:_seed_town()
 	if "--river" in args:
 		# Look at the world river instead (charted here for this capture only).
 		var river_z:=clampf(target.z,-600.0,600.0)
@@ -143,6 +145,24 @@ func _seed_great_works(center:Vector3)->void:
 	city.undertakings=list
 	print("MAP_ART_CAPTURE: seeded ",list.size()," great works around ",home)
 	terrain._refresh_undertaking_visuals(true)
+
+## `--town`: a later-era market town in place of the new camp, for reviewing
+## the settlement art as it grows (a fixture only; nothing is simulated).
+## Masonry and timber houses along streets round a market plaza, halls,
+## workshops and stores, a well, fields in their season all round, and a
+## palisade with gates.
+## `--town`: a later-era market town (tests/town_fixture.gd) in place of the
+## new camp, behind a palisade with gates.
+func _seed_town()->void:
+	var town:Dictionary=preload("res://tests/town_fixture.gd").build()
+	GameState.settlement_plots.assign(town.plots)
+	GameState.settlement_routes.assign(town.routes)
+	var campaign:=get_node_or_null("/root/MilitaryCampaign")
+	if campaign:
+		campaign.settlement_defense["stage"]=3
+		campaign.settlement_defense["integrity"]=1.0
+	GameState.morphology_revision+=1
+	print("MAP_ART_CAPTURE: seeded a town of ",town.plots.size()," plots and ",town.routes.size()," routes")
 
 func _force_sky(kind:String)->void:
 	var ambience_script:=preload("res://scripts/map_ambience.gd")

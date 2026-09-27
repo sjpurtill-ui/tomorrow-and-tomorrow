@@ -115,6 +115,18 @@ static func remember_layout(plan:Dictionary,plots:Array[Dictionary])->void:
 
 static func kit_mesh(name: String) -> Mesh:
 	if meshes.has(name): return meshes[name]
+	var imported := _imported_mesh(name)
+	# Coded low-poly forms (settlement_kit_shapes.gd) fitted to the authored
+	# envelope, so placement is unchanged; the authored mesh stays where no
+	# coded form exists (the rubble household).
+	var coded: Mesh = preload("res://scripts/settlement_kit_shapes.gd").mesh(name, imported.get_aabb())
+	meshes[name] = coded if coded != null else imported
+	return meshes[name]
+
+static var imported_meshes: Dictionary = {}
+
+static func _imported_mesh(name: String) -> Mesh:
+	if imported_meshes.has(name): return imported_meshes[name]
 	var scene: PackedScene = load("res://assets/buildings/early_settlement/%s.glb" % name)
 	var root := scene.instantiate()
 	var children := root.find_children("*","MeshInstance3D",true,false)
@@ -126,7 +138,7 @@ static func kit_mesh(name: String) -> Mesh:
 			transform = ancestor.transform * transform; ancestor = ancestor.get_parent()
 		if transform.is_equal_approx(Transform3D.IDENTITY):
 			# Preserve importer LOD index buffers and shadow mesh, not just vertices.
-			meshes[name] = child.mesh; root.free(); return meshes[name]
+			imported_meshes[name] = child.mesh; root.free(); return imported_meshes[name]
 	# Unusual multi-mesh/nonidentity authored scenes require transform baking.
 	# This fallback flattens the mesh and cannot retain imported LOD/shadow data.
 	var surface := SurfaceTool.new()
@@ -136,8 +148,8 @@ static func kit_mesh(name: String) -> Mesh:
 		while ancestor is Node3D:
 			transform = ancestor.transform * transform; ancestor = ancestor.get_parent()
 		for part in child.mesh.get_surface_count(): surface.append_from(child.mesh,part,transform)
-	meshes[name] = surface.commit(); root.free()
-	return meshes[name]
+	imported_meshes[name] = surface.commit(); root.free()
+	return imported_meshes[name]
 
 static func render(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
 	var inherited := {"buildings":[],"replaced":plan.replaced}
