@@ -41,8 +41,7 @@ const TownFate:=preload("res://scripts/town_fate.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","pursue","let_go","abandon","keep"]
-## Storming a town our band already besieges.
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep"]## Storming a town our band already besieges.
 const STORM_WORDS:="(storm|assault|take the walls|scale the walls|over the walls|break (in|through)|attack now|attack (the|their) (walls|gate)|go in now|rush the gate|carry the walls)"
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
 const MIN_FORCE:=5
@@ -334,6 +333,61 @@ static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,a
 		return ask
 	var out:=base.duplicate(); out["kind"]="fate"; out["target"]=chosen
 	return out
+
+static func group_harm_reading(text:String,verb:String="kill",object:String="",context_civ:String="",audience_id:String="")->Dictionary:
+	## An order to kill or maim a people ("kill all the males of Tsaren",
+	## "put Tsaren's men to the sword", "kill them all") read as what it is:
+	## the fate of a town we hold, or, when the town is still theirs, a town
+	## that must be taken first ("take_first": the war leader asks to march).
+	## Never {} and never a person: court_commands.gd routes every such order
+	## here so it cannot fall on anyone in the hall.
+	var clean:=text.strip_edges()
+	var lower:=clean.to_lower()
+	var reading:=read(clean,context_civ,audience_id)
+	var kind:=String(reading.get("kind",""))
+	if kind in ["fate","which_town"] and bool((reading.get("fate",{}) as Dictionary).get("kill_men",false))==(verb=="kill"): return reading
+	var fate:=TownFate.fate_words(lower).duplicate()
+	if verb=="kill": fate["kill_men"]=true
+	fate["group"]=true
+	var base:={"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":false,"text":clean.substr(0,300),"harm":verb,"group_harm":true}
+	var target:=find_target(clean+(" "+object if object!="" else ""),context_civ)
+	if target.is_empty() or target.has("ambiguous"):
+		var spoken:=_place_in_audience(audience_id)
+		if not spoken.is_empty(): target=spoken
+	if bool(target.get("held",false)):
+		var out:=base.duplicate(); out["kind"]="fate" if verb=="kill" else "group_maim"; out["target"]=target
+		return out
+	if target.has("city_id") or target.has("unknown") or target.has("ambiguous"):
+		var first:=base.duplicate(); first["kind"]="take_first"; first["target"]=target
+		return first
+	# No town named or meant: the one we hold, or ask which, or say we hold none.
+	var held:=held_towns()
+	if held.size()==1:
+		var one:=base.duplicate(); one["kind"]="fate" if verb=="kill" else "group_maim"; one["target"]=held[0]
+		return one
+	if held.size()>1 and verb=="kill":
+		var ask:=base.duplicate(); ask["kind"]="which_town"; ask["target"]={}
+		var names:Array[String]=[]
+		for t:Dictionary in held: names.append(String(t.name))
+		ask["towns"]=names
+		return ask
+	var none:=base.duplicate(); none["kind"]="no_town"; none["target"]={}
+	return none
+
+static func _place_in_audience(audience_id:String)->Dictionary:
+	## The town, ours or theirs, last named in this audience: "kill them all"
+	## said while speaking of Tsaren means Tsaren's people.
+	if audience_id=="": return {}
+	var lines:Array=Hall.find(audience_id).get("lines",[])
+	var places:Array[Dictionary]=held_towns()
+	places.append_array(known_places())
+	for i in range(lines.size()-1,maxi(-1,lines.size()-16),-1):
+		var said:=String((lines[i] as Dictionary).get("text","")).to_lower()
+		var hits:Array[Dictionary]=[]
+		for t:Dictionary in places:
+			if _name_hit(said,String(t.name)): hits.append(t)
+		if hits.size()==1: return hits[0]
+	return {}
 
 static func _town_in_audience(held:Array,audience_id:String)->Dictionary:
 	## The held town last spoken of in this audience, by anyone.
@@ -652,6 +706,8 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"fate": return _fate(out,reading)
 		"which_town": return _which_town(out,reading)
 		"no_town": return _no_town(out,reading)
+		"take_first": return _take_first(out,reading)
+		"group_maim": return _group_maim(out,reading)
 		"storm": return _storm(out,insist)
 		"held": return _held(out,reading.get("target",{}))
 		"pursue": return _pursue(out,reading)
@@ -798,6 +854,40 @@ static func _no_town(out:Dictionary,reading:Dictionary)->Dictionary:
 	var what:="to kill or carry off" if bool(fate.get("kill_men",false)) and bool(fate.get("captives",false)) else ("to kill" if bool(fate.get("kill_men",false)) else "to carry off")
 	var failed:=_no(out,"no_town","We hold no town of theirs. There is nobody of theirs in our hands %s." % what,"Name a town and I will tell you what it would take to take it.")
 	failed.outcome="Nothing is done: we hold no town."
+	return failed
+
+static func _take_first(out:Dictionary,reading:Dictionary)->Dictionary:
+	## Harm to the people of a town still in their hands: nobody of theirs is
+	## in ours. The war leader says it must be taken first and asks to march;
+	## nothing moves until the god says yes (court_commands.gd keeps the
+	## march as the pending order). Nothing to march with: said plainly.
+	var target:Dictionary=reading.get("target",{})
+	if not target.has("city_id"): return _target_problem(out,target,"attack")
+	var name:=String(target.get("name","")).trim_prefix("Reported home of ")
+	out["target"]=target.duplicate(true)
+	var fate:Dictionary=reading.get("fate",{})
+	var men:=_has(String(reading.get("text","")).to_lower(),"(males?|men|menfolk|boys|sons|every man)\\b")
+	var deed:=("kill its men" if men else "kill its people") if String(reading.get("harm","kill"))=="kill" or bool(fate.get("kill_men",false)) else ("harm its men" if men else "harm its people")
+	var f:=forces(out.general_ref)
+	var anyone:=int(f.trained)>0 or int(f.drilling)>0 or not (f.band as Dictionary).is_empty() or not (f.idle as Array).is_empty() or not (f.away as Array).is_empty()
+	if not anyone:
+		var none:=_no(out,"nobody_under_arms","%s is still theirs. To %s we must take it first, and we have nobody under arms to take it." % [name,deed],"Raise and drill a levy first.")
+		none.outcome="Nothing is done: %s is still theirs." % name
+		return none
+	out.verdict="ask_march"; out.reason="take_first"
+	out.says="%s is still theirs. To %s we must take it first. Shall I march on it?" % [name,deed]
+	out.fix="Say yes and we march on %s." % name
+	out.outcome="Nothing is done yet: %s is still theirs." % name
+	out["march_text"]="Attack %s" % name
+	return out
+
+static func _group_maim(out:Dictionary,reading:Dictionary)->Dictionary:
+	## Maiming a whole town's people is not something a garrison does; the
+	## war leader says what it can do instead.
+	var town:Dictionary=reading.get("target",{})
+	out["target"]=town.duplicate(true)
+	var failed:=_no(out,"group_maim","That is not a thing a garrison does to a whole town.","I can put its men to the sword, take captives, rule it by the spear, or burn it. Tell me which.")
+	failed.outcome="Nothing is done at %s." % String(town.get("name","the town"))
 	return failed
 
 static func _besieged()->Dictionary:

@@ -33,6 +33,7 @@ const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
+const TownFateWords:=preload("res://scripts/town_fate.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -56,6 +57,16 @@ const ENVOY_LEADS_PATTERN:="(?i)\\b(lead|guide|show) (our|my|the) (scouts?|party
 ## Explicit words for goods moving, and for a party going out.
 const EXPLICIT_TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|plunder|loot|strip)\\b[\\w' ]{0,40}?\\b(food|meat|grain|provisions|rations|timber|wood|logs|stone|stones|clay|fiber|fibre|reeds|flax|gift|gifts|goods|packs?|stores|tribute|loads?)\\b"
 const LIVE_CONFIDENCE:=0.6
+## A people as a body, or a town's people: "all the males", "every man",
+## "the villagers", "them all". Harm ordered on them is a war order about a
+## town (court_war_orders.group_harm_reading), never a punishment of anyone
+## in the hall.
+const GROUP_OBJECT_PATTERN:="(?i)\\b(males?|men|menfolk|boys|grown men|fighting men|every (man|male|boy|soul|last one|one of (them|its|their) \\w+)|females?|women|womenfolk|girls|children|everyone|everybody|all of them|them all|villagers|townsfolk|townspeople|inhabitants|residents|population|its people|their people|the people|whole (town|village|people|tribe)|all (the|of|those|these|who|that|its|their))\\b|\\ball\\s*[!.]*$"
+## Words that name one person as the object: only these let harm fall on
+## someone in the hall ("them" and "they" never do on their own).
+const PERSON_PRONOUNS:=["himself","herself","yourself","him","her","you","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
+## The god's yes to a war leader's "Shall I march on it?".
+const CONFIRM_PATTERN:="(?i)^\\s*(yes|yes,? (do it|go|march|take it|march on it)|aye|do it|do so|go|go on|march|march on it|take it|so be it|make it so|see to it|very well|then go|go then)\\b[\\s!.,]*(now|at once)?[\\s!.]*$"
 const PENDING_DAYS:=2
 
 static var custom_directive_handler:Callable=Callable()
@@ -326,6 +337,8 @@ static func resolve_ref(ref:String,audience:Dictionary,list:Array[Dictionary],ac
 		if not speaker.is_empty() and String(speaker.key)!=actor_key: return speaker
 	var found:=mentions(clean,list)
 	if not lower in ["me","myself","the god","god"]: found=found.filter(func(m:Dictionary)->bool:return String(m.by)!="god")
+	# "All the males of Tsaren", "the villagers": a people, not one person here.
+	if not _clear_person(clean,list) and (_re(GROUP_OBJECT_PATTERN).search(clean)!=null or _names_a_place(lower)): return {}
 	if found.is_empty(): return _salient(audience,list,actor_key)
 	return _land(found[0],audience,list,actor_key)
 
@@ -409,9 +422,19 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 			for h:String in HEADINGS:
 				if String(cls.heading)=="" and h in obj: cls.heading=h
 	var foreign:=String(audience.get("origin",""))=="foreign"
+	# The god's yes to "Shall I march on it?": the march asked for goes, with
+	# the war leader still free to object if it cannot be done well.
+	var confirming:=_confirmed_war(id,audience,list,clean,context)
+	if not confirming.is_empty(): return confirming
+	# Harm ordered on a people or a town's people ("kill all the males of
+	# Tsaren") is a war order about that town, whoever it was said to and
+	# whatever the live reading names: never a hand laid on anyone here.
+	var people:=harm_to_people(clean,cls,list,live) if not bool(cls.insist) and String(cls.act)!="question" else ""
+	if people!="":
+		cls.act="command"; cls.merge(_people_route(clean,cls,audience,live,people),true)
 	# A war order ("attack Tsaren", "march home", "raid their fields") goes to
 	# the war leader as a real objective, never to the generic directive path.
-	if not foreign and not bool(cls.insist):
+	elif not foreign and not bool(cls.insist):
 		var war_reading:=WarOrders.read_live(String(live.get("object","")),clean,String(audience.get("civ_id","")),id) if from_live and String(cls.verb)=="war" else WarOrders.read(clean,String(audience.get("civ_id","")),id)
 		# The answer to "Which town?": the order given before, at the town named now.
 		var answered:=_which_town_answer(audience,clean)
@@ -441,6 +464,14 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 				var insisted:=cls.duplicate(); insisted["war"]=again_war; insisted["verb"]="war"
 				return _perform(id,audience,list,"war",_entry(list,String(pending.get("actor",""))),{},clean,insisted,true,context)
 		if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
+			var pending_said:=String(pending.get("text",""))
+			var pending_cls:=classify(pending_said)
+			pending_cls["verb"]=String(pending.verb)
+			var pending_people:=harm_to_people(pending_said,pending_cls,list) if String(pending.verb) in ["kill","maim"] else ""
+			if pending_people!="":
+				# A hesitation over harm to a people is never settled on a person here.
+				var as_war:=cls.duplicate(); as_war.merge(_people_route(pending_said,pending_cls,audience,{},pending_people),true)
+				return _perform(id,audience,list,String(as_war.verb),_entry(list,String(pending.get("actor",""))) if String(as_war.verb)=="order" else {},{},clean,as_war,true,context)
 			return _perform(id,audience,list,String(pending.verb),_entry(list,String(pending.get("actor",""))),_entry(list,String(pending.get("target",""))),clean,cls,true,context)
 		# No pending order: the god repeats the last command they gave here.
 		var lines:Array=audience.get("lines",[])
@@ -450,6 +481,11 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 			var said:=String(line.get("text",""))
 			if said==clean: continue
 			var again:=classify(said)
+			var again_people:=harm_to_people(said,again,list) if not bool(again.insist) and String(again.act)!="question" else ""
+			if again_people!="":
+				# "Now!" after "kill all the males of Tsaren": the same war order again.
+				var repeated:=again.duplicate(); repeated["act"]="command"; repeated.merge(_people_route(said,again,audience,{},again_people),true)
+				return _perform(id,audience,list,String(repeated.verb),_speaker_entry(list) if String(repeated.verb)=="order" else {},{},said,repeated,true,context)
 			if String(again.act)=="command" and not bool(again.insist) and String(again.verb)!="none":
 				var parts:=_parties(said,again,audience,list,{})
 				return _perform(id,audience,list,String(again.verb),parts.actor,parts.target,clean,again,true,context)
@@ -479,6 +515,7 @@ static func _which_town_answer(audience:Dictionary,clean:String)->Dictionary:
 		if WarOrders._name_hit(lower,String(town.name)):
 			var said:=String(pending.get("text",""))
 			var fate:=preload("res://scripts/town_fate.gd").fate_words(said.to_lower())
+			if fate.is_empty() and pending.get("fate") is Dictionary: fate=(pending.fate as Dictionary).duplicate()
 			if fate.is_empty(): return {}
 			return {"kind":"fate","target":town,"fate":fate,"full":false,"insist":false,"place":"","army_words":false,"text":said.substr(0,300)}
 	return {}
@@ -492,6 +529,111 @@ static func live_verb_allowed(verb:String,text:String)->bool:
 		"give": return _resource_in(text.to_lower())!="" or _re("(?i)\\b(gift|gifts|goods|reward|bundle)\\b").search(text)!=null
 		"send": return _re(String(VERB_PATTERNS[VERB_PATTERNS.size()-1][1])).search(text)!=null or _re("(?i)\\b(scouts?|scouting|explore|expedition|party|envoys?|messengers?|embassy)\\b").search(text)!=null
 	return true
+
+static func harm_to_people(text:String,cls:Dictionary,list:Array[Dictionary],live:Dictionary={})->String:
+	## Harm ordered on a people rather than a person: "group" when its object
+	## is a people as a body ("all the males of Tsaren", "every man in
+	## Tsaren", "them all"), "place" when it is a town or people by name
+	## ("slaughter the Esurai", "death to Tsaren"); "" when the harm is
+	## aimed at one person, or is no harm at all. Read from the ruler's own
+	## words; a live reading may add a group object but can never replace
+	## one with somebody in the hall.
+	var verb:=String(cls.get("verb",""))
+	var lower:=text.to_lower()
+	var fate_kill:=bool(TownFateWords.fate_words(lower).get("kill_men",false))
+	var live_harm:=String(live.get("act",""))=="command" and String(live.get("verb","")) in ["kill","maim"]
+	if not (verb in ["kill","maim"] or fate_kill or live_harm or is_harm(text)): return ""
+	var object:=_harm_object(text,cls)
+	if _clear_person(object,list): return ""
+	if _re(GROUP_OBJECT_PATTERN).search(object)!=null: return "group"
+	if _names_a_place(object.to_lower()): return "place"
+	if not live.is_empty():
+		var said:=(String(live.get("object",""))+" "+String(live.get("target_ref",""))).strip_edges()
+		if said!="" and _re(GROUP_OBJECT_PATTERN).search(said)!=null: return "group"
+		if said!="" and _names_a_place(said.to_lower()): return "place"
+	return ""
+
+static func _harm_object(text:String,cls:Dictionary)->String:
+	## The words the harm falls on: from the verb on (the verb phrase itself
+	## may hold "his" or "him"); without a verb, the order less its lead
+	## ("I want you to") and any opening vocative. A closing vocative
+	## ("..., war leader!") is dropped too.
+	var clean:=text.strip_edges()
+	var at:=int(cls.get("verb_at",-1))
+	var own:=String(cls.get("text",clean))==clean
+	var object:=clean.substr(at) if own and at>=0 and at<clean.length() else _strip_leads(clean)
+	var lower:=object.to_lower()
+	for lead:String in ["you to ","you "]:
+		if lower.begins_with(lead): object=object.substr(lead.length()); lower=object.to_lower()
+	var comma:=object.find(",")
+	if not (own and at>=0) and comma>0 and comma<28 and object.substr(0,comma).split(" ",false).size()<=3: object=object.substr(comma+1).strip_edges()
+	var last:=object.rfind(",")
+	if last>0:
+		var tail:=object.substr(last+1).strip_edges().trim_suffix("!").trim_suffix(".").strip_edges()
+		if tail.split(" ",false).size()<=4 and _re("(?i)\\b(him|her|himself|herself|you|yourself|kill|slay|then|and)\\b").search(tail)==null: object=object.substr(0,last)
+	return object
+
+static func _clear_person(object:String,list:Array[Dictionary])->bool:
+	## Does the object name one person: by name, by title, or "him"/"her"/"you"?
+	for m:Dictionary in mentions(object,list):
+		if String(m.by) in ["name","title"]: return true
+		if String(m.by)=="pronoun" and String(m.word) in PERSON_PRONOUNS: return true
+	return false
+
+static func _names_a_place(lower:String)->bool:
+	## A town (ours or theirs) or a people named in the words.
+	var names:Array[String]=[]
+	for t:Dictionary in WarOrders.held_towns(): names.append(String(t.name))
+	for t:Dictionary in WarOrders.known_places(): names.append(String(t.name))
+	if WorldSimulation.world!=null:
+		for c:Dictionary in WorldSimulation.world.civilizations:
+			if String(c.get("id",""))!="player": names.append(String(c.get("name","")))
+	for n:String in names:
+		if n!="" and WarOrders._name_hit(lower,n): return true
+	return false
+
+static func _people_reading(text:String,cls:Dictionary,audience:Dictionary,live:Dictionary,people:String)->Dictionary:
+	## The war reading for harm ordered on a people. A town named with no
+	## people words ("burn Tsaren") keeps its ordinary war reading.
+	var civ:=String(audience.get("civ_id",""))
+	var id:=String(audience.get("id",""))
+	if people=="place":
+		var plain:=WarOrders.read(text,civ,id)
+		if not plain.is_empty() and String(plain.get("kind",""))!="held": return plain
+	var cverb:=String(cls.get("verb",""))
+	var verb:="maim" if cverb=="maim" or (cverb!="kill" and String(live.get("verb",""))=="maim") else "kill"
+	return WarOrders.group_harm_reading(text,verb,String(live.get("object","")),civ,id)
+
+static func _people_route(text:String,cls:Dictionary,audience:Dictionary,live:Dictionary,people:String)->Dictionary:
+	## Where harm ordered on a people goes: {verb:"war", war} for a town,
+	## ours or theirs; {verb:"order"} for words about our own people with no
+	## town or foe in them ("kill all the rebels"), which go to the council's
+	## own path like any other order. Never a person in the hall.
+	var reading:=_people_reading(text,cls,audience,live,people)
+	if String(reading.get("kind",""))=="no_town" and people=="group" and _re("(?i)\\b(their|theirs|them|the enemy|enemy|foes?|those people)\\b").search(text)==null and not _names_a_place(text.to_lower()) and not _any_war():
+		var out:={"verb":"order","harm":""}
+		out.erase("war")
+		return out
+	return {"verb":"war","war":reading}
+
+static func _any_war()->bool:
+	if WorldSimulation.world==null: return false
+	for c:Dictionary in WorldSimulation.world.civilizations:
+		var rel:Dictionary=c.get("player_relation",{}) if c.get("player_relation") is Dictionary else {}
+		if bool(rel.get("at_war",false)): return true
+	return false
+
+static func _confirmed_war(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
+	## After "Shall I march on it?", the god's yes sends that march. {} when
+	## there is no such question open or these words are not a yes.
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if not bool(pending.get("confirm",false)) or Hall._day()-int(pending.get("day",-99))>PENDING_DAYS: return {}
+	if _re(CONFIRM_PATTERN).search(clean)==null and _re(INSIST_PATTERN).search(clean)==null: return {}
+	var march:=WarOrders.read(String(pending.get("text","")),String(audience.get("civ_id","")),id)
+	if march.is_empty(): return {}
+	var cls:=classify(clean)
+	cls["act"]="command"; cls["verb"]="war"; cls["war"]=march
+	return _perform(id,audience,list,"war",_entry(list,String(pending.get("actor",""))),{},clean,cls,false,context)
 
 static func _sovereign_decree(id:String,text:String,context:Dictionary)->Dictionary:
 	## Weapons of mass destruction are loosed, or forbidden again, only by the
@@ -573,6 +715,17 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:String,actor:Dictionary,target:Dictionary,text:String,cls:Dictionary,insist:bool,context:Dictionary)->Dictionary:
 	if not bool(context.get("echoed",false)):
 		Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":Hall._day(),"aside":false})
+	if verb in ["kill","maim"]:
+		# Last guard: harm whose object is a people or a town's people never
+		# lands on the actor, the one spoken to or anyone else in the hall.
+		var said:=String(cls.get("text",text))
+		var live:Dictionary=context.get("live",{}) if context.get("live") is Dictionary else {}
+		var people:=harm_to_people(said,cls,list,live)
+		if people!="":
+			cls=cls.duplicate(); cls.merge(_people_route(said,cls,audience,live,people),true)
+			verb=String(cls.verb); target={} if verb=="war" else actor
+	# A war order falls on a town or an army, never on a person in the hall.
+	if verb=="war": target={}
 	var r:=_result(verb,actor,target,text,insist)
 	audience.erase("pending_command")
 	if String(target.get("kind",""))=="god":
@@ -1016,6 +1169,10 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 	r.outcome=("%s%s " % [blocker+" " if blocker!="" else "","%s takes up your order." % who if who!="" else "Your order is taken up."])+String(routed.get("outcome",""))
 	r.route=String(routed.get("route",""))
 	r.executed=true; r.stage="order"; r.reaction="neutral"
+	if not bool(routed.get("ok",true)):
+		# Nothing was set in motion: the plain truth, never "it will be done".
+		r.outcome=(blocker+" " if blocker!="" else "")+String(routed.get("outcome",""))
+		r.executed=false
 	r.verb="order"
 	return r
 
@@ -1066,7 +1223,14 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			r.stage="war_ask"; r.executed=false; r.reaction="neutral"
 			r.obedience={"id":"object","manner":"plain","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
-			audience["pending_command"]={"verb":"war","which_town":true,"actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(reading.get("text",text)).substr(0,200)}
+			audience["pending_command"]={"verb":"war","which_town":true,"actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(reading.get("text",text)).substr(0,200),"fate":(reading.get("fate",{}) as Dictionary).duplicate()}
+		"ask_march":
+			# The town is still theirs: the war leader asks to march on it
+			# first. The march is the pending order; "yes" / "do it" sends it.
+			r.stage="war_ask"; r.executed=false; r.reaction="grave"
+			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience["pending_command"]={"verb":"war","confirm":true,"actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":String(decision.get("march_text","")).substr(0,200)}
 		"held":
 			# An attack on a town we already hold: the plain truth, no march.
 			r.stage="war_held"; r.executed=false; r.reaction="neutral"
@@ -1105,7 +1269,9 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	## custom_directive_handler, when set, is asked first.
 	# Never let a war order fall into the generic directive path.
 	var war:=WarOrders.read(text,"")
-	if not war.is_empty():
+	# "We hold no town of theirs" answers harm to a foe's people; words about
+	# our own people ("kill all the rebels") go on to the council's path.
+	if not war.is_empty() and not (String(war.get("kind",""))=="no_town" and not _any_war()):
 		var decided:=WarOrders.perform(war,false)
 		# No voice speaks here: the war leader's words and the note together.
 		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":(String(decided.get("says",""))+" "+String(decided.get("outcome",""))).strip_edges()}
@@ -1135,7 +1301,8 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 		if civic:
 			(terrain as Object).call("issue_civic_directive_text",text)
 			return {"ok":true,"route":"civic","outcome":"It goes out to the council to be carried out."}
-		return {"ok":true,"route":"recorded","outcome":"It is remembered, to be carried out."}
+		# Nothing was set in motion: say so, never that it will be done.
+		return {"ok":false,"route":"recorded","outcome":"Nothing is set in motion: nobody here has a way to carry that out as it was said. Say plainly what is to be done, and by whom."}
 	var rate:=float((applied.get("assessment",{}) as Dictionary).get("implementation_rate",0.5))
 	# Only a standing effort was set: say so, never that a concrete deed was done.
 	var words:="well" if rate>=0.72 else ("unevenly" if rate>=0.36 else "only a little")
