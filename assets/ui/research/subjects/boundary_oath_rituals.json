@@ -1,0 +1,12 @@
+{
+  "id": "boundary_oath_rituals",
+  "line": "institutions",
+  "game_year": 100,
+  "approx_historical_year": -4333,
+  "prompt": "c. 4333 BCE: Neighboring elders swear field-boundary oath at unworked marker stone; civic fresco. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-407d5d0f-d1bd-4e2b-9aa4-318f050a09f7.png",
+  "asset": "res://assets/ui/research/subjects/boundary_oath_rituals-v1.png",
+  "sha256": "3f2610d96914a2a2f2e4c26a67e6c6bb876e81fa863ec8dbcb2088f806643a11",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

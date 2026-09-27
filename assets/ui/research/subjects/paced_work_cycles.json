@@ -1,0 +1,12 @@
+{
+  "id": "paced_work_cycles",
+  "line": "labor",
+  "game_year": 95,
+  "approx_historical_year": -4367,
+  "prompt": "c. 4367 BCE: Field crew alternates rhythmic hoeing with rest in shade; charcoal and ochre. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5f6a490-3ccf-4e01-8bc3-ae99cbb89701.png",
+  "asset": "res://assets/ui/research/subjects/paced_work_cycles-v1.png",
+  "sha256": "f8cf70152c3a186c7e8b64d27e8aafb74e96bf666c198d0689a9b17643e1c474",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}

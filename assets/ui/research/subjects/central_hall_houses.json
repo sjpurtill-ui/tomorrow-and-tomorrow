@@ -1,0 +1,12 @@
+{
+  "id": "central_hall_houses",
+  "line": "infrastructure",
+  "game_year": 95,
+  "approx_historical_year": -4367,
+  "prompt": "c. 4367 BCE: Roofless tripartite house reveals central hall and two rows of side rooms; casein gouache. Mature flat handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0e2c870d-7ea6-4296-ada8-99e1c636f411.png",
+  "asset": "res://assets/ui/research/subjects/central_hall_houses-v1.png",
+  "sha256": "5306b877d0ee92b6b0f5f283b68c187968c44971bf9f8bab0388ced4c456b787",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
