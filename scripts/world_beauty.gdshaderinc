@@ -301,3 +301,26 @@ vec3 wb_woodland(vec3 earth, float stand, vec3 wood, vec2 world_xz, float pixel_
 	c *= mix(vec3(1.05, 1.03, 0.90), vec3(0.93, 1.0, 1.07), canopy.z);
 	return mix(earth, c, clamp(stand, 0.0, 1.0));
 }
+
+// -- Wind over the land (map_wind from scripts/map_ambience.gd) --------------
+// Gusts roll across open grass as travelling bands of paler, bent-over stems,
+// and ripple faintly over the canopy, downwind at the speed of the live wind.
+// Close views only. `wind` is map_wind (xy direction, z strength, w gust),
+// `clock` map_wind_clock, `motion` 0 under reduced motion (the bands then
+// hold still). Returns about -1..1 (0 when unresolved or calm).
+float wb_wind_waves(vec2 world_xz, float pixel_world, vec4 wind, float clock, float motion) {
+	float resolved = 1.0-smoothstep(0.004, 0.012, pixel_world);
+	float strength = clamp(wind.z, 0.0, 1.0)*(0.7+0.3*clamp(wind.w, 0.0, 1.0));
+	if (resolved <= 0.0 || strength <= 0.02) { return 0.0; }
+	vec2 dir = length(wind.xy) > 0.001 ? normalize(wind.xy) : vec2(1.0, 0.0);
+	vec2 across = vec2(-dir.y, dir.x);
+	float t = clock*motion;
+	// Position along the wind, in km; bands about 35 m apart travel downwind.
+	float along = dot(world_xz, dir);
+	float side = dot(world_xz, across);
+	float bend = (map_paper_noise(vec2(along, side)*18.0+vec2(4.0, -9.0))-0.5)*1.6;
+	float band = sin((along-t*0.006)*180.0+bend*3.0);
+	// Gusts come in patches a few hundred metres across, drifting with the wind.
+	float gust = smoothstep(0.35, 0.80, map_paper_noise((world_xz-dir*t*0.004)*3.2+vec2(-3.0, 7.0)));
+	return band*gust*strength*resolved;
+}

@@ -89,3 +89,28 @@ func test_shader_include_has_only_declarations_at_top_level()->void:
 		depth+=line.count("{")-line.count("}")
 		assert_int(depth).override_failure_message("unbalanced braces at line %d" % line_number).is_greater_equal(0)
 	assert_int(depth).is_equal(0)
+
+
+func test_fresh_snow_follows_the_weather_sky()->void:
+	var weather:=preload("res://scripts/map_weather.gd")
+	var cold:={"precipitation":0.8,"mean_temperature_c":-2.0,"seasonality_c":12.0,"position":Vector2(0,-4000)}
+	var hot:={"precipitation":0.8,"mean_temperature_c":26.0,"seasonality_c":4.0,"position":Vector2(0,-500)}
+	var snowy_days:=0;var lying_after_snow:=0
+	for day in range(0,730):
+		# Hot country never shows fresh snow.
+		assert_float(BEAUTY.lying_snow(4242,float(day),hot)).is_equal(0.0)
+		var sky:Dictionary=weather.state(4242,float(day),cold)
+		if float(sky.snow)>0.2:
+			snowy_days+=1
+			if BEAUTY.lying_snow(4242,float(day),cold)>0.3:lying_after_snow+=1
+	assert_int(snowy_days).is_greater(0)
+	# Wherever the sky snows hard, the ground shows it the same day.
+	assert_int(lying_after_snow).is_equal(snowy_days)
+
+
+func test_fresh_snow_is_deterministic_and_bounded()->void:
+	var cold:={"precipitation":0.9,"mean_temperature_c":-6.0,"seasonality_c":14.0,"position":Vector2(0,-5000)}
+	for day in range(0,400,7):
+		var a:=BEAUTY.lying_snow(77,float(day),cold)
+		assert_float(a).is_equal(BEAUTY.lying_snow(77,float(day),cold))
+		assert_float(a).is_between(0.0,1.0)

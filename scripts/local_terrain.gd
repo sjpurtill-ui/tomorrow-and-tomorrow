@@ -398,7 +398,10 @@ var capture_render_active:=false
 var discovery_mask_texture:ImageTexture
 var seasonal_materials:Array[WeakRef]=[]
 var last_seasonal_day:=INF
+var seasonal_motion:=-1.0
+var seasonal_snow:=0.0
 const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
+const WORLD_BEAUTY:=preload("res://scripts/world_beauty.gd")
 var woodland_visual_areas:=PackedVector4Array()
 var woodland_visual_key:=""
 var woodland_harvest_detail:MultiMeshInstance3D
@@ -2251,6 +2254,12 @@ uniform vec2 fog_current_origin = vec2(0.0);
 uniform float drainage_phase = 0.0;
 uniform float land_resources = 0.0;
 uniform bool woodland_channel = true;
+// The live wind (scripts/map_ambience.gd), reduced-motion switch and fresh
+// snow near home from the weather sky (world_beauty.gd), all visual only.
+uniform vec4 map_wind = vec4(1.0, 0.0, 0.0, 0.0);
+uniform float map_wind_clock = 0.0;
+uniform float wb_motion = 1.0;
+uniform float weather_snow = 0.0;
 
 varying vec3 world_position;
 uniform vec4 streamed_cutout = vec4(0.0);
@@ -2697,6 +2706,10 @@ void fragment() {
 	float wb_stand_cover=wb_stand(wb_wood_density,regional,soil_patch,pixel_world)*(1.0-rock_mask*0.8);
 	earth = wb_woodland(earth,wb_stand_cover,wb_biome_palette(wb_rain,wb_warmth,1.0,world_position.y,0.5),world_position.xz,pixel_world);
 	earth = wb_canopy_edges(earth,wb_stand_cover,relative_position.xz,pixel_world);
+	// Gusts rolling through the grass, a fainter shimmer over the canopy.
+	float wb_gust=wb_wind_waves(world_position.xz,pixel_world,map_wind,map_wind_clock,wb_motion);
+	earth*=1.0+wb_gust*mix(0.055,0.025,wb_stand_cover);
+	earth=mix(earth,earth*vec3(1.05,1.05,0.96),max(wb_gust,0.0)*(1.0-wb_stand_cover)*0.5);
 	earth = mix(earth, exposed_rock, rock_mask * 0.78);
 	// Resource mode reads as land cover, without floating pins or rings.
 	earth=mix(earth,earth*vec3(0.72,1.24,0.80),land_resources*forest_mask*0.70);
@@ -2711,6 +2724,14 @@ void fragment() {
 	if (surface_uv.x>=0.999 && world_position.y>0.0) {
 		float cryosphere_pattern=regional*0.62+soil_patch*0.38;
 		earth=seasonal_terrain(earth,surface_uv.y,surface_uv.x-1.0,seasonal_amplitude,world_position.z,forest_mask,slope,cryosphere_pattern);
+		// Fresh snow from the weather sky lies wherever the ground is cold
+		// enough today, heaviest on sheltered open ground.
+		if (weather_snow>0.0) {
+			float wb_ground_c=landscape_temperature(surface_uv.y,seasonal_amplitude,world_position.z);
+			float wb_fresh=weather_snow*(1.0-smoothstep(2.0,7.0,wb_ground_c))*(1.0-smoothstep(0.25,0.62,slope))
+				*smoothstep(0.25,0.60,cryosphere_pattern*0.6+0.4);
+			earth=mix(earth,vec3(0.86,0.88,0.90),clamp(wb_fresh*mix(0.85,0.45,wb_stand_cover),0.0,0.9));
+		}
 	}
 	// A fixed north-west sun gives the orthographic world the same readable relief
 	// cues as satellite hillshade. Keep the effect restrained at close range where
@@ -2822,20 +2843,36 @@ func _terrain_seasonality_at(x:float,z:float,_height:float)->float:
 func _register_seasonal_material(material:ShaderMaterial)->void:
 	seasonal_materials.append(weakref(material))
 	material.set_shader_parameter("season_phase",PlanetEnvironment.season_wave({},GameState.elapsed_days))
+	material.set_shader_parameter("weather_snow",seasonal_snow)
+	if seasonal_motion>=0.0:material.set_shader_parameter("wb_motion",seasonal_motion)
 
 func _refresh_seasonal_visuals()->void:
+	# Reduced motion stills the wind sway and grass waves at once.
+	var motion:=0.0 if preload("res://scripts/hud/motion.gd").reduced() else 1.0
+	if motion!=seasonal_motion:
+		seasonal_motion=motion
+		for reference in seasonal_materials:
+			var material:=reference.get_ref() as ShaderMaterial
+			if material:material.set_shader_parameter("wb_motion",motion)
 	# Simulation time only. Pausing freezes the season; no mesh/crown rebuild.
 	var day:=GameState.elapsed_days
 	if is_finite(last_seasonal_day) and absf(day-last_seasonal_day)<0.1:return
 	last_seasonal_day=day
 	var phase:=PlanetEnvironment.season_wave({},day)
+	# Fresh snow near home from the same sky the map's weather draws.
+	var snow:=0.0
+	var home:Vector3=GameState.settlement_founded_at if GameState.settlement_site_committed else (settler_marker.position if settler_marker else Vector3.ZERO)
+	if SEAMLESS_WORLD and PlanetEnvironment.has_method("profile_at"):
+		snow=WORLD_BEAUTY.lying_snow(int(GameState.world_seed),day,PlanetEnvironment.profile_at(Vector2(home.x,home.z)))
 	var living:Array[WeakRef]=[]
 	for reference in seasonal_materials:
 		var material:=reference.get_ref() as ShaderMaterial
 		if material==null:continue
 		living.append(reference)
 		material.set_shader_parameter("season_phase",phase)
+		material.set_shader_parameter("weather_snow",snow)
 	seasonal_materials=living
+	seasonal_snow=snow
 
 func _vegetation_climate(position:Vector3)->Color:
 	var biome:=_biome_at(position.x,position.z)
@@ -4494,6 +4531,12 @@ uniform int atlas_variant = -1;
 uniform float lod_fade = 1.0;
 uniform vec4 close_patch = vec4(0.0);
 uniform sampler2D canopy_atlas : source_color, filter_linear_mipmap, repeat_disable;
+// The live wind (scripts/map_ambience.gd): crowns and scrub sway downwind,
+// tops more than bases, each plant on its own phase. wb_motion is 0 under
+// reduced motion.
+uniform vec4 map_wind = vec4(1.0, 0.0, 0.0, 0.0);
+uniform float map_wind_clock = 0.0;
+uniform float wb_motion = 1.0;
 varying float tree_keep;
 varying vec3 world_position;
 varying vec2 patch_position;
@@ -4511,7 +4554,18 @@ float filtered_vn(vec2 point) {
 	float footprint=max(length(dFdx(point)),length(dFdy(point)));
 	return mix(vn(point),0.5,smoothstep(0.35,1.1,footprint));
 }
-void vertex() { plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
+void vertex() {
+	if (vegetation_kind!=2 && wb_motion>0.0 && map_wind.z>0.01) {
+		// Up to about half a metre at a crown's top in a gale.
+		vec2 root=MODEL_MATRIX[3].xz;
+		float phase=dot(root,vec2(913.7,677.3));
+		float lean=0.55+0.45*sin(map_wind_clock*1.9+phase)*(0.6+0.4*map_wind.w);
+		float reach=clamp(VERTEX.y/0.0024,0.0,1.0);
+		vec2 dir=length(map_wind.xy)>0.001?normalize(map_wind.xy):vec2(1.0,0.0);
+		vec3 push=vec3(dir.x,0.0,dir.y)*0.00045*map_wind.z*lean*reach*reach*wb_motion;
+		VERTEX+=inverse(mat3(MODEL_MATRIX))*push;
+	}
+	plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
 void fragment() {
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float revealed=max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin)));

@@ -57,3 +57,21 @@ static func biome_colour(rain:float,warm:float,forest:float,height:float,pattern
 
 static func _tint(c:Color,t:Color)->Color:
 	return Color(c.r*t.r,c.g*t.g,c.b*t.b)
+
+
+const MapWeather:=preload("res://scripts/map_weather.gd")
+## How many days fresh snow from map_weather.gd lies on the ground near home.
+const SNOW_LINGER_DAYS:=4
+
+## Fresh snow lying near home (0-1), read from the same sky map_weather.gd
+## draws, so the ground shows snow on and just after the days it snows there.
+## Each earlier snowy day counts a little less; warm spells melt it faster.
+## Pure: the same world, day and climate always give the same ground.
+static func lying_snow(seed:int,day:float,climate:Dictionary)->float:
+	var lying:=0.0
+	for back in SNOW_LINGER_DAYS:
+		var sky:Dictionary=MapWeather.state(seed,day-float(back),climate)
+		var fell:=float(sky.get("snow",0.0))
+		var thaw:=clampf((float(sky.get("temperature_c",0.0))-1.0)/6.0,0.0,1.0)
+		lying=maxf(lying,clampf(fell*2.2,0.0,1.0)*(1.0-float(back)*0.22)*(1.0-thaw*0.8))
+	return clampf(lying,0.0,1.0)
