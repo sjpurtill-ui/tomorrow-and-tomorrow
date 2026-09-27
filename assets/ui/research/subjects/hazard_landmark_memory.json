@@ -1,0 +1,12 @@
+{
+  "id": "hazard_landmark_memory",
+  "line": "infrastructure",
+  "game_year": 3,
+  "approx_historical_year": -4980,
+  "prompt": "c. 4980 BCE: a guide points travelers away from a dangerous river ford using a split boulder and bent tree as memorable landmarks. Flat matte architectural casein gouache, mineral blue and slate planar shapes; no map, sign, bridge or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-32fc6c94-ddd8-4efc-b28f-28ad1db930e5.png",
+  "asset": "res://assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+  "sha256": "eb3f533970414c028af6761dac38e14dfce4e7b3856c6da2fd3b26c8b9b6670e",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+}

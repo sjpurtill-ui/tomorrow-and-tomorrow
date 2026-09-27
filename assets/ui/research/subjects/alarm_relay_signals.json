@@ -1,0 +1,12 @@
+{
+  "id": "alarm_relay_signals",
+  "line": "security",
+  "game_year": 3,
+  "approx_historical_year": -4980,
+  "prompt": "c. 4980 BCE: alarm calls relayed by three adults between separate reed huts, without visual sound symbols. Mature handmade 2D layered woodblock print, vermilion and charcoal, rough ink and flat silhouettes, no later technology or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b34579bf-aaa7-466e-a638-3525e6e7bf9a.png",
+  "asset": "res://assets/ui/research/subjects/alarm_relay_signals-v1.png",
+  "sha256": "36ebf0dffed7594bd41a153807fb29f6df1cdcbc67017c226b159f5d6e829040",
+  "mode": "built-in image_gen / new image",
+  "review": "Third generation selected; earlier variants cropped caller or used comic sound marks. Accepted after visual 3.37:1 crop and subject/period check."
+}
