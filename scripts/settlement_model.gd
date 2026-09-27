@@ -1952,13 +1952,27 @@ func _update_plot_workforce(day:int,events:Array[Dictionary])->void:
 				plot["idle_months"]=0
 				# Idle ground decays while empty; a field is back in use as soon as
 				# people farm it again, however overgrown (its condition then recovers).
+				# A run-down workshop or store is taken back for repair instead.
 				if previous_status=="vacant" and (land_use=="field" or float(plot.get("condition",0.0))>=0.28):
 					plot["status"]="active"
 					plot["reoccupation_state"]="reoccupied"
+				elif previous_status=="vacant":
+					_reclaim_vacant_building(plot,day)
 			if String(plot.get("status",""))!=previous_status:
 				WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"work_ground_idled" if assigned<=0 else "work_ground_reoccupied","new_state":String(plot.status),"cause":"%s labor allocation changed" % role})
 				WorldSimulation.state.morphology_revision+=1
 				events.append({"type":"morphology","title":"%s %s" % [land_use.capitalize(),"Fell Idle" if assigned<=0 else "Returned to Use"],"plot_id":int(plot.id)})
+
+## A building left empty only decays, so it could never reach the condition
+## needed to be used again. When people come back to it, it needs repair, as
+## damage does: builders mend it month by month (the more it decayed, the
+## longer) until it stands in use again. Ruins keep their own path.
+func _reclaim_vacant_building(plot:Dictionary,day:int)->void:
+	plot["reoccupation_state"]="reoccupied"
+	plot["status"]="damaged";plot["repair_state"]="awaiting_assessment"
+	# What still stands is the frame: never so low that it is written off.
+	plot["condition"]=maxf(float(plot.get("condition",0.0)),0.14)
+	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"reclaimed_for_repair","new_state":"damaged","cause":"people returned to a run-down building; builders repair it"})
 
 func _attempt_field_growth(day:int,events:Array[Dictionary],context:Dictionary={})->void:
 	if not _can_add_plots(): return
@@ -2170,6 +2184,9 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			if previous_status=="vacant" and float(plot.get("condition",0.0))>=0.32:
 				plot["status"]="active"
 				plot["reoccupation_state"]="reoccupied"
+				plot["abandoned_day"]=-1
+			elif previous_status=="vacant":
+				_reclaim_vacant_building(plot,day)
 				plot["abandoned_day"]=-1
 		if String(plot.get("status",""))!=previous_status:
 			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"vacated" if String(plot.status)=="vacant" else "reoccupied","new_state":plot.status,"cause":"population redistribution across usable household ground"})
