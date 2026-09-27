@@ -1,0 +1,12 @@
+{
+  "id": "sleeping_area_rotation",
+  "line": "demography",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: overhead view of adults moving plain unpatterned reed sleeping mats around a stone-ring hearth so warm places rotate. Mature flat chalk pastel and cut-paper collage, terracotta, slate and warm ivory; no rug patterns, furniture, written schedule or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1090562c-106d-4cab-80be-090aa9ad5f28.png",
+  "asset": "res://assets/ui/research/subjects/sleeping_area_rotation-v1.png",
+  "sha256": "9741537f22e6f25ecd4b5d49b6ef98fa3ed68b41394f3a630da87e64a25cc5ed",
+  "mode": "built-in image_gen / new image",
+  "review": "Third generation selected; first used ornate textiles and second had graphic arrows. Accepted after visual 3.37:1 crop and subject/period check."
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "id": "aptitude_trials",
+    "line": "labor",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: experienced worker compares new hands shaping reeds and flint to assign practical work. Mature handmade 2D charcoal over ochre wash, coarse smears and angular hands, early Neolithic materials, no metal, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bf3d0717-505e-4c8d-b09f-8fe7a4227638.png",
+    "asset": "res://assets/ui/research/subjects/aptitude_trials-v1.png",
+    "sha256": "cff3cff78c3fc4d948d823b157be4575644f632549c197e1c40c47bbb9642bf7",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; distinct working hands clear in crop. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "dawn_readiness_drill",
+    "line": "security",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: at dawn adults practice quickly gathering flint-tipped spears from a reed shelter. Mature flat hand-cut woodblock print, black and vermilion ink, rough carved silhouettes; no helmets, armor, metal, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-73b9e0ee-e527-4a57-965e-725f3fecac69.png",
+    "asset": "res://assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+    "sha256": "f3f9c0ca819e56dd5f499fd90eb0b70306ca92e4f33ad021988217bc4986ec90",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first cropped action and used comic-like radiating marks. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "dissenting_voice_custom",
+    "line": "institutions",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: in a three-person early Neolithic council, the center adult respectfully voices opposition with an open hand while others listen. Mature matte civic fresco on rough plaster, dusty plum and limestone, handmade pigments; no voting gear, written proposal, classical robes or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a3d346c7-d57c-41b8-aa1e-bacbf621a72a.png",
+    "asset": "res://assets/ui/research/subjects/dissenting_voice_custom-v1.png",
+    "sha256": "b0989bdb981a1df1d410fea6b9ee4accfc1f22481bd07b08c10f1a05e72e0c52",
+    "mode": "built-in image_gen / new image",
+    "review": "Fourth generation selected; earlier crops cut speaker or made the group too tiny. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "fever_watch_customs",
+    "line": "demography",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: adult keeps night watch over a feverish infant on a plain reed mat by a stone-ring hearth, gently checking the childs forehead. Mature flat chalk pastel and cut-paper collage, terracotta and slate, no bedframe, later medical equipment or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0cfd5c14-13bb-4a20-9216-154a89925322.png",
+    "asset": "res://assets/ui/research/subjects/fever_watch_customs-v1.png",
+    "sha256": "f09448810a2a8652bf88957cc373e74db6e697fa08b8bf74b9290ae231f06700",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected for flatter handmade rendering. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "paired_carrier_balancing",
+    "line": "logistics",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: two adults balance a heavy load of gathered roots suspended from the center of a timber carrying pole supported at both ends. Mature flat panoramic travel watercolor, faded indigo and sand-gold washes, no cart, wheel, metal or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5e238461-a677-4bd0-855e-ac74bb9db80e.png",
+    "asset": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+    "sha256": "3dda5fd00ef21af97a940cd3c05d9aabb1f9e982a0a775f4083ee01a2bdcf7e0",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first had camera-like landscape. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "sleeping_area_rotation",
+    "line": "demography",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: overhead view of adults moving plain unpatterned reed sleeping mats around a stone-ring hearth so warm places rotate. Mature flat chalk pastel and cut-paper collage, terracotta, slate and warm ivory; no rug patterns, furniture, written schedule or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1090562c-106d-4cab-80be-090aa9ad5f28.png",
+    "asset": "res://assets/ui/research/subjects/sleeping_area_rotation-v1.png",
+    "sha256": "9741537f22e6f25ecd4b5d49b6ef98fa3ed68b41394f3a630da87e64a25cc5ed",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; first used ornate textiles and second had graphic arrows. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "symptom_sharing_customs",
+    "line": "health",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: ill adult indicates throat and chest while kin and healer listen openly. Mature flat transparent sage and celadon watercolor with spare ink and fibrous paper; no later medical devices, writing, diagram or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2671778a-54ab-4491-9f9d-297ef01c846a.png",
+    "asset": "res://assets/ui/research/subjects/symptom_sharing_customs-v1.png",
+    "sha256": "d915bf75b08ca354b889dd0aa080bb571b0bfb2757f391862cf0a966c9d639dc",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "tool_hazard_awareness",
+    "line": "health",
+    "game_year": 4,
+    "approx_historical_year": -4973,
+    "prompt": "c. 4973 BCE: adult guides an adolescent to hold a flint edge safely away from fingers and body. Mature watercolor and ink with flat sage/celadon washes, hand-drawn contours, no injury, metal knife, written warning or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-08ac240e-956c-4c73-9068-37e85db9e68f.png",
+    "asset": "res://assets/ui/research/subjects/tool_hazard_awareness-v1.png",
+    "sha256": "57f9172208d4b492ab211957a7b391cb467c1675467fff8029cb88cf59afbaa2",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected for clearer, less realistic safety gesture. Accepted after visual 3.37:1 crop and subject/period check."
+  }
+]

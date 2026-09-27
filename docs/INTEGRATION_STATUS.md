@@ -1,3 +1,11 @@
+## September 27 — earliest-first year 4 art, batch 3: INTEGRATED
+
+Worker `925e0a7879d1f8aeaa36781e9afdb53b100ce4d1`, branch `codex/research-art-earliest-03`, base `c5855a94`, integrated by clean fast-forward. Eight year4 subjects gain dedicated paintings: aptitude_trials, dawn_readiness_drill, dissenting_voice_custom, fever_watch_customs, paired_carrier_balancing, sleeping_area_rotation, symptom_sharing_customs and tool_hazard_awareness. Classical Other batch10 stays HELD/excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for early materials, dress, shelters and subject clarity. Combined Godot 4.7.2 import has no logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-03` passes eight catalogue lookups, distinct texture/provenance hashes, hidden gating and crop bounds. Every lookup also passes at years1,2,3,4,299,300,600. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest03-runtime.log` and `earliest-03-research-in-game-crops.png`.
+
+Reproduced early audit:1122 rows,388 own effective paintings,734 borrowed/line,zero missing files. Counts use proposed-year lookup and filename ownership, not artistic-quality certification. Next gaps are year5 common_path_alignment,edge_resharpening_rounds,emergency_food_caching. No simulation/save changes or import churn committed; full campaign/unrelated suites not repeated. No active canonical player found; no player/editor stopped or restarted.
+
 ## September 26 — earliest-first year 3 art, batch 2: INTEGRATED
 
 Worker `183d03efe6b135cada19f46ffe33108ea23268ad`, branch `codex/research-art-earliest-02`, base `27d48512`, merged with main `c42dd1c2` as `979a0127`. Nine year3 subjects gain dedicated paintings: alarm_relay_signals, council_messenger_duty, dawn_task_briefings, edge_testing_by_feel, hazard_landmark_memory, labor_position_customs, landmark_route_naming, named_descent_lines and sickness_pattern_memory. Newer test fixes remain preserved. Classical Other batch10 stays HELD/excluded.

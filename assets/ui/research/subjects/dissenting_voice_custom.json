@@ -1,0 +1,12 @@
+{
+  "id": "dissenting_voice_custom",
+  "line": "institutions",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: in a three-person early Neolithic council, the center adult respectfully voices opposition with an open hand while others listen. Mature matte civic fresco on rough plaster, dusty plum and limestone, handmade pigments; no voting gear, written proposal, classical robes or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a3d346c7-d57c-41b8-aa1e-bacbf621a72a.png",
+  "asset": "res://assets/ui/research/subjects/dissenting_voice_custom-v1.png",
+  "sha256": "b0989bdb981a1df1d410fea6b9ee4accfc1f22481bd07b08c10f1a05e72e0c52",
+  "mode": "built-in image_gen / new image",
+  "review": "Fourth generation selected; earlier crops cut speaker or made the group too tiny. Accepted after visual 3.37:1 crop and subject/period check."
+}

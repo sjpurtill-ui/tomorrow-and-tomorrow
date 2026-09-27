@@ -1,0 +1,12 @@
+{
+  "id": "symptom_sharing_customs",
+  "line": "health",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: ill adult indicates throat and chest while kin and healer listen openly. Mature flat transparent sage and celadon watercolor with spare ink and fibrous paper; no later medical devices, writing, diagram or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2671778a-54ab-4491-9f9d-297ef01c846a.png",
+  "asset": "res://assets/ui/research/subjects/symptom_sharing_customs-v1.png",
+  "sha256": "d915bf75b08ca354b889dd0aa080bb571b0bfb2757f391862cf0a966c9d639dc",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first was too realistic. Accepted after visual 3.37:1 crop and subject/period check."
+}
