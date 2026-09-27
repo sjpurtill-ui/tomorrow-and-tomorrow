@@ -9,6 +9,8 @@ func before_test()->void:
 	GameState.ensure_population_total(100);GameState.settlement_site_committed=true;GameState.convoy_traveling=false
 	GameState.population_allocations.Construction=20;GameState.population_allocations.Logistics=10
 	GameState.resource_stockpiles={"Stone":40.0,"Timber":20.0,"Clay":20.0,"Civilian Goods":4.0,"Freshwater":0.0}
+	# An even research split: no line's specialization scales these effects.
+	for line:String in GameState.research_allocations:GameState.research_allocations[line]=1.0
 
 func after_test()->void:
 	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
@@ -68,7 +70,11 @@ func test_cistern_uses_one_real_lining_and_rain_adds_finite_unsafe_water()->void
 	assert_float(float(GameState.water_metrics.rain_collected_today)).is_between(15.9,16.0)
 	assert_float(float(GameState.water_metrics.cistern_capacity)).is_greater(249.0)
 	assert_float(DiscoverySystem.effect("water_access")).is_greater(0.0)
-	assert_float(DiscoverySystem.effect("water_safety")).is_equal(0.0)
+	# The collected rain is unsafe water; safety comes only from the covered
+	# cistern practice's own small listed effect (research rebalance), never
+	# from the volume collected.
+	var listed:=float((DiscoverySystem.discovery_definition("rainwater_cisterns").get("effects",{}) as Dictionary).get("water_safety",0.0))
+	assert_float(DiscoverySystem.effect("water_safety")).is_equal_approx(listed*preload("res://scripts/civilian_goods.gd").factor("rainwater_cisterns"),.000001)
 	Works.advance({"environment_profile":{"precipitation":0.0}},2,100.0);DiscoverySystem.refresh_operating_effects()
 	assert_float(DiscoverySystem.effect("water_access")).is_equal(0.0)
 
