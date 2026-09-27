@@ -1,0 +1,12 @@
+{
+  "id": "rotating_heavy_tasks",
+  "line": "labor",
+  "game_year": 22,
+  "approx_historical_year": -4853,
+  "prompt": "c. 4853 BCE: Able adults exchange heavy timber-moving duty as first pair rests and second pair takes carrying ropes; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-86cbbc4e-772d-4d65-bdc5-acc86be594de.png",
+  "asset": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png",
+  "sha256": "4103780988bf69f8f7d6485d0391edde14d25ddebfb1bc342507d50bba0f4229",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; task handoff and shared heavy work clear in crop."
+}

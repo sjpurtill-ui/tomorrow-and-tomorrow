@@ -3754,5 +3754,15 @@
   "skill_recognition": {"path": "res://assets/ui/research/subjects/skill_recognition-v1.png", "focus": [0.5, 0.5]},
   "sledges_travois": {"path": "res://assets/ui/research/subjects/sledges_travois-v1.png", "focus": [0.5, 0.5]},
   "textile_repair_methods": {"path": "res://assets/ui/research/subjects/textile_repair_methods-v1.png", "focus": [0.5, 0.5]},
-  "throwing_spears": {"path": "res://assets/ui/research/subjects/throwing_spears-v1.png", "focus": [0.5, 0.5]}
+  "throwing_spears": {"path": "res://assets/ui/research/subjects/throwing_spears-v1.png", "focus": [0.5, 0.5]},
+  "blood_price": {"path": "res://assets/ui/research/subjects/blood_price-v1.png", "focus": [0.5, 0.5]},
+  "controlled_undergrowth_burning": {"path": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png", "focus": [0.5, 0.5]},
+  "down_the_line_exchange": {"path": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png", "focus": [0.5, 0.5]},
+  "mouths_against_store": {"path": "res://assets/ui/research/subjects/mouths_against_store-v1.png", "focus": [0.5, 0.5]},
+  "stone_maceheads": {"path": "res://assets/ui/research/subjects/stone_maceheads-v1.png", "focus": [0.5, 0.5]},
+  "wound_packing": {"path": "res://assets/ui/research/subjects/wound_packing-v1.png", "focus": [0.5, 0.5]},
+  "ambush_raids": {"path": "res://assets/ui/research/subjects/ambush_raids-v1.png", "focus": [0.5, 0.5]},
+  "load_lashing_knots": {"path": "res://assets/ui/research/subjects/load_lashing_knots-v1.png", "focus": [0.5, 0.5]},
+  "poultices": {"path": "res://assets/ui/research/subjects/poultices-v1.png", "focus": [0.5, 0.5]},
+  "rotating_heavy_tasks": {"path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png", "focus": [0.5, 0.5]}
 }

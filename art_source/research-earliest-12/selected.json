@@ -1,0 +1,122 @@
+[
+  {
+    "id": "blood_price",
+    "line": "institutions",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: A household compensates injured persons kin with baskets and grain while elders witness peaceful resolution; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c5d55860-0284-44a6-adf9-eaa984b0896e.png",
+    "asset": "res://assets/ui/research/subjects/blood_price-v1.png",
+    "sha256": "64d589b2d362b32e77f75df8b854329c50472922d92ea2a4cd7fe82fe0444cce",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; restitution goods and witnessed resolution clear in crop."
+  },
+  {
+    "id": "controlled_undergrowth_burning",
+    "line": "ecology",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: Adults manage narrow low undergrowth burn for future forage and game as others watch safe boundary; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42b613cf-7653-4a32-a649-e19216162aa5.png",
+    "asset": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png",
+    "sha256": "0e48a1d78d0098e7bdf6e746422813dc12af9d2b48da5434006c8aeeb795114c",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; bounded fire, thin smoke and grazing animals clear in crop."
+  },
+  {
+    "id": "down_the_line_exchange",
+    "line": "logistics",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: River communities pass flint, obsidian and shells from one trading pair to the next; sparse travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9545e8ae-ef61-49a9-b65e-6acd9a75e004.png",
+    "asset": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
+    "sha256": "6a5e34b7eb205d1bb935608016dfafac892a5b2d79463470ff38fbcf0be3bd16",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; relay exchange and varied goods clear in crop."
+  },
+  {
+    "id": "mouths_against_store",
+    "line": "demography",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: Adults compare household members to remaining grain baskets and count plain pebbles by each person; chalk pastel and cut-paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f638c823-7908-4ee8-9c61-dadfb68c72c7.png",
+    "asset": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
+    "sha256": "857402be5a6495842cf49814266ed8e64d15756be9fa8360731b57dba31e076f",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; family, pebble count and limited store clear in crop; no writing."
+  },
+  {
+    "id": "stone_maceheads",
+    "line": "security",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: Craftspeople drill rounded heavy stone mace head and bind another to plain wooden haft; hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-47024ae1-7355-4de5-a991-d33b11e6e0fd.png",
+    "asset": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
+    "sha256": "a018b782af74ac268a6b171d2cbfea8a4d2c014c62c76482e44be2ca0e6a11ca",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; mineral stone head and practice mace clear, no metal."
+  },
+  {
+    "id": "wound_packing",
+    "line": "health",
+    "game_year": 20,
+    "approx_historical_year": -4867,
+    "prompt": "c. 4867 BCE: Caregiver tends adult arm wound with moss, plant lint and leaves under reed shelter; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cfeec6ea-754d-4303-a447-6294923405f6.png",
+    "asset": "res://assets/ui/research/subjects/wound_packing-v1.png",
+    "sha256": "aced84f9d4bd7ba40bb6ede472fd1874461c069e85ad062c10e1290d3a453f8a",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; period care custom depicted without graphic injury or instructional labels."
+  },
+  {
+    "id": "ambush_raids",
+    "line": "security",
+    "game_year": 22,
+    "approx_historical_year": -4853,
+    "prompt": "c. 4853 BCE: Scouts rehearse dawn ambush with hidden group in brush and approach group on trail; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-85e2653c-1e4b-4b46-bf8b-908bf013d026.png",
+    "asset": "res://assets/ui/research/subjects/ambush_raids-v1.png",
+    "sha256": "77a6dfbdec2ed67337ecb1222804ae95144c55a6beb83de75df7c1e7ff818381",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; dawn concealment and rehearsal clear, no actual injury."
+  },
+  {
+    "id": "load_lashing_knots",
+    "line": "logistics",
+    "game_year": 22,
+    "approx_historical_year": -4853,
+    "prompt": "c. 4853 BCE: Adults secure timber and baskets to hand-drawn travois with fiber knots and hitches; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-34ee5c14-a2b6-4cce-81d2-f0389b6a7a90.png",
+    "asset": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
+    "sha256": "45b5e4992ffc49081f4d9f7e691e213c6bc98b1616b9d954def3be167ea268c8",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; lashing and loaded travois clear, no wheels or animals."
+  },
+  {
+    "id": "poultices",
+    "line": "health",
+    "game_year": 22,
+    "approx_historical_year": -4853,
+    "prompt": "c. 4853 BCE: Caregiver crushes wild leaves with clay and fat in stone bowl and places poultice on adults sore arm; watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6cb2d83c-1ff6-4497-916a-7834750a4e37.png",
+    "asset": "res://assets/ui/research/subjects/poultices-v1.png",
+    "sha256": "7d8bb4004617d7b4b3627b121f72245d332c4dd3179acfed6e1adf88a2d295aa",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; historical care action and bowl materials clear without instructional text."
+  },
+  {
+    "id": "rotating_heavy_tasks",
+    "line": "labor",
+    "game_year": 22,
+    "approx_historical_year": -4853,
+    "prompt": "c. 4853 BCE: Able adults exchange heavy timber-moving duty as first pair rests and second pair takes carrying ropes; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-86cbbc4e-772d-4d65-bdc5-acc86be594de.png",
+    "asset": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png",
+    "sha256": "4103780988bf69f8f7d6485d0391edde14d25ddebfb1bc342507d50bba0f4229",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; task handoff and shared heavy work clear in crop."
+  }
+]
