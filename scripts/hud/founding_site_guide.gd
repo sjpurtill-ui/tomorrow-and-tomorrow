@@ -57,16 +57,16 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	var water_row:=HBoxContainer.new();water_row.add_theme_constant_override("separation",9);water_column.add_child(water_row)
 	_icon(water_row,Icons.texture_for("Freshwater"),38)
 	var water_copy:=VBoxContainer.new();water_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;water_copy.add_theme_constant_override("separation",1);water_row.add_child(water_copy)
-	heading=_label(water_copy,16);heading.add_theme_font_override("font",T.font("ui_strong"));source=_label(water_copy,13);source.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	heading=_label(water_copy,16);heading.add_theme_font_override("font",T.font("ui_strong"));source=_wrapping(_label(water_copy,13),160)
 	meter_label=_label(water_row,18);meter_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;meter_label.custom_minimum_size.x=58;meter_label.add_theme_color_override("font_color",T.INK)
 	meter=ProgressBar.new();meter.custom_minimum_size.y=6;meter.show_percentage=false;water_column.add_child(meter)
-	meter_note=_label(water_column,13);meter_note.add_theme_color_override("font_color",T.INK_MUTED);meter_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	meter_note=_wrapping(_label(water_column,13),260);meter_note.add_theme_color_override("font_color",T.INK_MUTED)
 	var neighbor_card:=_card(body,T.RULE)
 	var neighbor_row:=HBoxContainer.new();neighbor_row.add_theme_constant_override("separation",9);neighbor_card.add_child(neighbor_row)
 	_icon(neighbor_row,SurveyVisuals.symbol("flag",T.INK_MUTED),28)
 	var neighbor_copy:=VBoxContainer.new();neighbor_copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;neighbor_copy.add_theme_constant_override("separation",1);neighbor_row.add_child(neighbor_copy)
 	neighbor_heading=_label(neighbor_copy,12);neighbor_heading.text="NEIGHBOURS";neighbor_heading.add_theme_color_override("font_color",T.INK_MUTED)
-	neighbor_label=_label(neighbor_copy,14);neighbor_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	neighbor_label=_wrapping(_label(neighbor_copy,14),150)
 	neighbor_badge=_label(neighbor_row,13);neighbor_badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;neighbor_badge.custom_minimum_size.x=78
 	var resource_header:=HBoxContainer.new();body.add_child(resource_header)
 	var resource_title:=_label(resource_header,12);resource_title.text="SEEN WITHIN %d KM" % roundi(RESOURCE_RADIUS_KM);resource_title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;resource_title.add_theme_color_override("font_color",T.INK_MUTED)
@@ -90,6 +90,13 @@ func _label(parent:Node,font_size:int)->Label:
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF
 	label.add_theme_font_override("font",T.FONT_UI)
 	label.add_theme_font_size_override("font_size",maxi(12,font_size));label.add_theme_color_override("font_color",T.BODY);parent.add_child(label);return label
+
+## A label that wraps onto more lines instead of trimming to "...".
+func _wrapping(label:Label,width:float)->Label:
+	label.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x=width
+	return label
 
 func _card(parent:Node,accent:Color)->PanelContainer:
 	var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -186,7 +193,7 @@ func _search()->void:
 	search_status.text="%d marked on the map" % sites.size()
 	if sites.is_empty():search_status.text="None found yet"
 	for index:int in sites.size():
-		var choose:=Kit.button(options,"Site %d, %.1f km" % [index+1,float(sites[index].travel_distance_km)],false,_select.bind(index),"Look at site %d on the map" % (index+1));choose.custom_minimum_size.y=34;choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_theme_font_size_override("font_size",14)
+		var choose:=Kit.button(options,"Site %d, %.1f km" % [index+1,float(sites[index].travel_distance_km)],false,_select.bind(index),"Look at site %d on the map" % (index+1));choose.custom_minimum_size.y=34;choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_theme_font_size_override("font_size",14);choose.clip_text=true
 	queue_redraw()
 
 func _select(index:int)->void:

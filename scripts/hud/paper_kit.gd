@@ -104,7 +104,7 @@ static func quiet_button(parent:Node,text:String,on_press:Callable=Callable(),ti
 static func text_color(accent:Color)->Color:
 	var twin:=T.text_for(accent)
 	if twin!=accent:return twin
-	return T.legible(Color(accent,1.0),T.PAPER_RAISED)
+	return T.legible(Color(accent,1.0))
 
 static func contrast(a:Color,b:Color)->float:
 	return T.contrast(a,b)
