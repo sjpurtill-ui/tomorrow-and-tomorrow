@@ -1,0 +1,122 @@
+[
+  {
+    "id": "batch_task_grouping",
+    "line": "production",
+    "game_year": 11,
+    "approx_historical_year": -4927,
+    "prompt": "c. 4927 BCE: Adults shape repeated wooden blanks, make multiple cord lengths, and assemble baskets in grouped adjacent stations; thick matte impasto oil paint. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-878069d3-7bc7-451f-9262-bac0c157689e.png",
+    "asset": "res://assets/ui/research/subjects/batch_task_grouping-v1.png",
+    "sha256": "52597d850e803ab6beadfd1e3857d3ee124e5fffa0f62b539a31f413f3e0a6f6",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; repeated staged tasks and batches visible in wide crop."
+  },
+  {
+    "id": "dietary_healing_regimens",
+    "line": "health",
+    "game_year": 11,
+    "approx_historical_year": -4927,
+    "prompt": "c. 4927 BCE: Caregiver offers ill adult a bowl of selected soft root-and-herb food in reed shelter; sparse ink and watercolor on fibrous paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e7ea24b9-246b-4ca1-bffd-303d31e467ca.png",
+    "asset": "res://assets/ui/research/subjects/dietary_healing_regimens-v1.png",
+    "sha256": "cda68a9684d17bef70eab8cc7fe582e9a0d036e280b315733f4e8a8e4995052e",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation; first too lifelike; food as care and selected ingredients clear in crop."
+  },
+  {
+    "id": "topsoil_depth_reading",
+    "line": "ecology",
+    "game_year": 11,
+    "approx_historical_year": -4927,
+    "prompt": "c. 4927 BCE: Adults test depth of dark topsoil with plain wooden digging stick beside exposed pale subsoil layer; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-075b148c-117f-420f-b042-f823e0bd1954.png",
+    "asset": "res://assets/ui/research/subjects/topsoil_depth_reading-v1.png",
+    "sha256": "e7daab0489e58fbd1c70e3fb1923c73846eff535cb231f036ee1aaaa2e6b2e22",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; soil profile and digging stick clear in crop."
+  },
+  {
+    "id": "elder_council_assent",
+    "line": "institutions",
+    "game_year": 12,
+    "approx_historical_year": -4920,
+    "prompt": "c. 4920 BCE: Two elders publicly assent to settlement decision before younger adults and witnesses; archaic mineral fresco on plaster. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7aafd7b6-1dfa-4ee7-9feb-abdc9cfca8fa.png",
+    "asset": "res://assets/ui/research/subjects/elder_council_assent-v1.png",
+    "sha256": "bc12ac656aaf1d068213d3253f9326f337611cafbc1a651090ff0478d549e412",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; visible assent and witnesses, no writing, crop reviewed."
+  },
+  {
+    "id": "task_sequencing_habits",
+    "line": "labor",
+    "game_year": 12,
+    "approx_historical_year": -4920,
+    "prompt": "c. 4920 BCE: Adults sort reeds, bind repeated bundles and install them on shelter frame in sequence; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7c81c86e-cf38-481f-a7e3-621f0972c235.png",
+    "asset": "res://assets/ui/research/subjects/task_sequencing_habits-v1.png",
+    "sha256": "08f199edfabaf3189a92fc1e94e89474c3ea841eb33c7096a0cf138620859b79",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; successive stations and ordered work clear in crop."
+  },
+  {
+    "id": "trail_waymarking",
+    "line": "logistics",
+    "game_year": 12,
+    "approx_historical_year": -4920,
+    "prompt": "c. 4920 BCE: Travelers stack small plain stone cairn at forest trail fork and scrape simple blaze in tree bark with stone flake; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d873d5e7-2504-4836-8534-d012df074ec9.png",
+    "asset": "res://assets/ui/research/subjects/trail_waymarking-v1.png",
+    "sha256": "e3072c9bda21a632d91049967199380f7f395d302307de03e41c4b1c4d1ffd4e",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; both waymarking methods and path fork clear in crop; no writing."
+  },
+  {
+    "id": "war_slings",
+    "line": "security",
+    "game_year": 12,
+    "approx_historical_year": -4920,
+    "prompt": "c. 4920 BCE: Adults choose smooth river stones and demonstrate a plain braided-fiber sling during restrained training; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-727ad1f9-25b2-43c1-8afe-67aabb45d5af.png",
+    "asset": "res://assets/ui/research/subjects/war_slings-v1.png",
+    "sha256": "46e26c1f5213f7823d03fd7c8f1aeb4b36d2743195490dbe005ae51f06549041",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; sling and chosen stones clear, no later weapons, crop reviewed."
+  },
+  {
+    "id": "burn_scar_regrowth_tracking",
+    "line": "ecology",
+    "game_year": 13,
+    "approx_historical_year": -4913,
+    "prompt": "c. 4913 BCE: Adults revisit burn scar and examine new green shoots among charred stumps, comparing with unburned scrub; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bc1d3082-15ff-490f-9b78-5b0849d36adc.png",
+    "asset": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v1.png",
+    "sha256": "c68688915c405668b74e321292740dcd44dad9e472c4303ac817be84f1fb3b46",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; burn scar and regrowth jointly visible in wide crop."
+  },
+  {
+    "id": "household_water_boiling",
+    "line": "health",
+    "game_year": 13,
+    "approx_historical_year": -4913,
+    "prompt": "c. 4913 BCE: Adults let muddy river water settle in clay vessel then pour clear upper layer away from dark sediment; flat watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a518eca3-9650-456b-8094-692f870b1702.png",
+    "asset": "res://assets/ui/research/subjects/household_water_boiling-v1.png",
+    "sha256": "6989fefd73f03debe2c201e6f9e862ba1b03eec5247ccc8b002c4c1d4741fb4d",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; depicts actual title/observation Drinking Water Left to Settle, not boiling despite technical ID; dark sediment and clear pour visible."
+  },
+  {
+    "id": "pest_deterrent_storage_herbs",
+    "line": "nutrition",
+    "game_year": 13,
+    "approx_historical_year": -4913,
+    "prompt": "c. 4913 BCE: Adults layer aromatic herbs among dried food in reed storage baskets to repel insects and rodents; matte egg tempera panel painting. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b51ea14d-71dd-48e3-96e7-5fbf40ac38c6.png",
+    "asset": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png",
+    "sha256": "8093b7a0a68745b6b700e691dbc12a4778c0034e3b67db0b309fa9836f3af1cd",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation; herb placement and storage action clear in crop."
+  }
+]
