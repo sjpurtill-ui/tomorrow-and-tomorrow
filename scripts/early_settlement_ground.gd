@@ -126,7 +126,13 @@ static func box(surface: SurfaceTool, p: Vector2, size: Vector3, y: float, color
 static func commit(surface: SurfaceTool, name: String, transparent: bool, count: int, parent: Node3D) -> void:
 	if count==0: return
 	var node := MeshInstance3D.new();node.name=name;node.mesh=surface.commit()
-	var material := StandardMaterial3D.new();material.vertex_color_use_as_albedo=true
-	material.roughness=1;material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	if transparent: material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+	var material:Material
+	if transparent:
+		var ground:=StandardMaterial3D.new();ground.vertex_color_use_as_albedo=true
+		ground.roughness=1;ground.cull_mode=BaseMaterial3D.CULL_DISABLED
+		ground.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+		material=ground
+	else:
+		# Hearth stones, racks and stores painted like the huts (settlement_ink.gd).
+		material=preload("res://scripts/settlement_ink.gd").material()
 	node.material_override=material;parent.add_child(node)

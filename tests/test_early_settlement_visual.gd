@@ -88,7 +88,11 @@ func test_mesh_envelopes_scale_and_ruin_respect_the_shared_placement_contract() 
 	var plan:=EARLY.layout(data.plots,data.routes,dry)
 	var parent:Node3D=auto_free(Node3D.new())
 	EARLY.render(plan,Vector3.ZERO,func(_x:float,_z:float)->float:return .5,parent)
-	assert_int(parent.get_child_count()).is_equal(1)
+	# One building batch, plus its soft ground shadows in their own group
+	# (settlement_ink.gd), one shadow per building.
+	assert_int(parent.get_child_count()).is_equal(2)
+	var shadows:Node=parent.get_node("SettlementGroundShadows")
+	assert_int((shadows.get_child(0) as MultiMeshInstance3D).multimesh.instance_count).is_equal((parent.get_child(0) as MultiMeshInstance3D).multimesh.instance_count)
 	var transform:Transform3D=parent.get_child(0).get_meta("source_transforms")[0]
 	assert_float(transform.basis.x.length()).is_equal_approx(.001,.000001)
 	assert_float(transform.origin.y).is_equal_approx(.5001,.000001)

@@ -6,7 +6,7 @@ const MAX_PLOTS := 128
 const MAX_POPULATION := 5000
 const KIT := ["house_narrow", "house_compact", "house_medium", "house_wide", "market_hall", "house_small"]
 static var meshes: Dictionary = {}
-static var material: StandardMaterial3D
+static var material: Material
 
 static func supports(plot: Dictionary) -> bool:
 	return String(plot.get("land_use", "")) in ["residential_compound", "mixed_household", "market"] \
@@ -214,9 +214,8 @@ static func kit_mesh(index: int) -> Mesh:
 
 static func render(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
 	if material == null:
-		material = StandardMaterial3D.new()
-		material.vertex_color_use_as_albedo = true
-		material.roughness = 0.95
+		# Painted in the map's ink (scripts/settlement_ink.gd), vertex colours kept.
+		material = preload("res://scripts/settlement_ink.gd").material()
 	_render_gardens(plan, center, height, parent)
 	for variant in KIT.size():
 		var visible: Array[Dictionary] = []
@@ -251,6 +250,8 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		node.multimesh = batch
 		node.material_override = material
 		parent.add_child(node)
+		# Soft shadows where each building stands (settlement_ink.gd).
+		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent, "GroundShadow_%s" % KIT[variant], transforms, kit_mesh(variant).get_aabb())
 
 static func _render_gardens(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
 	# Visual household land use only; these beds grant no production or workers.
