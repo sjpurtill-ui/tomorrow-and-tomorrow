@@ -1,0 +1,86 @@
+[
+  {
+    "id": "common_path_alignment",
+    "line": "logistics",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: adults clear and align one shared footpath between simple reed huts. Mature panoramic travel watercolor on fibrous paper, flat sand-gold and faded-indigo washes, no paving, wheel, sign, written plan or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-690eebf5-66cc-4fd4-b7a8-5b984d0442b5.png",
+    "asset": "res://assets/ui/research/subjects/common_path_alignment-v1.png",
+    "sha256": "e833833be33cb4607b01fb681b322d118998dc858aec15b15868e3cc12e7ae2b",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; clear common route in central banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "edge_resharpening_rounds",
+    "line": "production",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: workers pass worn flint blades and stone scrapers around for resharpening, one pressure-flakes an edge while another tests it. Mature flat palette-knife impasto in ochre, ember orange and soot black; no metal, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc677b5d-10bb-42fb-a868-f830e2f063e1.png",
+    "asset": "res://assets/ui/research/subjects/edge_resharpening_rounds-v1.png",
+    "sha256": "078dc59d2265c80d44a195140782c050131b9e9c5da36cbc14291ed05bbb51c5",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; repeated sharpening process and flint tools clear. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "emergency_food_caching",
+    "line": "security",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: adults lower baskets of dried food into a lined earth pit and conceal the reserve beneath stones and brush. Mature layered hand-cut woodblock print, charcoal and vermilion on warm parchment; no lock, masonry granary, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2f775c04-2e05-40d9-b10d-df20c64caf84.png",
+    "asset": "res://assets/ui/research/subjects/emergency_food_caching-v1.png",
+    "sha256": "a2a7394eeb5e823ed10bb3339c28c2218118fd264f3d7e2b13dcde5771b2a1a0",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; cache pit and cover clear. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "infant_swaddling_practice",
+    "line": "demography",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: caregivers wrap an infant against cold in an undyed woven-fiber swaddle beside a stone-ring hearth. Mature flat chalk pastel and cut-paper collage, terracotta and warm ivory; no patterned blanket, cradle, later dress or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1ab26be5-ad1c-4041-bd8b-da0ae052a98d.png",
+    "asset": "res://assets/ui/research/subjects/infant_swaddling_practice-v1.png",
+    "sha256": "091f9760ef4a2da340c2f05365e703caefeb6249aef3503add6627a73dddbe77",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; infant and protective wrap legible in banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "leader_gift_redistribution",
+    "line": "institutions",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: a household brings gathered food to a headman who shares portions back out to other adults, including the giver. Mature flat civic fresco on rough plaster, dusty plum and limestone; no throne, ledger, coins, classical robes or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aa1abfc3-0dd2-44cc-a643-7bc3e8e4985f.png",
+    "asset": "res://assets/ui/research/subjects/leader_gift_redistribution-v1.png",
+    "sha256": "52f218af93e9d473bda0082716779ecc84f7c690cd7db1f4ed1ca84d9d72ede7",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; reciprocal hand-to-hand distribution visible. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "paired_task_assignment",
+    "line": "labor",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: two adults jointly move one heavy timber beam for shelter repair as an elder assigns the shared task. Mature expressive charcoal over flat ochre wash with smears and rough grain; no cart, metal saw, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-30a14901-1f3a-4e36-b6db-9c84cea076d0.png",
+    "asset": "res://assets/ui/research/subjects/paired_task_assignment-v1.png",
+    "sha256": "f0d1b93300aaa25c97581ae6ef331c2fb31f642a390df1f26d317f50aeb24716",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; heavy beam and coordinated pair clear. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "turbidity_judging",
+    "line": "health",
+    "game_year": 5,
+    "approx_historical_year": -4967,
+    "prompt": "c. 4967 BCE: caregiver compares a cloudy bowl of river water against a clear settled bowl and rejects the muddy one. Mature transparent sage/celadon watercolor with sparse ink, flat hands and open paper; no glassware, scientific device, written sign or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-352248ac-244c-4e0a-8f21-5ff4ba12d966.png",
+    "asset": "res://assets/ui/research/subjects/turbidity_judging-v1.png",
+    "sha256": "e5ff0971f701f71027666b674f57f9628c75f149fa77a42be687b151bea71f09",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; sediment and rejection gesture clear. Accepted after visual 3.37:1 crop and subject/period check."
+  }
+]

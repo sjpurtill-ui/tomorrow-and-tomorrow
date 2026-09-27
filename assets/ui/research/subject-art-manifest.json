@@ -3686,5 +3686,12 @@
   "paired_carrier_balancing": {"path": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png", "focus": [0.5, 0.4]},
   "sleeping_area_rotation": {"path": "res://assets/ui/research/subjects/sleeping_area_rotation-v1.png", "focus": [0.5, 0.5]},
   "symptom_sharing_customs": {"path": "res://assets/ui/research/subjects/symptom_sharing_customs-v1.png", "focus": [0.5, 0.4]},
-  "tool_hazard_awareness": {"path": "res://assets/ui/research/subjects/tool_hazard_awareness-v1.png", "focus": [0.5, 0.5]}
+  "tool_hazard_awareness": {"path": "res://assets/ui/research/subjects/tool_hazard_awareness-v1.png", "focus": [0.5, 0.5]},
+  "common_path_alignment": {"path": "res://assets/ui/research/subjects/common_path_alignment-v1.png", "focus": [0.5, 0.5]},
+  "edge_resharpening_rounds": {"path": "res://assets/ui/research/subjects/edge_resharpening_rounds-v1.png", "focus": [0.5, 0.5]},
+  "emergency_food_caching": {"path": "res://assets/ui/research/subjects/emergency_food_caching-v1.png", "focus": [0.5, 0.5]},
+  "infant_swaddling_practice": {"path": "res://assets/ui/research/subjects/infant_swaddling_practice-v1.png", "focus": [0.5, 0.5]},
+  "leader_gift_redistribution": {"path": "res://assets/ui/research/subjects/leader_gift_redistribution-v1.png", "focus": [0.5, 0.5]},
+  "paired_task_assignment": {"path": "res://assets/ui/research/subjects/paired_task_assignment-v1.png", "focus": [0.5, 0.5]},
+  "turbidity_judging": {"path": "res://assets/ui/research/subjects/turbidity_judging-v1.png", "focus": [0.5, 0.5]}
 }

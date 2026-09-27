@@ -1,0 +1,12 @@
+{
+  "id": "turbidity_judging",
+  "line": "health",
+  "game_year": 5,
+  "approx_historical_year": -4967,
+  "prompt": "c. 4967 BCE: caregiver compares a cloudy bowl of river water against a clear settled bowl and rejects the muddy one. Mature transparent sage/celadon watercolor with sparse ink, flat hands and open paper; no glassware, scientific device, written sign or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-352248ac-244c-4e0a-8f21-5ff4ba12d966.png",
+  "asset": "res://assets/ui/research/subjects/turbidity_judging-v1.png",
+  "sha256": "e5ff0971f701f71027666b674f57f9628c75f149fa77a42be687b151bea71f09",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; sediment and rejection gesture clear. Accepted after visual 3.37:1 crop and subject/period check."
+}
