@@ -1,0 +1,12 @@
+{
+  "id": "streambank_vegetation_watch",
+  "line": "ecology",
+  "game_year": 6,
+  "approx_historical_year": -4960,
+  "prompt": "c. 4960 BCE: bare streambank erodes into water while neighboring reeds and rooted plants hold soil, watched by a small observer. Mature 2D naturalist field painting in layered plant pigments, flat bands, stylized roots and visible strokes; no engineering works, writing or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e4e8447d-9ccf-40f6-98d8-d10cc26d6f15.png",
+  "asset": "res://assets/ui/research/subjects/streambank_vegetation_watch-v1.png",
+  "sha256": "ec65e530d1acd5b9bce5233074042c80b2f687f4317ea4277188ea2137eaad60",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first looked photographic. Accepted after visual 3.37:1 crop and subject/period check."
+}

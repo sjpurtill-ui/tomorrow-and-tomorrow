@@ -1,0 +1,12 @@
+{
+  "id": "sightline_staking",
+  "line": "infrastructure",
+  "game_year": 6,
+  "approx_historical_year": -4960,
+  "prompt": "c. 4960 BCE: eye peers along three rough timber stakes and a taut plant-fiber cord as a hand aligns a future house plot. Mature flat architectural casein gouache, opaque mineral-blue and earth planes, matte brush texture; no metal surveying gear, masonry, written plan or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9ebcef5e-314a-4e83-a3b0-6cd5b6a3be67.png",
+  "asset": "res://assets/ui/research/subjects/sightline_staking-v1.png",
+  "sha256": "c2d40069f7d157cadb51dfe48ad23fe2caf869335ecd8f7695db740bac6663e4",
+  "mode": "built-in image_gen / new image",
+  "review": "Third generation selected; earlier images showed later-looking clothing or realistic scenery. Accepted after visual 3.37:1 crop and subject/period check."
+}
