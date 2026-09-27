@@ -59,6 +59,22 @@ func _ready()->void:
 		target=Vector3(terrain._world_river_x(river_z),0.0,river_z)
 		target.y=terrain._height_at(target.x,target.z)
 		CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+	if "--winter" in args:
+		# A cold region in the depth of its winter (charted for this capture).
+		var cold:=_find_cold(target)
+		if cold!=Vector3.INF:
+			target=cold
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+			print("MAP_ART_CAPTURE: cold ground at ",target," ",JSON.stringify(PlanetEnvironment.profile_at(Vector2(target.x,target.z)).get("mean_temperature_c")))
+		# Midwinter for that hemisphere (season_wave is -1).
+		GameState.elapsed_days=91.0 if target.z>0.0 else 274.0
+		terrain._refresh_seasonal_visuals()
+	if "--fresh-snow" in args:
+		# As if it snowed there yesterday: fresh snow lying on the ground.
+		for reference in terrain.seasonal_materials:
+			var material:=(reference as WeakRef).get_ref() as ShaderMaterial
+			if material:material.set_shader_parameter("weather_snow",0.85)
+		terrain.seasonal_snow=0.85
 	if "--woodland" in args:
 		# Look at the nearest dense woodland instead (charted for this capture only).
 		var found:=_find_woodland(target)
@@ -141,6 +157,24 @@ func _force_sky(kind:String)->void:
 		var sky:Dictionary=ambience.weather.duplicate();sky.merge(forced,true)
 		ambience.weather=sky
 		ambience.cloud=float(forced.cloud);ambience.rain=float(forced.rain);ambience.snow=float(forced.snow)
+
+## The coldest land found poleward of `center` (cold all year if any is).
+func _find_cold(center:Vector3)->Vector3:
+	var pole:=signf(center.z) if absf(center.z)>1.0 else -1.0
+	var best:=Vector3.INF
+	var best_c:=INF
+	for step in range(1,70):
+		for offset in [0.0,120.0,-120.0,260.0,-260.0]:
+			var x:=center.x+float(offset)
+			var z:=center.z+pole*float(step)*140.0
+			if absf(z)>9500.0:continue
+			var h:float=terrain._height_at(x,z)
+			if h<0.05:continue
+			var c:=float(PlanetEnvironment.profile_at(Vector2(x,z)).get("mean_temperature_c",99.0))
+			if c<best_c:
+				best_c=c;best=Vector3(x,h,z)
+			if c<-3.0:return best
+	return best
 
 ## Nearest point with dense woodland, searched on widening rings.
 func _find_woodland(center:Vector3)->Vector3:

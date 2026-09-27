@@ -23,6 +23,11 @@ vec3 seasonal_ground(vec3 base,float warmth,float rain,float amplitude,float lat
 	vec3 dry_stems=vec3(1.19,1.01,0.72)*luma;
 	vec3 woodland_litter=vec3(1.25,0.99,0.70)*luma;
 	vec3 ground=mix(base,mix(dry_stems,woodland_litter,woodland),strength);
+	// Hard cold silvers what is left (codex/beauty-2): hoarfrost greys the
+	// dead grass and dulls the crowns, cool rather than a mustard straw.
+	float frost=1.0-smoothstep(-7.0,1.0,temperature);
+	float g=dot(ground,vec3(0.28,0.57,0.15));
+	ground=mix(ground,vec3(0.94,0.98,1.04)*g*1.16,frost*mix(0.62,0.34,woodland));
 	if (season_contrast<=0.0) { return ground; }
 	float hemisphere=latitude_z>0.0?-1.0:1.0;
 	float warm_half=season_phase*hemisphere;      // +summer, -winter
@@ -64,13 +69,15 @@ vec3 seasonal_terrain(vec3 base,float warmth,float rain,float amplitude,float la
 	float drift=smoothstep(0.34,0.72,terrain_pattern);
 	float snow=cold*snow_supply*sheltered*drift;
 	// Very cold arid ground acquires pale frost, never a fictitious deep snowpack.
-	float hard_frost=(1.0-smoothstep(-16.0,-8.0,temperature))*(1.0-snow_supply)*sheltered;
+	float hard_frost=(1.0-smoothstep(-12.0,-2.0,temperature))*(1.0-snow_supply*0.6)*sheltered;
 	// A thin dusting also reaches open, sheltered ground between the drifts,
 	// so a snowy winter reads at settlement scale, not only on the uplands.
 	float dusting=cold*snow_supply*sheltered*(1.0-woodland*0.6)*0.36*season_contrast;
-	float cover=clamp(max(snow*0.72,dusting)+hard_frost*0.20*mix(0.45,1.0,drift),0.0,0.76);
+	float cover=clamp(max(snow*0.72,dusting)+hard_frost*0.34*mix(0.45,1.0,drift),0.0,0.78);
 	vec3 snow_colour=mix(vec3(0.66,0.69,0.68),vec3(0.82,0.84,0.82),drift);
 	// With seasonal cues on, fresh snow reads clean and cold rather than beige.
 	snow_colour=mix(snow_colour,vec3(0.90,0.92,0.95),0.55*season_contrast);
-	return mix(dormant_ground,snow_colour,cover);
+	// Frost lies blue-white; snow keeps its own clean colour.
+	vec3 lying=mix(snow_colour,vec3(0.80,0.85,0.90),clamp(hard_frost*0.34/max(cover,0.001),0.0,1.0)*(1.0-snow));
+	return mix(dormant_ground,lying,cover);
 }
