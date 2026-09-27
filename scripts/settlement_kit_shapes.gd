@@ -54,7 +54,8 @@ static func mesh(name:String,envelope:AABB)->ArrayMesh:
 ## The furniture of daily life, in metres (door or front toward +Z):
 ## woodpile, drying_rack, hide_frame, hearth_ring, bench, pots, quern, well,
 ## water_jars, midden, kiln, loom, pen_wattle, pen_stone, frame,
-## timber_stack. Cached; null for an unknown name.
+## timber_stack, and for markets and streets (codex/beauty-4) stall, cart and
+## baskets. Cached; null for an unknown name.
 static func prop(name:String)->ArrayMesh:
 	if cache.has("prop|"+name):return cache["prop|"+name]
 	var s:=SurfaceTool.new();s.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -154,6 +155,47 @@ static func prop(name:String)->ArrayMesh:
 				_beam(s,Vector3(-1.6,1.65,z),Vector3(0,3.1,z),0.05,TIMBER_DARK)
 				_beam(s,Vector3(1.6,1.65,z),Vector3(0,3.1,z),0.05,TIMBER_DARK)
 			_box(s,Vector3(-1.5,0.45,0),Vector3(0.06,0.9,3.2),WATTLE)
+		"stall":
+			# A market stall: four poles, a striped cloth awning falling to the
+			# front, a trestle board of goods beneath.
+			for x in [-1.1,1.1]:
+				for z in [-0.8,0.8]:
+					_beam(s,Vector3(x,0,z),Vector3(x,1.95 if z<0.0 else 1.65,z),0.045,TIMBER)
+			var cloth:=[Color(0.58,0.25,0.18),Color(0.76,0.70,0.56),Color(0.36,0.38,0.46)]
+			var stripe:Color=cloth[0]
+			for k in 6:
+				var x0:=-1.25+float(k)*0.4167;var x1:=x0+0.4167
+				_quad(s,Vector3(x0,2.0,-0.95),Vector3(x1,2.0,-0.95),Vector3(x1,1.62,0.98),Vector3(x0,1.62,0.98),stripe if k%2==0 else cloth[1],Vector3(0,1,0.4))
+			# The board and its goods: bundles, pots and cloth.
+			_box(s,Vector3(0,0.78,0.45),Vector3(2.1,0.08,0.7),TIMBER)
+			for x in [-0.8,0.8]:_beam(s,Vector3(x,0,0.45),Vector3(x,0.78,0.45),0.04,TIMBER_DARK)
+			for k in 5:
+				var x:=-0.8+float(k)*0.4
+				var tone:Color=[Color(0.66,0.46,0.28),Color(0.78,0.66,0.40),Color(0.52,0.30,0.20),Color(0.70,0.62,0.48),Color(0.40,0.46,0.28)][k]
+				if k%2==0:_frustum(s,Vector3(x,0.82,0.45),0.14,0.10,0.22,6,tone,0.0)
+				else:_box(s,Vector3(x,0.90,0.45),Vector3(0.28,0.16,0.34),tone)
+		"cart":
+			# A two-wheeled cart with its shafts down, the bed of planks.
+			_box(s,Vector3(0,0.78,-0.2),Vector3(1.3,0.12,2.2),TIMBER)
+			for x in [-0.62,0.62]:_box(s,Vector3(x,0.95,-0.2),Vector3(0.08,0.28,2.2),TIMBER_DARK)
+			_box(s,Vector3(0,0.95,-1.28),Vector3(1.3,0.28,0.08),TIMBER_DARK)
+			for x in [-0.78,0.78]:
+				# Solid or spoked wheel: a rim of blocks round a hub.
+				for k in 10:
+					var a0:=TAU*float(k)/10.0;var a1:=TAU*float(k+1)/10.0
+					_beam(s,Vector3(x,0.55+cos(a0)*0.52,-0.2+sin(a0)*0.52),Vector3(x,0.55+cos(a1)*0.52,-0.2+sin(a1)*0.52),0.05,TIMBER_DARK)
+				for k in 4:
+					var a:=TAU*float(k)/8.0
+					_beam(s,Vector3(x,0.55+cos(a)*0.5,-0.2+sin(a)*0.5),Vector3(x,0.55-cos(a)*0.5,-0.2-sin(a)*0.5),0.03,TIMBER)
+				_frustum(s,Vector3(x-0.08*signf(x),0.55,-0.2),0.12,0.12,0.16,6,TIMBER_DARK,0.0)
+			for x in [-0.45,0.45]:_beam(s,Vector3(x,0.8,0.9),Vector3(x*0.7,0.08,2.3),0.05,TIMBER)
+			# A load under a cloth.
+			_cone_roof(s,Vector3(0,0.84,-0.3),0.6,0.2,0.45,8,Color(0.72,0.64,0.48),0.05)
+		"baskets":
+			for k in 4:
+				var at:Vector3=[Vector3(0,0,0),Vector3(0.5,0,0.1),Vector3(0.2,0,0.5),Vector3(-0.35,0,0.35)][k]
+				_frustum(s,at,0.18,0.24,0.30,8,STRAW_DARK if k%2==0 else STRAW,0.08)
+				_frustum(s,at+Vector3(0,0.30,0),0.2,0.15,0.05,8,[Color(0.60,0.30,0.20),Color(0.70,0.62,0.30),Color(0.42,0.46,0.26),Color(0.66,0.50,0.30)][k],0.0)
 		"timber_stack":
 			for layer in 2:
 				for k in 5:

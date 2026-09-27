@@ -77,6 +77,36 @@ func test_precise_split_origin_and_only_the_home_settlement_repaints() -> void:
 	GROUNDS.build_if_home(plan, data.plots, data.routes, home + Vector3(30.0, 0, 0))
 	assert_vector(GROUNDS.origin_hi + GROUNDS.origin_lo).is_equal(painted)
 
+func test_other_towns_and_foreign_cities_get_their_own_slots_near_the_camera() -> void:
+	var data := _village()
+	var plan := EARLY.layout(data.plots, data.routes, func(_p: Vector2) -> bool: return true)
+	var home := Vector3(100.0, 0.0, 200.0)
+	GameState.settlement_founded_at = home
+	GameState.player_settlements.clear()
+	GROUNDS.build_if_home(plan, data.plots, data.routes, home)
+	var painted: Vector2 = GROUNDS.origin_hi + GROUNDS.origin_lo
+	# Other places are only remembered until the camera settles near them.
+	for k in 5:
+		GROUNDS.request("foreign:%d" % k, plan, data.plots, data.routes, home + Vector3(20.0 * float(k + 1), 0, 0))
+	assert_int(GROUNDS.slot_keys.count("")).is_equal(3)
+	GROUNDS.serve(Vector2(home.x + 20.0, home.z), 0.6)
+	assert_int(GROUNDS.slot_keys.find("foreign:0")).is_greater(0)
+	assert_float(GROUNDS.slot_frames[GROUNDS.slot_keys.find("foreign:0")].y).is_equal(1.0)
+	# The painted square covers that place, and the home is untouched.
+	var rect := GROUNDS.slot_rect(GROUNDS.slot_keys.find("foreign:0"))
+	assert_bool(rect.has_point(Vector2(home.x + 20.0, home.z))).is_true()
+	assert_vector(GROUNDS.origin_hi + GROUNDS.origin_lo).is_equal(painted)
+	assert_str(GROUNDS.slot_keys[0]).is_equal("home")
+	# A settled camera paints at most one place per call; far places wait.
+	GROUNDS.serve(Vector2(home.x + 20.0, home.z), 0.6)
+	assert_int(GROUNDS.slot_keys.count("")).is_equal(2)
+	# Visiting more places than there are slots lets the farthest go.
+	for k in range(1, 5):
+		GROUNDS.serve(Vector2(home.x + 20.0 * float(k + 1), home.z), 0.6)
+	assert_int(GROUNDS.slot_keys.find("foreign:4")).is_greater(0)
+	assert_int(GROUNDS.slot_keys.find("foreign:0")).is_equal(-1)
+	assert_str(GROUNDS.slot_keys[0]).is_equal("home")
+
 func test_coded_shapes_fit_the_authored_envelopes_and_face_outward() -> void:
 	for name in ["round_household", "carried_round", "carried_ridge", "rooted_lean_to", "raised_store", "covered_workshop", "earthen_household"]:
 		var mesh: Mesh = EARLY.kit_mesh(name)

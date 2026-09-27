@@ -1,7 +1,7 @@
 extends RefCounted
-## THE GROUND OF A LIVED PLACE (codex/beauty-3): the home settlement's worn
-## ground, painted into the land by the terrain shader
-## (settlement_ground.gdshaderinc).
+## THE GROUND OF A LIVED PLACE (codex/beauty-3, extended in codex/beauty-4):
+## the worn ground of every place the camera visits, painted into the land by
+## the terrain shader (settlement_ground.gdshaderinc).
 ##
 ## Rasterized once from the real settlement fabric whenever it changes (never
 ## per frame) into one small texture over the settled square:
@@ -11,10 +11,14 @@ extends RefCounted
 ##      paths out to the water point and the worked fields;
 ##   G  grass worn short around every dwelling and along the paths;
 ##   B  ash at the hearth, the midden, and the burnt ground of ruins.
-## Everything derives from plots, buildings and routes; nothing here changes
-## the simulation or the save.
+## Four slots share two texture arrays: slot 0 is the home settlement, slots
+## 1-3 the player's other towns and the foreign cities the people have seen,
+## whichever were drawn most recently near the camera (the farthest is let go
+## first). Everything derives from plots, buildings and routes; nothing here
+## changes the simulation or the save.
 
 const RES:=512
+const SLOTS:=4
 const MIN_SIZE_KM:=0.14
 const MAX_SIZE_KM:=1.1
 const PAD_KM:=0.03
@@ -22,6 +26,7 @@ const PAD_KM:=0.03
 ## plus the maintained gathering ground at the hearth).
 const HEARTH_FORMS:=["open_hearth_yard","maintained_gathering_ground","customary_precinct"]
 
+## The home slot, as before (tests and tools read these).
 static var texture:ImageTexture
 ## Worked ground: R cover, G row angle, B phase/pattern/worked, A crop/cover.
 static var fields_texture:ImageTexture
@@ -31,8 +36,23 @@ static var size_km:=1.0
 static var strength:=0.0
 static var signature:=0
 static var report:Dictionary={}
+## Every slot, for the shader: two texture arrays and per-slot frames.
+static var ground_layers:Texture2DArray
+static var field_layers:Texture2DArray
+static var slot_keys:PackedStringArray=PackedStringArray(["","","",""])
+static var slot_signatures:PackedInt64Array=PackedInt64Array([0,0,0,0])
+static var slot_centers:PackedVector2Array=PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
+static var slot_origins:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
+static var slot_frames:PackedVector4Array=PackedVector4Array([Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0)])
+static var slot_reports:Array[Dictionary]=[{},{},{},{}]
 static var _materials:Array[WeakRef]=[]
 static var _brushes:Dictionary={}
+## Places other than the home that have been drawn: key -> [plan, plots,
+## routes, center]. The camera's nearest ones are painted, one per settled
+## frame (serve); at most MAX_REQUESTS are remembered.
+static var _requests:Dictionary={}
+static var _served_at:=Vector2.INF
+const MAX_REQUESTS:=64
 
 ## Registers a terrain material; it receives the current ground and every
 ## later rebuild (called by local_terrain.gd for each seasonal material).
@@ -42,13 +62,11 @@ static func bind(material:ShaderMaterial)->void:
 	_apply(material)
 
 static func _apply(material:ShaderMaterial)->void:
-	if texture==null:
-		material.set_shader_parameter("settlement_ground_frame",Vector4(1.0,0.0,0.0,0.0))
-		return
-	material.set_shader_parameter("settlement_ground",texture)
-	material.set_shader_parameter("settlement_fields",fields_texture)
-	material.set_shader_parameter("settlement_ground_origin",Vector4(origin_hi.x,origin_hi.y,origin_lo.x,origin_lo.y))
-	material.set_shader_parameter("settlement_ground_frame",Vector4(size_km,strength,0.0,0.0))
+	material.set_shader_parameter("sg_frames",slot_frames)
+	if ground_layers==null:return
+	material.set_shader_parameter("settlement_ground",ground_layers)
+	material.set_shader_parameter("settlement_fields",field_layers)
+	material.set_shader_parameter("sg_origins",slot_origins)
 
 static func _apply_all()->void:
 	var alive:Array[WeakRef]=[]
@@ -62,6 +80,9 @@ static func _apply_all()->void:
 ## Clears the painted ground (a new world, or no settlement).
 static func clear()->void:
 	texture=null;fields_texture=null;strength=0.0;signature=0;report={}
+	_requests.clear();_served_at=Vector2.INF
+	for slot in SLOTS:
+		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={}
 	_apply_all()
 
 ## The home settlement's position (world km, x and z).
@@ -72,21 +93,83 @@ static func home_center()->Vector2:
 			if at!=Vector2.ZERO:return at
 	return Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
 
-## Builds only for the home settlement: secondary cities are drawn through the
-## same renderers with their own fabric swapped in, and must not repaint it.
+## Paints the home settlement into slot 0; any other town drawn through the
+## same renderers (its own fabric swapped in) gets a slot of its own and never
+## repaints the home.
 static func build_if_home(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
-	if Vector2(center.x,center.z).distance_to(home_center())>0.25:return
+	if Vector2(center.x,center.z).distance_to(home_center())>0.25:
+		request("town:%d:%d" % [roundi(center.x*100.0),roundi(center.z*100.0)],plan,plots,routes,center)
+		return
 	build(plan,plots,routes,center)
+
+## Remembers a place other than the home whose fabric was just drawn; its
+## ground is painted when the camera settles near it (serve).
+static func request(key:String,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
+	if not _requests.has(key) and _requests.size()>=MAX_REQUESTS:
+		# Forget the one farthest from this place.
+		var worst:="";var far:=-1.0
+		for other:String in _requests:
+			var d:=Vector2((_requests[other][3] as Vector3).x,(_requests[other][3] as Vector3).z).distance_to(Vector2(center.x,center.z))
+			if d>far:far=d;worst=other
+		_requests.erase(worst)
+	_requests[key]=[plan,plots,routes,center]
+	var slot:=slot_keys.find(key)
+	if slot>0:slot_signatures[slot]=-1
+	_served_at=Vector2.INF
+
+## Paints the nearest remembered place within `reach` km of `target` that is
+## not painted yet (at most one per call; cheap when there is nothing to do).
+## The map calls it on settled frames at settlement zoom.
+static func serve(target:Vector2,reach:float)->void:
+	if _requests.is_empty() or _served_at.distance_to(target)<reach*0.25:return
+	var best:="";var nearest:=INF
+	for key:String in _requests:
+		var center:Vector3=_requests[key][3]
+		var d:=Vector2(center.x,center.z).distance_to(target)
+		if d>reach+MAX_SIZE_KM*0.5 or d>=nearest:continue
+		var slot:=slot_keys.find(key)
+		if slot>0 and slot_signatures[slot]!=-1 and slot_frames[slot].y>0.0:continue
+		best=key;nearest=d
+	if best=="":
+		_served_at=target
+		return
+	var entry:Array=_requests[best]
+	var plots:Array[Dictionary]=[];plots.assign(entry[1])
+	var routes:Array[Dictionary]=[];routes.assign(entry[2])
+	build_other(best,entry[0],plots,routes,entry[3],target)
+
+## Paints a settlement other than the home (a player town or a seen foreign
+## city) into a free slot, or the one farthest from it. Cheap when nothing
+## changed.
+static func build_other(key:String,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,camera_at:=Vector2.INF)->void:
+	var near:=Vector2(center.x,center.z) if camera_at==Vector2.INF else camera_at
+	var slot:=slot_keys.find(key)
+	if slot<=0:
+		slot=-1
+		var farthest:=-1.0
+		for candidate in range(1,SLOTS):
+			if slot_keys[candidate]=="":slot=candidate;break
+			var distance:=slot_centers[candidate].distance_to(near)
+			if distance>farthest:farthest=distance;slot=candidate
+		slot_keys[slot]=key
+	slot_signatures[slot]=0
+	_paint(slot,plan,plots,routes,center)
 
 ## Paints the ground for the home settlement. `plan` is the early-town layout
 ## (buildings with position, angle, radius and plot; may be empty), `plots`
 ## and `routes` the recorded fabric, `center` the settlement's world position.
 ## Cheap when nothing changed.
 static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
+	slot_keys[0]="home"
+	_paint(0,plan,plots,routes,center)
+
+static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	var buildings:Array=plan.get("buildings",[])
-	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_works_near(center)])
-	if key==signature and texture!=null:return
-	signature=key
+	var works:Array[Dictionary]=[]
+	if slot==0:works=_works_near(center)
+	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_building_key(buildings),works])
+	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
+	slot_signatures[slot]=key
 	var began:=Time.get_ticks_usec()
 	# The settled square: everything lived in, plus a margin. Far vacant
 	# fields do not stretch it.
@@ -101,7 +184,6 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		box=box.expand(c)
 	# Great works of this settlement (sites in world km): each stands in a
 	# worked yard with a path to it.
-	var works:Array[Dictionary]=_works_near(center)
 	for work in works:box=box.expand(Vector2(work.at))
 	# Routes widen the square only near what is lived in (not the long
 	# tracks out to far fields).
@@ -234,8 +316,6 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		if String(plot.get("status","active"))=="ruin" or fire>0.2:
 			_disc(painter,Vector2(record.position),float(record.get("radius",0.003))*0.85,0.28+0.45*fire,Color(0,0,1))
 	image.generate_mipmaps()
-	if texture==null or texture.get_width()!=RES:texture=ImageTexture.create_from_image(image)
-	else:texture.update(image)
 	# --- Worked ground: fields and kitchen gardens ---------------------------
 	var worked:=Image.create_empty(RES,RES,false,Image.FORMAT_RGBA8)
 	worked.fill(Color(0,0,0,0))
@@ -268,15 +348,41 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 			_fill_polygon(worked,corner,side/float(RES),bed,Color(1.0,fposmod(angle,PI)/PI,(2.0+8.0*4.0+64.0)/255.0,(4.0*16.0+6.0)/255.0))
 			gardens+=1
 			if gardens>=48:break
-	if fields_texture==null or fields_texture.get_width()!=RES:fields_texture=ImageTexture.create_from_image(worked)
-	else:fields_texture.update(worked)
 	var world:=Vector2(center.x,center.z)+corner
-	origin_hi=Vector2(floorf(world.x/64.0)*64.0,floorf(world.y/64.0)*64.0)
-	origin_lo=world-origin_hi
-	size_km=side
-	strength=1.0
-	report={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began}
+	var hi:=Vector2(floorf(world.x/64.0)*64.0,floorf(world.y/64.0)*64.0)
+	var lo:=world-hi
+	_store(slot,image,worked)
+	slot_centers[slot]=Vector2(center.x,center.z)
+	slot_origins[slot]=Vector4(hi.x,hi.y,lo.x,lo.y)
+	slot_frames[slot]=Vector4(side,1.0,0.0,0.0)
+	slot_reports[slot]={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began,"slot":slot}
+	if slot==0:
+		if texture==null:texture=ImageTexture.create_from_image(image)
+		else:texture.update(image)
+		if fields_texture==null:fields_texture=ImageTexture.create_from_image(worked)
+		else:fields_texture.update(worked)
+		origin_hi=hi;origin_lo=lo;size_km=side;strength=1.0;signature=key
+		report=slot_reports[0]
 	_apply_all()
+
+## Writes one slot's images into the shared texture arrays (created blank on
+## first use: every layer the same size, format and mip chain).
+static func _store(slot:int,ground:Image,worked:Image)->void:
+	if ground_layers==null:
+		var blank_ground:=Image.create_empty(RES,RES,true,Image.FORMAT_RGBA8)
+		var blank_fields:=Image.create_empty(RES,RES,false,Image.FORMAT_RGBA8)
+		var grounds:Array[Image]=[];var fields:Array[Image]=[]
+		for i in SLOTS:
+			grounds.append(blank_ground);fields.append(blank_fields)
+		ground_layers=Texture2DArray.new();ground_layers.create_from_images(grounds)
+		field_layers=Texture2DArray.new();field_layers.create_from_images(fields)
+	ground_layers.update_layer(ground,slot)
+	field_layers.update_layer(worked,slot)
+
+## A slot's painted square (world km): origin corner and side.
+static func slot_rect(slot:int)->Rect2:
+	var o:=slot_origins[slot]
+	return Rect2(Vector2(o.x+o.z,o.y+o.w),Vector2.ONE*slot_frames[slot].x)
 
 const PHASES:=["","prepared","growing","mature","harvested","fallow","stressed"]
 const PATTERNS:=["smallholder_mosaic","irrigated_beds","dryland_patchwork","consolidated_field_strips"]
@@ -363,6 +469,11 @@ static func _labour()->Dictionary:
 static func _fabric_key(plots:Array[Dictionary])->int:
 	var parts:=[]
 	for plot in plots:parts.append([int(plot.get("id",0)),String(plot.get("status","")),String(plot.get("form","")),_v2(plot.get("centroid",Vector2.ZERO))])
+	return hash(parts)
+
+static func _building_key(buildings:Array)->int:
+	var parts:=[]
+	for record in buildings:parts.append([Vector2(record.get("position",Vector2.ZERO)),snappedf(float(record.get("angle",0.0)),0.01)])
 	return hash(parts)
 
 static func _route_key(routes:Array[Dictionary])->int:
