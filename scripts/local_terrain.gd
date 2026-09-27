@@ -6062,6 +6062,37 @@ func _append_settlement_defense_wall_segment(surface:SurfaceTool,center:Vector3,
 	return 1
 
 
+## A palisade drawn as what it is (codex/beauty-3): a close row of sharpened
+## stakes standing on the ground, each a little different in height and tone.
+func _append_settlement_palisade_segment(surface:SurfaceTool,center:Vector3,local_a:Vector2,local_b:Vector2,height:float,color:Color)->int:
+	var direction:=local_b-local_a
+	var length:=direction.length()
+	if length<0.0003: return 0
+	var along:=direction/length
+	var side:=Vector2(-along.y,along.x)
+	var half:=0.00019
+	var count:=clampi(ceili(length/0.00042),1,160)
+	for k in count:
+		var at:=local_a+along*(float(k)+0.5)*length/float(count)
+		var jitter:=float(absi(hash(Vector2i(roundi(at.x*1e5),roundi(at.y*1e5))))%1000)/1000.0
+		var tall:=height*(0.86+0.22*jitter)
+		var tone:=color.lerp(Color("#9a8260"),0.3*jitter).darkened(0.1*float(k%2))
+		var world:=Vector3(center.x+at.x,0.0,center.z+at.y)
+		world.y=_close_surface_height_at(world.x,world.z)+0.0001
+		var corners:Array[Vector3]=[]
+		for c in [Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)]:
+			var offset:Vector2=(along*c.x+side*c.y)*half
+			corners.append(world+Vector3(offset.x,0.0,offset.y))
+		var tip:=world+Vector3.UP*(tall+half*2.6)
+		for i in 4:
+			var p0:=corners[i];var p1:=corners[(i+1)%4]
+			var shade:=tone.darkened(0.05*float(i))
+			for v:Vector3 in [p0,p1,p1+Vector3.UP*tall,p0,p1+Vector3.UP*tall,p0+Vector3.UP*tall]:
+				surface.set_color(shade);surface.add_vertex(v)
+			for v:Vector3 in [p0+Vector3.UP*tall,p1+Vector3.UP*tall,tip]:
+				surface.set_color(shade.lightened(0.08));surface.add_vertex(v)
+	return 1
+
 func _settlement_defense_gate_angles(layout:Dictionary,limit:=4)->Array[float]:
 	# Gates inherit the actual strategic approaches. A through-road produces opposed
 	# openings; later roads add distinct entries instead of another decorative spoke.
@@ -6143,7 +6174,8 @@ func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:Surfa
 			# A palisade is a line of stakes a few metres high, not a rampart.
 			var wall_width:=clampf(radius*0.0082,0.0018,0.020) if defense_stage>3 else clampf(radius*0.0020,0.00045,0.0008)
 			var wall_height:=clampf((0.0032 if defense_stage==3 else (0.014 if defense_stage==4 else 0.020))*lerpf(0.78,1.0,integrity),0.003,0.028)
-			mass_count+=_append_settlement_defense_wall_segment(mass_surface,center,point_a,point_b,wall_width,wall_height,color)
+			if defense_stage==3:mass_count+=_append_settlement_palisade_segment(mass_surface,center,point_a,point_b,wall_height,color)
+			else:mass_count+=_append_settlement_defense_wall_segment(mass_surface,center,point_a,point_b,wall_width,wall_height,color)
 	return {"flat":flat_count,"mass":mass_count}
 
 
@@ -6242,7 +6274,8 @@ func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:Su
 		var post_offset:=_settlement_stage_resolve_land_offset(center,Vector2.from_angle(angle)*post_radius)
 		if post_offset==Vector2.ZERO and not _settlement_stage_land_at(Vector2(center.x,center.z)): continue
 		var post_width:=clampf(primary_radius*0.014,0.0022,0.014)
-		var post_height:float=[0.0,0.010,0.011,0.014,0.022,0.031][defense_stage]*lerpf(0.76,1.0,integrity)
+		# A palisade's gate towers are timber platforms, not keeps.
+		var post_height:float=[0.0,0.010,0.011,0.0065,0.022,0.031][defense_stage]*lerpf(0.76,1.0,integrity)
 		_append_settlement_urban_mass(mass_surface,center,post_offset,post_width,post_width*(1.0 if defense_stage<5 else 1.35),post_height,angle,color)
 		mass_count+=1
 	return {"flat":flat_count,"mass":mass_count}

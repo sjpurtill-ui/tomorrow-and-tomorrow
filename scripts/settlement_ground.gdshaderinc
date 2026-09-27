@@ -52,6 +52,9 @@ vec3 settlement_ground_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	if (strength <= 0.0) { return earth; }
 	vec2 uv = local_m/size_m;
 	if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) { return earth; }
+	// Untouched meadow costs one coarse look (a mip a few metres across).
+	vec4 coarse = textureLod(settlement_ground, uv, 2.0);
+	if (max(max(coarse.r, coarse.g), coarse.b) < 0.003) { return earth; }
 	// Wander the edges a little (in metres, so they hold still as you zoom).
 	float wobble = sg_noise(local_m*0.55)*0.65+sg_noise(local_m*1.9+vec2(7.1, -3.3))*0.35;
 	vec2 warp = (vec2(sg_noise(local_m*0.21+vec2(3.0, 9.0)), sg_noise(local_m*0.21+vec2(-5.0, 1.0)))-0.5)*1.4/size_m;
@@ -98,8 +101,13 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	if (strength <= 0.0) { return earth; }
 	vec2 uv = local_m/size_m;
 	if (uv.x <= 0.0 || uv.y <= 0.0 || uv.x >= 1.0 || uv.y >= 1.0) { return earth; }
+	// Most ground is not worked: one plain look before any noise.
+	if (textureLod(settlement_fields, uv, 0.0).r < 0.001) { return earth; }
 	vec2 warp = (vec2(sg_noise(local_m*0.13+vec2(3.0, 9.0)), sg_noise(local_m*0.13+vec2(-5.0, 1.0)))-0.5)*0.5/size_m;
-	float cover = texture(settlement_fields, uv+warp).r;
+	// Four half-texel taps: a smooth edge, never the texels' staircase.
+	vec2 half_texel = 0.5/vec2(textureSize(settlement_fields, 0));
+	float cover = 0.25*(texture(settlement_fields, uv+warp+half_texel).r+texture(settlement_fields, uv+warp-half_texel).r
+		+texture(settlement_fields, uv+warp+vec2(half_texel.x, -half_texel.y)).r+texture(settlement_fields, uv+warp+vec2(-half_texel.x, half_texel.y)).r);
 	if (cover < 0.02) { return earth; }
 	ivec2 dims = textureSize(settlement_fields, 0);
 	ivec2 texel = clamp(ivec2(uv*vec2(dims)), ivec2(0), dims-ivec2(1));
@@ -125,51 +133,57 @@ vec3 settlement_fields_paint(vec3 earth, vec2 local_m, float pixel_m) {
 	float along = dot(local_m, dir);
 	float across = dot(local_m, vec2(-dir.y, dir.x));
 	float w = pattern == 1 ? 1.6 : (pattern == 2 ? 1.25 : (pattern == 4 ? 0.75 : 0.9));
-	// Household parcels in a mosaic: each strip a little different.
-	float parcel = sg_hash(vec2(floor(along/9.0), floor(across/(w*6.0))));
+	// Household tenure: strips a few metres wide, each worked by its own
+	// hands, a little different in tone and in how far on the crop is.
+	float strip_w = pattern == 3 ? 7.0 : (pattern == 2 ? 14.0 : 5.0);
+	float strip = sg_hash(vec2(floor(across/strip_w), pattern == 0 ? floor(along/11.0) : 0.0));
 	float row = across/w;
-	float ridge_amp = smoothstep(1.4, 3.5, w/max(pixel_m, 0.001));
+	float ridge_amp = smoothstep(2.5, 5.0, w/max(pixel_m, 0.001));
 	float ridge = mix(0.5, 0.5+0.5*cos(row*6.2831853), ridge_amp*(pattern == 4 ? 1.0 : 0.8));
+	// A furrow between strips shows until a pixel spans it.
+	float to_balk = strip_w*(0.5-abs(fract(across/strip_w)-0.5));
+	float balk = (1.0-smoothstep(0.0, 0.35, to_balk))*(1.0-smoothstep(0.6, 1.4, pixel_m));
 	// Tilled loam in the local light: furrows in shade, crests catching it.
-	float field_luma = clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.16, 0.55);
-	vec3 furrow = vec3(0.98, 0.80, 0.58)*field_luma;
-	vec3 crest = vec3(1.22, 1.02, 0.74)*field_luma;
-	vec3 soil = mix(furrow, crest, ridge)*(0.92+0.16*parcel);
+	// (Mostly the region's light, only a little of the meadow's own mottle.)
+	float L = mix(clamp(dot(earth, vec3(0.2126, 0.7152, 0.0722)), 0.16, 0.55), 0.34, 0.6);
+	vec3 furrow = vec3(0.98, 0.80, 0.58)*L;
+	vec3 crest = vec3(1.22, 1.02, 0.74)*L;
+	vec3 soil = mix(furrow, crest, ridge)*(0.93+0.14*strip);
 	// Kitchen gardens are dug deep and dark, and kept.
 	if (pattern == 4) { soil *= 0.74; }
 	if (pattern == 1) {
 		// Beds with a damp channel between them.
 		float channel = 1.0-smoothstep(0.0, 0.10, abs(fract(row)-0.5)-0.38);
-		soil = mix(soil, vec3(0.105, 0.100, 0.090), channel*0.7*ridge_amp);
+		soil = mix(soil, soil*0.55, channel*0.8*ridge_amp);
 	}
-	// The crop of the season, on the ridges.
-	// Crop colours relative to the local light (the grade keeps them in palette).
-	vec3 green = (crop == 1 ? vec3(0.62, 0.92, 0.40) : (crop == 3 ? vec3(0.66, 0.88, 0.70) : vec3(0.78, 0.98, 0.42)))*field_luma;
+	// The crop of the season (colours in the local light; a crop field reads
+	// deeper and more even than the meadow round it, ripe grain gold).
+	vec3 green = (crop == 1 ? vec3(0.42, 0.76, 0.14) : (crop == 3 ? vec3(0.42, 0.80, 0.34) : vec3(0.52, 0.86, 0.14)))*L;
 	if (crop == 4) {
 		float bed = sg_hash(vec2(floor(row), floor(along/3.0)));
-		green = mix(vec3(0.46, 0.80, 0.30), vec3(0.78, 0.86, 0.36), bed)*field_luma;
+		green = mix(vec3(0.34, 0.66, 0.16), vec3(0.62, 0.78, 0.22), bed)*L;
 	}
-	vec3 ripe = (crop == 0 ? vec3(1.30, 1.05, 0.52) : (crop == 3 ? vec3(0.80, 0.88, 1.00) : vec3(0.95, 0.92, 0.48)))*field_luma;
-	vec3 straw = vec3(1.20, 1.05, 0.72)*field_luma;
+	vec3 ripe = (crop == 0 ? vec3(1.78, 1.26, 0.36) : (crop == 1 ? vec3(0.50, 0.80, 0.18) : (crop == 3 ? vec3(1.40, 1.22, 0.62) : vec3(1.30, 1.14, 0.46))))*L;
+	vec3 straw = vec3(1.55, 1.36, 0.86)*L;
 	float plants = sg_noise(vec2(along*2.3, row*3.0))*0.5+0.5*sg_noise(local_m*0.7);
+	float grown = clamp(growth+(strip-0.5)*0.25, 0.0, 1.0);
 	vec3 field = soil;
-	float leafy = 0.0;
 	if (phase == 2) {
-		// Plants in rows: clumps along each ridge, closing up as they grow.
-		leafy = growth;
-		float clumps = smoothstep(0.35, 0.65, plants+ridge*0.5+growth*0.3-0.35);
-		field = mix(soil, green, clumps*mix(0.55, 0.9, growth));
+		// Plants in rows, closing over the soil as they grow.
+		float closed = smoothstep(0.15, 0.65, grown+(plants-0.5)*0.25+(ridge-0.5)*0.45);
+		field = mix(soil, green*(0.94+0.12*strip), closed);
 	}
-	else if (phase == 3) { field = mix(soil, ripe, 0.85*smoothstep(0.1, 0.5, ridge+plants*0.4)); }
-	else if (phase == 4) { field = mix(soil, straw, 0.55*ridge); }
+	else if (phase == 3) { field = mix(soil, ripe*(0.92+0.16*strip), smoothstep(0.05, 0.40, ridge*0.6+plants*0.4+0.2)); }
+	else if (phase == 4) { field = mix(soil, straw, 0.35+0.35*ridge); }
 	else if (phase >= 5) {
 		// Fallow: weeds and grass take the beds back, the ridges still
 		// showing where hands keep it worked.
-		float weeds = smoothstep(0.35, 0.75, plants+(parcel-0.5)*0.4);
+		float weeds = smoothstep(0.35, 0.75, plants+(strip-0.5)*0.4);
 		vec3 grassy = mix(earth, soil, worked ? 0.30 : 0.10);
 		field = mix(worked ? soil : mix(soil, earth, 0.4), grassy, weeds*(worked ? 0.55 : 0.85));
 		if (phase == 6) { field = mix(field, straw*0.8, 0.25*plants); }
 	}
+	field *= 1.0-balk*0.18;
 	// Edge: a thin grass headland and a drawn line.
 	float inside = smoothstep(0.45, 0.62, cover);
 	float edge = smoothstep(0.30, 0.45, cover)*(1.0-smoothstep(0.50, 0.66, cover));

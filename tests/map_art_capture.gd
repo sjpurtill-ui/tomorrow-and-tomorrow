@@ -3,6 +3,7 @@ extends Node
 ## art reviews at the settlement and regional views.
 ##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river] [--woodland] [--timing]
 ##      [--town] (a later-era walled town fixture in place of the new camp)
+##      [--look=dx,dz] (aim the camera this far from the settlement, km)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -55,6 +56,13 @@ func _ready()->void:
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
 	if "--town" in args:_seed_town()
+	for argument in args:
+		# `--look=dx,dz`: aim the camera this far (km) from the settlement.
+		if argument.begins_with("--look="):
+			var parts:=argument.trim_prefix("--look=").split(",")
+			if parts.size()==2:
+				target+=Vector3(float(parts[0]),0.0,float(parts[1]))
+				target.y=terrain._height_at(target.x,target.z)
 	if "--river" in args:
 		# Look at the world river instead (charted here for this capture only).
 		var river_z:=clampf(target.z,-600.0,600.0)

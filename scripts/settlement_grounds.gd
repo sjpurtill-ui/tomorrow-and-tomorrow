@@ -150,6 +150,9 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 			_disc(painter,c,clampf(_plot_radius(plot)*0.55,0.003,0.008),0.62,Color(1,0,0))
 		elif form in ["guarded_cache","lined_storage_pits","protected_household_store","raised_timber_store","communal_store"]:
 			_disc(painter,c,clampf(_plot_radius(plot)*0.40,0.0025,0.006),0.45,Color(1,0,0))
+		elif String(plot.get("land_use","")) in ["market","civic","sacred"]:
+			# Courts and market grounds before the public buildings.
+			_disc(painter,c,clampf(_plot_radius(plot)*0.85,0.005,0.02),0.80,Color(1,0,0))
 		elif form=="carried_water_point":
 			_disc(painter,c,0.0032,0.80,Color(1,0,0))
 		elif form=="refuse_and_latrine_ground":
@@ -163,7 +166,9 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 		var kind:=String(route.get("kind","desire_path"))
 		if hierarchy in ["lane","main_approach"]:width_m*=1.25
 		if kind=="field_track":width_m*=0.8
-		_line(painter,_points(route),width_m*0.00036+0.00014,0.55+0.40*traffic,Color(1,0,0))
+		# Made streets (surface tier 2 and up) are full width and hard-worn.
+		var made:=int(route.get("surface_tier",0))>=2
+		_line(painter,_points(route),width_m*(0.50 if made else 0.36)*0.001+0.00014,1.0 if made else 0.55+0.40*traffic,Color(1,0,0))
 	# Each home's door yard, the ring its eaves drip on, and its own path
 	# to the route it fronts.
 	var fronts:Dictionary={}
