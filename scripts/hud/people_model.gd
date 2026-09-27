@@ -93,6 +93,14 @@ static func headline(report:Dictionary,totals:Dictionary)->String:
 	return " ".join(parts)
 
 
+## Fed today at home, then any band or garrison away that is short of food:
+## soldiers' hunger is theirs, told apart from the home fires.
+static func _fed_cause(intake:float,short:int)->String:
+	var home:="Everyone ate their fill." if intake>=0.99 else "%s went short today." % EraWords.count_word(maxi(0,short)).capitalize() if intake>=0.0 else "Told once the people have eaten."
+	var field:=preload("res://scripts/field_rations.gd").hungry_lines(MilitaryCampaign,CivilizationSystem.player_world_origin)
+	return home if field.is_empty() else "%s %s" % [home," ".join(field)]
+
+
 static func _cap(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
 
@@ -274,7 +282,7 @@ static func vitals(report:Dictionary,totals:Dictionary)->Array:
 	var fed_count:=EraWords.fed(int(totals.population),float(totals.food_eaten),need)
 	var fed_trend:=_trend(_history_now(GameState.food_history,"intake_ratio"),_history_then(GameState.food_history,"intake_ratio",SEASON_DAYS),0.03)
 	out.append({"id":"fed","label":"FED TODAY","value":("%d of %d" % [fed_count,int(totals.population)]) if fed_count>=0 else "Not yet told","fill":maxf(0.0,intake),
-		"trend":fed_trend,"cause":"Everyone ate their fill." if intake>=0.99 else "%s went short today." % EraWords.count_word(maxi(0,int(totals.population)-fed_count)).capitalize() if intake>=0.0 else "Told once the people have eaten."})
+		"trend":fed_trend,"cause":_fed_cause(intake,int(totals.population)-fed_count)})
 	# Stores.
 	var food:=float(report.food_min)
 	var stored_now:=_history_now(GameState.food_history,"stored")

@@ -641,6 +641,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var food_days:=float(food_result.food_days)
 	var production_ratio:=float(food_result.food_balance)+1.0
 	var intake_ratio:=float(food_result.food_intake_ratio)
+	_home_intake_today=intake_ratio
 	var malnutrition:=float(food_result.malnutrition_burden)
 	var water_intake:=clampf(float(WorldSimulation.state.water_metrics.get("intake_ratio",0.0)),0.0,1.0)
 	# A multi-day step (day_span.gd) covers `span` days of the same conditions.
@@ -905,6 +906,19 @@ func _population_location() -> String:
 		return "the founding camp in %s" % WorldSimulation.state.province_name
 	return "the settlement in %s" % WorldSimulation.state.province_name
 
+## Share of home need the people at home ate today (food_system.gd).
+var _home_intake_today:=1.0
+
+## Why hunger killed, in plain words and only what is true: stores gone,
+## food not reaching everyone, or old weakness from hungry months before.
+func _hunger_detail(food_days:float,production_ratio:float)->String:
+	var intake:=clampf(_home_intake_today,0.0,1.0)
+	if food_days<1.0 and intake<0.98:
+		if production_ratio<0.98: return "The stores ran out, and what we brought in each day was not enough for everyone."
+		return "The stores ran out before this season's food came in."
+	if intake<0.98: return "There was food in the stores, but not everyone got enough of it."
+	return "They were already weak from hungry months before and did not recover."
+
 func _record_demographic_change(kind: String,count: int,cause: String,food_days: float,production_ratio: float,housing_ratio: float,affected_cohorts:Dictionary={},publish:bool=true) -> Dictionary:
 	var location:=_population_location()
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -912,7 +926,7 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 	var water_distance:=float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0))
 	var cause_detail:=""
 	match cause:
-		"Hunger": cause_detail="Food stores were exhausted and daily production met only %d%% of need." % roundi(production_ratio*100.0)
+		"Hunger": cause_detail=_hunger_detail(food_days,production_ratio)
 		"Dehydration": cause_detail="Drinking-water collection met only %d%% of need%s." % [roundi(water_intake*100.0)," from a source %.1f km away" % water_distance if water_distance>=0.0 else "; no reachable source was recorded"]
 		"Illness": cause_detail="Poor health was the strongest mortality pressure."
 		"Exposure": cause_detail="Shelter covered only %d%% of the population." % roundi(housing_ratio*100.0)
@@ -924,7 +938,7 @@ func _record_demographic_change(kind: String,count: int,cause: String,food_days:
 		"Neonatal complications": cause_detail="The newborn died during the immediate period after birth."
 		_: cause_detail="No exceptional crisis outweighed ordinary mortality."
 	var cohort_detail:=" Affected cohorts: %s." % ", ".join(PackedStringArray(affected_cohorts.keys())) if not affected_cohorts.is_empty() else ""
-	var description:="%s %s Health: %d%%. Stored provisions: %.1f days. Food today: %d%%. Drinking water today: %d%%. Shelter: %d%%.%s" % [cause_detail,"Location: %s." % location,roundi(WorldSimulation.state.population_health*100.0),food_days,roundi(production_ratio*100.0),roundi(water_intake*100.0),roundi(housing_ratio*100.0),cohort_detail]
+	var description:="%s %s Health: %d%%. Stored provisions: %.1f days. Food brought in today: %d%% of what we eat. Drinking water today: %d%%. Shelter: %d%%.%s" % [cause_detail,"Location: %s." % location,roundi(WorldSimulation.state.population_health*100.0),food_days,roundi(production_ratio*100.0),roundi(water_intake*100.0),roundi(housing_ratio*100.0),cohort_detail]
 	var noun:="birth" if kind=="birth" else "death"
 	var title:="%d %s%s at %s" % [count,noun,"" if count==1 else "s",location]
 	var record:={
