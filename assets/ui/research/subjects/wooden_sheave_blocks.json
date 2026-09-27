@@ -1,0 +1,14 @@
+{
+  "id": "wooden_sheave_blocks",
+  "line": "logistics",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-594a5819-3762-4078-a5cd-42e8dd32ebe1.png",
+  "source_file": "exec-594a5819-3762-4078-a5cd-42e8dd32ebe1.png",
+  "creative_brief": "Wooden sheave blocks for hoisting yards and cargo. Show the people, tools and materials of this practice in a road, quay or storehouse with goods on the move, classical antiquity.",
+  "medium": "Travel watercolor",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/wooden_sheave_blocks-v1.png",
+  "sha256": "21fc86c6afeac629efb88b7c748e971f7c529c86bc51f37ae04f9523523418c9",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

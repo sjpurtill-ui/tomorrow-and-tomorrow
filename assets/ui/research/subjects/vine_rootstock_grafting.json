@@ -1,0 +1,14 @@
+{
+  "id": "vine_rootstock_grafting",
+  "line": "nutrition",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7a824d84-a5eb-4d59-8e81-b26437db2e07.png",
+  "source_file": "exec-7a824d84-a5eb-4d59-8e81-b26437db2e07.png",
+  "creative_brief": "Choice vines are grafted onto hardy roots suited to the soil, marrying good wine to a strong stock. Paint it as a classical antiquity scene.",
+  "medium": "Egg tempera",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/vine_rootstock_grafting-v1.png",
+  "sha256": "73f79ae14e05b113b5a306cab4db383841d32d73b43f388621e8e877c3cada13",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
