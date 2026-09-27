@@ -1,0 +1,12 @@
+{
+  "id": "newcomer_intermarriage",
+  "line": "demography",
+  "game_year": 132,
+  "approx_historical_year": -4120,
+  "prompt": "c. 4120 BCE: Newcomer adult couple joins hands as two village households welcome them; chalk pastel and cut-paper collage. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-62d6d704-6c83-4be0-bf3a-78a85d95655d.png",
+  "asset": "res://assets/ui/research/subjects/newcomer_intermarriage-v1.png",
+  "sha256": "a48f2a0af4789185ef9b5b5313287245faff83f5fecce3c4f39f3c6b2e5d6aa4",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after 3.37:1 crop review; subject and direction medium clear."
+}
