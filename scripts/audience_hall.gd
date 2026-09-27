@@ -307,6 +307,7 @@ static func _war()->GDScript:
 
 const REQUESTS_PATH:="res://scripts/envoy_requests.gd"
 const PACTS_PATH:="res://scripts/trade_pacts.gd"
+const MENACE_PATH:="res://scripts/envoy_messages.gd"
 static func _requests()->GDScript:
 	## The wider envoy business (envoy_requests.gd); loaded lazily because it
 	## reaches back into this one.
@@ -426,6 +427,8 @@ static func daily(day:int)->Array[Dictionary]:
 	_requests().call("daily",day)
 	# Standing exchanges sealed in talk with foreign rulers (trade_pacts.gd).
 	(load(PACTS_PATH) as GDScript).call("daily",day)
+	# Ultimatums the god's envoys delivered: deadlines, kept and broken threats.
+	(load(MENACE_PATH) as GDScript).call("daily",day)
 	# The court never comes on its own: its occasions become matters, held by
 	# the official until the ruler summons them.
 	for occasion in (s.occasions as Array).duplicate():
@@ -3729,6 +3732,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("envoy_requests") and not bool(_requests().call("valid_state",data.envoy_requests)): return false
 	if data.has("trade_pacts") and not bool((load(PACTS_PATH) as GDScript).call("valid_state",data.trade_pacts)): return false
+	if data.has("menace") and not bool((load(MENACE_PATH) as GDScript).call("valid_state",data.menace)): return false
 	if data.has("turning_points") and not bool((load(TURNING_PATH) as GDScript).call("valid_state",data.turning_points)): return false
 	if data.has("court_persons"):
 		var persons:GDScript=load("res://scripts/court_persons.gd")
