@@ -61,6 +61,10 @@ func run()->void:
 	for key:String in samples:
 		if samples[key].is_empty():print("WIDE_ART missing sample ",key);continue
 		GameState.known_discoveries.append(String(samples[key].id))
+	# Theme the capture the way the game does. Without the game's display
+	# preferences, controls inside this SubViewport and the popups' CanvasLayers
+	# fall back to Godot's default pale button text on paper.
+	var prefs:Node=preload("res://scripts/display_preferences.gd").new();prefs.config_path="user://wide_art_probe_no_display.cfg";add_child(prefs)
 	canvas=SubViewport.new();canvas.size=Vector2i(1600,900);canvas.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(canvas)
 	var backdrop:=ColorRect.new();backdrop.color=Color("2b2a26");backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);canvas.add_child(backdrop)
 	var host:=Host.new();canvas.add_child(host);var hud:=Control.new();hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);host.add_child(hud)

@@ -207,7 +207,7 @@ static func label(parent:Node,text:String,font:int=13,ink:Color=T.BODY,wrap:bool
 	parent.add_child(value);return value
 static func button(parent:Node,text:String,callback:Callable)->Button:
 	var b:=Button.new();b.text=text;b.custom_minimum_size.y=34;b.add_theme_font_size_override("font_size",13)
-	b.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,5,8));b.add_theme_stylebox_override("hover",T.flat(Color("253940"),T.TEAL,1,5,8));b.pressed.connect(callback);parent.add_child(b);return b
+	b.add_theme_stylebox_override("normal",T.flat(T.BUTTON_BG,T.BORDER,1,5,8));b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG if T.is_light() else Color("253940"),T.TEAL,1,5,8));b.pressed.connect(callback);parent.add_child(b);return b
 ## Display (carved titles) and Voice (names, sentences) faces from ART_DIRECTION.
 ## Voice prefers the bundled Garamond once it lands under assets/fonts/serif/.
 const VOICE_CANDIDATES:=["res://assets/fonts/serif/EBGaramond-Regular.ttf","res://assets/fonts/serif/EBGaramond.ttf","res://assets/fonts/serif/CormorantGaramond-Regular.ttf"]
