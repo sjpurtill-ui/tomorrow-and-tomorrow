@@ -165,8 +165,12 @@ func test_rival_training_uses_shared_duration_cost_and_target()->void:
 func test_large_roster_and_policy_controls_update_without_training_buttons()->void:
 	_home()
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
-	assert_int(screen._rows().size()).is_equal(2)
-	assert_int(screen.bindings.size()).is_equal(2)
+	# The roster groups a force's levy cohorts into one row (read-only
+	# presentation); the row still counts every soldier of both cohorts.
+	var rows:Array=screen._rows()
+	assert_int(rows.size()).is_equal(1)
+	assert_int(int(rows[0].count)).is_equal(120)
+	assert_int(screen.bindings.size()).is_equal(1)
 	screen.training_view=true;screen._build_body()
 	assert_int(screen.policy_buttons.size()).is_equal(4)
 	screen.policy_buttons.intensive.pressed.emit()
@@ -192,7 +196,10 @@ func test_staff_report_keeps_field_formations_dated_and_does_not_expose_live_cha
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army.status="moving";army.location_id="field"
 	army.last_report=MilitaryCampaign._army_report_snapshot(army)
-	var reported_count:=int(army.last_report.formations[0].count)
+	# The roster groups the army's cohorts into one row: it must show the
+	# reported total, not the live one.
+	var reported_count:=0
+	for formation:Dictionary in army.last_report.formations:reported_count+=int(formation.count)
 	army.formations[0].count=1
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
 	var reported:Array=screen._rows().filter(func(row:Dictionary)->bool:return "report" in String(row.location))

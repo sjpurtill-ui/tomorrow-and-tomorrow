@@ -46,8 +46,11 @@ func test_supply_numbers_refresh_without_reopening_the_view()->void:
 	assert_str(screen.support_labels.repair.note.text).contains("underway")
 
 func test_service_changes_keep_the_shared_shell_and_do_not_show_army_totals()->void:
+	# Navy and air are offered only once the people have boats and flight.
+	GameState.known_discoveries.append_array(["river_craft","powered_flight"])
 	MilitaryCampaign.open_roster("navy",false,"support")
 	var screen=MilitaryCampaign.roster_screen
+	assert_str(screen.service).is_equal("navy")
 	var panel_id:int=screen.panel.get_instance_id()
 	assert_bool(screen.support_labels.has("gear")).is_false()
 	screen.service="air";screen._build_body()

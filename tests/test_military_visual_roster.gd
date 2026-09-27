@@ -39,7 +39,10 @@ func test_live_updates_keep_card_and_expanded_detail_and_attention_filter_is_cur
 	screen._process(.6);assert_int(screen.bindings.size()).is_equal(0)
 
 func test_switching_service_and_policy_never_changes_another_service()->void:
+	# Services are offered only once the people can field them: boats and flight.
+	GameState.known_discoveries.append_array(["river_craft","powered_flight"])
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
+	assert_bool(screen.service_buttons.has("navy") and screen.service_buttons.has("air")).is_true()
 	screen.training_view=true;screen._build_body()
 	screen.policy_buttons.intensive.pressed.emit()
 	screen.service_buttons.navy.pressed.emit()

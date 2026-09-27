@@ -13,6 +13,8 @@ func before_test()->void:
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.resource_settlement_id="";GameState.ensure_population_total(100)
 	GameState.population_allocations.Crafting=10;GameState.population_health=1.0;GameState.simulation_metrics.labor_efficiency=1.0
 	GameState.resource_stockpiles={"Stone":20.0,"Clay":10.0,"Civilian Goods":3.0,"Timber":4.0,"Limestone":10.0,"Unfired Clay Conduits":4.0}
+	# An even research split: no line's specialization scales these effects.
+	for line:String in GameState.research_allocations:GameState.research_allocations[line]=1.0
 
 func after_test()->void:
 	WorldSimulation.clear();GameState.set_process(true);CivilizationSystem.set_process(true);MilitaryCampaign.set_process(true)
@@ -71,7 +73,8 @@ func test_lime_effects_follow_physical_stock_and_installed_masonry()->void:
 	assert_float(Craft.factor("lime_burning")).is_equal(1.0)
 	assert_float(DiscoverySystem.effect("construction_rate")).is_equal_approx(expected_effect("construction_rate",["lime_burning","lime_mortar"]),.00001)
 	assert_float(DiscoverySystem.effect("construction_rate")).is_greater(0.0)
-	GameState.settlement_plots=[{"form":"lime_masonry_household","status":"active","condition":.5}];DiscoverySystem.refresh_operating_effects()
+	# Lime mortar acts through a masonry-era city fabric (tier 3+), at its condition.
+	GameState.settlement_plots=[{"form":"lime_masonry_household","status":"active","condition":.5,"fabric_generation":3}];GameState.city_form={};DiscoverySystem.refresh_operating_effects()
 	assert_float(Craft.factor("lime_mortar")).is_equal(.5)
 	assert_float(DiscoverySystem.effect("housing_output")).is_equal_approx(expected_effect("housing_output",["lime_burning","lime_mortar"]),.00001)
 	assert_float(DiscoverySystem.effect("housing_output")).is_greater(0.0)

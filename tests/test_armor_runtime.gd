@@ -42,13 +42,16 @@ func test_authored_branches_retain_material_and_forming_alternatives()->void:
 		assert_int(K.entries().size()).is_equal(6)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),WorldSimulation.discovery.technology_catalog)).is_empty()
 		var T=preload("res://scripts/technology_requirements.gd")
+		# The rebuilt 600-1200 and 1800-2400 research blocks give armor one
+		# historical chain: lamellar follows scale attachment, and articulated
+		# plate follows plate limb defences and the coat of plates.
 		var lamellar:Dictionary=WorldSimulation.discovery.discovery_definition("lamellar_armor_assembly")
-		assert_bool(T.evaluate(lamellar,["cordage","bronze_alloying"]).ready).is_true()
-		assert_bool(T.evaluate(lamellar,["cordage","hardened_edges"]).ready).is_true()
-		assert_bool(T.evaluate(lamellar,["cordage"]).ready).is_false()
+		assert_bool(T.evaluate(lamellar,["scale_armor_attachment"]).ready).is_true()
+		assert_bool(T.evaluate(lamellar,["cordage","bronze_alloying","hardened_edges"]).ready).is_false()
 		var plate:Dictionary=WorldSimulation.discovery.discovery_definition("articulated_plate_armor")
-		assert_bool(T.evaluate(plate,["hardened_edges","standard_measures","structural_load_testing"]).ready).is_true()
-		assert_bool(T.evaluate(plate,["hardened_edges","standard_measures","sheet_steel_rolling"]).ready).is_true())
+		assert_bool(T.evaluate(plate,["plate_limb_defences","coat_of_plates"]).ready).is_true()
+		assert_bool(T.evaluate(plate,["plate_limb_defences"]).ready).is_false()
+		assert_bool(T.evaluate(plate,["coat_of_plates"]).ready).is_false())
 func test_armor_parts_are_not_lines_and_kits_bill_only_raw_materials_and_goods()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();var host=WorldSimulation.military

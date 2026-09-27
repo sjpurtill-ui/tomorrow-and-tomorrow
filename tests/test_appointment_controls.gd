@@ -34,6 +34,10 @@ func test_every_available_office_can_be_filled_by_stable_person_id()->void:
 
 func test_locked_office_reports_a_reason_and_changes_nothing()->void:
 	GovernmentPeopleSystem.government_stage=0
+	# Settle the founding-stage structure first (at stage 0 the Steward also
+	# leads the only settlement); only then must the refused appointment
+	# change nothing.
+	GovernmentPeopleSystem.initialize()
 	var person:Dictionary=GovernmentPeopleSystem.living_people()[0]
 	var before:=GameState.leadership_positions.duplicate(true)
 	var result:=AdvisorSystem.appoint_person(int(person.person_id),"Scholar")

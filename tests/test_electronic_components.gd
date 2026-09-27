@@ -50,11 +50,14 @@ func test_all_installation_types_can_save_their_maximum_commissioning_workforce(
 		state.ensure_population_total(maximum+6000);state.population_allocations.Crafting=maximum
 		state.population_health=1.0;state.simulation_metrics.labor_efficiency=1.0
 		for id:String in Ops.PLANTS:Ops.data().plants[id]={"installed":0,"building":1000,"work":0.0,"enabled":true}
+		# A water hammer is always built at a surveyed river site.
+		Ops.data().plants.water_hammer["river_site"]={"source_id":"test_river","source":[0.0,0.0,0.0],"home":[0.0,0.0,0.0]}
 		day(1)
 		assert_float(float(Ops.data().workers)).is_equal(float(maximum))
 		assert_bool(Ops.valid(JSON.parse_string(JSON.stringify(Ops.data())))).is_true()
 		var invalid:Dictionary=Ops.data().duplicate(true);invalid.workers=float(maximum+1)
 		assert_bool(Ops.valid(invalid)).is_false()
-		invalid=Ops.data().duplicate(true);invalid.services.mechanical_work=21501.0
+		# Above the 30,000 mechanical-work ceiling (raised from 21,500).
+		invalid=Ops.data().duplicate(true);invalid.services.mechanical_work=30001.0
 		assert_bool(Ops.valid(invalid)).is_false()
 	)

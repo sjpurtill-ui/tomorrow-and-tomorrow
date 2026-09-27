@@ -172,7 +172,10 @@ func test_scouts_reveal_nothing_until_their_return_then_chart_route_and_contact(
 	assert_int(system.contact_encounters_snapshot().size()).is_greater_equal(1)
 	for encounter_variant in system.contact_encounters_snapshot():
 		var encounter:Dictionary=encounter_variant
-		assert_str(String(encounter.source)).is_equal("returned_scout_report")
+		# Scouts meet a people either in the field or by watching one of their
+		# settlements; both are carried home by the returning party.
+		assert_array(["returned_scout_report","physical reconnaissance"]).contains([String(encounter.source)])
+		assert_str(String(encounter.source_description)).is_not_equal(system.contact_source_description(""))
 		assert_bool((encounter.position as Dictionary).has("x")).is_true()
 		assert_bool((encounter.position as Dictionary).has("z")).is_true()
 	assert_array(system.validate_state()).is_empty()

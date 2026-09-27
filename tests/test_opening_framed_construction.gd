@@ -29,6 +29,8 @@ func before_test()->void:
 	GameState.resource_stockpiles={"Civilian Goods":10.0,"Timber":50.0,"Fiber Plants":40.0,"Clay":20.0,"Stone":30.0}
 	GameState.known_discoveries=[]
 	GameState.discovery_adoption={}
+	# An even research split: no line's specialization scales these effects.
+	for line:String in GameState.research_allocations:GameState.research_allocations[line]=1.0
 	model=auto_free(SettlementModelScript.new())
 	model.ensure_founded()
 

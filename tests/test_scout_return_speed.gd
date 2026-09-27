@@ -9,10 +9,14 @@ func test_repeated_return_notifications_preserve_running_and_manual_pause()->voi
 	var label:=Label.new()
 	terrain.travel_status_label=label
 	CivilizationSystem.scout_report_returned.connect(terrain._on_scout_report_returned)
+	# A routine return (nothing new found) stays quiet.
+	CivilizationSystem.scout_report_returned.emit({"mission_id":99,"day":100})
+	assert_str(label.text).is_empty()
+	# A newsworthy return points to the report, and never pauses or speeds play.
 	for speed:float in [1.0,5.0,0.0]:
 		terrain.game_speed=speed
 		for party in 3:
-			CivilizationSystem.scout_report_returned.emit({"mission_id":party,"day":100})
+			CivilizationSystem.scout_report_returned.emit({"mission_id":party,"day":100,"new_contact_count":1})
 			assert_float(terrain.game_speed).is_equal(speed)
 	assert_str(label.text).contains("WORLD > SCOUTING")
 	CivilizationSystem.scout_report_returned.disconnect(terrain._on_scout_report_returned)

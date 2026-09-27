@@ -15,4 +15,7 @@ func test_science_capacity_is_minds_times_average_education()->void:
 func test_survival_indicator_reports_life_expectancy_and_infant_deaths_per_thousand()->void:
 	var result:=Indicators.health()
 	assert_float(float(result.life_expectancy)).is_greater(0.0)
-	assert_float(float(result.infant_mortality_per_1000)).is_between(4.0,180.0)
+	# Historical range: pre-modern worst cases reach about 300-310 per 1,000
+	# (docs/research/BENCHMARKS_1200.md..3000.md); the modern floor is a few.
+	# A newly founded band in hard conditions sits near the pre-modern worst.
+	assert_float(float(result.infant_mortality_per_1000)).is_between(3.0,320.0)

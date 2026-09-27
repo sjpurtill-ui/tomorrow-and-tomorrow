@@ -90,7 +90,9 @@ func test_silver_has_geographic_potential_and_old_ore_keys_keep_order()->void:
 	var profile:Dictionary=PlanetEnvironment.profile_at(Vector2(100,200))
 	assert_bool(profile.resource_potentials.has("Silver Ore")).is_true()
 	assert_float(float(profile.resource_potentials["Silver Ore"])).is_between(0.0,1.0)
-	assert_array(ResourceSystem.catalog.keys().slice(-7)).is_equal(["Silver Ore","Nickel Ore","Bauxite","Rutile Ore","Ochre Earth","Zinc Ore","Kaolin"])
+	# Gold Ore and Crude Oil (prospecting, 2026-09-14) sit after Silver; that
+	# order is now what existing worlds were generated with, so it is kept.
+	assert_array(ResourceSystem.catalog.keys().slice(-9)).is_equal(["Silver Ore","Gold Ore","Crude Oil","Nickel Ore","Bauxite","Rutile Ore","Ochre Earth","Zinc Ore","Kaolin"])
 	assert_bool(bool(ResourceSystem.catalog["Silver Ore"].renewable)).is_false()
 func test_appended_silver_does_not_change_existing_generated_deposits()->void:
 	WorldSimulation.scoped("polymers",func()->void:

@@ -868,7 +868,8 @@ func _build_toolbar()->void:
 	distance_selector.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	distance_selector.add_theme_color_override("font_color",Tokens.INK)
 	distance_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
-	for index:int in terrain.CAMERA_DISTANCE_LEVELS.size():distance_selector.add_item(String(EraWords.DISTANCE_WORDS[mini(index,EraWords.DISTANCE_WORDS.size()-1)]))
+	# Like the rest of the shell, tolerate a HUD built before its terrain is set.
+	for index:int in (terrain.CAMERA_DISTANCE_LEVELS.size() if terrain else 0):distance_selector.add_item(String(EraWords.DISTANCE_WORDS[mini(index,EraWords.DISTANCE_WORDS.size()-1)]))
 	distance_selector.tooltip_text="How far the map looks: close by, the valley, the region, the far lands. Scroll or pinch changes one step; Shift-scroll makes gentle fine adjustments."
 	# The map speaks in the people's distances; a metric scale bar ("SITE ·
 	# 20 M") is a surveyor's instrument, so the bar is kept only for tooltips.

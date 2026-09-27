@@ -37,12 +37,15 @@ func test_training_research_is_role_specific_and_scales_with_adoption()->void:
 	assert_float(absf(Land.training_days("skirmisher")-base*.85)).is_less(.000001)
 
 func test_alternative_teaching_foundations_keep_weapons_foundation()->void:
+	# The rebuilt 600-1200 block founds paired drill on skirmisher screens
+	# (themselves founded on slings and throwing spears); teaching alone,
+	# without that weapons foundation, is never enough.
 	var entry:=DiscoverySystem.discovery_definition("skirmish_pair_drill")
+	GameState.known_discoveries.assign(["skirmisher_infantry_screens"])
+	assert_bool(P.ready(entry,100000)).is_true()
 	for teaching:String in ["formation_drill","oral_epics"]:
 		GameState.known_discoveries.assign(["bow_craft",teaching])
-		assert_bool(P.ready(entry,100000)).is_true()
-	GameState.known_discoveries.assign(["oral_epics"])
-	assert_bool(P.ready(entry,100000)).is_false()
+		assert_bool(P.ready(entry,100000)).is_false()
 
 func test_new_order_uses_teaching_but_existing_order_keeps_schedule()->void:
 	MilitaryCampaign.reset_for_new_world()

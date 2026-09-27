@@ -1348,6 +1348,10 @@ func _discovery_effect_summary(entry:Dictionary)->String:
 			if resource in prospecting.resources and resource not in targets:targets.append(resource)
 		var target_text:=", ".join(PackedStringArray(targets)) if not targets.is_empty() else "matching geological materials"
 		summary+="\nSurvey workers at full adoption: +%.0f%% identification effort and +%.0f%% extent-survey effort for %s. Strongest method per family; combined improvement capped at 75%%. No deposits, stocks or extraction access are granted." % [float(prospecting.recognition)*100,float(prospecting.survey)*100,target_text]
+	# The rebalanced research blocks give many practical methods adoption
+	# effects; keep telling the player what physical work they still require.
+	var contract:=String(entry.get("production_contract",""))
+	if not summary.is_empty() and not contract.is_empty() and not contract in summary:summary+="\n"+contract
 	return summary if not summary.is_empty() else String(entry.get("production_contract","Unlocks a prerequisite used by later practical methods."))
 
 

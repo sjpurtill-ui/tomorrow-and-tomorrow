@@ -17,6 +17,8 @@ func before_test()->void:
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false
 	GameState.resource_stockpiles["Freshwater"]=0.0
 	GameState.population_allocations.Logistics=0;GameState.population_allocations.Food=0
+	# An even research split: no line's specialization scales these effects.
+	for line:String in GameState.research_allocations:GameState.research_allocations[line]=1.0
 
 func after_test()->void:
 	WorldSimulation.clear()

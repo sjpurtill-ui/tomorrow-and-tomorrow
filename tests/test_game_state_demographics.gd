@@ -209,16 +209,30 @@ func test_age_profile_accounts_for_the_entire_population() -> void:
 
 
 func test_natural_mortality_uses_the_same_age_gradient_as_the_life_table()->void:
-	state.population_exact=1_000_000.0
-	state.population_cohorts={"children":700_000.0,"youth":100_000.0,"early_adults":80_000.0,"established_adults":60_000.0,"mature_adults":40_000.0,"elders":20_000.0}
+	# Keep the band within its founding territory's carrying capacity: a million
+	# people in year 0 would be crushed by the crowding check, which saturates
+	# every band's hazard and hides the age gradient this test is about.
+	state.population_exact=300.0
+	state.population_cohorts={"children":210.0,"youth":30.0,"early_adults":24.0,"established_adults":18.0,"mature_adults":12.0,"elders":6.0}
 	state._normalize_population_cohorts()
 	var young_rate:float=state.current_natural_mortality_rate(1.0)
-	state.population_cohorts={"children":100_000.0,"youth":100_000.0,"early_adults":100_000.0,"established_adults":100_000.0,"mature_adults":150_000.0,"elders":450_000.0}
+	state.population_cohorts={"children":30.0,"youth":30.0,"early_adults":30.0,"established_adults":30.0,"mature_adults":45.0,"elders":135.0}
 	state._normalize_population_cohorts()
 	var old_rate:float=state.current_natural_mortality_rate(1.0)
-	assert_float(old_rate).is_greater(young_rate*3.0)
-	var deaths:Dictionary=state.register_population_deaths(10_000,"Natural causes")
-	assert_float(float(deaths.affected_cohorts.elders)/450_000.0).is_greater(float(deaths.affected_cohorts.children)/100_000.0)
+	assert_float(old_rate).is_less(0.5)
+	# Each band dies at its life-table hazard (with the era burden), so the old
+	# society's rate is the cohort-weighted table, not a flat per-head rate.
+	var conditions:float=state._mortality_condition_factor(1.0)
+	var hazards:Dictionary=state._natural_cohort_hazards(conditions)
+	var expected:=0.0
+	for key:String in hazards:expected+=float(state.population_cohorts[key])*clampf(float(hazards[key])*conditions,0.0001,0.98)
+	assert_float(old_rate).is_equal_approx(expected/300.0,0.000001)
+	# Pre-modern child mortality is heavy (about 5% a year under 14), yet an
+	# elder-heavy band still dies well over twice as fast as a child-heavy one.
+	assert_float(float(hazards.elders)).is_greater(float(hazards.children)*4.0)
+	assert_float(old_rate).is_greater(young_rate*2.5)
+	var deaths:Dictionary=state.register_population_deaths(3,"Natural causes")
+	assert_float(float(deaths.affected_cohorts.elders)/135.0).is_greater(float(deaths.affected_cohorts.children)/30.0)
 
 
 func test_population_function_profile_conserves_roles_and_removes_real_absences()->void:

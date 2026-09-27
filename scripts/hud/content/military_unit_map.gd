@@ -39,7 +39,7 @@ func tab(requested:int)->Dictionary:
 		rows.append({"name":String(unit.label),"sub":description,"value":"KNOWN" if bool(gate.unlocked) else "LOCKED","value_color":Tokens.TEAL if bool(gate.unlocked) else Tokens.MUTED})
 	var branches:PackedStringArray=[]
 	for domain in domains.slice(1):branches.append({"navy":"naval","air":"air"}[domain])
-	var intro:="50 land archetypes"
+	var intro:="%d land archetypes" % Land.ARCHETYPES.size()
 	if not branches.is_empty():intro+=" plus separate %s branches" % " and ".join(branches)
 	intro+=". Any people can develop these capabilities. Older forms remain available; a new discovery does not replace an existing force."
 	return {"kpis":[],"blocks":[{"type":"text","text":intro},{"type":"rows","items":rows}]}

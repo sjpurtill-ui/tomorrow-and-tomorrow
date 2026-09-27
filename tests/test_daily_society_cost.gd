@@ -26,7 +26,7 @@ func test_subcategories_match_scalar_with_live_leaders_and_state()->void:
 			for legitimacy in [0.1,0.85]:
 				state.simulation_metrics.legitimacy=legitimacy
 				state.elapsed_days+=137
-				state.player_settlements.assign([{"id":1,"position":Vector2(legitimacy*7,2)}])
+				state.player_settlements.assign([{"id":"settlement_001","position":Vector2(legitimacy*7,2)}])
 				state.leadership_positions={}
 				assert_dict(model.evaluate_subcategories({})).is_equal(reference.evaluate_subcategories({}))
 				for office in S.OFFICE_DYNAMICS:

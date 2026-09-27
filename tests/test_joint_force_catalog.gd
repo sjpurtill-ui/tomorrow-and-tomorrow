@@ -6,7 +6,10 @@ const Combat=preload("res://scripts/combat_simulator.gd")
 const Production=preload("res://scripts/persistent_production.gd")
 
 func test_fifty_land_units_have_combat_equipment_and_reachable_knowledge()->void:
-	assert_int(Land.ARCHETYPES.size()).is_equal(50)
+	# Fifty combat archetypes plus two support detachments added later
+	# (medical_detachment, field_repair_company).
+	assert_int(Land.ARCHETYPES.size()).is_equal(52)
+	assert_int(Land.ARCHETYPES.keys().filter(func(id:String)->bool:return String(Land.ARCHETYPES[id].branch)!="field_support").size()).is_equal(50)
 	assert_array(MilitaryCampaign.validate_military_progression()).is_empty()
 	for id:String in Land.ARCHETYPES:
 		assert_bool(Combat.UNIT_TYPES.has(id)).is_true()
@@ -68,8 +71,12 @@ func test_every_new_knowledge_dependency_exists_without_cycles()->void:
 
 func test_progression_view_keeps_fifty_land_separate_from_naval_and_air()->void:
 	var world:Node=auto_free(Node.new());var shell:Control=auto_free(Control.new())
+	# Naval and air tabs are offered once the people have boats and flight.
+	GameState.known_discoveries.append_array(["river_craft","powered_flight"])
 	var view:=preload("res://scripts/hud/content/military_unit_map.gd").new(world,shell)
-	assert_int(view.tab(0).blocks[1].items.size()).is_equal(50)
+	# Every land archetype, the two support detachments included.
+	assert_int(view.tab(0).blocks[1].items.size()).is_equal(Land.ARCHETYPES.size())
+	assert_str(String(view.tab(0).blocks[0].text)).starts_with("%d land archetypes" % Land.ARCHETYPES.size())
 	assert_int(view.tab(1).blocks[1].items.size()).is_equal(21)
 	assert_int(view.tab(2).blocks[1].items.size()).is_equal(16)
 

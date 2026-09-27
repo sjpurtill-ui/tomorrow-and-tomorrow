@@ -2209,6 +2209,8 @@ func contact_source_description(source:String,formation_kind:String="")->String:
 			return "Direct local encounter with a nearby %s" % formation_kind.replace("_"," ")
 		"returned_scout_report":
 			return "Your scout party encountered them and carried the report home"
+		"physical reconnaissance":
+			return "Your scouts watched one of their settlements and carried the report home"
 		"captured_foreign_scout":
 			return "A nearby foreign scout party was captured and identified"
 		"reconstructed_scout_report":
