@@ -1,3 +1,10 @@
+## September 27 — earliest-first year 6 art, batch 5: INTEGRATED
+
+Worker `a336b45895fb46b3bf0350d0eb8f25a3ae0e93e1`, branch `codex/research-art-earliest-05`, based on main `cba6ebc9`. Seven year-6 subjects gain dedicated paintings: birth_spacing_customs, delousing, refuge_point_marking, rest_break_timing, sightline_staking, streambank_vegetation_watch and vermin_deterrent_placement. Classical Other batch 10 remains HELD and excluded.
+
+Reviewed source sheet and actual shared-renderer 3.37:1 crops for subject clarity and obvious period mismatches in tools, clothing, shelters and materials. Combined Godot 4.7.2 import exited 0 without logged errors. Private GPU `tests/stylized_research_art_probe.tscn -- --earliest-05` exited 0 and passed all seven live catalogue lookups, manifest precedence, unique texture/provenance hashes, hidden gating and crop bounds. Every lookup passed at years 1, 2, 3, 4, 5, 6, 299, 300 and 600. Evidence: `C:/Users/sjpur/tt-integrate-stylized-art/artifacts/earliest05-runtime.log` and `earliest-05-research-in-game-crops.png`.
+
+Reproduced early audit: 1,122 rows, 402 own effective paintings, 720 borrowed/line, zero missing files. Counts classify filename ownership at each proposed year; they do not certify historical accuracy. Next gaps are year 7 postpartum_seclusion_care and witnessed_agreement_customs. No simulation/save changes or generated import churn committed. Full campaign and unrelated suites were not rerun. No active canonical player found; no player/editor stopped or restarted.
 ## September 27 — earliest-first year 5 art, batch 4: INTEGRATED
 
 Worker `f11b7c4c7411f2e2746cbf012f7560c73d284f7f`, branch `codex/research-art-earliest-04`, base `8ab5aa9c`, reconciled with newer main `981c08ad` in merge `b589c856`. The combined headless art probe passed again (`artifacts/earliest04-latest-runtime.log`); newer world and UI work is preserved. Seven year5 subjects gain dedicated paintings: common_path_alignment, edge_resharpening_rounds, emergency_food_caching, infant_swaddling_practice, leader_gift_redistribution, paired_task_assignment and turbidity_judging. Classical Other batch10 stays HELD/excluded.

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "birth_spacing_customs",
+    "line": "demography",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: caregiver guides an older weaned child to food from an earthenware bowl while another adult cradles a younger infant, showing birth spacing by weaning and custom. Mature flat chalk pastel and torn cut-paper collage, terracotta and warm ivory; no writing, medical diagram, later dress or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f8f37dbc-3660-4a41-b8d9-716e97fede9d.png",
+    "asset": "res://assets/ui/research/subjects/birth_spacing_customs-v1.png",
+    "sha256": "603d6be793926e276238273d11574a1c3337b5a2e7b5f1437786a91b07d98beb",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first was too lifelike. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "delousing",
+    "line": "health",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: one adult carefully combs lice from another adults hair with a fine-toothed bone comb beside a reed shelter. Mature transparent sage and celadon watercolor with spare ink, flat dignified figures; no metal comb, modern medicine or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7c7e2286-6ec3-4700-aa9b-2be18bb68b28.png",
+    "asset": "res://assets/ui/research/subjects/delousing-v1.png",
+    "sha256": "724efcd45146e973a596d5fefa409fed387c3657882590a2d1f55decc1284d2b",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; bone comb and care action clear. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "refuge_point_marking",
+    "line": "security",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: adults place a plain stone cairn on safe raised ground beside a flood-prone stream as others approach the refuge point. Mature hand-cut woodblock print, charcoal and vermilion ink on warm parchment; no carved symbol, sign, tower, fortress or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8ce297be-7d0a-4b58-a7a4-ffc87bf094b7.png",
+    "asset": "res://assets/ui/research/subjects/refuge_point_marking-v1.png",
+    "sha256": "225b871e95281963f2d7b34d9b6214b8300d76f7674ae565e7bf8b4fc981d6b6",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; cairn and approach visible. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "rest_break_timing",
+    "line": "labor",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: workers set down a timber beam and rest in shelter shade when a short midday shadow signals an agreed break. Mature expressive charcoal over flat ochre wash, angular figures and rough grain; no clock, sundial, written schedule or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-294797e5-ef00-48c7-9fa4-3fc2eb473686.png",
+    "asset": "res://assets/ui/research/subjects/rest_break_timing-v1.png",
+    "sha256": "2228e2e5622c5fe6257d2e4cf3a9b79bf97a89e32d4dffaf8918343b5f783338",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; beam and resting work group clear. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "sightline_staking",
+    "line": "infrastructure",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: eye peers along three rough timber stakes and a taut plant-fiber cord as a hand aligns a future house plot. Mature flat architectural casein gouache, opaque mineral-blue and earth planes, matte brush texture; no metal surveying gear, masonry, written plan or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9ebcef5e-314a-4e83-a3b0-6cd5b6a3be67.png",
+    "asset": "res://assets/ui/research/subjects/sightline_staking-v1.png",
+    "sha256": "c2d40069f7d157cadb51dfe48ad23fe2caf869335ecd8f7695db740bac6663e4",
+    "mode": "built-in image_gen / new image",
+    "review": "Third generation selected; earlier images showed later-looking clothing or realistic scenery. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "streambank_vegetation_watch",
+    "line": "ecology",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: bare streambank erodes into water while neighboring reeds and rooted plants hold soil, watched by a small observer. Mature 2D naturalist field painting in layered plant pigments, flat bands, stylized roots and visible strokes; no engineering works, writing or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e4e8447d-9ccf-40f6-98d8-d10cc26d6f15.png",
+    "asset": "res://assets/ui/research/subjects/streambank_vegetation_watch-v1.png",
+    "sha256": "ec65e530d1acd5b9bce5233074042c80b2f687f4317ea4277188ea2137eaad60",
+    "mode": "built-in image_gen / new image",
+    "review": "Second generation selected; first looked photographic. Accepted after visual 3.37:1 crop and subject/period check."
+  },
+  {
+    "id": "vermin_deterrent_placement",
+    "line": "logistics",
+    "game_year": 6,
+    "approx_historical_year": -4960,
+    "prompt": "c. 4960 BCE: adults protect stored dried food by raising baskets on plain stones and placing aromatic branches around them inside a reed storage shelter. Mature panoramic travel watercolor on coarse paper, sand-gold and faded-indigo washes; no poison, metal traps, pallets, written labels or photorealism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5a5a8b5c-b86c-4a28-950c-3a51c055b611.png",
+    "asset": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png",
+    "sha256": "f8124571b9c40938994a04a42728ea0a9af732c10ebb40d15182cbf67a3170ee",
+    "mode": "built-in image_gen / new image",
+    "review": "First generation selected; placement around baskets legible. Accepted after visual 3.37:1 crop and subject/period check."
+  }
+]
