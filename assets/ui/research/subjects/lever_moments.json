@@ -1,0 +1,14 @@
+{
+  "id": "lever_moments",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d64074f5-3cbc-418a-b470-e9d055d6f57f.png",
+  "source_file": "exec-d64074f5-3cbc-418a-b470-e9d055d6f57f.png",
+  "creative_brief": "Weight times distance on each side of the pivot must balance, so the long arm lifts the heavy load. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/lever_moments-v1.png",
+  "sha256": "b770d1438013591a6469115db9de7f3c88cf83e420f57a4614df95f564bbe181",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

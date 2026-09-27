@@ -107,8 +107,9 @@ func _army(id:int,at:Vector2,troops:int,objective:Vector2)->Dictionary:
 	var army:={"army_id":id,"name":"%s Host" % ["First","Second","Third","Fourth","Fifth","Sixth"][(id-900)%6],"troops":troops,"readiness":0.7,"supply_level":0.8,"morale":0.72,
 		"status":"moving" if objective.is_finite() else "stationed","location_id":"field_position","location_name":"Commanded ground","position":position,
 		"destination_id":"" if objective.is_finite() else "","destination_position":{"x":objective.x,"z":objective.y} if objective.is_finite() else {},"distance_remaining_km":at.distance_to(objective) if objective.is_finite() else 0.0,
-		"arrival_day":-1,"formations":[{"id":1,"unit":"line_infantry","count":troops,"training":0.6,"personnel_condition":1.0}],"commander":{"name":"Field staff","command":0.6,"tactics":0.6,"logistics":0.6,"resolve":0.6}}
-	army["last_report"]={"position":position.duplicate(),"troops":troops,"status":army.status,"day":today}
+		"arrival_day":-1,"formations":[{"id":1,"unit":"line_infantry","count":troops,"training":0.6,"personnel_condition":1.0}],"commander":{"name":["Field staff","Arno Kell","Field staff","Hena Vall","Field staff"][(id-900)%5],"command":0.6,"tactics":0.6,"logistics":0.6,"resolve":0.6}}
+	# One runner is three days behind, so its card says so.
+	army["last_report"]={"position":position.duplicate(),"troops":troops,"status":army.status,"day":today-(3 if id==903 else 0)}
 	return army
 
 
@@ -140,6 +141,8 @@ func _fixture_war()->void:
 		armies.append(_army(ids[k],at,[6000,30000,24000,8000,5000][k],objective))
 	# Real armies so the real counters draw. Kept in the private copy only.
 	for army in armies: MilitaryCampaign.field_armies.append(army)
+	# Round three: one force selected, so its gold ring and card show.
+	if stage!="before": terrain.selected_army_id=903
 	# Two of them are corps; group them under one army-group headquarters.
 	var command:Variant=MilitaryCampaign.get("command_hierarchy")
 	if command!=null:
@@ -166,6 +169,34 @@ func _fixture_war()->void:
 	await _plates([["regional",clampf(spread*5.0,90.0,700.0),line],["regional-wide",clampf(span*1.25,90.0,700.0),line],["local",clampf(span*0.5,30.0,80.0),clash_at],["continental",clampf(span*6.0,900.0,5000.0),line]])
 	await _extras(["local",clampf(span*0.5,30.0,80.0),line])
 	await _cost()
+	if stage!="before": await _era_plates(clampf(span*0.5,30.0,80.0),line)
+
+
+## Round three: the same ground in two other ages. Early: small war bands
+## (spear tallies) in the raid age. Late: rifles and armour (staff boxes).
+func _era_plates(zoom:float,line:Vector2)->void:
+	if overlay==null or not ("extra_inputs" in overlay): return
+	var bands:=[40,180,60,120,25]
+	var k:=0
+	for army in MilitaryCampaign.field_armies:
+		if int(army.get("army_id",0)) in [900,901,902,903,904]:
+			army.troops=bands[k]; army.last_report.troops=bands[k]; army.formations=[{"id":1,"unit":"levy","count":bands[k]}]; k+=1
+	var early:=fixture.duplicate(true)
+	early.stage="hearth"; early.mode="raid"; early.zones=[]; early.lanes=[]; early.harbours=[]; early.sieges=[]; early.engagements=[]
+	for e in early.enemy: e.strength=float(e.strength)/60.0
+	fixture=early
+	await _plates([["local",zoom,line]],"mature_early")
+	var units:=["rifle_infantry","armored_formation","motorized_infantry","modern_artillery","rifle_infantry"]
+	var sizes:=[6000,30000,24000,8000,5000]
+	k=0
+	for army in MilitaryCampaign.field_armies:
+		if int(army.get("army_id",0)) in [900,901,902,903,904]:
+			army.troops=sizes[k]; army.last_report.troops=sizes[k]; army.formations=[{"id":1,"unit":units[k],"count":sizes[k]}]; k+=1
+	var late:=early.duplicate(true)
+	late.stage="reckoned"; late.mode="theatre"
+	for e in late.enemy: e.strength=float(e.strength)*60.0; e["era"]=3; e["branch"]="armour" if int(e.strength)>=9000 else "foot"
+	fixture=late
+	await _plates([["local",zoom,line],["regional",clampf(zoom*2.5,90.0,700.0),line]],"mature_modern")
 
 
 ## An air zone over the front, and a fleet zone on the nearest real water.

@@ -25,8 +25,9 @@ func test_tags_and_hover_words_follow_the_era()->void:
 			for banned in ["%","READY","SUPPLY","FIELD"]:
 				assert_str(String(view.label)).not_contains(banned)
 	assert_str(String(Presentation.build_snapshot(20.0,[army],[],[front],destinations,{},0,"hearth").fronts[0].label)).is_equal("Feud with Ankora")
-	# The statistical age keeps its figures, and the stage never leaks to later calls.
-	assert_str(String(Presentation.build_snapshot(20.0,[army],[],[],destinations,{},0,"reckoned").player[0].label)).contains("%")
+	# Every age now speaks plainly on the map (round three), and the stage
+	# never leaks to later calls.
+	assert_str(String(Presentation.build_snapshot(20.0,[army],[],[],destinations,{},0,"reckoned").player[0].label)).is_equal("First Band, 7\nHolding its ground")
 	assert_str(Presentation.words_stage).is_equal("reckoned")
 	assert_float(Marks.raid_alpha(0)).is_equal(1.0)
 	assert_float(Marks.raid_alpha(Marks.RAID_FADE_DAYS)).is_equal(0.0)

@@ -1,0 +1,14 @@
+{
+  "id": "centers_of_mass",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8185e617-dcff-4bda-8377-b6bbaefb667e.png",
+  "source_file": "exec-8185e617-dcff-4bda-8377-b6bbaefb667e.png",
+  "creative_brief": "Every body balances on one point, and builders and shipwrights find it before they lift or load. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/centers_of_mass-v1.png",
+  "sha256": "9c9dd13a5b0da6b5f235bb2b57291caf8205c404818442afcddcc5026ddcddcd",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}

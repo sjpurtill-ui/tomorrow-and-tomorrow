@@ -14,10 +14,13 @@ const FOREIGN_COLOR:="#D6AD55"
 const SCOUT_COLOR:="#91BDC4"
 const FRONT_COLOR:="#D8B25E"
 const ENGAGEMENT_COLOR:="#ED725F"
+const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
-## The era's words for labels (see hud/era_words.gd). Before the statistical age
-## a formation label carries no readiness or supply percentages. Set for the
-## duration of build_snapshot; direct calls read the full modern label.
+## The era's words for labels (see hud/era_words.gd and hud/army_marks.gd).
+## Labels are plain in every age: the noun for the force's size and era, its
+## strength rounded, its general, what it is doing, and how old the report
+## is only when that matters. Set for the duration of build_snapshot.
 static var words_stage:="reckoned"
 
 
@@ -350,27 +353,23 @@ static func _front_priority(view:Dictionary)->int:
 	return (1_000_000_000 if bool(view.get("engagement",false)) else 0)+int(view.get("field_personnel",0))+roundi(float(view.get("progress",0.0))*10_000.0)
 
 
-static func _aggregate_formation_label(cluster:Array,views:Array[Dictionary],band:String,player_owned:bool)->String:
+static func _aggregate_formation_label(cluster:Array,views:Array[Dictionary],_band:String,player_owned:bool)->String:
 	var total_low:=0
 	var total_high:=0
-	var readiness_low:=1.25
-	var readiness_high:=0.0
 	var moving:=0
 	for index in cluster:
 		var view:=views[index]
 		total_low+=int(view.get("troops",view.get("strength_low",0)))
 		total_high+=int(view.get("troops",view.get("strength_high",0)))
-		readiness_low=minf(readiness_low,float(view.get("readiness",view.get("readiness_low",0.0))))
-		readiness_high=maxf(readiness_high,float(view.get("readiness",view.get("readiness_high",0.0))))
 		if bool(view.get("moving",false)): moving+=1
-	if words_stage!="reckoned":
-		var total:=total_low if player_owned else total_high
-		return "%s · %d bands · about %d fighters%s" % ["Ours" if player_owned else "Strangers",cluster.size(),total,(" · %d on the move" % moving) if moving>0 else ""]
-	var owner:="YOU" if player_owned else "FOREIGN"
-	var strength:=compact_count(total_low) if player_owned else "~%s–%s" % [compact_count(total_low),compact_count(total_high)]
-	var movement:=" • %d MOVING" % moving if moving>0 else ""
-	if band=="continental": return "%s • %d ARMIES • %s%s" % [owner,cluster.size(),strength,movement]
-	return "%s • %d ARMIES • %s\nREADINESS %d–%d%%%s" % [owner,cluster.size(),strength,roundi(readiness_low*100.0),roundi(readiness_high*100.0),movement]
+	var leader:=views[int(cluster[0])]
+	var lines:PackedStringArray
+	if player_owned:
+		lines=ArmyMarks.card_ours({"members":cluster.size(),"members_troops":total_low,"noun":String(leader.get("noun","host"))})
+	else:
+		lines=ArmyMarks.card_theirs({"members":cluster.size(),"low":total_low,"high":total_high,"noun":String(leader.get("noun","host"))})
+	var detail:=("%s on the move" % EraWords.count_word(moving).capitalize()) if moving>0 else ""
+	return (lines[0]+("\n"+detail if detail!="" else "")).strip_edges()
 
 
 static func _aggregate_front_label(cluster:Array,views:Array[Dictionary],band:String)->String:
@@ -394,29 +393,26 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	var destination:=String(army.get("destination_name",army.get("location_name","HOME"))) if moving else String(army.get("location_name","HOME"))
 	var readiness_text:=readiness_band(readiness)
 	var visual_state:=formation_visual_state(army)
-	var damage_text:="" if String(visual_state.damage_state)=="intact" else " • %s" % String(visual_state.damage_state).to_upper()
-	var strength_text:="%s SOLDIERS" % compact_count(troops)
-	var label:=""
-	if band in ["ground","local"]:
-		label="YOU · %s · %s\n%s %d%% · SUPPLY %d%%%s%s" % [String(army.get("name","FIELD ARMY")).to_upper(),strength_text,readiness_text,roundi(readiness*100.0),roundi(supply*100.0),damage_text,(" · → %s" % destination.to_upper()) if moving else ""]
-	elif band=="regional":
-		label="YOU • %s • %s %d%%%s\n%s" % [strength_text,readiness_text,roundi(readiness*100.0),damage_text,("→ %s" % destination.to_upper()) if moving else destination.to_upper()]
-	elif band=="continental":
-		label="YOU • %s • %d%% READY%s%s" % [strength_text,roundi(readiness*100.0),damage_text," →" if moving else ""]
 	var position_data:Dictionary=(army.get("position",{}) as Dictionary).duplicate(true)
 	var destination_data:Dictionary=(army.get("destination_position",{}) as Dictionary).duplicate(true)
 	var heading:=0.0
+	var delta:=Vector2.ZERO
 	if moving and destination_data.has("x") and destination_data.has("z"):
 		var heading_delta:=Vector2(float(destination_data.get("x",0.0))-float(position_data.get("x",0.0)),float(destination_data.get("z",0.0))-float(position_data.get("z",0.0)))
+		delta=heading_delta
 		if heading_delta.length_squared()>0.000001: heading=-heading_delta.angle()-PI*0.5
-	if words_stage!="reckoned" and band!="world":
-		# Before the statistical age: who, how many, where to. No percentages.
-		label="%s · %d fighters%s" % ["Our band" if words_stage=="hearth" else String(army.get("name","Our army")),troops,(" · going to %s" % destination) if moving else ""]
-	if army.has("report_age_days"):
-		label+="\nLAST REPORT · %d DAY%s OLD"%[int(army.report_age_days),"" if int(army.report_age_days)==1 else "S"]
+	var era:=formation_era(army)
+	var noun:=ArmyMarks.noun(troops,words_stage,era,false)
+	var doing:=ArmyMarks.doing({"status":String(army.get("status","stationed")),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
+		"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"delta":delta,
+		"at_home":String(army.get("status","stationed"))=="stationed" and String(army.get("location_id",""))=="player_home"})
+	var card:=ArmyMarks.card_ours({"troops":troops,"noun":noun,"name":String(army.get("name","")),"general":String((army.get("commander",{}) as Dictionary).get("name","")),
+		"doing":doing,"condition":String(visual_state.damage_state),"report_age":int(army.get("report_age_days",0))})
+	var label:="\n".join(card).strip_edges()
+	if band=="continental": label=card[0]
 	return {
 		"id":str(int(army.get("army_id",0))),"owner":"player","owner_label":"YOU","visible":band!="world" and troops>0,
-		"show_label":band in ["ground","local","regional"] or (band=="continental" and (selected or moving)),"label":label,
+		"show_label":band in ["ground","local","regional"] or (band=="continental" and (selected or moving)),"label":label,"noun":noun,"doing":doing,
 		# Selection is the gold outer ring, never a temporary change of faction color.
 		# Keeping the counter blue makes ownership stable while orders are being issued.
 		"selected":selected,"moving":moving,"color":PLAYER_COLOR,"selection_color":PLAYER_SELECTED_COLOR,
@@ -450,21 +446,15 @@ static func foreign_marker(sighting:Dictionary,camera_size:float)->Dictionary:
 	var observed_era:=clampi(int(sighting.get("formation_era",0)),0,3) if identified else 0
 	var owner:=String(sighting.get("civilization","FOREIGN")) if identified else "UNIDENTIFIED"
 	var moving:=bool(sighting.get("moving",sighting.get("movement_observed",false)))
-	var damage_text:="" if damage_state=="intact" else " • %s" % damage_state.to_upper()
-	var label:=""
-	if band in ["ground","local"]:
-		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
-	elif band=="regional":
-		label="%s · ~%s–%s SOLDIERS%s\n%s" % [(owner.to_upper()+" · SCOUT PARTY" if identified else "FOREIGN SCOUTS") if scout else owner.to_upper()+" · FIELD ARMY",compact_count(low),compact_count(high),damage_text,"CLICK TO INTERCEPT" if scout else ("ENEMY · CLICK TO ENGAGE" if hostile else "CLICK FOR CONTACT")]
 	var observed_day := int(sighting.get("last_seen_day",sighting.get("observed_day",sighting.get("day",-1))))
-	if words_stage!="reckoned" and band in ["ground","local","regional"]:
-		label="%s · about %d–%d men" % [owner.capitalize() if identified else "Strangers",low,high]
-		label+="\nSeen on day %d" % observed_day if observed_day>=0 else ""
-	else:
-		label += "\nOBSERVED DAY %d" % observed_day if observed_day >= 0 else "\nOBSERVATION DATE UNKNOWN"
+	var today:=int(GameState.elapsed_days) if Engine.get_main_loop()!=null else observed_day
+	var noun:="scouts" if scout else ArmyMarks.noun(roundi(float(low+high)*0.5),words_stage,observed_era,false)
+	var card:=ArmyMarks.card_theirs({"low":low,"high":high,"noun":noun,"owner":String(sighting.get("civilization","")) if identified else "","scout":scout,"moving":moving,"condition":damage_state,
+		"age_days":maxi(0,today-observed_day) if observed_day>=0 else 0})
+	var label:="\n".join(card).strip_edges() if band in ["ground","local","regional"] else ""
 	return {
 		"id":String(sighting.get("id","")),"owner":String(sighting.get("civ_id","")),"owner_label":owner.to_upper(),"visible":band in ["ground","local","regional"] and bool(sighting.get("visible",true)),
-		"show_label":band in ["ground","local","regional"],"label":label,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
+		"show_label":band in ["ground","local","regional"],"label":label,"noun":noun,"selected":false,"moving":moving,"heading":float(sighting.get("heading",0.0)),
 		"color":HOSTILE_COLOR if hostile else (SCOUT_COLOR if scout else FOREIGN_COLOR),"hostile":hostile,"scout":scout,"identified":identified,
 		"front_force":{"troops":roundi((low+high)*0.5),"formation_role":observed_role,"status":"moving" if moving else "observed","position":sighting.get("position",{}).duplicate(true)},"observed_day":sighting.get("last_seen_day",sighting.get("observed_day",sighting.get("day",-1))),"strength_low":low,"strength_high":high,"echelon":formation_echelon(high),"readiness_low":readiness_low,"readiness_high":readiness_high,
 		"formation_role":observed_role,"formation_unit":String(sighting.get("formation_unit",observed_role)),"formation_era":observed_era,
@@ -523,12 +513,3 @@ static func compact_count(value:int)->String:
 	if value>=1_000_000: return "%.2fM" % (float(value)/1_000_000.0)
 	if value>=1_000: return "%.1fK" % (float(value)/1_000.0)
 	return str(value)
-
-
-static func counter_strength(view:Dictionary)->String:
-	if view.has("troops"): return compact_count(maxi(0,int(view.troops)))
-	var low:=maxi(0,int(view.get("strength_low",0)))
-	var high:=maxi(low,int(view.get("strength_high",0)))
-	if high<=0: return "?"
-	if low==high or low==0: return "~%s" % compact_count(high)
-	return "~%s–%s" % [compact_count(low),compact_count(high)]

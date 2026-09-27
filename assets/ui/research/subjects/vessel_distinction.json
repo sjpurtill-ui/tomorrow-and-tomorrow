@@ -1,0 +1,14 @@
+{
+  "id": "vessel_distinction",
+  "line": "health",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-500feead-ecf3-49b3-a055-2963942c7bdd.png",
+  "source_file": "exec-500feead-ecf3-49b3-a055-2963942c7bdd.png",
+  "creative_brief": "Anatomists learn that arteries beat and carry blood from the heart, while veins lie slack. Paint it as a classical antiquity scene.",
+  "medium": "Watercolor and ink",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/vessel_distinction-v1.png",
+  "sha256": "03a2b2fa4db326d85275e1982dd3cd9ad0bcd2dc3639f20cd74014393acd07f2",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
