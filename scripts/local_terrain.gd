@@ -13851,8 +13851,14 @@ func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
 	if camera==null: return false
 	var best:Dictionary={}
 	var best_distance:=42.0
+	# Above the close view the war chart draws the marks: its hit test decides.
+	var war_mark:=_war_mark_at(screen_position)
+	var charted:=_war_chart_draws_marks()
 	for sighting_variant in CivilizationSystem.local_observation_snapshot().get("visible",[]):
 		var sighting:Dictionary=sighting_variant
+		if charted:
+			if String(war_mark.get("kind",""))=="sighting" and String(war_mark.get("enemy_id",""))==String(sighting.get("id","")): best=sighting
+			continue
 		var marker:Node3D=foreign_formation_markers.get(String(sighting.get("id","")),null)
 		if marker==null or not is_instance_valid(marker) or not marker.visible: continue
 		if camera.is_position_behind(marker.global_position): continue
@@ -13922,7 +13928,10 @@ func _select_field_army_from_screen(screen_position:Vector2)->bool:
 	if camera==null: return false
 	var best_id:=-1
 	var best_distance:=34.0
-	for army_id in player_field_army_markers:
+	# Above the close view the war chart draws the marks: its hit test decides.
+	var war_mark:=_war_mark_at(screen_position)
+	if String(war_mark.get("kind",""))=="army": best_id=int(war_mark.get("army_id",-1))
+	for army_id in ({} if _war_chart_draws_marks() else player_field_army_markers):
 		var marker:Node3D=player_field_army_markers[army_id]
 		if marker==null or not is_instance_valid(marker) or not marker.visible: continue
 		if camera.is_position_behind(marker.global_position): continue
@@ -13944,6 +13953,17 @@ func _select_field_army_from_screen(screen_position:Vector2)->bool:
 			travel_status_label.text="%s SELECTED  •  RIGHT-CLICK CHARTED LAND TO MARCH  •  ESC TO DESELECT" % String(army.get("name","FIELD ARMY")).to_upper()
 		break
 	return true
+
+
+## The force mark the war chart drew under a screen point, if any.
+func _war_mark_at(screen_position:Vector2)->Dictionary:
+	var chart:=get_node_or_null("WarMapMarks/WarFrontOverlay")
+	return chart.mark_at(screen_position) if chart!=null and chart.has_method("mark_at") else {}
+
+
+## Whether the war chart, not the close view, is drawing the force marks.
+func _war_chart_draws_marks()->bool:
+	return get_node_or_null("WarMapMarks/WarFrontOverlay")!=null and camera!=null and WarfareMapPresentation.scale_band(camera.size) not in ["ground","world"]
 
 
 func _clear_army_selection()->void:
@@ -14001,195 +14021,14 @@ func _warfare_arrowhead_mesh(radius:float,height:float,forward:=Vector2.RIGHT)->
 	return surface.commit()
 
 
-func _warfare_bow_mesh()->ArrayMesh:
-	var surface:=SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for segment in 8:
-		var a:=lerpf(-PI*0.5,PI*0.5,float(segment)/8.0)
-		var b:=lerpf(-PI*0.5,PI*0.5,float(segment+1)/8.0)
-		var first:=Vector2(-cos(a),sin(a))
-		var second:=Vector2(-cos(b),sin(b))
-		for point in [first*1.18,first*1.00,second*1.00,first*1.18,second*1.00,second*1.18]:
-			surface.add_vertex(Vector3(point.x,0.10,point.y))
-	surface.generate_normals()
-	return surface.commit()
-
-
-func _warfare_horse_head_mesh()->ArrayMesh:
-	# One readable cavalry silhouette, rather than overlapping person-like discs.
-	var points:=PackedVector2Array([Vector2(-0.72,1.12),Vector2(0.88,1.12),Vector2(0.72,0.50),Vector2(0.54,-0.55),Vector2(0.20,-0.95),Vector2(0.08,-1.35),Vector2(-0.16,-0.94),Vector2(-0.45,-0.80),Vector2(-1.08,-0.25),Vector2(-0.94,0.08),Vector2(-0.38,-0.06),Vector2(-0.12,0.16),Vector2(-0.40,0.65)])
-	var signed_area:=0.0
-	for index in points.size(): signed_area+=points[index].cross(points[(index+1)%points.size()])
-	if signed_area<0.0: points.reverse()
-	var triangles:=Geometry2D.triangulate_polygon(points)
-	var surface:=SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	surface.set_smooth_group(-1)
-	for index in triangles:
-		var point:=points[index]
-		surface.add_vertex(Vector3(point.x,0.10,point.y))
-	for index in range(triangles.size()-1,-1,-1):
-		var point:=points[triangles[index]]
-		surface.add_vertex(Vector3(point.x,-0.10,point.y))
-	for index in points.size():
-		var a:=points[index]
-		var b:=points[(index+1)%points.size()]
-		for vertex in [Vector3(a.x,0.10,a.y),Vector3(a.x,-0.10,a.y),Vector3(b.x,-0.10,b.y),Vector3(a.x,0.10,a.y),Vector3(b.x,-0.10,b.y),Vector3(b.x,0.10,b.y)]: surface.add_vertex(vertex)
-	surface.generate_normals()
-	return surface.commit()
-
-
 func _create_warfare_formation_marker(marker_name:String,player_owned:bool)->Node3D:
+	# The marker is where a force stands (and, up close, its occupied ground).
+	# Its inked mark, paper card and selection ring are drawn by the war chart
+	# (hud/war_front_overlay.gd with hud/army_marks.gd); only the close-view
+	# label stays a world-space label.
 	var marker:=Node3D.new()
 	marker.name=marker_name
-	# A formation is a map icon, not a spreadsheet cell. Owned forces use a compact
-	# hexagonal field badge; uncertain foreign observations remain diamonds.
-	var plate:=MeshInstance3D.new()
-	plate.name="ArmyPlate" if player_owned else "ObservationPlate"
-	if player_owned:
-		var plate_mesh:=CylinderMesh.new()
-		plate_mesh.top_radius=3.0; plate_mesh.bottom_radius=3.0; plate_mesh.height=0.26; plate_mesh.radial_segments=6
-		plate.mesh=plate_mesh
-		plate.position.y=0.13
-	else:
-		var plate_mesh:=CylinderMesh.new()
-		plate_mesh.top_radius=2.55
-		plate_mesh.bottom_radius=2.55
-		plate_mesh.height=0.24
-		plate_mesh.radial_segments=4
-		plate.mesh=plate_mesh
-		plate.position.y=0.12
-	var owner_color:=Color(WarfareMapPresentation.PLAYER_COLOR if player_owned else WarfareMapPresentation.FOREIGN_COLOR)
-	var plate_color:=owner_color.darkened(0.47)
-	plate_color.a=0.94
-	var plate_material:=_warfare_marker_material(plate_color)
-	plate_material.render_priority=-2
-	plate.material_override=plate_material
-	marker.add_child(plate)
-	# A single backing plate creates a crisp faction-colored rim. It is one fixed mesh
-	# per visible formation, independent of personnel, and prevents the dark counter
-	# from disappearing over forests, cities or ocean-blue terrain.
-	var counter_border:=MeshInstance3D.new()
-	counter_border.name="CounterBorder"
-	if player_owned:
-		var border_mesh:=CylinderMesh.new()
-		border_mesh.top_radius=3.32; border_mesh.bottom_radius=3.32; border_mesh.height=0.11; border_mesh.radial_segments=6
-		counter_border.mesh=border_mesh
-	else:
-		var border_mesh:=CylinderMesh.new()
-		border_mesh.top_radius=2.92
-		border_mesh.bottom_radius=2.92
-		border_mesh.height=0.11
-		border_mesh.radial_segments=4
-		counter_border.mesh=border_mesh
-	counter_border.position.y=0.055
-	var border_material:=_warfare_marker_material(owner_color.lightened(0.12))
-	border_material.render_priority=-3
-	counter_border.material_override=border_material
-	marker.add_child(counter_border)
-	# Four reusable primitive slots form readable historical unit silhouettes. Meshes
-	# are swapped when composition changes; no dormant unit scenes or sprite atlases
-	# are retained per army.
-	for glyph_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
-		var role_glyph:=MeshInstance3D.new()
-		role_glyph.name=glyph_name
-		var role_mesh:=BoxMesh.new(); role_mesh.size=Vector3(1.64,0.18,0.24)
-		role_glyph.mesh=role_mesh
-		role_glyph.position=Vector3(-1.85,0.36,0.0)
-		role_glyph.material_override=_warfare_marker_material(owner_color.lightened(0.12))
-		role_glyph.visible=false
-		marker.add_child(role_glyph)
-	var strength_label:=Label3D.new(); strength_label.name="StrengthLabel"; strength_label.font_size=10; strength_label.outline_size=4; strength_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; strength_label.fixed_size=true; strength_label.no_depth_test=true; strength_label.render_priority=8; strength_label.position=Vector3(1.25,1.0,0.45); strength_label.outline_modulate=Color(0.01,0.015,0.017,0.98); marker.add_child(strength_label)
-	# Four possible echelon bars share one MultiMesh. Personnel changes only its visible
-	# instance count and transforms, keeping one draw node from a squad through billions.
-	var echelon_bars:=MultiMeshInstance3D.new()
-	echelon_bars.name="EchelonBars"
-	var echelon_mesh:=BoxMesh.new(); echelon_mesh.size=Vector3(0.48,0.19,0.36)
-	var echelon_multimesh:=MultiMesh.new()
-	echelon_multimesh.transform_format=MultiMesh.TRANSFORM_3D
-	echelon_multimesh.mesh=echelon_mesh
-	echelon_multimesh.instance_count=4
-	echelon_multimesh.visible_instance_count=1
-	for bar_index in 4:
-		echelon_multimesh.set_instance_transform(bar_index,Transform3D(Basis.IDENTITY,Vector3(-0.86+float(bar_index)*0.58,0.29,-1.95)))
-	echelon_bars.multimesh=echelon_multimesh
-	echelon_bars.material_override=_warfare_marker_material(owner_color.lightened(0.22))
-	marker.add_child(echelon_bars)
-	var heading_chevron:=MeshInstance3D.new()
-	heading_chevron.name="HeadingChevron"
-	var heading_mesh:=_warfare_arrowhead_mesh(0.82,0.18,Vector2.UP)
-	heading_chevron.mesh=heading_mesh
-	heading_chevron.position=Vector3(0.0,0.27,-3.65)
-	heading_chevron.material_override=_warfare_marker_material(owner_color.lightened(0.18))
-	heading_chevron.visible=false
-	marker.add_child(heading_chevron)
-	var pip:=MeshInstance3D.new()
-	pip.name="ReadinessPip"
-	# A broad edge tab survives continental zoom. The former tiny round pip required a
-	# text label to interpret, defeating the purpose of the strategic counter itself.
-	var pip_mesh:=BoxMesh.new()
-	pip_mesh.size=Vector3(0.58,0.22,1.18)
-	pip.mesh=pip_mesh
-	pip.position=Vector3(2.43,0.25,-0.90)
-	pip.material_override=_warfare_marker_material(Color("#d5ad58"))
-	marker.add_child(pip)
-	var supply_track:=MeshInstance3D.new()
-	supply_track.name="SupplyTrack"
-	var supply_track_mesh:=BoxMesh.new()
-	supply_track_mesh.size=Vector3(3.70,0.13,0.46)
-	supply_track.mesh=supply_track_mesh
-	supply_track.position=Vector3(0.30,0.24,2.10)
-	supply_track.material_override=_warfare_marker_material(Color("#252d2d"))
-	marker.add_child(supply_track)
-	var supply:=MeshInstance3D.new()
-	supply.name="SupplyStripe"
-	var supply_mesh:=BoxMesh.new()
-	supply_mesh.size=Vector3(3.7,0.16,0.48)
-	supply.mesh=supply_mesh
-	supply.position=Vector3(0.30,0.27,2.10)
-	supply.material_override=_warfare_marker_material(Color("#76b99a"))
-	marker.add_child(supply)
-	# Up to three aggregate wear scars share one MultiMesh and one material. Damage can
-	# become more severe without adding draw nodes or covering the role glyph at left.
-	var damage_scars:=MultiMeshInstance3D.new()
-	damage_scars.name="DamageScars"
-	var damage_mesh:=BoxMesh.new(); damage_mesh.size=Vector3(0.22,0.20,1.40)
-	var damage_multimesh:=MultiMesh.new()
-	damage_multimesh.transform_format=MultiMesh.TRANSFORM_3D
-	damage_multimesh.mesh=damage_mesh
-	damage_multimesh.instance_count=3
-	damage_multimesh.visible_instance_count=0
-	damage_scars.multimesh=damage_multimesh
-	damage_scars.material_override=_warfare_marker_material(Color("#4f2925"))
-	marker.add_child(damage_scars)
-	if not player_owned:
-		var observation_ring:=MeshInstance3D.new()
-		observation_ring.name="ObservationRing"
-		var observation_mesh:=TorusMesh.new()
-		observation_mesh.inner_radius=3.00
-		observation_mesh.outer_radius=3.24
-		observation_mesh.rings=20
-		observation_mesh.ring_segments=5
-		observation_ring.mesh=observation_mesh
-		var observation_color:=owner_color
-		observation_color.a=0.64
-		observation_ring.material_override=_warfare_marker_material(observation_color)
-		marker.add_child(observation_ring)
-	var selected_ring:=MeshInstance3D.new(); selected_ring.name="SelectedRing"
-	var selected_mesh:=TorusMesh.new(); selected_mesh.inner_radius=3.75; selected_mesh.outer_radius=4.10; selected_mesh.rings=24; selected_mesh.ring_segments=6; selected_ring.mesh=selected_mesh; selected_ring.material_override=_warfare_marker_material(Color(WarfareMapPresentation.PLAYER_SELECTED_COLOR)); selected_ring.visible=false; marker.add_child(selected_ring)
-	# Explicit render order matters because strategic counters intentionally ignore
-	# terrain depth. The plate stays behind its glyph, readiness, supply and selection.
-	for priority_record in [
-		{"name":"SupplyTrack","priority":1},
-		{"name":"SupplyStripe","priority":2},{"name":"HeadingChevron","priority":4},
-		{"name":"RoleGlyphPrimary","priority":3},{"name":"RoleGlyphSecondary","priority":4},{"name":"RoleGlyphTertiary","priority":4},{"name":"RoleGlyphFourth","priority":4},
-		{"name":"ReadinessPip","priority":5},{"name":"SelectedRing","priority":6}
-	]:
-		var priority_part:=marker.get_node_or_null(String(priority_record.name)) as MeshInstance3D
-		if priority_part and priority_part.material_override: priority_part.material_override.render_priority=int(priority_record.priority)
-	if echelon_bars.material_override: echelon_bars.material_override.render_priority=2
-	if damage_scars.material_override: damage_scars.material_override.render_priority=5
-	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=8; label.outline_size=3; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.6 if player_owned else 7.0,-4.8); label.outline_modulate=Color(0.02,0.025,0.027,0.98); marker.add_child(label)
+	var label:=Label3D.new(); label.name="ArmyLabel" if player_owned else "FormationLabel"; label.font_size=8; label.outline_size=3; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.position=Vector3(0,7.6 if player_owned else 7.0,-4.8); label.modulate=Color("#efe3c2"); label.outline_modulate=Color("#2b2118"); label.visible=false; marker.add_child(label)
 	_configure_warfare_overlay_layers(marker)
 	return marker
 
@@ -14222,199 +14061,26 @@ func _set_warfare_part_color(part:MeshInstance3D,color:Color)->void:
 	material.albedo_color=color; material.emission=color.darkened(0.24)
 
 
-func _configure_warfare_role_glyph(marker:Node3D,role:String,unit:String="")->void:
-	var icon_key:=unit if unit!="" else role
-	if String(marker.get_meta("formation_icon",""))==icon_key: return
-	marker.set_meta("formation_icon",icon_key)
-	var primary:=marker.get_node_or_null("RoleGlyphPrimary") as MeshInstance3D
-	var secondary:=marker.get_node_or_null("RoleGlyphSecondary") as MeshInstance3D
-	var tertiary:=marker.get_node_or_null("RoleGlyphTertiary") as MeshInstance3D
-	var fourth:=marker.get_node_or_null("RoleGlyphFourth") as MeshInstance3D
-	if primary==null or secondary==null or tertiary==null or fourth==null: return
-	var glyphs:Array[MeshInstance3D]=[primary,secondary,tertiary,fourth]
-	for glyph in glyphs:
-		glyph.visible=false; glyph.rotation=Vector3.ZERO; glyph.scale=Vector3.ONE; glyph.position=Vector3(-0.72,0.40,0.0)
-	var bar:=func(length:float,width:float)->BoxMesh:
-		var mesh:=BoxMesh.new(); mesh.size=Vector3(length,0.20,width); return mesh
-	var disc:=func(radius:float,sides:int=12)->CylinderMesh:
-		var mesh:=CylinderMesh.new(); mesh.top_radius=radius; mesh.bottom_radius=radius; mesh.height=0.22; mesh.radial_segments=sides; return mesh
-	var wheel:=func(radius:float)->TorusMesh:
-		var mesh:=TorusMesh.new(); mesh.inner_radius=radius*0.55; mesh.outer_radius=radius; mesh.rings=14; mesh.ring_segments=5; return mesh
-	match icon_key:
-		"line_infantry":
-			primary.mesh=bar.call(2.15,0.20); primary.rotation.y=PI*0.5; primary.visible=true
-			secondary.mesh=_warfare_arrowhead_mesh(0.48,0.22,Vector2.UP); secondary.position=Vector3(-0.72,0.42,-1.02); secondary.visible=true
-		"skirmisher":
-			primary.mesh=_warfare_bow_mesh(); primary.position.x=-0.37; primary.visible=true
-			secondary.mesh=bar.call(2.20,0.10); secondary.position.x=-0.37; secondary.rotation.y=PI*0.5; secondary.visible=true
-			tertiary.mesh=bar.call(1.95,0.13); tertiary.position.x=-0.62; tertiary.visible=true
-			fourth.mesh=_warfare_arrowhead_mesh(0.34,0.22); fourth.position.x=0.48; fourth.visible=true
-		"cavalry","mobile":
-			primary.mesh=_warfare_horse_head_mesh(); primary.visible=true
-		"siege_engineer":
-			# Engineers build and breach works; distinguish their tools from cannon.
-			primary.mesh=bar.call(2.20,0.17); primary.rotation.y=0.72; primary.visible=true
-			secondary.mesh=bar.call(1.08,0.42); secondary.position=Vector3(-0.04,0.43,-0.59); secondary.rotation.y=0.72+PI*0.5; secondary.visible=true
-			tertiary.mesh=bar.call(2.20,0.17); tertiary.rotation.y=-0.72; tertiary.visible=true
-			fourth.mesh=_warfare_arrowhead_mesh(0.50,0.22,Vector2(-0.75,-0.66)); fourth.position=Vector3(-1.40,0.43,-0.59); fourth.visible=true
-		"field_artillery","modern_artillery","artillery":
-			primary.mesh=bar.call(2.55,0.22); primary.rotation.y=PI*0.5; primary.visible=true
-			secondary.mesh=disc.call(0.48,10); secondary.visible=true
-			tertiary.mesh=wheel.call(0.52); tertiary.position.x=-1.36; tertiary.visible=true
-			fourth.mesh=wheel.call(0.52); fourth.position.x=-0.08; fourth.visible=true
-		"rifle_infantry":
-			primary.mesh=bar.call(2.35,0.16); primary.rotation.y=0.72; primary.visible=true
-			secondary.mesh=bar.call(0.74,0.34); secondary.position=Vector3(-1.36,0.41,0.55); secondary.rotation.y=0.72; secondary.visible=true
-		"machine_gun_company":
-			primary.mesh=bar.call(2.35,0.20); primary.rotation.y=PI*0.5; primary.visible=true
-			secondary.mesh=bar.call(1.38,0.15); secondary.position.z=0.58; secondary.rotation.y=0.68; secondary.visible=true
-			tertiary.mesh=bar.call(1.38,0.15); tertiary.position.z=0.58; tertiary.rotation.y=-0.68; tertiary.visible=true
-		"motorized_infantry":
-			primary.mesh=bar.call(1.90,1.02); primary.visible=true
-			secondary.mesh=wheel.call(0.38); secondary.position.x=-1.42; secondary.visible=true
-			tertiary.mesh=wheel.call(0.38); tertiary.position.x=-0.02; tertiary.visible=true
-			fourth.mesh=bar.call(0.74,0.16); fourth.position.z=-0.68; fourth.rotation.y=PI*0.5; fourth.visible=true
-		"armored_formation","armored":
-			primary.mesh=bar.call(2.12,1.08); primary.visible=true
-			secondary.mesh=disc.call(0.48,8); secondary.position.y=0.49; secondary.visible=true
-			tertiary.mesh=bar.call(1.42,0.16); tertiary.position=Vector3(-0.72,0.52,-0.82); tertiary.rotation.y=PI*0.5; tertiary.visible=true
-			fourth.mesh=bar.call(2.42,0.18); fourth.position.y=0.37; fourth.visible=true
-		"unknown":
-			primary.mesh=disc.call(0.72,4); primary.rotation.y=PI*0.25; primary.visible=true
-		_:
-			# Levy / generic infantry: crossed spear or staff silhouettes.
-			primary.mesh=bar.call(2.08,0.19); primary.rotation.y=0.72; primary.visible=true
-			secondary.mesh=bar.call(2.08,0.19); secondary.rotation.y=-0.72; secondary.visible=true
-	for glyph in glyphs:
-		glyph.set_meta("glyph_base_position",glyph.position)
-
-
 func _apply_warfare_formation_view(marker:Node3D,view:Dictionary)->void:
-	for child in marker.get_children():
-		if child.has_meta("front_symbol_visible"):child.visible=child.get_meta("front_symbol_visible")
-	# Match the presentation floor: a second, larger clamp bloats close counters.
 	var marker_scale:=maxf(0.0005,float(view.get("scale",1.0)))
 	marker.scale=Vector3.ONE*marker_scale
 	marker.rotation.y=0.0
-	var color:=Color(String(view.get("color",WarfareMapPresentation.FOREIGN_COLOR)))
-	var damage_ratio:=clampf(float(view.get("damage_ratio",0.0)),0.0,1.0)
-	var scatter:=clampf(float(view.get("scatter",0.0)),0.0,0.78)
-	var order_state:=String(view.get("order_state","ordered"))
-	var missing_elements:=clampi(int(view.get("missing_elements",0)),0,3)
-	var role:=String(view.get("formation_role","infantry"))
-	var unit:=String(view.get("formation_unit",role))
-	_configure_warfare_role_glyph(marker,role,unit)
-	for part_name in ["HeadingChevron","ObservationRing","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
-		var part:=marker.get_node_or_null(part_name) as MeshInstance3D
-		if part: _set_warfare_part_color(part,color)
-	# Readiness displaces the complete branch symbol as one coherent staff mark. Ring
-	# and core, or hull and turret, never fly apart as if they were separate vehicles.
-	var role_offset:=Vector3(scatter*0.34,0.0,scatter*0.28)
-	if order_state=="broken": role_offset+=Vector3(-0.10,0.0,0.12)
-	for role_part_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
-		var role_part:=marker.get_node_or_null(String(role_part_name)) as MeshInstance3D
-		if role_part:
-			# Preserve wheels, spearheads and barrels relative to the authored symbol.
-			# Replacing every X/Z with one anchor collapsed them into a single blob.
-			var authored:Vector3=role_part.get_meta("glyph_base_position",Vector3(-0.72,0.40,0.0))
-			role_part.position=authored+Vector3(0.72,0,0)+role_offset
-	var counter_border:=marker.get_node_or_null("CounterBorder") as MeshInstance3D
-	if counter_border:
-		_set_warfare_part_color(counter_border,color.lightened(0.12).lerp(Color("#665f59"),damage_ratio*0.48))
-		counter_border.scale=Vector3(1.0,1.0,1.0-damage_ratio*0.08)
-	var heading_chevron:=marker.get_node_or_null("HeadingChevron") as MeshInstance3D
-	if heading_chevron:
-		heading_chevron.visible=bool(view.get("moving",false))
-		heading_chevron.rotation.y=float(view.get("heading",0.0))
-	var echelon:=clampi(int(view.get("echelon",1)),1,4)
-	var echelon_bars:=marker.get_node_or_null("EchelonBars") as MultiMeshInstance3D
-	if echelon_bars and echelon_bars.multimesh:
-		echelon_bars.multimesh.visible_instance_count=echelon
-		for bar_index in 4:
-			var bar_damaged:=bar_index<echelon and bar_index>=maxi(0,echelon-missing_elements)
-			var bar_origin:=Vector3(-0.86+float(bar_index)*0.58,0.29,-1.95+(scatter*0.18 if bar_index%2==0 else -scatter*0.14))
-			var bar_basis:=Basis.IDENTITY.scaled(Vector3(1.0,1.0,0.48 if bar_damaged else 1.0))
-			echelon_bars.multimesh.set_instance_transform(bar_index,Transform3D(bar_basis,bar_origin))
-		var echelon_color:=color.lightened(0.22).lerp(Color("#51433f"),damage_ratio*0.34)
-		var echelon_material:=echelon_bars.material_override as StandardMaterial3D
-		if echelon_material:
-			echelon_material.albedo_color=echelon_color; echelon_material.emission=echelon_color.darkened(0.24)
-	var plate:=marker.get_node_or_null("ArmyPlate") as MeshInstance3D
-	if plate==null: plate=marker.get_node_or_null("ObservationPlate") as MeshInstance3D
-	if plate:
-		var plate_color:=color.darkened(0.47).lerp(Color("#292625"),damage_ratio*0.62); plate_color.a=0.94
-		_set_warfare_part_color(plate,plate_color)
-		plate.scale=Vector3(1.0,1.0,1.0-damage_ratio*0.08)
-	var damage_scars:=marker.get_node_or_null("DamageScars") as MultiMeshInstance3D
-	if damage_scars and damage_scars.multimesh:
-		var scar_count:=clampi(missing_elements+1,1,3) if damage_ratio>=0.10 else 0
-		damage_scars.multimesh.visible_instance_count=scar_count
-		var scar_positions:=[Vector3(0.72,0.39,-0.16),Vector3(0.16,0.40,0.42),Vector3(1.52,0.40,-0.38)]
-		var scar_angles:=[0.62,-0.74,0.94]
-		for scar_index in 3:
-			var length_scale:=clampf(0.48+damage_ratio*0.72-float(scar_index)*0.11,0.28,1.12)
-			var scar_basis:=Basis(Vector3.UP,float(scar_angles[scar_index])).scaled(Vector3(1.0,1.0,length_scale))
-			damage_scars.multimesh.set_instance_transform(scar_index,Transform3D(scar_basis,scar_positions[scar_index]))
-		var scar_material:=damage_scars.material_override as StandardMaterial3D
-		if scar_material:
-			var scar_color:=Color("#684038").lerp(Color("#321d1b"),damage_ratio)
-			scar_material.albedo_color=scar_color; scar_material.emission=scar_color.darkened(0.24)
-	var pip:=marker.get_node_or_null("ReadinessPip") as MeshInstance3D
-	if pip:
-		var readiness_value:=clampf(float(view.get("readiness",(float(view.get("readiness_low",0.0))+float(view.get("readiness_high",0.0)))*0.5)),0.0,1.0)
-		pip.scale=Vector3(1.28 if order_state=="broken" else 1.0,1.0,lerpf(0.24,1.0,readiness_value))
-		_set_warfare_part_color(pip,Color(String(view.get("readiness_color","#d5ad58"))))
-	var supply:=marker.get_node_or_null("SupplyStripe") as MeshInstance3D
-	var supply_track:=marker.get_node_or_null("SupplyTrack") as MeshInstance3D
-	if supply_track: supply_track.visible=view.has("supply")
-	if supply:
-		supply.visible=view.has("supply")
-		var supply_ratio:=clampf(float(view.get("supply",0.0)),0.0,1.0)
-		supply.scale.x=maxf(0.035,supply_ratio)
-		supply.position.x=-1.55+1.85*supply_ratio
-		var supply_color:=Color(String(view.get("supply_color","#7d8790")))
-		_set_warfare_part_color(supply,supply_color)
-	var selected_ring:=marker.get_node_or_null("SelectedRing") as MeshInstance3D
-	if selected_ring:
-		selected_ring.visible=bool(view.get("selected",false))
-		_set_warfare_part_color(selected_ring,Color(String(view.get("selection_color",WarfareMapPresentation.PLAYER_SELECTED_COLOR))))
 	var label:=marker.get_node_or_null("ArmyLabel") as Label3D
 	if label==null: label=marker.get_node_or_null("FormationLabel") as Label3D
 	if label:
-		# Label3D.fixed_size does not cancel an inherited Node3D scale. Keep the
-		# glyphs at a stable screen size while the tactical marker grows with zoom.
+		# Label3D.fixed_size does not cancel an inherited Node3D scale.
 		label.scale=Vector3.ONE/marker_scale
 		if camera and camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
 			label.font_size=32
 			label.outline_size=8
 			label.pixel_size=0.0003125
-		label.text=String(view.get("label","")); label.visible=bool(view.get("show_label",false)); label.modulate=color.lightened(0.28)
+		# Only up close, where the war chart stands aside for the formation
+		# itself, does the force keep a label in the world (plain words).
+		var close:=camera!=null and WarfareMapPresentation.scale_band(camera.size)=="ground"
+		label.text=String(view.get("label",""))
+		label.visible=close and bool(view.get("show_label",false))
 		if label.visible: label.visible=_warfare_label_has_clear_space(label)
-	# Close figures must not be painted over by the depth-independent counter plate.
-	var inspect_figures:=view.has("troops") and camera!=null and camera.size<0.35
-	for part_name in ["ArmyPlate","CounterBorder","RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth","DamageScars","ReadinessPip","EchelonBars","SupplyStripe","SupplyTrack"]:
-		var part:=marker.get_node_or_null(part_name) as Node3D
-		if part and inspect_figures:part.visible=false
-		elif part and part_name in ["ArmyPlate","CounterBorder","ReadinessPip","EchelonBars","DamageScars"]:part.visible=true
-	if label and not inspect_figures:label.position=Vector3(0,7.6 if view.has("troops") else 7.0,-4.8)
-	if label and inspect_figures:
-		label.position=marker.global_basis.inverse()*(camera.global_basis.y*camera.size*.18)
-	var strength_label:=marker.get_node_or_null("StrengthLabel") as Label3D
-	if strength_label:
-		strength_label.scale=Vector3.ONE/marker_scale
-		# Put the count below its symbol in screen space, including after rotation.
-		strength_label.position=Vector3(0,0.5,4.25)
-		if camera:
-			strength_label.position=-(marker.global_basis.orthonormalized().inverse()*camera.global_basis.y)*4.25
-		if camera and camera.projection==Camera3D.PROJECTION_PERSPECTIVE:
-			strength_label.font_size=36 if view.has("troops") else 30
-			strength_label.outline_size=8
-			strength_label.pixel_size=0.0003125
-		strength_label.text=WarfareMapPresentation.counter_strength(view)
-		strength_label.visible=bool(view.get("visible",true)) and (label==null or not label.visible)
-		strength_label.modulate=color.lightened(0.34)
-
-
+		label.position=marker.global_basis.inverse()*(camera.global_basis.y*camera.size*.18) if close and view.has("troops") and camera.size<0.35 else Vector3(0,7.6 if view.has("troops") else 7.0,-4.8)
 	_apply_physical_army_front(marker, view)
 
 func _apply_physical_army_front(marker: Node3D, view: Dictionary) -> void:
@@ -21583,7 +21249,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				elif card.foreign:_show_city_intel_summary(String(card.id))
 				else:_focus_settlement_from_screen(event.position,event.double_click,String(card.id))
 				get_viewport().set_input_as_handled();return
-		for marker:Node3D in player_field_army_markers.values():
+		if String(_war_mark_at(event.position).get("kind",""))=="army":
+			_select_field_army_from_screen(event.position);get_viewport().set_input_as_handled();return
+		for marker:Node3D in ({} if _war_chart_draws_marks() else player_field_army_markers).values():
 			if is_instance_valid(marker) and marker.visible and event.position.distance_to(camera.unproject_position(marker.global_position))<=10.0:
 				_select_field_army_from_screen(event.position);get_viewport().set_input_as_handled();return
 		# Pick the actual rendered city geometry, independent of scout counter hit radii.

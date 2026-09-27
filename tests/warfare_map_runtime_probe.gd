@@ -2,6 +2,7 @@ extends Node
 
 const TERRAIN_SCENE:=preload("res://local_terrain.tscn")
 const PRESENTATION:=preload("res://scripts/warfare_map_presentation.gd")
+const ARMY_MARKS:=preload("res://scripts/hud/army_marks.gd")
 var failures:Array[String]=[]
 
 
@@ -26,119 +27,31 @@ func _ready()->void:
 	var marker:Node3D=terrain.player_field_army_markers.get("1",null)
 	_expect(marker!=null and marker.visible,"regional player army marker is absent")
 	if marker:
+		# The world keeps only where the force stands (and its ground up close):
+		# its mark, card and selection are inked by the war chart.
+		for part in marker.get_children():
+			_expect(not (part is MeshInstance3D or part is MultiMeshInstance3D),"a 3D counter plate or glyph survives on the map: %s" % part.name)
 		var label:=marker.get_node("ArmyLabel") as Label3D
-		var arrow:=marker.get_node("HeadingChevron") as MeshInstance3D
-		var arrow_arrays:=arrow.mesh.surface_get_arrays(0)
-		_expect((arrow_arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()==24,"direction arrow exceeds triangular prism vertex budget")
-		var arrow_normals:PackedVector3Array=arrow_arrays[Mesh.ARRAY_NORMAL]
-		_expect(arrow_normals[0].y>0.99 and arrow_normals[3].y< -0.99,"direction arrow cap winding is inverted: %s / %s" % [arrow_normals[0],arrow_normals[3]])
-		for direction in [Vector2.RIGHT,Vector2.LEFT,Vector2.UP,Vector2.DOWN]:
-			var moving_army:=army.duplicate(true)
-			moving_army.status="moving"
-			moving_army.position={"x":0.0,"z":0.0}
-			moving_army.destination_position={"x":direction.x,"z":direction.y}
-			terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(moving_army,320.0,true))
-			var tip_direction:=arrow.basis*Vector3.FORWARD
-			_expect(tip_direction.dot(Vector3(direction.x,0,direction.y))>0.999,"moving arrow points away from its destination")
-		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
-		_expect("YOU" in label.text and "8.0K" in label.text and "FORMING" in label.text,"player marker omits owner, aggregate strength, or readiness")
-		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
-		_expect((marker.get_node("SelectedRing") as MeshInstance3D).visible,"selected army has no distinct selection halo")
+		_expect(not label.visible,"a world-space army label shows above the close view")
+		_expect("about 8,000" in label.text and not "8.0K" in label.text and not "READY" in label.text,"army label is not plain words: %s" % label.text)
 		_expect(label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"army label inherits the regional marker scale")
-		_expect(_render_element_count(marker)<=16,"one aggregate player icon exceeds the fixed render-element budget")
-		_expect(marker.get_node_or_null("RoleGlyphPrimary")!=null and marker.get_node_or_null("RoleGlyphFourth")!=null,"aggregate icon is missing its reusable silhouette parts")
-		_expect((marker.get_node("StrengthLabel") as Label3D).text=="8.0K","army icon has no explicit compact soldier count")
-		_expect(marker.get_node_or_null("CommandSpine")==null,"counter retains a bar obscuring the centered weapon")
-		_expect(marker.get_node_or_null("RoleInfantryA")==null and marker.get_node_or_null("RoleArmoredHull")==null,"aggregate counter still retains dormant role-specific branches")
-		for historical_unit in ["levy","line_infantry","skirmisher","cavalry","siege_engineer","field_artillery","rifle_infantry","machine_gun_company","motorized_infantry","armored_formation","modern_artillery"]:
-			terrain._configure_warfare_role_glyph(marker,"infantry",historical_unit)
-			_expect(String(marker.get_meta("formation_icon",""))==historical_unit,"%s has no distinct military icon mapping" % historical_unit)
-			var visible_icon_parts:=0
-			for glyph_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
-				if (marker.get_node(glyph_name) as MeshInstance3D).visible: visible_icon_parts+=1
-			_expect(visible_icon_parts>=1,"%s icon has no visible silhouette" % historical_unit)
-		var damaged_army:=army.duplicate(true)
-		terrain._configure_warfare_role_glyph(marker,"artillery","siege_engineer")
-		_expect(marker.get_node("RoleGlyphSecondary").mesh is BoxMesh,"engineer hammer head is missing")
-		_expect(marker.get_node("RoleGlyphTertiary").mesh is BoxMesh,"engineer retains artillery wheels")
-		_expect(marker.get_node("RoleGlyphFourth").mesh is ArrayMesh,"engineer spade is missing")
-		terrain._configure_warfare_role_glyph(marker,"infantry","skirmisher")
-		var bow_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
-		_expect(bow_mesh.surface_get_array_len(0)==48,"bow arc exceeds its eight-segment budget")
-		for normal in bow_mesh.surface_get_arrays(0)[Mesh.ARRAY_NORMAL]:
-			_expect(normal.y>0.99,"bow arc faces away from the map camera")
-		_expect(marker.get_node("RoleGlyphFourth").visible,"bow has no directional arrowhead")
-		terrain._configure_warfare_role_glyph(marker,"mobile","cavalry")
-		var horse_mesh:ArrayMesh=marker.get_node("RoleGlyphPrimary").mesh
-		var horse_arrays:=horse_mesh.surface_get_arrays(0)
-		_expect(horse_arrays[Mesh.ARRAY_VERTEX].size()==144,"horse silhouette exceeds its fixed 144 vertex budget")
-		_expect(horse_arrays[Mesh.ARRAY_NORMAL][0].y>0.99,"horse silhouette top faces down")
-		_expect(not marker.get_node("RoleGlyphSecondary").visible and not marker.get_node("RoleGlyphTertiary").visible,"cavalry retains the person-like disc assembly")
-		terrain._configure_warfare_role_glyph(marker,"infantry","line_infantry")
-		var spear_mesh:ArrayMesh=marker.get_node("RoleGlyphSecondary").mesh
-		_expect(spear_mesh.surface_get_array_len(0)==24,"infantry spearhead is not a real triangular prism")
-		damaged_army["readiness"]=0.18
-		damaged_army["wounded_pool"]=8000
-		damaged_army["formations"]=[{"unit":"modern_artillery","count":8000,"equipment_condition":0.30}]
-		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(damaged_army,320.0,true))
-		var damage_scars:=marker.get_node("DamageScars") as MultiMeshInstance3D
-		_expect(damage_scars.multimesh.visible_instance_count>=2,"severe formation damage has no bounded scar cue")
-		_expect((marker.get_node("ReadinessPip") as MeshInstance3D).scale.z<0.45,"broken readiness does not visibly shorten the edge readiness tab")
-		_expect((marker.get_node("RoleGlyphPrimary") as MeshInstance3D).visible,"composition role disappears when damage/readiness changes")
-		terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
-	if marker:
-		for icon_unit in ["line_infantry","cavalry","siege_engineer","field_artillery","motorized_infantry","armored_formation"]:
-			var icon_army:=army.duplicate(true)
-			icon_army.formations=[{"unit":icon_unit,"count":8000}]
-			var icon_view:=PRESENTATION.player_marker(icon_army,320.0,true)
-			terrain._apply_warfare_formation_view(marker,icon_view)
-			var primary:=marker.get_node("RoleGlyphPrimary") as MeshInstance3D
-			var positions:Dictionary={}
-			for part_name in ["RoleGlyphPrimary","RoleGlyphSecondary","RoleGlyphTertiary","RoleGlyphFourth"]:
-				var part:=marker.get_node(part_name) as MeshInstance3D
-				positions[part_name]=part.position
-				var expected:Vector3=Vector3(part.get_meta("glyph_base_position"))-Vector3(primary.get_meta("glyph_base_position"))
-				_expect((part.position-primary.position).is_equal_approx(expected),"%s lost authored offsets for %s" % [icon_unit,part_name])
-			terrain._apply_warfare_formation_view(marker,icon_view)
-			for part_name in positions:
-				_expect((marker.get_node(part_name) as Node3D).position.is_equal_approx(positions[part_name]),"%s icon drifts on repeated updates" % icon_unit)
-			icon_army.readiness=0.1
-			terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(icon_army,320.0,true))
-			for part_name in positions:
-				var part:=marker.get_node(part_name) as Node3D
-				var expected:Vector3=Vector3(positions[part_name])-Vector3(positions["RoleGlyphPrimary"])
-				_expect((part.position-primary.position).is_equal_approx(expected),"broken readiness collapses %s silhouette" % icon_unit)
-	var foreign_counter:Node3D=terrain._create_warfare_formation_marker("ForeignBudgetProbe",false)
-	terrain.add_child(foreign_counter)
-	var foreign_view:Dictionary=PRESENTATION.foreign_marker({"id":"foreign_probe","civilization":"Cedar League","identified":true,"hostile":true,"strength_estimate_low":900,"strength_estimate_high":1500,"readiness_estimate_low":0.42,"readiness_estimate_high":0.66,"formation_role":"armored","formation_era":3,"damage_estimate":0.36,"position":{"x":origin.x+8.0,"z":origin.z+8.0}},320.0)
-	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
-	for zoom in [0.035,0.05,0.10,8.0]:
-		for counter in [marker,foreign_counter]:
-			var scaled_view:Dictionary=PRESENTATION.player_marker(army,zoom) if counter==marker else foreign_view.duplicate(true)
-			scaled_view.scale=PRESENTATION.marker_scale(zoom)
-			terrain._apply_warfare_formation_view(counter,scaled_view)
-			_expect(is_equal_approx(counter.scale.x,PRESENTATION.marker_scale(zoom)),"renderer enlarges the calculated counter scale at %s km" % zoom)
-			var count_label:Label3D=counter.get_node("StrengthLabel")
-			_expect(count_label.global_transform.basis.get_scale().is_equal_approx(Vector3.ONE),"closest zoom distorts compact count text")
-	terrain._apply_warfare_formation_view(marker,PRESENTATION.player_marker(army,320.0,true))
-	terrain._apply_warfare_formation_view(foreign_counter,foreign_view)
-	for counter in [marker,foreign_counter]:
-		for part in counter.get_children():
-			if part is Label3D:
-				_expect(part.render_priority==32,"counter label is not above map-symbol materials")
-			elif part is GeometryInstance3D:
-				var material:=part.material_override as StandardMaterial3D
-				_expect(material!=null,"counter part lacks an explicit material")
-				if material:
-					_expect(material.transparency==BaseMaterial3D.TRANSPARENCY_ALPHA,"opaque counter part can be overdrawn by transparent roofs")
-					_expect(material.render_priority>=17 and material.render_priority<=26,"counter part escaped its above-roof priority band")
-		var plate_name:String="ArmyPlate" if counter==marker else "ObservationPlate"
-		var plate_material:Material=counter.get_node(plate_name).material_override
-		_expect(counter.get_node("CounterBorder").material_override.render_priority<plate_material.render_priority,"counter border covers its plate")
-		_expect(counter.get_node("RoleGlyphPrimary").material_override.render_priority>plate_material.render_priority,"counter plate covers its weapon")
-	_expect(_render_element_count(foreign_counter)<=17,"one observed foreign icon exceeds the fixed render-element budget")
-	_expect((foreign_counter.get_node("RoleGlyphSecondary") as MeshInstance3D).visible,"identified foreign composition does not reach the aggregate role glyph")
-	foreign_counter.queue_free()
+		_expect(_render_element_count(marker)<=4,"one aggregate army keeps more than a position and a label in the world")
+	var chart:Control=terrain.get_node_or_null("WarMapMarks/WarFrontOverlay")
+	_expect(chart!=null,"the war chart that draws the force marks is missing")
+	if chart:
+		terrain.camera_target=origin
+		terrain._update_camera()
+		chart.set_scene(chart.compose(chart.collect()),true)
+		chart.queue_redraw()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var at:Vector2=chart.mark_screen_position("ours","1")
+		_expect(at.is_finite(),"the war chart drew no mark for the army")
+		if at.is_finite():
+			var drawn:Dictionary=(chart.drawn_marks as Array)[0]
+			_expect(is_equal_approx(float(drawn.size),ARMY_MARKS.size_px("regional",String(drawn.kind))),"the army mark is not sized for its zoom band")
+			terrain._clear_army_selection()
+			_expect(terrain._select_field_army_from_screen(at) and terrain.selected_army_id==1,"clicking the army mark does not select the army")
 	army["status"]="moving"
 	army["destination_id"]="probe_objective"
 	army["destination_name"]="North Crossing"
@@ -276,7 +189,8 @@ func _ready()->void:
 	for stacked_marker_variant in terrain.player_field_army_markers.values():
 		var stacked_marker:=stacked_marker_variant as Node3D
 		if stacked_marker and (stacked_marker.get_node("ArmyLabel") as Label3D).visible: stacked_labels+=1
-	_expect(stacked_labels==1,"co-located regional armies did not collapse to one aggregate label")
+	# Regionally the war chart letters the stack as one card; no world labels.
+	_expect(stacked_labels==0,"co-located regional armies still carry world-space labels")
 	terrain.camera.size=7.99
 	terrain._refresh_player_field_army_markers()
 	for close_marker_variant in terrain.player_field_army_markers.values():
@@ -311,28 +225,16 @@ func _ready()->void:
 	if grounded_counter and terrain.hud:
 		terrain._update_camera()
 		var detail_label:=grounded_counter.get_node("ArmyLabel") as Label3D
-		var compact_label:=grounded_counter.get_node("StrengthLabel") as Label3D
 		var view:=PRESENTATION.player_marker(reported_army,1.0,true)
 		view["show_label"]=true
 		var saved_label_position:=detail_label.position
 		var pill:Control=terrain.hud.time_pill
 		detail_label.global_position=terrain.camera.project_position(pill.get_global_rect().get_center(),2.0)
 		terrain._apply_warfare_formation_view(grounded_counter,view)
-		_expect(not detail_label.visible and compact_label.visible,"HUD-obscured army label loses its compact strength fallback")
-		detail_label.global_position=terrain.camera.project_position(get_viewport().get_visible_rect().get_center(),2.0)
-		terrain._apply_warfare_formation_view(grounded_counter,view)
-		_expect(detail_label.visible and not compact_label.visible,"clear army label does not return after leaving HUD obstruction")
+		detail_label.global_position=terrain.camera.project_position(pill.get_global_rect().get_center(),2.0)
+		_expect(not detail_label.visible or not terrain._warfare_label_has_clear_space(detail_label),"HUD-obscured army label stays drawn over the HUD")
 		detail_label.position=saved_label_position
-		var saved_yaw:float=terrain.camera_yaw
-		for yaw in [0.0,1.2,2.6]:
-			terrain.camera_yaw=yaw
-			terrain._update_camera()
-			terrain._apply_warfare_formation_view(grounded_counter,view)
-			var counter_screen:Vector2=terrain.camera.unproject_position(grounded_counter.global_position)
-			var count_screen:Vector2=terrain.camera.unproject_position(compact_label.global_position)
-			_expect(count_screen.y>counter_screen.y,"troop count stops sitting below counter after camera rotation")
-		terrain.camera_yaw=saved_yaw
-		terrain._update_camera()
+		_expect(not "LAST REPORT" in detail_label.text and not "DAYS OLD" in detail_label.text,"close army label carries report jargon: %s" % detail_label.text)
 	if not failures.is_empty():
 		for failure in failures: push_error(failure)
 		get_tree().quit(1)

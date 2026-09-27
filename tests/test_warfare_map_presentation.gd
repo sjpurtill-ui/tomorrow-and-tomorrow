@@ -3,13 +3,11 @@ extends GdUnitTestSuite
 const PRESENTATION:=preload("res://scripts/warfare_map_presentation.gd")
 
 
-func test_compact_strength_preserves_exact_owned_and_uncertain_foreign_counts()->void:
-	assert_str(PRESENTATION.counter_strength({"troops":1200})).is_equal("1.2K")
-	assert_str(PRESENTATION.counter_strength({"troops":0})).is_equal("0")
-	assert_str(PRESENTATION.counter_strength({"strength_low":900,"strength_high":1500})).is_equal("~900–1.5K")
-	assert_str(PRESENTATION.counter_strength({"strength_low":1200,"strength_high":1200})).is_equal("~1.2K")
-	assert_str(PRESENTATION.counter_strength({"strength_high":500})).is_equal("~500")
-	assert_str(PRESENTATION.counter_strength({})).is_equal("?")
+func test_strength_is_said_plainly_for_owned_and_uncertain_foreign_counts()->void:
+	assert_str(String(PRESENTATION.player_marker(_army(1,1200),48.0).label)).contains("about 1,200")
+	assert_str(String(PRESENTATION.foreign_marker(_foreign(),48.0).label)).contains("900 to 1,500")
+	var agreed:=_foreign(); agreed.strength_estimate_low=1200; agreed.strength_estimate_high=1200
+	assert_str(String(PRESENTATION.foreign_marker(agreed,48.0).label)).contains("about 1,200")
 
 
 func test_map_label_requires_viewport_and_hud_clearance()->void:
@@ -26,10 +24,12 @@ func test_player_marker_communicates_owner_strength_readiness_supply_and_selecti
 	assert_bool(bool(marker.visible)).is_true()
 	assert_bool(bool(marker.selected)).is_true()
 	assert_str(String(marker.owner_label)).is_equal("YOU")
-	assert_str(String(marker.label)).contains("12.5K")
-	assert_str(String(marker.label)).contains("SOLDIERS")
-	assert_str(String(marker.label)).contains("READY 78%")
-	assert_str(String(marker.label)).contains("SUPPLY 64%")
+	# Plain words: the force, its strength and what it is doing; no ledger jargon.
+	assert_str(String(marker.label)).contains("First Field Army")
+	assert_str(String(marker.label)).contains("about 13,000")
+	assert_str(String(marker.label)).contains("At home")
+	assert_str(String(marker.label)).not_contains("%")
+	assert_str(String(marker.label)).not_contains("SOLDIERS")
 	assert_str(String(marker.color)).is_equal(PRESENTATION.PLAYER_COLOR)
 	assert_str(String(marker.selection_color)).is_equal(PRESENTATION.PLAYER_SELECTED_COLOR)
 
@@ -75,7 +75,7 @@ func test_billion_strength_changes_label_not_runtime_shape()->void:
 	assert_int(snapshot.player.size()).is_equal(PRESENTATION.MAX_PLAYER_MARKERS)
 	assert_int(snapshot.foreign.size()).is_equal(PRESENTATION.MAX_FOREIGN_MARKERS)
 	assert_int(snapshot.fronts.size()).is_equal(PRESENTATION.MAX_FRONT_MARKERS)
-	assert_str(String(snapshot.player[0].label)).contains("12.00B")
+	assert_str(String(snapshot.player[0].label)).contains("billion")
 	assert_bool(bool(snapshot.bounded)).is_true()
 
 
@@ -118,7 +118,7 @@ func test_formation_condition_is_aggregate_bounded_and_damage_sensitive()->void:
 	var view:=PRESENTATION.player_marker(army,48.0,false)
 	assert_str(String(view.damage_state)).is_equal("damaged")
 	assert_float(float(view.damage_ratio)).is_greater(0.0)
-	assert_str(String(view.label)).contains("DAMAGED")
+	assert_str(String(view.label)).contains("badly mauled")
 
 
 func test_readiness_changes_formation_order_without_adding_map_elements()->void:
@@ -141,8 +141,8 @@ func test_local_formation_report_stays_in_two_compact_lines()->void:
 	army.arrival_day=84
 	var view:=PRESENTATION.player_marker(army,48.0,true)
 	assert_int(String(view.label).split("\n").size()).is_equal(2)
-	assert_str(String(view.label)).contains("READY 78%")
-	assert_str(String(view.label)).contains("SUPPLY 64%")
+	assert_str(String(view.label)).contains("Marching on North Road")
+	assert_str(String(view.label)).not_contains("%")
 	assert_float(absf(float(view.heading))).is_greater(0.01)
 
 
@@ -152,9 +152,10 @@ func test_visible_scout_label_tells_the_player_how_to_act()->void:
 	scout["civilization"]=""
 	scout["carries_report"]=true
 	var view:=PRESENTATION.foreign_marker(scout,48.0)
-	assert_str(String(view.label)).contains("FOREIGN SCOUTS")
-	assert_str(String(view.label)).contains("CLICK TO INTERCEPT")
-	assert_int(String(view.label).split("\n").size()).is_equal(2)
+	# Who and how many, in plain words; the map's contact card holds the actions.
+	assert_str(String(view.label)).contains("Strangers' scouts")
+	assert_str(String(view.label)).contains("900 to 1,500")
+	assert_str(String(view.label)).not_contains("CLICK")
 
 
 func test_unknown_objectives_do_not_receive_invented_map_coordinates()->void:
@@ -171,7 +172,7 @@ func test_regional_stacked_armies_collapse_to_one_aggregate_label()->void:
 	var snapshot:=PRESENTATION.build_snapshot(320.0,armies,[],[],[_home()],{},0)
 	var visible_labels:Array=snapshot.player.filter(func(view:Dictionary)->bool: return bool(view.show_label))
 	assert_int(visible_labels.size()).is_equal(1)
-	assert_str(String(visible_labels[0].label)).contains("12 ARMIES")
+	assert_str(String(visible_labels[0].label)).contains("Twelve hosts of ours")
 	var occupied_display_slots:Dictionary={}
 	for view in snapshot.player:
 		var offset:Dictionary=view.get("display_offset",{})
@@ -212,7 +213,7 @@ func test_close_colocated_armies_still_receive_separate_counter_slots()->void:
 	assert_float(absf(float(snapshot.player[0].display_offset.x)-float(snapshot.player[1].display_offset.x))).is_greater(PRESENTATION.marker_scale(0.7)*6.0)
 	var labels:Array=snapshot.player.filter(func(view:Dictionary)->bool: return bool(view.show_label))
 	assert_int(labels.size()).is_equal(1)
-	assert_str(String(labels[0].label)).contains("2 ARMIES")
+	assert_str(String(labels[0].label)).contains("Two war parties of ours")
 
 
 func test_counter_clearance_tracks_close_zoom_and_caps_regionally()->void:
@@ -242,7 +243,7 @@ func test_regional_foreign_stack_uses_unique_nonoverlapping_counter_slots()->voi
 		occupied_display_slots[slot]=point
 	var visible_labels:Array=snapshot.foreign.filter(func(view:Dictionary)->bool: return bool(view.show_label))
 	assert_int(visible_labels.size()).is_equal(1)
-	assert_str(String(visible_labels[0].label)).contains("8 ARMIES")
+	assert_str(String(visible_labels[0].label)).contains("Eight hosts of theirs")
 
 
 func test_opposing_formations_at_one_location_receive_separate_faction_lanes()->void:
@@ -283,7 +284,7 @@ func test_observed_foreign_damage_and_identified_role_reach_the_fixed_counter()-
 	assert_int(int(view.formation_era)).is_equal(2)
 	assert_str(String(view.damage_state)).is_equal("damaged")
 	assert_float(float(view.damage_ratio)).is_equal_approx(0.47,0.001)
-	assert_str(String(view.label)).contains("DAMAGED")
+	assert_str(String(view.label)).contains("Looked badly mauled")
 
 
 func test_occupation_front_is_distinct_from_battle_and_generic_objective()->void:
@@ -329,7 +330,7 @@ func test_ground_scale_keeps_units_visible_and_correctly_scaled()->void:
 	assert_bool(bool(snapshot.player[0].show_label)).is_true()
 	assert_bool(bool(snapshot.foreign[0].visible)).is_true()
 	assert_float(float(snapshot.player[0].scale)).is_equal_approx(7.99*0.016,0.001)
-	assert_str(String(snapshot.player[0].label)).contains("SOLDIERS")
+	assert_str(String(snapshot.player[0].label)).contains("about 1,000")
 	assert_bool(bool(snapshot.fronts[0].visible)).is_false()
 	assert_bool(bool(snapshot.fronts[0].show_label)).is_false()
 
@@ -356,6 +357,6 @@ func _objective()->Dictionary:
 func test_away_army_marker_identifies_dated_report_instead_of_implying_live_state()->void:
 	var army:=_army(7,12500)
 	army.report_age_days=2
-	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).contains("LAST REPORT · 2 DAYS OLD")
+	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).contains("reported two days ago")
 	army.erase("report_age_days")
-	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).not_contains("LAST REPORT")
+	assert_str(String(PRESENTATION.player_marker(army,48.0,true).label)).not_contains("reported")

@@ -327,6 +327,146 @@ static func _war_glyph(kind:String,c:Color)->Array:
 	return [_c(28,28,8,c)]
 
 
+# -- Forces on the war chart ------------------------------------------------
+
+static var _army_textures:Dictionary={}
+
+## Inked marks for forces on the war chart (see hud/army_marks.gd), drawn
+## bare with a paper halo so they read over any ground:
+##   "band:N"    a tally of N spears bound together (N 2..5);
+##   "host"      a leader's standard: pole, crossbar and a streamer;
+##   "army"      a framed standard with the arm's symbol on its cloth;
+##   "formation" a staff-map box with the branch symbol.
+## branch: foot, horse, missile, guns, engineers, motor, armour. ink draws
+## the strokes; accent (the owner's colour) touches only the streamer, the
+## tally's tie or a wash on the cloth.
+static func army_texture(kind:String,branch:String,ink:Color,accent:Color,px:int=64)->Texture2D:
+	var key:="%s|%s|%s|%s|%d" % [kind,branch,ink.to_html(),accent.to_html(),px]
+	if _army_textures.has(key): return _army_textures[key]
+	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(army_glyph(kind,branch,ink,accent),Color(0.94,0.89,0.76,0.92),2.4),px))
+	_army_textures[key]=texture
+	return texture
+
+
+## The glyph's primitives on the 56 px grid.
+static func army_glyph(kind:String,branch:String,ink:Color,accent:Color)->Array:
+	var paper:=Color(0.95,0.91,0.80,1.0)
+	var wash:=Color(accent,0.5)
+	if kind.begins_with("band"):
+		var count:=clampi(int(kind.get_slice(":",1)) if ":" in kind else 3,2,5)
+		var out:Array=[]
+		var spread:=7.0
+		var left:=28.0-spread*float(count-1)*0.5
+		for k in count:
+			var x:=left+spread*float(k)
+			var lean:=(float(k)-float(count-1)*0.5)*1.2
+			out.append_array([_s(x-lean,50,x+lean,15,2.4,ink),_t(x+lean,5,x+lean-3.2,15,x+lean+3.2,15,ink)])
+		# The binding: one tally stroke across the spears, with the owner's tie.
+		out.append(_s(left-5,42,left+spread*float(count-1)+5,34,2.6,ink))
+		out.append(_c(28,38,2.6,accent))
+		return out
+	match kind:
+		"host":
+			return [
+				_s(24,53,24,9,2.8,ink),_c(24,6,3.2,ink),_s(14,13,36,13,2.4,ink),
+				_t(25,14,25,34,50,21,ink),_t(26.5,16.5,26.5,30.5,45,21.5,accent),
+				_s(15,13,14,21,1.6,ink),_s(35,13,36,21,1.6,ink),_s(17,53,31,53,2.6,ink),
+			]
+		"army":
+			var cloth:=[_s(28,55,28,8,2.8,ink),_t(28,1,24.5,8,31.5,8,ink),_s(12,10,44,10,2.6,ink),
+				_rr(28,25,14,13,1.0,ink),_rr(28,25,11.6,10.6,0.6,paper),_rr(28,25,11.6,10.6,0.6,wash)]
+			for x in [18.0,23.0,28.0,33.0,38.0]: cloth.append(_s(x,39,x,42,1.4,ink))
+			cloth.append_array(_arm_symbol(branch,28,25,8.5,ink))
+			return cloth
+		"formation":
+			var box:=[_rr(28,31,21,14,0.6,ink),_rr(28,31,18.8,11.8,0.3,paper),_rr(28,31,18.8,11.8,0.3,wash)]
+			box.append_array(_branch_symbol(branch,28,31,18.8,11.8,ink,paper))
+			return box
+	return [_c(28,28,6,ink)]
+
+
+## The arm's symbol on a standard's cloth (older, drawn signs).
+static func _arm_symbol(branch:String,x:float,y:float,r:float,ink:Color)->Array:
+	match branch:
+		"horse": return [_s(x-r,y+r*0.7,x+r,y-r*0.7,2.2,ink),_c(x+r*0.65,y-r*0.55,2.4,ink)]
+		"missile":
+			var bow:=[Vector2(x-1,y-r),Vector2(x-r*0.55,y-r*0.55),Vector2(x-r*0.75,y),Vector2(x-r*0.55,y+r*0.55),Vector2(x-1,y+r)]
+			var out:=[_s(x-1,y-r,x-1,y+r,1.2,ink),_s(x-r*0.7,y,x+r*0.8,y,1.8,ink),_t(x+r+1,y,x+r*0.8-2,y-2.6,x+r*0.8-2,y+2.6,ink)]
+			for k in range(1,bow.size()): out.append(_s(bow[k-1].x,bow[k-1].y,bow[k].x,bow[k].y,2.0,ink))
+			return out
+		"guns","engineers": return [_ring(x,y,r*0.62,2.0,ink),_c(x,y,1.8,ink)]
+	return [_s(x-r,y+r*0.8,x+r,y-r*0.8,2.2,ink),_s(x-r,y-r*0.8,x+r,y+r*0.8,2.2,ink)]
+
+
+## The staff-map branch symbols inside a box of half-size (hw, hh).
+static func _branch_symbol(branch:String,x:float,y:float,hw:float,hh:float,ink:Color,paper:Color)->Array:
+	var diagonal_a:=_s(x-hw,y+hh,x+hw,y-hh,2.0,ink)
+	var diagonal_b:=_s(x-hw,y-hh,x+hw,y+hh,2.0,ink)
+	match branch:
+		"horse": return [diagonal_a]
+		"guns": return [_c(x,y,3.8,ink)]
+		"armour": return [_rr(x,y,hw*0.62,hh*0.5,hh*0.5,ink),_rr(x,y,hw*0.62-2.0,hh*0.5-2.0,hh*0.5-2.0,paper)]
+		"motor": return [diagonal_a,diagonal_b,_c(x-hw*0.5,y+hh+4.5,2.2,ink),_c(x+hw*0.5,y+hh+4.5,2.2,ink)]
+		"engineers": return [_s(x-hw*0.55,y-hh*0.45,x+hw*0.55,y-hh*0.45,2.0,ink),_s(x-hw*0.55,y-hh*0.45,x-hw*0.55,y+hh*0.4,2.0,ink),_s(x+hw*0.55,y-hh*0.45,x+hw*0.55,y+hh*0.4,2.0,ink),_s(x,y-hh*0.45,x,y+hh*0.4,2.0,ink)]
+		"missile": return [diagonal_a,diagonal_b,_c(x,y-hh*0.55,1.8,ink)]
+	return [diagonal_a,diagonal_b]
+
+
+## A paper halo beneath a glyph: each primitive again, grown, in paper.
+static func _with_halo(primitives:Array,paper:Color,grow:float)->Array:
+	var out:Array=[]
+	for primitive_variant in primitives:
+		var primitive:Dictionary=(primitive_variant as Dictionary).duplicate()
+		primitive.col=paper
+		primitive["g"]=grow
+		out.append(primitive)
+	out.append_array(primitives)
+	return out
+
+
+## The same distance fields and compositing as _render (without the disc),
+## but each primitive is evaluated only inside its own bounds, in order, so
+## a glyph with many strokes and a halo stays cheap to bake.
+static func _render_boxed(primitives:Array,px:int=ICON_PX)->Image:
+	var scale:=float(px)/float(ICON_PX)
+	var pixels:=PackedColorArray()
+	pixels.resize(px*px)
+	pixels.fill(Color(0,0,0,0))
+	for primitive_variant in primitives:
+		var primitive:Dictionary=primitive_variant
+		var col:Color=primitive.col
+		if col.a<=0.0: continue
+		var grow:=float(primitive.get("g",0.0))
+		var box:=_bounds(primitive).grow(grow+1.5)
+		var x0:=clampi(floori(box.position.x*scale),0,px-1); var x1:=clampi(ceili(box.end.x*scale),0,px-1)
+		var y0:=clampi(floori(box.position.y*scale),0,px-1); var y1:=clampi(ceili(box.end.y*scale),0,px-1)
+		for y in range(y0,y1+1):
+			for x in range(x0,x1+1):
+				var coverage:=clampf(0.5-(_sd(primitive,Vector2(x+0.5,y+0.5)/scale)-grow)*scale,0.0,1.0)*col.a
+				if coverage<=0.0: continue
+				var i:=y*px+x
+				var out:Color=pixels[i]
+				out.r=lerpf(out.r,col.r,coverage); out.g=lerpf(out.g,col.g,coverage); out.b=lerpf(out.b,col.b,coverage)
+				out.a=out.a+(1.0-out.a)*coverage
+				pixels[i]=out
+	var image:=Image.create(px,px,false,Image.FORMAT_RGBA8)
+	for y in px:
+		for x in px: image.set_pixel(x,y,pixels[y*px+x])
+	image.generate_mipmaps()
+	return image
+
+
+static func _bounds(primitive:Dictionary)->Rect2:
+	var a:Vector2=primitive.a
+	match int(primitive.k):
+		0,5: return Rect2(a,Vector2.ZERO).grow(float(primitive.r))
+		1: return Rect2(a,Vector2.ZERO).grow(float(primitive.r)+float(primitive.w)*0.5)
+		2: return Rect2(a,Vector2.ZERO).expand(primitive.b).grow(float(primitive.r))
+		3: return Rect2(a,Vector2.ZERO).expand(primitive.b).expand(primitive.c)
+		4: return Rect2(a-(primitive.b as Vector2),(primitive.b as Vector2)*2.0)
+	return Rect2(0,0,ICON_PX,ICON_PX)
+
+
 
 # -- The People -------------------------------------------------------------
 
