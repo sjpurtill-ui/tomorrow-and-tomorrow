@@ -1,0 +1,14 @@
+{
+  "id": "displacement_buoyancy",
+  "line": "knowledge",
+  "block": "y600_1200",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8577f683-3d21-4339-a10d-d17a4c4a0b23.png",
+  "source_file": "exec-8577f683-3d21-4339-a10d-d17a4c4a0b23.png",
+  "creative_brief": "A body in water is pressed upward by the weight of the water it pushes aside. Paint it as a classical antiquity scene.",
+  "medium": "Ink and lapis",
+  "style_schema": "research_direction_styles/2",
+  "asset": "res://assets/ui/research/subjects/displacement_buoyancy-v1.png",
+  "sha256": "f9fc6cbfc1474780fab1166513b99b3f6d5b1cc2ec0e7e72f1a78da373737593",
+  "mode": "built-in image_gen / direct style reference",
+  "review": "Selected after 3.37:1 banner crop review on 2026-09-26; approved direction image used as style reference."
+}
