@@ -10,13 +10,12 @@ func test_roster_has_service_artwork_actual_counts_and_distinct_portraits_withou
 	var stores:=GameState.resource_stockpiles.duplicate(true);var time:=GameState.elapsed_days
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
 	assert_int(screen.bindings.size()).is_equal(1)
-	assert_str(screen.hero_values.strength.text).is_equal("15")
-	assert_str(screen.hero_values.attention.text).is_equal("1")
-	assert_str(screen.bindings[0].personnel.text).is_equal("15 soldiers")
-	assert_str(screen.bindings[0].equipment.text).is_equal("80%")
-	assert_str(screen.bindings[0].activity.text).contains("Missing gear: 3 of 15")
-	assert_str(screen.bindings[0].skill_bar.mode).is_equal("patch")
-	assert_bool(screen.bindings[0].personnel_bar.visible).is_false()
+	assert_str(screen.hero_values.strength.text).is_equal("15 warriors")
+	assert_str(screen.hero_values.attention.text).starts_with("1 needs you: Home reserve lacks 3 weapons")
+	assert_str(screen.bindings[0].headline.text).starts_with("Home reserve is at home: 15 warriors, every place filled.")
+	assert_str(screen.bindings[0].arms.text).starts_with("12 of 15 armed; 3 still wait for simple levy weapons.")
+	assert_str(screen.bindings[0].action.text).is_equal("Order weapons")
+	assert_bool(screen.bindings[0].activity_bar.visible).is_false()
 	assert_object(screen.bindings[0].portrait.texture).is_not_null()
 	assert_str(Art.illustration_path("levy")).ends_with("levy-v1.png")
 	assert_str(Art.illustration_path("armored_formation")).ends_with("armor-v1.png")
@@ -74,15 +73,19 @@ func test_unknown_field_report_uses_no_model_or_invented_readiness()->void:
 	var unknown:Dictionary=screen._rows().filter(func(row:Dictionary)->bool:return row.get("unknown",false))[0]
 	assert_str(unknown.type_id).is_empty()
 	var index:int=screen._rows().find(unknown)
-	assert_str(screen.bindings[index].equipment.text).is_equal("Not reported")
-	assert_bool(screen.bindings[index].equipment_bar.visible).is_false()
+	assert_str(screen.bindings[index].headline.text).contains("has not sent a full report yet")
+	assert_str(screen.bindings[index].people.text).contains("unknown until a messenger arrives")
+	assert_bool(screen.bindings[index].arms.visible).is_false()
+	assert_bool(screen.bindings[index].activity_bar.visible).is_false()
 
 func test_compact_rows_and_small_army_panel_leave_the_map_visible()->void:
 	var view:SubViewport=auto_free(SubViewport.new());view.size=Vector2i(1440,900);add_child(view)
 	var screen:CanvasLayer=auto_free(Roster.new());view.add_child(screen)
 	for frame in 8:await await_idle_frame()
-	assert_float(screen.bindings[0].card.size.y).is_less_equal(104)
-	assert_float(screen.panel.size.y).is_less_equal(510)
+	# Each card now says in words what the force lacks, so it is taller than the
+	# old one-line strip; one force still leaves most of the map in view.
+	assert_float(screen.bindings[0].card.size.y).is_less_equal(200)
+	assert_float(screen.panel.size.y).is_less_equal(560)
 	for type_id:String in Art.manifest():
 		assert_bool(ResourceLoader.exists(Art.illustration_path(type_id))).override_failure_message(type_id).is_true()
 	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
@@ -99,7 +102,7 @@ func test_fragmented_levies_share_force_but_never_combine_separate_armies()->voi
 	var rows:Array=screen._rows()
 	assert_int(rows.size()).is_equal(3)
 	assert_int(rows[0].count).is_equal(100)
-	assert_str(rows[0].composition).contains("100 soldiers")
+	assert_str(rows[0].composition).contains("100 people")
 	assert_str(rows[1].name).contains("Northbank")
 	assert_int(rows[1].count).is_equal(4)
 	assert_int(rows[2].count).is_equal(2)
