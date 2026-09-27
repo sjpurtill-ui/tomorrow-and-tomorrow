@@ -23,6 +23,7 @@ extends RefCounted
 ## rebuilt outside the editor).
 
 const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
+const AFTERMATH_PATH:="res://scripts/envoy_aftermath.gd"
 const SOCIETY:=preload("res://scripts/society_exchange.gd")
 const NAMES:=preload("res://scripts/historical_name_generator.gd")
 const COMMITMENTS:=preload("res://scripts/diplomatic_commitments.gd")
@@ -183,6 +184,11 @@ const SITUATIONS:={
 	"boundary_cairn":{"kind":"request","headline":"asks to raise a cairn on the border","mechanic":"envoy_requests.gd; Stone spent, border tension and a cairn bond"},
 	"joint_hunt":{"kind":"request","headline":"asks your hunters to join a great drive","mechanic":"envoy_requests.gd; hunters away, shared meat, a hunter may die"},
 	"safe_passage":{"kind":"request","headline":"asks safe passage for its carriers","mechanic":"envoy_requests.gd; seasonal crossing gifts from their ledger, passage bond"},
+	# A beaten people's business (envoy_aftermath.gd): never a tribute demand.
+	"town_return":{"kind":"request","headline":"comes to ask for a town back","mechanic":"envoy_aftermath.gd; their goods for the town, occupation_resident_order restore_self_rule"},
+	"captive_plea":{"kind":"request","headline":"comes about the captives you took","mechanic":"envoy_aftermath.gd; captives on the road turned home, captives at home freed (occupation_transfers)"},
+	"people_plea":{"kind":"request","headline":"pleads for its people under your spears","mechanic":"envoy_aftermath.gd; town_fate spare, dread and relation"},
+	"vengeance_vow":{"kind":"request","headline":"brings a vow of vengeance","mechanic":"envoy_aftermath.gd; grudges, dread and border tension"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -315,6 +321,9 @@ static func _war()->GDScript:
 const REQUESTS_PATH:="res://scripts/envoy_requests.gd"
 const PACTS_PATH:="res://scripts/trade_pacts.gd"
 const MENACE_PATH:="res://scripts/envoy_messages.gd"
+static func _aftermath()->GDScript:
+	return load(AFTERMATH_PATH) as GDScript
+
 static func _requests()->GDScript:
 	## The wider envoy business (envoy_requests.gd); loaded lazily because it
 	## reaches back into this one.
@@ -1374,6 +1383,8 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	# one whose envoys were harmed here may send none at all.
 	if bool(_lives().call("avoids",civ_id,occasion,rng)): return {}
 	if bool(_rivals().call("withholds_envoys",civ_id,occasion,rng)): return {}
+	# A people with no town left has nobody to send.
+	if bool(_aftermath().call("silenced",civ_id)): return {}
 	var used:=_used_asks("civ:"+civ_id,day)
 	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day)
 	var chosen:=_weighted(candidates,rng)
@@ -1427,6 +1438,10 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	# replace whatever the occasion would have brought.
 	var wronged:Dictionary=_rivals().call("envoy_mix",civ_id,type)
 	if not wronged.is_empty(): mix=wronged; branches={}
+	# A people we have beaten (towns lost, captives taken, a war going badly)
+	# sues, pleads, ransoms or vows vengeance; it never demands tribute.
+	var beaten:Dictionary=_aftermath().call("mix",civ_id)
+	if not beaten.is_empty(): mix=beaten; branches={}
 	var p:=_personality(civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var result:Array[Dictionary]=[]
@@ -1444,7 +1459,7 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 	# Whether an envoy comes at all is the hall's business alone (the pace of
 	# visits is unchanged): wider requests join only business the hall could
 	# already back, drawn with their own dice so the hall's are untouched.
-	if result.is_empty() or not wronged.is_empty(): return result
+	if result.is_empty() or not wronged.is_empty() or not beaten.is_empty(): return result
 	var extra:Dictionary=er.call("extra_mix",type,occasion)
 	if not extra.is_empty():
 		var wider:=_rng("wider:%s:%s" % [civ_id,String(occasion.get("key",""))],day)
@@ -1529,7 +1544,8 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 	var situation:={"type":situation_type,"headline":String(SITUATIONS.get(situation_type,{}).get("headline",""))}
 	match situation_type:
 		"gift_goods","gratitude_gift","dread_tribute":
-			if war: return {}
+			# A beaten people may bring tribute even while the war lasts.
+			if war and not (situation_type=="dread_tribute" and bool(_aftermath().call("defeated",civ_id))): return {}
 			if situation_type=="gift_goods" and _gift_recent(civ_id,day): return {}
 			var terms:=_gift_terms(civ_id,civ,rng,used,1.3 if situation_type=="gratitude_gift" else (1.6 if situation_type=="dread_tribute" else 1.0))
 			if terms.is_empty(): return {}
@@ -1547,6 +1563,7 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			situation.summary="%s is short of food (about %d days of stores) and asks for %s." % [name,roundi(float(civ.get("food_days",0))),_terms_text(request)]
 			return {"kind":kind,"terms":request,"situation":situation}
 		"tribute_demand","emboldened_demand","test_of_resolve":
+			if bool(_aftermath().call("defeated",civ_id)): return {}
 			var scale:=1.4 if situation_type=="emboldened_demand" else (0.7 if situation_type=="test_of_resolve" else 1.0)
 			var avoid:=String(previous.get("resource","")) if situation_type=="emboldened_demand" else ""
 			var threat:=_threat_terms(civ,rng,used,scale,avoid)
@@ -1872,13 +1889,15 @@ static func _foreign_audience(civ_id:String,chosen:Dictionary,occasion:Dictionar
 	audience.situation=situation
 	# The ruler behind the envoy: memory, a string on the business, a bluff.
 	_rivals().call("dress",audience,occasion,day)
+	# Who leads a people whose chief town fell, and what they lost.
+	_aftermath().call("dress",audience)
 	return audience
 
 static func _generate_foreign(civ_id:String,day:int,forced_kind:String)->Dictionary:
 	## Forced generation (tests, captures): any situation of that kind that the
 	## world can truthfully back, ignoring the ledger and the budget.
 	var civ:=ForeignDiplomacy.civilization(civ_id)
-	if civ.is_empty() or ForeignDiplomacy.leader(civ_id).is_empty(): return {}
+	if civ.is_empty() or ForeignDiplomacy.leader(civ_id).is_empty() or bool(_aftermath().call("silenced",civ_id)): return {}
 	var rng:=_rng("forced:%s:%s:%d" % [civ_id,forced_kind,int(state().serial)],day)
 	var occasion:={"type":"debug","key":"debug","civ_id":civ_id,"data":{"text":"a summons from the ruler"}}
 	var order:Array=[]
