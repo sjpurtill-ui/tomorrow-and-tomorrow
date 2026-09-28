@@ -8,8 +8,12 @@ extends RefCounted
 ##   live     a live model stubbed at the transport: the order reader returns
 ##            the case's IDEAL structured reading (order_reader.gd schema) and
 ##            every voice prompt is kept (nothing leaves the machine);
-##   sloppy   grave group orders only: the reader wrongly names the one before
+##   sloppy   grave group orders only (and grave words that are a law at home,
+##            case key sloppy_words): the reader wrongly names the one before
 ##            the ruler as the victim; the guards must still hold.
+## A step that summons someone moves the court into their audience, as the
+## player's screen does; a live model's mapping of words about people (the
+## persons stage) is the step's ideal "persons" action, else plain talk.
 ## Each step is measured before and after (the town's ledger, bands, garrison,
 ## captives, stores, officials, aims, dread, the audience's open question) and
 ## checked against the case's expectations and the standing rules of
@@ -29,6 +33,7 @@ const Pursuit:=preload("res://scripts/pursuit.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
+const Persons:=preload("res://scripts/court_persons.gd")
 
 const PATHS:=["offline","live","sloppy"]
 ## A fake key: it must never appear in a prompt, a line or a receipt.
@@ -60,10 +65,10 @@ func _init(test_suite:Node)->void:
 # Cases
 # --------------------------------------------------------------------------
 
-const CASE_KEYS:=["id","domain","fixture","speaker","source","sloppy","paths","steps","say","ideal","expect","variants","note","sloppy_expect"]
+const CASE_KEYS:=["id","domain","fixture","speaker","source","sloppy","paths","steps","say","ideal","expect","variants","note","sloppy_expect","sloppy_words"]
 const STEP_KEYS:=["say","ideal","expect","note"]
 const EXPECT_KEYS:=["route","handled","verb","kind","verdict","stage","target","harm_ok","state","reply_has","reply_any","reply_lacks","says_has","says_any","says_lacks","prompt_has","prompt_any","known","asks","aim_ok","allow_stray","allow_done","offline","live","sloppy","when_verdict"]
-const IDEAL_KEYS:=["kind","action","type","ref","actor","details","confidence","clarify"]
+const IDEAL_KEYS:=["kind","action","type","ref","actor","details","confidence","clarify","persons"]
 
 func load_cases(path:String)->void:
 	cases.clear(); load_errors.clear()
@@ -175,7 +180,9 @@ func run(c:Dictionary,path:String)->Dictionary:
 		var expect:Dictionary=_merged(step.get("expect",{}),{})
 		if expect.get(path) is Dictionary: expect=_merged(expect,expect[path])
 		# The sloppy reader only garbles grave orders about many people.
-		var sloppy:=path=="sloppy" and _grave_step(step)
+		# sloppy_words: grave words that are no order about a town ("Execute every
+		# thief", a law): the careless reader still names the one before the ruler.
+		var sloppy:=path=="sloppy" and (_grave_step(step) or bool(c.get("sloppy_words",false)))
 		if sloppy: expect=_sloppy_expect(expect,c)
 		elif path=="sloppy" and expect.get("live") is Dictionary: expect=_merged(expect,expect.live)
 		var before:=measure(w,id)
@@ -197,18 +204,29 @@ func run(c:Dictionary,path:String)->Dictionary:
 		modal._speak()
 		if path!="offline":
 			# The stubbed model answers the voice's own reading of the words (the
-			# speak stage), as a live model would; every other request is dropped.
+			# speak stage) and, for words about people, maps them as the case's
+			# ideal says (the persons stage), as a live model would; every other
+			# request is dropped.
 			var serial:=i
-			voice.answer(func(r:Dictionary)->PackedByteArray: return _voice_reply(r,reading,serial))
+			var persons_ideal:=String((step.get("ideal",{}) as Dictionary).get("persons","")) if step.get("ideal") is Dictionary else ""
+			voice.answer(func(r:Dictionary)->PackedByteArray: return _voice_reply(r,reading,serial,voice,persons_ideal))
 		voice.drain(id)
 		if is_instance_valid(modal) and modal.has_method("_refresh_footer") and is_instance_valid(modal.speak_button): modal._refresh_footer()
 		var after:=measure(w,id)
 		var lines:Array=(Hall.find(id).get("lines",[]) as Array).slice(lines_before)
+		# Someone was brought before the ruler (a summons): the court now speaks
+		# in their audience, as the player's does; what they said arriving counts.
+		var now_id:=String(modal.audience_id) if is_instance_valid(modal) else id
+		if now_id!="" and now_id!=id and String(Hall.find(now_id).get("status",""))=="waiting":
+			lines=lines+(Hall.find(now_id).get("lines",[]) as Array)
+			after["_moved_to"]=now_id
+			voice.drain(now_id)
 		var answer_only:=step.get("ideal") is Dictionary and String((step.ideal as Dictionary).get("action","")) in ["confirm","cancel"]
 		var fails:=check(w,c,path,i+1,said,expect,before,after,lines,voice,asked,answer_only)
 		for f in fails: (out.fails as Array).append(f)
 		(out.log as Array).append({"say":said,"lines":lines.map(func(l:Dictionary)->String: return "%s: %s" % [String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "(narration)",String(l.get("text",""))]),
-			"calls":voice.calls.map(func(k:Dictionary)->String: return _call_words(k)),"prompts":voice.prompts.size()})
+			"calls":voice.calls.map(func(k:Dictionary)->String: return _call_words(k)),"prompts":voice.prompts.size(),"changed":changed(before,after)})
+		if after.has("_moved_to"): id=String(after._moved_to)
 	modal.queue_free(); voice.queue_free()
 	out.ok=(out.fails as Array).is_empty()
 	return out
@@ -250,6 +268,10 @@ func ref_of(token:String,w:Dictionary)->String:
 		"$rovik": return "figure:"+String(info.get("rovik_fid",""))
 		"$band": return "band:%d" % int(info.get("band_id",0))
 		"$seanstone": return "ours:"+String(GameState.player_settlements[0].get("id","")) if not GameState.player_settlements.is_empty() else "home"
+		"$focus":
+			# The commoner the court last named or brought in (court_persons.gd).
+			var focus:Dictionary=Persons.state().focus.get("person",{}) if Persons.state().focus.get("person") is Dictionary else {}
+			return Persons.ref_key(focus) if not focus.is_empty() else ""
 	var role:=token.trim_prefix("$")
 	var pid:=fx.role_pid(w,role)
 	return "person:%d" % pid if pid>0 else token
@@ -288,13 +310,40 @@ func _sloppy_expect(expect:Dictionary,c:Dictionary)->Dictionary:
 ## never twice in one audience: the voice drops a line said before).
 const NEUTRAL_LINES:=["I hear you.","I take your meaning.","Your words are heard.","I follow you.","So I understand it.","I mark what you say.","I have your words.","I hear it plainly."]
 
-func _voice_reply(r:Dictionary,reading:Dictionary,serial:int)->PackedByteArray:
-	## The stubbed voice model answers only the speak stage's own reading of the
+func _voice_reply(r:Dictionary,reading:Dictionary,serial:int,voice:Node=null,persons:String="")->PackedByteArray:
+	## The stubbed voice model answers the speak stage's own reading of the
 	## ruler's words (one plain line and the command it reads, from the same
-	## reading the order reader was given); anything else goes unanswered.
+	## reading the order reader was given) and maps words about people onto the
+	## persons engine's menu (the case's ideal "persons" action, else plain talk);
+	## anything else goes unanswered.
+	if String(r.get("stage",""))=="persons": return _persons_reply(r,serial,voice,persons)
 	if String(r.get("stage",""))!="speak" or bool(r.get("read",false)): return PackedByteArray()
 	var content:={"lines":[{"speaker_key":"envoy","text":NEUTRAL_LINES[serial%NEUTRAL_LINES.size()],"aside":false}],"mood_shift":0.0,"divine":"none","command":_voice_command(reading)}
 	return JSON.stringify({"id":"m","model":"mock-voice","choices":[{"finish_reason":"stop","message":{"role":"assistant","content":JSON.stringify(content)}}],"usage":{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}}).to_utf8_buffer()
+
+func _persons_reply(r:Dictionary,serial:int,voice:Node,persons:String)->PackedByteArray:
+	## A live model's mapping of words about people (court_persons_bridge.gd
+	## schema): the menu entry for the ideal action, else "talk". One plain line
+	## that names nobody (the engine's own line names whoever it chose).
+	var menu:Array=[]
+	if voice!=null and voice._requests.has(String(r.id)): menu=((voice._requests[String(r.id)] as Dictionary).get("extra",{}) as Dictionary).get("menu",[])
+	var action:=persons if persons!="" else "talk"
+	var choice:=-1
+	for i in menu.size():
+		if String((menu[i] as Dictionary).get("action",""))==action: choice=i; break
+	if choice<0 and action!="talk" and not action.begins_with("novel:"): action="talk"
+	var content:={"canonical_action":action,"choice":choice,"label":"","deltas":[],"lines":[{"speaker_key":"envoy","text":NEUTRAL_LINES[serial%NEUTRAL_LINES.size()],"aside":false}],
+		"reply_template":"","signature":{"role":"official","guilt":"none","lying":"none","band":"wary"},"generalizable":false,"mood_shift":0.0}
+	return JSON.stringify({"id":"m","model":"mock-voice","choices":[{"finish_reason":"stop","message":{"role":"assistant","content":JSON.stringify(content)}}],"usage":{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}}).to_utf8_buffer()
+
+static func changed(before:Dictionary,after:Dictionary)->String:
+	## What an order really changed, "key before->after" (for the report).
+	var parts:=PackedStringArray()
+	for k in after:
+		var key:=String(k)
+		if key.begins_with("_") or key in ["food_days_exact"]: continue
+		if str(before.get(key,""))!=str(after.get(key,"")): parts.append("%s %s->%s" % [key,str(before.get(key,"")),str(after.get(key,""))])
+	return ", ".join(parts)
 
 func _voice_command(reading:Dictionary)->Dictionary:
 	## The reader's reading in the voice's command schema (court_commands ACTS, VERBS).
@@ -412,7 +461,55 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["officials"]=officials.size(); m["_official_ids"]=officials
 	for role in ["headman","suri","kavu","imeri"]:
 		var pid:=fx.role_pid(w,role)
-		m["status_"+role]=String(GovernmentPeopleSystem.person_snapshot(pid).get("status","")) if pid>0 else ""
+		var snap:=GovernmentPeopleSystem.person_snapshot(pid) if pid>0 else {}
+		m["status_"+role]=String(snap.get("status",""))
+		# Which office each holds now (appointed, dismissed, replaced).
+		m["office_"+role]=String(snap.get("office_key","")) if String(snap.get("status",""))=="active" else ""
+		# How each holds the god (divine_regard.gd): love and dread, x100.
+		m["love_"+role]=roundi(Divine.love_of(snap)*100.0) if not snap.is_empty() else 0
+		m["dread_"+role]=roundi(Divine.dread_of(snap)*100.0) if not snap.is_empty() else 0
+	# The people as a whole: love and dread of the god; legitimacy, cohesion.
+	var people:=Divine.people_regard(Hall._officials())
+	m["people_love_x100"]=roundi(float(people.get("love",0.0))*100.0)
+	m["people_dread_x100"]=roundi(float(people.get("dread",0.0))*100.0)
+	m["legitimacy_x100"]=roundi(float(GameState.simulation_metrics.get("legitimacy",0.5))*100.0)
+	m["cohesion_x100"]=roundi(float(GameState.simulation_metrics.get("cohesion",0.5))*100.0)
+	m["settlement_name"]=String(GameState.settlement_name)
+	# The court's known persons (court_persons.gd): the living, the dead and
+	# the driven out, who is waiting before the ruler, whom the court spoke of.
+	var living:=0; var gone:=0; var bound:=0
+	for p in Persons.people():
+		var st:=String((p as Dictionary).get("status",""))
+		if st=="living": living+=1
+		else: gone+=1
+		if bool((p as Dictionary).get("bound",false)) and st=="living": bound+=1
+	m["known"]=living; m["known_gone"]=gone; m["known_bound"]=bound
+	var summoned:=0
+	for a in Hall.waiting():
+		if String(((a as Dictionary).get("speaker",{}) as Dictionary).get("known_id",""))!="": summoned+=1
+	m["summoned"]=summoned
+	m["waiting"]=Hall.waiting().size()
+	var focus:Dictionary=Persons.state().focus.get("person",{}) if Persons.state().focus.get("person") is Dictionary else {}
+	m["focus"]=Persons.ref_name(focus) if not focus.is_empty() else ""
+	var here_known:=Persons.speaker_known(audience_id)
+	# The one before the ruler when a commoner was brought in (or the one the
+	# court last named): their state after the ruler's word.
+	if here_known.is_empty() and not focus.is_empty() and String(focus.get("kind",""))=="known": here_known=Persons.by_id(String(focus.get("id","")))
+	m["speaker_known"]=String(here_known.get("name","")) if not here_known.is_empty() else ""
+	m["speaker_known_status"]=String(here_known.get("status","")) if not here_known.is_empty() else ""
+	m["speaker_known_role"]=String(here_known.get("role","")) if not here_known.is_empty() else ""
+	var marks:=PackedStringArray()
+	for flag in ["bound","maimed","cursed","exalted","flogged"]:
+		if bool(here_known.get(flag,false)): marks.append(flag)
+	if not (here_known.get("household",{}) as Dictionary).is_empty() and String(((here_known.household as Dictionary).get("spouse",{}) as Dictionary).get("known",""))!="": marks.append("married")
+	m["speaker_known_marks"]=",".join(marks)
+	m["speaker_known_love"]=roundi(float(here_known.get("love",0.0))*100.0) if not here_known.is_empty() else 0
+	m["speaker_known_dread"]=roundi(float(here_known.get("dread",0.0))*100.0) if not here_known.is_empty() else 0
+	# Great works raised at the god's word (great_works.gd).
+	m["works"]=(load("res://scripts/great_works.gd") as GDScript).call("works","player").size() if ResourceLoader.exists("res://scripts/great_works.gd") else 0
+	# The other people we know (at peace): their dread and their opinion of us.
+	var varesh:=String(info.get("varesh_id",""))
+	m["varesh_dread_x100"]=roundi(Divine.civ_dread(varesh)*100.0) if varesh!="" else 0
 	var fid:=String(info.get("rovik_fid",""))
 	m["status_rovik"]=String(HistoricalFigures.by_id(fid).get("status","")) if fid!="" else ""
 	var aims:=Aims.state()
@@ -457,7 +554,12 @@ static func _material(m:Dictionary)->String:
 	var keys:=["here","free","bound","hostage","worker","conscript","killed","fled","taken","displaced","running","on_road","garrison","held","ruin","ours","armies","moving","field_troops","chases","home_troops",
 		"recruits","training","equipment_orders","prisoners","food","timber","stone","fiber_plants","forced_labor","transport_carts","spears","population","modifiers","practice_prisoners","practice_spoils",
 		"settlement_prisoners","settlement_spoils","officials","status_headman","status_suri","status_kavu","status_imeri","status_rovik","aim_active","aim_god","at_war","scouts","going_home","dread_x100",
-		"measures","envoy_state","released","freed","envoys_out"]
+		"measures","envoy_state","released","freed","envoys_out",
+		# Offices, the god's standing with each official and with the people, the
+		# court's known persons, the realm's name: what acts at home really change.
+		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
+		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
+		"speaker_known_status","speaker_known_role","speaker_known_marks","works"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)
@@ -561,8 +663,11 @@ func check(w:Dictionary,c:Dictionary,path:String,step:int,said:String,expect:Dic
 	if expect.has("asks") and did_ask!=bool(expect.asks): add.call("asks","the court %s, wanted %s: %s" % ["asked" if did_ask else "did not ask","a question" if bool(expect.asks) else "no question",_short(says if says!="" else reply)])
 	# ---- the standing rules ----
 	# 1. Nobody in the hall is harmed by an order that is not about them.
-	if not bool(expect.get("harm_ok",false)):
-		var gone:=_harmed(before,after)
+	# harm_ok: true (the words are about someone here), or the roles the words
+	# are about (["kavu"]): nobody else may be touched.
+	var harm_ok:Variant=expect.get("harm_ok",false)
+	if not (harm_ok is bool and bool(harm_ok)):
+		var gone:=_harmed(before,after,w,harm_ok if harm_ok is Array else [])
 		if gone!="": add.call("harm","a hall member was harmed: "+gone)
 	# 2. An order never becomes a generation's aim.
 	if not bool(expect.get("aim_ok",false)) and (int(after.aim_god)>int(before.aim_god) or int(after.aim_active)>int(before.aim_active)):
@@ -625,14 +730,17 @@ static func _norm(text:String)->String:
 	var re:=RegEx.new(); re.compile("[^a-z0-9 ]")
 	return re.sub(text.to_lower(),"",true).strip_edges()
 
-func _harmed(before:Dictionary,after:Dictionary)->String:
+func _harmed(before:Dictionary,after:Dictionary,w:Dictionary={},allowed:Array=[])->String:
 	var gone:=PackedStringArray()
+	var ok_pids:Array=[]
+	for role in allowed: ok_pids.append(fx.role_pid(w,String(role)))
 	for pid in before._official_ids:
-		if not pid in after._official_ids: gone.append("official %d left the court" % int(pid))
+		if not pid in after._official_ids and not int(pid) in ok_pids: gone.append("official %d left the court" % int(pid))
 	for role in ["headman","suri","kavu","imeri"]:
+		if role in allowed: continue
 		var b:=String(before.get("status_"+role,"")); var a:=String(after.get("status_"+role,""))
 		if b!=a and a!="": gone.append("%s is now %s" % [role,a])
-	if String(before.status_rovik)!=String(after.status_rovik): gone.append("Rovik is now %s" % String(after.status_rovik))
+	if not "rovik" in allowed and String(before.status_rovik)!=String(after.status_rovik): gone.append("Rovik is now %s" % String(after.status_rovik))
 	return "; ".join(gone)
 
 func _role_name(w:Dictionary,role:String)->String:

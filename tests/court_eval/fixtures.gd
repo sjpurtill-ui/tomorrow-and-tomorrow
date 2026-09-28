@@ -28,6 +28,7 @@ extends RefCounted
 ##   battle_won         a fight just won by Rovik's band at the ford: 12 captives and spoils settled
 ##   envoy_after_fall   Tsaren held; an Esurai envoy has come about Tsaren (town_return)
 ##   aim_suri           at war, Tsaren theirs; War Chief Suri holds a matter of aims for a generation
+##   grain_lost         at peace; six days ago damp got into the grain pits and 600 Food rotted
 ##
 ## Roles a case may speak to: headman, suri, kavu, imeri, rovik, envoy, aim.
 
@@ -42,7 +43,7 @@ const AiMode:=preload("res://scripts/ai_mode.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 
-const NAMES:=["home_peace","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri"]
+const NAMES:=["home_peace","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost"]
 
 ## The user's own words used to make the worlds.
 const BIND_WORDS:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
@@ -122,6 +123,8 @@ func base(at_war:bool=true)->Dictionary:
 	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];SettlementModel.ensure_founded()
 	GameState.select_founding_focus("provision")
 	GameState.settlement_name="Seanstone"
+	# The home settlement's own record carries the same name, as in play.
+	if not GameState.player_settlements.is_empty(): SettlementModel.rename_settlement(String((GameState.player_settlements[0] as Dictionary).get("id","")),"Seanstone")
 	GameState.society_capacities["institutions"]=0.4
 	GovernmentPeopleSystem._update_government_stage(false)
 	GovernmentPeopleSystem.initialize()
@@ -340,6 +343,13 @@ func _build(name:String)->Dictionary:
 			if audience.is_empty(): return {"error":"no envoy audience (town_return)"}
 			audiences["envoy"]=String(audience.id)
 			notes.append("envoy: %s, %s" % [String((audience.speaker as Dictionary).get("title","")),String((audience.situation as Dictionary).get("headline",""))])
+		"grain_lost":
+			info=base(false)
+			train(12)
+			# Six days ago the grain pits spoiled: the stores are 600 Food lighter
+			# and the realm's notices carry it, as the simulation would record it.
+			GameState.resource_stockpiles["Food"]=float(GameState.resource_stockpiles.get("Food",0.0))-600.0
+			GameState.simulation_events.push_front({"day":int(GameState.elapsed_days)-6,"title":"Grain Stores Spoiled","description":"Damp got into the grain pits; 600 Food rotted and was lost.","domain":"economy","severity":"major"})
 		"aim_suri":
 			info=base(true)
 			train(30)

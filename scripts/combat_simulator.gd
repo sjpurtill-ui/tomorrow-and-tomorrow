@@ -391,12 +391,14 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		var attacker_variance := _casualty_variance(rng)
 		var defender_variance := _casualty_variance(rng)
 		var river_exposure:=Blocks.RIVER_EXPOSURE if river else 1.0
+		# How much of the line is struck in half an hour in this age.
+		var lethality:=float(Blocks.LETHALITY[clampi(int(state.get("era",0)),0,Blocks.LETHALITY.size()-1)])
 
 		# Casualties are based on the opposing force's share of power. They are
 		# calculated before either side is reduced, so each round is simultaneous.
 		# Only the men in the line can be struck; the reserve waits.
-		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_front) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity) * river_exposure)))
-		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_front) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
+		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_front) * BASE_CASUALTY_RATE * lethality * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity) * river_exposure)))
+		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_front) * BASE_CASUALTY_RATE * lethality * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
 		if crush>1.0:
 			if attacker_weaker:
 				attacker_losses=mini(attacker_troops,roundi(float(attacker_losses)*crush)); defender_losses=roundi(float(defender_losses)/crush)
@@ -424,10 +426,10 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		Blocks.book_kinds(state,"attacker",attacker_block_losses,attacker_casualties)
 		Blocks.book_kinds(state,"defender",defender_block_losses,defender_casualties)
 
-		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)))
-		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)))
+		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)),lethality)
+		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)),lethality)
 		if crush>1.0:
-			var dread:=maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_MORALE_STEP
+			var dread:=maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_MORALE_STEP*lethality
 			if attacker_weaker: attacker_morale=maxf(0.0,attacker_morale-dread)
 			else: defender_morale=maxf(0.0,defender_morale-dread)
 		# Blocks lose heart; the worn-out break and run, and the army sees it.
@@ -1177,6 +1179,8 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		formation_force["severe_disabled_pool"]=int(force.get("severe_disabled_pool",0))
 		formation_force["scattered_pool"]=int(force.get("scattered_pool",0))
 		formation_force["captured_pool"]=int(force.get("captured_pool",0))
+		# Men taken when blocks broke, over every day the battle has been fought.
+		formation_force["captured_in_battle"]=int(force.get("captured_in_battle",0))
 		formation_force["dead"]=int(force.get("dead",0))
 		return formation_force
 	var normalized := create_force(
@@ -1191,7 +1195,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 	normalized["penetration"] = clampf(float(force.get("penetration", 0.0)), 0.0, 2.0)
 	normalized["composition"] = force.get("composition", []).duplicate(true)
 	normalized["commander"] = force.get("commander",{}).duplicate(true)
-	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","dead"]: normalized[key]=int(force.get(key,0))
+	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","captured_in_battle","dead"]: normalized[key]=int(force.get(key,0))
 	return normalized
 
 
@@ -1202,9 +1206,11 @@ func _combat_power(force: Dictionary, opponent: Dictionary, troops: int, morale:
 	return float(troops) * float(force.attack) * float(force.defense) * float(force.readiness) * maxf(MIN_EFFECTIVE_STRENGTH, morale) * terrain_modifier * armor_advantage
 
 
-func _next_morale(current: float, losses: int, initial_troops: int, enemy_power_share: float,resolve: float) -> float:
+## tempo: the age's pace (battle_blocks.LETHALITY): being outfought wears a
+## dispersed, dug-in line down over hours, not in one half hour.
+func _next_morale(current: float, losses: int, initial_troops: int, enemy_power_share: float,resolve: float,tempo:float=1.0) -> float:
 	var casualty_shock := float(losses) / float(initial_troops) * 1.8
-	var pressure := maxf(0.0, enemy_power_share - 0.5) * 0.08
+	var pressure := maxf(0.0, enemy_power_share - 0.5) * 0.08 * clampf(tempo,0.0,1.0)
 	var resolve_protection:=0.78+clampf(resolve,0.0,1.0)*0.34
 	return clampf(current-(casualty_shock+pressure)/resolve_protection,0.0,1.5)
 

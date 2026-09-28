@@ -676,7 +676,9 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 			r["garrison"]=WarOrders._has(lower,"(garrisons?|every ?one|every ?body|all of (you|them)|them all|you all|every soldier|all our|all the)")
 			return _war_plan(r)
 		"defend":
-			var r:=base.duplicate(); r["kind"]="defend"; r["target"]={}
+			# A town we hold named: its garrison is reinforced (court_war_orders._reinforce).
+			var r:=base.duplicate(); r["kind"]="defend"; r["target"]=_held_by_ref(ref)
+			if details.has("count"): r["count"]=int(details.count)
 			return _war_plan(r)
 		"drill":
 			var r:=base.duplicate(); r["kind"]="drill"; r["target"]={}

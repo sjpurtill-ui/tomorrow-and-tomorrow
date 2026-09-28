@@ -61,6 +61,12 @@ static func _ordinal(index:int)->String:
 	return ORDINALS[index] if index>=0 and index<ORDINALS.size() else "%dth" % (index+1)
 
 
+## "a, b and c".
+static func _and_list(items:PackedStringArray)->String:
+	if items.size()<=1: return "".join(items)
+	return "%s and %s" % [", ".join(items.slice(0,items.size()-1)),items[-1]]
+
+
 static func _cap(text:String)->String:
 	return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
 
@@ -244,10 +250,22 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		if kind in ["won","lost"]: headline=_overrun_headline(kind,before,their_before,enemy_name,where,band)
 		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)+(" "+surprise_line if surprise_line!="" else "")]
 		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
-	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
+	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general,at_home)
 	# Home itself lost with the fight (siege_recovery.gd capture): everyone of
 	# ours still there is in their hands.
 	var occupation:Dictionary=strategic.get("player_occupation",{}) if strategic.get("player_occupation") is Dictionary else {}
+	var army_now:Dictionary=state.get("army",{})
+	if at_home and int(record.get("militia_id",-1))>=0 and not army_now.is_empty():
+		var neighbours:=int(ledger.present)-int(army_now.get("troops",0))
+		if neighbours>0 and kind in ["won","held","mutual","uncontested","nobody"]:
+			now["now"]=String(now.now)+" The other %s who stood with the watch %s gone back to their work." % [exact(neighbours),"has" if neighbours==1 else "have"]
+	var raided:Dictionary=strategic.get("raid_losses",{}) if strategic.get("raid_losses") is Dictionary else {}
+	if at_home and not raided.is_empty():
+		var taken_goods:PackedStringArray=PackedStringArray()
+		for item in ["Food","Timber","Stone","Fiber Plants"]:
+			var amount:=roundi(float(raided.get(item,0.0)))
+			if amount>0: taken_goods.append("%s %s" % [exact(amount),String(item).to_lower()])
+		if not taken_goods.is_empty(): now["now"]=String(now.now)+" They broke into the stores and carried off %s." % _and_list(taken_goods)
 	if at_home and kind in ["lost","withdrew"] and bool(occupation.get("ok",false)):
 		now={"now":"%s is theirs now: they hold it, and the %s of ours still there are in their hands." % [home_place,exact(int(ledger.present))],
 			"next":"What becomes of %s and its people is for you to say: talk with them, or gather our people elsewhere to take it back." % home_place}
@@ -271,7 +289,7 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		# The war leader tells it himself: the same account, his own voice.
 		headline=_spoken(headline,band,general,noun)
 		now={"now":_spoken(String(now.now),band,general,noun),"next":_spoken(String(now.next),band,general,noun)}
-	var advice:=_advice(kind,ledger,theirs_ledger,town,state,defending)
+	var advice:=_advice(kind,ledger,theirs_ledger,town,state,defending,at_home)
 	var actions:Array=[]
 	if not (record.get("rounds",[]) as Array).is_empty(): actions.append({"id":"watch","label":"Watch the battle"})
 	actions.append({"id":"talk","label":("Talk to "+general) if general!="" else "Talk to the war leader"})
@@ -441,7 +459,7 @@ static func _event_words(r:Dictionary,home:String,band:String,enemy:String)->Str
 
 
 ## Where things stand now and what happens next, from the real state.
-static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Dictionary,state:Dictionary,strategic:Dictionary,defending:bool,general:String)->Dictionary:
+static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Dictionary,state:Dictionary,strategic:Dictionary,defending:bool,general:String,at_home:bool=false)->Dictionary:
 	var army:Dictionary=state.get("army",{})
 	var garrison:Dictionary=state.get("garrison",{})
 	var siege:Dictionary=state.get("siege",{})
@@ -482,6 +500,10 @@ static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Di
 				if town!="" and not defending and not bool(strategic.get("region_captured",false)):
 					now="We hold the ground before %s, but they still hold the town; the gate is shut. %s has %s, %s." % [town,who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits outside %s for your word. Nothing more happens there unless you give it." % [_cap(he),town]
+				elif at_home:
+					# Beaten off at our own edge: the watch goes back to its posts.
+					now="They are driven off. %s has %s under arms at home, %s." % [who,_ours(left,"fighter","fighters"),morale]
+					next="The watch is back at its posts; nothing more is done unless you want them followed."
 				else:
 					now="The field is ours. %s has %s, %s." % [who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits where the fight was for your word." % _cap(he)
@@ -506,7 +528,7 @@ static func _days(days:int)->String:
 
 
 ## What the war leader advises, in his own plain words.
-static func _advice(kind:String,ours:Dictionary,theirs:Dictionary,town:String,state:Dictionary,defending:bool)->String:
+static func _advice(kind:String,ours:Dictionary,theirs:Dictionary,town:String,state:Dictionary,defending:bool,at_home:bool=false)->String:
 	var present:=int(ours.present)
 	var their_left:=maxi(0,int(theirs.seen_high)-int(theirs.fell)-int(theirs.fled)-int(theirs.taken))
 	var marching:Dictionary=state.get("marching_to",{})
@@ -522,9 +544,11 @@ static func _advice(kind:String,ours:Dictionary,theirs:Dictionary,town:String,st
 			if town!="" and not defending:
 				if their_left*2<present: return "They have few left behind the gate. Let me try it again while they are still shaken."
 				return "Their gate is too strong for us as we are. Send me more fighters, or let me ring the town and starve it."
+			if at_home: return "They may come again once they have mended. Keep the watch as strong as it is."
 			return "We had the better of them. Tell me whether to press on or come home."
 		"lost","withdrew":
 			if present<=0: return ""
+			if at_home: return "We could not hold them at our own edge. We need more drilled fighters at home, and a wall or ditch would help us hold them."
 			return "We cannot beat them as we are. Let the hurt heal and give me more drilled fighters before we try them again."
 		"mutual": return "Both sides are spent. Let me bring the band home to recover."
 	return "Standing here trading blows costs us every day. Tell me to press them or bring us home."
@@ -541,7 +565,8 @@ static func ledger_line(ours:Dictionary)->String:
 	if int(ours.captured)>0: parts.append("%s taken captive" % exact(int(ours.captured)))
 	if int(ours.detached)>0: parts.append("%s left to hold the town" % exact(int(ours.detached)))
 	var lost:=", ".join(parts) if not parts.is_empty() else "nobody lost"
-	return "%s went in: %s; %s still with the band, %s." % [_cap(exact(int(ours.in_fight))),lost,exact(int(ours.present)),String(ours.morale_words)]
+	var left:="none" if int(ours.present)<=0 else exact(int(ours.present))
+	return "%s went in: %s; %s still with the band, %s." % [_cap(exact(int(ours.in_fight))),lost,left,String(ours.morale_words)]
 
 
 static func sent_line(ours:Dictionary)->String:
@@ -706,7 +731,11 @@ static func doing(army:Dictionary)->String:
 		if String(marching.kind)=="home": return "on the road home, %s out" % _days(int(marching.days))
 		var verb:=String({"siege":"lay siege to","raid":"raid"}.get(String(marching.kind),"attack"))
 		return "marching to %s %s, %s out" % [verb,String(marching.name) if String(marching.name)!="" else "the town",_days(int(marching.days))]
-	if String(army.get("status",""))=="moving": return "marching to %s" % (_place_name(String(army.get("destination_name",""))) if _place_name(String(army.get("destination_name","")))!="" else "the marked ground")
+	if String(army.get("status",""))=="moving":
+		# Going after a band that was seen (its label is "INTERCEPT · who"):
+		# said as the map card says it (hud/army_marks.gd doing).
+		if String(army.get("destination_name","")).to_upper().begins_with("INTERCEPT"): return Marks.doing({"status":"moving","destination_name":String(army.get("destination_name",""))})
+		return "marching to %s" % (_place_name(String(army.get("destination_name",""))) if _place_name(String(army.get("destination_name","")))!="" else "the marked ground")
 	if Marks.at_home(army,WorldSimulation.world.player_world_origin): return "at home"
 	for past_variant in mc.battle_history:
 		var past:Dictionary=past_variant

@@ -35,7 +35,7 @@ const FORTIFIED_STORES_MAX_PROTECTION:=0.60
 const EQUIPMENT_DELIVERY_LOAD:Dictionary={"improvised":0.80,"spear":1.00,"bow":0.80,"sword_shield":1.80,"lance":1.60,"siege_kit":6.00,"field_gun":10.00,"service_rifle":1.15,"machine_gun":8.0,"motorized_kit":12.0,"armored_vehicle":28.0,"modern_field_gun":18.0}
 const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65,"small_arms_ammunition":0.04,"heavy_shells":0.90}
 # Unit identity, gating, lineage, and fielding data live in the archetype
-# catalog (design bible Â§17â€“18); these constants are parse-time views kept for
+# catalog (design bible §17–18); these constants are parse-time views kept for
 # the many existing call sites.
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
@@ -318,7 +318,7 @@ func start_training(unit:String,weapon:String,count:int)->Dictionary:
 	aggregate_recruits-=accepted
 	training_queue.append({"id":order_id,"unit":unit,"weapon":weapon,"count":accepted,"initial_count":accepted,"experience":0.0,"progress_days":0.0,"start_day":int(WorldSimulation.state.elapsed_days),"required_days":training_days,"injury_accumulator":0.0,"prototype":prototype})
 	if prototype:
-		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles â€” %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
+		return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"prototype":true,"message":"An experimental cohort of %d begins learning %s from first principles — %.0f days at exceptional cost. The practice is understood, not yet established." % [accepted,unit.replace("_"," "),training_days]}
 	return {"id":order_id,"accepted":accepted,"unit":unit,"weapon":weapon,"required_days":training_days,"message":"Training begun for %d %s with %s; baseline %.0f days, with %d/%d training places now committed." % [accepted,unit.replace("_"," "),weapon.replace("_"," "),training_days,_queued_trainees(),training_capacity()]}
 
 
@@ -453,7 +453,7 @@ func equipment_production_quote(item:String,count:int)->Dictionary:
 	if amount<=0: return {"error":"Production amount must be positive."}
 	var experimental:=false
 	if not bool(gate.unlocked):
-		# Â§18.1 prototype path: an UNDERSTOOD item can be produced as a small
+		# §18.1 prototype path: an UNDERSTOOD item can be produced as a small
 		# experimental workshop batch (slow, bounded) before it is adopted
 		# practice. Tier-gated industry has no such shortcut.
 		var item_discovery:=String(EQUIPMENT_KNOWLEDGE.get(item,""))
@@ -483,7 +483,7 @@ func queue_equipment_production(item:String,count:int)->Dictionary:
 	for material in recipe.materials: reserved[material]=float(recipe.materials[material])*amount
 	equipment_queue.append({"id":job_id,"job_type":"production","item":item,"count":amount,"completed":0,"progress_days":0.0,"work_per_item":float(recipe.days),"required_days":float(recipe.days)*amount,"reserved_materials":reserved,"allocation":1.0,"efficiency":0.20,"experimental":experimental})
 	if experimental:
-		return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"experimental":true,"message":"Queued %d experimental %s â€” understood but unpracticed, at double workshop time. At most 12 can exist before the practice is established." % [amount,item.replace("_"," ")]}
+		return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"experimental":true,"message":"Queued %d experimental %s — understood but unpracticed, at double workshop time. At most 12 can exist before the practice is established." % [amount,item.replace("_"," ")]}
 	return {"id":job_id,"queued":amount,"item":item,"work_days":float(recipe.days)*amount,"message":"Queued %d %s; %.1f workshop-days reserved with %d jobs waiting." % [amount,item.replace("_"," "),float(recipe.days)*amount,equipment_queue.size()]}
 
 
@@ -766,7 +766,7 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	var committed:=0
 	for formation in detached: committed+=int(formation.get("count",0))
 	if committed<=0: return {"error":"No surviving field personnel were available to hold the captured region.","troops":0,"required":required}
-	var force:Dictionary=simulator.create_formation_force("OCCUPATION â€¢ %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(source.get("morale",0.55))*0.92,0.20,1.0),readiness)
+	var force:Dictionary=simulator.create_formation_force("OCCUPATION • %s" % String(region.get("name","STRATEGIC REGION")),detached,clampf(float(source.get("morale",0.55))*0.92,0.20,1.0),readiness)
 	force["civ_id"]=civ_id
 	force["region_id"]=region_id
 	force["region_name"]=String(region.get("name","STRATEGIC REGION"))
@@ -1245,7 +1245,7 @@ func order_field_army_intercept(army_id:int,formation_id:String)->Dictionary:
 	if bool(availability.get("can_engage",false)): return launch_map_engagement(army_id,formation_id)
 	var sighting:Dictionary=availability.sighting
 	var position:Dictionary=sighting.get("position",{})
-	var label:="INTERCEPT Â· %s" % String(sighting.get("label","FOREIGN FORMATION"))
+	var label:="INTERCEPT · %s" % String(sighting.get("label","FOREIGN FORMATION"))
 	var result:=move_field_army_to_position(army_id,float(position.get("x",0.0)),float(position.get("z",0.0)),label)
 	if not bool(result.get("ok",false)): return result
 	var index:=_field_army_index(army_id)
@@ -1255,7 +1255,7 @@ func order_field_army_intercept(army_id:int,formation_id:String)->Dictionary:
 		_begin_operation(index,"formation:"+formation_id)
 		result["army"]=field_armies[index].duplicate(true)
 	result["underway"]=true
-	result["message"]="INTERCEPT ORDER UNDERWAY â€” %s is tracking %s. If contact holds, battle begins automatically at close range." % [String((result.get("army",{}) as Dictionary).get("name","The army")),String(sighting.get("label","the foreign formation"))]
+	result["message"]="%s goes after %s. If they are still there when we close on them, we fight." % [String((result.get("army",{}) as Dictionary).get("name","The army")),String(sighting.get("label","the foreign formation"))]
 	return result
 
 
@@ -1296,7 +1296,7 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		_restore_waiting_threat(waiting)
 		return settled
 	_restore_waiting_threat(waiting)
-	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
+	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"%s has met %s, and the fight has begun. The general fights it; the battle shows how it goes." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
 func return_field_army(army_id:int)->Dictionary:
@@ -1424,7 +1424,7 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	template["entries"]=entries
 	army_templates[index]=template
 	var result:Dictionary={"ok":true,"template":template.duplicate(true)}
-	if applied<delta: result["message"]="Added %d of %d â€” the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
+	if applied<delta: result["message"]="Added %d of %d — the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
 	return result
 
 
@@ -1564,7 +1564,7 @@ func _process_field_army_movement_day()->void:
 			army["destination_position"]=tracked_position.duplicate(true)
 			army["distance_total_km"]=tracked_distance
 			army["distance_remaining_km"]=tracked_distance
-			army["destination_name"]="INTERCEPT Â· %s" % String(tracked.get("label","FOREIGN FORMATION"))
+			army["destination_name"]="INTERCEPT · %s" % String(tracked.get("label","FOREIGN FORMATION"))
 			# The quarry moves: the road to where it was last seen is re-planned.
 			army.erase("march_route")
 		var origin_data:Dictionary=army.get("origin_position",army.get("position",{}))
@@ -2107,7 +2107,8 @@ func _settle_aftermath(aftermath:Dictionary,result:Dictionary={})->Dictionary:
 	pending_aftermath={}
 	if outcome.has("error") or (prisoners<=0 and not has_spoils and not captured_general): return {}
 	var day:=int(WorldSimulation.state.elapsed_days)
-	var settlement:={"id":"settled-%d-%d" % [day,int(result.get("seed",0))],"day":day,"until":day+SETTLE_WINDOW_DAYS,"seed":int(result.get("seed",0)),"battle_id":String(result.get("id","")),
+	var at_home:=String(result.get("home_side",""))=="defender" and String(result.get("home_force_kind","field"))=="field" and String(result.get("target_region_id",""))=="" and not bool(threat.get("field_encounter",false))
+	var settlement:={"id":"settled-%d-%d" % [day,int(result.get("seed",0))],"day":day,"until":day+SETTLE_WINDOW_DAYS,"seed":int(result.get("seed",0)),"battle_id":String(result.get("id","")),"at_home":at_home,
 		"general":general_name,"people":String(threat.get("source_name","")),"civ_id":civ_id,
 		"prisoners":prisoners,"prisoner_policy":String(practice.prisoners),"spoils_taken":taken,"has_spoils":has_spoils,"spoils":(outcome.get("spoils",{}) as Dictionary).duplicate(true),
 		"spoils_policy":String(practice.spoils),"captured_general":captured_general,"enemy_general":String(aftermath.get("commander","")),"general_policy":String(practice.general),
@@ -2133,7 +2134,7 @@ static func settlement_line(s:Dictionary)->String:
 	if n>0:
 		var many:=Account._ours(n,"captive","captives")
 		match String(s.get("prisoner_policy","hold")):
-			"enslave": parts.append("%s sent %s home as bondservants" % [who,many])
+			"enslave": parts.append(("%s put %s to work as %s" if bool(s.get("at_home",false)) else "%s sent %s home as %s") % [who,many,"a bondservant" if n==1 else "bondservants"])
 			"release": parts.append("%s let %s go" % [who,many])
 			"parole": parts.append("%s let %s go on their word" % [who,many])
 			"ransom": parts.append("%s gave %s back to %s for ransom" % [who,many,their])
@@ -2895,7 +2896,7 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	if source_civ_id!="":
 		var strategic_outcome:Dictionary=WorldSimulation.world.resolve_player_battle(source_civ_id,final_result)
 		if String(threat.get("incident_kind","campaign"))=="raid" and String(final_result.get("campaign_mode","defensive"))=="defensive" and bool(strategic_outcome.get("decisive",false)) and not bool(strategic_outcome.get("player_won",false)):
-			var raid_losses:=_apply_raid_store_losses(threat,0.65)
+			var raid_losses:=_apply_raid_store_losses(threat,0.65,int((final_result[enemy_side] as Dictionary).get("remaining_troops",0)))
 			strategic_outcome["raid_losses"]=raid_losses
 			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Raiders break into the stores","description":"The defeated garrison could not prevent the raiders from taking portable food and materials.","domain":"security","severity":"danger"})
 		if bool(final_result.get("field_encounter",false)):
@@ -2925,16 +2926,25 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	return committed
 
 
-func _apply_raid_store_losses(threat:Dictionary,battle_modifier:float=1.0)->Dictionary:
+## What raiders who break in (or whom we let in) carry off: a share of the
+## exposed stores, and never more than the raiders can carry away on their
+## backs (RAIDER_CARRY each; food first). carriers: raiders able to carry
+## (-1: the threat's estimated strength).
+const RAIDER_CARRY:=14.0
+
+
+func _apply_raid_store_losses(threat:Dictionary,battle_modifier:float=1.0,carriers:int=-1)->Dictionary:
 	var losses:Dictionary={}
 	var protection:=store_protection()
 	var fraction:=clampf(float(threat.get("plunder_fraction",0.12))*float(protection.get("exposed_share",1.0))*battle_modifier,0.0,0.35)
+	var room:=float(maxi(0,carriers if carriers>=0 else int(threat.get("estimated_strength",(threat.get("enemy_force",{}) as Dictionary).get("troops",0)))))*RAIDER_CARRY
 	for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
 		var available:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
-		var requested:=available*fraction
+		var requested:=minf(available*fraction,room)
 		var removed:=WorldSimulation.food.issue_for_obligation(requested,"raid_loss","Stores seized after a failed defense") if resource_name=="Food" else requested
 		if resource_name!="Food": WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,available-removed)
 		losses[resource_name]=removed
+		room=maxf(0.0,room-removed)
 	return losses
 
 
@@ -3003,9 +3013,12 @@ func respond_to_threat(response:String)->Dictionary:
 		var protection:Dictionary=store_protection()
 		var base_plunder_fraction:=clampf(float(threat.get("plunder_fraction",0.12)),0.0,1.0)
 		var effective_plunder_fraction:=base_plunder_fraction*float(protection.exposed_share)
+		# Never more than the raiders can carry away (RAIDER_CARRY each).
+		var room:=float(maxi(0,int(threat.get("estimated_strength",(threat.get("enemy_force",{}) as Dictionary).get("troops",0)))))*RAIDER_CARRY
 		for resource_name in ["Food","Timber","Stone","Fiber Plants"]:
 			var available:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
-			var amount:=available*effective_plunder_fraction
+			var amount:=minf(available*effective_plunder_fraction,room)
+			room=maxf(0.0,room-amount)
 			var removed:=WorldSimulation.food.issue_for_obligation(amount,"raid_loss","Food seized during withdrawal") if resource_name=="Food" else amount
 			protected[resource_name]=maxf(0.0,available*base_plunder_fraction-removed)
 			if resource_name!="Food": WorldSimulation.state.resource_stockpiles[resource_name]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))-removed)
@@ -4034,12 +4047,12 @@ func _formation_index(formation_id:int)->int:
 const PROTOTYPE_TRAINING_MULTIPLIER:=2.5
 
 
-## Â§18.1 capability ladder. Knowledge reveals a capability; this ladder says
+## §18.1 capability ladder. Knowledge reveals a capability; this ladder says
 ## how far the society has actually carried it: unobserved â†’ observed (the
 ## problem or foreign solution is visible) â†’ understood (the principle is
 ## established knowledge) â†’ established (adopted practice; normal fielding) â†’
 ## scalable (production and spread support reproduction) â†’ mature (fielded
-## formations carry real experience). Legacy is future work â€” nothing
+## formations carry real experience). Legacy is future work — nothing
 ## obsolesces yet.
 func unit_capability_state(unit:String)->Dictionary:
 	var gate_id:=UnitCatalog.gate_for(unit)
@@ -4085,7 +4098,7 @@ func _training_gate(unit:String,weapon:String)->Dictionary:
 	var unit_gate:=_knowledge_gate(UnitCatalog.gate_for(unit),0.10)
 	var weapon_gate:=_knowledge_gate(String(EQUIPMENT_KNOWLEDGE.get(weapon,"")),0.10)
 	if bool(unit_gate.unlocked) and bool(weapon_gate.unlocked): return {}
-	# Â§18.1 prototype path: with the principle UNDERSTOOD (known, not yet
+	# §18.1 prototype path: with the principle UNDERSTOOD (known, not yet
 	# adopted practice), one small experimental cohort can be raised at
 	# exceptional cost and risk. Understanding is required for both the unit
 	# and its equipment; observation alone fields nothing.
@@ -4954,7 +4967,7 @@ func _process_training_program_day()->void:
 		return
 	var required_food:=float(participants)*float(definition.food_per_participant)*WorldSimulation.span
 	var available_food:=training_staff.spendable_food()
-	var food_taken:=WorldSimulation.food.issue_for_obligation(minf(required_food,available_food),"military_training","%s â€¢ %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
+	var food_taken:=WorldSimulation.food.issue_for_obligation(minf(required_food,available_food),"military_training","%s • %d participants" % [String(definition.get("label",program_id.replace("_"," ").capitalize())),participants],1.0,participants) if required_food>0.0 else 0.0
 	var ration_coverage:=clampf(food_taken/maxf(0.001,required_food),0.0,1.0) if required_food>0.0 else 1.0
 	var supply_coverage:=field_provision_delivery_ratio() if String(definition.scope)=="army" else clampf(0.45+float(WorldSimulation.state.society_capacities.get("institutions",0.25))*0.30+float(WorldSimulation.state.society_capacities.get("logistics",0.16))*0.25,0.0,1.0)
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
@@ -5522,7 +5535,11 @@ func _adjust_war_reputation(mercy_delta:float,fear_delta:float,grievance_delta:f
 	war_reputation["grievance"]=clampf(float(war_reputation.get("grievance",0.0))+grievance_delta,0.0,1.0)
 
 
-func _mark_home_prisoners(count:int)->void:
+## refresh: whether to refresh readiness now. Never while another force is
+## swapped into home_army (_mark_engaged_force_prisoners): the refresh sets
+## home_army's commander to the marshal, and the swapped band would come
+## back led by him.
+func _mark_home_prisoners(count:int,refresh:bool=true)->void:
 	var available:=maxi(0,int(home_army.get("troops",0)))
 	var marked:=mini(maxi(0,count),available)
 	if marked<=0: return
@@ -5539,7 +5556,7 @@ func _mark_home_prisoners(count:int)->void:
 	home_army["troops"]=available-marked
 	home_army["captured_pool"]=maxi(0,int(home_army.get("captured_pool",0)))+marked
 	home_army["captive_days"]=0
-	_refresh_readiness()
+	if refresh: _refresh_readiness()
 
 
 func _mark_engaged_force_prisoners(force_kind:String,force_id:int,civ_id:String,region_id:String,count:int)->void:
@@ -5550,18 +5567,20 @@ func _mark_engaged_force_prisoners(force_kind:String,force_id:int,civ_id:String,
 		if army_index<0: return
 		var field_home_reserve:=home_army
 		home_army=field_armies[army_index].duplicate(true)
-		_mark_home_prisoners(requested)
+		_mark_home_prisoners(requested,false)
 		field_armies[army_index]=home_army
 		home_army=field_home_reserve
+		_refresh_readiness()
 		return
 	if force_kind=="occupation":
 		var occupation_index:=_occupation_force_index(civ_id,region_id)
 		if occupation_index<0: return
 		var occupation_home_reserve:=home_army
 		home_army=occupation_forces[occupation_index].duplicate(true)
-		_mark_home_prisoners(requested)
+		_mark_home_prisoners(requested,false)
 		occupation_forces[occupation_index]=home_army
 		home_army=occupation_home_reserve
+		_refresh_readiness()
 		return
 	_mark_home_prisoners(requested)
 

@@ -87,6 +87,10 @@ static func all()->Array:
 		"ours":[f("pikeman","pike",1000),f("heavy_swordsman","sword_shield",700),f("armored_cavalry","armored_lance",300)],
 		"theirs":[f("pikeman","pike",1000),f("heavy_swordsman","sword_shield",800)],
 		"expect":{"winner":"either","overrun":false}})
+	out.append({"id":"classical_12000v10000","about":"two great hosts of the classical age meet in the open","kind":"field","era":2,"seed":46,"population":80000,
+		"ours":[f("pikeman","pike",6000),f("heavy_swordsman","sword_shield",4000),f("armored_cavalry","armored_lance",2000)],
+		"theirs":[f("pikeman","pike",6000),f("heavy_swordsman","sword_shield",3000),f("light_cavalry","lance",1000)],"budget_ms":9000.0,
+		"expect":{"overrun":false}})
 	out.append({"id":"classical_5000v800_overrun","about":"five thousand overrun eight hundred","kind":"field","era":2,"seed":42,"population":30000,
 		"ours":[f("pikeman","pike",3000),f("heavy_swordsman","sword_shield",2000)],"theirs":[f("levy","improvised",800,0.3)],"their_morale":0.6,
 		"expect":{"winner":"ours","overrun":true}})

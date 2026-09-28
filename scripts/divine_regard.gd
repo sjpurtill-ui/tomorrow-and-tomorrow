@@ -71,7 +71,7 @@ static func valid_state(data:Variant)->bool:
 	if data.has("events"):
 		if not data.events is Array or (data.events as Array).size()>EVENTS_MAX: return false
 		for e in data.events:
-			if not e is Dictionary or not _num(e.get("day")) or not String(e.get("action","")) in WRATH+FAVOR+["terrify_envoy","flight","slay_envoy","maim_envoy","shame_envoy"] or JSON.stringify(e).length()>1200: return false
+			if not e is Dictionary or not _num(e.get("day")) or not String(e.get("action","")) in WRATH+FAVOR+["terrify_envoy","flight","slay_envoy","maim_envoy","shame_envoy"]+PEOPLE_ACTS.keys() or JSON.stringify(e).length()>1200: return false
 	if data.has("warned"):
 		if not data.warned is Dictionary or (data.warned as Dictionary).size()>300: return false
 		for k in data.warned:
@@ -293,9 +293,20 @@ static func fade(person:Dictionary,day:int)->bool:
 # The people as a whole and foreign peoples
 # --------------------------------------------------------------------------
 
+## The god's acts on the people as a whole (court_realm_acts.gd), remembered
+## at every hearth: [dread they leave, love they leave], fading over months.
+const PEOPLE_ACTS:={"terrify_people":[0.08,-0.03],"curse_people":[0.07,-0.06],"harsh_law":[0.04,-0.01],"bless_people":[0.0,0.05],"bless_fields":[0.0,0.04]}
+
+static func record_people_act(action:String)->void:
+	## One act of the god on the whole people (terror, a curse, a harsh law, a
+	## blessing), kept among the recent acts the people talk of.
+	if not PEOPLE_ACTS.has(action): return
+	_record_event({"day":_day(),"action":action,"person_id":0,"name":"the people","witnesses":[]})
+
 static func people_regard(officials:Array)->Dictionary:
 	## The people's regard, read from the officials who speak for them and from
-	## the realm's legitimacy and cohesion, plus the memory of recent wrath.
+	## the realm's legitimacy and cohesion, plus the memory of recent wrath and
+	## of the god's acts on the whole people.
 	var love_sum:=0.0; var dread_sum:=0.0; var res_sum:=0.0; var n:=0
 	for person in officials:
 		if not person is Dictionary: continue
@@ -304,11 +315,18 @@ static func people_regard(officials:Array)->Dictionary:
 	var standing:=float(metrics.get("legitimacy",0.5))*0.6+float(metrics.get("cohesion",0.5))*0.4
 	var love:=(love_sum/n*0.55+standing*0.45) if n>0 else standing
 	var echo:=0.0
+	var warmth:=0.0
 	for e in store().events:
 		var age:=_day()-int(e.get("day",0)) if e is Dictionary else 9999
 		if age>365: continue
 		# The memory of wrath fades from the people's talk over a few months.
-		echo+=float({"strike_down":0.08,"slay_envoy":0.08,"maim_envoy":0.06,"shame_envoy":0.03,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))*pow(0.5,maxf(0.0,float(age))/90.0)
+		var fade:=pow(0.5,maxf(0.0,float(age))/90.0)
+		echo+=float({"strike_down":0.08,"slay_envoy":0.08,"maim_envoy":0.06,"shame_envoy":0.03,"cast_out":0.05,"terrify":0.02,"penance":0.01}.get(String(e.get("action","")),0.0))*fade
+		var act:Array=PEOPLE_ACTS.get(String(e.get("action","")),[])
+		if not act.is_empty():
+			echo+=float(act[0])*fade
+			warmth+=float(act[1])*fade
+	love=clampf(love+clampf(warmth,-0.2,0.15),0.0,1.0)
 	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)
