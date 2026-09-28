@@ -533,6 +533,15 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if not decree.is_empty(): return decree
 	var list:=roster(audience)
 	var cls:=classify(clean)
+	# The god's word on new towns ("stop founding new towns", "our leaders may
+	# settle new land again"): the leaders' leave, a real switch (home_orders,
+	# auto_founding.gd), set here before the words can be taken for a law, an
+	# act held back or a town's measure. The one spoken to answers.
+	if String(cls.act)!="question" and not bool(cls.insist) and String(audience.get("origin",""))!="foreign" and not is_harm(clean):
+		var founding:=HomeOrders.found_reading(clean)
+		if not founding.is_empty():
+			cls.act="command"; cls.verb="home"; cls.confidence=0.85; cls["home"]=founding
+			return _perform(id,audience,list,"home",_speaker_entry(list),{},clean,cls,false,context)
 	# The order reader (order_reader.gd) resolved a war or a town's fate to
 	# ids we supplied: the engine carries that reading. Never a person.
 	var forced:Dictionary=context.get("war_reading",{}) if context.get("war_reading") is Dictionary else {}
@@ -2285,7 +2294,10 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 	elif not _person(actor).is_empty() and String(_person(actor).get("local_leader_of",""))!="": ctx["settlement_id"]=String(_person(actor).local_leader_of)
 	var words:=_strip_vocative(text,actor)
 	if blocker=="" and bare_assent(words): return _assent(id,audience,r,actor,words)
-	var home:=HomeOrders.read(words) if blocker=="" and String(ctx.get("settlement_id",""))=="" else {}
+	var home:=HomeOrders.read(words) if blocker=="" else {}
+	# A local leader's orders are the civic council's, save the god's word on
+	# new towns, which is the whole realm's (auto_founding.gd).
+	if String(ctx.get("settlement_id",""))!="" and String(home.get("kind",""))!="found_towns": home={}
 	if not home.is_empty(): return _home(id,r,actor,words,home)
 	var routed:=custom_order(words,ctx)
 	if int(actor.get("person_id",0))>0:

@@ -42,6 +42,7 @@ const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
 const MarchTerrain:=preload("res://scripts/march_terrain.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
+const SupplyState:=preload("res://scripts/supply_state.gd")
 const BattleBlocks:=preload("res://scripts/battle_blocks.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
@@ -3347,7 +3348,13 @@ func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
 			var destination:=_movement_destination("player_home")
 			if not position.is_empty() and destination.has("position"):
 				if Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(destination.position.get("x",0)),float(destination.position.get("z",0))))<=.25:return 1.0
-	return _field_transport_delivery_ratio()
+	# What the carriers bring, less what they eat on the haul (supply_state.gd).
+	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
+
+
+## A garrison's carried share: the carriers, over the haul to its town.
+func _garrison_provision_access(force:Dictionary)->float:
+	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
 
 
 func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary={})->float:
@@ -3368,7 +3375,7 @@ func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary=
 		# The held town feeds its garrison (field_rations.gd); only the rest travels.
 		var local:=clampf(float(air_delivery.get("by_occupation",{}).get(FieldRations.occupation_key(force),0.0)),0.0,held_share)
 		remaining-=local
-		accessible+=(held_share-local)*_field_transport_delivery_ratio()
+		accessible+=(held_share-local)*_garrison_provision_access(force)
 	return clampf(accessible/remaining,0.0,1.0) if remaining>0.0 else 1.0
 
 
@@ -3427,7 +3434,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		# The held town's own food comes first; home sends only the rest.
 		var held_need:=need*share
 		var local:=clampf(float(air_delivery.get("by_occupation",{}).get(FieldRations.occupation_key(force),0.0)),0.0,held_need)
-		var sent:=maxf(0.0,held_need-local)*clampf(_field_transport_delivery_ratio()*delivery_ratio,0.0,1.0)
+		var sent:=maxf(0.0,held_need-local)*clampf(_garrison_provision_access(force)*delivery_ratio,0.0,1.0)
 		provision_ratio=clampf((local+sent)/held_need,0.0,1.0) if held_need>0.0 else 1.0
 		force["provisions_required_today"]=held_need
 		force["provisions_delivered_today"]=sent
