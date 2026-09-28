@@ -50,6 +50,8 @@ static func status(report:Dictionary)->Dictionary:
 		var garrison:=int(hold.garrison)
 		var note:="Held since "+EraWords.when(int(hold.since)) if int(hold.since)>=0 else "Held by us"
 		note+=(" · %s hold it" % EraWords.grouped(garrison)) if garrison>0 else " · no one guards it"
+		var away:=preload("res://scripts/pursuit.gd").away_from(city_id)
+		if away>0:note+=" · %s out after the men who fled" % EraWords.grouped(away)
 		return {"kind":"occupied","emblem":"player","original":original,"glyph":ICONS.SETTLEMENT_GLYPH_OCCUPIED,"mark_px":MARK_PX_STRONG,
 			"accent":_accent(original,0.55),"line":"Ours · taken from "+people(original),"note":note,"garrison":garrison,"since":int(hold.since)}
 	var holder:=String(report.get("controller",""))

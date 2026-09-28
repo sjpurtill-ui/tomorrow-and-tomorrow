@@ -38,9 +38,10 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
+const Pursuit:=preload("res://scripts/pursuit.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep"]
 ## Storming a town our band already besieges.
 const STORM_WORDS:="(storm|assault|take the walls|scale the walls|over the walls|break (in|through)|attack now|attack (the|their) (walls|gate)|go in now|rush the gate|carry the walls)"
 ## Fewer trained soldiers than this cannot take or besiege a town at all.
@@ -71,6 +72,14 @@ const INSIST_WORDS:="(regardless|whatever the cost|no matter (what|the cost|the 
 ## "Drill them first", "let them finish their drill": the god takes the war
 ## leader's advice instead of insisting.
 const DRILL_WORDS:="((drill|train) (them|the band|the levy|your band|your men) (first|more|longer)|let them (finish|drill|train)|finish (their|the) (drill|training)|bring (them|the band|your band) home (to|and) (drill|train))"
+## "Chase them", "go after the men who ran": after men got away from a town we hold.
+const CHASE_WORDS:="(\\b(chase|pursue|go after|run down|hunt down|hunt|track down|catch|ride down|follow)\\b[\\w' ]{0,14}\\b(them|men|ones|fled|ran|runaways|fugitives|survivors|rest|others|escaped|got away)\\b|\\b(after them|chase them|run them down)\\b)"
+## "Come back", "everyone come home", "return to Seanstone": our people, not a town's fate.
+const RECALL_BACK:="((come|get|head|turn|go|march|walk|fall)\\w* (back|home)\\b|\\breturn (home|to )|call off the (chase|pursuit|hunt)|call (them|everyone|everybody|the \\w+) (back|home))"
+const GROUP_RECALL:="(everyone|everybody|all of you|you all|them all|all of them|the garrison|garrisons?|the detachment|the men|our men|the band|every one of)"
+## Answers to the war leader's question ("Shall I?", "Leave it unguarded?").
+const YES_WORDS:="^\\W*(yes|yeah|yea|yep|aye|do it|go ahead|go on|go|please|sure|all right|alright|ok|okay|very well|so be it|of course|indeed|do so)\\b"
+const NO_WORDS:="^\\W*(no|nope|nay|don'?t|do not|let them go|leave them|not now|never mind|forget it|stay|keep (it|them|the garrison))\\b"
 const PLACE_WORDS:="(ford|pass|bridge|crossing|river|border|hills?|gate|road|walls?|home|village|town|camp|fields)"
 
 static func _re(pattern:String)->RegEx:
@@ -207,6 +216,12 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	var named:=find_target(clean,context_civ)
 	var named_town:=named.has("city_id") or named.has("unknown")
 	var kind:=""
+	# After men got away from a town we hold: "chase them" is a chase.
+	if _has(lower,CHASE_WORDS):
+		var flight:=Pursuit.latest_flight(String(named.city_id) if bool(named.get("held",false)) else "")
+		if not flight.is_empty():
+			var n:=_re("\\b(\\d{1,4})\\b").search(lower)
+			return {"kind":"pursue","target":_held_town(String(flight.region_id)),"count":int(n.get_string(1)) if n!=null else 0,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
 	if not bool(named.get("held",false)):
 		var implied:=_implied_town(clean,lower,named,army,audience_id)
 		if not implied.is_empty(): return implied
@@ -225,6 +240,7 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	elif _has(lower,SIEGE_WORDS): kind="siege"
 	elif _has(lower,RAID_WORDS): kind="raid"
 	elif _has(lower,RECALL_WORDS) and (army or _has(lower,"(march|come) home|withdraw|retreat|fall back|pull back|recall")): kind="recall"
+	elif _has(lower,RECALL_BACK) and (army or _has(lower,GROUP_RECALL) or _re("^\\W*(come|get|head|turn|return|go|march|call|all|everyone|everybody)\\b").search(lower)!=null): kind="recall"
 	elif _has(lower,ATTACK_WORDS): kind="attack"
 	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,"(defend|hold|guard|protect|garrison) (the|our|my) "+PLACE_WORDS)): kind="defend"
 	elif army and _has(lower,"(send|march|lead|take|move)") and _has(lower,"(on|against|to|at|toward|towards)\\b"): kind="attack"
@@ -240,7 +256,41 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	var place:=""
 	var pm:=_re("\\b(the|our|my) "+PLACE_WORDS+"\\b").search(lower)
 	if pm!=null: place=pm.get_string()
-	return {"kind":kind,"target":target,"full":_has(lower,FULL_WORDS),"insist":_has(lower,INSIST_WORDS),"place":place,"army_words":army,"text":clean.substr(0,300)}
+	var reading:={"kind":kind,"target":target,"full":_has(lower,FULL_WORDS),"insist":_has(lower,INSIST_WORDS),"place":place,"army_words":army,"text":clean.substr(0,300)}
+	if kind=="recall":
+		# Home, or back to the town they came from; and whether the garrison is meant.
+		var home_name:=String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
+		reading["home"]=_has(lower,"(home|withdraw|retreat|recall)") or (home_name!="" and _name_hit(lower,home_name))
+		reading["garrison"]=_has(lower,"(garrisons?|every ?one|every ?body|all of (you|them)|them all|you all|every soldier|all our|all the)")
+	return reading
+
+static func _held_town(region_id:String)->Dictionary:
+	for town:Dictionary in held_towns():
+		if String(town.city_id)==region_id: return town
+	return {}
+
+static func pending_answer(audience:Dictionary,clean:String)->Dictionary:
+	## The god's answer to the war leader's own question: "Shall I send some
+	## after them?" or "Leave Tsaren unguarded?". A reading, or {}.
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if pending.is_empty() or Hall._day()-int(pending.get("day",-99))>PENDING_DAYS+2: return {}
+	var ask:=String(pending.get("ask",""))
+	if ask=="": return {}
+	var lower:=clean.to_lower().strip_edges()
+	var yes:=_re(YES_WORDS).search(lower)!=null
+	var no:=_re(NO_WORDS).search(lower)!=null and not yes
+	var town:=_held_town(String(pending.get("region_id","")))
+	var base:={"target":town,"full":false,"insist":false,"place":"","army_words":false,"text":clean.substr(0,300),"answer":true}
+	if ask=="chase":
+		if no or _has(lower,"(let them (go|run)|leave them|not worth)"): base["kind"]="let_go"; return base
+		if yes or _has(lower,CHASE_WORDS):
+			var n:=_re("\\b(\\d{1,4})\\b").search(lower)
+			base["kind"]="pursue"; base["count"]=int(n.get_string(1)) if n!=null else 0; return base
+	elif ask=="abandon":
+		if no: base["kind"]="keep"; return base
+		if yes or _has(lower,"(abandon|leave it|leave (the town|them)|unguarded|come home|bring them home)"):
+			base["kind"]="abandon"; base["towns"]=(pending.get("towns",[]) as Array).duplicate(); return base
+	return {}
 
 static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,audience_id:String)->Dictionary:
 	## A fate order that names no town. With one town held, it is that town;
@@ -385,6 +435,15 @@ static func offline_choices(audience_id:String="")->Array[Dictionary]:
 		# "Which town?": each town we hold is an answer.
 		for town:Dictionary in held_towns():
 			out.append({"group":"war","label":String(town.name),"action":"command","params":{"command_text":String(town.name)}})
+	elif String(pending.get("ask",""))=="chase" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS+2:
+		# "Shall I send some after them?"
+		out.append({"group":"war","label":"Go after them","action":"command","params":{"command_text":"Yes, go after them"}})
+		out.append({"group":"war","label":"Let them go","action":"command","params":{"command_text":"No, let them go"}})
+	elif String(pending.get("ask",""))=="abandon" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS+2:
+		# "Leave Tsaren unguarded?"
+		var towns:=" and ".join(PackedStringArray(pending.get("towns",[])))
+		out.append({"group":"war","label":"Leave %s and come home" % towns,"action":"command","params":{"command_text":"Yes, leave %s and come home" % towns}})
+		out.append({"group":"war","label":"Keep the garrison there","action":"command","params":{"command_text":"No, keep the garrison there"}})
 	elif not pending.is_empty() and String(pending.get("verb",""))=="war" and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
 		out.append({"group":"war","label":"Take them as they are","action":"command","params":{"command_text":"Take them as they are"}})
 		out.append({"group":"war","label":"Drill them first","action":"command","params":{"command_text":"Drill them first"}})
@@ -421,7 +480,9 @@ static func offline_choices(audience_id:String="")->Array[Dictionary]:
 			break
 	if not band.is_empty() and _drill(band.get("formations",[]))<UNDRILLED and pending.is_empty():
 		out.append({"group":"war","label":"Drill %s's band" % who,"action":"command","params":{"command_text":"Bring your band home to drill"}})
-	if not (forces(general).away as Array).is_empty():
+	if not Pursuit.detachments().is_empty():
+		out.append({"group":"war","label":"Call the detachment back","action":"command","params":{"command_text":"Call off the chase and come back"}})
+	if not (forces(general).away as Array).filter(func(a:Dictionary)->bool: return not a.get("pursuit") is Dictionary).is_empty():
 		out.append({"group":"war","label":"Bring the army home","action":"command","params":{"command_text":"Bring the army home"}})
 	out.append({"group":"war","label":"Keep the soldiers home on watch","action":"command","params":{"command_text":"Defend our home with the soldiers"}})
 	return out
@@ -639,7 +700,7 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 	if WorldSimulation.military==null or WorldSimulation.world==null:
 		return _no(out,"no_military","We have nothing organised to fight with yet.","Raise and drill a levy first.")
 	match kind:
-		"recall": return _recall(out)
+		"recall": return _recall(out,reading)
 		"defend": return _defend(out,reading)
 		"intercept": return _intercept(out,reading,insist)
 		"drill": return _drill_first(out)
@@ -650,6 +711,10 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"group_maim": return _group_maim(out,reading)
 		"storm": return _storm(out,insist)
 		"held": return _held(out,reading.get("target",{}))
+		"pursue": return _pursue(out,reading)
+		"let_go": return _let_go(out,reading)
+		"abandon": return _abandon(out,reading)
+		"keep": return _keep(out,reading)
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
 	return _strike(out,reading,insist)
 
@@ -691,6 +756,83 @@ static func _fate(out:Dictionary,reading:Dictionary)->Dictionary:
 	out.says=(qualm+String(result.text)).strip_edges()
 	out.outcome=String(result.outcome)
 	out["fate"]=result
+	# Men got away and the garrison still holds the town: say so, and offer a chase.
+	var fled:Dictionary=result.get("fled",{}) if result.get("fled") is Dictionary else {}
+	if not fled.is_empty():
+		var garrison:=int(_mc().occupation_force_for_region(String(town.civ_id),String(town.city_id)).get("troops",0))
+		var offer:=Pursuit.offer_words(fled,garrison)
+		if offer!="":
+			out.says+=" "+offer
+			if Pursuit.detachment_size(garrison,int(fled.count),0)>0:
+				out["pending"]={"ask":"chase","region_id":String(town.city_id),"text":"Go after the men who fled %s" % String(town.name)}
+	return out
+
+static func _pursue(out:Dictionary,reading:Dictionary)->Dictionary:
+	## After the men who got away from a town we hold: a real detachment, or
+	## a plain reason why not (pursuit.gd).
+	var town:Dictionary=reading.get("target",{})
+	if town.is_empty():
+		var flight:=Pursuit.latest_flight()
+		if not flight.is_empty(): town=_held_town(String(flight.region_id))
+	if town.is_empty(): return _no(out,"nobody_fled","Nobody has run from any town of ours that I know of.","")
+	out["target"]=town.duplicate(true)
+	var r:=Pursuit.begin(String(town.civ_id),String(town.city_id),int(reading.get("count",0)))
+	if r.has("error"):
+		var failed:=_no(out,String(r.get("reason","no_pursuit")),String(r.error),"")
+		failed.outcome="Nobody goes after them."
+		return failed
+	out.verdict="act"; out.reason="pursuit"
+	out.objective={"army_id":int(r.army_id),"kind":"pursuit","city_id":String(town.city_id),"civ_id":String(town.civ_id),"troops":int(r.troops),"days":int(r.days),"left":int(r.left)}
+	out.says=String(r.says)
+	out.outcome=String(r.outcome)
+	Chronicle.record({"key":"pursuit_out:%s:%d" % [String(town.city_id),int(WorldSimulation.state.elapsed_days)],"title":("After the Men Who Fled %s" % String(town.name)).substr(0,70),
+		"text":"%s of the garrison of %s went after the men who had fled it." % [_cap(_number(int(r.troops))),String(town.name)],"tier":"notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":String(town.civ_id)}}})
+	return out
+
+static func _let_go(out:Dictionary,reading:Dictionary)->Dictionary:
+	var town:Dictionary=reading.get("target",{})
+	var flight:=Pursuit.latest_flight(String(town.get("city_id","")))
+	var where:=""
+	if not flight.is_empty(): where=", and the men who ran will be %s by tomorrow" % ("in the hills" if bool((flight.fled as Dictionary).get("hills",false)) else "in "+String((flight.fled as Dictionary).get("toward","their other towns")))
+	out.verdict="act"; out.reason="let_go"
+	out.objective={"army_id":0,"kind":"let_go"}
+	out.says="Then nobody goes after them. The garrison stays inside %s%s." % [String(town.get("name","the town")),where]
+	out.outcome="Nobody goes after them."
+	return out
+
+static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
+	## The god means the town to be left: the garrison marches home and the
+	## town's own people have it back (occupation_resident_order restore_self_rule).
+	var names:Array=reading.get("towns",[])
+	if names.is_empty() and not (reading.get("target",{}) as Dictionary).is_empty(): names=[String(reading.target.name)]
+	var left:Array[String]=[]
+	var home:=0
+	var refused:Array[String]=[]
+	for town:Dictionary in held_towns():
+		if not names.is_empty() and not String(town.name) in names: continue
+		var back:Dictionary=WorldSimulation.world.occupation_resident_order(String(town.civ_id),String(town.city_id),"restore_self_rule")
+		if back.has("error"): refused.append("%s: %s" % [String(town.name),String(back.error)]); continue
+		left.append("%s (%d)" % [String(town.name),int(town.garrison)]); home+=int(town.garrison)
+	for d:Dictionary in Pursuit.recall(false): home+=int(d.troops)
+	if left.is_empty():
+		return _no(out,"cannot_leave",("We cannot leave yet. "+"; ".join(PackedStringArray(refused))) if not refused.is_empty() else "We hold no town to leave.","")
+	var days:=0
+	for a in _mc().field_armies:
+		if String((a as Dictionary).get("destination_id",""))=="player_home" and String(a.get("status",""))=="moving": days=maxi(days,int(a.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))
+	out.verdict="act"; out.reason="abandon"
+	out.objective={"army_id":-1,"kind":"abandon","left":left,"troops":home,"days":days}
+	out.says="We leave %s to its own people. %s of ours are marching home%s." % [", ".join(PackedStringArray(left)),_cap(_number(home)),(", about %s on the road" % ("a day" if days<=1 else "%s days" % _number(days))) if days>0 else ""]
+	out.outcome="%s left; the garrison is coming home." % ", ".join(PackedStringArray(left))
+	return out
+
+static func _keep(out:Dictionary,reading:Dictionary)->Dictionary:
+	var town:Dictionary=reading.get("target",{})
+	out.verdict="act"; out.reason="keep"
+	out.objective={"army_id":0,"kind":"keep"}
+	var names:=PackedStringArray()
+	for t:Dictionary in held_towns(): names.append("%s (%d)" % [String(t.name),int(t.garrison)])
+	out.says="The garrison stays: %s." % (", ".join(names) if not names.is_empty() else String(town.get("name","the town")))
+	out.outcome="The garrison stays."
 	return out
 
 static func _which_town(out:Dictionary,reading:Dictionary)->Dictionary:
@@ -1047,15 +1189,21 @@ static func _on_departure(out:Dictionary,army:Dictionary,target:Dictionary,at_wa
 	if int(out.general_pid)>0:
 		GovernmentPeopleSystem.record_person_memory(int(out.general_pid),"The god sent me against %s with %d." % [place,int(out.objective.troops)],"divine",0.7,{"emotion":"duty","outcome":"marching"})
 
-static func _recall(out:Dictionary)->Dictionary:
+static func _recall(out:Dictionary,reading:Dictionary={})->Dictionary:
+	## Bring our people back: bands in the field march home; a detachment out
+	## after fleeing men turns back to its town ("come back") or comes home
+	## ("come home"); a garrison is only taken out of a town we hold when the
+	## god says to leave it, so the war leader asks once ("Leave Tsaren
+	## unguarded?"). The reply says who is coming, how many and how long.
 	var mc:=_mc()
 	var sent:Array[String]=[]
 	var longest:=0
 	var blocked:Array[String]=[]
 	var chosen:=int(out.get("chosen",0))
+	var to_home:=bool(reading.get("home",true))
 	for a in mc.field_armies.duplicate():
 		var army:Dictionary=a
-		if int(army.get("troops",0))<=0: continue
+		if int(army.get("troops",0))<=0 or army.get("pursuit") is Dictionary: continue
 		if chosen>0 and int(army.army_id)!=chosen: continue
 		if String(army.get("status",""))=="stationed" and String(army.get("location_id",""))=="player_home": continue
 		if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))=="player_home": continue
@@ -1063,23 +1211,50 @@ static func _recall(out:Dictionary)->Dictionary:
 		if r.has("error"): blocked.append("%s: %s" % [String(army.get("name","An army")),String(r.error)]); continue
 		var index:int=mc._field_army_index(int(army.army_id))
 		if index>=0: mc.field_armies[index].erase("court_order")
-		sent.append(String(army.get("name","An army")))
+		var c:Dictionary=army.get("commander",{}) if army.get("commander") is Dictionary else {}
+		var who:=("%s's band" % _given(String(c.get("name","")))) if String(c.get("name",""))!="" and chosen<=0 else String(army.get("name","An army"))
+		sent.append("%s (%d)" % [who,int(army.get("troops",0))] if chosen<=0 else who)
 		longest=maxi(longest,int(r.get("days",0)))
-	if sent.is_empty() and blocked.is_empty():
+	# Detachments out after fleeing men.
+	var turned:Array[String]=[]
+	if chosen<=0:
+		for d:Dictionary in Pursuit.recall(not to_home):
+			if String(d.get("error",""))!="": blocked.append("%s: %s" % [String(d.name),String(d.error)]); continue
+			var days:=int(d.get("days",0))
+			turned.append("%s (%d) %s%s" % [String(d.name),int(d.troops),"is back inside %s" % String(d.to) if days<=0 and String(d.to)!="home" else ("turns back to %s" % String(d.to) if String(d.to)!="home" else "is coming home"),(", %s" % _span(days)) if days>0 else ""])
+			longest=maxi(longest,days)
+	# Garrisons stay unless the town is to be left.
+	var garrisons:Array[Dictionary]=held_towns() if chosen<=0 else ([] as Array[Dictionary])
+	var ask_towns:Array[String]=[]
+	if not garrisons.is_empty() and not reading.is_empty() and to_home and (bool(reading.get("garrison",false)) or (sent.is_empty() and turned.is_empty() and blocked.is_empty() and to_home)):
+		for t:Dictionary in garrisons: ask_towns.append(String(t.name))
+	if sent.is_empty() and blocked.is_empty() and turned.is_empty() and ask_towns.is_empty():
 		return _no(out,"all_home","Every one of our soldiers is already at home or on the way back.","")
-	if sent.is_empty():
+	if sent.is_empty() and turned.is_empty() and ask_towns.is_empty():
 		return _no(out,"cannot_recall","I cannot bring them back yet. "+"; ".join(PackedStringArray(blocked)),"")
-	out.verdict="act"
-	out.objective={"army_id":-1,"recalled":sent,"days":longest,"kind":"recall"}
-	var names:=", ".join(PackedStringArray(sent))
-	var be:="is" if sent.size()==1 else "are"
-	if longest<=0:
-		out.says="%s %s called back before %s had gone far; %s home again." % [names,be,"it" if sent.size()==1 else "they","it is" if sent.size()==1 else "they are"]
-		out.outcome="%s home again." % ("It is" if sent.size()==1 else "They are")
-	else:
-		out.says="I have sent runners: %s %s turning for home, about %d %s out." % [names,be,longest,"day" if longest==1 else "days"]
-		out.outcome="%s %s marching home, about %d %s away." % [names,be,longest,"day" if longest==1 else "days"]
-	if not blocked.is_empty(): out.outcome+=" "+"; ".join(PackedStringArray(blocked))
+	var said:=PackedStringArray()
+	if not sent.is_empty():
+		var names:=", ".join(PackedStringArray(sent))
+		var be:="is" if sent.size()==1 else "are"
+		if longest<=0: said.append("%s %s called back before %s had gone far; %s home again." % [names,be,"it" if sent.size()==1 else "they","it is" if sent.size()==1 else "they are"])
+		else: said.append("I have sent runners: %s %s turning for home, %s." % [names,be,_span(longest)])
+	if not turned.is_empty(): said.append(_cap("; ".join(PackedStringArray(turned)))+".")
+	var outcome:=PackedStringArray()
+	if not sent.is_empty(): outcome.append("%s %s marching home%s." % [", ".join(PackedStringArray(sent)),"is" if sent.size()==1 else "are",", about %d %s away" % [longest,"day" if longest==1 else "days"] if longest>0 else ""])
+	if not turned.is_empty(): outcome.append("The detachment is coming back.")
+	if not ask_towns.is_empty():
+		var holding:=PackedStringArray()
+		for t:Dictionary in garrisons: holding.append("%d hold %s" % [int(t.garrison),String(t.name)])
+		var list:=" and ".join(PackedStringArray(ask_towns))
+		said.append("%s. If they come home too, %s is left to its own people. Leave %s unguarded?" % [_cap(", ".join(holding)),list,list])
+		out["pending"]={"ask":"abandon","towns":ask_towns.duplicate(),"region_id":String(garrisons[0].city_id),"text":"Abandon %s and bring the garrison home" % list}
+		outcome.append("The garrison at %s stays until you say." % list)
+	if not blocked.is_empty(): outcome.append("; ".join(PackedStringArray(blocked)))
+	out.verdict="act" if not (sent.is_empty() and turned.is_empty()) else "ask"
+	out.reason="recall" if String(out.verdict)=="act" else "abandon_ask"
+	out.objective={"army_id":-1,"recalled":sent,"turned":turned,"days":longest,"kind":"recall"} if String(out.verdict)=="act" else {}
+	out.says=" ".join(said)
+	out.outcome=" ".join(outcome)
 	return out
 
 static func _defend(out:Dictionary,reading:Dictionary)->Dictionary:
@@ -1205,6 +1380,8 @@ static func daily(day:int)->Array:
 	var filed:Array=[]
 	if WorldSimulation.military==null: return filed
 	var mc:=_mc()
+	# Detachments out after fleeing men: the chase, its one report, the way back.
+	filed.append_array(Pursuit.daily(day))
 	for e in _ledger():
 		var entry:Dictionary=e
 		if String(entry.get("status",""))!="marching": continue

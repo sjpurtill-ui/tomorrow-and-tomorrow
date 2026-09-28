@@ -880,7 +880,10 @@ func evacuate_occupation(civ_id:String,region_id:String)->Dictionary:
 	var occupation_index:=_occupation_force_index(civ_id,region_id)
 	var force:Dictionary=occupation_forces[occupation_index].duplicate(true)
 	var army_id:=next_field_army_id
-	var position:Dictionary=WorldSimulation.world.city_intelligence.site(region_id).get("position",{})
+	# The column leaves from the town as our chart has it (where its label is
+	# drawn and our bands marched), else from its site.
+	var position:Dictionary=(WorldSimulation.world.city_intelligence.known("player",region_id).get("position",{}) as Dictionary).duplicate(true)
+	if not WorldSimulation.world.city_intelligence.valid_point(position): position=WorldSimulation.world.city_intelligence.site(region_id).get("position",{})
 	if not WorldSimulation.world.city_intelligence.valid_point(position): return {"error":"The occupation's location is unavailable; no return route can be issued."}
 	# Transfer the complete record, including injuries, captives and issued gear.
 	# A withdrawal can exceed normal command capacity but never the hard bound.

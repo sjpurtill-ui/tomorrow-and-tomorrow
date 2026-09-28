@@ -9,6 +9,7 @@ const When=preload("res://scripts/hud/report_when.gd")
 const Orders=preload("res://scripts/hud/city_watch_orders.gd")
 const IDENTITY=preload("res://scripts/city_map_identity.gd")
 const INTEL=preload("res://scripts/city_intelligence.gd")
+const HELD=preload("res://scripts/held_town.gd")
 var city_id:=""
 var civ_id:=""
 var selector:OptionButton
@@ -33,6 +34,14 @@ var cards:Dictionary={}
 var timer:=0.0
 var _scouting_signature:=""
 var _war_signature:=""
+## A town we hold shows our garrison's account instead of the scouts' one.
+var scout_body:Control
+var scout_actions:Control
+var held_scroll:ScrollContainer
+var held_box:VBoxContainer
+var held_actions:VBoxContainer
+var held_talk:Button
+var _held_signature:=""
 
 func _metric(parent:Node,key:String,hero:bool=false)->void:
 	var card:=P.card(parent)
@@ -82,6 +91,8 @@ func _ready()->void:
 	selector.item_selected.connect(func(_i:int):_scouting_signature="";refresh())
 	summary=P.label(root,"","small",T.BODY)
 	var body:=P.scroll_body(root,10)
+	scout_body=body.get_parent()
+	held_box=P.scroll_body(root,10);held_scroll=held_box.get_parent();held_scroll.name="HeldBody";held_scroll.hide()
 	_metric(body,"population",true)
 	grid=GridContainer.new();grid.columns=2;grid.size_flags_horizontal=SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);body.add_child(grid)
 	for key:String in V.shown_keys():
@@ -90,6 +101,11 @@ func _ready()->void:
 	detail_text=P.label(body,"","small",T.BODY);detail_text.hide()
 	P.rule(root)
 	var actions:=VBoxContainer.new();actions.name="Actions";actions.add_theme_constant_override("separation",6);root.add_child(actions)
+	scout_actions=actions
+	held_actions=VBoxContainer.new();held_actions.name="HeldActions";held_actions.add_theme_constant_override("separation",6);held_actions.hide();root.add_child(held_actions)
+	var held_row:=HBoxContainer.new();held_row.add_theme_constant_override("separation",6);held_actions.add_child(held_row)
+	held_talk=P.button(held_row,"Speak to our war leader",_speak_about_held,true);held_talk.name="SpeakAboutTown"
+	P.button(held_row,"Show on the map",_show_map)
 	P.kicker(actions,"Talk it over in court")
 	var talk_row:=HBoxContainer.new();talk_row.add_theme_constant_override("separation",6);actions.add_child(talk_row)
 	talk_ruler=P.button(talk_row,"Talk to their ruler",_talk_to_ruler,true);talk_ruler.name="TalkRuler"
@@ -129,6 +145,32 @@ func _talk_to_ruler()->void:
 func _talk_to_general()->void:
 	var leader:=P.war_leader()
 	_close();P.summon(leader.get("target",{}))
+## Our war leader (or the town's commander) before us, the town the matter.
+func _speak_about_held()->void:
+	var held:=HELD.report(city_id)
+	if held.is_empty():return
+	var focus:Dictionary=(held.get("talk_target",{}) as Dictionary).duplicate()
+	if not focus.is_empty():focus["matter"]="Tell %s what is to become of %s…" % [String(held.general).get_slice(" ",0) if String(held.general)!="" else "them",String(held.name)]
+	_close();load("res://scripts/audience_director.gd").open_court_for(focus)
+
+## Shows the held-town account when we hold it, else the scouts' report.
+func _show_held(city:Dictionary)->bool:
+	var held:=HELD.report(city_id)
+	var holding:=not held.is_empty()
+	scout_body.visible=not holding;scout_actions.visible=not holding
+	held_scroll.visible=holding;held_actions.visible=holding;summary.visible=not holding
+	if not holding:_held_signature="";return false
+	var who:=String(held.general).get_slice(" ",0)
+	held_talk.text="Speak to %s about %s" % [who,String(held.name)] if who!="" else "Speak to the court about %s" % String(held.name)
+	var signature:=str(held.hash())
+	if signature==_held_signature:return true
+	_held_signature=signature
+	for child in held_box.get_children():held_box.remove_child(child);child.queue_free()
+	var status:=preload("res://scripts/map_ownership.gd").status(city)
+	var dossier=preload("res://scripts/hud/held_town_dossier.gd").new();held_box.add_child(dossier)
+	dossier.setup({"report":held,"caption":"%s · %s" % [String(status.line),String(status.note)] if String(status.note)!="" else String(status.line)})
+	return true
+
 func _say(text:String)->void:
 	feedback.text=text;feedback.visible=text!=""
 
@@ -204,6 +246,7 @@ func refresh()->void:
 	# A town we hold says so as the map does: whose it was, since when, who guards it.
 	var held:=preload("res://scripts/map_ownership.gd").status(city)
 	if String(held.kind)=="occupied":control_label.text="%s · %s" % [String(held.line),String(held.note)] if not String(held.note).is_empty() else String(held.line)
+	if _show_held(city):return
 	var owner_index:=WorldSimulation.world._civilization_index(owner)
 	if owner_index>=0:
 		var relation:Dictionary=WorldSimulation.world.civilizations[owner_index].player_relation
