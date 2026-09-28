@@ -540,8 +540,9 @@ static func gather(record:Dictionary)->Dictionary:
 	var siege:Dictionary=mc.active_siege
 	if not siege.is_empty() and army_id>0 and int(siege.get("army_id",0))==army_id:
 		state["siege"]={"days":int(siege.get("days",0)),"target_name":String((siege.get("threat",{}) as Dictionary).get("target_region_name",""))}
-	var engagement:Dictionary=mc.active_engagement
-	if not engagement.is_empty() and int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
+	for engagement_variant in mc.engagements.values():
+		var engagement:Dictionary=engagement_variant
+		if int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
 	state["aftermath_pending"]=not mc.pending_aftermath.is_empty()
 	if not army.is_empty():
 		var operation:Dictionary=army.get("operation",{})
@@ -609,8 +610,7 @@ static func doing(army:Dictionary)->String:
 	if mc==null: return ""
 	var id:=int(army.get("army_id",0))
 	var today:=int(WorldSimulation.state.elapsed_days)
-	var fights:Array=(mc.command_hierarchy.data.get("battles",[]) as Array).duplicate() if mc.get("command_hierarchy")!=null else []
-	if not mc.active_engagement.is_empty(): fights.append(mc.active_engagement)
+	var fights:Array=mc.engagements.values()
 	for fight_variant in fights:
 		var fight:Dictionary=fight_variant
 		var in_it:=int(fight.get("home_force_id",-1))==id

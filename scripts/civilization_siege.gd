@@ -58,7 +58,9 @@ static func order(siege:Dictionary,action:String)->Dictionary:
 		var result:=WorldSimulation.military.siege_order(String(siege.id),action)
 		# A defender's sortie meets the actual investing force. Its commander
 		# resolves that battle through the ordinary campaign rounds.
-		if action=="assault" and not result.has("error") and not WorldSimulation.military.active_engagement.is_empty():
+		# Only the battle this assault began: an overrun settles at once and
+		# leaves another battle in focus.
+		if action=="assault" and not result.has("error") and not WorldSimulation.military.active_engagement.is_empty() and String(WorldSimulation.military.active_engagement.get("id",""))==String((result.get("engagement",{}) as Dictionary).get("id","-")):
 			WorldSimulation.military.active_engagement.commander_managed=true
 			WorldSimulation.military.command_hierarchy.battle.archive_active()
 		return result

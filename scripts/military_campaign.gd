@@ -91,7 +91,23 @@ var prisoner_escape_accumulator:=0.0
 var escaped_prisoners_total:=0
 var active_threat:Dictionary={}
 var threats_resolved:=0
+## The battle in focus: one of our own battles (own_engagements), the one the
+## war planning page and the older one-battle code act on. Empty when we are
+## not fighting.
 var active_engagement:Dictionary={}
+## Our own battles being fought now, by id. Several run at once, each on its
+## own front; each is fought a day (a phase) at a time, reported when it ends
+## and saved with the game.
+var own_engagements:Dictionary={}
+## Every battle being fought now, by id: our own and those the generals fight
+## under their objectives (command_hierarchy.data.battles). Read only: a new
+## Dictionary of the live engagements themselves, each with `progress` (-1..1,
+## the player's side positive).
+var engagements:Dictionary:
+	get: return _all_engagements()
+## The battle in focus before a newer one took it: it comes back into focus
+## when the newer one ends or passes to a general.
+var _focus_before:=""
 var active_siege:Dictionary={}
 var siege_history:Array[Dictionary]=[]
 var war_reputation:Dictionary={"mercy":0.0,"fear":0.0,"grievance":0.0}
@@ -193,7 +209,9 @@ func reset_for_new_world()->void:
 	escaped_prisoners_total=0
 	active_threat.clear()
 	threats_resolved=0
-	active_engagement.clear()
+	active_engagement={}
+	own_engagements={}
+	_focus_before=""
 	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
 	sovereign_decisions.clear()
 	occupation_forces.clear()
@@ -996,7 +1014,8 @@ func _movement_destination(destination_id:String)->Dictionary:
 
 
 func create_field_army(personnel:int,custom_name:String="")->Dictionary:
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
+	# Home troops can form a new army while other armies fight elsewhere.
+	if _home_battle_running() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
 	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d independent land commands. Return and stand down a detachment before creating another." % [field_armies.size(),field_army_capacity()]}
 	var requested:=maxi(0,personnel)
 	var available:=maxi(0,int(home_army.get("troops",0)))
@@ -1107,7 +1126,6 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if index<0: return {"error":"Select a valid field army."}
 	if bool(field_armies[index].get("embarked",false)):return {"error":"This army is embarked. Recall or complete its transport before issuing a land order."}
 	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
-	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var destination:=_movement_destination(destination_id)
 	if destination.is_empty(): return {"error":"That destination is unknown. Only returned exploration and contact reports can support an army movement order."}
 	var army:Dictionary=field_armies[index]
@@ -1159,7 +1177,6 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	if index<0: return {"error":"Select a valid field army."}
 	if bool(field_armies[index].get("embarked",false)):return {"error":"This army is embarked. Recall or complete its transport before issuing a land order."}
 	if int(field_armies[index].get("troops",0))<=0:return {"error":"This force has no active soldiers. Its remaining recovery and occupation records are available in Military."}
-	if not active_engagement.is_empty(): return {"error":"Finish the active engagement before issuing another strategic move."}
 	var target:=Vector2(x,z)
 	if CivilizationSystem!=null:
 		if WorldSimulation.world.has_method("_position_is_revealed") and not WorldSimulation.world._position_is_revealed(target):
@@ -1198,7 +1215,7 @@ func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
 	if not active_siege.is_empty():return {"can_order":false,"can_engage":false,"error":"Resolve the current siege first."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"can_order":false,"can_engage":false,"error":"Select one field army first."}
-	if not active_engagement.is_empty(): return {"can_order":false,"can_engage":false,"error":"Finish the active battle before ordering another engagement."}
+	if command_hierarchy.battle.enemy_engaged(formation_id): return {"can_order":false,"can_engage":false,"error":"That band is already being fought."}
 	if not active_threat.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the active campaign decision before ordering another engagement."}
 	if not pending_aftermath.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the current battle aftermath first."}
 	var sighting:Dictionary=WorldSimulation.world.visible_formation_sighting(formation_id)
@@ -1443,7 +1460,7 @@ func _detach_matching_formations(entries:Array)->Array[Dictionary]:
 
 
 func template_deployment_availability(template_id:int)->Dictionary:
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
+	if _home_battle_running() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
 	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d field armies." % [field_armies.size(),field_army_capacity()]}
 	var index:=_template_index(template_id)
 	if index<0: return {"error":"That army build no longer exists."}
@@ -1858,7 +1875,7 @@ func formations_held_from_city(force:Dictionary)->Array:
 
 
 func resolve_campaign_battle(enemy_force:Dictionary,options:Dictionary={})->Dictionary:
-	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
+	if _home_battle_running(): return {"error":"Finish the active campaign engagement first."}
 	if home_army.is_empty(): muster_home_army()
 	if int(home_army.get("troops",0))<=0: return {"error":"No deployable home army."}
 	_refresh_readiness()
@@ -1914,13 +1931,18 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	record["day"]=int(WorldSimulation.state.elapsed_days)
 	battle_history.push_front(record)
 	if battle_history.size()>40: battle_history.resize(40)
-	pending_aftermath=termination.duplicate(true) if home_won else {}
-	if not pending_aftermath.is_empty(): pending_aftermath["home_force_name"]=home_force_name
-	if String(pending_aftermath.get("type","continued"))=="continued": pending_aftermath.clear()
-	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)) and int(pending_aftermath.get("prisoners",0))==0 and not bool(pending_aftermath.get("captured_general",false)) and not preload("res://scripts/raid_policy.gd").has_spoils(pending_aftermath.get("spoils",{})): pending_aftermath.clear()
+	var aftermath:Dictionary=termination.duplicate(true) if home_won else {}
+	if not aftermath.is_empty(): aftermath["home_force_name"]=home_force_name
+	if String(aftermath.get("type","continued"))=="continued": aftermath.clear()
+	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)) and int(aftermath.get("prisoners",0))==0 and not bool(aftermath.get("captured_general",false)) and not preload("res://scripts/raid_policy.gd").has_spoils(aftermath.get("spoils",{})): aftermath.clear()
+	# Battles on several fronts can end close together. The captives of an
+	# earlier victory still waiting on the ruler's word are held, as the
+	# general would hold them, rather than lost when the next ones arrive.
+	if not aftermath.is_empty() and not pending_aftermath.is_empty(): resolve_aftermath("hold","army stores","hold")
+	if not aftermath.is_empty(): pending_aftermath=aftermath
 	_record_council_battle(result)
 	battle_resolved.emit(result.duplicate(true))
-	if not pending_aftermath.is_empty():
+	if not aftermath.is_empty():
 		if bool(result.get("commander_managed",false)):resolve_aftermath("hold","army stores","hold")
 		else:aftermath_required.emit(pending_aftermath.duplicate(true))
 	army_changed.emit(home_army.duplicate(true))
@@ -2056,6 +2078,138 @@ func engagement_snapshot()->Dictionary:
 	return active_engagement.duplicate(true)
 
 
+## Battles of our own fought at once (bounds the daily tick and the save).
+const MAX_OWN_ENGAGEMENTS:=32
+
+
+func _all_engagements()->Dictionary:
+	var out:={}
+	for engagement in own_battles():
+		out[String((engagement as Dictionary).get("id",""))]=engagement
+	var index:=0
+	for battle in command_hierarchy.data.get("battles",[]):
+		if battle is Dictionary and not (battle as Dictionary).is_empty():
+			var key:=String((battle as Dictionary).get("id",""))
+			if key=="" or out.has(key): key="general-%d-%d" % [index,int((battle as Dictionary).get("seed",0))]
+			out[key]=battle
+		index+=1
+	return out
+
+
+## Our own battles being fought now, the one in focus first.
+func own_battles()->Array:
+	var out:Array=[]
+	if not active_engagement.is_empty(): out.append(active_engagement)
+	for id in own_engagements:
+		var engagement:Dictionary=own_engagements[id]
+		if not engagement.is_empty() and not is_same(engagement,active_engagement): out.append(engagement)
+	return out
+
+
+## Whether any battle is being fought now, ours or a general's.
+func fighting()->bool:
+	return not own_battles().is_empty() or not (command_hierarchy.data.get("battles",[]) as Array).is_empty()
+
+
+## Keeps a newly begun battle of ours, under an id no other battle has.
+func _register_engagement(engagement:Dictionary)->void:
+	if engagement.is_empty(): return
+	if String(engagement.get("id",""))=="": _open_battle(engagement)
+	var base:=String(engagement.id)
+	var id:=base
+	var n:=2
+	while own_engagements.has(id) and not is_same(own_engagements[id],engagement):
+		id="%s-%d" % [base,n]; n+=1
+	engagement["id"]=id
+	own_engagements[id]=engagement
+
+
+## With the battle in focus over, the one in focus before it, else the next
+## of ours still being fought.
+func _refocus()->void:
+	if not active_engagement.is_empty(): return
+	active_engagement={}
+	if _focus_before!="" and own_engagements.has(_focus_before) and not (own_engagements[_focus_before] as Dictionary).is_empty():
+		active_engagement=own_engagements[_focus_before]
+		return
+	for id in own_engagements:
+		if not (own_engagements[id] as Dictionary).is_empty():
+			active_engagement=own_engagements[id]
+			return
+
+
+## Drops finished battles, keeps a battle put in focus by older code, and
+## focuses another when the one in focus is over.
+func _prune_engagements()->void:
+	for id in own_engagements.keys():
+		if (own_engagements[id] as Dictionary).is_empty(): own_engagements.erase(id)
+	if not active_engagement.is_empty() and not bool(active_engagement.get("commander_managed",false)) and active_engagement.get("attacker") is Dictionary and active_engagement.get("defender") is Dictionary:
+		var id:=String(active_engagement.get("id",""))
+		if id=="": _register_engagement(active_engagement)
+		elif not own_engagements.has(id) or not is_same(own_engagements[id],active_engagement): own_engagements[id]=active_engagement
+	_refocus()
+
+
+## Puts one of our battles in focus. False when none of ours has that id.
+func focus_engagement(id:String)->bool:
+	_prune_engagements()
+	if not own_engagements.has(id): return false
+	active_engagement=own_engagements[id]
+	return true
+
+
+## The battle begun since `before` (our battle ids then), still being fought;
+## {} when none began or it is over already (an overrun settles at once).
+func begun_since(before:Array)->Dictionary:
+	if active_engagement.is_empty() or before.has(String(active_engagement.get("id",""))): return {}
+	return active_engagement
+
+
+## Fights a day (one phase) of every battle of ours, each on its own front.
+func _fight_own_battles_day()->void:
+	_prune_engagements()
+	if own_engagements.is_empty(): return
+	var focus:=active_engagement
+	for id in own_engagements.keys():
+		var engagement:Dictionary=own_engagements.get(id,{})
+		if engagement.is_empty() or bool(engagement.get("awaiting_player_view",false)): continue
+		active_engagement=engagement
+		fight_engagement_day(command_hierarchy.land.battle_order() if bool(engagement.get("commander_managed",false)) else "hold")
+	active_engagement=focus if not focus.is_empty() else {}
+	_prune_engagements()
+
+
+## Which of our forces fights a battle: the home army, a field army or a
+## garrison holding a taken town.
+static func _force_key(kind:String,id:int,civ_id:String,region_id:String)->String:
+	return "%s:%d:%s:%s" % [kind,id,civ_id,region_id]
+
+
+func _engagement_force_key(engagement:Dictionary)->String:
+	return _force_key(String(engagement.get("home_force_kind","field")),int(engagement.get("home_force_id",0)),String(engagement.get("home_force_civ_id","")),String(engagement.get("home_force_region_id","")))
+
+
+func _force_fighting(key:String)->bool:
+	for engagement in own_battles():
+		if _engagement_force_key(engagement)==key: return true
+	return false
+
+
+## Whether a field army is in any battle being fought now.
+func _army_in_battle(army_id:int)->bool:
+	for engagement_variant in engagements.values():
+		var engagement:Dictionary=engagement_variant
+		if String(engagement.get("home_force_kind",""))=="field_army" and int(engagement.get("home_force_id",0))==army_id: return true
+		for member in engagement.get("command_participants",[]):
+			if int((member as Dictionary).get("army_id",-1))==army_id: return true
+	return false
+
+
+## Whether the home army is fighting now (a raid or campaign against home).
+func _home_battle_running()->bool:
+	return _force_fighting(_force_key("field",0,"",""))
+
+
 ## Both generals choose how to fight (battle_tactics.gd). Ours from what our
 ## people know and field; theirs only from what they field and their
 ## general level of knowledge. Recorded on the engagement for resolution,
@@ -2099,8 +2253,11 @@ func _home_defense_force(allocate_id:bool=true)->Dictionary:
 
 func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	if not active_siege.is_empty(): return {"error":"Use the siege assault or sortie order to begin combat."}
-	if not active_engagement.is_empty(): return engagement_snapshot()
-	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
+	if active_threat.is_empty():
+		# Asked again for a battle already begun: the battle in focus.
+		if not active_engagement.is_empty(): return engagement_snapshot()
+		return {"error":"No military threat is awaiting a response."}
+	if own_engagements.size()>=MAX_OWN_ENGAGEMENTS: return {"error":"Too many battles are being fought at once."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
 	if WorldSimulation.enabled and preload("res://scripts/civilization_combat.gd").reserved(active_threat.get("owned_target",{})):return {"error":"That formation is already committed to a battle."}
 	var target_civ_id:=String(active_threat.get("source_civ_id",""))
@@ -2110,6 +2267,10 @@ func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
 	var field_army_id:=int(active_threat.get("field_army_id",0)) if offensive else 0
 	var field_army_index:=_field_army_index(field_army_id) if field_army_id>0 else -1
+	# Battles are fought on several fronts at once, but no band fights two.
+	var home_kind:="occupation" if defending_occupation else ("field_army" if field_army_index>=0 else "field")
+	var force_key:=_force_key(home_kind,field_army_id if field_army_index>=0 else 0,target_civ_id if defending_occupation else "",target_region_id if defending_occupation else "")
+	if (field_army_index>=0 and _army_in_battle(field_army_id)) or _force_fighting(force_key): return {"error":"Those fighters are already in a fight."}
 	var local_defense:=_home_defense_force() if not offensive and not defending_occupation else {}
 	var available_home_troops:=int(occupation_forces[occupation_index].get("troops",0)) if defending_occupation else (int(field_armies[field_army_index].get("troops",0)) if field_army_index>=0 else int(local_defense.get("troops",0)))
 	if available_home_troops<=0: return {"error":"No local watch or trained force is available for this campaign."}
@@ -2128,11 +2289,13 @@ func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	var attacker:Dictionary=home_force if offensive else threat.enemy_force.duplicate(true)
 	var defender:Dictionary=threat.enemy_force.duplicate(true) if offensive else home_force
 	var battle_ground:=float(threat.get("terrain_defense",1.0)) if offensive or defending_occupation else _terrain_defense()
+	if not active_engagement.is_empty(): _focus_before=String(active_engagement.get("id",""))
 	active_engagement={"threat":threat,"campaign_mode":String(threat.get("campaign_mode","defensive")),"home_side":"attacker" if offensive else "defender","home_force_kind":"occupation" if defending_occupation else ("field_army" if field_army_index>=0 else "field"),"home_force_id":field_army_id if field_army_index>=0 else 0,"home_force_civ_id":target_civ_id if defending_occupation else "","home_force_region_id":target_region_id if defending_occupation else "","attacker":attacker,"defender":defender,"attacker_initial":int(attacker.troops),"defender_initial":int(defender.troops),"round":0,"rounds":[],"seed":int(threat.seed),"terrain_defense":battle_ground,"status":"active","last_order":"hold"}
 	active_engagement["commander_managed"]=command_hierarchy.executing
 	if command_hierarchy.executing:command_hierarchy.battle.attach(active_engagement,command_hierarchy.battle_candidates)
 	active_engagement["tactics"]=_engagement_tactics(active_engagement)
 	_open_battle(active_engagement)
+	_register_engagement(active_engagement)
 	# A hopeless fight (tests/test_battle_scale.gd): the small side is overrun
 	# in one exchange, settled the day it starts, with no battle to sit through.
 	if simulator.overrun_expected(active_engagement.attacker,active_engagement.defender,battle_ground,active_engagement.get("ground",{}))!="": active_engagement["overrun_expected"]=true
@@ -2150,7 +2313,9 @@ func settle_overrun_now()->Dictionary:
 	var order:String=String(command_hierarchy.land.battle_order()) if bool(active_engagement.get("commander_managed",false)) else "hold"
 	var guard:=0
 	var outcome:Dictionary={}
-	while not active_engagement.is_empty() and guard<3:
+	# This battle only: when it ends another of ours may come into focus.
+	var fight:=active_engagement
+	while not fight.is_empty() and guard<3:
 		outcome=advance_engagement(order); guard+=1
 	var settled:Dictionary=outcome.duplicate(true)
 	settled["ok"]=true; settled["resolved"]=true; settled["overrun"]=true
@@ -2165,7 +2330,7 @@ func fight_engagement_day(order:String)->void:
 	if active_engagement.is_empty(): return
 	if not active_engagement.has("battle"): _open_battle(active_engagement)
 	var exchanges:=DAY_EXCHANGE_LIMIT if _quick_fight(active_engagement) else _exchanges_left_in_phase(active_engagement.get("battle",{}))
-	advance_engagement(order,exchanges)
+	advance_engagement(order,exchanges,false)
 
 
 func _exchanges_left_in_phase(battle:Dictionary)->int:
@@ -2230,8 +2395,9 @@ func set_battle_formation_order(index:int,kind:String,target:int=-1)->Dictionary
 
 ## Fights the active engagement: one exchange, or up to `exchanges` in one go
 ## (a day's phase). Viewing never calls this; only the calendar and the
-## general's orders fight a battle.
-func advance_engagement(order:String="hold",exchanges:int=1)->Dictionary:
+## general's orders fight a battle. snapshot: return a copy of the battle as
+## it stands (the calendar, fighting many battles a day, does not need one).
+func advance_engagement(order:String="hold",exchanges:int=1,snapshot:bool=true)->Dictionary:
 	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
 	active_engagement.erase("awaiting_player_view")
 	if not active_engagement.has("battle") or (active_engagement.get("battle",{}) as Dictionary).is_empty(): _open_battle(active_engagement)
@@ -2289,7 +2455,7 @@ func advance_engagement(order:String="hold",exchanges:int=1)->Dictionary:
 	if String(result.get("outcome","inconclusive")) not in ["continued","inconclusive"] or next_round>=longest:
 		return _finish_active_engagement(false,result)
 	army_changed.emit(home_army.duplicate(true))
-	return {"active":true,"engagement":engagement_snapshot(),"round":record}
+	return {"active":true,"engagement":engagement_snapshot() if snapshot else {},"round":record}
 
 
 func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
@@ -2310,6 +2476,10 @@ func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 
 func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionary:
 	var engagement:=active_engagement.duplicate(true)
+	# A battle of ours leaves the registry; a general's (command_battle.gd
+	# fights those in turn) was never in it.
+	var ours:=own_engagements.has(String(engagement.get("id",""))) and is_same(own_engagements[String(engagement.get("id",""))],active_engagement)
+	if ours: own_engagements.erase(String(engagement.id))
 	var attacker:Dictionary=engagement.attacker; var defender:Dictionary=engagement.defender
 	var home_side:=_engagement_home_side(engagement)
 	var enemy_side:=_engagement_enemy_side(engagement)
@@ -2372,6 +2542,8 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 		var report_index:=_field_army_index(int(final_result.home_force_id))
 		if report_index>=0:
 			field_armies[report_index]["last_report"]=_army_report_snapshot(field_armies[report_index])
+	# The next battle of ours still being fought comes into focus.
+	if ours: _refocus()
 	return committed
 
 
@@ -2470,13 +2642,14 @@ func respond_to_threat(response:String)->Dictionary:
 func has_active_operation_for_civ(civ_id:String)->bool:
 	if not active_siege.is_empty() and civ_id in [active_siege.attacker_id,active_siege.defender_id]: return true
 	if not active_threat.is_empty() and String(active_threat.get("source_civ_id",""))==civ_id: return true
-	if not active_engagement.is_empty() and String((active_engagement.get("threat",{}) as Dictionary).get("source_civ_id",""))==civ_id: return true
+	for engagement in engagements.values():
+		if String(((engagement as Dictionary).get("threat",{}) as Dictionary).get("source_civ_id",""))==civ_id: return true
 	return false
 
 
 func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
 	if not active_siege.is_empty(): return {"error":"Resolve the current siege before starting another operation."}
-	if not active_engagement.is_empty(): return {"error":"Finish the active campaign engagement first."}
+	if army_id>0 and _army_in_battle(army_id): return {"error":"That army is already fighting."}
 	if not active_threat.is_empty(): return {"error":"Resolve the approaching campaign before launching another."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
 	if region_id=="": return {"error":"Select a known strategic objective before assigning an army to attack it."}
@@ -2485,6 +2658,7 @@ func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:i
 	for force_variant in field_armies:
 		var force:Dictionary=force_variant
 		if (army_id==0 or int(force.get("army_id",0))==army_id) and String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))==region_id and int(force.get("troops",0))>0:
+			if army_id==0 and _army_in_battle(int(force.get("army_id",0))): continue
 			maneuver_army=force; break
 	if maneuver_army.is_empty(): return {"error":"Move a field army to the selected region before launching this campaign. Army movement is no longer instantaneous."}
 	var committed_strength:=int(maneuver_army.get("troops",0))
@@ -2513,7 +2687,7 @@ func city_force_summary(region_id:String)->String:
 
 func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is already in battle."}
-	if not active_engagement.is_empty() or not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current battle, siege or aftermath first."}
+	if not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current siege or aftermath first."}
 	var index:=_field_army_index(army_id)
 	if index<0 or int(field_armies[index].get("troops",0))<=0:return {"error":"No active soldiers in the selected army. Choose another army."}
 	var report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region_id)
@@ -2567,13 +2741,13 @@ func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictiona
 
 func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
 	if not active_siege.is_empty(): return {"error":"Resolve the siege before launching a raid."}
-	if not active_engagement.is_empty() or not active_threat.is_empty(): return {"error":"Resolve the current military operation first."}
+	if not active_threat.is_empty(): return {"error":"Resolve the current military operation first."}
 	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
 	if region_id=="": return {"error":"Select a known strategic region to raid."}
 	var maneuver_army:Dictionary={}
 	for force_variant in field_armies:
 		var force:Dictionary=force_variant
-		if String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))==region_id and int(force.get("troops",0))>0:
+		if String(force.get("status","stationed"))=="stationed" and String(force.get("location_id",""))==region_id and int(force.get("troops",0))>0 and not _army_in_battle(int(force.get("army_id",0))):
 			maneuver_army=force
 			break
 	if maneuver_army.is_empty(): return {"error":"Move a field army to the selected region before ordering a raid."}
@@ -2596,21 +2770,24 @@ func _resolve_threat_without_battle(title:String,description:String)->void:
 
 
 func _process_threat_day()->void:
+	# Every battle of ours is fought a day, each on its own front.
+	_fight_own_battles_day()
 	if not active_siege.is_empty(): return
-	if not active_engagement.is_empty():
-		if bool(active_engagement.get("awaiting_player_view",false)):return
-		fight_engagement_day(command_hierarchy.land.battle_order() if bool(active_engagement.get("commander_managed",false)) else "hold")
-		return
 	if not active_threat.is_empty():
 		if int(WorldSimulation.state.elapsed_days)>int(active_threat.get("deadline_day",WorldSimulation.state.elapsed_days)) and pending_aftermath.is_empty():
 			var occupation_defense:=occupation_force_for_region(String(active_threat.get("source_civ_id","")),String(active_threat.get("target_region_id","")))
 			if int(settlement_defense.get("stage",0))>=1 and String(active_threat.get("target_region_id",""))=="" and not bool(active_threat.get("field_encounter",false)) and String(active_threat.get("incident_kind","campaign"))!="raid":
 				var investment:=begin_siege()
 				if bool(investment.get("ok",false)): return
+			var before:Array=own_engagements.keys()
 			respond_to_threat("defend" if int(settlement_defense_snapshot().get("garrison_personnel",0))>0 or int(occupation_defense.get("troops",0))>0 else "withdraw")
-			while not active_engagement.is_empty() and not bool(active_engagement.get("awaiting_player_view",false)): advance_engagement("hold")
+			# That battle is fought out now; others go on a day at a time.
+			var fight:=begun_since(before)
+			while not fight.is_empty() and not bool(fight.get("awaiting_player_view",false)): advance_engagement("hold",1,false)
 		return
 	if not WorldSimulation.state.settlement_site_committed or int(WorldSimulation.state.elapsed_days)<90 or not pending_aftermath.is_empty(): return
+	# A new raid on home waits while our home fighters are in a fight.
+	if _home_battle_running(): return
 	var incident:=WorldSimulation.world.consume_player_incident()
 	if incident.is_empty(): return
 	_create_civilization_threat(incident,"defensive")
@@ -2913,6 +3090,8 @@ func export_state()->Dictionary:
 		"active_threat":active_threat.duplicate(true),
 		"threats_resolved":threats_resolved,
 		"active_engagement":active_engagement.duplicate(true),
+		"engagements":_saved_engagements(),
+		"focused_engagement":String(active_engagement.get("id","")),
 		"active_siege":active_siege.duplicate(true),
 		"siege_history":siege_history.duplicate(true),
 		"war_reputation":war_reputation.duplicate(true),
@@ -3034,7 +3213,7 @@ func validate_state()->Array[String]:
 	var siege_error:=SiegeModel.validate(active_siege)
 	if not siege_error.is_empty(): errors.append(siege_error)
 	if not active_siege.is_empty():
-		if not active_engagement.is_empty() or not active_threat.is_empty(): errors.append("A siege cannot duplicate another active encounter.")
+		if not active_threat.is_empty(): errors.append("A siege cannot duplicate another active encounter.")
 		if String(active_siege.get("mode",""))=="offensive" and _field_army_index(int(active_siege.get("army_id",0)))<0: errors.append("The siege references a missing field army.")
 	if siege_history.size()>SiegeModel.HISTORY_LIMIT: errors.append("Siege history exceeds its bound.")
 	for history in siege_history:
@@ -3126,11 +3305,16 @@ func validate_state()->Array[String]:
 		if int(damaged_equipment[item])<0: errors.append("Damaged-equipment inventory for %s is negative." % item)
 	if foreign_prisoners<0 or prisoner_custody_days<0 or escaped_prisoners_total<0: errors.append("Prisoner custody counters cannot be negative.")
 	if not is_finite(prisoner_escape_accumulator) or prisoner_escape_accumulator<0.0: errors.append("Prisoner escape accumulation must be finite and nonnegative.")
-	if not active_threat.is_empty() and not active_engagement.is_empty(): errors.append("A pending threat and active engagement cannot coexist.")
-	if not active_engagement.is_empty():
-		if String(active_engagement.get("home_side","")) not in ["attacker","defender"]: errors.append("Active engagement does not identify the home force side.")
-		if String(active_engagement.get("campaign_mode","")) not in ["offensive","defensive"]: errors.append("Active engagement has an invalid campaign mode.")
-		if String(active_engagement.get("home_force_kind","field")) not in ["field","field_army","occupation"]: errors.append("Active engagement has an invalid home-force kind.")
+	if own_engagements.size()>MAX_OWN_ENGAGEMENTS: errors.append("Too many battles are being fought at once.")
+	var engaged_forces:={}
+	for engagement_variant in own_battles():
+		var engagement:Dictionary=engagement_variant
+		if String(engagement.get("home_side","")) not in ["attacker","defender"]: errors.append("Active engagement does not identify the home force side.")
+		if String(engagement.get("campaign_mode","")) not in ["offensive","defensive"]: errors.append("Active engagement has an invalid campaign mode.")
+		if String(engagement.get("home_force_kind","field")) not in ["field","field_army","occupation"]: errors.append("Active engagement has an invalid home-force kind.")
+		var force_key:=_engagement_force_key(engagement)
+		if engaged_forces.has(force_key): errors.append("One force is fighting two battles at once.")
+		engaged_forces[force_key]=true
 	if occupation_forces.size()>MAX_OCCUPATION_FORCES: errors.append("Occupation forces exceed their fixed strategic-region bound.")
 	var occupation_keys:Dictionary={}
 	for force_variant in occupation_forces:
@@ -3266,7 +3450,6 @@ func _apply_imported_state(payload:Dictionary)->void:
 	escaped_prisoners_total=maxi(0,int(payload.get("escaped_prisoners_total",0)))
 	active_threat=(payload.get("active_threat",{}) as Dictionary).duplicate(true)
 	threats_resolved=maxi(0,int(payload.get("threats_resolved",0)))
-	active_engagement=(payload.get("active_engagement",{}) as Dictionary).duplicate(true)
 	war_reputation={"mercy":0.0,"fear":0.0,"grievance":0.0}
 	for key in (payload.get("war_reputation",{}) as Dictionary): war_reputation[key]=clampf(float(payload.war_reputation[key]),0.0,1.0)
 	occupation_forces.clear()
@@ -3293,6 +3476,35 @@ func _apply_imported_state(payload:Dictionary)->void:
 		for means:Variant in decisions:
 			var decision:Variant=decisions[means]
 			if decision is Dictionary and SovereignWeapons.authority(String(means))!="": sovereign_decisions[String(means)]=(decision as Dictionary).duplicate(true)
+	# Last: a battle opened from an older save reads the armies and defences.
+	_load_engagements(payload)
+
+
+## Our battles for the save, the one in focus first.
+func _saved_engagements()->Array:
+	var out:Array=[]
+	for engagement in own_battles(): out.append((engagement as Dictionary).duplicate(true))
+	return out
+
+
+## Our battles from a save: the list, or an older save's one battle.
+func _load_engagements(payload:Dictionary)->void:
+	own_engagements={}
+	active_engagement={}
+	_focus_before=""
+	var listed:Array=[]
+	var saved:Variant=payload.get("engagements",null)
+	if saved is Array: listed=saved
+	else:
+		var legacy:Variant=payload.get("active_engagement",{})
+		if legacy is Dictionary and not (legacy as Dictionary).is_empty(): listed=[legacy]
+	for item in listed:
+		if not item is Dictionary or (item as Dictionary).is_empty(): continue
+		if own_engagements.size()>=MAX_OWN_ENGAGEMENTS: break
+		_register_engagement((item as Dictionary).duplicate(true))
+	var focus:=String(payload.get("focused_engagement",""))
+	if focus!="" and own_engagements.has(focus): active_engagement=own_engagements[focus]
+	_refocus()
 
 
 func _empty_home_army()->Dictionary:
@@ -3694,7 +3906,7 @@ func _process_settlement_defense_day()->void:
 			settlement_defense["completed_day"]=int(WorldSimulation.state.elapsed_days)
 			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
 	var integrity:=float(settlement_defense.integrity)
-	if integrity<1.0 and active_engagement.is_empty():
+	if integrity<1.0 and not _home_battle_running():
 		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))*0.20
 		if repair_workers>0.0:
 			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012)*WorldSimulation.span)
@@ -3847,6 +4059,8 @@ func _process_military_day()->void:
 		_process_field_army_movement_day()
 		_process_army_runners_day()
 		occupation_transfers.advance(last_processed_day)
+		# Armies in the field fight on while home is held.
+		_fight_own_battles_day()
 		return
 	var home_fighting:bool=command_hierarchy.battle.engaged(0)
 	if active_engagement.is_empty() and not home_fighting: _reconcile_external_military_mortality()
@@ -3869,7 +4083,9 @@ func _process_military_day()->void:
 	_process_siege_day()
 	occupation_transfers.advance(int(WorldSimulation.state.elapsed_days))
 	_process_threat_day()
-	if not active_engagement.is_empty() or home_fighting: return
+	# The home army's own days wait while it fights; a battle elsewhere does not
+	# stop its supply, mending and recovery.
+	if home_fighting or _home_battle_running(): return
 	if home_army.is_empty() or not pending_aftermath.is_empty(): return
 	var logistics:=float((home_army.get("commander",{}) as Dictionary).get("logistics",0.5))
 	_update_supply_day()
@@ -5029,7 +5245,7 @@ func start_offensive_siege(civ_id:String,region_id:String,army_id:int=0)->Dictio
 	return result
 
 func begin_siege()->Dictionary:
-	if not active_siege.is_empty() or not active_engagement.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
+	if not active_siege.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
 	if active_threat.is_empty() or bool(active_threat.get("field_encounter",false)) or String(active_threat.get("incident_kind","campaign"))=="raid": return {"error":"A siege needs a settlement campaign, not a passing raid or field encounter."}
 	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
 	if WorldSimulation.enabled and not preload("res://scripts/civilization_siege.gd").available(active_threat.get("owned_target",{})):return {"error":"This city is already under siege."}
@@ -5037,6 +5253,7 @@ func begin_siege()->Dictionary:
 	var army_id:=int(active_threat.get("field_army_id",0))
 	var index:=_field_army_index(army_id)
 	if offensive and (index<0 or int(field_armies[index].get("troops",0))<=0): return {"error":"The investing army is no longer available."}
+	if (offensive and _army_in_battle(army_id)) or (not offensive and _home_battle_running()): return {"error":"Those fighters are already in a fight."}
 	var rival:=String(active_threat.get("source_civ_id",""))
 	if rival.is_empty(): return {"error":"The besieging force has no known campaign owner."}
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -5186,7 +5403,8 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 	if order=="assault":
 		var field_index:=_field_army_index(int(saved.army_id))
 		var troops:=int(field_armies[field_index].get("troops",0)) if String(saved.mode)=="offensive" and field_index>=0 else (int(_home_defense_force().get("troops",0)) if String(saved.mode)=="defensive" else 0)
-		if troops<=0 or not pending_aftermath.is_empty() or not active_engagement.is_empty(): return {"error":"No available local force can enter battle; the siege orders remain in place."}
+		var busy:=_army_in_battle(int(saved.army_id)) if String(saved.mode)=="offensive" else _home_battle_running()
+		if troops<=0 or not pending_aftermath.is_empty() or busy: return {"error":"No available local force can enter battle; the siege orders remain in place."}
 		_end_siege("The forces leave siege positions for battle.",false,false)
 		active_threat=(saved.threat as Dictionary).duplicate(true)
 		var result:=begin_threat_engagement(false)
@@ -5332,11 +5550,13 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	elif same_home:own_force=_home_defense_force(false)
 	var battle:Dictionary={}
 	var seed_value:=int((operation.get("threat",{}) as Dictionary).get("seed",-1))
-	if not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value:battle=engagement_snapshot()
-	else:
+	var live_battle:=false
+	for engagement in own_battles():
+		if int((engagement as Dictionary).get("seed",-2))==seed_value: battle=(engagement as Dictionary).duplicate(true); live_battle=true; break
+	if not live_battle:
 		for past_battle:Dictionary in battle_history:
 			if int(past_battle.get("seed",-2))==seed_value:battle=past_battle.duplicate(true);break
-	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",WorldSimulation.state.settlement_name)) if String(archived_home.get("name",WorldSimulation.state.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":not active_engagement.is_empty() and int(active_engagement.get("seed",-2))==seed_value,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
+	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",WorldSimulation.state.settlement_name)) if String(archived_home.get("name",WorldSimulation.state.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":live_battle,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
 
 func template_recruitment_blocker()->String:
 	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."

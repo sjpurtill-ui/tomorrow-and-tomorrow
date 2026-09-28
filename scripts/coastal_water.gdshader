@@ -17,6 +17,8 @@ uniform vec2 ripple_phase = vec2(0.0);
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
 #include "res://scripts/water_beauty.gdshaderinc"
+#include "res://scripts/world_beauty.gdshaderinc"
+#include "res://scripts/map_chart.gdshaderinc"
 
 float charted_at(vec2 xz) {
 	vec2 uv = clamp(xz/fog_world_size+0.5,vec2(0.0),vec2(1.0));
@@ -205,11 +207,15 @@ void fragment() {
 	// in place of a specular glint a straight-down view can never see.
 	float sheen = smoothstep(0.95,0.0,length((SCREEN_UV-vec2(0.08,0.02))*vec2(1.0,1.25)));
 	water *= 1.0+sheen*0.16*vec3(1.05,1.0,0.90);
-	ALBEDO = water*visible;
+	// From the regional view outward the sea is the chart's pale wash on the
+	// same paper as the land (map_chart.gdshaderinc), crossfaded by view scale.
+	float mc_w = mc_chart_weight(mc_design_km(relative_position,PROJECTION_MATRIX));
+	vec3 chart_sea = mc_w>0.0 ? mc_chart_sea(depth,world_position.xz,CAMERA_POSITION_WORLD.y) : vec3(0.0);
+	ALBEDO = water*visible*(1.0-mc_w);
 	// A chart's sea is a pale slate wash on the page, legible in any light:
 	// part of its colour is carried as emission so low sun cannot sink it to black.
-	EMISSION = unknown_surface*(1.0-visible)+water*visible*0.55;
-	NORMAL_MAP = vec3(normal_wave*visible,1.0)*0.5+0.5;
+	EMISSION = unknown_surface*(1.0-visible)+mix(water*0.55,chart_sea,mc_w)*visible;
+	NORMAL_MAP = vec3(normal_wave*visible*(1.0-mc_w),1.0)*0.5+0.5;
 	ROUGHNESS = mix(0.48,0.38,wind_detail);
-	SPECULAR = 0.14*visible;
+	SPECULAR = 0.14*visible*(1.0-mc_w);
 }
