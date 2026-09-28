@@ -35,6 +35,8 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const March:=preload("res://scripts/march_terrain.gd")
 
 const PLANS_PER_DAY:=3
+## Lattice cells across a rival's straight line (army_land_route.gd).
+const RIVAL_CELLS_ACROSS:=28.0
 const MAX_ROUTE_POINTS:=96
 ## How far along the road a sighting's plausible way ahead reaches (km).
 const ROAD_AHEAD_KM:=40.0
@@ -62,7 +64,11 @@ static func plan(f:Dictionary,ground:Callable=Callable())->Dictionary:
 	if fresh or not f.has("land_leg_base"): f["land_leg_base"]=float(f.get("leg_days",30.0))
 	var straight:=a.distance_to(b)
 	var mix:=mix_of(f)
-	var found:=Route.find(a,b,ground,true,March.context(mix))
+	# The same measure as our armies, on a coarser lattice: up to
+	# PLANS_PER_DAY of these are planned inside one day's tick.
+	var ctx:=March.context(mix)
+	if not ctx.is_empty(): ctx["cells_across"]=RIVAL_CELLS_ACROSS; ctx["key"]=String(ctx.key)+"|rival"
+	var found:=Route.find(a,b,ground,true,ctx)
 	if not found.has("error") and not found.has("e"): found=Route._with_profile(a,found.get("points",[]),mix,ground,found)
 	f["land_route_key"]=key(f)
 	if found.has("error"):

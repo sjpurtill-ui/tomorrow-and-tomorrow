@@ -276,7 +276,7 @@ static func _search_terrain(start:Vector2,goal:Vector2,land:Callable,ctx:Diction
 	var straight_ok:=dist<0.05 or segment_land(start,goal,land,maxf(SAMPLE_KM,dist/LONG_SAMPLES))
 	if straight_ok and dist<STRAIGHT_KM:
 		return _with_profile(start,[goal],mix,land,{"ok":true,"direct":true,"straight":true,"expanded":0,"cells":0})
-	var cell:=clampf(dist/CELLS_ACROSS_TERRAIN,MIN_CELL_KM,MAX_CELL_KM)
+	var cell:=clampf(dist/float(ctx.get("cells_across",CELLS_ACROSS_TERRAIN)),MIN_CELL_KM,MAX_CELL_KM)
 	var pad:=maxf(dist*0.6,cell*10.0)
 	var lo:=Vector2(minf(s.x,g.x),minf(s.y,g.y))-Vector2.ONE*pad
 	var hi:=Vector2(maxf(s.x,g.x),maxf(s.y,g.y))+Vector2.ONE*pad
