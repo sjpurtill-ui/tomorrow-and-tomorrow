@@ -93,6 +93,7 @@ class LiveVoice extends "res://scripts/audience_voice.gd":
 	var rows:Array[Dictionary]=[]  ## every real call's receipt since cleared
 	var last_proposed:Array=[]     ## the lines the model proposed, before validation
 	var last_prompt:=""            ## the last real voice call's scene (never the key)
+	var last_brief:=""             ## what the reader was shown for the last reading
 
 	func idle()->bool:
 		return _requests.is_empty() and _ordering.is_empty() and _reading.is_empty() and _picking.is_empty()
@@ -101,12 +102,14 @@ class LiveVoice extends "res://scripts/audience_voice.gd":
 		_requests.erase(audience_id); _ordering.erase(audience_id); _reading.erase(audience_id); _picking.erase(audience_id)
 
 	func read_order(audience_id:String,text:String,done:Callable)->bool:
-		if order_hook.is_valid() or meter==null: return super.read_order(audience_id,text,done)
 		if _ordering.has(audience_id): return true
 		var config:Dictionary=OrderReader.reader_config(_config())
 		var h:Variant=_hall()
 		if config.is_empty() or h==null or (h.find(audience_id) as Dictionary).is_empty(): return false
+		# The same payload the call below builds: kept to trace what was read.
 		var payload:Dictionary=OrderReader.build_payload(text,OrderReader.world_brief(audience_id),config)
+		last_brief=String(((payload.messages as Array)[1] as Dictionary).get("content",""))
+		if order_hook.is_valid() or meter==null: return super.read_order(audience_id,text,done)
 		if not bool(meter.reserve(self,payload,"order_read")): return false
 		last_raw={}; last_transport=-1; last_http=0; last_finish=""; last_row={}
 		call_started_ms=Time.get_ticks_msec()
@@ -492,13 +495,16 @@ func _replayed_reading(job:Dictionary)->void:
 	var rec:Dictionary=_replay.get("%s#%d" % [String(job.cid),int(job.k)],{})
 	if rec.is_empty():
 		job.status="not_run"; job.why_not="not in the replayed report"; return
-	for key in ["status","latency_ms","tokens","usd","reason","finish","http","transport","why_not"]:
+	for key in ["status","latency_ms","tokens","usd","reason","finish","http","transport","why_not","brief_md5","brief"]:
 		if rec.has(key): job[key]=rec[key]
 	job["latency_ms"]=int(job.get("latency_ms",0))
 	job["raw"]=(rec.get("model_raw",{}) as Dictionary).duplicate(true) if rec.get("model_raw") is Dictionary else {}
 	if String(job.status) in ["asking","pending"]: job.status="failed"
 
 func _got_reading(job:Dictionary,v:LiveVoice,read:Dictionary)->void:
+	# A voice reads one order at a time: its last brief is this one's.
+	job["brief"]=v.last_brief
+	job["brief_md5"]=v.last_brief.md5_text()
 	job["transport"]=v.last_transport
 	job["http"]=v.last_http
 	job["finish"]=v.last_finish
@@ -586,6 +592,14 @@ func _compare_plans(job:Dictionary,real:Dictionary,w:Dictionary)->void:
 	var rv:Dictionary=OR.validate(real,brief) if not real.is_empty() else {"rejected":"no reading"}
 	job["plan_ideal"]=_plan_sig(OR.decide(id,say,iv))
 	job["plan_real"]=_plan_sig(OR.decide(id,say,rv))
+	# Was the reading made from this same brief? Live, it must be (else the
+	# evaluation's states disagree); in a replay, a changed brief means the
+	# recorded reading may be stale (the lists or the lines have moved on).
+	if job.has("brief_md5"):
+		var shown:Dictionary=OR.build_payload(say,brief,{})
+		var now:=String(((shown.messages as Array)[1] as Dictionary).get("content",""))
+		job["brief_changed"]=now.md5_text()!=String(job.brief_md5)
+		if bool(job.brief_changed): job["brief_now"]=now
 	var lines:Array=Hall.find(id).get("lines",[])
 	if not lines.is_empty() and String((lines[lines.size()-1] as Dictionary).get("text",""))==say: lines.pop_back()
 
@@ -1200,7 +1214,7 @@ func _report()->Dictionary:
 	var verdicts:=["exact","equivalent","wrong","failed"]
 	var by_domain:={}; var by_source:={}; var totals:={}; var codes:={}
 	var lat:Array=[]; var timeouts:=0; var cut:=0; var rejected:=0; var consulted:=0; var scored:=0; var bad_ideals:Array=[]
-	var by_consulted:={"exact":0,"equivalent":0,"wrong":0,"failed":0}; var chained:=0; var harmless:=0
+	var by_consulted:={"exact":0,"equivalent":0,"wrong":0,"failed":0}; var chained:=0; var harmless:=0; var stale:Array=[]
 	for v in verdicts+["not_run","not_reached","no_ideal"]: totals[v]=0
 	for job in jobs:
 		var verdict:=String(job.verdict)
@@ -1225,9 +1239,10 @@ func _report()->Dictionary:
 		if verdict=="wrong" and bool(job.get("after_misread",false)): chained+=1
 		if verdict=="wrong" and bool(job.get("step_ok",false)): harmless+=1
 		if job.has("ideal_rejected"): bad_ideals.append("%s (%s)" % [String(job.cid),String(job.ideal_rejected)])
+		if bool(job.get("brief_changed",false)): stale.append(String(job.cid) if int(job.k)==0 else "%s s%d" % [String(job.cid),int(job.k)+1])
 	board["reader"]={"scored":scored,"totals":totals,"by_domain":by_domain,"by_source":by_source,"wrong_by":codes,"latency_ms":{"median":_quantile(lat,0.5),"p90":_quantile(lat,0.9),"max":_quantile(lat,1.0),"n":lat.size()},
 		"timeouts":timeouts,"cut_off":cut,"rejected":rejected,"consulted_by_the_court":consulted,"where_consulted":by_consulted,"wrong_after_an_earlier_misread":chained,
-		"wrong_but_the_step_still_right":harmless,"ideals_the_brief_rejects":bad_ideals}
+		"wrong_but_the_step_still_right":harmless,"ideals_the_brief_rejects":bad_ideals,"brief_changed":stale}
 	# ---- the engine ----
 	var e:={"cases":engine_rows.size(),"ideal_pass":0,"real_pass":0,"broke":[],"fixed":[],"by_domain":{},"user":{"cases":0,"ideal_pass":0,"real_pass":0}}
 	for row in engine_rows:
@@ -1277,7 +1292,7 @@ func _report()->Dictionary:
 	for job in wrong.slice(0,WORST_SHOWN):
 		worst.append({"id":String(job.cid),"step":int(job.k)+1,"domain":String(job.domain),"source":String(job.source),"say":String(job.say),"severity":int(job.severity),"codes":job.codes,
 			"ideal":_words(job.get("ideal_norm",{}),_world(job)),"model":_words(job.get("real_norm",{}),_world(job)),"plan_ideal":String(job.get("plan_ideal","")),"plan_real":String(job.get("plan_real","")),
-			"consulted":bool(job.get("consulted",false)),"step_ok":bool(job.get("step_ok",false)),"case_broken":broken.has(String(job.cid))})
+			"consulted":bool(job.get("consulted",false)),"step_ok":bool(job.get("step_ok",false)),"case_broken":broken.has(String(job.cid)),"brief_changed":bool(job.get("brief_changed",false))})
 	board["worst"]=worst
 	var elapsed:=float(Time.get_ticks_msec()-started_ms)/1000.0
 	var meta:={"started":run_started,"seconds":elapsed,"commit":commit,"model":String(connection.get("reader_model","")),"endpoint_host":String(connection.get("endpoint_host","")),
@@ -1286,11 +1301,14 @@ func _report()->Dictionary:
 	var detail_jobs:Array=[]
 	for job in jobs:
 		var copy:Dictionary={}
-		for key in ["cid","k","domain","source","say","status","verdict","codes","severity","consulted","after_misread","same_effect","step_ok","ideal_rejected","plan_ideal","plan_real","latency_ms","tokens","usd","reason","finish","http","transport","why_not","court_calls"]:
+		for key in ["cid","k","domain","source","say","status","verdict","codes","severity","consulted","after_misread","same_effect","step_ok","ideal_rejected","plan_ideal","plan_real","latency_ms","tokens","usd","reason","finish","http","transport","why_not","court_calls","brief_md5","brief_changed","brief_now"]:
 			if job.has(key): copy[key]=job[key]
 		copy["ideal"]=_words(job.get("ideal_norm",_reduce(_ideal_raw(job)) if job.ideal is Dictionary else {}),_world(job))
 		copy["model"]=_words(job.get("real_norm",{}),_world(job))
 		copy["model_raw"]=job.get("raw",{})
+		# What the reader was shown, kept where the reading went wrong (or the
+		# brief moved), so a misread can be traced to its words and lists.
+		if String(job.get("verdict","")) in ["wrong","failed"] or bool(job.get("brief_changed",false)): copy["brief"]=String(job.get("brief",""))
 		detail_jobs.append(copy)
 	var report:={"meta":meta,"board":board,"reader_steps":detail_jobs,"engine_cases":engine_rows,"voice_steps":voice_rows}
 	var text:=_render(board,meta)
@@ -1351,6 +1369,9 @@ func _render(board:Dictionary,meta:Dictionary)->String:
 	var l:Dictionary=r.latency_ms
 	out.append("  latency median %.1f s, p90 %.1f s, max %.1f s (%d calls); timeouts %d, cut off %d, rejected %d; the court consults the reader on %d of %d scored steps" % [float(l.median)/1000.0,float(l.p90)/1000.0,float(l.max)/1000.0,int(l.n),int(r.timeouts),int(r.cut_off),int(r.rejected),int(r.consulted_by_the_court),scored])
 	if not (r.ideals_the_brief_rejects as Array).is_empty(): out.append("  corpus: %d ideal readings name what their state's brief does not list (judged without that target): %s" % [(r.ideals_the_brief_rejects as Array).size(),", ".join(PackedStringArray(r.ideals_the_brief_rejects))])
+	var stale:Array=r.get("brief_changed",[])
+	if String(meta.replay_of)!="" and not stale.is_empty(): out.append("  %d steps' briefs changed since the recording (their readings may be stale; ask them live again): %s" % [stale.size(),", ".join(PackedStringArray(stale))])
+	elif String(meta.replay_of)=="" and not stale.is_empty(): out.append("  WARNING: %d steps were read from a brief that differs from the one their engine replay built (the evaluation's states disagree): %s" % [stale.size(),", ".join(PackedStringArray(stale))])
 	var e:Dictionary=board.engine
 	out.append("ENGINE  (each case's expectations)  with the ideal reading %d/%d   with the model's %d/%d   broken by the reader %d, fixed %d" % [int(e.ideal_pass),int(e.cases),int(e.real_pass),int(e.cases),(e.broke as Array).size(),(e.fixed as Array).size()])
 	out.append("  the user's own lines: ideal %d/%d, model %d/%d" % [int(e.user.ideal_pass),int(e.user.cases),int(e.user.real_pass),int(e.user.cases)])
@@ -1379,6 +1400,7 @@ func _render(board:Dictionary,meta:Dictionary)->String:
 		if bool(m.case_broken): notes.append("the case fails with this reading")
 		elif bool(m.step_ok): notes.append("the step still did what its case wanted")
 		if not bool(m.consulted): notes.append("the court does not ask the reader here")
+		if bool(m.get("brief_changed",false)): notes.append("its brief changed since the reading was made")
 		if not notes.is_empty(): out.append("     ("+"; ".join(notes)+")")
 	var vfails:=voice_rows.filter(func(x:Dictionary)->bool: return not bool(x.ok) and not String(x.status) in ["not_run","not_reached"])
 	if not vfails.is_empty():
