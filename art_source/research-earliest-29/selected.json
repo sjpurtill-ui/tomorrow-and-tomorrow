@@ -40,24 +40,24 @@
     "line": "demography",
     "game_year": 182,
     "approx_historical_year": -3787,
-    "prompt": "c. 3787 BCE: Villagers consider finite field harvest against households to feed; chalk pastel and cut-paper collage. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b82f38e1-a7e5-41fb-acd4-e31c35b1d172.png",
+    "prompt": "c. 3787 BCE: Chalk pastel and cut-paper collage of adults weighing scarce barley or wheat grain against households to feed; no maize. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-95671e1d-1a2d-4de5-98b6-7b77743d8514.png",
     "asset": "res://assets/ui/research/subjects/carrying_capacity_awareness-v1.png",
-    "sha256": "5f95b6e04978172c76f51e6c1cb062d9150e0049e06128fdac9f301505272deb",
+    "sha256": "2a38e395f2c99a69c02e193313dd44855a4f2c0460d5620e9fd140b0d4522a19",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
   },
   {
     "id": "castor_oil_remedies",
     "line": "health",
     "game_year": 182,
     "approx_historical_year": -3787,
-    "prompt": "c. 3787 BCE: Caregiver prepares castor oil from seeds for another adult; transparent watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-535c9a1a-d778-44be-bc5c-66d932c19065.png",
+    "prompt": "c. 3787 BCE: Watercolor caregiver rubs castor oil from a plain bowl onto another adult's arm, with castor plant and seeds; no machinery. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-053abd8f-7123-43c9-b1e2-f0acfeb77c36.png",
     "asset": "res://assets/ui/research/subjects/castor_oil_remedies-v1.png",
-    "sha256": "6de69d559a61d76383fae528e98279334879988041bda67dde878635c6d5df0b",
+    "sha256": "82f1b093b5a41da5eead09714405c3cea11a0d59187659f1df49c313eb3be59a",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
   },
   {
     "id": "measure_drift_checking",
@@ -148,12 +148,12 @@
     "line": "ecology",
     "game_year": 195,
     "approx_historical_year": -3700,
-    "prompt": "c. 3700 BCE: Woodland workers cut regrown stems from a living coppice stool; naturalist plant-pigment painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1fdf623d-2ccf-4c48-9c90-711b750719c4.png",
+    "prompt": "c. 3700 BCE: Naturalist painting of adult cutting regrown shoots with a visibly lashed flint blade on wooden handle; no metal axe. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fa34245a-3737-4136-9fea-b1dd85de9db7.png",
     "asset": "res://assets/ui/research/subjects/coppice_regrowth_cutting-v1.png",
-    "sha256": "a1e78e3dd82bf693fdfdc47a4a5e49dca0c3934bfedeef9fdf1471ced8184539",
+    "sha256": "8acce03e2a083e27ab99b4f3aa9cca4eee14aeafa5b37bd0a0645a94ff53f4d8",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
   },
   {
     "id": "intercrop_pairing_lore",
@@ -172,12 +172,12 @@
     "line": "production",
     "game_year": 195,
     "approx_historical_year": -3700,
-    "prompt": "c. 3700 BCE: Bronze workers cast a small object with wax model and clay mold; palette-knife impasto oil. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a2a6f283-328a-4173-95b2-ef9fe76d0bc6.png",
+    "prompt": "c. 3700 BCE: Impasto painting of workers pouring from a clay crucible into a clay mold using long wooden poles, hands remote from heat, with wax model. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7f263139-e039-4711-aa24-1d54d3d3af9f.png",
     "asset": "res://assets/ui/research/subjects/lost_wax_casting-v1.png",
-    "sha256": "43fe0f444c5da348e744dbd45dfebfab3ed533641e1dab3b48c585ac2de51b3d",
+    "sha256": "a3b3e3d3ac5dc13cf546b6613ade498c6a65da5ca16fdfc93b3b6b3a3addb4ca",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
   },
   {
     "id": "mutual_aid_pacts",
