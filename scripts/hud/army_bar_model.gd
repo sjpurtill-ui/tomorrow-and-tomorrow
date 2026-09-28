@@ -92,8 +92,8 @@ static func gear_of(formations:Array,mc:Node=null)->Dictionary:
 
 static func gear_words(gear:Dictionary,mc:Node=null)->String:
 	var missing:Dictionary=gear.get("missing",{})
-	if missing.is_empty():return "Gear %d of %d sets." % [int(gear.get("issued",0)),int(gear.get("required",0))]
-	var parts:PackedStringArray=["Gear %d of %d sets." % [int(gear.get("issued",0)),int(gear.get("required",0))]]
+	if missing.is_empty():return "Gear %d of %d." % [int(gear.get("issued",0)),int(gear.get("required",0))]
+	var parts:PackedStringArray=["Gear %d of %d." % [int(gear.get("issued",0)),int(gear.get("required",0))]]
 	for item:String in missing:
 		var row:Dictionary=Logistics.row(item,_host(mc))
 		parts.append("Short %d %s · %d in store" % [int(missing[item]),String(row.get("name",item)),int(row.get("stock",0))])
@@ -109,12 +109,27 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,share:float,fill:Color)->void:
 	canvas.draw_rect(rect,Color(T.RULE_STRONG,0.7),false,1.0)
 
 
+## One colour per bar, so gear, will and supply read apart at a glance:
+## gear steel blue (amber when short), will violet (red when they are
+## close to breaking), supply by its state (green, amber, red).
 static func will_color(will:float)->Color:
-	return T.RED if will<0.3 else T.AMBER
+	return T.RED if will<0.3 else T.VIOLET
 
 
 static func gear_color(share:float)->Color:
-	return T.INK if share>=0.999 else (T.AMBER if share>=0.4 else T.RED)
+	return T.BLUE if share>=0.999 else (T.AMBER if share>=0.4 else T.RED)
+
+
+static func will_words(will:float)->String:
+	return "Will to fight %d%%%s." % [roundi(will*100.0)," · close to breaking" if will<0.3 else ""]
+
+
+## "Supply 82%: fed" and the supply reading's own words.
+static func supply_line(card:Dictionary)->String:
+	var state:=String(card.get("supply_state","well"))
+	var head:="Supply %d%%: %s." % [roundi(float(card.get("supply",1.0))*100.0),{"well":"well fed","strained":"short of food","starving":"going hungry"}.get(state,state)]
+	var words:=String(card.get("supply_words","")).strip_edges()
+	return head if words=="" or words.begins_with("Supply ") else head+"\n"+words
 
 
 # --- Cards -----------------------------------------------------------------------
@@ -293,8 +308,8 @@ static func tooltip(card:Dictionary)->String:
 	var doing:=String(card.get("doing",""))
 	if doing!="":lines.append(doing.substr(0,1).to_upper()+doing.substr(1))
 	lines.append(gear_words(card.get("gear_detail",{})).get_slice("\nClick",0))
-	lines.append("Will to fight %d%%." % roundi(float(card.will)*100.0))
-	lines.append(String(card.get("supply_words","")))
+	lines.append(will_words(float(card.will)))
+	lines.append(supply_line(card))
 	var age:=ArmyMarks.age_words(int(card.get("report_age",0)))
 	if age!="":lines.append(age.substr(0,1).to_upper()+age.substr(1)+" by runner.")
 	lines.append("Click to find them · double-click for orders.")

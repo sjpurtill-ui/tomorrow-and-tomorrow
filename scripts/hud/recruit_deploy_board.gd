@@ -219,9 +219,9 @@ func _line_card(item:Dictionary)->void:
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
 	var title:=T.make_label(String(item.name),15,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.custom_minimum_size.x=80;head.add_child(title)
-	var minus:=_icon_button(head,"minus","",func():report(MilitaryCampaign.recruit_deploy.change_count(id,-1)),"One band fewer.");minus.name="Fewer"
+	var minus:=_icon_button(head,"minus","",func():report(MilitaryCampaign.recruit_deploy.change_count(id,-1)),"One band fewer: one not yet started, else the newest in drill goes home.");minus.name="Fewer"
 	var count:=T.make_label("",15,T.INK);count.add_theme_font_override("font",T.font("ui_strong"));count.custom_minimum_size.x=34;count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;head.add_child(count)
-	var plus:=_icon_button(head,"plus","",func():report(MilitaryCampaign.recruit_deploy.change_count(id,1)),"One band more.");plus.name="More"
+	var plus:=_icon_button(head,"plus","",func():report(MilitaryCampaign.recruit_deploy.change_count(id,1)),"One band more, drilled alongside the others.");plus.name="More"
 	var repeat:=_icon_button(head,"repeat","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"repeat",not bool(MilitaryCampaign.recruit_deploy.line(id).get("repeat",false)))),"Keep raising bands until stopped.")
 	repeat.toggle_mode=true;repeat.name="Repeat"
 	var priority:=_icon_button(head,"prio1","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"priority",(int(MilitaryCampaign.recruit_deploy.line(id).get("priority",1))+1)%3)),"");priority.name="Priority"
@@ -282,6 +282,7 @@ func update_values()->void:
 	for item:Dictionary in lines:
 		by_id[int(item.id)]=item;bands+=int(item.in_training);sent+=int(item.deployed)
 	queue_counts.text="%d training · %d sent" % [bands,sent] if not lines.is_empty() else ""
+	var stock:=Model.stock_rows() if not lines.is_empty() else {}
 	for control:Dictionary in live:
 		var item:Dictionary=by_id.get(int(control.id),{})
 		if item.is_empty():continue
@@ -290,7 +291,7 @@ func update_values()->void:
 		for candidate:Dictionary in item.bands:
 			if int(candidate.slot)==int(control.slot):band=candidate;break
 		if band.is_empty():continue
-		_update_band(control,band)
+		_update_band(control,band,stock)
 
 
 func _update_head(control:Dictionary,item:Dictionary)->void:
@@ -309,17 +310,17 @@ func _update_head(control:Dictionary,item:Dictionary)->void:
 	(control.minus as Button).disabled=not bool(item.repeat) and int(item.remaining)<=0 and int(item.in_training)<=1
 
 
-func _update_band(control:Dictionary,band:Dictionary)->void:
+func _update_band(control:Dictionary,band:Dictionary,stock:Dictionary={})->void:
 	var meters:Array=control.meters
 	var men_tip:="%d of %d men gathered." % [int(band.men),int(band.men_target)]
 	if bool(band.men_short):men_tip+="\nThe rest are called up as people come free."
-	meters[0].set_reading(float(band.men)/maxf(1.0,float(band.men_target)),"%d/%d" % [int(band.men),int(band.men_target)],T.GREEN if not bool(band.men_short) else T.AMBER,men_tip)
-	var gear_tip:=Model.gear_words(band)
-	meters[1].set_reading(float(band.gear)/maxf(1.0,float(band.gear_target)),"%d/%d" % [int(band.gear),int(band.gear_target)],T.AMBER if bool(band.gear_short) else T.GREEN,gear_tip)
+	meters[0].set_reading(float(band.men)/maxf(1.0,float(band.men_target)),"%d/%d" % [int(band.men),int(band.men_target)],T.INK_MUTED if not bool(band.men_short) else T.AMBER,men_tip)
+	var gear_tip:=Model.gear_words(band,null,stock)
+	meters[1].set_reading(float(band.gear)/maxf(1.0,float(band.gear_target)),"%d/%d" % [int(band.gear),int(band.gear_target)],T.AMBER if bool(band.gear_short) else T.BLUE,gear_tip)
 	meters[1].clickable=bool(band.gear_short)
 	var drill_tip:="%d%% of first drill done." % roundi(float(band.training)*100.0)
 	for reason:String in band.reasons:drill_tip+="\n"+reason
-	meters[2].set_reading(float(band.training),"%d%%" % roundi(float(band.training)*100.0),T.BLUE,drill_tip)
+	meters[2].set_reading(float(band.training),"%d%%" % roundi(float(band.training)*100.0),T.TEAL,drill_tip)
 	var date:DateMark=control.date
 	if bool(band.ready):date.set_reading("Ready",T.GREEN_TEXT,"Trained and armed. They join the army at home with the next day.")
 	elif bool(band.waits_for_gear):date.set_reading("Needs gear",T.AMBER_TEXT,"Drill is done; they wait for their gear.\n"+gear_tip.get_slice("\nClick",0))
@@ -382,7 +383,7 @@ class DateMark extends Control:
 	var colour:=Color.BLACK
 
 	func _ready()->void:
-		custom_minimum_size=Vector2(104,22);mouse_filter=Control.MOUSE_FILTER_STOP
+		custom_minimum_size=Vector2(128,22);mouse_filter=Control.MOUSE_FILTER_STOP
 
 	func set_reading(words:String,ink:Color,tip:String)->void:
 		text=words;colour=ink;tooltip_text=tip;queue_redraw()

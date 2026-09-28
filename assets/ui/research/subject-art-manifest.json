@@ -4176,5 +4176,21 @@
   "graded_tool_retirement": {"path": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png", "focus": [0.5, 0.6]},
   "gypsum_mortar": {"path": "res://assets/ui/research/subjects/gypsum_mortar-v1.png", "focus": [0.5, 0.6]},
   "stubble_grazing": {"path": "res://assets/ui/research/subjects/stubble_grazing-v1.png", "focus": [0.5, 0.5]},
-  "towpaths": {"path": "res://assets/ui/research/subjects/towpaths-v1.png", "focus": [0.5, 0.5]}
+  "towpaths": {"path": "res://assets/ui/research/subjects/towpaths-v1.png", "focus": [0.5, 0.5]},
+  "ash_fat_soap": {"path": "res://assets/ui/research/subjects/ash_fat_soap-v1.png", "focus": [0.5, 0.62]},
+  "ghee": {"path": "res://assets/ui/research/subjects/ghee-v1.png", "focus": [0.5, 0.5]},
+  "mast_making": {"path": "res://assets/ui/research/subjects/mast_making-v1.png", "focus": [0.5, 0.5]},
+  "people_herd_counts": {"path": "res://assets/ui/research/subjects/people_herd_counts-v1.png", "focus": [0.5, 0.55]},
+  "separate_temple_palace_stores": {"path": "res://assets/ui/research/subjects/separate_temple_palace_stores-v1.png", "focus": [0.5, 0.5]},
+  "workshop_layout_planning": {"path": "res://assets/ui/research/subjects/workshop_layout_planning-v1.png", "focus": [0.5, 0.29]},
+  "copper_battle_axes": {"path": "res://assets/ui/research/subjects/copper_battle_axes-v1.png", "focus": [0.5, 0.5]},
+  "crew_count_scribes": {"path": "res://assets/ui/research/subjects/crew_count_scribes-v1.png", "focus": [0.5, 0.5]},
+  "dressed_stone_masonry": {"path": "res://assets/ui/research/subjects/dressed_stone_masonry-v1.png", "focus": [0.5, 0.5]},
+  "ferry_crossings": {"path": "res://assets/ui/research/subjects/ferry_crossings-v1.png", "focus": [0.5, 0.5]},
+  "pit_pond_reclamation": {"path": "res://assets/ui/research/subjects/pit_pond_reclamation-v1.png", "focus": [0.5, 0.5]},
+  "copper_razors": {"path": "res://assets/ui/research/subjects/copper_razors-v1.png", "focus": [0.5, 0.5]},
+  "cross_settlement_registries": {"path": "res://assets/ui/research/subjects/cross_settlement_registries-v1.png", "focus": [0.5, 0.5]},
+  "gangs_of_ten": {"path": "res://assets/ui/research/subjects/gangs_of_ten-v1.png", "focus": [0.5, 0.4]},
+  "legume_field_interplanting": {"path": "res://assets/ui/research/subjects/legume_field_interplanting-v1.png", "focus": [0.5, 0.5]},
+  "patron_protection": {"path": "res://assets/ui/research/subjects/patron_protection-v1.png", "focus": [0.5, 0.35]}
 }

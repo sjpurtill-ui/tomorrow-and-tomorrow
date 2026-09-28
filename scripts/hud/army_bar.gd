@@ -44,6 +44,22 @@ func _ready()->void:
 	strip=Control.new();strip.name="Cards";strip.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.clip_contents=true;add_child(strip)
 	left_button=_arrow("‹",-1);right_button=_arrow("›",1)
 	refresh()
+	_mount_plans.call_deferred()
+
+
+## The battle plans the generals are carrying out stay drawn on the map, as
+## HOI4 keeps its front lines: under the rest of the HUD, over the ground.
+var plans:Control
+
+func _exit_tree()->void:
+	if is_instance_valid(plans):plans.queue_free()
+
+func _mount_plans()->void:
+	var hud:=get_parent()
+	# Only under the HUD shell (hud/command_rail_hud.gd), never another parent.
+	if hud==null or not hud.has_method("_position_army_bar") or is_instance_valid(plans):return
+	plans=PlanInk.new();plans.bar=self;plans.name="BattlePlans"
+	hud.add_child(plans);hud.move_child(plans,0)
 
 
 func _arrow(text:String,step:int)->Button:
@@ -68,6 +84,7 @@ func bar_height()->float:
 func place(rect:Rect2)->void:
 	area=rect
 	position=rect.position;size=rect.size
+	visible=not cards.is_empty() and not bool(get_meta("covered",false))
 	_arrange()
 
 
@@ -92,7 +109,7 @@ func refresh()->void:
 				if on_map in (card.members as Array) and String(card.id)!=selected_id and not _member_selected(card,on_map):selected_id=String(card.id)
 	var shape:=str(fresh.map(func(c:Dictionary)->String:return String(c.id)))+selected_id
 	cards=fresh
-	visible=not cards.is_empty()
+	visible=not cards.is_empty() and not bool(get_meta("covered",false))
 	if shape!=_shape:
 		_shape=shape
 		_rebuild()
@@ -234,7 +251,8 @@ class ArmyCard extends Control:
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		var changed_face:bool=String(card.get("id",""))!=String(data.id) or card.get("general",{})!=data.get("general",{})
 		card=data;card_id=String(data.id);chosen=is_chosen
-		tooltip_text=Model.tooltip(card)
+		# The full reading is worked out only when the pointer rests here.
+		tooltip_text="%s · %s men" % [String(card.get("title","")),EraWords.grouped(int(card.get("men",0)))]
 		if changed_face and is_instance_valid(face):_face()
 		queue_redraw()
 
@@ -277,9 +295,9 @@ class ArmyCard extends Control:
 			if rect.has_point(at):
 				match row:
 					0:return Model.gear_words(card.get("gear_detail",{}))
-					1:return "Will to fight %d%%. Below a quarter they break." % roundi(float(card.will)*100.0)
-					2:return String(card.get("supply_words",""))
-		return tooltip_text
+					1:return Model.will_words(float(card.will))+"\nBelow a quarter they break."
+					2:return Model.supply_line(card)
+		return Model.tooltip(card)
 
 	func _draw()->void:
 		if card.is_empty():return
@@ -317,6 +335,61 @@ class ArmyCard extends Control:
 			Model.draw_bar(self,rect,float(rows[row][1]),Color(rows[row][2],fade))
 
 
+class PlanInk extends Control:
+	## Front lines drawn by the player (army_orders.gd give_plan) that a
+	## general is holding: an inked line with its teeth. The army command
+	## panel draws them itself while it is open.
+	var bar:Node
+	var clock:=0.0
+	var heights:Dictionary={}
+
+	func _ready()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE;set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	func _process(delta:float)->void:
+		clock+=delta
+		if clock>=0.1:clock=0.0;queue_redraw()
+
+	func _screen(terrain:Node,point:Dictionary)->Vector2:
+		var at:=Vector2(float(point.get("x",0.0)),float(point.get("z",0.0)))
+		if not heights.has(at):
+			if heights.size()>2048:heights.clear()
+			heights[at]=float(terrain._height_at(at.x,at.y))
+		var world:=Vector3(at.x,float(heights[at])+0.001,at.y)
+		if terrain.camera.is_position_behind(world):return Vector2.INF
+		return terrain.camera.unproject_position(world)
+
+	func _draw()->void:
+		var terrain:Node=bar.terrain if bar!=null else null
+		if not is_instance_valid(terrain) or not ("camera" in terrain) or terrain.camera==null:return
+		if is_instance_valid(MilitaryCampaign.joint_operations.screen):return
+		var command:RefCounted=MilitaryCampaign.command_hierarchy
+		var held:={}
+		for entry:Dictionary in command.data.nodes.values():
+			var order:Dictionary=entry.get("order",{})
+			if String(order.get("mission",""))=="defend":held[String(order.get("zone_id",""))]=true
+		var ink:=BattleMarks.OXBLOOD
+		for region:Dictionary in command.data.zones:
+			if String(region.get("plan",""))!="front" or not held.has(String(region.get("id",""))) or not region.get("line") is Array:continue
+			var line:=PackedVector2Array()
+			for p in region.line:
+				if not p is Dictionary:continue
+				var at:=_screen(terrain,p)
+				if at.is_finite():line.append(at)
+			if line.size()<2:continue
+			draw_polyline(line,Color(BattleMarks.PAPER,0.85),6.0,true)
+			draw_polyline(line,Color(ink,0.9),3.0,true)
+			for i in line.size()-1:
+				var a:=line[i];var b:=line[i+1];var length:=a.distance_to(b)
+				if length<4.0:continue
+				var along:=(b-a)/length;var out:=Vector2(along.y,-along.x)
+				var t:=7.0
+				while t<length:
+					var base:=a+along*t
+					draw_colored_polygon(PackedVector2Array([base-along*4.0,base+along*4.0,base+out*7.0]),Color(ink,0.9))
+					t+=14.0
+
+
 class BandChip extends Control:
 	## One band of a selected army: name, men and its state glyph.
 	var bar:Node
@@ -332,8 +405,11 @@ class BandChip extends Control:
 
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		card=data;card_id=String(data.id);chosen=is_chosen
-		tooltip_text=Model.tooltip(card)
+		tooltip_text="%s · %s men" % [String(card.get("title","")),EraWords.grouped(int(card.get("men",0)))]
 		queue_redraw()
+
+	func _get_tooltip(_at:Vector2)->String:
+		return Model.tooltip(card) if not card.is_empty() else ""
 
 	func _gui_input(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:

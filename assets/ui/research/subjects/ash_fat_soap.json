@@ -1,0 +1,16 @@
+{
+  "id": "ash_fat_soap",
+  "line": "health",
+  "game_year": 345,
+  "approx_historical_year": -2700,
+  "prompt": "c. 2700 BCE: Soap from Ash and Fat. Soap from ash and fat. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7668c2f5-9fb1-4090-8ae7-aa5c43803bc8.png",
+  "asset": "res://assets/ui/research/subjects/ash_fat_soap-v1.png",
+  "sha256": "62c6622cd45aa29e4c251cc9877a6fa8cfe9f7d572a264fa170464d484810a53",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.62
+  ]
+}

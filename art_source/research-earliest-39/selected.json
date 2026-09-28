@@ -1,0 +1,214 @@
+[
+  {
+    "id": "ash_fat_soap",
+    "line": "health",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Soap from Ash and Fat. Soap from ash and fat. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7668c2f5-9fb1-4090-8ae7-aa5c43803bc8.png",
+    "asset": "res://assets/ui/research/subjects/ash_fat_soap-v1.png",
+    "sha256": "62c6622cd45aa29e4c251cc9877a6fa8cfe9f7d572a264fa170464d484810a53",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.62
+    ]
+  },
+  {
+    "id": "ghee",
+    "line": "nutrition",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Ghee. Ghee: butter clarified for keeping. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3f3358c6-9317-4467-9644-137d0cf588d6.png",
+    "asset": "res://assets/ui/research/subjects/ghee-v1.png",
+    "sha256": "b34cd939a68fb5477a26b6a07fe8df895ccab3b286c2fd78fc48f17bbc3ca7d7",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "mast_making",
+    "line": "logistics",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Stepped Mast and Yard. Stepped mast and yard. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-061bb5f3-a988-4ddc-b6e6-7193de18d996.png",
+    "asset": "res://assets/ui/research/subjects/mast_making-v1.png",
+    "sha256": "72777a689e3d443b076bca5c4d865b13689a7c17f1e37865ededc24084eef157",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "people_herd_counts",
+    "line": "demography",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Periodic Counts of People and Herds. Periodic counts of people and herds. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c25313d9-5b82-4f00-aebf-5de01a271704.png",
+    "asset": "res://assets/ui/research/subjects/people_herd_counts-v1.png",
+    "sha256": "1afd8d7e492d5279ac47b0b6ab9a50af7eb1c9f33553f19fc23b11b2db3ee9f8",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.55
+    ]
+  },
+  {
+    "id": "separate_temple_palace_stores",
+    "line": "institutions",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Temple and Palace Households Keep Separate Stores. Temple and palace households keep separate stores. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-91374048-216f-423c-9626-b6a0c637be5c.png",
+    "asset": "res://assets/ui/research/subjects/separate_temple_palace_stores-v1.png",
+    "sha256": "1a3cad14b29849c207fc65d959642feb4b0785a5826c083507d93b54c2bc0d23",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "workshop_layout_planning",
+    "line": "labor",
+    "game_year": 345,
+    "approx_historical_year": -2700,
+    "prompt": "c. 2700 BCE: Workshop Layout Planning. Workshop layout planning. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cbfdc79e-cf67-430b-9cdd-8c95aec618b9.png",
+    "asset": "res://assets/ui/research/subjects/workshop_layout_planning-v1.png",
+    "sha256": "9102a4af1ca530a3bb17ee60a2d030465942614bdee42737b3615aecb28ce534",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.29
+    ]
+  },
+  {
+    "id": "copper_battle_axes",
+    "line": "security",
+    "game_year": 350,
+    "approx_historical_year": -2667,
+    "prompt": "c. 2667 BCE: Cast Copper Battle-axes. Cast copper battle-axes. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7690f345-2428-48b4-92e6-c48c59d8e1cb.png",
+    "asset": "res://assets/ui/research/subjects/copper_battle_axes-v1.png",
+    "sha256": "67b43930d3efcd0966d8f3ffb634e764f207fa5e63be4ca0173ea73b80c28bed",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "crew_count_scribes",
+    "line": "labor",
+    "game_year": 350,
+    "approx_historical_year": -2667,
+    "prompt": "c. 2667 BCE: Scribes Assigned to Count Crews. Scribes assigned to count crews. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b986da91-4879-419e-98a7-49ab9c253bc9.png",
+    "asset": "res://assets/ui/research/subjects/crew_count_scribes-v1.png",
+    "sha256": "a52c56ed2bd5e5ed44d9a7e6cfe5420aaab69d90df09e617ad6f37951126a55f",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "dressed_stone_masonry",
+    "line": "infrastructure",
+    "game_year": 350,
+    "approx_historical_year": -2667,
+    "prompt": "c. 2667 BCE: Dressed-stone Masonry with Copper Tools. Dressed-stone masonry with copper tools. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bdb07e71-189b-49a4-a638-5400268927b7.png",
+    "asset": "res://assets/ui/research/subjects/dressed_stone_masonry-v1.png",
+    "sha256": "4420189bc0201af93b640d5eeab39259b7c1049ee7a83b6d58c031b0b13db09d",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "ferry_crossings",
+    "line": "logistics",
+    "game_year": 350,
+    "approx_historical_year": -2667,
+    "prompt": "c. 2667 BCE: Fixed Ferry Crossings. Fixed ferry crossings. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-87fdf731-cd1c-48d6-9d24-9dcf7adea95d.png",
+    "asset": "res://assets/ui/research/subjects/ferry_crossings-v1.png",
+    "sha256": "f2e79e404d9805fbf126297dafea3b5f963ed7e8cc360f5a0d06ed00bb35b04e",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "pit_pond_reclamation",
+    "line": "ecology",
+    "game_year": 350,
+    "approx_historical_year": -2667,
+    "prompt": "c. 2667 BCE: Spent Clay and Stone Pits Turned into Ponds. Spent clay and stone pits turned into ponds. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7118dde4-c13d-4be1-84f0-e708e312990c.png",
+    "asset": "res://assets/ui/research/subjects/pit_pond_reclamation-v1.png",
+    "sha256": "33c363362ff4d9ba123eb90d727ac0a1db390eba409af83cc39ca506d5924b89",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "copper_razors",
+    "line": "health",
+    "game_year": 355,
+    "approx_historical_year": -2633,
+    "prompt": "c. 2633 BCE: Shaving and Plucking with Copper Blades. Shaving and plucking with copper blades. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f29caa6c-034d-4936-841c-6060dc058112.png",
+    "asset": "res://assets/ui/research/subjects/copper_razors-v1.png",
+    "sha256": "ba2ed7fd5600538320b22f4759c430d16f440bcf8010a83a9a671f01a14ef353",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "cross_settlement_registries",
+    "line": "institutions",
+    "game_year": 355,
+    "approx_historical_year": -2633,
+    "prompt": "c. 2633 BCE: Registers Shared Between Settlements. Registers shared between settlements. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-50a45f9c-f679-4f58-befe-cec799742179.png",
+    "asset": "res://assets/ui/research/subjects/cross_settlement_registries-v1.png",
+    "sha256": "fd6630e57d12df3feccd98b2e12f1a9f6b942b0f8c92a4f4a4eccc521ff830dc",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "gangs_of_ten",
+    "line": "labor",
+    "game_year": 355,
+    "approx_historical_year": -2633,
+    "prompt": "c. 2633 BCE: Gangs of Ten Under a Foreman. Gangs of ten under a foreman. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cb324a28-95f5-49ef-97fe-70031b975014.png",
+    "asset": "res://assets/ui/research/subjects/gangs_of_ten-v1.png",
+    "sha256": "620425b45d01f1c8df3e72026fdfbee8582da9f5e1f02ca8c848f8f7cb2e1f04",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  {
+    "id": "legume_field_interplanting",
+    "line": "nutrition",
+    "game_year": 355,
+    "approx_historical_year": -2633,
+    "prompt": "c. 2633 BCE: Legumes Interplanted in Grain Fields. Legumes interplanted in grain fields. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9fab5b6f-2b7a-453e-8846-91fb948d3892.png",
+    "asset": "res://assets/ui/research/subjects/legume_field_interplanting-v1.png",
+    "sha256": "44c29e2abc643f69dfa704244f6437da362c457bdb1793ba45cfc5f4000a20ab",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "patron_protection",
+    "line": "demography",
+    "game_year": 355,
+    "approx_historical_year": -2633,
+    "prompt": "c. 2633 BCE: Outsiders Under a Patron's Protection. Outsiders under a patron's protection. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5d711e8-b8ca-441a-8d4c-5dd95ba56f9c.png",
+    "asset": "res://assets/ui/research/subjects/patron_protection-v1.png",
+    "sha256": "46c34dd5e104fa5d1dbb600bccaad1aaf01ffab6a7cc96bf0f638c10d8214f6c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  }
+]

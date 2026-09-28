@@ -379,8 +379,8 @@ func _refresh_force_card()->void:
 	var gear:Dictionary=card.get("gear_detail",{})
 	force_meters[0].clickable=not (gear.get("missing",{}) as Dictionary).is_empty()
 	force_meters[0].set_reading(float(card.get("gear",1.0)),"%d%%" % roundi(float(card.get("gear",1.0))*100),BarModel.gear_color(float(card.get("gear",1.0))),BarModel.gear_words(gear))
-	force_meters[1].set_reading(float(card.get("will",0.6)),"%d%%" % roundi(float(card.get("will",0.6))*100),BarModel.will_color(float(card.get("will",0.6))),"Will to fight %d%%. Below a quarter they break." % roundi(float(card.get("will",0.6))*100))
-	force_meters[2].set_reading(float(card.get("supply",1.0)),"%d%%" % roundi(float(card.get("supply",1.0))*100),BarModel.supply_color(String(card.get("supply_state","well"))),String(card.get("supply_words","")))
+	force_meters[1].set_reading(float(card.get("will",0.6)),"%d%%" % roundi(float(card.get("will",0.6))*100),BarModel.will_color(float(card.get("will",0.6))),BarModel.will_words(float(card.get("will",0.6)))+"\nBelow a quarter they break.")
+	force_meters[2].set_reading(float(card.get("supply",1.0)),"%d%%" % roundi(float(card.get("supply",1.0))*100),BarModel.supply_color(String(card.get("supply_state","well"))),BarModel.supply_line(card))
 
 func _refresh_where()->void:
 	var kind:=Orders.needs(verb_id)
@@ -465,8 +465,9 @@ func _refresh_plan()->void:
 	var line:=Orders.summary(reading)
 	if verb_id=="":line="Choose an order, then its target."
 	elif plan_mode!="":line=String(PLAN_HINTS.get(plan_mode,"")).get_slice(":",0)
-	elif line=="" and not bool(reading.get("ready",false)):line="Show them where on the map."
+	elif not bool(reading.get("ready",false)) and String(reading.get("likely",""))!="impossible":line=""
 	happens_label.text=line
+	happens_label.get_parent().visible=line!=""
 	var likely:=String(reading.get("likely",""))
 	happens_label.add_theme_color_override("font_color",T.RED_TEXT if likely=="impossible" else (T.AMBER_TEXT if likely=="object" else T.INK))
 	happens_label.tooltip_text="\n".join(reading.get("lines",[])) if not (reading.get("lines",[]) as Array).is_empty() else line
@@ -598,15 +599,19 @@ func hover_target(at:Vector2)->void:
 		if not hit.is_empty():
 			var ground:=Vector2(float(hit.x),float(hit.z))
 			candidate={"type":"spot","x":ground.x,"z":ground.y}
-			key="spot:%d:%d" % [roundi(ground.x*2.0),roundi(ground.y*2.0)]
+			key="spot:%d:%d" % [roundi(ground.x),roundi(ground.y)]
 	if candidate.is_empty():
 		if not hover.is_empty():hover={};ink.queue_redraw()
 		return
-	# The same target, or too soon after the last reckoning: only the
-	# pointer moves. The road is worked out at most about twelve times a second.
+	# The same target (a town, or the same square kilometre of ground), or too
+	# soon after the last reckoning: only the pointer moves. The road is worked
+	# out at most about eight times a second.
 	var now:=Time.get_ticks_msec()
-	if key==String(hover.get("key","")) or (not hover.is_empty() and now-int(hover.get("clock",0))<80):
-		hover.at=at;ink.queue_redraw();return
+	if key==String(hover.get("key","")):
+		hover.at=at;hover.erase("pending");ink.queue_redraw();return
+	if not hover.is_empty() and now-int(hover.get("clock",0))<120:
+		# Reckoned again once the pointer settles (see _process).
+		hover.at=at;hover["pending"]=at;ink.queue_redraw();return
 	var reading:Dictionary
 	if drawing_arrow:
 		var aim:={"verb":"attack","target":candidate} if String(candidate.type)!="spot" else {"verb":"goto","target":candidate}
@@ -1052,6 +1057,10 @@ func _process(delta:float)->void:
 	# new controls. It remains usable until the player closes and reopens it.
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing
 	if is_instance_valid(cancel_boundary_button):cancel_boundary_button.visible=map.drawing
+	if hover.has("pending") and Time.get_ticks_msec()-int(hover.get("clock",0))>=120:
+		var settled:Vector2=hover.pending
+		hover.erase("pending");hover.clock=0
+		hover_target(settled)
 	tick+=delta
 	if tick>=1:
 		tick=0;tree.refresh();_update_status();_update_current_order();_refresh_mission_availability()

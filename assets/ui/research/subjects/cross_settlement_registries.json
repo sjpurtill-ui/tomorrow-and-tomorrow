@@ -1,0 +1,12 @@
+{
+  "id": "cross_settlement_registries",
+  "line": "institutions",
+  "game_year": 355,
+  "approx_historical_year": -2633,
+  "prompt": "c. 2633 BCE: Registers Shared Between Settlements. Registers shared between settlements. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-50a45f9c-f679-4f58-befe-cec799742179.png",
+  "asset": "res://assets/ui/research/subjects/cross_settlement_registries-v1.png",
+  "sha256": "fd6630e57d12df3feccd98b2e12f1a9f6b942b0f8c92a4f4a4eccc521ff830dc",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
