@@ -1,0 +1,16 @@
+{
+  "id": "gate_watchtowers",
+  "line": "security",
+  "game_year": 230,
+  "approx_historical_year": -3467,
+  "prompt": "c. 3467 BCE: Defenders watch from low timber lookout beside woven palisade gate; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c233d94f-9961-4c8b-ae33-a3f33d55d9fb.png",
+  "asset": "res://assets/ui/research/subjects/gate_watchtowers-v1.png",
+  "sha256": "268e7890971304bb9ae7de42672fcca55cabc3b918f37fe7e870bbf6bbda8893",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear.",
+  "focus": [
+    0.5,
+    0.3
+  ]
+}
