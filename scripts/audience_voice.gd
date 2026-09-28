@@ -1688,8 +1688,24 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 		sources.append("%d" % roundi(float(terms.amount)))
 		sources.append("%d" % roundi(float(terms.amount)*0.5))
 	var number:=RegEx.new(); number.compile("\\d+(?:\\.\\d+)?")
-	for m in number.search_all(" ".join(sources)): allowed[m.get_string()]=true
+	for m in number.search_all(plain_numbers(" ".join(sources))):
+		var n:=m.get_string()
+		allowed[n]=true
+		# "enough for 30.0 days" may be said "about 30 days".
+		if "." in n:
+			allowed[str(int(floorf(float(n))))]=true
+			allowed[str(roundi(float(n)))]=true
 	return allowed
+
+## "6,000" and "1,100" as a speaker writes them are the facts' 6000 and 1100.
+static func plain_numbers(text:String)->String:
+	var re:=RegEx.new(); re.compile("(\\d),(\\d{3})(?!\\d)")
+	var out:=text
+	for i in 3:
+		var next:=re.sub(out,"$1$2",true)
+		if next==out: break
+		out=next
+	return out
 
 func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Array[Dictionary]:
 	var keys:=cast_keys(s)
@@ -1741,7 +1757,7 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		if not line_ok(text,_era_for(s,_member(s,key))): rejections.append("words these people do not have yet"); continue   # anachronism, quotation or named source
 		if (_voice_state().said as Dictionary).has(_text_key(text)): rejections.append("a line already said in this hall"); continue   # said before in this hall
 		var invented:=PackedStringArray()
-		for m in number.search_all(text):
+		for m in number.search_all(plain_numbers(text)):
 			if not allowed.has(m.get_string()): invented.append(m.get_string())
 		if not invented.is_empty(): rejections.append("a number that is not in the facts (%s)" % ", ".join(invented)); continue
 		if key!="envoy" and not key in principals and not gated_all:
@@ -3418,7 +3434,9 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 		"speak":
 			var classify:=COMMAND_CLASSIFY
 			if bool(extra.get("read",false)): classify=" These words were talk or a question, not an order: nobody acts, nobody is harmed or seized, nobody marches, nothing changes hands; no line claims or promises that anything was done."
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_gate_words(s),_divine_classify_words(s),classify]
+			# Asked "is that all?" or "why not all?": the whole account, runners too.
+			var whole:=" If asked whether that is all, or why not all of them, the line gives every part of the account the facts list: those still there by status, the killed, those who ran or got away and where, those taken, with each number." if String(s.get("origin",""))=="court" else ""
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now).%s Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),whole,_gate_words(s),_divine_classify_words(s),classify]
 		"divine":
 			return _divine_instruction(s,extra)
 		"command":

@@ -38,7 +38,9 @@ const AiMode:=preload("res://scripts/ai_mode.gd")
 ## 3.5 seconds and about one in four went past the old 4-second limit, so the
 ## plain reading decided orders the live reader would have read better.
 const TIMEOUT_SECONDS:=8.0
-const MAX_COMPLETION_TOKENS:=420
+## Room for a reasoning model's thinking and the reply: short follow-ups were
+## cut off at 420 (only the tokens used are billed).
+const MAX_COMPLETION_TOKENS:=900
 const MAX_RESPONSE_BYTES:=32768
 ## Below this nothing is carried out without asking.
 const MIN_CONFIDENCE:=0.6
@@ -66,6 +68,9 @@ const WAR_ACTIONS:=["town_fate","town_measure","attack","siege","raid","storm","
 ## (occupation_measures.gd), and how hard its hand is.
 const MEASURE_IDS:=Measures.IDS
 const STANCES:=["","lenient","firm","harsh","brutal"]
+## Whom the order is about, as the words name them ("kill all the women":
+## women). The reader never widens a group the words name.
+const WHO:=["","men","women","children","elders","everyone","bound"]
 const LEGACY_ACTIONS:=["send","trade","envoy","civic","order"]
 const ACTIONS:=["none"]+PERSON_ACTIONS+WAR_ACTIONS+LEGACY_ACTIONS+["confirm","cancel"]
 const TARGET_TYPES:=["person","group","town","people","band","none"]
@@ -77,16 +82,19 @@ const HARM:=["kill","maim"]
 ## the only part that changes). The examples teach the flat reading shape.
 const SYSTEM_PROMPT:="""You read what a ruler means in a royal audience of a fictional early society. You do NOT write dialogue. Return only the JSON asked for, one flat object.
 kind: 'question' for a question, 'speech' for talk, thanks, threats without an order, musing; 'order' for any instruction however phrased ('I want you to...', 'go ahead', 'come home').
-action: what is ordered. Person acts (kill, maim, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take) fall on ONE person from HALL. town_fate: what becomes of a town WE HOLD and its people (set flags). town_measure: what our garrison is to DO with the people of a town WE HOLD while holding it; measures lists every measure named: bind_men (round up, tie, bind, chain, detain, lock up, hold under guard), disarm (take or burn their weapons), hostages, curfew (keep them in their houses), search (search the houses), labour (make them work, build walls, clear roads, work fields), requisition (take their food or stores), conscript (take their men into our bands), execute_ringleaders (kill the leaders, make an example), release (free, untie, let go), relief (feed, protect, reward those who help), set_headman (set someone over them), settle (move our families in). stance is how hard the hand is: harsh for threats to families or beatings ("if any resist, threaten their wives"), brutal for "kill any who resist", lenient for gently, else ''. Group acts on a town's people are town_measure, never a person act. attack, siege, raid, storm: war on a FOREIGN town. intercept or pursue: go after their army or band in the field, or the men who fled a town. recall: bring bands home (type band and a band's id for one band, type none for all). defend: guard home or a place. drill: train first. send (scouts, envoys), trade, envoy, civic, order (recruit, make weapons, build, haul, any other work at home): other business. confirm: yes / do it / go ahead / send them, to the OPEN QUESTION. cancel: no / wait / leave it, to the OPEN QUESTION. none: not an order.
+action: what is ordered. Person acts (kill, maim, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take) fall on ONE person from HALL. town_fate: what becomes of a town WE HOLD and its people (set flags). town_measure: what our garrison is to DO with the people of a town WE HOLD while holding it; measures lists every measure named: bind_men (round up, tie, bind, chain, detain, lock up, hold under guard), disarm (take or burn their weapons), hostages, curfew (keep them in their houses), search (search the houses), labour (make them work, build walls, clear roads, work fields), requisition (take their food or stores), conscript (take their men into our bands), execute_ringleaders (kill the leaders, make an example), release (free, untie, let go), relief (feed, protect, reward those who help), set_headman (set someone over them), settle (move our families in). stance is how hard the hand is: harsh for threats to families or beatings ("if any resist, threaten their wives"), brutal for "kill any who resist", lenient for gently, else ''. Group acts on a town's people are town_measure, never a person act. attack, siege, raid, storm: war on a FOREIGN town (a raid or war on a people: type people, ref that people). Killing, taking captives from or burning the people of a town we do NOT hold is still kill (type group) or town_fate with its flags, NEVER attack: the court asks to take the town first. intercept or pursue: go after their army or band in the field, or the men who fled a town. recall: bring bands home, or stop something under way (call off the chase, bring the men back) (type band and a band's id for one band, type none for all). defend: guard home or a place. drill: train first. send (scouts, envoys), trade, envoy, civic, order (recruit, make weapons, build, haul, any other work at home): other business. confirm: yes / do it / go ahead / send them, to the OPEN QUESTION. cancel: no / wait / leave it, ONLY as the answer to the OPEN QUESTION. none: not an order. Telling an envoy to leave or refusing them ('no tribute, get out', 'go home') is speech, not exile, unless the words order them driven out, bound or harmed.
 type and ref: ref MUST be an id copied from the lists, or '' when none fits. 'him', 'her', 'you' mean a person (the one marked SPEAKING is the one before the ruler). Killing or harming many people (all the men, the villagers, everyone, them all, a town's people, a whole people) is NEVER a person in HALL: use type group (ref = the town or people meant, or ''), town, or people. A town we hold is a town_fate, never an attack. actor: the id of the one told to do it, from HALL, or ''.
-flags: each that applies to a town's fate (kill_men, kill_all, captives, raze, tribute, spare, hold, leave, free), and full_force for 'with everything'. count: a number said, else 0. resource: goods named, else ''. destination: an id or ''. measures and stance: for town_measure, else [] and ''.
-confidence 0 to 1 for how sure you are of action AND target. If the words are unclear about something grave (killing, maiming, burning a town, going to war, abandoning a town), give low confidence and write clarify: ONE short, plain question the court would ask the ruler (no flattery, no promise). Otherwise clarify is ''.
+who: whom the order is about as the words name them: men, women, children, elders, bound (those we tied up), everyone (only when the words say everyone), else ''. flags: each that applies to a town's fate (kill_men for killing, kill_all ONLY when the words say everyone, captives, raze, tribute, spare, hold, leave, free), and full_force for 'with everything'. Taking people back to our town is town_fate with captives and destination that town (hostages are held in their own town). count: a number said, else 0. resource: goods named, else ''. destination: an id or ''. measures and stance: for town_measure, else [] and ''.
+confidence 0 to 1 for how CLEAR the words are about the action and the target, not how grave the act is: a named act on a named place or people is 0.9 or more. If the words are unclear about something grave (killing, maiming, burning a town, going to war, abandoning a town), give low confidence and write clarify: ONE short, plain question the court would ask the ruler (no flattery, no promise). Otherwise clarify is ''.
 Examples (ids stand for ids from the lists):
-"kill all the males of <a town we hold>" -> order, town_fate, type group, ref that town, flags [kill_men].
+"kill all the males of <a town we hold>" -> order, town_fate, type group, ref that town, who men, flags [kill_men].
+"kill all the women of <a town we hold>" -> order, town_fate, type group, ref that town, who women, flags [kill_men] (never kill_all).
+"kill the men of <a town we do not hold>" -> order, kill, type group, ref that town, who men, flags [kill_men], confidence 0.9.
+"take all girls under 10 back to <home>" -> order, town_fate, type group, ref the town, who children, flags [captives], destination home.
 "take the women and girls to <home> and burn it" -> order, town_fate, type group, ref the town, flags [captives, raze], destination home.
 "round up the men and tie them up; if any resist, threaten their wives" -> order, town_measure, type group, ref the town, measures [bind_men], stance harsh.
 "send everything we have against <their town>" -> order, attack, type town, ref that town, flags [full_force].
-"chase the men who fled <a town we hold>" -> order, pursue, type town, ref that town.
+"chase the men who fled <a town we hold>" -> order, pursue, type town, ref that town. "call off the chase" -> order, recall.
 "how many are bound?" -> question, none. "yes" or "do it" with an OPEN QUESTION -> order, confirm."""
 
 # --------------------------------------------------------------------------
@@ -147,6 +155,16 @@ static func world_brief(audience_id:String)->Dictionary:
 			var once:=Ledger.hold_words(h) if bool(h.taken) else ""
 			(brief.towns as Array).append({"id":tid,"name":String(t.name).trim_prefix("Reported home of "),"people":String(t.civ_name),"once":once})
 			ids[tid]="town"
+		# A town we burned or left keeps its id: it is still a place the ruler
+		# may speak of ("what is left of Tsaren", "go back to Tsaren").
+		for pair in Ledger.towns():
+			var tid2:="town:"+String(pair[1])
+			if ids.has(tid2): continue
+			var h2:=Ledger.hold(String(pair[0]),String(pair[1]))
+			var region:Dictionary=WorldSimulation.world.region_snapshot(String(pair[0]),String(pair[1]))
+			if String(region.get("name",""))=="": continue
+			(brief.towns as Array).append({"id":tid2,"name":String(region.name),"people":Hall._civ_name(String(pair[0])),"once":Ledger.hold_words(h2)})
+			ids[tid2]="town"
 		for c:Dictionary in WorldSimulation.world.civilizations:
 			var cid:=String(c.get("id",""))
 			if cid=="" or cid=="player": continue
@@ -161,7 +179,10 @@ static func world_brief(audience_id:String)->Dictionary:
 			if int(army.get("troops",0))<=0: continue
 			var bid:="band:%d" % int(army.get("army_id",0))
 			var commander:Dictionary=army.get("commander",{}) if army.get("commander") is Dictionary else {}
-			(brief.bands as Array).append({"id":bid,"name":String(army.get("name","")),"troops":int(army.troops),"where":WarOrders._where(army),"status":String(army.get("status","")),"leader":String(commander.get("name",""))})
+			# What it is doing now: a chase under way, a march on a town.
+			var doing:=preload("res://scripts/pursuit.gd").doing_words(army)
+			if doing=="" and String(army.get("status",""))=="moving" and army.get("court_order") is Dictionary: doing="marching on %s" % String((army.court_order as Dictionary).get("name",(army.court_order as Dictionary).get("city_name","their town")))
+			(brief.bands as Array).append({"id":bid,"name":String(army.get("name","")),"troops":int(army.troops),"where":WarOrders._where(army),"status":String(army.get("status","")),"leader":String(commander.get("name","")),"doing":doing})
 			ids[bid]="band"
 		brief.besieging=String(WarOrders._besieged().get("name",""))
 	ids["home"]="town"
@@ -216,7 +237,7 @@ static func brief_text(brief:Dictionary)->String:
 	for p:Dictionary in brief.peoples: rows.append("%s = %s (%s)" % [String(p.id),String(p.name),"AT WAR with us" if bool(p.at_war) else "at peace"])
 	out.append("PEOPLES: "+("; ".join(rows) if not rows.is_empty() else "none known"))
 	rows=PackedStringArray()
-	for b:Dictionary in brief.bands: rows.append("%s = %s, %d fighters, %s%s" % [String(b.id),String(b.name),int(b.troops),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else ""])
+	for b:Dictionary in brief.bands: rows.append("%s = %s, %d fighters, %s%s%s" % [String(b.id),String(b.name),int(b.troops),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",("; UNDER WAY: "+String(b.doing)) if String(b.get("doing",""))!="" else ""])
 	out.append("OUR BANDS: "+("; ".join(rows) if not rows.is_empty() else "none in the field")+". Trained at home: %d." % int(brief.home_troops))
 	if String(brief.besieging)!="": out.append("WE ARE BESIEGING: "+String(brief.besieging))
 	out.append("OPEN QUESTION: "+(String(brief.pending) if String(brief.pending)!="" else "none"))
@@ -247,13 +268,14 @@ static func build_payload(text:String,brief:Dictionary,config:Dictionary)->Dicti
 static func response_format(_brief:Dictionary={})->Dictionary:
 	return {"type":"json_schema","json_schema":{"name":"order_reading","strict":true,"schema":{
 		"type":"object","additionalProperties":false,
-		"required":["kind","action","actor","type","ref","flags","count","resource","destination","measures","stance","confidence","clarify"],
+		"required":["kind","action","actor","type","ref","who","flags","count","resource","destination","measures","stance","confidence","clarify"],
 		"properties":{
 			"kind":{"type":"string","enum":KINDS},
 			"action":{"type":"string","enum":ACTIONS},
 			"actor":{"type":"string"},
 			"type":{"type":"string","enum":TARGET_TYPES},
 			"ref":{"type":"string"},
+			"who":{"type":"string","enum":WHO},
 			"flags":{"type":"array","items":{"type":"string","enum":DETAIL_FLAGS}},
 			"count":{"type":"integer"},
 			"resource":{"type":"string"},
@@ -339,6 +361,10 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 	var stance:=String(stance_in) if stance_in is String else ("" if stance_in==null else "?")
 	if not stance in STANCES: return {"rejected":"unknown stance"}
 	if stance!="": details["stance"]=stance
+	var who_in:Variant=details_in.get("who",raw.get("who",""))
+	var who:=String(who_in) if who_in is String else ""
+	if not who in WHO: return {"rejected":"unknown who"}
+	if who!="": details["who"]=who
 	var clarify:=String(raw.get("clarify","")).strip_edges().replace("\n"," ").substr(0,MAX_CLARIFY_CHARS)
 	return {"kind":kind,"action":action,"actor":actor,"type":ttype,"ref":ref,"details":details,
 		"confidence":clampf(float(conf) if (conf is float or conf is int) else 0.0,0.0,1.0),"clarify":clarify}
@@ -364,6 +390,10 @@ static func _held_by_ref(ref:String)->Dictionary:
 static func _place_by_ref(ref:String)->Dictionary:
 	if not ref.begins_with("town:"): return {}
 	for t:Dictionary in WarOrders.known_places():
+		if "town:"+String(t.city_id)==ref: return t
+	# A town we took and no longer guard: named as what it is, as offline
+	# (court_war_orders.find_target), never "we hold no town".
+	for t:Dictionary in WarOrders.unguarded_towns():
 		if "town:"+String(t.city_id)==ref: return t
 	return {}
 
@@ -523,6 +553,13 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 				return _war_plan(none)
 			return _war_plan(_measure_plan(text,held,details,base))
 		"attack","siege","raid":
+			# "Kill the men of <their town>" read as an attack with the fate in
+			# its flags: the fate is what was ordered, so it stays the fate and the
+			# war leader asks to take the town first (never a bare march).
+			if bool(details.get("kill_men",false)) or bool(details.get("kill_all",false)) or bool(details.get("captives",false)):
+				var as_fate:=reading.duplicate(true); as_fate["action"]="town_fate"
+				if String(as_fate.get("type",""))=="town": as_fate["type"]="group"
+				return _engine_plan(audience,text,as_fate,theirs)
 			var r:=base.duplicate(); r["kind"]=action; r["target"]=_foreign_target(ref)
 			# By night, and with how many: the same words as offline.
 			if details.has("count"): r["count"]=int(details.count)
@@ -619,9 +656,22 @@ static func _foreign_target(ref:String)->Dictionary:
 	return {}
 
 static func _fate(lower:String,details:Dictionary,theirs:Dictionary)->Dictionary:
+	## What the words decide about the town, with what the reader read. The
+	## reader never widens a group the words name: "kill all the women" is the
+	## women, never everyone (the bound men with them).
 	var fate:=TownFate.fate_words(lower).duplicate()
+	var named:=fate.has("kill_groups") or bool(fate.get("bound_only",false))
+	var who:=String(details.get("who",""))
 	for flag:String in ["kill_men","kill_all","captives","raze","tribute","spare","hold","leave","free"]:
-		if bool(details.get(flag,false)): fate[flag]=true
+		if not bool(details.get(flag,false)): continue
+		if flag=="kill_all" and (named or who in ["men","women","children","elders","bound"]): continue
+		fate[flag]=true
+	# Whom the reader heard, when the words' own reading named nobody.
+	if bool(fate.get("kill_men",false)) and not named and not bool(fate.get("kill_all",false)):
+		match who:
+			"women","children","elders": fate["kill_groups"]=[who]
+			"bound": fate["bound_only"]=true
+			"everyone": fate["kill_all"]=true
 	if bool(fate.get("kill_all",false)): fate["kill_men"]=true
 	if bool(fate.get("kill_men",false)): fate.erase("spare")
 	if details.has("count"): fate["count"]=int(details.count)
@@ -683,7 +733,10 @@ static func default_question(reading:Dictionary)->String:
 static func _fate_phrase(reading:Dictionary)->String:
 	var d:Dictionary=reading.get("details",{})
 	var parts:PackedStringArray=PackedStringArray()
-	if bool(d.get("kill_all",false)): parts.append("put everyone to death")
+	var who:=String(d.get("who",""))
+	if who in ["women","children","elders","bound"] and (bool(d.get("kill_men",false)) or bool(d.get("kill_all",false)) or String(reading.get("action",""))=="kill"):
+		parts.append("put %s to death" % String({"women":"the women","children":"the children","elders":"the old people","bound":"the bound men"}[who]))
+	elif bool(d.get("kill_all",false)) or who=="everyone": parts.append("put everyone to death")
 	elif bool(d.get("kill_men",false)) or String(reading.get("action",""))=="kill": parts.append("put the men to death")
 	if bool(d.get("captives",false)): parts.append("take captives")
 	if bool(d.get("raze",false)): parts.append("burn it")
