@@ -111,6 +111,23 @@ func test_the_reading_is_flat_and_read_exactly_as_the_old_shape()->void:
 	assert_bool(OR.validate({"kind":"order","action":"town_fate","type":"group","ref":town,"flags":["burn_everyone"]},brief).has("rejected")).is_true()
 	assert_bool(OR.validate({"kind":"order","action":"attack","type":"town","ref":"town:nowhere","flags":[]},brief).has("rejected")).is_true()
 
+func test_offline_the_rulers_own_words_go_as_the_brief_they_mean()->void:
+	## Without a live voice the envoy carries one of the briefs offered; the
+	## ruler's typed words go as the one they mean, and are what the envoy
+	## carries. Words that match none are never swapped for another brief.
+	var civ_id:=preload("res://tests/diplomacy_fixture.gd").build_fixture()
+	ForeignDiplomacy.leader(civ_id)["audience_day"]=0
+	var dialogue:=WorldSimulation.dialogue
+	assert_str(String(dialogue.typed_choice(civ_id,"Offer them our friendship and ask for safe passage along the river").get("id",""))).is_equal("honour")
+	assert_str(String(dialogue.typed_choice(civ_id,"Warn them to keep off our borders").get("id",""))).is_equal("warn")
+	assert_str(String(dialogue.typed_choice(civ_id,"What do they want from us?").get("id",""))).is_equal("ask_intent")
+	assert_dict(dialogue.typed_choice(civ_id,"We want the river fords kept open")).is_empty()
+	var words:="Offer them our friendship and ask for safe passage along the river; give nothing yet."
+	assert_bool(dialogue.ask_offline(civ_id,"honour",words)).is_true()
+	var thread:Dictionary=dialogue.thread(civ_id)
+	assert_str(String(thread.private_brief)).is_equal(words)
+	assert_str(String(thread.offline_choice)).is_equal("honour")
+
 func _live(c:Dictionary)->Dictionary:
 	var run:=h.run(c,"live")
 	return run

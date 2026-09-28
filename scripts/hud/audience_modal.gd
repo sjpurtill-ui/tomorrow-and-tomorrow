@@ -2618,9 +2618,16 @@ func speak_to_court(text:String)->void:
 		foreign={}
 		named=_war_leader_entry()
 	if named.is_empty() and not foreign.is_empty():
-		if show_foreign(String(foreign.civ_id)) and is_instance_valid(speech_input):
-			speech_input.text=text
-			ForeignDialogue.thread(String(foreign.civ_id))["next_brief"]=text
+		# The words are set down as the envoy's brief before the channel opens,
+		# so the compose area shows them (the foreign view has no court speech
+		# box of its own); offline, the brief they mean is the one picked.
+		var civ_id:=String(foreign.civ_id)
+		ForeignDialogue.thread(civ_id)["next_brief"]=text.substr(0,1500)
+		if show_foreign(civ_id) and is_instance_valid(compose) and not compose.online():
+			var picked:Dictionary=WorldSimulation.dialogue.typed_choice(civ_id,text)
+			if not picked.is_empty():
+				compose.sel.talk=String(picked.id)
+				compose.refresh(true)
 		return
 	var entry:=named if not named.is_empty() else Roster.default_speaker()
 	if entry.is_empty():
