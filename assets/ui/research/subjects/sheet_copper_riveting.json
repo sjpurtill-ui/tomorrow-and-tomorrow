@@ -3,10 +3,10 @@
   "line": "production",
   "game_year": 205,
   "approx_historical_year": -3633,
-  "prompt": "c. 3633 BCE: Smiths join hammered copper sheets using small copper rivets and simple mallet; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d5183482-8017-40ba-8bc1-1d534024fc31.png",
+  "prompt": "c. 3633 BCE: Impasto workers rivet irregular hand-hammered copper sheets using a hand-held natural hammerstone on stone slab, no metal hammer. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-66e7b52f-53b4-4e5e-a6a2-d15a5d4e73f2.png",
   "asset": "res://assets/ui/research/subjects/sheet_copper_riveting-v1.png",
-  "sha256": "a77d15cb70f7f232c754ddc8ab3944e7dd3e5ab76e26aec95541bee6d210abfb",
+  "sha256": "84a36790538ce66dd949c4a2aa4b1a37c613b97acc8942e82f4f57ec8daac0f8",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
 }

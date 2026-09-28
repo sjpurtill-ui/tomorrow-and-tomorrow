@@ -4039,7 +4039,7 @@
   "river_bathing": {"path": "res://assets/ui/research/subjects/river_bathing-v1.png", "focus": [0.5, 0.5]},
   "clay_dome_ovens": {"path": "res://assets/ui/research/subjects/clay_dome_ovens-v1.png", "focus": [0.5, 0.5]},
   "copper_daggers": {"path": "res://assets/ui/research/subjects/copper_daggers-v1.png", "focus": [0.5, 0.5]},
-  "free_adult_assembly": {"path": "res://assets/ui/research/subjects/free_adult_assembly-v1.png", "focus": [0.5, 0.5]},
+  "free_adult_assembly": {"path": "res://assets/ui/research/subjects/free_adult_assembly-v1.png", "focus": [0.5, 0.35]},
   "kin_wards": {"path": "res://assets/ui/research/subjects/kin_wards-v1.png", "focus": [0.5, 0.5]},
   "plank_extended_dugouts": {"path": "res://assets/ui/research/subjects/plank_extended_dugouts-v1.png", "focus": [0.5, 0.5]},
   "sapling_protection_customs": {"path": "res://assets/ui/research/subjects/sapling_protection_customs-v1.png", "focus": [0.5, 0.5]},
