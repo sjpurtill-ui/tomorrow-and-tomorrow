@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/salinity_recognition-v1.png",
   "sha256": "40201499d4671302e3ce94dca2dcf29fef4aedd9d925f2c1527d51c046465cc2",
   "mode": "built-in image_gen / new image",
-  "review": "Rerolled to remove multi-tier stepped background; barley ears and salinity actions reviewed full and cropped."
+  "review": "Rerolled to remove multi-tier stepped background; barley ears and salinity actions reviewed full and cropped.",
+  "focus": [
+    0.5,
+    0.42
+  ]
 }
