@@ -491,6 +491,47 @@ static func _common_answer(sheet:Dictionary,lower:String)->String:
 	return ""
 
 # --------------------------------------------------------------------------
+# A foreign envoy's own people
+# --------------------------------------------------------------------------
+
+## An envoy's answer about their own people, from what they know of them
+## (court_facts.people): the towns they still hold, where their ruler sits,
+## their number, the towns they lost to us. "" when the words ask none of these.
+static func envoy_answer(p:Dictionary,question:String)->String:
+	var text:=question.strip_edges()
+	if p.is_empty() or text.is_empty() or not is_question(text): return ""
+	var lower:=text.to_lower()
+	var towns:Array=p.get("towns",[])
+	var names:=PackedStringArray(towns.map(func(t:Variant)->String: return String((t as Dictionary).get("name",""))))
+	var lost:Array=p.get("lost",[])
+	var lost_words:=PackedStringArray()
+	var lost_seat:=""
+	for l in lost:
+		var ld:Dictionary=l
+		lost_words.append("%s %s" % [String(ld.name),{"held":"is in your hands","taken":"is in your hands","burned":"you burned"}.get(String(ld.get("state","")),"is lost to us")])
+		if bool(ld.get("seat",false)): lost_seat=String(ld.name)
+	var lost_line:=(" "+_cap("; ".join(lost_words))+".") if not lost_words.is_empty() else ""
+	# Where their ruler sits now.
+	if _has(lower,"\\b(ruler|chief|king|queen|leader|lord|headman|master)\\b") and _has(lower,"\\b(where|sits?|seat|lives?|dwells?|stays?|now|hall)\\b"):
+		if String(p.get("seat",""))=="": return "Our ruler has no town left to sit in."
+		return "Our ruler sits at %s now.%s" % [String(p.seat),(" %s was our seat until you took it from us." % lost_seat) if lost_seat!="" and lost_seat!=String(p.seat) else ""]
+	# A town named: how many live there, or that it is lost to us.
+	for t in towns:
+		if _name_in(lower,String((t as Dictionary).get("name",""))):
+			return "%s is ours; about %d live there%s." % [String(t.name),int(t.people),", and our ruler sits there now" if String(t.name)==String(p.get("seat","")) else ""]
+	for l in lost:
+		if _name_in(lower,String((l as Dictionary).get("name",""))):
+			return "%s? %s." % [String(l.name),_cap(String({"held":"it is in your hands; your garrison holds it","taken":"it is in your hands","burned":"you burned it"}.get(String(l.get("state","")),"it is lost to us")))]
+	# How many they are.
+	if _has(lower,"\\bhow many\\b") and _has(lower,"\\b(you|your|they|them|people|souls|of you|are you|are they)\\b"):
+		return "We are about %d, in %s." % [int(p.get("people",0)),_join(names) if not names.is_empty() else "no town of our own now"]
+	# What they hold still, their other towns.
+	if _has(lower,"\\b(hold|have|keep|own|left|remain|still|other|another|towns?|cities|city|villages?|settlements?|homes?)\\b"):
+		if names.is_empty(): return "We hold no town now.%s" % lost_line
+		return "We still hold %s.%s" % [_join(names),lost_line]
+	return ""
+
+# --------------------------------------------------------------------------
 # The war leader's own count, the headman's stores, the keeper's tribute
 # --------------------------------------------------------------------------
 
