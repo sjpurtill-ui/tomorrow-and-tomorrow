@@ -74,7 +74,7 @@ class Chip extends PanelContainer:
 	func _init(text:String="",accent:Color=Color(0,0,0,0),tip:String="")->void:
 		label=Label.new();add_child(label)
 		label.autowrap_mode=TextServer.AUTOWRAP_OFF
-		mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER;size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 		set_reading(text,accent,tip)
 	func set_reading(text:String,accent:Color,tip:String="")->void:
 		label.text=text;tooltip_text=tip

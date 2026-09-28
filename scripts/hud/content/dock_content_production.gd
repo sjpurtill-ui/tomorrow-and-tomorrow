@@ -37,7 +37,7 @@ func tab(sub:int)->Dictionary:
 		block.merge({"lines":line_views(lines,context,stock,pool),"capacity":snapshot.capacity,"context":context,
 			"materials":_stores(lines),"hands":{"total":int(pool.total),"lines":int(pool.lines)},"boatyards":_boatyards(),"stock":stock,
 			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":MilitaryCampaign.workshop.owner(),"status":MilitaryCampaign.workshop.data.status,
-			"repairs":_repair_list(),"recipes":recipe_list(lines),"start_target":START_TARGET,
+			"repairs":_repair_list(),"recipes":recipe_list(lines,stock),"start_target":START_TARGET,
 			"on_action":_action,"on_detail":workshop._open_workshop_job,"on_header":_header_action,"on_start":_start,
 			"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
 			"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
@@ -190,8 +190,10 @@ func _repairs()->Dictionary:
 ## Every known workshop recipe as a picker card: what one item needs, who it
 ## arms, and the one short reason it cannot start yet. Era-gated: only what
 ## the people know how to make.
-static func recipe_list(lines:Array)->Array:
+static func recipe_list(lines:Array,stock:Array=[])->Array:
 	var production=MilitaryCampaign.PersistentProduction
+	var short:={}
+	for row:Dictionary in stock:short[String(row.item)]=int(row.get("deficit",0))
 	var running:Array[String]=[]
 	for line:Dictionary in lines:running.append(String(line.get("item","")))
 	var gate:Dictionary=MilitaryCampaign._production_line_gate()
@@ -216,7 +218,7 @@ static func recipe_list(lines:Array)->Array:
 			full=" ".join(blockers);reason=Plain.blocker_text(String(blockers[0]))
 		var category:=Logistics.category(item)
 		result.append({"item":item,"name":production.product_name(item),"group":_group(item),"category":category,"needs":text,"materials":bill,
-			"arms":Logistics.arms(item),"description":production.product_description(item),"blocker":reason,"blocker_full":full,"running":item in running,"start_target":START_TARGET})
+			"arms":Logistics.arms(item),"description":production.product_description(item),"blocker":reason,"blocker_full":full,"running":item in running,"start_target":START_TARGET,"deficit":int(short.get(item,0))})
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var ga:=Logistics.CATEGORY_ORDER.find(String(a.category));var gb:=Logistics.CATEGORY_ORDER.find(String(b.category))
 		return ga<gb if ga!=gb else String(a.name)<String(b.name))

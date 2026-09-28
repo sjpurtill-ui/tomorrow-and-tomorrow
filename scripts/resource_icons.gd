@@ -1040,7 +1040,7 @@ static func workshop_texture(kind:String,ink:Color,px:int=24)->Texture2D:
 	match kind:
 		"bench": glyph=[_rr(28,23,21,3.6,1,ink),_s(13,27,11,46,3,ink),_s(43,27,45,46,3,ink),_s(12,38,44,38,2,ink),_s(22,17,33,13,2.2,ink),_rr(35,12.5,3.4,2.4,0.8,ink)]
 		"anchor": glyph=[_ring(28,10,4.2,2.4,ink),_s(28,14,28,46,3,ink),_s(19,20,37,20,2.6,ink),_s(12,33,17,41,3,ink),_s(17,41,28,47,3,ink),_s(28,47,39,41,3,ink),_s(39,41,44,33,3,ink),_t(8,29,15,34,9,37,ink),_t(48,29,41,34,47,37,ink)]
-		"mend": glyph=[_s(13,48,33,24,4.2,ink),_rr(33,17,13,5.5,1.5,ink),_rr(45,17,3,7.5,1,ink)]
+		"mend": glyph=[_rr(28,14,17,6.5,2,ink),_rr(12,14,3,8,1.5,ink),_s(28,20,28,51,6,ink)]
 		"hands": glyph=[_c(20,20,5,ink),_rr(20,33,6,8,4,ink),_s(16,41,30,44,3.4,ink),_s(24,30,36,28,2.4,ink),_s(36,28,44,20,2.2,ink),_rr(45,19,4,2.6,1,ink),_rr(40,44,8,3,1,ink)]
 		_: glyph=[_c(28,28,8,ink)]
 	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(glyph,WORKSHOP_PAPER,1.2),px))

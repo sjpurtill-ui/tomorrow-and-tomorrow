@@ -46,6 +46,8 @@ var repeat_one:Button
 var repeat_always:Button
 var skill:W.SkillGraph
 var _arm_close:=false
+## The line's condition colour, drawn as a rule down its left edge.
+var _left_rule:=Color(0,0,0,0)
 
 func build(owner_screen:Node,first:Dictionary)->void:
 	screen=owner_screen;view=first
@@ -177,7 +179,6 @@ func apply(next:Dictionary)->void:
 	skill.set_reading(float(view.efficiency),String(view.get("skill_tip","")))
 	tooltip_text=""
 
-var _left_rule:=Color(0,0,0,0)
 func _draw()->void:
 	# The line's condition, as a rule down its left edge.
 	if _left_rule.a>0.0:draw_rect(Rect2(Vector2.ZERO,Vector2(4,size.y)),_left_rule)

@@ -128,6 +128,8 @@ func _build_header()->void:
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
 	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)
+	var run_word:=Label.new();run_word.text="RUN BY";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
+	var run_gap:=Control.new();run_gap.custom_minimum_size.x=6;run.add_child(run_gap)
 	_header.staff=W.text_button("Staff","");_header.staff.name="RunStaff";run.add_child(_header.staff)
 	_header.staff.pressed.connect(func():_header_act("hand_back"))
 	_header.you=W.text_button("You","");_header.you.name="RunYou";run.add_child(_header.you)
@@ -223,7 +225,7 @@ func _build_stock()->void:
 		for part:String in ["Have","Need","Short","Mend","Damaged"]:
 			var label:Control
 			if part=="Mend":
-				var mend:=TextureRect.new();mend.texture=Icons.workshop_texture("mend",T.AMBER_TEXT,32);mend.custom_minimum_size=Vector2(14,14)
+				var mend:=TextureRect.new();mend.texture=Icons.workshop_texture("mend",T.AMBER_TEXT,36);mend.custom_minimum_size=Vector2(16,16)
 				mend.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mend.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mend.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label=mend
 			else:
 				var text:=Label.new()
@@ -337,6 +339,7 @@ func _build_households(parent:Node,full:bool)->void:
 	if not full:return
 	var techniques:Array=data.get("techniques",[])
 	if techniques.is_empty():return
+	var gap:=Control.new();gap.custom_minimum_size.y=8;box.add_child(gap)
 	var tech_head:=Label.new();tech_head.text="HOUSEHOLD TECHNIQUES";T.text(tech_head,"kicker",T.GOLD_TEXT);box.add_child(tech_head)
 	var flow:=HFlowContainer.new();flow.name="Techniques";flow.add_theme_constant_override("h_separation",8);flow.add_theme_constant_override("v_separation",6);box.add_child(flow)
 	for technique:Dictionary in techniques:
