@@ -1,0 +1,12 @@
+{
+  "id": "windbreak_hedgerow_siting",
+  "line": "ecology",
+  "game_year": 155,
+  "approx_historical_year": -3967,
+  "prompt": "c. 3967 BCE: Villagers plant living hedgerow against windward edge of grain field; layered plant-pigment naturalist field painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d9c721b4-d83f-4657-9e95-59ef8f67d441.png",
+  "asset": "res://assets/ui/research/subjects/windbreak_hedgerow_siting-v1.png",
+  "sha256": "09416508346d36cdbcf3068ec992b1d7297a9b9a01e5cc6534cb86dc027847de",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
