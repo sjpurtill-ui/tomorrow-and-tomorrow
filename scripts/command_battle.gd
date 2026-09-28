@@ -20,13 +20,14 @@ func attach(engagement:Dictionary,candidates:Array)->void:
 		var count:=int(actual.troops)
 		var entry:={"army_id":int(actual.army_id),"offset":forms.size(),"length":actual.formations.size(),"initial":count}
 		for key:String in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]:entry[key]=int(actual.get(key,0))
+		entry["captured_pool"]=int(actual.get("captured_pool",0))
 		records.append(entry);forms.append_array(actual.formations)
 		supply+=float(actual.get("supply_level",1))*count;morale+=float(actual.get("morale",.7))*count;readiness+=float(actual.get("readiness",.5))*count;total+=count
 	var combined:Dictionary=host.simulator.create_formation_force(String(original.name),forms,morale/maxi(1,total),readiness/maxi(1,total))
 	combined["commander"]=original.get("commander",{}).duplicate(true);combined["supply_level"]=supply/maxi(1,total)
-	for key:String in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]:
+	for key:String in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead","captured_pool"]:
 		combined[key]=0
-		for entry:Dictionary in records:combined[key]+=int(entry[key])
+		for entry:Dictionary in records:combined[key]+=int(entry.get(key,0))
 	engagement[side]=combined;engagement[side+"_initial"]=total;engagement["command_participants"]=records
 func engaged(army_id:int)->bool:
 	var assigned:int=host._field_army_index(army_id)
@@ -54,7 +55,7 @@ func commit(result:Dictionary)->void:
 	var side:String=result.home_side;var final:Dictionary=result[side];var entries:Array=result.command_participants
 	var member_rounds:Array=[];var totals:Array=[]
 	for entry:Dictionary in entries:
-		member_rounds.append([]);totals.append({"killed":0,"wounded":0,"scattered":0,"disabled":0,"severe_disability":0})
+		member_rounds.append([]);totals.append({"killed":0,"wounded":0,"scattered":0,"disabled":0,"severe_disability":0,"captured":0})
 	for round_data:Dictionary in result.rounds:
 		var weights:Array=[];var cohort:Array=round_data.get(side+"_cohort_losses",[])
 		for entry:Dictionary in entries:
@@ -67,11 +68,13 @@ func commit(result:Dictionary)->void:
 		var wounded:=allocate(int(breakdown.get("wounded",0)),weights)
 		for index in weights.size():weights[index]-=wounded[index]
 		var scattered:=allocate(int(breakdown.get("scattered",0)),weights)
+		for index in weights.size():weights[index]-=scattered[index]
+		var captured:=allocate(int(breakdown.get("captured",0)),weights)
 		var disabled:=allocate(int(breakdown.get("disabled",0)),wounded)
 		var severe:=allocate(int(breakdown.get("severe_disability",0)),disabled)
 		for index in entries.size():
 			var entry:Dictionary=entries[index];var local_round:=round_data.duplicate(true)
-			var losses:={"killed":killed[index],"wounded":wounded[index],"scattered":scattered[index],"disabled":disabled[index],"severe_disability":severe[index]}
+			var losses:={"killed":killed[index],"wounded":wounded[index],"scattered":scattered[index],"disabled":disabled[index],"severe_disability":severe[index],"captured":captured[index]}
 			local_round[side+"_casualties"]=losses
 			for key:String in ["_cohort_losses","_cohort_equipment_losses","_cohort_ammunition_used"]:local_round[side+key]=(round_data.get(side+key,[]) as Array).slice(int(entry.offset),int(entry.offset)+int(entry.length))
 			member_rounds[index].append(local_round)
@@ -81,6 +84,7 @@ func commit(result:Dictionary)->void:
 		local.formations=final.formations.slice(int(entry.offset),int(entry.offset)+int(entry.length));local.remaining_troops=0
 		for formation:Dictionary in local.formations:local.remaining_troops+=int(formation.count)
 		for pair:Array in [["wounded_pool","wounded"],["disabled_pool","disabled"],["severe_disabled_pool","severe_disability"],["scattered_pool","scattered"],["dead","killed"]]:local[pair[0]]=int(entry[pair[0]])+int(totals[index][pair[1]])
+		local["captured_in_battle"]=int(totals[index].captured)
 		host._apply_field_army_result(int(entry.army_id),local,member_rounds[index],int(result.seed),side)
 		var force_index:int=host._field_army_index(int(entry.army_id))
 		if force_index>=0:host.field_armies[force_index]["last_report"]=host._army_report_snapshot(host.field_armies[force_index])
