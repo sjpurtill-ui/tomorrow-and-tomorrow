@@ -115,6 +115,7 @@ func _expect_end(rec:Dictionary,done:Dictionary,army_id:int)->void:
 	if want.has("report_says"): _check(text.contains(String(want.report_says)),"expect","the report does not say '%s': %s" % [String(want.report_says),text.substr(0,240)])
 	if want.has("report_not"): _check(not text.contains(String(want.report_not)),"expect","the report says '%s': %s" % [String(want.report_not),text.substr(0,240)])
 	var seek:=String(s.get("seek",""))
+	if OS.get_environment("BATTLE_EVAL_PROFILE")=="1": _note("succession %s; army commander now %s; gather general %s" % [str(rec.get("commander_succession",{})),String((army(army_id).get("commander",{}) as Dictionary).get("name","")),String(Account.gather(rec).get("general_name","-"))])
 	if seek=="our_general_killed":
 		var dead:=String(((rec.get(String(rec.get("home_side","attacker")),{}) as Dictionary).get("commander",{}) as Dictionary).get("name",""))
 		var first:=Account._first_name(dead)
@@ -177,7 +178,14 @@ func _run_defend_home()->void:
 	for f in MilitaryCampaign.home_army.get("formations",[]):
 		_check(not bool((f as Dictionary).get("emergency_militia",false)),"ledger","the watch's militia stayed on as a formation of the home army after the fight")
 	if String(done.kind) in ["lost"] and String(s.get("incident","raid"))=="raid":
-		_check(float(GameState.resource_stockpiles.get("Food",0.0))<food_before,"expect","the raiders broke through but took nothing from the stores")
+		var gone:=food_before-float(GameState.resource_stockpiles.get("Food",0.0))
+		_check(gone>0.0,"expect","the raiders broke through but took nothing from the stores")
+		# Never more than the raiders could carry off.
+		var carriers:=int(enemy.get("troops",0))
+		_check(gone<=float(carriers)*MilitaryCampaign.RAIDER_CARRY+0.5,"range","%d raiders carried off %.0f food (at most %.0f)" % [carriers,gone,float(carriers)*MilitaryCampaign.RAIDER_CARRY])
+	# Fought at our own edge, the war leader does not offer to press on or
+	# come home, or wait on the field.
+	_check(not report_text.contains("press on or come home") and not report_text.contains("waits where the fight was"),"report","the report of a fight at home talks as if the band were away: %s" % report_text.substr(0,260))
 
 
 # =============================================================================
@@ -335,6 +343,7 @@ func _run_march()->void:
 	var mine:=(inputs.get("friendly",[]) as Array).filter(func(f:Dictionary)->bool: return int(f.get("army_id",0))==a)
 	if _check(mine.size()==1,"marker","the marching army is marked %d times" % mine.size()):
 		var road:Variant=mine[0].get("road",PackedVector2Array())
+		if OS.get_environment("BATTLE_EVAL_PROFILE")=="1": _note("mark %s road %s legs %d status %s" % [str(mine[0].get("pos")),str(road),legs.size(),String(army(a).get("status",""))])
 		if not bool(army(a).get("march_direct",true)):
 			_check(road is PackedVector2Array and (road as PackedVector2Array).size()>=3,"marker","the map draws the march as a straight line although it goes round the water")
 		if road is PackedVector2Array:
@@ -380,8 +389,11 @@ func _run_court()->void:
 	if done.is_empty(): return
 	expect_outcome(rec,String(done.kind))
 	var court:=_court_reports(int(rec.get("seed",0)))
+	if OS.get_environment("BATTLE_EVAL_PROFILE")=="1":
+		_note("ledger %s" % str(WO._ledger()).substr(0,400))
+		_note("matters %s" % str(_war_matters().map(func(m:Dictionary)->String: return "%s %s" % [str((m.war as Dictionary).get("mode","")),String(m.text).substr(0,80)])))
 	if court.size()==1:
-		var text:=String(((court[0] as Dictionary).get("petition",{}) as Dictionary).get("summary",""))
+		var text:=String((court[0] as Dictionary).text)
 		_check(text.contains("My ") or text.contains(" I ") or text.begins_with("I "),"report","the war leader's court report is not in his own voice: %s" % text.substr(0,200))
 
 
@@ -401,9 +413,10 @@ func _run_war_raid()->void:
 	var our_dead:=int(raid.get("our_dead",0)); var their_dead:=int(raid.get("their_dead",0))
 	_check(int(left.killed)==our_dead,"record","the Chronicle says %d of ours were killed, the battle view %d" % [our_dead,int(left.killed)])
 	_check(int(right.killed)==their_dead,"record","the Chronicle says %d of theirs fell, the battle view %d" % [their_dead,int(right.killed)])
-	var entries:=(GameState.chronicle.get("entries",[]) as Array).filter(func(e:Dictionary)->bool: return String(e.get("key","")).begins_with("raid:%s:%d" % [civ_id,day_now]))
+	_check(int(left.captured)==int(raid.get("captives",0)),"record","the Chronicle says %d of ours were taken, the battle view %d" % [int(raid.get("captives",0)),int(left.captured)])
+	var entries:=(GameState.chronicle.get("entries",[]) as Array).filter(func(e:Dictionary)->bool: return String(e.get("key","")).begins_with("war:raid:%s:%d" % [civ_id,day_now]))
 	_check(entries.size()==1,"report","the raid has %d Chronicle entries (should be one)" % entries.size())
-	var matters:Array=(Hall.state().get("queue",[]) as Array).filter(func(m:Dictionary)->bool: return String(((m.get("situation",{}) as Dictionary).get("war",{}) as Dictionary).get("mode",""))=="raided")
+	var matters:Array=_war_matters().filter(func(m:Dictionary)->bool: return String((m.war as Dictionary).get("mode",""))=="raided")
 	_check(matters.size()<=1,"report","the war leader came %d times about one raid" % matters.size())
 	_check(int((view.sides.left as Dictionary).totals.went_in)>0 and int((view.sides.right as Dictionary).totals.went_in)>0,"record","the kept raid has nobody on a side")
 
