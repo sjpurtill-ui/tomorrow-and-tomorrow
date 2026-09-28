@@ -363,7 +363,11 @@ static func mentions(text:String,list:Array[Dictionary])->Array[Dictionary]:
 					var at:=m.get_start()
 					if _overlaps(taken,at,m.get_end()): continue
 					for i in range(at,m.get_end()): taken[i]=true
-					found.append({"at":at,"end":m.get_end(),"key":String(e.key),"word":k,"by":by})
+					var hit:={"at":at,"end":m.get_end(),"key":String(e.key),"word":k,"by":by}
+					# "Rovik's men": what is his, not him ("of":"men").
+					var owned:=_re("^(?:'|’)s\\s+([a-z]+)").search(lower.substr(m.get_end()))
+					if owned!=null: hit["of"]=owned.get_string(1)
+					found.append(hit)
 	for m in _re("\\b(guards?|warriors|my (warriors|guards|spears))\\b").search_all(lower):
 		if not _overlaps(taken,m.get_start(),m.get_end()): found.append({"at":m.get_start(),"end":m.get_end(),"key":"","word":m.get_string(),"by":"guards"})
 	for p:String in PRONOUNS:
@@ -524,6 +528,11 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# the war leader still free to object if it cannot be done well.
 	var confirming:=_confirmed_war(id,audience,list,clean,context)
 	if not confirming.is_empty(): return confirming
+	# Harm on people who are one of ours' own ("kill Rovik's men"): never the
+	# owner, never a town's people; said plainly, nothing done.
+	if String(cls.verb) in CRUEL and String(cls.act)=="command" and not bool(cls.insist):
+		var owned:=_owned_people(_harm_object(clean,cls),list)
+		if owned!="": return _plain_answer(id,audience,clean,context,"%s are our own people. Nothing is done to them: say plainly whom you mean." % _cap_first(owned))
 	# Harm ordered on a people or a town's people ("kill all the males of
 	# Tsaren") is a war order about that town, whoever it was said to and
 	# whatever the live reading names: never a hand laid on anyone here.
@@ -619,12 +628,17 @@ static func _nothing_waiting(id:String,audience:Dictionary,clean:String,context:
 	## "Do it!", "SEND THEM!" with nothing waiting on the god's word: nothing is
 	## set in motion, said plainly, with what it would need. Never a deed done
 	## again on whoever stands there now, never a standing order named "Do it!".
+	return _plain_answer(id,audience,clean,context,"Nothing waits on your word now: your last order, \"%s\", was already answered. Nothing new is set in motion." % last.strip_edges().substr(0,80),true)
+
+static func _plain_answer(id:String,audience:Dictionary,clean:String,context:Dictionary,words:String,insist:bool=false)->Dictionary:
+	## The court's plain answer when nothing is to be done: handled, nothing
+	## changed, and said so.
 	if not bool(context.get("echoed",false)):
 		Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":Hall._day(),"aside":false})
 		audience["echoed_here"]=clean
-	var r:=_result("none",{},{},clean,true)
+	var r:=_result("none",{},{},clean,insist)
 	r.stage="none"; r.executed=false
-	r.outcome="Nothing waits on your word now: your last order, \"%s\", was already answered. Nothing new is set in motion." % last.strip_edges().substr(0,80)
+	r.outcome=words
 	return r
 
 static func _which_town_answer(audience:Dictionary,clean:String)->Dictionary:
@@ -704,9 +718,25 @@ static func _clear_person(object:String,list:Array[Dictionary])->bool:
 	## Does the object name one person: by name, by title, or "him"/"her"/"you"?
 	## ("the men that you have tied up": that "you" is who did the tying.)
 	for m:Dictionary in mentions(object,list):
-		if String(m.by) in ["name","title"]: return true
+		if String(m.by) in ["name","title"] and not _theirs_not_them(m): return true
 		if String(m.by)=="pronoun" and String(m.word) in PERSON_PRONOUNS and not _clause_subject(object,m): return true
 	return false
+
+## "Rovik's men", "Kishan's household": people or things of theirs, not the
+## person ("Rovik's hands" is still Rovik).
+static func _theirs_not_them(m:Dictionary)->bool:
+	var of:=String(m.get("of",""))
+	return of!="" and _re("(?i)^"+BODY_PARTS+"$").search(of)==null
+
+const OWN_PEOPLE_WORDS:=["men","band","fighters","warriors","soldiers","spears","family","kin","kinsmen","household","sons","daughters","wife","wives","husband","children","people","folk","servants","guards","garrison","followers","hunters","scouts"]
+
+static func _owned_people(object:String,list:Array[Dictionary])->String:
+	## Harm on people who belong to one of ours ("Rovik's men", "Kishan's
+	## family"): the words as said, or "". Never the owner, never a town.
+	for m:Dictionary in mentions(object,list):
+		if String(m.by) in ["name","title"] and String(m.get("of","")) in OWN_PEOPLE_WORDS:
+			return object.substr(int(m.at),int(m.end)-int(m.at)).strip_edges()+"'s "+String(m.of)
+	return ""
 
 ## "You" doing something inside the words ("the men that you have tied up",
 ## "those you hold"): the one who did it, never the one the act falls on.
@@ -841,6 +871,7 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 			if m==actor_mention or String(m.by)=="guards": continue
 			if String(m.by)=="god" and not verb in CRUEL: continue   # "a stone to me" is not a target
 			if String(m.by)=="pronoun" and _clause_subject(text,m): continue   # "the men you have tied up"
+			if String(m.by) in ["name","title"] and verb in CRUEL and _theirs_not_them(m): continue   # "Rovik's men"
 			if verb=="appoint" and String(m.by)=="title" and not candidates.is_empty(): continue
 			candidates.append(m)
 		var chosen:Dictionary={}
@@ -1126,6 +1157,10 @@ static func _succeed_all(mc:Variant,figures:Variant,fid:String,name:String)->Str
 		var fresh:Dictionary=figures.commander(mc._acting_field_commander(false),"army_%d" % int(army.get("army_id",0)))
 		if fresh.is_empty(): continue
 		army["commander"]=fresh
+		# A march the court ordered is led by the new war leader from now on.
+		if army.get("court_order") is Dictionary:
+			(army.court_order as Dictionary)["general"]=WarOrders._given(String(fresh.get("name","")))
+			(army.court_order as Dictionary)["general_pid"]=0
 		mc.field_armies[i]=army
 		next=fresh
 	for i in mc.occupation_forces.size():

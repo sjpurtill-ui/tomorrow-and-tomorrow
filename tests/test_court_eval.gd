@@ -28,9 +28,9 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 
 ## Passing runs required on the full corpus, by path: first measured on
 ## main at 91356176 (213 cases; offline 135/213, live 185/213, sloppy 41/42);
-## now 237 cases after codex/court-1a (offline 225, live 228, sloppy 42/42).
+## Now 252 cases after court 1A + 1B (offline 252, live 252, sloppy 46/46).
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":245,"live":245,"sloppy":42}
+const BASELINE:={"offline":254,"live":254,"sloppy":46}
 
 var _processing:Dictionary={}
 

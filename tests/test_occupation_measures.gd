@@ -284,10 +284,11 @@ func test_the_users_sentence_on_the_reader_path()->void:
 	assert_str(String(r.objective.stance)).is_equal("harsh")
 	assert_str(String(r.actor_says)).contains("his wife and children will answer for it")
 	assert_str(String(r.actor_says)).not_contains("already ours")
-	# The schema offers only the measures and stances there are.
-	var details:Dictionary=out.payload.response_format.json_schema.schema.properties.details.properties
-	assert_array(details.measures.items.enum as Array).contains(["bind_men","hostages","curfew","release","settle"])
-	assert_array(details.stance.enum as Array).is_equal(["","lenient","firm","harsh","brutal"])
+	# The schema offers only the measures and stances there are (the reading
+	# is flat: measures and stance sit beside the action).
+	var props:Dictionary=out.payload.response_format.json_schema.schema.properties
+	assert_array(props.measures.items.enum as Array).contains(["bind_men","hostages","curfew","release","settle"])
+	assert_array(props.stance.enum as Array).is_equal(["","lenient","firm","harsh","brutal"])
 
 func test_an_older_reading_of_town_fate_with_nothing_decided_is_never_already_ours()->void:
 	# The reader said town_fate with no flags (as the user's build would):
