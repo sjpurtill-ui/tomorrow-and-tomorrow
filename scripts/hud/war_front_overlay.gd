@@ -557,6 +557,10 @@ func collect()->Dictionary:
 		if not live and not at_home and not near_hold:
 			shown=army.get("last_report",{})
 			if shown.is_empty(): continue
+			# A march ordered since that report is known all the same (the order
+			# was given here): its goal and road are drawn from where it was.
+			if String(army.get("status",""))=="moving" and int(army.get("departure_day",-1))>=int(shown.get("day",-1)):
+				shown=shown.duplicate(); shown["status"]="moving"
 		var pos:=_v2(shown.get("position",army.get("position",{})))
 		if not pos.is_finite(): continue
 		var objective:=Vector2.INF
