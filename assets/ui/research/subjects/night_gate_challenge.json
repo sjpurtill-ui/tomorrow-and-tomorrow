@@ -1,0 +1,12 @@
+{
+  "id": "night_gate_challenge",
+  "line": "security",
+  "game_year": 250,
+  "approx_historical_year": -3333,
+  "prompt": "c. 3333 BCE: Village guards challenge a visitor at a plain timber gate; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0695dc21-c993-4150-86f7-8601486fad36.png",
+  "asset": "res://assets/ui/research/subjects/night_gate_challenge-v1.png",
+  "sha256": "2bbf4633d0659357d44046ca94c88b1d1a6ddf582a04e4c231c2d854e83c7e74",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
