@@ -1496,7 +1496,7 @@ static func _http_words(code:int,error_text:String)->String:
 
 func _envelope_facts(body:PackedByteArray)->Dictionary:
 	## Usage and finish facts from a provider reply. Never keeps content or headers.
-	var facts:={"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"model":"","finish_reason":"","refusal":false,"error":""}
+	var facts:={"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"cached_tokens":0,"total_tokens":0,"model":"","finish_reason":"","refusal":false,"error":""}
 	var parser:=JSON.new()
 	if body.is_empty() or parser.parse(body.get_string_from_utf8())!=OK or not parser.data is Dictionary: return facts
 	var envelope:Dictionary=parser.data
@@ -1509,6 +1509,11 @@ func _envelope_facts(body:PackedByteArray)->Dictionary:
 		if details is Dictionary:
 			var reasoning:Variant=(details as Dictionary).get("reasoning_tokens",0)
 			facts["reasoning_tokens"]=int(reasoning) if (reasoning is int or reasoning is float) else 0
+		# The prompt's prefix the provider served from its cache.
+		var prompt_details:Variant=(tokens as Dictionary).get("prompt_tokens_details",{})
+		if prompt_details is Dictionary:
+			var cached:Variant=(prompt_details as Dictionary).get("cached_tokens",0)
+			facts["cached_tokens"]=int(cached) if (cached is int or cached is float) else 0
 	facts["model"]=String(envelope.get("model","")).substr(0,80)
 	var choices:Variant=envelope.get("choices",[])
 	if choices is Array and not (choices as Array).is_empty() and choices[0] is Dictionary:
@@ -1528,7 +1533,7 @@ func _receipt_http(audience_id:String,request:Dictionary,result:int,code:int,env
 		"model":String(envelope.get("model","")) if not String(envelope.get("model","")).is_empty() else String((request.get("config",{}) as Dictionary).get("model","")),
 		"http":code,"transport":result,"latency_ms":Time.get_ticks_msec()-int(request.get("started_ms",Time.get_ticks_msec())),
 		"prompt_tokens":int(envelope.get("prompt_tokens",0)),"completion_tokens":int(envelope.get("completion_tokens",0)),
-		"reasoning_tokens":int(envelope.get("reasoning_tokens",0)),"total_tokens":int(envelope.get("total_tokens",0)),
+		"reasoning_tokens":int(envelope.get("reasoning_tokens",0)),"cached_tokens":int(envelope.get("cached_tokens",0)),"total_tokens":int(envelope.get("total_tokens",0)),
 		"finish_reason":String(envelope.get("finish_reason","")),"live":true,"accepted":false,"fallback":false,"reason":""}
 	totals.calls=int(totals.calls)+1
 	for key in ["prompt_tokens","completion_tokens","reasoning_tokens","total_tokens","latency_ms"]: totals[key]=int(totals[key])+int(row[key])
@@ -1542,8 +1547,8 @@ func _finish_receipt(row:Dictionary,accepted:bool,fallback:bool,reason:String)->
 	if accepted: totals.accepted=int(totals.accepted)+1
 	else: totals.failed=int(totals.failed)+1
 	# One plain line per call in the player log: proof of what was spent.
-	print("AUDIENCE_VOICE_RECEIPT stage=%s attempt=%d model=%s http=%d tokens=%d (prompt %d, completion %d, reasoning %d) latency_ms=%d accepted=%s%s" % [
-		String(row.stage),int(row.attempt),String(row.model),int(row.http),int(row.total_tokens),int(row.prompt_tokens),int(row.completion_tokens),int(row.reasoning_tokens),int(row.latency_ms),str(accepted)," reason="+reason if not reason.is_empty() else ""])
+	print("AUDIENCE_VOICE_RECEIPT stage=%s attempt=%d model=%s http=%d tokens=%d (prompt %d, completion %d, reasoning %d, cached %d) latency_ms=%d accepted=%s%s" % [
+		String(row.stage),int(row.attempt),String(row.model),int(row.http),int(row.total_tokens),int(row.prompt_tokens),int(row.completion_tokens),int(row.reasoning_tokens),int(row.get("cached_tokens",0)),int(row.latency_ms),str(accepted)," reason="+reason if not reason.is_empty() else ""])
 
 func _receipt_offline(s:Dictionary,stage:String,reason:String,model:String="")->void:
 	totals.offline=int(totals.offline)+1
@@ -1688,8 +1693,24 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 		sources.append("%d" % roundi(float(terms.amount)))
 		sources.append("%d" % roundi(float(terms.amount)*0.5))
 	var number:=RegEx.new(); number.compile("\\d+(?:\\.\\d+)?")
-	for m in number.search_all(" ".join(sources)): allowed[m.get_string()]=true
+	for m in number.search_all(plain_numbers(" ".join(sources))):
+		var n:=m.get_string()
+		allowed[n]=true
+		# "enough for 30.0 days" may be said "about 30 days".
+		if "." in n:
+			allowed[str(int(floorf(float(n))))]=true
+			allowed[str(roundi(float(n)))]=true
 	return allowed
+
+## "6,000" and "1,100" as a speaker writes them are the facts' 6000 and 1100.
+static func plain_numbers(text:String)->String:
+	var re:=RegEx.new(); re.compile("(\\d),(\\d{3})(?!\\d)")
+	var out:=text
+	for i in 3:
+		var next:=re.sub(out,"$1$2",true)
+		if next==out: break
+		out=next
+	return out
 
 func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Array[Dictionary]:
 	var keys:=cast_keys(s)
@@ -1741,7 +1762,7 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		if not line_ok(text,_era_for(s,_member(s,key))): rejections.append("words these people do not have yet"); continue   # anachronism, quotation or named source
 		if (_voice_state().said as Dictionary).has(_text_key(text)): rejections.append("a line already said in this hall"); continue   # said before in this hall
 		var invented:=PackedStringArray()
-		for m in number.search_all(text):
+		for m in number.search_all(plain_numbers(text)):
 			if not allowed.has(m.get_string()): invented.append(m.get_string())
 		if not invented.is_empty(): rejections.append("a number that is not in the facts (%s)" % ", ".join(invented)); continue
 		if key!="envoy" and not key in principals and not gated_all:
@@ -3418,7 +3439,9 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 		"speak":
 			var classify:=COMMAND_CLASSIFY
 			if bool(extra.get("read",false)): classify=" These words were talk or a question, not an order: nobody acts, nobody is harmed or seized, nobody marches, nothing changes hands; no line claims or promises that anything was done."
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_gate_words(s),_divine_classify_words(s),classify]
+			# Asked "is that all?" or "why not all?": the whole account, runners too.
+			var whole:=" If asked whether that is all, or why not all of them, the line gives every part of the account the facts list: those still there by status, the killed, those who ran or got away and where, those taken, with each number." if String(s.get("origin",""))=="court" else ""
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now).%s Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),whole,_gate_words(s),_divine_classify_words(s),classify]
 		"divine":
 			return _divine_instruction(s,extra)
 		"command":

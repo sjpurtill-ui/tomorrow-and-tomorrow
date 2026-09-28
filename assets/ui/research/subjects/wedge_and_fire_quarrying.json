@@ -1,0 +1,12 @@
+{
+  "id": "wedge_and_fire_quarrying",
+  "line": "infrastructure",
+  "game_year": 220,
+  "approx_historical_year": -3533,
+  "prompt": "c. 3533 BCE: Workers heat rock face with wood fire and drive simple wedges into crack; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9cc698e4-bac8-44da-8ab0-274c86d799f8.png",
+  "asset": "res://assets/ui/research/subjects/wedge_and_fire_quarrying-v1.png",
+  "sha256": "90cd1a4ee623904dc9f31e8b9e23161817ee39dad01086377eec9ae3dbc37c74",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
