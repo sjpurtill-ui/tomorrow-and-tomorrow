@@ -1,0 +1,206 @@
+[
+  {
+    "id": "seasonal_craft_scheduling",
+    "line": "production",
+    "game_year": 320,
+    "approx_historical_year": -2867,
+    "prompt": "c. 2867 BCE: Craft Work Scheduled by Season. Craft work scheduled by season. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-37bab6f5-9024-498a-8853-01e89c885372.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_craft_scheduling-v1.png",
+    "sha256": "1d2733a254b62732f884b5fc0a321a979456081850ae1e2a9322b69fae1dfe86",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "witnessed_land_sales",
+    "line": "institutions",
+    "game_year": 320,
+    "approx_historical_year": -2867,
+    "prompt": "c. 2867 BCE: Fields Sold Before Witnesses with Their Bounds Recited. Fields sold before witnesses with their bounds recited. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-41aaa7c3-4052-4d24-b8ed-6cba8fdda62c.png",
+    "asset": "res://assets/ui/research/subjects/witnessed_land_sales-v1.png",
+    "sha256": "4535e62364ffce666aca2982a185ec727488358916fcf3c1a94d2c0fb4bf3c52",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "drawbar_fitting",
+    "line": "logistics",
+    "game_year": 325,
+    "approx_historical_year": -2833,
+    "prompt": "c. 2833 BCE: Drawbar Fitting. Drawbar Fitting. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e9e6f932-7242-4721-a976-e560d8ad471a.png",
+    "asset": "res://assets/ui/research/subjects/drawbar_fitting-v1.png",
+    "sha256": "9ffca0082c9772c3c1df90d02d79934230af2643f0bfddc2531c7f9c7552a065",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "protected_wellheads",
+    "line": "health",
+    "game_year": 325,
+    "approx_historical_year": -2833,
+    "prompt": "c. 2833 BCE: Covered Wellheads. Covered wellheads. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-996af155-9d7e-455c-9897-33ea28f076ac.png",
+    "asset": "res://assets/ui/research/subjects/protected_wellheads-v1.png",
+    "sha256": "6c4cc8b870a4d016cd2f706928c593ed176e06b8abbd83987834dfcfc497c69a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "spoilage_inspection",
+    "line": "nutrition",
+    "game_year": 325,
+    "approx_historical_year": -2833,
+    "prompt": "c. 2833 BCE: Store Keepers Inspect Jars and Cull Spoilage. Store keepers inspect jars and cull spoilage. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-14cd9366-3bfe-4c66-91e0-65ecc088b036.png",
+    "asset": "res://assets/ui/research/subjects/spoilage_inspection-v1.png",
+    "sha256": "c90f93684f9958e3e988bd07a33a4b079d289e4f0431949d62c0e0b744f94305",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "fixed_interest_loans",
+    "line": "institutions",
+    "game_year": 330,
+    "approx_historical_year": -2800,
+    "prompt": "c. 2800 BCE: Loans of Grain and Silver at Fixed Interest. Loans of grain and silver at fixed interest. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f2387c84-5a4d-41a5-aa4a-67132d20833b.png",
+    "asset": "res://assets/ui/research/subjects/fixed_interest_loans-v1.png",
+    "sha256": "6509162f0e47c5bc1bbf1a629e8161f1ad340cf0e134bbdc8da4d36c967ac180",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.42
+    ]
+  },
+  {
+    "id": "kiln_fired_bricks",
+    "line": "infrastructure",
+    "game_year": 330,
+    "approx_historical_year": -2800,
+    "prompt": "c. 2800 BCE: Kiln-fired Bricks for Wet Courses. Kiln-fired bricks for wet courses. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ebdebb87-50d1-4599-91fc-7bc18353fa10.png",
+    "asset": "res://assets/ui/research/subjects/kiln_fired_bricks-v1.png",
+    "sha256": "8ce7d498721a4203e61abf76f8e2248cff6adde1ccc096347c93e3be8e2a7ef0",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "tin_smelting",
+    "line": "production",
+    "game_year": 330,
+    "approx_historical_year": -2800,
+    "prompt": "c. 2800 BCE: Tin Smelted from Cassiterite. Tin smelted from cassiterite. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f477afb1-3ab0-486f-bd01-1cd1b39626ad.png",
+    "asset": "res://assets/ui/research/subjects/tin_smelting-v1.png",
+    "sha256": "7ffe76c97d4caf507787871233760e4e54b83baa390ec4132bb9ba0bf92c3cce",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "wall_missile_posts",
+    "line": "security",
+    "game_year": 330,
+    "approx_historical_year": -2800,
+    "prompt": "c. 2800 BCE: Archers and Slingers Posted Along the Town Wall. Archers and slingers posted along the town wall. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5f649d67-4336-4b83-9754-2bf256324667.png",
+    "asset": "res://assets/ui/research/subjects/wall_missile_posts-v1.png",
+    "sha256": "23199c9a9f0e66d9d87ab13dd441bf04fd3e977e3c4aa75c106a19545bee3000",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "wetland_margin_reserves",
+    "line": "ecology",
+    "game_year": 330,
+    "approx_historical_year": -2800,
+    "prompt": "c. 2800 BCE: Wetland Edges Kept for Fish, Fowl and Reeds. Wetland edges kept for fish, fowl and reeds. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c208de56-78c0-4c19-83e2-a9517ecc13d1.png",
+    "asset": "res://assets/ui/research/subjects/wetland_margin_reserves-v1.png",
+    "sha256": "357d9957d2b5beaad57f1c9d7379fa48bef4e05c45708fff7a90c373ba7347ed",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "separate_clean_water_storage",
+    "line": "health",
+    "game_year": 335,
+    "approx_historical_year": -2767,
+    "prompt": "c. 2767 BCE: Drinking Water Stored Apart from Washing Water. Drinking water stored apart from washing water. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-87907947-d25d-4d09-87c7-7a8591955093.png",
+    "asset": "res://assets/ui/research/subjects/separate_clean_water_storage-v1.png",
+    "sha256": "993c6a956b4e6cce2f89b37bdc3cffcceff674214c00d05462438152a26315a5",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "flanked_gate_complex",
+    "line": "security",
+    "game_year": 340,
+    "approx_historical_year": -2733,
+    "prompt": "c. 2733 BCE: Gate Complex with Flanking Towers. Gate complex with flanking towers. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3554479c-f313-48e2-84ca-abd7019ec9db.png",
+    "asset": "res://assets/ui/research/subjects/flanked_gate_complex-v1.png",
+    "sha256": "276b450b90395536582faf54a1d59411f28c2637bae26e61fdaa04b6d97b83d3",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "graded_tool_retirement",
+    "line": "production",
+    "game_year": 340,
+    "approx_historical_year": -2733,
+    "prompt": "c. 2733 BCE: Tools Retired by Wear Grade. Tools retired by wear grade. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-89b823cc-20ba-41f1-8940-cfda2b542414.png",
+    "asset": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png",
+    "sha256": "32adf479dfc037ec6c2a9497fed0564e334f0c6710fafefa4a00a9892b2f54ca",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "gypsum_mortar",
+    "line": "infrastructure",
+    "game_year": 340,
+    "approx_historical_year": -2733,
+    "prompt": "c. 2733 BCE: Gypsum Mortar for Stone and Brick. Gypsum mortar for stone and brick. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-99347e16-4cc6-4c23-9e89-88be4373c89c.png",
+    "asset": "res://assets/ui/research/subjects/gypsum_mortar-v1.png",
+    "sha256": "647e7f925da5df19be331a2bfc52cbf5e139137c82e384ed7882e756a3aace76",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "stubble_grazing",
+    "line": "ecology",
+    "game_year": 340,
+    "approx_historical_year": -2733,
+    "prompt": "c. 2733 BCE: Stubble Grazed After Harvest, Herds Kept Off Before. Stubble grazed after harvest, herds kept off before. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9995a64c-7fe4-4322-9cc5-6ea673962a71.png",
+    "asset": "res://assets/ui/research/subjects/stubble_grazing-v1.png",
+    "sha256": "e790d6d315e04393de9fb3d6cdb7795716b30b73b5349825cff52893a44c5127",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "towpaths",
+    "line": "logistics",
+    "game_year": 340,
+    "approx_historical_year": -2733,
+    "prompt": "c. 2733 BCE: Towpaths. Towpaths: boats hauled upstream by rope. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-679c4e15-7c6c-4fda-962d-d97e46da3626.png",
+    "asset": "res://assets/ui/research/subjects/towpaths-v1.png",
+    "sha256": "67c61802f6a58156e93b426bd0c48a6f69da847b3da514fb556b8e4cf2997efc",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  }
+]

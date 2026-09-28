@@ -4160,5 +4160,21 @@
   "herringbone_plano_convex_brick": {"path": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png", "focus": [0.5, 0.6]},
   "woven_dressings": {"path": "res://assets/ui/research/subjects/woven_dressings-v1.png", "focus": [0.5, 0.5]},
   "copper_carpentry_tools": {"path": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png", "focus": [0.5, 0.5]},
-  "salt_leaching_fallow": {"path": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png", "focus": [0.5, 0.3]}
+  "salt_leaching_fallow": {"path": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png", "focus": [0.5, 0.3]},
+  "seasonal_craft_scheduling": {"path": "res://assets/ui/research/subjects/seasonal_craft_scheduling-v1.png", "focus": [0.5, 0.5]},
+  "witnessed_land_sales": {"path": "res://assets/ui/research/subjects/witnessed_land_sales-v1.png", "focus": [0.5, 0.35]},
+  "drawbar_fitting": {"path": "res://assets/ui/research/subjects/drawbar_fitting-v1.png", "focus": [0.5, 0.5]},
+  "protected_wellheads": {"path": "res://assets/ui/research/subjects/protected_wellheads-v1.png", "focus": [0.5, 0.5]},
+  "spoilage_inspection": {"path": "res://assets/ui/research/subjects/spoilage_inspection-v1.png", "focus": [0.5, 0.5]},
+  "fixed_interest_loans": {"path": "res://assets/ui/research/subjects/fixed_interest_loans-v1.png", "focus": [0.5, 0.42]},
+  "kiln_fired_bricks": {"path": "res://assets/ui/research/subjects/kiln_fired_bricks-v1.png", "focus": [0.5, 0.5]},
+  "tin_smelting": {"path": "res://assets/ui/research/subjects/tin_smelting-v1.png", "focus": [0.5, 0.5]},
+  "wall_missile_posts": {"path": "res://assets/ui/research/subjects/wall_missile_posts-v1.png", "focus": [0.5, 0.35]},
+  "wetland_margin_reserves": {"path": "res://assets/ui/research/subjects/wetland_margin_reserves-v1.png", "focus": [0.5, 0.5]},
+  "separate_clean_water_storage": {"path": "res://assets/ui/research/subjects/separate_clean_water_storage-v1.png", "focus": [0.5, 0.5]},
+  "flanked_gate_complex": {"path": "res://assets/ui/research/subjects/flanked_gate_complex-v1.png", "focus": [0.5, 0.5]},
+  "graded_tool_retirement": {"path": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png", "focus": [0.5, 0.5]},
+  "gypsum_mortar": {"path": "res://assets/ui/research/subjects/gypsum_mortar-v1.png", "focus": [0.5, 0.5]},
+  "stubble_grazing": {"path": "res://assets/ui/research/subjects/stubble_grazing-v1.png", "focus": [0.5, 0.5]},
+  "towpaths": {"path": "res://assets/ui/research/subjects/towpaths-v1.png", "focus": [0.5, 0.5]}
 }

@@ -1,0 +1,12 @@
+{
+  "id": "flanked_gate_complex",
+  "line": "security",
+  "game_year": 340,
+  "approx_historical_year": -2733,
+  "prompt": "c. 2733 BCE: Gate Complex with Flanking Towers. Gate complex with flanking towers. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3554479c-f313-48e2-84ca-abd7019ec9db.png",
+  "asset": "res://assets/ui/research/subjects/flanked_gate_complex-v1.png",
+  "sha256": "276b450b90395536582faf54a1d59411f28c2637bae26e61fdaa04b6d97b83d3",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

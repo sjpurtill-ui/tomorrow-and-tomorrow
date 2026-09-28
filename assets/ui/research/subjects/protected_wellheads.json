@@ -1,0 +1,12 @@
+{
+  "id": "protected_wellheads",
+  "line": "health",
+  "game_year": 325,
+  "approx_historical_year": -2833,
+  "prompt": "c. 2833 BCE: Covered Wellheads. Covered wellheads. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-996af155-9d7e-455c-9897-33ea28f076ac.png",
+  "asset": "res://assets/ui/research/subjects/protected_wellheads-v1.png",
+  "sha256": "6c4cc8b870a4d016cd2f706928c593ed176e06b8abbd83987834dfcfc497c69a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
