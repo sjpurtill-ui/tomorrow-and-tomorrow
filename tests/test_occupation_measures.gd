@@ -285,7 +285,9 @@ func test_the_users_sentence_on_the_reader_path()->void:
 	assert_str(String(r.actor_says)).contains("his wife and children will answer for it")
 	assert_str(String(r.actor_says)).not_contains("already ours")
 	# The schema offers only the measures and stances there are.
-	var details:Dictionary=out.payload.response_format.json_schema.schema.properties.details.properties
+	# The reader's schema is flat (order_reader: one cacheable static prefix);
+	# measures and stance are top-level lists.
+	var details:Dictionary=out.payload.response_format.json_schema.schema.properties
 	assert_array(details.measures.items.enum as Array).contains(["bind_men","hostages","curfew","release","settle"])
 	assert_array(details.stance.enum as Array).is_equal(["","lenient","firm","harsh","brutal"])
 
