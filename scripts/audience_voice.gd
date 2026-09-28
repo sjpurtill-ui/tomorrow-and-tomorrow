@@ -1787,10 +1787,50 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		var already:=false
 		for line in (h.find(String(s.id)) as Dictionary).get("lines",[]):
 			if String((line as Dictionary).get("text","")).strip_edges().trim_prefix("[").trim_suffix("]").strip_edges()==outcome.strip_edges(): already=true
+		# The one who answered already said this fact ("Tsaren is already
+		# ours." under "Tsaren is already ours. 16 of Rovik's garrison hold
+		# it."): the plain note would only say it twice.
+		for line in ordered:
+			if String(line.get("key",""))!="narrator" and fact_said(outcome,String(line.get("text",""))): already=true
 		if not outcome.is_empty() and not already: h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
+
+## An engine account retold in words this people has: the standing swaps
+## (character_voice.era_plain) and the blade idioms a pre-metal people says
+## otherwise.
+const ERA_IDIOMS:=[["metal","to the sword","to death"],["metal","swords","spears"],["metal","sword","spear"]]
+static func era_said(text:String,tags:Array)->String:
+	var out:=CV.era_plain(text,tags)
+	for rule in ERA_IDIOMS:
+		if tags.has(String(rule[0])): continue
+		out=out.replace(String(rule[1]),String(rule[2]))
+	return out
+
+## Does a spoken line already carry the facts of a plain note? Every figure
+## in the note must be in the line, and its words (four letters or more):
+## all of them when it has no figures, most of them when it has.
+static func fact_said(fact:String,line:String)->bool:
+	var clean:=func(text:String)->String:
+		var out:=""
+		for ch in text.to_lower():
+			out+=ch if (ch>="a" and ch<="z") or (ch>="0" and ch<="9") or ch==" " else " "
+		return " "+" ".join(out.split(" ",false))+" "
+	var note:String=clean.call(fact)
+	var said:String=clean.call(line)
+	if note.strip_edges()=="" or said.strip_edges()=="": return false
+	if said.contains(note): return true
+	var figures:=0; var weighty:=0; var missing:=0
+	for word in note.split(" ",false):
+		if word.is_valid_int():
+			figures+=1
+			if not said.contains(" "+word+" "): return false
+		elif word.length()>=4:
+			weighty+=1
+			if not said.contains(" "+word+" "): missing+=1
+	if figures==0: return missing==0 and weighty>=2
+	return float(missing)<=float(weighty)*0.4
 
 func _proposal(body:PackedByteArray)->Dictionary:
 	## The model's JSON object (from a chat envelope or bare), or {}.
@@ -2892,6 +2932,10 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	var key:=CC.actor_reaction_key(result)
 	var says:=String(result.get("actor_says",""))
 	if not actor.is_empty() and says!="":
+		# The engine's account in this people's own words: "put to the sword"
+		# before anyone works metal is "put to death", not a dropped line.
+		var tags:=_era_for(s,actor)
+		if not line_ok(says,tags): says=era_said(says,tags)
 		# The war leader answers with the engine's own decision and numbers,
 		# whole: the short-line cap for banked lines must not drop it.
 		var said:=_say(s,actor,[says],rng,{},false,[says])

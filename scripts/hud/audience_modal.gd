@@ -622,7 +622,7 @@ func _build_options()->void:
 	_build_divine_row()
 	_build_persons_row()
 
-const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"]]
+const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
 
 func _persons_live()->bool:
 	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
@@ -933,7 +933,8 @@ func _speak()->void:
 		# An aim in the god's own words (online), or one of those proposed.
 		if named.is_empty():named=String(preload("res://scripts/legacy_aims.gd").typed_choice(audience_id,text,_voice_ok() and voice.has_method("is_live") and bool(voice.is_live())))
 		# An order for the war leader in the god's own words ("hold the ford").
-		if named.is_empty():named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
+		# (Not when it is about the people of a town we hold: "take their food".)
+		if named.is_empty() and not _about_held_town(text):named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
 		# A crisis in the god's own words ("Keep the sick apart").
 		if named.is_empty():named=String(preload("res://scripts/crisis_system.gd").typed_choice(audience_id,text))
 		# The town's upkeep in the god's own words ("put more people on the roofs").
@@ -959,7 +960,7 @@ func _speak()->void:
 	# Words about people, with a live voice: one call maps them onto the
 	# persons engine's actions (ask, summon, question, accuse, judge).
 	var typed:=Persons.typed_action(text) if resolved_result.is_empty() and String(Hall.find(audience_id).get("origin",""))=="court" else {}
-	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id):
+	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id) and not _about_held_town(text):
 		var about_people:=not Persons.speaker_known(audience_id).is_empty() or not typed.is_empty()
 		if not about_people:
 			var re:=RegEx.new();re.compile(PERSONS_WORDS)
@@ -987,6 +988,12 @@ func _speak()->void:
 			return
 		_unecho(text)
 	_speak_rest(text)
+
+## Words about what becomes of a town we hold or its people: the war
+## leader's business, never a persons inquiry or a war-matter card.
+func _about_held_town(text:String)->bool:
+	var kind:=String(WarOrders.read(text,String(Hall.find(audience_id).get("civ_id","")),audience_id).get("kind",""))
+	return kind in ["measure","town_word","fate","which_town","measure_drop"]
 
 ## The order reader answered (or failed): act on its plan.
 func _after_order_reading(id:String,text:String,read:Dictionary)->void:

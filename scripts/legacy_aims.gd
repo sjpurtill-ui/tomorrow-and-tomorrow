@@ -1238,7 +1238,11 @@ static func is_order(text:String)->bool:
 	## hopes for a generation ("let fewer children die", "make them fear us").
 	var lower:=text.to_lower()
 	if RegEx.create_from_string("\\b(now|right now|at once|immediately|today|this instant|without delay|straight away)\\b").search(lower)!=null: return true
-	return RegEx.create_from_string("\\b(conquer|capture|seize|attack|invade|raid|besiege|storm|march (on|to|against)|burn|kill|slay|slaughter|execute|sack|plunder|loot|round up|tie (them|up)|bind (them|the)|chase|pursue|go after)\\b").search(lower)!=null
+	if RegEx.create_from_string("\\b(conquer|capture|seize|attack|invade|raid|besiege|storm|march (on|to|against)|burn|kill|slay|slaughter|execute|sack|plunder|loot|round up|tie (them|up)|bind (them|the)|chase|pursue|go after)\\b").search(lower)!=null: return true
+	# What a garrison is to do with a people ("take their weapons", "make
+	# them build our walls") is an order, not a hope for a generation.
+	var measure:=preload("res://scripts/occupation_measures.gd").read(text)
+	return not measure.is_empty() and not (measure.measures as Array).is_empty() and (bool(measure.people) or bool(measure.pronoun))
 
 static func from_words(text:String)->Dictionary:
 	## Any aim the god speaks is accepted and mapped onto the nearest

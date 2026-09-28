@@ -31,6 +31,11 @@ func setup(block:Dictionary)->void:
 	_section("OUR GARRISON",[
 		{"key":"garrison","name":"Holding it" if String(report.get("commander",""))=="" else "%s's fighters" % String(report.commander).get_slice(" ",0),"value":EraWords.grouped(int(report.get("garrison",0))),"text":String(facts.get("garrison",""))},
 		{"key":"supply","name":"Their food","value":"","text":String(facts.get("supply",""))}])
+	# What the garrison is doing with its people, as long as it runs.
+	var orders:Array=[]
+	for m in report.get("measures",[]):
+		orders.append({"key":"garrison","name":String(m.get("label","")),"value":String(m.get("value","")),"text":String(m.get("text",""))})
+	_section("UNDER OUR GARRISON'S ORDERS",orders)
 	_section("HOW THEY TAKE OUR RULE",[
 		{"key":"mood","name":"Our rule","value":String(report.get("rule","")),"text":String(facts.get("resistance",""))}])
 
