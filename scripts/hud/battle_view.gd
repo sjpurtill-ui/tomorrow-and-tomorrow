@@ -238,8 +238,17 @@ static func _place(record:Dictionary)->String:
 	var threat:Dictionary=record.get("threat",{})
 	var name:=Account._place_name(String(record.get("target_region_name",threat.get("target_region_name",""))))
 	if name!="": return name
+	# Fought at home: named by home, as the map names it.
+	if _at_home(record) and WorldSimulation!=null: return String(WorldSimulation.state.settlement_name)
 	if WorldSimulation!=null and WorldSimulation.world!=null: name=Account._nearest_town(threat.get("target_position",{}))
 	return name
+
+
+## Our own settlement defended at its edge (not a town fought for, not a
+## contact in the field).
+static func _at_home(record:Dictionary)->bool:
+	var threat:Dictionary=record.get("threat",{})
+	return String(record.get("home_side",""))=="defender" and String(record.get("target_region_name",threat.get("target_region_name","")))=="" and not bool(threat.get("field_encounter",false)) and String(record.get("home_force_kind","field"))=="field"
 
 
 static func _where(record:Dictionary)->String:

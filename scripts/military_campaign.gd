@@ -277,7 +277,7 @@ func _stand_down_aggregate(requested:int)->Dictionary:
 
 
 func stand_down(count:int)->Dictionary:
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before standing formations down."}
+	_settle_waiting()
 	var requested:=maxi(0,count)
 	if requested<=0: return {"error":"Stand-down count must be positive."}
 	var result:=_stand_down_aggregate(requested)
@@ -286,7 +286,7 @@ func stand_down(count:int)->Dictionary:
 
 
 func demobilize(count:int)->Dictionary:
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before demobilizing personnel."}
+	_settle_waiting()
 	var requested:=maxi(0,count)
 	if requested<=0: return {"error":"Demobilization count must be positive."}
 	var injured_release:=_demobilize_disabled(requested)
@@ -383,7 +383,7 @@ func cancel_training_program()->Dictionary:
 
 
 func reinforce_formation(formation_id:int,count:int)->Dictionary:
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before assigning reinforcements."}
+	_settle_waiting()
 	var formation_index:=_formation_index(formation_id)
 	if formation_index<0: return {"error":"Formation %d was not found." % formation_id}
 	var formation:Dictionary=home_army.formations[formation_index]
@@ -401,7 +401,7 @@ func reinforce_formation(formation_id:int,count:int)->Dictionary:
 
 
 func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before retraining a formation."}
+	_settle_waiting()
 	var formation_index:=_formation_index(formation_id)
 	if formation_index<0: return {"error":"Formation %d was not found." % formation_id}
 	var gate:=_training_gate(unit,weapon)
@@ -1224,12 +1224,11 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"can_order":false,"can_engage":false,"error":"This command is already in battle."}
-	if not active_siege.is_empty():return {"can_order":false,"can_engage":false,"error":"Resolve the current siege first."}
+	if _besieging(army_id):return {"can_order":false,"can_engage":false,"error":"This army is laying siege; lift the siege before sending it after another band."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"can_order":false,"can_engage":false,"error":"Select one field army first."}
 	if command_hierarchy.battle.enemy_engaged(formation_id): return {"can_order":false,"can_engage":false,"error":"That band is already being fought."}
-	if not active_threat.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the active campaign decision before ordering another engagement."}
-	if not pending_aftermath.is_empty(): return {"can_order":false,"can_engage":false,"error":"Resolve the current battle aftermath first."}
+	_settle_waiting()
 	var sighting:Dictionary=WorldSimulation.world.visible_formation_sighting(formation_id)
 	if sighting.is_empty(): return {"can_order":false,"can_engage":false,"error":"Contact has been lost. Reacquire the formation before issuing an order."}
 	var army:Dictionary=field_armies[index]
@@ -1276,6 +1275,7 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 	var incident:Dictionary=WorldSimulation.world.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
 	if incident.has("error"): return incident
 	incident["field_army_id"]=army_id
+	var waiting:=_set_aside_waiting_threat()
 	var operation_index:=_field_army_index(army_id)
 	if operation_index>=0 and (field_armies[operation_index].get("operation",{}) as Dictionary).is_empty(): _begin_operation(operation_index,"formation:"+formation_id)
 	_create_civilization_threat(incident,"offensive")
@@ -1286,12 +1286,16 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		field_armies[index].erase("target_formation_id")
 		field_armies[index].erase("order_kind")
 	var engagement:=begin_threat_engagement(false)
-	if engagement.has("error"):return engagement
+	if engagement.has("error"):
+		_restore_waiting_threat(waiting)
+		return engagement
 	active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
 	if bool(active_engagement.get("overrun_expected",false)):
 		var settled:=settle_overrun_now()
 		settled["message"]="%s overran %s." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy party"))]
+		_restore_waiting_threat(waiting)
 		return settled
+	_restore_waiting_threat(waiting)
 	return {"ok":true,"engagement_started":true,"engagement":engagement,"message":"CONTACT â€” %s has engaged %s. Open WAR PLANNING to order HOLD, PUSH, or RETREAT." % [String(army.get("name","The field army")),String((availability.sighting as Dictionary).get("label","the enemy formation"))]}
 
 
@@ -1908,9 +1912,10 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	WorldSimulation.figures.record_battle(result)
 	var home_side:=String(result.get("home_side","attacker"))
 	var home_result:Dictionary=result.get(home_side,result.get("attacker",{}))
-	# Their men our side took when their blocks broke are our captives now.
+	# Their men our side took when their blocks broke are our captives too:
+	# after a victory the general settles them with the rest (below); else
+	# they are held under guard.
 	var taken_in_battle:=int((result.get("defender" if home_side=="attacker" else "attacker",{}) as Dictionary).get("captured_in_battle",0))
-	if taken_in_battle>0: foreign_prisoners+=taken_in_battle
 	var home_force_kind:=String(result.get("home_force_kind","field"))
 	if not result.get("command_participants",[]).is_empty():
 		command_hierarchy.battle.commit(result)
@@ -1923,7 +1928,10 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 		home_army["recent_combat_days"]=7
 		home_army["supply_level"]=clampf(float(home_army.get("supply_level",1.0))-0.06,0.0,1.0)
 	var termination:Dictionary=result.get("termination",{})
-	if home_force_kind=="field": _apply_home_commander_fate(termination)
+	var succession:Dictionary={}
+	if home_force_kind=="field": succession=_apply_home_commander_fate(termination)
+	elif result.get("command_participants",[]).is_empty(): succession=_apply_force_commander_fate(result,termination)
+	if not succession.is_empty(): result["commander_succession"]=succession
 	var home_force_name:=String(home_result.get("name",home_army.get("name","")))
 	var home_won:=String(termination.get("captor",""))==home_force_name
 	var home_lost:=String(termination.get("defeated",""))==home_force_name and not home_won
@@ -1937,6 +1945,7 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 			String(result.get("home_force_region_id","")),
 			int(termination.prisoners)
 		)
+	if home_force_kind=="field": _dismiss_watch_militia(result)
 	var termination_summary:=String(termination.get("summary",""))
 	if termination_summary!="": result["message"]=termination_summary
 	var record:=result.duplicate(true)
@@ -1946,6 +1955,8 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	var aftermath:Dictionary=termination.duplicate(true) if home_won else {}
 	if not aftermath.is_empty(): aftermath["home_force_name"]=home_force_name
 	if String(aftermath.get("type","continued"))=="continued": aftermath.clear()
+	if not aftermath.is_empty(): aftermath["prisoners"]=int(aftermath.get("prisoners",0))+taken_in_battle
+	elif taken_in_battle>0: foreign_prisoners+=taken_in_battle
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)) and int(aftermath.get("prisoners",0))==0 and not bool(aftermath.get("captured_general",false)) and not preload("res://scripts/raid_policy.gd").has_spoils(aftermath.get("spoils",{})): aftermath.clear()
 	# The general settles the captives and spoils at once, by the ruler's
 	# standing word or the era's custom and his own nature, and says so in his
@@ -1959,6 +1970,81 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	battle_resolved.emit(result.duplicate(true))
 	army_changed.emit(home_army.duplicate(true))
 	return result
+
+
+## An older save's aftermath still waiting: the general settles it now, so
+## no order is ever refused over it.
+func _settle_waiting()->void:
+	if not pending_aftermath.is_empty(): settle_pending_aftermath()
+
+
+## Whether this army is the one laying the siege.
+func _besieging(army_id:int)->bool:
+	return army_id>0 and not active_siege.is_empty() and String(active_siege.get("mode",""))=="offensive" and int(active_siege.get("army_id",0))==army_id
+
+
+## Whether a threat is the siege itself (our home besieged and this is the
+## host at the walls; or the town we besiege; or our besieging army).
+func _is_the_siege(threat:Dictionary)->bool:
+	if active_siege.is_empty() or threat.is_empty(): return false
+	if String(active_siege.get("mode",""))=="defensive":
+		return String(threat.get("campaign_mode","defensive"))=="defensive" and String(threat.get("target_region_id",""))=="" and not bool(threat.get("field_encounter",false))
+	if String(threat.get("target_region_id",""))!="" and String(threat.get("target_region_id",""))==String(active_siege.get("region_id","")): return true
+	return int(threat.get("field_army_id",0))>0 and int(threat.get("field_army_id",0))==int(active_siege.get("army_id",0))
+
+
+## A raid or host coming at home waits for its answer in active_threat. An
+## attack ordered elsewhere is begun beside it, never refused because of it:
+## the waiting threat is set aside while the attack's own threat begins its
+## battle, then put back (_restore_waiting_threat).
+func _set_aside_waiting_threat()->Dictionary:
+	if active_threat.is_empty() or String(active_threat.get("campaign_mode","defensive"))!="defensive": return {}
+	var waiting:=active_threat.duplicate(true)
+	active_threat.clear()
+	return waiting
+
+
+func _restore_waiting_threat(waiting:Dictionary)->void:
+	if waiting.is_empty(): return
+	active_threat=waiting
+	threat_changed.emit(active_threat.duplicate(true))
+
+
+## The watch's untrained neighbours who stood with the soldiers at home
+## (_home_defense_force) go back to their work when the fight is over: their
+## survivors leave the home army, and their share of its hurt and scattered
+## goes home with them, not into the ranks. The dead are dead.
+func _dismiss_watch_militia(result:Dictionary)->void:
+	var militia_id:=int(result.get("militia_id",-1))
+	if militia_id<0: return
+	var home_side:=String(result.get("home_side","defender"))
+	var fought:Array=(result.get(home_side,{}) as Dictionary).get("formations",[])
+	var index:=-1
+	for i in fought.size():
+		if int((fought[i] as Dictionary).get("id",-2))==militia_id: index=i; break
+	var theirs:=0; var everyone:=0
+	var hurt:=0; var scattered:=0
+	for r in result.get("rounds",[]):
+		var round_data:Dictionary=r
+		var losses:Array=round_data.get(home_side+"_cohort_losses",[])
+		for i in losses.size():
+			everyone+=int(losses[i])
+			if i==index: theirs+=int(losses[i])
+		var kinds:Dictionary=round_data.get(home_side+"_casualties",{})
+		hurt+=int(kinds.get("wounded",0)); scattered+=int(kinds.get("scattered",0))
+	var formations:Array=home_army.get("formations",[])
+	for i in range(formations.size()-1,-1,-1):
+		if int((formations[i] as Dictionary).get("id",-2))!=militia_id: continue
+		home_army["troops"]=maxi(0,int(home_army.get("troops",0))-maxi(0,int((formations[i] as Dictionary).get("count",0))))
+		formations.remove_at(i)
+	home_army["formations"]=formations
+	if theirs>0 and everyone>0:
+		var share:=float(theirs)/float(everyone)
+		home_army["wounded_pool"]=maxi(0,int(home_army.get("wounded_pool",0))-roundi(float(hurt)*share))
+		home_army["disabled_pool"]=clampi(int(home_army.get("disabled_pool",0)),0,int(home_army.wounded_pool))
+		home_army["severe_disabled_pool"]=clampi(int(home_army.get("severe_disabled_pool",0)),0,int(home_army.disabled_pool))
+		home_army["scattered_pool"]=maxi(0,int(home_army.get("scattered_pool",0))-roundi(float(scattered)*share))
+	_refresh_readiness()
 
 
 ## What may be done with captives, spoils and a captured leader.
@@ -2045,7 +2131,7 @@ static func settlement_line(s:Dictionary)->String:
 	var parts:Array[String]=[]
 	var n:=int(s.get("prisoners",0))
 	if n>0:
-		var many:=Account._people(n,"captive","captives")
+		var many:=Account._ours(n,"captive","captives")
 		match String(s.get("prisoner_policy","hold")):
 			"enslave": parts.append("%s sent %s home as bondservants" % [who,many])
 			"release": parts.append("%s let %s go" % [who,many])
@@ -2168,7 +2254,7 @@ func _revise_captives(s:Dictionary,policy:String,when:String)->Dictionary:
 		return {"error":"That cannot be changed now.","reason":"cannot"}
 	s["prisoners_changed"]=int(s.get("prisoners_changed",0))+moved
 	var words:=String({"release":"%s set free","parole":"%s let go on their word","ransom":"%s sent back to their people for ransom","enslave":"%s put to work as bondservants",
-		"execute":"%s put to death","hold":"%s kept under guard","exchange":"%s traded for our own people"}.get(policy,"%s dealt with")) % Account._people(moved,"captive","captives")
+		"execute":"%s put to death","hold":"%s kept under guard","exchange":"%s traded for our own people"}.get(policy,"%s dealt with")) % Account._ours(moved,"captive","captives")
 	(s.changes as Array).append({"day":int(WorldSimulation.state.elapsed_days),"part":"prisoners","from":was,"to":policy,"count":moved})
 	s["prisoner_policy"]=policy if moved>=left else was
 	return {"ok":true,"done":_cap_first(words)+".","moved":moved,"from":was,"to":policy}
@@ -2535,17 +2621,18 @@ func _home_defense_force(allocate_id:bool=true)->Dictionary:
 	assembled["commander"]=(force.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
 	assembled["supply_level"]=float(force.get("supply_level",1.0))
 	assembled["emergency_militia_personnel"]=militia
+	assembled["emergency_militia_id"]=formation_id
 	return assembled
 
 
 func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
-	if not active_siege.is_empty(): return {"error":"Use the siege assault or sortie order to begin combat."}
+	if _is_the_siege(active_threat): return {"error":"Use the siege assault or sortie order to begin combat."}
 	if active_threat.is_empty():
 		# Asked again for a battle already begun: the battle in focus.
 		if not active_engagement.is_empty(): return engagement_snapshot()
 		return {"error":"No military threat is awaiting a response."}
 	if own_engagements.size()>=MAX_OWN_ENGAGEMENTS: return {"error":"Too many battles are being fought at once."}
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	_settle_waiting()
 	if WorldSimulation.enabled and preload("res://scripts/civilization_combat.gd").reserved(active_threat.get("owned_target",{})):return {"error":"That formation is already committed to a battle."}
 	var target_civ_id:=String(active_threat.get("source_civ_id",""))
 	var target_region_id:=String(active_threat.get("target_region_id",""))
@@ -2616,6 +2703,8 @@ func settle_overrun_now()->Dictionary:
 func fight_engagement_day(order:String)->void:
 	if active_engagement.is_empty(): return
 	if not active_engagement.has("battle"): _open_battle(active_engagement)
+	# Which day of the fighting this is (the map's "Tsaren · day 2").
+	active_engagement["day_count"]=int(active_engagement.get("day_count",0))+1
 	var exchanges:=DAY_EXCHANGE_LIMIT if _quick_fight(active_engagement) else _exchanges_left_in_phase(active_engagement.get("battle",{}))
 	advance_engagement(order,exchanges,false)
 
@@ -2792,6 +2881,8 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	final_result["id"]=String(engagement.get("id",""))
 	final_result["progress"]=BattleBlocks.progress_for(battle,home_side) if not battle.is_empty() else 0.0
 	final_result["command_participants"]=engagement.get("command_participants",[]).duplicate(true)
+	# The watch's militia who stood at home (_home_defense_force) go home after.
+	if String(final_result.home_force_kind)=="field": final_result["militia_id"]=int((engagement.get(home_side,{}) as Dictionary).get("emergency_militia_id",-1))
 	var committed:=_commit_campaign_battle(final_result)
 	var troops_after_fight:=_force_troops(String(final_result.home_force_kind),int(final_result.home_force_id))
 	if retreated and bool(final_result.commander_managed):
@@ -2882,7 +2973,7 @@ func _retreat_termination(attacker:Dictionary,defender:Dictionary,battle_seed:in
 func respond_to_threat(response:String)->Dictionary:
 	if active_threat.is_empty(): return {"error":"No military threat is awaiting a response."}
 	var choice:=response.to_lower()
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	_settle_waiting()
 	var threat:=active_threat.duplicate(true)
 	if choice=="defend":
 		return begin_threat_engagement()
@@ -2935,10 +3026,10 @@ func has_active_operation_for_civ(civ_id:String)->bool:
 
 
 func offensive_campaign_availability(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
-	if not active_siege.is_empty(): return {"error":"Resolve the current siege before starting another operation."}
+	if army_id>0 and _besieging(army_id): return {"error":"This army is laying siege; lift the siege before sending it against another town."}
+	if not active_siege.is_empty() and String(active_siege.get("region_id",""))==region_id and region_id!="": return {"error":"We are already laying siege to that town; storm it from the siege lines."}
 	if army_id>0 and _army_in_battle(army_id): return {"error":"That army is already fighting."}
-	if not active_threat.is_empty(): return {"error":"Resolve the approaching campaign before launching another."}
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	_settle_waiting()
 	if region_id=="": return {"error":"Select a known strategic objective before assigning an army to attack it."}
 	if field_armies.is_empty(): return {"error":"Form a field army from trained home formations, then move it to the selected strategic objective. Campaign forces no longer teleport from the reserve."}
 	var maneuver_army:Dictionary={}
@@ -2973,8 +3064,9 @@ func city_force_summary(region_id:String)->String:
 	return text
 
 func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionary:
-	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is already in battle."}
-	if not active_siege.is_empty() or not active_threat.is_empty() or not pending_aftermath.is_empty():return {"error":"Resolve the current siege or aftermath first."}
+	if command_hierarchy.battle.engaged(army_id) or _army_in_battle(army_id):return {"error":"This command is already in battle."}
+	if _besieging(army_id):return {"error":"This army is laying siege; lift the siege before sending it elsewhere."}
+	_settle_waiting()
 	var index:=_field_army_index(army_id)
 	if index<0 or int(field_armies[index].get("troops",0))<=0:return {"error":"No active soldiers in the selected army. Choose another army."}
 	var report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region_id)
@@ -3021,19 +3113,20 @@ func launch_offensive(civ_id:String,region_id:String="",army_id:int=0,approach:D
 	var availability:=offensive_campaign_availability(civ_id,region_id,army_id)
 	if availability.has("error"): return availability
 	var incident:Dictionary=availability.incident
+	var waiting:=_set_aside_waiting_threat()
 	_create_civilization_threat(incident,"offensive")
 	if not approach.is_empty(): active_threat["approach"]=approach.duplicate(true)
 	var result:=begin_threat_engagement(false)
 	if not result.has("error"):
 		active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
-		if bool(active_engagement.get("overrun_expected",false)): return settle_overrun_now()
+		if bool(active_engagement.get("overrun_expected",false)): result=settle_overrun_now()
+	_restore_waiting_threat(waiting)
 	return result
 
 
 func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
-	if not active_siege.is_empty(): return {"error":"Resolve the siege before launching a raid."}
-	if not active_threat.is_empty(): return {"error":"Resolve the current military operation first."}
-	if not pending_aftermath.is_empty(): return {"error":"Resolve the current battle aftermath first."}
+	if not active_siege.is_empty() and String(active_siege.get("region_id",""))==region_id and region_id!="": return {"error":"We are already laying siege to that town; its fields are ours to cut off already."}
+	_settle_waiting()
 	if region_id=="": return {"error":"Select a known strategic region to raid."}
 	var maneuver_army:Dictionary={}
 	for force_variant in field_armies:
@@ -3051,9 +3144,12 @@ func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
 func launch_raid(civ_id:String,region_id:String="",approach:Dictionary={})->Dictionary:
 	var availability:=raid_campaign_availability(civ_id,region_id)
 	if availability.has("error"): return availability
+	var waiting:=_set_aside_waiting_threat()
 	_create_civilization_threat(availability.incident,"offensive")
 	if not approach.is_empty(): active_threat["approach"]=approach.duplicate(true)
-	return begin_threat_engagement()
+	var result:=begin_threat_engagement()
+	_restore_waiting_threat(waiting)
+	return result
 
 
 func _resolve_threat_without_battle(title:String,description:String)->void:
@@ -3064,7 +3160,9 @@ func _resolve_threat_without_battle(title:String,description:String)->void:
 func _process_threat_day()->void:
 	# Every battle of ours is fought a day, each on its own front.
 	_fight_own_battles_day()
-	if not active_siege.is_empty(): return
+	# Home besieged: the siege is the fight at home. A siege we lay elsewhere
+	# does not stop raids and hosts coming at home, or their answer.
+	if not active_siege.is_empty() and String(active_siege.get("mode",""))=="defensive": return
 	if not active_threat.is_empty():
 		if int(WorldSimulation.state.elapsed_days)>int(active_threat.get("deadline_day",WorldSimulation.state.elapsed_days)) and pending_aftermath.is_empty():
 			var occupation_defense:=occupation_force_for_region(String(active_threat.get("source_civ_id","")),String(active_threat.get("target_region_id","")))
@@ -3508,7 +3606,7 @@ func validate_state()->Array[String]:
 	var siege_error:=SiegeModel.validate(active_siege)
 	if not siege_error.is_empty(): errors.append(siege_error)
 	if not active_siege.is_empty():
-		if not active_threat.is_empty(): errors.append("A siege cannot duplicate another active encounter.")
+		if not active_threat.is_empty() and _is_the_siege(active_threat): errors.append("A siege cannot duplicate another active encounter.")
 		if String(active_siege.get("mode",""))=="offensive" and _field_army_index(int(active_siege.get("army_id",0)))<0: errors.append("The siege references a missing field army.")
 	if siege_history.size()>SiegeModel.HISTORY_LIMIT: errors.append("Siege history exceeds its bound.")
 	for history in siege_history:
@@ -4050,15 +4148,45 @@ func _apply_command_development(commander:Dictionary)->Dictionary:
 	return commander
 
 
-func _apply_home_commander_fate(termination:Dictionary)->void:
-	if String(termination.get("defeated",""))!=String(home_army.get("name","")): return
+func _apply_home_commander_fate(termination:Dictionary)->Dictionary:
+	if String(termination.get("defeated",""))!=String(home_army.get("name","")): return {}
 	var fate:=String(termination.get("commander_fate","escaped"))
-	if fate not in ["killed","captured"]: return
+	if fate not in ["killed","captured"]: return {}
 	var former:Dictionary=home_army.get("commander",{})
 	var successor:=WorldSimulation.figures.commander(_acting_field_commander(false),"home")
 	home_army["commander"]=successor
 	var command_effect:="was destroyed" if fate=="killed" else "was captured"
 	WorldSimulation.state.council_inbox.push_front({"id":"command_succession_%d" % int(WorldSimulation.state.elapsed_days),"advisor":String(successor.get("name","ACTING FIELD STAFF")),"office":"Marshal","topic":"security","act":{"type":"report"},"text":"%s %s. %s has assumed field coordination with reduced effectiveness." % [String(former.get("name","The field command element")),command_effect,String(successor.get("name","The acting field staff"))],"urgency":0.98,"day":int(WorldSimulation.state.elapsed_days),"status":"unread"})
+	return {"fell":String(former.get("name","")),"fate":fate,"now":String(successor.get("name",""))}
+
+
+## A band's (or a garrison's) general killed or taken in the fight: the next
+## living general takes it over (HistoricalFigures.commander finds one, or a
+## new one comes forward), so no dead man leads it or speaks for it. Returns
+## {fell, fate, now} for the battle's record and report, or {}.
+func _apply_force_commander_fate(result:Dictionary,termination:Dictionary)->Dictionary:
+	var fate:=String(termination.get("commander_fate",""))
+	if fate not in ["killed","captured"]: return {}
+	var home_side:=String(result.get("home_side","attacker"))
+	var ours:Dictionary=result.get(home_side,{})
+	if String(termination.get("defeated",""))!=String(ours.get("name","")): return {}
+	var kind:=String(result.get("home_force_kind",""))
+	var former:Dictionary={}
+	var successor:Dictionary={}
+	if kind=="field_army":
+		var index:=_field_army_index(int(result.get("home_force_id",0)))
+		if index<0: return {}
+		former=field_armies[index].get("commander",{})
+		successor=WorldSimulation.figures.commander(_acting_field_commander(false),"army_%d" % int(result.get("home_force_id",0)))
+		field_armies[index]["commander"]=successor
+	elif kind=="occupation":
+		var at:=_occupation_force_index(String(result.get("home_force_civ_id","")),String(result.get("home_force_region_id","")))
+		if at<0: return {}
+		former=occupation_forces[at].get("commander",{})
+		successor=WorldSimulation.figures.commander(_acting_field_commander(false),"occupation_%s" % String(result.get("home_force_region_id","")))
+		occupation_forces[at]["commander"]=successor
+	else: return {}
+	return {"fell":String(former.get("name",(ours.get("commander",{}) as Dictionary).get("name",""))),"fate":fate,"now":String(successor.get("name",""))}
 
 
 func _record_military_deaths(_legacy_names:Array[String],cause:String)->void:
@@ -5556,15 +5684,19 @@ func offensive_siege_availability(civ_id:String,region_id:String,army_id:int=0)-
 func start_offensive_siege(civ_id:String,region_id:String,army_id:int=0)->Dictionary:
 	var available:=offensive_siege_availability(civ_id,region_id,army_id)
 	if available.has("error"): return available
+	if not active_siege.is_empty(): return {"error":"We are already laying siege to %s; our people can hold one siege at a time. Storm it or lift it first, or send this army to attack instead." % String((active_siege.get("threat",{}) as Dictionary).get("target_region_name","another town"))}
+	var waiting:=_set_aside_waiting_threat()
 	_create_civilization_threat(available.incident,"offensive")
 	var result:=begin_siege()
 	if not result.has("error"):
 		active_siege.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army began a hostile siege.")
 	else:active_threat.clear()
+	_restore_waiting_threat(waiting)
 	return result
 
 func begin_siege()->Dictionary:
-	if not active_siege.is_empty() or not pending_aftermath.is_empty(): return {"error":"Resolve the current military operation first."}
+	_settle_waiting()
+	if not active_siege.is_empty(): return {"error":"We are already laying siege to %s; our people can hold one siege at a time." % String((active_siege.get("threat",{}) as Dictionary).get("target_region_name","another town"))}
 	if active_threat.is_empty() or bool(active_threat.get("field_encounter",false)) or String(active_threat.get("incident_kind","campaign"))=="raid": return {"error":"A siege needs a settlement campaign, not a passing raid or field encounter."}
 	var offensive:=String(active_threat.get("campaign_mode","defensive"))=="offensive"
 	if WorldSimulation.enabled and not preload("res://scripts/civilization_siege.gd").available(active_threat.get("owned_target",{})):return {"error":"This city is already under siege."}
@@ -5723,7 +5855,8 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 		var field_index:=_field_army_index(int(saved.army_id))
 		var troops:=int(field_armies[field_index].get("troops",0)) if String(saved.mode)=="offensive" and field_index>=0 else (int(_home_defense_force().get("troops",0)) if String(saved.mode)=="defensive" else 0)
 		var busy:=_army_in_battle(int(saved.army_id)) if String(saved.mode)=="offensive" else _home_battle_running()
-		if troops<=0 or not pending_aftermath.is_empty() or busy: return {"error":"No available local force can enter battle; the siege orders remain in place."}
+		_settle_waiting()
+		if troops<=0 or busy: return {"error":"No available local force can enter battle; the siege orders remain in place."}
 		_end_siege("The forces leave siege positions for battle.",false,false)
 		active_threat=(saved.threat as Dictionary).duplicate(true)
 		var result:=begin_threat_engagement(false)

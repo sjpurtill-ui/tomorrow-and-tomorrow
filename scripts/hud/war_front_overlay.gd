@@ -550,6 +550,9 @@ func collect()->Dictionary:
 		# A band at a town we hold, or a detachment out of its garrison, is
 		# known: the garrison is ours and word comes in every day.
 		var near_hold:=army.get("pursuit") is Dictionary or (String(army.get("status",""))=="stationed" and preload("res://scripts/town_ledger.gd").holds(_region_civ(String(army.get("location_id",""))),String(army.get("location_id",""))))
+		# A band in a fight is where its battle is drawn (the battle mark and
+		# the battle panel read it as it stands), not where a runner last left it.
+		if not near_hold and MilitaryCampaign._army_in_battle(int(army.get("army_id",0))): near_hold=true
 		# Before signals the map knows only what the last runner reported.
 		if not live and not at_home and not near_hold:
 			shown=army.get("last_report",{})

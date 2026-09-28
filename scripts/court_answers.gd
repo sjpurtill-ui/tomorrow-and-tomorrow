@@ -446,7 +446,8 @@ static func _battle_answer(b:Dictionary,lower:String)->String:
 	var result:="We won %s" % at if won else ("We lost %s" % at if lost else "Neither side won %s" % at)
 	if not b.has("our_dead"):
 		# Only what everyone has heard: the war leader keeps the count.
-		return "%s, %s. The war leader keeps the count of the dead and what was taken." % [result,when]
+		var brought:=(" We took %d captives there, and they were %s." % [int(b.captives),String(b.get("captives_fate",""))]) if int(b.get("captives",0))>0 else ""
+		return "%s, %s.%s The war leader keeps the count of the dead and the spoils." % [result,when,brought]
 	var ours:=int(b.get("our_dead",0)); var theirs:=int(b.get("their_dead",0))
 	var captives:=int(b.get("captives",0))
 	var took:PackedStringArray=PackedStringArray()

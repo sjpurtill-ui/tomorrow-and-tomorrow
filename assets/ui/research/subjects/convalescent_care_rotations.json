@@ -1,0 +1,12 @@
+{
+  "id": "convalescent_care_rotations",
+  "line": "health",
+  "game_year": 229,
+  "approx_historical_year": -3473,
+  "prompt": "c. 3473 BCE: Adult caregivers hand over water and cloth beside recovering person; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1291e35a-4187-4b05-9e60-0bd258fae1dc.png",
+  "asset": "res://assets/ui/research/subjects/convalescent_care_rotations-v1.png",
+  "sha256": "9a2db80878bdadabc2a61ec6c60c98e0b8d7d0bab4e54d777b5147cf9d4ba763",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

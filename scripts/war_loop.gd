@@ -1177,7 +1177,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 
 const TYPED:=[
 	["war_chief",["chief","ruler","leader","bring me","capture","their head"]],
-	["war_burn",["burn","stores","granar","raid them","strike them","hit them","their food"]],
+	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food"]],
 	["war_pursue",["after them","pursue","take back","chase","follow","get it back","hunt them"]],
 	["war_guard",["defend","hold","guard","ford","watch","approach","protect","keep them out","wall"]],
 	["war_parley",["peace","truce","talk","parley","messenger","end it","enough"]],
@@ -1187,9 +1187,13 @@ const TYPED:=[
 ]
 
 static func typed_choice(audience_id:String,text:String)->String:
-	## The god's own words mapped onto an order the war leader can carry.
+	## The god's own words mapped onto an order the war leader can carry. A
+	## question is discussion, never an order ("Who holds Tsaren?" is not
+	## "hold"), and words match whole ("holds", "afford", "repay" are not
+	## "hold", "ford", "pay").
 	var audience:=Hall.find(audience_id)
 	if audience.is_empty() or _war_part(audience).is_empty(): return ""
+	if preload("res://scripts/legacy_aims.gd").asks(text): return ""
 	var lower:=text.to_lower()
 	var open:Dictionary={}
 	for option in Hall.options(audience_id):
@@ -1197,5 +1201,5 @@ static func typed_choice(audience_id:String,text:String)->String:
 	for row in TYPED:
 		var words:Array=row[1] if row[1] is Array else [row[1]]
 		for word in words:
-			if String(word) in lower and open.has(String(row[0])): return String(row[0])
+			if open.has(String(row[0])) and RegEx.create_from_string("\\b%s(s|es)?\\b" % String(word)).search(lower)!=null: return String(row[0])
 	return ""

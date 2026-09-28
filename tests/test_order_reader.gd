@@ -380,7 +380,9 @@ func test_the_world_brief_holds_towns_garrisons_bands_and_the_hall()->void:
 	assert_str(schema).not_contains("town:"+city_id)
 	assert_str(schema).not_contains("person:%d" % int(headman.person_id))
 	assert_str(schema).is_equal(JSON.stringify(OR.response_format()))
-	assert_int(int(payload.max_completion_tokens)).is_less_equal(600)
+	# Room for the model's thinking and the reply: at 420 short follow-ups were
+	# cut off in live play (only the tokens used are billed); still bounded.
+	assert_int(int(payload.max_completion_tokens)).is_less_equal(900)
 
 func test_the_reader_model_is_configurable_apart_from_the_voice()->void:
 	var headman:=_headman()

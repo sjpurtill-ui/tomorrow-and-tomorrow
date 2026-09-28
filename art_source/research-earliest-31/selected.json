@@ -1,0 +1,202 @@
+[
+  {
+    "id": "seasonal_well_flushing",
+    "line": "health",
+    "game_year": 210,
+    "approx_historical_year": -3600,
+    "prompt": "c. 3600 BCE: Villagers remove silt and flush a communal well; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6138e7e4-80e9-4b92-83f7-172d3acffd05.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_well_flushing-v1.png",
+    "sha256": "dfbadfe53773303a1255bba39c74ce91bd80286057a7e0872d633f160ef58791",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "stone_lined_drains",
+    "line": "infrastructure",
+    "game_year": 210,
+    "approx_historical_year": -3600,
+    "prompt": "c. 3600 BCE: Builders line an open water drainage trench with rough stones; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-449d5909-7366-4097-afdf-cd10c4ba0035.png",
+    "asset": "res://assets/ui/research/subjects/stone_lined_drains-v1.png",
+    "sha256": "4816ce3b5150f5bd3a4d6451e36416ad861de033af5e4e87e69aa3a6d8e04caf",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "shared_reserve_access_rules",
+    "line": "nutrition",
+    "game_year": 212,
+    "approx_historical_year": -3587,
+    "prompt": "c. 3587 BCE: Villagers distribute food from shared grain reserve in orderly turns; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90530125-0af0-48a5-a566-714289e6c26b.png",
+    "asset": "res://assets/ui/research/subjects/shared_reserve_access_rules-v1.png",
+    "sha256": "d5b67eb192719955327d2271b9268a12ca80309f8cc7904f18c5130818fdab26",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "fixed_worker_rations",
+    "line": "labor",
+    "game_year": 215,
+    "approx_historical_year": -3567,
+    "prompt": "c. 3567 BCE: Workers receive comparable measured food bowls at communal worksite; charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-16e99d42-38d5-496e-b1b4-7862bfcfad88.png",
+    "asset": "res://assets/ui/research/subjects/fixed_worker_rations-v1.png",
+    "sha256": "a54cbee596020f1a50d239622d768317804a74c2e0db7295b06dc9460fd9c990",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "tributary_villages",
+    "line": "institutions",
+    "game_year": 215,
+    "approx_historical_year": -3567,
+    "prompt": "c. 3567 BCE: Plainly dressed neighboring village adults offer simple baskets of barley and undyed cloth to receiving villagers in mudbrick courtyard, without court regalia. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3dad4311-84ef-4a99-833c-70e08f04a174.png",
+    "asset": "res://assets/ui/research/subjects/tributary_villages-v1.png",
+    "sha256": "81387522991d7c9f67c973485253cdb3a230ce486185d019bf0305a39469fafb",
+    "mode": "built-in image_gen / new image",
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "barley_beer",
+    "line": "nutrition",
+    "game_year": 220,
+    "approx_historical_year": -3533,
+    "prompt": "c. 3533 BCE: Brewers ferment barley mash in large plain clay jar; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7ef2f5ac-7c1a-43d2-af12-884683906dd0.png",
+    "asset": "res://assets/ui/research/subjects/barley_beer-v1.png",
+    "sha256": "277c61f4c2a08b3bb9a055ef346e655d5bdf6047a260320103e7c7b360914775",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "dung_cake_fuel",
+    "line": "ecology",
+    "game_year": 220,
+    "approx_historical_year": -3533,
+    "prompt": "c. 3533 BCE: Herders shape and dry cattle dung cakes for hearth fuel; naturalist plant-pigment painting. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9695d21b-c494-4222-ba2d-fde74ba4f4f5.png",
+    "asset": "res://assets/ui/research/subjects/dung_cake_fuel-v1.png",
+    "sha256": "29b7eff85e10408b36e6c26b9e447cf5c8933e924b3a3bf88c42597a1f3a202f",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "wedge_and_fire_quarrying",
+    "line": "infrastructure",
+    "game_year": 220,
+    "approx_historical_year": -3533,
+    "prompt": "c. 3533 BCE: Workers heat rock face with wood fire and drive simple wedges into crack; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9cc698e4-bac8-44da-8ab0-274c86d799f8.png",
+    "asset": "res://assets/ui/research/subjects/wedge_and_fire_quarrying-v1.png",
+    "sha256": "90cd1a4ee623904dc9f31e8b9e23161817ee39dad01086377eec9ae3dbc37c74",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "wheel_hub_boring",
+    "line": "logistics",
+    "game_year": 220,
+    "approx_historical_year": -3533,
+    "prompt": "c. 3533 BCE: Cartmakers bore solid wooden wheel hub using primitive bow drill in inland work yard; no boats or sails. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-846f2df2-46bc-47b8-8ed5-74113a0b821b.png",
+    "asset": "res://assets/ui/research/subjects/wheel_hub_boring-v1.png",
+    "sha256": "66fdf1538670c8dd5ceba441f9565facd426c19d6e950480d771476ee3328d47",
+    "mode": "built-in image_gen / new image",
+    "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
+  },
+  {
+    "id": "childhood_illness_recognition",
+    "line": "demography",
+    "game_year": 222,
+    "approx_historical_year": -3520,
+    "prompt": "c. 3520 BCE: Adult caregivers notice a child's illness and offer water and cloth; chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7d88c3f5-d3e4-4b4b-878f-5c86f345099a.png",
+    "asset": "res://assets/ui/research/subjects/childhood_illness_recognition-v1.png",
+    "sha256": "118017d33629bf6660b3b12ab2534585567d3cecf09bdb237a1939618bc097a5",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "outbreak_burial_protocols",
+    "line": "health",
+    "game_year": 222,
+    "approx_historical_year": -3520,
+    "prompt": "c. 3520 BCE: Adults carry wrapped shroud to separate grave while others keep distance; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b7cb31a8-2093-4d03-8964-516c59406a94.png",
+    "asset": "res://assets/ui/research/subjects/outbreak_burial_protocols-v1.png",
+    "sha256": "f99699d83ba70b1a19777697ade13c723d896d242aa116e742e8cb2ccbe16540",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "kin_fostering_networks",
+    "line": "demography",
+    "game_year": 224,
+    "approx_historical_year": -3507,
+    "prompt": "c. 3507 BCE: Kin households arrange temporary care of child with supportive relatives; chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2047cdbe-45c0-4021-800d-e5f495ccdc70.png",
+    "asset": "res://assets/ui/research/subjects/kin_fostering_networks-v1.png",
+    "sha256": "9942100d5e18818e083300eb5a8c7e39ee4b97997f206655ee42028b960506e6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "coordinated_retreat_drill",
+    "line": "security",
+    "game_year": 225,
+    "approx_historical_year": -3500,
+    "prompt": "c. 3500 BCE: Village defenders practice withdrawing together in formation with wooden staves; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4b40dd81-b1ea-497e-9896-abeda2348c67.png",
+    "asset": "res://assets/ui/research/subjects/coordinated_retreat_drill-v1.png",
+    "sha256": "f227dfec542e411f32499998d091632e7acfd6cbbedfd564d22b8c56157aa5ec",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "craft_quarters",
+    "line": "labor",
+    "game_year": 225,
+    "approx_historical_year": -3500,
+    "prompt": "c. 3500 BCE: Potters, weavers and stone-tool makers work in neighboring specialized village yards; charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1718d856-f1d0-4eef-b6a6-a18c99a26dbc.png",
+    "asset": "res://assets/ui/research/subjects/craft_quarters-v1.png",
+    "sha256": "226c0ce7f11bdb6ab445cafdde8d4739e0e7f9b9440880166a1a1b9da29a29d4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "faience",
+    "line": "production",
+    "game_year": 225,
+    "approx_historical_year": -3500,
+    "prompt": "c. 3500 BCE: Craftworkers form small turquoise faience beads from quartz paste by kiln; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-58c056fa-9139-4aa7-9b68-8ebb0ac53904.png",
+    "asset": "res://assets/ui/research/subjects/faience-v1.png",
+    "sha256": "aad451d9487b96b07f1096aead0ee2330b9649d5e9717f2a541506453c91ad87",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "public_grievance_hearings",
+    "line": "institutions",
+    "game_year": 225,
+    "approx_historical_year": -3500,
+    "prompt": "c. 3500 BCE: Ordinary adult presents damaged communal channel grievance before listening village elders; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a6a0a32e-6380-49c4-bc38-e1a61add009f.png",
+    "asset": "res://assets/ui/research/subjects/public_grievance_hearings-v1.png",
+    "sha256": "57c4a2510f7dbffbb72dba27effd46a7b1456e3a35bc402211a832aa754828c7",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  }
+]

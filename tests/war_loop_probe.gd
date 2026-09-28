@@ -164,6 +164,9 @@ func _order_the_general(civ_id:String)->void:
 	var typed:=WAR.typed_choice(String(audience.id),"Burn their stores to the ground.")
 	check(typed=="war_burn","Typed 'burn their stores' mapped to '%s'" % typed)
 	check(WAR.typed_choice(String(audience.id),"Hold the ford against them")=="war_guard","Typed 'hold the ford' did not map to guarding")
+	# A question is discussion, never an order; words match whole words.
+	check(WAR.typed_choice(String(audience.id),"Who holds the ford?")=="","A question ('Who holds the ford?') chose an order")
+	check(WAR.typed_choice(String(audience.id),"We cannot afford to lose more men")=="","'afford' was read as the ford")
 	var their_before:=_their_pop(civ_id)
 	var ours_before:=GameState.population_total
 	var result:=HALL.resolve(String(audience.id),typed)
