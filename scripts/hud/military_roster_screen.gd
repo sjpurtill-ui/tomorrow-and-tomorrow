@@ -1,14 +1,19 @@
 extends CanvasLayer
 ## The military screen over the real world: forces, recruitment, training and
-## supply. Every figure comes from the existing reports; the Forces page says in
-## plain words what each force is, what it lacks, who is fixing it and what the
-## ruler can do next (hud/military_force_story.gd). Paper and ink, as the court
-## and production screens.
+## supply, as HOI4 shows them. Every figure comes from the one ledger's
+## readings. For the army, Forces is the army overview (hud/forces_board.gd:
+## one row per army with the army bar's numbers) and Readiness & supply the
+## logistics view (hud/readiness_board.gd: the supply model's lines and the
+## gear each force lacks); sentences live in their tooltips. Boats and air
+## craft keep their service cards (hud/military_force_story.gd). Paper and
+## ink, as the court and production screens.
 const Art=preload("res://scripts/hud/military_roster_visuals.gd")
 const Gauge=preload("res://scripts/hud/military_roster_gauge.gd")
 const Story=preload("res://scripts/hud/military_force_story.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
+const ForcesBoard=preload("res://scripts/hud/forces_board.gd")
+const ReadinessBoard=preload("res://scripts/hud/readiness_board.gd")
 var TEXT:=T.INK
 var MUTED:=T.INK_MUTED
 var GOOD:=T.GREEN
@@ -47,6 +52,11 @@ var editor_id:int=-1
 var notice:=""
 var notice_label:Label
 var stories:Dictionary={}
+## The army's Forces board (also the strip over its Training page) and its
+## Readiness & supply board, while shown.
+var forces_board:VBoxContainer
+var readiness_board:VBoxContainer
+var army_filter:="all"
 
 func accent(domain:String="")->Color:
 	return {"army":T.GOLD,"navy":T.TEAL,"air":T.BLUE}.get(service if domain.is_empty() else domain,T.GOLD)
@@ -100,6 +110,8 @@ func _layout()->void:
 		layout_size=view
 		var inset:=maxf(16,view.x*.045)
 		panel.position=Vector2(inset,64);panel.size=Vector2(view.x-inset*2,view.y-100)
+		for board:Node in [forces_board,readiness_board]:
+			if is_instance_valid(board):board.call("set_available_width",_body_width())
 	if is_instance_valid(body):
 		var column:VBoxContainer=panel.get_child(0)
 		var content_height:=48.0+column.get_theme_constant("separation")*(column.get_child_count()-1)+body.get_combined_minimum_size().y
@@ -151,48 +163,36 @@ func _template_editor()->void:
 			_button(choices,"+10 %s · %s" % [unit.replace("_"," ").capitalize(),MilitaryCampaign.PersistentProduction.product_name(weapon)],func():MilitaryCampaign.adjust_template_entry(editor_id,kind,equipment,10);_build_body())
 	_button(body,"Delete this design",func():MilitaryCampaign.delete_army_template(editor_id);editor_id=-1;_build_body())
 
+## Boats and air craft: one card each with its condition, crews and task.
 func _support_data()->Array:
-	if service!="army":
-		var items:Array=[]
-		for force:Dictionary in _rows():
-			items.append({"id":String(force.id),"label":String(force.name).to_upper(),"value":"%.0f%% condition" % (float(force.get("condition",0))*100),"note":String(force.get("equipment_note",""))+" · "+String(force.get("activity",""))})
-		if items.is_empty():items.append({"id":"empty","label":"SERVICE READINESS","value":"No forces in service","note":"Force condition and crew readiness will appear here."})
-		return items
-	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
-	var damaged:=0;var spare:=0;var equipped:=0;var required:=0
-	for count in army.get("damaged_equipment",{}).values():damaged+=int(count)
-	for count in army.get("military_inventory",{}).values():spare+=int(count)
-	for formation:Dictionary in army.get("formations",[]):
-		equipped+=int(formation.get("equipment",0));required+=int(formation.get("equipment_required",0))
-	var deployed:=MilitaryCampaign.field_army_active_personnel()>0
-	var repairs:Array[String]=[]
-	var upkeep=preload("res://scripts/routine_military_upkeep.gd")
-	var repair_items:Array=army.get("damaged_equipment",{}).keys()
-	for job:Dictionary in MilitaryCampaign.equipment_queue:
-		if (job.get("job_type","")=="repair" or job.has("repair_pending")) and job.get("item","") not in repair_items:repair_items.append(job.item)
-	for item:String in repair_items:
-		var underway:int=upkeep.pending(MilitaryCampaign,item);damaged+=underway
-		if int(army.get("damaged_equipment",{}).get(item,0))+underway>0:repairs.append("%s: %s" % [MilitaryCampaign.PersistentProduction.product_name(item),upkeep.status(MilitaryCampaign,item)])
-	return [
-		{"id":"food","label":"FOOD EACH DAY","value":_amount(float(army.get("provisions_required_today",0))),"note":"Rations the fighting people eat each day"},
-		{"id":"delivery","label":"FOOD REACHING THE FIELD","value":"%.0f%%" % (MilitaryCampaign.field_provision_delivery_ratio()*100) if deployed else "No one in the field","note":"Share of the field army's rations that arrive"},
-		{"id":"gear","label":"WEAPONS AT HOME","value":"%d of %d" % [equipped,required],"note":"%d still missing · %d spare in stores" % [maxi(0,required-equipped),spare]},
-		{"id":"repair","label":"WEAPONS BEING MENDED","value":str(damaged),"note":"Nothing broken is waiting" if repairs.is_empty() else "\n".join(repairs)}]
+	var items:Array=[]
+	for force:Dictionary in _rows():
+		items.append({"id":String(force.id),"label":String(force.name).to_upper(),"value":"%.0f%% condition" % (float(force.get("condition",0))*100),"note":String(force.get("equipment_note",""))+" · "+String(force.get("activity",""))})
+	if items.is_empty():items.append({"id":"empty","label":"SERVICE READINESS","value":"No forces in service","note":"Their condition and crews show here."})
+	return items
 
-func _amount(value:float)->String:
-	return "none" if value<.05 else ("%.1f" % value if value<10 else Story.number(roundi(value)))
-
+## Readiness & supply. The army: HOI4's logistics view (hud/readiness_board.gd).
 func _support()->void:
-	T.text(_label(body,"Readiness and supply"),"voice",TEXT)
-	_wrapped(body,"Staff hand out weapons and arrange repairs. Shortages and delays show here; making things belongs in Production.")
+	if service=="army":
+		readiness_board=ReadinessBoard.new();body.add_child(readiness_board)
+		readiness_board.setup({"width":_body_width()})
+		readiness_board.close_wanted.connect(queue_free)
+		support_labels=readiness_board.chips
+		return
 	var grid:=GridContainer.new();grid.columns=2 if panel.size.x>=760 else 1;grid.add_theme_constant_override("h_separation",12);grid.add_theme_constant_override("v_separation",12);body.add_child(grid)
 	for item:Dictionary in _support_data():
 		var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,16));grid.add_child(card)
 		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
 		_kicker(column,String(item.label))
 		var value:=_label(column,String(item.value));T.text(value,"value",TEXT)
-		support_labels[item.id]={"value":value,"note":_wrapped(column,String(item.note))}
+		var note:=_label(column,String(item.note),14,MUTED);note.clip_text=true;note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;note.tooltip_text=String(item.note);note.mouse_filter=Control.MOUSE_FILTER_PASS
+		support_labels[item.id]={"value":value,"note":note}
 	_button(body,"Military production ↗",_production)
+
+## The width the boards have to lay out in (the panel less its margins and
+## the scroll bar).
+func _body_width()->float:
+	return maxf(0.0,panel.size.x-72.0)
 
 func _update_support()->void:
 	var items:=_support_data()
@@ -200,7 +200,7 @@ func _update_support()->void:
 	for item:Dictionary in items:
 		if not support_labels.has(item.id):_build_body();return
 		support_labels[item.id].value.text=String(item.value)
-		support_labels[item.id].note.text=String(item.note)
+		support_labels[item.id].note.text=String(item.note);support_labels[item.id].note.tooltip_text=String(item.note)
 
 func _management(sub:int)->void:
 	_show_page("support" if sub==3 else "recruitment")
@@ -211,11 +211,22 @@ func _show_page(value:String)->void:
 
 func _map_command()->void:
 	MilitaryCampaign.joint_operations.open_hierarchy(service)
+	_follow_command()
+
+## While the army command panel is open this screen steps aside, and comes
+## back when it closes.
+func _follow_command()->void:
 	var command=MilitaryCampaign.joint_operations.screen
 	if not is_instance_valid(command):return
 	panel.hide()
 	command.tree_exited.connect(func():
 		if not is_queued_for_deletion():panel.show();_build_body())
+
+## A row's Orders opened: the army command panel (this screen steps aside) or
+## a held town's own view (this screen closes).
+func _command_opened(kind:String)->void:
+	if kind=="garrison":queue_free();return
+	_follow_command()
 
 func _input(event:InputEvent)->void:
 	if not panel.visible:return
@@ -229,8 +240,9 @@ func _process(delta:float)->void:
 	_layout();timer+=delta
 	if timer<.5:return
 	timer=0;stories.clear()
+	# The embedded recruitment, forces and readiness boards own live updates.
+	if page=="recruitment" or (service=="army" and page in ["forces","support"]):return
 	if page=="support":_update_support();return
-	if page=="recruitment":return # The embedded recruitment board owns live updates.
 	if training_view:_update_policy();return
 	var rows:=_rows();_update_hero(rows)
 	var visible:=_filtered(rows)
@@ -258,8 +270,10 @@ func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Butt
 func _bar(parent:Node,color:Color,mode:String="segments")->ProgressBar:
 	var bar:ProgressBar=Gauge.new();bar.ink=color;bar.mode=mode;bar.track=T.TRACK;bar.ground=T.PAPER_SUNK;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(bar);return bar
 func _clear()->void:
+	if is_instance_valid(forces_board) and not bool(forces_board.strip_only):army_filter=String(forces_board.filter)
 	for child in body.get_children():body.remove_child(child);child.queue_free()
-	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();support_labels.clear();policy_grid=null;notice_label=null
+	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();support_labels={};policy_grid=null;notice_label=null
+	forces_board=null;readiness_board=null
 
 func _build_body()->void:
 	var saved_scroll:=scroll.scroll_vertical
@@ -274,6 +288,11 @@ func _build_body()->void:
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
+	if service=="army":
+		# HOI4's army overview; over the Training page only its strip of totals.
+		_forces(training_view)
+		if training_view:_policy()
+		scroll.set_deferred("scroll_vertical",saved_scroll);return
 	var rows:=_rows();_hero(rows)
 	if training_view:_policy();scroll.set_deferred("scroll_vertical",saved_scroll);return
 	var filters:=HBoxContainer.new();filters.add_theme_constant_override("separation",6);body.add_child(filters)
@@ -285,14 +304,23 @@ func _build_body()->void:
 	if rows.is_empty():
 		var empty:=PanelContainer.new();empty.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,24));body.add_child(empty)
 		var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10);empty.add_child(content)
-		T.text(_label(content,{"army":"No one is under arms yet","navy":"No boats are in service yet","air":"No aircraft are in service yet"}[service]),"voice",TEXT)
-		_wrapped(content,{"army":"Recruit a band in Recruit & deploy, or set people to Defense and the watch drills them by itself.","navy":"Build a base and commission craft through service command.","air":"Build a field and commission aircraft through service command."}[service])
-		_button(content,"Recruit & deploy" if service=="army" else "Service command",func():_show_page("recruitment") if service=="army" else _map_command(),true)
+		T.text(_label(content,{"navy":"No boats are in service yet","air":"No aircraft are in service yet"}[service]),"voice",TEXT)
+		_wrapped(content,{"navy":"Build a base and commission craft through service command.","air":"Build a field and commission aircraft through service command."}[service])
+		_button(content,"Service command",_map_command,true)
 	elif visible.is_empty():_wrapped(body,"No forces match this filter.")
 	for data:Dictionary in visible:
 		_unit_card(data)
 		if data.id==selected_row.get("id",""):selected_row=data;_inspection()
 	scroll.set_deferred("scroll_vertical",saved_scroll)
+
+## The army's Forces page, HOI4's army overview (hud/forces_board.gd); over
+## the Training page only its strip of totals.
+func _forces(strip_only:bool=false)->void:
+	forces_board=ForcesBoard.new();body.add_child(forces_board)
+	forces_board.setup({"width":_body_width(),"strip_only":strip_only,"filter":army_filter})
+	forces_board.page_wanted.connect(_show_page)
+	forces_board.close_wanted.connect(queue_free)
+	forces_board.command_opened.connect(_command_opened)
 
 func _hero(rows:Array[Dictionary])->void:
 	var hero:=PanelContainer.new();hero.custom_minimum_size.y=128;hero.clip_contents=true
@@ -421,30 +449,15 @@ func _update_row(binding:Dictionary,data:Dictionary)->void:
 	binding.card.add_theme_stylebox_override("panel",_card_style(bool(story.attention),data.id==selected_row.get("id","")))
 	binding.activity_bar.queue_redraw()
 
-## One next step per force, always through an existing flow.
+## One next step per boat or air force, always through an existing flow.
 func _act(binding:Dictionary)->void:
 	var data:Dictionary=binding.get("row",{});var story:Dictionary=binding.get("story",{})
 	match String(story.get("action",{}).get("id","")):
-		"reinforce":notice=_call_up(data);_build_body()
 		"production":_production()
 		"recruitment":_show_page("recruitment")
 		"training":training_view=true;page="training";_build_body()
 		"map":_map_command()
 		_:_talk_to_captain(data)
-
-func _call_up(data:Dictionary)->String:
-	## The war-planning call-up, one force at a time: raise free adults into the
-	## recruit reserve, then send them to the empty places (reinforce_formation).
-	var sent:=0;var refusal:=""
-	for member:Dictionary in data.get("members",[data]):
-		var gap:=maxi(0,int(member.get("authorized",0))-int(member.get("count",0)))
-		if gap<=0 or not member.has("formation_id"):continue
-		if MilitaryCampaign.aggregate_recruits<gap:MilitaryCampaign.raise_recruits(gap-MilitaryCampaign.aggregate_recruits)
-		var result:Dictionary=MilitaryCampaign.reinforce_formation(int(member.formation_id),gap)
-		if result.has("error"):refusal=String(result.error);continue
-		sent+=int(result.get("accepted",0))
-	if sent<=0:return refusal if not refusal.is_empty() else "No one could be called up."
-	return "%s called up; they drill for a few days, then take the empty places in %s." % [Story.number(sent),Story.sentence_name(String(data.name))]
 
 func _talk_to_captain(data:Dictionary)->void:
 	var captain:Dictionary=Story.captain_for(data,MilitaryCampaign)
@@ -455,66 +468,32 @@ func _talk_to_captain(data:Dictionary)->void:
 	else:director.call("open_court",{})
 	queue_free()
 
+## The service cards' rows: boats and air craft. The army reads its forces
+## from the army bar's cards (hud/forces_model.gd).
 func _rows()->Array[Dictionary]:
-	var raw:=_raw_rows()
-	return preload("res://scripts/hud/army_roster_groups.gd").group(raw) if service=="army" else raw
+	return _raw_rows()
 
 func _raw_rows()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
+	if service=="army":return result
 	var campaign=MilitaryCampaign
-	if service=="army":
-		var forces:Array=[{"force":campaign.home_army,"location":"Home reserve","key":"home","place":"reserve"}]
-		var snapshot:Dictionary=campaign.field_armies_snapshot()
-		for army:Dictionary in snapshot.get("armies",[]):
-			var home:bool=String(army.get("location_id",""))=="player_home" and army.get("status","")=="stationed"
-			var report:Dictionary=army.get("last_report",{})
-			var commander:Dictionary=army.get("commander",{})
-			if not home and not bool(snapshot.get("live_reports",false)):
-				if report.get("formations",[]).is_empty():
-					result.append({"id":"field:%s" % army.get("army_id",army.get("id",0)),"type_id":"","name":String(army.get("name","Field army")),"glyph":"⚑","location":"Awaiting formation report","count":int(report.get("troops",0)),"unknown":true,"commander":commander});continue
-				forces.append({"force":report,"key":"field:%s" % army.get("army_id",army.get("id",0)),"place":"report","commander":commander,"location":"%s · report %dd old" % [army.get("name","Field army"),maxi(0,int(GameState.elapsed_days)-int(report.get("day",0)))]})
-			else:forces.append({"force":army,"key":"field:%s" % army.get("army_id",army.get("id",0)),"place":"home" if home else "field","commander":commander,"location":army.get("name","Field army")})
-		for occupation:Dictionary in campaign.occupation_forces:forces.append({"force":occupation,"place":"garrison","commander":occupation.get("commander",{}),"key":"garrison:%s:%s" % [occupation.get("civ_id",""),occupation.get("region_id",campaign.occupation_forces.find(occupation))],"location":String(occupation.get("region_name","Occupied settlement"))+" garrison"})
-		for group:Dictionary in forces:
-			for unit:Dictionary in group.force.get("formations",[]):
-				var count:=int(unit.get("count",0));var attending:=int(unit.get("training_attending",0)) if not "report" in String(group.location) else 0
-				var type_id:=String(unit.get("unit","levy"))
-				var glyph:="♞" if type_id in ["cavalry","horse_archer","mounted_archer"] else "➶" if String(unit.get("weapon",""))=="bow" else "⚔"
-				var entry:={"id":"%s:%s" % [group.key,unit.get("id",group.force.get("formations",[]).find(unit))],"kind":"formation","place":String(group.place),"commander":group.get("commander",{}),"group_key":group.key,"group_name":"Home reserve" if group.key=="home" else String(group.location),"equipment_count":int(unit.get("equipment",0)),"equipment_required":int(unit.get("equipment_required",count)),"type_id":type_id,"purpose":campaign.UnitCatalog.archetype(type_id).get("purpose",""),"weapon":String(unit.get("weapon","")),"name":campaign.UnitCatalog.archetype(type_id).get("label",type_id),"glyph":glyph,"location":group.location,"count":count,"authorized":int(unit.get("authorized_count",count)),"condition":float(unit.get("personnel_condition",1)),"equipment":float(unit.get("equipment",0))/maxf(1,unit.get("equipment_required",count)),"equipment_note":("Ammo %d / %d" % [unit.get("ammunition",0),unit.get("ammunition_required",0)] if int(unit.get("ammunition_required",0))>0 else "No ammo needed"),"skill":float(unit.get("training",0)),"experience":float(unit.get("experience",0)),"in_training":attending>0,"activity":"Staff training" if attending>0 else "On duty / reserve","progress":float(campaign.training_program.get("progress_days",0))/maxf(1,campaign.training_program.get("duration_days",1)) if attending>0 else 0.0,"training_note":"%d rotating through drill" % attending if attending>0 else "Training: "+String(campaign.training_staff.policy(service).label).to_lower()}
-				if group.key=="home" and unit.has("id"):entry.formation_id=int(unit.id)
-				result.append(entry)
-		for trainee:Dictionary in campaign.training_queue:
-			var count:=int(trainee.get("count",0));var days:=float(trainee.get("required_days",1));var progress:=float(trainee.get("progress_days",0))
-			var line:=trainee.has("deployment_line")
-			var kind:="line" if line else "basic" if bool(trainee.get("automated_basic",false)) else "instruction"
-			var unit_type:=String(trainee.get("unit","levy"))
-			# A recruitment line's size is its template (target_count). initial_count
-			# counts everyone ever enrolled, including recruits hurt and replaced.
-			var target:=int(trainee.get("target_count",count)) if line else count
-			var required:int=campaign._equipment_required_for(unit_type,count)
-			var reserved:=int(trainee.get("reserved_equipment",0))
-			var armed:=mini(required,reserved) if line else roundi(float(trainee.get("equipment_access_today",0))*required)
-			var access:=clampf(float(reserved)/maxf(1.0,float(required)),0,1)
-			var manpower:=clampf(float(count)/maxf(1.0,float(target)),0,1)
-			result.append({"id":"recruit:%s" % trainee.get("id",campaign.training_queue.find(trainee)),"kind":kind,"place":"reserve","order_id":int(trainee.get("id",-1)),"line_id":int(trainee.get("deployment_line",-1)),"hurt":maxi(0,int(trainee.get("initial_count",count))-count),"ceiling":minf(manpower,access) if line else 1.0,"ceiling_reason":"gear" if access<manpower else "people","group_key":"recruit:%s" % trainee.get("deployment_line",trainee.get("build_batch","legacy")),"group_name":String(campaign.recruit_deploy.line(int(trainee.deployment_line)).get("name","Recruitment line %s" % trainee.deployment_line)) if line else "New recruits","type_id":unit_type,"weapon":String(trainee.get("weapon","improvised")),"name":campaign.UnitCatalog.archetype(unit_type).get("label","Recruits"),"glyph":"◇","location":"Initial instruction","count":count,"authorized":target,"condition":float(trainee.get("personnel_condition",1)),"equipment_count":armed,"equipment_required":required,"equipment":float(armed)/maxf(1,required),"equipment_note":"Weapons for drill","skill":0.0,"experience":float(trainee.get("experience",0)),"in_training":true,"activity":"Initial training","progress":progress/maxf(1,days),"training_note":"%.0f of %.0f days of first drill" % [progress,days]})
-	else:
-		var op=campaign.joint_operations
-		for unit:Dictionary in op.state.forces:
-			if unit.owner!="player" or unit.domain!=service:continue
-			var authorized:=0;var missing_equipment:=""
-			for kind:String in unit.authorized:
-				authorized+=int(unit.authorized[kind])
-				if missing_equipment.is_empty() and int(unit.authorized[kind])>int(unit.units.get(kind,0)):missing_equipment=String(op.C.UNITS.get(kind,{}).get("equipment",""))
-			var staff_status:=String(unit.get("training_status",""))
-			var staff_report:Dictionary=campaign.training_staff.service_force_report(unit,maxi(int(op.state.last_day),int(unit.get("staff_training_day",-1))))
-			var exercising:bool=staff_report.group=="training" and float(unit.training)>=1.0
-			var activity:=staff_status if exercising else String(unit.status)
-			var note:=String(unit.status) if exercising else staff_status
-			if note==activity or note=="":note="Training: "+String(campaign.training_staff.policy(service).label).to_lower()
-			var type_id:="";var largest:=0
-			for kind:String in unit.units:
-				if int(unit.units[kind])>largest:type_id=kind;largest=int(unit.units[kind])
-			result.append({"id":"%s:%s" % [service,unit.id],"kind":"service","service_equipment":missing_equipment,"auto_replace":bool(unit.get("auto_replace",true)),"crew_short":int(unit.get("crew_shortfall",0)),"type_id":type_id,"purpose":String(op.C.UNITS.get(type_id,{}).get("purpose","")),"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"in_training":staff_report.group=="training","activity":activity,"progress":float(unit.training) if float(unit.training)<1.0 else 0.0,"training_note":note})
+	var op=campaign.joint_operations
+	for unit:Dictionary in op.state.forces:
+		if unit.owner!="player" or unit.domain!=service:continue
+		var authorized:=0;var missing_equipment:=""
+		for kind:String in unit.authorized:
+			authorized+=int(unit.authorized[kind])
+			if missing_equipment.is_empty() and int(unit.authorized[kind])>int(unit.units.get(kind,0)):missing_equipment=String(op.C.UNITS.get(kind,{}).get("equipment",""))
+		var staff_status:=String(unit.get("training_status",""))
+		var staff_report:Dictionary=campaign.training_staff.service_force_report(unit,maxi(int(op.state.last_day),int(unit.get("staff_training_day",-1))))
+		var exercising:bool=staff_report.group=="training" and float(unit.training)>=1.0
+		var activity:=staff_status if exercising else String(unit.status)
+		var note:=String(unit.status) if exercising else staff_status
+		if note==activity or note=="":note="Training: "+String(campaign.training_staff.policy(service).label).to_lower()
+		var type_id:="";var largest:=0
+		for kind:String in unit.units:
+			if int(unit.units[kind])>largest:type_id=kind;largest=int(unit.units[kind])
+		result.append({"id":"%s:%s" % [service,unit.id],"kind":"service","service_equipment":missing_equipment,"auto_replace":bool(unit.get("auto_replace",true)),"crew_short":int(unit.get("crew_shortfall",0)),"type_id":type_id,"purpose":String(op.C.UNITS.get(type_id,{}).get("purpose","")),"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"in_training":staff_report.group=="training","activity":activity,"progress":float(unit.training) if float(unit.training)<1.0 else 0.0,"training_note":note})
 	return result
 
 func _inspection()->void:
@@ -583,7 +562,7 @@ func _policy()->void:
 	_update_policy()
 func _update_policy()->void:
 	var state:Dictionary=MilitaryCampaign.training_staff.snapshot(service)
-	_update_hero(_rows())
+	if service!="army":_update_hero(_rows())
 	for id in policy_buttons:
 		policy_buttons[id].set_pressed_no_signal(id==state.id)
 		var style:=_skin(T.PAPER_RAISED,T.GOLD if id==state.id else T.RULE,12)

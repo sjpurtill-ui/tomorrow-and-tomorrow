@@ -4,6 +4,8 @@ extends GdUnitTestSuite
 const Story=preload("res://scripts/hud/military_force_story.gd")
 const Roster=preload("res://scripts/hud/military_roster_screen.gd")
 const JARGON:=["PERSONNEL","LISTED SOLDIERS","FORCE GROUPS","NEED ATTENTION","planned","Short ","Missing gear","Condition "]
+## The army's Forces page is numbers now; "Short of gear" is its plain filter.
+const SCREEN_JARGON:=["PERSONNEL","LISTED SOLDIERS","FORCE GROUPS","NEED ATTENTION","planned","Missing gear","Condition "]
 
 func _ctx(extra:Dictionary={})->Dictionary:
 	var ctx:={"service":"army","stage":"hearth","free_adults":0,"policy":{"id":"regular","label":"Regular","intake":1.0},"food_for_drill":true,
@@ -113,22 +115,23 @@ func test_summary_speaks_in_forces_and_warriors()->void:
 	assert_str(summary.attention).starts_with("2 need you: ")
 	assert_str(Story.summary(rows,told,"army","reckoned").fighters).is_equal("22 soldiers")
 
-func test_live_screen_tells_the_reported_story_without_jargon()->void:
+func test_live_screen_shows_the_force_and_its_recruits_without_jargon()->void:
 	GameState.reset_for_new_world(424242);MilitaryCampaign.reset_for_new_world()
 	GameState.initialize_population_model();GameState.ensure_population_total(120)
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":2,"authorized_count":2,"equipment":0,"training":.7,"experience":.01,"personnel_condition":.98}],.8,.7)
 	MilitaryCampaign.recruit_deploy.data={"next_id":2,"next_slot":2,"lines":[{"id":1,"name":"LEVY BAND","template_id":1,"entries":[{"unit":"levy","weapon":"improvised","count":20}],"parallel":1,"remaining":0,"repeat":false,"priority":1,"paused":false,"auto_deploy":true,"target_army":0,"deployed":0,"slots":[1]}]}
 	MilitaryCampaign.training_queue=[{"id":5,"mode":"new","unit":"levy","weapon":"improvised","count":20,"initial_count":39,"experience":0.0,"progress_days":5.95,"required_days":7.0,"injury_accumulator":0.0,"deployment_line":1,"deployment_slot":1,"entry_index":0,"target_count":20,"reserved_equipment":17,"equipment_access_today":.85,"personnel_condition":1.0}]
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
-	assert_int(screen.bindings.size()).is_equal(2)
-	var band:Dictionary=screen.bindings[1]
-	assert_str(band.title.text).is_equal("Levy band")
-	assert_str(band.headline.text).contains("all 20")
-	assert_str(band.drill.text).contains("cannot go further until everyone is armed")
-	assert_str(band.arms.text).contains("17 of 20 armed")
+	# The levy at home is a row of numbers; the band still in first drill is
+	# counted on the strip and lives in Recruit & deploy.
+	var board:VBoxContainer=screen.forces_board
+	assert_int(board.live.size()).is_equal(1)
+	assert_str(board.live[0].men.text).is_equal("2/2")
+	assert_str(String(board.live[0].meters[0].text)).is_equal("0/2")
+	assert_str(board.chips.men.value.text+" "+board.chips.men.word.text).is_equal("2 warriors")
+	assert_str(board.chips.training.value.text).is_equal("20")
 	var text:=""
 	for node:Node in screen.find_children("*","Label",true,false):text+=(node as Label).text+"\n"
 	for node:Node in screen.find_children("*","Button",true,false):text+=(node as Button).text+"\n"
-	for word:String in JARGON:assert_str(text).not_contains(word)
-	assert_str(screen.hero_values.strength.text).is_equal("22 warriors")
+	for word:String in SCREEN_JARGON:assert_str(text).not_contains(word)
 	WorldSimulation.clear()

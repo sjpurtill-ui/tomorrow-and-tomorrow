@@ -165,12 +165,12 @@ func test_rival_training_uses_shared_duration_cost_and_target()->void:
 func test_large_roster_and_policy_controls_update_without_training_buttons()->void:
 	_home()
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
-	# The roster groups a force's levy cohorts into one row (read-only
-	# presentation); the row still counts every soldier of both cohorts.
-	var rows:Array=screen._rows()
+	# The Forces page has one row for the levy at home (the army bar's card):
+	# it counts every soldier of both cohorts.
+	var rows:Array=screen.forces_board.rows
 	assert_int(rows.size()).is_equal(1)
-	assert_int(int(rows[0].count)).is_equal(120)
-	assert_int(screen.bindings.size()).is_equal(1)
+	assert_int(int(rows[0].men)).is_equal(120)
+	assert_int(screen.forces_board.live.size()).is_equal(1)
 	screen.training_view=true;screen._build_body()
 	assert_int(screen.policy_buttons.size()).is_equal(4)
 	screen.policy_buttons.intensive.pressed.emit()
@@ -196,14 +196,15 @@ func test_staff_report_keeps_field_formations_dated_and_does_not_expose_live_cha
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army.status="moving";army.location_id="field"
 	army.last_report=MilitaryCampaign._army_report_snapshot(army)
-	# The roster groups the army's cohorts into one row: it must show the
-	# reported total, not the live one.
+	# The army's row must show the reported total, not the live one.
 	var reported_count:=0
 	for formation:Dictionary in army.last_report.formations:reported_count+=int(formation.count)
-	army.formations[0].count=1
+	var lost:=int(army.formations[0].count)-1
+	army.formations[0].count=1;army.troops=int(army.troops)-lost
 	var screen:CanvasLayer=auto_free(Roster.new());add_child(screen)
-	var reported:Array=screen._rows().filter(func(row:Dictionary)->bool:return "report" in String(row.location))
-	assert_int(int(reported[0].count)).is_equal(reported_count)
+	var reported:Array=screen.forces_board.rows.filter(func(row:Dictionary)->bool:return String(row.id)=="army:%d" % int(army.army_id))
+	assert_int(int(reported[0].men)).is_equal(reported_count)
+	assert_int(int(reported[0].men)).is_not_equal(int(army.troops))
 
 func test_roster_policy_layout_fits_the_game_and_map_click_closes_it()->void:
 	_home()

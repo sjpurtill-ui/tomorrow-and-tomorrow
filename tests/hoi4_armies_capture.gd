@@ -4,8 +4,10 @@ extends Node
 ## army command with a route preview). Run it through
 ## tools/run_isolated_gpu_probe.ps1 at 1600x900. Arguments after "--":
 ##   --era=early|late        1-2 bands at the hearth, or several armies later
-##   --shot=map|recruit|training|command|route|plan|arrow|front
-##     (front: a front line drawn and ordered, three days on, panel closed)
+##   --shot=map|recruit|training|command|route|plan|arrow|front|forces|readiness
+##     (front: a front line drawn and ordered, three days on, panel closed;
+##      forces/readiness: the Military screen's Forces and Readiness & supply
+##      tabs, with a band short of gear and, later, a town we hold)
 ##   --out=res://artifacts/hoi4-armies/<name>.png
 ## Works on the code before and after the HOI4 rework (new hooks are
 ## looked up with has_method), so the same fixture gives before and after.
@@ -73,6 +75,8 @@ func _run()->void:
 	match shot:
 		"recruit":MilitaryCampaign.open_roster("army",false,"recruitment")
 		"training":MilitaryCampaign.open_roster("army",true,"training")
+		"forces":MilitaryCampaign.open_roster("army",false,"forces")
+		"readiness":MilitaryCampaign.open_roster("army",false,"support")
 		"command","route","plan","arrow","front","zones":await _open_command(shot)
 		"map":
 			if terrain.hud and terrain.hud.has_method("select_army") and not MilitaryCampaign.field_armies.is_empty():terrain.hud.select_army(int(MilitaryCampaign.field_armies[0].army_id))
@@ -194,7 +198,30 @@ func _stage_forces(era:String)->void:
 		MilitaryCampaign.recruit_deploy.add(2,3,1,false)
 		MilitaryCampaign.recruit_deploy.add(1,2,1,true)
 		for order:Dictionary in MilitaryCampaign.training_queue:order.progress_days=float(order.required_days)*0.55
+	if _arg("shot","map") in ["forces","readiness"]:_stage_readiness(era)
 	MilitaryCampaign.command_hierarchy.sync()
+
+## For the Forces and Readiness shots: one band out is short of gear (the
+## last early, River band later); later, a town we took (Orvel) is held by a
+## garrison that lacks some too.
+func _stage_readiness(era:String)->void:
+	if not MilitaryCampaign.field_armies.is_empty():
+		var band:Dictionary=MilitaryCampaign.field_armies[mini(2,MilitaryCampaign.field_armies.size()-1)] if era=="late" else MilitaryCampaign.field_armies[-1]
+		var short:=10 if era=="late" else 6
+		var formation:Dictionary=(band.formations as Array)[0]
+		formation["equipment"]=maxi(0,int(formation.get("equipment",0))-short)
+		# A band away is known by its runner's report: the report says so too.
+		var report:Dictionary=band.get("last_report",{})
+		if not (report.get("formations",[]) as Array).is_empty():
+			var told:Dictionary=(report.formations as Array)[0]
+			told["equipment"]=maxi(0,int(told.get("equipment",0))-short)
+	if era!="late" or towns.size()<2:return
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	for region:Dictionary in civ.strategic_regions:
+		if String(region.id)!=towns[1]:continue
+		region["controller"]="player";region["resistance"]=0.3
+		MilitaryCampaign.occupation_forces.assign([{"civ_id":String(civ.id),"region_id":towns[1],"region_name":String(region.get("name","Orvel")),"troops":30,"morale":0.7,"supply_level":0.85,
+			"formations":[{"id":1,"unit":"levy","weapon":"improvised","count":30,"authorized_count":30,"equipment":22,"equipment_required":30,"training":0.6,"experience":0.2}],"commander":{"name":"Suri Vell"}}])
 
 func _open_command(shot:String)->void:
 	# The band still at home: free for a new order.
