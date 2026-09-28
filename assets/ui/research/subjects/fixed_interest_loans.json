@@ -4,9 +4,9 @@
   "game_year": 330,
   "approx_historical_year": -2800,
   "prompt": "c. 2800 BCE: Loans of Grain and Silver at Fixed Interest. Loans of grain and silver at fixed interest. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7ea97055-06a9-4220-b548-2bb54d275758.png",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc004935-777b-44d2-9a27-00f1ed0d1606.png",
   "asset": "res://assets/ui/research/subjects/fixed_interest_loans-v1.png",
-  "sha256": "057c356108afd92fbd1561a9bdb0a94f10585585f48f0a517a4ae2934699fcf6",
+  "sha256": "8a404feeb772fad68eba48e3f90c3e0d699ae0be57fb1e9d27b28bc476cfe6b5",
   "mode": "built-in image_gen / new image",
   "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
 }
