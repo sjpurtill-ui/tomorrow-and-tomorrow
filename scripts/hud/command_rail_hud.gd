@@ -117,6 +117,7 @@ func _ready()->void:
 	_build_kpi_strip()
 	_build_decision_queue()
 	_build_toolbar()
+	_build_army_bar()
 	_build_dock()
 	dock.visibility_changed.connect(_layout)
 	detail_dock.visibility_changed.connect(_layout)
@@ -206,6 +207,43 @@ func _position_toolbar()->void:
 	toolbar.visible=active_section=="" or view.x>=1400
 	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
 	toolbar.position=Vector2(free_left+(view.x-free_left)*0.5-toolbar.size.x*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y)
+	_position_army_bar()
+
+# --- Army bar (hud/army_bar.gd): HOI4's army cards above the map toolbar ------
+
+var army_bar:Control
+
+func _build_army_bar()->void:
+	army_bar=preload("res://scripts/hud/army_bar.gd").new()
+	army_bar.terrain=terrain
+	add_child(army_bar)
+	_position_army_bar()
+
+func _position_army_bar()->void:
+	if army_bar==null:return
+	var view:=get_viewport().get_visible_rect().size
+	army_bar.terrain=terrain
+	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
+	var bottom:=toolbar.position.y-8.0 if toolbar!=null and toolbar.visible else view.y-Tokens.EDGE_MARGIN
+	var height:float=army_bar.bar_height()
+	var left:=free_left+16.0
+	var help:Variant=terrain.get("map_help_button") if is_instance_valid(terrain) else null
+	if help is Control and (help as Control).is_visible_in_tree() and (help as Control).get_global_rect().end.y>bottom-height:left=maxf(left,(help as Control).get_global_rect().end.x+12.0)
+	var right:=view.x-Tokens.EDGE_MARGIN
+	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:right-=Tokens.QUEUE_WIDTH+12.0
+	army_bar.place(Rect2(left,bottom-height,maxf(0.0,right-left),height))
+
+## The top of what sits along the map's bottom edge (the army bar, else the
+## toolbar), for anything that stands just above it.
+func map_bottom_top()->float:
+	if army_bar!=null and army_bar.visible:return army_bar.position.y+army_bar.size.y-army_bar.bar_height()
+	return toolbar.position.y if toolbar!=null and toolbar.visible else get_viewport().get_visible_rect().size.y-Tokens.EDGE_MARGIN
+
+func select_army(army_id:int)->void:
+	if army_bar==null:return
+	army_bar.refresh()
+	for card:Dictionary in army_bar.cards:
+		if army_id in (card.get("members",[]) as Array) or (army_id==0 and String(card.kind)=="home"):army_bar.select_card(card);return
 
 # --- Rail -------------------------------------------------------------------
 

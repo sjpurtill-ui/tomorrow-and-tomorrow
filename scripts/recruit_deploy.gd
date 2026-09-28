@@ -147,6 +147,43 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 		host._refresh_readiness()
 	item.slots.erase(slot);item.deployed=int(item.deployed)+1
 	return {"ok":true,"message":"%d soldiers deployed at home%s." % [int(report.people)," with incomplete training" if early else ""]}
+## One band more or fewer on a line, as HOI4's -/+ beside a queued
+## template: +1 asks for another band trained alongside the others; -1
+## drops a band not yet started, else the newest band in training (its
+## people go home, its gear back to store). A line that keeps going stops
+## asking for more on -1. The last band stays; Stop ends the line.
+func change_count(id:int,delta:int)->Dictionary:
+	var item:=line(id)
+	if item.is_empty():return {"error":"Recruitment line no longer exists."}
+	if delta>0:
+		if bool(item.repeat):return {"ok":true,"message":"This line keeps raising bands until stopped."}
+		item.remaining=int(item.remaining)+delta;item.parallel=int(item.parallel)+delta
+		prepare()
+		return {"ok":true,"message":"%d more %s asked for." % [delta,"band" if delta==1 else "bands"]}
+	if delta<0:
+		if bool(item.repeat):
+			item.repeat=false;item.remaining=0
+			return {"ok":true,"message":"No more bands after these."}
+		if int(item.remaining)>0:
+			item.remaining=int(item.remaining)-1;item.parallel=maxi(1,int(item.parallel)-1)
+			return {"ok":true,"message":"One band fewer."}
+		if item.slots.size()>1:
+			var result:=cancel_slot(id,int(item.slots[-1]))
+			if result.has("ok"):item.parallel=maxi(1,int(item.parallel)-1)
+			return result
+		return {"error":"This is the last band on the line. Stop the line to send them home."}
+	return {"ok":true}
+## Stops one band in training: its recruits go back to civilian life and
+## their reserved gear to the stores (injuries already suffered remain).
+func cancel_slot(id:int,slot:int)->Dictionary:
+	var item:=line(id)
+	if item.is_empty() or slot not in item.slots:return {"error":"That band is no longer in training."}
+	for order:Dictionary in orders(id,slot):
+		var weapon:=String(order.weapon)
+		host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+int(order.get("reserved_equipment",0))
+		host.training_queue.erase(order)
+	item.slots.erase(slot)
+	return {"ok":true,"message":"One band stood down. Its recruits went home; its gear went back to the stores."}
 func cancel(id:int)->Dictionary:
 	var item:=line(id)
 	if item.is_empty():return {"error":"Recruitment line no longer exists."}

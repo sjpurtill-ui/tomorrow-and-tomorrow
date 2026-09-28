@@ -154,15 +154,21 @@ func test_invalid_saved_line_is_rejected_without_replacing_current_forces()->voi
 	assert_int(int(MilitaryCampaign.recruit_deploy.data.lines[0].id)).is_equal(1)
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(10)
 
-func test_template_card_train_button_queues_selected_batch_settings()->void:
+func test_template_card_train_and_five_buttons_queue_one_or_five_bands()->void:
+	# HOI4's model: one click trains a band; x5 trains five side by side.
 	var board=auto_free(preload("res://scripts/hud/recruit_deploy_board.gd").new());add_child(board)
 	board.setup({"edit_template":func(_id:int):pass})
-	board.parallel.value=2;board.serial.value=3
 	var train:Button=board.find_child("TrainTemplate1",true,false)
 	assert_object(train).is_not_null()
 	train.pressed.emit()
 	assert_int(MilitaryCampaign.recruit_deploy.data.lines.size()).is_equal(1)
 	var line:Dictionary=MilitaryCampaign.recruit_deploy.data.lines[0]
-	assert_int(line.parallel).is_equal(2)
-	assert_int(line.remaining+line.slots.size()).is_equal(6)
-	assert_int(board.live.size()).is_equal(3)
+	assert_int(line.parallel).is_equal(1)
+	assert_int(line.remaining+line.slots.size()).is_equal(1)
+	var five:Button=board.find_child("TrainFive1",true,false)
+	five.pressed.emit()
+	var more:Dictionary=MilitaryCampaign.recruit_deploy.data.lines[1]
+	assert_int(more.parallel).is_equal(5)
+	assert_int(more.remaining+more.slots.size()).is_equal(5)
+	# Each line has its head row; its bands have a row each (four to a page).
+	assert_int(board.live.size()).is_equal(2+line.slots.size()+mini(4,more.slots.size()))

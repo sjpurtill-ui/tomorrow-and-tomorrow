@@ -4926,9 +4926,9 @@ func _process_equipment_production_day()->void:
 	var weight_total:=0.0
 	for job in equipment_queue:
 		if PersistentProduction.eligible(self,job): weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
-	# Scarce shared inputs go to higher-priority lines first, then oldest line.
+	# Scarce shared inputs go down the list in order: line 1 first. The order
+	# is the priority the player sets on the Production screen.
 	var ordered:Array=equipment_queue.filter(func(job:Dictionary)->bool:return bool(job.get("persistent",false)))
-	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.allocation)>float(b.allocation) if not is_equal_approx(float(a.allocation),float(b.allocation)) else int(a.id)<int(b.id))
 	for job:Dictionary in ordered:
 		var work:=crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency)
 		if PersistentProduction.eligible(self,job):work=preload("res://scripts/managed_weapon_repair.gd").advance(self,job,work)
