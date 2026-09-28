@@ -38,6 +38,9 @@ func after_test()->void:
 	MilitaryCampaign.reset_for_new_world()
 	GovernmentPeopleSystem.reset_for_new_world()
 	ForeignDiplomacy.reset_for_new_world()
+	# The rival peoples' own systems (probe._stock_actor) are freed here, not
+	# left as orphans for the next suite.
+	WorldSimulation.clear()
 
 func _op()->Dictionary:
 	var f:Dictionary=WAR.front(civ_id)

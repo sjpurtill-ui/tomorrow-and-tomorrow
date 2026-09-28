@@ -1,0 +1,16 @@
+{
+  "id": "certified_craft_competence",
+  "line": "labor",
+  "game_year": 365,
+  "approx_historical_year": -2567,
+  "prompt": "c. 2567 BCE: Recognized Master Craftworkers. Recognized master craftworkers. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0e6365f8-bd27-42f6-9841-ac180f1e954d.png",
+  "asset": "res://assets/ui/research/subjects/certified_craft_competence-v1.png",
+  "sha256": "67b819774902a9ce1109e45375216251cb774d98a52f640da30064d0bccf4da4",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.31
+  ]
+}
