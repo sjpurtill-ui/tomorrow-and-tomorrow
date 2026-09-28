@@ -68,7 +68,7 @@ const GROUP_OBJECT_PATTERN:="(?i)\\b(males?|men|menfolk|boys|grown men|fighting 
 const PERSON_PRONOUNS:=["himself","herself","yourself","him","her","you","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
 ## The god's yes to a war leader's "Shall I march on it?": "yes", "go
 ## ahead", "SEND THEM!", "yes, march on it", "do it now".
-const CONFIRM_PATTERN:="(?i)^\\s*(?=\\w)(?:(?:yes|yeah|yep|yea|aye|ok|okay|sure|all right|alright|very well|indeed|of course)\\b[\\s,!.]*)?(?:please\\s+)?(?:(?:do it|do so|do that|go ahead|go on|go|proceed|carry on|march on it|march on them|march them|march|take it|send them(?: in| out| now| off)?|send the band|send them all|send it|attack|then go|go then|so be it|make it so|see to it|get going|be off)\\b)?[\\s!.,]*(?:now|at once|then|already)?[\\s!.]*$"
+const CONFIRM_PATTERN:="(?i)^\\s*(?=\\w)(?:(?:yes|yeah|yep|yea|aye|ok|okay|sure|all right|alright|very well|indeed|of course)\\b[\\s,!.]*)?(?:please\\s+)?(?:(?:do it|do so|do that|go ahead|go on|go|proceed|carry on|march on it|march on them|march them|march|take it|send them(?: in| out| now| off)?|send the band|send them all|send it|attack|then go|go then|so be it|make it so|see to it|get going|get on with it|be off)\\b)?[\\s!.,]*(?:now|at once|then|already)?[\\s!.]*$"
 const PENDING_DAYS:=2
 
 static var custom_directive_handler:Callable=Callable()
@@ -77,7 +77,7 @@ static var custom_directive_handler:Callable=Callable()
 # Lexicon
 # --------------------------------------------------------------------------
 
-const INSIST_PATTERN:="(?i)^\\s*(yes,? )?(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|go ahead|proceed|carry on|carry it out|go anyway|march anyway|send them anyway|send them( in| out| now| off)?|send them all|send the band|march them|take them (anyway|as they are)|(let them )?go as they are|as they are|then go)\\b[\\s!.]*$"
+const INSIST_PATTERN:="(?i)^\\s*(yes,? )?(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|go ahead|get on with it|proceed|carry on|carry it out|go anyway|march anyway|send them anyway|send them( in| out| now| off)?|send them all|send the band|march them|take them (anyway|as they are)|(let them )?go as they are|as they are|then go)\\b[\\s!.]*$"
 ## [verb, pattern]; checked in order. Patterns match the verb phrase only.
 const VERB_PATTERNS:=[
 	["kill","(?i)\\b(kill|kills|kil|kiil|killl|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them)|burn (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)( alive)?|bur(y|ied) [\\w' ]{0,30}?alive|feed [\\w' ]{0,30}?to (the |my )?(dogs|wolves|pigs|hounds|crows|ravens|fire|fish|river|beasts)|(throw|give|hand|toss) [\\w' ]{0,30}?to the (dogs|wolves|pigs|hounds)|drown (him|her|them|(?-i:[A-Z])\\w+)|impale|crucify|flay|skin [\\w' ]{0,20}?alive|boil [\\w' ]{0,20}?alive|stone (him|her|them|(?-i:[A-Z])\\w+)|(beat|whip|flog|club|stone|burn|kick|starve|bleed|torture) [\\w' ]{0,30}?to death|(send|return|ship) [\\w' ]{0,40}?in pieces|(chop|cut|hack) [\\w' ]{0,30}?(head off|into pieces|to pieces|in pieces|apart)|draw and quarter|quarter (him|her|them)|sacrifice (him|her|them|(?-i:[A-Z])\\w+)|slit (his|her|their) throat|rid [\\w' ]{0,30}?of (every|all|each|its|their|the)\\b[\\w' ]{0,24}?\\b(men|males|menfolk|man|people|villagers|souls?)|(have|get|want|see that|see to it that) [\\w' ]{1,40}?(killed|executed|slain|beheaded|hanged|hung|drowned|strangled|murdered|put to death))\\b"],
@@ -737,6 +737,11 @@ static func _people_route(text:String,cls:Dictionary,audience:Dictionary,live:Di
 	## town or foe in them ("kill all the rebels"), which go to the council's
 	## own path like any other order. Never a person in the hall.
 	var reading:=_people_reading(text,cls,audience,live,people)
+	# "Put the prisoners to death" with nobody of theirs in our hands: the
+	# captives' own plain answer (we hold none), never a standing order.
+	if String(reading.get("kind",""))=="no_town":
+		var captive:=WarOrders.captive_reading(text)
+		if not captive.is_empty() and String(captive.get("part",""))=="prisoners": return {"verb":"war","war":captive}
 	if String(reading.get("kind",""))=="no_town" and people=="group" and _re("(?i)\\b(their|theirs|them|the enemy|enemy|foes?|those people)\\b").search(text)==null and not _names_a_place(text.to_lower()) and not _any_war():
 		var out:={"verb":"order","harm":""}
 		out.erase("war")

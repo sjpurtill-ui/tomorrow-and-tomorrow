@@ -271,9 +271,7 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	# ("free the captives", "from now on the spoils go to the warriors").
 	if not bool(named.get("held",false)):
 		var captive:=captive_reading(clean)
-		# With no town of theirs in our hands, "the captives" can only be those
-		# of a fight: their fate, or the plain truth that we hold none.
-		if not captive.is_empty() and (captive_applies(captive) or (held_towns().is_empty() and not named.has("city_id"))): return captive
+		if not captive.is_empty() and captive_applies(captive): return captive
 	# After men got away from a town we hold: "chase them" is a chase.
 	if _has(lower,CHASE_WORDS):
 		var flight:=Pursuit.latest_flight(String(named.city_id) if bool(named.get("held",false)) else "")
