@@ -535,8 +535,9 @@ static func pronoun_harm_reading(text:String,audience_id:String)->Dictionary:
 ## "The women too", "now the children", "take the women too": the same
 ## order again for another group of the same town, said just after it
 ## (audience town_order). A plain verb may lead ("take", "bind", "round up");
-## one that names a different deed ("kill the women") is its own order.
-const FOLLOW_UP_RE:="^(?:(?:and|now|also|then|yes|good|next|right|the same for|same for|do the same (?:to|with|for)|the same (?:to|with|for)|take|get|grab|seize|bind|tie up|tie|round up|do)[,]?\\s+)*(?:all\\s+)?(?:of\\s+)?(?:the\\s+|their\\s+)?(?<who>women|womenfolk|wives|children|boys|girls|old people|old men|old women|old ones|elders|the rest|rest|others|rest of them|everyone else|everybody else|men|males)(?:\\s+of\\s+[a-z' -]+)?(?:\\s+(?:too|as well|also|next|now|up))*\\W*$"
+## one that names a different deed ("kill the women") or a place to take them
+## ("take the women to Seanstone") is its own order.
+const FOLLOW_UP_RE:="^(?:(?:and|now|also|then|yes|good|next|right|the same for|same for|do the same (?:to|with|for)|the same (?:to|with|for)|take|get|grab|seize|bind|tie up|tie|round up|do)[,]?\\s+)*(?:all\\s+)?(?:of\\s+)?(?:the\\s+|their\\s+)?(?<who>women|womenfolk|wives|children|boys|girls|old people|old men|old women|old ones|elders|the rest|rest|others|rest of them|everyone else|everybody else|men|males)(?:\\s+of\\s+[a-z'-]+)?(?:\\s+(?:too|as well|also|next|now|up))*\\W*$"
 
 static func follow_up(clean:String,audience_id:String)->Dictionary:
 	var audience:=Hall.find(audience_id)

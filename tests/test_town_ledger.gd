@@ -455,7 +455,8 @@ func test_the_bound_women_are_taken_first_and_none_slip_away()->void:
 	assert_int(int(r.objective.captives)).is_equal(int(b.taken))
 	# Those we held went first; none of them could slip away.
 	assert_int(Ledger.count(Ledger.of(civ_id,city_id),"bound","women")).is_equal(maxi(0,bound_women-int(b.taken)))
-	assert_str(says).contains("could not slip away")
+	assert_str(says).contains("slip away")
+	assert_bool(WO.follow_up("Take the women of Tsaren to Seanstone",id).is_empty()).is_true()
 	_consistent("taken the bound women")
 
 func test_the_women_too_after_a_killing_is_asked_once()->void:
