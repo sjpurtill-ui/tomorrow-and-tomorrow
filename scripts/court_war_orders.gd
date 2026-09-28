@@ -519,8 +519,11 @@ static func _fate_less(fate:Dictionary,consumes:Array)->Dictionary:
 		if String(flag)=="policy":
 			if String(out.get("policy",""))=="forced_labor": out.erase("policy")
 		else: out.erase(String(flag))
+	# What the words said about a killing goes with the killing.
+	if not out.has("kill_men"):
+		for key in ["kill_named","kill_all_words","kill_groups","kill_kids","kill_kids_words","bound_only"]: out.erase(key)
 	for key in out.keys():
-		if not String(key) in ["count","group"]: return out
+		if not String(key) in ["count","group","kill_named","kill_all_words"]: return out
 	return {}
 
 ## Measures that are only ever about a people in our hands.

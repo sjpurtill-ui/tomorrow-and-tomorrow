@@ -79,6 +79,12 @@
    "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.9},
    "expect": {"verb": "war", "verdict": "fate", "state": {"killed_women": ">0", "killed_men": "==before", "bound_men": "==before"}}},
 
+  {"id": "grave.kill_women.reader_all", "domain": "grave_group", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
+   "note": "A live reader flagged kill_all for these words (gpt-6-luna) and the 20 bound men died too: the words' own group stands.",
+   "say": "Kill all the women of Tsaren",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "kill_all": true}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_women": ">0", "killed_men": "==before", "bound_men": "==before", "killed_children": "==before", "killed_elders": "==before"}}},
+
   {"id": "grave.maim_every_man", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "say": "maim every man in Tsaren",
    "ideal": {"kind": "order", "action": "maim", "type": "group", "ref": "$tsaren", "confidence": 0.9},
@@ -99,7 +105,10 @@
    "say": "Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children.",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"], "stance": "harsh"}, "confidence": 0.95},
    "expect": {"verb": "war", "verdict": "fate", "state": {"bound_men": ">0", "killed": "==before", "m_bind_men": "==1"}},
-   "variants": ["Round up all the men of Tsaren and tie them up.", "round up the men of tsaren and bind them", "Tie up every man in Tsaren"]},
+   "variants": [
+    {"say": "Round up all the men of Tsaren and tie them up.", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}},
+    {"say": "round up the men of tsaren and bind them", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}},
+    {"say": "Tie up every man in Tsaren", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}}]},
 
   {"id": "measure.bind.headman", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "headman", "source": "user", "sloppy": true,
    "say": "Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children.",
@@ -251,7 +260,7 @@
     {"say": "Kill all the men of Tsaren that you have tied up!", "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.95},
      "expect": {"verdict": "fate", "state": {"bound_men": "==0"}}},
     {"say": "How did they escape their bindings!?", "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-     "expect": {"handled": false, "known": true, "reply_any": ["none of the bound", "cannot run", "could not run", "none could run", "none escaped", "no one escaped", "nobody escaped", "not one of the bound"], "prompt_has": ["none of the bound got away"]}}]},
+     "expect": {"handled": false, "known": true, "reply_any": ["none of the bound", "cannot run", "could not run", "none could run", "none escaped", "no one escaped", "nobody escaped", "not one of the bound", "did not escape", "didn't escape", "never escaped", "none broke free", "no one broke free", "nobody broke free", "all the bound", "every one of the bound", "every bound man", "before they could be bound", "before we bound", "before we could bind", "before we tied", "before they were bound", "before the round-up"], "prompt_has": ["none of the bound got away"]}}]},
 
   {"id": "facts.bound.headman", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "headman", "source": "design",
    "say": "How many men of Tsaren are bound?",

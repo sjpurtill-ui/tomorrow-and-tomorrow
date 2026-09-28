@@ -111,7 +111,12 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	var count_match:=_re("\\b(\\d{1,4})\\b",lower)
 	if count_match!=null: out["count"]=int(count_match.get_string(1))
 	if kill: out["kill_men"]=true
-	if kill and everyone: out["kill_all"]=true
+	if kill and everyone: out["kill_all"]=true; out["kill_all_words"]=true
+	# The groups the words themselves name for the killing ("all the women"):
+	# a reading's "kill everyone" never widens them (apply honours these).
+	if kill and not everyone:
+		var named:=named_kill_groups(lower)
+		if not named.is_empty(): out["kill_named"]=named
 	# Who is to be killed: "kill the women" never kills the men, and "the boys"
 	# are never all the children (town_ledger's make-up of the children).
 	if kill and not everyone:
@@ -184,6 +189,15 @@ static func kill_span(lower:String)->String:
 		if hit.get_start()<cut: cut=hit.get_start()
 		break
 	return span.substr(0,cut).strip_edges()
+
+## The groups a killing's own words name, [] when they name none ("kill
+## them", "kill everyone"): kill_groups without its default of the men.
+static func named_kill_groups(lower:String)->Array:
+	var m:=_re(KILL_VERB,lower)
+	if m==null: return []
+	var span:=kill_span(lower).replace("old men","old ones")
+	if not _has("\\b(men|males|menfolk|husbands|fathers|sons|fighting men|grown men|every man|women|womenfolk|females?|wives|mothers|children|boys|girls|daughters|young ones|babies|infants|elders|old people|old ones|old women)\\b",span): return []
+	return kill_groups(lower)
 
 static func kill_groups(lower:String)->Array:
 	var m:=_re(KILL_VERB,lower)
@@ -280,7 +294,21 @@ static func implicit(fate:Dictionary,lower:String)->bool:
 	return _has(TOWN_REF,lower)
 
 
-static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Dictionary={})->Dictionary:
+static func honour_words(fate:Dictionary)->Dictionary:
+	## The ruler's own words over any reading's flags: when the words name who
+	## is to die ("kill all the women of Tsaren") and do not say everyone, a
+	## "kill everyone" from elsewhere (a live reader's kill_all) is those
+	## groups, never the whole town.
+	var named:Array=fate.get("kill_named",[]) if fate.get("kill_named") is Array else []
+	if not bool(fate.get("kill_all",false)) or bool(fate.get("kill_all_words",false)) or named.is_empty(): return fate
+	var out:=fate.duplicate(true)
+	out.erase("kill_all")
+	if named!=["men"]: out["kill_groups"]=named.duplicate()
+	else: out.erase("kill_groups")
+	return out
+
+static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dictionary={})->Dictionary:
+	var fate:=honour_words(fate_in)
 	var world:Variant=WorldSimulation.world
 	var mc:Variant=WorldSimulation.military
 	if world==null or mc==null: return {"error":"Nobody holds that town for us."}
