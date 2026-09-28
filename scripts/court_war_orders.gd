@@ -40,11 +40,12 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives","follow_kill"]
 ## A strike by stealth: by night, unseen, on them asleep ("sneak attack
 ## Eldwick under cover of night"). The attack goes in as a night approach
 ## (battle_tactics.night_approach) at a chance stated when it is ordered.
@@ -180,7 +181,12 @@ static func find_target(text:String,context_civ:String="")->Dictionary:
 		if _name_hit(lower,String(town.name)): return town
 	var places:=known_places()
 	for p:Dictionary in places:
-		if _name_hit(lower,String(p.name)): return p
+		if _name_hit(lower,String(p.name)):
+			# A town we burned and left: a ruin, never a town to march on.
+			if not Ledger.our_ruin(String(p.city_id)).is_empty():
+				var ruin:=p.duplicate(true); ruin["ruin"]=true
+				return ruin
+			return p
 	var civs:Array=WorldSimulation.world.civilizations if WorldSimulation.world!=null else []
 	for c:Dictionary in civs:
 		if String(c.get("id",""))=="player": continue
@@ -234,6 +240,10 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	var lower:=clean.to_lower()
 	for lead in ["what","why","how","who","whom","where","when","should","could","can","would","shall we","do we","is it","are we"]:
 		if lower.begins_with(lead+" "): return {}
+	# "The women too" just after an order about a town: that order, for them.
+	if audience_id!="":
+		var more:=follow_up(clean,audience_id)
+		if not more.is_empty(): return more
 	var army:=_has(lower,ARMY_WORDS+"\\b")
 	var named:=find_target(clean,context_civ)
 	var named_town:=named.has("city_id") or named.has("unknown")
@@ -522,6 +532,94 @@ static func pronoun_harm_reading(text:String,audience_id:String)->Dictionary:
 	if town.is_empty(): return {}
 	return {"kind":"town_word","target":town,"full":false,"insist":false,"place":"","army_words":false,"text":text.strip_edges().substr(0,300),"implied":true}
 
+## "The women too", "now the children", "take the women too": the same
+## order again for another group of the same town, said just after it
+## (audience town_order). A plain verb may lead ("take", "bind", "round up");
+## one that names a different deed ("kill the women") or a place to take them
+## ("take the women to Seanstone") is its own order.
+const FOLLOW_UP_RE:="^(?:(?:and|now|also|then|yes|good|next|right|the same for|same for|do the same (?:to|with|for)|the same (?:to|with|for)|take|get|grab|seize|bind|tie up|tie|round up|do)[,]?\\s+)*(?:all\\s+)?(?:of\\s+)?(?:the\\s+|their\\s+)?(?<who>women|womenfolk|wives|children|boys|girls|old people|old men|old women|old ones|elders|the rest|rest|others|rest of them|everyone else|everybody else|men|males)(?:\\s+of\\s+[a-z'-]+)?(?:\\s+(?:too|as well|also|next|now|up))*\\W*$"
+
+static func follow_up(clean:String,audience_id:String)->Dictionary:
+	var audience:=Hall.find(audience_id)
+	if audience.is_empty() or not audience.get("town_order") is Dictionary: return {}
+	var last:Dictionary=audience.town_order
+	if Hall._day()-int(last.get("day",-99))>PENDING_DAYS: return {}
+	var lower:=clean.to_lower().strip_edges()
+	var m:=_re(FOLLOW_UP_RE).search(lower)
+	if m==null: return {}
+	var word:=m.get_string("who")
+	var town:=_held_town(String(last.get("city_id","")))
+	if town.is_empty(): return {}
+	var who:=_group_of(word)
+	var words:=_group_words(who)
+	var name:=String(town.get("name","the town"))
+	var base:={"target":town,"full":false,"insist":false,"place":"","army_words":false,"text":clean.substr(0,300),"implied":true,"follow_up":true}
+	var ids:Array=last.get("measures",[])
+	var fate:Dictionary=last.get("fate",{}) if last.get("fate") is Dictionary else {}
+	if bool(fate.get("kill_men",false)):
+		# Killing more is grave: one question, with the choices.
+		var ask:=base.duplicate(); ask["kind"]="follow_kill"; ask["who"]=who
+		return ask
+	if ids.has("bind_men"):
+		var measure:=Measures.read("Round up the %s of %s and bind them" % [words,name])
+		measure["who"]=who
+		var bind:=base.duplicate(); bind["kind"]="measure"; bind["measures"]=["bind_men"]; bind["measure"]=measure; bind["fate"]={}
+		return bind
+	if bool(fate.get("captives",false)):
+		var take:=base.duplicate(); take["kind"]="fate"
+		take["fate"]={"captives":true,"take":{} if who=="people" else {who:1.0}}
+		if who=="people": (take.fate as Dictionary)["take"]={"women":1.0,"children":1.0,"elders":1.0,"men":1.0}
+		return take
+	return {}
+
+## The ledger's group for a word: "girls" -> children; "the rest" -> people.
+static func _group_of(word:String)->String:
+	match word:
+		"women","womenfolk","wives": return "women"
+		"children","boys","girls": return "children"
+		"old people","old men","old women","old ones","elders": return "elders"
+		"men","males": return "men"
+	return "people"
+
+static func _group_words(who:String)->String:
+	return String({"men":"men","women":"women","children":"children","elders":"old people"}.get(who,"people"))
+
+## An order about a town's people remembered for a follow-up ("the women too").
+static func _note_town_order(out:Dictionary,town:Dictionary,ids:Array,fate:Dictionary)->void:
+	var audience:=Hall.find(String(out.get("audience_id","")))
+	if audience.is_empty(): return
+	audience["town_order"]={"city_id":String(town.get("city_id","")),"measures":ids.duplicate(),"fate":fate.duplicate(),"day":Hall._day()}
+
+static func _follow_kill(out:Dictionary,reading:Dictionary)->Dictionary:
+	## "The women too" after the men were killed: the war leader asks once,
+	## his own reading first; an unclear answer is that reading.
+	var town:Dictionary=reading.get("target",{})
+	var name:=String(town.get("name","the town"))
+	var who:=String(reading.get("who","people"))
+	var words:=_group_words(who)
+	var groups:Array=Ledger.GROUPS.duplicate() if who=="people" else [who]
+	var options:=[
+		{"kind":"fate","id":"kill_"+who,"fate":{"kill_men":true,"kill_groups":groups},"stance":"firm","words":"put the %s to death as well" % words,"order":"Kill the %s of %s" % [words,name],"keys":["kill","death","sword","yes"]},
+		{"kind":"measure","id":"bind_men","who":who,"stance":"firm","words":"bind them and keep them under guard","order":"Round up the %s of %s and bind them" % [words,name],"keys":["bind","tie","guard","round up"]},
+		{"kind":"measure","id":"word","tone":"lenient","stance":"lenient","words":"leave them be","order":"Leave the %s of %s be" % [words,name],"keys":["leave","spare","alone","let them be"]}]
+	var audience_id:=String(out.get("audience_id",""))
+	var key:="follow:%s:%s" % [String(town.get("city_id","")),who]
+	var question:="The %s of %s as well? I can %s, %s, or %s." % [words,name,String(options[0].words),String(options[1].words),String(options[2].words)]
+	if _asked(audience_id,key)>=1:
+		var again:=reading.duplicate()
+		again["kind"]="fate"; again["nearest"]=true; again["fate"]=(options[0].fate as Dictionary).duplicate(true)
+		var done:=_fate(out,again)
+		if String(done.verdict)=="fate": done.says="You said it again, so I take it you mean me to %s. %s" % [String(options[0].words),String(done.says)]
+		return done
+	_mark_asked(audience_id,key)
+	out.verdict="ask"; out.reason="measure_ask"
+	out["target"]=town.duplicate(true)
+	out.says=question
+	out.fix="Say which; if you only say go on, I do the first."
+	out.outcome="Nothing is done yet at %s." % name
+	out["pending"]={"ask":"measure","confirm":true,"region_id":String(town.get("city_id","")),"options":options,"nearest":options[0],"question":question,"text":String(options[0].order)}
+	return out
+
 static func _implied_word(clean:String,lower:String,audience_id:String)->Dictionary:
 	## An order that names no measure, about the people of a town this
 	## audience is speaking of ("punish them", "deal with the men there"): the
@@ -578,7 +676,7 @@ static func pending_answer(audience:Dictionary,clean:String)->Dictionary:
 		base["kind"]="measure" if String(chosen.get("kind","measure"))=="measure" else "fate"
 		base["measures"]=[String(chosen.id)] if base.kind=="measure" else []
 		base["fate"]=(chosen.get("fate",{}) as Dictionary).duplicate()
-		base["measure"]={"stance":String(chosen.get("stance","firm")),"stance_set":String(chosen.get("stance","firm"))!="firm","words":String(pending.get("text",""))}
+		base["measure"]={"stance":String(chosen.get("stance","firm")),"stance_set":String(chosen.get("stance","firm"))!="firm","words":String(pending.get("text","")),"who":String(chosen.get("who","men")),"tone":String(chosen.get("tone",""))}
 		base["taken"]=pick.is_empty() and not yes
 		base["taken_words"]=String(chosen.get("words",""))
 		return base
@@ -1079,11 +1177,33 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"abandon": return _abandon(out,reading)
 		"keep": return _keep(out,reading)
 		"captives": return _captives(out,reading)
+		"follow_kill": return _follow_kill(out,reading)
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
+	if bool((reading.get("target",{}) as Dictionary).get("ruin",false)): return _ruin(out,reading.target)
 	var struck:=_strike(out,reading,insist)
 	# A strike by night: the chance of reaching them unseen, stated plainly.
 	if String(struck.get("night_words",""))!="": struck["says"]=(String(struck.says)+" "+String(struck.night_words)).strip_edges()
 	return struck
+
+static func _ruin(out:Dictionary,town:Dictionary)->Dictionary:
+	## A town we burned and left: nothing there to attack or burn again. Said
+	## plainly from our own record, with who lives there now.
+	var ruin:=Ledger.our_ruin(String(town.get("city_id","")))
+	var rec:Dictionary=ruin.get("ruin",{})
+	var c:=Ledger.counts(String(ruin.get("civ_id","")),String(town.get("city_id","")))
+	var name:=String(ruin.get("name",town.get("name","the town")))
+	out["target"]=town.duplicate(true)
+	out.verdict="noted"; out.reason="ruin"
+	out.objective={"army_id":0,"kind":"ruin","city_id":String(town.get("city_id",""))}
+	var lives:="Nobody lives there now." if int(c.get("here",0))<=0 else "%s live in the ruins." % _cap(_number(int(c.here)))
+	out.says="%s is a ruin; we burned it %s and nobody of ours holds it. %s There is nothing there to take or burn again." % [name,_in_season_words(int(rec.get("day",-1))),lives]
+	out.outcome="%s is a ruin; nothing is done." % name
+	return out
+
+static func _in_season_words(day:int)->String:
+	if day<0: return "some time ago"
+	var parts:=preload("res://scripts/hud/era_words.gd").when(day).split(" · ")
+	return "in the %s of %s" % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "in "+String(parts[0])
 
 static func _held_words(town:Dictionary)->String:
 	var who:=_given(String(town.get("commander","")))
@@ -1189,6 +1309,7 @@ static func _measure(out:Dictionary,reading:Dictionary)->Dictionary:
 	out.outcome=" ".join(notes)
 	out["measure"]=done
 	out["fate"]=fated
+	_note_town_order(out,town,(done.get("applied",[]) as Array)+(done.get("renewed",[]) as Array),fate)
 	# Men got away as the round-up began (or the killing): offer a chase.
 	var fled:Dictionary=done.get("fled_record",{}) if done.get("fled_record") is Dictionary and not (done.get("fled_record") as Dictionary).is_empty() else (fated.get("fled",{}) if fated.get("fled") is Dictionary else {})
 	if not fled.is_empty() and not bool(fated.get("left",false)):
@@ -1317,6 +1438,7 @@ static func _fate(out:Dictionary,reading:Dictionary)->Dictionary:
 	out.says=(taken+qualm+String(result.text)).strip_edges()
 	out.outcome=String(result.outcome)
 	out["fate"]=result
+	_note_town_order(out,town,[],fate)
 	# Men got away and the garrison still holds the town: say so, and offer a chase.
 	var fled:Dictionary=result.get("fled",{}) if result.get("fled") is Dictionary else {}
 	if not fled.is_empty():
@@ -1369,10 +1491,14 @@ static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
 	var left:Array[String]=[]
 	var home:=0
 	var refused:Array[String]=[]
+	var ruins:Array[String]=[]
 	for town:Dictionary in held_towns():
 		if not names.is_empty() and not String(town.name) in names: continue
-		var back:Dictionary=WorldSimulation.world.occupation_resident_order(String(town.civ_id),String(town.city_id),"restore_self_rule")
+		# A ruin we burned is left to nobody, never handed back to its old people.
+		var ruin:=not Ledger.our_ruin(String(town.city_id)).is_empty()
+		var back:Dictionary=_mc().evacuate_occupation(String(town.civ_id),String(town.city_id)) if ruin else WorldSimulation.world.occupation_resident_order(String(town.civ_id),String(town.city_id),"restore_self_rule")
 		if back.has("error"): refused.append("%s: %s" % [String(town.name),String(back.error)]); continue
+		if ruin: ruins.append(String(town.name))
 		left.append("%s (%d)" % [String(town.name),int(town.garrison)]); home+=int(town.garrison)
 	for d:Dictionary in Pursuit.recall(false): home+=int(d.troops)
 	if left.is_empty():
@@ -1382,7 +1508,8 @@ static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
 		if String((a as Dictionary).get("destination_id",""))=="player_home" and String(a.get("status",""))=="moving": days=maxi(days,int(a.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))
 	out.verdict="act"; out.reason="abandon"
 	out.objective={"army_id":-1,"kind":"abandon","left":left,"troops":home,"days":days}
-	out.says="We leave %s to its own people. %s of ours are marching home%s." % [", ".join(PackedStringArray(left)),_cap(_number(home)),(", about %s on the road" % ("a day" if days<=1 else "%s days" % _number(days))) if days>0 else ""]
+	var whom:=("We leave %s to its own people." % ", ".join(PackedStringArray(left))) if ruins.is_empty() else ("We leave the ruins of %s; nobody holds them now." % ", ".join(PackedStringArray(ruins)) if ruins.size()==left.size() else "We leave %s; the ruins of %s are nobody's now." % [", ".join(PackedStringArray(left)),", ".join(PackedStringArray(ruins))])
+	out.says="%s %s of ours are marching home%s." % [whom,_cap(_number(home)),(", about %s on the road" % ("a day" if days<=1 else "%s days" % _number(days))) if days>0 else ""]
 	out.outcome="%s left; the garrison is coming home." % ", ".join(PackedStringArray(left))
 	return out
 
@@ -1991,6 +2118,9 @@ static func daily(day:int)->Array:
 	# What the garrisons do with the people of towns we hold: food, labour,
 	# desertion, the end of each measure and any incident, each told once.
 	filed.append_array(Measures.daily(day))
+	# Ruins we burned: nobody resists in an empty ruin; its people may come
+	# back on their day, told when our people hear of it.
+	filed.append_array(TownFate.daily(day))
 	for e in _ledger():
 		var entry:Dictionary=e
 		if String(entry.get("status",""))!="marching": continue

@@ -377,7 +377,7 @@ func _advance_wounded(day:int)->void:
 		host.aggregate_recruits=int(host.aggregate_recruits)+survivors-roundi(float(survivors)*AN.DISABLED_SHARE)
 	var held:=int(state.get("captured_holding",0))
 	if held>0 and not host.home_army.is_empty():
-		host.home_army["captured_pool"]=int(host.home_army.get("captured_pool",0))+held;state.erase("captured_holding")
+		host.home_army["captured_pool"]=int(host.home_army.get("captured_pool",0))+held;state["captured_holding"]=0
 
 ## The force's named commander: an admiral or an air commander from the
 ## realm's own names (HistoricalFigures), who runs the drawn zone.

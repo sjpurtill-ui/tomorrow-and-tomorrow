@@ -12,7 +12,7 @@ func report()->Dictionary:return CivilizationSystem.city_intelligence.known("pla
 func meta()->Dictionary:
 	var city:=report()
 	var held:=Held.report(city_id)
-	if not held.is_empty():return {"eyebrow":"Our town","title":String(held.name),"subtabs":[]}
+	if not held.is_empty():return {"eyebrow":"Burned by us" if String(held.get("kind",""))=="ruin" else "Our town","title":String(held.name),"subtabs":[]}
 	return {"eyebrow":"City report","title":String(city.get("name","Reported city")),"subtabs":[]}
 ## The player's own primary city, for the gold home marks. Own figures are
 ## the player's to know; the foreign side stays on returned estimates.

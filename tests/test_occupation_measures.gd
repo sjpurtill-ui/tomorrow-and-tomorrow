@@ -28,6 +28,7 @@ const CV:=preload("res://scripts/character_voice.gd")
 const PlainSpeech:=preload("res://scripts/plain_speech.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 
 const USERS_SENTENCE:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 const SECRET:="sk-test-DO-NOT-LOG-0123456789"
@@ -241,9 +242,13 @@ func test_the_users_sentence_binds_the_men_under_a_harsh_hand()->void:
 	var garrison:=int(_force().troops)
 	assert_int(bound).is_less_equal((garrison-maxi(M.KEEP_AT_LEAST,ceili(float(garrison)*M.KEEP_SHARE)))*M.BOUND_PER_GUARD)
 	assert_int(M.men_bound(civ_id,city_id)).is_equal(bound)
-	# A harsh hand: few got away, and they are on the record for a chase.
-	assert_int(int(o.fled)).is_less_equal(roundi(float(men)*M.ROUND_UP_FLIGHT*0.5))
-	if int(o.fled)>0: assert_dict(preload("res://scripts/pursuit.gd").latest_flight(city_id)).is_not_empty()
+	# A harsh hand: few got away (each man's chance is stated: about 1 in 10),
+	# and they are on the town's ledger, running, for a chase.
+	assert_int(int(o.fled)).is_less_equal(roundi(float(men)*M.ROUND_UP_FLIGHT*float(M.STANCES.harsh.escape)*2.0)+3)
+	if int(o.fled)>0:
+		assert_dict(preload("res://scripts/pursuit.gd").latest_flight(city_id)).is_not_empty()
+		assert_int(int(Ledger.running(Ledger.of(civ_id,city_id)).count)).is_equal(int(o.fled))
+	assert_bool(bool(Ledger.check(civ_id,city_id).ok)).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
 	# The war leader says what was done, with the numbers, and the threat.
 	var says:=String(r.actor_says)
 	assert_str(says).not_contains("already ours")
@@ -558,6 +563,23 @@ func test_the_chronicle_tells_a_measure_once_and_an_incident_once()->void:
 	assert_int(_days(3).size()).is_equal(0)
 	assert_int(_entries("measure_incident:").size()).is_equal(1)
 
+func test_strengthening_the_garrison_keeps_its_orders()->void:
+	_captured_tsaren()
+	var id:=_audience(_headman())
+	CC.hear(id,USERS_SENTENCE)
+	var bound:=M.men_bound(civ_id,city_id)
+	# A band of ours standing at the town joins the garrison.
+	_train(10)
+	var made:=MilitaryCampaign.create_field_army(10,"LEVY BAND 3")
+	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int((made.army as Dictionary).army_id))]
+	army["position"]={"x":city.x+0.2,"z":city.y}; army["location_id"]=city_id; army["status"]="stationed"
+	army["supply_level"]=1.0; army["readiness"]=1.0
+	var before:=int(_force().troops)
+	var r:=CC.hear(id,"Strengthen the garrison at Tsaren")
+	assert_int(int(_force().troops)).override_failure_message(String(r.get("actor_says",""))).is_greater(before)
+	assert_int(M.men_bound(civ_id,city_id)).is_equal(bound)
+	assert_str(String(_force().get("fate_note",""))).is_equal("Men bound and under guard · %d" % bound)
+
 func test_bound_men_cannot_run_when_they_are_put_to_death()->void:
 	_captured_tsaren()
 	var id:=_audience(_headman())
@@ -592,6 +614,9 @@ func test_nobody_in_the_hall_is_harmed_by_orders_about_a_people()->void:
 	for words in ["Kill them","Lock up all the men","Tie them up","Kill anyone who resists","Whoever resists, kill him"]:
 		var r:=CC.hear(id2,words)
 		_nobody_here_harmed(r,words,before2,headman2)
+	# A careless live reading ("detain", aimed at the one before you) cannot either.
+	var careless:=_say(id2,"Tie them up",_reading("order","detain","person","person:%d" % int(headman2.person_id),0.95))
+	_nobody_here_harmed(careless.result,"careless detain",before2,headman2)
 
 func test_the_fact_he_said_is_not_said_again_underneath()->void:
 	_captured_tsaren()

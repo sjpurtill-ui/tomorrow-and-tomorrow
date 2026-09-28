@@ -178,6 +178,8 @@ var route_mesh: MeshInstance3D
 var river_course := PackedFloat32Array()
 var world_tributary_courses: Array[Array] = []
 var river_terrain_height_texture:ImageTexture
+## The patch heights with box-filtered mip levels (map_chart.gdshaderinc).
+var chart_relief_texture:ImageTexture
 var river_terrain_grid:=Vector4.ZERO
 var coastal_water_material:ShaderMaterial
 var ocean_surface:MeshInstance3D
@@ -1686,6 +1688,10 @@ func _install_regional_patch(completed:Dictionary)->void:
 	var height_image:=Image.create_from_data(regional_patch_resolution,regional_patch_resolution,false,Image.FORMAT_RF,completed.heights.to_byte_array())
 	rendered_regional_heights=completed.heights
 	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
+	# The same heights box-filtered level by level, for the chart's
+	# generalised landform (map_chart.gdshaderinc).
+	height_image.generate_mipmaps()
+	chart_relief_texture=ImageTexture.create_from_image(height_image)
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
 	# The patch's land draws its shoreline from the same heights (map_coast).
@@ -2039,14 +2045,15 @@ void fragment() {
 		}
 		mc_wood*=woodland_retained(world_position.xz);
 		float mc_slope=1.0-clamp(normalize(world_normal).y,0.0,1.0);
-		vec2 mc_land=mc_landform(world_position.xz,world_position.y,pixel_world,!far_layer,mc_normal);
+		float mc_prominence;
+		vec2 mc_land=mc_landform(world_position.xz,world_position.y,pixel_world,mc_design,!far_layer,mc_normal,mc_prominence);
 		float mc_temperature=surface_uv.x>=0.999?landscape_temperature(mc_f.y,seasonal_amplitude,world_position.z):15.0;
 		float mc_sheltered=1.0-smoothstep(0.18,0.58,mc_slope);
 		float mc_snow=(1.0-smoothstep(-1.5,3.5,mc_temperature))*smoothstep(0.045,0.38,mc_f.x)*mc_sheltered*0.78;
 		mc_snow=max(mc_snow,(1.0-smoothstep(-12.0,-2.0,mc_temperature))*mc_sheltered*0.30);
 		mc_snow=max(mc_snow,weather_snow*(1.0-smoothstep(2.0,7.0,mc_temperature))*(1.0-smoothstep(0.25,0.62,mc_slope))*0.8);
-		mc_ground=mc_chart_ground(world_position,mc_land,mc_normal,pixel_world,mc_design,mc_f.x,mc_f.y,mc_wood,mc_slope,mc_temperature,mc_snow,
-			coast_height,coast_height_px,wb_frontier_px,CAMERA_POSITION_WORLD.y,land_resources);
+		mc_ground=mc_chart_ground(world_position,mc_land,mc_normal,mc_prominence,pixel_world,mc_design,mc_f.x,mc_f.y,mc_wood,mc_slope,mc_temperature,mc_snow,
+			coast_height,coast_height_px,wb_frontier_px,CAMERA_POSITION_WORLD.y,land_resources,!far_layer,mc_screen_up(INV_VIEW_MATRIX));
 	}
 	// Fully hidden ground needs only the existing unlit veil. Avoid all
 	// texture and procedural surface work until there is visible ground.
@@ -2989,6 +2996,7 @@ func _bind_river_terrain(material:ShaderMaterial)->void:
 	if river_terrain_height_texture==null: return
 	material.set_shader_parameter("terrain_heights",river_terrain_height_texture)
 	material.set_shader_parameter("terrain_grid",river_terrain_grid)
+	if chart_relief_texture:material.set_shader_parameter("chart_relief",chart_relief_texture)
 
 func _build_river_network() -> void:
 	var banks := SurfaceTool.new()

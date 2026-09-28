@@ -11,6 +11,8 @@ extends Node
 ##      [--topdown] (the player's view: straight down with the distance-level lens;
 ##       --sizes may then name the levels L0..L3: 10,000 ft, 50,000 ft, Region, Continent)
 ##      [--reveal=km] (chart this radius round the target, as a well-explored campaign)
+##      [--trails=n] (n scout trails charted out from home) [--day=n] (the calendar day)
+##      [--highest] (the highest ground within ~1,500 km: a mountain range, charted)
 ##      [--sweep] (after the captures: frame times while stepping through the
 ##       distance levels and panning at the Region level, GPU included)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
@@ -135,6 +137,32 @@ func _ready()->void:
 			target=found
 			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
 			print("MAP_ART_CAPTURE: woodland at ",target)
+	if "--highest" in args:
+		# Look at the highest ground within ~1,500 km (a mountain range), charted.
+		var best:=Vector3.INF
+		var best_h:=-INF
+		for ring in range(0,31):
+			for step in maxi(1,ring*6):
+				var angle:=TAU*float(step)/float(maxi(1,ring*6))
+				var x:=target.x+cos(angle)*float(ring)*50.0
+				var z:=target.z+sin(angle)*float(ring)*50.0
+				var h:float=terrain._height_at(x,z)
+				if h>best_h:best_h=h;best=Vector3(x,h,z)
+		if best!=Vector3.INF:
+			target=best
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),420.0,"capture")
+			print("MAP_ART_CAPTURE: highest ground at ",target)
+	if "--heights" in args:
+		# Diagnosis: the spread of land heights (km) within 1,500 km of the target.
+		var heights:Array[float]=[]
+		for i in 61:
+			for j in 61:
+				var h:float=terrain._height_at(target.x+(float(i)-30.0)*50.0,target.z+(float(j)-30.0)*50.0)
+				if h>0.0:heights.append(h)
+		heights.sort()
+		if not heights.is_empty():
+			var pick:=func(q:float)->float:return snappedf(heights[mini(heights.size()-1,int(q*float(heights.size())))],0.01)
+			print("MAP_ART_HEIGHTS: land=",heights.size()," p10=",pick.call(0.1)," p50=",pick.call(0.5)," p90=",pick.call(0.9)," p99=",pick.call(0.99)," max=",heights[-1])
 	for argument in args:
 		# `--reveal=km`: the ground a long campaign has charted round the target.
 		if argument.begins_with("--reveal="):

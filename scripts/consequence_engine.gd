@@ -16,6 +16,8 @@ func _food_system() -> Node:
 
 func reset_for_new_world()->void:
 	initialized=false
+	# A save from before field rations has no value; start from a full meal.
+	_home_intake_today=1.0
 
 func initialize() -> void:
 	if initialized:

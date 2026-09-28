@@ -30,6 +30,7 @@ const CC:=preload("res://scripts/court_commands.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 const AiMode:=preload("res://scripts/ai_mode.gd")
 
 ## The reader must be quick: past this the regex classifier answers instead.
@@ -112,9 +113,11 @@ static func world_brief(audience_id:String)->Dictionary:
 		for t:Dictionary in WarOrders.held_towns():
 			var tid:="town:"+String(t.city_id)
 			# What the garrison is doing there now (occupation_measures.gd).
-			var in_force:Array=[]
-			for m:Dictionary in Measures.active(String(t.civ_id),String(t.city_id)): in_force.append(Measures.card_label(m))
-			(brief.held as Array).append({"id":tid,"name":String(t.name),"people":String(t.civ_name),"garrison":int(t.garrison),"commander":String(t.commander),"measures":in_force})
+			var in_force:Array=Measures.card_labels(String(t.civ_id),String(t.city_id))
+			# Who is there and what became of the rest: the town's one ledger.
+			var c:=Ledger.counts(String(t.civ_id),String(t.city_id))
+			(brief.held as Array).append({"id":tid,"name":String(t.name),"people":String(t.civ_name),"garrison":int(t.garrison),"commander":String(t.commander),"measures":in_force,
+				"here":Ledger.here_words(c) if not c.is_empty() else "","gone":Ledger.gone_words(c) if not c.is_empty() else ""})
 			ids[tid]="town"
 		for t:Dictionary in WarOrders.known_places():
 			var tid:="town:"+String(t.city_id)
@@ -178,8 +181,9 @@ static func brief_text(brief:Dictionary)->String:
 	rows.append("home = %s (our home settlement)" % home_name if home_name!="" else "home = our home settlement")
 	out.append("OUR TOWNS: "+"; ".join(rows))
 	rows=PackedStringArray()
-	for t:Dictionary in brief.held: rows.append("%s = %s (%s town; our garrison %d%s%s)" % [String(t.id),String(t.name),String(t.people),int(t.garrison),(", under "+String(t.commander)) if String(t.commander)!="" else "",
-		("; in force: "+", ".join(PackedStringArray(t.get("measures",[])))) if not (t.get("measures",[]) as Array).is_empty() else ""])
+	for t:Dictionary in brief.held: rows.append("%s = %s (%s town; our garrison %d%s%s%s%s)" % [String(t.id),String(t.name),String(t.people),int(t.garrison),(", under "+String(t.commander)) if String(t.commander)!="" else "",
+		("; in force: "+", ".join(PackedStringArray(t.get("measures",[])))) if not (t.get("measures",[]) as Array).is_empty() else "",
+		("; there now: "+String(t.here)) if String(t.get("here",""))!="" else "",("; gone: "+String(t.gone)) if String(t.get("gone",""))!="" and String(t.gone)!="none" else ""])
 	out.append("TOWNS WE HOLD: "+("; ".join(rows) if not rows.is_empty() else "none"))
 	rows=PackedStringArray()
 	for t:Dictionary in brief.towns: rows.append("%s = %s (%s)" % [String(t.id),String(t.name),String(t.people)])
@@ -287,13 +291,15 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 	if res!="": details["resource"]=res
 	# Measures and stance come only from their lists: anything else is refused.
 	var measures_in:Variant=details_in.get("measures",[])
+	if measures_in==null: measures_in=[]
 	if not measures_in is Array: return {"rejected":"measures is not a list"}
 	var measures:Array[String]=[]
 	for m in measures_in:
 		if not m is String or not String(m) in MEASURE_IDS: return {"rejected":"unknown measure"}
 		if not measures.has(String(m)): measures.append(String(m))
 	if not measures.is_empty(): details["measures"]=measures
-	var stance:=String(details_in.get("stance","")) if details_in.get("stance","") is String else "?"
+	var stance_in:Variant=details_in.get("stance","")
+	var stance:=String(stance_in) if stance_in is String else ("" if stance_in==null else "?")
 	if not stance in STANCES: return {"rejected":"unknown stance"}
 	if stance!="": details["stance"]=stance
 	var clarify:=String(raw.get("clarify","")).strip_edges().replace("\n"," ").substr(0,MAX_CLARIFY_CHARS)
@@ -349,6 +355,9 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	## One plan from a validated reading (see the header).
 	var audience:=Hall.find(audience_id)
 	if reading.is_empty() or reading.has("rejected") or audience.is_empty(): return {"route":"legacy","why":String(reading.get("rejected","no reading"))}
+	# "The women too" just after an order about a town we hold: that order
+	# again for them (court_war_orders.follow_up), whatever the reading says.
+	if not confirmed and not WarOrders.follow_up(text,audience_id).is_empty(): return {"route":"engine","context":{"reader":true}}
 	var action:=String(reading.action)
 	var kind:=String(reading.kind)
 	var conf:=float(reading.confidence)

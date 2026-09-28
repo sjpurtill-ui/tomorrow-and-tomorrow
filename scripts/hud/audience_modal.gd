@@ -1040,7 +1040,7 @@ func _speak_rest(text:String)->void:
 		live_reads=String(reading.get("verb",""))=="order" and _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and "command_router" in voice and civic_settlement.is_empty()
 		# A war order is decided by the engine at once (a real march, or the
 		# war leader's plain no); the live voice then speaks to what happened.
-		if live_reads and not WarOrders.read(text,String(Hall.find(audience_id).get("civ_id",""))).is_empty(): live_reads=false
+		if live_reads and not WarOrders.read(text,String(Hall.find(audience_id).get("civ_id","")),audience_id).is_empty(): live_reads=false
 	if resolved_result.is_empty() and not live_reads:
 		var heard:=Commands.hear(audience_id,text,{"terrain":terrain,"civic_settlement":civic_settlement})
 		if bool(heard.get("handled",false)):
