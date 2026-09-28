@@ -1,0 +1,210 @@
+[
+  {
+    "id": "layered_defense_coordination",
+    "line": "security",
+    "game_year": 360,
+    "approx_historical_year": -2600,
+    "prompt": "c. 2600 BCE: Layered Defense Coordination. Layered defense coordination. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7a4e1065-aca4-4651-9d19-99fed5bc5a39.png",
+    "asset": "res://assets/ui/research/subjects/layered_defense_coordination-v1.png",
+    "sha256": "d6b5c1915cc3204fd60810ec0963873e23da12113fd841f26913711cf6c0d97c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "recovery_zone_designation",
+    "line": "ecology",
+    "game_year": 360,
+    "approx_historical_year": -2600,
+    "prompt": "c. 2600 BCE: Recovery Zones Set Aside. Recovery zones set aside. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0b1bf82c-27db-404d-a7bf-3b1b0ba2eea4.png",
+    "asset": "res://assets/ui/research/subjects/recovery_zone_designation-v1.png",
+    "sha256": "b7abadfc642e499a912bde1fa33ae79820d471bda7b96fcba462a25be127d5ea",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "reserve_rotation_ledgers",
+    "line": "nutrition",
+    "game_year": 360,
+    "approx_historical_year": -2600,
+    "prompt": "c. 2600 BCE: Reserve Rotation Ledgers. Reserve rotation ledgers. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-56653890-ea5a-4db5-93d3-b3a60abd70b6.png",
+    "asset": "res://assets/ui/research/subjects/reserve_rotation_ledgers-v1.png",
+    "sha256": "32cb56f6c63328cfd0b01888b7f3f282e81bb4c705f3da1f42120e797c92c22a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "watershed_boundary_marking",
+    "line": "ecology",
+    "game_year": 362,
+    "approx_historical_year": -2587,
+    "prompt": "c. 2587 BCE: Watershed Boundaries Marked. Watershed boundaries marked. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e7318544-9a5b-409b-938a-3afdce644ad7.png",
+    "asset": "res://assets/ui/research/subjects/watershed_boundary_marking-v1.png",
+    "sha256": "85e022e8594a39b81f3b63221912bd9ba66789c6d6d01f6965ca8afb3f333822",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "certified_craft_competence",
+    "line": "labor",
+    "game_year": 365,
+    "approx_historical_year": -2567,
+    "prompt": "c. 2567 BCE: Recognized Master Craftworkers. Recognized master craftworkers. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0e6365f8-bd27-42f6-9841-ac180f1e954d.png",
+    "asset": "res://assets/ui/research/subjects/certified_craft_competence-v1.png",
+    "sha256": "67b819774902a9ce1109e45375216251cb774d98a52f640da30064d0bccf4da4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.31
+    ]
+  },
+  {
+    "id": "kingship",
+    "line": "institutions",
+    "game_year": 365,
+    "approx_historical_year": -2567,
+    "prompt": "c. 2567 BCE: Kingship. Kingship: the war-leader rules for life. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6ef1a1dc-ce1f-401f-bd69-5c7a8a65b6c2.png",
+    "asset": "res://assets/ui/research/subjects/kingship-v1.png",
+    "sha256": "6a737827edbe8cd611fa3b4a98fdce1e8398a2ff9f02dffa3c82d77c7908c4ab",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "resource_use_quotas",
+    "line": "ecology",
+    "game_year": 365,
+    "approx_historical_year": -2567,
+    "prompt": "c. 2567 BCE: Resource-use Quotas. Resource-use quotas. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d3146db1-902c-4e2f-a2fb-663eea7e56d1.png",
+    "asset": "res://assets/ui/research/subjects/resource_use_quotas-v1.png",
+    "sha256": "acbcdf4cd1a844482639bad72b8f0315ea9213889eabb675623e72b186e561aa",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "weaning_food_customs",
+    "line": "nutrition",
+    "game_year": 365,
+    "approx_historical_year": -2567,
+    "prompt": "c. 2567 BCE: Soft Weaning Foods Customary. Soft weaning foods customary. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c0639122-0269-4b4c-8784-509c20d7fd58.png",
+    "asset": "res://assets/ui/research/subjects/weaning_food_customs-v1.png",
+    "sha256": "f46cfe016a0a4b1679e68cb12c5e9ec4662397e48b9868309daa5e3459d2efbb",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  {
+    "id": "healer_specialization_customs",
+    "line": "health",
+    "game_year": 368,
+    "approx_historical_year": -2547,
+    "prompt": "c. 2547 BCE: Healers Specialise by Ailment. Healers specialise by ailment. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7d3c1c28-ba09-47a4-ae6a-a501efd2d7d5.png",
+    "asset": "res://assets/ui/research/subjects/healer_specialization_customs-v1.png",
+    "sha256": "0094e6c64ce1cddfb51eb00875b324db62804f4f7ad4e8ef6ea34953f082da3f",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "healer_titles",
+    "line": "health",
+    "game_year": 368,
+    "approx_historical_year": -2547,
+    "prompt": "c. 2547 BCE: Healer Titles. Healer titles: physician, tooth-healer, eye-healer. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ef84ae43-e07e-4b2d-856e-d973e298c472.png",
+    "asset": "res://assets/ui/research/subjects/healer_titles-v1.png",
+    "sha256": "203edea21a28a2d1e8d8555578919e0dd9fd269aee03598eca88fb3251739787",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "workshop_effluent_separation",
+    "line": "ecology",
+    "game_year": 368,
+    "approx_historical_year": -2547,
+    "prompt": "c. 2547 BCE: Workshop Effluent Kept Separate. Workshop effluent kept separate. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2a2878d4-0495-43e4-91a4-68f8bbe1f969.png",
+    "asset": "res://assets/ui/research/subjects/workshop_effluent_separation-v1.png",
+    "sha256": "ccc689a242f8ba4ed905d0de9b64c7c483aa994aea9272a04e76bf19c5e28b4a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "convoy_load_distribution",
+    "line": "logistics",
+    "game_year": 370,
+    "approx_historical_year": -2533,
+    "prompt": "c. 2533 BCE: Loads Spread Across a Convoy. Loads spread across a convoy. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-19aa6176-c181-4700-a425-edc55eb249b1.png",
+    "asset": "res://assets/ui/research/subjects/convoy_load_distribution-v1.png",
+    "sha256": "118b4d5f56740d08e2d0419eb0c510bbbdfafc034ddb17e731e3aba788cf07eb",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "cross_settlement_measure_agreement",
+    "line": "production",
+    "game_year": 370,
+    "approx_historical_year": -2533,
+    "prompt": "c. 2533 BCE: Measures Agreed Between Settlements. Measures agreed between settlements. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-160cb217-f3a4-4a8a-b2bf-e87e7e2a4fa1.png",
+    "asset": "res://assets/ui/research/subjects/cross_settlement_measure_agreement-v1.png",
+    "sha256": "d376aeb2263ecdab39cbe16eba07a8de94eec4d8f855157729386b029c398270",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "palace_guard",
+    "line": "security",
+    "game_year": 370,
+    "approx_historical_year": -2533,
+    "prompt": "c. 2533 BCE: Palace Guard of Household Retainers. Palace guard of household retainers. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4ec021d0-b713-4a2a-8242-4e8871fb8874.png",
+    "asset": "res://assets/ui/research/subjects/palace_guard-v1.png",
+    "sha256": "37587ae2e1d9b56bde566ea60645e9b7d9a71002c6a8aa02d343235d477a6e00",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  {
+    "id": "stepped_stone_tombs",
+    "line": "infrastructure",
+    "game_year": 370,
+    "approx_historical_year": -2533,
+    "prompt": "c. 2533 BCE: Stepped Stone Tomb. Stepped stone tomb: ramps, sledges and wetted tracks. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-354defc5-95ed-4d51-89f6-096ab5c19b3f.png",
+    "asset": "res://assets/ui/research/subjects/stepped_stone_tombs-v1.png",
+    "sha256": "6481f4a46b8974cf29fe6ccb6315b1f4fadabf0b857916ebb1ec38ec6955132c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "ceremonial_investiture",
+    "line": "institutions",
+    "game_year": 375,
+    "approx_historical_year": -2500,
+    "prompt": "c. 2500 BCE: Officials Invested Before the God. Officials invested before the god. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c9a3315c-f352-4c33-b621-6c49107e5eaa.png",
+    "asset": "res://assets/ui/research/subjects/ceremonial_investiture-v1.png",
+    "sha256": "99c55db790d855570bb623d9f417a10dfb5d4f3db120541afa40e50a58e34a9e",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  }
+]
