@@ -313,7 +313,7 @@ func test_army_bar_click_selects_and_centres_on_the_army()->void:
 	assert_float(ground.camera_target.z).is_equal_approx(home.y-4.0,0.001)
 	assert_str(bar.selected_id).is_equal(String(card.id))
 	# Every card says what its bars mean.
-	for face:Control in bar.strip.get_children():assert_str(face.tooltip_text).contains("Will to fight")
+	for face:Control in bar.strip.get_children():assert_str(face._get_tooltip(Vector2(2,2))).contains("Will to fight")
 
 # ---------------------------------------------------------------------------
 # The army command panel
