@@ -29,9 +29,11 @@ extends GdUnitTestSuite
 const Runners:=preload("res://tests/battle_eval/runners.gd")
 const Scenarios:=preload("res://tests/battle_eval/scenarios.gd")
 
-## Scenarios that must pass. First measured on main at f426bd30: 9 of 62.
-## Raise it as fixes land; the results are deterministic.
-const BASELINE:={"pass":9}
+## Scenarios that must pass. First measured on main at f426bd30: 9 of 62;
+## 58 after the first fixes (overruns, marks, places, captives, militia,
+## fallen generals, exact numbers, march gates). Raise it as fixes land; the
+## results are deterministic.
+const BASELINE:={"pass":58}
 
 var _processing:Dictionary={}
 
@@ -122,6 +124,11 @@ func _render(board:Dictionary,results:Array[Dictionary],verbose:bool,elapsed:int
 		out.append("  %-30s [%s] %s%s" % [String(r.id),String(first.code),String(first.text).substr(0,200),(" (+%d more)" % (fails.size()-1)) if fails.size()>1 else ""])
 		if verbose:
 			for f in fails.slice(1): out.append("      - %s: %s" % [String((f as Dictionary).code),String((f as Dictionary).text).substr(0,240)])
+			for n in r.get("notes",[]): out.append("      . %s" % String(n))
+	if OS.get_environment("BATTLE_EVAL_NOTES").strip_edges() in ["1","true","yes"]:
+		out.append("how each scenario went:")
+		for r in results:
+			out.append("  %s%s" % [String(r.id),"" if bool(r.ok) else "  (FAILING)"])
 			for n in r.get("notes",[]): out.append("      . %s" % String(n))
 	out.append("slowest: %s" % ", ".join(PackedStringArray(_slowest(results))))
 	out.append("==========================================================================")

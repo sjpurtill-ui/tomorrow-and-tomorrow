@@ -343,8 +343,9 @@ func our_army(spec:Array,opts:Dictionary={})->int:
 	if bool(opts.get("hungry",false)): army["hungry_days"]=6.0; army["supply_level"]=0.3
 	var general:Dictionary=opts.get("general",{})
 	if not general.is_empty():
+		# Skill and resolve only: the name stays the general's own (his
+		# HistoricalFigures record decides who he is and whether he lives).
 		var commander:Dictionary=(army.get("commander",{}) as Dictionary).duplicate(true)
-		commander["name"]=String(general.get("name",commander.get("name","")))
 		for key in ["command","tactics"]: commander[key]=float(general.get("skill",commander.get(key,0.5)))
 		commander["resolve"]=float(general.get("resolve",commander.get("resolve",0.5)))
 		army["commander"]=commander
@@ -765,12 +766,13 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 		_check(String(matter.get("advisor",""))=="WAR LEADER","report","%s: the report comes from '%s', not the war leader" % [label,String(matter.get("advisor",""))])
 		var text:=String(matter.get("text",""))
 		var line:=Account.ledger_line(account.ours)
-		var went:="%s went in" % Account._cap(Account.count_words(int((account.ours as Dictionary).in_fight)))
+		var went:="%s went in" % Account._cap(Account.exact(int((account.ours as Dictionary).in_fight)))
 		_check(text.contains(went),"report","%s: the report does not say '%s' (it says: %s)" % [label,went,text.substr(0,160)])
 		_check(int((account.ours as Dictionary).in_fight)==int(ours.get("initial_troops",0)),"report","%s: the report's %d went in is not the %d who fought" % [label,int((account.ours as Dictionary).in_fight),int(ours.get("initial_troops",0))])
 		var lost:=_sum_rounds(record,home_side)
 		_check(int((account.ours as Dictionary).killed)==int(lost.killed),"report","%s: the report's %d killed is not the battle's %d" % [label,int((account.ours as Dictionary).killed),int(lost.killed)])
-		if int(lost.killed)>0: _check(text.contains("%s killed" % Account.count_words(int(lost.killed))),"report","%s: the report does not say %s killed" % [label,Account.count_words(int(lost.killed))])
+		if int(lost.killed)>0: _check(text.contains("%s killed" % Account.exact(int(lost.killed))),"report","%s: the report does not say %s killed" % [label,Account.exact(int(lost.killed))])
+		_check(not line.contains("about"),"report","%s: the report guesses at our own numbers: %s" % [label,line])
 		_check(not text.contains("FIELD STAFF") and not text.contains("FIELD HOST") and not text.contains("_"),"report","%s: the report shows internal names: %s" % [label,text.substr(0,160)])
 		_check(line!="" and text.contains(line),"report","%s: the report's own ledger line is not in it (%s)" % [label,line])
 	var court:=_court_reports(seed)
@@ -828,6 +830,10 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	if not settled2.is_empty(): _check(String(account.now).contains(String(settled2.get("line","~"))),"aftermath","%s: the report does not say what the general did with the captives" % label)
 	# --- Historical ranges.
 	_check_ranges(record,kind,label)
+	var ours_lost:=_sum_rounds(record,home_side); var theirs_lost:=_sum_rounds(record,enemy_side)
+	_note("%s %s %d v %d, %d exch (%d days seen), ground %s, ours -%d (k%d w%d f%d c%d), theirs -%d (k%d w%d f%d c%d), %s, taken %d" % [label,kind,int(ours.get("initial_troops",0)),int(theirs.get("initial_troops",0)),rounds.size(),int(trace.get("fought_days",0)),
+		String((view.get("ground",{}) as Dictionary).get("kind","")),int(ours_lost.losses),int(ours_lost.killed),int(ours_lost.wounded),int(ours_lost.scattered),int(ours_lost.captured),
+		int(theirs_lost.losses),int(theirs_lost.killed),int(theirs_lost.wounded),int(theirs_lost.scattered),int(theirs_lost.captured),String(term.get("type","")),int(term.get("prisoners",0))])
 	return {"record":record,"account":account,"view":view,"kind":kind}
 
 

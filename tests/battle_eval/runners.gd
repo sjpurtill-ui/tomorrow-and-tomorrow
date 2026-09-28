@@ -165,6 +165,13 @@ func _run_defend_home()->void:
 		if bool((f as Dictionary).get("emergency_militia",false)): militia+=int((f as Dictionary).get("count",0))
 	var after:=int(MilitaryCampaign.home_army.get("troops",0))
 	var taken:=int((rec.get("termination",{}) as Dictionary).get("prisoners",0)) if String(done.kind) in ["lost","withdrew"] else 0
+	var report_text:=Account.text(done.account)
+	_note("report: "+report_text)
+	if MilitaryCampaign.recovery.home_unavailable():
+		# Home fell: everyone under arms there was taken (siege_recovery.gd).
+		_check(after==0,"ledger","home fell but %d are still under arms there" % after)
+		_check(report_text.contains("Seanstone is theirs") or report_text.contains("holds Seanstone") or report_text.contains("took Seanstone"),"report","home fell but the report does not say so: %s" % report_text.substr(0,260))
+		return
 	_check(after<=int(pre.troops),"ledger","home had %d trained defenders before the fight and %d after: the watch's militia were kept as soldiers" % [int(pre.troops),after])
 	_check(after>=int(pre.troops)-trained_lost-taken,"ledger","home had %d trained, lost %d of them, but now has %d" % [int(pre.troops),trained_lost,after])
 	for f in MilitaryCampaign.home_army.get("formations",[]):
