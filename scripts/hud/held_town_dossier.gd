@@ -44,7 +44,9 @@ static func sketch_data(report:Dictionary,caption:String)->Dictionary:
 	var exact:=func(value:float)->Dictionary:return {"low":value,"high":value,"observed_low":value,"observed_high":value}
 	var fields:={"population":exact.call(float(report.get("residents",0))),"fortification":exact.call(float(report.get("walls",0.0))),"damage":exact.call(float(report.get("damage",0.0)))}
 	if int(report.get("garrison",0))>0:fields["garrison"]=exact.call(float(report.garrison))
-	return {"city_id":String(report.get("city_id","")),"fields":fields,"fresh_level":5,"fresh_status":"","caption":"","held_caption":caption}
+	# A ruin nobody of ours holds flies no banner of ours.
+	var flag:=not (String(report.get("kind",""))=="ruin" and int(report.get("garrison",0))<=0)
+	return {"city_id":String(report.get("city_id","")),"fields":fields,"fresh_level":5,"fresh_status":"","caption":"","held_caption":caption,"flag":flag}
 
 func _section(title:String,rows:Array)->void:
 	var shown:=rows.filter(func(row:Dictionary)->bool:return String(row.text)!="")
@@ -86,13 +88,18 @@ class HeldSketch extends Dossier.Sketch:
 		var x:=cx-spread*2.9+8.0
 		if x<18.0:x=18.0
 		var top:=ground-h*.52
+		if not bool(data.get("flag",true)):
+			_caption(w,h)
+			return
 		draw_line(Vector2(x,ground+14),Vector2(x,top),T.INK,1.6,true)
 		var emblem:Texture2D=Identity.emblem("player") if Engine.get_main_loop()!=null else null
 		var flag:=Rect2(Vector2(x+1,top),Vector2(34,30))
 		draw_rect(flag,T.PAPER_RAISED)
 		if emblem!=null:draw_texture_rect(emblem,flag.grow(-2),false)
 		draw_rect(flag,T.GOLD,false,1.2)
-		# Who holds it, as the map card says it, across the whole foot of the sketch.
+		_caption(w,h)
+	## Who holds it, as the map card says it, across the whole foot of the sketch.
+	func _caption(w:float,h:float)->void:
 		var caption:=String(data.get("held_caption",""))
 		if caption!="":
 			var band:=Rect2(Vector2(1,h-26),Vector2(w-2,25))

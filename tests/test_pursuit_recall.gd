@@ -12,6 +12,7 @@ extends GdUnitTestSuite
 ## on the town and the detachment as its own band; recall reaches bands,
 ## detachments and (after asking once) garrisons.
 
+const Ledger:=preload("res://scripts/town_ledger.gd")
 const CC:=preload("res://scripts/court_commands.gd")
 const WO:=preload("res://scripts/court_war_orders.gd")
 const Fate:=preload("res://scripts/town_fate.gd")
@@ -147,10 +148,15 @@ func test_the_users_sequence_kill_chase_report_return()->void:
 	# the rest are counted, with where they ran, and a chase is offered.
 	var kill:=CC.hear(id,"Kill all the men of Tsaren")
 	assert_str(String(kill.war.verdict)).override_failure_message(String(kill.get("actor_says",""))).is_equal("fate")
+	# Each man caught on the stated odds (one seeded roll each); every man of
+	# Tsaren is on its ledger, killed or running.
 	var killed:=int(kill.objective.killed)
-	assert_int(killed).is_equal(15)
-	var fled:Dictionary=MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("fled",{})
-	assert_int(int(fled.get("count",0))).is_equal(roundi(90.0*Fate.MEN_SHARE)-killed)
+	var men:=int(Ledger.split(90,Ledger.SHARES).men)
+	assert_int(killed).is_greater(0)
+	assert_int(killed).is_less(men)
+	var fled:=Pursuit.flight_of(civ_id,city_id)
+	assert_int(int(fled.get("count",0))).is_equal(men-killed)
+	assert_bool(bool(Ledger.check(civ_id,city_id).ok)).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
 	var says:=String(kill.actor_says)
 	assert_str(says).contains("got away toward Stonefield")
 	assert_str(says).contains("I can send")
@@ -189,7 +195,13 @@ func test_the_users_sequence_kill_chase_report_return()->void:
 	# Those who got away are out of Tsaren (or dead), bounded by who fled.
 	var left:=CivilizationSystem.region_snapshot(civ_id,city_id)
 	assert_float(float(left.population)).is_less_equal(90.0-float(killed)-0.0+0.01)
-	assert_str(String(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).fled.state)).is_not_equal("running")
+	assert_str(String(Pursuit.flight_of(civ_id,city_id).state)).is_not_equal("running")
+	# Caught and away add up to those who ran; the ledger still balances.
+	var flight:=Pursuit.flight_of(civ_id,city_id)
+	assert_int(int(flight.caught)+int(flight.reached)).is_equal(int(flight.ran))
+	assert_bool(bool(Ledger.check(civ_id,city_id).ok)).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
+	# The report says the odds it was decided on.
+	assert_str(told).contains("for each man")
 
 
 func test_the_map_shows_the_garrison_on_its_town_and_the_detachment_apart()->void:

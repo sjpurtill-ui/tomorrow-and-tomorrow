@@ -15,8 +15,10 @@ extends RefCounted
 ##   the town's resistance and its occupation governance (grievance, trust,
 ##   welfare, repression, local institutions): occupation_governance.gd,
 ##   synced through civilization_combat.governance;
-##   men who slip away as a round-up starts: pursuit.gd (record_flight, so
-##   the war leader can offer a chase; _reach_refuge for deserters);
+##   the town's people: town_ledger.gd, the one ledger of who is free,
+##   bound, a hostage, at forced labour or serving with us, and who ran
+##   (a round-up's flight is a seeded roll on the stated odds, so the war
+##   leader can offer a chase; pursuit._reach_refuge moves deserters);
 ##   food: the town's own stores (civilization_exchange, or the rival's food
 ##   days) and ours;
 ##   deaths: civilization_system._apply_rival_civilian_deaths;
@@ -31,7 +33,8 @@ extends RefCounted
 ## the war leader reports once. Lenient is the reverse.
 ##
 ## Measures live on the garrison's own record (occupation force "measures"),
-## are saved with it and end with it. daily() (called from
+## are saved with it and end with it; the people they hold are counted only
+## in the town's ledger (no measure keeps a count of its own). daily() (called from
 ## court_war_orders.daily) feeds the bound, keeps resistance down while the
 ## men are held, runs labour and desertion, ends measures when their days
 ## are up and files each incident once. The garrison's map card
@@ -50,6 +53,7 @@ const Governance:=preload("res://scripts/occupation_governance.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const CV:=preload("res://scripts/character_voice.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
 ## Measure ids, in the order a war leader carries them out and tells them.
@@ -308,7 +312,7 @@ static func read(text:String)->Dictionary:
 		var kept_home:=curfew!=null and _has(said,"\\b(lock|shut|keep|hold|confine)\\b") and curfew.get_start()<=bind.get_start()+2
 		if not kept_home and not (release!=null and release.get_start()==bind.get_start()):
 			found.append("bind_men")
-			if _has(said,EVERYONE_WORDS): out.who="people"
+			out.who=_who_of(_clause_from(main,bind.get_start()))
 	var disarm:=_find(main,DISARM_RE)
 	if disarm!=null:
 		found.append("disarm")
@@ -381,6 +385,33 @@ static func read(text:String)->Dictionary:
 	if String(cond.clause)!="": consumes.append_array(["kill_men","kill_all","captives"])
 	out.consumes=consumes
 	return out
+
+## Which of the town's people the words name: "men" (the default),
+## "women", "children", "elders", several ("women,children") or "people"
+## (everyone), in the ledger's groups.
+const WHO_WORDS:={
+	"men":"\\b(men|males|menfolk|husbands|fathers|sons|fighters|warriors|youths|every man|each man|any man)\\b",
+	"women":"\\b(women|womenfolk|wives|females|mothers)\\b",
+	"children":"\\b(children|boys|girls|daughters|young ones|little ones|babies|infants)\\b",
+	"elders":"\\b(elders|old men|old women|old people|old ones|grandfathers|grandmothers)\\b",
+}
+const ALL_PEOPLE:="\\b(everyone|everybody|all of them|them all|the people|its people|their people|villagers|townsfolk|townspeople|inhabitants|residents|families|every soul)\\b"
+
+static func _who_of(said:String)->String:
+	if _has(said,ALL_PEOPLE): return "people"
+	var parts:PackedStringArray=PackedStringArray()
+	for g in Ledger.GROUPS:
+		# "old men" are elders, not men.
+		var words:=said.replace("old men","old ones") if g=="men" else said
+		if _has(words,String(WHO_WORDS[g])): parts.append(g)
+	if parts.is_empty(): return "men"
+	return "people" if parts.size()==Ledger.GROUPS.size() else ",".join(parts)
+
+## The clause of an order from a match onward, to its end (". ; ! ?").
+static func _clause_from(text:String,at:int)->String:
+	var rest:=text.substr(at)
+	var stop:=_re("[.;!?]").search(rest)
+	return rest.substr(0,stop.get_start()) if stop!=null else rest
 
 ## A town or a people we know by that name (never a person to set over them).
 static func _is_place(word:String)->bool:
@@ -510,25 +541,33 @@ static func _running(force:Dictionary,id:String)->Dictionary:
 		if m is Dictionary and String((m as Dictionary).get("id",""))==id and not bool((m as Dictionary).get("ended",false)): return m
 	return {}
 
-## Men of this town bound and under our guard now (town_fate: they cannot run).
+## Men of this town bound and under our guard now (the town's ledger).
 static func men_bound(civ_id:String,region_id:String)->int:
+	if not Ledger.has(civ_id,region_id): return 0
+	var l:=Ledger.of(civ_id,region_id)
 	var at:=_force_index(civ_id,region_id)
-	if at<0: return 0
-	return int(_running(_mc().occupation_forces[at],"bind_men").get("count",0))
+	return Ledger.count(l,"bound","men")+(bound_workers(_mc().occupation_forces[at],l) if at>=0 else 0)
 
-## Men were put to the sword (town_fate): the bound, the workers and the
-## conscripts are among them; a measure with nobody left ends.
-static func after_killing(civ_id:String,region_id:String,killed:int)->void:
+## A measure that holds people ends when nobody it held is left in the town
+## (killed, taken, scattered); the guards on the bound shrink with them.
+static func settle_records(civ_id:String,region_id:String)->void:
 	var at:=_force_index(civ_id,region_id)
-	if at<0 or killed<=0: return
+	if at<0 or not Ledger.has(civ_id,region_id): return
 	var force:Dictionary=_mc().occupation_forces[at]
-	for id in ["bind_men","labour","conscript"]:
-		var m:=_running(force,id)
-		if m.is_empty(): continue
-		var left:=maxi(0,int(m.get("count",0))-killed)
-		m["count"]=left
-		if left<=0: m["ended"]=true; m["end_day"]=_day(); m["end_reason"]="killed"
+	_end_empty(force,Ledger.of(civ_id,region_id),_day())
 	refresh_note(force)
+
+static func _end_empty(force:Dictionary,l:Dictionary,day:int)->void:
+	for pair in [["bind_men","bound"],["hostages","hostage"],["labour","worker"],["conscript","conscript"]]:
+		var m:=_running(force,String(pair[0]))
+		# The bound men put to work are still bound men.
+		var still:=Ledger.count(l,String(pair[1]))+(bound_workers(force,l) if String(pair[0])=="bind_men" else 0)
+		if not m.is_empty() and still<=0:
+			m["ended"]=true; m["end_day"]=day; m["end_reason"]="none_left"
+	var bind:=_running(force,"bind_men")
+	if not bind.is_empty(): bind["guards"]=maxi(1,ceili(float(Ledger.count(l,"bound"))/float(BOUND_PER_GUARD)))
+	var hostages:=_running(force,"hostages")
+	if not hostages.is_empty(): hostages["guards"]=maxi(1,ceili(float(Ledger.count(l,"hostage"))/float(HOSTAGES_PER_GUARD)))
 
 ## The garrison's free hands: its strength less the gate watch and the
 ## guards already tied to running measures.
@@ -566,11 +605,13 @@ static func apply(civ_id:String,region_id:String,ids:Array,opts:Dictionary={},ge
 	if not stance in STANCE_IDS: stance="firm"
 	var day:=_day()
 	var tags:=CV.era_tags("player")
+	# The town's one ledger of its people: every measure reads and writes it.
+	var l:=Ledger.of(civ_id,region_id)
 	var c:={"civ_id":civ_id,"region_id":region_id,"name":String(region.get("name",force.get("region_name","the town"))),"population":maxi(0,roundi(float(region.get("population",0.0)))),
-		"garrison":garrison,"force":force,"stance":stance,"S":STANCES[stance],"opts":opts,"day":day,"tags":tags,"metal":tags.has("metal"),"general":general,
+		"garrison":garrison,"force":force,"ledger":l,"stance":stance,"S":STANCES[stance],"opts":opts,"day":day,"tags":tags,"metal":tags.has("metal"),"general":general,
 		"texts":[],"notes":[],"titles":[],"applied":[],"renewed":[],"freed":[],"refused":[],"harsh":0.0,"mercy":0.0,"weight":0,"killed":0,"fled":0,
 		"gov":{},"resist_mul":1.0,"resist_add":0.0,"integration_add":0.0,"results":{},"fled_record":{}}
-	c["men"]=roundi(float(c.population)*MEN_SHARE)
+	c["men"]=Ledger.here(l,"men")
 	var order:Array[String]=[]
 	for id:String in IDS:
 		if ids.has(id) and not order.has(id): order.append(id)
@@ -598,6 +639,7 @@ static func apply(civ_id:String,region_id:String,ids:Array,opts:Dictionary={},ge
 	if not (c.refused as Array).is_empty(): (c.texts as Array).append("But "+_lower_first(" ".join(PackedStringArray(c.refused))))
 	_region_effects(c)
 	_consequences(c)
+	_end_empty(force,c.ledger,day)
 	_trim(force)
 	refresh_note(force)
 	_chronicle(c)
@@ -645,16 +687,31 @@ static func _gov(c:Dictionary,deltas:Dictionary)->void:
 
 static func _resent(c:Dictionary)->float: return float((c.S as Dictionary).resent)
 
-static func _kill(c:Dictionary,count:int)->int:
-	if count<=0: return 0
-	var world:Variant=_world()
-	var index:int=world._civilization_index(String(c.civ_id))
-	if index<0: return 0
-	var done:Dictionary=world._apply_rival_civilian_deaths(world.civilizations[index],String(c.region_id),count)
-	world.civilizations[index]=done.civilization
-	var dead:=int(done.get("dead",0))
+## People put to death, in the order given (plan: [[status, group], ...]).
+## The town's ledger is read afresh after (the world's deaths rebuild the
+## town's record). Returns how many died.
+static func _kill(c:Dictionary,plan:Array,count:int)->int:
+	var dead:=_die(String(c.civ_id),String(c.region_id),plan,count)
+	c["ledger"]=Ledger.of(String(c.civ_id),String(c.region_id))
 	c["killed"]=int(c.killed)+dead
 	c["population"]=maxi(0,int(c.population)-dead)
+	return dead
+
+## Deaths in a town we hold: the ledger first (it goes with the town's
+## record the world rebuilds), then the world's count.
+static func _die(civ_id:String,region_id:String,plan:Array,count:int)->int:
+	var l:=Ledger.of(civ_id,region_id)
+	if count<=0 or l.is_empty(): return 0
+	var have:=0
+	for step in plan: have+=Ledger.count(l,String(step[0]),String(step[1]))
+	count=mini(count,have)
+	if count<=0: return 0
+	var world:Variant=_world()
+	var index:int=world._civilization_index(civ_id)
+	if index<0: return 0
+	var dead:=int(Ledger.remove(l,plan,count,"killed").total)
+	var done:Dictionary=world._apply_rival_civilian_deaths(world.civilizations[index],region_id,dead)
+	world.civilizations[index]=done.civilization
 	return dead
 
 # --- Food ---------------------------------------------------------------------
@@ -735,57 +792,100 @@ static func _road_words(c:Dictionary)->String:
 
 # --- The measures -------------------------------------------------------------
 
+## Who "the men" of an order are, as ledger groups ("women,children" names two).
+static func _who_groups(who:String)->Array:
+	if who in ["people",""]: return ["men","women","elders","children"]
+	var out:Array=[]
+	for part in who.split(",",false):
+		if String(part) in Ledger.GROUPS: out.append(String(part))
+	return out if not out.is_empty() else ["men"]
+
+static func _who_words(who:String)->String:
+	if who in ["people",""]: return "people"
+	var words:PackedStringArray=PackedStringArray()
+	for g in _who_groups(who): words.append(String(Ledger.GROUP_WORDS[g]))
+	return " and ".join(words)
+
 static func _bind(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
-	var running:=_running(force,"bind_men")
-	if not running.is_empty():
-		_renew(c,running)
-		(c.texts as Array).append("The men of %s are already bound and under guard, %s of them. They stay so for another month." % [name,_count(int(running.count))])
-		c.results["bound"]=int(running.count)
-		return
 	var opts:Dictionary=c.opts
-	var everyone:=String(opts.get("who","men"))=="people"
-	var wanted:=roundi(float(c.population)*0.85) if everyone else int(c.men)
-	if int(opts.get("count",0))>0: wanted=mini(wanted,int(opts.count))
+	var who:=String(opts.get("who","men"))
+	var groups:=_who_groups(who)
+	var words:=_who_words(who)
+	var running:=_running(force,"bind_men")
+	var free:=0
+	var held:=0
+	for g in groups:
+		free+=Ledger.count(l,"free",String(g))
+		held+=Ledger.count(l,"bound",String(g))
+	if free<=0:
+		if not running.is_empty() and held>0:
+			_renew(c,running)
+			(c.texts as Array).append("The %s of %s are already bound and under guard, %s of them. They stay so for another month." % [words,name,_count(held)])
+			c.results["bound"]=Ledger.count(l,"bound")
+		else:
+			(c.refused as Array).append("There are no %s left free in %s to bind." % [words,name])
+		return
 	var hands:=free_hands(force)
-	if wanted<=0:
-		(c.refused as Array).append("There are no men left in %s to bind." % name); return
 	if hands<=0:
 		(c.refused as Array).append("Every one of the %s holding %s is on the gate or already guarding; there is nobody to spare for a round-up. Send me more, or let some of those we hold go." % [_count(int(c.garrison)),name]); return
+	var wanted:=free
+	if int(opts.get("count",0))>0: wanted=mini(wanted,int(opts.count))
+	# The odds, stated: the share who slip away as a round-up starts, by the
+	# hand we show; fewer when they are kept indoors or their kin are hostages.
 	var S:Dictionary=c.S
 	var flight:=ROUND_UP_FLIGHT*float(S.escape)
 	if not _running(force,"curfew").is_empty(): flight*=0.5
-	if not _running(force,"hostages").is_empty(): flight*=0.6
+	if Ledger.count(l,"hostage")>0: flight*=0.6
 	flight=clampf(flight,0.03,0.45)
-	var fled:=roundi(float(wanted)*flight)
-	var catchable:=maxi(0,wanted-fled)
-	var bound:=mini(catchable,hands*BOUND_PER_GUARD)
-	var loose:=catchable-bound
+	var r:=_rng(String(c.region_id),int(c.day),"round-up:"+who)
+	var refuge:=Pursuit.refuge(String(c.civ_id),String(c.region_id))
+	var capacity:=hands*BOUND_PER_GUARD
+	var fled:=0
+	var bound:=0
+	var left:=wanted
+	for g in groups:
+		if left<=0: break
+		var want:=mini(Ledger.count(l,"free",String(g)),left)
+		left-=want
+		# Men run at the full rate; women, the old and children at half.
+		var ran:=Ledger.roll(r,want,flight if String(g)=="men" else flight*0.5)
+		if ran>0: Ledger.run(l,"free",String(g),ran,refuge,int(c.day))
+		fled+=ran
+		bound+=Ledger.move(l,"free","bound",String(g),mini(want-ran,capacity-bound))
+	var loose:=0
+	for g in groups: loose+=Ledger.count(l,"free",String(g))
 	var killed:=0
-	if String(c.stance)=="brutal": killed=_kill(c,mini(5,roundi(float(bound)*0.04)))
-	bound=maxi(0,bound-killed)
-	var guards:=maxi(1,ceili(float(bound)/float(BOUND_PER_GUARD)))
-	_start(c,"bind_men",{"count":bound,"guards":guards,"fled":fled,"who":"people" if everyone else "men"})
+	if String(c.stance)=="brutal":
+		killed=_kill(c,[["bound","men"]],mini(5,roundi(float(bound)*0.04)))
+		l=c.ledger
+	bound-=killed
+	var guards:=maxi(1,ceili(float(Ledger.count(l,"bound"))/float(BOUND_PER_GUARD)))
+	if running.is_empty(): _start(c,"bind_men",{"guards":guards,"who":who})
+	else:
+		running["guards"]=guards
+		running["who"]=who if String(running.get("who","men"))==who else "people"
+		_renew(c,running)
+		(c.applied as Array).append("bind_men")
+		(c.renewed as Array).erase("bind_men")
 	c["fled"]=int(c.fled)+fled
-	if fled>0 and not everyone: c["fled_record"]=Pursuit.record_flight(String(c.civ_id),String(c.region_id),fled)
-	c.results["bound"]=bound; c.results["guards"]=guards
+	if fled>0: c["fled_record"]=Ledger.running(l).duplicate(true)
+	c.results["bound"]=bound; c.results["guards"]=guards; c.results["flight_odds"]=flight
 	c["resist_mul"]=float(c.resist_mul)*0.55
 	_gov(c,{"grievance":0.10*_resent(c),"trust":-0.06*_resent(c),"welfare":-0.04,"repression":0.10})
 	c["harsh"]=float(c.harsh)+1.0
 	c["weight"]=int(c.weight)+bound
-	var who:="people" if everyone else "men"
-	var t:="We went house to house in %s. %s %s are %s and kept together under guard; %s of the %s of ours watch them in turns." % [name,_cap(_count(bound)),who,_bind_means(c),_count(guards),_count(int(c.garrison))]
-	if fled>0:
-		var toward:=Pursuit.toward_words(Pursuit.refuge(String(c.civ_id),String(c.region_id)))
-		t+=" About %s got away %s before we reached them." % [_count(fled),toward]
+	var t:="We went house to house in %s. %s %s are %s and kept together under guard; %s of the %s of ours watch them in turns." % [name,_cap(_count(bound)),words,_bind_means(c),_count(guards),_count(int(c.garrison))]
+	if fled>0: t+=" %s got away %s before we reached them; %s run when a round-up starts, the way we went about it." % [_cap(_count(fled)),Pursuit.toward_words(refuge),Ledger.chance_words(flight)]
 	else: t+=" None got away."
 	if loose>0: t+=" We are too few to guard more; %s are still loose in their houses." % _count(loose)
 	if killed>0: t+=" %s fought us and were killed." % _cap(_count(killed))
 	t+=" They eat from their own stores."
 	(c.texts as Array).append(t)
-	(c.notes as Array).append("%s %s of %s were bound and put under guard%s." % [_cap(_count(bound)),who,name,"; about %s got away" % _count(fled) if fled>0 else ""])
-	(c.titles as Array).append("The Men of %s Bound" % name if not everyone else "The People of %s Bound" % name)
+	(c.notes as Array).append("%s %s of %s were bound and put under guard%s." % [_cap(_count(bound)),words,name,"; %s got away" % _count(fled) if fled>0 else ""])
+	(c.titles as Array).append("The %s of %s Bound" % [_cap(words),name])
 
 static func _disarm(c:Dictionary)->void:
 	var force:Dictionary=c.force
@@ -820,31 +920,44 @@ static func _disarm(c:Dictionary)->void:
 
 static func _hostages(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var running:=_running(force,"hostages")
-	if not running.is_empty():
+	if not running.is_empty() and Ledger.count(l,"hostage")>0:
 		_renew(c,running)
-		(c.texts as Array).append("We hold %s hostages from %s already. They stay with the garrison." % [_count(int(running.count)),name])
+		(c.texts as Array).append("We hold %s hostages from %s already. They stay with the garrison." % [_count(Ledger.count(l,"hostage")),name])
 		return
 	var opts:Dictionary=c.opts
+	var free:=Ledger.count(l,"free")
 	var n:=int(opts.count) if int(opts.get("count",0))>0 else clampi(roundi(float(c.population)*0.03),2,12)
-	n=mini(n,mini(20,maxi(0,int(c.population)-1)))
+	n=mini(n,mini(20,free))
 	var hands:=free_hands(force)
 	if hands<=0:
 		(c.refused as Array).append("Nobody can be spared to guard hostages; every one of the %s is on the gate or already guarding." % _count(int(c.garrison))); return
 	n=mini(n,hands*HOSTAGES_PER_GUARD)
 	if n<=0:
-		(c.refused as Array).append("There is nobody left in %s to take." % name); return
-	var guards:=maxi(1,ceili(float(n)/float(HOSTAGES_PER_GUARD)))
-	_start(c,"hostages",{"count":n,"guards":guards})
-	c.results["hostages"]=n
+		(c.refused as Array).append("There is nobody left free in %s to take." % name); return
+	# Two of their elders, then the families of the men who led the fighting.
+	var elders:=Ledger.move_any(l,"free","hostage",mini(2,n),["elders","men","women"])
+	var family:=Ledger.move_any(l,"free","hostage",n-mini(2,n),["women","children","elders","men"])
+	var got:=0
+	for g in elders: got+=int(elders[g])
+	for g in family: got+=int(family[g])
+	var guards:=maxi(1,ceili(float(Ledger.count(l,"hostage"))/float(HOSTAGES_PER_GUARD)))
+	if not running.is_empty(): running["ended"]=true; running["end_day"]=int(c.day); running["end_reason"]="again"
+	_start(c,"hostages",{"guards":guards})
+	c.results["hostages"]=got
 	c["resist_mul"]=float(c.resist_mul)*0.75
 	_gov(c,{"grievance":0.06*_resent(c),"trust":-0.04*_resent(c)})
 	c["harsh"]=float(c.harsh)+0.7
-	c["weight"]=int(c.weight)+n
-	var whom:="%s of their elders" % _count(n) if n<=2 else "two of their elders and %s from the families of the men who led the fighting" % _count(n-2)
-	(c.texts as Array).append("We took %s of %s's people as hostages: %s. They are held in the garrison's house under watch, and the town knows they answer for any rising." % [_count(n),name,whom])
-	(c.notes as Array).append("%s hostages were taken from %s." % [_cap(_count(n)),name])
+	c["weight"]=int(c.weight)+got
+	var old:=int(elders.get("elders",0))
+	var whom:=""
+	if got<=old: whom="%s of their elders" % _count(got)
+	elif old>0: whom="%s of their elders and %s from the families of the men who led the fighting" % [_count(old),_count(got-old)]
+	else: whom="%s from the families of the men who led the fighting" % _count(got)
+	(c.texts as Array).append("We took %s of %s's people as hostages: %s. They are held in the garrison's house under watch, and the town knows they answer for any rising." % [_count(got),name,whom])
+	(c.notes as Array).append("%s hostages were taken from %s." % [_cap(_count(got)),name])
 	(c.titles as Array).append("Hostages Taken at %s" % name)
 
 static func _curfew(c:Dictionary)->void:
@@ -868,6 +981,7 @@ static func _curfew(c:Dictionary)->void:
 
 static func _search(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var old:=_running(force,"search")
 	if not old.is_empty(): old["ended"]=true; old["end_day"]=int(c.day); old["end_reason"]="again"
@@ -880,10 +994,14 @@ static func _search(c:Dictionary)->void:
 	var hid:=0
 	var bind:=_running(force,"bind_men")
 	if not bind.is_empty():
-		hid=mini(roundi(float(c.men)*0.04),free_hands(force)*BOUND_PER_GUARD)
-		bind["count"]=int(bind.count)+hid
+		# Men who hid from the round-up, found in roofs and pits, bound with the rest.
+		var r:=_rng(String(c.region_id),int(c.day),"search")
+		var found_men:=Ledger.roll(r,Ledger.count(l,"free","men"),0.3)
+		hid=Ledger.move(l,"free","bound","men",mini(found_men,free_hands(force)*BOUND_PER_GUARD))
+		bind["guards"]=maxi(1,ceili(float(Ledger.count(l,"bound"))/float(BOUND_PER_GUARD)))
 	_start(c,"search",{"weapons":weapons,"food":roundi(food),"hid":hid,"guards":0})
 	c.results["weapons"]=int(c.results.get("weapons",0))+weapons
+	if hid>0: c.results["bound"]=int(c.results.get("bound",0))+hid
 	c["resist_add"]=float(c.resist_add)-0.05
 	_gov(c,{"grievance":0.04*_resent(c),"trust":-0.02*_resent(c)})
 	c["harsh"]=float(c.harsh)+0.3
@@ -898,31 +1016,35 @@ static func _search(c:Dictionary)->void:
 
 static func _labour(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var opts:Dictionary=c.opts
 	var running:=_running(force,"labour")
-	if not running.is_empty():
+	if not running.is_empty() and Ledger.count(l,"worker")>0:
 		_renew(c,running)
 		if String(opts.get("work",""))!="" and String(opts.work)!=String(running.get("work","")): running["work"]=String(opts.work)
-		(c.texts as Array).append("The work gangs of %s go on another month." % name)
+		(c.texts as Array).append("The work gangs of %s go on another month, %s men in them." % [name,_count(Ledger.count(l,"worker"))])
 		return
 	var bind:=_running(force,"bind_men")
-	var pool:=int(bind.count) if not bind.is_empty() else int(c.men)
-	var hands:=free_hands(force)+(1 if not bind.is_empty() else 0)
+	var from:="bound" if Ledger.count(l,"bound","men")>0 else "free"
+	var pool:=Ledger.count(l,from,"men")
+	var hands:=free_hands(force)+(1 if from=="bound" else 0)
 	var workers:=mini(pool,hands*WORKERS_PER_GUARD)
 	if int(opts.get("count",0))>0: workers=mini(workers,int(opts.count))
 	if workers<=0:
-		(c.refused as Array).append("Nobody can be spared to watch a work gang; every one of the %s is on the gate or already guarding." % _count(int(c.garrison)) if pool>0 else "There are no men left in %s to work." % name)
+		(c.refused as Array).append(("Nobody can be spared to watch a work gang; every one of the %s is on the gate or already guarding." % _count(int(c.garrison))) if pool>0 else ("There are no men left in %s to work." % name))
 		return
-	var guards:=0 if not bind.is_empty() else maxi(1,ceili(float(workers)/float(WORKERS_PER_GUARD)))
+	workers=Ledger.move(l,from,"worker","men",workers)
+	var guards:=0 if from=="bound" else maxi(1,ceili(float(workers)/float(WORKERS_PER_GUARD)))
 	var work:=String(opts.get("work",""))
-	_start(c,"labour",{"count":workers,"guards":guards,"work":work,"done":0.0})
+	if not running.is_empty(): running["ended"]=true; running["end_day"]=int(c.day); running["end_reason"]="again"
+	_start(c,"labour",{"guards":guards,"work":work,"done":0.0,"from":from})
 	c.results["workers"]=workers
 	_gov(c,{"welfare":-0.05,"grievance":0.08*_resent(c),"trust":-0.05*_resent(c),"inequality":0.05,"repression":0.05})
 	c["harsh"]=float(c.harsh)+0.8
 	c["weight"]=int(c.weight)+workers
 	var under:=_count(maxi(1,guards if guards>0 else int(bind.get("guards",1))))
-	var gang:=("%s of the bound men" % _count(workers)) if not bind.is_empty() else "%s men of %s" % [_count(workers),name]
+	var gang:=("%s of the bound men" % _count(workers)) if from=="bound" else "%s men of %s" % [_count(workers),name]
 	var t:=""
 	match work:
 		"walls": t="From tomorrow %s are put to forced labour on %s round the town, in gangs under %s of ours. They eat from their own stores. It will take about a month." % [gang,_wall_words(c),under]
@@ -963,29 +1085,35 @@ static func _requisition(c:Dictionary)->void:
 
 static func _conscript(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var opts:Dictionary=c.opts
 	var running:=_running(force,"conscript")
-	if not running.is_empty():
+	if not running.is_empty() and Ledger.count(l,"conscript")>0:
 		_renew(c,running)
-		(c.texts as Array).append("Their young men already serve with the garrison, %s of them still with us." % _count(int(running.count)))
+		(c.texts as Array).append("Their young men already serve with the garrison, %s of them still with us." % _count(Ledger.count(l,"conscript")))
 		return
+	# Their young men: from the bound first, then the work gangs, then the free.
+	var from:="free"
+	for status in ["bound","worker","free"]:
+		if Ledger.count(l,String(status),"men")>0: from=String(status); break
+	var men:=Ledger.count(l,"free","men")+Ledger.count(l,"bound","men")+Ledger.count(l,"worker","men")
 	var hands:=free_hands(force)
-	var n:=mini(roundi(float(c.men)*0.3),mini(hands*CONSCRIPTS_PER_GUARD,40))
+	var n:=mini(roundi(float(men)*0.3),mini(hands*CONSCRIPTS_PER_GUARD,40))
 	if int(opts.get("count",0))>0: n=mini(int(opts.count),mini(hands*CONSCRIPTS_PER_GUARD,60))
+	n=mini(n,Ledger.count(l,from,"men"))
 	if n<=0:
-		(c.refused as Array).append("I have nobody to spare to watch new men; every one of ours is on the gate or guarding." if int(c.men)>0 else "There are no young men left in %s to take." % name); return
+		(c.refused as Array).append("I have nobody to spare to watch new men; every one of ours is on the gate or guarding." if men>0 else "There are no young men left in %s to take." % name); return
+	n=Ledger.move(l,from,"conscript","men",n)
 	var guards:=maxi(1,ceili(float(n)/float(CONSCRIPTS_PER_GUARD)))
-	var bind:=_running(force,"bind_men")
-	var from_bound:=not bind.is_empty() and int(bind.count)>0
-	if from_bound: bind["count"]=maxi(0,int(bind.count)-n)
-	_start(c,"conscript",{"count":n,"guards":guards,"deserted":0,"carry":0.0})
+	if not running.is_empty(): running["ended"]=true; running["end_day"]=int(c.day); running["end_reason"]="again"
+	_start(c,"conscript",{"guards":guards,"deserted":0,"carry":0.0})
 	c.results["conscripts"]=n
 	c["resist_mul"]=float(c.resist_mul)*0.85
 	_gov(c,{"grievance":0.07*_resent(c),"trust":-0.04*_resent(c)})
 	c["harsh"]=float(c.harsh)+0.8
 	c["weight"]=int(c.weight)+n
-	var t:="We took %s of the young men of %s%s to serve with the garrison. They carry, dig and stand watch beside ours with spears we give them. I would not trust them in a fight yet, and some will run off when they can." % [_count(n),name," from among the bound men" if from_bound else ""]
+	var t:="We took %s of the young men of %s%s to serve with the garrison. They carry, dig and stand watch beside ours with spears we give them. I would not trust them in a fight yet, and some will run off when they can." % [_count(n),name,{"bound":" from among the bound men","worker":" from the work gangs"}.get(from,"")]
 	if bool(opts.get("families",false)): t+=" Their families know what running would cost them."
 	(c.texts as Array).append(t)
 	(c.notes as Array).append("%s young men of %s were taken to serve with the garrison." % [_cap(_count(n)),name])
@@ -993,20 +1121,21 @@ static func _conscript(c:Dictionary)->void:
 
 static func _execute(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var opts:Dictionary=c.opts
-	var n:=clampi(int(opts.count),1,10) if int(opts.get("count",0))>0 else clampi(roundi(float(c.men)*0.05),1,6)
-	n=mini(n,maxi(0,int(c.population)-1))
+	var men:=Ledger.here(l,"men")
+	var n:=clampi(int(opts.count),1,10) if int(opts.get("count",0))>0 else clampi(roundi(float(men)*0.05),1,6)
+	n=mini(n,men)
 	if n<=0:
-		(c.refused as Array).append("There is nobody left in %s to put to death." % name); return
-	var dead:=_kill(c,n)
+		(c.refused as Array).append("There are no men left in %s to put to death." % name); return
+	# The men who led them are among those we hold, if we hold any.
+	var dead:=_kill(c,[["bound","men"],["worker","men"],["conscript","men"],["hostage","men"],["free","men"]],n)
 	if dead<=0:
 		(c.refused as Array).append("The men who led them are not to be found in %s." % name); return
-	var bind:=_running(force,"bind_men")
-	if not bind.is_empty(): bind["count"]=maxi(0,int(bind.count)-dead)
 	var old:=_running(force,"execute_ringleaders")
 	if not old.is_empty(): old["ended"]=true; old["end_day"]=int(c.day); old["end_reason"]="again"
-	_start(c,"execute_ringleaders",{"count":dead,"guards":0})
+	_start(c,"execute_ringleaders",{"dead":dead,"guards":0})
 	c.results["executed"]=dead
 	c["resist_add"]=float(c.resist_add)-0.15
 	_gov(c,{"grievance":0.18*_resent(c),"trust":-0.12*_resent(c),"legitimacy":-0.05})
@@ -1019,40 +1148,57 @@ static func _execute(c:Dictionary)->void:
 
 static func _release(c:Dictionary)->void:
 	var force:Dictionary=c.force
+	var l:Dictionary=c.ledger
 	var name:=String(c.name)
 	var what:Array=(c.opts as Dictionary).get("release",[])
 	if what.is_empty(): what=PEOPLE_HELD.duplicate()
 	var said:PackedStringArray=PackedStringArray()
+	var let_go:=0
 	for id in what:
 		var m:=_running(force,String(id))
-		if m.is_empty(): continue
-		m["ended"]=true; m["end_day"]=int(c.day); m["end_reason"]="released"
+		var status:=String({"bind_men":"bound","hostages":"hostage","labour":"worker","conscript":"conscript"}.get(String(id),""))
+		var held:=Ledger.count(l,status) if status!="" else 0
+		if m.is_empty() and held<=0: continue
+		if not m.is_empty():
+			m["ended"]=true; m["end_day"]=int(c.day); m["end_reason"]="released"
 		(c.freed as Array).append(String(id))
+		var n:=0
+		if status!="":
+			for g in Ledger.GROUPS: n+=Ledger.move(l,status,"free",String(g),Ledger.count(l,status,String(g)))
+		let_go+=n
 		match String(id):
 			"bind_men":
-				said.append("The men of %s are untied and sent back to their houses." % name)
+				said.append(("The %s bound people of %s are untied and sent back to their houses." % [_count(n),name]) if n>0 else ("The men of %s are untied and sent back to their houses." % name))
 				c["resist_add"]=float(c.resist_add)+0.08
 				_gov(c,{"grievance":-0.03,"trust":0.03})
 				c["mercy"]=float(c.mercy)+0.4
 			"hostages":
-				said.append("The hostages go back to their families.")
+				said.append(("The %s hostages go back to their families." % _count(n)) if n>0 else "The hostages go back to their families.")
 				_gov(c,{"grievance":-0.04,"trust":0.05})
 				c["mercy"]=float(c.mercy)+0.3
 			"labour":
-				said.append("The work gangs are sent home.")
+				said.append(("The work gangs are sent home, %s men." % _count(n)) if n>0 else "The work gangs are sent home.")
 				_gov(c,{"welfare":0.02})
 				c["mercy"]=float(c.mercy)+0.2
 			"curfew":
 				said.append("The curfew is lifted; they may go out after dark again.")
 				c["mercy"]=float(c.mercy)+0.1
 			"conscript":
-				said.append("The men we took into the garrison are sent back to their families.")
+				said.append(("The %s men we took into the garrison are sent back to their families." % _count(n)) if n>0 else "The men we took into the garrison are sent back to their families.")
 				c["mercy"]=float(c.mercy)+0.2
+	# Workers taken from the bound are bound no more once the binding ends.
+	if (c.freed as Array).has("bind_men") and not (c.freed as Array).has("labour"):
+		var lab:=_running(force,"labour")
+		if not lab.is_empty() and String(lab.get("from",""))=="bound":
+			lab["ended"]=true; lab["end_day"]=int(c.day); lab["end_reason"]="released"
+			let_go+=Ledger.move(l,"worker","free","men",Ledger.count(l,"worker","men"))
+	l["released"]=int(l.get("released",0))+let_go
+	c.results["released"]=let_go
 	if said.is_empty():
 		(c.texts as Array).append("Nobody in %s is bound or held by us; there is no one to free." % name)
 		return
 	(c.texts as Array).append(" ".join(said))
-	(c.notes as Array).append("The people held in %s were let go." % name)
+	(c.notes as Array).append(("%s people held in %s were let go." % [_cap(_count(let_go)),name]) if let_go>0 else ("The people held in %s were let go." % name))
 	(c.titles as Array).append("The Men of %s Freed" % name)
 
 static func _relief(c:Dictionary)->void:
@@ -1304,13 +1450,14 @@ static func _chronicle(c:Dictionary)->void:
 	Chronicle.record({"key":key,"title":String((c.titles as Array)[0]).substr(0,70),"text":" ".join(PackedStringArray(c.notes)),
 		"tier":"moment" if applied.has("execute_ringleaders") else "notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":String(c.civ_id)}}})
 
-## One plain note: "Tsaren: 58 men bound and under guard, about 14 got away."
+## One plain note: "Tsaren: 58 men bound and under guard, 14 got away."
 static func _outcome(c:Dictionary)->String:
 	var bits:PackedStringArray=PackedStringArray()
 	var r:Dictionary=c.results
+	var who:=_who_words(String((c.opts as Dictionary).get("who","men")))
 	for id in (c.applied as Array)+(c.renewed as Array):
 		match String(id):
-			"bind_men": bits.append("%s men bound and under guard" % _count(int(r.get("bound",0))))
+			"bind_men": bits.append("%s %s bound and under guard" % [_count(int(r.get("bound",0))),who])
 			"disarm": bits.append("%s weapons taken" % _count(int(r.get("weapons",0))))
 			"hostages": bits.append("%s hostages held" % _count(int(r.get("hostages",0))))
 			"curfew": bits.append("kept to their houses after dark")
@@ -1323,8 +1470,8 @@ static func _outcome(c:Dictionary)->String:
 			"set_headman": bits.append("%s set over them" % String(r.get("headman","one of ours")).get_slice(" ",0))
 			"settle": bits.append("%s of our families settling there" % _count(int(r.get("settlers",0))))
 			WORD: bits.append("the garrison has your word")
-	if not (c.freed as Array).is_empty(): bits.append("those held let go")
-	if int(c.fled)>0: bits.append("about %s got away" % _count(int(c.fled)))
+	if not (c.freed as Array).is_empty(): bits.append(("%s let go" % _count(int(r.get("released",0)))) if int(r.get("released",0))>0 else "those held let go")
+	if int(c.fled)>0: bits.append("%s got away" % _count(int(c.fled)))
 	if bits.is_empty(): return "%s: nothing is changed." % String(c.name)
 	var unique:PackedStringArray=PackedStringArray()
 	for b in bits:
@@ -1336,15 +1483,19 @@ static func _outcome(c:Dictionary)->String:
 # The map card and the held-town report
 # --------------------------------------------------------------------------
 
-## The line a measure puts on the garrison's map card.
-static func card_label(m:Dictionary)->String:
+## The line a measure puts on the garrison's map card; the people it holds are
+## read from the town's ledger.
+static func card_label(m:Dictionary,l:Dictionary={},force:Dictionary={})->String:
 	var n:=int(m.get("count",0))
 	match String(m.get("id","")):
-		"bind_men": return "%s · %d" % ["Men bound and under guard" if String(m.get("who","men"))=="men" else "People bound and under guard",n]
-		"hostages": return "Hostages held · %d" % n
-		"labour": return "Men at forced labour · %d" % n
-		"conscript": return "Their men serving with ours · %d" % n
-		"execute_ringleaders": return "Ringleaders put to death · %d" % n
+		"bind_men":
+			var bound:=Ledger.count(l,"bound")+bound_workers(force,l) if not l.is_empty() else n
+			var men_only:=l.is_empty() or Ledger.count(l,"bound")==Ledger.count(l,"bound","men")
+			return "%s · %d" % ["Men bound and under guard" if men_only else "People bound and under guard",bound]
+		"hostages": return "Hostages held · %d" % (Ledger.count(l,"hostage") if not l.is_empty() else n)
+		"labour": return "Men at forced labour · %d" % (Ledger.count(l,"worker") if not l.is_empty() else n)
+		"conscript": return "Their men serving with ours · %d" % (Ledger.count(l,"conscript") if not l.is_empty() else n)
+		"execute_ringleaders": return "Ringleaders put to death · %d" % int(m.get("dead",n))
 		"curfew": return "Kept to their houses"
 		"disarm": return "Disarmed · %d weapons taken" % n
 		"requisition": return "Stores taken · %d Food" % int(m.get("food",0))
@@ -1354,6 +1505,26 @@ static func card_label(m:Dictionary)->String:
 		"search": return "Houses searched"
 		WORD: return {"brutal":"Your word: kill any who fight","harsh":"Your word: a hard hand","lenient":"Your word: a light hand"}.get(String(m.get("tone","")),"Your word to the garrison")
 	return String((CATALOGUE.get(String(m.get("id","")),{}) as Dictionary).get("label",""))
+
+## Bound men put to forced labour (labour taken from the bound): still bound.
+static func bound_workers(force:Dictionary,l:Dictionary)->int:
+	var lab:=_running(force,"labour")
+	if lab.is_empty() or String(lab.get("from",""))!="bound" or l.is_empty(): return 0
+	return Ledger.count(l,"worker")
+
+## The card lines of every measure running on a town's garrison.
+static func card_labels(civ_id:String,region_id:String)->Array[String]:
+	var out:Array[String]=[]
+	var at:=_force_index(civ_id,region_id)
+	if at<0: return out
+	var force:Dictionary=_mc().occupation_forces[at]
+	var l:=Ledger.of(civ_id,region_id,false)
+	for m:Dictionary in active(civ_id,region_id): out.append(card_label(m,l,force))
+	return out
+
+## The town's ledger for a garrison record ({} when it has none).
+static func ledger_of(force:Dictionary)->Dictionary:
+	return Ledger.of(String(force.get("civ_id","")),String(force.get("region_id","")),false)
 
 ## The garrison's card note follows what is in force; when nothing is, the
 ## last order's note (town_fate) comes back.
@@ -1369,7 +1540,7 @@ static func refresh_note(force:Dictionary)->void:
 	list.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return _priority(String(a.id))<_priority(String(b.id)))
 	if not bool(force.get("measure_note",false)): force["note_before"]=String(force.get("fate_note",""))
 	force["measure_note"]=true
-	var note:=card_label(list[0])
+	var note:=card_label(list[0],ledger_of(force),force)
 	if list.size()>1: note+=" · %d more" % (list.size()-1)
 	force["fate_note"]=note.substr(0,70)
 
@@ -1377,6 +1548,9 @@ static func refresh_note(force:Dictionary)->void:
 static func report_lines(civ_id:String,region_id:String)->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	var day:=_day()
+	var l:=Ledger.of(civ_id,region_id,false)
+	var at:=_force_index(civ_id,region_id)
+	var force:Dictionary=_mc().occupation_forces[at] if at>=0 else {}
 	for m:Dictionary in active(civ_id,region_id):
 		var n:=int(m.get("count",0))
 		var left:=maxi(0,int(m.get("until",day))-day)
@@ -1384,16 +1558,23 @@ static func report_lines(civ_id:String,region_id:String)->Array[Dictionary]:
 		var text:=""; var value:=""
 		match String(m.id):
 			"bind_men":
-				value=str(n)
-				text="%s %s are bound and kept under guard; %s of ours watch them.%s" % [_cap(_count(n)),String(m.get("who","men")),_count(int(m.get("guards",0))),holds]
+				var working:=bound_workers(force,l)
+				var bound:=Ledger.count(l,"bound")+working
+				var men:=Ledger.count(l,"bound","men")+working
+				value=str(bound)
+				text="%s %s bound and kept under guard%s; %s of ours watch them.%s" % [_cap(_count(bound)),("men are" if bound!=1 else "man is") if men==bound else "people are (%d of them men)" % men,(", %s of them at forced labour" % _count(working)) if working>0 else "",_count(int(m.get("guards",0))),holds]
 			"hostages":
+				n=Ledger.count(l,"hostage")
 				value=str(n); text="%s of their people are held in the garrison's house as hostages.%s" % [_cap(_count(n)),holds]
 			"labour":
+				n=Ledger.count(l,"worker")
 				value=str(n)
 				text="%s men work %s under our guard.%s" % [_cap(_count(n)),{"walls":"on a wall round the town","fields":"their fields for us","roads":"on a track toward "+_home()}.get(String(m.get("work","")),"wherever the garrison needs them"),holds]
 			"conscript":
+				n=Ledger.count(l,"conscript")
 				value=str(n); text="%s of their young men serve with the garrison%s.%s" % [_cap(_count(n)),"; %s have run off" % _count(int(m.get("deserted",0))) if int(m.get("deserted",0))>0 else "",holds]
 			"execute_ringleaders":
+				n=int(m.get("dead",n))
 				value=str(n); text="%s who led the fighting %s put to death %s ago." % [_cap(_count(n))+" men" if n>1 else "The man","were" if n>1 else "was",_days(maxi(1,day-int(m.day)))]
 			"curfew":
 				text="Nobody goes out after dark.%s" % holds
@@ -1411,7 +1592,7 @@ static func report_lines(civ_id:String,region_id:String)->Array[Dictionary]:
 				text="Every house was searched %s ago." % _days(maxi(1,day-int(m.day)))
 			WORD:
 				text={"brutal":"Your word to the garrison: any man who fights or runs is killed.","harsh":"Your word to the garrison: a hard hand.","lenient":"Your word to the garrison: a light hand."}.get(String(m.get("tone","")),"The garrison keeps order as you said.")
-		out.append({"id":String(m.id),"label":card_label(m).get_slice(" · ",0),"value":value,"text":text})
+		out.append({"id":String(m.id),"label":card_label(m,l,force).get_slice(" · ",0),"value":value,"text":text})
 	return out
 
 
@@ -1444,6 +1625,8 @@ static func daily(day:int)->Array:
 					if bool(rec.get("ended",false)): break
 				rec["last_day"]=day
 			if not bool(rec.get("ended",false)): cap=minf(cap,float((CATALOGUE.get(String(rec.id),{}) as Dictionary).get("cap",1.0)))
+		var l:=Ledger.of(civ_id,region_id,false)
+		if not l.is_empty(): _end_empty(force,l,day)
 		_daily_region(civ_id,region_id,cap,hungry)
 		_trim(force)
 		refresh_note(force)
@@ -1454,19 +1637,20 @@ static func daily(day:int)->Array:
 static func _tick(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,day:int,filed:Array)->float:
 	var id:=String(m.id)
 	var short:=0.0
+	var l:=Ledger.of(civ_id,region_id)
 	match id:
 		"bind_men":
-			var need:=float(int(m.get("count",0)))*BOUND_RATION
+			var need:=float(Ledger.count(l,"bound"))*BOUND_RATION
 			var got:=_take_town_food(civ_id,region_id,need)
 			if got<need: got+=_take_our_food(need-got)
 			short=maxf(0.0,need-got)
 		"hostages":
-			var need:=float(int(m.get("count",0)))*HOSTAGE_RATION
+			var need:=float(Ledger.count(l,"hostage"))*HOSTAGE_RATION
 			var got:=_take_our_food(need)
 			if got<need: got+=_take_town_food(civ_id,region_id,need-got)
 			short=maxf(0.0,need-got)
 		"labour":
-			var workers:=int(m.get("count",0))
+			var workers:=Ledger.count(l,"worker")
 			match String(m.get("work","")):
 				"walls":
 					var rise:=minf(WALL_PER_DAY*float(workers)/40.0,maxf(0.0,WALL_MAX-float(m.get("done",0.0))))
@@ -1478,15 +1662,15 @@ static func _tick(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,d
 					var got:=_take_town_food(civ_id,region_id,want)
 					if got>0.0: _receive_our_food(got); m["done"]=float(m.get("done",0.0))+got
 		"conscript":
-			var n:=int(m.get("count",0))
+			var n:=Ledger.count(l,"conscript")
 			var rate:=float((STANCES.get(String(m.get("stance","firm")),STANCES.firm) as Dictionary).desert)
 			m["carry"]=float(m.get("carry",0.0))+float(n)*rate
 			var gone:=mini(n,floori(float(m.carry)))
 			if gone>0:
 				m["carry"]=float(m.carry)-float(gone)
-				m["count"]=n-gone; m["deserted"]=int(m.get("deserted",0))+gone
-				Pursuit._reach_refuge(civ_id,region_id,gone,Pursuit.refuge(civ_id,region_id))
-				if int(m.count)<=0: m["ended"]=true; m["end_day"]=day; m["end_reason"]="deserted"
+				m["deserted"]=int(m.get("deserted",0))+gone
+				_leave(civ_id,region_id,"conscript","men",gone)
+				if Ledger.count(l,"conscript")<=0: m["ended"]=true; m["end_day"]=day; m["end_reason"]="deserted"
 	var incident:Variant=m.get("incident")
 	if incident is Dictionary and not bool((incident as Dictionary).get("done",false)) and day>=int((incident as Dictionary).get("day",day+1)) and not bool(m.get("ended",false)):
 		(incident as Dictionary)["done"]=true
@@ -1497,6 +1681,15 @@ static func _tick(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,d
 		var matter:=_ended(m,force,civ_id,region_id,day)
 		if not matter.is_empty(): filed.append(matter)
 	return short
+
+## n of a status slip off to their people for good: the ledger first, then
+## the world moves them to their refuge.
+static func _leave(civ_id:String,region_id:String,status:String,group:String,n:int,refuge:Dictionary={})->int:
+	var l:=Ledger.of(civ_id,region_id)
+	var to:=refuge if not refuge.is_empty() else Pursuit.refuge(civ_id,region_id)
+	var went:=Ledger.fled_now(l,status,group,n,"the hills" if bool(to.get("hills",false)) else String(to.get("name","the hills")))
+	if went>0: Pursuit._reach_refuge(civ_id,region_id,went,to,went if group=="men" else 0)
+	return went
 
 ## Resistance held under the running measures' cap; hunger among those we
 ## hold is their people's grievance.
@@ -1525,20 +1718,24 @@ static func _edit_region(civ_id:String,region_id:String,edit:Callable)->void:
 	if WorldSimulation.enabled: Combat.governance(civ_id,region_id,r)
 
 ## Something went wrong (or right) under a measure: told once by the war
-## leader as a court matter, with one Chronicle line.
+## leader as a court matter, with one Chronicle line. Bound men never get
+## away: a man who works his cords loose is caught at the edge of the fields.
 static func _incident(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,day:int)->Dictionary:
 	var name:=String(force.get("region_name","the town"))
 	var region:Dictionary=_world().region_snapshot(civ_id,region_id)
 	if not region.is_empty(): name=String(region.get("name",name))
+	var l:=Ledger.of(civ_id,region_id)
 	var stance:=String(m.get("stance","firm"))
 	var hard:=stance in ["harsh","brutal"]
 	var text:=""
-	var deaths:=0; var grievance:=0.0; var trust:=0.0; var resist:=0.0; var dread:=0.0; var ran:=0
+	var grievance:=0.0; var trust:=0.0; var resist:=0.0; var dread:=0.0
 	match String(m.id):
 		"bind_men":
+			if Ledger.count(l,"bound")<=0: return {}
 			if stance=="brutal":
+				if _die(civ_id,region_id,[["bound","men"],["bound","women"],["bound","elders"]],1)<=0: return {}
 				text="One of the bound men in %s got loose in the night and went for a guard with a stone. The guards killed him. The town has been silent since." % name
-				deaths=1; grievance=0.06; dread=0.03
+				grievance=0.06; dread=0.03
 			elif stance=="harsh" and bool(m.get("families",false)):
 				text="Two nights ago one of the bound men in %s worked his cords loose and ran. As you ordered, the guards dragged his wife and children into the open; he came back by morning and gave himself up. The whole town watched it." % name
 				grievance=0.05; dread=0.02; resist=-0.02
@@ -1546,33 +1743,45 @@ static func _incident(m:Dictionary,force:Dictionary,civ_id:String,region_id:Stri
 				text="One of the bound men in %s tried to run and was caught at the edge of the fields. He was beaten in front of the rest." % name
 				grievance=0.04; dread=0.015
 			else:
-				text="One of the bound men in %s got loose in the night and ran %s. We did not catch him." % [name,Pursuit.toward_words(Pursuit.refuge(civ_id,region_id))]
-				ran=1; grievance=0.01
+				text="One of the bound men in %s worked his cords loose in the night. The guard on the fields caught him before he reached the trees, and he is bound again." % name
+				grievance=0.01
 		"hostages":
-			if hard:
+			if Ledger.count(l,"hostage")<=0: return {}
+			if hard and _die(civ_id,region_id,[["hostage","elders"],["hostage","men"],["hostage","women"],["hostage","children"]],1)>0:
 				text="One of the hostages from %s, an old man, sickened in the garrison's house and died. His family says we let him die." % name
-				deaths=1; grievance=0.05
+				grievance=0.05
 			else:
 				text="The families of the hostages from %s come to the garrison's house each day with food. There has been no trouble." % name
 				trust=0.02
 		"labour":
+			if Ledger.count(l,"worker")<=0: return {}
 			if hard:
 				text="A log slipped on the work gang at %s and broke a man's leg. They say we drive them too hard." % name
 				grievance=0.04
+			elif String(m.get("from",""))=="bound":
+				text="One of the work gang at %s fell sick in the heat and was carried back to the others under guard. The rest work on." % name
+				grievance=0.01
 			else:
-				text="Two of the work gang at %s slipped off into the hills in the night." % name
-				ran=2; grievance=0.01
+				var ran:=_leave(civ_id,region_id,"worker","men",2,{"name":"the hills","region_id":"","hills":true})
+				if ran<=0: return {}
+				text="%s of the work gang at %s slipped off into the hills in the night." % [_cap(_count(ran)),name]
+				grievance=0.01
 		"conscript":
-			var k:=mini(int(m.get("count",0)),1+roundi(float(int(m.get("count",0)))*0.15))
+			var n:=Ledger.count(l,"conscript")
+			if n<=0: return {}
+			var k:=_leave(civ_id,region_id,"conscript","men",mini(n,1+roundi(float(n)*0.15)))
+			if k<=0: return {}
+			m["deserted"]=int(m.get("deserted",0))+k
 			text="%s of the men we took from %s ran off in the night, with the spears we gave them." % [_cap(_count(k)),name]
-			ran=k
-			m["count"]=maxi(0,int(m.get("count",0))-k); m["deserted"]=int(m.get("deserted",0))+k
 		"search":
-			if hard:
+			if hard and _die(civ_id,region_id,[["free","women"],["free","men"]],1)>0:
 				text="During the search of %s a woman struck one of ours with a stick; he struck back, and she died of it. Her people want blood." % name
-				deaths=1; grievance=0.06
+				grievance=0.06
+			elif not _running(force,"bind_men").is_empty() and Ledger.move(l,"free","bound","men",1)>0:
+				text="During the search of %s one of ours was cut by a man hiding in a roof. He will mend; the man is bound with the rest." % name
+				grievance=0.01
 			else:
-				text="During the search of %s one of ours was cut by a man hiding in a roof. He will mend; the man is bound." % name
+				text="During the search of %s one of ours was cut by a man hiding in a roof. He will mend; we took the man's spear." % name
 				grievance=0.01
 		"curfew":
 			text="Three boys of %s were caught out after dark and beaten by our watch. Their mothers came to the gate to scream at us." % name
@@ -1591,8 +1800,9 @@ static func _incident(m:Dictionary,force:Dictionary,civ_id:String,region_id:Stri
 		WORD:
 			match String(m.get("tone","")):
 				"brutal":
+					if _die(civ_id,region_id,[["free","men"]],1)<=0: return {}
 					text="A man of %s raised his hand to one of ours in the lane. As you ordered, he was killed where he stood." % name
-					deaths=1; grievance=0.05; dread=0.03
+					grievance=0.05; dread=0.03
 				"harsh":
 					text="A man of %s spat at one of ours in the lane and was beaten for it, as you ordered." % name
 					grievance=0.03; dread=0.01
@@ -1602,15 +1812,6 @@ static func _incident(m:Dictionary,force:Dictionary,civ_id:String,region_id:Stri
 				_:
 					text="A quarrel over water between one of ours and a woman of %s. I settled it before it went further." % name
 	if text=="": return {}
-	if deaths>0:
-		var world:Variant=_world()
-		var index:int=world._civilization_index(civ_id)
-		if index>=0:
-			var done:Dictionary=world._apply_rival_civilian_deaths(world.civilizations[index],region_id,deaths)
-			world.civilizations[index]=done.civilization
-	if ran>0: Pursuit._reach_refuge(civ_id,region_id,ran,Pursuit.refuge(civ_id,region_id))
-	if String(m.id)=="bind_men" and ran>0: m["count"]=maxi(0,int(m.get("count",0))-ran)
-	if String(m.id)=="labour" and ran>0: m["count"]=maxi(0,int(m.get("count",0))-ran)
 	var edit:=func(r:Dictionary)->void:
 		var data:Dictionary=Governance.state(r)
 		data.grievance=clampf(float(data.grievance)+grievance,0.0,1.0)
@@ -1623,32 +1824,54 @@ static func _incident(m:Dictionary,force:Dictionary,civ_id:String,region_id:Stri
 	m["incident_text"]=text
 	return _report(civ_id,name,region_id,String(m.id),int(m.day),text,day,"incident")
 
-## A measure that held people ran its days: the war leader says so once.
+## A measure that held people ran its days: the war leader says so once, and
+## the people it held go back to their houses (the ledger says so too).
 static func _ended(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,day:int)->Dictionary:
 	var name:=String(force.get("region_name","the town"))
 	var region:Dictionary=_world().region_snapshot(civ_id,region_id)
 	if not region.is_empty(): name=String(region.get("name",name))
+	var l:=Ledger.of(civ_id,region_id)
 	var text:=""
 	match String(m.id):
 		"bind_men":
+			var n:=_send_home(l,"bound")
+			var lab:=_running(force,"labour")
+			if not lab.is_empty() and String(lab.get("from",""))=="bound":
+				lab["ended"]=true; lab["end_day"]=day; lab["end_reason"]="released"
+				n+=_send_home(l,"worker")
 			_edit_region(civ_id,region_id,func(r:Dictionary)->void: r["resistance"]=clampf(float(r.get("resistance",0.5))+0.06,0.01,1.0))
-			text="The month is out. I have let the men of %s go back to their houses and fields; the harvest would not wait. Say the word and we bind them again." % name
+			if n<=0: return {}
+			text="The month is out. I have let the %s bound men of %s go back to their houses and fields; the harvest would not wait. Say the word and we bind them again." % [_count(n),name]
 		"hostages":
-			text="We have kept the hostages from %s three months. I have sent them back to their families; say the word if you want others taken." % name
+			var n:=_send_home(l,"hostage")
+			if n<=0: return {}
+			text="We have kept the %s hostages from %s three months. I have sent them back to their families; say the word if you want others taken." % [_count(n),name]
 		"labour":
+			var bound_still:=String(m.get("from",""))=="bound" and not _running(force,"bind_men").is_empty()
+			var n:=0
+			if bound_still: n=Ledger.move(l,"worker","bound","men",Ledger.count(l,"worker","men"))
+			else: n=_send_home(l,"worker")
+			var back:=" They are back with the other bound men." if bound_still else ""
 			match String(m.get("work","")):
-				"walls": text="The work gangs at %s are done. The town has a stake wall and a ditch round it now." % name
-				"fields": text="The work gangs at %s are done. Their fields gave %d Food to the garrison and to %s." % [name,roundi(float(m.get("done",0.0))),_home()]
+				"walls": text="The work gangs at %s are done. The town has a stake wall and a ditch round it now.%s" % [name,back]
+				"fields": text="The work gangs at %s are done. Their fields gave %d Food to the garrison and to %s.%s" % [name,roundi(float(m.get("done",0.0))),_home(),back]
 				"roads":
 					var mc:Variant=_mc()
 					var at:int=mc._occupation_force_index(civ_id,region_id)
 					if at>=0: mc.occupation_forces[at]["supply_level"]=clampf(float(mc.occupation_forces[at].get("supply_level",0.5))+0.1,0.0,1.0)
-					text="The work gangs at %s are done. A track is cleared from the town toward %s, and our carriers reach the garrison quicker." % [name,_home()]
-				_: text="The work gangs at %s are done and sent home." % name
+					text="The work gangs at %s are done. A track is cleared from the town toward %s, and our carriers reach the garrison quicker.%s" % [name,_home(),back]
+				_: text=("The work gangs at %s are done and sent home, %s men." % [name,_count(n)]) if not bound_still else "The work gangs at %s are done.%s" % [name,back]
 		"conscript":
-			text="The two months are up. Of the young men of %s who served with us, %s are still here; I have sent them home." % [name,_count(int(m.get("count",0)))]
+			var n:=_send_home(l,"conscript")
+			text="The two months are up. Of the young men of %s who served with us, %s are still here; I have sent them home." % [name,_count(n)]
 	if text=="": return {}
 	return _report(civ_id,name,region_id,String(m.id),int(m.day),text,day,"ended")
+
+## Everyone of a status goes back to their houses. Returns how many.
+static func _send_home(l:Dictionary,status:String)->int:
+	var n:=0
+	for g in Ledger.GROUPS: n+=Ledger.move(l,status,"free",String(g),Ledger.count(l,status,String(g)))
+	return n
 
 static func _report(civ_id:String,town:String,region_id:String,id:String,started:int,text:String,day:int,kind:String)->Dictionary:
 	var war_loop:GDScript=load(WAR_LOOP_PATH)

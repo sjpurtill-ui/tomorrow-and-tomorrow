@@ -731,8 +731,10 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 	return {"actor":actor,"target":target,"guards":guards}
 
 static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:String,actor:Dictionary,target:Dictionary,text:String,cls:Dictionary,insist:bool,context:Dictionary)->Dictionary:
+	audience.erase("echoed_here")
 	if not bool(context.get("echoed",false)):
 		Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":Hall._day(),"aside":false})
+		audience["echoed_here"]=text
 	if verb in ["kill","maim"]:
 		# Last guard: harm whose object is a people or a town's people never
 		# lands on the actor, the one spoken to or anyone else in the hall.
@@ -1410,10 +1412,28 @@ static func _refusal(id:String,audience:Dictionary,list:Array[Dictionary],r:Dict
 
 static func _fallback(id:String,r:Dictionary,reason:String)->Dictionary:
 	## The act could not land as spoken (no one by that name, or the office
-	## machinery refused): still a result, never silence.
+	## machinery refused): still a result, never silence. Just after an order
+	## about a town we hold, words that land on nobody here are talk about
+	## that town: the room answers them (from the facts), never this line.
+	var audience:=Hall.find(id)
+	if not audience.is_empty() and String(r.get("target_name",""))=="" and _town_talk(audience):
+		r.handled=false; r.stage="none"; r.outcome=""; r["speech"]=true
+		# The ruler's words are the voice's to show now, once.
+		if String(audience.get("echoed_here",""))==String(r.get("text","")):
+			var lines:Array=audience.get("lines",[])
+			if not lines.is_empty() and String((lines[-1] as Dictionary).get("role",""))=="ruler" and String((lines[-1] as Dictionary).get("text",""))==String(r.get("text","")): lines.pop_back()
+			audience.erase("echoed_here")
+		return r
 	r.stage="none"
 	r.outcome=(reason+" " if reason!="" else "")+"Nobody here answers to that; the court waits for you to name who you mean."
 	return r
+
+## Is this audience in the middle of the business of a town we hold (an
+## order about it just given, or its war leader's report on it)?
+static func _town_talk(audience:Dictionary)->bool:
+	if String(audience.get("origin",""))!="court" or WarOrders.held_towns().is_empty(): return false
+	var last:Dictionary=audience.get("town_order",{}) if audience.get("town_order") is Dictionary else {}
+	return not last.is_empty() and Hall._day()-int(last.get("day",-99))<=PENDING_DAYS
 
 # --------------------------------------------------------------------------
 # Words for the voice: stage directions and reactions

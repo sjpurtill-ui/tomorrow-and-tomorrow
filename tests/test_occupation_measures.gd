@@ -28,6 +28,7 @@ const CV:=preload("res://scripts/character_voice.gd")
 const PlainSpeech:=preload("res://scripts/plain_speech.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 
 const USERS_SENTENCE:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 const SECRET:="sk-test-DO-NOT-LOG-0123456789"
@@ -241,9 +242,13 @@ func test_the_users_sentence_binds_the_men_under_a_harsh_hand()->void:
 	var garrison:=int(_force().troops)
 	assert_int(bound).is_less_equal((garrison-maxi(M.KEEP_AT_LEAST,ceili(float(garrison)*M.KEEP_SHARE)))*M.BOUND_PER_GUARD)
 	assert_int(M.men_bound(civ_id,city_id)).is_equal(bound)
-	# A harsh hand: few got away, and they are on the record for a chase.
-	assert_int(int(o.fled)).is_less_equal(roundi(float(men)*M.ROUND_UP_FLIGHT*0.5))
-	if int(o.fled)>0: assert_dict(preload("res://scripts/pursuit.gd").latest_flight(city_id)).is_not_empty()
+	# A harsh hand: few got away (each man's chance is stated: about 1 in 10),
+	# and they are on the town's ledger, running, for a chase.
+	assert_int(int(o.fled)).is_less_equal(roundi(float(men)*M.ROUND_UP_FLIGHT*float(M.STANCES.harsh.escape)*2.0)+3)
+	if int(o.fled)>0:
+		assert_dict(preload("res://scripts/pursuit.gd").latest_flight(city_id)).is_not_empty()
+		assert_int(int(Ledger.running(Ledger.of(civ_id,city_id)).count)).is_equal(int(o.fled))
+	assert_bool(bool(Ledger.check(civ_id,city_id).ok)).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
 	# The war leader says what was done, with the numbers, and the threat.
 	var says:=String(r.actor_says)
 	assert_str(says).not_contains("already ours")
