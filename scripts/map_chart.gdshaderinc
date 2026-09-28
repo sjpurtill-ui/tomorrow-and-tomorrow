@@ -30,6 +30,9 @@ uniform sampler2D chart_cover : filter_linear_mipmap, repeat_disable;
 // x, z, how far its fields reach (km), 0 ours or 1 a stranger's.
 uniform int chart_place_count = 0;
 uniform vec4 chart_places[24];
+// The same places' built ground: radius (km), 1 walled + 2 ruined, the
+// holder's colour packed r*65536+g*256+b (0-255), its strength.
+uniform vec4 chart_towns[24];
 
 const float MC_CHART_FROM = 0.010;
 const float MC_CHART_FULL = 0.032;
@@ -588,6 +591,31 @@ vec3 mc_mountains(vec2 xz, float design_km, float pixel_world, bool use_patch, v
 
 // -- Woods, marsh and worked land in the same ink --------------------------
 
+// How much of the ground at `xz` place `i` works (0-1): its reach, thinning
+// raggedly outward.
+float mc_worked_share(vec2 xz, vec4 place, int i) {
+	float reach = place.z;
+	vec2 offset = xz-place.xy;
+	float d2 = dot(offset, offset);
+	if (reach <= 0.0 || d2 > reach*reach*1.6) { return 0.0; }
+	float ragged = map_paper_noise(offset/max(reach*0.35, 0.01)+vec2(float(i)*5.1, 3.7))-0.5;
+	return 1.0-smoothstep(0.62, 1.0, sqrt(d2)/reach+ragged*0.30);
+}
+
+// The place whose worked land reaches over `xz` (within `margin_km` more),
+// or -1: the trees ask it whether their spot is cleared.
+int mc_nearest_place(vec2 xz, float margin_km) {
+	int best = -1;
+	float best_d = 1.0e9;
+	for (int i = 0; i < 24; i++) {
+		if (i >= chart_place_count) { break; }
+		vec4 place = chart_places[i];
+		float d = length(xz-place.xy)-(place.z*1.3+margin_km);
+		if (d < 0.0 && d < best_d) { best_d = d; best = i; }
+	}
+	return best;
+}
+
 // One small symbol drawn in profile, upright on the screen, `size` km tall:
 // kind 0 a tree (a round crown, or a narrow conifer when `variant` > 0.5,
 // on a short trunk, the east side of the crown in shade), kind 1 a tuft of
@@ -645,7 +673,7 @@ float mc_marsh(vec4 cover, float height) {
 // (centre xz, variant, present 0-1). Trees stand where the blurred woodland
 // makes a stand, conifers where it is cold; reeds where the land is low and
 // wet (marsh). Every read is of the patch's box-filtered cover.
-vec4 mc_symbol_at(int kind, vec2 c, float level, float base_km, float pixel_world) {
+vec4 mc_symbol_at(int kind, vec2 c, float level, float base_km, float pixel_world, int near_place) {
 	float cell = base_km*exp2(level);
 	vec2 salt = level*vec2(53.0, 17.0)+float(kind)*vec2(211.0, -97.0);
 	vec2 jitter = vec2(map_paper_hash(c+vec2(3.0, 11.0)+salt), map_paper_hash(c+vec2(-9.0, 4.0)+salt));
@@ -658,13 +686,18 @@ vec4 mc_symbol_at(int kind, vec2 c, float level, float base_km, float pixel_worl
 	if (kind == 1) {
 		want = mc_marsh(cover, mc_relief_height(centre, cell*0.5, true))*0.62;
 	} else {
-		// Trees mark the wood, they do not fill it: a scatter inside the
-		// stand, a little denser along its margin, where a surveyor drew
-		// the trees that showed where the wood began.
+		// Trees mark the wood, they do not fill it: the wash carries a large
+		// wood, the trees stand mainly along its margins (where the wider
+		// ground round a tree is not all wood), with a sparse sprinkle inside,
+		// sparser still as the view widens.
 		float stand = smoothstep(0.30, 0.58, cover.x);
-		float margin = stand*(1.0-smoothstep(0.58, 0.80, cover.x));
-		// Fewer, as a sign rather than a census, as the view widens.
-		want = (stand*0.26+margin*0.30)*(1.0-0.5*smoothstep(3.5, 5.5, level));
+		float wide = smoothstep(0.35, 0.60, mc_cover_km(centre, cell*3.0).x);
+		float margin = stand*(1.0-smoothstep(0.70, 0.95, wide));
+		float inside = stand*smoothstep(0.70, 0.95, wide);
+		float far = smoothstep(2.5, 5.0, level);
+		want = margin*mix(0.40, 0.22, far)+inside*mix(0.10, 0.025, far);
+		// Cleared where a place works the land.
+		if (near_place >= 0) { want *= 1.0-mc_worked_share(centre, chart_places[near_place], near_place); }
 		float cold = 1.0-smoothstep(0.26, 0.42, cover.z);
 		variant = step(map_paper_hash(c+vec2(1.0, -5.0)+salt), cold);
 	}
@@ -676,7 +709,7 @@ vec4 mc_symbol_at(int kind, vec2 c, float level, float base_km, float pixel_worl
 // apart and passed across zoom octaves the way the peaks are (each coarser
 // symbol grows out of the child that carries it on; the others fade), so a
 // wood never pops or doubles as the view widens. Returns (ink, fill, shade).
-vec3 mc_symbols(int kind, vec2 xz, float cell_px, float design_km, float pixel_world, vec2 up, float base_km) {
+vec3 mc_symbols(int kind, vec2 xz, float cell_px, float design_km, float pixel_world, vec2 up, float base_km, int near_place) {
 	float octave = log2(max(cell_px*design_km/base_km, 0.000001));
 	float level = floor(octave);
 	// The hand-over takes a fifth of an octave: through the rest of the
@@ -692,7 +725,7 @@ vec3 mc_symbols(int kind, vec2 xz, float cell_px, float design_km, float pixel_w
 			for (int x = -1; x <= 1; x++) {
 				vec2 c = ic+vec2(float(x), float(y));
 				if (all(equal(mod(c, 2.0), vec2(0.0)))) { continue; }
-				vec4 symbol = mc_symbol_at(kind, c, level, base_km, pixel_world);
+				vec4 symbol = mc_symbol_at(kind, c, level, base_km, pixel_world, near_place);
 				float depth = -dot(symbol.xy, up);
 				if (symbol.w <= 0.0 || depth <= front) { continue; }
 				vec3 marks = mc_symbol_marks(kind, xz, symbol.xy, cell*size_scale*mix(1.0, 0.75, grow), symbol.z, up, pixel_world);
@@ -708,8 +741,8 @@ vec3 mc_symbols(int kind, vec2 xz, float cell_px, float design_km, float pixel_w
 	for (int y = -1; y <= 1; y++) {
 		for (int x = -1; x <= 1; x++) {
 			vec2 parent_cell = ip+vec2(float(x), float(y));
-			vec4 child = mc_symbol_at(kind, parent_cell*2.0, level, base_km, pixel_world);
-			vec4 parent = mc_symbol_at(kind, parent_cell, level+1.0, base_km, pixel_world);
+			vec4 child = mc_symbol_at(kind, parent_cell*2.0, level, base_km, pixel_world, near_place);
+			vec4 parent = mc_symbol_at(kind, parent_cell, level+1.0, base_km, pixel_world, near_place);
 			float present = mix(child.w, parent.w, grow);
 			if (present <= 0.01) { continue; }
 			vec2 centre = mix(child.xy, parent.xy, grow);
@@ -736,14 +769,7 @@ vec3 mc_farmland(vec2 xz, float pixel_world) {
 	float worked = 0.0;
 	for (int i = 0; i < 24; i++) {
 		if (i >= chart_place_count) { break; }
-		vec4 place = chart_places[i];
-		float reach = place.z;
-		vec2 offset = xz-place.xy;
-		float d2 = dot(offset, offset);
-		if (d2 > reach*reach*1.6) { continue; }
-		float d = sqrt(d2);
-		float ragged = map_paper_noise(offset/max(reach*0.35, 0.01)+vec2(float(i)*5.1, 3.7))-0.5;
-		worked = max(worked, 1.0-smoothstep(0.62, 1.0, d/reach+ragged*0.30));
+		worked = max(worked, mc_worked_share(xz, chart_places[i], i));
 	}
 	if (worked <= 0.0) { return vec3(0.0); }
 	// Parcels about 700 m across on a gently wandering grid.
@@ -787,6 +813,82 @@ vec3 mc_farmland(vec2 xz, float pixel_world) {
 	}
 	float pasture = mix(speck*0.5, kind >= 0.58 && kind < 0.86 ? speck : 0.0, resolved);
 	return vec3(fields*worked, pasture*worked, worked);
+}
+
+// -- Towns as small plans in ink --------------------------------------------
+
+vec3 mc_unpack_colour(float packed) {
+	float r = floor(packed/65536.0);
+	float g = floor((packed-r*65536.0)/256.0);
+	float b = packed-r*65536.0-g*256.0;
+	return vec3(r, g, b)/255.0;
+}
+
+// Every place's built ground as an old chart draws a town: a light wash of
+// its holder's colour (the same colour its mark on the map wears), blocks of
+// houses in ink between the streets, densest at the market in the middle
+// and thinning raggedly outward, and a wall round it if it has one, with
+// small towers along it. Blocks are fixed on the ground (a zoom never
+// rearranges a town) and melt into one even tone before they could shimmer.
+// A burned town keeps only broken blocks and no colour. Returns the chart
+// with the towns drawn on it.
+vec3 mc_towns(vec3 chart, vec2 xz, float pixel_world, vec3 paper) {
+	for (int i = 0; i < 24; i++) {
+		if (i >= chart_place_count) { break; }
+		vec4 place = chart_places[i];
+		vec4 town = chart_towns[i];
+		float r = town.x;
+		vec2 offset = xz-place.xy;
+		if (r <= 0.0 || dot(offset, offset) > r*r*1.5) { continue; }
+		float d = length(offset);
+		float r_px = r/max(pixel_world, 0.000001);
+		// Smaller than its mark on the map: the mark alone says it.
+		float shown = smoothstep(4.0, 9.0, r_px);
+		if (shown <= 0.0) { continue; }
+		float walled = mod(town.y, 2.0);
+		float ruined = step(1.5, town.y);
+		float seed = map_paper_hash(place.xy*0.37+vec2(float(i), 3.0));
+		// The built edge wanders; a walled town stops at its wall.
+		float ragged = (map_paper_noise(offset/max(r*0.30, 0.001)+vec2(seed*40.0, 7.0))-0.5)*(1.0-walled*0.8);
+		float edge = d/r+ragged*0.35;
+		float built = 1.0-smoothstep(0.80, 1.0, edge);
+		// The holder's colour, washed lightly (ours: the paper, a shade warmer).
+		vec3 accent = mc_unpack_colour(town.z);
+		float strength = town.w*(1.0-ruined);
+		vec3 wash = mix(paper*vec3(0.97, 0.93, 0.86), paper*mix(vec3(1.0), accent*1.25, 0.55), step(0.01, strength));
+		chart = mix(chart, wash, built*0.55*shown);
+		// Blocks on a street grid laid its own way, about a fifth of the
+		// town's radius across, a little crooked from one to the next.
+		float angle = seed*1.5708;
+		vec2 axis = vec2(cos(angle), sin(angle));
+		vec2 local = vec2(dot(offset, axis), dot(offset, vec2(-axis.y, axis.x)));
+		float cell = r*0.19;
+		vec2 c = floor(local/cell);
+		vec2 f = fract(local/cell);
+		vec2 lean = (vec2(map_paper_hash(c+vec2(2.0, 9.0)), map_paper_hash(c+vec2(-4.0, 1.0)))-0.5)*0.10;
+		float in_block = step(abs(f.x-0.5+lean.x), 0.35)*step(abs(f.y-0.5+lean.y), 0.32);
+		float centre_d = length((c+0.5)*cell)/r;
+		float keep = map_paper_hash(c+vec2(seed*91.0, 13.0));
+		float density = 1.0-smoothstep(0.45, 1.0, centre_d+ragged*0.25);
+		density *= mix(1.0, 0.45, ruined);
+		// The market: the blocks nearest the middle stay open.
+		float market = step(centre_d, 0.14);
+		float block = in_block*step(keep, density)*(1.0-market)*built;
+		// Too small to draw one by one: an even tone of the same ink.
+		float cell_px = cell/max(pixel_world, 0.000001);
+		float resolved = smoothstep(2.2, 3.6, cell_px);
+		float ink = mix(built*0.42*(1.0-ruined*0.4), block, resolved);
+		chart = mix(chart, MAP_INK*1.35, ink*0.72*shown);
+		// The wall, with small towers along it.
+		if (walled > 0.5) {
+			float wall_px = abs(d-r*1.02)/max(pixel_world, 0.000001);
+			float wall = 1.0-smoothstep(0.55, 1.25, wall_px);
+			float around = atan(offset.y, offset.x)*r/max(pixel_world, 0.000001);
+			float tower = (1.0-smoothstep(1.2, 2.0, length(vec2(abs(fract(around/14.0)-0.5)*14.0, wall_px))))*step(wall_px, 2.5);
+			chart = mix(chart, MAP_INK*1.3, max(wall, tower)*0.85*shown*(1.0-ruined*0.5));
+		}
+	}
+	return chart;
 }
 
 // The known world's edge as a drying wash: within a few dozen pixels of the
@@ -838,18 +940,21 @@ vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float promin
 	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.28));
 	// Fields hatched and pasture dotted in sepia ink.
 	chart = mix(chart, MAP_SEPIA, farm.x*0.34+farm.y*0.30);
+	// The towns themselves, as small plans in ink.
+	if (use_patch) { chart = mc_towns(chart, ground.xz, pixel_world, paper); }
 	if (use_patch) {
 		// Marsh: a wet blue-green wash, and tufts of reeds in water ink.
 		float marsh = cover.x < 0.0 ? 0.0 : mc_marsh(cover, landform.x);
 		chart = mix(chart, chart*vec3(0.88, 0.97, 1.02), marsh*0.55);
 		if (marsh > 0.01 || mc_cover(ground.xz, 24.0, pixel_world).y > 0.60) {
-			vec3 reeds = mc_symbols(1, ground.xz, 11.0, design_km, pixel_world, screen_up, 0.05);
+			vec3 reeds = mc_symbols(1, ground.xz, 11.0, design_km, pixel_world, screen_up, 0.05, -1);
 			chart = mix(chart, MC_WATER_INK*1.3, reeds.x*0.66);
 		}
 		// Woods as small inked trees in profile over their wash, thinning
 		// toward the continent view.
 		if (stand > 0.0 || mc_cover(ground.xz, 24.0, pixel_world).x > 0.18) {
-			vec3 trees = mc_symbols(0, ground.xz, 9.0, design_km, pixel_world, screen_up, 0.05);
+			int near_place = mc_nearest_place(ground.xz, pixel_world*20.0);
+			vec3 trees = mc_symbols(0, ground.xz, 9.0, design_km, pixel_world, screen_up, 0.05, near_place);
 			trees *= 1.0-smoothstep(0.35, 1.4, design_km)*0.55;
 			vec3 crown = paper*mc_wash(rain, warm, ground.y, 1.0, temperature, snow);
 			chart = mix(chart, crown*1.04, trees.y*0.85);
