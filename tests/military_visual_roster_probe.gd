@@ -40,7 +40,7 @@ func run()->void:
 	screen=Roster.new();canvas.add_child(screen)
 	await settle()
 	await capture("army-forces")
-	screen.selected_row=screen._rows()[0];screen._build_body();await capture("army-detail")
+	screen.forces_board.set_filter("short");await capture("army-short-of-gear")
 	screen.training_view=true;screen._build_body();await capture("army-training")
 	for service:String in ["navy","air"]:
 		screen.service=service;screen.training_view=false;screen._build_body();await capture(service+"-empty")

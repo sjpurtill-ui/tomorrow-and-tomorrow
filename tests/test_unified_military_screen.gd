@@ -25,25 +25,32 @@ func test_navigation_keeps_one_panel_and_embeds_recruitment_and_editor()->void:
 	assert_int(screen.panel.get_instance_id()).is_equal(panel_id)
 	screen._show_page("support")
 	assert_int(screen.panel.get_instance_id()).is_equal(panel_id)
-	assert_int(screen.support_labels.size()).is_equal(4)
+	# The army's Readiness & supply is HOI4's logistics view: its strip of
+	# carriers, share carried, hubs, depots, rations and gear being mended.
+	assert_object(screen.body.get_node_or_null("ReadinessBoard")).is_not_null()
+	assert_bool(screen.support_labels.has_all(["carriers","carried","hubs","depots","rations","repair"])).is_true()
 	screen._show_page("training")
 	assert_bool(screen.training_view).is_true()
 	screen._show_page("forces")
 	assert_bool(screen.training_view).is_false()
+	assert_object(screen.body.get_node_or_null("ForcesBoard")).is_not_null()
 	assert_int(screen.panel.get_instance_id()).is_equal(panel_id)
 func test_supply_numbers_refresh_without_reopening_the_view()->void:
 	MilitaryCampaign.damaged_equipment={"improvised":3}
 	MilitaryCampaign.open_roster("army",false,"support")
 	var screen=MilitaryCampaign.roster_screen
 	assert_str(screen.support_labels.repair.value.text).is_equal("3")
+	var value:Label=screen.support_labels.repair.value
 	MilitaryCampaign.damaged_equipment.improvised=1
-	screen._process(.5)
+	screen.readiness_board._process(.5)
+	# The same label, refreshed in place; the staff's words are its tooltip.
+	assert_object(screen.support_labels.repair.value).is_same(value)
 	assert_str(screen.support_labels.repair.value.text).is_equal("1")
-	assert_str(screen.support_labels.repair.note.text).contains("Staff")
+	assert_str(screen.support_labels.repair.chip.tooltip_text).contains("Staff")
 	MilitaryCampaign.equipment_queue=[{"item":"improvised","job_type":"repair","count":4,"completed":1}]
-	screen._update_support()
+	screen.readiness_board.refresh()
 	assert_str(screen.support_labels.repair.value.text).is_equal("4")
-	assert_str(screen.support_labels.repair.note.text).contains("underway")
+	assert_str(screen.support_labels.repair.chip.tooltip_text).contains("underway")
 
 func test_service_changes_keep_the_shared_shell_and_do_not_show_army_totals()->void:
 	# Navy and air are offered only once the people have boats and flight.

@@ -34,7 +34,7 @@ func run()->void:
 	screen=Roster.new();canvas.add_child(screen)
 	await settle()
 	await capture("forces")
-	screen.selected_row=screen._rows()[1];screen._build_body();await capture("detail")
+	screen.forces_board.set_filter("short");await capture("short-of-gear")
 	screen.training_view=true;screen._build_body();await capture("training")
 	screen.training_view=false;screen._show_page("support");await capture("support")
 	screen._show_page("forces");canvas.size=Vector2i(1024,640);screen._layout();screen._build_body();await capture("small")

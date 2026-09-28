@@ -1107,3 +1107,47 @@ static func workshop_texture(kind:String,ink:Color,px:int=24)->Texture2D:
 	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(glyph,WORKSHOP_PAPER,1.2),px))
 	_workshop_textures[key]=texture
 	return texture
+
+
+# -- Logistics: the Forces and Readiness & supply tabs -------------------------
+
+static var _logistics_textures:Dictionary={}
+
+## Small inked marks for the Military screen's Forces and Readiness & supply
+## tabs (hud/forces_board.gd, hud/readiness_board.gd), drawn bare like
+## command_texture so they sit beside a number. Kinds:
+##   carriers  porter (a bearer with his pack), cart, lorry
+##   the line  hub (a storehouse in a ring: home or one of our towns),
+##             depot (crates under a pennant: a town we hold), road
+##   the band  hungry (an empty bowl), seen (a star: fights come through),
+##             find (a sighting ring: show it on the map)
+## Unknown kinds draw a dot, never an error.
+static func logistics_texture(kind:String,ink:Color,px:int=40)->Texture2D:
+	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
+	if _logistics_textures.has(key): return _logistics_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(logistics_glyph(kind,ink),px,false))
+	_logistics_textures[key]=texture
+	return texture
+
+
+static func logistics_glyph(kind:String,c:Color)->Array:
+	var soft:=Color(c,0.5)
+	match kind:
+		"porter": return _figure(22,c)+[_rr(33,24,6,9,2.5,c),_s(26,18,31,16,2,c),_s(12,20,9,50,2.4,soft)]
+		"cart": return [_rr(27,25,17,6,1.5,c),_s(10,17,10,25,2.4,c),_s(44,17,44,25,2.4,c),_ring(18,39,7,3,c),_ring(36,39,7,3,c),_c(18,39,2,c),_c(36,39,2,c),_s(44,27,54,21,2.6,c)]
+		"lorry": return [_rr(21,26,15,10,1.5,c),_rr(43,30,8,6,1.5,c),_rr(41,21,5,4,1,c),_s(6,37,51,37,2.4,c),_ring(15,42,5,3,c),_ring(41,42,5,3,c)]
+		"hub": return [_ring(28,28,22,3,c),_t(28,11,13,25,43,25,c),_rr(28,34,10,8,1,c)]
+		"depot": return [_rr(19,40,9,8,1.2,c),_rr(36,43,6,5,1.2,soft),_s(36,6,36,37,2.6,c),_t(37.5,7,37.5,20,51,13.5,c),_s(8,50,48,50,2.2,soft)]
+		"road": return [_s(4,18,52,18,3.2,c),_s(4,38,52,38,3.2,c),_s(7,28,16,28,2.6,c),_s(23,28,33,28,2.6,c),_s(40,28,49,28,2.6,c)]
+		"hungry": return [_s(8,27,48,27,3.4,c),_rr(28,33,15,6,6,c),_rr(28,43,7,2.2,1,c),_s(20,8,24,17,2.2,soft),_s(34,8,30,17,2.2,soft)]
+		"seen":
+			var star:Array=[_c(28,30,7.5,c)]
+			for k in 5:
+				var a:=-PI*0.5+TAU*float(k)/5.0
+				var tip:=Vector2(28,30)+Vector2.from_angle(a)*21.0
+				var left:=Vector2(28,30)+Vector2.from_angle(a-PI/5.0)*8.5
+				var right:=Vector2(28,30)+Vector2.from_angle(a+PI/5.0)*8.5
+				star.append(_t(tip.x,tip.y,left.x,left.y,right.x,right.y,c))
+			return star
+		"find": return [_ring(28,28,13,3.4,c),_s(28,5,28,14,3.4,c),_s(28,42,28,51,3.4,c),_s(5,28,14,28,3.4,c),_s(42,28,51,28,3.4,c),_c(28,28,3.8,c)]
+	return [_c(28,28,6,c)]

@@ -175,6 +175,7 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 	var men:=int(shown.get("troops",army.get("troops",0)))
 	var formations:Array=shown.get("formations",army.get("formations",[]))
 	var gear:=gear_of(formations,mc)
+	var make:=make_of(formations)
 	var will:=clampf(float(shown.get("morale",army.get("morale",0.6))),0.0,1.0)
 	var supply:=supply_of(army if live else shown,live)
 	var besieging:=""
@@ -199,7 +200,8 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 	return {"id":"army:%d" % id,"kind":"army","army_id":id,"members":[id],"title":title,"short":String(general.get("name",name if name!="" else noun.capitalize())),
 		"general":general,"noun":noun,"men":men,"full":maxi(men,ArmyMarks.full_strength(army)),"gear":gear.share,"gear_detail":gear,"will":will,
 		"supply":float(supply.ratio),"supply_state":String(supply.state),"supply_words":String(supply.words),"state":state,"doing":doing,
-		"position":position,"report_age":0 if live else maxi(0,today-int(shown.get("day",today))),"unknown":unknown,"home":home}
+		"position":position,"report_age":0 if live else maxi(0,today-int(shown.get("day",today))),"unknown":unknown,"home":home,
+		"name":name,"drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
 static func _home_card(mc:Node)->Dictionary:
@@ -207,6 +209,7 @@ static func _home_card(mc:Node)->Dictionary:
 	var men:=int(force.get("troops",0))
 	if men<=0:return {}
 	var gear:=gear_of(force.get("formations",[]),mc)
+	var make:=make_of(force.get("formations",[]))
 	var supply:=supply_of(force)
 	var leader:=Orders.war_leader_name()
 	var noun:=ArmyMarks.noun(maxi(1,men),EraWords.stage())
@@ -215,12 +218,14 @@ static func _home_card(mc:Node)->Dictionary:
 		"short":"Home","general":{"name":leader} if leader!="" else {},"noun":noun,"men":men,"full":maxi(men,ArmyMarks.full_strength(force)),
 		"gear":gear.share,"gear_detail":gear,"will":clampf(float(force.get("morale",0.6)),0.0,1.0),"supply":float(supply.ratio),"supply_state":String(supply.state),
 		"supply_words":String(supply.words),"state":"fighting" if fighting else "holding","doing":"in battle at home" if fighting else "at home",
-		"position":WorldSimulation.world.player_world_origin,"report_age":0,"unknown":false,"home":true}
+		"position":WorldSimulation.world.player_world_origin,"report_age":0,"unknown":false,"home":true,
+		"name":"","drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
 static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 	var men:=int(force.get("troops",0))
 	var gear:=gear_of(force.get("formations",[]),mc)
+	var make:=make_of(force.get("formations",[]))
 	var supply:=supply_of(force)
 	var town:=ArmyMarks.place(preload("res://scripts/town_names.gd").of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name","the town"))))
 	var general:=_general(force)
@@ -231,7 +236,8 @@ static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 		"civ_id":String(force.get("civ_id","")),"region_id":String(force.get("region_id","")),"title":"Garrison of %s" % town,"short":town,"general":general,
 		"noun":"garrison","men":men,"full":maxi(men,ceili(float(force.get("required",men)))),"gear":gear.share,"gear_detail":gear,"will":will,
 		"supply":float(supply.ratio),"supply_state":String(supply.state),"supply_words":String(supply.words),"state":state,"doing":"holding %s" % town,
-		"position":Pursuit.town_position(String(force.get("region_id",""))),"report_age":0,"unknown":false,"home":false}
+		"position":Pursuit.town_position(String(force.get("region_id",""))),"report_age":0,"unknown":false,"home":false,
+		"name":town,"drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
 ## Bands a general leads together stand as one card: a headquarters the
@@ -278,10 +284,15 @@ static func group_card(key:String,members:Array,hq_name:String="")->Dictionary:
 	var missing:={}
 	var state:="holding";var worst_supply:="well"
 	var ids:Array=[]
+	var drill:=0.0;var seen:=0.0;var kinds:={}
 	for m in members:
 		var card:Dictionary=m
 		if int(card.men)>int(lead.men):lead=card
 		men+=int(card.men);full+=int(card.full)
+		drill+=float(card.get("drill",0.0))*float(card.men);seen+=float(card.get("seen",0.0))*float(card.men)
+		for kind:Dictionary in card.get("kinds",[]):
+			var merged:Dictionary=kinds.get(String(kind.unit),{"unit":String(kind.unit),"label":String(kind.label),"count":0})
+			merged.count=int(merged.count)+int(kind.count);kinds[String(kind.unit)]=merged
 		var gear:Dictionary=card.gear_detail
 		gear_issued+=int(gear.get("issued",0));gear_required+=int(gear.get("required",0))
 		for item:String in gear.get("missing",{}):missing[item]=int(missing.get(item,0))+int(gear.missing[item])
@@ -299,7 +310,8 @@ static func group_card(key:String,members:Array,hq_name:String="")->Dictionary:
 		"general":general,"noun":"army","men":men,"full":full,"gear":clampf(float(gear_issued)/maxf(1.0,float(gear_required)),0.0,1.0) if gear_required>0 else 1.0,
 		"gear_detail":{"issued":gear_issued,"required":gear_required,"missing":missing,"share":clampf(float(gear_issued)/maxf(1.0,float(gear_required)),0.0,1.0) if gear_required>0 else 1.0},
 		"will":will/weight,"supply":supply/weight,"supply_state":worst_supply,"supply_words":"\n".join(words),"state":state,
-		"doing":"%d %s" % [members.size(),"bands"],"position":lead.position,"report_age":int(lead.report_age),"unknown":false,"home":bool(lead.home)}
+		"doing":"%d %s" % [members.size(),"bands"],"position":lead.position,"report_age":int(lead.report_age),"unknown":false,"home":bool(lead.home),
+		"name":hq_name,"drill":drill/weight,"seen":seen/weight,"kinds":_largest_first(kinds.values())}
 
 
 ## The card's hover words: who, how many, what they are doing, and each bar.
@@ -314,3 +326,31 @@ static func tooltip(card:Dictionary)->String:
 	if age!="":lines.append(age.substr(0,1).to_upper()+age.substr(1)+" by runner.")
 	lines.append("Click to find them · double-click for orders.")
 	return "\n".join(lines)
+
+
+## A band's make-up, for the Forces list (hud/forces_model.gd): drill and
+## experience across these formations weighted by their men (0..1 each), and
+## its kinds of fighters, largest first: {drill, seen, kinds:[{unit, label,
+## count}]}. Read from the same formations as the card's men and gear.
+static func make_of(formations:Array)->Dictionary:
+	var units:=preload("res://scripts/military_unit_catalog.gd")
+	var men:=0;var drill:=0.0;var seen:=0.0
+	var by_unit:={}
+	for f in formations:
+		if not f is Dictionary:continue
+		var formation:Dictionary=f
+		var count:=maxi(0,int(formation.get("count",0)))
+		men+=count
+		drill+=clampf(float(formation.get("training",0.0)),0.0,1.0)*float(count)
+		seen+=clampf(float(formation.get("experience",0.0)),0.0,1.0)*float(count)
+		var unit:=String(formation.get("unit","levy"))
+		var kind:Dictionary=by_unit.get(unit,{"unit":unit,"label":String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize())),"count":0})
+		kind.count=int(kind.count)+count;by_unit[unit]=kind
+	var weight:=maxf(1.0,float(men))
+	return {"drill":drill/weight,"seen":seen/weight,"kinds":_largest_first(by_unit.values())}
+
+
+static func _largest_first(kinds:Array)->Array:
+	var out:=kinds.duplicate()
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count) if int(a.count)!=int(b.count) else String(a.label)<String(b.label))
+	return out
