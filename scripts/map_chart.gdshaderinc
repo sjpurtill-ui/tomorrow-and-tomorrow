@@ -26,6 +26,10 @@ uniform sampler2D chart_relief : filter_linear_mipmap, repeat_disable;
 // Its land cover likewise (terrain_patch_builder.gd `cover`): woodland,
 // rainfall, warmth, and land (1) or water (0).
 uniform sampler2D chart_cover : filter_linear_mipmap, repeat_disable;
+// Every place the chart draws worked land round (scripts/chart_places.gd):
+// x, z, how far its fields reach (km), 0 ours or 1 a stranger's.
+uniform int chart_place_count = 0;
+uniform vec4 chart_places[24];
 
 const float MC_CHART_FROM = 0.010;
 const float MC_CHART_FULL = 0.032;
@@ -267,6 +271,17 @@ vec4 mc_cover(vec2 xz, float width_px, float pixel_world) {
 	vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
 	float cell_px = terrain_grid.z/cells/max(pixel_world, 0.000001);
 	return textureLod(chart_cover, uv, max(log2(width_px/cell_px), 0.0));
+}
+
+// The same, averaged over about `width_km` on the ground: the same answer
+// for every pixel that asks about one place.
+vec4 mc_cover_km(vec2 xz, float width_km) {
+	vec2 rel = xz-terrain_grid.xy;
+	if (!coast_patch_ready() || textureSize(chart_cover, 0).x != int(terrain_grid.w)
+			|| max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.5) { return vec4(-1.0); }
+	float cells = max(terrain_grid.w-1.0, 1.0);
+	vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
+	return textureLod(chart_cover, uv, max(log2(width_km*cells/terrain_grid.z), 0.0));
 }
 
 // The coast's own ink, half of it drawn by the land and half by the sea
@@ -522,7 +537,7 @@ vec3 mc_mountains(vec2 xz, float design_km, float pixel_world, bool use_patch, v
 	if (show <= 0.0 || mc_relief_height(xz, 34.0*design_km*0.5, use_patch) < 1.6) { return vec3(0.0); }
 	float octave = log2(34.0*design_km/8.0);
 	float level = floor(octave);
-	float grow = smoothstep(0.10, 0.90, fract(octave));
+	float grow = smoothstep(0.35, 0.65, fract(octave));
 	float cell = 8.0*exp2(level);
 	float front = -1.0e9;
 	vec3 fading = vec3(0.0);
@@ -571,6 +586,209 @@ vec3 mc_mountains(vec2 xz, float design_km, float pixel_world, bool use_patch, v
 	return vec3(max(best.x, fading.x*covered), max(best.y, fading.y), max(best.z, fading.z*covered))*show;
 }
 
+// -- Woods, marsh and worked land in the same ink --------------------------
+
+// One small symbol drawn in profile, upright on the screen, `size` km tall:
+// kind 0 a tree (a round crown, or a narrow conifer when `variant` > 0.5,
+// on a short trunk, the east side of the crown in shade), kind 1 a tuft of
+// marsh reeds (three strokes over a short water line). Returns (ink, fill,
+// shade) coverage.
+vec3 mc_symbol_marks(int kind, vec2 xz, vec2 centre, float size, float variant, vec2 up, float pixel_world) {
+	vec2 d = xz-centre;
+	vec2 q = vec2(dot(d, vec2(-up.y, up.x)), dot(d, up))/max(size, 0.000001);
+	if (abs(q.x) > 0.60 || abs(q.y) > 0.72) { return vec3(0.0); }
+	float px = size/max(pixel_world, 0.000001);
+	if (kind == 1) {
+		// Reeds: a short water line and three strokes rising from it.
+		float water = (1.0-smoothstep(0.40, 1.05, abs(q.y+0.30)*px))*(1.0-smoothstep(0.34, 0.44, abs(q.x)));
+		float reeds = 0.0;
+		for (int k = -1; k <= 1; k++) {
+			float x0 = float(k)*0.19;
+			float top = k == 0 ? 0.30 : 0.10;
+			float stroke = (1.0-smoothstep(0.30, 0.95, abs(q.x-x0-(q.y+0.30)*float(k)*0.18)*px))*step(-0.30, q.y)*step(q.y, top);
+			reeds = max(reeds, stroke);
+		}
+		return vec3(max(water, reeds), 0.0, 0.0);
+	}
+	float trunk = (1.0-smoothstep(0.30, 0.85, abs(q.x)*px))*step(-0.52, q.y)*step(q.y, -0.10);
+	float inside;
+	float edge;
+	float east;
+	if (variant > 0.5) {
+		vec2 apex = vec2(0.0, 0.62);
+		vec2 left = vec2(-0.27, -0.22);
+		vec2 right = vec2(0.27, -0.22);
+		float t = clamp((q.y-left.y)/(apex.y-left.y), 0.0, 1.0);
+		inside = step(left.y, q.y)*step(q.y, apex.y)*step(abs(q.x), mix(right.x, 0.0, t));
+		edge = min(min(mc_segment_distance(q, left, apex), mc_segment_distance(q, apex, right)), mc_segment_distance(q, left, right))*px;
+		east = step(0.02, q.x);
+	} else {
+		vec2 crown = vec2(0.0, 0.14);
+		float r = 0.36;
+		float dist = length(q-crown);
+		inside = step(dist, r);
+		edge = abs(dist-r)*px;
+		east = smoothstep(-0.06, 0.10, dot(q-crown, vec2(0.80, -0.60)));
+	}
+	float outline = 1.0-smoothstep(0.40, 1.10, edge);
+	return vec3(max(outline, trunk*(1.0-inside)), inside, inside*east);
+}
+
+// How much this is marsh (0-1): very wet ground low by its rivers and
+// shores, from the patch's blurred cover (rainfall) and the height, as the
+// simulation's own wet-meadow land lies (rain above ~0.7, under ~0.9 km).
+float mc_marsh(vec4 cover, float height) {
+	return smoothstep(0.62, 0.78, cover.y)*(1.0-smoothstep(0.35, 0.95, height))*(1.0-smoothstep(0.45, 0.70, cover.x));
+}
+
+// The symbol of cell `c` in the grid at `level` (cells base_km x 2^level):
+// (centre xz, variant, present 0-1). Trees stand where the blurred woodland
+// makes a stand, conifers where it is cold; reeds where the land is low and
+// wet (marsh). Every read is of the patch's box-filtered cover.
+vec4 mc_symbol_at(int kind, vec2 c, float level, float base_km, float pixel_world) {
+	float cell = base_km*exp2(level);
+	vec2 salt = level*vec2(53.0, 17.0)+float(kind)*vec2(211.0, -97.0);
+	vec2 jitter = vec2(map_paper_hash(c+vec2(3.0, 11.0)+salt), map_paper_hash(c+vec2(-9.0, 4.0)+salt));
+	vec2 centre = (c+0.2+0.6*jitter)*cell;
+	// Blurred by the symbol's own cell, so every pixel of it decides alike.
+	vec4 cover = mc_cover_km(centre, cell*0.6);
+	if (cover.w < 0.5) { return vec4(centre, 0.0, 0.0); }
+	float want;
+	float variant = 0.0;
+	if (kind == 1) {
+		want = mc_marsh(cover, mc_relief_height(centre, cell*0.5, true))*0.62;
+	} else {
+		// Trees mark the wood, they do not fill it: a scatter inside the
+		// stand, a little denser along its margin, where a surveyor drew
+		// the trees that showed where the wood began.
+		float stand = smoothstep(0.30, 0.58, cover.x);
+		float margin = stand*(1.0-smoothstep(0.58, 0.80, cover.x));
+		// Fewer, as a sign rather than a census, as the view widens.
+		want = (stand*0.26+margin*0.30)*(1.0-0.5*smoothstep(3.5, 5.5, level));
+		float cold = 1.0-smoothstep(0.26, 0.42, cover.z);
+		variant = step(map_paper_hash(c+vec2(1.0, -5.0)+salt), cold);
+	}
+	if (want <= 0.02 || map_paper_hash(c+vec2(7.0, 7.0)+salt) > want) { return vec4(centre, variant, 0.0); }
+	return vec4(centre, variant, 1.0);
+}
+
+// The front-most symbol covering `xz`, held about `cell_px` design pixels
+// apart and passed across zoom octaves the way the peaks are (each coarser
+// symbol grows out of the child that carries it on; the others fade), so a
+// wood never pops or doubles as the view widens. Returns (ink, fill, shade).
+vec3 mc_symbols(int kind, vec2 xz, float cell_px, float design_km, float pixel_world, vec2 up, float base_km) {
+	float octave = log2(max(cell_px*design_km/base_km, 0.000001));
+	float level = floor(octave);
+	// The hand-over takes a fifth of an octave: through the rest of the
+	// zoom every symbol stands crisp, never half-faded.
+	float grow = smoothstep(0.40, 0.60, fract(octave));
+	float cell = base_km*exp2(level);
+	float size_scale = kind == 1 ? 0.70 : 0.95;
+	float front = -1.0e9;
+	vec3 fading = vec3(0.0);
+	if (grow < 0.99) {
+		vec2 ic = floor(xz/cell);
+		for (int y = -1; y <= 1; y++) {
+			for (int x = -1; x <= 1; x++) {
+				vec2 c = ic+vec2(float(x), float(y));
+				if (all(equal(mod(c, 2.0), vec2(0.0)))) { continue; }
+				vec4 symbol = mc_symbol_at(kind, c, level, base_km, pixel_world);
+				float depth = -dot(symbol.xy, up);
+				if (symbol.w <= 0.0 || depth <= front) { continue; }
+				vec3 marks = mc_symbol_marks(kind, xz, symbol.xy, cell*size_scale*mix(1.0, 0.75, grow), symbol.z, up, pixel_world);
+				if (marks.x+marks.y <= 0.0) { continue; }
+				front = depth;
+				fading = marks*(1.0-grow);
+			}
+		}
+	}
+	front = -1.0e9;
+	vec3 best = vec3(0.0);
+	vec2 ip = floor(xz/(2.0*cell));
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			vec2 parent_cell = ip+vec2(float(x), float(y));
+			vec4 child = mc_symbol_at(kind, parent_cell*2.0, level, base_km, pixel_world);
+			vec4 parent = mc_symbol_at(kind, parent_cell, level+1.0, base_km, pixel_world);
+			float present = mix(child.w, parent.w, grow);
+			if (present <= 0.01) { continue; }
+			vec2 centre = mix(child.xy, parent.xy, grow);
+			float depth = -dot(centre, up);
+			if (depth <= front) { continue; }
+			float variant = grow < 0.5 ? child.z : parent.z;
+			vec3 marks = mc_symbol_marks(kind, xz, centre, cell*size_scale*mix(1.0, 2.0, grow), variant, up, pixel_world);
+			if (marks.x+marks.y <= 0.0) { continue; }
+			front = depth;
+			best = marks*present;
+		}
+	}
+	float covered = 1.0-best.y;
+	return vec3(max(best.x, fading.x*covered), max(best.y, fading.y), max(best.z, fading.z*covered));
+}
+
+// Worked land round the places: fields drawn as parcels of fine parallel
+// hatching (each laid its own way) and pasture as a sparse scatter of dots,
+// thinning raggedly toward the edge of what a place farms. Parcels are a
+// fixed size on the ground, so they never pop; the hatching is held about
+// three pixels apart and blended across zoom octaves on shared lines.
+// Returns (field ink, pasture ink, worked share 0-1).
+vec3 mc_farmland(vec2 xz, float pixel_world) {
+	float worked = 0.0;
+	for (int i = 0; i < 24; i++) {
+		if (i >= chart_place_count) { break; }
+		vec4 place = chart_places[i];
+		float reach = place.z;
+		vec2 offset = xz-place.xy;
+		float d2 = dot(offset, offset);
+		if (d2 > reach*reach*1.6) { continue; }
+		float d = sqrt(d2);
+		float ragged = map_paper_noise(offset/max(reach*0.35, 0.01)+vec2(float(i)*5.1, 3.7))-0.5;
+		worked = max(worked, 1.0-smoothstep(0.62, 1.0, d/reach+ragged*0.30));
+	}
+	if (worked <= 0.0) { return vec3(0.0); }
+	// Parcels about 700 m across on a gently wandering grid.
+	float parcel_km = 0.7;
+	vec2 p = xz/parcel_km;
+	vec2 cell = floor(p+vec2(map_paper_noise(p*0.37)-0.5, map_paper_noise(p*0.37+vec2(9.0, 4.0))-0.5)*0.5);
+	float kind = map_paper_hash(cell+vec2(19.0, -7.0));
+	float angle = floor(map_paper_hash(cell+vec2(-3.0, 23.0))*4.0)*0.785398;
+	vec2 across = vec2(cos(angle), sin(angle));
+	float octave = log2(max(pixel_world*3.0/0.001, 0.000001));
+	float level = floor(octave);
+	float blend = fract(octave);
+	float hatch = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float spacing = 0.001*exp2(level+float(k));
+		float u = dot(xz, across)/spacing;
+		float line = 1.0-smoothstep(0.30, 0.85, abs(fract(u)-0.5)*spacing/max(pixel_world, 0.000001));
+		hatch = max(hatch, line*(k == 0 ? 1.0-blend : 1.0));
+	}
+	// Parcels too small on screen to draw give way to the map's sign for
+	// worked land: one fine diagonal hatch over it all.
+	float resolved = 1.0-smoothstep(0.45, 0.90, pixel_world/parcel_km*8.0);
+	float diagonal = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float spacing = 0.001*exp2(level+float(k))*1.4;
+		float u = dot(xz, vec2(0.7071, 0.7071))/spacing;
+		float line = 1.0-smoothstep(0.30, 0.85, abs(fract(u)-0.5)*spacing/max(pixel_world, 0.000001));
+		diagonal = max(diagonal, line*(k == 0 ? 1.0-blend : 1.0));
+	}
+	float fields = mix(diagonal*0.55, kind < 0.58 ? hatch : 0.0, resolved);
+	// Pasture dots one to a small cell of a zoom octave, blended across
+	// octaves so they never swim or pop.
+	float speck = 0.0;
+	float dot_octave = log2(max(pixel_world*5.0/0.001, 0.000001));
+	for (int k = 0; k < 2; k++) {
+		float dot_km = 0.001*exp2(floor(dot_octave)+float(k));
+		vec2 dot_cell = floor(xz/dot_km);
+		vec2 dot_at = (dot_cell+0.2+0.6*vec2(map_paper_hash(dot_cell+vec2(4.0, 9.0)), map_paper_hash(dot_cell+vec2(-2.0, 1.0))))*dot_km;
+		float one = (1.0-smoothstep(0.35, 0.85, length(xz-dot_at)/max(pixel_world, 0.000001)))*step(map_paper_hash(dot_cell+vec2(-6.0, 2.0)), 0.45);
+		speck = max(speck, one*(k == 0 ? 1.0-fract(dot_octave) : fract(dot_octave)));
+	}
+	float pasture = mix(speck*0.5, kind >= 0.58 && kind < 0.86 ? speck : 0.0, resolved);
+	return vec3(fields*worked, pasture*worked, worked);
+}
+
 // The known world's edge as a drying wash: within a few dozen pixels of the
 // frontier ink the washes thin raggedly back to bare paper, with a faint
 // pigment rim where the wash dried. `inland_px` screen pixels inland.
@@ -593,8 +811,18 @@ vec3 mc_frontier_wash(vec3 chart, vec3 paper, float inland_px, vec2 world_xz, fl
 // from it), `resources` the resource view (0-1).
 vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float prominence, float pixel_world, float design_km, float rain, float warm, float woodland, float slope, float temperature, float snow, float coast_height, float coast_height_px, float frontier_px, float camera_height, float resources, bool use_patch, vec2 screen_up) {
 	vec3 paper = MC_PAPER*(1.0+mc_grain(ground.xz, camera_height)*0.030);
-	float stand = mc_stand(woodland)*(1.0-smoothstep(0.42, 0.82, slope));
+	// Woods as broad masses: the patch's woodland blurred over a few pixels
+	// (the per-vertex field alone mottles into camouflage), cleared where a
+	// place works the land.
+	// Blurred wider as the view widens, so the woods stay broad masses and
+	// never print the small gaps of the woodland field as camouflage.
+	vec4 cover = use_patch ? mc_cover(ground.xz, mix(8.0, 22.0, smoothstep(0.10, 0.45, design_km)), pixel_world) : vec4(-1.0);
+	vec3 farm = use_patch ? mc_farmland(ground.xz, pixel_world) : vec3(0.0);
+	float wood = cover.x < 0.0 ? woodland : cover.x;
+	float stand = mc_stand(wood)*(1.0-smoothstep(0.42, 0.82, slope))*(1.0-farm.z*0.85);
 	vec3 chart = paper*mc_wash(rain, warm, ground.y, stand, temperature, snow);
+	// Worked land takes a warmer straw wash under its hatching.
+	chart = mix(chart, chart*vec3(1.06, 1.02, 0.84), farm.z*0.40*(1.0-snow));
 	// The resource view reads as land cover here too.
 	chart = mix(chart, chart*vec3(0.80, 1.12, 0.84), resources*stand*0.60);
 	float light = mc_light(light_normal, design_km);
@@ -608,6 +836,27 @@ vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float promin
 	// as a stipple along every little sea cliff.
 	float hachure = mc_hachures(ground.xz, landform.x, gradient, pixel_world)*prominence;
 	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.28));
+	// Fields hatched and pasture dotted in sepia ink.
+	chart = mix(chart, MAP_SEPIA, farm.x*0.34+farm.y*0.30);
+	if (use_patch) {
+		// Marsh: a wet blue-green wash, and tufts of reeds in water ink.
+		float marsh = cover.x < 0.0 ? 0.0 : mc_marsh(cover, landform.x);
+		chart = mix(chart, chart*vec3(0.88, 0.97, 1.02), marsh*0.55);
+		if (marsh > 0.01 || mc_cover(ground.xz, 24.0, pixel_world).y > 0.60) {
+			vec3 reeds = mc_symbols(1, ground.xz, 11.0, design_km, pixel_world, screen_up, 0.05);
+			chart = mix(chart, MC_WATER_INK*1.3, reeds.x*0.66);
+		}
+		// Woods as small inked trees in profile over their wash, thinning
+		// toward the continent view.
+		if (stand > 0.0 || mc_cover(ground.xz, 24.0, pixel_world).x > 0.18) {
+			vec3 trees = mc_symbols(0, ground.xz, 9.0, design_km, pixel_world, screen_up, 0.05);
+			trees *= 1.0-smoothstep(0.35, 1.4, design_km)*0.55;
+			vec3 crown = paper*mc_wash(rain, warm, ground.y, 1.0, temperature, snow);
+			chart = mix(chart, crown*1.04, trees.y*0.85);
+			chart = mix(chart, crown*vec3(0.62, 0.70, 0.66), trees.z*0.65);
+			chart = mix(chart, MAP_INK*1.25, trees.x*0.66);
+		}
+	}
 	// Ranges as inked peaks at the far views.
 	vec3 peaks = mc_mountains(ground.xz, design_km, pixel_world, use_patch, screen_up);
 	chart = mix(chart, paper*vec3(1.02, 1.00, 0.97), peaks.y*0.88);

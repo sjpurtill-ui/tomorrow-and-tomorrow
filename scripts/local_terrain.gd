@@ -947,6 +947,8 @@ func _process(delta: float) -> void:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
 		_refresh_settlement_network()
 		_refresh_settlement_roads()
+		# Worked land round every place, for the chart (scripts/chart_places.gd).
+		preload("res://scripts/chart_places.gd").refresh(Vector2(camera_target.x,camera_target.z),terrain_fog_materials.live_materials())
 		if not pending_city_designs.is_empty():_advance_pending_city_designs()
 		stamp=trace.mark("frame_map_settlement_network",stamp)
 		_refresh_settlement_convoy_marker()
