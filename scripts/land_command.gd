@@ -3,6 +3,7 @@ extends RefCounted
 ## Fronts are contact between real forces, never the outline the player drew.
 const R=preload("res://scripts/joint_regions.gd")
 const G=preload("res://scripts/joint_geography.gd")
+const March=preload("res://scripts/march_terrain.gd")
 var _command:WeakRef
 var command:RefCounted:
 	get:return _command.get_ref()
@@ -78,7 +79,7 @@ func route(start:Vector2,goal:Vector2)->Array:
 	# The same land road every march uses (army_land_route.gd): round bays,
 	# inlets and lakes, never refused because the straight line is wet.
 	if not is_land(start) or not is_land(goal):return []
-	var path:=preload("res://scripts/army_land_route.gd").find(start,goal,Callable(WorldSimulation.world,"_scout_land_at"))
+	var path:=preload("res://scripts/army_land_route.gd").find(start,goal,Callable(WorldSimulation.world,"_scout_land_at"),true,March.context())
 	if path.has("error"):return []
 	var result:Array=[]
 	for p:Vector2 in path.points:result.append(G.pack(p))
@@ -107,12 +108,21 @@ func _respond_rivals(day:int)->void:
 		var destination:=target+(current-target).normalized()*(width+.2)
 		var path:=route(current,destination)
 		if path.is_empty():continue
+		# A day's march over the ground (march_terrain.gd): rough stretches cost more.
 		var budget:=18.0*(.5+.5*float(record.get("readiness",.4)))
 		for waypoint:Dictionary in path:
-			var next:=G.unpack(waypoint);var leg:=current.distance_to(next);var move:=minf(budget,leg)
-			current=current.move_toward(next,move);budget-=move
+			var next:=G.unpack(waypoint)
+			while current.distance_to(next)>.01 and budget>.001:
+				var weight:=_ground_weight(current.move_toward(next,.25),{"foot":1.0})
+				var move:=minf(minf(.25,current.distance_to(next)),budget/weight)
+				current=current.move_toward(next,move);budget-=move*weight
 			if budget<=.001:break
 		record["command_position"]=G.pack(current)
+## The time weight of a step of ground for this force (1 on open ground).
+func _ground_weight(at:Vector2,mix:Dictionary)->float:
+	if not March.has_ground(): return 1.0
+	var road_list:=March.roads()
+	return maxf(0.1,March.factor(March.ground_at(at),mix,March.road_at(at,road_list) if not road_list.is_empty() else -1))
 func _encirclement(enemy:Dictionary,allies:Array)->float:
 	# Sample possible retreat directions; every direction must actually be
 	# covered by a supplied, sufficiently strong friendly frontage.
@@ -140,12 +150,16 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 			break
 	if path.is_empty():actual["command_status"]="No land route · commander needs another approach";actual["command_route"]=[];return
 	actual["command_route"]=path
+	# The day's march is spent against the ground (march_terrain.gd), as every
+	# march is: hills, forest and marsh cost more of it than open ground.
 	var budget:float=host._field_army_speed(actual)
+	var mix:=March.mix_of(actual)
 	var current:=start
 	for waypoint:Dictionary in path:
 		var next:=G.unpack(waypoint)
 		while current.distance_to(next)>.01 and budget>.001:
-			var distance:=minf(.25,minf(budget,current.distance_to(next)))
+			var weight:=_ground_weight(current.move_toward(next,minf(.25,current.distance_to(next))),mix)
+			var distance:=minf(.25,minf(budget/weight,current.distance_to(next)))
 			var proposed:=current.move_toward(next,distance)
 			var claim:=territory(proposed)
 			if not claim.is_empty() and claim.owner!="player" and not hostile(String(claim.owner)):
@@ -159,7 +173,7 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 				if proposed.distance_to(point(enemy))<width and proposed.distance_to(point(enemy))<current.distance_to(point(enemy)) and strength(actual)<float(enemy.strength)*1.15:
 					actual["command_status"]="Front contested · protecting flanks and awaiting support";blocked=true;break
 			if blocked:budget=0;break
-			current=proposed;budget-=distance
+			current=proposed;budget-=distance*weight
 		if budget<=.001:break
 	actual["position"]=G.pack(current);actual["status"]="stationed";actual["location_id"]="field_position"
 	actual["location_name"]="Commanded ground";actual["distance_remaining_km"]=current.distance_to(destination)

@@ -280,7 +280,7 @@ static func _chase_point(from:Vector2,toward:Vector2,mc:Variant,force:Dictionary
 		for turn in [0.0,0.4,-0.4]:
 			var goal:=from+dir.rotated(turn)*km*float(scale)
 			if land.is_valid() and not bool(land.call(goal)): continue
-			if not mc.field_route(from,goal).has("error"): return goal
+			if not mc.field_route(from,goal,force).has("error"): return goal
 	return Vector2.INF
 
 
@@ -296,7 +296,7 @@ static func _march(index:int,goal:Vector2,destination_id:String,label:String)->D
 		if destination_id!="field_position": army["location_id"]=destination_id; army["location_name"]=label
 		mc.field_armies[index]=army
 		return {"days":0}
-	var route:Dictionary=mc.field_route(start,goal)
+	var route:Dictionary=mc.field_route(start,goal,army)
 	if route.has("error"): return {"error":String(route.error)}
 	var speed:=maxf(0.1,float(mc._field_army_speed(army)))
 	army.erase("city_operation"); army.erase("movement_block_reason")
@@ -309,7 +309,8 @@ static func _march(index:int,goal:Vector2,destination_id:String,label:String)->D
 	army["distance_total_km"]=float(route.length_km)
 	army["distance_remaining_km"]=float(route.length_km)
 	army["departure_day"]=_day()
-	var days:=ceili(float(route.length_km)/speed)
+	# The one march estimate (march_terrain.gd), as the daily march spends it.
+	var days:=int(mc._march_days_left(army,start))
 	army["arrival_day"]=_day()+days
 	army["speed_km_day"]=speed
 	mc.field_armies[index]=army

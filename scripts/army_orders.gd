@@ -252,9 +252,9 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			if force_id==HOME:
 				out.lines.append("Every band away turns for home by the land road.")
 				return out
-			var road:Dictionary=mc.field_route(from,_home()) if from.distance_to(_home())>=0.5 else {"length_km":0.0,"points":[_home()]}
+			var road:Dictionary=mc.field_route(from,_home(),record) if from.distance_to(_home())>=0.5 else {"length_km":0.0,"points":[_home()]}
 			if road.has("error"): out.lines.append(String(road.error)); out.likely="impossible"; return out
-			_road_lines(out,road,mc._field_army_speed(record),"home")
+			_road_lines(out,road,record,"home")
 			return out
 	var there:=Vector2.INF
 	match String(target.get("type","")):
@@ -263,11 +263,10 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		"spot": there=Vector2(float(target.get("x",0)),float(target.get("z",0)))
 	if not there.is_finite():
 		out.ready=false; out.lines.append("That place is not on our charts."); return out
-	var road:Dictionary=mc.field_route(from,there) if from.distance_to(there)>=0.5 else {"length_km":0.0,"points":[there],"direct":true}
+	var road:Dictionary=mc.field_route(from,there,speed_force) if from.distance_to(there)>=0.5 else {"length_km":0.0,"points":[there],"direct":true}
 	if road.has("error"):
 		out.lines.append(String(road.error)); out.likely="impossible"; return out
-	var speed:float=mc._field_army_speed(speed_force) if not (speed_force.get("formations",[]) as Array).is_empty() else 12.0
-	_road_lines(out,road,speed,target_title(target))
+	_road_lines(out,road,speed_force,target_title(target))
 	if going<=0 and force_id==HOME and int(f.drilling)>0 and verb_id in ["attack","siege","raid"]:
 		var leads:=leader if leader!="" else "The war leader"
 		out.lines.append("Nobody has finished drill. %s will want to wait, about %d days, unless you insist and he takes the %d recruits as they are." % [leads,int(f.drill_days),int(f.drilling)])
@@ -314,16 +313,18 @@ static func _heads(formations:Array)->int:
 	for f in formations: n+=maxi(0,int((f as Dictionary).get("count",0)))
 	return n
 
-static func _road_lines(out:Dictionary,road:Dictionary,speed:float,where:String)->void:
+static func _road_lines(out:Dictionary,road:Dictionary,force:Dictionary,where:String)->void:
 	var km:=float(road.get("length_km",0.0))
-	var days:=ceili(km/maxf(0.1,speed)) if km>0.0 else 0
+	# The one march estimate (march_terrain.gd through MilitaryCampaign).
+	var days:=int(_mc().march_days(force,road)) if km>0.0 and not (force.get("formations",[]) as Array).is_empty() else (ceili(km/12.0) if km>0.0 else 0)
 	out.km=km; out.days=days
 	var points:Array=[]
 	for p in road.get("points",[]): points.append(p)
 	out.road=points
 	if km<0.5: out.lines.append("They are already there."); return
 	var round_water:="" if bool(road.get("direct",true)) else " by land round the water"
-	out.lines.append("The road to %s is %s km%s, about %d %s." % [where,EraWords.grouped(roundi(km)),round_water,days,"day" if days==1 else "days"])
+	var ground:=String(road.get("ground_words",""))
+	out.lines.append("The road to %s is %s km%s%s, about %d %s." % [where,EraWords.grouped(roundi(km)),round_water," "+ground if ground!="" else "",days,"day" if days==1 else "days"])
 
 static func guard_radius(troops:int)->float:
 	return clampf(sqrt(maxf(1.0,float(troops)))*0.6,2.0,15.0)
