@@ -20,6 +20,10 @@ extends Node
 ##       image a step, to find pops across the crossfades)
 ##      [--sweep] (after the captures: frame times while stepping through the
 ##       distance levels and panning at the Region level, GPU included)
+##      [--glide=from,to] (a glide between distance levels, images after it)
+##      [--stream=from,to] (the same glide timed frame by frame until the
+##       streamed ground is at full detail: when each patch lands, frame and
+##       patch-work times)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -281,6 +285,12 @@ func _ready()->void:
 			var levels:=argument.trim_prefix("--glide=").split(",")
 			if levels.size()==2:await _glide_shots(target,int(levels[0]),int(levels[1]),out_dir,prefix)
 	for argument in args:
+		# `--stream=from,to`: the same glide, timed frame by frame until the
+		# streamed ground reaches full detail over the whole view.
+		if argument.begins_with("--stream="):
+			var levels:=argument.trim_prefix("--stream=").split(",")
+			if levels.size()==2:await _stream_timing(target,int(levels[0]),int(levels[1]),out_dir,prefix)
+	for argument in args:
 		# `--film=from,to,steps`: a zoom from one view size to another in even
 		# steps (a zoom factor per step), one image per step, to find pops.
 		if argument.begins_with("--film="):
@@ -318,6 +328,96 @@ func _glide_shots(target:Vector3,from_level:int,to_level:int,out_dir:String,pref
 		if image:image.save_png(out_dir.path_join("%s_glide_%d_%d_%04d.png" % [prefix,from_level,to_level,wait_ms]))
 		var covered:bool=terrain._patch_covers_camera(terrain.regional_patch_center,terrain.regional_patch_span) if terrain.has_method("_patch_covers_camera") else true
 		print("MAP_ART_GLIDE: +%d ms patch=%.1f/%d job=%s covers=%s" % [wait_ms,terrain.regional_patch_span,terrain.regional_patch_resolution,str(terrain.terrain_patch_job!=null),str(covered)])
+
+## `--stream`: settle at one distance level, glide to another as the wheel
+## does (real time, vsync as in play), then follow every frame until the
+## streamed patch covers the view at full detail with nothing pending: when
+## each patch lands (from the glide's start and end), the frame times, the
+## terrain-patch share of each frame's script time, and one image once full
+## detail is in.
+func _stream_timing(target:Vector3,from_level:int,to_level:int,out_dir:String,prefix:String)->void:
+	var lod=preload("res://scripts/terrain_lod.gd")
+	var trace=preload("res://scripts/performance_trace.gd")
+	terrain.camera_target=target
+	terrain.set_camera_distance_level(from_level)
+	terrain.camera.size=terrain.zoom_target_size
+	terrain.zoom_target_size=-1.0
+	terrain.zoom_preset_active=false
+	terrain._update_camera()
+	var deadline:=Time.get_ticks_msec()+60000
+	var settle:=0
+	while Time.get_ticks_msec()<deadline and (settle<60 or terrain.terrain_patch_job!=null or terrain.regional_patch_resolution!=lod.resolution_for(terrain.regional_patch_span)):
+		await get_tree().process_frame
+		settle+=1
+	for i in 30:await get_tree().process_frame
+	trace.totals.clear();trace.enabled=true
+	terrain.set_camera_distance_level(to_level)
+	terrain.zoom_pointer=get_viewport().get_visible_rect().size*0.5
+	var started:=Time.get_ticks_usec()
+	var previous:=started
+	var glide_end:=-1
+	var events:=[]
+	var last_patch:=Vector2(terrain.regional_patch_span,terrain.regional_patch_resolution)
+	var frames:Array[float]=[]
+	var patch_ms:Array[float]=[]
+	var streaming_ms:Array[float]=[]
+	var process_ms:Array[float]=[]
+	var worst:=[]
+	var full_at:=-1
+	var before_patch:=0
+	var before_streaming:=0
+	var tail:=0
+	var sections_before:={}
+	while Time.get_ticks_usec()-started<40000000:
+		await get_tree().process_frame
+		var now:=Time.get_ticks_usec()
+		var ms:=float(now-previous)/1000.0
+		previous=now
+		var patch_total:=int((trace.totals.get("frame_terrain_patch",{"microseconds":0}) as Dictionary).microseconds)
+		var streaming_total:=int((trace.totals.get("frame_world_streaming",{"microseconds":0}) as Dictionary).microseconds)
+		var patch_frame:=float(patch_total-before_patch)/1000.0
+		var streaming_frame:=float(streaming_total-before_streaming)/1000.0
+		before_patch=patch_total;before_streaming=streaming_total
+		frames.append(ms);patch_ms.append(patch_frame);streaming_ms.append(streaming_frame)
+		process_ms.append(Performance.get_monitor(Performance.TIME_PROCESS)*1000.0)
+		# The traced sections that took over a millisecond this frame.
+		var sections:=[]
+		for key in trace.totals:
+			var total_us:=int((trace.totals[key] as Dictionary).microseconds)
+			var delta:=total_us-int(sections_before.get(key,0))
+			sections_before[key]=total_us
+			if delta>1000:sections.append("%s=%.1f" % [key,delta/1000.0])
+		worst.append([snappedf(ms,0.01),snappedf(patch_frame,0.01),int((now-started)/1000),",".join(sections)])
+		if glide_end<0 and terrain.zoom_target_size<=0.0:glide_end=now
+		var patch:=Vector2(terrain.regional_patch_span,terrain.regional_patch_resolution)
+		if patch!=last_patch:
+			last_patch=patch
+			events.append({"ms":int((now-started)/1000),"span":snappedf(patch.x,0.1),"res":int(patch.y),"commit_us":terrain.terrain_patch_last_commit_usec,"covers":terrain._patch_covers_camera(terrain.regional_patch_center,terrain.regional_patch_span)})
+		if full_at<0 and glide_end>=0 and terrain.terrain_patch_job==null and terrain.regional_patch_resolution==lod.resolution_for(terrain.regional_patch_span) and terrain._patch_covers_camera(terrain.regional_patch_center,terrain.regional_patch_span):
+			full_at=now
+		if full_at>=0:
+			tail+=1
+			if tail>=30:break
+	trace.enabled=false
+	var sorted:=frames.duplicate();sorted.sort()
+	var patch_sorted:=patch_ms.duplicate();patch_sorted.sort()
+	var process_sorted:=process_ms.duplicate();process_sorted.sort()
+	var over16:=0;var over25:=0;var over33:=0
+	for t in frames:
+		if t>16.7:over16+=1
+		if t>25.0:over25+=1
+		if t>33.3:over33+=1
+	worst.sort_custom(func(a:Array,b:Array)->bool:return a[0]>b[0])
+	var result:={"glide":"L%d->L%d" % [from_level,to_level],"glide_ms":int((glide_end-started)/1000) if glide_end>=0 else -1,
+		"full_ms_from_start":int((full_at-started)/1000) if full_at>=0 else -1,"full_ms_after_glide":int((full_at-glide_end)/1000) if full_at>=0 and glide_end>=0 else -1,
+		"frames":frames.size(),"frame_p50_ms":snappedf(sorted[sorted.size()/2],0.01),"frame_p95_ms":snappedf(sorted[int(sorted.size()*0.95)],0.01),"frame_max_ms":snappedf(sorted[-1],0.01),
+		"over_16ms":over16,"over_25ms":over25,"over_33ms":over33,
+		"patch_p50_ms":snappedf(patch_sorted[patch_sorted.size()/2],0.01),"patch_p95_ms":snappedf(patch_sorted[int(patch_sorted.size()*0.95)],0.01),"patch_max_ms":snappedf(patch_sorted[-1],0.01),
+		"process_p95_ms":snappedf(process_sorted[int(process_sorted.size()*0.95)],0.01),"process_max_ms":snappedf(process_sorted[-1],0.01),
+		"events":events,"worst":worst.slice(0,6)}
+	print("MAP_ART_STREAM: ",JSON.stringify(result))
+	var image:=get_viewport().get_texture().get_image()
+	if image:image.save_png(out_dir.path_join("%s_stream_%d_%d_full.png" % [prefix,from_level,to_level]))
 
 ## `--film`: the view zooms from `from_size` to `to_size` about the target in
 ## `steps` equal ratios, two frames a step (streaming and fades run as in
