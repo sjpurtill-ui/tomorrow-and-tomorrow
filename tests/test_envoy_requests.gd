@@ -25,6 +25,9 @@ func _world()->void:
 	WorldSimulation.clear()
 	GameState.set_process(false); CivilizationSystem.set_process(false); MilitaryCampaign.set_process(false)
 	GameState.reset_for_new_world(SEED); GameState.civic_api_enabled=false
+	# Three peoples met are needed; the rival count is a new-game setting that
+	# reset_for_new_world keeps, so another suite's choice must not shrink it.
+	GameState.opponent_count=maxi(GameState.opponent_count,3)
 	DiscoverySystem.reset_for_new_world(); FoodSystem.reset_for_new_world(); MilitaryCampaign.reset_for_new_world()
 	CivilizationSystem.reset_for_new_world()
 	ForeignDiplomacy.reset_for_new_world(); GovernmentPeopleSystem.reset_for_new_world()

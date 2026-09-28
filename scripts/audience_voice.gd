@@ -974,15 +974,26 @@ func read_order(audience_id:String,text:String,done:Callable)->bool:
 	if h==null or (h.find(audience_id) as Dictionary).is_empty(): return false
 	var config:=OrderReader.reader_config(_config())
 	if config.is_empty(): return false
+	# A field this endpoint rejected before is not sent again (the voice's quirks).
+	for quirk in ["no_reasoning_effort","no_schema"]:
+		if bool(_compat.get(quirk,false)): config[quirk]=true
 	var brief:=OrderReader.world_brief(audience_id)
 	var payload:=OrderReader.build_payload(text,brief,config)
-	var request:={"stage":"order_read","attempts":1,"config":config,"started_ms":Time.get_ticks_msec(),"payload":payload,"http":null,"done":done,"brief":brief}
+	var request:={"stage":"order_read","attempts":1,"config":config,"started_ms":Time.get_ticks_msec(),"payload":payload,"http":null,"done":done,"brief":brief,"text":text}
 	_ordering[audience_id]=request
+	_send_order(audience_id)
+	return true
+
+func _send_order(audience_id:String)->void:
+	if not _ordering.has(audience_id): return
+	var request:Dictionary=_ordering[audience_id]
+	var payload:Dictionary=request.payload
+	var config:Dictionary=request.config
 	if order_hook.is_valid():
 		var body:Variant=order_hook.call(audience_id,payload.duplicate(true))
 		var ok:bool=body is PackedByteArray and not (body as PackedByteArray).is_empty()
 		_on_order_response(HTTPRequest.RESULT_SUCCESS if ok else HTTPRequest.RESULT_TIMEOUT,200 if ok else 0,PackedStringArray(),body if ok else PackedByteArray(),audience_id)
-		return true
+		return
 	var http:=HTTPRequest.new()
 	add_child(http)
 	request.http=http
@@ -995,8 +1006,8 @@ func read_order(audience_id:String,text:String,done:Callable)->bool:
 		request.http=null
 		http.queue_free()
 		_ordering.erase(audience_id)
-		done.call_deferred({})
-	return true
+		var done:Variant=request.get("done")
+		if done is Callable and (done as Callable).is_valid(): (done as Callable).call_deferred({})
 
 func _on_order_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,audience_id:String)->void:
 	if not _ordering.has(audience_id): return
@@ -1006,6 +1017,25 @@ func _on_order_response(result:int,response_code:int,_headers:PackedStringArray,
 	if http is HTTPRequest and is_instance_valid(http): (http as HTTPRequest).queue_free()
 	var envelope:=_envelope_facts(body)
 	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
+	# An endpoint that rejects an optional field (reasoning effort, the strict
+	# schema) loses it for the session, and the reading is asked for once more
+	# without it, rather than every reading failing to the plain one.
+	if result==HTTPRequest.RESULT_SUCCESS and response_code in [400,415,422] and int(request.get("attempts",1))<2:
+		var complaint:=String(envelope.get("error","")).to_lower()
+		var payload:Dictionary=request.payload
+		var dropped:=""
+		if payload.has("reasoning_effort") and "reasoning" in complaint:
+			payload.erase("reasoning_effort"); _compat["no_reasoning_effort"]=true; dropped="reasoning_effort"
+		elif payload.has("response_format") and ("response_format" in complaint or "schema" in complaint or "json" in complaint):
+			payload.erase("response_format"); _compat["no_schema"]=true; dropped="the strict JSON schema"
+		elif payload.has("prompt_cache_key") and "cache" in complaint:
+			payload.erase("prompt_cache_key"); dropped="prompt_cache_key"
+		if dropped!="":
+			_finish_receipt(receipt,false,false,"endpoint rejected %s (HTTP %d)" % [dropped,response_code])
+			request.attempts=int(request.get("attempts",1))+1
+			_ordering[audience_id]=request
+			_send_order(audience_id)
+			return
 	var out:={}
 	var reason:=""
 	if result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300:
