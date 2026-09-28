@@ -1740,6 +1740,7 @@ func _install_regional_patch(completed:Dictionary)->void:
 	replacement.name="RegionalTerrainLOD"
 	replacement.mesh=completed.mesh
 	replacement.material_override=regional_terrain_patch.material_override if regional_terrain_patch else _create_terrain_material()
+	if regional_terrain_patch==null:_bind_coast_mask(replacement.material_override)
 	# Soft outer edge (coast_mask.gdshaderinc): the patch dissolves into the planet layer.
 	replacement.set_instance_shader_parameter("patch_feather",Vector4(completed.center.x,completed.center.y,float(completed.span),1.0))
 	add_child(replacement)
@@ -1847,6 +1848,24 @@ func _sync_coast_mask()->void:
 			var far:=province_terrain_mesh.material_override as ShaderMaterial
 			far.set_shader_parameter("coast_color%d" % index,color_texture)
 			far.set_shader_parameter("coast_fields%d" % index,fields_texture)
+		# codex/map-speed: the streamed patches read them too. Their painting's
+		# relief cues (world_beauty: hollows lush, crests dry, valleys shaded;
+		# calm macro light at regional scale) and the chart's landform near
+		# the patch edge were written for them but never ran there, so the
+		# patch disagreed with the planet layer beside it.
+		coast_mask_bindings["coast_level%d" % index]=texture
+		coast_mask_bindings["coast_grid%d" % index]=grid
+		coast_mask_bindings["coast_color%d" % index]=color_texture
+		coast_mask_bindings["coast_fields%d" % index]=fields_texture
+		if regional_terrain_patch and regional_terrain_patch.material_override is ShaderMaterial:
+			_bind_coast_mask(regional_terrain_patch.material_override as ShaderMaterial)
+
+## codex/map-speed: the macro rasters as last bound (_sync_coast_mask), for a
+## streamed patch material made after they landed.
+var coast_mask_bindings:Dictionary={}
+
+func _bind_coast_mask(material:ShaderMaterial)->void:
+	for parameter in coast_mask_bindings:material.set_shader_parameter(parameter,coast_mask_bindings[parameter])
 
 func _discovery_mask_pixel(position:Vector2,width:int,height:int)->Vector2:
 	return Vector2((position.x/world_width+0.5)*float(width-1),(position.y/world_depth+0.5)*float(height-1))
