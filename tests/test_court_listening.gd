@@ -134,6 +134,18 @@ func test_offline_the_rulers_own_words_go_as_the_brief_they_mean()->void:
 	assert_str(String(thread.private_brief)).is_equal(words)
 	assert_str(String(thread.offline_choice)).is_equal("honour")
 
+func test_the_voice_reads_six_thousand_as_the_facts_number()->void:
+	## Live evaluation: true lines were thrown out for "6,000" (read as 6 and
+	## 000) and "about 30 days" (the sheet says 30.0).
+	var Voice:=preload("res://scripts/audience_voice.gd")
+	assert_str(Voice.plain_numbers("We have 6,000 Food and houses for 1,100; 12,345,678 in all")).is_equal("We have 6000 Food and houses for 1100; 12345678 in all")
+	var v:Node=Voice.new()
+	add_child(v)
+	var allowed:Dictionary=v.allowed_numbers({"records":"Stores: 6,000 Food, enough for 30.0 days. People: 900; houses for 1100."},{})
+	for n in ["6000","1100","30","30.0","900"]: assert_bool(allowed.has(n)).override_failure_message("%s not allowed: %s" % [n,str(allowed.keys())]).is_true()
+	assert_bool(allowed.has("000")).is_false()
+	v.queue_free()
+
 func _live(c:Dictionary)->Dictionary:
 	var run:=h.run(c,"live")
 	return run
@@ -167,3 +179,11 @@ func test_orders_holding_who_or_bring_go_to_the_engine_and_talk_of_people_to_the
 	var calls:=_calls(who,0)
 	assert_bool(calls.has("persons")).override_failure_message(str(calls)).is_true()
 	assert_bool(calls.any(func(k:Variant)->bool: return String(k).begins_with("read"))).override_failure_message(str(calls)).is_false()
+	# A question the facts answer is the voice's, even with "who" in it: the
+	# persons engine answered "Who holds Tsaren?" with "Whom do you mean?".
+	for q in ["Who holds Tsaren?","Who won the last fight?"]:
+		var fact:=_live({"id":"listen.fact_who","domain":"x","fixture":"tsaren_captured","speaker":"suri","source":"design","steps":[
+			{"say":q,"ideal":{"kind":"question","action":"none","type":"none"},"expect":{"handled":false}}]})
+		calls=_calls(fact,0)
+		assert_bool(calls.has("persons")).override_failure_message("%s: %s" % [q,str(calls)]).is_false()
+		assert_bool(calls.has("speak (read)")).override_failure_message("%s: %s" % [q,str(calls)]).is_true()

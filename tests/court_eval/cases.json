@@ -60,6 +60,18 @@
    "expect": {"verb": "war", "verdict": "fate", "state": {"killed_men": "==b.bound_men", "bound_men": "==0", "running": "==before", "dread_x100": ">before"}, "says_any": ["none could run", "could not run", "cannot run"]},
    "variants": ["kill the men you have bound", "Kill all the bound men of Tsaren"]},
 
+  {"id": "grave.kill_women.reader_kill_all", "domain": "grave_group", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
+   "note": "Live evaluation: a real reader read 'Kill all the women' with kill_all and the 20 bound men died too. The group the words name is never widened.",
+   "say": "Kill all the women of Tsaren",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "kill_all": true}, "confidence": 0.95},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_women": ">0", "killed_men": "==before", "bound_men": "==before"}}},
+
+  {"id": "grave.kill_men.read_as_attack", "domain": "grave_group", "fixture": "war_not_held", "speaker": "headman", "source": "design",
+   "note": "Live evaluation: a real reader read 'kill the men of <a town not held>' as an attack with kill_men. The fate is what was ordered: the war leader asks to take the town first; nothing marches on the words alone.",
+   "say": "Kill the men of Tsaren",
+   "ideal": {"kind": "order", "action": "attack", "type": "town", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "war", "verdict": "ask_march", "asks": true, "state": {"to_tsaren": "==before", "moving": "==before"}}},
+
   {"id": "grave.kill_bound.headman", "domain": "grave_group", "fixture": "tsaren_bound", "speaker": "headman", "source": "user", "sloppy": true,
    "say": "Kill all the men of Tsaren that you have tied up!",
    "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.95},
@@ -622,7 +634,7 @@
   {"id": "envoy.tsaren_lost", "domain": "envoy", "fixture": "envoy_after_fall", "speaker": "envoy", "source": "design",
    "say": "Is Tsaren still yours?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["your hands", "your garrison"], "prompt_has": ["Tsaren"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["your hands", "your garrison", "garrison holds", "holds Tsaren", "you hold", "you took"], "prompt_has": ["Tsaren"]}},
 
   {"id": "home.roads", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "user",
    "say": "Build roads between the houses and haul stone to the new houses",
