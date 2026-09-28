@@ -31,6 +31,7 @@ func _ready()->void:
 	GameState.reset_for_new_world(74017);GameState.civic_api_enabled=false
 	DiscoverySystem.reset_for_new_world();ProgressionSystem.reset_for_new_world();ResourceSystem.reset_for_new_world();FoodSystem.reset_for_new_world();ConsequenceEngine.reset_for_new_world();CivilizationSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world()
 	GameState.select_founding_focus("provision")
+	PeopleDirection.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];SettlementModel.ensure_founded()
 	GameState.settlement_name="Seanstone"
 	terrain=preload("res://local_terrain.tscn").instantiate();add_child(terrain);terrain._set_game_speed(0)
@@ -58,6 +59,7 @@ func _ready()->void:
 	terrain.camera.size=float(terrain.zoom_target_size)
 	terrain.zoom_target_size=-1.0
 	terrain.zoom_preset_active=false
+	terrain.camera_yaw=0.0
 	terrain._set_camera_target(Vector3(look_at.x,terrain._height_at(look_at.x,look_at.y),look_at.y))
 	terrain._update_camera()
 	terrain._update_scale_lod()
@@ -74,12 +76,7 @@ func _ready()->void:
 	for f in 20: await get_tree().process_frame
 	if tip:
 		var chart:Control=map.get("chart")
-		var marks:Array=chart.get("marks")
-		for mark:Dictionary in marks:
-			if String(mark.id).begins_with("army:"):
-				var at:Vector2=chart.call("_screen",mark.pos,float(mark.h))
-				(map.get("key_card") as Control).call("show_tip",chart.call("_force_tip",mark.report),at+Vector2(0,-24))
-				break
+		chart.call("pin","army:7")
 	for f in 6: await get_tree().process_frame
 	RenderingServer.force_sync()
 	RenderingServer.force_draw(true,0.0)
@@ -102,6 +99,27 @@ func _land_near(want:Vector2)->Vector2:
 			var p:=want+Vector2.from_angle(TAU*float(k)/16.0)*float(ring)*6.0
 			if terrain._scout_land_at(p): return p
 	return want
+
+## A town of a people we know, reported where we want it on the chart
+## (one whose intelligence the world keeps). {civ, region}.
+func _take_town(at:Vector2,name:String,used:Array)->Dictionary:
+	var day:=int(GameState.elapsed_days)
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		for region:Dictionary in civ.strategic_regions:
+			var rid:=String(region.id)
+			if rid in used: continue
+			# A town that stands (founded) where the chart wants it.
+			region["settlement_founded"]=true
+			region["position"]=at
+			var seen:Dictionary=CivilizationSystem.city_intelligence.capture("player",rid,.8,day,"field campaign report","capture")
+			if seen.is_empty(): continue
+			CivilizationSystem.city_intelligence.publish("player",seen,day)
+			if not (CivilizationSystem.city_intelligence.records.get("player",{}) as Dictionary).has(rid): continue
+			region["name"]=name
+			CivilizationSystem.city_intelligence.records.player[rid]["position"]={"x":at.x,"z":at.y}
+			return {"civ":civ,"region":region}
+	print("SUPPLY_MAP_CAPTURE no town for ",name)
+	return {"civ":CivilizationSystem.civilizations[0],"region":{}}
 
 func _know(radius:float)->void:
 	CivilizationSystem.revealed_areas.assign([{"kind":"circle","x":home.x,"z":home.y,"radius":radius,"day":0}])
@@ -133,29 +151,26 @@ func _stage_early()->void:
 	var out_at:=_land_near(home+Vector2.from_angle(0.6)*78.0)
 	_know(120.0); _reveal(out_at,40.0)
 	MilitaryCampaign.field_armies.assign([_band(7,out_at,30,"Rovik's band","Rovik Ashdown")])
-	look_at=home.lerp(out_at,0.45) if zoom=="region" else home
+	look_at=home.lerp(out_at,0.5) if zoom=="region" else home
 
 func _stage_late()->void:
 	_summer()
 	GameState.elapsed_days+=365*40
 	GameState.ensure_population_total(2600);GameState.housing_capacity=3000
-	GameState.population_allocations.Logistics=60
+	GameState.population_allocations.Logistics=130
 	GameState.resource_stockpiles["Transport Carts"]=40.0
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
 	MilitaryCampaign.home_army.troops=120
 	_know(520.0)
 	# A town of theirs we took, and one beyond it we lay siege to.
-	var civ:Dictionary=CivilizationSystem.civilizations[0]
-	civ["name"]="Esurai"
-	var regions:Array=civ.strategic_regions
-	var held_region:Dictionary=regions[CivilizationSystem._frontline_region_index(civ)]
-	held_region["name"]="Tsaren"
 	var town:=_land_near(home+Vector2.from_angle(-0.4)*120.0)
 	var day:=int(GameState.elapsed_days)
-	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(held_region.id),.8,day,"field campaign report","capture"),day)
-	CivilizationSystem.city_intelligence.records.player[String(held_region.id)]["position"]={"x":town.x,"z":town.y}
+	var taken:=_take_town(town,"Tsaren",[])
+	var civ:Dictionary=taken.civ
+	civ["name"]="Esurai"
+	var held_region:Dictionary=taken.region
 	held_region["controller"]="player"; held_region["resistance"]=0.35
-	MilitaryCampaign.occupation_forces.assign([{"civ_id":String(civ.id),"region_id":String(held_region.id),"region_name":"Tsaren","troops":40,"formations":[{"unit":"levy","count":40}],"supply_level":0.9,"commander":{"name":"Suri Vell"}}])
+	MilitaryCampaign.occupation_forces.assign([{"civ_id":String(civ.id),"region_id":String(held_region.get("id","")),"region_name":"Tsaren","troops":40,"formations":[{"unit":"levy","count":40}],"supply_level":0.9,"commander":{"name":"Suri Vell"}}])
 	_reveal(town,60.0)
 	# Our roads: a made road to Tsaren, a cart track north.
 	March.use_roads_override=true
@@ -170,14 +185,12 @@ func _stage_late()->void:
 		_band(8,near,160,"Northern levy","Kavu Tern"),
 		_band(9,far,260,"Western raiders","Oda Marr")])
 	# The town beyond, under siege (the record military_campaign keeps).
-	var target_region:Dictionary=regions[(CivilizationSystem._frontline_region_index(civ)+1)%regions.size()]
-	target_region["name"]="Kelvra"
-	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(target_region.id),.7,day,"field campaign report","siege"),day)
 	var target:=_land_near(siege_at+Vector2.from_angle(-0.25)*6.0)
-	CivilizationSystem.city_intelligence.records.player[String(target_region.id)]["position"]={"x":target.x,"z":target.y}
+	var besieged:=_take_town(target,"Kelvra",[String(held_region.get("id",""))])
+	var target_region:Dictionary=besieged.get("region",{})
 	MilitaryCampaign.active_siege={"id":"siege_capture","active":true,"mode":"offensive","attacker_id":"player","defender_id":String(civ.id),"start_day":day-12,"last_day":day,"days":12,
-		"target_position":{"x":target.x,"z":target.y},"region_id":String(target_region.id),"army_id":7,
-		"threat":{"target_region_name":"Kelvra","target_region_id":String(target_region.id),"source_name":"Esurai","campaign_mode":"offensive"},
+		"target_position":{"x":target.x,"z":target.y},"region_id":String(target_region.get("id","")),"army_id":7,
+		"threat":{"target_region_name":"Kelvra","target_region_id":String(target_region.get("id","")),"source_name":"Esurai","campaign_mode":"offensive"},
 		"pressure":0.3,"fatigue":0.1,"blockade":0.4,"hardship":0.2,"starving_days":0,"relief":[]}
 	look_at=town.lerp(siege_at,0.35) if zoom=="region" else home
 

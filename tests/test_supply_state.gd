@@ -265,18 +265,20 @@ func test_the_maps_wash_carries_the_grid_and_leaves_unknown_land_bare()->void:
 	job.run()
 	var result:Dictionary=job.result
 	assert_bool(result.is_empty()).is_false()
-	var colors:PackedColorArray=result.colors
+	var bytes:PackedByteArray=result.grid_bytes
 	var known:=Supply.known_mask(field)
 	var grid:=Supply.grid(field,45,Supply.day_inputs(),known)
 	var n:=int(field.nx)*int(field.ny)
+	assert_int(bytes.size()).is_equal(n*4)
 	var bare:=0; var washed:=0
 	for i in n:
 		if known[i]==0:
-			assert_float(colors[i].a).is_equal(0.0)
+			# Unknown to us: the shader's known channel is empty, no wash.
+			assert_int(bytes[i*4+2]).is_equal(0)
 			bare+=1
 		else:
-			assert_float(colors[i].a).is_equal(1.0)
-			assert_float(colors[i].r).is_equal_approx(float((grid.ratio as PackedFloat32Array)[i]),0.004)
+			assert_int(bytes[i*4+2]).is_equal(255)
+			assert_int(bytes[i*4]).is_equal(clampi(roundi(float((grid.ratio as PackedFloat32Array)[i])*255.0),0,255))
 			washed+=1
 	assert_int(bare).is_greater(10)
 	assert_int(washed).is_greater(10)

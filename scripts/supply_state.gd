@@ -1152,7 +1152,7 @@ static func forage_factor(force:Dictionary)->float:
 # Reports for the screens
 # --------------------------------------------------------------------------
 
-## What a band of `troops` (-1: our largest band out, else 30) would get at
+## What a band of `troops` (-1: the middle one of our bands out) would get at
 ## this point today, standing (or moving).
 static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
 	if troops<0: troops=typical_troops()
@@ -1164,16 +1164,18 @@ static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
 	report["words"]=words(report)
 	return report
 
-## The size the map's wash is drawn for: our largest band out, else the
-## home levy, else 30.
+## The size the map's wash is drawn for: the middle one of our bands out,
+## else the home levy, else 30.
 static func typical_troops()->int:
 	var mc:Variant=_mc()
-	var best:=0
+	var sizes:Array=[]
 	if mc!=null:
 		for a in mc.field_armies:
-			if a is Dictionary: best=maxi(best,int((a as Dictionary).get("troops",0)))
-		if best<=0: best=int((mc.home_army as Dictionary).get("troops",0))
-	return best if best>0 else 30
+			if a is Dictionary and int((a as Dictionary).get("troops",0))>0: sizes.append(int((a as Dictionary).troops))
+		if sizes.is_empty() and int((mc.home_army as Dictionary).get("troops",0))>0: sizes.append(int(mc.home_army.troops))
+	if sizes.is_empty(): return 30
+	sizes.sort()
+	return int(sizes[sizes.size()/2])
 
 static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 	var hub:Dictionary=t.hub

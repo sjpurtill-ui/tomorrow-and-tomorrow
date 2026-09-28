@@ -208,11 +208,15 @@ func _discard_paint()->void:
 func _commit(done:PaintJob)->void:
 	var r:Dictionary=done.result
 	var arrays:=[]; arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX]=r.vertices; arrays[Mesh.ARRAY_COLOR]=r.colors; arrays[Mesh.ARRAY_INDEX]=r.indices
+	arrays[Mesh.ARRAY_VERTEX]=r.vertices; arrays[Mesh.ARRAY_TEX_UV]=r.uvs; arrays[Mesh.ARRAY_INDEX]=r.indices
 	var mesh:=ArrayMesh.new()
 	if (r.indices as PackedInt32Array).size()>0: mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	mesh.custom_aabb=AABB(Vector3((r.aabb as Rect2).position.x,-2.0,(r.aabb as Rect2).position.y),Vector3((r.aabb as Rect2).size.x,20.0,(r.aabb as Rect2).size.y))
 	wash.mesh=mesh
+	var texels:=int(r.texels)
+	var grid:=Image.create_from_data(texels,texels,false,Image.FORMAT_RGBA8,r.grid_bytes)
+	wash_material.set_shader_parameter("supply_grid",ImageTexture.create_from_image(grid))
+	wash_material.set_shader_parameter("grid_texels",float(texels))
 	chart.call("set_data",{"routes":r.routes,"reach":r.reach,"hubs":r.hubs,"marks":r.marks,"roads":r.roads,"troops":done.troops})
 	key_card.call("set_troops",done.troops)
 	_painted_key=done.key
@@ -279,18 +283,33 @@ class PaintJob:
 			have=next_have
 		for i in n:
 			if have[i]==0: fill_r[i]=0.6; fill_h[i]=0.5
-		# The wash's mesh: every node, and the cells that touch known land.
+		# The grid for the wash's shader: a texel a node (ratio, haul, known).
+		var grid_bytes:=PackedByteArray(); grid_bytes.resize(n*4)
+		for i in n:
+			grid_bytes[i*4]=clampi(roundi(clampf(fill_r[i],0.0,1.0)*255.0),0,255)
+			grid_bytes[i*4+1]=clampi(roundi(clampf(fill_h[i],0.0,1.0)*255.0),0,255)
+			grid_bytes[i*4+2]=255 if known[i]==1 else 0
+			grid_bytes[i*4+3]=255
+		# The wash's mesh, draped: every node, and the cells near known land.
 		var vertices:=PackedVector3Array(); vertices.resize(n)
-		var colors:=PackedColorArray(); colors.resize(n)
+		var uvs:=PackedVector2Array(); uvs.resize(n)
 		for i in n:
 			var p:=origin+Vector2(float(i%nx),float(i/nx))*cell
 			vertices[i]=Vector3(p.x,maxf(0.0,h[i])+0.002,p.y)
-			colors[i]=Color(clampf(fill_r[i],0.0,1.0),clampf(fill_h[i],0.0,1.0),0.0,float(known[i]))
+			uvs[i]=Vector2((float(i%nx)+0.5)/float(nx),(float(i/nx)+0.5)/float(ny))
+		var near:=known.duplicate()
+		for y in ny:
+			for x in nx:
+				if known[y*nx+x]==0: continue
+				for oy in range(-1,2):
+					for ox in range(-1,2):
+						var xx:=x+ox; var yy:=y+oy
+						if xx>=0 and yy>=0 and xx<nx and yy<ny: near[yy*nx+xx]=1
 		var indices:=PackedInt32Array()
 		for y in ny-1:
 			for x in nx-1:
 				var a:=y*nx+x; var b:=a+1; var c2:=a+nx; var d:=c2+1
-				if known[a]+known[b]+known[c2]+known[d]==0: continue
+				if near[a]+near[b]+near[c2]+near[d]==0: continue
 				indices.append_array([a,c2,b,b,c2,d])
 		if bool(cancel[0]): return
 		# The carts' reach: where half a carried load still arrives.
@@ -319,7 +338,7 @@ class PaintJob:
 		for s:Dictionary in f.sources: hubs.append({"pos":s.pos,"h":_height_at(f,s.pos),"kind":String(s.kind),"name":String(s.name)})
 		var road_rows:Array=[]
 		for r:Dictionary in roads: road_rows.append({"a":r.a,"b":r.b,"tier":int(r.tier),"ha":_height_at(f,r.a),"hb":_height_at(f,r.b)})
-		result={"vertices":vertices,"colors":colors,"indices":indices,"aabb":Rect2(origin,Vector2(float(nx-1),float(ny-1))*cell),
+		result={"vertices":vertices,"uvs":uvs,"indices":indices,"grid_bytes":grid_bytes,"texels":nx,"aabb":Rect2(origin,Vector2(float(nx-1),float(ny-1))*cell),
 			"reach":reach_lines,"routes":routes,"marks":marks,"hubs":hubs,"roads":road_rows,"ms":float(Time.get_ticks_usec()-began)/1000.0}
 
 	func _height_at(f:Dictionary,p:Vector2)->float:

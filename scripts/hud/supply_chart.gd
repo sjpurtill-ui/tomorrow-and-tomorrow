@@ -39,6 +39,10 @@ var _drawn:=-1
 var _hover_id:=""
 var _hover_elapsed:=0.0
 var _land_tip:Dictionary={}
+## A mark or hub clicked: its note stays until the next click elsewhere.
+var pinned_id:=""
+var _pinned_tip:Dictionary={}
+var _pinned_at:=Vector2.ZERO
 ## Counters for probes (never saved).
 var redraws:=0
 
@@ -110,11 +114,17 @@ func _draw()->void:
 			draw_line(sa,sb,Color(INK,0.78*a),2.6,true)
 		# The carts' reach: a dotted ring, lettered once.
 		var label_at:=Vector2.INF
+		var clear:=_clear_rect()
+		var middle:=clear.get_center()
 		for line:Dictionary in reach:
 			var pts:=_screen_line(line.points,line.heights)
 			_dotted(pts,Color(INK,0.72*a),1.5,7.0)
+			# Lettered only where the ring is large enough to carry a word.
+			var extent:=Rect2(pts[0],Vector2.ZERO) if not pts.is_empty() else Rect2()
+			for p in pts: extent=extent.expand(p)
+			if maxf(extent.size.x,extent.size.y)<260.0: continue
 			for p in pts:
-				if get_viewport_rect().grow(-60.0).has_point(p) and (not label_at.is_finite() or p.y<label_at.y): label_at=p
+				if clear.has_point(p) and (not label_at.is_finite() or p.distance_squared_to(middle)<label_at.distance_squared_to(middle)): label_at=p
 		# The supply lines.
 		for route:Dictionary in routes: _draw_route(route,a)
 		if label_at.is_finite(): _label(label_at+Vector2(0,-8),"the carts' reach",a)
@@ -196,6 +206,12 @@ func _draw_plate(mark:Dictionary)->void:
 	draw_line(Vector2(x,bar.position.y-1.0),Vector2(x,bar.end.y+1.0),Color(INK,0.55),1.0)
 
 
+## The map between the rail, the top bar and the toolbar, where a caption
+## is never under the interface.
+func _clear_rect()->Rect2:
+	var view:=get_viewport_rect().size
+	return Rect2(Vector2(130.0,130.0),(view-Vector2(130.0+300.0,130.0+190.0)).max(Vector2(50,50)))
+
 func _dashed(points:PackedVector2Array,colour:Color,width:float,on:float,off:float)->void:
 	var carry:=0.0; var drawing:=true
 	for i in range(1,points.size()):
@@ -222,11 +238,11 @@ func _dotted(points:PackedVector2Array,colour:Color,radius:float,spacing:float)-
 
 func _label(at:Vector2,text:String,a:float)->void:
 	var font:=T.voice_font(true)
-	var size_px:=14
+	var size_px:=17
 	var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,size_px).x
 	var origin:=at-Vector2(width*0.5,0)
-	draw_string_outline(font,origin,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size_px,4,Color(PAPER,0.85*a))
-	draw_string(font,origin,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size_px,Color(INK,0.85*a))
+	draw_string_outline(font,origin,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size_px,6,Color(PAPER,0.92*a))
+	draw_string(font,origin,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size_px,Color(INK,0.95*a))
 
 
 # --- Hover -----------------------------------------------------------------------
@@ -257,7 +273,31 @@ func _update_hover()->void:
 				if bool(CivilizationSystem._position_is_revealed(at)):
 					id="land"; tip=_land_tip_at(at)
 	_hover_id=id
-	if is_instance_valid(key_card): key_card.call("show_tip",tip,mouse)
+	if not is_instance_valid(key_card): return
+	if tip.is_empty() and pinned_id!="": key_card.call("show_tip",_pinned_tip,_pinned_at)
+	else: key_card.call("show_tip",tip,mouse)
+
+## Pins the note of what is under the pointer (a mark or a hub), or lets a
+## pinned note go. Clicks still reach the map.
+func _input(event:InputEvent)->void:
+	if not visible or not (event is InputEventMouseButton) or not event.pressed or event.button_index!=MOUSE_BUTTON_LEFT: return
+	if _hover_id!="" and _hover_id!="land":
+		pinned_id=_hover_id; _pinned_at=event.position
+		_update_hover()
+		_pinned_tip=key_card.get("tip") if is_instance_valid(key_card) else {}
+	else:
+		pinned_id=""; _pinned_tip={}
+
+## Pins one mark's note (tests, captures): its id in marks, e.g. "army:7".
+func pin(id:String)->void:
+	for mark:Dictionary in marks:
+		if String(mark.id)!=id: continue
+		var s:=_screen(mark.pos,float(mark.get("h",0.0)))
+		if not s.is_finite(): return
+		pinned_id=id; _pinned_at=s+Vector2(0,-24)
+		_pinned_tip=_force_tip(mark.report)
+		if is_instance_valid(key_card): key_card.call("show_tip",_pinned_tip,_pinned_at)
+		return
 
 func _force_tip(report:Dictionary)->Dictionary:
 	var name:=T.sentence_case(String(report.get("name","")))
@@ -345,8 +385,9 @@ class KeyCard extends Control:
 	func _draw_legend()->void:
 		var ui:=T.font("ui")
 		var view:=get_viewport_rect().size
+		# At the map's left foot, above Map help, clear of the army bar.
 		var size_px:=Vector2(236,176)
-		var origin:=Vector2(view.x-size_px.x-16.0,view.y-size_px.y-78.0)
+		var origin:=Vector2(T.RAIL_WIDTH+40.0,view.y-size_px.y-176.0)
 		legend_rect=Rect2(origin,size_px)
 		draw_style_box(T.flat(T.PANEL_BG_SOLID,T.BORDER,1,4,0),legend_rect)
 		draw_string(ui,origin+Vector2(14,22),"SUPPLY",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
@@ -383,8 +424,10 @@ class KeyCard extends Control:
 		var box_size:=Vector2(TIP_WIDTH+24.0,height)
 		var origin:=tip_at+Vector2(18,20)
 		var view:=get_viewport_rect().size
-		origin.x=clampf(origin.x,8.0,maxf(8.0,view.x-box_size.x-8.0))
-		origin.y=clampf(origin.y,8.0,maxf(8.0,view.y-box_size.y-8.0))
+		# Above the pointer near the foot of the map, clear of the toolbar.
+		if origin.y+box_size.y>view.y-150.0: origin.y=tip_at.y-box_size.y-18.0
+		origin.x=clampf(origin.x,96.0,maxf(96.0,view.x-box_size.x-8.0))
+		origin.y=clampf(origin.y,80.0,maxf(80.0,view.y-box_size.y-150.0))
 		var state:=String(tip.get("state",""))
 		var accent:=S.state_color(state) if state!="" else T.BORDER
 		draw_style_box(T.flat(T.PANEL_BG_SOLID,Color(accent,0.8),1,4,0),Rect2(origin,box_size))
