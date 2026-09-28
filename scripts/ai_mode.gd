@@ -24,6 +24,7 @@ static var _loaded:bool=false
 static var _mode:String=LIVE
 static var _threshold:float=DEFAULT_HYBRID_THRESHOLD
 static var _record:bool=true
+static var _reader_model:String=""   ## "" = the voice model (order_reader.gd)
 static var settings_path:String=SETTINGS_PATH
 
 static func _ensure()->void:
@@ -35,6 +36,7 @@ static func _ensure()->void:
 		if saved in MODES: _mode=saved
 		_threshold=clampf(float(cfg.get_value("ai","hybrid_threshold",DEFAULT_HYBRID_THRESHOLD)),0.3,0.99)
 		_record=bool(cfg.get_value("ai","record_interactions",true))
+		_reader_model=String(cfg.get_value("ai","reader_model","")).strip_edges().substr(0,120)
 
 ## Current mode; the LEVIATHAN_AI_MODE environment variable wins for this launch.
 static func mode()->String:
@@ -87,6 +89,19 @@ static func set_records_interactions(value:bool,persist:bool=true)->void:
 	_record=value
 	if persist: _save()
 
+## The model that reads the ruler's orders (order_reader.gd); "" means the
+## same model as the voices. LEVIATHAN_AI_READER_MODEL overrides it.
+static func reader_model()->String:
+	_ensure()
+	return _reader_model
+
+static func set_reader_model(value:String,persist:bool=true)->void:
+	_ensure()
+	var clean:=value.strip_edges()
+	_reader_model="" if "
+" in clean or clean.length()>120 else clean
+	if persist: _save()
+
 static func label(value:String="")->String:
 	return String(LABELS.get(value if not value.is_empty() else mode(),""))
 
@@ -101,6 +116,7 @@ static func reset_for_tests(path:String)->void:
 	_mode=LIVE
 	_threshold=DEFAULT_HYBRID_THRESHOLD
 	_record=true
+	_reader_model=""
 
 static func _save()->void:
 	var cfg:ConfigFile=ConfigFile.new()
@@ -108,4 +124,5 @@ static func _save()->void:
 	cfg.set_value("ai","mode",_mode)
 	cfg.set_value("ai","hybrid_threshold",_threshold)
 	cfg.set_value("ai","record_interactions",_record)
+	cfg.set_value("ai","reader_model",_reader_model)
 	cfg.save(settings_path)

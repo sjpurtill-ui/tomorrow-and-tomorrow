@@ -29,6 +29,7 @@ const PersonsLines:=preload("res://scripts/court_persons_lines.gd")
 const Plain:=preload("res://scripts/plain_speech.gd")
 const Relevance:=preload("res://scripts/court_relevance.gd")
 const RequestAI:=preload("res://scripts/envoy_request_ai.gd")
+const OrderReader:=preload("res://scripts/order_reader.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim","upkeep"]
@@ -807,13 +808,15 @@ var _open_after_pick:Dictionary={}
 var _used:Dictionary={}
 var answer_hook:Callable         ## tests: (audience_id, payload) -> reply body (empty = failure); replaces HTTP for typed answers
 var _reading:Dictionary={}       ## audience_id -> the one live call reading the god's typed answer
+var order_hook:Callable          ## tests: (audience_id, payload) -> reply body (empty = failure/timeout); replaces HTTP for the order reader
+var _ordering:Dictionary={}      ## audience_id -> the one live call reading what the ruler's words mean (order_reader.gd)
 
 # ---------------------------------------------------------------------------
 # Public API (contract)
 # ---------------------------------------------------------------------------
 
 func busy(audience_id:String)->bool:
-	return _requests.has(audience_id) or _picking.has(audience_id) or _reading.has(audience_id)
+	return _requests.has(audience_id) or _picking.has(audience_id) or _reading.has(audience_id) or _ordering.has(audience_id)
 
 func picking(audience_id:String)->bool:
 	return _picking.has(audience_id)
@@ -951,6 +954,64 @@ func _on_answer_response(result:int,response_code:int,_headers:PackedStringArray
 	var done:Variant=request.get("done")
 	if done is Callable and (done as Callable).is_valid(): (done as Callable).call(reading)
 
+# ---------------------------------------------------------------------------
+# The order reader (order_reader.gd): one short call that only reads what the
+# ruler meant, before anyone speaks. done.call({reading, brief}) with a
+# validated reading, or done.call({}) on any failure or timeout (the regex
+# classifier then decides, as offline). False when there is no connection.
+# ---------------------------------------------------------------------------
+
+func read_order(audience_id:String,text:String,done:Callable)->bool:
+	if _ordering.has(audience_id): return true
+	var h:Variant=_hall()
+	if h==null or (h.find(audience_id) as Dictionary).is_empty(): return false
+	var config:=OrderReader.reader_config(_config())
+	if config.is_empty(): return false
+	var brief:=OrderReader.world_brief(audience_id)
+	var payload:=OrderReader.build_payload(text,brief,config)
+	var request:={"stage":"order_read","attempts":1,"config":config,"started_ms":Time.get_ticks_msec(),"payload":payload,"http":null,"done":done,"brief":brief}
+	_ordering[audience_id]=request
+	if order_hook.is_valid():
+		var body:Variant=order_hook.call(audience_id,payload.duplicate(true))
+		var ok:bool=body is PackedByteArray and not (body as PackedByteArray).is_empty()
+		_on_order_response(HTTPRequest.RESULT_SUCCESS if ok else HTTPRequest.RESULT_TIMEOUT,200 if ok else 0,PackedStringArray(),body if ok else PackedByteArray(),audience_id)
+		return true
+	var http:=HTTPRequest.new()
+	add_child(http)
+	request.http=http
+	http.timeout=OrderReader.TIMEOUT_SECONDS
+	http.max_redirects=0
+	http.body_size_limit=OrderReader.MAX_RESPONSE_BYTES
+	http.request_completed.connect(_on_order_response.bind(audience_id))
+	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: order-read-%s-%d" % [audience_id,Time.get_ticks_msec()]])
+	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+		request.http=null
+		http.queue_free()
+		_ordering.erase(audience_id)
+		done.call_deferred({})
+	return true
+
+func _on_order_response(result:int,response_code:int,_headers:PackedStringArray,body:PackedByteArray,audience_id:String)->void:
+	if not _ordering.has(audience_id): return
+	var request:Dictionary=_ordering[audience_id]
+	_ordering.erase(audience_id)
+	var http:Variant=request.get("http")
+	if http is HTTPRequest and is_instance_valid(http): (http as HTTPRequest).queue_free()
+	var envelope:=_envelope_facts(body)
+	var receipt:=_receipt_http(audience_id,request,result,response_code,envelope)
+	var out:={}
+	var reason:=""
+	if result==HTTPRequest.RESULT_SUCCESS and response_code>=200 and response_code<300:
+		var reading:=OrderReader.validate(OrderReader.parse(body),request.brief)
+		if reading.has("rejected"): reason="order reading rejected: "+String(reading.rejected)
+		else: out={"reading":reading,"brief":request.brief}
+	else:
+		reason="order reader timed out" if result==HTTPRequest.RESULT_TIMEOUT else ("could not reach the service (transport %d)" % result if result!=HTTPRequest.RESULT_SUCCESS else _http_words(response_code,String(envelope.get("error",""))))
+	_finish_receipt(receipt,reason=="",reason!="",reason)
+	if reason!="": last_problem[audience_id]=reason
+	var done:Variant=request.get("done")
+	if done is Callable and (done as Callable).is_valid(): (done as Callable).call(out)
+
 ## True when a live model is configured (the court may let it read orders).
 func is_live()->bool:
 	return not _config().is_empty()
@@ -958,7 +1019,10 @@ func is_live()->bool:
 ## offline_order: the offline reading found only a general order; the live
 ## classifier may read it more exactly, and if it does not, the general order
 ## still goes to the court's command engine (never lost).
-func player_speaks(audience_id:String,text:String,offline_order:bool=false)->void:
+## read: the order reader already read these words as talk or a question (and
+## the ruler's line is already in the transcript): the voice only answers in
+## words and classifies nothing.
+func player_speaks(audience_id:String,text:String,offline_order:bool=false,read:bool=false)->void:
 	var clean:String=text.strip_edges().replace("\n"," ").substr(0,MAX_PLAYER_CHARS)
 	if clean.is_empty(): return
 	var h:Variant=_hall()
@@ -966,8 +1030,10 @@ func player_speaks(audience_id:String,text:String,offline_order:bool=false)->voi
 		failed.emit(audience_id,"No audience is waiting.")
 		return
 	# The ruler's words land in the transcript immediately, before any reply.
-	h.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":_day(),"aside":false})
-	_begin(audience_id,"speak",{"player_text":clean,"offline_order":offline_order})
+	var lines:Array=(h.find(audience_id) as Dictionary).get("lines",[])
+	var shown:bool=read and not lines.is_empty() and String((lines[-1] as Dictionary).get("role",""))=="ruler" and String((lines[-1] as Dictionary).get("text",""))==clean
+	if not shown: h.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":_day(),"aside":false})
+	_begin(audience_id,"speak",{"player_text":clean,"offline_order":offline_order and not read,"read":read})
 
 ## Words about people (who is responsible, tell me of, summon, questioning,
 ## accusation, judgment) with a live model: ONE call maps them onto the
@@ -1260,7 +1326,7 @@ func prepare_request(s:Dictionary,stage:String,extra:Dictionary,config:Dictionar
 		payload["reasoning_effort"]="low"
 	var divine:Array=_divine_allowed(s) if stage=="speak" else []
 	if stage=="command" or stage=="persons": keys.append("narrator")
-	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=PersonsBridge.response_format(keys) if stage=="persons" else response_format(keys,divine,stage=="speak")
+	if bool(config.get("structured_output",false)) and not bool(_compat.get("no_schema",false)): payload["response_format"]=PersonsBridge.response_format(keys) if stage=="persons" else response_format(keys,divine,stage=="speak" and not bool(extra.get("read",false)))
 	var headers:PackedStringArray=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: audience-%s-%d" % [String(s.id),Time.get_ticks_msec()]])
 	return {"scene":s,"stage":stage,"extra":extra,"config":config,"payload":payload,"headers":headers,"keys":keys,
 		"attempts":0,"max_attempts":MAX_ATTEMPTS,"downgraded":false,"http":null}
@@ -1310,7 +1376,7 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 			detail="reply cut off at the token cap" if String(envelope.get("finish_reason",""))=="length" else ("model declined to answer" if bool(envelope.get("refusal",false)) else "reply was not the expected JSON")
 		else:
 			var s:Dictionary=request.scene
-			var heard_command:Dictionary=parsed.get("command",{})
+			var heard_command:Dictionary={} if bool((request.extra as Dictionary).get("read",false)) else parsed.get("command",{})
 			if not (String(heard_command.get("act",""))=="command" and String(heard_command.get("verb","none"))!="none" and float(heard_command.get("confidence",0.0))>=CC.LIVE_CONFIDENCE):
 				heard_command=GENERAL_ORDER if bool((request.extra as Dictionary).get("offline_order",false)) else {}
 			if String(request.stage)=="speak" and command_router.is_valid() and not heard_command.is_empty():
@@ -3137,7 +3203,9 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			if bench==0: return who+" Nobody else is on the bench, so 'envoy' may add one more line. 1 to 2 lines total. mood_shift 0."
 			return who+" 'envoy' says at most 2 lines in all."+_gate_words(s)+" mood_shift 0."
 		"speak":
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_gate_words(s),_divine_classify_words(s),COMMAND_CLASSIFY]
+			var classify:=COMMAND_CLASSIFY
+			if bool(extra.get("read",false)): classify=" These words were talk or a question, not an order: nobody acts, nobody is harmed or seized, nobody marches, nothing changes hands; no line claims or promises that anything was done."
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now). Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),_gate_words(s),_divine_classify_words(s),classify]
 		"divine":
 			return _divine_instruction(s,extra)
 		"command":

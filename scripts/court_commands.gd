@@ -331,6 +331,9 @@ static func resolve_ref(ref:String,audience:Dictionary,list:Array[Dictionary],ac
 	## A live classifier's reference ("Ansel", "him", "the war leader").
 	var clean:=ref.strip_edges()
 	if clean=="": return {}
+	# An exact roster key (the order reader's ids): that entry, nobody else.
+	var keyed:=_entry(list,clean)
+	if not keyed.is_empty(): return keyed
 	var lower:=clean.to_lower()
 	if "before me" in lower or "in front of me" in lower or "before you" in lower:
 		var speaker:=_speaker_entry(list)
@@ -408,9 +411,18 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if not decree.is_empty(): return decree
 	var list:=roster(audience)
 	var cls:=classify(clean)
+	# The order reader (order_reader.gd) resolved a war or a town's fate to
+	# ids we supplied: the engine carries that reading. Never a person.
+	var forced:Dictionary=context.get("war_reading",{}) if context.get("war_reading") is Dictionary else {}
+	if not forced.is_empty():
+		cls.act="command"; cls.verb="war"; cls["war"]=forced
+		return _perform(id,audience,list,"war",_speaker_entry(list),{},clean,cls,bool(forced.get("insist",false)),context)
+	# The reader heard "yes, go ahead" to an objection or a hesitation.
+	if bool(context.get("insist",false)): cls.act="command"; cls.insist=true
 	var live:Dictionary=context.get("live",{}) if context.get("live") is Dictionary else {}
 	var from_live:=false
-	if not live.is_empty() and (String(cls.act) in ["statement","question"] or String(cls.verb) in ["none","order"]):
+	var reader:=bool(context.get("reader",false))
+	if not live.is_empty() and (reader or String(cls.act) in ["statement","question"] or String(cls.verb) in ["none","order"]):
 		var lact:=String(live.get("act",""))
 		var lverb:=String(live.get("verb","none"))
 		if lact=="command" and lverb in VERBS and float(live.get("confidence",0.0))>=LIVE_CONFIDENCE and live_verb_allowed(lverb,clean):
@@ -625,7 +637,7 @@ static func _confirmed_war(id:String,audience:Dictionary,list:Array[Dictionary],
 	## there is no such question open or these words are not a yes.
 	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	if not bool(pending.get("confirm",false)) or Hall._day()-int(pending.get("day",-99))>PENDING_DAYS: return {}
-	if _re(CONFIRM_PATTERN).search(clean)==null and _re(INSIST_PATTERN).search(clean)==null: return {}
+	if not bool(context.get("confirm",false)) and _re(CONFIRM_PATTERN).search(clean)==null and _re(INSIST_PATTERN).search(clean)==null: return {}
 	var march:=WarOrders.read(String(pending.get("text","")),String(audience.get("civ_id","")),id)
 	if march.is_empty(): return {}
 	var cls:=classify(clean)
@@ -1188,7 +1200,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	if carrier.is_empty(): carrier=actor if not actor.is_empty() else _speaker_entry(list)
 	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
 	r.verb="war"
-	var decision:=WarOrders.perform(reading,insist,{"general":general})
+	var decision:=WarOrders.perform(reading,insist,{"general":general,"army_id":int(reading.get("army_id",0))})
 	r["war"]=decision
 	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
 	r["actor_says"]=String(decision.get("says",""))
