@@ -431,21 +431,44 @@ static func _join(entry:Dictionary,mark:Dictionary)->void:
 ## one front (on the same side) stand as one mark; forces off the fronts
 ## are grouped by a coarse grid of the same size.
 static func sector_key(at:Vector2,side:String,fronts:Array,sector_px:float)->String:
-	var best_gap:=sector_px*0.6
-	var best:=""
-	for f in fronts.size():
-		var line:PackedVector2Array=fronts[f]
-		var walked:=0.0
+	return _sector_of(at,side,_nearest_front(front_table(fronts),at,sector_px*0.6),sector_px)
+
+
+static func _sector_of(at:Vector2,side:String,near:Dictionary,sector_px:float)->String:
+	if not near.is_empty() and float(near.gap)<=sector_px*0.6: return "f%d:%d:%s" % [int(near.front),floori(float(near.arc)/sector_px),side]
+	return "g%d:%d:%s" % [floori(at.x/sector_px),floori(at.y/sector_px),side]
+
+
+## The fronts once per layout: each line with its bounds and running length.
+static func front_table(fronts:Array)->Array:
+	var out:Array=[]
+	for line_variant in fronts:
+		var line:PackedVector2Array=line_variant
+		if line.size()<2: continue
+		var box:=Rect2(line[0],Vector2.ZERO)
+		var run:=PackedFloat32Array(); run.resize(line.size())
 		for i in range(1,line.size()):
-			var a:=line[i-1]; var b:=line[i]
-			var p:=Geometry2D.get_closest_point_to_segment(at,a,b)
+			box=box.expand(line[i]); run[i]=run[i-1]+line[i-1].distance_to(line[i])
+		out.append({"line":line,"box":box,"run":run,"index":out.size()})
+	return out
+
+
+## The nearest point on any front within `reach` (fronts farther away are
+## skipped by their bounds): {front, point, gap, arc} or {}.
+static func _nearest_front(table:Array,at:Vector2,reach:float)->Dictionary:
+	var best:={}
+	var best_gap:=reach
+	for info in table:
+		if not (info.box as Rect2).grow(best_gap).has_point(at): continue
+		var line:PackedVector2Array=info.line
+		var run:PackedFloat32Array=info.run
+		for i in range(1,line.size()):
+			var p:=Geometry2D.get_closest_point_to_segment(at,line[i-1],line[i])
 			var gap:=p.distance_to(at)
 			if gap<best_gap:
 				best_gap=gap
-				best="f%d:%d:%s" % [f,floori((walked+a.distance_to(p))/sector_px),side]
-			walked+=a.distance_to(b)
-	if best!="": return best
-	return "g%d:%d:%s" % [floori(at.x/sector_px),floori(at.y/sector_px),side]
+				best={"front":int(info.index),"point":p,"gap":gap,"arc":run[i-1]+line[i-1].distance_to(p)}
+	return best
 
 
 ## Which marks are drawn, where, and which carry a card. Pure over screen
@@ -469,6 +492,7 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 	var home:Vector2=context.get("home",Vector2.INF)
 	var sector_px:=float(context.get("sector_px",0.0))
 	var sectors:Dictionary={}
+	var table:=front_table(fronts)
 	var ordered:=marks.duplicate()
 	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		if int(a.get("priority",0))!=int(b.get("priority",0)): return int(a.get("priority",0))>int(b.get("priority",0))
@@ -487,12 +511,14 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 		# Far out, the forces on one stretch of front stand as one mark (the
 		# selected force and a town's garrison keep their own).
 		var sector:=""
+		var size:=float(mark.get("size",24.0))
+		# One look along the fronts serves both the sector and the give-way.
+		var near:=_nearest_front(table,at,maxf(sector_px*0.6,size*0.5+9.0))
 		if sector_px>0.0 and not bool(mark.get("selected",false)) and not bool(mark.get("garrison",false)):
-			sector=sector_key(at,String(mark.get("side","ours")),fronts,sector_px)
+			sector=_sector_of(at,String(mark.get("side","ours")),near,sector_px)
 			if sectors.has(sector):
 				_join(sectors[sector],mark); hidden[id]="sector"; continue
 		if (ours and ours_kept>=MAX_OURS) or (not ours and theirs_kept>=MAX_THEIRS): hidden[id]="budget"; continue
-		var size:=float(mark.get("size",24.0))
 		# Same side and overlapping: one mark stands for the stack. A town's
 		# garrison never stacks: its card counts only the men in the town.
 		var joined:=false
@@ -511,12 +537,8 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 			sectors[sector]=entry
 			entry["sector"]=true
 		# Give way to the front: step back off the line toward our own side.
-		var nearest:=Vector2.INF; var gap:=INF
-		for line:PackedVector2Array in fronts:
-			for i in range(1,line.size()):
-				var p:=Geometry2D.get_closest_point_to_segment(at,line[i-1],line[i])
-				var d:=p.distance_to(at)
-				if d<gap: gap=d; nearest=p
+		var nearest:Vector2=near.get("point",Vector2.INF)
+		var gap:=float(near.get("gap",INF))
 		# Clear of the line, and of the counter hanging beneath the mark.
 		var clearance:=size*0.5+(4.0 if sector_px<=0.0 else 9.0)
 		if gap<clearance:

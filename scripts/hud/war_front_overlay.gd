@@ -140,6 +140,11 @@ var drawn_marks:Array=[]
 ## Captions requested by the last drawing, and their placement memory.
 var caption_requests:Array=[]
 var caption_memory:Dictionary={}
+## The lettering is placed afresh at most this often while the chart only
+## eases or pans; between times each label follows its mark.
+const CAPTION_REPLACE_MSEC:=250
+var caption_key:=0
+var caption_placed_msec:=-100000
 var caption_extent:Dictionary={}
 var placed_captions:Array=[]
 var dropped_captions:=0
@@ -453,8 +458,36 @@ func _note_front_events(before:Dictionary,after:Dictionary)->void:
 		if toward.length_squared()<0.000001: continue
 		var radius:=sigma*BULGE_RADIUS_SIGMA
 		bulges.append({"pos":at.point,"dir":(toward if bool(event.forward) else -toward).normalized(),"amp":sigma*BULGE_AMP_SIGMA,"radius":radius,"t":0.0,"dur":BULGE_SECONDS,
-			"ghost":_ghost_near(at.point,radius*2.5)})
+			"ghost":_ghost_near(at.point,radius*2.5),"forward":bool(event.forward)})
 	while bulges.size()>MAX_BULGES: bulges.pop_front()
+
+
+## The screen polygon between where a front stood (the bulge's ghost) and
+## where it is drawn now, near the bulge; empty when it cannot be made.
+func _gained_ground(bulge:Dictionary)->PackedVector2Array:
+	var ghost:PackedVector2Array=bulge.get("ghost",PackedVector2Array())
+	if ghost.size()<2: return PackedVector2Array()
+	var reach:=float(bulge.radius)*2.5
+	var now:=PackedVector2Array(); var best_d:=INF
+	for entry in live_fronts:
+		if float(entry.get("alpha",0.0))<=0.3: continue
+		var drawn:=_bulged(entry.points)
+		var near:=PackedVector2Array(); var closest:=INF
+		for p in drawn:
+			var d:=p.distance_to(bulge.pos)
+			closest=minf(closest,d)
+			if d<=reach: near.append(p)
+		if near.size()>=2 and closest<best_d: best_d=closest; now=near
+	if now.size()<2: return PackedVector2Array()
+	# Both runs the same way round, then one closed ring.
+	var along:=ghost[-1]-ghost[0]
+	if (now[-1]-now[0]).dot(along)<0.0: now.reverse()
+	var ring:=_poly(ghost)
+	var back:=_poly(now)
+	if ring.size()<2 or back.size()<2: return PackedVector2Array()
+	back.reverse()
+	ring.append_array(back)
+	return ring
 
 
 ## Where the line was drawn near a point before it gave way (world), kept
@@ -602,7 +635,11 @@ func collect()->Dictionary:
 		sieges.append({"pos":_v2(siege.get("target_position",{})) if offensive else home,"pressure":float(siege.get("pressure",0.0)),"works":works,"ours":offensive,"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	var raids:=_raid_inputs(today,home)
 	var garrisons:=_garrison_inputs()
-	var battles:=BattleSource.collect(MilitaryCampaign,_rival_militaries(),_battle_context(today,home,friendly,garrisons),rival_memory)
+	# The towns and peoples a battle is named by are read only while one is fought.
+	var rivals:=_rival_militaries()
+	var battles:Array=[]
+	if BattleSource.any_fighting(MilitaryCampaign,rivals) or not rival_memory.is_empty():
+		battles=BattleSource.collect(MilitaryCampaign,rivals,_battle_context(today,home,friendly,garrisons),rival_memory)
 	var inputs:={"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
@@ -1376,6 +1413,13 @@ func _draw()->void:
 			for run in _drape(road.points,step):
 				_dashed(run,Color(OURS,0.75),2.0,5.0,5.0)
 				hits.append({"kind":"army","line":run,"army_id":int(road.army_id)})
+	# The ground won (or lost) as a front gives way: washed in the winner's
+	# colour between where the line stood and where it now runs, fading.
+	for bulge in bulges:
+		var gained:=_gained_ground(bulge)
+		if gained.size()>=3 and _fillable(gained):
+			var fade:=1.0-clampf(float(bulge.t)/maxf(0.001,float(bulge.dur)),0.0,1.0)
+			draw_colored_polygon(gained,Color(OURS_WASH if bool(bulge.get("forward",true)) else THEIRS_WASH,0.34*fade))
 	for index in live_fronts.size():
 		var entry:Dictionary=live_fronts[index]
 		if float(entry.alpha)<=0.01: continue
@@ -1463,7 +1507,7 @@ func _battle_entries(band:String)->Array:
 			if (group.members as Array).size()==1: grouped.append(group.members[0])
 			else: grouped.append({"at":group.at,"battle":(group.members[0] as Dictionary).battle,"group":group})
 		entries=grouped
-	var r:=BattleMarks.MARK_RADIUS*(0.9 if wide else 1.0)
+	var r:=BattleMarks.MARK_RADIUS*_battle_scale(band)
 	for entry in entries:
 		var battle:Dictionary=entry.battle
 		entry["radius"]=r+3.0
@@ -1472,6 +1516,11 @@ func _battle_entries(band:String)->Array:
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
 	battle_cache=entries
 	return entries
+
+
+## A battle's mark a little larger up close, a little smaller far out.
+static func _battle_scale(band:String)->float:
+	return float({"local":1.15,"regional":1.0,"continental":0.85,"world":0.8}.get(band,1.0))
 
 
 static func _battle_men(battle:Dictionary)->int:
@@ -1504,7 +1553,7 @@ func _draw_battles(entries:Array,band:String)->void:
 			hits.append({"kind":"battles","centre":at,"radius":float(entry.radius)+4.0,"battles":members,"line":line})
 			continue
 		var battle:Dictionary=entry.battle
-		var scale:=(0.85 if wide else 1.0)*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
+		var scale:=_battle_scale(band)*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
 		BattleMarks.draw_battle(self,at,battle,era,scale)
 		if band!="world":
 			var id:=String(battle.get("id",""))
@@ -1528,18 +1577,25 @@ func draw_animated(canvas:CanvasItem)->void:
 		var heat:PackedFloat32Array=run.heat
 		var alpha:=float(run.alpha)*float(run.peak)
 		var wide:=bool(run.wide)
-		canvas.draw_polyline(points,Color(THEIRS_WASH,(0.20+0.10*breath)*alpha),14.0 if wide else 24.0,true)
-		canvas.draw_polyline(points,Color(THEIRS,(0.30+0.16*breath)*alpha),8.0 if wide else 14.0,true)
+		canvas.draw_polyline(points,Color(THEIRS_WASH,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
+		canvas.draw_polyline(points,Color(THEIRS,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
+		# Teeth biting into their side from the edge of the ink, about every
+		# 14 px, in a slow wave running along the stretch being fought over.
 		var n:=points.size()
-		for i in range(0,n-1,2 if n>8 else 1):
+		var run_px:=0.0
+		for i in range(1,n): run_px+=points[i-1].distance_to(points[i])
+		var stride:=clampi(roundi(14.0*float(n-1)/maxf(1.0,run_px)),1,4)
+		var edge:=3.5 if wide else 5.0
+		for i in range(0,n-1,stride):
 			var h:=heat[i]
 			if h<0.3: continue
 			var a:=points[i]; var b:=points[i+1]
 			var along:=(b-a).normalized()
-			var wave:=1.0 if still else 0.72+0.38*sin(float(i)*0.9-t*3.2)
-			var tooth:=((6.0 if wide else 9.0)+7.0*h)*wave
-			var tri:=PackedVector2Array([a-along*4.5,a+along*4.5,a+normals[i]*tooth])
-			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(THEIRS,0.92*float(run.alpha)))
+			var wave:=1.0 if still else 0.8+0.4*sin(float(i)*0.9-t*3.2)
+			var tooth:=((6.0 if wide else 8.0)+(6.0 if wide else 9.0)*h)*wave
+			var base:=a+normals[i]*edge
+			var tri:=PackedVector2Array([base-along*5.0,base+along*5.0,base+normals[i]*tooth])
+			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(THEIRS,0.95*float(run.alpha)))
 	if still: return
 	for entry in battle_cache:
 		if not bool(entry.get("live",false)): continue
@@ -2532,19 +2588,35 @@ func _caption_obstacles()->Dictionary:
 
 
 func _letter_captions(font:Font)->void:
-	placed_captions.clear()
-	dropped_captions=0
-	if caption_requests.is_empty(): return
-	var notes:Array=[]
-	for request in caption_requests:
-		var entry:Dictionary=request.duplicate()
-		entry.extent=_caption_size(String(request.text),font,String(request.get("style","card")))
-		notes.append(entry)
-	var obstacles:=_caption_obstacles()
-	var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
-	caption_memory=result.memory
-	placed_captions=result.notes
-	dropped_captions=(result.dropped as Array).size()
+	if caption_requests.is_empty():
+		placed_captions.clear(); dropped_captions=0; caption_key=0
+		return
+	var key_parts:=PackedStringArray()
+	for request in caption_requests: key_parts.append(String(request.id)+"|"+String(request.text)+"|"+str(int(request.priority)))
+	var key:=hash(key_parts)
+	var now:=Time.get_ticks_msec()
+	if key==caption_key and now-caption_placed_msec<CAPTION_REPLACE_MSEC and not placed_captions.is_empty():
+		# The same labels a moment later: each follows its mark.
+		var anchors:Dictionary={}
+		for request in caption_requests: anchors[String(request.id)]=request.anchor
+		for caption in placed_captions:
+			if not anchors.has(String(caption.id)): continue
+			var moved:=(anchors[String(caption.id)] as Vector2)-(caption.anchor as Vector2)
+			caption.rect=Rect2((caption.rect as Rect2).position+moved,(caption.rect as Rect2).size)
+			caption.anchor=anchors[String(caption.id)]
+	else:
+		var notes:Array=[]
+		for request in caption_requests:
+			var entry:Dictionary=request.duplicate()
+			entry.extent=_caption_size(String(request.text),font,String(request.get("style","card")))
+			notes.append(entry)
+		var obstacles:=_caption_obstacles()
+		var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
+		caption_memory=result.memory
+		placed_captions=result.notes
+		dropped_captions=(result.dropped as Array).size()
+		caption_key=key
+		caption_placed_msec=now
 	for caption in placed_captions:
 		var box:Rect2=caption.rect
 		var anchor:Vector2=caption.anchor

@@ -8,7 +8,9 @@ extends Control
 ##   b_long_front         a later front, about 40 hosts and 15 battles (medium);
 ##   c_long_front_far     the same front far out: forces per stretch of
 ##                        front, battles per place;
-##   d_won_battle_surge   a front just after a won battle, mid-surge.
+##   d_won_battle_surge   a front just after a won battle, mid-surge;
+##   e_worm_close_a/_b    two battles on a front up close, at two moments of
+##                        the worm's working (its motion, frozen twice).
 ## Run only through tools/run_isolated_gpu_probe.ps1 with
 ## -- --capture-dir=<absolute dir>. Quits by itself.
 
@@ -70,7 +72,9 @@ func _ready()->void:
 	city_labels=towns
 	overlay.terrain=self
 	var long_front:=_long_front()
-	plates=[_early(),long_front,_far(long_front),_surge()]
+	var worm:=_worm()
+	var later:=worm.duplicate(true); later.name="e_worm_close_b"; later.clock=2.2
+	plates=[_early(),long_front,_far(long_front),_surge(),worm,later]
 	_next()
 
 
@@ -202,6 +206,19 @@ func _surge()->Dictionary:
 	return {"name":"d_won_battle_surge","band":"regional","title":"Just after a won battle: the front surges forward and settles where control now lies",
 		"view":{"centre":Vector2(4,-6),"scale":18.0},"towns":[[Vector2(-30,-30),"Seanstone"],[Vector2(4.5,-2.0),"Hollin"],[Vector2(24,-8),"Kesh"]],
 		"river":[Vector2(-20,-60),Vector2(1,-20),Vector2(3,10),Vector2(-8,40)],"inputs":before,"after":after,"steps":24}
+
+
+func _worm()->Dictionary:
+	var home:=Vector2(-30,0)
+	var friendly:=[]; var enemy:=[]
+	for k in 3:
+		friendly.append({"id":str(k),"army_id":k+1,"pos":Vector2(-2.5,-6.0+float(k)*6.0),"strength":3200.0,"full":3600,"morale":0.66-0.2*float(k==1),"era":1,"general":["Arno Kell","Ysa Morn",""][k],"doing_context":{"status":"stationed"}})
+		enemy.append({"id":"e%d" % k,"pos":Vector2(3.5,-6.0+float(k)*6.0),"strength":3000.0,"low":2600,"high":3400,"age_days":0,"observed":true,"owner":"Esurai","era":1,"will_low":0.4,"will_high":0.65})
+	var battles:=[_battle("w1",Vector2(0.6,-5.8),0.35,3,"Hollin",1,3200,2700),_battle("w2",Vector2(0.4,0.3),-0.25,2,"Varn ford",2,2900,3100)]
+	return {"name":"e_worm_close_a","band":"local","clock":0.9,"title":"Two battles on a front up close: the fought-over stretch of the line works like a worm",
+		"view":{"centre":Vector2(0.5,-1.5),"scale":80.0},"towns":[[Vector2(-4.5,-9.0),"Tsaren"]],"river":[Vector2(-3,-14),Vector2(0.4,-4),Vector2(1.2,6),Vector2(-2,12)],
+		"inputs":{"mode":"front","stage":"lettered","home":home,"today":700,"friendly":friendly,"enemy":enemy,"battles":battles,
+			"engagements":[{"pos":Vector2(0.6,-5.8),"axis":Vector2.RIGHT,"ours":"flank_attack","theirs":"dense_line","rounds":3,"army_id":1,"phase_ours":"closing","phase_theirs":"hold","our_troops":3200,"their_troops":2700}]}}
 
 
 # --- The painted stand-in for the ground ----------------------------------------------------

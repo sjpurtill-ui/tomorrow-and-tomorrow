@@ -381,6 +381,16 @@ static func rivals(actors:Dictionary,context:Dictionary,memory:Dictionary)->Arra
 	return out.slice(0,MAX_BATTLES)
 
 
+## Whether anything is being fought at all (a cheap look before the rest).
+static func any_fighting(military:Variant,actors:Dictionary)->bool:
+	if not engagements_of(military).is_empty(): return true
+	var siege:Variant=dig(military,["active_siege"])
+	if siege is Dictionary and not (siege as Dictionary).is_empty(): return true
+	for owner in actors:
+		if not engagements_of(actors[owner]).is_empty(): return true
+	return false
+
+
 ## Everything: ours first, then what our watchers see of the rivals'.
 static func collect(military:Variant,actors:Dictionary,context:Dictionary,memory:Dictionary)->Array:
 	var out:=ours(military,context)
