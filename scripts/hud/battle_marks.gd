@@ -112,6 +112,11 @@ static func label(battle:Dictionary)->String:
 		if String(battle.get("status",""))=="besieged": return "%s besieged · day %d" % [place,day]
 		return "Siege of %s · day %d" % [place.trim_prefix("Near "),day]
 	if age>0: return "%s · seen %s" % [place,"yesterday" if age==1 else "%s days ago" % EraWords.count_word(age)]
+	# Another people's fight: who is fighting whom, where our watchers see it.
+	if not bool(battle.get("ours",true)):
+		var sides:Dictionary=battle.get("sides",{})
+		var a:=String((sides.get("a",{}) as Dictionary).get("name","")); var b:=String((sides.get("b",{}) as Dictionary).get("name",""))
+		if a!="" and b!="": return "%s against %s · day %d" % [a,b,day]
 	return "%s · day %d" % [place,day] if place!="" else "Day %d" % day
 
 

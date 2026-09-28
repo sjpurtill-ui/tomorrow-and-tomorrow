@@ -1740,6 +1740,7 @@ func _install_regional_patch(completed:Dictionary)->void:
 	replacement.name="RegionalTerrainLOD"
 	replacement.mesh=completed.mesh
 	replacement.material_override=regional_terrain_patch.material_override if regional_terrain_patch else _create_terrain_material()
+	if regional_terrain_patch==null:_bind_coast_mask(replacement.material_override)
 	# Soft outer edge (coast_mask.gdshaderinc): the patch dissolves into the planet layer.
 	replacement.set_instance_shader_parameter("patch_feather",Vector4(completed.center.x,completed.center.y,float(completed.span),1.0))
 	add_child(replacement)
@@ -1847,6 +1848,24 @@ func _sync_coast_mask()->void:
 			var far:=province_terrain_mesh.material_override as ShaderMaterial
 			far.set_shader_parameter("coast_color%d" % index,color_texture)
 			far.set_shader_parameter("coast_fields%d" % index,fields_texture)
+		# codex/map-speed: the streamed patches read them too. Their painting's
+		# relief cues (world_beauty: hollows lush, crests dry, valleys shaded;
+		# calm macro light at regional scale) and the chart's landform near
+		# the patch edge were written for them but never ran there, so the
+		# patch disagreed with the planet layer beside it.
+		coast_mask_bindings["coast_level%d" % index]=texture
+		coast_mask_bindings["coast_grid%d" % index]=grid
+		coast_mask_bindings["coast_color%d" % index]=color_texture
+		coast_mask_bindings["coast_fields%d" % index]=fields_texture
+		if regional_terrain_patch and regional_terrain_patch.material_override is ShaderMaterial:
+			_bind_coast_mask(regional_terrain_patch.material_override as ShaderMaterial)
+
+## codex/map-speed: the macro rasters as last bound (_sync_coast_mask), for a
+## streamed patch material made after they landed.
+var coast_mask_bindings:Dictionary={}
+
+func _bind_coast_mask(material:ShaderMaterial)->void:
+	for parameter in coast_mask_bindings:material.set_shader_parameter(parameter,coast_mask_bindings[parameter])
 
 func _discovery_mask_pixel(position:Vector2,width:int,height:int)->Vector2:
 	return Vector2((position.x/world_width+0.5)*float(width-1),(position.y/world_depth+0.5)*float(height-1))
@@ -12910,26 +12929,68 @@ func _refresh_local_resource_overlays() -> void:
 		if resource_overlay_root.get_child_count()>=16: break
 	rendered_resource_overlay_zoom_key=_resource_overlay_view_key()
 
+## codex/map-speed: finished ground indications (their meshes and
+## materials) by occurrence, chart and world, so the overlay rebuilt at the
+## end of a zoom (its clusters regroup with the view) reuses them: building
+## one cost 17 ms of height samples.
+var resource_indication_cache:Dictionary={}
+const RESOURCE_INDICATION_CACHE_LIMIT:=48
+## Rock outcrops are some 50-150 m across: under a pixel once the view is
+## wider than this (km), so wider views leave them out (7 ms to build).
+const RESOURCE_OUTCROP_MAX_VIEW_KM:=40.0
+
 func _resource_ground_indication(cluster:Dictionary)->MeshInstance3D:
 	# An indication is an approximate exposed-ground area, not a surveyed ore
 	# boundary. It only exists for already recognized local occurrences.
+	var rocks_resolved:=camera==null or camera.size<=RESOURCE_OUTCROP_MAX_VIEW_KM
+	var key:=[String(cluster.resource),cluster.position,String(cluster.visual_stage),CivilizationSystem.fog_revision,CivilizationSystem.revealed_areas.size(),GameState.world_seed,GameState.active_province,rocks_resolved]
+	var parts:Array=resource_indication_cache.get(key,[])
+	if parts.is_empty():
+		var built:=_build_resource_ground_indication(cluster,rocks_resolved)
+		var built_rocks:=built.get_node_or_null("ExposedRockFaces") as MeshInstance3D
+		if resource_indication_cache.size()>=RESOURCE_INDICATION_CACHE_LIMIT:resource_indication_cache.erase(resource_indication_cache.keys()[0])
+		resource_indication_cache[key]=[String(built.name),built.mesh,built.material_override,built_rocks.mesh if built_rocks else null,built_rocks.material_override if built_rocks else null]
+		return built
+	var patch:=MeshInstance3D.new()
+	patch.name=String(parts[0])
+	patch.mesh=parts[1]
+	patch.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	patch.material_override=parts[2]
+	if parts[3]!=null:
+		var rocks:=MeshInstance3D.new()
+		rocks.name="ExposedRockFaces"
+		rocks.mesh=parts[3]
+		rocks.material_override=parts[4]
+		patch.add_child(rocks)
+	return patch
+
+func _build_resource_ground_indication(cluster:Dictionary,rocks:bool=true)->MeshInstance3D:
 	var center:Vector3=cluster.position
 	var style:=LANDSCAPE_VISUALS.surface_style(String(cluster.resource))
 	var radius:=0.35 if String(cluster.visual_stage)=="recognized" else 0.65
 	var surface:=SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Each of the 13 x 13 grid nodes is sampled once; the 12 x 12 cells'
+	# corners share them (up to six each) exactly as before.
+	var node_points:=PackedVector3Array()
+	var node_colors:=PackedColorArray()
+	for node_z in 13:
+		for node_x in 13:
+			var offset:=Vector2(float(node_x)/12.0*2.0-1.0,float(node_z)/12.0*2.0-1.0)*radius
+			var point:=Vector2(center.x,center.z)+offset
+			var mottling:=clampf(0.55+detail_noise.get_noise_2d(point.x*8.0,point.y*8.0),0.0,1.0)
+			var edge:=1.0-smoothstep(0.25,1.0,offset.length()/radius+mottling*0.20)
+			if not _world_position_is_revealed(Vector3(point.x,0.0,point.y)): edge=0.0
+			var soil:Color=style.soil
+			soil.a=edge*mottling*0.50
+			node_colors.append(soil)
+			node_points.append(Vector3(point.x,_height_at(point.x,point.y)+0.002,point.y))
 	for z in 12:
 		for x in 12:
 			for corner in [Vector2i(0,0),Vector2i(0,1),Vector2i(1,1),Vector2i(0,0),Vector2i(1,1),Vector2i(1,0)]:
-				var offset:=Vector2(float(x+corner.x)/12.0*2.0-1.0,float(z+corner.y)/12.0*2.0-1.0)*radius
-				var point:=Vector2(center.x,center.z)+offset
-				var mottling:=clampf(0.55+detail_noise.get_noise_2d(point.x*8.0,point.y*8.0),0.0,1.0)
-				var edge:=1.0-smoothstep(0.25,1.0,offset.length()/radius+mottling*0.20)
-				if not _world_position_is_revealed(Vector3(point.x,0.0,point.y)): edge=0.0
-				var soil:Color=style.soil
-				soil.a=edge*mottling*0.50
-				surface.set_color(soil)
-				surface.add_vertex(Vector3(point.x,_height_at(point.x,point.y)+0.002,point.y))
+				var node:int=(z+corner.y)*13+x+corner.x
+				surface.set_color(node_colors[node])
+				surface.add_vertex(node_points[node])
 	var patch:=MeshInstance3D.new()
 	patch.name="RecognizedGround_%s" % String(cluster.resource).replace(" ","")
 	patch.mesh=surface.commit()
@@ -12942,7 +13003,7 @@ func _resource_ground_indication(cluster:Dictionary)->MeshInstance3D:
 	sediment_random.seed=GameState.world_seed^int(center.x*1000.0)^int(center.z*1700.0)
 	material.set_shader_parameter("sediment_axis",Vector2.from_angle(sediment_random.randf()*TAU))
 	patch.material_override=material
-	if bool(style.outcrops): _add_resource_outcrops(patch,center,style)
+	if bool(style.outcrops) and rocks: _add_resource_outcrops(patch,center,style)
 	return patch
 
 func _add_resource_outcrops(parent:Node3D,center:Vector3,style:Dictionary)->void:

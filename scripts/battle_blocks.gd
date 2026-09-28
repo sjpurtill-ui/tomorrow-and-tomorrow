@@ -37,6 +37,13 @@ const BASE_SIZE:=[30,40,100,120,250,250]
 const FRONT_MEN:=[8000,12000,16000,20000,24000,30000]
 ## Exchanges in a phase, by age: two hours early, four hours in the rifle age.
 const PHASE_EXCHANGES:=[4,4,4,6,8,8]
+## How much of the line is struck in half an hour of fighting, by age (1.0:
+## close order, shield to shield). Muskets fight at range in open order;
+## rifle, machine-gun and armoured lines are dispersed and dug in, so a host
+## bleeds a few in a hundred an hour and a great battle lasts a day or days
+## (Breitenfeld and Waterloo a long day; Antietam and Sedan a day; armoured
+## battles days), not an hour (tests/test_battle_eval.gd ranges).
+const LETHALITY:=[1.0,1.0,1.0,0.35,0.14,0.08]
 ## Limits on a battle's length in exchanges (thirty minutes each).
 const MIN_EXCHANGES:=12
 const MAX_EXCHANGES:=48
@@ -305,7 +312,8 @@ static func begin(attacker:Dictionary,defender:Dictionary,options:Dictionary={})
 	state.capacity=capacity(era,ground,int(state.directions))
 	var biggest:=maxi(int(state.initial.attacker),int(state.initial.defender))
 	var waves:=ceili(float(biggest)/float(maxi(1,int(state.capacity))))
-	state.max_exchanges=clampi(MIN_EXCHANGES*maxi(1,waves),MIN_EXCHANGES,MAX_EXCHANGES)
+	# A slower age (dispersed lines) fights longer before it is decided.
+	state.max_exchanges=clampi(roundi(float(MIN_EXCHANGES*maxi(1,waves))/float(LETHALITY[era])),MIN_EXCHANGES,MAX_EXCHANGES)
 	state.cur=_new_phase(1)
 	deploy(state,{},true)
 	state.start=snapshot(state)

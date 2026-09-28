@@ -446,13 +446,16 @@ static func reap()->void:
 			job.set("_group",-1)
 		_running.remove_at(index)
 
-## Main thread: stops every worker build and waits for its threads (the
-## owner is leaving the tree, or a test is done with it).
+## Main thread: waits for the threads of every abandoned build (its owner
+## is leaving the tree, or a test is done with it). A build another owner
+## still wants runs on: a worker never touches its owner, so nothing it
+## holds can be freed under it.
 static func drain()->void:
-	for job:RefCounted in _running:job.call("cancel")
-	for job:RefCounted in _running:
+	for index in range(_running.size()-1,-1,-1):
+		var job:RefCounted=_running[index]
+		if not bool(job.get("cancelled")):continue
 		var group:int=job.get("_group")
 		if group>=0:
 			WorkerThreadPool.wait_for_group_task_completion(group)
 			job.set("_group",-1)
-	_running.clear()
+		_running.remove_at(index)

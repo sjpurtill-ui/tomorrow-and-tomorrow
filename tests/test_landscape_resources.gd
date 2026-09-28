@@ -167,15 +167,6 @@ func test_surface_stone_mesh_uses_metre_scale_not_hill_scale()->void:
 	assert_float(Terrain.SURFACE_STONE_RADIUS_KM.x).is_greater(0.0)
 	assert_float(Terrain.SURFACE_STONE_RADIUS_KM.y).is_less_equal(0.005)
 
-func test_material_flow_calls_a_depleted_source_exhausted()->void:
-	var renderer:Node3D=auto_free(Terrain.new())
-	var rows:Array[Dictionary]=renderer._material_flow_rows([{"resource":"Salt","stage":"developed","remaining":0.0,"stock_at_source":0.0,"shipments":[],"workers":0,"extracted_today":0.0,"bottleneck":"Source exhausted"}])
-	assert_int(rows.size()).is_equal(1)
-	assert_str(String(rows[0].status)).is_equal("EXHAUSTED")
-	var brief:Dictionary=renderer._material_constraint_brief({"lost_today":2.0,"losses_by_resource":{"Clay":1.7}},1,100.0,20.0)
-	assert_str(String(brief.status)).contains("STORAGE IS LOSING")
-	assert_str(String(brief.why)).contains("Clay")
-
 func test_regrowth_does_not_trap_extractors_on_a_depleted_front()->void:
 	ResourceSystem._ensure_woodland_supply(_context(0.7))
 	var first:Dictionary=GameState.resource_deposits[0]

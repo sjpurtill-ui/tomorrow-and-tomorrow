@@ -295,11 +295,15 @@ static func from_siege(siege:Dictionary,context:Dictionary)->Dictionary:
 	var rival:=String(siege.get("defender_id","") if offensive else siege.get("attacker_id",""))
 	var pressure:=clampf(float(siege.get("pressure",0.0)),0.0,1.0)
 	var armies:Dictionary=context.get("armies_troops",{})
-	var besiegers:=int(armies.get(int(siege.get("army_id",0)),0))
+	# Ours: the army ringing their town, or the garrison behind our own walls.
+	var besiegers:=int(armies.get(int(siege.get("army_id",0)),0)) if offensive else int(context.get("home_garrison",0))
+	# Theirs: the host behind their walls or around ours, as the siege holds it.
+	var enemy:Dictionary=threat.get("enemy_force",{}) if threat.get("enemy_force") is Dictionary else {}
+	var their_men:=int(enemy.get("troops",threat.get("estimated_strength",threat.get("strength",0))))
 	var name:=String(threat.get("target_region_name",""))
 	var place:=ArmyMarks.place(name) if _usable_name(name) else (String(context.get("home_name","home")) if not offensive else place_name(pos,"",context).trim_prefix("Near "))
 	var a:={"civ_id":"player","name":String(context.get("player_name","")),"colour":OURS_COLOUR,"troops":besiegers,"initial":besiegers,"morale":MORALE_FULL}
-	var b:={"civ_id":rival,"name":_name_for(rival,String(threat.get("source_name","")),context),"colour":_colour_for(rival,context),"troops":int(threat.get("strength",0)),"initial":int(threat.get("strength",0)),"morale":MORALE_FULL}
+	var b:={"civ_id":rival,"name":_name_for(rival,String(threat.get("source_name","")),context),"colour":_colour_for(rival,context),"troops":their_men,"initial":their_men,"morale":MORALE_FULL}
 	return {"id":"siege:%s" % String(siege.get("id","")),"kind":"siege","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":pressure if offensive else -pressure,
 		"status":"besieging" if offensive else "besieged","day":maxi(1,int(siege.get("days",0))),"place_name":place,"ours":true,"army_id":int(siege.get("army_id",0)),
 		"seed":0,"rounds":0,"commanded":false,"skirmish":false,"age_days":0,"observed_day":int(context.get("today",0)),"siege_id":String(siege.get("id",""))}

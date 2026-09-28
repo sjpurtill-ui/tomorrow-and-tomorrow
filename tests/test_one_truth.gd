@@ -57,6 +57,9 @@ func before_test()->void:
 	if _processing.is_empty():
 		for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]: _processing[node]=node.is_processing()
 	AiMode.reset_for_tests("user://__one_truth_test_missing.cfg")
+	# The stubbed live voice's exchanges are never written into the player's
+	# interaction records (user://interactions/), as in court_eval/fixtures.gd.
+	AiMode.set_records_interactions(false,false)
 	OS.unset_environment("LEVIATHAN_AI_READER_MODEL")
 	WorldSimulation.clear()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)

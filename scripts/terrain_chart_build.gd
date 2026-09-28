@@ -13,11 +13,16 @@ extends RefCounted
 const CHART_ON:="const bool MC_CHART_ON = true;"
 const CHART_OFF:="const bool MC_CHART_ON = false;"
 const INCLUDE:="res://scripts/map_chart.gdshaderinc"
-## Beyond the view's own edge rays: the chart starts this much short of where
-## the ground reaches it, and ends a little further, so a view never flips
-## back and forth at the edge.
-const ON_MARGIN:=0.85
-const OFF_MARGIN:=0.75
+## Beyond the view's own edge rays: the chart build comes on where the
+## farthest ground reaches chart scale (its weight is still nothing there,
+## so nothing pops), and goes off a little short of it, so a view never
+## flips back and forth at the edge. The band is narrow on purpose
+## (codex/map-speed): the 50,000 ft view reaches 0.82 at its corners, and
+## held on the chart build after a zoom in from the Region view it drew
+## three times slower (3.3 ms instead of 1.1 on the test GPU), the chart's
+## code taking the registers the painting needs.
+const ON_MARGIN:=1.0
+const OFF_MARGIN:=0.92
 
 ## code hash -> [painted build, chart build]
 static var _builds:Dictionary={}

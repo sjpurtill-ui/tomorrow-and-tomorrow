@@ -4519,7 +4519,8 @@ func resolve_player_battle(civ_id:String,result:Dictionary)->Dictionary:
 	relation["rival_war_exhaustion"]=clampf(float(relation.get("rival_war_exhaustion",0.0))+float(dead+prisoners)/maxf(1.0,population_before_losses)*5.0+(0.025 if decisive and player_won else 0.0),0.0,1.0)
 	if decisive and player_won:
 		civ["wars_lost"]=int(civ.wars_lost)+1
-		if campaign_mode=="offensive" and target_region_id!="":
+		# A raid takes what it can carry and goes; it never takes the town.
+		if campaign_mode=="offensive" and target_region_id!="" and not is_raid:
 			var capture:=_capture_region(civ,target_region_id,home_result,rival_result)
 			civ=capture.get("civilization",civ)
 			strategic_result.merge(capture.get("outcome",{}),true)

@@ -29,6 +29,7 @@ extends RefCounted
 const Record:=preload("res://scripts/battle_record.gd")
 const Account:=preload("res://scripts/battle_account.gd")
 const View:=preload("res://scripts/hud/battle_view.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Source:=preload("res://scripts/hud/battle_marker_source.gd")
 const OverlayScript:=preload("res://scripts/hud/war_front_overlay.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
@@ -59,6 +60,20 @@ const OVERRUN_BIG_LOSS_MAX:=0.06
 const HOURS_SMALL:=8.0
 const HOURS_ANY:=24.0
 const SMALL_SIDE:=60
+## The least a pitched battle between large, comparable hosts (each at least
+## LARGE_SIDE, the smaller at least COMPARABLE of the larger) is fought, in
+## hours, by age: before gunpowder an hour and a half or more (Marathon,
+## Cannae, Hastings: one to eight hours); pike, shot and muskets a long day,
+## three hours or more of the engine's six-exchange day (Breitenfeld, Rocroi,
+## Waterloo); the rifle and armour ages at least two of the engine's days of
+## fighting, eight hours (Antietam, Sedan; armoured battles days).
+const LARGE_SIDE:=5000
+const COMPARABLE:=0.6
+const MIN_HOURS_BY_AGE:=[1.5,1.5,1.5,3.0,8.0,8.0]
+## In the rifle and armour ages a winning host loses at most this share of
+## its strength an hour of fighting (divisions in hard fighting: a few in a
+## hundred a day).
+const WINNER_LOSS_PER_HOUR_LATE:=0.03
 ## A day of this many battles must be fought within this many milliseconds.
 const DAY_BUDGET_MS:=900.0
 
@@ -209,6 +224,9 @@ func _build_base(officials:bool)->Dictionary:
 	out["city_id"]=String(region.id)
 	out["home"]=CivilizationSystem.player_world_origin
 	out["city"]=CivilizationSystem.player_world_origin+Vector2(-20.0,8.0)
+	# The world's own site for Tsaren is where our chart draws it (in play the
+	# two agree; every observation re-publishes the true site).
+	region["position"]=out.city
 	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(out.city_id),.8,DAY0,"scout report","test"),DAY0)
 	CivilizationSystem.city_intelligence.records.player[String(out.city_id)]["position"]={"x":(out.city as Vector2).x,"z":(out.city as Vector2).y}
 	out["civ2_id"]=""; out["city2_id"]=""; out["city2"]=Vector2.INF
@@ -224,6 +242,7 @@ func _build_base(officials:bool)->Dictionary:
 			region2["name"]="Varrow"
 			out["city2_id"]=String(region2.id)
 			out["city2"]=CivilizationSystem.player_world_origin+Vector2(30.0,-12.0)
+			region2["position"]=out.city2
 			CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(out.city2_id),.8,DAY0,"scout report","test"),DAY0)
 			CivilizationSystem.city_intelligence.records.player[String(out.city2_id)]["position"]={"x":(out.city2 as Vector2).x,"z":(out.city2 as Vector2).y}
 	MilitaryCampaign.last_processed_day=DAY0
@@ -559,6 +578,16 @@ func _observe_one(e:Dictionary,listed:Array,marks:Array,clashes:Array,view:Dicti
 		_check(panel_town==map_town,"marker","battle %s: the panel places it at '%s', the map at '%s'" % [id,String(t.get("panel_place","")),String(m.get("place_name",""))])
 		t["skirmish"]=bool(m.get("skirmish",false))
 		t["map_pos"]=m.get("pos",Vector2.INF)
+		# The battle panel itself, opened once a day has been fought: its day
+		# line says the day the map letters.
+		if int(t.get("fought_days",0))>=1 and not bool(t.get("panel_opened",false)) and is_instance_valid(suite):
+			t["panel_opened"]=true
+			var panel:Control=View.open(id,suite)
+			if _check(panel!=null,"panel","battle %s cannot be opened in the battle panel" % id):
+				var words:=String(panel.call("_battle_day_words"))
+				var said:=words.trim_prefix("Day ").trim_suffix(" of the battle")
+				_check(said==_number_word(int(m.get("day",0))) or said==str(int(m.get("day",0))),"timing","battle %s: the panel says '%s', the map day %d" % [id,words,int(m.get("day",0))])
+				View.close_open(suite)
 	# Its clash on the war chart (the worm and arrows): once.
 	var seed:=int(e.get("seed",0))
 	var mine_clashes:=clashes.filter(func(c:Dictionary)->bool: return int(c.get("seed",-1))==seed and not bool(c.get("finished",false)))
@@ -569,6 +598,11 @@ func _observe_one(e:Dictionary,listed:Array,marks:Array,clashes:Array,view:Dicti
 		var at:Vector2=t.get("map_pos",Vector2.INF)
 		if at.is_finite(): _check((c.pos as Vector2).distance_to(at)<=3.0,"marker","battle %s: its clash is drawn %.1f km from its battle mark" % [id,(c.pos as Vector2).distance_to(at)])
 	(t.days as Array).append({"day":int(GameState.elapsed_days),"exchange":int(battle.get("exchange",0)),"round":int(e.get("round",0)),"ours":ours,"theirs":theirs,"progress":progress})
+
+
+func _number_word(n:int)->String:
+	var words:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+	return words[n] if n>=0 and n<words.size() else str(n)
 
 
 ## The town a place name names ("Near Tsaren" and "Tsaren" name Tsaren).
@@ -731,6 +765,14 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 		if not bool(opts.get("force_moves",false)):
 			_check(now_troops==expected,"ledger","%s: our force had %d, lost %d in the fight, %d taken at the end, %d left to hold a town; it should have %d but has %d" % [label,int(before.get("troops",0)),int(lost.losses),taken_at_end,detached,expected,now_troops])
 			_check(int(after.get("dead",0))-int(before.get("dead",0))==int(lost.killed),"ledger","%s: %d of ours were killed but the force's dead grew by %d" % [label,int(lost.killed),int(after.get("dead",0))-int(before.get("dead",0))])
+		# The band is led after the fight by the man who led it, or by the
+		# one who took over when he fell or was taken; never by anyone else.
+		if not after.is_empty() and String((trace.get("force",{}) as Dictionary).get("kind",""))=="field_army":
+			var led:=String((ours.get("commander",{}) as Dictionary).get("name",""))
+			var succession:Dictionary=record.get("commander_succession",{}) if record.get("commander_succession") is Dictionary else {}
+			var should:=String(succession.get("now",led)) if not succession.is_empty() else led
+			var leads:=String((after.get("commander",{}) as Dictionary).get("name",""))
+			_check(leads==should,"ledger","%s: %s led the band into the fight%s, but %s leads it now" % [label,led,(" and %s took over" % should) if should!=led else "",leads])
 		# Report "present" is the force as it stands.
 		if not after.is_empty() and not bool(opts.get("force_moves",false)) and String((trace.get("force",{}) as Dictionary).get("kind",""))=="field_army":
 			_check(int((account.ours as Dictionary).present)==now_troops,"report","%s: the report says %d are still with the band, the army has %d" % [label,int((account.ours as Dictionary).present),now_troops])
@@ -797,6 +839,7 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	for pair in [["killed","killed"],["wounded","wounded"],["fled","fled"],["captured","captured"]]:
 		_check(int(left.get(pair[0],-1))==int(a.get(pair[1],0)),"record","%s: the battle view says %d of ours %s, the report %d" % [label,int(left.get(pair[0],-1)),String(pair[0]),int(a.get(pair[1],0))])
 	_check(int(right.get("captured",-1))==int((account.theirs as Dictionary).taken),"record","%s: the battle view says %d of theirs taken, the report %d" % [label,int(right.get("captured",-1)),int((account.theirs as Dictionary).taken)])
+	_check_panel_captives(id,int((account.theirs as Dictionary).taken),label)
 	var phases:Array=view.get("phases",[])
 	if not phases.is_empty() and not rounds.is_empty():
 		# The phases cover the fight from the first exchange to the last.
@@ -830,6 +873,7 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	if not settled2.is_empty(): _check(String(account.now).contains(String(settled2.get("line","~"))),"aftermath","%s: the report does not say what the general did with the captives" % label)
 	# --- Historical ranges.
 	_check_ranges(record,kind,label)
+	if OS.get_environment("BATTLE_EVAL_REPORTS")=="1": _note("REPORT %s" % Account.text(account))
 	var ours_lost:=_sum_rounds(record,home_side); var theirs_lost:=_sum_rounds(record,enemy_side)
 	_note("%s %s %d v %d, %d exch (%d days seen), ground %s, ours -%d (k%d w%d f%d c%d), theirs -%d (k%d w%d f%d c%d), %s, taken %d" % [label,kind,int(ours.get("initial_troops",0)),int(theirs.get("initial_troops",0)),rounds.size(),int(trace.get("fought_days",0)),
 		String((view.get("ground",{}) as Dictionary).get("kind","")),int(ours_lost.losses),int(ours_lost.killed),int(ours_lost.wounded),int(ours_lost.scattered),int(ours_lost.captured),
@@ -837,13 +881,49 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	return {"record":record,"account":account,"view":view,"kind":kind}
 
 
+## The war leader's court matters about a battle (audience_hall.gd keeps
+## court business as matters, each with its audience).
 func _court_reports(seed:int)->Array:
 	var out:Array=[]
-	for a in Hall.state().get("queue",[]):
-		var audience:Dictionary=a
-		var war:Dictionary=((audience.get("situation",{}) as Dictionary).get("war",{}) as Dictionary) if audience.get("situation") is Dictionary else {}
-		if int(war.get("battle_seed",-1))==seed: out.append(audience)
+	for m in _war_matters():
+		if int((m.war as Dictionary).get("battle_seed",-1))==seed: out.append(m)
 	return out
+
+
+## Every war matter at court: [{matter, audience, war, text}].
+func _war_matters()->Array:
+	var out:Array=[]
+	for m in Hall.state().get("matters",[]):
+		if not m is Dictionary: continue
+		var audience:Dictionary=(m as Dictionary).get("audience",{}) if (m as Dictionary).get("audience") is Dictionary else {}
+		var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+		var war:Dictionary=situation.get("war",{}) if situation.get("war") is Dictionary else {}
+		if war.is_empty(): continue
+		out.append({"matter":m,"audience":audience,"war":war,"text":String((audience.get("petition",{}) as Dictionary).get("summary",""))})
+	return out
+
+
+## The battle panel opened on the finished battle: the captives we took are
+## ours to count, so it says their number exactly, as the report does.
+func _check_panel_captives(id:String,taken:int,label:String)->void:
+	if taken<=0 or id=="" or not is_instance_valid(suite): return
+	var panel:Control=View.open(id,suite)
+	if not _check(panel!=null,"panel","%s cannot be opened in the battle panel once it is over" % label): return
+	var side:Node=panel.find_child("SideRight",true,false)
+	var grid:Node=side.find_child("Totals",true,false) if side!=null else null
+	var shown:=""
+	if grid!=null:
+		var cells:=grid.get_children()
+		for i in range(0,cells.size()-1,2):
+			if cells[i] is Label and (cells[i] as Label).text=="Taken" and cells[i+1] is Label: shown=(cells[i+1] as Label).text
+	elif side!=null:
+		# A skirmish's card: "... 12 taken."
+		var lost:=side.find_child("Lost",true,false) as Label
+		if lost!=null:
+			for part in lost.text.trim_suffix(".").split(", "):
+				if part.ends_with(" taken"): shown=part.trim_suffix(" taken")
+	View.close_open(suite)
+	_check(shown==EraWords.grouped(taken),"panel","%s: the battle panel says '%s' of theirs taken, the report %d" % [label,shown,taken])
 
 
 func _check_ranges(record:Dictionary,kind:String,label:String)->void:
@@ -867,9 +947,21 @@ func _check_ranges(record:Dictionary,kind:String,label:String)->void:
 			_check(float(sum.killed)/float(went)<=LOSER_KILLED_MAX,"range","%s: the beaten side had %d of %d killed" % [label,int(sum.killed),went])
 		if int(sum.killed)+int(sum.wounded)>=10:
 			_check(float(sum.killed)/float(int(sum.killed)+int(sum.wounded))<=(KILLED_SHARE_MAX if won else ROUTED_KILLED_SHARE_MAX),"range","%s: %d killed against %d wounded on the %s side" % [label,int(sum.killed),int(sum.wounded),role])
-	var biggest:=maxi(int((record.get("attacker",{}) as Dictionary).get("initial_troops",0)),int((record.get("defender",{}) as Dictionary).get("initial_troops",0)))
+	var a_in:=int((record.get("attacker",{}) as Dictionary).get("initial_troops",0))
+	var d_in:=int((record.get("defender",{}) as Dictionary).get("initial_troops",0))
+	var biggest:=maxi(a_in,d_in)
+	var smallest:=mini(a_in,d_in)
 	var hours:=float(rounds.size())*0.5
-	_check(hours<=(HOURS_SMALL if biggest<=SMALL_SIDE else HOURS_ANY),"range","%s: %d against %d fought for %.1f hours" % [label,int((record.get("attacker",{}) as Dictionary).get("initial_troops",0)),int((record.get("defender",{}) as Dictionary).get("initial_troops",0)),hours])
+	_check(hours<=(HOURS_SMALL if biggest<=SMALL_SIDE else HOURS_ANY),"range","%s: %d against %d fought for %.1f hours" % [label,a_in,d_in,hours])
+	var age:=clampi(int((record.get("battle",{}) as Dictionary).get("era",0)),0,MIN_HOURS_BY_AGE.size()-1)
+	if not overrun and smallest>=LARGE_SIDE and float(smallest)>=float(biggest)*COMPARABLE:
+		_check(hours>=float(MIN_HOURS_BY_AGE[age]),"range","%s: %d against %d in the %s age were decided in %.1f hours (at least %.1f)" % [label,a_in,d_in,["first","bronze","classical","gunpowder","rifle","armour"][age],hours,float(MIN_HOURS_BY_AGE[age])])
+	if not overrun and age>=4 and kind in ["won","taken","lost","withdrew"] and hours>0.0:
+		var winner:=home_side if kind in ["won","taken"] else enemy_side
+		var went:=maxi(1,int((record.get(winner,{}) as Dictionary).get("initial_troops",0)))
+		var lost:=_sum_rounds(record,winner)
+		var rate:=float(int(lost.killed)+int(lost.wounded))/float(went)/hours
+		_check(rate<=WINNER_LOSS_PER_HOUR_LATE,"range","%s: the winners lost %.1f%% of their strength an hour of fighting" % [label,rate*100.0])
 
 
 ## Checks every battle of ours that ended in this scenario (by trace).

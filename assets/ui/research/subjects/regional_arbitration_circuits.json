@@ -1,0 +1,16 @@
+{
+  "id": "regional_arbitration_circuits",
+  "line": "institutions",
+  "game_year": 240,
+  "approx_historical_year": -3400,
+  "prompt": "c. 3400 BCE: Traveling mediator hears neighboring villages and points to shared water path; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5c27a681-13f6-4045-bbcb-90a14be8d8ba.png",
+  "asset": "res://assets/ui/research/subjects/regional_arbitration_circuits-v1.png",
+  "sha256": "5feb5be89cc46e9992c03f5c648f1fd1c35f53581474be019b4b27d3c79c23da",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear.",
+  "focus": [
+    0.5,
+    0.35
+  ]
+}

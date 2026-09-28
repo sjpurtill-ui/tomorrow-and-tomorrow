@@ -140,13 +140,13 @@ func _build_card()->void:
 	var line:=HBoxContainer.new(); line.add_theme_constant_override("separation",24); column.add_child(line)
 	for key in ["left","right"]:
 		var side:Dictionary=view.sides[key]
-		var box:=VBoxContainer.new(); box.size_flags_horizontal=SIZE_EXPAND_FILL; line.add_child(box)
+		var box:=VBoxContainer.new(); box.name="Side"+key.capitalize(); box.size_flags_horizontal=SIZE_EXPAND_FILL; line.add_child(box)
 		_label(box,_side_kicker(key),"kicker",left_text if key=="left" else right_text)
 		var totals:Dictionary=side.totals
 		var exact:=bool(side.exact)
 		_label(box,"%s went in; %s still standing." % [_n(int(totals.went_in),exact),_n(int(totals.standing),exact)],"body",T.BODY)
-		var lost:=_lost_words(totals,exact)
-		if lost!="": _label(box,lost,"small",T.INK_MUTED)
+		var lost:=_lost_words(totals,exact,bool(view.player) and key=="right")
+		if lost!="": _label(box,lost,"small",T.INK_MUTED).name="Lost"
 	var events:Array=[]
 	for phase in view.phases: events.append_array(phase.events)
 	if not events.is_empty(): _label(column,String(events[-1])+".","body",T.BODY).name="Event"
@@ -250,7 +250,9 @@ func _totals(side:Dictionary,key:String)->Control:
 	grid.add_theme_constant_override("h_separation",10); grid.add_theme_constant_override("v_separation",2)
 	for pair in [["Went in",int(totals.went_in)],["Still standing",int(totals.standing)],["Killed",int(totals.killed)],["Wounded",int(totals.wounded)],["Fled",int(totals.fled)],["Taken",int(totals.captured)]]:
 		var name:=_label(grid,String(pair[0]),"small",T.INK_MUTED); name.autowrap_mode=TextServer.AUTOWRAP_OFF
-		var value:=_label(grid,"none" if int(pair[1])<=0 and String(pair[0]) not in ["Went in","Still standing"] else _n(int(pair[1]),exact),"body",T.INK)
+		# Their men we took are ours to count: said exactly, as the report does.
+		var counted:=exact or (String(pair[0])=="Taken" and bool(view.player) and key=="right")
+		var value:=_label(grid,"none" if int(pair[1])<=0 and String(pair[0]) not in ["Went in","Still standing"] else _n(int(pair[1]),counted),"body",T.INK)
 		value.autowrap_mode=TextServer.AUTOWRAP_OFF
 		value.add_theme_font_override("font",T.font("ui_strong"))
 	return grid
@@ -281,6 +283,10 @@ func _build_line(parent:Node,width:float)->void:
 
 func _plate_row(parent:Node,title:String,plates:Array,key:String,plate_width:float,label_width:float,rear:bool,fit:int=RESERVE_SHOWN)->void:
 	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",8); parent.add_child(row)
+	# Behind the line with nobody waiting, only blocks that broke or fled:
+	# said as that, not as a reserve.
+	if rear and not plates.is_empty() and plates.all(func(p:Dictionary)->bool: return String(p.get("state",""))!="reserve"):
+		title=("Ours who broke or fled" if key=="left" else "Theirs who broke or fled") if bool(view.player) else "%s who broke or fled" % _cap(_strip(String(view.names[key])))
 	var name:=_label(row,title,"small",left_text if key=="left" else right_text)
 	name.custom_minimum_size.x=label_width; name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	name.add_theme_font_override("font",T.font("ui_strong"))
@@ -512,10 +518,11 @@ func _when_words()->String:
 	return Chronicle.date_label(int(view.day)) if int(view.day)>0 else ""
 
 
+## Which day of the fighting it is, as the map letters it under the battle
+## (hud/battle_marker_source.gd day_of: the days it has been fought).
 func _battle_day_words()->String:
-	var started:=int(view.started)
-	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else started
-	var day:=maxi(1,today-started+1)
+	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else int(view.started)
+	var day:=int(preload("res://scripts/hud/battle_marker_source.gd").day_of(record,today))
 	return "Day %s of the battle" % _count(day)
 
 
@@ -534,10 +541,11 @@ func _plate_words(plate:Dictionary)->String:
 	return "%s: %s of %s still with it, %s, %s." % [_cap(Record.arm_words(String(plate.arm),2)),_grouped(int(plate.men)),_grouped(int(plate.men0)),heart,where]
 
 
-func _lost_words(totals:Dictionary,exact:bool)->String:
+## captives_counted: their men we took, ours to count exactly.
+func _lost_words(totals:Dictionary,exact:bool,captives_counted:bool=false)->String:
 	var parts:Array[String]=[]
 	for pair in [["killed","killed"],["wounded","wounded"],["fled","ran"],["captured","taken"]]:
-		if int(totals[pair[0]])>0: parts.append("%s %s" % [_n(int(totals[pair[0]]),exact),String(pair[1])])
+		if int(totals[pair[0]])>0: parts.append("%s %s" % [_n(int(totals[pair[0]]),exact or (captives_counted and pair[0]=="captured")),String(pair[1])])
 	return _cap(", ".join(parts)+".") if not parts.is_empty() else "Nobody lost."
 
 
@@ -624,11 +632,19 @@ class Plate extends Control:
 		if state=="front": draw_rect(Rect2(0,0,w,3),accent)
 		var ink:=T.INK if not faded else Color(T.INK_MUTED,0.8)
 		var icon:=Icons.arm_texture(String(data.get("arm","spear")),T.INK if not faded else T.INK_MUTED,accent)
-		draw_texture_rect(icon,Rect2(5,7,26,26),false,Color(1,1,1,0.55 if faded else 1.0))
 		var strong:=T.font("ui_strong"); var plain:=T.font("ui")
 		var men:=int(data.get("men",0))
 		var number:=preload("res://scripts/hud/era_words.gd").grouped(men) if men>0 else ("broke" if state=="broken" else "gone")
-		draw_string(strong,Vector2(33,22),number,HORIZONTAL_ALIGNMENT_RIGHT,w-38,15,ink if men>0 else (T.RED_TEXT if state=="broken" else T.INK_MUTED))
+		# The whole number always shows ("1,830", never a clipped "1,83"): on a
+		# narrow plate the icon draws smaller and the number steps down a size.
+		var icon_rect:=Rect2(5,7,26,26)
+		var room:=w-38.0
+		var font_size:=15
+		if strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room:
+			icon_rect=Rect2(4,6,17,17); room=w-27.0
+			while font_size>10 and strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room: font_size-=1
+		draw_texture_rect(icon,icon_rect,false,Color(1,1,1,0.55 if faded else 1.0))
+		draw_string(strong,Vector2(w-4.0-room,22),number,HORIZONTAL_ALIGNMENT_RIGHT,room,font_size,ink if men>0 else (T.RED_TEXT if state=="broken" else T.INK_MUTED))
 		if w>=86.0:
 			var word:=Record.arm_words(String(data.get("arm","spear")),maxi(2,men))
 			draw_string(plain,Vector2(33,37),word,HORIZONTAL_ALIGNMENT_RIGHT,w-38,12,T.INK_MUTED)

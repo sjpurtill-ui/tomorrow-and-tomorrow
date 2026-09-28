@@ -87,6 +87,10 @@ static func all()->Array:
 		"ours":[f("pikeman","pike",1000),f("heavy_swordsman","sword_shield",700),f("armored_cavalry","armored_lance",300)],
 		"theirs":[f("pikeman","pike",1000),f("heavy_swordsman","sword_shield",800)],
 		"expect":{"winner":"either","overrun":false}})
+	out.append({"id":"classical_12000v10000","about":"two great hosts of the classical age meet in the open","kind":"field","era":2,"seed":46,"population":80000,
+		"ours":[f("pikeman","pike",6000),f("heavy_swordsman","sword_shield",4000),f("armored_cavalry","armored_lance",2000)],
+		"theirs":[f("pikeman","pike",6000),f("heavy_swordsman","sword_shield",3000),f("light_cavalry","lance",1000)],"budget_ms":9000.0,
+		"expect":{"overrun":false}})
 	out.append({"id":"classical_5000v800_overrun","about":"five thousand overrun eight hundred","kind":"field","era":2,"seed":42,"population":30000,
 		"ours":[f("pikeman","pike",3000),f("heavy_swordsman","sword_shield",2000)],"theirs":[f("levy","improvised",800,0.3)],"their_morale":0.6,
 		"expect":{"winner":"ours","overrun":true}})
@@ -149,6 +153,10 @@ static func all()->Array:
 		"ours":[f("spearman","shield_spear",30,0.4)]})
 	out.append({"id":"siege_tsaren","about":"four hundred ring Tsaren for six days, then storm it","kind":"siege","era":1,"seed":93,"siege_days":6,"population":5000,
 		"ours":[f("spearman","shield_spear",400)]})
+	out.append({"id":"home_besieged","about":"a host of four hundred rings Seanstone behind its palisade, then storms it","kind":"home_siege","era":1,"seed":96,"siege_days":4,"population":4000,
+		"ours":[f("spearman","shield_spear",120)],"watch":120,"theirs":[f("spearman","shield_spear",400)]})
+	out.append({"id":"raid_tsaren","about":"our band raids Tsaren's fields and stores","kind":"raid","era":1,"seed":97,"population":3000,
+		"ours":[f("spearman","shield_spear",150)]})
 	out.append({"id":"garrison_holds_tsaren","about":"our thirty in Tsaren beat off twenty come to take it back","kind":"garrison","era":0,"seed":94,"garrison":30,
 		"ours":[f("levy","spear",40)],"theirs":[f("levy","improvised",20,0.4)],"expect":{"winner":"ours"}})
 	out.append({"id":"garrison_loses_tsaren","about":"our ten in Tsaren against sixty come to take it back","kind":"garrison","era":0,"seed":95,"garrison":10,
@@ -185,6 +193,7 @@ static func all()->Array:
 	out.append({"id":"orders_after_victory","about":"after a victory with captives, the next march and levy go at once","kind":"blocked","era":0,"seed":151,"case":"after_victory"})
 	out.append({"id":"orders_with_raiders_coming","about":"raiders coming at home do not stop a band sent to Tsaren","kind":"blocked","era":0,"seed":152,"case":"raid_pending"})
 	out.append({"id":"orders_during_a_siege","about":"a siege at Tsaren does not stop another band marching elsewhere","kind":"blocked","era":1,"seed":153,"case":"siege_elsewhere","population":4000})
+	out.append({"id":"generals_fight_during_a_siege","about":"with a siege at Tsaren and raiders at home, our generals still fight the bands and towns before them","kind":"blocked","era":1,"seed":154,"case":"commanded_elsewhere","population":6000})
 	out.append({"id":"general_fights_it","about":"our general takes a battle over and fights it himself","kind":"commanded","era":1,"seed":171,"population":4000,
 		"ours":[f("spearman","shield_spear",400)],"theirs":[f("spearman","shield_spear",380)]})
 	# --- Other peoples' battles -----------------------------------------------------------------
