@@ -1,0 +1,12 @@
+{
+  "id": "course_leveling_practice",
+  "line": "infrastructure",
+  "game_year": 240,
+  "approx_historical_year": -3400,
+  "prompt": "c. 3400 BCE: Builders level course of handmade mudbricks with rough board and cord; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8ffa54e2-0482-41a2-a2a6-b36c3b130687.png",
+  "asset": "res://assets/ui/research/subjects/course_leveling_practice-v1.png",
+  "sha256": "881f055eec2173b4a23dc1ac145a5a0718dd7325a26556bea7b028269779420a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
