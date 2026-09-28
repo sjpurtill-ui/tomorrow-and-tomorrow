@@ -1,0 +1,12 @@
+{
+  "id": "spoilage_inspection",
+  "line": "nutrition",
+  "game_year": 325,
+  "approx_historical_year": -2833,
+  "prompt": "c. 2833 BCE: Store Keepers Inspect Jars and Cull Spoilage. Store keepers inspect jars and cull spoilage. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-14cd9366-3bfe-4c66-91e0-65ecc088b036.png",
+  "asset": "res://assets/ui/research/subjects/spoilage_inspection-v1.png",
+  "sha256": "c90f93684f9958e3e988bd07a33a4b079d289e4f0431949d62c0e0b744f94305",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

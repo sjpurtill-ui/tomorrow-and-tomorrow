@@ -12,10 +12,17 @@ extends RefCounted
 ##            "Make twenty spears", "Arm the recruits": the workshops' queue
 ##            (MilitaryCampaign.queue_equipment_production); the materials are
 ##            set aside now. With no number, enough for the recruits waiting.
+##   found_towns  "Stop founding new towns", "don't found any more towns
+##            without my word", "found new towns as you see fit", "our
+##            leaders may settle new land again": the leaders' leave to found
+##            new towns on their own (auto_founding.gd), the same switch as the
+##            Settlement dock's. One town asked for ("found a town by the
+##            river") is not their leave.
 ## Words about a foreign town or its people ("conscript the men of Tsaren",
 ## "take their weapons") are the war leader's business, never these.
 ##
-## read(text) -> {kind:"recruit"|"arm", count, item?, for_recruits?} or {}.
+## read(text) -> {kind:"recruit"|"arm"|"found_towns", count, item?,
+##   for_recruits?, allow?} or {}.
 ## perform(reading) -> {ok, says, outcome, kind, count, ...}: says is the
 ##   official's own plain answer, outcome the narration; ok=false when nothing
 ##   could be set in motion (and says what stands in the way).
@@ -38,6 +45,33 @@ const ITEM_WORDS:=[["spear","\\bspears?\\b"],["bow","\\b(bows?|archers?|bowmen)\
 const ITEM_NAMES:={"improvised":"clubs and sharpened staves","spear":"spears","bow":"bows","sword_shield":"swords and shields","lance":"lances"}
 ## What a recruit is armed with, best first, when the words name no weapon.
 const FIRST_WEAPONS:=["spear","improvised"]
+
+## New towns, the leaders' leave to found them (see found_reading).
+const PLACE_NOUNS:="(?:towns?|cities|city|villages?|settlements?|hamlets?|colony|colonies)"
+const ONE_PLACE:=["town","city","village","settlement","hamlet","colony"]
+## Founding a place: "found new towns", "the founding of new villages",
+## "don't found any more towns"; a plainer verb needs the place to be new:
+## "build new towns", "start more villages" (never "make our towns stronger").
+const FOUND_PLACES:="(?i)\\b(?:found|founding|founds|colonise|colonising|colonize|colonizing)\\s+(?:(?:any|some|more|new|other|further|fresh|another|a|an|no|the|our|of)\\s+){0,3}"+PLACE_NOUNS+"\\b|\\b(?:build|building|start|starting|raise|raising|make|making|plant|planting|settle|settling)\\s+(?:(?:any|a|an|no|some)\\s+)?(?:(?:more|new|other|further|fresh|another)\\s+){1,2}"+PLACE_NOUNS+"\\b"
+## Settling new land: "settle new land", "found new homes".
+const FOUND_LAND:="(?i)\\b(?:found|founding|founds|settle|settling|settles|colonise|colonising|colonize|colonizing)\\s+(?:(?:any|some|more|the|our|of)\\s+){0,2}(?:new|fresh|other|further|free|empty|open|unclaimed|good)\\s+(?:land|lands|ground|homes|hearths|places)\\b"
+## Settlers sent out (only with words that stop or allow it: "send settlers
+## to the river" is one party, not the leaders' leave).
+const SEND_SETTLERS:="(?i)\\bsend(?:s|ing)?\\s+(?:(?:out|off|away|any|more|new|our|the)\\s+){0,3}settlers\\b|\\bsettlers\\s+(?:out|away)\\b"
+## "No more new towns", "new towns only when I order it": said without a verb.
+const NEW_PLACES:="(?i)\\bnew\\s+(?:towns|cities|villages|settlements|colonies)\\b"
+## "found" that is the finding of something ("the scout who found new land").
+const FINDING:="(?i)\\b(who|that|which|had|have|has|we|they|i|he|she|it|scouts?|hunters?|someone|somebody|nobody|everyone)\\s+found\\b"
+## Words that hold the leaders back: nothing is founded without the god's word.
+const FOUND_STOP:="(?i)\\b(stop|stops|stopping|halt|cease|quit|no more|no longer|don'?t|do not|dont|never|not|no new|nobody|no one|forbid|forbidden|ban|banned|mustn'?t|must not|shall not|may not|cannot|can'?t|hold off|leave (?:it |that |them |this |the founding |new towns )?to me|i (?:will|shall|alone|myself) (?:decide|choose|say)|i decide|wait (?:for|on) my|until i|unless i|except (?:when|if|on|by) (?:i|my)|only (?:when|if|on|at|by|after|once|with) (?:i|my|me)|without my (?:word|leave|order|orders|say|permission|command|consent))\\b"
+## ...unless they say the god's word is no longer needed.
+const FOUND_FREE:="(?i)\\b(?:(?:no longer|don'?t|do not|dont|needn'?t|need not|never) (?:need|wait for|wait on|ask for|ask|require|have to (?:ask|wait))|without (?:asking|waiting|needing)|(?:don'?t|do not|never) stop)\\b"
+## Leave given in so many words (one town or one party asked for is not it).
+const FOUND_LEAVE:="(?i)\\b(?:may|can|free to|as you see fit|as they see fit|whenever|again|on (?:your|their) own|yourselves|themselves|let (?:them|the|our|my)|leave (?:it|that|this) to (?:the|our|you)|allow|permit|resume|keep|continue|go on|carry on|you decide|they decide|leaders decide)\\b"
+## A question about it is talk ("why did our leaders found new towns").
+const QUESTION_LEADS:="(?i)^\\s*(?:what|why|how|who|whom|where|when|whose|which)\\b"
+## A march or a strike beside it is the war leader's.
+const FOUND_WAR:="(?i)\\b(attack|march|strike|raid|besiege|storm|assault|invade|conquer|go to war|war on)\\b"
 
 const UNITS:={"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"thirteen":13,"fourteen":14,"fifteen":15,"sixteen":16,"seventeen":17,"eighteen":18,"nineteen":19}
 const TENS:={"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"seventy":70,"eighty":80,"ninety":90}
@@ -78,10 +112,36 @@ static func _names_foreign(lower:String)->bool:
 		if n.length()>=3 and WarOrders._name_hit(lower,n): return true
 	return false
 
+## The leaders' leave to found new towns (auto_founding.gd): {kind:
+## "found_towns", allow} when the words give it or take it back, else {}.
+## Not a question, a march, a foreign town named, one town asked for ("found a
+## new town by the river") or one party sent ("send settlers to the ford").
+static func found_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
+	# "The scout who found new land" came upon it; nobody founded anything.
+	var lower:=_re(FINDING).sub(clean.to_lower(),"$1 came upon",true)
+	if _has(lower,FOUND_WAR) or _names_foreign(lower): return {}
+	var stop:=_has(lower,FOUND_STOP) and not _has(lower,FOUND_FREE)
+	var leave:=_has(lower,FOUND_LEAVE) or _has(lower,FOUND_FREE)
+	var place:=_re(FOUND_PLACES).search(lower)
+	if place!=null:
+		var said:=place.get_string().split(" ",false)
+		if not stop and not leave and String(said[said.size()-1]) in ONE_PLACE: return {}
+	elif not _has(lower,FOUND_LAND):
+		# Settlers sent out, or new towns named without a verb: only with
+		# words that stop or allow it.
+		if not (_has(lower,SEND_SETTLERS) or _has(lower,NEW_PLACES)) or not (stop or leave): return {}
+	return {"kind":"found_towns","allow":not stop}
+
 static func read(text:String)->Dictionary:
 	var clean:=text.strip_edges()
 	var lower:=clean.to_lower()
 	if clean.is_empty() or clean.ends_with("?"): return {}
+	# The god's word on new towns comes first: "at their own judgment" is not
+	# someone else's people, and "against my word" is no war.
+	var founding:=found_reading(clean)
+	if not founding.is_empty(): return founding
 	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
 	# Weapons for our fighters: "make the weapons we need", "arm the recruits".
 	var make:=_re(MAKE_VERBS).search(lower)
@@ -113,6 +173,7 @@ static func perform(reading:Dictionary)->Dictionary:
 	match String(reading.get("kind","")):
 		"recruit": return _recruit(reading)
 		"arm": return _arm(reading)
+		"found_towns": return preload("res://scripts/auto_founding.gd").court_order(bool(reading.get("allow",true)))
 	return {"ok":false,"kind":"","says":"","outcome":""}
 
 static func _recruit(reading:Dictionary)->Dictionary:

@@ -1,0 +1,12 @@
+{
+  "id": "drawbar_fitting",
+  "line": "logistics",
+  "game_year": 325,
+  "approx_historical_year": -2833,
+  "prompt": "c. 2833 BCE: Drawbar Fitting. Drawbar Fitting. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e9e6f932-7242-4721-a976-e560d8ad471a.png",
+  "asset": "res://assets/ui/research/subjects/drawbar_fitting-v1.png",
+  "sha256": "9ffca0082c9772c3c1df90d02d79934230af2643f0bfddc2531c7f9c7552a065",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

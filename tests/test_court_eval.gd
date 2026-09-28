@@ -35,8 +35,10 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## Then words that hold an act back ("don't kill Kavu", "no, don't attack"),
 ## statements that are no order, and how people really type (66 more runs,
 ## the careless reader on the grave ones): offline 491, live 492, sloppy 74.
+## The god's word on new towns ("stop founding new towns", "our leaders may
+## settle new land again": 12 more cases a path): offline 503, live 504.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":491,"live":492,"sloppy":74}
+const BASELINE:={"offline":508,"live":509,"sloppy":74}
 
 var _processing:Dictionary={}
 

@@ -5,6 +5,7 @@ const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Words:=preload("res://scripts/hud/home_plain.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Works:=preload("res://scripts/hud/water_conveyance_controls.gd")
+const AutoFounding:=preload("res://scripts/auto_founding.gd")
 ## SETTLEMENT section: People & Labor / Works & Defense / History.
 ## Replaces the settlement dashboard, the settler side panel, and the
 ## population ledger summary.
@@ -31,7 +32,24 @@ func meta()->Dictionary:
 	}
 
 func tab(sub:int)->Dictionary:
+	# New towns are the whole realm's business: read outside this place's stores.
+	_founding=founding_block() if sub==0 else {}
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab(sub)))
+
+var _founding:Dictionary={}
+
+## The "New towns" switch (auto_founding.gd): whether our leaders found new
+## towns on their own, in plain words, one click either way.
+func founding_block()->Dictionary:
+	var state:=AutoFounding.dock()
+	state["options"]=[
+		{"id":"leaders","label":"Our leaders found them","tip":String(state.leaders_tip),"on_press":_set_founding.bind(true)},
+		{"id":"ruler","label":"Only when I order","tip":String(state.ruler_tip),"on_press":_set_founding.bind(false)}]
+	return state
+
+func _set_founding(enabled:bool)->void:
+	AutoFounding.set_on(enabled)
+	if is_instance_valid(hud):hud.request_immediate_dock_refresh()
 
 func _city_tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()
@@ -104,7 +122,7 @@ func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
 
 
 func signature()->Array:
-	return [GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size(),snappedf(float(GameState.simulation_metrics.get("food_days",-1.0)),0.5),GameState.water_waste_works.get("works",[]).hash(),GameState.water_conveyance.get("lines",[]).size(),snappedf(ResourceSystem.stored_bulk(),1.0)]
+	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size(),snappedf(float(GameState.simulation_metrics.get("food_days",-1.0)),0.5),GameState.water_waste_works.get("works",[]).hash(),GameState.water_conveyance.get("lines",[]).size(),snappedf(ResourceSystem.stored_bulk(),1.0)]
 
 ## What the local leader is putting extra hands on, as a short phrase.
 const FOCUS_WORDS:={"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
@@ -143,6 +161,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 			{"kind":"food","art":0,"title":"Food and water","detail":String(food_reading.sentence),"action":"Food","on_press":jump("economy",0)},
 			{"kind":"building","art":3,"title":"Work and making","detail":"What the workshops are making and how fast.","action":"Production","on_press":jump("production",0)}],
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
+		"founding":_founding,
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":focused_action("Ages and families","",_people_report.bind("population")).on_press,"on_work":focused_action("Who does what","",_people_report.bind("work")).on_press,
 		"on_rename":terrain._open_settlement_naming_panel.bind(id)}]
