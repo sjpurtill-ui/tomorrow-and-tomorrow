@@ -44,6 +44,21 @@ func _ready()->void:
 	strip=Control.new();strip.name="Cards";strip.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.clip_contents=true;add_child(strip)
 	left_button=_arrow("‹",-1);right_button=_arrow("›",1)
 	refresh()
+	_mount_plans.call_deferred()
+
+
+## The battle plans the generals are carrying out stay drawn on the map, as
+## HOI4 keeps its front lines: under the rest of the HUD, over the ground.
+var plans:Control
+
+func _exit_tree()->void:
+	if is_instance_valid(plans):plans.queue_free()
+
+func _mount_plans()->void:
+	var hud:=get_parent()
+	if hud==null or is_instance_valid(plans):return
+	plans=PlanInk.new();plans.bar=self;plans.name="BattlePlans"
+	hud.add_child(plans);hud.move_child(plans,0)
 
 
 func _arrow(text:String,step:int)->Button:
@@ -277,8 +292,8 @@ class ArmyCard extends Control:
 			if rect.has_point(at):
 				match row:
 					0:return Model.gear_words(card.get("gear_detail",{}))
-					1:return "Will to fight %d%%. Below a quarter they break." % roundi(float(card.will)*100.0)
-					2:return String(card.get("supply_words",""))
+					1:return Model.will_words(float(card.will))+"\nBelow a quarter they break."
+					2:return Model.supply_line(card)
 		return tooltip_text
 
 	func _draw()->void:
@@ -315,6 +330,61 @@ class ArmyCard extends Control:
 			var rect:=_bar_rect(row)
 			draw_texture_rect(Icons.command_texture(String(rows[row][0]),T.INK_MUTED,32),Rect2(Vector2(left,rect.position.y-4.0),Vector2(14,14)),false,Color(1,1,1,fade))
 			Model.draw_bar(self,rect,float(rows[row][1]),Color(rows[row][2],fade))
+
+
+class PlanInk extends Control:
+	## Front lines drawn by the player (army_orders.gd give_plan) that a
+	## general is holding: an inked line with its teeth. The army command
+	## panel draws them itself while it is open.
+	var bar:Node
+	var clock:=0.0
+	var heights:Dictionary={}
+
+	func _ready()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE;set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	func _process(delta:float)->void:
+		clock+=delta
+		if clock>=0.1:clock=0.0;queue_redraw()
+
+	func _screen(terrain:Node,point:Dictionary)->Vector2:
+		var at:=Vector2(float(point.get("x",0.0)),float(point.get("z",0.0)))
+		if not heights.has(at):
+			if heights.size()>2048:heights.clear()
+			heights[at]=float(terrain._height_at(at.x,at.y))
+		var world:=Vector3(at.x,float(heights[at])+0.001,at.y)
+		if terrain.camera.is_position_behind(world):return Vector2.INF
+		return terrain.camera.unproject_position(world)
+
+	func _draw()->void:
+		var terrain:Node=bar.terrain if bar!=null else null
+		if not is_instance_valid(terrain) or not ("camera" in terrain) or terrain.camera==null:return
+		if is_instance_valid(MilitaryCampaign.joint_operations.screen):return
+		var command:RefCounted=MilitaryCampaign.command_hierarchy
+		var held:={}
+		for entry:Dictionary in command.data.nodes.values():
+			var order:Dictionary=entry.get("order",{})
+			if String(order.get("mission",""))=="defend":held[String(order.get("zone_id",""))]=true
+		var ink:=BattleMarks.OXBLOOD
+		for region:Dictionary in command.data.zones:
+			if String(region.get("plan",""))!="front" or not held.has(String(region.get("id",""))) or not region.get("line") is Array:continue
+			var line:=PackedVector2Array()
+			for p in region.line:
+				if not p is Dictionary:continue
+				var at:=_screen(terrain,p)
+				if at.is_finite():line.append(at)
+			if line.size()<2:continue
+			draw_polyline(line,Color(BattleMarks.PAPER,0.85),6.0,true)
+			draw_polyline(line,Color(ink,0.9),3.0,true)
+			for i in line.size()-1:
+				var a:=line[i];var b:=line[i+1];var length:=a.distance_to(b)
+				if length<4.0:continue
+				var along:=(b-a)/length;var out:=Vector2(along.y,-along.x)
+				var t:=7.0
+				while t<length:
+					var base:=a+along*t
+					draw_colored_polygon(PackedVector2Array([base-along*4.0,base+along*4.0,base+out*7.0]),Color(ink,0.9))
+					t+=14.0
 
 
 class BandChip extends Control:

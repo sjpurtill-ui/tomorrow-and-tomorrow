@@ -4,7 +4,8 @@ extends Node
 ## army command with a route preview). Run it through
 ## tools/run_isolated_gpu_probe.ps1 at 1600x900. Arguments after "--":
 ##   --era=early|late        1-2 bands at the hearth, or several armies later
-##   --shot=map|recruit|training|command|route|plan
+##   --shot=map|recruit|training|command|route|plan|arrow|front
+##     (front: a front line drawn and ordered, three days on, panel closed)
 ##   --out=res://artifacts/hoi4-armies/<name>.png
 ## Works on the code before and after the HOI4 rework (new hooks are
 ## looked up with has_method), so the same fixture gives before and after.
@@ -72,7 +73,7 @@ func _run()->void:
 	match shot:
 		"recruit":MilitaryCampaign.open_roster("army",false,"recruitment")
 		"training":MilitaryCampaign.open_roster("army",true,"training")
-		"command","route","plan","arrow":await _open_command(shot)
+		"command","route","plan","arrow","front":await _open_command(shot)
 		"map":
 			if terrain.hud and terrain.hud.has_method("select_army") and not MilitaryCampaign.field_armies.is_empty():terrain.hud.select_army(int(MilitaryCampaign.field_armies[0].army_id))
 	await _settle(10)
@@ -82,6 +83,30 @@ func _run()->void:
 	var error:=get_viewport().get_texture().get_image().save_png(output)
 	print("HOI4_ARMIES_CAPTURE ","PASS" if error==OK else "FAIL"," ",output)
 	get_tree().quit(0 if error==OK else 1)
+
+## Moves the camera so these ground points sit in the open map left of the
+## command panel (the panel covers the right third of the screen).
+func _frame(panel:Variant,points:Array)->void:
+	var centre:=Vector2.ZERO
+	for p:Vector2 in points:centre+=p/float(points.size())
+	var view:=get_viewport().get_visible_rect().size
+	var goal:=Vector2((96.0+(view.x-470.0))*0.5 if panel!=null else view.x*0.5,view.y*0.42)
+	for _pass in 3:
+		var here:=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y))
+		var east:=terrain.camera.unproject_position(Vector3(centre.x+1.0,terrain._height_at(centre.x,centre.y),centre.y))-here
+		var south:=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y+1.0))-here
+		var shift:=here-goal
+		var det:=east.x*south.y-east.y*south.x
+		if absf(det)<0.0001:break
+		var a:=(shift.x*south.y-shift.y*south.x)/det
+		var b:=(east.x*shift.y-east.y*shift.x)/det
+		terrain.camera_target+=Vector3(a,0.0,b)
+		terrain._update_camera()
+	await _settle(2)
+	while terrain.terrain_patch_job!=null:
+		terrain._advance_terrain_patch()
+		await get_tree().process_frame
+	await _settle(2)
 
 func _close_unbidden_scenes()->void:
 	## An envoy or court scene the staged contact may raise is not part of
@@ -182,12 +207,24 @@ func _open_command(shot:String)->void:
 	await _settle(3)
 	if panel==null:return
 	var home:Vector2=CivilizationSystem.player_world_origin
-	if shot=="plan" and panel.has_method("begin_plan"):
-		# A drawn front line east of home, before the order is given.
+	if shot in ["plan","front"] and panel.has_method("begin_plan"):
+		# A drawn front line near home: before the order, or three days on.
 		panel.choose_force(army_id)
 		panel.begin_plan("front")
-		for p in [home+Vector2(10,-16),home+Vector2(15,-4),home+Vector2(13,10)]:panel.plan_point(p)
+		var line:=[home+Vector2(10,-16),home+Vector2(15,-4),home+Vector2(13,10)]
+		for p in line:panel.plan_point(p)
 		panel.finish_plan()
+		await _frame(panel,line+[home])
+		if shot=="front":
+			panel._give(false)
+			print("HOI4_CAPTURE front order: ",String(panel.last_answer.get("says","")))
+			for _day in 3:
+				GameState.elapsed_days+=1
+				MilitaryCampaign.command_hierarchy.advance(int(GameState.elapsed_days))
+				MilitaryCampaign._process_field_army_movement_day()
+			panel.queue_free()
+			if terrain.hud and terrain.hud.has_method("select_army"):terrain.hud.select_army(army_id)
+			await _frame(null,line+[home])
 		return
 	if shot=="arrow" and panel.has_method("begin_plan"):
 		panel.choose_force(army_id)
@@ -199,6 +236,7 @@ func _open_command(shot:String)->void:
 		panel.choose_force(army_id);panel.choose_verb("attack")
 		if shot=="route" and panel.has_method("hover_target"):
 			var town:=Orders._v2(Orders.place(city_id).position)
+			await _frame(panel,[home,town])
 			panel.hover_target(panel.map.world_to_screen(town))
 		else:
 			panel.choose_place(city_id)
