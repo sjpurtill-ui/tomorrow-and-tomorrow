@@ -126,8 +126,7 @@ static func reserved(target:Dictionary,include_sieges:bool=true)->bool:
 		# Read each owner's campaign directly; entering its scope only to select
 		# this instance cost two full scope rebinds per owner per query.
 		var military:Node=MilitaryCampaign if id=="player" else WorldSimulation.actors[id].systems.MilitaryCampaign
-		var operations:Array=military.command_hierarchy.data.get("battles",[]).duplicate()
-		if not military.active_engagement.is_empty():operations.append(military.active_engagement)
+		var operations:Array=military.engagements.values()
 		if include_sieges and not military.active_siege.is_empty():operations.append(military.active_siege)
 		for operation:Dictionary in operations:
 			if same_force(operation.get("threat",{}).get("owned_target",{}),target):return true

@@ -7,7 +7,8 @@ extends RefCounted
 ## status(report) -> {
 ##   kind:     "occupied" (a stranger's town we took and hold), "besieged"
 ##             (our siege is round it), "ruined" (burned or broken, as last
-##             seen), "rival_capital" (a people's chief town), "foreign";
+##             seen, or burned by us, from our own record: ruin_status),
+##             "rival_capital" (a people's chief town), "foreign";
 ##   emblem:   whose emblem the card wears ("player" for a town we hold);
 ##   original: the people who held it before;
 ##   glyph:    its cell in resource_icons.settlement_atlas();
@@ -20,6 +21,7 @@ extends RefCounted
 const ICONS=preload("res://scripts/resource_icons.gd")
 const Identity=preload("res://scripts/city_map_identity.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
+const Ledger=preload("res://scripts/town_ledger.gd")
 ## A report of this much damage or more reads as a burned or broken town.
 const RUINED_DAMAGE:=0.6
 ## Mark sizes in design pixels: a plain stranger's town, and the ones that
@@ -28,6 +30,9 @@ const MARK_PX:=34.0
 const MARK_PX_STRONG:=40.0
 
 ## Our hold on a stranger's town, from the world itself; {} when not ours.
+## Whose it is and whether a garrison of ours holds it are the one reading
+## every system uses (town_ledger.hold): the region says whose, and the
+## garrison counts only while the town is ours. held: a garrison stands there.
 static func player_hold(city_id:String)->Dictionary:
 	var system:Node=CivilizationSystem
 	if system==null or city_id.is_empty():return {}
@@ -35,15 +40,19 @@ static func player_hold(city_id:String)->Dictionary:
 	if location.is_empty():return {}
 	var civ:Dictionary=system.civilizations[int(location.owner_index)]
 	var region:Dictionary=civ.strategic_regions[int(location.region_index)]
+	var h:=Ledger.hold(String(civ.id),city_id)
+	if not bool(h.ours):return {}
 	var force:Dictionary=MilitaryCampaign.occupation_force_for_region(String(civ.id),city_id) if MilitaryCampaign!=null else {}
-	if String(region.get("controller",""))!="player" and force.is_empty():return {}
 	var since:=int(region.get("last_control_change_day",-1))
 	if since<=0:since=int(force.get("committed_day",-1))
-	return {"original":String(civ.id),"since":since,"garrison":maxi(0,int(force.get("troops",0))),"integration":float(region.get("integration",0.0))}
+	return {"original":String(civ.id),"since":since,"garrison":int(h.garrison),"held":bool(h.held),"integration":float(region.get("integration",0.0))}
 
 static func status(report:Dictionary)->Dictionary:
 	var city_id:=String(report.get("city_id",""))
 	var original:=String(report.get("civ_id",""))
+	# A town we burned: our own account, dated the day, over any old report.
+	var ruin:=Ledger.our_ruin(city_id)
+	if not ruin.is_empty():return ruin_status(ruin)
 	var hold:=player_hold(city_id)
 	if not hold.is_empty():
 		original=String(hold.original)
@@ -71,6 +80,22 @@ static func status(report:Dictionary)->Dictionary:
 		result.kind="rival_capital";result.glyph=ICONS.SETTLEMENT_GLYPH_RIVAL_CAPITAL;result.mark_px=MARK_PX_STRONG-2.0
 		result.note="Their chief town"
 	return result
+
+## A ruin we made (town_ledger our_ruin): "ruined" from our own record, with
+## the day we burned it and who lives there now; ours while a garrison holds
+## it, nobody's once we left.
+static func ruin_status(ruin:Dictionary)->Dictionary:
+	var civ_id:=String(ruin.get("civ_id",""))
+	var rec:Dictionary=ruin.get("ruin",{})
+	var garrison:=int(ruin.get("garrison",0))
+	var day:=int(rec.get("day",-1))
+	var c:=Ledger.counts(civ_id,String(ruin.get("region_id","")))
+	var here:=0 if bool(ruin.get("unheard",false)) else int(c.get("here",0))
+	var note:="Burned by us · "+EraWords.when(day)
+	note+=(" · %s of ours hold it" % EraWords.grouped(garrison)) if garrison>0 else ""
+	note+=" · nobody lives there" if here<=0 else " · %s live there" % EraWords.grouped(here)
+	return {"kind":"ruined","emblem":"player" if garrison>0 else "","original":civ_id,"glyph":ICONS.SETTLEMENT_GLYPH_RUINED,"mark_px":MARK_PX_STRONG if garrison>0 else MARK_PX,
+		"accent":Color(0,0,0,0),"line":("Ours · the ruins of a town taken from "+people(civ_id)) if garrison>0 else ("A ruin · once %s'" % people(civ_id) if people(civ_id).ends_with("s") else "A ruin · once %s's" % people(civ_id)),"note":note,"garrison":garrison,"since":day,"firsthand":true}
 
 ## "the Esurai", or "strangers" before we know their name.
 static func people(civ_id:String)->String:

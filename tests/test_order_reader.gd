@@ -336,7 +336,9 @@ func test_timeout_falls_back_to_the_regex_reading()->void:
 	assert_dict(out.read as Dictionary).is_empty()
 	assert_str(String(out.plan.route)).is_equal("legacy")
 	assert_str(String(voice.last_problem.get(id,""))).contains("timed out")
-	assert_float(OR.TIMEOUT_SECONDS).is_less_equal(4.5)
+	# Quick, but long enough for a live reading (2.4 to 3.5 s in play; a 4 s
+	# limit sent about one in four to the plain reading).
+	assert_float(OR.TIMEOUT_SECONDS).is_less_equal(8.0)
 	# The offline path is unchanged: the regex engine and its guard decide.
 	var r:=CC.hear(id,USERS_ORDER)
 	_nobody_here_harmed(r,USERS_ORDER,before,headman)
@@ -438,3 +440,32 @@ func test_an_order_never_becomes_a_generation_aim()->void:
 		assert_bool(Aims.is_order(words)).override_failure_message(words).is_true()
 	for words in ["Let fewer of our children die before their first winter","We should learn to raise stone walls","Make the Esurai fear us"]:
 		assert_bool(Aims.is_order(words)).override_failure_message(words).is_false()
+
+# --------------------------------------------------------------------------
+# A strike by night; the captives of a fight
+# --------------------------------------------------------------------------
+
+func test_a_sneak_attack_read_live_is_the_same_night_attack()->void:
+	_train(40)
+	var id:=_audience(_headman())
+	var words:="Sneak attack Tsaren under cover of night. With 17 troops."
+	var out:=_say(id,words,_reading("order","attack","town","town:"+city_id,0.92,{"count":17}))
+	var r:Dictionary=out.result
+	assert_str(String(r.war.kind)).is_equal("attack")
+	assert_bool(String(r.war.verdict) in ["act","object"]).override_failure_message(String(r.get("actor_says",""))).is_true()
+	assert_str(String(r.get("actor_says",""))).contains("unseen is about")
+	if String(r.war.verdict)=="act": assert_int(int(r.war.objective.troops)).is_equal(17)
+
+
+func test_free_the_captives_read_live_changes_what_the_general_did()->void:
+	MilitaryCampaign.set_aftermath_practice("prisoners","enslave")
+	MilitaryCampaign._settle_aftermath({"type":"surrender","captor":"Rovik's band","home_force_name":"Rovik's band","prisoners":12,"spoils":{}},
+		{"home_side":"attacker","attacker":{"name":"Rovik's band","commander":{"name":"Rovik Longstride"}},"threat":{"source_name":"Esurai","source_civ_id":civ_id},"seed":4,"id":"b-4"})
+	var bound:=float(GameState.resource_stockpiles.get("Forced Labor",0.0))
+	var id:=_audience(_headman())
+	# The reader calls it other business; the words are about the fight's captives.
+	var out:=_say(id,"Free the captives",_reading("order","order","none","",0.9))
+	var r:Dictionary=out.result
+	assert_str(String(r.war.kind)).is_equal("captives")
+	assert_str(String(r.war.verdict)).is_equal("fate")
+	assert_float(bound-float(GameState.resource_stockpiles.get("Forced Labor",0.0))).is_equal_approx(12.0,0.001)

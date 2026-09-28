@@ -1,10 +1,12 @@
 extends RefCounted
 ## THE MEN WHO GOT AWAY, AND THE CHASE AFTER THEM.
 ##
-## When the men of a town we hold are put to the sword (town_fate.gd), some
-## always get away. They are counted on the garrison's record (force.fled:
-## how many, which day, which way they ran: their people's nearest other
-## town, else the hills). The war leader says so and offers a chase.
+## When the men of a town we hold are put to the sword (town_fate.gd) or
+## rounded up (occupation_measures.gd), some may get away. They are counted
+## in the town's one ledger (town_ledger.gd: its running record says how
+## many, of which groups, which day and which way they ran: their people's
+## nearest other town, else the hills). Bound men never run. The war leader
+## says so and offers a chase.
 ##
 ## A chase is a real, bounded operation:
 ##   begin()  a detachment leaves the garrison (the garrison's count drops by
@@ -13,15 +15,18 @@ extends RefCounted
 ##            MAX_DAYS_OUT. Foot pursuit of scattered men in their own
 ##            country is mostly fruitless, and the numbers say so.
 ##   daily()  the chase ends where the detachment stops (or when its days are
-##            up): some are caught and killed, most get away; a man of ours
-##            may be hurt. The war leader reports once (a court matter and
-##            one Chronicle line). The detachment turns back, reaches the town
-##            and rejoins the garrison. If the town is gone by then, it
-##            walks home instead.
-##   Those who got away reach their refuge: they are moved out of the town
-##   into their people's other towns (or stay hidden in the hills), and a
-##   share of them are fighting men their people can use again (bounded).
-##   If nobody chases them within FLED_DAYS, they are gone the same way.
+##            up): each man is caught on the stated chance (chance_of: the
+##            pursuers to the runners, horses, the days lost), one seeded
+##            roll each; the caught are killed and the rest get away; a man
+##            of ours may be hurt. The war leader reports once with the
+##            numbers and the odds (a court matter and one Chronicle line).
+##            The detachment turns back, reaches the town and rejoins the
+##            garrison. If the town is gone by then, it walks home instead.
+##   Those who got away reach their refuge: the ledger counts them fled (and
+##   where), they are moved out of the town into their people's other towns
+##   (or out of every town, into the hills), and a share of the men are
+##   fighting men their people can use again (bounded). If nobody chases
+##   them within FLED_DAYS, they are gone the same way.
 ##
 ## A detachment is an ordinary field army carrying a `pursuit` record, so
 ## the map draws it, recall reaches it, rations feed it, and a save keeps it.
@@ -31,6 +36,7 @@ extends RefCounted
 ## Static helpers; preload.
 
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
@@ -110,16 +116,27 @@ static func refuge(civ_id:String,region_id:String)->Dictionary:
 # The men who got away
 # --------------------------------------------------------------------------
 
-## Recorded by town_fate when the men are put to the sword: how many got away.
+## n free men of a town we hold run for their refuge (a sack they escaped):
+## the town's ledger counts them as running until they get there. Returns
+## the flight record ({} when none).
 static func record_flight(civ_id:String,region_id:String,count:int)->Dictionary:
+	if count<=0: return {}
+	var l:=Ledger.of(civ_id,region_id)
+	if l.is_empty(): return {}
+	return Ledger.run(l,"free","men",count,refuge(civ_id,region_id),_day()).duplicate(true)
+
+## The last flight from a town (the town's ledger): {count (still running),
+## ran, caught, reached, day, toward, toward_id, toward_position, hills,
+## state}. {} when nobody ran.
+static func flight_of(civ_id:String,region_id:String)->Dictionary:
+	# An older save keeps its flight on the garrison: the ledger takes it over.
 	var mc:Variant=_mc()
-	if mc==null or count<=0: return {}
-	var at:int=mc._occupation_force_index(civ_id,region_id)
-	if at<0: return {}
-	var to:=refuge(civ_id,region_id)
-	var fled:={"count":count,"day":_day(),"toward":String(to.name),"toward_id":String(to.region_id),"toward_position":(to.position as Dictionary).duplicate(true),"hills":bool(to.hills),"state":"running"}
-	mc.occupation_forces[at]["fled"]=fled
-	return fled
+	var legacy:=false
+	if mc!=null:
+		var at:int=mc._occupation_force_index(civ_id,region_id)
+		legacy=at>=0 and mc.occupation_forces[at].get("fled") is Dictionary
+	var l:=Ledger.of(civ_id,region_id,legacy)
+	return Ledger.last_flight(l) if not l.is_empty() else {}
 
 
 ## Words for where they ran ("toward Stonefield", "into the hills").
@@ -127,8 +144,9 @@ static func toward_words(fled:Dictionary)->String:
 	return "into the hills" if bool(fled.get("hills",false)) else "toward %s" % String(fled.get("toward",fled.get("name","their other towns")))
 
 
-## The held town whose men got away most recently: {civ_id, region_id, name,
-## fled, garrison, age}; {} when none. region_id narrows it to that town.
+## The held town whose people ran most recently: {civ_id, region_id, name,
+## fled (the flight record), garrison, age}; {} when none. region_id narrows
+## it to that town.
 static func latest_flight(region_id:String="")->Dictionary:
 	var mc:Variant=_mc()
 	if mc==null: return {}
@@ -136,7 +154,9 @@ static func latest_flight(region_id:String="")->Dictionary:
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
 		if region_id!="" and String(force.get("region_id",""))!=region_id: continue
-		var fled:Dictionary=force.get("fled",{}) if force.get("fled") is Dictionary else {}
+		# Only a town we hold (the one reading) has a garrison to send.
+		if not Ledger.holds(String(force.get("civ_id","")),String(force.get("region_id",""))): continue
+		var fled:=flight_of(String(force.get("civ_id","")),String(force.get("region_id","")))
 		if fled.is_empty(): continue
 		var age:=_day()-int(fled.get("day",0))
 		if age>FLED_REMEMBER: continue
@@ -147,7 +167,8 @@ static func latest_flight(region_id:String="")->Dictionary:
 
 ## The offer the war leader makes when men got away ("" when none).
 static func offer_words(fled:Dictionary,garrison:int)->String:
-	var n:=int(fled.get("count",0))
+	# Only fighting men are hunted; women, children and the old are let go.
+	var n:=int((fled.get("groups",{}) as Dictionary).get("men",0)) if fled.get("groups") is Dictionary else int(fled.get("count",0))
 	if n<=0: return ""
 	var spare:=detachment_size(garrison,n,0)
 	if spare<=0: return "I have too few in the town to send any after them."
@@ -166,26 +187,40 @@ static func detachment_size(garrison:int,fled:int,asked:int)->int:
 # The chase
 # --------------------------------------------------------------------------
 
-## Send a detachment after the men who fled a town we hold.
+## Send a detachment after the people who fled a town we hold.
 ## {ok, army_id, troops, days, says, outcome} | {error (plain words), reason}.
 static func begin(civ_id:String,region_id:String,asked:int=0)->Dictionary:
 	var mc:Variant=_mc()
 	var world:Variant=_world()
 	if mc==null or world==null: return {"error":"We have nobody to send.","reason":"no_military"}
 	var at:int=mc._occupation_force_index(civ_id,region_id)
-	if at<0: return {"error":"Nobody of ours holds that town, so there is nobody to send after them.","reason":"no_garrison"}
+	var h:=Ledger.hold(civ_id,region_id)
+	if at<0 or not bool(h.held):
+		var why:=Ledger.hold_words(h)
+		return {"error":(why+" There is nobody of ours there to send after them.") if why!="" else "Nobody of ours holds that town, so there is nobody to send after them.","reason":"no_garrison"}
 	var force:Dictionary=mc.occupation_forces[at]
 	var name:=String(force.get("region_name","the town"))
-	var fled:Dictionary=force.get("fled",{}) if force.get("fled") is Dictionary else {}
+	var fled:=flight_of(civ_id,region_id)
 	if fled.is_empty(): return {"error":"Nobody is running from %s that I know of." % name,"reason":"nobody_fled"}
 	var age:=_day()-int(fled.get("day",0))
-	if String(fled.get("state",""))=="chased": return {"error":"Some of ours are already after the men who ran from %s." % name,"reason":"already"}
-	if String(fled.get("state",""))!="running" or age>FLED_DAYS:
+	if String(fled.get("state",""))=="chased" and int(fled.get("count",0))>0: return {"error":"Some of ours are already after the men who ran from %s." % name,"reason":"already"}
+	if String(fled.get("state",""))!="running" or int(fled.get("count",0))<=0 or age>FLED_DAYS:
+		var ran:=int(fled.get("ran",fled.get("count",0)))
+		var caught_n:=int(fled.get("caught",0))
+		if String(fled.get("state",""))=="caught" or (ran>0 and caught_n>=ran):
+			return {"error":"Nobody is left running from %s: the %s who ran were caught." % [name,_count(ran)],"reason":"too_late"}
 		return {"error":"The men who ran from %s got away %s %s ago. They are %s by now; nobody catches them on foot after that." % [name,toward_words(fled),"a day" if age<=1 else "%s days" % _count(age),"in the hills" if bool(fled.get("hills",false)) else "inside %s" % String(fled.get("toward","their other towns"))],"reason":"too_late"}
 	if not mc.active_engagement.is_empty(): return {"error":"Not while a battle is being fought.","reason":"busy"}
 	if mc.field_armies.size()>=mc.field_army_capacity(): return {"error":"I cannot split off another band: every command we can lead is already out.","reason":"capacity"}
 	var garrison:=int(force.get("troops",0))
-	var sent:=detachment_size(garrison,int(fled.count),asked)
+	# Fighters guarding bound men or hostages (occupation_measures.gd) stay.
+	var tied:=0
+	for m in force.get("measures",[]):
+		if m is Dictionary and not bool((m as Dictionary).get("ended",false)): tied+=int((m as Dictionary).get("guards",0))
+	# Only the men who ran are hunted.
+	var men:=int(Ledger._rec_groups(fled).get("men",0))
+	if men<=0: return {"error":"Only women, children and old people ran from %s; there are no fighting men to go after." % name,"reason":"nobody_fled"}
+	var sent:=detachment_size(maxi(0,garrison-tied),men,asked)
 	if sent<=0: return {"error":"%s of ours hold %s. If any go after them, nobody keeps the gate." % [_cap(_count(garrison)),name],"reason":"too_few"}
 	var from:=town_position(region_id)
 	if not from.is_finite(): return {"error":"I do not know that ground well enough to send men across it.","reason":"no_position"}
@@ -213,7 +248,7 @@ static func begin(civ_id:String,region_id:String,asked:int=0)->Dictionary:
 	army["commander"]=(force.get("commander",{}) as Dictionary).duplicate(true)
 	army["supply_level"]=clampf(float(force.get("supply_level",army.get("supply_level",1.0))),0.0,1.0)
 	army["morale"]=float(force.get("morale",army.get("morale",0.6)))
-	army["pursuit"]={"civ_id":civ_id,"region_id":region_id,"town":name,"fled":int(fled.count),"toward":String(fled.get("toward","")),"hills":bool(fled.get("hills",false)),
+	army["pursuit"]={"civ_id":civ_id,"region_id":region_id,"town":name,"fled":men,"toward":String(fled.get("toward","")),"hills":bool(fled.get("hills",false)),
 		"toward_id":String(fled.get("toward_id","")),"state":"chasing","start_day":_day(),"fled_day":int(fled.get("day",_day())),"sent":took,"reported":false}
 	mc.field_armies[index]=army
 	var march:=_march(index,goal,"field_position","the men who fled %s" % name)
@@ -224,7 +259,6 @@ static func begin(civ_id:String,region_id:String,asked:int=0)->Dictionary:
 	army["last_report"]=mc._army_report_snapshot(army)
 	mc.field_armies[index]=army
 	fled["state"]="chased"
-	mc.occupation_forces[at]["fled"]=fled
 	var days:=mini(MAX_DAYS_OUT,maxi(1,int(march.days)))
 	var left:=int(mc.occupation_forces[at].get("troops",0))
 	return {"ok":true,"army_id":int(army.army_id),"troops":took,"days":days,"left":left,"town":name,
@@ -317,15 +351,15 @@ static func doing_words(army:Dictionary)->String:
 static func daily(day:int)->Array:
 	var filed:Array=[]
 	var mc:Variant=_mc()
-	if mc==null or _world()==null: return filed
-	# Men nobody went after reach their refuge.
-	for i in mc.occupation_forces.size():
-		var fled:Variant=mc.occupation_forces[i].get("fled")
-		if fled is Dictionary and String(fled.get("state",""))=="running" and day-int(fled.get("day",day))>FLED_DAYS:
-			var f:Dictionary=fled
-			_reach_refuge(String(mc.occupation_forces[i].get("civ_id","")),String(mc.occupation_forces[i].get("region_id","")),int(f.count),f)
-			f["state"]="gone"
-			mc.occupation_forces[i]["fled"]=f
+	var world:Variant=_world()
+	if mc==null or world==null: return filed
+	# People nobody went after reach their refuge (every town with a ledger,
+	# held or burned and left).
+	for pair in Ledger.towns():
+		var l:=Ledger.of(String(pair[0]),String(pair[1]),false)
+		var rec:=Ledger.running(l)
+		if not rec.is_empty() and String(rec.get("state",""))=="running" and day-int(rec.get("day",day))>FLED_DAYS:
+			arrive(String(pair[0]),String(pair[1]))
 	var i:int=mc.field_armies.size()-1
 	while i>=0:
 		var army:Dictionary=mc.field_armies[i]
@@ -336,6 +370,18 @@ static func daily(day:int)->Array:
 		i-=1
 		i=mini(i,mc.field_armies.size()-1)
 	return filed
+
+## Everyone still running from a town reaches their refuge now: the ledger
+## counts them fled (and where), and the world moves them. Returns how many.
+static func arrive(civ_id:String,region_id:String)->int:
+	var l:=Ledger.of(civ_id,region_id,false)
+	if l.is_empty(): return 0
+	var rec:=Ledger.running(l)
+	if rec.is_empty(): return 0
+	var where:=rec.duplicate(true)
+	var took:=Ledger.reached_refuge(l,int(rec.count))
+	_reach_refuge(civ_id,region_id,int(took.total),where,int(took.get("men",0)))
+	return int(took.total)
 
 
 static func _step(index:int,day:int)->Dictionary:
@@ -361,14 +407,19 @@ static func _step(index:int,day:int)->Dictionary:
 	return {}
 
 
-## The chase ends: some caught, most away; one report; the detachment turns back.
+## The chase ends: the stated chance for each man, one seeded roll each; the
+## caught are killed, the rest reach their refuge; one report; the
+## detachment turns back.
 static func _resolve(index:int,day:int)->Dictionary:
 	var mc:Variant=_mc()
 	var world:Variant=_world()
 	var army:Dictionary=mc.field_armies[index]
 	var p:Dictionary=army.pursuit
 	var civ_id:=String(p.civ_id); var region_id:=String(p.region_id); var town:=String(p.town)
-	var fled:=int(p.get("fled",0))
+	var l:=Ledger.of(civ_id,region_id,false)
+	var rec:=Ledger.running(l) if not l.is_empty() else {}
+	# The men who ran: the ones the detachment went after.
+	var fled:=Ledger.running_men(l) if not l.is_empty() else 0
 	var sent:=maxi(1,int(army.get("troops",p.get("sent",1))))
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("pursuit|%d|%s|%d|%d" % [int(GameState.world_seed),region_id,int(p.get("start_day",day)),sent])
@@ -378,58 +429,104 @@ static func _resolve(index:int,day:int)->Dictionary:
 	for formation in army.get("formations",[]):
 		if String((formation as Dictionary).get("unit",""))=="cavalry": mounted+=int(formation.get("count",0))
 	var late:=maxi(0,int(p.get("start_day",day))-int(p.get("fled_day",day)))
-	var chance:=clampf(0.08+0.18*clampf(float(sent)/maxf(1.0,float(fled)),0.0,1.5)/1.5+0.25*float(mounted)/float(sent)-0.05*float(late),0.02,0.45)
-	var caught:=mini(fled,roundi(float(fled)*chance*rng.randf_range(0.5,1.3)))
+	var chance:=chance_of(sent,fled,mounted,late)
+	var caught:=Ledger.roll(rng,fled,chance)
 	var hurt:=1 if sent>2 and rng.randf()<0.15 else 0
 	var killed:=0
-	if caught>0:
-		var region:Dictionary=world.region_snapshot(civ_id,region_id)
-		if not region.is_empty() and String(region.get("controller",""))=="player":
-			var done:Dictionary=world.occupation_resident_order(civ_id,region_id,"kill_residents",caught,true)
-			if not done.has("error"): killed=int(done.get("dead",0))
-		else:
-			killed=caught
-	var away:=maxi(0,fled-killed)
-	var refuge_record:Dictionary={"toward":String(p.get("toward","")),"toward_id":String(p.get("toward_id","")),"hills":bool(p.get("hills",false))}
-	_reach_refuge(civ_id,region_id,away,refuge_record)
+	var where_rec:=rec.duplicate(true)
+	var away:=0
+	if not l.is_empty():
+		# The ledger first (the world's changes rebuild the town's record, and
+		# the ledger goes with it): the caught die, the rest reach their refuge.
+		killed=Ledger.caught(l,caught,"men")
+		var took:=Ledger.reached_refuge(l,Ledger.running_total(l))
+		away=int(took.total)
+		var index_civ:int=world._civilization_index(civ_id)
+		if killed>0 and index_civ>=0:
+			var done:Dictionary=world._apply_rival_civilian_deaths(world.civilizations[index_civ],region_id,killed)
+			world.civilizations[index_civ]=done.civilization
+		_reach_refuge(civ_id,region_id,away,where_rec,int(took.get("men",0)))
 	# A hurt man is carried back; he mends with the garrison or at home.
 	if hurt>0: _hurt(index,hurt)
 	army=mc.field_armies[index]
-	p["state"]="returning"; p["caught"]=killed; p["got_away"]=away; p["hurt"]=hurt; p["start_day"]=day; p["reported"]=true
+	p["state"]="returning"; p["caught"]=killed; p["got_away"]=away; p["hurt"]=hurt; p["start_day"]=day; p["reported"]=true; p["chance"]=chance
 	army["pursuit"]=p
 	mc.field_armies[index]=army
-	var at:int=mc._occupation_force_index(civ_id,region_id)
-	if at>=0 and mc.occupation_forces[at].get("fled") is Dictionary:
-		var f:Dictionary=mc.occupation_forces[at].fled
-		f["state"]="caught" if away==0 else "gone"; f["caught"]=killed
-		mc.occupation_forces[at]["fled"]=f
 	var back:=_send_back(index)
 	var where:="into the hills" if bool(p.get("hills",false)) else "toward %s" % String(p.get("toward","their other towns"))
+	var odds:="%s, %s for each man" % [chance_quality(chance),Ledger.chance_words(chance)]
 	var text:=""
-	if killed>0:
-		text="We went after the men who fled %s with %s. We ran down %s and killed them; the other %s got away %s, where we could not follow." % [town,_count(sent),_count(killed),_count(away),where]
+	if fled<=0:
+		text="We went after the men who fled %s with %s, but they were gone before we got onto their tracks." % [town,_count(sent)]
+	elif killed>0:
+		text="We went after the men who fled %s with %s: %s of them running in their own country, %s. We ran down %s and killed them; the other %s got away %s, where we could not follow." % [town,_count(sent),_count(fled),odds,_count(killed),_count(away),where]
 	else:
-		text="We went after the men who fled %s with %s. We followed their tracks until they split up in rough ground and lost them; all %s got %s." % [town,_count(sent),_count(fled),where]
+		text="We went after the men who fled %s with %s: %s of them running in their own country, %s. We followed their tracks until they split up in rough ground and lost them; all %s got %s." % [town,_count(sent),_count(fled),odds,_count(fled),where]
 	if hurt>0: text+=" One of ours was hurt and is carried back."
 	text+=" "+String(back.get("words",""))
 	return _report(civ_id,town,region_id,int(army.army_id),text,day)
 
+## The chance to catch each man: pursuers to runners, horses, the days lost.
+static func chance_of(sent:int,fled:int,mounted:int,late:int)->float:
+	return clampf(0.08+0.18*clampf(float(sent)/maxf(1.0,float(fled)),0.0,1.5)/1.5+0.25*float(mounted)/float(maxi(1,sent))-0.05*float(late),0.02,0.45)
+
+static func chance_quality(p:float)->String:
+	if p<0.2: return "a poor chance"
+	if p<0.35: return "a fair chance"
+	return "a good chance"
+
 
 ## Those who got away reach their refuge: out of the town into their other
-## towns (or the hills), and some are fighting men again. Bounded.
-static func _reach_refuge(civ_id:String,region_id:String,count:int,fled:Dictionary)->void:
+## towns, or into the hills (out of every town), and the men among them are
+## fighting men again (bounded). The ledger is the caller's to write first.
+## men: how many of them are men (-1: all).
+static func _reach_refuge(civ_id:String,region_id:String,count:int,fled:Dictionary,men:int=-1)->void:
 	var world:Variant=_world()
 	if world==null or count<=0: return
 	var index:int=world._civilization_index(civ_id)
 	if index<0: return
+	var left:=count
 	if not bool(fled.get("hills",false)):
-		var moved:Dictionary=world._apply_rival_displacement(world.civilizations[index],region_id,count)
-		world.civilizations[index]=moved.civilization
+		for attempt in 12:
+			if left<=0: break
+			var moved:Dictionary=world._apply_rival_displacement(world.civilizations[index],region_id,left)
+			world.civilizations[index]=moved.civilization
+			var n:=int(moved.get("displaced",0))
+			if n<=0: break
+			left-=n
+	if left>0: _into_the_hills(civ_id,region_id,left)
 	var civ:Dictionary=world.civilizations[index]
-	var fighters:=mini(MAX_FIGHTERS_BACK,roundi(float(count)*FIGHTERS_SHARE))
+	var fighters:=mini(MAX_FIGHTERS_BACK,roundi(float(count if men<0 else men)*FIGHTERS_SHARE))
 	if fighters>0 and civ.has("military_population"):
 		civ["military_population"]=float(civ.get("military_population",0.0))+float(fighters)
 		world.civilizations[index]=civ
+
+## n people leave a town for the hills: out of the town's count, still their
+## people's (the multi-actor world counts them as gone from the settlement).
+static func _into_the_hills(civ_id:String,region_id:String,n:int)->void:
+	var world:Variant=_world()
+	var index:int=world._civilization_index(civ_id)
+	if index<0 or n<=0: return
+	var civ:Dictionary=world.civilizations[index]
+	var ri:int=world._region_index(civ,region_id)
+	if ri<0: return
+	var region:Dictionary=civ.strategic_regions[ri]
+	var here:=maxi(0,roundi(float(region.get("population",0.0))))
+	var gone:=mini(n,here)
+	if gone<=0: return
+	if WorldSimulation.enabled:
+		var city_id:=String(region.get("local_city_id",""))
+		if city_id!="":
+			WorldSimulation.scoped(preload("res://scripts/civilization_combat.gd").owner(civ_id),func()->void:
+				WorldSimulation.settlements.with_city_resources(city_id,func()->void:
+					WorldSimulation.settlements.with_local_population(func()->void:
+						WorldSimulation.state.register_population_departures(gone,"Fled into the hills")
+					,true)
+				)
+			)
+	region["population"]=maxf(0.0,float(region.get("population",0.0))-float(gone))
+	civ["displaced_population"]=maxf(0.0,float(civ.get("displaced_population",0.0))+float(gone))
+	world.civilizations[index]=civ
 
 
 static func _hurt(index:int,count:int)->void:
@@ -457,7 +554,7 @@ static func _send_back(index:int)->Dictionary:
 	var mc:Variant=_mc()
 	var army:Dictionary=mc.field_armies[index]
 	var p:Dictionary=army.pursuit
-	var held:bool=mc._occupation_force_index(String(p.civ_id),String(p.region_id))>=0
+	var held:=_town_to_rejoin(String(p.civ_id),String(p.region_id))
 	var town:=town_position(String(p.region_id))
 	var name:=String(p.get("town","the town"))
 	if held and town.is_finite():
@@ -478,6 +575,14 @@ static func _send_back(index:int)->Dictionary:
 	if r.has("error"): return {"error":String(r.error),"words":"%s is not ours now, and we cannot start for home yet: %s" % [name,String(r.error)]}
 	var home_days:=int(r.get("days",0))
 	return {"days":home_days,"to":"home","words":"%s is not ours now, so we are coming home, %s." % [name,"about a day" if home_days<=1 else "about %s days" % _count(home_days)]}
+
+
+## A detachment's town is still ours, with its garrison there to rejoin
+## (town_ledger.hold: the region says whose it is; the detachment is part of
+## that garrison, so its own absence never makes the town unheld).
+static func _town_to_rejoin(civ_id:String,region_id:String)->bool:
+	var mc:Variant=_mc()
+	return mc!=null and int(mc._occupation_force_index(civ_id,region_id))>=0 and bool(Ledger.hold(civ_id,region_id).get("ours",false))
 
 
 ## The detachment rejoins its garrison where it stands; with no garrison
@@ -509,7 +614,7 @@ static func _rebuilt(force:Dictionary,formations:Array)->Dictionary:
 	var mc:Variant=_mc()
 	var joined:Dictionary=mc.simulator.create_formation_force(String(force.get("name","OCCUPATION")),formations.duplicate(true),float(force.get("morale",0.55)),float(force.get("readiness",0.45)))
 	for key in force:
-		if not joined.has(key) or key in ["commander","fled","fate_note","civ_id","region_id","region_name","required","supply_level","committed_day"]:
+		if not joined.has(key) or key in ["commander","fate_note","civ_id","region_id","region_name","required","supply_level","committed_day"]:
 			joined[key]=force[key].duplicate(true) if force[key] is Dictionary or force[key] is Array else force[key]
 	return joined
 
@@ -527,19 +632,15 @@ static func recall(to_town:bool)->Array[Dictionary]:
 		if p is Dictionary and String(p.get("state",""))!="home":
 			var troops:=int(army.get("troops",0))
 			var town:=String(p.get("town","the town"))
-			if to_town and mc._occupation_force_index(String(p.civ_id),String(p.region_id))>=0:
+			if to_town and _town_to_rejoin(String(p.civ_id),String(p.region_id)):
 				var back:Dictionary={}
 				if String(p.state)=="returning" and String(army.get("status",""))=="moving":
 					back={"days":maxi(0,int(army.get("arrival_day",_day()))-_day())}
 				else:
 					if String(p.state)=="chasing":
-						# Called off: the men they chased keep running.
+						# Called off: the men they chased keep running, and get there.
 						p["called_off"]=true; army["pursuit"]=p; mc.field_armies[i]=army
-						var at:int=mc._occupation_force_index(String(p.civ_id),String(p.region_id))
-						if at>=0 and mc.occupation_forces[at].get("fled") is Dictionary:
-							var f:Dictionary=mc.occupation_forces[at].fled
-							_reach_refuge(String(p.civ_id),String(p.region_id),int(p.get("fled",0)),f)
-							f["state"]="gone"; mc.occupation_forces[at]["fled"]=f
+						arrive(String(p.civ_id),String(p.region_id))
 					back=_send_back(i)
 				out.append({"name":"the detachment from %s" % town,"troops":troops,"days":int(back.get("days",0)),"to":town})
 			else:
@@ -563,7 +664,7 @@ static func reconcile()->int:
 		var p:Variant=army.get("pursuit")
 		if p is Dictionary:
 			var state:=String(p.get("state",""))
-			var held:bool=mc._occupation_force_index(String(p.get("civ_id","")),String(p.get("region_id","")))>=0
+			var held:=_town_to_rejoin(String(p.get("civ_id","")),String(p.get("region_id","")))
 			var idle:=String(army.get("status",""))!="moving"
 			if int(army.get("troops",0))<=0:
 				pass

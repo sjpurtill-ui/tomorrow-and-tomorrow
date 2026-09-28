@@ -2,7 +2,7 @@ extends RefCounted
 ## Co-located reorganization only; no travel, recruits or equipment are created.
 const D=preload("res://scripts/combined_arms_doctrine.gd")
 static func available(host:Node,army_id:int)->Dictionary:
-	if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty() or host.command_hierarchy.battle.engaged(0):return {"error":"Finish battle commitments before reorganizing troops."}
+	if host._home_battle_running() or host.command_hierarchy.battle.engaged(0) or host.command_hierarchy.battle.engaged(army_id):return {"error":"Finish battle commitments before reorganizing troops."}
 	if WorldSimulation.state.convoy_traveling or not WorldSimulation.state.settlement_site_committed or host.recovery.home_unavailable():return {"error":"Reinforcements need an available settled home."}
 	var index:=int(host._field_army_index(army_id))
 	if index<0:return {"error":"Select an existing field army."}

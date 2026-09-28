@@ -19,8 +19,24 @@ extends Control
 ## (city_labels.gd placement). Inputs are re-read at most every
 ## COLLECT_EVERY seconds and only rebuilt when they changed; drawing happens
 ## only when the camera, the scene or the easing moves.
+##
+## Battles (hud/battle_marks.gd, from hud/battle_marker_source.gd): every
+## fight going on now stands on the front at its contact point as a small
+## crossed-weapons mark with a two-colour bar and its name and day; a
+## pointer resting on it gets one plain line, a click opens the battle view.
+## The stretch of front being fought over thickens and works (the worm),
+## and when a battle is won or lost or a town changes hands the front surges
+## there and settles where control now lies. Forces carry HOI4-style
+## counters (strength, will to fight, one state glyph); far out, forces
+## stand together per front sector and battles per place. The moving parts
+## (the worm working, the battles' pulse) are drawn on one small child
+## canvas behind this one, redrawn a few times a second only while battles
+## are on screen.
 
 const Model:=preload("res://scripts/war_front_model.gd")
+const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
+const BattleSource:=preload("res://scripts/hud/battle_marker_source.gd")
+const Motion:=preload("res://scripts/hud/motion.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Marks:=preload("res://scripts/war_map_marks.gd")
@@ -44,7 +60,24 @@ const EASE_REDRAW_SECONDS:=1.0/30.0
 const CLASH_PULSE_SECONDS:=1.3
 const MAX_CLASH_PULSES:=6
 ## Every drawn front is carried on this many points, so any two can morph.
-const FRONT_POINTS:=48
+const FRONT_POINTS:=96
+## Arrows are carried on this many points, so each eases as its army moves.
+const ARROW_POINTS:=21
+## A new arrow draws itself out this long; a finished one fades this long.
+const ARROW_GROW_SECONDS:=0.7
+const ARROW_FADE_SECONDS:=1.4
+## A front giving way surges and settles over this long, this far (a share
+## of the theatre's scale) and this wide.
+const BULGE_SECONDS:=1.8
+const BULGE_AMP_SIGMA:=0.35
+const BULGE_RADIUS_SIGMA:=0.9
+const MAX_BULGES:=8
+## The fighting's own motion (the worm working, the battles' pulse).
+const PULSE_FPS:=24.0
+const PULSE_PERIOD:=2.6
+## Far out, forces stand together per stretch of front this long on screen
+## (as a province's stack of counters does); up close each stands alone.
+const SECTOR_PX:={"regional":96.0,"continental":150.0}
 const CAPTION_SIZE:=14
 ## The detail line of a force's card (the art direction's 12 px floor).
 const CARD_DETAIL_SIZE:=12
@@ -65,6 +98,14 @@ const THEIRS_WASH:=Color("#b5503c")
 const SEA:=Color("#16475a")
 const SEA_LIGHT:=Color("#cfe3e0")
 const SKY:=Color("#3b4a78")
+## The chart's own paper and ink for cards and plates (ART_DIRECTION light
+## tokens: PAPER_RAISED, RULE, INK, INK_MUTED), fixed so text is always dark
+## on light.
+const CAPTION_PAPER:=Color("#f6efe1")
+const CAPTION_RULE:=Color("#b7a383")
+const CAPTION_INK:=Color("#1f1a14")
+const CAPTION_MUTED:=Color("#594e41")
+const OXBLOOD:=Color("#8e3b2e")
 
 var terrain:Node
 ## Injected by tests and the capture scene: func(Vector2 world)->Vector2 screen.
@@ -99,6 +140,11 @@ var drawn_marks:Array=[]
 ## Captions requested by the last drawing, and their placement memory.
 var caption_requests:Array=[]
 var caption_memory:Dictionary={}
+## The lettering is placed afresh at most this often while the chart only
+## eases or pans; between times each label follows its mark.
+const CAPTION_REPLACE_MSEC:=250
+var caption_key:=0
+var caption_placed_msec:=-100000
 var caption_extent:Dictionary={}
 var placed_captions:Array=[]
 var dropped_captions:=0
@@ -115,11 +161,50 @@ var last_compose_usec:=0
 var last_draw_usec:=0
 ## Newly joined battles: [{pos, t}] (bounded, visual only).
 var clash_pulses:Array[Dictionary]=[]
+## Arrows as drawn, keyed by what they belong to: {points (world), target,
+## grow 0..1, alpha, target_alpha, data}. New ones draw out; gone ones fade.
+var live_arrows:Dictionary={}
+## Fronts giving way: [{pos, dir, amp, radius, t, dur}] (visual only).
+var bulges:Array=[]
+## Rival battles as our watchers last saw them (never saved).
+var rival_memory:Dictionary={}
+## The fighting as last drawn, for the pulse canvas: hot stretches of front
+## [{points, normals, heat, peak}] and battles [{at, radius, live, phase}].
+var hot_cache:Array=[]
+var battle_cache:Array=[]
+## The drawn fronts as a few screen rects each, for the lettering to avoid.
+var front_chunks:Array[Rect2]=[]
+var anim_clock:=0.0
+var pulse_elapsed:=0.0
+## Whether anything on screen is being fought now (the pulse canvas works).
+var pulse_live:=false
+var pulse_layer:Control
+## The one line shown while the pointer rests on a battle.
+var tip:PanelContainer
+var hover_id:=""
+## TEST HOOK: when set, a click on one of our battles calls this with the
+## view request ({method, args} or {siege}) instead of opening it.
+var battle_opener:Callable
+
+
+## The moving parts of the fighting, drawn behind the chart's own ink.
+class PulseLayer extends Control:
+	var host:Control
+	func _ready()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE
+		show_behind_parent=true
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	func _draw()->void:
+		if host!=null and is_instance_valid(host): host.draw_animated(self)
 
 
 func _ready()->void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pulse_layer=PulseLayer.new()
+	pulse_layer.name="BattlePulse"
+	pulse_layer.host=self
+	add_child(pulse_layer)
 
 
 func _process(delta:float)->void:
@@ -133,6 +218,8 @@ func _process(delta:float)->void:
 			set_scene(compose(inputs))
 	if blend<1.0: blend=minf(1.0,blend+delta/MORPH_SECONDS)
 	settling=ease_fronts(delta)
+	var arrows_moving:=ease_arrows(delta)
+	var surging:=advance_bulges(delta)
 	var view:Array=[inputs_signature,size,blend,settling]
 	if not clash_pulses.is_empty():
 		var live:Array[Dictionary]=[]
@@ -141,10 +228,17 @@ func _process(delta:float)->void:
 			if float(pulse.t)<CLASH_PULSE_SECONDS:live.append(pulse)
 		clash_pulses=live
 		view.append(roundi(Time.get_ticks_msec()/33.0))
-	if settling:
+	if settling or arrows_moving or surging:
 		ease_elapsed+=delta
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
 		view.append(ease_frame)
+	# The fighting works on its own small canvas, only while it is on screen.
+	anim_clock+=delta
+	if pulse_layer!=null and pulse_live and not Motion.reduced():
+		pulse_elapsed+=delta
+		if pulse_elapsed>=1.0/PULSE_FPS:
+			pulse_elapsed=0.0
+			pulse_layer.queue_redraw()
 	var camera:=_camera()
 	if camera!=null: view.append_array([camera.global_transform,camera.size])
 	var cities:=_city_labels()
@@ -158,11 +252,15 @@ func _process(delta:float)->void:
 
 func set_scene(next:Dictionary,immediate:bool=false)->void:
 	var start:=Time.get_ticks_usec()
-	if not immediate and not scene.is_empty():_note_new_clashes(scene,next)
+	if not immediate and not scene.is_empty():
+		_note_new_clashes(scene,next)
+		_note_front_events(scene,next)
 	previous=scene if not immediate else {}
 	scene=next
 	blend=1.0 if immediate or previous.is_empty() else 0.0
 	retarget_fronts(scene.get("fronts",[]),immediate)
+	retarget_arrows(scene.get("arrows",[]),immediate)
+	if immediate: bulges.clear()
 	composes+=1
 	last_compose_usec=Time.get_ticks_usec()-start
 	queue_redraw()
@@ -254,6 +352,162 @@ func ease_fronts(delta:float)->bool:
 	return moving
 
 
+## New arrows are matched to the drawn ones by what they belong to (an
+## army's march, its chase, its siege, a host seen marching): a matched
+## arrow eases to its new road, a new one draws itself out from its tail,
+## and one whose work is done fades where it was.
+func retarget_arrows(arrows:Array,immediate:bool=false)->void:
+	var keep:Dictionary={}
+	var still:=immediate or Motion.reduced()
+	for arrow_variant in arrows:
+		var arrow:Dictionary=arrow_variant
+		var id:=String(arrow.get("id",""))
+		if id=="": id="arrow:%d" % keep.size()
+		if keep.has(id): continue
+		var target:=Model.resample(arrow.get("points",PackedVector2Array()),ARROW_POINTS)
+		if target.size()<3: continue
+		keep[id]=true
+		var entry:Dictionary=live_arrows.get(id,{})
+		if entry.is_empty():
+			entry={"points":target.duplicate(),"grow":1.0 if still else 0.0,"alpha":1.0}
+			live_arrows[id]=entry
+		entry["target"]=target
+		entry["data"]=arrow
+		entry["target_alpha"]=1.0
+		if still: entry.points=target.duplicate(); entry.grow=1.0; entry.alpha=1.0
+	for id in live_arrows.keys():
+		if keep.has(id): continue
+		if still: live_arrows.erase(id)
+		else: live_arrows[id]["target_alpha"]=0.0
+
+
+## One arrow step. Returns true while any arrow still grows, fades or moves.
+func ease_arrows(delta:float)->bool:
+	if live_arrows.is_empty(): return false
+	var moving:=false
+	var k:=1.0-exp(-maxf(0.0,delta)/EASE_SECONDS)
+	var sigma:=maxf(0.001,float(scene.get("sigma",1.0)))
+	for id in live_arrows.keys():
+		var entry:Dictionary=live_arrows[id]
+		if float(entry.grow)<1.0:
+			entry.grow=minf(1.0,float(entry.grow)+maxf(0.0,delta)/ARROW_GROW_SECONDS); moving=true
+		var goal:=float(entry.get("target_alpha",1.0))
+		if not is_equal_approx(float(entry.alpha),goal):
+			entry.alpha=move_toward(float(entry.alpha),goal,maxf(0.0,delta)/ARROW_FADE_SECONDS); moving=true
+		if goal<=0.0 and float(entry.alpha)<=0.0:
+			live_arrows.erase(id); continue
+		var points:PackedVector2Array=entry.points
+		var target:PackedVector2Array=entry.target
+		if points.size()!=target.size(): entry.points=target.duplicate(); continue
+		var worst:=0.0
+		for i in points.size():
+			var step:=(target[i]-points[i])*k
+			worst=maxf(worst,step.length())
+			points[i]+=step
+		entry.points=points
+		if worst>=sigma*0.0015: moving=true
+	return moving
+
+
+## One surge step. Returns true while any front is still giving way.
+func advance_bulges(delta:float)->bool:
+	if bulges.is_empty(): return false
+	var running:Array=[]
+	for bulge in bulges:
+		bulge["t"]=float(bulge.t)+maxf(0.0,delta)
+		if float(bulge.t)<float(bulge.dur): running.append(bulge)
+	bulges=running
+	return not bulges.is_empty()
+
+
+## A front point as drawn: where it has eased to, plus any surge running.
+func _bulged(points:PackedVector2Array)->PackedVector2Array:
+	if bulges.is_empty(): return points
+	var out:=points.duplicate()
+	for i in out.size(): out[i]+=Model.bulge_offset(out[i],bulges)
+	return out
+
+
+## When a battle of ours ends, or a town we hold is taken or lost, the front
+## surges there: forward (toward them) when we won or took it, back when we
+## lost it. Only near a drawn front, and never with reduced motion.
+func _note_front_events(before:Dictionary,after:Dictionary)->void:
+	if Motion.reduced(): return
+	var sigma:=maxf(0.001,float(after.get("sigma",1.0)))
+	var lines:Array=(after.get("fronts",[]) as Array)+(after.get("faceoffs",[]) as Array)
+	if lines.is_empty(): return
+	var events:Array=[]
+	var ended_before:Dictionary={}
+	for clash in before.get("clashes",[]):
+		if bool(clash.get("finished",false)): ended_before[int(clash.get("seed",0))]=true
+	for clash in after.get("clashes",[]):
+		if not bool(clash.get("finished",false)) or ended_before.has(int(clash.get("seed",0))) or int(clash.get("age",0))>1: continue
+		if bool(clash.get("won",false)): events.append({"pos":clash.pos,"forward":true})
+		elif bool(clash.get("lost",false)): events.append({"pos":clash.pos,"forward":false})
+	var held_before:Dictionary={}; var held_after:Dictionary={}
+	for mark in before.get("marks",[]):
+		if bool(mark.get("garrison",false)): held_before[String(mark.id)]=mark.pos
+	for mark in after.get("marks",[]):
+		if bool(mark.get("garrison",false)): held_after[String(mark.id)]=mark.pos
+	for id in held_after:
+		if not held_before.has(id): events.append({"pos":held_after[id],"forward":true})
+	for id in held_before:
+		if not held_after.has(id): events.append({"pos":held_before[id],"forward":false})
+	for event in events.slice(0,MAX_BULGES):
+		var at:=Model.front_at(lines,event.pos,sigma*1.6)
+		if at.is_empty(): continue
+		var toward:Vector2=at.toward
+		if toward.length_squared()<0.000001: continue
+		var radius:=sigma*BULGE_RADIUS_SIGMA
+		bulges.append({"pos":at.point,"dir":(toward if bool(event.forward) else -toward).normalized(),"amp":sigma*BULGE_AMP_SIGMA,"radius":radius,"t":0.0,"dur":BULGE_SECONDS,
+			"ghost":_ghost_near(at.point,radius*2.5),"forward":bool(event.forward)})
+	while bulges.size()>MAX_BULGES: bulges.pop_front()
+
+
+## The screen polygon between where a front stood (the bulge's ghost) and
+## where it is drawn now, near the bulge; empty when it cannot be made.
+func _gained_ground(bulge:Dictionary)->PackedVector2Array:
+	var ghost:PackedVector2Array=bulge.get("ghost",PackedVector2Array())
+	if ghost.size()<2: return PackedVector2Array()
+	var reach:=float(bulge.radius)*2.5
+	var now:=PackedVector2Array(); var best_d:=INF
+	for entry in live_fronts:
+		if float(entry.get("alpha",0.0))<=0.3: continue
+		var drawn:=_bulged(entry.points)
+		var near:=PackedVector2Array(); var closest:=INF
+		for p in drawn:
+			var d:=p.distance_to(bulge.pos)
+			closest=minf(closest,d)
+			if d<=reach: near.append(p)
+		if near.size()>=2 and closest<best_d: best_d=closest; now=near
+	if now.size()<2: return PackedVector2Array()
+	# Both runs the same way round, then one closed ring.
+	var along:=ghost[-1]-ghost[0]
+	if (now[-1]-now[0]).dot(along)<0.0: now.reverse()
+	var ring:=_poly(ghost)
+	var back:=_poly(now)
+	if ring.size()<2 or back.size()<2: return PackedVector2Array()
+	back.reverse()
+	ring.append_array(back)
+	return ring
+
+
+## Where the line was drawn near a point before it gave way (world), kept
+## faint while it surges so the ground won or lost reads.
+func _ghost_near(at:Vector2,reach:float)->PackedVector2Array:
+	var best:=PackedVector2Array(); var best_d:=INF
+	for entry in live_fronts:
+		if float(entry.get("alpha",0.0))<=0.3: continue
+		var points:PackedVector2Array=entry.points
+		var near:=PackedVector2Array(); var closest:=INF
+		for p in points:
+			var d:=p.distance_to(at)
+			closest=minf(closest,d)
+			if d<=reach: near.append(p)
+		if near.size()>=2 and closest<best_d: best_d=closest; best=near
+	return best
+
+
 # --- Reading the world (bounded, dated) -----------------------------------------
 
 func _camera()->Camera3D:
@@ -295,7 +549,7 @@ func collect()->Dictionary:
 		var shown:=army
 		# A band at a town we hold, or a detachment out of its garrison, is
 		# known: the garrison is ours and word comes in every day.
-		var near_hold:=army.get("pursuit") is Dictionary or (String(army.get("status",""))=="stationed" and not MilitaryCampaign.occupation_force_for_region(_region_civ(String(army.get("location_id",""))),String(army.get("location_id",""))).is_empty())
+		var near_hold:=army.get("pursuit") is Dictionary or (String(army.get("status",""))=="stationed" and preload("res://scripts/town_ledger.gd").holds(_region_civ(String(army.get("location_id",""))),String(army.get("location_id",""))))
 		# Before signals the map knows only what the last runner reported.
 		if not live and not at_home and not near_hold:
 			shown=army.get("last_report",{})
@@ -324,13 +578,19 @@ func collect()->Dictionary:
 		if bool(entry.get("withdrawing",false)): entry.offensive=false
 		# What its mark and card need: its arm, its era, its general, what it is doing.
 		var role:=Presentation.formation_role(army)
+		var condition:=String(Presentation.formation_visual_state(army).damage_state)
+		var morale:=clampf(float(shown.get("morale",army.get("morale",0.6))),0.0,1.0)
 		entry.merge({"era":Presentation.formation_era(army),"branch":ArmyMarks.branch(role,Presentation.dominant_unit(army) if not (army.get("formations",[]) as Array).is_empty() else ""),
-			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":String(Presentation.formation_visual_state(army).damage_state),
+			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":condition,
+			"full":ArmyMarks.full_strength(army),"morale":morale,
 			"doing_context":{"status":String(shown.get("status",army.get("status",""))),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
 				"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":at_home,
 				"home_km":ArmyMarks.home_km(shown if shown.has("position") else army,home),
-				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0)),"pursuit":Pursuit.doing_words(army)}})
-		if army.get("pursuit") is Dictionary: entry["detachment_of"]=String((army.pursuit as Dictionary).get("town",""))
+				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0)),"pursuit":Pursuit.doing_words(army),
+				"hungry":preload("res://scripts/field_rations.gd").is_hungry(army),"broken":morale<ArmyMarks.BROKEN_MORALE or condition=="shattered"}})
+		if army.get("pursuit") is Dictionary:
+			entry["detachment_of"]=String((army.pursuit as Dictionary).get("town",""))
+			entry["chasing"]=String((army.pursuit as Dictionary).get("state",""))=="chasing"
 		friendly.append(entry)
 	var enemy:Array=[]
 	# Strangers in sight who are not at war with us (scouts, passing hosts):
@@ -350,15 +610,20 @@ func collect()->Dictionary:
 			var identified:=bool(sighting.get("identified",false))
 			var entry:={"id":sighting_id,"pos":pos,"strength":float(low+high)*0.5,"low":low,"high":high,"age_days":maxi(0,today-seen),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"seen_day":seen,
 				"observed":list_name=="visible","owner":String(sighting.get("civilization","")) if identified else "","era":clampi(int(sighting.get("formation_era",0)),0,3) if identified else 0,
-				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false)),"road":_road_of(sighting.get("road_ahead",[]))}
+				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false)),"road":_road_of(sighting.get("road_ahead",[])),
+				"will_low":float(sighting.get("readiness_estimate_low",-1.0)) if identified else -1.0,"will_high":float(sighting.get("readiness_estimate_high",-1.0)) if identified else -1.0}
 			var hostile:=bool(sighting.get("hostile",false)) and not bool(entry.scout)
 			if hostile: enemy.append(entry); listed[sighting_id]=true
 			elif list_name=="visible": strangers.append(entry); listed[sighting_id]=true
 	enemy.append_array(_campaign_sightings(today))
 	var engagements:Array=[]
-	var command:Variant=MilitaryCampaign.get("command_hierarchy")
-	for battle in battles_to_draw(MilitaryCampaign.engagement_snapshot(),command.data.get("battles",[]) if command!=null else []):
-		engagements.append(_engagement_input(battle,friendly,enemy,home))
+	# Every battle of ours being fought now: the watched one, the battle
+	# model's registry and the command staff's parallel battles, each once.
+	for entry in BattleSource.engagements_of(MilitaryCampaign):
+		if engagements.size()>=Model.MAX_CLASHES: break
+		var input:=_engagement_input(entry.engagement,friendly,enemy,home)
+		input["battle_id"]=String(entry.id)
+		engagements.append(input)
 	# Fights of the last days stay on the chart where they were fought, with
 	# how they went; a click reads the report or watches it again.
 	for record in recent_battles(MilitaryCampaign.battle_history,today):
@@ -371,14 +636,62 @@ func collect()->Dictionary:
 		var works:="circumvallation" if (known.has("field_fortifications") or known.has("siege_engineering")) and offensive else ("circumvallation" if not offensive and float((siege.get("threat",{}) as Dictionary).get("technology",0.0))>=0.45 else "blockade_camp")
 		sieges.append({"pos":_v2(siege.get("target_position",{})) if offensive else home,"pressure":float(siege.get("pressure",0.0)),"works":works,"ours":offensive,"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
 	var raids:=_raid_inputs(today,home)
-	var inputs:={"garrisons":_garrison_inputs(),"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+	var garrisons:=_garrison_inputs()
+	# The towns and peoples a battle is named by are read only while one is fought.
+	var rivals:=_rival_militaries()
+	var battles:Array=[]
+	if BattleSource.any_fighting(MilitaryCampaign,rivals) or not rival_memory.is_empty():
+		battles=BattleSource.collect(MilitaryCampaign,rivals,_battle_context(today,home,friendly,garrisons),rival_memory)
+	var inputs:={"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
-		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today)}
+		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today),"battles":battles}
 	for key in extra_inputs:
 		var value:Variant=extra_inputs[key]
 		inputs[key]=(inputs.get(key,[]) as Array)+(value as Array) if value is Array and inputs.get(key) is Array else value
 	return inputs
+
+
+## The rival peoples' campaigns (each owner's own MilitaryCampaign), read
+## directly: the battle source keeps only what our watchers can see.
+static func _rival_militaries()->Dictionary:
+	var out:Dictionary={}
+	if not WorldSimulation.enabled: return out
+	for id in WorldSimulation.actors:
+		var systems:Variant=(WorldSimulation.actors[id] as Dictionary).get("systems",{})
+		var military:Variant=(systems as Dictionary).get("MilitaryCampaign") if systems is Dictionary else null
+		if military!=null and is_instance_valid(military): out[String(id)]=military
+	return out
+
+
+## What the battle source needs to know of our side of the map: where our
+## armies and held towns stand (our watchers too), the towns we know by
+## name, and which peoples we know well enough to name and colour.
+func _battle_context(today:int,home:Vector2,friendly:Array,garrisons:Array)->Dictionary:
+	var armies:Dictionary={}; var troops:Dictionary={}
+	for army in MilitaryCampaign.field_armies:
+		var count:=int((army as Dictionary).get("troops",0))
+		if count<=0: continue
+		var at:=_v2(army.get("position",{}))
+		if at.is_finite(): armies[int(army.get("army_id",0))]=at; troops[int(army.get("army_id",0))]=count
+	var towns:Dictionary={}
+	for g in garrisons: towns[String(g.region_id)]=g.pos
+	var cities:Array=[]
+	var civ_names:Dictionary={}
+	var at_war:Dictionary={}
+	if CivilizationSystem!=null and CivilizationSystem.city_intelligence!=null:
+		for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false,home,1200.0):
+			cities.append({"id":String(city.get("city_id",city.get("id",""))),"name":String(city.get("name","")),"pos":_v2(city.get("position",{})),"civ_id":String(city.get("civ_id",""))})
+			if cities.size()>=48: break
+		for civ:Dictionary in CivilizationSystem.civilizations:
+			var relation:Dictionary=civ.get("player_relation",{})
+			if int(relation.get("contact_level",0))>=2: civ_names[String(civ.id)]=String(civ.get("name",""))
+			at_war[String(civ.id)]=bool(relation.get("at_war",false))
+	var observers:={"home":home,"radius":float(CivilizationSystem._local_observation_radius()) if CivilizationSystem.has_method("_local_observation_radius") else BattleSource.HOME_SIGHT_KM,
+		"armies":armies.values(),"garrisons":towns.values()}
+	return {"today":today,"home":home,"armies":armies,"armies_troops":troops,"towns":towns,"cities":cities,"civ_names":civ_names,"at_war_with":at_war,"observers":observers,
+		"identity":func(civ_id:String)->Color: return preload("res://scripts/city_map_identity.gd").foreign(civ_id).accent,
+		"player_name":String(CivilizationSystem._player_civilization_name()) if CivilizationSystem.has_method("_player_civilization_name") else "","home_name":String(GameState.settlement_name)}
 
 
 ## Towns we hold, and who holds them: a small mark on the town with a card
@@ -406,7 +719,8 @@ static func _garrison_inputs()->Array:
 		var pos:=Pursuit.town_position(rid) if world.city_intelligence!=null else Vector2.INF
 		if not pos.is_finite(): continue
 		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name","")),
-			"fate_note":String(force.get("fate_note","")),"away":Pursuit.away_from(rid)})
+			"fate_note":String(force.get("fate_note","")),"away":Pursuit.away_from(rid),
+			"required":ceili(float(force.get("required",0.0))),"morale":clampf(float(force.get("morale",0.6)),0.0,1.0),"hungry":preload("res://scripts/field_rations.gd").is_hungry(force)})
 		if out.size()>=6: break
 	return out
 
@@ -562,7 +876,7 @@ func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vec
 	return {"pos":pos,"axis":axis,"ours":String((plan.get(home_side,{}) as Dictionary).get("id",Tactics.BASELINE)),"theirs":String((plan.get(enemy_side,{}) as Dictionary).get("id",Tactics.BASELINE)),
 		"rounds":int(engagement.get("round",0)),"phase_ours":String(last.get(home_side+"_tactic_phase","hold")),"phase_theirs":String(last.get(enemy_side+"_tactic_phase","hold")),"event":String(last.get("tactic_event","")),
 		"army_id":int(force_id),"commanded":bool(engagement.get("commander_managed",false)),"objective":String(engagement.get("command_objective","")),
-		"our_troops":_side_troops(engagement.get(home_side,{})),"their_troops":_side_troops(engagement.get(enemy_side,{}))}
+		"our_troops":_side_troops(engagement.get(home_side,{})),"their_troops":_side_troops(engagement.get(enemy_side,{})),"seed":int(engagement.get("seed",0))}
 
 
 static func _side_troops(side:Variant)->int:
@@ -603,6 +917,9 @@ func _finished_input(record:Dictionary,friendly:Array,enemy:Array,home:Vector2,t
 	entry["rounds"]=(record.get("rounds",[]) as Array).size()
 	entry["result"]="%s · %s" % [word,("%s hurt or killed" % BattleAccount.count_words(hurt)) if hurt>0 else "none of ours hurt"]
 	entry["headline"]=String(account.headline)
+	# How it went decides which way the front gives (a surge when it ends).
+	entry["won"]=String(account.kind) in ["won","taken","uncontested"]
+	entry["lost"]=String(account.kind) in ["lost","withdrew"]
 	return entry
 
 
@@ -749,22 +1066,34 @@ static func compose(inputs:Dictionary)->Dictionary:
 	var enemy:Array=(inputs.get("enemy",[]) as Array).slice(0,Model.MAX_ENEMY)
 	var home:Vector2=inputs.get("home",Vector2.ZERO)
 	var today:=int(inputs.get("today",0))
-	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"sigma":1.0}
+	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"battles":[],"fought":{},"era":1,"sigma":1.0}
 	var fronts:Array=[]
+	# The ground we hold is ours to the front as well as the hosts in the
+	# field: a garrison in a taken town pushes the line past the town.
+	var held:Array=[]
+	for g in (inputs.get("garrisons",[]) as Array):
+		var at:Vector2=g.get("pos",Vector2.INF)
+		if int(g.get("troops",0))>0 and at.is_finite(): held.append({"id":"held:%s" % String(g.get("region_id","")),"pos":at,"strength":float(g.troops),"garrison":true})
 	# Only forces that can hold a line meet on one; a party of a handful keeps
 	# its own small mark (tests/test_battle_scale.gd).
-	var holding:=Model.substantial(friendly,enemy)
-	var facing:=Model.substantial(enemy,friendly)
+	var holding:=Model.substantial(friendly+held,enemy)
+	var facing:=Model.substantial(enemy,friendly+held)
 	if mode in ["front","theatre"]:
 		var derived:=Model.derive(holding,facing)
 		fronts=derived.fronts; out.sigma=float(derived.sigma) if float(derived.sigma)>0.0 else 1.0
 		# Who holds each front: the armies nearest its line.
+		var reach:=float(out.sigma)*1.6
 		for front in fronts:
+			var points:PackedVector2Array=front.points
+			var box:=Rect2(points[0],Vector2.ZERO)
+			for p in points: box=box.expand(p)
+			box=box.grow(reach)
 			var holders:Array=[]
 			for f in holding:
+				if bool(f.get("garrison",false)) or not box.has_point(f.pos): continue
 				var nearest:=INF
-				for p in (front.points as PackedVector2Array): nearest=minf(nearest,p.distance_to(f.pos))
-				if nearest<=float(out.sigma)*1.6: holders.append(f)
+				for p in points: nearest=minf(nearest,p.distance_to(f.pos))
+				if nearest<=reach: holders.append(f)
 			front["armies"]=holders.map(func(f:Dictionary)->int: return int(f.get("army_id",0)))
 			front["holders"]=holders
 		out.fronts=fronts
@@ -783,33 +1112,61 @@ static func compose(inputs:Dictionary)->Dictionary:
 			var line:=Model.fallback_from_intent(front,holders)
 			if line.size()>=2: out.fallbacks.append({"points":line,"armies":front.armies,"how":String(holders[0].get("fallback_how","home"))})
 	if mode=="theatre":
+		# Supply lines from home to the farthest hosts only (bounded).
+		var far:Array=[]
 		for f in friendly:
-			if (f.pos as Vector2).distance_to(home)>float(out.sigma)*0.5: out.supply.append(PackedVector2Array([home,f.pos]))
+			var d:=(f.pos as Vector2).distance_to(home)
+			if d>float(out.sigma)*0.5: far.append([d,f.pos])
+		far.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])>float(b[0]))
+		for pair in far.slice(0,Model.MAX_SUPPLY): out.supply.append(PackedVector2Array([home,pair[1]]))
 	# A general who is withdrawing: his road back, dashed, in any age.
 	for f in friendly:
 		if bool(f.get("withdrawing",false)) and (f.get("route_home",PackedVector2Array()) as PackedVector2Array).size()>=1:
 			var road:=PackedVector2Array([f.pos]); road.append_array(f.route_home)
 			out.withdrawals.append({"points":road,"army_id":int(f.get("army_id",0))})
+	# Which of our armies is laying which siege.
+	var besieging:Dictionary={}
+	for siege in (inputs.get("sieges",[]) as Array):
+		if bool(siege.get("ours",true)) and int(siege.get("army_id",0))!=0: besieging[int(siege.army_id)]=siege.pos
 	# The generals' intent: arrows to their objectives (in the raid age, a
-	# band's path is a dotted raid track instead).
+	# band's path is a dotted raid track instead). A chase after men who fled
+	# and a siege being laid are arrows in any age.
 	var bias:=0.0
+	var marked:Dictionary={}
 	for f in friendly:
 		if out.arrows.size()>=Model.MAX_ARROWS: break
+		var id:=int(f.get("army_id",0))
 		var objective:Vector2=f.get("objective",Vector2.INF)
+		if besieging.has(id):
+			# The camp stands on the town: the arrow is lettered at the siege
+			# ring, pointing in from the side our road comes from.
+			var town:Vector2=besieging[id]
+			var from:=(home-town).normalized() if home.distance_to(town)>0.0001 else Vector2.LEFT
+			out.arrows.append({"id":"siege:%d" % id,"kind":"siege","points":PackedVector2Array([town+from,town+from*0.5,town]),"town":town,"from":from,"ours":true,"offensive":true,"weight":0.8,"stale":false,"army_id":id})
+			continue
 		if not objective.is_finite() or (f.pos as Vector2).distance_to(objective)<0.05 or bool(f.get("withdrawing",false)): continue
-		if mode=="raid" and (f.get("road",PackedVector2Array()) as PackedVector2Array).size()>=3:
-			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":int(f.get("army_id",0))})
+		var road:PackedVector2Array=f.get("road",PackedVector2Array())
+		if bool(f.get("chasing",false)):
+			var chase:=Model.arrow(f.pos,objective,[],0.1)
+			out.arrows.append({"id":"chase:%d" % id,"kind":"pursuit","points":_resample(road,20) if road.size()>=3 else Model.arrow_points(chase,20),"ours":true,"offensive":true,"weight":0.3,"stale":false,"army_id":id})
+			continue
+		if mode=="raid" and road.size()>=3:
+			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":id})
 			continue
 		if mode=="raid":
 			var delta:=objective-(f.pos as Vector2)
 			var spec:=PackedVector2Array([f.pos,(f.pos as Vector2)+delta*0.5+delta.orthogonal()*0.12,objective])
-			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":int(f.get("army_id",0))})
+			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":id})
 			continue
-		var road:PackedVector2Array=f.get("road",PackedVector2Array())
 		var spec:=Model.arrow(f.pos,objective,fronts,bias)
 		bias=-bias+0.05 if bias<=0.0 else -bias
-		out.arrows.append({"points":_resample(road,20) if road.size()>=3 else Model.arrow_points(spec),"ours":true,"offensive":bool(f.get("offensive",false)),"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":int(f.get("army_id",0))})
-		out.objectives.append({"pos":objective,"ours":true,"offensive":bool(f.get("offensive",false))})
+		var offensive:=bool(f.get("offensive",false))
+		out.arrows.append({"id":"army:%d" % id,"kind":"offensive" if offensive else "march","points":_resample(road,20) if road.size()>=3 else Model.arrow_points(spec,20),"ours":true,"offensive":offensive,"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":id})
+		# Many hosts sent to one place share one objective mark.
+		var key:=Vector2i((objective/maxf(0.001,float(out.sigma)*0.05)).round())
+		if not marked.has(key):
+			marked[key]=true
+			out.objectives.append({"pos":objective,"ours":true,"offensive":offensive})
 	if mode!="raid":
 		# Enemy arrows only from observed movement, dated.
 		for e in enemy:
@@ -822,7 +1179,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 			var spec:=PackedVector2Array([start,start+direction*length*0.5,start+direction*length])
 			# The road they were seen on (round the water), cut to the arrow's reach.
 			var seen_road:=_clip(e.get("road",PackedVector2Array()) as PackedVector2Array,start,length)
-			out.arrows.append({"points":_resample(seen_road,10) if seen_road.size()>=2 and _length(seen_road)>length*0.3 else Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1)),"enemy_id":String(e.get("id",""))})
+			out.arrows.append({"id":"enemy:%s" % String(e.get("id","")),"kind":"enemy","points":_resample(seen_road,10) if seen_road.size()>=2 and _length(seen_road)>length*0.3 else Model.arrow_points(spec,10),"ours":false,"offensive":true,"weight":clampf(log(maxf(10.0,float(e.strength)))/log(10.0)/5.0,0.25,0.8),"stale":float(e.get("age_days",0))>=Model.STALE_DAYS,"seen_day":int(e.get("seen_day",-1)),"enemy_id":String(e.get("id",""))})
 	for engagement in (inputs.get("engagements",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var ours_id:=String(engagement.get("ours",Tactics.BASELINE))
 		var theirs_id:=String(engagement.get("theirs",Tactics.BASELINE))
@@ -832,9 +1189,31 @@ static func compose(inputs:Dictionary)->Dictionary:
 			"shape_ours":Tactics.shape(ours_id,rounds,String(engagement.get("phase_ours","hold"))),"shape_theirs":Tactics.shape(theirs_id,rounds,String(engagement.get("phase_theirs","hold"))),
 			"label":_cap(Tactics.name_of(ours_id,stage)) if ours_id!=Tactics.BASELINE else _cap(Tactics.name_of(theirs_id,stage)) if theirs_id!=Tactics.BASELINE else "","event":String(engagement.get("event","")),
 			"army_id":int(engagement.get("army_id",0)),"rounds":rounds,"commanded":bool(engagement.get("commanded",false)),
-			"finished":bool(engagement.get("finished",false)),"seed":int(engagement.get("seed",0)),"age":int(engagement.get("age",0)),"result":String(engagement.get("result","")),"headline":String(engagement.get("headline",""))})
+			"finished":bool(engagement.get("finished",false)),"seed":int(engagement.get("seed",0)),"age":int(engagement.get("age",0)),"result":String(engagement.get("result","")),"headline":String(engagement.get("headline","")),
+			"won":bool(engagement.get("won",false)),"lost":bool(engagement.get("lost",false)),"battle_id":String(engagement.get("battle_id",""))})
 	for siege in (inputs.get("sieges",[]) as Array).slice(0,4):
 		out.sieges.append({"pos":siege.pos,"pressure":clampf(float(siege.get("pressure",0.0)),0.0,1.0),"works":String(siege.get("works","blockade_camp")),"ours":bool(siege.get("ours",true)),"label":_cap(Tactics.name_of(String(siege.get("works","blockade_camp")),stage)),"days":int(siege.get("days",0)),"army_id":int(siege.get("army_id",0))})
+	# Battles being fought now: ours on the front at their contact point, the
+	# stretch of front being fought over heated (the worm); rivals' where our
+	# watchers saw them. A siege's battle stands on its ring.
+	var lines:Array=(out.fronts as Array)+(out.faceoffs as Array)
+	out.battles=BattleMarks.place((inputs.get("battles",[]) as Array).slice(0,Model.MAX_BATTLES),lines,float(out.sigma))
+	for index in lines.size():
+		var line:Dictionary=lines[index]
+		line["heat"]=BattleMarks.heat(line.points,out.battles,index,float(out.sigma))
+	var fought:Dictionary={}
+	for battle in out.battles:
+		if not bool(battle.get("ours",false)): continue
+		if String(battle.get("kind",""))=="siege":
+			for siege in out.sieges:
+				if (siege.pos as Vector2).distance_to(battle.pos)<float(out.sigma)*0.2+0.01: siege["marked"]=true
+		else: fought[int(battle.get("army_id",0))]=battle.pos
+	out.fought=fought
+	# The tactic's diagram is drawn round the battle's own mark.
+	for clash in out.clashes:
+		if not bool(clash.get("finished",false)) and fought.has(int(clash.get("army_id",0))): clash["pos"]=fought[int(clash.army_id)]
+	# Spears before the lettered ages, swords after.
+	out.era=0 if stage=="hearth" else 1
 	for raid in (inputs.get("raids",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var from:Vector2=raid.from; var to:Vector2=raid.to
 		var delta:=to-from
@@ -865,10 +1244,12 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 	var stage:=String(inputs.get("stage","reckoned"))
 	var corps_known:=bool(inputs.get("corps_known",false))
 	var staffs_known:=bool(inputs.get("staffs_known",false))
-	var fighting:Dictionary={}
-	for clash in built.clashes: fighting[int(clash.get("army_id",0))]=true
+	# In battle: a fight being fought now (a finished one is only history).
+	var fighting:Dictionary=(built.get("fought",{}) as Dictionary).duplicate()
+	for clash in built.get("clashes",[]):
+		if not bool(clash.get("finished",false)): fighting[int(clash.get("army_id",0))]=true
 	var besieging:Dictionary={}
-	for siege in built.sieges:
+	for siege in built.get("sieges",[]):
 		if bool(siege.get("ours",true)): besieging[int(siege.get("army_id",0))]=String(siege.get("place",""))
 	var out:Array=[]
 	for f in friendly.slice(0,ArmyMarks.MAX_OURS):
@@ -881,17 +1262,20 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 		context["withdrawing"]=bool(f.get("withdrawing",false))
 		if besieging.has(id) and id!=0: context["besieging"]=String(besieging[id]) if String(besieging[id])!="" else "the town"
 		var detached:=String(f.get("detachment_of",""))
+		var full:=maxi(troops,int(f.get("full",troops)))
 		out.append({"id":"ours:%d" % id,"side":"ours","army_id":id,"pos":f.pos,"troops":troops,"era":era,"branch":String(f.get("branch","foot")),
 			"noun":ArmyMarks.noun(troops,stage,era,corps_known),"kind":ArmyMarks.kind(troops,stage,era,staffs_known),"detachment_of":detached,
 			"name":String(f.get("name","")),"general":"" if detached!="" else String(f.get("general","")),"doing":String(context.get("pursuit","")) if String(context.get("pursuit",""))!="" else ArmyMarks.doing(context),
-			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving"})
+			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving",
+			"full":full,"will":clampf(float(f.get("morale",0.6)),0.0,1.0),"state":BattleMarks.state_of(context),"heading":context.get("delta",Vector2.ZERO)})
 	# Towns we hold: the garrison's mark stands on the town.
 	for g in (inputs.get("garrisons",[]) as Array):
 		var held:=int(g.get("troops",0))
 		if held<=0: continue
 		out.append({"id":"held:%s" % String(g.get("region_id","")),"side":"ours","army_id":0,"garrison":true,"pos":g.pos,"troops":held,"era":0,"branch":"foot",
 			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
-			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note","")),"away":int(g.get("away",0))})
+			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note","")),"away":int(g.get("away",0)),
+			"full":maxi(held,int(g.get("required",held))),"will":clampf(float(g.get("morale",0.6)),0.0,1.0),"state":"hungry" if bool(g.get("hungry",false)) else "holding"})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])
@@ -900,6 +1284,7 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 	for s in strangers:
 		if theirs.size()>=ArmyMarks.MAX_THEIRS: break
 		theirs.append(s)
+	var near_battle:=maxf(4.0,float(built.get("sigma",1.0))*0.6)
 	for e in theirs:
 		var low:=int(e.get("low",roundi(float(e.get("strength",0.0)))))
 		var high:=maxi(low,int(e.get("high",roundi(float(e.get("strength",0.0))))))
@@ -907,11 +1292,21 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 		var mid:=roundi(float(low+high)*0.5)
 		var era:=int(e.get("era",0))
 		var scout:=bool(e.get("scout",false))
-		out.append({"id":"theirs:%s" % String(e.get("id","")),"side":"theirs","enemy_id":String(e.get("id","")),"pos":e.pos,"troops":mid,"low":low,"high":high,
+		var mark:={"id":"theirs:%s" % String(e.get("id","")),"side":"theirs","enemy_id":String(e.get("id","")),"pos":e.pos,"troops":mid,"low":low,"high":high,
 			"era":era,"branch":String(e.get("branch","foot")),"noun":"scouts" if scout else ArmyMarks.noun(mid,stage,era,false),
 			"kind":"band:2" if scout else ArmyMarks.kind(mid,stage,era,false),"owner":String(e.get("owner",e.get("name",""))),"moving":bool(e.get("moving",false)),
 			"age_days":int(e.get("age_days",0)),"hostile":not strangers.has(e),"observed":bool(e.get("observed",false)),"scout":scout,
-			"marked":bool(e.get("marked",false)),"sighting":e})
+			"marked":bool(e.get("marked",false)),"sighting":e}
+		# What was seen of them, and no more: their state as last seen, and
+		# their will only as the watchers' range, while the sighting is fresh.
+		var fighting_now:=false
+		if int(e.get("age_days",0))<ArmyMarks.FRESH_DAYS:
+			for battle in built.get("battles",[]):
+				if int(battle.get("age_days",0))==0 and (battle.pos as Vector2).distance_to(e.pos)<=near_battle: fighting_now=true; break
+		mark["state"]="fighting" if fighting_now else ("marching" if bool(e.get("moving",false)) else "holding")
+		if float(e.get("will_low",-1.0))>=0.0 and int(e.get("age_days",0))<ArmyMarks.FRESH_DAYS:
+			mark["will_low"]=float(e.will_low); mark["will_high"]=maxf(float(e.will_low),float(e.get("will_high",e.will_low)))
+		out.append(mark)
 	return out
 
 
@@ -922,7 +1317,7 @@ static func _cap(text:String)->String:
 ## Primitive counts, for probes and tests (bounded regardless of armies).
 static func primitive_count(built:Dictionary)->int:
 	var total:=0
-	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings"]: total+=(built.get(key,[]) as Array).size()
+	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings","battles"]: total+=(built.get(key,[]) as Array).size()
 	return total
 
 
@@ -984,12 +1379,17 @@ func _draw()->void:
 	hits.clear()
 	drawn_marks.clear()
 	caption_requests.clear()
+	hot_cache.clear()
+	battle_cache.clear()
+	front_chunks.clear()
+	pulse_live=false
+	if pulse_layer!=null: pulse_layer.queue_redraw()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
 	if band=="ground":
 		# Up close only the forces' small paper cards stay, placed clear of
 		# the town cards; the front and its ink stand aside for the ground.
-		_draw_marks(band,[])
+		_draw_marks(band,[],[])
 		_letter_captions(T.voice_font(true))
 		last_draw_usec=Time.get_ticks_usec()-started
 		return
@@ -1016,20 +1416,36 @@ func _draw()->void:
 			for run in _drape(road.points,step):
 				_dashed(run,Color(OURS,0.75),2.0,5.0,5.0)
 				hits.append({"kind":"army","line":run,"army_id":int(road.army_id)})
+	# The ground won (or lost) as a front gives way: washed in the winner's
+	# colour between where the line stood and where it now runs, fading.
+	for bulge in bulges:
+		var gained:=_gained_ground(bulge)
+		if gained.size()>=3 and _fillable(gained):
+			var fade:=1.0-clampf(float(bulge.t)/maxf(0.001,float(bulge.dur)),0.0,1.0)
+			draw_colored_polygon(gained,Color(OURS_WASH if bool(bulge.get("forward",true)) else THEIRS_WASH,0.34*fade))
 	for index in live_fronts.size():
 		var entry:Dictionary=live_fronts[index]
 		if float(entry.alpha)<=0.01: continue
 		_draw_front(entry,band,step)
+	# Where a front stood before it gave way, fading as it settles.
+	for bulge in bulges:
+		var ghost:PackedVector2Array=bulge.get("ghost",PackedVector2Array())
+		if ghost.size()<2: continue
+		var fade:=1.0-clampf(float(bulge.t)/maxf(0.001,float(bulge.dur)),0.0,1.0)
+		var line:=_poly(ghost)
+		if line.size()>=2: _dashed(line,Color(INK,0.5*fade),1.6,6.0,5.0)
 	for pocket in scene.get("pockets",[]): _draw_pocket(pocket,band)
 	for faceoff in scene.get("faceoffs",[]):
-		_draw_front({"points":faceoff.points,"alpha":1.0,"data":{"stale":bool(faceoff.get("stale",false))}},band,step)
+		_draw_front({"points":faceoff.points,"alpha":1.0,"data":faceoff},band,step)
 	for raid in scene.get("raids",[]): _draw_raid(raid)
-	for arrow in scene.get("arrows",[]): _draw_arrow(arrow,t,wide)
+	for id in live_arrows: _draw_arrow(live_arrows[id],t,wide)
 	if not wide:
 		for objective in scene.get("objectives",[]): _draw_objective(objective)
 	for siege in scene.get("sieges",[]): _draw_siege(siege,wide)
 	for clash in scene.get("clashes",[]): _draw_clash(clash,band)
 	for pulse in clash_pulses: _draw_clash_pulse(pulse,wide)
+	# Battles stand where the sides touch; forces step clear of them.
+	var battles:=_battle_entries(band)
 	# Highest echelon first; a group's own corps give way to its mark where
 	# they would crowd it, and the armies under a drawn mark give way to it.
 	var echelons_drawn:Array=[]
@@ -1042,8 +1458,9 @@ func _draw()->void:
 				if (other.at as Vector2).distance_to(at)<44.0: crowded=true; break
 			if crowded: continue
 			echelons_drawn.append({"at":at,"armies":echelon.get("armies",[]),"echelon":echelon})
-	_draw_marks(band,echelons_drawn)
+	_draw_marks(band,echelons_drawn,battles)
 	for entry in echelons_drawn: _draw_echelon(entry.echelon,band)
+	_draw_battles(battles,band)
 	# One small dated caption per stale front: the map says how old it is.
 	if not wide:
 		for entry in live_fronts:
@@ -1056,6 +1473,228 @@ func _draw()->void:
 			_request_caption("stale:%d" % where,(data.points as PackedVector2Array)[where],"Their line as last seen, %d days ago" % oldest,THEIRS,2)
 	_letter_captions(font)
 	last_draw_usec=Time.get_ticks_usec()-started
+
+
+# --- Battles ---------------------------------------------------------------------------
+
+## Where each battle stands on screen now: ours on the front, a siege's on
+## its ring clear of the town's own pin; far out, battles close together
+## stand as one. Kept for the forces' clearance, the lettering and the
+## pulse canvas. [{at, battle, radius, rect, live, phase, group?}]
+func _battle_entries(band:String)->Array:
+	var entries:Array=[]
+	var battles:Array=scene.get("battles",[])
+	if battles.is_empty(): return entries
+	var wide:=band in ["continental","world"]
+	var view:=Rect2(Vector2.ZERO,size).grow(40.0)
+	for battle in battles:
+		var at:=_screen(battle.pos)
+		if not at.is_finite() or not view.has_point(at): continue
+		if String(battle.get("kind",""))=="siege":
+			var ring:=36.0
+			for siege in scene.get("sieges",[]):
+				if (siege.pos as Vector2).distance_to(battle.pos)<=_world_per_px(battle.pos)*4.0: ring=lerpf(46.0,26.0,float(siege.pressure))*(0.55 if wide else 1.0)
+			# On its ring, up and to the left: the town's own card sits to its right.
+			at+=Vector2(-0.72,-0.72)*ring
+		entries.append({"at":at,"battle":battle})
+	# Ours first, then the larger fights, then a stable order.
+	entries.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var oa:=bool(a.battle.get("ours",false)); var ob:=bool(b.battle.get("ours",false))
+		if oa!=ob: return oa
+		var ma:=_battle_men(a.battle); var mb:=_battle_men(b.battle)
+		if ma!=mb: return ma>mb
+		return String(a.battle.get("id",""))<String(b.battle.get("id","")))
+	if wide:
+		var grouped:Array=[]
+		for group in BattleMarks.cluster(entries,float(BattleMarks.CLUSTER_PX.get(band,56.0))):
+			if (group.members as Array).size()==1: grouped.append(group.members[0])
+			else: grouped.append({"at":group.at,"battle":(group.members[0] as Dictionary).battle,"group":group})
+		entries=grouped
+	var r:=BattleMarks.MARK_RADIUS*_battle_scale(band)
+	for entry in entries:
+		var battle:Dictionary=entry.battle
+		entry["radius"]=r+3.0
+		entry["rect"]=Rect2((entry.at as Vector2)-Vector2(BattleMarks.BAR_WIDTH*0.5+2.0,r+3.0),Vector2(BattleMarks.BAR_WIDTH+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
+		entry["live"]=int(battle.get("age_days",0))==0
+		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
+		if bool(entry.live): pulse_live=true
+	if not hot_cache.is_empty(): pulse_live=true
+	battle_cache=entries
+	return entries
+
+
+## A battle's mark a little larger up close, a little smaller far out.
+static func _battle_scale(band:String)->float:
+	return float({"local":1.15,"regional":1.0,"continental":0.85,"world":0.8}.get(band,1.0))
+
+
+static func _battle_men(battle:Dictionary)->int:
+	var sides:Dictionary=battle.get("sides",{})
+	return int((sides.get("a",{}) as Dictionary).get("troops",0))+int((sides.get("b",{}) as Dictionary).get("troops",0))
+
+
+## The battle marks, their names and days, and what a click or a resting
+## pointer finds there.
+func _draw_battles(entries:Array,band:String)->void:
+	var wide:=band in ["continental","world"]
+	var era:=int(scene.get("era",1))
+	# Which names are kept when the chart is crowded: the one under the
+	# pointer, then our biggest fights, then ours, then the rivals' seen.
+	var ours_by_size:Array=entries.filter(func(e:Dictionary)->bool: return not e.has("group") and bool(e.battle.get("ours",false)))
+	ours_by_size.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return _battle_men(a.battle)>_battle_men(b.battle))
+	var biggest:Dictionary={}
+	for e in ours_by_size.slice(0,5): biggest[String(e.battle.get("id",""))]=true
+	for entry in entries:
+		var at:Vector2=entry.at
+		if entry.has("group"):
+			var group:Dictionary=entry.group
+			var members:Array=[]
+			for member in group.members: members.append(member.battle)
+			BattleMarks.draw_cluster(self,at,group,era,T.voice_font(false))
+			var places:=PackedStringArray()
+			for battle in members.slice(0,3): places.append(String(battle.get("place_name","")))
+			var line:="%s: %s" % [BattleMarks.aggregate_label(members.size()),", ".join(places)]
+			_request_caption("battles:%s" % String((members[0] as Dictionary).get("id","")),Vector2.INF,BattleMarks.aggregate_label(members.size()),INK,6,float(entry.radius)+12.0,at,"plate")
+			hits.append({"kind":"battles","centre":at,"radius":float(entry.radius)+4.0,"battles":members,"line":line})
+			continue
+		var battle:Dictionary=entry.battle
+		var scale:=_battle_scale(band)*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
+		BattleMarks.draw_battle(self,at,battle,era,scale)
+		if band!="world":
+			var id:=String(battle.get("id",""))
+			var priority:=8 if id==hover_id else (6 if biggest.has(id) else (5 if bool(battle.get("ours",false)) else 4))
+			# Set out to the side of the front with a leader line, not on it.
+			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,float(entry.radius)+(16.0 if wide else 22.0),at,"plate")
+		hits.append({"kind":"battle","centre":at,"radius":float(entry.radius)+4.0,"battle":battle,"line":String(battle.get("hover",""))})
+
+
+## The fighting's own motion, on the pulse canvas behind the chart's ink:
+## the worm's warm body under each stretch of front being fought over, its
+## teeth biting in a slow wave, and each battle's gentle pulse. No day and
+## night; with reduced motion it all stands still.
+func draw_animated(canvas:CanvasItem)->void:
+	var still:=Motion.reduced()
+	var t:=anim_clock
+	var breath:=0.6 if still else 0.5+0.5*sin(t*TAU/PULSE_PERIOD)
+	for run in hot_cache:
+		var points:PackedVector2Array=run.points
+		var normals:PackedVector2Array=run.normals
+		var heat:PackedFloat32Array=run.heat
+		var alpha:=float(run.alpha)*float(run.peak)
+		var wide:=bool(run.wide)
+		canvas.draw_polyline(points,Color(THEIRS_WASH,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
+		canvas.draw_polyline(points,Color(THEIRS,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
+		# Teeth biting into their side from the edge of the ink, about every
+		# 14 px, in a slow wave running along the stretch being fought over.
+		var n:=points.size()
+		var run_px:=0.0
+		for i in range(1,n): run_px+=points[i-1].distance_to(points[i])
+		var stride:=clampi(roundi(14.0*float(n-1)/maxf(1.0,run_px)),1,4)
+		var edge:=3.5 if wide else 5.0
+		for i in range(0,n-1,stride):
+			var h:=heat[i]
+			if h<0.3: continue
+			var a:=points[i]; var b:=points[i+1]
+			var along:=(b-a).normalized()
+			var wave:=1.0 if still else 0.8+0.4*sin(float(i)*0.9-t*3.2)
+			var tooth:=((6.0 if wide else 8.0)+(6.0 if wide else 9.0)*h)*wave
+			var base:=a+normals[i]*edge
+			var tri:=PackedVector2Array([base-along*5.0,base+along*5.0,base+normals[i]*tooth])
+			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(THEIRS,0.95*float(run.alpha)))
+	if still: return
+	for entry in battle_cache:
+		if not bool(entry.get("live",false)): continue
+		var at:Vector2=entry.at
+		var r:=float(entry.radius)
+		var u:=fposmod(t/PULSE_PERIOD+float(entry.phase),1.0)
+		var spread:=1.0-(1.0-u)*(1.0-u)
+		var fade:=(1.0-u)*(1.0-u)
+		canvas.draw_circle(at,r+2.0,Color(THEIRS_WASH,0.10+0.10*(0.5+0.5*sin((t/PULSE_PERIOD+float(entry.phase))*TAU))))
+		canvas.draw_arc(at,r+2.0+16.0*spread,0.0,TAU,32,Color(PAPER,0.45*fade),3.0,true)
+		canvas.draw_arc(at,r+2.0+16.0*spread,0.0,TAU,32,Color(THEIRS,0.55*fade),1.3,true)
+
+
+## The battle mark under a screen point: {kind:"battle", battle} or
+## {kind:"battles", battles} (far out), or {}.
+func battle_at(point:Vector2)->Dictionary:
+	var best:={}; var best_distance:=INF
+	for hit in hits:
+		if not String(hit.get("kind","")) in ["battle","battles"]: continue
+		var d:=(hit.centre as Vector2).distance_to(point)
+		if d<=float(hit.radius) and d<best_distance: best_distance=d; best=hit
+	return best
+
+
+## How a battle is opened: our battles in the battle view (the game's own
+## entry point, MilitaryCommandUI._open_battle_graphics, told which army's
+## fight), a siege in its siege screen. {} for a rival's (a note instead).
+static func battle_view_request(battle:Dictionary)->Dictionary:
+	if not bool(battle.get("ours",false)): return {}
+	if String(battle.get("kind",""))=="siege": return {"siege":String(battle.get("siege_id",""))}
+	return {"method":"_open_battle_graphics","args":[int(battle.get("army_id",0)),-1],"engagement":String(battle.get("id",""))}
+
+
+## A click on a battle: ours open in the battle view; far out, a group of
+## battles, or a rival's fight our watchers saw, opens a note about it.
+func open_battle(hit:Dictionary,at:Vector2)->void:
+	close_tip()
+	if String(hit.get("kind",""))=="battles":
+		open_note(hit,at); return
+	var battle:Dictionary=hit.get("battle",{})
+	var request:=battle_view_request(battle)
+	if request.is_empty():
+		open_note(hit,at); return
+	if battle_opener.is_valid():
+		battle_opener.call(request); return
+	close_note()
+	if request.has("siege"):
+		preload("res://scripts/hud/siege_screen.gd").open(String(request.siege))
+		return
+	var ui:Node=get_tree().root.get_node_or_null("MilitaryCommandUI") if is_inside_tree() else null
+	if ui==null: return
+	# The battle model's own opener, when it offers one by engagement.
+	if ui.has_method("open_engagement"): ui.call_deferred("open_engagement",String(request.engagement))
+	else: ui.call_deferred(String(request.method),int(request.args[0]),int(request.args[1]))
+
+
+## A pointer resting on a battle: one plain line beside it.
+func _hover(point:Vector2)->void:
+	var over:Dictionary={}
+	if get_viewport()!=null and get_viewport().gui_get_hovered_control()==null: over=battle_at(point)
+	var line:=String(over.get("line",""))
+	var id:=String((over.get("battle",{}) as Dictionary).get("id",over.get("kind","")))
+	# The battle under the pointer keeps its name on the chart, whatever else must give way.
+	if id!=hover_id and line!="": hover_id=id; queue_redraw()
+	if line=="":
+		if hover_id!="": close_tip(); queue_redraw()
+		else: close_tip()
+		return
+	if tip==null: _build_tip()
+	var label:=tip.get_child(0) as Label
+	if label.text!=line: label.text=line; tip.reset_size()
+	tip.show()
+	var extent:=tip.get_combined_minimum_size()
+	var view:=get_viewport_rect().size
+	tip.position=Vector2(clampf(point.x+16.0,8.0,maxf(8.0,view.x-extent.x-8.0)),clampf(point.y+18.0,8.0,maxf(8.0,view.y-extent.y-8.0)))
+
+
+func close_tip()->void:
+	if tip!=null: tip.hide()
+	hover_id=""
+
+
+func _build_tip()->void:
+	if note_layer==null:
+		note_layer=CanvasLayer.new(); note_layer.name="WarNoteLayer"; note_layer.layer=2
+		add_child(note_layer)
+	tip=PanelContainer.new(); tip.name="BattleTip"
+	tip.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CONTROL,8.0))
+	tip.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	note_layer.add_child(tip)
+	var label:=Label.new(); label.name="Line"; label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	T.text(label,"small",T.INK)
+	tip.add_child(label)
+	tip.hide()
 
 
 func _centre_of_scene()->Vector2:
@@ -1106,7 +1745,9 @@ static func _fillable(polygon:PackedVector2Array)->bool:
 ## Stretches derived from stale reports are dashed and paler.
 func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var data:Dictionary=entry.get("data",{})
-	var world:PackedVector2Array=entry.points
+	# Where it has eased to, plus any surge running where a battle ended or a
+	# town changed hands.
+	var world:=_bulged(entry.points)
 	var points:=_poly(world)
 	if points.size()<2: return
 	var alpha:=clampf(float(entry.get("alpha",1.0)),0.0,1.0)
@@ -1119,6 +1760,7 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var ages:PackedFloat32Array=data.get("age",PackedFloat32Array())
 	var toward:PackedVector2Array=data.get("toward",PackedVector2Array())
 	var pressure:PackedFloat32Array=data.get("pressure",PackedFloat32Array())
+	var heat:PackedFloat32Array=data.get("heat",PackedFloat32Array())
 	var all_stale:=bool(data.get("stale",false)) and ages.is_empty()
 	# Screen normals toward the enemy, one per vertex. The world "toward" is
 	# carried to the screen by the local projection (two samples per front).
@@ -1137,33 +1779,91 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 			if normal.dot(ex*toward[j].x+ey*toward[j].y)<0.0: normal=-normal
 		elif i>0 and normals[i-1].dot(normal)<0.0: normal=-normal
 		normals.append(normal)
-	if not wide:
-		# Each side's ground, as two soft bands (drawn as wide strokes: no
-		# polygon to fail when the line folds on screen).
-		var wash:=16.0 if band=="local" else 12.0
-		draw_polyline(_offset(points,normals,wash*0.5),Color(THEIRS_WASH,0.16*alpha),wash,true)
-		draw_polyline(_offset(points,normals,wash*0.25),Color(THEIRS_WASH,0.14*alpha),wash*0.5,true)
-		draw_polyline(_offset(points,normals,-wash*0.5),Color(OURS_WASH,0.20*alpha),wash,true)
-		draw_polyline(_offset(points,normals,-wash*0.25),Color(OURS_WASH,0.16*alpha),wash*0.5,true)
-	var base:=2.2 if wide else (2.8 if band=="regional" else 3.2)
+	# Each side's ground, as two soft bands (drawn as wide strokes: no
+	# polygon to fail when the line folds on screen).
+	var wash:=22.0 if band=="local" else (16.0 if band=="regional" else 8.0)
+	draw_polyline(_offset(points,normals,wash*0.5),Color(THEIRS_WASH,0.20*alpha),wash,true)
+	draw_polyline(_offset(points,normals,wash*0.25),Color(THEIRS_WASH,0.18*alpha),wash*0.5,true)
+	draw_polyline(_offset(points,normals,-wash*0.5),Color(OURS_WASH,0.26*alpha),wash,true)
+	draw_polyline(_offset(points,normals,-wash*0.25),Color(OURS_WASH,0.20*alpha),wash*0.5,true)
+	var base:=2.6 if wide else (3.4 if band=="regional" else 3.8)
 	draw_polyline(points,Color(PAPER,0.7*alpha),base+5.0,true)
-	for i in range(1,n):
+	# The line itself in runs (one polyline each, dashed where it is known
+	# only from old reports), then its weight where the sides are massed or
+	# fighting, batched by width.
+	var heat_at:=PackedFloat32Array(); heat_at.resize(n)
+	var stale_at:=PackedByteArray(); stale_at.resize(n)
+	for i in n:
 		var j:=clampi(roundi(float(i)*to_source),0,last_source)
-		var stale:=all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS))
-		var w:=base+(2.6 if not wide else 1.0)*(float(widths[j]) if j<widths.size() else 0.6)
-		if stale: _dashed(PackedVector2Array([points[i-1],points[i]]),Color(INK,0.5*alpha),2.0,6.0,5.0)
-		else: draw_line(points[i-1],points[i],Color(INK,0.92*alpha),w,true)
-	var stride:=maxi(2,n/(10 if wide else 16))
+		heat_at[i]=float(heat[j]) if j<heat.size() else 0.0
+		stale_at[i]=1 if all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS)) else 0
+	var run:=PackedVector2Array([points[0]])
+	var run_stale:=stale_at[0]==1
+	for i in range(1,n):
+		var stale:=stale_at[i]==1
+		if stale!=run_stale:
+			_front_run(run,run_stale,base,alpha)
+			run=PackedVector2Array([points[i-1]]); run_stale=stale
+		run.append(points[i])
+	_front_run(run,run_stale,base,alpha)
+	var buckets:Dictionary={}
+	for i in range(1,n):
+		if stale_at[i]==1: continue
+		var j:=clampi(roundi(float(i)*to_source),0,last_source)
+		var extra:=(2.6 if not wide else 1.0)*(float(widths[j]) if j<widths.size() else 0.6)+(3.4 if not wide else 2.0)*maxf(heat_at[i-1],heat_at[i])
+		var key:=roundi(extra*2.0)
+		if key<=0: continue
+		if not buckets.has(key): buckets[key]=PackedVector2Array()
+		var segments:PackedVector2Array=buckets[key]
+		segments.append(points[i-1]); segments.append(points[i])
+		buckets[key]=segments
+	for key in buckets: draw_multiline(buckets[key],Color(INK,0.92*alpha),base+float(key)*0.5,true)
+	# Where a battle is fought the worm works (drawn on the pulse canvas);
+	# elsewhere the teeth stand still.
+	var animated:=pulse_layer!=null and not Motion.reduced()
+	var hot_points:=PackedVector2Array(); var hot_normals:=PackedVector2Array(); var hot_heat:=PackedFloat32Array()
+	for i in n:
+		if heat_at[i]>0.06 and stale_at[i]==0:
+			hot_points.append(points[i]); hot_normals.append(normals[i]); hot_heat.append(heat_at[i])
+		elif hot_points.size()>=2:
+			_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide); hot_points=PackedVector2Array(); hot_normals=PackedVector2Array(); hot_heat=PackedFloat32Array()
+		else:
+			hot_points.clear(); hot_normals.clear(); hot_heat.clear()
+	if hot_points.size()>=2: _keep_hot(hot_points,hot_normals,hot_heat,alpha,wide)
+	# Teeth into their side, spaced along the line on screen.
+	var length_px:=0.0
+	for i in range(1,n): length_px+=points[i-1].distance_to(points[i])
+	var stride:=clampi(roundi(float(n-1)*(26.0 if wide else 22.0)/maxf(1.0,length_px)),1,maxi(1,n/4))
 	for i in range(stride/2,n-1,stride):
+		if animated and heat_at[i]>0.3: continue
 		var a:=points[i]; var b:=points[i+1]
 		var along:=(b-a).normalized()
 		var j:=clampi(roundi(float(i)*to_source),0,last_source)
-		var tooth:=(6.0 if wide else 9.0)+4.0*absf(float(pressure[j]) if j<pressure.size() else 0.0)
+		var tooth:=(6.0 if wide else 9.0)+4.0*absf(float(pressure[j]) if j<pressure.size() else 0.0)+6.0*heat_at[i]
 		var color:=Color(THEIRS,0.92*alpha)
-		if all_stale or (j<ages.size() and float(ages[j])>=float(Model.STALE_DAYS)): color.a=0.45*alpha
+		if stale_at[i]==1: color.a=0.45*alpha
 		var tri:=PackedVector2Array([a-along*5.0,a+along*5.0,a+normals[i]*tooth])
 		if _fillable(tri): draw_colored_polygon(tri,color)
 	hits.append({"kind":"front","line":points,"armies":data.get("armies",[]),"stale":bool(data.get("stale",false))})
+	# The line, in a few chunks, for the lettering to keep clear of.
+	var chunk:=maxi(4,n/12)
+	for start in range(0,n-1,chunk):
+		var box:=Rect2(points[start],Vector2.ZERO)
+		for i in range(start+1,mini(n,start+chunk+1)): box=box.expand(points[i])
+		front_chunks.append(box.grow(4.0))
+
+
+func _front_run(run:PackedVector2Array,stale:bool,base:float,alpha:float)->void:
+	if run.size()<2: return
+	if stale: _dashed(run,Color(INK,0.5*alpha),2.0,6.0,5.0)
+	else: draw_polyline(run,Color(INK,0.92*alpha),base,true)
+
+
+## A stretch of front being fought over, kept for the pulse canvas.
+func _keep_hot(points:PackedVector2Array,normals:PackedVector2Array,heat:PackedFloat32Array,alpha:float,wide:bool)->void:
+	var peak:=0.0
+	for h in heat: peak=maxf(peak,h)
+	hot_cache.append({"points":points,"normals":normals,"heat":heat,"peak":peak,"alpha":alpha,"wide":wide})
 
 
 ## A pocket: the ring closing on them, hatched inside, the gap still open
@@ -1189,13 +1889,53 @@ func _draw_pocket(pocket:Dictionary,band:String)->void:
 	hits.append({"kind":"pocket","poly":ring,"armies":(scene.fronts[index] as Dictionary).get("armies",[]) if index<(scene.get("fronts",[]) as Array).size() else []})
 
 
-func _draw_arrow(arrow:Dictionary,_t:float,wide:bool)->void:
-	var points:=_poly(arrow.points)
-	if points.size()<3: return
+## An arrow as drawn now: a new one draws itself out from its tail, a
+## finished one fades where it was (live_arrows).
+func _draw_arrow(entry:Dictionary,_t:float,wide:bool)->void:
+	var arrow:Dictionary=entry.get("data",entry)
+	var alpha:=clampf(float(entry.get("alpha",1.0)),0.0,1.0)
+	if alpha<=0.01: return
+	var grow:=clampf(float(entry.get("grow",1.0)),0.0,1.0)
+	var kind:=String(arrow.get("kind","offensive" if bool(arrow.get("ours",true)) else "enemy"))
 	var ours:=bool(arrow.get("ours",true))
+	if kind=="siege":
+		_draw_siege_arrow(arrow,alpha,grow,wide)
+		return
+	var world:PackedVector2Array=entry.get("points",arrow.get("points",PackedVector2Array()))
+	if grow<1.0: world=_grown(world,grow)
+	var points:=_poly(world)
+	if points.size()<3: return
 	var stale:=bool(arrow.get("stale",false))
 	var base:=(5.0 if wide else 7.0)+(6.0 if wide else 11.0)*float(arrow.get("weight",0.5))
-	# A tapered body (HOI4-style plan arrow) with an inked edge.
+	var fill:=Color(OURS_WASH if ours else THEIRS_WASH,0.5 if ours and bool(arrow.get("offensive",false)) else 0.26)
+	if kind=="pursuit": fill.a=0.36
+	if stale: fill.a*=0.5
+	var dashed:=stale or not ours or kind=="pursuit"
+	var body:=_ink_arrow(points,base,fill,Color(OURS if ours else THEIRS,0.9) if dashed else Color(INK,0.85),dashed,alpha)
+	if kind=="pursuit":
+		# A chase: small chevrons running along the shaft toward the quarry.
+		for u in [0.3,0.55]:
+			var k:=clampi(roundi(float(points.size()-1)*u),1,points.size()-2)
+			var ahead:=(points[k+1]-points[k-1]).normalized()
+			var side:=ahead.orthogonal()*base*0.34
+			draw_polyline(PackedVector2Array([points[k]-ahead*4.0+side,points[k]+ahead*2.0,points[k]-ahead*4.0-side]),Color(INK,0.8*alpha),1.4,true)
+	if body.size()>=3:
+		hits.append({"kind":"arrow" if ours else "enemy_arrow","poly":body,"line":points,"army_id":int(arrow.get("army_id",0)),"enemy_id":String(arrow.get("enemy_id","")),"seen_day":int(arrow.get("seen_day",-1))})
+
+
+## A polyline cut to the first `share` of its length (at least three points).
+static func _grown(points:PackedVector2Array,share:float)->PackedVector2Array:
+	if points.size()<2: return points
+	var total:=Model._length(points)
+	var cut:=_clip(points,points[0],total*clampf(share,0.0,1.0))
+	if cut.size()<2 or Model._length(cut)<=0.0: return PackedVector2Array()
+	return Model.resample(cut,maxi(3,roundi(float(points.size()-1)*share)+1))
+
+
+## A tapered, inked arrow along screen points (HOI4-style plan arrow): a
+## paper halo, a wash body and an ink edge (dashed for the uncertain, the
+## enemy's and the chase). Returns the body polygon.
+func _ink_arrow(points:PackedVector2Array,base:float,fill:Color,edge:Color,dashed:bool,alpha:float)->PackedVector2Array:
 	var left:=PackedVector2Array(); var right:=PackedVector2Array()
 	var shaft_end:=points.size()-3
 	for k in shaft_end+1:
@@ -1206,28 +1946,57 @@ func _draw_arrow(arrow:Dictionary,_t:float,wide:bool)->void:
 	var tip:=points[-1]
 	var back:=points[shaft_end]
 	var direction:=(tip-back).normalized()
+	if direction==Vector2.ZERO: return PackedVector2Array()
 	var wing:=direction.orthogonal()*base*0.75
 	var body:=left.duplicate()
 	body.append(back+wing); body.append(tip); body.append(back-wing)
 	right.reverse(); body.append_array(right)
 	var outline:=body.duplicate(); outline.append(body[0])
-	draw_polyline(outline,Color(PAPER,0.55),4.0,true)
-	var fill:=Color(OURS_WASH if ours else THEIRS_WASH,0.5 if ours and bool(arrow.get("offensive",false)) else 0.26)
-	if stale: fill.a*=0.5
-	if _fillable(body): draw_colored_polygon(body,fill)
-	if stale or not ours: _dashed(outline,Color(OURS if ours else THEIRS,0.9),1.4,6.0,4.0)
-	else: draw_polyline(outline,Color(INK,0.85),1.4,true)
-	hits.append({"kind":"arrow" if ours else "enemy_arrow","poly":body,"line":points,"army_id":int(arrow.get("army_id",0)),"enemy_id":String(arrow.get("enemy_id","")),"seen_day":int(arrow.get("seen_day",-1))})
+	draw_polyline(outline,Color(PAPER,0.55*alpha),4.0,true)
+	if _fillable(body): draw_colored_polygon(body,Color(fill,fill.a*alpha))
+	if dashed: _dashed(outline,Color(edge,edge.a*alpha),1.4,6.0,4.0)
+	else: draw_polyline(outline,Color(edge,edge.a*alpha),1.4,true)
+	return body
 
 
+## A siege being laid: a short heavy arrow into the siege ring from the side
+## our road comes from (the camp itself stands on the town).
+func _draw_siege_arrow(arrow:Dictionary,alpha:float,grow:float,wide:bool)->void:
+	var town:Vector2=arrow.get("town",Vector2.INF)
+	var from:Vector2=arrow.get("from",Vector2.LEFT)
+	if not town.is_finite(): return
+	var centre:=_screen(town)
+	var probe:=_screen(town+from*_world_per_px(town)*40.0)
+	if not centre.is_finite() or not probe.is_finite() or probe.distance_to(centre)<0.5: return
+	var out_dir:=(probe-centre).normalized()
+	var ring:=36.0
+	for siege in scene.get("sieges",[]):
+		if (siege.pos as Vector2).distance_to(town)<=_world_per_px(town)*4.0: ring=lerpf(46.0,26.0,float(siege.pressure))*(0.55 if wide else 1.0)
+	var reach:=(52.0 if not wide else 30.0)*clampf(grow,0.0,1.0)
+	if reach<6.0: return
+	var tip:=centre+out_dir*(ring-2.0)
+	var tail:=tip+out_dir*reach
+	var bend:=out_dir.orthogonal()*reach*0.18
+	var points:=PackedVector2Array()
+	for k in 13:
+		var u:=float(k)/12.0
+		points.append(tail.lerp(tail.lerp(tip,0.5)+bend,u).lerp((tail.lerp(tip,0.5)+bend).lerp(tip,u),u))
+	var body:=_ink_arrow(points,(9.0 if wide else 14.0),Color(OURS_WASH,0.55),Color(INK,0.85),false,alpha)
+	if body.size()>=3: hits.append({"kind":"siege","poly":body,"army_id":int(arrow.get("army_id",0))})
+
+
+## The ground a general marches on: a small inked target (ring, dot and
+## four ticks), never a cross that could be read as a battle.
 func _draw_objective(objective:Dictionary)->void:
 	var at:=_screen(objective.pos)
 	if not at.is_finite(): return
 	var color:=Color(INK,0.9)
-	draw_arc(at,9.0,0.0,TAU,28,Color(PAPER,0.7),5.0,true)
-	draw_arc(at,9.0,0.0,TAU,28,color,1.6,true)
-	draw_line(at+Vector2(-5,-5),at+Vector2(5,5),color,1.6,true)
-	draw_line(at+Vector2(-5,5),at+Vector2(5,-5),color,1.6,true)
+	draw_arc(at,8.0,0.0,TAU,28,Color(PAPER,0.7),5.0,true)
+	draw_arc(at,8.0,0.0,TAU,28,color,1.6,true)
+	draw_circle(at,2.0,color)
+	for k in 4:
+		var d:=Vector2.from_angle(TAU*float(k)/4.0)
+		draw_line(at+d*8.0,at+d*12.0,color,1.6,true)
 
 
 func _draw_raid(raid:Dictionary)->void:
@@ -1252,7 +2021,7 @@ func _draw_raid(raid:Dictionary)->void:
 ## once the sighting is old, as the front's stale stretches are dashed).
 ## Crowded marks stack under one, step off the front, and give way to the
 ## corps and army-group marks that stand for them (hud/army_marks.gd).
-func _draw_marks(band:String,echelons_drawn:Array)->void:
+func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 	drawn_marks.clear()
 	var marks:Array=scene.get("marks",[])
 	if marks.is_empty(): return
@@ -1274,9 +2043,12 @@ func _draw_marks(band:String,echelons_drawn:Array)->void:
 	var fronts:Array=[]
 	for entry in live_fronts:
 		if float(entry.alpha)<=0.3: continue
-		var line:=_poly(entry.points)
+		var line:=_poly(_bulged(entry.points))
 		if line.size()>=2: fronts.append(line)
-	var laid:=ArmyMarks.layout(candidates,{"band":band,"bounds":Rect2(Vector2.ZERO,size),"fronts":fronts,"echelons":echelons_drawn,"home":_screen(scene.get("home",Vector2.ZERO))})
+	var clear:Array=[]
+	for battle in battles: clear.append({"at":battle.at,"clear":float(battle.get("radius",14.0))+4.0})
+	var laid:=ArmyMarks.layout(candidates,{"band":band,"bounds":Rect2(Vector2.ZERO,size),"fronts":fronts,"echelons":echelons_drawn,"home":_screen(scene.get("home",Vector2.ZERO)),
+		"battles":clear,"sector_px":float(SECTOR_PX.get(band,0.0))})
 	for entry in laid.drawn:
 		_draw_mark(entry,band)
 		drawn_marks.append(entry)
@@ -1323,15 +2095,30 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 	if bool(entry.get("selected",false)):
 		draw_arc(at,px*0.66,0.0,TAU,28,Color(PAPER,0.8),3.4,true)
 		draw_arc(at,px*0.66,0.0,TAU,28,T.GOLD,1.6,true)
+	# The counter (HOI4-style, inked): strength and will to fight under the
+	# mark, one state glyph at its shoulder.
+	var counter:=ArmyMarks.counter(entry)
+	var bar_width:=maxf(22.0,px*1.05)
+	if not counter.is_empty(): BattleMarks.draw_counter(self,Vector2(at.x-bar_width*0.5,rect.end.y+2.0),bar_width,counter,accent,alpha)
+	var state:=String(entry.get("state",""))
+	if state!="":
+		var heading:Vector2=entry.get("heading",Vector2.ZERO)
+		var ahead:=Vector2.RIGHT
+		if heading.length_squared()>0.0:
+			var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
+			if probe.is_finite() and _screen(entry.pos).is_finite(): ahead=(probe-_screen(entry.pos)).normalized()
+		BattleMarks.draw_state(self,at+Vector2(-px*0.5-2.0,-px*0.2),state,maxf(5.0,px*0.22),alpha,ahead)
 	var members:=(entry.get("members",[]) as Array).size()
 	if members>1:
-		var badge:=at+Vector2(px*0.42,px*0.36)
+		var badge:=at+Vector2(px*0.5+2.0,-px*0.2)
 		draw_circle(badge,7.0,Color(PAPER,0.95))
 		draw_arc(badge,7.0,0.0,TAU,16,Color(ink,0.8),1.0,true)
 		var font:=T.voice_font(false)
 		var text:=str(members)
 		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		draw_string(font,badge+Vector2(-width*0.5,4.5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(ink,0.95))
+		# Far out, the stretch of front's forces are lettered in one line.
+		if bool(entry.get("sector",false)) and not bool(entry.get("card",false)): _request_caption("sector:%s" % String(entry.id),Vector2.INF,ArmyMarks.sector_words(entry),OURS if ours else THEIRS,3 if ours else 2,px*0.62+10.0,at,"plate")
 	if bool(entry.get("card",false)): _request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5 if bool(entry.get("selected",false)) else (3 if ours else 2),px*0.62+4.0,at)
 	if bool(entry.get("garrison",false)): pass
 	elif ours: hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.6),"army_id":int(entry.army_id),"mark":true})
@@ -1434,7 +2221,9 @@ func _draw_siege(siege:Dictionary,wide:bool)->void:
 	else:
 		_dashed(ring,color,1.8,7.0,6.0)
 		for k in 6: draw_circle(centre+Vector2.from_angle(TAU*float(k)/6.0+0.3)*radius,3.0,color)
-	if not wide: _request_caption("siege:%s" % str(siege.pos),siege.pos,"%s · day %d" % [String(siege.label),int(siege.get("days",0))] if int(siege.get("days",0))>0 else String(siege.label),color,4,radius+6.0)
+	# A siege with its own battle mark is lettered there ("Siege of Tsaren ·
+	# day 12"); the ring alone names its works.
+	if not wide and not bool(siege.get("marked",false)): _request_caption("siege:%s" % str(siege.pos),siege.pos,"%s · day %d" % [String(siege.label),int(siege.get("days",0))] if int(siege.get("days",0))>0 else String(siege.label),color,4,radius+6.0)
 	hits.append({"kind":"siege","centre":centre,"radius":radius+6.0,"army_id":int(siege.get("army_id",0))})
 
 
@@ -1457,7 +2246,12 @@ func _draw_clash(clash:Dictionary,band:String)->void:
 	var reach:=_screen((clash.pos as Vector2)+(clash.axis as Vector2)*sigma)
 	var sigma_px:=reach.distance_to(at) if reach.is_finite() else 80.0
 	var r:=clampf(sigma_px*0.45,12.0,56.0 if band=="local" else 40.0)
+	# A battle mark (hud/battle_marks.gd) stands for this fight: it carries
+	# the crossed weapons, the name and the day; the diagram only shows the
+	# shape of the tactic around it, up close.
+	var marked:=(scene.get("fought",{}) as Dictionary).has(int(clash.get("army_id",0)))
 	if bool(clash.get("skirmish",false)):
+		if marked: return
 		# A handful caught by a band: a skirmish mark between the two inked
 		# marks, not two opposed battle lines.
 		_crossed_strokes(at,5.0,Color(THEIRS,0.95))
@@ -1465,6 +2259,7 @@ func _draw_clash(clash:Dictionary,band:String)->void:
 		hits.append({"kind":"clash","centre":at,"radius":12.0,"army_id":int(clash.get("army_id",0)),"clash":clash})
 		return
 	if band in ["continental","world"] or r<20.0:
+		if marked: return
 		# Far out, a battle is a mark on the line, not a diagram.
 		_crossed_strokes(at,6.0,Color(THEIRS,0.95))
 		if band!="world" and String(clash.get("label",""))!="": _request_caption("clash:%s" % str(clash.pos),clash.pos,String(clash.label),INK,5,12.0)
@@ -1534,8 +2329,8 @@ func _draw_clash(clash:Dictionary,band:String)->void:
 		"reserve":
 			var c:=at-axis*r*(0.7-0.5*clampf(float(ours.hardening)*1.5-0.5,0.0,1.0))
 			draw_rect(Rect2(c-Vector2(7,4),Vector2(14,8)),Color(OURS,0.85),false,1.6)
-	_crossed_strokes(at,6.0,Color(THEIRS,0.95))
-	if String(clash.get("label",""))!="": _request_caption("clash:%s" % str(clash.pos),clash.pos,String(clash.label),INK,5,r+8.0)
+	if not marked: _crossed_strokes(at,6.0,Color(THEIRS,0.95))
+	if String(clash.get("label",""))!="": _request_caption("clash:%s" % str(clash.pos),clash.pos,String(clash.label),INK,4 if marked else 5,r+8.0)
 	hits.append({"kind":"clash","centre":at,"radius":r*0.8,"army_id":int(clash.get("army_id",0)),"clash":clash})
 
 
@@ -1743,22 +2538,29 @@ func _draw_echelon(echelon:Dictionary,band:String)->void:
 
 # --- Captions: lettered around what the chart already shows -----------------------
 
-func _request_caption(id:String,world:Vector2,text:String,color:Color,priority:int,clear:float=10.0,screen_anchor:=Vector2.INF)->void:
+## style: "card" (a small paper card, a title and a detail line) or "plate"
+## (one line of ink on a small paper plate: a battle's name and day, the
+## forces along a stretch of front).
+func _request_caption(id:String,world:Vector2,text:String,color:Color,priority:int,clear:float=10.0,screen_anchor:=Vector2.INF,style:="card")->void:
 	if text=="": return
 	var at:=screen_anchor if screen_anchor.is_finite() else _screen(world)
 	if not at.is_finite(): return
-	caption_requests.append({"id":id,"anchor":at,"text":text,"color":color,"priority":priority,"clear":clear})
+	caption_requests.append({"id":id,"anchor":at,"text":text,"color":color,"priority":priority,"clear":clear,"style":style})
 
 
-func _caption_size(text:String,font:Font)->Vector2:
-	if not caption_extent.has(text):
+func _caption_size(text:String,font:Font,style:="card")->Vector2:
+	var key:=style+"|"+text
+	if not caption_extent.has(key):
 		if caption_extent.size()>256: caption_extent.clear()
+		if style=="plate":
+			caption_extent[key]=Vector2(ceilf(T.font("ui").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,BattleMarks.LABEL_SIZE).x)+14.0,21.0)
+			return caption_extent[key]
 		# A card has a title line and a smaller detail line beneath it.
 		var lines:=text.split("\n")
 		var width:=font.get_string_size(lines[0],HORIZONTAL_ALIGNMENT_LEFT,-1,CAPTION_SIZE).x
 		for k in range(1,lines.size()): width=maxf(width,font.get_string_size(lines[k],HORIZONTAL_ALIGNMENT_LEFT,-1,CARD_DETAIL_SIZE).x)
-		caption_extent[text]=Vector2(ceilf(minf(420.0,width))+14.0,22.0+16.0*float(lines.size()-1))
-	return caption_extent[text]
+		caption_extent[key]=Vector2(ceilf(minf(420.0,width))+14.0,22.0+16.0*float(lines.size()-1))
+	return caption_extent[key]
 
 
 ## Everything the captions must keep clear of: city cards and pins, great
@@ -1775,46 +2577,81 @@ func _caption_obstacles()->Dictionary:
 	var tags:Variant=get_parent().get_node_or_null("WarMapOverlay") if get_parent()!=null else null
 	if tags!=null:
 		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
-	for entry in drawn_marks: pins.append({"at":entry.at,"clear":float(entry.size)*0.62+2.0})
+	for entry in drawn_marks:
+		pins.append({"at":entry.at,"clear":float(entry.size)*0.62+2.0})
+		# The mark with its state glyph at the shoulder and its counter beneath.
+		var px:=float(entry.size)
+		rects.append(Rect2((entry.at as Vector2)-Vector2(px*0.5+9.0,px*0.5+2.0),Vector2(px+18.0,px+14.0)))
+	# Battle marks, and the bar hanging beneath each.
+	for entry in battle_cache:
+		rects.append(entry.rect)
+		pins.append({"at":entry.at,"clear":float(entry.radius)+2.0})
+	# The fronts: names never sit on the line.
+	rects.append_array(front_chunks)
 	if note!=null and note.visible: rects.append(note.get_global_rect())
 	return {"rects":rects,"pins":pins,"bounds":bounds}
 
 
 func _letter_captions(font:Font)->void:
-	placed_captions.clear()
-	dropped_captions=0
-	if caption_requests.is_empty(): return
-	var notes:Array=[]
-	for request in caption_requests:
-		var entry:Dictionary=request.duplicate()
-		entry.extent=_caption_size(String(request.text),font)
-		notes.append(entry)
-	var obstacles:=_caption_obstacles()
-	var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
-	caption_memory=result.memory
-	placed_captions=result.notes
-	dropped_captions=(result.dropped as Array).size()
+	if caption_requests.is_empty():
+		placed_captions.clear(); dropped_captions=0; caption_key=0
+		return
+	var key_parts:=PackedStringArray()
+	for request in caption_requests: key_parts.append(String(request.id)+"|"+String(request.text)+"|"+str(int(request.priority)))
+	var key:=hash(key_parts)
+	var now:=Time.get_ticks_msec()
+	if key==caption_key and now-caption_placed_msec<CAPTION_REPLACE_MSEC and not placed_captions.is_empty():
+		# The same labels a moment later: each follows its mark.
+		var anchors:Dictionary={}
+		for request in caption_requests: anchors[String(request.id)]=request.anchor
+		for caption in placed_captions:
+			if not anchors.has(String(caption.id)): continue
+			var moved:=(anchors[String(caption.id)] as Vector2)-(caption.anchor as Vector2)
+			caption.rect=Rect2((caption.rect as Rect2).position+moved,(caption.rect as Rect2).size)
+			caption.anchor=anchors[String(caption.id)]
+	else:
+		var notes:Array=[]
+		for request in caption_requests:
+			var entry:Dictionary=request.duplicate()
+			entry.extent=_caption_size(String(request.text),font,String(request.get("style","card")))
+			notes.append(entry)
+		var obstacles:=_caption_obstacles()
+		var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
+		caption_memory=result.memory
+		placed_captions=result.notes
+		dropped_captions=(result.dropped as Array).size()
+		caption_key=key
+		caption_placed_msec=now
 	for caption in placed_captions:
 		var box:Rect2=caption.rect
 		var anchor:Vector2=caption.anchor
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		if end.distance_to(anchor)>float(caption.clear)+4.0:
-			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*0.6
-			draw_line(start,end,Color(PAPER,0.6),3.0,true)
-			draw_line(start,end,Color(INK,0.5),1.0,true)
+		var plate:=String(caption.get("style","card"))=="plate"
+		if end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
+			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*(0.45 if plate else 0.6)
+			draw_line(start,end,Color(PAPER,0.7),3.0,true)
+			draw_line(start,end,Color(INK,0.65),1.0,true)
+		if plate:
+			# One line of ink on a small paper plate, as the town cards are.
+			draw_style_box(_caption_style(),box)
+			draw_rect(Rect2(box.position+Vector2(0,3),Vector2(2,box.size.y-6)),Color(caption.color,0.85))
+			draw_string(T.font("ui"),box.position+Vector2(8.0,15.5),String(caption.text),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10.0,BattleMarks.LABEL_SIZE,CAPTION_INK)
+			continue
 		draw_style_box(_caption_style(),box)
 		var color:Color=caption.color
 		draw_rect(Rect2(box.position+Vector2(0,3),Vector2(2,box.size.y-6)),Color(color,0.85))
 		var lines:=String(caption.text).split("\n")
-		draw_string(font,box.position+Vector2(7,16),lines[0],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CAPTION_SIZE,Color(INK,0.95))
+		draw_string(font,box.position+Vector2(7,16),lines[0],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CAPTION_SIZE,CAPTION_INK)
 		for k in range(1,lines.size()):
-			draw_string(font,box.position+Vector2(7,16+16*k),lines[k],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CARD_DETAIL_SIZE,Color(INK,0.7))
+			draw_string(font,box.position+Vector2(7,16+16*k),lines[k],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CARD_DETAIL_SIZE,CAPTION_MUTED)
 
 
 var _style:StyleBoxFlat
+## Cards and plates are chart paper with iron-gall ink in either interface
+## mode (the chart itself does not turn dark), so their text always reads.
 func _caption_style()->StyleBoxFlat:
 	if _style==null:
-		_style=StyleBoxFlat.new(); _style.bg_color=Color(T.PAPER_RAISED,0.92); _style.border_color=Color(T.RULE,0.9)
+		_style=StyleBoxFlat.new(); _style.bg_color=Color(CAPTION_PAPER,0.95); _style.border_color=Color(CAPTION_RULE,0.95)
 		_style.set_border_width_all(1); _style.set_corner_radius_all(T.RADIUS_CONTROL)
 		_style.shadow_color=Color(0,0,0,0.08); _style.shadow_size=2; _style.shadow_offset=Vector2(0,1)
 	return _style
@@ -1846,12 +2683,21 @@ func hit_at(point:Vector2)->Dictionary:
 
 
 func _input(event:InputEvent)->void:
+	if event is InputEventMouseMotion:
+		if not battle_cache.is_empty() or (tip!=null and tip.visible): _hover((event as InputEventMouseMotion).position)
+		return
 	var press:bool=event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT
 	if not press:
 		if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE and note!=null and note.visible: close_note()
 		return
 	if note!=null and note.visible and note.get_global_rect().has_point(event.position): return
 	if get_viewport().gui_get_hovered_control()!=null: return
+	# A battle's mark stands over the forces fighting it: it opens the battle.
+	var battle:=battle_at(event.position)
+	if not battle.is_empty():
+		open_battle(battle,event.position)
+		get_viewport().set_input_as_handled()
+		return
 	# An army mark keeps its own click (selection); its general's note opens too.
 	var army_id:=_army_counter_at(event.position)
 	if army_id>0:
@@ -1938,6 +2784,28 @@ func note_content(hit:Dictionary)->Dictionary:
 			content.lines=lines+(content.lines as Array)
 			if armies.size()>1: content.kicker="FRONT · %d HOSTS" % armies.size()
 			return content
+		"battle":
+			var battle:Dictionary=hit.get("battle",{})
+			var lines:Array=[String(battle.get("hover",BattleMarks.hover_line(battle)))+"."]
+			if bool(battle.get("ours",false)):
+				var content:=_army_content(int(battle.get("army_id",0)),stage)
+				content.lines=lines+(content.lines as Array)
+				content.kicker="BATTLE"
+				content["second"]={"label":"Watch the battle","kind":"battle","battle":battle}
+				return content
+			var age:=int(battle.get("age_days",0))
+			lines.append("Our watchers saw it %s. Nothing newer has reached us." % ("today" if age==0 else ("yesterday" if age==1 else "%s days ago" % EraWords.count_word(age))))
+			return {"kicker":"THEIR BATTLE","title":String(battle.get("place_name","A battle")),"lines":lines,"action":_marshal_action()}
+		"battles":
+			var battles:Array=hit.get("battles",[])
+			var lines:Array=[]
+			var largest:Dictionary={}
+			for battle in battles.slice(0,6):
+				var push:=BattleMarks.push_words(battle)
+				lines.append("%s: %s." % [String(battle.get("place_name","")),push.substr(0,1).to_lower()+push.substr(1)])
+				if bool(battle.get("ours",false)) and (largest.is_empty() or _battle_men(battle)>_battle_men(largest)): largest=battle
+			var action:Dictionary={"label":"Watch the largest battle","kind":"battle","battle":largest} if not largest.is_empty() else _marshal_action()
+			return {"kicker":"BATTLES","title":BattleMarks.aggregate_label(battles.size()),"lines":lines,"action":action}
 		"clash":
 			var clash:Dictionary=hit.get("clash",{})
 			if bool(clash.get("finished",false)): return _finished_note(clash)
@@ -2080,8 +2948,9 @@ func open_note(hit:Dictionary,at:Vector2)->void:
 
 
 func _build_note()->void:
-	note_layer=CanvasLayer.new(); note_layer.name="WarNoteLayer"; note_layer.layer=2
-	add_child(note_layer)
+	if note_layer==null:
+		note_layer=CanvasLayer.new(); note_layer.name="WarNoteLayer"; note_layer.layer=2
+		add_child(note_layer)
 	note=PanelContainer.new(); note.name="WarNote"
 	note.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,14.0))
 	note.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -2102,6 +2971,7 @@ func _build_note()->void:
 func _act(action:Dictionary)->void:
 	close_note()
 	match String(action.get("kind","")):
+		"battle": open_battle({"kind":"battle","battle":action.get("battle",{})},Vector2.ZERO)
 		"campaign": GeneralCampaign.open_screen()
 		"report": preload("res://scripts/hud/battle_report_panel.gd").open(get_tree().current_scene,int(action.get("seed",0)))
 		"watch":
