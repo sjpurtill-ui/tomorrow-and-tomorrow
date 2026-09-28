@@ -4048,5 +4048,21 @@
   "portion_allotment_customs": {"path": "res://assets/ui/research/subjects/portion_allotment_customs-v1.png", "focus": [0.5, 0.5]},
   "clay_feel_judging": {"path": "res://assets/ui/research/subjects/clay_feel_judging-v1.png", "focus": [0.5, 0.5]},
   "grazing_ground_recovery_marking": {"path": "res://assets/ui/research/subjects/grazing_ground_recovery_marking-v1.png", "focus": [0.5, 0.5]},
-  "rotating_command_practice": {"path": "res://assets/ui/research/subjects/rotating_command_practice-v1.png", "focus": [0.5, 0.5]}
+  "rotating_command_practice": {"path": "res://assets/ui/research/subjects/rotating_command_practice-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_well_flushing": {"path": "res://assets/ui/research/subjects/seasonal_well_flushing-v1.png", "focus": [0.5, 0.5]},
+  "stone_lined_drains": {"path": "res://assets/ui/research/subjects/stone_lined_drains-v1.png", "focus": [0.5, 0.5]},
+  "shared_reserve_access_rules": {"path": "res://assets/ui/research/subjects/shared_reserve_access_rules-v1.png", "focus": [0.5, 0.5]},
+  "fixed_worker_rations": {"path": "res://assets/ui/research/subjects/fixed_worker_rations-v1.png", "focus": [0.5, 0.5]},
+  "tributary_villages": {"path": "res://assets/ui/research/subjects/tributary_villages-v1.png", "focus": [0.5, 0.5]},
+  "barley_beer": {"path": "res://assets/ui/research/subjects/barley_beer-v1.png", "focus": [0.5, 0.5]},
+  "dung_cake_fuel": {"path": "res://assets/ui/research/subjects/dung_cake_fuel-v1.png", "focus": [0.5, 0.5]},
+  "wedge_and_fire_quarrying": {"path": "res://assets/ui/research/subjects/wedge_and_fire_quarrying-v1.png", "focus": [0.5, 0.5]},
+  "wheel_hub_boring": {"path": "res://assets/ui/research/subjects/wheel_hub_boring-v1.png", "focus": [0.5, 0.5]},
+  "childhood_illness_recognition": {"path": "res://assets/ui/research/subjects/childhood_illness_recognition-v1.png", "focus": [0.5, 0.5]},
+  "outbreak_burial_protocols": {"path": "res://assets/ui/research/subjects/outbreak_burial_protocols-v1.png", "focus": [0.5, 0.5]},
+  "kin_fostering_networks": {"path": "res://assets/ui/research/subjects/kin_fostering_networks-v1.png", "focus": [0.5, 0.5]},
+  "coordinated_retreat_drill": {"path": "res://assets/ui/research/subjects/coordinated_retreat_drill-v1.png", "focus": [0.5, 0.5]},
+  "craft_quarters": {"path": "res://assets/ui/research/subjects/craft_quarters-v1.png", "focus": [0.5, 0.5]},
+  "faience": {"path": "res://assets/ui/research/subjects/faience-v1.png", "focus": [0.5, 0.5]},
+  "public_grievance_hearings": {"path": "res://assets/ui/research/subjects/public_grievance_hearings-v1.png", "focus": [0.5, 0.35]}
 }

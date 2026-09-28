@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_well_flushing",
+  "line": "health",
+  "game_year": 210,
+  "approx_historical_year": -3600,
+  "prompt": "c. 3600 BCE: Villagers remove silt and flush a communal well; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6138e7e4-80e9-4b92-83f7-172d3acffd05.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_well_flushing-v1.png",
+  "sha256": "dfbadfe53773303a1255bba39c74ce91bd80286057a7e0872d633f160ef58791",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
