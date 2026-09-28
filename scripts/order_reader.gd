@@ -376,6 +376,10 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# nearest reading (court_war_orders.pending_answer), never asked again.
 	if String(theirs.get("ask",""))=="measure" and kind!="question" and (kind!="order" or action=="none"): return {"route":"engine","context":{"reader":true}}
 	if kind!="order" or action=="none": return {"route":"speak"}
+	# The captives and spoils of our last fight (or the standing word for the
+	# next) are read by the war orders' own words, whatever the reading named.
+	var captive:=WarOrders.captive_reading(text)
+	if not captive.is_empty() and WarOrders.captive_applies(captive): return _war_plan(captive)
 	if action in LEGACY_ACTIONS: return {"route":"legacy","why":"not the reader's business"}
 	var is_grave:=grave(reading)
 	var sure:=certain(reading)
@@ -466,6 +470,9 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 			return _war_plan(_measure_plan(text,held,details,base))
 		"attack","siege","raid":
 			var r:=base.duplicate(); r["kind"]=action; r["target"]=_foreign_target(ref)
+			# By night, and with how many: the same words as offline.
+			if details.has("count"): r["count"]=int(details.count)
+			WarOrders.strike_manner(r,lower)
 			# A town we already hold is not attacked: the war leader says so.
 			if bool((r.target as Dictionary).get("held",false)): r["kind"]="held"
 			return _war_plan(r)
