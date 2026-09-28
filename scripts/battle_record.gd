@@ -35,6 +35,8 @@ const ARM_WORDS:={
 	"armour":["tank","tanks"],"engineers":["engineer","engineers"],"support":["carrier","carriers"]}
 const STATE_WORDS:={"front":"fighting","reserve":"waiting","broken":"broken","fled":"fled"}
 const NUMBER_WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+## The most a "why" line says a thing adds: three times over.
+const WHY_MOST_PCT:=300
 
 ## Tactic events are told by the side that used the tactic; seen from the
 ## other side they read the other way round.
@@ -407,7 +409,9 @@ static func why_words(items:Array,left:String,player:bool,names:Dictionary,stage
 	for item_variant in items:
 		var item:Dictionary=item_variant
 		var v:=float(item.get("v",0.0))*sign
-		var pct:=roundi((exp(absf(v))-1.0)*100.0)*(1 if v>=0.0 else -1)
+		# Told as a share, at most "three times over" (+300%): against a side
+		# that has broken the raw ratio runs to thousands and says nothing.
+		var pct:=mini(WHY_MOST_PCT,roundi((exp(absf(v))-1.0)*100.0))*(1 if v>=0.0 else -1)
 		if absi(pct)<3 and String(item.k)!="numbers": continue
 		var good:=v>=0.0
 		var a:Variant=item.get("a",0); var d:Variant=item.get("d",0)
@@ -417,11 +421,12 @@ static func why_words(items:Array,left:String,player:bool,names:Dictionary,stage
 		match String(item.k):
 			"numbers":
 				label="Numbers"
-				text="%s against %s still in the fight" % [_amount(int(ours_value),true),_amount(int(theirs_value),true)] if player else "%s against %s" % [_amount(int(ours_value),true),_amount(int(theirs_value),true)]
+				# Ours counted, theirs as our people saw them (about, when many).
+				text="%s against %s still in the fight" % [_amount(int(ours_value),true),_amount(int(theirs_value),false)] if player else "%s against %s" % [_amount(int(ours_value),false),_amount(int(theirs_value),false)]
 			"frontage":
 				label="Room to fight"
 				# The side the narrow front holds back is the one with more to bring.
-				if player: text="The ground lets only %s of %s reach %s at once" % [_amount(int(ours_value if not good else theirs_value),true),"ours" if not good else "theirs","them" if not good else "us"]
+				if player: text="The ground lets only %s of %s reach %s at once" % [_amount(int(ours_value if not good else theirs_value),not good),"ours" if not good else "theirs","them" if not good else "us"]
 				else: text="The ground lets only %s of %s fight at once" % [_amount(int(ours_value if not good else theirs_value),true),String(names.left) if not good else String(names.right)]
 			"weapons":
 				label="Weapons and drill"

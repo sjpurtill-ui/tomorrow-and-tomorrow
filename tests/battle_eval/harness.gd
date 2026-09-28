@@ -573,6 +573,16 @@ func _observe_one(e:Dictionary,listed:Array,marks:Array,clashes:Array,view:Dicti
 		_check(panel_town==map_town,"marker","battle %s: the panel places it at '%s', the map at '%s'" % [id,String(t.get("panel_place","")),String(m.get("place_name",""))])
 		t["skirmish"]=bool(m.get("skirmish",false))
 		t["map_pos"]=m.get("pos",Vector2.INF)
+		# The battle panel itself, opened once a day has been fought: its day
+		# line says the day the map letters.
+		if int(t.get("fought_days",0))>=1 and not bool(t.get("panel_opened",false)) and is_instance_valid(suite):
+			t["panel_opened"]=true
+			var panel:Control=View.open(id,suite)
+			if _check(panel!=null,"panel","battle %s cannot be opened in the battle panel" % id):
+				var words:=String(panel.call("_battle_day_words"))
+				var said:=words.trim_prefix("Day ").trim_suffix(" of the battle")
+				_check(said==_number_word(int(m.get("day",0))) or said==str(int(m.get("day",0))),"timing","battle %s: the panel says '%s', the map day %d" % [id,words,int(m.get("day",0))])
+				View.close_open(suite)
 	# Its clash on the war chart (the worm and arrows): once.
 	var seed:=int(e.get("seed",0))
 	var mine_clashes:=clashes.filter(func(c:Dictionary)->bool: return int(c.get("seed",-1))==seed and not bool(c.get("finished",false)))
@@ -583,6 +593,11 @@ func _observe_one(e:Dictionary,listed:Array,marks:Array,clashes:Array,view:Dicti
 		var at:Vector2=t.get("map_pos",Vector2.INF)
 		if at.is_finite(): _check((c.pos as Vector2).distance_to(at)<=3.0,"marker","battle %s: its clash is drawn %.1f km from its battle mark" % [id,(c.pos as Vector2).distance_to(at)])
 	(t.days as Array).append({"day":int(GameState.elapsed_days),"exchange":int(battle.get("exchange",0)),"round":int(e.get("round",0)),"ours":ours,"theirs":theirs,"progress":progress})
+
+
+func _number_word(n:int)->String:
+	var words:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+	return words[n] if n>=0 and n<words.size() else str(n)
 
 
 ## The town a place name names ("Near Tsaren" and "Tsaren" name Tsaren).

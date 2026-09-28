@@ -922,7 +922,8 @@ func _finished_input(record:Dictionary,friendly:Array,enemy:Array,home:Vector2,t
 	entry["seed"]=int(record.get("seed",0))
 	entry["age"]=maxi(0,today-int(record.get("day",today)))
 	entry["rounds"]=(record.get("rounds",[]) as Array).size()
-	entry["result"]="%s · %s" % [word,("%s hurt or killed" % BattleAccount.count_words(hurt)) if hurt>0 else "none of ours hurt"]
+	# Our own hurt and dead, counted exactly (the report says the same).
+	entry["result"]="%s · %s" % [word,("%s hurt or killed" % BattleAccount.exact(hurt)) if hurt>0 else "none of ours hurt"]
 	entry["headline"]=String(account.headline)
 	# How it went decides which way the front gives (a surge when it ends).
 	entry["won"]=String(account.kind) in ["won","taken","uncontested"]
@@ -1517,17 +1518,28 @@ func _battle_entries(band:String)->Array:
 			if (group.members as Array).size()==1: grouped.append(group.members[0])
 			else: grouped.append({"at":group.at,"battle":(group.members[0] as Dictionary).battle,"group":group})
 		entries=grouped
-	var r:=BattleMarks.MARK_RADIUS*_battle_scale(band)
 	for entry in entries:
 		var battle:Dictionary=entry.battle
+		var s:=_mark_scale(battle,band)
+		var r:=BattleMarks.MARK_RADIUS*s
+		var bar:=BattleMarks.BAR_WIDTH*maxf(0.75,s)
 		entry["radius"]=r+3.0
-		entry["rect"]=Rect2((entry.at as Vector2)-Vector2(BattleMarks.BAR_WIDTH*0.5+2.0,r+3.0),Vector2(BattleMarks.BAR_WIDTH+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
+		entry["rect"]=Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
 		entry["live"]=int(battle.get("age_days",0))==0
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
 		if bool(entry.live): pulse_live=true
 	if not hot_cache.is_empty(): pulse_live=true
 	battle_cache=entries
 	return entries
+
+
+## One battle's mark: by the map's band, a little larger for a great battle
+## than for a fight of bands (a host of 30,000 reads apart from 300 at a
+## glance), smaller for a skirmish.
+static func _mark_scale(battle:Dictionary,band:String)->float:
+	var men:=float(maxi(1,_battle_men(battle)))
+	var great:=1.0+clampf(log(men/300.0)/log(10.0)*0.18,0.0,0.45)
+	return _battle_scale(band)*great*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
 
 
 ## A battle's mark a little larger up close, a little smaller far out.
@@ -1565,7 +1577,7 @@ func _draw_battles(entries:Array,band:String)->void:
 			hits.append({"kind":"battles","centre":at,"radius":float(entry.radius)+4.0,"battles":members,"line":line})
 			continue
 		var battle:Dictionary=entry.battle
-		var scale:=_battle_scale(band)*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
+		var scale:=_mark_scale(battle,band)
 		BattleMarks.draw_battle(self,at,battle,era,scale)
 		if band!="world":
 			var id:=String(battle.get("id",""))
