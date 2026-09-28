@@ -1009,8 +1009,7 @@ func _speak()->void:
 ## Words about what becomes of a town we hold or its people: the war
 ## leader's business, never a persons inquiry or a war-matter card.
 func _about_held_town(text:String)->bool:
-	var kind:=String(WarOrders.read(text,String(Hall.find(audience_id).get("civ_id","")),audience_id).get("kind",""))
-	return kind in ["measure","town_word","fate","which_town","measure_drop"]
+	return WarOrders.court_business(text,String(Hall.find(audience_id).get("civ_id","")),audience_id)
 
 ## The order reader answered (or failed): act on its plan. about_people: the
 ## words speak of people (who, summon, bring...); what the reader reads as an

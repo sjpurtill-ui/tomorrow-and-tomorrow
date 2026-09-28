@@ -157,6 +157,19 @@ static func held_towns()->Array[Dictionary]:
 			"taken_day":int(force.get("committed_day",0))})
 	return out
 
+static func unguarded_towns()->Array[Dictionary]:
+	## Towns we took that are ours with no garrison of ours in them
+	## (town_ledger.hold state "unguarded"): neither held nor a foreign town
+	## to march on. {city_id, civ_id, name, civ_name, position, unguarded:true}.
+	var out:Array[Dictionary]=[]
+	if WorldSimulation.world==null: return out
+	for pair in Ledger.towns():
+		var h:=Ledger.hold(String(pair[0]),String(pair[1]))
+		if String(h.state)!="unguarded" or String(h.name)=="": continue
+		var known:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(pair[1])) if "city_intelligence" in WorldSimulation.world and WorldSimulation.world.city_intelligence!=null else {}
+		out.append({"city_id":String(pair[1]),"civ_id":String(pair[0]),"controller":"player","name":String(h.name),"civ_name":Hall._civ_name(String(pair[0])),"position":(known.get("position",{}) as Dictionary).duplicate(true),"unguarded":true})
+	return out
+
 static func _name_hit(lower:String,name:String)->bool:
 	var n:=name.to_lower().strip_edges()
 	if n.length()<3: return false
@@ -180,6 +193,10 @@ static func find_target(text:String,context_civ:String="")->Dictionary:
 	var lower:=text.to_lower()
 	# A town we already hold is named as ours, never as a place to attack.
 	for town:Dictionary in held_towns():
+		if _name_hit(lower,String(town.name)): return town
+	# A town we took that is ours with nobody of ours in it (the garrison
+	# left): named as what it is (town_ledger.hold), never "no town".
+	for town:Dictionary in unguarded_towns():
 		if _name_hit(lower,String(town.name)): return town
 	var places:=known_places()
 	for p:Dictionary in places:
@@ -284,6 +301,10 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 			if not measured.is_empty(): return measured
 		var fate:=TownFate.fate_words(main)
 		if not fate.is_empty(): return {"kind":"fate","target":named,"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300)}
+		# Maiming or flogging a whole town's people: the war leader's plain
+		# answer (group_maim), never a persons inquiry nor a hand on anyone here.
+		if _has(main,"(maim|mutilat|cripple|blind|geld|castrat|hamstring|brand|flog|whip|scourge)\\w*\\b") and _has(main,TownFate.GROUP_WORDS):
+			return {"kind":"group_maim","target":named,"fate":{"group":true},"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300),"harm":"maim","group_harm":true}
 		# A chase from the town when nobody has run: the war leader says so.
 		if _has(lower,CHASE_WORDS): return {"kind":"pursue","target":named,"count":0,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
 		if _attack_on_held(main,army): return {"kind":"held","target":named,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
@@ -302,6 +323,8 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,"(defend|hold|guard|protect|garrison) (the|our|my) "+PLACE_WORDS)): kind="defend"
 	elif army and _has(lower,"(send|march|lead|take|move)") and _has(lower,"(on|against|to|at|toward|towards)\\b"): kind="attack"
 	elif _has(lower,LOOSE_ARMY_WORDS) and _has(lower,"(send|march|lead|take)") and _has(lower,"(on|against)\\b") and named_town: kind="attack"
+	# "Send everything we have against Tsaren", "throw all we have at them".
+	elif named_town and _has(lower,"(send|throw|hurl|commit)\\b") and _has(lower,"(against|on|into|at)\\b") and _has(lower,"(everything|everyone|all (we|you) have|all of us|every one of us|whatever we have|all our)\\b"): kind="attack"
 	elif named_town and _has(lower,"(take|seize|win|burn|punish|humble|finish|end|go for|hit)"): kind="attack"
 	if kind=="": return _implied_word(clean,lower,audience_id)
 	var target:={} if kind=="recall" else named
@@ -321,6 +344,15 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 		reading["home"]=_has(lower,"(home|withdraw|retreat|recall)") or (home_name!="" and _name_hit(lower,home_name))
 		reading["garrison"]=_has(lower,"(garrisons?|every ?one|every ?body|all of (you|them)|them all|you all|every soldier|all our|all the)")
 	return reading
+
+## Words that are the war leader's business however they are phrased, never
+## a persons inquiry even when they say "who", "bring" or "maim": what becomes
+## of a town we hold and its people, the men who fled it, the captives of a
+## fight. (The court modal asks this before the persons engine takes words.)
+const COURT_BUSINESS:=["measure","town_word","fate","which_town","measure_drop","pursue","let_go","captives","group_maim","follow_kill","abandon","keep"]
+
+static func court_business(text:String,context_civ:String="",audience_id:String="")->bool:
+	return String(read(text,context_civ,audience_id).get("kind","")) in COURT_BUSINESS
 
 ## How a strike goes in, from the ruler's words: by night (approach) and
 ## with how many (count). Shared by the live reading (order_reader.gd).
@@ -401,6 +433,7 @@ static func _captives(out:Dictionary,reading:Dictionary)->Dictionary:
 		out.says="From now on, after every fight, %s." % practice_words(part,policy)
 		out.outcome="A standing word: %s." % practice_words(part,policy)
 		return out
+	var settled:Dictionary=(mc.open_settlement(part) as Dictionary).duplicate(true)
 	var changed:Dictionary=mc.revise_settlement(part,policy)
 	if changed.has("error") and part=="prisoners" and int(mc.foreign_prisoners)>0 and policy!="hold":
 		# Captives held under guard from any fight: all of them.
@@ -413,9 +446,27 @@ static func _captives(out:Dictionary,reading:Dictionary)->Dictionary:
 			return out
 	if changed.has("error"): return _refuse_captives(out,String(changed.get("reason","cannot")),String(changed.error))
 	out.verdict="fate"
-	out.says=String(changed.done)
+	var moved:Variant=changed.get("moved",0)
+	var count:=int(moved) if (moved is int or moved is float) else 0
+	out.says=(String(changed.done)+" "+_captives_were(settled,part,String(changed.get("from","")),count)).strip_edges()
 	out.outcome=String(changed.done)
 	return out
+
+## Who the captives were, from the fight's own record: "They were the Esurai
+## we took at the ford, at our hearths as bondservants."
+static func _captives_were(s:Dictionary,part:String,was:String,moved:int)->String:
+	if s.is_empty() or part!="prisoners" or moved<=0: return ""
+	var place:=""
+	for b in _mc().battle_history:
+		if String((b as Dictionary).get("id",""))==String(s.get("battle_id","")) and String(s.get("battle_id",""))!="":
+			place=String((b as Dictionary).get("target_region_name",""))
+			break
+	var people:=String(s.get("people",""))
+	var who:=("the %s" % people) if people!="" and not people.begins_with("UNIDENTIFIED") else "the ones"
+	var where:=(" at %s" % place) if place!="" else " in the last fight"
+	var how:=String({"enslave":", at our hearths as bondservants","hold":", held under guard"}.get(was,""))
+	if moved==1: return "That one was one of %s we took%s%s." % [who,where,how]
+	return "They were %s we took%s%s." % [who,where,how]
 
 
 static func _refuse_captives(out:Dictionary,reason:String,says:String)->Dictionary:
@@ -659,6 +710,11 @@ static func pending_answer(audience:Dictionary,clean:String)->Dictionary:
 	var no:=_re(NO_WORDS).search(lower)!=null and not yes
 	var town:=_held_town(String(pending.get("region_id","")))
 	var base:={"target":town,"full":false,"insist":false,"place":"","army_words":false,"text":clean.substr(0,300),"answer":true}
+	# A whole new order about the town's people ("Untie the men of Tsaren and
+	# let them go back to their houses") is read on its own, never as the
+	# answer "let them go" to "Shall I send some after them?". A plain yes or
+	# no, or words about "them" alone, still answer the question.
+	if ask in ["chase","abandon"] and not yes and not no and own_order(clean): return {}
 	if ask=="chase":
 		if no or _has(lower,"(let them (go|run)|leave them|not worth)"): base["kind"]="let_go"; return base
 		if yes or _has(lower,CHASE_WORDS):
@@ -682,12 +738,37 @@ static func pending_answer(audience:Dictionary,clean:String)->Dictionary:
 		if chosen.is_empty(): return {}
 		base["kind"]="measure" if String(chosen.get("kind","measure"))=="measure" else "fate"
 		base["measures"]=[String(chosen.id)] if base.kind=="measure" else []
-		base["fate"]=(chosen.get("fate",{}) as Dictionary).duplicate()
+		base["fate"]=(chosen.get("fate",{}) as Dictionary).duplicate(true)
 		base["measure"]={"stance":String(chosen.get("stance","firm")),"stance_set":String(chosen.get("stance","firm"))!="firm","words":String(pending.get("text","")),"who":String(chosen.get("who","men")),"tone":String(chosen.get("tone",""))}
+		# "Bind the children" to "The women as well?": the group the words name.
+		var named:=_named_group(lower)
+		if named!="" and not pick.is_empty():
+			if base.kind=="measure" and (base.measure as Dictionary).has("who"): (base.measure as Dictionary)["who"]=named
+			elif bool((base.fate as Dictionary).get("kill_men",false)): (base.fate as Dictionary)["kill_groups"]=Ledger.GROUPS.duplicate() if named=="people" else [named]
 		base["taken"]=pick.is_empty() and not yes
 		base["taken_words"]=String(chosen.get("words",""))
 		return base
 	return {}
+
+## A whole order of its own about a town's people: a measure or a fate that
+## names the people ("the men of Tsaren", "the women"), not "them" alone.
+static func own_order(clean:String)->bool:
+	var m:=Measures.read(clean)
+	if not m.is_empty() and bool(m.get("people",false)) and not (m.get("measures",[]) as Array).is_empty(): return true
+	var lower:=clean.to_lower()
+	var fate:=TownFate.fate_words(lower)
+	return not fate.is_empty() and _has(lower,TownFate.GROUP_WORDS) and not _re("^\\W*(them|those|these|they)\\b").search(lower)
+
+## The one group of a town's people the words name: "men", "women",
+## "children", "elders", "people" (everyone), or "".
+static func _named_group(lower:String)->String:
+	if _has(lower,"(everyone|everybody|all of them|them all|the rest|everyone else|the people)\\b"): return "people"
+	var found:Array[String]=[]
+	if _has(lower,"(women|womenfolk|wives)\\b"): found.append("women")
+	if _has(lower,"(children|boys|girls)\\b"): found.append("children")
+	if _has(lower,"(elders|old people|old men|old women|old ones)\\b"): found.append("elders")
+	if _has(lower.replace("old men","old ones"),"(men|males)\\b"): found.append("men")
+	return found[0] if found.size()==1 else ""
 
 ## "The second", "the last", or the words of one option, in an answer.
 static func _option_named(lower:String,options:Array)->Dictionary:
@@ -715,6 +796,10 @@ static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,a
 	## ("no_town"): there is nobody of theirs in our hands.
 	var fate:=TownFate.fate_words(lower)
 	if not TownFate.implicit(fate,lower): return {}
+	# A town of ours that nobody of ours holds, named: what is true of it
+	# (take_first says who holds it and what became of those we held).
+	if bool(named.get("unguarded",false)) and _name_hit(lower,String(named.get("name",""))):
+		return {"kind":"take_first","target":named,"fate":fate,"harm":"kill" if bool(fate.get("kill_men",false)) else "","full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300),"implied":true}
 	# A foreign town named by its own name is not a town we hold.
 	if named.has("city_id") and _name_hit(lower,String(named.get("name",""))): return {}
 	if named.has("unknown") and _name_hit(lower,String(named.unknown)) and String(named.get("civ_id",""))=="": return {}
@@ -768,8 +853,9 @@ static func group_harm_reading(text:String,verb:String="kill",object:String="",c
 	var reading:=read(clean,context_civ,audience_id)
 	var kind:=String(reading.get("kind",""))
 	# "Kill the ringleaders", "if any run, kill them": a measure or a standing
-	# word to the garrison, never every man in the town.
-	if kind in ["measure","town_word"]: return reading
+	# word to the garrison, never every man in the town. "Put the captives
+	# to death": the captives of our last fight, never a town's people.
+	if kind in ["measure","town_word","captives","follow_kill"]: return reading
 	if kind in ["fate","which_town"] and bool((reading.get("fate",{}) as Dictionary).get("kill_men",false))==(verb=="kill"): return reading
 	var measure:=Measures.read(clean)
 	var main:=String(Measures.conditions(lower).main) if not measure.is_empty() else lower
@@ -1193,6 +1279,7 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"follow_kill": return _follow_kill(out,reading)
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
 	if bool((reading.get("target",{}) as Dictionary).get("ruin",false)): return _ruin(out,reading.target)
+	if bool((reading.get("target",{}) as Dictionary).get("unguarded",false)): return _unguarded(out,reading.target)
 	var struck:=_strike(out,reading,insist)
 	# A strike by night: the chance of reaching them unseen, stated plainly.
 	if String(struck.get("night_words",""))!="": struck["says"]=(String(struck.says)+" "+String(struck.night_words)).strip_edges()
@@ -1212,6 +1299,19 @@ static func _ruin(out:Dictionary,town:Dictionary)->Dictionary:
 	out.says="%s is a ruin; we burned it %s and nobody of ours holds it. %s There is nothing there to take or burn again." % [name,_in_season_words(int(rec.get("day",-1))),lives]
 	out.outcome="%s is a ruin; nothing is done." % name
 	return out
+
+static func _unguarded(out:Dictionary,town:Dictionary)->Dictionary:
+	## A town that is ours with nobody of ours in it: nothing to attack there.
+	## Said plainly from who holds it (town_ledger.hold) and what became of
+	## those we held.
+	var h:=Ledger.hold_at(String(town.get("city_id","")))
+	var name:=String(town.get("name","the town"))
+	out["target"]=town.duplicate(true)
+	var c:=Ledger.counts(String(h.get("civ_id","")),String(town.get("city_id","")))
+	var went:=String(c.get("went_free_words",""))
+	var failed:=_no(out,"unguarded","%s%s There is nothing there to attack; to hold it again, a band must go and stand in it." % [Ledger.hold_words(h),(" "+went) if went!="" else ""],"")
+	failed.outcome="Nothing is done: %s is ours, and nobody of ours is there." % name
+	return failed
 
 static func _in_season_words(day:int)->String:
 	if day<0: return "some time ago"
@@ -1608,7 +1708,12 @@ static func _take_first(out:Dictionary,reading:Dictionary)->Dictionary:
 	if String(h.get("name",""))=="": h["name"]=name
 	if String(h.state) in ["unguarded","ruin"]:
 		# Ours, or our ruin, with nobody of ours there: no march; men must go there.
-		var there:=_no(out,"not_held","%s To %s, some of ours must be there first." % [Ledger.hold_words(h),deed],"Send a band to hold %s first." % name)
+		# Those we held there went free when our men left: said, from the ledger.
+		var c:=Ledger.counts(String(h.civ_id),String(target.city_id))
+		var went:=String(c.get("went_free_words",""))
+		var about_held:=bool(fate.get("bound_only",false)) or deed.begins_with("free") or _has(String(reading.get("text","")).to_lower(),"(bound|tied|captive|prisoners|hostages|held)\\b")
+		var why:=("%s Nobody of theirs is under our guard there now. " % went) if went!="" and about_held else ""
+		var there:=_no(out,"not_held","%s%s To %s, some of ours must be there first." % [why,Ledger.hold_words(h),deed],"Send a band to hold %s first." % name)
 		there.outcome="Nothing is done: nobody of ours is in %s." % name
 		return there
 	var taken:=bool(h.get("taken",false))
@@ -1731,7 +1836,11 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		return _no(out,"busy","We cannot start another fight while %s." % String(f.busy),"When that is done, give the order again.")
 	for marching:Dictionary in f.marching:
 		if String((marching.court_order as Dictionary).get("city_id",""))==String(target.city_id):
-			return _no(out,"already_marching","%s is already on the road to %s, %d days out." % [String(marching.get("name","Our army")),name,maxi(0,int(marching.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))],"")
+			var left_days:=maxi(0,int(marching.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))
+			var already:=_no(out,"already_marching","%s is already on the road to %s with %s, %s out." % [String(marching.get("name","Our army")),name,_fighters(int(marching.get("troops",0))),"a day" if left_days<=1 else "%d days" % left_days],"")
+			already.outcome="Nothing new is set in motion: %s is already on the road to %s." % [String(marching.get("name","Our army")),name]
+			already["target"]=target.duplicate(true)
+			return already
 	var mc:=_mc()
 	var full:=bool(reading.get("full",false))
 	var trained:=int(f.trained)

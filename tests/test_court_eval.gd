@@ -26,10 +26,11 @@ const Store:=preload("res://scripts/interaction_store.gd")
 const SPARE_ROOT:="user://__court_eval_no_records/"
 const CASES_PATH:="res://tests/court_eval/cases.json"
 
-## Passing runs required on the full corpus, by path: the baseline measured on
-## main at 91356176 (213 cases; offline 135/213, live 185/213, sloppy 41/42).
+## Passing runs required on the full corpus, by path: first measured on
+## main at 91356176 (213 cases; offline 135/213, live 185/213, sloppy 41/42);
+## now 237 cases after codex/court-1a (offline 225, live 228, sloppy 42/42).
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":216,"live":220,"sloppy":42}
+const BASELINE:={"offline":243,"live":243,"sloppy":42}
 
 var _processing:Dictionary={}
 
