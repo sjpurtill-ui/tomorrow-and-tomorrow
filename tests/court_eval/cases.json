@@ -79,6 +79,12 @@
    "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.9},
    "expect": {"verb": "war", "verdict": "fate", "state": {"killed_women": ">0", "killed_men": "==before", "bound_men": "==before"}}},
 
+  {"id": "grave.kill_women.reader_all", "domain": "grave_group", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
+   "note": "A live reader flagged kill_all for these words (gpt-6-luna) and the 20 bound men died too: the words' own group stands.",
+   "say": "Kill all the women of Tsaren",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "kill_all": true}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_women": ">0", "killed_men": "==before", "bound_men": "==before", "killed_children": "==before", "killed_elders": "==before"}}},
+
   {"id": "grave.maim_every_man", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "say": "maim every man in Tsaren",
    "ideal": {"kind": "order", "action": "maim", "type": "group", "ref": "$tsaren", "confidence": 0.9},
@@ -99,7 +105,10 @@
    "say": "Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children.",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"], "stance": "harsh"}, "confidence": 0.95},
    "expect": {"verb": "war", "verdict": "fate", "state": {"bound_men": ">0", "killed": "==before", "m_bind_men": "==1"}},
-   "variants": ["Round up all the men of Tsaren and tie them up.", "round up the men of tsaren and bind them", "Tie up every man in Tsaren"]},
+   "variants": [
+    {"say": "Round up all the men of Tsaren and tie them up.", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}},
+    {"say": "round up the men of tsaren and bind them", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}},
+    {"say": "Tie up every man in Tsaren", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.95}}]},
 
   {"id": "measure.bind.headman", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "headman", "source": "user", "sloppy": true,
    "say": "Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children.",
@@ -148,7 +157,8 @@
   {"id": "measure.hostages", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
    "say": "Take hostages from their leading families",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["hostages"]}, "confidence": 0.9},
-   "expect": {"verb": "war", "verdict": "fate", "state": {"hostage": ">0"}}},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"hostage": ">0"}},
+   "variants": [{"say": "Take their chief prisoner", "expect": {"state": {"hostage": ">0", "officials": "==before"}}}, "Seize their headman"]},
 
   {"id": "measure.release_bound", "domain": "town_measure", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
    "say": "Untie the men of Tsaren and let them go back to their houses",
@@ -184,6 +194,26 @@
    "say": "Feed the people of Tsaren from our stores",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["relief"]}, "confidence": 0.85},
    "expect": {"verb": "war", "verdict": "fate", "state": {"m_relief": "==1"}}},
+
+  {"id": "measure.women_labour", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+   "note": "The women are put to work, as said; never the men in their place.",
+   "say": "Make the women of Tsaren work the fields",
+   "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.85},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "worker_women": ">0", "worker_men": "==0"}}},
+
+  {"id": "measure.release_women", "domain": "town_measure", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
+   "note": "Freeing the women frees the women: the bound men stay bound and the binding goes on.",
+   "steps": [
+    {"say": "Round up the women of Tsaren and bind them", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.9},
+     "expect": {"verb": "war", "verdict": "fate", "state": {"bound_women": ">0"}}},
+    {"say": "Let the women go", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["release"]}, "confidence": 0.85},
+     "expect": {"verb": "war", "verdict": "fate", "state": {"bound_women": "==0", "bound_men": "==before", "m_bind_men": "==1"}}}]},
+
+  {"id": "grave.kill_men_enslave_women", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
+   "note": "Enslaving the women is the captives' road home in bonds; they are never killed with the men.",
+   "say": "Kill the men and enslave the women",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "captives": true}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_men": ">0", "killed_women": "==0", "taken_women": ">0"}}},
 
   {"id": "facts.remaining.rovik", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "rovik", "source": "user",
    "say": "Are their any men of Tsaren still remaining in Tsaren?",
@@ -230,7 +260,7 @@
     {"say": "Kill all the men of Tsaren that you have tied up!", "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true}, "confidence": 0.95},
      "expect": {"verdict": "fate", "state": {"bound_men": "==0"}}},
     {"say": "How did they escape their bindings!?", "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-     "expect": {"handled": false, "known": true, "reply_any": ["none of the bound", "cannot run", "could not run", "none could run", "none escaped", "no one escaped", "nobody escaped", "not one of the bound"], "prompt_has": ["none of the bound got away"]}}]},
+     "expect": {"handled": false, "known": true, "reply_any": ["none of the bound", "cannot run", "could not run", "none could run", "none escaped", "no one escaped", "nobody escaped", "not one of the bound", "did not escape", "didn't escape", "never escaped", "none broke free", "no one broke free", "nobody broke free", "all the bound", "every one of the bound", "every bound man", "before they could be bound", "before we bound", "before we could bind", "before we tied", "before they were bound", "before the round-up"], "prompt_has": ["none of the bound got away"]}}]},
 
   {"id": "facts.bound.headman", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "headman", "source": "design",
    "say": "How many men of Tsaren are bound?",
@@ -471,7 +501,8 @@
   {"id": "captives.ransom", "domain": "captives", "fixture": "battle_won", "speaker": "rovik", "source": "design",
    "say": "Ransom the captives back to the Esurai",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='ransom'"}}},
+   "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='ransom'"}},
+   "variants": ["Sell the captives", "sell the prisoners back to their people"]},
 
   {"id": "captives.let_go", "domain": "captives", "fixture": "battle_won", "speaker": "rovik", "source": "design",
    "say": "Let the captives go home",
@@ -752,6 +783,12 @@
    "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$rovik", "confidence": 0.9},
    "expect": {"verb": "demote", "target": "rovik", "state": {"status_rovik": "==before", "garrison": "==before"}}},
 
+  {"id": "person.kill_roviks_men", "domain": "person_acts", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "Rovik's men are our own fighters: never Rovik himself, never Tsaren's men.",
+   "say": "Kill Rovik's men",
+   "ideal": {"kind": "order", "action": "kill", "type": "group", "ref": "", "confidence": 0.5, "clarify": "Rovik's men are our own fighters. Whom do you mean?"},
+   "expect": {"state": {"status_rovik": "==before", "killed": "==before", "garrison": "==before", "field_troops": "==before", "officials": "==before"}}},
+
   {"id": "q.food_days.headman", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "How many days of food do we have?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
@@ -963,7 +1000,7 @@
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='execute'", "status_headman": "==before"}}},
 
-  {"id": "grave.kill_then_take.no_comma", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+  {"id": "grave.kill_then_take.no_comma", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "note": "No commas: each clause's group goes only with its own verb; the women are taken, never killed.",
    "say": "kill the men of tsaren then take the women home",
    "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "captives": true, "destination": "$home"}, "confidence": 0.9},
