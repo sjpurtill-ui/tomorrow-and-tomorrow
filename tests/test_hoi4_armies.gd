@@ -315,6 +315,27 @@ func test_army_bar_click_selects_and_centres_on_the_army()->void:
 	# Every card says what its bars mean.
 	for face:Control in bar.strip.get_children():assert_str(face._get_tooltip(Vector2(2,2))).contains("Will to fight")
 
+func test_army_bar_keeps_to_the_corner_and_waits_for_an_army()->void:
+	# The player: the lone "Home 1" card over the middle of the map was "an
+	# annoying place". The levy alone shows no bar; with a band out the cards
+	# start at the bar's left edge, the levy last.
+	var ground:Ground=auto_free(Ground.new());add_child(ground)
+	var bar:Control=auto_free(ArmyBar.new());bar.terrain=ground;add_child(bar)
+	_train(40)
+	bar.refresh();bar.place(Rect2(100,600,1000,bar.bar_height()))
+	assert_bool(bar.visible).override_failure_message("the levy alone must not show the bar").is_false()
+	assert_array(ArmyBar.shown_cards([{"id":"home","kind":"home","state":"fighting"}])).has_size(1)
+	var made:Dictionary=MilitaryCampaign.create_field_army(30,"Levy band 1")
+	var index:=MilitaryCampaign._field_army_index(int(made.army.army_id))
+	MilitaryCampaign.field_armies[index]["position"]={"x":home.x+6.0,"z":home.y-4.0}
+	MilitaryCampaign.field_armies[index]["last_report"]=MilitaryCampaign._army_report_snapshot(MilitaryCampaign.field_armies[index])
+	bar.refresh();bar.place(Rect2(100,600,1000,bar.bar_height()))
+	assert_bool(bar.visible).is_true()
+	assert_float(bar.strip.position.x).is_equal(0.0)
+	var kinds:Array=bar.cards.map(func(c:Dictionary)->String:return String(c.kind))
+	assert_str(String(kinds[0])).is_not_equal("home")
+	if kinds.has("home"):assert_str(String(kinds[kinds.size()-1])).is_equal("home")
+
 # ---------------------------------------------------------------------------
 # The army command panel
 # ---------------------------------------------------------------------------
