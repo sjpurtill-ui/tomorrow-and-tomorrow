@@ -42,7 +42,10 @@ func test_distant_moving_embarked_and_battle_committed_armies_cannot_teleport_su
 			host.field_armies[0].merge(condition,true)
 			assert_bool(H.transfer(host,id,"skirmisher",10).has("error")).is_true()
 			assert_dict(totals()).is_equal(before);host.field_armies[0]=original
-		host.pending_aftermath={"pending":true};assert_bool(H.transfer(host,id,"skirmisher",10).has("error")).is_true()
+		# A fight at home holds the home troops; a fight's captives never do
+		# (the general settles them himself).
+		host.active_engagement={"home_side":"defender","home_force_kind":"field","home_force_id":0};assert_bool(H.transfer(host,id,"skirmisher",10).has("error")).is_true()
+		host.active_engagement={}
 		assert_dict(totals()).is_equal(before)
 	)
 func test_invalid_count_or_unit_has_no_partial_transfer()->void:

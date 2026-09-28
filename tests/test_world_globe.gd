@@ -324,3 +324,81 @@ func test_measuring_adds_no_saved_state()->void:
 	var areas:Array=CivilizationSystem.revealed_areas
 	chart.refresh(areas,int(GameState.world_seed),Callable(),Callable(),false)
 	assert_str(JSON.stringify(CivilizationSystem.export_state())).is_equal(before)
+
+
+func test_routes_mark_walked_lines_only_near_them()->void:
+	var chart:=build([circle(3000,0,80),trail([Vector2(0,0),Vector2(900,300)],18.0)])
+	var routes:Image=chart.routes
+	assert_int(routes.get_width()).is_equal(Chart.ROUTE_COLUMNS)
+	var data:=routes.get_data()
+	var marked:=0
+	var astray:=0
+	var sides:={}
+	var a:=Chart.route_texel(Vector2(0,0))
+	var b:=Chart.route_texel(Vector2(900,300))
+	for texel in Chart.ROUTE_COLUMNS*Chart.ROUTE_ROWS:
+		if data[texel*2+1]==0:continue
+		marked+=1
+		var p:=Vector2(float(texel%Chart.ROUTE_COLUMNS),float(texel/Chart.ROUTE_COLUMNS))
+		if p.distance_to(Geometry2D.get_closest_point_to_segment(p,a,b))>Chart.ROUTE_RANGE:astray+=1
+		sides[signi(data[texel*2]-128)]=true
+	# The trail is marked on both sides of its line; the circle has no route.
+	assert_int(marked).is_greater(40)
+	assert_int(astray).is_equal(0)
+	assert_bool(sides.has(1) and sides.has(-1)).is_true()
+
+
+func test_background_prewarm_draws_the_shared_chart()->void:
+	WorldGlobe.prewarm(null)
+	var model:RefCounted=Chart.shared()
+	model.finish()
+	assert_bool(model.current(int(GameState.world_seed))).is_true()
+	assert_float(float(model.stats.known_fraction)).is_greater_equal(0.0)
+
+
+func test_world_view_opens_counts_what_is_known_and_closes_cleanly()->void:
+	var host:Node=auto_free(Node.new())
+	add_child(host)
+	var view:Control=WorldGlobe.open(host,null,false)
+	assert_object(view).is_not_null()
+	view.chart.finish()
+	view._process(0.016)
+	assert_str(String(view.headline.text)).is_not_empty()
+	# Captions stay neutral: nothing claims the world is round.
+	for words:String in [view.headline.text,view.growth.text,view.hint_label.text,WorldGlobe._hint_words()]:
+		for word:String in words.to_lower().replace("."," ").replace(","," ").split(" ",false):
+			assert_bool(word in ["round","globe","sphere","planet","spherical"]).override_failure_message("caption says '%s'" % word).is_false()
+	assert_str(String(view.close_button.text)).is_equal("Back to the map")
+	# Open, the map beneath need not draw; closing hands it back.
+	view.opacity=1.0
+	view.phase="open"
+	view._process(0.016)
+	assert_bool(get_viewport().disable_3d).is_true()
+	view.close()
+	assert_bool(get_viewport().disable_3d).is_false()
+	await await_millis(600)
+	assert_bool(is_instance_valid(view)).is_false()
+
+
+func test_a_screen_above_the_world_view_keeps_its_keys()->void:
+	var host:Node=auto_free(Node.new())
+	add_child(host)
+	var view:Control=WorldGlobe.open(host,null,false)
+	var above:=CanvasLayer.new()
+	above.layer=WorldGlobe.LAYER+10
+	host.add_child(above)
+	var sheet:=Panel.new()
+	sheet.size=Vector2(300,200)
+	above.add_child(sheet)
+	view.covered_frame=-1
+	assert_bool(view._covered()).is_true()
+	var escape:=InputEventKey.new()
+	escape.keycode=KEY_ESCAPE
+	escape.pressed=true
+	view._input(escape)
+	assert_str(String(view.phase)).is_not_equal("closing")
+	# With nothing above it, Escape closes the world view.
+	sheet.visible=false
+	view.covered_frame=-1
+	view._input(escape)
+	assert_str(String(view.phase)).is_equal("closing")
