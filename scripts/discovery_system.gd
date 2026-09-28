@@ -401,12 +401,21 @@ func _project_method(discovery:Dictionary) -> String:
 	return "Observers compare %s and preserve results until the method can be repeated." % signal_text
 
 
+## An effect as a signed percentage that never reads "+0.0%": tenths from a
+## tenth of a percent up, hundredths below that, "+<0.01%" at the smallest.
+static func effect_percent(value:float)->String:
+	var pct:=value*100.0
+	if absf(pct)>=0.05:return "%+.1f%%" % pct
+	if absf(pct)>=0.005:return "%+.2f%%" % pct
+	return ("+" if pct>=0.0 else "-")+"<0.01%"
+
+
 func _effect_summary(effects:Dictionary) -> String:
 	if effects.is_empty(): return "Unlocks a prerequisite used by later practical methods."
 	var parts:Array[String]=[]
 	for effect_id in effects:
 		var value:=float(effects[effect_id])
-		parts.append("%s %+.1f%%" % [String(EFFECT_DISPLAY_NAMES.get(String(effect_id),String(effect_id).replace("_"," "))).capitalize(),value*100.0])
+		parts.append("%s %s" % [String(EFFECT_DISPLAY_NAMES.get(String(effect_id),String(effect_id).replace("_"," "))).capitalize(),effect_percent(value)])
 	return "ESTABLISHED CAPACITY CHANGE  •  "+"  •  ".join(parts)
 
 

@@ -192,6 +192,30 @@ static func life(years:float)->String:
 	return "%.1f yr" % years
 
 
+## A change in how long a person born now can hope to live, in the unit that
+## shows it: "+5 days", "+3 weeks", "-2 months", "+1.5 years" ("+2 winters"
+## before writing). A new practice spreads over years, so its first month is
+## often days, never "+0.0 years". Under a day: "less than a day".
+static func life_change(delta_years:float)->String:
+	var size:=absf(delta_years)
+	var days:=size*365.25
+	if days<1.0:return "less than a day"
+	var sign:="+" if delta_years>0.0 else "-"
+	if days<14.0:
+		var d:=roundi(days)
+		return "%s%d %s" % [sign,d,"day" if d==1 else "days"]
+	if days<60.0:
+		var w:=roundi(days/7.0)
+		return "%s%d %s" % [sign,w,"week" if w==1 else "weeks"]
+	if size<2.0:
+		var m:=roundi(size*12.0)
+		return "%s%d %s" % [sign,m,"month" if m==1 else "months"]
+	match stage():
+		"hearth":return "%s%d winters" % [sign,roundi(size)]
+		"lettered":return "%s%d years" % [sign,roundi(size)]
+	return "%s%.1f years" % [sign,size]
+
+
 ## Children lost before their first winter, in the people's own counting.
 static func babes_lost(per_1000:float)->String:
 	match stage():
