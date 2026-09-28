@@ -20,6 +20,12 @@ extends RefCounted
 ## or the custom-directive seam below). The voice is then told what happened
 ## and only describes it.
 ##
+## Words that hold an act back ("don't kill Kavu", "never whip Suri again",
+## "Kavu must not be punished", "no, don't attack", "call it off") are never
+## carried out as the act, however they were read: nothing is done, said
+## plainly; a host on the road to it is called back; a town's people are
+## spared. What else was said beside them stands ("don't kill him, flog him").
+##
 ## Any other order goes through custom_order(): the civic pipeline for a
 ## settlement leader or a catalog policy, otherwise the universal
 ## custom-directive path (custom_directive.gd). `custom_directive_handler`
@@ -97,7 +103,7 @@ const VERB_PATTERNS:=[
 ]
 const GIVE_PATTERN:="(?i)\\b(give|hand|grant|bestow|send|bring)\\b"
 const TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|strip)\\b"
-const ORDER_LEADS:=["i order that ","i order ","i command that ","i command ","i want you to ","i need you to ","i demand that ","i demand ","i decree that ","i decree ","you will ","you shall ","you must ","see that ","see to it that ","make sure ","let ","have "]
+const ORDER_LEADS:=["i order that ","i order ","i command that ","i command ","i want you to ","i need you to ","i demand that ","i demand ","i decree that ","i decree ","you will ","you shall ","you must ","see that ","see to it that ","make sure ","let us ","let's ","lets ","let ","have "]
 const IMPERATIVES:=["throw","celebrate","teach","honour","honor","go","come","bring","fetch","make","dig","plant","hunt","gather","build","haul","drag","lug","quarry","chop","raise","feed","ration","guard","watch","train","clear","move","prepare","ready","double","halve","cut","burn","tell","find","get","take","keep","hold","open","close","set","call","summon","march","attack","defend","fortify","scout","sow","reap","harvest","store","share","stop","start","begin","finish","double","count","mend","repair","clean","carry","lead","muster","warn","teach","show","search","track","herd","fish","cook","dry","smoke","weave","fire","bake"]
 const RESOURCE_WORDS:={"food":"Food","meat":"Food","grain":"Food","provisions":"Food","rations":"Food","timber":"Timber","wood":"Timber","logs":"Timber","stone":"Stone","stones":"Stone","clay":"Clay","fiber":"Fiber Plants","fibre":"Fiber Plants","fibers":"Fiber Plants","reeds":"Fiber Plants","flax":"Fiber Plants"}
 const NUMBER_WORDS:={"a dozen":12,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"a hundred":100,"hundred":100}
@@ -130,8 +136,8 @@ static func classify(text:String)->Dictionary:
 		return out
 	var question:=clean.ends_with("?")
 	if not question:
-		for lead:String in ["what","why","how","who","whom","where","when","tell me"]:
-			if lower.begins_with(lead+" "): question=true; break
+		for lead:String in ["what","why","how","who","whom","where","when","tell me","hows","how's","whats","what's","wheres","where's","whos","who's","hw","wat","wht","any news","any word"]:
+			if lower.replace("’","'").begins_with(lead+" "): question=true; break
 	if question:
 		out.act="question"; out.confidence=0.8
 		return out
@@ -530,6 +536,12 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# The order reader (order_reader.gd) resolved a war or a town's fate to
 	# ids we supplied: the engine carries that reading. Never a person.
 	var forced:Dictionary=context.get("war_reading",{}) if context.get("war_reading") is Dictionary else {}
+	if not forced.is_empty() and not bool(forced.get("insist",false)):
+		# Words that hold back all they name ("don't kill the men of Tsaren",
+		# "no, don't attack") are never carried out as the act, whatever the
+		# reading made of them: the engine's own answer (below, _held_back).
+		var held_back:=_held_back(id,audience,list,clean,context)
+		if held_back.has("result"): return held_back.result
 	if not forced.is_empty():
 		# The war leader's own question about a town is open ("The women as
 		# well?"): an answer that names one of his choices ("bind them") is
@@ -558,6 +570,16 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 			for h:String in HEADINGS:
 				if String(cls.heading)=="" and h in obj: cls.heading=h
 	var foreign:=String(audience.get("origin",""))=="foreign"
+	# "Don't kill him", "never whip Suri again", "I won't exile you", "don't
+	# attack Tsaren", "call off the attack": the act named is held back, never
+	# done; what else was said stands ("don't kill him, flog him").
+	if not bool(cls.insist) and String(cls.act)!="question":
+		var held:=_held_back(id,audience,list,clean,context)
+		if held.has("result"): return held.result
+		if held.has("rest"):
+			_echo(id,audience,clean,context)
+			context=context.duplicate(); context["echoed"]=true; context.erase("live")
+			clean=String(held.rest); cls=classify(clean); live={}; from_live=false
 	# The god's yes to "Shall I march on it?": the march asked for goes, with
 	# the war leader still free to object if it cannot be done well.
 	var confirming:=_confirmed_war(id,audience,list,clean,context)
@@ -705,11 +727,19 @@ static func _realm(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 			if String(out2.get("target_key",""))!="": return {"cls":out2}
 	# An office (or the god's fire) given to one person named: "make imeri war
 	# leader", "Imeri is my new war leader", "Make her a priest".
-	if verb in ["none","order","raise"]:
+	if verb in ["none","order","raise","demote"]:
 		var ap:=_appoint_reading(clean,audience,list)
 		if not ap.is_empty():
 			var out4:=cls.duplicate()
 			out4.act="command"; out4.verb="appoint"; out4["target_key"]=String(ap.key); out4["realm"]=true
+			if bool(ap.get("negated",false)):
+				# "Suri is no longer war leader": the office named is taken from
+				# the one who holds it; from anyone else there is nothing to take.
+				var who:=_entry(list,String(ap.key))
+				var office:=_office_in(clean)
+				if String(who.get("kind",""))=="official" and office!="" and String(who.get("office_key",""))!=office:
+					return {"result":_plain_answer(id,audience,clean,context,"%s does not hold that office; nothing changes." % String(who.get("name","")))}
+				out4.verb="demote"
 			return {"cls":out4}
 	# A verb that falls on one person named in any case ("bless suri", "flog the
 	# headman", "let kishan go", "fire kavu", "Kavu must be punished").
@@ -722,15 +752,213 @@ static func _realm(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 			return {"cls":out3}
 	return {}
 
+# --------------------------------------------------------------------------
+# Words that hold an act back
+# --------------------------------------------------------------------------
+
+## "Call off the attack on Tsaren", "cancel the march", "call it off".
+const CALL_OFF:="(?i)^\\W*(?:no[,.!]?\\s+)?(?:please\\s+)?(?:(?:call off|cancel|abort|halt|stop|break off|hold off|belay)\\s+(?:the |our |my |this |that )?(?:attack|assault|raid|march|siege|strike|advance)\\b(?:\\s+(?:on|against|at|of|to)\\s+(?<rest>.+))?|(?:call (?:it|that|them) off|cancel (?:it|that)|belay that|abort)\\W*$)"
+## Held-back acts said plainly, by what they would have done.
+const HELD_HARM:=["kill","maim","exile","detain","penance","terrify","curse","take"]
+const MARCH_ORDERS:=["attack","siege","raid","storm","intercept"]
+
+static func _held_back(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
+	## {} when these words hold nothing back. {"result":...} when all they
+	## name is held back: said plainly, nothing done (or its plain opposite: a
+	## host on the road is called back, a town's people are spared). {"rest":
+	## words} when another act was said beside it ("don't kill him, flog him").
+	# The war leader's own question is answered by its own reading ("No, let
+	# them go"); "Whom do you mean?" likewise.
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
+		if not WarOrders.pending_answer(audience,clean).is_empty() or not _which_town_answer(audience,clean).is_empty(): return {}
+	var off:=_re(CALL_OFF).search(clean)
+	if off!=null:
+		var said:=off.get_string("rest")
+		var reading:={"kind":"attack","target":WarOrders.find_target(said,String(audience.get("civ_id",""))) if said!="" else {}}
+		return {"result":_held_march(id,audience,list,clean,reading,context)}
+	var parts:=_held_parts(id,audience,list,clean)
+	var held:Array[Dictionary]=parts.held
+	var others:PackedStringArray=parts.others
+	if held.is_empty(): return {}
+	# The one held back is who "him" means in what follows.
+	var first:Dictionary=held[0]
+	if String(first.kind)=="person": _focus(audience,first.target as Dictionary,{})
+	# Another act said beside it stands.
+	var acts:PackedStringArray=[]
+	for o in others:
+		if not _held_act(id,audience,list,o).is_empty(): acts.append(o)
+	if not acts.is_empty(): return {"rest":", ".join(acts)}
+	# The order they hesitated over is withdrawn.
+	if String(pending.get("verb",""))==String(first.get("verb","-")): audience.erase("pending_command")
+	match String(first.kind):
+		"war":
+			var reading:Dictionary=first.reading
+			var kind:=String(reading.get("kind",""))
+			if kind in MARCH_ORDERS: return {"result":_held_march(id,audience,list,clean,reading,context)}
+			if kind=="send": return {"result":_plain_answer(id,audience,clean,context,"Nobody is sent out; nothing is set in motion.")}
+			# "Do not give up Tsaren": it stays ours.
+			var kept:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+			if String(kept.get("name",""))!="" and not WarOrders._held_town(String(kept.get("city_id",""))).is_empty() and (kind=="abandon" or _re("(?i)\\b(give up|abandon|leave|hand (it )?back|give (it )?back|let go of|surrender|lose)\\b").search(String(first.get("words","")))!=null):
+				return {"result":_plain_answer(id,audience,clean,context,"%s stays ours; the garrison keeps it." % String(kept.name))}
+			# Harm held back from a town's people: the garrison spares them.
+			var town:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+			if bool(first.get("harm",false)) and String(town.get("name",""))!="" and not WarOrders._held_town(String(town.get("city_id",""))).is_empty():
+				_echo(id,audience,clean,context)
+				var ctx:=context.duplicate(); ctx["echoed"]=true; ctx.erase("live")
+				var spare:=WarOrders.read("spare %s" % String(town.name),String(audience.get("civ_id","")),id)
+				if not spare.is_empty():
+					var cls:=classify(clean); cls.act="command"; cls.verb="war"; cls["war"]=spare
+					return {"result":_perform(id,audience,list,"war",_speaker_entry(list),{},clean,cls,false,ctx)}
+			if bool(first.get("harm",false)): return {"result":_plain_answer(id,audience,clean,context,"Nothing is done to them.")}
+			return {"result":_plain_answer(id,audience,clean,context,"Nothing is set in motion.")}
+		"group":
+			return {"result":_plain_answer(id,audience,clean,context,"Nothing is done to %s." % _group_name(first.target as Dictionary))}
+	var target:Dictionary=first.target
+	var name:=String(target.get("name","them"))
+	var verb:=String(first.get("verb",""))
+	var words:=""
+	if verb in HELD_HARM:
+		words="Nothing is done to %s." % name
+		# The one spared hears it: a little less afraid.
+		if String(target.get("kind",""))=="official" and int(target.get("person_id",0))>0:
+			GovernmentPeopleSystem.adjust_person_bonds(int(target.person_id),{"fear":-0.02,"love":0.01})
+	elif verb=="demote": words="%s stays in office." % name
+	elif verb=="appoint": words="Nothing changes: %s is given no office." % name
+	else: words="Nothing changes for %s." % name
+	return {"result":_plain_answer(id,audience,clean,context,words)}
+
+static func _held_parts(id:String,audience:Dictionary,list:Array[Dictionary],clean:String)->Dictionary:
+	## {held:[the acts held back], others:[the clauses said beside them]}.
+	var held:Array[Dictionary]=[]
+	var others:PackedStringArray=[]
+	for p:Dictionary in Realm.clauses(clean):
+		if bool(p.filler): continue
+		if bool(p.held):
+			var act:=_held_act(id,audience,list,String(p.stripped),true)
+			if not act.is_empty():
+				act["words"]=String(p.stripped)
+				held.append(act); continue
+		others.append(String(p.text))
+	return {"held":held,"others":others}
+
+static func holds_back(id:String,text:String)->bool:
+	## Do these words hold back all they name ("don't kill him", "no, don't
+	## attack", "call it off", "Kavu must not be punished")? Read only: nothing
+	## is done. The order reader leaves such words to the engine, which says
+	## plainly that nothing is done (or calls back a host on the road, or has
+	## the garrison spare a town's people): order_reader.decide.
+	var audience:=Hall.find(id)
+	var clean:=text.strip_edges()
+	if audience.is_empty() or clean=="" or clean.ends_with("?"): return false
+	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+	if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS:
+		if not WarOrders.pending_answer(audience,clean).is_empty() or not _which_town_answer(audience,clean).is_empty(): return false
+	if _re(CALL_OFF).search(clean)!=null: return true
+	var list:=roster(audience)
+	var parts:=_held_parts(id,audience,list,clean)
+	if (parts.held as Array).is_empty(): return false
+	for o in (parts.others as PackedStringArray):
+		if not _held_act(id,audience,list,o).is_empty(): return false
+	return true
+
+static func _held_act(id:String,audience:Dictionary,list:Array[Dictionary],words:String,held:bool=false)->Dictionary:
+	## What act these words name, read as the engine would carry it:
+	## {kind:"person", verb, target} | {kind:"group", act, target} |
+	## {kind:"war", reading, harm}; {} when they name no act ("don't worry").
+	## held: the words were held back ("don't touch him", "don't attack"), so
+	## a plain "touch" or a bare "attack" is read as the act it would be.
+	var clean:=words.strip_edges()
+	if clean=="" or clean.ends_with("?"): return {}
+	if held:
+		# "Don't attack", "do not march": whatever march is on the road.
+		if _re("(?i)^\\W*(attack|march|raid|strike|go to war|besiege|storm|advance|fight)\\W*$").search(clean)!=null: return {"kind":"war","reading":{"kind":"attack","target":{}},"harm":false}
+		# "Nobody is to touch Kavu", "don't lay a hand on her".
+		if _re("(?i)^\\W*(touch|touches|harm|harms|hurt|hurts|lays? (a )?hands? on|lays? a finger on|strike|strikes|hit|hits|beat|kill|kills|punish)\\b").search(clean)!=null:
+			for f:Dictionary in mentions(clean,list):
+				if (String(f.by) in ["name","title"] and String(f.get("of",""))=="") or (String(f.by)=="pronoun" and String(f.word) in Realm.ONE_PERSON):
+					var who:=_land(f,audience,list,"")
+					if not who.is_empty() and String(who.get("kind",""))!="god": return {"kind":"person","verb":"maim","target":who}
+					break
+	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return mentions(t,l)
+	var salient:=func()->Dictionary: return _salient(audience,list,"")
+	# A law for our own people is its own thing ("no one may steal").
+	if not Realm.law(clean,list,mention).is_empty(): return {}
+	var g:=Realm.group_act(clean,audience,list,mention)
+	if not g.is_empty() and String((g.target as Dictionary).get("kind",""))!="unclear": return {"kind":"group","act":String(g.act),"target":g.target}
+	var cls:=classify(clean)
+	var harm:=String(cls.verb) in ["kill","maim"] or is_harm(clean) or _re("(?i)\\b(burn|raze|torch|enslave|sell|drive [\\w' ]{0,20}?out|take (the )?(women|girls|children|boys|men|captives)|rape|starve|hurt|harm|bind|tie up)\\b").search(clean)!=null
+	var people:=harm_to_people(clean,cls,list) if String(cls.verb) in CRUEL or is_harm(clean) else ""
+	var war:=WarOrders.read(clean,String(audience.get("civ_id","")),id)
+	var wkind:=String(war.get("kind",""))
+	if wkind!="" and (not wkind in ["no_town","which_town"] or people!=""): return {"kind":"war","reading":war,"harm":harm}
+	var ap:=_appoint_reading(clean,audience,list)
+	if not ap.is_empty() and not bool(ap.get("negated",false)):
+		var who:=_entry(list,String(ap.key))
+		if not who.is_empty(): return {"kind":"person","verb":"appoint","target":who}
+	var pv:=Realm.person_verb(clean,list,mention,salient)
+	if not pv.is_empty():
+		var who2:=_entry(list,String(pv.key))
+		if not who2.is_empty(): return {"kind":"person","verb":String(pv.verb),"target":who2}
+	if String(cls.verb) in ["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send"]:
+		if people!="": return {"kind":"war","reading":{"kind":"no_town"},"harm":true}
+		if String(cls.verb)=="send": return {"kind":"war","reading":{"kind":"send"},"harm":false}
+		var parts:=_parties(clean,cls,audience,list,{})
+		var target:Dictionary=parts.target
+		if not target.is_empty() and String(target.get("kind",""))!="god": return {"kind":"person","verb":String(cls.verb),"target":target}
+	return {}
+
+static func _held_march(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,reading:Dictionary,context:Dictionary)->Dictionary:
+	## A march held back: a host of ours on the road to it is called back;
+	## with none on the road, nothing is set in motion, said plainly.
+	var town:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+	var city:=String(town.get("city_id",""))
+	var civ:=String(town.get("civ_id",""))
+	var marching:Dictionary={}
+	var mc:Variant=WorldSimulation.military
+	if mc!=null:
+		for a in mc.field_armies:
+			if not a is Dictionary: continue
+			var o:Dictionary=(a as Dictionary).get("court_order",{}) if (a as Dictionary).get("court_order") is Dictionary else {}
+			if o.is_empty() or not String(o.get("kind","")) in MARCH_ORDERS or int((a as Dictionary).get("troops",0))<=0: continue
+			if String((a as Dictionary).get("destination_id",""))=="player_home": continue
+			if city!="" and String(o.get("city_id",""))!=city and not (town.has("unknown") and String(o.get("civ_id",""))==civ): continue
+			if marching.is_empty() or int(o.get("day",0))>int(((marching.get("court_order",{})) as Dictionary).get("day",0)): marching=a
+	if marching.is_empty():
+		var where:=String(town.get("name",town.get("unknown",""))).trim_prefix("Reported home of ")
+		return _plain_answer(id,audience,clean,context,("Nothing is set in motion: no host of ours is marching on %s." % where) if where!="" else "Nothing is set in motion: no host of ours is on the march.")
+	var recall:={"kind":"recall","target":{},"full":false,"insist":false,"place":"","army_words":true,"text":clean.substr(0,300),"home":true,"garrison":false,"army_id":int(marching.get("army_id",0))}
+	var cls:=classify(clean); cls.act="command"; cls.verb="war"; cls["war"]=recall
+	return _perform(id,audience,list,"war",_speaker_entry(list),{},clean,cls,false,context)
+
+static func _group_name(t:Dictionary)->String:
+	match String(t.get("kind","")):
+		"people": return "the "+String(t.get("name",""))
+		"town","held": return String(t.get("name","the town"))
+		"ours": return "our people"
+		"court": return "the court"
+		"fields": return "the fields"
+		"fighters": return "our fighters"
+	return "them"
+
 const PRIEST_WORDS:="(?i)\\b(priest|priestess|keeper of (the|my|your) (god's )?fire|fire-?keeper|holy (man|woman)|shaman)\\b"
 
 static func _appoint_reading(clean:String,audience:Dictionary,list:Array[Dictionary])->Dictionary:
-	## {key} of the one given an office (or the god's fire) by these words; {}.
+	## {key} of the one given an office (or the god's fire) by these words;
+	## {key, negated:true} for the one they take it from ("Suri is no longer
+	## war leader", "you are not my war leader any more"); {}.
 	var office:=_office_in(clean)
 	if office=="" and _re(PRIEST_WORDS).search(clean)==null: return {}
-	var found:=mentions(clean,list)
-	# "make/name/appoint/set X ...": the first one named after the verb.
-	var lead:=_re("(?i)\\b(make|name|appoint|set|install|raise|put)\\b").search(clean)
+	var said:=clean.replace("’","'")
+	var found:=mentions(said,list)
+	# "X is no longer ...": taken from them.
+	var neg:=_re("(?i)^\\W*(?<who>[\\w' -]{1,40}?)\\s*,?\\s*(?:is|are|'s|'re|shall|will)?\\s*(?:no longer|not|n't|never again)\\s+(?:be\\s+)?(?:my|our|the|a|an|your)?\\s*").search(said)
+	if neg!=null and _office_in(said.substr(neg.get_end()))!="":
+		var who:=_subject_key(neg.get_string("who"),neg.get_end("who"),found,audience,list)
+		return {"key":who,"negated":true} if who!="" else {}
+	if _re("(?i)\\b(no longer|not|isn't|aren't|never)\\b").search(said)!=null: return {}
+	# "make/name/appoint/set/promote X ...": the first one named after the verb.
+	var lead:=_re("(?i)\\b(make|name|appoint|set|install|raise|put|promote|elevate)\\b").search(said)
 	if lead!=null:
 		for f:Dictionary in found:
 			if int(f.at)<lead.get_end(): continue
@@ -740,12 +968,22 @@ static func _appoint_reading(clean:String,audience:Dictionary,list:Array[Diction
 			if String(f.by)=="pronoun":
 				key=String(_speaker_entry(list).get("key","")) if String(f.word) in ["you","yourself"] else String(_salient(audience,list,"").get("key",""))
 			return {"key":key} if key!="" else {}
-	# "X is (now) my new war leader".
-	var is_now:=_re("(?i)^\\s*(?<who>[\\w' -]{2,40}?)\\s+(is|will be|shall be)\\s+(now\\s+)?(my|our|the|a)?\\s*(new\\s+)?").search(clean)
+	# "X is (now) my new war leader", "he is now keeper of stores", "you're our new pathfinder".
+	var is_now:=_re("(?i)^\\s*(?<who>[\\w' -]{1,40}?)(\\s+(is|are|will be|shall be)|'s|'re)\\s+(now\\s+)?(my|our|the|a)?\\s*(new\\s+)?").search(said)
 	if is_now!=null:
-		for f:Dictionary in found:
-			if int(f.end)<=is_now.get_end("who") and String(f.by) in ["name","title"] and String(f.get("of",""))=="": return {"key":String(f.key)}
+		var who2:=_subject_key(is_now.get_string("who"),is_now.get_end("who"),found,audience,list)
+		if who2!="": return {"key":who2}
 	return {}
+
+static func _subject_key(who:String,who_end:int,found:Array[Dictionary],audience:Dictionary,list:Array[Dictionary])->String:
+	## The roster key of the one a sentence is about: named ("Suri is ..."), or
+	## "you" (the one before the god), or "he"/"she" (the one just spoken of).
+	for f:Dictionary in found:
+		if int(f.end)<=who_end and String(f.by) in ["name","title"] and String(f.get("of",""))=="": return String(f.key)
+	var w:=who.strip_edges().to_lower()
+	if w in ["you","thou"]: return String(_speaker_entry(list).get("key",""))
+	if w in ["he","she","this one","that one"]: return String(_salient(audience,list,"").get("key",""))
+	return ""
 
 static func realm_business(id:String,text:String)->bool:
 	## Are these words the realm's own business the engine carries (a law, the
@@ -757,10 +995,12 @@ static func realm_business(id:String,text:String)->bool:
 	if audience.is_empty() or clean=="" or String(audience.get("origin",""))!="court" or clean.ends_with("?"): return false
 	var list:=roster(audience)
 	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return mentions(t,l)
+	if not Realm.answer_whom(audience,clean,list,mention,false).is_empty(): return true
 	if not Realm.rename(clean).is_empty(): return true
 	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
 	if not Realm.law(clean,list,mention).is_empty(): return true
 	if not Realm.gift(clean).is_empty(): return true
+	if not _appoint_reading(clean,audience,list).is_empty(): return true
 	return not Realm.person_verb(clean,list,mention,func()->Dictionary: return _salient(audience,list,"")).is_empty()
 
 static func _echo(id:String,audience:Dictionary,clean:String,context:Dictionary)->void:
@@ -1292,6 +1532,10 @@ static func _known_act(id:String,audience:Dictionary,r:Dictionary,verb:String,ta
 	match verb:
 		"maim": params["harm"]=String(cls.get("harm","mutilate"))
 		"pardon": action="free" if bool(p.get("bound",false)) else "pardon"
+		"give","boon":
+			# "Give him 10 food": what was named, from the stores.
+			if String(cls.get("resource",""))!="": params["resource"]=String(cls.resource)
+			if float(cls.get("amount",0.0))>0.0: params["amount"]=float(cls.amount)
 		"appoint":
 			var office:=_office_in(text)
 			if _re("(?i)\\b(priest|priestess|keeper of (the|my|your) (god's )?fire|holy|shaman|fire-keeper)\\b").search(text)!=null: action="make_priest"
@@ -1314,9 +1558,10 @@ static func _known_act(id:String,audience:Dictionary,r:Dictionary,verb:String,ta
 	r.reaction="furious" if verb in ["kill","exile","maim","terrify","curse","detain"] else ("delighted" if verb in ["bless","raise","boon","give","appoint"] else "neutral")
 	var said:=String(done.get("outcome",""))
 	if not here:
-		# Not before the god: brought in under guard, then it is done.
+		# Not before the god: brought in (under guard, for a punishment), then it is done.
 		var rest:=said.trim_prefix(name+" ")
-		said=("%s was brought in under guard from %s and %s" % [name,String(p.get("village","their hearth")),rest.trim_prefix("was ")]) if rest!=said and rest.begins_with("was ") else "%s was brought in under guard from %s. %s" % [name,String(p.get("village","their hearth")),said]
+		var brought:="brought in under guard" if verb in ["kill","exile","maim","detain","terrify","penance","curse","take"] else "brought in"
+		said=("%s was %s from %s and %s" % [name,brought,String(p.get("village","their hearth")),rest.trim_prefix("was ")]) if rest!=said and rest.begins_with("was ") else "%s was %s from %s. %s" % [name,brought,String(p.get("village","their hearth")),said]
 	r.outcome=said
 	r["known"]=String(ref.id)
 	r.witness_ids=_witness_ids(id,[])

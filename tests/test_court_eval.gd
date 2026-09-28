@@ -32,8 +32,11 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## Court 2A widened it to the rest of the court (officials, summons, persons,
 ## divine acts, laws, culture, each office's questions): 172 more runs; first
 ## measured offline 295/421, live 348/421; now offline 425, live 426, sloppy 59.
+## Then words that hold an act back ("don't kill Kavu", "no, don't attack"),
+## statements that are no order, and how people really type (66 more runs,
+## the careless reader on the grave ones): offline 491, live 492, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":425,"live":426,"sloppy":59}
+const BASELINE:={"offline":491,"live":492,"sloppy":74}
 
 var _processing:Dictionary={}
 

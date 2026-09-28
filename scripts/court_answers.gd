@@ -65,10 +65,20 @@ static func _re(pattern:String)->RegEx:
 static func _has(text:String,pattern:String)->bool:
 	return _re(pattern).search(text)!=null
 
+## Typed shorthand read as said: "hows the food" is "how is the food", "whats
+## in the stores" is "what is in the stores", "hw many spears" is "how many".
+static func normalize(text:String)->String:
+	var t:=text.replace("’","'")
+	t=_re("\\b(how|what|where|who|when)'?s\\b").sub(t,"$1 is",true)
+	t=_re("\\bhw\\b").sub(t,"how",true)
+	t=_re("\\b(wat|wht|wut)\\b").sub(t,"what",true)
+	t=_re("\\bhow meny\\b").sub(t,"how many",true)
+	return t
+
 ## Words that ask something (a question mark, or a question's opening, also
 ## after a name: "Rovik, how many are bound").
 static func is_question(text:String)->bool:
-	var clean:=text.strip_edges()
+	var clean:=normalize(text.strip_edges())
 	if _re(QUESTION_RE).search(clean)!=null: return true
 	var comma:=clean.find(",")
 	if comma>0 and comma<28 and clean.substr(0,comma).split(" ",false).size()<=3: return _re(QUESTION_RE).search(clean.substr(comma+1).strip_edges())!=null
@@ -126,7 +136,7 @@ static func _home()->String:
 ## words ask nothing the sheet lists. recent: the audience's last lines, for a
 ## bare "how many?" just after an order about a town's men.
 static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:String="")->String:
-	var text:=question.strip_edges()
+	var text:=normalize(question.strip_edges())
 	if text.is_empty() or not is_question(text): return ""
 	var lower:=text.to_lower()
 	var offices:Array=sheet.get("offices",[])

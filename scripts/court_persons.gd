@@ -535,7 +535,9 @@ const QUALITY_WORDS:=[
 ]
 const PEOPLE_OPEN:="(?i)^\\W*(and |so |then |now |tell me,? )?(who|whom|which (man|woman|one|person|of (them|us|my people|the \\w+)))\\b|^\\W*(tell me (of|about)|name|point out|show me|find me|is there)\\b"
 const PEOPLE_NOT:="(?i)\\b(responsible|blame|fault|to blame|did this|did it|are you|art thou|is this|is that|goes there|sent you|speaks|is speaking|lied|lying)\\b"
-const SUMMON_WORDS:="(?i)^\\W*(please |now |then |so |good\\.? )?(?<verb>summon|bring|fetch|send for|call for|call in|call)\\s+(me\\s+|to me\\s+|here\\s+)?(?<who>him|her|them|that (man|woman|one|person|fellow)|this (man|woman|one|person)|the (man|woman|one|fellow)|(?-i:[A-Z])[\\w'-]+)\\b"
+## "I want to see the oldest man", "let me see her": the one meant, brought in.
+const SEE_LEADS:="i want to see|i wish to see|i would see|i'd like to see|i would like to see|let me see|i want to speak (?:to|with)|i would speak (?:to|with)|i want to talk to|i wish to speak (?:to|with)"
+const SUMMON_WORDS:="(?i)^\\W*(please |now |then |so |good\\.? )?(?<verb>summon|bring|fetch|send for|call for|call in|call|get me|"+SEE_LEADS+")\\s+(me\\s+|to me\\s+|here\\s+)?(?<who>him|her|them|that (man|woman|one|person|fellow)|this (man|woman|one|person)|the (man|woman|one|fellow)|(?-i:[A-Z])[\\w'-]+)\\b"
 
 ## Someone known by a deed: "who found the salt spring?", "the woman who found
 ## the salt spring". The ruler's own words are the deed.
@@ -619,7 +621,7 @@ static func typed_action(text:String)->Dictionary:
 		return _summon_who(named)
 	# "Summon the tallest man", "Bring me the woman who found the salt spring":
 	# whoever the court names for it, brought in.
-	var d:=RegEx.create_from_string("(?i)^\\W*(please |now |then |so )?(summon|fetch|send for|call for|bring( me)?)\\s+(?<rest>(the|our|my|your|a|an) .+)$").search(clean)
+	var d:=RegEx.create_from_string("(?i)^\\W*(please |now |then |so )?(summon|fetch( me)?|send for|call for|bring( me)?|get me|find and bring( me)?|"+SEE_LEADS+")\\s+(?<rest>(the|our|my|your|a|an) .+)$").search(clean.replace("’","'"))
 	if d!=null:
 		var described:=people_question("who is "+d.get_string("rest"))
 		if not described.is_empty() and int(described.get("count",1))<=1: return {"action":"summon","params":{"desc":described}}
@@ -1813,13 +1815,17 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 			hand="exalt"
 			result.outcome="%s was raised up and set in a place of honour." % name
 		"reward":
-			var paid:=Hall._debit_player("Food",minf(12.0*float(mini(count,6)),floorf(Hall.player_stock("Food"))))
+			# What the god named ("give him 10 food"), else a household's share.
+			var res:=String(params.get("resource","")) if String(params.get("resource",""))!="" else "Food"
+			var want:=clampf(float(params.get("amount",0.0)),1.0,500.0) if float(params.get("amount",0.0))>0.0 else 12.0*float(mini(count,6))
+			var paid:=Hall._debit_player(res,minf(want,floorf(Hall.player_stock(res))))
 			p["love"]=clampf(float(p.get("love",0.5))+0.12,0.0,1.0)
 			effects=DIVINE.apply_to_court("boon",{"person_id":0,"name":name},watchers)
 			_remember(p,"The god rewarded me from the stores.")
 			result["paid"]=paid
+			result["resource"]=res
 			hand="reward"
-			result.outcome=("%s was given %d food from the stores." % [name,roundi(paid)]) if paid>0.0 else "%s was praised; the stores had nothing to spare." % name
+			result.outcome=("%s was given %d %s from the stores." % [name,roundi(paid),res.to_lower()]) if paid>0.0 else "%s was praised; the stores had no %s to spare." % [name,res.to_lower()]
 		"pardon":
 			p["love"]=clampf(float(p.get("love",0.5))+0.15,0.0,1.0); p["dread"]=clampf(float(p.get("dread",0.2))-0.1,0.0,1.0)
 			p.erase("bound")
