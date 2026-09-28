@@ -1221,6 +1221,9 @@ static func typed_choice(audience_id:String,text:String,live:bool)->String:
 			found="aim_adopt:%s" % String(cand.cid)
 	if found!="" and found!="#": return found
 	if not live: return ""
+	# An order is not an aim: "Go and conquer Tsaren right now" goes to the
+	# court's command path (the war leader), never into a generation's aim.
+	if is_order(text): return ""
 	var mine:=from_words(text)
 	if mine.is_empty(): return ""
 	mine["proposed_day"]=_day()
@@ -1228,6 +1231,14 @@ static func typed_choice(audience_id:String,text:String,live:bool)->String:
 	var rows:Array=aim_part.get("candidates",[])
 	rows.append({"cid":String(mine.cid),"title":String(mine.title).substr(0,80),"by":"the god"})
 	return "aim_adopt:%s" % String(mine.cid)
+
+static func is_order(text:String)->bool:
+	## Words the court must carry out now rather than hold up as an aim: an
+	## order of war or force, or anything said to be done at once. Aims are
+	## hopes for a generation ("let fewer children die", "make them fear us").
+	var lower:=text.to_lower()
+	if RegEx.create_from_string("\\b(now|right now|at once|immediately|today|this instant|without delay|straight away)\\b").search(lower)!=null: return true
+	return RegEx.create_from_string("\\b(conquer|capture|seize|attack|invade|raid|besiege|storm|march (on|to|against)|burn|kill|slay|slaughter|execute|sack|plunder|loot|round up|tie (them|up)|bind (them|the)|chase|pursue|go after)\\b").search(lower)!=null
 
 static func from_words(text:String)->Dictionary:
 	## Any aim the god speaks is accepted and mapped onto the nearest
