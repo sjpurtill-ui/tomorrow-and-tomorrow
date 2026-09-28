@@ -1187,7 +1187,10 @@ func begin_settlement_convoy(destination:Vector2,duration_days:float,settlement_
 		result["leader"]=String((prepared.leader as Dictionary).get("name",""))
 		result["plan"]=String((prepared.plan as Dictionary).get("summary",""))
 		result["path"]=((prepared.plan as Dictionary).get("path",[]) as Array).duplicate()
-	if bool(result.get("ok",false)) and not delegated and WorldSimulation.actor_id=="player":WorldSimulation.direction.auto_settlement=false
+	# A town founded by hand leaves the leaders' leave to found towns as it was
+	# (auto_founding.gd: the ruler sets it in the Settlement dock or the court).
+	# The leaders' own caravan is marked, so its founding is told in their name.
+	if bool(result.get("ok",false)) and delegated and WorldSimulation.actor_id=="player":WorldSimulation.state.settlement_convoy["by_leaders"]=true
 	return result
 
 func _depart_local_convoy(destination:Vector2,quote:Dictionary,settlement_name:String)->Dictionary:
@@ -1274,7 +1277,14 @@ func complete_settlement_convoy(destination:Vector2)->Dictionary:
 	WorldSimulation.state.settlement_network_revision+=1
 	WorldSimulation.world.settlement_siting.founded(String(record.id),String(record.name),planned_destination,int(WorldSimulation.state.elapsed_days))
 	WorldSimulation.direction.record_cultural_action("settlement:"+String(record.id),"expansion",2.0)
-	return {"ok":true,"settlement":record.duplicate(true),"population":roundi(_settlement_population(record))}
+	var founded:={"ok":true,"settlement":record.duplicate(true),"population":roundi(_settlement_population(record))}
+	# Our leaders founded it themselves: the Chronicle tells it once, with how
+	# to stop them (auto_founding.gd); the map's arrival note then stays out of
+	# the Chronicle.
+	if bool(convoy.get("by_leaders",false)):
+		founded["by_leaders"]=true
+		founded["told"]=not preload("res://scripts/auto_founding.gd").tell_founded(record,convoy).is_empty()
+	return founded
 
 func _create_founding_nucleus()->void:
 	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id

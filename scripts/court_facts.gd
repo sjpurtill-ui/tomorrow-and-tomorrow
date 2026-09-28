@@ -43,6 +43,7 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
+const AutoFounding:=preload("res://scripts/auto_founding.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -141,6 +142,9 @@ static func _common(out:Dictionary)->void:
 	var council:Array=[]
 	for p:Dictionary in officials: council.append({"title":String(p.get("office_title","")),"name":String(p.get("name","")),"office":String(p.get("office_key",""))})
 	out["council"]=council
+	# The god's word on new towns (auto_founding.gd), which everyone at court
+	# knows; the headman also knows what keeps the leaders home.
+	if state!=null: out["new_towns"]=AutoFounding.court_facts("stores" in (out.get("offices",[]) as Array))
 	# Those put out of office or held under guard at the god's word, still living.
 	var set_aside:Array=[]
 	for p in GovernmentPeopleSystem.people:
@@ -542,6 +546,7 @@ static func text(s:Dictionary)->String:
 	var wars:Array=s.get("at_war_with",[])
 	var peace:Array=s.get("at_peace_with",[])
 	lines.append("At war with: %s. At peace with: %s." % [", ".join(PackedStringArray(wars)) if not wars.is_empty() else "nobody",", ".join(PackedStringArray(peace)) if not peace.is_empty() else "nobody we know"])
+	if s.get("new_towns") is Dictionary: lines.append("New towns: %s." % AutoFounding.court_words(s.new_towns,false))
 	var war:=(s.get("offices",[]) as Array).has("war")
 	for t:Dictionary in s.get("towns",[]):
 		lines.append(_town_line(t,war))

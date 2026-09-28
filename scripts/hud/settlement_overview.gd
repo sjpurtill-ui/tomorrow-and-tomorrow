@@ -1,7 +1,8 @@
 extends "res://scripts/hud/home_ledger.gd"
 ## The Settlement dock's first page: who runs the place and what they are
 ## putting extra hands on, one plain way to ask for more hands elsewhere, the
-## place at a glance, and the water and waste works it can start.
+## place at a glance, whether our leaders found new towns on their own, and
+## the water and waste works it can start.
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
 const Food:=preload("res://scripts/hud/provisions_art.gd")
@@ -26,6 +27,8 @@ func setup(block:Dictionary)->void:
 	for metric:Dictionary in data.metrics:
 		var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;headline.add_child(stack)
 		stack.add_child(_serif(String(metric.value),26));stack.add_child(T.make_label(String(metric.label),13,T.MUTED))
+	var founding:Dictionary=data.get("founding",{})
+	if not founding.is_empty():_new_towns(founding)
 	_rule(self)
 	cards=GridContainer.new();cards.columns=3;cards.add_theme_constant_override("h_separation",16);cards.add_theme_constant_override("v_separation",16);add_child(cards)
 	for item:Dictionary in data.cards:
@@ -52,6 +55,16 @@ func setup(block:Dictionary)->void:
 	_button(footer,"Who does what",data.on_work,"How the leader shares out the daily work")
 	_button(footer,"Rename this place",data.on_rename,"Change the name on the map")
 	resized.connect(_layout);_layout()
+
+## New towns (auto_founding.gd): whether our leaders found them on their own,
+## said in plain words, and the one click that changes it. The same switch as
+## the court's word and the "Our course" page.
+func _new_towns(founding:Dictionary)->void:
+	_rule(self)
+	var box:=VBoxContainer.new();box.name="NewTowns";box.add_theme_constant_override("separation",6);add_child(box)
+	box.add_child(_voice("New towns",20))
+	_line(box,String(founding.get("words","")),13,T.BODY).name="NewTownsWords"
+	_choices(box,"",founding.get("options",[]),"leaders" if bool(founding.get("on",true)) else "ruler").name="NewTownsChoice"
 
 ## Water and waste works: what is built, and what can be started, each with
 ## its cost and time and one verb.
