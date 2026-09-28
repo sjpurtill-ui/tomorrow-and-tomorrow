@@ -18,7 +18,12 @@ extends RefCounted
 ##                Never a war order, never a hand on anyone in the hall.
 ##   the name     "Rename Seanstone to Godshold": the settlement model.
 ##   person verbs a verb that falls on one person named in any case ("bless
-##                suri", "flog the headman", "let kishan go", "fire kavu").
+##                suri", "flog the headman", "let kishan go", "fire kavu",
+##                "kavu your fired", "Kavu must die"); never what they did
+##                ("Kavu whipped the boy"); on a condition, a threat.
+##   held back    the clauses of the words, and which of them hold an act back
+##                ("don't kill him", "Kavu must not be punished"): read by
+##                court_commands._held_back, never carried out as the act.
 ##   the council's people and the court's known persons: who is in the
 ##                roster beside the officials (put out of office, held under
 ##                guard; the commoners the court has named or brought in).
@@ -91,13 +96,68 @@ static func known_entries(audience:Dictionary)->Array[Dictionary]:
 	return out
 
 # --------------------------------------------------------------------------
+# Words that hold an act back ("don't kill him", "Kavu must not be punished")
+# --------------------------------------------------------------------------
+
+## A clause that forbids or holds back what it names: "don't", "never",
+## "I won't", "you must not", "no need to".
+const HOLD_LEAD:="(?i)^\\W*(?:(?:no|nay|nope|wait|stop|hold|enough|please|god|gods|oh|ah|now|listen|look|i said|i told you|i say)\\b[\\s,.!]*)*(?:please\\s+)?(?<lead>don'?t|do not|dont|never(?: again| ever)?|you (?:will|shall|must|may) not|you won'?t|you mustn'?t|you shan'?t|i (?:will|shall|do) not|i won'?t|i don'?t|we (?:will|shall|do) not|we won'?t|we don'?t|let us not|let'?s not|lets not|no need to|there is no need to|nobody is to|no ?one is to|none of you (?:is|are) to|none of you (?:will|shall|may)|(?:nobody|no ?one|none of you)(?= (?:lays|touches|harms|hurts|strikes|hits|kills)\\b))\\b\\s*"
+## "Kavu must not be punished", "Suri is not to be harmed", "he won't be flogged".
+const HOLD_PASSIVE:="(?i)^\\W*(?<who>[\\w' -]{2,40}?)\\s+(?:(?:must|shall|will|should|is|are)\\s*(?:not|n't|never)|won'?t|shan'?t|mustn'?t)\\s+(?:to\\s+)?(?<rest>be\\b.*)$"
+## A clause that is no act at all ("no", "wait", "instead").
+const FILLER_CLAUSE:="(?i)^\\W*(?:(?:no|nay|nope|wait|stop|hold|enough|please|god|gods|oh|ah|now|just|instead|rather|not yet|not now|not that|never|never mind|sorry|forget it|no no)\\b[\\s,.!]*)*$"
+## Where one thing said ends and the next begins.
+const CLAUSE_BREAK:="(?i)[,;.!?]+|\\s+but\\s+|\\s+instead\\b|\\s+rather\\b"
+
+static func clauses(text:String)->Array[Dictionary]:
+	## The words split where one thing said ends and another begins:
+	## {text, held, stripped, filler}. held: the clause forbids or holds back
+	## the act it names ("don't kill him"); stripped: that act itself ("kill
+	## him"), for reading what is held back.
+	var clean:=text.replace("’","'").strip_edges()
+	var pieces:PackedStringArray=[]
+	var at:=0
+	for m in _re(CLAUSE_BREAK).search_all(clean):
+		pieces.append(clean.substr(at,m.get_start()-at)); at=m.get_end()
+	pieces.append(clean.substr(at))
+	var out:Array[Dictionary]=[]
+	for piece in pieces:
+		var p:=String(piece).strip_edges()
+		if p=="": continue
+		var held:=false
+		var stripped:=p
+		var lead:=_re(HOLD_LEAD).search(p)
+		if lead!=null:
+			held=true; stripped=p.substr(lead.get_end()).strip_edges()
+		else:
+			var passive:=_re(HOLD_PASSIVE).search(p)
+			if passive!=null:
+				held=true; stripped="%s must %s" % [passive.get_string("who").strip_edges(),passive.get_string("rest").strip_edges()]
+		out.append({"text":p,"held":held,"stripped":stripped,"filler":_has(p,FILLER_CLAUSE)})
+	return out
+
+static func drop_held(text:String)->String:
+	## The words less what they hold back: "don't kill the men, take them to
+	## Seanstone" -> "take them to Seanstone"; "don't kill the men of Tsaren"
+	## -> "". The words unchanged when nothing is held back. For readings of a
+	## town's fate or a garrison's measures, which read "kill the men" in them.
+	var parts:=clauses(text)
+	if not parts.any(func(p:Dictionary)->bool: return bool(p.held)): return text
+	var kept:=PackedStringArray()
+	for p:Dictionary in parts:
+		if not bool(p.held) and not bool(p.filler): kept.append(String(p.text))
+	return ", ".join(kept)
+
+# --------------------------------------------------------------------------
 # Verbs that fall on one person, named in any case
 # --------------------------------------------------------------------------
 
-## [verb, pattern]: the verb phrase; the person must be named (by name, title
-## or "him"/"her") after it, or before it in a passive ("have kishan whipped",
-## "Kavu must be punished").
+## [verb, pattern, passive only]: the verb phrase; the person must be named (by
+## name, title or "him"/"her") after it, or before it in a passive ("have
+## kishan whipped", "Kavu must be punished", "Kavu must die").
 const PERSON_VERBS:=[
+	["kill","(?i)\\b(killed|executed|slain|beheaded|hanged|hung|put to death|die|dies)\\b",true],
+	["exile","(?i)\\b(banished|exiled|expelled|cast out|driven out)\\b",true],
 	["maim","(?i)\\b(flog|flogged|whip|whipped|lash|lashed|beat|beaten|thrash|thrashed|cane|caned|scourge|scourged)\\b"],
 	["pardon","(?i)\\b(pardon|pardoned|forgive|forgiven|free|freed|release|released|unchain|unchained|unbind|untie|set [\\w' ]{1,20}? free|let [\\w' ]{1,30}? go|spare|spared|show mercy to|have mercy on)\\b"],
 	["curse","(?i)\\b(curse|cursed|damn)\\b"],
@@ -113,37 +173,67 @@ const PERSON_VERBS:=[
 const ONE_PERSON:=["him","her","you","yourself","himself","herself","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
 ## "Tell Kavu to punish the thieves": the one named is the hand, not the one punished.
 const ACTOR_LEAD:="(?i)\\b(tell|ask|order|command|have|let|make|send|get)\\s+$"
+## A decree's own ending ("Kavu is dismissed.", "Kavu dies at dawn"): nothing
+## after the verb that makes it something they did ("Kavu whipped the boy").
+const BARE_TAIL:="(?i)^(now|at once|today|tonight|tomorrow|at dawn|at first light|at sunrise|immediately|forever|for good|again|from (his|her|their|the|this|my) (office|post|place|duties|command|service|court|hall|sight|seat)|for (this|that|it|his crimes|her crimes|their crimes|what (he|she|they) did|(his|her|their) (crimes|lies|failure|insolence|treachery))|before (the court|us all|everyone|you all|them all)|in front of everyone|,? ?(do you hear|understood|is that clear))*\\W*$"
+## A decree's words before the verb: "must be", "is to be", "shall".
+const STRONG_AUX:="(?i)^(must|should|shall|will|is to|are to|to|you will|you shall|you must|you are to|you're to)\\s*(be|be now|now be|now)?$|^(be|be now|now be)$"
+## "Kavu is dismissed", "you're fired": only as the decree's whole ending.
+const WEAK_AUX:="(?i)^(is|are|you'?re|youre|your|you are|ur|u r)\\s*(now)?$"
+## A condition after the act: a threat, not the act ("flog Kavu if he lies again").
+const CONDITION:="(?i)\\b(if|unless|should (he|she|they|you)|next time|the next time|ever again)\\b"
 
 static func person_verb(text:String,list:Array[Dictionary],mentions:Callable,salient:Callable)->Dictionary:
 	## {verb, key, at, harm?} when a person verb falls on one person named in
 	## the words; {} otherwise. mentions(text,list) and salient() come from
 	## court_commands (its own reading of names and pronouns).
-	var clean:=text.strip_edges()
+	var clean:=text.strip_edges().replace("’","'")
 	for pair in PERSON_VERBS:
 		var m:=_re(String(pair[1])).search(clean)
 		if m==null: continue
 		var verb:=String(pair[0])
+		var passive_only:=(pair as Array).size()>2 and bool(pair[2])
 		var found:Array=mentions.call(clean,list)
 		var target:Dictionary={}
 		# After the verb (or inside its phrase: "let kishan go", "set her free",
 		# "take Kavu's office").
 		for f:Dictionary in found:
+			if passive_only: break
 			if int(f.end)<=m.get_start(): continue
 			if String(f.by) in ["guards","god"]: continue
 			# "Let them go", "untie them": many people, never one person here.
 			if String(f.by)=="pronoun" and not String(f.word) in ONE_PERSON: continue
 			if String(f.by) in ["name","title"] and String(f.get("of",""))!="" and not (verb=="demote" and String(f.of) in ["office","post","rank","title","seat","command","place"]): continue
 			target=f; break
-		# A passive: "have kishan whipped", "Kavu must be punished", "Kavu is dismissed".
+		# A passive: "have kishan whipped", "Kavu must be punished", "Kavu is
+		# dismissed", "kavu, you're fired", "Kavu must die". Never what they did
+		# themselves ("Kavu whipped the boy", "Suri blessed the hunt"), nor what
+		# was ("Kavu was flogged").
+		var word:=m.get_string().to_lower()
+		# A condition after it ("Kavu must die if the stores fail again") is a
+		# threat, read below; the decree's words are otherwise the same.
+		var bare:=_has(clean.substr(m.get_end()).strip_edges(),BARE_TAIL) or _has(clean.substr(m.get_end()),CONDITION)
+		var participle:=_has(word,"(ed|en)$") or word in ["free","slain","hung","put to death","cast out","driven out"]
+		# Words of what someone is, not what is done to them ("Suri is scared").
+		var weak_ok:=not verb in ["terrify","bless","raise","marry"]
 		if target.is_empty():
 			for f:Dictionary in found:
 				if int(f.end)>m.get_start() or not String(f.by) in ["name","title"]: continue
 				if String(f.get("of",""))!="": continue
-				var between:=clean.substr(int(f.end),m.get_start()-int(f.end)).to_lower().strip_edges()
+				var between:=clean.substr(int(f.end),m.get_start()-int(f.end)).to_lower().replace(",","").strip_edges()
 				var before:=clean.substr(0,int(f.at)).to_lower()
-				var passive:=_has(between,"^(must|should|shall|will|is to|are to|is|are|was|to)?\\s*(be|be now|now be|now)?$") and _has(m.get_string(),"(?i)(ed|en)$|^free$")
-				var had:=_has(before,"(?i)\\b(have|get|see that|see to it that|let)\\s*$") and _has(m.get_string(),"(?i)(ed|en)$")
+				var passive:=false
+				if word in ["die","dies"]:
+					passive=bare and (_has(between,"^(must|shall|is to|are to|has to|have to)$") or (between=="" and word=="dies"))
+				else:
+					passive=participle and ((between!="" and _has(between,STRONG_AUX)) or (weak_ok and bare and (between=="" or _has(between,WEAK_AUX))))
+				var had:=_has(before,"(?i)\\b(have|get|see that|see to it that|let)\\s*$") and participle and not passive_only
 				if passive or had: target=f
+		# "You're fired", "your fired", "you are to be flogged": the one before the god.
+		if target.is_empty() and participle:
+			var lead:=clean.substr(0,m.get_start())
+			if _has(lead,"(?i)(^|[^\\w'])(you will be|you shall be|you must be|you are to be|you're to be)\\s+(now\\s+)?$") or (weak_ok and bare and _has(lead,"(?i)(^|[^\\w'])(you'?re|youre|your|you are|ur|u r)\\s+(now\\s+)?$")):
+				target={"by":"pronoun","word":"you","at":0,"end":0,"key":""}
 		if target.is_empty(): continue
 		# The one told to do it is the hand: "tell Kavu to punish the thieves"
 		# (but "have kishan whipped" is done to Kishan).
@@ -166,6 +256,13 @@ static func person_verb(text:String,list:Array[Dictionary],mentions:Callable,sal
 		if key=="": continue
 		var out:={"verb":verb,"key":key,"at":m.get_start(),"end":m.get_end()}
 		if verb=="maim": out["harm"]="beat"
+		if verb=="kill": out["harm"]="kill"
+		# "Flog Kavu if he lies again", "Kavu must die if the stores fail": a
+		# threat to them, not the act; a promise of favour is only words.
+		if _has(clean,CONDITION):
+			if verb in ["kill","exile","maim","curse","terrify","penance","demote"]:
+				out["verb"]="terrify"; out["threat"]=true; out.erase("harm")
+			else: continue
 		return out
 	return {}
 
@@ -198,10 +295,12 @@ static func stores_hold(material:String)->bool:
 # --------------------------------------------------------------------------
 
 const GROUP_ACTS:=[
-	["terrify","(?i)\\b(terrify|terrorize|terrorise|frighten|scare|strike (fear|terror) into|put (the )?fear (of [\\w ]+ )?into|make (?<o1>[\\w' ]{1,40}?) (fear|dread) me|show (?<o2>[\\w' ]{1,40}?) my (wrath|anger|fury|might|power)|let (?<o3>[\\w' ]{1,40}?) (feel|know|see) my (wrath|anger|fury)|let (?<o4>[\\w' ]{1,40}?) tremble)\\b"],
+	["terrify","(?i)\\b(terrify|terrorize|terrorise|frighten|scare|strike (fear|terror) into|put (the )?fear (of [\\w ]+ )?into|make (?<o1>[\\w' ]{1,40}?) (fear|dread) me|show (?<o2>[\\w' ]{1,40}?) my (wrath|anger|fury|might|power)|let (?<o3>[\\w' ]{1,40}?) (feel|know|see) my (wrath|anger|fury)|let (?<o4>[\\w' ]{1,40}?) tremble|make (?<o6>[\\w' ]{1,40}?) (tremble|shake|cower|quake|quail|shiver)|show (?<o7>[\\w' ]{1,40}?) what (happens|befalls|comes) to (those|anyone|any|all) who (defy|cross|oppose|anger|disobey|mock|insult) me)\\b"],
 	["curse","(?i)\\b(curse|damn)\\b"],
 	["bless","(?i)\\b(bless|show (?<o5>[\\w' ]{1,40}?) my (favou?r|love|kindness|mercy))\\b"],
 ]
+## Our own fighters, as a body ("bless my warriors", "curse the band").
+const FIGHTERS_RE:="(?i)^(the |my |our |all (the |my |our )?|every one of (the |my |our )?)?(warriors|fighters|soldiers|spearmen|spears|men at arms|war ?band|band|bands|host|army|armies|levy|garrison|troops)\\b"
 const OURS_RE:="(?i)\\b(the people|my people|our people|the townsfolk|the villagers|every ?one|every ?body|all of them|them all|all the people|the town|the camp|the village|our town|my town|the settlement|the realm|my realm|our realm|the land|my subjects|the hearths|every hearth)\\b"
 const COURT_RE:="(?i)\\b(the (whole )?court|the (whole )?council|all of you|you all|every ?one here|every ?body here|my officials|the officials|this hall|the hall|the bench)\\b"
 const FIELDS_RE:="(?i)\\b(the |our |my )?(harvest|fields?|crops?|herds?|flocks?|seed|sowing|planting|gardens?|orchards?|rains?|hunt|nets|the river|the land)\\b"
@@ -219,7 +318,7 @@ static func group_act(text:String,audience:Dictionary,list:Array[Dictionary],men
 		var act:=String(pair[0])
 		# The object: named inside the phrase ("make the Esurai fear me"), else after it.
 		var object:=""
-		for n in ["o1","o2","o3","o4","o5"]:
+		for n in ["o1","o2","o3","o4","o5","o6","o7"]:
 			if m.get_string(n)!="": object=m.get_string(n)
 		if object=="": object=clean.substr(m.get_end())
 		object=object.strip_edges()
@@ -252,6 +351,7 @@ static func _group_target(lo:String,audience:Dictionary)->Dictionary:
 			if cname!="" and WarOrders._name_hit(lo,cname): return {"kind":"people","civ_id":String(c.id),"name":cname}
 	var home:=String(GameState.settlement_name).to_lower()
 	if _has(lo,COURT_RE): return {"kind":"court"}
+	if _has(lo,FIGHTERS_RE): return {"kind":"fighters"}
 	if home!="" and WarOrders._name_hit(lo,home): return {"kind":"ours","name":String(GameState.settlement_name)}
 	# "Them", "them all", "everyone": the town this audience is speaking of.
 	var pronoun:=_has(lo,VAGUE_RE) or _has(lo,"(?i)^\\s*(them all|all of them|every ?one|every ?body|all of them there)\\s*[!.]*$")
@@ -331,6 +431,25 @@ static func perform_group(id:String,audience:Dictionary,r:Dictionary,g:Dictionar
 				DIVINE.apply_to_court("terrify",{"person_id":0,"name":"the court"},watchers)
 				for p in watchers: GovernmentPeopleSystem.adjust_person_bonds(int(p.person_id),{"fear":0.05,"hold_days":7})
 				r.outcome="Your anger fills the hall and falls on the whole court at once; nobody on the bench dares lift their eyes."
+		"fighters":
+			# Our own fighters: their heart for the fight, at home and in the field.
+			var delta:=0.05 if act=="bless" else -0.05
+			var touched:=0
+			var home_army:Dictionary=MilitaryCampaign.home_army
+			if int(home_army.get("troops",0))>0:
+				home_army["morale"]=clampf(float(home_army.get("morale",1.0))+delta,0.0,1.5); touched+=int(home_army.troops)
+			for a in MilitaryCampaign.field_armies:
+				if a is Dictionary and int((a as Dictionary).get("troops",0))>0:
+					a["morale"]=clampf(float((a as Dictionary).get("morale",1.0))+delta,0.0,1.5); touched+=int(a.troops)
+			if touched<=0:
+				r.executed=false; r.stage="none"
+				r.outcome="There are no fighters of ours to %s yet." % act
+				return r
+			DIVINE.apply_to_court("bless" if act=="bless" else "terrify",{"person_id":0,"name":"the fighters"},Hall._officials())
+			match act:
+				"bless": r.outcome="You bless the fighters before the fire, all %d of them; they stand taller for it and go back to the drill ground in good heart." % touched
+				"curse": r.outcome="You curse your own fighters before the court. All %d of them hear of it; they are afraid, and their heart for the fight sinks." % touched
+				_: r.outcome="Your anger falls on your own fighters. All %d of them hear of it; they are afraid, and their heart for the fight sinks." % touched
 		"fields":
 			DIVINE.record_people_act("bless_fields")
 			DIVINE.apply_to_court("bless",{"person_id":0,"name":"the fields"},Hall._officials())
@@ -364,9 +483,10 @@ static func _metric(key:String,delta:float)->void:
 	var m:Dictionary=GameState.simulation_metrics
 	m[key]=clampf(float(m.get(key,0.5))+delta,0.01,0.99)
 
-static func answer_whom(audience:Dictionary,text:String,list:Array[Dictionary],mentions:Callable)->Dictionary:
+static func answer_whom(audience:Dictionary,text:String,list:Array[Dictionary],mentions:Callable,consume:bool=true)->Dictionary:
 	## After "Whom do you mean?": the words that name them carry the act asked
-	## about ({act, target}); {} when these are other words.
+	## about ({act, target}); {} when these are other words. consume: the
+	## reader's own open question is settled by it (false: only read).
 	var p:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	var act:=""; var said:=""
 	if String(p.get("verb",""))=="divine" and String(p.get("ask",""))=="whom" and Hall._day()-int(p.get("day",-99))<=2:
@@ -384,7 +504,7 @@ static func answer_whom(audience:Dictionary,text:String,list:Array[Dictionary],m
 	lo=_re("(?i)\\b(of course|obviously|who else|naturally)\\b").sub(lo,"",true).strip_edges().trim_suffix(",").strip_edges()
 	var target:=_group_target(lo,audience)
 	if target.is_empty() or String(target.kind)=="unclear": return {}
-	audience.erase("reader_pending")
+	if consume: audience.erase("reader_pending")
 	return {"act":act,"target":target,"words":said}
 
 # --------------------------------------------------------------------------
@@ -392,7 +512,7 @@ static func answer_whom(audience:Dictionary,text:String,list:Array[Dictionary],m
 # --------------------------------------------------------------------------
 
 ## Explicit words of law.
-const LAW_WORDS:="(?i)(\\bfrom (now|this day|today)( on)?\\b|\\bhenceforth\\b|\\bmake (it )?a law\\b|\\bpass a law\\b|\\bit is (now )?(the )?law\\b|\\b(is|are) (now )?forbidden\\b|\\bforbid\\b|\\bno ?(one|body)\\b[\\w' ]{0,30}?\\b(may|shall|is to|can|will|must|leaves?|goes|works?|eats|walks|sleeps|hunts)\\b|\\bnone (may|shall)\\b|\\bevery ?(one|body)\\b[\\w' ]{0,30}?\\b(must|shall|is to)\\b|\\bevery (newborn|child|man|woman|family|household|hearth|hunter|boy|girl)\\b[\\w' ]{0,30}?\\b(must|shall|is to|will)\\b|\\b(a|any|each) (man|woman|husband|wife|child|family|household)\\b[\\w' ]{0,20}?\\b(must|may|shall|is to)\\b|\\bevery (second|third|fourth|fifth|sixth|seventh|tenth|\\w+th) day\\b|\\b(thieves|liars|hoarders|murderers|deserters|cowards|drunkards)\\b[\\w' ]{0,12}\\b(are|will be|shall be) to be\\b|\\b(are|is) to be (flogged|whipped|beaten|banished|exiled|driven out|put to death|killed|hanged|fined|branded|punished|burned)\\b)"
+const LAW_WORDS:="(?i)(\\bfrom (now|this day|today)( on)?\\b|\\bhenceforth\\b|\\bmake (it )?a law\\b|\\bpass a law\\b|\\bit is (now )?(the )?law\\b|\\b(is|are) (now )?forbidden\\b|\\bforbid\\b|\\bno ?(one|body)\\b[\\w' ]{0,30}?\\b(may|shall|is to|can|will|must|leaves?|goes|works?|eats|walks|sleeps|hunts)\\b|\\bnone (may|shall)\\b|\\bevery ?(one|body)\\b[\\w' ]{0,30}?\\b(must|shall|is to)\\b|\\bevery (newborn|child|man|woman|family|household|hearth|hunter|boy|girl)\\b[\\w' ]{0,30}?\\b(must|shall|is to|will)\\b|\\b(a|any|each) (man|woman|husband|wife|child|family|household)\\b[\\w' ]{0,20}?\\b(must|may|shall|is to)\\b|\\bevery (second|third|fourth|fifth|sixth|seventh|tenth|\\w+th) day\\b|\\b(thieves|liars|hoarders|murderers|deserters|cowards|drunkards)\\b[\\w' ]{0,12}\\b(are|will be|shall be) to be\\b|\\b(are|is) to be (flogged|whipped|beaten|banished|exiled|driven out|put to death|killed|hanged|fined|branded|punished|burned)\\b|\\b(outlaw|ban|prohibit)\\s+(all\\s+|any\\s+)?[a-z]|\\b(women|men|children|boys|girls|widows|wives|husbands|strangers|foreigners|hunters|elders|the young|the old|everyone|everybody|anyone)\\s+(may|must|shall|can|cannot|may not|must not|shall not|are to|are allowed to|are forbidden to|are free to)\\s+(now\\s+|no longer\\s+|never\\s+|also\\s+)?[a-z]|\\b(allow|permit)\\s+(the\\s+|our\\s+)?(women|men|children|widows|anyone|everyone|people|strangers|foreigners|hunters)\\s+to\\b|^\\W*never\\s+(again\\s+)?(kill|slay|harm|hurt|strike|beat|rob|steal from|take from|burn|enslave|sell|touch)\\s+(a|any|an)\\s+(man|woman|child|captive|prisoner|stranger|guest|envoy|herald|messenger|one|soul|boy|girl)\\b)"
 ## Our own wrongdoers, never a foe: the objects of a law.
 const CRIME_RE:="(?i)\\b(thie(f|ves)|steal(s|ing|ers?)?|stole|hoard(s|ers?|ing)?|murder(s|ers?|ing)?|killers?|the lazy|lazy|idle(rs)?|the idle|slackers?|shirk(ers|ing)?|drunk(ards?|s)?|liars?|lying|cheat(s|ers)?|adulter(y|ers?)|deserters?|cowards?|oath-?breakers?|poach(ers|ing)?|brawl(ers|ing)?|sleep(s|ing)? on (the )?(watch|duty)|trespass(ers)?|robbers?|robbing)\\b"
 ## Hard hands a law may lay on them.
@@ -433,9 +553,10 @@ static func rename(text:String)->Dictionary:
 	var home:=String(GameState.settlement_name)
 	var patterns:=[
 		"(?i)^\\s*rename\\s+(?<old>[\\w' ]{1,40}?)\\s+(to|as|into)\\s+(?<new>[\\w' -]{2,32}?)(\\s+from now on)?$",
-		"(?i)^\\s*(call|name)\\s+(our|the|this|my)\\s+%s\\s+(?<new>[\\w' -]{2,32}?)(\\s+from (now|today|this day)( on)?)?$" % PLACE_WORDS,
+		"(?i)^\\s*((i|we)\\s+((shall|will)\\s+)?)?(call|name)\\s+(our|the|this|my)\\s+%s\\s+(?<new>[\\w' -]{2,32}?)(\\s+from (now|today|this day)( on)?)?$" % PLACE_WORDS,
 		"(?i)^\\s*(from (now|today|this day)( on)?,?\\s+)?(?<old>[\\w' ]{2,40}?)\\s+(shall|will|is to)\\s+(now\\s+)?be\\s+(called|named|known as)\\s+(?<new>[\\w' -]{2,32}?)(\\s+from (now|today|this day)( on)?)?$",
-		"(?i)^\\s*(from (now|today|this day)( on)?,?\\s+)?(our|the|my)\\s+%s\\s+(is|shall be|will be)\\s+(called|named)\\s+(?<new>[\\w' -]{2,32})$" % PLACE_WORDS,
+		"(?i)^\\s*(from (now|today|this day)( on)?,?\\s+)?(our|the|my|this)\\s+%s\\s+(is|shall be|will be)\\s+(now\\s+)?(called|named|known as)\\s+(?<new>[\\w' -]{2,32}?)(\\s+from (now|today|this day)( on)?)?$" % PLACE_WORDS,
+		"(?i)^\\s*(from (now|today|this day)( on)?,?\\s+)?(the |our |my |this )?(town|camp|village|settlement|place)'s (new )?name is (now\\s+)?(?<new>[\\w' -]{2,32}?)$",
 	]
 	for pat in patterns:
 		var m:=_re(String(pat)).search(clean)

@@ -56,6 +56,8 @@ var suite:Node
 var fx:Fixtures
 var cases:Array[Dictionary]=[]
 var load_errors:PackedStringArray=PackedStringArray()
+## The audience the last run() ended in (a summons moves the court to the one brought in).
+var last_id:=""
 
 func _init(test_suite:Node)->void:
 	suite=test_suite
@@ -227,6 +229,7 @@ func run(c:Dictionary,path:String)->Dictionary:
 		(out.log as Array).append({"say":said,"lines":lines.map(func(l:Dictionary)->String: return "%s: %s" % [String(l.get("speaker","")) if String(l.get("speaker",""))!="" else "(narration)",String(l.get("text",""))]),
 			"calls":voice.calls.map(func(k:Dictionary)->String: return _call_words(k)),"prompts":voice.prompts.size(),"changed":changed(before,after)})
 		if after.has("_moved_to"): id=String(after._moved_to)
+	last_id=id
 	modal.queue_free(); voice.queue_free()
 	out.ok=(out.fails as Array).is_empty()
 	return out
@@ -443,6 +446,7 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["armies"]=MilitaryCampaign.field_armies.size(); m["moving"]=moving; m["field_troops"]=field; m["chases"]=chase
 	m["to_tsaren"]=to_tsaren; m["to_eldwick"]=to_eldwick; m["to_stonefield"]=to_stonefield; m["going_home"]=going_home
 	m["home_troops"]=int(MilitaryCampaign.home_army.get("troops",0))
+	m["home_morale_x100"]=roundi(float(MilitaryCampaign.home_army.get("morale",0.0))*100.0)
 	m["recruits"]=int(MilitaryCampaign.aggregate_recruits)
 	m["training"]=MilitaryCampaign.training_queue.size()
 	m["equipment_orders"]=MilitaryCampaign.equipment_queue.size()
@@ -559,7 +563,7 @@ static func _material(m:Dictionary)->String:
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
-		"speaker_known_status","speaker_known_role","speaker_known_marks","works"]
+		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

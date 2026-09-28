@@ -182,7 +182,9 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	if current.distance_to(WorldSimulation.world.player_world_origin)<.5:actual["location_id"]="player_home";actual["location_name"]="Home settlement"
 func _engage(actual:Dictionary,enemy:Dictionary,order:Dictionary,allies:Array)->void:
 	if command.battle.enemy_engaged(String(enemy.id)) or command.data.battles.size()>=32:return
-	if not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():return
+	# Held only by its own siege; a siege, raid or victory being settled
+	# elsewhere never stops this band (launch_map_engagement checks the rest).
+	if host._besieging(int(actual.army_id)):return
 	var distance:=point(actual).distance_to(point(enemy))
 	var width:=minf(host.MAP_ENGAGEMENT_RANGE_KM,frontage(int(actual.troops))+frontage(int(enemy.troops))+.15)
 	if distance>width+.5:return
@@ -292,7 +294,8 @@ func _city(actual:Dictionary,city:Dictionary,order:Dictionary,day:int,allies:Arr
 			var result:Dictionary=WorldSimulation.world.set_occupation_policy(String(city.civ_id),String(city.city_id),"raze")
 			actual["command_status"]=String(result.get("error","City infrastructure razed · occupation retained"))
 		return
-	if not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():actual["command_status"]="Holding approach · another engagement is resolving";return
+	if not host.active_siege.is_empty() and String(host.active_siege.get("mode",""))=="offensive" and String(host.active_siege.get("region_id",""))==String(city.city_id):
+		actual["command_status"]="Holding approach · our siege of the town goes on";return
 	actual["status"]="stationed";actual["location_id"]=String(city.city_id)
 	var before:Array=host.own_engagements.keys()
 	command.executing=true;command.battle_candidates=command.battle.participants(actual,allies,G.unpack(city.position))

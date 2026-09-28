@@ -7,6 +7,7 @@ extends GdUnitTestSuite
 ## Environment:
 ##   COURT_LIVE_EVAL=1           run it; anything else skips it (nothing spent)
 ##   COURT_LIVE_EVAL_FILTER      only cases whose id contains this, or whose domain is it
+##                               (several, comma-separated: any of them)
 ##   COURT_LIVE_EVAL_MAX_CALLS   at most this many model calls in this run
 ##   COURT_LIVE_EVAL_PARTS       "reader", "voice" or both (default "reader,voice")
 ##   COURT_LIVE_EVAL_DRY=1       no model at all: the reader returns the ideal

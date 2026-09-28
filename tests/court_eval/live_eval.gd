@@ -308,8 +308,10 @@ func _connection_problem()->String:
 
 func _select()->void:
 	selected.clear(); jobs.clear(); _jobs_by.clear(); _cases_by.clear()
+	# Several filters, comma-separated ("officials,summon"): any of them.
+	var wanted:=Array(filter.split(",",false)).map(func(x:String)->String: return x.strip_edges())
 	for c:Dictionary in cases:
-		if filter!="" and not (filter in String(c.id) or filter==String(c.get("domain",""))): continue
+		if filter!="" and not wanted.any(func(f:String)->bool: return f!="" and (f in String(c.id) or f==String(c.get("domain","")))): continue
 		if not "live" in paths_of(c): continue
 		selected.append(c)
 		_cases_by[String(c.id)]=c
@@ -396,13 +398,15 @@ func _prepare(job:Dictionary,mode:String)->String:
 	var prefix:Dictionary=c.duplicate()
 	prefix["steps"]=(c.steps as Array).slice(0,int(job.k))
 	_mode=mode; _cur=c; _step_i=0; _compare_on=false; _last_audience=""
+	last_id=""
 	var out:Dictionary=run(prefix,"live")
 	_cur={}; _mode="ideal"
 	for f in out.fails:
 		if String((f as Dictionary).code) in ["fixture","cannot_speak"]:
 			job["why_not"]=String((f as Dictionary).text)
 			return ""
-	var id:=_last_audience
+	# Where the steps before it left the court (a summons moves it).
+	var id:=last_id if last_id!="" else _last_audience
 	if id=="" or String(Hall.find(id).get("status",""))!="waiting":
 		job["why_not"]="the audience is over before this step"
 		return ""

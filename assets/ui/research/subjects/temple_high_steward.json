@@ -1,0 +1,12 @@
+{
+  "id": "temple_high_steward",
+  "line": "institutions",
+  "game_year": 260,
+  "approx_historical_year": -3267,
+  "prompt": "c. 3267 BCE: Plainly clothed community steward distributes grain at small mudbrick store; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-03c7e1cd-b74f-4651-be84-c1403a418bbe.png",
+  "asset": "res://assets/ui/research/subjects/temple_high_steward-v1.png",
+  "sha256": "4190c28ebd4d8c054e455a9c7db3025135fd495b8bcbea7153b6a61fe44a35fc",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

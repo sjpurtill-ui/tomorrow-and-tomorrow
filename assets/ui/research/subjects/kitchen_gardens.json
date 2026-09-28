@@ -1,0 +1,12 @@
+{
+  "id": "kitchen_gardens",
+  "line": "nutrition",
+  "game_year": 260,
+  "approx_historical_year": -3267,
+  "prompt": "c. 3267 BCE: Adults water leafy greens, alliums and pulses beside mudbrick houses; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-130fbd37-4c71-42cf-a632-06ee650779b4.png",
+  "asset": "res://assets/ui/research/subjects/kitchen_gardens-v1.png",
+  "sha256": "23f5f3af4a0c997357408379a5a166cfc04d19da1a2bef53ad5dfdac41b875ae",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

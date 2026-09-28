@@ -1,0 +1,16 @@
+{
+  "id": "council_reformation_practice",
+  "line": "institutions",
+  "game_year": 255,
+  "approx_historical_year": -3300,
+  "prompt": "c. 3300 BCE: Village council reassembles and votes in a mudbrick courtyard; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5f9a9fe4-9eb4-43fa-aa86-bf75f57bf21d.png",
+  "asset": "res://assets/ui/research/subjects/council_reformation_practice-v1.png",
+  "sha256": "056ab1e3b36376ae8594e6dac867de26ad0a6648623375e5b59db725b1c9ba1a",
+  "mode": "built-in image_gen / new image",
+  "review": "Focus adjusted after integrator actual GPU card review to retain adult faces and essential action.",
+  "focus": [
+    0.5,
+    0.35
+  ]
+}

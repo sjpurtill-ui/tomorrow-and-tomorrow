@@ -27,4 +27,5 @@ func test_selected_detail_names_required_choice_and_alternate_outcomes()->void:
 	atlas.all_records=records
 	var possibilities:Array[Dictionary]=atlas._branching_possibilities(atlas.all_records[0])
 	assert_int(possibilities.size()).is_equal(3)
-	assert_array(possibilities.map(func(item:Dictionary)->String:return String(item.relation))).contains(["required foundation","one possible foundation","supports another approach"])
+	# The atlas names each relation in plain words (research_atlas.gd).
+	assert_array(possibilities.map(func(item:Dictionary)->String:return String(item.relation))).contains(["needs this first","this is one of several ways in","helps another way to reach it"])

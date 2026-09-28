@@ -88,12 +88,16 @@ static func clear()->void:
 		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={};slot_halos[slot]=Vector4.ZERO
 	_apply_all()
 
-## The home settlement's position (world km, x and z).
+## The home settlement's position (world km, x and z). While another town's
+## resources are swapped in (SettlementModel.with_city_resources),
+## settlement_founded_at is that town's, so the primary record alone names
+## the home: a home at the origin must not make every other town "home".
 static func home_center()->Vector2:
+	var in_other_town:=not String(WorldSimulation.state.resource_settlement_id).is_empty()
 	for settlement in GameState.player_settlements:
 		if settlement is Dictionary and bool(settlement.get("primary",false)):
 			var at:=_v2(settlement.get("position",Vector2.INF))
-			if at!=Vector2.ZERO:return at
+			if at!=Vector2.ZERO or in_other_town:return at
 	return Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
 
 ## Paints the home settlement into slot 0; any other town drawn through the

@@ -193,6 +193,7 @@ static func all()->Array:
 	out.append({"id":"orders_after_victory","about":"after a victory with captives, the next march and levy go at once","kind":"blocked","era":0,"seed":151,"case":"after_victory"})
 	out.append({"id":"orders_with_raiders_coming","about":"raiders coming at home do not stop a band sent to Tsaren","kind":"blocked","era":0,"seed":152,"case":"raid_pending"})
 	out.append({"id":"orders_during_a_siege","about":"a siege at Tsaren does not stop another band marching elsewhere","kind":"blocked","era":1,"seed":153,"case":"siege_elsewhere","population":4000})
+	out.append({"id":"generals_fight_during_a_siege","about":"with a siege at Tsaren and raiders at home, our generals still fight the bands and towns before them","kind":"blocked","era":1,"seed":154,"case":"commanded_elsewhere","population":6000})
 	out.append({"id":"general_fights_it","about":"our general takes a battle over and fights it himself","kind":"commanded","era":1,"seed":171,"population":4000,
 		"ours":[f("spearman","shield_spear",400)],"theirs":[f("spearman","shield_spear",380)]})
 	# --- Other peoples' battles -----------------------------------------------------------------
