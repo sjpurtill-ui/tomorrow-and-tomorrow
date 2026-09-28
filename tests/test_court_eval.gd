@@ -29,7 +29,7 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## Passing runs required on the full corpus, by path: the baseline measured on
 ## main at 91356176 (213 cases; offline 135/213, live 185/213, sloppy 41/42).
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":135,"live":185,"sloppy":41}
+const BASELINE:={"offline":173,"live":190,"sloppy":41}
 
 var _processing:Dictionary={}
 
