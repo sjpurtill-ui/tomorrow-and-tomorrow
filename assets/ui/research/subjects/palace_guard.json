@@ -1,0 +1,16 @@
+{
+  "id": "palace_guard",
+  "line": "security",
+  "game_year": 370,
+  "approx_historical_year": -2533,
+  "prompt": "c. 2533 BCE: Palace Guard of Household Retainers. Palace guard of household retainers. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4ec021d0-b713-4a2a-8242-4e8871fb8874.png",
+  "asset": "res://assets/ui/research/subjects/palace_guard-v1.png",
+  "sha256": "37587ae2e1d9b56bde566ea60645e9b7d9a71002c6a8aa02d343235d477a6e00",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.36
+  ]
+}

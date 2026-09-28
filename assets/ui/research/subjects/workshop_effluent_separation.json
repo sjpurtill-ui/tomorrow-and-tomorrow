@@ -1,0 +1,12 @@
+{
+  "id": "workshop_effluent_separation",
+  "line": "ecology",
+  "game_year": 368,
+  "approx_historical_year": -2547,
+  "prompt": "c. 2547 BCE: Workshop Effluent Kept Separate. Workshop effluent kept separate. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2a2878d4-0495-43e4-91a4-68f8bbe1f969.png",
+  "asset": "res://assets/ui/research/subjects/workshop_effluent_separation-v1.png",
+  "sha256": "ccc689a242f8ba4ed905d0de9b64c7c483aa994aea9272a04e76bf19c5e28b4a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
