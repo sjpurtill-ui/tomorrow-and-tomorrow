@@ -290,7 +290,7 @@ func _ready()->void:
 
 ## `--glide`: settle at one distance level, glide to another as the wheel
 ## does (real time, vsync as in play), and save the view when the glide ends
-## and 0.25, 0.5, 1, 2 and 4 seconds later, with whether the streamed patch
+## and 0.25 to 16 seconds later, with whether the streamed patch
 ## has caught up.
 func _glide_shots(target:Vector3,from_level:int,to_level:int,out_dir:String,prefix:String)->void:
 	terrain.camera_target=target
@@ -312,7 +312,7 @@ func _glide_shots(target:Vector3,from_level:int,to_level:int,out_dir:String,pref
 		await get_tree().process_frame
 	var ended:=Time.get_ticks_msec()
 	print("MAP_ART_GLIDE: L%d->L%d glide %d ms" % [from_level,to_level,ended-started])
-	for wait_ms in [0,250,500,1000,2000,4000]:
+	for wait_ms in [0,250,500,1000,2000,4000,8000,16000]:
 		while Time.get_ticks_msec()-ended<wait_ms:await get_tree().process_frame
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(out_dir.path_join("%s_glide_%d_%d_%04d.png" % [prefix,from_level,to_level,wait_ms]))
