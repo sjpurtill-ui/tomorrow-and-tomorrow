@@ -331,18 +331,31 @@ func _auto_allocate_domain_attention(dynamic_id:String,weight:int,current_day:in
 func active_investigation_records()->Array[Dictionary]:
 	initialize()
 	_refresh_active_investigations()
-	var records:Array[Dictionary]=[]
+	# One record per question. Two lines can hold the same question for a day
+	# (its own line takes up a question another line borrowed as foundation
+	# work, or the player chooses it); their people are one team working it.
+	var lines_by_id:Dictionary={}
 	for channel in WorldSimulation.state.active_investigations:
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		if id=="": continue
+		if not lines_by_id.has(id): lines_by_id[id]=[]
+		(lines_by_id[id] as Array).append(String(channel))
+	var records:Array[Dictionary]=[]
+	for id:String in lines_by_id:
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
 		var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
-		var home:=_research_600_channel_home(String(channel)) # research_600
-		var allocation:=_subcategory_allocation(home[0],home[1])
+		var channels:Array=lines_by_id[id]
+		var allocation:=0
+		var research_capacity:={"researchers":0.0,"workforce_share":0.0,"progress_multiplier":0.0,"support_multiplier":1.0}
+		for channel:String in channels:
+			var home:=_research_600_channel_home(channel) # research_600
+			allocation+=_subcategory_allocation(home[0],home[1])
+			var line:=research_capacity_for(home[0],home[1])
+			for key:String in ["researchers","workforce_share","progress_multiplier"]: research_capacity[key]=float(research_capacity[key])+float(line.get(key,0.0))
+			research_capacity["support_multiplier"]=float(line.get("support_multiplier",1.0))
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var research_capacity:=research_capacity_for(home[0],home[1])
 		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		baseline_momentum*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
@@ -359,6 +372,7 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_discovery_effect_summary(discovery)
 		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
 		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
+		discovery["channels"]=channels
 		records.append(discovery)
 	return records
 
@@ -1526,7 +1540,12 @@ func _research_600_channel_home(channel:String)->Array[String]:
 func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
 	var home:=_research_600_channel_home(channel)
 	if _subcategory_allocation(home[0],home[1])<=0 and home[1]!=_diffusion_subcategory(home[0]): return false
-	if channel==_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory",""))): return true
+	var own:=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
+	if channel==own: return true
+	# Foundation work is for questions no line of their own is pursuing. Once the
+	# question's own line takes it up, the borrowing line hands it back and finds
+	# other work, so one question is never worked (and listed) twice.
+	if String(WorldSimulation.state.active_investigations.get(own,""))==String(discovery.get("id","")): return false
 	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
 
 
