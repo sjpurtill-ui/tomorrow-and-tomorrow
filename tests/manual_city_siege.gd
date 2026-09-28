@@ -81,22 +81,22 @@ func _verify_siege_hud()->void:
 	for frame in 10:await get_tree().process_frame
 	assert(not MilitaryCampaign.active_engagement.is_empty() and MilitaryCampaign.active_siege.is_empty())
 	assert(is_instance_valid(MilitaryCommandUI.battle_graphics) and int(MilitaryCampaign.active_engagement.round)==0)
-	var battle:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
-	for round_index in 16:
-		if battle.phase=="ended":break
-		if battle.phase=="result":await click(battle.result_primary.get_global_rect().get_center())
-		battle._hold_all();await click(battle.resolve_button.get_global_rect().get_center());await click(battle.skip_button.get_global_rect().get_center())
-	assert(battle.phase=="ended")
-	var linked_seed:=int(battle.context.seed)
+	var battle:Control=MilitaryCommandUI.battle_graphics
+	var linked_seed:=int(MilitaryCampaign.active_engagement.seed)
+	for day in 40:
+		if MilitaryCampaign.active_engagement.is_empty():break
+		MilitaryCampaign.fight_engagement_day("hold")
+	assert(MilitaryCampaign.active_engagement.is_empty())
 	var newer:Dictionary=MilitaryCampaign.battle_history.front().duplicate(true);newer.seed=linked_seed+1;MilitaryCampaign.battle_history.push_front(newer)
-	battle._close();for frame in 4:await get_tree().process_frame
+	if is_instance_valid(battle):battle.call("close")
+	for frame in 4:await get_tree().process_frame
 	preload("res://scripts/hud/siege_screen.gd").open(identity)
 	for frame in 5:await get_tree().process_frame
 	hud=get_tree().root.get_meta("persistent_siege_view");assert(not hud.last_snapshot.active);await _siege_capture("outcome")
 	await click(hud.result_action.get_global_rect().get_center())
 	for frame in 5:await get_tree().process_frame
-	assert(int(MilitaryCommandUI.battle_graphics.context.seed)==linked_seed)
-	MilitaryCommandUI.battle_graphics._close();for frame in 4:await get_tree().process_frame
+	assert(int(MilitaryCommandUI.battle_graphics.get("record").get("seed",-1))==linked_seed)
+	MilitaryCommandUI.battle_graphics.call("close");for frame in 4:await get_tree().process_frame
 	print("SIEGE_HUD_MOUSE_PASS map,besiege,war,orders,real-clock,pause,save-reopen,small-window,assault,new-battle,resolve,outcome,return")
 func _siege_capture(suffix:String)->void:
 	for frame in 6:await get_tree().process_frame

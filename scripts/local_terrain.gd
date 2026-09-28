@@ -12348,12 +12348,12 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 func _on_city_battle_started(_engagement:Dictionary)->void:
 	if bool(_engagement.get("commander_managed",false)):return
 	if bool((_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): return
+	# Time stops so the player sees the two sides drawn up; the battle panel
+	# lets the fight go on and follows it as the days pass (hud/battle_panel.gd).
 	_set_game_speed(0)
-	MilitaryCampaign.active_engagement["awaiting_player_view"]=true
-	MilitaryCommandUI.call_deferred("_open_battle_graphics")
+	MilitaryCommandUI.call_deferred("open_engagement",String(_engagement.get("id","")))
 func _on_city_aftermath(_aftermath:Dictionary)->void:
 	_set_game_speed(0)
-	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:return
 	_open_war_planning.call_deferred()
 
 func _restore_military_attention()->void:
@@ -12374,8 +12374,6 @@ func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->
 
 func _on_battle_attention(result:Dictionary)->void:
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
-	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
-		_set_game_speed(0);return
 	# The war leader's report card (hud/battle_report_panel.gd) pauses time
 	# itself and resumes it on Continue. Opened deferred so the town taken and
 	# the garrison left behind are already on the battle's record.

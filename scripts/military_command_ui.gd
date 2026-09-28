@@ -1,12 +1,18 @@
 extends Node
-## Hosts the battle view over the map (the MilitaryCommandUI autoload).
+## Opens the battle view over the map (the MilitaryCommandUI autoload).
 ##
 ## The old dark military command window that used to live here (direct
 ## training, production and army forms, prisoner policies, "hold this round")
 ## was removed: generals run battles and the player talks to them in the
-## court. What remains is the layer that shows a battle while it is fought.
+## court. The stick-figure replay is gone too: every way into a battle (the
+## report card, the court, the Chronicle, war planning, the siege screen and
+## the map's battle marks) now opens the battle panel (hud/battle_panel.gd)
+## through BattleView.
+
+const View:=preload("res://scripts/hud/battle_view.gd")
 
 var layer:CanvasLayer
+## The battle panel now open, if any (set by BattleView.open).
 var battle_graphics:Control
 ## Kept so older callers that ask "is the military window open?" get "no".
 var modal:Control
@@ -23,15 +29,28 @@ func _ready()->void:
 	layer.add_child(modal)
 
 
-## Shows the battle being fought (or a recorded one, by its seed).
-func _open_battle_graphics(_army_id:int=0,history_seed:int=-1)->void:
-	if is_instance_valid(battle_graphics): return
-	if MilitaryCampaign.active_engagement.is_empty() and MilitaryCampaign.battle_history.is_empty():
+## Shows a battle: the one with this seed (live or recorded), else the one
+## being fought by this army, else any being fought, else the last one fought.
+func _open_battle_graphics(army_id:int=0,history_seed:int=-1)->void:
+	var found:Dictionary=View.find(history_seed) if history_seed>=0 else View.pick(army_id)
+	if found.is_empty():
 		_toggle()
 		return
-	battle_graphics=preload("res://scripts/battle_graphics_screen.gd").new()
-	if battle_graphics is BattleGraphicsScreen: battle_graphics.history_seed=history_seed
-	layer.add_child(battle_graphics)
+	View.open_found(found)
+
+
+## Shows the battle with this engagement id (the map's battle marks call this).
+func open_engagement(engagement_id:String)->void:
+	var found:Dictionary=View.find(engagement_id)
+	if found.is_empty():
+		_open_battle_graphics()
+		return
+	View.open_found(found)
+
+
+## Whether the battle panel is open now.
+func battle_open()->bool:
+	return is_instance_valid(battle_graphics)
 
 
 ## The old window's entry point: the war leader now answers in the court.
