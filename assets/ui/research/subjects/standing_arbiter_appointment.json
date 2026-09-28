@@ -1,0 +1,12 @@
+{
+  "id": "standing_arbiter_appointment",
+  "line": "institutions",
+  "game_year": 157,
+  "approx_historical_year": -3953,
+  "prompt": "c. 3953 BCE: Village appoints continuing neutral arbiter with wooden staff; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c8c3de6a-d909-4683-b74e-16cf46f7b23c.png",
+  "asset": "res://assets/ui/research/subjects/standing_arbiter_appointment-v1.png",
+  "sha256": "189978725f60033f54650dba844305dca639eb7daedbc1ca2706213256da5d9c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

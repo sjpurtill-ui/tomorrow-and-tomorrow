@@ -3984,5 +3984,21 @@
   "fire_tending_safeguards": {"path": "res://assets/ui/research/subjects/fire_tending_safeguards-v1.png", "focus": [0.5, 0.5]},
   "rotating_speaker_order": {"path": "res://assets/ui/research/subjects/rotating_speaker_order-v1.png", "focus": [0.5, 0.5]},
   "seasonal_storage_sleeping_swap": {"path": "res://assets/ui/research/subjects/seasonal_storage_sleeping_swap-v1.png", "focus": [0.5, 0.5]},
-  "corner_squaring_method": {"path": "res://assets/ui/research/subjects/corner_squaring_method-v1.png", "focus": [0.5, 0.5]}
+  "corner_squaring_method": {"path": "res://assets/ui/research/subjects/corner_squaring_method-v1.png", "focus": [0.5, 0.5]},
+  "full_time_specialists": {"path": "res://assets/ui/research/subjects/full_time_specialists-v1.png", "focus": [0.5, 0.5]},
+  "rest_stop_spacing_custom": {"path": "res://assets/ui/research/subjects/rest_stop_spacing_custom-v1.png", "focus": [0.5, 0.5]},
+  "salting_fish_meat": {"path": "res://assets/ui/research/subjects/salting_fish_meat-v1.png", "focus": [0.5, 0.5]},
+  "windbreak_hedgerow_siting": {"path": "res://assets/ui/research/subjects/windbreak_hedgerow_siting-v1.png", "focus": [0.5, 0.5]},
+  "water_container_cleaning_customs": {"path": "res://assets/ui/research/subjects/water_container_cleaning_customs-v1.png", "focus": [0.5, 0.5]},
+  "standing_arbiter_appointment": {"path": "res://assets/ui/research/subjects/standing_arbiter_appointment-v1.png", "focus": [0.5, 0.5]},
+  "fallback_route_marking": {"path": "res://assets/ui/research/subjects/fallback_route_marking-v1.png", "focus": [0.5, 0.5]},
+  "planting_density_adjustment": {"path": "res://assets/ui/research/subjects/planting_density_adjustment-v1.png", "focus": [0.5, 0.5]},
+  "public_space_allocation": {"path": "res://assets/ui/research/subjects/public_space_allocation-v1.png", "focus": [0.5, 0.5]},
+  "root_stock_preservation": {"path": "res://assets/ui/research/subjects/root_stock_preservation-v1.png", "focus": [0.5, 0.5]},
+  "pest_barrier_maintenance": {"path": "res://assets/ui/research/subjects/pest_barrier_maintenance-v1.png", "focus": [0.5, 0.5]},
+  "reduction_firing": {"path": "res://assets/ui/research/subjects/reduction_firing-v1.png", "focus": [0.5, 0.5]},
+  "warning_call_relay": {"path": "res://assets/ui/research/subjects/warning_call_relay-v1.png", "focus": [0.5, 0.5]},
+  "famine_refugee_hosting": {"path": "res://assets/ui/research/subjects/famine_refugee_hosting-v1.png", "focus": [0.5, 0.5]},
+  "load_tallies": {"path": "res://assets/ui/research/subjects/load_tallies-v1.png", "focus": [0.5, 0.5]},
+  "seal_breaking_rights": {"path": "res://assets/ui/research/subjects/seal_breaking_rights-v1.png", "focus": [0.5, 0.5]}
 }
