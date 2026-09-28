@@ -5,11 +5,15 @@
     "game_year": 320,
     "approx_historical_year": -2867,
     "prompt": "c. 2867 BCE: Craft Work Scheduled by Season. Craft work scheduled by season. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-37bab6f5-9024-498a-8853-01e89c885372.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cddca91c-ae87-4445-a52e-59a41a04ce94.png",
     "asset": "res://assets/ui/research/subjects/seasonal_craft_scheduling-v1.png",
-    "sha256": "1d2733a254b62732f884b5fc0a321a979456081850ae1e2a9322b69fae1dfe86",
+    "sha256": "bbab4f78af6bcb3b77ccb6105c4e58e20ea5419f60ba002f6da058ded9f918c8",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.34
+    ]
   },
   {
     "id": "witnessed_land_sales",
@@ -17,14 +21,14 @@
     "game_year": 320,
     "approx_historical_year": -2867,
     "prompt": "c. 2867 BCE: Fields Sold Before Witnesses with Their Bounds Recited. Fields sold before witnesses with their bounds recited. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-41aaa7c3-4052-4d24-b8ed-6cba8fdda62c.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4c8948eb-be20-484e-b0ff-868b9e851b9d.png",
     "asset": "res://assets/ui/research/subjects/witnessed_land_sales-v1.png",
-    "sha256": "4535e62364ffce666aca2982a185ec727488358916fcf3c1a94d2c0fb4bf3c52",
+    "sha256": "61a55d855584b0c2d6ad740cd8fb7b911e826da01531deb278ed108253579c64",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.35
+      0.4
     ]
   },
   {
@@ -69,15 +73,11 @@
     "game_year": 330,
     "approx_historical_year": -2800,
     "prompt": "c. 2800 BCE: Loans of Grain and Silver at Fixed Interest. Loans of grain and silver at fixed interest. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f2387c84-5a4d-41a5-aa4a-67132d20833b.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7ea97055-06a9-4220-b548-2bb54d275758.png",
     "asset": "res://assets/ui/research/subjects/fixed_interest_loans-v1.png",
-    "sha256": "6509162f0e47c5bc1bbf1a629e8161f1ad340cf0e134bbdc8da4d36c967ac180",
+    "sha256": "057c356108afd92fbd1561a9bdb0a94f10585585f48f0a517a4ae2934699fcf6",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
-    "focus": [
-      0.5,
-      0.42
-    ]
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
   {
     "id": "kiln_fired_bricks",
@@ -85,9 +85,9 @@
     "game_year": 330,
     "approx_historical_year": -2800,
     "prompt": "c. 2800 BCE: Kiln-fired Bricks for Wet Courses. Kiln-fired bricks for wet courses. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ebdebb87-50d1-4599-91fc-7bc18353fa10.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0bf364d5-81e0-42e1-b951-587bf4454134.png",
     "asset": "res://assets/ui/research/subjects/kiln_fired_bricks-v1.png",
-    "sha256": "8ce7d498721a4203e61abf76f8e2248cff6adde1ccc096347c93e3be8e2a7ef0",
+    "sha256": "4f9c1936ceddfa5b445e67272ab5ae47cb2f9fe11cc59552da5a909215f6d44a",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -97,9 +97,9 @@
     "game_year": 330,
     "approx_historical_year": -2800,
     "prompt": "c. 2800 BCE: Tin Smelted from Cassiterite. Tin smelted from cassiterite. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f477afb1-3ab0-486f-bd01-1cd1b39626ad.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c21fbfae-3510-49a8-97bd-b4930798b97c.png",
     "asset": "res://assets/ui/research/subjects/tin_smelting-v1.png",
-    "sha256": "7ffe76c97d4caf507787871233760e4e54b83baa390ec4132bb9ba0bf92c3cce",
+    "sha256": "ad8ea00608e11c6c43ac1365bd84272215b78243deed27b20eabe0bb8eaea0cd",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -137,9 +137,9 @@
     "game_year": 335,
     "approx_historical_year": -2767,
     "prompt": "c. 2767 BCE: Drinking Water Stored Apart from Washing Water. Drinking water stored apart from washing water. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-87907947-d25d-4d09-87c7-7a8591955093.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2ee150dc-b179-4e2b-9662-445887b92992.png",
     "asset": "res://assets/ui/research/subjects/separate_clean_water_storage-v1.png",
-    "sha256": "993c6a956b4e6cce2f89b37bdc3cffcceff674214c00d05462438152a26315a5",
+    "sha256": "ee1c4acd79741067c4f2761312159790c5c39e8a24d39b952e5e943321d778a2",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -161,9 +161,9 @@
     "game_year": 340,
     "approx_historical_year": -2733,
     "prompt": "c. 2733 BCE: Tools Retired by Wear Grade. Tools retired by wear grade. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-89b823cc-20ba-41f1-8940-cfda2b542414.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-64e94453-94c7-4041-916f-d30fa482198b.png",
     "asset": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png",
-    "sha256": "32adf479dfc037ec6c2a9497fed0564e334f0c6710fafefa4a00a9892b2f54ca",
+    "sha256": "060a2c88b28195b74d104f638bcb224a7ce1eeecdcd68c593e2ef904f19e3a40",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -173,9 +173,9 @@
     "game_year": 340,
     "approx_historical_year": -2733,
     "prompt": "c. 2733 BCE: Gypsum Mortar for Stone and Brick. Gypsum mortar for stone and brick. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-99347e16-4cc6-4c23-9e89-88be4373c89c.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b6e33548-0825-4203-a361-821e86354cbf.png",
     "asset": "res://assets/ui/research/subjects/gypsum_mortar-v1.png",
-    "sha256": "647e7f925da5df19be331a2bfc52cbf5e139137c82e384ed7882e756a3aace76",
+    "sha256": "1e74f1f39a6587130d7e55ff96be7c2511a6e2dabc991c994510d6d783ec47d0",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
