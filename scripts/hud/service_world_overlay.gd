@@ -153,6 +153,25 @@ func _caption(point:Vector2,title:String,color:Color)->void:
 	draw_style_box(_label_style(),Rect2(point+Vector2(10,-19),Vector2(width+12,23)))
 	draw_string(font,point+Vector2(16,-2),title,HORIZONTAL_ALIGNMENT_LEFT,width,14,T.INK)
 
+func _front_line(points:Array,colour:Color)->void:
+	var line:=PackedVector2Array()
+	for p in points:
+		if not p is Dictionary:continue
+		var at:=world_to_screen(Vector2(float(p.get("x",0.0)),float(p.get("z",0.0))))
+		if at.is_finite():line.append(at)
+	if line.size()<2:return
+	draw_polyline(line,Color("efe3c2",0.9),6.0,true)
+	draw_polyline(line,colour,3.0,true)
+	for i in line.size()-1:
+		var a:=line[i];var b:=line[i+1];var length:=a.distance_to(b)
+		if length<4.0:continue
+		var along:=(b-a)/length;var out:=Vector2(along.y,-along.x)
+		var t:=7.0
+		while t<length:
+			var base:=a+along*t
+			draw_colored_polygon(PackedVector2Array([base-along*4.0,base+along*4.0,base+out*7.0]),colour)
+			t+=14.0
+
 func _label_style()->StyleBoxFlat:
 	return T.flat(T.MAP_LABEL_BG,T.BORDER_SOFT,1,3,2)
 
@@ -161,6 +180,12 @@ func _draw()->void:
 	var color:=Color("ddbc78") if domain=="army" else Color("64bcd9") if domain=="navy" else Color("b8d68c")
 	for region:Dictionary in MilitaryCampaign.command_hierarchy.known_regions(domain):
 		var active:bool=String(region.id)==String(selected.get("id",""))
+		# A front line the player drew (army_orders.gd give_plan) is inked as
+		# a line with its teeth, not as the strip of ground it holds.
+		if String(region.get("plan",""))=="front" and region.get("line") is Array:
+			_front_line(region.line,Color("ffd477") if active else Color("8e3b2e"))
+			_caption(world_to_screen(op.point(region)),String(region.name),Color("ffd477") if active else color)
+			continue
 		var fill:=PackedVector2Array()
 		for vertex:Dictionary in region.vertices:
 			var projected:=world_to_screen(Vector2(vertex.x,vertex.z))
@@ -240,7 +265,9 @@ func _draw_land()->void:
 		if not at.is_finite():continue
 		var chosen:bool=int(actual.army_id)==selected_force
 		var color:=Color("ffd477") if chosen else Color("b9cba0")
-		draw_rect(Rect2(at-Vector2(9,6),Vector2(18,12)),Color("0f211e"));draw_rect(Rect2(at-Vector2(9,6),Vector2(18,12)),color,false,2)
-		_caption(at,String(actual.name)+" · "+str(shown.get("troops",0)),color)
+		# The war chart draws every band's mark; the chosen one gets a ring.
+		if not chosen:continue
+		draw_arc(at,17.0,0,TAU,32,Color("efe3c2",0.9),5.0,true)
+		draw_arc(at,17.0,0,TAU,32,Color("8a6118"),2.2,true)
 		if chosen:
 			var route:Array=[shown.position];route.append_array(shown.get("command_route",[]));_line(route,Color(color,.65))

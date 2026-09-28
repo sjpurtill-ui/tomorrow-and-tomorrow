@@ -23,15 +23,19 @@ extends RefCounted
 ## siege, carts get out only as far as the besiegers let them.
 ##
 ## The supply field: one multi-source search (Dijkstra) over a square
-## lattice laid across our hubs and the known land. In play it is built only
-## on a worker thread, from the terrain's thread-safe fused sampler
-## (terrain_patch_sampler.gd) and snapshots, never from the scene; the day's
-## rations and the screens read the last finished field and never wait for
-## one. A point the field does not cover (or before the first field lands)
-## is reckoned by the straight line to the nearest hub (FALLBACK_FACTOR).
-## Tests and tools with fixture ground build it on the spot (field(true)).
-## The map's grid (hud/supply_map.gd) is terms() at the field's nodes, so
-## the chart and the rations agree whenever they read the same field.
+## lattice round home (its side doubling as our hubs and known land spread).
+## In play it is built only on a worker thread, from the terrain's
+## thread-safe fused sampler (terrain_patch_sampler.gd) and snapshots, never
+## from the scene. The day's rations read one field for the whole day: the
+## one built from the world as they found it at their first ask the day
+## before (waiting a moment at most if that build is still under way; a
+## slower build is taken the next day), so a saved game replays the same;
+## a change reaches the rations a day or two later, as word reaches the
+## quartermasters. A point off the lattice is reckoned by
+## the straight line to the nearest hub (FALLBACK_FACTOR). Tests and tools
+## with fixture ground build it on the spot (field(true)). The map's grid
+## (hud/supply_map.gd) is terms() at the field's nodes and reads the same
+## field as the rations, so the chart and the rations agree.
 ##
 ## Engine: military_campaign._force_provision_access asks haul_for(force);
 ## field_rations.forage_share asks forage_factor(force).
@@ -75,14 +79,19 @@ const FORAGE_SHARE_MAX:=0.6
 const NEUTRAL_RICH:=FORAGE_TYPICAL
 const NEUTRAL_SWING:=12.0
 
-## The lattice: square, at most MAX_NODES a side, cells from the ladder (km),
-## padded and snapped to SNAP cells so small changes rebuild nothing.
-const MAX_NODES:=96
-const CELL_LADDER:=[2.0,4.0,8.0,16.0,32.0,64.0]
+## The lattice: a square of CELLS x CELLS cells round home, its side a
+## doubling of MIN_SIDE_KM wide enough for our hubs and the known land
+## (padded), so it changes only when they outgrow it.
+const CELLS:=64
+const MIN_SIDE_KM:=128.0
+const MAX_SIDE_KM:=8192.0
+const CENTER_SNAP_KM:=64.0
 const PAD_KM:=40.0
-const SNAP:=8
 ## The lattice never reaches farther than this beyond our hubs.
 const MAX_MARGIN_KM:=1500.0
+## The longest the day's rations wait for a build of yesterday's world
+## (ms); a build slower than that is taken the next day.
+const WAIT_BUDGET_MS:=12.0
 ## Nodes within this many cells of a hub read their cost from the hub itself.
 const NEAR_CELLS:=1.5
 ## terrain_patch_sampler lifts its heights by this much.
@@ -94,6 +103,12 @@ const DX:=[1,-1,0,0,1,-1,1,-1]
 const DY:=[0,0,1,-1,1,1,-1,-1]
 
 static var _field:Dictionary={}
+## Finished fields by key (the last few), not necessarily in hand.
+static var _built:Dictionary={}
+## The day the rations last took a field, and the world's key as they found
+## it at that day's first ask (built for the next day).
+static var _rations_day:=-1
+static var _rations_key:=0
 static var _job:BuildJob=null
 static var _ground_cache:Dictionary={}
 static var _known_cache:Array=[-1,-1,Rect2()]
@@ -109,6 +124,8 @@ static var _report_day:=-1
 static var builds:=0
 static var async_builds:=0
 static var spec_builds:=0
+## Main-thread time the rations spent waiting for a build (ms).
+static var waited_ms:=0.0
 
 
 # --------------------------------------------------------------------------
@@ -298,22 +315,23 @@ static func _make_spec()->Dictionary:
 	var fixture:=March.ground_override.is_valid()
 	var sampler:=_terrain_sampler(terrain) if not fixture else null
 	if sampler==null and not fixture: return {"hubs":hub_list,"no_ground":true}
-	var hub_box:=Rect2(settlements[0].pos,Vector2.ZERO)
+	# A square round home, its side doubling as our hubs and known land spread
+	# (128, 256, 512 ... km over CELLS cells): it changes a few times a game.
+	var home:Vector2=settlements[0].pos
+	for h:Dictionary in settlements:
+		if String(h.kind)=="home": home=h.pos; break
+	var center:=home.snapped(Vector2.ONE*CENTER_SNAP_KM)
+	var hub_box:=Rect2(home,Vector2.ZERO)
 	for h:Dictionary in hub_list: hub_box=hub_box.expand(h.pos)
 	var box:=hub_box
 	var known:=_known_box()
-	if known.has_area(): box=box.merge(known)
-	box=box.grow(PAD_KM).intersection(hub_box.grow(MAX_MARGIN_KM))
-	var cell:=float(CELL_LADDER[CELL_LADDER.size()-1])
-	for c in CELL_LADDER:
-		var snap:=float(c)*float(SNAP)
-		var lo:=Vector2(floorf(box.position.x/snap)*snap,floorf(box.position.y/snap)*snap)
-		var hi:=Vector2(ceilf(box.end.x/snap)*snap,ceilf(box.end.y/snap)*snap)
-		if maxf(hi.x-lo.x,hi.y-lo.y)/float(c)+1.0<=float(MAX_NODES): cell=float(c); break
-	var grain:=cell*float(SNAP)
-	var origin:=Vector2(floorf(box.position.x/grain)*grain,floorf(box.position.y/grain)*grain)
-	var far:=Vector2(ceilf(box.end.x/grain)*grain,ceilf(box.end.y/grain)*grain)
-	var n:=mini(MAX_NODES,roundi(maxf(far.x-origin.x,far.y-origin.y)/cell)+1)
+	if known.has_area(): box=box.merge(known.intersection(hub_box.grow(MAX_MARGIN_KM)))
+	var need:=maxf(maxf(absf(box.position.x-center.x),absf(box.end.x-center.x)),maxf(absf(box.position.y-center.y),absf(box.end.y-center.y)))+PAD_KM
+	var side:=MIN_SIDE_KM
+	while side*0.5<need and side<MAX_SIDE_KM: side*=2.0
+	var cell:=side/float(CELLS)
+	var origin:=center-Vector2.ONE*side*0.5
+	var n:=CELLS+1
 	var who:=carrier()
 	var roads:=March.roads()
 	var geo_key:=hash([int(GameState.world_seed),origin,cell,n,fixture,hash(March.ground_override),terrain.get_instance_id() if terrain!=null else 0])
@@ -640,27 +658,53 @@ static func _pop(f:PackedFloat32Array,ids:PackedInt32Array)->int:
 # The field in hand (main thread)
 # --------------------------------------------------------------------------
 
-## The field the rations and the screens read now. In play: the last field
-## finished (possibly older than the world, possibly {} just after a load),
-## while a worker builds the one the world wants. sync=true builds it here
-## and now: tests, tools and fixture ground only.
+## The field the screens read. While the day's rations have taken a field
+## today, that one (so the chart and the rations agree); otherwise the
+## newest finished. In play it never builds here: a worker builds what the
+## world wants. sync=true builds it here and now: tests and tools only.
+## Fixture ground (tests) always builds on the spot.
 static func field(sync:=false)->Dictionary:
 	var s:=spec()
 	if s.is_empty() or bool(s.get("no_ground",false)): return {}
-	if int(_field.get("key",0))==int(s.key): return _field
-	# A field of another world (a new game, a new terrain) is never read.
-	if not _field.is_empty() and int(_field.get("world",0))!=int(s.world): _field={}; _report_cache.clear()
-	_poll(int(s.key),int(s.world))
-	if int(_field.get("key",0))==int(s.key): return _field
-	if sync or not bool(s.get("async",false)):
-		_discard_job()
-		builds+=1
-		_field=build(s,_cached_ground(s))
-		_keep_ground(_field)
-		_report_cache.clear()
-		return _field
-	if _job==null: _start(s)
-	elif int(_job.spec.key)!=int(s.key): _job.cancel[0]=true
+	_same_world(s)
+	_poll()
+	var key:=int(s.key)
+	if _key(_field)!=key:
+		if sync or not bool(s.get("async",false)): _take(_built.get(key,{}) if _built.has(key) else _build_now(s))
+		elif _rations_day!=today() and _built.has(key): _take(_built[key])
+	if bool(s.get("async",false)) and _job==null and _key(_field)!=key and not _built.has(key): _start(s)
+	return _field
+
+## The field the day's rations read: fixed for the day, the one built from
+## the world as the rations found it at their first ask the day before
+## (waiting WAIT_BUDGET_MS at most if its build is still under way, fully
+## only when nothing is in hand yet), so a saved game replays the same.
+## The world as found today is built for tomorrow.
+static func rations_field()->Dictionary:
+	var s:=spec()
+	if s.is_empty() or bool(s.get("no_ground",false)): return {}
+	_same_world(s)
+	var d:=today()
+	if d==_rations_day: return _field
+	_poll()
+	var key:=int(s.key)
+	var wanted:=_rations_key if _rations_key!=0 else key
+	if _key(_field)!=wanted and not _built.has(wanted):
+		if not bool(s.get("async",false)):
+			if wanted==key: _build_now(s)
+		elif _job!=null and int(_job.spec.key)==wanted:
+			# Nothing in hand (a load): wait for it. Otherwise wait a moment
+			# at most; a build slower than a day is taken the next day.
+			_await_job(-1.0 if _field.is_empty() else WAIT_BUDGET_MS)
+		elif _field.is_empty() and wanted==key:
+			_build_now(s)
+	if _built.has(wanted): _take(_built[wanted])
+	_rations_key=key
+	_rations_day=d
+	# Tomorrow's field: under way from now.
+	if bool(s.get("async",false)) and _key(_field)!=key and not _built.has(key):
+		if _job!=null and int(_job.spec.key)!=key: _discard_job()
+		if _job==null: _start(s)
 	return _field
 
 ## Starts a worker build when the world has moved on from the field in
@@ -671,17 +715,42 @@ static func prefetch()->void:
 ## Whether the field in hand is the one the world wants now.
 static func current()->bool:
 	var s:=spec()
-	return not s.is_empty() and int(_field.get("key",0))==int(s.get("key",-1))
+	return not s.is_empty() and _key(_field)==int(s.get("key",-1))
 
 ## Whether a worker build is under way.
 static func building()->bool:
 	return _job!=null
 
+static func _key(f:Dictionary)->int:
+	return int(f.get("key",0))
+
+static func _take(f:Dictionary)->void:
+	if f.is_empty() or _key(f)==_key(_field): return
+	_field=f
+	_report_cache.clear()
+
+static func _build_now(s:Dictionary)->Dictionary:
+	builds+=1
+	var f:=build(s,_cached_ground(s))
+	_keep(f)
+	return f
+
+## A field or a build of another world (a new game, a new terrain) is
+## never read: forget them.
+static func _same_world(s:Dictionary)->void:
+	var world:=int(s.get("world",0))
+	if not _field.is_empty() and int(_field.get("world",0))!=world:
+		_field={}; _built.clear(); _report_cache.clear(); _rations_key=0; _rations_day=-1
+	if _job!=null and int(_job.spec.get("world",0))!=world: _discard_job()
+
 static func _cached_ground(s:Dictionary)->Dictionary:
 	return _ground_cache.get(int(s.geo_key),{})
 
-static func _keep_ground(f:Dictionary)->void:
+## Keeps a finished field (the last few, by key) and its ground.
+static func _keep(f:Dictionary)->void:
 	if f.is_empty(): return
+	_built[_key(f)]=f
+	while _built.size()>4: _built.erase(_built.keys()[0])
 	_ground_cache[int(f.geo_key)]=f.ground
 	while _ground_cache.size()>2: _ground_cache.erase(_ground_cache.keys()[0])
 
@@ -691,17 +760,31 @@ static func _start(s:Dictionary)->void:
 	_job.task=WorkerThreadPool.add_task(_job.run,false,"Supply field")
 	async_builds+=1
 
-static func _poll(wanted:int,world:int)->void:
+## Waits for the worker build (budget_ms<0: until it is done).
+static func _await_job(budget_ms:float)->void:
+	if _job==null: return
+	var began:=Time.get_ticks_usec()
+	if budget_ms<0.0:
+		WorkerThreadPool.wait_for_task_completion(_job.task)
+		_finish_job()
+	else:
+		while not WorkerThreadPool.is_task_completed(_job.task) and float(Time.get_ticks_usec()-began)<budget_ms*1000.0: OS.delay_usec(250)
+		_poll()
+	waited_ms+=float(Time.get_ticks_usec()-began)/1000.0
+
+## Takes a finished worker build into the kept fields.
+static func _poll()->void:
 	if _job==null or not WorkerThreadPool.is_task_completed(_job.task): return
 	WorkerThreadPool.wait_for_task_completion(_job.task)
+	_finish_job()
+
+static func _finish_job()->void:
 	var done:=_job
 	_job=null
-	if done.result.is_empty() or int(done.result.get("world",0))!=world: return
-	_keep_ground(done.result)
-	# The newest the world wants, or at least newer than what is in hand.
-	if int(done.result.key)==wanted or int(_field.get("key",0))!=wanted:
-		_field=done.result
-		_report_cache.clear()
+	if done==null or done.result.is_empty(): return
+	var s:=spec()
+	if int(done.result.get("world",0))!=int(s.get("world",-1)): return
+	_keep(done.result)
 
 ## Stops any worker build and waits for it (it stops at its next row).
 static func _discard_job()->void:
@@ -727,7 +810,8 @@ static func _hook_quit()->void:
 ## Forget every field (tests; a new world).
 static func reset()->void:
 	_discard_job()
-	_field={}; _ground_cache.clear(); _report_cache.clear(); _report_day=-1
+	_field={}; _built.clear(); _rations_key=0; _rations_day=-1
+	_ground_cache.clear(); _report_cache.clear(); _report_day=-1
 	_known_cache=[-1,-1,Rect2()]; _spec={}; _spec_sig=0
 	_sampler=null; _sampler_key=0; _tribs=[]; _tribs_key=0
 
@@ -1031,7 +1115,7 @@ static func day_inputs()->Dictionary:
 static func haul_for(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite() or hubs_empty(): return 1.0
-	var f:=field()
+	var f:=rations_field()
 	var e:=effort_at(f,p)
 	if not is_finite(float(e.effort)): return 0.0
 	var who:=String(f.carrier) if not f.is_empty() else carrier()
@@ -1051,7 +1135,7 @@ static func hubs_empty()->bool:
 static func forage_factor(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite(): return 1.0
-	var land:=land_at(field(),p,today())
+	var land:=land_at(rations_field(),p,today())
 	return forage_factor_from(float(land.rich),float(land.cold),int(force.get("troops",0)))
 
 
