@@ -8,22 +8,22 @@ class Map extends "res://scripts/local_terrain.gd":
 	func _height_at(_x:float,_z:float)->float:return 0.0
 	func _terrain_hit(_screen:Vector2)->Dictionary:return {}
 
+const WindowGuard=preload("res://tests/window_canvas_guard.gd")
+
 ## Display preferences reshape the window's canvas when they apply (a 64 px
 ## headless window becomes a 640 x 640 canvas): put it back after each test
-## so the suites that follow draw on the canvas they expect.
+## so the suites that follow draw on the canvas they expect. The guard also
+## unhooks the preferences nodes still in the tree, which would otherwise
+## re-apply over the restore when it changes the window's size.
 var _window_saved:Array=[]
 
 func before_test()->void:
 	if FileAccess.file_exists(CONFIG_PATH):DirAccess.remove_absolute(CONFIG_PATH)
-	var window:=get_window()
-	_window_saved=[window.theme,window.content_scale_mode,window.content_scale_aspect,window.content_scale_size,window.content_scale_factor,window.scaling_3d_mode,window.scaling_3d_scale,Engine.max_fps]
+	_window_saved=WindowGuard.capture(get_window())
 func after_test()->void:
 	if FileAccess.file_exists(CONFIG_PATH):DirAccess.remove_absolute(CONFIG_PATH)
 	Tokens.set_color_mode("light")
-	if not _window_saved.is_empty():
-		var window:=get_window()
-		window.theme=_window_saved[0];window.content_scale_mode=_window_saved[1];window.content_scale_aspect=_window_saved[2];window.content_scale_size=_window_saved[3]
-		window.content_scale_factor=_window_saved[4];window.scaling_3d_mode=_window_saved[5];window.scaling_3d_scale=_window_saved[6];Engine.max_fps=_window_saved[7]
+	WindowGuard.restore(get_window(),_window_saved);_window_saved=[]
 
 func fixture()->Node3D:
 	var map:Node3D=auto_free(Map.new());add_child(map)

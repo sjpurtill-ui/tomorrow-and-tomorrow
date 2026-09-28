@@ -58,9 +58,12 @@ func test_new_design_items_use_the_catalog_format_and_a_valid_channel()->void:
 		assert_dict(entry.effects).is_not_empty()
 		assert_float(float(entry.chance)).is_equal_approx(Catalog.chance_for(float(Catalog.item(id).research_years),float(Catalog.item(id).proposed_year)),0.0000001)
 		assert_bool(bool(entry.get("frontier",false))).is_false()
-		# A dedicated research_600 painting (data/research/art_600.json) wins; otherwise the line's default art.
+		# A dedicated painting wins: the research_600 painting (data/research/art_600.json),
+		# then the discovery's own subject painting (assets/ui/research/subject-art-manifest.json,
+		# where the earliest-discovery art batches land); otherwise the line's default art.
 		var visuals:=preload("res://scripts/hud/research_visuals.gd")
-		var expected:=String(visuals.art600_manifest()[id].path) if visuals.art600_manifest().has(id) else "%s-v1.png" % String(entry.dynamic)
+		var own:=String(visuals.manifest().get(id,{}).get("path",""))
+		var expected:=String(visuals.art600_manifest()[id].path) if visuals.art600_manifest().has(id) else own if not own.is_empty() else "%s-v1.png" % String(entry.dynamic)
 		assert_str(visuals.subject_art_key(entry)).ends_with(expected)
 	assert_int(count).is_equal(543)
 
