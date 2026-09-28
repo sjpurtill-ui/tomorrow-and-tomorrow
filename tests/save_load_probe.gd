@@ -26,7 +26,12 @@ func _ready()->void:
 	GameState.civic_always_use_ai=true
 	GameState.civic_api_enabled=false
 	GameState.register_population_arrivals(30,"probe arrivals")
-	if "food_drying" not in GameState.known_discoveries: GameState.known_discoveries.append("food_drying")
+	# The marker must be a discovery a new world does not start with; every
+	# new world inherits founding practices (founding_knowledge.gd), food
+	# drying among them, so a fixed id here goes stale.
+	var marker:=_unknown_discovery()
+	_expect(marker!="","no discovery is left unknown to mark the save with")
+	GameState.known_discoveries.append(marker)
 	GameState.resource_stockpiles["Food"]=333.0
 	var civic_order:={
 		"id":"order_persistence_probe","type":"pronouncement","settlement_id":"player_settlement_1",
@@ -65,7 +70,7 @@ func _ready()->void:
 	_reset_all(999)
 	GameState.select_founding_focus("industry")
 	_expect(GameState.world_seed==999,"scramble reset did not take")
-	_expect("food_drying" not in GameState.known_discoveries,"scramble left old knowledge behind")
+	_expect(marker not in GameState.known_discoveries,"scramble left old knowledge behind (%s)" % marker)
 
 	# Load and verify the state layer.
 	var load_result:Dictionary=SaveSystem.load_game(SLOT)
@@ -77,7 +82,7 @@ func _ready()->void:
 	_expect(GameState.demographic_ledger.any(func(record:Dictionary)->bool: return String(record.get("source_order_id",""))=="saved_counted_decree" and int(record.get("count",0))==1),"counted execution death record was not restored")
 	_expect(GameState.civic_always_use_ai,"civic Always Ask AI routing preference not restored")
 	_expect(not GameState.civic_api_enabled,"civic API master switch not restored")
-	_expect("food_drying" in GameState.known_discoveries,"known discovery not restored")
+	_expect(marker in GameState.known_discoveries,"known discovery not restored (%s)" % marker)
 	_expect(absf(float(GameState.resource_stockpiles.get("Food",0.0))-333.0)<0.01,"food stockpile not restored")
 	_expect(GameState.founding_focus=="provision","founding focus not restored (%s)" % GameState.founding_focus)
 	var restored_civic_order:Dictionary={}
@@ -121,6 +126,15 @@ func _reset_all(seed_value:int)->void:
 	CivilizationSystem.reset_for_new_world()
 	WorldFacts.reset_for_new_world()
 	PronouncementInterpreter.reset_for_new_world()
+
+
+## The first catalogued discovery this world does not know yet.
+func _unknown_discovery()->String:
+	DiscoverySystem.initialize()
+	for entry:Dictionary in DiscoverySystem.catalog:
+		var id:=String(entry.get("id",""))
+		if id!="" and id not in GameState.known_discoveries: return id
+	return ""
 
 
 func _expect(condition:bool,message:String)->void:
