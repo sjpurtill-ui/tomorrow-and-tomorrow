@@ -1496,7 +1496,7 @@ static func _http_words(code:int,error_text:String)->String:
 
 func _envelope_facts(body:PackedByteArray)->Dictionary:
 	## Usage and finish facts from a provider reply. Never keeps content or headers.
-	var facts:={"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"model":"","finish_reason":"","refusal":false,"error":""}
+	var facts:={"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"cached_tokens":0,"total_tokens":0,"model":"","finish_reason":"","refusal":false,"error":""}
 	var parser:=JSON.new()
 	if body.is_empty() or parser.parse(body.get_string_from_utf8())!=OK or not parser.data is Dictionary: return facts
 	var envelope:Dictionary=parser.data
@@ -1509,6 +1509,11 @@ func _envelope_facts(body:PackedByteArray)->Dictionary:
 		if details is Dictionary:
 			var reasoning:Variant=(details as Dictionary).get("reasoning_tokens",0)
 			facts["reasoning_tokens"]=int(reasoning) if (reasoning is int or reasoning is float) else 0
+		# The prompt's prefix the provider served from its cache.
+		var prompt_details:Variant=(tokens as Dictionary).get("prompt_tokens_details",{})
+		if prompt_details is Dictionary:
+			var cached:Variant=(prompt_details as Dictionary).get("cached_tokens",0)
+			facts["cached_tokens"]=int(cached) if (cached is int or cached is float) else 0
 	facts["model"]=String(envelope.get("model","")).substr(0,80)
 	var choices:Variant=envelope.get("choices",[])
 	if choices is Array and not (choices as Array).is_empty() and choices[0] is Dictionary:
@@ -1528,7 +1533,7 @@ func _receipt_http(audience_id:String,request:Dictionary,result:int,code:int,env
 		"model":String(envelope.get("model","")) if not String(envelope.get("model","")).is_empty() else String((request.get("config",{}) as Dictionary).get("model","")),
 		"http":code,"transport":result,"latency_ms":Time.get_ticks_msec()-int(request.get("started_ms",Time.get_ticks_msec())),
 		"prompt_tokens":int(envelope.get("prompt_tokens",0)),"completion_tokens":int(envelope.get("completion_tokens",0)),
-		"reasoning_tokens":int(envelope.get("reasoning_tokens",0)),"total_tokens":int(envelope.get("total_tokens",0)),
+		"reasoning_tokens":int(envelope.get("reasoning_tokens",0)),"cached_tokens":int(envelope.get("cached_tokens",0)),"total_tokens":int(envelope.get("total_tokens",0)),
 		"finish_reason":String(envelope.get("finish_reason","")),"live":true,"accepted":false,"fallback":false,"reason":""}
 	totals.calls=int(totals.calls)+1
 	for key in ["prompt_tokens","completion_tokens","reasoning_tokens","total_tokens","latency_ms"]: totals[key]=int(totals[key])+int(row[key])
@@ -1542,8 +1547,8 @@ func _finish_receipt(row:Dictionary,accepted:bool,fallback:bool,reason:String)->
 	if accepted: totals.accepted=int(totals.accepted)+1
 	else: totals.failed=int(totals.failed)+1
 	# One plain line per call in the player log: proof of what was spent.
-	print("AUDIENCE_VOICE_RECEIPT stage=%s attempt=%d model=%s http=%d tokens=%d (prompt %d, completion %d, reasoning %d) latency_ms=%d accepted=%s%s" % [
-		String(row.stage),int(row.attempt),String(row.model),int(row.http),int(row.total_tokens),int(row.prompt_tokens),int(row.completion_tokens),int(row.reasoning_tokens),int(row.latency_ms),str(accepted)," reason="+reason if not reason.is_empty() else ""])
+	print("AUDIENCE_VOICE_RECEIPT stage=%s attempt=%d model=%s http=%d tokens=%d (prompt %d, completion %d, reasoning %d, cached %d) latency_ms=%d accepted=%s%s" % [
+		String(row.stage),int(row.attempt),String(row.model),int(row.http),int(row.total_tokens),int(row.prompt_tokens),int(row.completion_tokens),int(row.reasoning_tokens),int(row.get("cached_tokens",0)),int(row.latency_ms),str(accepted)," reason="+reason if not reason.is_empty() else ""])
 
 func _receipt_offline(s:Dictionary,stage:String,reason:String,model:String="")->void:
 	totals.offline=int(totals.offline)+1

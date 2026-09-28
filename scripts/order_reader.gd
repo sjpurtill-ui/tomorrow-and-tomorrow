@@ -82,8 +82,8 @@ const HARM:=["kill","maim"]
 ## the only part that changes). The examples teach the flat reading shape.
 const SYSTEM_PROMPT:="""You read what a ruler means in a royal audience of a fictional early society. You do NOT write dialogue. Return only the JSON asked for, one flat object.
 kind: 'question' for a question, 'speech' for talk, thanks, threats without an order, musing; 'order' for any instruction however phrased ('I want you to...', 'go ahead', 'come home').
-action: what is ordered. Person acts (kill, maim, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take) fall on ONE person from HALL. town_fate: what becomes of a town WE HOLD and its people (set flags). town_measure: what our garrison is to DO with the people of a town WE HOLD while holding it; measures lists every measure named: bind_men (round up, tie, bind, chain, detain, lock up, hold under guard), disarm (take or burn their weapons), hostages, curfew (keep them in their houses), search (search the houses), labour (make them work, build walls, clear roads, work fields), requisition (take their food or stores), conscript (take their men into our bands), execute_ringleaders (kill the leaders, make an example), release (free, untie, let go), relief (feed, protect, reward those who help), set_headman (set someone over them), settle (move our families in). stance is how hard the hand is: harsh for threats to families or beatings ("if any resist, threaten their wives"), brutal for "kill any who resist", lenient for gently, else ''. Group acts on a town's people are town_measure, never a person act. attack, siege, raid, storm: war on a FOREIGN town (a raid or war on a people: type people, ref that people). Killing, taking captives from or burning the people of a town we do NOT hold is still kill (type group) or town_fate with its flags, NEVER attack: the court asks to take the town first. intercept or pursue: go after their army or band in the field, or the men who fled a town. recall: bring bands home, or stop something under way (call off the chase, bring the men back) (type band and a band's id for one band, type none for all). defend: guard home or a place. drill: train first. send (scouts, envoys), trade, envoy, civic, order (recruit, make weapons, build, haul, any other work at home): other business. confirm: yes / do it / go ahead / send them, to the OPEN QUESTION. cancel: no / wait / leave it, ONLY as the answer to the OPEN QUESTION. none: not an order. Telling an envoy to leave or refusing them ('no tribute, get out', 'go home') is speech, not exile, unless the words order them driven out, bound or harmed.
-type and ref: ref MUST be an id copied from the lists, or '' when none fits. 'him', 'her', 'you' mean a person (the one marked SPEAKING is the one before the ruler). Killing or harming many people (all the men, the villagers, everyone, them all, a town's people, a whole people) is NEVER a person in HALL: use type group (ref = the town or people meant, or ''), town, or people. A town we hold is a town_fate, never an attack. actor: the id of the one told to do it, from HALL, or ''.
+action: what is ordered. Person acts (kill, maim, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take) fall on ONE person from HALL (raise: honour, exalt or promote them; boon: reward them with a gift). town_fate: what becomes of a town WE HOLD and its people (set flags). town_measure: what our garrison is to DO with the people of a town WE HOLD while holding it; measures lists every measure named: bind_men (round up, tie, bind, chain, detain, lock up, hold under guard), disarm (take or burn their weapons), hostages, curfew (keep them in their houses), search (search the houses), labour (make them work, build walls, clear roads, work fields), requisition (take their food or stores), conscript (take their men into our bands), execute_ringleaders (kill the leaders, make an example), release (free, untie, let go), relief (feed, protect, reward those who help), set_headman (set someone over them), settle (move our families in). stance is how hard the hand is: harsh for threats to families or beatings ("if any resist, threaten their wives"), brutal for "kill any who resist", lenient for gently, else ''. Group acts on a town's people are town_measure, never a person act. attack, siege, raid, storm: war on a FOREIGN town (a raid or war on a people: type people, ref that people). Killing, taking captives from or burning the people of a town we do NOT hold is still kill (type group) or town_fate with its flags, NEVER attack: the court asks to take the town first. intercept or pursue: go after their army or band in the field, or the men who fled a town. recall: bring bands home, or stop something under way (call off the chase, bring the men back) (type band and a band's id for one band, type none for all). defend: guard home or a place. drill: train first. send (scouts, envoys), trade, envoy, civic, order (recruit, make weapons, build, haul, any other work at home): other business. confirm: yes / do it / go ahead / send them, to the OPEN QUESTION. cancel: no / wait / leave it, ONLY as the answer to the OPEN QUESTION. none: not an order. Telling an envoy to leave or refusing them ('no tribute, get out', 'go home') is speech, not exile, unless the words order them driven out, bound or harmed.
+type and ref: ref MUST be a whole id copied from the lists, prefix and all (town:..., people:..., person:..., figure:..., band:..., ours:..., home), or '' when none fits. 'him', 'her', 'you' mean a person (the one marked SPEAKING is the one before the ruler). Killing or harming many people (all the men, the villagers, everyone, them all, a town's people, a whole people) is NEVER a person in HALL: use type group (ref = the town or people meant, or ''), town, or people. A town we hold is a town_fate, never an attack. actor: the id of the one told to do it, from HALL, or ''.
 who: whom the order is about as the words name them: men, women, children, elders, bound (those we tied up), everyone (only when the words say everyone), else ''. flags: each that applies to a town's fate (kill_men for killing, kill_all ONLY when the words say everyone, captives, raze, tribute, spare, hold, leave, free), and full_force for 'with everything'. Taking people back to our town is town_fate with captives and destination that town (hostages are held in their own town). count: a number said, else 0. resource: goods named, else ''. destination: an id or ''. measures and stance: for town_measure, else [] and ''.
 confidence 0 to 1 for how CLEAR the words are about the action and the target, not how grave the act is: a named act on a named place or people is 0.9 or more. If the words are unclear about something grave (killing, maiming, burning a town, going to war, abandoning a town), give low confidence and write clarify: ONE short, plain question the court would ask the ruler (no flattery, no promise). Otherwise clarify is ''.
 Examples (ids stand for ids from the lists):
@@ -95,6 +95,7 @@ Examples (ids stand for ids from the lists):
 "round up the men and tie them up; if any resist, threaten their wives" -> order, town_measure, type group, ref the town, measures [bind_men], stance harsh.
 "send everything we have against <their town>" -> order, attack, type town, ref that town, flags [full_force].
 "chase the men who fled <a town we hold>" -> order, pursue, type town, ref that town. "call off the chase" -> order, recall.
+"always ransom the captives" or "from now on bring captives home as bondservants" -> order, order.
 "how many are bound?" -> question, none. "yes" or "do it" with an OPEN QUESTION -> order, confirm."""
 
 # --------------------------------------------------------------------------
@@ -313,11 +314,16 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 	var ids:Dictionary=brief.get("ids",{})
 	# The flat reading (type, ref, flags at the top) or the older nested one
 	# (target:{type, ref}, details:{kill_men: true, ...}).
-	var target:Dictionary=raw.get("target",{}) if raw.get("target") is Dictionary else {"type":raw.get("type","none"),"ref":raw.get("ref","")}
+	# An empty container (a tool that makes a reading "safe" adds one) is no
+	# nested reading: the flat fields stand.
+	var nested:=raw.get("target") is Dictionary and not (raw.get("target") as Dictionary).is_empty()
+	var target:Dictionary=raw.get("target") if nested else {"type":raw.get("type","none"),"ref":raw.get("ref","")}
 	if target.get("type")==null: target["type"]="none"
 	if target.get("ref")==null: target["ref"]=""
 	var ttype:=String(target.get("type","none"))
-	var ref:=String(target.get("ref","")).strip_edges()
+	# An id written as a name or without its prefix is the id it plainly
+	# means; anything else is refused as before.
+	var ref:=resolve_id(String(target.get("ref","")),brief)
 	if not ttype in TARGET_TYPES: return {"rejected":"unknown target type"}
 	if ref!="":
 		if not ids.has(ref): return {"rejected":"target not in the lists"}
@@ -329,10 +335,10 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 			"band": if of!="band": return {"rejected":"target is not a band"}
 			"group": if not of in ["town","people"]: return {"rejected":"a group is a town or a people, never a person"}
 			"none": ref=""
-	var actor:=String(raw.get("actor","")).strip_edges()
+	var actor:=resolve_id(String(raw.get("actor","")),brief)
 	if actor!="" and String(ids.get(actor,""))!="person": return {"rejected":"actor not in the hall"}
 	var conf:Variant=raw.get("confidence",0.0)
-	var details_in:Dictionary=raw.get("details",{}) if raw.get("details") is Dictionary else raw
+	var details_in:Dictionary=raw.get("details") if raw.get("details") is Dictionary and not (raw.get("details") as Dictionary).is_empty() else raw
 	var details:={}
 	for flag:String in DETAIL_FLAGS:
 		if bool(details_in.get(flag,false)): details[flag]=true
@@ -344,7 +350,7 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 		details[String(f)]=true
 	var count:Variant=details_in.get("count",0)
 	if (count is int or count is float) and int(count)>0: details["count"]=clampi(int(count),1,100000)
-	var dest:=String(details_in.get("destination",""))
+	var dest:=resolve_id(String(details_in.get("destination","")),brief)
 	if dest!="" and ids.has(dest): details["destination"]=dest
 	var res:=String(details_in.get("resource","")).strip_edges().substr(0,40)
 	if res!="": details["resource"]=res
@@ -368,6 +374,40 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 	var clarify:=String(raw.get("clarify","")).strip_edges().replace("\n"," ").substr(0,MAX_CLARIFY_CHARS)
 	return {"kind":kind,"action":action,"actor":actor,"type":ttype,"ref":ref,"details":details,
 		"confidence":clampf(float(conf) if (conf is float or conf is int) else 0.0,0.0,1.0),"clarify":clarify}
+
+## An id in a reading that is not in the lists but plainly means one of them:
+## the id without its prefix ("civ_01_region_01"), or a name ("town:Tsaren",
+## "Tsaren", "people:Esurai", "Kishan", our home's name for "home"). The id
+## itself when it is in the lists; the words as given when they mean none, or
+## more than one (validate() then refuses them).
+static func resolve_id(ref:String,brief:Dictionary)->String:
+	var ids:Dictionary=brief.get("ids",{})
+	var r:=ref.strip_edges()
+	if r=="" or ids.has(r): return r
+	var prefix:=r.get_slice(":",0).to_lower() if ":" in r else ""
+	var bare:=r.substr(r.find(":")+1).strip_edges() if ":" in r else r
+	var hits:={}
+	for id in ids:
+		if ":" in String(id) and String(id).substr(String(id).find(":")+1)==bare: hits[String(id)]=true
+	if hits.size()==1: return String(hits.keys()[0])
+	var name:=bare.to_lower().trim_prefix("the ").strip_edges()
+	if name=="": return r
+	var home:=String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
+	if home!="" and name==home and ids.has("home"): return "home"
+	hits.clear()
+	for group in ["roster","ours","held","towns","peoples","bands"]:
+		for e in brief.get(group,[]):
+			if not e is Dictionary: continue
+			var n:=String((e as Dictionary).get("name","")).to_lower().trim_prefix("the ").strip_edges()
+			if n!="" and (n==name or n.get_slice(" ",0)==name): hits[String((e as Dictionary).get("id",""))]=true
+	# A prefix that says what kind of thing is meant settles a tie.
+	if hits.size()>1 and prefix!="":
+		var narrowed:={}
+		for id in hits:
+			if String(id).begins_with(prefix+":"): narrowed[id]=true
+		if not narrowed.is_empty(): hits=narrowed
+	if hits.size()==1: return String(hits.keys()[0])
+	return r
 
 # --------------------------------------------------------------------------
 # Deciding
@@ -460,6 +500,10 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	var is_grave:=grave(reading)
 	var sure:=certain(reading)
 	if not confirmed and (conf<MIN_CONFIDENCE or (is_grave and (conf<GRAVE_CONFIDENCE or not sure))):
+		# The words' own reading (court_war_orders, as offline) names the same
+		# act on the same town: two readings agree, so the words are not unclear;
+		# the engine carries them as it would offline.
+		if mine.is_empty() and _offline_agrees(audience,text,reading): return {"route":"legacy","why":"the words' own reading agrees"}
 		var question:=String(reading.get("clarify",""))
 		# One plain question, never a promise ("...and it is done").
 		if question=="" or not question.ends_with("?") or CC._re(PROMISE_PATTERN).search(question)!=null: question=default_question(reading)
@@ -481,6 +525,22 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 		return {"route":"legacy","why":"still no one named"}
 	return _engine_plan(audience,text,reading,theirs)
 
+static func _offline_agrees(audience:Dictionary,text:String,reading:Dictionary)->bool:
+	## Does the words' own reading (court_war_orders.read) name the same grave
+	## act, on the same place, as the reader's unsure reading?
+	var action:=String(reading.get("action",""))
+	if not WarOrders.captive_reading(text).is_empty(): return action in ["kill","maim","town_fate","order"]
+	var offline:=WarOrders.read(text,String(audience.get("civ_id","")),String(audience.get("id","")))
+	if offline.is_empty(): return false
+	var target:Dictionary=offline.get("target",{}) if offline.get("target") is Dictionary else {}
+	var ref:=String(reading.get("ref",""))
+	var same:=ref=="" or target.is_empty() or ref=="town:"+String(target.get("city_id","")) or (ref.begins_with("people:") and ref.trim_prefix("people:")==String(target.get("civ_id","")))
+	if not same: return false
+	match String(offline.get("kind","")):
+		"fate","take_first": return action in ["town_fate","kill","maim"]
+		"attack","siege","raid","storm": return action in ["attack","siege","raid","storm"]
+	return false
+
 static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,theirs:Dictionary)->Dictionary:
 	var action:=String(reading.action)
 	var ttype:=String(reading.type)
@@ -499,6 +559,16 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 		return {"route":"engine","context":{"live":live,"reader":true}}
 	match action:
 		"town_fate":
+			# Burning a town of theirs, with nothing said of its people, is an
+			# attack on it (as offline, "Burn Eldwick"); a people's fate asks
+			# to take the town first (below).
+			var foreign_place:={}
+			for t:Dictionary in WarOrders.known_places():
+				if "town:"+String(t.city_id)==ref: foreign_place=t
+			if not foreign_place.is_empty() and bool(details.get("raze",false)) and not (bool(details.get("kill_men",false)) or bool(details.get("kill_all",false)) or bool(details.get("captives",false))):
+				var strike:=base.duplicate(); strike["kind"]="attack"; strike["target"]=foreign_place
+				WarOrders.strike_manner(strike,lower)
+				return _war_plan(strike)
 			if ref.begins_with("town:") and _held_by_ref(ref).is_empty() and not _place_by_ref(ref).is_empty():
 				# Their town, not ours: nobody of theirs is in our hands yet.
 				var first:=base.duplicate(); first["kind"]="take_first"; first["target"]=_place_by_ref(ref)
@@ -587,7 +657,9 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 			return _war_plan(r)
 		"recall":
 			var r:=base.duplicate(); r["kind"]="recall"; r["target"]={}
-			if ref.begins_with("band:"): r["army_id"]=int(ref.trim_prefix("band:"))
+			# A band out on a chase is called off as the chase ("call off the
+			# chase"), which the recall of all does; another band by its id.
+			if ref.begins_with("band:") and not _chasing(int(ref.trim_prefix("band:"))): r["army_id"]=int(ref.trim_prefix("band:"))
 			# Home, or back to the town they came from; and whether garrisons are meant.
 			var home_name:=String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
 			r["home"]=WarOrders._has(lower,"(home|withdraw|retreat|recall)") or (home_name!="" and WarOrders._name_hit(lower,home_name))
@@ -600,6 +672,12 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 			var r:=base.duplicate(); r["kind"]="drill"; r["target"]={}
 			return _war_plan(r)
 	return {"route":"legacy","why":"no engine mapping"}
+
+static func _chasing(army_id:int)->bool:
+	if WorldSimulation.military==null: return false
+	for a in WorldSimulation.military.field_armies:
+		if a is Dictionary and int((a as Dictionary).get("army_id",-1))==army_id: return (a as Dictionary).get("pursuit") is Dictionary
+	return false
 
 static func _war_plan(reading:Dictionary)->Dictionary:
 	return {"route":"engine","context":{"war_reading":reading,"reader":true}}
@@ -804,7 +882,10 @@ static func quick_plan(audience_id:String,text:String)->Dictionary:
 	if clean.ends_with("?"): return {"route":"speak","quick":"question"}
 	var theirs:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	var open:=not pending(audience).is_empty() or (not theirs.is_empty() and Hall._day()-int(theirs.get("day",-99))<=CC.PENDING_DAYS)
-	if not open: return {}
+	# A bare "SEND THEM!" or "Do it!" with nothing open: the court's own
+	# answer to it (the march already on the road, or "send whom, and
+	# where?"), never a fresh order read into it (court_commands._assent).
+	if not open: return {"route":"legacy","quick":"assent"} if CC.bare_assent(clean) else {}
 	var action:=""
 	if CC._re(CC.CONFIRM_PATTERN).search(clean)!=null or CC._re(CC.INSIST_PATTERN).search(clean)!=null or CC.bare_assent(clean): action="confirm"
 	elif CC._re(NO_PATTERN).search(clean)!=null: action="cancel"
