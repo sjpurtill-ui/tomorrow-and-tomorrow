@@ -40,9 +40,24 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
+const Tactics:=preload("res://scripts/battle_tactics.gd")
+const BattleGround:=preload("res://scripts/battle_ground.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives"]
+## A strike by stealth: by night, unseen, on them asleep ("sneak attack
+## Eldwick under cover of night"). The attack goes in as a night approach
+## (battle_tactics.night_approach) at a chance stated when it is ordered.
+const NIGHT_WORDS:="\\b(sneak|by night|at night|in the night|night (attack|raid|march|strike)|under (the )?cover of (the )?(night|darkness|dark)|in the dark(ness)?|before (dawn|first light|daybreak)|while they sleep|asleep|unawares|by surprise|surprise (attack|raid|strike)|creep up|steal up|slip up)\\b"
+## "With 17 troops": how many the ruler wants sent.
+const COUNT_WORDS:="\\b(\\d{1,5})\\s+(of (our|my|the|them) )?(troops|men|fighters|warriors|soldiers|spears|spearmen|archers|riders|bowmen|people|of them|of us|hunters)\\b"
+## What becomes of those we took in a fight and what we took from them, or the
+## standing word for every fight to come. Never a held town's people
+## (occupation_measures.gd).
+const CAPTIVE_WORDS:="\\b(captives?|prisoners?|bondservants?|bondsmen|slaves|the (men|ones|people|fighters) we (took|captured|caught))\\b"
+const SPOILS_WORDS:="\\b(spoils|plunder|loot|booty|what we took|everything we took|all we took)\\b"
+const LEADER_WORDS:="\\b(their|the captured|the enemy'?s?) (leader|chief|war ?leader|general|commander|headman)\\b"
+const STANDING_WORDS:="\\b(from now on|from this day|henceforth|in future|in the future|always|every time|whenever|as a rule|each time|after every|after each|after any)\\b"
 ## What a measure on a town still in their hands would be, said plainly.
 const MEASURE_DEEDS:={"bind_men":"round up its men","disarm":"take its weapons","hostages":"take hostages from it","curfew":"keep its people indoors","search":"search its houses",
 	"labour":"put its men to work","requisition":"take its food","conscript":"take its young men","execute_ringleaders":"put its ringleaders to death","release":"free anyone there",
@@ -223,6 +238,11 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	var named:=find_target(clean,context_civ)
 	var named_town:=named.has("city_id") or named.has("unknown")
 	var kind:=""
+	# The captives and spoils of a fight, or the standing word for the next
+	# ("free the captives", "from now on the spoils go to the warriors").
+	if not bool(named.get("held",false)):
+		var captive:=captive_reading(clean)
+		if not captive.is_empty() and captive_applies(captive): return captive
 	# After men got away from a town we hold: "chase them" is a chase.
 	if _has(lower,CHASE_WORDS):
 		var flight:=Pursuit.latest_flight(String(named.city_id) if bool(named.get("held",false)) else "")
@@ -282,12 +302,119 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	var pm:=_re("\\b(the|our|my) "+PLACE_WORDS+"\\b").search(lower)
 	if pm!=null: place=pm.get_string()
 	var reading:={"kind":kind,"target":target,"full":_has(lower,FULL_WORDS),"insist":_has(lower,INSIST_WORDS),"place":place,"army_words":army,"text":clean.substr(0,300)}
+	strike_manner(reading,lower)
 	if kind=="recall":
 		# Home, or back to the town they came from; and whether the garrison is meant.
 		var home_name:=String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
 		reading["home"]=_has(lower,"(home|withdraw|retreat|recall)") or (home_name!="" and _name_hit(lower,home_name))
 		reading["garrison"]=_has(lower,"(garrisons?|every ?one|every ?body|all of (you|them)|them all|you all|every soldier|all our|all the)")
 	return reading
+
+## How a strike goes in, from the ruler's words: by night (approach) and
+## with how many (count). Shared by the live reading (order_reader.gd).
+static func strike_manner(reading:Dictionary,lower:String)->void:
+	var kind:=String(reading.get("kind",""))
+	if kind in ["attack","raid"] and _has(lower,NIGHT_WORDS): reading["approach"]="night"
+	var counted:=_re(COUNT_WORDS).search(lower)
+	if counted!=null and kind in ["attack","raid","siege"] and int(reading.get("count",0))<=0: reading["count"]=int(counted.get_string(1))
+
+
+## {} when the words are not about captives or spoils; else {kind:"captives",
+## part (prisoners | spoils | general), policy, standing}.
+static func captive_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?"): return {}
+	var lower:=clean.to_lower()
+	var part:=""
+	if _has(lower,SPOILS_WORDS): part="spoils"
+	elif _has(lower,LEADER_WORDS) and not _has(lower,CAPTIVE_WORDS): part="general"
+	elif _has(lower,CAPTIVE_WORDS): part="prisoners"
+	if part=="": return {}
+	var policy:=_captive_policy(lower,part)
+	if policy=="": return {}
+	return {"kind":"captives","part":part,"policy":policy,"standing":_has(lower,STANDING_WORDS),"target":{},"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":false,"text":clean.substr(0,300)}
+
+
+static func _captive_policy(lower:String,part:String)->String:
+	if part=="spoils":
+		if _has(lower,"\\b(give|hand|send|take) ([\\w']+ ){0,3}back\\b|\\breturn\\b"): return "return property"
+		if _has(lower,"\\b(warriors|fighters|troops|soldiers|men|band|bands|those who fought|the ones who fought|hunters)\\b"): return "reward troops"
+		if _has(lower,"\\b(treasury|coffers)\\b"): return "state treasury"
+		if _has(lower,"\\b(stores?|store ?houses?|granar\\w*|common)\\b"): return "army stores"
+		return ""
+	if _has(lower,"\\b(kill|execute|put ([\\w']+ ){0,3}to death|slay|behead|hang)\\b"): return "execute"
+	if _has(lower,"\\b(ransom|sell ([\\w']+ ){0,3}back|trade ([\\w']+ ){0,3}back)\\b"): return "ransom"
+	if part=="prisoners" and _has(lower,"\\b(bondservants?|bondsmen|slaves?|enslave|put ([\\w']+ ){0,3}to work|make ([\\w']+ ){0,3}work|servants)\\b"): return "enslave"
+	if _has(lower,"\\b(free|freed|release|let ([\\w']+ ){0,3}go|set ([\\w']+ ){0,3}free|send ([\\w']+ ){0,3}home|spare|unbind|untie)\\b"): return "release"
+	if _has(lower,"\\b(keep|hold|guard|lock ([\\w']+ ){0,3}up)\\b"): return "hold"
+	return ""
+
+
+## Whether a captives reading has something to act on: a standing word
+## always does; otherwise a fight's settlement still open to change, or
+## captives still held under guard (a held town's people are the garrison's).
+static func captive_applies(reading:Dictionary)->bool:
+	if bool(reading.get("standing",false)): return true
+	var mc:Node=WorldSimulation.military if WorldSimulation!=null else null
+	if mc==null or not mc.has_method("open_settlement"): return false
+	var part:=String(reading.get("part","prisoners"))
+	if not (mc.open_settlement(part) as Dictionary).is_empty(): return true
+	if part=="prisoners": return int(mc.foreign_prisoners)>0
+	if part=="general": return not (mc.held_generals as Array).is_empty()
+	return false
+
+
+## What becomes of them, as a standing word says it.
+static func practice_words(part:String,policy:String)->String:
+	match part:
+		"spoils": return String({"army stores":"the spoils go to the stores","reward troops":"the spoils go to the warriors","state treasury":"the spoils go to the treasury",
+			"return property":"what we take is given back","unrestricted plunder":"the warriors keep all they can carry"}.get(policy,"the spoils go to the stores"))
+		"general": return String({"hold":"their leader is held","ransom":"their leader is given back for ransom","release":"their leader is let go","execute":"their leader is put to death"}.get(policy,"their leader is held"))
+	return String({"hold":"the captives are held under guard","release":"the captives are let go","parole":"the captives are let go on their word","ransom":"the captives are given back for ransom",
+		"enslave":"the captives come home as bondservants","execute":"the captives are put to death","exchange":"the captives are traded for our own"}.get(policy,"the captives are held under guard"))
+
+
+## The ruler's word on captives and spoils: a standing word for every fight
+## to come, or a change to what the general did after the last one (only
+## what is still in our hands, and only by what is really there).
+static func _captives(out:Dictionary,reading:Dictionary)->Dictionary:
+	var mc:=_mc()
+	var part:=String(reading.get("part","prisoners"))
+	var policy:=String(reading.get("policy",""))
+	out["part"]=part; out["policy"]=policy
+	if bool(reading.get("standing",false)):
+		var set:Dictionary=mc.set_aftermath_practice(part,policy)
+		if set.has("error"): return _refuse_captives(out,"unknown",String(set.error))
+		out.verdict="fate"
+		out.says="From now on, after every fight, %s." % practice_words(part,policy)
+		out.outcome="A standing word: %s." % practice_words(part,policy)
+		return out
+	var changed:Dictionary=mc.revise_settlement(part,policy)
+	if changed.has("error") and part=="prisoners" and int(mc.foreign_prisoners)>0 and policy!="hold":
+		# Captives held under guard from any fight: all of them.
+		var held:=int(mc.foreign_prisoners)
+		var done:Dictionary=mc.resolve_held_prisoners(policy,held)
+		if not done.has("error"):
+			var did:=_cap(String({"release":"%s set free","parole":"%s let go on their word","ransom":"%s sent back to their people for ransom","enslave":"%s put to work as bondservants",
+				"execute":"%s put to death","exchange":"%s traded for our own people"}.get(policy,"%s dealt with")) % _people_words(held))
+			out.verdict="fate"; out.says="The %d we were holding under guard: %s." % [held,did.substr(0,1).to_lower()+did.substr(1)]; out.outcome=did+"."
+			return out
+	if changed.has("error"): return _refuse_captives(out,String(changed.get("reason","cannot")),String(changed.error))
+	out.verdict="fate"
+	out.says=String(changed.done)
+	out.outcome=String(changed.done)
+	return out
+
+
+static func _refuse_captives(out:Dictionary,reason:String,says:String)->Dictionary:
+	out.verdict="impossible"; out.reason=reason; out.says=says; out.fix=""
+	out.outcome="Nothing is changed."
+	return out
+
+
+static func _people_words(n:int)->String:
+	return preload("res://scripts/battle_account.gd")._people(n,"captive","captives")
+
 
 static func _held_town(region_id:String)->Dictionary:
 	for town:Dictionary in held_towns():
@@ -839,10 +966,11 @@ static func forces(general:Dictionary={})->Dictionary:
 		var at_home:=_at_home(army)
 		if at_home and not mc.command_hierarchy.battle.engaged(int(army.army_id)) and not army.has("court_order"): idle.append(army)
 		elif not at_home: away.append(army)
+	# A fight elsewhere does not stop a march: the bands in it are simply not
+	# free (engaged above). The captives of a fight never hold anything up:
+	# the general settles them himself (MilitaryCampaign._settle_aftermath).
 	var busy:=""
-	if not mc.active_engagement.is_empty(): busy="a battle is still being fought"
-	elif not mc.active_siege.is_empty(): busy="our soldiers are already besieging %s" % String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","a town"))
-	elif not mc.pending_aftermath.is_empty(): busy="the last battle's captives and spoils are not yet settled"
+	if not mc.active_siege.is_empty(): busy="our soldiers are already besieging %s" % String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","a town"))
 	elif not mc.active_threat.is_empty() and String(mc.active_threat.get("campaign_mode",""))=="defensive": busy="an enemy force is already coming at us"
 	var garrisons:=held_towns()
 	var holding:=0
@@ -950,8 +1078,12 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"let_go": return _let_go(out,reading)
 		"abandon": return _abandon(out,reading)
 		"keep": return _keep(out,reading)
+		"captives": return _captives(out,reading)
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
-	return _strike(out,reading,insist)
+	var struck:=_strike(out,reading,insist)
+	# A strike by night: the chance of reaching them unseen, stated plainly.
+	if String(struck.get("night_words",""))!="": struck["says"]=(String(struck.says)+" "+String(struck.night_words)).strip_edges()
+	return struck
 
 static func _held_words(town:Dictionary)->String:
 	var who:=_given(String(town.get("commander","")))
@@ -1445,21 +1577,25 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var use_army:Dictionary={}
 	var own_band:=false
 	var chosen:=int(out.chosen)
+	# "With 17 troops": that many go from the home reserve when it has them.
+	var asked:=maxi(0,int(reading.get("count",0)))
+	var exact:=asked>0 and chosen<=0 and not bool(out.home_only) and trained>=asked
 	if chosen>0:
 		var picked:=_army(chosen)
 		if picked.is_empty(): return _no(out,"no_band","That band is no longer on our rolls.","")
 		if not _available(picked): return _no(out,"band_busy","%s cannot take a new order now: %s." % [String(picked.get("name","That band")),_busy_words(picked)],"Call it home first, or wait until it is free.")
 		use_army=picked; own_band=not band.is_empty() and int(band.army_id)==chosen
-	elif not bool(out.home_only) and not band.is_empty() and (int(band.troops)>=trained or not _at_home(band)):
+	elif not exact and not bool(out.home_only) and not band.is_empty() and (int(band.troops)>=trained or not _at_home(band)):
 		use_army=band; own_band=true
 	var keep:=0 if full else (ceili(trained*WATCH_SHARE) if trained>=MIN_FORCE*2 else 0)
 	var send:=trained-keep
-	if use_army.is_empty() and not bool(out.home_only):
+	if exact: send=asked; keep=trained-asked
+	if use_army.is_empty() and not exact and not bool(out.home_only):
 		var idle:Array=f.idle
 		if not idle.is_empty():
 			idle.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.troops)>int(b.troops))
 			if int(idle[0].troops)>=send: use_army=idle[0]
-	if use_army.is_empty() and not bool(out.home_only) and send<MIN_FORCE and int(t.heads)==0:
+	if use_army.is_empty() and not exact and not bool(out.home_only) and send<MIN_FORCE and int(t.heads)==0:
 		var largest:Dictionary={}
 		for a:Dictionary in f.away:
 			if _available(a) and int(a.troops)>send and (largest.is_empty() or int(a.troops)>int(largest.troops)): largest=a
@@ -1503,6 +1639,17 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	out["going"]=going
 	out["days"]=days
 	out["road_km"]=float(road.length_km)
+	# By night: the chance of reaching them unseen, from what is really there
+	# (battle_tactics.surprise_odds). The attack is rolled at this chance.
+	var approach:={}
+	if String(reading.get("approach",""))=="night" and kind in ["attack","raid"]:
+		var leader:Dictionary=(use_army.get("commander",{}) as Dictionary) if not use_army.is_empty() else (mc.home_army.get("commander",{}) as Dictionary)
+		var ground:=BattleGround.classify(BattleGround.sample(there))
+		var at_war_now:=_at_war(String(target.civ_id))
+		var odds:=Tactics.surprise_odds({"troops":going,"march_days":days,"watchers":float(enemy.get("mid",0.0)) if bool(enemy.known) else -1.0,"alert":1.0 if at_war_now else 0.0,"cover":Tactics.cover_of(ground),"tactics":float(leader.get("tactics",0.5))})
+		approach={"kind":"night","chance":float(odds.chance),"ground":ground}
+		out["surprise"]=odds
+		out["night_words"]=_night_words(odds,going,name,days,ground,at_war_now)
 	var take_word:="say the word and I take them as they are."
 	if not insist:
 		# Forces exist: the war leader objects with the real numbers, never "raise a levy".
@@ -1548,7 +1695,7 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		if made.has("error"): return _no(out,"cannot_form",String(made.error),"")
 		army_id=int((made.army as Dictionary).army_id); formed=true
 		going=ready
-	var order:Dictionary=mc.order_city_operation(army_id,String(target.civ_id),String(target.city_id),kind=="siege",kind=="raid")
+	var order:Dictionary=mc.order_city_operation(army_id,String(target.civ_id),String(target.city_id),kind=="siege",kind=="raid",approach)
 	if order.has("error"):
 		if formed: mc.disband_field_army(army_id)
 		return _no(out,"order_failed",String(order.error),"")
@@ -1558,12 +1705,14 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var at_war:=_at_war(String(target.civ_id))
 	army["court_order"]={"kind":kind,"civ_id":String(target.civ_id),"city_id":String(target.city_id),"city_name":name,"day":day,"general":String(out.general),"general_pid":int(out.general_pid),"going":going}
+	if not approach.is_empty(): army.court_order["approach"]=approach.duplicate(true)
 	if not own_band and not formed and chosen<=0 and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
 	mc.field_armies[index]=army
 	mc.army_changed.emit(mc.home_army.duplicate(true))
 	days=int(order.get("days",days))
 	var km:=roundi(float(order.get("distance_km",road.length_km)))
 	var verb:String={"attack":"to attack","siege":"to lay siege to","raid":"to raid the fields and stores of"}.get(kind,"against")
+	if not approach.is_empty(): verb={"attack":"to fall by night on","raid":"to raid by night the fields and stores of"}.get(kind,verb)
 	var roundabout:="" if bool(road.get("direct",true)) else " going round the water by land"
 	var as_they_are:=insist and (drilled<UNDRILLED or (unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE) or going<MIN_FORCE)
 	out.verdict="act"
@@ -1580,6 +1729,15 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	out["chronicle"]="%s leaves with %s for %s: %d km%s, about %d days on the road.%s" % [party,_fighters(going),name,km,roundabout,days,"" if at_war else " There was no declaration; the war begins when they reach %s, and %s will hear of it before then." % [name,Hall._civ_name(String(target.civ_id))]]
 	_on_departure(out,army,target,at_war)
 	return out
+
+## The night approach's chance, with every number it came from.
+static func _night_words(odds:Dictionary,going:int,name:String,days:int,ground:String,at_war:bool)->String:
+	var theirs:=("about %d of theirs" % int(odds.watchers)) if bool(odds.counted) else "a watch nobody has counted"
+	var road:=("%s on the road" % _span(days)) if days>0 else "no march at all"
+	var cover:=String({"forest":"with woods to hide in","rough":"over broken ground","pass":"through the hills","marsh":"through wet ground","ford":"across the ford","bridge":"over the bridge"}.get(ground,"over open ground"))
+	var wary:=", and they are at war with us and watching" if at_war else ""
+	return "By night: %s against %s, %s, %s%s. The chance we reach %s unseen is %s." % [_fighters(going),theirs,road,cover,wary,name,Tactics.chance_words(float(odds.chance))]
+
 
 static func _drill_first(out:Dictionary)->Dictionary:
 	## The god takes the war leader's advice: his band comes home (if away)

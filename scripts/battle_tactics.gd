@@ -77,6 +77,15 @@ const TACTICS:Dictionary={
 	"dawn_raid":{"names":{"hearth":"fell on them at first light","lettered":"a dawn attack","reckoned":"a surprise attack at dawn"},
 		"requires_all":[],"requires_any":[],"needs":{"max_troops":800},"roles":{"attacker":1.0},"kinds":["raid","field"],"weight":1.4,"trait":"cunning",
 		"phases":[{"from":1,"to":1,"own":0.75,"enemy":1.45},{"from":2,"to":2,"own":0.95,"enemy":1.12}],"shape":"strike","era":"stone"},
+	# Only when the ruler orders it (night_approach): a general never gambles a
+	# night march on his own. Unseen, the band falls on a camp asleep; seen,
+	# it stumbles into a ready defence in the dark.
+	"night_attack":{"names":{"hearth":"crept up on them in the dark","lettered":"a night attack","reckoned":"a surprise attack by night"},
+		"requires_all":[],"requires_any":[],"needs":{},"roles":{"attacker":1.0},"kinds":["field","raid","assault"],"weight":0.0,"trait":"cunning","ordered":true,"special":"night_unseen",
+		"phases":[{"from":1,"to":1,"own":0.65,"enemy":1.7},{"from":2,"to":2,"own":0.85,"enemy":1.3}],"shape":"strike","era":"stone"},
+	"night_attack_seen":{"names":{"hearth":"came at them in the dark but were seen","lettered":"a night attack that was seen coming","reckoned":"a night attack met by a ready defence"},
+		"requires_all":[],"requires_any":[],"needs":{},"roles":{"attacker":1.0},"kinds":["field","raid","assault"],"weight":0.0,"trait":"cunning","ordered":true,"special":"night_seen",
+		"phases":[{"from":1,"to":1,"own":1.15,"enemy":0.95}],"shape":"strike","era":"stone"},
 	"ambush":{"names":{"hearth":"lay in wait for them","lettered":"an ambush","reckoned":"an ambush from cover"},
 		"requires_all":[],"requires_any":[],"needs":{"max_troops":4000,"min_terrain":1.08},"roles":{"defender":1.0,"attacker":0.35},"kinds":["raid","field"],"weight":1.2,"trait":"cunning",
 		"phases":[{"from":1,"to":1,"own":0.7,"enemy":1.6},{"from":2,"to":2,"own":0.9,"enemy":1.1}],"shape":"ambush","era":"stone"},
@@ -157,6 +166,7 @@ const COUNTERS:Dictionary={
 	"dense_line":["flank_attack","hammer_and_anvil","double_envelopment","oblique_order"],
 	"missile_harassment":["flank_attack","hammer_and_anvil","shield_wall","column_assault"],
 	"dawn_raid":["fortified_camp","entrenched_defence","reserve"],
+	"night_attack":["fortified_camp","reserve"],
 	"ambush":["missile_harassment","reserve"],
 	"feigned_retreat":["shield_wall","dense_line","pike_and_shot","reserve"],
 	"flank_attack":["reserve","pike_and_shot","defence_in_depth","fortified_camp"],
@@ -181,7 +191,7 @@ const COUNTERED_KEEP:=0.3
 const COUNTERED_EXPOSURE:=1.06
 ## Surprise tactics belong to the opening of a fight; a general cannot switch
 ## to them once both sides are locked together.
-const OPENING_ONLY:=["dawn_raid","ambush"]
+const OPENING_ONLY:=["dawn_raid","ambush","night_attack","night_attack_seen"]
 ## What a hard-pressed, careful general falls back on, in order of preference.
 const FALLBACKS:=["entrenched_defence","fortified_camp","defence_in_depth","shield_wall","reserve","dense_line"]
 
@@ -443,8 +453,76 @@ static func available(id:String,side:Dictionary,battle:Dictionary)->bool:
 static func available_ids(side:Dictionary,battle:Dictionary)->Array:
 	var ids:Array=[]
 	for id in TACTICS:
+		# Ordered tactics (the night attack) are the ruler's, never a choice.
+		if bool((TACTICS[id] as Dictionary).get("ordered",false)): continue
 		if available(String(id),side,battle): ids.append(String(id))
 	return ids
+
+
+# --- The night approach ---------------------------------------------------------------
+
+## The chance of reaching the enemy unseen by night is kept inside these.
+const SURPRISE_MIN:=0.05
+const SURPRISE_MAX:=0.85
+## Their numbers when nobody has counted them.
+const UNCOUNTED_WATCH:=60.0
+
+
+## The chance a band ordered to strike by night reaches its enemy unseen.
+## Fewer men, a shorter march, fewer and less wary watchers, cover near them
+## and a cunning leader help. context: {troops, march_days, watchers (their
+## numbers; below 0 when nobody has counted them), alert (0..1: at war with
+## us), cover (0.8 open ground .. 1.2 woods and broken ground), tactics (the
+## leader's skill 0..1)}. Returns the chance and each stated input.
+static func surprise_odds(context:Dictionary)->Dictionary:
+	var troops:=maxf(1.0,float(context.get("troops",10)))
+	var days:=clampf(float(context.get("march_days",1)),0.0,90.0)
+	var counted:=float(context.get("watchers",-1.0))
+	var watchers:=counted if counted>=0.0 else UNCOUNTED_WATCH
+	var alert:=clampf(float(context.get("alert",0.0)),0.0,1.0)
+	var cover:=clampf(float(context.get("cover",1.0)),0.8,1.2)
+	var skill:=clampf(float(context.get("tactics",0.5)),0.0,1.0)
+	var size:=clampf(1.12-0.12*log(troops)/log(10.0),0.55,1.0)
+	var road:=pow(0.93,days)
+	var watch:=1.0/(1.0+watchers/150.0)
+	var wary:=1.0-0.35*alert
+	var chance:=clampf(0.72*size*road*watch*wary*cover*(0.8+0.4*skill),SURPRISE_MIN,SURPRISE_MAX)
+	return {"chance":chance,"troops":int(troops),"march_days":int(days),"watchers":roundi(watchers),"counted":counted>=0.0,"alert":alert,"cover":cover,"tactics":skill}
+
+
+## A chance in plain words: "about 1 in 3", "about even", "about 3 in 4".
+static func chance_words(p:float)->String:
+	if p>=0.8: return "about 4 in 5"
+	if p>=0.7: return "about 3 in 4"
+	if p>=0.6: return "about 2 in 3"
+	if p>=0.45: return "about even"
+	return "about 1 in %d" % maxi(2,roundi(1.0/maxf(0.01,p)))
+
+
+## Cover near a place for a night approach, from its ground.
+static func cover_of(ground_kind:String)->float:
+	return float({"forest":1.2,"rough":1.1,"pass":1.1,"marsh":1.0,"ford":1.0,"bridge":0.95,"open":0.9}.get(ground_kind,1.0))
+
+
+## A band ordered to fall on the enemy by night: one seeded roll at the stated
+## chance decides whether it reaches them unseen. Unseen, it strikes a camp
+## still asleep that has no time for anything clever; seen, it stumbles into
+## a ready defence in the dark. The roll and the chance stay on the plan.
+static func night_approach(plan:Dictionary,side:String,chance:float,seed:int)->Dictionary:
+	var out:=plan.duplicate(true)
+	var rng:=RandomNumberGenerator.new(); rng.seed=seed^0x51ee7
+	var unseen:=rng.randf()<clampf(chance,0.0,1.0)
+	var id:="night_attack" if unseen else "night_attack_seen"
+	var entry:Dictionary=(out.get(side,{}) as Dictionary).duplicate(true)
+	entry["id"]=id; entry["shape"]=String((TACTICS[id] as Dictionary).get("shape","strike")); entry["since"]=0
+	entry["surprise"]={"chance":chance,"unseen":unseen}
+	out[side]=entry
+	var other:="defender" if side=="attacker" else "attacker"
+	if unseen and out.get(other) is Dictionary:
+		var them:Dictionary=(out[other] as Dictionary).duplicate(true)
+		them["id"]=BASELINE; them["shape"]="clash"; them["since"]=0
+		out[other]=them
+	return out
 
 
 ## The general's choice. Deterministic for a seed. Clever manoeuvres need
@@ -547,6 +625,10 @@ static func side_effect(entry:Dictionary,enemy_entry:Dictionary,battle_round:int
 	if not phase.is_empty():
 		result.own=float(phase.get("own",1.0)); result.enemy=float(phase.get("enemy",1.0)); result.intensity=float(phase.get("intensity",1.0))
 	match String(spec.get("special","")):
+		"night_unseen":
+			if round_number==1: result.event="We fell on them while they slept."; result.phase="turn"
+		"night_seen":
+			if round_number==1: result.event="Their watch saw us coming in the dark."; result.phase="failed"
 		"feigned_retreat":
 			if round_number==1:
 				result.own=1.15; result.enemy=0.95; result.phase="yield"

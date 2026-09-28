@@ -118,11 +118,12 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 	var item:=line(id);var report:=status(id,slot)
 	if item.is_empty() or slot not in item.slots:return {"error":"Training formation no longer exists."}
 	if not bool(report.early if early else report.ready):return {"error":"Early deployment needs 20% training; automatic deployment needs full people, equipment and training."}
-	if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty() or host.recovery.home_unavailable():return {"error":"Deployment site is unavailable during combat, occupation or unresolved aftermath."}
+	if host._home_battle_running() or host.recovery.home_unavailable():return {"error":"Deployment site is unavailable during a fight at home or occupation."}
 	var target:int=item.target_army
 	if target!=0:
 		var target_index:int=host._field_army_index(target)
 		if target_index<0:return {"error":"Assigned army no longer exists. Choose another destination."}
+		if host.command_hierarchy.battle.engaged(target):return {"error":"That army is fighting; recruits join it when the fight is over."}
 		var force:Dictionary=host.field_armies[target_index]
 		if String(force.get("location_id",""))!="player_home" or String(force.get("status",""))!="stationed":return {"error":"Assigned army must be at home to receive recruits; soldiers cannot teleport."}
 	elif host.field_armies.size()>=host.field_army_capacity():return {"error":"Assign recruits to an existing army at home."}

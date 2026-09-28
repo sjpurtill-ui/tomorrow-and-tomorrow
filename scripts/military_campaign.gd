@@ -66,7 +66,17 @@ const SETTLEMENT_DEFENSE_STAGES:=[
 var simulator:RefCounted
 var home_army:Dictionary={}
 var battle_history:Array[Dictionary]=[]
+## A victory's captives and spoils before the general settles them. Settled
+## the moment the battle ends (_settle_aftermath): nothing waits on the ruler.
 var pending_aftermath:Dictionary={}
+## The ruler's standing word on what becomes of captives and spoils after a
+## fight: {prisoners, spoils, general} (any may be missing: then the general
+## decides by the era's custom and his own nature).
+var aftermath_practice:Dictionary={}
+## Recent settlements, newest first: what was done with each victory's
+## captives and spoils, with the numbers, so the ruler can change it in court
+## while the window is open (revise_settlement).
+var settlements:Array=[]
 var military_inventory:Dictionary={}
 var military_consumables:Dictionary={}
 var damaged_equipment:Dictionary={}
@@ -184,6 +194,8 @@ func reset_for_new_world()->void:
 	home_army={}
 	battle_history.clear()
 	pending_aftermath.clear()
+	aftermath_practice={}
+	settlements=[]
 	active_siege.clear(); siege_history.clear()
 	military_inventory=_empty_equipment_inventory()
 	military_consumables=_empty_consumable_inventory()
@@ -1015,7 +1027,7 @@ func _movement_destination(destination_id:String)->Dictionary:
 
 func create_field_army(personnel:int,custom_name:String="")->Dictionary:
 	# Home troops can form a new army while other armies fight elsewhere.
-	if _home_battle_running() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
+	if _home_battle_running(): return {"error":"Our people at home are fighting; no new band can form until the fight is over."}
 	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d independent land commands. Return and stand down a detachment before creating another." % [field_armies.size(),field_army_capacity()]}
 	var requested:=maxi(0,personnel)
 	var available:=maxi(0,int(home_army.get("troops",0)))
@@ -1460,7 +1472,7 @@ func _detach_matching_formations(entries:Array)->Array[Dictionary]:
 
 
 func template_deployment_availability(template_id:int)->Dictionary:
-	if _home_battle_running() or not pending_aftermath.is_empty(): return {"error":"Finish the active battle and aftermath before reorganizing armies."}
+	if _home_battle_running(): return {"error":"Our people at home are fighting; no new band can form until the fight is over."}
 	if field_armies.size()>=field_army_capacity(): return {"error":"Command capacity is full: %d/%d field armies." % [field_armies.size(),field_army_capacity()]}
 	var index:=_template_index(template_id)
 	if index<0: return {"error":"That army build no longer exists."}
@@ -1628,7 +1640,7 @@ func _process_field_army_movement_day()->void:
 		if remaining<=0.001 and army.has("city_operation"):
 			var planned:Dictionary=army.city_operation.duplicate(true)
 			field_armies[index].erase("city_operation")
-			var result:=order_city_operation(int(army.army_id),String(planned.civ_id),String(planned.region_id),bool(planned.besiege),bool(planned.get("raid",false)))
+			var result:=order_city_operation(int(army.army_id),String(planned.civ_id),String(planned.region_id),bool(planned.besiege),bool(planned.get("raid",false)),planned.get("approach",{}) if planned.get("approach") is Dictionary else {})
 			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"City order blocked" if result.has("error") else "City engagement begins","description":String(result.get("error","The army reached its ordered city and began hostilities.")),"domain":"security","severity":"warning"})
 		if remaining<=0.001 and not intercept_target_id.is_empty():
 			var contact_result:=launch_map_engagement(int(army.get("army_id",0)),intercept_target_id)
@@ -1935,18 +1947,287 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	if not aftermath.is_empty(): aftermath["home_force_name"]=home_force_name
 	if String(aftermath.get("type","continued"))=="continued": aftermath.clear()
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)) and int(aftermath.get("prisoners",0))==0 and not bool(aftermath.get("captured_general",false)) and not preload("res://scripts/raid_policy.gd").has_spoils(aftermath.get("spoils",{})): aftermath.clear()
-	# Battles on several fronts can end close together. The captives of an
-	# earlier victory still waiting on the ruler's word are held, as the
-	# general would hold them, rather than lost when the next ones arrive.
-	if not aftermath.is_empty() and not pending_aftermath.is_empty(): resolve_aftermath("hold","army stores","hold")
-	if not aftermath.is_empty(): pending_aftermath=aftermath
+	# The general settles the captives and spoils at once, by the ruler's
+	# standing word or the era's custom and his own nature, and says so in his
+	# report. Nothing waits on the ruler; he can change it in court for a while.
+	if not aftermath.is_empty():
+		var settled:=_settle_aftermath(aftermath,result)
+		if not settled.is_empty():
+			result["aftermath_settled"]=settled.duplicate(true)
+			battle_history[0]["aftermath_settled"]=settled.duplicate(true)
 	_record_council_battle(result)
 	battle_resolved.emit(result.duplicate(true))
-	if not aftermath.is_empty():
-		if bool(result.get("commander_managed",false)):resolve_aftermath("hold","army stores","hold")
-		else:aftermath_required.emit(pending_aftermath.duplicate(true))
 	army_changed.emit(home_army.duplicate(true))
 	return result
+
+
+## What may be done with captives, spoils and a captured leader.
+const AFTERMATH_POLICIES:={"prisoners":["hold","release","exchange","parole","ransom","execute","enslave"],
+	"spoils":["army stores","reward troops","state treasury","return property","unrestricted plunder"],"general":["hold","release","ransom","execute"]}
+## How long the ruler can still change what the general did, and how many
+## settlements are remembered.
+const SETTLE_WINDOW_DAYS:=30
+const SETTLEMENTS_KEPT:=8
+
+
+## What the general does after a victory when the ruler has said nothing:
+## the era's custom, bent by his own nature (fixed for his life, from his
+## name). He never puts captives to death on his own.
+func _general_practice(general_name:String,has_people:bool)->Dictionary:
+	var stage:=String(preload("res://scripts/hud/era_words.gd").stage())
+	var nature:=float(posmod(hash("nature:"+general_name),1000))/1000.0
+	var prisoners:="hold"
+	match stage:
+		"hearth": prisoners="release" if nature<0.25 else "enslave"
+		"lettered": prisoners="release" if nature<0.2 else ("ransom" if has_people and nature<0.7 else "enslave")
+	var spoils:="reward troops" if stage=="hearth" and nature>=0.75 else "army stores"
+	var general:="ransom" if stage=="lettered" and has_people else "hold"
+	return {"prisoners":prisoners,"spoils":spoils,"general":general}
+
+
+## The practice for one victory: the ruler's standing word where given, else
+## the general's own. by: {part: "ruler" | "general"}.
+func _practice_for(general_name:String,has_people:bool)->Dictionary:
+	var practice:=_general_practice(general_name,has_people)
+	var by:={}
+	for part in ["prisoners","spoils","general"]:
+		by[part]="general"
+		var word:=String(aftermath_practice.get(part,""))
+		if word!="" and word in AFTERMATH_POLICIES[part]:
+			practice[part]=word; by[part]="ruler"
+	# Ransom needs a people to pay it.
+	if not has_people and String(practice.prisoners)=="ransom": practice["prisoners"]="hold"
+	if not has_people and String(practice.general)=="ransom": practice["general"]="hold"
+	practice["by"]=by
+	return practice
+
+
+## Settles a victory's captives and spoils now (resolve_aftermath) and keeps
+## what was done, with the numbers, for the report and for the ruler.
+func _settle_aftermath(aftermath:Dictionary,result:Dictionary={})->Dictionary:
+	var home_side:=String(result.get("home_side","attacker"))
+	var ours:Dictionary=result.get(home_side,{}) if result.get(home_side) is Dictionary else {}
+	var general_name:=String((ours.get("commander",{}) as Dictionary).get("name",""))
+	if general_name=="": general_name=String((home_army.get("commander",{}) as Dictionary).get("name",""))
+	var threat:Dictionary=result.get("threat",{}) if result.get("threat") is Dictionary else {}
+	var civ_id:=String(threat.get("source_civ_id",aftermath.get("civ_id","")))
+	var practice:=_practice_for(general_name,civ_id!="")
+	var prisoners:=maxi(0,int(aftermath.get("prisoners",0)))
+	var taken:Dictionary=(aftermath.get("spoils",{}) as Dictionary).duplicate(true) if aftermath.get("spoils") is Dictionary else {}
+	var has_spoils:=preload("res://scripts/raid_policy.gd").has_spoils(taken)
+	var captured_general:=bool(aftermath.get("captured_general",false))
+	pending_aftermath=aftermath.duplicate(true)
+	var outcome:=resolve_aftermath(String(practice.prisoners),String(practice.spoils),String(practice.general))
+	pending_aftermath={}
+	if outcome.has("error") or (prisoners<=0 and not has_spoils and not captured_general): return {}
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var settlement:={"id":"settled-%d-%d" % [day,int(result.get("seed",0))],"day":day,"until":day+SETTLE_WINDOW_DAYS,"seed":int(result.get("seed",0)),"battle_id":String(result.get("id","")),
+		"general":general_name,"people":String(threat.get("source_name","")),"civ_id":civ_id,
+		"prisoners":prisoners,"prisoner_policy":String(practice.prisoners),"spoils_taken":taken,"has_spoils":has_spoils,"spoils":(outcome.get("spoils",{}) as Dictionary).duplicate(true),
+		"spoils_policy":String(practice.spoils),"captured_general":captured_general,"enemy_general":String(aftermath.get("commander","")),"general_policy":String(practice.general),
+		"by":(practice.by as Dictionary).duplicate(),"changes":[]}
+	settlement["line"]=settlement_line(settlement)
+	settlements.push_front(settlement)
+	while settlements.size()>SETTLEMENTS_KEPT: settlements.pop_back()
+	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Captives and spoils settled","description":String(settlement.line),"domain":"security","severity":"notice"})
+	return settlement
+
+
+## One plain line for the report: what the general did with the captives,
+## their leader and the spoils ("Rovik sent twelve captives home as
+## bondservants; the spoils went to the stores.").
+static func settlement_line(s:Dictionary)->String:
+	var Account:=preload("res://scripts/battle_account.gd")
+	var who:=Account._first_name(String(s.get("general","")))
+	if who=="": who="The war leader"
+	var people:=String(s.get("people",""))
+	var their:=("the "+people) if people!="" and not people.begins_with("UNIDENTIFIED") else "their people"
+	var parts:Array[String]=[]
+	var n:=int(s.get("prisoners",0))
+	if n>0:
+		var many:=Account._people(n,"captive","captives")
+		match String(s.get("prisoner_policy","hold")):
+			"enslave": parts.append("%s sent %s home as bondservants" % [who,many])
+			"release": parts.append("%s let %s go" % [who,many])
+			"parole": parts.append("%s let %s go on their word" % [who,many])
+			"ransom": parts.append("%s gave %s back to %s for ransom" % [who,many,their])
+			"execute": parts.append("%s had %s put to death" % [who,many])
+			"exchange": parts.append("%s traded %s for our own people" % [who,many])
+			_: parts.append("%s is holding %s under guard" % [who,many])
+	if bool(s.get("captured_general",false)):
+		var leader:=String(s.get("enemy_general",""))
+		var named:=("their leader, %s," % Account._first_name(leader)) if leader!="" else "their leader"
+		match String(s.get("general_policy","hold")):
+			"ransom": parts.append("%s was given back for ransom" % named)
+			"release": parts.append("%s was let go" % named)
+			"execute": parts.append("%s was put to death" % named)
+			_: parts.append("%s is held" % named)
+	if bool(s.get("has_spoils",false)):
+		parts.append(String({"army stores":"the spoils went to the stores","reward troops":"the spoils went to the warriors","state treasury":"the spoils went to the treasury",
+			"return property":"what we took was given back","unrestricted plunder":"the warriors kept all they could carry"}.get(String(s.get("spoils_policy","army stores")),"the spoils went to the stores")))
+	if parts.is_empty(): return ""
+	# "As you ordered" only when every part told was the ruler's standing word.
+	var by:Dictionary=s.get("by",{})
+	var told:Array=[]
+	if n>0: told.append("prisoners")
+	if bool(s.get("captured_general",false)): told.append("general")
+	if bool(s.get("has_spoils",false)): told.append("spoils")
+	var ordered:=not told.is_empty() and told.all(func(part:Variant)->bool: return String(by.get(String(part),""))=="ruler")
+	var line:="; ".join(parts)
+	return line.substr(0,1).to_upper()+line.substr(1)+(", as you ordered." if ordered else ".")
+
+
+## A victory's aftermath left waiting (an older save): the general settles it
+## now, as he would have when the battle ended.
+func settle_pending_aftermath()->Dictionary:
+	if pending_aftermath.is_empty(): return {}
+	var waiting:=pending_aftermath.duplicate(true)
+	var record:Dictionary=battle_history[0] if not battle_history.is_empty() else {}
+	var settled:=_settle_aftermath(waiting,record)
+	if not settled.is_empty() and not battle_history.is_empty() and not battle_history[0].has("aftermath_settled"): battle_history[0]["aftermath_settled"]=settled.duplicate(true)
+	return settled
+
+
+## The ruler's standing word for every victory from now on: part is
+## prisoners, spoils or general; policy one of AFTERMATH_POLICIES[part], or ""
+## to leave it to the general again.
+func set_aftermath_practice(part:String,policy:String)->Dictionary:
+	if not AFTERMATH_POLICIES.has(part): return {"error":"Unknown part of the aftermath: %s" % part}
+	if policy=="":
+		aftermath_practice.erase(part)
+		return {"ok":true,"part":part,"policy":""}
+	if policy not in AFTERMATH_POLICIES[part]: return {"error":"Unknown %s policy: %s" % [part,policy]}
+	aftermath_practice[part]=policy
+	return {"ok":true,"part":part,"policy":policy}
+
+
+## The latest settlement the ruler can still change ({} when none is open).
+func open_settlement(part:String="")->Dictionary:
+	var today:=int(WorldSimulation.state.elapsed_days)
+	for item in settlements:
+		var s:Dictionary=item
+		if today>int(s.get("until",-1)): continue
+		if part=="prisoners" and int(s.get("prisoners",0))<=0: continue
+		if part=="spoils" and not bool(s.get("has_spoils",false)): continue
+		if part=="general" and not bool(s.get("captured_general",false)): continue
+		return s
+	return {}
+
+
+## The ruler changes what the general did with the latest victory's captives
+## or spoils, while it can still be changed. Only what is still in our hands
+## can be changed, and only by what is really there: freed captives are gone,
+## ransom paid is paid, spoils already spent are spent.
+## {ok, done (plain words with numbers), moved} | {error (plain words), reason}.
+func revise_settlement(part:String,policy:String)->Dictionary:
+	if not AFTERMATH_POLICIES.has(part) or policy not in AFTERMATH_POLICIES[part]: return {"error":"That is not something I can do with them.","reason":"unknown"}
+	var s:=open_settlement(part)
+	if s.is_empty():
+		var last:Dictionary=settlements[0] if not settlements.is_empty() else {}
+		if last.is_empty(): return {"error":"We have taken nobody and nothing in any fight yet.","reason":"none"}
+		var ago:=int(WorldSimulation.state.elapsed_days)-int(last.get("day",0))
+		return {"error":"That was settled %d days ago; it is done and cannot be undone now." % ago,"reason":"too_late"}
+	var today:=int(WorldSimulation.state.elapsed_days)
+	var ago:=today-int(s.get("day",today))
+	var when:="today" if ago<=0 else ("yesterday" if ago==1 else "%d days ago" % ago)
+	match part:
+		"prisoners": return _revise_captives(s,policy,when)
+		"spoils": return _revise_spoils(s,policy,when)
+		_: return _revise_leader(s,policy,when)
+
+
+func _revise_captives(s:Dictionary,policy:String,when:String)->Dictionary:
+	var Account:=preload("res://scripts/battle_account.gd")
+	var was:=String(s.get("prisoner_policy","hold"))
+	var left:=maxi(0,int(s.get("prisoners",0))-int(s.get("prisoners_changed",0)))
+	if policy==was: return {"ok":true,"done":"That is what was done already.","moved":0,"reason":"same"}
+	var gone:={"release":"They were let go %s and are home by now." % when,"parole":"They were let go on their word %s and are home by now." % when,
+		"ransom":"Their people paid for them %s; they are home." % when,"execute":"They were put to death %s." % when,"exchange":"They were traded %s." % when}
+	if gone.has(was): return {"error":String(gone[was]),"reason":"gone"}
+	if left<=0: return {"error":"There is nobody left of them to change.","reason":"none_left"}
+	var moved:=0
+	var outcome:={}
+	if was=="hold":
+		# Held under guard with the other captives: as many as are still here.
+		moved=mini(left,foreign_prisoners)
+		if moved<=0: return {"error":"The captives from that fight are no longer in our hands.","reason":"gone"}
+		if policy!="hold":
+			var done:=resolve_held_prisoners(policy,moved)
+			if done.has("error"): return {"error":String(done.error),"reason":"cannot"}
+	elif was=="enslave":
+		# Bondservants at our hearths: as many as are still among us.
+		moved=mini(left,floori(float(WorldSimulation.state.resource_stockpiles.get("Forced Labor",0.0))))
+		if moved<=0: return {"error":"None of those bondservants is still among us.","reason":"gone"}
+		WorldSimulation.state.resource_stockpiles["Forced Labor"]=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Forced Labor",0.0))-float(moved))
+		if policy=="hold": foreign_prisoners+=moved
+		else:
+			# Freeing them now wins back less than never binding them would have.
+			if policy in ["release","parole"]: WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.015,0.0,1.0)
+			_apply_campaign_prisoner_policy(policy,moved,outcome)
+	else:
+		return {"error":"That cannot be changed now.","reason":"cannot"}
+	s["prisoners_changed"]=int(s.get("prisoners_changed",0))+moved
+	var words:=String({"release":"%s set free","parole":"%s let go on their word","ransom":"%s sent back to their people for ransom","enslave":"%s put to work as bondservants",
+		"execute":"%s put to death","hold":"%s kept under guard","exchange":"%s traded for our own people"}.get(policy,"%s dealt with")) % Account._people(moved,"captive","captives")
+	(s.changes as Array).append({"day":int(WorldSimulation.state.elapsed_days),"part":"prisoners","from":was,"to":policy,"count":moved})
+	s["prisoner_policy"]=policy if moved>=left else was
+	return {"ok":true,"done":_cap_first(words)+".","moved":moved,"from":was,"to":policy}
+
+
+func _revise_spoils(s:Dictionary,policy:String,when:String)->Dictionary:
+	var was:=String(s.get("spoils_policy","army stores"))
+	if policy==was: return {"ok":true,"done":"That is what was done already.","moved":0,"reason":"same"}
+	if bool(s.get("spoils_changed",false)): return {"error":"The spoils were already dealt with again; what is left is where it is.","reason":"done"}
+	if was!="army stores": return {"error":"The spoils went out of the stores %s; they cannot be gathered back." % when,"reason":"gone"}
+	if policy not in ["reward troops","return property"]: return {"error":"The spoils are already in the stores.","reason":"same"}
+	# What the stores still hold of what we took goes out: never more.
+	var taken:Dictionary=s.get("spoils_taken",{})
+	var moved:={}
+	var food:=minf(float(taken.get("supplies",0)),float(WorldSimulation.state.resource_stockpiles.get("Food",0.0)))
+	if food>0.0: moved["food"]=WorldSimulation.food.issue_for_obligation(food,"spoils_out","Spoils given out of the stores")
+	var carts:=minf(float(taken.get("carts",0)),float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0)))
+	if carts>0.0: WorldSimulation.state.resource_stockpiles["Transport Carts"]=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))-carts; moved["carts"]=carts
+	var gear:=0
+	for weapon in (taken.get("weapons",{}) as Dictionary):
+		var out:=mini(int(taken.weapons[weapon]),int(military_inventory.get(weapon,0)))
+		if out>0: military_inventory[weapon]=int(military_inventory.get(weapon,0))-out; gear+=out
+	if gear>0: moved["gear"]=gear
+	var share:=clampf((float(moved.get("food",0.0))+float(moved.get("carts",0.0))*5.0+float(gear)*2.0)/maxf(1.0,float(taken.get("supplies",0))+float(taken.get("carts",0))*5.0+2.0*float((taken.get("weapons",{}) as Dictionary).values().reduce(func(a,b): return int(a)+int(b),0))),0.0,1.0)
+	if policy=="reward troops":
+		home_army["morale"]=clampf(float(home_army.get("morale",0.0))+0.10*share,0.0,1.5)
+	else:
+		WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))+0.06*share,0.0,1.0)
+		_adjust_war_reputation(0.04*share,0.0,-0.025*share)
+	s["spoils_changed"]=true
+	s["spoils_policy"]=policy
+	(s.changes as Array).append({"day":int(WorldSimulation.state.elapsed_days),"part":"spoils","from":was,"to":policy,"moved":moved})
+	var bits:PackedStringArray=PackedStringArray()
+	if float(moved.get("food",0.0))>=1.0: bits.append("%d food" % roundi(float(moved.food)))
+	if float(moved.get("carts",0.0))>=1.0: bits.append("%d %s" % [roundi(float(moved.carts)),"cart" if roundi(float(moved.carts))==1 else "carts"])
+	if gear>0: bits.append("%d %s" % [gear,"weapon" if gear==1 else "weapons"])
+	if bits.is_empty(): return {"ok":true,"done":"Nothing of it is left in the stores to give out; it has been used.","moved":0,"to":policy}
+	var what:=", ".join(bits)
+	return {"ok":true,"done":("%s went from the stores to the warriors." if policy=="reward troops" else "%s went back to their people.") % _cap_first(what),"moved":moved,"from":was,"to":policy}
+
+
+func _revise_leader(s:Dictionary,policy:String,when:String)->Dictionary:
+	var was:=String(s.get("general_policy","hold"))
+	if policy==was: return {"ok":true,"done":"That is what was done already.","moved":0,"reason":"same"}
+	if was!="hold": return {"error":"Their leader was dealt with %s; that cannot be undone." % when,"reason":"gone"}
+	var name:=String(s.get("enemy_general",""))
+	var index:=-1
+	for i in held_generals.size():
+		if String((held_generals[i] as Dictionary).get("name",""))==name: index=i; break
+	if index<0: return {"error":"Their leader is no longer in our hands.","reason":"gone"}
+	var done:=resolve_held_general(index,policy)
+	if done.has("error"): return {"error":String(done.error),"reason":"cannot"}
+	s["general_policy"]=policy
+	(s.changes as Array).append({"day":int(WorldSimulation.state.elapsed_days),"part":"general","from":was,"to":policy})
+	return {"ok":true,"done":String({"release":"Their leader was let go.","ransom":"Their leader was sent back for ransom.","execute":"Their leader was put to death."}.get(policy,"It is done.")),"moved":1,"from":was,"to":policy}
+
+
+static func _cap_first(text:String)->String:
+	return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
 
 
 func resolve_aftermath(prisoner_policy:String,spoils_policy:String,general_policy:="hold")->Dictionary:
@@ -2223,7 +2504,13 @@ func _engagement_tactics(engagement:Dictionary)->Dictionary:
 	var sides:={}
 	sides[home_side]={"force":engagement.get(home_side,{}),"known":Tactics.known_for_player()}
 	sides[enemy_side]={"force":engagement.get(enemy_side,{}),"known":Tactics.known_from_force(engagement.get(enemy_side,{}),float(threat.get("technology",0.2)))}
-	return Tactics.plan(sides,{"kind":kind,"terrain":float(engagement.get("terrain_defense",1.0))},int(engagement.get("seed",1)))
+	var plan:=Tactics.plan(sides,{"kind":kind,"terrain":float(engagement.get("terrain_defense",1.0))},int(engagement.get("seed",1)))
+	# The ruler ordered a strike by night: whether the band reaches them unseen
+	# is rolled once, at the chance stated when it was ordered.
+	var approach:Dictionary=threat.get("approach",{}) if threat.get("approach") is Dictionary else {}
+	if String(approach.get("kind",""))=="night" and home_side=="attacker":
+		plan=Tactics.night_approach(plan,home_side,float(approach.get("chance",Tactics.SURPRISE_MIN)),int(engagement.get("seed",1)))
+	return plan
 
 
 func _engagement_home_side(engagement:Dictionary)->String:
@@ -2706,7 +2993,9 @@ func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionar
 		distance=float(road.length_km); direct=bool(road.get("direct",true))
 	return {"ok":true,"at_target":distance<=0.5,"distance_km":distance,"direct":direct,"days":ceili(distance/maxf(.1,_field_army_speed(field_armies[index])))}
 
-func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:bool=false,raid:bool=false)->Dictionary:
+## approach: how the band goes in ({kind:"night", chance}: a strike by
+## night ordered in court, court_war_orders.gd); carried to the attack.
+func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:bool=false,raid:bool=false,approach:Dictionary={})->Dictionary:
 	var quote:=city_operation_quote(army_id,civ_id,region_id)
 	if quote.has("error"):return quote
 	var index:=_field_army_index(army_id)
@@ -2714,6 +3003,7 @@ func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:boo
 		var result:=move_field_army(army_id,region_id)
 		if result.has("error"):return result
 		field_armies[index]["city_operation"]={"civ_id":civ_id,"region_id":region_id,"besiege":besiege,"raid":raid}
+		if not approach.is_empty() and not besiege: field_armies[index].city_operation["approach"]=approach.duplicate(true)
 		_begin_operation(index,region_id)
 		return {"ok":true,"queued":true,"distance_km":float(quote.distance_km),"days":int(quote.days),"message":"%s: marching %.1f km, about %d days, then %s. War starts on hostile contact, not departure." % [String(field_armies[index].name),float(quote.distance_km),int(quote.days),"raiding its fields and stores" if raid else ("besieging the city" if besiege else "attacking the city")]}
 	var old_location:=String(field_armies[index].get("location_id",""));var old_status:=String(field_armies[index].get("status","stationed"))
@@ -2722,16 +3012,17 @@ func order_city_operation(army_id:int,civ_id:String,region_id:String,besiege:boo
 	field_armies[index]["location_id"]=region_id;field_armies[index]["status"]="stationed";field_armies[index].erase("city_operation")
 	var town_report:Dictionary=WorldSimulation.world.city_intelligence.known("player",region_id)
 	if String(town_report.get("name",""))!="": field_armies[index]["location_name"]=String(town_report.name)
-	var result:=launch_raid(civ_id,region_id) if raid else (start_offensive_siege(civ_id,region_id,army_id) if besiege else launch_offensive(civ_id,region_id,army_id))
+	var result:=launch_raid(civ_id,region_id,approach) if raid else (start_offensive_siege(civ_id,region_id,army_id) if besiege else launch_offensive(civ_id,region_id,army_id,approach))
 	if result.has("error"):
 		field_armies[index]["location_id"]=old_location;field_armies[index]["status"]=old_status;field_armies[index]["location_name"]=old_location_name
 	return result
 
-func launch_offensive(civ_id:String,region_id:String="",army_id:int=0)->Dictionary:
+func launch_offensive(civ_id:String,region_id:String="",army_id:int=0,approach:Dictionary={})->Dictionary:
 	var availability:=offensive_campaign_availability(civ_id,region_id,army_id)
 	if availability.has("error"): return availability
 	var incident:Dictionary=availability.incident
 	_create_civilization_threat(incident,"offensive")
+	if not approach.is_empty(): active_threat["approach"]=approach.duplicate(true)
 	var result:=begin_threat_engagement(false)
 	if not result.has("error"):
 		active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(civ_id,region_id,"A player army attacked the settlement without awaiting a declaration.")
@@ -2757,10 +3048,11 @@ func raid_campaign_availability(civ_id:String,region_id:String="")->Dictionary:
 	return {"ok":true,"incident":incident,"field_army":maneuver_army.duplicate(true)}
 
 
-func launch_raid(civ_id:String,region_id:String="")->Dictionary:
+func launch_raid(civ_id:String,region_id:String="",approach:Dictionary={})->Dictionary:
 	var availability:=raid_campaign_availability(civ_id,region_id)
 	if availability.has("error"): return availability
 	_create_civilization_threat(availability.incident,"offensive")
+	if not approach.is_empty(): active_threat["approach"]=approach.duplicate(true)
 	return begin_threat_engagement()
 
 
@@ -3062,6 +3354,8 @@ func export_state()->Dictionary:
 		"home_army":home_army.duplicate(true),
 		"battle_history":battle_history.duplicate(true),
 		"pending_aftermath":pending_aftermath.duplicate(true),
+		"aftermath_practice":aftermath_practice.duplicate(true),
+		"settlements":settlements.duplicate(true),
 		"military_inventory":military_inventory.duplicate(true),
 		"military_consumables":military_consumables.duplicate(true),
 		"damaged_equipment":damaged_equipment.duplicate(true),
@@ -3404,6 +3698,16 @@ func _apply_imported_state(payload:Dictionary)->void:
 	_normalize_formation_ammunition()
 	battle_history.assign(payload.get("battle_history",[]))
 	pending_aftermath=(payload.get("pending_aftermath",{}) as Dictionary).duplicate(true)
+	aftermath_practice={}
+	var practice:Variant=payload.get("aftermath_practice",{})
+	if practice is Dictionary:
+		for part in ["prisoners","spoils","general"]:
+			if String((practice as Dictionary).get(part,"")) in AFTERMATH_POLICIES.get(part,[]): aftermath_practice[part]=String(practice[part])
+	settlements=[]
+	var settled:Variant=payload.get("settlements",[])
+	if settled is Array:
+		for item in settled:
+			if item is Dictionary and settlements.size()<SETTLEMENTS_KEPT: settlements.append((item as Dictionary).duplicate(true))
 	military_inventory=_empty_equipment_inventory()
 	for item in (payload.get("military_inventory",{}) as Dictionary): military_inventory[item]=int(payload.military_inventory[item])
 	military_consumables=_empty_consumable_inventory()
@@ -4052,6 +4356,8 @@ func _reconcile_external_military_mortality()->Dictionary:
 
 
 func _process_military_day()->void:
+	# Nothing waits on the ruler: an older save's aftermath is settled now.
+	if not pending_aftermath.is_empty(): settle_pending_aftermath()
 	command_hierarchy.advance(last_processed_day)
 	joint_operations.advance(last_processed_day)
 	recovery.advance(last_processed_day)
@@ -4439,9 +4745,8 @@ func _training_program_gate(program_id:String,include_campaign_state:bool=true)-
 	if String(definition.get("scope","army"))=="command" and int(WorldSimulation.state.population_allocations.get("Defense",0))<3:
 		return {"error":"Staff exercises require at least 3 people committed to Defense administration."}
 	if include_campaign_state:
-		if not active_engagement.is_empty(): return {"error":"Training cannot begin during a live battle."}
+		if _home_battle_running(): return {"error":"Training cannot begin while our people at home are fighting."}
 		if not active_threat.is_empty(): return {"error":"Resolve the approaching threat before beginning a training program."}
-		if not pending_aftermath.is_empty(): return {"error":"Resolve the battle aftermath before beginning a training program."}
 	return {}
 
 
@@ -4493,9 +4798,8 @@ func _process_training_program_day()->void:
 		return
 	var definition:Dictionary=TRAINING_PROGRAMS[program_id]
 	var interruption:=""
-	if not active_engagement.is_empty(): interruption="Paused during a live battle."
+	if _home_battle_running(): interruption="Paused while our people at home are fighting."
 	elif not active_threat.is_empty(): interruption="Paused while the army responds to an approaching threat."
-	elif not pending_aftermath.is_empty(): interruption="Paused until the battle aftermath is resolved."
 	var participants:=_training_program_participants(definition)
 	if String(definition.scope)=="army" and participants<=0: interruption="Paused: no trained soldiers are stationed at home."
 	if String(definition.scope)=="command" and participants<=0: interruption="Paused because no command cadre is available."
@@ -4684,7 +4988,7 @@ func _automatic_basic_trainees()->int:
 func _ensure_automatic_basic_training()->void:
 	# Assignment to Defense is enough to start basic levy/watch instruction. Players
 	# still order every advanced unit, weapon conversion, reinforcement, and exercise.
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty(): return
+	if _home_battle_running(): return
 	for template:Dictionary in army_templates:
 		if bool(template.get("recruitment_requested",false)):return
 	var target:=_home_garrison_target()
@@ -5559,7 +5863,7 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 	return {"id":String(operation.id),"active":not active_siege.is_empty() and String(active_siege.id)==String(operation.id),"mode":String(operation.mode),"name":String(city.get("name",(String(archived_home.get("name",WorldSimulation.state.settlement_name)) if String(archived_home.get("name",WorldSimulation.state.settlement_name))!="" else "Home settlement") if not offensive else "Reported settlement")),"population":population,"defense_stage":defense_stage,"damage":damage,"blockade":float(operation.get("blockade",0)),"description":description,"own_force":own_force,"battle":battle,"battle_active":live_battle,"summary":String(operation.get("summary","")),"region_id":String(operation.region_id),"rival":String(operation.defender_id if offensive else operation.attacker_id)}
 
 func template_recruitment_blocker()->String:
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return "Resolve the battle or aftermath before recruiting."
+	if _home_battle_running():return "Our people at home are fighting; recruiting waits until the fight is over."
 	if recovery.home_unavailable():return "Home is occupied."
 	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "All available adults committed: %d of %d people." % [_mobilized_count(),recruitment_capacity()]
 	return "Available places will enter training on the next simulation day while the order is active."
@@ -5569,7 +5873,7 @@ func cancel_template_recruitment(template_id:int)->Dictionary:
 	army_templates[index].recruitment_requested=false
 	return {"ok":true,"message":"Further recruitment stopped. Existing soldiers and queued trainees remain."}
 func _process_requested_templates()->void:
-	if not active_engagement.is_empty() or not pending_aftermath.is_empty():return
+	if _home_battle_running():return
 	for template:Dictionary in army_templates:
 		if bool(template.get("recruitment_requested",false)):queue_template_training(int(template.template_id),false)
 func grouped_home_formations(force:Dictionary={})->Array[Dictionary]:
