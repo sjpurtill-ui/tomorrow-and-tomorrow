@@ -25,11 +25,18 @@ extends RefCounted
 ##   land_route_state  "ok" | "none"
 ##   land_route_km     the road's length
 ##   land_leg_base     the scheduler's straight-line leg_days, before scaling
+##   land_route_effort the road's effort in level km (march_terrain.gd); each
+##                     land_route point also carries "e", the effort to it,
+##                     so the formation slows on hills, in forest and marsh
+##                     exactly as our own armies do.
 ## Static helpers; preload.
 
 const Route:=preload("res://scripts/army_land_route.gd")
+const March:=preload("res://scripts/march_terrain.gd")
 
 const PLANS_PER_DAY:=3
+## Lattice cells across a rival's straight line (army_land_route.gd).
+const RIVAL_CELLS_ACROSS:=28.0
 const MAX_ROUTE_POINTS:=96
 ## How far along the road a sighting's plausible way ahead reaches (km).
 const ROAD_AHEAD_KM:=40.0
@@ -56,26 +63,68 @@ static func plan(f:Dictionary,ground:Callable=Callable())->Dictionary:
 	var fresh:=String(f.get("land_route_key",""))!=key(f)
 	if fresh or not f.has("land_leg_base"): f["land_leg_base"]=float(f.get("leg_days",30.0))
 	var straight:=a.distance_to(b)
-	var found:=Route.find(a,b,ground)
+	var mix:=mix_of(f)
+	# The same measure as our armies, on a coarser lattice: up to
+	# PLANS_PER_DAY of these are planned inside one day's tick.
+	var ctx:=March.context(mix)
+	if not ctx.is_empty(): ctx["cells_across"]=RIVAL_CELLS_ACROSS; ctx["key"]=String(ctx.key)+"|rival"
+	var found:=Route.find(a,b,ground,true,ctx)
+	if not found.has("error") and not found.has("e"): found=Route._with_profile(a,found.get("points",[]),mix,ground,found)
 	f["land_route_key"]=key(f)
 	if found.has("error"):
 		f["land_route_state"]="none"
 		f["land_route"]=[]
 		f["land_route_km"]=0.0
+		f["land_route_effort"]=0.0
 		f["leg_days"]=float(f.land_leg_base)
 		return found
-	var points:Array=[{"x":a.x,"z":a.y}]
-	for p:Vector2 in found.points:
-		if points.size()>=MAX_ROUTE_POINTS: break
-		points.append({"x":p.x,"z":p.y})
-	points[-1]={"x":b.x,"z":b.y}
+	var pts:Array=found.get("points",[])
+	var marks:PackedFloat32Array=found.get("e",PackedFloat32Array())
+	var points:Array=[{"x":a.x,"z":a.y,"e":0.0}]
+	# Bounded: keep every k-th point (always the last) with its effort mark.
+	var stride:=maxi(1,ceili(float(pts.size())/float(MAX_ROUTE_POINTS-1)))
+	for i in pts.size():
+		if i%stride!=0 and i!=pts.size()-1: continue
+		var p:Vector2=pts[i]
+		points.append({"x":p.x,"z":p.y,"e":float(marks[i]) if i<marks.size() else 0.0})
+	points[-1]["x"]=b.x; points[-1]["z"]=b.y
+	var effort:=float(found.get("effort_km",found.length_km))
 	f["land_route_state"]="ok"
 	f["land_route"]=points
 	f["land_route_km"]=float(found.length_km)
-	# March time grows with the real road: a detour round a bay takes longer.
-	var ratio:=float(found.length_km)/straight if straight>0.05 else 1.0
+	f["land_route_effort"]=effort
+	# March time grows with the real road and its ground (march_terrain.gd):
+	# a detour round a bay, or hills and forest on the way, take longer.
+	var ratio:=effort/straight if straight>0.05 else 1.0
 	f["leg_days"]=clampf(float(f.land_leg_base)*maxf(1.0,ratio),1.0,1800.0)
 	return found
+
+## A rival formation's arms (its unit when it is known), for the ground's weights.
+static func mix_of(f:Dictionary)->Dictionary:
+	var unit:=String(f.get("formation_unit",f.get("unit","")))
+	if unit=="": return {"foot":1.0}
+	return {March.arm_of(unit):1.0}
+
+## Where along a planned road a formation stands at this fraction of its
+## march: the fraction of the road's effort, so rough stretches take longer.
+static func point_at(road:Array[Vector2],marks:PackedFloat32Array,fraction:float)->Vector2:
+	var total:=0.0
+	for k in road.size()-1: total+=road[k].distance_to(road[k+1])
+	if marks.size()!=road.size() or marks[-1]<=0.0:
+		return Route.point_along(road[0],road.slice(1),total*clampf(fraction,0.0,1.0))
+	var want:=marks[-1]*clampf(fraction,0.0,1.0)
+	for k in road.size()-1:
+		if want<=marks[k+1]:
+			var f:=clampf((want-marks[k])/maxf(0.000001,marks[k+1]-marks[k]),0.0,1.0)
+			return road[k].lerp(road[k+1],f)
+	return road[-1]
+
+static func _marks(f:Dictionary)->PackedFloat32Array:
+	var out:=PackedFloat32Array()
+	for p in f.get("land_route",[]):
+		if not p is Dictionary or not (p as Dictionary).has("e"): return PackedFloat32Array()
+		out.append(float(p.e))
+	return out
 
 static func advance(formations:Array,day:int,ground:Callable=Callable(),budget:int=PLANS_PER_DAY)->int:
 	## Plans up to `budget` pending roads, in formation order. Returns how many.
@@ -99,9 +148,7 @@ static func position(f:Dictionary,progress:float)->Vector2:
 	if String(f.get("land_route_state",""))!="ok": return a
 	var road:=Route.unpack(f.get("land_route",[]))
 	if road.size()<2: return a
-	var total:=0.0
-	for k in road.size()-1: total+=road[k].distance_to(road[k+1])
-	return Route.point_along(road[0],road.slice(1),total*clampf(progress,0.0,1.0))
+	return point_at(road,_marks(f),progress)
 
 static func phase(f:Dictionary,day:float)->Dictionary:
 	## The same out-and-back timing CivilizationSystem uses: {progress, outbound}.
@@ -121,11 +168,20 @@ static func motion(f:Dictionary,progress:float,outbound:bool)->Dictionary:
 	if not managed(f) or pending(f) or String(f.get("land_route_state",""))!="ok": return {}
 	var road:=Route.unpack(f.get("land_route",[]))
 	if road.size()<2: return {}
+	# Where it stands: the same effort fraction position() uses.
+	var here_on:=point_at(road,_marks(f),progress)
 	if not outbound: road.reverse()
 	var total:=0.0
 	for k in road.size()-1: total+=road[k].distance_to(road[k+1])
 	if total<0.1: return {}
-	var walked:=total*clampf(progress if outbound else 1.0-progress,0.0,1.0)
+	var walked:=0.0
+	var best_d:=INF
+	var run:=0.0
+	for k in road.size()-1:
+		var c:=Geometry2D.get_closest_point_to_segment(here_on,road[k],road[k+1])
+		var d:=c.distance_to(here_on)
+		if d<best_d: best_d=d; walked=run+road[k].distance_to(c)
+		run+=road[k].distance_to(road[k+1])
 	var here:=Route.point_along(road[0],road.slice(1),walked)
 	var ahead:=PackedVector2Array([here])
 	var reach:=walked
@@ -149,5 +205,5 @@ static func valid(f:Dictionary)->String:
 	for p in road:
 		if not p is Dictionary or not is_finite(float(p.get("x",NAN))) or not is_finite(float(p.get("z",NAN))): return "Foreign formation land route has an invalid point."
 	if String(f.get("land_route_state","ok")) not in ["ok","none"]: return "Foreign formation land route state is invalid."
-	if not is_finite(float(f.get("land_route_km",0.0))) or not is_finite(float(f.get("land_leg_base",1.0))): return "Foreign formation land route length is invalid."
+	if not is_finite(float(f.get("land_route_km",0.0))) or not is_finite(float(f.get("land_leg_base",1.0))) or not is_finite(float(f.get("land_route_effort",0.0))): return "Foreign formation land route length is invalid."
 	return ""

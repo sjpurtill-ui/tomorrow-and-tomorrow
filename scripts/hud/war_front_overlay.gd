@@ -47,6 +47,7 @@ const Blockade:=preload("res://scripts/naval_blockade.gd")
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
+const March:=preload("res://scripts/march_terrain.gd")
 
 const COLLECT_EVERY:=0.5
 ## Clash shapes and arrows blend over this long after a change.
@@ -834,7 +835,10 @@ func _withdrawal(army:Dictionary,pos:Vector2,home:Vector2,campaign:bool)->Dictio
 			route=withdrawal_cache[key]
 			if not route.is_empty(): how="road"
 	if route.is_empty(): route=PackedVector2Array([home])
-	var day_march:=clampf(float(MilitaryCampaign._field_army_speed(army)) if MilitaryCampaign.has_method("_field_army_speed") else 12.0,1.0,60.0)
+	# A day's march on the ground it stands on (march_terrain.gd).
+	var weight:=1.0
+	if March.has_ground(): weight=maxf(0.1,March.factor(March.ground_at(pos),March.mix_of(army)))
+	var day_march:=clampf((float(MilitaryCampaign._field_army_speed(army)) if MilitaryCampaign.has_method("_field_army_speed") else 12.0)/weight,1.0,60.0)
 	var depth:=minf(day_march,pos.distance_to(home)*0.5)
 	var troops:=int(army.get("troops",0))
 	return {"fallback":Model.withdrawal_point(pos,route,depth),"withdrawing":withdrawing,"fallback_how":how,"route_home":route.slice(0,24),
@@ -1157,7 +1161,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 		var road:PackedVector2Array=f.get("road",PackedVector2Array())
 		if bool(f.get("chasing",false)):
 			var chase:=Model.arrow(f.pos,objective,[],0.1)
-			out.arrows.append({"id":"chase:%d" % id,"kind":"pursuit","points":_resample(road,20) if road.size()>=3 else Model.arrow_points(chase,20),"ours":true,"offensive":true,"weight":0.3,"stale":false,"army_id":id})
+			out.arrows.append({"id":"chase:%d" % id,"kind":"pursuit","points":_resample(road,20) if road.size()>=2 else Model.arrow_points(chase,20),"ours":true,"offensive":true,"weight":0.3,"stale":false,"army_id":id})
 			continue
 		if mode=="raid" and road.size()>=3:
 			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":id})
@@ -1170,7 +1174,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 		var spec:=Model.arrow(f.pos,objective,fronts,bias)
 		bias=-bias+0.05 if bias<=0.0 else -bias
 		var offensive:=bool(f.get("offensive",false))
-		out.arrows.append({"id":"army:%d" % id,"kind":"offensive" if offensive else "march","points":_resample(road,20) if road.size()>=3 else Model.arrow_points(spec,20),"ours":true,"offensive":offensive,"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":id})
+		out.arrows.append({"id":"army:%d" % id,"kind":"offensive" if offensive else "march","points":_resample(road,20) if road.size()>=2 else Model.arrow_points(spec,20),"ours":true,"offensive":offensive,"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":id})
 		# Many hosts sent to one place share one objective mark.
 		var key:=Vector2i((objective/maxf(0.001,float(out.sigma)*0.05)).round())
 		if not marked.has(key):

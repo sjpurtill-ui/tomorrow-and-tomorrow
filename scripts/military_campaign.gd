@@ -40,6 +40,7 @@ const AMMUNITION_DELIVERY_LOAD:Dictionary={"arrows":0.08,"artillery_rounds":0.65
 const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
+const MarchTerrain:=preload("res://scripts/march_terrain.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const BattleBlocks:=preload("res://scripts/battle_blocks.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
@@ -1114,17 +1115,51 @@ func field_route_availability(start:Vector2,target:Vector2)->Dictionary:
 			return {"error":"Water lies on the straight line between them."}
 	return {"ok":true}
 
-func field_route(start:Vector2,target:Vector2)->Dictionary:
-	## The general's road: straight when dry, otherwise round bays, inlets and
-	## lakes by land (army_land_route.gd). Only when no land route exists at all
-	## is the march refused, in plain words, with what would change that.
+func field_route(start:Vector2,target:Vector2,force:Dictionary={})->Dictionary:
+	## The general's road for this force (march_terrain.gd weighs the ground:
+	## round mountains, through passes, to fords, along our roads; round
+	## bays, inlets and lakes by land, army_land_route.gd). The result carries
+	## the road's profile (e: level km to each point) that the stated days and
+	## the daily march both spend. Only when no land route exists at all is
+	## the march refused, in plain words, with what would change that.
 	if not WorldSimulation.world.scout_land_authority.is_valid():return {"error":"Terrain information is unavailable. No march was ordered.","reason":"no_survey"}
-	var path:=ArmyLandRoute.find(start,target,Callable(WorldSimulation.world,"_scout_land_at"))
+	var land:=Callable(WorldSimulation.world,"_scout_land_at")
+	var mix:=MarchTerrain.mix_of(force) if not force.is_empty() else {"foot":1.0}
+	var path:=ArmyLandRoute.find(start,target,land,true,MarchTerrain.context(mix))
 	if path.has("error"):
 		var why:=String(path.get("reason",""))
 		var words:={"start_water":"The army is not standing on dry ground, so it cannot set out by land.","goal_water":"That place is open water; an army needs dry ground to march to.","no_land_route":"No march was ordered: there is no way there by land. It lies across open water, and our people have no boats that can carry an army."}
 		return {"error":String(words.get(why,String(path.error))),"reason":why}
+	if not path.has("e"): path=ArmyLandRoute._with_profile(start,path.get("points",[]),mix,land,path)
 	return path
+
+
+## THE ONE MARCH ESTIMATE: days for this force to walk this road (a
+## field_route result) from today, day by day as the daily march spends it
+## (march_terrain.days / walk_day). A road profiled for another force is
+## re-weighed for this one first.
+func march_days(force:Dictionary,route:Dictionary)->int:
+	if float(route.get("length_km",0.0))<0.5 and not route.has("e"): return 0
+	var mix:=MarchTerrain.mix_of(force)
+	var packed:=_march_packed(route,mix)
+	if packed.is_empty(): return 0
+	var origin:Vector2=route.get("origin",ArmyLandRoute.unpack(packed)[0])
+	return MarchTerrain.days(origin,packed,_field_army_speed(force),int(WorldSimulation.state.elapsed_days),mix)
+
+
+func _march_packed(route:Dictionary,mix:Dictionary)->Array:
+	var points:Array=route.get("points",[])
+	if points.is_empty(): return []
+	if route.has("e") and String(route.get("mix_key",""))==MarchTerrain.mix_key(mix): return MarchTerrain.pack(route)
+	var origin:Vector2=route.get("origin",points[0] if points[0] is Vector2 else Vector2.ZERO)
+	var land:=Callable(WorldSimulation.world,"_scout_land_at") if WorldSimulation.world!=null else Callable()
+	return MarchTerrain.pack(MarchTerrain.profile(origin,points,mix,land))
+
+
+## The ground words for a march message (" over hills and through forest").
+static func _march_ground_words(route:Dictionary)->String:
+	var words:=String(route.get("ground_words",""))
+	return " "+words if words!="" else ""
 
 func _field_supply_advice(army:Dictionary)->String:
 	var supply:=clampf(float(army.get("supply_level",1)),0,1)
@@ -1146,7 +1181,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
 	var target:=Vector2(float(target_position.get("x",0.0)),float(target_position.get("z",0.0)))
 	var distance:=start.distance_to(target)
-	var route:=field_route(start,target) if distance>=0.5 else {"ok":true,"points":[target],"length_km":distance,"direct":true}
+	var route:=field_route(start,target,army) if distance>=0.5 else {"ok":true,"points":[target],"length_km":distance,"direct":true}
 	if route.has("error"):return route
 	army.erase("city_operation")
 	army.erase("movement_block_reason")
@@ -1161,21 +1196,33 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	army["destination_name"]=String(destination.get("label",destination_id))
 	army["destination_position"]=target_position.duplicate(true)
 	_set_march_route(army,route)
+	var days:=_march_days_left(army,start)
 	army["distance_total_km"]=distance
 	army["distance_remaining_km"]=distance
 	army["departure_day"]=int(WorldSimulation.state.elapsed_days)
-	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+ceili(distance/maxf(0.1,speed))
+	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+days
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"days":ceili(distance/maxf(0.1,speed)),"distance_km":distance,"message":"%s is moving to %s: %.0f km%s, about %d days at %.1f km/day." % [String(army.name),String(army.destination_name),distance,"" if bool(route.get("direct",true)) else " by land round the water",ceili(distance/maxf(0.1,speed)),speed]+_field_supply_advice(army)}
+	return {"ok":true,"army":army.duplicate(true),"days":days,"distance_km":distance,"message":"%s is moving to %s: %.0f km%s%s, about %d %s." % [String(army.name),String(army.destination_name),distance,"" if bool(route.get("direct",true)) else " by land round the water",_march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
 
 func _set_march_route(army:Dictionary,route:Dictionary)->void:
 	## The legs the general chose (after the army's current position; the last
-	## is the destination). Movement follows them; the map draws them.
-	army["march_route"]=ArmyLandRoute.pack(route.get("points",[]))
+	## is the destination), each with the level km of effort to reach it
+	## (march_terrain.gd). Movement spends them; the map draws them.
+	var here:Dictionary=army.get("position",{}) if army.get("position") is Dictionary else {}
+	if not route.has("origin"): route["origin"]=Vector2(float(here.get("x",0.0)),float(here.get("z",0.0)))
+	army["march_route"]=_march_packed(route,MarchTerrain.mix_of(army))
 	army["march_travelled_km"]=0.0
+	army["march_effort_done"]=0.0
 	army["march_direct"]=bool(route.get("direct",true))
+
+
+## Days left on the army's own road from where it set out (the one estimate).
+func _march_days_left(army:Dictionary,origin:Vector2)->int:
+	var packed:Array=army.get("march_route",[]) if army.get("march_route") is Array else []
+	if packed.is_empty(): return 0
+	return MarchTerrain.days(origin,packed,_field_army_speed(army),int(WorldSimulation.state.elapsed_days),MarchTerrain.mix_of(army),float(army.get("march_effort_done",0.0)))
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
@@ -1200,7 +1247,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	var start:=Vector2(float(current_position.get("x",0.0)),float(current_position.get("z",0.0)))
 	var distance:=start.distance_to(target)
 	if distance<0.5: return {"ok":true,"message":"%s is already at that position." % String(army.get("name","The army"))}
-	var route:=field_route(start,target)
+	var route:=field_route(start,target,army)
 	if route.has("error"):return route
 	army.erase("city_operation")
 	army.erase("movement_block_reason")
@@ -1212,14 +1259,15 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	army["destination_name"]=label
 	army["destination_position"]={"x":target.x,"z":target.y}
 	_set_march_route(army,route)
+	var days:=_march_days_left(army,start)
 	army["distance_total_km"]=distance
 	army["distance_remaining_km"]=distance
 	army["departure_day"]=int(WorldSimulation.state.elapsed_days)
-	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+ceili(distance/maxf(0.1,speed))
+	army["arrival_day"]=int(WorldSimulation.state.elapsed_days)+days
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"message":"%s marches to the marked ground: %.0f km, about %d days at %.1f km/day. Runners will carry its reports home." % [String(army.name),distance,ceili(distance/maxf(0.1,speed)),speed]+_field_supply_advice(army)}
+	return {"ok":true,"army":army.duplicate(true),"days":days,"message":"%s marches to the marked ground: %.0f km%s, about %d %s. Runners will carry its reports home." % [String(army.name),distance,_march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
 
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
@@ -1576,7 +1624,7 @@ func _process_field_army_movement_day()->void:
 		if not army.get("march_route") is Array or (army.march_route as Array).is_empty():
 			# Older saves and re-planned intercepts: the general picks a land road
 			# from where the army stands now.
-			var plan:=field_route(previous_point,destination)
+			var plan:=field_route(previous_point,destination,army)
 			if plan.has("error"):
 				army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Halted: no road on";army["destination_id"]=""
 				army["movement_block_reason"]=String(plan.error)
@@ -1587,15 +1635,33 @@ func _process_field_army_movement_day()->void:
 			_set_march_route(army,plan)
 			army["distance_total_km"]=float(plan.length_km)
 			army["distance_remaining_km"]=float(plan.length_km)
-		var legs:=ArmyLandRoute.unpack(army.get("march_route",[]))
-		var remaining:=maxf(0.0,float(army.get("distance_remaining_km",0.0)))
+		if not MarchTerrain.profiled(army.get("march_route")):
+			# An older save's road: weigh what is left of it from here.
+			var old_legs:=ArmyLandRoute.unpack(army.get("march_route",[]))
+			var rest:=ArmyLandRoute.remaining_legs(origin,old_legs,float(army.get("march_travelled_km",0.0)))
+			if rest.is_empty(): rest=[destination]
+			var reweighed:=ArmyLandRoute._with_profile(previous_point,rest,MarchTerrain.mix_of(army),Callable(WorldSimulation.world,"_scout_land_at"),{"ok":true,"direct":bool(army.get("march_direct",true))})
+			army["origin_position"]={"x":previous_point.x,"z":previous_point.y}
+			origin=previous_point
+			_set_march_route(army,reweighed)
+			army["distance_total_km"]=float(reweighed.length_km)
+			army["distance_remaining_km"]=float(reweighed.length_km)
+		# The day's march is spent against the road's effort (march_terrain.gd):
+		# the same step that stated the days.
+		var packed:Array=army.get("march_route",[])
+		var legs:=ArmyLandRoute.unpack(packed)
+		var mix:=MarchTerrain.mix_of(army)
 		var speed:=_field_army_speed(army)
-		var traveled:=minf(remaining,speed)
-		remaining=maxf(0.0,remaining-traveled)
+		var today:=int(WorldSimulation.state.elapsed_days)
+		var done_before:=float(army.get("march_effort_done",0.0))
+		var done:=MarchTerrain.walk_day(origin,packed,done_before,speed,today,mix)
+		var arrived:=done>=MarchTerrain.total_effort(packed)-0.001
+		var walked_before:=float(MarchTerrain.at_effort(origin,packed,done_before).km)
+		var walked:=float(MarchTerrain.at_effort(origin,packed,done).km)
+		var traveled:=maxf(0.0,walked-walked_before)
+		var remaining:=0.0 if arrived else maxf(0.001,float(army.get("distance_total_km",walked))-walked)
 		army["speed_km_day"]=speed
 		army["distance_remaining_km"]=remaining
-		var walked_before:=float(army.get("march_travelled_km",0.0))
-		var walked:=walked_before+traveled
 		# Along the chosen legs. The ground walked today is checked again: if
 		# it is no longer passable, the general picks a new road from here, or
 		# halts and sends word when there is none.
@@ -1611,7 +1677,7 @@ func _process_field_army_movement_day()->void:
 				dry=wet<=ArmyLandRoute.FORD_KM
 		if not dry:
 			ArmyLandRoute.clear_cache()
-			var detour:=field_route(previous_point,destination)
+			var detour:=field_route(previous_point,destination,army)
 			army["distance_remaining_km"]=remaining+traveled
 			if detour.has("error"):
 				army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Halted: no road on";army["destination_id"]=""
@@ -1625,16 +1691,19 @@ func _process_field_army_movement_day()->void:
 			field_armies[index]=army
 			continue
 		army["march_travelled_km"]=walked
-		var current:=ArmyLandRoute.point_along(origin,legs,walked) if remaining>0.001 else destination
+		army["march_effort_done"]=done
+		var current:=ArmyLandRoute.point_along(origin,legs,walked) if not arrived else destination
+		if not arrived: army["arrival_day"]=today+MarchTerrain.days(origin,packed,speed,today,mix,done)
 		army["position"]={"x":current.x,"z":current.y}
 		army["supply_level"]=clampf(move_toward(float(army.get("supply_level",0.75)),field_provision_delivery_ratio(),0.025)-0.0008*traveled,0.05,1.0)
-		if remaining<=0.001:
+		if arrived:
+			remaining=0.0
 			army["status"]="stationed"
 			army["location_id"]=String(army.get("destination_id",""))
 			army["location_name"]=String(army.get("destination_name","DESTINATION"))
 			army["destination_id"]=""
 			army["arrival_day"]=int(WorldSimulation.state.elapsed_days)
-			army.erase("march_route"); army.erase("march_travelled_km")
+			army.erase("march_route"); army.erase("march_travelled_km"); army.erase("march_effort_done")
 			if _army_is_home(army) or _live_army_reporting():
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
 			else:
@@ -3093,10 +3162,11 @@ func city_operation_quote(army_id:int,civ_id:String,region_id:String)->Dictionar
 	var direct:=true
 	if distance>0.5:
 		# March time is the length of the road the general would take.
-		var road:=field_route(from,to)
+		var road:=field_route(from,to,field_armies[index])
 		if road.has("error"):return road
 		distance=float(road.length_km); direct=bool(road.get("direct",true))
-	return {"ok":true,"at_target":distance<=0.5,"distance_km":distance,"direct":direct,"days":ceili(distance/maxf(.1,_field_army_speed(field_armies[index])))}
+		return {"ok":true,"at_target":false,"distance_km":distance,"direct":direct,"days":march_days(field_armies[index],road),"ground_words":String(road.get("ground_words",""))}
+	return {"ok":true,"at_target":distance<=0.5,"distance_km":distance,"direct":direct,"days":0}
 
 ## approach: how the band goes in ({kind:"night", chance}: a strike by
 ## night ordered in court, court_war_orders.gd); carried to the attack.

@@ -1910,7 +1910,7 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		going_strength=float(f.home_strength)*(float(send)/maxf(1.0,float(trained)))+recruits*(0.35+0.65*recruit_drill)*(0.45+0.55*(1.0-float(t.unarmed)/maxf(1.0,float(t.heads))))
 	var speed_force:Dictionary=use_army if not use_army.is_empty() else mc.home_army
 	var speed:float=mc._field_army_speed(speed_force) if not speed_force.is_empty() else 0.0
-	var days:=ceili(float(road.length_km)/maxf(2.0,speed))
+	var days:=int(mc.march_days(speed_force,road)) if speed>0.0 else ceili(float(road.length_km)/2.0) # march-terrain: the one estimate
 	var enemy:=_enemy_estimate(String(target.city_id))
 	var ratio:=going_strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
 	out["estimate"]=enemy
