@@ -14,6 +14,11 @@ const AFTERMATH_BUNDLES:Array[Array]=[
 	["Be harsh","enslave","unrestricted plunder","execute","Make the captives slaves, take everything, kill their leader. Others will fear us and hate us."],
 ]
 
+## An order for one of our battles: that battle comes into focus first.
+func _order(battle_id:String,order:String)->void:
+	if MilitaryCampaign.focus_engagement(battle_id): MilitaryCampaign.advance_engagement(order)
+
+
 func meta()->Dictionary:
 	return {
 		"eyebrow":"WAR",
@@ -23,7 +28,8 @@ func meta()->Dictionary:
 
 func tab(_sub:int)->Dictionary:
 	var threat:Dictionary=MilitaryCampaign.threat_snapshot()
-	var engagement:Dictionary=MilitaryCampaign.engagement_snapshot()
+	# Our battles being fought now: several can run at once, on different fronts.
+	var fights:Array=MilitaryCampaign.own_battles()
 	var aftermath:Dictionary=MilitaryCampaign.pending_aftermath
 	var fronts:Array=CivilizationSystem.military_fronts_snapshot().get("fronts",[])
 	var captives:=int(MilitaryCampaign.foreign_prisoners)
@@ -36,8 +42,9 @@ func tab(_sub:int)->Dictionary:
 	var brief:Dictionary
 	if not aftermath.is_empty():
 		brief={"tone":"danger","title":"The fight is over. The captives wait on your word","why":"Choose what becomes of them and of what we took, below."}
-	elif not engagement.is_empty():
-		brief={"tone":"danger","title":"Our people are fighting now","why":"The war leader commands the fight. You will get his report when it ends."}
+	elif not fights.is_empty():
+		brief={"tone":"danger","title":"Our people are fighting now" if fights.size()==1 else "Our people are fighting in %d places" % fights.size(),
+			"why":"The war leader commands the fight. You will get his report when it ends." if fights.size()==1 else "Each war leader commands his own fight. You will get each report when it ends."}
 	elif not threat.is_empty():
 		brief={"tone":"danger","title":String(threat.get("title","A war band is coming")),"why":"Decide how to meet them before day %d, or the war leader decides for you." % int(threat.get("deadline_day",0))}
 	elif fronts.is_empty():
@@ -65,7 +72,9 @@ func tab(_sub:int)->Dictionary:
 			{"label":"Pay them off","sub":"%.0f food" % float(threat.get("tribute_food",0.0)),"on_press":func()->void: MilitaryCampaign.respond_to_threat("tribute"),"tip":"Give them food from the stores to go away"},
 			{"label":"Give way","sub":"let them take what they came for","on_press":func()->void: MilitaryCampaign.respond_to_threat("withdraw"),"tip":"Get our people clear and let them take it"},
 		]})
-	if not engagement.is_empty():
+	for fight_index in fights.size():
+		var engagement:Dictionary=fights[fight_index]
+		var battle_id:=String(engagement.get("id",""))
 		var home_side:=String(engagement.get("home_side","attacker"))
 		var enemy_side:="defender" if home_side=="attacker" else "attacker"
 		var ours:Dictionary=engagement.get(home_side,{})
@@ -83,14 +92,15 @@ func tab(_sub:int)->Dictionary:
 			var words:=preload("res://scripts/hud/era_words.gd").stage()
 			rows.append({"name":BattleAccount._tactic_line(String((plan.get(home_side,{}) as Dictionary).get("id","head_on")),words,true),"sub":"our war leader's choice","value":"","accent":Tokens.RED,"tip":"He chose this from our fighters, what our people know and the ground. Ask him about it in the court."})
 			rows.append({"name":BattleAccount._tactic_line(String((plan.get(enemy_side,{}) as Dictionary).get("id","head_on")),words,false),"sub":"as our people saw it · they have about %d" % int(theirs.get("troops",0)),"value":"","accent":Tokens.RED,"tip":"What their leader is doing, as our people read it from the field."})
-		blocks.append({"type":"rows","heading":"THE FIGHT NOW","items":rows})
+		blocks.append({"type":"rows","heading":"THE FIGHT NOW" if fights.size()==1 else "FIGHTING NOW · %d OF %d" % [fight_index+1,fights.size()],"items":rows})
 		blocks.append({"type":"actions","items":[
-			{"label":"Hold the line","sub":"keep fighting as we are","primary":true,"on_press":func()->void: MilitaryCampaign.advance_engagement("hold"),"tip":"Keep fighting without forcing it"},
-			{"label":"Press them hard","sub":"more losses, quicker end","on_press":func()->void: MilitaryCampaign.advance_engagement("push"),"tip":"Accept losses to break them"},
-			{"label":"Pull back","sub":"break off and save who we can","on_press":func()->void: MilitaryCampaign.advance_engagement("retreat"),"tip":"Break off the fight"},
+			{"label":"Watch the battle","sub":"the two lines and how it goes","primary":true,"on_press":func()->void: MilitaryCommandUI.call_deferred("open_engagement",battle_id),"tip":"Opens this battle. Watching does not fight it."},
+			{"label":"Hold the line","sub":"keep fighting as we are","on_press":func()->void: _order(battle_id,"hold"),"tip":"Keep fighting without forcing it"},
+			{"label":"Press them hard","sub":"more losses, quicker end","on_press":func()->void: _order(battle_id,"push"),"tip":"Accept losses to break them"},
+			{"label":"Pull back","sub":"break off and save who we can","on_press":func()->void: _order(battle_id,"retreat"),"tip":"Break off the fight"},
 		]})
 	# The last fight, as the war leader told it.
-	if engagement.is_empty() and not MilitaryCampaign.battle_history.is_empty():
+	if fights.is_empty() and not MilitaryCampaign.battle_history.is_empty():
 		var record:Dictionary=MilitaryCampaign.battle_history[0]
 		if int(GameState.elapsed_days)-int(record.get("day",0))<=60:
 			var account:=BattleAccount.build(record,BattleAccount.gather(record))
@@ -198,7 +208,10 @@ static func _reputation_words(reputation:Dictionary)->String:
 	return "Other peoples say %s." % " and ".join(parts)
 
 func signature()->Array:
-	return [JSON.stringify(MilitaryCampaign.siege_public_snapshot()),MilitaryCampaign.threat_snapshot().size(),MilitaryCampaign.engagement_snapshot().size(),MilitaryCampaign.pending_aftermath.size(),CivilizationSystem.military_fronts_snapshot().get("fronts",[]).size(),MilitaryCampaign.foreign_prisoners,MilitaryCampaign.battle_history.size(),int(MilitaryCampaign.battle_history[0].get("seed",0)) if not MilitaryCampaign.battle_history.is_empty() else 0,(MilitaryCampaign.engagement_snapshot().get("rounds",[]) as Array).size()]
+	# Each battle of ours being fought, by id and how far it has gone.
+	var fights:=""
+	for engagement in MilitaryCampaign.own_battles(): fights+="%s:%d;" % [String((engagement as Dictionary).get("id","")),((engagement as Dictionary).get("rounds",[]) as Array).size()]
+	return [JSON.stringify(MilitaryCampaign.siege_public_snapshot()),MilitaryCampaign.threat_snapshot().size(),fights,MilitaryCampaign.pending_aftermath.size(),CivilizationSystem.military_fronts_snapshot().get("fronts",[]).size(),MilitaryCampaign.foreign_prisoners,MilitaryCampaign.battle_history.size(),int(MilitaryCampaign.battle_history[0].get("seed",0)) if not MilitaryCampaign.battle_history.is_empty() else 0]
 
 
 func _siege_notice(result:Dictionary)->void:

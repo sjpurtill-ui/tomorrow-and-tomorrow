@@ -206,15 +206,26 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		"ours":_tactic_line(our_tactic,stage,true) if not plan.is_empty() else "",
 		"theirs":_tactic_line(their_tactic,stage,false) if not plan.is_empty() else ""}
 	if kind in ["uncontested","nobody"]: tactics={"ours_id":"","theirs_id":"","ours":"","theirs":""}
+	# A strike by night: whether they were seen, and the chance they had.
+	var surprise:Dictionary=(plan.get(s.home,{}) as Dictionary).get("surprise",{}) if plan.get(s.home) is Dictionary and (plan.get(s.home) as Dictionary).get("surprise") is Dictionary else {}
+	var surprise_line:=""
+	if not surprise.is_empty():
+		var odds:=Tactics.chance_words(float(surprise.get("chance",0.0)))
+		surprise_line=("We reached them in the dark unseen; the chance of that had been %s." % odds) if bool(surprise.get("unseen",false)) else ("Their watch saw us coming in the dark; the chance of reaching them unseen had been %s." % odds)
+		tactics["ours"]=(String(tactics.ours)+" "+surprise_line).strip_edges()
 
 	var headline:=_headline(kind,band,enemy_name,where,town,defending,their_tactic,raid,home_place)
 	var phases:=_phases(record,s,band,enemy_name,kind,termination)
 	if overrun(record):
 		# One short beat: who overran whom, and what it cost.
 		if kind in ["won","lost"]: headline=_overrun_headline(kind,before,their_before,enemy_name,where,band)
-		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)]
+		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)+(" "+surprise_line if surprise_line!="" else "")]
 		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
+	# What the general did with the captives and spoils (military_campaign.gd
+	# _settle_aftermath), in one line.
+	var settled:Dictionary=record.get("aftermath_settled",{}) if record.get("aftermath_settled") is Dictionary else {}
+	if String(settled.get("line",""))!="": now["now"]=String(now.now)+" "+String(settled.line)
 	var first:=String(state.get("voice",""))=="first"
 	if first:
 		# The war leader tells it himself: the same account, his own voice.
@@ -236,7 +247,7 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 static func _spoken(text:String,band:String,general:String,noun:String)->String:
 	var out:=text.replace(_cap(band),"My "+noun).replace(band,"my "+noun)
 	if general=="": return out
-	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "]]:
+	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "],[" sent "," sent "],[" let "," let "],[" gave "," gave "],[" had "," had "],[" traded "," traded "]]:
 		out=out.replace(general+String(pair[0]),"I"+String(pair[1]))
 	out=out.replace("with "+general,"with me")
 	return out
@@ -540,8 +551,9 @@ static func gather(record:Dictionary)->Dictionary:
 	var siege:Dictionary=mc.active_siege
 	if not siege.is_empty() and army_id>0 and int(siege.get("army_id",0))==army_id:
 		state["siege"]={"days":int(siege.get("days",0)),"target_name":String((siege.get("threat",{}) as Dictionary).get("target_region_name",""))}
-	var engagement:Dictionary=mc.active_engagement
-	if not engagement.is_empty() and int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
+	for engagement_variant in mc.engagements.values():
+		var engagement:Dictionary=engagement_variant
+		if int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
 	state["aftermath_pending"]=not mc.pending_aftermath.is_empty()
 	if not army.is_empty():
 		var operation:Dictionary=army.get("operation",{})
@@ -609,8 +621,7 @@ static func doing(army:Dictionary)->String:
 	if mc==null: return ""
 	var id:=int(army.get("army_id",0))
 	var today:=int(WorldSimulation.state.elapsed_days)
-	var fights:Array=(mc.command_hierarchy.data.get("battles",[]) as Array).duplicate() if mc.get("command_hierarchy")!=null else []
-	if not mc.active_engagement.is_empty(): fights.append(mc.active_engagement)
+	var fights:Array=mc.engagements.values()
 	for fight_variant in fights:
 		var fight:Dictionary=fight_variant
 		var in_it:=int(fight.get("home_force_id",-1))==id

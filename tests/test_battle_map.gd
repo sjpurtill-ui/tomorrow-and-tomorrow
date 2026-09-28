@@ -18,6 +18,15 @@ func after_test()->void:
 	Motion.reduce_motion=false
 
 
+## The overlay fills its viewport when it enters the tree; the suites that
+## draw on it want a known page size whatever the window was left at by
+## other suites (a headless window's canvas can be 640 x 640 or 1920 x 1080).
+static func _fix_size(overlay:Control,page:Vector2)->void:
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	overlay.position=Vector2.ZERO
+	overlay.size=page
+
+
 # --- Fixtures ----------------------------------------------------------------------------
 
 static func _engagement(seed:int,force:int,ours:int,ours_initial:int,ours_morale:float,theirs:int,theirs_initial:int,theirs_morale:float,extra:Dictionary={})->Dictionary:
@@ -309,10 +318,10 @@ func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_l
 	assert_object(ui).is_not_null()
 	assert_bool(ui.has_method("_open_battle_graphics")).is_true()
 	var overlay:Control=auto_free(Overlay.new())
-	overlay.size=Vector2(1200,800)
 	overlay.project=func(p:Vector2)->Vector2: return Vector2(600,400)+p*60.0
 	overlay.band_override="local"
 	add_child(overlay)
+	_fix_size(overlay,Vector2(1200,800))
 	var inputs:=_front_inputs()
 	inputs.battles=[_battle("ours:1",Vector2(3.0,-2.0),0.3,{"army_id":1}),_battle("rival:x",Vector2(-4,-5),0.1,{"ours":false,"army_id":0})]
 	overlay.set_scene(Overlay.compose(inputs),true)
@@ -371,10 +380,10 @@ func test_compose_and_draw_stay_fast_with_fifty_bands_and_twenty_battles()->void
 	assert_int((built.battles as Array).size()).is_equal(20)
 	assert_int((built.marks as Array).size()).is_greater_equal(100)
 	var overlay:Control=auto_free(Overlay.new())
-	overlay.size=Vector2(1600,900)
 	overlay.project=func(p:Vector2)->Vector2: return Vector2(700,40)+p*4.0
 	overlay.band_override="regional"
 	add_child(overlay)
+	_fix_size(overlay,Vector2(1600,900))
 	overlay.set_scene(built,true)
 	overlay.queue_redraw()
 	await await_idle_frame()

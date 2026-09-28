@@ -8,6 +8,11 @@ extends Node
 ##      [--foreign] (the nearest known foreign city) [--second-town]
 ##      [--hide=Name,Other] (hide nodes whose names contain these, to diagnose)
 ##      [--inventory] (list the settlement batches drawn, with a tint)
+##      [--topdown] (the player's view: straight down with the distance-level lens;
+##       --sizes may then name the levels L0..L3: 10,000 ft, 50,000 ft, Region, Continent)
+##      [--reveal=km] (chart this radius round the target, as a well-explored campaign)
+##      [--sweep] (after the captures: frame times while stepping through the
+##       distance levels and panning at the Region level, GPU included)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
 ## a private custom user dir first (a local, uncommitted override.cfg), never at
 ## the player's saves. Windowed only (a headless run has no image); run it
@@ -19,13 +24,15 @@ func _ready()->void:
 	var out_dir:="user://map_art_capture"
 	var prefix:="map"
 	var sizes:Array[float]=[6.0,40.0,160.0,900.0]
+	var size_names:PackedStringArray=[]
 	var args:=OS.get_cmdline_user_args()
 	for argument in args:
 		if argument.begins_with("--out="):out_dir=argument.trim_prefix("--out=")
 		elif argument.begins_with("--prefix="):prefix=argument.trim_prefix("--prefix=")
 		elif argument.begins_with("--sizes="):
 			sizes.clear()
-			for part in argument.trim_prefix("--sizes=").split(","):sizes.append(float(part))
+			size_names=argument.trim_prefix("--sizes=").split(",")
+			for part in size_names:sizes.append(float(part))
 	if "--saved" in args:
 		var restored:Dictionary=SaveSystem.load_game()
 		if restored.has("error"):
@@ -57,6 +64,14 @@ func _ready()->void:
 	for argument in args:
 		if argument.begins_with("--sky="):_force_sky(argument.trim_prefix("--sky="))
 	var lod=preload("res://scripts/terrain_lod.gd")
+	# `--topdown`: the lens and straight-down view the distance levels give
+	# (the wheel steps between them); `L0..L3` in --sizes name those levels.
+	if "--topdown" in args:
+		terrain.set_camera_distance_level(0)
+		terrain.zoom_target_size=-1.0
+		terrain.zoom_preset_active=false
+	for index in size_names.size():
+		if size_names[index].begins_with("L"):sizes[index]=terrain._distance_camera_size(int(size_names[index].substr(1)))
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
 	if "--town" in args:_seed_town()
@@ -120,7 +135,30 @@ func _ready()->void:
 			target=found
 			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
 			print("MAP_ART_CAPTURE: woodland at ",target)
-	for size in sizes:
+	for argument in args:
+		# `--reveal=km`: the ground a long campaign has charted round the target.
+		if argument.begins_with("--reveal="):
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),float(argument.trim_prefix("--reveal=")),"capture")
+		# `--trails=n`: n returned scout trails wandering out from home, charted
+		# as the game charts them (18 km either side), as years of scouting leave.
+		elif argument.begins_with("--trails="):
+			var home:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+			var count:=int(argument.trim_prefix("--trails="))
+			for trail in count:
+				var heading:=TAU*float(trail)/float(max(count,1))+0.4
+				var at:=home
+				var points:=[{"x":at.x,"z":at.y}]
+				for leg in 9:
+					heading+=sin(float(trail*7+leg)*1.7)*0.45
+					at+=Vector2(cos(heading),sin(heading))*48.0
+					points.append({"x":at.x,"z":at.y})
+				CivilizationSystem._add_revealed_trail(points,18.0,"returned scout trail",int(GameState.elapsed_days))
+		# `--day=n`: the calendar day (the season and the day's weather).
+		elif argument.begins_with("--day="):
+			GameState.elapsed_days=float(argument.trim_prefix("--day="))
+			terrain._refresh_seasonal_visuals()
+	for size_index in sizes.size():
+		var size:=sizes[size_index]
 		terrain.camera.size=size
 		terrain.zoom_target_size=-1.0
 		terrain.camera_target=target
@@ -157,6 +195,7 @@ func _ready()->void:
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true,0.0)
 		var tag:=str(int(size)) if is_equal_approx(size,roundf(size)) else str(snappedf(size,0.01)).replace(".","p")
+		if size_index<size_names.size() and size_names[size_index].begins_with("L"):tag=size_names[size_index]
 		var path:=out_dir.path_join("%s_z%s.png" % [prefix,tag])
 		var image:=get_viewport().get_texture().get_image()
 		if image:image.save_png(ProjectSettings.globalize_path(path) if path.begins_with("user://") or path.begins_with("res://") else path)
@@ -182,7 +221,77 @@ func _ready()->void:
 				if (node as MeshInstance3D).is_visible_in_tree() and not node is MultiMeshInstance3D:meshes[String(node.get_parent().name)+"/"+String(node.name).get_slice("@",0)]=true
 			print("MAP_ART_MESHES: ",", ".join(PackedStringArray(meshes.keys())))
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
+	if "--sweep" in args:
+		for line in await _level_sweep(target):print("MAP_ART_SWEEP: ",JSON.stringify(line))
 	get_tree().quit(0)
+
+## `--sweep`: frame times (vsync off, GPU included) while the camera glides
+## between the distance levels as the wheel steps them, holding a second at
+## each, then while panning across the Region view. Streaming, label layout
+## and every shader change on the way are part of what is measured.
+func _level_sweep(target:Vector3)->Array:
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps=0
+	var lines:=[]
+	terrain.camera_target=target
+	terrain.set_camera_distance_level(0)
+	terrain.camera.size=terrain.zoom_target_size
+	terrain.zoom_target_size=-1.0
+	terrain.zoom_preset_active=false
+	terrain._update_camera()
+	for i in 120:await RenderingServer.frame_post_draw
+	var center:=get_viewport().get_visible_rect().size*0.5
+	for next in [1,2,3,2,1,0]:
+		var from:=int(terrain.camera_distance_level())
+		terrain.set_camera_distance_level(next)
+		terrain.zoom_pointer=center
+		var times:Array[float]=[]
+		var worst:=[]
+		var previous:=Time.get_ticks_usec()
+		var glide_frames:=0
+		var dwell:=0
+		while dwell<60 and times.size()<1200:
+			await RenderingServer.frame_post_draw
+			var now:=Time.get_ticks_usec()
+			var ms:=float(now-previous)/1000.0
+			previous=now
+			times.append(ms)
+			worst.append([snappedf(ms,0.01),snappedf(terrain.camera.size,0.01)])
+			if terrain.zoom_target_size>0.0:glide_frames+=1
+			else:dwell+=1
+		lines.append(_timing_summary("L%d->L%d" % [from,next],times,worst,{"glide_frames":glide_frames}))
+	# Pan across the Region view, as a drag does, for two seconds.
+	terrain.set_camera_distance_level(2)
+	terrain.camera.size=terrain.zoom_target_size
+	terrain.zoom_target_size=-1.0
+	terrain.zoom_preset_active=false
+	terrain._update_camera()
+	for i in 90:await RenderingServer.frame_post_draw
+	var origin:Vector3=terrain.camera_target
+	var times:Array[float]=[]
+	var worst:=[]
+	var previous:=Time.get_ticks_usec()
+	for i in 120:
+		terrain.camera_input_msec=Time.get_ticks_msec()
+		terrain._set_camera_target(origin+Vector3(terrain.camera.size*0.004*i,0,terrain.camera.size*0.002*i))
+		terrain._update_camera()
+		await RenderingServer.frame_post_draw
+		var now:=Time.get_ticks_usec()
+		var ms:=float(now-previous)/1000.0
+		previous=now
+		times.append(ms)
+		worst.append([snappedf(ms,0.01),snappedf(terrain.camera.size,0.01)])
+	lines.append(_timing_summary("pan_region",times,worst,{}))
+	return lines
+
+func _timing_summary(name:String,times:Array[float],worst:Array,extra:Dictionary)->Dictionary:
+	var sorted:=times.duplicate();sorted.sort()
+	worst.sort_custom(func(a:Array,b:Array)->bool:return a[0]>b[0])
+	var over:=0
+	for t in times:if t>33.3:over+=1
+	var out:={"phase":name,"frames":times.size(),"p50_ms":snappedf(sorted[sorted.size()/2],0.01),"p95_ms":snappedf(sorted[int(sorted.size()*0.95)],0.01),"max_ms":snappedf(sorted[-1],0.01),"over_33ms":over,"worst":worst.slice(0,4)}
+	out.merge(extra)
+	return out
 
 ## `--great-works`: several works of different shapes, materials and stages
 ## around the home settlement (one without a surveyed site, as older saves have).

@@ -54,6 +54,15 @@ const GENERAL_WAIT:=30
 const GUARD_DAYS:=180
 ## What one fighter carries home, in Food.
 const CARRY:=14.0
+## Clashes kept to be watched in the battle panel (hud/battle_view.gd): the
+## newest few, small enough to leave the saved ledger well inside its bound.
+const OBSERVED_MAX:=6
+const OBSERVED_CHARS:=40000
+const STATE_CHARS:=190000
+## Where a raid's fight was, by what they came for.
+const WHERE:={"fields":"at the planted fields","herds":"out with the herds","gathering":"at the gathering grounds","racks":"at the drying racks","hunters":"out on the hunt","scouts":"out on the scouting trail"}
+## Where our band's fight was, by what it went to do.
+const OP_WHERE:={"war_pursue":"on the raiders' trail","war_burn":"at their stores","war_chief":"where their chief was"}
 const TERMS_WAIT:=60
 const LEVEL_DECAY_DAYS:=4*365
 ## A war in which neither side has fought for this long goes quiet: a truce.
@@ -98,7 +107,7 @@ static func state()->Dictionary:
 	var d:Dictionary=s
 	for key in ["fronts","stats"]:
 		if not d.get(key) is Dictionary: d[key]={}
-	for key in ["refusals","log"]:
+	for key in ["refusals","log","battles"]:
 		if not d.get(key) is Array: d[key]=[]
 	return d
 
@@ -110,6 +119,7 @@ static func valid_state(data:Variant)->bool:
 	for key in ["refusals","log"]:
 		if not d.get(key,[]) is Array: return false
 	if (d.get("refusals",[]) as Array).size()>REFUSALS_MAX or (d.get("log",[]) as Array).size()>LOG_MAX: return false
+	if not d.get("battles",[]) is Array or (d.get("battles",[]) as Array).size()>OBSERVED_MAX: return false
 	if not d.get("stats",{}) is Dictionary: return false
 	return JSON.stringify(d).length()<=200000
 
@@ -212,7 +222,50 @@ static func _clash(attacker:Dictionary,defender:Dictionary,terrain:float,key:Str
 	var outcome:=String(result.get("outcome","inconclusive"))
 	var rng:=_rng("clash:"+key)
 	return {"outcome":outcome,"tactics":tactics,"won":outcome=="attacker_victory" or (outcome=="inconclusive" and rng.randf()<0.4),
-		"att_dead":roundi(float(a.get("casualties",0))*rng.randf_range(0.3,0.5)),"def_dead":roundi(float(d.get("casualties",0))*rng.randf_range(0.3,0.5))}
+		"att_dead":roundi(float(a.get("casualties",0))*rng.randf_range(0.3,0.5)),"def_dead":roundi(float(d.get("casualties",0))*rng.randf_range(0.3,0.5)),"result":result}
+
+
+## The clashes kept to be watched, newest first (read only; nothing is made).
+static func observed_battles()->Array:
+	var holder:Variant=ForeignDiplomacy.get("audiences")
+	var s:Variant=(holder as Dictionary).get("war") if holder is Dictionary else null
+	if not s is Dictionary: return []
+	var list:Variant=(s as Dictionary).get("battles",[])
+	return list if list is Array else []
+
+
+## Keeps a clash for the battle panel: the block battle as fought, each
+## side's numbers and general, and where. home: our side's role. Returns
+## the seed the panel opens it by (-1 when there is nothing to keep).
+static func _observe(key:String,title:String,where:String,civ_id:String,home:String,fight:Dictionary)->int:
+	var result:Dictionary=fight.get("result",{}) if fight.get("result") is Dictionary else {}
+	var battle:Variant=result.get("battle",{})
+	if not battle is Dictionary or (battle as Dictionary).is_empty(): return -1
+	var seed:=hash("seen:"+key) & 0x7fffffff
+	var rounds:Array=[]
+	for round_variant in result.get("rounds",[]):
+		var r:Dictionary=round_variant
+		rounds.append({"attacker_casualties":(r.get("attacker_casualties",{}) as Dictionary).duplicate(),"defender_casualties":(r.get("defender_casualties",{}) as Dictionary).duplicate(),
+			"attacker_losses":int(r.get("attacker_losses",0)),"defender_losses":int(r.get("defender_losses",0))})
+	var record:={"id":"war:"+key,"seed":seed,"observed":true,"day":_day(),"home_side":home,
+		"attacker":_slim_force(result.get("attacker",{})),"defender":_slim_force(result.get("defender",{})),
+		"threat":{"source_civ_id":civ_id,"source_name":_name(civ_id),"discovered_day":_day(),"field_encounter":true},
+		"battle":(battle as Dictionary).duplicate(true),"tactics":(fight.get("tactics",{}) as Dictionary).duplicate(true),"outcome":String(result.get("outcome","")),
+		"termination":(result.get("termination",{}) as Dictionary).duplicate(true),"rounds":rounds,"where":where,"headline":title}
+	var s:=state()
+	var list:Array=s.battles
+	list.push_front(record)
+	while list.size()>OBSERVED_MAX: list.pop_back()
+	while list.size()>1 and (JSON.stringify(list).length()>OBSERVED_CHARS or JSON.stringify(s).length()>STATE_CHARS): list.pop_back()
+	if JSON.stringify(s).length()>STATE_CHARS: list.clear(); return -1
+	return seed
+
+
+static func _slim_force(force:Dictionary)->Dictionary:
+	var out:={"commander":(force.get("commander",{}) as Dictionary).duplicate(true)}
+	for key in ["name","initial_troops","remaining_troops","casualties","morale","routed","captured_in_battle","dead","wounded_pool","scattered_pool","captured_pool"]:
+		if force.has(key): out[key]=force[key]
+	return out
 
 static func _cap_dead(n:int,pop:float)->int:
 	return clampi(n,0,maxi(1,ceili(pop*CLASH_DEATH_CAP)))
@@ -314,9 +367,12 @@ static func _exhaust(civ_id:String,our_dead:int,their_dead:int)->void:
 		relation["player_war_exhaustion"]=maxf(float(relation.get("player_war_exhaustion",0.0)),float(war.our_exh))
 		relation["rival_war_exhaustion"]=maxf(float(relation.get("rival_war_exhaustion",0.0)),float(war.their_exh))
 
-static func _chronicle(key:String,title:String,text:String,tier:String,civ_id:String)->void:
+## battle_seed: a clash kept to be watched (the Chronicle offers to).
+static func _chronicle(key:String,title:String,text:String,tier:String,civ_id:String,battle_seed:int=-1)->void:
+	var action:={"kind":"court","focus":{"civ_id":civ_id}}
+	if battle_seed>=0: action["battle_seed"]=battle_seed
 	Chronicle.record({"key":"war:"+key,"title":title.substr(0,70),"text":text,"tier":tier,"kind":"war","domain":"security",
-		"action":{"kind":"court","focus":{"civ_id":civ_id}}})
+		"action":action})
 
 static func _pick_target(civ_id:String,rng:RandomNumberGenerator)->String:
 	var known:Array=GameState.known_discoveries
@@ -496,7 +552,8 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if guarded and not won: text+=" The watch at the approaches held."
 	text+=" It was for %s." % _cause_words(civ_id,cause) if cause!="" else ""
 	var title:="%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_cap(where.trim_prefix("our "))]
-	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id)
+	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight)
+	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id,seen)
 	ForeignDiplomacy.remember(civ_id,"Our %s went against the god's people at %s and came home with %d Food." % ["fighters" if skirmish else "raiders",where,roundi(taken)])
 	_log(civ_id,"skirmish" if skirmish else "raid",text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause})
 	_file(civ_id,"raided",text,day)
@@ -743,7 +800,8 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 			_rivals().call("grudge",civ_id,"the %s you burned" % "stores" if objective=="war_burn" else "hunters you killed on our own ground",0.4,"struck:"+key)
 			if rng.randf()<(0.6 if objective=="war_burn" else 0.4): _schedule(civ_id,day+rng.randi_range(60,300),"vengeance",key)
 	Hall._shift_relation(civ_id,-0.05,0.08)
-	_chronicle(key,title,text,"moment",civ_id)
+	var seen:=_observe(key,title,String(OP_WHERE.get(objective,"on their own ground")),civ_id,"attacker",fight)
+	_chronicle(key,title,text,"moment",civ_id,seen)
 	_log(civ_id,"op_"+objective.trim_prefix("war_"),text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"loot":roundi(loot),"captives":captives})
 	if at_war and bool(war.get("chief_held",false)): return
 	_file(civ_id,"report",text,day)
@@ -788,7 +846,9 @@ static func _enemy_op(civ_id:String,day:int)->void:
 	else:
 		text="%d %s fighters came at %s and were thrown back%s. %s" % [their_n,name,String(t.words)," by the watch at the approaches" if guarded else "",_dead_words(our_dead,names,String(t.who))]
 		if their_dead>0: text+=" %d of theirs did not go home." % their_dead
-	_chronicle(key,"%s %s" % [name,"Break Through" if won else "Thrown Back"],text,"moment" if our_dead>0 or captives>0 or won else "notice",civ_id)
+	var title:="%s %s" % [name,"Break Through" if won else "Thrown Back"]
+	var seen:=_observe(key,title,String(WHERE.get(target if target!="scouts" else "gathering","")),civ_id,"defender",fight)
+	_chronicle(key,title,text,"moment" if our_dead>0 or captives>0 or won else "notice",civ_id,seen)
 	_log(civ_id,"enemy_attack",text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives})
 	if (war.op as Dictionary).is_empty() and day-int(front(civ_id).get("matter_day",-1))>45: _file(civ_id,"report",text,day)
 

@@ -12,8 +12,9 @@ const vec2 MAP_CLOUD_SUN_XZ = vec2(-0.7385, -0.6743);
 // Cloud shadows cast on the land itself (map_cloud from map_ambience.gd:
 // drift xy, cover, strength). The cloud deck sits about 1.2 km up; each
 // point reads the cloud that stands between it and the low north-west sun,
-// so a shadow slides over a hill the way a real one climbs it. Soft-edged
-// and cool, never a dark blot. Returns a colour multiplier.
+// so a shadow slides over a hill the way a real one climbs it. Soft-edged,
+// cool and faint (secondary to the land; codex/map-beauty), never a dark
+// blot. Returns a colour multiplier.
 vec3 map_cloud_shadow(vec2 world_xz, float height, vec4 cloud, float scale_km) {
 	if (cloud.w <= 0.001) { return vec3(1.0); }
 	// Low sun (about 31 degrees): horizontal reach per km of height is ~1.66.
@@ -23,5 +24,5 @@ vec3 map_cloud_shadow(vec2 world_xz, float height, vec4 cloud, float scale_km) {
 		+map_paper_noise(p*4.0+41.0)*0.12+map_paper_noise(p*8.0+73.0)*0.05;
 	float edge = 1.0-cloud.z;
 	float c = smoothstep(edge-0.16, edge+0.24, n);
-	return mix(vec3(1.0), vec3(0.80, 0.84, 0.93), c*clamp(cloud.w, 0.0, 1.0));
+	return mix(vec3(1.0), vec3(0.89, 0.91, 0.96), c*clamp(cloud.w, 0.0, 1.0));
 }

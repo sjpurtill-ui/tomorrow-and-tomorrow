@@ -36,11 +36,11 @@ const BUILDERS_PER_WORK:=4
 const BUILDER_MAX_VIEW:=2.2       ## the living map's figure band
 const MAX_BOATS:=3
 const MAX_DROPS:=1400
-const CLOUD_FULL_BELOW:=18.0      ## camera.size (km): full cloud shadow at and below
-const CLOUD_GONE_ABOVE:=55.0      ## gone before the pattern shrinks to speckle
+const CLOUD_FULL_BELOW:=6.0       ## camera.size (km): full cloud shadow at and below
+const CLOUD_GONE_ABOVE:=24.0      ## gone before the chart takes over (map_chart.gdshaderinc)
 const WEATHER_MAX_VIEW:=7.0       ## rain and snow drawn at and below this view
 const LIFE_MAX_VIEW:=4.0          ## birds, herds and boats
-const CLOUD_SPEED_KMH:=120.0      ## time-lapsed drift at full wind (real: 20-60 km/h)
+const CLOUD_SPEED_KMH:=60.0       ## time-lapsed drift at full wind (real: 20-60 km/h): slow, secondary
 
 static var enabled:=true
 ## Capture harnesses only: merged over the derived sky (never set in play).
@@ -642,7 +642,7 @@ uniform float cover = 0.35;
 uniform float strength = 0.0;
 uniform float scale_km = 2.4;
 uniform float ground_y = 0.0;
-uniform vec3 shade = vec3(0.64, 0.67, 0.76);
+uniform vec3 shade = vec3(0.78, 0.80, 0.87);
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 0.0, 1.0);
