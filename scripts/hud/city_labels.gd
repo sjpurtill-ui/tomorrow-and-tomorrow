@@ -254,7 +254,7 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var summary:Dictionary={}
 	if foreign:
 		# A town we hold: our garrison's exact figures, never a scout's range.
-		var held:Dictionary=HELD.report(String(label.get_meta("city_map_id",""))) if String(ownership.get("kind",""))=="occupied" else {}
+		var held:Dictionary=HELD.report(String(label.get_meta("city_map_id",""))) if String(ownership.get("kind","")) in ["occupied","ruined"] else {}
 		if not held.is_empty():
 			summary=HELD.card_summary(held)
 			count="Population "+EraWords.grouped(int(held.residents))

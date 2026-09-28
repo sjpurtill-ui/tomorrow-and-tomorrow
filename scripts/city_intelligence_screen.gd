@@ -176,18 +176,23 @@ func _say(text:String)->void:
 
 func _war_actions(_city:Dictionary)->void:
 	var m:=WorldSimulation.military
-	var signature:=city_id+str(m.active_siege.get("region_id",""))+str(m.active_engagement.get("status",""))+str(m.pending_aftermath.size())+JSON.stringify(m.occupation_forces.map(func(f:Dictionary)->String:return "%s:%d" % [f.get("region_id",""),int(f.get("troops",0))]))
+	var signature:=city_id+str(m.active_siege.get("region_id",""))+str(m.engagements.keys())+str(m.pending_aftermath.size())+JSON.stringify(m.occupation_forces.map(func(f:Dictionary)->String:return "%s:%d" % [f.get("region_id",""),int(f.get("troops",0))]))
 	if signature==_war_signature:return
 	_war_signature=signature
 	for child in war_box.get_children():war_box.remove_child(child);child.queue_free()
 	siege_button=null;garrison_button=null;aftermath_button=null
 	var military:=WorldSimulation.military
+	# A battle being fought at this city, ours or a general's.
+	var here:Dictionary={}
+	for engagement in military.engagements.values():
+		if String(((engagement as Dictionary).get("threat",{}) as Dictionary).get("target_region_id",""))==city_id: here=engagement; break
 	if not military.active_siege.is_empty() and String(military.active_siege.get("region_id",""))==city_id:
 		P.label(war_box,"Our army is besieging this city. Its general runs the siege; the briefing shows how it stands.","small",T.BODY)
 		siege_button=P.button(war_box,"Siege briefing",func():_close();preload("res://scripts/hud/siege_screen.gd").open())
-	elif not military.active_engagement.is_empty() and String((military.active_engagement.get("threat",{}) as Dictionary).get("target_region_id",""))==city_id:
+	elif not here.is_empty():
 		P.label(war_box,"Our soldiers are fighting here now.","small",T.BODY)
-		P.button(war_box,"Watch the battle",func():_close();MilitaryCommandUI.call_deferred("_open_battle_graphics"))
+		var battle_id:=String(here.get("id",""))
+		P.button(war_box,"Watch the battle",func():_close();MilitaryCommandUI.call_deferred("open_engagement",battle_id))
 	for force:Dictionary in military.occupation_forces:
 		if String(force.get("region_id",""))==city_id and int(force.get("troops",0))>0:
 			P.label(war_box,"We hold this city. %d of our soldiers keep it as a garrison." % int(force.troops),"small",T.BODY)

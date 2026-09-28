@@ -168,7 +168,7 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	if current.distance_to(WorldSimulation.world.player_world_origin)<.5:actual["location_id"]="player_home";actual["location_name"]="Home settlement"
 func _engage(actual:Dictionary,enemy:Dictionary,order:Dictionary,allies:Array)->void:
 	if command.battle.enemy_engaged(String(enemy.id)) or command.data.battles.size()>=32:return
-	if not host.active_engagement.is_empty() or not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():return
+	if not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():return
 	var distance:=point(actual).distance_to(point(enemy))
 	var width:=minf(host.MAP_ENGAGEMENT_RANGE_KM,frontage(int(actual.troops))+frontage(int(enemy.troops))+.15)
 	if distance>width+.5:return
@@ -178,16 +178,19 @@ func _engage(actual:Dictionary,enemy:Dictionary,order:Dictionary,allies:Array)->
 	var ratio:=combined/maxf(1,float(enemy.strength))
 	var enclosed:=_encirclement(enemy,allies)
 	if order.mission=="encircle" and enclosed<.95 and allies.size()>=3 and distance>width*.6:return
+	var before:Array=host.own_engagements.keys()
 	command.executing=true;command.battle_candidates=nearby
 	var result:Dictionary=host.launch_map_engagement(int(actual.army_id),String(enemy.id))
 	command.executing=false;command.battle_candidates=[]
 	if result.has("error"):actual["command_status"]=String(result.error);return
-	if not host.active_engagement.is_empty():
-		host.active_engagement["commander_managed"]=true;host.active_engagement["command_objective"]=order.mission
-		host.active_engagement["encirclement"]=enclosed
+	# The battle this order began (other battles of ours may be under way).
+	var started:Dictionary=host.begun_since(before)
+	if not started.is_empty():
+		started["commander_managed"]=true;started["command_objective"]=order.mission
+		started["encirclement"]=enclosed
 		if enclosed>=.95:
-			var side:String=host._engagement_enemy_side(host.active_engagement)
-			host.active_engagement[side]["supply_level"]=minf(float(host.active_engagement[side].get("supply_level",1)),1.0-enclosed*.65)
+			var side:String=host._engagement_enemy_side(started)
+			started[side]["supply_level"]=minf(float(started[side].get("supply_level",1)),1.0-enclosed*.65)
 		actual["command_status"]="Engaging · escape routes cut" if enclosed>=.95 else "Engaging enemy front"
 		command.battle.archive_active()
 func advance(day:int)->void:
@@ -275,14 +278,16 @@ func _city(actual:Dictionary,city:Dictionary,order:Dictionary,day:int,allies:Arr
 			var result:Dictionary=WorldSimulation.world.set_occupation_policy(String(city.civ_id),String(city.city_id),"raze")
 			actual["command_status"]=String(result.get("error","City infrastructure razed · occupation retained"))
 		return
-	if not host.active_engagement.is_empty() or not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():actual["command_status"]="Holding approach · another engagement is resolving";return
+	if not host.active_siege.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():actual["command_status"]="Holding approach · another engagement is resolving";return
 	actual["status"]="stationed";actual["location_id"]=String(city.city_id)
+	var before:Array=host.own_engagements.keys()
 	command.executing=true;command.battle_candidates=command.battle.participants(actual,allies,G.unpack(city.position))
 	var result:Dictionary=host.order_city_operation(int(actual.army_id),String(city.civ_id),String(city.city_id),order.mission=="occupy")
 	command.executing=false;command.battle_candidates=[]
 	actual["command_status"]=String(result.get("error","Commander attacking city defenses"))
-	if not host.active_engagement.is_empty():
-		host.active_engagement["commander_managed"]=true;host.active_engagement["command_objective"]=order.mission
+	var started:Dictionary=host.begun_since(before) if not result.has("error") else {}
+	if not started.is_empty():
+		started["commander_managed"]=true;started["command_objective"]=order.mission
 		command.battle.archive_active()
 	if not host.active_siege.is_empty() and int(host.active_siege.get("army_id",0))==int(actual.army_id):
 		host.active_siege["commander_managed"]=true

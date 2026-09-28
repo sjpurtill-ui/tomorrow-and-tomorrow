@@ -283,6 +283,11 @@ static func _moment_glyph(kind:String,c:Color)->Array:
 		"court": return [_ring(28,30,13,2.4,c),_t(28,20,23,33,33,33,hi),_c(28,31,3,Color(1,0.9,0.6,0.95))]
 		"hearth_count": return [_s(15,16,15,40,2.4,c),_s(21,16,21,40,2.4,c),_s(27,16,27,40,2.4,c),_s(33,16,33,40,2.4,c),_s(11,34,39,22,2.2,hi)]
 		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
+		# The world view (hud/world_globe.gd): a ring of the world with its
+		# graticule, the side meridians bowed in short strokes.
+		"world": return [_ring(28,28,15,2.4,hi),_s(13.5,28,42.5,28,1.6,c),_s(16,20,40,20,1.2,c),_s(16,36,40,36,1.2,c),_s(28,13,28,43,1.6,c),
+			_s(28,13,21.5,19,1.3,c),_s(21.5,19,20,28,1.3,c),_s(20,28,21.5,37,1.3,c),_s(21.5,37,28,43,1.3,c),
+			_s(28,13,34.5,19,1.3,c),_s(34.5,19,36,28,1.3,c),_s(36,28,34.5,37,1.3,c),_s(34.5,37,28,43,1.3,c)]
 	# Founding and anything unnamed: the hearth fire.
 	return [_t(28,11,18,36,38,36,hi),_t(28,21,23,36,33,36,Color(1,0.92,0.62,0.95)),_s(16,40,40,44,2.4,dim),_s(40,40,16,44,2.4,dim)]
 
@@ -845,22 +850,58 @@ static func _great_work_form(shape:String,c:Color,paper:Color)->Array:
 	return [_t(28,13,13,25,43,25,c),_rr(28,32,11.5,6,0.5,c),_rr(28,34.5,2.5,3.5,0.5,paper),_s(14,39.5,42,39.5,2.2,c)]
 
 
-# -- Battle figures ---------------------------------------------------------
+# -- Arms (battle view block plates) ------------------------------------------
 
-static var _figure_textures:Dictionary={}
+static var _arm_textures:Dictionary={}
 
-## One fighter for the battle replay, inked on a paper halo, weapon by era
-## and arm: "club" (a hearth band's clubs and sharpened sticks), "spear",
-## "bow", "sword" (sword and shield), "musket", "rifle", "horse" (a rider),
-## and "fallen" (a fighter down). The owner's colour touches only a sash.
-static func battle_figure_texture(kind:String,ink:Color,accent:Color,px:int=64)->Texture2D:
-	var key:="%s|%s|%s|%d" % [kind,ink.to_html(),accent.to_html(),px]
-	if _figure_textures.has(key): return _figure_textures[key]
-	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(battle_figure_glyph(kind,ink,accent),Color(0.95,0.91,0.80,0.9),2.2),px))
-	_figure_textures[key]=texture
+## The arm a block fights as, drawn as its weapon or mount, inked on a paper
+## halo (hud/battle_panel.gd plates): club, spear, pike, sword, axe, bow,
+## sling, javelin, horse, chariot, elephant, musket, rifle, machine_gun,
+## guns, armour, engineers, support. accent touches one small detail.
+static func arm_texture(arm:String,ink:Color,accent:Color,px:int=48)->Texture2D:
+	var key:="%s|%s|%s|%d" % [arm,ink.to_html(),accent.to_html(),px]
+	if _arm_textures.has(key): return _arm_textures[key]
+	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(arm_glyph(arm,ink,accent),Color(0.95,0.91,0.80,0.9),1.6),px))
+	_arm_textures[key]=texture
 	return texture
 
 
+static func arm_glyph(arm:String,ink:Color,accent:Color)->Array:
+	var paper:=Color(0.95,0.91,0.80,1.0)
+	match arm:
+		"club": return [_s(15,46,33,20,3.4,ink),_c(35,16,7,ink),_c(29,22,4,ink),_s(13,48,19,42,2.0,accent)]
+		"spear": return [_s(11,47,37,17,2.6,ink),_t(45,8,33,15,40,22,ink),_s(16,42,21,47,2.2,accent)]
+		"pike": return [_s(7,51,43,11,2.2,ink),_t(49,5,40,10,45,15,ink),_s(7,11,43,51,2.2,ink),_t(49,55,40,50,45,45,ink),_c(25,31,2.6,accent)]
+		"sword": return [_s(28,10,28,37,3.4,ink),_t(28,4,24.6,11,31.4,11,ink),_s(19,38,37,38,3.2,ink),_s(28,39,28,48,3.6,ink),_c(28,51,3.0,accent)]
+		"axe": return [_s(17,50,33,11,2.8,ink),_t(29,9,46,7,43,27,ink),_t(29,9,43,27,33,21,ink),_s(15,52,20,46,2.0,accent)]
+		"bow":
+			var arc:=[Vector2(20,6),Vector2(30,12),Vector2(35,28),Vector2(30,44),Vector2(20,50)]
+			var out:=[_s(20,6,20,50,1.2,ink),_s(12,28,44,28,2.0,ink),_t(50,28,43,24.5,43,31.5,ink),_s(12,28,8,24,1.6,accent),_s(12,28,8,32,1.6,accent)]
+			for k in range(1,arc.size()): out.append(_s(arc[k-1].x,arc[k-1].y,arc[k].x,arc[k].y,2.8,ink))
+			return out
+		"sling": return [_s(14,10,25,31,1.8,ink),_s(35,10,25,31,1.8,ink),_c(25,34,4.6,ink),_c(42,42,4.2,ink),_s(31,47,37,44,1.4,accent),_s(29,42,35,40,1.4,accent)]
+		"javelin": return [_s(9,43,38,14,2.2,ink),_t(44,8,35,12,40,17,ink),_s(16,51,45,22,2.2,ink),_t(51,16,42,20,47,25,ink),_c(24,40,2.2,accent)]
+		"horse", "chariot":
+			if arm=="chariot":
+				return [_ring(19,40,9,2.4,ink),_s(19,31,19,49,1.4,ink),_s(10,40,28,40,1.4,ink),_rr(32,30,10,7,1.5,ink),_s(41,33,53,41,2.2,ink),_c(32,17,3.6,ink),_s(32,20,32,25,2.8,ink),_s(29,22,36,24,1.6,accent)]
+			return battle_figure_glyph("horse",ink,accent)
+		"elephant": return [_rr(28,30,15,10,9,ink),_c(44,24,8,ink),_s(50,28,52,46,3.2,ink),_s(19,36,19,49,4.4,ink),_s(33,36,33,49,4.4,ink),_c(41,21,3.6,accent),_s(45,32,49,36,1.6,paper)]
+		"musket": return [_s(11,45,48,12,2.4,ink),_t(6,52,18,43,11,38,ink),_c(22,36,2.6,ink),_s(24,39,26,43,1.6,accent)]
+		"rifle": return [_s(11,45,45,15,2.2,ink),_s(45,15,52,8,1.4,ink),_t(6,52,17,43,11,38,ink),_rr(27,33,2.2,3.4,0.6,ink),_s(17,38,32,26,1.2,accent)]
+		"machine_gun": return [_s(12,22,48,22,3.2,ink),_rr(19,22,7,5.5,1.2,ink),_s(22,27,13,46,2.2,ink),_s(22,27,31,46,2.2,ink),_s(22,27,22,46,2.2,ink),_s(16,29,10,38,1.8,accent)]
+		"guns": return [_s(15,34,47,18,5.6,ink),_ring(20,41,8,2.6,ink),_c(20,41,2.2,ink),_s(20,41,7,49,2.6,ink),_c(48,17,2.0,accent)]
+		"armour": return [_rr(28,39,20,6,5.5,ink),_rr(28,32,17,4,1.5,ink),_rr(25,24,9,5,2.5,ink),_s(33,23,51,20,2.6,ink),_c(15,39,2.0,paper),_c(23,39,2.0,paper),_c(31,39,2.0,paper),_c(39,39,2.0,paper),_s(20,24,29,24,1.4,accent)]
+		"engineers": return [_s(14,47,40,15,2.4,ink),_rr(43,11,4.4,6,1.8,ink),_s(14,15,40,47,2.4,ink),_s(8,21,21,7,2.8,ink),_c(27,31,2.2,accent)]
+		"support": return [_rr(28,25,15,9,1.5,ink),_ring(19,39,5.5,2.2,ink),_ring(37,39,5.5,2.2,ink),_s(43,24,53,18,2.2,ink),_s(28,19,28,31,2.4,paper),_s(22,25,34,25,2.4,paper)]
+	return [_c(28,28,8,ink)]
+
+
+# -- Battle figures ---------------------------------------------------------
+
+## One fighter, inked, weapon by era and arm: "club", "spear", "bow",
+## "sword" (sword and shield), "musket", "rifle", "horse" (a rider) and
+## "fallen" (a fighter down). The owner's colour touches only a sash. The
+## battle view's arm icons (arm_glyph) draw the rider from here.
 static func battle_figure_glyph(kind:String,ink:Color,accent:Color)->Array:
 	if kind=="fallen":
 		return [_c(11,45,4.0,ink),_rr(24,45.5,9,3.6,2.4,ink),_s(33,45,47,47,3.0,ink),_s(33,46,45,50,2.6,ink),_s(6,51,44,51,1.4,ink),_s(20,43,28,45,1.8,accent)]

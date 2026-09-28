@@ -1,0 +1,12 @@
+{
+  "id": "carrying_capacity_awareness",
+  "line": "demography",
+  "game_year": 182,
+  "approx_historical_year": -3787,
+  "prompt": "c. 3787 BCE: Chalk pastel and cut-paper collage of adults weighing scarce barley or wheat grain against households to feed; no maize. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-95671e1d-1a2d-4de5-98b6-7b77743d8514.png",
+  "asset": "res://assets/ui/research/subjects/carrying_capacity_awareness-v1.png",
+  "sha256": "2a38e395f2c99a69c02e193313dd44855a4f2c0460d5620e9fd140b0d4522a19",
+  "mode": "built-in image_gen / new image",
+  "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
+}

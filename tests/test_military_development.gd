@@ -288,6 +288,9 @@ func test_visible_map_formation_requires_war_then_opens_battle_with_the_selected
 	foreign["depart_day"]=0
 	foreign["leg_days"]=60.0
 	foreign["disabled_until_day"]=0
+	# A band about as strong as ours: a real battle, not a hopeless one settled
+	# at the first blow (tests/test_battle_scale.gd).
+	foreign["strength_share"]=0.6
 	CivilizationSystem.foreign_formations[formation_index]=foreign
 	var civ_index:=CivilizationSystem._civilization_index(String(foreign.civ_id))
 	var civ:Dictionary=CivilizationSystem.civilizations[civ_index]

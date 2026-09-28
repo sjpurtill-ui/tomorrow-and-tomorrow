@@ -1,0 +1,12 @@
+{
+  "id": "planting_density_adjustment",
+  "line": "nutrition",
+  "game_year": 158,
+  "approx_historical_year": -3947,
+  "prompt": "c. 3947 BCE: Farmers thin dense cereal row and plant adjacent row at wider spacing; opaque botanical egg tempera. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5a78a14e-9e66-4578-8f2c-556a8bca3ded.png",
+  "asset": "res://assets/ui/research/subjects/planting_density_adjustment-v1.png",
+  "sha256": "8086ab5a357c36b23fa0fb421414e16f599b349544b62f516234ac0d352833e3",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

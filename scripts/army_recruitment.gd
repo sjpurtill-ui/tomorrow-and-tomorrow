@@ -16,7 +16,8 @@ func quote(template_id:int)->Dictionary:
 	var food_left:float=host.training_staff.spendable_food();var food:=0.0
 	var policy:Dictionary=host.training_staff.policy("army")
 	var global_block:=""
-	if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty():global_block="Finish the battle or aftermath before enrolling recruits."
+	# Only a fight at home holds up recruiting; armies fighting elsewhere do not.
+	if host._home_battle_running():global_block="Our people at home are fighting; recruits are enrolled when the fight is over."
 	elif host.recovery.home_unavailable():global_block="Home is occupied; recruitment cannot operate here."
 	for entry:Dictionary in host.army_templates[index].get("entries",[]):
 		var unit:=String(entry.unit);var weapon:=String(entry.weapon);var count:=int(entry.count)
