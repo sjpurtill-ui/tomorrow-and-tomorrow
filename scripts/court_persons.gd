@@ -47,13 +47,16 @@ const WAITING_CAP:=10
 const ASK:=["ask_blame","ask_about","seek"]
 const QUESTION:=["q_where","q_did","q_swear","q_who_else","q_mercy","q_threaten"]
 const CONFRONT:=["accuse_lie","accuse_record","bring_ledger"]
-const JUDGE:=["exalt","reward","pardon","exile","execute","maim","curse","make_priest","make_official","marry_off","make_example"]
-const OTHER:=["summon","talk"]
+const JUDGE:=["exalt","reward","pardon","exile","execute","maim","curse","make_priest","make_official","marry_off","make_example","bind","free","terrify","penance"]
+const OTHER:=["summon","talk","no_event"]
 const LABELS:={"ask_blame":"Who is responsible for this?","ask_about":"Tell me of…","seek":"Have them sought out","summon":"Summon them",
 	"q_where":"Where were you?","q_did":"Did you do this?","q_swear":"Swear it before me","q_who_else":"Who else knows?","q_mercy":"Show mercy","q_threaten":"Threaten",
 	"accuse_lie":"You are lying","accuse_record":"The records say otherwise","bring_ledger":"Bring the ledger",
 	"exalt":"Exalt","reward":"Reward","pardon":"Pardon","exile":"Exile","execute":"Execute","maim":"Maim","curse":"Curse",
-	"make_priest":"Make priest","make_official":"Make official","marry_off":"Marry off","make_example":"Make an example","talk":"Speak with them"}
+	"make_priest":"Make priest","make_official":"Make official","marry_off":"Marry off","make_example":"Make an example","talk":"Speak with them",
+	"bind":"Bind","free":"Free","terrify":"Terrify","penance":"Demand penance of"}
+## What a trade the people do not know yet would have them do ("Nobody here makes pots yet").
+const TRADE_WORK:={"potter":"makes pots","farmer":"tills the fields","herder":"keeps herds","weaver":"weaves cloth","mason":"dresses stone","smith":"works metal","boatman":"builds boats"}
 
 ## Trades, gated by what the people know (character_voice era gates).
 const TRADES:={
@@ -534,20 +537,39 @@ const PEOPLE_OPEN:="(?i)^\\W*(and |so |then |now |tell me,? )?(who|whom|which (m
 const PEOPLE_NOT:="(?i)\\b(responsible|blame|fault|to blame|did this|did it|are you|art thou|is this|is that|goes there|sent you|speaks|is speaking|lied|lying)\\b"
 const SUMMON_WORDS:="(?i)^\\W*(please |now |then |so |good\\.? )?(?<verb>summon|bring|fetch|send for|call for|call in|call)\\s+(me\\s+|to me\\s+|here\\s+)?(?<who>him|her|them|that (man|woman|one|person|fellow)|this (man|woman|one|person)|the (man|woman|one|fellow)|(?-i:[A-Z])[\\w'-]+)\\b"
 
+## Someone known by a deed: "who found the salt spring?", "the woman who found
+## the salt spring". The ruler's own words are the deed.
+const DEED_RE:="(?i)\\b(?:(?<sex>man|woman|boy|girl|fellow|lad|lass|one|person|child)\\s+)?who\\s+(?<deed>(?:first\\s+)?(?:found|discovered|made|built|carved|slew|killed the|saved|caught|brought back|led|dug|raised|tamed|healed|painted|invented|crossed|climbed|drove off|fought off|rescued)\\b[\\w' -]{2,60})"
+## Words asking who is to blame for something ("who stole the grain?"):
+## the persons engine answers from what happened, or says nothing did.
+const BLAME_RE:="(?i)^\\W*(and |so |then |now |tell me,? )?(who|whom|whose)\\b.{0,40}\\b(responsible|to blame|blame|fault|guilty|stole|steal|took|lost|let|broke|burned|burnt|spoiled|spoilt|ruined|started|caused|wasted|killed|did this|did it|is behind|was behind)\\b"
+
 static func people_question(text:String)->Dictionary:
 	## A description for a "who is the -est ..." question, or {} when the words
 	## are not asking the court to name someone.
 	var t:=text.strip_edges()
 	if t=="" or RegEx.create_from_string(PEOPLE_OPEN).search(t)==null: return {}
 	if RegEx.create_from_string(PEOPLE_NOT).search(t)!=null: return {}
+	if RegEx.create_from_string(BLAME_RE).search(t)!=null: return {}
 	var low:=t.to_lower()
 	var quals:Array[String]=[]
 	for q in QUALITY_WORDS:
 		if RegEx.create_from_string("(?i)\\b"+String(q[1])).search(low)!=null: quals.append(String(q[0]))
 	var desc:Dictionary={"settlement_id":String(_settlement("").get("id",""))}
+	# Known by what they did.
+	var deed:=RegEx.create_from_string(DEED_RE).search(t)
+	if deed!=null:
+		desc["deed"]=deed.get_string("deed").strip_edges().trim_suffix("?").trim_suffix(".").strip_edges().substr(0,80)
+		var who:=deed.get_string("sex").to_lower()
+		if who in ["man","boy","fellow","lad"]: desc["sex"]="male"
+		elif who in ["woman","girl","lass"]: desc["sex"]="female"
+		if who in ["boy","girl","child"]: desc["age"]="young"
+		return desc
 	for key in TRADES:
 		var k:=String(key)
 		if RegEx.create_from_string("(?i)\\b(%s|%s|%s)\\b" % [k,trade_label(k),trade_label(k,true)]).search(low)!=null:
+			# A craft nobody here has learned yet: said so, and nobody is named.
+			if not trade_ok(k) and TRADE_WORK.has(k): return {"no_trade":k,"settlement_id":String(desc.settlement_id)}
 			desc["trade"]=k if trade_ok(k) else _fit_trade([k,"gatherer"])
 			break
 	if RegEx.create_from_string("(?i)\\b(oldest|eldest)\\b").search(low)!=null:
@@ -571,29 +593,80 @@ static func people_question(text:String)->Dictionary:
 	desc["quality"]="+".join(quals)
 	return desc
 
+## "Put him on trial", "try her", "bring them to judgment": the one named is
+## brought before the god to answer.
+const TRIAL_RE:="(?i)^\\W*(now |then |so )?(put|bring|place|set)\\s+(?<who>him|her|them|(?-i:[A-Z])[\\w'-]+)\\s+(on|to|before)\\s+(trial|judgment|judgement|the court)\\b|^\\W*(now |then |so )?(try|judge)\\s+(?<who2>him|her|them|(?-i:[A-Z])[\\w'-]+)\\b"
+## Capitalised words after "summon" that are nobody's name.
+const NOT_A_NAME:=["Food","Timber","Stone","Clay","Water","Wood","Meat","Grain","The","All","Everyone","Everybody","Them","Him","Her","Me","My","Our","Your","Their","A","An","Help","Rain","War"]
+
 static func typed_action(text:String)->Dictionary:
 	## Typed words the persons engine can act on without a live voice:
 	## {action, params} or {}. "Who is the strongest man?" asks about someone;
 	## "summon him" brings the one just named.
-	var q:=people_question(text)
+	var clean:=text.strip_edges()
+	# "Who stole the grain?": whoever the court holds responsible, or the plain
+	# word that nothing like it happened.
+	if RegEx.create_from_string(BLAME_RE).search(clean)!=null:
+		var ev:=event_for_words(clean)
+		if not ev.is_empty(): return {"action":"ask_blame","params":{"event":String(ev.key)}}
+		return {"action":"no_event","params":{"words":clean.substr(0,160)}}
+	var q:=people_question(clean)
 	if not q.is_empty(): return {"action":"ask_about","params":{"desc":q}}
-	var m:=RegEx.create_from_string(SUMMON_WORDS).search(text.strip_edges())
-	if m==null:
-		# "Summon the tallest man": whoever the court names for it, brought in.
-		var d:=RegEx.create_from_string("(?i)^\\W*(please |now |then |so )?(summon|fetch|send for|call for|bring( me)?)\\s+(?<rest>(the|our|my|your|a|an) .+)$").search(text.strip_edges())
-		if d==null: return {}
+	# A trial: the one named (or just spoken of) brought before the god.
+	var trial:=RegEx.create_from_string(TRIAL_RE).search(clean)
+	if trial!=null:
+		var named:=trial.get_string("who") if trial.get_string("who")!="" else trial.get_string("who2")
+		return _summon_who(named)
+	# "Summon the tallest man", "Bring me the woman who found the salt spring":
+	# whoever the court names for it, brought in.
+	var d:=RegEx.create_from_string("(?i)^\\W*(please |now |then |so )?(summon|fetch|send for|call for|bring( me)?)\\s+(?<rest>(the|our|my|your|a|an) .+)$").search(clean)
+	if d!=null:
 		var described:=people_question("who is "+d.get_string("rest"))
-		return {"action":"summon","params":{"desc":described}} if not described.is_empty() and int(described.get("count",1))<=1 else {}
+		if not described.is_empty() and int(described.get("count",1))<=1: return {"action":"summon","params":{"desc":described}}
+	var m:=RegEx.create_from_string(SUMMON_WORDS).search(clean)
+	if m==null: return {}
 	var who:=m.get_string("who")
 	# "bring him bread" and "call him a liar" are not summonses.
-	var tail:=text.strip_edges().substr(m.get_end()).strip_edges().to_lower()
+	var tail:=clean.substr(m.get_end()).strip_edges().to_lower()
 	if m.get_string("verb").to_lower() in ["bring","call"] and RegEx.create_from_string("^(to me|here|before me|in|now|at once|to (the )?(court|fire|hall))?\\W*$").search(tail)==null: return {}
+	return _summon_who(who)
+
+static func _summon_who(who:String)->Dictionary:
+	## Summon by a name or a pronoun: someone the court knows, the one just
+	## named, or (a name nobody knows, or nobody named yet) the plain word.
 	var focus:Dictionary=state().focus.get("person",{}) if state().focus.get("person") is Dictionary else {}
 	if who.substr(0,1)==who.substr(0,1).to_upper() and not who.to_lower() in ["him","her","them","that","this","the"]:
+		if who in NOT_A_NAME: return {}
 		var r:=resolve_name(who)
-		return {"action":"summon","params":{"ref":r}} if not r.is_empty() else {}
-	if focus.is_empty(): return {}
+		if not r.is_empty(): return {"action":"summon","params":{"ref":r}}
+		# A town or a people is no one to summon.
+		if (load("res://scripts/court_commands.gd") as GDScript).call("_names_a_place",who.to_lower()): return {}
+		return {"action":"summon","params":{"name":who.substr(0,40)}}
+	if focus.is_empty(): return {"action":"summon","params":{}}
 	return {"action":"summon","params":{"ref":focus.duplicate()}}
+
+## The recent event the words ask about ("who stole the grain?" -> the grain
+## stores spoiled): the same kind of thing, sharing a word. {} when none.
+static func event_for_words(text:String)->Dictionary:
+	var low:=text.to_lower()
+	var kind:=_classify_event(low)
+	var words:=PackedStringArray()
+	for w in RegEx.create_from_string("[a-z]{4,}").search_all(low): words.append(w.get_string())
+	var best:Dictionary={}
+	var best_score:=0
+	for e in recent_events(8):
+		var said:=(String(e.get("title",""))+" "+String(e.get("text",""))).to_lower()
+		var score:=0
+		for w in words:
+			if w in ["this","that","they","them","what","which","responsible","blame","fault","guilty","stole","steal","took","lost","broke","burned","spoiled","ruined","started","caused","wasted","killed","behind","there","whose","made"]: continue
+			if w in said: score+=2
+		if String(e.get("type",""))==String(kind.id) and score>0: score+=1
+		if score>best_score: best_score=score; best=e
+	# "Who did this?" with nothing named: the matter in front of the court.
+	if best.is_empty() and RegEx.create_from_string("(?i)\\b(did this|did it|this|that)\\b").search(low)!=null:
+		var recent:=recent_events(1)
+		if not recent.is_empty(): best=recent[0]
+	return best
 
 static func resolve_name(given:String)->Dictionary:
 	## Someone the court already knows by this name (never creates anyone).
@@ -905,6 +978,8 @@ static func choices(audience_id:String)->Array[Dictionary]:
 	if not known.is_empty() and waiting and String(known.get("status",""))=="living":
 		for q in QUESTION: out.append(_choice(q,String(LABELS[q]),"question"))
 		for j in JUDGE:
+			# Bound only once, freed only when bound.
+			if (j=="bind" and bool(known.get("bound",false))) or (j=="free" and not bool(known.get("bound",false))): continue
 			if j=="make_official":
 				for office:Dictionary in GovernmentPeopleSystem.active_offices():
 					var title:=String(GovernmentPeopleSystem.office_definition(String(office.key)).get("title",String(office.key)))
@@ -1074,9 +1149,13 @@ static func decide(audience_id:String,action:String,params:Dictionary={})->Dicti
 			return {"ok":true,"outcome_id":"name","words":"%s names %s for %s%s." % [String((existing.answerer as Dictionary).get("name","")),ref_name(existing.named),String(ev.title)," (A LIE, hidden: the truth is %s; they shield it)" % ref_name(existing.true_party) if bool(existing.lie) else ""]}
 		"ask_about":
 			var desc:Dictionary=params.get("desc",{}) if params.get("desc") is Dictionary else {}
+			if desc.has("no_trade"): return {"ok":true,"outcome_id":"no_trade","words":"Nobody here has learned that craft yet; the official says so and names nobody."}
 			return {"ok":true,"outcome_id":"unknown" if bool(desc.get("far",false)) else "describe","words":"No one at court knows such a person; they offer to have them sought." if bool(desc.get("far",false)) else "An official describes the person asked about (created or remembered)."}
 		"seek": return {"ok":true,"outcome_id":"found","words":"Runners are sent; the person is found and named."}
+		"no_event": return {"ok":true,"outcome_id":"no_event","words":"Nothing like that has happened that the court knows of; the one answering says so plainly, with the count if it is about the stores."}
 		"summon":
+			if String(params.get("name",""))!="": return {"ok":true,"outcome_id":"unknown_name","words":"No one at court knows anyone called %s; they ask for a trade, a village or a deed to find them by." % String(params.name)}
+			if params.get("desc") is Dictionary and (params.desc as Dictionary).has("no_trade"): return {"ok":true,"outcome_id":"no_trade","words":"Nobody here has learned that craft yet; nobody is brought."}
 			var ref:Dictionary=params.get("ref",{}) if params.get("ref") is Dictionary else {}
 			if ref.is_empty() and params.get("desc") is Dictionary: return {"ok":true,"outcome_id":"summoned","words":"The person described is found (or created) and brought before the god."}
 			if ref.is_empty(): ref=state().focus.get("person",{})
@@ -1195,7 +1274,7 @@ static func perform(audience_id:String,action:String,params:Dictionary={},how:Di
 		var ask:=_answerer_beat(audience_id,"clarify",{})
 		if not ask.is_empty():
 			var said:=Lines.render([ask],result.signature,_rng("clarify|%s|%s|%d" % [audience_id,action,(Hall.find(audience_id).get("lines",[]) as Array).size()]))
-			_speak_lines(audience_id,said)
+			if not bool(how.get("silent",false)): _speak_lines(audience_id,said)
 			result["spoken"]=said
 		return result
 	var beats:Array=[]
@@ -1204,12 +1283,18 @@ static func perform(audience_id:String,action:String,params:Dictionary={},how:Di
 		"ask_about": beats=_do_ask_about(audience_id,params,result)
 		"seek": beats=_do_seek(audience_id,params,result)
 		"summon": beats=_do_summon(audience_id,params,result)
+		"no_event": beats=_do_no_event(audience_id,params,result)
 		"accuse_lie","accuse_record": beats=_do_accuse(audience_id,action,params,result,d)
 		"bring_ledger": beats=_do_ledger(audience_id,result,d)
 		"talk": beats=[]
 	if action in QUESTION or (action=="accuse_lie" and bool(d.get("accused",false))): beats=_do_question(audience_id,"q_did" if action=="accuse_lie" else action,params,result,d)
 	if action in JUDGE or action.begins_with("novel:"): beats=_do_judge(audience_id,action,params,result,how)
 	result.ok=true
+	# The one just named here is who "him" and "her" mean next in this
+	# audience (court_commands._salient), until someone else is dealt with.
+	var here:=Hall.find(audience_id)
+	if not here.is_empty() and result.get("named") is Dictionary and not (result.named as Dictionary).is_empty() and action in ["ask_about","ask_blame","seek"]:
+		here["named_focus"]={"key":ref_key(result.named),"day":_day(),"line":(here.get("lines",[]) as Array).size()}
 	# Speak: the live model's lines if given, else offline (learned or banked).
 	# Where the engine chose a person, the live principal line must name them,
 	# or the engine's own line stands in for it (asides and staging stay).
@@ -1238,8 +1323,9 @@ static func perform(audience_id:String,action:String,params:Dictionary={},how:Di
 		# staged in the summoned person's own audience.
 		_speak_lines(audience_id,spoken)
 		result["spoke_live"]=principal_ok
-	else: _speak_lines(target_id,offline_lines)
-	if String(result.outcome)!="" and not bool(how.get("quiet_outcome",false)) and not action in ASK:
+	elif not bool(how.get("silent",false)): _speak_lines(target_id,offline_lines)
+	# silent: the court's command engine applied it and stages it itself (court_commands.gd).
+	if String(result.outcome)!="" and not bool(how.get("quiet_outcome",false)) and not bool(how.get("silent",false)) and not action in ASK:
 		Hall.append_line(target_id if spoken.is_empty() else audience_id,{"speaker":"","role":"narrator","person_id":0,"text":String(result.outcome),"day":_day()})
 	result.lines=beats
 	result["spoken"]=offline_lines if spoken.is_empty() else spoken
@@ -1361,8 +1447,27 @@ static func _reveal(rec:Dictionary,tell:String)->void:
 	if not revealed.has(tell): revealed.append(tell)
 	rec["revealed"]=revealed
 
+static func _no_trade_beat(audience_id:String,desc:Dictionary,result:Dictionary)->Array:
+	## A craft the people have not learned yet: said plainly; nobody is named.
+	var trade:=String(desc.get("no_trade",""))
+	result.outcome=""
+	return [_answerer_beat(audience_id,"no_trade",{"trade_work":String(TRADE_WORK.get(trade,"does that work")),"trade":trade_label(trade,true),"village":_settlement_name("")})]
+
+static func _do_no_event(audience_id:String,params:Dictionary,result:Dictionary)->Array:
+	## Asked who did something the court knows nothing of: the one answering
+	## says so plainly, with the stores' own count when it is about the stores.
+	var words:=String(params.get("words","")).to_lower()
+	var what:=RegEx.create_from_string("\\b(grain|food|meat|stores?|seed|fish|timber|wood)\\b").search(words)
+	result.outcome=""
+	if what!=null:
+		var noun:=what.get_string(1)
+		if noun.begins_with("store"): noun="food"
+		return [_answerer_beat(audience_id,"no_event_stores",{"what":noun,"food":str(roundi(float(GameState.resource_stockpiles.get("Food",0.0))))})]
+	return [_answerer_beat(audience_id,"no_event",{})]
+
 static func _do_ask_about(audience_id:String,params:Dictionary,result:Dictionary)->Array:
 	var desc:Dictionary=params.get("desc",{}) if params.get("desc") is Dictionary else {}
+	if desc.has("no_trade"): return _no_trade_beat(audience_id,desc,result)
 	var a:=Hall.find(audience_id)
 	var answerer:Dictionary={}
 	var sp:=int((a.get("speaker",{}) as Dictionary).get("person_id",0)) if not a.is_empty() else 0
@@ -1399,6 +1504,11 @@ static func _do_seek(audience_id:String,params:Dictionary,result:Dictionary)->Ar
 	return [_beat_official(answerer,"found",slots_for(ref_of(p)))]
 
 static func _do_summon(audience_id:String,params:Dictionary,result:Dictionary)->Array:
+	# A name nobody at court knows: said plainly; nobody is made up for it.
+	if String(params.get("name",""))!="":
+		result.outcome=""
+		return [_answerer_beat(audience_id,"unknown_name",{"asked":String(params.name)})]
+	if params.get("desc") is Dictionary and (params.desc as Dictionary).has("no_trade"): return _no_trade_beat(audience_id,params.desc,result)
 	var ref:Dictionary=params.get("ref",{}) if params.get("ref") is Dictionary and not (params.get("ref") as Dictionary).is_empty() else state().focus.get("person",{})
 	if params.get("desc") is Dictionary and not (params.get("desc") as Dictionary).is_empty():
 		var r:=resolve(params.desc)
@@ -1611,6 +1721,8 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 	var slots:=slots_for(ref_of(p))
 	var beats:Array=[]
 	var stance:=stance_in(rec,ref_of(p))
+	# Not before the god: brought in under guard first, then judged.
+	var away:=not same_ref(ref_of(p),sref)
 	var hand:=""
 	var effects:Dictionary={}
 	match action:
@@ -1639,13 +1751,44 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 			result.outcome="%s %s driven out of the realm." % [name,"were" if count>1 else "was"]
 			_log("Cast Out","%s was driven out of the realm at the god's word." % name)
 		"maim":
-			p["status"]="living"; p["maimed"]=true
-			p["dread"]=clampf(float(p.get("dread",0.2))+0.35,0.0,1.0); p["love"]=clampf(float(p.get("love",0.5))-0.15,0.0,1.0)
+			# A flogging or a beating leaves them whole; a cutting maims.
+			var flogged:=String(params.get("harm",""))=="beat"
+			p["status"]="living"
+			if flogged: p["flogged"]=true
+			else: p["maimed"]=true
+			p["dread"]=clampf(float(p.get("dread",0.2))+(0.25 if flogged else 0.35),0.0,1.0); p["love"]=clampf(float(p.get("love",0.5))-(0.1 if flogged else 0.15),0.0,1.0)
 			effects=DIVINE.apply_to_court("terrify",{"person_id":0,"name":name},watchers)
 			_metric("cohesion",-0.004)
-			_remember(p,"At the god's word I was maimed before the court.")
-			hand="maim"
-			result.outcome="%s was maimed before the court and carried out." % name
+			_remember(p,"At the god's word I was flogged before the court." if flogged else "At the god's word I was maimed before the court.")
+			hand="flog" if flogged else "maim"
+			result.outcome=("%s was flogged before the court. They live, and they will not forget it." if flogged else "%s was maimed before the court and carried out.") % name
+		"bind":
+			p["status"]="living"; p["bound"]=true
+			p["dread"]=clampf(float(p.get("dread",0.2))+0.2,0.0,1.0)
+			effects=DIVINE.apply_to_court("terrify",{"person_id":0,"name":name},watchers)
+			_remember(p,"At the god's word I was bound and put under guard.")
+			hand="bind"
+			result.outcome="%s was bound and put under guard at your word." % name
+		"free":
+			var was_bound:=bool(p.get("bound",false))
+			p.erase("bound")
+			p["love"]=clampf(float(p.get("love",0.5))+0.12,0.0,1.0); p["dread"]=clampf(float(p.get("dread",0.2))-0.08,0.0,1.0)
+			effects=DIVINE.apply_to_court("bless",{"person_id":0,"name":name},watchers)
+			_remember(p,"The god had my bonds cut and let me go home.")
+			hand="free"
+			result.outcome=("%s was freed at your word and sent home." if was_bound else "%s is not held; they go home with your word in their ears.") % name
+		"terrify":
+			p["dread"]=clampf(float(p.get("dread",0.2))+0.25,0.0,1.0); p["love"]=clampf(float(p.get("love",0.5))-0.05,0.0,1.0)
+			effects=DIVINE.apply_to_court("terrify",{"person_id":0,"name":name},watchers)
+			_remember(p,"The god's fury fell on me before the court.")
+			hand="terrify"
+			result.outcome="Your anger fell on %s before the court; %s shakes with it." % [name,"they" if count>1 else ("she" if String(p.get("sex",""))=="female" else "he")]
+		"penance":
+			p["dread"]=clampf(float(p.get("dread",0.2))+0.1,0.0,1.0)
+			effects=DIVINE.apply_to_court("penance",{"person_id":0,"name":name},watchers)
+			_remember(p,"The god set me to fast and keep vigil until the anger passed.")
+			hand="penance"
+			result.outcome="%s must fast and keep vigil at your word." % name
 		"curse":
 			p["cursed"]=true
 			p["dread"]=clampf(float(p.get("dread",0.2))+0.25,0.0,1.0); p["love"]=clampf(float(p.get("love",0.5))-0.2,0.0,1.0)
@@ -1692,7 +1835,7 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 			_importance(p,4.0)
 			_remember(p,"The god made me %s." % priest_word())
 			hand="priest"
-			result.outcome="%s now keeps the god's fire as %s." % [name,priest_word()]
+			result.outcome=("%s is the god's priest now, and keeps the god's fire." if priest_word()=="priest" else "%s keeps the god's fire now, for the whole people.") % name
 		"make_official":
 			return _make_official(audience_id,p,String(params.get("office","")),result,watchers)
 		"marry_off":
@@ -1713,6 +1856,7 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 				return _novel(audience_id,action,p,params,how,result,watchers)
 	result["effects"]=effects
 	result["witness_ids"]=watchers.map(func(w:Variant)->int: return int((w as Dictionary).get("person_id",0)))
+	if away: beats.append(_beat_narrator("judge_brought",slots))
 	beats.append(_beat_narrator("judge_"+hand,slots))
 	if not action in ["execute","exile"]: beats.append(_beat_known(p,"react_"+hand,slots))
 	for w in watchers:

@@ -2141,7 +2141,87 @@ static func _recall(out:Dictionary,reading:Dictionary={})->Dictionary:
 	out.outcome=" ".join(outcome)
 	return out
 
+static func _reinforce(out:Dictionary,reading:Dictionary)->Dictionary:
+	## "Send our full forces into battle on Tsaren" read as defending a town we
+	## hold: its garrison is reinforced. A band of ours standing at the town
+	## joins it at once; the trained at home march to it (every one of them for
+	## full forces, else a watch stays behind) and join the garrison when they
+	## arrive (pursuit.gd's own rejoining). Numbers and days said plainly;
+	## nobody attacks a town that is already ours.
+	var town:Dictionary=reading.get("target",{})
+	var name:=String(town.get("name","the town"))
+	var civ_id:=String(town.get("civ_id","")); var city_id:=String(town.get("city_id",""))
+	var mc:=_mc()
+	var f:=forces(out.general_ref)
+	out["target"]=town.duplicate(true)
+	if String(f.busy)!="": return _no(out,"busy","We cannot move soldiers while %s." % String(f.busy),"When that is done, give the order again.")
+	var full:=bool(reading.get("full",false))
+	var trained:=int(f.trained)
+	var asked:=maxi(0,int(reading.get("count",0)))
+	var keep:=0 if full else (ceili(trained*WATCH_SHARE) if trained>=MIN_FORCE*2 else 0)
+	if asked>0: keep=maxi(0,trained-asked)
+	var send:=maxi(0,trained-keep)
+	var before:=int(town.get("garrison",0))
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var joined_now:=0
+	var bands:PackedStringArray=PackedStringArray()
+	var slowest:=0
+	# A band of ours already at the town, and (for full forces) the idle bands at home.
+	var i:int=mc.field_armies.size()-1
+	while i>=0:
+		var army:Dictionary=mc.field_armies[i]
+		var here:bool=String(army.get("location_id",""))==city_id and String(army.get("status",""))=="stationed"
+		var idle_home:bool=full and _at_home(army) and not army.has("court_order") and not bool(mc.command_hierarchy.battle.engaged(int(army.army_id)))
+		if int(army.get("troops",0))>0 and not army.get("pursuit") is Dictionary and (here or idle_home):
+			army["pursuit"]={"state":"returning","civ_id":civ_id,"region_id":city_id,"town":name,"start_day":day,"reinforce":true}
+			mc.field_armies[i]=army
+			var troops:=int(army.troops)
+			if here:
+				Pursuit._rejoin(i); joined_now+=troops
+			else:
+				var went:=Pursuit._march(i,Pursuit.town_position(city_id),city_id,name)
+				if went.has("error") or int(went.get("days",0))<=0:
+					if went.has("error"): army.erase("pursuit"); mc.field_armies[i]=army
+					else: Pursuit._rejoin(i); joined_now+=troops
+				else:
+					bands.append("%s with %d" % [String(army.get("name","a band")),troops]); slowest=maxi(slowest,int(went.days))
+		i-=1
+		i=mini(i,mc.field_armies.size()-1)
+	var column:=0
+	var days:=0
+	if send>0:
+		var made:Dictionary=mc.create_field_army(send,"Reinforcements for %s" % name)
+		if not made.has("error"):
+			var index:int=mc._field_army_index(int((made.army as Dictionary).army_id))
+			var army2:Dictionary=mc.field_armies[index]
+			army2["pursuit"]={"state":"returning","civ_id":civ_id,"region_id":city_id,"town":name,"start_day":day,"reinforce":true}
+			army2["court_order"]={"kind":"reinforce","civ_id":civ_id,"city_id":city_id,"city_name":name,"day":day,"general":String(out.general),"general_pid":int(out.general_pid),"going":send}
+			mc.field_armies[index]=army2
+			var went2:=Pursuit._march(index,Pursuit.town_position(city_id),city_id,name)
+			if went2.has("error"):
+				mc.disband_field_army(int(army2.army_id))
+			else:
+				column=send; days=int(went2.get("days",0))
+				if days<=0: Pursuit._rejoin(index); joined_now+=send; column=0
+	if column<=0 and joined_now<=0 and bands.is_empty():
+		return _no(out,"no_forces","Nobody is free to send to %s: %s hold it now%s." % [name,_number(before),(", and %d stay at home to keep watch" % trained) if trained>0 else ", and nobody trained is at home"],"Raise more fighters and have them drilled; then I can send them.")
+	mc.army_changed.emit(mc.home_army.duplicate(true))
+	var parts:PackedStringArray=PackedStringArray()
+	if joined_now>0: parts.append("%d already at %s join its garrison now" % [joined_now,name])
+	if column>0: parts.append("%d march from home, about %d %s on the road" % [column,days,"day" if days==1 else "days"])
+	for b in bands: parts.append("%s, about %d days out" % [b,slowest])
+	var arriving:=column
+	for b in bands: arriving+=int(String(b).get_slice(" with ",1))
+	out.verdict="act"
+	out.objective={"army_id":0,"kind":"reinforce","city_id":city_id,"civ_id":civ_id,"troops":column+joined_now+arriving-column,"days":maxi(days,slowest)}
+	out.says="%s is ours already, so nobody attacks it: I send what we have to hold it. %s. %s hold it now; with them it will be %d.%s" % [name,_cap("; ".join(parts)),_cap(_number(before+joined_now)),before+joined_now+arriving,(" %d stay at home to keep watch." % keep) if keep>0 else " Nobody trained stays at home."]
+	out.outcome="Reinforcements go to %s: %d join its garrison%s." % [name,joined_now+arriving,(" over the next %d days" % maxi(days,slowest)) if arriving>0 else " now"]
+	return out
+
 static func _defend(out:Dictionary,reading:Dictionary)->Dictionary:
+	# A town we hold named: its garrison is reinforced.
+	var named:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+	if named.has("city_id") and not _held_town(String(named.city_id)).is_empty(): return _reinforce(out,reading.merged({"target":_held_town(String(named.city_id))},true))
 	var f:=forces()
 	var place:=String(reading.get("place",""))
 	var home_words:=place=="" or _has(place,"(home|walls?|village|town|camp|fields|gate)")
