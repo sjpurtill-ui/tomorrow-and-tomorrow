@@ -108,6 +108,7 @@ static func open(terrain_node:Node,hud_node:Node=null,zoomed_out:=false)->Contro
 
 
 func _ready()->void:
+	open_views+=1
 	name="WorldGlobe"
 	theme=T.control_theme()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -144,6 +145,7 @@ func _ready()->void:
 
 
 func _exit_tree()->void:
+	open_views=maxi(0,open_views-1)
 	_set_3d_hidden(false)
 	if motion and motion.is_valid():motion.kill()
 
@@ -313,7 +315,7 @@ func leave_to(position:Vector2,level:int=GROUND_LEVEL)->void:
 		distance_goal=distance
 		# Turn to the map's heading as it arrives, so the map takes over in place.
 		roll=lerpf(from_roll,arrive_roll,ease(t,2.4))
-		_update_uniforms(),0.0,1.0,T.MOTION.scene)
+		_update_uniforms(),0.0,1.0,1.1)
 	motion.tween_callback(func()->void:
 		_set_3d_hidden(false)
 		if is_instance_valid(terrain) and terrain.has_method("_world_view_arrive"):terrain._world_view_arrive(position))
@@ -353,7 +355,9 @@ func _set_3d_hidden(hidden:bool)->void:
 
 func _process(delta:float)->void:
 	delta=clampf(delta,0.0,0.1)
-	if chart.poll():_apply_chart()
+	chart.poll()
+	# A chart published by anyone (this view or the background prewarm) is shown.
+	if chart.revision!=shown_revision and chart.current(int(GameState.world_seed)):_apply_chart()
 	refresh_elapsed+=delta
 	if refresh_elapsed>=1.0:
 		refresh_elapsed=0.0
@@ -429,8 +433,60 @@ func _update_uniforms()->void:
 func _refresh_chart(first:bool)->void:
 	if CivilizationSystem==null:return
 	var areas:Array=CivilizationSystem.revealed_areas
-	chart.refresh(areas,int(GameState.world_seed),_city_sources,_height_source)
+	chart.refresh(areas,int(GameState.world_seed),city_sources,height_source.bind(terrain))
 	if first and chart.current(int(GameState.world_seed)):_apply_chart()
+
+
+## Draws the chart in the background before anyone opens the view (the map's
+## toolbar asks a few seconds after the world loads), so a long-travelled
+## world's first opening does not wait on it. Nothing is shown or saved.
+static func prewarm(terrain_node:Node)->void:
+	if CivilizationSystem==null or GameState==null:return
+	var model:RefCounted=Chart.shared()
+	model.refresh(CivilizationSystem.revealed_areas,int(GameState.world_seed),city_sources,height_source.bind(terrain_node))
+	# Collect the finished job even if the view is never opened.
+	var tree:=Engine.get_main_loop() as SceneTree
+	if tree==null or _prewarm_poll.is_valid() or not model.busy():return
+	_prewarm_poll=func()->void:
+		if not model.busy() or model.poll():
+			tree.process_frame.disconnect(_prewarm_poll)
+			_prewarm_poll=Callable()
+			if open_views==0:_upload_ahead(model)
+	tree.process_frame.connect(_prewarm_poll)
+
+
+static var _prewarm_poll:Callable=Callable()
+## Views open now: the background prewarm leaves textures to an open view.
+static var open_views:=0
+
+
+## Puts the prewarmed chart on the graphics card and draws it once on an
+## invisible pixel, so the first opening does not stall on the upload.
+static func _upload_ahead(model:RefCounted)->void:
+	if model.image==null or model.routes==null or int(model.texture_revision)==int(model.revision):return
+	var tree:=Engine.get_main_loop() as SceneTree
+	if tree==null:return
+	model.textures=[ImageTexture.create_from_image(model.image)]
+	model.route_textures=[ImageTexture.create_from_image(model.routes)]
+	model.texture_front=0
+	model.texture_revision=model.revision
+	var layer:=CanvasLayer.new()
+	layer.name="WorldViewUploadAhead"
+	layer.layer=-100
+	var pixel:=ColorRect.new()
+	pixel.size=Vector2.ONE
+	pixel.modulate.a=0.01
+	pixel.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var ahead:=ShaderMaterial.new()
+	ahead.shader=SHADER
+	ahead.set_shader_parameter("known_map",model.textures[0])
+	ahead.set_shader_parameter("previous_map",model.textures[0])
+	ahead.set_shader_parameter("route_map",model.route_textures[0])
+	ahead.set_shader_parameter("previous_route_map",model.route_textures[0])
+	pixel.material=ahead
+	layer.add_child(pixel)
+	tree.root.add_child(layer)
+	tree.create_timer(0.5).timeout.connect(layer.queue_free)
 
 
 ## The figures for this world, or none while its chart is still being drawn.
@@ -440,7 +496,7 @@ func current_stats()->Dictionary:
 
 ## Where each observed town's report came from, so the ground it revealed is
 ## credited to scouts, armies or envoys.
-func _city_sources()->Dictionary:
+static func city_sources()->Dictionary:
 	var sources:={}
 	var book:Dictionary=CivilizationSystem.city_intelligence.records.get("player",{}) if CivilizationSystem.city_intelligence!=null else {}
 	for id:String in book:
@@ -452,9 +508,9 @@ func _city_sources()->Dictionary:
 
 ## The map's own planet raster when it is ready (the globe then matches the
 ## map's coasts), else the planet's exact heights.
-func _height_source()->Dictionary:
-	if is_instance_valid(terrain):
-		var render:Variant=terrain.get("macro_render")
+static func height_source(terrain_node:Node)->Dictionary:
+	if is_instance_valid(terrain_node):
+		var render:Variant=terrain_node.get("macro_render")
 		if render is RefCounted:
 			var levels:Variant=(render as RefCounted).get("levels")
 			if levels is Array and not (levels as Array).is_empty() and (levels as Array)[0] is RefCounted:
@@ -474,20 +530,31 @@ func _apply_chart()->void:
 	# unless the known world changed. A new chart goes into the texture not on
 	# show, so the one on show can stay as the ground the new one inks over.
 	var held:Array=chart.textures
+	var held_routes:Array=chart.route_textures
 	if int(chart.texture_revision)!=int(chart.revision):
-		if held.is_empty():
+		if held.is_empty() or held_routes.size()!=held.size():
 			held=[ImageTexture.create_from_image(chart.image)]
+			held_routes=[ImageTexture.create_from_image(chart.routes)]
 			chart.texture_front=0
 		else:
 			var back:=1-int(chart.texture_front)
-			if held.size()<2:held.append(ImageTexture.create_from_image(chart.image))
-			else:(held[back] as ImageTexture).update(chart.image)
+			if held.size()<2:
+				held.append(ImageTexture.create_from_image(chart.image))
+				held_routes.append(ImageTexture.create_from_image(chart.routes))
+			else:
+				(held[back] as ImageTexture).update(chart.image)
+				(held_routes[back] as ImageTexture).update(chart.routes)
 			chart.texture_front=back
 		chart.textures=held
+		chart.route_textures=held_routes
 		chart.texture_revision=chart.revision
-	var front:ImageTexture=held[int(chart.texture_front)]
-	var behind:ImageTexture=held[1-int(chart.texture_front)] if held.size()>1 else front
+	var front_index:=int(chart.texture_front)
+	var behind_index:=1-front_index if held.size()>1 else front_index
+	var front:ImageTexture=held[front_index]
+	var behind:ImageTexture=held[behind_index]
 	globe_material.set_shader_parameter("known_map",front)
+	globe_material.set_shader_parameter("route_map",held_routes[front_index])
+	globe_material.set_shader_parameter("previous_route_map",held_routes[behind_index] if shown_revision>=0 else held_routes[front_index])
 	if shown_revision<0:
 		# First sight in this opening: the known world inks in over blank vellum.
 		globe_material.set_shader_parameter("previous_map",front)
@@ -887,6 +954,11 @@ func _gather_marks()->void:
 		var name_text:=CityLabels.chart_name(String(settlement.get("name",home_name)))
 		list.append({"id":String(settlement.get("id","")),"kind":"ours","rank":0 if primary else 1,"position":at,"vector":_vector(at),"emblem":ours,
 			"name":name_text if primary else "","tip":"%s · our %s" % [name_text,EraWords.word("place","town")],"people":"player"})
+	# Before any town is founded our people are wherever they have walked to.
+	if list.is_empty() and CivilizationSystem!=null:
+		var here:=CivilizationSystem.player_world_origin
+		list.append({"id":"our_people","kind":"ours","rank":0,"position":here,"vector":_vector(here),"emblem":ours,
+			"name":"Our people","tip":"Our people, still looking for a place to settle","people":"player"})
 	# Town reaches change only with the settlement network: skip the snapshot otherwise.
 	if realm_key!=realm_signature:
 		realm_signature=realm_key
@@ -973,6 +1045,11 @@ class MarksLayer extends Control:
 	## Emblems and names drawn over the globe: ours first, then towns we hold,
 	## chief towns, and other towns. A mark that would sit on another is left
 	## as a small ink dot; names only where they have room.
+	## The globe is always parchment, whatever the interface palette: its marks
+	## use the chart's own inks, not the night or day text colours.
+	const PARCHMENT:=Color("f6efe1")
+	const INK:=Color("20231f")
+	const GOLD_INK:=Color("8a6118")
 	var view:Control
 	var entries:Array[Dictionary]=[]
 	var realm:Array=[]
@@ -999,7 +1076,7 @@ class MarksLayer extends Control:
 		if fade<=0.01:return
 		var radius:float=view.globe_radius()
 		var scale:=clampf(radius/420.0,0.8,1.35)
-		var gold:=T.GOLD
+		var gold:=GOLD_INK
 		# Our land: a gold wash inside each town's reach.
 		for polygon:PackedVector3Array in realm:
 			var points:=PackedVector2Array()
@@ -1038,7 +1115,7 @@ class MarksLayer extends Control:
 				continue
 			placed.append({"screen":centre,"size":mark_size,"entry":entry,"at":at})
 		for at in dots:
-			draw_circle(at,2.4,Color(T.PAPER_RAISED,0.85*fade))
+			draw_circle(at,2.4,Color(PARCHMENT,0.85*fade))
 			draw_circle(at,1.5,Color(ink,fade))
 		for mark:Dictionary in placed:
 			var entry:Dictionary=mark.entry
@@ -1046,7 +1123,7 @@ class MarksLayer extends Control:
 			var centre:Vector2=mark.screen
 			var mark_size:=float(mark.size)
 			var box:=Rect2(centre-Vector2(mark_size,mark_size)*0.5,Vector2(mark_size,mark_size))
-			draw_line(at,centre+Vector2(0,mark_size*0.42),Color(T.PAPER_RAISED,0.7*fade),3.0,true)
+			draw_line(at,centre+Vector2(0,mark_size*0.42),Color(PARCHMENT,0.7*fade),3.0,true)
 			draw_line(at,centre+Vector2(0,mark_size*0.42),Color(ink,0.85*fade),1.1,true)
 			draw_circle(at,1.6,Color(ink,fade))
 			var emblem:Texture2D=entry.get("emblem")
@@ -1054,13 +1131,13 @@ class MarksLayer extends Control:
 				var alpha:=0.72 if bool(entry.get("stale",false)) else 1.0
 				draw_texture_rect(emblem,box,false,Color(1,1,1,alpha*fade))
 			else:
-				draw_circle(centre,mark_size*0.32,Color(T.PAPER_RAISED,fade))
+				draw_circle(centre,mark_size*0.32,Color(PARCHMENT,fade))
 				draw_arc(centre,mark_size*0.32,0.0,TAU,24,Color(ink,fade),1.2,true)
 			if String(entry.kind)=="occupied":
 				draw_arc(centre,mark_size*0.62,0.0,TAU,32,Color(gold,0.9*fade),1.6,true)
 			var hover:Vector2=view.pointer
 			if hover.distance_to(centre)<=mark_size*0.6:
-				draw_arc(centre,mark_size*0.66,0.0,TAU,32,Color(T.GOLD,fade),1.8,true)
+				draw_arc(centre,mark_size*0.66,0.0,TAU,32,Color(GOLD_INK,fade),1.8,true)
 			labels.append(box)
 		for mark:Dictionary in placed:
 			var words:=String((mark.entry as Dictionary).get("name",""))
@@ -1080,9 +1157,9 @@ class MarksLayer extends Control:
 				if other.intersects(rect):clash=true;break
 			if clash or not get_rect().grow(-8).encloses(rect):continue
 			labels.append(rect)
-			var halo:=Color(T.PAPER_RAISED,0.92*fade)
+			var halo:=Color(PARCHMENT,0.92*fade)
 			draw_string_outline(font,origin,words,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,8,halo)
-			draw_string(font,origin,words,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,Color(T.INK,fade))
+			draw_string(font,origin,words,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,Color(INK,fade))
 			return
 
 

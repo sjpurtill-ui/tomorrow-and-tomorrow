@@ -960,6 +960,10 @@ func _build_toolbar()->void:
 		warm.material=warm_material
 		world_button.add_child(warm)
 		get_tree().create_timer(3.0).timeout.connect(warm.queue_free)
+		# Draw the world view's chart in the background once the world has
+		# settled, so its first opening shows what is known at once.
+		get_tree().create_timer(8.0).timeout.connect(func()->void:
+			if is_instance_valid(terrain):preload("res://scripts/hud/world_globe.gd").prewarm(terrain))
 
 	toolbar.reset_size()
 	_position_toolbar()

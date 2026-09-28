@@ -11,6 +11,10 @@ render_mode unshaded;
 
 uniform sampler2D known_map : filter_linear_mipmap, repeat_enable;
 uniform sampler2D previous_map : filter_linear_mipmap, repeat_enable;
+// Signed distance to the nearest walked route's centre line (L) and whether a
+// route is near at all (A); see world_globe_chart.gd.
+uniform sampler2D route_map : filter_linear_mipmap, repeat_enable;
+uniform sampler2D previous_route_map : filter_linear_mipmap, repeat_enable;
 // 0 shows previous_map, 1 known_map: new knowledge inks in over the old.
 uniform float map_mix = 1.0;
 uniform float chart_alpha = 1.0;
@@ -40,8 +44,12 @@ uniform vec3 sepia = vec3(0.42, 0.31, 0.20);
 uniform vec3 land_low = vec3(0.71, 0.63, 0.45);
 uniform vec3 land_green = vec3(0.50, 0.55, 0.32);
 uniform vec3 land_high = vec3(0.64, 0.57, 0.45);
-uniform vec3 sea_shallow = vec3(0.42, 0.54, 0.52);
-uniform vec3 sea_deep = vec3(0.24, 0.35, 0.38);
+uniform vec3 sea_shallow = vec3(0.60, 0.70, 0.68);
+uniform vec3 sea_deep = vec3(0.44, 0.56, 0.57);
+// How strongly the sea wash is laid on (land is 1).
+uniform float sea_wash = 0.62;
+// The warm wash over well-walked country.
+uniform vec3 region_tint = vec3(0.91, 0.85, 0.73);
 uniform vec3 glow = vec3(0.86, 0.68, 0.36);
 uniform vec3 backdrop_center = vec3(0.24, 0.19, 0.14);
 uniform vec3 backdrop_edge = vec3(0.09, 0.07, 0.05);
@@ -77,6 +85,14 @@ vec4 chart_sample(vec2 uv, vec2 ddx, vec2 ddy) {
 		return now;
 	}
 	return mix(textureGrad(previous_map, uv, ddx, ddy), now, map_mix);
+}
+
+vec2 route_sample(vec2 uv, vec2 ddx, vec2 ddy) {
+	vec2 now = textureGrad(route_map, uv, ddx, ddy).ra;
+	if (map_mix >= 0.999) {
+		return now;
+	}
+	return mix(textureGrad(previous_route_map, uv, ddx, ddy).ra, now, map_mix);
 }
 
 vec4 chart_lod(vec2 uv, float lod) {
@@ -156,7 +172,9 @@ void fragment() {
 	float land = clamp(k.g * inv, 0.0, 1.0);
 	float height01 = clamp(k.b * inv, 0.0, 1.0);
 	float height_km = mix(-4.0, 8.0, height01);
-	float known = smoothstep(0.30, 0.62, known_share) * chart_alpha;
+	// Known ground is laid on as a wash whose edge feathers into the vellum:
+	// no hard outline, so a route reads as a soft band, not a tube.
+	float known = smoothstep(0.04, 0.85, known_share) * chart_alpha;
 
 	// Hill shading from the neighbouring heights, one footprint away.
 	vec2 step_uv = max(vec2(1.0) / texels, vec2(footprint) / texels);
@@ -164,7 +182,9 @@ void fragment() {
 	vec4 ky = chart_lod(uv + vec2(0.0, step_uv.y), lod);
 	float hx = mix(-4.0, 8.0, clamp(kx.b / max(kx.r, 1.0 / 255.0), 0.0, 1.0));
 	float hy = mix(-4.0, 8.0, clamp(ky.b / max(ky.r, 1.0 / 255.0), 0.0, 1.0));
-	float valid = step(0.25, kx.r) * step(0.25, ky.r);
+	// Only where the ground is broadly known: the thin edges carry too few
+	// samples for a slope.
+	float valid = step(0.6, kx.r) * step(0.6, ky.r) * smoothstep(0.6, 0.9, known_share);
 	// Height change per kilometre, exaggerated as a chart's hill shading is.
 	vec2 slope = vec2(hx - height_km, hy - height_km) * valid / max(step_uv.x * 40075.0, 1.0) * 14.0;
 	float shade = clamp(1.0 + dot(slope, vec2(-0.55, -0.83)), 0.74, 1.16);
@@ -181,7 +201,8 @@ void fragment() {
 	float depth = clamp(-height_km / 2.8, 0.0, 1.0);
 	vec3 sea_color = mix(mix(sea_shallow, sea_deep, smoothstep(0.02, 0.75, depth)), map_sea, map_likeness);
 	float land_weight = smoothstep(0.40, 0.60, land);
-	// Washes laid over the vellum, as colour on paper.
+	// Sea takes a lighter wash than land (full strength at the map's own scale).
+	float wash = mix(mix(sea_wash, 1.0, land_weight), 1.0, map_likeness);
 	vec3 known_color = mix(sea_color, land_color, land_weight) * (1.0 + mottle * 0.04 + fibre * 0.015);
 
 	// Engraved water-lines along the coast: two lines of the blurred shore.
@@ -189,22 +210,35 @@ void fragment() {
 	float blurred_land = clamp(kb.g / max(kb.r, 1.0 / 255.0), 0.0, 1.0);
 	float bl_fw = max(fwidth(blurred_land), 0.0001);
 	float water_lines = hairline(abs(blurred_land - 0.30) / bl_fw) * 0.55 + hairline(abs(blurred_land - 0.12) / bl_fw) * 0.32;
-	water_lines *= (1.0 - land_weight) * smoothstep(0.5, 0.8, kb.r);
-	known_color = mix(known_color, sea_deep * 0.62, water_lines * 0.55);
+	water_lines *= (1.0 - land_weight) * smoothstep(0.8, 0.96, kb.r);
+	known_color = mix(known_color, sea_deep * 0.85, water_lines * 0.35);
 
-	// Coast: one ink line where land meets sea, only inside the known ground.
+	// Coast: one ink line where land meets sea, only where the known ground is
+	// broad (a narrow route's few samples would scribble a false shore).
 	float coast_px = abs(land - 0.5) / max(fwidth(land), 0.0001);
-	float coast = hairline(coast_px * 0.8) * smoothstep(0.5, 0.8, known_share);
-	known_color = mix(known_color, ink, coast * 0.85);
+	float coast = hairline(coast_px * 0.8) * smoothstep(0.7, 0.95, known_share) * smoothstep(0.7, 0.9, kb.r);
+	known_color = mix(known_color, mix(sepia, ink, 0.6), coast * 0.7);
 
-	color = mix(color, known_color, known);
+	// Where routes crowd, the country between them reads as explored: a
+	// neutral warm wash that says nothing of land or sea there.
+	float crowd = chart_lod(uv, clamp(lod + 3.0, 0.0, 10.0)).r;
+	float region = smoothstep(0.26, 0.58, crowd) * chart_alpha * (1.0 - map_likeness);
+	color = mix(color, color * region_tint, region * 0.75);
+
+	color = mix(color, known_color, known * wash);
 	color = mix(color, sepia, graticule * mix(0.20, 0.12, known) + equator * 0.10);
 
-	// The edge of the known world: a fine ink line, a sepia shade outside it.
-	float edge_px = (known_share - 0.46) / max(fwidth(known_share), 0.0001);
-	float frontier = hairline(abs(edge_px)) * step(0.02, known_share) * chart_alpha;
-	float shade_out = smoothstep(0.02, 0.3, kb.r) * (1.0 - known) * chart_alpha;
-	color = mix(color, color * vec3(0.88, 0.81, 0.70), shade_out * 0.28);
+	// Each walked route: a fine inked line along its middle, at any zoom (the
+	// routes image holds the distance to the nearest route's centre line).
+	vec2 route_field = route_sample(uv, ddx, ddy);
+	float gap_texels = abs(route_field.x - 0.5) * 2.0 * 2.0;
+	float gap_px = gap_texels * 2.0 / max(footprint, 0.0001);
+	// A real route is within a texel; midway between two routes the sign also
+	// flips, but far from both, so nearness keeps that from drawing a line.
+	// Where routes crowd into explored country the lines give way to the wash.
+	float route = (1.0 - smoothstep(0.25, 0.95, gap_px)) * smoothstep(0.6, 0.78, route_field.y) * chart_alpha * (1.0 - map_likeness) * (1.0 - region * 0.75);
+	color = mix(color, mix(sepia, ink, 0.3), route * 0.55);
+
 	// A small known patch still shows from afar: a soft warm glow around it,
 	// blurred over five taps so the coarse mip never shows its squares.
 	vec2 tap = vec2(10.0 / 2048.0, 10.0 / 1024.0);
@@ -212,7 +246,6 @@ void fragment() {
 		+ chart_lod(uv + vec2(0.0, tap.y), 4.0).r + chart_lod(uv - vec2(0.0, tap.y), 4.0).r) / 6.0;
 	float halo = sqrt(clamp(far_share * 10.0, 0.0, 1.0)) * (1.0 - known) * chart_alpha * halo_strength;
 	color = mix(color, glow, halo * 0.22);
-	color = mix(color, mix(sepia, ink, 0.45), frontier * 0.6);
 
 	// --- Light on a paper sphere ----------------------------------------------
 	vec3 light_dir = normalize(vec3(-0.50, 0.62, 0.72));

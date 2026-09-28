@@ -50,27 +50,62 @@ func _ready()->void:
 	_learn_the_wider_world()
 	await _shot("later",{"today":40*365})
 	await _shot("later-close",{"today":40*365,"distance":WorldGlobe.NEAR_DISTANCE+0.25})
+	# The night palette (display preferences): the view as a dark-mode player sees it.
+	HudTokens.set_color_mode("dark")
+	await _shot("later-night",{"today":40*365})
+	HudTokens.set_color_mode("light")
+	await _fly_back()
 	print("WORLD_GLOBE_CAPTURE shots written: %d" % written)
-	if written>=8:print("WORLD_GLOBE_CAPTURE PASS")
-	get_tree().quit(0 if written>=8 else 1)
+	if written>=11:print("WORLD_GLOBE_CAPTURE PASS")
+	get_tree().quit(0 if written>=11 else 1)
+
+
+## Clicking known ground: the globe turns to it, closes in, and the map takes
+## over there and eases in to the region.
+func _fly_back()->void:
+	var view:Control=WorldGlobe.open(terrain,terrain.hud,false)
+	var started:=Time.get_ticks_msec()
+	while view.phase!="open" or view.chart.busy():
+		await get_tree().process_frame
+		if Time.get_ticks_msec()-started>20000:break
+	await _wait(0.4)
+	view.leave_to(home+Vector2(420.0,-160.0),2)
+	await _wait(0.55)
+	await _save("leave-mid")
+	await _wait(2.4)
+	await _save("leave-end")
 
 
 ## Opens the world view, waits for the chart and its ink, saves one image.
 func _shot(label:String,options:Dictionary)->void:
+	# Let the map finish its own response to new reveals first, so the timings
+	# below belong to the world view alone.
+	await _wait(2.5)
 	var opening:=Time.get_ticks_usec()
 	var view:Control=WorldGlobe.open(terrain,terrain.hud,false)
 	var open_ms:=float(Time.get_ticks_usec()-opening)/1000.0
 	if options.has("today"):view.today_override=int(options.today)
 	var started:=Time.get_ticks_msec()
 	var worst:=0.0
-	for frame in 8:
+	var worst_frame:=-1
+	for frame in 40:
+		var frame_start:=Time.get_ticks_usec()
+		await get_tree().process_frame
+		var took:=float(Time.get_ticks_usec()-frame_start)/1000.0
+		if took>worst:
+			worst=took
+			worst_frame=frame
+	print("WORLD_GLOBE_CAPTURE %s open took %.1f ms, worst of the next 40 frames %.1f ms (frame %d)" % [label,open_ms,worst,worst_frame])
+	while view.chart.busy() or view.shown_revision!=view.chart.revision or view.phase!="open":
 		var frame_start:=Time.get_ticks_usec()
 		await get_tree().process_frame
 		worst=maxf(worst,float(Time.get_ticks_usec()-frame_start)/1000.0)
-	print("WORLD_GLOBE_CAPTURE %s open took %.1f ms, worst of the next 8 frames %.1f ms" % [label,open_ms,worst])
-	while view.chart.busy() or view.shown_revision!=view.chart.revision or view.phase!="open":
-		await get_tree().process_frame
 		if Time.get_ticks_msec()-started>30000:break
+	for frame in 10:
+		var frame_start:=Time.get_ticks_usec()
+		await get_tree().process_frame
+		worst=maxf(worst,float(Time.get_ticks_usec()-frame_start)/1000.0)
+	print("WORLD_GLOBE_CAPTURE %s worst frame through the chart's arrival %.1f ms" % [label,worst])
 	print("WORLD_GLOBE_CAPTURE %s chart ready in %d ms (%s heights, %d records, %d texels)" % [label,Time.get_ticks_msec()-started,view.chart.height_mode,int(view.chart.stats.records),int(view.chart.stats.texels)])
 	if options.has("distance"):
 		view.distance=float(options.distance)

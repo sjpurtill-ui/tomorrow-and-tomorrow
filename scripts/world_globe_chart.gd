@@ -41,6 +41,15 @@ const SAMPLE_SUBROWS:=[2,5]
 const SAMPLE_COLUMNS:=[0.3125,0.6875]
 const CATEGORIES:=["travel","scouts","envoys","trade","war","other"]
 const YEAR_DAYS:=365
+## The routes image (LA8, half resolution): L is the signed distance to the
+## nearest walked route's centre line (0.5 on the line, the sign telling which
+## side), A is how near a route is (1 on it, 0 at ROUTE_RANGE texels). A signed
+## distance interpolates through zero exactly on the line, so the globe can ink
+## each route as a fine line at any zoom; A tells a real crossing from the
+## sign flip midway between two neighbouring routes.
+const ROUTE_COLUMNS:=1024
+const ROUTE_ROWS:=512
+const ROUTE_RANGE:=2.0
 
 # --- Main-thread bookkeeping (which records are already in the chart) -------
 var world_seed:=-1
@@ -55,6 +64,7 @@ var _task_reset:=false
 ## Bumped on every published result; views compare it to know when to redraw.
 var revision:=0
 var image:Image
+var routes:Image
 ## The world the published image and figures belong to.
 var image_seed:=-1
 var stats:Dictionary=empty_stats()
@@ -63,6 +73,7 @@ var _job_seed:=-1
 ## GPU copies of the published image, kept by the view between openings
 ## (created and updated on the main thread only).
 var textures:Array=[]
+var route_textures:Array=[]
 var texture_front:=0
 var texture_revision:=-1
 var _city_source_fn:Callable=Callable()
@@ -77,6 +88,8 @@ var _surface:=0.0
 var _area:=PackedFloat32Array()
 var _land:=PackedFloat32Array()
 var _pixels:=PackedByteArray()
+var _routes:=PackedByteArray()
+var _route_gap:=PackedFloat32Array()
 var _known:=PackedInt32Array()
 var _gain_days:=PackedInt32Array()
 var _gain_values:=PackedFloat64Array()
@@ -415,6 +428,7 @@ func _start_job(height_source:Dictionary,threaded:bool)->void:
 func _publish()->void:
 	if _job_result.is_empty():return
 	image=_job_result.image
+	routes=_job_result.routes
 	stats=_job_result.stats
 	image_seed=_job_seed
 	_job_result={}
@@ -429,6 +443,9 @@ func _reset_state()->void:
 	_area=PackedFloat32Array();_area.resize(COLUMNS*ROWS)
 	_land=PackedFloat32Array();_land.resize(COLUMNS*ROWS)
 	_pixels=PackedByteArray();_pixels.resize(COLUMNS*ROWS*4)
+	_routes=PackedByteArray();_routes.resize(ROUTE_COLUMNS*ROUTE_ROWS*2)
+	for index in ROUTE_COLUMNS*ROUTE_ROWS:_routes[index*2]=128
+	_route_gap=PackedFloat32Array();_route_gap.resize(ROUTE_COLUMNS*ROUTE_ROWS);_route_gap.fill(ROUTE_RANGE)
 	_known=PackedInt32Array()
 	_gain_days=PackedInt32Array()
 	_gain_values=PackedFloat64Array()
@@ -437,6 +454,7 @@ func _reset_state()->void:
 
 
 func _run_job()->void:
+	var started:=Time.get_ticks_usec()
 	if _task_reset or _area.size()!=COLUMNS*ROWS:_reset_state()
 	var dirty:Dictionary={}
 	for item:Array in _job_items:
@@ -448,9 +466,11 @@ func _run_job()->void:
 		_gain_categories.append(kind)
 		_category_totals[kind]+=gain
 	_job_items=[]
+	var merged_at:=Time.get_ticks_usec()
 	for row:int in dirty:
 		var span:Vector2i=dirty[row]
 		_refresh_texels(row,span.x,span.y)
+	var texels_at:=Time.get_ticks_usec()
 	var known:=0.0
 	var land:=0.0
 	for index in _known:
@@ -460,8 +480,11 @@ func _run_job()->void:
 	for i in CATEGORIES.size():by[CATEGORIES[i]]=_category_totals[i]/maxf(1.0,_surface)
 	var chart:=Image.create_from_data(COLUMNS,ROWS,false,Image.FORMAT_RGBA8,_pixels)
 	chart.generate_mipmaps()
-	_job_result={"image":chart,"stats":{"known_km2":known,"known_fraction":known/_surface,"land_fraction":land/_surface,"sea_fraction":maxf(0.0,known-land)/_surface,
-		"surface_km2":_surface,"by_category":by,"days":_gain_days.duplicate(),"gains":_gain_values.duplicate(),"records":_gain_days.size(),"texels":_known.size()}}
+	var route_image:=Image.create_from_data(ROUTE_COLUMNS,ROUTE_ROWS,false,Image.FORMAT_LA8,_routes)
+	route_image.generate_mipmaps()
+	_job_result={"image":chart,"routes":route_image,"stats":{"known_km2":known,"known_fraction":known/_surface,"land_fraction":land/_surface,"sea_fraction":maxf(0.0,known-land)/_surface,
+		"surface_km2":_surface,"by_category":by,"days":_gain_days.duplicate(),"gains":_gain_values.duplicate(),"records":_gain_days.size(),"texels":_known.size(),
+		"job_ms":{"records":float(merged_at-started)/1000.0,"texels":float(texels_at-merged_at)/1000.0,"image":float(Time.get_ticks_usec()-texels_at)/1000.0}}}
 
 
 ## Adds one record (or the part of a trail walked since it was last read) and
@@ -478,6 +501,7 @@ func _add_record(area:Dictionary,first_point:int,dirty:Dictionary)->float:
 	else:
 		points.append(Vector2(float(area.get("x",0.0)),float(area.get("z",0.0))))
 	if points.is_empty():return 0.0
+	if points.size()>=2:_add_route(points)
 	# Every crossing of this record with a sub-row band, in one flat list of
 	# (sub-row, start, end, share of the band's height it covers). A shape
 	# whose top or bottom lies inside a band covers only part of it, so an
@@ -512,13 +536,23 @@ func _add_record(area:Dictionary,first_point:int,dirty:Dictionary)->float:
 			local.append(Vector3(spans[end].y,spans[end].z,spans[end].w))
 			end+=1
 		start=end
-		var merged:=_merge(_rows.get(s,PackedVector3Array()),local)
-		var before:=float(_row_length.get(s,0.0))
-		var after:=0.0
-		for span in merged:after+=(span.y-span.x)*span.z
-		_rows[s]=merged
-		_row_length[s]=after
-		gain+=(after-before)*_weights[s]
+		# Only the known pieces this record reaches are merged; the rest of the
+		# sub-row is spliced back around them untouched.
+		var existing:PackedVector3Array=_rows.get(s,PackedVector3Array())
+		var reach:=local[0].x
+		var until:=local[0].y
+		for span in local:until=maxf(until,span.y)
+		var first:=_first_reaching(existing,reach)
+		var stop:=maxi(first,_after_starting_by(existing,until))
+		var window:=existing.slice(first,stop)
+		var merged:=_merge(window,local)
+		var added:=_span_sum(merged)-_span_sum(window)
+		var result:=existing.slice(0,first)
+		result.append_array(merged)
+		result.append_array(existing.slice(stop))
+		_rows[s]=result
+		_row_length[s]=float(_row_length.get(s,0.0))+added
+		gain+=added*_weights[s]
 		var row:=s/SUBROWS
 		var c0:=clampi(floori((local[0].x+WIDTH_KM*0.5)/TEXEL_X),0,COLUMNS-1)
 		var c1:=c0
@@ -526,6 +560,67 @@ func _add_record(area:Dictionary,first_point:int,dirty:Dictionary)->float:
 		var previous:Vector2i=dirty.get(row,Vector2i(c0,c1))
 		dirty[row]=Vector2i(mini(previous.x,c0),maxi(previous.y,c1))
 	return gain
+
+
+## Marks a walked route's centre line in the routes image: each texel near
+## it keeps the signed distance to the nearest route (left of the route's
+## direction positive).
+func _add_route(points:PackedVector2Array)->void:
+	for index in points.size()-1:
+		var a:=route_texel(points[index])
+		var b:=route_texel(points[index+1])
+		var along:=b-a
+		if along.length_squared()<0.000001:continue
+		var normal:=Vector2(-along.y,along.x).normalized()
+		var x0:=maxi(0,floori(minf(a.x,b.x)-ROUTE_RANGE))
+		var x1:=mini(ROUTE_COLUMNS-1,ceili(maxf(a.x,b.x)+ROUTE_RANGE))
+		var y0:=maxi(0,floori(minf(a.y,b.y)-ROUTE_RANGE))
+		var y1:=mini(ROUTE_ROWS-1,ceili(maxf(a.y,b.y)+ROUTE_RANGE))
+		for y in range(y0,y1+1):
+			for x in range(x0,x1+1):
+				var p:=Vector2(float(x),float(y))
+				var nearest:=Geometry2D.get_closest_point_to_segment(p,a,b)
+				var gap:=p.distance_to(nearest)
+				var at:=y*ROUTE_COLUMNS+x
+				if gap>=_route_gap[at]:continue
+				_route_gap[at]=gap
+				var side:=signf((p-nearest).dot(normal))
+				if side==0.0:side=1.0
+				_routes[at*2]=clampi(roundi(127.5+side*gap/ROUTE_RANGE*127.5),0,255)
+				_routes[at*2+1]=clampi(roundi((1.0-gap/ROUTE_RANGE)*255.0),0,255)
+
+
+## Map km -> routes-image texel coordinates (texel centres on whole numbers).
+static func route_texel(position:Vector2)->Vector2:
+	return Vector2((position.x+WIDTH_KM*0.5)/WIDTH_KM*float(ROUTE_COLUMNS)-0.5,(position.y+DEPTH_KM*0.5)/DEPTH_KM*float(ROUTE_ROWS)-0.5)
+
+
+static func _span_sum(list:PackedVector3Array)->float:
+	var total:=0.0
+	for piece in list:total+=(piece.y-piece.x)*piece.z
+	return total
+
+
+## The first piece that ends at or after x (sorted, disjoint pieces).
+static func _first_reaching(list:PackedVector3Array,x:float)->int:
+	var low:=0
+	var high:=list.size()
+	while low<high:
+		var middle:=(low+high)>>1
+		if list[middle].y<x:low=middle+1
+		else:high=middle
+	return low
+
+
+## One past the last piece that starts at or before x.
+static func _after_starting_by(list:PackedVector3Array,x:float)->int:
+	var low:=0
+	var high:=list.size()
+	while low<high:
+		var middle:=(low+high)>>1
+		if list[middle].x<=x:low=middle+1
+		else:high=middle
+	return low
 
 
 ## Union of a sub-row's known pieces (start, end, share of the band) with new
@@ -553,39 +648,59 @@ static func _merge(existing:PackedVector3Array,local:PackedVector3Array)->Packed
 			if last<0 or next.x>out[last].y:out.append(Vector3(next.x,next.y,1.0))
 			elif next.y>out[last].y:out[last]=Vector3(out[last].x,next.y,1.0)
 		return out
-	# Some pieces cover part of a band: cut at every end and keep the largest
-	# share over each cut.
-	var pieces:=existing.duplicate()
-	pieces.append_array(local)
-	pieces.sort()
-	var cuts:=PackedFloat64Array()
-	for piece in pieces:
+	return _merge_disjoint(existing,_normalize(local))
+
+
+## One record's pieces on one sub-row made disjoint, keeping the larger share
+## where they overlap (a handful of pieces, so cutting at every end is cheap).
+static func _normalize(local:PackedVector3Array)->PackedVector3Array:
+	if local.size()<=1:return local
+	var cuts:=PackedFloat32Array()
+	for piece in local:
 		cuts.append(piece.x)
 		cuts.append(piece.y)
 	cuts.sort()
 	var result:=PackedVector3Array()
-	var active:=PackedInt32Array()
-	var next_piece:=0
 	for index in cuts.size()-1:
 		var from:=cuts[index]
 		var to:=cuts[index+1]
 		if to<=from:continue
-		while next_piece<pieces.size() and float(pieces[next_piece].x)<=from:
-			active.append(next_piece)
-			next_piece+=1
 		var share:=0.0
-		var still:=PackedInt32Array()
-		for held in active:
-			if float(pieces[held].y)>from:
-				still.append(held)
-				share=maxf(share,pieces[held].z)
-		active=still
+		for piece in local:
+			if piece.x<=from and piece.y>=to:share=maxf(share,piece.z)
 		if share<=0.0:continue
 		var last:=result.size()-1
-		if last>=0 and float(result[last].y)==from and absf(result[last].z-share)<0.000001:
-			result[last]=Vector3(result[last].x,to,result[last].z)
-		else:
-			result.append(Vector3(from,to,share))
+		if last>=0 and result[last].y==from and absf(result[last].z-share)<0.000001:result[last]=Vector3(result[last].x,to,share)
+		else:result.append(Vector3(from,to,share))
+	return result
+
+
+## Two sorted, disjoint lists of pieces walked together once: at every point
+## the larger share of the two stands.
+static func _merge_disjoint(a:PackedVector3Array,b:PackedVector3Array)->PackedVector3Array:
+	var result:=PackedVector3Array()
+	var i:=0
+	var j:=0
+	var at:=-INF
+	while i<a.size() or j<b.size():
+		var pa:Vector3=a[i] if i<a.size() else Vector3(INF,INF,0.0)
+		var pb:Vector3=b[j] if j<b.size() else Vector3(INF,INF,0.0)
+		if at<minf(pa.x,pb.x):at=minf(pa.x,pb.x)
+		var share_a:=pa.z if pa.x<=at and at<pa.y else 0.0
+		var share_b:=pb.z if pb.x<=at and at<pb.y else 0.0
+		# The next place either list starts or ends a piece.
+		var next:=INF
+		for edge:float in [pa.x,pa.y,pb.x,pb.y]:
+			if edge>at and edge<next:next=edge
+		var share:=maxf(share_a,share_b)
+		if share>0.0 and next<INF:
+			var last:=result.size()-1
+			if last>=0 and result[last].y==at and absf(result[last].z-share)<0.000001:result[last]=Vector3(result[last].x,next,share)
+			else:result.append(Vector3(at,next,share))
+		at=next
+		if i<a.size() and pa.y<=at:i+=1
+		if j<b.size() and pb.y<=at:j+=1
+		if next==INF:break
 	return result
 
 
