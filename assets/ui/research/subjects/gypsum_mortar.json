@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/gypsum_mortar-v1.png",
   "sha256": "1e74f1f39a6587130d7e55ff96be7c2511a6e2dabc991c994510d6d783ec47d0",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.6
+  ]
 }

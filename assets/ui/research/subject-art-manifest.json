@@ -4173,8 +4173,8 @@
   "wetland_margin_reserves": {"path": "res://assets/ui/research/subjects/wetland_margin_reserves-v1.png", "focus": [0.5, 0.5]},
   "separate_clean_water_storage": {"path": "res://assets/ui/research/subjects/separate_clean_water_storage-v1.png", "focus": [0.5, 0.5]},
   "flanked_gate_complex": {"path": "res://assets/ui/research/subjects/flanked_gate_complex-v1.png", "focus": [0.5, 0.5]},
-  "graded_tool_retirement": {"path": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png", "focus": [0.5, 0.5]},
-  "gypsum_mortar": {"path": "res://assets/ui/research/subjects/gypsum_mortar-v1.png", "focus": [0.5, 0.5]},
+  "graded_tool_retirement": {"path": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png", "focus": [0.5, 0.6]},
+  "gypsum_mortar": {"path": "res://assets/ui/research/subjects/gypsum_mortar-v1.png", "focus": [0.5, 0.6]},
   "stubble_grazing": {"path": "res://assets/ui/research/subjects/stubble_grazing-v1.png", "focus": [0.5, 0.5]},
   "towpaths": {"path": "res://assets/ui/research/subjects/towpaths-v1.png", "focus": [0.5, 0.5]}
 }
