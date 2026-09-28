@@ -4,9 +4,9 @@
   "game_year": 345,
   "approx_historical_year": -2700,
   "prompt": "c. 2700 BCE: Stepped Mast and Yard. Stepped mast and yard. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a320f94c-8c28-4e96-a113-73faa03c7d25.png",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-061bb5f3-a988-4ddc-b6e6-7193de18d996.png",
   "asset": "res://assets/ui/research/subjects/mast_making-v1.png",
-  "sha256": "eabce514db3a39188d3ffa5389f62ea47c41b145b04aa133c31903dfff4ad8bd",
+  "sha256": "72777a689e3d443b076bca5c4d865b13689a7c17f1e37865ededc24084eef157",
   "mode": "built-in image_gen / new image",
   "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
 }
