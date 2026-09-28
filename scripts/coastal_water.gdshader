@@ -17,7 +17,6 @@ uniform vec2 ripple_phase = vec2(0.0);
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
 #include "res://scripts/water_beauty.gdshaderinc"
-#include "res://scripts/world_beauty.gdshaderinc"
 #include "res://scripts/map_chart.gdshaderinc"
 
 float charted_at(vec2 xz) {

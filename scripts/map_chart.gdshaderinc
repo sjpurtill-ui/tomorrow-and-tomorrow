@@ -12,14 +12,18 @@
 // The terrain shader crossfades into it by view scale (mc_chart_weight), so a
 // zoom out of the valley is a painting turning into its map, never a pop.
 //
-// Include after map_palette.gdshaderinc (MAP_*, map_paper_*), coast_mask,
-// map_coast (the streamed patch's heights) and world_beauty (wb_contours).
+// Include after map_palette.gdshaderinc (MAP_*, map_paper_*), coast_mask
+// and map_coast (the streamed patch's heights).
 // Values are linear. No derivatives are taken here, so every function is safe
 // inside the terrain shader's branches.
 
 // Where the chart takes over, in km per design pixel (1/1080 of the view's
 // height, the unit map_glyph and the rivers use). Nothing of it at the
 // 50,000 ft view, all of it at the Region view, at any window size or aspect.
+// The streamed patch's heights again, with box-filtered mip levels, for the
+// generalised landform (local_terrain.gd binds it with terrain_heights).
+uniform sampler2D chart_relief : filter_linear_mipmap, repeat_disable;
+
 const float MC_CHART_FROM = 0.010;
 const float MC_CHART_FULL = 0.032;
 
@@ -48,7 +52,8 @@ const vec3 MC_WASH_STEPPE = vec3(0.965, 0.930, 0.800);
 const vec3 MC_WASH_DRYLAND = vec3(1.000, 0.965, 0.870);
 const vec3 MC_WASH_WETLAND = vec3(0.740, 0.840, 0.820);
 const vec3 MC_WASH_TUNDRA = vec3(0.940, 0.960, 0.990);
-const vec3 MC_WASH_UPLAND = vec3(0.890, 0.860, 0.840);
+const vec3 MC_WASH_UPLAND = vec3(0.860, 0.830, 0.840);
+const vec3 MC_WASH_SUMMIT = vec3(1.060, 1.050, 1.080);
 const vec3 MC_WASH_WOOD = vec3(0.580, 0.720, 0.600);
 const vec3 MC_WASH_WOOD_COLD = vec3(0.540, 0.670, 0.640);
 const vec3 MC_WASH_WOOD_DRY = vec3(0.700, 0.790, 0.640);
@@ -120,9 +125,48 @@ vec3 mc_wash(float rain, float warm, float height, float stand, float temperatur
 	vec3 wood = mix(MC_WASH_WOOD, MC_WASH_WOOD_COLD, max(cold, 1.0-smoothstep(0.25, 0.45, warm))*0.8);
 	wood = mix(wood, MC_WASH_WOOD_DRY, dry*0.7);
 	vec3 wash = mix(open, wood, stand);
-	// Bare high ground above the treeline.
-	wash = mix(wash, MC_WASH_UPLAND, smoothstep(4.5, 9.0, height)*0.75);
+	// Height as a layer-tinted survey shows it: rising ground warms toward
+	// buff, the high country greys to bare stone above the treeline, and the
+	// summits lighten, as the heights catch the light on a relief map.
+	wash *= mix(vec3(1.0), vec3(1.03, 0.97, 0.88), smoothstep(0.8, 3.5, height)*0.55);
+	wash = mix(wash, MC_WASH_UPLAND, smoothstep(3.8, 7.0, height)*0.80);
+	wash = mix(wash, MC_WASH_SUMMIT, smoothstep(6.5, 9.5, height)*0.65);
 	return mix(wash, MC_WASH_SNOW, clamp(snow, 0.0, 1.0));
+}
+
+// Derivative of coast_catmull_rom's weights (map_coast.gdshaderinc).
+vec4 mc_catmull_rom_slope(float t) {
+	return vec4(-0.5+t*(2.0-1.5*t), t*(-5.0+4.5*t), 0.5+t*(4.0-4.5*t), t*(-1.0+1.5*t));
+}
+
+float mc_level_height(ivec2 texel, int level, ivec2 size) {
+	return texelFetch(chart_relief, clamp(texel, ivec2(0), size-ivec2(1)), level).r;
+}
+
+// The streamed patch's heights at mip `level` (each texel the mean of
+// 2^level x 2^level samples: a true low-pass, where sparse point samples
+// would alias every bump into the slope) as one smooth Catmull-Rom surface,
+// with its exact slope: no triangle facets, no cell seams. `rel` world xz
+// minus the patch centre. Returns the height; `gradient` km/km.
+float mc_patch_bicubic(vec2 rel, int level, out vec2 gradient) {
+	ivec2 size = textureSize(chart_relief, level);
+	float scale = exp2(float(level));
+	float cells = max(terrain_grid.w-1.0, 1.0);
+	vec2 texel = clamp(((rel/terrain_grid.z+0.5)*cells+0.5)/scale-0.5, vec2(0.0), vec2(size)-1.001);
+	ivec2 base = ivec2(floor(texel));
+	vec2 f = fract(texel);
+	vec4 wx = coast_catmull_rom(f.x);
+	vec4 wy = coast_catmull_rom(f.y);
+	vec4 dx = mc_catmull_rom_slope(f.x);
+	vec4 dy = mc_catmull_rom_slope(f.y);
+	vec4 r0 = vec4(mc_level_height(base+ivec2(-1,-1), level, size), mc_level_height(base+ivec2(0,-1), level, size), mc_level_height(base+ivec2(1,-1), level, size), mc_level_height(base+ivec2(2,-1), level, size));
+	vec4 r1 = vec4(mc_level_height(base+ivec2(-1,0), level, size), mc_level_height(base, level, size), mc_level_height(base+ivec2(1,0), level, size), mc_level_height(base+ivec2(2,0), level, size));
+	vec4 r2 = vec4(mc_level_height(base+ivec2(-1,1), level, size), mc_level_height(base+ivec2(0,1), level, size), mc_level_height(base+ivec2(1,1), level, size), mc_level_height(base+ivec2(2,1), level, size));
+	vec4 r3 = vec4(mc_level_height(base+ivec2(-1,2), level, size), mc_level_height(base+ivec2(0,2), level, size), mc_level_height(base+ivec2(1,2), level, size), mc_level_height(base+ivec2(2,2), level, size));
+	vec4 across = vec4(dot(wx, r0), dot(wx, r1), dot(wx, r2), dot(wx, r3));
+	vec4 across_slope = vec4(dot(dx, r0), dot(dx, r1), dot(dx, r2), dot(dx, r3));
+	gradient = vec2(dot(wy, across_slope), dot(dy, across))*cells/(terrain_grid.z*scale);
+	return dot(wy, across);
 }
 
 // The landform the chart draws, generalised the way a cartographer
@@ -133,65 +177,38 @@ vec3 mc_wash(float rain, float warm, float height, float stand, float temperatur
 // raster. Returns (generalised height, its screen-pixel rate); `normal` is
 // the generalised normal. The rate is the height's slope times the pixel
 // footprint: no derivatives, so it is safe inside the terrain's branches.
-float mc_height_at(vec2 xz, bool on_patch) {
-	if (on_patch) {
-		float spread;
-		return coast_patch_triangle(xz-terrain_grid.xy, spread);
-	}
-	return coast_mask_height(xz);
-}
-
-// Derivative of coast_catmull_rom's weights (map_coast.gdshaderinc).
-vec4 mc_catmull_rom_slope(float t) {
-	return vec4(-0.5+t*(2.0-1.5*t), t*(-5.0+4.5*t), 0.5+t*(4.0-4.5*t), t*(-1.0+1.5*t));
-}
-
-// The streamed patch's heights as one smooth (Catmull-Rom) surface through
-// its samples, with its exact slope: smooth to the first derivative, so
-// relief shaded from it shows no triangle facets and no cell seams.
-// `rel` world xz minus the patch centre. Returns the height; `gradient` km/km.
-float mc_patch_smooth(vec2 rel, out vec2 gradient) {
-	float cells = max(terrain_grid.w-1.0, 1.0);
-	vec2 cell = clamp((rel/terrain_grid.z+0.5)*cells, vec2(0.0), vec2(terrain_grid.w-1.001));
-	ivec2 base = ivec2(floor(cell));
-	vec2 f = fract(cell);
-	vec4 wx = coast_catmull_rom(f.x);
-	vec4 wy = coast_catmull_rom(f.y);
-	vec4 dx = mc_catmull_rom_slope(f.x);
-	vec4 dy = mc_catmull_rom_slope(f.y);
-	vec4 r0 = vec4(coast_patch_height_at(base+ivec2(-1,-1)), coast_patch_height_at(base+ivec2(0,-1)), coast_patch_height_at(base+ivec2(1,-1)), coast_patch_height_at(base+ivec2(2,-1)));
-	vec4 r1 = vec4(coast_patch_height_at(base+ivec2(-1,0)), coast_patch_height_at(base), coast_patch_height_at(base+ivec2(1,0)), coast_patch_height_at(base+ivec2(2,0)));
-	vec4 r2 = vec4(coast_patch_height_at(base+ivec2(-1,1)), coast_patch_height_at(base+ivec2(0,1)), coast_patch_height_at(base+ivec2(1,1)), coast_patch_height_at(base+ivec2(2,1)));
-	vec4 r3 = vec4(coast_patch_height_at(base+ivec2(-1,2)), coast_patch_height_at(base+ivec2(0,2)), coast_patch_height_at(base+ivec2(1,2)), coast_patch_height_at(base+ivec2(2,2)));
-	vec4 across = vec4(dot(wx, r0), dot(wx, r1), dot(wx, r2), dot(wx, r3));
-	vec4 across_slope = vec4(dot(dx, r0), dot(dx, r1), dot(dx, r2), dot(dx, r3));
-	float cell_km = terrain_grid.z/cells;
-	gradient = vec2(dot(wy, across_slope), dot(dy, across))/cell_km;
-	return dot(wy, across);
-}
-
-vec2 mc_landform(vec2 xz, float height, float pixel_world, bool use_patch, out vec3 normal) {
+vec2 mc_landform(vec2 xz, float height, float pixel_world, float design_km, bool use_patch, out vec3 normal, out float prominence) {
 	normal = vec3(0.0, 1.0, 0.0);
+	prominence = 1.0;
 	vec2 rel = xz-terrain_grid.xy;
 	float cell = terrain_grid.z/max(terrain_grid.w-1.0, 1.0);
-	bool on_patch = use_patch && coast_patch_ready();
-	if (on_patch && max(abs(rel.x), abs(rel.y))+max(cell*5.0, pixel_world*28.0) >= terrain_grid.z*0.5) { on_patch = false; }
-	if (!on_patch) {
-		if (!coast_mask_ready()) { return vec2(height, 0.0); }
-		cell = coast_grid1.z > 0.0 ? coast_grid1.z : coast_grid0.z;
-	}
-	// The broad form, from four samples several cells out: wide enough that
-	// the mesh's triangle facets average away.
-	float broad = max(cell*5.0, pixel_world*28.0);
-	vec4 b = vec4(mc_height_at(xz-vec2(broad, 0.0), on_patch), mc_height_at(xz+vec2(broad, 0.0), on_patch),
-		mc_height_at(xz-vec2(0.0, broad), on_patch), mc_height_at(xz+vec2(0.0, broad), on_patch));
-	vec2 gradient = vec2(b.y-b.x, b.w-b.z)/(2.0*broad);
-	float local = dot(b, vec4(0.25));
+	// The scale the chart generalises to: about 9 km at the Region view (the
+	// ground's small hills stay a whisper under the ranges and valleys),
+	// 20 km at the next widening, 55 km across a continent.
+	float broad = max(cell*3.0, 9.0*pow(max(design_km, 0.0001)/0.078, 0.6));
+	bool on_patch = use_patch && coast_patch_ready() && max(abs(rel.x), abs(rel.y))+broad < terrain_grid.z*0.5
+		&& textureSize(chart_relief, 0).x == int(terrain_grid.w);
+	vec2 gradient;
+	float local;
 	if (on_patch) {
-		// The finer form (a cell or two) from the smooth surface, whispering.
-		vec2 fine_gradient;
-		local = mix(mc_patch_smooth(rel, fine_gradient), local, 0.72);
-		gradient = mix(fine_gradient, gradient, 0.70);
+		// The form from two box-filtered levels, blended so it never steps
+		// as the view widens.
+		float level = clamp(log2(broad/cell/3.5), 0.0, 5.0);
+		int l0 = int(floor(level));
+		vec2 g0; vec2 g1;
+		float h0 = mc_patch_bicubic(rel, l0, g0);
+		float h1 = mc_patch_bicubic(rel, l0+1, g1);
+		gradient = mix(g0, g1, fract(level));
+		local = mix(h0, h1, fract(level));
+		prominence = smoothstep(0.012, 0.05, length(g1));
+	} else {
+		if (!coast_mask_ready()) { return vec2(height, 0.0); }
+		float raster = max(coast_grid1.z > 0.0 ? coast_grid1.z : coast_grid0.z, broad*0.5);
+		vec4 b = vec4(coast_mask_height(xz-vec2(raster, 0.0)), coast_mask_height(xz+vec2(raster, 0.0)),
+			coast_mask_height(xz-vec2(0.0, raster)), coast_mask_height(xz+vec2(0.0, raster)));
+		gradient = vec2(b.y-b.x, b.w-b.z)/(2.0*raster);
+		local = dot(b, vec4(0.25));
+		prominence = smoothstep(0.012, 0.05, length(gradient));
 	}
 	normal = normalize(vec3(-gradient.x, 1.0, -gradient.y));
 	// Near the shore keep the true height, so contours never cross the coast.
@@ -206,21 +223,249 @@ vec3 mc_chart_sea(float depth, vec2 world_xz, float camera_height) {
 	return paper*mix(MC_WASH_SEA_SHALLOW, MC_WASH_SEA, smoothstep(0.01, 0.9, depth));
 }
 
-// Relief shading, as a copper-plate survey is washed: slopes facing the
-// north-west light lift a little and warm, slopes turned away take a cool
-// grey-violet shade. Flat ground keeps its wash. Relief is exaggerated more
-// the wider the view, the cartographer's rule, so the continent keeps its
-// ranges and the region its hills.
-vec3 mc_relief(vec3 c, vec3 normal, float design_km) {
-	float exaggeration = clamp(3.5*pow(max(design_km, 0.0001)/0.03, 0.35), 3.0, 12.0);
+// Relief lighting, as a copper-plate survey is washed: how much this ground
+// faces the north-west light compared with flat ground (-1..1), from the
+// generalised landform. Relief is exaggerated more the wider the view, the
+// cartographer's rule, so the continent keeps its ranges and the region its
+// hills.
+float mc_light(vec3 normal, float design_km) {
+	float exaggeration = clamp(4.2*pow(max(design_km, 0.0001)/0.03, 0.35), 3.2, 14.0);
 	vec3 n = normalize(vec3(normal.x*exaggeration, max(normal.y, 0.05), normal.z*exaggeration));
 	const vec3 sun = vec3(-0.4609, 0.7815, -0.4208);
-	float d = dot(n, sun)-sun.y;
-	float shade = clamp(-d*1.15, 0.0, 0.58);
-	float lit = clamp(d*1.10, 0.0, 0.30);
+	return dot(n, sun)-sun.y;
+}
+
+// Slopes facing the light lift a little and warm, slopes turned away take a
+// cool grey-violet shade. Flat ground keeps its wash.
+// `prominence` (0-1) how much this is real relief (a range, a valley wall)
+// rather than the small hills of a rolling plain: those only whisper.
+vec3 mc_relief(vec3 c, float light, float prominence) {
+	float strength = mix(0.45, 1.0, prominence);
+	float shade = clamp(-light*1.15, 0.0, 0.58)*strength;
+	float lit = clamp(light*1.10, 0.0, 0.30)*strength;
 	c *= mix(vec3(1.0), vec3(0.66, 0.68, 0.80), shade);
 	c *= mix(vec3(1.0), vec3(1.12, 1.08, 0.97), lit);
 	return c;
+}
+
+// Contours as an engraver cuts them: lines of equal height, a little heavier
+// where the ground is steep, faint on the flats where they would only
+// wander, every fourth an index line; a shade darker on slopes turned from
+// the light and lighter on the lit ones (illuminated contours, restrained).
+// Where they would crowd into a smear they give way to hachures. `height`
+// the generalised height, `slope` its gradient (km/km), `light` from
+// mc_light. The interval doubles as the view widens, blended so no line
+// pops. Returns ink coverage (0-1).
+float mc_contours(float height, float slope, float pixel_world, float light) {
+	if (height <= 0.004) { return 0.0; }
+	float octave = log2(max(pixel_world, 0.000001)/0.012);
+	float level = floor(octave);
+	float blend = fract(octave);
+	float heavy = smoothstep(0.04, 0.30, slope);
+	float coverage = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float interval = 0.025*exp2(level+float(k));
+		float fade = k == 0 ? 1.0-blend : blend;
+		float u = height/interval;
+		// Contour units per screen pixel, so widths are held in pixels.
+		float per_px = max(slope*pixel_world/interval, 0.00001);
+		float d = abs(fract(u+0.5)-0.5)/per_px;
+		float index = 1.0-step(0.5, abs(mod(floor(u+0.5), 4.0)));
+		float half_w = mix(0.42, 0.80, heavy)*mix(1.0, 1.40, index);
+		float line = 1.0-smoothstep(half_w-0.30, half_w+0.45, d);
+		float crowd = 1.0-smoothstep(0.16, 0.26, per_px);
+		coverage = max(coverage, line*fade*crowd*mix(0.55, 1.0, index));
+	}
+	float flats = mix(0.22, 1.0, smoothstep(0.010, 0.045, slope));
+	return coverage*flats*mix(1.0, 0.55, clamp(light*2.0, 0.0, 1.0));
+}
+
+// Hachures (Lehmann's rule): on steep ground, where contours would crowd,
+// short strokes run down the fall line in rows between the contour levels,
+// thicker the steeper the slope, the way copper-plate surveys drew their
+// escarpments. Strokes are held about 4.5 pixels apart; their bearing is
+// quantised to sixteen and eased between neighbours so no swirl or seam
+// shows, and rows are staggered like a hand-cut plate. `gradient` km/km.
+// Returns ink coverage (0-1).
+float mc_hachure_set(vec2 xz, float bearing, float spacing_km, float pixel_world, float stagger, float half_w) {
+	vec2 across = vec2(cos(bearing), sin(bearing));
+	float u = dot(xz, across)/spacing_km+stagger;
+	float d = abs(fract(u)-0.5)*spacing_km/max(pixel_world, 0.000001);
+	return 1.0-smoothstep(half_w-0.30, half_w+0.40, d);
+}
+
+float mc_hachures(vec2 xz, float height, vec2 gradient, float pixel_world) {
+	float slope = length(gradient);
+	if (slope < 0.015 || height <= 0.004) { return 0.0; }
+	float octave = log2(max(pixel_world, 0.000001)/0.012);
+	float level = floor(octave);
+	float blend = fract(octave);
+	// The strokes run along the fall line; `across` is perpendicular to it.
+	float angle = atan(-gradient.x, gradient.y);
+	float bin = fract(angle/3.14159265)*16.0;
+	float k0 = floor(bin);
+	float ease = smoothstep(0.30, 0.70, bin-k0);
+	float half_w = mix(0.35, 0.85, smoothstep(0.06, 0.45, slope));
+	float coverage = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float interval = 0.025*exp2(level+float(k));
+		float fade = k == 0 ? 1.0-blend : blend;
+		// Only where this interval's contours would crowd (closer than ~8 px).
+		float spacing_px = interval/max(slope*pixel_world, 0.000001);
+		float steep = 1.0-smoothstep(5.0, 9.0, spacing_px);
+		if (steep*fade <= 0.001) { continue; }
+		// Rows two contour intervals tall, so each stroke reads as a stroke.
+		float v = height/(interval*2.0);
+		float row = fract(v);
+		float dash = smoothstep(0.03, 0.10, row)*(1.0-smoothstep(0.90, 0.97, row));
+		float stagger = mod(floor(v), 2.0)*0.5;
+		float spacing_km = 4.5*pixel_world;
+		float a = mc_hachure_set(xz, k0*3.14159265/16.0, spacing_km, pixel_world, stagger, half_w);
+		float b = mc_hachure_set(xz, (k0+1.0)*3.14159265/16.0, spacing_km, pixel_world, stagger, half_w);
+		coverage = max(coverage, mix(a, b, ease)*dash*steep*fade);
+	}
+	return coverage;
+}
+
+// The direction up the screen, on the ground (world x, z), from the view's
+// inverse matrix: map symbols drawn in profile stand upright however the
+// camera is turned.
+vec2 mc_screen_up(mat4 inv_view) {
+	vec2 up = inv_view[1].xz;
+	if (dot(up, up) < 0.000001) { up = -inv_view[2].xz; }
+	return dot(up, up) > 0.000001 ? normalize(up) : vec2(0.0, -1.0);
+}
+
+// Height (km) averaged over about `scale_km` round `xz`: the streamed
+// patch's box-filtered levels where it covers the point (one filtered read),
+// else the macro raster; -1 when neither is ready.
+float mc_relief_height(vec2 xz, float scale_km, bool use_patch) {
+	vec2 rel = xz-terrain_grid.xy;
+	if (use_patch && coast_patch_ready() && max(abs(rel.x), abs(rel.y)) < terrain_grid.z*0.5
+			&& textureSize(chart_relief, 0).x == int(terrain_grid.w)) {
+		float cells = max(terrain_grid.w-1.0, 1.0);
+		vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
+		return textureLod(chart_relief, uv, max(log2(scale_km*cells/terrain_grid.z), 0.0)).r;
+	}
+	if (coast_mask_ready()) { return coast_mask_height(xz); }
+	return -1.0;
+}
+
+// Mountains at the far views, drawn the way old surveys drew ranges: small
+// inked peaks in profile, lit from the west with the east face hatched,
+// larger the higher the ground, standing wherever the land rises high and
+// rugged (never on a smooth high plain). They stand upright however the map
+// is turned, and the peak lower on the screen covers the ones behind it.
+float mc_segment_distance(vec2 p, vec2 a, vec2 b) {
+	vec2 ab = b-a;
+	return length(p-a-ab*clamp(dot(p-a, ab)/dot(ab, ab), 0.0, 1.0));
+}
+
+// The peak of cell `c` in the grid at `level` (cells 8 x 2^level km):
+// (centre xz, size km, height class 0-1; 0 when the cell has none).
+vec4 mc_peak_at(vec2 c, float level, bool use_patch) {
+	float cell = 8.0*exp2(level);
+	vec2 salt = level*vec2(37.0, 91.0);
+	vec2 jitter = vec2(map_paper_hash(c+vec2(11.0, 3.0)+salt), map_paper_hash(c+vec2(-7.0, 19.0)+salt));
+	vec2 centre = (c+0.25+0.5*jitter)*cell;
+	float h = mc_relief_height(centre, cell*0.35, use_patch);
+	if (h < 2.6) { return vec4(centre, 0.0, 0.0); }
+	float slope = length(vec2(mc_relief_height(centre+vec2(cell*0.5, 0.0), cell*0.35, use_patch)-h,
+		mc_relief_height(centre+vec2(0.0, cell*0.5), cell*0.35, use_patch)-h))/(cell*0.5);
+	float high = smoothstep(2.8, 6.0, h)*max(smoothstep(0.012, 0.05, slope), smoothstep(6.0, 8.0, h));
+	if (high <= 0.05 || map_paper_hash(c+vec2(5.0, 5.0)+salt) > 0.12+0.66*high) { return vec4(centre, 0.0, 0.0); }
+	return vec4(centre, cell*mix(0.85, 1.35, high), high);
+}
+
+// One peak drawn at `centre`, `size` km across, class `high`, seed `seed`:
+// (outline ink, paper fill, hatching) coverage, and in `depth` how far down
+// the screen it stands (for which peak covers which).
+vec3 mc_peak_marks(vec2 xz, vec2 centre, float size, float high, float seed, vec2 up, float pixel_world) {
+	vec2 d = xz-centre;
+	vec2 q = vec2(dot(d, vec2(-up.y, up.x)), dot(d, up))/max(size, 0.0001);
+	if (abs(q.x) > 0.60 || q.y < -0.40 || q.y > 0.80) { return vec3(0.0); }
+	vec2 left = vec2(-0.50, -0.32);
+	vec2 apex = vec2((seed-0.5)*0.26, mix(0.36, 0.66, high));
+	vec2 right = vec2(0.50, -0.32);
+	float px = size/max(pixel_world, 0.000001);
+	// Flanks sweep in a little toward the summit, as a pen draws them.
+	float t = clamp((q.y-left.y)/(apex.y-left.y), 0.0, 1.0);
+	float bow = t*(1.0-t)*0.10;
+	float x_left = mix(left.x, apex.x, t)+bow;
+	float x_right = mix(right.x, apex.x, t)-bow;
+	float inside = step(left.y, q.y)*step(q.y, apex.y)*step(x_left, q.x)*step(q.x, x_right);
+	float lean_l = (apex.y-left.y)/length(apex-left);
+	float lean_r = (apex.y-right.y)/length(apex-right);
+	float dl = abs(q.x-x_left)*lean_l*px;
+	float dr = abs(q.x-x_right)*lean_r*px;
+	float in_height = step(left.y-0.02, q.y)*step(q.y, apex.y+0.02);
+	float tip = length(q-apex)*px;
+	float outline = (1.0-smoothstep(0.55, 1.35, min(min(dl, dr*0.85), tip)))*max(in_height, 1.0-step(0.0, tip-1.4))*smoothstep(-0.34, -0.22, q.y);
+	if (inside <= 0.0 && outline <= 0.0) { return vec3(0.0); }
+	// The east face in shade: fine strokes parallel to its flank.
+	float east = step(mix(apex.x, apex.x*0.4+0.08, 1.0-t), q.x)*inside;
+	vec2 flank = normalize(right-apex);
+	float across = dot(q-apex, vec2(-flank.y, flank.x))*px;
+	float hatch = (1.0-smoothstep(0.30, 0.85, abs(fract(across/2.7)-0.5)*2.7))*east;
+	return vec3(outline, inside, hatch);
+}
+
+// The peaks, faded in as the view widens past the Region. Held about 34
+// design pixels apart: as the view widens past an octave, every fourth peak
+// grows and slides into the place of the coarser grid's peak while the other
+// three fade, so at the octave both grids are the same and nothing pops.
+vec3 mc_mountains(vec2 xz, float design_km, float pixel_world, bool use_patch, vec2 up) {
+	float show = smoothstep(0.30, 0.80, design_km);
+	if (show <= 0.0 || mc_relief_height(xz, 34.0*design_km*0.5, use_patch) < 1.6) { return vec3(0.0); }
+	float octave = log2(34.0*design_km/8.0);
+	float level = floor(octave);
+	float grow = smoothstep(0.10, 0.90, fract(octave));
+	float cell = 8.0*exp2(level);
+	float front = -1.0e9;
+	vec3 fading = vec3(0.0);
+	// This level's peaks that do not carry on to the coarser grid: fading.
+	if (grow < 0.99) {
+		vec2 ic = floor(xz/cell);
+		for (int y = -1; y <= 1; y++) {
+			for (int x = -1; x <= 1; x++) {
+				vec2 c = ic+vec2(float(x), float(y));
+				if (all(equal(mod(c, 2.0), vec2(0.0)))) { continue; }
+				vec4 peak = mc_peak_at(c, level, use_patch);
+				float depth = -dot(peak.xy, up);
+				if (peak.w <= 0.0 || depth <= front) { continue; }
+				vec3 marks = mc_peak_marks(xz, peak.xy, peak.z*mix(1.0, 0.7, grow), peak.w, map_paper_hash(c+vec2(2.0, -9.0)+level*vec2(37.0, 91.0)), up, pixel_world);
+				if (marks.x+marks.y <= 0.0) { continue; }
+				front = depth;
+				fading = marks*(1.0-grow);
+			}
+		}
+	}
+	// Each coarser peak, grown from the child that carries it on, drawn over
+	// the fading ones.
+	front = -1.0e9;
+	vec3 best = vec3(0.0);
+	vec2 ip = floor(xz/(2.0*cell));
+	for (int y = -1; y <= 1; y++) {
+		for (int x = -1; x <= 1; x++) {
+			vec2 parent_cell = ip+vec2(float(x), float(y));
+			vec4 child = mc_peak_at(parent_cell*2.0, level, use_patch);
+			vec4 parent = mc_peak_at(parent_cell, level+1.0, use_patch);
+			float present = mix(step(0.001, child.w), step(0.001, parent.w), grow);
+			if (present <= 0.01) { continue; }
+			vec2 centre = mix(child.xy, parent.xy, grow);
+			float size = mix(child.w > 0.0 ? child.z : parent.z*0.5, parent.w > 0.0 ? parent.z : child.z*1.2, grow);
+			float high = mix(child.w > 0.0 ? child.w : parent.w, parent.w > 0.0 ? parent.w : child.w, grow);
+			float seed = mix(map_paper_hash(parent_cell*2.0+vec2(2.0, -9.0)+level*vec2(37.0, 91.0)), map_paper_hash(parent_cell+vec2(2.0, -9.0)+(level+1.0)*vec2(37.0, 91.0)), grow);
+			float depth = -dot(centre, up);
+			if (depth <= front) { continue; }
+			vec3 marks = mc_peak_marks(xz, centre, size, high, seed, up, pixel_world);
+			if (marks.x+marks.y <= 0.0) { continue; }
+			front = depth;
+			best = marks*present;
+		}
+	}
+	float covered = 1.0-best.y;
+	return vec3(max(best.x, fading.x*covered), max(best.y, fading.y), max(best.z, fading.z*covered))*show;
 }
 
 // The known world's edge as a drying wash: within a few dozen pixels of the
@@ -243,16 +488,26 @@ vec3 mc_frontier_wash(vec3 chart, vec3 paper, float inland_px, vec2 world_xz, fl
 // sky, `coast_height`/`coast_height_px` the shore height and its screen rate,
 // `frontier_px` pixels inland from the frontier ink (a large number when far
 // from it), `resources` the resource view (0-1).
-vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float pixel_world, float design_km, float rain, float warm, float woodland, float slope, float temperature, float snow, float coast_height, float coast_height_px, float frontier_px, float camera_height, float resources) {
+vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float prominence, float pixel_world, float design_km, float rain, float warm, float woodland, float slope, float temperature, float snow, float coast_height, float coast_height_px, float frontier_px, float camera_height, float resources, bool use_patch, vec2 screen_up) {
 	vec3 paper = MC_PAPER*(1.0+mc_grain(ground.xz, camera_height)*0.030);
 	float stand = mc_stand(woodland)*(1.0-smoothstep(0.42, 0.82, slope));
 	vec3 chart = paper*mc_wash(rain, warm, ground.y, stand, temperature, snow);
 	// The resource view reads as land cover here too.
 	chart = mix(chart, chart*vec3(0.80, 1.12, 0.84), resources*stand*0.60);
-	chart = mc_relief(chart, light_normal, design_km);
-	// Engraved contours (world_beauty): faint sepia over the washes.
-	float contour = wb_contours(landform.x, landform.y, pixel_world);
-	chart = mix(chart, MAP_SEPIA, contour*0.18);
+	float light = mc_light(light_normal, design_km);
+	chart = mc_relief(chart, light, prominence);
+	// Engraved relief in sepia ink: contours on the gentler ground, hachures
+	// where it steepens.
+	vec2 gradient = -light_normal.xz/max(light_normal.y, 0.05);
+	float slope_km = length(gradient);
+	float contour = mc_contours(landform.x, slope_km, pixel_world, light);
+	float hachure = mc_hachures(ground.xz, landform.x, gradient, pixel_world);
+	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.34));
+	// Ranges as inked peaks at the far views.
+	vec3 peaks = mc_mountains(ground.xz, design_km, pixel_world, use_patch, screen_up);
+	chart = mix(chart, paper*vec3(1.02, 1.00, 0.97), peaks.y*0.88);
+	chart = mix(chart, MAP_SEPIA, peaks.z*0.50);
+	chart = mix(chart, MAP_INK, peaks.x*0.85);
 	// The coast is one inked line where the land rises out of the sea.
 	float shore_px = coast_height/max(coast_height_px, 0.0000001);
 	float coast_ink = (1.0-smoothstep(0.9, 1.9, shore_px))*step(0.0, coast_height);

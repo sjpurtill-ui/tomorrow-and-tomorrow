@@ -8,6 +8,10 @@ const CHART:="res://scripts/map_chart.gdshaderinc"
 const TERRAIN:=preload("res://scripts/local_terrain.gd")
 const AMBIENCE:=preload("res://scripts/map_ambience.gd")
 
+class BareTerrain extends "res://scripts/local_terrain.gd":
+	func _ready()->void:pass
+	func _process(_delta:float)->void:pass
+
 
 func _text(path:String)->String:
 	return FileAccess.get_file_as_string(path)
@@ -71,8 +75,12 @@ func test_terrain_and_sea_draw_the_chart()->void:
 	var sea:=_text("res://scripts/coastal_water.gdshader")
 	assert_bool(sea.contains('#include "res://scripts/map_chart.gdshaderinc"')).is_true()
 	assert_bool(sea.contains("mc_chart_sea(")).is_true()
-	# The sea's include order: the chart needs world_beauty's contours.
-	assert_int(sea.find("world_beauty.gdshaderinc")).is_less(sea.find("map_chart.gdshaderinc"))
+	# The chart needs the palette and the coast rasters included before it.
+	var chart_include:='#include "res://scripts/map_chart.gdshaderinc"'
+	for needed in ["map_palette.gdshaderinc","coast_mask.gdshaderinc","map_coast.gdshaderinc"]:
+		var line:='#include "res://scripts/%s"' % needed
+		assert_int(sea.find(line)).is_between(0,sea.find(chart_include))
+		assert_int(terrain.find(line)).is_between(0,terrain.find(chart_include))
 
 
 func test_chart_takes_over_between_the_valley_and_region_views()->void:
@@ -126,3 +134,37 @@ func test_chart_washes_are_muted_and_read_as_their_lands()->void:
 	for key in washes:
 		var other:Vector3=washes[key]
 		assert_float(snow.x+snow.y+snow.z).is_greater_equal(other.x+other.y+other.z)
+
+
+func test_relief_is_engraved_and_ranges_carry_peaks()->void:
+	# Contours heavier on steep ground and faint on flats, hachures where they
+	# would crowd, relief shaded from a generalised landform, and inked peaks
+	# at the far views, all composed into the chart.
+	var text:=_text(CHART)
+	for call in ["mc_contours(","mc_hachures(","mc_mountains(","mc_relief(","mc_patch_bicubic("]:
+		assert_bool(text.contains(call)).override_failure_message("chart lacks %s" % call).is_true()
+	var ground:=text.substr(text.find("vec3 mc_chart_ground("))
+	for call in ["mc_contours(","mc_hachures(","mc_mountains(","mc_relief("]:
+		assert_bool(ground.contains(call)).override_failure_message("chart ground does not draw %s" % call).is_true()
+	# Peaks stand upright on the screen, whichever way the map is turned.
+	assert_bool(_text("res://scripts/local_terrain.gd").contains("mc_screen_up(INV_VIEW_MATRIX)")).is_true()
+
+
+func test_patch_heights_reach_the_chart_with_box_filtered_levels()->void:
+	# The generalised landform reads mip levels of the patch heights: the
+	# plain height texture (texelFetch, nearest) stays as it was, and a
+	# second texture with every level is bound as chart_relief.
+	var terrain:BareTerrain=auto_free(BareTerrain.new())
+	add_child(terrain)
+	var size:=33
+	var heights:=PackedFloat32Array()
+	for z in size:
+		for x in size:heights.append(0.2+0.1*sin(float(x)*0.4)+0.05*cos(float(z)*0.3))
+	terrain._install_regional_patch({"mesh":ArrayMesh.new(),"center":Vector2.ZERO,"span":8.0,"resolution":size,"heights":heights})
+	assert_object(terrain.chart_relief_texture).is_not_null()
+	var relief:Image=terrain.chart_relief_texture.get_image()
+	assert_bool(relief.has_mipmaps()).is_true()
+	assert_int(relief.get_width()).is_equal(size)
+	assert_bool(terrain.river_terrain_height_texture.get_image().has_mipmaps()).is_false()
+	var material:=terrain.regional_terrain_patch.material_override as ShaderMaterial
+	assert_object(material.get_shader_parameter("chart_relief")).is_same(terrain.chart_relief_texture)
