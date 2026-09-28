@@ -144,6 +144,9 @@ static func _pending_words(audience:Dictionary)->String:
 	var p:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	if p.is_empty() or Hall._day()-int(p.get("day",-99))>CC.PENDING_DAYS: return ""
 	if bool(p.get("confirm",false)): return "The war leader asked whether to go ahead with: \"%s\"." % String(p.get("text",""))
+	if String(p.get("ask",""))=="chase": return "The war leader offered to send men after those who fled; the ruler may say yes (confirm), no (cancel), or name how many (pursue)."
+	if String(p.get("ask",""))=="abandon": return "The war leader asked whether to leave the town unguarded and bring its garrison home; yes is confirm, no is cancel."
+	if String(p.get("ask",""))!="": return "The war leader asked the ruler a question about the order \"%s\"; yes is confirm, no is cancel." % String(p.get("text",""))
 	if bool(p.get("which_town",false)): return "The war leader asked which town the order \"%s\" is for." % String(p.get("text",""))
 	if String(p.get("verb",""))=="war": return "The war leader objected to the order \"%s\"; the ruler may insist." % String(p.get("text",""))
 	return "Someone hesitated over the order \"%s\"; the ruler may insist." % String(p.get("text",""))
@@ -336,9 +339,14 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 			plan["clear_pending"]=true
 			return plan
 		if bool(theirs.get("confirm",false)): return {"route":"engine","context":{"confirm":true,"reader":true}}
+		# The war leader's own question ("Shall I send some after them?",
+		# "Leave Tsaren unguarded?"): the court's answer reading takes the words.
+		if String(theirs.get("ask",""))!="": return {"route":"engine","context":{"reader":true}}
 		if not theirs.is_empty(): return {"route":"engine","context":{"insist":true,"reader":true}}
 		return {"route":"speak"}
-	if action=="cancel": return {"route":"speak","clear_pending":true}
+	if action=="cancel":
+		if String(theirs.get("ask",""))!="": return {"route":"engine","context":{"reader":true}}
+		return {"route":"speak","clear_pending":true}
 	if kind!="order" or action=="none": return {"route":"speak"}
 	if action in LEGACY_ACTIONS: return {"route":"legacy","why":"not the reader's business"}
 	var is_grave:=grave(reading)
@@ -401,6 +409,12 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 			var r:=base.duplicate(); r["kind"]="storm" if not besieged.is_empty() else "attack"; r["target"]=besieged if not besieged.is_empty() else _foreign_target(ref)
 			return _war_plan(r)
 		"intercept","pursue":
+			# Men who fled a town we hold: the chase is real (pursuit.gd).
+			var held_id:=String(_held_by_ref(ref).get("city_id","")) if ref.begins_with("town:") else ""
+			var flight:=preload("res://scripts/pursuit.gd").latest_flight(held_id)
+			if action=="pursue" and not flight.is_empty():
+				var chase:=base.duplicate(); chase["kind"]="pursue"; chase["target"]=WarOrders._held_town(String(flight.region_id)); chase["count"]=int((reading.get("details",{}) as Dictionary).get("count",0))
+				return _war_plan(chase)
 			var r:=base.duplicate(); r["kind"]="intercept"
 			var civ:=""
 			if ref.begins_with("people:"): civ=ref.trim_prefix("people:")

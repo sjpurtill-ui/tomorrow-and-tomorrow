@@ -402,3 +402,39 @@ func test_no_api_key_appears_in_payloads_receipts_or_logs()->void:
 	var src:=FileAccess.get_file_as_string("res://scripts/order_reader.gd")
 	assert_str(src).not_contains("print(")
 	assert_str(src).not_contains("push_warning(")
+
+func test_yes_to_the_chase_offer_sends_a_real_detachment()->void:
+	# The user's sequence through the reader: the kill order, the war leader's
+	# offer to chase those who fled, then "Yeah, go ahead and chase them".
+	_captured_tsaren()
+	var id:=_audience(_headman())
+	var out:=_say(id,USERS_ORDER,_reading("order","town_fate","group","town:"+city_id,0.95,{"kill_men":true}))
+	assert_str(String(out.result.war.verdict)).is_equal("fate")
+	var ask:=String((Hall.find(id).get("pending_command",{}) as Dictionary).get("ask",""))
+	if ask!="chase": return   # nobody got away in this fixture: nothing to chase
+	var held_before:=int(WO.held_towns()[0].garrison)
+	var yes:=_say(id,"Yeah, go ahead and chase them",_reading("order","confirm","none","",0.95))
+	var r:Dictionary=yes.result
+	assert_str(String(r.get("war",{}).get("verdict",""))).override_failure_message(String(r.get("actor_says",""))).is_equal("act")
+	var sent:=int(r.objective.troops)
+	assert_int(sent).is_greater(0)
+	assert_int(int(WO.held_towns()[0].garrison)).is_equal(held_before-sent)
+	var out_there:=false
+	for army in MilitaryCampaign.field_armies:
+		if (army as Dictionary).has("pursuit"): out_there=true
+	assert_bool(out_there).is_true()
+
+func test_the_reader_naming_pursue_uses_the_real_chase_when_men_fled()->void:
+	_captured_tsaren()
+	var id:=_audience(_headman())
+	_say(id,USERS_ORDER,_reading("order","town_fate","group","town:"+city_id,0.95,{"kill_men":true}))
+	if preload("res://scripts/pursuit.gd").latest_flight(city_id).is_empty(): return
+	var out:=_say(id,"send ten after the men who fled",_reading("order","pursue","town","town:"+city_id,0.9,{"count":10}))
+	assert_str(String(out.result.war.objective.get("kind",out.result.get("objective",{}).get("kind","")))).is_not_equal("intercept")
+
+func test_an_order_never_becomes_a_generation_aim()->void:
+	var Aims:=preload("res://scripts/legacy_aims.gd")
+	for words in ["Go and conquer Tsaren right now","Attack Tsaren","Kill all the males of Tsaren","March on Stonefield at once","take Tsaren immediately"]:
+		assert_bool(Aims.is_order(words)).override_failure_message(words).is_true()
+	for words in ["Let fewer of our children die before their first winter","We should learn to raise stone walls","Make the Esurai fear us"]:
+		assert_bool(Aims.is_order(words)).override_failure_message(words).is_false()
