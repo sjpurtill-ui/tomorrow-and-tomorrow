@@ -378,3 +378,27 @@ func test_world_view_opens_counts_what_is_known_and_closes_cleanly()->void:
 	assert_bool(get_viewport().disable_3d).is_false()
 	await await_millis(600)
 	assert_bool(is_instance_valid(view)).is_false()
+
+
+func test_a_screen_above_the_world_view_keeps_its_keys()->void:
+	var host:Node=auto_free(Node.new())
+	add_child(host)
+	var view:Control=WorldGlobe.open(host,null,false)
+	var above:=CanvasLayer.new()
+	above.layer=WorldGlobe.LAYER+10
+	host.add_child(above)
+	var sheet:=Panel.new()
+	sheet.size=Vector2(300,200)
+	above.add_child(sheet)
+	view.covered_frame=-1
+	assert_bool(view._covered()).is_true()
+	var escape:=InputEventKey.new()
+	escape.keycode=KEY_ESCAPE
+	escape.pressed=true
+	view._input(escape)
+	assert_str(String(view.phase)).is_not_equal("closing")
+	# With nothing above it, Escape closes the world view.
+	sheet.visible=false
+	view.covered_frame=-1
+	view._input(escape)
+	assert_str(String(view.phase)).is_equal("closing")

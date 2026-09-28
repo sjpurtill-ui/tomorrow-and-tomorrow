@@ -106,6 +106,7 @@ func _shot(label:String,options:Dictionary)->void:
 		await get_tree().process_frame
 		worst=maxf(worst,float(Time.get_ticks_usec()-frame_start)/1000.0)
 	print("WORLD_GLOBE_CAPTURE %s worst frame through the chart's arrival %.1f ms" % [label,worst])
+	print("WORLD_GLOBE_CAPTURE %s keys held by a screen above: %s" % [label,str(view._covered())])
 	print("WORLD_GLOBE_CAPTURE %s chart ready in %d ms (%s heights, %d records, %d texels)" % [label,Time.get_ticks_msec()-started,view.chart.height_mode,int(view.chart.stats.records),int(view.chart.stats.texels)])
 	if options.has("distance"):
 		view.distance=float(options.distance)

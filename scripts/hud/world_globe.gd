@@ -90,6 +90,8 @@ var owns_3d_switch:=false
 var today_override:=-1
 ## The eye distance the opening zoom starts from.
 var opening_start:=4.3
+var covered_frame:=-1
+var covered_now:=false
 
 
 static func open(terrain_node:Node,hud_node:Node=null,zoomed_out:=false)->Control:
@@ -629,6 +631,8 @@ func _gui_input(event:InputEvent)->void:
 func _input(event:InputEvent)->void:
 	if not (event is InputEventKey) or not event.is_pressed():return
 	var key:=event as InputEventKey
+	# A screen opened above the world view (the court, a report) keeps its keys.
+	if _covered():return
 	if key.keycode==KEY_ESCAPE:
 		get_viewport().set_input_as_handled()
 		close()
@@ -653,6 +657,25 @@ func _input(event:InputEvent)->void:
 	if handled:
 		idle=0.0
 		get_viewport().set_input_as_handled()
+
+
+## True while another screen shows above this one (a higher canvas layer with
+## something visible on it).
+func _covered()->bool:
+	var tree:=get_tree()
+	if tree==null:return false
+	# Once per frame at most: held keys repeat.
+	if covered_frame==Engine.get_process_frames():return covered_now
+	covered_frame=Engine.get_process_frames()
+	covered_now=false
+	for node:Node in tree.root.find_children("*","CanvasLayer",true,false):
+		var layer:=node as CanvasLayer
+		if layer.layer<=LAYER or not layer.visible or layer.is_ancestor_of(self):continue
+		for child:Node in layer.get_children():
+			if child is Control and (child as Control).is_visible_in_tree() and (child as Control).size.x*(child as Control).size.y>1.0:
+				covered_now=true
+				return true
+	return false
 
 
 ## How far the ground at the centre turns per screen pixel, so a drag keeps
