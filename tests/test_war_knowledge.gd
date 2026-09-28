@@ -13,8 +13,12 @@ const HallProbe:=preload("res://tests/audience_hall_probe.gd")
 
 var probe:Node
 var civ_id:=""
+## The world's number of rival peoples before this suite set its own (restored
+## after each test, or later suites generate worlds of the wrong size).
+var opponents_before:=-1
 
 func before_test()->void:
+	if opponents_before<0:opponents_before=int(GameState.opponent_count)
 	probe=auto_free(HallProbe.new())
 	probe._base()
 	GameState.opponent_count=4
@@ -41,6 +45,7 @@ func after_test()->void:
 	# The rival peoples' own systems (probe._stock_actor) are freed here, not
 	# left as orphans for the next suite.
 	WorldSimulation.clear()
+	GameState.opponent_count=opponents_before
 
 func _op()->Dictionary:
 	var f:Dictionary=WAR.front(civ_id)
