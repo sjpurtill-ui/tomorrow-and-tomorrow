@@ -17,7 +17,9 @@ extends RefCounted
 ##     where, running now, taken home on the road or arrived, let go, freed),
 ##     the last flight from each town (and that the bound cannot run),
 ##     measures in force with the days left, resistance, chases out, the
-##     last battles;
+##     last battles, and how well each band and garrison is fed today
+##     (supply_state.gd: the share it gets, foraged, carried, from its town,
+##     days hungry, its line back to our stores);
 ##   headman, steward, keeper of stores (Steward, Quartermaster, a settlement
 ##     leader): food in store and the days it lasts, water, housing,
 ##     sickness, workers by task, births and deaths this season, the people
@@ -44,6 +46,7 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
+const Supply:=preload("res://scripts/supply_state.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -279,12 +282,14 @@ static func _war(out:Dictionary)->void:
 		var where:=WarOrders._where(army)
 		var at:=String(army.get("location_name",""))
 		if at!="" and String(army.get("status",""))=="stationed" and not at.to_lower() in where.to_lower(): where="at %s, %s" % [at,where]
-		bands.append({"name":String(army.get("name","")),"fighters":int(army.troops),"where":where,"leader":String(commander.get("name","")),"doing":doing if doing!="" else String(army.get("status",""))})
+		bands.append({"name":String(army.get("name","")),"fighters":int(army.troops),"where":where,"leader":String(commander.get("name","")),"doing":doing if doing!="" else String(army.get("status","")),
+			"fed":fed_facts(Supply.of_force(army))})
 	out["bands"]=bands
 	var garrisons:Array=[]
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
-		garrisons.append({"town":String(force.get("region_name","")),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else ""})
+		garrisons.append({"town":String(force.get("region_name","")),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
+			"fed":fed_facts(Supply.of_force(force))})
 	out["garrisons"]=garrisons
 	var chases:Array=[]
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
@@ -333,6 +338,30 @@ static func battles(limit:int=3,detail:bool=true)->Array:
 		row["spoils"]=spoils_words(taken)
 		row["spoils_went"]=SPOILS_WENT.get(String(settled.get("spoils_policy","")),"to the stores") if String(row.spoils)!="" else ""
 		out.append(row)
+	return out
+
+## How well a band or garrison is fed today, from the supply model
+## (supply_state.of_force, the rations' own numbers): whole percentages that
+## add up, the state in words, the days hungry and its line back to stores.
+## {gets, foraged, carried, from_town, state, hungry_days, line, words}.
+static func fed_facts(report:Dictionary)->Dictionary:
+	if report.is_empty(): return {}
+	var parts:=Supply.percents(float(report.get("ratio",0.0)),[float(report.get("local",0.0)),float(report.get("foraged",0.0)),float(report.get("carried",0.0))])
+	return {"gets":roundi(float(report.get("ratio",0.0))*100.0),"from_town":int(parts[0]),"foraged":int(parts[1]),"carried":int(parts[2]),
+		"state":Supply.state_words(String(report.get("state",""))),"hungry_days":roundi(float(report.get("hungry_days",0.0))) if bool(report.get("hungry",false)) else 0,
+		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words",""))}
+
+## "; food 60% (35% foraged, 25% carried), 4 days from Seanstone by cart
+## track, hungry 3 days" for the prompt's band and garrison lines.
+static func fed_line(fed:Dictionary)->String:
+	if fed.is_empty(): return ""
+	if bool(fed.get("at_home",false)): return "; fed from the stores at home"
+	var shares:=PackedStringArray()
+	if int(fed.get("from_town",0))>0: shares.append("%d%% from the town" % int(fed.from_town))
+	if int(fed.get("foraged",0))>0: shares.append("%d%% foraged" % int(fed.foraged))
+	if int(fed.get("carried",0))>0: shares.append("%d%% carried" % int(fed.carried))
+	var out:="; food %d%%%s, %s" % [int(fed.get("gets",0)),(" ("+", ".join(shares)+")") if not shares.is_empty() else "",String(fed.get("line",""))]
+	if int(fed.get("hungry_days",0))>0: out+=", hungry %d days" % int(fed.hungry_days)
 	return out
 
 const CAPTIVE_FATE:={"enslave":"sent home as bondservants","release":"let go","parole":"let go on their word","ransom":"given back for ransom","execute":"put to death","exchange":"traded for our own people","hold":"held under guard"}
@@ -557,10 +586,10 @@ static func text(s:Dictionary)->String:
 		for w in weapons: arms.append("%s %d" % [String(w),int(weapons[w])])
 		lines.append("Spears in store: %d%s. Called up, waiting for weapons and drill: %d; in training: %d." % [int(s.get("spears",0)),(" (other arms: %s)" % ", ".join(arms)) if not arms.is_empty() else "",int(s.get("recruits",0)),int(s.get("in_training",0))])
 		var bands:PackedStringArray=PackedStringArray()
-		for b:Dictionary in s.get("bands",[]): bands.append("%s, %d fighters, %s%s (%s)" % [String(b.name),int(b.fighters),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",String(b.doing)])
+		for b:Dictionary in s.get("bands",[]): bands.append("%s, %d fighters, %s%s (%s)%s" % [String(b.name),int(b.fighters),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",String(b.doing),fed_line(b.get("fed",{}))])
 		lines.append("Bands out: %s." % ("; ".join(bands) if not bands.is_empty() else "none"))
 		var gar:PackedStringArray=PackedStringArray()
-		for g:Dictionary in s.get("garrisons",[]): gar.append("%s: %d fighters%s%s" % [String(g.town),int(g.fighters),(", %d wounded" % int(g.wounded)) if int(g.wounded)>0 else "",(" under "+String(g.commander)) if String(g.commander)!="" else ""])
+		for g:Dictionary in s.get("garrisons",[]): gar.append("%s: %d fighters%s%s%s" % [String(g.town),int(g.fighters),(", %d wounded" % int(g.wounded)) if int(g.wounded)>0 else "",(" under "+String(g.commander)) if String(g.commander)!="" else "",fed_line(g.get("fed",{}))])
 		lines.append("Garrisons: %s." % ("; ".join(gar) if not gar.is_empty() else "none"))
 		if not (s.get("chases",[]) as Array).is_empty(): lines.append("Out on a chase: %s." % "; ".join(PackedStringArray(s.chases)))
 		var fights:PackedStringArray=PackedStringArray()

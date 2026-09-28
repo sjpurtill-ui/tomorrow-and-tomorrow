@@ -252,6 +252,41 @@ func test_the_map_grid_is_the_model_at_its_nodes_and_unknown_land_is_not_tinted(
 	var at:=home+Vector2(90,20)
 	assert_bool(CivilizationSystem._position_is_revealed(at)).is_true()
 
+func test_the_maps_wash_carries_the_grid_and_leaves_unknown_land_bare()->void:
+	_know(120.0)
+	var band:=_band(7,Vector2(90,20),45)
+	MilitaryCampaign.field_armies.assign([band])
+	var field:=Supply.field(true)
+	var job=load("res://scripts/hud/supply_map.gd").PaintJob.new()
+	job.field=field; job.troops=45; job.inputs=Supply.day_inputs()
+	job.areas=CivilizationSystem.revealed_areas.duplicate(true); job.roads=[]
+	job.forces=[{"id":"army:7","pos":Supply.force_pos(band),"report":Supply.of_force(band),"route":Supply.route_to(field,Supply.force_pos(band))}]
+	job.model=load("res://scripts/supply_state.gd"); job.reach_level=Supply.REACH_HAUL
+	job.run()
+	var result:Dictionary=job.result
+	assert_bool(result.is_empty()).is_false()
+	var colors:PackedColorArray=result.colors
+	var known:=Supply.known_mask(field)
+	var grid:=Supply.grid(field,45,Supply.day_inputs(),known)
+	var n:=int(field.nx)*int(field.ny)
+	var bare:=0; var washed:=0
+	for i in n:
+		if known[i]==0:
+			assert_float(colors[i].a).is_equal(0.0)
+			bare+=1
+		else:
+			assert_float(colors[i].a).is_equal(1.0)
+			assert_float(colors[i].r).is_equal_approx(float((grid.ratio as PackedFloat32Array)[i]),0.004)
+			washed+=1
+	assert_int(bare).is_greater(10)
+	assert_int(washed).is_greater(10)
+	# The band's supply line starts at its hub and ends where it stands.
+	var route:Dictionary=(result.routes as Array)[0]
+	var pts:PackedVector2Array=route.points
+	assert_float(pts[0].distance_to(home)).is_less(1.0)
+	assert_float(pts[pts.size()-1].distance_to(Supply.force_pos(band))).is_less(1.0)
+	assert_int((result.marks as Array).size()).is_equal(1)
+
 func test_the_field_is_kept_until_the_world_changes()->void:
 	var first:=Supply.field(true)
 	var builds:=Supply.builds
@@ -279,6 +314,34 @@ func test_the_rations_read_one_field_a_day_and_a_change_arrives_two_days_on()->v
 	assert_float(Supply.haul_for(band)).is_greater(day1+0.05)
 	# The screens show what the rations read today.
 	assert_int(int(Supply.field().get("key",0))).is_equal(int(Supply.rations_field().get("key",0)))
+
+func test_the_war_leader_says_exactly_how_the_men_are_fed()->void:
+	_hold_tsaren(Vector2(60,-30))
+	MilitaryCampaign.field_armies.assign([_band(7,Vector2(140,0))])
+	_ration_day(40.0)
+	var Facts=load("res://scripts/court_facts.gd")
+	var Answers=load("res://scripts/court_answers.gd")
+	var sheet:Dictionary=Facts.sheet(["war"])
+	var report:=Supply.of_force(MilitaryCampaign.field_armies[0])
+	var fed:Dictionary=(sheet.bands[0] as Dictionary).fed
+	var gets:=roundi(float(report.ratio)*100.0)
+	assert_int(int(fed.gets)).is_equal(gets)
+	assert_int(int(fed.foraged)+int(fed.carried)).is_equal(gets)
+	var said:String=Answers.answer(sheet,"Are my men fed?")
+	assert_str(said).contains("LEVY BAND 7 gets %d%% of its food (%d%% foraged and %d%% carried): %s, %s" % [gets,int(fed.foraged),int(fed.carried),String(fed.state),String(fed.line)])
+	# Beyond the town we hold, the band's line runs from the depot there.
+	assert_str(String(fed.line)).contains("from our depot at Tsaren")
+	var garrison:=Supply.of_force(MilitaryCampaign.occupation_forces[0])
+	assert_str(said).contains("The garrison in Tsaren gets %d%% of its food" % roundi(float(garrison.ratio)*100.0))
+	assert_str(said).contains("from the town")
+	# The garrison stands at its own depot: its line is home's.
+	assert_str(said).contains("from the town and ")
+	assert_str(String(garrison.words)).contains("from Seanstone")
+	# The live voice's prompt carries the same numbers.
+	assert_str(String(Facts.text(sheet))).contains("food %d%% (" % gets)
+	# The stores are the headman's question, not this one.
+	assert_str(String(Answers.answer(sheet,"How much food is in the stores?"))).not_contains("of its food")
+	assert_str(String(Answers.answer(sheet,"Is LEVY BAND 7 hungry?"))).starts_with("LEVY BAND 7 gets %d%%" % gets)
 
 ## Another world's ground (a new game, a new terrain).
 func _other_ground(_p:Vector2)->Dictionary:

@@ -89,6 +89,8 @@ const CENTER_SNAP_KM:=64.0
 const PAD_KM:=40.0
 ## The lattice never reaches farther than this beyond our hubs.
 const MAX_MARGIN_KM:=1500.0
+## Within this distance of a depot (a town we hold) a force stands in it.
+const AT_DEPOT_KM:=3.0
 ## The longest the day's rations wait for a build of yesterday's world
 ## (ms); a build slower than that is taken the next day.
 const WAIT_BUDGET_MS:=12.0
@@ -565,10 +567,15 @@ static func build(spec:Dictionary,ground:Dictionary={},cancel:Array=[false])->Di
 	var held:Array=spec.get("held",[])
 	if not held.is_empty():
 		field["cost"]=found.cost
+		field["src"]=found.src
 		for h_row:Dictionary in held:
 			var reach:=_bilinear(field,found.cost,h_row.pos)
 			if not is_finite(reach): continue
-			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":"held","pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id",""))})
+			# The settlement whose line stocks this depot.
+			var node:=_node_near(field,h_row.pos)
+			var via:=int((found.src as PackedInt32Array)[node]) if node>=0 else -1
+			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":"held","pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id","")),
+				"via":String((sources[via] as Dictionary).name) if via>=0 and via<sources.size() else ""})
 		found=_search(field,ecost,sources,cancel)
 		if found.is_empty(): return {}
 	field["cost"]=found.cost; field["src"]=found.src; field["parent"]=found.parent
@@ -910,9 +917,11 @@ static func _fallback_effort(p:Vector2)->Dictionary:
 		if String(h.kind)!="held": settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
 	for h:Dictionary in hub_list:
 		if String(h.kind)!="held": continue
-		var reach:=INF
-		for home:Dictionary in settlements: reach=minf(reach,(home.pos as Vector2).distance_to(h.pos)*FALLBACK_FACTOR)
-		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":"held","pos":h.pos,"base":reach*RELAY})
+		var reach:=INF; var via:=""
+		for home:Dictionary in settlements:
+			var e:=(home.pos as Vector2).distance_to(h.pos)*FALLBACK_FACTOR
+			if e<reach: reach=e; via=String(home.name)
+		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":"held","pos":h.pos,"base":reach*RELAY,"via":via})
 	var best:=INF; var source:=-1
 	for k in sources.size():
 		var e:=float((sources[k] as Dictionary).base)+((sources[k] as Dictionary).pos as Vector2).distance_to(p)*FALLBACK_FACTOR
@@ -1171,10 +1180,14 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 	var route:=route_to(f,p) if not hub.is_empty() else PackedVector2Array()
 	var roads:=route_roads(f,route) if route.size()>=2 else {"km":0.0,"road":0.0,"tier":-1}
 	var ratio:=float(t.ratio)
+	# Standing at a depot of ours, its line is the settlement that stocks it.
+	var hub_name:=String(hub.get("name","")); var hub_kind:=String(hub.get("kind",""))
+	if hub_kind=="held" and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
+		hub_name=String(hub.via); hub_kind="home"
 	var report:={"ratio":ratio,"state":state_of(ratio),"carried":float(t.carried),"foraged":float(t.foraged),"local":float(t.local),"air":0.0,
 		"haul":float(t.haul),"transport":float(t.transport),"stores":float(t.stores),"days":float(t.days),"effort":float(t.effort),
 		"km":float(roads.km),"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
-		"hub":String(hub.get("name","")),"hub_kind":String(hub.get("kind","")),"hub_position":hub.get("pos",Vector2.INF),
+		"hub":hub_name,"hub_kind":hub_kind,"hub_position":hub.get("pos",Vector2.INF),
 		"season":"winter" if float(t.cold)>=0.3 else "","cold":float(t.cold),"rich":float(t.rich),"carrier":String(t.carrier),
 		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio,"fallback":bool(t.fallback)}
 	report["why"]=why(report)
@@ -1261,7 +1274,7 @@ static func _siege_and_blockade(report:Dictionary,force:Dictionary)->void:
 	var siege:Dictionary=mc.active_siege
 	if not siege.is_empty():
 		if String(siege.get("mode",""))=="offensive" and int(siege.get("army_id",siege.get("home_force_id",-1)))==int(force.get("army_id",-2)):
-			report.siege="besieging %s: the siege holds while they are fed" % String(siege.get("target_name",siege.get("city_name","the town")))
+			report.siege="besieging %s: the siege holds while they are fed" % String((siege.get("threat",{}) as Dictionary).get("target_region_name","the town"))
 		elif String(siege.get("mode",""))=="defensive" and String(report.get("hub_kind",""))=="home" and siege_factor()<1.0:
 			report.siege="home is besieged: %d%% of the carts get out" % roundi(siege_factor()*100.0)
 	var ops:Variant=mc.get("joint_operations")

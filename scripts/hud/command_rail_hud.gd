@@ -947,6 +947,8 @@ func _build_toolbar()->void:
 	world_button.pressed.connect(func()->void:
 		if terrain and terrain.has_method("open_world_globe"):terrain.open_world_globe())
 	scale_box.add_child(world_button)
+	# The supply map (hud/supply_map.gd): where our fighters can be fed.
+	scale_box.add_child(preload("res://scripts/hud/supply_map.gd").toggle_button(terrain))
 	# Compile the world view's shader while the map loads, so its first opening
 	# does not stall: one invisible pixel drawn with it for a moment.
 	if is_inside_tree():

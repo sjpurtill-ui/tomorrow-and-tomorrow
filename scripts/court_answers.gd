@@ -149,6 +149,10 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 	# the town this audience spoke of.
 	var fight:=battle_of(sheet,lower)
 	if not fight.is_empty(): return _battle_answer(fight,lower)
+	# Whether our fighters are fed (the war leader's count, supply_state.gd).
+	if offices.has("war"):
+		var fed:=_fed_answer(sheet,lower)
+		if fed!="": return fed
 	# How far a place is, and which way (the chief scout's count).
 	if offices.has("scouts"):
 		var way:=_way_answer(sheet,lower)
@@ -616,6 +620,44 @@ static func _war_answer(sheet:Dictionary,lower:String,topics:Array[String])->Str
 		if b is Dictionary: bits.append("%s has %d, %s" % [String(b.get("name","a band")),int(b.get("fighters",0)),String(b.get("where",""))])
 	for g in sheet.get("garrisons",[]):
 		if g is Dictionary and int(g.get("fighters",0))>0: bits.append("%d hold %s" % [int(g.fighters),String(g.get("town",""))])
+	return _cap("; ".join(bits))+"."
+
+## Food words about our own fighters (not the stores, not a town's people).
+const FED_RE:="\\b(fed|feed|feeding|food|hungry|hunger|starv\\w*|rations?|provision\\w*|supplies|supplied|supply|eat|eating|eaten)\\b"
+const OURS_RE:="\\b(my|our)\\s+(men|fighters|warriors|soldiers|troops|bands?|garrisons?|host|army|armies|levy|spears)\\b|\\b(fighters|warriors|soldiers|troops|bands?|garrisons?)\\b"
+
+## "Are my men fed?": each band and garrison's share of a day's food, how
+## it comes (foraged, carried, from its town), days hungry and its line
+## back to our stores, exactly as the day's rations gave it. A band or town
+## named in the question: that one only. "" when not asked.
+static func _fed_answer(sheet:Dictionary,lower:String)->String:
+	if not _has(lower,FED_RE) or _has(lower,"\\bstores?\\b"): return ""
+	var bands:Array=sheet.get("bands",[]); var garrisons:Array=sheet.get("garrisons",[])
+	var named:Array=[]
+	for b in bands:
+		if b is Dictionary and _name_in(lower,String((b as Dictionary).get("name",""))): named.append(b)
+	for g in garrisons:
+		if g is Dictionary and _name_in(lower,String((g as Dictionary).get("town",""))): named.append(g)
+	if named.is_empty() and not _has(lower,OURS_RE): return ""
+	var rows:Array=named if not named.is_empty() else bands+garrisons
+	var bits:=PackedStringArray()
+	for row in rows:
+		if not row is Dictionary: continue
+		var fed:Dictionary=(row as Dictionary).get("fed",{})
+		if fed.is_empty(): continue
+		var who:=String(row.get("name","")) if (row as Dictionary).has("name") else "The garrison in "+String(row.get("town",""))
+		if bool(fed.get("at_home",false)):
+			bits.append("%s is at home, fed from the stores" % who); continue
+		var shares:=PackedStringArray()
+		if int(fed.get("from_town",0))>0: shares.append("%d%% from the town" % int(fed.from_town))
+		if int(fed.get("foraged",0))>0: shares.append("%d%% foraged" % int(fed.foraged))
+		if int(fed.get("carried",0))>0: shares.append("%d%% carried" % int(fed.carried))
+		var bit:="%s gets %d%% of its food%s: %s, %s" % [who,int(fed.get("gets",0)),(" ("+_join(shares)+")") if not shares.is_empty() else "",String(fed.get("state","")),String(fed.get("line",""))]
+		if int(fed.get("hungry_days",0))>0: bit+=", hungry %d days now" % int(fed.hungry_days)
+		bits.append(bit)
+	if bits.is_empty():
+		var home_n:=int(sheet.get("fighters_at_home",0))
+		return "No band of ours is out; the %d at home eat from the stores." % home_n if home_n>0 else "No band of ours is out, and none is in the field to feed."
 	return _cap("; ".join(bits))+"."
 
 ## Words for what the stores hold, to the store's own name.
