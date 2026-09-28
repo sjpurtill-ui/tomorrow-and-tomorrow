@@ -12,6 +12,11 @@ class BareTerrain extends "res://scripts/local_terrain.gd":
 	func _ready()->void:pass
 	func _process(_delta:float)->void:pass
 
+class CheapTerrain extends BareTerrain:
+	func _height_at(x:float,z:float)->float:return x*.001+z*.002
+	func _terrain_color_at(_x:float,_z:float,_h:float)->Color:return Color(.2,.3,.15)
+	func _terrain_surface_fields_at(_x:float,_z:float,_h:float)->Vector4:return Vector4(1.5,.5,.5,.3)
+
 
 func _text(path:String)->String:
 	return FileAccess.get_file_as_string(path)
@@ -35,9 +40,10 @@ func _vec3_consts(prefix:String)->Dictionary:
 
 
 ## Mirror of mc_chart_weight() for a straight-down view: a design pixel at
-## the view's centre spans camera.size/1080 km (the lens keeps height).
+## the view's centre spans camera.size/1080 km (the lens keeps height). The
+## crossfade is eased over the scale's logarithm.
 func _weight(camera_size:float)->float:
-	return smoothstep(_float_const("MC_CHART_FROM"),_float_const("MC_CHART_FULL"),camera_size/1080.0)
+	return smoothstep(log(_float_const("MC_CHART_FROM")),log(_float_const("MC_CHART_FULL")),log(camera_size/1080.0))
 
 
 func test_chart_include_has_only_declarations_at_top_level()->void:
@@ -95,12 +101,15 @@ func test_chart_takes_over_between_the_valley_and_region_views()->void:
 
 
 func test_chart_crossfade_is_smooth_and_monotonic()->void:
+	# The wheel and the glide zoom by equal ratios: through the band no step of
+	# 4% changes the chart's share by more than about a tenth.
+	assert_bool(_text(CHART).contains("smoothstep(log(MC_CHART_FROM), log(MC_CHART_FULL), log(")).is_true()
 	var previous:=0.0
 	var size:=4.0
 	while size<200.0:
 		var w:=_weight(size)
 		assert_float(w).is_greater_equal(previous)
-		assert_float(w-previous).override_failure_message("chart jumps near size %.1f" % size).is_less(0.12)
+		assert_float(w-previous).override_failure_message("chart jumps near size %.1f" % size).is_less(0.09)
 		previous=w
 		size*=1.04
 
@@ -185,7 +194,7 @@ func test_water_is_drawn_like_a_chart()->void:
 	# water-lines and a light stipple; rivers taper from a hairline at the
 	# spring and stay on the map out to the continent view.
 	var sea:=_text("res://scripts/coastal_water.gdshader")
-	for call in ["mc_shore_px(","mc_waterlines(","mc_coast_ink(","mc_cover("]:
+	for call in ["mc_shore_px(","mc_waterlines(","mc_coast_ink(","mc_cover_patch("]:
 		assert_bool(sea.contains(call)).override_failure_message("sea lacks %s" % call).is_true()
 	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
 	assert_bool(ground.contains("mc_shore_px(") and ground.contains("mc_coast_ink(")).is_true()
@@ -200,12 +209,12 @@ func test_water_is_drawn_like_a_chart()->void:
 
 func test_woods_marsh_and_worked_land_are_drawn_in_the_same_ink()->void:
 	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
-	for call in ["mc_symbols(0,","mc_symbols(1,","mc_farmland(","mc_marsh(","mc_cover("]:
+	for call in ["mc_symbols(kind,","kind <= chart_reach","mc_farmland(","mc_marsh(","mc_cover("]:
 		assert_bool(ground.contains(call)).override_failure_message("chart ground lacks %s" % call).is_true()
 	# The shader's place array holds exactly what chart_places sends.
 	var places:=preload("res://scripts/chart_places.gd")
 	assert_bool(_text(CHART).contains("uniform vec4 chart_places[%d];" % places.MAX_PLACES)).is_true()
-	assert_bool(_text(CHART).contains("for (int i = 0; i < %d; i++)" % places.MAX_PLACES)).is_true()
+	assert_bool(_text(CHART).contains("for (int i = 0; i < min(chart_place_count, %d); i++)" % places.MAX_PLACES)).is_true()
 
 
 func test_worked_land_grows_with_a_place_within_historical_reach()->void:
@@ -284,3 +293,90 @@ func test_gather_keeps_places_and_towns_in_step()->void:
 	assert_int(gathered.size()).is_equal(2)
 	assert_int((gathered[0] as PackedVector4Array).size()).is_equal((gathered[1] as PackedVector4Array).size())
 	assert_int((gathered[0] as PackedVector4Array).size()).is_less_equal(places.MAX_PLACES)
+
+
+func test_the_planet_layer_draws_the_same_woods_towns_and_fields()->void:
+	# Beyond the streamed patch (while a zoom out waits for the new patch)
+	# the chart reads the same fields from the macro rasters, so woods, towns
+	# and worked land do not pop in when the patch streams in; the sea draws
+	# its water-lines from the patch alone.
+	var text:=_text(CHART)
+	assert_bool(text.contains("vec4 mc_cover_far(")).is_true()
+	var ground:=text.substr(text.find("vec3 mc_chart_ground("))
+	assert_bool(ground.contains("vec3 farm = mc_farmland(")).is_true()
+	assert_bool(ground.contains("chart = mc_towns(")).is_true()
+	assert_bool(ground.contains("if (use_patch) { chart = mc_towns(")).is_false()
+	var sea:=_text("res://scripts/coastal_water.gdshader")
+	assert_bool(sea.contains("mc_cover(")).is_false()
+
+
+func test_the_terrain_shader_comes_in_a_painted_and_a_chart_build()->void:
+	# The chart's code, never run, costs close views register space: they
+	# draw with a build that has none of it (scripts/terrain_chart_build.gd).
+	var build:=preload("res://scripts/terrain_chart_build.gd")
+	var source:=_text("res://scripts/local_terrain.gd")
+	assert_int(source.count(build.CHART_ON)).is_equal(1)
+	assert_bool(source.contains("float mc_w=MC_CHART_ON?mc_chart_weight(mc_design):0.0;")).is_true()
+	var code:="shader_type spatial;
+%s
+uniform float probe_value = 0.0;
+void fragment(){ALBEDO=vec3(MC_CHART_ON?probe_value:0.0);}
+" % build.CHART_ON
+	var painted:=build.shader_for(code,false)
+	var charted:=build.shader_for(code,true)
+	assert_object(build.shader_for(code,false)).is_same(painted)
+	assert_bool(painted.code.contains(build.CHART_OFF)).is_true()
+	assert_bool(charted.code.contains(build.CHART_ON)).is_true()
+	# A material moves between the builds and keeps its parameters.
+	var material:=ShaderMaterial.new();material.shader=charted
+	material.set_shader_parameter("probe_value",0.75)
+	assert_int(build.apply([material],false)).is_equal(1)
+	assert_object(material.shader).is_same(painted)
+	assert_float(float(material.get_shader_parameter("probe_value"))).is_equal_approx(0.75,0.0001)
+	assert_int(build.apply([material],false)).is_equal(0)
+	# Materials of other shaders are left alone.
+	var other:=ShaderMaterial.new();other.shader=Shader.new();other.shader.code="shader_type spatial;"
+	assert_int(build.apply([other],true)).is_equal(0)
+	# It reads where the chart starts from the include itself.
+	assert_float(build.chart_from()).is_equal_approx(_float_const("MC_CHART_FROM"),0.000001)
+
+
+func test_the_view_takes_the_chart_build_only_when_its_ground_reaches_chart_scale()->void:
+	var build:=preload("res://scripts/terrain_chart_build.gd")
+	var camera:=Camera3D.new();add_child(camera);auto_free(camera)
+	camera.fov=rad_to_deg(2.0*atan(tan(deg_to_rad(25.0))/(16.0/9.0)))
+	camera.far=100000.0
+	var viewport:=Vector2(1600,900)
+	for case:Array in [[1.6,false],[8.0,false],[84.375,true],[1687.5,true]]:
+		var size:float=case[0]
+		camera.near=size*0.001
+		camera.position=Vector3(0.0,size/(2.0*tan(deg_to_rad(camera.fov)*0.5)),0.0)
+		camera.look_at(Vector3(0.0,0.0,-0.0001),Vector3.FORWARD)
+		camera.rotation.x=-PI*0.5+0.0001
+		assert_bool(build.view_needs_chart(camera,viewport,0.0,false)).override_failure_message("size %.1f" % size).is_equal(case[1])
+	# Hysteresis: once on, it stays on a little below where it came on. (The
+	# rule looks at the farthest corner, about 13% farther than the middle of
+	# a 16:9 view: 0.72 in the middle is about 0.82 at the corner.)
+	var edge:=build.chart_from()*0.72*1080.0
+	camera.position=Vector3(0.0,edge/(2.0*tan(deg_to_rad(camera.fov)*0.5)),0.0)
+	assert_bool(build.view_needs_chart(camera,viewport,0.0,false)).is_false()
+	assert_bool(build.view_needs_chart(camera,viewport,0.0,true)).is_true()
+
+
+func test_a_far_zoom_out_shows_a_preview_before_the_full_patch()->void:
+	# A zoom out that leaves the finished patch a sliver of the new view gets
+	# a quick preview of all of it first; a small step keeps the finished
+	# ground until the full patch replaces it (test_terrain_lod).
+	var lod:=preload("res://scripts/terrain_lod.gd")
+	var terrain:CheapTerrain=auto_free(CheapTerrain.new());add_child(terrain)
+	var span:=lod.bucket(10)
+	for stage in 2:
+		terrain._rebuild_regional_terrain_patch(Vector2.ZERO,span)
+		while terrain.terrain_patch_job!=null:terrain._advance_terrain_patch()
+	var wide:=lod.bucket(span*4.0)
+	terrain._rebuild_regional_terrain_patch(Vector2.ZERO,wide)
+	assert_int(terrain.terrain_patch_job.resolution).is_equal(lod.preview_resolution(wide))
+	assert_int(terrain.terrain_patch_job.resolution).is_less(lod.resolution_for(wide))
+	# While nothing covers the view the idle budget hurries, within a 120 Hz frame.
+	assert_int(terrain.TERRAIN_PATCH_UNCOVERED_BUDGET_USEC).is_greater(terrain.TERRAIN_PATCH_IDLE_BUDGET_USEC)
+	assert_int(terrain.TERRAIN_PATCH_UNCOVERED_BUDGET_USEC).is_less_equal(8333)

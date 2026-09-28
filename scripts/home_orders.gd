@@ -23,7 +23,9 @@ extends RefCounted
 
 const DEFAULT_RECRUITS:=10
 
-const RECRUIT_VERBS:="(?i)\\b(recruit|enlist|draft|conscript|levy|call up|call out|muster|raise)\\b"
+## "Muster" and "call out" gather the fighters we have (the war leader's);
+## these call up new ones.
+const RECRUIT_VERBS:="(?i)\\b(recruit|enlist|draft|conscript|levy|call up|raise)\\b"
 ## A march or a strike is the war leader's, even with fighters named.
 const WAR_WORDS:="(?i)\\b(attack|march|strike|raid|besiege|storm|assault|invade|conquer|burn|fight them|go to war|war on|against)\\b"
 const FIGHTER_NOUNS:="(?i)\\b(warriors?|fighters?|soldiers?|spearmen|bowmen|archers|recruits?|levies|troops|men (to|who can|who will|for the) (fight|war|band|spears?)|fighting men|more men|able men|young men|new men|a war ?band|a band|a host|an army)\\b"
@@ -99,7 +101,7 @@ static func read(text:String)->Dictionary:
 	# "Recruit 20", "draft thirty": the verb alone is enough; "raise", "call
 	# up", "gather" need fighters named ("raise the wall", "gather the hunters").
 	if word in ["recruit","enlist","draft"] or (word in ["conscript","levy"] and (noun or n>0)) or noun:
-		if word=="raise" and _has(lower,"\\braise [\\w' ]{0,30}?up\\b"): return {}
+		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): return {}
 		return {"kind":"recruit","count":n}
 	return {}
 

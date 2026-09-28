@@ -16,6 +16,8 @@ extends Node
 ##      [--population=n] [--villages=n] (the home's people; villages of ours round it)
 ##      [--marsh] (the nearest wet meadows, charted)
 ##      [--strangers=n] (n strangers' towns seen near home, the last burned)
+##      [--film=from,to,steps] (after the captures: a zoom in even steps, an
+##       image a step, to find pops across the crossfades)
 ##      [--sweep] (after the captures: frame times while stepping through the
 ##       distance levels and panning at the Region level, GPU included)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
@@ -271,7 +273,84 @@ func _ready()->void:
 		if "--timing" in args:print("MAP_ART_TIMING: z=",size," ",JSON.stringify(await _frame_timing()))
 	if "--sweep" in args:
 		for line in await _level_sweep(target):print("MAP_ART_SWEEP: ",JSON.stringify(line))
+	for argument in args:
+		# `--glide=from,to`: a real glide between two distance levels, as the
+		# wheel makes it, with images at its end and after, to see how long
+		# the streamed ground takes to catch up.
+		if argument.begins_with("--glide="):
+			var levels:=argument.trim_prefix("--glide=").split(",")
+			if levels.size()==2:await _glide_shots(target,int(levels[0]),int(levels[1]),out_dir,prefix)
+	for argument in args:
+		# `--film=from,to,steps`: a zoom from one view size to another in even
+		# steps (a zoom factor per step), one image per step, to find pops.
+		if argument.begins_with("--film="):
+			var parts:=argument.trim_prefix("--film=").split(",")
+			if parts.size()==3:await _film(target,float(parts[0]),float(parts[1]),int(parts[2]),out_dir,prefix)
 	get_tree().quit(0)
+
+## `--glide`: settle at one distance level, glide to another as the wheel
+## does (real time, vsync as in play), and save the view when the glide ends
+## and 0.25 to 16 seconds later, with whether the streamed patch
+## has caught up.
+func _glide_shots(target:Vector3,from_level:int,to_level:int,out_dir:String,prefix:String)->void:
+	terrain.camera_target=target
+	terrain.set_camera_distance_level(from_level)
+	terrain.camera.size=terrain.zoom_target_size
+	terrain.zoom_target_size=-1.0
+	terrain.zoom_preset_active=false
+	terrain._update_camera()
+	var lod=preload("res://scripts/terrain_lod.gd")
+	var deadline:=Time.get_ticks_msec()+30000
+	var frames:=0
+	while Time.get_ticks_msec()<deadline and (frames<60 or terrain.terrain_patch_job!=null):
+		await get_tree().process_frame
+		frames+=1
+	terrain.set_camera_distance_level(to_level)
+	terrain.zoom_pointer=get_viewport().get_visible_rect().size*0.5
+	var started:=Time.get_ticks_msec()
+	while terrain.zoom_target_size>0.0 and Time.get_ticks_msec()-started<10000:
+		await get_tree().process_frame
+	var ended:=Time.get_ticks_msec()
+	print("MAP_ART_GLIDE: L%d->L%d glide %d ms" % [from_level,to_level,ended-started])
+	for wait_ms in [0,250,500,1000,2000,4000,8000,16000]:
+		while Time.get_ticks_msec()-ended<wait_ms:await get_tree().process_frame
+		var image:=get_viewport().get_texture().get_image()
+		if image:image.save_png(out_dir.path_join("%s_glide_%d_%d_%04d.png" % [prefix,from_level,to_level,wait_ms]))
+		var covered:bool=terrain._patch_covers_camera(terrain.regional_patch_center,terrain.regional_patch_span) if terrain.has_method("_patch_covers_camera") else true
+		print("MAP_ART_GLIDE: +%d ms patch=%.1f/%d job=%s covers=%s" % [wait_ms,terrain.regional_patch_span,terrain.regional_patch_resolution,str(terrain.terrain_patch_job!=null),str(covered)])
+
+## `--film`: the view zooms from `from_size` to `to_size` about the target in
+## `steps` equal ratios, two frames a step (streaming and fades run as in
+## play), saving each step's image at half size with its camera size, and
+## when the streamed patch changed.
+func _film(target:Vector3,from_size:float,to_size:float,steps:int,out_dir:String,prefix:String)->void:
+	var ratio:=pow(to_size/from_size,1.0/float(maxi(steps,1)))
+	var size:=from_size
+	terrain.camera_target=target
+	terrain.zoom_target_size=-1.0
+	terrain.camera.size=size
+	terrain._update_camera()
+	for i in 90:await get_tree().process_frame
+	var span:float=terrain.regional_patch_span
+	var log_lines:=PackedStringArray()
+	for step in steps+1:
+		terrain.camera.size=size
+		terrain.camera_target=target
+		terrain._update_camera()
+		for i in 2:await get_tree().process_frame
+		RenderingServer.force_draw(true,0.0)
+		var image:=get_viewport().get_texture().get_image()
+		if image:
+			image.resize(image.get_width()/2,image.get_height()/2,Image.INTERPOLATE_BILINEAR)
+			image.save_png(out_dir.path_join("%s_film_%03d.png" % [prefix,step]))
+		var installed:=not is_equal_approx(float(terrain.regional_patch_span),span)
+		span=terrain.regional_patch_span
+		log_lines.append("%d %.4f %d %.3f" % [step,size,1 if installed else 0,span])
+		size*=ratio
+	var file:=FileAccess.open(out_dir.path_join("%s_film.txt" % prefix),FileAccess.WRITE)
+	if file:file.store_string("
+".join(log_lines))
+	print("MAP_ART_FILM: ",steps+1," frames ",from_size," -> ",to_size)
 
 ## `--sweep`: frame times (vsync off, GPU included) while the camera glides
 ## between the distance levels as the wheel steps them, holding a second at

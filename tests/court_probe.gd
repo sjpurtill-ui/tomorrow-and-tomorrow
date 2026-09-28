@@ -225,7 +225,9 @@ func _test_speak_to_court()->void:
 		court._speak()
 		await _frames(2)
 		_check(String(court.mode)=="foreign" and String(court.foreign_civ)==String(people[0].civ_id),"naming %s did not open word to their ruler" % civ_name)
-		_check(civ_name in String(court.speech_input.text),"the words were not set down as the envoy's brief")
+		# The foreign view has no court speech box: the words are set down as
+		# the envoy's brief, which its compose area shows.
+		_check(civ_name in String(ForeignDialogue.thread(String(people[0].civ_id)).get("next_brief","")),"the words were not set down as the envoy's brief")
 		ForeignDialogue.thread(String(people[0].civ_id))["next_brief"]=""
 	court.show_court()
 	await _frames(1)

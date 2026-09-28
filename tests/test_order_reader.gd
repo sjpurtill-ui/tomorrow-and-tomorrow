@@ -373,10 +373,16 @@ func test_the_world_brief_holds_towns_garrisons_bands_and_the_hall()->void:
 	_say(id,"hold",_reading("speech","none","none",""))
 	var payload:Dictionary=payloads[-1]
 	assert_str(String(payload.messages[1].content)).contains("TOWNS WE HOLD: town:"+city_id)
-	var refs:Array=payload.response_format.json_schema.schema.properties.target.properties.ref.enum
-	assert_bool("town:"+city_id in refs).is_true()
-	assert_bool("person:%d" % int(headman.person_id) in refs).is_true()
-	assert_int(int(payload.max_completion_tokens)).is_less_equal(600)
+	# The schema is the same on every call (the provider caches it with the
+	# instructions): the ids are in the brief, and validate() refuses any id
+	# that is not in its lists (test_an_id_not_in_the_lists_is_rejected).
+	var schema:=JSON.stringify(payload.response_format)
+	assert_str(schema).not_contains("town:"+city_id)
+	assert_str(schema).not_contains("person:%d" % int(headman.person_id))
+	assert_str(schema).is_equal(JSON.stringify(OR.response_format()))
+	# Room for the model's thinking and the reply: at 420 short follow-ups were
+	# cut off in live play (only the tokens used are billed); still bounded.
+	assert_int(int(payload.max_completion_tokens)).is_less_equal(900)
 
 func test_the_reader_model_is_configurable_apart_from_the_voice()->void:
 	var headman:=_headman()

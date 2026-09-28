@@ -1,9 +1,18 @@
 extends GdUnitTestSuite
 const DAY=preload("res://scripts/civilization_day.gd")
 
+## The new-game setting these tests change (GameState.reset_for_new_world keeps
+## it, as a new game keeps the player's choice): restored after each test, so
+## later suites still get the default world of rival peoples.
+var _opponents:=-1
+
+func before_test()->void:
+	_opponents=GameState.opponent_count
+
 func after_test()->void:
 	WorldSimulation.clear()
 	WorldSimulation.context_provider=Callable()
+	if _opponents>0: GameState.opponent_count=_opponents
 
 func test_whole_game_load_preserves_research_and_opponent_next_day()->void:
 	WorldSimulation.clear()

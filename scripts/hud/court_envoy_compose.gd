@@ -564,10 +564,25 @@ func _fill_footer()->void:
 # --- Sending ----------------------------------------------------------------------
 
 func send_words(text:String)->bool:
-	## Speak with their ruler in the god's own words (online).
+	## Speak with their ruler in the god's own words. Online they go as typed;
+	## offline they go as the brief offered that they mean, and the envoy
+	## carries the ruler's own words (ForeignDialogue.typed_choice). Words that
+	## match none of the briefs are said plainly to need one: never another
+	## brief sent in their place.
 	choose("leader_parley")
 	words_edit.text=text
-	return not send().has("error")
+	if not online() and bool(WorldSimulation.dialogue.access(civ_id).get("ok",false)):
+		var picked:Dictionary=WorldSimulation.dialogue.typed_choice(civ_id,text)
+		if picked.is_empty():
+			var why:="Without a live voice your envoy carries one of the briefs offered here, and your words match none of them. Choose the one you mean."
+			ForeignDialogue.thread(civ_id)["status"]=why
+			_say(why,true)
+			return false
+		sel.talk=String(picked.id)
+		sel["words"]=text
+	var result:=send()
+	sel.erase("words")
+	return not result.has("error")
 
 func send()->Dictionary:
 	var problem:=blocker(purpose)
@@ -579,7 +594,7 @@ func send()->Dictionary:
 		"leader_parley":
 			if not bool(dialogue.access(civ_id).get("ok",false)):result=WorldSimulation.diplomacy.send_audience(civ_id)
 			else:
-				var ok:bool=dialogue.ask(civ_id,typed) if typed!="" else dialogue.ask_offline(civ_id,String(sel.talk))
+				var ok:bool=dialogue.ask(civ_id,typed) if typed!="" else dialogue.ask_offline(civ_id,String(sel.talk),String(sel.get("words","")))
 				result={"ok":true} if ok else {"error":String(dialogue.thread(civ_id).get("status","Your envoy could not leave."))}
 				if ok:words_edit.text=""
 		"shared_work":result=WorldSimulation.diplomacy.send(civ_id,String(sel.accord),String(sel.tone),bool(sel.generous))

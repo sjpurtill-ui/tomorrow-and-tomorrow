@@ -94,7 +94,34 @@ func offline_choices(id:String)->Array[Dictionary]:
 		for choice:Dictionary in Pacts.offline_choices(id): result.push_front(choice)
 	return result
 
-func ask_offline(id:String,choice_id:String)->bool:
+## The ruler's own words, offline: the brief offered that they mean, by what
+## they ask for (a marriage, amends, a debt paid or called in, a warning,
+## trade, their ruler's word, friendship, or what they want). {} when the
+## words match none of the briefs that can go now; the envoy then carries
+## nothing until the ruler picks one.
+const TYPED_BRIEFS:=[
+	["marriage","\\b(marr(y|iage)|wed|wedding|bride|groom|join our houses)\\b"],
+	["amends","\\b(amends|apologi[sz]e|apology|sorry|make up for|make good)\\b"],
+	["pay_debt","\\b(we owe|pay (them|back|what we owe)|repay|settle our debt)\\b"],
+	["call_debt","\\b(owe(s)? us|they owe|remind them|call in|what (they|he|she) owes?)\\b"],
+	["warn","\\b(warn|keep (away|off|out)|stay (away|off|out)|off our (land|border|ground)|our borders?|or else|trespass)\\b"],
+	["trade:","\\b(trade|barter|exchange|goods for)\\b"],
+	["heir","\\b(heir|(his|her|their) (father|mother)'?s? word|hold(s)? to|keep(s)? (the|their|his|her) word|old promise)\\b"],
+	["honour","\\b(friend(s|ship)?|peace|goodwill|good will|honou?r|respect|praise|greet(ings)?|welcome|kin(ship)?|ally|alliance|safe passage)\\b"],
+	["ask_intent","\\b(what (do|does|would|did) (they|you|he|she|your \\w+|their \\w+) (want|mean|intend|ask)|ask (them |him |her )?what|why (do|does|did|have|has))\\b|\\?\\s*$"],
+]
+func typed_choice(id:String,words:String)->Dictionary:
+	var lower:=words.to_lower()
+	var offered:=offline_choices(id)
+	for pair in TYPED_BRIEFS:
+		var re:=RegEx.new(); re.compile("(?i)"+String(pair[1]))
+		if re.search(lower)==null: continue
+		for choice:Dictionary in offered:
+			var cid:=String(choice.get("id",""))
+			if (cid==String(pair[0]) or (String(pair[0]).ends_with(":") and cid.begins_with(String(pair[0])))) and bool(choice.get("enabled",true)): return choice
+	return {}
+
+func ask_offline(id:String,choice_id:String,words:String="")->bool:
 	if pending.has(id): return false
 	var t:=thread(id)
 	if bool(t.get("in_transit",false)): return false
@@ -114,7 +141,9 @@ func ask_offline(id:String,choice_id:String)->bool:
 	if journey.has("error"):t.status=String(journey.error);changed.emit(id);return false
 	if not choice_id.begins_with("trade:"):load("res://scripts/rival_rulers.gd").call("talk_depart",id,choice)
 	else:t["offline_terms"]=(choice.get("terms",{}) as Dictionary).duplicate()
-	var label:=String(choice.get("label","")).substr(0,1500)
+	# The ruler's own words, when they typed them, are what the envoy carries;
+	# the brief they matched decides the answer offline.
+	var label:=(words.strip_edges() if words.strip_edges()!="" else String(choice.get("label",""))).substr(0,1500)
 	WorldSimulation.world.diplomatic_mission["dialogue_brief"]=label
 	WorldSimulation.world.diplomatic_mission["dialogue_exchange"]=true
 	t.private_brief=label;t.in_transit=true;t.staged_result={};t.retryable=false;t["returned_home"]=false
