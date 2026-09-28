@@ -139,6 +139,9 @@ func _refresh_badge()->void:
 	var toolbar_top:=view.y-10.0-44.0
 	if is_instance_valid(terrain) and "hud" in terrain and terrain.hud and "toolbar" in terrain.hud and is_instance_valid(terrain.hud.toolbar) and terrain.hud.toolbar.visible:
 		toolbar_top=terrain.hud.toolbar.position.y
+	# Above the army bar too, when the bands are shown along the bottom.
+	if is_instance_valid(terrain) and "hud" in terrain and terrain.hud and terrain.hud.has_method("map_bottom_top"):
+		toolbar_top=minf(toolbar_top,float(terrain.hud.map_bottom_top()))
 	badge.size=badge.custom_minimum_size
 	badge.pivot_offset=badge.size*.5
 	badge.position=Vector2((view.x-badge.size.x)*.5,toolbar_top-badge.size.y-12.0).round()

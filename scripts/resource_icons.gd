@@ -918,3 +918,64 @@ static func battle_figure_glyph(kind:String,ink:Color,accent:Color)->Array:
 		"rifle": body.append_array([_s(22,32,40,12,2.0,ink),_s(31,20,34,22,2.4,ink),_rr(28,7,5.6,2.4,2.2,ink)])
 		_: body.append_array([_s(31,19,35,26,2.6,ink),_s(36,2,36,52,1.8,ink),_t(36,-1,33.4,7,38.6,7,ink)])
 	return body
+
+
+# -- Army screens (HOI4-style rows) ----------------------------------------
+
+static var _command_textures:Dictionary={}
+
+## Small inked marks for the army screens (hud/army_bar.gd, the recruit
+## queue and the army command panel), drawn bare so they sit beside a
+## number the way a HOI4 row does. Kinds:
+##   people    men, free (can be called up), serving, drilling, work (jobs
+##             left undone at home), home
+##   stores    gear (spear and shield), drill (rank chevrons), will (a
+##             standard), supply (a grain sack), date (an hourglass)
+##   orders    attack, besiege, raid, defend, guard, goto, recall, front
+##             (a front line with its teeth), arrow (an offensive arrow)
+##   controls  pause, resume, stop, repeat, deploy, edit, plus, minus,
+##             prio0..prio2 (one to three chevrons)
+## Unknown kinds draw a dot, never an error.
+static func command_texture(kind:String,ink:Color,px:int=40)->Texture2D:
+	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
+	if _command_textures.has(key): return _command_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(command_glyph(kind,ink),px,false))
+	_command_textures[key]=texture
+	return texture
+
+
+static func command_glyph(kind:String,c:Color)->Array:
+	var soft:=Color(c,0.5)
+	match kind:
+		"men": return [_c(37,14,5,soft),_rr(37,28,5.8,9,4,soft),_s(34.5,36,33.5,48,3.4,soft),_s(39.5,36,40.5,48,3.4,soft)]+_figure(23,c)
+		"free": return _figure(22,c)+[_s(42,17,42,35,4,c),_s(33,26,51,26,4,c)]
+		"serving": return _figure(22,c)+[_s(37,6,37,52,2.8,c),_t(37,1,33.2,10,40.8,10,c),_s(26,25,37,22,3,c)]
+		"drilling": return _figure(20,c)+[_s(33,26,41,19,3.4,c),_s(41,19,49,26,3.4,c),_s(33,36,41,29,3.4,c),_s(41,29,49,36,3.4,c)]
+		"work": return [_s(14,50,36,14,3.6,c),_t(33,9,49,15,40,24,c),_s(10,50,24,50,3,soft)]
+		"home": return [_t(28,7,6,27,50,27,c),_rr(28,38,15,11,1,c)]
+		"gear": return [_s(12,52,42,12,3.4,c),_t(48,4,38.4,11,44,15.2,c),_c(24,34,11.5,c)]
+		"drill": return [_s(12,21,28,11,4.4,c),_s(28,11,44,21,4.4,c),_s(12,33,28,23,4.4,c),_s(28,23,44,33,4.4,c),_s(12,45,28,35,4.4,c),_s(28,35,44,45,4.4,c)]
+		"will": return [_s(17,52,17,6,3.4,c),_t(18.5,8,18.5,30,47,19,c),_s(10,51,26,51,3.4,c)]
+		"supply": return [_s(28,53,28,16,3.2,c),_c(28,11,4.6,c),_rr(21.5,21,4,6,4,c),_rr(34.5,21,4,6,4,c),_rr(21.5,32,4,6,4,c),_rr(34.5,32,4,6,4,c),_rr(21.5,43,4,6,4,soft),_rr(34.5,43,4,6,4,soft)]
+		"date": return [_s(13,8,43,8,3.6,c),_s(13,48,43,48,3.6,c),_t(16,10,40,10,28,28,c),_t(16,46,40,46,28,28,soft)]
+		"attack": return [_s(10,46,33,23,6,c),_t(47,9,28,15,41,28,c)]
+		"besiege": return [_ring(28,28,11,4,c),_s(28,4,28,12,3.6,c),_s(28,44,28,52,3.6,c),_s(4,28,12,28,3.6,c),_s(44,28,52,28,3.6,c),_s(11,11,17,17,3.2,c),_s(45,11,39,17,3.2,c),_s(11,45,17,39,3.2,c),_s(45,45,39,39,3.2,c)]
+		"raid": return [_t(28,3,17,40,39,40,c),_t(15,15,9,40,25,40,c),_t(42,12,31,40,47,40,c),_c(28,40,10,c),_s(8,52,48,52,3.2,soft)]
+		"defend": return [_rr(28,16,16,8,1.2,c),_t(12,20,44,20,28,52,c)]
+		"guard": return [_s(19,52,25,20,3.4,c),_s(37,52,31,20,3.4,c),_rr(28,18,11,3.4,1,c),_t(28,4,14,14,42,14,c),_s(21,42,35,32,2.6,c),_s(35,42,21,32,2.6,c)]
+		"goto": return [_s(36,52,36,8,3.4,c),_t(37.5,9,37.5,27,53,18,c),_c(12,48,3.8,soft),_c(19,40,3.8,soft),_c(13,31,3.8,c)]
+		"recall": return [_t(38,10,22,26,54,26,c),_rr(38,36,12,10,1,c),_s(4,40,17,40,4,c),_t(24,40,15,33,15,47,c)]
+		"front": return [_s(4,34,52,34,4.4,c),_t(6,33,16,33,11,21,c),_t(19,33,29,33,24,21,c),_t(32,33,42,33,37,21,c),_t(45,33,53,33,49,22,c)]
+		"arrow": return [_s(6,50,17,36,7,c),_s(17,36,29,27,6.4,c),_s(29,27,36,23.5,5.8,c),_t(52,15,32,14,40,33,c)]
+		"pause": return [_rr(19,28,5,15,1.5,c),_rr(37,28,5,15,1.5,c)]
+		"resume": return [_t(17,11,17,45,46,28,c)]
+		"stop": return [_s(14,14,42,42,5,c),_s(42,14,14,42,5,c)]
+		"repeat": return [_ring(18,28,9,4.4,c),_ring(38,28,9,4.4,c)]
+		"deploy": return _figure(15,c)+[_s(28,28,44,28,4.4,c),_t(54,28,42,20,42,36,c)]
+		"edit": return [_s(15,41,39,17,7,c),_t(9,47,11,37,19,45,c),_s(37,15,43,21,7,soft)]
+		"plus": return [_s(28,12,28,44,5.4,c),_s(12,28,44,28,5.4,c)]
+		"minus": return [_s(12,28,44,28,5.4,c)]
+		"prio0": return [_s(14,35,28,23,4.6,c),_s(28,23,42,35,4.6,c)]
+		"prio1": return [_s(14,29,28,17,4.6,c),_s(28,17,42,29,4.6,c),_s(14,41,28,29,4.6,c),_s(28,29,42,41,4.6,c)]
+		"prio2": return [_s(14,23,28,11,4.6,c),_s(28,11,42,23,4.6,c),_s(14,35,28,23,4.6,c),_s(28,23,42,35,4.6,c),_s(14,47,28,35,4.6,c),_s(28,35,42,47,4.6,c)]
+	return [_c(28,28,6,c)]

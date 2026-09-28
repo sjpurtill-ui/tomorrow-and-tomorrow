@@ -214,7 +214,7 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 	## Plain lines about what the order would do, and whether the war leader
 	## is likely to object. {lines:[...], likely:"act"|"object"|"impossible",
 	## ready:bool (enough chosen to give the order), road:[Vector2], days, km}
-	var out:={"lines":[],"likely":"act","ready":false,"road":[],"days":0,"km":0.0}
+	var out:={"lines":[],"likely":"act","ready":false,"road":[],"days":0,"km":0.0,"men":0,"arrive_day":-1}
 	var mc:=_mc()
 	if mc==null or WorldSimulation.world==null or verb_id=="": return out
 	var blocked:=unavailable(force_id,verb_id)
@@ -242,8 +242,10 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		going=trained-keep
 		formations=mc.home_army.get("formations",[])
 		speed_force=mc.home_army
+	out.men=going
 	match verb_id:
 		"defend":
+			out.men=int(f.trained)
 			var away:=(f.away as Array).size()
 			out.lines.append("The %d trained at home watch every approach for half a year." % int(f.trained))
 			if away>0: out.lines.append("%s away %s called home to join them." % [EraWords.count_word(away).capitalize()+(" band" if away==1 else " bands"),"is" if away==1 else "are"])
@@ -318,6 +320,7 @@ static func _road_lines(out:Dictionary,road:Dictionary,force:Dictionary,where:St
 	# The one march estimate (march_terrain.gd through MilitaryCampaign).
 	var days:=int(_mc().march_days(force,road)) if km>0.0 and not (force.get("formations",[]) as Array).is_empty() else (ceili(km/12.0) if km>0.0 else 0)
 	out.km=km; out.days=days
+	out["arrive_day"]=_today()+days
 	var points:Array=[]
 	for p in road.get("points",[]): points.append(p)
 	out.road=points
@@ -447,5 +450,188 @@ static func _guard(force_id:int,target:Dictionary)->Dictionary:
 	var node:Dictionary=command.node(String(result.id))
 	out.objective={"army_id":int(node.get("force_id",-1)),"kind":"guard","zone_id":String(region.id),"troops":troops}
 	out.says="%d of us go to hold %s, about %s km round, and fight anyone hostile who comes into it." % [troops,where,EraWords.grouped(roundi(radius))]
+	out.outcome=out.says
+	return out
+
+# --------------------------------------------------------------------------
+# One line for the screen, and drawn plans (the HOI4 battle plan)
+# --------------------------------------------------------------------------
+
+const Dates:=preload("res://scripts/hud/deployment_model.gd")
+## An arrow ending this close to a town or a host they saw aims at it.
+const ARROW_SNAP_KM:=4.0
+## A drawn front line shorter than this is a point, not a line.
+const MIN_FRONT_KM:=0.7
+
+## The one "What happens" line from a preview (or a plan preview):
+## "24 men · 3 days · arrive 12 Spring", with the war leader's likely
+## answer when it is not a plain yes. The preview's full lines stay for the
+## tooltip.
+static func summary(plan:Dictionary)->String:
+	if plan.is_empty(): return ""
+	var lines:Array=plan.get("lines",[])
+	if String(plan.get("likely",""))=="impossible" or not bool(plan.get("ready",false)):
+		return String(lines[0]).get_slice(". ",0).trim_suffix(".") if not lines.is_empty() else ""
+	var parts:=PackedStringArray()
+	if int(plan.get("men",0))>0: parts.append("%s men" % EraWords.grouped(int(plan.men)))
+	if float(plan.get("front_km",0.0))>0.0: parts.append("%s km line" % EraWords.grouped(maxi(1,roundi(float(plan.front_km)))))
+	var km:=float(plan.get("km",0.0))
+	var days:=int(plan.get("days",0))
+	if km>=0.5:
+		parts.append("%d %s" % [days,"day" if days==1 else "days"])
+		if int(plan.get("arrive_day",-1))>=0: parts.append("arrive "+Dates.day_words(int(plan.arrive_day)))
+	elif not (plan.get("road",[]) as Array).is_empty(): parts.append("already there")
+	if String(plan.get("likely",""))=="object":
+		var leader:=war_leader_name()
+		parts.append("%s will object" % (leader if leader!="" else "the war leader"))
+	return " · ".join(parts)
+
+
+static func _points(raw:Array)->Array[Vector2]:
+	var out:Array[Vector2]=[]
+	for p in raw:
+		var at:Vector2=p if p is Vector2 else _v2(p)
+		if at.is_finite() and (out.is_empty() or out[-1].distance_to(at)>=0.1): out.append(at)
+	return out
+
+
+static func line_km(points:Array)->float:
+	var line:=_points(points)
+	var km:=0.0
+	for i in range(1,line.size()): km+=line[i-1].distance_to(line[i])
+	return km
+
+
+## A drawn front line as ground to hold: a strip along the line, as wide
+## as a band of this size can watch (guard_radius). [] when the line
+## cannot make a simple outline even held straight from end to end.
+static func front_zone(points:Array,troops:int)->Array:
+	var line:=_points(points)
+	if line.size()<2 or line_km(line)<MIN_FRONT_KM: return []
+	var half:=clampf(guard_radius(troops)*0.4,0.8,6.0)
+	# Few enough corners for a zone (joint_regions: at most 64).
+	while line.size()>14:
+		var thinned:Array[Vector2]=[]
+		for i in line.size():
+			if i%2==0 or i==line.size()-1: thinned.append(line[i])
+		line=thinned
+	for attempt in 2:
+		var left:Array[Vector2]=[]
+		var right:Array[Vector2]=[]
+		for i in line.size():
+			var ahead:=(line[mini(i+1,line.size()-1)]-line[maxi(i-1,0)]).normalized()
+			var normal:=Vector2(-ahead.y,ahead.x)
+			var at:=line[i]
+			if i==0: at-=ahead*half*0.6
+			elif i==line.size()-1: at+=ahead*half*0.6
+			left.append(at+normal*half)
+			right.push_front(at-normal*half)
+		var vertices:Array=[]
+		for p:Vector2 in left+right: vertices.append(G.pack(p))
+		if R.validate(vertices)=="": return vertices
+		# A sharp bend folds the strip: hold the straight line from end to end.
+		var ends:Array[Vector2]=[line[0],line[-1]]
+		line=ends
+	return []
+
+
+## Where an arrow ending at `to` aims: a known town or a host they saw close
+## by (attack), else the ground itself (advance there). {verb, target}.
+static func arrow_target(to:Vector2)->Dictionary:
+	var best:={}
+	var best_d:=ARROW_SNAP_KM
+	for p:Dictionary in WO.known_places():
+		var d:=to.distance_to(_v2(p.position))
+		if d<best_d:
+			best_d=d
+			best=p
+	if not best.is_empty(): return {"verb":"attack","target":{"type":"place","place":best}}
+	for host:Dictionary in hosts():
+		var d:=to.distance_to(_v2(host.position))
+		if d<best_d:
+			best_d=d
+			best=host
+	if not best.is_empty(): return {"verb":"attack","target":{"type":"host","formation_id":String(best.formation_id),"civ_id":String(best.civ_id),"label":String(best.label),"position":best.position}}
+	return {"verb":"goto","target":{"type":"spot","x":to.x,"z":to.y}}
+
+
+## What a drawn plan would do, in the shape of preview(): an arrow is the
+## order it resolves to; a front line is the march to it and the ground held.
+static func plan_preview(force_id:int,plan:Dictionary)->Dictionary:
+	match String(plan.get("kind","")):
+		"arrow":
+			var aim:Dictionary=plan if plan.has("verb") else arrow_target(_v2(plan.get("to",{})))
+			var out:=preview(force_id,String(aim.verb),aim.target)
+			out["verb"]=String(aim.verb)
+			return out
+		"front":
+			var line:=_points(plan.get("points",[]))
+			var km:=line_km(line)
+			if line.size()<2 or km<MIN_FRONT_KM:
+				return {"lines":["Click two or more points on the map for the line."],"likely":"act","ready":false,"road":[],"days":0,"km":0.0,"men":0,"arrive_day":-1,"front_km":0.0}
+			var middle:Vector2=line[line.size()/2] if line.size()>2 else line[0].lerp(line[1],0.5)
+			var out:=preview(force_id,"guard",{"type":"spot","x":middle.x,"z":middle.y})
+			out["front_km"]=km
+			if bool(out.ready):
+				var kept:Array=[]
+				for text in out.lines:
+					if not String(text).begins_with("They hold about"): kept.append(text)
+				kept.append("They hold a line of %s km and fight anyone hostile who crosses it." % EraWords.grouped(maxi(1,roundi(km))))
+				out.lines=kept
+			return out
+	return {"lines":["Draw the line or the arrow on the map first."],"likely":"act","ready":false,"road":[],"days":0,"km":0.0,"men":0,"arrive_day":-1}
+
+
+## Carry out a drawn plan through the same objectives as every other order:
+## an arrow attacks the town or host it points at, or advances to the
+## ground (give()); a front line is held as a defended zone along it (the
+## zone staff march, patrol and fight, as for Guard).
+static func give_plan(force_id:int,plan:Dictionary,insist:bool=false)->Dictionary:
+	match String(plan.get("kind","")):
+		"arrow":
+			var aim:Dictionary=plan if plan.has("verb") else arrow_target(_v2(plan.get("to",{})))
+			return give(force_id,String(aim.verb),aim.target,insist)
+		"front": return _hold_front(force_id,plan.get("points",[]))
+	return _answer("impossible","plan","no_plan","Draw the line or the arrow on the map first.","")
+
+
+static func _hold_front(force_id:int,points:Array)->Dictionary:
+	var mc:=_mc()
+	if mc==null: return _answer("impossible","front","no_force","We have nothing organised to fight with yet.","")
+	var blocked:=unavailable(force_id,"guard")
+	if blocked!="": return _answer("impossible","front","unavailable",blocked,"")
+	var line:=_points(points)
+	if line.size()<2 or line_km(line)<MIN_FRONT_KM: return _answer("impossible","front","no_target","That line is too short to hold.","Click two or more points on the map.")
+	var command:RefCounted=mc.command_hierarchy
+	command.sync()
+	var node_id:=""
+	var troops:=0
+	for entry:Dictionary in command.data.nodes.values():
+		if entry.service=="army" and int(entry.force_id)==force_id:
+			node_id=String(entry.id)
+			troops=command.amount(entry)
+			break
+	if node_id=="" or troops<=0: return _answer("impossible","front","no_trained","Nobody trained is free to go.","Raise a levy and have it drilled first.")
+	var vertices:=front_zone(line,troops)
+	if vertices.is_empty(): return _answer("impossible","front","no_zone","That line folds over itself.","Draw it again with gentler bends.")
+	var middle:Vector2=line[line.size()/2] if line.size()>2 else line[0].lerp(line[1],0.5)
+	var where:=spot_words(middle)
+	var made:Dictionary=command.create_region("army",vertices,_sentence("line "+where.trim_prefix("the ")))
+	if made.has("error"): return _answer("impossible","front","no_zone",String(made.error),"")
+	var region:Dictionary=made.region
+	var packed:Array=[]
+	for p:Vector2 in line: packed.append(G.pack(p))
+	region["plan"]="front"
+	region["line"]=packed
+	_release_from_zone(force_id)
+	var result:Dictionary=command.assign(node_id,[],region,"defend","","")
+	if result.has("error"):
+		command.remove_region(String(region.id))
+		return _answer("impossible","front","order_failed",String(result.error),"")
+	var out:=_answer("act","front","","","")
+	var node:Dictionary=command.node(String(result.id))
+	var km:=line_km(line)
+	out.objective={"army_id":int(node.get("force_id",-1)),"kind":"front","zone_id":String(region.id),"troops":troops,"km":km}
+	out.says="%d of us hold the line %s, %s km of it, and fight anyone hostile who crosses." % [troops,where,EraWords.grouped(maxi(1,roundi(km)))]
 	out.outcome=out.says
 	return out

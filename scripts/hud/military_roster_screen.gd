@@ -130,8 +130,9 @@ func _template_editor()->void:
 		if int(candidate.template_id)==editor_id:template=candidate;break
 	_button(body,"← Recruitment queue",func():editor_id=-1;_build_body())
 	if template.is_empty():_wrapped(body,"This design no longer exists.");return
-	T.text(_label(body,Story.sentence_name(String(template.name))),"voice",TEXT)
-	_wrapped(body,"A formation design sets how many people and which weapons to recruit. Changing it does not create troops.")
+	var heading:=_label(body,Story.sentence_name(String(template.name)));T.text(heading,"voice",TEXT)
+	heading.tooltip_text="Who is in this kind of band. Changing it raises nobody; press Train for that."
+	heading.mouse_filter=Control.MOUSE_FILTER_PASS
 	for entry:Dictionary in template.entries:
 		var unit:=String(entry.unit);var weapon:=String(entry.weapon)
 		var row:=HBoxContainer.new();body.add_child(row)
@@ -543,41 +544,42 @@ func _update_inspection()->void:
 	inspection_labels.activity.text=String(selected_row.training_note)+("" if String(story.condition).is_empty() else "\n"+String(story.condition))
 
 func _policy()->void:
-	T.text(_label(body,"How much should we train?"),"voice",TEXT)
-	_wrapped(body,"Choose how hard to drill. Staff rotate people through drill and pause for shortages or emergencies.")
+	## How hard to drill, as HOI4 shows a policy: four cards, each two bars
+	## (how many drill at a time, the skill they aim for) and its cost; the
+	## explanations are in the tooltips.
+	var Icons:=preload("res://scripts/resource_icons.gd")
 	policy_grid=GridContainer.new();policy_grid.columns=4 if panel.size.x>=920 else 2
 	policy_grid.add_theme_constant_override("h_separation",10);policy_grid.add_theme_constant_override("v_separation",10);body.add_child(policy_grid)
 	for id:String in MilitaryCampaign.training_staff.POLICIES:
 		var definition:Dictionary=MilitaryCampaign.training_staff.POLICIES[id]
 		var outer:=PanelContainer.new();outer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		outer.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,12));policy_grid.add_child(outer);policy_cards[id]=outer
-		var card:=VBoxContainer.new();card.add_theme_constant_override("separation",8);outer.add_child(card)
+		outer.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,10));policy_grid.add_child(outer);policy_cards[id]=outer
+		outer.tooltip_text=String(definition.description)
+		var card:=VBoxContainer.new();card.add_theme_constant_override("separation",6);outer.add_child(card)
 		var choice:=id
 		var button:=_button(card,String(definition.label),func():MilitaryCampaign.training_staff.set_policy(service,choice);_update_policy())
-		button.toggle_mode=true;button.custom_minimum_size.y=38;policy_buttons[id]=button
-		var icons:ProgressBar=_bar(card,accent(),"people");icons.marks=20;icons.value=float(definition.share)*100;icons.custom_minimum_size.y=26
-		var share:=_label(card,"%d in 100 drill at a time" % roundi(float(definition.share)*100));T.text(share,"value",TEXT)
-		_label(card,"Aim: drill %d%%" % roundi(float(definition.target)*100),13,accent())
-		var skill:=_bar(card,accent(),"patch");skill.value=float(definition.target)*100
-		skill.custom_minimum_size=Vector2(44,32);skill.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-		var description:=_wrapped(card,String(definition.description),13);description.custom_minimum_size.x=140
+		button.toggle_mode=true;button.custom_minimum_size.y=36;policy_buttons[id]=button;button.tooltip_text=String(definition.description)
+		for meter:Array in [["drilling",float(definition.share),"%d%% drill at a time" % roundi(float(definition.share)*100)],["drill",float(definition.target),"Aim for %d%% skill" % roundi(float(definition.target)*100)]]:
+			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);line.tooltip_text=String(meter[2]);line.mouse_filter=Control.MOUSE_FILTER_PASS;card.add_child(line)
+			var mark:=TextureRect.new();mark.texture=Icons.command_texture(String(meter[0]),T.INK_MUTED,32);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.custom_minimum_size=Vector2(16,16);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(mark)
+			var bar:ProgressBar=_bar(line,accent(),"segments");bar.marks=10;bar.value=float(meter[1])*100;bar.custom_minimum_size=Vector2(70,18);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			var value:=_label(line,"%d%%" % roundi(float(meter[1])*100),14,TEXT);value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var effort:=_kicker(card,{"suspended":"Saves stores","maintain":"Light cost","regular":"Steady cost","intensive":"Heavy cost"}[id])
 		effort.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	if service!="army":
 		var overview:=GridContainer.new();overview.columns=4;overview.add_theme_constant_override("h_separation",10);body.add_child(overview)
 		for definition:Array in [["training","In training",T.GREEN],["assigned","On missions",T.BLUE],["target","Drilled enough",T.GOLD],["paused","Paused",T.RED]]:
 			var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(card)
-			var value:=_label(card,"0",24,definition[2]);_kicker(card,String(definition[1]))
+			var value:=_label(card,"0",24,T.text_for(definition[2]));_kicker(card,String(definition[1]))
 			var bar:=_bar(card,definition[2]);service_indicators[definition[0]]={"value":value,"bar":bar,"card":card}
-		_wrapped(body,"Counts are fleets or wings. Staff review the training level each day.",13)
-	policy_status=_wrapped(body,"",14,TEXT)
-	var investment:=HFlowContainer.new();investment.add_theme_constant_override("h_separation",16);body.add_child(investment)
-	for definition:Array in [["food","Extra food eaten","supply"],["materials","Materials used","equipment"],["time","First drill takes","calendar"]]:
-		var box:=PanelContainer.new();box.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,12));box.custom_minimum_size.x=180;investment.add_child(box)
-		var content:=HBoxContainer.new();content.add_theme_constant_override("separation",9);box.add_child(content)
-		var icon:=TextureRect.new();icon.texture=Art.symbol(definition[2],accent());icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.custom_minimum_size=Vector2(30,30);content.add_child(icon)
-		var text:=VBoxContainer.new();content.add_child(text);summary_costs[definition[0]]=_label(text,"",20);_kicker(text,String(definition[1]))
-	_wrapped(body,"First drill counts only days with food and weapons to practise with; shortages pause it. Longer exercises take 72 to 252 such days. Staff always keep seven days of food for everyone else.",13)
+	policy_status=_label(body,"",14,TEXT);policy_status.clip_text=true;policy_status.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	policy_status.mouse_filter=Control.MOUSE_FILTER_PASS
+	var investment:=HFlowContainer.new();investment.add_theme_constant_override("h_separation",24);body.add_child(investment)
+	for definition:Array in [["food","supply","extra food eaten","Food eaten by drill beyond ordinary rations. Staff always keep seven days of food for everyone else."],["materials","gear","materials used","Materials worn out in drill."],["time","date","first drill","First drill counts only days with food and gear to practise with; shortages pause it. Longer exercises take 72 to 252 such days."]]:
+		var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",8);chip.tooltip_text=String(definition[3]);chip.mouse_filter=Control.MOUSE_FILTER_PASS;investment.add_child(chip)
+		var icon:=TextureRect.new();icon.texture=Icons.command_texture(String(definition[1]),T.INK,48);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.custom_minimum_size=Vector2(22,22);icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(icon)
+		summary_costs[definition[0]]=_label(chip,"",20);summary_costs[definition[0]].add_theme_font_override("font",T.font("ui_strong"));summary_costs[definition[0]].mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var word:=_label(chip,String(definition[2]),13,MUTED);word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_update_policy()
 func _update_policy()->void:
 	var state:Dictionary=MilitaryCampaign.training_staff.snapshot(service)
@@ -592,7 +594,8 @@ func _update_policy()->void:
 		indicator.value.text=str(state.groups[group]);indicator.bar.value=float(state.groups[group])/maxf(1,state.forces)*100
 		var tips:Dictionary={"training":"Crews in instruction or training rotations; other qualified crews may still operate.","assigned":"Forces committed to missions or travel without a training rotation.","target":"Crews at home whose proficiency meets the selected target.","paused":String(state.get("pause_details","No paused training."))}
 		indicator.card.tooltip_text=tips[group];indicator.value.tooltip_text=tips[group];indicator.bar.tooltip_text=tips[group]
-	policy_status.text=String(state.status)
-	if service=="army" and not state.active.is_empty():policy_status.text+="\n%s · %.0f of %.0f days done" % [state.active.label,state.active.progress_days,state.active.duration_days]
+	policy_status.text=String(state.status).get_slice("\n",0)
+	if service=="army" and not state.active.is_empty():policy_status.text="%s · %.0f of %.0f days" % [state.active.label,state.active.progress_days,state.active.duration_days]
+	policy_status.tooltip_text=String(state.status)
 	summary_costs.food.text="%.1f" % state.food_spent;summary_costs.materials.text="%.1f" % state.materials_spent
 	summary_costs.time.text="45+ days" if service=="army" else "90+ days"
