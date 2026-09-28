@@ -153,22 +153,27 @@ func _layout()->void:
 		# supported canvas, retain the urgent food, survival and GDP outcomes and
 		# hide duplicate context instead of wrapping downward over the map.
 		var compact_top:=view.x<1280
-		(kpi_chips.get("population",{}).get("chip") as Control).visible=not compact_top
-		(kpi_chips.get("water",{}).get("chip") as Control).visible=not compact_top
+		for id in kpi_chips:(kpi_chips[id].chip as Control).visible=true
+		for rule in kpi_separators:rule.visible=true
+		if compact_top:
+			_hide_kpi("population");_hide_kpi("water")
 		# Before writing, tools and gear are told in the People view, not the strip.
-		var goods_shown:=not compact_top and not EraWords.hearth()
-		(kpi_chips.get("goods",{}).get("chip") as Control).visible=goods_shown
+		if compact_top or EraWords.hearth():_hide_kpi("goods")
 		# Before writing, who ate today is told in the PEOPLE chip itself; a
 		# separate "bellies filled" count only repeated the head count.
-		var gdp_shown:=not EraWords.hearth()
-		(kpi_chips.get("gdp",{}).get("chip") as Control).visible=gdp_shown
-		if kpi_separators.size()>=6:
-			kpi_separators[0].visible=not compact_top
-			kpi_separators[1].visible=not compact_top
-			kpi_separators[2].visible=goods_shown
-			kpi_separators[5].visible=gdp_shown
+		if EraWords.hearth():_hide_kpi("gdp")
+		# Never over the clock and the pace buttons: the strip starts after the
+		# time pill. When a later age's chips do not fit in what is left, the
+		# least urgent go first (KPI_SHED_ORDER); food, lives and the day's
+		# labour always stay.
+		var left:=Tokens.DOCK_X
+		if time_pill and time_pill.visible:left=time_pill.position.x+time_pill.get_combined_minimum_size().x+12.0
+		var room:=view.x-Tokens.EDGE_MARGIN-left
+		for id in KPI_SHED_ORDER:
+			if kpi_strip.get_combined_minimum_size().x<=room:break
+			_hide_kpi(String(id))
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(Tokens.DOCK_X,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),1)
+		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),1)
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
@@ -674,6 +679,10 @@ const KPI_DEFS:Array[Dictionary]=[
 	{"id":"gdp","label":"REAL GDP / DAY","width":136.0,"accent":Tokens.BLUE,"section":"economy","sub":2},
 ]
 
+## Which status chips give way first when the top bar is too narrow for them
+## all (after the age's own rules in _layout).
+const KPI_SHED_ORDER:=["goods","water","population","science"]
+
 const KPI_GUTTER:=10.0
 ## Caption, value and its note stack in three short lines inside the 56 px top
 ## frame, so a value never shares its line with (or is cut off by) a note.
@@ -760,6 +769,18 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),KPI_HEIGHT)
 
 ## Stable widths per era: the people's words are longer than the acronyms.
+## Hides one status chip and the rule beside it: the rule before it, or, for
+## the first chip, the rule after it.
+func _hide_kpi(id:String)->void:
+	var parts:Dictionary=kpi_chips.get(id,{})
+	if parts.is_empty():return
+	(parts.chip as Control).visible=false
+	for index in KPI_DEFS.size():
+		if String(KPI_DEFS[index].id)!=id:continue
+		var rule:=maxi(0,index-1)
+		if rule<kpi_separators.size():kpi_separators[rule].visible=false
+		return
+
 func _kpi_width(id:String,base:float)->float:
 	if EraWords.reckoned():return base
 	# Value and note each have a full line: widths fit "1,240 souls",

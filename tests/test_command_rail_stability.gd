@@ -23,6 +23,35 @@ func test_food_shortage_copy_cannot_resize_or_drop_the_kpi_strip()->void:
 	assert_float(hud.kpi_strip.position.y).is_equal(positive_y)
 	assert_float(hud.kpi_strip.get_combined_minimum_size().x).is_less_equal(800.0)
 
+func test_a_later_age_strip_never_covers_the_clock()->void:
+	# A later age shows every chip (goods and the day's labour too). The canvas
+	# is the window divided by the UI scale (display_preferences.logical_size):
+	# a 1600x900 window at the default 1.25 lays out at 1280x720, and 1138x640
+	# is the smallest. There the least urgent chips give way; food, lives and
+	# the day's labour stay; a wide canvas shows them all again.
+	var known:Array[String]=GameState.known_discoveries.duplicate()
+	GameState.known_discoveries.append("printing_process")
+	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1280,720);add_child(canvas)
+	var hud:Control=auto_free(BareHud.new());canvas.add_child(hud)
+	hud._build_time_pill();hud._build_kpi_strip()
+	hud.time_text.text="[b]Year 13 · Summer[/b] · Hot →"
+	for size in [Vector2i(1280,720),Vector2i(1138,640)]:
+		canvas.size=size
+		for i in 3:await get_tree().process_frame
+		hud._layout()
+		for i in 2:await get_tree().process_frame
+		var clock_end:float=hud.time_pill.position.x+hud.time_pill.get_combined_minimum_size().x
+		assert_float(hud.kpi_strip.position.x).override_failure_message("strip over the clock at %s" % str(size)).is_greater_equal(clock_end+12.0)
+		assert_float(hud.kpi_strip.position.x+hud.kpi_strip.get_combined_minimum_size().x).override_failure_message("strip off the edge at %s" % str(size)).is_less_equal(float(size.x))
+		for id in ["food","health","gdp"]:
+			assert_bool((hud.kpi_chips[id].chip as Control).visible).override_failure_message("%s must stay at %s" % [id,str(size)]).is_true()
+	canvas.size=Vector2i(2400,1000)
+	for i in 2:await get_tree().process_frame
+	hud._layout()
+	for id in hud.kpi_chips:
+		assert_bool((hud.kpi_chips[id].chip as Control).visible).override_failure_message(String(id)+" hidden at 2400").is_true()
+	GameState.known_discoveries.clear();GameState.known_discoveries.append_array(known)
+
 class RailBare extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:
 		_build_rail()
