@@ -39,9 +39,10 @@ varying float trunk_flow;
 varying float scale_role;
 
 float stroke_scale(float downstream, float trunk) {
-	// The trunk swells from a firm line in its upper reaches to a broad lower
-	// river; a tributary gathers from a thread at its spring to its join.
-	return trunk>0.5 ? mix(0.80,1.65,pow(downstream,0.8)) : mix(0.50,0.95,downstream);
+	// A chart's river is a tapered ink line: a hairline at its spring that
+	// swells as it gathers water down to a broad lower river; a tributary
+	// gathers from a thread at its spring to its join.
+	return trunk>0.5 ? mix(0.28,1.65,pow(downstream,0.65)) : mix(0.30,0.95,pow(downstream,0.8));
 }
 
 void vertex(){
@@ -132,8 +133,8 @@ void fragment(){
 	if(river_water){
 		// A firm blue-slate line; broad reaches open into two inked banks
 		// around a pale water fill, as an engraver draws a lower river.
-		// Linear colour: ink #2B4A57, fill #6F929A.
-		vec3 ink=vec3(0.024,0.069,0.095);
+		// Linear colour: ink #325363, fill #6F929A.
+		vec3 ink=vec3(0.032,0.087,0.125);
 		vec3 fill=vec3(0.159,0.288,0.323);
 		float opened=smoothstep(2.0,2.9,ink_half_px);
 		float bank_line=1.0-smoothstep(0.75,1.45,ink_edge_px);
@@ -144,7 +145,9 @@ void fragment(){
 		// the larger rivers a fine water-line running parallel to the bank.
 		float beyond=max(from_centre_px-ink_half_px,0.0);
 		float tint_reach=max(chart_tint_px,0.001);
-		float tint=(1.0-smoothstep(0.0,tint_reach,beyond))*0.34;
+		// A pale wash of water either side, as a colourist lays a river on a
+		// chart, fading into the land.
+		float tint=(1.0-smoothstep(0.0,tint_reach,beyond))*0.50;
 		float line_offset=2.1+ink_half_px*0.15;
 		float water_line=(1.0-smoothstep(0.30,0.85,abs(beyond-line_offset)))*smoothstep(0.35,0.70,max(trunk_flow,ink_half_px/3.4))*0.50;
 		// Linear colour: tint #6F939B, water-line #3E5F6B.

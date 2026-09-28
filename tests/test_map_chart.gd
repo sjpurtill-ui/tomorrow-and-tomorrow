@@ -160,7 +160,9 @@ func test_patch_heights_reach_the_chart_with_box_filtered_levels()->void:
 	var heights:=PackedFloat32Array()
 	for z in size:
 		for x in size:heights.append(0.2+0.1*sin(float(x)*0.4)+0.05*cos(float(z)*0.3))
-	terrain._install_regional_patch({"mesh":ArrayMesh.new(),"center":Vector2.ZERO,"span":8.0,"resolution":size,"heights":heights})
+	var cover:=PackedByteArray()
+	for index in size*size:cover.append_array(PackedByteArray([128,160,200,255 if heights[index]>0.2 else 0]))
+	terrain._install_regional_patch({"mesh":ArrayMesh.new(),"center":Vector2.ZERO,"span":8.0,"resolution":size,"heights":heights,"cover":cover})
 	assert_object(terrain.chart_relief_texture).is_not_null()
 	var relief:Image=terrain.chart_relief_texture.get_image()
 	assert_bool(relief.has_mipmaps()).is_true()
@@ -168,3 +170,29 @@ func test_patch_heights_reach_the_chart_with_box_filtered_levels()->void:
 	assert_bool(terrain.river_terrain_height_texture.get_image().has_mipmaps()).is_false()
 	var material:=terrain.regional_terrain_patch.material_override as ShaderMaterial
 	assert_object(material.get_shader_parameter("chart_relief")).is_same(terrain.chart_relief_texture)
+	# The land cover and shore mask go the same way (woods, marsh, water-lines).
+	var covered:Image=terrain.chart_cover_texture.get_image()
+	assert_bool(covered.has_mipmaps()).is_true()
+	assert_int(covered.get_width()).is_equal(size)
+	assert_object(material.get_shader_parameter("chart_cover")).is_same(terrain.chart_cover_texture)
+	# A patch built without a cover (an old cache, a probe) binds none.
+	terrain._install_regional_patch({"mesh":ArrayMesh.new(),"center":Vector2.ZERO,"span":8.0,"resolution":size,"heights":heights})
+	assert_object(terrain.chart_cover_texture).is_null()
+
+
+func test_water_is_drawn_like_a_chart()->void:
+	# The sea draws the coast's ink with the land from one shore, three
+	# water-lines and a light stipple; rivers taper from a hairline at the
+	# spring and stay on the map out to the continent view.
+	var sea:=_text("res://scripts/coastal_water.gdshader")
+	for call in ["mc_shore_px(","mc_waterlines(","mc_coast_ink(","mc_cover("]:
+		assert_bool(sea.contains(call)).override_failure_message("sea lacks %s" % call).is_true()
+	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
+	assert_bool(ground.contains("mc_shore_px(") and ground.contains("mc_coast_ink(")).is_true()
+	var river:=_text("res://scripts/map_river.gdshader")
+	assert_bool(river.contains("mix(0.28,1.65")).override_failure_message("river no longer tapers from its spring").is_true()
+	var terrain:=_text("res://scripts/local_terrain.gd")
+	assert_bool(terrain.contains("river_overlay.visible=camera.size<=4000.0")).is_true()
+	# The continent view (a 3,000 km wide window) keeps its rivers at any aspect.
+	for aspect in [4.0/3.0,16.0/9.0,21.0/9.0]:
+		assert_float(3000.0/aspect).is_less_equal(4000.0)

@@ -8,6 +8,9 @@ var vertices:=PackedVector3Array()
 var heights:=PackedFloat32Array()
 var normals:=PackedVector3Array()
 var colors:=PackedColorArray()
+## The land cover the chart reads (map_chart.gdshaderinc), four bytes a vertex
+## in grid order: woodland, rainfall, warmth, land (255) or water (0).
+var cover:=PackedByteArray()
 var indices:=PackedInt32Array()
 var cursor:=0
 var phase:=0
@@ -52,6 +55,7 @@ func _init(grid_resolution:int,patch_span:float,patch_center:Vector2,height_fn:C
 	season_sampler=season_fn
 	heights.resize(resolution*resolution)
 	vertices.resize(resolution*resolution); normals.resize(vertices.size()); colors.resize(vertices.size())
+	cover.resize(vertices.size()*4)
 	indices.resize((resolution-1)*(resolution-1)*6)
 	if sample_surface.is_valid():
 		climate_uv.resize(vertices.size());geology_uv.resize(vertices.size())
@@ -173,6 +177,12 @@ func advance(budget_usec:int=2500)->bool:
 			var dx:=(vertices[z_index*resolution+right].y-vertices[z_index*resolution+left].y)/(float(right-left)*spacing)
 			var dz:=(vertices[down*resolution+x_index].y-vertices[up*resolution+x_index].y)/(float(down-up)*spacing)
 			normals[cursor]=Vector3(-dx,1.0,-dz).normalized()
+			var byte:=cursor*4
+			cover[byte]=clampi(roundi(colors[cursor].a*255.0),0,255)
+			if not climate_uv.is_empty():
+				cover[byte+1]=clampi(roundi((climate_uv[cursor].x-1.0)*255.0),0,255)
+				cover[byte+2]=clampi(roundi(climate_uv[cursor].y*255.0),0,255)
+			cover[byte+3]=255 if vertices[cursor].y>0.0 else 0
 			if x_index<resolution-1 and z_index<resolution-1:
 				var a:=cursor; var b:=a+1; var d:=a+resolution; var c:=d+1
 				var offset:=(z_index*(resolution-1)+x_index)*6
