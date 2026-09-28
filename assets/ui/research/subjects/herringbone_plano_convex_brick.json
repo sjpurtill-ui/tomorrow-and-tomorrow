@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png",
   "sha256": "a473bf3374e7e6993e2c19ee5a5cec75a928ab499c5db06a4ba7417ffbb6d3e6",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator GPU card review to retain faces and the essential subject.",
+  "focus": [
+    0.5,
+    0.6
+  ]
 }
