@@ -1,0 +1,12 @@
+{
+  "id": "castor_oil_remedies",
+  "line": "health",
+  "game_year": 182,
+  "approx_historical_year": -3787,
+  "prompt": "c. 3787 BCE: Watercolor caregiver rubs castor oil from a plain bowl onto another adult's arm, with castor plant and seeds; no machinery. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-053abd8f-7123-43c9-b1e2-f0acfeb77c36.png",
+  "asset": "res://assets/ui/research/subjects/castor_oil_remedies-v1.png",
+  "sha256": "82f1b093b5a41da5eead09714405c3cea11a0d59187659f1df49c313eb3be59a",
+  "mode": "built-in image_gen / new image",
+  "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review."
+}

@@ -41,3 +41,23 @@ func test_close_ridge_shading_is_smoothed_without_flattening_geometry()->void:
 		assert_float(builder.vertices[row+index].y).is_equal_approx(-absf(builder.vertices[row+index].x)*0.2+0.0006,0.000001)
 	assert_float(builder.normals[row+8].x).is_less(-0.15)
 	assert_float(builder.normals[row+56].x).is_greater(0.15)
+
+
+func test_cover_records_woodland_climate_and_the_shore_in_grid_order()->void:
+	# The chart reads the patch's land cover from four bytes a vertex: woodland,
+	# rainfall, warmth and land (255) or water (0) (map_chart.gdshaderinc).
+	var height:=func(x:float,_z:float)->float: return x*0.5
+	var tint:=func(x:float,_z:float,_h:float)->Color: return Color(0.2,0.4,0.1,clampf(0.5+x*0.1,0.0,1.0))
+	var surface:=func(x:float,_z:float,_h:float)->Vector4: return Vector4(1.25,0.75,0.3,0.2)
+	var builder:=BUILDER.new(9,4.0,Vector2.ZERO,height,tint,surface)
+	while not builder.advance(1000): pass
+	assert_int(builder.cover.size()).is_equal(9*9*4)
+	for index in 9*9:
+		var land:=builder.vertices[index].y>0.0
+		assert_int(builder.cover[index*4+3]).is_equal(255 if land else 0)
+		assert_int(builder.cover[index*4]).is_equal(clampi(roundi(builder.colors[index].a*255.0),0,255))
+		assert_int(builder.cover[index*4+1]).is_equal(roundi(0.25*255.0))
+		assert_int(builder.cover[index*4+2]).is_equal(roundi(0.75*255.0))
+	# Grid order: x runs fastest, so the west column is water and the east land.
+	assert_int(builder.cover[3]).is_equal(0)
+	assert_int(builder.cover[8*4+3]).is_equal(255)

@@ -1,0 +1,12 @@
+{
+  "id": "sealed_store_doors",
+  "line": "logistics",
+  "game_year": 190,
+  "approx_historical_year": -3733,
+  "prompt": "c. 3733 BCE: A storekeeper seals a timber storeroom door beside baskets of grain; panoramic travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1348023e-1a22-4e16-8c9f-077e5211198a.png",
+  "asset": "res://assets/ui/research/subjects/sealed_store_doors-v1.png",
+  "sha256": "55f002512fefb3d79abe3f410aa09dc715a8304ce6d8346072f245fd0e072568",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "hereditary_chiefly_rank",
+  "line": "institutions",
+  "game_year": 190,
+  "approx_historical_year": -3733,
+  "prompt": "c. 3733 BCE: An elder passes the leadership staff to an adult heir before the settlement; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b6daee73-bcd5-4417-a657-5572ba312e21.png",
+  "asset": "res://assets/ui/research/subjects/hereditary_chiefly_rank-v1.png",
+  "sha256": "783d7c27f7348bbed4893161db5184afdde3a74e02337e95575b60dfd0a1c696",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
