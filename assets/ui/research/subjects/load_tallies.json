@@ -1,0 +1,12 @@
+{
+  "id": "load_tallies",
+  "line": "labor",
+  "game_year": 165,
+  "approx_historical_year": -3900,
+  "prompt": "c. 3900 BCE: Workers count arriving grain loads with physical wooden tally sticks; charcoal over ochre wash. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-973dc1f7-7dad-42bc-b092-3f626c38d9aa.png",
+  "asset": "res://assets/ui/research/subjects/load_tallies-v1.png",
+  "sha256": "6ac759254b13c74b6c48908ae9299732104d56114d3d9989be10226c5d834f1e",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

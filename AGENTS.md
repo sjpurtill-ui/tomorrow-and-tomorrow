@@ -20,12 +20,17 @@ Shared integration hotspots are `project.godot`, `local_terrain.gd`, `game_state
 
 The user authorizes normal pushes of completed task work to this project's existing private GitHub repository. Do not wait for another request to push each completed batch. Respect an explicit request to keep a particular change local.
 
+- The canonical checkout's `main` must never run ahead of or behind `origin/main`. Integrate in a worktree, merge both `origin/main` and the canonical `main` into it, push that commit to `origin/main` first, verify it with `git ls-remote`, and only then fast-forward the canonical checkout. Never commit to, merge into, or fast-forward the canonical `main` to a commit that is not already on `origin/main`. If the push is rejected because `origin/main` moved, merge again in the worktree and push; do not leave the canonical checkout ahead.
 - Before work, fetch origin and inspect the current branch, upstream, and ahead/behind counts. Resolve existing unpushed task commits before accumulating another backlog. Preserve unrelated changes and coordinate divergent history; never force-push shared branches or reset work to make synchronization easy.
 - Commit intentional task files at each coherent, validated checkpoint and push that checkpoint promptly. Workers push their own `codex/<task>` branch before handoff; only the designated integrator integrates and pushes `main`. Pushing a worker branch does not deliver the change to the player branch.
 - After every integration, the integrator must push `main` before reporting delivery or moving to the next batch. Local commits alone are not a backup, synchronization, or delivery to another device.
 - Verify successful delivery with a fresh remote query: `git ls-remote origin refs/heads/<branch>` must match the intended local commit. Fetch afterward and check ahead/behind counts; a synchronized branch has zero on both sides. A push attempt or stale `origin/main` is not verification.
 - Before ending a task, check for uncommitted task files and unpushed task commits. Report the pushed branch and verified commit. Explicitly identify anything still local, unfinished, or excluded; never say “everything is pushed” without checking the requested scope.
 - If authentication, networking, remote divergence, or asset size blocks a push, report it immediately with the local commit and affected branch. Preserve the work and resolve the blocker; do not silently continue building a backlog or imply another device has the work. Never publish credentials, saves, generated caches, or unrelated files to satisfy this rule.
+
+## Adjudication pillar
+
+Read docs/ADJUDICATION.md before any court, order, consequence or occupation work. The engine adjudicates from one consistent ledger with stated odds and seeded rolls; the AI only narrates the facts it is given. Nothing may contradict the state, and officials answer from exact fact sheets.
 
 ## General-led campaign direction
 

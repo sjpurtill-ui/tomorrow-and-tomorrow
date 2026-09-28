@@ -1,0 +1,12 @@
+{
+  "id": "hearth_hazard_proofing",
+  "line": "demography",
+  "game_year": 148,
+  "approx_historical_year": -4013,
+  "prompt": "c. 4013 BCE: Adults ring hearth with stones and move dry reeds away; chalk pastel cut-paper collage. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-66a082b8-ff18-4812-8ca5-98895b35f69e.png",
+  "asset": "res://assets/ui/research/subjects/hearth_hazard_proofing-v1.png",
+  "sha256": "517434852b68ecfc643c3fa286edd2221413fb0d0ff69ff54e66a3b086522ab4",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

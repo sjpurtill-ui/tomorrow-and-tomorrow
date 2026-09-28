@@ -7,6 +7,7 @@ const P:=preload("res://scripts/hud/paper_sheet.gd")
 const Store:=preload("res://scripts/ai_connection_store.gd")
 var key:LineEdit
 var model:LineEdit
+var reader_model:LineEdit
 var endpoint:LineEdit
 var status:Label
 var card:PanelContainer
@@ -52,6 +53,8 @@ func _ready()->void:
 	advanced.add_child(remember)
 	model=_field(advanced,"Model",OS.get_environment("LEVIATHAN_AI_MODEL"))
 	if model.text.is_empty():model.text=PronouncementInterpreter.DEFAULT_API_MODEL
+	reader_model=_field(advanced,"Model that reads your orders (blank: same as above)",preload("res://scripts/ai_mode.gd").reader_model());reader_model.name="ReaderModel"
+	reader_model.placeholder_text=model.text
 	endpoint=_field(advanced,"Service address",OS.get_environment("LEVIATHAN_AI_ENDPOINT"))
 	if endpoint.text.is_empty():endpoint.text="https://api.openai.com/v1/chat/completions"
 	var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",8);advanced.add_child(actions)
@@ -84,6 +87,7 @@ func _fit()->void:
 	card.size=Vector2(minf(600,extent.x-40),0);card.position=(extent-card.size)*.5
 func _apply()->void:
 	var result:=PronouncementInterpreter.configure_connection(key.text,model.text,endpoint.text,remember.button_pressed)
+	if not result.has("error"):preload("res://scripts/ai_mode.gd").set_reader_model(reader_model.text)
 	if not result.has("error"):key.clear()
 	_show_status(String(result.get("error",result.get("message",""))));_fit.call_deferred()
 func _unhandled_input(event:InputEvent)->void:

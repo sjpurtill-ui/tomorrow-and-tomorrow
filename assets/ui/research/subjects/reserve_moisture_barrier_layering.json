@@ -1,0 +1,12 @@
+{
+  "id": "reserve_moisture_barrier_layering",
+  "line": "nutrition",
+  "game_year": 150,
+  "approx_historical_year": -4000,
+  "prompt": "c. 4000 BCE: Storekeepers layer dry straw and reed mats beneath grain baskets; opaque botanical egg tempera. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d368b015-546e-4a96-9fed-aaa2895258c6.png",
+  "asset": "res://assets/ui/research/subjects/reserve_moisture_barrier_layering-v1.png",
+  "sha256": "2b7e956eb3dffcb9e3c6c958eb1dcd6202d48e039a66f4a50137b5025203de8c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

@@ -34,6 +34,7 @@ const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const TownFateWords:=preload("res://scripts/town_fate.gd")
+const Measures:=preload("res://scripts/occupation_measures.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -61,7 +62,7 @@ const LIVE_CONFIDENCE:=0.6
 ## "the villagers", "them all". Harm ordered on them is a war order about a
 ## town (court_war_orders.group_harm_reading), never a punishment of anyone
 ## in the hall.
-const GROUP_OBJECT_PATTERN:="(?i)\\b(males?|men|menfolk|boys|grown men|fighting men|every (man|male|boy|soul|last one|one of (them|its|their) \\w+)|females?|women|womenfolk|girls|children|everyone|everybody|all of them|them all|villagers|townsfolk|townspeople|inhabitants|residents|population|its people|their people|the people|whole (town|village|people|tribe)|all (the|of|those|these|who|that|its|their))\\b|\\ball\\s*[!.]*$"
+const GROUP_OBJECT_PATTERN:="(?i)\\b(males?|men|menfolk|boys|grown men|fighting men|every (man|male|boy|soul|last one|one of (them|its|their) \\w+)|females?|women|womenfolk|girls|children|everyone|everybody|all of them|them all|villagers|townsfolk|townspeople|inhabitants|residents|population|its people|their people|the people|whole (town|village|people|tribe)|all (the|of|those|these|who|that|its|their)|ringleaders?|troublemakers?|agitators?|instigators?|rebels|anyone who|anybody who|whoever|any who|those who)\\b|\\ball\\s*[!.]*$"
 ## Words that name one person as the object: only these let harm fall on
 ## someone in the hall ("them" and "they" never do on their own).
 const PERSON_PRONOUNS:=["himself","herself","yourself","him","her","you","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
@@ -331,6 +332,9 @@ static func resolve_ref(ref:String,audience:Dictionary,list:Array[Dictionary],ac
 	## A live classifier's reference ("Ansel", "him", "the war leader").
 	var clean:=ref.strip_edges()
 	if clean=="": return {}
+	# An exact roster key (the order reader's ids): that entry, nobody else.
+	var keyed:=_entry(list,clean)
+	if not keyed.is_empty(): return keyed
 	var lower:=clean.to_lower()
 	if "before me" in lower or "in front of me" in lower or "before you" in lower:
 		var speaker:=_speaker_entry(list)
@@ -408,9 +412,18 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if not decree.is_empty(): return decree
 	var list:=roster(audience)
 	var cls:=classify(clean)
+	# The order reader (order_reader.gd) resolved a war or a town's fate to
+	# ids we supplied: the engine carries that reading. Never a person.
+	var forced:Dictionary=context.get("war_reading",{}) if context.get("war_reading") is Dictionary else {}
+	if not forced.is_empty():
+		cls.act="command"; cls.verb="war"; cls["war"]=forced
+		return _perform(id,audience,list,"war",_speaker_entry(list),{},clean,cls,bool(forced.get("insist",false)),context)
+	# The reader heard "yes, go ahead" to an objection or a hesitation.
+	if bool(context.get("insist",false)): cls.act="command"; cls.insist=true
 	var live:Dictionary=context.get("live",{}) if context.get("live") is Dictionary else {}
 	var from_live:=false
-	if not live.is_empty() and (String(cls.act) in ["statement","question"] or String(cls.verb) in ["none","order"]):
+	var reader:=bool(context.get("reader",false))
+	if not live.is_empty() and (reader or String(cls.act) in ["statement","question"] or String(cls.verb) in ["none","order"]):
 		var lact:=String(live.get("act",""))
 		var lverb:=String(live.get("verb","none"))
 		if lact=="command" and lverb in VERBS and float(live.get("confidence",0.0))>=LIVE_CONFIDENCE and live_verb_allowed(lverb,clean):
@@ -445,7 +458,7 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		var named_place:=(war_reading.get("target",{}) as Dictionary).has("city_id") or (war_reading.get("target",{}) as Dictionary).has("unknown")
 		# What becomes of a people in our hands is never a court punishment
 		# ("kill all the males" is not "kill him") nor a vague directive.
-		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town","pursue","let_go","keep","abandon"] or bool(war_reading.get("answer",false))
+		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town","pursue","let_go","keep","abandon","measure","town_word","measure_drop"] or bool(war_reading.get("answer",false))
 		if not war_reading.is_empty() and String(cls.act)!="question" and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
 			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
@@ -514,6 +527,11 @@ static func _which_town_answer(audience:Dictionary,clean:String)->Dictionary:
 	for town:Dictionary in WarOrders.held_towns():
 		if WarOrders._name_hit(lower,String(town.name)):
 			var said:=String(pending.get("text",""))
+			# The order was about what the garrison does with its people.
+			var measures:=Measures.read(said)
+			if not measures.is_empty():
+				var on_town:=WarOrders._measure_reading(said,String(Measures.conditions(said.to_lower()).main),town,measures,false)
+				if not on_town.is_empty(): return on_town
 			var fate:=preload("res://scripts/town_fate.gd").fate_words(said.to_lower())
 			if fate.is_empty() and pending.get("fate") is Dictionary: fate=(pending.fate as Dictionary).duplicate()
 			if fate.is_empty(): return {}
@@ -628,7 +646,7 @@ static func _confirmed_war(id:String,audience:Dictionary,list:Array[Dictionary],
 	## there is no such question open or these words are not a yes.
 	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	if not bool(pending.get("confirm",false)) or Hall._day()-int(pending.get("day",-99))>PENDING_DAYS: return {}
-	if _re(CONFIRM_PATTERN).search(clean)==null and _re(INSIST_PATTERN).search(clean)==null: return {}
+	if not bool(context.get("confirm",false)) and _re(CONFIRM_PATTERN).search(clean)==null and _re(INSIST_PATTERN).search(clean)==null: return {}
 	var march:=WarOrders.read(String(pending.get("text","")),String(audience.get("civ_id","")),id)
 	if march.is_empty(): return {}
 	var cls:=classify(clean)
@@ -724,6 +742,47 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 		if people!="":
 			cls=cls.duplicate(); cls.merge(_people_route(said,cls,audience,live,people),true)
 			verb=String(cls.verb); target={} if verb=="war" else actor
+	if verb in ["kill","maim"]:
+		# "Whoever resists, kill him", "if he lies again, kill him": harm only on
+		# a condition is a standing word to a garrison, or a threat to the one
+		# named; nobody dies now.
+		var said:=String(cls.get("text",text))
+		var cond:=Measures.conditions(said.to_lower())
+		if String(cond.clause)!="" and not is_harm(String(cond.main)):
+			var reading:=WarOrders.read(said,String(audience.get("civ_id","")),id)
+			if reading.is_empty(): reading=WarOrders.conditional_reading(said,id)
+			# "If he lies again": one person, threatened. "Whoever resists": nobody here.
+			var one:=_re("(?i)\\b(if|should|whenever|when) (he|she|you)\\b").search(String(cond.clause))!=null
+			if not reading.is_empty():
+				cls=cls.duplicate(); cls["verb"]="war"; cls["war"]=reading; verb="war"; target={}
+			elif one and not target.is_empty() and String(target.get("kind",""))!="god":
+				cls=cls.duplicate(); cls["verb"]="terrify"; verb="terrify"; actor={}
+			else:
+				return _fallback(id,_result(verb,actor,{},text,insist),"Nobody here was named.")
+	if verb in ["kill","maim"] and String(audience.get("origin",""))=="court":
+		# "Kill them" with nobody named: never anyone in the hall. About a town
+		# we hold it is the war leader's question; otherwise the court waits
+		# to be told who is meant.
+		var said:=String(cls.get("text",text))
+		var object:=_harm_object(said,cls)
+		if not _clear_person(object,list) and _re("(?i)\\b(them|those|these|they)\\b").search(object)!=null:
+			var reading:=WarOrders.read(said,String(audience.get("civ_id","")),id)
+			if reading.is_empty(): reading=WarOrders.pronoun_harm_reading(said,id)
+			if not reading.is_empty():
+				cls=cls.duplicate(); cls["verb"]="war"; cls["war"]=reading; verb="war"; target={}
+			else:
+				return _fallback(id,_result(verb,actor,{},text,insist),"Nobody here was named.")
+	if verb in ["detain","exile"]:
+		# Binding or driving out a people ("lock up all the men", "detain the
+		# villagers") is what a garrison does to a town, or the council's
+		# business at home: never a hand laid on anyone in the hall.
+		var said:=String(cls.get("text",text))
+		var object:=_harm_object(said,cls)
+		if not _clear_person(object,list) and _re(GROUP_OBJECT_PATTERN).search(object)!=null:
+			var reading:=WarOrders.read(said,String(audience.get("civ_id","")),id)
+			cls=cls.duplicate()
+			if not reading.is_empty(): cls["verb"]="war"; cls["war"]=reading; verb="war"; target={}
+			else: cls["verb"]="order"; verb="order"; target=actor
 	# A war order falls on a town or an army, never on a person in the hall.
 	if verb=="war": target={}
 	var r:=_result(verb,actor,target,text,insist)
@@ -1191,7 +1250,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	if carrier.is_empty(): carrier=actor if not actor.is_empty() else _speaker_entry(list)
 	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
 	r.verb="war"
-	var decision:=WarOrders.perform(reading,insist,{"general":general})
+	var decision:=WarOrders.perform(reading,insist,{"general":general,"army_id":int(reading.get("army_id",0)),"audience_id":id})
 	r["war"]=decision
 	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
 	r["actor_says"]=String(decision.get("says",""))
@@ -1235,6 +1294,12 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			# An attack on a town we already hold: the plain truth, no march.
 			r.stage="war_held"; r.executed=false; r.reaction="neutral"
 			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
+		"noted":
+			# The god let the war leader's question drop: nothing more is done.
+			r.stage="war_fate"; r.executed=false; r.reaction="neutral"
+			r.obedience={"id":"obey","manner":"plain","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
 			audience.erase("pending_command")
 		_:
@@ -1511,6 +1576,8 @@ static func decided_words(result:Dictionary)->String:
 		if verdict=="act": parts.append("The army HAS set out; say so plainly with the place and the days on the road.")
 		elif verdict=="fate": parts.append("The god's word about the town we hold HAS been carried out; tell it soberly, keeping every number, with no gore.")
 		elif verdict=="held": parts.append("The town is ALREADY OURS; nobody marches against it. Say who holds it and ask what is to become of it.")
+		elif verdict=="noted": parts.append("The god let it drop: nothing more is done to the town's people. Say so plainly.")
+		elif verdict=="ask": parts.append("NOTHING has been done yet; the war leader asks the god ONE question, with the choices exactly as given. Ask it once, plainly.")
 		elif verdict=="object": parts.append("%s OBJECTS: nothing has marched. They explain why and what would fix it; if the god insists they will go." % actor)
 		else: parts.append("It CANNOT be done as ordered: nothing has marched. Say plainly why and what would change that. Never promise to go.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))

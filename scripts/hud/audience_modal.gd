@@ -29,6 +29,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const OrderReader:=preload("res://scripts/order_reader.gd")
 const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
@@ -621,7 +622,7 @@ func _build_options()->void:
 	_build_divine_row()
 	_build_persons_row()
 
-const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"]]
+const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
 
 func _persons_live()->bool:
 	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
@@ -932,7 +933,8 @@ func _speak()->void:
 		# An aim in the god's own words (online), or one of those proposed.
 		if named.is_empty():named=String(preload("res://scripts/legacy_aims.gd").typed_choice(audience_id,text,_voice_ok() and voice.has_method("is_live") and bool(voice.is_live())))
 		# An order for the war leader in the god's own words ("hold the ford").
-		if named.is_empty():named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
+		# (Not when it is about the people of a town we hold: "take their food".)
+		if named.is_empty() and not _about_held_town(text):named=String(load("res://scripts/war_loop.gd").typed_choice(audience_id,text))
 		# A crisis in the god's own words ("Keep the sick apart").
 		if named.is_empty():named=String(preload("res://scripts/crisis_system.gd").typed_choice(audience_id,text))
 		# The town's upkeep in the god's own words ("put more people on the roofs").
@@ -958,7 +960,7 @@ func _speak()->void:
 	# Words about people, with a live voice: one call maps them onto the
 	# persons engine's actions (ask, summon, question, accuse, judge).
 	var typed:=Persons.typed_action(text) if resolved_result.is_empty() and String(Hall.find(audience_id).get("origin",""))=="court" else {}
-	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id):
+	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id) and not _about_held_town(text):
 		var about_people:=not Persons.speaker_known(audience_id).is_empty() or not typed.is_empty()
 		if not about_people:
 			var re:=RegEx.new();re.compile(PERSONS_WORDS)
@@ -973,6 +975,60 @@ func _speak()->void:
 	if not typed.is_empty() and not _persons_live():
 		_after_persons(Persons.perform(audience_id,String(typed.action),typed.params as Dictionary,{"echo":text}))
 		return
+	# With a live model, one short call first reads what the words MEAN
+	# (order_reader.gd): the engine acts on that reading, the court asks when
+	# a grave order is unclear, and the voice then speaks to what happened.
+	# Any failure or timeout falls back to the offline reading below.
+	if resolved_result.is_empty() and _voice_ok() and voice.has_method("read_order") and bool(voice.is_live()) and not voice.busy(audience_id):
+		var id:=audience_id
+		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+		if bool(voice.read_order(audience_id,text,func(read:Dictionary)->void:_after_order_reading(id,text,read))):
+			_pump()
+			_refresh_footer()
+			return
+		_unecho(text)
+	_speak_rest(text)
+
+## Words about what becomes of a town we hold or its people: the war
+## leader's business, never a persons inquiry or a war-matter card.
+func _about_held_town(text:String)->bool:
+	var kind:=String(WarOrders.read(text,String(Hall.find(audience_id).get("civ_id","")),audience_id).get("kind",""))
+	return kind in ["measure","town_word","fate","which_town","measure_drop"]
+
+## The order reader answered (or failed): act on its plan.
+func _after_order_reading(id:String,text:String,read:Dictionary)->void:
+	if is_queued_for_deletion() or id!=audience_id or not resolved_result.is_empty():return
+	var plan:Dictionary={}
+	if read.has("reading"):plan=OrderReader.decide(id,text,read.reading as Dictionary)
+	else:plan=OrderReader.offline_confirm(id,text)
+	if plan.is_empty():plan={"route":"legacy"}
+	var route:=String(plan.get("route","legacy"))
+	if route=="speak" and not civic_settlement.is_empty() and not text.ends_with("?"):route="legacy"
+	match route:
+		"engine","clarify":
+			var done:=OrderReader.carry_out(id,text,plan,{"terrain":terrain,"civic_settlement":civic_settlement})
+			if String(done.get("route",""))=="clarify":
+				_pump();_refresh_footer();return
+			var heard:Dictionary=done.get("result",{})
+			if bool(heard.get("handled",false)):
+				_after_command(heard);return
+			# Read as an order, but the engine had nothing to do: the room answers.
+			if _voice_ok():voice.player_speaks(id,text,false,true)
+			_pump();return
+		"speak":
+			if bool(plan.get("clear_pending",false)):Hall.find(id).erase("reader_pending")
+			if _voice_ok():voice.player_speaks(id,text,false,true)
+			_pump();return
+	_unecho(text)
+	_speak_rest(text)
+
+## Takes back the ruler's line shown while the reader was working, so the
+## offline path (which shows it itself) does not show it twice.
+func _unecho(text:String)->void:
+	var lines:Array=Hall.find(audience_id).get("lines",[])
+	if not lines.is_empty() and String((lines[-1] as Dictionary).get("role",""))=="ruler" and String((lines[-1] as Dictionary).get("text",""))==text:lines.pop_back()
+
+func _speak_rest(text:String)->void:
 	# The god's word is law: an order (to the one before you, to anyone at
 	# court, or to the guards) is decided and carried out by the engine first;
 	# the court then reacts to what actually happened.

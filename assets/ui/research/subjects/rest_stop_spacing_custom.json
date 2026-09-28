@@ -1,0 +1,12 @@
+{
+  "id": "rest_stop_spacing_custom",
+  "line": "logistics",
+  "game_year": 155,
+  "approx_historical_year": -3967,
+  "prompt": "c. 3967 BCE: Traders rest at regularly spaced shade stops with pack donkeys; travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-41c13a85-9be8-4ce8-8a58-090a020351a3.png",
+  "asset": "res://assets/ui/research/subjects/rest_stop_spacing_custom-v1.png",
+  "sha256": "fa0c9f1b42e360b3610ef15ca4b38e874c436debff37738f584af108d4d422ee",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
