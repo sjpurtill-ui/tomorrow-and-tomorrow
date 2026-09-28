@@ -29,6 +29,7 @@ extends RefCounted
 const Record:=preload("res://scripts/battle_record.gd")
 const Account:=preload("res://scripts/battle_account.gd")
 const View:=preload("res://scripts/hud/battle_view.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Source:=preload("res://scripts/hud/battle_marker_source.gd")
 const OverlayScript:=preload("res://scripts/hud/war_front_overlay.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
@@ -838,6 +839,7 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	for pair in [["killed","killed"],["wounded","wounded"],["fled","fled"],["captured","captured"]]:
 		_check(int(left.get(pair[0],-1))==int(a.get(pair[1],0)),"record","%s: the battle view says %d of ours %s, the report %d" % [label,int(left.get(pair[0],-1)),String(pair[0]),int(a.get(pair[1],0))])
 	_check(int(right.get("captured",-1))==int((account.theirs as Dictionary).taken),"record","%s: the battle view says %d of theirs taken, the report %d" % [label,int(right.get("captured",-1)),int((account.theirs as Dictionary).taken)])
+	_check_panel_captives(id,int((account.theirs as Dictionary).taken),label)
 	var phases:Array=view.get("phases",[])
 	if not phases.is_empty() and not rounds.is_empty():
 		# The phases cover the fight from the first exchange to the last.
@@ -899,6 +901,29 @@ func _war_matters()->Array:
 		if war.is_empty(): continue
 		out.append({"matter":m,"audience":audience,"war":war,"text":String((audience.get("petition",{}) as Dictionary).get("summary",""))})
 	return out
+
+
+## The battle panel opened on the finished battle: the captives we took are
+## ours to count, so it says their number exactly, as the report does.
+func _check_panel_captives(id:String,taken:int,label:String)->void:
+	if taken<=0 or id=="" or not is_instance_valid(suite): return
+	var panel:Control=View.open(id,suite)
+	if not _check(panel!=null,"panel","%s cannot be opened in the battle panel once it is over" % label): return
+	var side:Node=panel.find_child("SideRight",true,false)
+	var grid:Node=side.find_child("Totals",true,false) if side!=null else null
+	var shown:=""
+	if grid!=null:
+		var cells:=grid.get_children()
+		for i in range(0,cells.size()-1,2):
+			if cells[i] is Label and (cells[i] as Label).text=="Taken" and cells[i+1] is Label: shown=(cells[i+1] as Label).text
+	elif side!=null:
+		# A skirmish's card: "... 12 taken."
+		var lost:=side.find_child("Lost",true,false) as Label
+		if lost!=null:
+			for part in lost.text.trim_suffix(".").split(", "):
+				if part.ends_with(" taken"): shown=part.trim_suffix(" taken")
+	View.close_open(suite)
+	_check(shown==EraWords.grouped(taken),"panel","%s: the battle panel says '%s' of theirs taken, the report %d" % [label,shown,taken])
 
 
 func _check_ranges(record:Dictionary,kind:String,label:String)->void:

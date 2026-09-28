@@ -632,6 +632,49 @@ func _run_blocked()->void:
 			rel["at_war"]=true; rel["treaty"]="war"
 			var quote:=MilitaryCampaign.city_operation_quote(b,civ2_id,city2_id)
 			_check(not quote.has("error"),"aftermath","with a siege at Tsaren, no other band can march on Varrow: %s" % String(quote.get("error","")))
+		"commanded_elsewhere":
+			# One band besieges Tsaren while raiders wait at home. A general
+			# leading his own band meets a Cedar League band in the field, and
+			# another general's band comes up before Varrow: both fight.
+			var a:=_army_at_town([{"unit":"levy","weapon":"spear","count":400}])
+			var begun:=MilitaryCampaign.start_offensive_siege(civ_id,city_id,a)
+			if not _check(not begun.has("error"),"setup","the siege did not begin: %s" % String(begun.get("error",""))): return
+			var rel:Dictionary=CivilizationSystem.civilizations[1].player_relation
+			rel["at_war"]=true; rel["treaty"]="war"
+			home_watch([{"unit":"levy","weapon":"spear","count":30}],30)
+			MilitaryCampaign._create_civilization_threat({"id":"raiders","source_civ_id":civ_id,"source_name":"Esurai","incident_kind":"raid","strength":40,"technology":0.2,"readiness":0.6},"defensive")
+			var raiders:=String(MilitaryCampaign.active_threat.get("id",""))
+			CivilizationSystem.civilizations[1]["military_population"]=4000.0
+			var land:RefCounted=MilitaryCampaign.command_hierarchy.land
+			var today:=int(GameState.elapsed_days)
+			var b:=our_army([{"unit":"spearman","weapon":"shield_spear","count":300}],{"at":Vector2(12.0,-4.0),"morale":0.9})
+			var index:=CivilizationSystem._foreign_formation_index("%s_patrol" % civ2_id)
+			if not _check(index>=0,"setup","the Cedar League has no band in the field"): return
+			var band:Dictionary=CivilizationSystem.foreign_formations[index]
+			var there:=home+Vector2(12.3,-4.0)
+			band["command_position"]={"x":there.x,"z":there.y}; band["disabled_until_day"]=0; band["kind"]="patrol"; band["strength_share"]=0.06
+			CivilizationSystem._process_local_observation(today,true)
+			var enemy:Dictionary={}
+			for e:Dictionary in land._known_enemies(today):
+				if String(e.id)==String(band.id): enemy=e
+			if not _check(not enemy.is_empty(),"setup","our band beside the Cedar League band does not see it"): return
+			var actual:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(b)]
+			var fought_before:=MilitaryCampaign.battle_history.size()
+			land._engage(actual,enemy,{"mission":"defeat"},[actual])
+			_check(MilitaryCampaign.command_hierarchy.battle.engaged(b) or MilitaryCampaign.battle_history.size()>fought_before,"aftermath","with a siege at Tsaren and raiders at home, the general's band will not fight the band beside it: %s" % String(actual.get("command_status","")))
+			if int(enemy.troops)<50: _fail("setup","the Cedar League band is only %d strong" % int(enemy.troops))
+			# The second general, before Varrow.
+			var c:=our_army([{"unit":"spearman","weapon":"shield_spear","count":300}],{"at":city2-home+Vector2(0.2,0.0),"morale":0.9})
+			var town:Dictionary=CivilizationSystem.city_intelligence.known("player",city2_id)
+			if not _check(not town.is_empty(),"setup","Varrow is not on our chart"): return
+			var before_c:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(c)]
+			var stormed_before:=MilitaryCampaign.battle_history.size()
+			land._city(before_c,town,{"mission":"capture","target":city2_id},today,[before_c])
+			var status:=String(before_c.get("command_status",""))
+			_check(MilitaryCampaign.command_hierarchy.battle.engaged(c) or MilitaryCampaign.command_hierarchy.battle.city_engaged(city2_id) or MilitaryCampaign.battle_history.size()>stormed_before,"aftermath","with a siege at Tsaren and raiders at home, the general's band waits before Varrow: %s" % status)
+			# The siege and the raiders are still there, untouched.
+			_check(not MilitaryCampaign.active_siege.is_empty(),"aftermath","the siege at Tsaren ended when another band fought")
+			_check(raiders!="" and String(MilitaryCampaign.active_threat.get("id",""))==raiders,"aftermath","the raiders waiting at home were lost when another band fought")
 
 
 # =============================================================================
