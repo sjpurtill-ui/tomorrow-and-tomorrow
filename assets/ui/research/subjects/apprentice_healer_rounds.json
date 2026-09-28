@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/apprentice_healer_rounds-v1.png",
   "sha256": "3ec3b743d3451152ad2dd6617c2296b3a85a3b766e6a583135409f71dde31281",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.4
+  ]
 }

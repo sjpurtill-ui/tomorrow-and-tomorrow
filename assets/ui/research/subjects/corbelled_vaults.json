@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/corbelled_vaults-v1.png",
   "sha256": "322fc1066401ea9006e75a9a094cc7267d47104d72c48554435ac8208a95a5b2",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.33
+  ]
 }

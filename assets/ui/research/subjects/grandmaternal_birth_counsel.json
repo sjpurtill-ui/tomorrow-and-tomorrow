@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/grandmaternal_birth_counsel-v1.png",
   "sha256": "2771a368487f22bfa1e0e6659dc9e90064b95ac79c8babef6007eba2c32ce8fb",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.35
+  ]
 }

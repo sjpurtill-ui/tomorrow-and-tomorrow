@@ -33,7 +33,11 @@
     "asset": "res://assets/ui/research/subjects/apprentice_healer_rounds-v1.png",
     "sha256": "3ec3b743d3451152ad2dd6617c2296b3a85a3b766e6a583135409f71dde31281",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.4
+    ]
   },
   {
     "id": "childhood_growth_milestones",
@@ -77,7 +81,11 @@
     "asset": "res://assets/ui/research/subjects/load_path_reading-v1.png",
     "sha256": "544918fe1505fc840d43e74926fe7f65bf2b76564f7e673c756b854c6cafd3f6",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.27
+    ]
   },
   {
     "id": "oath_witness_registers",
@@ -101,7 +109,11 @@
     "asset": "res://assets/ui/research/subjects/grandmaternal_birth_counsel-v1.png",
     "sha256": "2771a368487f22bfa1e0e6659dc9e90064b95ac79c8babef6007eba2c32ce8fb",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
   },
   {
     "id": "multi_post_command_relay",
@@ -113,7 +125,11 @@
     "asset": "res://assets/ui/research/subjects/multi_post_command_relay-v1.png",
     "sha256": "7c7234eb85d4ebffb3c253575ff76d3aa3bfea530b20413de67260cc33bbb3aa",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.3
+    ]
   },
   {
     "id": "shared_work_crew_rotation",
@@ -161,7 +177,11 @@
     "asset": "res://assets/ui/research/subjects/rotating_relief_wardens-v1.png",
     "sha256": "3913ac6218d3044a375b1101506d8bba08e826193283a7f0792aa50f7f4f376a",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.38
+    ]
   },
   {
     "id": "trained_midwife_referral",
@@ -201,6 +221,10 @@
     "asset": "res://assets/ui/research/subjects/corbelled_vaults-v1.png",
     "sha256": "322fc1066401ea9006e75a9a094cc7267d47104d72c48554435ac8208a95a5b2",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.33
+    ]
   }
 ]

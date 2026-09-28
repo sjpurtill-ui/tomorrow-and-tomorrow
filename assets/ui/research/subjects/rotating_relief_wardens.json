@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/rotating_relief_wardens-v1.png",
   "sha256": "3913ac6218d3044a375b1101506d8bba08e826193283a7f0792aa50f7f4f376a",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.38
+  ]
 }

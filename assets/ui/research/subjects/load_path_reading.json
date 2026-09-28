@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/load_path_reading-v1.png",
   "sha256": "544918fe1505fc840d43e74926fe7f65bf2b76564f7e673c756b854c6cafd3f6",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.27
+  ]
 }
