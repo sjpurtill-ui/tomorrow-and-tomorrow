@@ -1926,6 +1926,7 @@ float organic_noise(vec2 p) {
 #include "res://scripts/map_palette.gdshaderinc"
 #include "res://scripts/map_coast.gdshaderinc"
 #include "res://scripts/world_beauty.gdshaderinc"
+#include "res://scripts/map_chart.gdshaderinc"
 #include "res://scripts/map_cloud.gdshaderinc"
 #include "res://scripts/settlement_ground.gdshaderinc"
 
@@ -2018,10 +2019,41 @@ void fragment() {
 		unknown_ground=mix(unknown_ground,MAP_INK,frontier.x*frontier_scale*0.85);
 		reveal=mix(reveal,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
 	}
+	// From the regional view outward the known land is a hand-coloured chart
+	// (map_chart.gdshaderinc), crossfaded in by view scale; at full weight the
+	// painted path below is skipped altogether.
+	float mc_design=mc_design_km(relative_position,PROJECTION_MATRIX);
+	float mc_w=mc_chart_weight(mc_design);
+	vec3 mc_ground=vec3(0.0);
+	vec3 mc_normal=vec3(0.0,1.0,0.0);
+	if (mc_w>0.0 && reveal>0.0) {
+		vec3 mc_f=mc_fields(surface_color,surface_uv,pixel_world,woodland_channel,world_position.y);
+		float mc_wood=mc_f.z;
+		if (!far_layer && patch_feather.w>0.5 && coast_mask_ready()) {
+			float mc_seam=smoothstep(0.60,0.82,coast_patch_edge(world_position.xz,patch_feather));
+			if (mc_seam>0.0) {
+				vec4 mc_far_color=surface_color; vec2 mc_far_uv=surface_uv; vec2 mc_far_uv2=surface_uv2;
+				coast_far_surface(world_position.xz,mc_far_color,mc_far_uv,mc_far_uv2);
+				mc_wood=mix(mc_wood,clamp(mc_far_color.a,0.0,1.0),mc_seam);
+			}
+		}
+		mc_wood*=woodland_retained(world_position.xz);
+		float mc_slope=1.0-clamp(normalize(world_normal).y,0.0,1.0);
+		vec2 mc_land=mc_landform(world_position.xz,world_position.y,pixel_world,!far_layer,mc_normal);
+		float mc_temperature=surface_uv.x>=0.999?landscape_temperature(mc_f.y,seasonal_amplitude,world_position.z):15.0;
+		float mc_sheltered=1.0-smoothstep(0.18,0.58,mc_slope);
+		float mc_snow=(1.0-smoothstep(-1.5,3.5,mc_temperature))*smoothstep(0.045,0.38,mc_f.x)*mc_sheltered*0.78;
+		mc_snow=max(mc_snow,(1.0-smoothstep(-12.0,-2.0,mc_temperature))*mc_sheltered*0.30);
+		mc_snow=max(mc_snow,weather_snow*(1.0-smoothstep(2.0,7.0,mc_temperature))*(1.0-smoothstep(0.25,0.62,mc_slope))*0.8);
+		mc_ground=mc_chart_ground(world_position,mc_land,mc_normal,pixel_world,mc_design,mc_f.x,mc_f.y,mc_wood,mc_slope,mc_temperature,mc_snow,
+			coast_height,coast_height_px,wb_frontier_px,CAMERA_POSITION_WORLD.y,land_resources);
+	}
 	// Fully hidden ground needs only the existing unlit veil. Avoid all
 	// texture and procedural surface work until there is visible ground.
 	if (reveal<=0.0) {
 		ALBEDO=vec3(0.0); EMISSION=unknown_ground; ROUGHNESS=0.96;
+	} else if (mc_w>=0.999) {
+		ALBEDO=vec3(0.0); EMISSION=mc_ground*reveal+unknown_ground*(1.0-reveal); ROUGHNESS=0.96;
 	} else {
 	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
@@ -2412,6 +2444,9 @@ void fragment() {
 			wb_light_normal=normalize(mix(wb_light_normal,wb_macro_normal(world_position.xz,wb_step),wb_calm));
 		}
 	}
+	// Toward the chart the painting's light settles onto the chart's own
+	// generalised landform, so no mesh facet shows through the crossfade.
+	if (mc_w>0.0) { wb_calm=max(wb_calm,0.001); wb_light_normal=normalize(mix(wb_light_normal,mc_normal,smoothstep(0.0,0.6,mc_w))); }
 	float hill_light = dot(wb_light_normal, normalize(vec3(-0.46, 0.78, -0.42)));
 	vec3 horizontal_sun = normalize(vec3(-0.46, 0.0, -0.42));
 	float directional_slope = dot(wb_light_normal, horizontal_sun);
@@ -2485,6 +2520,11 @@ void fragment() {
 	EMISSION += earth*reveal*wb_sky_fill(wb_light_normal);
 	ROUGHNESS = 0.96;
 	if (wb_calm>0.0) { NORMAL = normalize((VIEW_MATRIX*vec4(wb_light_normal,0.0)).xyz); }
+	// The painting gives way to its chart as the view widens.
+	if (mc_w>0.0) {
+		ALBEDO *= 1.0-mc_w;
+		EMISSION = mix(EMISSION,mc_ground*reveal+unknown_ground*(1.0-reveal),mc_w);
+	}
 	}
 }
 """
