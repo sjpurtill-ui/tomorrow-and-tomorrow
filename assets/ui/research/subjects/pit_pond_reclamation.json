@@ -1,0 +1,12 @@
+{
+  "id": "pit_pond_reclamation",
+  "line": "ecology",
+  "game_year": 350,
+  "approx_historical_year": -2667,
+  "prompt": "c. 2667 BCE: Spent Clay and Stone Pits Turned into Ponds. Spent clay and stone pits turned into ponds. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7118dde4-c13d-4be1-84f0-e708e312990c.png",
+  "asset": "res://assets/ui/research/subjects/pit_pond_reclamation-v1.png",
+  "sha256": "33c363362ff4d9ba123eb90d727ac0a1db390eba409af83cc39ca506d5924b89",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

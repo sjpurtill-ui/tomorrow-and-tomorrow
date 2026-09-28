@@ -1,0 +1,12 @@
+{
+  "id": "copper_battle_axes",
+  "line": "security",
+  "game_year": 350,
+  "approx_historical_year": -2667,
+  "prompt": "c. 2667 BCE: Cast Copper Battle-axes. Cast copper battle-axes. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7690f345-2428-48b4-92e6-c48c59d8e1cb.png",
+  "asset": "res://assets/ui/research/subjects/copper_battle_axes-v1.png",
+  "sha256": "67b43930d3efcd0966d8f3ffb634e764f207fa5e63be4ca0173ea73b80c28bed",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
