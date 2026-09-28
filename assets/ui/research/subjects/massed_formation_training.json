@@ -1,0 +1,16 @@
+{
+  "id": "massed_formation_training",
+  "line": "security",
+  "game_year": 380,
+  "approx_historical_year": -2467,
+  "prompt": "c. 2467 BCE: Massed Formation Training. Massed formation training. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8596ddb8-d674-4f97-a5e9-babd095c9c9f.png",
+  "asset": "res://assets/ui/research/subjects/massed_formation_training-v1.png",
+  "sha256": "ac9a756ea9589adc32c54b8dcca0a21d7d429c795630c032eec9ae38d4d7f75c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.39
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "structural_repair_triage",
+  "line": "infrastructure",
+  "game_year": 380,
+  "approx_historical_year": -2467,
+  "prompt": "c. 2467 BCE: Structural Repair Triage. Structural repair triage. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-205f342a-a116-4f75-b37b-4186e7b924e7.png",
+  "asset": "res://assets/ui/research/subjects/structural_repair_triage-v1.png",
+  "sha256": "cf5cbf89f706ac916911b4338f929cf45c97012efd185f34a505378c2c3b0f45",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.37
+  ]
+}

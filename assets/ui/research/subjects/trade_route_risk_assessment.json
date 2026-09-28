@@ -1,0 +1,16 @@
+{
+  "id": "trade_route_risk_assessment",
+  "line": "logistics",
+  "game_year": 380,
+  "approx_historical_year": -2467,
+  "prompt": "c. 2467 BCE: Trade Route Risk Assessment. Trade route risk assessment. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fd26d78e-709f-4d6d-be4d-a23f5d7d327a.png",
+  "asset": "res://assets/ui/research/subjects/trade_route_risk_assessment-v1.png",
+  "sha256": "fb072d5b71cab26aa26d72cbd2883c19adc1e930cfe8f360f5e1b85652c21d0c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.39
+  ]
+}
