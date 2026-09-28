@@ -4,9 +4,17 @@ extends GdUnitTestSuite
 const DAY=preload("res://scripts/civilization_day.gd")
 const DAYS:=6
 
+## The new-game setting these tests change (GameState.reset_for_new_world keeps
+## it): restored after each test, so later suites get the default world.
+var _opponents:=-1
+
+func before_test()->void:
+	_opponents=GameState.opponent_count
+
 func after_test()->void:
 	WorldSimulation.clear()
 	WorldSimulation.context_provider=Callable()
+	if _opponents>0: GameState.opponent_count=_opponents
 
 func _new_world()->void:
 	WorldSimulation.clear()
