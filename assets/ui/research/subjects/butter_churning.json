@@ -1,0 +1,12 @@
+{
+  "id": "butter_churning",
+  "line": "nutrition",
+  "game_year": 172,
+  "approx_historical_year": -3853,
+  "prompt": "c. 3853 BCE: Adults churn milk in skin bag and collect pale butter; opaque botanical egg tempera. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-075bef1b-12ea-485b-8293-24127026266d.png",
+  "asset": "res://assets/ui/research/subjects/butter_churning-v1.png",
+  "sha256": "d26749d8a8629569fb59d115ef6320e7fb74cc54ecd248fc429d8d57be90b433",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

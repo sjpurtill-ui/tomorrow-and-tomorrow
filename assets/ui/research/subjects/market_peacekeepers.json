@@ -1,0 +1,12 @@
+{
+  "id": "market_peacekeepers",
+  "line": "security",
+  "game_year": 180,
+  "approx_historical_year": -3800,
+  "prompt": "c. 3800 BCE: Unarmored adults keep calm order at village barter market; hand-cut woodblock print. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-368c4cb1-256e-40e0-b2dc-4a58e59f2509.png",
+  "asset": "res://assets/ui/research/subjects/market_peacekeepers-v1.png",
+  "sha256": "4703fdc33fa9dd27b5db3c9e85c40419bed4d2115512c119f0036866cac46693",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
