@@ -106,6 +106,114 @@ static func configure(host: Node, id: int, target: int, paused: bool) -> Diction
 			return {"ok":true,"message":"Production line updated."}
 	return {"error":"Select a persistent production line."}
 
+## Workshop hands, counted the way HOI4 counts factories, in whole people:
+## "total" craftspeople (the effective Crafting workers), "lines" of them at
+## work on the lines, and each unpaused line's hands ("by_line"). The rows add
+## up to "lines". Every line that gets a real part of someone's day shows at
+## least one hand (while there are people to show), the rest follow the line
+## weights by largest remainder, earlier lines winning ties. Paused lines hold
+## no hands. "workers" and "exact" keep the unrounded figures the daily loop
+## uses; add_hands turns them into whole people.
+const MEANINGFUL_HAND:=.2
+static func hands(host:Node)->Dictionary:
+	var workers:=maxf(0.0,float(workforce().workers))
+	var share:=clampf(float(host.production_labor_share),0.0,1.0)
+	var weights:={};var weight_sum:=0.0;var order:Array[int]=[]
+	for job:Dictionary in host.equipment_queue:
+		if bool(job.get("paused",false)):continue
+		var id:=int(job.get("id",0))
+		weights[id]=maxf(.05,float(job.get("allocation",1.0)));weight_sum+=float(weights[id]);order.append(id)
+	var exact_lines:=workers*share if not weights.is_empty() else 0.0
+	var total:=floori(workers+.0001)
+	var by_line:={};var exact:={}
+	for job:Dictionary in host.equipment_queue:
+		var id:=int(job.get("id",0))
+		by_line[id]=0
+		exact[id]=exact_lines*float(weights[id])/weight_sum if weights.has(id) else 0.0
+	var working:=0
+	for id:int in order:
+		if float(exact[id])>=MEANINGFUL_HAND:working+=1
+	var on_lines:=mini(total,maxi(roundi(exact_lines),working))
+	var given:=0
+	# One hand for each line with real work, in list order, while people last.
+	for id:int in order:
+		if given<on_lines and float(exact[id])>=MEANINGFUL_HAND:by_line[id]=1;given+=1
+	# The rest by weight: first whole shares beyond that one hand, then the
+	# largest remainders.
+	var parts:Array=[]
+	for id:int in order:
+		var part:=maxf(0.0,float(on_lines)*float(weights[id])/weight_sum-float(by_line[id]))
+		var whole:=mini(floori(part+.000001),on_lines-given)
+		by_line[id]=int(by_line[id])+whole;given+=whole
+		parts.append([part-float(whole),order.find(id),id])
+	parts.sort_custom(func(a:Array,b:Array)->bool:return float(a[0])>float(b[0]) if not is_equal_approx(float(a[0]),float(b[0])) else int(a[1])<int(b[1]))
+	for entry:Array in parts:
+		if given>=on_lines:break
+		by_line[int(entry[2])]=int(by_line[int(entry[2])])+1;given+=1
+	return {"total":total,"lines":given,"share":share,"by_line":by_line,"workers":workers,"exact":exact}
+
+## HOI4's factory −/+: `delta` more whole hands on line `id`, or fewer when
+## negative. New hands come from household crafting while any craftsperson is
+## left there, then from the lowest lines in the list; hands taken off go back
+## to household crafting. The labor share becomes exactly the people on the
+## lines and each line's weight follows its hands, so the daily loop works
+## with whole people afterwards. The player takes the line over from staff,
+## as with any manual change.
+static func add_hands(host:Node,id:int,delta:float)->Dictionary:
+	var job:Dictionary={}
+	for candidate:Dictionary in host.equipment_queue:
+		if int(candidate.get("id",-1))==id:job=candidate;break
+	if job.is_empty():return {"error":"That line is no longer active."}
+	if bool(job.get("paused",false)):return {"error":"Resume the line to put hands on it."}
+	var pool:=hands(host)
+	var total:=int(pool.total)
+	if total<=0:return {"error":"No craftspeople to put on the lines. Settlement leaders assign crafting work."}
+	var step:=roundi(delta)
+	if step==0:step=1 if delta>0.0 else -1
+	var current:Dictionary=(pool.by_line as Dictionary).duplicate()
+	var active:Array[int]=[]
+	for candidate:Dictionary in host.equipment_queue:
+		if not bool(candidate.get("paused",false)):active.append(int(candidate.get("id",0)))
+	var had:=int(current.get(id,0))
+	var wanted:=maxi(0,had+step)
+	var free:=maxi(0,total-int(pool.lines))
+	if wanted-had>free:
+		var short:=wanted-had-free
+		for index in range(active.size()-1,-1,-1):
+			var other:=active[index]
+			if other==id or short<=0:continue
+			var give:=mini(short,int(current.get(other,0)))
+			current[other]=int(current.get(other,0))-give;short-=give
+		wanted-=maxi(0,short)
+	current[id]=wanted
+	var on_lines:=0;var largest:=0
+	for other:int in active:
+		on_lines+=int(current.get(other,0));largest=maxi(largest,int(current.get(other,0)))
+	host.production_labor_share=clampf(float(on_lines)/maxf(.0001,float(pool.workers)),0.0,1.0)
+	if largest>0:
+		for candidate:Dictionary in host.equipment_queue:
+			var other:=int(candidate.get("id",0))
+			if other in active:candidate.allocation=clampf(4.0*float(int(current.get(other,0)))/float(largest),.05,4.0)
+	job.erase("planner_managed");job.erase("staff_idle");job.erase("ai_turnover")
+	return {"ok":true,"hands":wanted,"message":"%s: %s on the line; %d of %d craftspeople work the lines." % [product_name(String(job.get("item",""))),_hands_words(wanted),on_lines,total]}
+
+static func _hands_words(value:int)->String:
+	return "%d hand%s" % [value,"" if value==1 else "s"]
+
+## Put line `id` at list position `to_index` (0 = line 1). The order is the
+## priority: scarce materials go to line 1 first, then line 2, and so on.
+static func move(host:Node,id:int,to_index:int)->Dictionary:
+	var from:=-1
+	for index in host.equipment_queue.size():
+		if int(host.equipment_queue[index].get("id",-1))==id:from=index;break
+	if from<0:return {"error":"That line is no longer active."}
+	var to:=clampi(to_index,0,host.equipment_queue.size()-1)
+	var job:Dictionary=host.equipment_queue[from]
+	if to!=from:
+		host.equipment_queue.remove_at(from)
+		host.equipment_queue.insert(to,job)
+	return {"ok":true,"message":"%s is line %d now." % [product_name(String(job.get("item",""))),to+1]}
+
 static func retool(host: Node, id: int, item: String) -> Dictionary:
 	var definition:=recipe(host,item)
 	if definition.has("error"): return definition

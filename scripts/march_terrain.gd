@@ -111,7 +111,7 @@ static func ground_at(p:Vector2)->Dictionary:
 	var biome:Dictionary=terrain.call("_biome_from_climate",p.x,p.y,h,climate)
 	var id:=String(biome.get("id",""))
 	var wet:=1.0 if id=="wetland" else (0.45 if id=="floodplain" else 0.0)
-	return {"h":h,"slope":slope,"wood":float(biome.get("woodland",0.0)),"wet":wet,"t":float(climate.get("temperature",0.5))}
+	return {"h":h,"slope":slope,"wood":float(biome.get("woodland",0.0)),"wet":wet,"t":float(climate.get("temperature",0.5)),"rain":float(climate.get("precipitation",0.5))}
 
 
 ## River crossing on the straight step a->b: "" | "ford" | "deep".

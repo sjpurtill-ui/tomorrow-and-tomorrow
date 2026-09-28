@@ -17,7 +17,11 @@ const HUNGRY_BELOW:=0.75
 
 
 static func forage_share(force:Dictionary)->float:
-	return FORAGE_MOVING if String(force.get("status","stationed"))=="moving" else FORAGE_STATIONED
+	var base:=FORAGE_MOVING if String(force.get("status","stationed"))=="moving" else FORAGE_STATIONED
+	# The country, the season and the band's size (supply_state.gd): rich green
+	# land in summer feeds a small band better than a host in winter.
+	var supply=load("res://scripts/supply_state.gd")
+	return minf(float(supply.FORAGE_SHARE_MAX),base*float(supply.forage_factor(force)))
 
 
 ## Share of a garrison's ration the held town supplies from its own fields and
