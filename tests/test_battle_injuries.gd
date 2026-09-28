@@ -77,15 +77,3 @@ func test_returned_field_army_keeps_injury_subsets()->void:
 	MilitaryCampaign.demobilize(12)
 	assert_int(PermanentInjuries.total(GameState.civilian_injuries)).is_equal(12)
 	assert_int(int(MilitaryCampaign.home_army.wounded_pool)).is_equal(8)
-
-func test_water_clipping_catches_crossing_triangles_with_vertices_outside()->void:
-	var landscape:=BattleLandscape.new()
-	var polygon:Array[Vector2]=[Vector2(-500,-500),Vector2(500,-500),Vector2(0,500)]
-	for axis in 2:
-		polygon=landscape._clip_water(polygon,axis,-160,-1)
-		polygon=landscape._clip_water(polygon,axis,160,1)
-	assert_int(polygon.size()).is_greater_equal(3)
-	for point in polygon:
-		assert_float(absf(point.x)).is_less_equal(160.001)
-		assert_float(absf(point.y)).is_less_equal(160.001)
-	landscape.free()

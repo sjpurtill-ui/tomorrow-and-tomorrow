@@ -190,20 +190,19 @@ func test_a_shaken_band_regroups_for_a_fortnight_and_the_memory_is_saved()->void
 	assert_dict(saved.get("formation_memory",{})).is_equal(memory)
 
 
-func test_replay_draws_era_figures_and_reads_like_paper_not_a_dev_tool()->void:
-	var Diorama:=preload("res://scripts/battle_diorama.gd")
-	assert_str(Diorama.figure_kind({"unit":"levy","weapon":"improvised"})).is_equal("club")
-	assert_str(Diorama.figure_kind({"unit":"line_infantry","weapon":"spear"})).is_equal("spear")
-	assert_str(Diorama.figure_kind({"unit":"skirmisher","weapon":"bow"})).is_equal("bow")
-	assert_str(Diorama.figure_kind({"unit":"cavalry","weapon":"spear"})).is_equal("horse")
-	assert_str(Diorama.figure_kind({"unit":"line_infantry","weapon":"musket"})).is_equal("musket")
-	# A small band is drawn one figure per person; a host in ranks.
-	assert_int(Diorama.per_figure(20)).is_equal(1)
-	assert_int(Diorama.per_figure(3000)).is_equal(50)
-	var icon:=preload("res://scripts/resource_icons.gd").battle_figure_texture("spear",Color("2b2118"),Color("295750"))
-	assert_object(icon).is_not_null()
-	assert_int(icon.get_height()).is_equal(64)
+func test_battle_view_draws_arms_and_reads_like_paper_not_a_dev_tool()->void:
+	var Blocks:=preload("res://scripts/battle_blocks.gd")
+	assert_str(Blocks.arm_of("levy","improvised")).is_equal("club")
+	assert_str(Blocks.arm_of("line_infantry","spear")).is_equal("spear")
+	assert_str(Blocks.arm_of("skirmisher","bow")).is_equal("bow")
+	assert_str(Blocks.arm_of("cavalry","spear")).is_equal("horse")
+	assert_str(Blocks.arm_of("line_infantry","musket")).is_equal("musket")
+	# Every arm has its inked icon from the icon engine.
+	for arm in ["club","spear","pike","sword","axe","bow","sling","javelin","horse","chariot","elephant","musket","rifle","machine_gun","guns","armour","engineers","support"]:
+		var icon:=preload("res://scripts/resource_icons.gd").arm_texture(arm,Color("2b2118"),Color("295750"))
+		assert_object(icon).override_failure_message(arm).is_not_null()
+		assert_int(icon.get_height()).is_equal(48)
 	# The chrome speaks in words: no glyph controls, no all-caps status.
-	var source:=FileAccess.get_file_as_string("res://scripts/battle_graphics_screen.gd")
-	for glyph in ["→","½","\"×\"","\"‹\"","\"›\"","WATCHING","ROUND %d","RETURN TO MAP","YOUR FORMATIONS","Color(\"0b1013\")"]:
+	var source:=FileAccess.get_file_as_string("res://scripts/hud/battle_panel.gd")
+	for glyph in ["→","½","\"×\"","\"‹\"","\"›\"","WATCHING","ROUND %d","RETURN TO MAP","YOUR FORMATIONS","Color(\"0b1013\")","Charge","Retreat whole army"]:
 		assert_str(source).override_failure_message(glyph).not_contains(glyph)

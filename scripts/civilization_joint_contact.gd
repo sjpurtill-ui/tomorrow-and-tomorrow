@@ -149,7 +149,9 @@ static func share_sea_pressure(day:int)->void:
 			var level:=AN.raiding_level(float(pressure.get("raid",0.0)),escort)
 			var previous:Dictionary=op.state.get("raiding",{})
 			if level<=.001:
-				op.state.erase("raiding")
+				# Keep the key: import restores the reset shape, so an erased key
+				# would come back as {} and a reloaded day would differ.
+				op.state["raiding"]={}
 				return
 			var carry:=float(previous.get("carry",0.0))+WorldSimulation.state.population_exact*level*AN.MERCHANT_DEATH_RATE
 			var dead:=floori(carry);carry-=float(dead)
@@ -169,7 +171,7 @@ static func share_sea_pressure(day:int)->void:
 			var mine:Dictionary=outgoing.get(owner,{})
 			var before:Dictionary=op.state.get("raids_out",{})
 			if mine.is_empty():
-				op.state.erase("raids_out");return
+				op.state["raids_out"]={};return
 			for view in mine:
 				if float(before.get(view,0.0))<.05 and float(mine[view])>=.05:
 					op._event("Our raiders are sinking merchant ships bound for %s: their sea trade is %d%% down." % [_people_name(String(view)),roundi(float(mine[view])*100)],"navy")

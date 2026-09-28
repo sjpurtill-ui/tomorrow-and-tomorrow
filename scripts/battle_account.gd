@@ -85,17 +85,18 @@ static func sides(record:Dictionary)->Dictionary:
 	return {"home":home,"enemy":"defender" if home=="attacker" else "attacker"}
 
 
-## Killed, wounded and fled (scattered) on one side, summed from the rounds.
+## Killed, wounded, fled (scattered) and taken (when a block broke and the
+## enemy rode its men down) on one side, summed from the rounds.
 static func round_losses(record:Dictionary,side:String)->Dictionary:
-	var out:={"killed":0,"wounded":0,"fled":0,"total":0}
+	var out:={"killed":0,"wounded":0,"fled":0,"taken":0,"total":0}
 	for round_variant in record.get("rounds",[]):
 		var round_data:Dictionary=round_variant
 		var total:=int(round_data.get(side+"_losses",0))
 		var breakdown:Dictionary=round_data.get(side+"_casualties",{})
-		var killed:=int(breakdown.get("killed",0)); var wounded:=int(breakdown.get("wounded",0)); var fled:=int(breakdown.get("scattered",0))
+		var killed:=int(breakdown.get("killed",0)); var wounded:=int(breakdown.get("wounded",0)); var fled:=int(breakdown.get("scattered",0)); var taken:=int(breakdown.get("captured",0))
 		# Older records carry only the total; count the unexplained as fled.
-		fled+=maxi(0,total-killed-wounded-fled)
-		out.killed+=killed; out.wounded+=wounded; out.fled+=fled; out.total+=total
+		fled+=maxi(0,total-killed-wounded-fled-taken)
+		out.killed+=killed; out.wounded+=wounded; out.fled+=fled; out.taken+=taken; out.total+=total
 	return out
 
 
@@ -167,6 +168,8 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var captured:=int(termination.get("prisoners",0)) if kind in ["lost","withdrew"] else 0
 	var after_fight:=int(ours.get("remaining_troops",before-int(lost.total)))
 	captured=mini(captured,after_fight)
+	# Taken in the fight itself (a block broke and was ridden down) plus at the end.
+	var taken_in_fight:=int(lost.taken)
 	# Records without exchanges (older saves) still say how many were lost.
 	var unsorted:=maxi(0,before-after_fight-int(lost.total))
 	var detached:=clampi(int(record.get("detached",0)),0,after_fight-captured)
@@ -178,13 +181,13 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var sent:=int(operation.get("sent",before+earlier_total))
 	var elsewhere:=maxi(0,sent-before-earlier_total)
 	var ledger:={"sent":sent,"earlier":earlier_total,"earlier_fights":int(earlier.get("fights",0)),"elsewhere":elsewhere,
-		"in_fight":before,"killed":int(lost.killed),"wounded":int(lost.wounded),"fled":int(lost.fled),"unsorted":unsorted,"captured":captured,
+		"in_fight":before,"killed":int(lost.killed),"wounded":int(lost.wounded),"fled":int(lost.fled),"unsorted":unsorted,"captured":captured+taken_in_fight,
 		"detached":detached,"present":present,"morale":morale,"morale_words":morale_words(morale)}
 
 	# Their side, as our people saw it.
 	var their_before:=int(theirs.get("initial_troops",0))
 	var their_lost:=round_losses(record,String(s.enemy))
-	var our_captives:=int(termination.get("prisoners",0)) if kind in ["won","taken","uncontested"] else 0
+	var our_captives:=(int(termination.get("prisoners",0)) if kind in ["won","taken","uncontested"] else 0)+int(their_lost.taken)
 	var held_field:=kind in ["won","taken","uncontested","nobody"]
 	var exact:=their_before<=COUNTABLE
 	var seen_low:=their_before if exact else roundi(float(their_before)*0.8)
@@ -203,15 +206,26 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		"ours":_tactic_line(our_tactic,stage,true) if not plan.is_empty() else "",
 		"theirs":_tactic_line(their_tactic,stage,false) if not plan.is_empty() else ""}
 	if kind in ["uncontested","nobody"]: tactics={"ours_id":"","theirs_id":"","ours":"","theirs":""}
+	# A strike by night: whether they were seen, and the chance they had.
+	var surprise:Dictionary=(plan.get(s.home,{}) as Dictionary).get("surprise",{}) if plan.get(s.home) is Dictionary and (plan.get(s.home) as Dictionary).get("surprise") is Dictionary else {}
+	var surprise_line:=""
+	if not surprise.is_empty():
+		var odds:=Tactics.chance_words(float(surprise.get("chance",0.0)))
+		surprise_line=("We reached them in the dark unseen; the chance of that had been %s." % odds) if bool(surprise.get("unseen",false)) else ("Their watch saw us coming in the dark; the chance of reaching them unseen had been %s." % odds)
+		tactics["ours"]=(String(tactics.ours)+" "+surprise_line).strip_edges()
 
 	var headline:=_headline(kind,band,enemy_name,where,town,defending,their_tactic,raid,home_place)
 	var phases:=_phases(record,s,band,enemy_name,kind,termination)
 	if overrun(record):
 		# One short beat: who overran whom, and what it cost.
 		if kind in ["won","lost"]: headline=_overrun_headline(kind,before,their_before,enemy_name,where,band)
-		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)]
+		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)+(" "+surprise_line if surprise_line!="" else "")]
 		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
+	# What the general did with the captives and spoils (military_campaign.gd
+	# _settle_aftermath), in one line.
+	var settled:Dictionary=record.get("aftermath_settled",{}) if record.get("aftermath_settled") is Dictionary else {}
+	if String(settled.get("line",""))!="": now["now"]=String(now.now)+" "+String(settled.line)
 	var first:=String(state.get("voice",""))=="first"
 	if first:
 		# The war leader tells it himself: the same account, his own voice.
@@ -233,7 +247,7 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 static func _spoken(text:String,band:String,general:String,noun:String)->String:
 	var out:=text.replace(_cap(band),"My "+noun).replace(band,"my "+noun)
 	if general=="": return out
-	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "]]:
+	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "],[" sent "," sent "],[" let "," let "],[" gave "," gave "],[" had "," had "],[" traded "," traded "]]:
 		out=out.replace(general+String(pair[0]),"I"+String(pair[1]))
 	out=out.replace("with "+general,"with me")
 	return out
@@ -537,8 +551,9 @@ static func gather(record:Dictionary)->Dictionary:
 	var siege:Dictionary=mc.active_siege
 	if not siege.is_empty() and army_id>0 and int(siege.get("army_id",0))==army_id:
 		state["siege"]={"days":int(siege.get("days",0)),"target_name":String((siege.get("threat",{}) as Dictionary).get("target_region_name",""))}
-	var engagement:Dictionary=mc.active_engagement
-	if not engagement.is_empty() and int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
+	for engagement_variant in mc.engagements.values():
+		var engagement:Dictionary=engagement_variant
+		if int(engagement.get("seed",0))!=int(record.get("seed",0)) and int(engagement.get("home_force_id",-1))==army_id and army_id>0: state["engaged_again"]=true
 	state["aftermath_pending"]=not mc.pending_aftermath.is_empty()
 	if not army.is_empty():
 		var operation:Dictionary=army.get("operation",{})
@@ -606,8 +621,7 @@ static func doing(army:Dictionary)->String:
 	if mc==null: return ""
 	var id:=int(army.get("army_id",0))
 	var today:=int(WorldSimulation.state.elapsed_days)
-	var fights:Array=(mc.command_hierarchy.data.get("battles",[]) as Array).duplicate() if mc.get("command_hierarchy")!=null else []
-	if not mc.active_engagement.is_empty(): fights.append(mc.active_engagement)
+	var fights:Array=mc.engagements.values()
 	for fight_variant in fights:
 		var fight:Dictionary=fight_variant
 		var in_it:=int(fight.get("home_force_id",-1))==id

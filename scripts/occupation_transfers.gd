@@ -19,9 +19,10 @@ func preview(civ_id:String,region_id:String,count:int,status:String,sack:bool=fa
 	if data.transfers.size()>=MAX_TRANSFERS: return {"error":"All eight transport groups are already traveling."}
 	if data.groups.size()+data.transfers.size()>=MAX_GROUPS: return {"error":"The community-record capacity is full."}
 	var region:Dictionary=WorldSimulation.world.region_snapshot(civ_id,region_id)
-	if region.is_empty() or String(region.controller)!="player": return {"error":"Select a region you occupy."}
-	var garrison:Dictionary=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
-	if int(garrison.get("troops",0))<=0: return {"error":"An unsupported occupation cannot organize a transfer."}
+	# Who holds it: the one reading every system uses (town_ledger.hold).
+	var h:Dictionary=preload("res://scripts/town_ledger.gd").hold(civ_id,region_id)
+	if region.is_empty() or not bool(h.ours): return {"error":"Select a region you occupy."}
+	if not bool(h.held): return {"error":"An unsupported occupation cannot organize a transfer."}
 	if status!="citizen" and not sack:
 		var control:=WorldSimulation.world.occupation_coercion_availability(civ_id,region_id,count)
 		if control.has("error"):return control

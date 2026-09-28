@@ -127,7 +127,7 @@ func prepare_army_day()->bool:
 		for formation:Dictionary in force.get("formations",[]):formation.training_attending=0
 	var reason:=""
 	if current.id=="suspended":reason="Training suspended."
-	elif not host.active_engagement.is_empty() or not host.active_threat.is_empty() or not host.pending_aftermath.is_empty():reason="Staff released training rotations for the military emergency."
+	elif host._home_battle_running() or not host.active_threat.is_empty():reason="Staff released training rotations for the military emergency."
 	elif spendable_food()<=0:reason="Training paused to protect seven days of civilian food."
 	var rotation:=army_rotation() if reason=="" else {"attending":0,"total":0}
 	if reason=="" and int(rotation.attending)==0:reason="No training rotation: units meet the target, need equipment, or are recovering."

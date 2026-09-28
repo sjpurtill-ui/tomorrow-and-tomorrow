@@ -162,7 +162,9 @@ func test_actual_home_battle_uses_survivors_for_capture()->void:
 	MilitaryCampaign.active_threat=MilitaryCampaign.active_siege.threat.duplicate(true)
 	MilitaryCampaign.active_siege.clear()
 	GameState.population_allocations.Defense=20
-	assert_bool(MilitaryCampaign.begin_threat_engagement().has("error")).is_false()
+	# Keep the battle open (a thousand against twenty would otherwise be settled
+	# at once) so the fixture can leave the victors only five survivors.
+	assert_bool(MilitaryCampaign.begin_threat_engagement(false).has("error")).is_false()
 	MilitaryCampaign.active_engagement.attacker.troops=5
 	MilitaryCampaign.active_engagement.attacker.supply_level=1.0
 	MilitaryCampaign.active_engagement.defender.troops=0

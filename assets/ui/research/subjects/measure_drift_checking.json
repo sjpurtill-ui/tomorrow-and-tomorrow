@@ -1,0 +1,12 @@
+{
+  "id": "measure_drift_checking",
+  "line": "production",
+  "game_year": 183,
+  "approx_historical_year": -3780,
+  "prompt": "c. 3780 BCE: Two craftspeople compare worn measuring rods against a trusted reference; palette-knife impasto oil. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a4b740b0-b14e-44d5-a840-c4be0750e537.png",
+  "asset": "res://assets/ui/research/subjects/measure_drift_checking-v1.png",
+  "sha256": "f27c46902b48025f43205e1b8d584694c389da7cb4f504a0929fbc0997beb6ac",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
