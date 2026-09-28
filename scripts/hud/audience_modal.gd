@@ -19,6 +19,7 @@ const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const CourtAnswers:=preload("res://scripts/court_answers.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
 const EnvoyRequests:=preload("res://scripts/envoy_requests.gd")
@@ -1023,7 +1024,7 @@ func _after_order_reading(id:String,text:String,read:Dictionary,about_people:boo
 	if plan.is_empty():plan={"route":"legacy"}
 	var route:=String(plan.get("route","legacy"))
 	if route=="speak" and not civic_settlement.is_empty() and not text.ends_with("?"):route="legacy"
-	if about_people and _voice_ok() and voice.has_method("persons_turn") and (route=="speak" or (route=="legacy" and _persons_take(text))):
+	if about_people and _voice_ok() and voice.has_method("persons_turn") and not _fact_question(text) and (route=="speak" or (route=="legacy" and _persons_take(text))):
 		# Talk about people, or a summons: the persons engine answers (it shows
 		# the ruler's words itself).
 		if bool(plan.get("clear_pending",false)):Hall.find(id).erase("reader_pending")
@@ -1047,6 +1048,17 @@ func _after_order_reading(id:String,text:String,read:Dictionary,about_people:boo
 			_pump();return
 	_unecho(text)
 	_speak_rest(text)
+
+## A question the court's facts answer ("Who holds Tsaren?", "Who won the
+## last fight?", "Where is Rovik's band?"): the voice answers it from the
+## speaker's sheet, never the persons engine, which asks "whom do you mean?".
+## A question about a person as such ("who is the strongest man?") stays theirs.
+const FACT_WORDS:="(?i)\\b(hold|holds|held|won|win|lost|lose|battle|fight|fought|garrison|band|bands|army|fighters|town|towns|fled|ran|killed|bound|captives?|prisoners?|stores?|food|water|houses?|war|peace|tribute|envoys?|ford)\\b"
+func _fact_question(text:String)->bool:
+	if not text.strip_edges().ends_with("?") and not CourtAnswers.is_question(text): return false
+	if not Persons.typed_action(text).is_empty(): return false
+	var re:=RegEx.new();re.compile(FACT_WORDS)
+	return re.search(text)!=null or Commands._names_a_place(text.to_lower())
 
 ## Words about people that are no order the engine acts on (the reader left
 ## them to the old path, or failed): the persons engine's. An order of war, a

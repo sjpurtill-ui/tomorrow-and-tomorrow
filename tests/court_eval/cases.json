@@ -634,7 +634,7 @@
   {"id": "envoy.tsaren_lost", "domain": "envoy", "fixture": "envoy_after_fall", "speaker": "envoy", "source": "design",
    "say": "Is Tsaren still yours?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["your hands", "your garrison"], "prompt_has": ["Tsaren"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["your hands", "your garrison", "garrison holds", "holds Tsaren", "you hold", "you took"], "prompt_has": ["Tsaren"]}},
 
   {"id": "home.roads", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "user",
    "say": "Build roads between the houses and haul stone to the new houses",
