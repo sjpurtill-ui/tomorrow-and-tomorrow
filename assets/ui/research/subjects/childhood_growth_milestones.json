@@ -1,0 +1,16 @@
+{
+  "id": "childhood_growth_milestones",
+  "line": "demography",
+  "game_year": 268,
+  "approx_historical_year": -3213,
+  "prompt": "c. 3213 BCE: Family compares a child against simple growth notches on a timber post; chalk pastel and cut paper. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3c25090b-5f3d-4ad1-9724-a94d7f9a4f8c.png",
+  "asset": "res://assets/ui/research/subjects/childhood_growth_milestones-v1.png",
+  "sha256": "b435761800d142a1e5a6f26c122f02db9c5c950b767f2f9b404ab1d6058e55eb",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.3
+  ]
+}

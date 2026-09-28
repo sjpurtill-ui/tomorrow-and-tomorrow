@@ -1,0 +1,16 @@
+{
+  "id": "load_path_reading",
+  "line": "infrastructure",
+  "game_year": 268,
+  "approx_historical_year": -3213,
+  "prompt": "c. 3213 BCE: Builders read how a mudbrick roof load passes to timber beams and posts, then brace a sagging beam; casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d7ea199a-89f0-48b6-8682-653a7f280c1c.png",
+  "asset": "res://assets/ui/research/subjects/load_path_reading-v1.png",
+  "sha256": "544918fe1505fc840d43e74926fe7f65bf2b76564f7e673c756b854c6cafd3f6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.27
+  ]
+}
