@@ -1,0 +1,12 @@
+{
+  "id": "hearth_counts",
+  "line": "demography",
+  "game_year": 170,
+  "approx_historical_year": -3867,
+  "prompt": "c. 3867 BCE: Adults count occupied household hearths with one pebble each; chalk pastel cut-paper collage. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-dbd67fc5-d2f9-4558-b6a8-2071b4ccb086.png",
+  "asset": "res://assets/ui/research/subjects/hearth_counts-v1.png",
+  "sha256": "d8943e596d1cdc01f48a7500e7d1ce1a614ee16af70d352721547fa7ddbd2296",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

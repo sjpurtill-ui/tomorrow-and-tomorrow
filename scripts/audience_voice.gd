@@ -30,6 +30,8 @@ const Plain:=preload("res://scripts/plain_speech.gd")
 const Relevance:=preload("res://scripts/court_relevance.gd")
 const RequestAI:=preload("res://scripts/envoy_request_ai.gd")
 const OrderReader:=preload("res://scripts/order_reader.gd")
+const CourtFacts:=preload("res://scripts/court_facts.gd")
+const CourtAnswers:=preload("res://scripts/court_answers.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim","upkeep"]
@@ -73,6 +75,8 @@ The world: people know only what the WORLD line lists. Anything not listed does 
 The ruler is the living god of their own people, and the god's command is law. Officials never flatly refuse an order: they may fear, plead or protest briefly in their own manner, but whether an order is obeyed is decided before you write, and you are told; write only what was decided. When the ruler gives an order you are not told the outcome of, nothing has been set in motion: never say it is done or will be done, and never promise it; say briefly and plainly what it would need or who must carry it out, and do not refuse. No filler: never a proverb, riddle or stock saying; say plain things plainly. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
 
 Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody talks down to the ruler: never "child", "dearie", "boy", "girl", "pet" or any diminutive. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
+
+Answer factual questions from FACTS and WHAT OUR OWN PEOPLE KNOW with the exact numbers given there (how many, who, where, what became of them). Never claim not to know, not to have counted or not to have been told anything listed there. If a fact really is not listed, say who would know or what would find it out (a count, a scout, a messenger, another official); never invent an excuse.
 
 Reply with JSON only: {"lines":[{"speaker_key":"<a listed key>","text":"...","aside":false}],"mood_shift":0.0}. aside=true means murmured to the ruler alone. mood_shift (-0.25 to 0.25) is how this moment changed the warmth between the ruler and the visitor."""
 
@@ -369,14 +373,16 @@ const ORDER_ACK:=[
 	"I'll carry it out. Expect grumbling.",
 	"Right. I'll put it in hand.",
 ]
-## Asked something a summoned official has no facts for: honest and short.
+## Asked something that is not a matter of fact (a view, a wish): honest and
+## short. Never a claim not to know what the fact sheets list (those
+## questions are answered from them, court_answers.gd).
 const SUMMONS_REPLY:=[
-	"I'd have to ask around before I answered that.",
-	"I don't know enough to say, and I won't guess.",
-	"Not my part of the work. I can find out.",
-	"I've heard talk, nothing I'd swear to. Give me a few days.",
-	"Nobody's brought that to me. I'll ask.",
-	"I can tell you what I've seen, and it isn't much on that.",
+	"Plainly? I'd go carefully, and count the cost before anything else.",
+	"That is yours to judge. Settle it and I'll carry it out.",
+	"I'd hear the council on it first. Then you decide.",
+	"Tell me what you want done and I'll tell you what it will take.",
+	"I'd want it done carefully, and soon.",
+	"If you want my view: go slowly, and count the cost first.",
 ]
 const SUMMONS_CLOSING:=[
 	"Then I'll get back to it.",
@@ -790,6 +796,7 @@ var force_offline:=false       ## tests / "no AI" play
 var send_hook:Callable         ## tests: replaces the HTTP transport (id, payload, attempt)
 var config_override:Dictionary={} ## tests: pretend a connection is configured
 var last_problem:Dictionary={} ## audience_id -> reason the live voice fell back
+var rejections:Array[String]=[] ## why validate_lines threw out each proposed line (last call)
 ## func(audience_id:String, player_text:String, command:Dictionary)->bool: the
 ## court's command engine (set by the modal). The live classifier read the
 ## ruler's words as an order; true means the engine carried it out, and the
@@ -1400,7 +1407,7 @@ func _on_response(result:int,response_code:int,_headers:PackedStringArray,body:P
 				var heard:=String(parsed.get("divine","none"))
 				if String(request.stage)=="speak" and heard in DIVINE_SPOKEN and heard in _divine_allowed(s): divine_intent.emit.call_deferred(audience_id,heard)
 				return
-			detail="every line failed validation (%d proposed)" % (parsed.get("lines",[]) as Array).size()
+			detail="every line failed validation (%d proposed%s)" % [(parsed.get("lines",[]) as Array).size(),(": "+"; ".join(PackedStringArray(rejections))) if not rejections.is_empty() else ""]
 			# A readable reply whose every line broke the rules would cost as much
 			# again and likely fail the same way: the offline line answers instead.
 			_finish_receipt(receipt,false,true,detail)
@@ -1500,6 +1507,8 @@ func _receipt_http(audience_id:String,request:Dictionary,result:int,code:int,env
 
 func _finish_receipt(row:Dictionary,accepted:bool,fallback:bool,reason:String)->void:
 	row["accepted"]=accepted;row["fallback"]=fallback;row["reason"]=reason
+	# Why, in words the god reads (the hall's footer).
+	row["plain"]=plain_reason(reason,int(row.get("transport",0)))
 	if accepted: totals.accepted=int(totals.accepted)+1
 	else: totals.failed=int(totals.failed)+1
 	# One plain line per call in the player log: proof of what was spent.
@@ -1509,7 +1518,30 @@ func _finish_receipt(row:Dictionary,accepted:bool,fallback:bool,reason:String)->
 func _receipt_offline(s:Dictionary,stage:String,reason:String,model:String="")->void:
 	totals.offline=int(totals.offline)+1
 	_push_receipt({"audience_id":String(s.get("id","")),"stage":stage,"attempt":0,"day":_day(),"model":model,"http":0,"transport":0,"latency_ms":0,
-		"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"finish_reason":"","live":false,"accepted":false,"fallback":true,"reason":reason})
+		"prompt_tokens":0,"completion_tokens":0,"reasoning_tokens":0,"total_tokens":0,"finish_reason":"","live":false,"accepted":false,"fallback":true,"reason":reason,"plain":plain_reason(reason)})
+
+## Why a live line fell back, in plain words for the footer ("the connection
+## timed out"; "the answer broke the court's rules: a number that is not in
+## the facts (99)"; "the answer ran too long and was cut off").
+static func plain_reason(reason:String,transport:int=0)->String:
+	var r:=reason.strip_edges()
+	if r=="": return ""
+	var lower:=r.to_lower()
+	if lower.begins_with("order reader timed out"): return "reading your words took too long, so the plain reading stood in"
+	if lower.begins_with("order reading rejected"): return "the reading of your words made no sense, so the plain reading stood in"
+	if lower.contains("cut off at the token cap") or lower.contains("output limit"): return "the answer ran too long and was cut off"
+	if lower.contains("declined to answer"): return "the voice declined to answer"
+	if lower.contains("not the expected json"): return "the answer came back garbled"
+	if lower.begins_with("every line failed validation"):
+		var at:=r.find(": ")
+		if at>0: return "the answer broke the court's rules: "+r.substr(at+2).trim_suffix(")")
+		return "the answer broke the court's rules"
+	if lower.contains("transport %d" % HTTPRequest.RESULT_TIMEOUT) or (transport==HTTPRequest.RESULT_TIMEOUT and lower.contains("transport")): return "the connection timed out"
+	if lower.contains("could not reach") or lower.contains("request could not start"): return "the connection failed"
+	if lower.contains("http 401") or lower.contains("key rejected"): return "the key was refused"
+	if lower.contains("http 429") or lower.contains("usage limit"): return "the service's limit was reached"
+	if lower.contains("service error"): return "the service had an error"
+	return r
 
 func _push_receipt(row:Dictionary)->void:
 	usage.append(row)
@@ -1532,22 +1564,42 @@ func status()->Dictionary:
 	var config:Dictionary={} if not reason.is_empty() else _config()
 	var model:=String(config.get("model",""))
 	var last_live:Dictionary={}
+	var last_read:Dictionary={}
 	for i in range(usage.size()-1,-1,-1):
-		if bool(usage[i].get("live",false)): last_live=usage[i]; break
+		if not bool(usage[i].get("live",false)): continue
+		var stage:=String(usage[i].get("stage",""))
+		if stage=="order_read":
+			if last_read.is_empty(): last_read=usage[i]
+		elif last_live.is_empty(): last_live=usage[i]
+		if not last_live.is_empty() and not last_read.is_empty(): break
 	var live:=not config.is_empty()
 	var note:=""
+	var why:=""
 	if live and not last_live.is_empty() and bool(last_live.get("fallback",false)):
+		why=String(last_live.get("plain",plain_reason(String(last_live.get("reason","")))))
 		note="last reply failed: %s; offline lines stood in" % String(last_live.get("reason",""))
+	# The reading of the god's words failed (the plain reading stood in).
+	var read_why:=""
+	if live and not last_read.is_empty() and bool(last_read.get("fallback",false)):
+		read_why=String(last_read.get("plain",plain_reason(String(last_read.get("reason","")))))
 	if not live and reason.is_empty(): reason="no connection"
-	var label:=("Live voice · %s" % model)+(" · last line offline" if not note.is_empty() else "") if live else "Offline voice — %s" % reason
+	var label:=("Live voice · %s" % model) if live else "Offline voice — %s" % reason
+	# The first reason, briefly (the tooltip keeps the whole account).
+	if live and why!="": label+=" · last line offline: "+_brief_reason(why)
+	elif live and read_why!="": label+=" · last order read offline: "+_brief_reason(read_why)
 	var tip:=PackedStringArray()
 	tip.append("Audience voices this session: %d live call%s (%d used, %d failed), %d offline scene%s." % [int(totals.calls),"" if int(totals.calls)==1 else "s",int(totals.accepted),int(totals.failed),int(totals.offline),"" if int(totals.offline)==1 else "s"])
 	tip.append("Tokens: %d total (%d prompt, %d completion, of which %d reasoning)." % [int(totals.total_tokens),int(totals.prompt_tokens),int(totals.completion_tokens),int(totals.reasoning_tokens)])
 	if not last_live.is_empty():
 		tip.append("Last call: %s, HTTP %d, %d tokens, %.1f s%s." % [String(last_live.stage),int(last_live.http),int(last_live.total_tokens),float(last_live.latency_ms)/1000.0,"" if bool(last_live.accepted) else " — "+String(last_live.reason)])
 	if not note.is_empty(): tip.append(note.substr(0,1).to_upper()+note.substr(1)+".")
+	if read_why!="": tip.append("Your last words were read without the live reader: %s." % read_why)
 	if not live: tip.append("Offline voices are written from each speaker's character and never cost anything.")
-	return {"live":live,"model":model,"reason":reason,"note":note,"label":label,"tooltip":"\n".join(tip),"calls":int(totals.calls),"tokens":int(totals.total_tokens),"totals":totals.duplicate()}
+	return {"live":live,"model":model,"reason":reason,"note":note,"why":why,"read_why":read_why,"label":label,"tooltip":"\n".join(tip),"calls":int(totals.calls),"tokens":int(totals.total_tokens),"totals":totals.duplicate()}
+
+static func _brief_reason(why:String)->String:
+	var first:=why.get_slice("; ",0)
+	return first if first.length()<=110 else first.substr(0,first.rfind(" ",107))+"..."
 
 func _ruler_spoke(s:Dictionary)->bool:
 	for line in (s.audience as Dictionary).get("lines",[]):
@@ -1592,6 +1644,10 @@ func parse_body(body:PackedByteArray)->Dictionary:
 func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 	var allowed:={}
 	var sources:PackedStringArray=PackedStringArray([JSON.stringify(s.get("report",{})),JSON.stringify(s.get("scout_brief",{})),JSON.stringify(s.get("ctx",{})),String(s.get("fact","")),String(s.get("summary","")),String(s.get("amt","")),String(extra.get("player_text",""))])
+	# The speaker's fact sheet (court_facts.gd): the exact numbers the prompt
+	# gave the voice and told it to state. Without them a true answer ("38 were
+	# killed") was thrown out as an invented number.
+	sources.append(String(s.records) if s.has("records") else court_records(s))
 	var result:Dictionary=extra.get("result",{})
 	sources.append(String(result.get("outcome","")))
 	sources.append(String(result.get("actor_says","")))
@@ -1628,17 +1684,19 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 			if not who.is_empty(): principals.append(String(who.key))
 	var visible:=" ".join(PackedStringArray([String(s.get("summary","")),String(s.get("fact","")),String(s.get("headline","")),String(result.get("outcome",""))]))
 	var side_spoken:=0
+	# Why each proposed line was thrown out, for the receipt and the footer.
+	rejections.clear()
 	for item in raw:
 		if out.size()>=limit: break
-		if not item is Dictionary: continue
+		if not item is Dictionary: rejections.append("not a line"); continue
 		var key:String=String((item as Dictionary).get("speaker_key",""))
-		if key not in keys: continue
-		if stage=="divine" and key=="envoy" and bool((extra.get("result",{}) as Dictionary).get("terminal",false)): continue   # the removed do not speak
-		if stage=="command" and key=="envoy" and not _envoy_may_speak(s,result): continue
+		if key not in keys: rejections.append("a speaker who is not here"); continue
+		if stage=="divine" and key=="envoy" and bool((extra.get("result",{}) as Dictionary).get("terminal",false)): rejections.append("the removed do not speak"); continue   # the removed do not speak
+		if stage=="command" and key=="envoy" and not _envoy_may_speak(s,result): rejections.append("the removed do not speak"); continue
 		if key=="narrator":
 			if staged: continue
 			var stage_text:=stage_direction(String((item as Dictionary).get("text","")))
-			if stage_text.is_empty() or not line_ok(stage_text,CV.era_tags("player")+(s.get("fact_tags",[]) as Array)) or meta.search(stage_text)!=null or (_voice_state().said as Dictionary).has(_text_key(stage_text)): continue
+			if stage_text.is_empty() or not line_ok(stage_text,CV.era_tags("player")+(s.get("fact_tags",[]) as Array)) or meta.search(stage_text)!=null or (_voice_state().said as Dictionary).has(_text_key(stage_text)): rejections.append("a stage direction that broke the rules"); continue
 			staged=true
 			out.push_front({"key":"narrator","text":stage_text,"aside":false})
 			continue
@@ -1646,21 +1704,21 @@ func validate_lines(raw:Array,s:Dictionary,stage:String,extra:Dictionary={})->Ar
 		text=without_filler(text,names)
 		# Invented maxims go; the plain part of the line stays if it stands alone.
 		text=Plain.strip_tics(Plain.strip(text))
-		if text.is_empty(): continue
-		if (obeyed or ordered) and refusal.search(text)!=null: continue   # the engine, not the model, decides obedience
-		if text.is_empty() or meta.search(text)!=null: continue
-		if _recent_lines(s,_member(s,key)).has(text.to_lower()): continue   # word for word from a past audience
-		if not line_ok(text,_era_for(s,_member(s,key))): continue   # anachronism, quotation or named source
-		if (_voice_state().said as Dictionary).has(_text_key(text)): continue   # said before in this hall
-		var invented:=false
+		if text.is_empty(): rejections.append("only a saying, nothing said"); continue
+		if (obeyed or ordered) and refusal.search(text)!=null: rejections.append("a refusal of an order"); continue   # the engine, not the model, decides obedience
+		if text.is_empty() or meta.search(text)!=null: rejections.append("talk of the game itself"); continue
+		if _recent_lines(s,_member(s,key)).has(text.to_lower()): rejections.append("a line repeated from a past audience"); continue   # word for word from a past audience
+		if not line_ok(text,_era_for(s,_member(s,key))): rejections.append("words these people do not have yet"); continue   # anachronism, quotation or named source
+		if (_voice_state().said as Dictionary).has(_text_key(text)): rejections.append("a line already said in this hall"); continue   # said before in this hall
+		var invented:=PackedStringArray()
 		for m in number.search_all(text):
-			if not allowed.has(m.get_string()): invented=true
-		if invented: continue
+			if not allowed.has(m.get_string()): invented.append(m.get_string())
+		if not invented.is_empty(): rejections.append("a number that is not in the facts (%s)" % ", ".join(invented)); continue
 		if key!="envoy" and not key in principals and not gated_all:
 			# One official beside the principals, and only with real guidance.
-			if side_spoken>=1: continue
+			if side_spoken>=1: rejections.append("a second official"); continue
 			var kind:=String(gate.get("kind","aside")) if String(gate.get("key",""))==key else "aside"
-			if not Relevance.clears({"kind":kind,"text":text},visible): continue
+			if not Relevance.clears({"kind":kind,"text":text},visible): rejections.append("an official with nothing new to say"); continue
 			side_spoken+=1
 		out.append({"key":key,"text":text,"aside":bool((item as Dictionary).get("aside",false))})
 	return out
@@ -1787,10 +1845,50 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		var already:=false
 		for line in (h.find(String(s.id)) as Dictionary).get("lines",[]):
 			if String((line as Dictionary).get("text","")).strip_edges().trim_prefix("[").trim_suffix("]").strip_edges()==outcome.strip_edges(): already=true
+		# The one who answered already said this fact ("Tsaren is already
+		# ours." under "Tsaren is already ours. 16 of Rovik's garrison hold
+		# it."): the plain note would only say it twice.
+		for line in ordered:
+			if String(line.get("key",""))!="narrator" and fact_said(outcome,String(line.get("text",""))): already=true
 		if not outcome.is_empty() and not already: h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
+
+## An engine account retold in words this people has: the standing swaps
+## (character_voice.era_plain) and the blade idioms a pre-metal people says
+## otherwise.
+const ERA_IDIOMS:=[["metal","to the sword","to death"],["metal","swords","spears"],["metal","sword","spear"]]
+static func era_said(text:String,tags:Array)->String:
+	var out:=CV.era_plain(text,tags)
+	for rule in ERA_IDIOMS:
+		if tags.has(String(rule[0])): continue
+		out=out.replace(String(rule[1]),String(rule[2]))
+	return out
+
+## Does a spoken line already carry the facts of a plain note? Every figure
+## in the note must be in the line, and its words (four letters or more):
+## all of them when it has no figures, most of them when it has.
+static func fact_said(fact:String,line:String)->bool:
+	var clean:=func(text:String)->String:
+		var out:=""
+		for ch in text.to_lower():
+			out+=ch if (ch>="a" and ch<="z") or (ch>="0" and ch<="9") or ch==" " else " "
+		return " "+" ".join(out.split(" ",false))+" "
+	var note:String=clean.call(fact)
+	var said:String=clean.call(line)
+	if note.strip_edges()=="" or said.strip_edges()=="": return false
+	if said.contains(note): return true
+	var figures:=0; var weighty:=0; var missing:=0
+	for word in note.split(" ",false):
+		if word.is_valid_int():
+			figures+=1
+			if not said.contains(" "+word+" "): return false
+		elif word.length()>=4:
+			weighty+=1
+			if not said.contains(" "+word+" "): missing+=1
+	if figures==0: return missing==0 and weighty>=2
+	return float(missing)<=float(weighty)*0.4
 
 func _proposal(body:PackedByteArray)->Dictionary:
 	## The model's JSON object (from a chat envelope or bare), or {}.
@@ -2689,11 +2787,23 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	var loving:=float(regard.get("love",0.0))>=0.62 and float(regard.get("dread",0.0))<0.3
 	if directive:
 		line=_say(s,envoy,DV.generic("order_dread") if dreadful else ORDER_ACK,rng,{},false,ORDER_ACK)
+	# A factual question to one of our own officials: the numbers from the same
+	# fact sheet the live voice is given (court_answers.gd), exactly as they
+	# stand; never a stock line claiming not to know.
+	if line.is_empty():
+		var told:=court_answer(s,envoy,player_text)
+		if told!="": line={"key":"envoy","text":told,"aside":false,"fact":true}
+	var ours:=String(s.origin)=="court"
 	if line.is_empty():
 		var counted:=fact_answer(s,player_text)
-		if not counted.is_empty(): line=_say(s,envoy,counted,rng,{},false,counted)
+		# Asked of our own official and not on the sheet: who would know.
+		if ours and counted==DONT_KNOW: line={"key":"envoy","text":CourtAnswers.redirect(_offices_of(s,envoy)),"aside":false,"fact":true}
+		elif not counted.is_empty(): line=_say(s,envoy,counted,rng,{},false,counted)
 	var answers:=answer_bank(s,player_text) if line.is_empty() else []
 	if not answers.is_empty(): line=_say(s,envoy,answers,rng,{},false)
+	if line.is_empty() and ours and CourtAnswers.factual(player_text):
+		# A question of fact the sheet does not answer: who would know.
+		line={"key":"envoy","text":CourtAnswers.redirect(_offices_of(s,envoy)),"aside":false,"fact":true}
 	if line.is_empty() and String(s.kind)=="summons" and "?" in player_text:
 		line=_say(s,envoy,SUMMONS_REPLY,rng,{},false)
 	answered[String(s.id)]=not line.is_empty()
@@ -2708,10 +2818,15 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	if not member.is_empty():
 		var gate:Dictionary=s.gate
 		if String(gate.get("kind",""))=="direct_question":
-			var counted:=fact_answer(s,player_text)
-			var bank:Array=counted if not counted.is_empty() else answer_bank(s,player_text)
-			if bank.is_empty(): bank=CV.model_bank(member.persona,"react")
-			_append_if(out,_say(s,member,bank,rng,{},false,COURT_REACT.get(mood,COURT_REACT.neutral)))
+			# Asked outright: the numbers from that official's own sheet first.
+			var told:=court_answer(s,member,player_text)
+			if told!="": out.append({"key":key,"text":told,"aside":false,"fact":true})
+			else:
+				var counted:=fact_answer(s,player_text)
+				if counted==DONT_KNOW: counted=[CourtAnswers.redirect(_offices_of(s,member))]
+				var bank:Array=counted if not counted.is_empty() else answer_bank(s,player_text)
+				if bank.is_empty(): bank=CV.model_bank(member.persona,"react")
+				_append_if(out,_say(s,member,bank,rng,{},false,COURT_REACT.get(mood,COURT_REACT.neutral)))
 		elif String(gate.get("kind",""))=="objection" and not ((s.audience as Dictionary).get("lines",[]) as Array).any(func(l:Variant)->bool:return l is Dictionary and String((l as Dictionary).get("text","")).ends_with(String(gate.get("text","")))):
 			out.append({"key":key,"text":String(gate.text),"aside":true,"fact":true})
 	return out
@@ -2735,7 +2850,41 @@ const FACT_TOPICS:=[
 	["their_people","(?i)\\b(they|their|them|those people)\\b.*\\b(many|number|people|souls|strong)\\b|how many (are|of) (they|them)",["their_population"],["About {n} of them, near enough.","They number about {n}."]],
 	["our_people","(?i)how many (are )?(we|of us|people|souls|mouths)",["population"],["We number about {n}.","About {n} souls, counting the babes."]],
 ]
-const DONT_KNOW:=["I don't know that. Nobody has counted it.","That I can't tell you; no one has a count.","I don't know, and I won't guess at it."]
+## A counted thing that is not in the facts given: said as what would find it
+## out, never as not knowing (an envoy keeps their own people's counts).
+const DONT_KNOW:=["That count is not mine to give you.","A count of that would have to be made; none has come to me.","Send someone to count it and you'll have it exactly."]
+
+## The offices whose facts a speaker holds (court_facts.offices).
+func _offices_of(s:Dictionary,member:Dictionary)->Array:
+	var audience:Dictionary=s.get("audience",{}) if s.get("audience") is Dictionary else {}
+	var is_envoy:=String(member.get("key",""))=="envoy"
+	var speaker:Dictionary=(audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}) if is_envoy else {"person_id":int(member.get("person_id",0))}
+	return CourtFacts.offices(member.get("persona",{}) as Dictionary,speaker,String(audience.get("holder_key","")) if is_envoy else "")
+
+## A factual question to one of our own officials, answered from that
+## official's fact sheet (court_answers.gd); "" when it is not one.
+func court_answer(s:Dictionary,member:Dictionary,player_text:String)->String:
+	if String(s.get("origin",""))!="court" or not CourtAnswers.is_question(player_text): return ""
+	var sheet:=CourtFacts.sheet(_offices_of(s,member))
+	return CourtAnswers.answer(sheet,player_text,_spoken_town(s,sheet),_recent_words(s))
+
+## The audience's last few lines before the ruler's words, as one text (what a
+## bare "how many?" refers back to).
+func _recent_words(s:Dictionary)->String:
+	var lines:Array=((s.get("audience",{}) as Dictionary).get("lines",[])) if s.get("audience") is Dictionary else []
+	var out:PackedStringArray=PackedStringArray()
+	for i in range(maxi(0,lines.size()-4),lines.size()):
+		if lines[i] is Dictionary: out.append(String((lines[i] as Dictionary).get("text","")))
+	return " ".join(out)
+
+## The town last named in this audience (by anyone), among the sheet's towns.
+func _spoken_town(s:Dictionary,sheet:Dictionary)->String:
+	var lines:Array=((s.get("audience",{}) as Dictionary).get("lines",[])) if s.get("audience") is Dictionary else []
+	for i in range(lines.size()-1,maxi(-1,lines.size()-16),-1):
+		var said:=String((lines[i] as Dictionary).get("text","")).to_lower()
+		for t in sheet.get("towns",[]):
+			if t is Dictionary and CourtAnswers._name_in(said,String((t as Dictionary).get("name",""))): return String(t.name)
+	return ""
 
 func fact_answer(s:Dictionary,player_text:String)->Array:
 	## Real numbers for how-long/how-many/how-much questions. Empty when the
@@ -2892,6 +3041,10 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	var key:=CC.actor_reaction_key(result)
 	var says:=String(result.get("actor_says",""))
 	if not actor.is_empty() and says!="":
+		# The engine's account in this people's own words: "put to the sword"
+		# before anyone works metal is "put to death", not a dropped line.
+		var tags:=_era_for(s,actor)
+		if not line_ok(says,tags): says=era_said(says,tags)
 		# The war leader answers with the engine's own decision and numbers,
 		# whole: the short-line cap for banked lines must not drop it.
 		var said:=_say(s,actor,[says],rng,{},false,[says])
@@ -3151,6 +3304,10 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var facts:String=JSON.stringify(ctx)
 	if facts.length()>2400: facts=facts.substr(0,2400)+"...}"
 	parts.append("FACTS YOU MAY USE (nothing else is true): "+facts)
+	var records:=court_records(s)
+	# Kept on the scene: the numbers on the sheet are the numbers a line may say.
+	s["records"]=records
+	if records!="": parts.append("WHAT OUR OWN PEOPLE KNOW (exact, as of today; the one addressed knows these and states the numbers when asked):\n"+records)
 	var mood:float=float((s.audience as Dictionary).get("mood",0.0))
 	parts.append("ROOM: %s (%.2f)." % [_mood_words(mood),mood])
 	var regard:=_prompt_regard(s)
@@ -3180,6 +3337,17 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	parts.append("SO FAR:\n"+("\n".join(history) if not history.is_empty() else "(the doors have just opened)"))
 	parts.append("NOW: "+_stage_instruction(s,stage,extra))
 	return "\n\n".join(parts)
+
+## The exact fact sheet for the one addressed at our own court, by office
+## (court_facts.gd): the war leader has every town's ledger, the headman the
+## stores. "" for a foreign envoy, who knows nothing of what our people know.
+func court_records(s:Dictionary)->String:
+	if String(s.get("origin",""))!="court": return ""
+	var audience:Dictionary=s.get("audience",{}) if s.get("audience") is Dictionary else {}
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	var persona:Dictionary=(s.get("envoy",{}) as Dictionary).get("persona",{})
+	var which:=CourtFacts.offices(persona,speaker,String(audience.get("holder_key","")))
+	return CourtFacts.text(CourtFacts.sheet(which))
 
 ## The prompt's word on court officials: silent unless the gate chose one.
 func _gate_words(s:Dictionary)->String:

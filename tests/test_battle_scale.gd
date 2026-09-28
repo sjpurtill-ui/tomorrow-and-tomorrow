@@ -12,7 +12,7 @@ extends GdUnitTestSuite
 
 const Sim:=preload("res://scripts/combat_simulator.gd")
 const Account:=preload("res://scripts/battle_account.gd")
-const Replay:=preload("res://scripts/battle_replay.gd")
+const Record:=preload("res://scripts/battle_record.gd")
 const Model:=preload("res://scripts/war_front_model.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Front:=preload("res://scripts/army_front_visual.gd")
@@ -184,10 +184,12 @@ func test_twenty_against_two_is_settled_the_day_contact_is_made()->void:
 	assert_int((account.phases as Array).size()).is_equal(1)
 	assert_str(String(account.phases[0])).starts_with("It was over at once:")
 	assert_str(String(account.duration)).is_equal("half an hour")
-	var frames:=Replay.frames(record,"hearth")
-	assert_int(frames.size()).is_equal(2)
-	assert_str(String(frames[-1].caption)).contains("overran")
-	assert_str(String(frames[-1].caption)).not_contains("lines fought")
+	# The battle view shows it as one small card, not a battle to step through.
+	var view:=Record.view(record,{"stage":"hearth","headline":String(account.headline)})
+	assert_bool(bool(view.skirmish)).is_true()
+	assert_str(String(view.one_line)).contains("overran")
+	assert_str(String(view.one_line)).not_contains("lines fought")
+	assert_int((view.phases as Array).size()).is_equal(1)
 
 
 func test_a_lopsided_day_of_fighting_does_not_drag_across_days()->void:

@@ -163,7 +163,6 @@ func _busy(record:Dictionary)->String:
 	if record.service=="army":
 		if battle.engaged(int(record.force_id)):return "This command is already committed to a battle."
 		if WorldSimulation.campaign.active and int(actual.get("army_id",-1))==int(WorldSimulation.campaign.state.get("army_id",-2)):return "This army is committed to its general's active campaign."
-		if not host.active_engagement.is_empty() or not host.pending_aftermath.is_empty():return "Resolve the active battle before reorganizing forces."
 		if bool(actual.get("embarked",false)) or actual.get("status","stationed") in ["moving","besieging"]:return "Let this command assemble before detaching a subordinate."
 	else:
 		if not host.joint_operations.organized_at_home(actual):return "Subdivide this force at its ready home base before sending detachments."

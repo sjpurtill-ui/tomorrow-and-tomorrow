@@ -10,14 +10,9 @@ var next_button:Button
 var map:Control
 var map_stage:SubViewportContainer
 var map_camera:Camera3D
-var stage:SubViewportContainer
-var viewport:SubViewport
-var diorama:BattleDiorama
 var body:HBoxContainer
 var right:VBoxContainer
 var last_battle_seed:=-1
-var playback_round:=0
-var playback_clock:=0.0
 var shown_messages:=""
 
 func _ready()->void:
@@ -46,10 +41,6 @@ func _ready()->void:
 	var origin:Vector2=WorldSimulation.campaign.state.origin
 	map_camera.position=Vector3(origin.x,100,origin.y);map_camera.look_at(Vector3(origin.x,0,origin.y),Vector3(0,0,-1));map_camera.size=80
 	map=preload("res://scripts/general_campaign_map.gd").new();map.size_flags_vertical=SIZE_EXPAND_FILL;left.add_child(map)
-	stage=SubViewportContainer.new();stage.stretch=true;left.add_child(stage);stage.hide()
-	viewport=SubViewport.new();viewport.own_world_3d=false;viewport.world_3d=WorldSimulation.campaign.terrain.get_world_3d();viewport.size=Vector2i(800,600);stage.add_child(viewport)
-	diorama=BattleDiorama.new();diorama.live_terrain=WorldSimulation.campaign.terrain;viewport.add_child(diorama)
-	stage.gui_input.connect(_camera_input)
 	right=VBoxContainer.new();right.custom_minimum_size.x=360;body.add_child(right)
 	_label(right,"YOUR GENERAL",12)
 	conversation=RichTextLabel.new();conversation.bbcode_enabled=false;conversation.size_flags_vertical=SIZE_EXPAND_FILL;conversation.scroll_following=true;right.add_child(conversation)
@@ -106,49 +97,21 @@ func refresh()->void:
 	status.text=WorldSimulation.general_dialogue.status if not WorldSimulation.general_dialogue.status.is_empty() else "Discussion pauses time. Committing advances both sides and the wider world."
 	if not s.battle.is_empty() and int(s.battle.seed)!=last_battle_seed:_watch()
 
+## The last battle, in the battle panel (hud/battle_view.gd). Viewing does not
+## resolve it again.
 func _watch()->void:
 	if WorldSimulation.campaign.state.get("battle",{}).is_empty():status.text="No battle has occurred yet. The map shows actual mission progress.";return
-	map.hide();map_stage.hide();stage.show()
-	var s:Dictionary=WorldSimulation.campaign.state;var at:Vector2=s.battle.location
-	WorldSimulation.campaign.terrain._set_camera_target(Vector3(at.x,0,at.y))
-	WorldSimulation.campaign.terrain.camera.size=.22
-	diorama.set_landscape({"threat":{"target_position":{"x":at.x,"z":at.y}}})
-	diorama.reset(s.battle_initial[0],s.battle_initial[1]);diorama.target=Vector3(0,1,0);diorama._camera_update()
-	last_battle_seed=int(s.battle.seed);playback_round=0;playback_clock=0
-	status.text="Recorded battle · schematic deployment; cohort positions are not recorded. Drag to pan, right-drag to orbit, wheel to zoom at the pointer. Viewing does not resolve it twice."
+	var s:Dictionary=WorldSimulation.campaign.state
+	var shown:Dictionary=(s.battle as Dictionary).duplicate(true)
+	shown["home_side"]=String(shown.get("home_side","attacker"))
+	last_battle_seed=int(s.battle.seed)
+	preload("res://scripts/hud/battle_view.gd").open(shown,self)
 
-func _process(delta:float)->void:
+func _process(_delta:float)->void:
 	if not WorldSimulation.campaign.active:return
 	if WorldSimulation.campaign.resolving:title.text="ALDERFORD · Day %.2f · %s"%[WorldSimulation.state.elapsed_days,WorldSimulation.campaign.state.status]
-	if not stage.visible or WorldSimulation.campaign.state.battle.is_empty():return
-	playback_clock+=delta
-	var battle:Dictionary=WorldSimulation.campaign.state.battle
-	if playback_clock>=2 and playback_round<battle.rounds.size():
-		playback_clock=0
-		var row:Dictionary=battle.rounds[playback_round];playback_round+=1
-		# Cohort losses are applied cumulatively to the recorded initial forces.
-		var forces:Array=WorldSimulation.campaign.state.battle_initial.duplicate(true)
-		for i in playback_round:
-			var record:Dictionary=battle.rounds[i]
-			for side in 2:
-				var prefix:="attacker" if side==0 else "defender"
-				var losses:Array=record.get(prefix+"_cohort_losses",[])
-				for f in mini(losses.size(),forces[side].formations.size()):forces[side].formations[f].count=maxi(0,int(forces[side].formations[f].count)-int(losses[f]))
-		for side in 2:
-			var prefix:="attacker" if side==0 else "defender"
-			forces[side].troops=int(row.get(prefix+"_remaining",0));forces[side].morale=float(row.get(prefix+"_morale",1))
-		var visual_row:=row.duplicate(true)
-		if playback_round==battle.rounds.size():visual_row["termination"]=battle.get("termination",{})
-		diorama.apply_snapshot(forces[0],forces[1],visual_row,String(battle.outcome) if playback_round==battle.rounds.size() else "")
-
-func _camera_input(event:InputEvent)->void:
-	if event is InputEventMouseMotion and event.button_mask&MOUSE_BUTTON_MASK_LEFT:diorama.pan(event.position-event.relative,event.position)
-	if event is InputEventMouseMotion and event.button_mask&MOUSE_BUTTON_MASK_RIGHT:diorama.orbit(-event.relative.x*.006,event.relative.y*.003)
-	if event is InputEventMouseButton and event.pressed:
-		if event.button_index==MOUSE_BUTTON_WHEEL_UP:diorama.zoom_at(event.position,-6)
-		if event.button_index==MOUSE_BUTTON_WHEEL_DOWN:diorama.zoom_at(event.position,6)
 
 func _show_map()->void:
-	map.show();map_stage.show();stage.hide()
+	map.show();map_stage.show()
 	var at:Vector2=WorldSimulation.campaign.state.origin
 	WorldSimulation.campaign.terrain._set_camera_target(Vector3(at.x,0,at.y));WorldSimulation.campaign.terrain.camera.size=80

@@ -1209,7 +1209,15 @@ static func typed_choice(audience_id:String,text:String,live:bool)->String:
 			for word in pair[0]:
 				if lower.contains(String(word)): return String(pair[1])
 		return ""
+	# A question is never an aim, nor the choice of one: the court answers it
+	# ("What does each of these aims ask of us?").
+	if asks(text): return ""
 	if lower.contains(" not yet ") or lower.contains(" wait "): return "aim_wait" if String(aim_part.get("mode",""))=="propose" else "aim_keep"
+	# An order is carried out now, never held up as a hope for a generation:
+	# "Go and conquer Tsaren right now" goes to the war leader even when an aim
+	# on the table shares a word with it ("conquer" is also a word of fear).
+	# Only words that choose an aim outright ("that aim", "we adopt it") pick one.
+	if is_order(text) and not chooses_aim(text): return ""
 	var template:=template_of_words(text)
 	var found:=""
 	for row_variant in aim_part.get("candidates",[]):
@@ -1232,13 +1240,28 @@ static func typed_choice(audience_id:String,text:String,live:bool)->String:
 	rows.append({"cid":String(mine.cid),"title":String(mine.title).substr(0,80),"by":"the god"})
 	return "aim_adopt:%s" % String(mine.cid)
 
+static func asks(text:String)->bool:
+	## Words that ask rather than decide: a question mark, or a question's
+	## opening ("what", "should we", "does it"). "Do it" is no question.
+	var clean:=text.strip_edges().to_lower()
+	if clean.ends_with("?"): return true
+	return RegEx.create_from_string("^(what|why|how|who|whom|whose|where|when|which|should|shall we|shall i|would|could|can|is|are|was|were|does|do (you|we|they|these|those|the)|did|tell me)\\b").search(clean)!=null
+
+static func chooses_aim(text:String)->bool:
+	## Words that pick one of the aims on the table outright.
+	return RegEx.create_from_string("(?i)\\b(aims?|choose|chosen|adopt|take (it|that|this) up|that one|this one|the (first|second|third|last) (one|aim)|for a generation|over (the|a) generation|our purpose)\\b").search(text)!=null
+
 static func is_order(text:String)->bool:
 	## Words the court must carry out now rather than hold up as an aim: an
 	## order of war or force, or anything said to be done at once. Aims are
 	## hopes for a generation ("let fewer children die", "make them fear us").
 	var lower:=text.to_lower()
 	if RegEx.create_from_string("\\b(now|right now|at once|immediately|today|this instant|without delay|straight away)\\b").search(lower)!=null: return true
-	return RegEx.create_from_string("\\b(conquer|capture|seize|attack|invade|raid|besiege|storm|march (on|to|against)|burn|kill|slay|slaughter|execute|sack|plunder|loot|round up|tie (them|up)|bind (them|the)|chase|pursue|go after)\\b").search(lower)!=null
+	if RegEx.create_from_string("\\b(conquer|capture|seize|attack|invade|raid|besiege|storm|march (on|to|against)|burn|kill|slay|slaughter|execute|sack|plunder|loot|round up|tie (them|up)|bind (them|the)|chase|pursue|go after)\\b").search(lower)!=null: return true
+	# What a garrison is to do with a people ("take their weapons", "make
+	# them build our walls") is an order, not a hope for a generation.
+	var measure:=preload("res://scripts/occupation_measures.gd").read(text)
+	return not measure.is_empty() and not (measure.measures as Array).is_empty() and (bool(measure.people) or bool(measure.pronoun))
 
 static func from_words(text:String)->Dictionary:
 	## Any aim the god speaks is accepted and mapped onto the nearest

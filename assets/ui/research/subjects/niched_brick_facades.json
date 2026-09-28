@@ -1,0 +1,12 @@
+{
+  "id": "niched_brick_facades",
+  "line": "infrastructure",
+  "game_year": 190,
+  "approx_historical_year": -3733,
+  "prompt": "c. 3733 BCE: Builders set sun-dried mudbricks in shallow repeated facade niches; architectural casein gouache. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1940d3c2-bb50-4d0d-92c6-f6bcd1c2df0b.png",
+  "asset": "res://assets/ui/research/subjects/niched_brick_facades-v1.png",
+  "sha256": "da66cccf1fbcbbdb4a9f87b94e6d0b71cacd109a7640fb827fee762564cfb13e",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
