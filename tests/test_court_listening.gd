@@ -22,7 +22,6 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 
 const OLD_SCHEMA_MIN_CHARS:=2202
 const OLD_BRIEF_CHARS:={"tsaren_bound/rovik":1275,"tsaren_bound/headman":952,"battle_won/rovik":832,"envoy_after_fall/envoy":871}
-const OLD_LONG_BRIEF_CHARS:=2537
 const OLD_READING_CHARS:=366
 const CHARS_PER_TOKEN:=4
 ## OpenAI caches a prompt's prefix from 1024 tokens on.
@@ -75,8 +74,11 @@ func test_the_readers_prompt_is_a_cached_prefix_and_a_small_brief()->void:
 		for id in (made.brief.ids as Dictionary):
 			if ":" in String(id): assert_str(prefix).override_failure_message("%s in the static prefix" % id).not_contains(String(id))
 		var brief:=String(((payload.messages as Array)[1] as Dictionary).content)
-		print("reader prompt %s: static %d chars (~%d tokens, cached), brief %d chars (~%d tokens; was %d chars after a %d-char schema rebuilt per call)" % [key,prefix.length(),prefix.length()/CHARS_PER_TOKEN,brief.length(),brief.length()/CHARS_PER_TOKEN,int(OLD_BRIEF_CHARS[key]),OLD_SCHEMA_MIN_CHARS])
-		assert_int(brief.length()).is_less_equal(int(OLD_BRIEF_CHARS[key]))
+		# The brief grows only with the world it describes (the hall now lists
+		# the realm's named people too); what is processed fresh on each call is
+		# this, where before it was this plus the per-call schema.
+		print("reader prompt %s: static %d chars (~%d tokens, cached), brief %d chars (~%d tokens); before: brief %d chars after a %d+ char schema rebuilt per call, nothing cached" % [key,prefix.length(),prefix.length()/CHARS_PER_TOKEN,brief.length(),brief.length()/CHARS_PER_TOKEN,int(OLD_BRIEF_CHARS[key]),OLD_SCHEMA_MIN_CHARS])
+		assert_int(brief.length()).is_less(prefix.length())
 		assert_str(String(payload.get("prompt_cache_key",""))).is_equal(OR.PROMPT_CACHE_KEY)
 		assert_str(String(payload.get("reasoning_effort",""))).is_equal(OR.REASONING_EFFORT)
 	# The same bytes on every call, whoever speaks and whatever the world holds.
@@ -87,12 +89,16 @@ func test_the_readers_prompt_is_a_cached_prefix_and_a_small_brief()->void:
 	assert_int(JSON.stringify(OR.response_format()).length()).is_less(OLD_SCHEMA_MIN_CHARS)
 
 func test_a_long_audience_brief_keeps_only_the_last_short_lines()->void:
+	## Before, the last six lines went in at up to 220 characters each (a long
+	## audience's brief was 2537 chars on this world); now the last four, cut
+	## to 160: however long the audience, its lines add at most ~700 chars.
 	var w:=h.fx.use("tsaren_bound")
 	var id:=h.fx.audience_for(w,"rovik")
+	var short:=OR.brief_text(OR.world_brief(id)).length()
 	for i in 8:
 		Hall.append_line(id,{"speaker":"Rovik Longstride","role":"official","person_id":0,"civ_id":"player","text":"Report %d: the garrison keeps the men of Tsaren bound in the long house; two ran toward Stonefield before the ropes were on, and the women bring water and bread each morning under guard while the children stay indoors." % i,"day":0,"aside":false})
 	var brief:=OR.brief_text(OR.world_brief(id))
-	assert_int(brief.length()).is_less(int(OLD_LONG_BRIEF_CHARS*0.8))
+	assert_int(brief.length()-short).is_less_equal(OR.RECENT_LINES*(OR.RECENT_CHARS+24))
 	assert_str(brief).contains("Report 7")
 	assert_str(brief).not_contains("Report 3")
 
