@@ -100,9 +100,10 @@ static func seed_early()->void:
 	## spear line the Quartermaster runs; Rovik's levy lacks eight clubs.
 	_base_world(7511,120,6)
 	_know(["hafted_weapons","cordage","basketry"])
+	for domain:String in ["security","production","logistics","institutions"]:ProgressionSystem.domain_levels[domain]=1
 	GameState.resource_stockpiles={"Timber":5.08,"Stone":194.0,"Clay":336.0,"Copper Ore":1.0,"Fiber Plants":60.0,"Flint":12.0}
-	var quartermaster:=_appoint("Quartermaster","Mahun of the High Camp")
-	_appoint("Marshal","Rovik of the Ford",[quartermaster])
+	# In the first years the Steward keeps the workshops and leads the levy.
+	_appoint("Steward","Rovik of the Ford")
 	_line(1,"improvised",25,0,.2,false)
 	_line(2,"spear",20,18,.8,true)
 	MilitaryCampaign.damaged_equipment={"improvised":3}
@@ -121,6 +122,8 @@ static func seed_late()->void:
 	_know(["hafted_weapons","cordage","basketry","bow_craft","bronze_weaponry","woven_carriers","joinery","river_craft","domesticated_mounts","siege_engineering","workshop_standards"])
 	for domain:String in ["security","production","logistics","institutions"]:ProgressionSystem.domain_levels[domain]=6
 	GameState.resource_stockpiles={"Timber":142.0,"Stone":61.0,"Clay":212.0,"Fiber Plants":3.2,"Copper Ore":0.0,"Tin Ore":2.4,"Flint":30.0,"Civilian Goods":40.0}
+	# By now the council has a Quartermaster for the workshops and a Marshal
+	# for the bands.
 	var quartermaster:=_appoint("Quartermaster","Mahun of the High Camp")
 	var marshal:=_appoint("Marshal","Rovik of the Ford",[quartermaster])
 	MilitaryCampaign.joint_operations.state.bases.append({"id":1,"owner":"player","city_id":String(GameState.player_settlements[0].id),"name":"Alder Ford Landing","domain":"navy","position":{"x":0.0,"z":0.0},"capacity":20,"condition":1.0,"construction_work":30.0,"required_work":30.0})
@@ -157,25 +160,26 @@ func _run()->void:
 	var wanted:=_arg("state","all")
 	T.set_color_mode("light")
 	var ok:=true
-	for state:String in ["early","late"]:
+	for state:String in ["early","late","early-civilian","late-dark"]:
 		if wanted!="all" and wanted!=state:continue
-		if state=="early":seed_early()
+		T.set_color_mode("dark" if state.ends_with("dark") else "light")
+		if state.begins_with("early"):seed_early()
 		else:seed_late()
-		ok=await _capture(out,tag,state) and ok
+		ok=await _capture(out,tag,state,1 if state.ends_with("civilian") else 0) and ok
 	print("HOI4_PRODUCTION_CAPTURE ","PASS" if ok else "FAIL")
 	WorldSimulation.clear()
 	get_tree().quit(0 if ok else 1)
 
-func _capture(out:String,tag:String,state:String)->bool:
+func _capture(out:String,tag:String,state:String,sub:int=0)->bool:
 	var stage:=Control.new();stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(stage)
-	var ground:=ColorRect.new();ground.color=Color("6e7550");ground.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);stage.add_child(ground)
+	var ground:=ColorRect.new();ground.color=Color("6e7550") if T.is_light() else Color("2a3024");ground.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);stage.add_child(ground)
 	var rail:=ColorRect.new();rail.color=T.PAPER;rail.position=Vector2.ZERO;rail.size=Vector2(T.RAIL_WIDTH,1080);stage.add_child(rail)
 	var terrain:=CaptureTerrain.new();stage.add_child(terrain)
 	var hud:=CaptureHud.new();stage.add_child(hud)
 	var provider=load("res://scripts/hud/content/dock_content_production.gd").new(terrain,hud)
 	var dock:=DockPanel.new();stage.add_child(dock)
 	dock.position=Vector2(T.DOCK_X,64);dock.size=Vector2(clampf(1920*.65,720,980),1080-64-T.DOCK_MARGIN_Y)
-	dock.present(provider,0)
+	dock.present(provider,sub)
 	for i in 10:await get_tree().process_frame
 	dock.size=Vector2(clampf(1920*.65,720,980),1080-64-T.DOCK_MARGIN_Y)
 	for i in 4:await get_tree().process_frame

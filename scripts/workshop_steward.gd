@@ -81,8 +81,15 @@ func advance(day:int)->void:
 		var result:=schedule(demand)
 		data.status=String(result.get("message",result.get("error",data.status)))
 		if bool(result.get("changed",false)):break
+	var raised:Array[Dictionary]=[]
 	for job:Dictionary in host.equipment_queue:
-		if bool(job.get("planner_managed",false)) and bool(job.get("persistent",false)) and String(job.get("job_type",""))=="production":_set_muster_priority(job)
+		if bool(job.get("planner_managed",false)) and bool(job.get("persistent",false)) and String(job.get("job_type",""))=="production" and _set_muster_priority(job):raised.append(job)
+	# Gear for waiting soldiers also gets the first call on scarce materials:
+	# the officer moves the line to the top of the list once, where the player
+	# sees it (and may move it again).
+	for index in range(raised.size()-1,-1,-1):
+		var at:int=host.equipment_queue.find(raised[index])
+		if at>0:host.equipment_queue.remove_at(at);host.equipment_queue.push_front(raised[index])
 	var request:=extraction_request()
 	if not request.is_empty():data.status+=" "+_shortage_note(request)
 func army_demands()->Array[Dictionary]:
@@ -215,14 +222,16 @@ func muster_hands_work(job:Dictionary)->float:
 	if still<=0:return 0.0
 	return still*MUSTER_WORK_PER_SOLDIER*clampf(float(WorldSimulation.state.population_health),.2,1.0)
 
-## Staff lines making gear for waiting soldiers get high priority, and return
-## to normal priority once everyone is armed.
-func _set_muster_priority(job:Dictionary)->void:
+## Staff lines making gear for waiting soldiers get more hands, and return to
+## an even share once everyone is armed. True when the line was just raised.
+func _set_muster_priority(job:Dictionary)->bool:
 	if _waiting_total(String(job.get("item","")))>0:
 		if float(job.get("allocation",1.0))<MUSTER_PRIORITY:
 			job.allocation=MUSTER_PRIORITY;job["muster_priority"]=true
+			return true
 	elif bool(job.get("muster_priority",false)):
 		job.allocation=1.0;job.erase("muster_priority")
+	return false
 
 ## A line the player runs keeps its owner, priority and pause. When soldiers are
 ## missing gear the officer only raises a too-low stock target, says so, and

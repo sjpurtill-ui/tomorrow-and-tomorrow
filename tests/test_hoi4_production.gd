@@ -92,3 +92,169 @@ func test_material_trend_reads_the_last_week()->void:
 	assert_int(int(trend.days)).is_equal(7)
 	assert_float(float(trend.per_day)).is_equal_approx(2.0,.0001)
 	assert_dict(Logistics.material_trend("Clay")).is_empty()
+
+# --- The screen ---------------------------------------------------------------------
+
+const Provider=preload("res://scripts/hud/content/dock_content_production.gd")
+const Queue=preload("res://scripts/hud/production_queue.gd")
+const Plain=preload("res://scripts/hud/production_plain.gd")
+
+static func _appoint(office:String,given:String,skip:Array=[])->int:
+	for person:Dictionary in GovernmentPeopleSystem.people:
+		if String(person.get("status",""))!="active" or not person.has("person_id") or int(person.person_id) in skip:continue
+		person["name"]=given
+		GameState.leadership_positions[office]={"person_id":int(person.person_id)}
+		return int(person.person_id)
+	return -1
+
+func _officers()->void:
+	var quartermaster:=_appoint("Quartermaster","Mahun of the High Camp")
+	_appoint("Marshal","Rovik of the Ford",[quartermaster])
+
+func _screen(sub:int=2)->Control:
+	var provider=Provider.new(null,null)
+	var block:Dictionary=provider.tab(sub).blocks[0]
+	var panel:Control=auto_free(Queue.new());add_child(panel);panel.setup(block)
+	return panel
+
+static func _job(id:int)->Dictionary:
+	for job:Dictionary in MilitaryCampaign.equipment_queue:
+		if int(job.id)==id:return job
+	return {}
+
+func test_numbers_on_screen_match_the_model()->void:
+	_room_for_lines(2);_officers();_levy_at_home(20,12)
+	MilitaryCampaign.start_production_line("improvised",25)
+	MilitaryCampaign.start_production_line("spear",20)
+	MilitaryCampaign.military_inventory["spear"]=4
+	var panel:=_screen()
+	var pool:=P.hands(MilitaryCampaign)
+	var hands:Node=panel.find_child("Header",true,false).find_child("Hands",true,false)
+	assert_str((hands.get_node("Value") as Label).text).is_equal(Plain.hands_text(float(pool.lines)))
+	assert_str((hands.get_node("Side") as Label).text).is_equal("/ "+Plain.hands_text(float(pool.total)))
+	var snapshot:=MilitaryCampaign.production_lines_snapshot()
+	var context:=Provider.line_context(snapshot)
+	for index in snapshot.lines.size():
+		var line:Dictionary=snapshot.lines[index]
+		var row:Node=panel.find_child("Line%d" % int(line.id),true,false)
+		assert_str((row.find_child("Rank",true,false).get_child(0) as Label).text).is_equal(str(index+1))
+		assert_str((row.find_child("HandsValue",true,false) as Label).text).is_equal(Plain.hands_text(float(pool.by_line[int(line.id)])))
+		assert_str((row.find_child("KeepValue",true,false) as Label).text).is_equal(str(int(line.target_stock)))
+		assert_str((row.find_child("Stock",true,false) as Label).text).is_equal(str(int(line.stock)))
+		var story:=Plain.line_story(line,context)
+		if float(story.rate)>0.0:assert_str(String(row.find_child("Output",true,false).reading)).is_equal(Plain.rate_short(float(story.rate)))
+	var levy:=Logistics.row("improvised")
+	var chip:Node=panel.find_child("Stock_improvised",true,false)
+	assert_str((chip.find_child("Have",true,false) as Label).text).is_equal(str(int(levy.stock)))
+	assert_str((chip.find_child("Need",true,false) as Label).text).is_equal("/ %d" % int(levy.needed))
+
+func test_reorder_changes_priority()->void:
+	_room_for_lines(2)
+	GameState.population_allocations.Crafting=100
+	var club:=int(MilitaryCampaign.start_production_line("improvised",100).job_id)
+	var spear:=int(MilitaryCampaign.start_production_line("spear",100).job_id)
+	# Timber for less than one club: whichever line comes first takes it.
+	GameState.resource_stockpiles.Timber=0.05
+	MilitaryCampaign._process_equipment_production_day()
+	assert_float(float(_job(club).last_consumed.get("Timber",0.0))).is_greater(0.0)
+	assert_float(float(_job(spear).last_consumed.get("Timber",0.0))).is_equal(0.0)
+	GameState.resource_stockpiles.Timber=0.05
+	var panel:=_screen()
+	assert_bool((panel.find_child("Line%d" % club,true,false).find_child("Up",true,false) as Button).disabled).is_true()
+	(panel.find_child("Line%d" % spear,true,false).find_child("Up",true,false) as Button).pressed.emit()
+	assert_int(int(MilitaryCampaign.equipment_queue[0].id)).is_equal(spear)
+	MilitaryCampaign._process_equipment_production_day()
+	assert_float(float(_job(spear).last_consumed.get("Timber",0.0))).is_greater(0.0)
+	assert_float(float(_job(club).last_consumed.get("Timber",0.0))).is_equal(0.0)
+	# Dragging a row onto line 1 puts it first again.
+	panel=_screen()
+	var row:Node=panel.find_child("Line%d" % club,true,false)
+	var target:Node=panel.find_child("Line%d" % spear,true,false)
+	assert_bool(target._can_drop_data(Vector2.ZERO,{"production_line":club})).is_true()
+	target._drop_data(Vector2.ZERO,{"production_line":club})
+	assert_int(int(MilitaryCampaign.equipment_queue[0].id)).is_equal(club)
+	assert_bool(row._can_drop_data(Vector2.ZERO,{"production_line":club})).is_false()
+
+func test_hands_come_from_household_crafting_then_the_lowest_line()->void:
+	_room_for_lines(2)
+	var first:=int(MilitaryCampaign.start_production_line("improvised",25).job_id)
+	var second:=int(MilitaryCampaign.start_production_line("spear",25).job_id)
+	var before:=P.hands(MilitaryCampaign)
+	var share:=MilitaryCampaign.production_labor_share
+	assert_bool(P.add_hands(MilitaryCampaign,first,1.0).has("ok")).is_true()
+	var after:=P.hands(MilitaryCampaign)
+	assert_float(float(after.by_line[first])).is_equal_approx(float(before.by_line[first])+1.0,.001)
+	assert_float(float(after.by_line[second])).is_equal_approx(float(before.by_line[second]),.001)
+	assert_float(MilitaryCampaign.production_labor_share).is_equal_approx(share+1.0/float(before.total),.001)
+	# Every craftsperson busy: the hand comes from the lowest line.
+	MilitaryCampaign.production_labor_share=1.0
+	before=P.hands(MilitaryCampaign)
+	P.add_hands(MilitaryCampaign,first,1.0)
+	after=P.hands(MilitaryCampaign)
+	assert_float(float(after.by_line[first])).is_equal_approx(float(before.by_line[first])+1.0,.001)
+	assert_float(float(after.by_line[second])).is_equal_approx(float(before.by_line[second])-1.0,.001)
+	assert_float(float(after.lines)).is_equal_approx(float(before.lines),.001)
+	# Taking a hand off sends it back to household crafting.
+	P.add_hands(MilitaryCampaign,second,-1.0)
+	assert_float(MilitaryCampaign.production_labor_share).is_less(1.0)
+	assert_str(String(P.add_hands(MilitaryCampaign,999,1.0).get("error",""))).is_not_empty()
+
+func test_deficits_and_damaged_sets_show_on_the_stock_strip()->void:
+	_levy_at_home(20,12)
+	MilitaryCampaign.military_inventory["improvised"]=3
+	MilitaryCampaign.damaged_equipment={"improvised":2}
+	var chip:Node=_screen().find_child("Stock_improvised",true,false)
+	var short:Label=chip.find_child("Short",true,false)
+	assert_bool(short.visible).is_true()
+	assert_str(short.text).is_equal("−5")
+	assert_str((chip.find_child("Damaged",true,false) as Label).text).is_equal("2")
+	assert_str((chip as Control).tooltip_text).contains("Short 5").contains("2 damaged")
+
+func test_raised_levy_is_armed_by_staff_and_the_line_says_for_whom()->void:
+	_officers()
+	_levy_at_home(20,12)
+	assert_array(MilitaryCampaign.equipment_queue).is_empty()
+	MilitaryCampaign.workshop.advance(1)
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
+	var job:Dictionary=MilitaryCampaign.equipment_queue[0]
+	assert_bool(bool(job.planner_managed)).is_true()
+	var row:Node=_screen().find_child("Line%d" % int(job.id),true,false)
+	var badge:Control=row.find_child("Badge",true,false)
+	assert_bool(badge.visible).is_true()
+	# The levy carries the war leader's name ("for Rovik's levy").
+	var leader:=String(load("res://scripts/army_orders.gd").war_leader_name())
+	assert_str(leader).is_not_empty()
+	assert_str(String(badge.label.text)).is_equal("for %s's levy" % leader)
+	assert_str(badge.tooltip_text).contains("8 at home")
+	var auto:Button=row.find_child("Auto",true,false)
+	assert_bool(auto.visible).is_true()
+	assert_str(auto.tooltip_text).starts_with("Auto:")
+
+func test_main_surface_has_no_paragraphs()->void:
+	_room_for_lines(3);_officers();_levy_at_home(20,12)
+	for item:String in ["improvised","spear"]:MilitaryCampaign.start_production_line(item,20)
+	MilitaryCampaign.damaged_equipment={"spear":2}
+	MilitaryCampaign.workshop.data.status="Short of timber (7 needed, 2 in store) for soldiers' gear; the Quartermaster has asked the settlement leaders for more hands to gather it."
+	for sub:int in [0,1,2]:
+		var panel:=_screen(sub)
+		for node:Node in panel.find_children("*","",true,false):
+			var text:=""
+			if node is Label:text=(node as Label).text
+			elif node is Button:text=(node as Button).text
+			else:continue
+			if not (node as Control).is_visible_in_tree():continue
+			assert_int(text.split(" ",false).size()).override_failure_message("Too many words on the surface: "+text).is_less_equal(12)
+			if node is Label:assert_int((node as Label).get_theme_font_size("font_size")).is_greater_equal(12)
+
+func test_daily_refresh_updates_in_place()->void:
+	_room_for_lines(2)
+	var id:=int(MilitaryCampaign.start_production_line("improvised",25).job_id)
+	var provider=Provider.new(null,null)
+	var panel:Control=auto_free(Queue.new());add_child(panel);panel.setup(provider.tab(2).blocks[0])
+	var row:Node=panel.find_child("Line%d" % id,true,false)
+	MilitaryCampaign.configure_production_line(id,40,false)
+	assert_bool(panel.update_block(provider.tab(2).blocks[0])).is_true()
+	assert_object(panel.find_child("Line%d" % id,true,false)).is_same(row)
+	assert_str((row.find_child("KeepValue",true,false) as Label).text).is_equal("40")
+	MilitaryCampaign.start_production_line("spear",10)
+	assert_bool(panel.update_block(provider.tab(2).blocks[0])).is_false()
