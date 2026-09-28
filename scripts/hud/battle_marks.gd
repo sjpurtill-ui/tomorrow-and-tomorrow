@@ -267,12 +267,6 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,progress:float,a:Color,b:Color
 	canvas.draw_rect(rect,Color(INK,0.85*alpha),false,1.0)
 
 
-## Lettering straight on the chart: ink with a solid paper halo.
-static func letter(canvas:CanvasItem,font:Font,at:Vector2,text:String,size:int,color:Color,alpha:float=1.0)->void:
-	canvas.draw_string_outline(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size,6,Color(PAPER,0.96*alpha))
-	canvas.draw_string(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,size,Color(color,alpha))
-
-
 ## A battle mark at `at`: the crossed weapons over a soft paper ground, the
 ## bar below. Returns the rect it covers (for hits and lettering clearance).
 static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,scale:float=1.0,alpha:float=1.0)->Rect2:
@@ -280,7 +274,7 @@ static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,s
 	var r:=MARK_RADIUS*scale
 	var seen_before:=int(battle.get("age_days",0))>0
 	var fade:=alpha*(0.6 if seen_before else 1.0)
-	canvas.draw_circle(at,r+2.0,Color(PAPER,0.7*fade))
+	canvas.draw_circle(at,r+1.0,Color(PAPER,0.45*fade))
 	var ink:=Color(INK,fade) if bool(battle.get("ours",false)) else Color(INK.lerp(OXBLOOD,0.4),fade)
 	draw_weapons(canvas,at,r,era,ink,Color(PAPER,0.95*fade))
 	var width:=BAR_WIDTH*maxf(0.75,scale)

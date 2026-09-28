@@ -22,6 +22,37 @@ var current:Dictionary={}
 var overlay:Control
 var directory:=""
 var frames:=0
+## The towns, lettered above the war ink as the city cards are in the game,
+## and offered to the overlay as what its captions must keep clear of.
+var city_labels:Control
+
+
+class CaptureTowns extends Control:
+	var host:Control
+	var cards:Array=[]
+	func _ready()->void: mouse_filter=Control.MOUSE_FILTER_IGNORE; set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	func chart_obstacles()->Dictionary:
+		var rects:Array[Rect2]=[]; var pins:Array=[]
+		for card in cards: rects.append(card.rect); pins.append({"at":card.at,"clear":10.0})
+		return {"rects":rects,"pins":pins,"bounds":Rect2()}
+	## Laid out before the chart letters its captions (as the city cards are).
+	func layout()->void:
+		cards.clear()
+		if host==null or host.current.is_empty(): return
+		var font:=T.voice_font(false)
+		for town in host.current.get("towns",[]):
+			var at:Vector2=host._to_screen(town[0])
+			var name:=String(town[1])
+			var width:=font.get_string_size(name,HORIZONTAL_ALIGNMENT_LEFT,-1,17).x
+			cards.append({"rect":Rect2(at+Vector2(9,-24),Vector2(width+12,24)),"at":at,"name":name})
+	func _draw()->void:
+		var font:=T.voice_font(false)
+		for card in cards:
+			var at:Vector2=card.at; var rect:Rect2=card.rect
+			draw_circle(at,6.5,Color("#efe3c2")); draw_arc(at,6.5,0,TAU,20,Color("#2b2118"),1.6,true)
+			draw_circle(at,2.2,Color("#2b2118"))
+			draw_rect(rect,Color("#f6efe1",0.92)); draw_rect(rect,Color("#b7a383"),false,1.0)
+			draw_string(font,rect.position+Vector2(6,18),String(card.name),HORIZONTAL_ALIGNMENT_LEFT,-1,17,Color("#1f1a14"))
 
 
 func _ready()->void:
@@ -35,6 +66,9 @@ func _ready()->void:
 	add_child(overlay)
 	overlay.set_process(false)
 	overlay.project=func(p:Vector2)->Vector2: return _to_screen(p)
+	var towns:=CaptureTowns.new(); towns.host=self; add_child(towns)
+	city_labels=towns
+	overlay.terrain=self
 	var long_front:=_long_front()
 	plates=[_early(),long_front,_far(long_front),_surge()]
 	_next()
@@ -60,7 +94,8 @@ func _next()->void:
 			overlay.ease_fronts(1.0/30.0); overlay.ease_arrows(1.0/30.0); overlay.advance_bulges(1.0/30.0)
 	print("COMPOSE %s %.2f ms primitives=%d battles=%d marks=%d bulges=%d" % [current.name,compose_ms,Overlay.primitive_count(overlay.scene),(overlay.scene.battles as Array).size(),(overlay.scene.marks as Array).size(),(overlay.bulges as Array).size()])
 	frames=0
-	queue_redraw(); overlay.queue_redraw()
+	(city_labels as CaptureTowns).layout()
+	queue_redraw(); city_labels.queue_redraw(); overlay.queue_redraw()
 
 
 func _process(_delta:float)->void:
@@ -177,7 +212,7 @@ func _draw()->void:
 	var rng:=RandomNumberGenerator.new(); rng.seed=hash(String(current.name))
 	for k in 90:
 		var c:=Vector2(rng.randf()*size.x,rng.randf()*size.y)
-		draw_circle(c,rng.randf_range(24,110),Color("#6e7f3e") if k%3 else Color("#3e4a2c",0.85),true)
+		draw_circle(c,rng.randf_range(24,110),Color("#6e7f3e",0.8) if k%3 else Color("#3e4a2c",0.6),true)
 	for k in 40:
 		var c:=Vector2(rng.randf()*size.x,rng.randf()*size.y)
 		draw_circle(c,rng.randf_range(10,60),Color("#a89468",0.45))
@@ -186,13 +221,6 @@ func _draw()->void:
 	if river.size()>=2:
 		draw_polyline(river,Color("#5e7f7a"),9.0,true)
 		draw_polyline(river,Color("#2f4a52",0.5),3.0,true)
-	var font:=T.voice_font(true)
-	for town in current.get("towns",[]):
-		var at:=_to_screen(town[0])
-		draw_circle(at,6.5,Color("#efe3c2")); draw_arc(at,6.5,0,TAU,20,Color("#2b2118"),1.6,true)
-		draw_circle(at,2.2,Color("#2b2118"))
-		draw_string_outline(font,at+Vector2(10,-9),String(town[1]),HORIZONTAL_ALIGNMENT_LEFT,-1,16,4,Color("#efe3c2",0.9))
-		draw_string(font,at+Vector2(10,-9),String(town[1]),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#1f1a14"))
 	# Plate caption (TEST capture).
 	draw_rect(Rect2(16,16,size.x-32,34),Color("#efe6d4",0.94))
 	draw_string(T.font("ui"),Vector2(28,39),"TEST CAPTURE · %s" % String(current.title),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("#1f1a14"))

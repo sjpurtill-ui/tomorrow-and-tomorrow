@@ -98,6 +98,14 @@ const THEIRS_WASH:=Color("#b5503c")
 const SEA:=Color("#16475a")
 const SEA_LIGHT:=Color("#cfe3e0")
 const SKY:=Color("#3b4a78")
+## The chart's own paper and ink for cards and plates (ART_DIRECTION light
+## tokens: PAPER_RAISED, RULE, INK, INK_MUTED), fixed so text is always dark
+## on light.
+const CAPTION_PAPER:=Color("#f6efe1")
+const CAPTION_RULE:=Color("#b7a383")
+const CAPTION_INK:=Color("#1f1a14")
+const CAPTION_MUTED:=Color("#594e41")
+const OXBLOOD:=Color("#8e3b2e")
 
 var terrain:Node
 ## Injected by tests and the capture scene: func(Vector2 world)->Vector2 screen.
@@ -159,6 +167,8 @@ var rival_memory:Dictionary={}
 ## [{points, normals, heat, peak}] and battles [{at, radius, live, phase}].
 var hot_cache:Array=[]
 var battle_cache:Array=[]
+## The drawn fronts as a few screen rects each, for the lettering to avoid.
+var front_chunks:Array[Rect2]=[]
 var anim_clock:=0.0
 var pulse_elapsed:=0.0
 var pulse_layer:Control
@@ -441,8 +451,26 @@ func _note_front_events(before:Dictionary,after:Dictionary)->void:
 		if at.is_empty(): continue
 		var toward:Vector2=at.toward
 		if toward.length_squared()<0.000001: continue
-		bulges.append({"pos":at.point,"dir":(toward if bool(event.forward) else -toward).normalized(),"amp":sigma*BULGE_AMP_SIGMA,"radius":sigma*BULGE_RADIUS_SIGMA,"t":0.0,"dur":BULGE_SECONDS})
+		var radius:=sigma*BULGE_RADIUS_SIGMA
+		bulges.append({"pos":at.point,"dir":(toward if bool(event.forward) else -toward).normalized(),"amp":sigma*BULGE_AMP_SIGMA,"radius":radius,"t":0.0,"dur":BULGE_SECONDS,
+			"ghost":_ghost_near(at.point,radius*2.5)})
 	while bulges.size()>MAX_BULGES: bulges.pop_front()
+
+
+## Where the line was drawn near a point before it gave way (world), kept
+## faint while it surges so the ground won or lost reads.
+func _ghost_near(at:Vector2,reach:float)->PackedVector2Array:
+	var best:=PackedVector2Array(); var best_d:=INF
+	for entry in live_fronts:
+		if float(entry.get("alpha",0.0))<=0.3: continue
+		var points:PackedVector2Array=entry.points
+		var near:=PackedVector2Array(); var closest:=INF
+		for p in points:
+			var d:=p.distance_to(at)
+			closest=minf(closest,d)
+			if d<=reach: near.append(p)
+		if near.size()>=2 and closest<best_d: best_d=closest; best=near
+	return best
 
 
 # --- Reading the world (bounded, dated) -----------------------------------------
@@ -1314,6 +1342,7 @@ func _draw()->void:
 	caption_requests.clear()
 	hot_cache.clear()
 	battle_cache.clear()
+	front_chunks.clear()
 	if pulse_layer!=null: pulse_layer.queue_redraw()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
@@ -1351,6 +1380,13 @@ func _draw()->void:
 		var entry:Dictionary=live_fronts[index]
 		if float(entry.alpha)<=0.01: continue
 		_draw_front(entry,band,step)
+	# Where a front stood before it gave way, fading as it settles.
+	for bulge in bulges:
+		var ghost:PackedVector2Array=bulge.get("ghost",PackedVector2Array())
+		if ghost.size()<2: continue
+		var fade:=1.0-clampf(float(bulge.t)/maxf(0.001,float(bulge.dur)),0.0,1.0)
+		var line:=_poly(ghost)
+		if line.size()>=2: _dashed(line,Color(INK,0.5*fade),1.6,6.0,5.0)
 	for pocket in scene.get("pockets",[]): _draw_pocket(pocket,band)
 	for faceoff in scene.get("faceoffs",[]):
 		_draw_front({"points":faceoff.points,"alpha":1.0,"data":faceoff},band,step)
@@ -1411,7 +1447,8 @@ func _battle_entries(band:String)->Array:
 			var ring:=36.0
 			for siege in scene.get("sieges",[]):
 				if (siege.pos as Vector2).distance_to(battle.pos)<=_world_per_px(battle.pos)*4.0: ring=lerpf(46.0,26.0,float(siege.pressure))*(0.55 if wide else 1.0)
-			at+=Vector2(0.72,-0.72)*ring
+			# On its ring, up and to the left: the town's own card sits to its right.
+			at+=Vector2(-0.72,-0.72)*ring
 		entries.append({"at":at,"battle":battle})
 	# Ours first, then the larger fights, then a stable order.
 	entries.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
@@ -1447,6 +1484,12 @@ static func _battle_men(battle:Dictionary)->int:
 func _draw_battles(entries:Array,band:String)->void:
 	var wide:=band in ["continental","world"]
 	var era:=int(scene.get("era",1))
+	# Which names are kept when the chart is crowded: the one under the
+	# pointer, then our biggest fights, then ours, then the rivals' seen.
+	var ours_by_size:Array=entries.filter(func(e:Dictionary)->bool: return not e.has("group") and bool(e.battle.get("ours",false)))
+	ours_by_size.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return _battle_men(a.battle)>_battle_men(b.battle))
+	var biggest:Dictionary={}
+	for e in ours_by_size.slice(0,5): biggest[String(e.battle.get("id",""))]=true
 	for entry in entries:
 		var at:Vector2=entry.at
 		if entry.has("group"):
@@ -1457,13 +1500,17 @@ func _draw_battles(entries:Array,band:String)->void:
 			var places:=PackedStringArray()
 			for battle in members.slice(0,3): places.append(String(battle.get("place_name","")))
 			var line:="%s: %s" % [BattleMarks.aggregate_label(members.size()),", ".join(places)]
-			_request_caption("battles:%s" % String((members[0] as Dictionary).get("id","")),Vector2.INF,BattleMarks.aggregate_label(members.size()),INK,5,float(entry.radius)+14.0,at,"letter")
+			_request_caption("battles:%s" % String((members[0] as Dictionary).get("id","")),Vector2.INF,BattleMarks.aggregate_label(members.size()),INK,6,float(entry.radius)+12.0,at,"plate")
 			hits.append({"kind":"battles","centre":at,"radius":float(entry.radius)+4.0,"battles":members,"line":line})
 			continue
 		var battle:Dictionary=entry.battle
 		var scale:=(0.85 if wide else 1.0)*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
 		BattleMarks.draw_battle(self,at,battle,era,scale)
-		if band!="world": _request_caption("battle:%s" % String(battle.get("id","")),Vector2.INF,String(battle.get("label","")),INK,5 if bool(battle.get("ours",false)) else 4,float(entry.radius)+4.0,at,"letter")
+		if band!="world":
+			var id:=String(battle.get("id",""))
+			var priority:=8 if id==hover_id else (6 if biggest.has(id) else (5 if bool(battle.get("ours",false)) else 4))
+			# Set out to the side of the front with a leader line, not on it.
+			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,float(entry.radius)+(16.0 if wide else 22.0),at,"plate")
 		hits.append({"kind":"battle","centre":at,"radius":float(entry.radius)+4.0,"battle":battle,"line":String(battle.get("hover",""))})
 
 
@@ -1554,8 +1601,13 @@ func _hover(point:Vector2)->void:
 	var over:Dictionary={}
 	if get_viewport()!=null and get_viewport().gui_get_hovered_control()==null: over=battle_at(point)
 	var line:=String(over.get("line",""))
+	var id:=String((over.get("battle",{}) as Dictionary).get("id",over.get("kind","")))
+	# The battle under the pointer keeps its name on the chart, whatever else must give way.
+	if id!=hover_id and line!="": hover_id=id; queue_redraw()
 	if line=="":
-		close_tip(); return
+		if hover_id!="": close_tip(); queue_redraw()
+		else: close_tip()
+		return
 	if tip==null: _build_tip()
 	var label:=tip.get_child(0) as Label
 	if label.text!=line: label.text=line; tip.reset_size()
@@ -1563,7 +1615,6 @@ func _hover(point:Vector2)->void:
 	var extent:=tip.get_combined_minimum_size()
 	var view:=get_viewport_rect().size
 	tip.position=Vector2(clampf(point.x+16.0,8.0,maxf(8.0,view.x-extent.x-8.0)),clampf(point.y+18.0,8.0,maxf(8.0,view.y-extent.y-8.0)))
-	hover_id=String((over.get("battle",{}) as Dictionary).get("id",over.get("kind","")))
 
 
 func close_tip()->void:
@@ -1733,6 +1784,12 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 		var tri:=PackedVector2Array([a-along*5.0,a+along*5.0,a+normals[i]*tooth])
 		if _fillable(tri): draw_colored_polygon(tri,color)
 	hits.append({"kind":"front","line":points,"armies":data.get("armies",[]),"stale":bool(data.get("stale",false))})
+	# The line, in a few chunks, for the lettering to keep clear of.
+	var chunk:=maxi(4,n/12)
+	for start in range(0,n-1,chunk):
+		var box:=Rect2(points[start],Vector2.ZERO)
+		for i in range(start+1,mini(n,start+chunk+1)): box=box.expand(points[i])
+		front_chunks.append(box.grow(4.0))
 
 
 func _front_run(run:PackedVector2Array,stale:bool,base:float,alpha:float)->void:
@@ -1867,14 +1924,18 @@ func _draw_siege_arrow(arrow:Dictionary,alpha:float,grow:float,wide:bool)->void:
 	if body.size()>=3: hits.append({"kind":"siege","poly":body,"army_id":int(arrow.get("army_id",0))})
 
 
+## The ground a general marches on: a small inked target (ring, dot and
+## four ticks), never a cross that could be read as a battle.
 func _draw_objective(objective:Dictionary)->void:
 	var at:=_screen(objective.pos)
 	if not at.is_finite(): return
 	var color:=Color(INK,0.9)
-	draw_arc(at,9.0,0.0,TAU,28,Color(PAPER,0.7),5.0,true)
-	draw_arc(at,9.0,0.0,TAU,28,color,1.6,true)
-	draw_line(at+Vector2(-5,-5),at+Vector2(5,5),color,1.6,true)
-	draw_line(at+Vector2(-5,5),at+Vector2(5,-5),color,1.6,true)
+	draw_arc(at,8.0,0.0,TAU,28,Color(PAPER,0.7),5.0,true)
+	draw_arc(at,8.0,0.0,TAU,28,color,1.6,true)
+	draw_circle(at,2.0,color)
+	for k in 4:
+		var d:=Vector2.from_angle(TAU*float(k)/4.0)
+		draw_line(at+d*8.0,at+d*12.0,color,1.6,true)
 
 
 func _draw_raid(raid:Dictionary)->void:
@@ -1996,7 +2057,7 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		draw_string(font,badge+Vector2(-width*0.5,4.5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(ink,0.95))
 		# Far out, the stretch of front's forces are lettered in one line.
-		if bool(entry.get("sector",false)) and not bool(entry.get("card",false)): _request_caption("sector:%s" % String(entry.id),Vector2.INF,ArmyMarks.sector_words(entry),OURS if ours else THEIRS,3 if ours else 2,px*0.62+6.0,at,"letter")
+		if bool(entry.get("sector",false)) and not bool(entry.get("card",false)): _request_caption("sector:%s" % String(entry.id),Vector2.INF,ArmyMarks.sector_words(entry),OURS if ours else THEIRS,3 if ours else 2,px*0.62+10.0,at,"plate")
 	if bool(entry.get("card",false)): _request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5 if bool(entry.get("selected",false)) else (3 if ours else 2),px*0.62+4.0,at)
 	if bool(entry.get("garrison",false)): pass
 	elif ours: hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.6),"army_id":int(entry.army_id),"mark":true})
@@ -2416,8 +2477,9 @@ func _draw_echelon(echelon:Dictionary,band:String)->void:
 
 # --- Captions: lettered around what the chart already shows -----------------------
 
-## style: "card" (a small paper card) or "letter" (ink lettered straight on
-## the chart with a paper halo, as a battle's name and day are).
+## style: "card" (a small paper card, a title and a detail line) or "plate"
+## (one line of ink on a small paper plate: a battle's name and day, the
+## forces along a stretch of front).
 func _request_caption(id:String,world:Vector2,text:String,color:Color,priority:int,clear:float=10.0,screen_anchor:=Vector2.INF,style:="card")->void:
 	if text=="": return
 	var at:=screen_anchor if screen_anchor.is_finite() else _screen(world)
@@ -2429,8 +2491,8 @@ func _caption_size(text:String,font:Font,style:="card")->Vector2:
 	var key:=style+"|"+text
 	if not caption_extent.has(key):
 		if caption_extent.size()>256: caption_extent.clear()
-		if style=="letter":
-			caption_extent[key]=Vector2(ceilf(T.font("ui").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,BattleMarks.LABEL_SIZE).x)+10.0,20.0)
+		if style=="plate":
+			caption_extent[key]=Vector2(ceilf(T.font("ui").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,BattleMarks.LABEL_SIZE).x)+14.0,21.0)
 			return caption_extent[key]
 		# A card has a title line and a smaller detail line beneath it.
 		var lines:=text.split("\n")
@@ -2454,11 +2516,17 @@ func _caption_obstacles()->Dictionary:
 	var tags:Variant=get_parent().get_node_or_null("WarMapOverlay") if get_parent()!=null else null
 	if tags!=null:
 		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
-	for entry in drawn_marks: pins.append({"at":entry.at,"clear":float(entry.size)*0.62+2.0})
+	for entry in drawn_marks:
+		pins.append({"at":entry.at,"clear":float(entry.size)*0.62+2.0})
+		# The mark with its state glyph at the shoulder and its counter beneath.
+		var px:=float(entry.size)
+		rects.append(Rect2((entry.at as Vector2)-Vector2(px*0.5+9.0,px*0.5+2.0),Vector2(px+18.0,px+14.0)))
 	# Battle marks, and the bar hanging beneath each.
 	for entry in battle_cache:
 		rects.append(entry.rect)
 		pins.append({"at":entry.at,"clear":float(entry.radius)+2.0})
+	# The fronts: names never sit on the line.
+	rects.append_array(front_chunks)
 	if note!=null and note.visible: rects.append(note.get_global_rect())
 	return {"rects":rects,"pins":pins,"bounds":bounds}
 
@@ -2480,28 +2548,33 @@ func _letter_captions(font:Font)->void:
 	for caption in placed_captions:
 		var box:Rect2=caption.rect
 		var anchor:Vector2=caption.anchor
-		if String(caption.get("style","card"))=="letter":
-			# Lettered straight on the chart, beside its mark.
-			BattleMarks.letter(self,T.font("ui"),box.position+Vector2(5.0,15.0),String(caption.text),BattleMarks.LABEL_SIZE,INK)
-			continue
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		if end.distance_to(anchor)>float(caption.clear)+4.0:
-			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*0.6
-			draw_line(start,end,Color(PAPER,0.6),3.0,true)
-			draw_line(start,end,Color(INK,0.5),1.0,true)
+		var plate:=String(caption.get("style","card"))=="plate"
+		if end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
+			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*(0.45 if plate else 0.6)
+			draw_line(start,end,Color(PAPER,0.7),3.0,true)
+			draw_line(start,end,Color(INK,0.65),1.0,true)
+		if plate:
+			# One line of ink on a small paper plate, as the town cards are.
+			draw_style_box(_caption_style(),box)
+			draw_rect(Rect2(box.position+Vector2(0,3),Vector2(2,box.size.y-6)),Color(caption.color,0.85))
+			draw_string(T.font("ui"),box.position+Vector2(8.0,15.5),String(caption.text),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10.0,BattleMarks.LABEL_SIZE,CAPTION_INK)
+			continue
 		draw_style_box(_caption_style(),box)
 		var color:Color=caption.color
 		draw_rect(Rect2(box.position+Vector2(0,3),Vector2(2,box.size.y-6)),Color(color,0.85))
 		var lines:=String(caption.text).split("\n")
-		draw_string(font,box.position+Vector2(7,16),lines[0],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CAPTION_SIZE,Color(INK,0.95))
+		draw_string(font,box.position+Vector2(7,16),lines[0],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CAPTION_SIZE,CAPTION_INK)
 		for k in range(1,lines.size()):
-			draw_string(font,box.position+Vector2(7,16+16*k),lines[k],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CARD_DETAIL_SIZE,Color(INK,0.7))
+			draw_string(font,box.position+Vector2(7,16+16*k),lines[k],HORIZONTAL_ALIGNMENT_LEFT,box.size.x-10,CARD_DETAIL_SIZE,CAPTION_MUTED)
 
 
 var _style:StyleBoxFlat
+## Cards and plates are chart paper with iron-gall ink in either interface
+## mode (the chart itself does not turn dark), so their text always reads.
 func _caption_style()->StyleBoxFlat:
 	if _style==null:
-		_style=StyleBoxFlat.new(); _style.bg_color=Color(T.PAPER_RAISED,0.92); _style.border_color=Color(T.RULE,0.9)
+		_style=StyleBoxFlat.new(); _style.bg_color=Color(CAPTION_PAPER,0.95); _style.border_color=Color(CAPTION_RULE,0.95)
 		_style.set_border_width_all(1); _style.set_corner_radius_all(T.RADIUS_CONTROL)
 		_style.shadow_color=Color(0,0,0,0.08); _style.shadow_size=2; _style.shadow_offset=Vector2(0,1)
 	return _style
