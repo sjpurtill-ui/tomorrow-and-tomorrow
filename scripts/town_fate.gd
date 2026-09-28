@@ -42,6 +42,7 @@ const DIVINE:=preload("res://scripts/divine_regard.gd")
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const Governance:=preload("res://scripts/occupation_governance.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
+const Measures:=preload("res://scripts/occupation_measures.gd")
 
 ## Adult men in a farming village's population (the rest are women,
 ## children and the old): roughly a quarter.
@@ -155,6 +156,9 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	if bool(fate.get("kill_men",false)):
 		var all:=bool(fate.get("kill_all",false))
 		var wanted:=roundi(float(population)*(1.0 if all else MEN_SHARE)*CAUGHT_SHARE)
+		# Men already bound and under guard (occupation_measures.gd) cannot run.
+		var bound:=mini(Measures.men_bound(civ_id,region_id),roundi(float(population)*MEN_SHARE))
+		if bound>0 and not all: wanted=bound+roundi(float(roundi(float(population)*MEN_SHARE)-bound)*CAUGHT_SHARE)
 		if asked>0: wanted=mini(wanted,asked)
 		var can:=mini(wanted,garrison*KILLS_PER_FIGHTER*(2 if all else 1))
 		if can>0:
@@ -162,6 +166,7 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 			if done.has("error"): refusals.append(String(done.error))
 			else:
 				out.killed=int(done.get("dead",0))
+				Measures.after_killing(civ_id,region_id,int(out.killed))
 				# The men who were not caught got away (Pursuit: where they ran).
 				var men:=roundi(float(population)*MEN_SHARE)
 				out.escaped=maxi(0,roundi(float(population-int(out.killed))*MEN_SHARE) if all else men-int(out.killed))
@@ -292,6 +297,10 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	if held_at>=0:
 		var brief:=_note(name,out).trim_prefix(name+": ").trim_suffix(".")
 		mc.occupation_forces[held_at]["fate_note"]=_cap(brief).substr(0,80)
+		# Measures still in force keep the card; this order waits behind them.
+		if bool(mc.occupation_forces[held_at].get("measure_note",false)):
+			mc.occupation_forces[held_at]["note_before"]=_cap(brief).substr(0,80)
+			Measures.refresh_note(mc.occupation_forces[held_at])
 		# Running totals for the held-town report (scripts/held_town.gd).
 		var past:Dictionary=(mc.occupation_forces[held_at].get("fate") as Dictionary).duplicate() if mc.occupation_forces[held_at].get("fate") is Dictionary else {}
 		for key in ["killed","captives","moved","tribute"]: past[key]=int(past.get(key,0))+int(out.get(key,0))

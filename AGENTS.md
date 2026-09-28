@@ -28,6 +28,10 @@ The user authorizes normal pushes of completed task work to this project's exist
 - Before ending a task, check for uncommitted task files and unpushed task commits. Report the pushed branch and verified commit. Explicitly identify anything still local, unfinished, or excluded; never say “everything is pushed” without checking the requested scope.
 - If authentication, networking, remote divergence, or asset size blocks a push, report it immediately with the local commit and affected branch. Preserve the work and resolve the blocker; do not silently continue building a backlog or imply another device has the work. Never publish credentials, saves, generated caches, or unrelated files to satisfy this rule.
 
+## Adjudication pillar
+
+Read docs/ADJUDICATION.md before any court, order, consequence or occupation work. The engine adjudicates from one consistent ledger with stated odds and seeded rolls; the AI only narrates the facts it is given. Nothing may contradict the state, and officials answer from exact fact sheets.
+
 ## General-led campaign direction
 
 Read docs/GENERAL_CAMPAIGN_DESIGN.md before military or leader work. Generals execute battlefield operations in every era; the player observes consequences and gives objectives through conversation. Do not revive the discarded direct-cohort-control design or make routine logistics a mandatory form-filling flow.

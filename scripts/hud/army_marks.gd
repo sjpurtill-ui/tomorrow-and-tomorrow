@@ -22,11 +22,19 @@ extends RefCounted
 ## way a clerk would say it ("about 30,000"); the general's name; what the
 ## force is doing ("marching on Tsaren", "holding the line"); and how old
 ## the report is, only when that matters ("reported three days ago").
+##
+## Counters (HOI4-style, inked): each mark carries a strength share (men
+## against its full strength), its will to fight (morale) and one state
+## (hud/battle_marks.gd draws them). Far out, the forces along one stretch
+## of front stand as one mark ("3 bands · 1,240").
 
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 
-const MAX_OURS:=12
-const MAX_THEIRS:=24
+const MAX_OURS:=64
+const MAX_THEIRS:=96
+## Morale below this, a force is broken (MilitaryCampaign.MORALE_BREAK is
+## where it stops fighting altogether).
+const BROKEN_MORALE:=0.25
 ## Card budgets per zoom band (cards beyond these are left to the note).
 const CARDS:={"ground":6,"local":6,"regional":4}
 ## Reports younger than this are fresh and say nothing about their age.
@@ -123,6 +131,49 @@ static func about(n:int)->String:
 	elif n>=1000: step=100
 	elif n>=100: step=10
 	return "about %s" % EraWords.grouped(roundi(float(n)/float(step))*step)
+
+
+## A force's full strength: every formation at its authorised count (the
+## men it would have with none lost), never less than the men it has.
+static func full_strength(force:Dictionary)->int:
+	var full:=0
+	for formation in force.get("formations",[]):
+		if formation is Dictionary: full+=maxi(maxi(0,int(formation.get("count",0))),int(formation.get("authorized_count",0)))
+	return maxi(full,maxi(0,int(force.get("troops",0))))
+
+
+## Its counter: strength share and will to fight (0..1 each). A force of
+## theirs is known only by sight: no strength share, and its will only as
+## the watchers' range.
+static func counter(mark:Dictionary)->Dictionary:
+	var members:=(mark.get("members",[]) as Array).size()
+	if String(mark.get("side","ours"))!="ours":
+		if mark.has("will_low"): return {"will_low":float(mark.will_low),"will_high":float(mark.get("will_high",mark.will_low))}
+		return {}
+	var troops:=int(mark.get("members_troops",mark.get("troops",0))) if members>1 else int(mark.get("troops",0))
+	var full:=int(mark.get("members_full",mark.get("full",troops))) if members>1 else int(mark.get("full",troops))
+	var will:=float(mark.get("members_will",0.0))/maxf(1.0,float(troops)) if members>1 and mark.has("members_will") else float(mark.get("will",0.6))
+	return {"strength":clampf(float(troops)/maxf(1.0,float(maxi(full,troops))),0.0,1.0),"will":clampf(will,0.0,1.0)}
+
+
+## Far out: the forces along one stretch of front, as the chart letters them
+## ("3 bands · 1,240"; theirs "Their 4 hosts · about 3,000").
+static func sector_words(mark:Dictionary)->String:
+	var members:=maxi(1,(mark.get("members",[]) as Array).size())
+	var ours:=String(mark.get("side","ours"))=="ours"
+	var noun:=String(mark.get("sector_noun",mark.get("noun","band")))
+	var word:=_plural_noun(noun) if members>1 else noun
+	if ours:
+		var troops:=int(mark.get("members_troops",mark.get("troops",0)))
+		return "%d %s · %s" % [members,word,EraWords.grouped(troops)]
+	var low:=int(mark.get("members_low",mark.get("low",0))); var high:=int(mark.get("members_high",mark.get("high",0)))
+	return "Their %d %s · %s" % [members,word,about_range(low,high)]
+
+
+static func _plural_noun(word:String)->String:
+	var plural:={"band":"bands","war party":"war parties","host":"hosts","great host":"great hosts","army":"armies","corps":"corps","garrison":"garrisons",
+		"regiment":"regiments","battalion":"battalions","brigade":"brigades","division":"divisions","scouts":"scouts"}
+	return String(plural.get(word,word+"s"))
 
 
 ## An estimate of their strength: one figure when the scouts agree, a
@@ -348,10 +399,84 @@ static func size_px(band:String,mark_kind:String)->float:
 	return 0.0
 
 
+## One more force joins a mark that stands for several: its men, estimate,
+## full strength and will are added to the mark's totals.
+static func _join(entry:Dictionary,mark:Dictionary)->void:
+	(entry.members as Array).append(String(mark.id))
+	var troops:=int(mark.get("troops",0))
+	if not entry.has("members_troops"):
+		var own:=int(entry.get("troops",0))
+		entry["members_troops"]=own
+		entry["members_low"]=int(entry.get("low",0))
+		entry["members_high"]=int(entry.get("high",0))
+		entry["members_full"]=maxi(own,int(entry.get("full",own)))
+		entry["members_will"]=float(entry.get("will",0.6))*float(own)
+		entry["nouns"]={String(entry.get("noun","")):1}
+	entry.members_troops=int(entry.members_troops)+troops
+	entry.members_low=int(entry.members_low)+int(mark.get("low",0))
+	entry.members_high=int(entry.members_high)+int(mark.get("high",0))
+	entry.members_full=int(entry.members_full)+maxi(troops,int(mark.get("full",troops)))
+	entry.members_will=float(entry.members_will)+float(mark.get("will",0.6))*float(troops)
+	var nouns:Dictionary=entry.nouns
+	var noun:=String(mark.get("noun",""))
+	nouns[noun]=int(nouns.get(noun,0))+1
+	# The stack is named for what most of it is (the leader's word on a tie).
+	var best:=String(entry.get("noun","")); var most:=int(nouns.get(best,0))
+	for word in nouns:
+		if int(nouns[word])>most: most=int(nouns[word]); best=String(word)
+	entry["sector_noun"]=best
+
+
+## The stretch of front a mark stands on, far out: forces on one stretch of
+## one front (on the same side) stand as one mark; forces off the fronts
+## are grouped by a coarse grid of the same size.
+static func sector_key(at:Vector2,side:String,fronts:Array,sector_px:float)->String:
+	return _sector_of(at,side,_nearest_front(front_table(fronts),at,sector_px*0.6),sector_px)
+
+
+static func _sector_of(at:Vector2,side:String,near:Dictionary,sector_px:float)->String:
+	if not near.is_empty() and float(near.gap)<=sector_px*0.6: return "f%d:%d:%s" % [int(near.front),floori(float(near.arc)/sector_px),side]
+	return "g%d:%d:%s" % [floori(at.x/sector_px),floori(at.y/sector_px),side]
+
+
+## The fronts once per layout: each line with its bounds and running length.
+static func front_table(fronts:Array)->Array:
+	var out:Array=[]
+	for line_variant in fronts:
+		var line:PackedVector2Array=line_variant
+		if line.size()<2: continue
+		var box:=Rect2(line[0],Vector2.ZERO)
+		var run:=PackedFloat32Array(); run.resize(line.size())
+		for i in range(1,line.size()):
+			box=box.expand(line[i]); run[i]=run[i-1]+line[i-1].distance_to(line[i])
+		out.append({"line":line,"box":box,"run":run,"index":out.size()})
+	return out
+
+
+## The nearest point on any front within `reach` (fronts farther away are
+## skipped by their bounds): {front, point, gap, arc} or {}.
+static func _nearest_front(table:Array,at:Vector2,reach:float)->Dictionary:
+	var best:={}
+	var best_gap:=reach
+	for info in table:
+		if not (info.box as Rect2).grow(best_gap).has_point(at): continue
+		var line:PackedVector2Array=info.line
+		var run:PackedFloat32Array=info.run
+		for i in range(1,line.size()):
+			var p:=Geometry2D.get_closest_point_to_segment(at,line[i-1],line[i])
+			var gap:=p.distance_to(at)
+			if gap<best_gap:
+				best_gap=gap
+				best={"front":int(info.index),"point":p,"gap":gap,"arc":run[i-1]+line[i-1].distance_to(p)}
+	return best
+
+
 ## Which marks are drawn, where, and which carry a card. Pure over screen
 ## positions. marks: [{id, side ("ours"/"theirs"), at, priority, kind,
 ## size, army_id?, selected?}]. context: {band, bounds:Rect2, fronts:
-## [PackedVector2Array], echelons:[{at, armies}], home:Vector2}.
+## [PackedVector2Array], echelons:[{at, armies}], home:Vector2, battles:
+## [{at, clear}] (marks step clear of battle marks), sector_px (far out:
+## the forces on one stretch of front stand as one mark)}.
 ## Returns {drawn:[{... , at, anchor, members:[ids], moved}], hidden:{id:reason}}.
 static func layout(marks:Array,context:Dictionary)->Dictionary:
 	var band:=String(context.get("band","local"))
@@ -363,7 +488,11 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 	var bounds:Rect2=context.get("bounds",Rect2(-1e6,-1e6,2e6,2e6))
 	var fronts:Array=context.get("fronts",[])
 	var echelons:Array=context.get("echelons",[])
+	var battles:Array=context.get("battles",[])
 	var home:Vector2=context.get("home",Vector2.INF)
+	var sector_px:=float(context.get("sector_px",0.0))
+	var sectors:Dictionary={}
+	var table:=front_table(fronts)
 	var ordered:=marks.duplicate()
 	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		if int(a.get("priority",0))!=int(b.get("priority",0)): return int(a.get("priority",0))>int(b.get("priority",0))
@@ -379,8 +508,17 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 			if (echelon.get("armies",[]) as Array).has(int(mark.get("army_id",-1))): under=true; break
 		if under and not bool(mark.get("selected",false)): hidden[id]="echelon"; continue
 		var ours:=String(mark.get("side","ours"))=="ours"
-		if (ours and ours_kept>=MAX_OURS) or (not ours and theirs_kept>=MAX_THEIRS): hidden[id]="budget"; continue
+		# Far out, the forces on one stretch of front stand as one mark (the
+		# selected force and a town's garrison keep their own).
+		var sector:=""
 		var size:=float(mark.get("size",24.0))
+		# One look along the fronts serves both the sector and the give-way.
+		var near:=_nearest_front(table,at,maxf(sector_px*0.6,size*0.5+9.0))
+		if sector_px>0.0 and not bool(mark.get("selected",false)) and not bool(mark.get("garrison",false)):
+			sector=_sector_of(at,String(mark.get("side","ours")),near,sector_px)
+			if sectors.has(sector):
+				_join(sectors[sector],mark); hidden[id]="sector"; continue
+		if (ours and ours_kept>=MAX_OURS) or (not ours and theirs_kept>=MAX_THEIRS): hidden[id]="budget"; continue
 		# Same side and overlapping: one mark stands for the stack. A town's
 		# garrison never stacks: its card counts only the men in the town.
 		var joined:=false
@@ -388,24 +526,21 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 			if String(entry.side)!=String(mark.get("side","ours")): continue
 			if bool(entry.get("garrison",false)) or bool(mark.get("garrison",false)): continue
 			if (entry.at as Vector2).distance_to(at)<(float(entry.size)+size)*0.55:
-				(entry.members as Array).append(id)
-				entry.members_troops=int(entry.get("members_troops",entry.get("troops",0)))+int(mark.get("troops",0))
-				entry.members_low=int(entry.get("members_low",entry.get("low",0)))+int(mark.get("low",0))
-				entry.members_high=int(entry.get("members_high",entry.get("high",0)))+int(mark.get("high",0))
+				_join(entry,mark)
 				hidden[id]="stacked"; joined=true; break
 		if joined: continue
 		var entry:=mark.duplicate()
 		entry.anchor=at
 		entry.members=[id]
 		entry.moved=false
+		if sector!="":
+			sectors[sector]=entry
+			entry["sector"]=true
 		# Give way to the front: step back off the line toward our own side.
-		var nearest:=Vector2.INF; var gap:=INF
-		for line:PackedVector2Array in fronts:
-			for i in range(1,line.size()):
-				var p:=Geometry2D.get_closest_point_to_segment(at,line[i-1],line[i])
-				var d:=p.distance_to(at)
-				if d<gap: gap=d; nearest=p
-		var clearance:=size*0.5+4.0
+		var nearest:Vector2=near.get("point",Vector2.INF)
+		var gap:=float(near.get("gap",INF))
+		# Clear of the line, and of the counter hanging beneath the mark.
+		var clearance:=size*0.5+(4.0 if sector_px<=0.0 else 9.0)
 		if gap<clearance:
 			var away:=(at-nearest).normalized() if gap>0.5 else Vector2.ZERO
 			if away==Vector2.ZERO and home.is_finite(): away=((home-at) if ours else (at-home)).normalized()
@@ -420,6 +555,18 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 			var need:=(float(other.size)+size)*0.5+2.0
 			if d<need:
 				var push:=(at-(other.at as Vector2)).normalized() if d>0.5 else Vector2.RIGHT*(1.0 if ours else -1.0)
+				at+=push*(need-d); entry.moved=true
+		# A battle's mark stands where the sides touch: forces step clear of it,
+		# ours toward home and theirs away.
+		for battle in battles:
+			var where:Vector2=battle.get("at",Vector2.INF)
+			if not where.is_finite(): continue
+			var d:=where.distance_to(at)
+			var need:=float(battle.get("clear",16.0))+size*0.5
+			if d<need:
+				var push:=(at-where).normalized() if d>0.5 else Vector2.ZERO
+				if push==Vector2.ZERO and home.is_finite(): push=((home-at) if ours else (at-home)).normalized()
+				if push==Vector2.ZERO: push=Vector2.DOWN if ours else Vector2.UP
 				at+=push*(need-d); entry.moved=true
 		entry.at=at
 		drawn.append(entry)

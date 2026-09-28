@@ -37,10 +37,13 @@ func test_routine_raid_starts_without_visual_gate_and_advances_in_the_calendar()
 	MilitaryCampaign.battle_started.connect(renderer._on_city_battle_started)
 	MilitaryCampaign._create_civilization_threat({"id":"routine_test","incident_kind":"raid","strength":6,"source_name":"Raiders","readiness":.4},"defensive")
 	assert_bool(MilitaryCampaign.active_threat.get("routine_raid",false)).is_true()
+	# Sixty drilled spears against six raiders is hopeless for the raiders: it is
+	# settled the day they come (tests/test_battle_scale.gd). Either way it is
+	# fought by the calendar, never waiting on the battle view.
+	var before:=MilitaryCampaign.battle_history.size()
 	var started:Dictionary=MilitaryCampaign.respond_to_threat("defend")
 	assert_bool(started.has("error")).is_false()
 	assert_bool(MilitaryCampaign.active_engagement.get("awaiting_player_view",false)).is_false()
-	var before:=MilitaryCampaign.battle_history.size()
 	for day in 32:
 		MilitaryCampaign._process_threat_day()
 		if MilitaryCampaign.active_engagement.is_empty():break
