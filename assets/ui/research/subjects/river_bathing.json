@@ -1,0 +1,12 @@
+{
+  "id": "river_bathing",
+  "line": "health",
+  "game_year": 198,
+  "approx_historical_year": -3680,
+  "prompt": "c. 3680 BCE: Adults wash in a shallow river, one pouring clean water over another; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-729702eb-e8aa-4234-a18e-b6358cc997a0.png",
+  "asset": "res://assets/ui/research/subjects/river_bathing-v1.png",
+  "sha256": "3e278aa74c84cf9aff94715a4b8b4d231aa7d621d67b4ed7150482480fade8bf",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
