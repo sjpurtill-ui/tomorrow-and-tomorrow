@@ -132,6 +132,34 @@ static func dock()->Dictionary:
 		if road!="":words+=" "+road
 	return {"on":leaders,"words":words,"leaders_tip":LEADERS_TIP,"ruler_tip":RULER_TIP}
 
+## What an official at court knows of it (court_facts.gd): {leaders, why}.
+## leaders: the switch, as everyone at court knows it. why (the headman's,
+## with detail): what keeps the leaders home or when they next look, or the
+## settlers still on the road when the switch is off; "" when nothing.
+static func court_facts(detail:bool)->Dictionary:
+	var leaders:=on()
+	var why:=""
+	if detail and leaders:
+		var held:=holdup()
+		var look:=_next_look_words()
+		if held!="":why="not now: "+held
+		elif look!="":why="they next look for land in "+look
+	elif detail:
+		var convoy:Dictionary=WorldSimulation.state.settlement_convoy
+		if bool(convoy.get("active",false)):why="the settlers already on the road to %s go on unless you call them home" % String(convoy.get("settlement_name","the new ground"))
+	return {"leaders":leaders,"why":why}
+
+## Those facts in words: the fact sheet's line ("our leaders found them on
+## their own ...; not now: ...") or, spoken, the official's own answer.
+static func court_words(facts:Dictionary,spoken:bool)->String:
+	var why:=String(facts.get("why",""))
+	var leaders:=bool(facts.get("leaders",false))
+	if spoken:
+		var said:="Our leaders found new towns on their own when good land is free and the stores can spare the settlers." if leaders else "No new town is founded unless you order it."
+		return said+((" %s." % (why.substr(0,1).to_upper()+why.substr(1))) if why!="" else "")
+	var line:="our leaders found them on their own when good land is free and the stores can spare the settlers" if leaders else "none is founded unless you order it"
+	return line+(("; "+why) if why!="" else "")
+
 ## The god's word in court (home_orders.gd): our leaders may found new towns,
 ## or none without the god's order. Sets the switch; says is the official's
 ## own plain answer, and the engine's note (outcome) is the same account, so

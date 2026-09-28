@@ -23,6 +23,7 @@ extends RefCounted
 
 const Ledger:=preload("res://scripts/town_ledger.gd")
 const TownFate:=preload("res://scripts/town_fate.gd")
+const AutoFounding:=preload("res://scripts/auto_founding.gd")
 
 ## A question: a question mark, or a question's opening (with or without the
 ## mark, after "and", "so", a name and a comma...). "Do it", "Have them bound"
@@ -53,6 +54,10 @@ const TOPIC_RES:=[
 	["all","\\b(all|the rest|rest of|left|remain|remaining|still there|what about|what became|what happened|become of|happened to|account|everyone|every one)\\b"],
 	["here","\\b(live there|living there|there now|still there|in the town|inside|how many people|population|how big)\\b"],
 ]
+## New towns founded by our leaders ("are our leaders founding new towns?",
+## "will they settle new land?", "are we sending settlers out?"); never the
+## houses at home ("new homes") or one town's settlers.
+const NEW_TOWNS_Q:="\\b(new|more|other|another|further|fresh) (towns?|cities|villages?|settlements?|colon(y|ies))\\b|\\b(found|founding|founds|founded|settle|settling|colonis\\w*|coloniz\\w*) (any |some |more |new |fresh |other |further |the )*(towns?|cities|villages?|settlements?|land|lands|ground)\\b|\\bsend(s|ing)? (out )?(any |more |our )?settlers\\b"
 ## The topics that ask about a town's people.
 const PEOPLE_TOPICS:=["bound","free","killed","fled","taken","road","hostage","worker","conscript","here"]
 const STATUS_SHORT:={"free":"free","bound":"bound","hostage":"held as hostages","worker":"at forced labour","conscript":"serving with us"}
@@ -506,6 +511,11 @@ static func _common_answer(sheet:Dictionary,lower:String)->String:
 		return "It is the %s of %s." % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "It is %s." % String(sheet.get("when",""))
 	if int(sheet.get("home_people",0))>0 and _has(lower,"\\bhow many (are we|of us|souls|mouths)\\b|\\bhow many people (are there|live) (at home|here)\\b|\\bour number\\b"):
 		return "We are %d people in %s." % [int(sheet.home_people),String(sheet.get("home","our home"))]
+	# The god's word on new towns ("are our leaders founding new towns?"), as
+	# the Settlement dock's switch stands (court_facts new_towns); a question
+	# of judgement ("should we found more towns?") is the voice's.
+	if sheet.get("new_towns") is Dictionary and _has(lower,NEW_TOWNS_Q) and not _has(lower,"\\b(should|ought|think|advise|would you|do you want|why)\\b"):
+		return AutoFounding.court_words(sheet.new_towns,true)
 	# Who holds an office now ("who keeps the stores now?", "who is on my council?").
 	var holder:=_office_answer(sheet,lower)
 	if holder!="": return holder

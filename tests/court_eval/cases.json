@@ -1364,6 +1364,24 @@
 
   {"id": "q.stores.typo", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "whats in the stores", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_has": ["Timber"]}},
 
-  {"id": "q.spears.typo", "domain": "office_questions", "fixture": "home_peace", "speaker": "suri", "source": "design", "say": "hw many spears", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["no spears", "0 spears"]}}
+  {"id": "q.spears.typo", "domain": "office_questions", "fixture": "home_peace", "speaker": "suri", "source": "design", "say": "hw many spears", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["no spears", "0 spears"]}},
+
+  {"id": "q.new_towns.on", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "The ruler asks whether our leaders found towns on their own: the headman answers from the switch the Settlement dock shows (auto_founding.gd), never the dock's button words, and says what keeps them home.",
+   "say": "Are our leaders founding new towns?", "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "state": {"auto_found": "==before"}, "reply_has": ["found new towns on their own"], "reply_lacks": ["Press"], "prompt_has": ["New towns: our leaders found them on their own"]},
+   "variants": ["will they found more towns on their own?", "are we sending out settlers?"]},
+
+  {"id": "q.new_towns.off", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "After the god's word to stop, the headman says no new town is founded without it.",
+   "steps": [
+    {"say": "Stop founding new towns", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"state": {"auto_found": "==0"}}},
+    {"say": "Will they found any new towns?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "state": {"auto_found": "==0"}, "reply_has": ["unless you order it"], "reply_lacks": ["Press"], "prompt_has": ["New towns: none is founded unless you order it"]}}
+   ]},
+
+  {"id": "q.new_towns.war", "domain": "office_questions", "fixture": "war_not_held", "speaker": "suri", "source": "design",
+   "note": "Every official at court knows the god's word on new towns; the war leader says it, and no band moves.",
+   "say": "Are our leaders still founding new towns?", "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "state": {"auto_found": "==before", "moving": "==before", "to_tsaren": "==before"}, "reply_has": ["found new towns on their own"], "prompt_has": ["New towns: our leaders found them on their own"]}}
  ]
 }

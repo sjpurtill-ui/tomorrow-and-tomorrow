@@ -38,7 +38,7 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## The god's word on new towns ("stop founding new towns", "our leaders may
 ## settle new land again": 12 more cases a path): offline 503, live 504.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":503,"live":504,"sloppy":74}
+const BASELINE:={"offline":508,"live":509,"sloppy":74}
 
 var _processing:Dictionary={}
 
