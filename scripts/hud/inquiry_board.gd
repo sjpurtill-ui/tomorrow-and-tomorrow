@@ -1,7 +1,17 @@
 extends "res://scripts/hud/settlement_overview.gd"
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
+## Below this board width the questions stack in one column and the lead
+## painting sits above its words instead of beside them.
+const WIDE:=760.0
+const THUMB:=96.0
+## Tallest the lead painting grows, beside or above its words.
+const LEAD_ART_MAX:=176.0
 var fields_grid:GridContainer
 var projects_grid:GridContainer
+var lead_row:BoxContainer
+## Holdup sentences already shown: each is written out once, on the first card
+## that has it; later cards with the same holdup keep only its short name.
+var explained:Dictionary={}
 func setup(block:Dictionary)->void:
 	data=block;name="InquiryBoard";add_theme_constant_override("separation",16)
 	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",16);add_child(heading)
@@ -9,10 +19,13 @@ func setup(block:Dictionary)->void:
 	intro.add_child(_serif("At the edge of what we know",27))
 	_note(intro,"Follow the work underway, or give your people a new question to pursue.")
 	_button(heading,"Explore the discovery tree",data.on_tree,"Explore known methods and their prerequisites")
-	add_child(T.make_label("BEING LEARNED NOW",12,T.GOLD_TEXT))
-	projects_grid=GridContainer.new();projects_grid.columns=2;projects_grid.add_theme_constant_override("h_separation",16);projects_grid.add_theme_constant_override("v_separation",14);add_child(projects_grid)
-	for record:Dictionary in data.investigations:
-		_investigation(record)
+	var learning:=VBoxContainer.new();learning.name="BeingLearned";learning.add_theme_constant_override("separation",12);add_child(learning)
+	learning.add_child(T.make_label("BEING LEARNED NOW",12,T.GOLD_TEXT))
+	var order:=question_order(data.investigations)
+	if not (order.lead as Dictionary).is_empty():_question(learning,order.lead,true)
+	projects_grid=GridContainer.new();projects_grid.columns=2;projects_grid.add_theme_constant_override("h_separation",16);projects_grid.add_theme_constant_override("v_separation",16);learning.add_child(projects_grid)
+	for record:Dictionary in order.rest:
+		_question(projects_grid,record,false)
 	if data.investigations.is_empty():
 		var empty:=_card(projects_grid);Visuals.paint(empty,"knowledge",130)
 		empty.add_child(_serif("The next question is still open",22))
@@ -40,61 +53,102 @@ func setup(block:Dictionary)->void:
 		_button(controls,"More",field.on_more,"Move one step of attention to this field")
 		_button(controls,"Open",field.on_open,"What this field is for, and what is being worked on")
 	resized.connect(_arrange);_arrange()
-func _investigation(record:Dictionary)->void:
-	# Wide banner paintings head the card at full width, shown whole; older
-	# square and 3:2 paintings keep the square thumbnail beside the text.
-	var domain:=String(record.get("dynamic","knowledge"));var accent:=Visuals.color(domain)
-	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	panel.tooltip_text="Review this field and its current investigations";projects_grid.add_child(panel)
-	var idle:=T.flat(T.ROW_BG,T.BORDER,1,0,10);var hover:=T.flat(T.HOVER_BG,T.GOLD,1,0,10)
+
+## The question nearest to proof that has a painting leads the section at full
+## width; the rest keep a steady order (by field, then name) so cards do not
+## trade places as the evidence builds day by day.
+static func question_order(records:Array)->Dictionary:
+	var lead:=-1
+	for index in records.size():
+		var record:Dictionary=records[index]
+		if not has_painting(record):continue
+		if lead<0 or float(record.get("progress",0.0))>float((records[lead] as Dictionary).get("progress",0.0)):lead=index
+	var rest:Array=[]
+	for index in records.size():
+		if index!=lead:rest.append(records[index])
+	var fields:Array=Visuals.NAMES.keys()
+	rest.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var first:=fields.find(String(a.get("dynamic","")));var second:=fields.find(String(b.get("dynamic","")))
+		if first<0:first=fields.size()
+		if second<0:second=fields.size()
+		if first!=second:return first<second
+		return String(a.get("name",""))<String(b.get("name","")))
+	return {"lead":records[lead] if lead>=0 else {},"rest":rest}
+static func has_painting(record:Dictionary)->bool:
+	var path:=Visuals.subject_art_key(record)
+	return not path.is_empty() and ResourceLoader.exists(path)
+## The field a question belongs to, for its card's kicker. A record without a
+## field names its line of study instead; with neither, the card has no kicker.
+static func field_name(record:Dictionary)->String:
+	var domain:=String(record.get("dynamic",record.get("direction","")))
+	if not domain.is_empty():return Visuals.name_for(domain)
+	return String(record.get("subcategory","")).strip_edges()
+
+## One card per question: its field, the question, how far the evidence has
+## come, who works it and what holds it back. A card is as tall as its own
+## words; the lead card spans the section with its painting beside its words
+## (above them on a narrow board).
+func _question(parent:Node,record:Dictionary,lead:bool)->void:
+	var domain:=String(record.get("dynamic",record.get("direction","")));var accent:=Visuals.color(domain)
+	var panel:=PanelContainer.new();panel.name="Question_"+String(record.get("id","")).validate_node_name()
+	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND;parent.add_child(panel)
+	var pad:=16.0 if lead else 12.0
+	var idle:=_card_style(pad);var hover:=_card_style(pad,true)
 	panel.add_theme_stylebox_override("panel",idle)
 	panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",hover))
 	panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",idle))
-	var review:Callable=data.on_domain.bind(domain)
+	var review:Callable=data.on_domain.bind(domain if not domain.is_empty() else "knowledge")
 	panel.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:review.call())
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);stack.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(stack)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);row.mouse_filter=Control.MOUSE_FILTER_PASS
-	const SIDE:=124.0
-	var painting:=Visuals.for_discovery(record)
-	if Visuals.is_wide(painting):
-		Visuals.paint_hero(stack,record,84,168)
-		stack.add_child(row)
-	elif painting!=null:
-		stack.add_child(row)
-		Visuals.paint_discovery(row,record,SIDE).custom_minimum_size.x=SIDE
+	var row:=BoxContainer.new();row.add_theme_constant_override("separation",20 if lead else 14);row.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(row)
+	if lead:
+		lead_row=row
+		# Banners show whole at their own proportions; taller plates are cropped
+		# around their subject so the painting stays about as tall as the words.
+		var art:=Visuals.paint_hero(row,record,120,LEAD_ART_MAX)
+		art.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;art.size_flags_stretch_ratio=0.85
+	elif has_painting(record):
+		var thumb:=Visuals.paint_discovery(row,record,THUMB);thumb.custom_minimum_size.x=THUMB;thumb.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	else:
-		stack.add_child(row)
-		var tile:=PanelContainer.new();tile.custom_minimum_size=Vector2(SIDE,SIDE);tile.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		tile.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.BORDER_SOFT,1,0,0));row.add_child(tile)
-		var glyph:=TextureRect.new();glyph.texture=preload("res://scripts/resource_icons.gd").domain_texture(domain,accent);glyph.custom_minimum_size=Vector2(56,56)
+		var tile:=PanelContainer.new();tile.custom_minimum_size=Vector2(THUMB,THUMB);tile.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;tile.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		tile.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.BORDER_SOFT,1,T.RADIUS_CONTROL,0));row.add_child(tile)
+		var glyph:=TextureRect.new();glyph.texture=preload("res://scripts/resource_icons.gd").domain_texture(domain if not domain.is_empty() else "knowledge",accent);glyph.custom_minimum_size=Vector2(48,48)
 		glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;glyph.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;glyph.size_flags_vertical=Control.SIZE_SHRINK_CENTER;tile.add_child(glyph)
-	var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",5);text.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(text)
+	var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",6);text.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(text)
+	var field:=field_name(record)
+	if not field.is_empty():
+		var kicker:=T.make_label(field.to_upper(),12,T.legible(accent));kicker.name="FieldLabel";text.add_child(kicker)
+	text.add_child(_serif(String(record.get("name","An open question")),24 if lead else 19))
 	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",10);head.mouse_filter=Control.MOUSE_FILTER_PASS;text.add_child(head)
-	var eyebrow:=T.make_label(Visuals.name_for(domain).to_upper(),12,T.GOLD_TEXT);eyebrow.size_flags_horizontal=Control.SIZE_EXPAND_FILL;eyebrow.clip_text=true;head.add_child(eyebrow)
-	var Words:=preload("res://scripts/hud/home_plain.gd")
-	head.add_child(T.make_label("%s; %s"%[Words.researchers(researchers),Words.evidence(progress)],12,Visuals.text_color(domain)))
-	text.add_child(_serif(String(record.get("name","An open question")),19))
 	_meter(text,progress,accent)
+	_line(text,"%s; %s"%[Words.researchers(researchers),Words.evidence(progress)],14 if lead else 13,T.BODY)
 	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
-	var reason:=bottleneck.split(" — ",true,1)
 	var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
-	if phase.is_empty():phase=reason[0].left(1)+reason[0].substr(1).to_lower()
-	_clamped(text,phase,13,T.BODY,1)
-	_clamped(text,Visuals.plain_bottleneck(bottleneck),12,T.TEXT_SOFT)
+	if phase.is_empty():
+		var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
+	_line(text,phase,14 if lead else 13,T.INK)
+	var why:=Visuals.plain_bottleneck(bottleneck)
+	var restated:=why.trim_suffix(".").to_lower()==phase.to_lower()
+	if not restated and not explained.has(why):
+		explained[why]=true;_line(text,why,13 if lead else 12,T.TEXT_SOFT)
+	var holdup:=why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)]
 	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))
-	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+"Click to review this field and its current investigations."
+	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+holdup+"\n\nClick to review this field and its current investigations."
+func _card_style(pad:float,hover:bool=false)->StyleBoxFlat:
+	return T.flat(T.HOVER_BG if hover else T.ROW_BG,T.GOLD if hover else T.BORDER,1,T.RADIUS_CARD,pad)
 func _clamped(parent:Node,value:String,font:int,ink:Color,lines:int=2)->void:
 	var label:=T.make_label(value,font,ink);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.max_lines_visible=lines;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;parent.add_child(label)
 func _card(parent:Node)->VBoxContainer:
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(panel)
-	panel.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.BORDER,1,0,12))
+	panel.add_theme_stylebox_override("panel",_card_style(12))
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",9);panel.add_child(box);return box
 func _meter(parent:Node,fraction:float,color:Color)->void:
 	var bar:=ProgressBar.new();bar.custom_minimum_size.y=6;bar.show_percentage=false;bar.value=fraction*100;parent.add_child(bar)
 	bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(color))
 func _arrange()->void:
+	var wide:=size.x>=WIDE
 	if fields_grid:fields_grid.columns=3 if size.x>=1100 else (2 if size.x>=520 else 1)
-	if projects_grid:projects_grid.columns=2 if size.x>=560 else 1
+	if projects_grid:projects_grid.columns=2 if wide and projects_grid.get_child_count()>1 else 1
+	if lead_row:lead_row.vertical=not wide
