@@ -62,7 +62,14 @@ const STATE_CHARS:=190000
 ## Where a raid's fight was, by what they came for.
 const WHERE:={"fields":"at the planted fields","herds":"out with the herds","gathering":"at the gathering grounds","racks":"at the drying racks","hunters":"out on the hunt","scouts":"out on the scouting trail"}
 ## Where our band's fight was, by what it went to do.
-const OP_WHERE:={"war_pursue":"on the raiders' trail","war_burn":"at their stores","war_chief":"where their chief was"}
+const OP_WHERE:={"war_pursue":"on the raiders' trail","war_burn":"at their stores","war_chief":"where their chief was","war_track":"on the raiders' trail"}
+## Orders that must reach the enemy's home: nobody goes there until the way is
+## known (relation.home_location_known). Until then the band follows the
+## raiders' trail to find it (war_track), whoever gave the word.
+const NEEDS_HOME:=["war_burn","war_chief"]
+## A tracking party: a few good trackers, never a war band.
+const TRACKERS_MIN:=2
+const TRACKERS_MAX:=6
 const TERMS_WAIT:=60
 const LEVEL_DECAY_DAYS:=4*365
 ## A war in which neither side has fought for this long goes quiet: a truce.
@@ -72,7 +79,7 @@ const ENEMY_SPENT:=0.55
 
 ## How often a ruler with a real grievance comes, by signature trait.
 const FOLLOW:={"grudge":0.9,"hunter":0.8,"ledger":0.72,"bluffer":0.7,"magpie":0.62,"matchmaker":0.5}
-const OBJECTIVES:=["war_guard","war_pursue","war_burn","war_chief","war_parley","war_pay","war_general","war_let","war_rest"]
+const OBJECTIVES:=["war_guard","war_pursue","war_burn","war_chief","war_parley","war_pay","war_general","war_let","war_rest","war_track"]
 const TARGETS:={
 	"fields":{"words":"the planted fields","who":"field hands","lethal":true},
 	"herds":{"words":"the herds","who":"herders","lethal":true},
@@ -678,12 +685,80 @@ static func _objective_for_general(civ_id:String,general:Dictionary,at_war:bool)
 	var war:Dictionary=front(civ_id).get("war",{})
 	if at_war:
 		if float(war.get("our_exh",0.0))>0.45 and care>0.5: return "war_parley"
-		if r<0.85 and courage>0.55: return "war_burn"
+		# A bold leader strikes their stores, but only a home we can find.
+		if r<0.85 and courage>0.55: return "war_burn" if home_known(civ_id) else "war_track"
 		if r<0.7 and courage>0.75: return "war_chief"
 		return "war_guard"
 	if r<1.1 and courage>0.55: return "war_pursue"
 	if care>0.65: return "war_parley"
 	return "war_guard"
+
+## Do we know where this people lives? (The same flag the map and the court's
+## "their home not yet found" read.)
+static func home_known(civ_id:String)->bool:
+	return bool(_relation(civ_id).get("home_location_known",false))
+
+## Our home and theirs on the world plane, and the km between (40 when the
+## world cannot say).
+static func _homes(civ_id:String)->Dictionary:
+	var world=WorldSimulation.world
+	var civ:=_civ(civ_id)
+	if world==null or civ.is_empty() or not world.has_method("_civilization_world_position"): return {"here":Vector2.ZERO,"there":Vector2(40,0),"km":40.0}
+	var there:Vector2=world._civilization_world_position(civ)
+	var here:Vector2=world.player_world_origin
+	return {"here":here,"there":there,"km":maxf(1.0,here.distance_to(there))}
+
+## The chance a tracking party finds their home: the farther, the colder the
+## trail; a skilled war leader reads it better. Stated in the order, rolled on
+## the op's own seed.
+static func track_chance(civ_id:String,skill:float)->float:
+	return clampf(0.85-float(_homes(civ_id).km)/250.0+(skill-0.5)*0.3,0.15,0.9)
+
+static func _track_odds_words(chance:float)->String:
+	if chance>=0.7: return "The trail is fresh; they should find it."
+	if chance>=0.45: return "They may find it or lose the trail."
+	return "It is far and the trail is old; they may not find it."
+
+## "3 days' walk west": how far their home lies from ours.
+static func _way_words(civ_id:String)->String:
+	var homes:=_homes(civ_id)
+	var d:Vector2=(homes.there as Vector2)-(homes.here as Vector2)
+	if d.length()<0.5: return ""
+	var days:=maxi(1,ceili(float(homes.km)/18.0))
+	var dir:String=["east","southeast","south","southwest","west","northwest","north","northeast"][posmod(roundi(rad_to_deg(d.angle())/45.0),8)]
+	return ("a day's walk %s" % dir) if days==1 else ("%d days' walk %s" % [days,dir])
+
+## Their home is found: on our chart (city_intelligence, which sets the
+## relation's home_location_known for their chief town) and, where no town is
+## charted, on the relation itself with the land around it revealed. Returns
+## where it lies ("3 days' walk west").
+static func _find_home(civ_id:String,day:int,source:String,reference:String)->String:
+	var world=WorldSimulation.world
+	var civ:=_civ(civ_id)
+	if world==null or civ.is_empty(): return ""
+	var chart=world.get("city_intelligence")
+	var home_id:=String(chart.primary_id(civ_id)) if chart!=null else ""
+	if home_id!="": chart.publish("player",chart.capture("player",home_id,0.55,day,source,"war:"+reference),day)
+	var relation:=_relation(civ_id)
+	if not bool(relation.get("home_location_known",false)):
+		var there:Vector2=_homes(civ_id).there
+		relation["home_location_known"]=true; relation["home_position"]={"x":there.x,"z":there.y}
+		relation["home_location_source"]=source; relation["last_observed_day"]=day
+		if world.has_method("_add_revealed_area"): world._add_revealed_area(there,72.0,"foreign settlement observed")
+	return _way_words(civ_id)
+
+## A band of ours has been to their home already (a raid on their stores or a
+## strike at their chief, from before the way had to be known): it knows the
+## way, so the map shows it. Once per people.
+static func _knows_the_way_from_before(civ_id:String,day:int)->void:
+	if home_known(civ_id): return
+	for entry in state().log:
+		if not entry is Dictionary or String((entry as Dictionary).get("civ",""))!=civ_id: continue
+		if not String((entry as Dictionary).get("kind","")) in ["op_burn","op_chief"]: continue
+		var name:=_name(civ_id)
+		var way:=_find_home(civ_id,day,"a band that went there","struck:"+civ_id)
+		_chronicle("way:%s" % civ_id,"The Way to %s" % name,"Our band that went to %s's home knows the way there%s. It is on our map now." % [name,(", "+way) if way!="" else ""],"notice",civ_id)
+		return
 
 static func _march_days(civ_id:String,rng:RandomNumberGenerator)->int:
 	var civ:=_civ(civ_id)
@@ -705,6 +780,13 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
 	if objective=="war_general": objective=_objective_for_general(civ_id,general,at_war)
 	if objective=="war_rest": objective="war_guard" if at_war else "war_let"
+	# Their stores and their chief are at their home: until someone has found
+	# it, the band can only follow the raiders' trail to look for it.
+	var asked:=objective
+	if objective in NEEDS_HOME and not home_known(civ_id): objective="war_track"
+	if objective=="war_track" and home_known(civ_id):
+		var where:=_way_words(civ_id)
+		return "We know where %s live already%s. Say what you want done there." % [_name(civ_id),(": "+where) if where!="" else ""]
 	if at_war and not (war.op as Dictionary).is_empty():
 		war["queued"]=objective
 		return "%s is already in the field. Your word will stand when they are back." % gname
@@ -734,6 +816,7 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 			_close_war(civ_id,day,"tribute paid","You paid %d Food. %s's fighters went home." % [roundi(paid),name])
 			return "You paid %d Food to %s, and the war is over." % [roundi(paid),name]
 	var band:=_band_size(_our_pop(),rng.randf_range(0.05,0.07)) if objective!="war_parley" else 2
+	if objective=="war_track": band=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
 	var due:=day+_march_days(civ_id,rng)
 	var op:={"objective":objective,"start":day,"due":due,"band":band,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":auto}
 	if at_war: war["op"]=op
@@ -744,6 +827,12 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 		"war_pursue": return "%s%s takes %d after the raiders, on their trail toward %s. Word will come back when it is done." % [prefix,gname,band,name]
 		"war_burn": return "%s%s leaves at dusk with %d to burn %s's stores." % [prefix,gname,band,name]
 		"war_chief": return "%s%s takes %d of the best to bring back %s's chief. Few of them expect to come home unhurt." % [prefix,gname,band,name]
+		"war_track":
+			var way:="their stores" if asked=="war_burn" else ("their chief" if asked=="war_chief" else "")
+			var why:=("No one here knows where %s live, so %s cannot be reached yet. " % [name,way]) if way!="" and not auto else ""
+			var again:=" When the way is found, give the word again." if way!="" and not auto else ""
+			var odds:=_track_odds_words(track_chance(civ_id,_general_skill(general)))
+			return "%s%s%s takes %d to follow %s's raiders' trail and find where they live. %s They should be back in about %d days.%s" % [why,prefix,gname,band,name,odds,due-day,again]
 	return "%s goes." % gname
 
 static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
@@ -773,6 +862,21 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 			_chronicle(key,"%s Will Not Talk" % name,refusal,"notice",civ_id)
 			_log(civ_id,"parley_refused",refusal)
 			if at_war: _file(civ_id,"report",refusal,day)
+		return
+	if objective=="war_track":
+		var tracker:=Hall._official(int(op.get("general_pid",0)))
+		if tracker.is_empty(): tracker=_general()
+		var chance:=track_chance(civ_id,_general_skill(tracker))
+		var found:=rng.randf()<chance
+		var said:=""
+		if found:
+			var way:=_find_home(civ_id,day,"trail followed by %s" % gname,key)
+			said="%s's trackers followed %s's raiders' trail%s to their home. It is on our map now." % [gname,name,(" "+way) if way!="" else ""]
+		else:
+			said="%s's trackers lost %s's raiders' trail and came back. Where they live is still not known." % [gname,name]
+		_chronicle(key,("%s's Home Found" % name) if found else "The Trail Went Cold",said,"notice",civ_id)
+		_log(civ_id,"op_track",said,{"found":found,"chance":snappedf(chance,0.01)})
+		if at_war: _file(civ_id,"report",said,day)
 		return
 	var their_share:=rng.randf_range(0.04,0.06) if objective=="war_pursue" else (rng.randf_range(0.05,0.07) if at_war else rng.randf_range(0.03,0.05))
 	var their_n:=_band_size(_their_pop(civ_id),their_share)
@@ -972,6 +1076,7 @@ static func daily(day:int)->void:
 		if civ.is_empty() or not bool(civ.get("alive",true)):
 			if not (f.war as Dictionary).is_empty(): f["war"]={}
 			continue
+		_knows_the_way_from_before(id,day)
 		var war:Dictionary=f.war
 		if war.is_empty():
 			var pending:Dictionary=f.pending
@@ -1147,10 +1252,15 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 	var theirs:=_band_size(_their_pop(civ_id),0.06)
 	var busy:=not (war.get("op",{}) as Dictionary).is_empty() or not (f.get("op",{}) as Dictionary).is_empty()
 	var note:=" (after the band now in the field is back)" if busy else ""
+	# Their stores and chief are at a home we must first find (NEEDS_HOME).
+	var findable:=home_known(civ_id)
+	var track:=Hall._option("war_track","Find where they live","Nobody knows where %s live. A few trackers follow their raiders' trail home. %s%s" % [name,_track_odds_words(track_chance(civ_id,_general_skill(_general()))),note],"neutral")
 	if not war.is_empty():
 		out.append(Hall._option("war_guard","Hold the approaches","Keep %d at the approaches for half a year; whoever comes meets spears.%s" % [band,note],"neutral"))
-		out.append(Hall._option("war_burn","Burn their stores","Take %d against %s's stores by night. %s%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),note],"hostile"))
-		out.append(Hall._option("war_chief","Bring me their chief","Go for %s's chief. %s If it fails, few come back.%s" % [name,_odds_words(_odds(civ_id,"war_chief")),note],"hostile"))
+		if findable:
+			out.append(Hall._option("war_burn","Burn their stores","Take %d against %s's stores by night. %s%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),note],"hostile"))
+			out.append(Hall._option("war_chief","Bring me their chief","Go for %s's chief. %s If it fails, few come back.%s" % [name,_odds_words(_odds(civ_id,"war_chief")),note],"hostile"))
+		else: out.append(track)
 		out.append(Hall._option("war_parley","Send for a truce","Two messengers to %s. %s" % [name,"They may listen now." if float(war.get("their_exh",0.0))>=0.3 else "They are not tired of it yet."],"warm"))
 		var terms:Dictionary=war.get("terms",{})
 		if not terms.is_empty():
@@ -1160,7 +1270,8 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 		return out
 	var raid:Dictionary=f.get("last_raid",{})
 	out.append(Hall._option("war_pursue","Go after them","Take %d on the raiders' trail%s. %s Blood may answer blood.%s" % [band," and bring back the %d Food" % int(raid.get("taken",0)) if int(raid.get("taken",0))>0 else "",_odds_words(_odds(civ_id,"war_pursue")),note],"hostile"))
-	out.append(Hall._option("war_burn","Burn their stores in return","Take %d against %s's stores. %s %s may come to war over it.%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),name,note],"hostile"))
+	if findable: out.append(Hall._option("war_burn","Burn their stores in return","Take %d against %s's stores. %s %s may come to war over it.%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),name,note],"hostile"))
+	else: out.append(track)
 	out.append(Hall._option("war_guard","Guard the approaches","A watch of %d for half a year. The next raiders meet spears." % band,"neutral"))
 	out.append(Hall._option("war_parley","Send word: enough","Messengers to %s to settle it. Some will call it weakness." % name,"warm"))
 	out.append(Hall._option("war_let","Let it pass","Bury the dead and do nothing. %s may take it for weakness." % name,"neutral"))
@@ -1198,7 +1309,8 @@ static func on_open(audience:Dictionary)->void:
 			said="%s's herald wants %d Food to end it. Our people are worn down. It is your word." % [name,int(float(terms.get("amount",0.0)))]
 	var advice:="" if String(part.get("account",""))!="" else _objective_for_general(civ_id,general,not (front(civ_id).war as Dictionary).is_empty())
 	var advice_words:String={"war_guard":"If it were mine to say, I would hold the approaches and let them come to us.","war_burn":"If it were mine to say, I would burn their stores.",
-		"war_chief":"If it were mine to say, I would go for their chief.","war_pursue":"If it were mine to say, I would go after them now, while the trail is fresh.","war_parley":"If it were mine to say, I would send for a truce."}.get(advice,"")
+		"war_chief":"If it were mine to say, I would go for their chief.","war_pursue":"If it were mine to say, I would go after them now, while the trail is fresh.","war_parley":"If it were mine to say, I would send for a truce.",
+		"war_track":"If it were mine to say, I would find where they live first. Nobody here knows the way."}.get(advice,"")
 	if said!="": Hall.append_line(String(audience.id),{"speaker":String(general.get("name","")),"role":"official","person_id":int(general.get("person_id",0)),"civ_id":"player","text":said,"day":_day(),"aside":false})
 	if advice_words!="": Hall.append_line(String(audience.id),{"speaker":String(general.get("name","")),"role":"official","person_id":int(general.get("person_id",0)),"civ_id":"player","text":advice_words,"day":_day(),"aside":false})
 
@@ -1214,6 +1326,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	return {"outcome":outcome,"reaction":"pleased" if option_id in ["war_general","war_guard"] else "neutral"}
 
 const TYPED:=[
+	["war_track",["where they live","where their home","find their home","find their village","find their camp","find the way","track them home","find them"]],
 	["war_chief",["chief","ruler","leader","bring me","capture","their head"]],
 	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food"]],
 	["war_pursue",["after them","pursue","take back","chase","follow","get it back","hunt them"]],
