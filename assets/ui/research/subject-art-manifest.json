@@ -4016,5 +4016,21 @@
   "market_peacekeepers": {"path": "res://assets/ui/research/subjects/market_peacekeepers-v1.png", "focus": [0.5, 0.5]},
   "output_quality_sorting": {"path": "res://assets/ui/research/subjects/output_quality_sorting-v1.png", "focus": [0.5, 0.5]},
   "plank_trackways": {"path": "res://assets/ui/research/subjects/plank_trackways-v1.png", "focus": [0.5, 0.5]},
-  "shrine_work_obligations": {"path": "res://assets/ui/research/subjects/shrine_work_obligations-v1.png", "focus": [0.5, 0.5]}
+  "shrine_work_obligations": {"path": "res://assets/ui/research/subjects/shrine_work_obligations-v1.png", "focus": [0.5, 0.5]},
+  "winter_fodder": {"path": "res://assets/ui/research/subjects/winter_fodder-v1.png", "focus": [0.5, 0.5]},
+  "wood_pasture": {"path": "res://assets/ui/research/subjects/wood_pasture-v1.png", "focus": [0.5, 0.5]},
+  "work_gang_overseers": {"path": "res://assets/ui/research/subjects/work_gang_overseers-v1.png", "focus": [0.5, 0.5]},
+  "carrying_capacity_awareness": {"path": "res://assets/ui/research/subjects/carrying_capacity_awareness-v1.png", "focus": [0.5, 0.5]},
+  "castor_oil_remedies": {"path": "res://assets/ui/research/subjects/castor_oil_remedies-v1.png", "focus": [0.5, 0.5]},
+  "measure_drift_checking": {"path": "res://assets/ui/research/subjects/measure_drift_checking-v1.png", "focus": [0.5, 0.5]},
+  "template_based_sizing": {"path": "res://assets/ui/research/subjects/template_based_sizing-v1.png", "focus": [0.5, 0.5]},
+  "copper_maceheads": {"path": "res://assets/ui/research/subjects/copper_maceheads-v1.png", "focus": [0.5, 0.5]},
+  "healing_chants": {"path": "res://assets/ui/research/subjects/healing_chants-v1.png", "focus": [0.5, 0.5]},
+  "hereditary_chiefly_rank": {"path": "res://assets/ui/research/subjects/hereditary_chiefly_rank-v1.png", "focus": [0.5, 0.5]},
+  "niched_brick_facades": {"path": "res://assets/ui/research/subjects/niched_brick_facades-v1.png", "focus": [0.5, 0.5]},
+  "sealed_store_doors": {"path": "res://assets/ui/research/subjects/sealed_store_doors-v1.png", "focus": [0.5, 0.5]},
+  "coppice_regrowth_cutting": {"path": "res://assets/ui/research/subjects/coppice_regrowth_cutting-v1.png", "focus": [0.5, 0.5]},
+  "intercrop_pairing_lore": {"path": "res://assets/ui/research/subjects/intercrop_pairing_lore-v1.png", "focus": [0.5, 0.5]},
+  "lost_wax_casting": {"path": "res://assets/ui/research/subjects/lost_wax_casting-v1.png", "focus": [0.5, 0.5]},
+  "mutual_aid_pacts": {"path": "res://assets/ui/research/subjects/mutual_aid_pacts-v1.png", "focus": [0.5, 0.5]}
 }
