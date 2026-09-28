@@ -148,6 +148,9 @@ const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
 const TERRAIN_LOD:=preload("res://scripts/terrain_lod.gd")
 const TERRAIN_PATCH_MOVING_BUDGET_USEC:=1400
 const TERRAIN_PATCH_IDLE_BUDGET_USEC:=3000
+## Idle, with no streamed patch covering the view (just after a zoom out,
+## when the coarse planet mesh shows): hurry, still inside a 120 Hz frame.
+const TERRAIN_PATCH_UNCOVERED_BUDGET_USEC:=7000
 var dragging := false
 var rotating_camera := false
 var grid_x := 80
@@ -909,6 +912,7 @@ func _process(delta: float) -> void:
 	stamp=trace.mark("frame_masks_and_vegetation",stamp)
 	_process_camera_navigation(delta)
 	_process_smooth_camera(delta)
+	_update_terrain_chart_build()
 	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
 	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
@@ -1615,7 +1619,10 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	var next_resolution:=TERRAIN_LOD.next_resolution(span,regional_patch_resolution if same_patch else 0)
 	# Never replace established detailed ground/water with a coarse preview.
 	# Retain the old pair until the next full-detail pair is ready to swap.
-	if regional_terrain_patch!=null and regional_patch_resolution==TERRAIN_LOD.resolution_for(regional_patch_span):
+	# Unless a zoom out has left it a sliver of the new view: then a quick
+	# preview of the whole view serves far better than the planet mesh for
+	# the seconds the full patch takes (codex/map-beauty).
+	if regional_terrain_patch!=null and regional_patch_resolution==TERRAIN_LOD.resolution_for(regional_patch_span) and span<=regional_patch_span*2.5:
 		next_resolution=resolution
 	var prior:=_overlapping_terrain_samples(snapped,span,next_resolution)
 	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at,prior)
@@ -1661,7 +1668,9 @@ func _advance_terrain_patch()->void:
 	# sampling below one tenth of a 60 Hz frame during navigation and below one
 	# fifth while idle; the former 2.5/5 ms slices compounded with rendering into
 	# obvious hitches even though the final terrain arrived sooner.
-	if not terrain_patch_job.advance(TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC): return
+	var budget:=TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC
+	if budget==TERRAIN_PATCH_IDLE_BUDGET_USEC and not _regional_patch_covers_camera():budget=TERRAIN_PATCH_UNCOVERED_BUDGET_USEC
+	if not terrain_patch_job.advance(budget): return
 	var started:=Time.get_ticks_usec()
 	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights,"cover":terrain_patch_job.cover,"samples":terrain_patch_job.completed_samples(),"sample_seed":GameState.world_seed,"sample_province":GameState.active_province}
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
@@ -1671,6 +1680,23 @@ func _advance_terrain_patch()->void:
 	_install_regional_patch(completed)
 	TERRAIN_LOD.retain(terrain_patch_cache,completed)
 	terrain_patch_last_commit_usec=Time.get_ticks_usec()-started
+
+## The terrain draws with its painted build until any ground in view is at
+## chart scale (scripts/terrain_chart_build.gd). Starts on the chart build so
+## both are compiled in the first frames.
+const TERRAIN_CHART_BUILD:=preload("res://scripts/terrain_chart_build.gd")
+var terrain_chart_view:=true
+var terrain_chart_warm_until:=-1
+func _update_terrain_chart_build()->void:
+	if camera==null or not camera.is_inside_tree():return
+	# Draw a few frames on the chart build first, so it is compiled while the
+	# map loads, never on the first zoom out.
+	if terrain_chart_warm_until<0:terrain_chart_warm_until=Engine.get_frames_drawn()+4
+	if Engine.get_frames_drawn()<terrain_chart_warm_until:return
+	var want:=TERRAIN_CHART_BUILD.view_needs_chart(camera,get_viewport().get_visible_rect().size,camera_target.y,terrain_chart_view)
+	if want==terrain_chart_view:return
+	terrain_chart_view=want
+	TERRAIN_CHART_BUILD.apply(terrain_fog_materials.live_materials(),want)
 
 func _install_regional_patch(completed:Dictionary)->void:
 	# A cached close view can be ready before the zoom reaches it. Keep the
@@ -1891,6 +1917,8 @@ uniform vec4 map_wind = vec4(1.0, 0.0, 0.0, 0.0);
 uniform float map_wind_clock = 0.0;
 uniform float wb_motion = 1.0;
 uniform float weather_snow = 0.0;
+// The chart build or the painted build (scripts/terrain_chart_build.gd).
+const bool MC_CHART_ON = true;
 
 varying vec3 world_position;
 uniform vec4 streamed_cutout = vec4(0.0);
@@ -2038,42 +2066,24 @@ void fragment() {
 		reveal=mix(reveal,frontier.z,frontier_scale)*(1.0-frontier.x*frontier_scale*0.85);
 	}
 	// From the regional view outward the known land is a hand-coloured chart
-	// (map_chart.gdshaderinc), crossfaded in by view scale; at full weight the
-	// painted path below is skipped altogether.
+	// (map_chart.gdshaderinc), crossfaded in by view scale. Its landform is
+	// found here (the painting's light follows it through the crossfade); the
+	// chart itself is drawn after the painting, and at full weight the
+	// painting is skipped altogether.
 	float mc_design=mc_design_km(relative_position,PROJECTION_MATRIX);
-	float mc_w=mc_chart_weight(mc_design);
-	vec3 mc_ground=vec3(0.0);
+	float mc_w=MC_CHART_ON?mc_chart_weight(mc_design):0.0;
 	vec3 mc_normal=vec3(0.0,1.0,0.0);
+	vec2 mc_land=vec2(world_position.y,0.0);
+	float mc_prominence=1.0;
 	if (mc_w>0.0 && reveal>0.0) {
-		vec3 mc_f=mc_fields(surface_color,surface_uv,pixel_world,woodland_channel,world_position.y);
-		float mc_wood=mc_f.z;
-		if (!far_layer && patch_feather.w>0.5 && coast_mask_ready()) {
-			float mc_seam=smoothstep(0.60,0.82,coast_patch_edge(world_position.xz,patch_feather));
-			if (mc_seam>0.0) {
-				vec4 mc_far_color=surface_color; vec2 mc_far_uv=surface_uv; vec2 mc_far_uv2=surface_uv2;
-				coast_far_surface(world_position.xz,mc_far_color,mc_far_uv,mc_far_uv2);
-				mc_wood=mix(mc_wood,clamp(mc_far_color.a,0.0,1.0),mc_seam);
-			}
-		}
-		mc_wood*=woodland_retained(world_position.xz);
-		float mc_slope=1.0-clamp(normalize(world_normal).y,0.0,1.0);
-		float mc_prominence;
-		vec2 mc_land=mc_landform(world_position.xz,world_position.y,pixel_world,mc_design,!far_layer,mc_normal,mc_prominence);
-		float mc_temperature=surface_uv.x>=0.999?landscape_temperature(mc_f.y,seasonal_amplitude,world_position.z):15.0;
-		float mc_sheltered=1.0-smoothstep(0.18,0.58,mc_slope);
-		float mc_snow=(1.0-smoothstep(-1.5,3.5,mc_temperature))*smoothstep(0.045,0.38,mc_f.x)*mc_sheltered*0.78;
-		mc_snow=max(mc_snow,(1.0-smoothstep(-12.0,-2.0,mc_temperature))*mc_sheltered*0.30);
-		mc_snow=max(mc_snow,weather_snow*(1.0-smoothstep(2.0,7.0,mc_temperature))*(1.0-smoothstep(0.25,0.62,mc_slope))*0.8);
-		mc_ground=mc_chart_ground(world_position,mc_land,mc_normal,mc_prominence,pixel_world,mc_design,mc_f.x,mc_f.y,mc_wood,mc_slope,mc_temperature,mc_snow,
-			coast_height,coast_height_px,wb_frontier_px,CAMERA_POSITION_WORLD.y,land_resources,!far_layer,mc_screen_up(INV_VIEW_MATRIX));
+		mc_land=mc_landform(world_position.xz,world_position.y,pixel_world,mc_design,!far_layer,mc_normal,mc_prominence);
 	}
 	// Fully hidden ground needs only the existing unlit veil. Avoid all
 	// texture and procedural surface work until there is visible ground.
 	if (reveal<=0.0) {
 		ALBEDO=vec3(0.0); EMISSION=unknown_ground; ROUGHNESS=0.96;
-	} else if (mc_w>=0.999) {
-		ALBEDO=vec3(0.0); EMISSION=mc_ground*reveal+unknown_ground*(1.0-reveal); ROUGHNESS=0.96;
 	} else {
+	if (mc_w<0.999) {
 	vec2 surface_origin=floor(CAMERA_POSITION_WORLD.xz/64.0)*64.0;
 	float broad = organic_noise(world_position.xz * 0.052);
 	float slope = 1.0 - clamp(dot(normalize(world_normal), vec3(0.0, 1.0, 0.0)), 0.0, 1.0);
@@ -2539,8 +2549,30 @@ void fragment() {
 	EMISSION += earth*reveal*wb_sky_fill(wb_light_normal);
 	ROUGHNESS = 0.96;
 	if (wb_calm>0.0) { NORMAL = normalize((VIEW_MATRIX*vec4(wb_light_normal,0.0)).xyz); }
+	} else {
+		ALBEDO=vec3(0.0); EMISSION=vec3(0.0); ROUGHNESS=0.96;
+	}
 	// The painting gives way to its chart as the view widens.
 	if (mc_w>0.0) {
+		vec3 mc_f=mc_fields(surface_color,surface_uv,pixel_world,woodland_channel,world_position.y);
+		float mc_wood=mc_f.z;
+		if (!far_layer && patch_feather.w>0.5 && coast_mask_ready()) {
+			float mc_seam=smoothstep(0.60,0.82,coast_patch_edge(world_position.xz,patch_feather));
+			if (mc_seam>0.0) {
+				vec4 mc_far_color=surface_color; vec2 mc_far_uv=surface_uv; vec2 mc_far_uv2=surface_uv2;
+				coast_far_surface(world_position.xz,mc_far_color,mc_far_uv,mc_far_uv2);
+				mc_wood=mix(mc_wood,clamp(mc_far_color.a,0.0,1.0),mc_seam);
+			}
+		}
+		mc_wood*=woodland_retained(world_position.xz);
+		float mc_slope=1.0-clamp(normalize(world_normal).y,0.0,1.0);
+		float mc_temperature=surface_uv.x>=0.999?landscape_temperature(mc_f.y,seasonal_amplitude,world_position.z):15.0;
+		float mc_sheltered=1.0-smoothstep(0.18,0.58,mc_slope);
+		float mc_snow=(1.0-smoothstep(-1.5,3.5,mc_temperature))*smoothstep(0.045,0.38,mc_f.x)*mc_sheltered*0.78;
+		mc_snow=max(mc_snow,(1.0-smoothstep(-12.0,-2.0,mc_temperature))*mc_sheltered*0.30);
+		mc_snow=max(mc_snow,weather_snow*(1.0-smoothstep(2.0,7.0,mc_temperature))*(1.0-smoothstep(0.25,0.62,mc_slope))*0.8);
+		vec3 mc_ground=mc_chart_ground(world_position,mc_land,mc_normal,mc_prominence,pixel_world,mc_design,mc_f.x,mc_f.y,mc_wood,mc_slope,mc_temperature,mc_snow,
+			coast_height,coast_height_px,wb_frontier_px,CAMERA_POSITION_WORLD.y,land_resources,!far_layer,mc_screen_up(INV_VIEW_MATRIX));
 		ALBEDO *= 1.0-mc_w;
 		EMISSION = mix(EMISSION,mc_ground*reveal+unknown_ground*(1.0-reveal),mc_w);
 	}
@@ -2549,7 +2581,7 @@ void fragment() {
 """
 	shader.code=shader.code.replace("varying vec3 world_position;",LANDSCAPE_VISUALS.CUTTING_SHADER+"\nvarying vec3 world_position;")
 	var material := ShaderMaterial.new()
-	material.shader = shader
+	material.shader = TERRAIN_CHART_BUILD.shader_for(shader.code,terrain_chart_view)
 	_register_woodland_material(material)
 	var ground_texture: Texture2D = load("res://assets/terrain/temperate_ground_albedo_v1.png")
 	var forest_texture: Texture2D = load("res://assets/terrain/temperate_forest_albedo_v1.png")
