@@ -3386,6 +3386,7 @@ func export_state()->Dictionary:
 		"active_engagement":active_engagement.duplicate(true),
 		"engagements":_saved_engagements(),
 		"focused_engagement":String(active_engagement.get("id","")),
+		"focus_before":_focus_before,
 		"active_siege":active_siege.duplicate(true),
 		"siege_history":siege_history.duplicate(true),
 		"war_reputation":war_reputation.duplicate(true),
@@ -3784,10 +3785,21 @@ func _apply_imported_state(payload:Dictionary)->void:
 	_load_engagements(payload)
 
 
-## Our battles for the save, the one in focus first.
+## Our battles for the save, in the order each day fights them (the registry's
+## own order; `focused_engagement` names the one in focus). Loading them in
+## another order would fight the next day's battles in another order and
+## change how they go.
 func _saved_engagements()->Array:
 	var out:Array=[]
-	for engagement in own_battles(): out.append((engagement as Dictionary).duplicate(true))
+	var focus_listed:=active_engagement.is_empty()
+	for id in own_engagements:
+		var engagement:Dictionary=own_engagements[id]
+		if engagement.is_empty(): continue
+		if is_same(engagement,active_engagement): focus_listed=true
+		out.append(engagement.duplicate(true))
+	# A battle put in focus by older code and not yet kept: the next day
+	# keeps it after the others.
+	if not focus_listed: out.append(active_engagement.duplicate(true))
 	return out
 
 
@@ -3808,6 +3820,9 @@ func _load_engagements(payload:Dictionary)->void:
 		_register_engagement((item as Dictionary).duplicate(true))
 	var focus:=String(payload.get("focused_engagement",""))
 	if focus!="" and own_engagements.has(focus): active_engagement=own_engagements[focus]
+	# The battle that comes back into focus when this one ends (_refocus
+	# ignores it once that battle is over).
+	_focus_before=String(payload.get("focus_before",""))
 	_refocus()
 
 
