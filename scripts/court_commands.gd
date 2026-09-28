@@ -35,6 +35,7 @@ const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const TownFateWords:=preload("res://scripts/town_fate.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
+const HomeOrders:=preload("res://scripts/home_orders.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -67,7 +68,7 @@ const GROUP_OBJECT_PATTERN:="(?i)\\b(males?|men|menfolk|boys|grown men|fighting 
 ## someone in the hall ("them" and "they" never do on their own).
 const PERSON_PRONOUNS:=["himself","herself","yourself","him","her","you","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
 ## The god's yes to a war leader's "Shall I march on it?".
-const CONFIRM_PATTERN:="(?i)^\\s*(yes|yes,? (do it|go|march|take it|march on it)|aye|do it|do so|go|go on|march|march on it|take it|so be it|make it so|see to it|very well|then go|go then)\\b[\\s!.,]*(now|at once)?[\\s!.]*$"
+const CONFIRM_PATTERN:="(?i)^\\s*(yes|yes,? (do it|go|march|take it|march on it|send them|go ahead)|aye|do it|do so|go|go on|go ahead|proceed|carry on|get on with it|march|march on it|take it|send them|send them all|send the (men|band|host|warriors|fighters)|so be it|make it so|see to it|very well|then go|go then)\\b[\\s!.,]*(now|at once)?[\\s!.]*$"
 const PENDING_DAYS:=2
 
 static var custom_directive_handler:Callable=Callable()
@@ -79,10 +80,10 @@ static var custom_directive_handler:Callable=Callable()
 const INSIST_PATTERN:="(?i)^\\s*(i demand it|i command it|i insist|do it|do it now|now|obey|obey me|obey your god|you heard me|did you not hear me|do as i (say|said|command)|i said do it|i said (kill|strike|do)|i will be obeyed|i gave you an order|do what i (say|said|command)|you will do it|at once|go on|carry it out|go anyway|march anyway|send them anyway|take them (anyway|as they are)|(let them )?go as they are|as they are|then go)\\b[\\s!.]*$"
 ## [verb, pattern]; checked in order. Patterns match the verb phrase only.
 const VERB_PATTERNS:=[
-	["kill","(?i)\\b(kill|kills|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them)|burn (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)( alive)?|bur(y|ied) [\\w' ]{0,30}?alive|feed [\\w' ]{0,30}?to (the |my )?(dogs|wolves|pigs|hounds|crows|ravens|fire|fish|river|beasts)|(throw|give|hand|toss) [\\w' ]{0,30}?to the (dogs|wolves|pigs|hounds)|drown (him|her|them|(?-i:[A-Z])\\w+)|impale|crucify|flay|skin [\\w' ]{0,20}?alive|boil [\\w' ]{0,20}?alive|stone (him|her|them|(?-i:[A-Z])\\w+)|(beat|whip|flog|club|stone|burn|kick|starve|bleed|torture) [\\w' ]{0,30}?to death|(send|return|ship) [\\w' ]{0,40}?in pieces|(chop|cut|hack) [\\w' ]{0,30}?(head off|into pieces|to pieces|in pieces|apart)|draw and quarter|quarter (him|her|them)|sacrifice (him|her|them|(?-i:[A-Z])\\w+)|slit (his|her|their) throat)\\b"],
+	["kill","(?i)\\b(kill|kills|kil|rid [\\w' ]{0,20}? of (all |every |each )?(one of )?(its |their |the )?(men|males|menfolk|people|inhabitants|villagers|townsfolk)|slay|slaughter|execute|behead|murder|butcher|stab|strangle|throttle|hang|smite|gut|decapitate|strike [\\w' ]{0,30}?down|cut [\\w' ]{0,24}?(throat|down)|put [\\w' ]{0,30}?to death|take (his|her|their) (head|life)|end (his|her|their) (life|days)|break (his|her|their) neck|off with (his|her|their) head|death to|make (him|her|them) (die|bleed)|spill (his|her|their) blood|bleed (him|her|them)|burn (him|her|them|(?-i:[A-Z])\\w+|the envoy|the herald)( alive)?|bur(y|ied) [\\w' ]{0,30}?alive|feed [\\w' ]{0,30}?to (the |my )?(dogs|wolves|pigs|hounds|crows|ravens|fire|fish|river|beasts)|(throw|give|hand|toss) [\\w' ]{0,30}?to the (dogs|wolves|pigs|hounds)|drown (him|her|them|(?-i:[A-Z])\\w+)|impale|crucify|flay|skin [\\w' ]{0,20}?alive|boil [\\w' ]{0,20}?alive|stone (him|her|them|(?-i:[A-Z])\\w+)|(beat|whip|flog|club|stone|burn|kick|starve|bleed|torture) [\\w' ]{0,30}?to death|(send|return|ship) [\\w' ]{0,40}?in pieces|(chop|cut|hack) [\\w' ]{0,30}?(head off|into pieces|to pieces|in pieces|apart)|draw and quarter|quarter (him|her|them)|sacrifice (him|her|them|(?-i:[A-Z])\\w+)|slit (his|her|their) throat)\\b"],
 	["maim",MAIM_PATTERN],
 	["exile","(?i)\\b(exile|banish|expel|cast [\\w' ]{0,30}?out|drive [\\w' ]{0,30}?out|throw [\\w' ]{0,30}?out|send [\\w' ]{0,30}?away (forever|for good|from the realm)|out of my (sight|realm|lands) forever)\\b"],
-	["detain","(?i)\\b(imprison|jail|gaol|lock [\\w' ]{0,30}?up|bind (him|her|them|(?-i:[A-Z])\\w+)|chain|shackle|arrest|detain|seize (him|her|them)|put [\\w' ]{0,30}?under guard|take [\\w' ]{0,24}?prisoner|throw [\\w' ]{0,30}?in(to)? the pit)\\b"],
+	["detain","(?i)\\b(imprison|jail|gaol|put [\\w' ]{0,30}? in (chains|irons|fetters|bonds)|in chains|lock [\\w' ]{0,30}?up|bind (him|her|them|(?-i:[A-Z])\\w+)|chain|shackle|arrest|detain|seize (him|her|them)|put [\\w' ]{0,30}?under guard|take [\\w' ]{0,24}?prisoner|throw [\\w' ]{0,30}?in(to)? the pit)\\b"],
 	["penance","(?i)\\b(penance|atone|repent|keep vigil)\\b"],
 	["demote","(?i)\\b(demote|dismiss|strip [\\w' ]{0,30}?of (his|her|their)? ?(office|rank|post|title)|remove [\\w' ]{0,30}?from (office|post|rank)|relieve [\\w' ]{0,30}?of (his|her|their)? ?(office|duties|post))\\b"],
 	["appoint","(?i)\\b(appoint|install|make [\\w' ]{1,30}? (our|the|my|your) new |make [\\w' ]{1,30}? (our|the|my) |name [\\w' ]{1,30}? (as )?(our|the|my) )"],
@@ -94,7 +95,7 @@ const VERB_PATTERNS:=[
 const GIVE_PATTERN:="(?i)\\b(give|hand|grant|bestow|send|bring)\\b"
 const TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|strip)\\b"
 const ORDER_LEADS:=["i order that ","i order ","i command that ","i command ","i want you to ","i need you to ","i demand that ","i demand ","i decree that ","i decree ","you will ","you shall ","you must ","see that ","see to it that ","make sure ","let ","have "]
-const IMPERATIVES:=["go","come","bring","fetch","make","dig","plant","hunt","gather","build","raise","feed","ration","guard","watch","train","clear","move","prepare","ready","double","halve","cut","burn","tell","find","get","take","keep","hold","open","close","set","call","summon","march","attack","defend","fortify","scout","sow","reap","harvest","store","share","stop","start","begin","finish","double","count","mend","repair","clean","carry","lead","muster","warn","teach","show","search","track","herd","fish","cook","dry","smoke","weave","fire","bake"]
+const IMPERATIVES:=["go","come","bring","fetch","make","dig","plant","hunt","gather","build","haul","drag","lug","quarry","chop","raise","feed","ration","guard","watch","train","clear","move","prepare","ready","double","halve","cut","burn","tell","find","get","take","keep","hold","open","close","set","call","summon","march","attack","defend","fortify","scout","sow","reap","harvest","store","share","stop","start","begin","finish","double","count","mend","repair","clean","carry","lead","muster","warn","teach","show","search","track","herd","fish","cook","dry","smoke","weave","fire","bake"]
 const RESOURCE_WORDS:={"food":"Food","meat":"Food","grain":"Food","provisions":"Food","rations":"Food","timber":"Timber","wood":"Timber","logs":"Timber","stone":"Stone","stones":"Stone","clay":"Clay","fiber":"Fiber Plants","fibre":"Fiber Plants","fibers":"Fiber Plants","reeds":"Fiber Plants","flax":"Fiber Plants"}
 const NUMBER_WORDS:={"a dozen":12,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"a hundred":100,"hundred":100}
 const OFFICE_WORDS:={"war leader":"Marshal","warleader":"Marshal","marshal":"Marshal","watch captain":"Marshal","pathfinder":"ChiefScout","chief scout":"ChiefScout","chief of scouts":"ChiefScout","hearth chief":"Steward","steward":"Steward","keeper of stores":"Quartermaster","quartermaster":"Quartermaster","lore keeper":"Scholar","scholar":"Scholar","messenger":"Envoy"}
@@ -149,6 +150,13 @@ static func classify(text:String)->Dictionary:
 			return _verb(out,"give",give)
 		var take:=_re(TAKE_PATTERN).search(clean)
 		if take!=null: return _verb(out,"take",take)
+	# An order at home a real system carries out (recruits called up, weapons
+	# made: home_orders.gd): its own verb, so "make the weapons we need" is
+	# never an appointment and "raise thirty new fighters" never a march.
+	var home:=HomeOrders.read(clean)
+	if not home.is_empty():
+		out.act="command"; out.verb="home"; out.confidence=0.85; out["home"]=home
+		return out
 	for pair in VERB_PATTERNS:
 		var m:=_re(String(pair[1])).search(clean)
 		if m!=null: return _verb(out,String(pair[0]),m)
@@ -1197,9 +1205,15 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 	if String(actor.get("kind",""))=="envoy" and _re(ENVOY_LEADS_PATTERN).search(text)==null: actor={}; r.actor={}; r.actor_name=""
 	var who:=String(actor.get("name",""))
 	if not civ.is_empty() and (_re("(?i)\\b(envoy|envoys|messenger|embassy|word)\\b").search(text)!=null or not "scout" in lower):
-		var sent:Dictionary=CivilizationSystem.dispatch_diplomat(String(civ.id))
-		if sent.has("error"): return _order(id,audience,r,actor,text,context,String(sent.error))
-		r.outcome="Envoys set out for %s at your word. %s" % [String(civ.get("name","")),String(sent.get("message","")).get_slice(".",0)+"."]
+		var sent:=dispatch_envoy(civ,text,String(cls.get("resource","")))
+		if not bool(sent.get("ok",false)):
+			# Nobody set out: the plain reason, never a standing order.
+			r.executed=false; r.stage="none"; r.reaction="neutral"
+			r["actor_says"]=String(sent.says)
+			r.outcome="Nothing is set in motion: %s" % String(sent.why)
+			return r
+		r["actor_says"]=String(sent.says)
+		r.outcome=String(sent.outcome)
 	else:
 		var heading:=String(cls.heading)
 		# The god may overrule the Chief Scout's caution. The party goes, and
@@ -1223,12 +1237,20 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 
 static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,text:String,context:Dictionary,blocker:String="")->Dictionary:
 	## Any other order: the actor takes it up and it goes to the council.
+	## Words that only assent or urge are an answer, never an order of their
+	## own; an order a real system carries out at home goes to that system.
+	if actor.is_empty() and String(r.get("verb",""))=="home":
+		actor=_speaker_entry(roster(audience))
+		r.actor=actor.duplicate(); r.actor_name=String(actor.get("name",""))
 	var ctx:=context.duplicate()
 	ctx["audience_id"]=id
 	ctx["actor"]=actor.duplicate()
 	if String(actor.get("office_key",""))=="settlement": ctx["settlement_id"]=String(actor.get("settlement_id",""))
 	elif not _person(actor).is_empty() and String(_person(actor).get("local_leader_of",""))!="": ctx["settlement_id"]=String(_person(actor).local_leader_of)
 	var words:=_strip_vocative(text,actor)
+	if blocker=="" and bare_assent(words): return _assent(id,audience,r,actor,words)
+	var home:=HomeOrders.read(words) if blocker=="" and String(ctx.get("settlement_id",""))=="" else {}
+	if not home.is_empty(): return _home(id,r,actor,words,home)
 	var routed:=custom_order(words,ctx)
 	if int(actor.get("person_id",0))>0:
 		GovernmentPeopleSystem.adjust_person_bonds(int(actor.person_id),{"obligation":0.02,"fear":0.01})
@@ -1243,6 +1265,110 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 		r.executed=false
 	r.verb="order"
 	return r
+
+## Words that only assent or urge, with no order of their own: "SEND THEM!",
+## "go ahead", "Do it!", "Take them as they are", "yes, now".
+const ASSENT_PHRASES:=["go","go on","go ahead","proceed","carry on","carry it out","get on with it","do it","do so","do that","do as i said","do as i say",
+	"send them","send it","send them all","send the men","send the band","send the host","send the warriors","send the fighters","send everyone",
+	"march","march on","take them","take them anyway","take them as they are","as they are","go as they are","let them go as they are",
+	"you heard me","what are you waiting for","i said do it","i said go","make it so","so be it","very well","ok","okay","get going","be off","off you go"]
+const ASSENT_FILLER:=["yes","yea","aye","then","now","at","once","already","please","just","right","immediately","so","well","and","quickly","today"]
+## A war leader's march that the god's "yes" or "do it" may name again: the
+## engine says where it stands ("already on the road") and never marches twice.
+const MARCH_KINDS:=["attack","siege","raid","storm","intercept","recall","defend","drill"]
+
+static func bare_assent(text:String)->bool:
+	var words:=Array(_re("[^a-z' ]").sub(text.to_lower()," ",true).split(" ",false))
+	while not words.is_empty() and String(words[0]) in ASSENT_FILLER: words.pop_front()
+	while not words.is_empty() and String(words[words.size()-1]) in ASSENT_FILLER: words.pop_back()
+	if words.is_empty(): return text.strip_edges()!=""
+	return " ".join(PackedStringArray(words)) in ASSENT_PHRASES
+
+static func _assent(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,words:String)->Dictionary:
+	## A bare "yes" or "send them" that reached the order path: no question was
+	## open for it (hear() answers those first). The last march ordered here is
+	## named again, so the war leader says where it stands; otherwise nothing is
+	## set in motion and the court says so. Never a new standing order.
+	var list:=roster(audience)
+	var civ:=String(audience.get("civ_id",""))
+	var lines:Array=audience.get("lines",[])
+	for i in range(lines.size()-1,-1,-1):
+		var line:Dictionary=lines[i]
+		if String(line.get("role",""))!="ruler": continue
+		var said:=String(line.get("text","")).strip_edges()
+		if said==words.strip_edges() or said==String(r.get("text","")).strip_edges() or bare_assent(said): continue
+		var again:=WarOrders.read(said,civ,id)
+		if String(again.get("kind","")) in MARCH_KINDS: return _war(id,audience,list,r,actor,said,{"war":again},false)
+		break
+	r.verb="order"; r.executed=false; r.stage="none"; r.reaction="neutral"
+	var ask:="Send whom, and where?" if "send" in words.to_lower() else ("March where, and against whom?" if _re("(?i)\\b(march|go)\\b").search(words)!=null else "What would you have done?")
+	r["actor_says"]="%s No order is waiting on your word, so nothing goes until you say what is to be done." % ask
+	r.outcome="Nothing is set in motion: no order was waiting for your word."
+	return r
+
+static func _home(id:String,r:Dictionary,actor:Dictionary,words:String,home:Dictionary)->Dictionary:
+	## An order at home a real system carries out (home_orders.gd): done, or
+	## the plain reason it cannot be.
+	var done:=HomeOrders.perform(home)
+	r.verb="order"; r["route"]="home"; r["home"]=done.duplicate()
+	r["actor_says"]=String(done.get("says",""))
+	r.outcome=String(done.get("outcome",""))
+	r.executed=bool(done.get("ok",false)) and int(done.get("count",0))>0
+	r.stage="order" if r.executed else "none"
+	r.reaction="neutral"
+	if int(actor.get("person_id",0))>0:
+		GovernmentPeopleSystem.adjust_person_bonds(int(actor.person_id),{"obligation":0.02,"fear":0.01})
+		GovernmentPeopleSystem.record_person_memory(int(actor.person_id),"The god gave me an order before the court: %s" % words.substr(0,160),"divine",0.55,{"emotion":"duty","outcome":"ordered"})
+	return r
+
+## An envoy to a people, carrying what the words ask: a truce (at war) or a
+## promise of peace, trade, a gift with good words; plain words ("send an
+## envoy to the Esurai") ask for an audience with their ruler, which war does
+## not forbid. Real missions only (civilization_system, foreign_diplomacy):
+## {ok, purpose, says, outcome, why}.
+static func dispatch_envoy(civ:Dictionary,text:String,gift:String="")->Dictionary:
+	var civ_id:=String(civ.get("id",""))
+	var name:=String(civ.get("name","their people"))
+	var lower:=text.to_lower()
+	var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+	var at_war:=bool(rel.get("at_war",false))
+	var mission:Dictionary=WorldSimulation.world.diplomatic_mission
+	if not mission.is_empty():
+		var away:=String(mission.get("civilization","another people"))
+		return {"ok":false,"purpose":"","why":"our envoys are already away, to the %s, and nobody else can go until they return." % away,
+			"says":"Our envoys are already on the road to the %s. Nobody else can go until they come back." % away}
+	var purpose:=""
+	if _re("(?i)\\b(peace|truce|end (the|this) war|stop the fighting|terms)\\b").search(lower)!=null: purpose="seek_peace" if at_war else "non_aggression"
+	elif not at_war and _re("(?i)\\b(trade|barter)\\b").search(lower)!=null: purpose="open_trade"
+	elif not at_war and gift!="": purpose="goodwill"
+	var result:Dictionary={}
+	var instead:=""
+	if purpose!="":
+		result=WorldSimulation.world.dispatch_diplomat(civ_id,gift if purpose=="goodwill" else "",purpose)
+		if result.has("error") and purpose in ["seek_peace","non_aggression","open_trade"]:
+			# They would turn that proposal away now (the world's own rule): the
+			# envoys go to speak with their ruler instead, and the court says why.
+			instead=_envoy_reason(String(result.error),name)+" "
+			result={}
+	if purpose=="" or not instead.is_empty():
+		purpose="audience"
+		result=WorldSimulation.diplomacy.send_audience(civ_id)
+	if result.has("error"):
+		var why:=_envoy_reason(String(result.error),name)
+		return {"ok":false,"purpose":purpose,"why":(instead+why).strip_edges(),"says":"No envoy can go to the %s now. %s" % [name,(instead+why).strip_edges()]}
+	var what:=String({"audience":"to speak with their ruler and bring back the answer","seek_peace":"to ask for a truce","non_aggression":"to ask that neither people raid the other",
+		"open_trade":"to propose trade","goodwill":"with a gift and good words"}.get(purpose,""))
+	var days:=maxi(1,int(WorldSimulation.world.diplomatic_mission.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))
+	return {"ok":true,"purpose":purpose,"why":"","says":"%sEnvoys go to the %s at your word%s, %s. They will be about %d days on the road there." % [instead,name," instead" if instead!="" else "",what,days],
+		"outcome":"%sEnvoys set out for the %s %s: about %d days there, and as long back with the answer." % [instead,name,what,days]}
+
+## A diplomatic refusal in the court's own words (the world's messages carry
+## labels meant for a ledger: "Esurai refuses peace: WILL REFUSE. ...").
+static func _envoy_reason(error:String,name:String)->String:
+	if "refuses peace" in error.to_lower(): return "The %s will not hear of a truce now; they would only turn the envoys back until the war goes worse for them." % name
+	var plain:=_re("\\b[A-Z]{2,}( [A-Z]{2,})*\\b").sub(error,"",true)
+	plain=_re("\\s+").sub(plain.replace(": .",".").replace(":.","."), " ",true).strip_edges()
+	return plain
 
 static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,actor:Dictionary,text:String,cls:Dictionary,insist:bool)->Dictionary:
 	## A war order: the war leader weighs it against what is really there and
@@ -1349,6 +1475,13 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 		var decided:=WarOrders.perform(war,false)
 		# No voice speaks here: the war leader's words and the note together.
 		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":(String(decided.get("says",""))+" "+String(decided.get("outcome",""))).strip_edges()}
+	# Recruits called up, weapons made: the real systems, never a directive.
+	var home:=HomeOrders.read(text)
+	if not home.is_empty():
+		var done:=HomeOrders.perform(home)
+		return {"ok":bool(done.get("ok",false)),"route":"home","home":done,"outcome":(String(done.get("says",""))+" "+String(done.get("outcome",""))).strip_edges()}
+	# A bare "yes" or "send them" is no order to set standing.
+	if bare_assent(text): return {"ok":false,"route":"recorded","outcome":"Nothing is set in motion: no order was waiting for your word."}
 	if custom_directive_handler.is_valid():
 		var handled:Variant=custom_directive_handler.call(text,context)
 		if handled is Dictionary and bool((handled as Dictionary).get("ok",false)): return handled

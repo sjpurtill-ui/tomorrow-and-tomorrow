@@ -582,6 +582,17 @@
    "ideal": {"kind": "question", "action": "none", "type": "people", "ref": "$esurai"},
    "expect": {"handled": false, "known": true, "reply_any": ["Eldwick"], "prompt_has": ["Eldwick"]}},
 
+  {"id": "envoy.how_many", "domain": "envoy", "fixture": "envoy_after_fall", "speaker": "envoy", "source": "design",
+   "note": "The envoy's own people, never our number.",
+   "say": "How many of you are there?",
+   "ideal": {"kind": "question", "action": "none", "type": "people", "ref": "$esurai"},
+   "expect": {"handled": false, "known": true, "reply_any": ["Eldwick", "Stonefield"], "reply_lacks": ["900"], "prompt_has": ["Your towns now"]}},
+
+  {"id": "envoy.tsaren_lost", "domain": "envoy", "fixture": "envoy_after_fall", "speaker": "envoy", "source": "design",
+   "say": "Is Tsaren still yours?",
+   "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
+   "expect": {"handled": false, "known": true, "reply_any": ["your hands", "your garrison"], "prompt_has": ["Tsaren"]}},
+
   {"id": "home.roads", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "user",
    "say": "Build roads between the houses and haul stone to the new houses",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
@@ -624,6 +635,24 @@
    "say": "Send an envoy to the Esurai",
    "ideal": {"kind": "order", "action": "send", "type": "people", "ref": "$esurai", "confidence": 0.9},
    "expect": {"verb": "send", "state": {"envoys_out": ">before"}}},
+
+  {"id": "home.envoy_peace", "domain": "home_orders", "fixture": "war_not_held", "speaker": "headman", "source": "design",
+   "note": "At war, envoys asking for a truce are a real mission, never a standing order.",
+   "say": "Send envoys to the Esurai to ask for peace",
+   "ideal": {"kind": "order", "action": "send", "type": "people", "ref": "$esurai", "confidence": 0.9},
+   "expect": {"verb": "send", "state": {"envoys_out": ">before", "modifiers": "==before"}, "reply_any": ["truce"]}},
+
+  {"id": "home.arm_recruits", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "note": "Twenty wait for weapons: enough for them is put in hand in the workshops, the materials taken now.",
+   "say": "Arm the recruits",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"equipment_orders": ">before", "modifiers": "==before", "timber": "<before"}}},
+
+  {"id": "home.recruit_no_number", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "note": "No number named: a few are called up and the court says how many.",
+   "say": "Raise more fighters",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"recruits": ">before", "modifiers": "==before"}, "reply_has": ["no number"]}},
 
   {"id": "home.give_food", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "Give Kavu twenty food",
@@ -815,6 +844,12 @@
    "say": "SEND THEM!",
    "ideal": {"kind": "order", "action": "send", "type": "none", "confidence": 0.4, "clarify": "Send whom, and where?"},
    "expect": {"state": {"scouts": "==before", "moving": "==before", "forced_labor": "==before", "prisoners": "==before", "envoys_out": "==before", "modifiers": "==before"}}},
+
+  {"id": "follow.go_ahead.nothing_pending", "domain": "followups", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "A bare yes with nothing waiting is never a new standing order.",
+   "say": "Go ahead",
+   "ideal": {"kind": "order", "action": "confirm", "confidence": 0.5},
+   "expect": {"state": {"modifiers": "==before", "moving": "==before", "recruits": "==before"}}},
 
   {"id": "follow.yes.nothing_pending", "domain": "followups", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "yes",
