@@ -979,3 +979,131 @@ static func command_glyph(kind:String,c:Color)->Array:
 		"prio1": return [_s(14,29,28,17,4.6,c),_s(28,17,42,29,4.6,c),_s(14,41,28,29,4.6,c),_s(28,29,42,41,4.6,c)]
 		"prio2": return [_s(14,23,28,11,4.6,c),_s(28,11,42,23,4.6,c),_s(14,35,28,23,4.6,c),_s(28,23,42,35,4.6,c),_s(14,47,28,35,4.6,c),_s(28,35,42,47,4.6,c)]
 	return [_c(28,28,6,c)]
+
+
+# -- Workshops: equipment, materials and the workshop's own marks -------------
+
+static var _equipment_textures:Dictionary={}
+static var _material_textures:Dictionary={}
+static var _workshop_textures:Dictionary={}
+const WORKSHOP_PAPER:=Color(0.95,0.91,0.80,0.9)
+
+## A kind of equipment, inked on a paper halo for the Production screen, its
+## stock strip and picker. Weapons reuse the battle view's arm marks; arrows,
+## rounds, carts, boats and aircraft are drawn here. accent touches one detail.
+static func equipment_texture(item:String,ink:Color,accent:Color,px:int=40)->Texture2D:
+	var key:="%s|%s|%s|%d" % [item,ink.to_html(),accent.to_html(),px]
+	if _equipment_textures.has(key): return _equipment_textures[key]
+	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(equipment_glyph(item,ink,accent),WORKSHOP_PAPER,1.4),px))
+	_equipment_textures[key]=texture
+	return texture
+
+
+## The battle arm whose mark stands for this equipment, or "" when the
+## workshop draws its own (see equipment_kind).
+static func equipment_arm(item:String)->String:
+	match item:
+		"improvised": return "club"
+		"spear","shield_spear","padded_spear","lamellar_spear","scale_spear","mail_spear","plate_spear": return "spear"
+		"javelin": return "javelin"
+		"bow","mounted_bow","crossbow": return "bow"
+		"sling": return "sling"
+		"sword_shield": return "sword"
+		"axe": return "axe"
+		"pike": return "pike"
+		"lance","armored_lance","dragoon_kit": return "horse"
+		"chariot_kit": return "chariot"
+		"elephant_kit": return "elephant"
+		"siege_kit","ram","engineering_kit","repair_kit": return "engineers"
+		"catapult","trebuchet","bombard","field_gun","horse_gun","mortar","rocket_launcher","modern_field_gun","anti_air_gun","anti_tank_kit": return "guns"
+		"hand_cannon","musket","grenadier_kit": return "musket"
+		"service_rifle","marksman_rifle","assault_kit","marine_kit","airborne_kit","mountain_kit","air_assault_kit": return "rifle"
+		"machine_gun": return "machine_gun"
+		"armored_vehicle","armored_car_kit","light_tank_kit","heavy_tank_kit","tank_destroyer_kit","mechanized_kit": return "armour"
+		"motorized_kit","medical_kit": return "support"
+	return ""
+
+
+## The workshop's own mark for items without a battle arm: arrows, shell,
+## cartridges, fuel, cart, canoe, galley, sail, steamship, submarine, plane,
+## balloon; "" for weapons (equipment_arm).
+static func equipment_kind(item:String)->String:
+	match item:
+		"arrows": return "arrows"
+		"artillery_rounds","heavy_shells": return "shell"
+		"small_arms_ammunition": return "cartridges"
+		"fuel": return "fuel"
+		"transport_cart": return "cart"
+	if not item.ends_with("_equipment"): return ""
+	if item.begins_with("war_canoe"): return "canoe"
+	if item.begins_with("galley") or item.begins_with("heavy_galley"): return "galley"
+	if item.begins_with("sailing_") or item.begins_with("ship_of_line"): return "sail"
+	if "submarine" in item: return "submarine"
+	if item.begins_with("observation_balloon") or item.begins_with("airship"): return "balloon"
+	for word in ["fighter","bomber","plane","aircraft","drone","helicopter","close_air"]:
+		if word in item and not item.begins_with("aircraft_carrier"): return "plane"
+	return "steamship"
+
+
+static func equipment_glyph(item:String,ink:Color,accent:Color)->Array:
+	var arm:=equipment_arm(item)
+	if arm!="": return arm_glyph(arm,ink,accent)
+	var paper:=Color(0.95,0.91,0.80,1.0)
+	match equipment_kind(item):
+		"arrows":
+			var out:Array=[]
+			for k in 3:
+				var x:=18.0+k*9.0
+				out.append_array([_s(x-4,50,x+4,13,1.8,ink),_t(x+5.2,5,x+0.9,13.2,x+7.3,14.5,ink),_s(x-3.4,47,x-7,43,1.4,ink),_s(x-3.4,47,x+0.6,44,1.4,ink)])
+			out.append(_rr(27,33,14,2.2,1,accent))
+			return out
+		"shell": return [_rr(28,35,6.5,12,1.5,ink),_t(28,9,21.5,23.5,34.5,23.5,ink),_rr(28,41,6.5,1.6,0.5,accent),_rr(28,48.5,7.5,1.6,0.5,ink)]
+		"cartridges":
+			var rounds:Array=[]
+			for x in [18.0,28.0,38.0]: rounds.append_array([_rr(x,37,3.6,9,0.8,ink),_t(x,17,x-3.6,28,x+3.6,28,ink),_s(x-3.6,40,x+3.6,40,1.4,accent)])
+			return rounds
+		"fuel": return [_rr(28,31,12,15,4,ink),_s(17,23,39,23,1.6,paper),_s(17,39,39,39,1.6,paper),_rr(35,13,2.4,2.4,0.6,accent)]
+		"cart": return [_rr(26,26,16,6.5,1.5,ink),_rr(26,24.5,13,3.2,1,paper),_rr(24,21,7,2.6,1.2,accent),_ring(16,39,7,2.4,ink),_ring(36,39,7,2.4,ink),_c(16,39,1.8,ink),_c(36,39,1.8,ink),_s(42,28,53,22,2.4,ink)]
+		"canoe": return [_rr(28,37,19,4.2,4.2,ink),_t(5,30,12,37,13,33,ink),_t(51,30,44,37,43,33,ink),_c(26,20,3.4,ink),_rr(26,27,3.2,4.6,2,ink),_s(34,13,22,46,2,ink),_s(8,45,48,45,1.4,accent)]
+		"galley":
+			var galley:=[_rr(28,34,21,4.6,3,ink),_t(3,36,9,32,9,38,ink),_s(47,32,51,24,2.4,ink),_s(28,33,28,8,2.2,ink),_rr(28,17,9,6.5,1,ink),_rr(28,17,7,4.5,0.6,paper),_s(21,17,35,17,1.8,accent)]
+			for x in [14.0,20.0,26.0,32.0,38.0]: galley.append(_s(x,38,x-5,47,1.4,ink))
+			return galley
+		"sail": return [_rr(28,39,20,4.5,4,ink),_t(4,35,10,35,10,41,ink),_s(20,38,20,8,2,ink),_s(35,38,35,11,2,ink),
+			_rr(20,17,7,4,1,ink),_rr(20,28,8.5,4,1,ink),_rr(35,19,6,3.6,1,ink),_rr(35,29,7.5,3.6,1,ink),_t(20,5,29,7.5,20,10,accent)]
+		"submarine": return [_rr(28,35,22,5.5,5.5,ink),_rr(25,27,5,4,1,ink),_s(27,23,27,14,1.4,ink),_s(27,14,31,14,1.4,ink),_s(8,44,48,44,1.4,accent)]
+		"steamship": return [_rr(28,38,22,5,2,ink),_t(3,32,9,32,9,43,ink),_rr(25,29.5,10,4,1,ink),_rr(33,21,3.2,6,1,ink),_s(29.8,19,36.2,19,1.8,accent),
+			_c(37,11,3.5,Color(ink,0.5)),_c(42,7,2.6,Color(ink,0.35)),_s(17,31,17,17,1.6,ink)]
+		"plane": return [_s(28,8,28,48,4,ink),_s(8,24,48,24,4.4,ink),_s(19,44,37,44,3,ink),_s(22,6,34,6,1.6,accent)]
+		"balloon": return [_c(28,20,13,ink),_s(16,20,40,20,1.6,accent),_s(20,31,24,42,1.2,ink),_s(36,31,32,42,1.2,ink),_rr(28,45,5,3.5,1,ink)]
+	return [_rr(28,28,12,12,3,ink),_c(28,28,4,paper)]
+
+
+## A raw material bare, without the map's disc, for rows on paper.
+static func material_texture(resource_name:String,px:int=24)->Texture2D:
+	var key:="%s|%d" % [resource_name,px]
+	if _material_textures.has(key): return _material_textures[key]
+	var glyph:=_glyph(resource_name)
+	if resource_name=="Civilian Goods": glyph=[_rr(28,34,14,9,4,Color("#a8784a")),_rr(28,24,16,2.6,1.2,Color("#7a5230")),_s(18,31,38,31,1.4,Color("#7a5230")),_s(18,37,38,37,1.4,Color("#7a5230"))]
+	elif resource_name=="Transport Carts": glyph=equipment_glyph("transport_cart",Color("#5a4632"),Color("#a8784a"))
+	var texture:=ImageTexture.create_from_image(_render(glyph,px,false))
+	_material_textures[key]=texture
+	return texture
+
+
+## The workshop's marks for its header: "bench" (a production line), "anchor"
+## (a boatyard), "mend" (a mallet: damaged sets waiting for repair), "hands"
+## (a craftsperson at work).
+static func workshop_texture(kind:String,ink:Color,px:int=24)->Texture2D:
+	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
+	if _workshop_textures.has(key): return _workshop_textures[key]
+	var glyph:Array
+	match kind:
+		"bench": glyph=[_rr(28,23,21,3.6,1,ink),_s(13,27,11,46,3,ink),_s(43,27,45,46,3,ink),_s(12,38,44,38,2,ink),_s(22,17,33,13,2.2,ink),_rr(35,12.5,3.4,2.4,0.8,ink)]
+		"anchor": glyph=[_ring(28,10,4.2,2.4,ink),_s(28,14,28,46,3,ink),_s(19,20,37,20,2.6,ink),_s(12,33,17,41,3,ink),_s(17,41,28,47,3,ink),_s(28,47,39,41,3,ink),_s(39,41,44,33,3,ink),_t(8,29,15,34,9,37,ink),_t(48,29,41,34,47,37,ink)]
+		"mend": glyph=[_rr(28,14,17,6.5,2,ink),_rr(12,14,3,8,1.5,ink),_s(28,20,28,51,6,ink)]
+		"hands": glyph=[_c(20,20,5,ink),_rr(20,33,6,8,4,ink),_s(16,41,30,44,3.4,ink),_s(24,30,36,28,2.4,ink),_s(36,28,44,20,2.2,ink),_rr(45,19,4,2.6,1,ink),_rr(40,44,8,3,1,ink)]
+		_: glyph=[_c(28,28,8,ink)]
+	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(glyph,WORKSHOP_PAPER,1.2),px))
+	_workshop_textures[key]=texture
+	return texture
