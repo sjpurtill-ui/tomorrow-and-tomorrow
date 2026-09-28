@@ -47,11 +47,10 @@ func _ready()->void:
 	while not Supply.current() and waited<600:
 		Supply.prefetch(); await get_tree().process_frame; waited+=1
 	_ration_day()
-	# The toolbar's own button turns the map on.
+	# The one entry point (the toolbar's own button follows it).
+	SupplyMap.set_shown(terrain,true)
 	var button:Button=terrain.hud.find_child("ToolbarSupply",true,false)
-	print("SUPPLY BUTTON ",button!=null)
-	if button!=null: button.button_pressed=true
-	else: SupplyMap.ensure(terrain).set_enabled(true)
+	print("SUPPLY BUTTON ",button!=null," pressed=",button.button_pressed if button!=null else false," shown=",SupplyMap.is_shown(terrain))
 	var map:Node=SupplyMap.find(terrain)
 	# The view.
 	var level:=2 if zoom=="region" else 3

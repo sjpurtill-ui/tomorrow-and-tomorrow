@@ -65,6 +65,24 @@ static func ensure(t:Node)->Node:
 		t.add_child(node)
 	return node
 
+## THE ONE WAY to show or hide the supply map from anywhere (a screen's
+## "Show supply on the map", a test): the toolbar's Supply button follows.
+##   preload("res://scripts/hud/supply_map.gd").set_shown(terrain,true)
+static func set_shown(t:Node,on:=true)->void:
+	if not is_instance_valid(t): return
+	var hud:Variant=t.get("hud")
+	var button:Button=(hud as Node).find_child("ToolbarSupply",true,false) as Button if hud is Node and is_instance_valid(hud) else null
+	if button!=null:
+		if button.button_pressed!=on: button.button_pressed=on
+		return
+	var node:=ensure(t)
+	if node!=null: node.call("set_enabled",on)
+
+## Whether the supply map is showing.
+static func is_shown(t:Node)->bool:
+	var node:=find(t)
+	return node!=null and bool(node.get("enabled"))
+
 ## The Supply toggle for the map toolbar (command_rail_hud._build_toolbar).
 static func toggle_button(t:Node)->Button:
 	var button:=Button.new()
