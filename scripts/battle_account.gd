@@ -85,17 +85,18 @@ static func sides(record:Dictionary)->Dictionary:
 	return {"home":home,"enemy":"defender" if home=="attacker" else "attacker"}
 
 
-## Killed, wounded and fled (scattered) on one side, summed from the rounds.
+## Killed, wounded, fled (scattered) and taken (when a block broke and the
+## enemy rode its men down) on one side, summed from the rounds.
 static func round_losses(record:Dictionary,side:String)->Dictionary:
-	var out:={"killed":0,"wounded":0,"fled":0,"total":0}
+	var out:={"killed":0,"wounded":0,"fled":0,"taken":0,"total":0}
 	for round_variant in record.get("rounds",[]):
 		var round_data:Dictionary=round_variant
 		var total:=int(round_data.get(side+"_losses",0))
 		var breakdown:Dictionary=round_data.get(side+"_casualties",{})
-		var killed:=int(breakdown.get("killed",0)); var wounded:=int(breakdown.get("wounded",0)); var fled:=int(breakdown.get("scattered",0))
+		var killed:=int(breakdown.get("killed",0)); var wounded:=int(breakdown.get("wounded",0)); var fled:=int(breakdown.get("scattered",0)); var taken:=int(breakdown.get("captured",0))
 		# Older records carry only the total; count the unexplained as fled.
-		fled+=maxi(0,total-killed-wounded-fled)
-		out.killed+=killed; out.wounded+=wounded; out.fled+=fled; out.total+=total
+		fled+=maxi(0,total-killed-wounded-fled-taken)
+		out.killed+=killed; out.wounded+=wounded; out.fled+=fled; out.taken+=taken; out.total+=total
 	return out
 
 
@@ -167,6 +168,8 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var captured:=int(termination.get("prisoners",0)) if kind in ["lost","withdrew"] else 0
 	var after_fight:=int(ours.get("remaining_troops",before-int(lost.total)))
 	captured=mini(captured,after_fight)
+	# Taken in the fight itself (a block broke and was ridden down) plus at the end.
+	var taken_in_fight:=int(lost.taken)
 	# Records without exchanges (older saves) still say how many were lost.
 	var unsorted:=maxi(0,before-after_fight-int(lost.total))
 	var detached:=clampi(int(record.get("detached",0)),0,after_fight-captured)
@@ -178,13 +181,13 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var sent:=int(operation.get("sent",before+earlier_total))
 	var elsewhere:=maxi(0,sent-before-earlier_total)
 	var ledger:={"sent":sent,"earlier":earlier_total,"earlier_fights":int(earlier.get("fights",0)),"elsewhere":elsewhere,
-		"in_fight":before,"killed":int(lost.killed),"wounded":int(lost.wounded),"fled":int(lost.fled),"unsorted":unsorted,"captured":captured,
+		"in_fight":before,"killed":int(lost.killed),"wounded":int(lost.wounded),"fled":int(lost.fled),"unsorted":unsorted,"captured":captured+taken_in_fight,
 		"detached":detached,"present":present,"morale":morale,"morale_words":morale_words(morale)}
 
 	# Their side, as our people saw it.
 	var their_before:=int(theirs.get("initial_troops",0))
 	var their_lost:=round_losses(record,String(s.enemy))
-	var our_captives:=int(termination.get("prisoners",0)) if kind in ["won","taken","uncontested"] else 0
+	var our_captives:=(int(termination.get("prisoners",0)) if kind in ["won","taken","uncontested"] else 0)+int(their_lost.taken)
 	var held_field:=kind in ["won","taken","uncontested","nobody"]
 	var exact:=their_before<=COUNTABLE
 	var seen_low:=their_before if exact else roundi(float(their_before)*0.8)

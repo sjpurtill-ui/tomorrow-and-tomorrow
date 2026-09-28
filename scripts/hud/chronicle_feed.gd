@@ -119,7 +119,7 @@ func _notice(entry:Dictionary)->void:
 
 
 ## A battle's entry offers its report and its replay (battle_account.gd,
-## battle_graphics_screen.gd). Watching never fights it again.
+## hud/battle_panel.gd). Watching never fights it again.
 func _battle_links(copy:VBoxContainer,entry:Dictionary)->void:
 	var action:Dictionary=entry.get("action",{}) if entry.get("action") is Dictionary else {}
 	if String(action.get("kind",""))!="battle": return

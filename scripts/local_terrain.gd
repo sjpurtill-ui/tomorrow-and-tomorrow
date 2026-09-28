@@ -3882,7 +3882,7 @@ func _update_world_streaming() -> void:
 func _process_camera_navigation(delta: float) -> void:
 	if not SEAMLESS_WORLD or camera==null:
 		return
-	if is_instance_valid(world_menu_panel):
+	if is_instance_valid(world_menu_panel) or is_instance_valid(world_globe):
 		key_pan_velocity=Vector2.ZERO;return
 	var focus:=get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is TextEdit:
@@ -12388,12 +12388,12 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 func _on_city_battle_started(_engagement:Dictionary)->void:
 	if bool(_engagement.get("commander_managed",false)):return
 	if bool((_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): return
+	# Time stops so the player sees the two sides drawn up; the battle panel
+	# lets the fight go on and follows it as the days pass (hud/battle_panel.gd).
 	_set_game_speed(0)
-	MilitaryCampaign.active_engagement["awaiting_player_view"]=true
-	MilitaryCommandUI.call_deferred("_open_battle_graphics")
+	MilitaryCommandUI.call_deferred("open_engagement",String(_engagement.get("id","")))
 func _on_city_aftermath(_aftermath:Dictionary)->void:
 	_set_game_speed(0)
-	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:return
 	_open_war_planning.call_deferred()
 
 func _restore_military_attention()->void:
@@ -12414,8 +12414,6 @@ func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->
 
 func _on_battle_attention(result:Dictionary)->void:
 	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
-	if is_instance_valid(MilitaryCommandUI.battle_graphics) and MilitaryCommandUI.battle_graphics is BattleGraphicsScreen:
-		_set_game_speed(0);return
 	# The war leader's report card (hud/battle_report_panel.gd) pauses time
 	# itself and resumes it on Continue. Opened deferred so the town taken and
 	# the garrison left behind are already on the battle's record.
@@ -15089,6 +15087,8 @@ func _update_camera() -> void:
 
 func _queue_camera_zoom(pointer:Vector2,steps:float,fast:bool=false)->void:
 	if camera==null: return
+	# Fine zoom well past the far lands eases into the world view.
+	if steps>0.0 and SEAMLESS_WORLD and camera.size>=_distance_camera_size(CAMERA_DISTANCE_LEVELS.size()-1)*WORLD_VIEW_ZOOM_RATIO and open_world_globe(true):return
 	var start:=zoom_target_size if zoom_target_size>0.0 and not zoom_preset_active else camera.size
 	zoom_preset_active=false
 	# Keep rapid wheel/gesture bursts from banking a large invisible zoom jump.
@@ -15132,10 +15132,38 @@ func _step_camera_distance(pointer:Vector2,steps:float,precise:bool=false)->void
 		if absf(distance_gesture_steps)<.8:return
 		steps=distance_gesture_steps
 	distance_gesture_steps=0.0
+	# One step out past the far lands eases into the world view.
+	if steps>0.0 and SEAMLESS_WORLD and camera_distance_level()>=CAMERA_DISTANCE_LEVELS.size()-1 and open_world_globe(true):
+		distance_input_msec=now
+		return
 	var next:=clampi(camera_distance_level()+(1 if steps>0.0 else -1),0,3)
 	set_camera_distance_level(next)
 	zoom_pointer=pointer
 	distance_input_msec=now
+
+## The world view (hud/world_globe.gd): the whole world as a turning globe,
+## and how much of it our people know. Opened by the toolbar's World button
+## or by zooming out past the far lands; it hands the map back itself.
+const WORLD_VIEW_ZOOM_RATIO:=2.0
+var world_globe:Control
+
+func open_world_globe(from_zoom:bool=false)->bool:
+	if is_instance_valid(world_globe):return true
+	world_globe=preload("res://scripts/hud/world_globe.gd").open(self,hud,from_zoom)
+	return world_globe!=null
+
+## The world view hands the map back over a place at the far-lands distance;
+## it then eases in to a nearer distance itself.
+func _world_view_arrive(position:Vector2)->void:
+	if camera==null:return
+	set_camera_distance_level(CAMERA_DISTANCE_LEVELS.size()-1)
+	camera.size=zoom_target_size
+	zoom_target_size=-1.0
+	zoom_preset_active=false
+	zoom_log_velocity=0.0
+	pan_coast_velocity=Vector3.ZERO
+	_set_camera_target(Vector3(position.x,0.0,position.y))
+	_update_scale_lod()
 
 func _reset_camera_north()->void:
 	north_reset_active=true

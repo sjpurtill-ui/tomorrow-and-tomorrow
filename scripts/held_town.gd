@@ -14,6 +14,7 @@ extends RefCounted
 const Ownership=preload("res://scripts/map_ownership.gd")
 const Governance=preload("res://scripts/occupation_governance.gd")
 const FieldRations=preload("res://scripts/field_rations.gd")
+const Measures=preload("res://scripts/occupation_measures.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const P=preload("res://scripts/hud/paper_sheet.gd")
 
@@ -106,9 +107,13 @@ static func report(city_id:String)->Dictionary:
 	for status:String in arrived:
 		happened.append("%s from %s now live in %s %s." % [_n(int(arrived[status])),name,home_name,"as slaves" if status=="enslaved" else "as bonded labourers" if status=="penal" else "as our own people"])
 	if int(fate.get("tribute",0))>0:happened.append("We took %s Food from their stores as tribute." % _n(int(fate.tribute)))
+	# What our garrison is doing with its people now (occupation_measures.gd).
+	out.measures=Measures.report_lines(civ_id,city_id)
 	if happened.is_empty():
-		var note:=String(force.get("fate_note","")).strip_edges()
-		happened.append("Last order: %s." % note.trim_suffix(".") if note!="" else "Nothing has been done to its people since we took it.")
+		# While measures run, the card note is theirs; the last order waits behind it.
+		var note:=String(force.get("note_before" if bool(force.get("measure_note",false)) else "fate_note","")).strip_edges()
+		if note!="":happened.append("Last order: %s." % note.trim_suffix("."))
+		elif (out.measures as Array).is_empty():happened.append("Nothing has been done to its people since we took it.")
 	out.happened=happened
 	out.tribute=int(fate.get("tribute",0))
 	# One plain opening sentence.
@@ -126,6 +131,10 @@ static func report(city_id:String)->Dictionary:
 		"damage":String(out.damage_words)+".",
 		"resistance":"%s. %s." % [String(out.resistance_words),String(out.mood_words)],
 	}
+	if not (out.measures as Array).is_empty():
+		var said:PackedStringArray=PackedStringArray()
+		for m:Dictionary in out.measures:said.append(String(m.text))
+		out.facts["measures"]=" ".join(said)
 	return out
 
 ## People walking home from this town now, by status: {status: {people, days}}.

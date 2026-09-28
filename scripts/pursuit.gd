@@ -185,7 +185,11 @@ static func begin(civ_id:String,region_id:String,asked:int=0)->Dictionary:
 	if not mc.active_engagement.is_empty(): return {"error":"Not while a battle is being fought.","reason":"busy"}
 	if mc.field_armies.size()>=mc.field_army_capacity(): return {"error":"I cannot split off another band: every command we can lead is already out.","reason":"capacity"}
 	var garrison:=int(force.get("troops",0))
-	var sent:=detachment_size(garrison,int(fled.count),asked)
+	# Fighters guarding bound men or hostages (occupation_measures.gd) stay.
+	var tied:=0
+	for m in force.get("measures",[]):
+		if m is Dictionary and not bool((m as Dictionary).get("ended",false)): tied+=int((m as Dictionary).get("guards",0))
+	var sent:=detachment_size(maxi(0,garrison-tied),int(fled.count),asked)
 	if sent<=0: return {"error":"%s of ours hold %s. If any go after them, nobody keeps the gate." % [_cap(_count(garrison)),name],"reason":"too_few"}
 	var from:=town_position(region_id)
 	if not from.is_finite(): return {"error":"I do not know that ground well enough to send men across it.","reason":"no_position"}
