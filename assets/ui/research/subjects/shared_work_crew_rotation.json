@@ -1,0 +1,12 @@
+{
+  "id": "shared_work_crew_rotation",
+  "line": "infrastructure",
+  "game_year": 270,
+  "approx_historical_year": -3200,
+  "prompt": "c. 3200 BCE: One canal repair crew hands wooden tools and baskets to its incoming relief crew; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fb6e1662-db3c-4b1a-ae57-15f7aaae60e7.png",
+  "asset": "res://assets/ui/research/subjects/shared_work_crew_rotation-v1.png",
+  "sha256": "9182aed04392c2dee72e37de71bc6a4b543d934252d1b2173599cd341590e226",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

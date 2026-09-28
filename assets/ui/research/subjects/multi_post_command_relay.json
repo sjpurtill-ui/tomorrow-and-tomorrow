@@ -1,0 +1,12 @@
+{
+  "id": "multi_post_command_relay",
+  "line": "security",
+  "game_year": 270,
+  "approx_historical_year": -3200,
+  "prompt": "c. 3200 BCE: Guards relay a command by hand gesture across three plain timber watch posts; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-645269b2-0923-49e2-b440-aa9259f93c90.png",
+  "asset": "res://assets/ui/research/subjects/multi_post_command_relay-v1.png",
+  "sha256": "7c7234eb85d4ebffb3c253575ff76d3aa3bfea530b20413de67260cc33bbb3aa",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
