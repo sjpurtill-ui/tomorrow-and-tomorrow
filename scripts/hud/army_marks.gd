@@ -256,6 +256,9 @@ static func card_garrison(mark:Dictionary)->PackedStringArray:
 	# The last order carried out there ("36 killed, 80 captives on the road").
 	var note:=String(mark.get("fate_note","")).strip_edges()
 	if note!="": out.append(note)
+	# Men of the garrison out of the town (a chase): not counted as holding it.
+	var away:=int(mark.get("away",0))
+	if away>0: out.append("%s more out of the town" % str(away))
 	return out
 
 
@@ -271,7 +274,9 @@ static func card_ours(mark:Dictionary)->PackedStringArray:
 	else:
 		var general:=_named(String(mark.get("general","")))
 		var name:=String(mark.get("name","")).strip_edges()
-		if general!="": title="%s's %s, %s" % [general,word,about(troops)]
+		var detached:=place(String(mark.get("detachment_of","")))
+		if detached!="": title="%s of the %s garrison" % [about(troops),detached]
+		elif general!="": title="%s's %s, %s" % [general,word,about(troops)]
 		elif name!="" and name.to_lower().ends_with(word): title="%s, %s" % [name,about(troops)]
 		elif name!="": title="%s: %s %s of %s" % [name,_article(word),word,about(troops)]
 		else: title="Our %s, %s" % [word,about(troops)]
@@ -376,10 +381,12 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 		var ours:=String(mark.get("side","ours"))=="ours"
 		if (ours and ours_kept>=MAX_OURS) or (not ours and theirs_kept>=MAX_THEIRS): hidden[id]="budget"; continue
 		var size:=float(mark.get("size",24.0))
-		# Same side and overlapping: one mark stands for the stack.
+		# Same side and overlapping: one mark stands for the stack. A town's
+		# garrison never stacks: its card counts only the men in the town.
 		var joined:=false
 		for entry:Dictionary in drawn:
 			if String(entry.side)!=String(mark.get("side","ours")): continue
+			if bool(entry.get("garrison",false)) or bool(mark.get("garrison",false)): continue
 			if (entry.at as Vector2).distance_to(at)<(float(entry.size)+size)*0.55:
 				(entry.members as Array).append(id)
 				entry.members_troops=int(entry.get("members_troops",entry.get("troops",0)))+int(mark.get("troops",0))
@@ -405,9 +412,10 @@ static func layout(marks:Array,context:Dictionary)->Dictionary:
 			if away==Vector2.ZERO: away=Vector2.UP
 			at=at+away*(clearance-gap)
 			entry.moved=true
-		# Opposing marks never sit on one another.
+		# Opposing marks never sit on one another; nor does a garrison and a
+		# band of ours beside it.
 		for other:Dictionary in drawn:
-			if String(other.side)==String(entry.side): continue
+			if String(other.side)==String(entry.side) and not (bool(other.get("garrison",false)) or bool(entry.get("garrison",false))): continue
 			var d:=(other.at as Vector2).distance_to(at)
 			var need:=(float(other.size)+size)*0.5+2.0
 			if d<need:

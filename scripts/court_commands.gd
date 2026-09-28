@@ -439,10 +439,13 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		# The answer to "Which town?": the order given before, at the town named now.
 		var answered:=_which_town_answer(audience,clean)
 		if not answered.is_empty() and String(war_reading.get("kind",""))!="fate": war_reading=answered
+		# The answer to the war leader's own question ("Shall I send some after them?").
+		var replied:=WarOrders.pending_answer(audience,clean)
+		if not replied.is_empty() and not String(war_reading.get("kind","")) in ["fate","pursue"]: war_reading=replied
 		var named_place:=(war_reading.get("target",{}) as Dictionary).has("city_id") or (war_reading.get("target",{}) as Dictionary).has("unknown")
 		# What becomes of a people in our hands is never a court punishment
 		# ("kill all the males" is not "kill him") nor a vague directive.
-		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town"]
+		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town","pursue","let_go","keep","abandon"] or bool(war_reading.get("answer",false))
 		if not war_reading.is_empty() and String(cls.act)!="question" and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
 			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
@@ -1238,6 +1241,9 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 			r.stage="war_refuse"; r.executed=false; r.reaction="troubled"
 			r.obedience={"id":"object","manner":"plain","chance":0.0}
 			r.outcome=relay+String(decision.outcome)
+	# The war leader asked something back (a chase, leaving a town): the answer carries it.
+	if decision.get("pending") is Dictionary:
+		audience["pending_command"]=(decision.pending as Dictionary).merged({"verb":"war","actor":String(carrier.get("key","")),"target":"","day":Hall._day()},true)
 	var pid:=int(carrier.get("person_id",0))
 	if pid>0:
 		GovernmentPeopleSystem.adjust_person_bonds(pid,{"obligation":0.02,"respect":0.01})
