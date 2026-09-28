@@ -3,10 +3,10 @@
   "line": "production",
   "game_year": 260,
   "approx_historical_year": -3267,
-  "prompt": "c. 3267 BCE: Craft workers fit two halves of a clay casting mould; impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4fd0f77d-a007-48dd-8f75-2eb8553ca210.png",
+  "prompt": "c. 3267 BCE: Two open matching clay mould halves each show a broad shaft-hole axe-head cavity; a clay core makes the round shaft hole and a finished copper axe head lies between them. Bold flat palette-knife impasto oil, copper/ember/umber, early mudbrick workshop. Mature handmade 2D, no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-15499ce4-de77-4f9d-be35-a0ad1d0c42ac.png",
   "asset": "res://assets/ui/research/subjects/bivalve_moulds-v1.png",
-  "sha256": "b6be29e6c467fd733544119cf0e0e2de0f9c029a94a67db2ed84e734850cadab",
+  "sha256": "fcef21ad9ad05d8184a91d2b5007868a9b94c3346fb53031e81b5bd3f3e72268",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Rerolled after integrator live card review: recognizable early shaft-hole axe cavity, clay core and finished copper axe; full image and 3.37:1 crop reviewed."
 }

@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/protective_birth_amulets-v1.png",
   "sha256": "dde97b67c5e26d873709efc614c0164a08b525fc02fe6cebe31845cdfd8090bb",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator actual GPU card review to retain adult faces and essential action.",
+  "focus": [
+    0.5,
+    0.38
+  ]
 }
