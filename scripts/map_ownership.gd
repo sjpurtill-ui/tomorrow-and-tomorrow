@@ -30,6 +30,9 @@ const MARK_PX:=34.0
 const MARK_PX_STRONG:=40.0
 
 ## Our hold on a stranger's town, from the world itself; {} when not ours.
+## Whose it is and whether a garrison of ours holds it are the one reading
+## every system uses (town_ledger.hold): the region says whose, and the
+## garrison counts only while the town is ours. held: a garrison stands there.
 static func player_hold(city_id:String)->Dictionary:
 	var system:Node=CivilizationSystem
 	if system==null or city_id.is_empty():return {}
@@ -37,11 +40,12 @@ static func player_hold(city_id:String)->Dictionary:
 	if location.is_empty():return {}
 	var civ:Dictionary=system.civilizations[int(location.owner_index)]
 	var region:Dictionary=civ.strategic_regions[int(location.region_index)]
+	var h:=Ledger.hold(String(civ.id),city_id)
+	if not bool(h.ours):return {}
 	var force:Dictionary=MilitaryCampaign.occupation_force_for_region(String(civ.id),city_id) if MilitaryCampaign!=null else {}
-	if String(region.get("controller",""))!="player" and force.is_empty():return {}
 	var since:=int(region.get("last_control_change_day",-1))
 	if since<=0:since=int(force.get("committed_day",-1))
-	return {"original":String(civ.id),"since":since,"garrison":maxi(0,int(force.get("troops",0))),"integration":float(region.get("integration",0.0))}
+	return {"original":String(civ.id),"since":since,"garrison":int(h.garrison),"held":bool(h.held),"integration":float(region.get("integration",0.0))}
 
 static func status(report:Dictionary)->Dictionary:
 	var city_id:=String(report.get("city_id",""))

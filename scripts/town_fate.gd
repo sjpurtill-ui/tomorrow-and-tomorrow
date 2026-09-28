@@ -109,10 +109,17 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if count_match!=null: out["count"]=int(count_match.get_string(1))
 	if kill: out["kill_men"]=true
 	if kill and everyone: out["kill_all"]=true
-	# Who is to be killed: "kill the women" never kills the men.
+	# Who is to be killed: "kill the women" never kills the men, and "the boys"
+	# are never all the children (town_ledger's make-up of the children).
 	if kill and not everyone:
 		var groups:=kill_groups(lower)
 		if groups!=["men"]: out["kill_groups"]=groups
+		if groups.has("children"):
+			var kkw:=kid_words(kill_span(lower))
+			if not kkw.is_empty():
+				out["kill_kids"]=kkw.bands
+				out["kill_kids_words"]=String(kkw.words)
+				if bool(kkw.get("aged",false)) and out.has("count") and int(out.count)==int(kkw.get("age_number",-1)): out.erase("count")
 	if kill and _has(BOUND_ONLY,lower): out["bound_only"]=true
 	if carry and people and homeward and not out.has("kill_all"):
 		if _has("\\bas (our own|citizens|free|our people|equals|kin)\\b",lower) and not bonded: out["move"]="citizen"
@@ -120,6 +127,13 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 		else:
 			out["captives"]=true
 			out["take"]=take_words(lower)
+			# "The girls under ten": which of the children, by band.
+			var kw:=kid_words(lower)
+			if not kw.is_empty():
+				out["kids"]=kw.bands
+				out["kids_words"]=String(kw.words)
+				# A number in the words is their age, not how many to take.
+				if bool(kw.get("aged",false)) and out.has("count") and int(out.count)==int(kw.get("age_number",-1)): out.erase("count")
 	if _has("\\b(burn|raze|torch|set fire|to the ground|level it|flatten|tear [\\w' ]{0,12}down|destroy (it|the town|what))",lower): out["raze"]=true
 	if _has("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them|their stores))\\b",lower): out["tribute"]=true
 	if _has("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b",lower) and not kill: out["spare"]=true
@@ -139,15 +153,22 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 ## order ("kill the males and take the women" kills the men only). Default men.
 const KILL_VERB:="\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death)"
 
-static func kill_groups(lower:String)->Array:
+## The words a killing falls on: from the verb up to the next order. "" when
+## no killing is named.
+static func kill_span(lower:String)->String:
 	var m:=_re(KILL_VERB,lower)
-	if m==null: return ["men"]
+	if m==null: return ""
 	var span:=lower.substr(m.get_start())
 	var cut:=span.length()
 	for stop in [" and take"," and bring"," and burn"," and carry"," and drive"," and lead"," and send"," and march"," then ",",",".",";","!"]:
 		var at:=span.find(stop)
 		if at>0 and at<cut: cut=at
-	span=span.substr(0,cut).replace("old men","old ones")
+	return span.substr(0,cut)
+
+static func kill_groups(lower:String)->Array:
+	var m:=_re(KILL_VERB,lower)
+	if m==null: return ["men"]
+	var span:=kill_span(lower).replace("old men","old ones")
 	var out:Array=[]
 	if _has("\\b(men|males|menfolk|husbands|fathers|sons|fighting men|grown men|every man)\\b",span): out.append("men")
 	if _has("\\b(women|womenfolk|females?|wives|mothers)\\b",span): out.append("women")
@@ -170,6 +191,56 @@ static func take_words(lower:String)->Dictionary:
 	if _has("\\b(men|males|menfolk|husbands|fathers|sons)\\b",lower.replace("old men","old ones")) and not _has("\\b(kill|slay|put [\\w' ]{0,24}to (the sword|death))",lower): out["men"]=1.0
 	if out.is_empty(): out={"women":1.0,"children":1.0}
 	return out
+
+const AGE_WORDS:={"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"thirteen":13,"fourteen":14,"fifteen":15}
+const AGE_RE:="(\\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen)"
+
+static func _age(word:String)->int:
+	return int(word) if word.is_valid_int() else int(AGE_WORDS.get(word,-1))
+
+## Which of the children the words mean, by band (town_ledger KID_BANDS):
+## {bands: {band: share of that band}, words: "girls under ten", aged (an
+## age was named), age_number}; {} when the words mean the children as a
+## whole or none of them. "girls under 10" -> girls_young 1; "boys" -> both
+## boys' bands; "girls under five" -> about half the girls under ten; "the
+## older girls" -> girls_older.
+static func kid_words(lower:String)->Dictionary:
+	var girls:=_has("\\b(girls?|daughters?)\\b",lower)
+	var boys:=_has("\\b(boys?|sons)\\b",lower)
+	var kids:=_has("\\b(children|child|kids?|young ones|little ones|babies|infants|toddlers)\\b",lower)
+	if not girls and not boys and not kids: return {}
+	var below:=Ledger.CHILD_YEARS.size()
+	var from:=0
+	var aged:=false
+	var number:=-1
+	var m:=_re("\\b(?:under|below|younger than|less than)\\s+(?:the age of\\s+|age\\s+)?"+AGE_RE+"\\b",lower)
+	if m!=null and _age(m.get_string(1))>0: number=_age(m.get_string(1)); below=clampi(number,1,Ledger.CHILD_YEARS.size()); aged=true
+	m=_re("\\b"+AGE_RE+"\\s+(?:and|or)\\s+(?:under|younger|below)\\b",lower)
+	if m!=null and _age(m.get_string(1))>=0: number=_age(m.get_string(1)); below=clampi(number+1,1,Ledger.CHILD_YEARS.size()); aged=true
+	m=_re("\\b(?:over|above|older than)\\s+(?:the age of\\s+|age\\s+)?"+AGE_RE+"\\b",lower)
+	if m!=null and _age(m.get_string(1))>=0: number=_age(m.get_string(1)); from=clampi(number+1,0,Ledger.CHILD_YEARS.size()-1); aged=true
+	m=_re("\\b"+AGE_RE+"\\s+(?:and|or)\\s+(?:over|older|above)\\b",lower)
+	if m!=null and _age(m.get_string(1))>=0: number=_age(m.get_string(1)); from=clampi(number,0,Ledger.CHILD_YEARS.size()-1); aged=true
+	if not aged:
+		if _has("\\b(little|small|young|youngest)\\s+(girls?|boys?|children|ones|daughters|sons|kids)\\b|\\b(babies|infants|toddlers|little ones)\\b",lower): below=Ledger.YOUNG_AGE
+		elif _has("\\b(older|oldest|grown|big)\\s+(girls?|boys?|children|daughters|sons|kids)\\b",lower): from=Ledger.YOUNG_AGE
+	var all_ages:=below>=Ledger.CHILD_YEARS.size() and from<=0
+	if (girls==boys) and all_ages: return {}
+	var bands:={}
+	for band:String in Ledger.KID_BANDS:
+		if girls and not boys and band.begins_with("boys"): continue
+		if boys and not girls and band.begins_with("girls"): continue
+		var part:=Ledger.band_part(band,from,below)
+		if part>0.0: bands[band]=snappedf(part,0.001)
+	if bands.is_empty(): return {}
+	var who:="girls" if girls and not boys else ("boys" if boys and not girls else "children")
+	var ages:=""
+	if from<=0 and below==Ledger.YOUNG_AGE: ages=" under ten"
+	elif from<=0 and below<Ledger.CHILD_YEARS.size(): ages=" under %s" % _count(below)
+	elif from==Ledger.YOUNG_AGE and below>=Ledger.CHILD_YEARS.size(): ages=" of ten and older"
+	elif from>0 and below>=Ledger.CHILD_YEARS.size(): ages=" of %s and older" % _count(from)
+	elif from>0: ages=" of %s to %s" % [_count(from),_count(below-1)]
+	return {"bands":bands,"words":who+ages,"aged":aged,"age_number":number}
 
 
 ## Words for the people of a town as a body: the men, the women, everyone.
@@ -196,9 +267,12 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	var index:int=world._civilization_index(civ_id)
 	if index<0: return {"error":"That town's people are no longer known to us."}
 	var region:Dictionary=world.region_snapshot(civ_id,region_id)
-	if region.is_empty() or String(region.get("controller",""))!="player": return {"error":"We do not hold that town."}
-	var garrison:=int(mc.occupation_force_for_region(civ_id,region_id).get("troops",0))
-	if garrison<=0: return {"error":"Nobody of ours is left in the town to carry out the order."}
+	# Who holds it: the one reading every system uses (town_ledger.hold).
+	var h:=Ledger.hold(civ_id,region_id)
+	if region.is_empty() or not bool(h.held):
+		var why:=Ledger.hold_words(h)
+		return {"error":(why+" Nobody of ours is there to carry out the order.") if why!="" else "We do not hold that town."}
+	var garrison:=int(h.garrison)
 	var name:=String(region.get("name","the town"))
 	var home:=String(WorldSimulation.state.settlement_name)
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -277,10 +351,18 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	if bool(fate.get("raze",false)): harsh+=_burn(civ_id,region_id,name,fate,garrison,out,parts,refusals,day)
 	# Given back, or stripped and left: the town goes back and the garrison comes home.
 	if not bool(out.burned) and (bool(fate.get("leave",false)) or (bool(fate.get("tribute",false)) and not bool(fate.get("hold",false)) and policy=="")):
-		var back:Dictionary=world.occupation_resident_order(civ_id,region_id,"restore_self_rule")
+		# A ruin we burned is left to nobody, never handed back to its old people
+		# (as court_war_orders._abandon).
+		var ruin:=not Ledger.our_ruin(region_id).is_empty()
+		var back:Dictionary=mc.evacuate_occupation(civ_id,region_id) if ruin else world.occupation_resident_order(civ_id,region_id,"restore_self_rule")
 		if not back.has("error"):
 			out.left=true
 			parts.append("The garrison marches home%s." % (" behind the captives" if int(out.captives)>0 else ""))
+			# Nobody of ours stays to guard those we held: they go free, said here.
+			var freed:=Ledger.settle(civ_id,region_id,true)
+			if not freed.is_empty():
+				parts.append(String(freed.words))
+				out["went_free"]=int(freed.freed)+int(freed.scattered)
 		else:
 			refusals.append("The garrison cannot leave yet: %s" % String(back.error))
 	if bool(fate.get("spare",false)) or (parts.is_empty() and refusals.is_empty() and bool(fate.get("hold",false))):
@@ -302,7 +384,7 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	out["outcome"]=_note(name,out)
 	# People got away and the garrison still holds the town: a chase can follow.
 	var held_at:int=mc._occupation_force_index(civ_id,region_id)
-	if int(out.escaped)>0 and held_at>=0 and not bool(out.left) and Ledger.running_men(Ledger.of(civ_id,region_id))>0: out["fled"]=Ledger.running(Ledger.of(civ_id,region_id)).duplicate(true)
+	if int(out.escaped)>0 and Ledger.holds(civ_id,region_id) and not bool(out.left) and Ledger.running_men(Ledger.of(civ_id,region_id))>0: out["fled"]=Ledger.running(Ledger.of(civ_id,region_id)).duplicate(true)
 	# The garrison's card on the map says what was last done there.
 	if held_at>=0:
 		var brief:=_note(name,out).trim_prefix(name+": ").trim_suffix(".")
@@ -342,6 +424,16 @@ static func catch_odds(garrison:int,free:int,force:Dictionary,l:Dictionary)->flo
 ## The free are each caught on the stated odds, one seeded roll each, at most
 ## a day's work of our fighters; the rest run for their refuge.
 static func _kill(civ_id:String,region_id:String,name:String,fate:Dictionary,garrison:int,out:Dictionary,parts:PackedStringArray,refusals:PackedStringArray,day:int)->float:
+	# Some of the children only ("kill the boys"): those bands, on the same
+	# odds; any grown group named with them goes by the whole-group path.
+	var only_kids:Dictionary=fate.get("kill_kids",{}) if fate.get("kill_kids") is Dictionary else {}
+	if not only_kids.is_empty() and not bool(fate.get("kill_all",false)) and (fate.get("kill_groups",["men"]) as Array).has("children"):
+		var harsh:=0.0
+		var grown:=(fate.get("kill_groups",[]) as Array).filter(func(g:Variant)->bool: return String(g)!="children")
+		if not grown.is_empty():
+			var rest:=fate.duplicate(); rest["kill_groups"]=grown; rest.erase("kill_kids")
+			harsh=maxf(harsh,_kill(civ_id,region_id,name,rest,garrison,out,parts,refusals,day))
+		return maxf(harsh,_kill_kids(civ_id,region_id,name,fate,only_kids,garrison,out,parts,refusals,day))
 	var world:Variant=WorldSimulation.world
 	var l:=Ledger.of(civ_id,region_id)
 	var all:=bool(fate.get("kill_all",false))
@@ -415,6 +507,85 @@ static func _kill(civ_id:String,region_id:String,name:String,fate:Dictionary,gar
 	parts.append(_kill_words(name,who,garrison,held_dead,take_held,want_free,free_dead,escaped,p,per_day,refuge,held_words,asked>0 and free>want_free))
 	return 1.0 if held_dead+free_dead>0 else 0.0
 
+## Only some of the children ("the boys", "the girls under ten"), band by
+## band from the town's ledger: those we hold cannot run and all die; the
+## free are each caught on the stated odds (catch_odds), one seeded roll each;
+## the rest run for their refuge. kids: {band: share of that band}.
+static func _kill_kids(civ_id:String,region_id:String,name:String,fate:Dictionary,kids:Dictionary,garrison:int,out:Dictionary,parts:PackedStringArray,refusals:PackedStringArray,day:int)->float:
+	var world:Variant=WorldSimulation.world
+	var l:=Ledger.of(civ_id,region_id)
+	var who:=String(fate.get("kill_kids_words","children"))
+	var asked:=int(fate.get("count",0))
+	var bound_only:=bool(fate.get("bound_only",false))
+	var held_order:=["bound","worker","conscript","hostage"]
+	var held_by:={}
+	var held:=0
+	var bound:=0
+	var free_by:={}
+	var free:=0
+	for band in Ledger.KID_BANDS:
+		var share:=clampf(float(kids.get(band,0.0)),0.0,1.0)
+		if share<=0.0: continue
+		var h:=0
+		for status in held_order:
+			var k:=roundi(float(int(Ledger.kids(l,String(status)).get(band,0)))*share)
+			h+=k
+			if status=="bound": bound+=k
+		if h>0: held_by[band]=h; held+=h
+		var n:=0 if bound_only else roundi(float(int(Ledger.kids(l,"free").get(band,0)))*share)
+		if n>0: free_by[band]=n; free+=n
+	if held+free<=0:
+		refusals.append(("There are no %s of %s under our guard to kill. %s" % [who,name,_left_words(civ_id,region_id,name)]) if bound_only else ("There are no %s left in %s to kill. %s" % [who,name,_left_words(civ_id,region_id,name)]))
+		return 0.0
+	var per_day:=maxi(1,garrison*KILLS_PER_FIGHTER)
+	var take_held:=held if asked<=0 else mini(held,asked)
+	var want_free:=free if asked<=0 else mini(free,maxi(0,asked-take_held))
+	var force:Dictionary=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
+	var p:=catch_odds(garrison,want_free,force,l)
+	var r:=Ledger.rng(region_id,day,"kill:"+who)
+	var caught_by:={}
+	var caught:=0
+	var left:=want_free
+	for band in free_by:
+		var n:=mini(int(free_by[band]),left); left-=n
+		var c:=mini(Ledger.roll(r,n,p),maxi(0,per_day-caught))
+		caught_by[band]=c; caught+=c
+	var escaped_by:={}
+	var escaped:=0
+	if want_free>0 and asked<=0:
+		for band in free_by:
+			var e:=int(free_by[band])-int(caught_by.get(band,0))
+			escaped_by[band]=e; escaped+=e
+	var total:=mini(take_held+caught,maxi(0,roundi(float(Ledger.region_ref(civ_id,region_id).get("population",0.0)))))
+	# The ledger first (as _kill): those we held, then the caught; the rest run.
+	var backup:=l.duplicate(true)
+	var held_dead:=0
+	var room:=mini(take_held,total)
+	for band in held_by:
+		if room-held_dead<=0: break
+		held_dead+=int(Ledger.remove_kids(l,held_order,{band:mini(int(held_by[band]),room-held_dead)},"killed").total)
+	var free_dead:=0
+	for band in caught_by:
+		var c:=mini(int(caught_by[band]),total-held_dead-free_dead)
+		if c>0: free_dead+=int(Ledger.remove_kids(l,["free"],{band:c},"killed").total)
+	var refuge:=Pursuit.refuge(civ_id,region_id)
+	for band in escaped_by:
+		if int(escaped_by[band])>0: Ledger.run(l,"free","children",int(escaped_by[band]),refuge,day,[band])
+	if held_dead+free_dead>0:
+		var done:Dictionary=world.occupation_resident_order(civ_id,region_id,"kill_residents",held_dead+free_dead,true)
+		if done.has("error"):
+			Ledger.region_ref(civ_id,region_id)["ledger"]=backup
+			refusals.append(String(done.error)); return 0.0
+	out.killed=int(out.killed)+held_dead+free_dead
+	out.escaped=int(out.escaped)+escaped
+	out["kill_odds"]=p
+	out["held_killed"]=int(out.get("held_killed",0))+held_dead
+	out["kill_escaped"]=int(out.get("kill_escaped",0))+escaped
+	Measures.settle_records(civ_id,region_id)
+	var held_words:=("bound "+who) if bound==held else (who+" we hold")
+	parts.append(_kill_words(name,who,garrison,held_dead,take_held,want_free,free_dead,escaped,p,per_day,refuge,held_words,asked>0 and free>want_free))
+	return 1.0 if held_dead+free_dead>0 else 0.0
+
 ## "17 of ours against 38 bound men: none could run. All 38 were killed."
 static func _kill_words(name:String,who:String,garrison:int,held_dead:int,held:int,free:int,free_dead:int,escaped:int,p:float,per_day:int,refuge:Dictionary,held_words:String,rest_left:bool)->String:
 	var ours:="%s of ours" % _cap(_count(garrison))
@@ -468,18 +639,27 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 	var l:=Ledger.of(civ_id,region_id)
 	var enslaved:=status=="enslaved"
 	var take:Dictionary=fate.get("take",{"women":1.0,"children":1.0}) if enslaved else {"men":1.0,"women":1.0,"children":1.0,"elders":1.0}
+	var kids:Dictionary=fate.get("kids",{}) if enslaved and fate.get("kids") is Dictionary else {}
+	if not kids.is_empty() and not take.has("children"): take=take.duplicate(); take["children"]=1.0
+	# Who is taken, one unit at a time: a group, or a band of its children
+	# ("the girls under ten": town_ledger's children's make-up).
+	var units:={}
+	for g in Ledger.GROUPS:
+		if not take.has(g) or (g=="children" and not kids.is_empty()): continue
+		units[g]={"group":g,"band":"","share":clampf(float(take[g]),0.0,1.0)}
+	for band in Ledger.KID_BANDS:
+		if float(kids.get(band,0.0))>0.0: units[band]={"group":"children","band":band,"share":clampf(float(kids[band]),0.0,1.0)}
 	var held_by:={}
 	var held_n:=0
 	var pool_by:={}
 	var pool:=0
-	for g in Ledger.GROUPS:
-		if not take.has(g): continue
-		var share:=clampf(float(take[g]),0.0,1.0)
-		var h:=roundi(float(Ledger.count(l,"bound",g)+Ledger.count(l,"hostage",g))*share) if enslaved else 0
-		if h>0: held_by[g]=h; held_n+=h
-		var n:=roundi(float(Ledger.count(l,"free",g))*share)
-		if n>0: pool_by[g]=n; pool+=n
-	var whom:=_take_names(take)
+	for key in units:
+		var u:Dictionary=units[key]
+		var h:=roundi(float(_unit_count(l,"bound",u)+_unit_count(l,"hostage",u))*float(u.share)) if enslaved else 0
+		if h>0: held_by[key]=h; held_n+=h
+		var n:=roundi(float(_unit_count(l,"free",u))*float(u.share))
+		if n>0: pool_by[key]=n; pool+=n
+	var whom:=_take_names(take,kids,String(fate.get("kids_words","")))
 	if pool+held_n<=0:
 		refusals.append("There are no %s left in %s to take. %s" % [whom,name,_left_words(civ_id,region_id,name)])
 		return 0.0
@@ -530,24 +710,31 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 		return 0.0
 	var transfer:Dictionary=(mc.occupation_transfers.data.transfers as Array).back()
 	out.arrive_days=int(transfer.get("days",0))
-	# The ledger: those we held go first, then the free, by group in
+	# The ledger: those we held go first, then the free, by unit in
 	# proportion to those caught.
 	var from_held:=mini(count,held_caught)
-	var weights:={}
-	for g in Ledger.GROUPS: weights[g]=float(held_caught_by.get(g,0))
-	var went:=Ledger.split(from_held,weights)
-	for g in Ledger.GROUPS:
-		if int(went[g])>0: Ledger.remove(l,[["bound",g],["hostage",g]],int(went[g]),"taken")
-	weights={}
-	for g in Ledger.GROUPS: weights[g]=float(caught_by.get(g,0))
-	went=Ledger.split(count-from_held,weights)
-	for g in Ledger.GROUPS:
-		if int(went[g])>0: Ledger.remove(l,[["free",g]],int(went[g]),"taken")
+	var went:=Ledger.split_by(from_held,_weights(held_caught_by))
+	for key in units:
+		var k:=int(went.get(key,0))
+		if k<=0: continue
+		var u:Dictionary=units[key]
+		if String(u.band)!="": Ledger.remove_kids(l,["bound","hostage"],{String(u.band):k},"taken")
+		else: Ledger.remove(l,[["bound",String(u.group)],["hostage",String(u.group)]],k,"taken")
+	went=Ledger.split_by(count-from_held,_weights(caught_by))
+	for key in units:
+		var k:=int(went.get(key,0))
+		if k<=0: continue
+		var u:Dictionary=units[key]
+		if String(u.band)!="": Ledger.remove_kids(l,["free"],{String(u.band):k},"taken")
+		else: Ledger.remove(l,[["free",String(u.group)]],k,"taken")
 	var refuge:=Pursuit.refuge(civ_id,region_id)
 	var ran:=0
-	for g in ran_by:
-		var n:=mini(int(ran_by[g]),Ledger.count(l,"free",String(g)))
-		if n>0: Ledger.run(l,"free",String(g),n,refuge,day); ran+=n
+	for key in ran_by:
+		var u:Dictionary=units[key]
+		var n:=mini(int(ran_by[key]),_unit_count(l,"free",u))
+		if n>0:
+			var rec:=Ledger.run(l,"free",String(u.group),n,refuge,day,[String(u.band)] if String(u.band)!="" else [])
+			if not rec.is_empty(): ran+=n
 	out.escaped=int(out.escaped)+ran
 	if from_held>0: Measures.settle_records(civ_id,region_id)
 	var road:="about %s on the road" % _days(int(out.arrive_days))
@@ -557,7 +744,8 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 		if held_caught>0 and pool>0: how="the %s we held could not slip away, and of the rest, %s" % [_count(held_caught),_chance(p)]
 		elif held_caught>0: how="all %s were already under our guard, so none could slip away" % _count(held_caught)
 		else: how=_chance(p)+(", with their men bound or dead" if p>=ROUNDED_UP_SHARE+0.15-0.001 else "")
-		var t:="%s of ours rounded up the %s of %s: %s. %s were led away toward %s as captives, %s." % [_cap(_count(garrison)),whom,name,how,_cap(_count(count)),home,road]
+		var there:=" (%s of them there)" % _count(pool+held_n) if not kids.is_empty() or asked>0 else ""
+		var t:="%s of ours rounded up the %s of %s%s: %s. %s were led away toward %s as captives, %s." % [_cap(_count(garrison)),whom,name,there,how,_cap(_count(count)),home,road]
 		if held_caught+caught>count: t+=" We could not feed or house more on the road, so %s we had caught stay in the town." % _count(held_caught+caught-count)
 		if ran>0: t+=" %s ran %s." % [_cap(_count(ran)),Pursuit.toward_words(refuge)]
 		if hid>0: t+=" %s hid in the town and were not found." % _cap(_count(hid))
@@ -567,15 +755,26 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 	parts.append("%s people of %s set out for %s %s, %s." % [_cap(_count(count)),name,home,"as our own people" if status=="citizen" else "to labour for us",road])
 	return 0.4 if status=="penal" else 0.0
 
-## "women and girls", "women and children", "people".
-static func _take_names(take:Dictionary)->String:
-	if take.size()>=4: return "people"
+## "women and girls", "women and children", "girls under ten", "people".
+static func _take_names(take:Dictionary,kids:Dictionary={},kids_words:String="")->String:
+	if take.size()>=4 and kids.is_empty(): return "people"
 	var words:PackedStringArray=PackedStringArray()
 	for g in Ledger.GROUPS:
 		if not take.has(g): continue
-		if g=="children" and float(take[g])<1.0: words.append("girls")
+		if g=="children" and not kids.is_empty(): words.append(kids_words if kids_words!="" else "children")
+		elif g=="children" and float(take[g])<1.0: words.append("girls")
 		else: words.append(String(Ledger.GROUP_WORDS[g]))
 	return " and ".join(words)
+
+## How many of one unit (a group, or a band of its children) have a status.
+static func _unit_count(l:Dictionary,status:String,u:Dictionary)->int:
+	if String(u.get("band",""))!="": return int(Ledger.kids(l,status).get(String(u.band),0))
+	return Ledger.count(l,status,String(u.get("group","")))
+
+static func _weights(by:Dictionary)->Dictionary:
+	var out:={}
+	for k in by: out[k]=float(by[k])
+	return out
 
 
 # --------------------------------------------------------------------------
@@ -695,18 +894,18 @@ static func daily(day:int)->Array:
 	var world:Variant=WorldSimulation.world
 	var mc:Variant=WorldSimulation.military
 	if world==null or mc==null: return filed
+	# No garrison of ours there any more: whoever we held is free again, and
+	# the war leader says so once (town_ledger.settle).
+	filed.append_array(Ledger.settle_all())
 	for pair in Ledger.towns():
 		var civ_id:=String(pair[0]); var region_id:=String(pair[1])
 		var r:=Ledger.region_ref(civ_id,region_id)
 		var l:=Ledger.of(civ_id,region_id)
-		# No garrison of ours there any more: whoever we held is free again.
-		if mc._occupation_force_index(civ_id,region_id)<0 and Ledger.held(l)>0:
-			for status in ["bound","hostage","worker","conscript"]:
-				for g in Ledger.GROUPS: Ledger.move(l,String(status),"free",String(g),Ledger.count(l,String(status),String(g)))
 		var ruin:Dictionary=l.get("ruin",{}) if l.get("ruin") is Dictionary else {}
 		if ruin.is_empty(): continue
-		var ours:=String(r.get("controller",""))=="player"
-		var held:bool=mc._occupation_force_index(civ_id,region_id)>=0
+		var h:=Ledger.hold(civ_id,region_id)
+		var ours:=bool(h.ours)
+		var held:=bool(h.held)
 		if ours and Ledger.present_total(l)<=0: r["resistance"]=0.0
 		if not held and ours and (ruin.get("resettle",{}) as Dictionary).is_empty():
 			ruin["held"]=false

@@ -34,7 +34,10 @@ const Ledger:=preload("res://scripts/town_ledger.gd")
 const AiMode:=preload("res://scripts/ai_mode.gd")
 
 ## The reader must be quick: past this the regex classifier answers instead.
-const TIMEOUT_SECONDS:=4.0
+## Measured in play (reasoning models at low effort): readings take 2.4 to
+## 3.5 seconds and about one in four went past the old 4-second limit, so the
+## plain reading decided orders the live reader would have read better.
+const TIMEOUT_SECONDS:=8.0
 const MAX_COMPLETION_TOKENS:=420
 const MAX_RESPONSE_BYTES:=32768
 ## Below this nothing is carried out without asking.
@@ -122,7 +125,10 @@ static func world_brief(audience_id:String)->Dictionary:
 		for t:Dictionary in WarOrders.known_places():
 			var tid:="town:"+String(t.city_id)
 			if ids.has(tid): continue
-			(brief.towns as Array).append({"id":tid,"name":String(t.name).trim_prefix("Reported home of "),"people":String(t.civ_name)})
+			# A town we took once and no longer hold: said so (town_ledger.hold).
+			var h:=Ledger.hold(String(t.civ_id),String(t.city_id))
+			var once:=Ledger.hold_words(h) if bool(h.taken) else ""
+			(brief.towns as Array).append({"id":tid,"name":String(t.name).trim_prefix("Reported home of "),"people":String(t.civ_name),"once":once})
 			ids[tid]="town"
 		for c:Dictionary in WorldSimulation.world.civilizations:
 			var cid:=String(c.get("id",""))
@@ -186,7 +192,7 @@ static func brief_text(brief:Dictionary)->String:
 		("; there now: "+String(t.here)) if String(t.get("here",""))!="" else "",("; gone: "+String(t.gone)) if String(t.get("gone",""))!="" and String(t.gone)!="none" else ""])
 	out.append("TOWNS WE HOLD: "+("; ".join(rows) if not rows.is_empty() else "none"))
 	rows=PackedStringArray()
-	for t:Dictionary in brief.towns: rows.append("%s = %s (%s)" % [String(t.id),String(t.name),String(t.people)])
+	for t:Dictionary in brief.towns: rows.append("%s = %s (%s%s)" % [String(t.id),String(t.name),String(t.people),("; NOT HELD: "+String(t.once)+" Nobody of it is in our hands.") if String(t.get("once",""))!="" else ""])
 	out.append("FOREIGN TOWNS WE KNOW: "+("; ".join(rows) if not rows.is_empty() else "none"))
 	rows=PackedStringArray()
 	for p:Dictionary in brief.peoples: rows.append("%s = %s (%s)" % [String(p.id),String(p.name),"AT WAR with us" if bool(p.at_war) else "at peace"])
@@ -442,6 +448,13 @@ static func _engine_plan(audience:Dictionary,text:String,reading:Dictionary,thei
 				if theirs_held.size()==1: town=theirs_held[0]
 			if town.is_empty() and bool(theirs.get("which_town",false)) and ref.begins_with("town:"): town=_held_by_ref(ref)
 			if town.is_empty() and WarOrders.held_towns().size()==1 and ref=="": town=WarOrders.held_towns()[0]
+			if town.is_empty() and WarOrders.held_towns().is_empty():
+				# The town this audience speaks of, not ours now: why, and what it would take.
+				var spoken:=WarOrders._place_in_audience(String(audience.get("id","")))
+				if spoken.has("city_id") and not bool(spoken.get("held",false)):
+					var again:=base.duplicate(); again["kind"]="take_first"; again["target"]=spoken
+					again["fate"]=_fate(lower,details,{}); again["harm"]="kill" if bool((again.fate as Dictionary).get("kill_men",false)) else ""
+					return _war_plan(again)
 			if town.is_empty():
 				var none:=base.duplicate(); none["kind"]="no_town" if WarOrders.held_towns().is_empty() else "which_town"; none["target"]={}
 				none["fate"]=_fate(lower,details,theirs)

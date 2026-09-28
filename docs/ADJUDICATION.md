@@ -18,6 +18,17 @@ state.
   read the same ledger.
 - Counts add up: the ledger before, plus or minus the reported changes, equals
   the ledger after. Tests assert this for every order that changes it.
+- Who holds a town is one reading too (town_ledger.hold / holds): the region
+  says whose it is, and it is held only while a garrison of ours stands in
+  it. The order path, the fact sheets, the reader's brief, the map, the
+  held-town report, the chase and the garrison's measures all ask it; none
+  keeps its own test of a garrison or a controller.
+- Only a held town has anyone under our guard. Where no garrison stands, those
+  we held go free (or scatter from a ruin we burned), reconciled on load, on
+  the first read and each day, and said once through the war leader.
+- When the live voice is off or fails, a factual question is answered from the
+  same fact sheet (court_answers.gd), never with a stock line claiming not to
+  know; the footer says in plain words why the line was offline.
 
 ## Every order, the same path
 

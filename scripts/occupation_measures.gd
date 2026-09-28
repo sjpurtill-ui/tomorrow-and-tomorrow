@@ -596,10 +596,13 @@ static func apply(civ_id:String,region_id:String,ids:Array,opts:Dictionary={},ge
 	if world==null or mc==null: return {"error":"Nobody holds that town for us."}
 	var region:Dictionary=world.region_snapshot(civ_id,region_id)
 	var at:=_force_index(civ_id,region_id)
-	if region.is_empty() or String(region.get("controller",""))!="player" or at<0: return {"error":"We do not hold that town."}
+	# Who holds it: the one reading every system uses (town_ledger.hold).
+	var h:=Ledger.hold(civ_id,region_id)
+	if region.is_empty() or at<0 or not bool(h.held):
+		var why:=Ledger.hold_words(h)
+		return {"error":(why+" Nobody of ours is there to carry it out.") if why!="" else "We do not hold that town."}
 	var force:Dictionary=mc.occupation_forces[at]
-	var garrison:=int(force.get("troops",0))
-	if garrison<=0: return {"error":"Nobody of ours is left in the town to carry it out."}
+	var garrison:=int(h.garrison)
 	if not force.get("measures") is Array: force["measures"]=[]
 	var stance:=String(opts.get("stance","firm"))
 	if not stance in STANCE_IDS: stance="firm"
@@ -1611,7 +1614,9 @@ static func daily(day:int)->Array:
 		if not list is Array or (list as Array).is_empty(): continue
 		var civ_id:=String(force.get("civ_id","")); var region_id:=String(force.get("region_id",""))
 		var region:Dictionary=world.region_snapshot(civ_id,region_id)
-		if region.is_empty() or String(region.get("controller",""))!="player":
+		# Not held (the one reading): nothing the garrison ordered runs there,
+		# and those it held go free (town_ledger.settle).
+		if region.is_empty() or not Ledger.holds(civ_id,region_id):
 			force.erase("measures"); continue
 		var cap:=1.0
 		var hungry:=0.0
