@@ -668,15 +668,22 @@ func fill(token:String,ctx:Dictionary)->String:
 	return out
 
 static func _contains(text:String,want:String)->bool:
-	## Case-insensitive; a number matches its digits or its word ("17" or "seventeen").
+	## Case-insensitive; a number matches its digits or its word ("17" or
+	## "seventeen"), whole: "2" is never found inside "20" or "12".
 	var lower:=text.to_lower()
-	var w:=want.to_lower()
-	if w in lower: return true
+	var w:=want.to_lower().strip_edges()
 	if w.is_valid_int():
 		var n:=int(w)
 		if n>=0 and n<SMALL.size() and RegEx.create_from_string("\\b%s\\b" % SMALL[n]).search(lower)!=null: return true
 		return RegEx.create_from_string("(?<![0-9])%d(?![0-9])" % n).search(lower)!=null
-	return false
+	if not w in lower: return false
+	# A phrase that starts or ends with a number ("20 bound") matches it whole.
+	var starts:=w.length()>0 and w.substr(0,1).is_valid_int()
+	var ends:=w.length()>0 and w.substr(w.length()-1).is_valid_int()
+	if not starts and not ends: return true
+	var escaped:=""
+	for ch in w: escaped+=("\\"+ch) if ch in ".^$*+?()[]{}|\\-/" else ch
+	return RegEx.create_from_string(("(?<![0-9])" if starts else "")+escaped+("(?![0-9])" if ends else "")).search(lower)!=null
 
 func _state_problem(metric:String,cond:String,before:Dictionary,after:Dictionary,w:Dictionary)->String:
 	## cond: ">0", "==0", "==before", "<before", ">before", "!=before", ">=before",

@@ -1647,7 +1647,7 @@ func allowed_numbers(s:Dictionary,extra:Dictionary)->Dictionary:
 	# The speaker's fact sheet (court_facts.gd): the exact numbers the prompt
 	# gave the voice and told it to state. Without them a true answer ("38 were
 	# killed") was thrown out as an invented number.
-	sources.append(String(s.records) if s.has("records") else court_records(s))
+	sources.append(String(s.records) if s.has("records") else (court_records(s) if String(s.get("origin",""))=="court" else CourtFacts.people_text(CourtFacts.people(String(s.get("civ_id",""))))))
 	var result:Dictionary=extra.get("result",{})
 	sources.append(String(result.get("outcome","")))
 	sources.append(String(result.get("actor_says","")))
@@ -2793,6 +2793,11 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	if line.is_empty():
 		var told:=court_answer(s,envoy,player_text)
 		if told!="": line={"key":"envoy","text":told,"aside":false,"fact":true}
+	# A foreign envoy asked about their own people: their towns, where their
+	# ruler sits, their number, from what they know (court_facts.people).
+	if line.is_empty() and String(s.origin)=="foreign" and String(s.get("civ_id",""))!="":
+		var theirs:=CourtAnswers.envoy_answer(CourtFacts.people(String(s.civ_id)),player_text)
+		if theirs!="": line={"key":"envoy","text":theirs,"aside":false,"fact":true}
 	var ours:=String(s.origin)=="court"
 	if line.is_empty():
 		var counted:=fact_answer(s,player_text)
@@ -2895,7 +2900,11 @@ func fact_answer(s:Dictionary,player_text:String)->Array:
 	var re_q:=RegEx.new(); re_q.compile("(?i)\\b(how long|how many|how much|how big|how old|when did|until|number)\\b")
 	if re_q.search(lower)==null: return []
 	var numbers:Dictionary=(s.get("ctx",{}) as Dictionary).get("numbers",{}) if (s.get("ctx",{}) as Dictionary).get("numbers") is Dictionary else {}
+	var foreign:=String(s.get("origin",""))=="foreign"
 	for topic in FACT_TOPICS:
+		# A foreign envoy's "we" is their own people (court_answers.envoy_answer),
+		# never our number: "We number about 900" is not theirs to say.
+		if foreign and String(topic[0]) in ["our_people","their_people"]: continue
 		var re:=RegEx.new(); re.compile(String(topic[1]))
 		if re.search(lower)==null: continue
 		for key in topic[2]:
@@ -3308,6 +3317,12 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	# Kept on the scene: the numbers on the sheet are the numbers a line may say.
 	s["records"]=records
 	if records!="": parts.append("WHAT OUR OWN PEOPLE KNOW (exact, as of today; the one addressed knows these and states the numbers when asked):\n"+records)
+	elif String(s.get("origin",""))=="foreign" and String(s.get("civ_id",""))!="":
+		# A foreign envoy knows their own people: their towns, where their
+		# ruler sits now, the towns they lost to us.
+		var theirs:=CourtFacts.people_text(CourtFacts.people(String(s.civ_id)))
+		s["records"]=theirs
+		if theirs!="": parts.append("THE VISITOR'S OWN PEOPLE (true, as of today; the visitor knows these and states them plainly when asked):\n"+theirs)
 	var mood:float=float((s.audience as Dictionary).get("mood",0.0))
 	parts.append("ROOM: %s (%.2f)." % [_mood_words(mood),mood])
 	var regard:=_prompt_regard(s)

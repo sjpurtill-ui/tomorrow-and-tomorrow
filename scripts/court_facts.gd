@@ -361,6 +361,62 @@ static func _tribute(out:Dictionary)->void:
 	out["peoples"]=peoples
 
 # --------------------------------------------------------------------------
+# A foreign envoy's own people
+# --------------------------------------------------------------------------
+
+## What an envoy knows of their own people, from the same world every system
+## reads: their towns and how many live in each, where their ruler sits now
+## (their high seat, or their largest town once the seat is lost), the towns
+## our people took or burned, their number, and war or peace with us.
+## {name, people, at_war, treaty, towns:[{name, people, seat}], seat, lost:[{name, how}]}.
+static func people(civ_id:String)->Dictionary:
+	var world:Variant=_world()
+	if world==null: return {}
+	var index:int=world._civilization_index(civ_id)
+	if index<0: return {}
+	var civ:Dictionary=world.civilizations[index]
+	var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+	var home:=String(WorldSimulation.state.settlement_name) if WorldSimulation.state!=null else "the ruler's people"
+	var towns:Array=[]; var lost:Array=[]
+	var seat:=""
+	for r in civ.get("strategic_regions",[]):
+		if not r is Dictionary: continue
+		var region:Dictionary=r
+		var name:=String(region.get("name",""))
+		if name=="" or not bool(region.get("settlement_founded",false)) and not Ledger.has(civ_id,String(region.get("id",""))): continue
+		var ruin:=Ledger.our_ruin(String(region.get("id","")))
+		if String(region.get("controller",""))=="player":
+			var guarded:=bool(Ledger.hold(civ_id,String(region.id)).get("held",false))
+			lost.append({"name":name,"state":"held" if guarded else "taken","how":"taken by %s; their garrison holds it" % home if guarded else "taken by %s" % home,"seat":String(region.get("role",""))=="capital"})
+			continue
+		if not ruin.is_empty():
+			lost.append({"name":name,"state":"burned","how":"burned by %s" % home,"seat":String(region.get("role",""))=="capital"}); continue
+		if not bool(region.get("settlement_founded",false)): continue
+		var n:=roundi(float(region.get("population",0.0)))
+		towns.append({"name":name,"people":n,"seat":String(region.get("role",""))=="capital"})
+		if String(region.get("role",""))=="capital": seat=name
+	# The high seat lost: the ruler sits in their largest town now.
+	if seat=="" and not towns.is_empty():
+		var best:Dictionary=towns[0]
+		for t in towns:
+			if int((t as Dictionary).people)>int(best.people): best=t
+		seat=String(best.name)
+		best["seat"]=true
+	return {"name":String(civ.get("name","")),"people":roundi(float(civ.get("population",0.0))),"at_war":bool(rel.get("at_war",false)),"treaty":String(rel.get("treaty","none")),
+		"towns":towns,"seat":seat,"lost":lost,"home":home}
+
+## The envoy's own people in plain lines, exact, for the voice's prompt.
+static func people_text(p:Dictionary)->String:
+	if p.is_empty(): return ""
+	var rows:PackedStringArray=PackedStringArray()
+	for t:Dictionary in p.get("towns",[]): rows.append("%s (%d people%s)" % [String(t.name),int(t.people),", where your ruler sits now" if bool(t.get("seat",false)) else ""])
+	var lines:PackedStringArray=PackedStringArray()
+	lines.append("Your people, the %s: about %d in all. Your towns now: %s." % [String(p.name),int(p.people),"; ".join(rows) if not rows.is_empty() else "none left"])
+	for l:Dictionary in p.get("lost",[]): lines.append("%s%s: %s." % [String(l.name)," (once your ruler's seat)" if bool(l.get("seat",false)) else "",String(l.how)])
+	lines.append("Your people and %s: %s." % [String(p.get("home","")),"at war" if bool(p.at_war) else ("treaty: "+String(p.treaty) if String(p.treaty) not in ["","none"] else "at peace")])
+	return "\n".join(lines)
+
+# --------------------------------------------------------------------------
 # The words the voice is given
 # --------------------------------------------------------------------------
 

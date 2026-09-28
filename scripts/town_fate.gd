@@ -84,8 +84,11 @@ const POLICY_WORDS:=[
 	["self_rule","\\b(govern (themselves|itself)|rule themselves|self.rule|their own elders|let them rule|keep their own (ways|elders|chief))"],
 	["equal_citizenship","\\b(equal citizens|equal citizenship|make them (our own|our people|citizens|one of us)|full citizens|as equals)"],
 	["stewardship","\\b(civil administration|(govern|rule) [\\w' ]{0,20}(well|fairly|justly|kindly)|as a town of ours|administer it|steward|protect (it|them|the town))"],
-	["forced_labor","\\b(enslave (the |its |their )?(whole )?(town|people|them|everyone)|make (them|the town|its people) (our )?slaves|forced labou?r|work them as slaves)"],
+	["forced_labor","\\b(enslave (the |its |their )?(whole )?(town|people|them|everyone|rest|rest of them|survivors|others)|enslave everyone (else|left)|enslave all (the )?(rest|others|who are left)|make (them|the town|its people|the rest) (our )?slaves|forced labou?r|work them as slaves)"],
 ]
+## "Enslave the women", "enslave the girls": those people taken home in
+## bonds (the captives' road), as "take the women to Seanstone" is.
+const ENSLAVE_GROUP:="\\benslave\\s+(all\\s+)?(of\\s+)?(the\\s+|their\\s+|its\\s+)?(young\\s+|little\\s+|older\\s+)?(women|womenfolk|wives|girls|daughters|children|boys|young ones|men|males|elders|old people|old men|old women)\\b"
 ## "Kill the men you have tied up": only those we hold.
 const BOUND_ONLY:="\\b((that|whom|who|which)\\s+(you|we|they|your men|the garrison|our men|you've|we've)\\s+(have\\s+|had\\s+|already\\s+|just\\s+)*(tied|bound|chained|taken|captured|caught|rounded up|locked up|roped)|(the|all the|every one of the|those|these)\\s+(bound|tied|captive|chained|roped|captured)\\s+(men|ones|prisoners|males)|the prisoners|those (we|you) (hold|are holding|have tied|have bound)|(who|that) are (tied|bound|chained|held|prisoners|under guard))"
 
@@ -99,7 +102,7 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	## What the god's words decide about a town we hold. {} when nothing.
 	var out:={}
 	var home:=home_name.to_lower().strip_edges() if home_name!="" else String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
-	var kill:=_has("\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
+	var kill:=_has("\\b(kill|kil\\b|kiil|rid [\\w' ]{0,24}of [\\w' ]{0,24}\\b(men|males|menfolk|man|people|souls?)\\b|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
 	var everyone:=_has("\\b(everyone|everybody|every soul|every one of them|all of them|them all|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b",lower)
 	var people:=_has("\\b(women|womenfolk|females?|girls|wives|daughters|children|captives?|slaves?|bondservants?|young ones|people|residents|families|them|villagers|townsfolk|townspeople|inhabitants)\\b",lower)
 	var carry:=_has("\\b(take|bring|carry|lead|drive|march|send|haul|herd|move|settle|resettle)\\b",lower)
@@ -108,7 +111,12 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	var count_match:=_re("\\b(\\d{1,4})\\b",lower)
 	if count_match!=null: out["count"]=int(count_match.get_string(1))
 	if kill: out["kill_men"]=true
-	if kill and everyone: out["kill_all"]=true
+	if kill and everyone: out["kill_all"]=true; out["kill_all_words"]=true
+	# The groups the words themselves name for the killing ("all the women"):
+	# a reading's "kill everyone" never widens them (apply honours these).
+	if kill and not everyone:
+		var named:=named_kill_groups(lower)
+		if not named.is_empty(): out["kill_named"]=named
 	# Who is to be killed: "kill the women" never kills the men, and "the boys"
 	# are never all the children (town_ledger's make-up of the children).
 	if kill and not everyone:
@@ -121,6 +129,9 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 				out["kill_kids_words"]=String(kkw.words)
 				if bool(kkw.get("aged",false)) and out.has("count") and int(out.count)==int(kkw.get("age_number",-1)): out.erase("count")
 	if kill and _has(BOUND_ONLY,lower): out["bound_only"]=true
+	# "Enslave the women" is the captives' road, as "take them home" is.
+	if _has(ENSLAVE_GROUP,lower) and not out.has("kill_all"):
+		carry=true; people=true; homeward=true; bonded=true
 	if carry and people and homeward and not out.has("kill_all"):
 		if _has("\\bas (our own|citizens|free|our people|equals|kin)\\b",lower) and not bonded: out["move"]="citizen"
 		elif _has("\\b(penal|to labou?r|to work)\\b",lower) and not bonded: out["move"]="penal"
@@ -138,7 +149,7 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if _has("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them|their stores))\\b",lower): out["tribute"]=true
 	if _has("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b",lower) and not kill: out["spare"]=true
 	if _has("\\b(hold|keep|garrison|govern|rule) (it|the town|the place|them|the ruins?)\\b",lower): out["hold"]=true
-	if _has("\\b(give it back|hand it back|(give|hand) [\\w' ]{1,20} back|return it|leave it|withdraw|come home|pull out|abandon|let them have it back)\\b",lower) and not out.has("hold"): out["leave"]=true
+	if _has("\\b(give it back|hand it back|(give|hand) [\\w' ]{1,20} back|return it|leave it|withdraw|come home|pull out|abandon|let them have it back|leave [\\w' ]{1,24}? to (its|their) (own )?(people|folk|elders|kin|chiefs?)|give (it|the town|the place|the village) up|give up (the town|the place|the village)|evacuate)\\b",lower) and not out.has("hold"): out["leave"]=true
 	if _has("\\b(rebuild|repair|reconstruct|build it (up|again))\\b",lower) and not out.has("raze"): out["reconstruct"]=true
 	if _has("\\b(strengthen|reinforce|more (soldiers|fighters|men|spears) (to|in|at|for)|send more|add [\\w' ]{0,12}to the garrison|bigger garrison)\\b",lower): out["reinforce"]=true
 	if _has("\\b(free|release|emancipate|unbind) (the )?(captives|slaves|bonded)",lower) and not kill: out["free"]=true
@@ -151,10 +162,13 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 
 ## The groups a killing names, from the words after the verb up to the next
 ## order ("kill the males and take the women" kills the men only). Default men.
-const KILL_VERB:="\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death)"
+const KILL_VERB:="\\b(kill|kil\\b|kiil|rid [\\w' ]{0,24}of|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death)"
 
 ## The words a killing falls on: from the verb up to the next order. "" when
-## no killing is named.
+## no killing is named. The next order starts at its own verb, with or
+## without "and" or a comma: "kill all the males of tsaren take the women and
+## girls to seanstone and burn tsaren" kills the men only.
+const NEXT_ORDER:="\\b(then|and then|take|bring|carry|drive|lead|send|march|haul|herd|burn|raze|torch|set fire|spare|free|release|let|leave|keep|hold|bind|tie|round up|enslave|make|give|loot|plunder|sack|strip|rebuild|govern|rule)\\b"
 static func kill_span(lower:String)->String:
 	var m:=_re(KILL_VERB,lower)
 	if m==null: return ""
@@ -163,7 +177,27 @@ static func kill_span(lower:String)->String:
 	for stop in [" and take"," and bring"," and burn"," and carry"," and drive"," and lead"," and send"," and march"," then ",",",".",";","!"]:
 		var at:=span.find(stop)
 		if at>0 and at<cut: cut=at
-	return span.substr(0,cut)
+	# The next order's own verb, past the killing's words ("put ... to the
+	# sword" and "cut down" are the killing itself).
+	var own:=_re(KILL_VERB,span)
+	var from:=own.get_end() if own!=null else 0
+	var r:=RegEx.new(); r.compile(NEXT_ORDER)
+	for hit in r.search_all(span,from):
+		# "the men who take up arms", "those that hold the gate": inside the killing's object.
+		var before:=span.substr(0,hit.get_start()).strip_edges()
+		if before.ends_with(" who") or before.ends_with(" that") or before.ends_with(" which") or before.ends_with(" to"): continue
+		if hit.get_start()<cut: cut=hit.get_start()
+		break
+	return span.substr(0,cut).strip_edges()
+
+## The groups a killing's own words name, [] when they name none ("kill
+## them", "kill everyone"): kill_groups without its default of the men.
+static func named_kill_groups(lower:String)->Array:
+	var m:=_re(KILL_VERB,lower)
+	if m==null: return []
+	var span:=kill_span(lower).replace("old men","old ones")
+	if not _has("\\b(men|males|menfolk|husbands|fathers|sons|fighting men|grown men|every man|women|womenfolk|females?|wives|mothers|children|boys|girls|daughters|young ones|babies|infants|elders|old people|old ones|old women)\\b",span): return []
+	return kill_groups(lower)
 
 static func kill_groups(lower:String)->Array:
 	var m:=_re(KILL_VERB,lower)
@@ -260,7 +294,21 @@ static func implicit(fate:Dictionary,lower:String)->bool:
 	return _has(TOWN_REF,lower)
 
 
-static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Dictionary={})->Dictionary:
+static func honour_words(fate:Dictionary)->Dictionary:
+	## The ruler's own words over any reading's flags: when the words name who
+	## is to die ("kill all the women of Tsaren") and do not say everyone, a
+	## "kill everyone" from elsewhere (a live reader's kill_all) is those
+	## groups, never the whole town.
+	var named:Array=fate.get("kill_named",[]) if fate.get("kill_named") is Array else []
+	if not bool(fate.get("kill_all",false)) or bool(fate.get("kill_all_words",false)) or named.is_empty(): return fate
+	var out:=fate.duplicate(true)
+	out.erase("kill_all")
+	if named!=["men"]: out["kill_groups"]=named.duplicate()
+	else: out.erase("kill_groups")
+	return out
+
+static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dictionary={})->Dictionary:
+	var fate:=honour_words(fate_in)
 	var world:Variant=WorldSimulation.world
 	var mc:Variant=WorldSimulation.military
 	if world==null or mc==null: return {"error":"Nobody holds that town for us."}

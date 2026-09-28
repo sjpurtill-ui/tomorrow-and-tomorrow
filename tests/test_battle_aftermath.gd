@@ -194,7 +194,10 @@ func test_the_court_reads_captive_and_spoils_orders()->void:
 	assert_bool(bool(free.standing)).is_false()
 	var done:=WO.perform(free)
 	assert_str(String(done.verdict)).is_equal("fate")
-	assert_str(String(done.says)).is_equal("Twelve captives set free.")
+	# What was done, then who they were (from the fight's own record).
+	assert_str(String(done.says)).starts_with("Twelve captives set free.")
+	assert_str(String(done.says)).contains("They were the Esurai we took")
+	assert_str(String(done.outcome)).is_equal("Twelve captives set free.")
 	var standing:=WO.read("From now on, give the spoils to the warriors")
 	assert_str(String(standing.part)).is_equal("spoils")
 	assert_str(String(standing.policy)).is_equal("reward troops")

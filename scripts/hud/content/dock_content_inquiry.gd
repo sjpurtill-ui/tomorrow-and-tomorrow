@@ -51,27 +51,30 @@ func tab(sub:int)->Dictionary:
 	var observers:=int(summary.get("researchers",0))
 	var science:=Indicators.science()
 	var emphasis_total:=int(summary.get("emphasis_total",0))
-	var lines:=int(summary.get("active_lines",0))
+	# Questions, not lines of attention: two lines on one question count once,
+	# the same as the cards. Only the board refreshes the lines' questions.
+	var investigations:Array=DiscoverySystem.active_investigation_records() if sub==0 else []
+	var questions:=investigations.size() if sub==0 else _questions_under_way()
 	var established_threads:=DiscoverySystem.established_knowledge_threads()
 	var established:=established_threads.size()
 	var kpis:Array=[
 		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":preload("res://scripts/hud/production_plain.gd").number(float(science.capacity)) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"about %s people at it" % preload("res://scripts/hud/production_plain.gd").number(float(science.minds)) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"People at learning, weighted by how well they were taught."},
 		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"How well what is known is kept and passed on."},
 		{"label":"FIELDS WATCHED","value":str(emphasis_total),"delta":"steps of attention","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"All the attention you have given out across the fields; each field gets its share of the people"},
-		{"label":"BEING LEARNED","value":str(lines),"delta":"questions","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now"},
+		{"label":"BEING LEARNED","value":str(questions),"delta":"question" if questions==1 else "questions","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now"},
 		{"label":"THINGS WE KNOW","value":str(established),"delta":"kinds of knowledge","accent":Tokens.GREEN,"tip":"Each is one body of knowledge, with the tests and refinements that followed it"},
 	]
 	var brief:Dictionary
 	if observers==0:
 		brief={"tone":"warn","title":"No one is set to learning","why":"Local leaders decide who works at learning. Ask them for more hands on learning.","action_label":"Who does the work","on_action":func():_open_report("RESEARCH WORK",_research_work_report)}
-	elif lines==0:
+	elif questions==0:
 		brief={"tone":"warn","title":"No question is being worked on","why":"Attention alone is not enough: the people need clues and earlier knowledge first. Open a field to see what it is waiting for."}
 	else:
 		brief={"tone":"info","title":"The people are learning","why":"What they find first depends on clues, place, what they already know, and luck."}
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board(),_artifact_study_block()]}
+	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board(investigations),_artifact_study_block()]}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
@@ -322,11 +325,17 @@ func _research_work_report()->Dictionary:
 	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
 	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people work at learning now. The local leader shares out their time with food, water and other needs, and is putting extra hands on %s."%[int(GameState.population_allocations.get("Knowledge",0)),String({"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up"}.get(String(state.get("focus","")),"everyday needs"))]},{"type":"actions","items":[{"label":"More hands on learning","sub":"Not while the place is occupied" if occupied else "Ask the leader to move some people to learning","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"Let the leader decide","sub":"Not while the place is occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}
 
-func _discovery_board()->Dictionary:
+## Distinct questions the lines of attention hold, read without refreshing them.
+func _questions_under_way()->int:
+	var ids:Dictionary={}
+	for id:Variant in GameState.active_investigations.values():
+		if String(id)!="":ids[String(id)]=true
+	return ids.size()
+
+func _discovery_board(investigations:Array)->Dictionary:
 	var fields:Array=[]
 	var total:=ArtifactCulture.study_weight()
 	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
-	var investigations:=DiscoverySystem.active_investigation_records()
 	for id:String in DOMAIN_COLORS:
 		var weight:=maxi(0,int(GameState.research_allocations.get(id,0)))
 		var count:=0
