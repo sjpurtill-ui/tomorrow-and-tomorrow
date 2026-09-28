@@ -640,7 +640,8 @@ static func _town_line(t:Dictionary,war:bool)->String:
 static func party_words(p:Dictionary)->String:
 	var where:=String(p.get("heading",""))
 	var toward:=("to the "+where) if where!="" else ("toward "+String(p.get("toward",""))) if String(p.get("toward",""))!="" else "out"
-	return "%d scouts %s, out %d days, back in about %d" % [int(p.get("scouts",0)),toward,int(p.get("out_days",0)),int(p.get("back_in",0))]
+	var out_days:=int(p.get("out_days",0))
+	return "%d scouts %s, %s, back in about %d days" % [int(p.get("scouts",0)),toward,"setting out today" if out_days<=0 else ("out a day" if out_days==1 else "out %d days" % out_days),int(p.get("back_in",0))]
 
 ## One town in plain words: "Tsaren (Esurai), about 22 km west".
 static func town_way_words(t:Dictionary)->String:

@@ -341,6 +341,9 @@ static func _name_keys(e:Dictionary)->Array[String]:
 	# Given name, a one-word byname, or the whole epithet; never "who" or "the"
 	# out of "Oren Who Found the Ford" (era_names.gd).
 	keys.append_array(preload("res://scripts/era_names.gd").name_keys(String(e.name)))
+	# "Aro of Seanstone" answers to Aro, never to every word about Seanstone.
+	var home:=String(GameState.settlement_name).to_lower()
+	if home!="": keys.erase(home)
 	return keys
 
 static func _title_keys(e:Dictionary)->Array[String]:
@@ -1304,10 +1307,17 @@ static func _known_act(id:String,audience:Dictionary,r:Dictionary,verb:String,ta
 	if not bool(done.get("ok",false)): return _fallback(id,r,"")
 	r.executed=true
 	r.stage=String(KNOWN_STAGE.get(verb,"none"))
+	# The god's fire has no old keeper to take the marks from: they are honoured.
+	if action in ["make_priest","exalt"]: r.stage="raise"
 	if verb=="maim": r["harm"]=String(params.get("harm","mutilate"))
 	r.removed=verb in ["kill","exile"]
 	r.reaction="furious" if verb in ["kill","exile","maim","terrify","curse","detain"] else ("delighted" if verb in ["bless","raise","boon","give","appoint"] else "neutral")
-	r.outcome=("" if here else "%s was brought in under guard from %s. " % [name,String(p.get("village","their hearth"))])+String(done.get("outcome",""))
+	var said:=String(done.get("outcome",""))
+	if not here:
+		# Not before the god: brought in under guard, then it is done.
+		var rest:=said.trim_prefix(name+" ")
+		said=("%s was brought in under guard from %s and %s" % [name,String(p.get("village","their hearth")),rest.trim_prefix("was ")]) if rest!=said and rest.begins_with("was ") else "%s was brought in under guard from %s. %s" % [name,String(p.get("village","their hearth")),said]
+	r.outcome=said
 	r["known"]=String(ref.id)
 	r.witness_ids=_witness_ids(id,[])
 	if bool(done.get("conclude",false)) or (here and r.removed): r.terminal=true
@@ -2003,9 +2013,12 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 			sent2=CivilizationSystem.dispatch_scouts(days,"open_world",heading,0,false,"",reckless)
 			if not sent2.has("error"): break
 		if sent2.has("error"): return _order(id,audience,r,actor,text,context,String(sent2.error))
-		r.outcome="A scouting party sets out%s at your word%s. %s" % [" to the "+heading if heading!="" else ""," under "+who if who!="" else "",String(sent2.get("message","")).get_slice(".",0)+"."]
+		# The party as it really left: how many, which way, how long (the mission record).
+		var party:Dictionary=CivilizationSystem.scout_missions[-1] if not CivilizationSystem.scout_missions.is_empty() else {}
+		var scouts:=int(party.get("personnel",0))
+		var away:=maxi(1,int(party.get("actual_return_day",party.get("return_day",0)))-int(GameState.elapsed_days))
+		r.outcome="A scouting party%s sets out%s at your word%s; they should be back in about %d days." % [(" of %d" % scouts) if scouts>0 else ""," to the "+heading if heading!="" else ""," under "+who if who!="" else "",away]
 		if reckless:
-			var party:Dictionary=CivilizationSystem.scout_missions[-1] if not CivilizationSystem.scout_missions.is_empty() else {}
 			r.outcome+=" You have told them not to turn back; the Chief Scout judges that %s." % ScoutSurvival.odds_phrase({"death_chance":float(party.get("field_death_chance",0.0))})
 	if int(actor.get("person_id",0))>0:
 		GovernmentPeopleSystem.adjust_person_bonds(int(actor.person_id),{"obligation":0.02,"respect":0.01})
@@ -2303,7 +2316,8 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	# through the great works themselves; the standing order keeps only its
 	# first month of marking out (order_great_work.gd).
 	var work:Dictionary=preload("res://scripts/order_great_work.gd").start_from_order(text,order_id) if not law else {}
-	if bool(work.get("started",false)): outcome=String(work.get("line",""))
+	# (The builder's own words; the assessment's reckoning stays on the work's card.)
+	if bool(work.get("started",false)): outcome=String(work.get("line","")).get_slice(" Their chief worry",0).strip_edges()
 	elif bool(work.get("asked",false)) and String(work.get("line",""))!="": outcome+=" "+String(work.line)
 	return {"ok":true,"route":"custom_directive","order_id":order_id,"plan":plan,"applied":applied,"work":work,"outcome":outcome}
 

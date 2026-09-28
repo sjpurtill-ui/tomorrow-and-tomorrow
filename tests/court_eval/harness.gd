@@ -8,8 +8,12 @@ extends RefCounted
 ##   live     a live model stubbed at the transport: the order reader returns
 ##            the case's IDEAL structured reading (order_reader.gd schema) and
 ##            every voice prompt is kept (nothing leaves the machine);
-##   sloppy   grave group orders only: the reader wrongly names the one before
+##   sloppy   grave group orders only (and grave words that are a law at home,
+##            case key sloppy_words): the reader wrongly names the one before
 ##            the ruler as the victim; the guards must still hold.
+## A step that summons someone moves the court into their audience, as the
+## player's screen does; a live model's mapping of words about people (the
+## persons stage) is the step's ideal "persons" action, else plain talk.
 ## Each step is measured before and after (the town's ledger, bands, garrison,
 ## captives, stores, officials, aims, dread, the audience's open question) and
 ## checked against the case's expectations and the standing rules of
@@ -61,7 +65,7 @@ func _init(test_suite:Node)->void:
 # Cases
 # --------------------------------------------------------------------------
 
-const CASE_KEYS:=["id","domain","fixture","speaker","source","sloppy","paths","steps","say","ideal","expect","variants","note","sloppy_expect"]
+const CASE_KEYS:=["id","domain","fixture","speaker","source","sloppy","paths","steps","say","ideal","expect","variants","note","sloppy_expect","sloppy_words"]
 const STEP_KEYS:=["say","ideal","expect","note"]
 const EXPECT_KEYS:=["route","handled","verb","kind","verdict","stage","target","harm_ok","state","reply_has","reply_any","reply_lacks","says_has","says_any","says_lacks","prompt_has","prompt_any","known","asks","aim_ok","allow_stray","allow_done","offline","live","sloppy","when_verdict"]
 const IDEAL_KEYS:=["kind","action","type","ref","actor","details","confidence","clarify","persons"]
@@ -176,7 +180,9 @@ func run(c:Dictionary,path:String)->Dictionary:
 		var expect:Dictionary=_merged(step.get("expect",{}),{})
 		if expect.get(path) is Dictionary: expect=_merged(expect,expect[path])
 		# The sloppy reader only garbles grave orders about many people.
-		var sloppy:=path=="sloppy" and _grave_step(step)
+		# sloppy_words: grave words that are no order about a town ("Execute every
+		# thief", a law): the careless reader still names the one before the ruler.
+		var sloppy:=path=="sloppy" and (_grave_step(step) or bool(c.get("sloppy_words",false)))
 		if sloppy: expect=_sloppy_expect(expect,c)
 		elif path=="sloppy" and expect.get("live") is Dictionary: expect=_merged(expect,expect.live)
 		var before:=measure(w,id)

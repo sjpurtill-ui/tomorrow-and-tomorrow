@@ -342,7 +342,7 @@ static func doing_words(army:Dictionary)->String:
 	var town:=preload("res://scripts/hud/army_marks.gd").place(String(p.get("town","the town")))
 	match String(p.get("state","")):
 		"chasing": return "chasing the %s men who fled" % town
-		"returning": return "returning to %s" % town
+		"returning": return ("marching to join the garrison at %s" if bool((p as Dictionary).get("reinforce",false)) else "returning to %s") % town
 		"home": return "marching home"
 	return ""
 

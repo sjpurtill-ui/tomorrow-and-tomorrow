@@ -1835,7 +1835,7 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 			_importance(p,4.0)
 			_remember(p,"The god made me %s." % priest_word())
 			hand="priest"
-			result.outcome="%s now keeps the god's fire as %s." % [name,priest_word()]
+			result.outcome=("%s is the god's priest now, and keeps the god's fire." if priest_word()=="priest" else "%s keeps the god's fire now, for the whole people.") % name
 		"make_official":
 			return _make_official(audience_id,p,String(params.get("office","")),result,watchers)
 		"marry_off":

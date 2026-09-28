@@ -43,6 +43,8 @@ static func _has(text:String,pattern:String)->bool:
 ## Known commoners listed beside the officials (the one before the god, the
 ## one just named, and the few most recently seen).
 const KNOWN_IN_ROSTER:=6
+## The council's people out of office listed beside the officials.
+const FORMER_IN_ROSTER:=8
 
 static func former_entries(listed:Dictionary)->Array[Dictionary]:
 	## The council's people who hold no office now but whom the god has dealt
@@ -59,8 +61,10 @@ static func former_entries(listed:Dictionary)->Array[Dictionary]:
 		var put_out:=status=="active" and String((p as Dictionary).get("office_key",""))=="" and reason in ["dismissed","arrested","exiled"]
 		if not held and not put_out: continue
 		out.append({"key":"person:%d" % pid,"kind":"former","person_id":pid,"figure_id":"","name":String(p.get("name","")),"title":"held under guard" if held else "once of the council",
-			"office_key":"","settlement_id":"","speaker":false,"present":false,"status":status})
-	return out
+			"office_key":"","settlement_id":"","speaker":false,"present":false,"status":status,"since":int((p as Dictionary).get("removed_day",0))})
+	# The most recent first, a handful at most (the roster stays short).
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.since)>int(b.since))
+	return out.slice(0,FORMER_IN_ROSTER)
 
 static func known_entries(audience:Dictionary)->Array[Dictionary]:
 	## The commoners the court knows by name: the one before the god first,
@@ -284,10 +288,10 @@ static func perform_group(id:String,audience:Dictionary,r:Dictionary,g:Dictionar
 			var place:=(" at "+String(t.name)) if String(t.kind)=="town" else ""
 			match act:
 				"terrify":
-					ForeignDiplomacy.remember(civ_id,"The ruler of %s sent their anger against us: fires on the ridges at night and a warning cried to our herders." % home)
+					ForeignDiplomacy.remember(civ_id,"The ruler of %s proclaimed their anger against us before their whole court, and the word reached every hearth of ours." % home)
 					var rivals:=Hall._rivals()
 					if rivals!=null and not at_war: rivals.call("grudge",civ_id,"how you threatened us for no cause",0.2,"threatened:%s:%d" % [id,Hall._day()])
-					r.outcome="Your anger is carried to the %s%s: %s. Their dread of you rises, and so does their hatred." % [people,place,"our warriors light fires on the ridges above them at night and cry your name down at their herders" if at_war else "word of it goes to them with the herders and traders who pass between us"]
+					r.outcome="You proclaim your anger against the %s%s before the court, and %s. Their dread of you rises, and so does their hatred." % [people,place,"the war carries the word to them" if at_war else "word of it goes to them with the herders and traders who pass between us"]
 				"curse":
 					ForeignDiplomacy.remember(civ_id,"The ruler of %s cursed our people before their whole court." % home)
 					r.outcome="You curse the %s%s before the court, and the curse is carried to them. Their dread of you rises; they will not forget it." % [people,place]
@@ -364,12 +368,24 @@ static func answer_whom(audience:Dictionary,text:String,list:Array[Dictionary],m
 	## After "Whom do you mean?": the words that name them carry the act asked
 	## about ({act, target}); {} when these are other words.
 	var p:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
-	if String(p.get("verb",""))!="divine" or String(p.get("ask",""))!="whom" or Hall._day()-int(p.get("day",-99))>2: return {}
+	var act:=""; var said:=""
+	if String(p.get("verb",""))=="divine" and String(p.get("ask",""))=="whom" and Hall._day()-int(p.get("day",-99))<=2:
+		act=String(p.get("act","terrify")); said=String(p.get("text",""))
+	else:
+		# The live reader asked it (order_reader.gd's own open question).
+		var mine:Dictionary=audience.get("reader_pending",{}) if audience.get("reader_pending") is Dictionary else {}
+		if not mine.is_empty() and Hall._day()-int(mine.get("day",-99))<=2:
+			var asked:=group_act(String(mine.get("text","")),audience,list,mentions)
+			if not asked.is_empty() and String((asked.get("target",{}) as Dictionary).get("kind",""))=="unclear":
+				act=String(asked.act); said=String(mine.get("text",""))
+	if act=="": return {}
 	var lo:=text.strip_edges().to_lower().trim_suffix(".").trim_suffix("!").strip_edges()
 	lo=_re("(?i)^(i mean|i meant|them|the ones|,|\\s)+").sub(lo,"",true).strip_edges()
+	lo=_re("(?i)\\b(of course|obviously|who else|naturally)\\b").sub(lo,"",true).strip_edges().trim_suffix(",").strip_edges()
 	var target:=_group_target(lo,audience)
 	if target.is_empty() or String(target.kind)=="unclear": return {}
-	return {"act":String(p.get("act","terrify")),"target":target,"words":String(p.get("text",""))}
+	audience.erase("reader_pending")
+	return {"act":act,"target":target,"words":said}
 
 # --------------------------------------------------------------------------
 # Laws for our own people
@@ -382,7 +398,7 @@ const CRIME_RE:="(?i)\\b(thie(f|ves)|steal(s|ing|ers?)?|stole|hoard(s|ers?|ing)?
 ## Hard hands a law may lay on them.
 const HARSH_RE:="(?i)\\b(kill|execute|put to death|hang|behead|slay|flog|whip|lash|beat|burn|banish|exile|drive out|cast out|brand|maim|cut off|blind|stone)\\w*\\b"
 ## "Anyone who resists": a garrison's standing word, never a law at home.
-const WAR_CLAUSE:="(?i)\\b(resist|resists|resisted|run|runs|ran|flee|flees|fled|fight|fights|fought|attack|attacks|escape|escapes|escaped|hide|hides|raise|raises|rebel|rebels|refuse|refuses|got away)\\b"
+const WAR_CLAUSE:="(?i)\\b(who|whoever|that|if|when|any who|those who)\\b[\\w' ]{0,16}?\\b(resist|resists|resisted|run|runs|ran|flee|flees|fled|fight|fights|fought|attack|attacks|escape|escapes|escaped|hide|hides|raise|raises|rebel|rebels|refuse|refuses|got away)\\b"
 
 static func law(text:String,list:Array[Dictionary],mentions:Callable)->Dictionary:
 	## {law:true, harsh:bool} for a law for our own people; {} otherwise.
