@@ -246,7 +246,7 @@ func _siege_order(order:String)->void:
 	var result:Dictionary=MilitaryCampaign.siege_order(siege_id,order)
 	feedback.text=String(result.get("error",result.get("message","")))
 	if order=="assault" and not result.has("error"):
-		MilitaryCampaign.active_engagement["awaiting_player_view"]=true;_open_battle();return
+		_open_battle();return
 	_refresh()
 func _result_action()->void:
 	if last_snapshot.get("battle",{}).is_empty() and MilitaryCampaign.recovery.home_unavailable():preload("res://scripts/hud/recovery_screen.gd").open()

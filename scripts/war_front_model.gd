@@ -24,15 +24,27 @@ extends RefCounted
 ## and supply lines ("theatre").
 ##
 ## Pure static helpers over plain data: tests call derive() with positions.
+##
+## Scale: a long front with dozens of hosts and battles stays cheap. The
+## lattice follows the theatre's shape (the long side gets GRID_LONG cells),
+## hosts standing almost on one another act as one source, and each source
+## only touches the cells within its reach.
 
 ## Hard bounds: population changes numbers on a front, never node counts.
 const GRID:=32
-const MAX_FRIENDLY:=12
-const MAX_ENEMY:=24
-const MAX_FRONTS:=6
-const MAX_POINTS:=96
-const MAX_ARROWS:=12
-const MAX_CLASHES:=8
+const GRID_LONG:=48
+const GRID_SHORT:=20
+const MAX_FRIENDLY:=64
+const MAX_ENEMY:=96
+const MAX_FRONTS:=8
+const MAX_POINTS:=128
+const MAX_ARROWS:=24
+const MAX_CLASHES:=24
+const MAX_BATTLES:=32
+## Supply lines from home in a theatre: the farthest hosts only.
+const MAX_SUPPLY:=16
+## Sources nearer than this share of the theatre's scale act as one.
+const MERGE_SIGMA:=0.25
 ## Report age (days) at which an enemy observation has lost most weight.
 const AGE_HALF_LIFE:=45.0
 ## Age beyond which the drawn line is shown as stale.
@@ -111,46 +123,95 @@ static func _reach(source:Dictionary,sigma:float)->float:
 	return sigma*clampf(0.8+0.08*log(strength)/log(10.0),0.8,1.3)
 
 
-## The influence field on a GRID x GRID lattice over the theatre.
+## Sources standing nearer each other than a quarter of the theatre's scale
+## act as one at the front's resolution: their weights add (so coincident
+## sources give the very same field); position, reach and report age are
+## weighted. [[pos, weight, reach, age]].
+static func _merged(sources:Array,is_enemy:bool,sigma:float)->Array:
+	var out:Array=[]
+	var radius:=sigma*MERGE_SIGMA
+	for s in sources:
+		var w:=_weight(s,is_enemy)
+		var r:=_reach(s,sigma)
+		var p:Vector2=s.pos
+		var age:=float(s.get("age_days",0.0)) if is_enemy else 0.0
+		var joined:=false
+		for entry in out:
+			if (entry[0] as Vector2).distance_to(p)<=radius:
+				var before:float=entry[1]
+				var total:=before+w
+				entry[0]=(entry[0] as Vector2)*(before/total)+p*(w/total)
+				entry[2]=(float(entry[2])*before+r*w)/total
+				entry[3]=(float(entry[3])*before+age*w)/total
+				entry[1]=total
+				joined=true; break
+		if not joined: out.append([p,w,r,age])
+	return out
+
+
+## The influence field on a lattice over the theatre: GRID_LONG cells along
+## its long side, proportionally fewer across (never under GRID_SHORT).
+## Each source is laid on the cells within three reaches of it (a separable
+## Gaussian: one multiply-add a cell).
 static func field(friendly:Array,enemy:Array)->Dictionary:
 	var sigma:=_sigma(friendly,enemy)
 	var box:=Rect2((friendly[0].pos as Vector2),Vector2.ZERO)
 	for s in friendly+enemy: box=box.expand(s.pos)
 	box=box.grow(sigma*2.2)
-	var step:=Vector2(box.size.x/float(GRID-1),box.size.y/float(GRID-1))
-	var ours:=PackedFloat32Array(); ours.resize(GRID*GRID)
-	var theirs:=PackedFloat32Array(); theirs.resize(GRID*GRID)
-	var age:=PackedFloat32Array(); age.resize(GRID*GRID)
-	var sources:=[]
-	for s in friendly: sources.append([s,false,_weight(s,false),_reach(s,sigma)])
-	for s in enemy: sources.append([s,true,_weight(s,true),_reach(s,sigma)])
+	var nx:=GRID_LONG; var ny:=GRID_LONG
+	if box.size.x>=box.size.y: ny=clampi(roundi(float(GRID_LONG)*box.size.y/maxf(box.size.x,0.000001)),GRID_SHORT,GRID_LONG)
+	else: nx=clampi(roundi(float(GRID_LONG)*box.size.x/maxf(box.size.y,0.000001)),GRID_SHORT,GRID_LONG)
+	var step:=Vector2(box.size.x/float(nx-1),box.size.y/float(ny-1))
+	var cells:=nx*ny
+	var ours:=PackedFloat32Array(); ours.resize(cells)
+	var theirs:=PackedFloat32Array(); theirs.resize(cells)
+	var aged:=PackedFloat32Array(); aged.resize(cells)
+	var layers:=[[_merged(friendly,false,sigma),false],[_merged(enemy,true,sigma),true]]
+	var ex:=PackedFloat32Array()
+	for layer in layers:
+		var enemy_layer:bool=layer[1]
+		for source in layer[0]:
+			var pos:Vector2=source[0]
+			var weight:float=source[1]
+			var reach:float=source[2]
+			var age:float=source[3]
+			var cut:=reach*3.0
+			var i0:=maxi(0,ceili((pos.x-cut-box.position.x)/step.x)); var i1:=mini(nx-1,floori((pos.x+cut-box.position.x)/step.x))
+			var j0:=maxi(0,ceili((pos.y-cut-box.position.y)/step.y)); var j1:=mini(ny-1,floori((pos.y+cut-box.position.y)/step.y))
+			if i0>i1 or j0>j1: continue
+			var inv:=1.0/(2.0*reach*reach)
+			ex.resize(i1-i0+1)
+			for i in range(i0,i1+1):
+				var dx:=box.position.x+float(i)*step.x-pos.x
+				ex[i-i0]=exp(-dx*dx*inv)
+			for j in range(j0,j1+1):
+				var dy:=box.position.y+float(j)*step.y-pos.y
+				var wy:=weight*exp(-dy*dy*inv)
+				if wy<=weight*0.0001: continue
+				var row:=j*nx
+				if enemy_layer:
+					for i in range(i0,i1+1):
+						var v:=wy*ex[i-i0]
+						theirs[row+i]+=v; aged[row+i]+=v*age
+				else:
+					for i in range(i0,i1+1): ours[row+i]+=wy*ex[i-i0]
 	var max_ours:=0.0
 	var max_theirs:=0.0
-	for j in GRID:
-		for i in GRID:
-			var p:=box.position+Vector2(float(i)*step.x,float(j)*step.y)
-			var f:=0.0; var e:=0.0; var aged:=0.0
-			for entry in sources:
-				var reach:float=entry[3]
-				var d2:=p.distance_squared_to((entry[0] as Dictionary).pos)
-				if d2>reach*reach*9.0: continue
-				var v:=float(entry[2])*exp(-d2/(2.0*reach*reach))
-				if entry[1]:
-					e+=v; aged+=v*float((entry[0] as Dictionary).get("age_days",0.0))
-				else: f+=v
-			var k:=j*GRID+i
-			ours[k]=f; theirs[k]=e; age[k]=aged/e if e>0.0 else 0.0
-			max_ours=maxf(max_ours,f); max_theirs=maxf(max_theirs,e)
-	return {"box":box,"step":step,"sigma":sigma,"ours":ours,"theirs":theirs,"age":age,"max_ours":maxf(max_ours,0.0001),"max_theirs":maxf(max_theirs,0.0001)}
+	var age_field:=PackedFloat32Array(); age_field.resize(cells)
+	for k in cells:
+		max_ours=maxf(max_ours,ours[k]); max_theirs=maxf(max_theirs,theirs[k])
+		if theirs[k]>0.0: age_field[k]=aged[k]/theirs[k]
+	return {"box":box,"step":step,"nx":nx,"ny":ny,"sigma":sigma,"ours":ours,"theirs":theirs,"age":age_field,"max_ours":maxf(max_ours,0.0001),"max_theirs":maxf(max_theirs,0.0001)}
 
 
 static func _sample(values:PackedFloat32Array,f:Dictionary,p:Vector2)->float:
 	var box:Rect2=f.box
 	var step:Vector2=f.step
-	var gx:=clampf((p.x-box.position.x)/step.x,0.0,float(GRID-1)-0.001)
-	var gy:=clampf((p.y-box.position.y)/step.y,0.0,float(GRID-1)-0.001)
+	var nx:=int(f.get("nx",GRID)); var ny:=int(f.get("ny",GRID))
+	var gx:=clampf((p.x-box.position.x)/step.x,0.0,float(nx-1)-0.001)
+	var gy:=clampf((p.y-box.position.y)/step.y,0.0,float(ny-1)-0.001)
 	var i:=int(gx); var j:=int(gy); var tx:=gx-float(i); var ty:=gy-float(j)
-	var a:=values[j*GRID+i]; var b:=values[j*GRID+i+1]; var c:=values[(j+1)*GRID+i]; var d:=values[(j+1)*GRID+i+1]
+	var a:=values[j*nx+i]; var b:=values[j*nx+i+1]; var c:=values[(j+1)*nx+i]; var d:=values[(j+1)*nx+i+1]
 	return lerpf(lerpf(a,b,tx),lerpf(c,d,tx),ty)
 
 
@@ -163,34 +224,37 @@ static func presence(f:Dictionary,p:Vector2)->Vector2:
 static func _contour(f:Dictionary)->Array:
 	var box:Rect2=f.box
 	var step:Vector2=f.step
+	var nx:=int(f.get("nx",GRID)); var ny:=int(f.get("ny",GRID))
 	var ours:PackedFloat32Array=f.ours
 	var theirs:PackedFloat32Array=f.theirs
-	var value:=func(i:int,j:int)->float:
-		# Raw strengths: the stronger side pushes the line toward the weaker.
-		return ours[j*GRID+i]-theirs[j*GRID+i]
-	var point:=func(i:int,j:int)->Vector2:
-		return box.position+Vector2(float(i)*step.x,float(j)*step.y)
-	# Edge keys identify shared crossings so segments chain exactly.
+	# Raw strengths: the stronger side pushes the line toward the weaker.
+	var diff:=PackedFloat32Array(); diff.resize(nx*ny)
+	for k in nx*ny: diff[k]=ours[k]-theirs[k]
+	# Edge keys (integers) identify shared crossings so segments chain exactly:
+	# a horizontal edge from lattice point k is 2k, a vertical one 2k+1.
 	var segments:Array=[]
-	for j in GRID-1:
-		for i in GRID-1:
-			var corners:=[[i,j],[i+1,j],[i+1,j+1],[i,j+1]]
-			var values:=[]
-			for c in corners: values.append(value.call(c[0],c[1]))
+	for j in ny-1:
+		for i in nx-1:
+			var k:=j*nx+i
+			var v0:=diff[k]; var v1:=diff[k+1]; var v2:=diff[k+nx+1]; var v3:=diff[k+nx]
+			var s0:=v0>0.0
+			if s0==(v1>0.0) and s0==(v2>0.0) and s0==(v3>0.0): continue
+			var values:=[v0,v1,v2,v3]
+			var corners:=[Vector2i(i,j),Vector2i(i+1,j),Vector2i(i+1,j+1),Vector2i(i,j+1)]
+			var keys:=[k*2,(k+1)*2+1,(k+nx)*2,k*2+1]
 			var crossings:=[]
 			for e in 4:
 				var a:float=values[e]; var b:float=values[(e+1)%4]
 				if (a>0.0)==(b>0.0): continue
-				var ca:Array=corners[e]; var cb:Array=corners[(e+1)%4]
-				var t:=a/(a-b)
-				var pa:Vector2=point.call(ca[0],ca[1]); var pb:Vector2=point.call(cb[0],cb[1])
-				var key:="%d,%d-%d,%d" % ([ca[0],ca[1],cb[0],cb[1]] if (ca[1]*GRID+ca[0])<(cb[1]*GRID+cb[0]) else [cb[0],cb[1],ca[0],ca[1]])
-				crossings.append([key,pa.lerp(pb,t)])
+				var ca:Vector2i=corners[e]; var cb:Vector2i=corners[(e+1)%4]
+				var pa:=box.position+Vector2(float(ca.x)*step.x,float(ca.y)*step.y)
+				var pb:=box.position+Vector2(float(cb.x)*step.x,float(cb.y)*step.y)
+				crossings.append([keys[e],pa.lerp(pb,a/(a-b))])
 			if crossings.size()==2: segments.append([crossings[0],crossings[1]])
 			elif crossings.size()==4:
 				# Saddle: pair by the cell centre's sign.
-				var centre:=(float(values[0])+float(values[1])+float(values[2])+float(values[3]))*0.25
-				if (centre>0.0)==(float(values[0])>0.0):
+				var centre:=(v0+v1+v2+v3)*0.25
+				if (centre>0.0)==(v0>0.0):
 					segments.append([crossings[0],crossings[3]]); segments.append([crossings[1],crossings[2]])
 				else:
 					segments.append([crossings[0],crossings[1]]); segments.append([crossings[2],crossings[3]])
@@ -198,7 +262,7 @@ static func _contour(f:Dictionary)->Array:
 	var by_key:={}
 	for index in segments.size():
 		for end in 2:
-			var key:String=segments[index][end][0]
+			var key:int=segments[index][end][0]
 			if not by_key.has(key): by_key[key]=[]
 			by_key[key].append(index)
 	var used:={}
@@ -216,7 +280,7 @@ static func _contour(f:Dictionary)->Array:
 				if next_index<0: break
 				used[next_index]=true
 				var seg:Array=segments[next_index]
-				var other:Array=seg[1] if String(seg[0][0])==String(tip[0]) else seg[0]
+				var other:Array=seg[1] if int(seg[0][0])==int(tip[0]) else seg[0]
 				if direction==0: line.append(other)
 				else: line.push_front(other)
 		var points:=PackedVector2Array()
@@ -448,3 +512,47 @@ static func arrow_points(arrow_spec:PackedVector2Array,samples:int=16)->PackedVe
 		var t:=float(k)/float(samples)
 		out.append(arrow_spec[0].lerp(arrow_spec[1],t).lerp(arrow_spec[1].lerp(arrow_spec[2],t),t))
 	return out
+
+
+# --- The front giving way -------------------------------------------------------------
+
+## When a battle is won or lost, or a town changes hands, the front surges
+## where it happened and settles where control now lies. A bulge: {pos, dir
+## (unit, world), amp and radius (world), t, dur (seconds)}.
+
+## How far into its surge a bulge is (0 at the start and the end, 1 at the
+## height of it): a smooth swell and settle.
+static func envelope(u:float)->float:
+	if u<=0.0 or u>=1.0: return 0.0
+	var s:=sin(PI*u)
+	return s*s
+
+
+## The displacement of a point of the front by the bulges now running.
+static func bulge_offset(p:Vector2,bulges:Array)->Vector2:
+	var out:=Vector2.ZERO
+	for bulge in bulges:
+		var radius:=maxf(0.000001,float(bulge.radius))
+		var d:=p.distance_to(bulge.pos)/radius
+		if d>3.0: continue
+		var k:=envelope(float(bulge.t)/maxf(0.001,float(bulge.dur)))
+		if k<=0.0: continue
+		out+=(bulge.dir as Vector2)*float(bulge.amp)*k*exp(-d*d)
+	return out
+
+
+## Where on the fronts an event at `at` falls, and which way is forward
+## (toward the enemy) there: {front, index, point, toward} or {} when no
+## front runs within `reach`.
+static func front_at(fronts:Array,at:Vector2,reach:float)->Dictionary:
+	var best:={}
+	var best_d:=reach
+	for f in fronts.size():
+		var points:PackedVector2Array=(fronts[f] as Dictionary).get("points",PackedVector2Array())
+		var toward:PackedVector2Array=(fronts[f] as Dictionary).get("toward",PackedVector2Array())
+		for i in points.size():
+			var d:=points[i].distance_to(at)
+			if d<best_d:
+				best_d=d
+				best={"front":f,"index":i,"point":points[i],"toward":toward[i] if i<toward.size() else Vector2.ZERO}
+	return best
