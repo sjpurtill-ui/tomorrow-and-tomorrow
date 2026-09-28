@@ -4053,7 +4053,7 @@
   "stone_lined_drains": {"path": "res://assets/ui/research/subjects/stone_lined_drains-v1.png", "focus": [0.5, 0.5]},
   "shared_reserve_access_rules": {"path": "res://assets/ui/research/subjects/shared_reserve_access_rules-v1.png", "focus": [0.5, 0.5]},
   "fixed_worker_rations": {"path": "res://assets/ui/research/subjects/fixed_worker_rations-v1.png", "focus": [0.5, 0.5]},
-  "tributary_villages": {"path": "res://assets/ui/research/subjects/tributary_villages-v1.png", "focus": [0.5, 0.5]},
+  "tributary_villages": {"path": "res://assets/ui/research/subjects/tributary_villages-v1.png", "focus": [0.5, 0.35]},
   "barley_beer": {"path": "res://assets/ui/research/subjects/barley_beer-v1.png", "focus": [0.5, 0.5]},
   "dung_cake_fuel": {"path": "res://assets/ui/research/subjects/dung_cake_fuel-v1.png", "focus": [0.5, 0.5]},
   "wedge_and_fire_quarrying": {"path": "res://assets/ui/research/subjects/wedge_and_fire_quarrying-v1.png", "focus": [0.5, 0.5]},
