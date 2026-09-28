@@ -2866,7 +2866,16 @@ func _offices_of(s:Dictionary,member:Dictionary)->Array:
 func court_answer(s:Dictionary,member:Dictionary,player_text:String)->String:
 	if String(s.get("origin",""))!="court" or not CourtAnswers.is_question(player_text): return ""
 	var sheet:=CourtFacts.sheet(_offices_of(s,member))
-	return CourtAnswers.answer(sheet,player_text,_spoken_town(s,sheet))
+	return CourtAnswers.answer(sheet,player_text,_spoken_town(s,sheet),_recent_words(s))
+
+## The audience's last few lines before the ruler's words, as one text (what a
+## bare "how many?" refers back to).
+func _recent_words(s:Dictionary)->String:
+	var lines:Array=((s.get("audience",{}) as Dictionary).get("lines",[])) if s.get("audience") is Dictionary else []
+	var out:PackedStringArray=PackedStringArray()
+	for i in range(maxi(0,lines.size()-4),lines.size()):
+		if lines[i] is Dictionary: out.append(String((lines[i] as Dictionary).get("text","")))
+	return " ".join(out)
 
 ## The town last named in this audience (by anyone), among the sheet's towns.
 func _spoken_town(s:Dictionary,sheet:Dictionary)->String:

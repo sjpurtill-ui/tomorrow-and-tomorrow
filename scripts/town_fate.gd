@@ -99,7 +99,7 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	## What the god's words decide about a town we hold. {} when nothing.
 	var out:={}
 	var home:=home_name.to_lower().strip_edges() if home_name!="" else String(WorldSimulation.state.settlement_name).to_lower() if WorldSimulation.state!=null else ""
-	var kill:=_has("\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
+	var kill:=_has("\\b(kill|kil\\b|kiil|rid [\\w' ]{0,24}of [\\w' ]{0,24}\\b(men|males|menfolk|man|people|souls?)\\b|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death|no quarter)",lower)
 	var everyone:=_has("\\b(everyone|everybody|every soul|every one of them|all of them|them all|man, woman and child|men, women and children|women and children too|leave none|nobody alive|no one alive)\\b",lower)
 	var people:=_has("\\b(women|womenfolk|females?|girls|wives|daughters|children|captives?|slaves?|bondservants?|young ones|people|residents|families|them|villagers|townsfolk|townspeople|inhabitants)\\b",lower)
 	var carry:=_has("\\b(take|bring|carry|lead|drive|march|send|haul|herd|move|settle|resettle)\\b",lower)
@@ -138,7 +138,7 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if _has("\\b(tribute|plunder|loot|sack it|take their (food|grain|stores|goods)|strip (it|the town|them|their stores))\\b",lower): out["tribute"]=true
 	if _has("\\b(spare|mercy|merciful|leave them (be|in peace)|let them (be|live)|no harm|harm no one|treat them (well|kindly|gently)|be gentle)\\b",lower) and not kill: out["spare"]=true
 	if _has("\\b(hold|keep|garrison|govern|rule) (it|the town|the place|them|the ruins?)\\b",lower): out["hold"]=true
-	if _has("\\b(give it back|hand it back|(give|hand) [\\w' ]{1,20} back|return it|leave it|withdraw|come home|pull out|abandon|let them have it back)\\b",lower) and not out.has("hold"): out["leave"]=true
+	if _has("\\b(give it back|hand it back|(give|hand) [\\w' ]{1,20} back|return it|leave it|withdraw|come home|pull out|abandon|let them have it back|leave [\\w' ]{1,24}? to (its|their) (own )?(people|folk|elders|kin|chiefs?)|give (it|the town|the place|the village) up|give up (the town|the place|the village)|evacuate)\\b",lower) and not out.has("hold"): out["leave"]=true
 	if _has("\\b(rebuild|repair|reconstruct|build it (up|again))\\b",lower) and not out.has("raze"): out["reconstruct"]=true
 	if _has("\\b(strengthen|reinforce|more (soldiers|fighters|men|spears) (to|in|at|for)|send more|add [\\w' ]{0,12}to the garrison|bigger garrison)\\b",lower): out["reinforce"]=true
 	if _has("\\b(free|release|emancipate|unbind) (the )?(captives|slaves|bonded)",lower) and not kill: out["free"]=true
@@ -151,10 +151,13 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 
 ## The groups a killing names, from the words after the verb up to the next
 ## order ("kill the males and take the women" kills the men only). Default men.
-const KILL_VERB:="\\b(kill|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death)"
+const KILL_VERB:="\\b(kill|kil\\b|kiil|rid [\\w' ]{0,24}of|slay|slaughter|massacre|butcher|execute|cut down|put [\\w' ]{0,24}to the sword|put [\\w' ]{0,24}to death)"
 
 ## The words a killing falls on: from the verb up to the next order. "" when
-## no killing is named.
+## no killing is named. The next order starts at its own verb, with or
+## without "and" or a comma: "kill all the males of tsaren take the women and
+## girls to seanstone and burn tsaren" kills the men only.
+const NEXT_ORDER:="\\b(then|and then|take|bring|carry|drive|lead|send|march|haul|herd|burn|raze|torch|set fire|spare|free|release|let|leave|keep|hold|bind|tie|round up|enslave|make|give|loot|plunder|sack|strip|rebuild|govern|rule)\\b"
 static func kill_span(lower:String)->String:
 	var m:=_re(KILL_VERB,lower)
 	if m==null: return ""
@@ -163,7 +166,18 @@ static func kill_span(lower:String)->String:
 	for stop in [" and take"," and bring"," and burn"," and carry"," and drive"," and lead"," and send"," and march"," then ",",",".",";","!"]:
 		var at:=span.find(stop)
 		if at>0 and at<cut: cut=at
-	return span.substr(0,cut)
+	# The next order's own verb, past the killing's words ("put ... to the
+	# sword" and "cut down" are the killing itself).
+	var own:=_re(KILL_VERB,span)
+	var from:=own.get_end() if own!=null else 0
+	var r:=RegEx.new(); r.compile(NEXT_ORDER)
+	for hit in r.search_all(span,from):
+		# "the men who take up arms", "those that hold the gate": inside the killing's object.
+		var before:=span.substr(0,hit.get_start()).strip_edges()
+		if before.ends_with(" who") or before.ends_with(" that") or before.ends_with(" which") or before.ends_with(" to"): continue
+		if hit.get_start()<cut: cut=hit.get_start()
+		break
+	return span.substr(0,cut).strip_edges()
 
 static func kill_groups(lower:String)->Array:
 	var m:=_re(KILL_VERB,lower)

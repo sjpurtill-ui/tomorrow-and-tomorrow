@@ -15,6 +15,7 @@ extends Node
 ##      [--highest] (the highest ground within ~1,500 km: a mountain range, charted)
 ##      [--population=n] [--villages=n] (the home's people; villages of ours round it)
 ##      [--marsh] (the nearest wet meadows, charted)
+##      [--strangers=n] (n strangers' towns seen near home, the last burned)
 ##      [--sweep] (after the captures: frame times while stepping through the
 ##       distance levels and panning at the Region level, GPU included)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
@@ -146,6 +147,8 @@ func _ready()->void:
 	for argument in args:
 		# `--villages=n`: n villages of ours round home, as a grown people has.
 		if argument.begins_with("--villages="):_seed_villages(int(argument.trim_prefix("--villages=")))
+		# `--strangers=n`: n strangers' towns seen near home (the last burned).
+		elif argument.begins_with("--strangers="):_seed_strangers(int(argument.trim_prefix("--strangers=")))
 	if "--marsh" in args:
 		# Look at the nearest wet meadows instead (charted for this capture):
 		# they lie along the great river, a few kilometres out from its banks.
@@ -441,6 +444,42 @@ func _seed_villages(count:int)->void:
 		WorldSimulation.state.player_settlements.append(record)
 		placed+=1
 	print("MAP_ART_CAPTURE: seeded ",placed," villages")
+
+## `--strangers=n`: strangers' towns our scouts have seen, set 25-50 km round
+## home on dry land, the last of them burned out (a fixture only).
+func _seed_strangers(count:int)->void:
+	if CivilizationSystem.civilizations.is_empty():CivilizationSystem.initialize()
+	# Strangers found their towns years in: found each people's chief town now.
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		for region:Dictionary in civ.strategic_regions:
+			if String(region.get("role",""))=="capital":region["settlement_founded"]=true
+	var intel=CivilizationSystem.city_intelligence
+	print("MAP_ART_CAPTURE: peoples=",CivilizationSystem.civilizations.size()," sites=",intel.sites(false).size())
+	for civ:Dictionary in CivilizationSystem.civilizations:civ.player_relation.contact_level=2
+	var home:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var day:=int(GameState.elapsed_days)
+	var placed:=0
+	for site:Dictionary in intel.sites(false):
+		if placed>=count:break
+		var at:=Vector2.INF
+		for attempt in 16:
+			var angle:=TAU*(float(placed)/float(maxi(count,1))+float(attempt)*0.07)+0.9
+			var candidate:=home+Vector2(cos(angle),sin(angle))*(28.0+float(attempt%4)*6.0)
+			if terrain._height_at(candidate.x,candidate.y)>0.08:at=candidate;break
+		if at==Vector2.INF:continue
+		var observation:Dictionary=intel.capture("player",String(site.city_id),.85,day,"Scout report","capture")
+		observation.position={"x":at.x,"z":at.y}
+		# The first is a grown walled city, the second a market town.
+		var report:={"observed_day":day,"quality":.85,"source":"Scout report","reference":"capture"}
+		if placed==0:
+			observation.fields["population"]=report.merged({"low":14000.0,"high":18000.0})
+			observation.fields["fortification"]=report.merged({"low":.6,"high":.75})
+		elif placed==1:
+			observation.fields["population"]=report.merged({"low":2500.0,"high":3500.0})
+		if placed==count-1 and count>1:observation.fields["damage"]=report.merged({"low":.7,"high":.85})
+		intel.publish("player",observation,day+1)
+		placed+=1
+	print("MAP_ART_CAPTURE: seeded ",placed," strangers' towns")
 
 ## Wet meadows beside the world river, walking its course from `center`.
 func _find_marsh(center:Vector3)->Vector3:

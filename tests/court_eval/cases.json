@@ -195,7 +195,8 @@
    "note": "Right after Rovik's report that the men are bound.",
    "say": "How many is there number?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_has": ["{bound_men}"], "prompt_has": ["{bound_men} bound"]}},
+   "expect": {"handled": false, "known": true, "reply_has": ["{bound_men}"], "prompt_has": ["{bound_men} bound"]},
+   "variants": ["how many are they"]},
 
   {"id": "facts.bound_no.rovik", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "rovik", "source": "user",
    "say": "No, how many of the men of Tsaren are bound!?",
@@ -502,6 +503,12 @@
    "ideal": {"kind": "question", "action": "none", "type": "none"},
    "expect": {"handled": false, "known": true, "reply_any": ["2"], "prompt_has": ["our dead 2"]}},
 
+  {"id": "facts.ford_lost.headman", "domain": "captives", "fixture": "battle_won", "speaker": "headman", "source": "design",
+   "note": "Everyone has heard who won at the ford; the count of the dead is the war leader's, and the headman says so instead of a stock line or a wrong count.",
+   "say": "How many did we lose at the ford?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["won", "war leader"], "reply_lacks": ["We number", "not in my count"], "prompt_has": ["the ford: we won"]}},
+
   {"id": "aim.conquer_now", "domain": "aim", "fixture": "aim_suri", "speaker": "aim", "source": "user",
    "note": "An order in an aim audience goes to the war path now, never into a generation's aim.",
    "say": "Go and conquer Tsaren right now",
@@ -686,6 +693,36 @@
    "ideal": {"kind": "order", "action": "exile", "type": "person", "ref": "$imeri", "confidence": 0.95},
    "expect": {"harm_ok": true, "verb": "exile", "target": "imeri"}},
 
+  {"id": "person.kill_unknown_name", "domain": "person_acts", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "A name nobody at court knows: said plainly, and the one spoken to is never the victim.",
+   "say": "Kill Tavo",
+   "ideal": {"kind": "order", "action": "kill", "type": "person", "ref": "", "confidence": 0.5, "clarify": "Nobody at court is called Tavo. Whom do you mean?"},
+   "expect": {"state": {"officials": "==before", "status_headman": "==before"}, "reply_has": ["Tavo"]},
+   "variants": ["Execute Tavo now!", "kill tavo"]},
+
+  {"id": "person.kill_rovik.band_home", "domain": "person_acts", "fixture": "war_not_held", "speaker": "headman", "source": "design",
+   "note": "The war leader of renown is not before the ruler: named, he is brought in and it is done to him, never to the Headman; his band gets a new leader.",
+   "say": "Kill Rovik",
+   "ideal": {"kind": "order", "action": "kill", "type": "person", "ref": "$rovik", "confidence": 0.95},
+   "expect": {"harm_ok": true, "verb": "kill", "target": "rovik", "state": {"status_rovik": "=='dead'", "status_headman": "==before", "officials": "==before"}},
+   "variants": ["Put Rovik to death", "Have Rovik Longstride executed"]},
+
+  {"id": "person.chains_imeri.absent", "domain": "person_acts", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "say": "Put Imeri in chains",
+   "ideal": {"kind": "order", "action": "detain", "type": "person", "ref": "$imeri", "confidence": 0.95},
+   "expect": {"harm_ok": true, "verb": "detain", "target": "imeri", "state": {"status_imeri": "!=before", "status_suri": "==before"}}},
+
+  {"id": "person.honour_rovik", "domain": "person_acts", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "say": "Honour Rovik",
+   "ideal": {"kind": "order", "action": "raise", "type": "person", "ref": "$rovik", "confidence": 0.9},
+   "expect": {"verb": "raise", "target": "rovik", "state": {"status_rovik": "==before", "status_headman": "==before"}}},
+
+  {"id": "person.relieve_rovik", "domain": "person_acts", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "A war leader relieved of command: the next war leader takes his band and garrison; nobody is harmed.",
+   "say": "Relieve Rovik of his command",
+   "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$rovik", "confidence": 0.9},
+   "expect": {"verb": "demote", "target": "rovik", "state": {"status_rovik": "==before", "garrison": "==before"}}},
+
   {"id": "q.food_days.headman", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "How many days of food do we have?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
@@ -775,7 +812,14 @@
   {"id": "q.at_war.headman", "domain": "office_questions", "fixture": "war_not_held", "speaker": "headman", "source": "design",
    "say": "Are we at war with anyone?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["At war with: Esurai"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["At war with: Esurai"]},
+   "variants": ["are we at war with anyone", "Kishan, who are we at war with"]},
+
+  {"id": "q.last_fight.suri", "domain": "office_questions", "fixture": "battle_won", "speaker": "suri", "source": "design",
+   "note": "The war leader tells the whole fight: who won, the dead on each side, the captives and the spoils.",
+   "say": "Who won the last fight?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["won", "14", "12 captives"], "prompt_has": ["captives taken 12"]}},
 
   {"id": "q.warriors_home.suri", "domain": "office_questions", "fixture": "war_not_held", "speaker": "suri", "source": "design",
    "say": "How many warriors are at home?",
@@ -864,6 +908,48 @@
   {"id": "truth.bound.headman", "domain": "one_truth", "fixture": "old_build_bound", "speaker": "headman", "source": "design",
    "say": "How many men of Tsaren are bound?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false}}
+   "expect": {"handled": false}},
+
+  {"id": "truth.attack_unguarded.suri", "domain": "one_truth", "fixture": "old_build_bound", "speaker": "suri", "source": "design",
+   "note": "Tsaren is ours with nobody of ours in it: no march on our own town, and the truth about who holds it.",
+   "say": "Attack Tsaren",
+   "ideal": {"kind": "order", "action": "attack", "type": "town", "ref": "$tsaren", "confidence": 0.9},
+   "expect": {"verb": "war", "state": {"moving": "==before", "to_tsaren": "==before"}, "says_lacks": ["hold no town"], "offline": {"says_any": ["none of our fighters", "nobody of ours"]}}},
+
+  {"id": "captives.none_to_kill", "domain": "captives", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "No fight has left captives in our hands: said plainly, never a standing order, never anyone in the hall.",
+   "say": "Put the prisoners to death",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.8},
+   "expect": {"verb": "war", "kind": "captives", "state": {"modifiers": "==before", "officials": "==before"}}},
+
+  {"id": "captives.execute.headman", "domain": "captives", "fixture": "battle_won", "speaker": "headman", "source": "design",
+   "note": "Said to the Headman: the captives' fate through the war leader, never a hand on the Headman.",
+   "say": "Put the captives to death",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='execute'", "status_headman": "==before"}}},
+
+  {"id": "grave.kill_then_take.no_comma", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+   "note": "No commas: each clause's group goes only with its own verb; the women are taken, never killed.",
+   "say": "kill the men of tsaren then take the women home",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "captives": true, "destination": "$home"}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_men": ">0", "killed_women": "==0", "killed_children": "==0", "taken_women": ">0"}},
+   "variants": ["kill all the men bring the women and children back to seanstone", "Put the men of Tsaren to the sword take their wives home"]},
+
+  {"id": "war.send_them_after_objection", "domain": "war_march", "fixture": "war_not_held", "speaker": "suri", "source": "design",
+   "note": "The war leader objects (too few); SEND THEM! overrides it and the few march.",
+   "steps": [
+    {"say": "Attack Eldwick with 3 troops", "ideal": {"kind": "order", "action": "attack", "type": "town", "ref": "$eldwick", "details": {"count": 3}, "confidence": 0.9},
+     "expect": {"verb": "war", "verdict": "object", "state": {"to_eldwick": "==before"}}},
+    {"say": "SEND THEM!", "ideal": {"kind": "order", "action": "confirm"},
+     "expect": {"verb": "war", "verdict": "act", "state": {"to_eldwick": ">0", "modifiers": "==before"}}}],
+   "variants": [{"say": "go ahead"}, {"say": "Send them anyway"}]},
+
+  {"id": "follow.do_it_after_council_order", "domain": "followups", "fixture": "home_peace", "speaker": "kavu", "source": "design",
+   "note": "An order already taken up by the council: 'Do it!' never makes a second standing order named after the words.",
+   "steps": [
+    {"say": "Store more grain for the winter", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+     "expect": {"state": {"modifiers": ">before"}}},
+    {"say": "Do it!", "ideal": {"kind": "order", "action": "confirm"},
+     "expect": {"state": {"modifiers": "==before"}}}]}
  ]
 }
