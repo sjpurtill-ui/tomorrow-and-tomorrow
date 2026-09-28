@@ -958,14 +958,19 @@ func _speak()->void:
 				_refresh_footer()
 				return
 	# Words about people, with a live voice: one call maps them onto the
-	# persons engine's actions (ask, summon, question, accuse, judge).
+	# persons engine's actions (ask, summon, question, accuse, judge). The
+	# order reader reads them first, so an order that only happens to hold
+	# "who" or "bring" ("Chase the men who fled Tsaren", "always bring captives
+	# home") goes to the engine as the order it is; talk about people goes on
+	# to the persons engine (_after_order_reading).
 	var typed:=Persons.typed_action(text) if resolved_result.is_empty() and String(Hall.find(audience_id).get("origin",""))=="court" else {}
+	var persons_words:=false
 	if resolved_result.is_empty() and _persons_live() and String(Hall.find(audience_id).get("origin",""))=="court" and not voice.busy(audience_id) and not _about_held_town(text):
-		var about_people:=not Persons.speaker_known(audience_id).is_empty() or not typed.is_empty()
-		if not about_people:
+		persons_words=not Persons.speaker_known(audience_id).is_empty() or not typed.is_empty()
+		if not persons_words:
 			var re:=RegEx.new();re.compile(PERSONS_WORDS)
-			about_people=re.search(text)!=null
-		if about_people:
+			persons_words=re.search(text)!=null
+		if persons_words and not (voice.has_method("read_order") and bool(voice.is_live())):
 			voice.persons_turn(audience_id,text)
 			_pump()
 			return
@@ -981,12 +986,17 @@ func _speak()->void:
 	# Any failure or timeout falls back to the offline reading below.
 	if resolved_result.is_empty() and _voice_ok() and voice.has_method("read_order") and bool(voice.is_live()) and not voice.busy(audience_id):
 		var id:=audience_id
+		var about_people:=persons_words
 		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
-		if bool(voice.read_order(audience_id,text,func(read:Dictionary)->void:_after_order_reading(id,text,read))):
+		if bool(voice.read_order(audience_id,text,func(read:Dictionary)->void:_after_order_reading(id,text,read,about_people))):
 			_pump()
 			_refresh_footer()
 			return
 		_unecho(text)
+		if persons_words:
+			voice.persons_turn(audience_id,text)
+			_pump()
+			return
 	_speak_rest(text)
 
 ## Words about what becomes of a town we hold or its people: the war
@@ -995,8 +1005,10 @@ func _about_held_town(text:String)->bool:
 	var kind:=String(WarOrders.read(text,String(Hall.find(audience_id).get("civ_id","")),audience_id).get("kind",""))
 	return kind in ["measure","town_word","fate","which_town","measure_drop"]
 
-## The order reader answered (or failed): act on its plan.
-func _after_order_reading(id:String,text:String,read:Dictionary)->void:
+## The order reader answered (or failed): act on its plan. about_people: the
+## words speak of people (who, summon, bring...); what the reader reads as an
+## order the engine carries goes to the engine, the rest to the persons engine.
+func _after_order_reading(id:String,text:String,read:Dictionary,about_people:bool=false)->void:
 	if is_queued_for_deletion() or id!=audience_id or not resolved_result.is_empty():return
 	var plan:Dictionary={}
 	if read.has("reading"):plan=OrderReader.decide(id,text,read.reading as Dictionary)
@@ -1004,6 +1016,13 @@ func _after_order_reading(id:String,text:String,read:Dictionary)->void:
 	if plan.is_empty():plan={"route":"legacy"}
 	var route:=String(plan.get("route","legacy"))
 	if route=="speak" and not civic_settlement.is_empty() and not text.ends_with("?"):route="legacy"
+	if about_people and _voice_ok() and voice.has_method("persons_turn") and (route=="speak" or (route=="legacy" and _persons_take(text))):
+		# Talk about people, or a summons: the persons engine answers (it shows
+		# the ruler's words itself).
+		if bool(plan.get("clear_pending",false)):Hall.find(id).erase("reader_pending")
+		_unecho(text)
+		voice.persons_turn(id,text)
+		_pump();return
 	match route:
 		"engine","clarify":
 			var done:=OrderReader.carry_out(id,text,plan,{"terrain":terrain,"civic_settlement":civic_settlement})
@@ -1021,6 +1040,22 @@ func _after_order_reading(id:String,text:String,read:Dictionary)->void:
 			_pump();return
 	_unecho(text)
 	_speak_rest(text)
+
+## Words about people that are no order the engine acts on (the reader left
+## them to the old path, or failed): the persons engine's. An order of war, a
+## town's people, the captives, or harm to a people stays with the engine.
+const PERSONS_VERBS:="(?i)\\b(who|whom|whose|summon|fetch|send for|call for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|confess|tell me (of|about)|where were you|mercy|pardon|exalt|curse|marry|priest)\\b"
+func _persons_take(text:String)->bool:
+	if not Persons.typed_action(text).is_empty(): return true
+	var civ:=String(Hall.find(audience_id).get("civ_id",""))
+	if not WarOrders.read(text,civ,audience_id).is_empty(): return false
+	var captive:=WarOrders.captive_reading(text)
+	if not captive.is_empty() and WarOrders.captive_applies(captive): return false
+	var cls:=Commands.classify(text)
+	if Commands.harm_to_people(text,cls,Commands.roster(Hall.find(audience_id)))!="": return false
+	if String(cls.act) in ["question","statement"] or String(cls.verb)=="none": return true
+	var re:=RegEx.new();re.compile(PERSONS_VERBS)
+	return re.search(text)!=null and not String(cls.verb) in ["send","give","take","war"]
 
 ## Takes back the ruler's line shown while the reader was working, so the
 ## offline path (which shows it itself) does not show it twice.
