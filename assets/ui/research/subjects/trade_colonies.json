@@ -1,0 +1,12 @@
+{
+  "id": "trade_colonies",
+  "line": "logistics",
+  "game_year": 235,
+  "approx_historical_year": -3433,
+  "prompt": "c. 3433 BCE: Traders establish small riverbank outpost and exchange basket goods; panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aefe2e7d-cfee-48e2-9806-b781a303531c.png",
+  "asset": "res://assets/ui/research/subjects/trade_colonies-v1.png",
+  "sha256": "7f903fb2f5520d0ec670318b8b28df0a44fb0a91c06730817ac2d7b06632da81",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

@@ -281,6 +281,10 @@ func _build_line(parent:Node,width:float)->void:
 
 func _plate_row(parent:Node,title:String,plates:Array,key:String,plate_width:float,label_width:float,rear:bool,fit:int=RESERVE_SHOWN)->void:
 	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",8); parent.add_child(row)
+	# Behind the line with nobody waiting, only blocks that broke or fled:
+	# said as that, not as a reserve.
+	if rear and not plates.is_empty() and plates.all(func(p:Dictionary)->bool: return String(p.get("state",""))!="reserve"):
+		title=("Ours who broke or fled" if key=="left" else "Theirs who broke or fled") if bool(view.player) else "%s who broke or fled" % _cap(_strip(String(view.names[key])))
 	var name:=_label(row,title,"small",left_text if key=="left" else right_text)
 	name.custom_minimum_size.x=label_width; name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	name.add_theme_font_override("font",T.font("ui_strong"))
@@ -512,10 +516,11 @@ func _when_words()->String:
 	return Chronicle.date_label(int(view.day)) if int(view.day)>0 else ""
 
 
+## Which day of the fighting it is, as the map letters it under the battle
+## (hud/battle_marker_source.gd day_of: the days it has been fought).
 func _battle_day_words()->String:
-	var started:=int(view.started)
-	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else started
-	var day:=maxi(1,today-started+1)
+	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else int(view.started)
+	var day:=int(preload("res://scripts/hud/battle_marker_source.gd").day_of(record,today))
 	return "Day %s of the battle" % _count(day)
 
 
@@ -624,11 +629,19 @@ class Plate extends Control:
 		if state=="front": draw_rect(Rect2(0,0,w,3),accent)
 		var ink:=T.INK if not faded else Color(T.INK_MUTED,0.8)
 		var icon:=Icons.arm_texture(String(data.get("arm","spear")),T.INK if not faded else T.INK_MUTED,accent)
-		draw_texture_rect(icon,Rect2(5,7,26,26),false,Color(1,1,1,0.55 if faded else 1.0))
 		var strong:=T.font("ui_strong"); var plain:=T.font("ui")
 		var men:=int(data.get("men",0))
 		var number:=preload("res://scripts/hud/era_words.gd").grouped(men) if men>0 else ("broke" if state=="broken" else "gone")
-		draw_string(strong,Vector2(33,22),number,HORIZONTAL_ALIGNMENT_RIGHT,w-38,15,ink if men>0 else (T.RED_TEXT if state=="broken" else T.INK_MUTED))
+		# The whole number always shows ("1,830", never a clipped "1,83"): on a
+		# narrow plate the icon draws smaller and the number steps down a size.
+		var icon_rect:=Rect2(5,7,26,26)
+		var room:=w-38.0
+		var font_size:=15
+		if strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room:
+			icon_rect=Rect2(4,6,17,17); room=w-27.0
+			while font_size>10 and strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room: font_size-=1
+		draw_texture_rect(icon,icon_rect,false,Color(1,1,1,0.55 if faded else 1.0))
+		draw_string(strong,Vector2(w-4.0-room,22),number,HORIZONTAL_ALIGNMENT_RIGHT,room,font_size,ink if men>0 else (T.RED_TEXT if state=="broken" else T.INK_MUTED))
 		if w>=86.0:
 			var word:=Record.arm_words(String(data.get("arm","spear")),maxi(2,men))
 			draw_string(plain,Vector2(33,37),word,HORIZONTAL_ALIGNMENT_RIGHT,w-38,12,T.INK_MUTED)

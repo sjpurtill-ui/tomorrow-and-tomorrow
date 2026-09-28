@@ -134,6 +134,10 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 	# the town this audience spoke of.
 	var fight:=battle_of(sheet,lower)
 	if not fight.is_empty(): return _battle_answer(fight,lower)
+	# How far a place is, and which way (the chief scout's count).
+	if offices.has("scouts"):
+		var way:=_way_answer(sheet,lower)
+		if way!="": return way
 	var t:=town_of(sheet,lower,spoken_of)
 	var group:=_group(lower)
 	var topics:=_topics(lower)
@@ -164,6 +168,9 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 	if offices.has("tribute"):
 		var tribute:=_tribute_answer(sheet,lower)
 		if tribute!="": return tribute
+	if offices.has("scouts"):
+		var scouts:=_scouts_answer(sheet,lower)
+		if scouts!="": return scouts
 	return ""
 
 ## Who would know, or what would find it out, for a question the sheet does
@@ -489,6 +496,38 @@ static func _common_answer(sheet:Dictionary,lower:String)->String:
 		return "It is the %s of %s." % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "It is %s." % String(sheet.get("when",""))
 	if int(sheet.get("home_people",0))>0 and _has(lower,"\\bhow many (are we|of us|souls|mouths)\\b|\\bhow many people (are there|live) (at home|here)\\b|\\bour number\\b"):
 		return "We are %d people in %s." % [int(sheet.home_people),String(sheet.get("home","our home"))]
+	# Who holds an office now ("who keeps the stores now?", "who is on my council?").
+	var holder:=_office_answer(sheet,lower)
+	if holder!="": return holder
+	# How the people hold the god ("do the people love me?", "are they happy?").
+	var regard:Dictionary=sheet.get("people_regard",{})
+	var collective:=_has(lower,"\\b(people|they|them|folk|everyone|everybody|the town|the camp|my subjects|the realm|the hearths)\\b") or _name_in(lower,String(sheet.get("home","")))
+	if not regard.is_empty() and collective and _has(lower,"\\b(love|loves|fear|fears|dread|hate|hates|revere|worship|trust) (me|you|us|their god|the god)\\b|\\b(happy|content|contented|unhappy|angry|restless|loyal|afraid|satisfied|pleased)\\b|\\bthink of (me|you|us)\\b|\\bwhat do (the|my|our) people (think|say|feel)\\b|\\bhow do (the|my|our) people (feel|see|take)\\b"):
+		return "%s: their love for you is %s, and their dread of you %s." % [_cap(String(regard.get("read","your people serve dutifully"))),String(regard.get("love","some")),String(regard.get("dread","little"))]
+	return ""
+
+## Office words the court uses, to the council's office keys.
+const OFFICE_ANSWER_WORDS:=[
+	["Quartermaster","\\b(stores?|keeper of (the )?stores|store-?keeper|tribute|keeper of tribute|quartermaster)\\b"],
+	["Marshal","\\b(war leader|war chief|warleader|marshal|the bands|the warriors|the fighters|the spears)\\b"],
+	["ChiefScout","\\b(pathfinder|chief scout|head scout|the scouts|the trails)\\b"],
+	["Steward","\\b(headman|head man|hearth chief|steward|the hearths)\\b"],
+]
+
+static func _office_answer(sheet:Dictionary,lower:String)->String:
+	var council:Array=sheet.get("council",[])
+	if council.is_empty(): return ""
+	if _has(lower,"\\bwho (is|are|sits?|serves?) (on|in) (my|our|the) council\\b|\\bwho (is|are) (my|our|the) (council|officials|advisors|advisers)\\b|\\bwho serves me\\b"):
+		var names:PackedStringArray=PackedStringArray()
+		for c:Dictionary in council: names.append("%s %s" % [String(c.get("title","")),String(c.get("name",""))])
+		var aside:Array=sheet.get("set_aside",[])
+		return "Your council: %s.%s" % [_join(names),(" Set aside: %s." % _join(PackedStringArray(aside))) if not aside.is_empty() else ""]
+	if not _has(lower,"\\bwho (keeps|holds|has|runs|leads|minds|is|serves as|is our|is my|is the)\\b"): return ""
+	for row in OFFICE_ANSWER_WORDS:
+		if not _has(lower,String(row[1])): continue
+		for c:Dictionary in council:
+			if String(c.get("office",""))==String(row[0]): return "%s is %s now." % [String(c.get("name","")),String(c.get("title",""))] if _has(lower,"\\bnow\\b") else "%s is %s." % [String(c.get("name","")),String(c.get("title",""))]
+		return "Nobody holds that office now."
 	return ""
 
 # --------------------------------------------------------------------------
@@ -537,7 +576,19 @@ static func envoy_answer(p:Dictionary,question:String)->String:
 # --------------------------------------------------------------------------
 
 static func _war_answer(sheet:Dictionary,lower:String,topics:Array[String])->String:
-	if not (topics.has("garrison") or _has(lower,"\\b(bands?|army|armies|host|at home|under arms|levy)\\b")): return ""
+	# What they fight with: spears and other arms in store.
+	if _has(lower,"\\b(spears?|weapons?|arms|axes?|bows?|slings?|clubs?|javelins?)\\b") and not _has(lower,"\\bunder arms\\b"):
+		var n:=int(sheet.get("spears",0))
+		var other:PackedStringArray=PackedStringArray()
+		var weapons:Dictionary=sheet.get("weapons",{})
+		for w in weapons: other.append("%d %s" % [int(weapons[w]),String(w)])
+		var spears:="We have %d spears in store" % n if n>0 else "We have no spears in store"
+		return "%s%s." % [spears,("; and "+_join(other)) if not other.is_empty() else ""]
+	# Those called up and those in drill.
+	if _has(lower,"\\b(recruits?|called up|new (fighters|warriors|men)|being trained|in training|training|drill(ing)?|levies)\\b"):
+		return "%d are called up and waiting for weapons and drill; %d are in training now." % [int(sheet.get("recruits",0)),int(sheet.get("in_training",0))]
+	var ready:=_has(lower,"\\b(ready|prepared|strong enough)\\b")
+	if not (ready or topics.has("garrison") or _has(lower,"\\b(bands?|army|armies|host|at home|under arms|levy)\\b")): return ""
 	var bits:PackedStringArray=PackedStringArray()
 	var home_n:=int(sheet.get("fighters_at_home",0))
 	bits.append("%d fighters are at home" % home_n if home_n>0 else "no fighters are at home")
@@ -547,7 +598,31 @@ static func _war_answer(sheet:Dictionary,lower:String,topics:Array[String])->Str
 		if g is Dictionary and int(g.get("fighters",0))>0: bits.append("%d hold %s" % [int(g.fighters),String(g.get("town",""))])
 	return _cap("; ".join(bits))+"."
 
+## Words for what the stores hold, to the store's own name.
+const STORE_WORDS:=[["Timber","\\b(timber|wood|logs?|lumber)\\b"],["Stone","\\b(stones?|rock)\\b"],["Clay","\\b(clay|mud brick)\\b"],["Fiber Plants","\\b(fib(er|re)s?|reeds?|flax|rushes)\\b"],["Forced Labor","\\b(bondservants?|slaves|forced labou?r)\\b"],["Transport Carts","\\b(carts?|sledges?|wagons?)\\b"]]
+## The work, in plain words (population_allocations task names).
+const WORK_WORDS:={"food":"getting food","survey":"going over the land","extraction":"cutting timber and quarrying stone","construction":"building","crafting":"making tools and goods","logistics":"hauling and carrying",
+	"knowledge":"learning and teaching the young","administration":"keeping the council's business","defense":"on the watch"}
+
 static func _stores_answer(sheet:Dictionary,lower:String)->String:
+	var stock:Dictionary=sheet.get("stock",{})
+	# One thing in the stores, by name ("how much timber?", "how much clay is in the stores?").
+	for row in STORE_WORDS:
+		if not _has(lower,String(row[1])): continue
+		var n:=int(stock.get(String(row[0]),0))
+		return "We have %d %s in the stores." % [n,String(row[0])] if n>0 else "We have no %s in the stores." % String(row[0])
+	# The whole of the stores.
+	if _has(lower,"\\bwhat (do we have|is|'s) in (the |our )?stores?\\b|\\bwhat (do|does) (the |our )?stores? hold\\b|\\ball (the|our) stores\\b|\\beverything in (the|our) stores\\b"):
+		var parts:PackedStringArray=PackedStringArray(["%d Food" % int(sheet.get("food_in_store",0))])
+		for res in stock: parts.append("%d %s" % [int(stock[res]),String(res)])
+		return "In the stores: %s. The food is enough for about %s days." % [_join(parts),str(sheet.get("food_days",0))]
+	# The work: who is doing what.
+	if _has(lower,"\\b(work|working|doing|busy|tasks?|jobs?|labou?r)\\b") and not _has(lower,"\\b(forced labou?r)\\b"):
+		var tasks:Dictionary=sheet.get("workers_by_task",{})
+		if not tasks.is_empty():
+			var bits:PackedStringArray=PackedStringArray()
+			for task in tasks: bits.append("%d %s" % [int(tasks[task]),String(WORK_WORDS.get(String(task).to_lower(),String(task).to_lower()))])
+			return "At work now: %s." % _join(bits)
 	if _has(lower,"\\b(food|stores?|grain|eat|hungry|ration)\\b|\\bhow long\\b.*\\blast\\b"):
 		return "We have %d Food in store, enough for about %s days." % [int(sheet.get("food_in_store",0)),str(sheet.get("food_days",0))]
 	if _has(lower,"\\b(water|wells?|drink)\\b"):
@@ -569,4 +644,39 @@ static func _tribute_answer(sheet:Dictionary,lower:String)->String:
 	if _has(lower,"\\b(tribute)\\b"):
 		var taken:Array=sheet.get("tribute_taken",[])
 		return ("Tribute taken: %s." % "; ".join(PackedStringArray(taken))) if not taken.is_empty() else "We have taken no tribute."
+	# Trade: with whom, and how much passes.
+	if _has(lower,"\\b(trade|trading|traders?|barter|exchange)\\b"):
+		var with_us:PackedStringArray=PackedStringArray()
+		var none:PackedStringArray=PackedStringArray()
+		for p:Dictionary in sheet.get("peoples",[]):
+			if float(p.get("trade",0.0))>0.0: with_us.append("the %s (%s)" % [String(p.people),str(p.trade)])
+			else: none.append("the %s" % String(p.people))
+		if with_us.is_empty(): return "We trade with no one yet: nothing passes between us and %s." % (_join(none) if not none.is_empty() else "any people we know")
+		return "We trade with %s.%s" % [_join(with_us),(" Nothing passes between us and %s." % _join(none)) if not none.is_empty() else ""]
+	return ""
+
+## The chief scout: the parties out, and what lies beyond our lands.
+static func _scouts_answer(sheet:Dictionary,lower:String)->String:
+	var parties:Array=sheet.get("parties",[])
+	if _has(lower,"\\b(scouts?|scouting|part(y|ies)|outriders|trackers)\\b"):
+		if parties.is_empty(): return "No scouting party is out now; all our scouts are at home."
+		var bits:PackedStringArray=PackedStringArray()
+		for p:Dictionary in parties: bits.append((load("res://scripts/court_facts.gd") as GDScript).call("party_words",p))
+		return "%s %s out: %s." % [str(parties.size()) if parties.size()>1 else "One",("parties are" if parties.size()>1 else "party is"),_join(bits)]
+	if _has(lower,"\\b(out there|beyond|around us|who else|other peoples?|any peoples?|neighbou?rs?|strangers|met|have we found|what lies|what is there|what's there|the world|the lands?)\\b"):
+		var met:PackedStringArray=PackedStringArray()
+		for p:Dictionary in sheet.get("met_peoples",[]): met.append("the %s (%s%s)" % [String(p.name),"at war with us" if bool(p.at_war) else "at peace","" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		var towns:PackedStringArray=PackedStringArray()
+		for t:Dictionary in sheet.get("known_towns",[]): towns.append((load("res://scripts/court_facts.gd") as GDScript).call("town_way_words",t))
+		if met.is_empty() and towns.is_empty(): return "We have met no other people yet; the scouts have found nobody."
+		return "We have met %s.%s" % [_join(met) if not met.is_empty() else "no people face to face",(" We know of %s." % _join(towns)) if not towns.is_empty() else ""]
+	return ""
+
+## How far a town is and which way ("how far is Tsaren?", "where is Eldwick?").
+static func _way_answer(sheet:Dictionary,lower:String)->String:
+	if not _has(lower,"\\b(how far|which way|what direction|where (is|are|lies)|how many (days|km)|distance)\\b"): return ""
+	for t:Dictionary in sheet.get("known_towns",[]):
+		if not _name_in(lower,String(t.get("name",""))): continue
+		if not t.has("km"): return "We know of %s, but not yet the way there." % String(t.name)
+		return "%s lies about %d km %s of %s%s." % [String(t.name),int(t.km),String(t.get("way","")),String(sheet.get("home","our home")),(", and it is ours now" if bool(t.get("held",false)) else "")]
 	return ""

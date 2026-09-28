@@ -30,7 +30,7 @@ const BANK:={
 		"That is {name}, the {trade}. {excels} {He} is {age} winters, and {he} {detail}.",
 		"{name} of {village}. {excels} {He} {detail}; you would know {him} anywhere."],
 	"clarify":["Whom do you mean, {god_address}? Give me a name, or tell me what they did, and I will see to it.",
-		"Tell me who, {god_address}. A name or a trade, and I will find them or see it done.",
+		"Tell me who, {god_address}. A name or a trade, and I will find them.",
 		"I am not sure what you want of me. Say it another way and I will do it."],
 	"cannot_bring":["{name} cannot come before you now, {god_address}. Ask me about someone else, or tell me what you want of {him}."],
 	"describe_group":["The {trade} of {village}? {count} of them work together. {name} speaks for them; {he} {detail}.",
@@ -63,6 +63,17 @@ const BANK:={
 	"judge_office":["[The marks of office are hung on {name}, the {trade}, before the whole court; the bench stares.]"],
 	"judge_marry":["[{spouse} is brought in and set beside {name}; the court murmurs its blessing.]"],
 	"judge_novel":["[At your word it is done: {act}. The court watches {name} in silence.]"],
+	"judge_flog":["[The guards stretch {name} over the log by the fire and flog {him} until {his} back runs red.]","[{name} is thrown down and beaten before the whole court; {he} is carried out groaning.]"],
+	"judge_bind":["[{name}'s wrists are bound with rawhide and {he} is led away to be kept under guard.]","[The guards seize {name} and tie {him} hand and foot; {he} is taken out under watch.]"],
+	"judge_terrify":["[Your anger fills the hall; {name} goes grey and presses {his} face to the floor.]","[{name} shakes where {he} kneels as the god's fury falls on {him}.]"],
+	"judge_penance":["[{name} is set to fast by the fire and keep vigil until your anger passes.]"],
+	"judge_free":["[At your word the cords are cut from {name}'s wrists; {he} rubs them and cannot stop staring at you.]"],
+	"judge_brought":["[{name} is brought in under guard from {village} and set before you.]"],
+	# ---- when there is nobody to name
+	"no_trade":["Nobody here {trade_work} yet, {god_address}. None of us has learned it.","No one here {trade_work}, {god_address}. That is something our people have not learned."],
+	"no_event":["Nothing like that has happened that the court knows of, {god_address}. Tell me what you saw and I will find out who was there.","I know of nothing like that, {god_address}. If something happened, tell me what, and I will find who was near it."],
+	"no_event_stores":["No {what} is missing, {god_address}: the stores hold {food} Food, as the count says. Nobody has been caught taking any.","Nothing is missing from the stores, {god_address}. The count is {food} Food, as it should be."],
+	"unknown_name":["No one at this court knows anyone called {asked}, {god_address}. Tell me their trade or their village, and runners will find them.","I know of no {asked}, {god_address}. Give me something to find them by: a trade, a village, a deed."],
 	# ---- the summoned speak for themselves
 	"arrive_guilty":["You sent for me, {god_address}. I came as fast as I could.","I am here. I am here. What would you have of me?"],
 	"arrive_named":["I am {given}, a {trade} of {village}. They said you called for me by name, {god_address}. I do not know why.","Why me, {god_address}? I am only a {trade}."],
@@ -102,6 +113,11 @@ const BANK:={
 	"react_priest":["I will keep your fire as long as I draw breath.","I am not worthy of it. I will try to be."],
 	"react_marry":["As you will it, {god_address}.","I will be a good {trade} to {spouse}, and a good partner."],
 	"react_novel":["As you command, {god_address}."],
+	"react_flog":["[{given} cannot answer; {he} only breathes.]","I will remember it, {god_address}. I will remember."],
+	"react_bind":["What have I done, {god_address}? Tell me what I have done.","I will not run. I have nowhere to run to."],
+	"react_terrify":["Forgive me, {god_address}, whatever I have done.","I am nothing before you. Do not look at me so."],
+	"react_penance":["I will fast, {god_address}. I will keep the vigil as long as you will it."],
+	"react_free":["Thank you, {god_address}. I will not give you cause again.","I can go home? Thank you. Thank you."],
 	# ---- accusation of an official
 	"protest_honest":["I told you the truth, {god_address}. It was {named}; I have nothing else to give you.","You wound me. I have never lied to you, and I did not now."],
 	"confess_self":["...It was mine. The fault is mine that {event}; I named {named} to save my own skin. Do what you will with me.","I lied. {charge} are my charge, and I failed at them. {named} had nothing to do with it."],
@@ -122,13 +138,19 @@ const BANK:={
 	"witness_priest":["A keeper for the fire. The people will like it.","Let us hope they keep it better than they kept their tongue."],
 	"witness_marry":["Their two households will have to get along now. We will see.","The camp loves a wedding."],
 	"witness_novel":["Well. That will be remembered."],
+	"witness_flog":["They will not sleep on their back for a moon.","Everyone at the fire heard that."],
+	"witness_bind":["Held under guard. Let us see what the god decides.","They will wait bound until you judge them."],
+	"witness_terrify":["I have never seen the god so angry.","None of us breathed while it lasted."],
+	"witness_penance":["A fast and a vigil. They got off lightly.","Let them keep it well."],
+	"witness_free":["Mercy. It suits you.","They walk free. The camp will talk of it."],
 }
 
 ## Beats that belong to the principal speaker of an exchange; these may be
 ## replaced by a learned template for the same situation.
 const PRINCIPAL_BEATS:=["blame","blame_lie","blame_again","credit","describe","describe_best","describe_group","clarify","cannot_bring","found","unknown","alibi","alibi_named","alibi_kin","protest","protest_named","swear_true","swear_true_named",
 	"thanks_alibi","thanks_alibi_named","witness","vague","deny","beg","confess","swear_false","shift_blame","no_one_guilty","no_one","false_confession","did_what","where_plain","thanks","cower","talk",
-	"protest_honest","confess_self","confess_kin","double_down","react_exalt","react_reward","react_pardon","react_priest","react_marry","react_curse","react_example"]
+	"protest_honest","confess_self","confess_kin","double_down","react_exalt","react_reward","react_pardon","react_priest","react_marry","react_curse","react_example",
+	"no_trade","no_event","no_event_stores","unknown_name","react_bind","react_terrify","react_penance","react_free"]
 
 static func fill(template:String,slots:Dictionary)->String:
 	var out:=template

@@ -1,0 +1,12 @@
+{
+  "id": "market_timing_knowledge",
+  "line": "logistics",
+  "game_year": 248,
+  "approx_historical_year": -3347,
+  "prompt": "c. 3347 BCE: Plainly dressed early traders read dawn conditions and walk with simple donkey basket loads toward small exchange gathering, past low mud/reed huts; panoramic travel watercolor. No fortified gate, sails, decorated load or metal hardware. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2c5c5e42-79ca-4fde-8cda-233672e73efe.png",
+  "asset": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png",
+  "sha256": "526bc3c10a1a5360600fb4a24fe96eaa1f371528ca49dc820557a95714c25130",
+  "mode": "built-in image_gen / new image",
+  "review": "Corrected after integrator full-image period review and selected after 3.37:1 crop review."
+}

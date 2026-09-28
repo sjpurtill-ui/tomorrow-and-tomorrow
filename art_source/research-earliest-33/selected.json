@@ -1,0 +1,210 @@
+[
+  {
+    "id": "trade_colonies",
+    "line": "logistics",
+    "game_year": 235,
+    "approx_historical_year": -3433,
+    "prompt": "c. 3433 BCE: Traders establish small riverbank outpost and exchange basket goods; panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aefe2e7d-cfee-48e2-9806-b781a303531c.png",
+    "asset": "res://assets/ui/research/subjects/trade_colonies-v1.png",
+    "sha256": "7f903fb2f5520d0ec670318b8b28df0a44fb0a91c06730817ac2d7b06632da81",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "kiln_smoke_venting_customs",
+    "line": "ecology",
+    "game_year": 238,
+    "approx_historical_year": -3413,
+    "prompt": "c. 3413 BCE: Potters open low clay kiln vent to carry smoke away from huts; naturalist plant-pigment painting. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5be22de4-a42f-46ab-b69d-638964540f95.png",
+    "asset": "res://assets/ui/research/subjects/kiln_smoke_venting_customs-v1.png",
+    "sha256": "317058f77b46fc1cbae6f74301db41a9e339cd59e66d5daae31147ea0d4cdfb4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "alarm_relay_customs",
+    "line": "security",
+    "game_year": 240,
+    "approx_historical_year": -3400,
+    "prompt": "c. 3400 BCE: Village sentries repeat warning gesture from timber lookout to nearby hill; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-78f2886c-ef11-4a9e-a162-e9ddc3ae92ad.png",
+    "asset": "res://assets/ui/research/subjects/alarm_relay_customs-v1.png",
+    "sha256": "271fc589b561fb28989d91e4ededd2eec16bdaab87afe2dba4f42c4b71d8cbae",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear.",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  {
+    "id": "course_leveling_practice",
+    "line": "infrastructure",
+    "game_year": 240,
+    "approx_historical_year": -3400,
+    "prompt": "c. 3400 BCE: Builders level course of handmade mudbricks with rough board and cord; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8ffa54e2-0482-41a2-a2a6-b36c3b130687.png",
+    "asset": "res://assets/ui/research/subjects/course_leveling_practice-v1.png",
+    "sha256": "881f055eec2173b4a23dc1ac145a5a0718dd7325a26556bea7b028269779420a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "regional_arbitration_circuits",
+    "line": "institutions",
+    "game_year": 240,
+    "approx_historical_year": -3400,
+    "prompt": "c. 3400 BCE: Traveling mediator hears neighboring villages and points to shared water path; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5c27a681-13f6-4045-bbcb-90a14be8d8ba.png",
+    "asset": "res://assets/ui/research/subjects/regional_arbitration_circuits-v1.png",
+    "sha256": "5feb5be89cc46e9992c03f5c648f1fd1c35f53581474be019b4b27d3c79c23da",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "cargo_stowage_sequencing",
+    "line": "logistics",
+    "game_year": 242,
+    "approx_historical_year": -3387,
+    "prompt": "c. 3387 BCE: Carriers place heavy jars low on ox cart then lighter baskets above; panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f4dec4b2-ee51-4f66-bb1b-402d4bc05a92.png",
+    "asset": "res://assets/ui/research/subjects/cargo_stowage_sequencing-v1.png",
+    "sha256": "e029ab6796923539d83bcc3b9b9d81f2548695b890991549aa36722b09865bdc",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "ground_bearing_assessment",
+    "line": "infrastructure",
+    "game_year": 242,
+    "approx_historical_year": -3387,
+    "prompt": "c. 3387 BCE: Builders assess firm versus wet soil before earthen house; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-656f85b8-0b5f-43de-9a4d-3318726cc46e.png",
+    "asset": "res://assets/ui/research/subjects/ground_bearing_assessment-v1.png",
+    "sha256": "69b642c7b3f5f80e32e15f9a5144a63653a9006ec2ec9d7a4f989ac15fe51a47",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "dried_fruit_cakes",
+    "line": "nutrition",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Cooks press dried fruit and nuts into compact travel cakes; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0e4f4591-82c8-4c96-9756-4c29b0c303af.png",
+    "asset": "res://assets/ui/research/subjects/dried_fruit_cakes-v1.png",
+    "sha256": "ebbf669f7cd4f358228926c69fb7851543521477bbf2d01670ebdb123e4636d4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "fly_protection",
+    "line": "health",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Caregivers shield food and resting child from flies with woven reed mesh; transparent watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-58c9bc04-11d4-4457-8129-79b6dace7d4b.png",
+    "asset": "res://assets/ui/research/subjects/fly_protection-v1.png",
+    "sha256": "d3019f6e826072f16421e02b4628a0fa9750a32ce9d3b6b580bb9beb17dee253",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "formal_oath_taking",
+    "line": "institutions",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Seated ordinary village adults witness a communal oath with hands raised and one hand on a bowl of grain, all faces and gestures in narrow card band; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2847f8e7-b49d-4bbd-94a6-d1ecd20670c4.png",
+    "asset": "res://assets/ui/research/subjects/formal_oath_taking-v1.png",
+    "sha256": "207da74741f971503b757a9f6abfb061fa0e810f6910104fabe4eb00439fb2da",
+    "mode": "built-in image_gen / new image",
+    "review": "Replaced for stronger subject readability in 3.37:1 crop; full image and actual focus crop reviewed.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "post_disaster_damage_survey",
+    "line": "infrastructure",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Builders inspect flood-cracked brown mudbrick hut and collapsed reed roof; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-832e36da-92e6-4fc0-b413-fbb888142a28.png",
+    "asset": "res://assets/ui/research/subjects/post_disaster_damage_survey-v1.png",
+    "sha256": "62097e3f874e1f24741075141d59e9fa09246fb45a3467279f0dbd8a6bf3dd5f",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "storage_humidity_judging",
+    "line": "logistics",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Storekeepers feel grain dampness and lift baskets onto dry wooden slats; panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d7fb7bd2-5a3c-4c84-945a-ff9d6c9a2d22.png",
+    "asset": "res://assets/ui/research/subjects/storage_humidity_judging-v1.png",
+    "sha256": "3c6d6c7cabeba263ce25126bb314c1920a6b69c6f2e07701c2c8a73064b22a2d",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "tube_drilled_stone_vessels",
+    "line": "production",
+    "game_year": 245,
+    "approx_historical_year": -3367,
+    "prompt": "c. 3367 BCE: Stoneworkers bow-rotate hollow reed with wet sand to drill stone vessel; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ed00cbc2-125f-4d7f-a805-d1dfde3e8077.png",
+    "asset": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png",
+    "sha256": "da7bfd60e3b212e3ba47a1cd8f5f71f7a64a0b421b83c39449ebed55b71b8d08",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  },
+  {
+    "id": "capacity_ledgers",
+    "line": "labor",
+    "game_year": 248,
+    "approx_historical_year": -3347,
+    "prompt": "c. 3347 BCE: Work steward arranges uninscribed clay tokens to track grain basket capacity; charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e10d1207-2127-41a0-a43c-db5329f4d54b.png",
+    "asset": "res://assets/ui/research/subjects/capacity_ledgers-v1.png",
+    "sha256": "5d3a674193a23753c929e2116376dfac2c8992e49e9e7ad81f4e53094c4f536b",
+    "mode": "built-in image_gen / new image",
+    "review": "Focus lowered after integrator actual card review to retain hand and complete clay token row.",
+    "focus": [
+      0.5,
+      0.65
+    ]
+  },
+  {
+    "id": "market_timing_knowledge",
+    "line": "logistics",
+    "game_year": 248,
+    "approx_historical_year": -3347,
+    "prompt": "c. 3347 BCE: Plainly dressed early traders read dawn conditions and walk with simple donkey basket loads toward small exchange gathering, past low mud/reed huts; panoramic travel watercolor. No fortified gate, sails, decorated load or metal hardware. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2c5c5e42-79ca-4fde-8cda-233672e73efe.png",
+    "asset": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png",
+    "sha256": "526bc3c10a1a5360600fb4a24fe96eaa1f371528ca49dc820557a95714c25130",
+    "mode": "built-in image_gen / new image",
+    "review": "Corrected after integrator full-image period review and selected after 3.37:1 crop review."
+  },
+  {
+    "id": "runoff_grade_reading",
+    "line": "infrastructure",
+    "game_year": 248,
+    "approx_historical_year": -3347,
+    "prompt": "c. 3347 BCE: Builders pour water into earthen channel to read drainage slope; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1f767cd4-02e3-46df-8638-db124a9f7126.png",
+    "asset": "res://assets/ui/research/subjects/runoff_grade_reading-v1.png",
+    "sha256": "e6b8220b99b0e4fb9ec85b1059085062ad70e823e53bd5ab77f998c505b27bf4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  }
+]
