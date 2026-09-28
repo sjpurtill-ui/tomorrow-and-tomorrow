@@ -35,9 +35,10 @@ func _vec3_consts(prefix:String)->Dictionary:
 
 
 ## Mirror of mc_chart_weight() for a straight-down view: a design pixel at
-## the view's centre spans camera.size/1080 km (the lens keeps height).
+## the view's centre spans camera.size/1080 km (the lens keeps height). The
+## crossfade is eased over the scale's logarithm.
 func _weight(camera_size:float)->float:
-	return smoothstep(_float_const("MC_CHART_FROM"),_float_const("MC_CHART_FULL"),camera_size/1080.0)
+	return smoothstep(log(_float_const("MC_CHART_FROM")),log(_float_const("MC_CHART_FULL")),log(camera_size/1080.0))
 
 
 func test_chart_include_has_only_declarations_at_top_level()->void:
@@ -95,12 +96,15 @@ func test_chart_takes_over_between_the_valley_and_region_views()->void:
 
 
 func test_chart_crossfade_is_smooth_and_monotonic()->void:
+	# The wheel and the glide zoom by equal ratios: through the band no step of
+	# 4% changes the chart's share by more than about a tenth.
+	assert_bool(_text(CHART).contains("smoothstep(log(MC_CHART_FROM), log(MC_CHART_FULL), log(")).is_true()
 	var previous:=0.0
 	var size:=4.0
 	while size<200.0:
 		var w:=_weight(size)
 		assert_float(w).is_greater_equal(previous)
-		assert_float(w-previous).override_failure_message("chart jumps near size %.1f" % size).is_less(0.12)
+		assert_float(w-previous).override_failure_message("chart jumps near size %.1f" % size).is_less(0.09)
 		previous=w
 		size*=1.04
 
@@ -185,7 +189,7 @@ func test_water_is_drawn_like_a_chart()->void:
 	# water-lines and a light stipple; rivers taper from a hairline at the
 	# spring and stay on the map out to the continent view.
 	var sea:=_text("res://scripts/coastal_water.gdshader")
-	for call in ["mc_shore_px(","mc_waterlines(","mc_coast_ink(","mc_cover("]:
+	for call in ["mc_shore_px(","mc_waterlines(","mc_coast_ink(","mc_cover_patch("]:
 		assert_bool(sea.contains(call)).override_failure_message("sea lacks %s" % call).is_true()
 	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
 	assert_bool(ground.contains("mc_shore_px(") and ground.contains("mc_coast_ink(")).is_true()
@@ -284,3 +288,18 @@ func test_gather_keeps_places_and_towns_in_step()->void:
 	assert_int(gathered.size()).is_equal(2)
 	assert_int((gathered[0] as PackedVector4Array).size()).is_equal((gathered[1] as PackedVector4Array).size())
 	assert_int((gathered[0] as PackedVector4Array).size()).is_less_equal(places.MAX_PLACES)
+
+
+func test_the_planet_layer_draws_the_same_woods_towns_and_fields()->void:
+	# Beyond the streamed patch (while a zoom out waits for the new patch)
+	# the chart reads the same fields from the macro rasters, so woods, towns
+	# and worked land do not pop in when the patch streams in; the sea draws
+	# its water-lines from the patch alone.
+	var text:=_text(CHART)
+	assert_bool(text.contains("vec4 mc_cover_far(")).is_true()
+	var ground:=text.substr(text.find("vec3 mc_chart_ground("))
+	assert_bool(ground.contains("vec3 farm = mc_farmland(")).is_true()
+	assert_bool(ground.contains("chart = mc_towns(")).is_true()
+	assert_bool(ground.contains("if (use_patch) { chart = mc_towns(")).is_false()
+	var sea:=_text("res://scripts/coastal_water.gdshader")
+	assert_bool(sea.contains("mc_cover(")).is_false()

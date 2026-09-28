@@ -211,9 +211,9 @@ void fragment() {
 	float mc_w = mc_chart_weight(mc_design_km(relative_position,PROJECTION_MATRIX));
 	// The shore blurred over the three water-lines' widths, and their screen
 	// rates, taken here outside any branch.
-	float mc_land1 = mc_cover(world_position.xz,14.0,pixel_world).w;
-	float mc_land2 = mc_cover(world_position.xz,27.0,pixel_world).w;
-	float mc_land3 = mc_cover(world_position.xz,45.0,pixel_world).w;
+	float mc_land1 = mc_cover_patch(world_position.xz,14.0,pixel_world).w;
+	float mc_land2 = mc_cover_patch(world_position.xz,27.0,pixel_world).w;
+	float mc_land3 = mc_cover_patch(world_position.xz,45.0,pixel_world).w;
 	float mc_land1_px = fwidth(mc_land1);
 	float mc_land2_px = fwidth(mc_land2);
 	float mc_land3_px = fwidth(mc_land3);

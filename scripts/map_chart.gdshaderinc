@@ -34,8 +34,8 @@ uniform vec4 chart_places[24];
 // holder's colour packed r*65536+g*256+b (0-255), its strength.
 uniform vec4 chart_towns[24];
 
-const float MC_CHART_FROM = 0.010;
-const float MC_CHART_FULL = 0.032;
+const float MC_CHART_FROM = 0.0102;
+const float MC_CHART_FULL = 0.040;
 
 // km per design pixel at a fragment `view_offset` (world position minus the
 // camera's) away, for the view's `projection`. Taken from the distance, not
@@ -46,8 +46,11 @@ float mc_design_km(vec3 view_offset, mat4 projection) {
 	return length(view_offset)*2.0/max(abs(projection[1][1])*1080.0, 0.0001);
 }
 
+// Eased over the scale's logarithm: the wheel and the glide zoom by equal
+// ratios, so the painting gives way to the chart at an even pace through
+// the whole band instead of all at once in its middle.
 float mc_chart_weight(float design_km) {
-	return smoothstep(MC_CHART_FROM, MC_CHART_FULL, design_km);
+	return smoothstep(log(MC_CHART_FROM), log(MC_CHART_FULL), log(max(design_km, 0.000001)));
 }
 
 // The sheet under the washes: the unknown's vellum, a shade cleaner where the
@@ -266,10 +269,39 @@ float mc_shore_px(vec2 xz, float pixel_world) {
 // `xz` (its box-filtered levels, trilinear): (woodland, rainfall, warmth,
 // land share). Land share 0.5 is the shore with every jag smaller than the
 // width smoothed away. (-1) when the patch's cover is not bound here.
-vec4 mc_cover(vec2 xz, float width_px, float pixel_world) {
+// Beyond the streamed patch (the planet layer, which has the macro rasters
+// bound), the same four fields from the finest raster, averaged over its
+// neighbours: the woods, marsh and worked land drawn there match what the
+// patch will draw when it streams in, instead of appearing only then.
+vec4 mc_cover_far(vec2 xz) {
+	if (!coast_mask_ready()) { return vec4(-1.0); }
+	float stride = coast_grid1.z > 0.0 ? coast_grid1.z : coast_grid0.z;
+	vec4 sum = vec4(0.0);
+	for (int k = 0; k < 5; k++) {
+		vec2 at = xz+(k == 0 ? vec2(0.0) : vec2(float(k == 1)-float(k == 2), float(k == 3)-float(k == 4))*stride*0.5);
+		vec4 color; vec2 climate; vec2 geology;
+		coast_far_surface(at, color, climate, geology);
+		sum += vec4(clamp(color.a, 0.0, 1.0), clamp(climate.x-1.0, 0.0, 1.0), climate.y, step(0.0, coast_mask_height(at)));
+	}
+	return sum*0.2;
+}
+
+// The streamed patch's cover only (-1 beyond it): the sea draws its
+// water-lines from this alone, never from the coarse rasters' shore.
+vec4 mc_cover_patch(vec2 xz, float width_px, float pixel_world) {
 	vec2 rel = xz-terrain_grid.xy;
 	if (!coast_patch_ready() || textureSize(chart_cover, 0).x != int(terrain_grid.w)
 			|| max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.5) { return vec4(-1.0); }
+	float cells = max(terrain_grid.w-1.0, 1.0);
+	vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
+	float cell_px = terrain_grid.z/cells/max(pixel_world, 0.000001);
+	return textureLod(chart_cover, uv, max(log2(width_px/cell_px), 0.0));
+}
+
+vec4 mc_cover(vec2 xz, float width_px, float pixel_world) {
+	vec2 rel = xz-terrain_grid.xy;
+	if (!coast_patch_ready() || textureSize(chart_cover, 0).x != int(terrain_grid.w)
+			|| max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.5) { return mc_cover_far(xz); }
 	float cells = max(terrain_grid.w-1.0, 1.0);
 	vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
 	float cell_px = terrain_grid.z/cells/max(pixel_world, 0.000001);
@@ -281,7 +313,7 @@ vec4 mc_cover(vec2 xz, float width_px, float pixel_world) {
 vec4 mc_cover_km(vec2 xz, float width_km) {
 	vec2 rel = xz-terrain_grid.xy;
 	if (!coast_patch_ready() || textureSize(chart_cover, 0).x != int(terrain_grid.w)
-			|| max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.5) { return vec4(-1.0); }
+			|| max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.5) { return mc_cover_far(xz); }
 	float cells = max(terrain_grid.w-1.0, 1.0);
 	vec2 uv = ((rel/terrain_grid.z+0.5)*cells+0.5)/terrain_grid.w;
 	return textureLod(chart_cover, uv, max(log2(width_km*cells/terrain_grid.z), 0.0));
@@ -779,16 +811,23 @@ vec3 mc_farmland(vec2 xz, float pixel_world) {
 	float kind = map_paper_hash(cell+vec2(19.0, -7.0));
 	float angle = floor(map_paper_hash(cell+vec2(-3.0, 23.0))*4.0)*0.785398;
 	vec2 across = vec2(cos(angle), sin(angle));
-	float octave = log2(max(pixel_world*3.0/0.001, 0.000001));
+	// A soft pattern, not wallpaper: fine lines about four pixels apart, a
+	// clear margin of plain paper round each parcel (a headland), and many
+	// parcels left plain.
+	float octave = log2(max(pixel_world*4.0/0.001, 0.000001));
 	float level = floor(octave);
 	float blend = fract(octave);
 	float hatch = 0.0;
 	for (int k = 0; k < 2; k++) {
 		float spacing = 0.001*exp2(level+float(k));
 		float u = dot(xz, across)/spacing;
-		float line = 1.0-smoothstep(0.30, 0.85, abs(fract(u)-0.5)*spacing/max(pixel_world, 0.000001));
+		float line = 1.0-smoothstep(0.28, 0.80, abs(fract(u)-0.5)*spacing/max(pixel_world, 0.000001));
 		hatch = max(hatch, line*(k == 0 ? 1.0-blend : 1.0));
 	}
+	vec2 wobble = vec2(map_paper_noise(p*0.37)-0.5, map_paper_noise(p*0.37+vec2(9.0, 4.0))-0.5)*0.5;
+	vec2 in_parcel = abs(p+wobble-cell-0.5);
+	float headland = 1.0-smoothstep(0.34, 0.42, max(in_parcel.x, in_parcel.y));
+	hatch *= headland*0.85;
 	// Parcels too small on screen to draw give way to the map's sign for
 	// worked land: one fine diagonal hatch over it all.
 	float resolved = 1.0-smoothstep(0.45, 0.90, pixel_world/parcel_km*8.0);
@@ -799,7 +838,7 @@ vec3 mc_farmland(vec2 xz, float pixel_world) {
 		float line = 1.0-smoothstep(0.30, 0.85, abs(fract(u)-0.5)*spacing/max(pixel_world, 0.000001));
 		diagonal = max(diagonal, line*(k == 0 ? 1.0-blend : 1.0));
 	}
-	float fields = mix(diagonal*0.55, kind < 0.58 ? hatch : 0.0, resolved);
+	float fields = mix(diagonal*0.45, kind < 0.50 ? hatch : 0.0, resolved);
 	// Pasture dots one to a small cell of a zoom octave, blended across
 	// octaves so they never swim or pop.
 	float speck = 0.0;
@@ -811,7 +850,7 @@ vec3 mc_farmland(vec2 xz, float pixel_world) {
 		float one = (1.0-smoothstep(0.35, 0.85, length(xz-dot_at)/max(pixel_world, 0.000001)))*step(map_paper_hash(dot_cell+vec2(-6.0, 2.0)), 0.45);
 		speck = max(speck, one*(k == 0 ? 1.0-fract(dot_octave) : fract(dot_octave)));
 	}
-	float pasture = mix(speck*0.5, kind >= 0.58 && kind < 0.86 ? speck : 0.0, resolved);
+	float pasture = mix(speck*0.4, kind >= 0.50 && kind < 0.72 ? speck*headland : 0.0, resolved);
 	return vec3(fields*worked, pasture*worked, worked);
 }
 
@@ -918,8 +957,8 @@ vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float promin
 	// place works the land.
 	// Blurred wider as the view widens, so the woods stay broad masses and
 	// never print the small gaps of the woodland field as camouflage.
-	vec4 cover = use_patch ? mc_cover(ground.xz, mix(8.0, 22.0, smoothstep(0.10, 0.45, design_km)), pixel_world) : vec4(-1.0);
-	vec3 farm = use_patch ? mc_farmland(ground.xz, pixel_world) : vec3(0.0);
+	vec4 cover = mc_cover(ground.xz, mix(8.0, 22.0, smoothstep(0.10, 0.45, design_km)), pixel_world);
+	vec3 farm = mc_farmland(ground.xz, pixel_world);
 	float wood = cover.x < 0.0 ? woodland : cover.x;
 	float stand = mc_stand(wood)*(1.0-smoothstep(0.42, 0.82, slope))*(1.0-farm.z*0.85);
 	vec3 chart = paper*mc_wash(rain, warm, ground.y, stand, temperature, snow);
@@ -939,10 +978,10 @@ vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float promin
 	float hachure = mc_hachures(ground.xz, landform.x, gradient, pixel_world)*prominence;
 	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.28));
 	// Fields hatched and pasture dotted in sepia ink.
-	chart = mix(chart, MAP_SEPIA, farm.x*0.34+farm.y*0.30);
+	chart = mix(chart, MAP_SEPIA, farm.x*0.30+farm.y*0.26);
 	// The towns themselves, as small plans in ink.
-	if (use_patch) { chart = mc_towns(chart, ground.xz, pixel_world, paper); }
-	if (use_patch) {
+	chart = mc_towns(chart, ground.xz, pixel_world, paper);
+	if (cover.x >= 0.0) {
 		// Marsh: a wet blue-green wash, and tufts of reeds in water ink.
 		float marsh = cover.x < 0.0 ? 0.0 : mc_marsh(cover, landform.x);
 		chart = mix(chart, chart*vec3(0.88, 0.97, 1.02), marsh*0.55);
