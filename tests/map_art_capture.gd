@@ -13,6 +13,9 @@ extends Node
 ##      [--reveal=km] (chart this radius round the target, as a well-explored campaign)
 ##      [--trails=n] (n scout trails charted out from home) [--day=n] (the calendar day)
 ##      [--highest] (the highest ground within ~1,500 km: a mountain range, charted)
+##      [--population=n] [--villages=n] (the home's people; villages of ours round it)
+##      [--marsh] (the nearest wet meadows, charted)
+##      [--strangers=n] (n strangers' towns seen near home, the last burned)
 ##      [--sweep] (after the captures: frame times while stepping through the
 ##       distance levels and panning at the Region level, GPU included)
 ## `--saved` loads the quicksave from this run's user dir: point the project at
@@ -137,6 +140,23 @@ func _ready()->void:
 			target=found
 			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
 			print("MAP_ART_CAPTURE: woodland at ",target)
+	for argument in args:
+		# `--population=n`: the home settlement's people (sizes its worked land).
+		if argument.begins_with("--population="):
+			GameState.ensure_population_total(int(argument.trim_prefix("--population=")))
+	for argument in args:
+		# `--villages=n`: n villages of ours round home, as a grown people has.
+		if argument.begins_with("--villages="):_seed_villages(int(argument.trim_prefix("--villages=")))
+		# `--strangers=n`: n strangers' towns seen near home (the last burned).
+		elif argument.begins_with("--strangers="):_seed_strangers(int(argument.trim_prefix("--strangers=")))
+	if "--marsh" in args:
+		# Look at the nearest wet meadows instead (charted for this capture):
+		# they lie along the great river, a few kilometres out from its banks.
+		var marsh:=_find_marsh(target)
+		if marsh!=Vector3.INF:
+			target=marsh
+			CivilizationSystem._add_revealed_area(Vector2(target.x,target.z),260.0,"capture")
+			print("MAP_ART_CAPTURE: marsh at ",target)
 	if "--highest" in args:
 		# Look at the highest ground within ~1,500 km (a mountain range), charted.
 		var best:=Vector3.INF
@@ -404,6 +424,87 @@ func _find_cold(center:Vector3)->Vector3:
 				best_c=c;best=Vector3(x,h,z)
 			if c<-3.0:return best
 	return best
+
+## `--villages=n`: villages of ours on dry land 15-45 km round home, each with
+## a share of the people (a fixture only; nothing is simulated).
+func _seed_villages(count:int)->void:
+	var home:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var placed:=0
+	for attempt in count*12:
+		if placed>=count:break
+		var angle:=TAU*float(attempt)/float(maxi(count,1))*0.618+0.3
+		var reach:=15.0+30.0*fmod(float(attempt)*0.37,1.0)
+		var at:=home+Vector2(cos(angle),sin(angle))*reach
+		if terrain._height_at(at.x,at.y)<0.05:continue
+		var sequence:=int(WorldSimulation.state.next_player_settlement_id)
+		var record:={"id":"settlement_%03d" % sequence,"sequence":sequence,"primary":false,"name":"Village %d" % (placed+1),"position":at,
+			"population_share":0.10,"founded_day":0,"status":"established","source_settlement_id":"","territory_context":{},"environment_profile":{},
+			"auto_manage":true,"management_focus":"establishment","leader_person_id":0}
+		WorldSimulation.state.next_player_settlement_id+=1
+		WorldSimulation.state.player_settlements.append(record)
+		placed+=1
+	print("MAP_ART_CAPTURE: seeded ",placed," villages")
+
+## `--strangers=n`: strangers' towns our scouts have seen, set 25-50 km round
+## home on dry land, the last of them burned out (a fixture only).
+func _seed_strangers(count:int)->void:
+	if CivilizationSystem.civilizations.is_empty():CivilizationSystem.initialize()
+	# Strangers found their towns years in: found each people's chief town now.
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		for region:Dictionary in civ.strategic_regions:
+			if String(region.get("role",""))=="capital":region["settlement_founded"]=true
+	var intel=CivilizationSystem.city_intelligence
+	print("MAP_ART_CAPTURE: peoples=",CivilizationSystem.civilizations.size()," sites=",intel.sites(false).size())
+	for civ:Dictionary in CivilizationSystem.civilizations:civ.player_relation.contact_level=2
+	var home:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var day:=int(GameState.elapsed_days)
+	var placed:=0
+	for site:Dictionary in intel.sites(false):
+		if placed>=count:break
+		var at:=Vector2.INF
+		for attempt in 16:
+			var angle:=TAU*(float(placed)/float(maxi(count,1))+float(attempt)*0.07)+0.9
+			var candidate:=home+Vector2(cos(angle),sin(angle))*(28.0+float(attempt%4)*6.0)
+			if terrain._height_at(candidate.x,candidate.y)>0.08:at=candidate;break
+		if at==Vector2.INF:continue
+		var observation:Dictionary=intel.capture("player",String(site.city_id),.85,day,"Scout report","capture")
+		observation.position={"x":at.x,"z":at.y}
+		# The first is a grown walled city, the second a market town.
+		var report:={"observed_day":day,"quality":.85,"source":"Scout report","reference":"capture"}
+		if placed==0:
+			observation.fields["population"]=report.merged({"low":14000.0,"high":18000.0})
+			observation.fields["fortification"]=report.merged({"low":.6,"high":.75})
+		elif placed==1:
+			observation.fields["population"]=report.merged({"low":2500.0,"high":3500.0})
+		if placed==count-1 and count>1:observation.fields["damage"]=report.merged({"low":.7,"high":.85})
+		intel.publish("player",observation,day+1)
+		placed+=1
+	print("MAP_ART_CAPTURE: seeded ",placed," strangers' towns")
+
+## Wet meadows beside the world river, walking its course from `center`.
+func _find_marsh(center:Vector3)->Vector3:
+	for step in range(0,800):
+		for direction:float in [1.0,-1.0]:
+			var z:=clampf(center.z,-750.0,750.0)+direction*float(step)*2.0
+			if absf(z)>758.0:continue
+			var river:float=terrain._world_river_x(z)
+			for offset:float in [5.0,8.0,11.0,14.0,17.0,-5.0,-8.0,-11.0,-14.0,-17.0]:
+				var x:=river+float(offset)
+				if String(terrain._biome_at(x,z).get("id",""))=="wetland":
+					return Vector3(x,terrain._height_at(x,z),z)
+	return Vector3.INF
+
+## Nearest land of this biome, searched on widening rings.
+func _find_biome(center:Vector3,id:String)->Vector3:
+	for ring in range(1,120):
+		var radius:=float(ring)*12.0
+		for step in 32:
+			var angle:=TAU*float(step)/32.0
+			var x:=center.x+cos(angle)*radius
+			var z:=center.z+sin(angle)*radius
+			if String(terrain._biome_at(x,z).get("id",""))==id:
+				return Vector3(x,terrain._height_at(x,z),z)
+	return Vector3.INF
 
 ## Nearest point with dense woodland, searched on widening rings.
 func _find_woodland(center:Vector3)->Vector3:

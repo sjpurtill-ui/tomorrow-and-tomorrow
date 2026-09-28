@@ -1,0 +1,12 @@
+{
+  "id": "cross_party_scheduling",
+  "line": "labor",
+  "game_year": 205,
+  "approx_historical_year": -3633,
+  "prompt": "c. 3633 BCE: Leaders of two work parties coordinate successive tasks by gesture and tool handoff; charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1cc25722-cef3-4e4f-b35e-9908339de492.png",
+  "asset": "res://assets/ui/research/subjects/cross_party_scheduling-v1.png",
+  "sha256": "6d23f663d78651b049c25f04223a74297f3a64814b25ac3afb2e64b83baa1b71",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

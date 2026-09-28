@@ -196,3 +196,91 @@ func test_water_is_drawn_like_a_chart()->void:
 	# The continent view (a 3,000 km wide window) keeps its rivers at any aspect.
 	for aspect in [4.0/3.0,16.0/9.0,21.0/9.0]:
 		assert_float(3000.0/aspect).is_less_equal(4000.0)
+
+
+func test_woods_marsh_and_worked_land_are_drawn_in_the_same_ink()->void:
+	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
+	for call in ["mc_symbols(0,","mc_symbols(1,","mc_farmland(","mc_marsh(","mc_cover("]:
+		assert_bool(ground.contains(call)).override_failure_message("chart ground lacks %s" % call).is_true()
+	# The shader's place array holds exactly what chart_places sends.
+	var places:=preload("res://scripts/chart_places.gd")
+	assert_bool(_text(CHART).contains("uniform vec4 chart_places[%d];" % places.MAX_PLACES)).is_true()
+	assert_bool(_text(CHART).contains("for (int i = 0; i < %d; i++)" % places.MAX_PLACES)).is_true()
+
+
+func test_worked_land_grows_with_a_place_within_historical_reach()->void:
+	var places:=preload("res://scripts/chart_places.gd")
+	var previous:=0.0
+	for population in [0.0,40.0,120.0,1000.0,5000.0,20000.0,100000.0,1000000.0]:
+		var reach:=places.worked_radius_km(population)
+		assert_float(reach).is_greater_equal(previous)
+		assert_float(reach).is_between(1.0,14.0)
+		previous=reach
+	# A camp farms about a kilometre round it; a town of a few thousand four
+	# or five; a great city's hinterland ten or more.
+	assert_float(places.worked_radius_km(120.0)).is_less(1.5)
+	assert_float(places.worked_radius_km(5000.0)).is_between(3.5,5.0)
+	assert_float(places.worked_radius_km(100000.0)).is_greater(10.0)
+
+
+func test_places_reach_the_terrain_materials_padded_to_the_shader_array()->void:
+	var places:=preload("res://scripts/chart_places.gd")
+	var saved:=places.places
+	var shader:=Shader.new()
+	shader.code="shader_type spatial;
+uniform int chart_place_count = 0;
+uniform vec4 chart_places[24];
+void fragment(){ALBEDO=vec3(chart_places[0].x*0.0+float(chart_place_count)*0.0);}
+"
+	var material:=ShaderMaterial.new();material.shader=shader
+	places.places=PackedVector4Array([Vector4(10,20,3,0),Vector4(-5,4,2,1)])
+	places.towns=PackedVector4Array([Vector4(0.7,1,0,0),Vector4(0.3,2,12345,0.8)])
+	places.push([material])
+	assert_int(int(material.get_shader_parameter("chart_place_count"))).is_equal(2)
+	var sent:PackedVector4Array=material.get_shader_parameter("chart_places")
+	assert_int(sent.size()).is_equal(places.MAX_PLACES)
+	assert_vector(sent[1]).is_equal(Vector4(-5,4,2,1))
+	var towns:PackedVector4Array=material.get_shader_parameter("chart_towns")
+	assert_int(towns.size()).is_equal(places.MAX_PLACES)
+	assert_vector(towns[1]).is_equal(Vector4(0.3,2,12345,0.8))
+	places.places=saved
+
+
+func test_towns_are_drawn_as_small_plans_sized_like_real_towns()->void:
+	var places:=preload("res://scripts/chart_places.gd")
+	assert_bool(_text(CHART).contains("uniform vec4 chart_towns[%d];" % places.MAX_PLACES)).is_true()
+	var ground:=_text(CHART).substr(_text(CHART).find("vec3 mc_chart_ground("))
+	assert_bool(ground.contains("mc_towns(")).is_true()
+	var previous:=0.0
+	for population in [1.0,120.0,400.0,4000.0,50000.0,1000000.0]:
+		var built:=places.built_radius_km(population)
+		assert_float(built).is_greater_equal(previous)
+		assert_float(built).is_between(0.08,2.5)
+		# A town is always built over less ground than it farms.
+		assert_float(built).is_less(places.worked_radius_km(population))
+		previous=built
+	assert_float(places.built_radius_km(4000.0)).is_between(0.5,0.9)
+	assert_float(places.built_radius_km(200000.0)).is_between(2.0,2.5)
+
+
+func test_holder_colour_packs_the_way_the_shader_unpacks_it()->void:
+	var places:=preload("res://scripts/chart_places.gd")
+	for colour in [Color(0.2,0.6,0.9),Color(1,0,0),Color(0,0,0),Color(1,1,1),Color(0.47,0.13,0.81)]:
+		var packed:=places.pack_colour(colour)
+		# mc_unpack_colour() in map_chart.gdshaderinc, in single precision.
+		var r:=floorf(packed/65536.0)
+		var g:=floorf((packed-r*65536.0)/256.0)
+		var b:=packed-r*65536.0-g*256.0
+		assert_float(r/255.0).is_equal_approx(colour.r,0.003)
+		assert_float(g/255.0).is_equal_approx(colour.g,0.003)
+		assert_float(b/255.0).is_equal_approx(colour.b,0.003)
+		# Exact in a 32-bit float (below 2^24).
+		assert_float(packed).is_less(16777216.0)
+
+
+func test_gather_keeps_places_and_towns_in_step()->void:
+	var places:=preload("res://scripts/chart_places.gd")
+	var gathered:Array=places.gather(Vector2.ZERO)
+	assert_int(gathered.size()).is_equal(2)
+	assert_int((gathered[0] as PackedVector4Array).size()).is_equal((gathered[1] as PackedVector4Array).size())
+	assert_int((gathered[0] as PackedVector4Array).size()).is_less_equal(places.MAX_PLACES)
