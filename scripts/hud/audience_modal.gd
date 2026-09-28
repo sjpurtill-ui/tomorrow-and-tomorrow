@@ -1063,6 +1063,9 @@ const FACT_WORDS:="(?i)\\b(hold|holds|held|won|win|lost|lose|battle|fight|fought
 func _fact_question(text:String)->bool:
 	if not text.strip_edges().ends_with("?") and not CourtAnswers.is_question(text): return false
 	if not Persons.typed_action(text).is_empty(): return false
+	# A commoner brought before the god answers for their own life and the
+	# matter they were called for ("Where were you when the stores soured?").
+	if not Persons.speaker_known(audience_id).is_empty(): return false
 	var re:=RegEx.new();re.compile(FACT_WORDS)
 	return re.search(text)!=null or Commands._names_a_place(text.to_lower())
 
