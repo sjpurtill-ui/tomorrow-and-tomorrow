@@ -13,7 +13,7 @@ extends GdUnitTestSuite
 
 const Account:=preload("res://scripts/battle_account.gd")
 const ReportPanel:=preload("res://scripts/hud/battle_report_panel.gd")
-const Replay:=preload("res://scripts/battle_replay.gd")
+const Record:=preload("res://scripts/battle_record.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 
 const JARGON:=["Attacker Victory","Defender Victory","attacker_victory","field contact","FIELD STAFF","morale ","%","remaining;","lost or removed","offensive operation","LEVY BAND","_"]
@@ -286,14 +286,18 @@ func test_replay_reads_recorded_rounds_without_resolving_again()->void:
 	MilitaryCampaign.order_city_operation(army_id,civ_id,city_id)
 	var record:=_fight_to_the_end()
 	var history_before:=JSON.stringify(MilitaryCampaign.battle_history)
-	var frames:=Replay.frames(record)
-	assert_int(frames.size()).is_equal((record.rounds as Array).size()+1)
-	# Frame 0 is the start: everyone present. Each later frame is one exchange.
+	var view:=Record.view(record,{"stage":"hearth","left_name":"Rovik's band","right_name":"the Esurai"})
+	# The start is everyone drawn up; the phases end where the record ends.
 	var s:=Account.sides(record)
-	assert_int(int(frames[0].ours)).is_equal(int((record[s.home] as Dictionary).initial_troops))
-	assert_int(int(frames[-1].ours)).is_equal(int((record[s.home] as Dictionary).remaining_troops))
-	assert_int(int(frames[-1].theirs)).is_equal(int((record[s.enemy] as Dictionary).remaining_troops))
-	for frame:Dictionary in frames: _assert_plain(String(frame.caption))
+	var start:=0
+	for plate in view.start.left.front+view.start.left.rear: start+=int(plate.men)
+	assert_int(start).is_equal(int((record[s.home] as Dictionary).initial_troops))
+	assert_int(int(view.sides.left.totals.went_in)).is_equal(int((record[s.home] as Dictionary).initial_troops))
+	var shown_rounds:=0
+	for phase in view.phases: shown_rounds+=int(phase.to)-int(phase.from)+1
+	assert_int(shown_rounds).is_equal((record.rounds as Array).size())
+	for phase in view.phases:
+		for line in phase.events: _assert_plain(String(line))
 	# Replaying changes nothing in the campaign.
 	assert_str(JSON.stringify(MilitaryCampaign.battle_history)).is_equal(history_before)
 	assert_dict(MilitaryCampaign.active_engagement).is_empty()
