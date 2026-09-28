@@ -41,6 +41,7 @@ const TownFate:=preload("res://scripts/town_fate.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const Ledger:=preload("res://scripts/town_ledger.gd")
+const TownNames:=preload("res://scripts/town_names.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
@@ -149,7 +150,8 @@ static func held_towns()->Array[Dictionary]:
 		var troops:=int(h.garrison)
 		var region:Dictionary=world.region_snapshot(civ_id,rid)
 		var known:Dictionary=world.city_intelligence.known("player",rid) if "city_intelligence" in world and world.city_intelligence!=null else {}
-		var name:=String(region.get("name",force.get("region_name","")))
+		# The town as the map names it (town_names.gd), whatever the force was told.
+		var name:=TownNames.of(civ_id,rid,String(region.get("name",force.get("region_name",""))))
 		if name=="": name=String(known.get("name","")).trim_prefix("Reported home of ")
 		var position:Dictionary=(known.get("position",{}) as Dictionary).duplicate(true)
 		out.append({"city_id":rid,"civ_id":civ_id,"name":name,"civ_name":Hall._civ_name(civ_id),"garrison":troops,

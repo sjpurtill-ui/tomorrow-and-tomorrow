@@ -47,6 +47,7 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
+const TownNames:=preload("res://scripts/town_names.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -170,7 +171,7 @@ static func _common(out:Dictionary)->void:
 	if _mc()!=null and world!=null:
 		for h:Dictionary in WarOrders.held_towns():
 			if towns.any(func(t:Dictionary)->bool: return String(t.region_id)==String(h.city_id)): continue
-			towns.append({"name":String(h.name),"region_id":String(h.city_id),"civ_id":String(h.civ_id),"taken_from":String(h.civ_name),"status":"held","garrison":int(h.garrison),
+			towns.append({"name":TownNames.of(String(h.civ_id),String(h.city_id),String(h.name)),"region_id":String(h.city_id),"civ_id":String(h.civ_id),"taken_from":String(h.civ_name),"status":"held","garrison":int(h.garrison),
 				"commander":String(h.commander),"people_here":int(h.population),"by_status":"all %d free in their houses; nothing has been done to them since we took it" % int(h.population)})
 	out["towns"]=towns
 
@@ -188,7 +189,7 @@ static func town(civ_id:String,region_id:String)->Dictionary:
 	var ruin:Dictionary=c.get("ruin",{})
 	var status:="held" if String(h.state)=="held" else ("ruin" if bool(h.ruin) else ("ours" if bool(h.ours) else "theirs again"))
 	var rs:Dictionary=ruin.get("resettle",{}) if ruin.get("resettle") is Dictionary else {}
-	var t:={"name":String(c.name),"region_id":region_id,"civ_id":civ_id,"taken_from":civ_name,"status":status,"held":bool(h.held),"why_not_held":Ledger.hold_words(h),
+	var t:={"name":TownNames.of(civ_id,region_id,String(c.name)),"region_id":region_id,"civ_id":civ_id,"taken_from":civ_name,"status":status,"held":bool(h.held),"why_not_held":Ledger.hold_words(h),
 		"garrison":int(h.garrison),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
 		"people_here":int(c.here),"by_status":Ledger.here_words(c),
 		"men_here":int(c.here_men),"men_free":int(c.free_men),"men_bound":int(c.bound_men)+int(c.worker_men if _labour_from_bound(force) else 0),"hostages":int(c.hostage),
@@ -288,7 +289,7 @@ static func _war(out:Dictionary)->void:
 	var garrisons:Array=[]
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
-		garrisons.append({"town":String(force.get("region_name","")),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
+		garrisons.append({"town":TownNames.of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name",""))),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
 			"fed":fed_facts(Supply.of_force(force))})
 	out["garrisons"]=garrisons
 	var chases:Array=[]
@@ -445,7 +446,7 @@ static func _tribute(out:Dictionary)->void:
 	if mc!=null:
 		for f in mc.occupation_forces:
 			var fate:Variant=(f as Dictionary).get("fate")
-			if fate is Dictionary and int((fate as Dictionary).get("tribute",0))>0: taken.append("%d Food from %s" % [int(fate.tribute),String((f as Dictionary).get("region_name",""))])
+			if fate is Dictionary and int((fate as Dictionary).get("tribute",0))>0: taken.append("%d Food from %s" % [int(fate.tribute),TownNames.of(String((f as Dictionary).get("civ_id","")),String((f as Dictionary).get("region_id","")),String((f as Dictionary).get("region_name","")))])
 	out["tribute_taken"]=taken
 	var peoples:Array=[]
 	var world:Variant=_world()

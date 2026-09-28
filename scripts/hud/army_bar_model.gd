@@ -227,11 +227,7 @@ static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 	var gear:=gear_of(force.get("formations",[]),mc)
 	var make:=make_of(force.get("formations",[]))
 	var supply:=supply_of(force)
-	# The town's name as the map letters it (supply_state.town_name).
-	var told:=String(force.get("region_name","the town"))
-	var reader:=supply_reader()
-	if reader!=null and reader.has_method("town_name"):told=String(reader.call("town_name",String(force.get("civ_id","")),String(force.get("region_id","")),told))
-	var town:=ArmyMarks.place(told)
+	var town:=ArmyMarks.place(preload("res://scripts/town_names.gd").of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name","the town"))))
 	var general:=_general(force)
 	var hungry:=Rations.is_hungry(force)
 	var will:=clampf(float(force.get("morale",0.6)),0.0,1.0)
