@@ -916,9 +916,10 @@
    "expect": {"handled": false, "known": true, "reply_any": ["{garrison}"], "prompt_has": ["Tsaren: {garrison} fighters"]}},
 
   {"id": "q.at_war.headman", "domain": "office_questions", "fixture": "war_not_held", "speaker": "headman", "source": "design",
+   "note": "Early feuds: the Esurai (270) and Seanstone (900) are both below the war line (conflict_scale.gd), so the sheet names the fighting as a feud; expectation changed from 'At war with: Esurai' to 'In a feud with: Esurai'.",
    "say": "Are we at war with anyone?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["At war with: Esurai"]},
+   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["In a feud with: Esurai"]},
    "variants": ["are we at war with anyone", "Kishan, who are we at war with"]},
 
   {"id": "q.last_fight.suri", "domain": "office_questions", "fixture": "battle_won", "speaker": "suri", "source": "design",
@@ -1382,6 +1383,29 @@
   {"id": "q.new_towns.war", "domain": "office_questions", "fixture": "war_not_held", "speaker": "suri", "source": "design",
    "note": "Every official at court knows the god's word on new towns; the war leader says it, and no band moves.",
    "say": "Are our leaders still founding new towns?", "ideal": {"kind": "question", "action": "none", "type": "none"},
-   "expect": {"handled": false, "known": true, "state": {"auto_found": "==before", "moving": "==before", "to_tsaren": "==before"}, "reply_has": ["found new towns on their own"], "prompt_has": ["New towns: our leaders found them on their own"]}}
+   "expect": {"handled": false, "known": true, "state": {"auto_found": "==before", "moving": "==before", "to_tsaren": "==before"}, "reply_has": ["found new towns on their own"], "prompt_has": ["New towns: our leaders found them on their own"]}},
+
+  {"id": "feud.at_war.headman", "domain": "feud", "fixture": "feud_unfound", "speaker": "headman", "source": "design",
+   "note": "Early feuds: a small people raiding us is a feud, never a war (conflict_scale.gd). Asked whether we are at war with them, the headman says so in plain words from the sheet, and nothing moves.",
+   "say": "Are we at war with the Neyali?", "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "state": {"trackers": "==before", "at_war": "==before", "moving": "==before"}, "reply_has": ["feud", "Neyali"], "reply_lacks": ["We are at war with the Neyali"], "prompt_has": ["In a feud with: Neyali"]},
+   "variants": ["are we at war with the neyali", "Kishan, who are we fighting?"]},
+
+  {"id": "feud.burn_stores.suri", "domain": "feud", "fixture": "feud_unfound", "speaker": "suri", "source": "design",
+   "note": "Early feuds: Suri comes about the Neyali raid; 'burn their stores' at a home nobody has found sends a few trackers after the raiders' trail (war_loop.gd NEEDS_HOME), never a war band and never a war.",
+   "say": "Burn their stores", "ideal": {"kind": "order", "action": "raid", "type": "people", "ref": "$neyali", "confidence": 0.9},
+   "expect": {"state": {"trackers": ">before", "at_war": "==before", "moving": "==before", "feud": "==1"}},
+   "variants": ["burn the neyali stores to the ground", "Suri, burn their granaries"]},
+
+  {"id": "feud.burn_stores.headman", "domain": "feud", "fixture": "feud_unfound", "speaker": "headman", "source": "design",
+   "note": "Early feuds: the same order said to the headman goes to the war leader: trackers first, the odds stated, no march on a place nobody has seen.",
+   "say": "Burn their stores", "ideal": {"kind": "order", "action": "raid", "type": "people", "ref": "$neyali", "confidence": 0.9},
+   "expect": {"verb": "war", "kind": "track", "verdict": "act", "state": {"trackers": ">before", "at_war": "==before", "moving": "==before"}, "says_has": ["raiders' trail", "Nobody here knows where the Neyali live"], "says_lacks": ["declare", "No scout has brought back"]}},
+
+  {"id": "feud.go_to_war.headman", "domain": "feud", "fixture": "feud_unfound", "speaker": "headman", "source": "design",
+   "note": "Early feuds: the player may say 'go to war with the Neyali', 'declare war on them' or 'attack them'. The court understands it as a strike in the feud and acts (trackers first while nobody knows where they live), in feud words, never refusing or lecturing about declarations.",
+   "say": "Go to war with the Neyali", "ideal": {"kind": "order", "action": "attack", "type": "people", "ref": "$neyali", "confidence": 0.9},
+   "expect": {"verb": "war", "kind": "track", "verdict": "act", "state": {"trackers": ">before", "at_war": "==before", "moving": "==before"}, "says_lacks": ["declare", "too few", "cannot", "No scout has brought back"]},
+   "variants": ["Declare war on them", "Attack them", "declare war on the neyali!"]}
  ]
 }

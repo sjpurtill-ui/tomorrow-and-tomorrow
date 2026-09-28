@@ -170,7 +170,10 @@ static func ties(id:String)->Array[Dictionary]:
 	var state:Dictionary=model().public_snapshot(id)
 	var civ:Dictionary=WorldSimulation.diplomacy.civilization(id)
 	var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
-	if bool(relation.get("at_war",false)):out.append({"text":"At war with you","tip":"No promise holds while you are at war.","tone":"danger"})
+	# A small people's fight is a feud (war_loop.gd), never called a war.
+	var war_loop:GDScript=load("res://scripts/war_loop.gd")
+	if war_loop!=null and bool(war_loop.call("feuding",id)) and bool(war_loop.call("hot",id)):out.append({"text":"In a feud with you","tip":"Raids and killings back and forth; no promise holds while the feud is hot.","tone":"danger"})
+	elif bool(relation.get("at_war",false)):out.append({"text":"At war with you","tip":"No promise holds while you are at war.","tone":"danger"})
 	var league:Dictionary=state.get("league",{})
 	if not league.is_empty() and id in league.get("members",[]):out.append({"text":"In your league","tip":LEAGUE_TERMS,"tone":"gold"})
 	for pact:Dictionary in Pacts.pacts(id):out.append({"text":"Trade: %s" % Pacts.short_words(pact.terms),"tip":exchange_tip(pact),"tone":"good"})

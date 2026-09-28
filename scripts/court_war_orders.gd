@@ -224,13 +224,23 @@ static func find_target(text:String,context_civ:String="")->Dictionary:
 		if context_civ!="":
 			var own:=_primary_place(places,context_civ)
 			if not own.is_empty(): return own
+		# "Them": the one people we fight, at war or in a feud (war_loop.gd).
 		var hostile:Array[String]=[]
+		var open_fight:=false
+		var war_loop:GDScript=load(WAR_LOOP_PATH)
 		for c:Dictionary in civs:
 			var rel:Dictionary=c.get("player_relation",{}) if c.get("player_relation") is Dictionary else {}
-			if bool(rel.get("at_war",false)): hostile.append(String(c.id))
+			if bool(rel.get("at_war",false)) or (war_loop!=null and bool(war_loop.call("feuding",String(c.id)))):
+				hostile.append(String(c.id))
+				open_fight=open_fight or bool(rel.get("at_war",false))
 		if hostile.size()==1:
 			var at_war:=_primary_place(places,hostile[0])
 			if not at_war.is_empty(): return at_war
+			# A people we only feud with, nowhere of theirs known: that people,
+			# to be found first (the war leader sends trackers after their
+			# raiders; _target_problem), never another people's town. An open
+			# fight reads on as before (a town of theirs we hold, say).
+			if not open_fight: return {"unknown":Hall._civ_name(hostile[0]),"civ_id":hostile[0]}
 		var peoples:Dictionary={}
 		for p:Dictionary in places: peoples[String(p.civ_id)]=String(p.civ_name)
 		if peoples.size()==1: return _primary_place(places,String(peoples.keys()[0]))
@@ -1803,9 +1813,54 @@ static func _object(out:Dictionary,reason:String,says:String,fix:String)->Dictio
 static func _target_problem(out:Dictionary,target:Dictionary,kind:String)->Dictionary:
 	if target.has("ambiguous"):
 		return _no(out,"ambiguous_target","Which people? We know of %s." % " and ".join(PackedStringArray(target.ambiguous)),"Name the town and I will look to it.")
+	# A people we feud with whose home nobody has found: "attack them", "go to
+	# war with them", "burn their stores". Nobody strikes a home we cannot find;
+	# a few trackers follow their raiders' trail to find it (war_loop.gd).
+	var feud_civ:=String(target.get("civ_id",""))
+	if feud_civ=="" and target.is_empty(): feud_civ=_the_feud()
+	if feud_civ!="" and kind in ["attack","raid","siege"]:
+		var tracked:=_track_them(out,feud_civ)
+		if not tracked.is_empty(): return tracked
 	if target.has("unknown"):
 		return _no(out,"unknown_place","No scout has brought back where %s stands. I cannot march on a place nobody has seen." % String(target.unknown),"Send scouts toward it; once they are back, give the order again.")
 	return _no(out,"no_target","You have not told me where to %s." % {"attack":"strike","siege":"lay siege","raid":"raid"}.get(kind,"go"),"Name the town.")
+
+## The one people we are feuding with ("" when none, or several).
+static func _the_feud()->String:
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
+	if war_loop==null or WorldSimulation.world==null: return ""
+	var found:=""
+	for c in WorldSimulation.world.civilizations:
+		if not c is Dictionary: continue
+		var id:=String((c as Dictionary).get("id",""))
+		if id=="" or id=="player" or not bool(war_loop.call("feuding",id)): continue
+		if found!="": return ""
+		found=id
+	return found
+
+## A feud order against a people whose home is not found: trackers go out
+## after their raiders' trail (war_loop.order war_track), the odds stated.
+## {} when this is not that (their home is known, or it is no feud).
+static func _track_them(out:Dictionary,civ_id:String)->Dictionary:
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
+	if war_loop==null or not bool(war_loop.call("feuding",civ_id)) or bool(war_loop.call("home_known",civ_id)): return {}
+	var name:=Hall._civ_name(civ_id)
+	var f:Dictionary=war_loop.call("front",civ_id)
+	var busy:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
+	if not busy.is_empty():
+		var left:=maxi(0,int(busy.get("due",0))-int(WorldSimulation.state.elapsed_days))
+		var already:=_no(out,"already_out","%s is already out against the %s with %s; they should be back in about %d %s." % [String(busy.get("general","Our band")),name,_fighters(int(busy.get("band",0))),left,"day" if left==1 else "days"],"")
+		already.outcome="Nothing new is set in motion: a band of ours is already out against the %s." % name
+		return already
+	var said:=String(war_loop.call("order",civ_id,"war_track",false))
+	var op:Dictionary=(war_loop.call("front",civ_id) as Dictionary).get("op",{})
+	var day:=int(WorldSimulation.state.elapsed_days)
+	out.verdict="act"; out.kind="track"; out.reason="track"
+	out["target"]={"civ_id":civ_id,"civ_name":name,"unknown":name}
+	out.objective={"army_id":0,"kind":"track","civ_id":civ_id,"band":int(op.get("band",0)),"days":maxi(0,int(op.get("due",day))-day)}
+	out.says="Nobody here knows where the %s live, so there is nothing of theirs to strike at yet. %s" % [name,said]
+	out.outcome="%d trackers set out on the %s raiders' trail to find where they live." % [int(op.get("band",0)),name]
+	return out
 
 static func _drill_words(drill:float)->String:
 	if drill<0.08: return "have barely begun their drill"
@@ -1997,7 +2052,10 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var as_they_are:=insist and (drilled<UNDRILLED or (unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE) or going<MIN_FORCE)
 	out.verdict="act"
 	out.objective={"army_id":army_id,"army_name":String(army.get("name","")),"city_id":String(target.city_id),"civ_id":String(target.civ_id),"kind":kind,"days":days,"troops":going,"route_km":km,"own_band":own_band,"mustered":mustered}
-	var declared:="" if at_war else " Nobody has declared war; it begins when we reach %s." % name
+	# A small people's fight is a feud (conflict_scale.gd): nobody declares
+	# anything to them, before or after.
+	var feud:=not bool((load(WAR_LOOP_PATH) as GDScript).call("formal",String(target.civ_id)))
+	var declared:="" if at_war else (" Nobody declares anything to them; the fighting begins when we reach %s." % name if feud else " Nobody has declared war; it begins when we reach %s." % name)
 	if own_band:
 		out.says="My band of %d marches %s %s from where it stands, %s. It is %d km%s, about %d days.%s%s" % [going,verb,name,where,km,roundabout,days," They go as they are." if as_they_are else "",declared]
 	else:
@@ -2006,7 +2064,7 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		out.says="%d of us march %s %s. It is %d km%s, about %d days. %s%s%s" % [going,verb,name,km,roundabout,days,left,raw_words,declared]
 	var party:="%s's band" % String(out.general) if own_band else String(army.get("name","The host"))
 	out.outcome="%s sets out for %s, about %d %s by land." % [party,name,days,"day" if days==1 else "days"]
-	out["chronicle"]="%s leaves with %s for %s: %d km%s, about %d days on the road.%s" % [party,_fighters(going),name,km,roundabout,days,"" if at_war else " There was no declaration; the war begins when they reach %s, and %s will hear of it before then." % [name,Hall._civ_name(String(target.civ_id))]]
+	out["chronicle"]="%s leaves with %s for %s: %d km%s, about %d days on the road.%s" % [party,_fighters(going),name,km,roundabout,days,"" if at_war else (" Nobody declared anything; the fighting begins when they reach %s, and %s will hear of it before then." if feud else " There was no declaration; the war begins when they reach %s, and %s will hear of it before then.") % [name,Hall._civ_name(String(target.civ_id))]]
 	_on_departure(out,army,target,at_war)
 	return out
 
@@ -2015,7 +2073,7 @@ static func _night_words(odds:Dictionary,going:int,name:String,days:int,ground:S
 	var theirs:=("about %d of theirs" % int(odds.watchers)) if bool(odds.counted) else "a watch nobody has counted"
 	var road:=("%s on the road" % _span(days)) if days>0 else "no march at all"
 	var cover:=String({"forest":"with woods to hide in","rough":"over broken ground","pass":"through the hills","marsh":"through wet ground","ford":"across the ford","bridge":"over the bridge"}.get(ground,"over open ground"))
-	var wary:=", and they are at war with us and watching" if at_war else ""
+	var wary:=", and they are fighting us and watching" if at_war else ""
 	return "By night: %s against %s, %s, %s%s. The chance we reach %s unseen is %s." % [_fighters(going),theirs,road,cover,wary,name,Tactics.chance_words(float(odds.chance))]
 
 

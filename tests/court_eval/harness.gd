@@ -267,6 +267,7 @@ func ref_of(token:String,w:Dictionary)->String:
 		"$eldwick": return "town:"+String(info.get("eldwick_id",""))
 		"$esurai": return "people:"+String(info.get("civ_id",""))
 		"$varesh": return "people:"+String(info.get("varesh_id",""))
+		"$neyali": return "people:"+String(info.get("feud_id",""))
 		"$home": return "home"
 		"$rovik": return "figure:"+String(info.get("rovik_fid",""))
 		"$band": return "band:%d" % int(info.get("band_id",0))
@@ -524,6 +525,15 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["aim_god"]=god
 	var relation:Dictionary=(CivilizationSystem.civilizations[0] as Dictionary).get("player_relation",{})
 	m["at_war"]=1 if bool(relation.get("at_war",false)) else 0
+	# A feud (war_loop.gd): whether it is on, and the war leader's band out in
+	# it (trackers after the raiders' trail, or a strike), for the feud world's
+	# people or else the Esurai.
+	var WarLoop:GDScript=load("res://scripts/war_loop.gd")
+	var feud_civ:=String(info.get("feud_id",civ))
+	var feud_op:Dictionary=(WarLoop.call("_peek",feud_civ) as Dictionary).get("op",{})
+	m["feud"]=1 if bool(WarLoop.call("feuding",feud_civ)) else 0
+	m["trackers"]=1 if String(feud_op.get("objective",""))=="war_track" else 0
+	m["feud_ops"]=0 if feud_op.is_empty() else 1
 	m["opinion_x100"]=roundi(float(relation.get("opinion",0.0))*100.0)
 	m["dread_x100"]=roundi(Divine.civ_dread(civ)*100.0)
 	m["scouts"]=CivilizationSystem.scout_missions.size()
@@ -565,7 +575,9 @@ static func _material(m:Dictionary)->String:
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
-		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found"]
+		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
+		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
+		"trackers","feud_ops","feud"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

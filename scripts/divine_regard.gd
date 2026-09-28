@@ -361,7 +361,10 @@ static func foreign_regard(civ_id:String)->Dictionary:
 	var tension:=clampf(float(relation.get("border_tension",0.0)),0.0,1.0)
 	var dread:=clampf(civ_dread(civ_id)+tension*0.3,0.0,1.0)
 	var id:="undecided"; var words:="are undecided about you"
-	if bool(relation.get("at_war",false)): id="war"; words="are at war with you"
+	# A small people's fight is a feud, not a war (conflict_scale.gd).
+	var feud:=not preload("res://scripts/conflict_scale.gd").formal(civ_id) and bool((load("res://scripts/war_loop.gd") as GDScript).call("hot",civ_id))
+	if feud: id="war"; words="are in a feud with you"
+	elif bool(relation.get("at_war",false)): id="war"; words="are at war with you"
 	elif dread>=0.55 and reverence>=0.55: id="awe"; words="hold you in awe"
 	elif dread>=0.55: id="fear"; words="fear your wrath"
 	elif reverence>=0.65: id="honor"; words="honour you"

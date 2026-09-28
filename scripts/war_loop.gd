@@ -29,6 +29,21 @@ extends RefCounted
 ## - Rival wars drag the player in. Standing with kin (a marriage or alliance)
 ##   in their war sends your fighters to it: war with their enemy. Standing
 ##   with a people you are not bound to only earns their enemy's raiders.
+## - FEUD, NOT WAR, FOR SMALL PEOPLES (conflict_scale.gd). Below the war line
+##   nothing declares or opens a war: the top of the ladder is an ambush that
+##   kills, a killed envoy starts a blood feud, and standing with kin in a
+##   feud earns their enemy's raiders. The war leader answers with the feud's
+##   own acts: guard, pursue, track, burn (a home we know), strike at their
+##   headman, send word, pay a blood price, or let it pass. A feud is hot
+##   while blood was spilled within FEUD_HOT_DAYS (no envoys come from them
+##   then, audience_hall.gd); it cools after FEUD_COLD_DAYS of quiet, with a
+##   blood price, a parley that holds, their exhaustion or a marriage, and
+##   flares with every new killing. A small people found "at war" (an older
+##   save, a war opened before this rule) becomes a feud (reconcile()): the
+##   dead, the raids and the grudges stay; fronts, terms and the general's
+##   campaign go. The god's own attack on a small people keeps the engine's
+##   war flag only while our band is out against them or holds a town of
+##   theirs, and is told as the feud.
 ##
 ## State lives in ForeignDiplomacy.audiences["war"] (saved with the audience
 ## hall; older saves start with an empty ledger). Static helpers; preload.
@@ -37,6 +52,8 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
 const EraNames:=preload("res://scripts/era_names.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Scale:=preload("res://scripts/conflict_scale.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 
 const VERSION:=1
@@ -76,10 +93,35 @@ const LEVEL_DECAY_DAYS:=4*365
 const QUIET_DAYS:=365
 ## Worn-out raiders stop coming; the war can then go quiet.
 const ENEMY_SPENT:=0.55
+## A feud is hot while either side has spilled the other's blood (or struck at
+## them) within this many days, while their raiders are on the way or a band
+## of ours is out against them: that people sends nobody into the hall.
+const FEUD_HOT_DAYS:=365
+## With no blood spilled either way for this long, a feud goes cold.
+const FEUD_COLD_DAYS:=3*365
+## A worn-out or frightened people's peace-seeker comes only after the raids
+## have stopped this long, and at most once a year.
+const PEACE_QUIET_DAYS:=120
+const PEACE_GAP:=365
+## Worn out enough to send a peace-seeker (the feud's own exhaustion), or
+## dreading the god this much (divine_regard.gd via court_lives.rival_dread).
+const PEACE_WORN:=0.4
+const PEACE_DREAD:=0.35
+## A blood price: Food for each life of theirs we took, never less than this.
+const PRICE_PER_DEAD:=15.0
+const PRICE_MIN:=10.0
+## A feud settled (a blood price, a parley, a marriage) keeps the raiders
+## home this long.
+const SETTLED_DAYS:=3*365
+## A killing ambush, the feud's top rung, after a fight at the border.
+const AMBUSH_CHANCE:=0.35
+## Envoy business a hot conflict still lets through: those who come to end it.
+## In a feud only after the raids have stopped a while (envoy_gate()).
+const PEACE_TYPES:=["feud_peace","dread_tribute","peace_feeler","town_return","captive_plea","people_plea"]
 
 ## How often a ruler with a real grievance comes, by signature trait.
 const FOLLOW:={"grudge":0.9,"hunter":0.8,"ledger":0.72,"bluffer":0.7,"magpie":0.62,"matchmaker":0.5}
-const OBJECTIVES:=["war_guard","war_pursue","war_burn","war_chief","war_parley","war_pay","war_general","war_let","war_rest","war_track"]
+const OBJECTIVES:=["war_guard","war_pursue","war_burn","war_chief","war_parley","war_pay","war_general","war_let","war_rest","war_track","war_price"]
 const TARGETS:={
 	"fields":{"words":"the planted fields","who":"field hands","lethal":true},
 	"herds":{"words":"the herds","who":"herders","lethal":true},
@@ -157,9 +199,12 @@ static func summary()->Dictionary:
 		if bool(r.get("follow",false)): followed+=1
 		if int(r.get("harm_day",-1))>=0 and int(r.harm_day)-int(r.day)<=730: within+=1
 	var at_war:Array=[]
+	var feuding:Array=[]
 	for civ_id in s.fronts:
-		if not ((s.fronts[civ_id] as Dictionary).get("war",{}) as Dictionary).is_empty(): at_war.append(String(civ_id))
-	return {"stats":(s.stats as Dictionary).duplicate(),"real_refusals":real,"followed":followed,"harmed_within_2y":within,"at_war":at_war}
+		var f:Dictionary=s.fronts[civ_id]
+		if not (f.get("war",{}) as Dictionary).is_empty(): at_war.append(String(civ_id))
+		elif int(f.get("level",0))>=1: feuding.append(String(civ_id))
+	return {"stats":(s.stats as Dictionary).duplicate(),"real_refusals":real,"followed":followed,"harmed_within_2y":within,"at_war":at_war,"feuding":feuding}
 
 # --------------------------------------------------------------------------
 # Peoples, strength and bands
@@ -446,6 +491,11 @@ static func after_answer(audience:Dictionary,option_id:String)->void:
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
 	var type:=String(situation.get("type",""))
 	var bluff:=bool((audience.get("hidden",{}) as Dictionary).get("bluff",false)) if audience.get("hidden") is Dictionary else false
+	# Their peace-seeker, or frightened tribute brought while we feud: taking it
+	# ends the feud; turning it away keeps it.
+	if type=="feud_peace" or (type=="dread_tribute" and feuding(civ_id) and option_id in ["accept","accept_return"]):
+		_peace_answered(audience,option_id)
+		return
 	if kind=="threat" and option_id in ["defy","counter"] and not bluff: on_refusal(audience,option_id)
 	elif kind=="threat" and option_id in ["defy","counter"] and bluff: _stat("bluffs_called")
 	elif kind=="threat" and option_id=="pay": _stat("paid")
@@ -493,28 +543,59 @@ static func _mark_harm(civ_id:String,day:int)->void:
 
 static func _truce_binds(civ_id:String,day:int)->bool:
 	var relation:=_relation(civ_id)
-	return String(relation.get("treaty","none"))=="non_aggression" or int(relation.get("truce_until_day",0))>day
+	if String(relation.get("treaty","none"))=="non_aggression" or int(relation.get("truce_until_day",0))>day: return true
+	# A feud settled with a blood price or a parley, and kin by marriage, keep
+	# their raiders home.
+	if int(_peek(civ_id).get("settled_until",-1))>day: return true
+	return not _married(civ_id).is_empty()
+
+## A marriage between our peoples (rival_rulers.gd bonds): kin do not raid kin.
+## Read only: a ruler whose character is not yet made has no bonds (asking
+## never makes one; the character's birth and death stay where they fall).
+static func _married(civ_id:String)->Dictionary:
+	var known:Variant=ForeignDiplomacy.leaders.get(civ_id,{})
+	var c:Variant=(known as Dictionary).get("character") if known is Dictionary else null
+	if not c is Dictionary: return {}
+	for b in (c as Dictionary).get("bonds",[]):
+		if b is Dictionary and String((b as Dictionary).get("kind",""))=="marriage" and int((b as Dictionary).get("until",1<<30))>_day(): return b
+	return {}
 
 static func _execute(civ_id:String,day:int)->void:
 	var f:=front(civ_id)
 	var pending:Dictionary=f.pending
 	f["pending"]={}
 	var relation:=_relation(civ_id)
-	if relation.is_empty() or bool(relation.get("at_war",false)): return
+	var formal:=Scale.formal(civ_id)
+	# In a war their host comes (_enemy_op); in a feud their raiders come even
+	# while our own band is out against them.
+	if relation.is_empty() or (bool(relation.get("at_war",false)) and formal): return
 	if _truce_binds(civ_id,day):
-		_log(civ_id,"held_back","%s kept to the truce." % _name(civ_id))
+		var why:="%s kept to the truce." % _name(civ_id)
+		if not _married(civ_id).is_empty(): why="%s did not come: kin by marriage do not raid kin." % _name(civ_id)
+		elif int(f.get("settled_until",-1))>day: why="%s kept to the settlement of the feud." % _name(civ_id)
+		_log(civ_id,"held_back",why)
+		return
+	# A people worn out by the feud keeps its raiders home.
+	if not formal and float(f.get("their_exh",0.0))>=ENEMY_SPENT:
+		_log(civ_id,"stood_down","%s has buried too many of its own; no raiders came." % _name(civ_id),{"ref":String(pending.get("ref",""))})
 		return
 	if day-int(f.last_harm)>LEVEL_DECAY_DAYS: f["level"]=maxi(0,int(f.level)-1)
 	var rival:=_rival(civ_id)
 	var rng:=_rng("rung:%s:%d" % [civ_id,day])
 	var level:=int(f.level)
 	var cause:=String(pending.get("cause","refusal"))
-	# The ladder is strict: war comes only after they have already fought us
-	# at the border (a skirmish of theirs within three years).
-	if level>=2 and day-int(f.get("last_skirmish",-99999))<=3*365 and day-int(f.last_war_end)>=WAR_COOLDOWN:
-		var p_war:=clampf(0.12+ratio(civ_id)*0.12+float(rival.get("grudge_weight",0.0))*0.1+(0.1 if String(rival.get("trait","")) in ["grudge","hunter"] else 0.0),0.1,0.5)
-		if rng.randf()<p_war:
-			declare(civ_id,day,_cause_words(civ_id,cause))
+	# The ladder is strict: the top rung comes only after they have already
+	# fought us at the border (a skirmish of theirs within three years). Among
+	# peoples organised for war that rung is war; among small peoples it is an
+	# ambush that kills (conflict_scale.gd): nobody declares anything.
+	if level>=2 and day-int(f.get("last_skirmish",-99999))<=3*365:
+		if formal and day-int(f.last_war_end)>=WAR_COOLDOWN:
+			var p_war:=clampf(0.12+ratio(civ_id)*0.12+float(rival.get("grudge_weight",0.0))*0.1+(0.1 if String(rival.get("trait","")) in ["grudge","hunter"] else 0.0),0.1,0.5)
+			if rng.randf()<p_war:
+				declare(civ_id,day,_cause_words(civ_id,cause))
+				return
+		elif not formal and rng.randf()<AMBUSH_CHANCE+minf(float(rival.get("grudge_weight",0.0)),1.0)*0.1:
+			_raid(civ_id,day,cause,true,true)
 			return
 	if level>=1 and rng.randf()<0.6: _raid(civ_id,day,cause,true)
 	else: _raid(civ_id,day,cause,false)
@@ -535,21 +616,26 @@ static func _cause_words(civ_id:String,cause:String)->String:
 # Raids and skirmishes
 # --------------------------------------------------------------------------
 
-static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
+static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=false)->Dictionary:
 	var f:=front(civ_id)
 	var name:=_name(civ_id)
 	var key:="raid:%s:%d" % [civ_id,day]
 	var rng:=_rng(key)
 	var target:=_pick_target(civ_id,rng)
+	# An ambush waits for people out in the open: hunters, herders, gatherers.
+	if ambush and not target in AMBUSHED: target=String(AMBUSHED[rng.randi_range(0,AMBUSHED.size()-1)])
+	if ambush and target=="herds" and not "animal_taming" in GameState.known_discoveries: target="hunters"
 	var t:Dictionary=TARGETS[target]
 	var guarded:=int(f.guard_until)>day
 	var their_n:=_band_size(_their_pop(civ_id),rng.randf_range(0.05,0.07) if skirmish else rng.randf_range(0.03,0.05))
-	var our_n:=_band_size(_our_pop(),rng.randf_range(0.04,0.06) if (skirmish or guarded) else rng.randf_range(0.02,0.035))
+	# Those they lie in wait for are the few out at the work, not a war band.
+	var our_n:=_band_size(_our_pop(),rng.randf_range(0.02,0.035) if ambush and not guarded else (rng.randf_range(0.04,0.06) if (skirmish or guarded) else rng.randf_range(0.02,0.035)))
 	var civ:=_civ(civ_id)
 	var general:=_general()
 	var attacker:=_band("%s raiders" % name,their_n,float(civ.get("knowledge",0.15)),float(civ.get("military_readiness",0.5)),"their war leader",0.5)
 	var defender:=_band("%s" % String(GameState.settlement_name),our_n,_our_tech(),0.55 if guarded else 0.4,String(general.get("name","")),_general_skill(general) if guarded else 0.4)
-	var fight:=_clash(attacker,defender,1.35 if guarded else 1.0,key)
+	# An ambush strikes from cover; the watch at the approaches takes that away.
+	var fight:=_clash(attacker,defender,1.35 if guarded else (0.85 if ambush else 1.0),key)
 	var won:=bool(fight.won)
 	var lethal:=bool(t.lethal)
 	var our_dead:=_cap_dead(int(fight.def_dead),_our_pop()) if lethal else 0
@@ -557,13 +643,14 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if not skirmish and not won: their_dead=mini(their_dead,1)
 	var stock:=Hall.player_stock("Food")
 	var loot:=0.0
-	if won: loot=minf(stock*rng.randf_range(0.05,0.12)*(1.4 if skirmish else 1.0),float(their_n)*CARRY)
-	elif rng.randf()<0.4: loot=minf(stock*0.02,float(their_n)*4.0)
+	# They came for blood, not stores: an ambush carries off little.
+	if won: loot=minf(stock*rng.randf_range(0.05,0.12)*(0.25 if ambush else (1.4 if skirmish else 1.0)),float(their_n)*CARRY)
+	elif rng.randf()<0.4 and not ambush: loot=minf(stock*0.02,float(their_n)*4.0)
 	if target=="scouts": loot=minf(loot,12.0)
 	var taken:=EXCHANGE.take("player","Food",loot) if loot>=1.0 else 0.0
 	if taken>0.0: Hall._credit_civ(civ_id,"Food",taken*(0.5 if target=="fields" else 1.0))
 	var captives:=0
-	if won and lethal and target in ["gathering","hunters","herds"] and rng.randf()<(0.3 if skirmish else 0.18): captives=1
+	if won and lethal and target in ["gathering","hunters","herds"] and rng.randf()<(0.35 if ambush else (0.3 if skirmish else 0.18)): captives=1
 	var names:=_names(our_dead,key,0.5 if target in ["gathering","racks"] else 0.15)
 	our_dead=_our_deaths(our_dead)
 	their_dead=_their_deaths(civ_id,their_dead)
@@ -572,19 +659,33 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	var rivals:=_rivals()
 	if cause=="refusal": rivals.call("settle_grudges",civ_id,0.4)
 	if their_dead>0: rivals.call("grudge",civ_id,"the %s we lost at your %s" % ["hunters" if their_dead>1 else "hunter",String(t.words).trim_prefix("the ").trim_prefix("a ").trim_prefix("our ")],0.25,"raid_dead:"+key)
+	var fresh:=int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>LEVEL_DECAY_DAYS or int(f.level)<1
 	f["level"]=maxi(int(f.level),2 if skirmish else 1)
-	if int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>LEVEL_DECAY_DAYS: f["feud_since"]=day
+	if fresh: _begin_feud(f,day)
 	f["last_harm"]=day
 	if skirmish: f["last_skirmish"]=day
 	f["taken"]=taken
-	f["last_raid"]={"day":day,"target":target,"their_n":their_n,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"skirmish":skirmish,"cause":cause,"names":names}
+	f["last_raid"]={"day":day,"target":target,"their_n":their_n,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"skirmish":skirmish,"ambush":ambush,"cause":cause,"names":names}
+	_tally(civ_id,"raids",our_dead+captives,their_dead)
 	_mark_harm(civ_id,day)
-	_stat("skirmishes" if skirmish else "raids")
+	_stat("ambushes" if ambush else ("skirmishes" if skirmish else "raids"))
+	# Blood asks for blood: raiders who left their own dead on our ground may
+	# come back for them, unless the feud has worn them out.
+	if their_dead>0 and (f.pending as Dictionary).is_empty() and float(f.get("their_exh",0.0))<ENEMY_SPENT:
+		var again:=clampf(0.3+minf(float(_rival(civ_id).get("grudge_weight",0.0)),2.5)*0.1,0.3,0.55)
+		if rng.randf()<again: _schedule(civ_id,day+rng.randi_range(60,240),"vengeance",key)
+	# Vengeance that drew no blood is not yet paid: they may come again.
+	if cause=="vengeance" and our_dead+captives<=0 and (f.pending as Dictionary).is_empty() and float(f.get("their_exh",0.0))<ENEMY_SPENT and rng.randf()<0.5:
+		_schedule(civ_id,day+rng.randi_range(60,240),"vengeance",key)
 	# Told plainly: who came, where, who died, what was taken, and why.
 	var where:=String(t.words)
 	var text:=""
 	if target=="scouts":
 		text="%d %s men caught %s in the open and drove them home. They took %d Food from the packs." % [their_n,name,where,roundi(taken)]
+	elif ambush:
+		text="%d %s men lay in wait for our %s and fell on them. %s" % [their_n,name,String(t.who),_dead_words(our_dead,names,String(t.who))]
+		if their_dead>0: text+=" %d of theirs fell." % their_dead
+		if taken>=1.0: text+=" They took %d Food." % roundi(taken)
 	elif skirmish:
 		text="%d %s fighters crossed the border at %s and our people met them. %s" % [their_n,name,where,_dead_words(our_dead,names,String(t.who))]
 		if their_dead>0: text+=" %d of theirs fell." % their_dead
@@ -596,13 +697,35 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if captives>0: text+=" One of ours was taken away with them."
 	if guarded and not won: text+=" The watch at the approaches held."
 	text+=" It was for %s." % _cause_words(civ_id,cause) if cause!="" else ""
-	var title:="%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_cap(where.trim_prefix("our "))]
+	var title:="%s Ambush Our %s" % [name,_cap(String(t.who))] if ambush else "%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_cap(where.trim_prefix("our "))]
 	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
 	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id,seen)
 	ForeignDiplomacy.remember(civ_id,"Our %s went against the god's people at %s and came home with %d Food." % ["fighters" if skirmish else "raiders",where,roundi(taken)])
-	_log(civ_id,"skirmish" if skirmish else "raid",text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause})
+	_log(civ_id,"ambush" if ambush else ("skirmish" if skirmish else "raid"),text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause})
 	_file(civ_id,"raided",text,day)
 	return f.last_raid
+
+## Where an ambush waits: people out at their work in the open.
+const AMBUSHED:=["hunters","gathering","herds"]
+
+## A feud begins (or begins again after going cold): its own count of the
+## dead, the raids and the strikes starts now; the grudges carry over.
+static func _begin_feud(f:Dictionary,day:int)->void:
+	f["feud_since"]=day
+	for key in ["our_dead","their_dead","raids","strikes"]: f[key]=0
+	f["our_exh"]=0.0; f["their_exh"]=0.0
+	f.erase("cold_day")
+
+## One exchange of the feud, counted: who struck ("raids" theirs, "strikes"
+## ours), the dead on each side, and how worn each people is by it (the same
+## measure a war keeps, _exhaust).
+static func _tally(civ_id:String,kind:String,our_dead:int,their_dead:int)->void:
+	var f:=front(civ_id)
+	f[kind]=int(f.get(kind,0))+1
+	f["our_dead"]=int(f.get("our_dead",0))+our_dead
+	f["their_dead"]=int(f.get("their_dead",0))+their_dead
+	f["our_exh"]=clampf(float(f.get("our_exh",0.0))+0.03+float(our_dead)/_our_pop()*6.0,0.0,1.0)
+	f["their_exh"]=clampf(float(f.get("their_exh",0.0))+0.03+float(their_dead)/_their_pop(civ_id)*6.0,0.0,1.0)
 
 static func _cap(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
@@ -612,8 +735,13 @@ static func _cap(text:String)->String:
 # --------------------------------------------------------------------------
 
 static func declare(civ_id:String,day:int,cause:String,ally:String="")->bool:
+	## War between peoples organised for it. Between smaller peoples nothing is
+	## declared: the feud flares instead (blood_feud) and false is returned.
 	var index:=Hall._civ_index(civ_id)
 	if index<0: return false
+	if not Scale.formal(civ_id):
+		blood_feud(civ_id,day,cause,ally)
+		return false
 	var world:=WorldSimulation.world
 	var civ:Dictionary=world.civilizations[index]
 	var relation:Dictionary=civ.get("player_relation",{})
@@ -649,9 +777,14 @@ static func declare(civ_id:String,day:int,cause:String,ally:String="")->bool:
 
 static func _adopt(civ_id:String,day:int)->void:
 	## A war opened by other means (an invasion, an uprising, a declaration the
-	## god sent): the general takes it up.
+	## god sent): the general takes it up. Against a small people there is no
+	## war to take up: the god's own band is out against them, and that is the
+	## feud (_feud_from_attack).
 	var f:=front(civ_id)
 	if not (f.war as Dictionary).is_empty(): return
+	if not Scale.formal(civ_id):
+		_feud_from_attack(civ_id,day)
+		return
 	var relation:=_relation(civ_id)
 	var rng:=_rng("adopt:%s:%d" % [civ_id,day])
 	f["level"]=3
@@ -671,10 +804,293 @@ static func _stand_with(ally:String,enemy:String)->void:
 		_schedule(enemy,day+_rng("sided_day:%s:%d" % [enemy,day]).randi_range(60,240),"sided","stand:"+ally)
 
 static func stand_words(civ_id:String,enemy:String,name:String,enemy_name:String)->String:
-	## The option text for standing with a people at war.
+	## The option text for standing with a people at war (or in a feud).
 	var kin:=not (_rivals().call("has_bond",civ_id,["marriage","ally"]) as Dictionary).is_empty()
+	if kin and enemy!="" and not Scale.formal(enemy): return "You are kin to %s: your fighters go to stand with them, and %s will count you in the feud and send raiders." % [name,enemy_name]
 	if kin: return "You are kin to %s: your fighters go to their war, and %s will be at war with you." % [name,enemy_name]
 	return "Warmer with %s; %s will count you an enemy's friend, and may send raiders." % [name,enemy_name]
+
+# --------------------------------------------------------------------------
+# Feuds: small peoples fight by raid and vengeance (conflict_scale.gd)
+# --------------------------------------------------------------------------
+
+static func formal(civ_id:String)->bool:
+	return Scale.formal(civ_id)
+
+## The front if it exists, never made by asking (nor the ledger itself).
+static func _peek(civ_id:String)->Dictionary:
+	var holder:Variant=ForeignDiplomacy.get("audiences")
+	var s:Variant=(holder as Dictionary).get("war") if holder is Dictionary else null
+	if not s is Dictionary or int((s as Dictionary).get("version",0))!=VERSION or int((s as Dictionary).get("world_seed",GameState.world_seed))!=int(GameState.world_seed): return {}
+	var fronts:Variant=(s as Dictionary).get("fronts")
+	var v:Variant=(fronts as Dictionary).get(civ_id) if fronts is Dictionary else null
+	return v if v is Dictionary else {}
+
+## Is fighting between this people and ours hot today? A war is; a feud is
+## while blood was spilled either way within FEUD_HOT_DAYS, while their
+## raiders are on the way, while a band of ours is out against them, or while
+## the god's own band fights them (the engine's war flag). A hot people sends
+## nobody into the hall but a rare peace-seeker (envoy_gate).
+static func hot(civ_id:String,day:int=-1)->bool:
+	if day<0: day=_day()
+	if bool(_relation(civ_id).get("at_war",false)): return true
+	var f:=_peek(civ_id)
+	if f.is_empty(): return false
+	if not (f.get("war",{}) as Dictionary).is_empty(): return true
+	if not (f.get("pending",{}) as Dictionary).is_empty() and not _truce_binds(civ_id,day): return true
+	var op:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
+	if not op.is_empty() and String(op.get("objective",""))!="war_parley": return true
+	return int(f.get("level",0))>=1 and day-int(f.get("last_harm",-99999))<FEUD_HOT_DAYS
+
+## Is there a feud with this people (hot or simmering, not yet cold)?
+static func feuding(civ_id:String,day:int=-1)->bool:
+	if day<0: day=_day()
+	if Scale.formal(civ_id) and bool(_relation(civ_id).get("at_war",false)): return false
+	var f:=_peek(civ_id)
+	if f.is_empty(): return bool(_relation(civ_id).get("at_war",false))
+	if not (f.get("war",{}) as Dictionary).is_empty(): return false
+	return int(f.get("level",0))>=1 or bool(_relation(civ_id).get("at_war",false))
+
+## Days since blood was last spilled either way (99999 when never).
+static func quiet_days(civ_id:String,day:int=-1)->int:
+	if day<0: day=_day()
+	var f:=_peek(civ_id)
+	return day-int(f.get("last_harm",-99999)) if not f.is_empty() else 99999
+
+## The feud as the court, the map and the tests read it: {} when there is
+## none. {civ_id, name, hot, since, days, raids, strikes, our_dead,
+## their_dead, last_harm, quiet, home_known, way, cause, open_fight}.
+static func feud_view(civ_id:String,day:int=-1)->Dictionary:
+	if day<0: day=_day()
+	if not feuding(civ_id,day): return {}
+	var f:=_peek(civ_id)
+	var since:=int(f.get("feud_since",f.get("last_harm",day))) if not f.is_empty() else day
+	if since<0: since=int(f.get("last_harm",day))
+	var relation:=_relation(civ_id)
+	if bool(relation.get("at_war",false)) and (f.is_empty() or int(f.get("level",0))<1): since=int(relation.get("war_started_day",day))
+	return {"civ_id":civ_id,"name":_name(civ_id),"hot":hot(civ_id,day),"since":since,"days":maxi(0,day-since),"raids":int(f.get("raids",0)),"strikes":int(f.get("strikes",0)),
+		"our_dead":int(f.get("our_dead",0)),"their_dead":int(f.get("their_dead",0)),"last_harm":int(f.get("last_harm",-1)),"quiet":quiet_days(civ_id,day),
+		"home_known":home_known(civ_id),"way":_way_words(civ_id) if home_known(civ_id) else "","cause":String(f.get("cause","")),"open_fight":bool(relation.get("at_war",false)),
+		"last_raid":(f.get("last_raid",{}) as Dictionary).duplicate() if f.get("last_raid") is Dictionary else {}}
+
+## Every feud with a people we know, the hottest first.
+static func feuds(day:int=-1)->Array[Dictionary]:
+	if day<0: day=_day()
+	var out:Array[Dictionary]=[]
+	if WorldSimulation.world==null: return out
+	for civ in WorldSimulation.world.civilizations:
+		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
+		var id:=String((civ as Dictionary).get("id",""))
+		if id=="" or id=="player": continue
+		var relation:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
+		if int(relation.get("contact_level",0))<=0 and not bool(relation.get("at_war",false)): continue
+		var view:=feud_view(id,day)
+		if not view.is_empty(): out.append(view)
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.last_harm)>int(b.last_harm))
+	return out
+
+## "the killing of their envoy", "the tribute you would not pay": why they fight.
+static func _feud_cause(civ_id:String)->String:
+	var f:=_peek(civ_id)
+	var cause:=String(f.get("cause",""))
+	if cause!="": return cause
+	var raid:Dictionary=f.get("last_raid",{}) if f.get("last_raid") is Dictionary else {}
+	if not raid.is_empty(): return _cause_words(civ_id,String(raid.get("cause","")))
+	return "old wrongs"
+
+## A feud begins or flares: a killing, a war that cannot be (declare() between
+## small peoples), kin standing together. Their raiders will come (a raid is
+## scheduled unless one already is); nothing hostile of theirs waits to come
+## to the hall; the war leader carries the matter. Returns what was told.
+static func blood_feud(civ_id:String,day:int,cause:String,ally:String="",source:String="")->String:
+	var index:=Hall._civ_index(civ_id)
+	if index<0: return ""
+	var f:=front(civ_id)
+	var fresh:=int(f.level)<1 or int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>FEUD_COLD_DAYS
+	if fresh: _begin_feud(f,day)
+	f["level"]=maxi(int(f.level),2)
+	f["last_harm"]=maxi(int(f.last_harm),day)
+	if cause!="": f["cause"]=cause.substr(0,120)
+	f.erase("settled_until")
+	Hall._shift_relation(civ_id,-0.12,0.2)
+	var rng:=_rng("blood:%s:%d" % [civ_id,day])
+	if (f.pending as Dictionary).is_empty(): _schedule(civ_id,day+rng.randi_range(20,90),"vengeance",source if source!="" else "blood")
+	_purge_occasions(civ_id)
+	var name:=_name(civ_id)
+	var text:=""
+	if ally!="": text="Your fighters go to stand with %s. %s counts you in its feud now, and its raiders will come for us too." % [_name(ally),name]
+	else: text="%s will have vengeance for %s. Their raiders will come for blood, and every killing on either side will ask for another." % [name,cause]
+	var general:=_general()
+	if not general.is_empty(): text+=" %s waits at the fire for your word." % EraNames.given_of(String(general.get("name","")))
+	_chronicle("feud:%s:%d" % [civ_id,day],"Blood Feud With %s" % name if fresh else "The Feud With %s Flares" % name,text,"moment",civ_id)
+	ForeignDiplomacy.remember(civ_id,"We will have blood for %s." % cause if ally=="" else "The god's people stand with %s against us." % _name(ally))
+	_log(civ_id,"feud",text,{"ally":ally,"fresh":fresh})
+	_stat("blood_feuds" if fresh else "feud_flares")
+	_mark_harm(civ_id,day)
+	_file(civ_id,"feud",text,day)
+	return text
+
+## Their envoy was killed at our court (court_commands.gd). A small people
+## answers with a blood feud at once; a people organised for war prepares for
+## war (rival_rulers.gd). Returns true when the feud began.
+static func envoy_slain(civ_id:String,envoy_name:String)->bool:
+	if Scale.formal(civ_id): return false
+	var who:=envoy_name.get_slice(" ",0) if envoy_name!="" else "their envoy"
+	blood_feud(civ_id,_day(),"the killing of their envoy %s" % who,"","envoy")
+	return true
+
+## The god's own band is out against a small people (the engine's war flag):
+## that is the feud, hot from today. Struck at home, they answer with raiders
+## of their own unless the feud has worn them out.
+static func _feud_from_attack(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	if int(f.level)<1 or int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>FEUD_COLD_DAYS: _begin_feud(f,day)
+	f["level"]=maxi(int(f.level),2)
+	f["last_harm"]=maxi(int(f.last_harm),day)
+	f["last_strike"]=day
+	f["strikes"]=int(f.get("strikes",0))+1
+	if String(f.get("cause",""))=="": f["cause"]="our attack on them"
+	f.erase("settled_until")
+	_purge_occasions(civ_id)
+	var rng:=_rng("answer:%s:%d" % [civ_id,day])
+	if (f.pending as Dictionary).is_empty() and float(f.get("their_exh",0.0))<ENEMY_SPENT and rng.randf()<0.5: _schedule(civ_id,day+rng.randi_range(20,120),"vengeance","attack")
+	_stat("feuds_from_attack")
+
+## Have our spears struck this people since that day (a band of ours at their
+## stores, their chief or their raiders; the god's own attack)?
+static func struck_since(civ_id:String,day:int)->bool:
+	var f:=_peek(civ_id)
+	if int(f.get("last_strike",-99999))>=day: return true
+	for e in state().log:
+		if e is Dictionary and String((e as Dictionary).get("civ",""))==civ_id and int((e as Dictionary).get("day",-1))>=day and String((e as Dictionary).get("kind","")) in ["op_burn","op_chief","op_pursue"]: return true
+	return false
+
+## Their business still waiting to come to the hall, gone: a people at feud
+## brings no demands, boasts or gifts. Those who come to end it are kept.
+static func _purge_occasions(civ_id:String)->void:
+	var list:Array=Hall.state().occasions
+	for occasion in list.duplicate():
+		if not occasion is Dictionary or String((occasion as Dictionary).get("civ_id",""))!=civ_id: continue
+		if String((occasion as Dictionary).get("type","")) in ["feud_peace","peace_possible"]: continue
+		if String((occasion as Dictionary).get("type","")) in Hall.COURT_OCCASIONS: continue
+		list.erase(occasion)
+
+## Whether an envoy of this people may come, and with what business:
+## "" (no fight between us: the hall's own business stands), "none" (a hot
+## feud or war: nobody comes), or "peace" (only those who come to end it:
+## allowed() then says which business).
+static func envoy_gate(civ_id:String,day:int=-1)->String:
+	if day<0: day=_day()
+	if not hot(civ_id,day): return ""
+	if not feuding(civ_id,day): return "peace"
+	return "peace" if peace_due(civ_id,day) else "none"
+
+## A feud's peace-seeker may come: the raids stopped PEACE_QUIET_DAYS ago,
+## nobody of ours is out against them, and they are worn out, dread the god,
+## or are beaten (towns lost, people taken).
+static func peace_due(civ_id:String,day:int=-1)->bool:
+	if day<0: day=_day()
+	var f:=_peek(civ_id)
+	if f.is_empty() or quiet_days(civ_id,day)<PEACE_QUIET_DAYS: return false
+	var op:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
+	if not op.is_empty() and String(op.get("objective",""))!="war_parley": return false
+	if not (f.get("pending",{}) as Dictionary).is_empty(): return false
+	return float(f.get("their_exh",0.0))>=PEACE_WORN or _dread(civ_id)>=PEACE_DREAD or bool(Hall._aftermath().call("defeated",civ_id))
+
+static func _dread(civ_id:String)->float:
+	var lives:=Hall._lives()
+	return float(lives.call("rival_dread",civ_id)) if lives!=null else 0.0
+
+## The envoy business a hot conflict lets through (PEACE_TYPES), as weights.
+static func peace_mix(civ_id:String,mix:Dictionary)->Dictionary:
+	var out:={}
+	var feud:=feuding(civ_id)
+	for type in mix:
+		if not String(type) in PEACE_TYPES: continue
+		# A feud has no heralds under a sign of truce: its peace-seeker brings a
+		# gift or a blood price (feud_peace).
+		if feud and String(type)=="peace_feeler": continue
+		out[type]=mix[type]
+	if feud and peace_due(civ_id): out["feud_peace"]=maxf(1.0,float(out.get("feud_peace",0.0)))
+	return out
+
+## What their peace-seeker brings: Food for our dead (a blood price) or a gift
+## to end it. {resource, amount, price(bool)}; {} when they have nothing.
+static func peace_terms(civ_id:String)->Dictionary:
+	var f:=_peek(civ_id)
+	var dead:=int(f.get("our_dead",0))
+	var want:=maxf(PRICE_MIN,float(dead)*PRICE_PER_DEAD)
+	var have:=Hall.foreign_stock(civ_id,"Food")
+	var amount:=Hall._nice(minf(want,have*0.4)) if have>=0.0 else Hall._nice(want)
+	if have>=0.0 and have<PRICE_MIN: return {}
+	return {"resource":"Food","amount":amount,"price":dead>0}
+
+## A feud ends: a blood price, a parley that held, a peace-seeker heard, a
+## marriage, a ransom. Grudges are settled in part; their raiders stay home
+## for SETTLED_DAYS; the dead of the whole feud are told once.
+static func _end_feud(civ_id:String,day:int,why:String,text:String)->void:
+	var f:=front(civ_id)
+	var name:=_name(civ_id)
+	var told:="%s In all, %d of ours and %d of theirs died in the feud." % [text,int(f.get("our_dead",0)),int(f.get("their_dead",0))]
+	f["level"]=0; f["pending"]={}
+	f["settled_until"]=day+SETTLED_DAYS
+	f["feud_end"]={"day":day,"why":why}
+	f["guard_until"]=-1
+	_rivals().call("settle_grudges",civ_id,0.6)
+	Hall._shift_relation(civ_id,0.08,-0.2)
+	_chronicle("feud_end:%s:%d" % [civ_id,day],"The Feud With %s Is Settled" % name,told,"moment",civ_id)
+	ForeignDiplomacy.remember(civ_id,"The feud with the god's people is settled: %s." % why)
+	_log(civ_id,"feud_end",told,{"why":why,"our_dead":int(f.get("our_dead",0)),"their_dead":int(f.get("their_dead",0))})
+	_stat("feud_ends_"+why.replace(" ","_"))
+	_drop_matters(civ_id)
+
+## No blood either way for FEUD_COLD_DAYS: the feud goes cold. Nobody made
+## peace and nobody forgot (the grudges stay, and can send raiders again).
+static func _feud_cold(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	var name:=_name(civ_id)
+	f["level"]=0
+	f["cold_day"]=day
+	var winters:=maxi(1,roundi(float(day-int(f.last_harm))/365.0))
+	var text:="Neither side has spilled blood for %s %s. The feud with %s has gone cold. Nobody made peace, and nobody has forgotten: %d of ours and %d of theirs died in it." % [EraWords.count_word(winters),"winter" if winters==1 else "winters",name,int(f.get("our_dead",0)),int(f.get("their_dead",0))]
+	_chronicle("feud_cold:%s:%d" % [civ_id,day],"The Feud With %s Goes Cold" % name,text,"notice",civ_id)
+	_log(civ_id,"feud_cold",text,{"our_dead":int(f.get("our_dead",0)),"their_dead":int(f.get("their_dead",0))})
+	_stat("feuds_cold")
+	_drop_matters(civ_id)
+
+## The blood price we would pay them: Food for each life of theirs we took in
+## the feud (never less than PRICE_MIN).
+static func blood_price(civ_id:String)->float:
+	var f:=_peek(civ_id)
+	return Hall._nice(maxf(PRICE_MIN,float(int(f.get("their_dead",0)))*PRICE_PER_DEAD))
+
+## Now and then a worn-out or frightened people at feud sends someone to end
+## it (feud_peace), never while the raids go on, at most once a year.
+static func _peace_seeker(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	if day-int(f.get("peace_asked",-99999))<PEACE_GAP or not peace_due(civ_id,day): return
+	if Hall.foreign_stock(civ_id,"Food")>=0.0 and peace_terms(civ_id).is_empty(): return
+	var chance:=0.012+float(f.get("their_exh",0.0))*0.02+_dread(civ_id)*0.02
+	if _rng("peace_seek:%s:%d" % [civ_id,day]).randf()>=chance: return
+	f["peace_asked"]=day
+	Hall._add_occasion({"key":"feud_peace:%s:%d" % [civ_id,day],"type":"feud_peace","civ_id":civ_id,"day":day,"not_before":day,"expires":day+90,"crisis":true,
+		"data":{"text":"they come to end the feud"}})
+	_stat("peace_seekers")
+
+## The god's answer to their peace-seeker (audience_hall feud_peace).
+static func _peace_answered(audience:Dictionary,option_id:String)->void:
+	var civ_id:=String(audience.get("civ_id",""))
+	var day:=_day()
+	var name:=_name(civ_id)
+	if option_id in ["accept","accept_return"]:
+		var terms:Dictionary=audience.get("terms",{}) if audience.get("terms") is Dictionary else {}
+		_end_feud(civ_id,day,"peace sought","%s sent %s to end the feud, and you took it. Their raiders will not come for it." % [name,Hall._terms_text(terms)])
+		return
+	if option_id in ["refuse","decline"]:
+		var f:=front(civ_id)
+		f["peace_asked"]=day
+		_rivals().call("grudge",civ_id,"how you turned away our peace",0.25,"peace_refused:%d" % day)
+		_log(civ_id,"peace_refused","%s's peace was turned away; the feud goes on." % name)
 
 static func _objective_for_general(civ_id:String,general:Dictionary,at_war:bool)->String:
 	## What the war leader does without the god's word, by their own character.
@@ -790,6 +1206,10 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 	if at_war and not (war.op as Dictionary).is_empty():
 		war["queued"]=objective
 		return "%s is already in the field. Your word will stand when they are back." % gname
+	# In a feud one band goes out at a time; the word waits for it to come back.
+	var out_now:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
+	if not at_war and not out_now.is_empty() and objective in ["war_pursue","war_burn","war_chief","war_track","war_parley"]:
+		return "%s is already out against %s. Give your word again when they are back." % [String(out_now.get("general",gname)),_name(civ_id)]
 	var rng:=_rng("order:%s:%s:%d" % [civ_id,objective,day])
 	var name:=_name(civ_id)
 	_stat("orders_auto" if auto else "orders")
@@ -815,6 +1235,18 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 			if paid>0.0: Hall._credit_civ(civ_id,"Food",paid)
 			_close_war(civ_id,day,"tribute paid","You paid %d Food. %s's fighters went home." % [roundi(paid),name])
 			return "You paid %d Food to %s, and the war is over." % [roundi(paid),name]
+		"war_price":
+			# A blood price ends a feud; a war ends only on its own terms.
+			if at_war: return "This is a war. Only their terms, a truce or their exhaustion end it."
+			var price:=blood_price(civ_id)
+			var short:=Hall._short("Food",price)
+			if short!="": return "%s The blood price for %s's dead is %d Food." % [short,name,roundi(price)]
+			var paid2:=Hall._debit_player("Food",price)
+			if paid2>0.0: Hall._credit_civ(civ_id,"Food",paid2)
+			var dead:=int(f.get("their_dead",0))
+			_end_feud(civ_id,day,"blood price","You sent %d Food to %s as a blood price%s. The blood between us is paid, and their raiders will not come for it." % [roundi(paid2),name,(" for the %d of theirs we killed" % dead) if dead>0 else ""])
+			_log(civ_id,"order","price",{"auto":auto,"paid":roundi(paid2)})
+			return "%s carries %d Food to %s as a blood price. The feud is settled; their raiders will not come for it." % [gname,roundi(paid2),name]
 	var band:=_band_size(_our_pop(),rng.randf_range(0.05,0.07)) if objective!="war_parley" else 2
 	if objective=="war_track": band=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
 	var due:=day+_march_days(civ_id,rng)
@@ -852,6 +1284,9 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 		var accept:=0.25+(float(war.get("their_exh",0.0))*0.9 if at_war else 0.35)+float(war.get("score",0))*0.06-float(rival.get("grudge_weight",0.0))*0.12-(0.15 if String(rival.get("trait",""))=="grudge" else 0.0)+float(rival.get("dread",0.0))*0.2
 		if rng.randf()<clampf(accept,0.05,0.9):
 			if at_war: _close_war(civ_id,day,"truce","The messengers came back with a truce. %s's fighters are going home." % name)
+			elif int(f.level)>=2 or int(f.get("our_dead",0))+int(f.get("their_dead",0))>0:
+				# Blood was spilled: word that holds ends the feud itself.
+				_end_feud(civ_id,day,"parley","%s's messengers came back: %s will send no more raiders, and the feud is set down." % [gname,name])
 			else:
 				f["level"]=maxi(0,int(f.level)-1); f["pending"]={}
 				_rivals().call("settle_grudges",civ_id,0.5)
@@ -930,6 +1365,12 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 	var dead_text:=_dead_words(our_dead,names,"fighters")
 	if our_dead>0: text+=" "+dead_text
 	if loot>0.0: EXCHANGE.receive("player","Food",loot)
+	# A headman taken in a feud is ransomed at once, and his people swear off.
+	var ransomed:=0.0
+	if objective=="war_chief" and won and not at_war:
+		ransomed=EXCHANGE.take(civ_id,"Food",maxf(10.0,Hall.foreign_stock(civ_id,"Food")*0.25))
+		if ransomed>0.0: EXCHANGE.receive("player","Food",ransomed)
+		text+=" %s ransomed their chief for %d Food and swore to send no more raiders." % [name,roundi(ransomed)]
 	if at_war:
 		war["score"]=int(war.get("score",0))+(1 if won else -1)
 		war["last_fight"]=day
@@ -937,14 +1378,21 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 		_record_battle(civ_id,title,our_dead,their_dead,captives,"won" if won else "lost")
 	else:
 		# Blood for blood: a people you strike may come back for more.
-		f["level"]=maxi(int(f.level),2 if objective=="war_burn" else 1)
+		if int(f.level)<1 or int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>FEUD_COLD_DAYS: _begin_feud(f,day)
+		f["level"]=maxi(int(f.level),2 if objective=="war_burn" or their_dead>0 else 1)
+		f["last_harm"]=day
+		f["last_strike"]=day
+		_tally(civ_id,"strikes",our_dead,their_dead+captives)
 		if their_dead>0 or objective=="war_burn":
 			_rivals().call("grudge",civ_id,"the %s you burned" % "stores" if objective=="war_burn" else "hunters you killed on our own ground",0.4,"struck:"+key)
-			if rng.randf()<(0.6 if objective=="war_burn" else 0.4): _schedule(civ_id,day+rng.randi_range(60,300),"vengeance",key)
+			if ransomed<=0.0 and rng.randf()<(0.6 if objective=="war_burn" else 0.4) and (f.pending as Dictionary).is_empty(): _schedule(civ_id,day+rng.randi_range(60,300),"vengeance",key)
 	Hall._shift_relation(civ_id,-0.05,0.08)
 	var seen:=_observe(key,title,String(OP_WHERE.get(objective,"on their own ground")),civ_id,"attacker",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":0,"away_taken":captives})
 	_chronicle(key,title,text,"moment",civ_id,seen)
 	_log(civ_id,"op_"+objective.trim_prefix("war_"),text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"loot":roundi(loot),"captives":captives})
+	if ransomed>0.0 or (objective=="war_chief" and won and not at_war):
+		_end_feud(civ_id,day,"ransom","%s ransomed their chief for %d Food." % [name,roundi(ransomed)])
+		return
 	if at_war and bool(war.get("chief_held",false)): return
 	_file(civ_id,"report",text,day)
 
@@ -1065,10 +1513,18 @@ static func daily(day:int)->void:
 	# The authored General Campaign runs its own war; leave it alone.
 	if WorldSimulation.system("GeneralCampaign")!=null and bool(WorldSimulation.campaign.active): return
 	var s:=state()
-	# Wars opened by other means are taken up by the war leader.
+	# A small people found "at war" fights on as a feud once no band of ours is
+	# out against it (an older save, a war opened before the rule).
+	reconcile(day)
+	# Wars opened by other means are taken up by the war leader; the god's own
+	# attack on a small people is the feud, hot from the day it began.
 	for civ in WorldSimulation.world.civilizations:
 		var relation:Dictionary=civ.get("player_relation",{})
-		if bool(relation.get("at_war",false)) and bool(civ.get("alive",true)) and not bool(civ.get("general_campaign_owned",false)) and int(relation.get("contact_level",0))>=1 and ((front(String(civ.id)).war as Dictionary).is_empty()): _adopt(String(civ.id),day)
+		if not bool(relation.get("at_war",false)) or not bool(civ.get("alive",true)) or bool(civ.get("general_campaign_owned",false)) or int(relation.get("contact_level",0))<1: continue
+		var cid:=String(civ.id)
+		if Scale.formal(cid):
+			if (front(cid).war as Dictionary).is_empty(): _adopt(cid,day)
+		else: _open_fight(cid,relation,day)
 	for civ_id in (s.fronts as Dictionary).keys():
 		var id:=String(civ_id)
 		var f:=front(id)
@@ -1085,6 +1541,7 @@ static func daily(day:int)->void:
 			if not op.is_empty() and day>=int(op.get("due",day)):
 				f["op"]={}
 				_resolve_op(id,op,day)
+			_feud_day(id,day)
 			continue
 		if not bool(_relation(id).get("at_war",false)):
 			_close_war(id,day,"truce","%s and your people have made peace." % _name(id))
@@ -1110,6 +1567,209 @@ static func daily(day:int)->void:
 	if day%30==0:
 		_grudges(day)
 		_rival_wars(day)
+
+## The god's own band against a small people (the engine's war flag): the feud
+## is hot from the day the fight began, and while blood is being spilled.
+static func _open_fight(civ_id:String,relation:Dictionary,day:int)->void:
+	var f:=front(civ_id)
+	var started:=int(relation.get("war_started_day",day))
+	if int(f.get("fight_from",-99999))!=started:
+		f["fight_from"]=started
+		_feud_from_attack(civ_id,day)
+	elif _battle_live(civ_id): f["last_harm"]=day
+
+## A fight of ours with them is on right now (a siege, a battle, their band
+## met in the field).
+static func _battle_live(civ_id:String)->bool:
+	var mc:Variant=WorldSimulation.military
+	return mc!=null and mc.has_method("has_active_operation_for_civ") and bool(mc.has_active_operation_for_civ(civ_id))
+
+## A band of ours is out against them, fighting them, or holds a town of
+## theirs: the engine's war flag stays while the god's own fight goes on.
+static func _our_fight_live(civ_id:String)->bool:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return false
+	if _battle_live(civ_id): return true
+	for a in mc.field_armies:
+		if not a is Dictionary: continue
+		var op:Variant=(a as Dictionary).get("city_operation")
+		if op is Dictionary and String((op as Dictionary).get("civ_id",""))==civ_id: return true
+		var ordered:Variant=(a as Dictionary).get("court_order")
+		if ordered is Dictionary and String((ordered as Dictionary).get("civ_id",""))==civ_id and String((a as Dictionary).get("status",""))=="moving": return true
+	for force in mc.occupation_forces:
+		if force is Dictionary and String((force as Dictionary).get("civ_id",""))==civ_id and int((force as Dictionary).get("troops",0))>0: return true
+	return false
+
+## Each tick of a feud: kin by marriage end it, three quiet winters make it go
+## cold, and a worn-out or frightened people may send someone to end it.
+static func _feud_day(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	if int(f.level)<1 or bool(_relation(civ_id).get("at_war",false)): return
+	if not _married(civ_id).is_empty():
+		_end_feud(civ_id,day,"marriage","The marriage between our peoples has ended the feud with %s: kin do not raid kin." % _name(civ_id))
+		return
+	if day-int(f.last_harm)>=FEUD_COLD_DAYS and (f.pending as Dictionary).is_empty() and (f.get("op",{}) as Dictionary).is_empty():
+		_feud_cold(civ_id,day)
+		return
+	_peace_seeker(civ_id,day)
+
+## ONE RULE FOR OLD AND NEW: a small people found "at war" with us (a save
+## from before the rule; a war opened by other means) fights on as a feud. The
+## dead, the raids and the grudges stay; the fronts, the terms and the
+## general's campaign go at once. The engine's war flag itself stays while a
+## band of ours is out against them or we hold a town of theirs (the god's own
+## fight), and goes when that fight is over. Two small peoples at war with each
+## other feud too (CivilizationSystem.reconcile_rival_feuds). Runs on load and
+## each tick. Returns the peoples whose war (or open fight) became the feud.
+static func reconcile(day:int=-1)->Array:
+	if day<0: day=_day()
+	var out:Array=[]
+	var world:Variant=WorldSimulation.world
+	if world==null: return out
+	for index in world.civilizations.size():
+		var civ:Dictionary=world.civilizations[index]
+		var id:=String(civ.get("id",""))
+		if id=="" or bool(civ.get("general_campaign_owned",false)) or not bool(civ.get("alive",true)): continue
+		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+		if not bool(relation.get("at_war",false)) or Scale.formal(id): continue
+		if _our_fight_live(id):
+			# Our band is still out: their war from before the rule is a feud
+			# already, and the engine's flag waits for our band.
+			if not (_peek(id).get("war",{}) as Dictionary).is_empty():
+				_war_to_feud(id,day,true)
+				out.append(id)
+			continue
+		_war_to_feud(id,day)
+		out.append(id)
+	if world.has_method("reconcile_rival_feuds"): world.reconcile_rival_feuds(day)
+	return out
+
+## The dead of the engine's war record for this fight not yet in the feud's
+## count ({ours, theirs}): the god's own strikes are fought by the field army
+## (MilitaryCampaign), whose battles the record keeps. Each record is counted
+## once, however often the feud reads it.
+static func _record_dead(f:Dictionary,civ_id:String,war_id:String)->Dictionary:
+	var out:={"ours":0,"theirs":0}
+	var world:Variant=WorldSimulation.world
+	if war_id=="" or world==null or not world.has_method("_war_record_index"): return out
+	var at:int=world._war_record_index(war_id)
+	if at<0: return out
+	var casualties:Dictionary=world.war_history[at].get("casualties",{}) if world.war_history[at].get("casualties") is Dictionary else {}
+	var ours:=0; var theirs:=0
+	for side in casualties:
+		var c:Dictionary=casualties[side] if casualties[side] is Dictionary else {}
+		var n:=int(c.get("military_dead",0))+int(c.get("civilian_dead",0))
+		if String(side)=="player": ours+=n
+		elif String(side)==civ_id: theirs+=n
+	var seen:Dictionary=f.get("war_dead_seen",{}) if f.get("war_dead_seen") is Dictionary else {}
+	var before:Dictionary=seen.get(war_id,{}) if seen.get(war_id) is Dictionary else {}
+	out.ours=maxi(0,ours-int(before.get("ours",0)))
+	out.theirs=maxi(0,theirs-int(before.get("theirs",0)))
+	seen[war_id]={"ours":ours,"theirs":theirs}
+	while seen.size()>4: seen.erase(seen.keys()[0])
+	f["war_dead_seen"]=seen
+	return out
+
+## Why a war that became a feud was fought, in words: a killed envoy first
+## (rival_rulers.gd keeps the wrong), else the war's own cause.
+static func _war_cause(civ_id:String,war:Dictionary,relation:Dictionary)->String:
+	var r:GDScript=_rivals()
+	if r!=null and not ForeignDiplomacy.leader(civ_id).is_empty():
+		var wronged:=String(r.call("envoy_wrong_words",civ_id))
+		if wronged!="": return wronged
+	var cause:=String(war.get("cause",""))
+	if cause!="" and cause!="the war": return cause
+	var world:Variant=WorldSimulation.world
+	var war_id:=String(relation.get("war_id",war.get("war_id","")))
+	if world!=null and war_id!="" and world.has_method("_war_record_index"):
+		var at:int=world._war_record_index(war_id)
+		if at>=0:
+			var said:=String(world.war_history[at].get("cause",""))
+			for lead in ["Vengeance for ","War over "]: said=said.trim_prefix(lead)
+			# The god's own attack (record_player_hostile_order, declare_war).
+			for ours in ["A player","A commanded","War declared by"]:
+				if said.begins_with(ours): return "our attack on them"
+			if said!="" and not said.begins_with("Ongoing"): return (_rivals().call("narrate",said) as String) if r!=null else said
+	return "old wrongs"
+
+## One war, as a feud (reconcile): what it cost both sides is kept, their
+## raiders keep coming, and nothing of a war is left. keep_flag: a band of
+## ours is still out against them, so the engine's war flag and record stay
+## until it is home. When the god's own strike on a people already feuding
+## with us is over, the feud simply goes on (no new word in the Chronicle).
+static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
+	var index:=Hall._civ_index(civ_id)
+	if index<0: return
+	var world:=WorldSimulation.world
+	var civ:Dictionary=world.civilizations[index]
+	var relation:Dictionary=civ.get("player_relation",{})
+	var f:=front(civ_id)
+	var war:Dictionary=(f.war as Dictionary).duplicate(true)
+	var started:=int(relation.get("war_started_day",war.get("start",day)))
+	if started<0: started=int(war.get("start",day))
+	started=mini(started,day)
+	var last:=maxi(int(war.get("last_fight",war.get("start",started))),int((war.get("last_attack",{}) as Dictionary).get("day",-99999)))
+	last=maxi(last,int(f.get("last_harm",-99999)))
+	if last<0: last=started
+	var had:=int(f.level)>=1 and int(f.get("feud_since",-1))>=0 and started-int(f.last_harm)<=FEUD_COLD_DAYS
+	# The god's own strike, over, on a people the feud already counts.
+	var quiet:=had and war.is_empty()
+	var cause:=String(f.get("cause","")) if had and String(f.get("cause",""))!="" else _war_cause(civ_id,war,relation)
+	if not had: _begin_feud(f,started)
+	# What the war cost both sides is the feud's own count (the war leader's
+	# own tally, or the field army's battles in the war record, whichever
+	# counted more); its raids and strikes are counted from the log (one ledger).
+	var war_id:=String(relation.get("war_id",war.get("war_id","")))
+	var recorded:=_record_dead(f,civ_id,war_id)
+	f["our_dead"]=int(f.get("our_dead",0))+maxi(int(war.get("our_dead",0)),int(recorded.ours))
+	f["their_dead"]=int(f.get("their_dead",0))+maxi(int(war.get("their_dead",0)),int(recorded.theirs))
+	f["our_exh"]=maxf(float(f.get("our_exh",0.0)),float(war.get("our_exh",0.0)))
+	f["their_exh"]=maxf(float(f.get("their_exh",0.0)),float(war.get("their_exh",0.0)))
+	var raids:=0; var strikes:=0
+	for e in state().log:
+		if not e is Dictionary or String((e as Dictionary).get("civ",""))!=civ_id or int((e as Dictionary).get("day",-1))<int(f.feud_since): continue
+		var kind:=String((e as Dictionary).get("kind",""))
+		if kind in ["raid","skirmish","ambush","enemy_attack"]: raids+=1
+		elif kind in ["op_burn","op_chief","op_pursue"]: strikes+=1
+	f["raids"]=maxi(int(f.get("raids",0)),raids); f["strikes"]=maxi(int(f.get("strikes",0)),strikes)
+	f["level"]=2
+	f["last_harm"]=last
+	f["cause"]=cause.substr(0,120)
+	f["fight_from"]=int(relation.get("war_started_day",-1))
+	f.erase("settled_until")
+	# Our band out in the war comes back in the feud; the general's own
+	# campaign, the terms and the next host of theirs are gone.
+	var op:Dictionary=war.get("op",{}) if war.get("op") is Dictionary else {}
+	if not op.is_empty() and (f.get("op",{}) as Dictionary).is_empty(): f["op"]=op
+	f["war"]={}
+	if (f.pending as Dictionary).is_empty() and day-last<FEUD_HOT_DAYS:
+		var next:=maxi(day+20,int(war.get("next_enemy",day+_rng("feud_next:%s:%d" % [civ_id,day]).randi_range(30,90))))
+		_schedule(civ_id,next,"vengeance","war")
+	if not keep_flag:
+		relation["at_war"]=false; relation["treaty"]="none"; relation["stance"]="hostile"
+		relation["war_goal"]="limited"; relation["war_target_region_id"]=""; relation["war_score"]=0.0; relation["conflict_turns"]=0
+		relation["last_war_result"]="became a feud"
+		civ["player_relation"]=relation
+		world.civilizations[index]=civ
+		if war_id!="" and world.has_method("_end_war"): world._end_war(war_id,day,"became a feud")
+		if world.has_method("_remove_pending_player_incidents"): world._remove_pending_player_incidents(civ_id)
+	var r:GDScript=_rivals()
+	if r!=null and not ForeignDiplomacy.leader(civ_id).is_empty():
+		var c:Dictionary=r.call("character",civ_id)
+		c.erase("war_prep_day"); c.erase("war_due_day")
+	_purge_occasions(civ_id)
+	var had_matter:=false
+	for m in Hall.state().matters:
+		if m is Dictionary and String(m.get("situation_type",""))=="war_campaign" and String((((m.get("audience",{}) as Dictionary).get("situation",{}) as Dictionary).get("war",{}) as Dictionary).get("civ_id",""))==civ_id: had_matter=true
+	var name:=_name(civ_id)
+	var text:="%s still wants vengeance for %s. No host will march: it is a feud, and their raiders will come instead, and ours may answer them. So far %d of ours and %d of theirs have died." % [name,cause,int(f.our_dead),int(f.their_dead)]
+	_log(civ_id,"war_to_feud",text,{"our_dead":int(f.our_dead),"their_dead":int(f.their_dead),"war_id":war_id,"quiet":quiet,"band_out":keep_flag})
+	if quiet:
+		_stat("strikes_home")
+		return
+	_chronicle("war_to_feud:%s:%d" % [civ_id,day],"The Feud With %s" % name,text,"notice",civ_id)
+	_stat("wars_to_feuds")
+	if had_matter or day-last<FEUD_HOT_DAYS: _file(civ_id,"feud",text,day)
 
 ## Neighbouring peoples go to war with each other at about the benchmark rate
 ## for general war (EPOCHAL_SHIFTS.md s5: 0.15-0.6 wars per people per game
@@ -1161,8 +1821,18 @@ static func _rival_wars(day:int)->void:
 			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
 			var relation:Dictionary=(first.get("relations",{}) as Dictionary).get(String(second.id),{})
 			if relation.is_empty() or bool(relation.get("at_war",false)) or String(relation.get("pending_message",""))!="" or String(relation.get("treaty","none")) in ["non_aggression","truce","trade"]: continue
+			# Already feuding: the feud runs its own course (CivilizationSystem).
+			if world.has_method("rival_feud_hot") and bool(world.rival_feud_hot(relation,day)): continue
 			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0
 			if _rng("rivalwar:%s:%s:%d" % [String(first.id),String(second.id),day]).randf()>=monthly: continue
+			# Two small peoples do not declare war: the same quarrel is a feud,
+			# fought by raiders (conflict_scale.gd). The benchmark hazard is the
+			# onset of fighting either way; only peoples organised for war carry
+			# a declaration and fight a war (EPOCHAL_SHIFTS.md s5).
+			if not Scale.formal_war(String(first.id),String(second.id)):
+				if world.has_method("start_rival_feud"): world.start_rival_feud(i,j,day,"old quarrels on the border")
+				_stat("rival_feuds")
+				continue
 			var carried:=relation.duplicate(true)
 			carried["pending_message"]="war"
 			carried["pending_message_sent_day"]=day
@@ -1208,7 +1878,7 @@ static func _file(civ_id:String,mode:String,summary:String,day:int,extra:Diction
 	var name:=_name(civ_id)
 	var audience:=Hall._new_audience("court","petition",day)
 	audience.speaker={"name":String(general.get("name","")).substr(0,100),"title":String(general.get("office_title","War Leader")).substr(0,100),"person_id":int(general.get("person_id",0)),"role":"official"}
-	var headline:String={"raided":"comes about the raid","war":"comes about the war","report":"reports from the field","terms":"brings the enemy's terms"}.get(mode,"comes about the war")
+	var headline:String={"raided":"comes about the raid","war":"comes about the war","feud":"comes about the feud","report":"reports from the field","terms":"brings the enemy's terms"}.get(mode,"comes about the war" if Scale.formal(civ_id) else "comes about the feud")
 	var text:=summary.substr(0,380)
 	audience.petition={"topic":"campaign","summary":text,"suggested_decree":""}
 	audience.situation={"type":"war_campaign","ask":"war:%s:%s:%d" % [civ_id,mode,day],"headline":headline,"summary":text,
@@ -1245,7 +1915,8 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 	var war:Dictionary=f.get("war",{})
 	var name:=_name(civ_id)
 	var mode:=String(part.get("mode",""))
-	if civ_id=="" or _civ(civ_id).is_empty() or (mode in ["war","terms"] and war.is_empty()):
+	# A war that became a feud (reconcile) is still to be answered as the feud.
+	if civ_id=="" or _civ(civ_id).is_empty() or (mode in ["war","terms"] and war.is_empty() and not feuding(civ_id)):
 		out.append(Hall._option("war_rest","It is past","That war is over.","neutral"))
 		return out
 	var band:=_band_size(_our_pop(),0.06)
@@ -1268,12 +1939,23 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			out.append(Hall._option("war_pay","Pay what they ask","%d Food, and the war ends." % roundi(float(terms.get("amount",0.0))),"neutral",short=="",short))
 		out.append(Hall._option("war_general","Do as you judge","The war leader chooses.","neutral"))
 		return out
+	# A feud (or raids short of war): the feud's own acts.
 	var raid:Dictionary=f.get("last_raid",{})
+	var small:=not Scale.formal(civ_id)
 	out.append(Hall._option("war_pursue","Go after them","Take %d on the raiders' trail%s. %s Blood may answer blood.%s" % [band," and bring back the %d Food" % int(raid.get("taken",0)) if int(raid.get("taken",0))>0 else "",_odds_words(_odds(civ_id,"war_pursue")),note],"hostile"))
-	if findable: out.append(Hall._option("war_burn","Burn their stores in return","Take %d against %s's stores. %s %s may come to war over it.%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),name,note],"hostile"))
+	if findable:
+		out.append(Hall._option("war_burn","Burn their stores in return","Take %d against %s's stores. %s %s%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),("%s will want blood for it." % name) if small else ("%s may come to war over it." % name),note],"hostile"))
+		# Their chief at their own fire: taken, he is ransomed and they swear off.
+		if int(f.level)>=2: out.append(Hall._option("war_chief","Bring me their chief","Go for %s's chief at their own fire. %s If he is taken, they will ransom him and swear off the feud; if it fails, few come back.%s" % [name,_odds_words(_odds(civ_id,"war_chief")),note],"hostile"))
 	else: out.append(track)
 	out.append(Hall._option("war_guard","Guard the approaches","A watch of %d for half a year. The next raiders meet spears." % band,"neutral"))
 	out.append(Hall._option("war_parley","Send word: enough","Messengers to %s to settle it. Some will call it weakness." % name,"warm"))
+	# A blood price for the lives of theirs we took settles the feud itself.
+	if int(f.level)>=2 or int(f.get("their_dead",0))>0:
+		var price:=blood_price(civ_id)
+		var short:=Hall._short("Food",price)
+		var dead:=int(f.get("their_dead",0))
+		out.append(Hall._option("war_price","Pay a blood price","%d Food to %s%s. It settles the blood between us; some here will call it weakness." % [roundi(price),name,(" for the %d of theirs we killed" % dead) if dead>0 else ""],"warm",short=="",short))
 	out.append(Hall._option("war_let","Let it pass","Bury the dead and do nothing. %s may take it for weakness." % name,"neutral"))
 	return out
 
@@ -1289,7 +1971,16 @@ static func on_open(audience:Dictionary)->void:
 	var band:=_band_size(_our_pop(),0.06)
 	var theirs:=_band_size(_their_pop(civ_id),0.06)
 	var said:=""
+	var at_war_now:=not (front(civ_id).war as Dictionary).is_empty()
+	# A war that became a feud is spoken of as the feud.
+	if mode in ["war","terms"] and not at_war_now and feuding(civ_id): mode="feud"
 	match mode:
+		"feud":
+			var f:=front(civ_id)
+			var dead:=""
+			if int(f.get("our_dead",0))+int(f.get("their_dead",0))>0: dead=" So far %d of ours and %d of theirs have died in it." % [int(f.get("our_dead",0)),int(f.get("their_dead",0))]
+			var can:="keep a watch at the approaches, go after their raiders, %s, or send word to settle it" % ("strike at their stores" if home_known(civ_id) else "find where they live")
+			said="%s wants vengeance for %s. Their raiders will come, a few at a time, when we least look for them.%s I can %s. Tell me which." % [name,_feud_cause(civ_id),dead,can]
 		"raided":
 			var raid:Dictionary=front(civ_id).get("last_raid",{})
 			said="%s came to %s. %s" % [name,String((TARGETS.get(String(raid.get("target","gathering")),TARGETS.gathering) as Dictionary).words),"We lost %d." % int(raid.get("our_dead",0)) if int(raid.get("our_dead",0))>0 else "No one of ours died."]
@@ -1307,9 +1998,10 @@ static func on_open(audience:Dictionary)->void:
 		"terms":
 			var terms:Dictionary=(front(civ_id).war as Dictionary).get("terms",{})
 			said="%s's herald wants %d Food to end it. Our people are worn down. It is your word." % [name,int(float(terms.get("amount",0.0)))]
-	var advice:="" if String(part.get("account",""))!="" else _objective_for_general(civ_id,general,not (front(civ_id).war as Dictionary).is_empty())
+	var advice:="" if String(part.get("account",""))!="" else _objective_for_general(civ_id,general,at_war_now)
 	var advice_words:String={"war_guard":"If it were mine to say, I would hold the approaches and let them come to us.","war_burn":"If it were mine to say, I would burn their stores.",
-		"war_chief":"If it were mine to say, I would go for their chief.","war_pursue":"If it were mine to say, I would go after them now, while the trail is fresh.","war_parley":"If it were mine to say, I would send for a truce.",
+		"war_chief":"If it were mine to say, I would go for their chief.","war_pursue":"If it were mine to say, I would go after them now, while the trail is fresh.",
+		"war_parley":"If it were mine to say, I would send for a truce." if at_war_now else "If it were mine to say, I would send word to settle it.",
 		"war_track":"If it were mine to say, I would find where they live first. Nobody here knows the way."}.get(advice,"")
 	if said!="": Hall.append_line(String(audience.id),{"speaker":String(general.get("name","")),"role":"official","person_id":int(general.get("person_id",0)),"civ_id":"player","text":said,"day":_day(),"aside":false})
 	if advice_words!="": Hall.append_line(String(audience.id),{"speaker":String(general.get("name","")),"role":"official","person_id":int(general.get("person_id",0)),"civ_id":"player","text":advice_words,"day":_day(),"aside":false})
@@ -1320,19 +2012,28 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	if option_id=="war_rest" and (front(civ_id).war as Dictionary).is_empty() and String(part.get("mode","")) in ["war","terms"]:
 		return {"outcome":"That war is already over.","reaction":"neutral"}
 	if not option_id in OBJECTIVES: return {"error":"That is not an order the war leader can carry."}
-	var outcome:=order(civ_id,option_id,false)
+	var at_war_now:=not (front(civ_id).war as Dictionary).is_empty()
+	# "Burn their stores" at a home nobody has found went to the trackers; the
+	# war leader answers the words the god said (order() says why).
+	var asked:=String(audience.get("typed_asked",""))
+	audience.erase("typed_asked")
+	var outcome:=order(civ_id,asked if option_id=="war_track" and asked in NEEDS_HOME else option_id,false)
 	var pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
-	if pid>0: GovernmentPeopleSystem.record_person_memory(pid,"The god gave me the war with %s: %s" % [_name(civ_id),outcome.substr(0,160)],"audience",0.6,{"emotion":"duty"})
+	if pid>0: GovernmentPeopleSystem.record_person_memory(pid,"The god gave me the %s with %s: %s" % ["war" if at_war_now else "feud",_name(civ_id),outcome.substr(0,160)],"audience",0.6,{"emotion":"duty"})
 	return {"outcome":outcome,"reaction":"pleased" if option_id in ["war_general","war_guard"] else "neutral"}
 
 const TYPED:=[
 	["war_track",["where they live","where their home","find their home","find their village","find their camp","find the way","track them home","find them"]],
 	["war_chief",["chief","ruler","leader","bring me","capture","their head"]],
-	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food"]],
+	# "Go to war with them", "declare war on them", "attack them": in a feud,
+	# a strike at them (at a home we know; trackers first when we do not).
+	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food","attack","attack them","go to war","war on","make war","declare war","wage war"]],
 	["war_pursue",["after them","pursue","take back","chase","follow","get it back","hunt them"]],
 	["war_guard",["defend","hold","guard","ford","watch","approach","protect","keep them out","wall"]],
-	["war_parley",["peace","truce","talk","parley","messenger","end it","enough"]],
+	["war_price",["blood price","blood-price","pay for their dead","pay for the dead","pay the price","compensate","make amends"]],
+	["war_parley",["peace","truce","talk","parley","messenger","end it","enough","settle"]],
 	["war_pay","pay"],
+	["war_price","pay"],
 	["war_let",["let it pass","leave it","do nothing","bury"]],
 	["war_general",["you judge","your judgment","you decide","as you see","your call","do what you"]],
 ]
@@ -1352,5 +2053,11 @@ static func typed_choice(audience_id:String,text:String)->String:
 	for row in TYPED:
 		var words:Array=row[1] if row[1] is Array else [row[1]]
 		for word in words:
-			if open.has(String(row[0])) and RegEx.create_from_string("\\b%s(s|es)?\\b" % String(word)).search(lower)!=null: return String(row[0])
+			if RegEx.create_from_string("\\b%s(s|es)?\\b" % String(word)).search(lower)==null: continue
+			if open.has(String(row[0])): return String(row[0])
+			# Their stores or their chief, at a home nobody has found: the
+			# trackers go first, and the war leader says why (NEEDS_HOME).
+			if String(row[0]) in NEEDS_HOME and open.has("war_track"):
+				audience["typed_asked"]=String(row[0])
+				return "war_track"
 	return ""

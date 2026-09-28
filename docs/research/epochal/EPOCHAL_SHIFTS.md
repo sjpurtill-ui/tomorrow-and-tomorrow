@@ -63,6 +63,7 @@ Generic kinds: `general_war`, `grinding_war`, `war_of_opportunity`, `war_of_many
 - **D.** Era median 4.5–10 years, up to 32.
 - **R.** Winners gain institutions (war makes states). Losers lose 0.1–0.3 legitimacy and gain strain, which drives later collapses. Mass mobilisation levels inequality (−0.12) and speeds industry, knowledge and medicine [C11][C19].
 - **±** − few alliances, low mobilisation, strong cohesion without doctrinal quarrels. + alliance webs, arms races, schisms, vacuums, technological imbalance.
+- **Below the war line: feud.** War needs two peoples organised for it: both at least 1,500 people (`scripts/conflict_scale.gd`, `ConflictScale.formal_war`), a chiefdom-scale regional polity whose 3–7% puts 45–105 fighters under one leader; a war already declared is fought out while both keep 80% of that line. Bands and villages below that fight by raid, ambush and blood feud (raiding parties of 5–30; feuds settled by compensation, gift exchange and marriage, or worn out), as the ethnographic record of band and village societies shows [C26]. Nothing is declared between them: no heralds, fronts, war goals or campaigns, and no envoy comes to the hall of the people being raided (`war_loop.gd` feuds). The onset hazard is the same; only its form differs, so the §5 rates are rates of formal war between peoples organised for it.
 
 ### 3.5 Migration and invasion (`migration`)
 Generic kinds: `border_migration`, `folk_wandering`, `rider_raids`, `horde_conquest`.
@@ -375,6 +376,7 @@ apply_changes(state, civ_graph, changes, year)                             # slo
 | C23 | Collapse as a response to diminishing returns on complexity (Tainter 1988); secular cycles of about 200–300 years (Turchin & Nefedov 2009). |
 | C24 | Levelling after collapse and plague (Scheidel 2017). |
 | C25 | State death: about 66 of 207 states died between 1816 and 2000, almost all before 1945 (Fazal 2007). Decolonisation raised the UN from 51 to 193 members. |
+| C26 | Band, tribe, chiefdom and state (Service 1962; Johnson & Earle 2000: regional polities from the low thousands). Warfare before the state: raids and ambushes by small parties, blood feud and compensation (Evans-Pritchard 1940; Meggitt 1977; Chagnon 1968; Keeley 1996). |
 
 Frequency ranges in the §5 table (`catalog.HISTORICAL_BASE_RATES`) are judgement syntheses of these sources, per polity per century. They are not measured statistics. Treat them as plausibility bands.
 

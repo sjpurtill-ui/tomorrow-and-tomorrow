@@ -175,9 +175,11 @@ static func court_waiting()->Array[Dictionary]:
 
 static func foreign_peoples()->Array[Dictionary]:
 	## Peoples whose leaders you can reach through envoys:
-	## {civ_id,name,leader,access,regard,at_war,waiting}
+	## {civ_id,name,leader,access,regard,at_war,feud,waiting}; feud: a small
+	## people's fight with us, never called a war (war_loop.gd).
 	var result:Array[Dictionary]=[]
 	var waiting:Dictionary={}
+	var war_loop:GDScript=load("res://scripts/war_loop.gd")
 	for audience in envoys(): waiting[String(audience.get("civ_id",""))]=true
 	for civ in CivilizationSystem.civilizations:
 		if not civ is Dictionary: continue
@@ -188,7 +190,7 @@ static func foreign_peoples()->Array[Dictionary]:
 		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 		var access:Dictionary=ForeignDialogue.access(id)
 		result.append({"civ_id":id,"name":String(civ.get("name",id)),"leader":String(leader.get("name","")),"access":bool(access.get("ok",false)),
-			"regard":Divine.foreign_regard(id),"at_war":bool(relation.get("at_war",false)),"waiting":waiting.has(id)})
+			"regard":Divine.foreign_regard(id),"at_war":bool(relation.get("at_war",false)),"feud":war_loop!=null and bool(war_loop.call("feuding",id)) and bool(war_loop.call("hot",id)),"waiting":waiting.has(id)})
 	return result
 
 static func find_by_words(text:String)->Dictionary:

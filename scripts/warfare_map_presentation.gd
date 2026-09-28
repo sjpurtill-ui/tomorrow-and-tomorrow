@@ -477,7 +477,10 @@ static func front_marker(front:Dictionary,destination:Dictionary,camera_size:flo
 		label="%s\n%s • %s • %d%%" % [String(front.get("opponent","WAR FRONT")).to_upper(),phase,String(front.get("objective","OBJECTIVE")).to_upper(),roundi(progress*100.0)]
 	elif band=="regional":
 		label="%s\n%s • %d%% • FIELD %s" % ["BATTLE IN PROGRESS" if engagement_active else ("OCCUPATION FRONT" if occupation_personnel>0 else String(front.get("war_name","ACTIVE FRONT")).to_upper()),String(front.get("objective","OBJECTIVE")).to_upper(),roundi(progress*100.0),compact_count(fielded)]
-	if words_stage!="reckoned":
+	if bool(front.get("feud",false)):
+		# A small people's fight is a feud in every age (conflict_scale.gd).
+		label="Feud with %s" % String(front.get("opponent","them"))
+	elif words_stage!="reckoned":
 		# Never drawn in play (war_map_overlay owns wars); kept plain regardless.
 		label=("Feud with %s" if words_stage=="hearth" else "War with %s") % String(front.get("opponent","them"))
 	elif band=="local":

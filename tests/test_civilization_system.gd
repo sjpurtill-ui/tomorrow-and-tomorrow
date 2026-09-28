@@ -34,6 +34,20 @@ func _set_all_contacted_and_located()->void:
 			system.city_intelligence.publish("player",system.city_intelligence.capture("player",String(region.id),.8,0,"fixture reconnaissance","test"),0)
 
 
+## Declared war needs two peoples organised for war (conflict_scale.gd): a
+## chiefdom or more on each side; smaller peoples feud (test_early_feuds.gd).
+## The cases that declare war are set in such a world; the fighters each side
+## can field are left as they were.
+func _organised_for_war(index:int=0)->void:
+	GameState.ensure_population_total(2000)
+	var civ:Dictionary=system.civilizations[index]
+	var factor:=3000.0/maxf(1.0,float(civ.population))
+	civ["population"]=3000.0
+	civ["cohorts"]=system._scaled_cohorts(civ.get("cohorts",{}),3000.0)
+	for region:Dictionary in civ.strategic_regions: region["population"]=float(region.get("population",0.0))*factor
+	system.civilizations[index]=civ
+
+
 func _hide_all_contacts()->void:
 	system.city_intelligence.records.clear()
 	for index in system.civilizations.size():
@@ -539,6 +553,7 @@ func test_computer_civilizations_also_wait_for_carried_treaty_messages()->void:
 
 
 func test_war_declaration_begins_when_the_carried_message_arrives_not_at_departure()->void:
+	_organised_for_war()
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
 	civ.player_relation["contact_source"]="returned_scout_report"
@@ -968,6 +983,7 @@ func test_campaign_front_exposes_exactly_one_enemy_region_at_a_time()->void:
 
 
 func test_war_plans_are_explicit_bounded_and_lock_when_war_begins()->void:
+	_organised_for_war()
 	var civ_id:=String(system.civilizations[0].id)
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
 	var options:Array=system.war_goal_options(civ_id,String(target.id))
@@ -982,6 +998,7 @@ func test_war_plans_are_explicit_bounded_and_lock_when_war_begins()->void:
 
 
 func test_limited_objective_capture_creates_war_score_and_completion()->void:
+	_organised_for_war()
 	var civ:Dictionary=system.civilizations[0]
 	var civ_id:=String(civ.id)
 	var target:Dictionary=system.campaign_targets(civ_id)[0]
@@ -1044,6 +1061,7 @@ func test_strategic_turn_changes_population_strategy_and_power_without_growing_s
 
 
 func test_player_foreign_policy_changes_real_trade_and_war_state()->void:
+	_organised_for_war()
 	var civ:Dictionary=system.civilizations[0]
 	civ.strategic_regions[0].fortification=.3
 	civ.player_relation["opinion"]=0.40
@@ -1062,6 +1080,7 @@ func test_player_foreign_policy_changes_real_trade_and_war_state()->void:
 
 
 func test_standing_actions_are_idempotent_and_cannot_create_contradictory_war_state()->void:
+	_organised_for_war()
 	var civ_id:=String(system.civilizations[0].id)
 	system.civilizations[0].player_relation["opinion"]=0.40
 	assert_bool(bool(system.conduct_player_action(civ_id,"open_trade",true).get("ok",false))).is_true()

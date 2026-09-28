@@ -1983,8 +1983,12 @@ static func _punish_envoy(id:String,audience:Dictionary,r:Dictionary,verb:String
 	if rivals!=null:
 		rivals.call("grudge",civ_id,clause,weight,"%s:%s" % [String(row[5]),id])
 		if bool(goods.get("seized",false)): rivals.call("grudge",civ_id,"the gift you tore from our bearers",0.3,"seized_gift:"+id)
-		posture=String(rivals.call("envoy_posture",civ_id))
-	parts.append(String({"redress":"%s will demand redress, and the border is on edge.","halt":"%s may send no more envoys.","fearful":"%s is frightened; hatred and dread of you both rise.","war":"%s is preparing for war."}.get(posture,"Their people will hear of it: hatred and dread of you both rise, and the border grows dangerous.")).replace("%s",civ_name))
+	# A small people answers a killed envoy with a blood feud at once: raiders,
+	# not a declared war (war_loop.gd, conflict_scale.gd).
+	if harm=="kill": (load("res://scripts/war_loop.gd") as GDScript).call("envoy_slain",civ_id,name)
+	if rivals!=null: posture=String(rivals.call("envoy_posture",civ_id))
+	parts.append(String({"redress":"%s will demand redress, and the border is on edge.","halt":"%s may send no more envoys.","fearful":"%s is frightened; hatred and dread of you both rise.","war":"%s is preparing for war.",
+		"feud":"%s will have blood for it: their raiders will come, and no more envoys."}.get(posture,"Their people will hear of it: hatred and dread of you both rise, and the border grows dangerous.")).replace("%s",civ_name))
 	r.outcome=" ".join(parts)
 	r.envoy_state=String(ENVOY_STATE.get(harm,"gone")); r.harm=harm; r.part=part
 	audience["envoy_fate"]={"state":String(r.envoy_state),"harm":harm,"part":part}
@@ -2499,7 +2503,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	var pid:=int(carrier.get("person_id",0))
 	if pid>0:
 		GovernmentPeopleSystem.adjust_person_bonds(pid,{"obligation":0.02,"respect":0.01})
-		GovernmentPeopleSystem.record_person_memory(pid,"The god ordered war: %s. %s" % [text.substr(0,120),"We marched." if verdict=="act" else "I told the god why not."],"divine",0.6,{"emotion":"duty","outcome":verdict})
+		GovernmentPeopleSystem.record_person_memory(pid,"The god ordered war: %s. %s" % [text.substr(0,120),("Trackers went out after them." if String(decision.get("kind",""))=="track" else "We marched.") if verdict=="act" else "I told the god why not."],"divine",0.6,{"emotion":"duty","outcome":verdict})
 	return r
 
 static func _strip_vocative(text:String,actor:Dictionary)->String:
@@ -2799,7 +2803,8 @@ static func decided_words(result:Dictionary)->String:
 	if String(result.get("verb",""))=="war":
 		var verdict:=String((result.get("war",{}) as Dictionary).get("verdict",""))
 		parts.append("THE WAR LEADER'S ANSWER, in substance (keep every number exactly): "+String(result.get("actor_says","")))
-		if verdict=="act": parts.append("The army HAS set out; say so plainly with the place and the days on the road.")
+		if verdict=="act" and String((result.get("war",{}) as Dictionary).get("kind",""))=="track": parts.append("A few trackers HAVE set out on the raiders' trail to find where that people lives; nobody strikes at them until it is found. Say so plainly with the number and the days, and never call it a war.")
+		elif verdict=="act": parts.append("The army HAS set out; say so plainly with the place and the days on the road.")
 		elif verdict=="fate" and String((result.get("war",{}) as Dictionary).get("kind",""))=="captives": parts.append("The god's word about the captives of our fight HAS been carried out; tell it soberly, keeping every number, with no gore.")
 		elif verdict=="fate": parts.append("The god's word about the town we hold HAS been carried out; tell it soberly, keeping every number, with no gore.")
 		elif verdict=="held": parts.append("The town is ALREADY OURS; nobody marches against it. Say who holds it and ask what is to become of it.")

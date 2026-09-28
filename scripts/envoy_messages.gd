@@ -881,7 +881,7 @@ static func consequence_note(civ_id:String,menace:Dictionary)->String:
 	if String(menace.purpose)=="ultimatum" and String(result.answer) in ["defy","harm"]:
 		var due:=int(result.get("day",_day()))+int(menace.get("deadline",182))
 		if String(menace.get("consequence","war"))=="war":
-			lines.append("Their deadline is %s. If they have not given way by then, you are bound to make war on them before %s, or your threats lose their weight." % [Chronicle.date_label(due),Chronicle.date_label(due+GRACE_DAYS)])
+			lines.append("Their deadline is %s. If they have not given way by then, you are bound to %s before %s, or your threats lose their weight." % [Chronicle.date_label(due),"send your spears against them" if _feud(civ_id) else "make war on them",Chronicle.date_label(due+GRACE_DAYS)])
 		else:
 			lines.append("Their deadline is %s. If they have not given way by then, your people will close the frontier with them." % Chronicle.date_label(due))
 	return " ".join(lines)
@@ -950,6 +950,9 @@ static func daily(day:int)->void:
 		if civ.is_empty() or not bool(civ.get("alive",true)): u["status"]="void"; continue
 		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 		var at_war:=bool(relation.get("at_war",false)) and int(relation.get("war_started_day",-1))>=int(u.issued)
+		# Against a small people nobody declares anything: the threat is kept
+		# when our spears strike them (war_loop.gd feud).
+		if not at_war and _feud(civ_id): at_war=bool((load(WAR_LOOP_PATH) as GDScript).call("struck_since",civ_id,int(u.issued)))
 		if String(u.consequence)=="war" and at_war: _kept(u,day); continue
 		if day<int(u.due): continue
 		if not bool(u.get("reconsidered",false)):
@@ -972,8 +975,15 @@ static func daily(day:int)->void:
 			continue
 		if not bool(u.get("announced",false)):
 			u["announced"]=true
-			_court_hears(civ_id,"The Deadline Passes","Your deadline for %s has come and they have not given way. You swore war. Declare it before %s, or every people will learn your threats are empty." % [Hall._civ_name(civ_id),Chronicle.date_label(int(u.due)+GRACE_DAYS)],"moment")
+			if _feud(civ_id): _court_hears(civ_id,"The Deadline Passes","Your deadline for %s has come and they have not given way. You swore to send your spears against them. Strike before %s, or every people will learn your threats are empty." % [Hall._civ_name(civ_id),Chronicle.date_label(int(u.due)+GRACE_DAYS)],"moment")
+			else: _court_hears(civ_id,"The Deadline Passes","Your deadline for %s has come and they have not given way. You swore war. Declare it before %s, or every people will learn your threats are empty." % [Hall._civ_name(civ_id),Chronicle.date_label(int(u.due)+GRACE_DAYS)],"moment")
 		if day>=int(u.due)+GRACE_DAYS: _broken(u,day)
+
+## A small people (conflict_scale.gd): our threat of war is a threat of spears,
+## kept by a strike, never by a declaration.
+const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
+static func _feud(civ_id:String)->bool:
+	return not preload("res://scripts/conflict_scale.gd").formal(civ_id)
 
 static func _tell_stale(day:int)->void:
 	## A live voice that never answered (lost to a reload): tell the preset words.
@@ -1004,7 +1014,7 @@ static func _kept(u:Dictionary,day:int)->void:
 		var other:=String(civ.get("id",""))
 		if other=="" or other==civ_id or not bool(civ.get("alive",true)): continue
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: Divine.add_civ_dread(other,0.03)
-	var what:="war" if String(u.consequence)=="war" else "the closing of the frontier"
+	var what:=("your spears struck them" if _feud(civ_id) else "war") if String(u.consequence)=="war" else "the closing of the frontier"
 	_court_hears(civ_id,"A Threat Kept","You did what you told %s you would do: %s. Every people that hears of it will fear your word a little more." % [Hall._civ_name(civ_id),what],"notice")
 	ForeignDiplomacy.remember(civ_id,"The god did what it threatened. Its word is not empty.")
 
@@ -1016,8 +1026,9 @@ static func _broken(u:Dictionary,day:int)->void:
 	(Divine.store().civ_dread as Dictionary)[civ_id]={"v":maxf(0.0,d-0.15),"day":day}
 	_set_stance(civ_id,"emboldened",540)
 	Hall._shift_relation(civ_id,-0.02,0.0)
-	_court_hears(civ_id,"An Empty Threat","%s refused your ultimatum and nothing happened. You swore war and did not make it. Other peoples will weigh your threats more lightly now, and %s will ask more of you." % [Hall._civ_name(civ_id),Hall._civ_name(civ_id)],"moment")
-	ForeignDiplomacy.remember(civ_id,"The god threatened war and never came. We laughed about it at the fire.")
+	var feud:=_feud(civ_id)
+	_court_hears(civ_id,"An Empty Threat","%s refused your ultimatum and nothing happened. %s Other peoples will weigh your threats more lightly now, and %s will ask more of you." % [Hall._civ_name(civ_id),"You swore to send your spears and never did." if feud else "You swore war and did not make it.",Hall._civ_name(civ_id)],"moment")
+	ForeignDiplomacy.remember(civ_id,"The god threatened %s and never came. We laughed about it at the fire." % ("its spears" if feud else "war"))
 
 static func _sever(civ_id:String)->void:
 	var index:=Hall._civ_index(civ_id)

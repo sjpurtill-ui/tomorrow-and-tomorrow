@@ -533,7 +533,8 @@ func _dossier_rows(audience:Dictionary)->Array:
 	if String(audience.get("origin",""))=="foreign":
 		var civ:Dictionary=context.get("civ",{}) if context.get("civ") is Dictionary else {}
 		var leader:Dictionary=context.get("leader",{}) if context.get("leader") is Dictionary else {}
-		if bool(civ.get("at_war_with_player",false)):rows.append(["Standing","at war with us",Tokens.RED])
+		if bool(civ.get("feud_with_player",false)):rows.append(["Standing","in a feud with us",Tokens.RED])
+		elif bool(civ.get("at_war_with_player",false)):rows.append(["Standing","at war with us",Tokens.RED])
 		else:rows.append(["View of us",String(civ.get("opinion","unknown")),Tokens.BODY])
 		rows.append(["Our border",String(civ.get("border","unknown")),Tokens.RED if String(civ.get("border",""))in ["tense","on the edge of violence"] else Tokens.BODY])
 		rows.append(["Their larder",String(civ.get("food","unknown")),Tokens.BODY])
@@ -2597,7 +2598,7 @@ func _build_foreign_list()->Control:
 	for entry in peoples:
 		var civ_id:=String(entry.civ_id)
 		var regard:Dictionary=entry.get("regard",{})
-		var state:="at war with you" if bool(entry.at_war) else ("your envoys know the way" if bool(entry.access) else "no audience yet: send delegates first")
+		var state:="in a feud with you" if bool(entry.get("feud",false)) else ("at war with you" if bool(entry.at_war) else ("your envoys know the way" if bool(entry.access) else "no audience yet: send delegates first"))
 		if bool(entry.waiting):state="their envoy waits in your antechamber"
 		var sub:="%s · they %s · %s" % [String(entry.leader),String(regard.get("read","are undecided about you")),state]
 		var row:=_simple_row("Foreign_"+civ_id,String(entry.name),sub,"Send word",_ink(Identity.banner_color(Identity.foreign(civ_id).texture)),Identity.foreign(civ_id).texture)
