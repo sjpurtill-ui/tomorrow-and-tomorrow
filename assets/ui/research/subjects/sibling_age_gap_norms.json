@@ -1,0 +1,12 @@
+{
+  "id": "sibling_age_gap_norms",
+  "line": "demography",
+  "game_year": 150,
+  "approx_historical_year": -4000,
+  "prompt": "c. 4000 BCE: Couple discusses birth spacing while caring for older child and baby; chalk pastel cut-paper collage. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4c8a71a9-2a49-47fa-b803-75885eba909c.png",
+  "asset": "res://assets/ui/research/subjects/sibling_age_gap_norms-v1.png",
+  "sha256": "ba047a8fef3a417af490a94ced07cd66939bafc1941dfc5b2090c21a5f0129e7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

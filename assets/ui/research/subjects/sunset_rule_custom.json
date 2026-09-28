@@ -1,0 +1,12 @@
+{
+  "id": "sunset_rule_custom",
+  "line": "institutions",
+  "game_year": 152,
+  "approx_historical_year": -3987,
+  "prompt": "c. 3987 BCE: Adults settle grievance before setting sun as neighbors witness; matte civic fresco. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-77eda485-7b09-45d5-8023-13b233eab9f8.png",
+  "asset": "res://assets/ui/research/subjects/sunset_rule_custom-v1.png",
+  "sha256": "96c269a35aadaf9a47e73493b7d1efd966cb2c87f70981d95517e9cb3ec5943b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
