@@ -1,0 +1,16 @@
+{
+  "id": "riverbank_shift_watch",
+  "line": "ecology",
+  "game_year": 312,
+  "approx_historical_year": -2920,
+  "prompt": "c. 2920 BCE: Shifting Riverbanks Watched Before Siting Fields. Shifting riverbanks watched before siting fields. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a32071b9-dd8a-4cb2-a422-50618990095a.png",
+  "asset": "res://assets/ui/research/subjects/riverbank_shift_watch-v1.png",
+  "sha256": "1ba7721bcf3648422602e9c26f179713ae2be7a320c891aad24fd6d44617e07a",
+  "mode": "built-in image_gen / new image",
+  "review": "Focus adjusted after integrator GPU card review to retain faces and the essential subject.",
+  "focus": [
+    0.5,
+    0.4
+  ]
+}

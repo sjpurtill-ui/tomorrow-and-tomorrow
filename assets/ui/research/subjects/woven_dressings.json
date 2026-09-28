@@ -1,0 +1,12 @@
+{
+  "id": "woven_dressings",
+  "line": "health",
+  "game_year": 318,
+  "approx_historical_year": -2880,
+  "prompt": "c. 2880 BCE: Woven Linen Dressings. Woven linen dressings. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-abff697b-8355-490e-a789-1ad689c8b660.png",
+  "asset": "res://assets/ui/research/subjects/woven_dressings-v1.png",
+  "sha256": "1ccea60378816235929d52e485be8ee8995f2c10a61c2826e6dc721a98f919a6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

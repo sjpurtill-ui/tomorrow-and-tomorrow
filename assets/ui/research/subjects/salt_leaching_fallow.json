@@ -1,0 +1,16 @@
+{
+  "id": "salt_leaching_fallow",
+  "line": "ecology",
+  "game_year": 320,
+  "approx_historical_year": -2867,
+  "prompt": "c. 2867 BCE: Fresh water washes white salt crust from a fallow plot next to narrow-leaved barley and low mudbrick houses; plant-pigment field painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2614a2da-83d4-449b-b177-5fc603cfd6bd.png",
+  "asset": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png",
+  "sha256": "03c7ab44cbb0f659a73736760749b36c077295238baf2160821460064df5a08a",
+  "mode": "built-in image_gen / new image",
+  "review": "Rerolled to remove multi-tier stepped background; leaching action reviewed full and cropped.",
+  "focus": [
+    0.5,
+    0.3
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "salinity_recognition",
+  "line": "ecology",
+  "game_year": 305,
+  "approx_historical_year": -2967,
+  "prompt": "c. 2967 BCE: Farmers examine white salt crust and stunted narrow-leaved barley roots beside a healthy barley strip and low mudbrick houses; plant-pigment field painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e511aeb-0908-4432-8661-e4990e2c5a79.png",
+  "asset": "res://assets/ui/research/subjects/salinity_recognition-v1.png",
+  "sha256": "40201499d4671302e3ce94dca2dcf29fef4aedd9d925f2c1527d51c046465cc2",
+  "mode": "built-in image_gen / new image",
+  "review": "Rerolled to remove multi-tier stepped background; barley ears and salinity actions reviewed full and cropped.",
+  "focus": [
+    0.5,
+    0.42
+  ]
+}

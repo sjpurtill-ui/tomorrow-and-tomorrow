@@ -1,0 +1,16 @@
+{
+  "id": "herringbone_plano_convex_brick",
+  "line": "infrastructure",
+  "game_year": 315,
+  "approx_historical_year": -2900,
+  "prompt": "c. 2900 BCE: Plano-convex Brick Laid in Herringbone Courses. Plano-convex brick laid in herringbone courses. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-79bafcee-45ac-4c44-b9c6-a4b8f6acbd3f.png",
+  "asset": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png",
+  "sha256": "a473bf3374e7e6993e2c19ee5a5cec75a928ab499c5db06a4ba7417ffbb6d3e6",
+  "mode": "built-in image_gen / new image",
+  "review": "Focus adjusted after integrator GPU card review to retain faces and the essential subject.",
+  "focus": [
+    0.5,
+    0.6
+  ]
+}

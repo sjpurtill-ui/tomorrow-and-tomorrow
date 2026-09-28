@@ -1,0 +1,12 @@
+{
+  "id": "titled_estate_overseers",
+  "line": "institutions",
+  "game_year": 310,
+  "approx_historical_year": -2933,
+  "prompt": "c. 2933 BCE: Titled Overseers of Fields, Granary and Works. Titled overseers of fields, granary and works. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4e009496-971d-4c8c-824f-b0b36436233e.png",
+  "asset": "res://assets/ui/research/subjects/titled_estate_overseers-v1.png",
+  "sha256": "16bb7ec88543faee723227b846dd2f1cb97f017653d7bc6ba14d8e0358db64f8",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
