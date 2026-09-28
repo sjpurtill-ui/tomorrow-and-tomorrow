@@ -3,12 +3,16 @@ const INTEL:=preload("res://scripts/city_intelligence.gd")
 const V:=preload("res://scripts/hud/city_report_visuals.gd")
 const Dossier:=preload("res://scripts/hud/city_dossier.gd")
 const Orders:=preload("res://scripts/hud/city_watch_orders.gd")
+const Held:=preload("res://scripts/held_town.gd")
+const Ownership:=preload("res://scripts/map_ownership.gd")
 var city_id:String
 func _init(world:Node,shell:Control,id:String)->void:
 	super(world,shell);city_id=id
 func report()->Dictionary:return CivilizationSystem.city_intelligence.known("player",city_id)
 func meta()->Dictionary:
 	var city:=report()
+	var held:=Held.report(city_id)
+	if not held.is_empty():return {"eyebrow":"Our town","title":String(held.name),"subtabs":[]}
 	return {"eyebrow":"City report","title":String(city.get("name","Reported city")),"subtabs":[]}
 ## The player's own primary city, for the gold home marks. Own figures are
 ## the player's to know; the foreign side stays on returned estimates.
@@ -20,6 +24,9 @@ func home(city:Dictionary)->Dictionary:
 func tab(_sub:int)->Dictionary:
 	var city:=report()
 	if city.is_empty():return {"brief":{"title":"No report available","why":"This city has not been observed."},"blocks":[]}
+	# A town we hold is reported by our own garrison, not by scouts.
+	var held_report:=Held.report(city_id)
+	if not held_report.is_empty():return held_tab(city,held_report)
 	var today:=int(GameState.elapsed_days)
 	var own:=home(city)
 	var own_values:Dictionary=own.get("values",{})
@@ -56,4 +63,26 @@ func tab(_sub:int)->Dictionary:
 	talk.append({"label":"Full report","sub":"Everything our scouts saw, and who to talk to about it","on_press":func()->void:CivilizationSystem.city_intelligence.open(city_id)})
 	blocks.append({"type":"actions","items":talk})
 	return {"blocks":blocks}
-func signature()->Array:return [report(),CivilizationSystem.scouting_staff.city_watch(city_id),Orders.party_away(city_id).get("mission_id",-1),int(GameState.elapsed_days)]
+## Our garrison's account of a town we hold, and one row of things to do.
+func held_tab(city:Dictionary,held:Dictionary)->Dictionary:
+	var status:=Ownership.status(city)
+	var caption:="%s · %s" % [String(status.line),String(status.note)] if String(status.note)!="" else String(status.line)
+	var name:=String(held.name)
+	var talk:Dictionary=held.get("talk_target",{})
+	var who:=String(held.general).get_slice(" ",0)
+	var items:Array=[]
+	items.append({"label":"Speak to %s about %s" % [who,name] if who!="" else "Speak to the court about %s" % name,"sub":"In court: what becomes of %s is decided there" % name,"primary":true,
+		"on_press":speak_about(talk,name,who)})
+	items.append({"label":"Show on map","sub":"Centre the chart on %s" % name,"on_press":func()->void:
+		if terrain!=null and terrain.has_method("_focus_known_city"):terrain._focus_known_city(city_id)})
+	return {"blocks":[{"type":"held_town","report":held,"caption":caption},{"type":"actions","items":items}]}
+
+## Opens the court with the war leader before you and the town named as the
+## matter at hand; with no war leader, the court at rest.
+func speak_about(target:Dictionary,town:String,who:String)->Callable:
+	return func()->void:
+		var focus:=target.duplicate()
+		if not focus.is_empty():focus["matter"]="Tell %s what is to become of %s…" % [who if who!="" else "them",town]
+		load("res://scripts/audience_director.gd").open_court_for(focus)
+
+func signature()->Array:return [Held.report(city_id).hash(),report(),CivilizationSystem.scouting_staff.city_watch(city_id),Orders.party_away(city_id).get("mission_id",-1),int(GameState.elapsed_days)]

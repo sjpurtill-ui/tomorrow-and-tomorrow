@@ -10,7 +10,7 @@ const LETTERED_LABELS={"population":"People","fortification":"Walls","garrison":
 const RECKONED_KEYS:=["science_capacity","education","gdp","infant_mortality"]
 ## One plain line on what each figure means.
 const MEANINGS={"population":"How many live there, as our scouts counted.","garrison":"Armed people seen guarding the place.","fortification":"How hard the place would be to break into.","supply":"How long their food would last if cut off.","production":"How busy their crafts and workshops looked.","logistics":"How easily they move food and goods.","damage":"Harm from war, fire or neglect.","life_expectancy":"How long their people usually live.","science_capacity":"People working at learning and invention.","education":"How many of them are schooled.","gdp":"What their people produce in a day.","infant_mortality":"Infants who die before their first year."}
-static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN}
+static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN,"rule":T.GOLD,"mood":T.TEAL,"events":T.RED}
 const PATHS={
 	"science":'<path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10"/>',
 	"gdp":'<path d="M4 21V13h4v8M10 21V9h4v12M16 21V3h4v18"/>',
@@ -21,7 +21,10 @@ const PATHS={
 	"production":'<path d="M3 21V10l6-4v6l6-4v5h6v8ZM5 17h2m3 0h2m3 0h3M17 12V3h3v10"/>',
 	"logistics":'<path d="m7 3-4 18M17 3l4 18M12 3v3m0 4v4m0 4v3"/>',
 	"supply":'<path d="M12 22V4M12 8C5 8 4 5 5 2c4 0 7 2 7 6ZM12 13C5 13 4 10 5 7M12 18C5 18 4 15 5 12M12 10c7 0 8-3 7-6-4 0-7 2-7 6ZM12 15c7 0 8-3 7-6"/>',
-	"damage":'<path d="M3 20h18M5 20V9l7-6 7 6v11M13 4l-3 7 5 2-4 7"/>'}
+	"damage":'<path d="M3 20h18M5 20V9l7-6 7 6v11M13 4l-3 7 5 2-4 7"/>',
+	"rule":'<path d="M6 21V3M6 4h12l-3 4 3 4H6"/>',
+	"mood":'<circle cx="12" cy="12" r="9"/><path d="M8 16c2-2 6-2 8 0M9 9.5h.01M15 9.5h.01"/>',
+	"events":'<path d="M6 3h10l3 3v15H6ZM9 9h7M9 13h7M9 17h4"/>'}
 static var textures:Dictionary={}
 
 static func icon(key:String)->Texture2D:
