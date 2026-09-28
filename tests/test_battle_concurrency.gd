@@ -9,6 +9,7 @@ extends GdUnitTestSuite
 const View:=preload("res://scripts/hud/battle_view.gd")
 const Record:=preload("res://scripts/battle_record.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
+const Marks:=preload("res://scripts/hud/battle_marker_source.gd")
 
 var _processing:Dictionary={}
 var civ_id:=""
@@ -157,6 +158,32 @@ func test_two_battles_are_fought_at_once_and_each_is_reported_on_its_own()->void
 		var record:Dictionary=reported[String(pair[1])]
 		assert_int(int((record.attacker as Dictionary).initial_troops)).is_equal(int(pair[2]))
 		assert_int(left).is_less_equal(int((record.attacker as Dictionary).remaining_troops))
+
+
+func test_the_war_map_marks_each_battle_once()->void:
+	var made:=_two_battles()
+	var marks:Array=Marks.engagements_of(MilitaryCampaign)
+	var ids:Array=marks.map(func(mark:Dictionary)->String: return String(mark.id))
+	assert_array(ids).contains_exactly_in_any_order([String(made[2]),String(made[3])])
+	# A general's battle joins them, marked once.
+	var third:=_steady(_army(80,12.0))
+	var before:Array=MilitaryCampaign.own_engagements.keys()
+	var started:Dictionary=_fight(third,_band_like(third,76),"f9",21)
+	assert_bool(started.has("error")).is_false()
+	var begun:Dictionary=MilitaryCampaign.begun_since(before)
+	begun["commander_managed"]=true
+	MilitaryCampaign.command_hierarchy.battle.archive_active()
+	assert_int(MilitaryCampaign.own_engagements.size()).is_equal(2)
+	assert_int(MilitaryCampaign.engagements.size()).is_equal(3)
+	assert_int(Marks.engagements_of(MilitaryCampaign).size()).is_equal(3)
+	# The battle in focus before the general's began is in focus again.
+	assert_str(String(MilitaryCampaign.active_engagement.get("id",""))).is_equal(String(made[3]))
+	# The general fights his a day at a time with the rest; it is not fought twice.
+	var general_id:=String(started.id)
+	MilitaryCampaign.command_hierarchy.battle.advance_all()
+	var after_general:=_exchanges(general_id)
+	MilitaryCampaign._fight_own_battles_day()
+	assert_int(_exchanges(general_id)).is_equal(after_general)
 
 
 func test_the_battle_in_focus_moves_on_when_it_ends()->void:
