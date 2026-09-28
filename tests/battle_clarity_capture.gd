@@ -117,20 +117,15 @@ func _report(seed:int)->void:
 
 
 func _battle(seed:int)->void:
+	# The battle panel (hud/battle_panel.gd): the result, then the two sides drawn up.
 	MilitaryCommandUI._open_battle_graphics(0,seed)
-	var screen:Control=MilitaryCommandUI.battle_graphics
-	var replaying:=screen!=null and "replay_only" in screen and bool(screen.get("replay_only"))
+	var panel:Control=MilitaryCommandUI.battle_graphics
 	for i in 20: await get_tree().process_frame
-	await _wait(1.2)
-	await _save("battle_drawn_up" if replaying else "battle")
-	if not replaying: return
-	await _wait(3.4)
-	await _save("battle_exchange")
-	var guard:=0.0
-	while is_instance_valid(screen) and String(screen.get("phase"))!="ended" and guard<60.0:
-		await _wait(0.5); guard+=0.5
-	await _wait(0.6)
 	await _save("battle_result")
+	if not is_instance_valid(panel): return
+	panel.call("_select",0)
+	for i in 8: await get_tree().process_frame
+	await _save("battle_drawn_up")
 
 
 func _wait(seconds:float)->void:

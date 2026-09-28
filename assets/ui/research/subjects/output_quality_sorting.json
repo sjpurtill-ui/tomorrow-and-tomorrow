@@ -1,0 +1,12 @@
+{
+  "id": "output_quality_sorting",
+  "line": "production",
+  "game_year": 180,
+  "approx_historical_year": -3800,
+  "prompt": "c. 3800 BCE: Craftworkers sort sound fired pots from cracked pieces; palette-knife impasto oil. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc0b4892-b90d-472b-97c4-559468baed6d.png",
+  "asset": "res://assets/ui/research/subjects/output_quality_sorting-v1.png",
+  "sha256": "2c31518b5d50f1a1995bce3d90ade5f65dd29c80ef756d050e7b1ed6ddc35763",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

@@ -202,13 +202,13 @@ func _cap(text:String)->String:
 
 
 func _act(id:String)->void:
-	var seed:=int(record.get("seed",0))
 	var host:=terrain
 	match id:
 		"watch":
 			_close()
-			var ui:Node=get_tree().root.get_node_or_null("MilitaryCommandUI")
-			if ui!=null: ui.call_deferred("_open_battle_graphics",0,seed)
+			# The battle panel, on this battle's own record (hud/battle_view.gd).
+			var shown:=record.duplicate(true)
+			(func()->void: preload("res://scripts/hud/battle_view.gd").open(shown,host if is_instance_valid(host) else null)).call_deferred()
 		"talk":
 			var commander:Dictionary=(record.get(String(record.get("home_side","attacker")),{}) as Dictionary).get("commander",{})
 			_close()

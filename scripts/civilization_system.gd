@@ -4479,7 +4479,8 @@ func resolve_player_battle(civ_id:String,result:Dictionary)->Dictionary:
 	var population_before_losses:=float(civ.population)
 	civ["population"]=maxf(1.0,float(civ.population)-float(dead))
 	civ=_scale_strategic_region_populations(civ,float(civ.population)/maxf(1.0,population_before_losses))
-	civ["military_population"]=maxf(0.0,float(civ.military_population)-float(dead+prisoners))
+	# Men of theirs taken in the fight itself (a block broke and was ridden down).
+	civ["military_population"]=maxf(0.0,float(civ.military_population)-float(dead+prisoners+maxi(0,int(rival_result.get("captured_in_battle",0)))))
 	var combat_weights:={"children":0.08,"youth":1.30,"early_adults":1.85,"established_adults":1.70,"mature_adults":1.05,"elders":0.18}
 	civ["cohorts"]=_scaled_cohorts(_remove_weighted_cohort_population(civ.cohorts,float(dead),combat_weights),float(civ.population))
 	var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)

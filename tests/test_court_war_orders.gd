@@ -542,3 +542,42 @@ func test_no_forces_at_all_is_the_only_raise_a_levy()->void:
 	assert_str(String(r.war.verdict)).is_equal("impossible")
 	assert_str(String(r.war.reason)).is_equal("no_forces")
 	assert_str(String(r.actor_says)).contains("nobody under arms and nobody in drill")
+
+# ---------------------------------------------------------------------------
+# A strike by night; the captives of a fight
+# ---------------------------------------------------------------------------
+
+func test_a_sneak_attack_by_night_goes_with_the_men_asked_for_and_states_its_chance()->void:
+	## The user's words in court: "Sneak attack Eldwick under cover of night.
+	## With 17 troops." Here the town is Tsaren.
+	_train(40)
+	var id:=_marshal_audience()
+	var words:="Sneak attack Tsaren under cover of night. With 17 troops."
+	var reading:=WO.read(words)
+	assert_str(String(reading.kind)).is_equal("attack")
+	assert_str(String(reading.approach)).is_equal("night")
+	assert_int(int(reading.count)).is_equal(17)
+	var r:=CC.hear(id,words)
+	var war:Dictionary=r.war
+	assert_str(String(war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("act")
+	assert_int(int(war.objective.troops)).is_equal(17)
+	var chance:=float((war.surprise as Dictionary).chance)
+	assert_str(String(r.actor_says)).contains("By night: 17 fighters against about 2 of theirs, 6 days on the road")
+	assert_str(String(r.actor_says)).contains("The chance we reach Tsaren unseen is %s." % preload("res://scripts/battle_tactics.gd").chance_words(chance))
+	# The march carries the stated chance to the attack; nothing is rolled yet.
+	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(war.objective.army_id))]
+	assert_float(float(((army.city_operation as Dictionary).approach as Dictionary).chance)).is_equal_approx(chance,0.0001)
+	assert_str(String((army.court_order as Dictionary).approach.kind)).is_equal("night")
+
+
+func test_the_last_fights_captives_hold_up_no_march()->void:
+	## The user's report: "no one marches: the last battle's captives and spoils
+	## remain unsettled". A fight's aftermath is settled by the general at once.
+	_train(40)
+	MilitaryCampaign.pending_aftermath={"type":"surrender","captor":"x","home_force_name":"x","prisoners":5,"spoils":{}}
+	MilitaryCampaign.settle_pending_aftermath()
+	assert_dict(MilitaryCampaign.pending_aftermath).is_empty()
+	var id:=_marshal_audience()
+	var r:=CC.hear(id,"Attack Tsaren with 17 troops")
+	assert_str(String(r.war.reason)).is_not_equal("busy")
+	assert_str(String(r.get("actor_says",""))).not_contains("captives")

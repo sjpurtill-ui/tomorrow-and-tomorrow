@@ -118,14 +118,16 @@ func _notice(entry:Dictionary)->void:
 	_battle_links(copy,entry)
 
 
-## A battle's entry offers its report and its replay (battle_account.gd,
-## battle_graphics_screen.gd). Watching never fights it again.
+## A battle's entry offers its report and the battle panel (battle_account.gd,
+## hud/battle_panel.gd); a war leader's clash (war_loop.gd) offers the panel.
+## Watching never fights it again.
 func _battle_links(copy:VBoxContainer,entry:Dictionary)->void:
 	var action:Dictionary=entry.get("action",{}) if entry.get("action") is Dictionary else {}
-	if String(action.get("kind",""))!="battle": return
-	var seed:=int(action.get("seed",0))
+	var reported:=String(action.get("kind",""))=="battle"
+	var seed:=int(action.get("seed",0)) if reported else int(action.get("battle_seed",-1))
+	if not reported and seed<0: return
 	var row:=HBoxContainer.new();row.name="BattleLinks";row.add_theme_constant_override("separation",12);copy.add_child(row)
-	for link in [["Read the report","report"],["Watch the battle","watch"]]:
+	for link in ([["Read the report","report"],["Watch the battle","watch"]] if reported else [["Watch the battle","watch"]]):
 		var button:=Button.new();button.text=String(link[0]);button.flat=true;button.name=String(link[1]).capitalize()
 		button.add_theme_color_override("font_color",T.GOLD);button.add_theme_font_size_override("font_size",13)
 		button.pressed.connect(_open_battle.bind(String(link[1]),seed))

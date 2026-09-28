@@ -1,6 +1,5 @@
 extends GdUnitTestSuite
 const FRONT := preload("res://scripts/army_front_visual.gd")
-const VIEW := preload("res://scripts/battle_diorama.gd")
 const MAP := preload("res://scripts/local_terrain.gd")
 
 func force(count: int = 1000) -> Dictionary:
@@ -83,20 +82,13 @@ func test_invasion_renderer_and_replay_do_not_resolve_again() -> void:
 	MilitaryCampaign.active_threat = {"seed":741,"name":"Invasion","enemy_force":MilitaryCampaign.simulator.create_formation_force("Invaders",[{"id":2,"unit":"line_infantry","weapon":"spear","count":250}],1,1),"campaign_mode":"defensive"}
 	var engagement := MilitaryCampaign.begin_threat_engagement()
 	assert_bool(engagement.has("error")).is_false()
-	var view: BattleDiorama = auto_free(VIEW.new())
-	add_child(view)
-	view.reset(engagement.attacker,engagement.defender)
-	assert_int(view.representative_count()).is_equal(0)
-	assert_int(view.generals.size()).is_equal(0)
+	# The battle view reads the engagement as it stands, again and again,
+	# without fighting it (battle_record.gd).
 	var before := MilitaryCampaign.engagement_snapshot()
-	var simulated: Dictionary = MilitaryCampaign.simulator.simulate(engagement.attacker,engagement.defender,{"seed":81,"max_rounds":1})
-	for replay in 3:
-		view.apply_snapshot(simulated.attacker,simulated.defender,simulated.rounds[0],simulated.outcome)
-		view._process(1)
+	for look in 3:
+		var view: Dictionary = preload("res://scripts/battle_record.gd").view(MilitaryCampaign.active_engagement,{"live":true})
+		assert_bool(bool(view.live)).is_true()
 	assert_dict(MilitaryCampaign.engagement_snapshot()).is_equal(before)
-	view.playback_speed=0
-	var clock := view.clock; view._process(1)
-	assert_float(view.clock).is_equal(clock)
 
 func test_real_map_hook_cancels_camera_scale_and_stack_offsets() -> void:
 	var renderer: Node3D = auto_free(MAP.new())

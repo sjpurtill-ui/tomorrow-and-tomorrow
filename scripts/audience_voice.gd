@@ -30,6 +30,7 @@ const Plain:=preload("res://scripts/plain_speech.gd")
 const Relevance:=preload("res://scripts/court_relevance.gd")
 const RequestAI:=preload("res://scripts/envoy_request_ai.gd")
 const OrderReader:=preload("res://scripts/order_reader.gd")
+const CourtFacts:=preload("res://scripts/court_facts.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim","upkeep"]
@@ -73,6 +74,8 @@ The world: people know only what the WORLD line lists. Anything not listed does 
 The ruler is the living god of their own people, and the god's command is law. Officials never flatly refuse an order: they may fear, plead or protest briefly in their own manner, but whether an order is obeyed is decided before you write, and you are told; write only what was decided. When the ruler gives an order you are not told the outcome of, nothing has been set in motion: never say it is done or will be done, and never promise it; say briefly and plainly what it would need or who must carry it out, and do not refuse. No filler: never a proverb, riddle or stock saying; say plain things plainly. Officials address and treat the ruler as divine, each in the way their REGARD line says: the loving are frank and warm, the frightened flatter, soften bad news and overpromise, the resentful let it leak sideways, the proud stand straight even under wrath. Foreign envoys regard the ruler as their people do. The god's wrath is presence, words and real decrees carried out by people; never invent miracles, omens, curses that come true or any supernatural event.
 
 Truth: use only the facts supplied. Never invent amounts, goods, agreements, promises, battles, deaths, alliances or events; say amounts exactly as given or not at all. Nobody announces or assumes what the ruler will decide. Nobody talks down to the ruler: never "child", "dearie", "boy", "girl", "pet" or any diminutive. Nobody agrees to new terms. Never mention games, systems, mechanics, buttons, menus, AI or data formats.
+
+Answer factual questions from FACTS and WHAT OUR OWN PEOPLE KNOW with the exact numbers given there (how many, who, where, what became of them). Never claim not to know, not to have counted or not to have been told anything listed there. If a fact really is not listed, say who would know or what would find it out (a count, a scout, a messenger, another official); never invent an excuse.
 
 Reply with JSON only: {"lines":[{"speaker_key":"<a listed key>","text":"...","aside":false}],"mood_shift":0.0}. aside=true means murmured to the ruler alone. mood_shift (-0.25 to 0.25) is how this moment changed the warmth between the ruler and the visitor."""
 
@@ -1787,10 +1790,50 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 		var already:=false
 		for line in (h.find(String(s.id)) as Dictionary).get("lines",[]):
 			if String((line as Dictionary).get("text","")).strip_edges().trim_prefix("[").trim_suffix("]").strip_edges()==outcome.strip_edges(): already=true
+		# The one who answered already said this fact ("Tsaren is already
+		# ours." under "Tsaren is already ours. 16 of Rovik's garrison hold
+		# it."): the plain note would only say it twice.
+		for line in ordered:
+			if String(line.get("key",""))!="narrator" and fact_said(outcome,String(line.get("text",""))): already=true
 		if not outcome.is_empty() and not already: h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":outcome,"day":_day(),"aside":false})
 	# Only the ruler's own words move the room; openings and farewells do not.
 	if stage=="speak" and absf(mood_shift)>0.0: h.apply_mood(String(s.id),clampf(mood_shift,-0.25,0.25))
 	lines_ready.emit.call_deferred(String(s.id))
+
+## An engine account retold in words this people has: the standing swaps
+## (character_voice.era_plain) and the blade idioms a pre-metal people says
+## otherwise.
+const ERA_IDIOMS:=[["metal","to the sword","to death"],["metal","swords","spears"],["metal","sword","spear"]]
+static func era_said(text:String,tags:Array)->String:
+	var out:=CV.era_plain(text,tags)
+	for rule in ERA_IDIOMS:
+		if tags.has(String(rule[0])): continue
+		out=out.replace(String(rule[1]),String(rule[2]))
+	return out
+
+## Does a spoken line already carry the facts of a plain note? Every figure
+## in the note must be in the line, and its words (four letters or more):
+## all of them when it has no figures, most of them when it has.
+static func fact_said(fact:String,line:String)->bool:
+	var clean:=func(text:String)->String:
+		var out:=""
+		for ch in text.to_lower():
+			out+=ch if (ch>="a" and ch<="z") or (ch>="0" and ch<="9") or ch==" " else " "
+		return " "+" ".join(out.split(" ",false))+" "
+	var note:String=clean.call(fact)
+	var said:String=clean.call(line)
+	if note.strip_edges()=="" or said.strip_edges()=="": return false
+	if said.contains(note): return true
+	var figures:=0; var weighty:=0; var missing:=0
+	for word in note.split(" ",false):
+		if word.is_valid_int():
+			figures+=1
+			if not said.contains(" "+word+" "): return false
+		elif word.length()>=4:
+			weighty+=1
+			if not said.contains(" "+word+" "): missing+=1
+	if figures==0: return missing==0 and weighty>=2
+	return float(missing)<=float(weighty)*0.4
 
 func _proposal(body:PackedByteArray)->Dictionary:
 	## The model's JSON object (from a chat envelope or bare), or {}.
@@ -2892,6 +2935,10 @@ func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)-
 	var key:=CC.actor_reaction_key(result)
 	var says:=String(result.get("actor_says",""))
 	if not actor.is_empty() and says!="":
+		# The engine's account in this people's own words: "put to the sword"
+		# before anyone works metal is "put to death", not a dropped line.
+		var tags:=_era_for(s,actor)
+		if not line_ok(says,tags): says=era_said(says,tags)
 		# The war leader answers with the engine's own decision and numbers,
 		# whole: the short-line cap for banked lines must not drop it.
 		var said:=_say(s,actor,[says],rng,{},false,[says])
@@ -3151,6 +3198,8 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var facts:String=JSON.stringify(ctx)
 	if facts.length()>2400: facts=facts.substr(0,2400)+"...}"
 	parts.append("FACTS YOU MAY USE (nothing else is true): "+facts)
+	var records:=court_records(s)
+	if records!="": parts.append("WHAT OUR OWN PEOPLE KNOW (exact, as of today; the one addressed knows these and states the numbers when asked):\n"+records)
 	var mood:float=float((s.audience as Dictionary).get("mood",0.0))
 	parts.append("ROOM: %s (%.2f)." % [_mood_words(mood),mood])
 	var regard:=_prompt_regard(s)
@@ -3180,6 +3229,17 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	parts.append("SO FAR:\n"+("\n".join(history) if not history.is_empty() else "(the doors have just opened)"))
 	parts.append("NOW: "+_stage_instruction(s,stage,extra))
 	return "\n\n".join(parts)
+
+## The exact fact sheet for the one addressed at our own court, by office
+## (court_facts.gd): the war leader has every town's ledger, the headman the
+## stores. "" for a foreign envoy, who knows nothing of what our people know.
+func court_records(s:Dictionary)->String:
+	if String(s.get("origin",""))!="court": return ""
+	var audience:Dictionary=s.get("audience",{}) if s.get("audience") is Dictionary else {}
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	var persona:Dictionary=(s.get("envoy",{}) as Dictionary).get("persona",{})
+	var which:=CourtFacts.offices(persona,speaker,String(audience.get("holder_key","")))
+	return CourtFacts.text(CourtFacts.sheet(which))
 
 ## The prompt's word on court officials: silent unless the gate chose one.
 func _gate_words(s:Dictionary)->String:

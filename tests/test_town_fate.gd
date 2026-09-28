@@ -15,6 +15,7 @@ const Voice:=preload("res://scripts/audience_voice.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
+const Ledger:=preload("res://scripts/town_ledger.gd")
 
 const USERS_ORDER:="Kill all males and take all women and girls back to seanstone and burn what remains of Tsaren to the ground."
 
@@ -142,9 +143,17 @@ func test_the_users_order_is_carried_out_on_the_town_with_real_consequences()->v
 	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("fate")
 	assert_bool(bool(r.get("executed",false))).is_true()
 	var o:Dictionary=r.objective
-	# Men killed, bounded by the men who could not get away and the garrison's reach.
+	# Men killed: each free man caught on the stated odds (one seeded roll
+	# each), bounded by the garrison's reach; the rest got away. Every man is
+	# accounted for in the town's ledger.
+	var men:=int(Ledger.split(300,Ledger.SHARES).men)
+	var fate:Dictionary=r.war.get("fate",{})
 	assert_int(int(o.killed)).is_greater(0)
-	assert_int(int(o.killed)).is_less_equal(mini(roundi(300.0*Fate.MEN_SHARE*Fate.CAUGHT_SHARE),17*Fate.KILLS_PER_FIGHTER))
+	assert_int(int(o.killed)).is_less_equal(mini(men,17*Fate.KILLS_PER_FIGHTER))
+	assert_int(int(o.killed)+int(fate.get("kill_escaped",0))).is_equal(men)
+	var odds:=float(fate.get("kill_odds",0.0))
+	assert_float(odds).is_between(0.35,0.92)
+	assert_str(String(r.actor_says)).contains(Ledger.chance_words(odds))
 	# Captives led home, bounded by what 17 can guard on the road.
 	assert_int(int(o.captives)).is_greater(0)
 	assert_int(int(o.captives)).is_less_equal(17*Fate.CAPTIVES_PER_FIGHTER)
