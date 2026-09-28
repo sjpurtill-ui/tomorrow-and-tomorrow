@@ -599,15 +599,19 @@ func hover_target(at:Vector2)->void:
 		if not hit.is_empty():
 			var ground:=Vector2(float(hit.x),float(hit.z))
 			candidate={"type":"spot","x":ground.x,"z":ground.y}
-			key="spot:%d:%d" % [roundi(ground.x*2.0),roundi(ground.y*2.0)]
+			key="spot:%d:%d" % [roundi(ground.x),roundi(ground.y)]
 	if candidate.is_empty():
 		if not hover.is_empty():hover={};ink.queue_redraw()
 		return
-	# The same target, or too soon after the last reckoning: only the
-	# pointer moves. The road is worked out at most about twelve times a second.
+	# The same target (a town, or the same square kilometre of ground), or too
+	# soon after the last reckoning: only the pointer moves. The road is worked
+	# out at most about eight times a second.
 	var now:=Time.get_ticks_msec()
-	if key==String(hover.get("key","")) or (not hover.is_empty() and now-int(hover.get("clock",0))<80):
-		hover.at=at;ink.queue_redraw();return
+	if key==String(hover.get("key","")):
+		hover.at=at;hover.erase("pending");ink.queue_redraw();return
+	if not hover.is_empty() and now-int(hover.get("clock",0))<120:
+		# Reckoned again once the pointer settles (see _process).
+		hover.at=at;hover["pending"]=at;ink.queue_redraw();return
 	var reading:Dictionary
 	if drawing_arrow:
 		var aim:={"verb":"attack","target":candidate} if String(candidate.type)!="spot" else {"verb":"goto","target":candidate}
@@ -1053,6 +1057,10 @@ func _process(delta:float)->void:
 	# new controls. It remains usable until the player closes and reopens it.
 	if is_instance_valid(finish_button):finish_button.visible=map.drawing
 	if is_instance_valid(cancel_boundary_button):cancel_boundary_button.visible=map.drawing
+	if hover.has("pending") and Time.get_ticks_msec()-int(hover.get("clock",0))>=120:
+		var settled:Vector2=hover.pending
+		hover.erase("pending");hover.clock=0
+		hover_target(settled)
 	tick+=delta
 	if tick>=1:
 		tick=0;tree.refresh();_update_status();_update_current_order();_refresh_mission_availability()
