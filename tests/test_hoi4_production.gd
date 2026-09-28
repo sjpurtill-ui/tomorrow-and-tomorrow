@@ -290,3 +290,17 @@ func test_a_short_screen_gets_a_short_dock()->void:
 	dock.present(tall,0)
 	for frame in 6:await get_tree().process_frame
 	assert_float(dock.size.y).is_equal_approx(1008.0,1.0)
+
+func test_the_quartermaster_puts_gear_for_waiting_soldiers_first_once()->void:
+	_room_for_lines(2);_officers()
+	var spear:=int(MilitaryCampaign.start_production_line("spear",10).job_id)
+	_levy_at_home(20,12)
+	MilitaryCampaign.workshop.advance(1)
+	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(2)
+	var first:Dictionary=MilitaryCampaign.equipment_queue[0]
+	assert_str(String(first.item)).is_equal("improvised")
+	assert_bool(bool(first.get("planner_managed",false))).is_true()
+	# The player may put it back; the officer does not fight the order.
+	P.move(MilitaryCampaign,int(first.id),1)
+	MilitaryCampaign.workshop.advance(2)
+	assert_int(int(MilitaryCampaign.equipment_queue[0].id)).is_equal(spear)
