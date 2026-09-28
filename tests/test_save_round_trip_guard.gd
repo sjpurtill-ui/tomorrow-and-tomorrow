@@ -186,13 +186,13 @@ func test_a_held_town_after_the_sword_saves_with_the_chase_offered()->void:
 	var id:=_war_leader(_captured_tsaren())
 	var kill:=CC.hear(id,"Kill all the men of Tsaren")
 	assert_str(String(kill.war.verdict)).override_failure_message(String(kill.get("actor_says",""))).is_equal("fate")
-	var fled:Dictionary=MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("fled",{})
-	assert_int(int(fled.get("count",0))).is_greater(0)
+	var fled:Dictionary=preload("res://scripts/town_ledger.gd").snapshot(civ_id,city_id)  # the flight lives in the town ledger
+	assert_int(preload("res://scripts/town_ledger.gd").running_total(preload("res://scripts/town_ledger.gd").of(civ_id,city_id))).is_greater(0)
 	_assert_same(_round_trip(2))
 	# The escape is still counted and the chase is still offered after a load.
 	var loaded:=SaveSystem.load_game(slot)
 	assert_bool(loaded.has("error")).override_failure_message(str(loaded)).is_false()
-	assert_dict(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("fled",{}) as Dictionary).is_equal(fled)
+	assert_dict(preload("res://scripts/town_ledger.gd").snapshot(civ_id,city_id)).is_equal(fled)
 	assert_str(String((Hall.find(id).get("pending_command",{}) as Dictionary).get("ask",""))).is_equal("chase")
 
 func test_a_chase_out_after_the_men_who_fled_saves_and_comes_back()->void:
@@ -233,7 +233,7 @@ func test_two_battles_being_fought_save_and_go_on()->void:
 func test_an_older_save_without_the_newer_fields_loads_with_safe_defaults()->void:
 	var id:=_war_leader(_captured_tsaren())
 	CC.hear(id,"Kill all the men of Tsaren")
-	var fled:Dictionary=MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("fled",{})
+	var fled:Dictionary=preload("res://scripts/town_ledger.gd").snapshot(civ_id,city_id)  # the flight lives in the town ledger
 	var made:=Legacy.write(slot)
 	assert_bool(made.has("error")).override_failure_message(str(made)).is_false()
 	assert_array(made.removed as Array).contains(["curated_GeneralCampaign","reflected_GeneralDialogue","player MilitaryCampaign.engagements","player MilitaryCampaign.joint_operations.raiding","player CivilizationSystem.formation_memory","player ConsequenceEngine._home_intake_today"])
@@ -250,7 +250,7 @@ func test_an_older_save_without_the_newer_fields_loads_with_safe_defaults()->voi
 	assert_dict({"raiding":joint.get("raiding"),"raids_out":joint.get("raids_out"),"war_ledger":joint.get("war_ledger"),"wounded":joint.get("wounded"),"captured_holding":joint.get("captured_holding")}).is_equal({"raiding":{},"raids_out":{},"war_ledger":{},"wounded":[],"captured_holding":0})
 	assert_dict(MilitaryCampaign.own_engagements).is_empty()
 	# What the older save did hold is all there, and the war goes on.
-	assert_dict(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("fled",{}) as Dictionary).is_equal(fled)
+	assert_dict(preload("res://scripts/town_ledger.gd").snapshot(civ_id,city_id)).is_equal(fled)
 	assert_str(String((Hall.find(id).get("pending_command",{}) as Dictionary).get("ask",""))).is_equal("chase")
 	_war_day()
 	assert_array(MilitaryCampaign.validate_state()).is_empty()
