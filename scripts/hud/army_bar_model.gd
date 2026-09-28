@@ -222,7 +222,7 @@ static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 	var men:=int(force.get("troops",0))
 	var gear:=gear_of(force.get("formations",[]),mc)
 	var supply:=supply_of(force)
-	var town:=ArmyMarks.place(String(force.get("region_name","the town")))
+	var town:=ArmyMarks.place(preload("res://scripts/town_names.gd").of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name","the town"))))
 	var general:=_general(force)
 	var hungry:=Rations.is_hungry(force)
 	var will:=clampf(float(force.get("morale",0.6)),0.0,1.0)

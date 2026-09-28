@@ -45,6 +45,7 @@ extends RefCounted
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const March:=preload("res://scripts/march_terrain.gd")
 const Sampler:=preload("res://scripts/terrain_patch_sampler.gd")
+const TownNames:=preload("res://scripts/town_names.gd")
 
 ## A day's ration from this share up is a fed day (FieldRations.HUNGRY_BELOW);
 ## below STARVING_BELOW the band is going hungry (field_rations.short_words).
@@ -213,20 +214,9 @@ static func hubs()->Array:
 			out.append({"id":"h:"+rid,"name":town_name(civ_id,rid,String(force.get("region_name","the held town"))),"kind":"held","pos":at,"civ_id":civ_id,"region_id":rid})
 	return out
 
-## A town's name as the map shows it: our chart's record of the town (what
-## its label reads), else the world's name for it, else what the force was
-## told when it took the town. One name for the label, the rations and the
-## court.
+## A town's name as the map shows it (town_names.gd: one name everywhere).
 static func town_name(civ_id:String,region_id:String,fallback:String="")->String:
-	var world:Variant=_world()
-	if world!=null and world.get("city_intelligence")!=null:
-		var book:Dictionary=(world.city_intelligence.records as Dictionary).get("player",{})
-		var name:=String((book.get(region_id,{}) as Dictionary).get("name",""))
-		if name!="": return name
-	if world!=null and civ_id!="" and world.has_method("region_snapshot"):
-		var name:=String((world.region_snapshot(civ_id,region_id) as Dictionary).get("name",""))
-		if name!="": return name
-	return fallback
+	return TownNames.of(civ_id,region_id,fallback)
 
 ## Where a force stands (Vector2.INF when it has no place).
 static func force_pos(force:Dictionary)->Vector2:

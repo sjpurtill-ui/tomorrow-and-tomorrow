@@ -727,7 +727,7 @@ static func _garrison_inputs()->Array:
 		# marched), not at a point the chart does not show.
 		var pos:=Pursuit.town_position(rid) if world.city_intelligence!=null else Vector2.INF
 		if not pos.is_finite(): continue
-		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":String(force.get("region_name","")),"general":String((force.get("commander",{}) as Dictionary).get("name","")),
+		out.append({"region_id":rid,"pos":pos,"troops":troops,"town":preload("res://scripts/town_names.gd").of(String(force.get("civ_id","")),rid,String(force.get("region_name",""))),"general":String((force.get("commander",{}) as Dictionary).get("name","")),
 			"fate_note":String(force.get("fate_note","")),"away":Pursuit.away_from(rid),
 			"required":ceili(float(force.get("required",0.0))),"morale":clampf(float(force.get("morale",0.6)),0.0,1.0),"hungry":preload("res://scripts/field_rations.gd").is_hungry(force)})
 		if out.size()>=6: break

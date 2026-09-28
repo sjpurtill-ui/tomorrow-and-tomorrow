@@ -361,21 +361,46 @@ func project(civ:Dictionary)->void:
 	civ.territory=world._player_territory()
 	civ["land_personnel"]=military._mobilized_count()-military.joint_operations.personnel()
 	var regions:Array=civ.strategic_regions
+	# A town keeps the region it was first given: its id, name and place go
+	# with the town, never with its place in the list. When a capital falls
+	# and another town becomes the capital (siege_recovery._activate_capital),
+	# a region someone holds never turns into another town. A binding counts only for a town of this network (a
+	# copied or stale one frees its region). Roles stay with their regions.
+	var network:=settlements.settlement_network_snapshot()
+	var present:={}
+	for listed:Dictionary in network.settlements: present[String(listed.id)]=true
+	var bound:={}
+	var taken:={}
+	for i in regions.size():
+		var held_city:=String((regions[i] as Dictionary).get("local_city_id",""))
+		if held_city!="" and present.has(held_city) and not bound.has(held_city): bound[held_city]=i; taken[i]=true
 	for region:Dictionary in regions:
 		region["settlement_founded"]=false
 		region.population=0.0
 		region.fortification=0.0
 		region["garrison"]=0
-	var network:=settlements.settlement_network_snapshot()
 	for index in network.settlements.size():
 		var city:Dictionary=network.settlements[index]
 		var primary:=bool(city.get("primary",false))
-		var slot:int=4 if primary else (index-1 if index<5 else index)
+		var slot:int=int(bound.get(String(city.id),-1))
+		if slot<0:
+			# A town seen for the first time: its place as always, unless that
+			# region is another town's (then the first region nobody holds).
+			slot=4 if primary else (index-1 if index<5 else index)
+			if slot<0 or taken.has(slot):
+				slot=regions.size()
+				for i in regions.size():
+					if not taken.has(i): slot=i; break
 		if slot>=regions.size():
-			var added:Dictionary=(regions[4] as Dictionary).duplicate(true)
+			var added:Dictionary=(regions[mini(4,regions.size()-1)] as Dictionary).duplicate(true)
 			added.id="%s_city_%d" % [civ.id,index]
-			added.role="frontier";added.approach_index=slot
+			for other:Dictionary in regions:
+				if String(other.id)==String(added.id): added.id="%s_city_%d_%d" % [civ.id,index,regions.size()]
+			added.erase("local_city_id")
+			added.role="frontier";added.approach_index=regions.size()
 			regions.append(added)
+			slot=regions.size()-1
+		bound[String(city.id)]=slot; taken[slot]=true
 		var region:Dictionary=regions[slot]
 		var local:=settlements.city_resource_snapshot(String(city.id),false,true)
 		region["settlement_founded"]=true
