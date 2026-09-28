@@ -8,8 +8,8 @@ Drafting displaces civilian work. `GameState.effective_workers` reduces actual c
 
 ## Implemented land recruitment workflow
 
-- Recruit & Deploy opens a compact formation queue board rather than the old design chooser.
-- Select an era-appropriate template; set parallel formations, serial batches, or continuous repetition.
+- Recruit & Deploy is laid out as HOI4's deployment screen (hud/recruit_deploy_board.gd, numbers from hud/deployment_model.gd): a manpower strip (can be called up, serving, in training, jobs left undone), band templates as small cards with one Train click or ×5, and a queue of lines.
+- Each line has −/+ for how many bands it raises side by side, ∞ to keep raising until stopped, priority, auto-deploy, where the men go, pause and stop. Each band in training is one row of three bars (men gathered, gear issued, training), the day it is ready and Deploy early. A short gear bar is amber; its tooltip says what is missing from the shared stock reading (equipment_logistics.gd) and a click opens production. The Quartermaster's lines make that gear (tests/test_hoi4_gear_loop.gd checks the loop to deployment).
 - Each line owns its copied composition and its own recruits. It never counts a shared home soldier twice.
 - Manpower, equipment and instruction are separate progress bars. Missing equipment, food or classroom places do not forbid enlistment. Instruction consumes available food, including civilian reserves; no food means no instruction progress. Crowding reduces instruction speed. Equipment/personnel completeness limits new-line training progress.
 - Low/normal/high priority allocates incoming equipment and available people. Existing reservations stay with their owners. Pause, cancel, repeat and automatic deployment are supported.
@@ -17,6 +17,11 @@ Drafting displaces civilian work. `GameState.effective_workers` reduces actual c
 - Deployment creates a new army at home or joins a selected existing army stationed at home. It transfers real recruits/equipment; it does not teleport them to a distant front. Battlefield commands and commander authority are unchanged.
 - Completed line settings remain available for review/reuse. Pending headcounts remain aggregate: a million requested parallel formations with a small population does not create a million empty objects. Queue rendering paginates lines and formations. Recruitment operates on aggregate cohorts, never individual people.
 - Old standing-template requests and saves still work, with their arbitrary intake restrictions removed. New lines and reservations use the normal military save payload and its actual binary Variant codec; malformed line identities/links are rejected.
+
+## Army bar and army command
+
+- Along the bottom of the map, an army bar (hud/army_bar.gd, numbers from hud/army_bar_model.gd) has one card per band, held town and the levy at home: the general's face and name, the men, bars for gear, will to fight and supply (supply_state.gd), and the counter's state glyph. Click finds and selects; double-click opens orders. Bands under one headquarters (the Organization tab) or one general stand as one army card listing its bands. A band away before signals is shown from its last runner's report, as on the war chart.
+- The army command panel is one army at a time: its card, the orders as icons, the target picked on the map with the road and days shown on hover (the one march estimate), one numbers line ("24 men · 3 days · arrive 12 Spring") and Talk it over. A drawn front line is held as a defended zone along it (region.plan = "front"); an offensive arrow is the same attack or advance the court gives (army_orders.gd give_plan). Generals still choose the road, the camps and the fight.
 
 ## HOI4 comparison and remaining differences
 

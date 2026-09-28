@@ -145,18 +145,25 @@ static func band(mc:Node,raw:Dictionary,slot:int,progress:Dictionary={},today:in
 
 ## Plain words for why a band's gear bar is short, for its tooltip:
 ## "Short 8 of Simple levy weapons · 2 in store · workshops make 1.5 a day".
-static func gear_words(band_row:Dictionary,mc:Node=null)->String:
+static func gear_words(band_row:Dictionary,mc:Node=null,stock_rows:Dictionary={})->String:
 	mc=_host(mc)
 	var missing:Dictionary=band_row.get("gear_missing",{})
 	if missing.is_empty():return "Every set issued: %d of %d." % [int(band_row.get("gear",0)),int(band_row.get("gear_target",0))]
 	var parts:PackedStringArray=[]
 	for item:String in missing:
-		var row:Dictionary=Logistics.row(item,mc)
+		var row:Dictionary=stock_rows.get(item,{}) if stock_rows.has(item) else Logistics.row(item,mc)
 		var making:=float(row.get("making_per_day",0.0))
 		var line:="Short %d %s · %d in store" % [int(missing[item]),String(row.get("name",item)),int(row.get("stock",0))]
 		line+=" · workshops make %s a day" % _rate(making) if making>0.0 else " · no workshop makes them"
 		parts.append(line)
 	return "\n".join(parts)+"\nClick to open production."
+
+
+## The shared stock reading, keyed by item, for one refresh of the board.
+static func stock_rows(mc:Node=null)->Dictionary:
+	var out:={}
+	for row:Dictionary in Logistics.rows(_host(mc)):out[String(row.item)]=row
+	return out
 
 
 static func _rate(value:float)->String:
