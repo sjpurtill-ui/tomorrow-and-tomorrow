@@ -40,14 +40,18 @@ func apply(recipes:Array,note:String)->void:
 		var running:=bool(recipe.get("running",false))
 		card.disabled=running or not blocker.is_empty()
 		var tag:Label=card.find_child("Tag",true,false)
-		# "No free line" is said once, above the cards; the card only dims.
+		# "No free line" is said once, above the cards; the card only dims. A
+		# kind the bands are short of, with no line making it, says so.
+		var deficit:=int(recipe.get("deficit",0))
 		tag.text="Making" if running else ("" if blocker.is_empty() or blocker=="No free line" else blocker)
+		if tag.text.is_empty() and deficit>0 and not running:tag.text="%d short" % deficit
 		tag.visible=not tag.text.is_empty()
 		tag.add_theme_color_override("font_color",T.GREEN_TEXT if running else T.RED_TEXT)
 		var name_label:Label=card.find_child("Title",true,false)
 		name_label.add_theme_color_override("font_color",T.INK if not card.disabled or running else T.INK_MUTED)
 		var tip:PackedStringArray=[String(recipe.name)+": "+String(recipe.get("description",""))]
 		tip.append(String(recipe.get("needs","")))
+		if int(recipe.get("deficit",0))>0 and not running:tip.append("The bands are %d short of these." % int(recipe.deficit))
 		if running:tip.append("A line already makes this. Give it more hands instead.")
 		elif not blocker.is_empty():tip.append(String(recipe.get("blocker_full",blocker)))
 		else:tip.append("Click to start a line that keeps %d in store." % int(recipe.get("start_target",10)))

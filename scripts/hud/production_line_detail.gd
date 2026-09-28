@@ -52,7 +52,7 @@ func setup(data:Dictionary)->void:
 		_cell(row,String(input.name),0,true,color,"small");_cell(row,Plain.number(float(input.stored)),78,false,color,"small")
 		_cell(row,Plain.number(float(input.per_item)),66,false,T.INK_MUTED,"small");_cell(row,Plain.number(float(input.per_day)),66,false,T.INK_MUTED,"small")
 	var targets:=HBoxContainer.new();targets.add_theme_constant_override("separation",4);add_child(targets)
-	_cell(targets,"KEEP IN STORE",120,false,T.INK_MUTED,"kicker")
+	var keep:=Label.new();keep.text="KEEP IN STORE";T.text(keep,"kicker",T.INK_MUTED);keep.custom_minimum_size.x=120;keep.size_flags_vertical=Control.SIZE_SHRINK_CENTER;targets.add_child(keep)
 	for choice:int in [0,5,20,100,500]:
 		_button(targets,Plain.target_text(choice),func():data.on_target.call(choice),"Keep making without a limit." if choice==0 else "Keep %d in store." % choice,target==choice)
 	var footer:=HFlowContainer.new();footer.add_theme_constant_override("h_separation",6);footer.add_theme_constant_override("v_separation",6);add_child(footer)

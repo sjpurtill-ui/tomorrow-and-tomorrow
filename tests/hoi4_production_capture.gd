@@ -9,6 +9,12 @@ extends Node
 class CaptureTerrain extends Node:
 	var last:Dictionary
 	func _report_military_action(result:Dictionary)->void:last=result
+class ReportProvider extends RefCounted:
+	var report:Dictionary
+	func _init(blocks:Dictionary)->void:report=blocks
+	func meta()->Dictionary:return {"eyebrow":"Workshop line","title":"Bows","subtabs":[]}
+	func tab(_sub:int)->Dictionary:return report
+	func signature()->Array:return []
 class CaptureHud extends Control:
 	signal section_requested(section:String,sub:int)
 	var providers:Dictionary={}
@@ -160,7 +166,7 @@ func _run()->void:
 	var wanted:=_arg("state","all")
 	T.set_color_mode("light")
 	var ok:=true
-	for state:String in ["early","late","early-civilian","late-dark"]:
+	for state:String in ["early","late","early-civilian","late-dark","late-narrow"]:
 		if wanted!="all" and wanted!=state:continue
 		T.set_color_mode("dark" if state.ends_with("dark") else "light")
 		if state.begins_with("early"):seed_early()
@@ -178,10 +184,12 @@ func _capture(out:String,tag:String,state:String,sub:int=0)->bool:
 	var hud:=CaptureHud.new();stage.add_child(hud)
 	var provider=load("res://scripts/hud/content/dock_content_production.gd").new(terrain,hud)
 	var dock:=DockPanel.new();stage.add_child(dock)
-	dock.position=Vector2(T.DOCK_X,64);dock.size=Vector2(clampf(1920*.65,720,980),1080-64-T.DOCK_MARGIN_Y)
+	# The production dock's width at 1920 wide (980), or its narrowest (720).
+	var width:=720.0 if state.ends_with("narrow") else clampf(1920*.65,720,980)
+	dock.position=Vector2(T.DOCK_X,64);dock.size=Vector2(width,1080-64-T.DOCK_MARGIN_Y)
 	dock.present(provider,sub)
 	for i in 10:await get_tree().process_frame
-	dock.size=Vector2(clampf(1920*.65,720,980),1080-64-T.DOCK_MARGIN_Y)
+	dock.size=Vector2(width,1080-64-T.DOCK_MARGIN_Y)
 	for i in 4:await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var ok:=_save(out,"production-%s-%s.png" % [tag,state])
@@ -190,6 +198,14 @@ func _capture(out:String,tag:String,state:String,sub:int=0)->bool:
 		for i in 4:await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		ok=_save(out,"production-%s-%s-lower.png" % [tag,state]) and ok
+		# The line opened from its name: the detail sheet over the dock.
+		var military=load("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
+		var detail:=DockPanel.new();stage.add_child(detail)
+		detail.position=Vector2(T.DOCK_X+width+12,64);detail.size=Vector2(T.DOCK_WIDTH,1080-64-T.DOCK_MARGIN_Y)
+		detail.present(ReportProvider.new(military._workshop_job_report(2)),0)
+		for i in 8:await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		ok=_save(out,"production-%s-line-detail.png" % tag) and ok
 	stage.queue_free()
 	await get_tree().process_frame
 	return ok
