@@ -3,14 +3,14 @@
   "line": "nutrition",
   "game_year": 375,
   "approx_historical_year": -2500,
-  "prompt": "c. 2500 BCE: Named Beers by Grain and Strength. Named beers by grain and strength. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc5737dc-2603-4abe-bb82-ce662c59ce41.png",
+  "prompt": "c. 2500 BCE. Ultrawide botanical egg tempera brewer comparing pale and dark beer in opaque shallow earthenware bowls, with separate cereal grain baskets and color-banded opaque storage jars; full-bleed, no glass or text.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e41dd16-3516-4284-b649-8c5229bf097f.png",
   "asset": "res://assets/ui/research/subjects/named_beers-v1.png",
-  "sha256": "84649c0ea1778dce44744ea1bb6b319dcb453f20c78ff0e40e27498b46e39bd6",
+  "sha256": "9856903f9804f1f5b50bf0f529e62bb82f660edf95e1266be45d717e3a6d4ee6",
   "mode": "built-in image_gen / new image",
   "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
   "focus": [
     0.5,
-    0.3
+    0.42
   ]
 }

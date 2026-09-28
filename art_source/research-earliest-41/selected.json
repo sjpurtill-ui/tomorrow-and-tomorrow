@@ -4,15 +4,15 @@
     "line": "nutrition",
     "game_year": 375,
     "approx_historical_year": -2500,
-    "prompt": "c. 2500 BCE: Named Beers by Grain and Strength. Named beers by grain and strength. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc5737dc-2603-4abe-bb82-ce662c59ce41.png",
+    "prompt": "c. 2500 BCE. Ultrawide botanical egg tempera brewer comparing pale and dark beer in opaque shallow earthenware bowls, with separate cereal grain baskets and color-banded opaque storage jars; full-bleed, no glass or text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e41dd16-3516-4284-b649-8c5229bf097f.png",
     "asset": "res://assets/ui/research/subjects/named_beers-v1.png",
-    "sha256": "84649c0ea1778dce44744ea1bb6b319dcb453f20c78ff0e40e27498b46e39bd6",
+    "sha256": "9856903f9804f1f5b50bf0f529e62bb82f660edf95e1266be45d717e3a6d4ee6",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.3
+      0.42
     ]
   },
   {
@@ -52,15 +52,15 @@
     "line": "demography",
     "game_year": 378,
     "approx_historical_year": -2480,
-    "prompt": "c. 2480 BCE: Child-watch Rotas Between Neighbours. Child-watch rotas between neighbours. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6a9c96af-f41e-4881-b21f-205a7372467a.png",
+    "prompt": "c. 2500 BCE. Chalk pastel and cut-paper collage of adult neighbors transferring care of children in a courtyard with clay tally pebbles; no domestic chickens, full-bleed and text-free.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42bb7fcf-2b23-4ed7-9ec5-a93f6b387e4a.png",
     "asset": "res://assets/ui/research/subjects/communal_child_supervision_rotas-v1.png",
-    "sha256": "e514d8d1f5b5654f6e1f383459166cd5f91a59c11363a5c78a036115fdb00e31",
+    "sha256": "17fce72205a049152779b904dcb3122fe5ec546c9ca6b27c3d620c27b1d43bd3",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.38
+      0.36
     ]
   },
   {
@@ -84,15 +84,15 @@
     "line": "production",
     "game_year": 380,
     "approx_historical_year": -2467,
-    "prompt": "c. 2467 BCE: Closed Stone and Clay Moulds. Closed stone and clay moulds. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-671e5206-ef7c-4f9e-ab26-01351d9eba69.png",
+    "prompt": "c. 2470 BCE. Palette-knife impasto of supported closed clay mould receiving copper from a hot crucible carried by two long wooden handles, hands safely distant; full-bleed, no text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90bccfc9-0beb-4886-826a-ae6c62acea11.png",
     "asset": "res://assets/ui/research/subjects/closed_moulds-v1.png",
-    "sha256": "85050e0c08c9fdda6cab01cc0beb01ddaff6d09d4d843df4cfa4e2106a89ed40",
+    "sha256": "b5fed6a2f4559db2aa5cf56b78fa1fed5740aa77b446a9d62b3db5a4460e6052",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.4
+      0.42
     ]
   },
   {
@@ -124,7 +124,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.39
+      0.29
     ]
   },
   {
@@ -132,15 +132,15 @@
     "line": "labor",
     "game_year": 380,
     "approx_historical_year": -2467,
-    "prompt": "c. 2467 BCE: Named Gangs in Rotating Watches for Great Works. Named gangs in rotating watches for great works. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-675437af-18b4-4634-b279-4441bf7d41ed.png",
+    "prompt": "c. 2470 BCE. Ultrawide charcoal over ochre of a fresh gang taking a wooden shovel from a tired gang while an overseer holds two distinct knotted cords; full-bleed, no text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d995aae2-2c5e-4194-bd6e-f223d959f717.png",
     "asset": "res://assets/ui/research/subjects/rotating_named_gangs-v1.png",
-    "sha256": "5867a17c9477065b43c5d655ff57d27b9739d923b72388a95606a38894522a6a",
+    "sha256": "72982b3b74bc21022e7370f27a5ea4992d59e7b5c1e3bb8cbb2701e9b3e6200e",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.42
+      0.44
     ]
   },
   {
@@ -180,15 +180,15 @@
     "line": "health",
     "game_year": 381,
     "approx_historical_year": -2460,
-    "prompt": "c. 2460 BCE: Aprons, Wraps and Eye Guards for Hot and Sharp Work. Aprons, wraps and eye guards for hot and sharp work. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-de261a15-a085-4ece-8935-74e62b5eac06.png",
+    "prompt": "c. 2460 BCE. Transparent watercolor and restrained ink of three adult workers tying a woven apron, wrapping wrists and arranging a headcloth before hearth work; hot crucible untouched, full-bleed, no text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f360bd34-bef2-449e-8784-099b7f40131f.png",
     "asset": "res://assets/ui/research/subjects/protective_gear_customs-v1.png",
-    "sha256": "3eb7075a2201c54381a43ab48ebf4d547d4580305ec50ef31dd882139a246f1f",
+    "sha256": "6051c7b28a5bd01e934b7ba77607b83f435d70ba7e9b9e3b413015fe955e1010",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.46
+      0.3
     ]
   },
   {
@@ -236,7 +236,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.34
+      0.32
     ]
   },
   {
