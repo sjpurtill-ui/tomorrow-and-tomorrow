@@ -1368,7 +1368,7 @@ static func _mark_asked(audience_id:String,key:String)->void:
 static func _measure_opts(reading:Dictionary)->Dictionary:
 	var m:Dictionary=reading.get("measure",{}) if reading.get("measure") is Dictionary else {}
 	var opts:={"stance":String(m.get("stance","firm")),"stance_set":bool(m.get("stance_set",false)),"families":bool(m.get("families",false)),"clause":String(m.get("clause","")),
-		"who":String(m.get("who","men")),"work":String(m.get("work","")),"work_who":String(m.get("work_who","men")),"count":int(m.get("count",0)),"headman":String(m.get("headman","")),"release":(m.get("release",[]) as Array).duplicate(),
+		"who":String(m.get("who","men")),"work":String(m.get("work","")),"work_who":String(m.get("work_who","men")),"count":int(m.get("count",0)),"headman":String(m.get("headman","")),"release":(m.get("release",[]) as Array).duplicate(),"release_who":String(m.get("release_who","people")),
 		"destroy":bool(m.get("destroy",false)),"heavy":bool(m.get("heavy",false)),"tone":String(m.get("tone","")),"words":String(m.get("words",reading.get("text","")))}
 	return opts
 

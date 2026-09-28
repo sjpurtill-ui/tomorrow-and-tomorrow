@@ -1149,6 +1149,10 @@ static func _succeed_all(mc:Variant,figures:Variant,fid:String,name:String)->Str
 		var fresh:Dictionary=figures.commander(mc._acting_field_commander(false),"army_%d" % int(army.get("army_id",0)))
 		if fresh.is_empty(): continue
 		army["commander"]=fresh
+		# A march the court ordered is led by the new war leader from now on.
+		if army.get("court_order") is Dictionary:
+			(army.court_order as Dictionary)["general"]=WarOrders._given(String(fresh.get("name","")))
+			(army.court_order as Dictionary)["general_pid"]=0
 		mc.field_armies[i]=army
 		next=fresh
 	for i in mc.occupation_forces.size():

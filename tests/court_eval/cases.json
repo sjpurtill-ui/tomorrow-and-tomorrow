@@ -148,7 +148,8 @@
   {"id": "measure.hostages", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
    "say": "Take hostages from their leading families",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["hostages"]}, "confidence": 0.9},
-   "expect": {"verb": "war", "verdict": "fate", "state": {"hostage": ">0"}}},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"hostage": ">0"}},
+   "variants": [{"say": "Take their chief prisoner", "expect": {"state": {"hostage": ">0", "officials": "==before"}}}, "Seize their headman"]},
 
   {"id": "measure.release_bound", "domain": "town_measure", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
    "say": "Untie the men of Tsaren and let them go back to their houses",
@@ -190,6 +191,14 @@
    "say": "Make the women of Tsaren work the fields",
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.85},
    "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "worker_women": ">0", "worker_men": "==0"}}},
+
+  {"id": "measure.release_women", "domain": "town_measure", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
+   "note": "Freeing the women frees the women: the bound men stay bound and the binding goes on.",
+   "steps": [
+    {"say": "Round up the women of Tsaren and bind them", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["bind_men"]}, "confidence": 0.9},
+     "expect": {"verb": "war", "verdict": "fate", "state": {"bound_women": ">0"}}},
+    {"say": "Let the women go", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["release"]}, "confidence": 0.85},
+     "expect": {"verb": "war", "verdict": "fate", "state": {"bound_women": "==0", "bound_men": "==before", "m_bind_men": "==1"}}}]},
 
   {"id": "grave.kill_men_enslave_women", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "note": "Enslaving the women is the captives' road home in bonds; they are never killed with the men.",
