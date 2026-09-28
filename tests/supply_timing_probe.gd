@@ -104,6 +104,8 @@ func _ready()->void:
 		var keys:={}; var geo:={}
 		var last_geo:=0; var changes:=0
 		var builds:=Supply.async_builds
+		var waited0:=Supply.waited_ms
+		var worst_day_us:=0
 		for day in 31:
 			var km:=float(day if day<=15 else 30-day)*20.0
 			var at:=home+Vector2(km,km*0.2)
@@ -115,9 +117,11 @@ func _ready()->void:
 			var sp:=Supply.spec()
 			if int(sp.geo_key)!=last_geo: changes+=1; last_geo=int(sp.geo_key)
 			keys[int(sp.key)]=true
+			var h0:=Time.get_ticks_usec()
 			Supply.haul_for(MilitaryCampaign.field_armies[0])
-			for f in 2: await get_tree().process_frame
-		out["march_reveal" if reveal else "march"]={"geo_key_changes":changes-1,"keys":keys.size(),"worker_builds":Supply.async_builds-builds}
+			worst_day_us=maxi(worst_day_us,Time.get_ticks_usec()-h0)
+			await get_tree().process_frame
+		out["march_reveal" if reveal else "march"]={"geo_key_changes":changes-1,"keys":keys.size(),"worker_builds":Supply.async_builds-builds,"rations_waited_ms":Supply.waited_ms-waited0,"worst_rations_call_us":worst_day_us}
 	_say("march")
 	# (4) the main thread's cost of a day's rations with five bands out.
 	Supply.reset(); _know(home,300.0)

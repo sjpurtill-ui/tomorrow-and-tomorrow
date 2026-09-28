@@ -263,6 +263,23 @@ func test_the_field_is_kept_until_the_world_changes()->void:
 	assert_int(Supply.builds).is_equal(builds+1)
 
 
+func test_the_rations_read_one_field_a_day_and_a_change_arrives_two_days_on()->void:
+	var band:=_band(7,Vector2(170,0))
+	MilitaryCampaign.field_armies.assign([band])
+	GameState.resource_stockpiles["Transport Carts"]=12.0
+	var day1:=Supply.haul_for(band)
+	# A made road appears the same day: today's rations are already set.
+	March.roads_override=[{"a":home,"b":home+Vector2(200,0),"tier":2}]
+	assert_float(Supply.haul_for(band)).is_equal(day1)
+	# Next day: the rations still read the world as it was at yesterday's first ask.
+	GameState.elapsed_days+=1
+	assert_float(Supply.haul_for(band)).is_equal_approx(day1,0.02)
+	# The day after, the road carries the food.
+	GameState.elapsed_days+=1
+	assert_float(Supply.haul_for(band)).is_greater(day1+0.05)
+	# The screens show what the rations read today.
+	assert_int(int(Supply.field().get("key",0))).is_equal(int(Supply.rations_field().get("key",0)))
+
 ## Another world's ground (a new game, a new terrain).
 func _other_ground(_p:Vector2)->Dictionary:
 	return {"h":0.5,"slope":0.05,"wood":0.3,"wet":0.0,"t":warmth,"rain":0.5}
