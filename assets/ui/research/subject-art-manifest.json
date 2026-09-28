@@ -4080,5 +4080,21 @@
   "timber_stand_reserves": {"path": "res://assets/ui/research/subjects/timber_stand_reserves-v1.png", "focus": [0.5, 0.5]},
   "wooden_axle_boxes": {"path": "res://assets/ui/research/subjects/wooden_axle_boxes-v1.png", "focus": [0.5, 0.5]},
   "mould_made_bowls": {"path": "res://assets/ui/research/subjects/mould_made_bowls-v1.png", "focus": [0.5, 0.5]},
-  "specialist_rotation_ladders": {"path": "res://assets/ui/research/subjects/specialist_rotation_ladders-v1.png", "focus": [0.5, 0.5]}
+  "specialist_rotation_ladders": {"path": "res://assets/ui/research/subjects/specialist_rotation_ladders-v1.png", "focus": [0.5, 0.5]},
+  "trade_colonies": {"path": "res://assets/ui/research/subjects/trade_colonies-v1.png", "focus": [0.5, 0.5]},
+  "kiln_smoke_venting_customs": {"path": "res://assets/ui/research/subjects/kiln_smoke_venting_customs-v1.png", "focus": [0.5, 0.5]},
+  "alarm_relay_customs": {"path": "res://assets/ui/research/subjects/alarm_relay_customs-v1.png", "focus": [0.5, 0.3]},
+  "course_leveling_practice": {"path": "res://assets/ui/research/subjects/course_leveling_practice-v1.png", "focus": [0.5, 0.5]},
+  "regional_arbitration_circuits": {"path": "res://assets/ui/research/subjects/regional_arbitration_circuits-v1.png", "focus": [0.5, 0.35]},
+  "cargo_stowage_sequencing": {"path": "res://assets/ui/research/subjects/cargo_stowage_sequencing-v1.png", "focus": [0.5, 0.5]},
+  "ground_bearing_assessment": {"path": "res://assets/ui/research/subjects/ground_bearing_assessment-v1.png", "focus": [0.5, 0.5]},
+  "dried_fruit_cakes": {"path": "res://assets/ui/research/subjects/dried_fruit_cakes-v1.png", "focus": [0.5, 0.5]},
+  "fly_protection": {"path": "res://assets/ui/research/subjects/fly_protection-v1.png", "focus": [0.5, 0.5]},
+  "formal_oath_taking": {"path": "res://assets/ui/research/subjects/formal_oath_taking-v1.png", "focus": [0.5, 0.5]},
+  "post_disaster_damage_survey": {"path": "res://assets/ui/research/subjects/post_disaster_damage_survey-v1.png", "focus": [0.5, 0.5]},
+  "storage_humidity_judging": {"path": "res://assets/ui/research/subjects/storage_humidity_judging-v1.png", "focus": [0.5, 0.5]},
+  "tube_drilled_stone_vessels": {"path": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png", "focus": [0.5, 0.5]},
+  "capacity_ledgers": {"path": "res://assets/ui/research/subjects/capacity_ledgers-v1.png", "focus": [0.5, 0.5]},
+  "market_timing_knowledge": {"path": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png", "focus": [0.5, 0.5]},
+  "runoff_grade_reading": {"path": "res://assets/ui/research/subjects/runoff_grade_reading-v1.png", "focus": [0.5, 0.5]}
 }

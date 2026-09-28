@@ -1,0 +1,12 @@
+{
+  "id": "cargo_stowage_sequencing",
+  "line": "logistics",
+  "game_year": 242,
+  "approx_historical_year": -3387,
+  "prompt": "c. 3387 BCE: Carriers place heavy jars low on ox cart then lighter baskets above; panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f4dec4b2-ee51-4f66-bb1b-402d4bc05a92.png",
+  "asset": "res://assets/ui/research/subjects/cargo_stowage_sequencing-v1.png",
+  "sha256": "e029ab6796923539d83bcc3b9b9d81f2548695b890991549aa36722b09865bdc",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

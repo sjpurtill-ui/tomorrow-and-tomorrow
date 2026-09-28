@@ -1,0 +1,12 @@
+{
+  "id": "post_disaster_damage_survey",
+  "line": "infrastructure",
+  "game_year": 245,
+  "approx_historical_year": -3367,
+  "prompt": "c. 3367 BCE: Builders inspect flood-cracked brown mudbrick hut and collapsed reed roof; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-832e36da-92e6-4fc0-b413-fbb888142a28.png",
+  "asset": "res://assets/ui/research/subjects/post_disaster_damage_survey-v1.png",
+  "sha256": "62097e3f874e1f24741075141d59e9fa09246fb45a3467279f0dbd8a6bf3dd5f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
