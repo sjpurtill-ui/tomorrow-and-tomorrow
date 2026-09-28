@@ -1,0 +1,16 @@
+{
+  "id": "rotating_named_gangs",
+  "line": "labor",
+  "game_year": 380,
+  "approx_historical_year": -2467,
+  "prompt": "c. 2467 BCE: Named Gangs in Rotating Watches for Great Works. Named gangs in rotating watches for great works. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-675437af-18b4-4634-b279-4441bf7d41ed.png",
+  "asset": "res://assets/ui/research/subjects/rotating_named_gangs-v1.png",
+  "sha256": "5867a17c9477065b43c5d655ff57d27b9739d923b72388a95606a38894522a6a",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.42
+  ]
+}

@@ -4208,5 +4208,21 @@
   "cross_settlement_measure_agreement": {"path": "res://assets/ui/research/subjects/cross_settlement_measure_agreement-v1.png", "focus": [0.5, 0.5]},
   "palace_guard": {"path": "res://assets/ui/research/subjects/palace_guard-v1.png", "focus": [0.5, 0.36]},
   "stepped_stone_tombs": {"path": "res://assets/ui/research/subjects/stepped_stone_tombs-v1.png", "focus": [0.5, 0.32]},
-  "ceremonial_investiture": {"path": "res://assets/ui/research/subjects/ceremonial_investiture-v1.png", "focus": [0.5, 0.36]}
+  "ceremonial_investiture": {"path": "res://assets/ui/research/subjects/ceremonial_investiture-v1.png", "focus": [0.5, 0.36]},
+  "named_beers": {"path": "res://assets/ui/research/subjects/named_beers-v1.png", "focus": [0.5, 0.3]},
+  "store_airflow_arrangement": {"path": "res://assets/ui/research/subjects/store_airflow_arrangement-v1.png", "focus": [0.5, 0.38]},
+  "assembly_petition_rights": {"path": "res://assets/ui/research/subjects/assembly_petition_rights-v1.png", "focus": [0.5, 0.35]},
+  "communal_child_supervision_rotas": {"path": "res://assets/ui/research/subjects/communal_child_supervision_rotas-v1.png", "focus": [0.5, 0.38]},
+  "public_works_priority_review": {"path": "res://assets/ui/research/subjects/public_works_priority_review-v1.png", "focus": [0.5, 0.47]},
+  "closed_moulds": {"path": "res://assets/ui/research/subjects/closed_moulds-v1.png", "focus": [0.5, 0.4]},
+  "marriage_age_norms": {"path": "res://assets/ui/research/subjects/marriage_age_norms-v1.png", "focus": [0.5, 0.31]},
+  "massed_formation_training": {"path": "res://assets/ui/research/subjects/massed_formation_training-v1.png", "focus": [0.5, 0.39]},
+  "rotating_named_gangs": {"path": "res://assets/ui/research/subjects/rotating_named_gangs-v1.png", "focus": [0.5, 0.42]},
+  "structural_repair_triage": {"path": "res://assets/ui/research/subjects/structural_repair_triage-v1.png", "focus": [0.5, 0.37]},
+  "trade_route_risk_assessment": {"path": "res://assets/ui/research/subjects/trade_route_risk_assessment-v1.png", "focus": [0.5, 0.39]},
+  "protective_gear_customs": {"path": "res://assets/ui/research/subjects/protective_gear_customs-v1.png", "focus": [0.5, 0.46]},
+  "household_partition_customs": {"path": "res://assets/ui/research/subjects/household_partition_customs-v1.png", "focus": [0.5, 0.34]},
+  "seasonal_hazard_calendar": {"path": "res://assets/ui/research/subjects/seasonal_hazard_calendar-v1.png", "focus": [0.5, 0.43]},
+  "sanitation_inspection_customs": {"path": "res://assets/ui/research/subjects/sanitation_inspection_customs-v1.png", "focus": [0.5, 0.34]},
+  "distant_timber_reserves": {"path": "res://assets/ui/research/subjects/distant_timber_reserves-v1.png", "focus": [0.5, 0.36]}
 }

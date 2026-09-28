@@ -1,0 +1,16 @@
+{
+  "id": "closed_moulds",
+  "line": "production",
+  "game_year": 380,
+  "approx_historical_year": -2467,
+  "prompt": "c. 2467 BCE: Closed Stone and Clay Moulds. Closed stone and clay moulds. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-671e5206-ef7c-4f9e-ab26-01351d9eba69.png",
+  "asset": "res://assets/ui/research/subjects/closed_moulds-v1.png",
+  "sha256": "85050e0c08c9fdda6cab01cc0beb01ddaff6d09d4d843df4cfa4e2106a89ed40",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.4
+  ]
+}

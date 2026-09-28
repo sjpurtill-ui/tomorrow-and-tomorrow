@@ -1,0 +1,16 @@
+{
+  "id": "distant_timber_reserves",
+  "line": "ecology",
+  "game_year": 385,
+  "approx_historical_year": -2433,
+  "prompt": "c. 2433 BCE: Distant Forests Known as Reserves of Long Timber. Distant forests known as reserves of long timber. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f84aeb09-bcd2-4ffb-b8f3-adb2979b361a.png",
+  "asset": "res://assets/ui/research/subjects/distant_timber_reserves-v1.png",
+  "sha256": "3c818ff980b64d898964503e39f9f39ef141bd9736aa6df49b8af4cefbee8b21",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.36
+  ]
+}
