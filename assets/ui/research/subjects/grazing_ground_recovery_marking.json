@@ -1,0 +1,12 @@
+{
+  "id": "grazing_ground_recovery_marking",
+  "line": "ecology",
+  "game_year": 210,
+  "approx_historical_year": -3600,
+  "prompt": "c. 3600 BCE: Herders mark recovering grass patch with woven branches and guide goats away; naturalist plant-pigment painting. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c07f6b04-f184-4df4-a83c-797e29207eee.png",
+  "asset": "res://assets/ui/research/subjects/grazing_ground_recovery_marking-v1.png",
+  "sha256": "9a0bb568eabdb5b3ca74bb86d70e140dd23a0f292d91d6cea5d0455fe5f66a78",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

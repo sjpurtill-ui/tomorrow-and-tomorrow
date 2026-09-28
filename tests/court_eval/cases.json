@@ -195,7 +195,8 @@
    "note": "Right after Rovik's report that the men are bound.",
    "say": "How many is there number?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_has": ["{bound_men}"], "prompt_has": ["{bound_men} bound"]}},
+   "expect": {"handled": false, "known": true, "reply_has": ["{bound_men}"], "prompt_has": ["{bound_men} bound"]},
+   "variants": ["how many are they"]},
 
   {"id": "facts.bound_no.rovik", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "rovik", "source": "user",
    "say": "No, how many of the men of Tsaren are bound!?",
@@ -502,6 +503,12 @@
    "ideal": {"kind": "question", "action": "none", "type": "none"},
    "expect": {"handled": false, "known": true, "reply_any": ["2"], "prompt_has": ["our dead 2"]}},
 
+  {"id": "facts.ford_lost.headman", "domain": "captives", "fixture": "battle_won", "speaker": "headman", "source": "design",
+   "note": "Everyone has heard who won at the ford; the count of the dead is the war leader's, and the headman says so instead of a stock line or a wrong count.",
+   "say": "How many did we lose at the ford?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["won", "war leader"], "reply_lacks": ["We number", "not in my count"], "prompt_has": ["the ford: we won"]}},
+
   {"id": "aim.conquer_now", "domain": "aim", "fixture": "aim_suri", "speaker": "aim", "source": "user",
    "note": "An order in an aim audience goes to the war path now, never into a generation's aim.",
    "say": "Go and conquer Tsaren right now",
@@ -805,7 +812,14 @@
   {"id": "q.at_war.headman", "domain": "office_questions", "fixture": "war_not_held", "speaker": "headman", "source": "design",
    "say": "Are we at war with anyone?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["At war with: Esurai"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["At war with: Esurai"]},
+   "variants": ["are we at war with anyone", "Kishan, who are we at war with"]},
+
+  {"id": "q.last_fight.suri", "domain": "office_questions", "fixture": "battle_won", "speaker": "suri", "source": "design",
+   "note": "The war leader tells the whole fight: who won, the dead on each side, the captives and the spoils.",
+   "say": "Who won the last fight?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["won", "14", "12 captives"], "prompt_has": ["captives taken 12"]}},
 
   {"id": "q.warriors_home.suri", "domain": "office_questions", "fixture": "war_not_held", "speaker": "suri", "source": "design",
    "say": "How many warriors are at home?",

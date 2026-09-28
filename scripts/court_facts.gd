@@ -109,6 +109,8 @@ static func _common(out:Dictionary)->void:
 			else: peace.append(String(c.get("name","")))
 	out["at_war_with"]=wars
 	out["at_peace_with"]=peace
+	# The last fight, as everyone has heard it: where, when and who won.
+	out["last_fights"]=battles(1,false)
 	var towns:Array=[]
 	# Every town we hold has its ledger (begun from its people now if no
 	# order has touched them yet).
@@ -226,16 +228,72 @@ static func _war(out:Dictionary)->void:
 	var chases:Array=[]
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
 	out["chases"]=chases
-	var battles:Array=[]
+	out["battles"]=battles(3,true)
+
+## The last fights, newest first, from the battle record and what the war
+## leader settled after each (the captives and spoils, military_campaign
+## settlements): {when, where, place, winner, won, lost, our_dead, their_dead,
+## their_people, general, captives, captives_fate, spoils, spoils_went}.
+## detail=false: only where, when and who won (what everyone has heard).
+static func battles(limit:int=3,detail:bool=true)->Array:
+	var out:Array=[]
+	var mc:Variant=_mc()
+	if mc==null: return out
 	for b in mc.battle_history:
-		if battles.size()>=3: break
+		if out.size()>=limit: break
+		if not b is Dictionary: continue
 		var rec:Dictionary=b
 		var ours:=String(rec.get("home_side","attacker"))
 		var theirs:="defender" if ours=="attacker" else "attacker"
 		var where:=String(rec.get("target_region_name",""))
-		battles.append({"when":EraWords.when(int(rec.get("day",-1))),"where":where if where!="" else "in the field","winner":String(rec.get("winner","")),
-			"our_dead":int((rec.get(ours,{}) as Dictionary).get("dead",0)),"their_dead":int((rec.get(theirs,{}) as Dictionary).get("dead",0))})
-	out["battles"]=battles
+		var winner:=String(rec.get("winner",""))
+		var row:={"when":EraWords.when(int(rec.get("day",-1))),"in_season":_in_season(int(rec.get("day",-1))),"where":where if where!="" else "in the field","place":where,"winner":winner,
+			"won":winner!="" and winner==ours,"lost":winner!="" and winner==theirs}
+		if not detail:
+			out.append(row); continue
+		var threat:Dictionary=rec.get("threat",{}) if rec.get("threat") is Dictionary else {}
+		row["our_dead"]=int((rec.get(ours,{}) as Dictionary).get("dead",0))
+		row["their_dead"]=int((rec.get(theirs,{}) as Dictionary).get("dead",0))
+		row["our_troops"]=int((rec.get(ours,{}) as Dictionary).get("initial_troops",0))
+		row["their_troops"]=int((rec.get(theirs,{}) as Dictionary).get("initial_troops",0))
+		row["their_people"]=String(threat.get("source_name",""))
+		row["general"]=String(((rec.get(ours,{}) as Dictionary).get("commander",{}) as Dictionary).get("name","")) if (rec.get(ours,{}) as Dictionary).get("commander") is Dictionary else ""
+		# What the war leader did with the captives and the spoils of this fight.
+		var settled:Dictionary=rec.get("aftermath_settled",{}) if rec.get("aftermath_settled") is Dictionary else {}
+		if settled.is_empty() and String(rec.get("id",""))!="":
+			for s in mc.settlements:
+				if s is Dictionary and String((s as Dictionary).get("battle_id",""))==String(rec.id): settled=s; break
+		var term:Dictionary=rec.get("termination",{}) if rec.get("termination") is Dictionary else {}
+		row["captives"]=int(settled.get("prisoners",term.get("prisoners",0)))
+		row["captives_fate"]=CAPTIVE_FATE.get(String(settled.get("prisoner_policy","")),"held under guard") if int(row.captives)>0 else ""
+		var taken:Dictionary=settled.get("spoils_taken",{}) if settled.get("spoils_taken") is Dictionary else {}
+		row["spoils"]=spoils_words(taken)
+		row["spoils_went"]=SPOILS_WENT.get(String(settled.get("spoils_policy","")),"to the stores") if String(row.spoils)!="" else ""
+		out.append(row)
+	return out
+
+const CAPTIVE_FATE:={"enslave":"sent home as bondservants","release":"let go","parole":"let go on their word","ransom":"given back for ransom","execute":"put to death","exchange":"traded for our own people","hold":"held under guard"}
+const SPOILS_WENT:={"army stores":"to the stores","reward troops":"to the warriors","state treasury":"to the treasury","return property":"given back","unrestricted plunder":"kept by the warriors"}
+
+## "40 supplies, a cart and 6 spears" (a battle's spoils in plain words).
+static func spoils_words(taken:Dictionary)->String:
+	var parts:PackedStringArray=PackedStringArray()
+	var supplies:=int(taken.get("supplies",0))
+	if supplies>0: parts.append("%d supplies" % supplies)
+	var carts:=int(taken.get("carts",0))
+	if carts>0: parts.append("a cart" if carts==1 else "%d carts" % carts)
+	for kind in ["weapons","consumables"]:
+		var items:Dictionary=taken.get(kind,{}) if taken.get(kind) is Dictionary else {}
+		for item in items:
+			var n:=int(items[item])
+			if n<=0: continue
+			var noun:=String(item).replace("_"," ")
+			parts.append(("a %s" % noun) if n==1 else "%d %s" % [n,noun if noun.ends_with("s") else noun+"s"])
+	var wealth:=int(taken.get("wealth",0))
+	if wealth>0: parts.append("%d in goods of worth" % wealth)
+	if parts.is_empty(): return ""
+	if parts.size()==1: return parts[0]
+	return ", ".join(parts.slice(0,parts.size()-1))+" and "+parts[parts.size()-1]
 
 # --------------------------------------------------------------------------
 # The headman and the keeper of stores
@@ -326,8 +384,10 @@ static func text(s:Dictionary)->String:
 		lines.append("Garrisons: %s." % ("; ".join(gar) if not gar.is_empty() else "none"))
 		if not (s.get("chases",[]) as Array).is_empty(): lines.append("Out on a chase: %s." % "; ".join(PackedStringArray(s.chases)))
 		var fights:PackedStringArray=PackedStringArray()
-		for b:Dictionary in s.get("battles",[]): fights.append("%s, %s: %s won; our dead %d, theirs %d" % [String(b.when),String(b.where),String(b.winner) if String(b.winner)!="" else "nobody",int(b.our_dead),int(b.their_dead)])
+		for b:Dictionary in s.get("battles",[]): fights.append(battle_words(b))
 		if not fights.is_empty(): lines.append("Last battles: %s." % "; ".join(fights))
+	else:
+		for b:Dictionary in s.get("last_fights",[]): lines.append("The last fight: %s, %s: %s." % [String(b.when),String(b.where),"we won" if bool(b.won) else ("we lost" if bool(b.lost) else "nobody won")])
 	if (s.get("offices",[]) as Array).has("stores"):
 		var water:Dictionary=s.get("water",{})
 		lines.append("Stores: %d Food, enough for %s days. Water: %d stored, %s days%s." % [int(s.get("food_in_store",0)),str(s.get("food_days",0)),int(water.get("stored",0)),str(water.get("days",0)),"" if bool(water.get("reachable",true)) else ", and the source is out of reach"])
@@ -344,6 +404,14 @@ static func text(s:Dictionary)->String:
 		if not ties.is_empty(): lines.append("Peoples: %s." % "; ".join(ties))
 	var out:="\n".join(lines)
 	return out if out.length()<=MAX_CHARS else out.substr(0,MAX_CHARS)+"..."
+
+## One fight in plain words, exact: who won, the dead on each side, the
+## captives and what became of them, the spoils and where they went.
+static func battle_words(b:Dictionary)->String:
+	var out:="%s, %s: %s; our dead %d, theirs %d" % [String(b.get("when","")),String(b.get("where","")),"we won" if bool(b.get("won",false)) else ("we lost" if bool(b.get("lost",false)) else "nobody won"),int(b.get("our_dead",0)),int(b.get("their_dead",0))]
+	if int(b.get("captives",0))>0: out+="; captives taken %d, %s" % [int(b.captives),String(b.get("captives_fate",""))]
+	if String(b.get("spoils",""))!="": out+="; spoils %s, %s" % [String(b.spoils),String(b.get("spoils_went",""))]
+	return out
 
 ## One town in plain words, exact. The war leader hears the whole ledger.
 static func _town_line(t:Dictionary,war:bool)->String:
