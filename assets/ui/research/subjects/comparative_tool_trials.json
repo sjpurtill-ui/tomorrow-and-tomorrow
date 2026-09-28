@@ -1,0 +1,12 @@
+{
+  "id": "comparative_tool_trials",
+  "line": "production",
+  "game_year": 198,
+  "approx_historical_year": -3680,
+  "prompt": "c. 3680 BCE: Woodworkers test different stone axe heads on adjacent logs; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e32858e5-9425-4dd5-94e6-2ace77603c49.png",
+  "asset": "res://assets/ui/research/subjects/comparative_tool_trials-v1.png",
+  "sha256": "a66cd22c706fc9b6699cc941b3826f681bffdd94cf3a06c09b9d2cede637eb4f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
