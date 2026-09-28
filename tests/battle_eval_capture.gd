@@ -6,6 +6,7 @@ extends Control
 ##   battle_in_the_hills  a first-age fight of bands on broken ground, a day in
 ##   modern_40000v35000   an armoured battle, reserves waiting, two days in
 ##   two_battles_at_once  two of our fights and a rival fight our band sees
+##   home_besieged        a host rings Seanstone: the siege mark, both sides
 ## Run only through tools/run_isolated_gpu_probe.ps1 with
 ## -UserArguments "--capture-dir=<absolute dir>". Quits by itself.
 
@@ -41,6 +42,7 @@ func _ready()->void:
 	await _stone()
 	await _modern()
 	await _two_and_a_rival()
+	await _siege_at_home()
 	print("BATTLE_EVAL_CAPTURE_DONE %s" % directory)
 	get_tree().quit(0)
 
@@ -132,6 +134,24 @@ func _two_and_a_rival()->void:
 	await _map("two_battles_and_a_rival_map",26.0)
 	WorldSimulation.enabled=false
 	WorldSimulation.clear()
+
+
+## A host of four hundred rings Seanstone behind its palisade (the runner's
+## own steps, _run_home_siege), two days into the siege.
+func _siege_at_home()->void:
+	var s:=_begin("home_besieged")
+	runner.home_watch(s.get("ours",[]),int(s.get("watch",120)))
+	MilitaryCampaign.settlement_defense={"stage":2,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
+	var enemy:Dictionary=runner.their_force(s.get("theirs",[]),{"morale":0.8,"readiness":0.6})
+	MilitaryCampaign._create_civilization_threat({"id":"host","source_civ_id":runner.civ_id,"source_name":"Esurai","incident_kind":"campaign","strength":int(enemy.troops),"technology":0.3,"readiness":0.6},"defensive")
+	MilitaryCampaign.active_threat["enemy_force"]=enemy
+	MilitaryCampaign.active_threat["estimated_strength"]=int(enemy.troops)
+	MilitaryCampaign.active_threat["deadline_day"]=int(GameState.elapsed_days)
+	MilitaryCampaign.active_threat["seed"]=int(s.get("seed",11))
+	runner.day()
+	if MilitaryCampaign.active_siege.is_empty(): push_warning("CAPTURE the host did not ring Seanstone"); return
+	runner.day(); runner.day()
+	await _map("home_besieged_map",40.0)
 
 
 # --- Photographs --------------------------------------------------------------------------

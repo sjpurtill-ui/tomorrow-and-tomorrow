@@ -49,6 +49,8 @@ func test_new_city_classification_has_no_age_gate()->void:
 	assert_str(SettlementModel._settlement_classification(city,3000)).is_equal("town")
 
 func test_actual_secondary_renderer_uses_design_assets_and_ground()->void:
+	var grounds:=preload("res://scripts/settlement_grounds.gd")
+	grounds.clear()
 	var terrain:Node3D=auto_free(FlatTerrain.new())
 	var parent:Node3D=auto_free(Node3D.new())
 	# The first pass computes the town's layout; the next one draws it.
@@ -62,7 +64,12 @@ func test_actual_secondary_renderer_uses_design_assets_and_ground()->void:
 	for batch in batches:count+=batch.multimesh.instance_count
 	assert_int(count).is_greater(0)
 	assert_int(count).is_less_equal(512)
-	assert_int(parent.find_children("*","MeshInstance3D",true,false).size()).is_greater(0)
+	# The town's worn ground (yards, paths, worked fields) is painted into the
+	# land by settlement_grounds.gd rather than built as a mesh: drawing the
+	# town files its ground, to be painted when the camera settles near it.
+	var at:Vector2=SettlementModel.settlement_record("second").position
+	assert_bool(grounds._requests.has("town:%d:%d" % [roundi(at.x*100.0),roundi(at.y*100.0)])).override_failure_message("the town's ground was not requested: %s" % str(grounds._requests.keys())).is_true()
+	grounds.clear()
 
 func test_existing_recorded_fabric_is_never_replaced()->void:
 	var city:=SettlementModel.settlement_record("second")

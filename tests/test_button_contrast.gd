@@ -7,14 +7,23 @@ const Art=preload("res://scripts/hud/research_visuals.gd")
 const ChronicleCard=preload("res://scripts/hud/chronicle_card.gd")
 const DiscoveryPopup=preload("res://scripts/hud/discovery_popup.gd")
 const Prefs=preload("res://scripts/display_preferences.gd")
+const WindowGuard=preload("res://tests/window_canvas_guard.gd")
 ## [font colour item, stylebox item, minimum ratio]
 const STATES:=[["font_color","normal",4.5],["font_hover_color","hover",4.5],["font_pressed_color","pressed",4.5],["font_hover_pressed_color","hover_pressed",4.5],["font_disabled_color","disabled",3.0]]
 class Host extends Node:
 	var game_speed:=3.0
 	func _set_game_speed(value:float)->void:game_speed=value
 
+## The root window as it was before a test added display preferences.
+var _window_saved:Array=[]
+
 func after()->void:
 	T.set_color_mode("light")
+
+func after_test()->void:
+	# Display preferences reshape the root window; put it back so later suites
+	# draw and project on the canvas they expect (tests/window_canvas_guard.gd).
+	WindowGuard.restore(get_window(),_window_saved);_window_saved=[]
 
 static func luminance(color:Color)->float:
 	var channels:=[color.r,color.g,color.b]
@@ -69,7 +78,7 @@ func test_game_display_preferences_theme_popups_on_canvas_layers()->void:
 	# The game themes controls that sit under CanvasLayers and SubViewports;
 	# without it Button text falls back to Godot's pale default on paper.
 	T.set_color_mode("light")
-	var window:=get_window();var saved:=[window.theme,window.content_scale_mode,window.content_scale_aspect,window.content_scale_size,window.scaling_3d_mode]
+	_window_saved=WindowGuard.capture(get_window())
 	var prefs:Node=auto_free(Prefs.new());prefs.config_path="user://button_contrast_no_display.cfg";add_child(prefs)
 	GameState.reset_for_new_world(314159);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.known_discoveries.append("food_drying")
@@ -78,7 +87,6 @@ func test_game_display_preferences_theme_popups_on_canvas_layers()->void:
 	var popup:=DiscoveryPopup.announce(host,hud,[{"id":"food_drying","day":12}])
 	check_button(popup.next_button,"discovery popup Continue")
 	popup.close()
-	window.theme=saved[0];window.content_scale_mode=saved[1];window.content_scale_aspect=saved[2];window.content_scale_size=saved[3];window.scaling_3d_mode=saved[4]
 
 ## Every colour the HUD uses for TEXT, on every ground text sits on, in both
 ## palettes. The plain accents (GREEN, AMBER, TEAL, RED, GOLD...) are for bars
