@@ -4064,5 +4064,21 @@
   "coordinated_retreat_drill": {"path": "res://assets/ui/research/subjects/coordinated_retreat_drill-v1.png", "focus": [0.5, 0.5]},
   "craft_quarters": {"path": "res://assets/ui/research/subjects/craft_quarters-v1.png", "focus": [0.5, 0.5]},
   "faience": {"path": "res://assets/ui/research/subjects/faience-v1.png", "focus": [0.5, 0.5]},
-  "public_grievance_hearings": {"path": "res://assets/ui/research/subjects/public_grievance_hearings-v1.png", "focus": [0.5, 0.35]}
+  "public_grievance_hearings": {"path": "res://assets/ui/research/subjects/public_grievance_hearings-v1.png", "focus": [0.5, 0.35]},
+  "replanting_after_clearance": {"path": "res://assets/ui/research/subjects/replanting_after_clearance-v1.png", "focus": [0.5, 0.5]},
+  "burn_treatment_protocols": {"path": "res://assets/ui/research/subjects/burn_treatment_protocols-v1.png", "focus": [0.5, 0.5]},
+  "hemorrhage_control_herbs": {"path": "res://assets/ui/research/subjects/hemorrhage_control_herbs-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_diet_diversification": {"path": "res://assets/ui/research/subjects/seasonal_diet_diversification-v1.png", "focus": [0.5, 0.5]},
+  "grazing_rotation_customs": {"path": "res://assets/ui/research/subjects/grazing_rotation_customs-v1.png", "focus": [0.5, 0.5]},
+  "layered_pit_storage": {"path": "res://assets/ui/research/subjects/layered_pit_storage-v1.png", "focus": [0.5, 0.5]},
+  "multigenerational_household_norms": {"path": "res://assets/ui/research/subjects/multigenerational_household_norms-v1.png", "focus": [0.5, 0.5]},
+  "convalescent_care_rotations": {"path": "res://assets/ui/research/subjects/convalescent_care_rotations-v1.png", "focus": [0.5, 0.5]},
+  "gate_watchtowers": {"path": "res://assets/ui/research/subjects/gate_watchtowers-v1.png", "focus": [0.5, 0.3]},
+  "wheel_thrown_pottery": {"path": "res://assets/ui/research/subjects/wheel_thrown_pottery-v1.png", "focus": [0.5, 0.5]},
+  "field_rest_scheduling": {"path": "res://assets/ui/research/subjects/field_rest_scheduling-v1.png", "focus": [0.5, 0.5]},
+  "linchpin_retention": {"path": "res://assets/ui/research/subjects/linchpin_retention-v1.png", "focus": [0.5, 0.5]},
+  "timber_stand_reserves": {"path": "res://assets/ui/research/subjects/timber_stand_reserves-v1.png", "focus": [0.5, 0.5]},
+  "wooden_axle_boxes": {"path": "res://assets/ui/research/subjects/wooden_axle_boxes-v1.png", "focus": [0.5, 0.5]},
+  "mould_made_bowls": {"path": "res://assets/ui/research/subjects/mould_made_bowls-v1.png", "focus": [0.5, 0.5]},
+  "specialist_rotation_ladders": {"path": "res://assets/ui/research/subjects/specialist_rotation_ladders-v1.png", "focus": [0.5, 0.5]}
 }

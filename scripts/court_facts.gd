@@ -270,7 +270,12 @@ static func _war(out:Dictionary)->void:
 		if int(army.get("troops",0))<=0: continue
 		var commander:Dictionary=army.get("commander",{}) if army.get("commander") is Dictionary else {}
 		var doing:=Pursuit.doing_words(army)
-		bands.append({"name":String(army.get("name","")),"fighters":int(army.troops),"where":WarOrders._where(army),"leader":String(commander.get("name","")),"doing":doing if doing!="" else String(army.get("status",""))})
+		# A band standing at a town is at that town ("at Tsaren, about 21 km
+		# from home"), not only somewhere out from home.
+		var where:=WarOrders._where(army)
+		var at:=String(army.get("location_name",""))
+		if at!="" and String(army.get("status",""))=="stationed" and not at.to_lower() in where.to_lower(): where="at %s, %s" % [at,where]
+		bands.append({"name":String(army.get("name","")),"fighters":int(army.troops),"where":where,"leader":String(commander.get("name","")),"doing":doing if doing!="" else String(army.get("status",""))})
 	out["bands"]=bands
 	var garrisons:Array=[]
 	for f in mc.occupation_forces:
@@ -557,7 +562,9 @@ static func text(s:Dictionary)->String:
 		for b:Dictionary in s.get("battles",[]): fights.append(battle_words(b))
 		if not fights.is_empty(): lines.append("Last battles: %s." % "; ".join(fights))
 	else:
-		for b:Dictionary in s.get("last_fights",[]): lines.append("The last fight: %s, %s: %s%s." % [String(b.when),String(b.where),"we won" if bool(b.won) else ("we lost" if bool(b.lost) else "nobody won"),("; captives taken %d, %s" % [int(b.captives),String(b.captives_fate)]) if int(b.get("captives",0))>0 else ""])
+		# Who won and the captives everyone has seen; the count of the dead is
+		# the war leader's, so no one else says it (or makes one up).
+		for b:Dictionary in s.get("last_fights",[]): lines.append("The last fight: %s, %s: %s%s; how many died on each side is the war leader's count, not yours." % [String(b.when),String(b.where),"we won" if bool(b.won) else ("we lost" if bool(b.lost) else "nobody won"),("; captives taken %d, %s" % [int(b.captives),String(b.captives_fate)]) if int(b.get("captives",0))>0 else ""])
 	if (s.get("offices",[]) as Array).has("stores"):
 		var water:Dictionary=s.get("water",{})
 		var others:PackedStringArray=PackedStringArray()

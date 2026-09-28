@@ -1,0 +1,12 @@
+{
+  "id": "field_rest_scheduling",
+  "line": "nutrition",
+  "game_year": 232,
+  "approx_historical_year": -3453,
+  "prompt": "c. 3453 BCE: Farmers discuss leaving one field fallow while tending adjacent barley field; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-69756515-17d1-4936-8d4b-53fc42f24623.png",
+  "asset": "res://assets/ui/research/subjects/field_rest_scheduling-v1.png",
+  "sha256": "0da78cc3e88069ee5e5b088bf2166d58ad1e17151e97dab063243e2999c7f51c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

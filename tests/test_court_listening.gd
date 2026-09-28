@@ -179,3 +179,11 @@ func test_orders_holding_who_or_bring_go_to_the_engine_and_talk_of_people_to_the
 	var calls:=_calls(who,0)
 	assert_bool(calls.has("persons")).override_failure_message(str(calls)).is_true()
 	assert_bool(calls.any(func(k:Variant)->bool: return String(k).begins_with("read"))).override_failure_message(str(calls)).is_false()
+	# A question the facts answer is the voice's, even with "who" in it: the
+	# persons engine answered "Who holds Tsaren?" with "Whom do you mean?".
+	for q in ["Who holds Tsaren?","Who won the last fight?"]:
+		var fact:=_live({"id":"listen.fact_who","domain":"x","fixture":"tsaren_captured","speaker":"suri","source":"design","steps":[
+			{"say":q,"ideal":{"kind":"question","action":"none","type":"none"},"expect":{"handled":false}}]})
+		calls=_calls(fact,0)
+		assert_bool(calls.has("persons")).override_failure_message("%s: %s" % [q,str(calls)]).is_false()
+		assert_bool(calls.has("speak (read)")).override_failure_message("%s: %s" % [q,str(calls)]).is_true()

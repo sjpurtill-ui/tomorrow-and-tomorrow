@@ -83,7 +83,7 @@ const HARM:=["kill","maim"]
 const SYSTEM_PROMPT:="""You read what a ruler means in a royal audience of a fictional early society. You do NOT write dialogue. Return only the JSON asked for, one flat object.
 kind: 'question' for a question, 'speech' for talk, thanks, threats without an order, musing; 'order' for any instruction however phrased ('I want you to...', 'go ahead', 'come home').
 action: what is ordered. Person acts (kill, maim, exile, detain, penance, terrify, bless, boon, raise, demote, appoint, give, take) fall on ONE person from HALL (raise: honour, exalt or promote them; boon: reward them with a gift). town_fate: what becomes of a town WE HOLD and its people (set flags). town_measure: what our garrison is to DO with the people of a town WE HOLD while holding it; measures lists every measure named: bind_men (round up, tie, bind, chain, detain, lock up, hold under guard), disarm (take or burn their weapons), hostages, curfew (keep them in their houses), search (search the houses), labour (make them work, build walls, clear roads, work fields), requisition (take their food or stores), conscript (take their men into our bands), execute_ringleaders (kill the leaders, make an example), release (free, untie, let go), relief (feed, protect, reward those who help), set_headman (set someone over them), settle (move our families in). stance is how hard the hand is: harsh for threats to families or beatings ("if any resist, threaten their wives"), brutal for "kill any who resist", lenient for gently, else ''. Group acts on a town's people are town_measure, never a person act. attack, siege, raid, storm: war on a FOREIGN town (a raid or war on a people: type people, ref that people). Killing, taking captives from or burning the people of a town we do NOT hold is still kill (type group) or town_fate with its flags, NEVER attack: the court asks to take the town first. intercept or pursue: go after their army or band in the field, or the men who fled a town. recall: bring bands home, or stop something under way (call off the chase, bring the men back) (type band and a band's id for one band, type none for all). defend: guard home or a place. drill: train first. send (scouts, envoys), trade, envoy, civic, order (recruit, make weapons, build, haul, any other work at home): other business. confirm: yes / do it / go ahead / send them, to the OPEN QUESTION. cancel: no / wait / leave it, ONLY as the answer to the OPEN QUESTION. none: not an order. Telling an envoy to leave or refusing them ('no tribute, get out', 'go home') is speech, not exile, unless the words order them driven out, bound or harmed.
-type and ref: ref MUST be a whole id copied from the lists, prefix and all (town:..., people:..., person:..., figure:..., band:..., ours:..., home), or '' when none fits. 'him', 'her', 'you' mean a person (the one marked SPEAKING is the one before the ruler). Killing or harming many people (all the men, the villagers, everyone, them all, a town's people, a whole people) is NEVER a person in HALL: use type group (ref = the town or people meant, or ''), town, or people. A town we hold is a town_fate, never an attack. actor: the id of the one told to do it, from HALL, or ''.
+type and ref: ref MUST be a whole id copied from the lists, prefix and all (town:..., people:..., person:..., figure:..., band:..., ours:..., home; a foreign envoy before the ruler is envoy), or '' when none fits. 'him', 'her', 'you' mean a person (the one marked SPEAKING is the one before the ruler). Killing or harming many people (all the men, the villagers, everyone, them all, a town's people, a whole people) is NEVER a person in HALL: use type group (ref = the town or people meant, or ''), town, or people. A town we hold is a town_fate, never an attack. actor: the id of the one told to do it, from HALL, or ''.
 who: whom the order is about as the words name them: men, women, children, elders, bound (those we tied up), everyone (only when the words say everyone), else ''. flags: each that applies to a town's fate (kill_men for killing, kill_all ONLY when the words say everyone, captives, raze, tribute, spare, hold, leave, free), and full_force for 'with everything'. Taking people back to our town is town_fate with captives and destination that town (hostages are held in their own town). count: a number said, else 0. resource: goods named, else ''. destination: an id or ''. measures and stance: for town_measure, else [] and ''.
 confidence 0 to 1 for how CLEAR the words are about the action and the target, not how grave the act is: a named act on a named place or people is 0.9 or more. If the words are unclear about something grave (killing, maiming, burning a town, going to war, abandoning a town), give low confidence and write clarify: ONE short, plain question the court would ask the ruler (no flattery, no promise). Otherwise clarify is ''.
 Examples (ids stand for ids from the lists):
@@ -491,12 +491,18 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# no order of its own goes to him, and an unclear one is taken as his own
 	# nearest reading (court_war_orders.pending_answer), never asked again.
 	if String(theirs.get("ask",""))=="measure" and kind!="question" and (kind!="order" or action=="none"): return {"route":"engine","context":{"reader":true}}
-	if kind!="order" or action=="none": return {"route":"speak"}
 	# The captives and spoils of our last fight (or the standing word for the
-	# next) are read by the war orders' own words, whatever the reading named.
-	var captive:=WarOrders.captive_reading(text)
+	# next) are read by the war orders' own words, whatever the reading named:
+	# "free the captives" read as talk is still that order (never a question).
+	var captive:=WarOrders.captive_reading(text) if kind!="question" else {}
 	if not captive.is_empty() and WarOrders.captive_applies(captive): return _war_plan(captive)
+	if kind!="order" or action=="none": return {"route":"speak"}
 	if action in LEGACY_ACTIONS: return {"route":"legacy","why":"not the reader's business"}
+	# "Kill the envoy" read with nobody named: the envoy before the ruler.
+	if action in PERSON_ACTIONS and String(reading.get("type",""))=="person" and String(reading.get("ref",""))=="" and CC._re("(?i)\\b(envoy|herald|messenger)\\b").search(text)!=null:
+		for e:Dictionary in CC.roster(audience):
+			if String(e.get("key",""))=="envoy":
+				reading=reading.duplicate(); reading["ref"]="envoy"; break
 	var is_grave:=grave(reading)
 	var sure:=certain(reading)
 	if not confirmed and (conf<MIN_CONFIDENCE or (is_grave and (conf<GRAVE_CONFIDENCE or not sure))):
@@ -530,6 +536,10 @@ static func _offline_agrees(audience:Dictionary,text:String,reading:Dictionary)-
 	## act, on the same place, as the reader's unsure reading?
 	var action:=String(reading.get("action",""))
 	if not WarOrders.captive_reading(text).is_empty(): return action in ["kill","maim","town_fate","order"]
+	# Harm to a town's people or a whole people ("maim every man in Tsaren"):
+	# the offline court reads it as a war order about the town as well.
+	if action in HARM and String(reading.get("type","")) in ["group","town","people"]:
+		if CC.harm_to_people(text,CC.classify(text),CC.roster(audience))!="": return true
 	var offline:=WarOrders.read(text,String(audience.get("civ_id","")),String(audience.get("id","")))
 	if offline.is_empty(): return false
 	var target:Dictionary=offline.get("target",{}) if offline.get("target") is Dictionary else {}

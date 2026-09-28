@@ -337,7 +337,10 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		var total_power := maxf(MIN_EFFECTIVE_STRENGTH, attacker_power + defender_power)
 		var attacker_share := attacker_power / total_power
 		var defender_share := defender_power / total_power
-		var overrun:=overrun_side(attacker_power,defender_power,attacker_front,defender_front,effective_terrain_defense)
+		# Overrun at the first blow only (a hopeless fight from the start). A
+		# side worn down later in a real battle breaks and runs by its morale,
+		# and the battle ends as a battle, not as a fight "over at once".
+		var overrun:=overrun_side(attacker_power,defender_power,attacker_front,defender_front,effective_terrain_defense) if int(state.exchange)==0 else ""
 		if overrun!="":
 			var exchange:=_overrun_exchange(overrun,attacking_force,defending_force,attacker_troops,defender_troops,attacker_power,defender_power,rng)
 			attacker_troops=int(exchange.attacker_remaining); defender_troops=int(exchange.defender_remaining)
@@ -348,8 +351,12 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			overrun_record["attacker_morale"]=attacker_morale
 			overrun_record["defender_morale"]=defender_morale
 			overrun_record["order_intensity"]=casualty_intensity
-			Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,overrun_record.get("attacker_cohort_losses",[]),int(overrun_record.get("attacker_losses",0))),where.attacker)
-			Blocks.book_losses(state,"defender",_block_loss_list(defending_force,overrun_record.get("defender_cohort_losses",[]),int(overrun_record.get("defender_losses",0))),where.defender)
+			# Booked on the blocks and, by kind, on the phase: the record's
+			# phases add up to the exchange like any other.
+			var attacker_hit:=Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,overrun_record.get("attacker_cohort_losses",[]),int(overrun_record.get("attacker_losses",0))),where.attacker)
+			var defender_hit:=Blocks.book_losses(state,"defender",_block_loss_list(defending_force,overrun_record.get("defender_cohort_losses",[]),int(overrun_record.get("defender_losses",0))),where.defender)
+			Blocks.book_kinds(state,"attacker",attacker_hit,overrun_record.get("attacker_casualties",{}))
+			Blocks.book_kinds(state,"defender",defender_hit,overrun_record.get("defender_casualties",{}))
 			var overrun_outcome:="attacker_victory" if overrun=="defender" else "defender_victory"
 			var overrun_termination:=_termination_event(overrun_outcome,attacking_force,defending_force,attacker_troops,defender_troops,attacker_morale,defender_morale,rng,true)
 			_event_overrun(state,overrun)

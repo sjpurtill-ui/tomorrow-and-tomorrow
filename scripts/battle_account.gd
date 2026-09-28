@@ -42,6 +42,17 @@ static func count_words(n:int)->String:
 	return NUMBER_WORDS[n] if n<NUMBER_WORDS.size() else Marks.about(n)
 
 
+## A number of our own, told exactly: the war leader counted them ("45",
+## "1,200"; small ones in words). Theirs are count_words, "about" when many.
+static func exact(n:int)->String:
+	n=maxi(0,n)
+	return NUMBER_WORDS[n] if n<NUMBER_WORDS.size() else preload("res://scripts/hud/era_words.gd").grouped(n)
+
+
+static func _ours(n:int,one:String="person",many:String="people")->String:
+	return "%s %s" % [exact(n),one if n==1 else many]
+
+
 static func _people(n:int,one:String="person",many:String="people")->String:
 	return "%s %s" % [count_words(n),one if n==1 else many]
 
@@ -145,18 +156,26 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var raid:=String(threat.get("incident_kind",""))=="raid"
 	var town:=_place_name(String(record.get("target_region_name",threat.get("target_region_name",""))))
 	var near:=_place_name(String(state.get("near","")))
-	var general_full:=String(state.get("general_name",(ours.get("commander",{}) as Dictionary).get("name","")))
+	# Who led the fight, and who leads the band now: the same man unless he
+	# fell or was taken (military_campaign.gd _apply_force_commander_fate).
+	var led:=String((ours.get("commander",{}) as Dictionary).get("name",""))
+	var succession:Dictionary=record.get("commander_succession",{}) if record.get("commander_succession") is Dictionary else {}
+	var general_full:=String(state.get("general_name",String(succession.get("now",led)) if not succession.is_empty() else led))
 	var general:=_first_name(general_full)
+	var leader:=_first_name(led) if _first_name(led)!="" else general
 	var before:=int(ours.get("initial_troops",0))
 	var noun:=Marks.noun(maxi(1,before),stage)
-	var band:=("%s's %s" % [general,noun]) if general!="" else ("our "+noun)
+	var band:=("%s's %s" % [leader,noun]) if leader!="" else ("our "+noun)
 	var enemy_people:=String(threat.get("source_name",""))
 	var enemy_name:=("the "+enemy_people) if enemy_people!="" and not enemy_people.begins_with("UNIDENTIFIED") else "the strangers"
 	var home_place:=String(state.get("home_name","home"))
 
-	# Where it happened, in words.
+	# Where it happened, in words. Home defended at its edge is "at home".
+	var at_home:=defending and town=="" and not field and String(record.get("home_force_kind","field"))=="field"
 	var where:=""
-	if field or town=="":
+	if at_home:
+		where="at "+home_place
+	elif field or town=="":
 		where=("near "+near) if near!="" else "in the open country"
 	elif defending:
 		where="at "+(town if town!="" else home_place)
@@ -189,14 +208,16 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var their_lost:=round_losses(record,String(s.enemy))
 	var our_captives:=(int(termination.get("prisoners",0)) if kind in ["won","taken","uncontested"] else 0)+int(their_lost.taken)
 	var held_field:=kind in ["won","taken","uncontested","nobody"]
-	var exact:=their_before<=COUNTABLE
-	var seen_low:=their_before if exact else roundi(float(their_before)*0.8)
-	var seen_high:=their_before if exact else roundi(float(their_before)*1.2)
+	var countable:=their_before<=COUNTABLE
+	var seen_low:=their_before if countable else roundi(float(their_before)*0.8)
+	var seen_high:=their_before if countable else roundi(float(their_before)*1.2)
 	var their_fell:=int(their_lost.killed)+int(their_lost.wounded)
-	var theirs_ledger:={"seen_low":seen_low,"seen_high":seen_high,"exact":exact,"fell":their_fell,"killed":int(their_lost.killed),
+	var theirs_ledger:={"seen_low":seen_low,"seen_high":seen_high,"exact":countable,"fell":their_fell,"killed":int(their_lost.killed),
 		"wounded":int(their_lost.wounded),"fled":int(their_lost.fled),"taken":our_captives,"counted":held_field,
 		"morale_words":morale_words(float(theirs.get("morale",0.0))),"name":enemy_name,
-		"commander":_first_name(String((theirs.get("commander",{}) as Dictionary).get("name",""))),"commander_fate":String(termination.get("commander_fate",""))}
+		"commander":_first_name(String((theirs.get("commander",{}) as Dictionary).get("name",""))),
+		# The fate told at the end is the beaten side's general's.
+		"commander_fate":String(termination.get("commander_fate","")) if kind in ["won","taken"] else ""}
 
 	# How each side fought.
 	var plan:Dictionary=record.get("tactics",{})
@@ -205,6 +226,8 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var tactics:={"ours_id":our_tactic,"theirs_id":their_tactic,
 		"ours":_tactic_line(our_tactic,stage,true) if not plan.is_empty() else "",
 		"theirs":_tactic_line(their_tactic,stage,false) if not plan.is_empty() else ""}
+	if not plan.is_empty() and our_tactic==their_tactic:
+		tactics["ours"]=_both_line(our_tactic,stage); tactics["theirs"]=""
 	if kind in ["uncontested","nobody"]: tactics={"ours_id":"","theirs_id":"","ours":"","theirs":""}
 	# A strike by night: whether they were seen, and the chance they had.
 	var surprise:Dictionary=(plan.get(s.home,{}) as Dictionary).get("surprise",{}) if plan.get(s.home) is Dictionary and (plan.get(s.home) as Dictionary).get("surprise") is Dictionary else {}
@@ -222,6 +245,23 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)+(" "+surprise_line if surprise_line!="" else "")]
 		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general)
+	# Home itself lost with the fight (siege_recovery.gd capture): everyone of
+	# ours still there is in their hands.
+	var occupation:Dictionary=strategic.get("player_occupation",{}) if strategic.get("player_occupation") is Dictionary else {}
+	if at_home and kind in ["lost","withdrew"] and bool(occupation.get("ok",false)):
+		now={"now":"%s is theirs now: they hold it, and the %s of ours still there are in their hands." % [home_place,exact(int(ledger.present))],
+			"next":"What becomes of %s and its people is for you to say: talk with them, or gather our people elsewhere to take it back." % home_place}
+	# Our general's own fate, told first: who fell or was taken, and who
+	# leads the band now; or that he was hurt and got away.
+	var fate_line:=""
+	var our_fate:=String(termination.get("commander_fate","")) if kind in ["lost","withdrew"] else ""
+	if not succession.is_empty():
+		var fell:=_first_name(String(succession.get("fell",led)))
+		var now_name:=_first_name(String(succession.get("now","")))
+		fate_line="%s %s; %s the %s now." % [fell if fell!="" else "Our war leader","fell in the fight" if String(succession.get("fate",""))=="killed" else "was taken by them",("%s leads" % now_name) if now_name!="" else "another leads",noun]
+	elif our_fate=="wounded, but escaped" and leader!="":
+		fate_line="%s was wounded but got away." % leader
+	if fate_line!="": now["now"]=fate_line+" "+String(now.now)
 	# What the general did with the captives and spoils (military_campaign.gd
 	# _settle_aftermath), in one line.
 	var settled:Dictionary=record.get("aftermath_settled",{}) if record.get("aftermath_settled") is Dictionary else {}
@@ -247,7 +287,7 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 static func _spoken(text:String,band:String,general:String,noun:String)->String:
 	var out:=text.replace(_cap(band),"My "+noun).replace(band,"my "+noun)
 	if general=="": return out
-	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "],[" sent "," sent "],[" let "," let "],[" gave "," gave "],[" had "," had "],[" traded "," traded "]]:
+	for pair in [[" has "," have "],[" keeps "," keep "],[" waits "," wait "],[" means "," mean "],[" left "," left "],[" is "," am "],[" sent "," sent "],[" let "," let "],[" gave "," gave "],[" had "," had "],[" traded "," traded "],[" leads "," lead "]]:
 		out=out.replace(general+String(pair[0]),"I"+String(pair[1]))
 	out=out.replace("with "+general,"with me")
 	return out
@@ -255,8 +295,19 @@ static func _spoken(text:String,band:String,general:String,noun:String)->String:
 
 static func _tactic_line(id:String,stage:String,ours:bool)->String:
 	var name:=Tactics.name_of(id,stage)
-	if stage=="hearth": return ("We %s." if ours else "They %s.") % name
+	if stage=="hearth":
+		# The hearth names are told from the doer's side ("met them head-on");
+		# theirs are told from ours ("They met us head-on").
+		if ours: return "We %s." % name
+		return "They %s." % (" "+name+" ").replace(" them "," us ").replace(" their "," our ").strip_edges()
 	return ("We fought with %s." if ours else "They fought with %s.") % Tactics._with_article(name)
+
+
+## Both sides fought the same way: said once.
+static func _both_line(id:String,stage:String)->String:
+	var name:=Tactics.name_of(id,stage)
+	if stage=="hearth": return "Both sides %s." % (" "+name+" ").replace(" them "," ").strip_edges()
+	return "Both sides fought with %s." % Tactics._with_article(name)
 
 
 static func _headline(kind:String,band:String,enemy:String,where:String,town:String,defending:bool,their_tactic:String,raid:bool,home_place:String)->String:
@@ -285,15 +336,16 @@ static func overrun(record:Dictionary)->bool:
 
 static func _overrun_headline(kind:String,ours:int,theirs:int,enemy:String,where:String,band:String)->String:
 	var of_them:="%s of %s" % [count_words(theirs),enemy]
-	if kind=="lost": return "%s overran %s, %s strong, %s." % [_cap(of_them),band,count_words(ours),where]
-	return "%s, %s strong, overran %s %s." % [_cap(band),count_words(ours),of_them,where]
+	if kind=="lost": return "%s overran %s, %s strong, %s." % [_cap(of_them),band,exact(ours),where]
+	return "%s, %s strong, overran %s %s." % [_cap(band),exact(ours),of_them,where]
 
 
 ## "both", "all three", "one", "two": n out of a group of total.
 static func _of_group(n:int,total:int,whose:String="them")->String:
+	var ours:=whose=="ours"
 	if n==total and total==2: return "both of %s" % whose
-	if n==total and total>2: return "all %s of %s" % [count_words(total),whose]
-	return count_words(n)
+	if n==total and total>2: return "all %s of %s" % [exact(total) if ours else count_words(total),whose]
+	return exact(n) if ours else count_words(n)
 
 
 static func _overrun_line(kind:String,theirs:Dictionary,ours:Dictionary,their_before:int,termination:Dictionary)->String:
@@ -314,8 +366,8 @@ static func _overrun_line(kind:String,theirs:Dictionary,ours:Dictionary,their_be
 	if hurt_killed<=0 and hurt_wounded<=0: cost="none of %s was hurt" % ("ours" if won else "theirs")
 	else:
 		var bits:Array[String]=[]
-		if hurt_killed>0: bits.append("%s of %s %s killed" % [count_words(hurt_killed),"ours" if won else "theirs","was" if hurt_killed==1 else "were"])
-		if hurt_wounded>0: bits.append("%s of %s %s" % [count_words(hurt_wounded),"ours" if won else "theirs","was cut" if hurt_wounded==1 else "were cut"])
+		if hurt_killed>0: bits.append("%s of %s %s killed" % [exact(hurt_killed) if won else count_words(hurt_killed),"ours" if won else "theirs","was" if hurt_killed==1 else "were"])
+		if hurt_wounded>0: bits.append("%s of %s %s" % [exact(hurt_wounded) if won else count_words(hurt_wounded),"ours" if won else "theirs","was cut" if hurt_wounded==1 else "were cut"])
 		cost=" and ".join(bits)
 	return "It was over at once: %s; %s." % [beaten,cost]
 
@@ -330,7 +382,7 @@ static func _phases(record:Dictionary,s:Dictionary,band:String,enemy:String,kind
 		return lines
 	var home:=String(s.home); var foe:=String(s.enemy)
 	var first:Dictionary=rounds[0]
-	lines.append("%s %s. We lost %s; they lost %s." % [_cap("in the first exchange"),_intensity_words(String(first.get("intensity",""))),_loss_words(int(first.get(home+"_losses",0))),_loss_words(int(first.get(foe+"_losses",0)))])
+	lines.append("%s %s. We lost %s; they lost %s." % [_cap("in the first exchange"),_intensity_words(String(first.get("intensity",""))),_loss_words(int(first.get(home+"_losses",0)),true),_loss_words(int(first.get(foe+"_losses",0)))])
 	var told:Dictionary={}
 	var wavered:=false
 	for index in range(1,rounds.size()):
@@ -351,12 +403,12 @@ static func _phases(record:Dictionary,s:Dictionary,band:String,enemy:String,kind
 	match kind:
 		"won","taken":
 			match String(termination.get("type","")):
-				"surrender": ending="After %s some of them threw down their arms; we took %s." % [span,_people(int(termination.get("prisoners",0)),"captive","captives")]
-				"pursuit": ending="After %s they broke and ran; we chased them and took %s." % [span,_people(int(termination.get("prisoners",0)),"captive","captives")]
-				_: ending="After %s they gave up the fight and drew off%s." % [span,(", leaving %s behind" % _people(int(termination.get("prisoners",0)),"captive","captives")) if int(termination.get("prisoners",0))>0 else ""]
+				"surrender": ending="After %s some of them threw down their arms; we took %s." % [span,_ours(int(termination.get("prisoners",0)),"captive","captives")]
+				"pursuit": ending="After %s they broke and ran; we chased them and took %s." % [span,_ours(int(termination.get("prisoners",0)),"captive","captives")]
+				_: ending="After %s they gave up the fight and drew off%s." % [span,(", leaving %s behind" % _ours(int(termination.get("prisoners",0)),"captive","captives")) if int(termination.get("prisoners",0))>0 else ""]
 		"lost":
-			ending="After %s we broke%s." % [span,(" and %s of ours were taken" % count_words(int(termination.get("prisoners",0)))) if int(termination.get("prisoners",0))>0 else ""]
-		"withdrew": ending="After %s we broke off and pulled back%s." % [span,(", losing %s as captives" % count_words(int(termination.get("prisoners",0)))) if int(termination.get("prisoners",0))>0 else ""]
+			ending="After %s we broke%s." % [span,(" and %s of ours were taken" % exact(int(termination.get("prisoners",0)))) if int(termination.get("prisoners",0))>0 else ""]
+		"withdrew": ending="After %s we broke off and pulled back%s." % [span,(", losing %s as captives" % exact(int(termination.get("prisoners",0)))) if int(termination.get("prisoners",0))>0 else ""]
 		"mutual": ending="After %s both sides had had enough and drew apart." % span
 		_: ending="After %s neither side would give way, and the fighting stopped." % span
 	lines.append(ending)
@@ -368,8 +420,8 @@ static func _intensity_words(label:String)->String:
 		"Close engagement":"it came to close fighting","Violent crisis":"it turned savage","Overrun":"it was over at once"}.get(label,"the lines met"))
 
 
-static func _loss_words(n:int)->String:
-	return "nobody" if n<=0 else count_words(n)
+static func _loss_words(n:int,ours:bool=false)->String:
+	return "nobody" if n<=0 else (exact(n) if ours else count_words(n))
 
 
 ## The simulator's local events, in plain words and the right names.
@@ -401,8 +453,8 @@ static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Di
 	var morale:=String(ledger.morale_words)
 	if kind=="taken":
 		var holding:=int(garrison.get("troops",ledger.detached))
-		now="%s is ours. %s %s to hold it." % [town if town!="" else "The town",("%s left" % who) if general!="" else "We left",_people(holding,"fighter","fighters")]
-		if left>0: now+=" %s more %s still with %s." % [_cap(count_words(left)),"is" if left==1 else "are",he]
+		now="%s is ours. %s %s to hold it." % [town if town!="" else "The town",("%s left" % who) if general!="" else "We left",_ours(holding,"fighter","fighters")]
+		if left>0: now+=" %s more %s still with %s." % [_cap(exact(left)),"is" if left==1 else "are",he]
 		next="What becomes of %s and its people is for you to say." % (town if town!="" else "the town")
 	elif not siege.is_empty():
 		var days:=int(siege.get("days",0))
@@ -418,32 +470,32 @@ static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Di
 		var dest:=String(marching.name)
 		var days:=int(marching.get("days",0))
 		if String(marching.get("kind",""))=="home":
-			now="%s is on the road home with %s, %s." % [_cap(band),_people(left,"fighter","fighters"),morale]
+			now="%s is on the road home with %s, %s." % [_cap(band),_ours(left,"fighter","fighters"),morale]
 			next="They should be home in about %s." % _days(days)
 		else:
-			now="%s goes on toward %s with %s, %s." % [_cap(band),dest,_people(left,"fighter","fighters"),morale]
+			now="%s goes on toward %s with %s, %s." % [_cap(band),dest,_ours(left,"fighter","fighters"),morale]
 			var verb:=String({"siege":"lay siege to it","raid":"raid its fields and stores"}.get(String(marching.get("kind","")),"attack it"))
 			next="%s means to %s on arrival, about %s from now." % [_cap(he),verb,_days(days)]
 	else:
 		match kind:
 			"won":
 				if town!="" and not defending and not bool(strategic.get("region_captured",false)):
-					now="We hold the ground before %s, but they still hold the town; the gate is shut. %s has %s, %s." % [town,who,_people(left,"fighter","fighters"),morale]
+					now="We hold the ground before %s, but they still hold the town; the gate is shut. %s has %s, %s." % [town,who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits outside %s for your word. Nothing more happens there unless you give it." % [_cap(he),town]
 				else:
-					now="The field is ours. %s has %s, %s." % [who,_people(left,"fighter","fighters"),morale]
+					now="The field is ours. %s has %s, %s." % [who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits where the fight was for your word." % _cap(he)
 			"uncontested","nobody":
-				now="Nothing stands in front of %s. %s has %s, %s." % [band,who,_people(left,"fighter","fighters"),morale]
+				now="Nothing stands in front of %s. %s has %s, %s." % [band,who,_ours(left,"fighter","fighters"),morale]
 				next="%s waits there for your word." % _cap(he)
 			"lost","withdrew":
-				now="%s is beaten and has pulled back, %s, with %s left." % [_cap(band),morale,count_words(left)]
+				now="%s is beaten and has pulled back, %s, with %s left." % [_cap(band),morale,exact(left)]
 				next="%s waits for your word. Nothing more happens unless you give it." % _cap(he)
 			"mutual":
-				now="Both sides have drawn apart. %s has %s, %s." % [who,_people(left,"fighter","fighters"),morale]
+				now="Both sides have drawn apart. %s has %s, %s." % [who,_ours(left,"fighter","fighters"),morale]
 				next="%s waits for your word." % _cap(he)
 			_:
-				now="Both sides still face each other. %s has %s, %s." % [who,_people(left,"fighter","fighters"),morale]
+				now="Both sides still face each other. %s has %s, %s." % [who,_ours(left,"fighter","fighters"),morale]
 				next="Nothing more happens there unless you give the word."
 	if bool(state.get("aftermath_pending",false)): next+=" The captives and what we took wait on your word first."
 	return {"now":now,"next":next}
@@ -482,14 +534,14 @@ static func _advice(kind:String,ours:Dictionary,theirs:Dictionary,town:String,st
 
 static func ledger_line(ours:Dictionary)->String:
 	var parts:Array[String]=[]
-	if int(ours.killed)>0: parts.append("%s killed" % count_words(int(ours.killed)))
-	if int(ours.wounded)>0: parts.append("%s wounded" % count_words(int(ours.wounded)))
-	if int(ours.fled)>0: parts.append("%s ran off" % count_words(int(ours.fled)))
-	if int(ours.get("unsorted",0))>0: parts.append("%s out of the fight, dead or hurt" % count_words(int(ours.unsorted)))
-	if int(ours.captured)>0: parts.append("%s taken captive" % count_words(int(ours.captured)))
-	if int(ours.detached)>0: parts.append("%s left to hold the town" % count_words(int(ours.detached)))
+	if int(ours.killed)>0: parts.append("%s killed" % exact(int(ours.killed)))
+	if int(ours.wounded)>0: parts.append("%s wounded" % exact(int(ours.wounded)))
+	if int(ours.fled)>0: parts.append("%s ran off" % exact(int(ours.fled)))
+	if int(ours.get("unsorted",0))>0: parts.append("%s out of the fight, dead or hurt" % exact(int(ours.unsorted)))
+	if int(ours.captured)>0: parts.append("%s taken captive" % exact(int(ours.captured)))
+	if int(ours.detached)>0: parts.append("%s left to hold the town" % exact(int(ours.detached)))
 	var lost:=", ".join(parts) if not parts.is_empty() else "nobody lost"
-	return "%s went in: %s; %s still with the band, %s." % [_cap(count_words(int(ours.in_fight))),lost,count_words(int(ours.present)),String(ours.morale_words)]
+	return "%s went in: %s; %s still with the band, %s." % [_cap(exact(int(ours.in_fight))),lost,exact(int(ours.present)),String(ours.morale_words)]
 
 
 static func sent_line(ours:Dictionary)->String:
@@ -497,9 +549,9 @@ static func sent_line(ours:Dictionary)->String:
 	var sent:=int(ours.sent)
 	if sent<=int(ours.in_fight): return ""
 	var parts:Array[String]=[]
-	if int(ours.earlier)>0: parts.append("%s were lost or hurt in %s" % [count_words(int(ours.earlier)),"the earlier fight" if int(ours.earlier_fights)<=1 else "%s earlier fights" % count_words(int(ours.earlier_fights))])
-	if int(ours.elsewhere)>0: parts.append("%s fell out on the road, sick or lame" % count_words(int(ours.elsewhere)))
-	return "Of the %s who set out, %s." % [count_words(sent),"; ".join(parts)] if not parts.is_empty() else ""
+	if int(ours.earlier)>0: parts.append("%s were lost or hurt in %s" % [exact(int(ours.earlier)),"the earlier fight" if int(ours.earlier_fights)<=1 else "%s earlier fights" % count_words(int(ours.earlier_fights))])
+	if int(ours.elsewhere)>0: parts.append("%s fell out on the road, sick or lame" % exact(int(ours.elsewhere)))
+	return "Of the %s who set out, %s." % [exact(sent),"; ".join(parts)] if not parts.is_empty() else ""
 
 
 static func their_line(theirs:Dictionary)->String:
@@ -508,8 +560,14 @@ static func their_line(theirs:Dictionary)->String:
 	var parts:Array[String]=[]
 	if int(theirs.fell)>0: parts.append(("we counted %s of theirs down" if bool(theirs.counted) else "we think we brought down %s") % count_words(int(theirs.fell)))
 	if int(theirs.fled)>0: parts.append("%s ran" % count_words(int(theirs.fled)))
-	if int(theirs.taken)>0: parts.append("we took %s captive" % count_words(int(theirs.taken)))
+	if int(theirs.taken)>0: parts.append("we took %s captive" % exact(int(theirs.taken)))
 	if not parts.is_empty(): text+=" "+_cap(", ".join(parts))+"."
+	# Their leader's fate, when he fell or was hurt (a leader taken is told in
+	# the general's settlement line).
+	var leader:=String(theirs.get("commander",""))
+	match String(theirs.get("commander_fate","")):
+		"killed": text+=" Their leader%s fell." % ((", %s," % leader) if leader!="" else "")
+		"wounded, but escaped": text+=" Their leader%s was wounded but got away." % ((", %s," % leader) if leader!="" else "")
 	return text
 
 
@@ -600,16 +658,24 @@ static func _marching(army:Dictionary,today:int)->Dictionary:
 	return {}
 
 
+## A known town this close names a fight ("near Tsaren"); farther off it is
+## told by its ground or its distance from home. The battle panel, the
+## report and the map (hud/battle_marker_source.gd) all use this one rule.
+const NEAR_TOWN_KM:=25.0
+
+
 static func _nearest_town(position:Variant)->String:
 	if not position is Dictionary or not (position as Dictionary).has_all(["x","z"]): return ""
 	var at:=Vector2(float(position.x),float(position.z))
-	var best:=""; var best_d:=40.0
-	var places:Array=preload("res://scripts/court_war_orders.gd").known_places()
-	for place_variant in places:
-		var place:Dictionary=place_variant
-		var p:Dictionary=place.get("position",{})
-		var d:=at.distance_to(Vector2(float(p.get("x",0)),float(p.get("z",0))))
-		if d<best_d: best_d=d; best=String(place.get("name","")).trim_prefix("Reported home of ")
+	var world:Variant=WorldSimulation.world if WorldSimulation!=null else null
+	if world==null or world.get("city_intelligence")==null: return ""
+	var best:=""; var best_d:=NEAR_TOWN_KM
+	for city_variant in world.city_intelligence.known_cities("player","",false):
+		var city:Dictionary=city_variant
+		var p:Dictionary=city.get("position",{}) if city.get("position") is Dictionary else {}
+		if not p.has_all(["x","z"]): continue
+		var d:=at.distance_to(Vector2(float(p.x),float(p.z)))
+		if d<best_d: best_d=d; best=String(city.get("name","")).trim_prefix("Reported home of ")
 	return best
 
 

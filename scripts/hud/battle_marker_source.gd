@@ -41,8 +41,9 @@ const HOME_SIGHT_KM:=28.0
 const RIVAL_MEMORY_DAYS:=3
 const MAX_BATTLES:=32
 const MAX_MEMORY:=32
-## A town this close names the ground a battle is fought on.
-const NEAR_TOWN_KM:=25.0
+## A town this close names the ground a battle is fought on (the one rule
+## the battle panel and the report use too: battle_account.gd).
+const NEAR_TOWN_KM:=preload("res://scripts/battle_account.gd").NEAR_TOWN_KM
 
 
 # --- Reading plain data ------------------------------------------------------------
@@ -146,10 +147,15 @@ static func _usable_name(name:String)->bool:
 	return true
 
 
-## The name a battle goes by: the town fought for, else the nearest known
-## town ("Near Tsaren"), else how far and which way from home.
+## The name a battle goes by: the town fought for; at home, home's own
+## name; else the nearest known town ("Near Tsaren"), else how far and which
+## way from home.
 static func place_name(pos:Vector2,named:String,context:Dictionary)->String:
 	if _usable_name(named): return ArmyMarks.place(named)
+	var at_home:Vector2=context.get("home",Vector2.INF)
+	if at_home.is_finite() and pos.distance_to(at_home)<2.0:
+		var home_name:=String(context.get("home_name",""))
+		return ArmyMarks.place(home_name) if home_name!="" else "At home"
 	var best:=""; var best_km:=NEAR_TOWN_KM
 	for city in context.get("cities",[]):
 		var at:=v2((city as Dictionary).get("pos",(city as Dictionary).get("position",{})))
@@ -165,15 +171,21 @@ static func place_name(pos:Vector2,named:String,context:Dictionary)->String:
 	return "In the field"
 
 
-## Which day of the fighting it is: the battle model's own count when kept,
-## else one exchange a day (fight_engagement_day), at least the first.
+## Which day of the fighting it is: the battle model's own count of days
+## fought (fight_engagement_day keeps it); else, for a block battle, one
+## phase a day from the exchanges fought; for an older engagement with no
+## blocks, one exchange a day. At least the first.
 static func day_of(engagement:Dictionary,today:int)->int:
 	for key in ["day_count","days"]:
 		if engagement.get(key) is int or engagement.get(key) is float: return maxi(1,int(engagement[key]))
 	for key in ["start_day","started_day"]:
 		if engagement.get(key) is int or engagement.get(key) is float: return maxi(1,today-int(engagement[key])+1)
 	var rounds:Variant=engagement.get("rounds",[])
-	return maxi(1,(rounds as Array).size() if rounds is Array else int(engagement.get("round",1)))
+	var fought:=(rounds as Array).size() if rounds is Array else int(engagement.get("round",1))
+	var battle:Variant=engagement.get("battle",{})
+	if battle is Dictionary and (battle as Dictionary).has("phase_len"):
+		return maxi(1,ceili(float(fought)/float(maxi(1,int((battle as Dictionary).phase_len)))))
+	return maxi(1,fought)
 
 
 static func _colour_for(civ_id:String,context:Dictionary)->Color:
@@ -247,10 +259,20 @@ static func from_engagement(engagement:Dictionary,id:String,context:Dictionary)-
 	var named:=String(threat.get("target_region_name",""))
 	var rounds:Variant=engagement.get("rounds",[])
 	return {"id":id,"kind":"battle","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":progress_of(engagement,home_side),
-		"status":String(engagement.get("status","fighting")) if String(engagement.get("status","active"))!="active" else "fighting",
+		"status":_status(engagement),
 		"day":day_of(engagement,today),"place_name":place_name(pos,named,context),"ours":true,"army_id":int(engagement.get("home_force_id",0)),
 		"seed":int(engagement.get("seed",0)),"rounds":(rounds as Array).size() if rounds is Array else 0,"commanded":bool(engagement.get("commander_managed",false)),
 		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today}
+
+
+## What a battle is doing now, as the battle panel says it
+## (hud/battle_view.gd): drawn up before the first exchange, then fighting.
+static func _status(engagement:Dictionary)->String:
+	var own:=String(engagement.get("status","active"))
+	if own not in ["active","","fighting"]: return own
+	var rounds:Variant=engagement.get("rounds",[])
+	var fought:=int(engagement.get("round",(rounds as Array).size() if rounds is Array else 0))
+	return "fighting" if fought>0 else "drawn up"
 
 
 ## A fight in which one side is a handful, or hopelessly outnumbered
@@ -336,7 +358,7 @@ static func from_rival(owner:String,military:Variant,engagement:Dictionary,id:St
 	var b:=_side(b_force,int(engagement.get(enemy_side+"_initial",b_force.get("troops",0))),foe,_name_for(foe,"strangers",context),_colour_for(foe,context))
 	var today:=int(context.get("today",0))
 	return {"id":"rival:%s:%s" % [owner,id],"kind":"battle","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":progress_of(engagement,home_side),
-		"status":"fighting","day":day_of(engagement,today),"place_name":place_name(pos,String(threat.get("target_region_name","")),context),"ours":false,"army_id":0,
+		"status":_status(engagement),"day":day_of(engagement,today),"place_name":place_name(pos,String(threat.get("target_region_name","")),context),"ours":false,"army_id":0,
 		"seed":int(engagement.get("seed",0)),"rounds":(engagement.get("rounds",[]) as Array).size() if engagement.get("rounds") is Array else 0,"commanded":false,
 		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today}
 

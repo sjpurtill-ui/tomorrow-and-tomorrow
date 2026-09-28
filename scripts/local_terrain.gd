@@ -142,6 +142,13 @@ var terrain_patch_last_commit_usec:int=0
 var terrain_visual_sample_position:=Vector3(INF,INF,INF)
 var terrain_visual_sample_climate:Dictionary={}
 const TERRAIN_PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
+## codex/map-speed: streamed patches sample on worker threads through one
+## fused, exact copy of the sampler chain (terrain_patch_sampler.gd). Test
+## doubles that override a sampler keep the main-thread slices.
+const TERRAIN_PATCH_SAMPLER:=preload("res://scripts/terrain_patch_sampler.gd")
+var terrain_patch_sampler:RefCounted
+var terrain_patch_threads:=true
+var terrain_patch_last_worker_usec:=0
 const TERRAIN_MACRO_RENDER:=preload("res://scripts/terrain_macro_render.gd") # codex/terrain-bake
 var macro_render:=TERRAIN_MACRO_RENDER.new() # codex/terrain-bake: visual-only planet rasters
 const SURFACE_PRECISION:=preload("res://scripts/surface_precision.gd")
@@ -491,6 +498,9 @@ func _ready() -> void:
 
 func _exit_tree()->void:
 	macro_render.cancel() # codex/terrain-bake: no raster band may outlive this node
+	# codex/map-speed: nor any streamed patch still building on a worker.
+	if terrain_patch_job!=null:terrain_patch_job.cancel()
+	TERRAIN_PATCH_BUILDER.drain()
 
 func _trace_load(stage: String) -> void:
 	if "--trace-load" in OS.get_cmdline_user_args():
@@ -1238,6 +1248,7 @@ func _configure_shape() -> void:
 		world_width = world_depth * aspect
 
 func _configure_noise() -> void:
+	terrain_patch_sampler=null # codex/map-speed: rebuilt from the new noise
 	var local_seed: int = GameState.world_seed ^ ((GameState.active_province + 1) * 104729)
 	mountain_relief.configure(GameState.world_seed)
 	if SEAMLESS_WORLD:
@@ -1606,6 +1617,7 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	if terrain_patch_job!=null:
 		if terrain_patch_job.center==snapped and is_equal_approx(terrain_patch_job.span,span): return
 		# Latest view wins. Do not finish/upload a mesh for a camera already gone.
+		terrain_patch_job.cancel()
 		terrain_patch_job=null
 		terrain_patch_cancellations+=1
 	if regional_terrain_patch and regional_patch_center==snapped and is_equal_approx(regional_patch_span,span) and regional_patch_resolution==resolution: return
@@ -1628,6 +1640,19 @@ func _rebuild_regional_terrain_patch(center:Vector2,span:float)->void:
 	terrain_patch_job=TERRAIN_PATCH_BUILDER.new(next_resolution,span,snapped,_height_at,_terrain_color_at,_terrain_surface_fields_at,_terrain_seasonality_at,prior)
 	# codex/terrain-bake: planet-scale patches read the per-seed raster (null = noise).
 	terrain_patch_job.macro_raster=macro_render.raster_for(snapped,span,next_resolution)
+	# codex/map-speed: the whole build on worker threads (the fused sampler).
+	terrain_patch_job.start(_terrain_patch_sampler())
+
+## The fused sampler for worker builds, or null to keep the main-thread
+## slices: only the unmodified world samples this way, so a test double's
+## overridden sampler is always the one used.
+func _terrain_patch_sampler()->RefCounted:
+	if not SEAMLESS_WORLD or not terrain_patch_threads:return null
+	var script:Script=get_script()
+	if script==null or script.resource_path!="res://scripts/local_terrain.gd":return null
+	if terrain_patch_sampler==null or int(terrain_patch_sampler.get("seed_value"))!=GameState.world_seed:
+		terrain_patch_sampler=TERRAIN_PATCH_SAMPLER.from_terrain(self)
+	return terrain_patch_sampler
 
 func _regional_patch_covers_camera()->bool:
 	if camera==null or regional_terrain_patch==null:return false
@@ -1671,8 +1696,16 @@ func _advance_terrain_patch()->void:
 	var budget:=TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC
 	if budget==TERRAIN_PATCH_IDLE_BUDGET_USEC and not _regional_patch_covers_camera():budget=TERRAIN_PATCH_UNCOVERED_BUDGET_USEC
 	if not terrain_patch_job.advance(budget): return
+	# codex/map-speed: a worker build sampled for another world is dropped.
+	if terrain_patch_job.uses_worker() and int(terrain_patch_job.sample_seed)!=GameState.world_seed:
+		terrain_patch_job=null
+		return
 	var started:=Time.get_ticks_usec()
 	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights,"cover":terrain_patch_job.cover,"samples":terrain_patch_job.completed_samples(),"sample_seed":GameState.world_seed,"sample_province":GameState.active_province}
+	# A worker build brings its texture images ready made.
+	if terrain_patch_job.height_image!=null:
+		completed.height_image=terrain_patch_job.height_image;completed.relief_image=terrain_patch_job.relief_image;completed.cover_image=terrain_patch_job.cover_image
+	terrain_patch_last_worker_usec=terrain_patch_job.worker_usec
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
 	terrain_patch_last_reused_vertices=terrain_patch_job.reused_vertices
 	terrain_patch_last_sampled_vertices=terrain_patch_job.sampled_vertices
@@ -1715,21 +1748,16 @@ func _install_regional_patch(completed:Dictionary)->void:
 	regional_patch_center=completed.center
 	regional_patch_span=completed.span
 	regional_patch_resolution=int(completed.resolution)
-	var height_image:=Image.create_from_data(regional_patch_resolution,regional_patch_resolution,false,Image.FORMAT_RF,completed.heights.to_byte_array())
 	rendered_regional_heights=completed.heights
-	river_terrain_height_texture=ImageTexture.create_from_image(height_image)
-	# The same heights box-filtered level by level, for the chart's
-	# generalised landform (map_chart.gdshaderinc).
-	height_image.generate_mipmaps()
-	chart_relief_texture=ImageTexture.create_from_image(height_image)
-	# Its land cover and land/water mask, likewise (the chart's woods, marsh
-	# and water-lines); patches built elsewhere without it keep the last off.
-	var cover:PackedByteArray=completed.get("cover",PackedByteArray())
-	chart_cover_texture=null
-	if cover.size()==regional_patch_resolution*regional_patch_resolution*4:
-		var cover_image:=Image.create_from_data(regional_patch_resolution,regional_patch_resolution,false,Image.FORMAT_RGBA8,cover)
-		cover_image.generate_mipmaps()
-		chart_cover_texture=ImageTexture.create_from_image(cover_image)
+	# codex/map-speed: one set of patch textures a grid size, updated in place.
+	# Allocating a mipmapped texture costs the render thread 3-7 ms (with the
+	# rest of a frame, a visible hitch); updating one costs well under 1 ms.
+	if terrain_patch_textures.is_empty():
+		for size in [129,257,385,513]:_warm_patch_textures(size)
+	var images:=_patch_images(completed)
+	river_terrain_height_texture=_patch_texture(regional_patch_resolution,0,images[0])
+	chart_relief_texture=_patch_texture(regional_patch_resolution,1,images[1])
+	chart_cover_texture=_patch_texture(regional_patch_resolution,2,images[2]) if images[2]!=null else null
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
 	# The patch's land draws its shoreline from the same heights (map_coast).
@@ -1738,6 +1766,49 @@ func _install_regional_patch(completed:Dictionary)->void:
 	if previous:
 		previous.visible=false
 		previous.queue_free()
+
+## codex/map-speed: the patch's textures by grid size: [heights, relief, cover].
+var terrain_patch_textures:Dictionary={}
+
+## The images a patch's textures show: its heights; the same heights
+## box-filtered level by level, for the chart's generalised landform
+## (map_chart.gdshaderinc); its land cover and land/water mask likewise (the
+## chart's woods, marsh and water-lines; null for a patch built without it).
+## A worker build brings them; otherwise they are made here once and kept
+## with the patch, so a cached patch reinstalls without remaking them.
+func _patch_images(completed:Dictionary)->Array:
+	if completed.get("height_image")==null:
+		var size:=int(completed.resolution)
+		var height_image:=Image.create_from_data(size,size,false,Image.FORMAT_RF,(completed.heights as PackedFloat32Array).to_byte_array())
+		var relief_image:=height_image.duplicate() as Image
+		relief_image.generate_mipmaps()
+		var cover_image:Image=null
+		var cover:PackedByteArray=completed.get("cover",PackedByteArray())
+		if cover.size()==size*size*4:
+			cover_image=Image.create_from_data(size,size,false,Image.FORMAT_RGBA8,cover)
+			cover_image.generate_mipmaps()
+		completed.height_image=height_image;completed.relief_image=relief_image;completed.cover_image=cover_image
+	return [completed.height_image,completed.relief_image,completed.get("cover_image")]
+
+## The grid size's texture in `slot` (the relief and cover carry mipmaps, the
+## heights none), now showing `image`.
+func _patch_texture(size:int,slot:int,image:Image)->ImageTexture:
+	if image.has_mipmaps()!=(slot>0):return ImageTexture.create_from_image(image)
+	var textures:Array=terrain_patch_textures.get_or_add(size,[null,null,null])
+	var texture:ImageTexture=textures[slot]
+	if texture!=null and texture.get_width()==image.get_width() and texture.get_height()==image.get_height() and texture.get_format()==image.get_format():
+		texture.update(image)
+	else:
+		texture=ImageTexture.create_from_image(image)
+		textures[slot]=texture
+	return texture
+
+## Allocates a grid size's textures ahead of use (while the map loads).
+func _warm_patch_textures(size:int)->void:
+	var heights:=Image.create_empty(size,size,false,Image.FORMAT_RF)
+	_patch_texture(size,0,heights)
+	_patch_texture(size,1,Image.create_empty(size,size,true,Image.FORMAT_RF))
+	_patch_texture(size,2,Image.create_empty(size,size,true,Image.FORMAT_RGBA8))
 
 
 func _sync_coast_mask()->void:
