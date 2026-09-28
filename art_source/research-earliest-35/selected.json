@@ -1,0 +1,230 @@
+[
+  {
+    "id": "meteoric_iron_working",
+    "line": "production",
+    "game_year": 265,
+    "approx_historical_year": -3233,
+    "prompt": "c. 3233 BCE: Rare meteoric iron is cold-hammered into small beads using a stone hammer; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-253fd713-67c1-42fd-8f5e-796647ae79b0.png",
+    "asset": "res://assets/ui/research/subjects/meteoric_iron_working-v1.png",
+    "sha256": "99fe9cc8cf1442b49e62451df8bb32dab77660dce0f41a2831ebd3f9ccba0866",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "riparian_tree_belts",
+    "line": "ecology",
+    "game_year": 265,
+    "approx_historical_year": -3233,
+    "prompt": "c. 3233 BCE: Adults plant rooted tree belts along a riverbank to stabilize soil; naturalist field painting in plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-70ae2c2a-7a16-48b8-b48a-485cad156ee5.png",
+    "asset": "res://assets/ui/research/subjects/riparian_tree_belts-v1.png",
+    "sha256": "20a8289fa18efbd3ce45f33e17cf3e76fde9f6fff6b9fa32ad88a4a56a6dcbfd",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "apprentice_healer_rounds",
+    "line": "health",
+    "game_year": 268,
+    "approx_historical_year": -3213,
+    "prompt": "c. 3213 BCE: Experienced healer guides an adult apprentice through patient visits and herb treatment; watercolor and ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-83cc3d71-eab8-47ce-83b3-fe5c2619a82e.png",
+    "asset": "res://assets/ui/research/subjects/apprentice_healer_rounds-v1.png",
+    "sha256": "3ec3b743d3451152ad2dd6617c2296b3a85a3b766e6a583135409f71dde31281",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.4
+    ]
+  },
+  {
+    "id": "childhood_growth_milestones",
+    "line": "demography",
+    "game_year": 268,
+    "approx_historical_year": -3213,
+    "prompt": "c. 3213 BCE: Family compares a child against simple growth notches on a timber post; chalk pastel and cut paper. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3c25090b-5f3d-4ad1-9724-a94d7f9a4f8c.png",
+    "asset": "res://assets/ui/research/subjects/childhood_growth_milestones-v1.png",
+    "sha256": "b435761800d142a1e5a6f26c122f02db9c5c950b767f2f9b404ab1d6058e55eb",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  {
+    "id": "journeyman_placement",
+    "line": "labor",
+    "game_year": 268,
+    "approx_historical_year": -3213,
+    "prompt": "c. 3213 BCE: Skilled adult helper is placed with a neighboring pottery master; charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cbe247d4-a48e-4576-9813-a61a76a0bb4f.png",
+    "asset": "res://assets/ui/research/subjects/journeyman_placement-v1.png",
+    "sha256": "708c443ab48dc8abe3485b7a9708fbfefa9b54eca8b9467273b395394650df4d",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  {
+    "id": "load_path_reading",
+    "line": "infrastructure",
+    "game_year": 268,
+    "approx_historical_year": -3213,
+    "prompt": "c. 3213 BCE: Builders read how a mudbrick roof load passes to timber beams and posts, then brace a sagging beam; casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d7ea199a-89f0-48b6-8682-653a7f280c1c.png",
+    "asset": "res://assets/ui/research/subjects/load_path_reading-v1.png",
+    "sha256": "544918fe1505fc840d43e74926fe7f65bf2b76564f7e673c756b854c6cafd3f6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.27
+    ]
+  },
+  {
+    "id": "oath_witness_registers",
+    "line": "institutions",
+    "game_year": 268,
+    "approx_historical_year": -3213,
+    "prompt": "c. 3213 BCE: Two adults swear an oath, witnesses observe, and a steward keeps unmarked clay counters in bowls; civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-446dbccc-762b-429a-8d9e-73c2166bf56d.png",
+    "asset": "res://assets/ui/research/subjects/oath_witness_registers-v1.png",
+    "sha256": "070a2f140a06ef5fe60de51e72414f2b4f6bb07c2ef6da870d5524fd34263c7a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "grandmaternal_birth_counsel",
+    "line": "demography",
+    "game_year": 270,
+    "approx_historical_year": -3200,
+    "prompt": "c. 3200 BCE: Grandmother counsels expectant daughter on birth timing by counting seasons and preparing cloth; chalk pastel and cut paper. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6122dca8-e13c-46ab-bc3a-9f939a64e9df.png",
+    "asset": "res://assets/ui/research/subjects/grandmaternal_birth_counsel-v1.png",
+    "sha256": "2771a368487f22bfa1e0e6659dc9e90064b95ac79c8babef6007eba2c32ce8fb",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "multi_post_command_relay",
+    "line": "security",
+    "game_year": 270,
+    "approx_historical_year": -3200,
+    "prompt": "c. 3200 BCE: Guards relay a command by hand gesture across three plain timber watch posts; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-645269b2-0923-49e2-b440-aa9259f93c90.png",
+    "asset": "res://assets/ui/research/subjects/multi_post_command_relay-v1.png",
+    "sha256": "7c7234eb85d4ebffb3c253575ff76d3aa3bfea530b20413de67260cc33bbb3aa",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  {
+    "id": "shared_work_crew_rotation",
+    "line": "infrastructure",
+    "game_year": 270,
+    "approx_historical_year": -3200,
+    "prompt": "c. 3200 BCE: One canal repair crew hands wooden tools and baskets to its incoming relief crew; architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fb6e1662-db3c-4b1a-ae57-15f7aaae60e7.png",
+    "asset": "res://assets/ui/research/subjects/shared_work_crew_rotation-v1.png",
+    "sha256": "9182aed04392c2dee72e37de71bc6a4b543d934252d1b2173599cd341590e226",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "task_matched_tool_selection",
+    "line": "production",
+    "game_year": 270,
+    "approx_historical_year": -3200,
+    "prompt": "c. 3200 BCE: Craftsperson matches flint scraper, stone adze and shaping tool to hide, wood and clay; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e53634b3-6e49-4bef-9353-a7e044be377c.png",
+    "asset": "res://assets/ui/research/subjects/task_matched_tool_selection-v1.png",
+    "sha256": "0b84ccf77c24b579bb33455ddcd45f793171e6669d7225edeacc9a1351fe841d",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "regional_levy_coordination",
+    "line": "institutions",
+    "game_year": 272,
+    "approx_historical_year": -3187,
+    "prompt": "c. 3187 BCE: Representatives of several villages bring coordinated grain levies to a shared store; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-acb13c54-5546-4fc1-ae64-e42b8cf63746.png",
+    "asset": "res://assets/ui/research/subjects/regional_levy_coordination-v1.png",
+    "sha256": "d005de4b7a55027a718a27dbfff995080af5610eb7fb7ba2562d14e736bec7c4",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "rotating_relief_wardens",
+    "line": "security",
+    "game_year": 272,
+    "approx_historical_year": -3187,
+    "prompt": "c. 3187 BCE: Relief wardens change shift at communal grain store and tend neighbors; layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bb56e251-80d1-49ea-b771-f9a51a6368b0.png",
+    "asset": "res://assets/ui/research/subjects/rotating_relief_wardens-v1.png",
+    "sha256": "3913ac6218d3044a375b1101506d8bba08e826193283a7f0792aa50f7f4f376a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  {
+    "id": "trained_midwife_referral",
+    "line": "demography",
+    "game_year": 272,
+    "approx_historical_year": -3187,
+    "prompt": "c. 3187 BCE: Community helper refers expectant mother to experienced older birth attendant; chalk pastel and cut paper. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2b3faf1f-7b90-40f2-a8c9-9dff8aee698f.png",
+    "asset": "res://assets/ui/research/subjects/trained_midwife_referral-v1.png",
+    "sha256": "53fd511097eb755286f01e74cdea8e64cec94803d4971e147f93d9b58f0fe714",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.34
+    ]
+  },
+  {
+    "id": "elder_quarters_customs",
+    "line": "demography",
+    "game_year": 274,
+    "approx_historical_year": -3173,
+    "prompt": "c. 3173 BCE: Household reserves warm protected place by clay hearth for an elder; chalk pastel and cut paper. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42ea5403-8836-4dff-ae1d-4a7a9252846c.png",
+    "asset": "res://assets/ui/research/subjects/elder_quarters_customs-v1.png",
+    "sha256": "635e15411d112bb84f364d203583bb610686ee1f1f5570ae08712edc2797b4b5",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "corbelled_vaults",
+    "line": "infrastructure",
+    "game_year": 275,
+    "approx_historical_year": -3167,
+    "prompt": "c. 3167 BCE: Stoneworkers form corbelled passage by stacking inward projecting courses of rough flat stone; casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2a1253f9-d641-4733-a0c0-f98a727b01e0.png",
+    "asset": "res://assets/ui/research/subjects/corbelled_vaults-v1.png",
+    "sha256": "322fc1066401ea9006e75a9a094cc7267d47104d72c48554435ac8208a95a5b2",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.33
+    ]
+  }
+]

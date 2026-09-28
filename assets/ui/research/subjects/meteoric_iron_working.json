@@ -1,0 +1,12 @@
+{
+  "id": "meteoric_iron_working",
+  "line": "production",
+  "game_year": 265,
+  "approx_historical_year": -3233,
+  "prompt": "c. 3233 BCE: Rare meteoric iron is cold-hammered into small beads using a stone hammer; palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-253fd713-67c1-42fd-8f5e-796647ae79b0.png",
+  "asset": "res://assets/ui/research/subjects/meteoric_iron_working-v1.png",
+  "sha256": "99fe9cc8cf1442b49e62451df8bb32dab77660dce0f41a2831ebd3f9ccba0866",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

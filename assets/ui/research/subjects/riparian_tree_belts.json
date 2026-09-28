@@ -1,0 +1,12 @@
+{
+  "id": "riparian_tree_belts",
+  "line": "ecology",
+  "game_year": 265,
+  "approx_historical_year": -3233,
+  "prompt": "c. 3233 BCE: Adults plant rooted tree belts along a riverbank to stabilize soil; naturalist field painting in plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-70ae2c2a-7a16-48b8-b48a-485cad156ee5.png",
+  "asset": "res://assets/ui/research/subjects/riparian_tree_belts-v1.png",
+  "sha256": "20a8289fa18efbd3ce45f33e17cf3e76fde9f6fff6b9fa32ad88a4a56a6dcbfd",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
