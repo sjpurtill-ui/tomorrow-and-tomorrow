@@ -133,6 +133,9 @@ func _upgrade_running_job()->void:
 	## restarts on the raster (a few hundred ms instead of seconds more of noise).
 	var job:RefCounted=terrain.get("terrain_patch_job")
 	if job==null or job.get("macro_raster")!=null or int(job.get("phase"))>=2:return
+	# codex/map-speed: a worker build finishes its exact samples in well under
+	# a second; restarting it would only throw that work away.
+	if job.has_method("uses_worker") and job.call("uses_worker"):return
 	var raster:=raster_for(job.get("center"),float(job.get("span")),int(job.get("resolution")))
 	if raster==null:return
 	job.set("macro_raster",raster)
