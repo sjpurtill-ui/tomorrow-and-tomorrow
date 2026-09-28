@@ -104,9 +104,8 @@ class OutputBar extends Control:
 			_:tone=T.RULE_STRONG
 		queue_redraw()
 	func text_color()->Color:
-		match look:
-			"warn":return T.AMBER_TEXT
-			"bad":return T.RED_TEXT
+		# Ink on every wash: the bar's colour already says the condition, and
+		# tinted text on a tinted fill falls under 4.5:1.
 		return T.INK
 	func _draw()->void:
 		# The whole bar carries the line's condition as a light wash (HOI4's

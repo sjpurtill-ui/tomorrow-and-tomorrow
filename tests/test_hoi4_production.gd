@@ -130,15 +130,19 @@ func test_numbers_on_screen_match_the_model()->void:
 	var panel:=_screen()
 	var pool:=P.hands(MilitaryCampaign)
 	var hands:Node=panel.find_child("Header",true,false).find_child("Hands",true,false)
-	assert_str((hands.get_node("Value") as Label).text).is_equal(Plain.hands_text(float(pool.lines)))
-	assert_str((hands.get_node("Side") as Label).text).is_equal("/ "+Plain.hands_text(float(pool.total)))
+	assert_str((hands.get_node("Value") as Label).text).is_equal(str(int(pool.lines)))
+	assert_str((hands.get_node("Side") as Label).text).is_equal("/ %d" % int(pool.total))
+	# Whole people: the rows add up to the header.
+	var rows:=0
+	for id:int in pool.by_line:rows+=int(pool.by_line[id])
+	assert_int(rows).is_equal(int(pool.lines))
 	var snapshot:=MilitaryCampaign.production_lines_snapshot()
 	var context:=Provider.line_context(snapshot)
 	for index in snapshot.lines.size():
 		var line:Dictionary=snapshot.lines[index]
 		var row:Node=panel.find_child("Line%d" % int(line.id),true,false)
 		assert_str((row.find_child("Rank",true,false).get_child(0) as Label).text).is_equal(str(index+1))
-		assert_str((row.find_child("HandsValue",true,false) as Label).text).is_equal(Plain.hands_text(float(pool.by_line[int(line.id)])))
+		assert_str((row.find_child("HandsValue",true,false) as Label).text).is_equal(str(int(pool.by_line[int(line.id)])))
 		assert_str((row.find_child("KeepValue",true,false) as Label).text).is_equal(str(int(line.target_stock)))
 		assert_str((row.find_child("Stock",true,false) as Label).text).is_equal(str(int(line.stock)))
 		var story:=Plain.line_story(line,context)
@@ -180,20 +184,29 @@ func test_hands_come_from_household_crafting_then_the_lowest_line()->void:
 	var first:=int(MilitaryCampaign.start_production_line("improvised",25).job_id)
 	var second:=int(MilitaryCampaign.start_production_line("spear",25).job_id)
 	var before:=P.hands(MilitaryCampaign)
-	var share:=MilitaryCampaign.production_labor_share
+	# A line with real work shows at least one whole hand; rows add up.
+	var sum:=0
+	for id:int in before.by_line:
+		sum+=int(before.by_line[id])
+		if float(before.exact[id])>=P.MEANINGFUL_HAND:assert_int(int(before.by_line[id])).is_greater_equal(1)
+	assert_int(sum).is_equal(int(before.lines))
 	assert_bool(P.add_hands(MilitaryCampaign,first,1.0).has("ok")).is_true()
 	var after:=P.hands(MilitaryCampaign)
-	assert_float(float(after.by_line[first])).is_equal_approx(float(before.by_line[first])+1.0,.001)
-	assert_float(float(after.by_line[second])).is_equal_approx(float(before.by_line[second]),.001)
-	assert_float(MilitaryCampaign.production_labor_share).is_equal_approx(share+1.0/float(before.total),.001)
+	assert_int(int(after.by_line[first])).is_equal(int(before.by_line[first])+1)
+	assert_int(int(after.by_line[second])).is_equal(int(before.by_line[second]))
+	assert_int(int(after.lines)).is_equal(int(before.lines)+1)
+	# The simulation's share is exactly the people on the lines: whole hands.
+	assert_float(float(after.workers)*MilitaryCampaign.production_labor_share).is_equal_approx(float(after.lines),.0001)
+	assert_float(float(after.exact[first])).is_equal_approx(float(after.by_line[first]),.05)
 	# Every craftsperson busy: the hand comes from the lowest line.
-	MilitaryCampaign.production_labor_share=1.0
+	P.add_hands(MilitaryCampaign,second,float(int(after.total)-int(after.lines)))
 	before=P.hands(MilitaryCampaign)
+	assert_int(int(before.lines)).is_equal(int(before.total))
 	P.add_hands(MilitaryCampaign,first,1.0)
 	after=P.hands(MilitaryCampaign)
-	assert_float(float(after.by_line[first])).is_equal_approx(float(before.by_line[first])+1.0,.001)
-	assert_float(float(after.by_line[second])).is_equal_approx(float(before.by_line[second])-1.0,.001)
-	assert_float(float(after.lines)).is_equal_approx(float(before.lines),.001)
+	assert_int(int(after.by_line[first])).is_equal(int(before.by_line[first])+1)
+	assert_int(int(after.by_line[second])).is_equal(int(before.by_line[second])-1)
+	assert_int(int(after.lines)).is_equal(int(before.lines))
 	# Taking a hand off sends it back to household crafting.
 	P.add_hands(MilitaryCampaign,second,-1.0)
 	assert_float(MilitaryCampaign.production_labor_share).is_less(1.0)
@@ -258,3 +271,22 @@ func test_daily_refresh_updates_in_place()->void:
 	assert_str((row.find_child("KeepValue",true,false) as Label).text).is_equal("40")
 	MilitaryCampaign.start_production_line("spear",10)
 	assert_bool(panel.update_block(provider.tab(2).blocks[0])).is_false()
+
+class StubProvider extends RefCounted:
+	var fit:=false
+	func meta()->Dictionary:return {"title":"Stub","subtabs":[],"fit_height":fit}
+	func tab(_sub:int)->Dictionary:return {"blocks":[{"type":"text","text":"Short."}]}
+	func signature()->Array:return []
+
+func test_a_short_screen_gets_a_short_dock()->void:
+	var dock:Control=auto_free(load("res://scripts/hud/dock_panel.gd").new());add_child(dock)
+	dock.size=Vector2(980,1008)
+	var stub:=StubProvider.new();stub.fit=true
+	dock.present(stub,0)
+	for frame in 6:await get_tree().process_frame
+	assert_float(dock.size.y).is_less(400.0)
+	# A dock that does not ask to fit keeps the room it was given.
+	var tall:=StubProvider.new()
+	dock.present(tall,0)
+	for frame in 6:await get_tree().process_frame
+	assert_float(dock.size.y).is_equal_approx(1008.0,1.0)

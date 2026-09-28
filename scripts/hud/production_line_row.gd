@@ -135,7 +135,7 @@ func apply(next:Dictionary)->void:
 	down.disabled=int(view.rank)>=count;down.tooltip_text="Move down: the lines above get scarce materials first."
 	pause.visible=persistent
 	pause.set_glyph("play" if paused else "pause","Resume this line." if paused else "Pause this line. Work in progress is kept.")
-	close.tooltip_text="Close this line. Finished goods stay in store; work in progress is lost."
+	close.tooltip_text=_close_tip()
 	if not _arm_close:close.set_glyph("close")
 	picture.texture=Icons.equipment_texture(String(view.item),T.INK,T.GOLD,64)
 	var deficit:=int(view.get("deficit",0))
@@ -145,18 +145,26 @@ func apply(next:Dictionary)->void:
 	(picture.get_parent() as Control).tooltip_text="%d in store" % int(view.stock)+(", %d needed by the bands: short %d." % [need,deficit] if deficit>0 else (", %d needed by the bands." % need if need>0 else "."))
 	bar.set_reading(float(view.progress),look,String(view.bar_text),String(view.tip))
 	var step:=float(view.hands_step)
-	hands_value.text=Plain.hands_text(float(view.hands))
-	var total:=float(view.get("hands_total",0.0))
-	hands_value.tooltip_text="%s of your %s craftspeople work this line." % [Plain.hands_text(float(view.hands)),Plain.hands_text(total)]
+	var people:=int(view.hands)
+	hands_value.text=str(people)
+	var total:=int(view.get("hands_total",0))
+	if people>0:hands_value.tooltip_text="%d of your %d craftspeople work this line." % [people,total]
+	elif float(view.get("hands_exact",0.0))>.05:hands_value.tooltip_text="No one works this line full time; it gets odd moments of the other hands' day. Add a hand to give it one."
+	else:hands_value.tooltip_text="No hands on this line."
 	var step_words:=Plain.hands_text(step)+(" hand" if is_equal_approx(step,1.0) else " hands")
 	hands_down.tooltip_text="Take %s off; they go back to household crafting." % step_words
 	hands_up.tooltip_text="Add %s: from household crafting, or from the lowest line when every craftsperson is busy." % step_words
 	hands_five.tooltip_text="Add %s hands at once." % Plain.hands_text(step*5.0)
-	for button:Button in [hands_down,hands_up,hands_five]:button.disabled=paused or total<=0.0
-	hands_down.disabled=hands_down.disabled or float(view.hands)<.05
+	for button:Button in [hands_down,hands_up,hands_five]:button.disabled=paused or total<=0
+	hands_down.disabled=hands_down.disabled or people<=0
 	if paused:
 		for button:Button in [hands_up,hands_five]:button.tooltip_text="Resume the line to put hands on it."
-	if keep_value!=null:
+	if keep_value!=null and not persistent:
+		keep_value.text="%d/%d" % [int(view.get("completed",0)),int(view.get("ordered",0))]
+		keep_value.tooltip_text="One-off order: "+String(view.get("progress_text",""))+"."
+		keep_down.disabled=true;keep_up.disabled=true
+		keep_down.tooltip_text="A one-off order has a fixed count.";keep_up.tooltip_text=keep_down.tooltip_text
+	elif keep_value!=null:
 		var target:=int(view.target)
 		keep_value.text=Plain.target_text(target)
 		keep_value.tooltip_text=("Keep %d in store: the line rests when %d are in store and starts again when some are issued." % [target,target]) if target>0 else "No limit: the line keeps making until you pause it."
@@ -174,13 +182,17 @@ func _draw()->void:
 	# The line's condition, as a rule down its left edge.
 	if _left_rule.a>0.0:draw_rect(Rect2(Vector2.ZERO,Vector2(4,size.y)),_left_rule)
 
+func _close_tip()->String:
+	if bool(view.get("persistent",true)):return "Close this line. Finished goods stay in store; work in progress is lost."
+	return "Cancel this one-off order. Finished items stay in store; unused materials come back."
+
 func _on_close()->void:
 	if not _arm_close:
 		_arm_close=true;close.set_glyph("close","Click again to close this line.");close.danger=true
 		close.add_theme_stylebox_override("normal",T.flat(T.DANGER_BG,T.DANGER_BORDER,1,T.RADIUS_CONTROL))
 		get_tree().create_timer(3.0).timeout.connect(func():
 			if is_instance_valid(self):
-				_arm_close=false;close.restyle();close.tooltip_text="Close this line. Finished goods stay in store; work in progress is lost.")
+				_arm_close=false;close.restyle();close.tooltip_text=_close_tip())
 		return
 	screen.act(int(view.id),"close",0.0)
 

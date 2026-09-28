@@ -172,9 +172,9 @@ func _apply_header()->void:
 		if use>=.01:tip.append("The lines use about %s a day." % Plain.number(use))
 		_set_fact(_material_chips[String(material.resource)],Plain.number(float(material.amount)),side,color,"\n".join(tip))
 	var hands:Dictionary=data.get("hands",{})
-	var total:=float(hands.get("total",0.0));var on_lines:=float(hands.get("lines",0.0))
-	_set_fact(_header.hands,Plain.hands_text(on_lines),"/ "+Plain.hands_text(total),T.INK_MUTED,
-		"Hands: %s of your %s craftspeople work the lines; the rest make household goods.\nAdd or take hands on each line with − and +." % [Plain.hands_text(on_lines),Plain.hands_text(total)])
+	var total:=int(hands.get("total",0));var on_lines:=int(hands.get("lines",0))
+	_set_fact(_header.hands,str(on_lines),"/ %d" % total,T.INK_MUTED,
+		"Hands: %d of your %d craftspeople work the lines; the rest make household goods.\nAdd or take hands on each line with − and +." % [on_lines,total])
 	var capacity:=int(data.get("capacity",0));var count:=(data.get("lines",[]) as Array).size()
 	_set_fact(_header.lines,str(count),"/ %d" % capacity,T.INK_MUTED,"Lines: %d of %d workshop lines in use. More open as your security, production, supply and institutions grow." % [count,capacity])
 	if _header.has("boatyards"):
@@ -195,8 +195,11 @@ func _apply_header()->void:
 	var status:=String(data.get("status","")).strip_edges()
 	var note:Label=_header.note
 	note.visible=not status.is_empty()
+	# The officer by given name, as the game names people in short; the full
+	# name, office and whole note are in the tooltip.
 	note.text=((given+": ") if not person.is_empty() else "")+Plain.brief(status,11)
-	note.tooltip_text=status
+	note.tooltip_text=(("%s, your %s:
+" % [String(person.name),String(person.office)]) if not person.is_empty() else "")+status
 
 func _named_lines()->Array:
 	var result:Array=[]
@@ -326,7 +329,10 @@ func _build_households(parent:Node,full:bool)->void:
 		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(icon)
 		var place:=Label.new();place.name="Place";place.text=String(city.get("city",""));T.text(place,"small",T.INK);place.custom_minimum_size.x=140;place.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(place)
 		var bar:=W.OutputBar.new(220);bar.name="Coverage";row.add_child(bar)
-		var net:=Label.new();net.name="Net";T.text(net,"kicker",T.INK_MUTED);net.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(net)
+		var net:=Label.new();net.name="Net";T.text(net,"kicker",T.INK_MUTED);net.custom_minimum_size.x=70;net.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(net)
+		if full:
+			# What households can work with, as marks and amounts (filled in _apply).
+			var basket:=HBoxContainer.new();basket.name="Basket";basket.add_theme_constant_override("separation",4);basket.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(basket)
 		_household_rows[String(city.get("id",""))]=row
 	if not full:return
 	var techniques:Array=data.get("techniques",[])
@@ -353,6 +359,15 @@ func _apply_households()->void:
 		net.text=("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day"
 		net.add_theme_color_override("font_color",T.GREEN_TEXT if change>0.0 else (T.RED_TEXT if change<0.0 else T.INK_MUTED))
 		row.tooltip_text=tip
+		var basket:=row.get_node_or_null("Basket")
+		if basket!=null:
+			for child:Node in basket.get_children():basket.remove_child(child);child.queue_free()
+			for material:Dictionary in city.get("basket",[]):
+				if not material.has("resource"):continue
+				var mark:=TextureRect.new();mark.texture=Icons.material_texture(String(material.resource),36);mark.custom_minimum_size=Vector2(18,18)
+				mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(mark)
+				var amount:=Label.new();amount.text=Plain.number(float(material.amount));T.text(amount,"kicker",T.BODY);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(amount)
+				var gap:=Control.new();gap.custom_minimum_size.x=6;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(gap)
 	var coverage:=float((data.get("households",[{}]) as Array)[0].get("coverage",0.0)) if not (data.get("households",[]) as Array).is_empty() else 0.0
 	for technique:Dictionary in data.get("techniques",[]):
 		var chip:W.Chip=_technique_chips.get(String(technique.get("id","")))

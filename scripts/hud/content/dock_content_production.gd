@@ -16,7 +16,7 @@ const STORE_RESOURCES:=["Timber","Fiber Plants","Stone","Clay","Copper Ore"]
 const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
 func meta()->Dictionary:
-	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "subtabs":["All","Civilian","Military"]}
+	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "subtabs":["All","Civilian","Military"], "fit_height":true}
 func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
@@ -35,7 +35,7 @@ func tab(sub:int)->Dictionary:
 		var stock:=Logistics.rows(MilitaryCampaign,snapshot)
 		var pool:=P.hands(MilitaryCampaign)
 		block.merge({"lines":line_views(lines,context,stock,pool),"capacity":snapshot.capacity,"context":context,
-			"materials":_stores(lines),"hands":{"total":float(pool.total),"lines":float(pool.lines)},"boatyards":_boatyards(),"stock":stock,
+			"materials":_stores(lines),"hands":{"total":int(pool.total),"lines":int(pool.lines)},"boatyards":_boatyards(),"stock":stock,
 			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":MilitaryCampaign.workshop.owner(),"status":MilitaryCampaign.workshop.data.status,
 			"repairs":_repair_list(),"recipes":recipe_list(lines),"start_target":START_TARGET,
 			"on_action":_action,"on_detail":workshop._open_workshop_job,"on_header":_header_action,"on_start":_start,
@@ -58,12 +58,12 @@ static func line_views(lines:Array,context:Dictionary,stock:Array,pool:Dictionar
 		var line:Dictionary=lines[index]
 		var item:=String(line.get("item",""))
 		var category:=Logistics.category(item)
-		var extra:={"name":P.product_name(item),"hands":float((pool.by_line as Dictionary).get(int(line.get("id",0)),0.0)),"hands_step":Plain.hands_step(float(pool.total)),
+		var extra:={"name":P.product_name(item),"hands":int((pool.by_line as Dictionary).get(int(line.get("id",0)),0)),"hands_exact":float((pool.exact as Dictionary).get(int(line.get("id",0)),0.0)),"hands_step":Plain.hands_step(float(pool.total)),
 			"badge":Logistics.line_badge(line,MilitaryCampaign,need),"stock":by_item.get(item,{}),"ship":category=="boats","today":today,
 			"learn_per_day":learn,"office":String(owner.get("office","")) if not owner.is_empty() else "","auto":category in ["weapons","ammunition"],"owner":MilitaryCampaign.workshop.owner()}
 		var view:=Plain.line_view(line,context,extra)
 		view.rank=index+1;view.count=lines.size()
-		view.hands_total=float(pool.total)
+		view.hands_total=int(pool.total)
 		view.description=P.product_description(item)
 		view.auto_ready=not owner.is_empty()
 		if view.has("ready_day"):
@@ -246,7 +246,7 @@ static func _household_card()->Dictionary:
 	var basket:Array=[]
 	for resource:String in goods.BASKET:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
-		if amount>0.0:basket.append({"name":ResourceSystem.display_name(resource),"amount":amount})
+		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
 	return {"stock":goods.stock(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
 		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.DAILY_WEAR,"reason":String(report.get("reason","")) if current else "","basket":basket}
 

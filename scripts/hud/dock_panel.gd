@@ -125,6 +125,9 @@ func _ready()->void:
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation",14)
 	body_margin.add_child(body)
+	resized.connect(_on_resized)
+	body.minimum_size_changed.connect(func()->void:
+		if fit_height:call_deferred("_fit"))
 
 
 func present(new_provider:Object,new_sub:int=0)->void:
@@ -139,6 +142,7 @@ func present(new_provider:Object,new_sub:int=0)->void:
 func rebuild()->void:
 	if provider==null: return
 	var meta:Dictionary=provider.meta()
+	_set_fit(bool(meta.get("fit_height",false)))
 	# Providers still pass shouted text; the dock speaks in sentence case.
 	eyebrow_label.text=Tokens.sentence_case(String(meta.get("eyebrow","")))
 	eyebrow_label.visible=eyebrow_label.text!=""
@@ -358,3 +362,34 @@ func _on_tab_pressed(index:int)->void:
 	tab_changed.emit(sub)
 	# Tab change: the new content cross-fades in (Motion.BASE, cubic ease-out).
 	preload("res://scripts/hud/motion.gd").cross_fade(body_scroll)
+
+
+# --- Fitting a short screen ------------------------------------------------------
+## A provider whose meta() says "fit_height" gets a dock that ends where its
+## content ends (up to the room the HUD gives it) instead of a tall empty
+## sheet under a short screen. Other docks keep the full height.
+var fit_height:=false
+var _room:=0.0
+var _fitting:=false
+
+func _set_fit(enabled:bool)->void:
+	if enabled==fit_height:return
+	fit_height=enabled
+	if enabled:call_deferred("_fit")
+	elif _room>0.0 and size.y<_room-1.0:
+		_fitting=true;size.y=_room;_fitting=false
+
+func _on_resized()->void:
+	if _fitting:return
+	_room=size.y
+	if fit_height:call_deferred("_fit")
+
+func _fit()->void:
+	if not fit_height or _room<=0.0 or get_child_count()==0:return
+	var chrome:=(get_child(0) as Control).get_combined_minimum_size().y
+	var style:=get_theme_stylebox("panel")
+	if style!=null:chrome+=style.get_minimum_size().y
+	# The body's own margins (12 above, 18 below) are outside its minimum size.
+	var wanted:=minf(_room,ceilf(chrome+body.get_combined_minimum_size().y+30.0))
+	if absf(size.y-wanted)>1.0:
+		_fitting=true;size.y=wanted;_fitting=false
