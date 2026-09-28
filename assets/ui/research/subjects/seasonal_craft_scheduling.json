@@ -1,0 +1,16 @@
+{
+  "id": "seasonal_craft_scheduling",
+  "line": "production",
+  "game_year": 320,
+  "approx_historical_year": -2867,
+  "prompt": "c. 2867 BCE: Craft Work Scheduled by Season. Craft work scheduled by season. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cddca91c-ae87-4445-a52e-59a41a04ce94.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_craft_scheduling-v1.png",
+  "sha256": "bbab4f78af6bcb3b77ccb6105c4e58e20ea5419f60ba002f6da058ded9f918c8",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.34
+  ]
+}

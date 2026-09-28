@@ -11887,7 +11887,9 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 			"id":"settlement_founded_%d" % int(GameState.elapsed_days*24.0),"day":int(GameState.elapsed_days),
 			"title":"A new settlement",
 			"description":"%s settlers arrived and founded %s. Its people and its growth count with the rest of our people." % [_compact_population(int(completed.population)),String(settlement.get("name","the new settlement"))],
-			"domain":"settlement","severity":"major"
+			"domain":"settlement","severity":"major",
+			# Our leaders' own founding is told once, in their name (auto_founding.gd).
+			"chronicle":bool(completed.get("told",false))
 		}
 		GameState.simulation_events.push_front(event)
 		if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)

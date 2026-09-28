@@ -1,0 +1,12 @@
+{
+  "id": "wetland_margin_reserves",
+  "line": "ecology",
+  "game_year": 330,
+  "approx_historical_year": -2800,
+  "prompt": "c. 2800 BCE: Wetland Edges Kept for Fish, Fowl and Reeds. Wetland edges kept for fish, fowl and reeds. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c208de56-78c0-4c19-83e2-a9517ecc13d1.png",
+  "asset": "res://assets/ui/research/subjects/wetland_margin_reserves-v1.png",
+  "sha256": "357d9957d2b5beaad57f1c9d7379fa48bef4e05c45708fff7a90c373ba7347ed",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

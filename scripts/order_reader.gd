@@ -98,6 +98,7 @@ Examples (ids stand for ids from the lists):
 "always ransom the captives" or "from now on bring captives home as bondservants" -> order, order.
 "curse <name>" -> order, terrify, type person, ref that person's id. "terrify the people" -> order, terrify, type group, ref home. "curse <a people>" -> order, terrify, type people, ref that people.
 "punish the thieves" or "execute every thief" -> order, order, type none. "free <name>" -> order, order, type person, ref that person's id.
+"stop founding new towns" or "our leaders may settle new land again" -> order, order, type none.
 "bring her to me" -> order, none. "don't kill him" -> speech, none. "<name> is no longer war leader" -> order, demote, type person, ref that person's id.
 "how many are bound?" -> question, none. "yes" or "do it" with an OPEN QUESTION -> order, confirm."""
 
@@ -483,6 +484,10 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# "The women too" just after an order about a town we hold: that order
 	# again for them (court_war_orders.follow_up), whatever the reading says.
 	if not confirmed and not WarOrders.follow_up(text,audience_id).is_empty(): return {"route":"engine","context":{"reader":true}}
+	# The god's word on new towns ("stop founding new towns", "our leaders may
+	# settle new land again") is the engine's own switch (home_orders.gd),
+	# whatever the reading made of it.
+	if String(reading.kind)!="question" and not CC.HomeOrders.found_reading(text).is_empty(): return {"route":"legacy","why":"the god's word on new towns"}
 	var action:=String(reading.action)
 	var kind:=String(reading.kind)
 	var conf:=float(reading.confidence)
