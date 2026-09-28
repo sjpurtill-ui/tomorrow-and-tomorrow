@@ -176,6 +176,8 @@ var battle_cache:Array=[]
 var front_chunks:Array[Rect2]=[]
 var anim_clock:=0.0
 var pulse_elapsed:=0.0
+## Whether anything on screen is being fought now (the pulse canvas works).
+var pulse_live:=false
 var pulse_layer:Control
 ## The one line shown while the pointer rests on a battle.
 var tip:PanelContainer
@@ -232,7 +234,7 @@ func _process(delta:float)->void:
 		view.append(ease_frame)
 	# The fighting works on its own small canvas, only while it is on screen.
 	anim_clock+=delta
-	if pulse_layer!=null and (not hot_cache.is_empty() or not battle_cache.is_empty()) and not Motion.reduced():
+	if pulse_layer!=null and pulse_live and not Motion.reduced():
 		pulse_elapsed+=delta
 		if pulse_elapsed>=1.0/PULSE_FPS:
 			pulse_elapsed=0.0
@@ -1380,6 +1382,7 @@ func _draw()->void:
 	hot_cache.clear()
 	battle_cache.clear()
 	front_chunks.clear()
+	pulse_live=false
 	if pulse_layer!=null: pulse_layer.queue_redraw()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
@@ -1514,6 +1517,8 @@ func _battle_entries(band:String)->Array:
 		entry["rect"]=Rect2((entry.at as Vector2)-Vector2(BattleMarks.BAR_WIDTH*0.5+2.0,r+3.0),Vector2(BattleMarks.BAR_WIDTH+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
 		entry["live"]=int(battle.get("age_days",0))==0
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
+		if bool(entry.live): pulse_live=true
+	if not hot_cache.is_empty(): pulse_live=true
 	battle_cache=entries
 	return entries
 
