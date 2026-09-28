@@ -13784,7 +13784,7 @@ func _refresh_player_scout_route_markers()->void:
 		var mission_id:=str(mission.get("mission_id",""))
 		var route:Array=mission.get("route",[])
 		if mission_id=="" or route.size()<2: continue
-		wanted.append({"key":mission_id,"mission":mission,"route":route,"rank":-1,"content":"%s:%s:%d:%d:%d" % [mission_id,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),int(mission.get("start_day",0))],"scale":"%s:%d" % [band,zoom_octave]})
+		wanted.append({"key":mission_id,"mission":mission,"route":route,"rank":-1,"content":"%s:%s:%d:%d:%d:%s:%s" % [mission_id,String(mission.get("ordered_heading","")),route.size(),int(mission.get("return_day",0)),int(mission.get("start_day",0)),String(mission.get("route_status","")),str(bool(mission.get("circuit",false)))],"scale":"%s:%d" % [band,zoom_octave]})
 	var rank:=0
 	for report_variant in CivilizationSystem.scout_reports:
 		if rank>=SCOUT_CHART_RETURNED_LIMIT: break
@@ -13949,7 +13949,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 		var base_pixel_size:=walker.pixel_size
 		walker.set_script(preload("res://scripts/scout_chart_walker.gd"))
 		walker.set("chart",chart); walker.set("heights",heights); walker.set("arcs",ScoutChartStroke.arc_lengths(chart)); walker.set("lift",clearance*0.4)
-		walker.set("start_day",float(mission.get("start_day",GameState.elapsed_days))); walker.set("return_day",float(mission.get("return_day",GameState.elapsed_days+1.0))); walker.set("base_pixel_size",base_pixel_size)
+		walker.set("start_day",float(mission.get("start_day",GameState.elapsed_days))); walker.set("return_day",float(mission.get("return_day",GameState.elapsed_days+1.0))); walker.set("base_pixel_size",base_pixel_size); walker.set("mission",mission)
 		marks_root.add_child(walker)
 	var hover_layer:=CanvasLayer.new()
 	hover_layer.layer=0

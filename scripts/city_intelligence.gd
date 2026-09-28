@@ -281,17 +281,9 @@ func route_position(route:Array,fraction:float)->Vector2:
 	return vector(route[-1])
 
 func mission_position(mission:Dictionary,day:float)->Vector2:
-	var start:=float(mission.get("start_day",day))
-	var end:=float(mission.get("actual_return_day",mission.get("return_day",start+1)))
-	var total:=maxf(1,end-start)
-	var elapsed:=clampf(day-start,0,total)
-	# Older active missions retain their original timing; new targeted missions
-	# persist the travel allowance from their dispatch quote.
-	if bool(mission.get("circuit",false)) and mission.get("route_status","")!="turning_back":return route_position(mission.get("route",[]),elapsed/total)
-	var leg:=clampf(float(mission.get("travel_leg_days",total*.5)),.5,total*.5)
-	if mission.get("route_status","")=="turning_back":leg=total*.5
-	var fraction:=elapsed/leg if elapsed<leg else (1.0 if elapsed<=total-leg else (total-elapsed)/leg)
-	return route_position(mission.get("route",[]),fraction)
+	# One rule for where the plan reckons a party to be (scout_progress.gd),
+	# shared with the walker the map draws on its route.
+	return route_position(mission.get("route",[]),preload("res://scripts/scout_progress.gd").fraction(mission,day))
 
 func sample_missions(day:int)->void:
 	var places:Array=[]
