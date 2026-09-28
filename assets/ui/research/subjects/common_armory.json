@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/common_armory-v1.png",
   "sha256": "896f33f0e0c741ee28c45471d909f00357afb84a7e7dce78b80d942fcbda5384",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator actual GPU card review to retain adult faces and essential action.",
+  "focus": [
+    0.5,
+    0.35
+  ]
 }

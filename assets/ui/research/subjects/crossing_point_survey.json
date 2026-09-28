@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/crossing_point_survey-v1.png",
   "sha256": "f3dd6fcf29544c59b001430724638b5c66c5dec9b515c20d7af22a22e0ab0626",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator actual GPU card review to retain adult faces and essential action.",
+  "focus": [
+    0.5,
+    0.33
+  ]
 }

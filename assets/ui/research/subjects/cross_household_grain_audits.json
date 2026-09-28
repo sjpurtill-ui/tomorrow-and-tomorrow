@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/cross_household_grain_audits-v1.png",
   "sha256": "3baa05619fd1e37212c84582264ad0a578989d435a43c66281abdac76d442084",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator actual GPU card review to retain adult faces and essential action.",
+  "focus": [
+    0.5,
+    0.65
+  ]
 }
