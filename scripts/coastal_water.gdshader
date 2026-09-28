@@ -209,7 +209,15 @@ void fragment() {
 	// From the regional view outward the sea is the chart's pale wash on the
 	// same paper as the land (map_chart.gdshaderinc), crossfaded by view scale.
 	float mc_w = mc_chart_weight(mc_design_km(relative_position,PROJECTION_MATRIX));
-	vec3 chart_sea = mc_w>0.0 ? mc_chart_sea(depth,world_position.xz,CAMERA_POSITION_WORLD.y) : vec3(0.0);
+	vec3 chart_sea = vec3(0.0);
+	if (mc_w>0.0) {
+		chart_sea = mc_chart_sea(depth,world_position.xz,CAMERA_POSITION_WORLD.y);
+		// The sea's half of the coast ink, water-lines along every shore and
+		// a light stipple (map_chart).
+		float shore_px = mc_shore_px(world_position.xz,pixel_world);
+		chart_sea = mc_waterlines(chart_sea,shore_px,world_position.xz,pixel_world,CAMERA_POSITION_WORLD.y);
+		chart_sea = mix(chart_sea,MAP_INK*1.3,mc_coast_ink(shore_px)*0.85);
+	}
 	ALBEDO = water*visible*(1.0-mc_w);
 	// A chart's sea is a pale slate wash on the page, legible in any light:
 	// part of its colour is carried as emission so low sun cannot sink it to black.

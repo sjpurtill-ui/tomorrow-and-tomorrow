@@ -223,6 +223,82 @@ vec3 mc_chart_sea(float depth, vec2 world_xz, float camera_height) {
 	return paper*mix(MC_WASH_SEA_SHALLOW, MC_WASH_SEA, smoothstep(0.01, 0.9, depth));
 }
 
+// Water-line ink: the slate blue of the rivers, a little softer.
+const vec3 MC_WATER_INK = vec3(0.070, 0.135, 0.170);
+
+// Signed distance from the shore as the map draws it, in screen pixels:
+// positive over water, negative over land. The shore is the one the land and
+// the sea already cut the coast along (map_coast coast_patch_ground: the
+// smooth surface through the patch heights, wobbled a little so it reads as
+// bays and points), measured from its own value and slope, so every coastal
+// line drawn from this lies exactly on the coast. One Newton step toward the
+// shore on the smooth surface checks that the ground really rises out of the
+// water there (a shoal that stays under water is no coast). First order, so
+// exact near the shore where the lines are drawn; a large value when the
+// patch does not cover the point or no shore is near. No derivatives.
+float mc_shore_px(vec2 xz, float pixel_world) {
+	vec2 rel = xz-terrain_grid.xy;
+	if (!coast_patch_ready() || max(abs(rel.x), abs(rel.y)) > terrain_grid.z*0.49
+			|| textureSize(chart_relief, 0).x != int(terrain_grid.w)) { return 1.0e6; }
+	vec2 gradient;
+	float h = mc_patch_bicubic(rel, 0, gradient);
+	float slope = max(length(gradient), 0.00001);
+	float px = max(pixel_world, 0.000001);
+	if (abs(h)/slope > px*40.0) { return h > 0.0 ? -1.0e6 : 1.0e6; }
+	if (h < 0.0) {
+		vec2 toward = gradient/slope;
+		vec2 gradient2;
+		float h2 = mc_patch_bicubic(rel+toward*(-h/slope), 0, gradient2);
+		if (h2/(-h) < -0.40) { return 1.0e6; }
+	}
+	// The visible shore: the value and slope of the very surface the coast
+	// is cut along (a forward difference half a pixel across).
+	float step = px*0.5;
+	float v = coast_patch_ground(rel, pixel_world, 0.0);
+	vec2 dv = vec2(coast_patch_ground(rel+vec2(step, 0.0), pixel_world, 0.0)-v,
+		coast_patch_ground(rel+vec2(0.0, step), pixel_world, 0.0)-v)/step;
+	return -v/max(length(dv), slope*0.25)/px;
+}
+
+// The coast's own ink, half of it drawn by the land and half by the sea
+// from the same shore, so the line is crisp and even. `shore_px` from
+// mc_shore_px (either sign). Returns ink coverage.
+float mc_coast_ink(float shore_px) {
+	return 1.0-smoothstep(0.55, 1.35, abs(shore_px));
+}
+
+// The sea drawn as an engraver draws it: three fine water-lines following
+// every shore, farther apart and fainter seaward, and a light stipple of dots
+// in the shallows that thins away from the land. Everything is held at a
+// constant size on screen. `offshore_px` from mc_shore_px.
+vec3 mc_waterlines(vec3 sea, float offshore_px, vec2 xz, float pixel_world, float camera_height) {
+	float lines = 0.0;
+	for (int k = 0; k < 3; k++) {
+		float at = 4.0+float(k)*4.2+float(k*k)*1.3;
+		float width = 0.95-float(k)*0.18;
+		float line = 1.0-smoothstep(width*0.5, width*0.5+0.75, abs(offshore_px-at));
+		lines = max(lines, line*(0.72-float(k)*0.20));
+	}
+	sea = mix(sea, MC_WATER_INK*1.4, lines*0.75);
+	// Stipple: one dot in each small cell, blended across zoom octaves so it
+	// never pops; dense by the shore, a light scatter offshore.
+	float octave = log2(max(pixel_world, 0.000001)*6.0/0.001);
+	float level = floor(octave);
+	float blend = fract(octave);
+	float dots = 0.0;
+	for (int k = 0; k < 2; k++) {
+		float cell = 0.001*exp2(level+float(k));
+		vec2 p = xz/cell;
+		vec2 c = floor(p);
+		vec2 centre = c+0.2+0.6*vec2(map_paper_hash(c+vec2(3.0, 7.0)), map_paper_hash(c+vec2(-11.0, 5.0)));
+		float keep = step(map_paper_hash(c+vec2(13.0, -2.0)), mix(0.14, 0.62, 1.0-smoothstep(8.0, 36.0, offshore_px)));
+		float d = length(p-centre)*cell/max(pixel_world, 0.000001);
+		dots = max(dots, (1.0-smoothstep(0.35, 0.95, d))*keep*(k == 0 ? 1.0-blend : blend));
+	}
+	float inshore = 1.0-smoothstep(12.0, 36.0, offshore_px);
+	return mix(sea, MC_WATER_INK*1.6, dots*mix(0.18, 0.42, inshore)*step(2.0, offshore_px));
+}
+
 // Relief lighting, as a copper-plate survey is washed: how much this ground
 // faces the north-west light compared with flat ground (-1..1), from the
 // generalised landform. Relief is exaggerated more the wider the view, the
@@ -314,7 +390,12 @@ float mc_hachures(vec2 xz, float height, vec2 gradient, float pixel_world) {
 		float spacing_px = interval/max(slope*pixel_world, 0.000001);
 		float steep = 1.0-smoothstep(5.0, 9.0, spacing_px);
 		if (steep*fade <= 0.001) { continue; }
-		// Rows two contour intervals tall, so each stroke reads as a stroke.
+		// Rows two contour intervals tall, so each stroke reads as a stroke;
+		// where even those would be a few pixels (a sea cliff seen from afar)
+		// they would only stipple, and the shading carries the slope.
+		float row_px = 2.0*spacing_px;
+		steep *= smoothstep(4.5, 7.0, row_px);
+		if (steep*fade <= 0.001) { continue; }
 		float v = height/(interval*2.0);
 		float row = fract(v);
 		float dash = smoothstep(0.03, 0.10, row)*(1.0-smoothstep(0.90, 0.97, row));
@@ -501,16 +582,21 @@ vec3 mc_chart_ground(vec3 ground, vec2 landform, vec3 light_normal, float promin
 	vec2 gradient = -light_normal.xz/max(light_normal.y, 0.05);
 	float slope_km = length(gradient);
 	float contour = mc_contours(landform.x, slope_km, pixel_world, light);
-	float hachure = mc_hachures(ground.xz, landform.x, gradient, pixel_world);
-	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.34));
+	// Hachures only on real relief (a range's flank, a valley wall), never
+	// as a stipple along every little sea cliff.
+	float hachure = mc_hachures(ground.xz, landform.x, gradient, pixel_world)*prominence;
+	chart = mix(chart, MAP_SEPIA, max(contour*0.30, hachure*0.28));
 	// Ranges as inked peaks at the far views.
 	vec3 peaks = mc_mountains(ground.xz, design_km, pixel_world, use_patch, screen_up);
 	chart = mix(chart, paper*vec3(1.02, 1.00, 0.97), peaks.y*0.88);
 	chart = mix(chart, MAP_SEPIA, peaks.z*0.50);
 	chart = mix(chart, MAP_INK, peaks.x*0.85);
-	// The coast is one inked line where the land rises out of the sea.
-	float shore_px = coast_height/max(coast_height_px, 0.0000001);
-	float coast_ink = (1.0-smoothstep(0.9, 1.9, shore_px))*step(0.0, coast_height);
+	// The coast is one inked line where the land rises out of the sea: the
+	// land's half of it (the sea draws the other half from the same shore).
+	// Where the streamed patch does not reach, the height's own rate.
+	float shore_px = use_patch ? mc_shore_px(ground.xz, pixel_world) : 1.0e6;
+	float coast_ink = abs(shore_px) < 1.0e5 ? mc_coast_ink(shore_px)
+		: (1.0-smoothstep(0.9, 1.9, coast_height/max(coast_height_px, 0.0000001)))*step(0.0, coast_height);
 	chart = mix(chart, MAP_INK*1.3, coast_ink*0.85);
 	return mc_frontier_wash(chart, paper, frontier_px, ground.xz, pixel_world);
 }

@@ -3688,11 +3688,12 @@ func _update_scale_lod() -> void:
 		(province_terrain_mesh.material_override as ShaderMaterial).set_shader_parameter("streamed_cutout",cutout)
 	if regional_terrain_patch:
 		regional_terrain_patch.visible = true
-	# At country and continental footprints the coarse world mesh cannot drape a
-	# hundred-metre ribbon without gaps or z artifacts. Drainage remains in the
-	# albedo and relief; explicit water geometry enters with the regional mesh.
+	# Rivers are the chart's ink out to the continent view: the river shader
+	# drapes its line on the streamed patch and lifts it by screen pixels
+	# (map_river.gdshader), so no coarse mesh can swallow it. Past a
+	# continent the patch no longer covers the view.
 	for river_overlay in river_overlays:
-		if is_instance_valid(river_overlay): river_overlay.visible=camera.size<=420.0
+		if is_instance_valid(river_overlay): river_overlay.visible=camera.size<=4000.0
 	if lens_panel:
 		lens_panel.visible=lens_requested_visible and camera.size<=1600.0
 	if settler_map_ring:
