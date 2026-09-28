@@ -8,6 +8,11 @@ extends RefCounted
 
 const MAX_ROUNDS := 12
 const BattleTactics:=preload("res://scripts/battle_tactics.gd")
+## Blocks, frontage, reserves and phases (battle_blocks.gd).
+const Blocks:=preload("res://scripts/battle_blocks.gd")
+## Above this many losses in one exchange, losses are spread over formations
+## by their exposure in one pass instead of one person at a time.
+const LOSS_ONE_BY_ONE:=64
 const BASE_CASUALTY_RATE := 0.055
 const MIN_EFFECTIVE_STRENGTH := 0.05
 ## Overwhelming odds (tests/test_battle_scale.gd). At about five to one in
@@ -261,7 +266,6 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var attacking_force := _normalize_force(attacker, "Attacker")
 	var defending_force := _normalize_force(defender, "Defender")
 	var seed := int(options.get("seed", 1))
-	var round_limit := clampi(int(options.get("max_rounds", MAX_ROUNDS)), 1, MAX_ROUNDS)
 	var terrain_defense := clampf(float(options.get("terrain_defense", 1.0)), 0.5, 2.0)
 	var casualty_intensity:=clampf(float(options.get("casualty_intensity",1.0)),0.20,2.0)
 	var attacker_exposure_modifier:=clampf(float(options.get("attacker_exposure_modifier",1.0)),0.50,2.0)
@@ -270,6 +274,22 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var effective_terrain_defense:=lerpf(terrain_defense,1.0,siege_reduction) if terrain_defense>1.0 else terrain_defense
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed
+	# The generals' chosen tactics (battle_tactics.gd) shape each round's
+	# exposure within fixed bounds. Absent a plan nothing changes.
+	var tactics:Dictionary=options.get("tactics",{}) if options.get("tactics") is Dictionary else {}
+	var plan:=tactics
+	var round_offset:=maxi(0,int(options.get("round_offset",0)))
+	# The block battle (battle_blocks.gd): carried between the campaign's
+	# single-exchange calls, or begun here for a battle fought in one call.
+	var carried:=options.get("battle") is Dictionary and not (options.get("battle") as Dictionary).is_empty()
+	var block_options:=options.duplicate(false)
+	block_options["tactics"]=tactics
+	# A carried battle is advanced in place: the caller keeps the result's.
+	var state:Dictionary=options.get("battle") if carried else Blocks.begin(attacking_force,defending_force,block_options)
+	var round_limit := clampi(int(options.get("max_rounds", MAX_ROUNDS if carried else maxi(MAX_ROUNDS,int(state.get("max_exchanges",MAX_ROUNDS))))), 1, Blocks.MAX_EXCHANGES)
+	var river:=bool((state.get("ground",{}) as Dictionary).get("river",false))
+	var hungry:={"attacker":preload("res://scripts/field_rations.gd").is_hungry(attacker),"defender":preload("res://scripts/field_rations.gd").is_hungry(defender)}
+	var pursues:={"attacker":_pursues(tactics,"attacker",attacking_force),"defender":_pursues(tactics,"defender",defending_force)}
 
 	var attacker_initial := int(attacking_force.troops)
 	var defender_initial := int(defending_force.troops)
@@ -277,28 +297,47 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	var defender_troops := defender_initial
 	var attacker_morale := float(attacking_force.morale)
 	var defender_morale := float(defending_force.morale)
+	var side_initial:={"attacker":maxi(1,int(state.initial.get("attacker",attacker_initial))),"defender":maxi(1,int(state.initial.get("defender",defender_initial)))}
 	var rounds: Array[Dictionary] = []
-	# The generals' chosen tactics (battle_tactics.gd) shape each round's
-	# exposure within fixed bounds. Absent a plan nothing changes.
-	var tactics:Dictionary=options.get("tactics",{}) if options.get("tactics") is Dictionary else {}
-	var round_offset:=maxi(0,int(options.get("round_offset",0)))
+	var last_why:Array=state.get("why",[])
+	Blocks.reconcile(state,"attacker",attacking_force.get("formations",[]))
+	Blocks.reconcile(state,"defender",defending_force.get("formations",[]))
+	var where:={"attacker":Blocks.index_of(state,"attacker",maxi(1,(attacking_force.get("formations",[]) as Array).size())),"defender":Blocks.index_of(state,"defender",maxi(1,(defending_force.get("formations",[]) as Array).size()))}
 
 	for round_number in range(1, round_limit + 1):
 		if attacker_troops <= 0 or defender_troops <= 0:
 			break
 		if attacker_morale <= 0.15 or defender_morale <= 0.15:
 			break
+		if Blocks.standing_men(state,"attacker")<=0 or Blocks.standing_men(state,"defender")<=0:
+			break
+		var battle_round:=round_number+round_offset
+		# A phase is over: each general may change how he fights.
+		if not plan.is_empty() and battle_round>1 and (battle_round-1)%int(state.phase_len)==0:
+			var second_look:Dictionary=BattleTactics.rechoose(plan,{"progress":float(state.progress),"exchange":battle_round-1},seed+battle_round*104729)
+			if not (second_look.changes as Dictionary).is_empty():
+				plan=second_look.plan
+				Blocks.note_tactics(state,second_look.changes,plan)
+		elif battle_round==1 and not plan.is_empty():
+			Blocks.note_tactics(state,{},plan)
+		Blocks.deploy(state,plan)
 
-		var attacker_cohorts := evaluate_force(attacking_force, defending_force, 1.0)
-		var defender_cohorts := evaluate_force(defending_force, attacking_force, effective_terrain_defense)
+		var attacker_cohorts := evaluate_force(attacking_force, defending_force, 1.0, true)
+		var defender_cohorts := evaluate_force(defending_force, attacking_force, effective_terrain_defense, true)
 		var attacker_commander:Dictionary=attacking_force.get("commander",{})
 		var defender_commander:Dictionary=defending_force.get("commander",{})
-		var attacker_power := _cohort_power(attacker_cohorts,attacker_morale,float(attacking_force.readiness),float(attacker_commander.get("command",0.5)))
-		var defender_power := _cohort_power(defender_cohorts,defender_morale,float(defending_force.readiness),float(defender_commander.get("command",0.5)))
+		var attacker_weights:=Blocks.weights(state,"attacker",attacker_cohorts.size(),attacker_morale)
+		var defender_weights:=Blocks.weights(state,"defender",defender_cohorts.size(),defender_morale)
+		var attacker_front:=Blocks.front_men(state,"attacker")
+		var defender_front:=Blocks.front_men(state,"defender")
+		var attacker_side_factor:=(Blocks.RIVER_ATTACK if river else 1.0)*(Blocks.HUNGER_POWER if bool(hungry.attacker) else 1.0)
+		var defender_side_factor:=Blocks.HUNGER_POWER if bool(hungry.defender) else 1.0
+		var attacker_power := _cohort_power(attacker_cohorts,attacker_morale,float(attacking_force.readiness),float(attacker_commander.get("command",0.5)),attacker_weights)*attacker_side_factor
+		var defender_power := _cohort_power(defender_cohorts,defender_morale,float(defending_force.readiness),float(defender_commander.get("command",0.5)),defender_weights)*defender_side_factor
 		var total_power := maxf(MIN_EFFECTIVE_STRENGTH, attacker_power + defender_power)
 		var attacker_share := attacker_power / total_power
 		var defender_share := defender_power / total_power
-		var overrun:=overrun_side(attacker_power,defender_power,attacker_troops,defender_troops,effective_terrain_defense)
+		var overrun:=overrun_side(attacker_power,defender_power,attacker_front,defender_front,effective_terrain_defense)
 		if overrun!="":
 			var exchange:=_overrun_exchange(overrun,attacking_force,defending_force,attacker_troops,defender_troops,attacker_power,defender_power,rng)
 			attacker_troops=int(exchange.attacker_remaining); defender_troops=int(exchange.defender_remaining)
@@ -309,9 +348,16 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			overrun_record["attacker_morale"]=attacker_morale
 			overrun_record["defender_morale"]=defender_morale
 			overrun_record["order_intensity"]=casualty_intensity
-			rounds.append(overrun_record)
+			Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,overrun_record.get("attacker_cohort_losses",[]),int(overrun_record.get("attacker_losses",0))),where.attacker)
+			Blocks.book_losses(state,"defender",_block_loss_list(defending_force,overrun_record.get("defender_cohort_losses",[]),int(overrun_record.get("defender_losses",0))),where.defender)
 			var overrun_outcome:="attacker_victory" if overrun=="defender" else "defender_victory"
 			var overrun_termination:=_termination_event(overrun_outcome,attacking_force,defending_force,attacker_troops,defender_troops,attacker_morale,defender_morale,rng,true)
+			_event_overrun(state,overrun)
+			last_why=_why(state,attacking_force,defending_force,attacker_cohorts,defender_cohorts,attacker_weights,defender_weights,effective_terrain_defense,river,hungry,{},plan,attacker_morale,defender_morale)
+			overrun_record["progress"]=1.0 if overrun=="defender" else -1.0
+			rounds.append(overrun_record)
+			Blocks.after_exchange(state,plan,last_why,true)
+			Blocks.finish(state,overrun_outcome,overrun_termination)
 			return {
 				"seed": seed,
 				"outcome": overrun_outcome,
@@ -324,22 +370,26 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 				"effective_terrain_defense":effective_terrain_defense,
 				"siege_terrain_reduction":siege_reduction,
 				"tactics":tactics.duplicate(true),
+				"plan_now":plan.duplicate(true),
 				"termination":overrun_termination,
-				"overrun":true
+				"overrun":true,
+				"battle":state
 			}
 		# Lopsided but not overwhelming: the weaker side bleeds and wavers faster.
 		var odds:=clampf(maxf(attacker_power,defender_power)/maxf(MIN_EFFECTIVE_STRENGTH,minf(attacker_power,defender_power)),1.0,OVERRUN_RATIO)
 		var crush:=1.0+maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_CASUALTY_STEP
 		var attacker_weaker:=attacker_power<defender_power
 		var engagement:=_engagement_context(rng,attacker_share,defender_share,attacker_morale,defender_morale,effective_terrain_defense)
-		var tactic_round:Dictionary=BattleTactics.round_effects(tactics,round_number+round_offset,attacker_share,attacker_morale,defender_morale)
+		var tactic_round:Dictionary=BattleTactics.round_effects(plan,battle_round,attacker_share,attacker_morale,defender_morale)
 		var attacker_variance := _casualty_variance(rng)
 		var defender_variance := _casualty_variance(rng)
+		var river_exposure:=Blocks.RIVER_EXPOSURE if river else 1.0
 
 		# Casualties are based on the opposing force's share of power. They are
 		# calculated before either side is reduced, so each round is simultaneous.
-		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_troops) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity))))
-		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_troops) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
+		# Only the men in the line can be struck; the reserve waits.
+		var attacker_losses := mini(attacker_troops, maxi(0, roundi(float(attacker_front) * BASE_CASUALTY_RATE * defender_share * 2.0 * defender_variance * float(engagement.intensity) * casualty_intensity * float(engagement.attacker_exposure) * attacker_exposure_modifier * float(tactic_round.attacker) * float(tactic_round.intensity) * river_exposure)))
+		var defender_losses := mini(defender_troops, maxi(0, roundi(float(defender_front) * BASE_CASUALTY_RATE * attacker_share * 2.0 * attacker_variance * float(engagement.intensity) * casualty_intensity * float(engagement.defender_exposure) * defender_exposure_modifier * float(tactic_round.defender) * float(tactic_round.intensity) / effective_terrain_defense)))
 		if crush>1.0:
 			if attacker_weaker:
 				attacker_losses=mini(attacker_troops,roundi(float(attacker_losses)*crush)); defender_losses=roundi(float(defender_losses)/crush)
@@ -350,26 +400,22 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		if defender_losses==0 and float(engagement.intensity)>=0.65: defender_losses=1
 		attacker_troops -= attacker_losses
 		defender_troops -= defender_losses
-		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1),options.get("attacker_ordered_targets",{}))
-		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1),options.get("defender_ordered_targets",{}))
+		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1),options.get("attacker_ordered_targets",{}),Blocks.exposure(state,"attacker",attacker_cohorts.size()))
+		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1),options.get("defender_ordered_targets",{}),Blocks.exposure(state,"defender",defender_cohorts.size()))
+		var attacker_block_losses:=Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,attacker_cohort_result.losses,attacker_losses),where.attacker)
+		var defender_block_losses:=Blocks.book_losses(state,"defender",_block_loss_list(defending_force,defender_cohort_result.losses,defender_losses),where.defender)
 		var attacker_ammunition_used:=_consume_ammunition(attacker_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
 		var defender_ammunition_used:=_consume_ammunition(defender_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
 		var attacker_casualties:=_casualty_breakdown(attacker_losses,rng,float(engagement.intensity))
 		var defender_casualties:=_casualty_breakdown(defender_losses,rng,float(engagement.intensity))
 		attacking_force["formations"] = attacker_cohort_result.formations
 		defending_force["formations"] = defender_cohort_result.formations
-		attacking_force["wounded_pool"]=int(attacking_force.get("wounded_pool",0))+int(attacker_casualties.wounded)
-		attacking_force["disabled_pool"]=int(attacking_force.get("disabled_pool",0))+int(attacker_casualties.get("disabled",0))
-		attacking_force["severe_disabled_pool"]=int(attacking_force.get("severe_disabled_pool",0))+int(attacker_casualties.get("severe_disability",0))
-		attacking_force["scattered_pool"]=int(attacking_force.get("scattered_pool",0))+int(attacker_casualties.scattered)
-		attacking_force["dead"]=int(attacking_force.get("dead",0))+int(attacker_casualties.killed)
-		defending_force["wounded_pool"]=int(defending_force.get("wounded_pool",0))+int(defender_casualties.wounded)
-		defending_force["disabled_pool"]=int(defending_force.get("disabled_pool",0))+int(defender_casualties.get("disabled",0))
-		defending_force["severe_disabled_pool"]=int(defending_force.get("severe_disabled_pool",0))+int(defender_casualties.get("severe_disability",0))
-		defending_force["scattered_pool"]=int(defending_force.get("scattered_pool",0))+int(defender_casualties.scattered)
-		defending_force["dead"]=int(defending_force.get("dead",0))+int(defender_casualties.killed)
+		_pool_casualties(attacking_force,attacker_casualties)
+		_pool_casualties(defending_force,defender_casualties)
 		attacking_force["troops"] = attacker_troops
 		defending_force["troops"] = defender_troops
+		Blocks.book_kinds(state,"attacker",attacker_block_losses,attacker_casualties)
+		Blocks.book_kinds(state,"defender",defender_block_losses,defender_casualties)
 
 		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)))
 		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)))
@@ -377,6 +423,49 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			var dread:=maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_MORALE_STEP
 			if attacker_weaker: attacker_morale=maxf(0.0,attacker_morale-dread)
 			else: defender_morale=maxf(0.0,defender_morale-dread)
+		# Blocks lose heart; the worn-out break and run, and the army sees it.
+		var sides:={"attacker":{"force":attacking_force,"cohorts":attacker_cohort_result,"casualties":attacker_casualties,"block_losses":attacker_block_losses,"share":defender_share,"commander":attacker_commander,"target":int(engagement.get("attacker_target",-1))},
+			"defender":{"force":defending_force,"cohorts":defender_cohort_result,"casualties":defender_casualties,"block_losses":defender_block_losses,"share":attacker_share,"commander":defender_commander,"target":int(engagement.get("defender_target",-1))}}
+		var morale_now:={"attacker":attacker_morale,"defender":defender_morale}
+		var broke_now:={"attacker":0,"defender":0}
+		var losses_now:={"attacker":attacker_losses,"defender":defender_losses}
+		for side in ["attacker","defender"]:
+			var part:Dictionary=sides[side]
+			var enemy:="defender" if side=="attacker" else "attacker"
+			var struck:=_blocks_of_formation(state,side,int(part.target))
+			var breaking:=Blocks.wear(state,side,part.block_losses,float(losses_now[side])/float(side_initial[side]),float((part.commander as Dictionary).get("resolve",0.5)),float(morale_now[side]),bool(hungry[side]),struck)
+			for b in breaking:
+				# Once the whole army breaks, its blocks go with it: the rout is
+				# the battle's ending (termination), not one block at a time.
+				if float(morale_now[side])<=MORALE_BREAK_AT: break
+				var men0:=int((state.sides[side].blocks as Array)[b].men0)
+				var split:Dictionary=Blocks.break_block(state,side,b,rng,bool(pursues[enemy]),battle_round)
+				var removed:=_remove_broken(part.force,part.cohorts,split)
+				broke_now[side]=int(broke_now[side])+removed
+				var casualties:Dictionary=part.casualties
+				casualties["killed"]=int(casualties.get("killed",0))+int(split.killed)
+				casualties["wounded"]=int(casualties.get("wounded",0))+int(split.wounded)
+				casualties["scattered"]=int(casualties.get("scattered",0))+int(split.fled)
+				casualties["captured"]=int(casualties.get("captured",0))+int(split.captured)
+				_pool_casualties(part.force,{"killed":split.killed,"wounded":split.wounded,"scattered":split.fled,"captured":split.captured})
+				var phase_losses:Dictionary=state.cur.losses[side]
+				phase_losses.k=int(phase_losses.k)+int(split.killed); phase_losses.w=int(phase_losses.w)+int(split.wounded)
+				phase_losses.f=int(phase_losses.f)+int(split.fled); phase_losses.c=int(phase_losses.c)+int(split.captured)
+				# Seeing a body of their own run shakes the whole army.
+				morale_now[side]=maxf(0.0,float(morale_now[side])-minf(0.25,float(men0)/float(side_initial[side])*0.9))
+		attacker_morale=float(morale_now.attacker); defender_morale=float(morale_now.defender)
+		attacker_troops-=int(broke_now.attacker); defender_troops-=int(broke_now.defender)
+		attacker_losses+=int(broke_now.attacker); defender_losses+=int(broke_now.defender)
+		attacking_force["troops"]=attacker_troops; defending_force["troops"]=defender_troops
+		var quality:={"attacker":_quality(attacker_cohorts,1.0),"defender":_quality(defender_cohorts,1.0)}
+		var progress:=Blocks.measure(state,quality,{"attacker":attacker_morale,"defender":defender_morale})
+		var decided:=attacker_troops<=0 or defender_troops<=0 or attacker_morale<=0.15 or defender_morale<=0.15 or Blocks.standing_men(state,"attacker")<=0 or Blocks.standing_men(state,"defender")<=0
+		var closes:=decided or (round_number==round_limit and not carried)
+		# Why one side is winning: worked out when a phase closes (and at the start).
+		var why:Array=[]
+		if Blocks.closing(state,closes) or int(state.exchange)==0:
+			why=_why(state,attacking_force,defending_force,attacker_cohorts,defender_cohorts,attacker_weights,defender_weights,effective_terrain_defense,river,hungry,tactic_round,plan,attacker_morale,defender_morale)
+			last_why=why
 		rounds.append({
 			"round": round_number,
 			"attacker_losses": attacker_losses,
@@ -398,11 +487,20 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			"attacker_cohort_ammunition_used":attacker_ammunition_used,
 			"defender_cohort_ammunition_used":defender_ammunition_used,
 			"attacker_casualties":attacker_casualties,
-			"defender_casualties":defender_casualties
+			"defender_casualties":defender_casualties,
+			"attacker_front":attacker_front,
+			"defender_front":defender_front,
+			"progress":progress
 		})
+		if String(tactic_round.event)!="": Blocks.note_event(state,{"k":"tactic_event","text":String(tactic_round.event),"side":String(tactic_round.get("event_side",""))})
+		elif String(engagement.event)!="No decisive local event.": Blocks.note_event(state,{"k":"local","code":String(engagement.event)})
+		Blocks.after_exchange(state,plan,why,closes)
 
-	var outcome := _outcome(attacker_troops, defender_troops, attacker_morale, defender_morale)
+	var outcome := _outcome(attacker_troops if Blocks.standing_men(state,"attacker")>0 else 0, defender_troops if Blocks.standing_men(state,"defender")>0 else 0, attacker_morale, defender_morale)
 	var termination:=_termination_event(outcome,attacking_force,defending_force,attacker_troops,defender_troops,attacker_morale,defender_morale,rng)
+	if outcome!="inconclusive" or not carried:
+		Blocks.close_phase(state,plan,last_why)
+		Blocks.finish(state,outcome,termination)
 	return {
 		"seed": seed,
 		"outcome": outcome,
@@ -415,8 +513,132 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		"effective_terrain_defense":effective_terrain_defense,
 		"siege_terrain_reduction":siege_reduction,
 		"tactics":tactics.duplicate(true),
-		"termination":termination
+		"plan_now":plan.duplicate(true),
+		"termination":termination,
+		"battle":state
 	}
+
+
+## A new block battle between two forces (battle_blocks.gd), for a caller
+## that fights it an exchange at a time and carries it between calls.
+## options: ground, tactics, terrain_defense.
+func open_battle(attacker:Dictionary,defender:Dictionary,options:Dictionary={})->Dictionary:
+	return Blocks.begin(_normalize_force(attacker,"Attacker"),_normalize_force(defender,"Defender"),options)
+
+
+## The whole army breaks at this morale (as _outcome and MilitaryCampaign).
+const MORALE_BREAK_AT:=0.15
+
+
+## Whether a side can ride down men who break: the plan says so, or (with no
+## plan) a real share of the side is mounted.
+func _pursues(plan:Dictionary,side:String,force:Dictionary)->bool:
+	var entry:Variant=plan.get(side,{})
+	if entry is Dictionary and (entry as Dictionary).has("pursuit"): return bool((entry as Dictionary).pursuit)
+	return float(BattleTactics.profile(force).get("mobile",0.0))>=float(BattleTactics.PURSUIT.mobile)
+
+
+## Adds an exchange's casualties to a force's pools.
+func _pool_casualties(force:Dictionary,casualties:Dictionary)->void:
+	force["wounded_pool"]=int(force.get("wounded_pool",0))+int(casualties.get("wounded",0))
+	force["disabled_pool"]=int(force.get("disabled_pool",0))+int(casualties.get("disabled",0))
+	force["severe_disabled_pool"]=int(force.get("severe_disabled_pool",0))+int(casualties.get("severe_disability",0))
+	force["scattered_pool"]=int(force.get("scattered_pool",0))+int(casualties.get("scattered",0))
+	force["captured_pool"]=int(force.get("captured_pool",0))+int(casualties.get("captured",0))
+	force["captured_in_battle"]=int(force.get("captured_in_battle",0))+int(casualties.get("captured",0))
+	force["dead"]=int(force.get("dead",0))+int(casualties.get("killed",0))
+
+
+## Losses per formation for the blocks; a force with no formations (troops
+## only) is one formation of everyone.
+func _block_loss_list(force:Dictionary,cohort_losses:Array,total:int)->Array:
+	if (force.get("formations",[]) as Array).is_empty(): return [total]
+	return cohort_losses
+
+
+## Takes a broken block's men out of their formations (and some of the kit
+## they drop in the rout). Returns how many left.
+func _remove_broken(force:Dictionary,cohort_result:Dictionary,split:Dictionary)->int:
+	var formations:Array=force.get("formations",[])
+	var removed:=0
+	var per:Dictionary=split.get("per_formation",{})
+	if formations.is_empty():
+		for f in per: removed+=int(per[f])
+		return removed
+	for f in per:
+		var index:=int(f)
+		if index<0 or index>=formations.size(): continue
+		var formation:Dictionary=formations[index]
+		var before:=int(formation.get("count",0))
+		var n:=mini(before,int(per[f]))
+		if n<=0: continue
+		formation["count"]=before-n
+		var equipment:=int(formation.get("equipment",before))
+		var dropped:=mini(equipment,roundi(float(equipment)*float(n)/maxf(1.0,float(before))*0.5))
+		formation["equipment"]=equipment-dropped
+		formations[index]=formation
+		removed+=n
+		var losses:Array=cohort_result.get("losses",[])
+		if index<losses.size(): losses[index]=int(losses[index])+n
+		var equipment_losses:Array=cohort_result.get("equipment_losses",[])
+		if index<equipment_losses.size(): equipment_losses[index]=int(equipment_losses[index])+dropped
+	force["formations"]=formations
+	return removed
+
+
+func _blocks_of_formation(state:Dictionary,side:String,formation_index:int)->Array:
+	var out:Array=[]
+	if formation_index<0: return out
+	var blocks:Array=state.sides[side].blocks
+	for b in blocks.size():
+		for member in blocks[b].members:
+			if int(member[0])==formation_index: out.append(b); break
+	return out
+
+
+## Fighting quality per man of each formation: sqrt(attack x defense) with the
+## ground divided out (it is its own modifier).
+func _quality(cohorts:Array[Dictionary],terrain:float)->PackedFloat32Array:
+	var out:=PackedFloat32Array(); out.resize(cohorts.size())
+	for i in cohorts.size():
+		out[i]=sqrt(maxf(0.0,float(cohorts[i].attack)*float(cohorts[i].defense))/maxf(0.05,terrain))
+	return out
+
+
+func _event_overrun(state:Dictionary,weak:String)->void:
+	Blocks.note_event(state,{"k":"overrun","side":weak})
+	for block in state.live[weak]:
+		if String(block.st) in ["front","reserve"] and int(block.men)<=0: block.st="broken"
+
+
+## The signed modifiers actually used this exchange (battle_blocks.factors).
+func _why(state:Dictionary,a:Dictionary,d:Dictionary,ac:Array[Dictionary],dc:Array[Dictionary],aw:PackedFloat32Array,dw:PackedFloat32Array,terrain:float,river:bool,hungry:Dictionary,tactic_round:Dictionary,plan:Dictionary,am:float,dm:float)->Array:
+	var sides:={}
+	for side in ["attacker","defender"]:
+		var force:Dictionary=a if side=="attacker" else d
+		var cohorts:Array[Dictionary]=ac if side=="attacker" else dc
+		var w:PackedFloat32Array=aw if side=="attacker" else dw
+		var t:=terrain if side=="defender" else 1.0
+		var weighted:=0.0; var men:=0.0
+		for i in cohorts.size():
+			var n:=float(cohorts[i].count)*(float(w[i]) if i<w.size() else 1.0)
+			weighted+=n*sqrt(maxf(0.0,float(cohorts[i].attack)*float(cohorts[i].defense))/maxf(0.05,t)); men+=n
+		var cohesion:=0.0; var fatigue:=0.0; var front:=0.0
+		var blocks:Array=state.sides[side].blocks
+		for b in blocks.size():
+			var block:Dictionary=state.live[side][b]
+			if String(block.st)!="front": continue
+			cohesion+=float(block.men)*float(block.c); fatigue+=float(block.men)*Blocks.fatigue_factor(int(block.fat)); front+=float(block.men)
+		var commander:Dictionary=force.get("commander",{})
+		sides[side]={"men":Blocks.standing_men(state,side),"front":Blocks.front_men(state,side),"quality":weighted/maxf(1.0,men),"terrain":t,
+			"river":Blocks.RIVER_ATTACK if river and side=="attacker" else 1.0,"cohesion":cohesion/maxf(1.0,front) if front>0.0 else (am if side=="attacker" else dm),
+			"readiness":float(force.get("readiness",1.0)),"command":0.90+clampf(float(commander.get("command",0.5)),0.0,1.0)*0.20,
+			"fatigue":fatigue/maxf(1.0,front) if front>0.0 else 1.0,"hunger":Blocks.HUNGER_POWER if bool(hungry[side]) else 1.0}
+	var ids:={"attacker":String((plan.get("attacker",{}) as Dictionary).get("id","")),"defender":String((plan.get("defender",{}) as Dictionary).get("id",""))}
+	var surprise:=""
+	for side in ["attacker","defender"]:
+		if String(ids[side]) in ["dawn_raid","ambush"] and not tactic_round.is_empty() and absf(float(tactic_round.get("attacker",1.0))-float(tactic_round.get("defender",1.0)))>0.05: surprise=side
+	return Blocks.factors(sides,{"attacker":float(tactic_round.get("attacker",1.0)),"defender":float(tactic_round.get("defender",1.0))},ids,surprise)
 
 
 ## Which side is overrun at these odds: "attacker", "defender" or "" (a real
@@ -459,12 +681,15 @@ static func effective_odds(attacker_power:float,defender_power:float,attacker_tr
 
 ## The same test on two whole forces, before any exchange (the campaign uses
 ## it to settle a hopeless fight the day it starts).
-func overrun_expected(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->String:
+## ground: the battle's ground (battle_blocks.GROUNDS); where it is too narrow
+## for all to fight, only the men in the line count, as in the battle itself.
+func overrun_expected(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0,ground:Dictionary={})->String:
 	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
 	var ac:=evaluate_force(a,d,1.0); var dc:=evaluate_force(d,a,clampf(terrain_defense,0.5,2.0))
-	var ap:=_cohort_power(ac,float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
-	var dp:=_cohort_power(dc,float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)))
-	return overrun_side(ap,dp,int(a.troops),int(d.troops),terrain_defense)
+	var state:=Blocks.begin(a,d,{"ground":ground,"terrain_defense":terrain_defense})
+	var ap:=_cohort_power(ac,float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)),Blocks.weights(state,"attacker",ac.size(),float(a.morale)))
+	var dp:=_cohort_power(dc,float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)),Blocks.weights(state,"defender",dc.size(),float(d.morale)))
+	return overrun_side(ap,dp,Blocks.front_men(state,"attacker"),Blocks.front_men(state,"defender"),terrain_defense)
 
 
 ## Effective odds (stronger over weaker, at least 1) of two forces: fighting
@@ -532,7 +757,9 @@ func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Di
 	return result
 
 
-func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier := 1.0) -> Array[Dictionary]:
+## Each formation's fighting stats against this opponent. lean: only count,
+## attack and defense (the same numbers), for the exchange loop.
+func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier := 1.0, lean:=false) -> Array[Dictionary]:
 	var formations: Array = force.get("formations", force.get("composition", []))
 	if formations.is_empty():
 		return [{
@@ -546,6 +773,9 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var result: Array[Dictionary] = []
 	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))*(1+clampf(float(force.get("joint_air_support",0)),0,.3))*(1-clampf(float(force.get("joint_air_pressure",0)),0,.25))
 	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
+	# The enemy's mix is the same for every formation: weigh it once per arm.
+	var matchups:Dictionary={}
+	var enemy_penetration:=_enemy_penetration(enemy_formations)
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))
 		var weapon_id := String(formation.get("weapon", "improvised"))
@@ -569,10 +799,16 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var experience_factor:=0.94+experience*0.14
 		var personnel_condition:=clampf(float(formation.get("personnel_condition",1.0)),0.0,1.0)
 		var condition_factor:=0.72+personnel_condition*0.28
-		var matchup := _weighted_matchup(unit_id, enemy_formations)
+		if not matchups.has(unit_id): matchups[unit_id]=_weighted_matchup(unit_id, enemy_formations)
+		var matchup:=float(matchups[unit_id])
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var doctrine_defense:=preload("res://scripts/combined_arms_doctrine.gd").defense(formation,formations,enemy_formations)
-		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) * equipment_ratio - _enemy_penetration(enemy_formations)) * 0.35
+		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) * equipment_ratio - enemy_penetration) * 0.35
+		if lean:
+			result.append({"count":count,
+				"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+				"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0))})
+			continue
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
 			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
@@ -733,10 +969,15 @@ func _enemy_penetration(enemy_formations: Array) -> float:
 	return weighted / float(total) if total > 0 else 0.0
 
 
-func _cohort_power(cohorts: Array[Dictionary], morale: float, readiness: float,command: float) -> float:
+## Fighting power. weights: per formation, the share of its men in the line
+## (battle_blocks.weights); empty means everyone fights.
+func _cohort_power(cohorts: Array[Dictionary], morale: float, readiness: float,command: float,weights:PackedFloat32Array=PackedFloat32Array()) -> float:
 	var power := 0.0
-	for cohort in cohorts:
-		power += float(cohort.count) * sqrt(float(cohort.attack) * float(cohort.defense))
+	var weighted:=not weights.is_empty()
+	for index in cohorts.size():
+		var cohort:Dictionary=cohorts[index]
+		var weight:=float(weights[index]) if weighted and index<weights.size() else 1.0
+		power += float(cohort.count) * weight * sqrt(float(cohort.attack) * float(cohort.defense))
 	return power*maxf(MIN_EFFECTIVE_STRENGTH,morale)*readiness*(0.90+clampf(command,0.0,1.0)*0.20)
 
 
@@ -808,13 +1049,14 @@ func _casualty_breakdown(losses: int,rng: RandomNumberGenerator,intensity: float
 	return {"killed":killed,"wounded":wounded,"scattered":losses-killed-wounded,"disabled":disabled,"severe_disability":floori(disabled*.35)}
 
 
-func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses: int,rng: RandomNumberGenerator,targeted_cohort: int=-1,ordered_targets:Dictionary={}) -> Dictionary:
+func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses: int,rng: RandomNumberGenerator,targeted_cohort: int=-1,ordered_targets:Dictionary={},line_exposure:PackedFloat32Array=PackedFloat32Array()) -> Dictionary:
 	var updated: Array[Dictionary] = []
 	var original_counts:Array[int]=[]
 	var cohort_losses:Array[int]=[]
 	var cohort_equipment_losses:Array[int]=[]
 	for formation in formations:
-		updated.append(formation.duplicate(true))
+		# Only counts and kit change here: a shallow copy leaves the input as it was.
+		updated.append(formation.duplicate(false))
 		original_counts.append(int(formation.get("count",0)))
 		cohort_losses.append(0)
 		cohort_equipment_losses.append(0)
@@ -824,8 +1066,12 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		if index==targeted_cohort: contact*=2.25
 		contact*=1.0+1.25*clampf(float(ordered_targets.get(str(index),0)),0,1)
 		contact*=float(updated[index].get("round_order_exposure",1.0))
+		# Men waiting in reserve are almost out of reach (battle_blocks.exposure).
+		if index<line_exposure.size(): contact*=float(line_exposure[index])
 		contact_factors.append(contact)
 	var remaining_losses := losses
+	if losses>LOSS_ONE_BY_ONE:
+		remaining_losses=_spread_losses(updated,cohorts,contact_factors,cohort_losses,losses,rng)
 	while remaining_losses > 0:
 		var total_exposure:=0.0
 		var exposures:Array[float]=[]
@@ -855,6 +1101,35 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		updated[index]["equipment"]=old_equipment-equipment_losses
 		cohort_equipment_losses[index]=equipment_losses
 	return {"formations":updated,"losses":cohort_losses,"equipment_losses":cohort_equipment_losses}
+
+
+## Many losses at once: each formation takes its share of them by exposure
+## (count over defense, times contact), whole people by largest remainder,
+## none more than it has. Returns what could not be placed (normally 0).
+func _spread_losses(updated:Array,cohorts:Array[Dictionary],contact:Array[float],cohort_losses:Array[int],losses:int,rng:RandomNumberGenerator)->int:
+	var exposures:Array[float]=[]
+	var total:=0.0
+	for index in updated.size():
+		var count:=int(updated[index].get("count",0))
+		var exposure:=float(count)/maxf(0.05,float(cohorts[index].defense))*contact[index] if count>0 else 0.0
+		exposures.append(exposure); total+=exposure
+	if total<=0.0: return losses
+	var left:=losses
+	var remainders:Array[float]=[]
+	for index in updated.size():
+		var count:=int(updated[index].get("count",0))
+		var exact:=float(losses)*exposures[index]/total
+		var whole:=mini(count,floori(exact))
+		updated[index]["count"]=count-whole; cohort_losses[index]+=whole; left-=whole
+		remainders.append(exact-float(whole)+rng.randf()*0.001)
+	while left>0:
+		var best:=-1
+		for index in updated.size():
+			if int(updated[index].get("count",0))<=0: continue
+			if best<0 or remainders[index]>remainders[best]: best=index
+		if best<0: break
+		updated[best]["count"]=int(updated[best].count)-1; cohort_losses[best]+=1; left-=1; remainders[best]=-1.0
+	return left
 
 
 func _consume_ammunition(formations:Array,intensity:float,rng:RandomNumberGenerator)->Array[int]:
@@ -894,6 +1169,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		formation_force["disabled_pool"]=int(force.get("disabled_pool",0))
 		formation_force["severe_disabled_pool"]=int(force.get("severe_disabled_pool",0))
 		formation_force["scattered_pool"]=int(force.get("scattered_pool",0))
+		formation_force["captured_pool"]=int(force.get("captured_pool",0))
 		formation_force["dead"]=int(force.get("dead",0))
 		return formation_force
 	var normalized := create_force(
@@ -908,7 +1184,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 	normalized["penetration"] = clampf(float(force.get("penetration", 0.0)), 0.0, 2.0)
 	normalized["composition"] = force.get("composition", []).duplicate(true)
 	normalized["commander"] = force.get("commander",{}).duplicate(true)
-	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]: normalized[key]=int(force.get(key,0))
+	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","dead"]: normalized[key]=int(force.get(key,0))
 	return normalized
 
 
@@ -1064,5 +1340,7 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"disabled_pool":int(force.get("disabled_pool",0)),
 		"severe_disabled_pool":int(force.get("severe_disabled_pool",0)),
 		"scattered_pool":int(force.get("scattered_pool",0)),
+		"captured_pool":int(force.get("captured_pool",0)),
+		"captured_in_battle":int(force.get("captured_in_battle",0)),
 		"dead":int(force.get("dead",0))
 	}

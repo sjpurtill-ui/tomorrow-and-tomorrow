@@ -145,6 +145,119 @@ const TACTICS:Dictionary={
 		"phases":[{"from":1,"to":99,"own":0.88,"enemy":1.2}],"shape":"combined","era":"modern"},
 }
 
+## Real counters: the tactics that undo each tactic when the enemy uses them.
+## A formed line is undone by a blow on its side or rear; a missile screen by
+## a fast charge or raised shields; a feigned retreat by a line that will not
+## break ranks to chase; a dawn attack by a camp that keeps watch; a column
+## by a steady firing line; trenches by infiltration and every arm together;
+## a breakthrough by a defence in depth. Plain data, so the general's choice,
+## the resolver and the battle view read the same table.
+const COUNTERS:Dictionary={
+	"shield_wall":["flank_attack","hammer_and_anvil","double_envelopment"],
+	"dense_line":["flank_attack","hammer_and_anvil","double_envelopment","oblique_order"],
+	"missile_harassment":["flank_attack","hammer_and_anvil","shield_wall","column_assault"],
+	"dawn_raid":["fortified_camp","entrenched_defence","reserve"],
+	"ambush":["missile_harassment","reserve"],
+	"feigned_retreat":["shield_wall","dense_line","pike_and_shot","reserve"],
+	"flank_attack":["reserve","pike_and_shot","defence_in_depth","fortified_camp"],
+	"hammer_and_anvil":["reserve","pike_and_shot","defence_in_depth"],
+	"double_envelopment":["reserve","defence_in_depth","fortified_camp"],
+	"oblique_order":["reserve"],
+	"fortified_camp":["breach_and_storm"],
+	"escalade":["missile_harassment","line_volley"],
+	"breach_and_storm":["defence_in_depth","entrenched_defence"],
+	"pike_and_shot":["line_volley"],
+	"line_volley":["infiltration","combined_arms"],
+	"column_assault":["line_volley","entrenched_defence"],
+	"converging_corps":["reserve","defence_in_depth"],
+	"entrenched_defence":["infiltration","combined_arms"],
+	"defence_in_depth":["combined_arms"],
+	"infiltration":["defence_in_depth"],
+	"armoured_breakthrough":["defence_in_depth"],
+}
+## A countered tactic keeps this share of the harm it would have done, and its
+## own side stands a little more exposed for trying it.
+const COUNTERED_KEEP:=0.3
+const COUNTERED_EXPOSURE:=1.06
+## Surprise tactics belong to the opening of a fight; a general cannot switch
+## to them once both sides are locked together.
+const OPENING_ONLY:=["dawn_raid","ambush"]
+## What a hard-pressed, careful general falls back on, in order of preference.
+const FALLBACKS:=["entrenched_defence","fortified_camp","defence_in_depth","shield_wall","reserve","dense_line"]
+
+
+## Whether `id` is countered by the enemy using `enemy_id`.
+static func countered(id:String,enemy_id:String)->bool:
+	return (COUNTERS.get(id,[]) as Array).has(enemy_id)
+
+
+## Tactics among `options` that counter `enemy_id`.
+static func answers_to(enemy_id:String,options:Array)->Array:
+	var out:Array=[]
+	for option in options:
+		if countered(enemy_id,String(option)): out.append(String(option))
+	return out
+
+
+## A general's second look, once a phase of the fight is over. He keeps what
+## works. He drops a tactic the enemy has countered (a skilled general sees it
+## sooner), answers the enemy's tactic with its counter when his people can
+## carry it out, and a hard-pressed careful general digs in or holds a reserve.
+## Only tactics recorded as open to this side at the start (plan() "options")
+## can be chosen, so knowledge and troops still gate everything.
+## context: {progress (attacker winning > 0, -1..1), exchange (exchanges fought)}.
+## Returns {plan, changes:{role:{from,to,why}}}; the plan is a new copy.
+static func rechoose(plan:Dictionary,context:Dictionary,seed:int)->Dictionary:
+	var out:=plan.duplicate(true)
+	var changes:={}
+	if out.is_empty(): return {"plan":out,"changes":changes}
+	var exchange:=int(context.get("exchange",0))
+	var progress:=float(context.get("progress",0.0))
+	for role in ["attacker","defender"]:
+		if not out.get(role) is Dictionary: continue
+		var entry:Dictionary=out[role]
+		var options:Array=entry.get("options",[])
+		if options.size()<=1: continue
+		var other:="defender" if role=="attacker" else "attacker"
+		var enemy_id:=String((out.get(other,{}) as Dictionary).get("id",BASELINE))
+		var own_id:=String(entry.get("id",BASELINE))
+		var skill:=clampf(float((entry.get("profile",{}) as Dictionary).get("tactics",0.5)),0.0,1.0)
+		var standing:=progress if role=="attacker" else -progress
+		var rng:=RandomNumberGenerator.new(); rng.seed=seed+(0 if role=="attacker" else 7919)
+		var open:Array=[]
+		for option in options:
+			if String(option) in OPENING_ONLY or countered(String(option),enemy_id): continue
+			open.append(String(option))
+		var pick:=""
+		var why:=""
+		var answers:=answers_to(enemy_id,open)
+		if countered(own_id,enemy_id) and rng.randf()<0.35+skill*0.5:
+			pick=String(answers[0]) if not answers.is_empty() else (BASELINE if open.has(BASELINE) else "")
+			why="countered"
+		elif not answers.is_empty() and not answers.has(own_id) and rng.randf()<0.10+skill*0.45:
+			pick=String(answers[rng.randi_range(0,answers.size()-1)])
+			why="answer"
+		elif standing<-0.35 and rng.randf()<0.5:
+			for fallback in FALLBACKS:
+				if open.has(fallback): pick=fallback; break
+			why="hard_pressed"
+		if pick=="" or pick==own_id: continue
+		entry["id"]=pick
+		entry["since"]=exchange
+		entry["shape"]=String((TACTICS.get(pick,{}) as Dictionary).get("shape","clash"))
+		changes[role]={"from":own_id,"to":pick,"why":why}
+	return {"plan":out,"changes":changes}
+
+
+## Tactics that add a direction of attack (a flank or both flanks), widening
+## the front both sides must hold. 0: straight ahead.
+static func extra_directions(id:String)->int:
+	match id:
+		"double_envelopment","converging_corps": return 2
+		"flank_attack","hammer_and_anvil","oblique_order","armoured_breakthrough": return 1
+	return 0
+
+
 ## Siege works are drawn around an invested city; they are how a siege is
 ## conducted, not a round effect (the siege model owns pressure and fatigue).
 const SIEGE_WORKS:={
@@ -398,7 +511,11 @@ static func plan(sides:Dictionary,battle:Dictionary,seed:int)->Dictionary:
 				if not bool(enemy_view.rigid): continue
 			var choice_side:={"known":side.get("known",[]),"profile":own_profile,"role":role,"character":side.get("character",{})}
 			var id:=choose(choice_side,enemy_view,context,seed+(0 if role=="attacker" else 7919))
-			result[role]={"id":id,"profile":own_profile,"pursuit":_can_pursue(side.get("known",[]),own_profile),"shape":String((TACTICS.get(id,{}) as Dictionary).get("shape","clash"))}
+			# options: what this side could do in this battle at all, kept so the
+			# general can change course between phases (rechoose) without the
+			# resolver ever looking up knowledge again.
+			result[role]={"id":id,"profile":own_profile,"pursuit":_can_pursue(side.get("known",[]),own_profile),"shape":String((TACTICS.get(id,{}) as Dictionary).get("shape","clash")),
+				"options":available_ids(choice_side,context),"since":0}
 	return result
 
 
@@ -417,13 +534,15 @@ static func _phase(spec:Dictionary,round_number:int)->Dictionary:
 
 ## One side's own/enemy multipliers for a round. share: this side's share of
 ## combat power this round; enemy_morale: the other side's morale.
-static func side_effect(entry:Dictionary,enemy_entry:Dictionary,round_number:int,share:float,enemy_morale:float)->Dictionary:
+static func side_effect(entry:Dictionary,enemy_entry:Dictionary,battle_round:int,share:float,enemy_morale:float)->Dictionary:
 	var id:=String(entry.get("id",BASELINE))
 	var spec:Dictionary=TACTICS.get(id,TACTICS[BASELINE])
 	var own:Dictionary=entry.get("profile",{})
 	var enemy_profile:Dictionary=enemy_entry.get("profile",{})
 	var enemy_spec:Dictionary=TACTICS.get(String(enemy_entry.get("id",BASELINE)),{})
 	var result:={"own":1.0,"enemy":1.0,"intensity":1.0,"event":"","phase":"hold"}
+	# A tactic adopted mid-battle (rechoose) runs its own timetable from then.
+	var round_number:=maxi(1,battle_round-int(entry.get("since",0)))
 	var phase:=_phase(spec,round_number)
 	if not phase.is_empty():
 		result.own=float(phase.get("own",1.0)); result.enemy=float(phase.get("enemy",1.0)); result.intensity=float(phase.get("intensity",1.0))
@@ -462,7 +581,7 @@ static func side_effect(entry:Dictionary,enemy_entry:Dictionary,round_number:int
 			if String(enemy_entry.get("id",""))=="entrenched_defence": result.enemy=float(result.enemy)*1.15
 	if bool(spec.get("flank",false)) and bool(enemy_spec.get("rigid",false)) and float(result.enemy)>1.0 and String(spec.get("special",""))!="double_envelopment":
 		result.enemy=float(result.enemy)*1.15
-	if bool(entry.get("pursuit",false)) and round_number>=int(PURSUIT.from_round) and enemy_morale<float(PURSUIT.enemy_morale_below):
+	if bool(entry.get("pursuit",false)) and battle_round>=int(PURSUIT.from_round) and enemy_morale<float(PURSUIT.enemy_morale_below):
 		result.enemy=float(result.enemy)*float(PURSUIT.enemy)
 		if String(result.event)=="": result.event="Our riders ran down the fleeing."
 		result["pursuit"]=true
@@ -481,12 +600,24 @@ static func round_effects(plan:Dictionary,round_number:int,attacker_share:float,
 	var defender:Dictionary=plan.get("defender",{})
 	var a:=side_effect(attacker,defender,round_number,attacker_share,defender_morale)
 	var d:=side_effect(defender,attacker,round_number,1.0-attacker_share,attacker_morale)
+	# A countered tactic does little of what it was meant to, and exposes its side.
+	var a_countered:=countered(String(attacker.get("id",BASELINE)),String(defender.get("id",BASELINE)))
+	var d_countered:=countered(String(defender.get("id",BASELINE)),String(attacker.get("id",BASELINE)))
+	if a_countered: _blunt(a)
+	if d_countered: _blunt(d)
 	var event:=String(a.event) if String(a.event)!="" else String(d.event)
 	return {
 		"attacker":clampf(float(a.own)*float(d.enemy),COMBINED_MIN,COMBINED_MAX),
 		"defender":clampf(float(d.own)*float(a.enemy),COMBINED_MIN,COMBINED_MAX),
 		"intensity":clampf(float(a.intensity)*float(d.intensity),0.8,1.2),
-		"event":event,"attacker_phase":String(a.phase),"defender_phase":String(d.phase)}
+		"event":event,"attacker_phase":String(a.phase),"defender_phase":String(d.phase),
+		"event_side":"attacker" if String(a.event)!="" else ("defender" if String(d.event)!="" else ""),
+		"attacker_countered":a_countered,"defender_countered":d_countered}
+
+
+static func _blunt(effect:Dictionary)->void:
+	if float(effect.enemy)>1.0: effect.enemy=1.0+(float(effect.enemy)-1.0)*COUNTERED_KEEP
+	effect.own=clampf(maxf(float(effect.own),1.0)*COUNTERED_EXPOSURE,ROUND_MIN,ROUND_MAX)
 
 
 # --- What the map draws --------------------------------------------------------------
