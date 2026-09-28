@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/layered_defense_coordination-v1.png",
   "sha256": "d6b5c1915cc3204fd60810ec0963873e23da12113fd841f26913711cf6c0d97c",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.39
+  ]
 }

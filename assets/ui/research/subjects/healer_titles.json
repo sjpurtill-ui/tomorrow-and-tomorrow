@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/healer_titles-v1.png",
   "sha256": "203edea21a28a2d1e8d8555578919e0dd9fd269aee03598eca88fb3251739787",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.32
+  ]
 }

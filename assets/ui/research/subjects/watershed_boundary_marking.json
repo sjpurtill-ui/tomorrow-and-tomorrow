@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/watershed_boundary_marking-v1.png",
   "sha256": "85e022e8594a39b81f3b63221912bd9ba66789c6d6d01f6965ca8afb3f333822",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.3
+  ]
 }

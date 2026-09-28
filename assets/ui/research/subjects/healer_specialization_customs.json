@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/healer_specialization_customs-v1.png",
   "sha256": "0094e6c64ce1cddfb51eb00875b324db62804f4f7ad4e8ef6ea34953f082da3f",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.32
+  ]
 }

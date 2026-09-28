@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/stepped_stone_tombs-v1.png",
   "sha256": "6481f4a46b8974cf29fe6ccb6315b1f4fadabf0b857916ebb1ec38ec6955132c",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.32
+  ]
 }

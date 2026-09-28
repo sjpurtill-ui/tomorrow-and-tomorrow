@@ -3,10 +3,14 @@
   "line": "nutrition",
   "game_year": 360,
   "approx_historical_year": -2600,
-  "prompt": "c. 2600 BCE: Reserve Rotation Ledgers. Reserve rotation ledgers. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-56653890-ea5a-4db5-93d3-b3a60abd70b6.png",
+  "prompt": "Hand-painted opaque botanical egg tempera of a c. 2600 BCE granary keeper touching a sealed grain jar while checking a clay tally token; face, hands, jar and token in the narrow card crop; full-bleed olive, wheat gold and earth, flat brushworked planes, no text or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0ea9f047-f066-463c-bd99-e9cde872c66c.png",
   "asset": "res://assets/ui/research/subjects/reserve_rotation_ledgers-v1.png",
-  "sha256": "32cb56f6c63328cfd0b01888b7f3f282e81bb4c705f3da1f42120e797c92c22a",
+  "sha256": "cbb2286144e36510b1c850820df1698e38ad9222e5df1a4e1a873d825d93e1b7",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.42
+  ]
 }
