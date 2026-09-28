@@ -1,0 +1,16 @@
+{
+  "id": "patron_protection",
+  "line": "demography",
+  "game_year": 355,
+  "approx_historical_year": -2633,
+  "prompt": "c. 2633 BCE: Outsiders Under a Patron's Protection. Outsiders under a patron's protection. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5d711e8-b8ca-441a-8d4c-5dd95ba56f9c.png",
+  "asset": "res://assets/ui/research/subjects/patron_protection-v1.png",
+  "sha256": "46c34dd5e104fa5d1dbb600bccaad1aaf01ffab6a7cc96bf0f638c10d8214f6c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.35
+  ]
+}

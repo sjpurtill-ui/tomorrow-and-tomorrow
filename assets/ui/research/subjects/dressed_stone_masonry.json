@@ -1,0 +1,12 @@
+{
+  "id": "dressed_stone_masonry",
+  "line": "infrastructure",
+  "game_year": 350,
+  "approx_historical_year": -2667,
+  "prompt": "c. 2667 BCE: Dressed-stone Masonry with Copper Tools. Dressed-stone masonry with copper tools. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bdb07e71-189b-49a4-a638-5400268927b7.png",
+  "asset": "res://assets/ui/research/subjects/dressed_stone_masonry-v1.png",
+  "sha256": "4420189bc0201af93b640d5eeab39259b7c1049ee7a83b6d58c031b0b13db09d",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

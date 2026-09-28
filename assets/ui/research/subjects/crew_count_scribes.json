@@ -1,0 +1,12 @@
+{
+  "id": "crew_count_scribes",
+  "line": "labor",
+  "game_year": 350,
+  "approx_historical_year": -2667,
+  "prompt": "c. 2667 BCE: Scribes Assigned to Count Crews. Scribes assigned to count crews. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b986da91-4879-419e-98a7-49ab9c253bc9.png",
+  "asset": "res://assets/ui/research/subjects/crew_count_scribes-v1.png",
+  "sha256": "a52c56ed2bd5e5ed44d9a7e6cfe5420aaab69d90df09e617ad6f37951126a55f",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
