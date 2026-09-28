@@ -263,6 +263,31 @@ func test_the_field_is_kept_until_the_world_changes()->void:
 	assert_int(Supply.builds).is_equal(builds+1)
 
 
+## Another world's ground (a new game, a new terrain).
+func _other_ground(_p:Vector2)->Dictionary:
+	return {"h":0.5,"slope":0.05,"wood":0.3,"wet":0.0,"t":warmth,"rain":0.5}
+
+func test_a_worker_build_stops_when_asked_and_another_worlds_is_never_read()->void:
+	var s:=Supply.spec().duplicate()
+	s["async"]=true
+	Supply._start(s)
+	assert_bool(Supply.building()).is_true()
+	Supply.shutdown()
+	assert_bool(Supply.building()).is_false()
+	# A build of this world finishes after the world has changed: dropped.
+	Supply._start(Supply.spec().duplicate())
+	var task:int=Supply._job.task
+	var waited:=0
+	while not WorkerThreadPool.is_task_completed(task) and waited<20000:
+		OS.delay_msec(5); waited+=5
+	var old_world:=int(Supply._job.spec.world)
+	March.ground_override=Callable(self,"_other_ground")
+	var now:=Supply.field()
+	assert_bool(Supply.building()).is_false()
+	assert_int(int(now.get("world",0))).is_not_equal(old_world)
+	assert_int(int(now.get("world",0))).is_equal(int(Supply.spec().world))
+
+
 # --------------------------------------------------------------------------
 # Words
 # --------------------------------------------------------------------------

@@ -10,7 +10,7 @@ extends RefCounted
 ##            haulers, carts, the commander's care, supply groups) times the
 ##            HAUL: the share of a load the carriers do not eat on the road.
 ##            The haul falls with the days of hauling from the nearest hub
-##            along the supply line, weighed on march_terrain.gd's ground
+##            along the supply line, weighed as march_terrain.gd weighs ground
 ##            (hills, forest, marsh, rivers, our roads), and slows in winter.
 ##   foraged  found in the country: a share of what the carriers did not
 ##            bring (field_rations.forage_share), richer in green, wooded,
@@ -22,13 +22,16 @@ extends RefCounted
 ## from it starts at RELAY of the cost of reaching it. When home is under
 ## siege, carts get out only as far as the besiegers let them.
 ##
-## The supply field: one multi-source search (Dijkstra) over a lattice laid
-## across our hubs, bands and known land, cached and rebuilt only when a hub,
-## a road, the carriers or the lattice change (on a worker thread for the
-## map, on the spot when the day's rations need it). Every point query is
-## that field read at the point plus the day's terms (season, carriers,
-## stores). The map's grid (hud/supply_map.gd) is this same function at the
-## lattice's nodes, so the chart and the rations always agree.
+## The supply field: one multi-source search (Dijkstra) over a square
+## lattice laid across our hubs and the known land. In play it is built only
+## on a worker thread, from the terrain's thread-safe fused sampler
+## (terrain_patch_sampler.gd) and snapshots, never from the scene; the day's
+## rations and the screens read the last finished field and never wait for
+## one. A point the field does not cover (or before the first field lands)
+## is reckoned by the straight line to the nearest hub (FALLBACK_FACTOR).
+## Tests and tools with fixture ground build it on the spot (field(true)).
+## The map's grid (hud/supply_map.gd) is terms() at the field's nodes, so
+## the chart and the rations agree whenever they read the same field.
 ##
 ## Engine: military_campaign._force_provision_access asks haul_for(force);
 ## field_rations.forage_share asks forage_factor(force).
@@ -37,6 +40,7 @@ extends RefCounted
 
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const March:=preload("res://scripts/march_terrain.gd")
+const Sampler:=preload("res://scripts/terrain_patch_sampler.gd")
 
 ## A day's ration from this share up is a fed day (FieldRations.HUNGRY_BELOW);
 ## below STARVING_BELOW the band is going hungry (field_rations.short_words).
@@ -59,17 +63,20 @@ const FREE_DAYS:=1.5
 const RELAY:=0.5
 ## The carts' reach, as the map draws it: where half a load still arrives.
 const REACH_HAUL:=0.5
-## Foraging: the typical richness of the land (CaravanLeader.forage_quality),
-## the band size that forages at the stated rate, and the bounds.
+## Level km per km of straight line where no field covers a point (a road
+## seldom runs straight; open country with some hills and woods).
+const FALLBACK_FACTOR:=1.25
+## Foraging: the typical richness of the land, the band size that forages
+## at field_rations' stated rate, and the cap on the share.
 const FORAGE_TYPICAL:=0.42
 const SIZE_REF:=60.0
 const FORAGE_SHARE_MAX:=0.6
-## Ground weight when the map is not surveyed (tests, headless): open land.
+## Ground weight when nothing is surveyed (tests, headless): open land.
 const NEUTRAL_RICH:=FORAGE_TYPICAL
 const NEUTRAL_SWING:=12.0
 
-## The lattice: at most MAX_NODES a side, cells from the ladder (km), the
-## bounds padded and snapped to SNAP cells so small moves rebuild nothing.
+## The lattice: square, at most MAX_NODES a side, cells from the ladder (km),
+## padded and snapped to SNAP cells so small changes rebuild nothing.
 const MAX_NODES:=96
 const CELL_LADDER:=[2.0,4.0,8.0,16.0,32.0,64.0]
 const PAD_KM:=40.0
@@ -78,6 +85,8 @@ const SNAP:=8
 const MAX_MARGIN_KM:=1500.0
 ## Nodes within this many cells of a hub read their cost from the hub itself.
 const NEAR_CELLS:=1.5
+## terrain_patch_sampler lifts its heights by this much.
+const SAMPLER_LIFT:=0.0006
 
 const ROAD_WORDS:=["footpath","cart track","made road"]
 ## Neighbour steps (x, y), axial first.
@@ -88,11 +97,18 @@ static var _field:Dictionary={}
 static var _job:BuildJob=null
 static var _ground_cache:Dictionary={}
 static var _known_cache:Array=[-1,-1,Rect2()]
+static var _spec:Dictionary={}
+static var _spec_sig:=0
+static var _sampler:RefCounted=null
+static var _sampler_key:=0
+static var _tribs:Array=[]
+static var _tribs_key:=0
 static var _report_cache:Dictionary={}
 static var _report_day:=-1
 ## Counters for tests and probes (never saved).
 static var builds:=0
 static var async_builds:=0
+static var spec_builds:=0
 
 
 # --------------------------------------------------------------------------
@@ -127,7 +143,7 @@ static func state_words(state:String)->String:
 
 
 # --------------------------------------------------------------------------
-# What the world gives the model
+# What the world gives the model (main thread)
 # --------------------------------------------------------------------------
 
 static func _state()->Variant: return WorldSimulation.state if WorldSimulation!=null else null
@@ -214,32 +230,80 @@ static func _known_box()->Rect2:
 	_known_cache=[revision,areas.size(),box]
 	return box
 
+## The terrain's fused sampler (its own copies of the noise: safe on any
+## thread, whatever becomes of the terrain), kept per terrain and world.
+static func _terrain_sampler(terrain:Object)->RefCounted:
+	if terrain==null or terrain.get("continent_noise")==null or terrain.get("mountain_relief")==null: return null
+	var key:=hash([terrain.get_instance_id(),int(GameState.world_seed)])
+	if _sampler==null or key!=_sampler_key:
+		_sampler=Sampler.from_terrain(terrain)
+		_sampler_key=key
+	return _sampler
+
+## The tributaries' courses, copied once per terrain and world.
+static func _tributaries(terrain:Object)->Array:
+	var key:=hash([terrain.get_instance_id() if terrain!=null else 0,int(GameState.world_seed)])
+	if key==_tribs_key: return _tribs
+	_tribs=[]
+	var courses:Variant=terrain.get("world_tributary_courses") if terrain!=null else null
+	if courses is Array:
+		for course in courses: _tribs.append(PackedVector3Array(course))
+	_tribs_key=key
+	return _tribs
+
 
 # --------------------------------------------------------------------------
 # The field's specification (main thread)
 # --------------------------------------------------------------------------
 
-## Everything a field is built from, with its key. {} when there is no home.
+## What a field would be built from, cheaply fingerprinted: the day and the
+## counters that move when a hub, the known land, the carriers or the
+## fixtures change. spec() is rebuilt only when this moves.
+static func _signature()->int:
+	var s:Variant=_state(); var world:Variant=_world(); var mc:Variant=_mc()
+	if s==null or world==null: return 0
+	var garrisons:=0
+	if mc!=null:
+		for f in mc.occupation_forces:
+			if f is Dictionary and int((f as Dictionary).get("troops",0))>0: garrisons+=1
+	var terrain:Object=March._terrain()
+	return hash([int(s.elapsed_days),int(GameState.world_seed),bool(s.settlement_site_committed),(s.player_settlements as Array).size(),garrisons,
+		mc.occupation_forces.size() if mc!=null else 0,int(world.fog_revision),(world.revealed_areas as Array).size(),
+		float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0,"internal_combustion" in s.known_discoveries,
+		hash(March.ground_override),hash(March.crossing_override),March.use_roads_override,March.roads_override.size(),hash(March.roads_override),
+		March.bridge_override,terrain.get_instance_id() if terrain!=null else 0])
+
+## Everything a field is built from, with its key; {} when there is no home
+## or no ground to weigh (then every point is reckoned by the straight line).
 static func spec()->Dictionary:
+	var sig:=_signature()
+	if sig!=0 and sig==_spec_sig: return _spec
+	_spec_sig=sig
+	_spec=_make_spec()
+	spec_builds+=1
+	return _spec
+
+## Which world a field belongs to: the seed and the terrain (or fixture).
+static func _world_id(terrain:Object,fixture:bool)->int:
+	return hash([int(GameState.world_seed),terrain.get_instance_id() if terrain!=null else 0,fixture,hash(March.ground_override) if fixture else 0])
+
+static func _make_spec()->Dictionary:
 	var hub_list:=hubs()
 	if hub_list.is_empty(): return {}
 	var settlements:Array=[]
 	var held:Array=[]
 	for h:Dictionary in hub_list: (held if String(h.kind)=="held" else settlements).append(h)
 	if settlements.is_empty(): return {}
+	var terrain:Object=March._terrain()
+	var fixture:=March.ground_override.is_valid()
+	var sampler:=_terrain_sampler(terrain) if not fixture else null
+	if sampler==null and not fixture: return {"hubs":hub_list,"no_ground":true}
 	var hub_box:=Rect2(settlements[0].pos,Vector2.ZERO)
 	for h:Dictionary in hub_list: hub_box=hub_box.expand(h.pos)
 	var box:=hub_box
-	var mc:Variant=_mc()
-	if mc!=null:
-		for a in mc.field_armies:
-			if not a is Dictionary or int((a as Dictionary).get("troops",0))<=0: continue
-			var at:=force_pos(a)
-			if at.is_finite(): box=box.expand(at)
 	var known:=_known_box()
 	if known.has_area(): box=box.merge(known)
-	var limit:=hub_box.grow(MAX_MARGIN_KM)
-	box=box.grow(PAD_KM).intersection(limit)
+	box=box.grow(PAD_KM).intersection(hub_box.grow(MAX_MARGIN_KM))
 	var cell:=float(CELL_LADDER[CELL_LADDER.size()-1])
 	for c in CELL_LADDER:
 		var snap:=float(c)*float(SNAP)
@@ -249,68 +313,115 @@ static func spec()->Dictionary:
 	var grain:=cell*float(SNAP)
 	var origin:=Vector2(floorf(box.position.x/grain)*grain,floorf(box.position.y/grain)*grain)
 	var far:=Vector2(ceilf(box.end.x/grain)*grain,ceilf(box.end.y/grain)*grain)
-	var nx:=mini(MAX_NODES,roundi((far.x-origin.x)/cell)+1)
-	var ny:=mini(MAX_NODES,roundi((far.y-origin.y)/cell)+1)
+	var n:=mini(MAX_NODES,roundi(maxf(far.x-origin.x,far.y-origin.y)/cell)+1)
 	var who:=carrier()
-	var mix:={String(CARRIERS[who].arm):1.0}
 	var roads:=March.roads()
-	var terrain:Object=March._terrain()
-	var grounded:=March.has_ground()
-	var world:Variant=_world()
-	var land:Callable=Callable()
-	if not grounded and world!=null and world.get("scout_land_authority") is Callable and (world.scout_land_authority as Callable).is_valid(): land=world.scout_land_authority
-	var geo_key:=hash([int(GameState.world_seed),origin,cell,nx,ny,grounded,terrain.get_instance_id() if terrain!=null else 0,hash(March.ground_override),land.hash() if land.is_valid() else 0])
+	var geo_key:=hash([int(GameState.world_seed),origin,cell,n,fixture,hash(March.ground_override),terrain.get_instance_id() if terrain!=null else 0])
 	var hub_rows:Array=[]
 	for h:Dictionary in hub_list: hub_rows.append([String(h.id),String(h.kind),(h.pos as Vector2).snapped(Vector2.ONE*0.01)])
 	var key:=hash([geo_key,who,hash(roads.map(func(r:Dictionary)->Array: return [r.a,r.b,r.tier])),March.bridge_tier(),hub_rows,hash(March.crossing_override)])
-	if terrain!=null:
-		# Worker builds read these; settle them here, on the main thread.
-		PlanetEnvironment.prepare_macro_sampling()
-		March.rivers_near(Rect2(origin,Vector2(float(nx-1),float(ny-1))*cell))
-	return {"key":key,"geo_key":geo_key,"origin":origin,"cell":cell,"nx":nx,"ny":ny,"carrier":who,"mix":mix,"roads":roads.duplicate(true),"bridge":March.bridge_tier(),
-		"settlements":settlements,"held":held,"grounded":grounded,"terrain":terrain,"land":land,"seed":int(GameState.world_seed)}
+	return {"key":key,"geo_key":geo_key,"world":_world_id(terrain,fixture),"origin":origin,"cell":cell,"nx":n,"ny":n,"carrier":who,"mix":{String(CARRIERS[who].arm):1.0},
+		"roads":roads.duplicate(true),"bridge":March.bridge_tier(),"settlements":settlements,"held":held,"hubs":hub_list,
+		"sampler":sampler,"fixture":fixture,"crossing_fixture":March.crossing_override.is_valid(),
+		"tribs":_tributaries(terrain) if sampler!=null else [],"seed":int(GameState.world_seed),
+		"async":sampler!=null and not March.crossing_override.is_valid()}
 
 
 # --------------------------------------------------------------------------
-# Building the field (pure: any thread)
+# Building the field (pure: any thread, from the spec alone)
 # --------------------------------------------------------------------------
 
-## A build on a worker thread (the map's), adopted on the main thread.
+## A build on a worker thread, adopted on the main thread. `cancelled` asks
+## it to stop at the next row.
 class BuildJob:
 	var spec:Dictionary
 	var ground:Dictionary
 	var model:GDScript
+	var cancel:=[false]
 	var result:Dictionary={}
 	var task:=-1
+	var ms:=0.0
 	func _init(p_spec:Dictionary,p_ground:Dictionary,p_model:GDScript)->void:
 		spec=p_spec; ground=p_ground; model=p_model
 	func run()->void:
-		result=model.call("build",spec,ground)
+		var began:=Time.get_ticks_usec()
+		result=model.call("build",spec,ground,cancel)
+		ms=float(Time.get_ticks_usec()-began)/1000.0
 
-## The ground of every node: {h, slope, wood, wet, t, rain, rich, swing, land}.
-static func sample_ground(spec:Dictionary)->Dictionary:
+## A square patch for the fused sampler: the lattice itself, nothing reused.
+class PatchJob:
+	var resolution:int
+	var center:Vector2
+	var span:float
+	var reuse_resolution:=0
+	var reuse_stride:=1
+	var reuse_offset:=Vector2i.ZERO
+	var reuse_center:=Vector2.ZERO
+	var reuse_span:=1.0
+	var reuse_vertices:=PackedVector3Array()
+	var reuse_colors:=PackedColorArray()
+	var reuse_climate:=PackedVector2Array()
+	var reuse_geology:=PackedVector2Array()
+	var reuse_seasons:=PackedFloat32Array()
+
+## The great river's line at z (local_terrain._world_river_x), INF beyond it.
+static func river_x(z:float,world_seed:int)->float:
+	if absf(z)>760.0: return INF
+	return -18.0+sin(z/128.0+float(world_seed%97)*0.031)*32.0+sin(z/57.0-0.8)*14.0+sin(z/21.0+1.7)*4.5
+
+## The ground of every node: {h, slope, wood, wet, t, rain, rich, swing,
+## land}. The terrain's sampler in play; fixture ground in tests (main
+## thread). {} when cancelled.
+static func sample_ground(spec:Dictionary,cancel:Array=[false])->Dictionary:
 	var nx:=int(spec.nx); var ny:=int(spec.ny); var n:=nx*ny
 	var origin:Vector2=spec.origin; var cell:=float(spec.cell)
-	var grounded:=bool(spec.grounded)
-	var land_fn:Callable=spec.get("land",Callable())
 	# Packed arrays are values: fill these, then hand them over at the end.
 	var h:=PackedFloat32Array(); var slope:=PackedFloat32Array(); var wood:=PackedFloat32Array(); var wet:=PackedFloat32Array()
 	var t:=PackedFloat32Array(); var rain:=PackedFloat32Array(); var rich:=PackedFloat32Array(); var swing:=PackedFloat32Array()
 	h.resize(n); slope.resize(n); wood.resize(n); wet.resize(n); t.resize(n); rain.resize(n); rich.resize(n); swing.resize(n)
 	var land:=PackedByteArray(); land.resize(n)
-	var seasons:=grounded and spec.get("terrain")!=null
-	for i in n:
-		var p:=origin+Vector2(float(i%nx),float(i/nx))*cell
-		if grounded:
+	var sampler:RefCounted=spec.get("sampler")
+	if sampler!=null:
+		var job:=PatchJob.new()
+		job.resolution=nx
+		job.center=origin+Vector2.ONE*float(nx-1)*0.5*cell
+		job.span=float(nx-1)*cell
+		var world_seed:=int(spec.seed)
+		for y in ny:
+			if bool(cancel[0]): return {}
+			var rows:Array=sampler.sample_rows(job,y,1)
+			var heights:PackedFloat32Array=rows[0]; var colors:PackedColorArray=rows[2]; var climate:PackedVector2Array=rows[3]; var seasons:PackedFloat32Array=rows[5]
+			var z:=origin.y+float(y)*cell
+			var rx:=river_x(z,world_seed)
+			for x in nx:
+				var i:=y*nx+x
+				var raw:=heights[x]-SAMPLER_LIFT
+				h[i]=raw
+				land[i]=1 if raw>0.015 else 0
+				wood[i]=colors[x].a if land[i]==1 else 0.0
+				rain[i]=clampf(climate[x].x-1.0,0.0,1.0); t[i]=climate[x].y; swing[i]=seasons[x]
+				# local_terrain._biome_from_climate's wet classes, as march_terrain reads them.
+				var rd:=absf(origin.x+float(x)*cell-rx) if is_finite(rx) else INF
+				if t[i]>=0.16 and raw<=6.0:
+					if rd<3.2 and raw<3.0: wet[i]=0.45
+					elif rain[i]>0.70 and raw<0.9 and rd<18.0: wet[i]=1.0
+				rich[i]=richness(rain[i],wood[i],wet[i],raw)
+		# Slope across the lattice (the ground a cell's carriers climb).
+		for y in ny:
+			for x in nx:
+				var i:=y*nx+x
+				var gx:=(h[y*nx+mini(x+1,nx-1)]-h[y*nx+maxi(x-1,0)])/(cell*float(mini(x+1,nx-1)-maxi(x-1,0)))
+				var gz:=(h[mini(y+1,ny-1)*nx+x]-h[maxi(y-1,0)*nx+x])/(cell*float(mini(y+1,ny-1)-maxi(y-1,0)))
+				slope[i]=Vector2(gx,gz).length()
+	else:
+		for i in n:
+			var p:=origin+Vector2(float(i%nx),float(i/nx))*cell
 			var g:Dictionary=March.ground_at(p)
 			h[i]=float(g.get("h",0.25)); slope[i]=float(g.get("slope",0.0)); wood[i]=float(g.get("wood",0.0)); wet[i]=float(g.get("wet",0.0))
 			t[i]=float(g.get("t",-1.0)); rain[i]=float(g.get("rain",0.5))
 			land[i]=1 if h[i]>0.015 else 0
-			rich[i]=richness(rain[i],wood[i],wet[i],h[i]) if g.has("rain") or g.has("wood") else NEUTRAL_RICH
-		else:
-			h[i]=0.25; t[i]=-1.0; rain[i]=0.5; rich[i]=NEUTRAL_RICH
-			land[i]=1 if (not land_fn.is_valid() or bool(land_fn.call(p))) else 0
-		swing[i]=float(PlanetEnvironment.seasonality_unchecked(p)) if seasons else NEUTRAL_SWING
+			rich[i]=richness(rain[i],wood[i],wet[i],h[i])
+			swing[i]=NEUTRAL_SWING
 	return {"h":h,"slope":slope,"wood":wood,"wet":wet,"t":t,"rain":rain,"rich":rich,"swing":swing,"land":land}
 
 ## How much a band finds in this country: wild food and game as
@@ -330,16 +441,32 @@ static func richness(rain:float,wood:float,wet:float,h:float)->float:
 	elif rain<0.36: soil=0.14
 	return clampf(forage*0.4+game*0.3+soil*0.3,0.0,1.2)
 
-## The whole field for a spec: ground, costs (level km of hauling from the
-## nearest hub), the hub each node draws on, and the line back to it.
-static func build(spec:Dictionary,ground:Dictionary={})->Dictionary:
+## River crossing on the step a->b (march_terrain.crossing, from the spec's
+## own copies): "" | "ford" | "deep".
+static func _crossing(a:Vector2,b:Vector2,world_seed:int,segments:Array)->String:
+	var ra:=river_x(a.y,world_seed); var rb:=river_x(b.y,world_seed)
+	if is_finite(ra) and is_finite(rb) and signf(a.x-ra)!=signf(b.x-rb) and absf(a.x-ra)+absf(b.x-rb)>0.0:
+		var t:=absf(a.x-ra)/maxf(0.0001,absf(a.x-ra)+absf(b.x-rb))
+		var z:=lerpf(a.y,b.y,t)
+		return "ford" if fposmod(z+float(posmod(world_seed,997)),37.0)<4.0 else "deep"
+	for seg:Array in segments:
+		if Geometry2D.segment_intersects_segment(a,b,seg[0],seg[1])!=null: return "ford"
+	return ""
+
+## The whole field for a spec: costs (level km of hauling from the nearest
+## hub), the hub each node draws on, and the line back to it. {} when
+## cancelled. Touches nothing but the spec and its own arrays.
+static func build(spec:Dictionary,ground:Dictionary={},cancel:Array=[false])->Dictionary:
 	var began:=Time.get_ticks_usec()
 	var nx:=int(spec.nx); var ny:=int(spec.ny); var n:=nx*ny
 	var origin:Vector2=spec.origin; var cell:=float(spec.cell)
 	var mix:Dictionary=spec.mix
+	var sampled_ms:=0.0
 	if ground.is_empty() or int(ground.get("geo_key",0))!=int(spec.geo_key):
-		ground=sample_ground(spec)
+		ground=sample_ground(spec,cancel)
+		if ground.is_empty(): return {}
 		ground["geo_key"]=int(spec.geo_key)
+		sampled_ms=float(Time.get_ticks_usec()-began)/1000.0
 	var h:PackedFloat32Array=ground.h; var land:PackedByteArray=ground.land
 	# Our roads, laid on the lattice (tier at each node, -1 off the road).
 	var road:=PackedInt32Array(); road.resize(n); road.fill(-1)
@@ -359,42 +486,36 @@ static func build(spec:Dictionary,ground:Dictionary={})->Dictionary:
 	# Each node's time factor for the carriers on its ground and road.
 	var fac:=PackedFloat32Array(); fac.resize(n)
 	var slope:PackedFloat32Array=ground.slope; var wood:PackedFloat32Array=ground.wood; var wet:PackedFloat32Array=ground.wet
-	var grounded:=bool(spec.grounded)
 	for i in n:
-		if land[i]==0: fac[i]=INF; continue
-		fac[i]=March.factor({"slope":slope[i],"wood":wood[i],"wet":wet[i]} if grounded else {},mix,road[i])
-	# River crossings: the great river where a step changes its side, a
-	# tributary where a step touches one (march_terrain.crossing decides).
-	var terrain:Object=spec.get("terrain")
+		fac[i]=March.factor({"slope":slope[i],"wood":wood[i],"wet":wet[i]},mix,road[i]) if land[i]==1 else INF
+	if bool(cancel[0]): return {}
+	# River crossings: the great river where a step changes its side; a
+	# tributary where a step crosses one of its segments near the step.
+	var world_seed:=int(spec.get("seed",0))
+	var fixture_crossings:=bool(spec.get("crossing_fixture",false))
 	var side:=PackedInt32Array(); side.resize(n)
-	var trib:=PackedByteArray(); trib.resize(n)
-	var all_edges:=March.crossing_override.is_valid()
-	if terrain!=null and grounded and not all_edges:
-		if terrain.has_method("_world_river_x"):
-			for y in ny:
-				var z:=origin.y+float(y)*cell
-				var rx:=float(terrain.call("_world_river_x",z))
-				if not is_finite(rx): continue
-				for x in nx:
-					var dx:=origin.x+float(x)*cell-rx
-					side[y*nx+x]=1 if dx>0.0 else -1
-		var tribs:Variant=terrain.get("world_tributary_courses")
-		if tribs is Array:
-			for course in tribs:
-				var prev:=Vector2.INF
-				for v in course:
-					var q:=Vector2(float(v.x),float(v.z))
-					if prev.is_finite():
-						var steps:=maxi(1,ceili(prev.distance_to(q)/(cell*0.5)))
-						for s in steps+1:
-							var m:=prev.lerp(q,float(s)/float(steps))
-							var x:=roundi((m.x-origin.x)/cell); var y:=roundi((m.y-origin.y)/cell)
-							if x>=0 and y>=0 and x<nx and y<ny: trib[y*nx+x]=1
-					prev=q
+	var buckets:={}
+	if not fixture_crossings and spec.get("sampler")!=null:
+		for y in ny:
+			var rx:=river_x(origin.y+float(y)*cell,world_seed)
+			if not is_finite(rx): continue
+			for x in nx: side[y*nx+x]=1 if origin.x+float(x)*cell-rx>0.0 else -1
+		for course:PackedVector3Array in spec.get("tribs",[]):
+			for k in range(1,course.size()):
+				var p:=Vector2(course[k-1].x,course[k-1].z); var q:=Vector2(course[k].x,course[k].z)
+				var steps:=maxi(1,ceili(p.distance_to(q)/(cell*0.5)))
+				for s in steps+1:
+					var m:=p.lerp(q,float(s)/float(steps))
+					var x:=roundi((m.x-origin.x)/cell); var y:=roundi((m.y-origin.y)/cell)
+					if x<0 or y<0 or x>=nx or y>=ny: continue
+					var list:Array=buckets.get(y*nx+x,[])
+					if list.is_empty() or list[list.size()-1][0]!=p: list.append([p,q])
+					buckets[y*nx+x]=list
 	var climb_k:=March._mix_value(March.CLIMB_K,mix)
 	var bridged:=int(spec.bridge)>=1
 	var ecost:=PackedFloat32Array(); ecost.resize(n*8); ecost.fill(INF)
 	for y in ny:
+		if bool(cancel[0]): return {}
 		for x in nx:
 			var i:=y*nx+x
 			if land[i]==0: continue
@@ -408,33 +529,38 @@ static func build(spec:Dictionary,ground:Dictionary={})->Dictionary:
 				var e:=cell*(1.41421356 if diagonal else 1.0)*(fac[i]+fac[j])*0.5
 				var climb:=h[j]-h[i]
 				if climb>0.0: e+=climb*climb_k*(0.5 if road[i]>=0 and road[j]>=0 else 1.0)
-				if all_edges or (side[i]!=0 and side[j]!=0 and side[i]!=side[j]) or trib[i]==1 or trib[j]==1:
-					var a:=origin+Vector2(float(x),float(y))*cell
-					var b:=origin+Vector2(float(xx),float(yy))*cell
-					var kind:=March.crossing(a,b)
-					if kind!="": e+=March.crossing_cost(kind,mix,bridged and road[i]>=0 and road[j]>=0)
+				var kind:=""
+				if fixture_crossings:
+					kind=March.crossing(origin+Vector2(float(x),float(y))*cell,origin+Vector2(float(xx),float(yy))*cell)
+				elif (side[i]!=0 and side[j]!=0 and side[i]!=side[j]) or buckets.has(i) or buckets.has(j):
+					var segs:Array=(buckets.get(i,[]) as Array)+(buckets.get(j,[]) as Array)
+					kind=_crossing(origin+Vector2(float(x),float(y))*cell,origin+Vector2(float(xx),float(yy))*cell,world_seed,segs)
+				if kind!="": e+=March.crossing_cost(kind,mix,bridged and road[i]>=0 and road[j]>=0)
 				ecost[i*8+k]=e
 	# From our own hubs first; then the held towns join as depots.
 	var sources:Array=[]
 	for h_row:Dictionary in spec.settlements: sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":String(h_row.kind),"pos":h_row.pos,"base":0.0})
-	var field:={"key":int(spec.key),"geo_key":int(spec.geo_key),"origin":origin,"cell":cell,"nx":nx,"ny":ny,"carrier":String(spec.carrier),"mix":mix,
+	var field:={"key":int(spec.key),"geo_key":int(spec.geo_key),"world":int(spec.get("world",0)),"origin":origin,"cell":cell,"nx":nx,"ny":ny,"carrier":String(spec.carrier),"mix":mix,
 		"ground":ground,"road":road,"fac":fac,"sources":sources}
-	var pass1:=_search(field,ecost,sources)
+	var found:=_search(field,ecost,sources,cancel)
+	if found.is_empty(): return {}
 	var held:Array=spec.get("held",[])
 	if not held.is_empty():
-		field["cost"]=pass1.cost
+		field["cost"]=found.cost
 		for h_row:Dictionary in held:
-			var reach:=_bilinear(field,pass1.cost,h_row.pos)
+			var reach:=_bilinear(field,found.cost,h_row.pos)
 			if not is_finite(reach): continue
 			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":"held","pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id",""))})
-		pass1=_search(field,ecost,sources)
-	field["cost"]=pass1.cost; field["src"]=pass1.src; field["parent"]=pass1.parent
+		found=_search(field,ecost,sources,cancel)
+		if found.is_empty(): return {}
+	field["cost"]=found.cost; field["src"]=found.src; field["parent"]=found.parent
 	field["sources"]=sources
 	field["ms"]=float(Time.get_ticks_usec()-began)/1000.0
+	field["sample_ms"]=sampled_ms
 	return field
 
 ## Dijkstra from the sources' seeds over the precomputed edge costs.
-static func _search(field:Dictionary,ecost:PackedFloat32Array,sources:Array)->Dictionary:
+static func _search(field:Dictionary,ecost:PackedFloat32Array,sources:Array,cancel:Array=[false])->Dictionary:
 	var nx:=int(field.nx); var ny:=int(field.ny); var n:=nx*ny
 	var origin:Vector2=field.origin; var cell:=float(field.cell)
 	var land:PackedByteArray=(field.ground as Dictionary).land
@@ -463,10 +589,13 @@ static func _search(field:Dictionary,ecost:PackedFloat32Array,sources:Array)->Di
 				if c<cost[i]:
 					cost[i]=c; src[i]=s_index; parent[i]=-1
 					_push(hf,hi,c,i)
+	var popped:=0
 	while hi.size()>0:
 		var i:=_pop(hf,hi)
 		if closed[i]==1: continue
 		closed[i]=1
+		popped+=1
+		if popped%2048==0 and bool(cancel[0]): return {}
 		var ci:=cost[i]
 		var base:=i*8
 		for k in 8:
@@ -508,93 +637,113 @@ static func _pop(f:PackedFloat32Array,ids:PackedInt32Array)->int:
 
 
 # --------------------------------------------------------------------------
-# The current field (main thread)
+# The field in hand (main thread)
 # --------------------------------------------------------------------------
 
-## The field for the world as it stands. sync: build it now if needed (the
-## day's rations); else start a build on a worker and return the last one
-## (the map), which may be {} or older.
-static func field(sync:=true)->Dictionary:
+## The field the rations and the screens read now. In play: the last field
+## finished (possibly older than the world, possibly {} just after a load),
+## while a worker builds the one the world wants. sync=true builds it here
+## and now: tests, tools and fixture ground only.
+static func field(sync:=false)->Dictionary:
 	var s:=spec()
-	if s.is_empty(): return {}
+	if s.is_empty() or bool(s.get("no_ground",false)): return {}
 	if int(_field.get("key",0))==int(s.key): return _field
-	_poll(int(s.key))
+	# A field of another world (a new game, a new terrain) is never read.
+	if not _field.is_empty() and int(_field.get("world",0))!=int(s.world): _field={}; _report_cache.clear()
+	_poll(int(s.key),int(s.world))
 	if int(_field.get("key",0))==int(s.key): return _field
-	if _job!=null and int(_job.spec.key)==int(s.key):
-		if not sync: return _field
-		WorkerThreadPool.wait_for_task_completion(_job.task)
-		_adopt(int(s.key))
+	if sync or not bool(s.get("async",false)):
+		_discard_job()
+		builds+=1
+		_field=build(s,_cached_ground(s))
+		_keep_ground(_field)
+		_report_cache.clear()
 		return _field
-	if not sync:
-		if _job==null: _start(s)
-		return _field
-	builds+=1
-	_field=build(s,_cached_ground(s))
-	_ground_cache[int(s.geo_key)]=_field.ground
-	_trim_cache()
-	_report_cache.clear()
+	if _job==null: _start(s)
+	elif int(_job.spec.key)!=int(s.key): _job.cancel[0]=true
 	return _field
 
-## Starts a worker build for the current world when it differs from the
-## field in hand. Cheap to call every frame or so (the map does).
+## Starts a worker build when the world has moved on from the field in
+## hand. Cheap: the map calls it a few times a second.
 static func prefetch()->void:
 	field(false)
 
-## Whether the field in hand matches the world as it stands.
+## Whether the field in hand is the one the world wants now.
 static func current()->bool:
 	var s:=spec()
-	return not s.is_empty() and int(_field.get("key",0))==int(s.key)
+	return not s.is_empty() and int(_field.get("key",0))==int(s.get("key",-1))
+
+## Whether a worker build is under way.
+static func building()->bool:
+	return _job!=null
 
 static func _cached_ground(s:Dictionary)->Dictionary:
 	return _ground_cache.get(int(s.geo_key),{})
 
-static func _trim_cache()->void:
+static func _keep_ground(f:Dictionary)->void:
+	if f.is_empty(): return
+	_ground_cache[int(f.geo_key)]=f.ground
 	while _ground_cache.size()>2: _ground_cache.erase(_ground_cache.keys()[0])
 
 static func _start(s:Dictionary)->void:
+	_hook_quit()
 	_job=BuildJob.new(s,_cached_ground(s),load("res://scripts/supply_state.gd"))
 	_job.task=WorkerThreadPool.add_task(_job.run,false,"Supply field")
 	async_builds+=1
 
-static func _poll(wanted:int)->void:
-	if _job==null: return
-	if not WorkerThreadPool.is_task_completed(_job.task): return
+static func _poll(wanted:int,world:int)->void:
+	if _job==null or not WorkerThreadPool.is_task_completed(_job.task): return
 	WorkerThreadPool.wait_for_task_completion(_job.task)
-	_adopt(wanted)
-
-## Takes a finished worker build. It replaces the field in hand when it is
-## what the world wants now, or when the one in hand is no better (older).
-static func _adopt(wanted:int)->void:
 	var done:=_job
 	_job=null
-	if done.result.is_empty(): return
-	_ground_cache[int(done.result.geo_key)]=done.result.ground
-	_trim_cache()
+	if done.result.is_empty() or int(done.result.get("world",0))!=world: return
+	_keep_ground(done.result)
+	# The newest the world wants, or at least newer than what is in hand.
 	if int(done.result.key)==wanted or int(_field.get("key",0))!=wanted:
 		_field=done.result
 		_report_cache.clear()
 
+## Stops any worker build and waits for it (it stops at its next row).
+static func _discard_job()->void:
+	if _job==null: return
+	_job.cancel[0]=true
+	if _job.task>=0: WorkerThreadPool.wait_for_task_completion(_job.task)
+	_job=null
+
+## For the terrain's exit and a new world: no build outlives the world.
+static func shutdown()->void:
+	_discard_job()
+
+static var _quit_hooked:=false
+## Waits for any worker build when the scene tree comes down (quit), even
+## where no map node is there to do it.
+static func _hook_quit()->void:
+	if _quit_hooked: return
+	var tree:=Engine.get_main_loop() as SceneTree
+	if tree==null or tree.root==null: return
+	tree.root.tree_exiting.connect(Callable(load("res://scripts/supply_state.gd"),"shutdown"))
+	_quit_hooked=true
+
 ## Forget every field (tests; a new world).
 static func reset()->void:
-	if _job!=null and _job.task>=0: WorkerThreadPool.wait_for_task_completion(_job.task)
-	_job=null; _field={}; _ground_cache.clear(); _report_cache.clear(); _report_day=-1
-	_known_cache=[-1,-1,Rect2()]
+	_discard_job()
+	_field={}; _ground_cache.clear(); _report_cache.clear(); _report_day=-1
+	_known_cache=[-1,-1,Rect2()]; _spec={}; _spec_sig=0
+	_sampler=null; _sampler_key=0; _tribs=[]; _tribs_key=0
 
 
 # --------------------------------------------------------------------------
 # Reading the field at a point
 # --------------------------------------------------------------------------
 
-## A lattice value at a point, bilinear over the land nodes around it
-## (INF when none of them is reached).
+## A lattice value at a point, bilinear over the reached nodes round it
+## (INF when none of them is reached or the point is off the lattice).
 static func _bilinear(field:Dictionary,values:PackedFloat32Array,p:Vector2)->float:
 	var nx:=int(field.nx); var ny:=int(field.ny)
 	var fx:=(p.x-(field.origin as Vector2).x)/float(field.cell)
 	var fy:=(p.y-(field.origin as Vector2).y)/float(field.cell)
 	if fx<0.0 or fy<0.0 or fx>float(nx-1) or fy>float(ny-1): return INF
-	var x0:=mini(floori(fx),nx-2); var y0:=mini(floori(fy),ny-2)
-	if nx<2: x0=0
-	if ny<2: y0=0
+	var x0:=clampi(floori(fx),0,maxi(0,nx-2)); var y0:=clampi(floori(fy),0,maxi(0,ny-2))
 	var u:=fx-float(x0); var v:=fy-float(y0)
 	var total:=0.0; var weight:=0.0
 	for corner in 4:
@@ -605,10 +754,27 @@ static func _bilinear(field:Dictionary,values:PackedFloat32Array,p:Vector2)->flo
 		if w<=0.0 or not is_finite(value): continue
 		total+=value*w; weight+=w
 	if weight<=0.0:
-		# At a node exactly (or all weight on unreached corners): the node itself.
 		var node:=roundi(fy)*nx+roundi(fx)
 		return values[node] if node>=0 and node<values.size() else INF
 	return total/weight
+
+## Bilinear over all nodes (land or not), for ground values.
+static func _bilinear_any(field:Dictionary,values:PackedFloat32Array,p:Vector2)->float:
+	var nx:=int(field.nx); var ny:=int(field.ny)
+	var fx:=(p.x-(field.origin as Vector2).x)/float(field.cell)
+	var fy:=(p.y-(field.origin as Vector2).y)/float(field.cell)
+	if fx<0.0 or fy<0.0 or fx>float(nx-1) or fy>float(ny-1): return INF
+	var x0:=clampi(floori(fx),0,maxi(0,nx-2)); var y0:=clampi(floori(fy),0,maxi(0,ny-2))
+	var u:=clampf(fx-float(x0),0.0,1.0); var v:=clampf(fy-float(y0),0.0,1.0)
+	var x1:=mini(x0+1,nx-1); var y1:=mini(y0+1,ny-1)
+	return lerpf(lerpf(values[y0*nx+x0],values[y0*nx+x1],u),lerpf(values[y1*nx+x0],values[y1*nx+x1],u),v)
+
+## Whether the field's lattice covers a point.
+static func covers(field:Dictionary,p:Vector2)->bool:
+	if field.is_empty() or not p.is_finite(): return false
+	var fx:=(p.x-(field.origin as Vector2).x)/float(field.cell)
+	var fy:=(p.y-(field.origin as Vector2).y)/float(field.cell)
+	return fx>=0.0 and fy>=0.0 and fx<=float(int(field.nx)-1) and fy<=float(int(field.ny)-1)
 
 ## The node nearest a point, among the reached ones round it (-1 if none).
 static func _node_near(field:Dictionary,p:Vector2)->int:
@@ -626,9 +792,12 @@ static func _node_near(field:Dictionary,p:Vector2)->int:
 			if d<best_d: best_d=d; best=i
 	return best
 
-## Level km of hauling from the nearest hub to p, and which hub: {effort, source}.
+## Level km of hauling from the nearest hub to p, and which hub:
+## {effort, source (index into the sources), sources, fallback}.
+## Off the field (or with none), the straight line from the nearest hub.
 static func effort_at(field:Dictionary,p:Vector2)->Dictionary:
-	if field.is_empty() or not p.is_finite(): return {"effort":INF,"source":-1}
+	if not p.is_finite(): return {"effort":INF,"source":-1,"sources":[],"fallback":true}
+	if not covers(field,p): return _fallback_effort(p)
 	var cost:PackedFloat32Array=field.cost
 	var effort:=_bilinear(field,cost,p)
 	var node:=_node_near(field,p)
@@ -644,12 +813,37 @@ static func effort_at(field:Dictionary,p:Vector2)->Dictionary:
 		if d>cell*NEAR_CELLS: continue
 		var direct:=float(s.base)+d*f_here
 		if direct<effort: effort=direct; source=k
-	return {"effort":effort,"source":source}
+	return {"effort":effort,"source":source,"sources":sources,"fallback":false}
 
-## The supply line from the hub to p along the field: [hub, ..., p].
+## The straight line from the nearest hub (a held town counts as a depot).
+static func _fallback_effort(p:Vector2)->Dictionary:
+	var s:=spec()
+	var hub_list:Array=s.get("hubs",[])
+	if hub_list.is_empty(): hub_list=hubs()
+	var sources:Array=[]
+	var settlements:Array=[]
+	for h:Dictionary in hub_list:
+		if String(h.kind)!="held": settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
+	for h:Dictionary in hub_list:
+		if String(h.kind)!="held": continue
+		var reach:=INF
+		for home:Dictionary in settlements: reach=minf(reach,(home.pos as Vector2).distance_to(h.pos)*FALLBACK_FACTOR)
+		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":"held","pos":h.pos,"base":reach*RELAY})
+	var best:=INF; var source:=-1
+	for k in sources.size():
+		var e:=float((sources[k] as Dictionary).base)+((sources[k] as Dictionary).pos as Vector2).distance_to(p)*FALLBACK_FACTOR
+		if e<best: best=e; source=k
+	return {"effort":best,"source":source,"sources":sources,"fallback":true}
+
+## The supply line from the hub to p: [hub, ..., p] (along the field; a
+## straight line where the field does not reach).
 static func route_to(field:Dictionary,p:Vector2)->PackedVector2Array:
 	var out:=PackedVector2Array()
-	if field.is_empty() or not p.is_finite(): return out
+	if not p.is_finite(): return out
+	if not covers(field,p):
+		var e:=_fallback_effort(p)
+		if int(e.source)>=0: out.append(((e.sources as Array)[int(e.source)] as Dictionary).pos); out.append(p)
+		return out
 	var node:=_node_near(field,p)
 	if node<0: return out
 	var nx:=int(field.nx)
@@ -674,14 +868,15 @@ static func route_roads(field:Dictionary,route:PackedVector2Array)->Dictionary:
 	var km:=0.0
 	var by:=[0.0,0.0,0.0]
 	var road:PackedInt32Array=field.get("road",PackedInt32Array())
-	var nx:=int(field.get("nx",1))
+	var nx:=int(field.get("nx",0)); var ny:=int(field.get("ny",0))
 	for k in range(1,route.size()):
 		var a:=route[k-1]; var b:=route[k]
 		var d:=a.distance_to(b)
 		km+=d
+		if road.is_empty(): continue
 		var mid:=a.lerp(b,0.5)
 		var fx:=roundi((mid.x-(field.origin as Vector2).x)/float(field.cell)); var fy:=roundi((mid.y-(field.origin as Vector2).y)/float(field.cell))
-		if fx<0 or fy<0 or fx>=nx or fy>=int(field.ny): continue
+		if fx<0 or fy<0 or fx>=nx or fy>=ny: continue
 		var tier:=road[fy*nx+fx]
 		if tier>=0: by[clampi(tier,0,2)]=float(by[clampi(tier,0,2)])+d
 	var on:=float(by[0])+float(by[1])+float(by[2])
@@ -728,36 +923,20 @@ static func forage_factor_from(rich:float,chill:float,troops:int)->float:
 	var size:=clampf(pow(SIZE_REF/float(maxi(1,troops)),0.25),0.6,1.1)
 	return clampf(area*season*size,0.2,1.5)
 
-## The terms of the land at a point: {rich, t, swing, cold}.
+## The land at a point: {rich, t, swing, cold}. From the field; off it, from
+## the marching ground (main thread) or open land.
 static func land_at(field:Dictionary,p:Vector2,day:int)->Dictionary:
 	var rich:=NEUTRAL_RICH; var t:=-1.0; var swing:=NEUTRAL_SWING
-	var inside:=false
-	if not field.is_empty() and p.is_finite():
+	if covers(field,p):
 		var g:Dictionary=field.ground
-		var r:=_bilinear_any(field,g.rich,p)
-		if is_finite(r):
-			inside=true
-			rich=r; t=_bilinear_any(field,g.t,p); swing=_bilinear_any(field,g.swing,p)
-	if not inside and p.is_finite() and March.has_ground():
+		rich=_bilinear_any(field,g.rich,p); t=_bilinear_any(field,g.t,p); swing=_bilinear_any(field,g.swing,p)
+	elif p.is_finite() and March.has_ground():
 		var gd:=March.ground_at(p)
 		if not gd.is_empty():
 			rich=richness(float(gd.get("rain",0.5)),float(gd.get("wood",0.0)),float(gd.get("wet",0.0)),float(gd.get("h",0.25)))
 			t=float(gd.get("t",-1.0))
-			swing=float(PlanetEnvironment.seasonality_at(p))
+			if March._terrain()!=null: swing=float(PlanetEnvironment.seasonality_at(p))
 	return {"rich":rich,"t":t,"swing":swing,"cold":cold(day,p,t,swing)}
-
-## Bilinear over all nodes (land or not) for ground values.
-static func _bilinear_any(field:Dictionary,values:PackedFloat32Array,p:Vector2)->float:
-	var nx:=int(field.nx); var ny:=int(field.ny)
-	var fx:=(p.x-(field.origin as Vector2).x)/float(field.cell)
-	var fy:=(p.y-(field.origin as Vector2).y)/float(field.cell)
-	if fx<0.0 or fy<0.0 or fx>float(nx-1) or fy>float(ny-1): return INF
-	var x0:=clampi(floori(fx),0,maxi(0,nx-2)); var y0:=clampi(floori(fy),0,maxi(0,ny-2))
-	var u:=clampf(fx-float(x0),0.0,1.0); var v:=clampf(fy-float(y0),0.0,1.0)
-	var x1:=mini(x0+1,nx-1); var y1:=mini(y0+1,ny-1)
-	var a:=lerpf(values[y0*nx+x0],values[y0*nx+x1],u)
-	var b:=lerpf(values[y1*nx+x0],values[y1*nx+x1],u)
-	return lerpf(a,b,v)
 
 ## Home under siege: the share of carts that get out (military_campaign).
 static func siege_factor()->float:
@@ -771,25 +950,27 @@ static func siege_factor()->float:
 # the map's grid)
 # --------------------------------------------------------------------------
 
-## The model at a point for a band of `troops`: transport (carriers' share
-## at all), stores (share the stores could send), siege (share of carts that
-## get out of a besieged home) are the day's inputs, read once by the caller.
+## The model at a point for a band of `troops`: transport (the carriers'
+## share at all), stores (the share the stores could send), siege (the
+## share of carts a besieged home lets out) are the day's inputs, read once
+## by the caller (day_inputs()).
 static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float)->Dictionary:
-	var who:=String(field.get("carrier",carrier())) if not field.is_empty() else carrier()
+	var who:=String(field.carrier) if not field.is_empty() else carrier()
 	var e:=effort_at(field,p)
 	var land:=land_at(field,p,day)
 	var chill:=float(land.cold)
 	var days:=haul_days(float(e.effort),who,chill)
 	var haul:=haul_share(days,who)
 	var source:=int(e.source)
-	var hub:Dictionary=(field.sources[source] as Dictionary) if source>=0 and source<(field.get("sources",[]) as Array).size() else {}
+	var sources:Array=e.sources
+	var hub:Dictionary=(sources[source] as Dictionary) if source>=0 and source<sources.size() else {}
 	if not hub.is_empty() and String(hub.kind) in ["home","held"]: haul*=siege
 	var carried:=clampf(transport*haul*stores,0.0,1.0)
 	var base:=FieldRations.FORAGE_MOVING if moving else FieldRations.FORAGE_STATIONED
 	var share:=minf(FORAGE_SHARE_MAX,base*forage_factor_from(float(land.rich),chill,troops))
 	var foraged:=(1.0-carried)*share
 	return {"ratio":clampf(carried+foraged,0.0,1.0),"carried":carried,"foraged":foraged,"local":0.0,"air":0.0,"haul":haul,"transport":transport,"stores":stores,
-		"effort":float(e.effort),"days":days,"cold":chill,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who}
+		"effort":float(e.effort),"days":days,"cold":chill,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
 
 ## A node's place on the land.
 static func node_pos(field:Dictionary,i:int)->Vector2:
@@ -815,7 +996,7 @@ static func known_mask(field:Dictionary)->PackedByteArray:
 ## ratio -1 where the land is unknown (known[i]==0) or water. Exactly
 ## terms() at each node, so the chart and at_point() agree. Pure given its
 ## inputs: a worker thread may run it.
-static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteArray)->Dictionary:
+static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteArray,cancel:Array=[false])->Dictionary:
 	var n:=int(field.nx)*int(field.ny)
 	var ratio:=PackedFloat32Array(); ratio.resize(n); ratio.fill(-1.0)
 	var carried:=PackedFloat32Array(); carried.resize(n)
@@ -823,6 +1004,7 @@ static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteA
 	var land:PackedByteArray=(field.ground as Dictionary).land
 	var day:=int(inputs.get("day",0))
 	for i in n:
+		if i%512==0 and bool(cancel[0]): return {}
 		if land[i]==0 or i>=known.size() or known[i]==0: continue
 		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege))
 		ratio[i]=float(t.ratio); carried[i]=float(t.carried); haul[i]=float(t.haul)
@@ -840,32 +1022,36 @@ static func day_inputs()->Dictionary:
 
 
 # --------------------------------------------------------------------------
-# The engine's two questions
+# The engine's two questions (never wait for a field)
 # --------------------------------------------------------------------------
 
-## Share of the carriers' food that reaches this force today (1 when it has
-## no place, no home or no field): the haul along its supply line, and a
-## besieged home's gate. military_campaign._force_provision_access.
+## Share of the carriers' food that reaches this force today: the haul
+## along its supply line and a besieged home's gate (1 with no place or no
+## home). military_campaign._force_provision_access.
 static func haul_for(force:Dictionary)->float:
 	var p:=force_pos(force)
-	if not p.is_finite(): return 1.0
-	var f:=field(true)
-	if f.is_empty(): return 1.0
+	if not p.is_finite() or hubs_empty(): return 1.0
+	var f:=field()
 	var e:=effort_at(f,p)
 	if not is_finite(float(e.effort)): return 0.0
+	var who:=String(f.carrier) if not f.is_empty() else carrier()
 	var land:=land_at(f,p,today())
-	var haul:=haul_share(haul_days(float(e.effort),String(f.carrier),float(land.cold)),String(f.carrier))
+	var haul:=haul_share(haul_days(float(e.effort),who,float(land.cold)),who)
 	var source:=int(e.source)
-	if source>=0 and source<(f.sources as Array).size() and String((f.sources[source] as Dictionary).kind) in ["home","held"]: haul*=siege_factor()
+	var sources:Array=e.sources
+	if source>=0 and source<sources.size() and String((sources[source] as Dictionary).kind) in ["home","held"]: haul*=siege_factor()
 	return haul
 
+static func hubs_empty()->bool:
+	var s:=spec()
+	return s.is_empty() or (s.get("hubs",[]) as Array).is_empty()
+
 ## How well this force forages where it stands today, as a factor on
-## field_rations' base shares (1 when it has no place or no field).
+## field_rations' base shares (1 when it has no place).
 static func forage_factor(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite(): return 1.0
-	var f:=field(true)
-	var land:=land_at(f,p,today())
+	var land:=land_at(field(),p,today())
 	return forage_factor_from(float(land.rich),float(land.cold),int(force.get("troops",0)))
 
 
@@ -877,7 +1063,7 @@ static func forage_factor(force:Dictionary)->float:
 ## this point today, standing (or moving).
 static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
 	if troops<0: troops=typical_troops()
-	var f:=field(true)
+	var f:=field()
 	var d:=day_inputs()
 	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege))
 	var report:=_report_from_terms(f,t,point)
@@ -906,7 +1092,7 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 		"km":float(roads.km),"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
 		"hub":String(hub.get("name","")),"hub_kind":String(hub.get("kind","")),"hub_position":hub.get("pos",Vector2.INF),
 		"season":"winter" if float(t.cold)>=0.3 else "","cold":float(t.cold),"rich":float(t.rich),"carrier":String(t.carrier),
-		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio}
+		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio,"fallback":bool(t.fallback)}
 	report["why"]=why(report)
 	return report
 
@@ -919,7 +1105,7 @@ static func of_force(force:Dictionary)->Dictionary:
 	if day!=_report_day: _report_cache.clear(); _report_day=day
 	var kind:="garrison" if force.has("region_id") and not force.has("army_id") else ("home" if mc!=null and force==mc.home_army else "field")
 	var p:=force_pos(force)
-	var cache_key:=hash([kind,int(force.get("army_id",0)),String(force.get("region_id","")),int(force.get("provision_day",-1)),float(force.get("provision_ratio",-1.0)),p.snapped(Vector2.ONE*0.05) if p.is_finite() else Vector2.ZERO,int(force.get("troops",0)),int(_field.get("key",0))])
+	var cache_key:=hash([kind,int(force.get("army_id",0)),String(force.get("region_id","")),int(force.get("provision_day",-1)),float(force.get("provision_ratio",-1.0)),p.snapped(Vector2.ONE*0.05) if p.is_finite() else Vector2.ZERO,int(force.get("troops",0)),int(_field.get("key",0)),String(force.get("status",""))])
 	if _report_cache.has(cache_key): return _report_cache[cache_key]
 	var report:Dictionary
 	var at_home:bool=kind=="home" or (mc!=null and kind=="field" and bool(mc._army_is_home(force)))
@@ -928,9 +1114,9 @@ static func of_force(force:Dictionary)->Dictionary:
 		var s:Variant=_state()
 		report={"ratio":ratio,"state":state_of(ratio),"carried":ratio,"foraged":0.0,"local":0.0,"air":0.0,"haul":1.0,"transport":1.0,"stores":ratio,
 			"days":0.0,"effort":0.0,"km":0.0,"road":"","road_share":0.0,"hub":String(s.settlement_name) if s!=null else "home","hub_kind":"home","hub_position":p,
-			"season":"","cold":0.0,"rich":NEUTRAL_RICH,"carrier":carrier(),"route":PackedVector2Array(),"position":p,"at_home":true}
+			"season":"","cold":0.0,"rich":NEUTRAL_RICH,"carrier":carrier(),"route":PackedVector2Array(),"position":p,"at_home":true,"fallback":false}
 	else:
-		var f:=field(true)
+		var f:=field()
 		var d:=day_inputs()
 		var moving:=String(force.get("status","stationed"))=="moving"
 		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege))
@@ -1019,7 +1205,7 @@ static func percents(total:float,parts:Array)->Array:
 		floors[order[k]]=int(floors[order[k]])+1; sum+=1; k+=1
 	return floors
 
-## "4 days", "a day", "half a day", "under half a day".
+## "4 days", "a day", "half a day".
 static func days_words(days:float)->String:
 	if not is_finite(days): return "beyond the carriers' reach"
 	if days<0.35: return "a short haul"
@@ -1036,9 +1222,8 @@ static func line_words(report:Dictionary)->String:
 	if road!="": way=" by "+road
 	elif float(report.get("road_share",0.0))>=0.15: way=" partly by road"
 	else: way=" across open country"
-	var d:=days_words(float(report.days))
 	var from:="from" if String(report.get("hub_kind",""))!="held" else "from our depot at"
-	return "%s %s %s%s" % [d,from,hub,way]
+	return "%s %s %s%s" % [days_words(float(report.days)),from,hub,way]
 
 ## One plain line: "Gets 60% of its food: 35% foraged, 25% carried; 4 days
 ## from Seanstone by cart track."
