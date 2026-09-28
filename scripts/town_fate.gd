@@ -84,8 +84,11 @@ const POLICY_WORDS:=[
 	["self_rule","\\b(govern (themselves|itself)|rule themselves|self.rule|their own elders|let them rule|keep their own (ways|elders|chief))"],
 	["equal_citizenship","\\b(equal citizens|equal citizenship|make them (our own|our people|citizens|one of us)|full citizens|as equals)"],
 	["stewardship","\\b(civil administration|(govern|rule) [\\w' ]{0,20}(well|fairly|justly|kindly)|as a town of ours|administer it|steward|protect (it|them|the town))"],
-	["forced_labor","\\b(enslave (the |its |their )?(whole )?(town|people|them|everyone)|make (them|the town|its people) (our )?slaves|forced labou?r|work them as slaves)"],
+	["forced_labor","\\b(enslave (the |its |their )?(whole )?(town|people|them|everyone|rest|rest of them|survivors|others)|enslave everyone (else|left)|enslave all (the )?(rest|others|who are left)|make (them|the town|its people|the rest) (our )?slaves|forced labou?r|work them as slaves)"],
 ]
+## "Enslave the women", "enslave the girls": those people taken home in
+## bonds (the captives' road), as "take the women to Seanstone" is.
+const ENSLAVE_GROUP:="\\benslave\\s+(all\\s+)?(of\\s+)?(the\\s+|their\\s+|its\\s+)?(young\\s+|little\\s+|older\\s+)?(women|womenfolk|wives|girls|daughters|children|boys|young ones|men|males|elders|old people|old men|old women)\\b"
 ## "Kill the men you have tied up": only those we hold.
 const BOUND_ONLY:="\\b((that|whom|who|which)\\s+(you|we|they|your men|the garrison|our men|you've|we've)\\s+(have\\s+|had\\s+|already\\s+|just\\s+)*(tied|bound|chained|taken|captured|caught|rounded up|locked up|roped)|(the|all the|every one of the|those|these)\\s+(bound|tied|captive|chained|roped|captured)\\s+(men|ones|prisoners|males)|the prisoners|those (we|you) (hold|are holding|have tied|have bound)|(who|that) are (tied|bound|chained|held|prisoners|under guard))"
 
@@ -121,6 +124,9 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 				out["kill_kids_words"]=String(kkw.words)
 				if bool(kkw.get("aged",false)) and out.has("count") and int(out.count)==int(kkw.get("age_number",-1)): out.erase("count")
 	if kill and _has(BOUND_ONLY,lower): out["bound_only"]=true
+	# "Enslave the women" is the captives' road, as "take them home" is.
+	if _has(ENSLAVE_GROUP,lower) and not out.has("kill_all"):
+		carry=true; people=true; homeward=true; bonded=true
 	if carry and people and homeward and not out.has("kill_all"):
 		if _has("\\bas (our own|citizens|free|our people|equals|kin)\\b",lower) and not bonded: out["move"]="citizen"
 		elif _has("\\b(penal|to labou?r|to work)\\b",lower) and not bonded: out["move"]="penal"

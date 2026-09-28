@@ -185,6 +185,18 @@
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["relief"]}, "confidence": 0.85},
    "expect": {"verb": "war", "verdict": "fate", "state": {"m_relief": "==1"}}},
 
+  {"id": "measure.women_labour", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+   "note": "The women are put to work, as said; never the men in their place.",
+   "say": "Make the women of Tsaren work the fields",
+   "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.85},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "worker_women": ">0", "worker_men": "==0"}}},
+
+  {"id": "grave.kill_men_enslave_women", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
+   "note": "Enslaving the women is the captives' road home in bonds; they are never killed with the men.",
+   "say": "Kill the men and enslave the women",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "captives": true}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"killed_men": ">0", "killed_women": "==0", "taken_women": ">0"}}},
+
   {"id": "facts.remaining.rovik", "domain": "town_facts", "fixture": "tsaren_bound", "speaker": "rovik", "source": "user",
    "say": "Are their any men of Tsaren still remaining in Tsaren?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
@@ -471,7 +483,8 @@
   {"id": "captives.ransom", "domain": "captives", "fixture": "battle_won", "speaker": "rovik", "source": "design",
    "say": "Ransom the captives back to the Esurai",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='ransom'"}}},
+   "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='ransom'"}},
+   "variants": ["Sell the captives", "sell the prisoners back to their people"]},
 
   {"id": "captives.let_go", "domain": "captives", "fixture": "battle_won", "speaker": "rovik", "source": "design",
    "say": "Let the captives go home",
@@ -723,6 +736,12 @@
    "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$rovik", "confidence": 0.9},
    "expect": {"verb": "demote", "target": "rovik", "state": {"status_rovik": "==before", "garrison": "==before"}}},
 
+  {"id": "person.kill_roviks_men", "domain": "person_acts", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "Rovik's men are our own fighters: never Rovik himself, never Tsaren's men.",
+   "say": "Kill Rovik's men",
+   "ideal": {"kind": "order", "action": "kill", "type": "group", "ref": "", "confidence": 0.5, "clarify": "Rovik's men are our own fighters. Whom do you mean?"},
+   "expect": {"state": {"status_rovik": "==before", "killed": "==before", "garrison": "==before", "field_troops": "==before", "officials": "==before"}}},
+
   {"id": "q.food_days.headman", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "How many days of food do we have?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
@@ -928,7 +947,7 @@
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"verb": "war", "kind": "captives", "state": {"settlement_prisoners": "=='execute'", "status_headman": "==before"}}},
 
-  {"id": "grave.kill_then_take.no_comma", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+  {"id": "grave.kill_then_take.no_comma", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "note": "No commas: each clause's group goes only with its own verb; the women are taken, never killed.",
    "say": "kill the men of tsaren then take the women home",
    "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"kill_men": true, "captives": true, "destination": "$home"}, "confidence": 0.9},

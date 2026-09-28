@@ -319,11 +319,14 @@ static func read(text:String)->Dictionary:
 		# "Take their weapons and burn them": destroyed, not kept.
 		out.destroy=_has(disarm.get_string(),DESTROY_RE) or _has(main.substr(disarm.get_end()),"^\\W*(?:and\\s+)?(?:then\\s+)?(burn|break|destroy|smash)\\s+(them|the lot|all of them|every one)\\b")
 	if _has(main,SEARCH_RE): found.append("search")
-	if _has(main,LABOUR_RE):
+	var labour:=_find(main,LABOUR_RE)
+	if labour!=null:
 		found.append("labour")
 		if _has(main,WALL_WORDS): out.work="walls"
 		elif _has(main,ROAD_WORDS): out.work="roads"
 		elif _has(main,FIELD_WORDS): out.work="fields"
+		# Who is put to work: "make the women work the fields" is the women.
+		out["work_who"]=_who_of(_clause_from(main,labour.get_start()))
 	var requisition:=_find(main,REQUISITION_RE)
 	if requisition!=null:
 		found.append("requisition")
@@ -1023,31 +1026,44 @@ static func _labour(c:Dictionary)->void:
 	var name:=String(c.name)
 	var opts:Dictionary=c.opts
 	var running:=_running(force,"labour")
+	# Who is put to work: the men unless the words name others ("make the
+	# women work the fields"). Old records without it were the men.
+	var who:=String(opts.get("work_who","men"))
+	var groups:=_who_groups(who)
+	var words:=_who_words(who)
 	if not running.is_empty() and Ledger.count(l,"worker")>0:
 		_renew(c,running)
 		if String(opts.get("work",""))!="" and String(opts.work)!=String(running.get("work","")): running["work"]=String(opts.work)
-		(c.texts as Array).append("The work gangs of %s go on another month, %s men in them." % [name,_count(Ledger.count(l,"worker"))])
+		(c.texts as Array).append("The work gangs of %s go on another month, %s %s in them." % [name,_count(Ledger.count(l,"worker")),_who_words(String(running.get("who","men")))])
 		return
 	var bind:=_running(force,"bind_men")
-	var from:="bound" if Ledger.count(l,"bound","men")>0 else "free"
-	var pool:=Ledger.count(l,from,"men")
+	var bound_pool:=0
+	for g in groups: bound_pool+=Ledger.count(l,"bound",String(g))
+	var from:="bound" if bound_pool>0 else "free"
+	var pool:=0
+	for g in groups: pool+=Ledger.count(l,from,String(g))
 	var hands:=free_hands(force)+(1 if from=="bound" else 0)
 	var workers:=mini(pool,hands*WORKERS_PER_GUARD)
 	if int(opts.get("count",0))>0: workers=mini(workers,int(opts.count))
 	if workers<=0:
-		(c.refused as Array).append(("Nobody can be spared to watch a work gang; every one of the %s is on the gate or already guarding." % _count(int(c.garrison))) if pool>0 else ("There are no men left in %s to work." % name))
+		(c.refused as Array).append(("Nobody can be spared to watch a work gang; every one of the %s is on the gate or already guarding." % _count(int(c.garrison))) if pool>0 else ("There are no %s left in %s to work." % [words,name]))
 		return
-	workers=Ledger.move(l,from,"worker","men",workers)
+	var moved:=0
+	for g in groups:
+		if moved>=workers: break
+		moved+=Ledger.move(l,from,"worker",String(g),mini(Ledger.count(l,from,String(g)),workers-moved))
+	workers=moved
 	var guards:=0 if from=="bound" else maxi(1,ceili(float(workers)/float(WORKERS_PER_GUARD)))
 	var work:=String(opts.get("work",""))
 	if not running.is_empty(): running["ended"]=true; running["end_day"]=int(c.day); running["end_reason"]="again"
-	_start(c,"labour",{"guards":guards,"work":work,"done":0.0,"from":from})
+	_start(c,"labour",{"guards":guards,"work":work,"done":0.0,"from":from,"who":who})
 	c.results["workers"]=workers
+	c.results["work_who"]=who
 	_gov(c,{"welfare":-0.05,"grievance":0.08*_resent(c),"trust":-0.05*_resent(c),"inequality":0.05,"repression":0.05})
 	c["harsh"]=float(c.harsh)+0.8
 	c["weight"]=int(c.weight)+workers
 	var under:=_count(maxi(1,guards if guards>0 else int(bind.get("guards",1))))
-	var gang:=("%s of the bound men" % _count(workers)) if from=="bound" else "%s men of %s" % [_count(workers),name]
+	var gang:=("%s of the bound %s" % [_count(workers),words]) if from=="bound" else "%s %s of %s" % [_count(workers),words,name]
 	var t:=""
 	match work:
 		"walls": t="From tomorrow %s are put to forced labour on %s round the town, in gangs under %s of ours. They eat from their own stores. It will take about a month." % [gang,_wall_words(c),under]
@@ -1055,7 +1071,7 @@ static func _labour(c:Dictionary)->void:
 		"roads": t="From tomorrow %s are put to forced labour clearing %s from the town toward %s, under %s of ours. Our carriers will reach the garrison quicker when it is done." % [gang,_road_words(c),_home(),under]
 		_: t="From tomorrow %s are put to forced labour, carrying and digging wherever the garrison needs them, under %s of ours." % [gang,under]
 	(c.texts as Array).append(_cap(t))
-	(c.notes as Array).append("%s men of %s were put to forced labour." % [_cap(_count(workers)),name])
+	(c.notes as Array).append("%s %s of %s were put to forced labour." % [_cap(_count(workers)),words,name])
 	(c.titles as Array).append("%s Put to Work" % name)
 
 static func _requisition(c:Dictionary)->void:
@@ -1180,7 +1196,7 @@ static func _release(c:Dictionary)->void:
 				_gov(c,{"grievance":-0.04,"trust":0.05})
 				c["mercy"]=float(c.mercy)+0.3
 			"labour":
-				said.append(("The work gangs are sent home, %s men." % _count(n)) if n>0 else "The work gangs are sent home.")
+				said.append(("The work gangs are sent home, %s %s." % [_count(n),_who_words(String(m.get("who","men")))]) if n>0 else "The work gangs are sent home.")
 				_gov(c,{"welfare":0.02})
 				c["mercy"]=float(c.mercy)+0.2
 			"curfew":
@@ -1465,7 +1481,7 @@ static func _outcome(c:Dictionary)->String:
 			"hostages": bits.append("%s hostages held" % _count(int(r.get("hostages",0))))
 			"curfew": bits.append("kept to their houses after dark")
 			"search": bits.append("every house searched")
-			"labour": bits.append("%s men at forced labour" % _count(int(r.get("workers",0))))
+			"labour": bits.append("%s %s at forced labour" % [_count(int(r.get("workers",0))),_who_words(String(r.get("work_who","men")))])
 			"requisition": bits.append("%d Food taken from their stores" % int(r.get("food",0)))
 			"conscript": bits.append("%s of their men serving with ours" % _count(int(r.get("conscripts",0))))
 			"execute_ringleaders": bits.append("%s ringleaders put to death" % _count(int(r.get("executed",0))))
@@ -1496,7 +1512,7 @@ static func card_label(m:Dictionary,l:Dictionary={},force:Dictionary={})->String
 			var men_only:=l.is_empty() or Ledger.count(l,"bound")==Ledger.count(l,"bound","men")
 			return "%s · %d" % ["Men bound and under guard" if men_only else "People bound and under guard",bound]
 		"hostages": return "Hostages held · %d" % (Ledger.count(l,"hostage") if not l.is_empty() else n)
-		"labour": return "Men at forced labour · %d" % (Ledger.count(l,"worker") if not l.is_empty() else n)
+		"labour": return "%s at forced labour · %d" % [_cap(_who_words(String(m.get("who","men")))),(Ledger.count(l,"worker") if not l.is_empty() else n)]
 		"conscript": return "Their men serving with ours · %d" % (Ledger.count(l,"conscript") if not l.is_empty() else n)
 		"execute_ringleaders": return "Ringleaders put to death · %d" % int(m.get("dead",n))
 		"curfew": return "Kept to their houses"
@@ -1572,7 +1588,7 @@ static func report_lines(civ_id:String,region_id:String)->Array[Dictionary]:
 			"labour":
 				n=Ledger.count(l,"worker")
 				value=str(n)
-				text="%s men work %s under our guard.%s" % [_cap(_count(n)),{"walls":"on a wall round the town","fields":"their fields for us","roads":"on a track toward "+_home()}.get(String(m.get("work","")),"wherever the garrison needs them"),holds]
+				text="%s %s work %s under our guard.%s" % [_cap(_count(n)),_who_words(String(m.get("who","men"))),{"walls":"on a wall round the town","fields":"their fields for us","roads":"on a track toward "+_home()}.get(String(m.get("work","")),"wherever the garrison needs them"),holds]
 			"conscript":
 				n=Ledger.count(l,"conscript")
 				value=str(n); text="%s of their young men serve with the garrison%s.%s" % [_cap(_count(n)),"; %s have run off" % _count(int(m.get("deserted",0))) if int(m.get("deserted",0))>0 else "",holds]
@@ -1854,9 +1870,10 @@ static func _ended(m:Dictionary,force:Dictionary,civ_id:String,region_id:String,
 		"labour":
 			var bound_still:=String(m.get("from",""))=="bound" and not _running(force,"bind_men").is_empty()
 			var n:=0
-			if bound_still: n=Ledger.move(l,"worker","bound","men",Ledger.count(l,"worker","men"))
+			if bound_still:
+				for g in Ledger.GROUPS: n+=Ledger.move(l,"worker","bound",String(g),Ledger.count(l,"worker",String(g)))
 			else: n=_send_home(l,"worker")
-			var back:=" They are back with the other bound men." if bound_still else ""
+			var back:=(" They are back with the other bound %s." % _who_words(String(m.get("who","men")))) if bound_still else ""
 			match String(m.get("work","")):
 				"walls": text="The work gangs at %s are done. The town has a stake wall and a ditch round it now.%s" % [name,back]
 				"fields": text="The work gangs at %s are done. Their fields gave %d Food to the garrison and to %s.%s" % [name,roundi(float(m.get("done",0.0))),_home(),back]

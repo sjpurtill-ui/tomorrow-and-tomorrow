@@ -387,7 +387,8 @@ static func _captive_policy(lower:String,part:String)->String:
 		if _has(lower,"\\b(stores?|store ?houses?|granar\\w*|common)\\b"): return "army stores"
 		return ""
 	if _has(lower,"\\b(kill|execute|put ([\\w']+ ){0,3}to death|slay|behead|hang)\\b"): return "execute"
-	if _has(lower,"\\b(ransom|sell ([\\w']+ ){0,3}back|trade ([\\w']+ ){0,3}back)\\b"): return "ransom"
+	# "Sell the captives": back to their own people for goods, the one sale there is.
+	if _has(lower,"\\b(ransom|sell|trade ([\\w']+ ){0,3}back)\\b"): return "ransom"
 	if part=="prisoners" and _has(lower,"\\b(bondservants?|bondsmen|slaves?|enslave|put ([\\w']+ ){0,3}to work|make ([\\w']+ ){0,3}work|servants)\\b"): return "enslave"
 	if _has(lower,"\\b(free|freed|release|let ([\\w']+ ){0,3}go|set ([\\w']+ ){0,3}free|send ([\\w']+ ){0,3}home|spare|unbind|untie)\\b"): return "release"
 	if _has(lower,"\\b(keep|hold|guard|lock ([\\w']+ ){0,3}up)\\b"): return "hold"
@@ -1367,7 +1368,7 @@ static func _mark_asked(audience_id:String,key:String)->void:
 static func _measure_opts(reading:Dictionary)->Dictionary:
 	var m:Dictionary=reading.get("measure",{}) if reading.get("measure") is Dictionary else {}
 	var opts:={"stance":String(m.get("stance","firm")),"stance_set":bool(m.get("stance_set",false)),"families":bool(m.get("families",false)),"clause":String(m.get("clause","")),
-		"who":String(m.get("who","men")),"work":String(m.get("work","")),"count":int(m.get("count",0)),"headman":String(m.get("headman","")),"release":(m.get("release",[]) as Array).duplicate(),
+		"who":String(m.get("who","men")),"work":String(m.get("work","")),"work_who":String(m.get("work_who","men")),"count":int(m.get("count",0)),"headman":String(m.get("headman","")),"release":(m.get("release",[]) as Array).duplicate(),
 		"destroy":bool(m.get("destroy",false)),"heavy":bool(m.get("heavy",false)),"tone":String(m.get("tone","")),"words":String(m.get("words",reading.get("text","")))}
 	return opts
 
