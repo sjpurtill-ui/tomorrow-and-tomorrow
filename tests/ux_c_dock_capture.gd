@@ -3,6 +3,7 @@ extends Node
 ## world and saves it, for UX review. Run it only through
 ## tools/run_isolated_gpu_probe.ps1 with user arguments
 ##   --dock=<section>/<sub> --out=res://artifacts/<name>.png
+## and, for the Settlement dock's "New towns" switch, --auto-found=off.
 const DockPanel:=preload("res://scripts/hud/dock_panel.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const PROVIDERS:={
@@ -55,6 +56,8 @@ func _ready()->void:
 	GameState.simulation_metrics.merge({"food_days":46.0,"food_production":62.0,"food_eaten":70.0,"food_spoilage":3.0,"food_net":-11.0,"food_weather_factor":0.9,"housing_ratio":0.85,"labor_efficiency":0.74,"cohesion":0.8,"food_forecast_90":{"first_shortage_day":38}},true)
 	GameState.water_metrics={"required_today":140.0,"collected_today":126.0,"intake_ratio":0.9,"stored":60.0,"days":0.4}
 	GameState.material_metrics.merge({"storage_capacity":80.0,"flow_ratio":0.55},true)
+	PeopleDirection.reset_for_new_world();PeopleDirection.ensure()
+	if "--auto-found=off" in OS.get_cmdline_user_args():preload("res://scripts/auto_founding.gd").set_on(false)
 	var backdrop:=ColorRect.new();backdrop.color=T.PAPER;backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(backdrop)
 	var hud:=CaptureHud.new();hud.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(hud)
 	var panel=DockPanel.new();hud.add_child(panel);hud.dock=panel

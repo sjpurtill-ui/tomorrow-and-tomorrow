@@ -707,6 +707,34 @@
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"handled": true, "state": {"modifiers": ">before"}}},
 
+  {"id": "home.found_stop", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "The ruler chooses, while playing, whether our leaders found new towns on their own. The word sets the same switch as the Settlement dock (auto_founding.gd): never a law or a standing directive.",
+   "say": "Stop founding new towns",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"auto_found": "==0", "modifiers": "==before", "moving": "==before"}, "reply_has": ["unless you order it"]},
+   "variants": ["don't found any more towns without my word", "No more new towns unless I say so", "Stop sending settlers out", "Never settle new land without my word", "From now on, no new towns are to be founded without my word"]},
+
+  {"id": "home.found_allow", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Stopped, then allowed again: the switch is on once more, and the headman says when they next look for land and what keeps them home.",
+   "steps": [
+    {"say": "Stop founding new towns", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"state": {"auto_found": "==0"}}},
+    {"say": "Found new towns as you see fit", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+     "expect": {"handled": true, "verb": "order", "state": {"auto_found": "==1", "modifiers": "==before"}, "reply_has": ["good free land"]}}],
+   "variants": [{"say": "our leaders may settle new land again"}, {"say": "Let our leaders found new towns again"}, {"say": "You no longer need my word to found new towns"}]},
+
+  {"id": "home.found_stop.war", "domain": "home_orders", "fixture": "war_not_held", "speaker": "suri", "source": "design",
+   "note": "Said to the war leader at war: still the god's word on new towns, never a march or a law.",
+   "say": "Don't found any more towns without my word",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"auto_found": "==0", "moving": "==before", "to_tsaren": "==before", "modifiers": "==before"}}},
+
+  {"id": "home.found_allow.held", "domain": "home_orders", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "Settling new land is our leaders' founding, never the garrison's measure to settle our families in the town we hold; the headman says what keeps them home.",
+   "steps": [
+    {"say": "Stop founding new towns", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"state": {"auto_found": "==0"}}},
+    {"say": "Our leaders may settle new land again", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+     "expect": {"handled": true, "verb": "order", "state": {"auto_found": "==1", "measures": "==before", "m_settle": "==0", "modifiers": "==before"}, "reply_has": ["Nobody goes yet"]}}]},
+
   {"id": "person.kill_him", "domain": "person_acts", "fixture": "home_peace", "speaker": "headman", "source": "user",
    "say": "Kill him",
    "ideal": {"kind": "order", "action": "kill", "type": "person", "ref": "$headman", "confidence": 0.95},
