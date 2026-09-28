@@ -180,6 +180,8 @@ var world_tributary_courses: Array[Array] = []
 var river_terrain_height_texture:ImageTexture
 ## The patch heights with box-filtered mip levels (map_chart.gdshaderinc).
 var chart_relief_texture:ImageTexture
+## The patch's land cover and land/water mask, likewise (map_chart).
+var chart_cover_texture:ImageTexture
 var river_terrain_grid:=Vector4.ZERO
 var coastal_water_material:ShaderMaterial
 var ocean_surface:MeshInstance3D
@@ -1659,7 +1661,7 @@ func _advance_terrain_patch()->void:
 	# obvious hitches even though the final terrain arrived sooner.
 	if not terrain_patch_job.advance(TERRAIN_PATCH_MOVING_BUDGET_USEC if _camera_in_motion() else TERRAIN_PATCH_IDLE_BUDGET_USEC): return
 	var started:=Time.get_ticks_usec()
-	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights,"samples":terrain_patch_job.completed_samples(),"sample_seed":GameState.world_seed,"sample_province":GameState.active_province}
+	var completed:Dictionary={"mesh":terrain_patch_job.commit(),"center":terrain_patch_job.center,"span":terrain_patch_job.span,"resolution":terrain_patch_job.resolution,"heights":terrain_patch_job.heights,"cover":terrain_patch_job.cover,"samples":terrain_patch_job.completed_samples(),"sample_seed":GameState.world_seed,"sample_province":GameState.active_province}
 	terrain_patch_last_slice_usec=terrain_patch_job.max_slice_usec
 	terrain_patch_last_reused_vertices=terrain_patch_job.reused_vertices
 	terrain_patch_last_sampled_vertices=terrain_patch_job.sampled_vertices
@@ -1692,6 +1694,14 @@ func _install_regional_patch(completed:Dictionary)->void:
 	# generalised landform (map_chart.gdshaderinc).
 	height_image.generate_mipmaps()
 	chart_relief_texture=ImageTexture.create_from_image(height_image)
+	# Its land cover and land/water mask, likewise (the chart's woods, marsh
+	# and water-lines); patches built elsewhere without it keep the last off.
+	var cover:PackedByteArray=completed.get("cover",PackedByteArray())
+	chart_cover_texture=null
+	if cover.size()==regional_patch_resolution*regional_patch_resolution*4:
+		var cover_image:=Image.create_from_data(regional_patch_resolution,regional_patch_resolution,false,Image.FORMAT_RGBA8,cover)
+		cover_image.generate_mipmaps()
+		chart_cover_texture=ImageTexture.create_from_image(cover_image)
 	river_terrain_grid=Vector4(regional_patch_center.x,regional_patch_center.y,regional_patch_span,float(regional_patch_resolution))
 	for river in river_overlays: _bind_river_terrain(river.material_override)
 	# The patch's land draws its shoreline from the same heights (map_coast).
@@ -2997,6 +3007,7 @@ func _bind_river_terrain(material:ShaderMaterial)->void:
 	material.set_shader_parameter("terrain_heights",river_terrain_height_texture)
 	material.set_shader_parameter("terrain_grid",river_terrain_grid)
 	if chart_relief_texture:material.set_shader_parameter("chart_relief",chart_relief_texture)
+	material.set_shader_parameter("chart_cover",chart_cover_texture)
 
 func _build_river_network() -> void:
 	var banks := SurfaceTool.new()

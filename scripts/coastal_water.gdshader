@@ -209,14 +209,23 @@ void fragment() {
 	// From the regional view outward the sea is the chart's pale wash on the
 	// same paper as the land (map_chart.gdshaderinc), crossfaded by view scale.
 	float mc_w = mc_chart_weight(mc_design_km(relative_position,PROJECTION_MATRIX));
+	// The shore blurred over the three water-lines' widths, and their screen
+	// rates, taken here outside any branch.
+	float mc_land1 = mc_cover(world_position.xz,14.0,pixel_world).w;
+	float mc_land2 = mc_cover(world_position.xz,27.0,pixel_world).w;
+	float mc_land3 = mc_cover(world_position.xz,45.0,pixel_world).w;
+	float mc_land1_px = fwidth(mc_land1);
+	float mc_land2_px = fwidth(mc_land2);
+	float mc_land3_px = fwidth(mc_land3);
 	vec3 chart_sea = vec3(0.0);
 	if (mc_w>0.0) {
 		chart_sea = mc_chart_sea(depth,world_position.xz,CAMERA_POSITION_WORLD.y);
 		// The sea's half of the coast ink, water-lines along every shore and
-		// a light stipple (map_chart).
+		// a light stipple inshore (map_chart).
 		float shore_px = mc_shore_px(world_position.xz,pixel_world);
-		chart_sea = mc_waterlines(chart_sea,shore_px,world_position.xz,pixel_world,CAMERA_POSITION_WORLD.y);
-		chart_sea = mix(chart_sea,MAP_INK*1.3,mc_coast_ink(shore_px)*0.85);
+		chart_sea = mc_waterlines(chart_sea,shore_px,mc_land1,mc_land1_px,mc_land2,mc_land2_px,mc_land3,mc_land3_px,world_position.xz,pixel_world);
+		// (Never round a shoal that stays under water: land must be near.)
+		chart_sea = mix(chart_sea,MAP_INK*1.3,mc_coast_ink(shore_px)*0.85*(mc_land1 < 0.0 ? 1.0 : smoothstep(0.015,0.06,mc_land1)));
 	}
 	ALBEDO = water*visible*(1.0-mc_w);
 	// A chart's sea is a pale slate wash on the page, legible in any light:
