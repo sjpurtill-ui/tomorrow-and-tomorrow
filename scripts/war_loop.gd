@@ -237,7 +237,10 @@ static func observed_battles()->Array:
 ## Keeps a clash for the battle panel: the block battle as fought, each
 ## side's numbers and general, and where. home: our side's role. Returns
 ## the seed the panel opens it by (-1 when there is nothing to keep).
-static func _observe(key:String,title:String,where:String,civ_id:String,home:String,fight:Dictionary)->int:
+## told: what the Chronicle and the court were told (and the peoples'
+## ledgers registered): {home_dead, away_dead, home_taken, away_taken}. The
+## kept battle says the same (_match_told).
+static func _observe(key:String,title:String,where:String,civ_id:String,home:String,fight:Dictionary,told:Dictionary={})->int:
 	var result:Dictionary=fight.get("result",{}) if fight.get("result") is Dictionary else {}
 	var battle:Variant=result.get("battle",{})
 	if not battle is Dictionary or (battle as Dictionary).is_empty(): return -1
@@ -252,6 +255,7 @@ static func _observe(key:String,title:String,where:String,civ_id:String,home:Str
 		"threat":{"source_civ_id":civ_id,"source_name":_name(civ_id),"discovered_day":_day(),"field_encounter":true},
 		"battle":(battle as Dictionary).duplicate(true),"tactics":(fight.get("tactics",{}) as Dictionary).duplicate(true),"outcome":String(result.get("outcome","")),
 		"termination":(result.get("termination",{}) as Dictionary).duplicate(true),"rounds":rounds,"where":where,"headline":title}
+	if not told.is_empty(): _match_told(record,told)
 	var s:=state()
 	var list:Array=s.battles
 	list.push_front(record)
@@ -259,6 +263,40 @@ static func _observe(key:String,title:String,where:String,civ_id:String,home:Str
 	while list.size()>1 and (JSON.stringify(list).length()>OBSERVED_CHARS or JSON.stringify(s).length()>STATE_CHARS): list.pop_back()
 	if JSON.stringify(s).length()>STATE_CHARS: list.clear(); return -1
 	return seed
+
+
+## The kept battle's dead and taken made what was told: each side's killed
+## are the dead counted (the rest of its losses hurt or scattered, each
+## exchange's losses unchanged), and those taken are the beaten side's
+## captives told. A war leader's clash takes nobody in the fight itself.
+static func _match_told(record:Dictionary,told:Dictionary)->void:
+	var home:=String(record.get("home_side","defender"))
+	var away:="defender" if home=="attacker" else "attacker"
+	var rounds:Array=record.get("rounds",[])
+	for pair in [[home,int(told.get("home_dead",-1))],[away,int(told.get("away_dead",-1))]]:
+		var side:=String(pair[0])
+		var want:=int(pair[1])
+		var have:=0
+		for r in rounds:
+			var c:Dictionary=(r as Dictionary).get(side+"_casualties",{})
+			c["scattered"]=int(c.get("scattered",0))+int(c.get("captured",0)); c["captured"]=0
+			have+=int(c.get("killed",0))
+		if want<0: continue
+		var shift:=have-want
+		for r in rounds:
+			if shift==0: break
+			var c:Dictionary=(r as Dictionary).get(side+"_casualties",{})
+			if shift>0:
+				var down:=mini(shift,int(c.get("killed",0)))
+				c["killed"]=int(c.get("killed",0))-down; c["wounded"]=int(c.get("wounded",0))+down; shift-=down
+			else:
+				var from_wounded:=mini(-shift,int(c.get("wounded",0)))
+				c["wounded"]=int(c.get("wounded",0))-from_wounded; c["killed"]=int(c.get("killed",0))+from_wounded; shift+=from_wounded
+				var from_scattered:=mini(-shift,int(c.get("scattered",0)))
+				c["scattered"]=int(c.get("scattered",0))-from_scattered; c["killed"]=int(c.get("killed",0))+from_scattered; shift+=from_scattered
+	var termination:Dictionary=record.get("termination",{})
+	var beaten_home:=String(termination.get("defeated",""))==String((record.get(home,{}) as Dictionary).get("name","~"))
+	termination["prisoners"]=maxi(0,int(told.get("home_taken" if beaten_home else "away_taken",0)))
 
 
 static func _slim_force(force:Dictionary)->Dictionary:
@@ -552,7 +590,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool)->Dictionary:
 	if guarded and not won: text+=" The watch at the approaches held."
 	text+=" It was for %s." % _cause_words(civ_id,cause) if cause!="" else ""
 	var title:="%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_cap(where.trim_prefix("our "))]
-	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight)
+	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
 	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id,seen)
 	ForeignDiplomacy.remember(civ_id,"Our %s went against the god's people at %s and came home with %d Food." % ["fighters" if skirmish else "raiders",where,roundi(taken)])
 	_log(civ_id,"skirmish" if skirmish else "raid",text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause})
@@ -800,7 +838,7 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 			_rivals().call("grudge",civ_id,"the %s you burned" % "stores" if objective=="war_burn" else "hunters you killed on our own ground",0.4,"struck:"+key)
 			if rng.randf()<(0.6 if objective=="war_burn" else 0.4): _schedule(civ_id,day+rng.randi_range(60,300),"vengeance",key)
 	Hall._shift_relation(civ_id,-0.05,0.08)
-	var seen:=_observe(key,title,String(OP_WHERE.get(objective,"on their own ground")),civ_id,"attacker",fight)
+	var seen:=_observe(key,title,String(OP_WHERE.get(objective,"on their own ground")),civ_id,"attacker",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":0,"away_taken":captives})
 	_chronicle(key,title,text,"moment",civ_id,seen)
 	_log(civ_id,"op_"+objective.trim_prefix("war_"),text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"loot":roundi(loot),"captives":captives})
 	if at_war and bool(war.get("chief_held",false)): return
@@ -847,7 +885,7 @@ static func _enemy_op(civ_id:String,day:int)->void:
 		text="%d %s fighters came at %s and were thrown back%s. %s" % [their_n,name,String(t.words)," by the watch at the approaches" if guarded else "",_dead_words(our_dead,names,String(t.who))]
 		if their_dead>0: text+=" %d of theirs did not go home." % their_dead
 	var title:="%s %s" % [name,"Break Through" if won else "Thrown Back"]
-	var seen:=_observe(key,title,String(WHERE.get(target if target!="scouts" else "gathering","")),civ_id,"defender",fight)
+	var seen:=_observe(key,title,String(WHERE.get(target if target!="scouts" else "gathering","")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
 	_chronicle(key,title,text,"moment" if our_dead>0 or captives>0 or won else "notice",civ_id,seen)
 	_log(civ_id,"enemy_attack",text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives})
 	if (war.op as Dictionary).is_empty() and day-int(front(civ_id).get("matter_day",-1))>45: _file(civ_id,"report",text,day)
