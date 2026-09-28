@@ -1,0 +1,12 @@
+{
+  "id": "town_enclosure_walls",
+  "line": "infrastructure",
+  "game_year": 300,
+  "approx_historical_year": -3000,
+  "prompt": "c. 3000 BCE: Mudbrick Town Enclosure Wall. Mudbrick town enclosure wall. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-67b5bdda-103d-451a-98ae-40076e90d2de.png",
+  "asset": "res://assets/ui/research/subjects/town_enclosure_walls-v1.png",
+  "sha256": "e08156df3749edbb8fe531660f5f4bb4dfdd608e1567d682607c1db9965c2d8b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

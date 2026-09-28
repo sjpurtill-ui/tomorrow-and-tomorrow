@@ -1,0 +1,12 @@
+{
+  "id": "copper_carpentry_tools",
+  "line": "production",
+  "game_year": 320,
+  "approx_historical_year": -2867,
+  "prompt": "c. 2867 BCE: Copper Saws, Chisels and Drills for Stone and Wood. Copper saws, chisels and drills for stone and wood. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-57c64da8-ecdf-4bc8-abc4-0b65716a56d8.png",
+  "asset": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png",
+  "sha256": "9834aa7e35553d1e7f9d5b66f02aef50515278c95e9408e2a67b6984439cca02",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

@@ -4144,5 +4144,21 @@
   "lampblack_capture": {"path": "res://assets/ui/research/subjects/lampblack_capture-v1.png", "focus": [0.5, 0.6]},
   "post_storm_resource_pooling": {"path": "res://assets/ui/research/subjects/post_storm_resource_pooling-v1.png", "focus": [0.5, 0.5]},
   "seasonal_trade_gathering": {"path": "res://assets/ui/research/subjects/seasonal_trade_gathering-v1.png", "focus": [0.5, 0.5]},
-  "succession_naming_rites": {"path": "res://assets/ui/research/subjects/succession_naming_rites-v1.png", "focus": [0.5, 0.5]}
+  "succession_naming_rites": {"path": "res://assets/ui/research/subjects/succession_naming_rites-v1.png", "focus": [0.5, 0.5]},
+  "diversion_dams": {"path": "res://assets/ui/research/subjects/diversion_dams-v1.png", "focus": [0.5, 0.5]},
+  "household_muster": {"path": "res://assets/ui/research/subjects/household_muster-v1.png", "focus": [0.5, 0.5]},
+  "named_soil_kinds": {"path": "res://assets/ui/research/subjects/named_soil_kinds-v1.png", "focus": [0.5, 0.36]},
+  "wound_suturing": {"path": "res://assets/ui/research/subjects/wound_suturing-v1.png", "focus": [0.5, 0.5]},
+  "town_enclosure_walls": {"path": "res://assets/ui/research/subjects/town_enclosure_walls-v1.png", "focus": [0.5, 0.5]},
+  "salinity_recognition": {"path": "res://assets/ui/research/subjects/salinity_recognition-v1.png", "focus": [0.5, 0.5]},
+  "stock_rotation": {"path": "res://assets/ui/research/subjects/stock_rotation-v1.png", "focus": [0.5, 0.5]},
+  "apprentice_for_keep": {"path": "res://assets/ui/research/subjects/apprentice_for_keep-v1.png", "focus": [0.5, 0.38]},
+  "temple_workshops": {"path": "res://assets/ui/research/subjects/temple_workshops-v1.png", "focus": [0.5, 0.27]},
+  "titled_estate_overseers": {"path": "res://assets/ui/research/subjects/titled_estate_overseers-v1.png", "focus": [0.5, 0.5]},
+  "riverbank_shift_watch": {"path": "res://assets/ui/research/subjects/riverbank_shift_watch-v1.png", "focus": [0.5, 0.5]},
+  "brine_fermentation": {"path": "res://assets/ui/research/subjects/brine_fermentation-v1.png", "focus": [0.5, 0.5]},
+  "herringbone_plano_convex_brick": {"path": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png", "focus": [0.5, 0.5]},
+  "woven_dressings": {"path": "res://assets/ui/research/subjects/woven_dressings-v1.png", "focus": [0.5, 0.5]},
+  "copper_carpentry_tools": {"path": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png", "focus": [0.5, 0.5]},
+  "salt_leaching_fallow": {"path": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png", "focus": [0.5, 0.5]}
 }

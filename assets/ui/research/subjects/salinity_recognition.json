@@ -1,0 +1,12 @@
+{
+  "id": "salinity_recognition",
+  "line": "ecology",
+  "game_year": 305,
+  "approx_historical_year": -2967,
+  "prompt": "c. 2967 BCE: Salt Crust Recognized on Irrigated Fields. Salt crust recognized on irrigated fields. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a8e08d43-5a2a-4066-a324-117dfecaf80f.png",
+  "asset": "res://assets/ui/research/subjects/salinity_recognition-v1.png",
+  "sha256": "e957f62b7d12fe7d4678786b7dafe53c95c0cd747a8f2dc26d0cc568f25ef9fd",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

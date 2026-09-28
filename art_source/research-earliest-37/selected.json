@@ -1,0 +1,206 @@
+[
+  {
+    "id": "diversion_dams",
+    "line": "infrastructure",
+    "game_year": 290,
+    "approx_historical_year": -3067,
+    "prompt": "c. 3067 BCE: Rubble Diversion Dams and Reservoirs. Rubble diversion dams and reservoirs. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4d941183-4862-45b0-9633-b2fcbeee08f4.png",
+    "asset": "res://assets/ui/research/subjects/diversion_dams-v1.png",
+    "sha256": "5802366536b9634f3c4baa57b4ecf05691a235df894577095b04772b74aef6bb",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "household_muster",
+    "line": "security",
+    "game_year": 290,
+    "approx_historical_year": -3067,
+    "prompt": "c. 3067 BCE: Household Muster of Able Fighters. Household muster of able fighters. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c6fa575a-4ce4-4c10-ab9c-5a6467c8e3f1.png",
+    "asset": "res://assets/ui/research/subjects/household_muster-v1.png",
+    "sha256": "2be0c3e4c6ab0392673dadb013ec8171a689a65f3e09f75abce6851515e23865",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "named_soil_kinds",
+    "line": "ecology",
+    "game_year": 290,
+    "approx_historical_year": -3067,
+    "prompt": "c. 3067 BCE: Named Soil Kinds. Named soil kinds: heavy, light, sandy, salty. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ccd9d7f4-283e-4b65-b735-81f82e3fa198.png",
+    "asset": "res://assets/ui/research/subjects/named_soil_kinds-v1.png",
+    "sha256": "895a8581db54eede44248294ed3a2b39100676a00494cded19a4964be0b5c0d6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  {
+    "id": "wound_suturing",
+    "line": "health",
+    "game_year": 292,
+    "approx_historical_year": -3053,
+    "prompt": "c. 3053 BCE: Stitching Wounds with Thread. Stitching wounds with thread. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-766a1a86-9609-4848-9ac4-939d28deb97b.png",
+    "asset": "res://assets/ui/research/subjects/wound_suturing-v1.png",
+    "sha256": "6db600c04f42cc901fccc6fb425bc2286b2a8ba57c4b155ee4dc688f6d381b1a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "town_enclosure_walls",
+    "line": "infrastructure",
+    "game_year": 300,
+    "approx_historical_year": -3000,
+    "prompt": "c. 3000 BCE: Mudbrick Town Enclosure Wall. Mudbrick town enclosure wall. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-67b5bdda-103d-451a-98ae-40076e90d2de.png",
+    "asset": "res://assets/ui/research/subjects/town_enclosure_walls-v1.png",
+    "sha256": "e08156df3749edbb8fe531660f5f4bb4dfdd608e1567d682607c1db9965c2d8b",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "salinity_recognition",
+    "line": "ecology",
+    "game_year": 305,
+    "approx_historical_year": -2967,
+    "prompt": "c. 2967 BCE: Salt Crust Recognized on Irrigated Fields. Salt crust recognized on irrigated fields. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a8e08d43-5a2a-4066-a324-117dfecaf80f.png",
+    "asset": "res://assets/ui/research/subjects/salinity_recognition-v1.png",
+    "sha256": "e957f62b7d12fe7d4678786b7dafe53c95c0cd747a8f2dc26d0cc568f25ef9fd",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "stock_rotation",
+    "line": "nutrition",
+    "game_year": 305,
+    "approx_historical_year": -2967,
+    "prompt": "c. 2967 BCE: Stores Rotated by Date, Oldest Used First. Stores rotated by date, oldest used first. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7c3ff663-3af3-4e91-8b94-c02c7e832ba2.png",
+    "asset": "res://assets/ui/research/subjects/stock_rotation-v1.png",
+    "sha256": "d844b7d6ff6f7b93db4e38922839cf873fc3811f23613a864c45d4a127f82a88",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "apprentice_for_keep",
+    "line": "labor",
+    "game_year": 310,
+    "approx_historical_year": -2933,
+    "prompt": "c. 2933 BCE: Apprentice Works for Keep While Learning. Apprentice works for keep while learning. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3c9d40cc-94ee-4966-9c1a-04103f4eee42.png",
+    "asset": "res://assets/ui/research/subjects/apprentice_for_keep-v1.png",
+    "sha256": "32888cd79b9691431fbf037e2771814104d439052f51b50af0b699ff307a9cea",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  {
+    "id": "temple_workshops",
+    "line": "production",
+    "game_year": 310,
+    "approx_historical_year": -2933,
+    "prompt": "c. 2933 BCE: Temple Workshops Under an Overseer. Temple workshops under an overseer. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d14dd652-58bf-43b4-b7ef-3fe367a259e6.png",
+    "asset": "res://assets/ui/research/subjects/temple_workshops-v1.png",
+    "sha256": "b76f1f12bd7d45b02fdff82a67221e4555a79ede79496065582d297993282774",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.27
+    ]
+  },
+  {
+    "id": "titled_estate_overseers",
+    "line": "institutions",
+    "game_year": 310,
+    "approx_historical_year": -2933,
+    "prompt": "c. 2933 BCE: Titled Overseers of Fields, Granary and Works. Titled overseers of fields, granary and works. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4e009496-971d-4c8c-824f-b0b36436233e.png",
+    "asset": "res://assets/ui/research/subjects/titled_estate_overseers-v1.png",
+    "sha256": "16bb7ec88543faee723227b846dd2f1cb97f017653d7bc6ba14d8e0358db64f8",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "riverbank_shift_watch",
+    "line": "ecology",
+    "game_year": 312,
+    "approx_historical_year": -2920,
+    "prompt": "c. 2920 BCE: Shifting Riverbanks Watched Before Siting Fields. Shifting riverbanks watched before siting fields. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a32071b9-dd8a-4cb2-a422-50618990095a.png",
+    "asset": "res://assets/ui/research/subjects/riverbank_shift_watch-v1.png",
+    "sha256": "1ba7721bcf3648422602e9c26f179713ae2be7a320c891aad24fd6d44617e07a",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "brine_fermentation",
+    "line": "nutrition",
+    "game_year": 315,
+    "approx_historical_year": -2900,
+    "prompt": "c. 2900 BCE: Vegetables and Fish Fermented in Brine. Vegetables and fish fermented in brine. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4cf05e72-28e2-44be-bd44-d412df67575c.png",
+    "asset": "res://assets/ui/research/subjects/brine_fermentation-v1.png",
+    "sha256": "12ef7e780b259244255c70503964ce0979c9cd2459beae900cac3d180a835ad9",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "herringbone_plano_convex_brick",
+    "line": "infrastructure",
+    "game_year": 315,
+    "approx_historical_year": -2900,
+    "prompt": "c. 2900 BCE: Plano-convex Brick Laid in Herringbone Courses. Plano-convex brick laid in herringbone courses. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-79bafcee-45ac-4c44-b9c6-a4b8f6acbd3f.png",
+    "asset": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png",
+    "sha256": "a473bf3374e7e6993e2c19ee5a5cec75a928ab499c5db06a4ba7417ffbb6d3e6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "woven_dressings",
+    "line": "health",
+    "game_year": 318,
+    "approx_historical_year": -2880,
+    "prompt": "c. 2880 BCE: Woven Linen Dressings. Woven linen dressings. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-abff697b-8355-490e-a789-1ad689c8b660.png",
+    "asset": "res://assets/ui/research/subjects/woven_dressings-v1.png",
+    "sha256": "1ccea60378816235929d52e485be8ee8995f2c10a61c2826e6dc721a98f919a6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "copper_carpentry_tools",
+    "line": "production",
+    "game_year": 320,
+    "approx_historical_year": -2867,
+    "prompt": "c. 2867 BCE: Copper Saws, Chisels and Drills for Stone and Wood. Copper saws, chisels and drills for stone and wood. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-57c64da8-ecdf-4bc8-abc4-0b65716a56d8.png",
+    "asset": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png",
+    "sha256": "9834aa7e35553d1e7f9d5b66f02aef50515278c95e9408e2a67b6984439cca02",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  },
+  {
+    "id": "salt_leaching_fallow",
+    "line": "ecology",
+    "game_year": 320,
+    "approx_historical_year": -2867,
+    "prompt": "c. 2867 BCE: Salted Fields Leached with Fresh Water and Rested. Salted fields leached with fresh water and rested. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b21540aa-15a3-4d2c-abd5-da4881773aa0.png",
+    "asset": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png",
+    "sha256": "3fe47d48fadfac7adf7df82e7380e0bb964c6fea9c2216811e6ddd3ee2baabac",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  }
+]

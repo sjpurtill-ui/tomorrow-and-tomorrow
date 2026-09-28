@@ -1,0 +1,16 @@
+{
+  "id": "named_soil_kinds",
+  "line": "ecology",
+  "game_year": 290,
+  "approx_historical_year": -3067,
+  "prompt": "c. 3067 BCE: Named Soil Kinds. Named soil kinds: heavy, light, sandy, salty. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ccd9d7f4-283e-4b65-b735-81f82e3fa198.png",
+  "asset": "res://assets/ui/research/subjects/named_soil_kinds-v1.png",
+  "sha256": "895a8581db54eede44248294ed3a2b39100676a00494cded19a4964be0b5c0d6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.36
+  ]
+}
