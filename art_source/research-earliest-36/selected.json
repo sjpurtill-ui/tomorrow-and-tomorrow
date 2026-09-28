@@ -9,19 +9,23 @@
     "asset": "res://assets/ui/research/subjects/fuelwood_rotation-v1.png",
     "sha256": "67b914b116e05024630d75d7fb03ca5ce9b9c576752f57528cdbd57995a57e57",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Focus adjusted after integrator actual GPU card review to retain faces and essential action.",
+    "focus": [
+      0.5,
+      0.65
+    ]
   },
   {
     "id": "occupational_rest_customs",
     "line": "health",
     "game_year": 275,
     "approx_historical_year": -3167,
-    "prompt": "c. 3167 BCE: Rest Days for Heavy Trades. Rest days for heavy trades. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a9641f0a-63e4-4f3a-a316-52607b0c65f2.png",
+    "prompt": "c. 3167 BCE: Resting stone haulers drink water under reed shade while a fresh crew takes over a small rubble sledge at a simple mudbrick worksite; transparent watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c9fe04aa-7693-47db-a84f-f031fb21784b.png",
     "asset": "res://assets/ui/research/subjects/occupational_rest_customs-v1.png",
-    "sha256": "63e2491adddac48d2842c18f3c0dac20b1125b1a95ee99e18abacd97637b3102",
+    "sha256": "e297ab5d0182814e5b6c6490819e80223d8e945cc7c8e2349861727977afebe8",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Rerolled to remove monumental pyramids; reviewed full image and 3.37:1 crop."
   },
   {
     "id": "standard_unit_naming",
@@ -69,7 +73,11 @@
     "asset": "res://assets/ui/research/subjects/age_graded_load_limits-v1.png",
     "sha256": "5ff1e68cf6b0aec46c84fa686cc2ab6d08265dd5f20b84e68745c293806fb5e7",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Focus adjusted after integrator actual GPU card review to retain faces and essential action.",
+    "focus": [
+      0.5,
+      0.34
+    ]
   },
   {
     "id": "spring_head_fencing",
@@ -128,12 +136,12 @@
     "line": "logistics",
     "game_year": 285,
     "approx_historical_year": -3100,
-    "prompt": "c. 3100 BCE: Cache Capacity Accounted. Cache capacity accounted. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-dd444050-e3f7-41a6-8c3c-c6684d0d10e6.png",
+    "prompt": "c. 3100 BCE: Adults measure remaining capacity of three clay storage jars against full baskets; a steward counts plain clay pebbles at an inland mudbrick cache; travel watercolor. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fedb8d61-5878-4873-9aa0-4ef3224d7d00.png",
     "asset": "res://assets/ui/research/subjects/cache_capacity_accounting-v1.png",
-    "sha256": "b6ca69daaa54ddfcbdaf7572585fcd09703aaf60bf72ac90dc4fd9fdb2eb3048",
+    "sha256": "83b6ee684c8ec61399ed51054121ee64859e798ddca9c83f6d91b43617cb61ff",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Rerolled to remove incidental sailing rigs; reviewed full image and 3.37:1 crop with counters visible."
   },
   {
     "id": "combined_drill_musters",
@@ -157,7 +165,11 @@
     "asset": "res://assets/ui/research/subjects/lampblack_capture-v1.png",
     "sha256": "50a12e6b3128c8906a2a32efa8fd8bd576c61df628dad4c7bba3381f3c5b0b40",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Focus adjusted after integrator actual GPU card review to retain faces and essential action.",
+    "focus": [
+      0.5,
+      0.6
+    ]
   },
   {
     "id": "post_storm_resource_pooling",

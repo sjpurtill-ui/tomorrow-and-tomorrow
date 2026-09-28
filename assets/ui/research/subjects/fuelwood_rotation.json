@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/fuelwood_rotation-v1.png",
   "sha256": "67b914b116e05024630d75d7fb03ca5ce9b9c576752f57528cdbd57995a57e57",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator actual GPU card review to retain faces and essential action.",
+  "focus": [
+    0.5,
+    0.65
+  ]
 }
