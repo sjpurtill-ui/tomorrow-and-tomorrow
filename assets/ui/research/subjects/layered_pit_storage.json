@@ -1,0 +1,12 @@
+{
+  "id": "layered_pit_storage",
+  "line": "nutrition",
+  "game_year": 228,
+  "approx_historical_year": -3480,
+  "prompt": "c. 3480 BCE: Villagers alternate straw and barley layers in earthen storage pit; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90eec1d1-15e9-46d4-b205-19cf39057134.png",
+  "asset": "res://assets/ui/research/subjects/layered_pit_storage-v1.png",
+  "sha256": "eee315e6730a30b4245f699ddb3c5155f45a9643e7fb06424cb66119d56ee1cd",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "multigenerational_household_norms",
+  "line": "demography",
+  "game_year": 228,
+  "approx_historical_year": -3480,
+  "prompt": "c. 3480 BCE: Three generations share household craft, food and child care in early courtyard; chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6d76583f-017d-4733-bf27-c91520a31cff.png",
+  "asset": "res://assets/ui/research/subjects/multigenerational_household_norms-v1.png",
+  "sha256": "9a5eb680cb0b257ea24679c82b1e2bd40fbf18ec716038def495e59fa09c5885",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
