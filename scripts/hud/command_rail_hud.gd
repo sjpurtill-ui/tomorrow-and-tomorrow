@@ -223,6 +223,7 @@ func _position_army_bar()->void:
 	if army_bar==null:return
 	var view:=get_viewport().get_visible_rect().size
 	army_bar.terrain=terrain
+	army_bar.set_meta("covered",(dock!=null and dock.visible) or (detail_dock!=null and detail_dock.visible))
 	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
 	var bottom:=toolbar.position.y-8.0 if toolbar!=null and toolbar.visible else view.y-Tokens.EDGE_MARGIN
 	var height:float=army_bar.bar_height()

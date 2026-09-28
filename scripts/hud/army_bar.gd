@@ -84,6 +84,7 @@ func bar_height()->float:
 func place(rect:Rect2)->void:
 	area=rect
 	position=rect.position;size=rect.size
+	visible=not cards.is_empty() and not bool(get_meta("covered",false))
 	_arrange()
 
 
@@ -108,7 +109,7 @@ func refresh()->void:
 				if on_map in (card.members as Array) and String(card.id)!=selected_id and not _member_selected(card,on_map):selected_id=String(card.id)
 	var shape:=str(fresh.map(func(c:Dictionary)->String:return String(c.id)))+selected_id
 	cards=fresh
-	visible=not cards.is_empty()
+	visible=not cards.is_empty() and not bool(get_meta("covered",false))
 	if shape!=_shape:
 		_shape=shape
 		_rebuild()
@@ -250,7 +251,8 @@ class ArmyCard extends Control:
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		var changed_face:bool=String(card.get("id",""))!=String(data.id) or card.get("general",{})!=data.get("general",{})
 		card=data;card_id=String(data.id);chosen=is_chosen
-		tooltip_text=Model.tooltip(card)
+		# The full reading is worked out only when the pointer rests here.
+		tooltip_text="%s · %s men" % [String(card.get("title","")),EraWords.grouped(int(card.get("men",0)))]
 		if changed_face and is_instance_valid(face):_face()
 		queue_redraw()
 
@@ -295,7 +297,7 @@ class ArmyCard extends Control:
 					0:return Model.gear_words(card.get("gear_detail",{}))
 					1:return Model.will_words(float(card.will))+"\nBelow a quarter they break."
 					2:return Model.supply_line(card)
-		return tooltip_text
+		return Model.tooltip(card)
 
 	func _draw()->void:
 		if card.is_empty():return
@@ -403,8 +405,11 @@ class BandChip extends Control:
 
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		card=data;card_id=String(data.id);chosen=is_chosen
-		tooltip_text=Model.tooltip(card)
+		tooltip_text="%s · %s men" % [String(card.get("title","")),EraWords.grouped(int(card.get("men",0)))]
 		queue_redraw()
+
+	func _get_tooltip(_at:Vector2)->String:
+		return Model.tooltip(card) if not card.is_empty() else ""
 
 	func _gui_input(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:

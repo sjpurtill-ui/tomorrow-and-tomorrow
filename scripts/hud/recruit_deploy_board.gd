@@ -282,6 +282,7 @@ func update_values()->void:
 	for item:Dictionary in lines:
 		by_id[int(item.id)]=item;bands+=int(item.in_training);sent+=int(item.deployed)
 	queue_counts.text="%d training · %d sent" % [bands,sent] if not lines.is_empty() else ""
+	var stock:=Model.stock_rows() if not lines.is_empty() else {}
 	for control:Dictionary in live:
 		var item:Dictionary=by_id.get(int(control.id),{})
 		if item.is_empty():continue
@@ -290,7 +291,7 @@ func update_values()->void:
 		for candidate:Dictionary in item.bands:
 			if int(candidate.slot)==int(control.slot):band=candidate;break
 		if band.is_empty():continue
-		_update_band(control,band)
+		_update_band(control,band,stock)
 
 
 func _update_head(control:Dictionary,item:Dictionary)->void:
@@ -309,12 +310,12 @@ func _update_head(control:Dictionary,item:Dictionary)->void:
 	(control.minus as Button).disabled=not bool(item.repeat) and int(item.remaining)<=0 and int(item.in_training)<=1
 
 
-func _update_band(control:Dictionary,band:Dictionary)->void:
+func _update_band(control:Dictionary,band:Dictionary,stock:Dictionary={})->void:
 	var meters:Array=control.meters
 	var men_tip:="%d of %d men gathered." % [int(band.men),int(band.men_target)]
 	if bool(band.men_short):men_tip+="\nThe rest are called up as people come free."
 	meters[0].set_reading(float(band.men)/maxf(1.0,float(band.men_target)),"%d/%d" % [int(band.men),int(band.men_target)],T.INK_MUTED if not bool(band.men_short) else T.AMBER,men_tip)
-	var gear_tip:=Model.gear_words(band)
+	var gear_tip:=Model.gear_words(band,null,stock)
 	meters[1].set_reading(float(band.gear)/maxf(1.0,float(band.gear_target)),"%d/%d" % [int(band.gear),int(band.gear_target)],T.AMBER if bool(band.gear_short) else T.BLUE,gear_tip)
 	meters[1].clickable=bool(band.gear_short)
 	var drill_tip:="%d%% of first drill done." % roundi(float(band.training)*100.0)

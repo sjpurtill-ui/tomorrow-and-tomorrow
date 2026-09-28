@@ -73,7 +73,7 @@ func _run()->void:
 	match shot:
 		"recruit":MilitaryCampaign.open_roster("army",false,"recruitment")
 		"training":MilitaryCampaign.open_roster("army",true,"training")
-		"command","route","plan","arrow","front":await _open_command(shot)
+		"command","route","plan","arrow","front","zones":await _open_command(shot)
 		"map":
 			if terrain.hud and terrain.hud.has_method("select_army") and not MilitaryCampaign.field_armies.is_empty():terrain.hud.select_army(int(MilitaryCampaign.field_armies[0].army_id))
 	await _settle(10)
@@ -207,6 +207,9 @@ func _open_command(shot:String)->void:
 	await _settle(3)
 	if panel==null:return
 	var home:Vector2=CivilizationSystem.player_world_origin
+	if shot=="zones":
+		panel.show_zone_orders()
+		return
 	if shot in ["plan","front"] and panel.has_method("begin_plan"):
 		# A drawn front line near home: before the order, or three days on.
 		panel.choose_force(army_id)
