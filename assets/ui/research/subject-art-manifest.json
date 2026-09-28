@@ -4000,5 +4000,21 @@
   "warning_call_relay": {"path": "res://assets/ui/research/subjects/warning_call_relay-v1.png", "focus": [0.5, 0.5]},
   "famine_refugee_hosting": {"path": "res://assets/ui/research/subjects/famine_refugee_hosting-v1.png", "focus": [0.5, 0.5]},
   "load_tallies": {"path": "res://assets/ui/research/subjects/load_tallies-v1.png", "focus": [0.5, 0.5]},
-  "seal_breaking_rights": {"path": "res://assets/ui/research/subjects/seal_breaking_rights-v1.png", "focus": [0.5, 0.5]}
+  "seal_breaking_rights": {"path": "res://assets/ui/research/subjects/seal_breaking_rights-v1.png", "focus": [0.5, 0.5]},
+  "shared_trade_escort": {"path": "res://assets/ui/research/subjects/shared_trade_escort-v1.png", "focus": [0.5, 0.5]},
+  "skin_oiling": {"path": "res://assets/ui/research/subjects/skin_oiling-v1.png", "focus": [0.5, 0.5]},
+  "courtyard_storerooms": {"path": "res://assets/ui/research/subjects/courtyard_storerooms-v1.png", "focus": [0.5, 0.5]},
+  "flood_silt_fields": {"path": "res://assets/ui/research/subjects/flood_silt_fields-v1.png", "focus": [0.5, 0.5]},
+  "hearth_counts": {"path": "res://assets/ui/research/subjects/hearth_counts-v1.png", "focus": [0.5, 0.5]},
+  "pack_load_balancing": {"path": "res://assets/ui/research/subjects/pack_load_balancing-v1.png", "focus": [0.5, 0.5]},
+  "temple_ration_issue": {"path": "res://assets/ui/research/subjects/temple_ration_issue-v1.png", "focus": [0.5, 0.5]},
+  "wool_spinning": {"path": "res://assets/ui/research/subjects/wool_spinning-v1.png", "focus": [0.5, 0.5]},
+  "butter_churning": {"path": "res://assets/ui/research/subjects/butter_churning-v1.png", "focus": [0.5, 0.5]},
+  "arsenical_copper": {"path": "res://assets/ui/research/subjects/arsenical_copper-v1.png", "focus": [0.5, 0.5]},
+  "pack_saddles": {"path": "res://assets/ui/research/subjects/pack_saddles-v1.png", "focus": [0.5, 0.5]},
+  "traction_fracture_setting": {"path": "res://assets/ui/research/subjects/traction_fracture_setting-v1.png", "focus": [0.5, 0.5]},
+  "market_peacekeepers": {"path": "res://assets/ui/research/subjects/market_peacekeepers-v1.png", "focus": [0.5, 0.5]},
+  "output_quality_sorting": {"path": "res://assets/ui/research/subjects/output_quality_sorting-v1.png", "focus": [0.5, 0.5]},
+  "plank_trackways": {"path": "res://assets/ui/research/subjects/plank_trackways-v1.png", "focus": [0.5, 0.5]},
+  "shrine_work_obligations": {"path": "res://assets/ui/research/subjects/shrine_work_obligations-v1.png", "focus": [0.5, 0.5]}
 }
