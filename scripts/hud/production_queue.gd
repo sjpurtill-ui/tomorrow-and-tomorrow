@@ -282,7 +282,8 @@ func _build_lines(parent:Node)->void:
 	for view:Dictionary in lines:
 		var row:=LineRow.new();list.add_child(row);row.build(self,view);_rows[int(view.id)]=row
 	if lines.is_empty():
-		var empty:=Label.new();empty.name="NoLines";empty.text="No lines yet. Pick equipment on the right to start one."
+		var empty:=Label.new();empty.name="NoLines"
+		empty.text="No lines yet. Pick a card to start one." if not (data.get("recipes",[]) as Array).is_empty() else "No lines. Your people know no workshop crafts yet."
 		T.text(empty,"body",T.BODY);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
 
 ## The heads over the rows' columns, aligned with LineRow's fixed widths.
