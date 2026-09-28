@@ -292,6 +292,11 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	if held_at>=0:
 		var brief:=_note(name,out).trim_prefix(name+": ").trim_suffix(".")
 		mc.occupation_forces[held_at]["fate_note"]=_cap(brief).substr(0,80)
+		# Running totals for the held-town report (scripts/held_town.gd).
+		var past:Dictionary=(mc.occupation_forces[held_at].get("fate") as Dictionary).duplicate() if mc.occupation_forces[held_at].get("fate") is Dictionary else {}
+		for key in ["killed","captives","moved","tribute"]: past[key]=int(past.get(key,0))+int(out.get(key,0))
+		past["day"]=day
+		mc.occupation_forces[held_at]["fate"]=past
 	Chronicle.record({"key":"town_fate:%s:%d" % [region_id,day],"title":_title(name,out).substr(0,70),"text":" ".join(parts),
 		"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 	return out

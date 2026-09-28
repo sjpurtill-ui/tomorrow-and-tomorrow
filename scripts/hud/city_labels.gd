@@ -11,6 +11,7 @@ const REPORT=preload("res://scripts/hud/city_report_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
+const HELD=preload("res://scripts/held_town.gd")
 ## Cards and emblems ease in and out instead of popping (codex/map-motion).
 const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
 const MODERN_LABELS:={"population":"PEOPLE","science_capacity":"LEARNING","gdp":"DAILY OUTPUT","life_expectancy":"LIFE EXPECTANCY"}
@@ -252,7 +253,12 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var status:=String(label.get_meta("map_status",""))
 	var summary:Dictionary={}
 	if foreign:
-		summary=report_summary(record,int(GameState.elapsed_days))
+		# A town we hold: our garrison's exact figures, never a scout's range.
+		var held:Dictionary=HELD.report(String(label.get_meta("city_map_id",""))) if String(ownership.get("kind",""))=="occupied" else {}
+		if not held.is_empty():
+			summary=HELD.card_summary(held)
+			count="Population "+EraWords.grouped(int(held.residents))
+		else:summary=report_summary(record,int(GameState.elapsed_days))
 		status=summary.status
 	var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
 	var ui:=T.font("ui")
@@ -781,6 +787,9 @@ func _draw_card(card:Dictionary,box:Rect2,solid:bool=false)->void:
 			draw_string(font,cell,String(stats[i].label),HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 			draw_string(font,cell+Vector2(0,15),String(stats[i].value),HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE,T.INK if stats[i].value!="Unknown" else T.DISABLED)
 			draw_string(font,cell+Vector2(0,29),String(stats[i].detail),HORIZONTAL_ALIGNMENT_LEFT,(box.size.x-20)*.5-6,12,T.TEXT_SOFT)
+		if bool(card.summary.get("held",false)):
+			draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","Held"))+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-20,12,T.GOLD_TEXT)
+			return
 		var level:=int(card.summary.level)
 		var freshness_color:=T.TEAL_TEXT if level>=4 else T.AMBER_TEXT if level>=2 else T.RED_TEXT
 		draw_string(font,Vector2(box.position.x+10,box.end.y-7),String(card.summary.get("heading","REPORT")).capitalize()+" · "+String(card.status),HORIZONTAL_ALIGNMENT_LEFT,box.size.x-90,12,freshness_color)

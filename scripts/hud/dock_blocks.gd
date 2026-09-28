@@ -31,6 +31,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"city_dossier":
 				var dossier:=preload("res://scripts/hud/city_dossier.gd").new();section.add_child(dossier);dossier.setup(block)
+			"held_town":
+				var held:=preload("res://scripts/hud/held_town_dossier.gd").new();section.add_child(held);held.setup(block)
 			"culture":
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
 			"people":
