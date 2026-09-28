@@ -1,0 +1,12 @@
+{
+  "id": "portion_allotment_customs",
+  "line": "nutrition",
+  "game_year": 208,
+  "approx_historical_year": -3613,
+  "prompt": "c. 3613 BCE: Community shares grain and legumes in comparable portions among households; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-64d9df55-7562-476e-9ff7-7239b059c7b7.png",
+  "asset": "res://assets/ui/research/subjects/portion_allotment_customs-v1.png",
+  "sha256": "f05808f7f58631a762e219231a8830e46659463bef5cf254abcf51028767bae8",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

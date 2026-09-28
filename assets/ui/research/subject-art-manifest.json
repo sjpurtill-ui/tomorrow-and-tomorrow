@@ -4032,5 +4032,21 @@
   "coppice_regrowth_cutting": {"path": "res://assets/ui/research/subjects/coppice_regrowth_cutting-v1.png", "focus": [0.5, 0.5]},
   "intercrop_pairing_lore": {"path": "res://assets/ui/research/subjects/intercrop_pairing_lore-v1.png", "focus": [0.5, 0.5]},
   "lost_wax_casting": {"path": "res://assets/ui/research/subjects/lost_wax_casting-v1.png", "focus": [0.5, 0.5]},
-  "mutual_aid_pacts": {"path": "res://assets/ui/research/subjects/mutual_aid_pacts-v1.png", "focus": [0.5, 0.5]}
+  "mutual_aid_pacts": {"path": "res://assets/ui/research/subjects/mutual_aid_pacts-v1.png", "focus": [0.5, 0.5]},
+  "tool_handoff_staging": {"path": "res://assets/ui/research/subjects/tool_handoff_staging-v1.png", "focus": [0.5, 0.5]},
+  "comparative_tool_trials": {"path": "res://assets/ui/research/subjects/comparative_tool_trials-v1.png", "focus": [0.5, 0.5]},
+  "dye_vat_runoff_control": {"path": "res://assets/ui/research/subjects/dye_vat_runoff_control-v1.png", "focus": [0.5, 0.5]},
+  "river_bathing": {"path": "res://assets/ui/research/subjects/river_bathing-v1.png", "focus": [0.5, 0.5]},
+  "clay_dome_ovens": {"path": "res://assets/ui/research/subjects/clay_dome_ovens-v1.png", "focus": [0.5, 0.5]},
+  "copper_daggers": {"path": "res://assets/ui/research/subjects/copper_daggers-v1.png", "focus": [0.5, 0.5]},
+  "free_adult_assembly": {"path": "res://assets/ui/research/subjects/free_adult_assembly-v1.png", "focus": [0.5, 0.35]},
+  "kin_wards": {"path": "res://assets/ui/research/subjects/kin_wards-v1.png", "focus": [0.5, 0.5]},
+  "plank_extended_dugouts": {"path": "res://assets/ui/research/subjects/plank_extended_dugouts-v1.png", "focus": [0.5, 0.5]},
+  "sapling_protection_customs": {"path": "res://assets/ui/research/subjects/sapling_protection_customs-v1.png", "focus": [0.5, 0.5]},
+  "cross_party_scheduling": {"path": "res://assets/ui/research/subjects/cross_party_scheduling-v1.png", "focus": [0.5, 0.5]},
+  "sheet_copper_riveting": {"path": "res://assets/ui/research/subjects/sheet_copper_riveting-v1.png", "focus": [0.5, 0.5]},
+  "portion_allotment_customs": {"path": "res://assets/ui/research/subjects/portion_allotment_customs-v1.png", "focus": [0.5, 0.5]},
+  "clay_feel_judging": {"path": "res://assets/ui/research/subjects/clay_feel_judging-v1.png", "focus": [0.5, 0.5]},
+  "grazing_ground_recovery_marking": {"path": "res://assets/ui/research/subjects/grazing_ground_recovery_marking-v1.png", "focus": [0.5, 0.5]},
+  "rotating_command_practice": {"path": "res://assets/ui/research/subjects/rotating_command_practice-v1.png", "focus": [0.5, 0.5]}
 }
