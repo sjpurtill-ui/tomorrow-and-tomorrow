@@ -4094,7 +4094,7 @@
   "post_disaster_damage_survey": {"path": "res://assets/ui/research/subjects/post_disaster_damage_survey-v1.png", "focus": [0.5, 0.5]},
   "storage_humidity_judging": {"path": "res://assets/ui/research/subjects/storage_humidity_judging-v1.png", "focus": [0.5, 0.5]},
   "tube_drilled_stone_vessels": {"path": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png", "focus": [0.5, 0.5]},
-  "capacity_ledgers": {"path": "res://assets/ui/research/subjects/capacity_ledgers-v1.png", "focus": [0.5, 0.5]},
+  "capacity_ledgers": {"path": "res://assets/ui/research/subjects/capacity_ledgers-v1.png", "focus": [0.5, 0.65]},
   "market_timing_knowledge": {"path": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png", "focus": [0.5, 0.5]},
   "runoff_grade_reading": {"path": "res://assets/ui/research/subjects/runoff_grade_reading-v1.png", "focus": [0.5, 0.5]}
 }
