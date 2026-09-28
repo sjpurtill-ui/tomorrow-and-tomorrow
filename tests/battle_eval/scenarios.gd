@@ -153,6 +153,10 @@ static func all()->Array:
 		"ours":[f("spearman","shield_spear",30,0.4)]})
 	out.append({"id":"siege_tsaren","about":"four hundred ring Tsaren for six days, then storm it","kind":"siege","era":1,"seed":93,"siege_days":6,"population":5000,
 		"ours":[f("spearman","shield_spear",400)]})
+	out.append({"id":"home_besieged","about":"a host of four hundred rings Seanstone behind its palisade, then storms it","kind":"home_siege","era":1,"seed":96,"siege_days":4,"population":4000,
+		"ours":[f("spearman","shield_spear",120)],"watch":120,"theirs":[f("spearman","shield_spear",400)]})
+	out.append({"id":"raid_tsaren","about":"our band raids Tsaren's fields and stores","kind":"raid","era":1,"seed":97,"population":3000,
+		"ours":[f("spearman","shield_spear",150)]})
 	out.append({"id":"garrison_holds_tsaren","about":"our thirty in Tsaren beat off twenty come to take it back","kind":"garrison","era":0,"seed":94,"garrison":30,
 		"ours":[f("levy","spear",40)],"theirs":[f("levy","improvised",20,0.4)],"expect":{"winner":"ours"}})
 	out.append({"id":"garrison_loses_tsaren","about":"our ten in Tsaren against sixty come to take it back","kind":"garrison","era":0,"seed":95,"garrison":10,

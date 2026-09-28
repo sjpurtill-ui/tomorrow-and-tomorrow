@@ -129,6 +129,9 @@ func _expect_end(rec:Dictionary,done:Dictionary,army_id:int)->void:
 		_check(theirs=="" or text.contains(theirs),"report","the report never says their leader %s fell: %s" % [theirs,text.substr(0,260)])
 	if bool(want.get("skirmish",false)):
 		_check(bool(view.get("skirmish",false)),"front","the battle view shows the tiny fight as a full battle")
+		# Over at once, it still stays on the chart for a few days: as a small
+		# mark, never a front or a worm.
+		check_no_front("the finished skirmish")
 
 
 # =============================================================================
@@ -225,6 +228,12 @@ func _run_assault()->void:
 		_check(int(garrison.get("troops",-1))==int(rec.get("detached",-2)),"ledger","the report says %d were left to hold Tsaren, the garrison has %d" % [int(rec.get("detached",0)),int(garrison.get("troops",0))])
 		_check(String((done.account as Dictionary).now).contains("Tsaren is ours"),"report","the town was taken but the report does not say so")
 		_check(Ledger.holds(civ_id,city_id),"ledger","the town ledger does not say we hold Tsaren")
+		# The garrison's card stands on Tsaren as our chart draws it, counting
+		# the men inside.
+		var cards:Array=OverlayScript._garrison_inputs()
+		if _check(cards.size()==1,"marker","the map has %d garrison cards for one held town" % cards.size()):
+			_check((cards[0].pos as Vector2).distance_to(city)<0.5,"marker","the garrison card stands %.1f km from Tsaren" % (cards[0].pos as Vector2).distance_to(city))
+			_check(int(cards[0].troops)==int(garrison.get("troops",-1)),"marker","the garrison card says %d, the garrison has %d" % [int(cards[0].troops),int(garrison.get("troops",-1))])
 
 
 ## Our army rings Tsaren, the days pass, then it storms the walls.
@@ -261,10 +270,15 @@ func _observe_siege()->void:
 	var marks:Array=(inputs.get("battles",[]) as Array).filter(func(m:Dictionary)->bool: return String(m.get("kind",""))=="siege")
 	if not _check(marks.size()==1,"marker","the siege of Tsaren has %d marks on the map (should be one)" % marks.size()): return
 	var m:Dictionary=marks[0]
+	var offensive:=String(siege.get("mode",""))=="offensive"
+	var enemy:Dictionary=(siege.get("threat",{}) as Dictionary).get("enemy_force",{})
 	_check(int(m.get("day",0))==maxi(1,int(siege.get("days",0))),"timing","the map says day %d of the siege, the engine day %d" % [int(m.get("day",0)),int(siege.get("days",0))])
-	_check(absf(float(m.get("progress",0.0))-float(siege.get("pressure",0.0)))<0.001,"marker","the map's siege pressure %.2f is not the engine's %.2f" % [float(m.get("progress",0.0)),float(siege.get("pressure",0.0))])
-	_check(String(m.get("place_name",""))=="Tsaren","marker","the siege is marked at '%s', not Tsaren" % String(m.get("place_name","")))
-	_check(int((m.sides.a as Dictionary).get("troops",-1))==int(army(int(siege.get("army_id",0))).get("troops",-2)),"marker","the siege mark counts %d besiegers, the army has %d" % [int((m.sides.a as Dictionary).get("troops",-1)),int(army(int(siege.get("army_id",0))).get("troops",-2))])
+	_check(absf(float(m.get("progress",0.0))-float(siege.get("pressure",0.0))*(1.0 if offensive else -1.0))<0.001,"marker","the map's siege pressure %.2f is not the engine's %.2f" % [float(m.get("progress",0.0)),float(siege.get("pressure",0.0))])
+	var place:=String(m.get("place_name",""))
+	_check(place==("Tsaren" if offensive else "Seanstone"),"marker","the siege is marked at '%s'" % place)
+	var ours_in:=int(army(int(siege.get("army_id",0))).get("troops",-2)) if offensive else int(MilitaryCampaign.settlement_defense_snapshot().get("garrison_personnel",-2))
+	_check(int((m.sides.a as Dictionary).get("troops",-1))==ours_in,"marker","the siege mark counts %d of ours, the engine %d" % [int((m.sides.a as Dictionary).get("troops",-1)),ours_in])
+	_check(int((m.sides.b as Dictionary).get("troops",-1))==int(enemy.get("troops",-2)),"marker","the siege mark counts %d of theirs, the engine %d" % [int((m.sides.b as Dictionary).get("troops",-1)),int(enemy.get("troops",-2))])
 
 
 # =============================================================================
@@ -711,3 +725,63 @@ func _run_commanded()->void:
 	t["before"]=pre
 	var done:=check_finished(rec,t)
 	if not done.is_empty(): expect_outcome(rec,String(done.kind))
+
+
+# =============================================================================
+# Home besieged; a raid on a town's fields and stores
+# =============================================================================
+
+## A host comes against home, behind our palisade: when its day comes it
+## rings Seanstone (a siege at home), the days pass, then it storms the wall.
+func _run_home_siege()->void:
+	home_watch(s.get("ours",[{"unit":"spearman","weapon":"shield_spear","count":120}]),int(s.get("watch",120)))
+	MilitaryCampaign.settlement_defense={"stage":2,"integrity":1.0,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
+	var enemy:=their_force(s.get("theirs",[{"unit":"spearman","weapon":"shield_spear","count":400}]),{"morale":0.8,"readiness":0.6})
+	MilitaryCampaign._create_civilization_threat({"id":"host","source_civ_id":civ_id,"source_name":"Esurai","incident_kind":"campaign","strength":int(enemy.troops),"technology":0.3,"readiness":0.6},"defensive")
+	MilitaryCampaign.active_threat["enemy_force"]=enemy
+	MilitaryCampaign.active_threat["estimated_strength"]=int(enemy.troops)
+	MilitaryCampaign.active_threat["deadline_day"]=int(GameState.elapsed_days)
+	MilitaryCampaign.active_threat["seed"]=int(s.get("seed",11))
+	day()
+	if not _check(not MilitaryCampaign.active_siege.is_empty(),"setup","the host did not ring Seanstone"): return
+	for n in int(s.get("siege_days",4)):
+		_observe_siege()
+		day()
+		if MilitaryCampaign.active_siege.is_empty(): break
+	if MilitaryCampaign.active_siege.is_empty(): return
+	_observe_siege()
+	var pre:=_ledger_for({"kind":"field","id":0})
+	var order:=MilitaryCampaign.siege_order(String(MilitaryCampaign.active_siege.id),"assault")
+	if order.has("error"): _fail("setup","the storm on Seanstone did not begin: %s" % String(order.error)); return
+	fight_out(int(s.get("max_days",20)))
+	var rec:Dictionary=MilitaryCampaign.battle_history[0] if not MilitaryCampaign.battle_history.is_empty() else {}
+	var t:Dictionary=traces.get(String(rec.get("id","")),{"before":pre,"force":{"kind":"field","id":0}})
+	var done:=check_finished(rec,t,{"force_moves":true})
+	if done.is_empty(): return
+	expect_outcome(rec,String(done.kind))
+	var said:=Account.text(done.account)
+	if String(done.kind) in ["lost","withdrew"]:
+		if MilitaryCampaign.recovery.home_unavailable(): _check(said.contains("Seanstone is theirs"),"report","Seanstone fell but the report does not say so: %s" % said.substr(0,260))
+		else: _check(said.contains("it is still ours"),"report","they stormed Seanstone but could not hold it, and the report does not say it is still ours: %s" % said.substr(0,260))
+
+
+## Our band at Tsaren raids its fields and stores (launch_raid).
+func _run_raid()->void:
+	var a:=_army_at_town(s.get("ours",[]))
+	if a<=0: return
+	var key:={"kind":"field_army","id":a}
+	var pre:=_ledger_for(key)
+	var result:=MilitaryCampaign.launch_raid(civ_id,city_id)
+	if result.has("error"): _fail("setup","the raid did not begin: %s" % String(result.error)); return
+	fight_out(int(s.get("max_days",20)))
+	var rec:Dictionary=MilitaryCampaign.battle_history[0] if not MilitaryCampaign.battle_history.is_empty() else {}
+	var t:Dictionary=traces.get(String(rec.get("id","")),{"before":pre,"force":key})
+	var done:=check_finished(rec,t)
+	if done.is_empty(): return
+	expect_outcome(rec,String(done.kind))
+	# A raid takes no town: Tsaren is still theirs, and no garrison is left.
+	_check(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).is_empty(),"expect","a raid left a garrison in Tsaren")
+	_check(not String((done.account as Dictionary).headline).contains("took Tsaren"),"report","the report of a raid says we took the town")
+	var said:=Account.text(done.account)
+	if String(done.kind)=="won":
+		_check(said.contains("raided the fields and stores of Tsaren") and not said.contains("gate is shut"),"report","the report of a won raid talks of a gate still to storm: %s" % said.substr(0,260))

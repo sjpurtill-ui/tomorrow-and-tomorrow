@@ -223,6 +223,9 @@ func _build_base(officials:bool)->Dictionary:
 	out["city_id"]=String(region.id)
 	out["home"]=CivilizationSystem.player_world_origin
 	out["city"]=CivilizationSystem.player_world_origin+Vector2(-20.0,8.0)
+	# The world's own site for Tsaren is where our chart draws it (in play the
+	# two agree; every observation re-publishes the true site).
+	region["position"]=out.city
 	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(out.city_id),.8,DAY0,"scout report","test"),DAY0)
 	CivilizationSystem.city_intelligence.records.player[String(out.city_id)]["position"]={"x":(out.city as Vector2).x,"z":(out.city as Vector2).y}
 	out["civ2_id"]=""; out["city2_id"]=""; out["city2"]=Vector2.INF
@@ -238,6 +241,7 @@ func _build_base(officials:bool)->Dictionary:
 			region2["name"]="Varrow"
 			out["city2_id"]=String(region2.id)
 			out["city2"]=CivilizationSystem.player_world_origin+Vector2(30.0,-12.0)
+			region2["position"]=out.city2
 			CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(out.city2_id),.8,DAY0,"scout report","test"),DAY0)
 			CivilizationSystem.city_intelligence.records.player[String(out.city2_id)]["position"]={"x":(out.city2 as Vector2).x,"z":(out.city2 as Vector2).y}
 	MilitaryCampaign.last_processed_day=DAY0

@@ -33,9 +33,10 @@ const Scenarios:=preload("res://tests/battle_eval/scenarios.gd")
 ## 58 after the first fixes (overruns, marks, places, captives, militia,
 ## fallen generals, exact numbers, march gates); 63 of 63 with the ages'
 ## pace, the raid record, the march road, bands keeping their generals and
-## raiders' carrying limit. Raise it as fixes land; the results are
-## deterministic.
-const BASELINE:={"pass":63}
+## raiders' carrying limit; 65 of 65 with home besieged and a raid on a
+## town's fields (raids no longer take towns; siege marks count both sides).
+## Raise it as fixes land; the results are deterministic.
+const BASELINE:={"pass":65}
 
 var _processing:Dictionary={}
 

@@ -697,6 +697,7 @@ func _battle_context(today:int,home:Vector2,friendly:Array,garrisons:Array)->Dic
 	var observers:={"home":home,"radius":float(CivilizationSystem._local_observation_radius()) if CivilizationSystem.has_method("_local_observation_radius") else BattleSource.HOME_SIGHT_KM,
 		"armies":armies.values(),"garrisons":towns.values()}
 	return {"today":today,"home":home,"armies":armies,"armies_troops":troops,"towns":towns,"cities":cities,"civ_names":civ_names,"at_war_with":at_war,"observers":observers,
+		"home_garrison":int(MilitaryCampaign.settlement_defense_snapshot().get("garrison_personnel",0)),
 		"identity":func(civ_id:String)->Color: return preload("res://scripts/city_map_identity.gd").foreign(civ_id).accent,
 		"player_name":String(CivilizationSystem._player_civilization_name()) if CivilizationSystem.has_method("_player_civilization_name") else "","home_name":String(GameState.settlement_name)}
 
