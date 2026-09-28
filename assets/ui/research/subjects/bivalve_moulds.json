@@ -1,0 +1,12 @@
+{
+  "id": "bivalve_moulds",
+  "line": "production",
+  "game_year": 260,
+  "approx_historical_year": -3267,
+  "prompt": "c. 3267 BCE: Craft workers fit two halves of a clay casting mould; impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4fd0f77d-a007-48dd-8f75-2eb8553ca210.png",
+  "asset": "res://assets/ui/research/subjects/bivalve_moulds-v1.png",
+  "sha256": "b6be29e6c467fd733544119cf0e0e2de0f9c029a94a67db2ed84e734850cadab",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

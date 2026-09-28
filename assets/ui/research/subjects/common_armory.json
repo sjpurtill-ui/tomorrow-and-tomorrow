@@ -1,0 +1,12 @@
+{
+  "id": "common_armory",
+  "line": "security",
+  "game_year": 260,
+  "approx_historical_year": -3267,
+  "prompt": "c. 3267 BCE: Adults store and count wooden spears and wicker shields on reed racks; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-10976c67-20cc-4c34-ad6a-37d83fa77282.png",
+  "asset": "res://assets/ui/research/subjects/common_armory-v1.png",
+  "sha256": "896f33f0e0c741ee28c45471d909f00357afb84a7e7dce78b80d942fcbda5384",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
