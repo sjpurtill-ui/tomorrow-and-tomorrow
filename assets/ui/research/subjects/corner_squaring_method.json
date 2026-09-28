@@ -1,0 +1,12 @@
+{
+  "id": "corner_squaring_method",
+  "line": "infrastructure",
+  "game_year": 155,
+  "approx_historical_year": -3967,
+  "prompt": "c. 3967 BCE: Builders set square mudbrick foundation corner with fiber cord and pegs; architectural casein gouache. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ff062612-2dd5-428f-8caf-4aaa0bbcb762.png",
+  "asset": "res://assets/ui/research/subjects/corner_squaring_method-v1.png",
+  "sha256": "55cbd93e7f43f13c037818a8d7cb30480cd2d9642cfb032e4ba8b9f14dbdb278",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

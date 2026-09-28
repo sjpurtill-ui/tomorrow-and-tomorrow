@@ -1,0 +1,12 @@
+{
+  "id": "neighbor_shelter_pledges",
+  "line": "security",
+  "game_year": 150,
+  "approx_historical_year": -4000,
+  "prompt": "c. 4000 BCE: Neighbor households pledge to shelter one another; hand-cut woodblock print. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6ace7f3b-40be-4c0b-8eda-fc4744321f2a.png",
+  "asset": "res://assets/ui/research/subjects/neighbor_shelter_pledges-v1.png",
+  "sha256": "1f6790c89263b46a014a6a40f93947d8177e9344ff7887f22ddee80d6838d103",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
