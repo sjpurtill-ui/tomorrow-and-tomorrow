@@ -89,32 +89,34 @@ func test_screen_has_one_readout_and_worded_controls()->void:
 	var actions:Array=[]
 	var panel:Control=auto_free(Queue.new());add_child(panel)
 	panel.setup({"mode":"military","owner":"Mahun of the High Camp · Quartermaster","managed":true,"status":"","capacity":2,"context":CONTEXT,
-		"lines":[starved_line(),healthy_line()],"stores":[{"resource":"Timber","name":"Timber","amount":5.0}],
-		"recipes":[{"item":"navy_hull","name":"War canoes","group":"Ships and aircraft","needs":"Each needs 40 timber","blocker":"Needs a naval base first","running":false}],
+		"lines":[starved_line(),healthy_line()],"materials":[{"resource":"Timber","name":"Timber","amount":5.0,"trend":{},"use":0.0}],
+		"recipes":[{"item":"navy_hull","name":"War canoes","category":"boats","needs":"Each needs 40 timber","materials":[{"resource":"Timber","amount":40.0}],"blocker":"Needs a naval base first","running":false}],
 		"on_action":func(id,action,value):actions.append([id,action,value]),"on_detail":func(_id):pass,"on_header":func(_k):pass,"on_start":func(_i):pass,
 		"on_add":func():pass,"on_manage":func():pass,"on_history":func():pass})
 	var text:=""
 	for label:Label in panel.find_children("*","Label",true,false):
-		text+=label.text+"\n"
+		text+=label.text+"
+"
 		assert_int(label.get_theme_font_size("font_size")).is_greater_equal(12)
-	for banned:String in ["LEADER MANAGED","/ lines","⌒","0.02 / day","Ready to order when needed","KNOWN WORKSHOP RECIPES"]:
+	for banned:String in ["LEADER MANAGED","/ lines","⌒","0.02 / day","Ready to order when needed","KNOWN WORKSHOP RECIPES","Low","Normal","Urgent","Held back"]:
 		assert_str(text).not_contains(banned)
-	assert_str(text).contains("runs the workshops except Simple levy weapons")
-	assert_str(text).contains("About 1 every 50 days")
-	assert_str(text).contains("Needs a naval base first")
+	# Numbers on the surface; the old card sentences live in the tooltips.
 	var card:Node=panel.find_child("Line1",true,false)
-	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(1)
+	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(0)
+	var bar:Control=card.find_child("Output",true,false)
+	assert_str(String(bar.reading)).is_equal("7 a year")
+	assert_str(bar.tooltip_text).contains("About 1 every 50 days").contains("Short of timber: the 5 in store covers about 16 of the 25 still wanted.")
+	assert_str((panel.find_child("RunStaff",true,false) as Button).tooltip_text).contains("runs the workshops except Simple levy weapons")
 	for button:Button in panel.find_children("*","Button",true,false):
+		if not button.is_visible_in_tree():continue
 		assert_str(button.tooltip_text).is_not_empty()
 		assert_str(button.text).is_not_equal("M")
-	var names:Array[String]=[]
-	for button:Button in card.find_children("*","Button",true,false):names.append(button.text)
-	for expected:String in ["Pause","−","+","Low","Normal","High","Urgent","More ▾"]:assert_array(names).contains([expected])
-	(card.find_child("TargetUp",true,false) as Button).pressed.emit()
-	(card.find_child("PriorityHigh",true,false) as Button).pressed.emit()
-	assert_array(actions).contains_exactly([[1,"target",30.0],[1,"priority",2.0]])
-	var start:Button=panel.find_child("Recipe_navy_hull",true,false).find_child("StartButton",true,false)
+	(card.find_child("KeepUp",true,false) as Button).pressed.emit()
+	(panel.find_child("Line2",true,false).find_child("Up",true,false) as Button).pressed.emit()
+	assert_array(actions).contains_exactly([[1,"target",30.0],[2,"move",-1.0]])
+	var start:Button=panel.find_child("Recipe_navy_hull",true,false)
 	assert_bool(start.disabled).is_true()
+	assert_str(start.tooltip_text).contains("Needs a naval base first")
 
 func test_provider_screen_drives_existing_production_actions()->void:
 	GameState.reset_for_new_world(7511);MilitaryCampaign.reset_for_new_world();GovernmentPeopleSystem.reset_for_new_world();SettlementModel.reset_for_new_world()
@@ -158,5 +160,4 @@ func test_staff_plan_is_said_plainly_when_present()->void:
 	assert_str(Plain.plan_text(starved_line(),story,"","Spears")).is_empty()
 	var panel:Control=auto_free(Queue.new());add_child(panel)
 	panel.setup({"mode":"military","owner":"Mahun of the High Camp · Quartermaster","managed":true,"capacity":1,"context":CONTEXT,"lines":[line]})
-	assert_str((panel.find_child("StaffPlan",true,false) as Label).text).is_equal(text)
-	assert_str((panel.find_child("Runner",true,false) as Label).text).is_equal("· Mahun of the High Camp runs this line")
+	assert_str((panel.find_child("Output",true,false) as Control).tooltip_text).contains(text)

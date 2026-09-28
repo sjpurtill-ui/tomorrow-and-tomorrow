@@ -48,5 +48,8 @@ func test_manager_and_status_visible_without_hover()->void:
 	panel.setup({"owner":"Kaia Almasi · Quartermaster","status":"Line paused under your control","lines":[]})
 	var text:=""
 	for label in panel.find_children("*","Label",true,false):text+=label.text+"\n"
-	assert_str(text).contains("Kaia Almasi")
-	assert_str(text).contains("Line paused under your control")
+	# The note names the manager by given name, as the game names people in
+	# short, so it stays one short line; the full name and office are in its
+	# tooltip.
+	assert_str(text).contains("Kaia: Line paused under your control")
+	assert_str((panel.find_child("StaffNote",true,false) as Label).tooltip_text).contains("Kaia Almasi, your Quartermaster")

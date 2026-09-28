@@ -307,3 +307,113 @@ static func plan_text(line:Dictionary,story:Dictionary,owner:String,product:Stri
 	if String(story.get("tone",""))=="bad" and not String(story.get("short","")).is_empty():notes.append(String(story.short).to_lower())
 	if not notes.is_empty():text+=" ("+"; ".join(notes)+")"
 	return text+"."
+
+# --- The compact (HOI4-style) screen: numbers on the row, words in tooltips ---
+
+## Output in the shortest honest unit: "3.2 a day", "5 a week", "2 a month",
+## "1 a year"; "" when nothing is made.
+static func rate_short(per_day:float)->String:
+	if per_day<=0.0 or not is_finite(per_day):return ""
+	if per_day>=.95:return "%s a day" % number(per_day)
+	if per_day*7.0>=.95:return "%s a week" % number(per_day*7.0)
+	if per_day*30.4>=.95:return "%s a month" % number(per_day*30.4)
+	if per_day*365.0>=.95:return "%s a year" % number(per_day*365.0)
+	return "under 1 a year"
+
+## Hands are whole people: "12", "2", "0".
+static func hands_text(value:float)->String:
+	return str(maxi(0,roundi(value)))
+
+## How many hands one −/+ moves: one craftsperson in a small workshop, a
+## tenth of the order of magnitude in a large one.
+static func hands_step(total:float)->float:
+	if total<200.0:return 1.0
+	return pow(10.0,floorf(log(total)/log(10.0))-1.0)
+
+static func target_text(target:int)->String:
+	return "∞" if target<=0 else str(target)
+
+## A staff note cut to its first clause, so the main surface never carries a
+## paragraph. The whole note stays in the tooltip.
+static func brief(text:String,max_words:int=12)->String:
+	var result:=text.strip_edges()
+	for mark:String in [". ","; "," — ",", "," so "," because "," while "," until "," and "]:
+		if result.split(" ",false).size()<=max_words:break
+		var cut:=result.find(mark)
+		if cut>0:result=result.left(cut)
+	var words:=result.split(" ",false)
+	if words.size()>max_words:result=" ".join(words.slice(0,max_words))+"…"
+	return result.trim_suffix(".")
+
+## Why a stopped line is stopped, in two or three words for its bar:
+## "No plant fiber", "No naval base", "No hands".
+static func stop_words(short:String)->String:
+	if short.begins_with("Out of "):return "No "+short.trim_prefix("Out of ")
+	if short.begins_with("Short of "):return "No "+short.trim_prefix("Short of ")
+	if short.begins_with("Needs a "):return "No "+short.trim_prefix("Needs a ")
+	match short:
+		"No workers assigned","Short of workers","Waiting for workers","Few hands on lines":return "No hands"
+		"No workshop space":return "No workshop"
+		"Workers can't work":return "Hands can't work"
+		"Know-how lost":return "Know-how lost"
+	return "Stopped"
+
+## One compact line row: `line` from the production snapshot, `context` as
+## for line_story, `extra` from the provider: hands, hands_step, badge,
+## stock (logistics row), ship, today, learn_per_day, office, staff_enabled,
+## auto (staff may run this kind of line).
+static func line_view(line:Dictionary,context:Dictionary={},extra:Dictionary={})->Dictionary:
+	var story:=line_story(line,context)
+	var item:=String(line.get("item",""))
+	var name:=String(extra.get("name",item.replace("_"," ").capitalize()))
+	var state:=String(line.get("state","Working"))
+	var persistent:=bool(line.get("persistent",false))
+	var paused:=bool(line.get("paused",false)) or state=="Paused"
+	var rate:=float(story.rate)
+	var view:={"id":int(line.get("id",0)),"item":item,"name":name,"persistent":persistent,"paused":paused,
+		"managed":bool(line.get("planner_managed",false)),"ship":bool(extra.get("ship",false)),
+		"stock":int(line.get("stock",0)),"target":int(line.get("target_stock",0)),"rate":rate,
+		"progress":float(story.progress),"short":String(story.short),"efficiency":clampf(float(line.get("efficiency",.2)),0.0,1.0),
+		"hands":int(extra.get("hands",0)),"hands_exact":float(extra.get("hands_exact",extra.get("hands",0))),"hands_step":float(extra.get("hands_step",1.0)),"badge":extra.get("badge",{}),
+		"ordered":int(line.get("ordered",line.get("count",0))),"completed":int(line.get("completed",0)),"progress_text":String(story.progress_text)}
+	var stock_row:Dictionary=extra.get("stock",{})
+	view.needed=int(stock_row.get("needed",0));view.deficit=int(stock_row.get("deficit",0))
+	# The bar: green running, amber short or slow, red stopped, grey resting.
+	var tone:=String(story.tone)
+	if paused:view.look="idle";view.bar_text="Paused"
+	elif state=="Target met":view.look="idle";view.bar_text="Full"
+	elif rate<=0.0:view.look="bad" if tone in ["bad","warn"] else "idle";view.bar_text=stop_words(String(story.short)) if view.look=="bad" else "Waiting"
+	else:
+		view.look="warn" if tone in ["bad","warn"] else "good"
+		view.bar_text=rate_short(rate)
+	# Ships: the next hull's ready date instead of a rate.
+	if bool(view.ship) and not paused and state!="Target met" and rate>0.0:
+		var next_done:=clampf(float(line.get("progress_days",0.0))/maxf(.001,float(line.get("work_per_item",1.0))),0.0,1.0)
+		var days:=(1.0-next_done)/rate
+		view.ready_day=int(extra.get("today",0))+ceili(days)
+		view.ready_days=days
+		view.bar_text=String(extra.get("ready_words",""))
+	# Tooltips carry the sentences the old cards printed, starting with what
+	# the bar shows.
+	var tip:PackedStringArray=[name+" · "+String(story.pace)]
+	var target:=int(line.get("target_stock",0))
+	if persistent and target>0 and not bool(view.ship):tip.append("The bar fills as the store nears the target: %d of %d." % [int(line.get("stock",0)),target])
+	elif persistent:tip.append("The bar is the next %s: %d%% done." % ["hull" if bool(view.ship) else "one",roundi(float(story.progress)*100.0)])
+	else:tip.append("The bar is this one-off order: %s." % String(story.progress_text))
+	var plan:=plan_text(line,story,String(extra.get("owner","")),name)
+	if not plan.is_empty():tip.append(plan)
+	tip.append(String(story.progress_text))
+	if persistent and not paused:tip.append(String(story.eta))
+	if not String(story.held).begins_with("Nothing"):tip.append(String(story.held))
+	if story.has("also"):tip.append(String(story.also))
+	for entry:Dictionary in story.materials:tip.append(String(entry.text))
+	view.tip="\n".join(tip)
+	var learn:=float(extra.get("learn_per_day",0.0))
+	var skill:=roundi(float(view.efficiency)*100.0)
+	view.skill_tip="Skill %d%%. " % skill+(("The hands get faster with practice, about 1 point every %s, up to 100%%. Changing product costs some." % span_text(.01/learn)) if learn>0.0 and skill<100 else "Full skill: practice has nothing more to teach." if skill>=100 else "Skill grows only while the line works.")
+	var office:=String(extra.get("office",""))
+	var who:=("the "+office) if not office.is_empty() else "staff"
+	view.auto=bool(extra.get("auto",false)) and persistent
+	view.auto_tip=("Auto: %s sets this line's target to what the bands need. Click to run it yourself." % who) if bool(view.managed) else ("You run this line. Auto lets %s set its target to what the bands need." % who)
+	if office.is_empty():view.auto_tip="Appoint a Quartermaster or Steward to let staff run lines."
+	return view

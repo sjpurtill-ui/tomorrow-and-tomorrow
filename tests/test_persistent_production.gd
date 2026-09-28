@@ -78,6 +78,13 @@ func test_priority_shares_one_workforce_and_scarce_inputs()->void:
 	assert_float(float(high.last_work)/float(low.last_work)).is_equal_approx(4,.00001)
 	assert_float(float(high.last_work)+float(low.last_work)).is_equal_approx(budget*.2,.00001)
 	assert_float(MilitaryCampaign.civilian_crafting_fraction()).is_equal(.5)
+	# Scarce inputs go down the list in order (the Production screen's line
+	# numbers), not by share of hands: line 1 first.
+	GameState.resource_stockpiles.Timber=.0001
+	MilitaryCampaign._process_equipment_production_day()
+	assert_float(float(low.last_work)).is_greater(0)
+	assert_float(float(high.last_work)).is_equal(0.0)
+	Production.move(MilitaryCampaign,int(high.id),0)
 	GameState.resource_stockpiles.Timber=.0001
 	MilitaryCampaign._process_equipment_production_day()
 	assert_float(float(high.last_work)).is_greater(0)
