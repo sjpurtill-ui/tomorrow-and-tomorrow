@@ -18,6 +18,8 @@ const Supply:=preload("res://scripts/supply_state.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
 const March:=preload("res://scripts/march_terrain.gd")
 const Roster:=preload("res://scripts/hud/military_roster_screen.gd")
+const SupplyMap:=preload("res://scripts/hud/supply_map.gd")
+const SupplyChart:=preload("res://scripts/hud/supply_chart.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 
 ## A stand-in terrain for the army bar: where it would centre the camera.
@@ -352,11 +354,58 @@ func test_the_home_levy_calls_up_its_empty_places()->void:
 	assert_int(int(orders[0].target_formation_id)).is_equal(int(formation.id))
 	assert_str(board.feedback.text).is_equal("5 called up to fill the levy")
 
+func test_talk_calls_the_bands_own_general_to_court()->void:
+	_train(40)
+	var band:=_band(30,"Levy band 1")
+	band["commander"]={"name":"Oda Longmeadow","figure_id":"fig_oda"}
+	var board:=_forces_board()
+	var row:=_control(board,"army:%d" % int(band.army_id))
+	assert_str((row.talk as Button).tooltip_text).is_equal("Call Oda to court.")
+	# No court sits in a test: it says so, and the screen stays open.
+	var closed:=[false]
+	board.close_wanted.connect(func():closed[0]=true)
+	(row.talk as Button).pressed.emit()
+	assert_bool(closed[0]).is_false()
+	assert_str(board.feedback.text).is_equal("The court cannot sit just now")
+
+func test_a_full_war_fits_the_military_screen_at_the_default_size()->void:
+	_train(160)
+	for i in 4:_band(30,"Levy band %d" % (i+1))
+	var away:Dictionary=MilitaryCampaign.field_armies[0]
+	_send_out(away,Vector2(30,-30))
+	away.last_report["day"]=int(GameState.elapsed_days)-7
+	_garrison(12,3)
+	(MilitaryCampaign.home_army.formations as Array)[0]["authorized_count"]=int((MilitaryCampaign.home_army.formations as Array)[0].count)+6
+	# 1600x900 at the game's 125% interface is 1280x720 of room.
+	var view:SubViewport=auto_free(SubViewport.new());view.size=Vector2i(1280,720);add_child(view)
+	var screen:CanvasLayer=auto_free(Roster.new());view.add_child(screen)
+	var room:=1280.0-2.0*maxf(16.0,1280.0*0.045)
+	for page:String in ["forces","support"]:
+		screen._show_page(page)
+		for frame in 4:await await_idle_frame()
+		var board:VBoxContainer=screen.forces_board if page=="forces" else screen.readiness_board
+		assert_bool(board.wide).override_failure_message(page).is_true()
+		# The rows fit the panel as laid out; it never grows past the screen's room.
+		assert_float(screen.panel.size.x).override_failure_message(page).is_less_equal(room+0.5)
+		assert_float(screen.body.get_combined_minimum_size().x).override_failure_message(page).is_less_equal(screen.scroll.size.x)
+	# A band away says where and how old its word is, in full.
+	screen._show_page("forces")
+	for frame in 4:await await_idle_frame()
+	var where:Label=_control(screen.forces_board,"army:%d" % int(away.army_id)).where
+	assert_str(where.text).contains("north-east").contains("reported 7 days ago")
+	var need:=where.get_theme_font("font").get_string_size(where.text,HORIZONTAL_ALIGNMENT_LEFT,-1,where.get_theme_font_size("font_size")).x
+	assert_float(need).override_failure_message("%s needs %.0f px, has %.0f" % [where.text,need,where.size.x]).is_less_equal(where.size.x)
+
 # ---------------------------------------------------------------------------
 # Readiness & supply: HOI4's logistics view
 # ---------------------------------------------------------------------------
 
-func test_readiness_rows_are_the_supply_models_own_line()->void:
+func _control_for(board:VBoxContainer,key:String)->Dictionary:
+	for control:Dictionary in board.live:
+		if String(control.key)==key:return control
+	return {}
+
+func test_readiness_rows_follow_the_one_supply_rule()->void:
 	_train(90)
 	var near:=_band(30,"Levy band 1")
 	var far:=_band(25,"Levy band 2")
@@ -366,33 +415,111 @@ func test_readiness_rows_are_the_supply_models_own_line()->void:
 	_ration_day()
 	far["hungry_days"]=5.0
 	var board:=_readiness_board()
-	var reports:=Supply.forces()
-	assert_int(board.rows.size()).is_equal(reports.size())
-	for report:Dictionary in reports:
-		var key:=ReadinessModel.key_of(report)
-		var control:Dictionary={}
-		for candidate:Dictionary in board.live:
-			if String(candidate.key)==key:control=candidate
-		assert_dict(control).override_failure_message(key).is_not_empty()
-		# The bar is the model's ratio, in its state's colour.
+	assert_int(board.rows.size()).is_equal(Supply.forces().size())
+	# The levy at home and the town we hold are known today: the supply
+	# model's own reading.
+	for force:Dictionary in [MilitaryCampaign.home_army,MilitaryCampaign.occupation_forces[0]]:
+		var report:=Supply.of_force(force)
+		var control:=_control_for(board,ReadinessModel.key_of(report))
+		assert_dict(control).override_failure_message(ReadinessModel.key_of(report)).is_not_empty()
 		assert_float(float(control.meter.share)).is_equal_approx(float(report.ratio),0.0001)
 		assert_str(String(control.meter.text)).is_equal("%d%%" % roundi(float(report.ratio)*100.0))
 		assert_bool(control.meter.fill==Supply.state_color(String(report.state))).is_true()
-		# The hub it draws on, and the days and km along the line.
 		assert_str(control.hub.text).is_equal(String(report.hub))
 		if not bool(report.get("at_home",false)):
 			assert_str(control.span.text).is_equal("%s · %d km" % [Supply.days_words(float(report.days)),roundi(float(report.km))])
 		# The reasons are the tooltip, never the row.
 		for reason in report.why:assert_str(String(control.who.tooltip_text).to_lower()).contains(String(reason).to_lower())
 		assert_bool((control.hungry as Control).visible).is_equal(bool(report.hungry))
-	# Farther out, less arrives; the hungry band wears its badge.
-	var near_report:=Supply.of_army_id(int(near.army_id))
-	var far_report:=Supply.of_army_id(int(far.army_id))
-	assert_float(float(far_report.days)).is_greater(float(near_report.days))
-	for control:Dictionary in board.live:
-		if String(control.key)=="army:%d" % int(far.army_id):
-			assert_bool((control.hungry as Control).visible).is_true()
-			assert_str(control.hungry_days.text).is_equal("5 days")
+	# A band away before signals: the supply its runner brought, dated, on
+	# the line from our hubs to where he left it.
+	for army:Dictionary in [near,far]:
+		var told:Dictionary=army.last_report
+		var control:=_control_for(board,"army:%d" % int(army.army_id))
+		assert_float(float(control.meter.share)).is_equal_approx(float(told.supply_level),0.0001)
+		var line:=Supply.at_point(Vector2(float(told.position.x),float(told.position.z)),int(told.troops),false)
+		assert_str(control.hub.text).is_equal(String(line.hub))
+		assert_str(control.span.text).is_equal("%s · %d km" % [Supply.days_words(float(line.days)),roundi(float(line.km))])
+		assert_str(control.men.text).contains("reported today")
+		assert_str(String(control.meter.tooltip_text)).contains("reported today by runner")
+	# Farther out, a longer haul; hunger is the war leader's word, told today.
+	assert_float(float(BarModel.known_supply(MilitaryCampaign,far).days)).is_greater(float(BarModel.known_supply(MilitaryCampaign,near).days))
+	var hungry:=_control_for(board,"army:%d" % int(far.army_id))
+	assert_bool((hungry.hungry as Control).visible).is_true()
+	assert_str(hungry.hungry_days.text).is_equal("5 days")
+
+func test_one_band_shows_one_supply_number_on_every_screen()->void:
+	_train(60)
+	var band:=_band(30,"Levy band 1")
+	_send_out(band,Vector2(40,6))
+	# The runner left seven days ago saying 82%; since then they have marched
+	# on, and today they get less. Home knows only what he said.
+	band.last_report["supply_level"]=0.82
+	band.last_report["day"]=int(GameState.elapsed_days)-7
+	band["position"]={"x":home.x+60.0,"z":home.y+10.0}
+	var held:=_garrison(12,0)
+	_ration_day()
+	var today:=Supply.of_force(band)
+	assert_float(absf(float(today.ratio)-0.82)).is_greater(0.02)
+	var id:="army:%d" % int(band.army_id)
+	# The army bar.
+	var card:=_card(id)
+	assert_float(float(card.supply)).is_equal_approx(0.82,0.0001)
+	assert_str(BarModel.supply_line(card).to_lower()).contains("82%").contains("reported seven days ago by runner")
+	# Forces.
+	var forces:=_forces_board()
+	var row:=_control(forces,id)
+	assert_float(float(row.meters[2].share)).is_equal_approx(0.82,0.0001)
+	assert_str(String(row.meters[2].text)).is_equal("82%")
+	assert_str(row.where.text).contains("reported 7 days ago")
+	assert_str(String(row.meters[2].tooltip_text).to_lower()).contains("reported seven days ago by runner")
+	# Readiness.
+	var readiness:=_readiness_board()
+	var line:=_control_for(readiness,id)
+	assert_float(float(line.meter.share)).is_equal_approx(0.82,0.0001)
+	assert_str(String(line.meter.text)).is_equal("82%")
+	assert_str(line.men.text).contains("reported 7 days ago")
+	# The supply map: the mark stands where the runner left them, with his number.
+	var map:Node=auto_free(SupplyMap.new())
+	var marks:Array=map._forces()
+	var mark:Dictionary={}
+	for candidate:Dictionary in marks:
+		if String(candidate.id)==id:mark=candidate
+	assert_dict(mark).is_not_empty()
+	assert_float((mark.pos as Vector2).distance_to(home+Vector2(40,6))).is_less(0.01)
+	var chart:Control=auto_free(SupplyChart.new())
+	var note:Dictionary=chart._force_tip(mark.report)
+	assert_float(float(note.ratio)).is_equal_approx(0.82,0.0001)
+	assert_str(String(note.text)).contains("Reported seven days ago by runner")
+	# And the note calls them what the army bar calls them.
+	assert_str(String(note.title)).is_equal(String(card.title))
+	# A town we hold is known today, the same number on all four.
+	var town:=Supply.of_force(held)
+	var key:="garrison:%s/%s" % [civ_id,city_id]
+	assert_float(float(_card(key).supply)).is_equal_approx(float(town.ratio),0.0001)
+	assert_float(float(_control(forces,key).meters[2].share)).is_equal_approx(float(town.ratio),0.0001)
+	assert_float(float(_control_for(readiness,"held:"+city_id).meter.share)).is_equal_approx(float(town.ratio),0.0001)
+	for candidate:Dictionary in marks:
+		if String(candidate.id)=="held:"+city_id:assert_float(float(chart._force_tip(candidate.report).ratio)).is_equal_approx(float(town.ratio),0.0001)
+	# Once they are home, word is today's everywhere.
+	band["position"]={"x":home.x,"z":home.y};band["location_id"]="player_home";band["status"]="stationed"
+	assert_bool(BarModel.live_known(MilitaryCampaign,band)).is_true()
+	assert_float(float(_card(id).supply)).is_equal_approx(float(Supply.of_force(band).ratio),0.0001)
+
+func test_a_band_with_no_runner_yet_shows_no_supply_anywhere()->void:
+	_train(40)
+	var band:=_band(30,"Levy band 1")
+	_send_out(band,Vector2(30,0))
+	band["last_report"]={}
+	var id:="army:%d" % int(band.army_id)
+	assert_dict(BarModel.known_supply(MilitaryCampaign,band)).is_empty()
+	assert_str(String(_card(id).supply_state)).is_equal("unknown")
+	var readiness:=_readiness_board()
+	var line:=_control_for(readiness,id)
+	assert_bool((line.meter as Control).visible).is_false()
+	assert_str(line.span.text).is_equal("no report yet")
+	var map:Node=auto_free(SupplyMap.new())
+	assert_bool((map._forces() as Array).any(func(m:Dictionary)->bool:return String(m.id)==id)).is_false()
 
 func test_readiness_gear_shortfalls_are_the_equipment_ledgers_and_open_production()->void:
 	_train(60)

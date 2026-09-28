@@ -1120,7 +1120,8 @@ static var _logistics_textures:Dictionary={}
 ##   the line  hub (a storehouse in a ring: home or one of our towns),
 ##             depot (crates under a pennant: a town we hold), road
 ##   the band  hungry (an empty bowl), seen (a star: fights come through),
-##             find (a sighting ring: show it on the map)
+##             find (a sighting ring: show it on the map), talk (two speech
+##             bubbles: call its general to court)
 ## Unknown kinds draw a dot, never an error.
 static func logistics_texture(kind:String,ink:Color,px:int=40)->Texture2D:
 	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
@@ -1150,4 +1151,5 @@ static func logistics_glyph(kind:String,c:Color)->Array:
 				star.append(_t(tip.x,tip.y,left.x,left.y,right.x,right.y,c))
 			return star
 		"find": return [_ring(28,28,13,3.4,c),_s(28,5,28,14,3.4,c),_s(28,42,28,51,3.4,c),_s(5,28,14,28,3.4,c),_s(42,28,51,28,3.4,c),_c(28,28,3.8,c)]
+		"talk": return [_rr(36,33,15,10,6,soft),_t(40,40,48,40,49,50,soft),_rr(21,19,16,11,6,c),_t(12,26,22,28,8,38,c)]
 	return [_c(28,28,6,c)]

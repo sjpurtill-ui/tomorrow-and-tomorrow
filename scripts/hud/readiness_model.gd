@@ -10,10 +10,15 @@ extends RefCounted
 ##            the share of the fighters' need our carriers can move
 ##            (supply_state.day_inputs().transport), our hubs and depots, the
 ##            rations the fighters eat a day and the gear being mended
-##   rows()   one per force, exactly as supply_state.forces() reports it
-##            (ratio, state, hub, days, km, road, hungry_days, why...), with
-##            the name the army bar gives it and its gear shortfalls
-##            (equipment_logistics.needs_by_force)
+##   rows()   one per force: the levy at home and each town we hold as
+##            supply_state.of_force reports them today, and each band by the
+##            army bar's one supply rule (army_bar_model.known_supply: today's
+##            reading while word reaches home, else its last runner's report,
+##            dated), so a band reads the same here, on the army bar and on
+##            the supply map. Each row has the model's keys (ratio, state,
+##            hub, days, km, road, hungry_days, why...), the name the army bar
+##            gives it and its gear shortfalls (equipment_logistics
+##            .needs_by_force)
 
 const Supply:=preload("res://scripts/supply_state.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
@@ -93,7 +98,7 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 	var stock:={}
 	for entry:Dictionary in Logistics.rows(mc):stock[String(entry.item)]=entry
 	var out:Array[Dictionary]=[]
-	for report:Dictionary in Supply.forces():
+	for report:Dictionary in _reports(mc):
 		var row:=report.duplicate()
 		var key:=key_of(report)
 		var card:Dictionary=cards.get(key,{})
@@ -102,7 +107,7 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 		row["title"]=String(card.get("title","")) if not card.is_empty() else _fallback_title(report)
 		row["general"]=card.get("general",{})
 		row["card_kind"]=String(card.get("kind",String(report.get("force_kind",""))))
-		row["men"]=int(report.get("troops",0))
+		row["men"]=int(report.get("troops",-1))
 		var short:Array[Dictionary]=[]
 		var items:Dictionary=gear.get(key,{})
 		for item:String in items:
@@ -114,6 +119,27 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 		row["order"]=ORDER.find(String(report.get("force_kind","field")))*10000+out.size()
 		out.append(row)
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.order)<int(b.order))
+	return out
+
+
+## The forces' supply as we know it at home: the levy and the towns we hold
+## today, each band by the one rule ({unknown} while no runner has come).
+static func _reports(mc:Node)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	if int((mc.home_army as Dictionary).get("troops",0))>0:out.append(_today(Supply.of_force(mc.home_army)))
+	for a in mc.field_armies:
+		if not a is Dictionary or int((a as Dictionary).get("troops",0))<=0:continue
+		var army:Dictionary=a
+		var known:=BarModel.known_supply(mc,army)
+		out.append(known if not known.is_empty() else {"force_kind":"field","army_id":int(army.get("army_id",0)),"name":String(army.get("name","")),"unknown":true,"live":false})
+	for g in mc.occupation_forces:
+		if g is Dictionary and int((g as Dictionary).get("troops",0))>0:out.append(_today(Supply.of_force(g)))
+	return out
+
+
+static func _today(report:Dictionary)->Dictionary:
+	var out:=report.duplicate()
+	out["live"]=true;out["report_age"]=0
 	return out
 
 

@@ -73,6 +73,92 @@ static func supply_color(state:String)->Color:
 	return {"well":T.GREEN,"strained":T.AMBER,"starving":T.RED}.get(state,T.GREEN)
 
 
+# --- What we know at home of a band in the field ----------------------------------
+
+static var _known_cache:Dictionary={}
+static var _known_day:=-1
+
+
+## Word of this band reaches home today: it is at home, it is fighting (the
+## news of a battle comes at once), or signals carry word from the field.
+## Otherwise it is known only from its last runner's report.
+static func live_known(mc:Node,army:Dictionary)->bool:
+	mc=_host(mc)
+	var id:=int(army.get("army_id",0))
+	return Orders.at_home(army) or mc.command_hierarchy.battle.engaged(id) or mc._army_in_battle(id) or mc._live_army_reporting()
+
+
+## THE ONE SUPPLY RULE for a band in the field, on every screen that shows
+## it: the army bar and its cards on the Forces tab, the Readiness & supply
+## rows, and the supply map's plates and notes. While word reaches home
+## today (live_known), the supply model's reading of today
+## (supply_state.of_force). Otherwise the last runner's report: the supply
+## the runner brought (military_campaign's runner: "... with 62 personnel
+## and 82% supply"), dated, on the line from our hubs to where the band
+## was. {} while no runner has come at all. The home side of the line (the
+## carriers, hubs and depots) is known at home and is read today; so is
+## hunger, which the war leader sends word of when it starts
+## (court_war_orders). Keys as supply_state reports, plus live and
+## report_age (days since the runner left).
+static func known_supply(mc:Node,army:Dictionary)->Dictionary:
+	mc=_host(mc)
+	var reader:=supply_reader()
+	if live_known(mc,army):
+		var today_report:Dictionary=reader.call("of_force",army) if reader!=null and reader.has_method("of_force") else {}
+		var live:=today_report.duplicate() if not today_report.is_empty() else supply_of(army,false)
+		live["live"]=true;live["report_age"]=0
+		# Named as the army bar and the war chart name it ("Oda's band").
+		live["name"]=Logistics.force_name(army)
+		if not live.has("position"):live["position"]=_v2(army.get("position",{}))
+		return live
+	var told:Dictionary=army.get("last_report",{}) if army.get("last_report") is Dictionary else {}
+	if told.is_empty():return {}
+	var today:=int(WorldSimulation.state.elapsed_days)
+	if today!=_known_day:_known_cache.clear();_known_day=today
+	var at:=_v2(told.get("position",{}))
+	var troops:=int(told.get("troops",army.get("troops",0)))
+	var ratio:=clampf(float(told.get("provision_ratio",told.get("supply_level",1.0))),0.0,1.0)
+	var field_key:=int((reader.call("field") as Dictionary).get("key",0)) if reader!=null and reader.has_method("field") else 0
+	var key:=hash([int(army.get("army_id",0)),int(told.get("day",-1)),at,troops,ratio,field_key,Rations.is_hungry(army)])
+	if _known_cache.has(key):return _known_cache[key]
+	# The line from our hubs to where the runner left them, as the model
+	# reckons any point today; the supply on it is the runner's.
+	var out:Dictionary={}
+	if reader!=null and at.is_finite() and reader.has_method("at_point"):
+		out=(reader.call("at_point",at,troops,String(told.get("status",""))=="moving") as Dictionary).duplicate()
+	for share in ["carried","foraged","local","air"]:out.erase(share)
+	var age:=maxi(0,today-int(told.get("day",today)))
+	var state:=String(reader.call("state_of",ratio)) if reader!=null and reader.has_method("state_of") else ("well" if ratio>=0.75 else ("strained" if ratio>=0.45 else "starving"))
+	out.merge({"ratio":ratio,"state":state,"supply_level":ratio,"force_kind":"field","army_id":int(army.get("army_id",0)),"name":Logistics.force_name({"commander":army.get("commander",{}),"troops":troops,"name":army.get("name","")}),
+		"troops":troops,"position":at,"live":false,"report_age":age,"report_day":int(told.get("day",today)),
+		"hungry":Rations.is_hungry(army),"hungry_days":float(army.get("hungry_days",0.0))},true)
+	# why[] keeps the model's order (the line first, as words tell it too);
+	# words say when the runner told it and where the line runs.
+	var dated:=report_words(age)
+	var line:=String(reader.call("line_words",out)) if reader!=null and reader.has_method("line_words") and out.has("hub") else ""
+	if not out.has("why"):out["why"]=PackedStringArray()
+	out["words"]=dated.substr(0,1).to_upper()+dated.substr(1)+("; "+line if line!="" else "")+"."
+	_known_cache[key]=out
+	return out
+
+
+## The age of a runner's report in a row, in figures: "reported today",
+## "reported yesterday", "reported 7 days ago" (the Forces and Readiness
+## rows).
+static func dated_words(age:int)->String:
+	if age<=0:return "reported today"
+	if age==1:return "reported yesterday"
+	return "reported %d days ago" % age
+
+
+## "reported today by runner", "reported yesterday by runner", "reported
+## seven days ago by runner".
+static func report_words(age:int)->String:
+	if age<=0:return "reported today by runner"
+	if age==1:return "reported yesterday by runner"
+	return ArmyMarks.age_words(age)+" by runner"
+
+
 ## {share 0..1, issued, required, missing:{item:count}} for these formations.
 static func gear_of(formations:Array,mc:Node=null)->Dictionary:
 	mc=_host(mc)
@@ -127,6 +213,7 @@ static func will_words(will:float)->String:
 ## "Supply 82%: fed" and the supply reading's own words.
 static func supply_line(card:Dictionary)->String:
 	var state:=String(card.get("supply_state","well"))
+	if state=="unknown":return "Supply not known: no runner has come from them yet."
 	var head:="Supply %d%%: %s." % [roundi(float(card.get("supply",1.0))*100.0),{"well":"well fed","strained":"short of food","starving":"going hungry"}.get(state,state)]
 	var words:=String(card.get("supply_words","")).strip_edges()
 	return head if words=="" or words.begins_with("Supply ") else head+"\n"+words
@@ -163,7 +250,7 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 	var id:=int(army.get("army_id",0))
 	var home:=Orders.at_home(army)
 	var fighting:bool=mc.command_hierarchy.battle.engaged(id) or mc._army_in_battle(id)
-	var live:bool=home or fighting or mc._live_army_reporting()
+	var live:=live_known(mc,army)
 	var shown:Dictionary=army if live else army.get("last_report",{})
 	var unknown:=shown.is_empty()
 	if unknown:shown=army
@@ -177,7 +264,9 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 	var gear:=gear_of(formations,mc)
 	var make:=make_of(formations)
 	var will:=clampf(float(shown.get("morale",army.get("morale",0.6))),0.0,1.0)
-	var supply:=supply_of(army if live else shown,live)
+	# The one supply rule (known_supply): today's, or the runner's, dated.
+	var known:=known_supply(mc,army)
+	var supply:={"ratio":float(known.get("ratio",0.0)),"state":String(known.get("state","unknown")),"words":String(known.get("words",""))} if not known.is_empty() else {"ratio":0.0,"state":"unknown","words":""}
 	var besieging:=""
 	if String(army.get("status",""))=="besieging":besieging=String(army.get("location_name","the town"))
 	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==id:
@@ -200,7 +289,7 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 	return {"id":"army:%d" % id,"kind":"army","army_id":id,"members":[id],"title":title,"short":String(general.get("name",name if name!="" else noun.capitalize())),
 		"general":general,"noun":noun,"men":men,"full":maxi(men,ArmyMarks.full_strength(army)),"gear":gear.share,"gear_detail":gear,"will":will,
 		"supply":float(supply.ratio),"supply_state":String(supply.state),"supply_words":String(supply.words),"state":state,"doing":doing,
-		"position":position,"report_age":0 if live else maxi(0,today-int(shown.get("day",today))),"unknown":unknown,"home":home,
+		"position":position,"report_age":0 if live else maxi(0,today-int(shown.get("day",today))),"unknown":unknown,"home":home,"live":live,
 		"name":name,"drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
@@ -218,7 +307,7 @@ static func _home_card(mc:Node)->Dictionary:
 		"short":"Home","general":{"name":leader} if leader!="" else {},"noun":noun,"men":men,"full":maxi(men,ArmyMarks.full_strength(force)),
 		"gear":gear.share,"gear_detail":gear,"will":clampf(float(force.get("morale",0.6)),0.0,1.0),"supply":float(supply.ratio),"supply_state":String(supply.state),
 		"supply_words":String(supply.words),"state":"fighting" if fighting else "holding","doing":"in battle at home" if fighting else "at home",
-		"position":WorldSimulation.world.player_world_origin,"report_age":0,"unknown":false,"home":true,
+		"position":WorldSimulation.world.player_world_origin,"report_age":0,"unknown":false,"home":true,"live":true,
 		"name":"","drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
@@ -236,7 +325,7 @@ static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 		"civ_id":String(force.get("civ_id","")),"region_id":String(force.get("region_id","")),"title":"Garrison of %s" % town,"short":town,"general":general,
 		"noun":"garrison","men":men,"full":maxi(men,ceili(float(force.get("required",men)))),"gear":gear.share,"gear_detail":gear,"will":will,
 		"supply":float(supply.ratio),"supply_state":String(supply.state),"supply_words":String(supply.words),"state":state,"doing":"holding %s" % town,
-		"position":Pursuit.town_position(String(force.get("region_id",""))),"report_age":0,"unknown":false,"home":false,
+		"position":Pursuit.town_position(String(force.get("region_id",""))),"report_age":0,"unknown":false,"home":false,"live":true,
 		"name":town,"drill":make.drill,"seen":make.seen,"kinds":make.kinds}
 
 
@@ -285,6 +374,8 @@ static func group_card(key:String,members:Array,hq_name:String="")->Dictionary:
 	var state:="holding";var worst_supply:="well"
 	var ids:Array=[]
 	var drill:=0.0;var seen:=0.0;var kinds:={}
+	# A band with no word yet adds nothing to what we know of the army's supply.
+	var supply_weight:=0.0
 	for m in members:
 		var card:Dictionary=m
 		if int(card.men)>int(lead.men):lead=card
@@ -296,11 +387,13 @@ static func group_card(key:String,members:Array,hq_name:String="")->Dictionary:
 		var gear:Dictionary=card.gear_detail
 		gear_issued+=int(gear.get("issued",0));gear_required+=int(gear.get("required",0))
 		for item:String in gear.get("missing",{}):missing[item]=int(missing.get(item,0))+int(gear.missing[item])
-		will+=float(card.will)*float(card.men);supply+=float(card.supply)*float(card.men)
+		will+=float(card.will)*float(card.men)
+		if String(card.supply_state)!="unknown":supply+=float(card.supply)*float(card.men);supply_weight+=float(card.men)
 		if STATE_ORDER.find(String(card.state))<STATE_ORDER.find(state):state=String(card.state)
 		if ["well","strained","starving"].find(String(card.supply_state))>["well","strained","starving"].find(worst_supply):worst_supply=String(card.supply_state)
 		ids.append(int(card.army_id))
 	var weight:=maxf(1.0,float(men))
+	if supply_weight<=0.0:worst_supply="unknown"
 	var general:Dictionary=lead.general
 	var default_hq:=hq_name=="" or hq_name.ends_with("headquarters")
 	var title:=hq_name if not default_hq else (("%s's army" % String(general.name)) if not general.is_empty() else "Our army")
@@ -309,8 +402,8 @@ static func group_card(key:String,members:Array,hq_name:String="")->Dictionary:
 	return {"id":key,"kind":"group","army_id":int(lead.army_id),"members":ids,"member_cards":members,"title":title,"short":String(general.get("name",title)),
 		"general":general,"noun":"army","men":men,"full":full,"gear":clampf(float(gear_issued)/maxf(1.0,float(gear_required)),0.0,1.0) if gear_required>0 else 1.0,
 		"gear_detail":{"issued":gear_issued,"required":gear_required,"missing":missing,"share":clampf(float(gear_issued)/maxf(1.0,float(gear_required)),0.0,1.0) if gear_required>0 else 1.0},
-		"will":will/weight,"supply":supply/weight,"supply_state":worst_supply,"supply_words":"\n".join(words),"state":state,
-		"doing":"%d %s" % [members.size(),"bands"],"position":lead.position,"report_age":int(lead.report_age),"unknown":false,"home":bool(lead.home),
+		"will":will/weight,"supply":supply/maxf(1.0,supply_weight),"supply_state":worst_supply,"supply_words":"\n".join(words),"state":state,
+		"doing":"%d %s" % [members.size(),"bands"],"position":lead.position,"report_age":int(lead.report_age),"unknown":false,"home":bool(lead.home),"live":bool(lead.get("live",true)),
 		"name":hq_name,"drill":drill/weight,"seen":seen/weight,"kinds":_largest_first(kinds.values())}
 
 
@@ -321,9 +414,8 @@ static func tooltip(card:Dictionary)->String:
 	if doing!="":lines.append(doing.substr(0,1).to_upper()+doing.substr(1))
 	lines.append(gear_words(card.get("gear_detail",{})).get_slice("\nClick",0))
 	lines.append(will_words(float(card.will)))
+	# A band known by its runner: the supply line says when he told it.
 	lines.append(supply_line(card))
-	var age:=ArmyMarks.age_words(int(card.get("report_age",0)))
-	if age!="":lines.append(age.substr(0,1).to_upper()+age.substr(1)+" by runner.")
 	lines.append("Click to find them · double-click for orders.")
 	return "\n".join(lines)
 

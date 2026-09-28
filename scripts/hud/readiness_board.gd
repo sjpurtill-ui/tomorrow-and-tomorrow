@@ -24,6 +24,7 @@ const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Board:=preload("res://scripts/hud/recruit_deploy_board.gd")
 const Forces:=preload("res://scripts/hud/forces_board.gd")
+const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const SupplyMap:=preload("res://scripts/hud/supply_map.gd")
 ## Below this width a row puts its line and gear on a second line.
 const WIDE_FROM:=940.0
@@ -268,21 +269,29 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 		face.texture=Forces.face_texture({"kind":String(row.card_kind),"general":general})
 		face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED if not general.is_empty() and String(row.card_kind)!="home" else TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	control.title.text=String(row.get("title",""))
-	control.men.text="%s men" % EraWords.grouped(int(row.get("men",0)))
+	# No runner yet: nothing is known of their supply, and nothing is guessed.
+	var unknown:=bool(row.get("unknown",false))
+	var age:=int(row.get("report_age",0))
+	var reported:=not bool(row.get("live",true))
+	control.men.text="—" if unknown else "%s men" % EraWords.grouped(int(row.get("men",0)))+(" · "+BarModel.dated_words(age) if reported else "")
+	(control.meter as Control).visible=not unknown
 	var reasons:=why_words(row)
-	control.who.tooltip_text=String(row.get("words",""))+("\n"+reasons if reasons!="" else "")
-	control.meter.set_reading(ratio,"%d%%" % roundi(ratio*100.0),Supply.state_color(state),"%s\n%s" % [shares_words(row),reasons] if reasons!="" else shares_words(row))
+	control.who.tooltip_text="No runner has come from them yet." if unknown else String(row.get("words",""))+("\n"+reasons if reasons!="" and not reported else "")
+	var head:=("Supply %d%%, %s." % [roundi(ratio*100.0),BarModel.report_words(age)]) if reported else shares_words(row)
+	control.meter.set_reading(ratio,"%d%%" % roundi(ratio*100.0),Supply.state_color(state),"%s\n%s" % [head,reasons] if reasons!="" else head)
 	var at_home:=bool(row.get("at_home",false))
 	var kind:=String(row.get("hub_kind",""))
 	(control.hub_mark as TextureRect).texture=Icons.logistics_texture("depot" if kind=="held" else "hub",T.INK,32) if not at_home else Icons.command_texture("home",T.INK,32)
 	control.hub.text=String(row.get("hub",""))
 	var days:=float(row.get("days",0.0))
-	if at_home:control.span.text="at home"
+	if unknown:control.span.text="no report yet"
+	elif at_home:control.span.text="at home"
 	elif String(row.get("hub",""))=="" or not is_finite(days):control.span.text="no road back"
 	else:control.span.text="%s · %d km" % [Supply.days_words(days),roundi(float(row.get("km",0.0)))]
-	control.line.tooltip_text=(Supply.line_words(row).substr(0,1).to_upper()+Supply.line_words(row).substr(1)+".") if not at_home else "At home: fed from the stores."
+	if unknown:control.line.tooltip_text="Where they are is not known until a runner comes."
+	else:control.line.tooltip_text=(Supply.line_words(row).substr(0,1).to_upper()+Supply.line_words(row).substr(1)+("." if not reported else ", where the runner left them.")) if not at_home else "At home: fed from the stores."
 	var road:=String(row.get("road",""))
-	(control.road as TextureRect).visible=road!=""
+	(control.road as TextureRect).visible=road!="" and not unknown
 	(control.road as TextureRect).tooltip_text="By %s." % road
 	var hungry:=bool(row.get("hungry",false))
 	(control.hungry as Control).visible=hungry

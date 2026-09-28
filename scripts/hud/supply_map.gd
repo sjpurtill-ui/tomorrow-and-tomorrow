@@ -18,6 +18,7 @@ extends Node
 ## for the day's rations while forces are out. Observe-only.
 
 const Supply:=preload("res://scripts/supply_state.gd")
+const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Chart:=preload("res://scripts/hud/supply_chart.gd")
 const Stroke:=preload("res://scripts/scout_chart_stroke.gd")
 const Index:=preload("res://scripts/scout_chart_index.gd")
@@ -184,8 +185,12 @@ func _forces()->Array:
 	if mc==null: return out
 	for a in mc.field_armies:
 		if not a is Dictionary or int((a as Dictionary).get("troops",0))<=0 or bool(mc._army_is_home(a)): continue
-		var p:=Supply.force_pos(a)
-		if p.is_finite(): out.append({"id":"army:%d" % int(a.get("army_id",0)),"pos":p,"report":Supply.of_force(a),"route":Supply.route_to(Supply.field(),p)})
+		# The army bar's one supply rule: a band away before signals stands
+		# where its last runner left it, as fed as he said (no mark until one
+		# has come); the army bar and the Military screen read the same.
+		var known:=BarModel.known_supply(mc,a)
+		var p:Vector2=known.get("position",Vector2.INF) if not known.is_empty() else Vector2.INF
+		if p.is_finite(): out.append({"id":"army:%d" % int(a.get("army_id",0)),"pos":p,"report":known,"route":Supply.route_to(Supply.field(),p)})
 	for g in mc.occupation_forces:
 		if not g is Dictionary or int((g as Dictionary).get("troops",0))<=0: continue
 		var p:=Supply.force_pos(g)
