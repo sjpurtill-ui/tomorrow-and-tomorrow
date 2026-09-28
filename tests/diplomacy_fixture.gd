@@ -6,6 +6,9 @@ extends RefCounted
 
 static func build_fixture()->String:
 	GameState.reset_for_new_world(424242)
+	# Three peoples are needed; the rival count is a new-game setting that
+	# reset_for_new_world keeps, so another suite's choice must not shrink it.
+	GameState.opponent_count=maxi(GameState.opponent_count,3)
 	MilitaryCampaign.reset_for_new_world()
 	SettlementModel.reset_for_new_world(); GovernmentPeopleSystem.reset_for_new_world()
 	CivilizationSystem.reset_for_new_world(); CivilizationSystem.initialize()
