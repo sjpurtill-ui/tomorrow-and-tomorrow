@@ -1266,6 +1266,8 @@ func _draw_marks(band:String,echelons_drawn:Array)->void:
 		if bool(mark.get("selected",false)): priority+=1_000_000_000
 		if String(mark.side)=="ours": priority+=200_000_000
 		if bool(mark.get("moving",false)): priority+=100_000_000
+		# A garrison is drawn on its town first; bands beside it give way.
+		if bool(mark.get("garrison",false)): priority+=150_000_000
 		priority-=int(mark.get("age_days",0))*1_000_000
 		entry.priority=priority
 		candidates.append(entry)

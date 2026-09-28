@@ -246,23 +246,26 @@ func test_come_back_turns_the_detachment_and_everyone_home_asks_about_the_town()
 	assert_str(String(back.get("verb",""))).is_equal("war")
 	assert_str(String(back.war.kind)).is_equal("recall")
 	assert_str(String(back.actor_says)).contains("detachment from Tsaren (%d)" % sent)
+	# Still at the gate they are back in the garrison at once; further out
+	# they walk back to Tsaren.
 	var out:=_detachment()
-	assert_str(String((out.pursuit as Dictionary).state)).is_equal("returning")
-	assert_str(String(out.destination_id)).is_equal(city_id)
+	if not out.is_empty():
+		assert_str(String((out.pursuit as Dictionary).state)).is_equal("returning")
+		assert_str(String(out.get("destination_id",""))).is_equal(city_id)
+	# Rovik's band, camped at Tsaren, is called home too.
+	var rovik:=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(band.army_id))]
+	assert_str(String(rovik.destination_id)).is_equal("player_home")
 	for d in 6:
 		_day()
 		if _detachment().is_empty(): break
 	assert_dict(_detachment()).is_empty()
 	assert_int(_garrison()+int(MilitaryCampaign.occupation_force_for_region(civ_id,city_id).get("wounded_pool",0))).is_equal(17)
-	# "Everyone come home": Rovik's band starts home; the garrison is not
-	# pulled out of Tsaren without asking once.
+	# "Everyone come home": the garrison is not pulled out of Tsaren
+	# without asking once.
 	var all:=CC.hear(id,"Everyone come home")
 	assert_str(String(all.war.kind)).is_equal("recall")
 	assert_str(String(all.actor_says)).contains("Leave Tsaren unguarded?")
 	assert_int(_garrison()).is_greater(0)
-	var rovik:=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(band.army_id))]
-	assert_str(String(rovik.destination_id)).is_equal("player_home")
-	assert_str(String(all.actor_says)).contains("turning for home")
 	# "Yes": the garrison marches home and Tsaren is left to its people.
 	var yes:=CC.hear(id,"Yes")
 	assert_str(String(yes.war.verdict)).override_failure_message(String(yes.get("actor_says",""))).is_equal("act")
@@ -339,3 +342,28 @@ func test_a_load_reconciles_a_detachment_that_no_longer_fits()->void:
 	Pursuit.reconcile()
 	var lost:=_detachment()
 	assert_str(String(lost.destination_id)).is_equal("player_home")
+
+
+func test_come_back_after_a_day_out_walks_them_back_to_the_town()->void:
+	var band:=_captured_tsaren()
+	var id:=_audience(band)
+	_kill_and_chase(id)
+	GameState.elapsed_days+=1
+	MilitaryCampaign._process_field_army_movement_day()
+	var out:=_detachment()
+	assert_float(Vector2(float(out.position.x),float(out.position.z)).distance_to(city)).is_greater(1.0)
+	var back:=CC.hear(id,"Call off the chase and come back")
+	assert_str(String(back.war.kind)).is_equal("recall")
+	assert_str(String(back.actor_says)).contains("turns back to Tsaren")
+	out=_detachment()
+	assert_str(String((out.pursuit as Dictionary).state)).is_equal("returning")
+	assert_str(String(out.destination_id)).is_equal(city_id)
+	assert_str(Pursuit.doing_words(out)).is_equal("returning to Tsaren")
+	for d in 8:
+		_day()
+		if _detachment().is_empty(): break
+	assert_dict(_detachment()).is_empty()
+	var force:=MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
+	assert_int(int(force.troops)+int(force.get("wounded_pool",0))).is_equal(17)
+	# Called off, no chase report is filed.
+	assert_int(_chronicled("pursuit:").size()).is_equal(0)

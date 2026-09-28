@@ -1224,7 +1224,7 @@ static func _recall(out:Dictionary,reading:Dictionary={})->Dictionary:
 			turned.append("%s (%d) %s%s" % [String(d.name),int(d.troops),"is back inside %s" % String(d.to) if days<=0 and String(d.to)!="home" else ("turns back to %s" % String(d.to) if String(d.to)!="home" else "is coming home"),(", %s" % _span(days)) if days>0 else ""])
 			longest=maxi(longest,days)
 	# Garrisons stay unless the town is to be left.
-	var garrisons:=held_towns() if chosen<=0 else []
+	var garrisons:Array[Dictionary]=held_towns() if chosen<=0 else ([] as Array[Dictionary])
 	var ask_towns:Array[String]=[]
 	if not garrisons.is_empty() and not reading.is_empty() and to_home and (bool(reading.get("garrison",false)) or (sent.is_empty() and turned.is_empty() and blocked.is_empty() and to_home)):
 		for t:Dictionary in garrisons: ask_towns.append(String(t.name))

@@ -150,8 +150,8 @@ static func offer_words(fled:Dictionary,garrison:int)->String:
 	var n:=int(fled.get("count",0))
 	if n<=0: return ""
 	var spare:=detachment_size(garrison,n,0)
-	if spare<=0: return "About %s got away %s. I have too few in the town to send any after them." % [_count(n),toward_words(fled)]
-	return "About %s got away %s. I can send %s of the garrison after them for a day or two, if you want it. They know the paths out there and we do not." % [_count(n),toward_words(fled),_count(spare)]
+	if spare<=0: return "I have too few in the town to send any after them."
+	return "I can send %s of the garrison after them for a day or two, if you want it. They know the paths out there and we do not." % _count(spare)
 
 
 ## How many go: an asked number, bounded by the garrison less the watch it keeps.
@@ -407,7 +407,7 @@ static func _resolve(index:int,day:int)->Dictionary:
 	var where:="into the hills" if bool(p.get("hills",false)) else "toward %s" % String(p.get("toward","their other towns"))
 	var text:=""
 	if killed>0:
-		text="We went after the men who fled %s with %s. We ran down %s and killed them; the other %s got %s, where we could not follow." % [town,_count(sent),_count(killed),_count(away),where]
+		text="We went after the men who fled %s with %s. We ran down %s and killed them; the other %s got away %s, where we could not follow." % [town,_count(sent),_count(killed),_count(away),where]
 	else:
 		text="We went after the men who fled %s with %s. We followed their tracks until they split up in rough ground and lost them; all %s got %s." % [town,_count(sent),_count(fled),where]
 	if hurt>0: text+=" One of ours was hurt and is carried back."
@@ -469,7 +469,10 @@ static func _send_back(index:int)->Dictionary:
 			_rejoin(index)
 			return {"days":0,"to":"town","words":"We are back inside %s." % name}
 		var days:=int(went.get("days",0))
-		return {"days":days,"to":"town","words":"We are walking back to %s, %s." % [name,"a day" if days<=1 else "%s days" % _count(days)] if days>0 else "We are back inside %s." % name}
+		if days<=0:
+			# Still at the gate: they are back in the garrison at once.
+			_rejoin(index)
+		return {"days":days,"to":"town","words":"We are walking back to %s, about %s on the road." % [name,"a day" if days<=1 else "%s days" % _count(days)] if days>0 else "We are back inside %s." % name}
 	p["state"]="home"; army["pursuit"]=p; mc.field_armies[index]=army
 	var r:Dictionary=mc.return_field_army(int(army.army_id))
 	if r.has("error"): return {"error":String(r.error),"words":"%s is not ours now, and we cannot start for home yet: %s" % [name,String(r.error)]}
