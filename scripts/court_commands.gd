@@ -783,6 +783,13 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 			cls=cls.duplicate()
 			if not reading.is_empty(): cls["verb"]="war"; cls["war"]=reading; verb="war"; target={}
 			else: cls["verb"]="order"; verb="order"; target=actor
+		elif String(audience.get("origin",""))=="court" and not _clear_person(object,list) and _re("(?i)\\b(them|those|these|they)\\b").search(object)!=null:
+			# "Tie them up" with nobody named: a town's people, or nobody here.
+			var reading:=WarOrders.read(said,String(audience.get("civ_id","")),id)
+			if not reading.is_empty():
+				cls=cls.duplicate(); cls["verb"]="war"; cls["war"]=reading; verb="war"; target={}
+			else:
+				return _fallback(id,_result(verb,actor,{},text,insist),"Nobody here was named.")
 	# A war order falls on a town or an army, never on a person in the hall.
 	if verb=="war": target={}
 	var r:=_result(verb,actor,target,text,insist)

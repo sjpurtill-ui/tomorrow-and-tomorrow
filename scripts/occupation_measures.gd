@@ -441,7 +441,7 @@ const NEAREST:={
 	"settle":["settlers","our families","our people live","move in","take over the houses"],
 }
 const TONE_HARSH:=["hard","harsh","harshly","fear","terrify","punish","crush","break","teach","show them","obey","submit","who rules","who is master","tremble","afraid","squeeze","grind","tight","firm","control","keep them down","in line","no nonsense","understand"]
-const TONE_LENIENT:=["kind","kindly","gentle","gently","care","soft","mercy","merciful","well","fair","fairly","friends","trust","calm","peace","easy","ease","help","decently","respect them","win them"]
+const TONE_LENIENT:=["kind","kindly","gentle","gently","care","soft","mercy","merciful","well","fair","fairly","friends","trust","calm","peace","easy","ease","help","decently","respect them","win them","let them be","leave them be","leave them alone","in peace"]
 
 static func nearest(text:String)->Dictionary:
 	var lower:=" "+text.to_lower().replace(","," ").replace("."," ").replace("!"," ").replace(";"," ")+" "
