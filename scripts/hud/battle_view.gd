@@ -101,12 +101,10 @@ static func find(target:Variant)->Dictionary:
 	return {}
 
 
-## Battles between others that our people saw (war_loop.gd), newest first.
+## The war leader's clashes with raiders and rivals (war_loop.gd), kept to
+## be watched: newest first.
 static func observed()->Array:
-	var war:Variant=null
-	var loop:GDScript=load("res://scripts/war_loop.gd") as GDScript
-	if loop!=null and loop.has_method("observed_battles"): war=loop.call("observed_battles")
-	return war if war is Array else []
+	return preload("res://scripts/war_loop.gd").observed_battles()
 
 
 ## The most useful battle when nothing is named: the one being fought for
@@ -186,7 +184,7 @@ static func words(record:Dictionary,live:bool)->Dictionary:
 			out["headline"]=String(account.get("headline",""))
 			out["left_name"]=String(account.get("band",out.left_name))
 		else:
-			out["where"]=_where(record)
+			out["where"]=String(record.get("where","")) if String(record.get("where",""))!="" else _where(record)
 	else:
 		out["left_name"]=String(record.get("attacker_people",(record.get("attacker",{}) as Dictionary).get("name","the attackers")))
 		out["right_name"]=String(record.get("defender_people",(record.get("defender",{}) as Dictionary).get("name","the defenders")))

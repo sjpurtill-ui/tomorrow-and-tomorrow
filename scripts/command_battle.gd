@@ -33,9 +33,8 @@ func engaged(army_id:int)->bool:
 	var assigned:int=host._field_army_index(army_id)
 	if assigned>=0 and bool(host.field_armies[assigned].get("relief_assignment",false)):return true
 	if WorldSimulation.enabled and preload("res://scripts/civilization_combat.gd").reserved({"actor":WorldSimulation.actor_id,"field_id":army_id},false):return true
-	var engagements:Array=host.command_hierarchy.data.get("battles",[]).duplicate()
-	if not host.active_engagement.is_empty():engagements.append(host.active_engagement)
-	for engagement:Dictionary in engagements:
+	# Every battle being fought: ours (several at once) and the generals'.
+	for engagement:Dictionary in host.engagements.values():
 		if int(engagement.get("home_force_id",0))==army_id:return true
 		for entry:Dictionary in engagement.get("command_participants",[]):
 			if int(entry.army_id)==army_id:return true
@@ -120,14 +119,17 @@ func siege_members()->Array:
 	return result
 func archive_active()->void:
 	if host.active_engagement.is_empty() or not bool(host.active_engagement.get("commander_managed",false)):return
+	# The general fights it from now on: it leaves our own battles.
+	host.own_engagements.erase(String(host.active_engagement.get("id","")))
 	host.command_hierarchy.data.battles.append(host.active_engagement.duplicate(true))
 	host.active_engagement.clear()
+	host._prune_engagements()
 func enemy_engaged(id:String)->bool:
-	for engagement:Dictionary in host.command_hierarchy.data.get("battles",[]):
+	for engagement:Dictionary in host.engagements.values():
 		if String(engagement.get("threat",{}).get("formation_id",""))==id:return true
 	return false
 func city_engaged(id:String)->bool:
-	for engagement:Dictionary in host.command_hierarchy.data.get("battles",[]):
+	for engagement:Dictionary in host.engagements.values():
 		if String(engagement.get("threat",{}).get("target_region_id",""))==id:return true
 	return false
 func advance_all()->void:

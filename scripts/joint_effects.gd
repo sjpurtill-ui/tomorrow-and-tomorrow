@@ -33,8 +33,8 @@ func advance(day:int)->void:
 		army.joint_air_pressure=clampf(mission_power("player",region,"air_superiority",true)/maxf(10,float(army.get("troops",0))),0,.25)
 		var disruption=mission_power("player",region,"logistics_strike",true)
 		army.supply_level=maxf(0,float(army.get("supply_level",1))-minf(.1,disruption*.001))
-	var engagement:Dictionary=op.host.active_engagement
-	if not engagement.is_empty():
+	# Air support reaches every battle of ours being fought.
+	for engagement:Dictionary in op.host.own_battles():
 		var own_side=String(op.host._engagement_home_side(engagement))
 		var enemy_side=String(op.host._engagement_enemy_side(engagement))
 		var friendly:Dictionary=engagement.get(own_side,{})

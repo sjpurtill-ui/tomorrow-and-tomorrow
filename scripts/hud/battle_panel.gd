@@ -40,6 +40,10 @@ var pause:=SimulationPause.new()
 var paused_here:=false
 var signature:=""
 var poll:=0.0
+## The battle shown, kept apart from the record: a battle that ends is
+## cleared where it was fought and read again from its report.
+var battle_id:=""
+var battle_seed:=-1
 var sheet:PanelContainer
 var buttons:Dictionary={}
 var left_colour:=Color()
@@ -83,12 +87,12 @@ func _process(delta:float)->void:
 	if poll<0.4: return
 	poll=0.0
 	var View:=load(VIEW_PATH)
-	var found:Dictionary=View.find(String(record.get("id",""))) if String(record.get("id",""))!="" else {}
-	if found.is_empty() or not bool(found.get("live",false)):
-		var done:Dictionary=View.find(int(record.get("seed",-1)))
-		if not done.is_empty() and not bool(done.get("live",false)):
-			record=done.record; live=false; following=true
-			_refresh()
+	var found:Dictionary=View.find(battle_id) if battle_id!="" else {}
+	if found.is_empty() and battle_seed>=0: found=View.find(battle_seed)
+	if found.is_empty(): return
+	if not bool(found.get("live",false)):
+		record=found.record; live=false; following=true
+		_refresh()
 		return
 	var now:Dictionary=found.record
 	var mark:=_signature(now)
@@ -105,6 +109,8 @@ func _signature(source:Dictionary)->String:
 # --- Building ---------------------------------------------------------------------------
 
 func _refresh()->void:
+	if String(record.get("id",""))!="": battle_id=String(record.id)
+	if record.has("seed"): battle_seed=int(record.seed)
 	var View:=load(VIEW_PATH)
 	view=Record.view(record,View.words(record,live))
 	signature=_signature(record)
