@@ -41,9 +41,10 @@ static func _in_season(when:String)->String:
 static func _first_up(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1) if text!="" else text
 
-## Is this town ours right now, in the world itself?
+## Do we hold this town right now: ours, with a garrison of ours in it (the
+## one reading every system uses, town_ledger.hold)?
 static func held(city_id:String)->bool:
-	return not Ownership.player_hold(city_id).is_empty()
+	return bool(Ledger.hold_at(city_id).get("held",false))
 
 static func report(city_id:String)->Dictionary:
 	# A town we burned: our own account of it, dated the day, until we hear otherwise.
@@ -61,7 +62,8 @@ static func report(city_id:String)->Dictionary:
 		"since_words":EraWords.when(int(hold.since)) if int(hold.since)>=0 else "","home_name":home_name,"home_population":int(GameState.population_total)}
 	out.residents=maxi(0,roundi(float(region.get("population",0.0))))
 	# Our garrison and who leads it.
-	out.garrison=maxi(0,int(force.get("troops",0)))
+	# Our garrison: counted only while the town is ours (town_ledger.hold).
+	out.garrison=int(hold.get("garrison",0))
 	out.needed=ceili(CivilizationSystem.occupation_requirement(CivilizationSystem.civilizations[CivilizationSystem._civilization_index(civ_id)],region))
 	var control:Dictionary=CivilizationSystem.occupation_control(civ_id,city_id) if int(out.garrison)>0 else {"error":"none"}
 	out.enough=int(out.garrison)>0 and not control.has("error")
@@ -100,7 +102,7 @@ static func report(city_id:String)->Dictionary:
 	var fate:Dictionary=force.get("fate",{}) if force.get("fate") is Dictionary else {}
 	# The town's ledger, begun from its people now when no order has touched
 	# them yet (an older save's totals are taken over).
-	if not force.is_empty() and not Ledger.has(civ_id,city_id):Ledger.of(civ_id,city_id)
+	if bool(hold.get("held",false)) and not Ledger.has(civ_id,city_id):Ledger.of(civ_id,city_id)
 	var counts:=Ledger.counts(civ_id,city_id)
 	out.ledger=counts
 	var happened:=happened_lines(counts,civ_id,city_id,name,home_name)

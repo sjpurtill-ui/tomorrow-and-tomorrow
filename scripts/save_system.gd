@@ -155,6 +155,10 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	# A detachment whose record no longer matches the world (a chase after
 	# fleeing men, a lost town) is sent back or rejoins its garrison.
 	preload("res://scripts/pursuit.gd").reconcile()
+	# Every town's people agree with who holds it: nobody is under our guard
+	# where no garrison of ours stands (an older game's leftovers go free), and
+	# the war leader says so once.
+	preload("res://scripts/town_ledger.gd").settle_all()
 	var message:="Loaded: %s, %d people." % [preload("res://scripts/hud/era_words.gd").when(int(GameState.elapsed_days)).to_lower(),GameState.population_total]
 	if direction_missing:message+=" This older save did not keep your people's direction; choose it again when the world opens."
 	if legacy_campaign:message+=" This older game keeps its old rules for other peoples. Start a new world to play with the current ones."

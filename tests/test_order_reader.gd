@@ -336,7 +336,9 @@ func test_timeout_falls_back_to_the_regex_reading()->void:
 	assert_dict(out.read as Dictionary).is_empty()
 	assert_str(String(out.plan.route)).is_equal("legacy")
 	assert_str(String(voice.last_problem.get(id,""))).contains("timed out")
-	assert_float(OR.TIMEOUT_SECONDS).is_less_equal(4.5)
+	# Quick, but long enough for a live reading (2.4 to 3.5 s in play; a 4 s
+	# limit sent about one in four to the plain reading).
+	assert_float(OR.TIMEOUT_SECONDS).is_less_equal(8.0)
 	# The offline path is unchanged: the regex engine and its guard decide.
 	var r:=CC.hear(id,USERS_ORDER)
 	_nobody_here_harmed(r,USERS_ORDER,before,headman)

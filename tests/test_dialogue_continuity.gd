@@ -97,7 +97,10 @@ func test_truncated_reply_exposes_output_limit_instead_of_generic_error()->void:
 	var http:=HTTPRequest.new();ForeignDialogue.add_child(http);ForeignDialogue.pending[id]=http
 	var body:=JSON.stringify({"choices":[{"message":{"content":"{"},"finish_reason":"length"}]}).to_utf8_buffer()
 	ForeignDialogue._response(HTTPRequest.RESULT_SUCCESS,200,PackedStringArray(),body,id,http,true,true)
-	assert_str(ForeignDialogue.thread(id).status).contains("output limit")
+	# The limit, said plainly (the old "output limit" wording became plain
+	# words; the reason must still be the length, never the generic failure).
+	assert_str(ForeignDialogue.thread(id).status).contains("ran too long and was cut off")
+	assert_str(ForeignDialogue.thread(id).status).not_contains("could not bring back a clear answer")
 	assert_bool(ForeignDialogue.thread(id).retryable).is_true()
 
 func test_audience_requires_real_envoys_and_does_not_purchase_an_accord()->void:

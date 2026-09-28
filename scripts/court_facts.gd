@@ -134,12 +134,14 @@ static func town(civ_id:String,region_id:String)->Dictionary:
 	var index:int=world._civilization_index(civ_id)
 	var civ_name:=String(world.civilizations[index].get("name","")) if index>=0 else ""
 	var region:Dictionary=world.region_snapshot(civ_id,region_id)
-	var force:Dictionary=_mc().occupation_force_for_region(civ_id,region_id) if _mc()!=null else {}
+	# Who holds it: the one reading every system uses (town_ledger.hold).
+	var h:=Ledger.hold(civ_id,region_id)
+	var force:Dictionary=(_mc().occupation_force_for_region(civ_id,region_id) if _mc()!=null else {}) if bool(h.held) else {}
 	var ruin:Dictionary=c.get("ruin",{})
-	var status:="held" if not force.is_empty() else ("ruin" if not Ledger.our_ruin(region_id).is_empty() else ("ours" if String(region.get("controller",""))=="player" else "theirs again"))
+	var status:="held" if String(h.state)=="held" else ("ruin" if bool(h.ruin) else ("ours" if bool(h.ours) else "theirs again"))
 	var rs:Dictionary=ruin.get("resettle",{}) if ruin.get("resettle") is Dictionary else {}
-	var t:={"name":String(c.name),"region_id":region_id,"civ_id":civ_id,"taken_from":civ_name,"status":status,
-		"garrison":int(force.get("troops",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
+	var t:={"name":String(c.name),"region_id":region_id,"civ_id":civ_id,"taken_from":civ_name,"status":status,"held":bool(h.held),"why_not_held":Ledger.hold_words(h),
+		"garrison":int(h.garrison),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
 		"people_here":int(c.here),"by_status":Ledger.here_words(c),
 		"men_here":int(c.here_men),"men_free":int(c.free_men),"men_bound":int(c.bound_men)+int(c.worker_men if _labour_from_bound(force) else 0),"hostages":int(c.hostage),
 		"at_forced_labour":int(c.worker),"serving_with_us":int(c.conscript),
@@ -161,6 +163,19 @@ static func town(civ_id:String,region_id:String)->Dictionary:
 		t["people_before_burning"]=int(ruin.get("before",0))
 		t["garrison_left"]=not bool(ruin.get("held",true))
 		if bool(rs.get("known",false)): t["lived_in_again"]="%s have come back to live there (we heard %s)" % [civ_name,EraWords.when(int(rs.get("learn_day",-1)))]
+	# Those we held there who went free when our men left (town_ledger.settle).
+	t["went_free"]=int(c.get("went_free",0))
+	t["went_free_words"]=String(c.get("went_free_words",""))
+	# The children by band, here now and taken (town_ledger's make-up).
+	var kids_here:Dictionary=c.get("kids_here",{})
+	var kids_taken:Dictionary=c.get("kids_taken",{})
+	t["children_here"]={}
+	t["children_taken"]={}
+	for b in Ledger.KID_BANDS:
+		if int(kids_here.get(b,0))>0: (t.children_here as Dictionary)[String(Ledger.KID_WORDS[b])]=int(kids_here[b])
+		if int(kids_taken.get(b,0))>0: (t.children_taken as Dictionary)[String(Ledger.KID_WORDS[b])]=int(kids_taken[b])
+	# The ledger's own counts, for answers built from this sheet (court_answers.gd).
+	t["counts"]=c.duplicate(true)
 	var lines:Array=[]
 	var day:=_day()
 	if not force.is_empty():
@@ -337,15 +352,21 @@ static func _town_line(t:Dictionary,war:bool)->String:
 	match String(t.get("status","")):
 		"held": head="%s (taken from the %s%s; our garrison %d%s)" % [name,String(t.get("taken_from","")),(" "+String(t.when_taken)) if String(t.get("when_taken",""))!="" else "",int(t.get("garrison",0)),(" under "+String(t.commander)) if String(t.get("commander",""))!="" else ""]
 		"ruin": head="%s (a ruin: burned by us %s; before, %d people; %s)" % [name,String(t.get("burned","")),int(t.get("people_before_burning",0)),"nobody of ours holds it" if int(t.get("garrison",0))<=0 else "%d of ours hold the ruins" % int(t.garrison)]
-		"theirs again": head="%s (the %s's again%s)" % [name,String(t.get("taken_from","")),("; "+String(t.lived_in_again)) if String(t.get("lived_in_again",""))!="" else ""]
-		_: head="%s (ours, no garrison)" % name
+		"theirs again": head="%s (the %s's again, nobody of ours there%s)" % [name,String(t.get("taken_from","")),("; "+String(t.lived_in_again)) if String(t.get("lived_in_again",""))!="" else ""]
+		_: head="%s (ours, but no garrison of ours is there)" % name
 	var line:="%s: %d people there now: %s." % [head,int(t.get("people_here",0)),String(t.get("by_status",""))]
+	# Nobody is under our guard where we have no garrison: said with the numbers.
+	if String(t.get("went_free_words",""))!="": line+=" "+String(t.went_free_words)
 	if not war or not t.has("men_bound"): return line
+	var young:Dictionary=t.get("children_here",{})
+	if not young.is_empty(): line+=" Children there now: %s." % _group_words(young)
 	line+=" Men there now: %d (%d bound, %d free). Hostages: %d. At forced labour: %d. Serving with us: %d." % [int(t.men_here),int(t.men_bound),int(t.men_free),int(t.hostages),int(t.at_forced_labour),int(t.serving_with_us)]
 	line+=" Killed since we took it: %d%s." % [int(t.killed),(" ("+_group_words(t.killed_by_group)+")") if not (t.killed_by_group as Dictionary).is_empty() else ""]
 	line+=" Fled and reached their people: %d%s." % [int(t.fled),(" ("+Ledger.fled_words(t.fled_to)+")") if not (t.fled_to as Dictionary).is_empty() else ""]
 	if int(t.running_now)>0: line+=" Running now, not there yet: %d toward %s." % [int(t.running_now),String(t.running_toward)]
 	if int(t.taken_home)>0: line+=" Taken to %s: %d (%s): %d on the road%s, %d arrived%s." % [String(WorldSimulation.state.settlement_name),int(t.taken_home),_group_words(t.taken_by_group),int(t.on_the_road),(" about %d days out" % int(t.road_days)) if int(t.on_the_road)>0 else "",int(t.arrived_among_us),(", %d died on the road" % int(t.died_on_road)) if int(t.died_on_road)>0 else ""]
+	var young_taken:Dictionary=t.get("children_taken",{})
+	if not young_taken.is_empty(): line+=" The children taken: %s." % _group_words(young_taken)
 	if int(t.let_go)>0: line+=" Let go back to their houses: %d." % int(t.let_go)
 	if int(t.freed)>0: line+=" Freed among us: %d." % int(t.freed)
 	var flight:Dictionary=t.get("last_flight",{})
