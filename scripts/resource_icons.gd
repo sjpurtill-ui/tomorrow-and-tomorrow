@@ -283,6 +283,11 @@ static func _moment_glyph(kind:String,c:Color)->Array:
 		"court": return [_ring(28,30,13,2.4,c),_t(28,20,23,33,33,33,hi),_c(28,31,3,Color(1,0.9,0.6,0.95))]
 		"hearth_count": return [_s(15,16,15,40,2.4,c),_s(21,16,21,40,2.4,c),_s(27,16,27,40,2.4,c),_s(33,16,33,40,2.4,c),_s(11,34,39,22,2.2,hi)]
 		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
+		# The world view (hud/world_globe.gd): a ring of the world with its
+		# graticule, the side meridians bowed in short strokes.
+		"world": return [_ring(28,28,15,2.4,hi),_s(13.5,28,42.5,28,1.6,c),_s(16,20,40,20,1.2,c),_s(16,36,40,36,1.2,c),_s(28,13,28,43,1.6,c),
+			_s(28,13,21.5,19,1.3,c),_s(21.5,19,20,28,1.3,c),_s(20,28,21.5,37,1.3,c),_s(21.5,37,28,43,1.3,c),
+			_s(28,13,34.5,19,1.3,c),_s(34.5,19,36,28,1.3,c),_s(36,28,34.5,37,1.3,c),_s(34.5,37,28,43,1.3,c)]
 	# Founding and anything unnamed: the hearth fire.
 	return [_t(28,11,18,36,38,36,hi),_t(28,21,23,36,33,36,Color(1,0.92,0.62,0.95)),_s(16,40,40,44,2.4,dim),_s(40,40,16,44,2.4,dim)]
 
