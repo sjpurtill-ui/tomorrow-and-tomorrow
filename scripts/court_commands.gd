@@ -36,6 +36,8 @@ const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const TownFateWords:=preload("res://scripts/town_fate.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const HomeOrders:=preload("res://scripts/home_orders.gd")
+const Realm:=preload("res://scripts/court_realm_acts.gd")
+const Persons:=preload("res://scripts/court_persons.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -96,10 +98,14 @@ const VERB_PATTERNS:=[
 const GIVE_PATTERN:="(?i)\\b(give|hand|grant|bestow|send|bring)\\b"
 const TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|strip)\\b"
 const ORDER_LEADS:=["i order that ","i order ","i command that ","i command ","i want you to ","i need you to ","i demand that ","i demand ","i decree that ","i decree ","you will ","you shall ","you must ","see that ","see to it that ","make sure ","let ","have "]
-const IMPERATIVES:=["go","come","bring","fetch","make","dig","plant","hunt","gather","build","haul","drag","lug","quarry","chop","raise","feed","ration","guard","watch","train","clear","move","prepare","ready","double","halve","cut","burn","tell","find","get","take","keep","hold","open","close","set","call","summon","march","attack","defend","fortify","scout","sow","reap","harvest","store","share","stop","start","begin","finish","double","count","mend","repair","clean","carry","lead","muster","warn","teach","show","search","track","herd","fish","cook","dry","smoke","weave","fire","bake"]
+const IMPERATIVES:=["throw","celebrate","teach","honour","honor","go","come","bring","fetch","make","dig","plant","hunt","gather","build","haul","drag","lug","quarry","chop","raise","feed","ration","guard","watch","train","clear","move","prepare","ready","double","halve","cut","burn","tell","find","get","take","keep","hold","open","close","set","call","summon","march","attack","defend","fortify","scout","sow","reap","harvest","store","share","stop","start","begin","finish","double","count","mend","repair","clean","carry","lead","muster","warn","teach","show","search","track","herd","fish","cook","dry","smoke","weave","fire","bake"]
 const RESOURCE_WORDS:={"food":"Food","meat":"Food","grain":"Food","provisions":"Food","rations":"Food","timber":"Timber","wood":"Timber","logs":"Timber","stone":"Stone","stones":"Stone","clay":"Clay","fiber":"Fiber Plants","fibre":"Fiber Plants","fibers":"Fiber Plants","reeds":"Fiber Plants","flax":"Fiber Plants"}
 const NUMBER_WORDS:={"a dozen":12,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"a hundred":100,"hundred":100}
-const OFFICE_WORDS:={"war leader":"Marshal","warleader":"Marshal","marshal":"Marshal","watch captain":"Marshal","pathfinder":"ChiefScout","chief scout":"ChiefScout","chief of scouts":"ChiefScout","hearth chief":"Steward","steward":"Steward","keeper of stores":"Quartermaster","quartermaster":"Quartermaster","lore keeper":"Scholar","scholar":"Scholar","messenger":"Envoy"}
+const OFFICE_WORDS:={"war leader":"Marshal","warleader":"Marshal","marshal":"Marshal","watch captain":"Marshal","war chief":"Marshal","warchief":"Marshal","chief of war":"Marshal","war captain":"Marshal",
+	"pathfinder":"ChiefScout","chief scout":"ChiefScout","chief of scouts":"ChiefScout","head scout":"ChiefScout","scout chief":"ChiefScout",
+	"hearth chief":"Steward","steward":"Steward","headman":"Steward","head man":"Steward","chief of the hearths":"Steward",
+	"keeper of stores":"Quartermaster","keeper of the stores":"Quartermaster","quartermaster":"Quartermaster","keeper of tribute":"Quartermaster","tribute keeper":"Quartermaster","storekeeper":"Quartermaster","store keeper":"Quartermaster",
+	"lore keeper":"Scholar","scholar":"Scholar","messenger":"Envoy"}
 const PRONOUNS:=["himself","herself","themselves","yourself","him","her","them","he","she","they","you","this one","that one","the traitor","the wretch","this wretch","the fool","this fool","that fool","the dog","this dog","that dog","the coward","this coward"]
 const HEADINGS:=["northeast","northwest","southeast","southwest","north","south","east","west"]
 const REFUSAL_PATTERN:="(?i)\\b(i (will|shall) not (do|kill|fight|strike|harm|hurt|obey|lift|raise|touch|slay|bind|cast|take|go|carry)|i won't (do|kill|fight|strike|harm|hurt|obey|go)|i refuse|i cannot do|i can't do|i will never|never will i|not by my hand|find another hand|another hand|give the order to another|ask another)\\b"
@@ -260,6 +266,16 @@ static func roster(audience:Dictionary)->Array[Dictionary]:
 		var at:=figure_at(fid,String(f.get("name","")))
 		out.append({"key":"figure:"+fid,"kind":"figure","person_id":0,"figure_id":fid,"name":String(f.get("name","")),"title":figure_title(f),"office_key":"","settlement_id":"",
 			"speaker":false,"present":false,"where":String(at.words),"from":String(at.from)})
+	# The council's people the god has put out of office or holds under guard,
+	# and the commoners the court knows by name (the one brought in first):
+	# named, the god's word reaches them too (court_realm_acts.gd).
+	var pids:={}
+	for e:Dictionary in out:
+		if int(e.get("person_id",0))>0: pids[int(e.person_id)]=true
+	for e:Dictionary in Realm.former_entries(pids):
+		if int(e.person_id)==speaker_pid and speaker_pid>0: e["speaker"]=true; e["present"]=true
+		out.append(e)
+	if String(audience.get("origin",""))=="court": out.append_array(Realm.known_entries(audience))
 	return out
 
 static func figures_at_large()->Array[Dictionary]:
@@ -343,6 +359,14 @@ static func _title_keys(e:Dictionary)->Array[String]:
 		for w:String in ["war leader","general"]: keys.append(w)
 	elif String(e.kind)=="figure" and not bool(e.get("present",false)):
 		keys.clear()
+	# The council's people out of office answer to their names only; a known
+	# commoner to their trade ("the hunter") only when before the god or just named.
+	if String(e.kind)=="former": keys.clear()
+	if String(e.kind)=="known":
+		keys.clear()
+		var trade:=String(e.get("trade",""))
+		if trade!="" and (bool(e.get("speaker",false)) or bool(e.get("focus",false))):
+			keys.append(String(Persons.trade_label(trade)).to_lower())
 	return keys
 
 static func mentions(text:String,list:Array[Dictionary])->Array[Dictionary]:
@@ -362,6 +386,8 @@ static func mentions(text:String,list:Array[Dictionary])->Array[Dictionary]:
 				for m in _re("\\b%s\\b" % _escape(k)).search_all(lower):
 					var at:=m.get_start()
 					if _overlaps(taken,at,m.get_end()): continue
+					# "Their headman", "his war leader", "a headman": someone else's, never ours.
+					if by=="title" and _re("\\b(their|his|her|its|whose|a|an|another|some|every|each|any)\\s+$").search(lower.substr(0,at))!=null: continue
 					for i in range(at,m.get_end()): taken[i]=true
 					var hit:={"at":at,"end":m.get_end(),"key":String(e.key),"word":k,"by":by}
 					# "Rovik's men": what is his, not him ("of":"men").
@@ -395,6 +421,11 @@ static func _salient(audience:Dictionary,list:Array[Dictionary],exclude:String)-
 	## Who "him"/"her"/"the traitor" means: the last person the god dealt with,
 	## else the one standing before the god, else the last to speak.
 	var focus:Dictionary=audience.get("command_focus",{}) if audience.get("command_focus") is Dictionary else {}
+	# The one the court just named here ("Who is the laziest man?" ... "kill
+	# him"), unless the god has dealt with someone since (court_persons.gd).
+	var named:Dictionary=audience.get("named_focus",{}) if audience.get("named_focus") is Dictionary else {}
+	var named_entry:=_entry(list,String(named.get("key","")))
+	if not named_entry.is_empty() and String(named_entry.key)!=exclude and Hall._day()-int(named.get("day",-99))<=PENDING_DAYS and int(named.get("line",-1))>=int(focus.get("line",-1)): return named_entry
 	var last:=_entry(list,String(focus.get("last_ref","")))
 	if not last.is_empty() and String(last.key)!=exclude: return last
 	var speaker:=_speaker_entry(list)
@@ -528,20 +559,28 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# the war leader still free to object if it cannot be done well.
 	var confirming:=_confirmed_war(id,audience,list,clean,context)
 	if not confirming.is_empty(): return confirming
+	# The realm's own business, read before war (court_realm_acts.gd): the
+	# god's anger or favour on many, a law for our own people, the realm's
+	# name, a verb that falls on one person named in any case, a gift.
+	if not foreign and not bool(cls.insist) and String(cls.act)!="question":
+		var realm:=_realm(id,audience,list,clean,cls,context)
+		if realm.has("result"): return realm.result
+		if realm.has("cls"): cls=realm.cls
+	var own_business:=bool(cls.get("realm",false))
 	# Harm on people who are one of ours' own ("kill Rovik's men"): never the
 	# owner, never a town's people; said plainly, nothing done.
-	if String(cls.verb) in CRUEL and String(cls.act)=="command" and not bool(cls.insist):
+	if String(cls.verb) in CRUEL and String(cls.act)=="command" and not bool(cls.insist) and not own_business:
 		var owned:=_owned_people(_harm_object(clean,cls),list)
 		if owned!="": return _plain_answer(id,audience,clean,context,"%s are our own people. Nothing is done to them: say plainly whom you mean." % _cap_first(owned))
 	# Harm ordered on a people or a town's people ("kill all the males of
 	# Tsaren") is a war order about that town, whoever it was said to and
 	# whatever the live reading names: never a hand laid on anyone here.
-	var people:=harm_to_people(clean,cls,list,live) if not bool(cls.insist) and String(cls.act)!="question" else ""
+	var people:=harm_to_people(clean,cls,list,live) if not bool(cls.insist) and String(cls.act)!="question" and not own_business else ""
 	if people!="":
 		cls.act="command"; cls.merge(_people_route(clean,cls,audience,live,people),true)
 	# A war order ("attack Tsaren", "march home", "raid their fields") goes to
 	# the war leader as a real objective, never to the generic directive path.
-	elif not foreign and not bool(cls.insist):
+	elif not foreign and not bool(cls.insist) and not own_business:
 		var war_reading:=WarOrders.read_live(String(live.get("object","")),clean,String(audience.get("civ_id","")),id) if from_live and String(cls.verb)=="war" else WarOrders.read(clean,String(audience.get("civ_id","")),id)
 		# The answer to "Which town?": the order given before, at the town named now.
 		var answered:=_which_town_answer(audience,clean)
@@ -623,6 +662,120 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if String(cls.verb)=="order" and String(context.get("civic_settlement",""))!="" and (actor.is_empty() or String(actor.key)==String(speaker.get("key",""))):
 		return {"handled":false,"act":"command","verb":"order"}   # the settlement leader's civic conversation carries it
 	return _perform(id,audience,list,String(cls.verb),actor,target,clean,cls,false,context)
+
+static func _realm(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,cls:Dictionary,context:Dictionary)->Dictionary:
+	## The realm's own business (court_realm_acts.gd): {"result":...} when it
+	## was carried out here, {"cls":...} when the ordinary path carries it on,
+	## {} when these words are none of it.
+	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return mentions(t,l)
+	var verb:=String(cls.verb)
+	# The answer to "Whom do you mean?" after the god's anger with no one named.
+	var whom:=Realm.answer_whom(audience,clean,list,mention)
+	if not whom.is_empty(): return {"result":_group(id,audience,list,clean,whom,context)}
+	# The realm's own name.
+	var renamed:=Realm.rename(clean)
+	if not renamed.is_empty():
+		_echo(id,audience,clean,context)
+		audience.erase("pending_command")
+		return {"result":Realm.perform_rename(id,_result("rename",{},{},clean,false),renamed)}
+	# The god's anger or favour on a whole people, a town, our people, the court, the fields.
+	if verb in ["none","order","terrify","bless","raise","penance","boon"] or String(cls.act) in ["statement","threat","blessing"]:
+		var g:=Realm.group_act(clean,audience,list,mention)
+		if not g.is_empty(): return {"result":_group(id,audience,list,clean,g,context)}
+	# A law for our own people (never a war order, never anyone in the hall).
+	if verb in ["none","order","kill","maim","exile","detain","penance","home"] or String(cls.act) in ["statement","threat"]:
+		var law:=Realm.law(clean,list,mention)
+		if not law.is_empty():
+			var out:=cls.duplicate()
+			out.act="command"; out.verb="law"; out["law"]=law; out["realm"]=true
+			return {"cls":out}
+	# A gift, maybe of what the stores do not hold ("Give Suri a gift of bronze").
+	if verb in ["none","order","give","boon","take"]:
+		var gift:=Realm.gift(clean)
+		if not gift.is_empty() and not (verb=="give" and String(cls.resource)!="" and not gift.has("material")):
+			var out2:=cls.duplicate()
+			out2.act="command"; out2.verb="boon"; out2["realm"]=true
+			if gift.has("material") and not Realm.stores_hold(String(gift.material)): out2["gift_material"]=String(gift.material)
+			var named:=Realm.person_verb(_re("(?i)\\b(give|grant|bestow|send|bring)\\b").sub(clean,"reward",false),list,mention,func()->Dictionary: return _salient(audience,list,""))
+			if not named.is_empty(): out2["target_key"]=String(named.key)
+			elif bool(gift.get("take",false)) or _re("(?i)\\b(you|yourself)\\b").search(clean)!=null: out2["target_key"]=String(_speaker_entry(list).get("key",""))
+			if String(out2.get("target_key",""))!="": return {"cls":out2}
+	# An office (or the god's fire) given to one person named: "make imeri war
+	# leader", "Imeri is my new war leader", "Make her a priest".
+	if verb in ["none","order","raise"]:
+		var ap:=_appoint_reading(clean,audience,list)
+		if not ap.is_empty():
+			var out4:=cls.duplicate()
+			out4.act="command"; out4.verb="appoint"; out4["target_key"]=String(ap.key); out4["realm"]=true
+			return {"cls":out4}
+	# A verb that falls on one person named in any case ("bless suri", "flog the
+	# headman", "let kishan go", "fire kavu", "Kavu must be punished").
+	if verb in ["none","order"] or String(cls.act) in ["statement","threat","blessing"]:
+		var pv:=Realm.person_verb(clean,list,mention,func()->Dictionary: return _salient(audience,list,""))
+		if not pv.is_empty():
+			var out3:=cls.duplicate()
+			out3.act="command"; out3.verb=String(pv.verb); out3.verb_at=int(pv.at); out3.verb_end=int(pv.end); out3["target_key"]=String(pv.key); out3["realm"]=true
+			if pv.has("harm"): out3.harm=String(pv.harm)
+			return {"cls":out3}
+	return {}
+
+const PRIEST_WORDS:="(?i)\\b(priest|priestess|keeper of (the|my|your) (god's )?fire|fire-?keeper|holy (man|woman)|shaman)\\b"
+
+static func _appoint_reading(clean:String,audience:Dictionary,list:Array[Dictionary])->Dictionary:
+	## {key} of the one given an office (or the god's fire) by these words; {}.
+	var office:=_office_in(clean)
+	if office=="" and _re(PRIEST_WORDS).search(clean)==null: return {}
+	var found:=mentions(clean,list)
+	# "make/name/appoint/set X ...": the first one named after the verb.
+	var lead:=_re("(?i)\\b(make|name|appoint|set|install|raise|put)\\b").search(clean)
+	if lead!=null:
+		for f:Dictionary in found:
+			if int(f.at)<lead.get_end(): continue
+			if String(f.by) in ["guards","god"]: continue
+			if String(f.by)=="pronoun" and not String(f.word) in Realm.ONE_PERSON: continue
+			var key:=String(f.get("key",""))
+			if String(f.by)=="pronoun":
+				key=String(_speaker_entry(list).get("key","")) if String(f.word) in ["you","yourself"] else String(_salient(audience,list,"").get("key",""))
+			return {"key":key} if key!="" else {}
+	# "X is (now) my new war leader".
+	var is_now:=_re("(?i)^\\s*(?<who>[\\w' -]{2,40}?)\\s+(is|will be|shall be)\\s+(now\\s+)?(my|our|the|a)?\\s*(new\\s+)?").search(clean)
+	if is_now!=null:
+		for f:Dictionary in found:
+			if int(f.end)<=is_now.get_end("who") and String(f.by) in ["name","title"] and String(f.get("of",""))=="": return {"key":String(f.key)}
+	return {}
+
+static func realm_business(id:String,text:String)->bool:
+	## Are these words the realm's own business the engine carries (a law, the
+	## god's act on many, the realm's name, a verb on one person named, a gift)?
+	## Read only; nothing is done. The court screen asks before handing words
+	## about people to the persons engine.
+	var audience:=Hall.find(id)
+	var clean:=text.strip_edges()
+	if audience.is_empty() or clean=="" or String(audience.get("origin",""))!="court" or clean.ends_with("?"): return false
+	var list:=roster(audience)
+	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return mentions(t,l)
+	if not Realm.rename(clean).is_empty(): return true
+	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
+	if not Realm.law(clean,list,mention).is_empty(): return true
+	if not Realm.gift(clean).is_empty(): return true
+	return not Realm.person_verb(clean,list,mention,func()->Dictionary: return _salient(audience,list,"")).is_empty()
+
+static func _echo(id:String,audience:Dictionary,clean:String,context:Dictionary)->void:
+	## The ruler's words in the transcript, once (the caller did not show them).
+	if bool(context.get("echoed",false)): return
+	Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":clean,"day":Hall._day(),"aside":false})
+	audience["echoed_here"]=clean
+
+static func _group(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,g:Dictionary,context:Dictionary)->Dictionary:
+	## The god's anger or favour on many, carried out and said (court_realm_acts.gd).
+	_echo(id,audience,clean,context)
+	audience.erase("pending_command")
+	var r:=Realm.perform_group(id,audience,_result(String(g.get("act","terrify")),{},{},clean,false),g)
+	# Nobody could tell whom: the one before the god asks it, once.
+	if String(r.get("actor_says",""))!="":
+		var speaker:=_speaker_entry(list)
+		r.actor=speaker.duplicate(); r.actor_name=String(speaker.get("name",""))
+	return r
 
 static func _nothing_waiting(id:String,audience:Dictionary,clean:String,context:Dictionary,last:String)->Dictionary:
 	## "Do it!", "SEND THEM!" with nothing waiting on the god's word: nothing is
@@ -863,7 +1016,9 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 		if verb=="send" and String(actor.get("kind",""))=="envoy": actor={}
 	var actor_key:=String(actor.get("key",""))
 	var target:Dictionary={}
-	if not live.is_empty() and String(live.get("target_ref",""))!="":
+	# The realm's own reading already named them (court_realm_acts.person_verb).
+	if String(cls.get("target_key",""))!="": target=_entry(list,String(cls.target_key))
+	if target.is_empty() and not live.is_empty() and String(live.get("target_ref",""))!="":
 		target=resolve_ref(String(live.target_ref),audience,list,actor_key)
 	if target.is_empty():
 		var candidates:Array[Dictionary]=[]
@@ -883,12 +1038,27 @@ static func _parties(text:String,cls:Dictionary,audience:Dictionary,list:Array[D
 	# for harm unless the words point at one person ("his hands", "the
 	# traitor"): "put the captives to death" or "kill Tavo" (nobody we know)
 	# never falls on whoever is standing there.
-	if target.is_empty() and verb in ["penance","demote","raise","bless","boon","terrify"]:
+	# (Not when the words name something that is nobody in the hall: "dismiss
+	# the war chief" with no such office is nobody, never the one spoken to.)
+	if target.is_empty() and verb in ["penance","demote","raise","bless","boon","terrify","pardon","curse"] and not _object_named(text,cls):
 		target=_salient(audience,list,actor_key)
 	elif target.is_empty() and verb in CRUEL and _points_at_one(text.substr(maxi(0,at)) if at>=0 else text):
 		target=_salient(audience,list,actor_key)
 	if verb in ["send","order"] and target.is_empty(): target=actor
 	return {"actor":actor,"target":target,"guards":guards}
+
+## Words after the verb that name something, but no one in the hall ("the
+## war chief" with nobody holding it, "the harvest"): nobody is assumed.
+static func _object_named(text:String,cls:Dictionary)->bool:
+	var at:=int(cls.get("verb_end",-1))
+	if at<0 or at>text.length(): return false
+	var rest:=text.substr(at).to_lower()
+	rest=_re("(?i)\\b(now|at once|today|tonight|again|too|as well|please|before (the court|them all|everyone|us all|you all)|for (his|her|their|its) [\\w' ]+|with [\\w' ]+|up)\\b").sub(rest,"",true)
+	rest=_re("[^a-z' ]").sub(rest," ",true).strip_edges()
+	if rest=="": return false
+	for p:String in PRONOUNS:
+		if _re("\\b%s\\b" % _escape(p)).search(rest)!=null: return false
+	return true
 
 ## Words that point at one person without naming them: "him", "her", "you",
 ## "the traitor", or a possessive on a body ("cut off his hands").
@@ -961,6 +1131,11 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 				return _fallback(id,_result(verb,actor,{},text,insist),"Nobody here was named.")
 	# A war order falls on a town or an army, never on a person in the hall.
 	if verb=="war": target={}
+	# A law for our own people: the council keeps it; nobody here is touched.
+	if verb=="law":
+		audience.erase("pending_command")
+		var speaker_now:=_speaker_entry(list)
+		return _law(id,audience,_result("law",speaker_now,{},text,insist),speaker_now,text,cls,context)
 	var r:=_result(verb,actor,target,text,insist)
 	audience.erase("pending_command")
 	if String(target.get("kind",""))=="god":
@@ -985,6 +1160,16 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 			return r
 		"refuse":
 			return _refusal(id,audience,list,r,person,verb)
+	# The court's known commoners and the council's people out of office: the
+	# god's word reaches them as it reaches the officials (court_realm_acts.gd).
+	var kind:=String(target.get("kind",""))
+	if kind=="known" and verb in KNOWN_ACTS: return _known_act(id,audience,r,verb,target,cls,text)
+	if kind=="former" and verb in KNOWN_ACTS: return _former_act(id,audience,r,verb,actor,target,cls,text)
+	# A gift of what the stores do not hold: honour instead, said plainly.
+	if verb=="boon" and String(cls.get("gift_material",""))!="": return _honour_instead(id,audience,r,target,String(cls.gift_material))
+	# "Reward Suri with twenty food": the amount named, not the stock boon.
+	if verb=="boon" and String(cls.get("resource",""))!="" and float(cls.get("amount",0.0))>0.0:
+		verb="give"; r.verb="give"; r.stage="give"
 	match verb:
 		"kill","exile","detain","maim": return _punish(id,audience,list,r,verb,actor,target,cls)
 		"penance","terrify","bless","boon","raise": return _spoken_act(id,audience,r,verb,target)
@@ -993,7 +1178,262 @@ static func _perform(id:String,audience:Dictionary,list:Array[Dictionary],verb:S
 		"give": return _give(id,audience,r,target,cls)
 		"take": return _take(id,audience,r,target,cls)
 		"send": return _send(id,audience,r,actor,cls,context,text)
+		"pardon": return _pardon(id,audience,r,target)
+		"curse": return _curse(id,audience,r,target)
+		"marry": return _marry(id,audience,r,target)
 	return _order(id,audience,r,actor,text,context)
+
+## Acts that reach a known commoner or one of the council's people out of office.
+const KNOWN_ACTS:=["kill","exile","detain","maim","penance","terrify","bless","boon","raise","demote","appoint","give","take","pardon","curse","marry"]
+const METALS:=["bronze","iron","gold","silver","copper","tin","steel"]
+
+static func _honour_instead(id:String,audience:Dictionary,r:Dictionary,target:Dictionary,material:String)->Dictionary:
+	## A gift of what the stores do not hold (bronze before anyone works metal):
+	## nothing leaves the stores; the one named is honoured before the court.
+	var name:=String(target.get("name",""))
+	var why:="There is no %s in your stores: nobody here has ever worked it." % material if material in METALS else "There is no %s in your stores to give." % material
+	if target.is_empty():
+		r.stage="none"; r.executed=false
+		r.outcome=why+" Nothing is given."
+		return r
+	match String(target.get("kind","")):
+		"official":
+			var pid:=int(target.person_id)
+			r.effects=_apply_court(id,"raise_up",_person(target),[pid])
+			GovernmentPeopleSystem.record_person_memory(pid,"The god would have given me %s, and honoured me before the court instead." % material,"divine",0.6,{"emotion":"awe","outcome":"honoured"})
+			r.witness_ids=_witness_ids(id,[pid])
+		"figure":
+			HistoricalFigures.note(String(target.figure_id),Hall._day(),"Honoured by the ruler before the court.",1)
+			r.witness_ids=_witness_ids(id,[])
+		"known":
+			Persons.perform(id,"exalt",{"target":{"kind":"known","id":String(target.known_id)}},{"silent":true})
+		_:
+			r.stage="none"; r.executed=false
+			r.outcome=why+" Nothing is given."
+			return r
+	r.stage="raise"; r.executed=true; r.reaction="delighted"; r.verb="boon"
+	r.terms={"resource":material,"amount":0}
+	r.outcome="%s %s is honoured before the court instead; nothing leaves the stores." % [why,name]
+	return r
+
+static func _pardon(id:String,audience:Dictionary,r:Dictionary,target:Dictionary)->Dictionary:
+	## Mercy: the bound walk free; one who stands charged with nothing hears it.
+	var name:=String(target.get("name",""))
+	match String(target.get("kind","")):
+		"official":
+			var pid:=int(target.person_id)
+			r.effects=DIVINE.apply_to_court("bless",_person(target),_court_watchers(id,[pid]))
+			GovernmentPeopleSystem.record_person_memory(pid,"The god spoke mercy over me before the court, though nothing stood against me.","divine",0.55,{"emotion":"relief","outcome":"pardoned"})
+			r.outcome="Nothing stands against %s; they hear your mercy before the court and are glad of it." % name
+			r.stage="bless"; r.executed=true; r.reaction="pleased"; r.witness_ids=_witness_ids(id,[pid])
+			return r
+		"figure":
+			var figure:Dictionary=HistoricalFigures.by_id(String(target.figure_id))
+			if figure.is_empty(): return _fallback(id,r,"")
+			if String(figure.get("status",""))=="detained":
+				figure["status"]="living"
+				HistoricalFigures.note(String(target.figure_id),Hall._day(),"Freed by the ruler's word.")
+				r.outcome="%s is freed at your word and walks out of the guards' keeping. Their old command stays with whoever took it up." % name
+			else:
+				HistoricalFigures.note(String(target.figure_id),Hall._day(),"Pardoned by the ruler before the court.")
+				r.outcome="Nothing stands against %s; your mercy is carried to them." % name
+			r.effects=_apply_court(id,"bless",{"person_id":0,"name":name},[])
+			r.stage="none"; r.executed=true; r.reaction="pleased"; r.witness_ids=_witness_ids(id,[])
+			return r
+	return _fallback(id,r,"")
+
+static func _curse(id:String,audience:Dictionary,r:Dictionary,target:Dictionary)->Dictionary:
+	## The god's curse: terror before the court, and love that does not come back soon.
+	var name:=String(target.get("name",""))
+	match String(target.get("kind","")):
+		"official":
+			var pid:=int(target.person_id)
+			r.effects=DIVINE.apply_to_court("terrify",_person(target),_court_watchers(id,[pid]))
+			GovernmentPeopleSystem.adjust_person_bonds(pid,{"love":-0.06,"resentment":0.04,"hold_days":30})
+			GovernmentPeopleSystem.record_person_memory(pid,"The god cursed me before the whole court.","divine",0.85,{"emotion":"terror","outcome":"cursed"})
+			r.outcome="You curse %s before the court. They go grey; nobody on the bench will meet their eyes." % name
+			r.stage="terrify"; r.executed=true; r.reaction="furious"; r.witness_ids=_witness_ids(id,[pid])
+			return r
+		"figure":
+			var done:=_figure_act(id,r,"terrify",target)
+			done.outcome="You curse %s. %s" % [name,String(done.outcome)]
+			return done
+	return _fallback(id,r,"")
+
+static func _marry(id:String,audience:Dictionary,r:Dictionary,target:Dictionary)->Dictionary:
+	## A match for one of the council: said plainly, nothing done without a name.
+	r.stage="none"; r.executed=false
+	r.outcome="The court makes no match for %s without your naming whom they are to wed." % String(target.get("name","them"))
+	return r
+
+static func _court_watchers(id:String,exclude:Array)->Array:
+	var watchers:Array=[]
+	for wid in _witness_ids(id,exclude):
+		var p:=Hall._official(int(wid))
+		if not p.is_empty(): watchers.append(p)
+	return watchers
+
+## The persons engine's action for each verb on a known commoner.
+const KNOWN_ACTION:={"kill":"execute","exile":"exile","maim":"maim","detain":"bind","bless":"exalt","raise":"exalt","boon":"reward","give":"reward","terrify":"terrify","penance":"penance","curse":"curse","marry":"marry_off","pardon":"free"}
+const KNOWN_STAGE:={"kill":"kill","exile":"exile","maim":"maim","detain":"detain","bless":"raise","raise":"raise","boon":"boon","give":"boon","terrify":"terrify","penance":"penance","curse":"terrify","appoint":"appoint"}
+
+static func _known_act(id:String,audience:Dictionary,r:Dictionary,verb:String,target:Dictionary,cls:Dictionary,text:String)->Dictionary:
+	## One of the court's known commoners (court_persons.gd), before the god or
+	## brought in: the persons engine decides and applies it; the court sees it.
+	var ref:={"kind":"known","id":String(target.get("known_id",""))}
+	var p:=Persons.by_id(String(ref.id))
+	var name:=String(p.get("name",target.get("name","")))
+	if p.is_empty() or String(p.get("status",""))!="living": return _fallback(id,r,"%s is no longer among the living." % name if not p.is_empty() else "")
+	var params:={"target":ref}
+	var action:=String(KNOWN_ACTION.get(verb,""))
+	match verb:
+		"maim": params["harm"]=String(cls.get("harm","mutilate"))
+		"pardon": action="free" if bool(p.get("bound",false)) else "pardon"
+		"appoint":
+			var office:=_office_in(text)
+			if _re("(?i)\\b(priest|priestess|keeper of (the|my|your) (god's )?fire|holy|shaman|fire-keeper)\\b").search(text)!=null: action="make_priest"
+			elif office!="" and GovernmentPeopleSystem.office_is_active(office): action="make_official"; params["office"]=office
+			else: action="exalt"
+		"demote","take":
+			r.stage="none"; r.executed=false
+			r.outcome="%s holds no office and keeps nothing apart from their household; there is nothing to take." % name
+			return r
+	if action=="": return _fallback(id,r,"")
+	var here:=bool(target.get("speaker",false))
+	var done:=Persons.perform(id,action,params,{"silent":true})
+	if not bool(done.get("ok",false)): return _fallback(id,r,"")
+	r.executed=true
+	r.stage=String(KNOWN_STAGE.get(verb,"none"))
+	if verb=="maim": r["harm"]=String(params.get("harm","mutilate"))
+	r.removed=verb in ["kill","exile"]
+	r.reaction="furious" if verb in ["kill","exile","maim","terrify","curse","detain"] else ("delighted" if verb in ["bless","raise","boon","give","appoint"] else "neutral")
+	r.outcome=("" if here else "%s was brought in under guard from %s. " % [name,String(p.get("village","their hearth"))])+String(done.get("outcome",""))
+	r["known"]=String(ref.id)
+	r.witness_ids=_witness_ids(id,[])
+	if bool(done.get("conclude",false)) or (here and r.removed): r.terminal=true
+	return r
+
+static func _former_act(id:String,audience:Dictionary,r:Dictionary,verb:String,actor:Dictionary,target:Dictionary,cls:Dictionary,text:String)->Dictionary:
+	## One of the council's people out of office or held under guard: the god's
+	## word reaches them through GovernmentPeopleSystem.
+	var pid:=int(target.get("person_id",0))
+	var person:=GovernmentPeopleSystem.person_snapshot(pid)
+	var name:=String(person.get("name",target.get("name","")))
+	var status:=String(person.get("status",""))
+	if person.is_empty() or not status in ["active","detained"]: return _fallback(id,r,"")
+	var held:=status=="detained"
+	var watchers:=_court_watchers(id,[])
+	r.witness_ids=_witness_ids(id,[])
+	match verb:
+		"kill":
+			var dead:=GovernmentPeopleSystem.person_put_to_death(pid)
+			if not bool(dead.get("ok",false)): return _fallback(id,r,String(dead.get("reason","")))
+			r.effects=DIVINE.apply_to_court("strike_down",{"person_id":0,"name":name},watchers)
+			r.outcome="%s was %sput to death at your word, before the court. It cost you legitimacy and cohesion." % [name,"brought out of the guards' keeping and " if held else ""]
+			r.removed=true; r.executed=true; r.reaction="furious"
+		"exile":
+			if held: GovernmentPeopleSystem.person_released(pid)
+			var gone:=GovernmentPeopleSystem.person_departs(pid,"exiled")
+			if not bool(gone.get("ok",false)): return _fallback(id,r,String(gone.get("reason","")))
+			r.effects=DIVINE.apply_to_court("cast_out",{"person_id":0,"name":name},watchers)
+			r.outcome="%s was cast out of the realm at your word." % name
+			r.removed=true; r.executed=true; r.reaction="furious"
+		"detain":
+			if held:
+				r.stage="none"; r.outcome="%s is already bound and under guard at your word." % name
+				return r
+			var bound:=GovernmentPeopleSystem.person_departs(pid,"detained")
+			if not bool(bound.get("ok",false)): return _fallback(id,r,String(bound.get("reason","")))
+			r.effects=DIVINE.apply_to_court("penance",{"person_id":0,"name":name},watchers)
+			r.outcome="%s was bound and put under guard at your word." % name
+			r.executed=true; r.reaction="furious"
+		"maim":
+			var harm:=String(cls.get("harm","mutilate"))
+			GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":0.3 if harm=="mutilate" else 0.2,"resentment":0.2 if harm=="mutilate" else 0.12,"love":-0.12,"hold_days":90})
+			GovernmentPeopleSystem.record_person_memory(pid,"The god had me %s before the whole court." % String({"beat":"flogged","humiliate":"shamed"}.get(harm,"maimed")),"divine",0.9,{"emotion":"terror","outcome":"maimed"})
+			r.effects=DIVINE.apply_to_court("terrify",{"person_id":0,"name":name},watchers)
+			r.outcome="%s was %s at your word, before the court. They live, and they will not forget it." % [name,String({"beat":"flogged bloody","humiliate":"shamed"}.get(harm,"maimed"))]
+			r.executed=true; r.reaction="furious"; r.harm=harm
+		"pardon":
+			if held:
+				var freed:=GovernmentPeopleSystem.person_released(pid)
+				if not bool(freed.get("ok",false)): return _fallback(id,r,String(freed.get("reason","")))
+				GovernmentPeopleSystem.adjust_person_bonds(pid,{"love":0.1,"fear":-0.05,"resentment":-0.05})
+				GovernmentPeopleSystem.record_person_memory(pid,"The god had my bonds cut and let me walk free.","divine",0.8,{"emotion":"relief","outcome":"freed"})
+				r.effects=DIVINE.apply_to_court("bless",{"person_id":0,"name":name},watchers)
+				r.outcome="%s is freed at your word and walks out of the guards' keeping. The office they held stays with the one who took it up." % name
+			else:
+				GovernmentPeopleSystem.adjust_person_bonds(pid,{"love":0.06,"fear":-0.03})
+				r.outcome="Nothing stands against %s; they hear your mercy." % name
+			r.stage="none"; r.executed=true; r.reaction="pleased"
+		"appoint":
+			var office:=_office_in(text)
+			if office=="" or not GovernmentPeopleSystem.office_is_active(office):
+				GovernmentPeopleSystem.adjust_person_bonds(pid,{"respect":0.08,"love":0.05})
+				r.outcome="%s is honoured before the court; no office was named for them." % name
+				r.stage="raise"; r.executed=true; r.reaction="delighted"
+				return r
+			if held: GovernmentPeopleSystem.person_released(pid)
+			var former:Dictionary=GovernmentPeopleSystem.officeholder(office)
+			var appointed:=GovernmentPeopleSystem.mark_central_appointment(pid,office)
+			if appointed.is_empty(): return _fallback(id,r,"%s cannot hold that office now." % name)
+			GovernmentPeopleSystem.adjust_person_bonds(pid,{"respect":0.08,"love":0.06,"obligation":0.06,"resentment":-0.05})
+			GovernmentPeopleSystem.record_person_memory(pid,"The god gave me back an office before the whole court: %s." % String(appointed.get("office_title",office)),"divine",0.8,{"emotion":"awe","outcome":"appointed"})
+			if not former.is_empty() and int(former.person_id)!=pid:
+				GovernmentPeopleSystem.adjust_person_bonds(int(former.person_id),{"resentment":0.1,"respect":-0.04})
+				GovernmentPeopleSystem.record_person_memory(int(former.person_id),"The god gave my office to %s before the court." % name,"divine",0.7,{"emotion":"shame","outcome":"replaced"})
+			r.outcome="%s%s is %s again by your word.%s" % [("%s is freed, and " % name) if held else "",name if not held else "",String(appointed.get("office_title",office))," %s no longer holds it." % String(former.name) if not former.is_empty() and int(former.person_id)!=pid else ""]
+			r.outcome=r.outcome.replace("and  is","and is")
+			r.stage="appoint"; r.executed=true; r.reaction="delighted"
+		"demote":
+			r.stage="none"; r.executed=false
+			r.outcome="%s holds no office now; there is nothing to strip." % name
+		"take":
+			GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":0.05,"obligation":0.05})
+			r.stage="penance"; r.executed=true
+			r.outcome="%s keeps nothing apart from the common stores; the fine becomes a fast and a vigil." % name
+		"give","boon":
+			var boon:=Hall._boon_terms()
+			var resource:=String(cls.get("resource","")) if String(cls.get("resource",""))!="" else String(boon.resource)
+			var want:=float(cls.get("amount",0.0)) if float(cls.get("amount",0.0))>0.0 else float(boon.amount)
+			var paid:=Hall._debit_player(resource,minf(want,floorf(Hall.player_stock(resource))))
+			GovernmentPeopleSystem.adjust_person_bonds(pid,{"love":0.08,"obligation":0.1,"resentment":-0.05})
+			r.terms={"resource":resource,"amount":paid}
+			r.outcome=("You gave %s %d %s from the stores." % [name,roundi(paid),resource]) if paid>0.0 else "Your stores hold no %s to give %s." % [resource,name]
+			r.stage="give" if paid>0.0 else "none"; r.executed=paid>0.0; r.reaction="delighted"
+		"curse","terrify","penance","bless","raise":
+			var action:=String({"curse":"terrify","raise":"raise_up"}.get(verb,verb))
+			r.effects=DIVINE.apply_to_court(action,person,watchers)
+			if verb=="curse": GovernmentPeopleSystem.adjust_person_bonds(pid,{"love":-0.06,"resentment":0.04})
+			r.outcome=String({"curse":"You curse %s before the court.","terrify":"Your anger falls on %s before the court.","penance":"%s must fast and keep vigil at your word.","bless":"You bless %s before the court.","raise":"You honour %s before the court."}[verb]) % name
+			r.stage=String({"curse":"terrify","raise":"raise"}.get(verb,verb)); r.executed=true; r.reaction="furious" if verb in ["curse","terrify","penance"] else "delighted"
+		"marry":
+			return _marry(id,audience,r,target)
+		_:
+			return {}
+	return r
+
+static func _law(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,text:String,cls:Dictionary,context:Dictionary)->Dictionary:
+	## A law for our own people: the council takes it up as a standing order
+	## (custom_order, never a war order); a harsh law is remembered with dread.
+	var law:Dictionary=cls.get("law",{}) if cls.get("law") is Dictionary else {}
+	var ctx:=context.duplicate()
+	ctx["law"]=true; ctx["audience_id"]=id; ctx["actor"]=actor.duplicate()
+	var words:=_strip_vocative(text,actor)
+	var routed:=custom_order(words,ctx)
+	r.verb="order"; r["law"]=true; r["route"]=String(routed.get("route",""))
+	r.reaction="neutral"
+	if not bool(routed.get("ok",true)):
+		r.stage="none"; r.executed=false
+		r.outcome=String(routed.get("outcome",""))
+		return r
+	r.stage="order"; r.executed=true
+	if bool(law.get("harsh",false)): DIVINE.record_people_act("harsh_law")
+	if int(actor.get("person_id",0))>0:
+		GovernmentPeopleSystem.adjust_person_bonds(int(actor.person_id),{"obligation":0.02})
+		GovernmentPeopleSystem.record_person_memory(int(actor.person_id),"The god gave the people a law before the court: %s" % words.substr(0,160),"divine",0.55,{"emotion":"duty","outcome":"law"})
+	r.outcome="From today it is the law. %s%s" % [String(routed.get("outcome","")),(" The people will fear it." if bool(law.get("harsh",false)) else "")]
+	return r
 
 static func _result(verb:String,actor:Dictionary,target:Dictionary,text:String,insist:bool)->Dictionary:
 	return {"handled":true,"ok":true,"act":"command","verb":verb,"text":text,"insist":insist,"actor":actor.duplicate(),"target":target.duplicate(),
@@ -1003,7 +1443,7 @@ static func _result(verb:String,actor:Dictionary,target:Dictionary,text:String,i
 static func _focus(audience:Dictionary,target:Dictionary,actor:Dictionary)->void:
 	var key:=String(target.get("key",""))
 	if key=="" or key=="god": key=String(actor.get("key",""))
-	if key!="": audience["command_focus"]={"last_ref":key,"day":Hall._day()}
+	if key!="": audience["command_focus"]={"last_ref":key,"day":Hall._day(),"line":(audience.get("lines",[]) as Array).size()}
 
 static func _witness_ids(id:String,exclude:Array)->Array:
 	var out:Array=[]
@@ -1809,8 +2249,10 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	## universal custom-directive path (custom_directive.gd): bounded changes
 	## on DecreeStatistics parameters, real costs, side effects. Never refused.
 	## custom_directive_handler, when set, is asked first.
-	# Never let a war order fall into the generic directive path.
-	var war:=WarOrders.read(text,"")
+	# Never let a war order fall into the generic directive path (a law for our
+	# own people is never one: court_realm_acts.law read it so).
+	var law:=bool(context.get("law",false))
+	var war:=WarOrders.read(text,"") if not law else {}
 	# "We hold no town of theirs" answers harm to a foe's people; words about
 	# our own people ("kill all the rebels") go on to the council's path.
 	if not war.is_empty() and not (String(war.get("kind",""))=="no_town" and not _any_war()):
@@ -1818,7 +2260,7 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 		# No voice speaks here: the war leader's words and the note together.
 		return {"ok":true,"route":"war","war":decided,"objective":decided.get("objective",{}),"outcome":(String(decided.get("says",""))+" "+String(decided.get("outcome",""))).strip_edges()}
 	# Recruits called up, weapons made: the real systems, never a directive.
-	var home:=HomeOrders.read(text)
+	var home:=HomeOrders.read(text) if not law else {}
 	if not home.is_empty():
 		var done:=HomeOrders.perform(home)
 		return {"ok":bool(done.get("ok",false)),"route":"home","home":done,"outcome":(String(done.get("says",""))+" "+String(done.get("outcome",""))).strip_edges()}
@@ -1856,8 +2298,14 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	# Only a standing effort was set: say so, never that a concrete deed was done.
 	var words:="well" if rate>=0.72 else ("unevenly" if rate>=0.36 else "only a little")
 	var lacking:=String(plan.get("source",""))=="attempt"
-	return {"ok":true,"route":"custom_directive","order_id":order_id,"plan":plan,"applied":applied,
-		"outcome":("We lack the means for most of it; the council will try %s as a standing order, and it will take hold %s." if lacking else "The council takes up %s as a standing order; it will take hold %s, and the reports will show what comes of it.") % [CustomDirective.display_name(plan),words]}
+	var outcome:=("We lack the means for most of it; the council will try %s as a standing order, and it will take hold %s." if lacking else "The council takes up %s as a standing order; it will take hold %s, and the reports will show what comes of it.") % [CustomDirective.display_name(plan),words]
+	# A lasting work asked for ("Build a great monument to me") is commissioned
+	# through the great works themselves; the standing order keeps only its
+	# first month of marking out (order_great_work.gd).
+	var work:Dictionary=preload("res://scripts/order_great_work.gd").start_from_order(text,order_id) if not law else {}
+	if bool(work.get("started",false)): outcome=String(work.get("line",""))
+	elif bool(work.get("asked",false)) and String(work.get("line",""))!="": outcome+=" "+String(work.line)
+	return {"ok":true,"route":"custom_directive","order_id":order_id,"plan":plan,"applied":applied,"work":work,"outcome":outcome}
 
 static func _refusal(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictionary,person:Dictionary,verb:String)->Dictionary:
 	## Rare and consequential: the brave, unafraid and embittered say no, and
@@ -1987,6 +2435,8 @@ const STAGE:={
 		"[Fists and {club} fall on {target} until they curl on the floor; their companions drag them out, bleeding and groaning.]"],
 	"envoy_maim_humiliate":["[The guards shave {target}'s head and strip them before the whole court; the envoy shakes with shame and fury as they are shoved out of the door.]",
 		"[{target} is dragged through the ash and dung by the fire while the court jeers; their retinue throws a cloak over them and hurries them away.]"],
+	"maim_beat":["[The guards throw {target} down and flog them until their back runs red; the court stares at the floor until it is over.]",
+		"[{target} is stretched over the log by the fire and beaten; nobody in the hall moves to help them.]"],
 	"maim":["[The guards hold {target} down and {blade} falls; they scream, and the court stares at the floor until it is over.]",
 		"[{target} is forced to their knees and struck again and again with {club}; nobody in the hall moves to help them.]"],
 	"envoy_detain":["[{target} is thrown down and bound with cord while their bearers are driven out, wailing, to carry word home.]"],
@@ -1999,6 +2449,7 @@ static func stage_key(result:Dictionary)->String:
 	var has_actor:=String(result.get("actor_name",""))!="" and not (result.get("actor",{}) as Dictionary).is_empty()
 	if String(target.get("kind",""))=="envoy" and stage in ["kill","detain","exile"]: return "envoy_"+stage
 	if String(target.get("kind",""))=="envoy" and stage=="maim": return "envoy_maim_"+String(result.get("harm","mutilate"))
+	if stage=="maim" and String(result.get("harm",""))=="beat": return "maim_beat"
 	if stage=="kill":
 		if not has_actor: return "kill_guards"
 		return "kill_by_reluctant" if String((result.get("obedience",{}) as Dictionary).get("id",""))=="reluctant" else "kill_by"

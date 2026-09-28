@@ -17,6 +17,7 @@ const Roster:=preload("res://scripts/hud/court_roster.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Commands:=preload("res://scripts/court_commands.gd")
+const CourtFacts:=preload("res://scripts/court_facts.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
@@ -970,6 +971,11 @@ func _speak()->void:
 		if not persons_words:
 			var re:=RegEx.new();re.compile(PERSONS_WORDS)
 			persons_words=re.search(text)!=null
+		# A question the one before you answers from their own count ("who do we
+		# trade with?", "who keeps the stores now?"), or the realm's own business
+		# the engine carries (a law, the god's act on many, a verb on one person
+		# named): not a question about people for the persons engine.
+		if persons_words and typed.is_empty() and (CourtFacts.answer_for(audience_id,text)!="" or Commands.realm_business(audience_id,text)): persons_words=false
 		if persons_words and not (voice.has_method("read_order") and bool(voice.is_live())):
 			voice.persons_turn(audience_id,text)
 			_pump()
@@ -1046,6 +1052,9 @@ func _after_order_reading(id:String,text:String,read:Dictionary,about_people:boo
 const PERSONS_VERBS:="(?i)\\b(who|whom|whose|summon|fetch|send for|call for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|confess|tell me (of|about)|where were you|mercy|pardon|exalt|curse|marry|priest)\\b"
 func _persons_take(text:String)->bool:
 	if not Persons.typed_action(text).is_empty(): return true
+	# The realm's own business (a law, the god's act on many, a verb on one
+	# person named, a gift) is the engine's, never a persons inquiry.
+	if Commands.realm_business(audience_id,text): return false
 	var civ:=String(Hall.find(audience_id).get("civ_id",""))
 	if not WarOrders.read(text,civ,audience_id).is_empty(): return false
 	var captive:=WarOrders.captive_reading(text)

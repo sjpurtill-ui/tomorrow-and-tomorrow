@@ -1185,6 +1185,47 @@ func person_departs(person_id:int,reason:String="fled")->Dictionary:
 	return {"ok":true,"status":normalized,"person_id":person_id,"name":name,"offices":offices,"successors":successors,"event":event,"message":event.description}
 
 
+func person_released(person_id:int)->Dictionary:
+	## One bound and kept under guard at the ruler's word walks free again. Their
+	## offices stay with whoever took them up; they rejoin the council's people
+	## and may be appointed again.
+	initialize()
+	var index:=_find_person_index(person_id)
+	if index<0: return {"ok":false,"reason":"That person is not known."}
+	if String(people[index].get("status",""))!="detained": return {"ok":false,"reason":"They are not held."}
+	people[index]["status"]="active"
+	people[index]["released_day"]=int(WorldSimulation.state.elapsed_days)
+	_ensure_pool()
+	revision+=1
+	_sync_advisor_roster()
+	return {"ok":true,"person":person_snapshot(person_id)}
+
+
+func person_put_to_death(person_id:int)->Dictionary:
+	## One of the council's people who holds no office now (put out of it, or
+	## held under guard) put to death at the ruler's word: one named death
+	## through the same conserved entry point; legitimacy and cohesion pay.
+	initialize()
+	var index:=_find_person_index(person_id)
+	if index<0 or String(people[index].get("status","")) not in ["active","detained"]: return {"ok":false,"reason":"That person is not available."}
+	if String(people[index].get("office_key",""))!="" or String(people[index].get("local_leader_of",""))!="": return {"ok":false,"reason":"They hold an office; the office passes first."}
+	var name:=String(people[index].get("name","A former official"))
+	people[index]["status"]="deceased"
+	people[index]["died_day"]=int(WorldSimulation.state.elapsed_days)
+	people[index]["removal_reason"]="executed"
+	WorldSimulation.state.register_directive_population_deaths(1,"person_execution","%s was put to death by sovereign order." % name,{"exact_count":1,"label":"named person"})
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.05,0.01,0.99)
+	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.5))-0.03,0.01,0.99)
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"title":"Put to Death","description":"%s was put to death by the ruler's decree." % name,"domain":"institutions","severity":"major"}
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	_ensure_pool()
+	revision+=1
+	_sync_advisor_roster()
+	return {"ok":true,"name":name,"event":event}
+
+
 func settlement_leader(settlement_id:String)->Dictionary:
 	if not initializing: initialize()
 	for settlement in WorldSimulation.state.player_settlements:

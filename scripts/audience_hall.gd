@@ -3592,7 +3592,10 @@ static func envoy_act(id:String,act_id:String,words:String="")->Dictionary:
 	return {"handled":false,"ok":false,"outcome":"That is not open to you here."}
 
 static func divine_intent(id:String,text:String)->String:
-	## The ruler's words, read for a spoken act the god may perform here.
+	## The ruler's words, read for a spoken act the god may perform here. A
+	## question ("Do they fear me?") asks; it is no act.
+	var asked:=RegEx.new(); asked.compile("(?i)^\\s*((and|so|but|then)\\s+)?(do|does|did|are|is|was|were|will|would|can|could|have|has|should|shall)\\s+(they|the people|my people|our people|you|we|he|she|it|anyone|everyone)\\b")
+	if text.strip_edges().ends_with("?") or asked.search(text)!=null: return ""
 	var action:=DIVINE.intent(text)
 	if action.is_empty(): return ""
 	for option in divine_options(id):

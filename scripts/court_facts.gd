@@ -23,9 +23,14 @@ extends RefCounted
 ##     sickness, workers by task, births and deaths this season, the people
 ##     brought home from towns we took;
 ##   keeper of tribute (Quartermaster, Envoy): tribute taken, treaties,
-##     trade and pacts with each people we know.
+##     trade and pacts with each people we know;
+##   chief scout (the Pathfinder): the scouting parties out (where, how many,
+##     when they come back), the peoples we have met and every town we know,
+##     how far and which way;
+##   everyone also knows how the people hold the god (love and dread, in
+##     words) and who sits on the council now.
 ##
-## offices(persona, speaker) -> ["common", "war"?, "stores"?, "tribute"?].
+## offices(persona, speaker) -> ["common", "war"?, "stores"?, "tribute"?, "scouts"?].
 ## sheet(offices) -> {day, when, ..., towns:[{name, men_bound, ...}], ...}.
 ## text(sheet) -> the prompt block (plain lines, exact figures).
 ## Static helpers; preload.
@@ -36,6 +41,8 @@ const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
+const Divine:=preload("res://scripts/divine_regard.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -45,8 +52,10 @@ const TRIBUTE_KEYS:=["Quartermaster","Envoy","Treasurer"]
 const WAR_WORDS:=["marshal","war leader","watch captain","watch speaker","watch keeper","defense","defence","militia","shield speaker","security"]
 const STORE_WORDS:=["steward","quartermaster","stores","storekeeper","provision","supply","hearth","headman","settlement"]
 const TRIBUTE_WORDS:=["quartermaster","treasurer","tribute","envoy","messenger","emissary","treaty","trade","market"]
+const SCOUT_KEYS:=["ChiefScout"]
+const SCOUT_WORDS:=["pathfinder","scout","tracker","outrider"]
 ## The prompt block is kept within this many characters.
-const MAX_CHARS:=2600
+const MAX_CHARS:=3600
 
 static func _world()->Variant: return WorldSimulation.world
 static func _mc()->Variant: return WorldSimulation.military
@@ -72,12 +81,24 @@ static func offices(persona:Dictionary,speaker:Dictionary={},holder_key:String="
 	if war: out.append("war")
 	if not war and (key in STORE_KEYS or (key=="" and _any(office,STORE_WORDS))): out.append("stores")
 	if key in TRIBUTE_KEYS or (key=="" and _any(office,TRIBUTE_WORDS)): out.append("tribute")
+	if key in SCOUT_KEYS or (key=="" and _any(office,SCOUT_WORDS)): out.append("scouts")
 	return out
 
 static func _any(text:String,words:Array)->bool:
 	for w in words:
 		if String(w) in text: return true
 	return false
+
+## The answer the one before the ruler gives from their own sheet, "" when
+## the words ask nothing it lists (the court screen asks this before handing
+## "who do we trade with?" to the persons engine as a question about people).
+static func answer_for(audience_id:String,text:String)->String:
+	var audience:=Hall.find(audience_id)
+	if audience.is_empty() or String(audience.get("origin",""))!="court": return ""
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	if String(speaker.get("known_id",""))!="": return ""
+	var which:=offices({},speaker,String(audience.get("holder_key","")))
+	return String((load("res://scripts/court_answers.gd") as GDScript).call("answer",sheet(which),text))
 
 ## The exact facts for these offices.
 static func sheet(which:Array)->Dictionary:
@@ -87,6 +108,7 @@ static func sheet(which:Array)->Dictionary:
 	if which.has("war"): _war(out)
 	if which.has("stores"): _stores(out)
 	if which.has("tribute"): _tribute(out)
+	if which.has("scouts"): _scouts(out)
 	return out
 
 # --------------------------------------------------------------------------
@@ -111,6 +133,23 @@ static func _common(out:Dictionary)->void:
 	out["at_peace_with"]=peace
 	# The last fight, as everyone has heard it: where, when and who won.
 	out["last_fights"]=battles(1,false)
+	# How the people hold the god, in words (divine_regard.people_regard), and
+	# who sits on the council now: things every official at court knows.
+	var officials:=Hall._officials()
+	var regard:=Divine.people_regard(officials)
+	out["people_regard"]={"read":String(regard.get("read","")),"love":Divine._band(float(regard.get("love",0.5))),"dread":Divine._band(float(regard.get("dread",0.0)))}
+	var council:Array=[]
+	for p:Dictionary in officials: council.append({"title":String(p.get("office_title","")),"name":String(p.get("name","")),"office":String(p.get("office_key",""))})
+	out["council"]=council
+	# Those put out of office or held under guard at the god's word, still living.
+	var set_aside:Array=[]
+	for p in GovernmentPeopleSystem.people:
+		if not p is Dictionary: continue
+		var reason:=String((p as Dictionary).get("removal_reason",""))
+		var status:=String((p as Dictionary).get("status",""))
+		if status=="detained": set_aside.append("%s (held under guard)" % String(p.get("name","")))
+		elif status=="active" and reason in ["dismissed","arrested"] and String((p as Dictionary).get("office_key",""))=="": set_aside.append("%s (put out of office)" % String(p.get("name","")))
+	out["set_aside"]=set_aside
 	var towns:Array=[]
 	# Every town we hold has its ledger (begun from its people now if no
 	# order has touched them yet).
@@ -212,6 +251,19 @@ static func _war(out:Dictionary)->void:
 	var mc:Variant=_mc()
 	if mc==null: return
 	out["fighters_at_home"]=maxi(0,int((mc.home_army as Dictionary).get("troops",0)))
+	# What they fight with, and who is still to be made a fighter.
+	var inventory:Dictionary=mc.military_inventory
+	out["spears"]=int(inventory.get("spear",0))
+	var weapons:={}
+	for item in inventory:
+		var n:=int(inventory[item])
+		if n>0 and String(item)!="spear": weapons[String(item).replace("_"," ")]=n
+	out["weapons"]=weapons
+	out["recruits"]=maxi(0,int(mc.aggregate_recruits))
+	var drilling:=0
+	for t in mc.training_queue:
+		if t is Dictionary: drilling+=int((t as Dictionary).get("count",(t as Dictionary).get("troops",0)))
+	out["in_training"]=drilling
 	var bands:Array=[]
 	for a in mc.field_armies:
 		var army:Dictionary=a
@@ -304,6 +356,12 @@ static func _stores(out:Dictionary)->void:
 	if state==null: return
 	var food:=float((state.resource_stockpiles as Dictionary).get("Food",0.0))
 	out["food_in_store"]=roundi(food)
+	# Everything else in the stores, by what it is (the keeper counts it all).
+	var stock:={}
+	for res in (state.resource_stockpiles as Dictionary):
+		var n:=roundi(float(state.resource_stockpiles[res]))
+		if String(res)!="Food" and n>0: stock[String(res)]=n
+	out["stock"]=stock
 	out["food_days"]=snappedf(float((state.simulation_metrics as Dictionary).get("food_days",0.0)),0.1)
 	var water:Dictionary=state.water_metrics
 	out["water"]={"stored":roundi(float(water.get("stored",0.0))),"days":snappedf(float(water.get("days",0.0)),0.1),"reachable":bool(water.get("source_accessible",false))}
@@ -359,6 +417,56 @@ static func _tribute(out:Dictionary)->void:
 			var pact:Dictionary=(ForeignDiplomacy.commitments.state.get("pacts",{}) as Dictionary).get(String(c.id),{}) if ForeignDiplomacy!=null else {}
 			peoples.append({"people":String(c.get("name","")),"treaty":String(rel.get("treaty","none")),"trade":snappedf(float(rel.get("trade",0.0)),0.01),"pact":String(pact.get("kind",pact.get("action",""))) if not pact.is_empty() else "none"})
 	out["peoples"]=peoples
+
+# --------------------------------------------------------------------------
+# The chief scout
+# --------------------------------------------------------------------------
+
+const COMPASS:=["east","southeast","south","southwest","west","northwest","north","northeast"]
+
+## "west", "northeast": which way a place lies from another (+x east, +z south).
+static func compass(from:Vector2,to:Vector2)->String:
+	if from.distance_to(to)<0.01: return ""
+	return COMPASS[posmod(roundi(rad_to_deg((to-from).angle())/45.0),8)]
+
+static func _pos(p:Variant)->Vector2:
+	if not p is Dictionary: return Vector2.INF
+	var d:Dictionary=p
+	if not d.has("x"): return Vector2.INF
+	return Vector2(float(d.get("x",0.0)),float(d.get("z",d.get("y",0.0))))
+
+static func _scouts(out:Dictionary)->void:
+	## The scouting parties out, the peoples we have met and every town we know
+	## of: how far and which way from home, from the scouts' own reports.
+	var day:=_day()
+	var parties:Array=[]
+	var world:Variant=_world()
+	if world!=null:
+		for m in world.scout_missions:
+			if not m is Dictionary: continue
+			var mission:Dictionary=m
+			var heading:=String(mission.get("ordered_heading",mission.get("planned_heading","")))
+			var back:=int(mission.get("actual_return_day",mission.get("return_day",day)))
+			parties.append({"scouts":int(mission.get("personnel",0)),"heading":heading,"toward":String(mission.get("target_label","")),"out_days":maxi(0,day-int(mission.get("start_day",day))),"back_in":maxi(0,back-day)})
+	out["parties"]=parties
+	var home:Vector2=world.player_world_origin if world!=null else Vector2.ZERO
+	var peoples:Array=[]
+	if world!=null:
+		for c in world.civilizations:
+			if not c is Dictionary or String((c as Dictionary).get("id",""))=="player": continue
+			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
+			if int(rel.get("contact_level",0))<=0 and not bool(rel.get("at_war",false)): continue
+			peoples.append({"name":String(c.get("name","")),"at_war":bool(rel.get("at_war",false)),"home_known":bool(rel.get("home_location_known",false)),"met":int(rel.get("contact_level",0))>=2})
+	out["met_peoples"]=peoples
+	var towns:Array=[]
+	for t:Dictionary in WarOrders.held_towns()+WarOrders.known_places():
+		var at:=_pos(t.get("position",{}))
+		var row:={"name":String(t.get("name","")).trim_prefix("Reported home of "),"people":String(t.get("civ_name","")),"held":bool(t.get("held",false))}
+		if at!=Vector2.INF:
+			row["km"]=roundi(home.distance_to(at))
+			row["way"]=compass(home,at)
+		towns.append(row)
+	out["known_towns"]=towns
 
 # --------------------------------------------------------------------------
 # A foreign envoy's own people
@@ -432,6 +540,10 @@ static func text(s:Dictionary)->String:
 		lines.append(_town_line(t,war))
 	if war:
 		lines.append("Fighters at home: %d." % int(s.get("fighters_at_home",0)))
+		var arms:PackedStringArray=PackedStringArray()
+		var weapons:Dictionary=s.get("weapons",{})
+		for w in weapons: arms.append("%s %d" % [String(w),int(weapons[w])])
+		lines.append("Spears in store: %d%s. Called up, waiting for weapons and drill: %d; in training: %d." % [int(s.get("spears",0)),(" (other arms: %s)" % ", ".join(arms)) if not arms.is_empty() else "",int(s.get("recruits",0)),int(s.get("in_training",0))])
 		var bands:PackedStringArray=PackedStringArray()
 		for b:Dictionary in s.get("bands",[]): bands.append("%s, %d fighters, %s%s (%s)" % [String(b.name),int(b.fighters),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",String(b.doing)])
 		lines.append("Bands out: %s." % ("; ".join(bands) if not bands.is_empty() else "none"))
@@ -446,7 +558,10 @@ static func text(s:Dictionary)->String:
 		for b:Dictionary in s.get("last_fights",[]): lines.append("The last fight: %s, %s: %s." % [String(b.when),String(b.where),"we won" if bool(b.won) else ("we lost" if bool(b.lost) else "nobody won")])
 	if (s.get("offices",[]) as Array).has("stores"):
 		var water:Dictionary=s.get("water",{})
-		lines.append("Stores: %d Food, enough for %s days. Water: %d stored, %s days%s." % [int(s.get("food_in_store",0)),str(s.get("food_days",0)),int(water.get("stored",0)),str(water.get("days",0)),"" if bool(water.get("reachable",true)) else ", and the source is out of reach"])
+		var others:PackedStringArray=PackedStringArray()
+		var stock:Dictionary=s.get("stock",{})
+		for res in stock: others.append("%d %s" % [int(stock[res]),String(res)])
+		lines.append("Stores: %d Food, enough for %s days%s. Water: %d stored, %s days%s." % [int(s.get("food_in_store",0)),str(s.get("food_days",0)),("; also "+", ".join(others)) if not others.is_empty() else "",int(water.get("stored",0)),str(water.get("days",0)),"" if bool(water.get("reachable",true)) else ", and the source is out of reach"])
 		lines.append("People: %d; houses for %d. Health: %s. Born this season: %d; died this season: %d." % [int(s.get("people",0)),int(s.get("housing",0)),String(s.get("health","")),int(s.get("births_this_season",0)),int(s.get("deaths_this_season",0))])
 		var work:PackedStringArray=PackedStringArray()
 		var tasks:Dictionary=s.get("workers_by_task",{})
@@ -458,6 +573,22 @@ static func text(s:Dictionary)->String:
 		var ties:PackedStringArray=PackedStringArray()
 		for p:Dictionary in s.get("peoples",[]): ties.append("%s: treaty %s, trade %s, pact %s" % [String(p.people),String(p.treaty),str(p.trade),String(p.pact)])
 		if not ties.is_empty(): lines.append("Peoples: %s." % "; ".join(ties))
+	if (s.get("offices",[]) as Array).has("scouts"):
+		var out_now:PackedStringArray=PackedStringArray()
+		for p:Dictionary in s.get("parties",[]): out_now.append(party_words(p))
+		lines.append("Scouting parties out: %s." % ("; ".join(out_now) if not out_now.is_empty() else "none"))
+		var met:PackedStringArray=PackedStringArray()
+		for p:Dictionary in s.get("met_peoples",[]): met.append("%s (%s%s)" % [String(p.name),"at war with us" if bool(p.at_war) else "at peace","" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		lines.append("Peoples we have met: %s." % (", ".join(met) if not met.is_empty() else "none"))
+		var places:PackedStringArray=PackedStringArray()
+		for t:Dictionary in s.get("known_towns",[]): places.append(town_way_words(t))
+		lines.append("Towns we know of: %s." % ("; ".join(places) if not places.is_empty() else "none"))
+	# What every official knows: how the people hold the god, and the council.
+	var regard:Dictionary=s.get("people_regard",{})
+	if not regard.is_empty(): lines.append("The people: %s (love %s, dread %s)." % [String(regard.get("read","")),String(regard.get("love","")),String(regard.get("dread",""))])
+	var council:PackedStringArray=PackedStringArray()
+	for c:Dictionary in s.get("council",[]): council.append("%s %s" % [String(c.title),String(c.name)])
+	if not council.is_empty(): lines.append("Council: %s.%s" % ["; ".join(council),(" Set aside: %s." % "; ".join(PackedStringArray(s.set_aside))) if not (s.get("set_aside",[]) as Array).is_empty() else ""])
 	var out:="\n".join(lines)
 	return out if out.length()<=MAX_CHARS else out.substr(0,MAX_CHARS)+"..."
 
@@ -501,6 +632,18 @@ static func _town_line(t:Dictionary,war:bool)->String:
 	if not (t.get("measures",[]) as Array).is_empty(): line+=" In force: %s." % "; ".join(PackedStringArray(t.measures))
 	if String(t.get("status",""))=="held": line+=" Resistance %.2f." % float(t.get("resistance",0.0))
 	return line
+
+## One scouting party in plain words: "6 scouts to the north, out 3 days,
+## back in about 27".
+static func party_words(p:Dictionary)->String:
+	var where:=String(p.get("heading",""))
+	var toward:=("to the "+where) if where!="" else ("toward "+String(p.get("toward",""))) if String(p.get("toward",""))!="" else "out"
+	return "%d scouts %s, out %d days, back in about %d" % [int(p.get("scouts",0)),toward,int(p.get("out_days",0)),int(p.get("back_in",0))]
+
+## One town in plain words: "Tsaren (Esurai), about 22 km west".
+static func town_way_words(t:Dictionary)->String:
+	var way:=("about %d km %s" % [int(t.km),String(t.get("way",""))]).strip_edges() if t.has("km") else "we do not know the way yet"
+	return "%s (%s%s), %s" % [String(t.get("name","")),String(t.get("people","")),", ours now" if bool(t.get("held",false)) else "",way]
 
 static func _group_words(by:Dictionary)->String:
 	var parts:PackedStringArray=PackedStringArray()
