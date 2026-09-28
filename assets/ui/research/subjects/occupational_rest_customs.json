@@ -3,10 +3,10 @@
   "line": "health",
   "game_year": 275,
   "approx_historical_year": -3167,
-  "prompt": "c. 3167 BCE: Rest Days for Heavy Trades. Rest days for heavy trades. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a9641f0a-63e4-4f3a-a316-52607b0c65f2.png",
+  "prompt": "c. 3167 BCE: Resting stone haulers drink water under reed shade while a fresh crew takes over a small rubble sledge at a simple mudbrick worksite; transparent watercolor and ink. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c9fe04aa-7693-47db-a84f-f031fb21784b.png",
   "asset": "res://assets/ui/research/subjects/occupational_rest_customs-v1.png",
-  "sha256": "63e2491adddac48d2842c18f3c0dac20b1125b1a95ee99e18abacd97637b3102",
+  "sha256": "e297ab5d0182814e5b6c6490819e80223d8e945cc7c8e2349861727977afebe8",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Rerolled to remove monumental pyramids; reviewed full image and 3.37:1 crop."
 }
