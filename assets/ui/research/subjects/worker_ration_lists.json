@@ -1,0 +1,12 @@
+{
+  "id": "worker_ration_lists",
+  "line": "institutions",
+  "game_year": 280,
+  "approx_historical_year": -3133,
+  "prompt": "c. 3133 BCE: Ration Lists by Worker and Month. Ration lists by worker and month. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6be98fff-a264-4756-a4a4-e76551a1e85a.png",
+  "asset": "res://assets/ui/research/subjects/worker_ration_lists-v1.png",
+  "sha256": "08f954468ee1aa8032b1c904c7a20cc62b084cf189b50643203284a6eee2fba1",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

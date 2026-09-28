@@ -1,0 +1,12 @@
+{
+  "id": "age_graded_load_limits",
+  "line": "labor",
+  "game_year": 280,
+  "approx_historical_year": -3133,
+  "prompt": "c. 3133 BCE: Age-graded Load Limits. Age-graded load limits. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-11c44630-0870-4027-aa8d-0915f372544d.png",
+  "asset": "res://assets/ui/research/subjects/age_graded_load_limits-v1.png",
+  "sha256": "5ff1e68cf6b0aec46c84fa686cc2ab6d08265dd5f20b84e68745c293806fb5e7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

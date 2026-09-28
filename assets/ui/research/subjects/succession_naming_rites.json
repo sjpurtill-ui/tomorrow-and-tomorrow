@@ -1,0 +1,12 @@
+{
+  "id": "succession_naming_rites",
+  "line": "institutions",
+  "game_year": 288,
+  "approx_historical_year": -3080,
+  "prompt": "c. 3080 BCE: Heir Named in Public Before the Elders. Heir named in public before the elders. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a1e1d3f5-950a-4779-b106-7885f34b9e9b.png",
+  "asset": "res://assets/ui/research/subjects/succession_naming_rites-v1.png",
+  "sha256": "64c12adb369c3315b91d3b70815fb58bee24c0e0e56e8b079bf40c2480315b93",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

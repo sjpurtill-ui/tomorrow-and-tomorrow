@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_trade_gathering",
+  "line": "logistics",
+  "game_year": 288,
+  "approx_historical_year": -3080,
+  "prompt": "c. 3080 BCE: Seasonal Trade Gatherings. Seasonal trade gatherings. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9e4bc9d1-d130-4cb2-98b9-8a20d23492fd.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_trade_gathering-v1.png",
+  "sha256": "929d0103416ae8831262c51dd9ac84fb8525ab09e56d8224af71b09205731b96",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "communal_washing_rotas",
+  "line": "health",
+  "game_year": 278,
+  "approx_historical_year": -3147,
+  "prompt": "c. 3147 BCE: Rotas for Communal Washing Places. Rotas for communal washing places. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f203f953-3f0c-461d-8bdb-7f1bef3cf137.png",
+  "asset": "res://assets/ui/research/subjects/communal_washing_rotas-v1.png",
+  "sha256": "cce5ac38b8eeae260f7fca642acfece24ec1f0140df44dfa91548d5ece209040",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}

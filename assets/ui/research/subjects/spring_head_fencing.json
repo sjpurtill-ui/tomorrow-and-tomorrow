@@ -1,0 +1,12 @@
+{
+  "id": "spring_head_fencing",
+  "line": "ecology",
+  "game_year": 280,
+  "approx_historical_year": -3133,
+  "prompt": "c. 3133 BCE: Spring Heads Fenced from Trampling Herds. Spring heads fenced from trampling herds. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4b48c421-ba3c-42d0-8524-0770387e6955.png",
+  "asset": "res://assets/ui/research/subjects/spring_head_fencing-v1.png",
+  "sha256": "2476c330c55eeb50855b0623f861797a9ddbc465564d7a5c6827c824c41f74a3",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+}
