@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/stock_rotation-v1.png",
   "sha256": "d844b7d6ff6f7b93db4e38922839cf873fc3811f23613a864c45d4a127f82a88",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator GPU card review to retain faces and the essential subject.",
+  "focus": [
+    0.5,
+    0.34
+  ]
 }

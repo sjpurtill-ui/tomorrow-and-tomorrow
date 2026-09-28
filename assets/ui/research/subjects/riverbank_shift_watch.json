@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/riverbank_shift_watch-v1.png",
   "sha256": "1ba7721bcf3648422602e9c26f179713ae2be7a320c891aad24fd6d44617e07a",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Focus adjusted after integrator GPU card review to retain faces and the essential subject.",
+  "focus": [
+    0.5,
+    0.4
+  ]
 }

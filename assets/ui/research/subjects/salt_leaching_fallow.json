@@ -3,10 +3,10 @@
   "line": "ecology",
   "game_year": 320,
   "approx_historical_year": -2867,
-  "prompt": "c. 2867 BCE: Salted Fields Leached with Fresh Water and Rested. Salted fields leached with fresh water and rested. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b21540aa-15a3-4d2c-abd5-da4881773aa0.png",
+  "prompt": "c. 2867 BCE: Fresh water washes white salt crust from a fallow plot next to narrow-leaved barley and low mudbrick houses; plant-pigment field painting. Mature handmade 2D; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2614a2da-83d4-449b-b177-5fc603cfd6bd.png",
   "asset": "res://assets/ui/research/subjects/salt_leaching_fallow-v1.png",
-  "sha256": "3fe47d48fadfac7adf7df82e7380e0bb964c6fea9c2216811e6ddd3ee2baabac",
+  "sha256": "03c7ab44cbb0f659a73736760749b36c077295238baf2160821460064df5a08a",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Rerolled to remove multi-tier stepped background; leaching action reviewed full and cropped."
 }
