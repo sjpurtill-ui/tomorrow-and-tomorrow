@@ -1,8 +1,10 @@
 extends Control
-## THE ARMY BAR: HOI4's strip of army cards along the bottom of the map.
+## THE ARMY BAR: HOI4's strip of army cards in the map's bottom-left corner.
 ##
 ## One paper card per army, band, garrison and the levy at home
-## (hud/army_bar_model.gd gives every number). A card shows the general's
+## (hud/army_bar_model.gd gives every number), shown only while we have a
+## band, army or garrison, or the levy is fighting at home (shown_cards), and
+## laid from the left edge so it never sits over the middle of the map. A card shows the general's
 ## face and name, the men, three bars (gear, will to fight, supply) and one
 ## state glyph. Click finds the army and selects it; double-click opens its
 ## orders (the army command panel, or a held town's own view). An army of
@@ -22,6 +24,8 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const CARD_SIZE:=Vector2(204,70)
 const CHIP_SIZE:=Vector2(150,30)
 const GAP:=6.0
+## Width kept at each end for a scroll arrow (22 px and its gap).
+const ARROW_ROOM:=28.0
 const REFRESH_SECONDS:=0.5
 
 var terrain:Node
@@ -89,7 +93,8 @@ func place(rect:Rect2)->void:
 
 
 func _fits()->int:
-	return maxi(1,floori((area.size.x+GAP)/(CARD_SIZE.x+GAP)))
+	# Room is kept for the scroll arrows on either side.
+	return maxi(1,floori((area.size.x-2.0*ARROW_ROOM+GAP)/(CARD_SIZE.x+GAP)))
 
 
 func _process(delta:float)->void:
@@ -99,8 +104,23 @@ func _process(delta:float)->void:
 	refresh()
 
 
+## The cards the bar shows: nothing while the levy at home is all we have and
+## it is not fighting (no army to watch; the Military screen keeps its
+## count), else the armies, bands and garrisons first and the levy last.
+static func shown_cards(all:Array[Dictionary])->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var at_home:Array[Dictionary]=[]
+	for card:Dictionary in all:
+		if String(card.get("kind",""))=="home":at_home.append(card)
+		else:out.append(card)
+	var defending:=at_home.any(func(c:Dictionary)->bool:return String(c.get("state",""))=="fighting")
+	if out.is_empty() and not defending:return out
+	out.append_array(at_home)
+	return out
+
+
 func refresh()->void:
-	var fresh:=Model.cards()
+	var fresh:=shown_cards(Model.cards())
 	# A selection made on the map shows on the bar too.
 	if is_instance_valid(terrain) and "selected_army_id" in terrain:
 		var on_map:=int(terrain.selected_army_id)
@@ -167,7 +187,9 @@ func _arrange()->void:
 	var width:=shown*CARD_SIZE.x+maxi(0,shown-1)*GAP
 	var chips:=members.get_child_count()
 	var top:=size.y-CARD_SIZE.y
-	var left:=maxf(0.0,(size.x-width)*0.5)
+	# From the corner, not the middle of the map; the arrows' room only when
+	# there are more cards than fit.
+	var left:=ARROW_ROOM if overflow else 0.0
 	strip.position=Vector2(left,top);strip.size=Vector2(width,CARD_SIZE.y)
 	var i:=0
 	for node:Control in strip.get_children():
@@ -178,7 +200,7 @@ func _arrange()->void:
 	left_button.disabled=scroll<=0;right_button.disabled=scroll>=count-fits
 	left_button.position=Vector2(left-28,top);right_button.position=Vector2(left+width+6,top)
 	var chip_width:=chips*CHIP_SIZE.x+maxi(0,chips-1)*GAP
-	members.position=Vector2(maxf(0.0,(size.x-chip_width)*0.5),top-CHIP_SIZE.y-GAP);members.size=Vector2(chip_width,CHIP_SIZE.y)
+	members.position=Vector2(left,top-CHIP_SIZE.y-GAP);members.size=Vector2(chip_width,CHIP_SIZE.y)
 	var j:=0
 	for node:Control in members.get_children():
 		if node.is_queued_for_deletion():continue
