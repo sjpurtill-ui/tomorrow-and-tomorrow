@@ -92,9 +92,9 @@ func _frame(panel:Variant,points:Array)->void:
 	var view:=get_viewport().get_visible_rect().size
 	var goal:=Vector2((96.0+(view.x-470.0))*0.5 if panel!=null else view.x*0.5,view.y*0.42)
 	for _pass in 3:
-		var here:=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y))
-		var east:=terrain.camera.unproject_position(Vector3(centre.x+1.0,terrain._height_at(centre.x,centre.y),centre.y))-here
-		var south:=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y+1.0))-here
+		var here:Vector2=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y))
+		var east:Vector2=terrain.camera.unproject_position(Vector3(centre.x+1.0,terrain._height_at(centre.x,centre.y),centre.y))-here
+		var south:Vector2=terrain.camera.unproject_position(Vector3(centre.x,terrain._height_at(centre.x,centre.y),centre.y+1.0))-here
 		var shift:=here-goal
 		var det:=east.x*south.y-east.y*south.x
 		if absf(det)<0.0001:break

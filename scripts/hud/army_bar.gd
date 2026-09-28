@@ -56,7 +56,8 @@ func _exit_tree()->void:
 
 func _mount_plans()->void:
 	var hud:=get_parent()
-	if hud==null or is_instance_valid(plans):return
+	# Only under the HUD shell (hud/command_rail_hud.gd), never another parent.
+	if hud==null or not hud.has_method("_position_army_bar") or is_instance_valid(plans):return
 	plans=PlanInk.new();plans.bar=self;plans.name="BattlePlans"
 	hud.add_child(plans);hud.move_child(plans,0)
 
