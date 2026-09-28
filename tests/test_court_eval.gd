@@ -37,8 +37,11 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## the careless reader on the grave ones): offline 491, live 492, sloppy 74.
 ## The god's word on new towns ("stop founding new towns", "our leaders may
 ## settle new land again": 12 more cases a path): offline 503, live 504.
+## Early feuds (a small people's fight is a feud: "are we at war with the
+## Neyali?", "burn their stores" at a home nobody has found, "go to war with
+## them": 11 more runs a path): offline 519, live 520, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":508,"live":509,"sloppy":74}
+const BASELINE:={"offline":519,"live":520,"sloppy":74}
 
 var _processing:Dictionary={}
 

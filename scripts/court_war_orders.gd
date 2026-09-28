@@ -159,6 +159,19 @@ static func held_towns()->Array[Dictionary]:
 			"taken_day":int(force.get("committed_day",0))})
 	return out
 
+## Do these words name a town outright: one we hold, one of ours nobody
+## holds, or a foreign town we know? ("Attack Tsaren" is then the court's own
+## order about that town, never the war leader's strike at a people.)
+static func names_a_town(text:String)->bool:
+	var lower:=text.to_lower()
+	for town:Dictionary in held_towns():
+		if _name_hit(lower,String(town.name)): return true
+	for town:Dictionary in unguarded_towns():
+		if _name_hit(lower,String(town.name)): return true
+	for p:Dictionary in known_places():
+		if _name_hit(lower,String(p.name)): return true
+	return false
+
 static func unguarded_towns()->Array[Dictionary]:
 	## Towns we took that are ours with no garrison of ours in them
 	## (town_ledger.hold state "unguarded"): neither held nor a foreign town

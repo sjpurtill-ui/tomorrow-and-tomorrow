@@ -433,8 +433,10 @@ static func _dead_words(count:int,names:Array[String],who:String)->String:
 	if count<=0: return "No one of ours was killed."
 	var listed:=", ".join(PackedStringArray(names)) if names.size()<=2 else "%s and %s" % [", ".join(PackedStringArray(names.slice(0,names.size()-1))),names[-1]]
 	if names.size()==2: listed="%s and %s" % [names[0],names[1]]
-	if count>names.size() and not names.is_empty(): return "%s and %d more of the %s were killed." % [listed,count-names.size(),who]
-	if names.is_empty(): return "%d of the %s were killed." % [count,who]
+	# "the old ones minding the racks" is said once: "of the old ones ...".
+	var group:=who.trim_prefix("the ")
+	if count>names.size() and not names.is_empty(): return "%s and %d more of the %s were killed." % [listed,count-names.size(),group]
+	if names.is_empty(): return "%d of the %s were killed." % [count,group]
 	return "%s %s killed." % [listed,"was" if count==1 else "were"]
 
 static func _record_battle(civ_id:String,name:String,our_dead:int,their_dead:int,taken:int,result:String)->void:
@@ -697,7 +699,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	if captives>0: text+=" One of ours was taken away with them."
 	if guarded and not won: text+=" The watch at the approaches held."
 	text+=" It was for %s." % _cause_words(civ_id,cause) if cause!="" else ""
-	var title:="%s Ambush Our %s" % [name,_cap(String(t.who))] if ambush else "%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_cap(where.trim_prefix("our "))]
+	var title:="%s Ambush Our %s" % [name,_cap(String(t.who))] if ambush else "%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_title_place(where.trim_prefix("our "))]
 	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
 	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id,seen)
 	ForeignDiplomacy.remember(civ_id,"Our %s went against the god's people at %s and came home with %d Food." % ["fighters" if skirmish else "raiders",where,roundi(taken)])
@@ -729,6 +731,16 @@ static func _tally(civ_id:String,kind:String,our_dead:int,their_dead:int)->void:
 
 static func _cap(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
+
+## A place as a Chronicle title names it: "the drying racks" -> "the Drying
+## Racks", "planted fields" -> "Planted Fields".
+static func _title_place(text:String)->String:
+	var words:=text.split(" ",false)
+	for i in words.size():
+		if i>0 and words[i] in ["the","of","at","by","in","on","and","to"]: continue
+		if i==0 and words[i] in ["the","a","an"] and words.size()>1: continue
+		words[i]=_cap(words[i])
+	return " ".join(words)
 
 # --------------------------------------------------------------------------
 # War: declaration, the general's operations, the enemy's, the ending
@@ -2025,9 +2037,12 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 const TYPED:=[
 	["war_track",["where they live","where their home","find their home","find their village","find their camp","find the way","track them home","find them"]],
 	["war_chief",["chief","ruler","leader","bring me","capture","their head"]],
-	# "Go to war with them", "declare war on them", "attack them": in a feud,
-	# a strike at them (at a home we know; trackers first when we do not).
-	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food","attack","attack them","go to war","war on","make war","declare war","wage war"]],
+	["war_burn",["burn","stores","granary","granaries","raid them","strike them","hit them","their food"]],
+	# "Go to war with them", "declare war on them", "attack them": a strike at
+	# them (at a home we know; trackers first when we do not). Marked true:
+	# when a town is named outright ("Attack Tsaren") it is the court's own
+	# order about that town (court_war_orders.names_a_town), not this.
+	["war_burn",["attack","go to war","war on","make war","declare war","wage war"],true],
 	["war_pursue",["after them","pursue","take back","chase","follow","get it back","hunt them"]],
 	["war_guard",["defend","hold","guard","ford","watch","approach","protect","keep them out","wall"]],
 	["war_price",["blood price","blood-price","pay for their dead","pay for the dead","pay the price","compensate","make amends"]],
@@ -2050,10 +2065,15 @@ static func typed_choice(audience_id:String,text:String)->String:
 	var open:Dictionary={}
 	for option in Hall.options(audience_id):
 		if bool(option.get("enabled",true)): open[String(option.id)]=true
+	var names_town:=-1
 	for row in TYPED:
 		var words:Array=row[1] if row[1] is Array else [row[1]]
+		var generic:=(row as Array).size()>2 and bool(row[2])
 		for word in words:
 			if RegEx.create_from_string("\\b%s(s|es)?\\b" % String(word)).search(lower)==null: continue
+			if generic:
+				if names_town<0: names_town=1 if bool((load("res://scripts/court_war_orders.gd") as GDScript).call("names_a_town",text)) else 0
+				if names_town==1: continue
 			if open.has(String(row[0])): return String(row[0])
 			# Their stores or their chief, at a home nobody has found: the
 			# trackers go first, and the war leader says why (NEEDS_HOME).
