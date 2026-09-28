@@ -3,10 +3,14 @@
   "line": "institutions",
   "game_year": 215,
   "approx_historical_year": -3567,
-  "prompt": "c. 3567 BCE: Neighboring village representatives bring food and woven goods to larger settlement; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-98f2db1b-a463-4950-b5fd-412009a1b84d.png",
+  "prompt": "c. 3567 BCE: Plainly dressed neighboring village adults offer simple baskets of barley and undyed cloth to receiving villagers in mudbrick courtyard, without court regalia. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3dad4311-84ef-4a99-833c-70e08f04a174.png",
   "asset": "res://assets/ui/research/subjects/tributary_villages-v1.png",
-  "sha256": "a5cd45d35d73fcf565317e6ccfbdadef39a1ad7f0bb788ade66e7e2d6b9c3636",
+  "sha256": "81387522991d7c9f67c973485253cdb3a230ce486185d019bf0305a39469fafb",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  "review": "Corrected after integrator full-image historical review and selected after 3.37:1 crop review.",
+  "focus": [
+    0.5,
+    0.35
+  ]
 }
