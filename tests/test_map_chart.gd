@@ -356,11 +356,16 @@ func test_the_view_takes_the_chart_build_only_when_its_ground_reaches_chart_scal
 		assert_bool(build.view_needs_chart(camera,viewport,0.0,false)).override_failure_message("size %.1f" % size).is_equal(case[1])
 	# Hysteresis: once on, it stays on a little below where it came on. (The
 	# rule looks at the farthest corner, about 13% farther than the middle of
-	# a 16:9 view: 0.72 in the middle is about 0.82 at the corner.)
-	var edge:=build.chart_from()*0.72*1080.0
+	# a 16:9 view: 0.85 in the middle is about 0.96 at the corner.)
+	var edge:=build.chart_from()*0.85*1080.0
 	camera.position=Vector3(0.0,edge/(2.0*tan(deg_to_rad(camera.fov)*0.5)),0.0)
 	assert_bool(build.view_needs_chart(camera,viewport,0.0,false)).is_false()
 	assert_bool(build.view_needs_chart(camera,viewport,0.0,true)).is_true()
+	# But the 50,000 ft view (about 0.82 at its corners) is never held on the
+	# chart build after a zoom in: no ground in it is at chart scale.
+	edge=build.chart_from()*0.72*1080.0
+	camera.position=Vector3(0.0,edge/(2.0*tan(deg_to_rad(camera.fov)*0.5)),0.0)
+	assert_bool(build.view_needs_chart(camera,viewport,0.0,true)).is_false()
 
 
 func test_a_far_zoom_out_shows_a_preview_before_the_full_patch()->void:

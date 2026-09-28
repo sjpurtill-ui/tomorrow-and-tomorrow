@@ -1,0 +1,12 @@
+{
+  "id": "dried_fruit_cakes",
+  "line": "nutrition",
+  "game_year": 245,
+  "approx_historical_year": -3367,
+  "prompt": "c. 3367 BCE: Cooks press dried fruit and nuts into compact travel cakes; botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0e4f4591-82c8-4c96-9756-4c29b0c303af.png",
+  "asset": "res://assets/ui/research/subjects/dried_fruit_cakes-v1.png",
+  "sha256": "ebbf669f7cd4f358228926c69fb7851543521477bbf2d01670ebdb123e4636d4",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
