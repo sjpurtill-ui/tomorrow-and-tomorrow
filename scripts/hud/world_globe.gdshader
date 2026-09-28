@@ -32,18 +32,19 @@ uniform float halo_strength = 1.0;
 // hand-over between them is a dissolve, not a change of paint.
 uniform float map_likeness = 0.0;
 uniform vec3 map_vellum = vec3(0.737, 0.651, 0.478);
-uniform vec3 map_land = vec3(0.33, 0.36, 0.22);
-uniform vec3 map_land_dry = vec3(0.47, 0.45, 0.30);
-uniform vec3 map_sea = vec3(0.17, 0.25, 0.245);
+// The far-lands chart as it shows on screen (map_chart.gdshaderinc).
+uniform vec3 map_land = vec3(0.665, 0.672, 0.455);
+uniform vec3 map_land_dry = vec3(0.73, 0.69, 0.54);
+uniform vec3 map_sea = vec3(0.53, 0.62, 0.58);
 
 uniform vec3 paper = vec3(0.925, 0.886, 0.792);
 uniform vec3 paper_edge = vec3(0.60, 0.50, 0.38);
 uniform vec3 ink = vec3(0.15, 0.11, 0.075);
 uniform vec3 sepia = vec3(0.42, 0.31, 0.20);
 // Washes in the map's palette (docs/ART_DIRECTION.md), laid on vellum.
-uniform vec3 land_low = vec3(0.71, 0.63, 0.45);
-uniform vec3 land_green = vec3(0.50, 0.55, 0.32);
-uniform vec3 land_high = vec3(0.64, 0.57, 0.45);
+uniform vec3 land_low = vec3(0.74, 0.68, 0.50);
+uniform vec3 land_green = vec3(0.57, 0.62, 0.38);
+uniform vec3 land_high = vec3(0.67, 0.61, 0.50);
 uniform vec3 sea_shallow = vec3(0.60, 0.70, 0.68);
 uniform vec3 sea_deep = vec3(0.44, 0.56, 0.57);
 // How strongly the sea wash is laid on (land is 1).
