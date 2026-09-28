@@ -9,7 +9,11 @@
     "asset": "res://assets/ui/research/subjects/ash_fat_soap-v1.png",
     "sha256": "62c6622cd45aa29e4c251cc9877a6fa8cfe9f7d572a264fa170464d484810a53",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.62
+    ]
   },
   {
     "id": "ghee",
@@ -29,9 +33,9 @@
     "game_year": 345,
     "approx_historical_year": -2700,
     "prompt": "c. 2700 BCE: Stepped Mast and Yard. Stepped mast and yard. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a320f94c-8c28-4e96-a113-73faa03c7d25.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-061bb5f3-a988-4ddc-b6e6-7193de18d996.png",
     "asset": "res://assets/ui/research/subjects/mast_making-v1.png",
-    "sha256": "eabce514db3a39188d3ffa5389f62ea47c41b145b04aa133c31903dfff4ad8bd",
+    "sha256": "72777a689e3d443b076bca5c4d865b13689a7c17f1e37865ededc24084eef157",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -45,7 +49,11 @@
     "asset": "res://assets/ui/research/subjects/people_herd_counts-v1.png",
     "sha256": "1afd8d7e492d5279ac47b0b6ab9a50af7eb1c9f33553f19fc23b11b2db3ee9f8",
     "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.55
+    ]
   },
   {
     "id": "separate_temple_palace_stores",
@@ -72,7 +80,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.4
+      0.29
     ]
   },
   {
@@ -93,9 +101,9 @@
     "game_year": 350,
     "approx_historical_year": -2667,
     "prompt": "c. 2667 BCE: Scribes Assigned to Count Crews. Scribes assigned to count crews. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0d537a8d-6aac-4ed1-9e46-03223728926b.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b986da91-4879-419e-98a7-49ab9c253bc9.png",
     "asset": "res://assets/ui/research/subjects/crew_count_scribes-v1.png",
-    "sha256": "10ec7affd986673b71ca9eff836f5b8dc61ba7fee0a387c81ea4394b0b407bce",
+    "sha256": "a52c56ed2bd5e5ed44d9a7e6cfe5420aaab69d90df09e617ad6f37951126a55f",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
   },
@@ -193,14 +201,14 @@
     "game_year": 355,
     "approx_historical_year": -2633,
     "prompt": "c. 2633 BCE: Outsiders Under a Patron's Protection. Outsiders under a patron's protection. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-adff388f-6557-47b7-962d-36d8b8cd821f.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b5d711e8-b8ca-441a-8d4c-5dd95ba56f9c.png",
     "asset": "res://assets/ui/research/subjects/patron_protection-v1.png",
-    "sha256": "60e73452251355800738757c106193f9c8bf7365aeb68b9fa72fc58950838065",
+    "sha256": "46c34dd5e104fa5d1dbb600bccaad1aaf01ffab6a7cc96bf0f638c10d8214f6c",
     "mode": "built-in image_gen / new image",
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.4
+      0.35
     ]
   }
 ]

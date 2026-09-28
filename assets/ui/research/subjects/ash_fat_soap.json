@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/ash_fat_soap-v1.png",
   "sha256": "62c6622cd45aa29e4c251cc9877a6fa8cfe9f7d572a264fa170464d484810a53",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear."
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.62
+  ]
 }
