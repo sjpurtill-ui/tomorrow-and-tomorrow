@@ -988,6 +988,13 @@ func _speak()->void:
 		var id:=audience_id
 		var about_people:=persons_words
 		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+		# A question, or a plain yes or no to the court's own question, needs
+		# no reading: no call, no wait (order_reader.quick_plan).
+		var quick:=OrderReader.quick_plan(id,text)
+		if not quick.is_empty():
+			_after_order_reading(id,text,{"plan":quick},about_people)
+			_refresh_footer()
+			return
 		if bool(voice.read_order(audience_id,text,func(read:Dictionary)->void:_after_order_reading(id,text,read,about_people))):
 			_pump()
 			_refresh_footer()
@@ -1011,7 +1018,8 @@ func _about_held_town(text:String)->bool:
 func _after_order_reading(id:String,text:String,read:Dictionary,about_people:bool=false)->void:
 	if is_queued_for_deletion() or id!=audience_id or not resolved_result.is_empty():return
 	var plan:Dictionary={}
-	if read.has("reading"):plan=OrderReader.decide(id,text,read.reading as Dictionary)
+	if read.get("plan") is Dictionary:plan=read.plan
+	elif read.has("reading"):plan=OrderReader.decide(id,text,read.reading as Dictionary)
 	else:plan=OrderReader.offline_confirm(id,text)
 	if plan.is_empty():plan={"route":"legacy"}
 	var route:=String(plan.get("route","legacy"))

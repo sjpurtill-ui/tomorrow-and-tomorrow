@@ -1,0 +1,146 @@
+extends GdUnitTestSuite
+## HOW THE COURT LISTENS: the live order reader is quick, and only reads what
+## needs reading (order_reader.gd, audience_modal._speak). Runs the real court
+## through the court evaluation's harness and worlds (tests/court_eval); every
+## model is a stub and nothing leaves the machine.
+##
+## The reader's prompt, measured on the evaluation's worlds before this change
+## (order_reader.gd at defbff06; four characters a token, roughly):
+##   instructions 2863 chars (static), schema 2202-2304 chars rebuilt for every
+##   audience (every id listed), brief 768-1275 chars; the schema came first,
+##   so no two calls shared a prefix the provider could cache (~1600 tokens
+##   processed on every call). A long audience's brief: 2537 chars. A reading
+##   (the reply) in the old nested shape: 366 chars.
+## After: the schema and the instructions are the same bytes on every call
+## (~1300 tokens, cached by the provider after the first call); only the brief
+## and the words change; the reply is flat (212 chars); a question, or a plain
+## yes or no to the court's own question, needs no reading at all.
+
+const Harness:=preload("res://tests/court_eval/harness.gd")
+const OR:=preload("res://scripts/order_reader.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
+
+const OLD_SCHEMA_MIN_CHARS:=2202
+const OLD_BRIEF_CHARS:={"tsaren_bound/rovik":1275,"tsaren_bound/headman":952,"battle_won/rovik":832,"envoy_after_fall/envoy":871}
+const OLD_LONG_BRIEF_CHARS:=2537
+const OLD_READING_CHARS:=366
+const CHARS_PER_TOKEN:=4
+## OpenAI caches a prompt's prefix from 1024 tokens on.
+const CACHE_FLOOR_TOKENS:=1024
+
+var _processing:Dictionary={}
+var h:Harness
+
+func before()->void:
+	for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]: _processing[node]=node.is_processing()
+	for key in ["OPENAI_API_KEY","LEVIATHAN_AI_API_KEY","LEVIATHAN_AI_ENDPOINT","LEVIATHAN_AI_MODEL","LEVIATHAN_AI_READER_MODEL"]: OS.unset_environment(key)
+	h=Harness.new(self)
+
+func after()->void:
+	CivilizationSystem.set_scout_geography_authority(Callable())
+	GameState.elapsed_days=0
+	MilitaryCampaign.reset_for_new_world()
+	GovernmentPeopleSystem.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world()
+	CivilizationSystem.reset_for_new_world()
+	FoodSystem.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
+	GameState.reset_for_new_world(74017)
+	ProgressionSystem.reset_for_new_world()
+	WorldSimulation.clear()
+	for node:Node in _processing: node.set_process(bool(_processing[node]))
+	preload("res://scripts/ai_mode.gd").reset_for_tests(preload("res://scripts/ai_mode.gd").SETTINGS_PATH)
+
+const CONFIG:={"endpoint":"https://api.openai.com/v1/chat/completions","api_key":"sk-listening-NOT-A-KEY","model":"mock-reader","structured_output":true}
+
+func _payload(world:String,role:String,words:String)->Dictionary:
+	var w:=h.fx.use(world)
+	assert_bool(w.has("error")).override_failure_message(str(w.get("error",""))).is_false()
+	var id:=h.fx.audience_for(w,role)
+	assert_str(id).is_not_empty()
+	return {"id":id,"payload":OR.build_payload(words,OR.world_brief(id),CONFIG),"brief":OR.world_brief(id)}
+
+static func _prefix(payload:Dictionary)->String:
+	return JSON.stringify(payload.get("response_format",{}))+String(((payload.messages as Array)[0] as Dictionary).content)
+
+func test_the_readers_prompt_is_a_cached_prefix_and_a_small_brief()->void:
+	var prefixes:={}
+	for key in OLD_BRIEF_CHARS:
+		var parts:=String(key).split("/")
+		var made:=_payload(parts[0],parts[1],"Kill all the men of Tsaren that you have tied up!")
+		var payload:Dictionary=made.payload
+		var prefix:=_prefix(payload)
+		prefixes[prefix]=true
+		# No id of this world in the static part: the ids are in the brief only.
+		for id in (made.brief.ids as Dictionary):
+			if ":" in String(id): assert_str(prefix).override_failure_message("%s in the static prefix" % id).not_contains(String(id))
+		var brief:=String(((payload.messages as Array)[1] as Dictionary).content)
+		print("reader prompt %s: static %d chars (~%d tokens, cached), brief %d chars (~%d tokens; was %d chars after a %d-char schema rebuilt per call)" % [key,prefix.length(),prefix.length()/CHARS_PER_TOKEN,brief.length(),brief.length()/CHARS_PER_TOKEN,int(OLD_BRIEF_CHARS[key]),OLD_SCHEMA_MIN_CHARS])
+		assert_int(brief.length()).is_less_equal(int(OLD_BRIEF_CHARS[key]))
+		assert_str(String(payload.get("prompt_cache_key",""))).is_equal(OR.PROMPT_CACHE_KEY)
+		assert_str(String(payload.get("reasoning_effort",""))).is_equal(OR.REASONING_EFFORT)
+	# The same bytes on every call, whoever speaks and whatever the world holds.
+	assert_int(prefixes.size()).is_equal(1)
+	# Long enough for the provider to cache it; the old per-call schema is gone.
+	var one:String=prefixes.keys()[0]
+	assert_int(one.length()/CHARS_PER_TOKEN).is_greater_equal(CACHE_FLOOR_TOKENS)
+	assert_int(JSON.stringify(OR.response_format()).length()).is_less(OLD_SCHEMA_MIN_CHARS)
+
+func test_a_long_audience_brief_keeps_only_the_last_short_lines()->void:
+	var w:=h.fx.use("tsaren_bound")
+	var id:=h.fx.audience_for(w,"rovik")
+	for i in 8:
+		Hall.append_line(id,{"speaker":"Rovik Longstride","role":"official","person_id":0,"civ_id":"player","text":"Report %d: the garrison keeps the men of Tsaren bound in the long house; two ran toward Stonefield before the ropes were on, and the women bring water and bread each morning under guard while the children stay indoors." % i,"day":0,"aside":false})
+	var brief:=OR.brief_text(OR.world_brief(id))
+	assert_int(brief.length()).is_less(int(OLD_LONG_BRIEF_CHARS*0.8))
+	assert_str(brief).contains("Report 7")
+	assert_str(brief).not_contains("Report 3")
+
+func test_the_reading_is_flat_and_read_exactly_as_the_old_shape()->void:
+	var w:=h.fx.use("tsaren_captured")
+	var id:=h.fx.audience_for(w,"rovik")
+	var brief:=OR.world_brief(id)
+	var town:="town:"+String((w.info as Dictionary).tsaren_id)
+	var flat:={"kind":"order","action":"town_fate","actor":"","type":"group","ref":town,"flags":["kill_men","captives","raze"],"count":0,"resource":"","destination":"home","measures":[],"stance":"","confidence":0.95,"clarify":""}
+	var nested:={"kind":"order","action":"town_fate","actor":"","target":{"type":"group","ref":town},"details":{"kill_men":true,"kill_all":false,"captives":true,"raze":true,"tribute":false,"spare":false,"hold":false,"leave":false,"free":false,"full_force":false,"count":0,"resource":"","destination":"home","measures":[],"stance":""},"confidence":0.95,"clarify":""}
+	assert_int(JSON.stringify(flat).length()).is_less(int(OLD_READING_CHARS*0.75))
+	var a:=OR.validate(flat,brief)
+	assert_bool(a.has("rejected")).override_failure_message(str(a)).is_false()
+	assert_dict(a).is_equal(OR.validate(nested,brief))
+	# Unknown flags and ids are refused, as before.
+	assert_bool(OR.validate({"kind":"order","action":"town_fate","type":"group","ref":town,"flags":["burn_everyone"]},brief).has("rejected")).is_true()
+	assert_bool(OR.validate({"kind":"order","action":"attack","type":"town","ref":"town:nowhere","flags":[]},brief).has("rejected")).is_true()
+
+func _live(c:Dictionary)->Dictionary:
+	var run:=h.run(c,"live")
+	return run
+
+static func _calls(run:Dictionary,step:int)->Array:
+	return ((run.log as Array)[step] as Dictionary).calls
+
+func test_questions_and_plain_answers_need_no_reading()->void:
+	# A question: the voice answers it at once, no reading first.
+	var q:=_live({"id":"listen.question","domain":"x","fixture":"war_not_held","speaker":"suri","source":"design","steps":[
+		{"say":"How many fighters do we have at home?","ideal":{"kind":"question","action":"none","type":"none"},"expect":{"handled":false}}]})
+	assert_bool(bool(q.ok)).override_failure_message(str(q.fails)).is_true()
+	var calls:=_calls(q,0)
+	assert_bool(calls.any(func(k:Variant)->bool: return String(k).begins_with("read"))).override_failure_message(str(calls)).is_false()
+	assert_bool(calls.has("speak (read)")).override_failure_message(str(calls)).is_true()
+	# "Shall I march on it?" answered "yes": the march goes, no reading first.
+	var yes:=_live({"id":"listen.yes","domain":"x","fixture":"war_not_held","speaker":"headman","source":"design","steps":[
+		{"say":"I want you to kill all the males of Tsaren immediately","ideal":{"kind":"order","action":"kill","type":"group","ref":"$tsaren","details":{"kill_men":true},"confidence":0.93},"expect":{"verdict":"ask_march"}},
+		{"say":"yes","ideal":{"kind":"order","action":"confirm"},"expect":{"verb":"war","verdict":["act","object"]}}]})
+	assert_bool(bool(yes.ok)).override_failure_message(str(yes.fails)).is_true()
+	calls=_calls(yes,1)
+	assert_bool(calls.any(func(k:Variant)->bool: return String(k).begins_with("read"))).override_failure_message(str(calls)).is_false()
+
+func test_orders_holding_who_or_bring_go_to_the_engine_and_talk_of_people_to_the_persons_engine()->void:
+	var chase:=_live({"id":"listen.chase","domain":"x","fixture":"tsaren_fled","speaker":"rovik","source":"design","steps":[
+		{"say":"Go after the men who ran","ideal":{"kind":"order","action":"pursue","type":"town","ref":"$tsaren","confidence":0.9},"expect":{"verb":"war","state":{"chases":">0"}}}]})
+	assert_bool(bool(chase.ok)).override_failure_message(str(chase.fails)).is_true()
+	assert_bool(_calls(chase,0).has("persons")).is_false()
+	var who:=_live({"id":"listen.who","domain":"x","fixture":"home_peace","speaker":"headman","source":"design","steps":[
+		{"say":"Who is the strongest man in Seanstone?","ideal":{"kind":"question","action":"none","type":"none"},"expect":{"handled":false}}]})
+	var calls:=_calls(who,0)
+	assert_bool(calls.has("persons")).override_failure_message(str(calls)).is_true()
+	assert_bool(calls.any(func(k:Variant)->bool: return String(k).begins_with("read"))).override_failure_message(str(calls)).is_false()
