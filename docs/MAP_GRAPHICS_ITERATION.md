@@ -260,3 +260,20 @@ The close vegetation cache previously returned whenever morphology_revision matc
 Validation:23/23 map-onboarding and landscape-resource tests pass. Editor import clean. Isolated real-render --vegetation-cache-audit checks unchanged root reuse, relocation with unchanged morphology, queued-root replacement, seed invalidation and restoration to the original fixture. Reviewed artifacts/vegetation-final.png. Audit and capture complete without script/shader errors; existing shutdown cleanup leaks persist. Whitespace check passes; captures/logs excluded.
 
 Save compatibility:unchanged; cache keys are transient scene fields. Location changes now correctly incur a vegetation rebuild, which remains synchronous and is not a performance improvement. Cache ownership remains in local terrain; no new simulation authority. Original Google Earth references remain the scale guide; no imagery/photorealism claim. Shared-file hunks limited to cache fields and _rebuild_close_vegetation guard/update, plus audit. No known conflicts. Integrator owns review/integration and player launch; no scope expansion in this delivery.
+
+
+## 2026-09-28: Map speed (codex/map-speed)
+
+Worker C:/Users/sjpur/tt-map-speed, branch codex/map-speed, base f426bd30. Measured with tests/map_art_capture.gd on a private desktop (1600x900, vsync 60 Hz, RTX 4090), three alternating runs against the base each. `--stream=from,to` times a glide frame by frame until full detail covers the view and names the traced sections of every slow frame.
+
+- Streamed patches build on two worker threads (scripts/terrain_patch_builder.gd `start()`), with the sampler chain fused into one exact pass (scripts/terrain_patch_sampler.gd: bit-identical to `_height_at`, `_terrain_color_at`, `_terrain_surface_fields_at` and `_terrain_seasonality_at`, about 4.5x cheaper a vertex). The worker also derives normals, cover, mesh and texture images. Patch textures are kept one set per grid size and updated in place: a new mipmapped texture cost the render thread 3-7 ms, an update under 1 ms. L1 to Region: full detail 14.8-15.5 s after the glide starts, now 0.43-0.52 s (the glide takes 1.13 s); install 27-30 ms, now 0.4-1.0 ms; worst frame 41 ms, now 17.5 ms. Region to Continent: 2.9-3.1 s, now 0.17-0.18 s.
+- Glide ends: the 30-48 ms frame at every glide's end was the recognized-resource overlay rebuilding a stone indication (17 ms), not the settlement. Indications now sample their grid nodes once (vertex for vertex the old mesh), are cached by occurrence and chart, and leave sub-pixel rock outcrops out of views wider than 40 km. No glide end now exceeds 17.5 ms.
+- The streamed patch now receives the macro rasters. Its painting's relief cues (world_beauty hollows and valley shade, calm regional light), its woodland seam and the chart's landform near its edge had never run there. The change is gentle; GPU cost is within noise.
+- Chart build hysteresis: the 50,000 ft view no longer keeps the chart build after a zoom in (1.48 ms to 1.00 ms GPU).
+
+The mid-crossfade cost (about 3.2 ms at camera size 25, against about 1.0 for either path alone) is register pressure, not double work. The chart's tree and reed symbol loops (`mc_symbols`) set the chart build's register count, and that throttles every painted pixel on it. Compiling the symbols out gives 1.56 ms at size 25, 2.01 at size 16 and 0.40 at Region; every other chart feature is 0.3 ms or less. Dead ends, measured:
+- Culling symbol cells before their texture reads: no gain.
+- Running the chart or its symbols before the painting: 0.3-0.5 ms worse.
+- A second blended overlay pass: not exact, because FILMIC is applied per pass before blending (a 0.2/0.8 mid blend reads 0.569 against 0.635 single-pass).
+- A screen-space SubViewport pre-pass read with `texelFetch(FRAGCOORD)`: the pixels do not correspond reliably in this renderer (24-47% land on another texel), which would break the 1 px symbol ink.
+The follow-up that would remove the cost is drawing the symbols as instanced glyphs (MultiMesh) instead of per-pixel loops; see the codex/map-speed hand-back for the estimate.

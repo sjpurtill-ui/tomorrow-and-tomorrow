@@ -126,8 +126,12 @@ func test_raster_bands_on_workers_are_the_sliced_raster_patch()->void:
 
 func test_cancelled_worker_build_stops_and_drains()->void:
 	var terrain:=_world()
+	var sampler:=SAMPLER.from_terrain(terrain)
 	var job:=_job(terrain,257,REGION_SPAN,Vector2(900,0))
-	job.start(SAMPLER.from_terrain(terrain))
+	job.start(sampler)
+	# Another owner's build is left to finish.
+	var wanted:=_job(terrain,33,REGION_SPAN,Vector2(-900,0))
+	wanted.start(sampler)
 	job.cancel()
 	var started:=Time.get_ticks_msec()
 	BUILDER.drain()
@@ -135,6 +139,7 @@ func test_cancelled_worker_build_stops_and_drains()->void:
 	assert_int(job.phase).is_less(2)
 	assert_object(job.built_mesh).is_null()
 	assert_bool(job.advance(1000)).is_false()
+	assert_bool(_finish(wanted).built_mesh!=null).is_true()
 
 
 func test_a_build_missing_channels_stays_on_the_main_thread()->void:
