@@ -22,6 +22,9 @@ const Marks:=preload("res://scripts/hud/army_marks.gd")
 
 ## Up to this many on a side, numbers are given exactly.
 const EXACT_UP_TO:=20
+## Where a fight was, by its ground, when there is no town to name it by.
+const GROUND_PLACES:={"open":"in the open country","rough":"on broken, hilly ground","forest":"at a forest edge","marsh":"in marshy ground",
+	"pass":"in a narrow pass","ford":"at a ford","bridge":"at a bridge","breach":"at a breach in the walls","gate":"at the gate"}
 
 ## Arms in plain words: one, many.
 const ARM_WORDS:={
@@ -290,8 +293,8 @@ static func phrase(progress:float,trend:float,player:bool,left_name:String,right
 static func status_words(out:Dictionary,record:Dictionary)->String:
 	if bool(out.live):
 		if int(out.exchanges)<=0: return "Drawn up, about to fight"
-		return "Fighting · %s so far" % String(out.hours)
-	return "Over · %s of fighting" % String(out.hours) if int(out.exchanges)>0 else "Over"
+		return "Fighting, %s so far" % String(out.hours)
+	return "Over after %s of fighting" % String(out.hours) if int(out.exchanges)>0 else "Over at once"
 
 
 static func _hours_words(exchanges:int)->String:
@@ -354,7 +357,8 @@ static func event_words(event:Dictionary,battle:Dictionary,left:String,out:Dicti
 			if bool(out.player) and not from_left and MIRROR.has(text): return String(MIRROR[text]).trim_suffix(".")
 			return text.trim_suffix(".")
 		"local":
-			var line:=Account._event_words({"event":String(event.get("code",""))},left if bool(out.player) else "attacker",names.left if left=="attacker" else names.right,names.right if left=="attacker" else names.left)
+			# The resolver's local events, named: the left side is "home" here.
+			var line:=Account._event_words({"event":String(event.get("code",""))},left,String(names.left),String(names.right))
 			return _cap(line.trim_suffix("."))
 		"widened":
 			if side=="": return ""
@@ -445,8 +449,8 @@ static func why_words(items:Array,left:String,player:bool,names:Dictionary,stage
 				text="%s handles the fight better" % _cap(("ours" if good else "theirs") if player else ("%s's" % (String(names.left) if good else String(names.right))))
 			"tactics":
 				label="How they fight"
-				var ids:=[String(item.get("a","")),String(item.get("d",""))]
-				text="%s way of fighting is costing the other side more men" % _cap(("our" if good else "their") if player else ("%s's" % (String(names.left) if good else String(names.right))))
+				if player: text="Our way of fighting costs them more men than it costs us" if good else "Their way of fighting costs us more men than it costs them"
+				else: text="%s way of fighting costs the other side more men" % _cap("%s's" % _strip_the(String(names.left) if good else String(names.right)))
 			"surprise":
 				label="Surprise"
 				text=("We caught them unready" if good else "They caught us unready") if player else "%s caught %s unready" % [_cap(String(names.left) if good else String(names.right)),String(names.right) if good else String(names.left)]
@@ -571,6 +575,10 @@ static func _derived_snap(battle:Dictionary,counts:Dictionary,morale:Dictionary,
 
 
 # --- Small words -----------------------------------------------------------------------------
+
+static func ground_place(kind:String)->String:
+	return String(GROUND_PLACES.get(kind,GROUND_PLACES.open))
+
 
 static func _ground(battle:Dictionary,record:Dictionary)->Dictionary:
 	var given:Dictionary=record.get("ground",battle.get("ground",{})) if record.get("ground",battle.get("ground",{})) is Dictionary else {}

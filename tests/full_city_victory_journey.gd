@@ -8,29 +8,21 @@ func _ready()->void:
 	for frame in 8:await get_tree().process_frame
 	await click(attack_button.get_global_rect().get_center())
 	for frame in 10:await get_tree().process_frame
-	var hud:BattleGraphicsScreen=MilitaryCommandUI.battle_graphics
-	assert(is_instance_valid(hud))
-	for cycle in 30:
-		if hud.phase=="ended":break
-		if hud.phase=="orders":
-			await click(hud.targets.get_child(0).get_global_rect().get_center())
-			await click(hud.order_buttons.charge.get_global_rect().get_center())
-			await click(hud.resolve_button.get_global_rect().get_center())
-			for frame in 4:await get_tree().process_frame
-		if hud.phase=="resolving":await click(hud.skip_button.get_global_rect().get_center())
-		if hud.phase=="result":await click(hud.result_primary.get_global_rect().get_center())
-		for frame in 4:await get_tree().process_frame
-	assert(hud.phase=="ended")
+	var panel:Control=MilitaryCommandUI.battle_graphics
+	assert(is_instance_valid(panel))
+	# The general fights it through the calendar; the panel follows.
+	for day in 40:
+		if MilitaryCampaign.active_engagement.is_empty():break
+		MilitaryCampaign.fight_engagement_day("hold")
+		for frame in 3:await get_tree().process_frame
+	await get_tree().create_timer(0.6).timeout
+	assert(MilitaryCampaign.active_engagement.is_empty())
 	print("VICTORY_OUTCOME ",MilitaryCampaign.battle_history[0].outcome," surviving=",MilitaryCampaign.battle_history[0].attacker.remaining_troops)
 	await _hud_capture("real-city-ended")
 	assert(CivilizationSystem.region_snapshot(civ_id,city_id).controller=="player")
 	assert(CivilizationSystem.occupation_control(civ_id,city_id).controlled)
-	await _hud_capture("real-city-victory")
-	await click(hud.result_primary.get_global_rect().get_center())
-	if is_instance_valid(hud) and hud.phase=="aftermath":
-		await _hud_capture("real-victory-aftermath")
-		await click(hud.result_primary.get_global_rect().get_center())
-	if is_instance_valid(hud):await click(hud.result_primary.get_global_rect().get_center())
+	if not MilitaryCampaign.pending_aftermath.is_empty():MilitaryCampaign.resolve_aftermath("hold","army stores","hold")
+	if is_instance_valid(MilitaryCommandUI.battle_graphics):MilitaryCommandUI.battle_graphics.call("close")
 	assert(MilitaryCampaign.pending_aftermath.is_empty())
 	var field:Dictionary=MilitaryCampaign.field_armies[0]
 	assert(int(field.last_report.troops)==int(field.troops))
