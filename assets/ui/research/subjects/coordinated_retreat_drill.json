@@ -1,0 +1,12 @@
+{
+  "id": "coordinated_retreat_drill",
+  "line": "security",
+  "game_year": 225,
+  "approx_historical_year": -3500,
+  "prompt": "c. 3500 BCE: Village defenders practice withdrawing together in formation with wooden staves; layered woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4b40dd81-b1ea-497e-9896-abeda2348c67.png",
+  "asset": "res://assets/ui/research/subjects/coordinated_retreat_drill-v1.png",
+  "sha256": "f227dfec542e411f32499998d091632e7acfd6cbbedfd564d22b8c56157aa5ec",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}

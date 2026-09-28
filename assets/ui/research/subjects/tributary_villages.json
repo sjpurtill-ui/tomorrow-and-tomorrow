@@ -1,0 +1,12 @@
+{
+  "id": "tributary_villages",
+  "line": "institutions",
+  "game_year": 215,
+  "approx_historical_year": -3567,
+  "prompt": "c. 3567 BCE: Neighboring village representatives bring food and woven goods to larger settlement; matte civic fresco. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-98f2db1b-a463-4950-b5fd-412009a1b84d.png",
+  "asset": "res://assets/ui/research/subjects/tributary_villages-v1.png",
+  "sha256": "a5cd45d35d73fcf565317e6ccfbdadef39a1ad7f0bb788ade66e7e2d6b9c3636",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+}
