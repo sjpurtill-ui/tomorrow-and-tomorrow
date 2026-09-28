@@ -127,6 +127,9 @@ func set_enabled(on:bool)->void:
 		_look=LOOK_EVERY
 	for layer in _layers: layer.visible=on
 	if is_instance_valid(wash): wash.visible=on
+	# Off, the chart neither watches the pointer nor redraws.
+	if is_instance_valid(chart): chart.set_process(on)
+	if is_instance_valid(key_card) and not on: key_card.call("show_tip",{},Vector2.ZERO)
 
 func _build_visuals()->void:
 	if is_instance_valid(wash): return

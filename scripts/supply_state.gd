@@ -210,8 +210,23 @@ static func hubs()->Array:
 			if not bool(hold.get("held",false)): continue
 			var at:Vector2=Pursuit.town_position(rid)
 			if not at.is_finite(): continue
-			out.append({"id":"h:"+rid,"name":String(force.get("region_name","the held town")),"kind":"held","pos":at,"civ_id":civ_id,"region_id":rid})
+			out.append({"id":"h:"+rid,"name":town_name(civ_id,rid,String(force.get("region_name","the held town"))),"kind":"held","pos":at,"civ_id":civ_id,"region_id":rid})
 	return out
+
+## A town's name as the map shows it: our chart's record of the town (what
+## its label reads), else the world's name for it, else what the force was
+## told when it took the town. One name for the label, the rations and the
+## court.
+static func town_name(civ_id:String,region_id:String,fallback:String="")->String:
+	var world:Variant=_world()
+	if world!=null and world.get("city_intelligence")!=null:
+		var book:Dictionary=(world.city_intelligence.records as Dictionary).get("player",{})
+		var name:=String((book.get(region_id,{}) as Dictionary).get("name",""))
+		if name!="": return name
+	if world!=null and civ_id!="" and world.has_method("region_snapshot"):
+		var name:=String((world.region_snapshot(civ_id,region_id) as Dictionary).get("name",""))
+		if name!="": return name
+	return fallback
 
 ## Where a force stands (Vector2.INF when it has no place).
 static func force_pos(force:Dictionary)->Vector2:
@@ -1239,7 +1254,7 @@ static func of_force(force:Dictionary)->Dictionary:
 	report["force_kind"]=kind
 	report["army_id"]=int(force.get("army_id",0))
 	report["region_id"]=String(force.get("region_id",""))
-	report["name"]=String(force.get("name",force.get("region_name","")))
+	report["name"]=town_name(String(force.get("civ_id","")),String(force.region_id),String(force.get("region_name",""))) if kind=="garrison" else String(force.get("name",""))
 	report["troops"]=int(force.get("troops",0))
 	report["supply_level"]=clampf(float(force.get("supply_level",report.ratio)),0.0,1.0)
 	report["hungry_days"]=float(force.get("hungry_days",0.0))

@@ -345,6 +345,18 @@ func test_the_war_leader_says_exactly_how_the_men_are_fed()->void:
 	assert_str(String(Answers.answer(sheet,"How much food is in the stores?"))).not_contains("of its food")
 	assert_str(String(Answers.answer(sheet,"Is LEVY BAND 7 hungry?"))).starts_with("LEVY BAND 7 gets %d%%" % gets)
 
+func test_a_held_town_is_named_as_the_map_names_it()->void:
+	_hold_tsaren(Vector2(80,0))
+	# The garrison was told one name; the chart's record of the town reads another.
+	CivilizationSystem.city_intelligence.records.player[town_id]["name"]="Nseko"
+	MilitaryCampaign.occupation_forces[0]["region_name"]="Tsaren"
+	Supply.reset()
+	var hub:=Supply.hubs().filter(func(h:Dictionary)->bool: return String(h.kind)=="held")
+	assert_str(String(hub[0].name)).is_equal("Nseko")
+	var report:=Supply.of_force(MilitaryCampaign.occupation_forces[0])
+	assert_str(String(report.name)).is_equal("Nseko")
+	assert_str(String(Supply.at_point(home+Vector2(120,0),30).words)).contains("depot at Nseko")
+
 ## Another world's ground (a new game, a new terrain).
 func _other_ground(_p:Vector2)->Dictionary:
 	return {"h":0.5,"slope":0.05,"wood":0.3,"wet":0.0,"t":warmth,"rain":0.5}
