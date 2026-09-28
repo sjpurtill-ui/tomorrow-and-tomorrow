@@ -212,7 +212,10 @@ func test_consequences_are_shown_in_the_conversation_chronicle_and_ties()->void:
 		if String(line.role)=="note": note=String(line.content)
 	assert_array(roles).contains(["user","envoy","assistant","note"])
 	assert_str(note).contains("Their deadline is Year ")
-	assert_str(note).contains("bound to make war")
+	# A people too small for a declared war is threatened with our spears, and
+	# the threat is kept by a strike (conflict_scale.gd; early feuds).
+	var small:=not preload("res://scripts/conflict_scale.gd").formal(target)
+	assert_str(note).contains("bound to send your spears against them" if small else "bound to make war")
 	var shown:=""
 	for tie:Dictionary in Council.ties(target): shown+=String(tie.text)+"\n"
 	assert_str(shown).contains("Your ultimatum · due Year ")
@@ -225,7 +228,7 @@ func test_consequences_are_shown_in_the_conversation_chronicle_and_ties()->void:
 	Messages.daily(int(u.due))
 	var last:Dictionary=(ForeignDialogue.thread(target).messages as Array).back()
 	assert_str(String(last.role)).is_equal("note")
-	assert_str(String(last.content)).contains("Declare it before")
+	assert_str(String(last.content)).contains("Strike before" if small else "Declare it before")
 
 func test_ultimatum_broken_when_the_god_does_not_follow_through()->void:
 	var target:=_boldest()

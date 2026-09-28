@@ -28,7 +28,7 @@ func _city_health()->Dictionary:
 	var housing:=roundi(float(GameState.simulation_metrics.get("housing_ratio",1.0))*100.0)
 	var infant_mortality:=Indicators.infant_mortality_per_1000()
 	var kpis:Array=[
-		{"label":"LIFE EXPECTANCY" if EraWords.reckoned() else "HOW LONG WE LIVE","value":"%.1f years" % expectancy if EraWords.reckoned() else EraWords.life(expectancy),"delta":("%s %.1f years since last month" % ["up" if expectancy_delta>0.0 else "down",absf(expectancy_delta)]) if absf(expectancy_delta)>=0.05 else "no change since last month","delta_color":Tokens.GREEN_TEXT if expectancy_delta>0.0 else (Tokens.RED_TEXT if expectancy_delta<0.0 else Tokens.MUTED),"accent":Tokens.TEAL,"tip":"How long a child born now can hope to live, as things stand."},
+		{"label":"LIFE EXPECTANCY" if EraWords.reckoned() else "HOW LONG WE LIVE","value":"%.1f years" % expectancy if EraWords.reckoned() else EraWords.life(expectancy),"delta":("%s %s since last month" % ["up" if expectancy_delta>0.0 else "down",EraWords.life_change(expectancy_delta).trim_prefix("+").trim_prefix("-")]) if absf(expectancy_delta)*365.25>=1.0 else "no change since last month","delta_color":Tokens.GREEN_TEXT if expectancy_delta>0.0 else (Tokens.RED_TEXT if expectancy_delta<0.0 else Tokens.MUTED),"accent":Tokens.TEAL,"tip":"How long a child born now can hope to live, as things stand."},
 		{"label":EraWords.babes_title() if EraWords.reckoned() else ("BABES LOST" if EraWords.hearth() else "INFANTS BURIED"),"value":"%.0f / 1,000" % infant_mortality if EraWords.reckoned() else EraWords.babes_lost(infant_mortality).get_slice(" ",0)+" in "+EraWords.babes_lost(infant_mortality).get_slice(" ",2),"delta":"projected now" if EraWords.reckoned() else "before the first winter" if EraWords.hearth() else "before the first year","accent":Tokens.RED if infant_mortality>=50.0 else Tokens.AMBER,"tip":"Babies who die before their first year, as things stand."},
 		{"label":"DEATHS IN THE LAST YEAR" if EraWords.reckoned() else "BURIED THIS YEAR","value":str(int(vital.get("deaths",0))),"delta":"since this time last year","accent":Tokens.RED,"tip":"Everyone who died in the past year."},
 		{"label":"MEAN AGE AT DEATH" if EraWords.reckoned() else "AGE OF THE DEAD","value":("%.1f years" % observed_age if EraWords.reckoned() else EraWords.life(observed_age)) if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"The average age of those who died so far."},
@@ -59,14 +59,19 @@ func _city_health()->Dictionary:
 		var marker:=String(point.get("marker_type",""))
 		if marker=="": continue
 		var delta:=float(point.get("delta",0.0))
+		# The whole month's change, in days or weeks when that is its size: a
+		# new practice is taken up over years, so its first month is small.
+		var change:=EraWords.life_change(delta)
+		var detail:=("Life expectancy that month: %s" if EraWords.reckoned() else "That month: %s of life") % change
+		if change=="less than a day" and marker=="discovery":detail="That month: less than a day so far; new ways take years to spread"
 		changes.append({
 			"name":String(point.get("marker_label","Living conditions changed")),
 			"sub":EraWords.when(int(point.get("day",0))),
-			"detail":("Life expectancy %+.1f years" if EraWords.reckoned() else "%+.1f years of life") % delta,
+			"detail":detail,
 			"value":"New knowledge" if marker=="discovery" else "How we live",
 			"value_color":Tokens.GOLD_TEXT if marker=="discovery" else (Tokens.RED_TEXT if delta<0.0 else Tokens.BLUE_TEXT),
 			"accent":Tokens.GOLD if marker=="discovery" else (Tokens.RED if delta<0.0 else Tokens.BLUE),
-			"tip":"A health-related discovery occurred in this interval." if marker=="discovery" else "No health-related discovery occurred in this interval; the shift came from simulated living conditions."
+			"tip":"A health-related discovery came this month. The change shown is the whole month's; the new way adds more as more of the people take it up." if marker=="discovery" else "No health-related discovery came this month; the shift came from how we live."
 		})
 		if changes.size()>=6: break
 	if not changes.is_empty(): blocks.append({"type":"rows","heading":"Why lives grew longer or shorter","note":"latest changes","items":changes})
@@ -124,7 +129,7 @@ func _health_brief(expectancy:float,delta:float,water_intake:int,housing:int)->D
 	if housing<80:
 		return {"tone":"warn","title":"Exposure is shortening lives","why":"Shelter covers %d%% of the population. %s" % [housing,lives]}
 	if delta<=-0.5:
-		return {"tone":"warn","title":"Life expectancy has fallen" if EraWords.reckoned() else "Lives are growing shorter","why":"The latest monthly observation changed by %.1f years. Check the marked history and current mortality pressures below." % delta}
+		return {"tone":"warn","title":"Life expectancy has fallen" if EraWords.reckoned() else "Lives are growing shorter","why":"Last month it changed by %s. Check the marked history and current mortality pressures below." % EraWords.life_change(delta)}
 	if not EraWords.reckoned():
 		return {"tone":"info","title":"A child born now can hope for %s" % EraWords.life(expectancy),"why":"This is how long a newborn may live as things stand, not the age of everyone alive. %s The chart shows which changes came from new knowledge and which from how the people live." % EraWords.babes_lost_sentence(Indicators.infant_mortality_per_1000())}
 	return {"tone":"info","title":"Expected lifespan is %.1f years" % expectancy,"why":"This is the modeled lifespan of a newborn under current conditions, not the average age of everyone alive. The chart distinguishes research-linked changes from shifts in living conditions."}

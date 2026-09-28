@@ -10,6 +10,15 @@ signal diplomatic_event(event:Dictionary)
 signal scout_report_returned(report:Dictionary)
 
 const MILITARY_DEVELOPMENT:=preload("res://scripts/military_development_catalog.gd")
+## War or feud: one predicate for every fight between peoples.
+const CONFLICT_SCALE:=preload("res://scripts/conflict_scale.gd")
+## A feud between two other peoples: a raid is this likely on a given day at
+## its start, fewer as it ages (about four raids in all, most in the first
+## year), and it goes cold after this many days without blood.
+const RIVAL_FEUD_RAID_DAILY:=0.012
+const RIVAL_FEUD_AGE_DAYS:=365.0
+const RIVAL_FEUD_HOT_DAYS:=365
+const RIVAL_FEUD_COLD_DAYS:=2*365
 
 const SAVE_VERSION:=10
 # Every new world draws its own rival count from this range; the player never
@@ -389,7 +398,9 @@ func _war_name(first_id:String,second_id:String,target_region_id:String,day:int)
 		if not location.is_empty(): return "War of %s (Year %d)" % [String(civilizations[int(location.owner_index)].strategic_regions[int(location.region_index)].name).capitalize(),year]
 	var first_name:=_participant_name(first_id).capitalize()
 	var second_name:=_participant_name(second_id).capitalize()
-	return "%s–%s War (Year %d)" % [first_name,second_name,year]
+	# The god's own fight with a small people is a feud (conflict_scale.gd).
+	var noun:="War" if CONFLICT_SCALE.formal_war(first_id,second_id,self) else "Feud"
+	return "%s–%s %s (Year %d)" % [first_name,second_name,noun,year]
 
 
 func _empty_war_casualties()->Dictionary:
@@ -405,7 +416,7 @@ func _start_war(first_id:String,second_id:String,goal:String,target_region_id:St
 	next_war_id+=1
 	var casualties:Dictionary={first_id:_empty_war_casualties(),second_id:_empty_war_casualties()}
 	var names:Dictionary={first_id:_participant_name(first_id),second_id:_participant_name(second_id)}
-	war_history.push_front({"id":war_id,"name":_war_name(first_id,second_id,target_region_id,day),"started_day":day,"ended_day":-1,"status":"active","participants":[first_id,second_id],"participant_names":names,"war_goal":goal,"target_region_id":target_region_id,"cause":cause,"casualties":casualties,"battle_count":0,"battles":[],"territorial_changes":[],"result":"ongoing"})
+	war_history.push_front({"id":war_id,"name":_war_name(first_id,second_id,target_region_id,day),"started_day":day,"ended_day":-1,"status":"active","participants":[first_id,second_id],"participant_names":names,"war_goal":goal,"target_region_id":target_region_id,"cause":cause,"formal":CONFLICT_SCALE.formal_war(first_id,second_id,self),"casualties":casualties,"battle_count":0,"battles":[],"territorial_changes":[],"result":"ongoing"})
 	if war_history.size()>WAR_HISTORY_LIMIT: war_history.resize(WAR_HISTORY_LIMIT)
 	return war_id
 
@@ -516,7 +527,7 @@ func military_fronts_snapshot()->Dictionary:
 		var front_force:Dictionary={"field_personnel":0,"inbound_personnel":0,"occupation_personnel":0,"reserve_personnel":0,"supply":0.0,"readiness":0.0,"armies":[]}
 		if MilitaryCampaign!=null and WorldSimulation.military.has_method("front_force_snapshot"):
 			front_force=WorldSimulation.military.front_force_snapshot(String(civ.id),target_region_id if target_region_id!="" else "player_home")
-		fronts.append({"id":"front_%s" % String(civ.id),"war_id":String(relation.get("war_id","")),"war_name":war_name,"opponent_id":String(civ.id),"opponent":String(civ.name),"target_region_id":target_region_id,"target":target_name,"stance":String(relation.get("front_stance","balanced")),"objective":String(objective.get("description","DEFEND")),"progress":float(objective.get("progress",0.0)),"field_personnel":int(front_force.get("field_personnel",0)),"inbound_personnel":int(front_force.get("inbound_personnel",0)),"occupation_personnel":int(front_force.get("occupation_personnel",0)),"reserve_personnel":int(front_force.get("reserve_personnel",0)),"supply":float(front_force.get("supply",0.0)),"readiness":float(front_force.get("readiness",0.0)),"armies":front_force.get("armies",[]),"enemy_personnel":float(strategic_assessment(String(civ.id),target_region_id).get("enemy_estimate",-1)),"war_score":float(relation.get("war_score",0.0)),"our_exhaustion":float(relation.get("player_war_exhaustion",0.0)),"enemy_exhaustion":float(relation.get("rival_war_exhaustion",0.0))})
+		fronts.append({"id":"front_%s" % String(civ.id),"war_id":String(relation.get("war_id","")),"war_name":war_name,"opponent_id":String(civ.id),"opponent":String(civ.name),"feud":not CONFLICT_SCALE.formal(String(civ.id),self),"target_region_id":target_region_id,"target":target_name,"stance":String(relation.get("front_stance","balanced")),"objective":String(objective.get("description","DEFEND")),"progress":float(objective.get("progress",0.0)),"field_personnel":int(front_force.get("field_personnel",0)),"inbound_personnel":int(front_force.get("inbound_personnel",0)),"occupation_personnel":int(front_force.get("occupation_personnel",0)),"reserve_personnel":int(front_force.get("reserve_personnel",0)),"supply":float(front_force.get("supply",0.0)),"readiness":float(front_force.get("readiness",0.0)),"armies":front_force.get("armies",[]),"enemy_personnel":float(strategic_assessment(String(civ.id),target_region_id).get("enemy_estimate",-1)),"war_score":float(relation.get("war_score",0.0)),"our_exhaustion":float(relation.get("player_war_exhaustion",0.0)),"enemy_exhaustion":float(relation.get("rival_war_exhaustion",0.0))})
 	return {"fronts":fronts,"active":fronts.size(),"bounded":true}
 
 
@@ -3589,13 +3600,17 @@ func _process_intercivilization_relations(day:int)->void:
 							relation["treaty"]="non_aggression"
 					"war":
 						if not bool(relation.get("at_war",false)):
-							relation["at_war"]=true
-							relation["treaty"]="war"
-							relation["war_started_day"]=day
-							relation["war_id"]=_start_war(String(first.id),String(second.id),"limited","",day,"A physically carried declaration follows escalating border pressure")
-							relation["trade"]=0.0
-							relation["border_tension"]=maxf(current_tension,0.68)
-							_record_world_event("War declaration delivered","A declaration carried between %s and %s opens a state of war." % [String(first.name),String(second.name)],"war",day)
+							if not CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self):
+								# Small peoples carry no declaration: the quarrel is a feud.
+								_begin_rival_feud(relation,first,second,day,"a quarrel on the border")
+							else:
+								relation["at_war"]=true
+								relation["treaty"]="war"
+								relation["war_started_day"]=day
+								relation["war_id"]=_start_war(String(first.id),String(second.id),"limited","",day,"A physically carried declaration follows escalating border pressure")
+								relation["trade"]=0.0
+								relation["border_tension"]=maxf(current_tension,0.68)
+								_record_world_event("War declaration delivered","A declaration carried between %s and %s opens a state of war." % [String(first.name),String(second.name)],"war",day)
 				relation["pending_message"]=""
 				relation["pending_message_sent_day"]=-1
 				relation["pending_message_due_day"]=-1
@@ -3634,9 +3649,13 @@ func _process_intercivilization_relations(day:int)->void:
 			pending_message=String(relation.get("pending_message",""))
 			if pending_message=="":
 				if not pact_blocks_war and war_capacity and opinion<-0.20 and tension>0.48 and shared_aggression+rng.randf()*0.35>0.76:
-					relation["pending_message"]="war"
-					relation["pending_message_sent_day"]=day
-					relation["pending_message_due_day"]=day+_intercivilization_message_days(first,second,false)
+					if CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self):
+						relation["pending_message"]="war"
+						relation["pending_message_sent_day"]=day
+						relation["pending_message_due_day"]=day+_intercivilization_message_days(first,second,false)
+					elif not rival_feud_hot(relation,day):
+						# Two small peoples: the same pressure starts a feud, not a war.
+						_begin_rival_feud(relation,first,second,day,"pressure on the border")
 				elif treaty=="none" and opinion>0.38 and proximity_distance<1.55:
 					relation["pending_message"]="trade"
 					relation["pending_message_sent_day"]=day
@@ -3648,8 +3667,106 @@ func _process_intercivilization_relations(day:int)->void:
 			relation["opinion"]=opinion
 			relation["trade"]=trade
 			relation["border_tension"]=tension
+			if int(relation.get("feud_since",-1))>=0: _rival_feud_day(first,second,relation,day)
 			civilizations[first_index]=first
 			civilizations[second_index]=second
+			_set_pair_relation(first_index,second_index,relation)
+
+
+# --------------------------------------------------------------------------
+# Feuds between two other peoples (conflict_scale.gd): below the war line two
+# peoples raid each other; nobody declares or carries anything. Kept on their
+# pair relation: feud_since, feud_last (the last raid), feud_raids,
+# feud_dead {civ_id: n}, feud_cause. Hot while blood was spilled within
+# RIVAL_FEUD_HOT_DAYS; cold after RIVAL_FEUD_COLD_DAYS of quiet.
+# --------------------------------------------------------------------------
+
+func rival_feud_hot(relation:Dictionary,day:int)->bool:
+	return int(relation.get("feud_since",-1))>=0 and day-int(relation.get("feud_last",-99999))<RIVAL_FEUD_HOT_DAYS
+
+func _begin_rival_feud(relation:Dictionary,first:Dictionary,second:Dictionary,day:int,why:String)->void:
+	var fresh:=int(relation.get("feud_since",-1))<0 or day-int(relation.get("feud_last",-99999))>=RIVAL_FEUD_COLD_DAYS
+	if fresh:
+		relation["feud_since"]=day; relation["feud_raids"]=0; relation["feud_dead"]={}
+	relation["feud_last"]=day
+	relation["feud_cause"]=why.substr(0,80)
+	relation["trade"]=0.0
+	if String(relation.get("treaty","none"))=="trade": relation["treaty"]="none"
+	relation["border_tension"]=maxf(0.55,float(relation.get("border_tension",0.0)))
+	relation["opinion"]=minf(-0.25,float(relation.get("opinion",0.0)))
+	if fresh: _record_world_event("A feud between neighbours","%s and %s are feuding over %s: raiders go back and forth between them, and nobody has declared anything." % [String(first.name),String(second.name),why],"war",day,{"feud":true})
+
+## Two other peoples begin (or take up again) a feud.
+func start_rival_feud(first_index:int,second_index:int,day:int,why:String="")->void:
+	if first_index<0 or second_index<0 or first_index>=civilizations.size() or second_index>=civilizations.size(): return
+	var first:Dictionary=civilizations[first_index]; var second:Dictionary=civilizations[second_index]
+	var relation:Dictionary=((first.relations as Dictionary).get(String(second.id),{}) as Dictionary).duplicate(true)
+	_begin_rival_feud(relation,first,second,day,why if why!="" else "old quarrels")
+	_set_pair_relation(first_index,second_index,relation)
+
+## One day of a feud between two other peoples: now and then a raid, fewer as
+## the feud ages and none once a side has buried too many; cold after long quiet.
+func _rival_feud_day(first:Dictionary,second:Dictionary,relation:Dictionary,day:int)->void:
+	if day-int(relation.get("feud_last",-99999))>=RIVAL_FEUD_COLD_DAYS:
+		for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
+		relation["feud_ended_day"]=day
+		return
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d:rival_feud:%s:%s:%d" % [last_world_seed,String(first.id),String(second.id),day])
+	var heat:=exp(-float(maxi(0,day-int(relation.get("feud_since",day))))/RIVAL_FEUD_AGE_DAYS)
+	if rng.randf()>=RIVAL_FEUD_RAID_DAILY*heat: return
+	var dead:Dictionary=relation.get("feud_dead",{}) if relation.get("feud_dead") is Dictionary else {}
+	var first_attacks:=rng.randf()<clampf(0.5+(float(first.get("aggression",0.4))-float(second.get("aggression",0.4)))*0.5,0.2,0.8)
+	var attacker:Dictionary=first if first_attacks else second
+	var defender:Dictionary=second if first_attacks else first
+	# A people that has buried a twenty-fifth of itself in the feud stays home.
+	if float(dead.get(String(attacker.id),0))>=float(attacker.population)*0.04: return
+	var d_pop:=float(defender.population)
+	var d_dead:=clampi(roundi(d_pop*rng.randf_range(0.002,0.008)),0,maxi(1,ceili(d_pop*0.025)))
+	var a_dead:=roundi(float(d_dead)*rng.randf_range(0.0,0.6))
+	_feud_losses(defender,d_dead)
+	_feud_losses(attacker,a_dead)
+	dead[String(defender.id)]=int(dead.get(String(defender.id),0))+d_dead
+	dead[String(attacker.id)]=int(dead.get(String(attacker.id),0))+a_dead
+	relation["feud_dead"]=dead
+	relation["feud_raids"]=int(relation.get("feud_raids",0))+1
+	if d_dead+a_dead>0: relation["feud_last"]=day
+	relation["border_tension"]=clampf(float(relation.get("border_tension",0.5))+0.02,0.0,1.0)
+	relation["opinion"]=clampf(float(relation.get("opinion",-0.3))-0.02,-1.0,1.0)
+
+## Those a feud's raid killed, from a people's own count.
+func _feud_losses(civ:Dictionary,dead:int)->void:
+	if dead<=0: return
+	var before:=float(civ.population)
+	var lost:=minf(float(dead),maxf(0.0,before-1.0))
+	if lost<=0.0: return
+	civ["population"]=before-lost
+	civ["military_population"]=maxf(0.0,float(civ.get("military_population",0.0))-lost*0.7)
+	if civ.get("cohorts") is Dictionary: civ["cohorts"]=_scaled_cohorts(_remove_weighted_cohort_population(civ.cohorts,lost,{"children":0.08,"youth":1.3,"early_adults":1.85,"established_adults":1.7,"mature_adults":1.05,"elders":0.18}),float(civ.population))
+	_scale_strategic_region_populations(civ,float(civ.population)/maxf(1.0,before))
+
+## Two small peoples found at war with each other (an older save, a war from
+## before the rule): the war ends and they feud (war_loop.reconcile).
+func reconcile_rival_feuds(day:int)->void:
+	for first_index in civilizations.size():
+		for second_index in range(first_index+1,civilizations.size()):
+			var first:Dictionary=civilizations[first_index]
+			var second:Dictionary=civilizations[second_index]
+			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
+			var relation:Dictionary=((first.relations as Dictionary).get(String(second.id),{}) as Dictionary).duplicate(true)
+			if relation.is_empty() or CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self): continue
+			var carried:=String(relation.get("pending_message",""))=="war"
+			if not bool(relation.get("at_war",false)) and not carried: continue
+			if carried:
+				relation["pending_message"]=""; relation["pending_message_sent_day"]=-1; relation["pending_message_due_day"]=-1
+			var since:=int(relation.get("war_started_day",-1)) if bool(relation.get("at_war",false)) else day
+			if since<0 or since>day: since=day
+			if bool(relation.get("at_war",false)):
+				relation["at_war"]=false
+				relation["treaty"]="none"
+				_end_war(String(relation.get("war_id","")),day,"became a feud")
+			_begin_rival_feud(relation,first,second,since,"the old war between them" if since<day else "a quarrel on the border")
+			relation["feud_last"]=day
 			_set_pair_relation(first_index,second_index,relation)
 
 
@@ -3787,7 +3904,9 @@ func _process_player_relations(day:int)->void:
 			var strategic_pressure:=(float(civ.aggression)*0.45+maxf(0.0,_military_power(civ)/maxf(1.0,player_power)-1.0)*0.10+maxf(0.0,-opinion)*0.25)*lerpf(0.42,1.0,rival_intelligence)
 			if int(relation.get("rival_contact_level",0))>=2 and rival_intelligence>=0.12 and WorldSimulation.state.settlement_site_committed and day>=90 and opinion<-0.34 and strategic_pressure>0.48:
 				var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*524287^(index+1)*4099
-				if rng.randf()<clampf(0.06+strategic_pressure*0.16,0.0,0.32):
+				# A small people mounts no campaign: its raiders come instead (the
+				# raid below and war_loop.gd's feud; conflict_scale.gd).
+				if rng.randf()<clampf(0.06+strategic_pressure*0.16,0.0,0.32) and CONFLICT_SCALE.formal(String(civ.id),self):
 					relation["at_war"]=true
 					relation["treaty"]="war"
 					relation["war_goal"]="defend"
@@ -3828,7 +3947,8 @@ func _process_player_relations(day:int)->void:
 					relation["war_id"]=_start_war("player",String(civ.id),"defend",String(uprising.get("region_id","")),day,"Occupation uprising")
 					relation["trade"]=0.0
 					relation["border_tension"]=maxf(0.84,float(relation.get("border_tension",0.0)))
-					_record_world_event("Occupation uprising","%s organizes a mass recapture campaign around %s; aggregate resistance became action because the occupation was under-garrisoned." % [String(civ.name),String(uprising.get("region_name","an occupied region"))],"war",day)
+					if CONFLICT_SCALE.formal(String(civ.id),self): _record_world_event("Occupation uprising","%s organizes a mass recapture campaign around %s; aggregate resistance became action because the occupation was under-garrisoned." % [String(civ.name),String(uprising.get("region_name","an occupied region"))],"war",day)
+					else: _record_world_event("Occupation uprising","The people of %s rise against the garrison we left at %s; there were too few of ours to hold them down." % [String(civ.name),String(uprising.get("region_name","their town"))],"war",day,{"feud":true})
 					_queue_player_incident_if_due(civ,relation,day)
 		relation["opinion"]=opinion
 		civ["player_relation"]=relation
@@ -3892,6 +4012,8 @@ func rival_opens_war(civ_id:String,reason:String)->Dictionary:
 		if not bool(civ.get("alive",true)): return {"ok":false,"error":"gone"}
 		var relation:Dictionary=civ.get("player_relation",{})
 		if bool(relation.get("at_war",false)): return {"ok":false,"error":"already at war"}
+		# A small people opens no war: it feuds (conflict_scale.gd, war_loop.gd).
+		if not CONFLICT_SCALE.formal(civ_id,self): return {"ok":false,"error":"feud"}
 		var day:=int(WorldSimulation.state.elapsed_days)
 		relation["at_war"]=true; relation["treaty"]="war"; relation["stance"]="hostile"
 		relation["war_goal"]="defend"; relation["war_target_region_id"]=""; relation["war_score"]=0.0
@@ -4323,6 +4445,12 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 			if String(relation.get("stance","watchful"))=="contain" and String(relation.get("treaty","none"))=="none": return {"error":"Containment is already the standing policy."}
 		"declare_war":
 			if at_war: return {"error":"Open war already exists with this civilization."}
+			# Nobody declares war on a people this small, or from one: it is a
+			# feud, answered by the war leader's raiders (conflict_scale.gd).
+			if not CONFLICT_SCALE.formal(civ_id,self):
+				var they:=String(civ.get("name",civ_id))
+				var why:="The %s are too few for a declared war" % they if CONFLICT_SCALE.organised("player",self) else ("Our people are too few to declare a war" if CONFLICT_SCALE.organised(civ_id,self) else "Neither our people nor the %s are many enough for a declared war" % they)
+				return {"error":"%s; fighting between us is a feud. Tell the war leader what you want done to them." % why,"feud":true}
 			if int(relation.get("truce_until_day",0))>int(WorldSimulation.state.elapsed_days): return {"error":"The truce remains binding for %d more days." % (int(relation.truce_until_day)-int(WorldSimulation.state.elapsed_days))}
 			var objective:=war_objective_status(civ_id)
 			if String(objective.get("goal","limited"))!="defend" and city_intelligence.known("player",String(objective.get("target_region_id",""))).is_empty(): return {"error":"Choose a discovered city before declaring this offensive war."}

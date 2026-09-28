@@ -304,7 +304,9 @@ static func daily(day:int)->void:
 		_later(id,c,day)
 		_hunting(id,c,day)
 		_war_preparation(id,c,day)
-		if war: continue
+		# At war or in a hot feud with us, they raise no business for the hall:
+		# no debts called, no redress demanded, no kin summoned (war_loop.gd).
+		if war or bool(Hall._war().call("hot",id,day)): continue
 		var name:=String(civ.get("name",id))
 		for d in c.debts:
 			if not d is Dictionary or bool(d.get("settled",false)) or bool(d.get("called",false)) or String(d.owed_by)!="player" or int(d.due)>day: continue
@@ -322,10 +324,11 @@ static func daily(day:int)->void:
 		var kin:=has_bond(id,["marriage","ally"])
 		if not kin.is_empty():
 			for other in (civ.get("relations",{}) as Dictionary):
-				if String(other)=="player" or not bool(((civ.relations as Dictionary)[other] as Dictionary).get("at_war",false)): continue
+				if String(other)=="player" or not _fighting((civ.relations as Dictionary)[other],day): continue
 				var enemy_name:=Hall._civ_name(String(other))
+				var feud:=not bool(((civ.relations as Dictionary)[other] as Dictionary).get("at_war",false))
 				Hall._add_occasion({"key":"kin_call:%s:%s:%d" % [id,String(other),floori(day/365.0)],"type":"kin_call","civ_id":id,"day":day,"expires":day+90,"crisis":true,
-					"data":{"text":"%s calls on its kin against %s" % [name,enemy_name],"enemy":String(other),"enemy_name":enemy_name}})
+					"data":{"text":"%s calls on its kin %s %s" % [name,"in its feud with" if feud else "against",enemy_name],"enemy":String(other),"enemy_name":enemy_name,"feud":feud}})
 				break
 
 static func _later(civ_id:String,c:Dictionary,day:int)->void:
@@ -543,6 +546,14 @@ static func _recall(civ_id:String,situation:Dictionary,occasion:Dictionary,day:i
 # Strings
 # --------------------------------------------------------------------------
 
+## Two other peoples fighting: at war, or in a hot feud (small peoples,
+## conflict_scale.gd; CivilizationSystem keeps their feud on the pair).
+static func _fighting(relation:Variant,day:int=-1)->bool:
+	if not relation is Dictionary: return false
+	if bool((relation as Dictionary).get("at_war",false)): return true
+	var world:Variant=WorldSimulation.world
+	return world!=null and world.has_method("rival_feud_hot") and bool(world.rival_feud_hot(relation,_day() if day<0 else day))
+
 static func _enemy(civ_id:String)->String:
 	## A people this one is fighting or quarrelling with (not the player).
 	var civ:=ForeignDiplomacy.civilization(civ_id)
@@ -550,7 +561,7 @@ static func _enemy(civ_id:String)->String:
 	for other in (civ.get("relations",{}) as Dictionary):
 		if String(other) in ["player",civ_id]: continue
 		var rel:Dictionary=(civ.relations as Dictionary)[other]
-		var score:=(2.0 if bool(rel.get("at_war",false)) else 0.0)+float(rel.get("border_tension",0.0))
+		var score:=(2.0 if _fighting(rel) else 0.0)+float(rel.get("border_tension",0.0))
 		if score>0.45 and score>best_score and Hall._civ_index(String(other))>=0: best=String(other); best_score=score
 	return best
 
@@ -1373,10 +1384,14 @@ const ENVOY_WRONGS:=["slain_envoy","maimed_envoy","beaten_envoy","insulted_envoy
 ## Business a wronged people will not bring: gifts and friendship.
 const WARM_TYPES:=["gift_goods","gratitude_gift","artifact_gift","accord_offer","protection_pact","league_invitation","trade_offer","scholar_offer","research_sale","license_offer","nonaggression_offer","artifact_purchase","rumor_share","intelligence_share"]
 ## Occasions a posture never overrides.
-const POSTURE_EXEMPT:=["first_contact","debt_due","peace_possible"]
+const POSTURE_EXEMPT:=["first_contact","debt_due","peace_possible","feud_peace"]
+## "war" and "feud" bring nobody: a people at war or in a blood feud with us
+## sends raiders, not heralds (the hall's own gate, war_loop.envoy_gate, keeps
+## even their peace-seeker for after the raids stop).
 const POSTURE_MIX:={
 	"redress":{"redress_demand":1.4,"tribute_demand":0.6,"test_of_resolve":0.4},
-	"war":{"test_of_resolve":1.0,"redress_demand":0.9,"tribute_demand":0.4},
+	"war":{},
+	"feud":{},
 	"fearful":{"dread_tribute":1.6,"redress_demand":0.15},
 }
 const WAR_PREP_MIN:=150
@@ -1398,13 +1413,18 @@ static func envoy_wrongs(civ_id:String)->Dictionary:
 
 static func envoy_posture(civ_id:String)->String:
 	## "" (no wrong remembered), "redress" (threats and demands), "halt" (no more
-	## envoys), "fearful" (terrified tribute) or "war" (preparing for war).
+	## envoys), "fearful" (terrified tribute), "war" (preparing for war, among
+	## peoples organised for it) or "feud" (a small people: a blood feud, their
+	## raiders instead of envoys; conflict_scale.gd).
 	var wrongs:=envoy_wrongs(civ_id)
 	if float(wrongs.weight)<0.25: return ""
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	if civ.is_empty(): return ""
 	var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
-	if bool(relation.get("at_war",false)): return "war"
+	var small:=not preload("res://scripts/conflict_scale.gd").formal(civ_id)
+	if bool(relation.get("at_war",false)): return "feud" if small else "war"
+	# A killed envoy of a small people is avenged in blood while the feud is on.
+	if small and int(wrongs.slain)>=1 and bool(Hall._war().call("feuding",civ_id)): return "feud"
 	var c:=character(civ_id)
 	var trait_id:=String(c.get("trait",""))
 	var p:=Hall._personality(civ_id)
@@ -1418,7 +1438,7 @@ static func envoy_posture(civ_id:String)->String:
 	var fear:=dread*(1.4-bold)
 	if fear>hatred*0.35+0.15 and size_ratio<1.1 and bold<0.62 and trait_id!="grudge": return "fearful"
 	var war_score:=hatred*(0.55+bold)*clampf(size_ratio,0.5,1.6)+(0.35 if trait_id in ["grudge","bluffer"] else 0.0)+0.25*maxi(0,blood-1)
-	if blood>=2 and war_score>=1.5: return "war"
+	if blood>=2 and war_score>=1.5: return "feud" if small else "war"
 	if blood>=1 and dread>=0.35 and size_ratio<0.9 and bold<0.5: return "halt"
 	if fear>hatred*0.45+0.1 and size_ratio<1.2 and trait_id!="grudge": return "fearful"
 	return "redress"
@@ -1432,7 +1452,7 @@ static func withholds_envoys(civ_id:String,occasion:Dictionary,rng:RandomNumberG
 	## A people that has lost envoys at your court may stop sending them.
 	if String(occasion.get("type","")) in POSTURE_EXEMPT: return false
 	var posture:=envoy_posture(civ_id)
-	var halt:=posture=="halt" or (posture=="war" and rng.randf()<0.5)
+	var halt:=posture in ["halt","feud"] or (posture=="war" and rng.randf()<0.5)
 	if not halt: return false
 	var c:=character(civ_id)
 	if not c.is_empty():
@@ -1444,6 +1464,20 @@ static func withholds_envoys(civ_id:String,occasion:Dictionary,rng:RandomNumberG
 			ForeignDiplomacy.remember(civ_id,"We will send no more envoys to a ruler who harms them.")
 	return true
 
+## A wrong done to an envoy as a feud names it: "the killing of their envoy
+## Qira", "the maiming of their envoy Tavo".
+const WRONG_NOUNS:={"slain_envoy":"the killing","maimed_envoy":"the maiming","beaten_envoy":"the flogging","insulted_envoy":"the shaming","seized_envoy":"the seizing"}
+static func wrong_words(g:Dictionary)->String:
+	var kind:=String(g.get("source","")).get_slice(":",0)
+	if not WRONG_NOUNS.has(kind): return "what was done to their envoys"
+	var m:=RegEx.create_from_string("envoy (\\S+)").search(String(g.get("text","")))
+	return "%s of their envoy%s" % [String(WRONG_NOUNS[kind]),(" "+m.get_string(1)) if m!=null else ""]
+
+## The heaviest envoy wrong this people remembers, in the feud's words ("" if none).
+static func envoy_wrong_words(civ_id:String)->String:
+	var g:=_top_envoy_wrong(character(civ_id))
+	return wrong_words(g) if not g.is_empty() else ""
+
 static func _top_envoy_wrong(c:Dictionary)->Dictionary:
 	var best:={}
 	for g in c.get("grudges",[]):
@@ -1453,9 +1487,22 @@ static func _top_envoy_wrong(c:Dictionary)->Dictionary:
 
 static func _war_preparation(civ_id:String,c:Dictionary,day:int)->void:
 	## Wronged and bold enough: they sharpen spears, the border hardens, and in
-	## time their ruler opens a war that their own generals run.
-	if envoy_posture(civ_id)!="war":
-		if c.has("war_prep_day") and envoy_posture(civ_id)!="war": c.erase("war_prep_day")
+	## time their ruler opens a war that their own generals run. A small people
+	## opens no war (conflict_scale.gd): the wrong is avenged in a blood feud,
+	## their raiders instead of a host (war_loop.blood_feud), once per wrong.
+	var posture:=envoy_posture(civ_id)
+	if posture=="feud":
+		c.erase("war_prep_day"); c.erase("war_due_day")
+		var wrong:=_top_envoy_wrong(c)
+		var marker:=int(wrong.get("day",-1))
+		var war:=Hall._war()
+		if marker>=0 and int(c.get("feud_vowed",-99999))!=marker and not bool(war.call("hot",civ_id,day)):
+			c["feud_vowed"]=marker
+			war.call("blood_feud",civ_id,day,wrong_words(wrong),"","envoy_wrong")
+		elif marker>=0: c["feud_vowed"]=marker
+		return
+	if posture!="war":
+		if c.has("war_prep_day"): c.erase("war_prep_day")
 		return
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}

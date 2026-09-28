@@ -9,12 +9,18 @@ extends Node
 ##   2. the god summons the war leader and gives an objective in words
 ##      ("burn their stores"); the general runs it; the combat simulator
 ##      decides it; a report comes back;
-##   3. war: the general is ordered to act, operations and enemy attacks are
-##      fought, and the war ends in a truce (or tribute, or exhaustion);
+##   3. war, between peoples organised for it (conflict_scale.gd): the general
+##      is ordered to act, operations and enemy attacks are fought, and the war
+##      ends in a truce (or tribute, or exhaustion);
 ##   4. population falls on both sides by what the log says died; bands stay
 ##      within the pre-modern mobilisation cap;
+##   4b. a feud where nobody knows the way: a small people's envoy is killed,
+##      a blood feud (never a war) follows, their raiders come, "burn their
+##      stores" sends trackers after the trail, no envoy of theirs comes while
+##      the raids go on, and the feud ends in a blood price;
 ##   5. a called bluff still collapses with no raid;
-##   6. standing with kin in their war drags the people into it;
+##   6. standing with kin in their feud earns their enemy's raiders; among
+##      peoples organised for war it is war;
 ##   7. saves: the war ledger round-trips and older saves load.
 ## Writes a transcript to res://reports/war/war_loop.txt (reports/ is ignored).
 ##   <godot> --headless --path <worktree> res://tests/war_loop_probe.tscn
@@ -23,6 +29,8 @@ const HALL:=preload("res://scripts/audience_hall.gd")
 const HallProbe:=preload("res://tests/audience_hall_probe.gd")
 const RIVALS:=preload("res://scripts/rival_rulers.gd")
 const WAR:=preload("res://scripts/war_loop.gd")
+const CC:=preload("res://scripts/court_commands.gd")
+const Scale:=preload("res://scripts/conflict_scale.gd")
 const OUT_PATH:="res://reports/war/war_loop.txt"
 
 var probe:Node
@@ -41,6 +49,8 @@ func _ready()->void:
 	if civ_id!="":
 		_order_the_general(civ_id)
 		_war_to_truce(civ_id)
+		_back_to_small(civ_id)
+	_feud_unknown_home()
 	_bluff_collapses()
 	_dragged_in()
 	_rival_war_rate()
@@ -182,11 +192,31 @@ func _order_the_general(civ_id:String)->void:
 
 # ------------------------------------------------------------------ 3
 
+func _set_pop(civ_id:String,n:float)->void:
+	for civ in CivilizationSystem.civilizations:
+		if String(civ.id)!=civ_id: continue
+		civ["population"]=n
+		civ["cohorts"]=CivilizationSystem._scaled_cohorts(civ.get("cohorts",{}),n)
+	WorldSimulation.scoped(civ_id,func()->void:WorldSimulation.state.ensure_population_total(int(n)))
+
+func _back_to_small(civ_id:String)->void:
+	## The rest of the probe is the stone age again: small peoples.
+	GameState.ensure_population_total(140)
+	_set_pop(civ_id,150.0)
+
 func _war_to_truce(civ_id:String)->void:
-	out.append("\n3. WAR, AND ITS END")
+	out.append("\n3. WAR, AND ITS END (both peoples organised for war)")
 	var s:=WAR.state()
 	var f:=WAR.front(civ_id)
 	f["pending"]={}; f["last_war_end"]=-99999
+	# Small peoples do not declare war: the same word flares a feud.
+	var small_said:=WAR.declare(civ_id,day,"the tribute you would not pay")
+	check(not small_said and not bool(WAR._relation(civ_id).get("at_war",false)),"Two small peoples went to war")
+	check(WAR.feuding(civ_id),"Declaring on a small people did not start a feud")
+	f["pending"]={}
+	GameState.ensure_population_total(2400)
+	_set_pop(civ_id,3000.0)
+	check(Scale.formal(civ_id),"2400 against 3000 is still a feud")
 	var their_before:=_their_pop(civ_id)
 	var ours_before:=GameState.population_total
 	WAR.declare(civ_id,day,"the tribute you would not pay")
@@ -235,6 +265,83 @@ func _war_to_truce(civ_id:String)->void:
 		if int(e.get("band",0))>0: check(int(e.band)<=maxi(3,ceili(GameState.population_total*0.07))+1,"A band of %d exceeds the mobilisation cap" % int(e.band))
 	check(WAR._truce_binds(civ_id,day),"No truce binds after the war")
 
+# ------------------------------------------------------------------ 4b
+
+func _feud_unknown_home()->void:
+	out.append("\n4b. A FEUD WHERE NOBODY KNOWS THE WAY")
+	# A small people nobody has used yet, whose home nobody has found.
+	var used:={String(CivilizationSystem.civilizations[1].id):true,String(CivilizationSystem.civilizations[2].id):true,String(CivilizationSystem.civilizations[3].id):true,String(CivilizationSystem.civilizations[-1].id):true}
+	for e in WAR.state().log: used[String((e as Dictionary).get("civ",""))]=true
+	var civ_id:=""
+	for civ in CivilizationSystem.civilizations:
+		if not used.has(String(civ.id)): civ_id=String(civ.id); break
+	check(civ_id!="","No untouched people left for the feud")
+	if civ_id=="": return
+	var relation:=WAR._relation(civ_id)
+	relation.home_location_known=false; relation.home_position={}
+	var name:=HALL._civ_name(civ_id)
+	# Their envoy killed in the hall: a blood feud, never a war.
+	var audience:=HALL._new_audience("foreign","gift",day)
+	audience.civ_id=civ_id; audience.civ_name=name
+	audience.speaker={"name":"Qira Venn","title":"Envoy","person_id":0,"role":"envoy"}
+	audience.terms={"resource":"Food","amount":10.0}
+	audience.situation={"type":"gift_goods","ask":"gift:Food","headline":"brings a gift","summary":"%s sends 10 Food." % name}
+	RIVALS.character(civ_id)
+	HALL._enqueue(audience,day,true)
+	var killed:=CC.envoy_act(String(audience.id),"kill")
+	out.append("  You: put their envoy to death.\n  -> %s" % String(killed.get("outcome","")).left(220))
+	check(WAR.feuding(civ_id) and not bool(relation.get("at_war",false)),"A killed envoy of a small people did not start a blood feud")
+	check(RIVALS.envoy_posture(civ_id)=="feud","The wronged small people's posture is '%s', not a feud" % RIVALS.envoy_posture(civ_id))
+	# A year of the full court: their raiders come; nobody of theirs comes to boast.
+	var envoys:Array=[]
+	var hot_days:=0
+	for i in 365:
+		day+=1
+		GameState.elapsed_days=day
+		probe._refill()
+		if WAR.hot(civ_id,day): hot_days+=1
+		for a in HALL.daily(day):
+			if String(a.get("civ_id",""))==civ_id and WAR.hot(civ_id,day) and String((a.get("situation",{}) as Dictionary).get("type",""))!="feud_peace": envoys.append(String((a.get("situation",{}) as Dictionary).get("type","")))
+		for w in HALL.waiting():
+			var choices:=HALL.options(String(w.id))
+			if not choices.is_empty(): HALL.resolve(String(w.id),String(choices[0].id))
+	var kinds:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==civ_id).map(func(e:Dictionary)->String:return String(e.kind))
+	out.append("  a year on: %d days hot; their doings: %s" % [hot_days,", ".join(PackedStringArray(kinds.slice(0,8)))])
+	check(kinds.has("raid") or kinds.has("skirmish") or kinds.has("ambush"),"No raider came in a year of blood feud")
+	check(envoys.is_empty(),"Envoys came from a people in a hot feud: %s" % str(envoys))
+	check(not bool(relation.get("at_war",false)) and (WAR.front(civ_id).war as Dictionary).is_empty(),"The blood feud became a war")
+	var told:=PackedStringArray()
+	for e in (GameState.chronicle.get("entries",[]) as Array):
+		if name in String((e as Dictionary).get("title","")): told.append(String(e.title))
+	out.append("  Chronicle: %s" % "; ".join(told.slice(0,6)))
+	check(" ".join(told).contains("Blood Feud"),"The Chronicle never named the blood feud")
+	for word in ["war with","goes to war","declar","sharpens its spears"]: check(not " ".join(told).to_lower().contains(word),"The Chronicle called the feud a war ('%s'): %s" % [word," ".join(told)])
+	# "Burn their stores": nobody knows the way, so trackers follow the trail.
+	WAR._file(civ_id,"feud",WAR._feud_cause(civ_id),day)
+	var m:=_war_matter(civ_id)
+	check(not m.is_empty(),"The war leader carries no feud matter")
+	if not m.is_empty():
+		var a2:=HALL.open_matter(String(m.id))
+		var typed:=WAR.typed_choice(String(a2.id),"Burn their stores.")
+		# Nobody knows the way: the words go to the trackers, remembered as asked.
+		check(typed=="war_track","'Burn their stores' at an unfound home mapped to '%s'" % typed)
+		var r:=HALL.resolve(String(a2.id),typed)
+		out.append("  You: Burn their stores.\n  -> %s" % String(r.get("outcome","")))
+		check(String(r.get("outcome","")).contains("No one here knows where"),"Burning an unfound home did not send trackers first")
+		var op:Dictionary=WAR.front(civ_id).get("op",{})
+		check(String(op.get("objective",""))=="war_track","The band went to burn a home nobody knows")
+		check(int(op.get("band",0))>=WAR.TRACKERS_MIN and int(op.get("band",0))<=WAR.TRACKERS_MAX,"The trackers are a war band (%d)" % int(op.get("band",0)))
+		_advance(60,civ_id,func()->bool:return (WAR.state().log as Array).any(func(e:Dictionary)->bool:return String(e.civ)==civ_id and String(e.kind)=="op_track"))
+		var tracked:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==civ_id and String(e.kind)=="op_track")
+		check(not tracked.is_empty(),"The trackers never came back")
+		if not tracked.is_empty(): out.append("  %s (chance %.2f)" % [String(tracked[0].text),float(tracked[0].get("chance",0.0))])
+	# A blood price ends it.
+	WAR.front(civ_id)["op"]={}
+	var paid:=WAR.order(civ_id,"war_price")
+	out.append("  You: pay them a blood price.\n  -> %s" % paid)
+	check(not WAR.feuding(civ_id),"A blood price did not end the feud")
+	check(WAR._truce_binds(civ_id,day+30),"Their raiders are not kept home after the blood price")
+
 # ------------------------------------------------------------------ 5
 
 func _bluff_collapses()->void:
@@ -250,27 +357,44 @@ func _bluff_collapses()->void:
 
 # ------------------------------------------------------------------ 6
 
-func _dragged_in()->void:
-	out.append("\n6. KIN AT WAR")
-	var ally:=String(CivilizationSystem.civilizations[1].id)
-	var enemy:=String(CivilizationSystem.civilizations[2].id)
-	if WAR.has_campaign(enemy) or WAR._truce_binds(enemy,day): enemy=String(CivilizationSystem.civilizations[3].id)
+func _stand_with(ally:String,enemy:String,feud:bool)->Dictionary:
 	RIVALS.character(ally)
-	RIVALS.bond(ally,"marriage","the marriage of Wren into your people")
+	if RIVALS.has_bond(ally,["marriage"]).is_empty(): RIVALS.bond(ally,"marriage","the marriage of Wren into your people")
 	probe._set_war(ally,enemy,true)
 	var audience:=HALL._new_audience("foreign","proposal",day)
 	audience.civ_id=ally; audience.civ_name=HALL._civ_name(ally)
 	audience.speaker={"name":"Envoy","title":"Envoy","person_id":0,"role":"envoy"}
-	audience.situation={"type":"war_support","ask":"war_support:"+enemy,"enemy":enemy,"enemy_name":HALL._civ_name(enemy),"headline":"asks you to take a side","summary":"%s is at war with %s." % [HALL._civ_name(ally),HALL._civ_name(enemy)]}
+	audience.situation={"type":"war_support","ask":"war_support:"+enemy,"enemy":enemy,"enemy_name":HALL._civ_name(enemy),"headline":"asks you to take a side","feud":feud,"summary":"%s is %s %s." % [HALL._civ_name(ally),"feuding with" if feud else "at war with",HALL._civ_name(enemy)]}
 	HALL._enqueue(audience,day,true)
 	var stand:Dictionary=HALL.options(String(audience.id)).filter(func(o:Dictionary)->bool:return String(o.id)=="stand")[0]
 	out.append("  option: %s — %s" % [String(stand.label),String(stand.sub)])
 	var result:=HALL.resolve(String(audience.id),"stand")
 	out.append("  %s" % String(result.get("outcome","")))
-	check(WAR.has_campaign(enemy),"Standing with kin did not bring war with their enemy")
-	check(bool(WAR._relation(enemy).get("at_war",false)),"The enemy's relation is not at war")
+	return stand
+
+func _dragged_in()->void:
+	out.append("\n6. KIN IN A FEUD, AND KIN AT WAR")
+	var ally:=String(CivilizationSystem.civilizations[1].id)
+	var enemy:=String(CivilizationSystem.civilizations[2].id)
+	if WAR.has_campaign(enemy) or WAR._truce_binds(enemy,day) or WAR.feuding(enemy): enemy=String(CivilizationSystem.civilizations[3].id)
+	# Small peoples: standing with kin earns the enemy's raiders, never a war.
+	var stand:=_stand_with(ally,enemy,true)
+	check(String(stand.sub).contains("feud"),"Standing with kin in a feud is offered as a war: %s" % String(stand.sub))
+	check(not WAR.has_campaign(enemy) and not bool(WAR._relation(enemy).get("at_war",false)),"Standing with kin in a small people's quarrel brought war")
+	check(WAR.feuding(enemy) and not (WAR.front(enemy).pending as Dictionary).is_empty(),"Standing with kin did not bring their enemy's raiders")
 	var entry:Dictionary=(WAR.state().log as Array)[0]
 	out.append("  %s" % String(entry.get("text","")))
+	# Peoples organised for war: the kin's war is ours.
+	var enemy2:=String(CivilizationSystem.civilizations[3].id) if enemy!=String(CivilizationSystem.civilizations[3].id) else String(CivilizationSystem.civilizations[4].id)
+	GameState.ensure_population_total(2400)
+	_set_pop(ally,3000.0); _set_pop(enemy2,3000.0)
+	WAR.front(enemy2)["pending"]={}
+	_stand_with(ally,enemy2,false)
+	check(WAR.has_campaign(enemy2),"Standing with kin did not bring war with their enemy among peoples organised for war")
+	check(bool(WAR._relation(enemy2).get("at_war",false)),"The enemy's relation is not at war")
+	var entry2:Dictionary=(WAR.state().log as Array)[0]
+	out.append("  %s" % String(entry2.get("text","")))
+	GameState.ensure_population_total(140)
 
 # ------------------------------------------------------------------ 8
 

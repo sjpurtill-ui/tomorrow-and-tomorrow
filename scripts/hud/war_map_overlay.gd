@@ -138,8 +138,8 @@ func collect()->Array[Dictionary]:
 	var civ_ids:Array=at_war.keys()
 	for civ_id in ledger.keys():
 		var f:Dictionary=ledger[civ_id]
-		# A feud short of war: raids within the last year.
-		if not civ_ids.has(civ_id) and int(f.get("level",0))>=1 and today-int(f.get("last_harm",-99999))<=365: civ_ids.append(civ_id)
+		# A feud short of war: blood spilled within the last year.
+		if not civ_ids.has(civ_id) and int(f.get("level",0))>=1 and today-int(f.get("last_harm",-99999))<=WarLoop.FEUD_HOT_DAYS: civ_ids.append(civ_id)
 	for civ_variant in civ_ids:
 		var civ_id:=String(civ_variant)
 		var f:Dictionary=ledger.get(civ_id,{}) if ledger.get(civ_id) is Dictionary else {}
@@ -147,7 +147,11 @@ func collect()->Array[Dictionary]:
 		var enemy:=_civ_name(civ_id)
 		var there:=_enemy_position(civ_id,home)
 		var is_war:=bool(at_war.get(civ_id,false))
-		var start:=int(war.get("start",today)) if is_war else int(f.get("feud_since",f.get("last_harm",today)))
+		# A small people's fight is a feud, even while our own band is out
+		# against them (conflict_scale.gd).
+		var feud:=not is_war or not WarLoop.formal(civ_id)
+		var start:=int(war.get("start",today)) if is_war and not war.is_empty() else int(f.get("feud_since",f.get("last_harm",today)))
+		if start<0: start=int(f.get("last_harm",today))
 		var days:=maxi(0,today-start)
 		var harm:Dictionary={}
 		var raids:Array[Dictionary]=[]
@@ -163,7 +167,7 @@ func collect()->Array[Dictionary]:
 			var key:="%s:%d" % [civ_id,int(raid.get("day",0))]
 			var info:={"enemy":enemy,"target":String(raid.get("target","")),"days_ago":ago,"our_dead":int(raid.get("our_dead",0)),"taken":int(raid.get("taken",0))}
 			out.append({"id":"raid:"+key,"kind":"raid","points":[_v3(Marks.raid_point(home,there,String(raid.get("target","")),key))],"tip":Marks.raid_details(info),"color":WAR_COLOR,"alpha":alpha})
-		var op_variant:Variant=war.get("op",{}) if is_war else f.get("op",{})
+		var op_variant:Variant=war.get("op",{}) if not war.is_empty() else f.get("op",{})
 		var op:Dictionary=op_variant if op_variant is Dictionary else {}
 		var op_info:Dictionary={}
 		if not op.is_empty() and String(op.get("objective",""))!="war_parley":
@@ -171,10 +175,13 @@ func collect()->Array[Dictionary]:
 			op_info={"band":int(op.get("band",0)),"days_left":left,"leader":String(op.get("general",leader))}
 			var band:={"ours":true,"count":int(op.get("band",0)),"leader":String(op.get("general",leader)),"enemy":enemy,"days_left":left}
 			out.append({"id":"band:ours:"+civ_id,"kind":"band","points":[_v3(Marks.band_point(home,there,int(op.get("start",today)),int(op.get("due",today)),today))],"tip":Marks.band_details(band),"color":OURS_COLOR,"alpha":1.0})
-		var last_fight:=int(war.get("last_fight",war.get("start",today)))
-		var info:={"enemy":enemy,"days":days,"our_dead":int(war.get("our_dead",0)),"their_dead":int(war.get("their_dead",0)),"leader":leader,"harm":harm,"op":op_info,
-			"quiet_days":today-last_fight if is_war and op_info.is_empty() else 0,"field":int(field_by_civ.get(civ_id,0))}
-		var tag:=Marks.war_tag(enemy,stage,days) if is_war else "Feud with %s" % enemy
+		var last_fight:=int(war.get("last_fight",war.get("start",today))) if not war.is_empty() else int(f.get("last_harm",today))
+		# The dead of the war, or of the feud (its own count, war_loop._tally).
+		var our_dead:=int(war.get("our_dead",0)) if not war.is_empty() else int(f.get("our_dead",0))
+		var their_dead:=int(war.get("their_dead",0)) if not war.is_empty() else int(f.get("their_dead",0))
+		var info:={"enemy":enemy,"days":days,"our_dead":our_dead,"their_dead":their_dead,"leader":leader,"harm":harm,"op":op_info,
+			"quiet_days":today-last_fight if is_war and op_info.is_empty() else 0,"field":int(field_by_civ.get(civ_id,0)),"feud":feud}
+		var tag:=Marks.war_tag(enemy,stage,days) if not feud else "Feud with %s" % enemy
 		var segment:=Marks.border_segment(home,there)
 		out.append({"id":"border:"+civ_id,"kind":"border","points":[_v3(segment[0]),_v3(segment[1])],"tip":"The border with %s. Their men cross here." % enemy,"color":WAR_COLOR,"alpha":1.0})
 		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})

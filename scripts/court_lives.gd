@@ -1063,6 +1063,10 @@ static func _rivals(day:int)->void:
 		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 		if int(relation.get("contact_level",0))<1 or bool(relation.get("at_war",false)): continue
 		var civ_id:=String(civ.get("id",""))
+		# A people in a hot feud with us neither sends tribute nor tests us: its
+		# raiders come instead. If dread wears it down, its peace-seeker comes
+		# once the raids have stopped (war_loop.gd feud_peace).
+		if bool(Hall._war().call("hot",civ_id,day)): continue
 		if day-int(rivals.get(civ_id,-99999))<RIVAL_GAP: continue
 		var d:=rival_dread(civ_id)
 		if d<0.35: continue

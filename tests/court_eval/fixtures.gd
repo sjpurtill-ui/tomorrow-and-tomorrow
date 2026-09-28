@@ -29,6 +29,9 @@ extends RefCounted
 ##   envoy_after_fall   Tsaren held; an Esurai envoy has come about Tsaren (town_return)
 ##   aim_suri           at war, Tsaren theirs; War Chief Suri holds a matter of aims for a generation
 ##   grain_lost         at peace; six days ago damp got into the grain pits and 600 Food rotted
+##   feud_unfound       at peace with the Esurai; a blood feud with the Neyali, a small people whose
+##                      envoy we killed: their raiders came forty days ago, nobody knows where they
+##                      live, and Suri holds the matter of their raid (war_loop.gd feuds)
 ##
 ## Roles a case may speak to: headman, suri, kavu, imeri, rovik, envoy, aim.
 
@@ -43,7 +46,7 @@ const AiMode:=preload("res://scripts/ai_mode.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 
-const NAMES:=["home_peace","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost"]
+const NAMES:=["home_peace","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
 
 ## The user's own words used to make the worlds.
 const BIND_WORDS:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
@@ -343,6 +346,15 @@ func _build(name:String)->Dictionary:
 			if audience.is_empty(): return {"error":"no envoy audience (town_return)"}
 			audiences["envoy"]=String(audience.id)
 			notes.append("envoy: %s, %s" % [String((audience.speaker as Dictionary).get("title","")),String((audience.situation as Dictionary).get("headline",""))])
+		"feud_unfound":
+			info=base(false)
+			train(30)
+			var army:=band(18,true)
+			if army.has("error"): return army
+			info["band_id"]=int(army.army_id); info["rovik_fid"]=String((army.commander as Dictionary).get("figure_id",""))
+			var made:=_feud_people(info)
+			if made!="": return {"error":made}
+			notes.append("feud with %s: %s" % [String(info.feud_id),str((load("res://scripts/war_loop.gd") as GDScript).call("feud_view",String(info.feud_id)))])
 		"grain_lost":
 			info=base(false)
 			train(12)
@@ -373,6 +385,31 @@ func _build(name:String)->Dictionary:
 	if info.is_empty(): return {"error":"base world failed"}
 	info["world"]=name
 	return {"snap":snapshot(),"info":info,"audiences":audiences,"notes":notes}
+
+func _feud_people(info:Dictionary)->String:
+	## The Neyali: a small people whose envoy was killed at our court. A blood
+	## feud (no war: conflict_scale.gd), their raiders came forty days ago, and
+	## nobody knows where they live.
+	if CivilizationSystem.civilizations.size()<3: return "no third people for the feud"
+	var neyali:Dictionary=CivilizationSystem.civilizations[2]
+	neyali["name"]="Neyali"
+	var id:=String(neyali.id)
+	info["feud_id"]=id
+	var rel:Dictionary=neyali.player_relation
+	rel.at_war=false; rel.treaty="none"; rel.contact_level=2; rel.met_day=0
+	rel.home_location_known=false; rel.home_position={}
+	rel.opinion=-0.5; rel.border_tension=0.7
+	var war_loop:GDScript=load("res://scripts/war_loop.gd")
+	if bool(war_loop.call("formal",id)): return "the Neyali are large enough for war"
+	var day:=int(GameState.elapsed_days)
+	(load("res://scripts/rival_rulers.gd") as GDScript).call("grudge",id,"how you slew our envoy Qira in your hall",1.0,"slain_envoy:fixture")
+	war_loop.call("blood_feud",id,day-60,"the killing of their envoy Qira")
+	var f:Dictionary=war_loop.call("front",id)
+	f["pending"]={}
+	war_loop.call("_raid",id,day-40,"vengeance",false)
+	f["pending"]={}
+	if not bool(war_loop.call("feuding",id)): return "the feud did not take"
+	return ""
 
 func _round_trip()->String:
 	## Save and load through the real save system on a temporary slot (the

@@ -179,7 +179,9 @@ static func world_brief(audience_id:String)->Dictionary:
 			if cid=="" or cid=="player": continue
 			var rel:Dictionary=c.get("player_relation",{}) if c.get("player_relation") is Dictionary else {}
 			if int(rel.get("contact_level",0))<=0 and not bool(rel.get("at_war",false)): continue
-			(brief.peoples as Array).append({"id":"people:"+cid,"name":String(c.get("name",cid)),"at_war":bool(rel.get("at_war",false))})
+			# A feud short of war (war_loop.gd): their raiders and ours, nothing declared.
+			var feud:=not bool(rel.get("at_war",false)) and bool((load("res://scripts/war_loop.gd") as GDScript).call("feuding",cid))
+			(brief.peoples as Array).append({"id":"people:"+cid,"name":String(c.get("name",cid)),"at_war":bool(rel.get("at_war",false)),"feud":feud})
 			ids["people:"+cid]="people"
 		var mc:Variant=WorldSimulation.military
 		brief.home_troops=maxi(0,int((mc.home_army as Dictionary).get("troops",0)))
@@ -254,7 +256,7 @@ static func brief_text(brief:Dictionary)->String:
 	for t:Dictionary in brief.towns: rows.append("%s = %s (%s%s)" % [String(t.id),String(t.name),String(t.people),("; NOT HELD: "+String(t.once)+" Nobody of it is in our hands.") if String(t.get("once",""))!="" else ""])
 	out.append("FOREIGN TOWNS WE KNOW: "+("; ".join(rows) if not rows.is_empty() else "none"))
 	rows=PackedStringArray()
-	for p:Dictionary in brief.peoples: rows.append("%s = %s (%s)" % [String(p.id),String(p.name),"AT WAR with us" if bool(p.at_war) else "at peace"])
+	for p:Dictionary in brief.peoples: rows.append("%s = %s (%s)" % [String(p.id),String(p.name),"AT WAR with us" if bool(p.at_war) else ("IN A FEUD with us: raids back and forth, nothing declared; an order to attack or go to war with them is a raid on them" if bool(p.get("feud",false)) else "at peace")])
 	out.append("PEOPLES: "+("; ".join(rows) if not rows.is_empty() else "none known"))
 	rows=PackedStringArray()
 	for b:Dictionary in brief.bands: rows.append("%s = %s, %d fighters, %s%s%s" % [String(b.id),String(b.name),int(b.troops),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",("; UNDER WAY: "+String(b.doing)) if String(b.get("doing",""))!="" else ""])

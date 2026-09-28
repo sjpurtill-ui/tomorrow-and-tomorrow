@@ -1748,6 +1748,17 @@ static func _rivals(day:int)->void:
 		var level:=int(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("contact_level",0))
 		if level<2: continue
 		var r:Dictionary=rivals.get(civ_id,{})
+		# While their raiders are out (a hot feud or a war), no vow is sworn,
+		# learned from a messenger, warned of, boasted or given up: nobody of
+		# theirs comes to our fire to tell it. The vow's clock stops until the
+		# fighting cools (war_loop.gd).
+		if bool(Hall._war().call("hot",civ_id,day)):
+			if not r.is_empty() and String(r.get("status",""))=="active":
+				var held_since:=int(r.get("held_day",day))
+				r["deadline"]=int(r.get("deadline",day))+maxi(0,day-held_since)
+				r["held_day"]=day
+			continue
+		if not r.is_empty(): r.erase("held_day")
 		if r.is_empty() or String(r.get("status",""))!="active":
 			if not r.is_empty() and day<int(r.get("rest_until",0)): continue
 			if rivals.size()>=RIVALS_MAX and not rivals.has(civ_id): continue
@@ -1877,6 +1888,7 @@ static func contradiction(cand:Dictionary)->String:
 		if String(live.get("template",""))=="friend" and String(live.get("subject",""))==civ_id: return "You would have %s fear us, when we are sworn to bind them to us in friendship?" % people
 	else:
 		if bool(_relation(civ_id).get("at_war",false)): return "You would bind %s to us, while our spears are out against them?" % people
+		if bool(Hall._war().call("hot",civ_id)): return "You would bind %s to us, while their raiders and ours are still killing each other?" % people
 		if String(live.get("template",""))=="fear" and String(live.get("subject",""))==civ_id: return "You would bind %s to us, when we are sworn to make them fear our name?" % people
 	return ""
 

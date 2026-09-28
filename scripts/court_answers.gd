@@ -497,19 +497,63 @@ static func _battle_answer(b:Dictionary,lower:String)->String:
 	if take_words!="": out+=" "+take_words
 	return out
 
+## A feud in plain words, from the sheet (court_facts feud_words' numbers):
+## "Their raiders have come three times since the spring of Year 94, and we
+## have struck back twice; four of ours and six of theirs are dead."
+static func feud_sentence(v:Dictionary)->String:
+	return "It is no war: %s.%s" % [feud_head(v),feud_detail(v)]
+
+## "we are in a feud with the Esurai, raids and killings back and forth, and
+## nobody has declared anything"
+static func feud_head(v:Dictionary)->String:
+	return "we are in a feud with the %s, raids and killings back and forth, and nobody has declared anything" % String(v.get("name",""))
+
+## The feud's own count, each sentence led by a space ("" when there is none).
+static func feud_detail(v:Dictionary)->String:
+	var parts:=PackedStringArray()
+	var since:=(" since %s" % _since_words(int(v.since))) if int(v.get("since",-1))>=0 and int(v.get("days",0))>0 else ""
+	if bool(v.get("open_fight",false)): parts.append("our own band is out against them now")
+	var raids:=int(v.get("raids",0)); var strikes:=int(v.get("strikes",0))
+	if raids>0: parts.append("their raiders have come %s%s%s" % [_times(raids),since,(", and we have struck back %s" % _times(strikes)) if strikes>0 else ""])
+	elif strikes>0: parts.append("we have struck at them %s%s" % [_times(strikes),since])
+	var ours:=int(v.get("our_dead",0)); var theirs:=int(v.get("their_dead",0))
+	if ours+theirs>0: parts.append("%d of ours and %d of theirs are dead" % [ours,theirs])
+	var out:=(" "+_cap("; ".join(parts))+".") if not parts.is_empty() else ""
+	if not bool(v.get("hot",true)): out+=" It has been quiet for a while now."
+	if not bool(v.get("home_known",false)): out+=" Nobody here knows yet where they live."
+	return out
+
+static func _times(n:int)->String:
+	return "once" if n==1 else ("twice" if n==2 else "%s times" % _count_word(n))
+
+static func _count_word(n:int)->String:
+	var words:=["none","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+	return String(words[n]) if n>=0 and n<words.size() else str(n)
+
+static func _since_words(day:int)->String:
+	return String((load("res://scripts/court_facts.gd") as GDScript).call("_in_season",day)).trim_prefix("in ")
+
 ## What everyone at court knows: whom we fight, whom we are at peace with,
 ## the day, our own number.
 static func _common_answer(sheet:Dictionary,lower:String)->String:
 	var wars:Array=sheet.get("at_war_with",[])
 	var peace:Array=sheet.get("at_peace_with",[])
-	if _has(lower,"\\b(at war|war with|in a war|at peace|peace with|(who|whom) do we fight|who are we fighting|(who|which people) (is|are) our (enemy|enemies|foes?)|do we have (any )?(enemies|foes))\\b"):
+	var feuds:Array=sheet.get("feuding_with",[])
+	if _has(lower,"\\b(at war|war with|in a war|at peace|peace with|feud|feuding|fighting (with|us)|(who|whom) do we fight|who are we fighting|(who|which people) (is|are) our (enemy|enemies|foes?)|do we have (any )?(enemies|foes))\\b"):
 		# A people named: yes or no, and the rest.
 		for n in wars:
 			if _name_in(lower,String(n)): return "Yes. We are at war with the %s." % String(n)
+		# A small people: a feud, never a war (conflict_scale.gd), in plain words.
+		for v in feuds:
+			if v is Dictionary and _name_in(lower,String((v as Dictionary).get("name",""))): return feud_sentence(v)
+		var feud_names:=PackedStringArray()
+		for v in feuds: if v is Dictionary: feud_names.append(String((v as Dictionary).get("name","")))
+		var feud_line:=(" We are in a feud with the %s: raids and killings back and forth, nothing declared." % " and the ".join(feud_names)) if not feud_names.is_empty() else ""
 		for n in peace:
-			if _name_in(lower,String(n)): return "No. We are at peace with the %s%s." % [String(n),("; we are at war with the %s" % " and the ".join(PackedStringArray(wars))) if not wars.is_empty() else ""]
-		if wars.is_empty(): return "We are at war with nobody.%s" % ((" We are at peace with the %s." % " and the ".join(PackedStringArray(peace))) if not peace.is_empty() else "")
-		return "We are at war with the %s.%s" % [" and the ".join(PackedStringArray(wars)),(" We are at peace with the %s." % " and the ".join(PackedStringArray(peace))) if not peace.is_empty() else ""]
+			if _name_in(lower,String(n)): return "No. We are at peace with the %s%s.%s" % [String(n),("; we are at war with the %s" % " and the ".join(PackedStringArray(wars))) if not wars.is_empty() else "",feud_line]
+		if wars.is_empty() and feuds.size()==1 and feuds[0] is Dictionary: return "We are at war with nobody, but %s.%s%s" % [feud_head(feuds[0]),feud_detail(feuds[0]),(" We are at peace with the %s." % " and the ".join(PackedStringArray(peace))) if not peace.is_empty() else ""]
+		if wars.is_empty(): return "We are at war with nobody.%s%s" % [feud_line,(" We are at peace with the %s." % " and the ".join(PackedStringArray(peace))) if not peace.is_empty() else ""]
+		return "We are at war with the %s.%s%s" % [" and the ".join(PackedStringArray(wars)),feud_line,(" We are at peace with the %s." % " and the ".join(PackedStringArray(peace))) if not peace.is_empty() else ""]
 	if _has(lower,"\\b(what|which) (day|year|season)\\b|\\bwhat time of (the )?year\\b"):
 		var parts:=String(sheet.get("when","")).split(" · ")
 		return "It is the %s of %s." % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "It is %s." % String(sheet.get("when",""))
@@ -727,7 +771,7 @@ static func _scouts_answer(sheet:Dictionary,lower:String)->String:
 		return "%s %s out: %s." % [str(parties.size()) if parties.size()>1 else "One",("parties are" if parties.size()>1 else "party is"),_join(bits)]
 	if _has(lower,"\\b(out there|beyond|around us|who else|other peoples?|any peoples?|neighbou?rs?|strangers|met|have we found|what lies|what is there|what's there|the world|the lands?)\\b"):
 		var met:PackedStringArray=PackedStringArray()
-		for p:Dictionary in sheet.get("met_peoples",[]): met.append("the %s (%s%s)" % [String(p.name),"at war with us" if bool(p.at_war) else "at peace","" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		for p:Dictionary in sheet.get("met_peoples",[]): met.append("the %s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else "at peace"),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
 		var towns:PackedStringArray=PackedStringArray()
 		for t:Dictionary in sheet.get("known_towns",[]): towns.append((load("res://scripts/court_facts.gd") as GDScript).call("town_way_words",t))
 		if met.is_empty() and towns.is_empty(): return "We have met no other people yet; the scouts have found nobody."

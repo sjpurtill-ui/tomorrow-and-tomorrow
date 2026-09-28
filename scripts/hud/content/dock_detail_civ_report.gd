@@ -49,7 +49,7 @@ func tab(_sub:int)->Dictionary:
 	var estimate_items:Array=[
 		{"name":"People in the places we saw","value":_reported_range(civ,"population"),"detail":"Only what our scouts saw; not a count of the whole people."},
 		{"name":"Fighters seen","value":_reported_range(civ,"military"),"detail":"What was seen on one visit, not their whole strength."},
-		{"name":"What they intend","value":"At war with us" if bool(relation.get("at_war",false)) else "Uncertain","detail":"We judge by what their ruler says and does; we cannot see their minds."},
+		{"name":"What they intend","value":_intent(civ_id,relation),"detail":"We judge by what their ruler says and does; we cannot see their minds."},
 	]
 	var blocks:Array=[{"type":"rows","heading":"What the reports say","items":estimate_items}]
 	var towns:=towns_block(civ_id)
@@ -113,6 +113,13 @@ static func towns_block(target_civ_id:String)->Dictionary:
 	else: line="%s holds no town that we know of." % civ_name
 	if unseen>0 and not still.is_empty(): line+=" They hold %s more our people have not seen." % ("one" if unseen==1 else str(unseen))
 	return {"type":"rows","heading":"Their towns","items":items+[{"name":"Where they live now","value":"","detail":line}]}
+
+## "At war with us", "In a feud with us" (a small people's fight, never a war:
+## war_loop.gd) or "Uncertain".
+static func _intent(target_civ_id:String,relation:Dictionary)->String:
+	var war_loop:GDScript=load("res://scripts/war_loop.gd")
+	if war_loop!=null and bool(war_loop.call("feuding",target_civ_id)) and bool(war_loop.call("hot",target_civ_id)): return "In a feud with us: their raiders come"
+	return "At war with us" if bool(relation.get("at_war",false)) else "Uncertain"
 
 func _reported_range(civ:Dictionary,prefix:String)->String:
 	if not civ.has(prefix+"_estimate_low") or not civ.has(prefix+"_estimate_high"):return "Not yet observed"

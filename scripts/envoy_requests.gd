@@ -244,7 +244,11 @@ static func _civ_ok(civ:Dictionary)->bool:
 	return not civ.is_empty() and bool(civ.get("alive",true))
 
 static func _at_war(civ:Dictionary)->bool:
-	return bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false))
+	## At war with us, or in a hot feud (war_loop.gd): no loans repaid, no
+	## carriers crossing, no business while their raiders are out.
+	if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): return true
+	var id:=String(civ.get("id",""))
+	return id!="" and bool((load("res://scripts/war_loop.gd") as GDScript).call("hot",id))
 
 static func _pop(civ:Dictionary)->float:
 	return maxf(20.0,float(civ.get("population",100)))

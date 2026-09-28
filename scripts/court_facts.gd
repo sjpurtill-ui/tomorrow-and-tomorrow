@@ -61,6 +61,8 @@ const SCOUT_KEYS:=["ChiefScout"]
 const SCOUT_WORDS:=["pathfinder","scout","tracker","outrider"]
 ## The prompt block is kept within this many characters.
 const MAX_CHARS:=3600
+## Raids, feuds and the war leader's fights (loaded when asked: it reaches back here).
+const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
 static func _world()->Variant: return WorldSimulation.world
 static func _mc()->Variant: return WorldSimulation.military
@@ -125,16 +127,23 @@ static func _common(out:Dictionary)->void:
 	out["home"]=String(state.settlement_name) if state!=null else ""
 	out["home_people"]=int(state.population_total) if state!=null else 0
 	var wars:Array=[]
+	var feuds:Array=[]
 	var peace:Array=[]
 	var world:Variant=_world()
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
 	if world!=null:
 		for c in world.civilizations:
 			if not c is Dictionary or String((c as Dictionary).get("id",""))=="player": continue
 			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
 			if int(rel.get("contact_level",0))<=0 and not bool(rel.get("at_war",false)): continue
-			if bool(rel.get("at_war",false)): wars.append(String(c.get("name","")))
+			# A small people's fight is a feud, never a war (conflict_scale.gd):
+			# raids and killings back and forth, the numbers from the war ledger.
+			var feud:Dictionary=war_loop.call("feud_view",String(c.get("id",""))) if war_loop!=null else {}
+			if not feud.is_empty(): feuds.append(feud)
+			elif bool(rel.get("at_war",false)): wars.append(String(c.get("name","")))
 			else: peace.append(String(c.get("name","")))
 	out["at_war_with"]=wars
+	out["feuding_with"]=feuds
 	out["at_peace_with"]=peace
 	# The last fight, as everyone has heard it: where, when and who won.
 	out["last_fights"]=battles(1,false)
@@ -492,12 +501,14 @@ static func _scouts(out:Dictionary)->void:
 	out["parties"]=parties
 	var home:Vector2=world.player_world_origin if world!=null else Vector2.ZERO
 	var peoples:Array=[]
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
 	if world!=null:
 		for c in world.civilizations:
 			if not c is Dictionary or String((c as Dictionary).get("id",""))=="player": continue
 			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
 			if int(rel.get("contact_level",0))<=0 and not bool(rel.get("at_war",false)): continue
-			peoples.append({"name":String(c.get("name","")),"at_war":bool(rel.get("at_war",false)),"home_known":bool(rel.get("home_location_known",false)),"met":int(rel.get("contact_level",0))>=2})
+			var feud:=war_loop!=null and bool(war_loop.call("feuding",String(c.get("id",""))))
+			peoples.append({"name":String(c.get("name","")),"at_war":bool(rel.get("at_war",false)) and not feud,"feud":feud,"home_known":bool(rel.get("home_location_known",false)),"met":int(rel.get("contact_level",0))>=2})
 	out["met_peoples"]=peoples
 	var towns:Array=[]
 	for t:Dictionary in WarOrders.held_towns()+WarOrders.known_places():
@@ -551,7 +562,9 @@ static func people(civ_id:String)->Dictionary:
 			if int((t as Dictionary).people)>int(best.people): best=t
 		seat=String(best.name)
 		best["seat"]=true
-	return {"name":String(civ.get("name","")),"people":roundi(float(civ.get("population",0.0))),"at_war":bool(rel.get("at_war",false)),"treaty":String(rel.get("treaty","none")),
+	var war_loop:GDScript=load(WAR_LOOP_PATH)
+	var feud:=war_loop!=null and bool(war_loop.call("feuding",civ_id))
+	return {"name":String(civ.get("name","")),"people":roundi(float(civ.get("population",0.0))),"at_war":bool(rel.get("at_war",false)) and not feud,"feud":feud,"treaty":String(rel.get("treaty","none")),
 		"towns":towns,"seat":seat,"lost":lost,"home":home}
 
 ## The envoy's own people in plain lines, exact, for the voice's prompt.
@@ -562,7 +575,7 @@ static func people_text(p:Dictionary)->String:
 	var lines:PackedStringArray=PackedStringArray()
 	lines.append("Your people, the %s: about %d in all. Your towns now: %s." % [String(p.name),int(p.people),"; ".join(rows) if not rows.is_empty() else "none left"])
 	for l:Dictionary in p.get("lost",[]): lines.append("%s%s: %s." % [String(l.name)," (once your ruler's seat)" if bool(l.get("seat",false)) else "",String(l.how)])
-	lines.append("Your people and %s: %s." % [String(p.get("home","")),"at war" if bool(p.at_war) else ("treaty: "+String(p.treaty) if String(p.treaty) not in ["","none"] else "at peace")])
+	lines.append("Your people and %s: %s." % [String(p.get("home","")),"in a feud (raids and killings back and forth; nobody has declared anything)" if bool(p.get("feud",false)) else ("at war" if bool(p.at_war) else ("treaty: "+String(p.treaty) if String(p.treaty) not in ["","none"] else "at peace"))])
 	return "\n".join(lines)
 
 # --------------------------------------------------------------------------
@@ -575,7 +588,9 @@ static func text(s:Dictionary)->String:
 	lines.append("Today: %s. Home: %s, %d people." % [String(s.get("when","")),String(s.get("home","")),int(s.get("home_people",0))])
 	var wars:Array=s.get("at_war_with",[])
 	var peace:Array=s.get("at_peace_with",[])
-	lines.append("At war with: %s. At peace with: %s." % [", ".join(PackedStringArray(wars)) if not wars.is_empty() else "nobody",", ".join(PackedStringArray(peace)) if not peace.is_empty() else "nobody we know"])
+	var feud_rows:PackedStringArray=PackedStringArray()
+	for v:Dictionary in s.get("feuding_with",[]): feud_rows.append(feud_words(v))
+	lines.append("At war with: %s.%s At peace with: %s." % [", ".join(PackedStringArray(wars)) if not wars.is_empty() else "nobody",(" In a feud with: %s (a feud, not a war: raids and killings back and forth, nothing declared)." % "; ".join(feud_rows)) if not feud_rows.is_empty() else "",", ".join(PackedStringArray(peace)) if not peace.is_empty() else "nobody we know"])
 	if s.get("new_towns") is Dictionary: lines.append("New towns: %s." % AutoFounding.court_words(s.new_towns,false))
 	var war:=(s.get("offices",[]) as Array).has("war")
 	for t:Dictionary in s.get("towns",[]):
@@ -622,7 +637,7 @@ static func text(s:Dictionary)->String:
 		for p:Dictionary in s.get("parties",[]): out_now.append(party_words(p))
 		lines.append("Scouting parties out: %s." % ("; ".join(out_now) if not out_now.is_empty() else "none"))
 		var met:PackedStringArray=PackedStringArray()
-		for p:Dictionary in s.get("met_peoples",[]): met.append("%s (%s%s)" % [String(p.name),"at war with us" if bool(p.at_war) else "at peace","" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		for p:Dictionary in s.get("met_peoples",[]): met.append("%s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else "at peace"),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
 		lines.append("Peoples we have met: %s." % (", ".join(met) if not met.is_empty() else "none"))
 		var places:PackedStringArray=PackedStringArray()
 		for t:Dictionary in s.get("known_towns",[]): places.append(town_way_words(t))
@@ -635,6 +650,26 @@ static func text(s:Dictionary)->String:
 	if not council.is_empty(): lines.append("Council: %s.%s" % ["; ".join(council),(" Set aside: %s." % "; ".join(PackedStringArray(s.set_aside))) if not (s.get("set_aside",[]) as Array).is_empty() else ""])
 	var out:="\n".join(lines)
 	return out if out.length()<=MAX_CHARS else out.substr(0,MAX_CHARS)+"..."
+
+## "once", "twice", "3 times".
+static func times_words(n:int)->String:
+	return "once" if n==1 else ("twice" if n==2 else "%d times" % n)
+
+## One feud in plain words, exact, from the war ledger (war_loop.feud_view):
+## "Esurai (since the spring of Year 94; their raiders have come 3 times; we
+## have struck back twice; 4 of ours and 6 of theirs dead; the last blood in
+## the autumn of Year 95; their home not yet found)".
+static func feud_words(v:Dictionary)->String:
+	var bits:=PackedStringArray()
+	if int(v.get("since",-1))>=0 and int(v.get("days",0))>0: bits.append("since %s" % _in_season(int(v.since)).trim_prefix("in "))
+	if bool(v.get("open_fight",false)): bits.append("our own band is out against them")
+	if int(v.get("raids",0))>0: bits.append("their raiders have come %s" % times_words(int(v.raids)))
+	if int(v.get("strikes",0))>0: bits.append("we have struck back %s" % times_words(int(v.strikes)))
+	if int(v.get("our_dead",0))+int(v.get("their_dead",0))>0: bits.append("%d of ours and %d of theirs dead" % [int(v.get("our_dead",0)),int(v.get("their_dead",0))])
+	if int(v.get("last_harm",-1))>=0: bits.append("the last blood %s" % _in_season(int(v.last_harm)))
+	if not bool(v.get("hot",true)): bits.append("quiet now")
+	bits.append("their home not yet found" if not bool(v.get("home_known",false)) else ("their home %s" % String(v.way) if String(v.get("way",""))!="" else "their home known"))
+	return "%s (%s)" % [String(v.get("name","")),"; ".join(bits)]
 
 ## One fight in plain words, exact: who won, the dead on each side, the
 ## captives and what became of them, the spoils and where they went.

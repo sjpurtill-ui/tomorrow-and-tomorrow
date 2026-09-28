@@ -46,7 +46,8 @@ static func time_words(days:int,stage:String)->String:
 
 ## The hover account of one war. `info` keys: enemy, days, our_dead, their_dead,
 ## leader, harm {target, days_ago}, op {band, days_left, leader}, quiet_days,
-## field (people in the field, shown only in the statistical age).
+## field (people in the field, shown only in the statistical age), feud (a
+## small people's fight: a feud in every age, conflict_scale.gd).
 static func details(info:Dictionary,stage:String)->String:
 	var enemy:=String(info.get("enemy","They"))
 	var lines:PackedStringArray=[]
@@ -56,7 +57,7 @@ static func details(info:Dictionary,stage:String)->String:
 	elif not harm.is_empty():
 		lines.append("%s's men have not come for a long while." % enemy)
 	else:
-		lines.append(("We are feuding with %s." if stage=="hearth" else "We are at war with %s.") % enemy)
+		lines.append(("We are feuding with %s." if stage=="hearth" or bool(info.get("feud",false)) else "We are at war with %s.") % enemy)
 	lines.append(time_words(int(info.get("days",0)),stage))
 	var ours:=int(info.get("our_dead",0)); var theirs:=int(info.get("their_dead",0))
 	lines.append("No one has died yet." if ours+theirs<=0 else "%d of ours dead, %d of theirs." % [ours,theirs])
