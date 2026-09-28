@@ -41,6 +41,8 @@ const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
+const BattleBlocks:=preload("res://scripts/battle_blocks.gd")
+const BattleGround:=preload("res://scripts/battle_ground.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
 const TRAINING_PROGRAMS:Dictionary={
 	"route_rehearsal":{"label": "ROUTE & SUPPLY PRACTICE", "duration_days": 108.0, "food_per_participant": 0.28, "training_gain": 0.03, "experience_gain": 0.0, "readiness_gain": 0.04, "fatigue_per_day": 0.00045, "wear_rate": 0.00048, "command_gain": {"logistics": 0.04, "resolve": 0.01}, "description": "Practice load distribution, route finding, and resupply. Builds logistics and resolve across unit types.", "scope": "army", "required_discovery": "", "minimum_adoption": 0.0},
@@ -1877,6 +1879,9 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	WorldSimulation.figures.record_battle(result)
 	var home_side:=String(result.get("home_side","attacker"))
 	var home_result:Dictionary=result.get(home_side,result.get("attacker",{}))
+	# Their men our side took when their blocks broke are our captives now.
+	var taken_in_battle:=int((result.get("defender" if home_side=="attacker" else "attacker",{}) as Dictionary).get("captured_in_battle",0))
+	if taken_in_battle>0: foreign_prisoners+=taken_in_battle
 	var home_force_kind:=String(result.get("home_force_kind","field"))
 	if not result.get("command_participants",[]).is_empty():
 		command_hierarchy.battle.commit(result)
@@ -2127,9 +2132,10 @@ func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	active_engagement["commander_managed"]=command_hierarchy.executing
 	if command_hierarchy.executing:command_hierarchy.battle.attach(active_engagement,command_hierarchy.battle_candidates)
 	active_engagement["tactics"]=_engagement_tactics(active_engagement)
+	_open_battle(active_engagement)
 	# A hopeless fight (tests/test_battle_scale.gd): the small side is overrun
 	# in one exchange, settled the day it starts, with no battle to sit through.
-	if simulator.overrun_expected(active_engagement.attacker,active_engagement.defender,battle_ground)!="": active_engagement["overrun_expected"]=true
+	if simulator.overrun_expected(active_engagement.attacker,active_engagement.defender,battle_ground,active_engagement.get("ground",{}))!="": active_engagement["overrun_expected"]=true
 	active_threat.clear(); threat_changed.emit({}); army_changed.emit(home_army.duplicate(true))
 	if bool(active_engagement.get("overrun_expected",false)):
 		return settle_overrun_now() if settle_overrun else engagement_snapshot()
@@ -2151,15 +2157,54 @@ func settle_overrun_now()->Dictionary:
 	return settled
 
 
-## A day of fighting: one exchange, or, where one side is badly outmatched or
-## both are only a handful, exchanges until it is decided (bounded), so a
-## lopsided or tiny fight does not drag across days.
+## A day of fighting is one phase of the battle (battle_blocks.gd: a couple of
+## hours of exchanges early on, longer in later ages). Where one side is badly
+## outmatched or both are only a handful, it is fought until it is decided
+## (bounded), so a lopsided or tiny fight does not drag across days.
 func fight_engagement_day(order:String)->void:
-	var exchanges:=0
-	while not active_engagement.is_empty() and exchanges<DAY_EXCHANGE_LIMIT:
-		var quick:=_quick_fight(active_engagement)
-		advance_engagement(order); exchanges+=1
-		if not quick or bool(active_engagement.get("awaiting_player_view",false)): break
+	if active_engagement.is_empty(): return
+	if not active_engagement.has("battle"): _open_battle(active_engagement)
+	var exchanges:=DAY_EXCHANGE_LIMIT if _quick_fight(active_engagement) else _exchanges_left_in_phase(active_engagement.get("battle",{}))
+	advance_engagement(order,exchanges)
+
+
+func _exchanges_left_in_phase(battle:Dictionary)->int:
+	if battle.is_empty(): return 1
+	var length:=maxi(1,int(battle.get("phase_len",4)))
+	return length-posmod(int(battle.get("exchange",0)),length)
+
+
+## Sets up the block battle for an engagement (battle_blocks.gd): the ground
+## it is fought on, each side gathered into blocks, the line and the reserve.
+## Also gives the engagement its id and a progress of 0 (player's side
+## positive). Older engagements get theirs the first time they are fought.
+func _open_battle(engagement:Dictionary)->void:
+	if engagement.is_empty(): return
+	var threat:Dictionary=engagement.get("threat",{})
+	if String(engagement.get("id",""))=="": engagement["id"]="%d-%d" % [int(threat.get("discovered_day",WorldSimulation.state.elapsed_days)),int(engagement.get("seed",0))]
+	if not engagement.has("ground") or not (engagement.ground as Dictionary).has("kind"):
+		engagement["ground"]=BattleGround.of(_ground_context(engagement))
+	if not engagement.has("battle") or (engagement.battle as Dictionary).is_empty():
+		engagement["battle"]=simulator.open_battle(engagement.get("attacker",{}),engagement.get("defender",{}),{"ground":engagement.ground,"tactics":engagement.get("tactics",{}),"terrain_defense":float(engagement.get("terrain_defense",1.0))})
+	engagement["progress"]=BattleBlocks.progress_for(engagement.battle,_engagement_home_side(engagement))
+
+
+func _ground_context(engagement:Dictionary)->Dictionary:
+	var threat:Dictionary=engagement.get("threat",{})
+	var home_side:=_engagement_home_side(engagement)
+	var kind:="raid" if String(threat.get("incident_kind",""))=="raid" else ("assault" if home_side=="attacker" and String(threat.get("target_region_id",""))!="" and not bool(threat.get("field_encounter",false)) else "field")
+	var context:={"kind":kind,"terrain_defense":float(engagement.get("terrain_defense",1.0)),"engineers":BattleGround.has_engineers(engagement.get("attacker",{}))}
+	var at_home:=home_side=="defender" and String(engagement.get("home_force_kind","field"))=="field" and String(threat.get("target_region_id",""))=="" and not bool(threat.get("field_encounter",false))
+	if at_home:
+		context["home_stage"]=int(settlement_defense.get("stage",0))
+		context["province_terrain"]=String(WorldSimulation.state.province_terrain)
+	var target:Variant=threat.get("target_position",{})
+	if target is Dictionary and (target as Dictionary).has_all(["x","z"]): context["at"]=Vector2(float(target.x),float(target.z))
+	if home_side=="attacker" and String(engagement.get("home_force_kind",""))=="field_army":
+		var index:=_field_army_index(int(engagement.get("home_force_id",0)))
+		var position:Variant=field_armies[index].get("position",{}) if index>=0 else {}
+		if position is Dictionary and (position as Dictionary).has_all(["x","z"]): context["from"]=Vector2(float(position.x),float(position.z))
+	return context
 
 
 const DAY_EXCHANGE_LIMIT:=8
@@ -2183,9 +2228,13 @@ func set_battle_formation_order(index:int,kind:String,target:int=-1)->Dictionary
 	active_engagement.formation_orders[str(index)]={"kind":kind,"target":target}
 	return {"ok":true}
 
-func advance_engagement(order:String="hold")->Dictionary:
+## Fights the active engagement: one exchange, or up to `exchanges` in one go
+## (a day's phase). Viewing never calls this; only the calendar and the
+## general's orders fight a battle.
+func advance_engagement(order:String="hold",exchanges:int=1)->Dictionary:
 	if active_engagement.is_empty(): return {"error":"No campaign battle is active."}
 	active_engagement.erase("awaiting_player_view")
+	if not active_engagement.has("battle") or (active_engagement.get("battle",{}) as Dictionary).is_empty(): _open_battle(active_engagement)
 	var command:=order.to_lower()
 	if command not in ["hold","push","retreat"]: return {"error":"Unknown battle order: %s" % order}
 	if command=="retreat": return _finish_active_engagement(true,{})
@@ -2215,17 +2264,29 @@ func advance_engagement(order:String="hold")->Dictionary:
 		round_options[home_side+"_exposure_modifier"]=float(round_options.get(home_side+"_exposure_modifier",1))*float(orders_context.exposure)
 		round_options["casualty_intensity"]=float(round_options.get("casualty_intensity",1))*float(orders_context.intensity)
 		round_options[("defender" if home_side=="attacker" else "attacker")+"_ordered_targets"]=orders_context.targets
-	var next_round:=int(active_engagement.round)+1
+	var battle:Dictionary=active_engagement.battle
+	var longest:=maxi(CombatSimulator.MAX_ROUNDS,int(battle.get("max_exchanges",CombatSimulator.MAX_ROUNDS)))
+	var budget:=clampi(exchanges,1,maxi(1,longest-int(active_engagement.round)))
 	round_options["tactics"]=active_engagement.get("tactics",{}); round_options["round_offset"]=int(active_engagement.round)
+	round_options["battle"]=battle; round_options["ground"]=active_engagement.get("ground",{}); round_options["max_rounds"]=budget
 	var result:Dictionary=simulator.simulate(attacker,defender,round_options)
 	BattleRoundOrders.clear_transient(result.attacker);BattleRoundOrders.clear_transient(result.defender)
+	active_engagement["battle"]=result.get("battle",battle)
+	if not (result.get("plan_now",{}) as Dictionary).is_empty(): active_engagement["tactics"]=(result.plan_now as Dictionary).duplicate(true)
+	active_engagement["progress"]=BattleBlocks.progress_for(active_engagement.battle,home_side)
 	if (result.get("rounds",[]) as Array).is_empty(): return _finish_active_engagement(false,result)
-	var record:Dictionary=(result.rounds[0] as Dictionary).duplicate(true); record["round"]=next_round; record["order"]=command; record["formation_orders"]=directives.duplicate(true)
-	(active_engagement.rounds as Array).append(record)
-	active_engagement["round"]=next_round; active_engagement["attacker"]=_force_from_round_result(active_engagement.attacker,result.attacker); active_engagement["defender"]=_force_from_round_result(active_engagement.defender,result.defender); active_engagement["last_order"]=command; active_engagement["last_result"]=result.duplicate(true)
+	var record:Dictionary={}
+	for round_variant in result.rounds:
+		record=(round_variant as Dictionary).duplicate(true)
+		active_engagement["round"]=int(active_engagement.round)+1
+		record["round"]=int(active_engagement.round); record["order"]=command; record["formation_orders"]=directives.duplicate(true)
+		(active_engagement.rounds as Array).append(record)
+	var next_round:=int(active_engagement.round)
+	active_engagement["attacker"]=_force_from_round_result(active_engagement.attacker,result.attacker); active_engagement["defender"]=_force_from_round_result(active_engagement.defender,result.defender); active_engagement["last_order"]=command
+	var last:=result.duplicate(false); last.erase("battle"); active_engagement["last_result"]=last.duplicate(true)
 	# The resolver calls an undecided round "inconclusive"; it is still an active
 	# engagement. Do not prematurely finish every battle after its first round.
-	if String(result.get("outcome","inconclusive")) not in ["continued","inconclusive"] or next_round>=CombatSimulator.MAX_ROUNDS:
+	if String(result.get("outcome","inconclusive")) not in ["continued","inconclusive"] or next_round>=longest:
 		return _finish_active_engagement(false,result)
 	army_changed.emit(home_army.duplicate(true))
 	return {"active":true,"engagement":engagement_snapshot(),"round":record}
@@ -2233,7 +2294,7 @@ func advance_engagement(order:String="hold")->Dictionary:
 
 func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 	var updated:=previous.duplicate(true)
-	for key in ["remaining_troops","morale","formations","reserve_manpower","wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","dead"]:
+	for key in ["remaining_troops","morale","formations","reserve_manpower","wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","captured_in_battle","dead"]:
 		if not side.has(key): continue
 		if key=="remaining_troops": updated["troops"]=int(side[key])
 		else: updated[key]=side[key].duplicate(true) if side[key] is Array or side[key] is Dictionary else side[key]
@@ -2260,11 +2321,19 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	var attacker_result:Dictionary=simulator._force_result(attacker,int(engagement.attacker_initial),int(attacker.troops),float(attacker.morale))
 	var defender_result:Dictionary=simulator._force_result(defender,int(engagement.defender_initial),int(defender.troops),float(defender.morale))
 	var threat:Dictionary=(engagement.get("threat",{}) as Dictionary).duplicate(true)
+	var battle:Dictionary=(engagement.get("battle",{}) as Dictionary)
+	if not battle.is_empty() and not bool(battle.get("finished",false)):
+		BattleBlocks.close_phase(battle,engagement.get("tactics",{}),battle.get("why",[]))
+		BattleBlocks.finish(battle,outcome,termination)
 	var final_result:Dictionary={"seed":int(engagement.seed),"outcome":outcome,"winner":String((engagement[enemy_side] as Dictionary).name) if retreated else String(last_result.get("winner","")),"round_count":int(engagement.round),"rounds":engagement.rounds.duplicate(true),"attacker":attacker_result,"defender":defender_result,"home_side":home_side,"home_force_kind":String(engagement.get("home_force_kind","field")),"home_force_id":int(engagement.get("home_force_id",0)),"home_force_civ_id":String(engagement.get("home_force_civ_id","")),"home_force_region_id":String(engagement.get("home_force_region_id","")),"campaign_mode":String(engagement.get("campaign_mode","defensive")),"field_encounter":bool(threat.get("field_encounter",false)),"formation_id":String(threat.get("formation_id","")),"target_region_id":String(threat.get("target_region_id","")),"target_region_name":String(threat.get("target_region_name","")),"threat":threat,"terrain_defense":float(engagement.terrain_defense),"effective_terrain_defense":float(last_result.get("effective_terrain_defense",engagement.terrain_defense)),"termination":termination,"orders":{"retreated":retreated}}
 	var source_civ_id:=String((engagement.get("threat",{}) as Dictionary).get("source_civ_id",""))
 	active_engagement.clear(); threats_resolved+=1
 	final_result["commander_managed"]=bool(engagement.get("commander_managed",false))
 	final_result["tactics"]=(engagement.get("tactics",{}) as Dictionary).duplicate(true)
+	final_result["battle"]=battle
+	final_result["ground"]=(engagement.get("ground",{}) as Dictionary).duplicate(true)
+	final_result["id"]=String(engagement.get("id",""))
+	final_result["progress"]=BattleBlocks.progress_for(battle,home_side) if not battle.is_empty() else 0.0
 	final_result["command_participants"]=engagement.get("command_participants",[]).duplicate(true)
 	var committed:=_commit_campaign_battle(final_result)
 	var troops_after_fight:=_force_troops(String(final_result.home_force_kind),int(final_result.home_force_id))
@@ -3730,6 +3799,9 @@ func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:
 	persisted["disabled_pool"]=clampi(int(side.get("disabled_pool",persisted.get("disabled_pool",0))),0,int(persisted.wounded_pool))
 	persisted["severe_disabled_pool"]=clampi(int(side.get("severe_disabled_pool",persisted.get("severe_disabled_pool",0))),0,int(persisted.disabled_pool))
 	persisted["scattered_pool"]=maxi(0,int(side.get("scattered_pool",persisted.get("scattered_pool",0))))
+	# Men taken when their block broke and ran are held by the enemy.
+	persisted["captured_pool"]=maxi(0,int(persisted.get("captured_pool",0)))+maxi(0,int(side.get("captured_in_battle",0)))
+	persisted.erase("captured_in_battle")
 	persisted["dead"]=int(side.get("dead",persisted.get("dead",0)))
 	for forbidden_key in ["soldier_ids","wounded_ids","scattered_ids","captured_ids"]: persisted.erase(forbidden_key)
 	home_army=persisted

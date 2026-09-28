@@ -3968,5 +3968,21 @@
   "mediated_restitution_custom": {"path": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png", "focus": [0.5, 0.5]},
   "paired_ox_yoke": {"path": "res://assets/ui/research/subjects/paired_ox_yoke-v1.png", "focus": [0.5, 0.5]},
   "runner_relays_between_work_sites": {"path": "res://assets/ui/research/subjects/runner_relays_between_work_sites-v1.png", "focus": [0.5, 0.5]},
-  "sickbed_distance_norms": {"path": "res://assets/ui/research/subjects/sickbed_distance_norms-v1.png", "focus": [0.5, 0.5]}
+  "sickbed_distance_norms": {"path": "res://assets/ui/research/subjects/sickbed_distance_norms-v1.png", "focus": [0.5, 0.5]},
+  "hearth_hazard_proofing": {"path": "res://assets/ui/research/subjects/hearth_hazard_proofing-v1.png", "focus": [0.5, 0.5]},
+  "communal_catch_limits": {"path": "res://assets/ui/research/subjects/communal_catch_limits-v1.png", "focus": [0.5, 0.5]},
+  "neighbor_shelter_pledges": {"path": "res://assets/ui/research/subjects/neighbor_shelter_pledges-v1.png", "focus": [0.5, 0.5]},
+  "recovery_diet_customs": {"path": "res://assets/ui/research/subjects/recovery_diet_customs-v1.png", "focus": [0.5, 0.5]},
+  "reserve_moisture_barrier_layering": {"path": "res://assets/ui/research/subjects/reserve_moisture_barrier_layering-v1.png", "focus": [0.5, 0.5]},
+  "shared_labor_registers": {"path": "res://assets/ui/research/subjects/shared_labor_registers-v1.png", "focus": [0.5, 0.5]},
+  "sibling_age_gap_norms": {"path": "res://assets/ui/research/subjects/sibling_age_gap_norms-v1.png", "focus": [0.5, 0.5]},
+  "load_bundling_by_weight": {"path": "res://assets/ui/research/subjects/load_bundling_by_weight-v1.png", "focus": [0.5, 0.5]},
+  "obstructed_labor_recognition": {"path": "res://assets/ui/research/subjects/obstructed_labor_recognition-v1.png", "focus": [0.5, 0.5]},
+  "refuse_pit_rotation": {"path": "res://assets/ui/research/subjects/refuse_pit_rotation-v1.png", "focus": [0.5, 0.5]},
+  "rotating_watch_captaincy": {"path": "res://assets/ui/research/subjects/rotating_watch_captaincy-v1.png", "focus": [0.5, 0.5]},
+  "sunset_rule_custom": {"path": "res://assets/ui/research/subjects/sunset_rule_custom-v1.png", "focus": [0.5, 0.5]},
+  "fire_tending_safeguards": {"path": "res://assets/ui/research/subjects/fire_tending_safeguards-v1.png", "focus": [0.5, 0.5]},
+  "rotating_speaker_order": {"path": "res://assets/ui/research/subjects/rotating_speaker_order-v1.png", "focus": [0.5, 0.5]},
+  "seasonal_storage_sleeping_swap": {"path": "res://assets/ui/research/subjects/seasonal_storage_sleeping_swap-v1.png", "focus": [0.5, 0.5]},
+  "corner_squaring_method": {"path": "res://assets/ui/research/subjects/corner_squaring_method-v1.png", "focus": [0.5, 0.5]}
 }
