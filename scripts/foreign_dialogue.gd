@@ -250,7 +250,7 @@ func _response(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
 				var msg:Variant=choices[0].get("message",{})
 				if msg is Dictionary:
 					problem="The envoys could not bring back a clear answer, even after asking twice."
-					if str(choices[0].get("finish_reason",""))=="length":problem="The answer was cut off before it was finished."
+					if str(choices[0].get("finish_reason",""))=="length":problem="The answer ran too long and was cut off before it was finished."
 					elif msg.get("refusal") is String and not String(msg.get("refusal")).is_empty():problem="No answer came back to this message."
 					var content:String=PronouncementInterpreter._content_text(msg.get("content",""))
 					var parser:=JSON.new()

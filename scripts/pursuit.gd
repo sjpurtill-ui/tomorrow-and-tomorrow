@@ -154,6 +154,8 @@ static func latest_flight(region_id:String="")->Dictionary:
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
 		if region_id!="" and String(force.get("region_id",""))!=region_id: continue
+		# Only a town we hold (the one reading) has a garrison to send.
+		if not Ledger.holds(String(force.get("civ_id","")),String(force.get("region_id",""))): continue
 		var fled:=flight_of(String(force.get("civ_id","")),String(force.get("region_id","")))
 		if fled.is_empty(): continue
 		var age:=_day()-int(fled.get("day",0))
@@ -192,7 +194,10 @@ static func begin(civ_id:String,region_id:String,asked:int=0)->Dictionary:
 	var world:Variant=_world()
 	if mc==null or world==null: return {"error":"We have nobody to send.","reason":"no_military"}
 	var at:int=mc._occupation_force_index(civ_id,region_id)
-	if at<0: return {"error":"Nobody of ours holds that town, so there is nobody to send after them.","reason":"no_garrison"}
+	var h:=Ledger.hold(civ_id,region_id)
+	if at<0 or not bool(h.held):
+		var why:=Ledger.hold_words(h)
+		return {"error":(why+" There is nobody of ours there to send after them.") if why!="" else "Nobody of ours holds that town, so there is nobody to send after them.","reason":"no_garrison"}
 	var force:Dictionary=mc.occupation_forces[at]
 	var name:=String(force.get("region_name","the town"))
 	var fled:=flight_of(civ_id,region_id)
@@ -549,7 +554,7 @@ static func _send_back(index:int)->Dictionary:
 	var mc:Variant=_mc()
 	var army:Dictionary=mc.field_armies[index]
 	var p:Dictionary=army.pursuit
-	var held:bool=mc._occupation_force_index(String(p.civ_id),String(p.region_id))>=0
+	var held:=_town_to_rejoin(String(p.civ_id),String(p.region_id))
 	var town:=town_position(String(p.region_id))
 	var name:=String(p.get("town","the town"))
 	if held and town.is_finite():
@@ -570,6 +575,14 @@ static func _send_back(index:int)->Dictionary:
 	if r.has("error"): return {"error":String(r.error),"words":"%s is not ours now, and we cannot start for home yet: %s" % [name,String(r.error)]}
 	var home_days:=int(r.get("days",0))
 	return {"days":home_days,"to":"home","words":"%s is not ours now, so we are coming home, %s." % [name,"about a day" if home_days<=1 else "about %s days" % _count(home_days)]}
+
+
+## A detachment's town is still ours, with its garrison there to rejoin
+## (town_ledger.hold: the region says whose it is; the detachment is part of
+## that garrison, so its own absence never makes the town unheld).
+static func _town_to_rejoin(civ_id:String,region_id:String)->bool:
+	var mc:Variant=_mc()
+	return mc!=null and int(mc._occupation_force_index(civ_id,region_id))>=0 and bool(Ledger.hold(civ_id,region_id).get("ours",false))
 
 
 ## The detachment rejoins its garrison where it stands; with no garrison
@@ -619,7 +632,7 @@ static func recall(to_town:bool)->Array[Dictionary]:
 		if p is Dictionary and String(p.get("state",""))!="home":
 			var troops:=int(army.get("troops",0))
 			var town:=String(p.get("town","the town"))
-			if to_town and mc._occupation_force_index(String(p.civ_id),String(p.region_id))>=0:
+			if to_town and _town_to_rejoin(String(p.civ_id),String(p.region_id)):
 				var back:Dictionary={}
 				if String(p.state)=="returning" and String(army.get("status",""))=="moving":
 					back={"days":maxi(0,int(army.get("arrival_day",_day()))-_day())}
@@ -651,7 +664,7 @@ static func reconcile()->int:
 		var p:Variant=army.get("pursuit")
 		if p is Dictionary:
 			var state:=String(p.get("state",""))
-			var held:bool=mc._occupation_force_index(String(p.get("civ_id","")),String(p.get("region_id","")))>=0
+			var held:=_town_to_rejoin(String(p.get("civ_id","")),String(p.get("region_id","")))
 			var idle:=String(army.get("status",""))!="moving"
 			if int(army.get("troops",0))<=0:
 				pass

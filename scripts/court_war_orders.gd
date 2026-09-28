@@ -134,18 +134,20 @@ static func held_towns()->Array[Dictionary]:
 	## Towns we have taken and still hold, with who holds them:
 	## {city_id, civ_id, name, civ_name, garrison, commander, population,
 	## position, held:true}.
+	## Held is the one reading every system uses (town_ledger.hold): the
+	## region is ours and a garrison of ours stands in it.
 	var out:Array[Dictionary]=[]
 	var mc:Variant=WorldSimulation.military
 	var world:Variant=WorldSimulation.world
 	if mc==null or world==null: return out
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
-		var troops:=int(force.get("troops",0))
-		if troops<=0: continue
 		var civ_id:=String(force.get("civ_id",""))
 		var rid:=String(force.get("region_id",""))
+		var h:=Ledger.hold(civ_id,rid)
+		if not bool(h.held): continue
+		var troops:=int(h.garrison)
 		var region:Dictionary=world.region_snapshot(civ_id,rid)
-		if not region.is_empty() and String(region.get("controller",""))!="player": continue
 		var known:Dictionary=world.city_intelligence.known("player",rid) if "city_intelligence" in world and world.city_intelligence!=null else {}
 		var name:=String(region.get("name",force.get("region_name","")))
 		if name=="": name=String(known.get("name","")).trim_prefix("Reported home of ")
@@ -569,6 +571,11 @@ static func follow_up(clean:String,audience_id:String)->Dictionary:
 		var take:=base.duplicate(); take["kind"]="fate"
 		take["fate"]={"captives":true,"take":{} if who=="people" else {who:1.0}}
 		if who=="people": (take.fate as Dictionary)["take"]={"women":1.0,"children":1.0,"elders":1.0,"men":1.0}
+		# "The boys too": which of the children (town_ledger's make-up).
+		var kw:=TownFate.kid_words(word)
+		if who=="children" and not kw.is_empty():
+			(take.fate as Dictionary)["kids"]=kw.bands
+			(take.fate as Dictionary)["kids_words"]=String(kw.words)
 		return take
 	return {}
 
@@ -724,6 +731,12 @@ static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,a
 	var base:={"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300),"implied":true}
 	if held.is_empty():
 		if not group: return {}
+		# The town this audience is speaking of, not ours now: said plainly
+		# why nobody of it is in our hands, and what it would take.
+		var spoken:=_place_in_audience(audience_id)
+		if spoken.has("city_id") and (people=="" or String(spoken.get("civ_id",""))==people):
+			var first:=base.duplicate(); first["kind"]="take_first"; first["target"]=spoken
+			return first
 		var none:=base.duplicate(); none["kind"]="no_town"; none["target"]={}
 		return none
 	var chosen:Dictionary={}
@@ -1492,6 +1505,7 @@ static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
 	var home:=0
 	var refused:Array[String]=[]
 	var ruins:Array[String]=[]
+	var freed:PackedStringArray=PackedStringArray()
 	for town:Dictionary in held_towns():
 		if not names.is_empty() and not String(town.name) in names: continue
 		# A ruin we burned is left to nobody, never handed back to its old people.
@@ -1500,6 +1514,9 @@ static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
 		if back.has("error"): refused.append("%s: %s" % [String(town.name),String(back.error)]); continue
 		if ruin: ruins.append(String(town.name))
 		left.append("%s (%d)" % [String(town.name),int(town.garrison)]); home+=int(town.garrison)
+		# Nobody of ours stays to guard those we held: they go free, said here.
+		var went:=Ledger.settle(String(town.civ_id),String(town.city_id),true)
+		if not went.is_empty(): freed.append(String(went.words))
 	for d:Dictionary in Pursuit.recall(false): home+=int(d.troops)
 	if left.is_empty():
 		return _no(out,"cannot_leave",("We cannot leave yet. "+"; ".join(PackedStringArray(refused))) if not refused.is_empty() else "We hold no town to leave.","")
@@ -1510,6 +1527,7 @@ static func _abandon(out:Dictionary,reading:Dictionary)->Dictionary:
 	out.objective={"army_id":-1,"kind":"abandon","left":left,"troops":home,"days":days}
 	var whom:=("We leave %s to its own people." % ", ".join(PackedStringArray(left))) if ruins.is_empty() else ("We leave the ruins of %s; nobody holds them now." % ", ".join(PackedStringArray(ruins)) if ruins.size()==left.size() else "We leave %s; the ruins of %s are nobody's now." % [", ".join(PackedStringArray(left)),", ".join(PackedStringArray(ruins))])
 	out.says="%s %s of ours are marching home%s." % [whom,_cap(_number(home)),(", about %s on the road" % ("a day" if days<=1 else "%s days" % _number(days))) if days>0 else ""]
+	if not freed.is_empty(): out.says+=" "+" ".join(freed)
 	out.outcome="%s left; the garrison is coming home." % ", ".join(PackedStringArray(left))
 	return out
 
@@ -1559,7 +1577,13 @@ static func _no_town(out:Dictionary,reading:Dictionary)->Dictionary:
 	## Violence to a people when we hold none of their towns: said plainly.
 	var fate:Dictionary=reading.get("fate",{})
 	var what:="to kill or carry off" if bool(fate.get("kill_men",false)) and bool(fate.get("captives",false)) else ("to kill" if bool(fate.get("kill_men",false)) else "to carry off")
-	var failed:=_no(out,"no_town","We hold no town of theirs. There is nobody of theirs in our hands %s." % what,"Name a town and I will tell you what it would take to take it.")
+	# Towns we took and no longer hold: named, so the god hears why.
+	var left:PackedStringArray=PackedStringArray()
+	for pair in Ledger.towns():
+		var h:=Ledger.hold(String(pair[0]),String(pair[1]))
+		if not bool(h.held) and String(h.state)=="theirs" and String(h.name)!="": left.append(String(h.name))
+	var now:=(" now: our men left %s" % " and ".join(left)) if not left.is_empty() else ""
+	var failed:=_no(out,"no_town","We hold no town of theirs%s. There is nobody of theirs in our hands %s." % [now,what],"Name a town and I will tell you what it would take to take it.")
 	failed.outcome="Nothing is done: we hold no town."
 	return failed
 
@@ -1575,17 +1599,31 @@ static func _take_first(out:Dictionary,reading:Dictionary)->Dictionary:
 	var fate:Dictionary=reading.get("fate",{})
 	var men:=_has(String(reading.get("text","")).to_lower(),"(males?|men|menfolk|boys|sons|every man)\\b")
 	var deed:=("kill its men" if men else "kill its people") if String(reading.get("harm","kill"))=="kill" or bool(fate.get("kill_men",false)) else ("harm its men" if men else "harm its people")
+	if bool(fate.get("captives",false)) and not bool(fate.get("kill_men",false)):
+		deed="carry off its "+TownFate._take_names(fate.get("take",{"women":1.0,"children":1.0}) as Dictionary,fate.get("kids",{}) as Dictionary if fate.get("kids") is Dictionary else {},String(fate.get("kids_words","")))
+	elif String(fate.get("move",""))!="" and not bool(fate.get("kill_men",false)): deed="bring its people home"
 	if String(reading.get("deed",""))!="": deed=String(reading.deed)
+	# Why nobody of it is in our hands, from who holds it (town_ledger.hold).
+	var h:=Ledger.hold_at(String(target.city_id))
+	if String(h.get("name",""))=="": h["name"]=name
+	if String(h.state) in ["unguarded","ruin"]:
+		# Ours, or our ruin, with nobody of ours there: no march; men must go there.
+		var there:=_no(out,"not_held","%s To %s, some of ours must be there first." % [Ledger.hold_words(h),deed],"Send a band to hold %s first." % name)
+		there.outcome="Nothing is done: nobody of ours is in %s." % name
+		return there
+	var taken:=bool(h.get("taken",false))
+	var lead:=("%s None of its people are in our hands." % Ledger.hold_words(h)) if taken else "%s is still theirs." % name
+	var again:="again" if taken else "first"
 	var f:=forces(out.general_ref)
 	var anyone:=int(f.trained)>0 or int(f.drilling)>0 or not (f.band as Dictionary).is_empty() or not (f.idle as Array).is_empty() or not (f.away as Array).is_empty()
 	if not anyone:
-		var none:=_no(out,"nobody_under_arms","%s is still theirs. To %s we must take it first, and we have nobody under arms to take it." % [name,deed],"Raise and drill a levy first.")
-		none.outcome="Nothing is done: %s is still theirs." % name
+		var none:=_no(out,"nobody_under_arms","%s To %s we must take it %s, and we have nobody under arms to take it." % [lead,deed,again],"Raise and drill a levy first.")
+		none.outcome="Nothing is done: %s is not ours." % name
 		return none
 	out.verdict="ask_march"; out.reason="take_first"
-	out.says="%s is still theirs. To %s we must take it first. Shall I march on it?" % [name,deed]
+	out.says="%s To %s we must take it %s. Shall I march on it?" % [lead,deed,again]
 	out.fix="Say yes and we march on %s." % name
-	out.outcome="Nothing is done yet: %s is still theirs." % name
+	out.outcome="Nothing is done yet: %s is not ours." % name if taken else "Nothing is done yet: %s is still theirs." % name
 	out["march_text"]="Attack %s" % name
 	return out
 
@@ -2113,6 +2151,9 @@ static func daily(day:int)->Array:
 	var filed:Array=[]
 	if WorldSimulation.military==null: return filed
 	var mc:=_mc()
+	# Every town's people agree with who holds it: nobody is under our guard
+	# where no garrison of ours stands, and the war leader says so once.
+	filed.append_array(Ledger.settle_all())
 	# Detachments out after fleeing men: the chase, its one report, the way back.
 	filed.append_array(Pursuit.daily(day))
 	# What the garrisons do with the people of towns we hold: food, labour,
