@@ -558,6 +558,23 @@ func test_the_chronicle_tells_a_measure_once_and_an_incident_once()->void:
 	assert_int(_days(3).size()).is_equal(0)
 	assert_int(_entries("measure_incident:").size()).is_equal(1)
 
+func test_strengthening_the_garrison_keeps_its_orders()->void:
+	_captured_tsaren()
+	var id:=_audience(_headman())
+	CC.hear(id,USERS_SENTENCE)
+	var bound:=M.men_bound(civ_id,city_id)
+	# A band of ours standing at the town joins the garrison.
+	_train(10)
+	var made:=MilitaryCampaign.create_field_army(10,"LEVY BAND 3")
+	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int((made.army as Dictionary).army_id))]
+	army["position"]={"x":city.x+0.2,"z":city.y}; army["location_id"]=city_id; army["status"]="stationed"
+	army["supply_level"]=1.0; army["readiness"]=1.0
+	var before:=int(_force().troops)
+	var r:=CC.hear(id,"Strengthen the garrison at Tsaren")
+	assert_int(int(_force().troops)).override_failure_message(String(r.get("actor_says",""))).is_greater(before)
+	assert_int(M.men_bound(civ_id,city_id)).is_equal(bound)
+	assert_str(String(_force().get("fate_note",""))).is_equal("Men bound and under guard · %d" % bound)
+
 func test_bound_men_cannot_run_when_they_are_put_to_death()->void:
 	_captured_tsaren()
 	var id:=_audience(_headman())
@@ -592,6 +609,9 @@ func test_nobody_in_the_hall_is_harmed_by_orders_about_a_people()->void:
 	for words in ["Kill them","Lock up all the men","Tie them up","Kill anyone who resists","Whoever resists, kill him"]:
 		var r:=CC.hear(id2,words)
 		_nobody_here_harmed(r,words,before2,headman2)
+	# A careless live reading ("detain", aimed at the one before you) cannot either.
+	var careless:=_say(id2,"Tie them up",_reading("order","detain","person","person:%d" % int(headman2.person_id),0.95))
+	_nobody_here_harmed(careless.result,"careless detain",before2,headman2)
 
 func test_the_fact_he_said_is_not_said_again_underneath()->void:
 	_captured_tsaren()

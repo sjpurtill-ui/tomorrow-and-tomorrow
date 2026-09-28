@@ -146,7 +146,17 @@ static func apply(civ_id:String,region_id:String,fate:Dictionary,general:Diction
 	# Strengthen the garrison from a band standing at the town.
 	if bool(fate.get("reinforce",false)):
 		var before:=garrison
+		# The rebuilt garrison record keeps what this garrison is doing and
+		# what it did (measures in force, the card note, the fled, the totals).
+		var kept:={}
+		var at_before:int=mc._occupation_force_index(civ_id,region_id)
+		if at_before>=0:
+			for key in ["measures","measure_note","note_before","fate","fate_note","fled"]:
+				if mc.occupation_forces[at_before].has(key): kept[key]=mc.occupation_forces[at_before][key]
 		var more:Dictionary=mc.reinforce_occupation(civ_id,region_id)
+		var at_after:int=mc._occupation_force_index(civ_id,region_id)
+		if at_after>=0:
+			for key in kept: mc.occupation_forces[at_after][key]=kept[key]
 		if more.has("error"): refusals.append(String(more.error))
 		else:
 			garrison=int(mc.occupation_force_for_region(civ_id,region_id).get("troops",garrison))

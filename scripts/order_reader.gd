@@ -287,13 +287,15 @@ static func validate(raw:Dictionary,brief:Dictionary)->Dictionary:
 	if res!="": details["resource"]=res
 	# Measures and stance come only from their lists: anything else is refused.
 	var measures_in:Variant=details_in.get("measures",[])
+	if measures_in==null: measures_in=[]
 	if not measures_in is Array: return {"rejected":"measures is not a list"}
 	var measures:Array[String]=[]
 	for m in measures_in:
 		if not m is String or not String(m) in MEASURE_IDS: return {"rejected":"unknown measure"}
 		if not measures.has(String(m)): measures.append(String(m))
 	if not measures.is_empty(): details["measures"]=measures
-	var stance:=String(details_in.get("stance","")) if details_in.get("stance","") is String else "?"
+	var stance_in:Variant=details_in.get("stance","")
+	var stance:=String(stance_in) if stance_in is String else ("" if stance_in==null else "?")
 	if not stance in STANCES: return {"rejected":"unknown stance"}
 	if stance!="": details["stance"]=stance
 	var clarify:=String(raw.get("clarify","")).strip_edges().replace("\n"," ").substr(0,MAX_CLARIFY_CHARS)
