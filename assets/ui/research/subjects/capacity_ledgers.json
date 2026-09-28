@@ -8,5 +8,9 @@
   "asset": "res://assets/ui/research/subjects/capacity_ledgers-v1.png",
   "sha256": "5d3a674193a23753c929e2116376dfac2c8992e49e9e7ad81f4e53094c4f536b",
   "mode": "built-in image_gen / new image",
-  "review": "Selected after full-image and 3.37:1 crop review; subject and direction medium clear."
+  "review": "Focus lowered after integrator actual card review to retain hand and complete clay token row.",
+  "focus": [
+    0.5,
+    0.65
+  ]
 }
