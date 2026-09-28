@@ -929,9 +929,42 @@ func _build_toolbar()->void:
 	scale_label.visible=false
 	distance_selector.item_selected.connect(func(index:int)->void:terrain.set_camera_distance_level(index))
 	scale_box.add_child(distance_selector)
+	# Past the far lands: the whole world, and how much of it our people know
+	# (hud/world_globe.gd). Zooming out past the far lands opens it too.
+	world_button=Button.new()
+	world_button.name="ToolbarWorld"
+	world_button.text="World"
+	world_button.icon=_toolbar_icon("world")
+	world_button.add_theme_constant_override("icon_max_width",20)
+	world_button.add_theme_constant_override("h_separation",6)
+	world_button.custom_minimum_size=Vector2(0,32)
+	world_button.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
+	world_button.add_theme_color_override("font_color",Tokens.BODY)
+	world_button.add_theme_stylebox_override("normal",Tokens.action_button_style(false))
+	world_button.add_theme_stylebox_override("hover",Tokens.action_button_style(false,true))
+	world_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	world_button.tooltip_text="See the whole world, and how much of it our people know."
+	world_button.pressed.connect(func()->void:
+		if terrain and terrain.has_method("open_world_globe"):terrain.open_world_globe())
+	scale_box.add_child(world_button)
+	# Compile the world view's shader while the map loads, so its first opening
+	# does not stall: one invisible pixel drawn with it for a moment.
+	if is_inside_tree():
+		var warm:=ColorRect.new()
+		warm.name="WorldViewWarmUp"
+		warm.size=Vector2.ONE
+		warm.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		warm.modulate.a=0.01
+		var warm_material:=ShaderMaterial.new()
+		warm_material.shader=preload("res://scripts/hud/world_globe.gdshader")
+		warm.material=warm_material
+		world_button.add_child(warm)
+		get_tree().create_timer(3.0).timeout.connect(warm.queue_free)
 
 	toolbar.reset_size()
 	_position_toolbar()
+
+var world_button:Button
 
 func _toolbar_icon(id:String)->Texture2D:
 	var Icons:=preload("res://scripts/resource_icons.gd")
@@ -939,6 +972,7 @@ func _toolbar_icon(id:String)->Texture2D:
 		"settle":return Icons.moment_texture("settlement",_rail_ink(),40)
 		"scouts":return Icons.moment_texture("scout",_rail_ink(),40)
 		"diplomat":return Icons.moment_texture("contact",_rail_ink(),40)
+		"world":return Icons.moment_texture("world",_rail_ink(),40)
 	return Icons.people_texture("carry",_rail_ink(),40,false)
 
 ## The toolbar speaks in one case: sentence case. Labels that arrive shouted
