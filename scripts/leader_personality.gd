@@ -1,17 +1,14 @@
 extends RefCounted
 const AXES:=["openness","discipline","empathy","assertiveness","risk_tolerance"]
-const Culture:=preload("res://scripts/cultural_inheritance.gd")
 
 ## Which way each of a people's ambitions (people_direction.gd AMBITIONS)
-## leans a temper, on the five axes of a ruler's personality. One table, read
-## both ways: a ruler takes up the ambition that best fits it
-## (civilization_strategy.gd preferences), and a people's own council, which
-## has no ruler of its own, takes its temper from the ambitions the people
-## have taken up (temper_of_culture). A negative weight reads the other end
-## of the axis: a ruler with 0.3 risk tolerance fits "-0.24" as 0.7 x 0.24.
-## Every ambition's weights add up to one, so fits compare fairly, and across
-## rulers drawn at random each ambition is chosen by between 2 and 10 in 100
-## (once other peoples are known: civilization_strategy.gd preferences).
+## leans a temper, on the five axes of a ruler's personality: a ruler takes up
+## the ambition that best fits it (civilization_strategy.gd preferences), so
+## every ambition a people can take up is open to a computer ruler. A negative
+## weight reads the other end of the axis: a ruler with 0.3 risk tolerance fits
+## "-0.24" as 0.7 x 0.24. Every ambition's weights add up to one, so fits
+## compare fairly, and across rulers drawn at random each ambition is chosen by
+## between 2 and 10 in 100 (once other peoples are known).
 const AMBITION_TEMPER:={
 	"horizons":{"openness":.69,"risk_tolerance":.31},
 	"makers":{"discipline":.5,"openness":.5},
@@ -28,8 +25,6 @@ const AMBITION_TEMPER:={
 	"retribution":{"empathy":-.55,"risk_tolerance":-.29,"assertiveness":.16},
 	"orthodoxy":{"openness":-.71,"discipline":.29},
 }
-## How far a people's ambitions move its council's temper from even (0.5).
-const CULTURE_TEMPER_SPREAD:=0.6
 
 static func generate(rng:RandomNumberGenerator)->Dictionary:
 	var result:Dictionary={}
@@ -50,32 +45,15 @@ static func ambition_fit(ambition:String,p:Dictionary)->float:
 		fit+=weight*value if weight>=0.0 else -weight*(1.0-value)
 	return fit
 
-## The temper of a people's own council (the player's leaders, who have no
-## ruler of their own): the people's, read from the ambitions they have taken
-## up, the recent ones weighing most (cultural_inheritance.choice_weights).
-## A people with no ambition yet is even-tempered: 0.5 on every axis.
-static func temper_of_culture(choice_weights:Dictionary)->Dictionary:
-	var total:=0.0
-	for weight in choice_weights.values():total+=maxf(0.0,float(weight))
-	var result:Dictionary={}
-	for axis:String in AXES:
-		var lean:=0.0
-		if total>0.0:
-			for choice in choice_weights:
-				lean+=float((AMBITION_TEMPER.get(String(choice),{}) as Dictionary).get(axis,0.0))*maxf(0.0,float(choice_weights[choice]))/total
-		result[axis]=clampf(.5+lean*CULTURE_TEMPER_SPREAD,.12,.92)
-	return result
-
 ## The temper that guides an owner's automated leaders: a computer ruler's own
-## personality; for the player (or a people no computer rules) its council's,
-## taken from the people's ambitions. The same rules read either one.
+## personality; for the player (or a people no computer rules) the people's
+## tendency, the values they live by (from_values), the one reading every
+## delegated choice uses. The same rules read either one.
 static func of_owner(owner:String)->Dictionary:
 	var actor:Dictionary=WorldSimulation.actors.get(owner,{})
 	if owner!="player" and (actor.is_empty() or String(actor.get("controller",""))=="ai"):
 		return foreign(int(WorldSimulation.state.world_seed),owner)
-	return WorldSimulation.scoped(owner,func()->Dictionary:
-		WorldSimulation.direction._ensure_cultural_memory()
-		return temper_of_culture(Culture.choice_weights(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))))
+	return WorldSimulation.scoped(owner,func()->Dictionary:return from_values(WorldSimulation.state.societal_values))
 
 ## The traits other systems read from a people (border tension, raids, rival
 ## wars, peace terms, occupation rule), drawn from its leader's character in
@@ -132,3 +110,19 @@ static func agenda(civ:Dictionary,p:Dictionary)->Array[Dictionary]:
 	goals.resize(3)
 	for goal:Dictionary in goals:goal.erase("weight")
 	return goals
+
+## A people's tendency on the same five axes, read from the values they live by
+## (SocietalValuesModel state). It stands in for a ruler's temperament where
+## the people themselves decide, and stays in the range rulers are drawn from.
+static func from_values(values:Dictionary)->Dictionary:
+	var lived:Variant=values.get("lived",values.get("official",{}))
+	var v:Dictionary=lived if lived is Dictionary else {}
+	var axis:=func(name:String)->float:return clampf(float(v.get(name,.5)),0.0,1.0)
+	var result:={
+		"openness":(axis.call("openness")+axis.call("experimentation"))*.5,
+		"discipline":(axis.call("collective_obligation")+axis.call("centralization"))*.5,
+		"empathy":(axis.call("common_stewardship")+axis.call("restorative_justice"))*.5,
+		"assertiveness":axis.call("hierarchy"),
+		"risk_tolerance":(axis.call("experimentation")+1.0-axis.call("ecological_restraint"))*.5}
+	for key:String in AXES:result[key]=clampf(float(result[key]),.12,.92)
+	return result

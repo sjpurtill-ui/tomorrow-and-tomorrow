@@ -1506,6 +1506,22 @@ func _apply_food_labor_floor(weights:Dictionary)->void:
 	weights.Food=maxf(float(weights.get("Food",0)),other*floor_share/maxf(.01,1.0-floor_share))
 
 
+## Planning weight added to guards at full threat (the base plan gives guards 4).
+const THREAT_GUARD_WEIGHT:=10.0
+
+## How hard the neighbours press on this people, 0..1, read the same way for
+## every people from its own view of them: border tension, ill will, open war.
+func neighbour_threat()->float:
+	var worst:=0.0
+	if WorldSimulation.world==null: return 0.0
+	for civ in WorldSimulation.world.civilizations:
+		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
+		var relation:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
+		var at_war:=bool(relation.get("at_war",false))
+		if int(relation.get("contact_level",0))<1 and not at_war: continue
+		worst=maxf(worst,float(relation.get("border_tension",0.0))*0.5+maxf(0.0,-float(relation.get("opinion",0.0)))*0.4+(0.5 if at_war else 0.0))
+	return clampf(worst,0.0,1.0)
+
 func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)->Dictionary:
 	var weights:Dictionary=BASE_ALLOCATIONS.duplicate(true)
 	var changes:Dictionary=({
@@ -1531,6 +1547,9 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		reserve_lean=reserve_lean_of(float(bias.get("Food",0.0)))
 	# The workshop officer asks for gatherers while soldiers' gear lacks materials.
 	if WorldSimulation.military!=null:weights.Extraction=float(weights.get("Extraction",0))+float(WorldSimulation.military.workshop.extraction_request().get("weight",0.0))
+	# Guards in proportion to how hard the neighbours press (docs/STANDING_DESIGN.md
+	# section 7); food still comes first (the guard and the floor below).
+	weights.Defense=float(weights.get("Defense",0))+THREAT_GUARD_WEIGHT*neighbour_threat()
 	_apply_survival_guard(weights,reserve_lean)
 	_apply_food_labor_floor(weights) # research_600 balance
 	if not leader.is_empty():

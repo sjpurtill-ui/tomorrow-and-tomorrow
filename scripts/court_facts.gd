@@ -117,7 +117,22 @@ static func sheet(which:Array)->Dictionary:
 	if which.has("stores"): _stores(out)
 	if which.has("tribute"): _tribute(out)
 	if which.has("scouts"): _scouts(out)
+	# How each people we know sees us (standing.gd): the keepers of our ties
+	# and the war leader know it, with the odds it moves.
+	if which.has("tribute") or which.has("war"): _standing(out)
 	return out
+
+static func _standing(out:Dictionary)->void:
+	var Standing:=preload("res://scripts/standing.gd")
+	var peoples:Array=[]
+	for v:Dictionary in Standing.views():
+		var does:PackedStringArray=PackedStringArray()
+		for c:Dictionary in Standing.consequences(String(v.civ_id),v): does.append(String(c.words))
+		var feelings:={}
+		for row:Array in Standing.VIEWS: feelings[String(row[0])]=roundi(float(v.get(String(row[0]),0.0))*100.0)
+		peoples.append({"name":String(v.civ_name),"headline":Standing.view_words(v),"feelings":feelings,"envy":roundi(float(v.envy)*100.0),"contempt":roundi(float(v.contempt)*100.0),
+			"strength":String(preload("res://scripts/hud/content/dock_content_standing.gd")._strength_words(float(v.strength_ratio))),"does":does})
+	out["standing"]={"peoples":peoples,"posture":String(Standing.posture().words)}
 
 # --------------------------------------------------------------------------
 # Everyone
@@ -646,6 +661,13 @@ static func text(s:Dictionary)->String:
 		var places:PackedStringArray=PackedStringArray()
 		for t:Dictionary in s.get("known_towns",[]): places.append(town_way_words(t))
 		lines.append("Towns we know of: %s." % ("; ".join(places) if not places.is_empty() else "none"))
+	var standing:Dictionary=s.get("standing",{})
+	if not standing.is_empty():
+		var seen:PackedStringArray=PackedStringArray()
+		for p:Dictionary in standing.get("peoples",[]):
+			var f:Dictionary=p.feelings
+			seen.append("the %s: %s Allure %d%%, awe %d%%, fear %d%%, respect %d%%, trust %d%%, resentment %d%%; envy %d%%, contempt %d%%. %s.%s" % [String(p.name),String(p.headline),int(f.get("allure",0)),int(f.get("awe",0)),int(f.get("fear",0)),int(f.get("respect",0)),int(f.get("trust",0)),int(f.get("resentment",0)),int(p.envy),int(p.contempt),String(p.strength),(" "+"; ".join(PackedStringArray(p.does))+".") if not (p.does as Array).is_empty() else ""])
+		lines.append("What we are: %s How the peoples we know see us: %s" % [String(standing.get("posture","")),(" | ".join(seen)) if not seen.is_empty() else "we have met no other people."])
 	# What every official knows: how the people hold the god, and the council.
 	var regard:Dictionary=s.get("people_regard",{})
 	if not regard.is_empty(): lines.append("The people: %s (love %s, dread %s)." % [String(regard.get("read","")),String(regard.get("love","")),String(regard.get("dread",""))])

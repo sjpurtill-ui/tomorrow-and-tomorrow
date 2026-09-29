@@ -937,7 +937,7 @@ static func _silence(omen:Dictionary,day:int)->void:
 	## remembers. Belief rises only on coincidence (_omen), never by decree.
 	var wish:=String(omen.get("wish","any"))
 	var metrics:Dictionary=GameState.simulation_metrics
-	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01,0.01,0.99)
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01*preload("res://scripts/standing.gd").blame(),0.01,0.99)
 	var pid:=int(omen.get("pid",0))
 	if pid>0: GovernmentPeopleSystem.record_person_memory(pid,"I led the rite the god asked for, and nothing came of it.","omen",0.5,{"emotion":"doubt"})
 	var wish_words:=String((Lines.WISHES.get(wish,{}) as Dictionary).get("wish","what was asked")) if Lines.WISHES.has(wish) else "what was asked"
@@ -1045,9 +1045,12 @@ static func dread_weight(situation_type:String,civ_id:String)->float:
 static func standing_weight(situation_type:String,civ_id:String,view:Dictionary={})->float:
 	var v:=view if not view.is_empty() else preload("res://scripts/standing.gd").view_of(civ_id)
 	if not bool(v.get("known",false)): return 1.0
+	# Bound with others against us, they are bolder and less giving.
+	var league:=preload("res://scripts/fear_league.gd")
+	var bound:=league.is_member(civ_id)
 	match situation_type:
-		"tribute_demand","emboldened_demand","test_of_resolve":return clampf(1.0+float(v.contempt)*2.0+float(v.envy)*0.8-float(v.awe)*0.6,0.2,3.5)
-		"dread_tribute","gift_goods","nonaggression_offer":return clampf(1.0+float(v.awe)*1.2,0.5,2.5)
+		"tribute_demand","emboldened_demand","test_of_resolve":return clampf((1.0+float(v.contempt)*2.0+float(v.envy)*0.8-float(v.awe)*0.6)*(league.DEMAND_BACKING if bound else 1.0),0.2,3.5)
+		"dread_tribute","gift_goods","nonaggression_offer":return clampf((1.0+float(v.awe)*1.2)*(league.GIFT_BACKING if bound else 1.0),0.35,2.5)
 		"trade_offer","accord_offer","protection_pact":return clampf(1.0+float(v.trust)*0.6+float(v.allure)*0.5-float(v.resentment)*0.6,0.3,2.5)
 		"redress_demand":return clampf(1.0+float(v.resentment)*1.5,0.5,2.5)
 	return 1.0

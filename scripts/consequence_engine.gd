@@ -457,6 +457,10 @@ func _standing_cohesion()->float:
 func _standing_legitimacy()->float:
 	return preload("res://scripts/standing.gd").legitimacy_shift()
 
+## A proud people forgives its chiefs more (standing.gd forgiveness).
+func _standing_blame()->float:
+	return preload("res://scripts/standing.gd").blame()
+
 func policy_effect(channel:String)->float:
 	var result:=0.0
 	for modifier_variant in WorldSimulation.state.active_modifiers:
@@ -700,9 +704,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
 
-	var inquiry_points := 0
-	for value in WorldSimulation.state.research_allocations.values(): inquiry_points += int(value)
-	var focus_quality := 1.0 if inquiry_points <= maxi(1,int(observers)) else clampf(observers/maxf(1.0,float(inquiry_points)),0.15,1.0)
+	# The keepers the plan asks for follow the lines it covers, not the size of
+	# its numbers (Research600.keepers_asked), the same for every ruler.
+	var inquiry_points := preload("res://scripts/research_600_catalog.gd").keepers_asked(WorldSimulation.state.research_allocations)
+	var focus_quality := 1.0 if inquiry_points <= maxf(1.0,floorf(observers)) else clampf(observers/maxf(1.0,inquiry_points),0.15,1.0)
 	var knowledge := float(previous.get("knowledge",0.18))
 	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,WorldSimulation.state.combined_intelligence)
 	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+WorldSimulation.state.founding_effect("knowledge_gain")+WorldSimulation.progression.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"))*span
@@ -731,7 +736,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
 	ecology = clampf(ecology+ecology_delta*span,0.04,1.0)
-	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-administrative_load*0.12-policy_churn*0.18-directive_resistance*0.24+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
+	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-(administrative_load*0.12+policy_churn*0.18+directive_resistance*0.24)*_standing_blame()+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,SPAN.rate(0.012))
 
 	# Mortality is accumulated as population-level risk, while reproduction is
@@ -829,6 +834,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var annual_birth_rate:=float(reproduction.get("projected_birth_rate",0.0))
 
 	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
+	# The month's standing reading (standing.gd record_monthly) outlives the
+	# day's rebuild of the metrics: it is read monthly and charted.
+	var standing_reading:={}
+	for key in WorldSimulation.state.simulation_metrics:
+		if String(key).begins_with("standing_"): standing_reading[key]=WorldSimulation.state.simulation_metrics[key]
 	WorldSimulation.state.simulation_metrics = {
 		"clothing_coverage":clothing.duplicate(),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
@@ -847,6 +857,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"survey_capacity":surveyors*labor_efficiency*(1.0+WorldSimulation.state.founding_effect("survey_output")+WorldSimulation.progression.effect("knowledge_rate")*0.35),"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+WorldSimulation.state.founding_effect("construction_output")+WorldSimulation.progression.effect("construction_rate")),"combined_intelligence":WorldSimulation.state.combined_intelligence,
 		"workshop_function":workshop_function,"storage_function":storage_function
 	}
+	WorldSimulation.state.simulation_metrics.merge(standing_reading)
 	for dynamic_name in WorldSimulation.state.society_capacities:
 		WorldSimulation.state.simulation_metrics["society_"+String(dynamic_name)]=WorldSimulation.state.society_capacities[dynamic_name]
 	for food_metric in food_result:

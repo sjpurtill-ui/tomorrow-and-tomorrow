@@ -55,9 +55,11 @@ func test_controller_selects_foundation_with_existing_budget_and_no_material_int
 			WorldSimulation.submit("foundation_ruler",{"kind":"research_emphasis","domain":domain,"weight":0})
 		WorldSimulation.submit("foundation_ruler",{"kind":"research_emphasis","domain":"security","weight":3})
 		preload("res://scripts/civilization_controller.gd").research_orders("foundation_ruler",{"research_weights":weights,"goals":[{"title":"Broaden practical knowledge"}]})
+		# Emphasis is shares in the player's own steps; it buys no research.
 		var total:=0
-		for amount in WorldSimulation.state.research_allocations.values():total+=int(amount)
-		assert_int(total).is_equal(3)
+		for amount in WorldSimulation.state.research_allocations.values():
+			total+=int(amount);assert_int(int(amount)).is_between(0,12)
+		assert_int(total).is_less_equal(preload("res://scripts/research_600_catalog.gd").ATTENTION_STEPS)
 		assert_bool("cordage" in WorldSimulation.state.active_investigations.values()).is_true()
 		assert_array(WorldSimulation.state.known_discoveries).is_empty()
 	)

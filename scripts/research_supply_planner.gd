@@ -3,6 +3,7 @@ extends RefCounted
 ## research frontier; it neither predicts a complete route nor grants knowledge.
 const P=preload("res://scripts/knowledge_pathways.gd")
 const R=preload("res://scripts/technology_requirements.gd")
+const NEAR_AGE:=preload("res://scripts/discovery_system.gd").NEAR_AGE_YEARS
 
 static func frontier(target:String)->Dictionary:
 	var state:=WorldSimulation.state
@@ -40,6 +41,9 @@ static func recommendation()->Dictionary:
 			var candidates:=frontier(method)
 			for id:String in candidates:
 				var entry:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+				# Advice points at work near its age's cost; a question years
+				# ahead of its age costs several times as much (never a wall).
+				if WorldSimulation.discovery.research_years_ahead(entry)>=NEAR_AGE: continue
 				var distance:int=candidates[id]
 				var score:=(1.0-stock/20.0)/(1.0+float(distance)*.25)
 				score+=clampf(float(state.discovery_progress.get(id,0)),0,1)*.1

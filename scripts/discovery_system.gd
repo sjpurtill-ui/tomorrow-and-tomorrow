@@ -238,6 +238,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var current_day := int(floor(WorldSimulation.state.elapsed_days))
 	WorldSimulation.state.scholarship_level=scholarship_level()+scholarship_rate()*float(WorldSimulation.span)/365.0
 	_refresh_active_investigations()
+	var teams:=research_teams()
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
@@ -245,7 +246,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		if discovery.is_empty(): continue
 		var home:=_research_600_channel_home(channel) # research_600: foundation work is staffed by its channel
 		var allocation:=_subcategory_allocation(home[0],home[1])
-		var research_capacity:=research_capacity_for(home[0],home[1])
+		var research_capacity:=research_capacity_for(home[0],home[1],teams)
 		var attention:=float(research_capacity.get("progress_multiplier",0.0))
 		if attention<=0.0: continue
 		var activity := 0.65
@@ -341,6 +342,7 @@ func active_investigation_records()->Array[Dictionary]:
 		if not lines_by_id.has(id): lines_by_id[id]=[]
 		(lines_by_id[id] as Array).append(String(channel))
 	var records:Array[Dictionary]=[]
+	var teams:=research_teams()
 	for id:String in lines_by_id:
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
@@ -351,7 +353,7 @@ func active_investigation_records()->Array[Dictionary]:
 		for channel:String in channels:
 			var home:=_research_600_channel_home(channel) # research_600
 			allocation+=_subcategory_allocation(home[0],home[1])
-			var line:=research_capacity_for(home[0],home[1])
+			var line:=research_capacity_for(home[0],home[1],teams)
 			for key:String in ["researchers","workforce_share","progress_multiplier"]: research_capacity[key]=float(research_capacity[key])+float(line.get(key,0.0))
 			research_capacity["support_multiplier"]=float(line.get("support_multiplier",1.0))
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
@@ -991,18 +993,24 @@ func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 # Knowledge labor role supplies the aggregate workforce; emphasis divides that
 # workforce among at most 48 fixed inquiry channels. More people therefore
 # create more parallel and faster science without creating runtime work per
-# researcher. Logarithmic team returns prevent a billion people from completing
-# every discovery in a single tick, while knowledge, institutions, materials,
-# and food compound the civilization's ability to use that scale.
-func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
+# researcher. One rule for every people: the community's whole work comes from
+# its researchers alone (Research600.team_capacity) and each channel does its
+# team's part of it (Research600.team_strength), so the same researchers make
+# the same total progress under any emphasis and any ruler; opening more
+# channels adds nothing, and piling people onto one has diminishing returns.
+# Logarithmic team returns prevent a billion people from completing every
+# discovery in a single tick, while knowledge, institutions, materials, and
+# food compound the civilization's ability to use that scale.
+func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary={})->Dictionary:
+	if teams.is_empty(): teams=research_teams()
 	var weight:=maxi(0,_subcategory_allocation(dynamic_id,subcategory))
-	var total_weight:=research_emphasis_total()
-	var total_researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
+	var total_weight:=int(teams.total_weight)
+	var total_researchers:=float(teams.researchers)
 	var workforce_share:=float(weight)/maxf(1.0,float(total_weight)) if weight>0 else 0.0
 	var researchers:=total_researchers*workforce_share
 	var team_scale:=0.0
-	if researchers>0.0:
-		team_scale=researchers if researchers<1.0 else 1.0+log(researchers)/log(10.0)*0.78
+	if researchers>0.0 and float(teams.strength)>0.0:
+		team_scale=float(teams.work)*Research600.team_strength(researchers)/float(teams.strength)
 	elif weight==0 and subcategory==_diffusion_subcategory(dynamic_id):
 		team_scale=Research600.DIFFUSION_TEAM # research_3000: diffusion
 	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
@@ -1021,6 +1029,24 @@ func research_capacity_for(dynamic_id:String,subcategory:String)->Dictionary:
 	}
 
 
+## The research community as the channels share it: the emphasis total, the
+## researchers, their whole work (Research600.team_capacity of those not on
+## artifact study) and the summed strength of every staffed channel's team.
+## One reading serves every channel of a day (research_capacity_for).
+func research_teams()->Dictionary:
+	var total_weight:=research_emphasis_total()
+	var researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
+	var per_step:=researchers/maxf(1.0,float(total_weight))
+	var staffed:=0
+	var strength:=0.0
+	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
+		for value in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary).values():
+			if int(value)<=0: continue
+			staffed+=int(value)
+			strength+=Research600.team_strength(per_step*float(value))
+	return {"total_weight":total_weight,"researchers":researchers,"work":Research600.team_capacity(per_step*float(staffed)),"strength":strength}
+
+
 func research_emphasis_total()->int:
 	var total:=0
 	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
@@ -1033,12 +1059,13 @@ func research_program_summary()->Dictionary:
 	var active_lines:=0
 	var weighted_capacity:=0.0
 	var total_weight:=research_emphasis_total()
+	var teams:=research_teams()
 	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
 		for subcategory in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary):
 			var weight:=_subcategory_allocation(String(dynamic_id),String(subcategory))
 			if weight<=0: continue
 			active_lines+=1
-			weighted_capacity+=float(research_capacity_for(String(dynamic_id),String(subcategory)).get("progress_multiplier",0.0))*float(weight)
+			weighted_capacity+=float(research_capacity_for(String(dynamic_id),String(subcategory),teams).get("progress_multiplier",0.0))*float(weight)
 	return {
 		"researchers":maxi(0,int(WorldSimulation.state.effective_workers("Knowledge"))),
 		"emphasis_total":total_weight,"active_lines":active_lines,

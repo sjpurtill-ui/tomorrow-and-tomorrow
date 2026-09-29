@@ -713,9 +713,9 @@ static func decide(city_id:String,work_id:String,option_id:String)->Dictionary:
 
 ## The choice a computer ruler makes at once, and the player's council after
 ## the god's long silence: one rule for both (civilization_strategy.works_answer).
-## Only the temper differs: a computer ruler's own personality, the council's
-## taken from the people's ambitions (leader_personality.of_owner), or `temper`
-## when the caller gives one.
+## Only the temper differs: a computer ruler's own personality, or for the
+## council the people's tendency, the values they live by
+## (leader_personality.of_owner), or `temper` when the caller gives one.
 static func auto_option(state:Node,r:Dictionary,temper:Dictionary={})->String:
 	var enabled:={}
 	for option:Dictionary in decision_options(state,r):

@@ -26,8 +26,8 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	weights.culture+=integration*5
 	weights.infrastructure+=integration*5
 	if war:weights.security+=1.5;weights.logistics+=1.0
-	# Every ambition a people can take up is open to its ruler, by fit to temper
-	# (the same table gives the player's council its temper: leader_personality.gd).
+	# Every ambition a people can take up is open to its ruler, by fit to its
+	# temper (leader_personality.gd AMBITION_TEMPER).
 	var ambitions:Dictionary={}
 	for candidate:String in PERSONALITY.AMBITION_TEMPER:ambitions[candidate]=PERSONALITY.ambition_fit(candidate,p)
 	# Arms, rule over others, vengeance and trade need other peoples: until one
@@ -55,17 +55,33 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":12+empathy*18+(1-risk)*12,
 		"offensive":assertive*.55+risk*.45>empathy*.3+(1-risk)*.35+.15}
 
-static func research_plan(weights:Dictionary,budget:int)->Dictionary:
+## A ruler's research emphasis, in the steps the player's own screen uses (0 to
+## 12 a field). Emphasis is only a set of shares, so no budget is carried over:
+## steps are not a resource and a larger plan buys no research. Plans are laid
+## out in Research600.ATTENTION_STEPS steps unless `steps` says otherwise. When
+## there are steps enough, every field the ruler weighs at all keeps one, so each
+## line stays alive on questions of its own age; the rest follow the ruler's
+## preferences, twelve at most on any field.
+static func research_plan(weights:Dictionary,steps:int=-1)->Dictionary:
+	if steps<0:steps=preload("res://scripts/research_600_catalog.gd").ATTENTION_STEPS
 	var result:Dictionary={}
-	for domain:String in DOMAINS:result[domain]=0
-	# Preserve the existing emphasis budget, including a deliberately zero budget.
-	for _point in clampi(budget,0,DOMAINS.size()*12):
-		var best:="";var score:=-INF
-		for domain:String in DOMAINS:
+	var weighed:Array[String]=[]
+	for domain:String in DOMAINS:
+		result[domain]=0
+		if float(weights.get(domain,.1))>0.0:weighed.append(domain)
+	if weighed.is_empty() or steps<=0:return result
+	var left:=steps
+	if steps>=weighed.size():
+		for domain:String in weighed:result[domain]=1
+		left-=weighed.size()
+	for _point in left:
+		var best:="";var score:=0.0
+		for domain:String in weighed:
 			if int(result[domain])>=12:continue
 			var value:=float(weights.get(domain,.1))/float(int(result[domain])+1)
 			if value>score:best=domain;score=value
-		if best!="":result[best]+=1
+		if best=="":break
+		result[best]+=1
 	return result
 
 static func unit_score(definition:Dictionary,plan:Dictionary)->float:

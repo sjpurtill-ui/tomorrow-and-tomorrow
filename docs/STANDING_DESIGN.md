@@ -148,33 +148,6 @@ on food with a 40-60% margin, population and discoveries as before; a poor dry
 site goes all in on food and holds 25-60 people; research-heavy grows to about
 1,500 by year 600 against 3,500 for a balanced people.
 
-One rule for every automated leader (2026-09-29): a computer ruler and the
-player's own leaders (the Headman, the council's answers at a great work's
-gates, the search for land) read the same rules; only the temper differs. A
-ruler's temper is its personality; the player's council takes the people's,
-read from their ambitions through `leader_personality.gd` AMBITION_TEMPER, the
-same table a ruler uses to choose its ambition (every ambition is open to
-rulers; arms, dominion, vengeance and trade wait until another people is met).
-
-- Great works: `civilization_strategy.works_answer`; the crews build on while
-  a gate's question waits (90 days for the god's word, 2 for a ruler's).
-- Land: `expansion_months` (every month for the boldest or an expansionist
-  tradition, every third for an even temper, every fifth for the most
-  cautious), settling at 45-100 days of stores, 16-40 km out; bold rulers send
-  thinner rations (32 days for the new town's first weeks against 57).
-- Food: a people's wish for food work (sustenance fully, wellbeing half) is
-  planned as a deeper reserve, up to 120 days with twice the margin.
-- Goodwill carries a real gift from the stores or does not go; a people's
-  aggression, diplomacy and adaptability come from its leader's character.
-
-`python tools/sim/leaders.py` (five archetypes, or `--ambitions`, good and
-poor sites, `--shocks`) checks it: across both sites no temper is as good as
-another everywhere. Sustenance holds 65 days of stores on poor land where the
-rest hold 2-18, bold expansion grows most on good land but loses most settlers,
-works and raids, the warlike are mightiest but fewest, the scholarly live
-longest. The surrogate has no war, conquest or exploration, so the warlike and
-far-ranging tempers show their costs there more than their gains.
-
 ## 8. Build order
 
 1. Research without walls (done: a3b70597).
@@ -191,5 +164,63 @@ far-ranging tempers show their costs there more than their gains.
    god, and trust in the chiefs. The monthly reading of all nine strengths is
    kept in `strategic_history` for the years chart.
 3. Consequences: war and raid decisions, migration, tribute, leagues, pride.
+   Leagues done (fear_league.gd): two or more met peoples holding Fear 0.45+
+   (or Awe 0.6+ with Resentment 0.3+) bind together against us; each weighs
+   our strength against all of theirs, backs the others' raids and demands
+   (x1.5, gifts x0.7) and shares every fresh grudge; they let go below Fear 0.3.
+   Pride forgives (Standing.forgiveness); memory grows with writing and print
+   (Standing.memory_span).
 4. Headman and rival allocation, then the sim calibration across postures.
 5. Era scaling of reach and memory to year 3500.
+
+## 9. Every people on the same rules
+
+The player, 2026-09-29: "Make sure all players (computer and player) are
+perfectly balanced and that all automated leaders are equally balanced though
+with varying tendencies." Every people runs the same simulation in its own
+WorldSimulation scope; what differs must be tendency, not rules.
+
+- Food and the Headman: one planner for every people (section 7).
+- Crises: the god's people meet them at court (crisis_system.gd); every other
+  people meets the same ones in its own scope (crisis_unattended.gd): the same
+  hazards read from its own state, the same death draws and floors, and the
+  court official's own answers when the god is silent, paid from its own
+  stores, roofs and labour.
+- Feuds: two small simulated neighbours who fall out (war_loop._rival_wars, at
+  the benchmark rate) now fight their feud for real (rival_feuds.gd): the same
+  bands and combat simulator as raids on the god's people, the dead and the
+  stolen food out of both real ledgers, each side remembering it; grudges fade
+  between feuds. Big peoples declare their own wars through their leaders.
+- Research: capacity from the people at research, emphasis only directs it,
+  one budget rule for every ruler (codex/research-parity).
+- Leaders: one rule for every decision a computer ruler and the player's own
+  leaders both make; only the temper differs (codex/leader-balance). A ruler's
+  temper is its personality; the player's leaders take the people's tendency,
+  the values they live by (`leader_personality.from_values`, the reading their
+  delegated research uses too).
+  - Ambitions: every ambition is open to a ruler, by fit to its temper
+    (`AMBITION_TEMPER`); arms, dominion, vengeance and trade wait until another
+    people is met.
+  - Great works: one answer at a work's gates (`civilization_strategy.works_answer`),
+    and the crews build on while a question waits (90 days for the god's word,
+    2 for a ruler's); grief moves a ruler to build only after a hard year.
+  - Land: `expansion_months` (every month for the boldest or an expansionist
+    tradition, every third for an even temper, every fifth for the most
+    cautious), settling at 45-100 days of stores, 16-40 km out; bold rulers
+    send thinner rations (32 days for the new town's first weeks against 57).
+  - Food: a people's wish for food work (sustenance fully, wellbeing half) is
+    planned as a deeper reserve, up to 120 days with twice the margin.
+  - Goodwill carries a real gift from the stores or does not go; a people's
+    aggression, diplomacy and adaptability come from its leader's character.
+
+  `python tools/sim/leaders.py` (five archetypes, or `--ambitions`; good and
+  poor land; `--shocks`) checks it: over good and poor land together no
+  temper is as good as another everywhere by year 600. On good land the
+  cautious and caring grow most (about 28,600 people, 1,070 discoveries) but
+  raise no great work; the bold raise most works (59) but lose 31 to folly
+  and 6.6 settlers for each town; the warlike are mightiest; the scholarly
+  live longest but are fewest (15,300). On poor land the sustenance people
+  lose 1.9 in 1,000 to hunger each year against 2.3-4.7 (3.3 against 12-20
+  through the shocks). The surrogate has no war, conquest, trade or
+  exploration, so the warlike and far-ranging tempers show their costs there
+  more than their gains.

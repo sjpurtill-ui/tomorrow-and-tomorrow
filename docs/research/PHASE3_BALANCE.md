@@ -67,7 +67,7 @@ Their labor cost is unchanged. Before this, all three were no-ops once health an
 - **Focus.** A line's focus is its share of research emphasis above an even spread, from 0 (an even spread) to 1 (all emphasis on that line).
 - **Stronger practices.** The benefits of a focused line's practices count up to 35% more.
 - **Higher ceiling.** That line's channels may pass the common era ceiling by the same share. `EFFECT_LINE` maps each effect key to the line that carries most of its content.
-- **Cost.** Every other line is researched less. Every other line's benefits are also counted, capped and carried out (`SocietyModel.practiced`, which early care reads) up to 35% less (`SPECIALIZATION_NEGLECT`), so a focus pays for as long as it lasts.
+- **Cost.** Every other line is researched less. The other lines also give up, between them, exactly what the focused line gains (`SPECIALIZATION_NEGLECT` 1, `SocietyModel.neglect_for`): each has its benefits counted, capped and carried out (`SocietyModel.practiced`, which early care reads) an equal part less, about 3% each with all emphasis on one line. A focus pays for as long as it lasts, but never costs more than it brings. (It was a flat cut of up to 35% on every other line, which charged a ruler with one strong aim several times what its focus brought.)
 
 ### Research is never free
 

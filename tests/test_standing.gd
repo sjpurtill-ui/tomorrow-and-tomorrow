@@ -192,3 +192,107 @@ func test_posture_names_the_lean_and_the_neglect()->void:
 	assert_str(String(lean.id)).is_equal("genius")
 	assert_str(String(lean.words)).is_equal("A learned people, with few spears.")
 	assert_bool(bool(lean.lopsided)).is_true()
+
+func test_pride_forgives_the_chiefs_and_shame_blames_them()->void:
+	GameState.simulation_metrics["standing_pride"]=0.5
+	assert_float(Standing.blame()).is_equal_approx(1.0,0.0001)
+	GameState.simulation_metrics["standing_pride"]=0.85
+	assert_float(Standing.blame()).is_equal_approx(0.72,0.0001)
+	GameState.simulation_metrics["standing_pride"]=0.2
+	assert_float(Standing.blame()).is_equal_approx(1.2,0.0001)
+	# A failed aim costs a proud people's chiefs less trust.
+	var Aims:=preload("res://scripts/legacy_aims.gd")
+	GameState.simulation_metrics["standing_pride"]=0.85
+	var proud_cost:=float(Aims.FAIL_METRICS.legitimacy)*Standing.blame()
+	GameState.simulation_metrics["standing_pride"]=0.5
+	var plain_cost:=float(Aims.FAIL_METRICS.legitimacy)*Standing.blame()
+	assert_float(absf(proud_cost)).is_less(absf(plain_cost))
+
+func test_memory_grows_with_what_a_people_knows()->void:
+	var Voice:=preload("res://scripts/character_voice.gd")
+	Voice.knowledge_override["civ_oral"]=[]
+	Voice.knowledge_override["civ_print"]=["printing_process"]
+	assert_float(Standing.memory_span("civ_oral")).is_equal(1.0)
+	assert_float(Standing.memory_span("civ_print")).is_equal(3.0)
+	Voice.knowledge_override.erase("civ_oral")
+	Voice.knowledge_override.erase("civ_print")
+
+## Leagues of the fearful (fear_league.gd): two peoples who fear us bind
+## together; each weighs our strength against both, and backs the other's raids.
+func _met_second(population:float=120.0,warriors:float=6.0,readiness:float=0.55)->String:
+	var civ:Dictionary=CivilizationSystem.civilizations[1]
+	civ.player_relation.contact_level=2
+	civ.player_relation.opinion=0.0
+	civ.player_relation.border_tension=0.2
+	civ.population=population
+	civ.military_population=warriors
+	civ.military_readiness=readiness
+	ForeignDiplomacy.leader(String(civ.id))
+	return String(civ.id)
+
+func test_peoples_who_fear_us_stand_together_and_it_costs_us()->void:
+	var first:=_met(100.0,4.0,0.5)
+	var second:=_met_second(100.0,4.0,0.5)
+	_rich(120.0)
+	_arm(14,0.85)
+	var DIVINE:=preload("res://scripts/divine_regard.gd")
+	var League:=preload("res://scripts/fear_league.gd")
+	var alone:=Standing.view_of(first)
+	var raid_alone:=War.envy_raid_chance(first,0.6)
+	DIVINE.add_civ_dread(first,0.4); DIVINE.add_civ_dread(first,0.4)
+	DIVINE.add_civ_dread(second,0.4); DIVINE.add_civ_dread(second,0.4)
+	League.monthly(int(GameState.elapsed_days))
+	assert_array(League.members()).contains_exactly_in_any_order([first,second])
+	var bound:=Standing.view_of(first)
+	# Weighed against both of them, our might awes less.
+	assert_float(float(bound.strength_ratio)).is_less(float(alone.strength_ratio))
+	assert_float(float(bound.awe)).is_less_equal(float(alone.awe))
+	assert_float(War.envy_raid_chance(first,0.6)).is_equal_approx(raid_alone*League.RAID_BACKING,0.00001)
+	var said:=Standing.consequences(first,bound)
+	assert_str(String(said[0].id)).is_equal("league")
+	# Fear gone, the league breaks up.
+	(DIVINE.store().civ_dread as Dictionary).clear()
+	League.monthly(int(GameState.elapsed_days)+30)
+	assert_array(League.members()).is_empty()
+
+func test_the_envoy_knows_how_each_people_sees_us_and_says_it()->void:
+	var id:=_met(160.0,10.0,0.7)
+	_rich(120.0)
+	_arm(0,0.3)
+	var Facts:=preload("res://scripts/court_facts.gd")
+	var Answers:=preload("res://scripts/court_answers.gd")
+	var sheet:=Facts.sheet(["common","tribute"])
+	var peoples:Array=sheet.standing.peoples
+	assert_int(peoples.size()).is_equal(1)
+	var name:=String(peoples[0].name)
+	assert_str(Facts.text(sheet)).contains("How the peoples we know see us")
+	var said:=Answers.answer(sheet,"Why do the %s raid us?" % name)
+	assert_str(said).contains("Allure")
+	assert_str(said).contains("each month")
+	# An official who keeps only the stores does not know it.
+	assert_bool(Facts.sheet(["common","stores"]).has("standing")).is_false()
+	assert_bool(id!="").is_true()
+
+func test_pride_is_reckoned_the_same_for_every_people()->void:
+	# Read from a people's own strengths, never from who has met it: a
+	# computer-run people (no views) and ours stand on the same rule.
+	var our:=Standing.strengths()
+	var alone:=float(Standing.pride(our,[]).value)
+	var admired:=float(Standing.pride(our,[{"awe":1.0,"allure":1.0}]).value)
+	assert_float(admired).is_equal(alone)
+	# Works and might raise it for anyone.
+	our.splendor={"value":0.8,"why":""}
+	our.might={"value":0.7,"why":""}
+	assert_float(float(Standing.pride(our).value)).is_greater(alone)
+
+func test_the_months_reading_survives_the_days_and_is_charted()->void:
+	# ConsequenceEngine rebuilds the day's metrics; the month's standing
+	# reading must outlive it, or nothing is ever charted.
+	Standing.record_monthly()
+	var before:=float(GameState.simulation_metrics.get("standing_pride",-1.0))
+	assert_float(before).is_greater(0.0)
+	GameState.elapsed_days=401.0
+	ConsequenceEngine.process_day({})
+	assert_float(float(GameState.simulation_metrics.get("standing_pride",-1.0))).is_equal(before)
+	var scopes:=preload("res://scripts/strategic_history.gd").capture_scopes()
+	assert_bool((scopes.civilization as Dictionary).has("standing_pride")).is_true()

@@ -185,6 +185,7 @@ var rose:Rose
 var seal:TextureRect
 var name_label:Label
 var posture_label:Label
+var renown_label:Label
 var hero_body:GridContainer
 var strength_list:VBoxContainer
 var strength_rows:Array[Control]=[]
@@ -218,6 +219,8 @@ func apply(block:Dictionary)->void:
 	data=block
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
+	var renown:Dictionary=block.get("renown",{})
+	renown_label.text="Our name commands awe %d%% and allure %d%%." % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
@@ -295,6 +298,9 @@ func _build_hero()->void:
 	words.add_child(name_label)
 	posture_label=_voice(words,"",21)
 	posture_label.name="Posture"
+	renown_label=Kit.label(words,"","note")
+	renown_label.name="Renown"
+	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; allure from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	hero_body=GridContainer.new();hero_body.name="Strengths";hero_body.columns=2
 	hero_body.add_theme_constant_override("h_separation",18);hero_body.add_theme_constant_override("v_separation",12)
 	column.add_child(hero_body)
@@ -535,6 +541,11 @@ func _fill_home()->void:
 		parts.append("%s %s%.1f" % [String(pair[1]),"+" if amount>0.0 else "−",absf(amount)])
 	var note:=Kit.label(column,("This month, in points of 100: "+"; ".join(parts)+".") if not parts.is_empty() else "Pride is ordinary this month: it neither draws people to us nor holds them.","note")
 	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	var forgiving:=float(effects.get("forgiveness",0.0))
+	if absf(forgiving)>=0.02:
+		var said:=("A proud people forgives: the blame its chiefs carry for hard orders, constant change and failed aims is %d%% lighter." % roundi(forgiving*100.0)) if forgiving>0.0 else ("A people ashamed of itself blames its chiefs %d%% more for hard orders, constant change and failed aims." % roundi(-forgiving*100.0))
+		var line:=Kit.label(column,said,"note",T.GREEN if forgiving>0.0 else T.RED)
+		line.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 
 ## First letter up, the rest as written.
 static func _sentence(text:String)->String:

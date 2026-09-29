@@ -1,7 +1,8 @@
 extends GdUnitTestSuite
 ## Every automated leader plays by the same rules; only its temper moves its
 ## preferences. A computer ruler's temper is its personality; the player's own
-## council takes the people's (leader_personality.gd temper_of_culture).
+## leaders take the people's tendency, the values they live by
+## (leader_personality.gd from_values, as the delegated research does).
 
 const Personality:=preload("res://scripts/leader_personality.gd")
 const Strategy:=preload("res://scripts/civilization_strategy.gd")
@@ -43,24 +44,25 @@ func test_ambitions_needing_others_wait_until_another_people_is_known()->void:
 	# Callers that do not say (older tests, other systems) see no change.
 	assert_str(String(Strategy.preferences(Martial,{"food_days":120}).ambition)).is_equal(String(met.ambition))
 
-## The player's council has no ruler of its own: its temper is the people's.
-func test_the_council_takes_its_temper_from_the_peoples_ambitions()->void:
-	var even:=Personality.temper_of_culture({})
-	for axis:String in Personality.AXES:assert_float(float(even[axis])).is_equal(.5)
-	var martial:=Personality.temper_of_culture({"military":10.0})
-	assert_float(float(martial.assertiveness)).is_greater(.8)
-	assert_float(float(martial.discipline)).is_greater(.6)
-	var caring:=Personality.temper_of_culture({"wellbeing":7.5,"sustenance":2.5})
-	assert_float(float(caring.empathy)).is_greater(.8)
-	assert_float(float(caring.risk_tolerance)).is_less(.5)
-	# Read back, a people's ambition is the one its council's temper best fits.
+## A temper leaning toward each ambition takes it up: every ambition is reachable.
+func test_every_ambition_has_tempers_that_take_it_up()->void:
 	for ambition:String in PeopleDirection.AMBITIONS:
-		assert_str(String(Strategy.preferences(Personality.temper_of_culture({ambition:10.0}),{"food_days":120,"peoples_known":1}).ambition)).is_equal(ambition)
-	# The live council: an even temper before any ambition, then the people's.
+		var temper:Dictionary={}
+		for axis:String in Personality.AXES:temper[axis]=clampf(.5+float((Personality.AMBITION_TEMPER[ambition] as Dictionary).get(axis,0.0))*.6,.12,.92)
+		assert_str(String(Strategy.preferences(temper,{"food_days":120,"peoples_known":1}).ambition)).is_equal(ambition)
+
+## The player's leaders have no ruler of their own: their temper is the people's
+## tendency, the values they live by, the same reading their delegated research uses.
+func test_the_council_takes_its_temper_from_the_values_the_people_live_by()->void:
 	GameState.reset_for_new_world(515);PeopleDirection.reset_for_new_world();PeopleDirection.ensure()
-	assert_dict(Personality.of_owner("player")).is_equal(even)
-	Culture.record(PeopleDirection.cultural_memory,"century:0","military",0,10.0)
-	assert_float(float(Personality.of_owner("player").assertiveness)).is_greater(.8)
+	assert_dict(Personality.of_owner("player")).is_equal(Personality.from_values(GameState.societal_values))
+	GameState.societal_values.lived.hierarchy=.9;GameState.societal_values.lived.experimentation=.9;GameState.societal_values.lived.ecological_restraint=.1
+	var bold:=Personality.of_owner("player")
+	assert_float(float(bold.assertiveness)).is_equal_approx(.9,.001)
+	assert_float(float(bold.risk_tolerance)).is_equal_approx(.9,.001)
+	assert_dict(Controller.current_plan("player").personality).is_equal(bold)
+	# A given tendency still stands in for it (PeopleDirection's delegated research).
+	assert_dict(Controller.current_plan("player",Cautious).personality).is_equal(Cautious)
 	# A computer ruler keeps its own personality.
 	WorldSimulation.create_actor("ruler",515)
 	assert_dict(Personality.of_owner("ruler")).is_equal(Personality.foreign(515,"ruler"))
@@ -78,9 +80,9 @@ func test_one_rule_for_when_leaders_look_for_land()->void:
 	for month in 12:
 		if Strategy.looks_for_land(month*30,3):looks+=1
 	assert_int(looks).is_equal(4)
-	# The player's leaders read the same rule through the people's temper.
+	# The player's leaders read the same rule through the people's tendency.
 	GameState.reset_for_new_world(516);PeopleDirection.reset_for_new_world();PeopleDirection.ensure()
-	assert_int(AutoFounding.look_months(0)).is_equal(3)
+	assert_int(AutoFounding.look_months(0)).is_equal(Strategy.expansion_months(Personality.from_values(GameState.societal_values)))
 	assert_int(int(Controller.current_plan("player").expansion_months)).is_equal(AutoFounding.look_months(0))
 	Culture.record(PeopleDirection.cultural_memory,"century:0","expansion",0,10.0)
 	assert_int(AutoFounding.look_months(0)).is_equal(1)
@@ -115,8 +117,8 @@ func test_great_works_gates_answer_by_one_rule()->void:
 	assert_str(Strategy.works_answer("stores",facts,Even)).is_equal("pour")
 	assert_str(Strategy.works_answer("labor",facts,Even)).is_equal("paid")
 	assert_str(Strategy.works_answer("demand",facts,Even)).is_equal("honor")
-	# A council whose people took up expansion answers as a bold ruler does.
-	var council:=Personality.temper_of_culture({"expansion":10.0})
+	# A council whose people live by rank and bold trials answers as a bold ruler does.
+	var council:=Personality.from_values({"lived":{"hierarchy":.8,"experimentation":.85,"ecological_restraint":.2}})
 	var doubtful_for_even:=facts.duplicate();doubtful_for_even.feasibility=.66
 	assert_str(Strategy.works_answer("design",doubtful_for_even,council)).is_equal("grander")
 	assert_str(Strategy.works_answer("design",doubtful_for_even,Even)).is_equal("practical")

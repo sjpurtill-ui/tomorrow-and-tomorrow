@@ -124,11 +124,12 @@ func _old_capacities()->Dictionary:
 	var security:=clampf(float(metrics.get("security",0.38)),0.0,1.0)
 	var legitimacy:=clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0)
 	var observers:=float(GameState.effective_workers("Knowledge"))
-	var inquiry_total:=0.0
 	var active_directions:=0
 	for allocation in GameState.research_allocations.values():
-		inquiry_total+=float(allocation)
 		if int(allocation)>0: active_directions+=1
+	# Research parity: the keepers a plan asks for are two for each line it
+	# follows (Research600.keepers_asked), not the sum of its numbers.
+	var inquiry_total:=2.0*float(active_directions)
 	var attention_fit:=clampf(observers/maxf(1.0,inquiry_total),0.10,1.0)
 	var diversity:=clampf(float(active_directions)/12.0,0.05,1.0)
 	var preserved:=clampf(float(metrics.get("knowledge",0.18))+effect.call("knowledge_preservation")*0.55,0.0,1.0)

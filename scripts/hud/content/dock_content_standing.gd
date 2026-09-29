@@ -26,11 +26,11 @@ func tab(_sub:int)->Dictionary:
 	var board:=board_data(our,seen)
 	var blocks:Array=[board]
 	blocks.append(History.block("standing","HOW OUR NAME HAS GROWN","civilization","of 100",[
+		{"key":"standing_awe","label":"Awe","color":Tokens.GOLD},
+		{"key":"standing_allure","label":"Allure","color":Tokens.TEAL},
+		{"key":"standing_pride","label":"Pride","color":Tokens.GREEN},
 		{"key":"standing_might","label":"Might","color":Tokens.RED},
-		{"key":"standing_genius","label":"Genius","color":Tokens.BLUE},
-		{"key":"standing_wealth","label":"Wealth","color":Tokens.AMBER},
-		{"key":"standing_splendor","label":"Splendor","color":Tokens.GOLD},
-		{"key":"standing_pride","label":"Pride","color":Tokens.GREEN}],
+		{"key":"standing_genius","label":"Genius","color":Tokens.BLUE}],
 		"Read once a month from what the people are and do."))
 	return {"brief":_brief(board),"blocks":blocks}
 
@@ -64,7 +64,7 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	for p:Dictionary in peoples: found=found or String(p.civ_id)==compare
 	if not found: view_state["compare"]=""
 	var home:=_home(our,seen)
-	return {"type":"standing","people_name":_our_name(),"posture":posture,"strengths":strengths,"year_ago":year_ago,
+	return {"type":"standing","people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
 		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,
 		"on_raise":func(section:String,sub:int)->void: hud.section_requested.emit(section,sub),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),
@@ -160,6 +160,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 			if String(c.tone)!="danger": continue
 			var title:=""
 			match String(c.id):
+				"league": title="%s stand together against us" % String(p.name)
 				"envy": title="%s envy our stores" % String(p.name)
 				"grudge": title="%s nurse a grudge against us" % String(p.name)
 				"tribute_demand": title="%s think us easy to push" % String(p.name)
@@ -176,7 +177,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 	return warnings
 
 static func _rank(id:String)->int:
-	return {"envy":0,"grudge":1,"tribute_demand":2,"redress_demand":3}.get(id,5)
+	return {"league":0,"envy":1,"grudge":2,"tribute_demand":3,"redress_demand":4}.get(id,5)
 
 ## What answers a danger, in the engine's own terms.
 static func _fix_for(id:String,our:Dictionary)->Dictionary:
@@ -185,6 +186,8 @@ static func _fix_for(id:String,our:Dictionary)->Dictionary:
 			return {"words":"More under arms and ready would make them think again (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Warriors"}
 		"grudge","redress_demand":
 			return {"words":"An envoy with gifts or redress can ease a grudge.","section":"","sub":0,"action":""}
+		"league":
+			return {"words":"Fear binds them: fewer warbands at their borders, gifts and kept word ease it; more spears only deepen it.","section":"","sub":0,"action":""}
 	return {"words":"","section":"","sub":0,"action":""}
 
 static func _neglect_words(id:String)->String:
