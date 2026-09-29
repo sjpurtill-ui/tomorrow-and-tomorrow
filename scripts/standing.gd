@@ -351,6 +351,14 @@ static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5)),"allure":float(metrics.get("standing_allure",ALLURE_ORDINARY)),"awe":float(metrics.get("standing_awe",0.0))}
 
+## How much a target's fighting strength against ours holds a ruler back from
+## declaring war on it: positive when they are stronger (awe of their might),
+## negative when they are much weaker (contempt emboldens). The same for every
+## ruler, read in its own scope; war decisions add it to other deterrence.
+static func war_deterrence(target:Dictionary)->float:
+	var ratio:=their_fighting_strength(target)/our_fighting_strength()
+	return clampf((ratio-1.0)*0.12,-0.12,0.18)
+
 ## Allure an ordinary people commands (a plain village's culture and plenty).
 const ALLURE_ORDINARY:=0.25
 

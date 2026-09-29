@@ -410,7 +410,7 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		var other:=GREAT_WORKS.global_owner(String(civ.id),id)
 		# Lasting grievances over seized, looted or sabotaged works; known deterrence.
 		relationship.opinion=clampf(float(relationship.opinion)-GREAT_WORKS.grievance(id,other),-1,1)
-		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other))
+		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other)+preload("res://scripts/standing.gd").war_deterrence(civ))
 		if bool(civ.player_relation.get("at_war",false)) and action!="seek_peace":
 			var urgency:=-float(civ.player_relation.get("opinion",0))
 			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)

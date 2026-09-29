@@ -322,3 +322,20 @@ func test_the_months_reading_counts_the_peoples_moved_against_us()->void:
 	_arm(0,0.3)
 	assert_int(Standing.danger_count()).is_equal(1)
 	assert_float(float(GameState.simulation_metrics.get("standing_dangers",-1.0))).is_equal(1.0)
+
+func test_a_stronger_target_deters_war_and_a_weak_one_emboldens()->void:
+	var Strategy:=preload("res://scripts/civilization_strategy.gd")
+	var id:=_met(160.0,40.0,0.9)
+	var civ:=ForeignDiplomacy.civilization(id)
+	_arm(0,0.3)
+	var strong:=Standing.war_deterrence(civ)
+	assert_float(strong).is_greater(0.0)
+	civ.population=40.0; civ.military_population=0.0; civ.military_readiness=0.2
+	_arm(14,0.85)
+	var weak:=Standing.war_deterrence(civ)
+	assert_float(weak).is_less(0.0)
+	# At an opinion just short of war, only the emboldened ruler declares.
+	var plan:={"war_opinion":-0.4,"war_food":30.0,"offensive":true,"peace_food":10.0,"trade_opinion":0.5,"personality":{"empathy":0.3}}
+	var relation:={"opinion":-0.35,"at_war":false,"treaty":"none"}
+	assert_str(Strategy.diplomatic_action(relation,plan,90.0,strong)).is_not_equal("declare_war")
+	assert_str(Strategy.diplomatic_action(relation,plan,90.0,weak)).is_equal("declare_war")

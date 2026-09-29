@@ -117,7 +117,9 @@ static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:floa
 	if bool(relation.get("at_war",false)):
 		return "seek_peace" if food_days<float(plan.peace_food) else ""
 	var opinion:=float(relation.get("opinion",0))
-	if opinion<float(plan.war_opinion)-clampf(deterrence,0,.3) and food_days>float(plan.war_food) and bool(plan.offensive):return "declare_war"
+	# Deterrence: works they have heard of and a stronger target hold a ruler
+	# back; a much weaker target emboldens it (standing.gd war_deterrence).
+	if opinion<float(plan.war_opinion)-clampf(deterrence,-.12,.3) and food_days>float(plan.war_food) and bool(plan.offensive):return "declare_war"
 	if opinion>float(plan.trade_opinion) and String(relation.get("treaty","none"))=="none":return "open_trade"
 	return "goodwill" if opinion>-.5 and opinion<GOODWILL_CEILING and float(plan.personality.empathy)>.65 else ""
 
