@@ -30,6 +30,9 @@ var record:Dictionary={}
 var voice_ctx:Dictionary={}
 var result:Dictionary={}
 var allure_before:=0.0
+## Our works' renown before the dedication (great_works.gd renown), to state
+## what the dedication adds in the engine's own numbers.
+var renown_before:Dictionary={}
 var pending_lines:Array=[]
 var lines_shown:=0
 var reveal_clock:=0.0
@@ -73,6 +76,7 @@ func _ready()->void:
 	city_id=String(ceremony.get("city_id",""))
 	record=Bridge.api_dict("site",[city_id,work_id])
 	allure_before=float(Bridge.api_dict("allure_contribution",["player"]).get("value",0.0))
+	renown_before=Bridge.api_dict("renown",["player"])
 	backdrop=Backdrop.new();backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(backdrop)
 	backdrop.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed:skip_reveal())
@@ -360,9 +364,21 @@ func _show_result(chosen:String)->void:
 	var gifts:Array=result.get("gifts",[])
 	if not gifts.is_empty():
 		var received:=_label("Gifts received: "+"; ".join(PackedStringArray(gifts.map(func(g:Variant)->String:return String(g)))),14,Tokens.BODY);received.name="GiftsReceived";received.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(received)
-	words.add_child(_label("Other peoples will talk of this dedication for years, and admire us more while they do." if spike>0.0 else "The dedication is done.",14,Tokens.GOLD_TEXT))
+	var effect:=_label(dedication_words(spike,renown_before,Bridge.api_dict("renown",["player"])),14,Tokens.GOLD_TEXT)
+	effect.name="DedicationEffect";effect.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(effect)
 	var close_button:=P.button(null,"Let the feast begin",close,true);close_button.name="CloseCeremony";close_button.custom_minimum_size=Vector2(220,46)
 	close_button.size_flags_horizontal=Control.SIZE_SHRINK_END;close_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(close_button)
+
+## What the dedication does, in the engine's numbers: its allure (fading over
+## great_works.gd SPIKE_YEARS) and what it adds to our culture's allure and to
+## Splendor now, from the renown read before and after (great_works.gd renown).
+static func dedication_words(spike:float,before:Dictionary,after:Dictionary)->String:
+	if spike<=0.0:return "The dedication is done."
+	var gw:=load("res://scripts/great_works.gd") as GDScript
+	var years:=roundi(float(gw.get_script_constant_map().get("SPIKE_YEARS",5.0))) if gw!=null else 5
+	var gain:=maxf(0.0,float(after.get("share",0.0))-float(before.get("share",0.0)))
+	var splendor:=float(preload("res://scripts/standing.gd").SPLENDOR_WORKS)
+	return "Other peoples will talk of this dedication for %d years: it adds %.0f allure, fading to nothing by then. Now that is +%d to how alluring our culture is and +%d Splendor (our works give +%d and +%d in all)." % [years,spike,roundi(gain*100.0),roundi(gain*splendor*100.0),roundi(float(after.get("share",0.0))*100.0),roundi(float(after.get("share",0.0))*splendor*100.0)]
 
 func close()->void:
 	if is_queued_for_deletion():return
@@ -405,7 +421,7 @@ class Flourish extends Control:
 		draw_colored_polygon(PackedVector2Array([Vector2(mid,y-6),Vector2(mid+8,y),Vector2(mid,y+6),Vector2(mid-8,y)]),HudTokens.GOLD)
 
 class AllureBurst extends Control:
-	## The rise in how we are admired, shown as a radiant seal (words, no number).
+	## The rise in how we are admired, shown as a radiant seal with its allure.
 	var value:=0.0
 	var clock:=0.0
 	func _process(delta:float)->void:
@@ -422,4 +438,8 @@ class AllureBurst extends Control:
 		var font:=ThemeDB.fallback_font
 		var text:="Admired"
 		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
-		draw_string(font,c+Vector2(-width*.5,5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,HudTokens.GOLD_TEXT)
+		draw_string(font,c+Vector2(-width*.5,-2),text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,HudTokens.GOLD_TEXT)
+		if value>0.0:
+			var amount:="+%.0f allure" % value
+			var amount_width:=font.get_string_size(amount,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+			draw_string(font,c+Vector2(-amount_width*.5,14),amount,HORIZONTAL_ALIGNMENT_LEFT,-1,12,HudTokens.GOLD_TEXT)

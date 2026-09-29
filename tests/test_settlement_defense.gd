@@ -44,6 +44,34 @@ func test_home_siege_damages_defenses_and_reduces_their_bonus()->void:
 	assert_array(MilitaryCampaign.validate_state()).is_empty()
 
 
+## The dock's STORES gauge reads the real protected share (it read keys that
+## do not exist and always showed 0%), and its tip names both layers.
+func test_the_stores_gauge_shows_the_protected_share_and_what_it_is_made_of()->void:
+	GameState.known_discoveries.append("fortified_stores")
+	GameState.discovery_adoption["fortified_stores"]=0.5
+	MilitaryCampaign.settlement_defense={"stage":3,"integrity":0.8,"project_stage":-1,"project_progress":0.0,"project_work":0.0,"reserved_materials":{},"completed_day":0}
+	var stores:=MilitaryCampaign.store_protection()
+	assert_float(float(stores.learned_protection)).is_equal_approx(0.5*MilitaryCampaign.FORTIFIED_STORES_MAX_PROTECTION,.0001)
+	assert_float(float(stores.structural_protection)).is_equal_approx(0.26*0.8,.0001)
+	assert_float(float(stores.seizure_reduction)).is_equal_approx(1.0-(1.0-0.3)*(1.0-0.208),.0001)
+	var provider:=preload("res://scripts/hud/content/dock_content_military.gd").new(null,null)
+	var tile:Dictionary={}
+	for block:Dictionary in provider._formation_blocks(MilitaryCampaign.campaign_army_snapshot()):
+		if String(block.get("heading",""))!="SETTLEMENT DEFENSE":continue
+		for item:Dictionary in block.items:
+			if String(item.label)=="STORES":tile=item
+	assert_str(String(tile.value)).is_equal("%d%%" % roundi(float(stores.seizure_reduction)*100.0))
+	assert_str(String(tile.value)).is_not_equal("0%")
+	var tip:=String(tile.tip)
+	print("STORES TIP: ",tip)
+	assert_str(tip).contains("Fortified stores: 30%")
+	assert_str(tip).contains("Defense works: 21%")
+	assert_str(tip).contains("palisade protect 26% when whole and are 80% whole")
+	assert_str(tip).contains("= %d%%" % roundi(float(stores.seizure_reduction)*100.0))
+	# Open ground: the tip lists what each stage of works would protect.
+	MilitaryCampaign.settlement_defense.stage=0
+	assert_str(preload("res://scripts/hud/content/dock_content_military.gd").store_protection_tip(MilitaryCampaign.store_protection(),MilitaryCampaign.settlement_defense_snapshot())).contains("watch posts 5%")
+
 func test_unfortified_home_is_not_immune_to_settlement_grid_damage()->void:
 	GameState.settlement_completed=["Hearth Circle"]
 	SettlementModel.ensure_founded()

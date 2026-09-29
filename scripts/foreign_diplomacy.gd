@@ -18,9 +18,11 @@ var audiences:Dictionary={}
 var layer:CanvasLayer
 var panel:Control
 var commitments=preload("res://scripts/diplomatic_commitments.gd").new()
+## The day _drawn_envoys last looked (advance runs many times a day). Never saved.
+var _drawn_checked_day:=-1
 
 func reset_for_new_world()->void:
-	seed_value=-999999; leaders.clear(); audiences={}
+	seed_value=-999999; leaders.clear(); audiences={}; _drawn_checked_day=-1
 	commitments=preload("res://scripts/diplomatic_commitments.gd").new()
 	if is_instance_valid(panel): panel.queue_free()
 	WorldSimulation.dialogue.reset()
@@ -291,6 +293,7 @@ func apply_recruitment_incident(id:String,recruits:int,day:int)->Dictionary:
 func advance(day:int)->void:
 	ensure()
 	commitments.advance(day)
+	_drawn_envoys(day)
 	for id:String in leaders.keys():
 		var civ:=civilization(id); var p:Dictionary=leaders[id]
 		if civ.is_empty() or (p.accord as Dictionary).is_empty(): continue
@@ -299,6 +302,44 @@ func advance(day:int)->void:
 			p.accord={}; p.next_day=day+90 if war else day
 			p.trust=clampf(float(p.trust)+(-.35 if war else .10),-1,1)
 			remember(id,"War ended our shared undertaking. Trust fell sharply." if war else "Two years of cooperation completed. Your word carries more weight now.")
+
+## Envoys drawn by a work of ours that welcomes strangers (undertaking_effects
+## traffic, pull 0..0.40), for the god's own court only: a known people at peace
+## that has heard of our works (great_works_rivalry.known_traffic) and has real
+## business (the hall's own reading, audience_hall._business_mix) comes once it
+## has been silent (1 - pull) of its usual wait between envoys (civ_gap), not
+## the whole of it. Only when the hall could receive a routine envoy anyway,
+## one chance per silence, and the hall's own floor for one people still holds:
+## how often envoys come in all is unchanged.
+func _drawn_envoys(day:int)->void:
+	if WorldSimulation.actor_id!="player" or day==_drawn_checked_day:return
+	_drawn_checked_day=day
+	if preload("res://scripts/undertaking_effects.gd").traffic_bonus("player")<=0.0:return
+	var rivalry:=preload("res://scripts/great_works_rivalry.gd")
+	var hall:=preload("res://scripts/audience_hall.gd")
+	var s:Dictionary=hall.state()
+	if day-int(s.get("last_arrival_day",-9999))<hall._gap() or day<int(s.get("next_any",0)):return
+	var best:={};var longest:=-1
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		var id:=String(civ.get("id",""))
+		if civilization(id).is_empty() or not bool(civ.get("alive",true)) or bool(civ.player_relation.get("at_war",false)) or "civ:"+id==String(s.get("last_speaker","")):continue
+		if bool(hall._war().call("hot",id,day)):continue
+		var pull:=rivalry.known_traffic(preload("res://scripts/society_exchange.gd").owner_id(id),"player")
+		if pull<=0.0:continue
+		var heard:=maxi(maxi(int((s.last_civ as Dictionary).get(id,-99999)),int((s.last_word as Dictionary).get(id,-99999))),int(civ.player_relation.get("met_day",-99999)))
+		var usual:=hall.civ_gap(id)
+		var silent:=day-heard
+		if silent>=usual or silent<roundi(float(usual)*(1.0-pull)) or silent<=longest:continue
+		var person:=leader(id)
+		if person.is_empty() or int(person.get("drawn_anchor",-99999))==heard:continue
+		var business:Dictionary=hall._business_mix(id,day)
+		# One chance in each silence: no business now, and they wait as usual.
+		if business.is_empty():person["drawn_anchor"]=heard;continue
+		longest=silent;best={"id":id,"heard":heard,"business":business}
+	if best.is_empty():return
+	leader(String(best.id))["drawn_anchor"]=int(best.heard)
+	(s.last_word as Dictionary)[String(best.id)]=day
+	hall._add_occasion({"key":"drawn:%s:%d" % [String(best.id),day],"type":"ambient","civ_id":String(best.id),"day":day,"expires":day+45,"data":{"text":"business between your peoples, brought sooner by what they hear of our works","business":best.business}})
 
 func multiplier(domain:String)->float:
 	advance(int(WorldSimulation.state.elapsed_days))

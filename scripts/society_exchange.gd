@@ -8,6 +8,12 @@ const EarlyArt=preload("res://scripts/early_civ_artifacts.gd")
 const Artifacts=preload("res://scripts/artifact_collection.gd")
 const CONTACT_RADIUS:=2.0
 const MINIMUM_ATTRACTION_ADVANTAGE:=0.10
+## Households drawn by a work that welcomes strangers (drawn_households): every
+## DRAWN_REVIEW_DAYS, their people x DRAWN_RATE x our pull x their advantage,
+## at most DRAWN_SHARE_MAX of them a month.
+const DRAWN_REVIEW_DAYS:=30
+const DRAWN_RATE:=.1
+const DRAWN_SHARE_MAX:=.002
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
 
@@ -45,6 +51,7 @@ static func valid(value:Variant)->bool:
 	if value.has("artifact_rumors") and not preload("res://scripts/artifact_sites.gd").valid_rumors(value.artifact_rumors):return false
 	if value.migration_policy not in ["balanced","welcome","consolidate"] or value.sharing_policy not in ["open","selective","guarded"]:return false
 	if not number(value.last_day) or not number(value.exposure) or value.exposure<0 or value.exposure>1:return false
+	if value.has("drawn_day") and not number(value.drawn_day):return false
 	if not value.integration is Array or value.integration.size()>128 or not value.history is Array or value.history.size()>64:return false
 	for group:Variant in value.integration:
 		if not group is Dictionary or not group.has_all(["origin","count","remaining"]) or not group.origin is String:return false
@@ -558,6 +565,75 @@ static func arrive(mission:Dictionary,day:int)->int:
 	log_event("%d newcomers arrived from %s; reception and integration are under way." % [count,String(reservation.source_name)])
 	return count
 
+## Households drawn by a work that welcomes strangers (undertaking_effects
+## traffic), for the people in scope, once every DRAWN_REVIEW_DAYS. From each
+## known people at peace with us (and no border understanding against it) that
+## has heard of our works (great_works_rivalry.known_traffic) and whose
+## households judge life here at least MINIMUM_ATTRACTION_ADVANTAGE better (the
+## same judgement an invitation needs), about their people x DRAWN_RATE x our
+## pull x that advantage come on their own, never more than DRAWN_SHARE_MAX of
+## them, and all together no more than reception has room for; a seeded roll
+## settles the fraction. Returns how many came.
+static func drawn_households(day:int)->int:
+	var d:=data()
+	if day<int(d.get("drawn_day",-DRAWN_REVIEW_DAYS))+DRAWN_REVIEW_DAYS:return 0
+	d["drawn_day"]=day
+	var recipient:=WorldSimulation.actor_id
+	var pull:=float((load("res://scripts/undertaking_effects.gd") as GDScript).call("traffic_bonus",recipient))
+	if pull<=0.0 or String(d.migration_policy)=="consolidate":return 0
+	var room:=reception_capacity()
+	if room<2:return 0
+	var rivalry:=load("res://scripts/great_works_rivalry.gd") as GDScript
+	var ours:=attraction()
+	var arrived:=0
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if arrived>=room:break
+		var relation:Dictionary=civ.get("player_relation",{})
+		var source:=owner_id(String(civ.get("id","")))
+		if source==recipient or owner_state(source)==null or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)):continue
+		if day<int(known_relation(source).get("recruitment_truce_until",0)):continue
+		if float(rivalry.call("known_traffic",source,recipient))<=0.0:continue
+		var theirs:float=WorldSimulation.scoped(source,func()->float:return attraction())
+		var advantage:=ours-theirs
+		if advantage<MINIMUM_ATTRACTION_ADVANTAGE:continue
+		var people:=maxf(0.0,float(owner_state(source).population_exact))
+		var expected:=minf(people*DRAWN_SHARE_MAX,people*DRAWN_RATE*pull*advantage)
+		var rng:=RandomNumberGenerator.new()
+		rng.seed=hash("%d:drawn:%s:%s:%d" % [int(WorldSimulation.state.world_seed),source,recipient,day])
+		var count:=mini(room-arrived,floori(expected+rng.randf()))
+		if count>=1:arrived+=_drawn_arrival(source,String(civ.get("name",source)),count,day)
+	return arrived
+
+## Moves `count` households that chose to come from `source` into the people in
+## scope: they leave that people's own count (never its last free hands) and
+## join ours, to be settled like any newcomers; their rulers resent the loss as
+## they resent households invited away (arrive).
+static func _drawn_arrival(source:String,source_name:String,count:int,_day:int)->int:
+	var recipient:=WorldSimulation.actor_id
+	var rivalry:=load("res://scripts/great_works_rivalry.gd") as GDScript
+	var departure:Dictionary=WorldSimulation.scoped(source,func()->Dictionary:
+		var free:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-12)
+		var leaving:=mini(count,free)
+		if leaving<1:return {}
+		var there:=String(rivalry.call("civ_name",source,recipient))
+		var gone:Dictionary=WorldSimulation.state.register_population_departures(leaving,"Households left for %s, drawn by what they heard of its works" % there,{"children":1.0,"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":1.0,"elders":1.0})
+		gone["cohorts"]=WorldSimulation.state.last_population_removal_by_cohort.duplicate()
+		var ties:=connection(recipient)
+		ties.departures+=int(gone.get("count",0))
+		ties.resentment=minf(.4,float(ties.resentment)+float(gone.get("count",0))/maxf(1,WorldSimulation.state.population_exact)*.2)
+		log_event("%d people left us on their own for %s, drawn by what they heard of its works." % [int(gone.get("count",0)),there])
+		return gone)
+	var moved:=int(departure.get("count",0))
+	if moved<=0:return 0
+	WorldSimulation.state.register_population_arrivals(moved,"Households from %s, drawn by our works" % source_name,departure.cohorts)
+	var merged:=false
+	for group:Dictionary in data().integration:
+		if group.origin==source:group.count+=moved;group.remaining+=moved;merged=true;break
+	if not merged:data().integration.append({"origin":source,"count":float(moved),"remaining":float(moved)})
+	connection(source).arrivals+=moved
+	log_event("%d people came from %s on their own, drawn by what they heard of our works; reception and integration are under way." % [moved,source_name])
+	return moved
+
 static func advance(day:int)->void:
 	if day<=int(data().last_day):return
 	var elapsed:=mini(7,maxi(1,day-int(data().last_day))) if int(data().last_day)>=0 else 1
@@ -580,6 +656,7 @@ static func advance(day:int)->void:
 	for group:Dictionary in data().integration.duplicate():
 		var used:=minf(work,float(group.remaining));group.remaining-=used;work-=used
 		if group.remaining<=.001:data().integration.erase(group)
+	drawn_households(day)
 	# Study competes within the existing Knowledge workforce, not a free team.
 	# Recovered artifacts are studied only by the artifact-study role.
 	var study_work:=WorldSimulation.state.effective_workers("Knowledge")*.15*elapsed*food

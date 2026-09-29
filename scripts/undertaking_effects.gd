@@ -9,7 +9,9 @@ extends RefCounted
 ##   long_song    - archives leaders' memories and adopted knowledge; restores both
 ## Exposed as data for AI/controller wiring (G2 / integration):
 ##   deterrence(owner) - 0..0.25 reduction to rivals' war propensity toward owner
-##   traffic_bonus(owner) - 0..0.40 extra envoy/trader/refugee routing weight
+##   traffic_bonus(owner) - 0..0.40 pull on strangers (traffic_words says where):
+##     traders (great_works_rivalry.trade_routing), envoys (foreign_diplomacy and
+##     civilization_controller), households (society_exchange.drawn_households)
 const Catalog=preload("res://scripts/undertaking_catalog.gd")
 const FoodScript=preload("res://scripts/food_system.gd")
 ## Legacy founding works keep fixed magnitudes; conceived works scale by their
@@ -22,6 +24,12 @@ const MEMORY_CAP:={"long_song":12}
 const RESTORE_PER_YEAR:={"long_song":1}
 const CIVIC_DAILY:=.00004
 const CIVIC_CEILING:=.85
+## A work that welcomes strangers pulls them by the owner's traffic_bonus
+## (0..0.40): foreign traders get TRAFFIC_MARKET x the pull more market access
+## here, at most TRAFFIC_MARKET_MAX (great_works_rivalry.trade_routing).
+const TRAFFIC_MARKET:=.25
+const TRAFFIC_MARKET_MAX:=.10
+const EXCHANGE_PATH:="res://scripts/society_exchange.gd"
 
 ## Effect family of a record: stored for conceived works, catalog for legacy.
 static func family(r:Dictionary)->String:
@@ -40,7 +48,14 @@ static func memory_cap(r:Dictionary)->int:return int(MEMORY_CAP[String(r.id)]) i
 static func restore_rate(r:Dictionary)->int:return int(RESTORE_PER_YEAR[String(r.id)]) if RESTORE_PER_YEAR.has(String(r.id)) else (3 if strength(r)>=1.5 else 1)
 const MAX_ARCHIVED_DISCOVERIES:=4096
 
-static func _system()->GDScript:return load("res://scripts/undertaking_system.gd")
+## The works engine and its rivalry module, loaded once (both reach back here,
+## so they are loaded, not preloaded; allure and traffic are read every day).
+static var _system_script:GDScript=null
+static var _rivalry_script:GDScript=null
+static var _rivalry_looked:=false
+static func _system()->GDScript:
+	if _system_script==null:_system_script=load("res://scripts/undertaking_system.gd")
+	return _system_script
 
 ## Every work in settlements `owner` controls, including captured ones:
 ## [{record, city:{id,name}, owner (builder), captured}]. Control follows the
@@ -48,7 +63,8 @@ static func _system()->GDScript:return load("res://scripts/undertaking_system.gd
 static func controlled_records(owner:String)->Array:
 	var U:=_system()
 	var result:Array=[]
-	var rivalry:GDScript=U.rivalry_script()
+	if not _rivalry_looked:_rivalry_script=U.rivalry_script();_rivalry_looked=true
+	var rivalry:GDScript=_rivalry_script
 	if rivalry!=null:
 		for entry:Dictionary in rivalry.call("held_works",owner):
 			result.append({"record":entry.record,"city":{"id":String(entry.city_id),"name":String(entry.city_name)},"owner":String(entry.owner),"captured":bool(entry.captured)})
@@ -106,9 +122,28 @@ static func describe(id:String,condition:float=1.0,record:Dictionary={})->String
 		"covenant":return "Seals up to %d rations of real surplus against famine; released when people go hungry." % roundi(covenant_cap(r)*condition)
 		"long_song":return "Keeps up to %d leaders' memories for successors and restores up to %d lost discoveries a year." % [memory_cap(r),restore_rate(r)]
 		"deterrence":return "Rivals' willingness to make war on you falls by up to %d%%." % roundi(deterrence_of(r)*condition*100)
-		"traffic":return "Envoys, traders and refugees are %d%% more likely to route toward you." % roundi(traffic_of(r)*condition*100)
+		"traffic":return traffic_words(traffic_of(r)*condition)
 		"civic":return "Steadies cohesion and legitimacy while it stands."
 	return String(d.get("effect_text",""))
+
+## What a pull on strangers of `pull` (0..0.40) does, with the engine's sizes.
+static func traffic_words(pull:float)->String:
+	var exchange:=load(EXCHANGE_PATH) as GDScript
+	var rules:Dictionary=exchange.get_script_constant_map() if exchange!=null else {}
+	var per_thousand:=1000.0*float(rules.get("DRAWN_RATE",.1))*pull*.1
+	return "Draws strangers (a pull of %d%%): foreign traders get +%d points of market access here; known peoples who have heard of our works send their envoys with real business up to %d%% sooner, and computer-run rulers weigh trade and goodwill missions to us x%.2f; households of known peoples at peace who judge life here at least %d points better come on their own, about %.1f in 1,000 of them a month for every 10 points better (at most %.1f in 1,000), as far as reception has room." % [roundi(pull*100.0),roundi(minf(TRAFFIC_MARKET_MAX,pull*TRAFFIC_MARKET)*100.0),roundi(pull*100.0),1.0+pull,roundi(float(rules.get("MINIMUM_ATTRACTION_ADVANTAGE",.10))*100.0),per_thousand,float(rules.get("DRAWN_SHARE_MAX",.002))*1000.0]
+
+## The whole pull an owner's works put on strangers, in its present numbers,
+## and every bound on it: for the works screen's tooltip.
+static func traffic_detail(owner:String)->String:
+	var pull:=traffic_bonus(owner)
+	var exchange:=load(EXCHANGE_PATH) as GDScript
+	var rules:Dictionary=exchange.get_script_constant_map() if exchange!=null else {}
+	var lines:PackedStringArray=["All our works together pull strangers at %d%% (at most 40%%)." % roundi(pull*100.0)]
+	lines.append("Traders: market access for foreign traders +%d points (the pull x%.2f, at most +%d)." % [roundi(minf(TRAFFIC_MARKET_MAX,pull*TRAFFIC_MARKET)*100.0),TRAFFIC_MARKET,roundi(TRAFFIC_MARKET_MAX*100.0)])
+	lines.append("Envoys: a known people that has heard of our works and has real business to do sends its envoy after %d%% of its usual wait (never below the court's floor of 60%%). How often envoys come in all is unchanged. Computer-run rulers choosing where to send trade and goodwill missions weigh us x%.2f." % [roundi((1.0-pull)*100.0),1.0+pull])
+	lines.append("Households: every %d days, from each known people at peace with us that has heard of our works and whose households judge life here at least %d points better (of 100), their people x %.2f x the pull x that advantage come on their own (a seeded roll settles the fraction); never more than %.1f in 1,000 of them a month, and no more in all than our reception has room for. They leave that people's count and join ours, and their rulers resent it." % [int(rules.get("DRAWN_REVIEW_DAYS",30)),roundi(float(rules.get("MINIMUM_ATTRACTION_ADVANTAGE",.10))*100.0),float(rules.get("DRAWN_RATE",.1)),float(rules.get("DRAWN_SHARE_MAX",.002))*1000.0])
+	return "\n".join(lines)
 
 # --- Daily effects (called from advance_all inside the owner's scope) ---------
 static func advance_city(state:Node,city:Dictionary,day:int,days:int)->void:

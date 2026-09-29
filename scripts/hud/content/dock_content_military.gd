@@ -164,13 +164,31 @@ func _formation_blocks(army:Dictionary)->Array:
 			"tip":"Return every recruit and home formation to the civilian labor pool; equipment goes back to stores. Field armies are untouched."},
 		]})
 	var defense:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
+	var stores:Dictionary=MilitaryCampaign.store_protection()
 	blocks.append({"type":"tiles","heading":"SETTLEMENT DEFENSE","items":[
 		{"label":"WORKS","value":String(defense.get("short","Open ground")),"note":"integrity %d%%" % roundi(float(defense.get("integrity",0.0))*100.0),"note_color":Tokens.RED if float(defense.get("integrity",0.0))<0.4 else Tokens.MUTED,"tip":String(defense.get("description",""))},
 		{"label":"LOOKOUT","value":"%.0f km" % float(defense.get("observation_radius_km",0.0)),"note":"observation reach","note_color":Tokens.MUTED,"tip":"How far approaching forces are seen"},
 		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_personnel",0)),int(defense.get("garrison_required",0))],"note":"%d trained · %d militia" % [int(defense.get("garrison_trained",0)),int(defense.get("garrison_militia",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The local Defense allocation always mans the watch and receives automatic basic training. Army builds set the desired force; staff manage exercises under your training policy."},
-		{"label":"STORES","value":"%d%%" % roundi(float(MilitaryCampaign.store_protection().get("total",MilitaryCampaign.store_protection().get("protection",0.0)))*100.0),"note":"protected share","note_color":Tokens.MUTED,"tip":"Share of the food reserve protected from raids"},
+		{"label":"STORES","value":"%d%%" % roundi(float(stores.seizure_reduction)*100.0),"note":"out of raiders' reach","note_color":Tokens.MUTED,"tip":store_protection_tip(stores,defense)},
 	]})
 	return blocks
+
+## The STORES tile's tip: the share raiders cannot reach and what it is made of,
+## in the engine's own numbers (MilitaryCampaign.store_protection).
+static func store_protection_tip(stores:Dictionary,defense:Dictionary)->String:
+	var learned:=float(stores.get("learned_protection",0.0))
+	var works:=float(stores.get("structural_protection",0.0))
+	var lines:PackedStringArray=["Raiders who break in, or whom we let in, carry off part of the stores they can reach: food, timber, stone and fiber, never more than %d loads each. %d%% of the stores is out of their reach; %d%% is exposed." % [roundi(MilitaryCampaign.RAIDER_CARRY),roundi(float(stores.get("seizure_reduction",0.0))*100.0),roundi(float(stores.get("exposed_share",1.0))*100.0)]]
+	var adoption:=float(stores.get("adoption",0.0))
+	lines.append("Fortified stores: %d%%. %s; fully in use it protects %d%%." % [roundi(learned*100.0),("Fortified Stores is %d%% in use" % roundi(adoption*100.0)) if adoption>0.0 else "Fortified Stores is not yet in use",roundi(MilitaryCampaign.FORTIFIED_STORES_MAX_PROTECTION*100.0)])
+	if int(defense.get("stage",0))>0:
+		lines.append("Defense works: %d%%. The %s protect %d%% when whole and are %d%% whole." % [roundi(works*100.0),String(defense.get("short","works")).to_lower(),roundi(float(stores.get("stage_protection",0.0))*100.0),roundi(float(stores.get("integrity",1.0))*100.0)])
+	else:
+		var ladder:PackedStringArray=[]
+		for stage:Dictionary in MilitaryCampaign.SETTLEMENT_DEFENSE_STAGES.slice(1):ladder.append("%s %d%%" % [String(stage.short).to_lower(),roundi(float(stage.store_protection)*100.0)])
+		lines.append("Defense works: none yet, so 0%%. When whole, %s." % ", ".join(ladder))
+	lines.append("The two layers stack: 1 − (1 − %d%%) × (1 − %d%%) = %d%%." % [roundi(learned*100.0),roundi(works*100.0),roundi(float(stores.get("seizure_reduction",0.0))*100.0)])
+	return "\n".join(lines)
 
 # --- ARMY BUILDS ------------------------------------------------------------
 

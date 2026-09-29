@@ -125,6 +125,9 @@ static func rumored_sites(observer:String="player")->Array[Dictionary]:return Si
 
 static func allure()->float:return float(allure_report(false).allure)
 
+## The works engine, loaded once (it reaches back here through society_exchange).
+static var _works_engine:GDScript=null
+
 static func allure_report(with_text:bool=true)->Dictionary:
 	var state:=WorldSimulation.state
 	var effective:=0.0
@@ -140,10 +143,15 @@ static func allure_report(with_text:bool=true)->Dictionary:
 	var lived:Dictionary=state.societal_values.get("lived",{}) if state.societal_values is Dictionary else {}
 	var openness:=clampf((float(lived.get("openness",.5))+float(lived.get("pluralism",.5)))*.5,0,1)
 	var values:=ALLURE_VALUES*openness
-	var rewards:=preload("res://scripts/undertaking_rewards.gd")
-	var works:=minf(ALLURE_WORKS,rewards.local_bonus(state,"attraction")+rewards.local_bonus(state,"reputation")*.5)
+	# Great works: the one reading every screen and system shares (great_works.gd
+	# renown): every standing work by its size, outcome and repair, plus what
+	# welcoming purposes add, at most ALLURE_WORKS. Loaded, not preloaded: the
+	# works engine reaches back here through society_exchange.
+	if _works_engine==null:_works_engine=load("res://scripts/great_works.gd")
+	var renown:Dictionary=_works_engine.call("renown",WorldSimulation.actor_id,false)
+	var works:=float(renown.share)
 	var total:=clampf(collection+culture+values+works,0,1)
-	var result:={"allure":total,"works":works}
+	var result:={"allure":total,"works":works,"works_points":float(renown.points),"works_standing":int(renown.standing),"works_monument":float(renown.monument),"works_purpose":float(renown.purpose)}
 	if not with_text:return result
 	var label:=String(LABELS[-1][1])
 	for step:Array in LABELS:
@@ -153,22 +161,35 @@ static func allure_report(with_text:bool=true)->Dictionary:
 		{"source":"collection","value":collection,"text":"Studied and exhibited artifacts (effective prestige %.1f). Unstudied pieces count for a fifth; exhibited studied pieces for half again as much." % effective},
 		{"source":"culture","value":culture,"text":"Cultural capacity %d%% — cohesion, shared practice and the spread of new customs." % roundi(culture_capacity*100)},
 		{"source":"values","value":values,"text":"Openness and pluralism in lived values (%d%%): a society others feel they could belong to." % roundi(openness*100)},
-		{"source":"works","value":works,"text":"Functioning undertakings and wonders that travelers speak of."},
+		{"source":"works","value":works,"text":works_text(renown)},
 	]
 	var diplomacy:=total*DIPLOMACY_MAX
 	result["effects"]=[
 		{"target":"diplomacy","value":diplomacy,"text":"Foreign rulers receive proposals more warmly: +%.3f to a proposal's reception (x0.6 for closed-minded rulers, up to x1.4 for open ones)." % diplomacy},
-		{"target":"migration","value":maxf(0.0,total-works)*MIGRATION_MAX,"text":"Households elsewhere judge life here more attractive: +%.1f%% to living-condition attraction when invited (wonders already count there directly)." % (maxf(0.0,total-works)*MIGRATION_MAX*100)},
+		{"target":"migration","value":maxf(0.0,total-works)*MIGRATION_MAX,"text":"Households elsewhere judge life here more attractive: +%.1f%% to living-condition attraction when invited (great works are left out: households weigh a work only by the attraction its purpose adds, which counts there directly)." % (maxf(0.0,total-works)*MIGRATION_MAX*100)},
 		{"target":"museum","value":total*A.MUSEUM_ALLURE,"text":"Museum visitors come more often: admissions draw x%.2f, still limited by household money and Knowledge staff." % (1.0+total*A.MUSEUM_ALLURE)},
 	]
 	return result
+
+## The great works line of the allure breakdown, in the engine's own numbers
+## (great_works.gd renown), on the same scale as the allure seal (of 100).
+static func works_text(renown:Dictionary)->String:
+	var standing:=int(renown.get("standing",0))
+	var points:=float(renown.get("points",0.0))
+	var cap:=roundi(float(renown.get("cap",ALLURE_WORKS))*100.0)
+	if points<=0.0 and float(renown.get("purpose",0.0))<=0.0:return "No great work of ours stands yet. Every standing work will count here, whatever it was built for: up to %d." % cap
+	var text:="%d great work%s standing, %.0f allure among other peoples: +%d (the first works count most; %d at the very most)." % [standing,"" if standing==1 else "s",points,roundi(float(renown.get("monument",0.0))*100.0),cap]
+	if float(renown.get("purpose",0.0))>0.0:text+=" Built to welcome strangers or carry our name, they add +%d more." % roundi(float(renown.purpose)*100.0)
+	if float(renown.get("monument",0.0))+float(renown.get("purpose",0.0))>float(renown.get("share",0.0))+.0005:text+=" Together they reach the %d limit." % cap
+	return text
 
 ## Bounded addition to ForeignDiplomacy.forecast score (0 to 0.14).
 static func diplomatic_bonus(personality:Dictionary={})->float:
 	return allure()*DIPLOMACY_MAX*(.6+.8*clampf(float(personality.get("openness",.5)),0,1))
 
-## Bounded addition to SocietyExchange.attraction (0 to 0.06). Undertakings are
-## already counted there directly, so their share of allure is excluded here.
+## Bounded addition to SocietyExchange.attraction (0 to 0.06). Great works are
+## left out: households weigh a work only by the attraction its purpose adds,
+## which SocietyExchange.attraction counts directly (undertaking_rewards).
 static func migration_bonus()->float:
 	var report:=allure_report(false)
 	return maxf(0.0,float(report.allure)-float(report.works))*MIGRATION_MAX

@@ -64,6 +64,12 @@ static func execute(order:Dictionary)->Dictionary:
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
 		"transport":return WorldSimulation.military.joint_operations.logistics.start(int(order.get("force",0)),String(order.get("destination","")),float(order.get("food",0.0)),int(order.get("army",0)))
 		"commission":return WorldSimulation.military.joint_operations.commission(int(order.get("base",0)),String(order.get("unit","")),int(order.get("count",0)),String(order.get("name","")))
+		# Settlement defences: the court's own call (realm_orders), with the same
+		# works, materials and Defense labour. `stage`, when given, must be the next.
+		"settlement_defense":
+			var next:=int(WorldSimulation.military.settlement_defense_snapshot().stage)+1
+			if order.has("stage") and int(order.stage)!=next:return {"error":"The next defence stage is %d, not %d." % [next,int(order.stage)]}
+			return WorldSimulation.military.start_settlement_defense_upgrade()
 		# Great Works: the same undertaking functions the player's dock uses.
 		"great_work_commission":
 			if not order.get("concept") is Dictionary:return {"error":"Describe the work to be commissioned."}

@@ -135,7 +135,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","civilian","foreign","great_works","expansion"]:
+	for kind:String in ["research","military","defense","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -148,6 +148,7 @@ static func order_steps(id:String)->Array:
 			match kind:
 				"research":research_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
+				"defense":defense_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
 				"great_works":great_work_orders(id,shared.plan)
 		])
@@ -377,6 +378,104 @@ static func ensure_line(id:String,item:String,target:int)->void:
 			return
 	WorldSimulation.submit(id,{"kind":"production","item":item,"target":target})
 
+## Settlement defences. The danger a ruler reads from its own world, each part
+## 0..1 (the strongest counts): at war, under siege or facing raiders at its
+## gate; its home attacked within DEFENSE_MEMORY_DAYS; its people's fear of war
+## (war_fear x 4); a hostile neighbour (opinion -0.2 or less, or border tension
+## 0.45 or more); rich stores few guard (the month's Standing: wealth at least
+## 0.35 above might); or simply other peoples known.
+const DEFENSE_DANGER:={"war":1.0,"attacked":.8,"hostile":.55,"tempting":.4,"neighbours":.2}
+const DEFENSE_MEMORY_DAYS:=730
+## Danger, weighed by the ruler's wariness (x0.6 for the boldest to x1.4 for
+## the most wary), that each next stage needs: watch posts, earthworks,
+## palisade, walled districts, bastion network.
+const DEFENSE_STAGE_NEED:=[0.0,.2,.35,.5,.65,.8]
+## A ruler commits a stage's materials only while DEFENSE_SPARE times each is
+## in store and food for DEFENSE_FOOD_DAYS, and only if its Defense workers can
+## raise it within DEFENSE_MAX_DAYS.
+const DEFENSE_SPARE:=2.0
+const DEFENSE_FOOD_DAYS:=30.0
+const DEFENSE_MAX_DAYS:=1095.0
+
+## A computer ruler raises its next defence stage through the validated order
+## the court's own call uses (civilization_orders "settlement_defense"): the same
+## works, materials and Defense labour, nothing the player lacks.
+static func defense_orders(id:String,plan:Dictionary)->void:
+	var decision:=defense_decision(plan)
+	if bool(decision.build):WorldSimulation.submit(id,{"kind":"settlement_defense","stage":int(decision.stage),"reason":String(decision.reason)})
+
+## Whether this ruler raises its next defence stage now, and why, from its own
+## world (run in its scope): {build, stage, name, danger, parts, wariness,
+## weighed, need, blockers, reason}.
+static func defense_decision(plan:Dictionary)->Dictionary:
+	var campaign=WorldSimulation.military
+	var state=WorldSimulation.state
+	var snapshot:Dictionary=campaign.settlement_defense_snapshot()
+	var stage:=int(snapshot.stage)+1
+	var result:={"build":false,"stage":stage,"name":"","danger":0.0,"parts":{},"wariness":0.0,"weighed":0.0,"need":1.0,"blockers":[],"reason":""}
+	if not (snapshot.get("construction",{}) as Dictionary).is_empty():
+		result.blockers.append("a stage is already being raised");return result
+	if stage>=campaign.SETTLEMENT_DEFENSE_STAGES.size():
+		result.blockers.append("the strongest works already stand");return result
+	var works:Dictionary=campaign.SETTLEMENT_DEFENSE_STAGES[stage]
+	result.name=String(works.short)
+	var parts:=defense_danger(plan)
+	var danger:=0.0
+	for key:String in parts:danger=maxf(danger,float(parts[key]))
+	var wariness:=defense_wariness(plan)
+	result.merge({"danger":danger,"parts":parts,"wariness":wariness,"weighed":danger*(.6+.8*wariness),"need":float(DEFENSE_STAGE_NEED[stage])},true)
+	if float(result.weighed)<float(result.need):result.blockers.append("danger %.2f x wariness %.2f is %.2f, below the %.2f %s need" % [danger,wariness,float(result.weighed),float(result.need),String(works.short).to_lower()])
+	var food_days:=float(state.simulation_metrics.get("food_days",0.0))
+	if bool(plan.get("hungry",false)) or food_days<DEFENSE_FOOD_DAYS:result.blockers.append("food for %d days, %d needed" % [roundi(food_days),roundi(DEFENSE_FOOD_DAYS)])
+	for material:String in works.materials:
+		var stored:=float(state.resource_stockpiles.get(material,0.0))
+		if stored<float(works.materials[material])*DEFENSE_SPARE:result.blockers.append("%s %.0f in store, %.0f needed to spare it" % [material,stored,float(works.materials[material])*DEFENSE_SPARE])
+	var workers:=float(state.population_allocations.get("Defense",0))
+	var efficiency:=clampf(float(state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
+	# The same daily work _process_settlement_defense_day gives the project.
+	var daily:=minf(float(works.work)*.04,workers*efficiency*.38)
+	var days:=float(works.work)/daily if daily>0.0 else INF
+	if days>DEFENSE_MAX_DAYS:result.blockers.append("%d Defense workers would need %s days" % [roundi(workers),"endless" if days==INF else str(roundi(days))])
+	var available:Dictionary=campaign.settlement_defense_upgrade_availability()
+	if (result.blockers as Array).is_empty() and not bool(available.get("available",false)):result.blockers.append(String(available.get("reason","not possible now")))
+	var named:PackedStringArray=[]
+	for key:String in parts:named.append(key)
+	result.reason="%s: danger %.2f (%s) x wariness %.2f = %.2f against %.2f; about %d days of Defense work" % [String(works.short),danger,", ".join(named) if not named.is_empty() else "none",wariness,float(result.weighed),float(result.need),roundi(days) if days!=INF else -1]
+	result.build=(result.blockers as Array).is_empty()
+	return result
+
+## What endangers this people, as its ruler reads it (see DEFENSE_DANGER).
+static func defense_danger(plan:Dictionary)->Dictionary:
+	var campaign=WorldSimulation.military
+	var state=WorldSimulation.state
+	var day:=int(state.elapsed_days)
+	var parts:Dictionary={}
+	if bool(plan.get("at_war",false)) or not (campaign.active_threat as Dictionary).is_empty() or String((campaign.active_siege as Dictionary).get("mode",""))=="defensive":parts["war"]=DEFENSE_DANGER.war
+	for battle:Dictionary in campaign.battle_history:
+		if day-int(battle.get("day",-99999))>DEFENSE_MEMORY_DAYS:continue
+		if String(battle.get("campaign_mode",""))=="defensive" and String(battle.get("target_region_id",""))=="":parts["attacked"]=DEFENSE_DANGER.attacked;break
+	var fear:=clampf(float(state.simulation_metrics.get("war_fear",0.0))*4.0,0.0,float(DEFENSE_DANGER.attacked))
+	if fear>0.0:parts["fear"]=fear
+	var met:=0
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		var relation:Dictionary=civ.get("player_relation",{})
+		if int(relation.get("contact_level",0))<2 or not bool(civ.get("alive",true)):continue
+		met+=1
+		if float(relation.get("opinion",0.0))<=-.2 or float(relation.get("border_tension",0.0))>=.45:parts["hostile"]=DEFENSE_DANGER.hostile
+	if met>0:
+		parts["neighbours"]=DEFENSE_DANGER.neighbours
+		var metrics:Dictionary=state.simulation_metrics
+		if float(metrics.get("standing_wealth",0.0))-float(metrics.get("standing_might",0.0))>=.35:parts["tempting"]=DEFENSE_DANGER.tempting
+	return parts
+
+## How much a ruler makes of danger, 0..1, by temper: the cautious, the
+## disciplined and the protective wall their towns; a bold, assertive ruler
+## bent on attack trusts its spears more.
+static func defense_wariness(plan:Dictionary)->float:
+	var p:Dictionary=plan.get("personality",{})
+	var bold:=.15 if bool(plan.get("offensive",false)) and float(p.get("assertiveness",.5))>.6 else 0.0
+	return clampf((1.0-float(p.get("risk_tolerance",.5)))*.5+float(p.get("discipline",.5))*.3+float(p.get("empathy",.5))*.2-bold,0.0,1.0)
+
 static func license_acquisition_orders(id:String,plan:Dictionary)->bool:
 	var order:=preload("res://scripts/license_acquisition_planner.gd").recommendation(plan)
 	return not order.is_empty() and not WorldSimulation.submit(id,order).has("error")
@@ -423,11 +522,18 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 			order["gift"]=gift
 		var opinion:=float(civ.player_relation.get("opinion",0))
 		var score:=3.0 if action=="seek_peace" else (2.0-opinion if action=="declare_war" else 1.0+opinion)
+		score*=mission_pull(id,other,action)
 		candidates.append({"order":order,"score":score})
 	if campaign_enemy!="":campaign_objective(id,campaign_enemy,plan)
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.score)>float(b.score))
 	for candidate in candidates:
 		if not WorldSimulation.submit(id,candidate.order).has("error"):break
+
+## How much a ruler's trade and goodwill missions lean toward a people whose
+## work welcomes strangers, once it has heard of that people's works
+## (undertaking_effects traffic): x(1 + pull), at most x1.40; 1 otherwise.
+static func mission_pull(id:String,other:String,action:String)->float:
+	return 1.0+GREAT_WORKS.known_traffic(id,other) if action in ["open_trade","goodwill"] else 1.0
 
 static func campaign_objective(id:String,enemy:String,plan:Dictionary)->void:
 	var campaign:=WorldSimulation.military
