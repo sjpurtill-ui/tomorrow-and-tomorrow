@@ -315,6 +315,9 @@ var travel_reported_milestones: Dictionary = {}
 var travel_active := false
 var travel_start := Vector3.ZERO
 var travel_target := Vector3.ZERO
+## The founding leader's plan the map last drew; a new one (a turn aside for
+## water, a replan) redraws the route.
+var founding_route_revision:=-1
 var travel_days_total := 0.0
 var travel_days_elapsed := 0.0
 var game_speed := 0.0
@@ -1131,6 +1134,14 @@ func _after_world_time(days_advanced:float)->void:
 		var was_traveling:=travel_active
 		travel_active=bool(journey.get("active",false))
 		var led:=not (journey.get("caravan",{}) as Dictionary).is_empty()
+		var caravan:Dictionary=journey.get("caravan",{})
+		if led and travel_active and int(caravan.get("plan_revision",0))!=founding_route_revision:
+			founding_route_revision=int(caravan.get("plan_revision",0))
+			var path:Array=caravan.get("path",[])
+			if path.size()>=2:
+				var end:Vector2=path[-1]
+				travel_target=Vector3(end.x,_height_at(end.x,end.y)+.002,end.y)
+				_draw_route(settler_marker.position,travel_target,path)
 		if not led:_check_travel_milestone_reports(progress)
 		if was_traveling and not travel_active:
 			travel_reported_milestones.erase("forage_ready")
@@ -11452,13 +11463,16 @@ func _move_settlers_to(destination:Vector3)->void:
 		if bool(accepted.get("refused",false)):_show_caravan_notice({"leader":String(accepted.get("leader","The caravan leader")),"title":"The caravan leader advises against this","text":String(accepted.error).trim_prefix(String(accepted.get("leader",""))+": "),"severity":"warning"})
 		return
 	travel_start=settler_marker.position
-	travel_target=destination
+	# The leader may camp by water near the chosen ground rather than on it.
+	var camp:Variant=accepted.get("destination",null)
+	travel_target=Vector3(camp.x,_height_at(camp.x,camp.y)+.002,camp.y) if camp is Vector2 else destination
+	founding_route_revision=int((GameState.founding_journey.get("caravan",{}) as Dictionary).get("plan_revision",0))
 	travel_days_total=float(accepted.duration_days)
 	travel_days_elapsed=0.0
 	travel_active=bool(GameState.founding_journey.get("active",true))
 	travel_reported_milestones.clear()
 	_draw_route(travel_start, travel_target, accepted.get("path",[]))
-	_inspect_location(destination)
+	_inspect_location(travel_target)
 	_present_caravan_reports()
 	_update_time_interface()
 

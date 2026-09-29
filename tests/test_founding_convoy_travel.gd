@@ -1,12 +1,15 @@
 extends GdUnitTestSuite
 
 const Travel:=preload("res://scripts/civilization_travel.gd")
+const Leader:=preload("res://scripts/caravan_leader.gd")
 var previous_route_provider:Callable
 var previous_context_provider:Callable
+var previous_geography:Callable
 
 func before_test()->void:
 	previous_route_provider=WorldSimulation.route_provider
 	previous_context_provider=WorldSimulation.context_provider
+	previous_geography=Leader.geography_provider
 	GameState.reset_for_new_world(4417)
 	GameState.initialize_population_model()
 	CivilizationSystem.reset_for_new_world()
@@ -31,6 +34,7 @@ func before_test()->void:
 func after_test()->void:
 	WorldSimulation.route_provider=previous_route_provider
 	WorldSimulation.context_provider=previous_context_provider
+	Leader.geography_provider=previous_geography
 
 func test_initial_convoy_can_enter_black_ground_then_camp_at_its_physical_position()->void:
 	var destination:=Vector2(48,0)
@@ -91,3 +95,44 @@ func test_travel_council_says_when_camp_has_rebuilt_a_reserve()->void:
 	GameState.resource_stockpiles.Food=3000.0
 	assert_str(String(Travel.advice().status)).is_equal("READY TO CONTINUE")
 	assert_bool(bool(Travel.advice().ready)).is_true()
+
+## One river along x=0; all other ground is dry (the player's 2026-09-28 report:
+## the travellers walked to ground with no water, sat there and died).
+func _river_country()->void:
+	Leader.geography_provider=func(point:Vector2)->Dictionary:
+		return {"water_km":absf(point.x),"land":true,"forage":0.5,"game":0.4,"water_kind":"river"}
+
+func test_dry_chosen_ground_makes_camp_by_the_nearest_water_and_says_so()->void:
+	_river_country()
+	var begun:Dictionary=Travel.begin(Vector2(9.0,20.0))
+	assert_bool(bool(begun.get("ok",false))).override_failure_message(str(begun)).is_true()
+	var camp:Vector2=begun.destination
+	assert_float(absf(camp.x)).is_less_equal(Leader.WET_KM)
+	assert_str(String(begun.plan)).contains("no water within a day's carry").contains("the river")
+
+func test_a_party_with_nothing_to_drink_is_led_to_water_not_refused()->void:
+	_river_country()
+	CivilizationSystem.player_world_origin=Vector2(10.0,0.0)
+	GameState.resource_stockpiles["Freshwater"]=0.0
+	var begun:Dictionary=Travel.begin(Vector2(30.0,0.0))
+	assert_bool(begun.has("error")).override_failure_message(str(begun)).is_false()
+	var water:Vector2=begun.destination
+	assert_float(absf(water.x)).is_less_equal(Leader.WET_KM)
+	assert_str(String(begun.plan)).contains("nothing to drink where we stand")
+
+func test_an_arrival_camp_on_dry_ground_moves_itself_to_water()->void:
+	_river_country()
+	var here:=Vector2(10.0,0.0)
+	var path:=[Vector2(10.0,-8.0),here]
+	var plan:=Leader._finish_plan(path,Leader.profile_path(path),"direct",{"safe_dry_km":0.0,"daily_km":16.0,"vessel_days":2.0,"direct_km":8.0,"direct_longest_dry_km":8.0},{"skip_route_provider":true})
+	var caravan:=Leader.new_record("founding",Leader.generated_leader("test"),path[0],here,plan,0.0)
+	caravan["progress_km"]=float(caravan.total_km)
+	caravan["mode"]="arrived"
+	GameState.founding_journey={"origin":path[0],"destination":here,"duration_days":1.0,"elapsed":1.0,"active":false,"camped_foraging":true,"camp_position":here,"caravan":caravan}
+	GameState.simulation_metrics.merge({"travel_speed_factor":1.0,"health":1.0},true)
+	Travel.advance(1.0)
+	caravan=GameState.founding_journey.caravan
+	assert_bool(String(caravan.mode) in ["seeking_hold","held"]).override_failure_message(String(caravan.mode)).is_true()
+	var destination:Vector2=caravan.destination
+	assert_float(absf(destination.x)).is_less_equal(Leader.WET_KM)
+	assert_float(Leader.position(caravan).x).is_less(10.0)

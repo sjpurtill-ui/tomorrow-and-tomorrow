@@ -87,11 +87,32 @@ static func begin(destination:Vector2)->Dictionary:
 	var leader:Dictionary=previous.get("leader",{})
 	if leader.is_empty():leader=Leader.choose_leader(0,"founding")
 	var now:=situation()
-	var plan:=Leader.plan_route(origin,destination,{"daily_km":float(now.daily_km),"vessel_days":float(now.water_capacity_days),"competency":float(leader.get("competency",.5)),"start_water_days":float(now.water_days)})
+	var leader_name:=String(leader.get("name","The caravan leader"))
+	var competency:=float(leader.get("competency",.5))
+	var options:={"daily_km":float(now.daily_km),"vessel_days":float(now.water_capacity_days),"competency":competency,"start_water_days":float(now.water_days)}
+	# People cannot live beyond a day's carry of water: the leader makes camp by
+	# the water nearest the ground the ruler chose, and says so.
+	var chosen:=destination
+	var note:=""
+	var camp:=Leader.camp_ground(chosen,competency)
+	if not camp.is_empty():
+		destination=camp.point
+		if float(camp.moved_km)>0.0:note="That ground has no water within a day's carry, so I will make camp by %s." % String(camp.words)
+	var plan:Dictionary={} if camp.is_empty() else Leader.plan_route(origin,destination,options)
 	if not bool(plan.get("ok",false)):
-		var refusal:={"error":"%s: %s" % [String(leader.get("name","The caravan leader")),String(plan.get("reason","We cannot reach that ground."))],"leader":String(leader.get("name","")),"refused":true}
-		if plan.get("alternative") is Vector2:refusal["alternative"]=plan.alternative
-		return refusal
+		# Never a dead end: go as far toward it as water allows, or, with nothing
+		# to drink where we stand, straight to the nearest water.
+		var fallback:=_fallback(origin,chosen,plan,options)
+		if fallback.is_empty():
+			var reason:=String(plan.get("reason","We cannot reach that ground."))
+			if camp.is_empty():reason="There is no water within %.0f km of that ground; nobody could live there. Choose ground nearer a river or creek." % Leader.CAMP_WATER_KM
+			var refusal:={"error":"%s: %s" % [leader_name,reason],"leader":String(leader.get("name","")),"refused":true}
+			if plan.get("alternative") is Vector2:refusal["alternative"]=plan.alternative
+			return refusal
+		plan=fallback.plan
+		destination=fallback.destination
+		note=String(fallback.note)
+	if note!="":plan["summary"]="%s %s" % [note,String(plan.get("summary",""))]
 	var caravan:=Leader.new_record("founding",leader,origin,destination,plan,float(WorldSimulation.state.elapsed_days))
 	var journey:={"ok":true,"origin":origin,"destination":destination,"duration_days":maxf(.5,float(plan.days)),"elapsed":0.0,"active":true,"caravan":caravan}
 	WorldSimulation.state.founding_journey=journey
@@ -105,6 +126,24 @@ static func begin(destination:Vector2)->Dictionary:
 	result["leader"]=String(leader.get("name",""))
 	result["path"]=(caravan.get("path",[]) as Array).duplicate()
 	return result
+
+## When no safe route reaches the chosen ground: the reachable water nearest
+## to it, if that brings the people meaningfully closer; else, when there is
+## nothing to drink where they stand (or the ground has no water at all and
+## they are dry), the nearest water. {} when staying put is the right answer.
+static func _fallback(origin:Vector2,chosen:Vector2,plan:Dictionary,options:Dictionary)->Dictionary:
+	var here_dry:=not Leader.drinkable(Leader.sample(origin))
+	var alternative:Variant=plan.get("alternative",null)
+	if alternative is Vector2 and (alternative as Vector2).distance_to(chosen)<origin.distance_to(chosen)-3.0:
+		var partial:=Leader.plan_route(origin,alternative as Vector2,options)
+		if bool(partial.get("ok",false)):
+			var point:Vector2=alternative
+			return {"plan":partial,"destination":point,"note":"We cannot reach that ground with the water we can carry. I will take the people to %s, %.0f km short of it; from there we look again." % [Leader.water_words(Leader.sample(point)),point.distance_to(chosen)]}
+	if not here_dry:return {}
+	var rescue:=Leader.rescue_plan(origin,options)
+	if rescue.is_empty():return {}
+	var water:Vector2=rescue.rescue_to
+	return {"plan":rescue,"destination":water,"note":"We have nothing to drink where we stand. Before anything else I am taking the people to %s, %.1f km %s." % [Leader.water_words(Leader.sample(water)),origin.distance_to(water),Leader.direction_words(origin,water)]}
 
 ## The ruler's halt. The leader obeys, but will not hold the party in dry
 ## country: when water runs short it moves to the nearest water and holds there.
@@ -217,7 +256,9 @@ static func advance(days:float)->void:
 	var journey:=WorldSimulation.state.founding_journey
 	if journey.is_empty() or WorldSimulation.state.settlement_site_committed:return
 	var caravan:=ensure_caravan(journey)
-	if caravan.is_empty() or String(caravan.get("mode",""))=="arrived":return
+	if caravan.is_empty():return
+	# An arrival camp with nothing to drink is held, and the leader moves it to water.
+	if String(caravan.get("mode",""))=="arrived" and not Leader.hold_if_dry(caravan):return
 	if bool(journey.get("active",false)):_progress_from_elapsed(journey,caravan)
 	var result:=Leader.step(caravan,situation(days))
 	journey["caravan"]=caravan

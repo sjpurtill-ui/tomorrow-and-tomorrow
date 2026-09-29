@@ -19,6 +19,13 @@ extends RefCounted
 ## situation and apply the movement.
 
 const WET_KM:=1.6
+## Water within a day's carry. Beyond it the daily water ledger
+## (resource_system.gd, household carrying) gives a camp nothing to drink.
+const DRINK_KM:=6.0
+## How far around the ground the ruler chose the leader looks for water to camp by.
+const CAMP_WATER_KM:=12.0
+## How far a party with nothing to drink where it stands will march to find water.
+const RESCUE_WATER_KM:=40.0
 const SAMPLE_KM:=1.5
 const CAMP_MODES:=["watering","foraging","resting","provisioning"]
 const MAX_LOG:=16
@@ -81,6 +88,38 @@ static func water_words(data:Dictionary)->String:
 	var km:=float(data.get("water_km",-1.0))
 	if km>=0.0 and km<=0.45:return "the river"
 	return "the water"
+
+## Whether people camped at `data` could drink: water charted within a day's
+## carry, or no chart at all (which the leader cannot judge).
+static func drinkable(data:Dictionary)->bool:
+	return not water_known(data) or float(data.get("water_km",-1.0))<=DRINK_KM
+
+## The way from one point to another in plain words (+z is south on the map).
+static func direction_words(from:Vector2,to:Vector2)->String:
+	return ["east","south-east","south","south-west","west","north-west","north","north-east"][posmod(roundi((to-from).angle()/(PI/4.0)),8)]
+
+## Where the party should camp for the ground the ruler chose: that ground
+## when water is within a day's carry of it, else the nearest water to it.
+## {} when no water lies within CAMP_WATER_KM of it.
+static func camp_ground(chosen:Vector2,competency:float=0.5)->Dictionary:
+	var data:=sample(chosen)
+	if drinkable(data):return {"point":chosen,"moved_km":0.0}
+	var water:Variant=find_water_near(chosen,CAMP_WATER_KM,maxf(competency,0.5))
+	if not water is Vector2:return {}
+	var point:Vector2=water
+	return {"point":point,"moved_km":chosen.distance_to(point),"words":"%s %.0f km %s of it" % [water_words(sample(point)),maxf(1.0,chosen.distance_to(point)),direction_words(chosen,point)]}
+
+## A march straight to water for a party with nothing to drink where it
+## stands. It ignores the vessel rule: staying is certain death, walking is not.
+static func rescue_plan(here:Vector2,options:Dictionary={})->Dictionary:
+	var water:Variant=find_water_near(here,RESCUE_WATER_KM,maxf(float(options.get("competency",0.5)),0.5))
+	if not water is Vector2:return {}
+	var point:Vector2=water
+	var path:=[here,point]
+	var plan:=_finish_plan(path,profile_path(path),"water_route",{"safe_dry_km":0.0,"daily_km":maxf(2.0,float(options.get("daily_km",16.0))),"vessel_days":float(options.get("vessel_days",3.0)),"direct_km":here.distance_to(point),"direct_longest_dry_km":here.distance_to(point)},{"skip_route_provider":true})
+	plan["ok"]=true
+	plan["rescue_to"]=point
+	return plan
 
 # --------------------------------------------------------------- leaders
 
@@ -494,7 +533,7 @@ static func _simplify(path:Array,tolerance:float)->Array:
 static func plan_summary(plan:Dictionary)->String:
 	var total:=float(plan.get("total_km",0.0))
 	var days:=float(plan.get("days",0.0))
-	var trip:String="%.0f km, about %s" % [total,_days_words(days)]
+	var trip:String="%.0f km, %s" % [total,"less than a day" if days<1.0 else "about "+_days_words(days)]
 	var sentence:=func(text:String)->String:return text if text.is_empty() else text.substr(0,1).to_upper()+text.substr(1)
 	if not bool(plan.get("water_known",false)):
 		return "%s. We have no chart of water on this route; I will keep the vessels full and judge each camp as we go." % String(sentence.call(trip))
@@ -506,7 +545,7 @@ static func plan_summary(plan:Dictionary)->String:
 	var detour:=float(plan.get("detour_km",0.0))
 	var opening:String="I will follow water the whole way" if crossings.is_empty() else ("I will keep to water, with one dry crossing of %s" % crossings[0] if crossings.size()==1 else "I will keep to water, with %d dry crossings (%s)" % [crossings.size(),", ".join(crossings)])
 	var detour_text:String="" if detour<3.0 else " — %.0f km longer than the straight line, because the direct way is dry" % detour
-	return "%s%s. %s; %d places to drink and camp along the way." % [opening,detour_text,String(sentence.call(trip)),stretches.size()]
+	return "%s%s. %s; %s to drink and camp along the way." % [opening,detour_text,String(sentence.call(trip)),"one place" if stretches.size()==1 else "%d places" % stretches.size()]
 
 static func _days_words(days:float)->String:
 	if days<1.0:return "less than a day"
@@ -684,17 +723,33 @@ static func step(record:Dictionary,situation:Dictionary)->Dictionary:
 		record["days_camped"]=float(record.get("days_camped",0.0))+days
 		var hold_here:=position(record)
 		var here_data:=sample(hold_here)
-		if bool(record.get("water_known",false)) and not is_wet(here_data) and float(situation.get("water_days",0.0))<float(situation.get("water_capacity_days",3.0))*0.5:
-			var water_point:Variant=find_water_near(hold_here,maxf(3.0,daily_km),competency)
+		# Nothing to drink within a day's carry: move at once, however far.
+		# Water within carrying reach: move only when the vessels run low.
+		var nothing_to_drink:=not drinkable(here_data)
+		var low:=(bool(record.get("water_known",false)) or water_known(here_data)) and not is_wet(here_data) and float(situation.get("water_days",0.0))<float(situation.get("water_capacity_days",3.0))*0.5
+		# A long search that found nothing is not repeated every day.
+		var searched_lately:=nothing_to_drink and day-float(record.get("water_search_day",-999.0))<5.0
+		if (nothing_to_drink or low) and not searched_lately:
+			if nothing_to_drink:record["water_search_day"]=day
+			var water_point:Variant=find_water_near(hold_here,RESCUE_WATER_KM if nothing_to_drink else maxf(3.0,daily_km),maxf(competency,0.5) if nothing_to_drink else competency)
 			if water_point is Vector2:
 				_divert(record,hold_here,water_point as Vector2,situation,competency,"held")
-				report(record,"divert","No water where we halted","We stopped as you ordered, but there is no water here. I have moved the party %.1f km to %s and will hold there until you give the word." % [hold_here.distance_to(water_point as Vector2),water_words(sample(water_point as Vector2))],"warning",false,"hold_water_%d" % int(record.get("plan_revision",0)))
+				if bool(record.get("hold_at_water",false)):
+					# The journey ended on dry ground: the water is the camp now.
+					record.erase("destination_after_hold")
+					record.erase("hold_at_water")
+					record["destination"]=water_point
+					record["camped_for_water"]=true
+				var why:="There is no water within a day's carry of this ground." if nothing_to_drink else "We stopped as you ordered, but there is no water here."
+				report(record,"divert","No water where we halted","%s I have moved the party %.1f km %s to %s and will hold there until you give the word." % [why,hold_here.distance_to(water_point as Vector2),direction_words(hold_here,water_point as Vector2),water_words(sample(water_point as Vector2))],"warning",false,"hold_water_%d" % int(record.get("plan_revision",0)))
 				km=float(record.get("progress_km",0.0))
 				total=float(record.get("total_km",0.0))
 				record["mode"]="seeking_hold"
 				mode="seeking_hold"
 		if mode=="held":
-			record["intent"]="Holding position on your order (%s)" % _days_words(float(record.get("days_camped",0.0)))
+			if nothing_to_drink:record["intent"]="No water within %.0f km of here; the people drink what the vessels hold" % RESCUE_WATER_KM
+			elif bool(record.get("camped_for_water",false)):record["intent"]="Camped by %s, waiting for your word (%s)" % [water_words(here_data),_days_words(float(record.get("days_camped",0.0)))]
+			else:record["intent"]="Holding position on your order (%s)" % _days_words(float(record.get("days_camped",0.0)))
 			result.camped=true
 			return result
 	var water_days:=float(situation.get("water_days",3.0))
@@ -775,7 +830,7 @@ static func step(record:Dictionary,situation:Dictionary)->Dictionary:
 		if target>=total-0.01:
 			if mode=="seeking_hold":
 				record["mode"]="held"
-				record["intent"]="Holding by %s on your order" % water_words(sample(result.position as Vector2))
+				record["intent"]=("Camped by %s, waiting for your word" if bool(record.get("camped_for_water",false)) else "Holding by %s on your order") % water_words(sample(result.position as Vector2))
 				result.camped=true
 				return result
 			if bool(record.get("returning",false)):
@@ -992,6 +1047,16 @@ static func _divert(record:Dictionary,here:Vector2,water_point:Vector2,situation
 		record["destination_after_hold"]=destination
 		var cum:Array=record.cum_km
 		record["total_km"]=float(cum[1]) if cum.size()>1 else 0.0
+
+## A founding party whose march ended where there is nothing to drink is held
+## there instead of left to die; the held camp moves itself to the nearest
+## water (step). True when the record was changed.
+static func hold_if_dry(record:Dictionary)->bool:
+	if String(record.get("mode",""))!="arrived" or drinkable(sample(position(record))):return false
+	record["mode"]="held"
+	record["hold_at_water"]=true
+	record["days_camped"]=0.0
+	return true
 
 ## Ruler override: halt. The leader obeys, but never holds a party in dry
 ## country when water is near — it moves to the water first.
