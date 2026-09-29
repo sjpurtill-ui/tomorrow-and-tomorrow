@@ -141,3 +141,18 @@ func test_the_buildings_page_shows_what_buildings_and_homes_do()->void:
 		assert_array((project.impact as Dictionary).lines).is_not_empty()
 	assert_str(String(dock.meta().title)).is_equal("Buildings")
 	terrain.free()
+
+
+## The page's figures are the engine's: if a rule changes, this fails
+## rather than the page going on telling the old numbers.
+func test_the_pages_numbers_match_the_food_rules()->void:
+	var food=WorldSimulation.food
+	GameState.ensure_population_total(200)
+	GameState.settlement_completed.erase("Storage Pits")
+	var without:float=float(food.call("_food_storage_capacity"))
+	var rot_without:Array=food.call("_spoilage_rates",false)
+	GameState.settlement_completed.append("Storage Pits")
+	var with_pits:float=float(food.call("_food_storage_capacity"))
+	var rot_with:Array=food.call("_spoilage_rates",false)
+	assert_float(with_pits-without).is_equal_approx(float(GameState.population_exact)*Impact.PITS_RATIONS,0.5)
+	assert_float(float(rot_with[0])/float(rot_without[0])).is_equal_approx(Impact.PITS_SPOILAGE,0.001)
