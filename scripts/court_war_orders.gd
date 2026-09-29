@@ -85,7 +85,7 @@ const UNARMED_SHARE:=0.25
 const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|levy|levies|war ?bands?|spearmen|column|everyone who can fight|every fighter|every spear)"
 ## Words that mean fighters only next to "against"/"on" ("send our men against them").
 const LOOSE_ARMY_WORDS:="(men|bands?|spears|companies|people)"
-const ATTACK_WORDS:="(attack|assault|storm|strike|fall (up)?on|march (on|against|to war|to battle|into battle)|go (to war|against|to battle)|make war|wage war|war on|battle|into battle|fight|take the (city|town|village|settlement)|capture|conquer|sack|crush|destroy|wipe out|invade|smash|raze|burn [\\w' ]{0,20}?to the ground|put [\\w' ]{0,20}? to the sword)"
+const ATTACK_WORDS:="(attack|assault|storm|strike|fall (up)?on|march (on|against|to war|to battle|into battle)|go (to war|against|to battle)|make war|wage war|war on|(?:we are|we're) (?:now )?at war with|declare war|battle|into battle|fight|take the (city|town|village|settlement)|capture|conquer|sack|crush|destroy|wipe out|invade|smash|raze|burn [\\w' ]{0,20}?to the ground|put [\\w' ]{0,20}? to the sword)"
 const SIEGE_WORDS:="(besiege|lay siege|siege|starve [\\w' ]{0,20}?out|surround (the|their) (city|town|walls|village))"
 const RAID_WORDS:="(raid|plunder|pillage|loot|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
 const INTERCEPT_WORDS:="(attack|fight|meet|catch|hunt down|destroy|engage|smash|crush|intercept|fall (up)?on|go after|chase|pursue) (their|the enemy'?s?|the) (army|host|war ?band|column|forces?|fighters|raiders|warriors|soldiers|troops|men)"
@@ -2073,7 +2073,8 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	# A small people's fight is a feud (conflict_scale.gd): nobody declares
 	# anything to them, before or after.
 	var feud:=not bool((load(WAR_LOOP_PATH) as GDScript).call("formal",String(target.civ_id)))
-	var declared:="" if at_war else (" Nobody declares anything to them; the fighting begins when we reach %s." % name if feud else " Nobody has declared war; it begins when we reach %s." % name)
+	var said_war:=RegEx.create_from_string("(?i)\\b(declare war|at war with|go to war|make war|wage war)\\b").search(String(reading.get("text","")))!=null
+	var declared:="" if at_war else ((" They are too few for a war between peoples: it is a feud, and it begins when we reach %s." % name if said_war else " Nobody declares anything to them; the fighting begins when we reach %s." % name) if feud else " Nobody has declared war; it begins when we reach %s." % name)
 	if own_band:
 		out.says="My band of %d marches %s %s from where it stands, %s. It is %d km%s, about %d days.%s%s" % [going,verb,name,where,km,roundabout,days," They go as they are." if as_they_are else "",declared]
 	else:

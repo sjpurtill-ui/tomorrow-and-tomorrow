@@ -565,6 +565,43 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["fighters_at_home"]=int(sheet.get("fighters_at_home",0))
 	m["housing"]=int(sheet.get("housing",0))
 	m["people"]=int(sheet.get("people",0))
+	# The realm's own settings (realm_orders.gd): training, drill, workshop
+	# lines, what our thinkers study, the scouting, strangers, a great work.
+	m["training_policy"]=String((MilitaryCampaign.training_staff.policy("army") as Dictionary).get("id",""))
+	m["drill_program"]=0 if (MilitaryCampaign.training_program as Dictionary).is_empty() else 1
+	var lines:=0; var line_target:=0
+	for job in MilitaryCampaign.equipment_queue:
+		if bool((job as Dictionary).get("persistent",false)) and not bool((job as Dictionary).get("paused",false)):
+			lines+=1; line_target+=int((job as Dictionary).get("target_stock",0))
+	m["lines"]=lines; m["line_target"]=line_target
+	var top:=""; var top_weight:=-1
+	for k in GameState.research_allocations:
+		if int(GameState.research_allocations[k])>top_weight: top_weight=int(GameState.research_allocations[k]); top=String(k)
+	m["research_top"]=top
+	var targets:Array=(GameState.research_targets as Dictionary).values()
+	targets.sort()
+	m["research_targets"]=",".join(PackedStringArray(targets))
+	m["scout_share_x100"]=roundi(float(CivilizationSystem.scouting_staff.data.get("share",0.0))*100.0)
+	m["scout_focus"]=String(CivilizationSystem.scouting_staff.data.get("focus",""))
+	var exchange:Dictionary=preload("res://scripts/society_exchange.gd").data()
+	m["migration"]=String(exchange.get("migration_policy","")); m["sharing"]=String(exchange.get("sharing_policy",""))
+	var pace:=""
+	var home_city:=SettlementModel.settlement_record(SettlementModel._primary_settlement_id())
+	for r in home_city.get("undertakings",[]):
+		if r is Dictionary and String((r as Dictionary).get("status","")) in ["building","stalled"]: pace=String((r as Dictionary).get("policy","careful"))
+	m["work_pace"]=pace
+	m["build_priority"]=String(home_city.get("construction_priority",""))
+	var town:Dictionary=GameState.player_settlements[0] if not GameState.player_settlements.is_empty() else {}
+	m["town_focus"]=String(town.get("management_focus","")) if not bool(town.get("auto_manage",true)) else "leaders"
+	m["defence_works"]=int(MilitaryCampaign.settlement_defense.get("project_stage",-1))
+	m["settling"]=0 if (GameState.settlement_convoy as Dictionary).is_empty() else 1
+	var ration:=0; var water:=0
+	for mod in GameState.active_modifiers:
+		if not mod is Dictionary or float((mod as Dictionary).get("until_day",0.0))<=float(GameState.elapsed_days): continue
+		if String((mod as Dictionary).get("id","")).begins_with("court_ration"): ration=1
+		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
+	m["ration"]=ration; m["clean_water"]=water
+	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
 	m["_material"]=_material(m)
 	return m
 

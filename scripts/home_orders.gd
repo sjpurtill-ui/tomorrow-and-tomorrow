@@ -50,6 +50,10 @@ extends RefCounted
 ## Static helpers; preload.
 
 const DEFAULT_RECRUITS:=10
+## Home orders a real system carries out: never turned into a law, a war
+## order or a standing directive on the way (court_commands.gd).
+const ENGINE_KINDS:=["levy","recruit","arm","stand_down","found_towns","work","deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace",
+	"build","defences","found_town","ration","provisions","declare_war","envoy","repair","sick_apart","clean_water","scout_party","town_focus"]
 
 ## "Muster" and "call out" gather the fighters we have (the war leader's);
 ## these call up new ones.
@@ -245,6 +249,8 @@ static func work_reading(text:String)->Dictionary:
 		var role:=_task_role(on.get_string(2))
 		if role!="": return {"kind":"work","role":role,"count":number_in(on.get_string(1)),"fewer":false,"other":""}
 	var more:=_re("(?i)\\b(?:put|set|add|move|send|assign|have|get|place)\\s+more\\s+"+PEOPLE_WORDS+"(?:on|onto|to|at|into|in|for|doing|to work on)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	# Said without a verb: "More hands on the hunt", "more people for the fields".
+	if more==null: more=_re("(?i)^\\s*(?:and\\s+)?(?:we need\\s+)?more\\s+(?:people|hands|men|women|workers|folk|of us)\\s+(?:on|to|at|in|for)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
 	if more!=null:
 		var role:=_task_role(more.get_string(1))
 		if role!="": return {"kind":"work","role":role,"count":0,"fewer":false,"other":""}
@@ -272,6 +278,11 @@ static func read(text:String)->Dictionary:
 	# and never the dismissal of whoever is told.
 	var down:=stand_down_reading(clean)
 	if not down.is_empty(): return down
+	# The rest of the realm's own functions (realm_orders.gd): a band formed,
+	# the army's training, workshop lines, what our thinkers study, the
+	# scouting, how strangers are received, a great work's pace.
+	var realm:=realm_reading(clean)
+	if not realm.is_empty(): return realm
 	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
 	# New fighters of our own, called up, drilled and armed: every part said in
 	# one breath is done ("recruit, train and arm 5 levies"), and a levy called
@@ -288,6 +299,17 @@ static func read(text:String)->Dictionary:
 			if _has(lower,String(pair[1])): item=String(pair[0]); break
 		return {"kind":"arm","count":number_in(lower),"item":item,"for_recruits":arming or _has(lower,FIGHTER_NOUNS+"|\\b(requisitioned|called up|conscripted|drafted|raised)\\b")}
 	return {}
+
+
+## The realm's own functions (realm_orders.gd), loaded when used: that module
+## reads numbers and foreign names through this one.
+static func _realm()->GDScript:
+	return load("res://scripts/realm_orders.gd") as GDScript
+
+
+## A realm order (realm_orders.gd read) or {}.
+static func realm_reading(text:String)->Dictionary:
+	return _realm().call("read",text)
 
 
 ## Our fighters stood down: {kind: "stand_down", count, all, recruits} when
@@ -353,6 +375,8 @@ static func perform(reading:Dictionary)->Dictionary:
 	match String(reading.get("kind","")):
 		"levy": return _levy(reading)
 		"stand_down": return _stand_down(reading)
+		"deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace","build","defences","found_town","ration","provisions","declare_war","envoy","repair","sick_apart","clean_water","scout_party","town_focus":
+			return _realm().call("perform",reading)
 		"recruit": return _recruit(reading)
 		"arm": return _arm(reading)
 		"found_towns": return preload("res://scripts/auto_founding.gd").court_order(bool(reading.get("allow",true)))

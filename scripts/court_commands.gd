@@ -157,7 +157,10 @@ static func classify(text:String)->Dictionary:
 			out.seize=_re(SEIZE_PATTERN).search(clean)!=null
 			return out
 	# Goods next: "give Zuri 20 food", "take their stone".
-	if resource!="":
+	# Goods named with a people or a party ("send 50 food to the Varesh",
+	# "send scouts to find good stone") are an embassy or a party, never goods
+	# laid before whoever is in the hall (realm_orders.gd).
+	if resource!="" and _re("(?i)\\b(scouts?|scouting|a party|parties|searchers|envoys?|messengers?)\\b").search(clean)==null and not String(HomeOrders.realm_reading(clean).get("kind","")) in ["envoy","scout_party","declare_war"]:
 		var give:=_re(GIVE_PATTERN).search(clean)
 		if give!=null and not " from " in lower:
 			return _verb(out,"give",give)
@@ -630,7 +633,8 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		# ("kill all the males" is not "kill him", "put the captives to death"
 		# is the captives' fate) nor a vague directive.
 		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town","pursue","let_go","keep","abandon","measure","town_word","measure_drop","captives","follow_kill","take_first","group_maim"] or bool(war_reading.get("answer",false))
-		if not war_reading.is_empty() and String(cls.act)!="question" and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
+		var home_kind:=String((cls.get("home",{}) as Dictionary).get("kind","")) if String(cls.verb)=="home" else ""
+		if not war_reading.is_empty() and String(cls.act)!="question" and not home_kind in HomeOrders.ENGINE_KINDS and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
 			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
 		# "Send him home": the envoy goes home, never made to lead a party nor
@@ -720,7 +724,8 @@ static func _realm(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 		var g:=Realm.group_act(clean,audience,list,mention)
 		if not g.is_empty(): return {"result":_group(id,audience,list,clean,g,context)}
 	# A law for our own people (never a war order, never anyone in the hall).
-	if verb in ["none","order","kill","maim","exile","detain","penance","home"] or String(cls.act) in ["statement","threat"]:
+	var engine_home:=verb=="home" and String((cls.get("home",{}) as Dictionary).get("kind","")) in HomeOrders.ENGINE_KINDS
+	if (verb in ["none","order","kill","maim","exile","detain","penance","home"] or String(cls.act) in ["statement","threat"]) and not engine_home:
 		var law:=Realm.law(clean,list,mention)
 		if not law.is_empty():
 			var out:=cls.duplicate()
@@ -1012,6 +1017,7 @@ static func realm_business(id:String,text:String)->bool:
 	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
 	if not Realm.law(clean,list,mention).is_empty(): return true
 	if not Realm.gift(clean).is_empty(): return true
+	if not HomeOrders.read(clean).is_empty(): return true
 	if not _appoint_reading(clean,audience,list).is_empty(): return true
 	return not Realm.person_verb(clean,list,mention,func()->Dictionary: return _salient(audience,list,"")).is_empty()
 
