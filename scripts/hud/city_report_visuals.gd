@@ -10,7 +10,7 @@ const LETTERED_LABELS={"population":"People","fortification":"Walls","garrison":
 const RECKONED_KEYS:=["science_capacity","education","gdp","infant_mortality"]
 ## One plain line on what each figure means.
 const MEANINGS={"population":"How many live there, as our scouts counted.","garrison":"Armed people seen guarding the place.","fortification":"How hard the place would be to break into.","supply":"How long their food would last if cut off.","production":"How busy their crafts and workshops looked.","logistics":"How easily they move food and goods.","damage":"Harm from war, fire or neglect.","life_expectancy":"How long their people usually live.","science_capacity":"People working at learning and invention.","education":"How many of them are schooled.","gdp":"What their people produce in a day.","infant_mortality":"Infants who die before their first year."}
-static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN,"rule":T.GOLD,"mood":T.TEAL,"events":T.RED}
+static var COLORS={"population":T.INK,"fortification":T.BLUE,"garrison":T.RED,"production":T.GOLD,"logistics":T.TEAL,"supply":T.GREEN,"damage":T.AMBER,"science":T.BLUE,"gdp":T.GOLD,"health":T.GREEN,"science_capacity":T.BLUE,"education":T.BLUE,"life_expectancy":T.GREEN,"infant_mortality":T.GREEN,"rule":T.GOLD,"mood":T.TEAL,"events":T.RED,"water":T.TEAL,"roofs":T.AMBER,"works":T.GOLD,"building":T.AMBER}
 const PATHS={
 	"science":'<path d="M9 3h6M10 3v7L4 20h16l-6-10V3M7 15h10"/>',
 	"gdp":'<path d="M4 21V13h4v8M10 21V9h4v12M16 21V3h4v18"/>',
@@ -24,16 +24,45 @@ const PATHS={
 	"damage":'<path d="M3 20h18M5 20V9l7-6 7 6v11M13 4l-3 7 5 2-4 7"/>',
 	"rule":'<path d="M6 21V3M6 4h12l-3 4 3 4H6"/>',
 	"mood":'<circle cx="12" cy="12" r="9"/><path d="M8 16c2-2 6-2 8 0M9 9.5h.01M15 9.5h.01"/>',
-	"events":'<path d="M6 3h10l3 3v15H6ZM9 9h7M9 13h7M9 17h4"/>'}
+	"events":'<path d="M6 3h10l3 3v15H6ZM9 9h7M9 13h7M9 17h4"/>',
+	"water":'<path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11Z"/><path d="M9 14.5a3 3 0 0 0 3 3"/>',
+	"roofs":'<path d="M3 11 12 4l9 7M5 9.5V20h14V9.5M10 20v-5h4v5"/>',
+	"works":'<path d="M2 11 12 5l10 6M4 20V11M20 20V11M3 20h18M8.5 20v-6M12 20v-6M15.5 20v-6"/>',
+	"building":'<path d="M3 21h18M5 21V10l7-5 7 5v11M5 14.5h14M9 21v-6.5M15 21v-6.5M9 14.5l6-4.5"/>'}
+## Figures that share another's icon.
+const ICON_ALIAS:={"science_capacity":"science","education":"science","learning":"science","life_expectancy":"health","infant_mortality":"health"}
 static var textures:Dictionary={}
 
 static func icon(key:String)->Texture2D:
-	key=String({"science_capacity":"science","education":"science","life_expectancy":"health","infant_mortality":"health"}.get(key,key))
+	key=String(ICON_ALIAS.get(key,key))
 	if not textures.has(key):
 		var svg:='<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><g fill="none" stroke="#%s" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">%s</g></svg>' % [Color(COLORS[key]).to_html(false),PATHS[key]]
 		var image:=Image.new();image.load_svg_from_string(svg)
 		textures[key]=ImageTexture.create_from_image(image)
 	return textures[key]
+
+## The same icon in the given ink, for pages drawn in the palette now in use
+## (COLORS keeps the light palette it was made in). Cached by colour.
+static func tinted(key:String,color:Color)->Texture2D:
+	key=String(ICON_ALIAS.get(key,key))
+	var id:=key+"|"+color.to_html(false)
+	if not textures.has(id):
+		var svg:='<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><g fill="none" stroke="#%s" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">%s</g></svg>' % [color.to_html(false),PATHS.get(key,PATHS.events)]
+		var image:=Image.new();image.load_svg_from_string(svg)
+		textures[id]=ImageTexture.create_from_image(image)
+	return textures[id]
+
+## Each figure's accent in the palette now in use (light or dark).
+static func accent(key:String)->Color:
+	match String(ICON_ALIAS.get(key,key)):
+		"population":return T.INK_MUTED
+		"fortification","science":return T.BLUE
+		"garrison":return T.RED
+		"production","works","gdp":return T.GOLD
+		"logistics","water":return T.TEAL
+		"supply","health":return T.GREEN
+		"damage","roofs","building":return T.AMBER
+	return T.INK_MUTED
 
 static func number(value:float)->String:
 	if value>=1000000:return "%.1fm" % (value/1000000.0)
