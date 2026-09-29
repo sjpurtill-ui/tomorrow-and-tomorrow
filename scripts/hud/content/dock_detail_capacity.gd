@@ -49,14 +49,19 @@ func _kpis(now:float,recorded:Array[Dictionary])->Array:
 ## The line over the recorded months, marked where something changed.
 func _chart(recorded:Array[Dictionary],told:Array[Dictionary],model:Object)->Dictionary:
 	var by_day:Dictionary={}
-	for change:Dictionary in told: by_day[int(change.day)]=change
+	# A run is marked once, where it stands now; a run stored line by line
+	# (before runs were folded) keeps no marks on its earlier lines.
+	var quiet:Dictionary={}
+	for change:Dictionary in told:
+		by_day[int(change.day)]=change
+		for folded_day in change.get("folded_days",[]): quiet[int(folded_day)]=true
 	var reads:=_effects_read(model)
 	var items:Array=[]
 	var previous_day:=-1
 	var previous_value:=float(recorded[0].value)
 	for month:Dictionary in recorded:
 		var day:=int(month.day)
-		var mark:=int(month.mark)
+		var mark:=int(month.mark) if not quiet.has(day) else History.MARK_NONE
 		var label:=""
 		if by_day.has(day): label=Words.change_name(by_day[day])
 		elif mark==History.MARK_DISCOVERY: label=_learned_label(previous_day,day,reads)
@@ -121,19 +126,28 @@ func _why(told:Array[Dictionary])->Dictionary:
 		var mark:=int(change.mark)
 		var events:PackedStringArray=[]
 		for code:Array in change.events: events.append(Words.event(code))
-		var detail:=_short("; ".join(events)) if not events.is_empty() else _third_reason(change)
-		rows.append({"name":Words.change_name(change),"sub":EraWords.when(int(change.day)),"detail":detail,
+		var detail:=_short("; ".join(events)) if not events.is_empty() else _short(_also(change,Words.named_reasons(change)))
+		rows.append({"name":Words.change_name(change),"sub":Words.change_when(change),"detail":detail,
 			"value":Words.points(points),"value_color":Tokens.GREEN_TEXT if points>0.0 else Tokens.RED_TEXT,
 			"accent":_mark_color(mark,points),"tip":Words.change_sentence(name,change)})
 	return {"type":"rows","heading":"Why it grew or fell","note":"latest first","items":rows}
 
-func _third_reason(change:Dictionary)->String:
+## What the row's name leaves out, so the row adds up at a glance: the next
+## reason, and the many small ones together when they come to half a point.
+func _also(change:Dictionary,named:int)->String:
 	var shown:=0
+	var next:=""
+	var accounted:=0.0
 	for reason:Array in change.reasons:
 		if String(reason[0])=="~": continue
 		shown+=1
-		if shown==3: return "Also: "+Words.reason(String(reason[0]),float(reason[1]))
-	return ""
+		if shown>named+1: break
+		accounted+=float(reason[1])
+		if shown==named+1: next=Words.reason(String(reason[0]),float(reason[1]))
+	var rest:=float(change.get("change",0.0))-accounted
+	var small:="many small changes (%s)" % Words.points(rest) if absf(rest)>=0.5 else ""
+	if next=="": return "Also: "+small if small!="" else ""
+	return "Also: "+next+(" and "+small if small!="" else "")
 
 ## A visible line keeps to twelve words; the tooltip says the rest.
 static func _short(text:String)->String:

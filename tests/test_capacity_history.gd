@@ -8,6 +8,7 @@ extends GdUnitTestSuite
 const Society:=preload("res://scripts/society_model.gd")
 const History:=preload("res://scripts/capacity_history.gd")
 const Values:=preload("res://scripts/societal_values_model.gd")
+const Words:=preload("res://scripts/hud/capacity_words.gd")
 
 var model:Object
 var slot:=""
@@ -269,6 +270,9 @@ func test_a_season_that_comes_round_again_is_drawn_not_told_but_a_raid_is()->voi
 	var raid:Dictionary=History.changes("nutrition")[0]
 	assert_int(int(raid.day)).is_equal(24*30)
 	assert_int(int(raid.mark)).is_equal(History.MARK_CRISIS)
+	# The raid is told over its own month, not over the seasons drawn before it.
+	assert_int(int(raid.since)).is_equal(23*30)
+	assert_str(Words.change_name(raid)).starts_with("Less food to go round (-")
 	GameState.food_security=0.66+0.08*sin(TAU*25.0/12.0)
 	_record(25*30)
 	var back:Dictionary=History.changes("nutrition")[0]
@@ -279,6 +283,83 @@ func test_a_season_that_comes_round_again_is_drawn_not_told_but_a_raid_is()->voi
 		GameState.food_security=0.66+0.08*sin(TAU*float(month)/12.0)
 		_record(month*30)
 	assert_int(int(History.changes("nutrition")[0].day)).is_equal(25*30)
+
+## Carriers rise each month by a point or so: one line, however long it runs.
+func _more_carriers(months:Array)->void:
+	for month in months:
+		GameState.simulation_metrics["logistics"]=0.20+0.02*float(month)
+		_record(int(month)*30)
+
+func test_a_steady_run_is_one_line_until_an_event_or_a_turn_breaks_it()->void:
+	_record(0)
+	# Six months of more carriers; a new way with routes is learned in the third.
+	_more_carriers([1,2])
+	var definition:=_know("route_memory",0.25)
+	GameState.discovery_log.push_front({"day":80,"id":"route_memory","name":String(definition.name),"effects":definition.effects.duplicate(true)})
+	_more_carriers([3,4,5,6])
+	var told:=History.changes("logistics")
+	assert_int(told.size()).is_equal(1)
+	var run:Dictionary=told[0]
+	assert_int(int(run.since)).is_equal(0)
+	assert_int(int(run.day)).is_equal(180)
+	# The run's reasons add up to its change: carriers, and the routes learned.
+	var routes:=float(definition.effects.get("route_speed",0.0))*0.25*0.16*100.0
+	assert_float(routes).is_greater(0.05)
+	assert_float(_reason(run,_learned("route_memory"))).is_equal_approx(routes,0.011)
+	assert_float(float(run.change)).is_equal_approx(6.6+routes,0.02)
+	assert_float(float(run.change)).is_equal_approx(float(run.to)-float(run.from),0.1)
+	assert_float(_reason(run,"hauling")).is_equal_approx(6.6,0.02)
+	assert_str(Words.change_name(run)).is_equal("More carrying and hauling: +7 over two seasons")
+	assert_str(Words.change_when(run)).is_equal("%s to %s" % [preload("res://scripts/hud/era_words.gd").when(0),preload("res://scripts/hud/era_words.gd").when(180)])
+	# The chart marks the run once, where it stands now; the month the new way
+	# was learned keeps its gold mark.
+	var marks:Array=[]
+	for month:Dictionary in History.months("logistics"): marks.append(int(month.mark))
+	assert_array(marks).contains_exactly([History.MARK_NONE,History.MARK_NONE,History.MARK_NONE,History.MARK_DISCOVERY,History.MARK_NONE,History.MARK_NONE,History.MARK_UP])
+	# A decree for the carriers begins: that month keeps its own line.
+	GameState.active_modifiers.append({"id":"carrying_levy","kind":"policy","effects":{"logistics_target":1.0},"magnitude":0.1,"started_day":195.0,"until_day":400.0,"description":"Carriers for the roads"})
+	_more_carriers([7,8,9])
+	# Then the carriers fall away: a turn starts a new line.
+	for month in [10,11]:
+		GameState.simulation_metrics["logistics"]=0.38-0.02*float(month-9)
+		_record(month*30)
+	var names:Array=[]
+	for change:Dictionary in History.changes("logistics"): names.append(Words.change_name(change))
+	assert_array(names).contains_exactly(["Less carrying and hauling: -2 over a season","More carrying and hauling: +2 over a season","More carrying and hauling (+1)","More carrying and hauling: +7 over two seasons"])
+	var decree:Dictionary=History.changes("logistics")[2]
+	assert_array(decree.events).contains_exactly([["decree","carrying_levy",1]])
+	# On the page: the run's span, and what else moved it.
+	var page:Dictionary=Detail.new(null,null,"logistics").tab(0)
+	var rows:Array=page.blocks[1].items
+	assert_str(String(rows[3].name)).is_equal("More carrying and hauling: +7 over two seasons")
+	assert_str(String(rows[3].sub)).contains(" to ")
+	assert_str(String(rows[3].detail)).is_equal("Also: Encoded Routes learned (%s)" % Words.points(routes))
+	assert_str(String(rows[2].detail)).is_equal("Decree: carrying levy")
+	# A long run's many small parts are said together, so the row adds up.
+	var page_maker=Detail.new(null,null,"logistics")
+	var long_run:={"since":0,"day":2920,"change":14.7,"reasons":[["hauling",11.4],["n:0",0.7],["n:1",0.1],["~",2.5]]}
+	assert_str(Words.change_name(long_run)).is_equal("More carrying and hauling: +11 over eight years")
+	assert_str(page_maker._also(long_run,Words.named_reasons(long_run))).is_equal("Also: %s learned (+0.7) and many small changes (+3)" % Words.practice_name(GameState.known_discoveries[0]))
+
+func test_a_run_stored_line_by_line_is_folded_when_read()->void:
+	_record(0)
+	_more_carriers([1,2,3])
+	# As the first build stored it: a line and a mark for every month.
+	var history:Dictionary=GameState.capacity_history
+	var recorded:=History.months("logistics")
+	var lines:Array=[]
+	for month in range(1,4):
+		lines.append([month*30,(month-1)*30,roundi(float(recorded[month-1].value)*10.0),roundi(float(recorded[month].value)*10.0),History.MARK_UP,["hauling",110],[]])
+		History._set_mark(history,"logistics",month,History.MARK_UP)
+	history.why["logistics"]=lines
+	var told:=History.changes("logistics")
+	assert_int(told.size()).is_equal(1)
+	assert_array(told[0].folded_days).contains_exactly([30,60])
+	assert_str(Words.change_name(told[0])).is_equal("More carrying and hauling: +3 over a season")
+	var chart:Dictionary=Detail.new(null,null,"logistics").tab(0).blocks[0]
+	var marks:Array=[]
+	for item:Dictionary in chart.items: marks.append(String(item.marker_type))
+	assert_array(marks).contains_exactly(["","","","up"])
 
 func test_a_practice_learned_in_the_month_is_told_as_learned_and_marked_gold()->void:
 	_record(0)
@@ -474,7 +555,6 @@ func test_the_history_page_tells_why_in_short_plain_words()->void:
 	T.set_color_mode("light")
 
 func test_small_changes_are_told_in_points_never_as_nothing()->void:
-	var Words:=preload("res://scripts/hud/capacity_words.gd")
 	assert_str(Words.points(6.04)).is_equal("+6")
 	assert_str(Words.points(-2.6)).is_equal("-3")
 	assert_str(Words.points(0.36)).is_equal("+0.4")
@@ -485,3 +565,8 @@ func test_small_changes_are_told_in_points_never_as_nothing()->void:
 	assert_str(Words.reason("limit",0.7)).is_equal("Our age allows more (+0.7)")
 	assert_str(Words.event(["crisis","the Kintara Fever",12])).is_equal("The Kintara Fever: 12 died")
 	assert_str(Words.event(["official","Marshal",""])).is_equal("No war leader now")
+	# How long a run took, as the Chronicle counts time.
+	assert_str(Words.over(60)).is_equal("over a season")
+	assert_str(Words.over(200)).is_equal("over two seasons")
+	assert_str(Words.over(400)).is_equal("over a year")
+	assert_str(Words.over(1187)).is_equal("over three years")
