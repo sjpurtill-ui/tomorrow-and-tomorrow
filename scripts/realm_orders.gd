@@ -66,6 +66,11 @@ const Home:=preload("res://scripts/home_orders.gd")
 ## A blow at someone is the war leader's, even with a band named.
 const STRIKE:="(?i)\\b(attack|strike|raid|besiege|storm|assault|invade|conquer|burn|against|kill|slay)\\b"
 const QUESTION:="(?i)^\\s*(?:what|why|how|who|whom|where|when|whose|which)\\b"
+## Others put to work ("make them build our walls", "have the captives dig a
+## ditch", "get the men of Tsaren to raise a palisade"), never our own
+## builders ("have our men build a palisade", "build our walls"): in a town
+## we hold, the garrison's forced labour (occupation_measures.gd).
+const OTHERS_WORK:="(?i)\\b(?:make|force|have|set|put|get|compel|drive)\\s+(?:them|those|these|them all|(?:all|each|some|most|half|the rest|every one) of them|(?:(?:all|some|most|half)\\s+(?:of\\s+)?)?(?:(?:the|their|its|these|those)\\s+)?(?:(?:bound|captured|conquered|defeated|taken|remaining|able|able-bodied|young|grown|strong|strongest|other)\\s+)?(?:captives|prisoners|slaves|hostages|men|males|menfolk|women|boys|youths|villagers|townsfolk|townspeople|inhabitants|residents|people|folk|families|survivors)(?:\\s+of\\s+(?!our\\b)[a-z'-]+)?)\\s+(?:to\\s+)?(?:work|labou?r|toil|dig|build|carry|haul|clear|till|plough|plow|repair|mend|raise|cut|fell|drag|quarry|put up|throw up|serve)(?:s|ed|ing)?\\b"
 
 # --- The words -------------------------------------------------------------------
 
@@ -192,6 +197,11 @@ static func read(text:String)->Dictionary:
 	if r.is_empty(): r=_health(lower)
 	if r.is_empty(): r=_research(lower)
 	return r
+
+
+## Whether the words put others to work (OTHERS_WORK), not our own people.
+static func others_at_work(text:String)->bool:
+	return _has(text.strip_edges().to_lower().replace("’","'"),OTHERS_WORK)
 
 
 static func _foreign(lower:String)->bool:

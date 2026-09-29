@@ -213,6 +213,28 @@
    "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.85},
    "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "worker_women": ">0", "worker_men": "==0"}}},
 
+  {"id": "measure.labour.them_walls", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "Said of Tsaren, 'them' are its people: the garrison's forced labour on a wall, never our builders' palisade.",
+   "steps": [
+    {"say": "What news of Tsaren?", "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"}, "expect": {"handled": false}},
+    {"say": "Make them build our walls", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.9},
+     "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "defence_works": "==before"}}}],
+   "variants": [{"say": "Get them to build our walls"}, {"say": "Make them dig our ditches"}, {"say": "Have them raise an earthwork for us"}]},
+
+  {"id": "measure.labour.captives_palisade", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "The captives put to work: the garrison's labour, never our own palisade.",
+   "say": "Make the captives build a palisade",
+   "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["labour"]}, "confidence": 0.85},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"m_labour": "==1", "defence_works": "==before"}}},
+
+  {"id": "home.defences.ours_while_holding", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "headman", "source": "design",
+   "note": "Our own people building, with Tsaren just spoken of: our builders' work, never Tsaren's men at forced labour.",
+   "steps": [
+    {"say": "What news of Tsaren?", "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"}, "expect": {"handled": false}},
+    {"say": "Have our men build a palisade", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+     "expect": {"handled": true, "verb": "order", "state": {"m_labour": "==0"}}}],
+   "variants": [{"say": "Make our people build walls"}, {"say": "Build our walls"}]},
+
   {"id": "measure.release_women", "domain": "town_measure", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design",
    "note": "Freeing the women frees the women: the bound men stay bound and the binding goes on.",
    "steps": [
@@ -1661,7 +1683,7 @@
    "say": "Build a wall around the camp",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"handled": true, "state": {"modifiers": "==before", "defence_works": ">before"}},
-   "variants": ["Put a palisade around our town"]},
+   "variants": ["Put a palisade around our town", "Make them build our walls"]},
 
   {"id": "fn.found_town", "domain": "functions", "fixture": "home_charted", "speaker": "headman", "source": "design",
    "note": "The test world has no mapped rivers: the court says plainly why no site will do (a founding that sets out is in tests/test_levy_orders.gd).",
