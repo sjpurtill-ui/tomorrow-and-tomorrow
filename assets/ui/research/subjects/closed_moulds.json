@@ -3,14 +3,14 @@
   "line": "production",
   "game_year": 380,
   "approx_historical_year": -2467,
-  "prompt": "c. 2470 BCE. Palette-knife impasto of supported closed clay mould receiving copper from a hot crucible carried by two long wooden handles, hands safely distant; full-bleed, no text.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90bccfc9-0beb-4886-826a-ae6c62acea11.png",
+  "prompt": "c. 2470 BCE. Ultrawide palette-knife impasto of two smiths using long wooden handles to pour copper from a crucible into a closed clay mould supported on stone, hands far from heat; full heads and action in the 3.37:1 crop.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c54cf035-4c15-4c91-9e5d-7a33ea6caf9e.png",
   "asset": "res://assets/ui/research/subjects/closed_moulds-v1.png",
-  "sha256": "b5fed6a2f4559db2aa5cf56b78fa1fed5740aa77b446a9d62b3db5a4460e6052",
+  "sha256": "b007d6bdb65deb15a9dd177c1726666588afa7306edf0cc4d5d139713c037510",
   "mode": "built-in image_gen / new image",
   "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
   "focus": [
     0.5,
-    0.42
+    0.46
   ]
 }
