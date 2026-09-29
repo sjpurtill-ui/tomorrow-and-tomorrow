@@ -137,15 +137,21 @@ func _our_rows()->Array:
 
 func _their_rows()->Array:
 	var theirs:Dictionary=account.theirs
-	var had:String=BattleAccount.count_words(int(theirs.seen_low)) if bool(theirs.exact) else preload("res://scripts/hud/army_marks.gd").about_range(int(theirs.seen_low),int(theirs.seen_high))
-	return [["Had",had,true],["Killed or hurt" if bool(theirs.counted) else "Brought down, we think",int(theirs.fell),true],
+	# Nobody under arms: one plain row, never "Had no" beside "Killed none".
+	if int(theirs.seen_high)<=0: return [["Stood to fight","nobody",true]]
+	var had:String=str(int(theirs.seen_low)) if bool(theirs.exact) else preload("res://scripts/hud/army_marks.gd").about_range(int(theirs.seen_low),int(theirs.seen_high))
+	var fell:Variant=int(theirs.fell)
+	# Their leader who fell is counted among their fallen, as the note says.
+	if int(fell)<=0 and String(theirs.commander_fate) in ["killed","wounded, but escaped"]: fell="their leader"
+	return [["Had",had,true],["Killed or hurt" if bool(theirs.counted) else "Brought down, we think",fell,true],
 		["Ran",int(theirs.fled),false],["Taken by us",int(theirs.taken),false]]
 
 
 func _their_note()->String:
 	var theirs:Dictionary=account.theirs
 	var notes:Array[String]=[]
-	if bool(theirs.exact): notes.append("Few enough to count.")
+	if int(theirs.seen_high)<=0: pass
+	elif bool(theirs.exact): notes.append("Few enough to count.")
 	else: notes.append("Counted by eye across the field.")
 	if not bool(theirs.counted): notes.append("We did not hold the ground, so this is our best guess.")
 	if String(theirs.commander)!="" and String(theirs.commander_fate) not in ["","in command","unknown"]:
@@ -178,6 +184,8 @@ func _side_block(parent:Node,title:String,rows:Array,morale:String,note:String)-
 
 
 func _section(parent:Node,title:String,lines:Array)->void:
+	# A heading with nothing under it is never shown.
+	if lines.all(func(line:Variant)->bool:return String(line).strip_edges()==""): return
 	var box:=VBoxContainer.new(); box.add_theme_constant_override("separation",4); parent.add_child(box)
 	box.name=title.capitalize().replace(" ","")
 	_label(box,title,"kicker",T.INK_MUTED)

@@ -126,6 +126,61 @@ func test_a_skirmish_is_a_card()->void:
 	host.queue_free()
 
 
+## The user: "THAT's THE SKIRMISH! A TEXT SCREEN!?" A skirmish is drawn:
+## both bands as figures on the ground they fought on, every fate the record
+## tells (the fallen, the hurt, those who ran, the taken), the town fought
+## for behind the defenders, and it can be watched again.
+func test_a_skirmish_is_drawn_not_a_text_screen()->void:
+	var sim:=Sim.new()
+	var result:=sim.simulate(_force(sim,"Ours",[["levy","improvised",20]]),_force(sim,"Theirs",[["levy","improvised",2]]),{"seed":3})
+	result["home_side"]="attacker"
+	result["threat"]={"source_name":"Esurai","target_region_name":"Tsaren"}
+	result["target_region_name"]="Tsaren"
+	var host:=_host()
+	var panel:Control=View.open(result,host)
+	await get_tree().process_frame
+	var scene:Control=panel.find_child("Scene",true,false)
+	assert_object(scene).is_not_null()
+	# One mark a man for a small band, each with its fate.
+	var ours:Dictionary=panel.view.sides.left.totals
+	var theirs:Dictionary=panel.view.sides.right.totals
+	assert_int((scene.marks.left as Array).size()).is_equal(int(ours.went_in))
+	assert_int((scene.marks.right as Array).size()).is_equal(int(theirs.went_in))
+	var down:=0
+	for status in scene.marks.right:
+		if String(status)!="standing": down+=1
+	assert_int(down).is_equal(mini(int(theirs.went_in),int(theirs.killed)+int(theirs.wounded)+int(theirs.fled)+int(theirs.captured)))
+	assert_str(String(scene.town)).is_equal("Tsaren")
+	assert_str(String(scene.winner)).is_equal("left")
+	assert_object(panel.find_child("WatchAgain",true,false)).is_not_null()
+	# It plays through, and draws its end as the record says.
+	for i in 6: await get_tree().process_frame
+	scene.t=1.0; scene.queue_redraw()
+	await get_tree().process_frame
+	assert_int(int(scene.drawn)).is_greater(0)
+	_assert_readable(panel)
+	panel.close()
+	host.queue_free()
+
+
+## A band larger than its marks: each mark stands for several, the counts
+## shared out, and the scale said on the drawing.
+func test_a_large_band_is_drawn_with_marks_that_stand_for_several()->void:
+	var scene:Control=preload("res://scripts/hud/skirmish_scene.gd").new()
+	scene.configure({"ground":{"kind":"forest"},"outcome":"lost","live":false,"sides":{
+		"left":{"totals":{"went_in":60,"killed":12,"wounded":8,"fled":20,"captured":5,"standing":15}},
+		"right":{"totals":{"went_in":25,"killed":2,"wounded":3,"fled":0,"captured":0,"standing":20}}}},Color.BLUE,Color.RED,"")
+	# Sixty at three a mark: twenty marks, never more marks than men.
+	assert_int((scene.marks.left as Array).size()).is_equal(20)
+	assert_int(int(scene.per_mark.left)).is_equal(3)
+	assert_int((scene.marks.left as Array).count("killed")).is_equal(4)
+	assert_int((scene.marks.left as Array).count("fled")).is_equal(7)
+	assert_int(int(scene.per_mark.right)).is_equal(2)
+	assert_int((scene.marks.right as Array).size()).is_equal(13)
+	assert_str(String(scene.winner)).is_equal("right")
+	scene.free()
+
+
 func test_live_battles_are_listed_and_followed_without_fighting()->void:
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home",[{"id":1,"unit":"line_infantry","weapon":"spear","count":300,"equipment":300}],1,1)
 	MilitaryCampaign.active_threat={"seed":741,"name":"Invasion","enemy_force":MilitaryCampaign.simulator.create_formation_force("Invaders",[{"id":2,"unit":"line_infantry","weapon":"spear","count":280,"equipment":280}],1,1),"campaign_mode":"defensive","source_name":"Esurai"}

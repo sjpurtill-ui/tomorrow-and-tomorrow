@@ -44,6 +44,10 @@ var poll:=0.0
 ## cleared where it was fought and read again from its report.
 var battle_id:=""
 var battle_seed:=-1
+## The battle whose skirmish has been drawn already (a live one is redrawn as
+## it goes on, without marching in again).
+var scene_shown:=""
+var skirmish_scene:Control
 var sheet:PanelContainer
 var buttons:Dictionary={}
 var left_colour:=Color()
@@ -137,6 +141,13 @@ func _build_card()->void:
 	_label(column,"A SKIRMISH%s" % _where_suffix().to_upper(),"kicker",T.INK_MUTED).name="Kicker"
 	var headline:=_label(column,String(view.one_line) if String(view.one_line)!="" else String(view.phrase)+".","title",T.INK)
 	headline.name="Headline"; headline.add_theme_font_override("font",T.voice_font()); headline.add_theme_font_size_override("font_size",26)
+	# The fight itself, drawn: both bands, the ground, and how it went.
+	var scene:=preload("res://scripts/hud/skirmish_scene.gd").new(); scene.name="Scene"
+	column.add_child(scene)
+	scene.configure(view,left_colour,right_colour,_town_behind())
+	if scene_shown==battle_id and battle_id!="": scene.skip_approach()
+	scene_shown=battle_id
+	skirmish_scene=scene
 	var line:=HBoxContainer.new(); line.add_theme_constant_override("separation",24); column.add_child(line)
 	for key in ["left","right"]:
 		var side:Dictionary=view.sides[key]
@@ -152,8 +163,23 @@ func _build_card()->void:
 	if not events.is_empty(): _label(column,String(events[-1])+".","body",T.BODY).name="Event"
 	column.add_child(_rule())
 	var row:=HBoxContainer.new(); row.alignment=BoxContainer.ALIGNMENT_END; row.add_theme_constant_override("separation",12); column.add_child(row)
+	if not live:
+		var again:=Button.new(); again.name="WatchAgain"; again.text="Watch again"
+		T.text(again,"body",T.INK); again.custom_minimum_size=Vector2(0,40)
+		again.add_theme_stylebox_override("normal",T.action_button_style(false))
+		again.pressed.connect(func()->void: if is_instance_valid(skirmish_scene): skirmish_scene.replay())
+		row.add_child(again)
 	_time_button(row)
 	_button(row,"Close","close",true)
+
+
+## The town the right-hand side stood before, drawn behind it: the one we
+## went against. "" for a fight in the field or at home.
+func _town_behind()->String:
+	var threat:Dictionary=record.get("threat",{}) if record.get("threat") is Dictionary else {}
+	if bool(record.get("field_encounter",threat.get("field_encounter",false))): return ""
+	if String(view.get("left",""))!="attacker": return ""
+	return String(record.get("target_region_name",threat.get("target_region_name","")))
 
 
 func _build_panel()->void:

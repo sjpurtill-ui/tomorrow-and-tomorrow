@@ -18,6 +18,8 @@ extends RefCounted
 ## WORLDS:
 ##   home_peace         at peace with the Esurai (Tsaren known, not held), no band out;
 ##                      12 trained at home and 20 called up, waiting for weapons and drill
+##   home_charted       at peace, 12 trained at home, and the land around home charted by
+##                      our scouts (a new town can be founded)
 ##   war_not_held       at war; Tsaren theirs; Rovik's band of 18 at home, 30 trained at home
 ##   tsaren_captured    Tsaren just taken: 17 of Rovik's band hold it, Rovik with 1 at the gate
 ##   tsaren_bound       ... and Rovik was told to round up and bind the men (the user's words)
@@ -46,7 +48,7 @@ const AiMode:=preload("res://scripts/ai_mode.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 
-const NAMES:=["home_peace","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
+const NAMES:=["home_peace","home_charted","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
 
 ## The user's own words used to make the worlds.
 const BIND_WORDS:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
@@ -277,6 +279,12 @@ func _build(name:String)->Dictionary:
 			train(12)
 			# Twenty more called up and waiting for weapons and drill.
 			MilitaryCampaign.raise_recruits(20)
+		"home_charted":
+			info=base(false)
+			train(12)
+			# Our scouts have charted the land around home: a new town can be
+			# founded there (realm_orders.gd found_town).
+			CivilizationSystem._add_revealed_area(home,45.0,"scout report")
 		"war_not_held":
 			info=base(true)
 			train(30)

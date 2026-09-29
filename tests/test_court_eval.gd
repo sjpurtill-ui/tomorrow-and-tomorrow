@@ -43,8 +43,14 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## Who sets the daily work ("I will set the work myself", "put 10 more on
 ## building", "let the headman decide the work again": 13 more runs a path):
 ## offline 532, live 533, sloppy 74.
+## Every game function carried out by its real mechanic (the "functions"
+## domain: levies drilled and armed, fighters stood down, bands formed,
+## training, workshop lines, research, scouting, strangers, building, a new
+## town, rations, envoys, repairs, the sick kept apart: realm_orders.gd), and
+## the user's own levy and stand-down lines: 110 more runs a path):
+## offline 642, live 643, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":532,"live":533,"sloppy":74}
+const BASELINE:={"offline":642,"live":643,"sloppy":74}
 
 var _processing:Dictionary={}
 

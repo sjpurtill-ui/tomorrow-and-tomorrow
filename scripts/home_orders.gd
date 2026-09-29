@@ -4,10 +4,26 @@ extends RefCounted
 ##
 ## An order about our own people at home that a real system carries out goes
 ## to that system, never into a vague standing directive:
-##   recruit  "Recruit 20 more warriors", "Raise thirty new fighters", "Call up
-##            fifteen more men to fight": MilitaryCampaign.raise_recruits(n).
-##            Real adults leave their work; they wait for weapons and drill.
-##            Only as many as there are free adults can be called up.
+##   levy     "Recruit 20 more warriors", "Raise thirty new fighters", "Call up
+##            fifteen more men to fight", "Recruit, train and arm 5 levies",
+##            "Train the recruits": every part of raising a levy is done, never
+##            only the first thing the words name. New fighters are called up
+##            (MilitaryCampaign.raise_recruits: real adults leave their work,
+##            only as many as there are free adults), they begin their drill at
+##            once (start_training: as a levy, or as the archers or spearmen
+##            named when our people can train them), and the weapons they lack
+##            are put in hand in the workshops (queue_equipment_production:
+##            only what the store and the work already under way will not
+##            cover). Words that only drill ("train the recruits") drill those
+##            waiting; with none waiting, those under arms at home go to camp
+##            drill.
+##   stand_down  "Please dismiss 5 of our soldiers and return them to the
+##            workforce", "send the recruits home", "stand the levy down":
+##            MilitaryCampaign.demobilize(n), those hurt first, then the
+##            recruits waiting, then the fighters at home; their weapons go
+##            back to the store. Never the dismissal of the one who is told
+##            (a count or a group of our fighters is never one person). With
+##            no number and no "all", the court asks how many.
 ##   arm      "make the weapons we need for the soldiers I requisitioned",
 ##            "Make twenty spears", "Arm the recruits": the workshops' queue
 ##            (MilitaryCampaign.queue_equipment_production); the materials are
@@ -25,14 +41,19 @@ extends RefCounted
 ## Words about a foreign town or its people ("conscript the men of Tsaren",
 ## "take their weapons") are the war leader's business, never these.
 ##
-## read(text) -> {kind:"recruit"|"arm"|"found_towns"|"work", count, item?,
-##   for_recruits?, allow?, mode?, role?, fewer?, other?} or {}.
+## read(text) -> {kind:"levy"|"arm"|"found_towns"|"work", count, item?,
+##   recruit?, arm_said?, unit?, for_recruits?, allow?, mode?, role?, fewer?,
+##   other?} or {}. ("recruit", an older reading, is still carried out.)
 ## perform(reading) -> {ok, says, outcome, kind, count, ...}: says is the
 ##   official's own plain answer, outcome the narration; ok=false when nothing
 ##   could be set in motion (and says what stands in the way).
 ## Static helpers; preload.
 
 const DEFAULT_RECRUITS:=10
+## Home orders a real system carries out: never turned into a law, a war
+## order or a standing directive on the way (court_commands.gd).
+const ENGINE_KINDS:=["levy","recruit","arm","stand_down","found_towns","work","deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace",
+	"build","defences","found_town","ration","provisions","declare_war","envoy","repair","sick_apart","clean_water","scout_party","town_focus"]
 
 ## "Muster" and "call out" gather the fighters we have (the war leader's);
 ## these call up new ones.
@@ -44,6 +65,24 @@ const MAKE_VERBS:="(?i)\\b(make|craft|forge|fashion|produce|prepare|shape|knap|c
 const WEAPON_NOUNS:="(?i)\\b(weapons?|arms|spears?|bows?|clubs?|axes?|shields?|swords?|lances?|gear|equipment|kit)\\b"
 ## Theirs, not ours: occupation measures and captives belong to the war leader.
 const THEIRS:="(?i)\\b(their|theirs|captives?|prisoners?|bondservants?|enemy|enemies)\\b"
+
+## Drilling our fighters: "train", "drill", "teach them to fight".
+const DRILL_VERBS:="(?i)\\b(train|trains|training|trained|drill|drills|drilling|drilled|teach (?:them |the [\\w']+ )?to fight|make (?:them )?ready to fight)\\b"
+## The new fighters a drill is for ("train the recruits"), never a band before
+## a march ("let the band finish its drill" is the war leader's).
+const NEW_FIGHTERS:="(?i)\\b(recruits?|levies|levy|conscripts?|draftees?|new (?:fighters|warriors|men|soldiers|spearmen|archers|bowmen))\\b"
+## "Recruit a scout", "call up the builders": people for other work.
+const OTHER_CALLINGS:="(?i)\\b(scouts?|builders?|workers?|hunters?|gatherers?|farmers?|settlers?|healers?|teachers?|carriers?|porters?|stewards?|elders?|priests?|makers?|smiths?|potters?|weavers?|traders?|envoys?|messengers?|runners?|a law|laws?|a plan|plans?|a letter)\\b"
+## "Levy a tax", "levy ten hides from each family": goods, not fighters.
+const LEVY_GOODS:="(?i)\\b(tax|taxes|tribute|tithe|dues?|shares?|hides?|food|grain|goods|stores?|payment|furs?|meat|timber|stone)\\b"
+## Standing our fighters down: dismissed, released, sent home or back to work.
+const STAND_DOWN_VERBS:="(?i)\\b(dismiss|dismissed|release|released|discharge|discharged|demobili[sz]e|demobili[sz]ed|stand [\\w' ]{0,30}?down|disband|disbanded|let [\\w' ]{0,30}?go home|send [\\w' ]{0,30}?(?:home|back to (?:the |their )?(?:fields|work|workforce|homes|hearths|families))|return [\\w' ]{0,30}?to (?:the |their )?(?:workforce|fields|work|homes|hearths|families))\\b"
+## Our own fighters, as a group or a number ("5 of our soldiers").
+const OUR_FIGHTERS:="(?i)\\b(soldiers?|fighters?|warriors?|levies|levy|recruits?|troops|spearmen|archers|bowmen|men under arms|men at arms|fighting men)\\b"
+
+## A kind of fighter the words ask for: [unit, its weapon, the words].
+const KIND_WORDS:=[["archer","bow","\\b(archers?|bowmen)\\b"],["spearman","spear","\\bspearmen\\b"]]
+const KIND_NAMES:={"levy":"a levy","archer":"archers","spearman":"spearmen"}
 
 const ITEM_WORDS:=[["spear","\\bspears?\\b"],["bow","\\b(bows?|archers?|bowmen)\\b"],["improvised","\\b(clubs?|staves|staffs?|cudgels?|sticks?)\\b"],["sword_shield","\\b(swords?|shields?)\\b"],["lance","\\blances?\\b"]]
 const ITEM_NAMES:={"improvised":"clubs and sharpened staves","spear":"spears","bow":"bows","sword_shield":"swords and shields","lance":"lances"}
@@ -210,6 +249,8 @@ static func work_reading(text:String)->Dictionary:
 		var role:=_task_role(on.get_string(2))
 		if role!="": return {"kind":"work","role":role,"count":number_in(on.get_string(1)),"fewer":false,"other":""}
 	var more:=_re("(?i)\\b(?:put|set|add|move|send|assign|have|get|place)\\s+more\\s+"+PEOPLE_WORDS+"(?:on|onto|to|at|into|in|for|doing|to work on)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	# Said without a verb: "More hands on the hunt", "more people for the fields".
+	if more==null: more=_re("(?i)^\\s*(?:and\\s+)?(?:we need\\s+)?more\\s+(?:people|hands|men|women|workers|folk|of us)\\s+(?:on|to|at|in|for)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
 	if more!=null:
 		var role:=_task_role(more.get_string(1))
 		if role!="": return {"kind":"work","role":role,"count":0,"fewer":false,"other":""}
@@ -233,7 +274,21 @@ static func read(text:String)->Dictionary:
 	# "let our leaders decide their work again" names nobody else's people.
 	var work:=work_reading(clean)
 	if not work.is_empty(): return work
+	# Our fighters stood down: "dismiss 5 of our soldiers" is never a levy,
+	# and never the dismissal of whoever is told.
+	var down:=stand_down_reading(clean)
+	if not down.is_empty(): return down
+	# The rest of the realm's own functions (realm_orders.gd): a band formed,
+	# the army's training, workshop lines, what our thinkers study, the
+	# scouting, how strangers are received, a great work's pace.
+	var realm:=realm_reading(clean)
+	if not realm.is_empty(): return realm
 	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
+	# New fighters of our own, called up, drilled and armed: every part said in
+	# one breath is done ("recruit, train and arm 5 levies"), and a levy called
+	# up is drilled and armed as a matter of course.
+	var levy:=levy_reading(clean)
+	if not levy.is_empty(): return levy
 	# Weapons for our fighters: "make the weapons we need", "arm the recruits".
 	var make:=_re(MAKE_VERBS).search(lower)
 	var weapon:=_re(WEAPON_NOUNS).search(lower)
@@ -243,18 +298,74 @@ static func read(text:String)->Dictionary:
 		for pair in ITEM_WORDS:
 			if _has(lower,String(pair[1])): item=String(pair[0]); break
 		return {"kind":"arm","count":number_in(lower),"item":item,"for_recruits":arming or _has(lower,FIGHTER_NOUNS+"|\\b(requisitioned|called up|conscripted|drafted|raised)\\b")}
-	# Fighters called up from our own people.
-	var verb:=_re(RECRUIT_VERBS).search(lower)
-	if verb==null: return {}
-	var noun:=_has(lower,FIGHTER_NOUNS)
-	var n:=number_in(lower)
-	var word:=verb.get_string(1)
-	# "Recruit 20", "draft thirty": the verb alone is enough; "raise", "call
-	# up", "gather" need fighters named ("raise the wall", "gather the hunters").
-	if word in ["recruit","enlist","draft"] or (word in ["conscript","levy"] and (noun or n>0)) or noun:
-		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): return {}
-		return {"kind":"recruit","count":n}
 	return {}
+
+
+## The realm's own functions (realm_orders.gd), loaded when used: that module
+## reads numbers and foreign names through this one.
+static func _realm()->GDScript:
+	return load("res://scripts/realm_orders.gd") as GDScript
+
+
+## A realm order (realm_orders.gd read) or {}.
+static func realm_reading(text:String)->Dictionary:
+	return _realm().call("read",text)
+
+
+## Our fighters stood down: {kind: "stand_down", count, all, recruits} when
+## the words dismiss, release or send home a number or a group of our own
+## fighters; else {}. Not a question, a march, or words about another
+## people's men ("release the prisoners" is the war leader's).
+static func stand_down_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
+	var lower:=clean.to_lower()
+	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
+	if not _has(lower,STAND_DOWN_VERBS) or not _has(lower,OUR_FIGHTERS): return {}
+	var recruits:=_has(lower,"\\brecruits?\\b") and not _has(lower,"\\b(soldiers?|fighters?|warriors?|troops|levies|spearmen|archers|bowmen)\\b")
+	return {"kind":"stand_down","count":number_in(lower),"all":_has(lower,"\\b(all|every|everyone|each|the whole)\\b"),"recruits":recruits}
+
+
+## New fighters of our own: {kind: "levy", count, recruit, arm_said, unit,
+## item} when the words call up new fighters, or drill the ones called up;
+## else {}. Arming alone ("arm the recruits", "make twenty spears") is read()'s
+## "arm". Not a question, a march, words about another people's fighters, or
+## people called for other work ("recruit a scout", "draft a law", "levy a
+## tax").
+static func levy_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
+	var lower:=clean.to_lower()
+	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
+	var verb:=_re(RECRUIT_VERBS).search(lower)
+	# The fighters named, never the verb itself ("recruit a scout" names none).
+	var named:=lower if verb==null else lower.substr(0,verb.get_start())+" "+lower.substr(verb.get_end())
+	var noun:=_has(named,FIGHTER_NOUNS)
+	var n:=number_in(lower)
+	var other:=_has(lower,OTHER_CALLINGS) and not noun
+	var recruit:=false
+	if verb!=null:
+		var word:=verb.get_string(1)
+		# "Recruit 20": the verb and a number are enough; "draft", "enlist",
+		# "conscript" and "levy" need fighters or a number of people named;
+		# "raise" and "call up" need fighters named ("raise the wall").
+		if word=="recruit": recruit=not other
+		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or (n>0 and not other and not _has(lower,LEVY_GOODS))
+		else: recruit=noun
+		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): recruit=false
+	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")))
+	if not recruit and not drill: return {}
+	var make:=_re(MAKE_VERBS).search(lower)
+	var weapon:=_re(WEAPON_NOUNS).search(lower)
+	var arm_said:=_has(lower,"\\b(arm|arms|armed|equip|equipped|outfit|fit out)\\b") or (make!=null and weapon!=null)
+	var unit:="levy"
+	var item:=""
+	for k in KIND_WORDS:
+		if _has(lower,String(k[2])): unit=String(k[0]); item=String(k[1]); break
+	if item=="":
+		for pair in ITEM_WORDS:
+			if _has(lower,String(pair[1])): item=String(pair[0]); break
+	return {"kind":"levy","count":n,"recruit":recruit,"arm_said":arm_said,"unit":unit,"item":item}
 
 # --------------------------------------------------------------------------
 # Carrying them out
@@ -262,6 +373,10 @@ static func read(text:String)->Dictionary:
 
 static func perform(reading:Dictionary)->Dictionary:
 	match String(reading.get("kind","")):
+		"levy": return _levy(reading)
+		"stand_down": return _stand_down(reading)
+		"deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace","build","defences","found_town","ration","provisions","declare_war","envoy","repair","sick_apart","clean_water","scout_party","town_focus":
+			return _realm().call("perform",reading)
 		"recruit": return _recruit(reading)
 		"arm": return _arm(reading)
 		"found_towns": return preload("res://scripts/auto_founding.gd").court_order(bool(reading.get("allow",true)))
@@ -287,6 +402,278 @@ static func _recruit(reading:Dictionary)->Dictionary:
 	out.says="%d are called up and leave their work in the fields and workshops.%s%s %d now wait for weapons and drill." % [raised,short,unnamed,waiting]
 	out.outcome="%d called up from our own people; %d recruits now wait for weapons and drill, and that much less work is done at home." % [raised,waiting]
 	return out
+
+## Fighters stood down (MilitaryCampaign.demobilize): those hurt first, then
+## the recruits waiting, then the fighters at home; bands away in the field
+## are the war leader's to bring home first. Every number is the engine's own.
+static func _stand_down(reading:Dictionary)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return {"ok":false,"kind":"stand_down","says":"","outcome":""}
+	var waiting:=int(mc.aggregate_recruits)
+	var at_home:=int(mc.home_army.get("troops",0))
+	var free:=waiting+at_home
+	var out:={"ok":false,"kind":"stand_down","count":0}
+	var n:=int(reading.get("count",0))
+	if n<=0:
+		if bool(reading.get("recruits",false)): n=waiting
+		elif bool(reading.get("all",false)): n=free
+	if n<=0:
+		out.says="How many should go home? %d wait as recruits and %d are under arms at home." % [waiting,at_home] if free>0 else "There is nobody under arms at home to send back."
+		out.outcome="Nothing is set in motion: no number was named." if free>0 else "Nothing is set in motion: nobody is under arms at home."
+		return out
+	if free<=0:
+		out.says="There is nobody under arms at home to send back; our fighters are away with the bands."
+		out.outcome="Nothing is set in motion: nobody is under arms at home."
+		return out
+	var r:Dictionary=mc.demobilize(mini(n,free))
+	if r.has("error"):
+		out.says="They cannot be stood down: %s" % String(r.error)
+		out.outcome="Nothing is set in motion: %s" % String(r.error)
+		return out
+	var released:=int(r.get("released",0))
+	out.ok=released>0
+	out.count=released
+	var parts:PackedStringArray=PackedStringArray()
+	if int(r.get("released_injured_veterans",0))>0: parts.append("%d who were hurt" % int(r.released_injured_veterans))
+	if int(r.get("released_recruits",0))>0: parts.append("%d recruits" % int(r.released_recruits))
+	if int(r.get("released_field_soldiers",0))>0: parts.append("%d who stood under arms" % int(r.released_field_soldiers))
+	var short:=(" Only %d were at home to send back; the rest are away with the bands." % released) if released<n else ""
+	var gear:=""
+	var returned:Dictionary=r.get("returned_equipment",{}) if r.get("returned_equipment") is Dictionary else {}
+	var back:PackedStringArray=PackedStringArray()
+	for item in returned:
+		if int(returned[item])>0: back.append("%d %s" % [int(returned[item]),String(ITEM_NAMES.get(String(item),String(item).replace("_"," ")))])
+	if not back.is_empty(): gear=" Their %s go back to the store." % ", ".join(back)
+	out.says="%d go home to their families and their work: %s.%s%s" % [released,", ".join(parts) if not parts.is_empty() else "%d in all" % released,short,gear]
+	out.outcome="%d stood down and back at work at home." % released
+	return out
+
+
+## A levy raised: called up (when the words call up new fighters), drilled
+## at once, and armed from the store with the rest put in hand in the
+## workshops. Every number said is the engine's own.
+static func _levy(reading:Dictionary)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return {"ok":false,"kind":"levy","says":"","outcome":""}
+	var asked:=int(reading.get("count",0))
+	var named:=asked>0
+	var calling:=bool(reading.get("recruit",false))
+	var out:={"ok":false,"kind":"levy","asked":asked,"count":0,"raised":0,"drilling":0,"made":0}
+	var says:PackedStringArray=[]
+	var done:PackedStringArray=[]
+	var raised:=0
+	if calling:
+		var n:=asked if named else DEFAULT_RECRUITS
+		var r:Dictionary=mc.raise_recruits(n)
+		raised=int(r.get("raised",0))
+		out.raised=raised
+		if raised>0:
+			var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
+			var unnamed:=(" You named no number, so I called up %d." % raised) if not named else ""
+			says.append("%d are called up and leave their work in the fields and workshops.%s%s" % [raised,short,unnamed])
+			done.append("%d called up from our own people" % raised)
+		elif int(mc.aggregate_recruits)<=0:
+			out.says="There is nobody left to call up: every able adult is already under arms or away."
+			out.outcome="Nothing is set in motion: no free adults remain to be called up."
+			return out
+		else:
+			says.append("There is nobody left to call up, so I drill those already waiting.")
+	var waiting:=int(mc.aggregate_recruits)
+	if waiting<=0:
+		# Only a drill was asked, and nobody is waiting: those under arms at
+		# home go to camp drill, if they are not at it already.
+		return _drill_home(mc,out)
+	var drill_count:=mini(waiting,asked if named else (raised if raised>0 else waiting))
+	var kit:=_kit(mc,String(reading.get("unit","levy")),String(reading.get("item","")))
+	if kit.is_empty():
+		out.ok=raised>0;out.count=raised
+		says.append("They cannot begin a drill yet: our people know no way to train them.")
+		out.says=" ".join(says);out.outcome=(", ".join(done)+"; they wait for a drill we cannot yet give." if not done.is_empty() else "Nothing more is set in motion.")
+		return out
+	var started:Dictionary=mc.start_training(String(kit.unit),String(kit.weapon),drill_count)
+	var weapon:=String(kit.weapon)
+	var arms:=String(ITEM_NAMES.get(weapon,weapon.replace("_"," ")))
+	if started.has("error"):
+		says.append("Their drill cannot begin: %s" % String(started.error))
+		out.ok=raised>0;out.count=raised
+		out.says=" ".join(says);out.outcome=", ".join(done)+"." if not done.is_empty() else "Nothing more is set in motion."
+		return out
+	var drilling:=int(started.get("accepted",drill_count))
+	var days:=ceili(float(started.get("required_days",0.0)))
+	out.drilling=drilling
+	if String(kit.get("note",""))!="": says.append(String(kit.note))
+	var as_what:=String(KIND_NAMES.get(String(kit.unit),"a levy"))
+	says.append("%s begin their drill as %s with %s now: about %d days before they are fit to fight." % ["They" if raised>0 else ("The %d waiting" % drilling),as_what,arms,days])
+	done.append("%d begin drill as %s with %s, about %d days" % [drilling,as_what,arms,days])
+	# Armed: what they need, less the store and the work already under way
+	# that nobody else in drill is counting on.
+	var need:int=mc._equipment_required_for(String(kit.unit),drilling)
+	var stock:=int((mc.military_inventory as Dictionary).get(weapon,0))
+	var making:=_in_production(mc,weapon)
+	var spoken:=_spoken_for(mc,weapon,int(started.get("id",-1)))
+	var cover:=maxi(0,stock+making-spoken)
+	var short:=maxi(0,need-cover)
+	if short<=0:
+		says.append("We have the %s for them%s." % [arms," in store" if stock>=need else " in store and in the making"])
+	else:
+		var have:=("%d in store" % cover) if cover>0 else "none in store"
+		var put:=_put_in_hand(mc,weapon,short,stock)
+		if put.has("error"):
+			says.append("Of the %d %s they need we have %s, and the workshops cannot make the rest now: %s They drill with what they have until then." % [need,arms,have,String(put.error)])
+			done.append("%d short of %s" % [short,arms])
+		else:
+			out.made=short
+			says.append("Of the %d %s they need we have %s; %s" % [need,arms,have,String(put.says)])
+			done.append("%d %s put in hand in the workshops" % [short,arms])
+	out.ok=true
+	out.count=drilling
+	out.says=" ".join(says)
+	out.outcome=_cap_first("; ".join(done))+"."
+	return out
+
+
+## Nobody waiting to be drilled: those under arms at home go to camp drill.
+static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
+	var home:=int(mc.home_army.get("troops",0))
+	if home<=0:
+		out.says="There is nobody waiting to be drilled and nobody under arms at home. Call up a levy first."
+		out.outcome="Nothing is set in motion: nobody is waiting to be drilled."
+		return out
+	if not (mc.training_program as Dictionary).is_empty():
+		out.ok=true;out.count=home
+		out.says="The %d under arms at home are already at their drill." % home
+		out.outcome="The drill at home goes on."
+		return out
+	var began:Dictionary=mc.start_training_program("camp_drill")
+	if began.has("error"):
+		out.says="Nobody is waiting to be drilled, and camp drill cannot begin: %s" % String(began.error)
+		out.outcome="Nothing is set in motion: %s" % String(began.error)
+		return out
+	out.ok=true;out.count=home
+	out.says="Nobody new is waiting, so the %d under arms at home go to camp drill: musters, signals and changes of formation, for about %d days." % [home,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))]
+	out.outcome="The %d under arms at home begin camp drill." % home
+	return out
+
+
+## The kind of fighter and weapon a levy drills with: the kind and weapon the
+## words name when our people can train them now, else a levy with spears
+## once spears are a practice, else with clubs and staves. {unit, weapon,
+## note} ({} when none can be trained); note says, in plain words, why the
+## kind asked for could not be.
+static func _kit(mc:Variant,unit:String,item:String)->Dictionary:
+	var tries:Array=[]
+	if unit!="" and unit!="levy":tries.append([unit,item if item!="" else String(mc.UnitCatalog.equipment_for(unit)[0])])
+	if item!="":tries.append(["levy",item])
+	for fallback in ["spear","improvised"]:
+		if not tries.has(["levy",fallback]):tries.append(["levy",fallback])
+	var wanted:=String(tries[0][0])!="levy" or String(tries[0][1])==item
+	for pair in tries:
+		var gate:Dictionary=mc._training_gate(String(pair[0]),String(pair[1]))
+		if gate.has("error") or bool(gate.get("prototype",false)):continue
+		var note:=""
+		if wanted and (String(pair[0])!=String(tries[0][0]) or String(pair[1])!=String(tries[0][1])):
+			var asked:=String(KIND_NAMES.get(String(tries[0][0]),"")) if String(tries[0][0])!="levy" else String(ITEM_NAMES.get(String(tries[0][1]),String(tries[0][1])))
+			note="We cannot train them with %s yet: our people do not know how well enough." % asked if String(tries[0][0])=="levy" else "We cannot train %s yet: our people do not know how well enough." % asked
+		return {"unit":String(pair[0]),"weapon":String(pair[1]),"note":note}
+	return {}
+
+
+## `short` weapons put in hand, the way the workshops' own lines work: a line
+## that already makes them keeps that many more in store (and works again if
+## it was paused); else a batch of them; else, when every line is taken, a
+## paused line is turned over to them. {says} or {error} in plain words.
+static func _put_in_hand(mc:Variant,weapon:String,short:int,stock:int)->Dictionary:
+	var arms:=String(ITEM_NAMES.get(weapon,weapon.replace("_"," ")))
+	for job in mc.equipment_queue:
+		var j:Dictionary=job
+		if not bool(j.get("persistent",false)) or String(j.get("item",""))!=weapon:continue
+		var target:=maxi(int(j.get("target_stock",0)),stock+short) if int(j.get("target_stock",0))>0 else 0
+		var set:Dictionary=mc.configure_production_line(int(j.id),target,false)
+		if set.has("error"):return {"error":String(set.error)}
+		return {"says":"the workshop line that makes %s is set to keep %d in store, and is at work on them now." % [arms,target] if target>0 else "the workshop line that makes %s keeps on making them." % arms}
+	# A batch of them already in the workshops takes these too.
+	for job in mc.equipment_queue:
+		var j:Dictionary=job
+		if bool(j.get("persistent",false)) or String(j.get("item",""))!=weapon or String(j.get("job_type","production"))!="production":continue
+		var grown:=_grow_batch(mc,j,weapon,short)
+		if grown.has("error"):return grown
+		return {"says":"the %s already being made in the workshops are %d more now, about %d more days of work, and %s are set aside for them now." % [arms,short,ceili(float(grown.days)),String(grown.materials)]}
+	var queued:Dictionary=mc.queue_equipment_production(weapon,short)
+	if not queued.has("error"):
+		var materials:PackedStringArray=PackedStringArray()
+		var recipe:Dictionary=mc._equipment_recipe(weapon)
+		for m in (recipe.get("materials",{}) as Dictionary):
+			materials.append("%d %s" % [ceili(float(recipe.materials[m])*short),String(m)])
+		return {"says":"the workshops will make %d more, about %d days of work, and %s are set aside for it now." % [short,ceili(float(queued.get("work_days",0.0))),", ".join(materials) if not materials.is_empty() else "nothing"]}
+	if not String(queued.error).begins_with("All "):
+		return {"error":_plain_shortage(String(queued.error))}
+	# Every line is taken: a paused line is turned over to them.
+	for job in mc.equipment_queue:
+		var j:Dictionary=job
+		if not bool(j.get("persistent",false)) or not bool(j.get("paused",false)):continue
+		var was:=String(ITEM_NAMES.get(String(j.get("item","")),String(j.get("item","")).replace("_"," ")))
+		var turned:Dictionary=mc.retool_production_line(int(j.id),weapon)
+		if turned.has("error"):continue
+		var set:Dictionary=mc.configure_production_line(int(j.id),stock+short,false)
+		if set.has("error"):return {"error":String(set.error)}
+		return {"says":"every workshop line was taken, so the idle line that made %s now makes %s, to keep %d in store." % [was,arms,stock+short]}
+	return {"error":"every workshop line is already at other work."}
+
+
+## A batch already in hand grows by `count`: its work and its materials,
+## taken from the stores now as for a new batch. {days, materials} or {error}.
+static func _grow_batch(mc:Variant,job:Dictionary,weapon:String,count:int)->Dictionary:
+	var recipe:Dictionary=mc._equipment_recipe(weapon)
+	var materials:Dictionary=recipe.get("materials",{}) if recipe.get("materials") is Dictionary else {}
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	for m in materials:
+		var need:=float(materials[m])*count
+		if float(stocks.get(m,0.0))<need:return {"error":"there is not enough %s in the stores (%d is needed)." % [String(m),ceili(need)]}
+	var words:PackedStringArray=PackedStringArray()
+	var reserved:Dictionary=job.get("reserved_materials",{}) if job.get("reserved_materials") is Dictionary else {}
+	for m in materials:
+		var need2:=float(materials[m])*count
+		stocks[m]=float(stocks.get(m,0.0))-need2
+		reserved[m]=float(reserved.get(m,0.0))+need2
+		words.append("%d %s" % [ceili(need2),String(m)])
+	job["reserved_materials"]=reserved
+	var per:=float(job.get("work_per_item",recipe.get("days",1.0)))
+	job["count"]=int(job.get("count",0))+count
+	job["required_days"]=float(job.get("required_days",0.0))+per*count
+	return {"days":per*count,"materials":", ".join(words) if not words.is_empty() else "nothing"}
+
+
+## A workshop's refusal in the people's words.
+static func _plain_shortage(error:String)->String:
+	var m:=RegEx.create_from_string("^Insufficient (.+?): need ([0-9.]+)\\.").search(error)
+	if m!=null:return "there is not enough %s in the stores (%d is needed)." % [m.get_string(1),ceili(float(m.get_string(2)))]
+	return error.substr(0,1).to_lower()+error.substr(1)
+
+
+## Weapons of this kind still being made in the workshops.
+static func _in_production(mc:Variant,weapon:String)->int:
+	var n:=0
+	for job in mc.equipment_queue:
+		var j:Dictionary=job
+		if String(j.get("item",""))!=weapon or String(j.get("job_type","production"))!="production" or bool(j.get("persistent",false)):continue
+		n+=maxi(0,int(j.get("count",0))-int(j.get("completed",0)))
+	return n
+
+
+## Weapons of this kind already counted on by others in drill (not on a
+## recruitment line, whose weapons are set aside as they come).
+static func _spoken_for(mc:Variant,weapon:String,skip_id:int)->int:
+	var n:=0
+	for order in mc.training_queue:
+		var o:Dictionary=order
+		if int(o.get("id",-1))==skip_id or o.has("deployment_line") or String(o.get("weapon",""))!=weapon:continue
+		n+=maxi(0,int(mc._equipment_required_for(String(o.get("unit","levy")),int(o.get("count",0))))-int(o.get("reserved_equipment",0)))
+	return n
+
+
+static func _cap_first(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
+
 
 ## What the recruits waiting need, less what is in store.
 static func _needed(mc:Variant,item:String)->int:
