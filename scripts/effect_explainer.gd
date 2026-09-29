@@ -148,7 +148,7 @@ const KEYS:={
 			{"cover":"water","src":"early_life_conditions.gd:27"},
 			{"relief":true,"src":"early_life_conditions.gd:80"},
 			{"epidemic":1.0/3.0,"src":"crisis_system.gd:484","guards":[["crisis_system.gd",'var ws:=_effect("water_safety")']]},
-			{"to":"drinking water quality when sickness spreads","per":0.2,"unit":"pts","src":"crisis_system.gd:498","guards":[["crisis_system.gd",'"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,1.2)']]},
+			{"to":"drinking water quality when sickness spreads (even with plenty to drink, cleaner water keeps cutting outbreaks, by up to a quarter)","per":0.2,"unit":"pts","src":"crisis_system.gd:512","guards":[["crisis_system.gd",'"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,WATER_Q_MAX)'],["crisis_system.gd",'return WATER_SHORT_BETA*(1.0-minf(1.0,q))-CLEAN_WATER_BETA*maxf(0.0,q-1.0)']]},
 			{"steer":["health","Water & sanitation"],"per":0.65,"src":"society_model.gd:713","guards":[["society_model.gd",'effect("water_safety")*0.65']]}]},
 	"sanitation":{"label":"Sanitation","good":1,
 		"what":"Latrines, drains and clean streets. Sickness from the surroundings and deaths from illness fall, and children's summer fevers ease.",

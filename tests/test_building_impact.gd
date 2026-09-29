@@ -174,3 +174,15 @@ func test_landmarks_explain_each_great_work()->void:
 	assert_str(String(standing[2].label)).is_equal("Upkeep")
 	var ruin:Array=page._impact({"status":"ruined"},{})
 	assert_str(String(ruin[0].value)).is_equal("nothing")
+
+
+## Water works say how often sickness breaks out with the town's water, as
+## the crisis rules read it: plain plentiful water is ×1.00.
+func test_water_works_say_how_often_sickness_breaks_out()->void:
+	GameState.simulation_metrics["water_intake_ratio"]=1.0
+	var told:=Impact.water_work("latrine")
+	var outbreaks:Dictionary={}
+	for line:Dictionary in told.lines:
+		if String(line.label)=="Sickness breaking out": outbreaks=line
+	assert_dict(outbreaks).is_not_empty()
+	assert_str(String(outbreaks.value)).starts_with("×")

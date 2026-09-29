@@ -90,12 +90,19 @@ static func history(state:Node)->Dictionary:
 				if int(state.elapsed_days)-int(account.day)<=365*30 and contact not in known_by:known_by.append(contact)
 	return {"attempted":attempted,"succeeded":succeeded,"follies":follies,"standing":standing,"enduring":enduring,"kinds":kinds.size(),"known_by":known_by.size(),"costly":costly}
 
-static func description(id:String,condition:float=1.0)->String:
+## The work's rewards in words. With its record `r`, what it actually pays as
+## it turned out (triumph, success or flawed: the table local_bonus applies);
+## without, the design's plain success.
+static func description(id:String,condition:float=1.0,r:Dictionary={})->String:
 	var d:Dictionary=REWARDS.get(id,{})
 	var definition:=Catalog.get_definition(id)
 	if bool(definition.get("concept",false)):
 		d=load("res://scripts/wonder_concept.gd").rewards_for(String(definition.purpose),String(definition.ambition),"success")
 		d["path"]=String(PURPOSE_PATH.get(String(definition.purpose),"Legacy"))
+	if r.get("rewards") is Dictionary and not (r.rewards as Dictionary).is_empty():
+		var path:=String(d.get("path","Legacy"))
+		d=(r.rewards as Dictionary).duplicate()
+		d["path"]=path
 	var parts:Array[String]=[]
 	if d.has("food_capacity"):parts.append("+%s rations of local storage" % str(roundi(float(d.food_capacity)*condition)))
 	if d.has("water_capacity"):parts.append("+%s water units of local storage" % str(roundi(float(d.water_capacity)*condition)))

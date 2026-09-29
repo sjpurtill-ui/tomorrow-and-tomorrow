@@ -131,7 +131,7 @@ static func site(city_id:String,id:String,owner:String="player")->Dictionary:
 		# The reward line tells the design's effect at a plain success; a work
 		# that stands tells what it actually does, as it turned out.
 		var effect:=Effects.describe(id,float(r.condition),r)
-		var reward:=Rewards.description(id,float(r.condition))
+		var reward:=Rewards.description(id,float(r.condition),r)
 		var design:=Effects.describe(id,float(r.condition))
 		if U.held(r) and not design.is_empty() and design!=effect:reward=reward.replace(design.trim_suffix("."),effect.trim_suffix("."))
 		result.merge({"city_id":city_id,"city_name":String(city.get("name","")),"title":String(Catalog.get_definition(id).title),"display_name":U.display_name(r),"stage":U.stage_of(r),"fraction":U.fraction(r),"total_work":U.total_work(r),"claimed":U.completed(r),"effect_text":effect,"assessment":U.assess_record(r,owner) if r.status in ["building","stalled"] else {},"reward_text":reward},true)

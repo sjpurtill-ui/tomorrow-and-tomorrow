@@ -273,6 +273,14 @@ static func water_work(kind:String)->Dictionary:
 		var words:Array=WATER_WORDS[String(key)]
 		var better:=amount>0.0 if String(key)!="disease_exposure" else amount<0.0
 		lines.append(_line(String(words[0]),"%s%s" % ["+" if amount>=0.0 else "−",_three(absf(amount))],"%s: %s (the practice's listed %s at %d%% coverage)." % [_cap(String(words[1])),"it helps" if better else "it harms",_three(absf(float(listed[key]))),roundi(coverage*100.0)],"good" if better else "bad"))
+	# What the town's water, its water knowledge and these works do to how
+	# often sickness breaks out (crisis_system.gd inputs water_q, water_term):
+	# short water raises it, and clean water keeps lowering it past plenty.
+	var crisis=preload("res://scripts/crisis_system.gd")
+	var drink:=clampf(float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",1.0)),0.0,1.0)
+	var quality:float=clampf(drink-0.15*crisis._effect("disease_exposure")+0.2*crisis._effect("water_safety")+0.2*crisis._effect("sanitation"),0.0,float(crisis.WATER_Q_MAX))
+	var outbreaks:=exp(float(crisis.water_term(quality)))
+	lines.append(_line("Sickness breaking out","×%s" % _two(outbreaks),"With the water drunk today and everything the people know and have built to keep it clean, sickness breaks out ×%s as often as with plain, plentiful water (it can fall to ×%s)." % [_two(outbreaks),_two(exp(float(crisis.water_term(float(crisis.WATER_Q_MAX)))))],"good" if outbreaks<1.0 else ("bad" if outbreaks>1.02 else "plain")))
 	if kind=="cistern":
 		var people:=maxf(1.0,float(WorldSimulation.state.population_exact))
 		var condition:=float(record.get("condition",1.0))
