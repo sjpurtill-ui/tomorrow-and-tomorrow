@@ -654,9 +654,10 @@
    "expect": {"handled": true, "state": {"equipment_orders": ">before"}}},
 
   {"id": "home.recruit", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "user",
+   "note": "Called up and put straight into their drill: a levy is drilled and armed as a matter of course.",
    "say": "Recruit 20 more warriors",
    "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 20}, "confidence": 0.9},
-   "expect": {"handled": true, "state": {"recruits": ">before"}},
+   "expect": {"handled": true, "state": {"training": ">before"}},
    "variants": ["recruit 20", "Raise thirty new fighters", "Call up fifteen more men to fight"]},
 
   {"id": "home.rations", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
@@ -695,7 +696,28 @@
    "note": "No number named: a few are called up and the court says how many.",
    "say": "Raise more fighters",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"handled": true, "state": {"recruits": ">before", "modifiers": "==before"}, "reply_has": ["no number"]}},
+   "expect": {"handled": true, "state": {"training": ">before", "modifiers": "==before"}, "reply_has": ["no number"]}},
+
+  {"id": "home.levy_train_arm", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "user",
+   "note": "The user's words: every part is done, never only the spears.",
+   "say": "Raise an army of five levies and train them and arm them.",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 5}, "confidence": 0.9},
+   "expect": {"handled": true, "state": {"training": ">before", "equipment_orders": ">before", "modifiers": "==before", "officials": "==before"}},
+   "variants": ["recruit train and arm 5 levies", "Recruit, train and arm five levies"]},
+
+  {"id": "home.train_recruits", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "note": "Those waiting begin their drill.",
+   "say": "Train the recruits",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"training": ">before", "recruits": "<before", "modifiers": "==before"}},
+   "variants": ["drill the new levies"]},
+
+  {"id": "home.stand_down", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "user",
+   "note": "The user's words: five go home; nobody in the hall loses office (the court once stripped the war leader for it).",
+   "say": "Please dismiss 5 of our soldiers and return them to the workforce",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 5}, "confidence": 0.9},
+   "expect": {"handled": true, "state": {"recruits": "<before", "officials": "==before", "modifiers": "==before"}},
+   "variants": ["send 5 of the soldiers home", "stand down five warriors"]},
 
   {"id": "home.give_food", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "Give Kavu twenty food",
