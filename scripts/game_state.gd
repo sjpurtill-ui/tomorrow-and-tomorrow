@@ -408,6 +408,9 @@ var vital_statistics_tracking_start_day := -1
 ## health discovery that occurred in the interval or an explicit conditions
 ## marker, so the chart never implies that every change came from research.
 var health_history: Array[Dictionary] = []
+## Monthly record of the twelve capacities and why each moved
+## (scripts/capacity_history.gd). Older saves start empty.
+var capacity_history:Dictionary={}
 var death_progress := 0.0
 var consecutive_food_shortage_days := 0.0
 var consecutive_water_shortage_days := 0.0
@@ -603,6 +606,7 @@ func reset_for_new_world(new_seed:int)->void:
 	vital_statistics_history=[]
 	vital_statistics_tracking_start_day=-1
 	health_history=[]
+	capacity_history={}
 	lifetime_departures=0
 	death_progress=0.0
 	consecutive_food_shortage_days=0.0

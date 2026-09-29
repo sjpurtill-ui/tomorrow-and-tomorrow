@@ -142,9 +142,29 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 
 static func _render_line_chart(parent:VBoxContainer,block:Dictionary)->void:
 	var chart:=HealthHistoryChart.new()
+	# Optional shape of the line; without them the chart is the Health dock's.
+	if block.has("value_key"): chart.value_key=String(block.value_key)
+	if block.has("min_span"): chart.min_span=float(block.min_span)
+	if block.has("floor"): chart.floor_value=float(block.floor)
+	if block.has("ceiling"): chart.ceiling_value=float(block.ceiling)
+	if block.get("describe") is Callable: chart.describe=block.describe
 	chart.set_points(block.get("items",[]) as Array)
 	chart.tooltip_text=String(block.get("tip","Hover the line to inspect a recorded month."))
 	parent.add_child(chart)
+	if block.get("legend") is Array:
+		# The marks this chart uses, each drawn as the chart draws it.
+		var keyed:=HFlowContainer.new()
+		keyed.add_theme_constant_override("h_separation",14)
+		keyed.add_theme_constant_override("v_separation",2)
+		parent.add_child(keyed)
+		for entry_variant in (block.legend as Array):
+			var entry:Dictionary=entry_variant
+			var pair:=HBoxContainer.new()
+			pair.add_theme_constant_override("separation",5)
+			pair.add_child(HealthHistoryChart.Glyph.new(String(entry.get("kind","")),float(entry.get("delta",0.0))))
+			pair.add_child(Tokens.make_label(String(entry.get("text","")),12,Tokens.MUTED))
+			keyed.add_child(pair)
+		return
 	var legend:=HBoxContainer.new()
 	legend.add_theme_constant_override("separation",14)
 	parent.add_child(legend)
@@ -399,12 +419,16 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 
 static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:
 	var grid:=GridContainer.new()
-	grid.columns=2
+	grid.columns=clampi(int(block.get("columns",2)),1,2)
 	grid.add_theme_constant_override("h_separation",14)
 	grid.add_theme_constant_override("v_separation",4)
 	parent.add_child(grid)
 	for item_variant in (block.get("items",[]) as Array):
 		var item:Dictionary=item_variant
+		# A row that carries its history, or opens it, is drawn as a history row.
+		if item.has("history") or item.get("on_press") is Callable:
+			grid.add_child(_capacity_row(item))
+			continue
 		var pct:=clampf(float(item.get("pct",0.0)),0.0,100.0)
 		var color:=Tokens.capacity_color(pct)
 		var cell:=VBoxContainer.new()
@@ -438,6 +462,78 @@ static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:
 		fill.anchor_bottom=1.0
 		fill.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		track.add_child(fill)
+
+
+## One capacity with its recent years: its name, a small line of the last
+## years, the change since last year, its level and bar. The whole row opens
+## its history ("on_press").
+static func _capacity_row(item:Dictionary)->Control:
+	var pct:=clampf(float(item.get("pct",0.0)),0.0,100.0)
+	var color:=Tokens.capacity_color(pct)
+	var row:=PanelContainer.new()
+	row.name="CapacityRow_"+String(item.get("id",item.get("name","")))
+	row.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var rest:=Tokens.flat(Color(0,0,0,0),Color(0,0,0,0),0,Tokens.RADIUS_CONTROL)
+	rest.content_margin_left=6;rest.content_margin_right=6;rest.content_margin_top=3;rest.content_margin_bottom=4
+	var hover:=rest.duplicate() as StyleBoxFlat
+	hover.bg_color=Tokens.HOVER_BG
+	row.add_theme_stylebox_override("panel",rest)
+	row.tooltip_text=String(item.get("tip",""))
+	var column:=VBoxContainer.new()
+	column.add_theme_constant_override("separation",2)
+	row.add_child(column)
+	var top:=HBoxContainer.new()
+	top.add_theme_constant_override("separation",8)
+	column.add_child(top)
+	var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
+	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	top.add_child(name_label)
+	var history:Array=Array(item.get("history",[]))
+	if history.size()>=2:
+		var line=preload("res://scripts/hud/hover_card.gd").Spark.new()
+		line.name="Sparkline"
+		line.values=history
+		line.color=color
+		line.custom_minimum_size=Vector2(96,18)
+		line.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		top.add_child(line)
+	if item.has("change_text"):
+		var change_label:=Tokens.make_label(String(item.change_text),12,item.get("change_color",Tokens.MUTED))
+		change_label.name="Change"
+		change_label.custom_minimum_size=Vector2(52,0)
+		change_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		top.add_child(change_label)
+	var pct_label:=Tokens.make_label("%d%%" % roundi(pct),13,Tokens.text_for(color))
+	pct_label.custom_minimum_size=Vector2(38,0)
+	pct_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	top.add_child(pct_label)
+	var track:=ColorRect.new()
+	track.color=Tokens.TRACK
+	track.custom_minimum_size=Vector2(0,5)
+	column.add_child(track)
+	var fill:=ColorRect.new()
+	fill.color=color
+	fill.anchor_right=pct/100.0
+	fill.anchor_bottom=1.0
+	fill.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	track.add_child(fill)
+	var action:Variant=item.get("on_press")
+	if action is Callable:
+		# The whole row is one hit target, lit under the pointer.
+		for child:Node in row.find_children("*","Control",true,false):
+			(child as Control).mouse_filter=Control.MOUSE_FILTER_IGNORE
+		row.mouse_filter=Control.MOUSE_FILTER_STOP
+		row.focus_mode=Control.FOCUS_ALL
+		row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+		row.mouse_entered.connect(func()->void:row.add_theme_stylebox_override("panel",hover))
+		row.mouse_exited.connect(func()->void:row.add_theme_stylebox_override("panel",rest))
+		row.gui_input.connect(func(event:InputEvent)->void:
+			var mouse:=event as InputEventMouseButton
+			if mouse and mouse.pressed and mouse.button_index==MOUSE_BUTTON_LEFT:
+				row.accept_event();(action as Callable).call()
+			elif event.is_action_pressed("ui_accept"):
+				row.accept_event();(action as Callable).call())
+	return row
 
 
 static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:

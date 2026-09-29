@@ -12,6 +12,8 @@ const ValuesModel:=preload("res://scripts/societal_values_model.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const CourtDirector:=preload("res://scripts/audience_director.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const CapacityHistory:=preload("res://scripts/capacity_history.gd")
+const CapacityWords:=preload("res://scripts/hud/capacity_words.gd")
 
 func meta()->Dictionary:
 	return {
@@ -28,14 +30,33 @@ func _society_blocks(capacities:Dictionary)->Array:
 	var items:Array=[]
 	for domain in DYNAMIC_ORDER:
 		var value:=clampf(float(capacities.get(domain,0.0)),0.0,1.0)*100.0
-		items.append({"name":String(domain).capitalize(),"pct":value,"trend":"—","tip":String(terrain._dynamic_definition(domain))})
+		# Each row carries its last years and the change since last year, and
+		# opens its history: how it moved and why (capacity_history.gd).
+		var change:=CapacityHistory.change_over(domain,365)
+		var points:=float(change.points)
+		var since:=("since last winter" if EraWords.hearth() else "since last year") if bool(change.full) else "since %s" % EraWords.when(int(change.since))
+		var steady:=absf(points)<0.05
+		var definition:=String(terrain._dynamic_definition(domain)) if is_instance_valid(terrain) and terrain.has_method("_dynamic_definition") else ""
+		var moved:=("Steady %s." % since) if steady else ("%s %s %s %s." % ["Up" if points>0.0 else "Down",CapacityWords.amount(points),"point" if CapacityWords.amount(points)=="1" else "points",since])
+		items.append({"id":domain,"name":String(domain).capitalize(),"pct":value,"trend":"—",
+			"history":CapacityHistory.sparkline(domain,120),
+			"change_text":"steady" if steady else CapacityWords.points(points),
+			"change_color":Tokens.MUTED if steady else (Tokens.GREEN_TEXT if points>0.0 else Tokens.RED_TEXT),
+			"tip":"%s\n\n%s Click to see how it changed and why." % [definition,moved] if definition!="" else "%s Click to see how it changed and why." % moved,
+			"on_press":_open_capacity.bind(domain)})
 	items.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.pct)<float(b.pct))
 	var identity:Dictionary=ValuesModel.identity_snapshot(GameState.societal_values)
 	var identity_text:="%s · %s." % [String(identity.get("name","Forming order")).capitalize(),String(identity.get("summary","still forming")).to_lower()]
 	return [
-		{"type":"caps","heading":"TWELVE CAPACITIES","note":"weakest first","items":items},
+		{"type":"caps","heading":"TWELVE CAPACITIES","note":"weakest first · click one to see why","columns":1,"items":items},
 		{"type":"text","heading":"VALUES & IDENTITY","text":identity_text+" Values shift slowly with lived conditions, not by decree."},
 	]
+
+## Opens one capacity's history: its line over the years, why it grew or fell,
+## and what it is made of now.
+func _open_capacity(domain:String)->void:
+	if hud==null or not hud.has_method("open_detail"): return
+	hud.open_detail(preload("res://scripts/hud/content/dock_detail_capacity.gd").new(terrain,hud,domain))
 
 func _council_all_blocks()->Array:
 	var blocks:Array=[]
