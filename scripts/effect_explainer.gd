@@ -275,9 +275,10 @@ const KEYS:={
 		"what":"Digging and sorting clay. Worked clay pits give more each day.",
 		"feeds":[
 			{"to":"daily yield of worked clay","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
-	"fiber_yield":{"label":"Fibre yield","good":1,"inert":true,
-		"what":"Meant to raise the fibre gathered from fibre plants. The engine looks a yield bonus up by the resource's own name, and the resource is called Fiber Plants, so this one is never read.",
-		"feeds":[]},
+	"fiber_yield":{"label":"Fibre yield","good":1,
+		"what":"Gathering and retting skill. Worked fibre plants give more each day.",
+		"feeds":[
+			{"to":"daily yield of worked fibre plants","per":1.0,"unit":"pct","src":"resource_system.gd:653","guards":[["resource_system.gd",'if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")']]}]},
 	"fuel_efficiency":{"label":"Fuel economy","good":1,"inert":true,
 		"what":"Meant to make fires, kilns and furnaces burn less fuel. Nothing in the simulation reads it yet.",
 		"feeds":[]},
@@ -307,9 +308,9 @@ const KEYS:={
 			{"capacity":"infrastructure"},
 			{"steer":["infrastructure","Construction"],"per":0.30,"src":"society_model.gd:725","guards":[["society_model.gd",'effect("construction_rate")*0.30']]}]},
 	"housing_output":{"label":"Room in shelters","good":1,
-		"what":"Better ways of pitching and roofing shelters. It only sets how many people the Lean-to Shelters hold, and only at the moment they are finished; later homes are not affected.",
+		"what":"Better ways of pitching, roofing and dividing shelters. It sets how many people the Lean-to Shelters hold when they are finished, and every later batch of new homes holds as much more.",
 		"feeds":[
-			{"chain":"lean_to","src":"settlement_construction.gd:137","guards":[["settlement_construction.gd",'roundi(LEAN_TO_PLACES*(1+WorldSimulation.discovery.effect("housing_output")']]}]},
+			{"chain":"lean_to","src":"settlement_construction.gd","guards":[["settlement_construction.gd",'return maxf(0.0,WorldSimulation.discovery.effect("housing_output")+WorldSimulation.progression.effect("housing_output"))'],["settlement_construction.gd",'return roundi(LEAN_TO_PLACES*(1.0+housing_output()))'],["settlement_construction.gd",'return roundi(maxi(24,roundi(WorldSimulation.state.population_total*.12))*(1.0+housing_output()))']]}]},
 	"disaster_resilience":{"label":"Resilience to disaster","good":1,
 		"what":"Building and stores made to ride out floods, fires and storms. Today it only raises the Infrastructure capacity; no flood, fire or storm reads it directly.",
 		"feeds":[
@@ -833,7 +834,10 @@ static func _chain_line(key:String,feed:Dictionary,now:float)->String:
 		"lean_to":
 			var places:float=_once("lean_to",func()->float: return float(load("res://scripts/settlement_construction.gd").LEAN_TO_PLACES))
 			var built:bool="Lean-to Shelters" in state.settlement_completed
-			return quantity("Places in the Lean-to Shelters when they are finished",now*places,"places","%s places before this; %s" % [str(roundi(places)),"they already stand, so this changes nothing now" if built else "counted once, when they are finished"])
+			# Every later batch of homes holds as much more (settlement_construction.gd housing_batch_places).
+			var batch:=float(maxi(24,roundi(float(state.population_total)*0.12)))
+			if built: return quantity("Places in each new batch of homes",now*batch,"places","%s places a batch before this; the Lean-to Shelters already stand" % str(roundi(batch)))
+			return quantity("Places in the Lean-to Shelters and each later batch of homes",now*places,"places","%s places in the Lean-tos before this, counted when they are finished; each later batch of %s homes holds as much more" % [str(roundi(places)),str(roundi(batch))])
 	return ""
 
 ## Today's mining and quarrying against the people's size, 0..2 (ConsequenceEngine).

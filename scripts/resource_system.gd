@@ -649,6 +649,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var profile:=_material_profile(String(deposit.resource))
 		var knowledge_multiplier:=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
 		if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
+		# Research names the fibre bonus "fiber_yield"; the resource is "Fiber Plants".
+		if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
 		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
 		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)*span) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield)*span)

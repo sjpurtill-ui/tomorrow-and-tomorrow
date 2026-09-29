@@ -143,7 +143,7 @@ func test_inert_list_matches_the_code()->void:
 	var read:=_read_keys()
 	for key:String in Explainer.keys():
 		assert_bool(Explainer.is_inert(key)).override_failure_message("%s: inert=%s but read=%s" % [key,Explainer.is_inert(key),String(read.get(key,"nowhere"))]).is_equal(not read.has(key))
-	assert_array(Explainer.inert_keys()).contains_exactly_in_any_order(["water_access","fiber_yield","fuel_efficiency","repair_capacity","chemical_control","mining_output","logistics_endurance","naval_capacity","fuel_demand"])
+	assert_array(Explainer.inert_keys()).contains_exactly_in_any_order(["water_access","fuel_efficiency","repair_capacity","chemical_control","mining_output","logistics_endurance","naval_capacity","fuel_demand"])
 	# Fiber Plants is extracted, but its yield is looked up under its own name.
 	assert_bool(read.has("fiber_plants_yield")).is_true()
 	# Demand for timber guides research only: the capacities never read it.
