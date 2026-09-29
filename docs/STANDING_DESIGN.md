@@ -166,3 +166,21 @@ site goes all in on food and holds 25-60 people; research-heavy grows to about
 3. Consequences: war and raid decisions, migration, tribute, leagues, pride.
 4. Headman and rival allocation, then the sim calibration across postures.
 5. Era scaling of reach and memory to year 3500.
+
+## 9. Every people on the same rules
+
+The player, 2026-09-29: "Make sure all players (computer and player) are
+perfectly balanced and that all automated leaders are equally balanced though
+with varying tendencies." Every people runs the same simulation in its own
+WorldSimulation scope; what differs must be tendency, not rules.
+
+- Food and the Headman: one planner for every people (section 7).
+- Crises: the god's people meet them at court (crisis_system.gd); every other
+  people meets the same ones in its own scope (crisis_unattended.gd): the same
+  hazards read from its own state, the same death draws and floors, and the
+  court official's own answers when the god is silent, paid from its own
+  stores, roofs and labour.
+- Research: capacity from the people at research, emphasis only directs it,
+  one budget rule for every ruler (codex/research-parity).
+- Leaders: one rule for great works and expansion for computer rulers and the
+  delegated player; every personality a trade-off (codex/leader-balance).

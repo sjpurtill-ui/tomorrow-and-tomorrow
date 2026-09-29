@@ -139,13 +139,16 @@ const NUMBER_WORDS:=["no one","one","two","three","four","five","six","seven","e
 # --------------------------------------------------------------------------
 
 static func state()->Dictionary:
-	# The court block is replaced when a new world begins: read it fresh.
-	ForeignDiplomacy.ensure()
-	var raw:Variant=ForeignDiplomacy.audiences.get(KEY,{})
+	# The court block is replaced when a new world begins: read it fresh. Every
+	# people keeps its own (crisis_unattended.gd runs the others'), so this
+	# reads whichever people is being simulated.
+	var diplomacy=WorldSimulation.diplomacy
+	diplomacy.ensure()
+	var raw:Variant=diplomacy.audiences.get(KEY,{})
 	var s:Dictionary=raw if raw is Dictionary else {}
-	if not s.is_empty() and (int(s.get("world_seed",GameState.world_seed))!=int(GameState.world_seed) or float(s.get("last_day",0))>GameState.elapsed_days+1.0): s.clear()
+	if not s.is_empty() and (int(s.get("world_seed",WorldSimulation.state.world_seed))!=int(WorldSimulation.state.world_seed) or float(s.get("last_day",0))>WorldSimulation.state.elapsed_days+1.0): s.clear()
 	if int(s.get("version",0))!=VERSION: _seed(s)
-	ForeignDiplomacy.audiences[KEY]=s
+	diplomacy.audiences[KEY]=s
 	return s
 
 static func _seed(s:Dictionary)->void:
@@ -155,7 +158,7 @@ static func _seed(s:Dictionary)->void:
 		if not s.get(key) is Array: s[key]=[]
 	for key in ["serial","last_day","last_onset","immunity","pool"]:
 		if not _num(s.get(key)): s[key]=0 if key!="last_onset" else -99999
-	s["world_seed"]=int(GameState.world_seed)
+	s["world_seed"]=int(WorldSimulation.state.world_seed)
 	s["version"]=VERSION
 
 static func valid_state(data:Variant)->bool:
@@ -178,16 +181,16 @@ static func _num(value:Variant)->bool:
 	return (value is int or value is float) and is_finite(float(value))
 
 static func _day()->int:
-	return int(GameState.elapsed_days)
+	return int(WorldSimulation.state.elapsed_days)
 
 static func _rng(key:String)->RandomNumberGenerator:
 	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:crisis:%s" % [int(GameState.world_seed),key])
+	rng.seed=hash("%d:crisis:%s" % [int(WorldSimulation.state.world_seed),key])
 	return rng
 
 static func _pick(list:Array,key:String)->String:
 	if list.is_empty(): return ""
-	return String(list[posmod(hash("%d|%s" % [int(GameState.world_seed),key]),list.size())])
+	return String(list[posmod(hash("%d|%s" % [int(WorldSimulation.state.world_seed),key]),list.size())])
 
 static func _log(kind:String,text:String,extra:Dictionary={})->void:
 	## A bounded record (tests and the playtest harness read it).
@@ -405,18 +408,27 @@ static func _ramp(points:Array,x:float)->float:
 
 static func hist_year()->float:
 	## The era clock: game year -> historical year (TechnologyEras.CURVE).
-	return _ramp(ERAS.CURVE,GameState.elapsed_days/365.0)
+	return _ramp(ERAS.CURVE,WorldSimulation.state.elapsed_days/365.0)
 
 static func _effect(id:String)->float:
-	return float(DiscoverySystem.effect(id)) if is_instance_valid(DiscoverySystem) and DiscoverySystem.has_method("effect") else 0.0
+	var discovery=WorldSimulation.discovery
+	return float(discovery.effect(id)) if discovery!=null and is_instance_valid(discovery) and discovery.has_method("effect") else 0.0
 
 static func _knows(ids:Array)->bool:
 	for id in ids:
-		if String(id) in GameState.known_discoveries: return true
+		if String(id) in WorldSimulation.state.known_discoveries: return true
 	return false
 
+## The season's weather at this people's own ground (its FoodSystem's).
 static func _weather(day:int)->float:
-	return float(Lives._weather(day))
+	var food=WorldSimulation.food
+	if food==null or not is_instance_valid(food) or not food.has_method("_weather_yield_factor") or not food.has_method("_environment_mix"): return 1.0
+	return float(food.call("_weather_yield_factor",food.call("_environment_mix"),float(day)))
+
+static func _season_wave(day:int)->float:
+	var food=WorldSimulation.food
+	if food==null or not is_instance_valid(food) or not food.has_method("_environment_mix") or not is_instance_valid(PlanetEnvironment): return 0.0
+	return float(PlanetEnvironment.season_wave(food.call("_environment_mix"),float(day)))
 
 static func _weather_mean(from_day:int,to_day:int)->float:
 	var total:=0.0; var n:=0
@@ -428,7 +440,7 @@ static func _weather_mean(from_day:int,to_day:int)->float:
 
 static func _contacts()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
-	for civ in CivilizationSystem.civilizations:
+	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary: continue
 		var rel:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
 		if int(rel.get("contact_level",0))>0: out.append(civ)
@@ -443,32 +455,32 @@ static func _trade_level()->float:
 
 static func inputs(day:int)->Dictionary:
 	## Everything the hazards read, from the live simulation.
-	var m:Dictionary=GameState.simulation_metrics
-	var pop:=float(maxi(1,GameState.population_total))
-	var cap:=float(maxi(1,GameState.housing_capacity))
+	var m:Dictionary=WorldSimulation.state.simulation_metrics
+	var pop:=float(maxi(1,WorldSimulation.state.population_total))
+	var cap:=float(maxi(1,WorldSimulation.state.housing_capacity))
 	var hp:=_effect("health_protection"); var san:=_effect("sanitation"); var ws:=_effect("water_safety"); var de:=_effect("disease_exposure")
 	var hk:=clampf(0.05+(hp+san+ws)/3.0-0.5*de,0.0,1.0)
 	var H:=hist_year()
 	var water:=clampf(float(m.get("water_intake_ratio",1.0)),0.0,1.0)
 	var forecast:Dictionary=m.get("food_forecast_90",{}) if m.get("food_forecast_90") is Dictionary else {}
-	var water_origin:=String(GameState.water_metrics.get("source_origin",""))
-	var water_kind:=String(GameState.water_metrics.get("source_kind",""))
-	var water_km:=float(GameState.water_metrics.get("source_distance_km",-1.0))
-	var carrying:=maxf(1.0,float(EARLY_CARE.carrying_capacity(GameState,DiscoverySystem)))
+	var water_origin:=String(WorldSimulation.state.water_metrics.get("source_origin",""))
+	var water_kind:=String(WorldSimulation.state.water_metrics.get("source_kind",""))
+	var water_km:=float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0))
+	var carrying:=maxf(1.0,float(EARLY_CARE.carrying_capacity(WorldSimulation.state,WorldSimulation.discovery)))
 	return {
 		"pop":pop,"crowd":pop/cap,"dens":clampf(pop/5000.0,0.02,1.0),
-		"health":float(GameState.population_health),"food_days":float(m.get("food_days",30.0)),
+		"health":float(WorldSimulation.state.population_health),"food_days":float(m.get("food_days",30.0)),
 		"intake":float(m.get("food_intake_ratio",1.0)),"shortage_days":float(m.get("food_shortage_days",0.0)),
 		"first_shortage":int(forecast.get("first_shortage_day",-1)),
 		"water":water,"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,1.2),
 		"hk":hk,"H":H,"med":hk*_ramp(MEDICINE_CEILING,H),
-		"inst":float(GameState.society_capacities.get("institutions",0.25)),
-		"divers":clampf(float(EARLY_CARE.diet_window(GameState)),0.0,1.0),
+		"inst":float(WorldSimulation.state.society_capacities.get("institutions",0.25)),
+		"divers":clampf(float(EARLY_CARE.diet_window(WorldSimulation.state)),0.0,1.0),
 		"trade":_trade_level(),"ecology":float(m.get("ecology",0.88)),
 		"cohesion":float(m.get("cohesion",0.58)),
 		"pressure":maxf(0.0,pop/carrying-0.85),
 		"weather":_weather(day),"weather_season":_weather_mean(day-24,day+36),
-		"season":float(Lives._season(day)),
+		"season":_season_wave(day),
 		"river":(water_origin=="mapped_hydrology" or water_kind.contains("river")) and water_km>=0.0 and water_km<=2.0,
 	}
 
@@ -477,20 +489,25 @@ static func inputs(day:int)->Dictionary:
 # --------------------------------------------------------------------------
 
 static func _active_of(type:String)->Dictionary:
-	for c in active():
-		if String(c.get("type",""))==type: return c
+	return _active_in(state(),type)
+
+static func _active_in(s:Dictionary,type:String)->Dictionary:
+	for key in s.active:
+		var c:Variant=s.active[key]
+		if c is Dictionary and String((c as Dictionary).get("type",""))==type: return c
 	return {}
 
 static func _until(key:String)->int:
 	return int((state().until as Dictionary).get(key,-1))
 
-static func hazards(day:int,x:Dictionary={})->Dictionary:
-	## Annual hazard per crisis type from today's real state.
+static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
+	## Annual hazard per crisis type from today's real state, for whichever
+	## people is being simulated (`s`: its crisis state; the court's by default).
 	if x.is_empty(): x=inputs(day)
-	var s:=state()
+	if s.is_empty(): s=state()
 	var flags:Dictionary=s.flags
-	var hunger_on:=0.0 if _active_of("hunger").is_empty() else 1.0
-	var drought_on:=0.0 if _active_of("drought").is_empty() else 1.0
+	var hunger_on:=0.0 if _active_in(s,"hunger").is_empty() else 1.0
+	var drought_on:=0.0 if _active_in(s,"drought").is_empty() else 1.0
 	var out:={}
 	# Famine (catalog engine._famine), per game year.
 	var other:=maxf(0.0,1.0-float(x.weather_season))+maxf(0.0,0.97-float(x.intake))
@@ -503,9 +520,9 @@ static func hazards(day:int,x:Dictionary={})->Dictionary:
 	# Endemic sickness (catalog pestilence form, local base).
 	var season_factor:=1.0+0.35*absf(float(x.season))
 	var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)+1.5*(1.0-minf(1.0,float(x.water_q)))+1.5*(HEALTH_REF-float(x.health))+0.8*hunger_on+0.6*(float(s.pool)-POOL_REF))*(1.0-0.5*float(x.med))*season_factor
-	if day<_until("after_flood"): sick*=2.0
+	if day<int((s.until as Dictionary).get("after_flood",-1)): sick*=2.0
 	if drought_on>0.0: sick*=1.3
-	if apart_custom(): sick*=0.85
+	if bool(flags.get("apart_custom",false)) or (WorldSimulation.actor_id=="player" and unlocked("sickness:apart_plus")): sick*=0.85
 	out["sickness"]=clampf(sick,0.0,3.0)
 	# Emergence of a truly new pestilence (catalog pandemic_emerge), era-scaled.
 	out["pestilence_emerge"]=_ramp(PANDEMIC_EMERGE,float(x.H))/100.0*exp(1.6*(float(x.dens)-0.4)+1.2*(float(x.trade)-0.4)+0.8*hunger_on+0.6*(float(s.pool)-0.4))*(1.0-0.5*float(x.med))
@@ -514,7 +531,7 @@ static func hazards(day:int,x:Dictionary={})->Dictionary:
 	if _knows(["ember_tending","cookfire_smoke_venting_habit"]): fire*=0.75
 	if bool(flags.get("spaced",false)): fire*=0.6
 	if bool(flags.get("earth",false)): fire*=0.5
-	if day<_until("burn"): fire*=2.0
+	if day<int((s.until as Dictionary).get("burn",-1)): fire*=2.0
 	out["fire"]=clampf(fire,0.0,2.0)
 	# Flood: river camps, wet years.
 	var flood:=0.0
