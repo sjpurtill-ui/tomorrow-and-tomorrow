@@ -170,8 +170,22 @@ site goes all in on food and holds 25-60 people; research-heavy grows to about
    (x1.5, gifts x0.7) and shares every fresh grudge; they let go below Fear 0.3.
    Pride forgives (Standing.forgiveness); memory grows with writing and print
    (Standing.memory_span).
+   Also done: war declarations weigh the target's might (Standing.war_deterrence:
+   a stronger target deters, a weak one emboldens); trade terms read allure,
+   respect and contempt (trade_pacts._threshold); allure draws newcomers and
+   pride keeps them (Standing.attraction_shift, the same for every people);
+   pride comes from a people's own renown (Standing.renown), so it is reckoned
+   alike for computer and player peoples; a levy past a twentieth of the
+   people is resented (Standing.levy_burden); the court's keepers of ties and
+   war leader carry the whole reckoning on their fact sheets (court_facts
+   _standing) and answer "why do the X raid us?" from it; the rail's Standing
+   button counts the peoples moved against us.
 4. Headman and rival allocation, then the sim calibration across postures.
-5. Era scaling of reach and memory to year 3500.
+   Done for food (section 7) and guards: the Headman adds guards as the
+   neighbours press (GovernmentPeopleSystem.neighbour_threat); rivals share
+   the planner (section 9).
+5. Era scaling of reach and memory to year 3500. Memory done
+   (Standing.memory_span: told, written, printed); reach still to come.
 
 ## 9. Every people on the same rules
 
