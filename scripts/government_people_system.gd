@@ -1485,6 +1485,17 @@ const FOOD_FLOOR_OF_TYPICAL:=0.9
 const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1200.0,0.47],[1800.0,0.45],[2400.0,0.38],[2500.0,0.36],[2600.0,0.33],[2700.0,0.28],[2800.0,0.22],[2900.0,0.13],[3000.0,0.08]]
 
 func _apply_food_labor_floor(weights:Dictionary)->void:
+	var floor_share:=food_floor_share()
+	var other:=0.0
+	for role:String in weights:
+		if role!="Food":other+=maxf(0.0,float(weights[role]))
+	weights.Food=maxf(float(weights.get("Food",0)),other*floor_share/maxf(.01,1.0-floor_share))
+
+## The share of those who can work that this people's planners keep on food at
+## the least: the age's typical share (FOOD_LABOR_FLOOR) times
+## FOOD_FLOOR_OF_TYPICAL, less for food and labour research, more for care and
+## for orders that claim labour.
+func food_floor_share()->float:
 	var year:=float(WorldSimulation.state.elapsed_days)/365.0
 	var floor_share:=float(FOOD_LABOR_FLOOR[FOOD_LABOR_FLOOR.size()-1][1])
 	for index in range(1,FOOD_LABOR_FLOOR.size()):
@@ -1499,11 +1510,44 @@ func _apply_food_labor_floor(weights:Dictionary)->void:
 	# Care-focused societies keep more of their sick, old and young alive to feed.
 	floor_share*=1.0+0.12*float(focus.get("health",0.0))+0.08*float(focus.get("demography",0.0))
 	if WorldSimulation.consequences!=null:floor_share*=1.0+maxf(0.0,-float(WorldSimulation.consequences.policy_effect("labor_multiplier")))
-	floor_share=clampf(floor_share,0.0,0.85)
-	var other:=0.0
-	for role:String in weights:
-		if role!="Food":other+=maxf(0.0,float(weights[role]))
-	weights.Food=maxf(float(weights.get("Food",0)),other*floor_share/maxf(.01,1.0-floor_share))
+	return clampf(floor_share,0.0,0.85)
+
+## The reserve this people's planners aim for, as _apply_survival_guard reckons
+## it: {target_days, food_days, gap (0..1 short), margin (planned above need)}.
+func reserve_plan()->Dictionary:
+	var lean:=0.0
+	if WorldSimulation.direction!=null:
+		WorldSimulation.direction._ensure_cultural_memory()
+		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
+		lean=reserve_lean_of(float(bias.get("Food",0.0)))
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	var demand:=maxf(0.01,float(metrics.get("food_consumption",0)))
+	var target:=RESERVE_TARGET_DAYS*(1.0+lean)
+	if WorldSimulation.food!=null and WorldSimulation.food.has_method("_food_storage_capacity"):target=minf(target,float(WorldSimulation.food._food_storage_capacity())/demand*0.8)
+	var days:=float(metrics.get("food_days",target))
+	var gap:=clampf((target-days)/maxf(1.0,target),0.0,1.0)
+	return {"target_days":target,"food_days":days,"gap":gap,"margin":RESERVE_MARGIN*(1.0+lean)*gap}
+
+## Why this many hands are on food, in plain words with the planners' own
+## numbers (the Food page reads it).
+func food_plan_words()->String:
+	var state=WorldSimulation.state
+	var metrics:Dictionary=state.simulation_metrics
+	var able:=maxf(1.0,float(state.able_population()))
+	var on_food:=float(state.population_allocations.get("Food",0))
+	var eaten:=float(metrics.get("food_consumption",0.0))
+	if eaten<=0.0: return ""
+	var ratio:=float(metrics.get("food_production",0.0))/eaten
+	var line:="%d of the %d who can work are on food (%d%%), bringing in %s what is eaten." % [roundi(on_food),roundi(able),roundi(on_food/able*100.0),("%.2f times" % ratio) if absf(ratio-1.0)>=0.005 else "just"]
+	if WorldSimulation.direction!=null and not bool(WorldSimulation.direction.automatic_work):
+		return line+" You set the daily work, so no floor or reserve plan changes it."
+	line+=" The planners keep at least %d%% on food" % roundi(food_floor_share()*100.0)
+	var plan:=reserve_plan()
+	if float(plan.gap)>0.01:
+		line+="; while the stores hold %d of the %d days they aim for, they plan %d%% more than is eaten." % [roundi(float(plan.food_days)),roundi(float(plan.target_days)),maxi(1,roundi(float(plan.margin)*100.0))]
+	else:
+		line+="; the stores hold what they aim for, so no one works food beyond the need."
+	return line
 
 
 ## Planning weight added to guards at full threat (the base plan gives guards 4).

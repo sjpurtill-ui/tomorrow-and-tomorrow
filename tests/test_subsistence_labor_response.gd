@@ -78,3 +78,17 @@ func test_hostile_neighbours_draw_more_guards_but_food_comes_first()->void:
 func _planned_split(production:float)->Dictionary:
 	GameState.simulation_metrics={"food_consumption":120.0,"food_production":production,"food_labor_share":.5,"food_intake_ratio":1.0,"food_days":90.0,"food_projected_days":90.0}
 	return GovernmentPeopleSystem._allocations_for_focus("balanced",{},false)
+
+## The Food page says why this many hands are on food, from the planners' numbers.
+func test_the_food_plan_is_told_from_the_planners_numbers()->void:
+	GameState.initialize_population_model()
+	GameState.simulation_metrics={"food_consumption":120.0,"food_production":150.0,"food_labor_share":.55,"food_intake_ratio":1.0,"food_days":20.0,"food_projected_days":20.0}
+	GameState.founding_manifest["food_storage_rations"]=120.0*200.0
+	var said:=GovernmentPeopleSystem.food_plan_words()
+	assert_str(said).contains("1.25 times what is eaten")
+	assert_str(said).contains("at least %d%% on food" % roundi(GovernmentPeopleSystem.food_floor_share()*100.0))
+	assert_str(said).contains("they plan")
+	# The same floor the plan applies.
+	var weights:={"Food":0.0,"Knowledge":38.0}
+	GovernmentPeopleSystem._apply_food_labor_floor(weights)
+	assert_float(float(weights.Food)/(float(weights.Food)+38.0)).is_equal_approx(GovernmentPeopleSystem.food_floor_share(),0.0001)

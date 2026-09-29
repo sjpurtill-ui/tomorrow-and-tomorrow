@@ -18,6 +18,8 @@ func setup(block:Dictionary)->void:
 	var food:=Words.food(float(data.food_days),flow,data.has("food_days") and float(data.food_days)>=0.0)
 	var food_reading:=_reading(food_row,String(food.headline),String(food.trend),String(food.cause),String(food.tone));food_reading.name="FoodReading"
 	_line(self,Words.flow_sentence(flow),13,T.BODY).name="FlowSentence"
+	# Why this many hands are on food: the planners' own numbers.
+	if String(data.get("food_plan",""))!="": _line(self,String(data.food_plan),13,T.BODY).name="FoodPlan"
 	# Water, the same way.
 	var water:Dictionary=Words.water(data.water)
 	var water_row:=HBoxContainer.new();water_row.add_theme_constant_override("separation",14);add_child(water_row)
