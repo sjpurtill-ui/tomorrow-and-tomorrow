@@ -199,7 +199,7 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 					"note":"%d scholars" % keepers,"meaning":"How many of us are schooled, and who works at learning."}
 			var who:="lore keeper" if stage=="hearth" else "scholar"
 			return {"key":key,"name":"Lore" if stage=="hearth" else "Learning","value":("%s %s%s" % [EraWords.grouped(keepers),who,"" if keepers==1 else "s"]) if keepers>0 else "no one yet",
-				"number":keepers,"own":education,"capacity":true,"note":kept_words(education),
+				"number":keepers,"own":education,"capacity":true,"note":kept_words(education,stage),
 				"meaning":"Who keeps what we know, and how well it is passed on."}
 		"garrison":
 			var s:Dictionary=f.get("strength",{})
@@ -221,7 +221,9 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 				"meaning":String(s.wall_words)}
 		"damage":
 			var condition:=clampf(float(f.condition),0.0,1.0)
-			return {"key":key,"name":"Repair" if stage!="reckoned" else "Condition","value":repair_words(condition) if stage=="hearth" else "%d%%" % roundi(condition*100.0),
+			# A stranger's damage is war damage; our repair also counts wear. Their
+			# sightings are told in the tooltip, not drawn against our scale.
+			return {"key":key,"name":"Repair" if stage!="reckoned" else "Condition","value":repair_words(condition) if stage=="hearth" else "%d%%" % roundi(condition*100.0),"bands":false,
 				"number":roundi(condition*100.0),"own":condition,"capacity":true,"meaning":"How well our buildings are kept up. Builders mend them; war, fire and neglect wear them."}
 		"supply":
 			var days:=float(f.food_days)
@@ -275,13 +277,20 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 				"state":String(project.get("state","")),"meaning":"It "+String(project.get("effect","serves the town"))+"."}
 	return {}
 
-## How well what is known is kept and passed on (the education index), in words.
-static func kept_words(education:float)->String:
-	if education>=0.8:return "well kept"
-	if education>=0.6:return "kept steadily"
-	if education>=0.4:return "kept patchily"
-	if education>=0.2:return "poorly kept"
-	return "barely kept"
+## How well what is known is kept and passed on (the education index), said
+## of the thing that keeps it: the lore told at the fire, then the records.
+static func kept_words(education:float,stage:String="hearth")->String:
+	if stage=="hearth":
+		if education>=0.8:return "lore well passed on"
+		if education>=0.6:return "lore passed on steadily"
+		if education>=0.4:return "lore passed on in part"
+		if education>=0.2:return "lore thinly passed on"
+		return "lore barely passed on"
+	if education>=0.8:return "records well kept"
+	if education>=0.6:return "records kept"
+	if education>=0.4:return "records patchy"
+	if education>=0.2:return "records thin"
+	return "records scarce"
 
 static func _exact(value:float)->Dictionary:
 	return {"low":value,"high":value,"observed_low":value,"observed_high":value}
@@ -309,6 +318,7 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			if not s.is_empty() and int(s.wall_stage)>0:lines.append("They stand %s whole." % ("mostly" if float(s.wall_integrity)>=0.7 else "only partly") if EraWords.hearth() else "They stand %d%% whole." % roundi(float(s.wall_integrity)*100.0))
 		"damage":
 			if not EraWords.hearth():lines.append("Condition %d%%, as the Buildings page shows." % int(row.number))
+			if not (row.get("marks",[]) as Array).is_empty():lines.append("What our scouts saw of theirs:")
 		"supply":
 			var reading:Dictionary=row.get("reading",{})
 			if bool(f.food_reported):lines.append(String(reading.get("sentence","")));lines.append(Words.flow_sentence(f.flow))
@@ -327,6 +337,7 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			if String(row.get("state",""))!="" and String(row.value)!="nothing":lines.append("Now: %s." % String(row.state))
 		"learning":
 			lines.append(("We know %s ways of doing things." if EraWords.hearth() else "We have learned %s things.") % EraWords.grouped(int(f.known)))
+			lines.append("The bar shows how well what we know is kept and passed on.")
 	for mark:Dictionary in row.get("marks",[]):
 		lines.append("%s: %s, seen %s." % [String(mark.name),String(mark.words),String(mark.seen)])
 	lines.append("Opens %s." % ("this town's ages and families" if key=="population" else "the %s page" % String(row.get("owner",""))))

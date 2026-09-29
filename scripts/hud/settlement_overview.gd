@@ -154,7 +154,7 @@ func _row(row:Dictionary)->Control:
 	var label:=T.text(Label.new(),"body",T.INK) as Label;label.name="Name";label.text=String(row.name);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(label)
 	var value:=T.text(Label.new(),"body",T.INK) as Label;value.name="Value";value.text=String(row.value);value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(value)
 	if bool(row.get("bar",true)):
-		var bar:=OwnScale.new();bar.name="Scale";bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=row.get("marks",[]);body.add_child(bar)
+		var bar:=OwnScale.new();bar.name="Scale";bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=row.get("marks",[]) if bool(row.get("bands",true)) else [];body.add_child(bar)
 	if String(row.get("note",""))!="":
 		var note:=T.text(Label.new(),"small",tone_color(String(row.get("note_tone","muted")))) as Label;note.name="Note";note.text=String(row.note);note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note)
 	return panel
@@ -217,17 +217,23 @@ class OwnScale extends Control:
 		set(value):marks=value;custom_minimum_size.y=10.0+5.0*marks.size();queue_redraw()
 	func _init()->void:
 		custom_minimum_size.y=10;mouse_filter=MOUSE_FILTER_IGNORE
+	## Inset so the ends of a full or empty bar are never cut by the edge.
+	const PAD:=3.0
+	func _at(value:float)->float:
+		return PAD+clampf(value/top,0.0,1.0)*maxf(1.0,size.x-PAD*2.0)
 	func _draw()->void:
 		var mid:=4.0
-		draw_line(Vector2(0,mid),Vector2(size.x,mid),T.RULE,1.0)
-		for tick in 5:draw_line(Vector2(size.x*tick/4.0,mid-2),Vector2(size.x*tick/4.0,mid+2),T.RULE,1.0)
-		var x:=clampf(own/top,0.0,1.0)*size.x
-		if x>0.5:draw_rect(Rect2(0,mid-2,x,4),Color(T.GOLD,.82))
+		draw_line(Vector2(PAD,mid),Vector2(size.x-PAD,mid),T.RULE,1.0)
+		for tick in 5:
+			var tx:=_at(top*tick/4.0)
+			draw_line(Vector2(tx,mid-2),Vector2(tx,mid+2),T.RULE,1.0)
+		var x:=_at(own)
+		if x>PAD+0.5:draw_rect(Rect2(PAD,mid-2,x-PAD,4),Color(T.GOLD,.82))
 		draw_line(Vector2(x,mid-4),Vector2(x,mid+4),T.GOLD,2.0)
 		for index in marks.size():
 			var mark:Dictionary=marks[index]
 			var y:=mid+7.0+index*5.0
-			var a:=clampf(float(mark.low)/top,0.0,1.0)*size.x;var b:=clampf(float(mark.high)/top,0.0,1.0)*size.x
+			var a:=_at(float(mark.low));var b:=_at(float(mark.high))
 			var ink:=Color(Color(mark.color),.85)
 			if b-a<3.0:draw_circle(Vector2((a+b)*.5,y),2.2,ink)
 			else:
