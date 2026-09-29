@@ -834,6 +834,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var annual_birth_rate:=float(reproduction.get("projected_birth_rate",0.0))
 
 	var settlement_score := clampf(float(WorldSimulation.state.settlement_completed.size())/8.0,0.0,1.0)
+	# The month's standing reading (standing.gd record_monthly) outlives the
+	# day's rebuild of the metrics: it is read monthly and charted.
+	var standing_reading:={}
+	for key in WorldSimulation.state.simulation_metrics:
+		if String(key).begins_with("standing_"): standing_reading[key]=WorldSimulation.state.simulation_metrics[key]
 	WorldSimulation.state.simulation_metrics = {
 		"clothing_coverage":clothing.duplicate(),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
@@ -852,6 +857,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"survey_capacity":surveyors*labor_efficiency*(1.0+WorldSimulation.state.founding_effect("survey_output")+WorldSimulation.progression.effect("knowledge_rate")*0.35),"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+WorldSimulation.state.founding_effect("construction_output")+WorldSimulation.progression.effect("construction_rate")),"combined_intelligence":WorldSimulation.state.combined_intelligence,
 		"workshop_function":workshop_function,"storage_function":storage_function
 	}
+	WorldSimulation.state.simulation_metrics.merge(standing_reading)
 	for dynamic_name in WorldSimulation.state.society_capacities:
 		WorldSimulation.state.simulation_metrics["society_"+String(dynamic_name)]=WorldSimulation.state.society_capacities[dynamic_name]
 	for food_metric in food_result:

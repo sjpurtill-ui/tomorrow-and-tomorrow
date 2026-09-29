@@ -185,6 +185,7 @@ var rose:Rose
 var seal:TextureRect
 var name_label:Label
 var posture_label:Label
+var renown_label:Label
 var hero_body:GridContainer
 var strength_list:VBoxContainer
 var strength_rows:Array[Control]=[]
@@ -218,6 +219,8 @@ func apply(block:Dictionary)->void:
 	data=block
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
+	var renown:Dictionary=block.get("renown",{})
+	renown_label.text="Our name commands awe %d%% and allure %d%%." % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
@@ -295,6 +298,9 @@ func _build_hero()->void:
 	words.add_child(name_label)
 	posture_label=_voice(words,"",21)
 	posture_label.name="Posture"
+	renown_label=Kit.label(words,"","note")
+	renown_label.name="Renown"
+	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; allure from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	hero_body=GridContainer.new();hero_body.name="Strengths";hero_body.columns=2
 	hero_body.add_theme_constant_override("h_separation",18);hero_body.add_theme_constant_override("v_separation",12)
 	column.add_child(hero_body)

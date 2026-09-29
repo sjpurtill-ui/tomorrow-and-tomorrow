@@ -284,3 +284,15 @@ func test_pride_is_reckoned_the_same_for_every_people()->void:
 	our.splendor={"value":0.8,"why":""}
 	our.might={"value":0.7,"why":""}
 	assert_float(float(Standing.pride(our).value)).is_greater(alone)
+
+func test_the_months_reading_survives_the_days_and_is_charted()->void:
+	# ConsequenceEngine rebuilds the day's metrics; the month's standing
+	# reading must outlive it, or nothing is ever charted.
+	Standing.record_monthly()
+	var before:=float(GameState.simulation_metrics.get("standing_pride",-1.0))
+	assert_float(before).is_greater(0.0)
+	GameState.elapsed_days=401.0
+	ConsequenceEngine.process_day({})
+	assert_float(float(GameState.simulation_metrics.get("standing_pride",-1.0))).is_equal(before)
+	var scopes:=preload("res://scripts/strategic_history.gd").capture_scopes()
+	assert_bool((scopes.civilization as Dictionary).has("standing_pride")).is_true()
