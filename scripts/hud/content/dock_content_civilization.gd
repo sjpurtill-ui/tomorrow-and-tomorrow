@@ -19,12 +19,55 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"What our people value",
 		"title":"Culture",
-		"subtabs":["Culture","Council"],
+		"subtabs":["Culture","Council","Standing"],
 	}
 
 func tab(sub:int)->Dictionary:
 	if sub==1:return {"blocks":_council_blocks()}
+	if sub==2:return {"blocks":_standing_blocks()}
 	return {"blocks":_society_overview()}
+
+## What we are, how each people we have met sees us, and our own pride
+## (standing.gd, docs/STANDING_DESIGN.md): every number with its reasons.
+const STRENGTH_ORDER:=[["might","Might"],["genius","Genius"],["persuasion","Persuasion"],["cunning","Cunning"],["wealth","Wealth"],["splendor","Splendor"],["order","Order"],["endurance","Endurance"],["reach","Reach"]]
+const STRENGTH_MEANS:={"might":"warriors ready to fight","genius":"what we know and learn","persuasion":"how well we win others over","cunning":"what our watchers find and keep hidden","wealth":"food and goods put by","splendor":"works and treasures that impress","order":"fair and steady rule","endurance":"how long we can hold out","reach":"how far our word and roads go"}
+const VIEW_ORDER:=[["allure","Allure","they want to come to us, trade and learn"],["awe","Awe","they hold back and defer"],["fear","Fear","they give way now, but band together and flee from us"],["respect","Respect","they treat us as equals"],["trust","Trust","they believe our word: treaties, loans, marriages"],["resentment","Resentment","they seek redress and vengeance"]]
+
+static func standing_words(value:float)->String:
+	if value<0.1:return "none"
+	if value<0.3:return "a little"
+	if value<0.5:return "some"
+	if value<0.7:return "much"
+	return "great"
+
+func _standing_blocks()->Array:
+	var Standing:=preload("res://scripts/standing.gd")
+	var our:=Standing.strengths()
+	var strengths:Array=[]
+	for pair:Array in STRENGTH_ORDER:
+		var id:=String(pair[0])
+		var value:=float((our[id] as Dictionary).value)
+		strengths.append({"name":String(pair[1]),"sub":String(STRENGTH_MEANS[id]),"detail":String((our[id] as Dictionary).why),"value":"%d%%" % roundi(value*100.0),
+			"accent":Tokens.GREEN if value>=0.6 else (Tokens.AMBER if value<0.3 else Tokens.MUTED)})
+	var blocks:Array=[{"type":"rows","heading":"What we are","note":"earned from what our people do","items":strengths}]
+	var seen:=Standing.views()
+	if seen.is_empty():
+		blocks.append({"type":"text","heading":"How others see us","text":"We have met no other people yet. Once we have, each will come to see us in its own way: drawn to us, in awe of us, afraid, respectful, trusting, or resentful, by what we are and what we do to them."})
+	for v:Dictionary in seen:
+		var items:Array=[]
+		for triple:Array in VIEW_ORDER:
+			var id:=String(triple[0])
+			var value:=float(v.get(id,0.0))
+			items.append({"name":"%s: %s" % [String(triple[1]),standing_words(value)],"sub":String(triple[2]),"detail":String((v.why as Dictionary).get(id,"")),"value":"%d%%" % roundi(value*100.0),
+				"accent":(Tokens.RED if id in ["fear","resentment"] else Tokens.GREEN) if value>=0.5 else Tokens.MUTED})
+		if float(v.envy)>Standing.ENVY_RAID_FLOOR:
+			items.append({"name":"Danger: envy","sub":"raiders may come for our stores","detail":String((v.why as Dictionary).get("envy","")),"value":"%d%%" % roundi(float(v.envy)*100.0),"accent":Tokens.RED,"value_color":Tokens.RED_TEXT})
+		if float(v.contempt)>Standing.CONTEMPT_FLOOR:
+			items.append({"name":"Danger: contempt","sub":"they will test us and demand tribute","detail":String((v.why as Dictionary).get("contempt","")),"value":"%d%%" % roundi(float(v.contempt)*100.0),"accent":Tokens.RED,"value_color":Tokens.RED_TEXT})
+		blocks.append({"type":"rows","heading":"How %s see us" % String(v.civ_name),"note":"what they know of us, and what we have done to them","items":items})
+	var proud:=Standing.pride(our,seen)
+	blocks.append({"type":"rows","heading":"Our own people","items":[{"name":"Pride: %s" % standing_words(float(proud.value)),"sub":"proud people stay through hard years and forgive their chiefs more","detail":String(proud.why),"value":"%d%%" % roundi(float(proud.value)*100.0),"accent":Tokens.GREEN if float(proud.value)>=0.6 else Tokens.MUTED}]})
+	return blocks
 
 func _society_blocks(capacities:Dictionary)->Array:
 	var items:Array=[]
