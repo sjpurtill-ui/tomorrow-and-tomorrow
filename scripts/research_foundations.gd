@@ -3,11 +3,15 @@ extends RefCounted
 ## exists and which one eligible foundation can make causally ready count.
 const P=preload("res://scripts/knowledge_pathways.gd")
 const R=preload("res://scripts/technology_requirements.gd")
+const NEAR_AGE:=preload("res://scripts/discovery_system.gd").NEAR_AGE_YEARS
 static func recommendation()->Dictionary:
 	var discovery:=WorldSimulation.discovery
 	var known:Array=WorldSimulation.state.known_discoveries
 	var eligible:Dictionary={};var opens:Dictionary={}
 	for entry:Dictionary in discovery.technology_catalog:
+		# A foundation to start now is one near its own age (work before it
+		# costs proportionally more; never a wall).
+		if discovery.research_years_ahead(entry)>=NEAR_AGE: continue
 		if discovery._discovery_is_eligible(entry,int(WorldSimulation.state.elapsed_days)):eligible[String(entry.id)]=entry
 	for child:Dictionary in discovery.technology_catalog:
 		if child.id in known or eligible.has(String(child.id)) or not discovery._resource_requirements_met(child.get("resource_requirements",[])):continue
