@@ -96,8 +96,16 @@ PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, 
             for k in ("PARALLEL_POPULATION_REF", "PARALLEL_PER_DECADE", "PARALLEL_LITERACY")}
 # Research600.stale_factor (research_3000): superseded registry items.
 STALE = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("STALE_GRACE", "STALE_DOUBLING", "STALE_ABANDON", "DEAD_END_PENALTY", "DEAD_END_VIABLE")}
-# Research600 soft era gate: per-world opening years and early start at a cost.
-EARLY = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("OPEN_JITTER", "OPEN_JITTER_MAX", "EARLY_LEAD", "EARLY_LEAD_MIN", "EARLY_LEAD_MAX", "EARLY_DOUBLINGS")}
+# Research600 soft era gate: per-world opening years; early work costs in
+# proportion to the years ahead (never a wall).
+EARLY = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("OPEN_JITTER", "OPEN_JITTER_MAX", "AHEAD_STEP_YEARS")}
+# DiscoverySystem.FOUNDATION_HORIZON_YEARS: foundations serve questions near their age.
+FOUNDATION_HORIZON = float(g.const("scripts/discovery_system.gd", "FOUNDATION_HORIZON_YEARS", default=50.0, optional=True))
+# DiscoverySystem._switch_to_quicker_questions: a line ahead of its age takes up a quicker question.
+SWITCH_CHECK_DAYS = float(g.const("scripts/discovery_system.gd", "SWITCH_CHECK_DAYS", default=0.0, optional=True))
+SWITCH_MARGIN = float(g.const("scripts/discovery_system.gd", "SWITCH_MARGIN", default=1.5, optional=True))
+EARLY_SCORE_PER_WORK = float(g.const("scripts/discovery_system.gd", "EARLY_SCORE_PER_WORK", default=0.0, optional=True))
+NEAR_AGE_YEARS = float(g.const("scripts/discovery_system.gd", "NEAR_AGE_YEARS", default=1e9, optional=True))
 # FoodSystem technique levers and AgronomyKnowledge.factors (engine features the
 # 0-600 surrogate left out; they matter once fertilizer and breeding arrive).
 FOOD_TECHNIQUES = g.const("scripts/food_system.gd", "TECHNIQUES", default={}, optional=True)
@@ -220,13 +228,11 @@ class Surrogate:
             dead = cat.registry & (cat.relevance_year >= 0) & (cat.relevance_year <= cat.design_year + 0.5) & ~cat.key_threshold
             draw = np.random.default_rng((seed * 2654435761 + 97) & 0xFFFFFFFF).random(n)
             self.offered = ~dead | (draw < self.stale_k["DEAD_END_VIABLE"])
-        # Research600.open_year / early_lead: this world's opening years and the
-        # earliest start (a seeded draw per question, as dead ends use).
+        # Research600.open_year: this world's opening years (a seeded draw per
+        # question, as dead ends use). Early work is only slower (_early_doublings).
         earliest = cat.earliest
         open_draw = np.random.default_rng((seed * 2654435761 + 131) & 0xFFFFFFFF).random(n)
         self.open_year = np.where(earliest > 0, np.maximum(0.0, earliest + (open_draw * 2.0 - 1.0) * np.minimum(EARLY["OPEN_JITTER_MAX"], earliest * EARLY["OPEN_JITTER"])), 0.0)
-        self.early_lead = np.where(self.open_year > 0, np.clip(self.open_year * EARLY["EARLY_LEAD"], EARLY["EARLY_LEAD_MIN"], EARLY["EARLY_LEAD_MAX"]), 0.0)
-        self.start_year = self.open_year - self.early_lead
         if line_scale:
             scale = np.array([float(line_scale.get(line, 1.0)) for line in gd.LINES])[cat.line]
             self.E = cat.E * scale[:, None]
@@ -1218,13 +1224,17 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
-        open_mask = self.ready & self.cond_ok & (self.start_year <= year) & cat.channel_staffable[cat.channel] & self.offered
+        open_mask = self.ready & self.cond_ok & cat.channel_staffable[cat.channel] & self.offered
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued (research_3000): superseded practices are abandoned.
             k = self.stale_k
             doublings = np.where(self.relevance >= 0, np.maximum(0.0, self.ceiling_era - self.relevance - k["STALE_GRACE"]) / k["STALE_DOUBLING"], 0.0)
             open_mask &= doublings <= math.log2(k["STALE_ABANDON"])
-        has_candidate = np.bincount(cat.channel[open_mask], minlength=len(cat.channel_keys)) > 0
+        # DiscoverySystem._channel_has_candidate: a line is live only with an open
+        # question within NEAR_AGE_YEARS of its age; otherwise its units help the
+        # line's live channels, and work ahead only when none is live.
+        near_age = open_mask & (self.open_year - year < NEAR_AGE_YEARS)
+        has_candidate = np.bincount(cat.channel[near_age], minlength=len(cat.channel_keys)) > 0
         # Emphasis units per line sit on subcategory channels and stay there
         # (_auto_allocate_domain_attention). A channel with no open question
         # hands its units to the line's live channels with the fewest
@@ -1298,10 +1308,16 @@ class Surrogate:
         for ch in sorted(set(np.where(weights > 0)[0].tolist()) | diffusion):
             item = self.active[ch]
             cand = None
-            if item < 0 or not open_mask[item]:
+            recheck = False
+            if item >= 0 and open_mask[item] and SWITCH_CHECK_DAYS > 0 and self.targets[item] <= 0 and self.open_year[item] > year                     and int(cat.channel[item]) == ch:
+                switch_day = self.__dict__.setdefault("_switch_day", {})
+                if self.day - switch_day.get(ch, -1e9) >= SWITCH_CHECK_DAYS:
+                    switch_day[ch] = self.day
+                    recheck = True
+            if item < 0 or not open_mask[item] or recheck:
                 items = self.chan_items[ch]
                 cand = items[open_mask[items]]
-                if len(cand) == 0 and FOUNDATION_WORK:
+                if len(cand) == 0 and FOUNDATION_WORK and not recheck:
                     busy = set(self.active[self.active >= 0].tolist())
                     found_ids = [i for i in self._foundation_ids(int(cat.channel_line[ch]), year, open_mask) if i not in busy]
                     if found_ids:
@@ -1311,9 +1327,11 @@ class Surrogate:
                 if cand is not None and len(cand) == 0:
                     self.active[ch] = -1
                     continue
-            if cand is not None and (item < 0 or not open_mask[item]):
+            if cand is not None and (item < 0 or not open_mask[item] or recheck):
+                current_item = item
                 era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
-                score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - (era_cost + self._early_doublings(cand, year)) * 20.0 + self.targets[cand] * 1e5
+                early_work = np.exp2(self._early_doublings(cand, year)) - 1.0
+                score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - era_cost * 20.0 - early_work * EARLY_SCORE_PER_WORK + self.targets[cand] * 1e5
                 if self.stale_k.get("STALE_DOUBLING"):
                     # DiscoverySystem._candidate_score: superseded practices last (research_3000).
                     rel = self.relevance[cand]
@@ -1330,6 +1348,8 @@ class Surrogate:
                         found_ids = [i for i in self._foundation_ids(int(cat.channel_line[ch]), year, open_mask) if i not in busy]
                         if found_ids:
                             item = found_ids[0]
+                if recheck and item != current_item and self._expected_work(item, year) * SWITCH_MARGIN >= self._expected_work(current_item, year):
+                    item = current_item
                 self.active[ch] = item
             researchers = researchers_total * weights[ch] / total_weight
             team = researchers if researchers < 1.0 else 1.0 + math.log10(researchers) * 0.78
@@ -1356,10 +1376,16 @@ class Surrogate:
             self._learn(item)
         return found
 
+    def _expected_work(self, i: int, year: float) -> float:
+        """DiscoverySystem._expected_work: remaining work over the question's chance."""
+        era_cost = max(0.0, float(self.cat.era[i]) - self.scholarship - self.tune_window) / self.tune_doubling
+        difficulty = float(self.cost_draw[i]) * 2.0 ** (min(30.0, era_cost) + float(self._early_doublings(i, year)))
+        return (1.0 - float(self.progress[i])) * difficulty / max(1e-9, float(self.chance[i]))
+
     def _early_doublings(self, idx, year: float):
-        """Research600.early_factor as doublings: 0 once a question's age has come."""
-        lead = np.maximum(self.early_lead[idx], 1e-9)
-        return EARLY["EARLY_DOUBLINGS"] * np.clip((self.open_year[idx] - year) / lead, 0.0, 1.0)
+        """Research600.early_factor as doublings (log2): 0 once a question's age has
+        come, then 1 + years_ahead / AHEAD_STEP_YEARS times the work."""
+        return np.log2(1.0 + np.maximum(0.0, self.open_year[idx] - year) / max(EARLY["AHEAD_STEP_YEARS"], 1e-9))
 
     def _foundation_ids(self, line: int, year: float, open_mask: np.ndarray) -> list:
         """Open prerequisites (down to researchable ones, depth <= 8) of the line's
@@ -1371,7 +1397,7 @@ class Surrogate:
         cat = self.cat
         n = cat.n
         frontier = []
-        pending = (cat.line == line) & ~self.known & (self.start_year <= year) & self.cond_ok
+        pending = (cat.line == line) & ~self.known & (self.open_year - year <= FOUNDATION_HORIZON) & self.cond_ok
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued: only questions still pursued ask for foundations (research_3000).
             k = self.stale_k
@@ -1386,7 +1412,7 @@ class Surrogate:
                 if j in visited or j >= n or self.known[j]:
                     continue
                 visited.add(j)
-                if not (self.start_year[j] <= year and self.cond_ok[j]):
+                if not self.cond_ok[j]:
                     continue
                 if open_mask[j]:
                     found[j] = cat.era[j]

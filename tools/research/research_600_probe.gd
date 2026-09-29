@@ -2,8 +2,9 @@ extends RefCounted
 ## Best-case "earliest possible year" probe for the 600-year research layer.
 ##
 ## Starting from nothing, steps the calendar and, at each step, instantly learns
-## every live discovery DiscoverySystem would open for a society that satisfies
-## every design condition, has every activity signal and unlimited research.
+## every live discovery DiscoverySystem would open at its age for a society that
+## satisfies every design condition, has every activity signal and unlimited
+## research (early work is only slower, never a wall, so the probe keeps to ages).
 ## Real research takes years, so the result is a lower bound: no discovery can
 ## be learned earlier than the year recorded here. Used by
 ## tests/test_research_600.gd and tools/research/run_research_600_probe.gd.
@@ -36,7 +37,9 @@ static func earliest_years(discovery:Node,horizon:float,step:float)->Dictionary:
 			var remaining:Array=[]
 			for entry:Dictionary in pending:
 				var id:=String(entry.get("id",""))
-				if discovery.research_600_open(entry,society) and Pathways.ready_for(entry,known,context):
+				# At its age (horizon 0): unlimited research could otherwise take up
+				# every question at once, now that early work is only slower.
+				if discovery.research_600_open(entry,society,-1,0.0) and Pathways.ready_for(entry,known,context):
 					known[id]=true
 					first[id]=year
 					changed=true

@@ -49,6 +49,23 @@ static func current_city(state:Node)->Dictionary:
 	return {}
 
 # --- Record helpers -----------------------------------------------------------
+## Days of building left at the pace of the last day worked; -1 when unknown.
+static func days_left(r:Dictionary)->int:
+	var pace:=float(r.get("last_work",0.0))
+	if pace<=.00001:return -1
+	return ceili(maxf(0.0,total_work(r)-float(r.get("progress",0.0)))/pace)
+
+## Why a work is not rising today, in a few plain words; "" while it rises.
+static func idle_words(r:Dictionary)->String:
+	if not (r.get("decision",{}) as Dictionary).is_empty():return "waiting for your word in court"
+	if String(r.get("status",""))!="stalled":return ""
+	var reason:=String(r.get("reason",""))
+	if reason.begins_with("Waiting for "):return reason.trim_suffix(".").to_lower()
+	if reason.begins_with("No building crew"):return "no builders to spare"
+	if reason.begins_with("Paused to protect"):return "paused while food or water is short"
+	if reason.begins_with("Crews have laid down"):return "the crews have laid down their tools"
+	return "no work done"
+
 static func total_work(r:Dictionary)->float:
 	return float(Catalog.get_definition(String(r.id)).get("work",1.0))*float(r.get("work_scale",1.0))
 static func fraction(r:Dictionary)->float:

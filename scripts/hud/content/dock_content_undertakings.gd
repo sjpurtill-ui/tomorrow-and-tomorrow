@@ -40,7 +40,7 @@ func _status(item:Dictionary)->String:
 	var status:=String(item.get("status",""))
 	var outcome:=String(item.get("outcome",""))
 	if status=="ruined" and outcome=="collapse":return "A folly, fallen"
-	if status in ["building","stalled"]:return "%s · %s · %d%%" % [String(STATUS_WORDS.get(status,"Rising")),String(Works.STAGE_WORDS.get(String(item.get("stage","")),"")),roundi(float(item.get("progress",0))*100)]
+	if status in ["building","stalled"]:return _building_words(item)
 	if status=="functioning" and outcome in ["triumph","flawed"]:return "Standing · %s" % ("a triumph" if outcome=="triumph" else "flawed")
 	return String(STATUS_WORDS.get(status,status.capitalize()))
 
@@ -85,3 +85,15 @@ func _local(id:String)->Dictionary:
 			if warning is Dictionary:rows.append({"name":"In %d days" % int(warning.get("in_days",0)),"detail":String(warning.get("text",""))})
 		blocks.append({"type":"rows","heading":"THE WATCHING SKY FORESEES","items":rows})
 	return {"blocks":blocks}
+
+## A work under way: rising (how far, how long to go at today's pace) or idle
+## (and why), in the words the map card uses.
+func _building_words(item:Dictionary)->String:
+	var Visual=preload("res://scripts/undertaking_map_visual.gd")
+	var idle:=String(item.get("idle",""))
+	var stage:=String(Works.STAGE_WORDS.get(String(item.get("stage","")),""))
+	var line:="Idle" if idle!="" else "Rising"
+	if stage!="":line+=" · "+stage
+	line+=" · "+Visual.percent_words(float(item.get("progress",0)))
+	var why:=idle if idle!="" else Visual.time_left_words(int(item.get("days_left",-1)))
+	return line+(" · "+why if why!="" else "")

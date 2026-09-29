@@ -75,10 +75,9 @@ func test_running_gear_reconverges_after_either_wheel_method()->void:
 		WorldSimulation.state.known_discoveries.append("four_wheeled_wagons");forget("load_bundling_by_weight")
 		assert_bool(discovery._discovery_is_eligible(entry,day)).is_false()
 		WorldSimulation.state.known_discoveries.append("load_bundling_by_weight")
-		# A question may be started a few years before its age at extra cost
-		# (research_start_year); before that it is closed.
-		var closed_day:=int(floor(discovery.research_start_year(entry)*365.0))-365
-		assert_bool(discovery._discovery_is_eligible(entry,closed_day)).is_false()
+		# Its age is never a wall: a year early it is open, at proportional work.
+		var early:=discovery.research_open_year(entry)-1.0
+		assert_float(discovery.research_early_factor(entry,early)).is_equal_approx(1.0+1.0/preload("res://scripts/research_600_catalog.gd").AHEAD_STEP_YEARS,0.0001)
 		assert_array(preload("res://scripts/technology_catalog_contract.gd").validate(K.entries(),discovery.technology_catalog)).is_empty()
 	)
 

@@ -60,10 +60,10 @@ func test_hand_cannons_stay_locked_until_hand_gun_tubes()->void:
 	assert_bool(_unlocked(String(Land.EQUIPMENT_GATES.hand_cannon))).is_false()
 	# Every foundation known still waits for the tubes' band.
 	var opens:=DiscoverySystem.research_600_earliest_year(tubes)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(tubes)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(tubes)
 	assert_float(opens).is_equal(float(Catalog.item("hand_gun_tubes").band_low))
-	assert_bool(_eligible_at(tubes,start-1.0)).is_false()
+	assert_float(DiscoverySystem.research_early_factor(tubes,start-1.0)).is_equal_approx(1.0+1.0/Catalog.AHEAD_STEP_YEARS,0.0001)
 	assert_bool(_eligible_at(tubes,start)).is_true()
 	_know(["black_powder","gun_barrel_founding","pot_bolt_guns","hand_gun_tubes"])
 	assert_bool(_unlocked(Land.gate_for("hand_cannoneer"))).is_true()
@@ -124,15 +124,17 @@ func test_four_course_rotation_is_locked_before_its_window()->void:
 	assert_str(Catalog.block_of("four_course_rotation")).is_equal("y1800_2400")
 	assert_array(rotation.requires_all).is_equal(["three_field_rotation","clover_ley_fodder","field_turnips"])
 	var opens:=DiscoverySystem.research_600_earliest_year(rotation)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(rotation)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(rotation)
 	assert_float(opens).is_equal(float(Catalog.item("four_course_rotation").band_low))
 	assert_float(opens).is_greater(2200.0)
 	GameState.known_discoveries.assign(rotation.requires_all)
 	assert_bool(P.ready(rotation,_day(1800))).is_true()
+	# Its age is never a wall: with its foundations known it may be taken up
+	# early, at work proportional to the years ahead of its age.
 	for year:float in [1800.0,2000.0,2200.0,start-1.0]:
-		assert_bool(DiscoverySystem.research_600_open(rotation,_society(year))).override_failure_message("year %d" % int(year)).is_false()
-		assert_bool(_eligible_at(rotation,year)).override_failure_message("year %d" % int(year)).is_false()
+		assert_bool(DiscoverySystem.research_600_open(rotation,_society(year))).override_failure_message("year %d" % int(year)).is_true()
+		assert_float(DiscoverySystem.research_early_factor(rotation,year)).override_failure_message("year %d" % int(year)).is_equal_approx(1.0+(start-year)/Catalog.AHEAD_STEP_YEARS,0.0001)
 	assert_bool(DiscoverySystem.research_600_open(rotation,_society(start))).is_true()
 	assert_array(DiscoverySystem.research_600_missing(rotation,_society(start))).is_empty()
 
@@ -144,8 +146,8 @@ func test_maize_requires_contact_across_the_ocean()->void:
 	assert_array(trials.requires_all).is_equal(["transoceanic_contact_voyages"])
 	assert_array(_entry("maize_field_crop").requires_all).is_equal(["maize_garden_trials"])
 	var opens:=DiscoverySystem.research_600_earliest_year(trials)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(trials)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(trials)
 	var alone:=_society(start);alone.contact=false
 	assert_bool(DiscoverySystem.research_600_open(trials,alone)).is_false()
 	assert_array(Catalog.unmet_conditions("maize_garden_trials",alone)).is_equal(["Contact with another people"])

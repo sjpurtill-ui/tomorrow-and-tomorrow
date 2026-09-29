@@ -102,7 +102,7 @@ func test_place_value_requires_its_whole_recording_chain()->void:
 		assert_bool(ancestors.has(link)).override_failure_message("place_value chain lacks "+link).is_true()
 	assert_float(DiscoverySystem.research_600_earliest_year(place)).is_equal(470.0)
 
-func test_bookbinding_waits_for_its_era_even_with_cordage()->void:
+func test_bookbinding_can_start_early_at_proportional_work()->void:
 	var book:=_entry("bookbinding_assemblies")
 	# The 600-1200 block designs the codex: its own foundations and band.
 	assert_str(Catalog.block_of("bookbinding_assemblies")).is_equal("y600_1200")
@@ -113,13 +113,13 @@ func test_bookbinding_waits_for_its_era_even_with_cordage()->void:
 	var opens:=DiscoverySystem.research_600_earliest_year(book)
 	assert_float(opens).is_equal(float(Catalog.item("bookbinding_assemblies").min_year))
 	assert_float(opens).is_greater(1000.0)
-	# A soft gate: startable (slowly) a little before this world's opening year.
-	var start:=DiscoverySystem.research_start_year(book)
-	assert_float(start).is_less(DiscoverySystem.research_open_year(book))
+	# Its age is never a wall: with its foundations known it may be taken up at
+	# any time, and every AHEAD_STEP_YEARS ahead of its age adds its work again.
+	var start:=DiscoverySystem.research_open_year(book)
 	assert_float(start).is_greater(opens*0.75)
-	for year:float in [16.0,75.0,180.0,600.0,start-1.0]:
-		GameState.elapsed_days=_day(year)
-		assert_bool(DiscoverySystem._discovery_is_eligible(book,_day(year))).override_failure_message("year %d" % int(year)).is_false()
+	for year:float in [16.0,600.0,start-1.0,start]:
+		assert_bool(DiscoverySystem.research_600_open(book,_society(year))).override_failure_message("year %d" % int(year)).is_true()
+		assert_float(DiscoverySystem.research_early_factor(book,year)).override_failure_message("year %d" % int(year)).is_equal_approx(1.0+maxf(0.0,start-year)/Catalog.AHEAD_STEP_YEARS,0.0001)
 	GameState.elapsed_days=_day(start)
 	assert_bool(DiscoverySystem._discovery_is_eligible(book,_day(start))).is_true()
 
@@ -238,11 +238,12 @@ func test_ages_open_over_several_years_and_early_work_costs_more()->void:
 	var id:=String(Catalog.ids()[0]);var first:=DiscoverySystem.research_open_year(_entry(id))
 	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	assert_float(DiscoverySystem.research_open_year(_entry(id))).is_equal(first)
-	# Cost doubles EARLY_DOUBLINGS times across the lead and is normal once the age has come.
+	# Work grows in proportion to the years ahead of its age, and is normal once
+	# the age has come: 5 years ahead is twice the work, 50 years eleven times.
 	assert_float(Catalog.early_factor(50.0,50.0)).is_equal(1.0)
 	assert_float(Catalog.early_factor(50.0,60.0)).is_equal(1.0)
-	assert_float(Catalog.early_factor(50.0,50.0-Catalog.early_lead(50.0))).is_equal_approx(pow(2.0,Catalog.EARLY_DOUBLINGS),0.0001)
-	assert_float(Catalog.early_factor(50.0,48.0)).is_between(1.01,pow(2.0,Catalog.EARLY_DOUBLINGS))
+	assert_float(Catalog.early_factor(50.0,45.0)).is_equal_approx(2.0,0.0001)
+	assert_float(Catalog.early_factor(50.0,0.0)).is_equal_approx(11.0,0.0001)
 
 func test_first_century_probe_opens_nothing_before_its_band()->void:
 	var step:=0.5
@@ -250,15 +251,16 @@ func test_first_century_probe_opens_nothing_before_its_band()->void:
 	var early:Array[String]=[]
 	for id:String in first:
 		var year:=float(first[id])
-		var gate:=DiscoverySystem.research_start_year(_entry(id))
-		if year<gate-0.000001:early.append("%s@%.1f<gate %.1f" % [id,year,gate])
-		# Started early only within the soft lead (jitter plus early start, at most about a quarter).
-		if Catalog.has(id) and year+step<float(Catalog.item(id).band_low)*0.75-Catalog.EARLY_LEAD_MIN:early.append("%s@%.1f<band %.1f" % [id,year,float(Catalog.item(id).band_low)])
+		var gate:=DiscoverySystem.research_open_year(_entry(id))
+		if year<gate-0.000001:early.append("%s@%.1f<age %.1f" % [id,year,gate])
+		# Its age in this world stays near its band (jitter only, at most about a quarter).
+		if Catalog.has(id) and year+step<float(Catalog.item(id).band_low)*0.75-2.0:early.append("%s@%.1f<band %.1f" % [id,year,float(Catalog.item(id).band_low)])
 	assert_array(early).is_empty()
-	# The gate does not starve the early game: every design item whose band
-	# opens in the first century is reachable within it.
+	# Ages do not starve the early game: every design item whose age, with this
+	# world's jitter, comes in the first century is reachable within it.
 	for id:String in Catalog.ids():
-		if float(Catalog.item(id).min_year)<=99.5:assert_bool(first.has(id)).override_failure_message(id).is_true()
+		var min_year:=float(Catalog.item(id).min_year)
+		if min_year+minf(Catalog.OPEN_JITTER_MAX,min_year*Catalog.OPEN_JITTER)<=99.5:assert_bool(first.has(id)).override_failure_message(id).is_true()
 	for id:String in ["bookbinding_assemblies","bloomery_smelting","differential_calculus","place_value","rigid_pipe_bedding"]:
 		assert_bool(first.has(id)).override_failure_message(id).is_false()
 

@@ -74,7 +74,7 @@ func test_building_rises_in_courses_with_scaffold_and_ruins_fall()->void:
 	# Scaffold poles stand outside the finished work's footprint.
 	assert_float(rising.size.x).is_greater_equal(whole.size.x-.0001)
 	assert_float(ruin.end.y).is_less(whole.end.y*.8)
-	assert_str(Visual.status_line("building",.46)).is_equal("Rising · 40%")
+	assert_str(Visual.status_line("building",.46)).is_equal("Rising · 46%")
 	assert_str(Visual.status_line("standing",1.0)).is_empty()
 	assert_str(Visual.state_of({"status":"functioning","dedicated_day":3})).is_equal("dedicated")
 
@@ -158,3 +158,30 @@ func test_card_measure_wraps_long_names_and_keeps_status()->void:
 	# The chart form is the name alone, on as few lines as fit.
 	assert_float((long.chart_extent as Vector2).y).is_less((long.extent as Vector2).y)
 	assert_float((long.chart_extent as Vector2).x).is_less_equal(Labels.WORK_CHART_WIDTH+1)
+
+## The player's report (2026-09-28): the Spire-that-Never-Kneels read "Rising ·
+## 0%" on the map while it was rising fine. The card rounded down to tenths and
+## was only redrawn at each tenth; it now reads the record live.
+func test_the_map_card_shows_the_real_progress_and_why_a_work_is_idle()->void:
+	assert_str(Visual.status_line("building",.07)).is_equal("Rising · 7%")
+	assert_str(Visual.status_line("building",.004)).is_equal("Rising · 0.4%")
+	assert_str(Visual.status_line("building",0.0)).is_equal("Rising · just begun")
+	var r:=_record("tower","stone","building",.07)
+	assert_str(Visual.record_status(r)).is_equal("Rising · 7%")
+	r.status="stalled";r.reason="Waiting for stone."
+	assert_str(Visual.record_status(r)).is_equal("Idle · waiting for stone")
+	r.status="building";r.decision={"key":"design","day":3}
+	assert_str(Visual.record_status(r)).is_equal("Idle · waiting for your word in court")
+
+func test_the_map_reads_a_work_live_between_redraws()->void:
+	var saved:Array=GameState.player_settlements
+	var r:=_record("tower","stone","building",.07)
+	GameState.player_settlements=[{"id":"probe_city","undertakings":[r]}]
+	var before:=Visual.live("probe_city",String(r.id))
+	r.progress=float(r.progress)*2.0
+	var after:=Visual.live("probe_city",String(r.id))
+	GameState.player_settlements=saved
+	assert_str(String(before.status)).is_equal("Rising · 7%")
+	assert_str(String(after.status)).is_equal("Rising · 14%")
+	assert_float(float(after.progress)).is_equal_approx(.14,.001)
+	assert_bool(Visual.live("probe_city","gone").is_empty()).is_true()

@@ -50,14 +50,47 @@ static func state_of(r:Dictionary)->String:
 	if status=="ruined":return "ruined"
 	return "dedicated" if int(r.get("dedicated_day",-1))>=0 else "standing"
 
+## Progress a player can watch move: whole percents, tenths of one while the
+## work is barely begun.
+static func percent_words(progress:float)->String:
+	if progress>=.01:return "%d%%" % floori(progress*100.0)
+	if progress<.001:return "just begun"
+	return "%.1f%%" % (floorf(progress*1000.0)/10.0)
+
+## Building time still to go at the last day's pace; "" when unknown.
+static func time_left_words(days:int)->String:
+	if days<0:return ""
+	if days<45:return "%d day%s to go" % [maxi(1,days),"" if maxi(1,days)==1 else "s"]
+	if days<730:return "%d months to go" % roundi(float(days)/30.4)
+	return "%d years to go" % roundi(float(days)/365.0)
+
 ## A short line for the work's map card: empty for a plain standing work.
-static func status_line(state:String,progress:float,folly:bool=false)->String:
+## A work that is not rising today says why instead of claiming to rise.
+static func status_line(state:String,progress:float,folly:bool=false,idle:String="",days_left:int=-1)->String:
 	match state:
-		"building":return "Rising · %d%%" % (floori(progress*10.0)*10)
-		"abandoned":return "Abandoned · %d%%" % (floori(progress*10.0)*10)
+		"building":
+			if idle!="":return "Idle · "+idle
+			var left:=time_left_words(days_left)
+			return "Rising · %s%s" % [percent_words(progress),(" · "+left) if left!="" else ""]
+		"abandoned":return "Abandoned · %s" % percent_words(progress)
 		"ruined":return "A folly, fallen" if folly else "In ruins"
 		"dedicated":return "Dedicated"
 	return ""
+
+## The map card's line for a record, from its live state.
+static func record_status(r:Dictionary)->String:
+	var state:=state_of(r)
+	return status_line(state,U.fraction(r),state=="ruined" and String(r.get("outcome",""))=="collapse",U.idle_words(r))
+
+## A work's card line and progress read live from its record, so the map
+## moves day by day without redrawing the landmark (the mesh rises in courses,
+## a tenth at a time). {} when the work is gone.
+static func live(city_id:String,work_id:String)->Dictionary:
+	for city:Dictionary in GameState.player_settlements:
+		if String(city.get("id",""))!=city_id:continue
+		for r:Dictionary in city.get("undertakings",[]):
+			if String(r.get("id",""))==work_id:return {"status":record_status(r),"progress":U.fraction(r)}
+	return {}
 
 static func _halo()->QuadMesh:
 	if _halo_mesh==null:
@@ -101,9 +134,8 @@ static func render(cities:Array,parent:Node3D,height:Callable)->void:
 				halo.rotation.y=-angle;halo.scale=Vector3(plinth.size.x,1,plinth.size.y)
 				halo.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;halo.visibility_range_end=20
 				root.add_child(halo)
-			var folly:bool=state=="ruined" and String(r.get("outcome",""))=="collapse"
 			root.set_meta("map_mark",{"id":String(r.id),"city_id":String(city.get("id","")),"title":U.display_name(r),"shape":shape,"state":state,"progress":progress,
-				"status":status_line(state,progress,folly),"anchor":origin+Vector3(0,float(built.top)+float(built.height)*.5,0),"radius":plinth.size.length()*.5,
+				"status":record_status(r),"anchor":origin+Vector3(0,float(built.top)+float(built.height)*.5,0),"radius":plinth.size.length()*.5,
 				"plinth":plinth,"angle":angle,"plinth_top":origin.y+float(built.top)})
 
 ## The map mark a rendered work root carries (empty for anything else).

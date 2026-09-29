@@ -193,7 +193,7 @@ func _status_words(item:Dictionary)->String:
 	var outcome:=String(item.get("outcome",""))
 	if status=="ruined" and outcome=="collapse":return "Folly · fallen"
 	if status in ["building","stalled"]:
-		return "%s · %s · %d%%" % [String(STATUS_WORDS.get(status,"Rising")),String(Bridge.STAGE_WORDS.get(String(item.get("stage","")),"")),roundi(float(item.get("progress",0))*100)]
+		return _building_words(item)
 	if status=="functioning" and outcome=="triumph":return "Standing · a triumph"
 	if status=="functioning" and outcome=="flawed":return "Standing · flawed"
 	return String(STATUS_WORDS.get(status,status.capitalize()))
@@ -533,3 +533,14 @@ func _confidence(value:float)->String:
 
 # ---------------------------------------------------------------- drawn pieces
 
+## A work under way: rising (how far, how long to go at today's pace) or idle
+## (and why), in the words the map card uses.
+func _building_words(item:Dictionary)->String:
+	var Visual=preload("res://scripts/undertaking_map_visual.gd")
+	var idle:=String(item.get("idle",""))
+	var stage:=String(Bridge.STAGE_WORDS.get(String(item.get("stage","")),""))
+	var line:="Idle" if idle!="" else "Rising"
+	if stage!="":line+=" · "+stage
+	line+=" · "+Visual.percent_words(float(item.get("progress",0)))
+	var why:=idle if idle!="" else Visual.time_left_words(int(item.get("days_left",-1)))
+	return line+(" · "+why if why!="" else "")
