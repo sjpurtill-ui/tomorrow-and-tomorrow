@@ -162,9 +162,11 @@ func test_the_era_gate_window_follows_the_latest_block()->void:
 	# The design items of the new block open at their own band, not at the window.
 	assert_float(DiscoverySystem.research_600_earliest_year(_entry("fx_bloom_hearths"))).is_equal(640.0)
 	GameState.known_discoveries.assign(["copper_smelting"])
-	var start:=DiscoverySystem.research_start_year(_entry("fx_bloom_hearths"))
-	assert_float(start).is_between(640.0-Catalog.OPEN_JITTER_MAX-Catalog.EARLY_LEAD_MAX,640.0+Catalog.OPEN_JITTER_MAX)
-	assert_bool(DiscoverySystem.research_600_open(_entry("fx_bloom_hearths"),{},int(ceil((start-1.0)*365.0)))).is_false()
+	var start:=DiscoverySystem.research_open_year(_entry("fx_bloom_hearths"))
+	assert_float(start).is_between(640.0-Catalog.OPEN_JITTER_MAX,640.0+Catalog.OPEN_JITTER_MAX)
+	# Never a wall: open a year early, at work proportional to the year ahead.
+	assert_bool(DiscoverySystem.research_600_open(_entry("fx_bloom_hearths"),{},int(ceil((start-1.0)*365.0)))).is_true()
+	assert_float(DiscoverySystem.research_early_factor(_entry("fx_bloom_hearths"),start-1.0)).is_equal_approx(1.0+1.0/Catalog.AHEAD_STEP_YEARS,0.0001)
 	assert_bool(DiscoverySystem.research_600_open(_entry("fx_bloom_hearths"),{},int(ceil(start*365.0)))).is_true()
 	GameState.elapsed_days=int(ceil(start*365.0))
 	assert_bool(DiscoverySystem._discovery_is_eligible(_entry("fx_bloom_hearths"),int(ceil(start*365.0)))).is_true()

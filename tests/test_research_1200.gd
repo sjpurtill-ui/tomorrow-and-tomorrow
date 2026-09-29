@@ -37,28 +37,32 @@ func test_glass_blowing_cannot_unlock_before_its_era_window()->void:
 	assert_str(Catalog.block_of("glass_blowing")).is_equal("y600_1200")
 	assert_array(glass.requires_all).is_equal(["mandrel_wound_beads","decolorized_clear_glass"])
 	var opens:=DiscoverySystem.research_600_earliest_year(glass)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(glass)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(glass)
 	assert_float(opens).is_equal(float(Catalog.item("glass_blowing").band_low))
 	assert_float(opens).is_greater(900.0)
-	# Every foundation known still does not open it early.
 	GameState.known_discoveries.assign(["mandrel_wound_beads","decolorized_clear_glass"])
 	assert_bool(P.ready(glass,_day(700))).is_true()
+	# Its age is never a wall: with its foundations known it may be taken up
+	# early, at work proportional to the years ahead of its age.
 	for year:float in [100.0,600.0,700.0,start-1.0]:
-		assert_bool(DiscoverySystem.research_600_open(glass,_society(year))).override_failure_message("year %d" % int(year)).is_false()
-		assert_bool(_eligible_at(glass,year)).override_failure_message("year %d" % int(year)).is_false()
+		assert_bool(DiscoverySystem.research_600_open(glass,_society(year))).override_failure_message("year %d" % int(year)).is_true()
+		assert_float(DiscoverySystem.research_early_factor(glass,year)).override_failure_message("year %d" % int(year)).is_equal_approx(1.0+(start-year)/Catalog.AHEAD_STEP_YEARS,0.0001)
 	assert_bool(DiscoverySystem.research_600_open(glass,_society(start))).is_true()
 	assert_bool(_eligible_at(glass,start)).is_true()
 
-func test_bloomery_smelting_is_not_available_at_year_100()->void:
+func test_bloomery_smelting_at_year_100_is_open_but_centuries_ahead()->void:
 	var bloomery:=_entry("bloomery_smelting")
 	assert_str(Catalog.block_of("bloomery_smelting")).is_equal("y600_1200")
 	assert_float(DiscoverySystem.research_600_earliest_year(bloomery)).is_greater_equal(660.0)
 	GameState.known_discoveries.assign(["shaft_furnaces","clay_tuyere_draft"])
-	assert_bool(DiscoverySystem.research_600_open(bloomery,_society(100.0))).is_false()
-	assert_bool(_eligible_at(bloomery,100.0)).is_false()
-	assert_bool(_eligible_at(bloomery,659.0)).is_false()
-	# Iron needs its ore as well as its year.
+	# Open at year 100 with its foundations and ore, at work proportional to the
+	# centuries ahead of its age.
+	var age:=DiscoverySystem.research_open_year(bloomery)
+	assert_bool(DiscoverySystem.research_600_open(bloomery,_society(100.0))).is_true()
+	assert_float(DiscoverySystem.research_early_factor(bloomery,100.0)).is_equal_approx(1.0+(age-100.0)/Catalog.AHEAD_STEP_YEARS,0.0001)
+	assert_float(DiscoverySystem.research_early_factor(bloomery,100.0)).is_greater(100.0)
+	# Iron needs its ore as well as its foundations.
 	var society:=_society(660.0)
 	assert_bool(DiscoverySystem.research_600_open(bloomery,society)).is_true()
 	society.resources={}

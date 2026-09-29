@@ -419,12 +419,24 @@ func _effect_summary(effects:Dictionary) -> String:
 	return "ESTABLISHED CAPACITY CHANGE  •  "+"  •  ".join(parts)
 
 
+## A work multiplier in words: "a little more work than usual", "about twice
+## the usual work", "about six times the usual work".
+static func work_words(factor:float)->String:
+	if factor<1.05: return "the usual work"
+	if factor<1.75: return "a little more work than usual"
+	var whole:=roundi(factor)
+	if whole<=2: return "about twice the usual work"
+	return "about %s times the usual work" % (["","","","three","four","five","six","seven","eight","nine","ten"][whole] if whole<=10 else str(whole))
+
+
 func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor:float,material_evidence:float,progress:float,research_capacity:Dictionary={}) -> String:
 	if allocation<=0: return "NO RESEARCH PRIORITY — project is paused"
 	var research_workforce:=float(research_capacity.get("researchers",0.0))
 	if research_workforce<1.0: return "RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
 	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
-	if era_cost_multiplier(discovery)*research_early_factor(discovery)>=2.0: return "AHEAD OF ITS AGE — broader scholarship must mature before this question can be answered quickly"
+	var ahead:=research_years_ahead(discovery)
+	if ahead>=1.0: return "AHEAD OF ITS AGE — %d years early: %s" % [roundi(ahead),work_words(research_early_factor(discovery))]
+	if era_cost_multiplier(discovery)>=2.0: return "BEYOND OUR SCHOLARSHIP — broader learning must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
 	if progress<0.25: return "EARLY EVIDENCE — more repeated cases are required"
@@ -439,6 +451,7 @@ func _refresh_active_investigations()->void:
 		var discovery:=discovery_definition(id)
 		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
+	_switch_to_quicker_questions(current_day)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
 	# When a line completes or temporarily runs out of evidence, keep the same
 	# number of observers working by redirecting them toward a live frontier. The
@@ -461,6 +474,33 @@ func _refresh_active_investigations()->void:
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
 		WorldSimulation.state.active_observations.append(String(record.observation))
+
+
+## A line working a question ahead of its age takes up a quicker one as soon as
+## it opens; the progress made stays with the question for later. So people
+## can stay on their lines while work runs where it pays best. Checked once a
+## month per line; a question the player chose is never set aside.
+const SWITCH_CHECK_DAYS:=30
+const SWITCH_MARGIN:=1.5
+var _switch_checked:Dictionary={}
+
+func _expected_work(discovery:Dictionary)->float:
+	var progress:=float(WorldSimulation.state.discovery_progress.get(String(discovery.get("id","")),0.0))
+	return (1.0-progress)*research_difficulty(discovery,WorldSimulation.state.world_seed)/maxf(0.000001,float(discovery.get("chance",0.001)))
+
+func _switch_to_quicker_questions(current_day:int)->void:
+	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
+		var channel:=String(channel_variant)
+		if current_day-int(_switch_checked.get(channel,-SWITCH_CHECK_DAYS))<SWITCH_CHECK_DAYS: continue
+		_switch_checked[channel]=current_day
+		var current:=discovery_definition(String(WorldSimulation.state.active_investigations.get(channel,"")))
+		if current.is_empty() or research_early_factor(current)<=1.0: continue
+		if String(WorldSimulation.state.research_targets.get(channel,""))==String(current.id): continue
+		# Foundation work borrowed by another line keeps its own rules.
+		if channel!=_channel_key(String(current.get("dynamic","")),String(current.get("subcategory",""))): continue
+		var best:=_best_candidate_for_channel(channel,current_day)
+		if best.is_empty() or String(best.id)==String(current.id): continue
+		if _expected_work(best)*SWITCH_MARGIN<_expected_work(current): WorldSimulation.state.active_investigations[channel]=String(best.id)
 
 
 func _redistribute_stranded_attention(current_day:int)->void:
@@ -493,7 +533,7 @@ func _redistribute_stranded_attention(current_day:int)->void:
 			var subcategory:=String(subcategory_variant)
 			var channel:=_channel_key(dynamic_id,subcategory)
 			var candidate:=_best_candidate_for_channel(channel,current_day)
-			if candidate.is_empty(): continue
+			if candidate.is_empty() or research_years_ahead(candidate)>=NEAR_AGE_YEARS: continue
 			live_channels.append({"dynamic":dynamic_id,"subcategory":subcategory,"channel":channel,"candidate":candidate})
 	if live_channels.is_empty():
 		# A genuine evidence drought should not erase the player's broad emphasis.
@@ -555,11 +595,19 @@ func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=n
 	if not Research600.pursued(id,society_model.ceiling_era):return false # research_3000: superseded practice abandoned
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
 
+## A line whose open questions all stand NEAR_AGE_YEARS or more ahead of their
+## age lends its people to the lines of its field that have work of their own
+## age; when the whole field is ahead, everyone works ahead at the proportional
+## cost. No line ever sits idle and nobody has to move people by hand.
+const NEAR_AGE_YEARS:=5.0
+
+## True when the line has an open question within NEAR_AGE_YEARS of its age.
 func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
+	var year:=float(current_day)/365.0
 	for discovery:Dictionary in candidates:
-		if _discovery_is_eligible(discovery,current_day,known):return true
+		if research_years_ahead(discovery,year)<NEAR_AGE_YEARS and _discovery_is_eligible(discovery,current_day,known):return true
 	return false
 
 
@@ -605,6 +653,10 @@ func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool
 	return posmod(hash("%s:%s:viability" % [seed_value,path_key]),10_000)<FRONTIER_PATH_AVAILABILITY
 
 
+## Score a line gives up for each extra "usual work" a question ahead of its
+## age costs (research_early_factor - 1).
+const EARLY_SCORE_PER_WORK:=60.0
+
 func _candidate_score(discovery:Dictionary)->float:
 	var id:=String(discovery.get("id",""))
 	var score:=research_affinity(discovery,WorldSimulation.state.world_seed,WorldSimulation.food.current_environment_profile())
@@ -620,8 +672,11 @@ func _candidate_score(discovery:Dictionary)->float:
 	# Once a society has invested in a viable tradition, its deeper methods have
 	# a modest continuity advantage, but other routes can still overtake it.
 	score+=float(discovery.get("stage_index",0))*3.5
-	# Work far beyond current scholarship is slow; lines prefer questions of their age.
-	score-=log(era_cost_multiplier(discovery)*research_early_factor(discovery))/log(2.0)*20.0
+	# Work far beyond current scholarship is slow; lines prefer questions of their
+	# age. The penalty for being ahead grows with the extra work itself, so a line
+	# goes ahead only when nothing of its own age is open.
+	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
+	score-=(research_early_factor(discovery)-1.0)*EARLY_SCORE_PER_WORK
 	# research_3000: and they take up the current frontier before older leftovers.
 	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
 	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
@@ -1086,6 +1141,9 @@ func technology_tree(dynamic_id:String="")->Array[Dictionary]:
 		row["leads_to"]=children.get(id,[])
 		row["progress"]=float(WorldSimulation.state.discovery_progress.get(id,0.0))
 		row["research_difficulty"]=research_difficulty(entry,WorldSimulation.state.world_seed)
+		var ahead:=research_years_ahead(entry)
+		row["years_ahead"]=ahead
+		if ahead>=1.0 and not known: row["ahead_note"]="%d years ahead of its age: %s" % [roundi(ahead),work_words(research_early_factor(entry))]
 		var channel:=_channel_key(String(entry.dynamic),String(entry.subcategory))
 		row["status"]="DISCOVERED" if known else ("RESEARCHING" if String(WorldSimulation.state.active_investigations.get(channel,""))==id else ("AVAILABLE" if missing.is_empty() else "LOCKED"))
 		rows.append(row)
@@ -1120,7 +1178,14 @@ static func plain_wait_reason(missing:Array)->String:
 
 ## Why a staffed line has no open question, in plain words; "" when it has one.
 func line_wait_reason(dynamic_id:String,subcategory:String,rows:Array=[])->String:
-	if _channel_has_candidate(_channel_key(dynamic_id,subcategory),int(floor(WorldSimulation.state.elapsed_days))):return ""
+	var channel:=_channel_key(dynamic_id,subcategory)
+	var today:=int(floor(WorldSimulation.state.elapsed_days))
+	if _channel_has_candidate(channel,today):return ""
+	# Only questions ahead of their age: its people help this field's other lines
+	# until one comes of age, or all work ahead when the whole field is ahead.
+	var ahead:=_best_candidate_for_channel(channel,today)
+	if not ahead.is_empty():
+		return "Its next question, %s, is %d years ahead of its age (%s); its people help this field's other lines meanwhile." % [String(ahead.get("name","")),roundi(research_years_ahead(ahead)),work_words(research_early_factor(ahead))]
 	if rows.is_empty():rows=technology_tree(dynamic_id)
 	var frontier:=technology_frontier(rows)
 	var best:Dictionary={}
@@ -1233,7 +1298,7 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 	var society:=research_600_rival_society(civ) # research_600: same gate as the player
 	for entry in technology_catalog:
 		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
-		if not research_600_open(entry,society): continue
+		if not research_600_open(entry,society,-1,Research600.RIVAL_AHEAD_YEARS): continue
 		var viable:=false
 		for route:Dictionary in Pathways.routes_for(entry,known,{}):
 			if route.ready:viable=true;break
@@ -1245,7 +1310,10 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 			if minf(float(civ.get("production",0.0)),float(civ.get("logistics",0.0)))<capacity_floor: viable=false; break
 		if viable: candidates.append(entry)
 	var seed_value:=int(profile.get("seed",WorldSimulation.state.world_seed))
-	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return research_affinity(a,seed_value,environment)>research_affinity(b,seed_value,environment))
+	# Rivals too take up the questions of their age first.
+	var year:=float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
+	var rank:=func(entry:Dictionary)->float: return research_affinity(entry,seed_value,environment)-(research_early_factor(entry,year)-1.0)*EARLY_SCORE_PER_WORK
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(rank.call(a))>float(rank.call(b)))
 	return candidates
 
 func technology_depth(id:String,visiting:Dictionary={})->int:
@@ -1436,34 +1504,36 @@ var _open_year_cache:Dictionary={}
 var _open_year_seed:=0
 
 
-## Earliest game year at which `discovery` may be started (ahead of its age, slowly).
-func research_start_year(discovery:Dictionary)->float:
-	var open:=research_open_year(discovery)
-	return open-Research600.early_lead(open)
+## Years `discovery` stands ahead of its age at `year` (0 once its age has come).
+func research_years_ahead(discovery:Dictionary,year:float=NAN)->float:
+	if is_nan(year): year=float(WorldSimulation.state.elapsed_days)/365.0
+	return maxf(0.0,research_open_year(discovery)-year)
 
 
-## Cost multiplier for working on `discovery` before its age (1 once it has come).
+## Work multiplier for `discovery` before its age: proportional to the years
+## ahead (1 once its age has come). Never a wall.
 func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
 	if is_nan(year): year=float(WorldSimulation.state.elapsed_days)/365.0
 	return Research600.early_factor(research_open_year(discovery),year)
 
 
-## True when the calendar has reached the entry's age and its design conditions
-## hold for `society` (default: the acting player-side society). `day` (>=0)
-## evaluates the calendar at that simulated day instead of today.
-func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1)->bool:
-	var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
-	if year<research_start_year(discovery): return false
+## True when the entry's design conditions hold for `society` (default: the
+## acting player-side society). Its age is never a wall (research_early_factor
+## makes early work proportionally slower); `horizon_years` >= 0 limits how far
+## ahead of its age a question may be (rival peoples keep to their age).
+## `day` (>=0) evaluates the calendar at that simulated day instead of today.
+func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1,horizon_years:float=-1.0)->bool:
+	if horizon_years>=0.0:
+		var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
+		if research_open_year(discovery)-year>horizon_years: return false
 	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
 	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society())
 
 
-## Player-facing reasons the era gate or design conditions still hold `discovery`.
+## Player-facing reasons the design conditions still hold `discovery` (its age
+## never does: early work is only slower).
 func research_600_missing(discovery:Dictionary,society:Dictionary={})->Array[String]:
 	var reasons:Array[String]=[]
-	var year:=float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
-	var earliest:=research_start_year(discovery)
-	if year<earliest: reasons.append("Its age has not come: not before year %d" % int(ceil(earliest)))
 	if not (discovery.get("conditions",{}) as Dictionary).is_empty():
 		reasons.append_array(Research600.unmet_conditions(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society()))
 	return reasons
@@ -1565,8 +1635,12 @@ func _research_600_foundation_candidate(dynamic_id:String,current_day:int)->Dict
 	return {}
 
 
+## How far ahead of their age the questions are whose foundations a line with
+## nothing of its own takes up.
+const FOUNDATION_HORIZON_YEARS:=50.0
+
 ## Open prerequisites (followed down to ones that can be researched now) of the
-## domain's era-open unknown questions, earliest first.
+## domain's unknown questions near their age, earliest age first.
 func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[String]:
 	var key:="%s:%d:%d" % [dynamic_id,current_day,WorldSimulation.state.known_discoveries.size()]
 	if _research_600_foundation_cache.has(key): return _research_600_foundation_cache[key]
@@ -1576,7 +1650,8 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	var frontier:Array[String]=[]
 	for entry:Dictionary in technology_catalog:
 		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
-		if research_600_open(entry,{},current_day) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
+		# Foundation work serves questions within FOUNDATION_HORIZON_YEARS of their age.
+		if research_600_open(entry,{},current_day,FOUNDATION_HORIZON_YEARS) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
 	var found:Dictionary={}
 	var visited:Dictionary={}
 	var depth:=0
@@ -1587,13 +1662,13 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 			visited[id]=true
 			var foundation:=discovery_definition(id)
 			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
-			if _discovery_is_eligible(foundation,current_day,known): found[id]=int(foundation.get("day",0))
+			if _discovery_is_eligible(foundation,current_day,known): found[id]=research_open_year(foundation)
 			else: next.append_array(_research_600_missing_parents(foundation,known))
 		frontier=next
 		depth+=1
 	var ids:Array[String]=[]
 	for id:Variant in found: ids.append(String(id))
-	ids.sort_custom(func(a:String,b:String)->bool: return int(found[a])<int(found[b]))
+	ids.sort_custom(func(a:String,b:String)->bool: return float(found[a])<float(found[b]))
 	_research_600_foundation_cache[key]=ids
 	return ids
 

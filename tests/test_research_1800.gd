@@ -42,16 +42,17 @@ func test_printing_process_cannot_open_before_its_window()->void:
 	assert_str(Catalog.block_of("printing_process")).is_equal("y1200_1800")
 	assert_array(printing.requires_all).is_equal(["relief_block_cutting","paper_making"])
 	var opens:=DiscoverySystem.research_600_earliest_year(printing)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(printing)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(printing)
 	assert_float(opens).is_equal(float(Catalog.item("printing_process").band_low))
 	assert_float(opens).is_greater(1300.0)
-	# Every foundation known still does not open it early.
 	GameState.known_discoveries.assign(["relief_block_cutting","paper_making"])
 	assert_bool(P.ready(printing,_day(1000))).is_true()
+	# Its age is never a wall: with its foundations known it may be taken up
+	# early, at work proportional to the years ahead of its age.
 	for year:float in [600.0,1082.0,1200.0,start-1.0]:
-		assert_bool(DiscoverySystem.research_600_open(printing,_society(year))).override_failure_message("year %d" % int(year)).is_false()
-		assert_bool(_eligible_at(printing,year)).override_failure_message("year %d" % int(year)).is_false()
+		assert_bool(DiscoverySystem.research_600_open(printing,_society(year))).override_failure_message("year %d" % int(year)).is_true()
+		assert_float(DiscoverySystem.research_early_factor(printing,year)).override_failure_message("year %d" % int(year)).is_equal_approx(1.0+(start-year)/Catalog.AHEAD_STEP_YEARS,0.0001)
 	# At its band the era gate and design conditions let it through.
 	assert_bool(DiscoverySystem.research_600_open(printing,_society(start))).is_true()
 	assert_array(DiscoverySystem.research_600_missing(printing,_society(start))).is_empty()
@@ -60,16 +61,18 @@ func test_blast_furnace_is_closed_at_year_1200()->void:
 	var furnace:=_entry("blast_furnace")
 	assert_str(Catalog.block_of("blast_furnace")).is_equal("y1200_1800")
 	var opens:=DiscoverySystem.research_600_earliest_year(furnace)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(furnace)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(furnace)
 	assert_float(opens).is_equal(float(Catalog.item("blast_furnace").band_low))
 	assert_float(opens).is_greater(1700.0)
 	GameState.known_discoveries.assign(furnace.requires_all)
 	assert_bool(P.ready(furnace,_day(1200))).is_true()
-	assert_bool(DiscoverySystem.research_600_open(furnace,_society(1200.0))).is_false()
-	assert_bool(_eligible_at(furnace,1200.0)).is_false()
-	assert_bool(_eligible_at(furnace,start-1.0)).is_false()
+	# Open long before its age, at work proportional to the years ahead.
+	assert_bool(DiscoverySystem.research_600_open(furnace,_society(1200.0))).is_true()
+	assert_float(DiscoverySystem.research_early_factor(furnace,1200.0)).is_equal_approx(1.0+(start-1200.0)/Catalog.AHEAD_STEP_YEARS,0.0001)
+	assert_float(DiscoverySystem.research_early_factor(furnace,1200.0)).is_greater(50.0)
 	assert_bool(DiscoverySystem.research_600_open(furnace,_society(start))).is_true()
+	assert_float(DiscoverySystem.research_early_factor(furnace,start)).is_equal(1.0)
 
 func test_black_powder_does_not_unlock_hand_cannons()->void:
 	assert_str(Catalog.block_of("black_powder")).is_equal("y1200_1800")
@@ -112,17 +115,18 @@ func test_ocean_sailing_is_not_available_at_year_560()->void:
 	assert_bool(Catalog.block_ids("y0_600").has("ocean_sailing")).is_false()
 	assert_array(sailing.requires_all).is_equal(["open_sea_cargo_ships","floating_needle_compass"])
 	var opens:=DiscoverySystem.research_600_earliest_year(sailing)
-	# Soft gate: this world's start year, a few years around the authored band.
-	var start:=DiscoverySystem.research_start_year(sailing)
+	# Its age in this world: a few years around the authored band.
+	var start:=DiscoverySystem.research_open_year(sailing)
 	assert_float(opens).is_equal(float(Catalog.item("ocean_sailing").band_low))
 	assert_float(opens).is_greater(1600.0)
 	# Its old 0-600 foundations no longer open it at 560.
 	GameState.known_discoveries.assign(["coastal_watercraft","rope_rigging","regional_maps","island_hopping_sailing"])
 	assert_bool(P.ready(sailing,_day(560))).is_false()
 	GameState.known_discoveries.assign(["open_sea_cargo_ships","floating_needle_compass"])
-	assert_bool(DiscoverySystem.research_600_open(sailing,_society(560.0))).is_false()
-	assert_bool(_eligible_at(sailing,560.0)).is_false()
-	assert_bool(_eligible_at(sailing,start-1.0)).is_false()
+	# With its own foundations known it is open at 560, at work proportional to
+	# the centuries ahead of its age.
+	assert_bool(DiscoverySystem.research_600_open(sailing,_society(560.0))).is_true()
+	assert_float(DiscoverySystem.research_early_factor(sailing,560.0)).is_equal_approx(1.0+(start-560.0)/Catalog.AHEAD_STEP_YEARS,0.0001)
 	assert_bool(_eligible_at(sailing,start)).is_true()
 	# Sailing warships and convoys move with it.
 	assert_str(String(Land.EQUIPMENT_GATES.sailing_warship_equipment)).is_equal("ocean_sailing")

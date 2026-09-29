@@ -112,19 +112,17 @@ func test_legacy_opponent_candidates_use_the_same_alternative_foundations()->voi
 		if entry.id=="public_libraries":found=true
 	assert_bool(found).is_true()
 
-## research_600: ready foundations still wait for the entry's era (it may be
-## started a few years early at extra cost: research_start_year); the legacy
-## ordering day is never the gate, and routes are unaffected.
-func test_ready_foundations_wait_only_for_the_era_gate()->void:
+## research_600: ready foundations never wait for the entry's era; before its
+## age the work is only proportionally larger (research_early_factor). The
+## legacy ordering day is never the gate, and routes are unaffected.
+func test_ready_foundations_never_wait_for_the_era()->void:
 	GameState.elapsed_days=1
 	GameState.known_discoveries.assign(library_foundations())
 	var entry:=DiscoverySystem.discovery_definition("public_libraries")
-	var opens:=int(ceil(DiscoverySystem.research_start_year(entry)*365.0))
+	var opens:=int(ceil(DiscoverySystem.research_open_year(entry)*365.0))
 	assert_bool(int(entry.day)>1).is_true()
 	assert_bool(P.ready(entry,1)).is_true()
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,1)).is_false()
-	assert_bool(DiscoverySystem._discovery_is_eligible(entry,opens-365)).is_false()
-	assert_array(DiscoverySystem.research_600_missing(entry)).is_not_empty()
+	assert_float(DiscoverySystem.research_early_factor(entry,0.0)).is_greater(2.0)
 	GameState.elapsed_days=opens
 	assert_bool(DiscoverySystem._discovery_is_eligible(entry,opens)).is_true()
 	assert_array(DiscoverySystem.research_600_missing(entry)).is_empty()

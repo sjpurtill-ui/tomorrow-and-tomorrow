@@ -255,6 +255,36 @@
     "Administration": 6.9,
     "Defense": 3.2
    }
+  },
+  "research_heavy": {
+   "site": "good",
+   "focus": "research",
+   "research": {
+    "demography": 1,
+    "nutrition": 2,
+    "health": 2,
+    "labor": 1,
+    "knowledge": 8,
+    "production": 4,
+    "infrastructure": 1,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 3,
+    "security": 0,
+    "culture": 2
+   },
+   "labor": {
+    "Food": 30.0,
+    "Survey": 6.0,
+    "Extraction": 7.0,
+    "Construction": 7.0,
+    "Crafting": 4.0,
+    "Logistics": 5.0,
+    "Knowledge": 35.0,
+    "Administration": 4.0,
+    "Defense": 2.0
+   },
+   "_doc": "The player's 2026-09-28 manual allocation: 35 of about 100 people on research (manual labor control)."
   }
  },
  "generated": {
