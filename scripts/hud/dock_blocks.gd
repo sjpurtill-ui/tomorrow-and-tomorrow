@@ -33,6 +33,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var dossier:=preload("res://scripts/hud/city_dossier.gd").new();section.add_child(dossier);dossier.setup(block)
 			"held_town":
 				var held:=preload("res://scripts/hud/held_town_dossier.gd").new();section.add_child(held);held.setup(block)
+			"standing":
+				var board:=preload("res://scripts/hud/standing_board.gd").new();section.add_child(board);board.setup(block)
 			"culture":
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
 			"people":

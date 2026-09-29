@@ -63,6 +63,13 @@ func _draw()->void:
 		"military":
 			draw_colored_polygon(PackedVector2Array([Vector2(15,3),Vector2(25,7),Vector2(23,19),Vector2(15,27),Vector2(7,19),Vector2(5,7)]),c)
 			draw_colored_polygon(PackedVector2Array([Vector2(15,8),Vector2(20,10),Vector2(18,18),Vector2(15,21)]),_cut_color())
+		"standing":
+			# A standing stone on its ground, with word of it carried outward.
+			draw_colored_polygon(PackedVector2Array([Vector2(12,25),Vector2(11,13),Vector2(13,6),Vector2(17,5),Vector2(19,12),Vector2(18,25)]),c)
+			draw_rect(Rect2(6,24,18,3),c,true)
+			for r in [7.0,11.0]:
+				draw_arc(Vector2(15,14),r,deg_to_rad(150),deg_to_rad(210),10,c,2.0,true)
+				draw_arc(Vector2(15,14),r,deg_to_rad(-30),deg_to_rad(30),10,c,2.0,true)
 		"chronicle":
 			# A tally-stick: four notches and a fifth struck across.
 			draw_rect(Rect2(4,20,22,5),c,true)

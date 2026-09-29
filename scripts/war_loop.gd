@@ -55,6 +55,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const Scale:=preload("res://scripts/conflict_scale.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+const Standing:=preload("res://scripts/standing.gd")
 
 const VERSION:=1
 const TICK:=5
@@ -234,10 +235,12 @@ static func _band_size(pop:float,share:float)->int:
 	return maxi(3,roundi(pop*clampf(share,MOBILIZE_MIN,MOBILIZE_MAX)))
 
 static func ratio(civ_id:String)->float:
-	## Their fighting strength over ours: people and readiness, not a guess.
+	## Their fighting strength over ours: people, warriors and readiness on one
+	## scale (standing.gd), not a guess. A people that keeps trained, ready
+	## warriors is not the same prey as one that keeps none.
 	var civ:=_civ(civ_id)
-	var readiness:=clampf(float(civ.get("military_readiness",0.45)),0.2,1.0)
-	return clampf(_their_pop(civ_id)*(0.7+readiness*0.5)/maxf(1.0,_our_pop()*0.95),0.2,5.0)
+	if civ.is_empty(): return 1.0
+	return clampf(Standing.their_fighting_strength(civ)/Standing.our_fighting_strength(),0.2,5.0)
 
 static func _rival(civ_id:String)->Dictionary:
 	var r:GDScript=_rivals()
@@ -612,6 +615,7 @@ static func _cause_words(civ_id:String,cause:String)->String:
 			return "an old wrong"
 		"sided": return "your siding with their enemy"
 		"vengeance": return "the blood your fighters spilled"
+		"envy": return "our full stores, with too few to guard them"
 	return "old wrongs"
 
 # --------------------------------------------------------------------------
@@ -1855,19 +1859,35 @@ static func _rival_wars(day:int)->void:
 			_stat("rival_wars")
 
 static func _grudges(day:int)->void:
-	## A heavy old grudge sends raiders without a new demand.
+	## A heavy old grudge sends raiders without a new demand; so does envy of a
+	## people rich in stores and works that too few guard (standing.gd).
+	var our:=Standing.strengths()
 	for civ_id in ForeignDiplomacy.leaders.keys():
 		var id:=String(civ_id)
 		var relation:=_relation(id)
 		if relation.is_empty() or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)) or _truce_binds(id,day): continue
 		var f:=front(id)
 		if not (f.pending as Dictionary).is_empty() or day-int(f.last_harm)<365: continue
-		var rival:=_rival(id)
-		var weight:=float(rival.get("grudge_weight",0.0))
-		if weight<0.9: continue
-		var chance:=clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)
-		if _rng("grudge:%s:%d" % [id,day]).randf()<chance:
+		var chance:=grudge_raid_chance(id)
+		if chance>0.0 and _rng("grudge:%s:%d" % [id,day]).randf()<chance:
 			_schedule(id,day+_rng("grudge_day:%s:%d" % [id,day]).randi_range(20,90),"grudge","grudge")
+			continue
+		var envy_chance:=envy_raid_chance(id,float(Standing.view_of(id,our).get("envy",0.0)))
+		if envy_chance>0.0 and _rng("envy:%s:%d" % [id,day]).randf()<envy_chance:
+			_schedule(id,day+_rng("envy_day:%s:%d" % [id,day]).randi_range(15,60),"envy","envy")
+
+## This month's chance that a heavy old grudge sends raiders (checked monthly
+## by _grudges; the Standing page states it).
+static func grudge_raid_chance(civ_id:String)->float:
+	var rival:=_rival(civ_id)
+	var weight:=float(rival.get("grudge_weight",0.0))
+	if weight<0.9: return 0.0
+	return clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)
+
+## This month's chance that envy of our stores and works sends raiders.
+static func envy_raid_chance(civ_id:String,envy:float)->float:
+	if envy<=Standing.ENVY_RAID_FLOOR: return 0.0
+	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)
 
 # --------------------------------------------------------------------------
 # The court: the war leader's matter, options, answers

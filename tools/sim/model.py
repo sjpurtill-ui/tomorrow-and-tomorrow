@@ -54,7 +54,7 @@ RELIEF_POWER = float(g.const("scripts/early_life_conditions.gd", "RELIEF_POWER",
 MODERN = {k: float(g.const("scripts/early_life_conditions.gd", k, default=0.0, optional=True))
           for k in ("MODERN_BURDEN_LIFT", "MODERN_TABLE_ONSET", "MODERN_TABLE_FULL", "MODERN_TABLE_DEPTH", "MODERN_SURVIVAL_LIMIT")}
 SURPLUS_RELEASE = {k: float(g.const("scripts/government_people_system.gd", k, default=0.0, optional=True))
-                   for k in ("SURPLUS_RELEASE_DAYS", "SURPLUS_RELEASE_MARGIN")}
+                   for k in ("SURPLUS_RELEASE_DAYS", "SURPLUS_RELEASE_MARGIN", "RESERVE_TARGET_DAYS", "RESERVE_MARGIN")}
 BURDEN_OVERLAP_FLOOR = float(g.const("scripts/early_life_conditions.gd", "BURDEN_OVERLAP_FLOOR", default=1.0, optional=True))
 PREMODERN_FECUNDITY = float(g.const("scripts/early_life_conditions.gd", "PREMODERN_FECUNDITY", default=1.0, optional=True))
 # Phase 3 (R3) engine mechanics mirrored here; each reads its constants from the GDScript.
@@ -71,6 +71,7 @@ SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECI
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
 DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
 FOOD_LABOR_FLOOR = g.const("scripts/government_people_system.gd", "FOOD_LABOR_FLOOR", default=[], optional=True)
+FOOD_FLOOR_OF_TYPICAL = float(g.const("scripts/government_people_system.gd", "FOOD_FLOOR_OF_TYPICAL", default=1.0, optional=True))
 SPECIALIZATION_HEADROOM = float(g.const("scripts/society_model.gd", "SPECIALIZATION_HEADROOM", default=0.0, optional=True))
 EFFECT_LINE = g.const("scripts/society_model.gd", "EFFECT_LINE", default={}, optional=True)
 INFANT_LOSS_REPLACEMENT = float(g.const("scripts/early_life_conditions.gd", "INFANT_LOSS_REPLACEMENT", default=2.6, optional=True))
@@ -178,6 +179,9 @@ class Scenario:
     site_profile: dict = field(default_factory=dict)
     seed_finds_day: int = -1
     study_rule: str = ""      # "ai": ArtifactCollection.advance staffs 1 while anything is unstudied
+    # The ruler's own daily split (manual_work.gd, GovernmentPeopleSystem._lay_ruler_split):
+    # applied as given, with no survival guard and no food floor.
+    manual: dict = field(default_factory=dict)
 
     @staticmethod
     def from_dict(name: str, d: dict, sites: dict) -> "Scenario":
@@ -595,6 +599,11 @@ class Surrogate:
     # --------------------------------------------------------------------- labor
     def _allocate_labor(self) -> None:
         """GovernmentPeopleSystem._allocations_for_focus + _apply_survival_guard."""
+        if self.s.manual:
+            total = sum(max(0.0, float(v)) for v in self.s.manual.values()) or 1.0
+            for r in ROLES:
+                self.alloc_pct[r] = max(0.0, float(self.s.manual.get(r, 0.0))) / total * 100.0
+            return
         if self.s.labor:
             # Observed delegated mix (GovernmentPeopleSystem auto focus + cultural
             # labor bias + leader skills), measured from the truth runs.
@@ -621,8 +630,19 @@ class Surrogate:
             w["Food"] += 18.0
             w["Logistics"] += 5.0
         demand, produced, prev = self.last["need"], self.last["production"], self.last["food_share"]
-        if demand > 0 and prev > 0 and (food_risk or self.p.get("guard_always", False)):
-            buffer = (1.08 if food_risk else 1.02) * float(self.p["food_buffer"]) / 1.10
+        # GovernmentPeopleSystem reserve planning: below the reserve target the
+        # planners plan past today's need in proportion to the gap.
+        target_days = SURPLUS_RELEASE.get("RESERVE_TARGET_DAYS") or 0.0
+        if target_days > 0 and demand > 0:
+            target_days = min(target_days, self._storage_capacity() / demand * 0.8)
+        reserve_gap = clamp((target_days - self.stored_days) / max(1.0, target_days), 0.0, 1.0) if target_days > 0 else 0.0
+        margin = float(SURPLUS_RELEASE.get("RESERVE_MARGIN") or 0.0) * reserve_gap
+        if demand > 0 and prev > 0 and (food_risk or reserve_gap > 0.0 or self.p.get("guard_always", False)):
+            if food_risk or self.p.get("guard_always", False):
+                buffer = ((1.08 if food_risk else 1.02) + margin) * float(self.p["food_buffer"]) / 1.10
+            else:
+                # The engine's own plain reserve margin (no shortage calibration).
+                buffer = 1.02 + margin
             needed = clamp(prev * demand * buffer / max(0.01, produced), 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = max(w["Food"], other * needed / max(0.01, 1.0 - needed))
@@ -635,7 +655,7 @@ class Surrogate:
             w["Food"] = min(w["Food"], other * released / max(0.01, 1.0 - released))
         if FOOD_LABOR_FLOOR:
             # GovernmentPeopleSystem._apply_food_labor_floor (Phase 3 R3).
-            floor_share = curve(FOOD_LABOR_FLOOR, self.day / YEAR)
+            floor_share = curve(FOOD_LABOR_FLOOR, self.day / YEAR) * FOOD_FLOOR_OF_TYPICAL
             pol = self.research_policy(self.day / YEAR) or {}
             tot = sum(max(0.0, float(v)) for v in pol.values())
             if tot > 0:
@@ -657,6 +677,11 @@ class Surrogate:
         rate = 1.0 if food_risk else float(self.p["food_adjust_rate"])
         for r in ROLES:
             self.alloc_pct[r] = lerp(self.alloc_pct[r], target[r], rate)
+
+    def _storage_capacity(self) -> float:
+        """FoodSystem._food_storage_capacity (founding stores, pits, public stores)."""
+        pop = max(1.0, self.population)
+        return float(self.p["storage_base_rations"]) + (pop * 84.0 if self.completed_names("Storage Pits") else 0.0)             + (pop * 120.0 if self.completed_names("Public Stores") else 0.0)
 
     @property
     def stored_days(self) -> float:
@@ -713,7 +738,10 @@ class Surrogate:
         prof = self.s.site_profile
         pop = max(1.0, self.population)
         day = self.day + days * 0.5
-        W = self.workers("Food")
+        # FoodSystem.FOOD_WORK_SHARE: the rest of a food worker's day carries,
+        # grinds, cooks and stores what was got.
+        W_all = self.workers("Food")
+        W = W_all * c.food_work_share
         # --- demand (_calculate_aggregate_demand)
         children, elders = self.coh[0], self.coh[5]
         adults = max(0.0, pop - children - elders)
@@ -785,7 +813,7 @@ class Surrogate:
         harvest["staples"] = staples
         # _update_source_health
         able = max(1.0, self.able)
-        pressure = W / able
+        pressure = W_all / able
         for k in ("plants", "meat", "fish"):
             h = sh[keymap[k]]
             take = harvest[k] / max(0.01, rations[k])
@@ -822,7 +850,7 @@ class Surrogate:
         from_stores = max(0.0, need - eat_fresh)
         eaten_stored = min(self.stored, from_stores * days) / days
         self.stored -= eaten_stored * days
-        capacity = float(p["storage_base_rations"]) + (pop * 84.0 if self.completed_names("Storage Pits") else 0.0)             + (pop * 120.0 if self.completed_names("Public Stores") else 0.0)
+        capacity = self._storage_capacity()
         excess = self.fresh + self.stored - capacity
         if excess > 0:
             cut = min(excess, self.fresh)
@@ -851,7 +879,7 @@ class Surrogate:
         self.diet_window = lag(self.diet_window, diet, 1.0 / 120.0, days)
         food_days = (self.fresh + self.stored) / max(0.01, need)
         self.last.update({"production": production, "need": need, "intake": intake, "diet": diet, "harvest": harvest,
-                          "food_share": W / max(1.0, self.able), "food_days": food_days, "weather": weather})
+                          "food_share": W_all / max(1.0, self.able), "food_days": food_days, "weather": weather})
         return self.last
 
     def completed_names(self, name: str) -> bool:

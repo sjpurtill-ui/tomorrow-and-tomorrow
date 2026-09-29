@@ -1025,17 +1025,34 @@ static func rival_dread(civ_id:String)->float:
 	return clampf(DIVINE.civ_dread(civ_id)+people*0.35,0.0,1.0)
 
 static func rival_stance(civ_id:String)->String:
-	## "tribute", "avoid" or "provoke": how this people answers dread.
+	## "tribute", "avoid" or "provoke": how this people answers dread. Their
+	## fighting strength against ours (standing.gd), not head-counts.
 	var p:=Hall._personality(civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	if p.is_empty() or civ.is_empty(): return "avoid"
-	var size_ratio:=clampf(float(civ.get("population",100))/maxf(1.0,Hall._player_population()),0.2,3.0)
+	var Standing:=preload("res://scripts/standing.gd")
+	var size_ratio:=clampf(Standing.their_fighting_strength(civ)/Standing.our_fighting_strength(),0.2,3.0)
 	if (float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5>0.6 and size_ratio>=0.9: return "provoke"
 	if float(p.get("empathy",0.5))>0.55 or float(p.get("discipline",0.5))>0.62 or size_ratio<0.8: return "tribute"
 	return "avoid"
 
 static func dread_weight(situation_type:String,civ_id:String)->float:
-	## Multiplier on how likely each kind of envoy business is, by dread.
+	## Multiplier on how likely each kind of envoy business is: by dread, and
+	## by how they see us (standing.gd): contempt and envy bring demands and
+	## tests, awe brings gifts, trust and allure bring offers, resentment redress.
+	return _dread_only_weight(situation_type,civ_id)*standing_weight(situation_type,civ_id)
+
+static func standing_weight(situation_type:String,civ_id:String,view:Dictionary={})->float:
+	var v:=view if not view.is_empty() else preload("res://scripts/standing.gd").view_of(civ_id)
+	if not bool(v.get("known",false)): return 1.0
+	match situation_type:
+		"tribute_demand","emboldened_demand","test_of_resolve":return clampf(1.0+float(v.contempt)*2.0+float(v.envy)*0.8-float(v.awe)*0.6,0.2,3.5)
+		"dread_tribute","gift_goods","nonaggression_offer":return clampf(1.0+float(v.awe)*1.2,0.5,2.5)
+		"trade_offer","accord_offer","protection_pact":return clampf(1.0+float(v.trust)*0.6+float(v.allure)*0.5-float(v.resentment)*0.6,0.3,2.5)
+		"redress_demand":return clampf(1.0+float(v.resentment)*1.5,0.5,2.5)
+	return 1.0
+
+static func _dread_only_weight(situation_type:String,civ_id:String)->float:
 	var d:=rival_dread(civ_id)
 	if d<0.2: return 1.0
 	match rival_stance(civ_id):
