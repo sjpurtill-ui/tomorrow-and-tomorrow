@@ -316,6 +316,16 @@ static func cohesion_shift()->float:
 static func legitimacy_shift()->float:
 	return (float(monthly().pride)-0.5)*0.04
 
+## How far pride forgives the chiefs: the share by which the blame for
+## unpopular orders, constant change and failed aims is lightened. A proud
+## people forgives up to 30%; one ashamed of itself blames up to 20% more.
+static func forgiveness()->float:
+	return clampf((float(monthly().pride)-0.5)*0.8,-0.2,0.3)
+
+## The blame multiplier the daily systems apply (1 - forgiveness).
+static func blame()->float:
+	return 1.0-forgiveness()
+
 # ------------------------------------------------ read by the Standing page
 
 ## What the shape of our strengths makes of us, in plain words:
@@ -401,7 +411,7 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 ## {attraction, cohesion, legitimacy, menace}.
 static func home_effects()->Dictionary:
 	var m:=monthly()
-	return {"attraction":(float(m.pride)-0.5)*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0}
+	return {"attraction":(float(m.pride)-0.5)*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness()}
 
 ## Another people's strengths, reckoned in their own scope by the same code as
 ## ours ({} if they are not simulated). Rounded to tens: we know them from

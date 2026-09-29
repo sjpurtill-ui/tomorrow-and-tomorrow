@@ -192,3 +192,18 @@ func test_posture_names_the_lean_and_the_neglect()->void:
 	assert_str(String(lean.id)).is_equal("genius")
 	assert_str(String(lean.words)).is_equal("A learned people, with few spears.")
 	assert_bool(bool(lean.lopsided)).is_true()
+
+func test_pride_forgives_the_chiefs_and_shame_blames_them()->void:
+	GameState.simulation_metrics["standing_pride"]=0.5
+	assert_float(Standing.blame()).is_equal_approx(1.0,0.0001)
+	GameState.simulation_metrics["standing_pride"]=0.85
+	assert_float(Standing.blame()).is_equal_approx(0.72,0.0001)
+	GameState.simulation_metrics["standing_pride"]=0.2
+	assert_float(Standing.blame()).is_equal_approx(1.2,0.0001)
+	# A failed aim costs a proud people's chiefs less trust.
+	var Aims:=preload("res://scripts/legacy_aims.gd")
+	GameState.simulation_metrics["standing_pride"]=0.85
+	var proud_cost:=float(Aims.FAIL_METRICS.legitimacy)*Standing.blame()
+	GameState.simulation_metrics["standing_pride"]=0.5
+	var plain_cost:=float(Aims.FAIL_METRICS.legitimacy)*Standing.blame()
+	assert_float(absf(proud_cost)).is_less(absf(plain_cost))

@@ -937,7 +937,7 @@ static func _silence(omen:Dictionary,day:int)->void:
 	## remembers. Belief rises only on coincidence (_omen), never by decree.
 	var wish:=String(omen.get("wish","any"))
 	var metrics:Dictionary=GameState.simulation_metrics
-	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01,0.01,0.99)
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01*preload("res://scripts/standing.gd").blame(),0.01,0.99)
 	var pid:=int(omen.get("pid",0))
 	if pid>0: GovernmentPeopleSystem.record_person_memory(pid,"I led the rite the god asked for, and nothing came of it.","omen",0.5,{"emotion":"doubt"})
 	var wish_words:=String((Lines.WISHES.get(wish,{}) as Dictionary).get("wish","what was asked")) if Lines.WISHES.has(wish) else "what was asked"

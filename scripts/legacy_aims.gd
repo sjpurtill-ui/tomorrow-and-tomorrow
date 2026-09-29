@@ -1599,7 +1599,8 @@ static func fail(day:int)->void:
 	if aim.is_empty(): return
 	var metrics:Dictionary=GameState.simulation_metrics
 	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))+float(FAIL_METRICS.cohesion),0.01,0.99)
-	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))+float(FAIL_METRICS.legitimacy),0.01,0.99)
+	# A proud people forgives a failed aim more (standing.gd).
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))+float(FAIL_METRICS.legitimacy)*preload("res://scripts/standing.gd").blame(),0.01,0.99)
 	var bonds:Dictionary=FAIL_BONDS.duplicate()
 	bonds["hold_days"]=60
 	_bonds_all(bonds)

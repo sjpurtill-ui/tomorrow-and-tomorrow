@@ -732,6 +732,8 @@ static func aim_ending(which:String)->Dictionary:
 			bonds=(map.FULFIL_BONDS as Dictionary)[which]
 		"fail":
 			moves=(map.FAIL_METRICS as Dictionary).duplicate()
+			# The people's pride lightens the blame, as legacy_aims.fail applies it.
+			moves["legitimacy"]=float(moves.get("legitimacy",0.0))*preload("res://scripts/standing.gd").blame()
 			bonds=map.FAIL_BONDS
 		"release":
 			moves={"cohesion":float(map.RELEASE_COHESION)}
