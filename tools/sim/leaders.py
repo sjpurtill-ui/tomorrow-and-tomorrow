@@ -5,13 +5,12 @@ of rules, and its temper only moves preferences.
     python tools/sim/leaders.py --seeds 2 --years 600 [--site good|poor|both] [--ambitions] [--shocks] [--json out.json]
 
 An automated leader is a computer ruler (its personality) or the player's own
-council (the temper of the people's ambitions, leader_personality.gd
-temper_of_culture). Both read the same rules. This runs five archetypal
-tempers (or, with --ambitions, the council temper of a people of each
-ambition) through them on the good and the poor site and asks: is any temper
-at least as good as another on every outcome, and does each have a clear
-strength and a clear cost? About 25 s for the archetypes, 75 s for the
-ambitions (10 processes).
+leaders (the people's tendency, the values they live by: leader_personality.gd
+from_values). Both read the same rules. This runs five archetypal tempers (or,
+with --ambitions, one temper leaning toward each ambition) through them on the
+good and the poor site and asks: is any temper at least as good as another on
+every outcome, and does each have a clear strength and a clear cost? About
+25 s for the archetypes, 75 s for the ambitions (10 processes).
 
 Rules mirrored here (each names its engine source; constants are parsed from
 the GDScript so they cannot drift):
@@ -22,7 +21,7 @@ the GDScript so they cannot drift):
   cultural labor bias (cultural_inheritance.gd WORK) and its wish for food
   work planned as deeper stores (reserve_lean_of), in model.py _allocate_labor;
 * research: the ruler's emphasis (preferences research weights plus the
-  controller's culture weights, research_plan with the new-world budget of 4)
+  controller's culture weights, research_plan in ATTENTION_STEPS steps)
   and the ambition's pace (PeopleDirection.research_multiplier);
 * expansion: civilization_strategy.gd expansion_food, expansion_months,
   settle_distance and settle_margin_days, with the founding party of
@@ -86,7 +85,8 @@ NEEDING_OTHERS = g.const("scripts/civilization_strategy.gd", "AMBITIONS_NEEDING_
 HALF_LIFE_DAYS = float(g.const("scripts/cultural_inheritance.gd", "HALF_LIFE_DAYS"))
 CENTURY_DAYS = float(g.const("scripts/people_direction.gd", "CENTURY_DAYS"))
 HARD_YEAR_DEATHS = float(g.const("scripts/civilization_controller.gd", "HARD_YEAR_DEATHS"))
-CULTURE_SPREAD = float(g.const("scripts/leader_personality.gd", "CULTURE_TEMPER_SPREAD"))
+ATTENTION_STEPS = int(g.const("scripts/research_600_catalog.gd", "ATTENTION_STEPS", default=4, optional=True))
+TEMPER_LEAN = 0.6           # how far the --ambitions tempers lean from even toward their ambition
 GATES = [(0.25, "design"), (0.45, "stores"), (0.70, "labor")]
 WORK_BASE = 6000.0          # mean base work of the concept forms (wonder_concept.gd FORMS)
 SITE_YEARS = 30.0           # one more good site known every 30 years
@@ -155,11 +155,24 @@ def research_weights(p: dict) -> dict:
     return w
 
 
-def research_plan(weights: dict, budget: int) -> dict:
-    """civilization_strategy.gd research_plan: diminishing returns per unit."""
+def research_plan(weights: dict, steps: int = -1) -> dict:
+    """civilization_strategy.gd research_plan: shares in ATTENTION_STEPS steps; with
+    steps enough every weighed field keeps one, the rest by preference, 12 at most."""
+    if steps < 0:
+        steps = ATTENTION_STEPS
     out = dict.fromkeys(gd.LINES, 0)
-    for _ in range(budget):
-        best = max(gd.LINES, key=lambda k: float(weights.get(k, .1)) / (out[k] + 1) if out[k] < 12 else -1)
+    weighed = [k for k in gd.LINES if float(weights.get(k, .1)) > 0.0]
+    if not weighed or steps <= 0:
+        return out
+    left = steps
+    if steps >= len(weighed):
+        for k in weighed:
+            out[k] = 1
+        left -= len(weighed)
+    for _ in range(left):
+        best = max((k for k in weighed if out[k] < 12), key=lambda k: float(weights.get(k, .1)) / (out[k] + 1), default=None)
+        if best is None:
+            break
         out[best] += 1
     return out
 
@@ -264,7 +277,7 @@ class LeaderSurrogate(Surrogate):
         """What the people's ambitions do now (choice weights fade with the years):
         the labor bias and deeper stores (GovernmentPeopleSystem), the research
         pace (PeopleDirection.research_multiplier), the ruler's research emphasis
-        (preferences + current_plan's culture weights, research_plan with 4) and
+        (preferences + current_plan's culture weights, research_plan) and
         the expansion drive (current_plan)."""
         p = self.temper
         scores = choice_weights(self.culture_events, self.day)
@@ -283,7 +296,7 @@ class LeaderSurrogate(Surrogate):
         for c, s in share.items():
             for d in AMBITIONS[c]["domains"]:
                 weights[d] += s * 4.0
-        self.s.research = research_plan(weights, 4)
+        self.s.research = research_plan(weights)
         self.drive = culture_drive(scores)
         self.expand = expansion_plan(p, self.drive)
 
@@ -525,9 +538,10 @@ def _shock_class():
     return LeaderShockSurrogate
 
 
-def temper_of_culture(ambition: str) -> dict:
-    """leader_personality.gd temper_of_culture for a people of one ambition."""
-    return {a: clamp(.5 + TEMPER[ambition].get(a, 0.0) * CULTURE_SPREAD, .12, .92) for a in AXES}
+def temper_choosing(ambition: str) -> dict:
+    """A temper leaning from even toward one ambition's weights (AMBITION_TEMPER),
+    so a ruler of that temper takes it up (tests/test_leader_balance.gd checks every one)."""
+    return {a: clamp(.5 + TEMPER[ambition].get(a, 0.0) * TEMPER_LEAN, .12, .92) for a in AXES}
 
 
 def run_one(args) -> tuple:
@@ -549,19 +563,30 @@ OUTCOMES = [  # key, label, higher is better
     ("works", "Great works standing", True),
     ("might_ratio", "Might (fighting strength ratio)", True),
     ("towns", "Towns", True),
-    ("hunger_deaths", "Hunger deaths (total)", False),
-    ("raid_deaths", "Killed by raiders (total)", False),
-    ("settler_deaths", "Settlers lost (total)", False),
+    ("cap_production", "Production capacity", True),
+    ("cap_culture", "Culture capacity", True),
+    ("hunger_rate", "Hunger deaths /1000 person-years", False),
+    ("raid_rate", "Killed by raiders /1000 person-years", False),
+    ("settlers_per_town", "Settlers lost per town founded", False),
     ("follies", "Follies (works fallen)", False),
 ]
 
 
 def summarize(rows_by_seed: list, year: int) -> dict:
-    vals = {}
-    for key, _label, _up in OUTCOMES:
-        xs = [min(rows, key=lambda r: abs(r["year"] - year))[key] for rows in rows_by_seed]
-        vals[key] = float(np.mean(xs))
-    return vals
+    """Mean over seeds at `year`. Deaths are rates over the person-years lived so
+    far (a larger people is not charged for being larger); settler losses are
+    per town founded."""
+    vals: dict = {}
+    for rows in rows_by_seed:
+        upto = [r for r in rows if r["year"] <= year + 1e-6]
+        at = upto[-1]
+        lived = max(1.0, sum(float(r["population"]) for r in upto))
+        derived = {"hunger_rate": at["hunger_deaths"] / lived * 1000.0, "raid_rate": at["raid_deaths"] / lived * 1000.0,
+                   "settlers_per_town": at["settler_deaths"] / max(1, at["towns"] - 1),
+                   "cap_production": at["capacities"]["production"], "cap_culture": at["capacities"]["culture"]}
+        for key, _label, _up in OUTCOMES:
+            vals.setdefault(key, []).append(float(derived[key] if key in derived else at[key]))
+    return {key: float(np.mean(v)) for key, v in vals.items()}
 
 
 def dominance(table: dict, outcomes: list, eps: float = .03) -> list:
@@ -610,7 +635,7 @@ def print_table(title: str, table: dict, outcomes: list, width: int = 21) -> Non
     for key, label, up in outcomes:
         vals = [table[n][key] for n in names]
         hi, lo = (max(vals), min(vals)) if up else (min(vals), max(vals))
-        cells = [f"{v:>{width - 2},.1f}{' +' if v == hi and hi != lo else ' -' if v == lo and hi != lo else '  '}" for v in vals]
+        cells = [f"{v:>{width - 2},.{2 if max(abs(x) for x in vals) < 10 else 1}f}{' +' if v == hi and hi != lo else ' -' if v == lo and hi != lo else '  '}" for v in vals]
         print(f"  {label:38s}" + "".join(cells))
 
 
@@ -620,13 +645,13 @@ def main() -> int:
     ap.add_argument("--years", type=int, default=600)
     ap.add_argument("--site", default="both", choices=["good", "poor", "both"])
     ap.add_argument("--ambitions", action="store_true",
-                    help="one temper per ambition (the council temper of a people of that ambition) instead of the five archetypes")
+                    help="one temper per ambition (a temper that takes it up) instead of the five archetypes")
     ap.add_argument("--shocks", action="store_true", help="opt-in: live through the epochal-shock world (shock_world.py)")
     ap.add_argument("--jobs", type=int, default=10)
     ap.add_argument("--json", type=Path, default=None)
     args = ap.parse_args()
     t0 = time.time()
-    tempers = {a: temper_of_culture(a) for a in TEMPER} if args.ambitions else dict(ARCHETYPES)
+    tempers = {a: temper_choosing(a) for a in TEMPER} if args.ambitions else dict(ARCHETYPES)
     sites = ["good", "poor"] if args.site == "both" else [args.site]
     jobs = [(name, temper, s, args.years, site, args.shocks)
             for site in sites for name, temper in tempers.items() for s in range(1, args.seeds + 1)]
