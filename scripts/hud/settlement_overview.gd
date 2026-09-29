@@ -33,6 +33,11 @@ func setup(block:Dictionary)->void:
 	if bool(block.get("can_direct",false)):
 		var ask:=_choices(self,"Ask %s for more hands on" % (first if not first.is_empty() else "the leader"),block.get("choices",[]),String(block.get("current","")))
 		ask.name="AskForHands"
+		# One compact row under the leader's word.
+		for chip in ask.get_children():
+			if chip is Button:
+				(chip as Button).custom_minimum_size.y=26
+				(chip as Button).add_theme_font_size_override("font_size",12)
 	var groups:Array=block.get("groups",[])
 	if not groups.is_empty():_groups(groups,block.get("legend",[]),String(block.get("town_name","")))
 	var founding:Dictionary=block.get("founding",{})
@@ -149,7 +154,7 @@ func _row(row:Dictionary)->Control:
 	var label:=T.text(Label.new(),"body",T.INK) as Label;label.name="Name";label.text=String(row.name);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(label)
 	var value:=T.text(Label.new(),"body",T.INK) as Label;value.name="Value";value.text=String(row.value);value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(value)
 	if bool(row.get("bar",true)):
-		var bar:=OwnScale.new();bar.name="Scale";bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=row.get("marks",[]);body.add_child(bar)
+		var bar:=OwnScale.new();bar.name="Scale";bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=row.get("marks",[]) if bool(row.get("bands",true)) else [];body.add_child(bar)
 	if String(row.get("note",""))!="":
 		var note:=T.text(Label.new(),"small",tone_color(String(row.get("note_tone","muted")))) as Label;note.name="Note";note.text=String(row.note);note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note)
 	return panel
@@ -185,7 +190,9 @@ func _works(works:Dictionary)->void:
 	var box:=VBoxContainer.new();box.name="WaterWorks";box.add_theme_constant_override("separation",8);add_child(box)
 	box.add_child(T.make_label("WATER AND WASTE WORKS",12,T.GOLD_TEXT))
 	for line:String in works.get("progress",[]):_line(box,line,13,T.BODY)
-	if (works.get("progress",[]) as Array).is_empty():_line(box,"Nothing is built yet. Clean water keeps people well.",13,T.MUTED).tooltip_text="Clean water and waste kept apart from it mean fewer sick."
+	if (works.get("progress",[]) as Array).is_empty():
+		var none:=_line(box,"Nothing is built yet.",13,T.MUTED)
+		none.tooltip_text="Clean water, and waste kept apart from it, mean fewer sick.";none.mouse_filter=Control.MOUSE_FILTER_PASS
 	for offer:Dictionary in works.get("offers",[]):
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);box.add_child(row)
 		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
@@ -210,17 +217,23 @@ class OwnScale extends Control:
 		set(value):marks=value;custom_minimum_size.y=10.0+5.0*marks.size();queue_redraw()
 	func _init()->void:
 		custom_minimum_size.y=10;mouse_filter=MOUSE_FILTER_IGNORE
+	## Inset so the ends of a full or empty bar are never cut by the edge.
+	const PAD:=3.0
+	func _at(value:float)->float:
+		return PAD+clampf(value/top,0.0,1.0)*maxf(1.0,size.x-PAD*2.0)
 	func _draw()->void:
 		var mid:=4.0
-		draw_line(Vector2(0,mid),Vector2(size.x,mid),T.RULE,1.0)
-		for tick in 5:draw_line(Vector2(size.x*tick/4.0,mid-2),Vector2(size.x*tick/4.0,mid+2),T.RULE,1.0)
-		var x:=clampf(own/top,0.0,1.0)*size.x
-		if x>0.5:draw_rect(Rect2(0,mid-2,x,4),Color(T.GOLD,.82))
+		draw_line(Vector2(PAD,mid),Vector2(size.x-PAD,mid),T.RULE,1.0)
+		for tick in 5:
+			var tx:=_at(top*tick/4.0)
+			draw_line(Vector2(tx,mid-2),Vector2(tx,mid+2),T.RULE,1.0)
+		var x:=_at(own)
+		if x>PAD+0.5:draw_rect(Rect2(PAD,mid-2,x-PAD,4),Color(T.GOLD,.82))
 		draw_line(Vector2(x,mid-4),Vector2(x,mid+4),T.GOLD,2.0)
 		for index in marks.size():
 			var mark:Dictionary=marks[index]
 			var y:=mid+7.0+index*5.0
-			var a:=clampf(float(mark.low)/top,0.0,1.0)*size.x;var b:=clampf(float(mark.high)/top,0.0,1.0)*size.x
+			var a:=_at(float(mark.low));var b:=_at(float(mark.high))
 			var ink:=Color(Color(mark.color),.85)
 			if b-a<3.0:draw_circle(Vector2((a+b)*.5,y),2.2,ink)
 			else:
