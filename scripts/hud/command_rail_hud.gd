@@ -1346,12 +1346,15 @@ func _refresh_badges()->void:
 	var envoys:=0
 	for audience:Dictionary in load("res://scripts/audience_hall.gd").waiting():
 		if String(audience.get("origin",""))=="foreign": envoys+=1
-	var signature:="%d|%d|%s|%d" % [decisions,visible_foreign,danger,envoys]
+	# Peoples moved against us (standing.gd's monthly reading).
+	var standing_dangers:=int(metrics.get("standing_dangers",0))
+	var signature:="%d|%d|%s|%d|%d" % [decisions,visible_foreign,danger,envoys,standing_dangers]
 	if signature==_badge_signature: return
 	_badge_signature=signature
 	_set_badge("court",str(envoys) if envoys>0 else "",Tokens.GOLD)
 	_set_badge("civ",str(decisions) if decisions>0 else "",Tokens.RED)
 	_set_badge("world",str(visible_foreign) if visible_foreign>0 else "",Tokens.AMBER)
+	_set_badge("standing",str(standing_dangers) if standing_dangers>0 else "",Tokens.RED)
 	_set_badge("economy","!" if danger else "",Tokens.RED)
 
 

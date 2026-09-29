@@ -330,6 +330,22 @@ static func record_monthly()->void:
 	metrics["standing_awe"]=float(command.awe)
 	metrics["standing_allure"]=float(command.allure)
 	metrics["standing_pride"]=float(pride(our).value)
+	# How many peoples we know are moved against us (the rail's Standing badge).
+	metrics["standing_dangers"]=float(danger_count(our))
+
+## Peoples we know who are moved against us now: envy or contempt past their
+## floors, a grudge heavy enough to raid, or a league against us.
+static func danger_count(our:Dictionary={})->int:
+	var count:=0
+	var league:=load("res://scripts/fear_league.gd") as GDScript
+	var war:=load("res://scripts/war_loop.gd") as GDScript
+	for v:Dictionary in views():
+		var id:=String(v.civ_id)
+		var moved:=float(v.envy)>ENVY_RAID_FLOOR or float(v.contempt)>CONTEMPT_FLOOR
+		if not moved and war!=null: moved=float(war.call("grudge_raid_chance",id))>0.0
+		if not moved and league!=null: moved=bool(league.call("is_member",id))
+		if moved: count+=1
+	return count
 
 static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
