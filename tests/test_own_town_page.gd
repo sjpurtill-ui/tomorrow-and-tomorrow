@@ -328,6 +328,19 @@ func test_new_towns_switch_leader_card_hands_and_reports_still_act()->void:
 	text="\n".join(_texts(_page(_block())))
 	assert_str(text).contains("Water (now)").contains("You asked")
 
+func test_the_leader_counts_in_words_and_seasons()->void:
+	assert_str(Model.spoken(7)).is_equal("seven")
+	assert_str(Model.spoken(13)).is_equal("thirteen")
+	assert_str(Model.spoken(40)).is_equal("forty")
+	assert_str(Model.spoken(93)).is_equal("ninety-three")
+	assert_str(Model.spoken(2400)).is_equal("2,400")
+	assert_str(Model.since(10)).is_equal("this season")
+	assert_str(Model.since(45)).is_equal("two moons ago")
+	assert_str(Model.since(400)).is_equal("a winter ago")
+	assert_str(Model.since(31*365+120)).is_equal("thirty-one winters ago")
+	GameState.known_discoveries.append("pictographic_records")
+	assert_str(Model.since(400)).is_equal("13 months ago")
+
 func test_the_history_tab_is_unchanged()->void:
 	var history:Array=Provider.new(terrain,hud).tab(1).blocks
 	assert_str(String(history[0].type)).is_equal("chronicle")

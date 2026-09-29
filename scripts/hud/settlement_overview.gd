@@ -190,7 +190,9 @@ func _works(works:Dictionary)->void:
 	var box:=VBoxContainer.new();box.name="WaterWorks";box.add_theme_constant_override("separation",8);add_child(box)
 	box.add_child(T.make_label("WATER AND WASTE WORKS",12,T.GOLD_TEXT))
 	for line:String in works.get("progress",[]):_line(box,line,13,T.BODY)
-	if (works.get("progress",[]) as Array).is_empty():_line(box,"Nothing is built yet. Clean water keeps people well.",13,T.MUTED).tooltip_text="Clean water and waste kept apart from it mean fewer sick."
+	if (works.get("progress",[]) as Array).is_empty():
+		var none:=_line(box,"Nothing is built yet.",13,T.MUTED)
+		none.tooltip_text="Clean water, and waste kept apart from it, mean fewer sick.";none.mouse_filter=Control.MOUSE_FILTER_PASS
 	for offer:Dictionary in works.get("offers",[]):
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);box.add_child(row)
 		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)

@@ -379,7 +379,12 @@ static func lead(f:Dictionary)->String:
 ## How long ago the town was settled, in the people's own counting.
 static func since(days:int)->String:
 	if days<30:return "this season"
-	if EraWords.hearth() and days>=365*2:return "%s winters ago" % spoken(roundi(days/365.0))
+	if EraWords.hearth():
+		if days<365:
+			var moons:=maxi(1,roundi(days/29.5))
+			return "a moon ago" if moons==1 else "%s moons ago" % spoken(moons)
+		var winters:=roundi(days/365.0)
+		return "a winter ago" if winters==1 else "%s winters ago" % spoken(winters)
 	return Plain.span_text(float(days))+" ago"
 
 ## The sketch's inputs, from exact figures: houses for those under a roof in
