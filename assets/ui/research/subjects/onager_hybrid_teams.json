@@ -1,0 +1,16 @@
+{
+  "id": "onager_hybrid_teams",
+  "line": "logistics",
+  "game_year": 390,
+  "approx_historical_year": -2400,
+  "prompt": "c. 2400 BCE: Onager-hybrid Teams for Four-wheeled Wagons. Onager-hybrid teams for four-wheeled wagons. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9ef720c1-f8fd-46b2-9cfe-a65ca734f7b6.png",
+  "asset": "res://assets/ui/research/subjects/onager_hybrid_teams-v1.png",
+  "sha256": "5948fbff4d68d7081c956dcb66de918f3c12fe7bb58cf5f8b186660db0192a80",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}
