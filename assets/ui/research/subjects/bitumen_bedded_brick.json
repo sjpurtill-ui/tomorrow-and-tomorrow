@@ -1,0 +1,16 @@
+{
+  "id": "bitumen_bedded_brick",
+  "line": "infrastructure",
+  "game_year": 410,
+  "approx_historical_year": -2267,
+  "prompt": "c. 2267 BCE: Bitumen-bedded Brick for Baths and Drains. Bitumen-bedded brick for baths and drains. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-15f7efb8-6e34-4bd1-b9d9-f73cf87e3710.png",
+  "asset": "res://assets/ui/research/subjects/bitumen_bedded_brick-v1.png",
+  "sha256": "448ac3eb8575e97168d5169ea4940ba6b9a8368412f9c55c934b273a8311de08",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.38
+  ]
+}
