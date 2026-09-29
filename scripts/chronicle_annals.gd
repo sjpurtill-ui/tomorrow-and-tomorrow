@@ -14,7 +14,11 @@ extends RefCounted
 ##   roll()    When a year ends, its facts become one entry: a name for the
 ##             year taken from its most memorable event, then only what
 ##             changed, crossed a record, or reversed a run. A quiet year gets
-##             a short line, never a list of nothing.
+##             a short line, never a list of nothing. A trouble that took no
+##             one never names its year: it is told in the entry, so a run of
+##             dry years is not "the fifth Dry Year". Each year also keeps its
+##             mark (glyph_of), the picture the Chronicle's count of years
+##             draws for it (hud/chronicle_feed.gd).
 ##
 ## State (all optional keys of GameState.chronicle, so older saves load and
 ## simply begin their annals at the next year's end):
@@ -41,6 +45,18 @@ const SAME_FINDING_DAYS:=60
 const SAID_MAX:=240
 const SAID_TEXTS_MAX:=400
 const NUMBER_WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
+## A trouble names its year only when it filled graves: at least this many
+## dead, and at least this share of the people.
+const NAMING_DEATHS:=2
+const NAMING_DEAD_SHARE:=0.015
+## A "year of ..." name is kept short enough to read as a name.
+const NAME_MAX_CHARS:=34
+## The mark a trouble leaves on the count of years, by crisis type.
+const TROUBLE_GLYPHS:={"sickness":"sickness","stranger":"stranger","drought":"drought","cold":"cold","flood":"flood","fire":"fire","thinning":"thinning","hunger":"hunger"}
+## Words in a trouble's short name that tell its type (older years kept only
+## the name).
+const TROUBLE_WORDS:={"strangers":"stranger","dry":"drought","springs":"drought","rain":"drought","flux":"sickness","cough":"sickness","fever":"sickness","sickness":"sickness","spotted":"sickness",
+	"hungry":"hunger","hunger":"hunger","lean":"hunger","burning":"fire","fire":"fire","high water":"flood","flood":"flood","river":"flood","dim":"cold","worn":"thinning","thinning":"thinning","wearing":"thinning"}
 const ORDINALS:=["zeroth","first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth"]
 ## Crisis onset titles (crisis_system.gd) to the crisis type.
 const CRISIS_TYPES:={"Sickness at the Fires":"sickness","The Strangers' Sickness":"stranger","The Rain Does Not Come":"drought","The Sun Is Dim":"cold","The River Comes In":"flood","Fire in the Camp":"fire","The Land Is Worn Out":"thinning","The Sickness Spreads":"sickness"}
@@ -78,7 +94,7 @@ static func acc(c:Dictionary,day:int=-1)->Dictionary:
 static func _new_acc(year:int)->Dictionary:
 	return {"year":year,"pop0":_people(),"crises":[],"deaths":[],"learned":[],"firsts":[],"scouts":{"n":0,"km":0,"days":0,"hurt":0,"back":0,"news":0},
 		"contacts":[],"aims":[],"works":[],"wars":[],"heads":[],"milestones":[],"born":0,"buried":0,"folded":0,"regard":"",
-		"abroad":[],"births":[],"turnings":[],"mild":[],"upkeep":[]}
+		"abroad":[],"births":[],"turnings":[],"mild":[],"dry":[],"upkeep":[]}
 
 
 static func _list_of(c:Dictionary,key:String)->Array:
@@ -595,6 +611,14 @@ static func note_mild(c:Dictionary,fact:Dictionary)->void:
 	if list.size()<MILD_PER_YEAR:list.append(fact.duplicate(true))
 
 
+## A shallow dry spell the people carried by custom (crisis_system.gd): no
+## card, no court; counted in the year it ended and told in its entry.
+const DRY_PER_YEAR:=4
+static func note_dry(c:Dictionary,fact:Dictionary)->void:
+	var list:=_list_of(acc(c,int(fact.get("end",-1))),"dry")
+	if list.size()<DRY_PER_YEAR:list.append(fact.duplicate(true))
+
+
 ## Losses in the war at sea and in the air (air_naval_consequences.gd): the
 ## routine ones are counted here and told once, in the year's entry.
 const WAR_LOSS_KEYS:=["sunk","downed","crew_dead","civilians","raids","drowned","enemy_sunk","enemy_downed","enemy_civilians","enemy_raids"]
@@ -689,9 +713,23 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var ctx:={"seed":seed,"era":"tally" if tally else "annals","recent":recent,"used":[],"regard":regard,"divine":_divine_lines(y),"pop":int(memory.pop),"change":_biggest_change(a.learned),"sayable":_sayable(a.learned)}
 	var picked:=Years.entry(Years.items(a,annals,ctx))
 	var lines:PackedStringArray=picked.lines
-	# The year's name, from its most memorable event.
-	var name:=_name_year(a,annals)
+	# The year's name and mark, from its most memorable event.
+	var named:=_name_year(a,annals)
+	var name:=String(named.name)
 	memory.name=name
+	memory["glyph"]=String(named.glyph) if name!="" else _quiet_glyph(a)
+	memory["born"]=int(a.born)
+	memory["buried"]=int(a.buried)
+	var types:Array=[]
+	for cr in crises:
+		if not types.has(String(cr.get("type",""))):types.append(String(cr.get("type","")))
+	if not types.is_empty():memory["types"]=types
+	var dry:Array=a.get("dry",[])
+	if not dry.is_empty():
+		var dry_deaths:=0
+		for f in dry:dry_deaths+=int((f as Dictionary).get("deaths",0))
+		memory["dry"]=dry.size()
+		memory["dry_deaths"]=dry_deaths
 	# What the years after need to set themselves against.
 	memory["used"]=ctx.used
 	memory["sig"]=picked.sig
@@ -751,7 +789,7 @@ static func _facts(a:Dictionary,memory:Dictionary,title:String)->Dictionary:
 		"scouts":(a.scouts as Dictionary).duplicate(),"aims":(a.aims as Array).duplicate(true),"works":(a.works as Array).duplicate(),"peoples":(a.contacts as Array).duplicate(),
 		"wars":(a.wars as Array).duplicate(),"people_now":int(memory.get("pop",0)),"people_a_year_before":int(a.pop0),"born":int(a.born),"buried":int(a.buried),
 		"abroad":_texts(a.get("abroad",[])),"envoys":(a.get("envoys",[]) as Array).duplicate(),"named_births":(a.get("births",[]) as Array).duplicate(),"came_forward":(a.get("figures",[]) as Array).duplicate(),
-		"changed_daily_life":_texts(a.get("turnings",[])),"small_sicknesses":(a.get("mild",[]) as Array).duplicate(true)}
+		"changed_daily_life":_texts(a.get("turnings",[])),"small_sicknesses":(a.get("mild",[]) as Array).duplicate(true),"dry_spells":(a.get("dry",[]) as Array).duplicate(true)}
 
 
 static func _texts(items:Array)->Array:
@@ -765,41 +803,166 @@ static func _crisis_short(cr:Dictionary)->String:
 	return _a(_word(String(cr.get("type","hunger")),false))
 
 
-static func _name_year(a:Dictionary,annals:Array)->String:
-	# A great death, a deadly trouble, a first meeting, a kept aim, a finished
-	# work, a first knowing, then any trouble at all.
-	var name:=""
+## Whether `deaths` from one trouble among `pop` people fill enough graves
+## to name the year.
+static func deadly(deaths:int,pop:int)->bool:
+	return deaths>=maxi(NAMING_DEATHS,ceili(float(maxi(0,pop))*NAMING_DEAD_SHARE))
+
+
+## The year's name and its mark, from its most memorable event, the way a
+## count of winters names each winter by one thing: a great death, a trouble
+## that filled graves, a kept aim, a finished work, a first meeting, a change
+## in daily life, a first knowing, the first of a kind of trouble, then the
+## new way that did most. A trouble that took no one never names its year, so
+## a run of dry years is not "the fifth Dry Year"; only a deadly trouble that
+## comes again is counted ("the second Hungry Winter"). Returns {name, glyph};
+## the name is "" for a quiet year.
+static func _name_year(a:Dictionary,annals:Array)->Dictionary:
+	var pop:=maxi(int(a.get("pop0",0)),_people())
 	for d in a.deaths:
-		if bool(d.great):name="the year %s died" % String(d.name).get_slice(" ",0);break
+		if bool(d.great):return {"name":"the year %s died" % String(d.name).get_slice(" ",0),"glyph":"death"}
 	var deadliest:Dictionary={}
 	for cr in a.crises:
 		if int(cr.deaths)>0 and (deadliest.is_empty() or int(cr.deaths)>int(deadliest.deaths)):deadliest=cr
-	if not deadliest.is_empty() and (name=="" or int(deadliest.deaths)>=3):name=_crisis_short(deadliest)
-	if name=="":
-		for aim in a.aims:
-			if String(aim.kind)=="done":name="the year of %s" % _lower_first(String(aim.name));break
-	if name=="" and not (a.works as Array).is_empty():name="the year %s was finished" % String(a.works[0])
-	if name=="" and not (a.contacts as Array).is_empty():
-		var t:=String(a.contacts[0])
-		if ": " in t:name="the year of the %s" % t.get_slice(": ",1)
-		elif not t.ends_with(" Is Dead"):name="the year of %s" % _lower_first(t)
-	if name=="" and not (a.firsts as Array).is_empty():name="the year of %s" % String(a.firsts[0]).to_lower()
-	if name=="" and not (a.crises as Array).is_empty():name=_crisis_short(a.crises[0])
-	if name=="" or not name.begins_with("the "):return name
-	# A name already given to an earlier year is counted: "the second Dry Year".
+	if not deadliest.is_empty() and deadly(int(deadliest.deaths),pop):
+		return {"name":_counted(_crisis_short(deadliest),annals),"glyph":trouble_glyph(String(deadliest.get("type","")),_crisis_short(deadliest))}
+	for aim in a.aims:
+		if String(aim.kind)=="done":return {"name":"the year of %s" % _lower_first(String(aim.name)),"glyph":"milestone"}
+	if not (a.works as Array).is_empty():return {"name":"the year %s was finished" % String(a.works[0]),"glyph":"work"}
+	for t in a.contacts:
+		var met:=String(t)
+		if ": " in met:return {"name":"the year of the %s" % met.get_slice(": ",1),"glyph":"contact"}
+		if not met.ends_with(" Is Dead"):return {"name":"the year of %s" % _lower_first(met),"glyph":"contact"}
+	for t in a.get("turnings",[]):
+		var turn:=String((t as Dictionary).get("title","")) if t is Dictionary else String(t)
+		if turn!="" and turn.length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % _lower_first(turn),"glyph":"ceremony"}
+	for f in a.firsts:
+		if String(f).length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % String(f).to_lower(),"glyph":"discovery"}
+	# The first of its kind is remembered even when it took no one.
+	for cr in a.crises:
+		var type:=String(cr.get("type",""))
+		if type!="" and String(cr.get("short",""))!="" and not _seen_type(annals,type):return {"name":_crisis_short(cr),"glyph":trouble_glyph(type,_crisis_short(cr))}
+	var change:=_biggest_change(a.learned)
+	if not change.is_empty() and String(change.name).length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % String(change.name).to_lower(),"glyph":"discovery"}
+	return {"name":"","glyph":""}
+
+
+## A deadly trouble's name, counted when an earlier year bore it: "the second
+## Hungry Winter".
+static func _counted(name:String,annals:Array)->String:
+	if not name.begins_with("the "):return name
 	var base:=name.substr(4)
 	var seen:=0
 	for m in annals:
 		var old:=String((m as Dictionary).get("name",""))
 		if old==name or old.ends_with(" "+base) and old.begins_with("the "):seen+=1
-	if seen>0 and seen+1<ORDINALS.size() and not name.begins_with("the year"):name="the %s %s" % [ORDINALS[seen+1],base]
+	if seen>0 and seen+1<ORDINALS.size():return "the %s %s" % [ORDINALS[seen+1],base]
 	return name
+
+
+## Whether an earlier year came through a trouble of this type.
+static func _seen_type(annals:Array,type:String)->bool:
+	for m in annals:
+		var mm:Dictionary=m
+		if (mm.get("types",[]) as Array).has(type):return true
+		for k in mm.get("kinds",[]):
+			if _type_of_words(String(k))==type:return true
+	return false
+
+
+## The crisis type a trouble's short name tells ("the Dry Year" -> drought).
+static func _type_of_words(words:String)->String:
+	var lower:=" "+words.to_lower()
+	for w in TROUBLE_WORDS:
+		# At the start of a word: "rain" is not in "strangers".
+		for lead in [" ","-","'"]:
+			if (lead+String(w)) in lower:return String(TROUBLE_WORDS[w])
+	for t in TYPE_WORDS:
+		if String((TYPE_WORDS[t] as Array)[0]) in lower:return String(t)
+	return ""
+
+
+## The mark for a trouble, by its type (or, for older years, its name).
+static func trouble_glyph(type:String,words:String="")->String:
+	if TROUBLE_GLYPHS.has(type):return String(TROUBLE_GLYPHS[type])
+	var from_words:=_type_of_words(words)
+	return String(TROUBLE_GLYPHS.get(from_words,"omen"))
+
+
+## A year with no name still leaves a mark: its trouble, its learning, its
+## roads, or a plain notch.
+static func _quiet_glyph(a:Dictionary)->String:
+	for cr in a.crises:return trouble_glyph(String(cr.get("type","")),_crisis_short(cr))
+	if not (a.get("dry",[]) as Array).is_empty():return "drought"
+	if not (a.get("mild",[]) as Array).is_empty():return "sickness"
+	if int(a.born)>=int(a.buried)+3:return "birth"
+	if (a.learned as Array).size()>=5:return "discovery"
+	if int(a.scouts.n)>=2:return "scout"
+	return "quiet"
+
+
+## The mark of a closed year from its record (older years kept no mark).
+static func glyph_of(m:Dictionary)->String:
+	if String(m.get("glyph",""))!="":return String(m.glyph)
+	var name:=display_name(m)
+	if name!="":
+		if name.begins_with("the year ") and name.ends_with(" died"):return "death"
+		if name.ends_with(" was finished"):return "work"
+		if name.begins_with("the year of "):
+			if not (m.get("kept",[]) as Array).is_empty():return "milestone"
+			if not (m.get("met",[]) as Array).is_empty():return "contact"
+			if not (m.get("turns",[]) as Array).is_empty():return "ceremony"
+			return "discovery"
+		var types:=_types_of(m)
+		return trouble_glyph(String(types[0]) if not types.is_empty() else "",name)
+	if not _types_of(m).is_empty():return trouble_glyph(String(_types_of(m).front()))
+	if int(m.get("dry",0))>0:return "drought"
+	if int(m.get("mild",0))>0:return "sickness"
+	if int(m.get("born",0))>=int(m.get("buried",0))+3:return "birth"
+	if int(m.get("learned",0))>=5:return "discovery"
+	if int(m.get("km",0))>=1000:return "scout"
+	return "quiet"
+
+
+static func _types_of(m:Dictionary)->Array:
+	if m.get("types") is Array and not (m.types as Array).is_empty():return m.types
+	var out:Array=[]
+	for k in m.get("kinds",[]):
+		var t:=_type_of_words(String(k))
+		if t!="" and not out.has(t):out.append(t)
+	return out
+
+
+## The name a closed year is shown by. Years closed before the naming rule
+## changed kept names taken from any trouble, counted ("the eighth Dry
+## Year"); a trouble that did not fill graves no longer names its year, so
+## such a year is shown unnamed. "" for a quiet year.
+static func display_name(m:Dictionary)->String:
+	var name:=String(m.get("name",""))
+	if name=="" or not _trouble_name(name,m):return name
+	return name if deadly(int(m.get("deaths",0)),int(m.get("pop",0))) else ""
+
+
+## Whether a year's name is a trouble's name (with or without its count).
+static func _trouble_name(name:String,m:Dictionary)->bool:
+	if name.begins_with("the year "):return false
+	var base:=name
+	var re:=RegEx.create_from_string("^the (second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth) ")
+	var counted:=re.search(name)
+	if counted!=null:base="the "+name.substr(counted.get_end())
+	if (m.get("kinds",[]) as Array).has(base) or String(m.get("worst",""))==base:return true
+	for t in TYPE_WORDS:
+		if base==_a(_word(String(t),false)):return true
+	return counted!=null and _type_of_words(base)!=""
 
 
 static func _quiet_title(a:Dictionary,seed:int)->String:
 	if int(a.born)>=int(a.buried)+3:return "A year of many births"
-	if not (a.learned as Array).is_empty():return "The year of %s" % String(a.learned[0]).to_lower()
+	var learned:Array=a.learned
+	if learned.size()>=5:return "A year of %s new ways" % _number(learned.size())
 	if int(a.scouts.n)>=2:return "A year on the roads"
+	if not (a.get("dry",[]) as Array).is_empty():return "A dry summer" if String(((a.dry as Array)[0] as Dictionary).get("season",""))=="summer" else "A dry season"
+	if not learned.is_empty() and String(learned[0]).length()<=NAME_MAX_CHARS-12:return "The year of %s" % String(learned[0]).to_lower()
 	return ["A quiet year","A year without a name","An ordinary year"][posmod(seed,3)]
 
 

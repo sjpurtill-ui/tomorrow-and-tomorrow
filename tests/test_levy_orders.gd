@@ -166,3 +166,19 @@ func test_standing_down_sends_the_recruits_then_the_fighters_home()->void:
 	assert_bool(bool(asked.ok)).is_false()
 	assert_str(String(asked.says)).contains("How many")
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(home_before-2)
+
+
+## Founding one town (realm_orders.gd found_town): the settlers set out.
+## Tests have no mapped rivers, so the site is given through the seam.
+func test_founding_a_town_sends_settlers_out()->void:
+	var Realm:=load("res://scripts/realm_orders.gd")
+	CivilizationSystem._add_revealed_area(Vector2.ZERO,45.0,"scout report")
+	var reading:Dictionary=Realm.read("Found a new town by the river")
+	assert_str(String(reading.get("kind",""))).is_equal("found_town")
+	assert_bool(bool(reading.river)).is_true()
+	Realm.site_override=func()->Vector2: return Vector2(12.0,5.0)
+	var done:Dictionary=Realm.perform(reading)
+	Realm.site_override=Callable()
+	assert_bool(bool(done.ok)).override_failure_message(str(done)).is_true()
+	assert_bool((GameState.settlement_convoy as Dictionary).is_empty()).is_false()
+	assert_str(String(done.says)).contains("settlers set out")

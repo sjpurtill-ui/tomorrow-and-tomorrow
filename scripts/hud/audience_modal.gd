@@ -20,6 +20,7 @@ const Commands:=preload("res://scripts/court_commands.gd")
 const CourtFacts:=preload("res://scripts/court_facts.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const OfficeOrders:=preload("res://scripts/court_office_orders.gd")
 const CourtAnswers:=preload("res://scripts/court_answers.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
@@ -88,6 +89,12 @@ var regard_label:Label
 var divine_row:HBoxContainer
 ## Offline, the Court's choices about people: ask, summon, question, confront, judge.
 var persons_row:HBoxContainer
+## The official's own orders as plain choices (court_office_orders.gd).
+var orders_row:HFlowContainer
+## "Did you mean": the closest orders when typed words were not carried out
+## as a real mechanic.
+var suggest_row:HFlowContainer
+var _last_words:=""
 var speaker_frame:PanelContainer
 var bench_cards:Dictionary={}      # person_id -> PanelContainer
 var envoy_color:=Color.WHITE
@@ -186,7 +193,7 @@ func _reset_card(next_mode:String)->void:
 	envoy_stage=null;speech_box=null;business_label=null;scene_note=null;envoy_popovers.clear()
 	transcript=null;transcript_scroll=null;thinking=null;options_row=null;stakes_box=null;outcome_box=null;proposal_box=null
 	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
-	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null
+	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null;orders_row=null;suggest_row=null
 	weigh_clock=-1.0
 	# A different view of the court cross-fades in (BASE); a refresh does not.
 	if next_mode!=mode and is_inside_tree():Motion.cross_fade.call_deferred(card)
@@ -275,6 +282,8 @@ func show_audience(id:String)->void:
 		column.add_child(proposal_box)
 		_build_proposal()
 	column.add_child(_build_speech_row())
+	suggest_row=HFlowContainer.new();suggest_row.name="SuggestRow";suggest_row.add_theme_constant_override("h_separation",6);suggest_row.visible=false;column.add_child(suggest_row)
+	orders_row=HFlowContainer.new();orders_row.name="OrdersRow";orders_row.add_theme_constant_override("h_separation",6);orders_row.add_theme_constant_override("v_separation",6);orders_row.visible=false;column.add_child(orders_row)
 	options_row=HBoxContainer.new();options_row.name="Options";options_row.add_theme_constant_override("separation",10);column.add_child(options_row)
 	persons_row=HBoxContainer.new();persons_row.name="PersonsRow";persons_row.add_theme_constant_override("separation",6);column.add_child(persons_row)
 	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)
@@ -630,6 +639,7 @@ func _build_options()->void:
 		options_row.add_child(_envoy_option_card(option) if is_instance_valid(envoy_stage) else _option_card(option))
 	_build_divine_row()
 	_build_persons_row()
+	_build_orders_row()
 
 const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
 
@@ -681,6 +691,71 @@ func _build_persons_row()->void:
 	var offered:=persons_choices()
 	offered.append_array(WarOrders.offline_choices(audience_id))
 	_fill_persons_menus(persons_row,offered)
+
+## ORDERS BY OFFICE: the official's own business as a few plain choices,
+## each at most one blank (court_office_orders.gd). A choice is the same
+## words the god could type and goes the same way (court_commands.hear).
+func _build_orders_row()->void:
+	if not is_instance_valid(orders_row):return
+	for child in orders_row.get_children():child.queue_free()
+	var audience:=Hall.find(audience_id)
+	var menus:Array=OfficeOrders.menus(audience_id) if mode=="audience" and resolved_result.is_empty() and String(audience.get("status",""))=="waiting" else []
+	orders_row.visible=not menus.is_empty()
+	if menus.is_empty():return
+	var caption:=Tokens.make_label("ORDERS",11,Tokens.GOLD,0.12);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;caption.custom_minimum_size.x=58
+	orders_row.add_child(caption)
+	for menu:Dictionary in menus:
+		if menu.has("items"):
+			var button:=MenuButton.new();button.name="Order_"+String(menu.get("name",""));button.text=String(menu.label);button.flat=false
+			_order_style(button)
+			var items:Array=menu.items
+			var popup:=button.get_popup()
+			for index in items.size():popup.add_item(String((items[index] as Dictionary).label),index)
+			button.set_meta("items",items)
+			popup.id_pressed.connect(func(item:int)->void:office_order(String((items[item] as Dictionary).text)))
+			orders_row.add_child(button)
+		else:
+			var one:=Button.new();one.name="Order_"+String(menu.get("name",""));one.text=String(menu.label)
+			_order_style(one)
+			var words:=String(menu.text)
+			one.pressed.connect(func()->void:office_order(words))
+			orders_row.add_child(one)
+
+func _order_style(button:Button)->void:
+	_divine_style(button,Tokens.GOLD)
+	button.custom_minimum_size=Vector2(0,34);button.add_theme_font_size_override("font_size",13)
+
+## "Did you mean": up to three of the closest orders (court_office_orders.gd
+## closest), as one-click choices under the speaking row.
+func _offer_closest(text:String)->void:
+	if not is_instance_valid(suggest_row) or mode!="audience" or not resolved_result.is_empty():return
+	_clear_suggestions()
+	var near:=OfficeOrders.closest(text,3)
+	if near.is_empty():return
+	var caption:=Tokens.make_label("Did you mean",12,Tokens.TEXT_SOFT);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	suggest_row.add_child(caption)
+	for choice:Dictionary in near:
+		var button:=Button.new();button.name="Suggest";button.text=String(choice.label);button.tooltip_text=String(choice.text)
+		_order_style(button)
+		var words:=String(choice.text)
+		button.pressed.connect(func()->void:office_order(words))
+		suggest_row.add_child(button)
+	suggest_row.visible=true
+
+func _clear_suggestions()->void:
+	if not is_instance_valid(suggest_row):return
+	for child in suggest_row.get_children():child.queue_free()
+	suggest_row.visible=false
+
+## One of the official's orders, chosen (or given by a test): the words go
+## to the court as if spoken, and the court answers in the same way.
+func office_order(text:String)->Dictionary:
+	if mode!="audience" or audience_id.is_empty() or not resolved_result.is_empty() or text.strip_edges()=="":return {}
+	_clear_suggestions()
+	_last_words=""
+	var heard:=Commands.hear(audience_id,text,{"terrain":terrain,"civic_settlement":civic_settlement})
+	if bool(heard.get("handled",false)):_after_command(heard)
+	return heard
 
 func _fill_persons_menus(row:HBoxContainer,all:Array[Dictionary])->void:
 	for pair in PERSONS_GROUPS:
@@ -980,6 +1055,8 @@ func _speak()->void:
 		send_envoy_brief(text)
 		return
 	speech_input.clear()
+	_last_words=text
+	_clear_suggestions()
 	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
 	if resolved_result.is_empty():
 		var named:=String(Lives.typed_choice(audience_id,text))
@@ -1181,6 +1258,7 @@ func _speak_rest(text:String)->void:
 		_pump()
 		return
 	if _voice_ok():voice.player_speaks(audience_id,text)
+	if not text.ends_with("?") and String(Commands.classify(text).get("act",""))!="question":_offer_closest(text)
 	# An order given to a summoned official goes to the civic council as a directive.
 	var here:=Hall.find(audience_id)
 	if String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
@@ -1207,6 +1285,9 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 ## Shows a command's result: the voice stages it (a bracketed direction, the
 ## actor's answer as decided, a witness), then the outcome line and receipt.
 func _after_command(result:Dictionary)->void:
+	# Carried out only as a vague standing order: the closest real orders are
+	# offered, so the god can pick instead of rephrasing.
+	if String(result.get("route",""))=="custom_directive" and _last_words!="":_offer_closest(_last_words)
 	if _voice_ok() and voice.has_method("command_reaction"):voice.command_reaction(audience_id,result)
 	elif not String(result.get("outcome","")).is_empty():
 		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(result.outcome),"day":int(GameState.elapsed_days),"aside":false})
@@ -1272,6 +1353,7 @@ func _show_outcome(result:Dictionary)->void:
 	if is_instance_valid(stakes_box):stakes_box.visible=false
 	if is_instance_valid(divine_row):divine_row.visible=false
 	if is_instance_valid(persons_row):persons_row.visible=false
+	if is_instance_valid(orders_row):orders_row.visible=false
 	for child in outcome_box.get_children():child.queue_free()
 	outcome_box.visible=true
 	var reaction:=String(result.get("reaction","neutral"))

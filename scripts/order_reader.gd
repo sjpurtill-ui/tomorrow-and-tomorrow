@@ -498,6 +498,9 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# Standing our fighters down ("dismiss 5 of our soldiers"): a count or a
 	# group of our fighters is never one person to demote.
 	if String(reading.kind)!="question" and not CC.HomeOrders.stand_down_reading(text).is_empty(): return {"route":"legacy","why":"standing our own fighters down"}
+	# The realm's own functions (realm_orders.gd): a band formed, the army's
+	# training, workshop lines, research, scouting, strangers, a great work.
+	if String(reading.kind)!="question" and not CC.HomeOrders.realm_reading(text).is_empty(): return {"route":"legacy","why":"the realm's own business"}
 	var action:=String(reading.action)
 	var kind:=String(reading.kind)
 	var conf:=float(reading.confidence)
