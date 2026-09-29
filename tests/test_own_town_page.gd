@@ -247,12 +247,16 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	assert_float(float(again.high)).is_equal(float(mark.high))
 	# Rows with no estimate of theirs carry no mark: water, roofs, works.
 	for key:String in ["water","roofs","works","building"]:assert_array(rows[key].marks).override_failure_message(key).is_empty()
-	# Their damage is drawn as their repair, beside ours.
-	if (known.fields as Dictionary).has("damage"):
-		var damage:=V.bounds(known.fields.damage)
-		assert_float(float(rows.damage.marks[0].low)).is_equal_approx(1.0-damage.y,0.0001)
+	# Their damage is war damage and our repair counts wear too: their sighting
+	# is told in the tooltip, never drawn against our scale.
+	assert_bool(bool(rows.damage.get("bands",true))).is_false()
+	assert_str(String(rows.damage.tip)).contains("Flintwick: ")
 	page=_page(block)
 	assert_object(page.find_child("Legend",true,false)).is_not_null()
+	var repair:=page.find_child("Row_damage",true,false).find_child("Scale",true,false)
+	assert_array(repair.marks).is_empty()
+	var people:=page.find_child("Row_population",true,false).find_child("Scale",true,false)
+	assert_int((people.marks as Array).size()).is_equal(1)
 
 # --------------------------------------------------------------------------
 # Other towns of ours
@@ -328,6 +332,24 @@ func test_new_towns_switch_leader_card_hands_and_reports_still_act()->void:
 	text="\n".join(_texts(_page(_block())))
 	assert_str(text).contains("Water (now)").contains("You asked")
 
+func test_the_leader_counts_in_words_and_seasons()->void:
+	assert_str(Model.spoken(7)).is_equal("seven")
+	assert_str(Model.spoken(13)).is_equal("thirteen")
+	assert_str(Model.spoken(40)).is_equal("forty")
+	assert_str(Model.spoken(93)).is_equal("ninety-three")
+	assert_str(Model.spoken(2400)).is_equal("2,400")
+	assert_str(Model.since(10)).is_equal("this season")
+	assert_str(Model.since(45)).is_equal("two moons ago")
+	assert_str(Model.since(400)).is_equal("a winter ago")
+	assert_str(Model.since(31*365+120)).is_equal("thirty-one winters ago")
+	GameState.known_discoveries.append("pictographic_records")
+	assert_str(Model.since(400)).is_equal("13 months ago")
+
+func test_the_history_tab_is_unchanged()->void:
+	var history:Array=Provider.new(terrain,hud).tab(1).blocks
+	assert_str(String(history[0].type)).is_equal("chronicle")
+	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
+
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door
 # --------------------------------------------------------------------------
@@ -391,7 +413,7 @@ func _assert_short(page:Node)->void:
 func test_era_words_before_writing_and_short_labels()->void:
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
-	assert_str(text).contains("93 souls").contains("winters").contains("in 100").contains("Babes lost").contains("Food put by")
+	assert_str(text).contains("93 souls").contains("winters").contains("in 100").contains("Babes lost").contains("Food put by").contains("lore ").contains(" passed on")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	assert_array(Voice.lexicon_hits(text,Voice.era_tags("player"))).is_empty()
 	_assert_short(page)
@@ -399,7 +421,7 @@ func test_era_words_before_writing_and_short_labels()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	page=_page(_block())
 	text="\n".join(_texts(page))
-	assert_str(text).contains("93 people").contains("years").contains("in 1,000").contains("Infants buried")
+	assert_str(text).contains("93 people").contains("years").contains("in 1,000").contains("Infants buried").contains("records ")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	_assert_short(page)
 	# Print: the statistical age has its measures.
