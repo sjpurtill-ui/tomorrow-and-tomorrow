@@ -2052,6 +2052,11 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var army:Dictionary=mc.field_armies[index]
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var at_war:=_at_war(String(target.civ_id))
+	# Already standing at the town: nobody marches. The blow falls now
+	# (military_campaign.order_city_operation fights it at once), and the
+	# war leader tells what came of it, never "0 km, about 0 days".
+	if not bool(order.get("queued",false)):
+		return _struck_here(out,army,target,kind,name,going,own_band,order,at_war)
 	army["court_order"]={"kind":kind,"civ_id":String(target.civ_id),"city_id":String(target.city_id),"city_name":name,"day":day,"general":String(out.general),"general_pid":int(out.general_pid),"going":going}
 	if not approach.is_empty(): army.court_order["approach"]=approach.duplicate(true)
 	if not own_band and not formed and chosen<=0 and not String(army.get("name","")).contains(name): army["name"]=_host_name(kind,name)
@@ -2133,6 +2138,50 @@ static func _at_war(civ_id:String)->bool:
 	if index<0: return false
 	var rel:Variant=WorldSimulation.world.civilizations[index].get("player_relation",{})
 	return rel is Dictionary and bool((rel as Dictionary).get("at_war",false))
+
+## The order carried out where the band already stands: what the blow did,
+## from the engine's own result (a town taken, a fight won that could not
+## hold the town and why, a fight begun, a siege laid), in the war leader's
+## plain words.
+static func _struck_here(out:Dictionary,army:Dictionary,target:Dictionary,kind:String,name:String,going:int,own_band:bool,order:Dictionary,at_war:bool)->Dictionary:
+	var civ_id:=String(target.civ_id)
+	var army_id:=int(army.get("army_id",0))
+	var day:=int(WorldSimulation.state.elapsed_days)
+	out.verdict="act"
+	out.objective={"army_id":army_id,"army_name":String(army.get("name","")),"city_id":String(target.city_id),"civ_id":civ_id,"kind":kind,"days":0,"troops":going,"route_km":0,"own_band":own_band,"mustered":0,"here":true}
+	var strategic:Dictionary=order.get("strategic_outcome",{}) if order.get("strategic_outcome") is Dictionary else {}
+	var defenders:=int((order.get("defender",{}) as Dictionary).get("initial_troops",-1)) if order.get("defender") is Dictionary else -1
+	# The band that struck, by the one who leads it there (not whoever speaks in the hall).
+	var leader:=String((army.get("commander",{}) as Dictionary).get("name","")).get_slice(" of ",0).get_slice(" ",0) if army.get("commander") is Dictionary else ""
+	var band:="My band" if own_band else (("%s's band" % leader) if leader!="" else String(army.get("name","The host")))
+	var lead:="We are at %s already, so we went in at once." % name
+	var says:=""
+	var outcome:=""
+	if kind=="siege" and not bool(order.get("resolved",false)):
+		says="We are at %s already: we ring it now and let nothing in or out." % name
+		outcome="%s lays siege to %s where it stands." % [band,name]
+	elif not bool(order.get("resolved",false)):
+		says="%s The fight has begun." % lead
+		outcome="%s is fighting at %s." % [band,name]
+	elif bool(strategic.get("region_captured",false)):
+		says=("%s There was nobody under arms to stop us. %s is ours; what becomes of it and its people is for you to say." % [lead,name]) if defenders==0 else ("%s We beat them, and %s is ours; what becomes of it and its people is for you to say." % [lead,name])
+		outcome="%s took %s." % [band,name]
+	elif String(order.get("outcome",""))=="attacker_victory":
+		var short:=preload("res://scripts/battle_account.gd").hold_shortfall(strategic)
+		var why:=preload("res://scripts/battle_account.gd").hold_words(short).trim_suffix(",") if not short.is_empty() else "we are too few to hold it"
+		says="%s %s but %s. Send more, or let them eat and rest first, and we can take it." % [lead,"Nobody stood against us," if defenders==0 else "We beat them,",why]
+		outcome="%s won the fight at %s but could not hold the town." % [band,name]
+	else:
+		says="%s They threw us back." % lead
+		outcome="%s was beaten at %s." % [band,name]
+	out.says=says
+	out.outcome=outcome
+	out["chronicle"]=outcome
+	Hall._shift_relation(civ_id,-0.06 if not at_war else -0.02,0.12)
+	Chronicle.record({"key":"court_war:%s:%d:%d:here" % [String(target.city_id),day,army_id],"title":("%s Strikes %s" % [String(out.general),name]).substr(0,70),"text":outcome,"tier":"notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
+	if int(out.general_pid)>0:
+		GovernmentPeopleSystem.record_person_memory(int(out.general_pid),"The god sent us in at %s where we stood." % name,"divine",0.6,{"emotion":"duty","outcome":"fought"})
+	return out
 
 static func _on_departure(out:Dictionary,army:Dictionary,target:Dictionary,at_war:bool)->void:
 	var civ_id:=String(target.civ_id)

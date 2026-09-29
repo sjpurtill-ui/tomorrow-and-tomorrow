@@ -655,6 +655,10 @@ func _why(state:Dictionary,a:Dictionary,d:Dictionary,ac:Array[Dictionary],dc:Arr
 ## command); the numbers must also be against the small side, so a few
 ## well-armed people are never "overrun" by a larger rabble they outclass.
 static func overrun_side(attacker_power:float,defender_power:float,attacker_troops:int,defender_troops:int,terrain_defense:float=1.0)->String:
+	# Nobody under arms on one side: the other walks in. A town with no one to
+	# defend it is taken at once, never a battle both sides stand through.
+	if defender_troops<=0 and attacker_troops>0: return "defender"
+	if attacker_troops<=0 and defender_troops>0: return "attacker"
 	if attacker_troops<=0 or defender_troops<=0: return ""
 	var weak:="defender" if defender_power<=attacker_power else "attacker"
 	var weak_power:=minf(attacker_power,defender_power); var strong_power:=maxf(attacker_power,defender_power)

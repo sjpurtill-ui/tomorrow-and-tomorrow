@@ -37,6 +37,24 @@ static func morale_words(morale:float)->String:
 	return "broken"
 
 
+## Why a won town was not held, from the engine's own reckoning
+## (siege_recovery.gd capture_capacity / capture_city): {troops, effective,
+## required}, the counts unknown as -1; {} when the town was not refused.
+static func hold_shortfall(strategic:Dictionary)->Dictionary:
+	var said:=String(strategic.get("message",""))
+	var m:=RegEx.create_from_string("their (\\d+) survivors provide ([\\d.]+) effective personnel; holding this city needs (\\d+)").search(said)
+	if m!=null: return {"troops":int(m.get_string(1)),"effective":float(m.get_string(2)),"required":int(m.get_string(3))}
+	if "lack the supplied" in said: return {"troops":-1,"effective":-1.0,"required":-1}
+	return {}
+
+
+## "our 5 are hungry and worn: they count for about 2 at holding a town, and
+## it needs 3," or the same without the numbers when they are not known.
+static func hold_words(short:Dictionary)->String:
+	if int(short.get("required",-1))<0: return "we are too few and too hungry to hold the town,"
+	return "our %s %s hungry and worn: they count for about %s at holding a town, and it needs %s," % [exact(int(short.troops)),"is" if int(short.troops)==1 else "are",exact(maxi(0,floori(float(short.effective)))),exact(int(short.required))]
+
+
 static func count_words(n:int)->String:
 	n=maxi(0,n)
 	return NUMBER_WORDS[n] if n<NUMBER_WORDS.size() else Marks.about(n)
@@ -253,6 +271,10 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 		if kind in ["won","lost"]: headline=_overrun_headline(kind,before,their_before,enemy_name,where,band)
 		phases=[_overrun_line(kind,theirs_ledger,ledger,their_before,termination)+(" "+surprise_line if surprise_line!="" else "")]
 		tactics={"ours_id":our_tactic,"theirs_id":their_tactic,"ours":"","theirs":""}
+	if kind=="taken" and their_before<=0:
+		headline="%s walked into %s: nobody stood to defend it." % [_cap(band),town if town!="" else "the town"]
+		phases=["There was nobody under arms to meet us."]
+		tactics={"ours_id":"","theirs_id":"","ours":"","theirs":""}
 	var now:=_standing(kind,band,enemy_name,town,ledger,state,strategic,defending,general,at_home,our_raid)
 	# Home itself lost with the fight (siege_recovery.gd capture): everyone of
 	# ours still there is in their hands.
@@ -505,6 +527,9 @@ static func _standing(kind:String,band:String,enemy:String,town:String,ledger:Di
 				if our_raid:
 					now="We raided the fields and stores of %s; the town itself is still theirs. %s has %s, %s." % [town,who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits outside %s for your word. Nothing more happens there unless you give it." % [_cap(he),town]
+				elif town!="" and not defending and not bool(strategic.get("region_captured",false)) and not hold_shortfall(strategic).is_empty():
+					now="We won the fight at %s, but %s so the town is still theirs. %s has %s, %s." % [town,hold_words(hold_shortfall(strategic)),who,_ours(left,"fighter","fighters"),morale]
+					next="Send more fighters, or let these eat and rest, and the town can be taken. %s waits outside %s for your word." % [_cap(he),town]
 				elif town!="" and not defending and not bool(strategic.get("region_captured",false)):
 					now="We hold the ground before %s, but they still hold the town; the gate is shut. %s has %s, %s." % [town,who,_ours(left,"fighter","fighters"),morale]
 					next="%s waits outside %s for your word. Nothing more happens there unless you give it." % [_cap(he),town]
