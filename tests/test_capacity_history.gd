@@ -157,16 +157,20 @@ func _old_capacities()->Dictionary:
 
 # --- Recording ----------------------------------------------------------------
 
-func test_a_month_is_recorded_on_the_month_and_the_record_stays_bounded_and_small()->void:
-	for month in 3:
-		GameState.elapsed_days=month*30
+func test_a_month_is_recorded_as_its_mean_and_the_record_stays_bounded_and_small()->void:
+	for day in 61:
+		GameState.elapsed_days=day
 		model.process_day(DiscoverySystem.catalog,{"food":0.8})
 	var history:Dictionary=GameState.capacity_history
 	assert_int((history.days as PackedInt32Array).size()).is_equal(3)
+	assert_array(Array(history.days as PackedInt32Array)).contains_exactly([0,30,60])
 	for dynamic_id:String in Society.DYNAMICS:
 		assert_int((history.values[dynamic_id] as PackedByteArray).size()).is_equal(6)
+		# A steady month reads as the days it was made of.
 		var recorded:=History.months(dynamic_id)
 		assert_float(float(recorded[-1].value)).is_equal_approx(float(GameState.society_capacities[dynamic_id])*100.0,0.051)
+	# The month's mean is counting again from the day it turned.
+	assert_float(float((history.month as Dictionary).get("days",0.0))).is_equal(1.0)
 	# A day inside the month records nothing.
 	GameState.elapsed_days=70
 	model.process_day(DiscoverySystem.catalog,{"food":0.8})
@@ -228,6 +232,53 @@ func test_more_carriers_and_a_practice_taken_up_are_named_with_their_sign_and_si
 	assert_float(float((watch.r as Dictionary).get(_taken_up("supply_groups"),0.0))).is_greater(0.0)
 	var labor:=History.gathering("labor")
 	assert_float(float((labor.r as Dictionary).get(_taken_up("supply_groups"),0.0))).is_less(0.0)
+
+func test_one_odd_day_inside_a_month_makes_no_mark()->void:
+	_record(0)
+	# A month of ordinary days, and one very bad one just before it turns.
+	for day in range(1,30):
+		GameState.elapsed_days=day
+		GameState.food_security=0.46 if day==29 else 0.66
+		History.observe_day(model.capacity_inputs(),1.0)
+	GameState.food_security=0.46
+	var odd_day:=Society.capacity_value("nutrition",model.capacity_inputs())
+	GameState.food_security=0.66
+	_record(30)
+	# Read on its last day alone, nutrition would have fallen 14 points.
+	assert_float((float(History.months("nutrition")[0].value)-odd_day*100.0)).is_greater(10.0)
+	# As the month's mean it moved half a point: no change told, no mark.
+	var recorded:=History.months("nutrition")
+	assert_float(absf(float(recorded[-1].value)-float(recorded[0].value))).is_less(1.0)
+	assert_int(int(recorded[-1].mark)).is_equal(History.MARK_NONE)
+	assert_array(History.changes("nutrition")).is_empty()
+	var gathered:=History.gathering("nutrition")
+	assert_float(float((gathered.r as Dictionary).get("food",0.0))*100.0).is_equal_approx(-0.2*0.72*100.0/29.0,0.01)
+
+func test_a_season_that_comes_round_again_is_drawn_not_told_but_a_raid_is()->void:
+	for month in 24:
+		GameState.food_security=0.66+0.08*sin(TAU*float(month)/12.0)
+		_record(month*30)
+	# The first year has nothing to compare with; the second repeats it.
+	var told:=History.changes("nutrition",History.KEEP_WHY)
+	assert_int(told.size()).is_greater(0)
+	for change:Dictionary in told: assert_int(int(change.day)).is_less(360)
+	# Raiders in the second winter: told, and so is the way back.
+	GameState.food_issue_history.append({"day":24*30-5,"category":"raid_loss","label":"Stores seized after a failed defense","amount":1800.0,"settlement_days":9.0})
+	GameState.food_security=0.66+0.08*sin(TAU*24.0/12.0)-0.15
+	_record(24*30)
+	var raid:Dictionary=History.changes("nutrition")[0]
+	assert_int(int(raid.day)).is_equal(24*30)
+	assert_int(int(raid.mark)).is_equal(History.MARK_CRISIS)
+	GameState.food_security=0.66+0.08*sin(TAU*25.0/12.0)
+	_record(25*30)
+	var back:Dictionary=History.changes("nutrition")[0]
+	assert_int(int(back.day)).is_equal(25*30)
+	assert_float(_reason(back,"food")).is_greater(5.0)
+	# The seasons after it are drawn again, the raid's season a year on too.
+	for month in range(26,41):
+		GameState.food_security=0.66+0.08*sin(TAU*float(month)/12.0)
+		_record(month*30)
+	assert_int(int(History.changes("nutrition")[0].day)).is_equal(25*30)
 
 func test_a_practice_learned_in_the_month_is_told_as_learned_and_marked_gold()->void:
 	_record(0)

@@ -177,9 +177,13 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 	WorldSimulation.state.society_subcategories=evaluate_subcategories(context)
 	WorldSimulation.state.knowledge_effects=effect_totals.duplicate(true)
 	WorldSimulation.state.combined_intelligence=float(capacities.get("knowledge",0.0))
-	# The people's own record of how each capacity moved, once a month, right
-	# after the month's practices were counted (rival peoples keep none).
-	if month_turned and WorldSimulation.state==GameState: load(CAPACITY_HISTORY_PATH).record(self,inputs,day)
+	# The people's own record of how each capacity moved (rival peoples keep
+	# none): every day counts into the month's mean, and the month just ended
+	# is recorded right after the new month's practices are counted.
+	if WorldSimulation.state==GameState:
+		var history=load(CAPACITY_HISTORY_PATH)
+		if month_turned: history.record(self,inputs,day)
+		history.observe_day(inputs,float(WorldSimulation.span))
 
 func register_discovery(discovery:Dictionary,catalog:Array[Dictionary])->void:
 	var id:=String(discovery.get("id",""))
@@ -284,10 +288,17 @@ const CAPACITY_EFFECTS:Array[String]=["maternal_safety","nutrition_quality","hea
 ## Capacities the people's shared values move, and the values effect each reads.
 const VALUE_EFFECTS:Dictionary={"institutions":"institutions","culture":"cohesion","knowledge":"knowledge","ecology":"ecology","security":"security"}
 
-## The inputs of the day's capacities (not saved: rebuilt every day).
+## The inputs of the day's capacities, and working caches for the monthly
+## history (an Object, so saves never capture it; all rebuilt as needed).
 class Today extends RefCounted:
 	var inputs:Dictionary={}
 	var day:=-1
+	## Per practice: [effect names the capacities read, their values, line].
+	var rows:Dictionary={}
+	var rows_catalog:=-1
+	## The last practice sources worked out, by what they were worked out from.
+	var sources_key:=0
+	var sources:Dictionary={}
 var _today:=Today.new()
 
 ## One reading of everything the twelve capacities are made from.
@@ -444,11 +455,37 @@ func evaluate_capacities(_context:Dictionary)->Dictionary:
 	for dynamic_id:String in DYNAMICS: result[dynamic_id]=capacity_value(dynamic_id,inputs)
 	return result
 
+## CAPACITY_EFFECTS as a set, for quick membership.
+static var _capacity_effect_set:Dictionary={}
+
 ## Whether a practice feeds any total the capacities read.
 static func feeds_capacities(definition:Dictionary)->bool:
+	if _capacity_effect_set.is_empty():
+		for key:String in CAPACITY_EFFECTS: _capacity_effect_set[key]=true
 	for effect_name in definition.get("effects",{}):
-		if String(effect_name) in CAPACITY_EFFECTS: return true
+		if _capacity_effect_set.has(effect_name): return true
 	return false
+
+## A known practice's effects on the totals the capacities read, from its
+## definition: [names, values, line], or [] when it feeds none of them.
+func _capacity_row(id:String)->Array:
+	if _today.rows_catalog!=definitions_by_id.size():
+		_today.rows.clear()
+		_today.rows_catalog=definitions_by_id.size()
+	var row:Variant=_today.rows.get(id)
+	if row is Array: return row
+	var built:Array=[]
+	var definition:Dictionary=definitions_by_id.get(id,{})
+	if not definition.is_empty() and feeds_capacities(definition):
+		var names:=PackedStringArray()
+		var values:=PackedFloat64Array()
+		var effects:Dictionary=definition.get("effects",{})
+		for effect_name in effects:
+			names.append(String(effect_name))
+			values.append(float(effects[effect_name]))
+		built=[names,values,String(definition.get("dynamic",""))]
+	_today.rows[id]=built
+	return built
 
 ## How fully each known practice that feeds a capacity is carried out, as the
 ## effect totals were last built: a two-byte level for each, in the order the
@@ -460,8 +497,7 @@ func practice_basis()->Dictionary:
 	var levels:=PackedByteArray()
 	for id_variant in known:
 		var id:=String(id_variant)
-		var definition:Dictionary=definitions_by_id.get(id,{})
-		if definition.is_empty() or not feeds_capacities(definition): continue
+		if _capacity_row(id).is_empty(): continue
 		var level:=_practice_level(id,adoption,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id))
 		levels.resize(levels.size()+2)
 		levels.encode_u16(levels.size()-2,clampi(roundi(level*65535.0),0,65535))
@@ -472,31 +508,46 @@ func practice_basis()->Dictionary:
 ## _rebuild_effect_totals makes before the era's ceiling and the upkeep. Empty
 ## when the basis does not belong to this people's known practices. A
 ## Dictionary passed as levels_out receives each practice's level by index.
-func effect_sources(basis:Dictionary,effect_ids:Array,levels_out:Variant=null)->Dictionary:
+## The monthly history remembers the last sources worked out; a screen that
+## only reads passes remember=false.
+func effect_sources(basis:Dictionary,effect_ids:Array,levels_out:Variant=null,remember:=true)->Dictionary:
 	var known:Array=WorldSimulation.state.known_discoveries
 	var count:=int(basis.get("n",-1))
 	if count<0 or count>known.size() or known.slice(0,count).hash()!=int(basis.get("hash",0)): return {}
 	var levels:PackedByteArray=basis.get("levels",PackedByteArray())
 	var focus:Dictionary=basis.get("focus",{})
 	var max_focus:=float(basis.get("max_focus",0.0))
+	# The same basis gives the same sources: this month's are next month's
+	# "before" (a load only works them out once more).
+	var key:=hash([count,basis.get("hash",0),levels,focus,max_focus,effect_ids,definitions_by_id.size()])
+	if remember and key==_today.sources_key and not _today.sources.is_empty():
+		if levels_out is Dictionary: (levels_out as Dictionary).merge(_today.sources.levels)
+		return _today.sources.result
 	var result:Dictionary={}
 	for effect_id in effect_ids: result[String(effect_id)]={}
+	var by_place:Dictionary={}
 	var cursor:=0
 	for index in count:
-		var definition:Dictionary=definitions_by_id.get(String(known[index]),{})
-		if definition.is_empty() or not feeds_capacities(definition): continue
+		var row:=_capacity_row(String(known[index]))
+		if row.is_empty(): continue
 		if cursor+2>levels.size(): return {}
 		var level:=float(levels.decode_u16(cursor))/65535.0
 		cursor+=2
-		if levels_out is Dictionary: levels_out[index]=level
+		by_place[index]=level
 		if level==0.0: continue
-		var scale:=practice_scale(String(definition.get("dynamic","")),focus,max_focus)
-		var effects:Dictionary=definition.get("effects",{})
-		for effect_name in effects:
-			if not result.has(String(effect_name)): continue
-			var by_source:Dictionary=result[String(effect_name)]
-			by_source[index]=float(by_source.get(index,0.0))+scaled_effect(String(effect_name),float(effects[effect_name]),scale)*level
-	return result if cursor==levels.size() else {}
+		var scale:=practice_scale(String(row[2]),focus,max_focus)
+		var names:PackedStringArray=row[0]
+		var values:PackedFloat64Array=row[1]
+		for position in names.size():
+			var by_source:Variant=result.get(names[position])
+			if by_source==null: continue
+			(by_source as Dictionary)[index]=float((by_source as Dictionary).get(index,0.0))+scaled_effect(names[position],values[position],scale)*level
+	if cursor!=levels.size(): return {}
+	if remember:
+		_today.sources_key=key
+		_today.sources={"result":result,"levels":by_place}
+	if levels_out is Dictionary: (levels_out as Dictionary).merge(by_place)
+	return result
 
 func leadership_effect(dynamic_id:String)->float:
 	var total:=0.0

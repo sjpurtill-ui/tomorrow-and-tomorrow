@@ -29,21 +29,21 @@ func tab(_sub:int)->Dictionary:
 
 func _kpis(now:float,recorded:Array[Dictionary])->Array:
 	var change:=History.change_over(dynamic_id,365)
-	var points:=float(change.points)
 	var then:=float(change.from)
 	var low:=now
 	var high:=now
 	for month:Dictionary in recorded:
 		low=minf(low,float(month.value));high=maxf(high,float(month.value))
 	var ago:=("A WINTER AGO" if EraWords.hearth() else "A YEAR AGO") if bool(change.full) else "SINCE %s" % EraWords.when(int(change.since)).to_upper()
-	var steady:=absf(points)<0.05
+	# Said as the two shown levels differ, so the tile adds up at a glance.
+	var shown:=roundi(clampf(now,0.0,100.0))-roundi(clampf(then,0.0,100.0))
 	return [
-		{"label":"NOW","value":Words.percent(now),"delta":"today","accent":Tokens.capacity_color(now),"tip":_definition()},
-		{"label":ago,"value":Words.percent(then),"delta":"steady since then" if steady else "%s points since then" % Words.points(points),
-			"delta_color":Tokens.MUTED if steady else (Tokens.GREEN_TEXT if points>0.0 else Tokens.RED_TEXT),"accent":Tokens.TEAL,
+		{"label":"NOW","value":Words.percent(now),"accent":Tokens.capacity_color(now),"tip":"How strong it is today, out of 100."},
+		{"label":ago,"value":Words.percent(then),"delta":"steady" if shown==0 else "%+d %s" % [shown,"point" if absi(shown)==1 else "points"],
+			"delta_color":Tokens.MUTED if shown==0 else (Tokens.GREEN_TEXT if shown>0 else Tokens.RED_TEXT),"accent":Tokens.TEAL,
 			"tip":"%s then, %s now." % [Words.percent(then),Words.percent(now)]},
-		{"label":"ON RECORD","value":"%d–%d%%" % [roundi(low),roundi(high)],"delta":"lowest and highest","accent":Tokens.AMBER,
-			"tip":"The lowest and highest it has been since the record began, %s." % EraWords.when(int(recorded[0].day))},
+		{"label":"ON RECORD","value":"%d–%d%%" % [roundi(low),roundi(high)],"delta":"lowest, highest","accent":Tokens.AMBER,
+			"tip":"Since the record began, %s." % EraWords.when(int(recorded[0].day))},
 	]
 
 ## The line over the recorded months, marked where something changed.
@@ -70,7 +70,13 @@ func _chart(recorded:Array[Dictionary],told:Array[Dictionary],model:Object)->Dic
 		"items":items,"value_key":"value","min_span":10.0,"floor":0.0,"ceiling":100.0,
 		"describe":func(point:Dictionary)->String:return "%s: %s" % [EraWords.when(int(point.get("day",0))),Words.percent(float(point.get("value",0.0)))],
 		"legend":[{"kind":"discovery","text":"a new way"},{"kind":"up","text":"better"},{"kind":"down","text":"worse"},{"kind":"building","text":"a work built"},{"kind":"decree","text":"a decree or office"},{"kind":"crisis","text":"hard times"}],
-		"tip":"%s, recorded each month. Hover the line to read a month; the marks show what moved it." % name}
+		"tip":_chart_tip(name)}
+
+## The chart's tooltip: what the capacity is, then how the line is read.
+func _chart_tip(name:String)->String:
+	var how:="%s, recorded each month as the month's mean. Hover the line to read a month; the marks show what moved it." % name
+	var meaning:=_definition()
+	return how if meaning=="" else "%s\n\n%s" % [meaning,how]
 
 ## Practices learned between two recorded months that feed this capacity.
 func _learned_label(from_day:int,to_day:int,reads:Dictionary)->String:
@@ -155,7 +161,7 @@ func _made_of(ledger:Dictionary,model:Object)->Dictionary:
 	var effect_ids:Array=[]
 	for key in keys:
 		if String(key).begins_with("fx:"): effect_ids.append(String(key).substr(3))
-	var sources:Dictionary=model.effect_sources(model.practice_basis(),effect_ids) if not effect_ids.is_empty() else {}
+	var sources:Dictionary=model.effect_sources(model.practice_basis(),effect_ids,null,false) if not effect_ids.is_empty() else {}
 	var bars:Array=[]
 	var small:=0.0
 	for key in keys:

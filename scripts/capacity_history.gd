@@ -5,9 +5,11 @@ extends RefCounted
 ## Recorded once a month for the player's people (society_model.process_day,
 ## right after the month's practices are counted) into
 ## GameState.capacity_history, which saves with the world; an older save
-## starts empty and fills from its next month. Every number here comes from
-## the one capacity formula (SocietyModel.capacity_value) applied to one
-## reading of the state (capacity_inputs); nothing is estimated for the report.
+## starts empty and fills from its next month. A month is its mean: every day
+## counts its reading into the month (observe_day) and the month is read at
+## that mean, so one odd day never shows as a change. Every number here comes
+## from the one capacity formula (SocietyModel.capacity_value) applied to
+## that reading (capacity_inputs); nothing is estimated for the report.
 ##
 ## Why a capacity moved between two months is answered exactly:
 ##   1. each input's share of the change, by putting that one input back to
@@ -21,7 +23,8 @@ extends RefCounted
 ##      finished, office holders changed, decrees begun or ended, hard times,
 ##      food taken by raiders or war, and our dead in battle. An event is never
 ##      given a share it cannot be shown to have.
-## Small changes are gathered until they come to a point, then told as one.
+## Small changes are gathered until they come to a point, then told as one;
+## a season that comes round as it did last year is drawn, not told.
 ##
 ## Storage stays small (about 60 KB at most): one two-byte word per capacity
 ## and month holding the value and the chart's mark, the last KEEP_WHY told
@@ -82,32 +85,63 @@ static func empty()->Dictionary:
 	for dynamic_id:String in Society.DYNAMICS:
 		values[dynamic_id]=PackedByteArray()
 		why[dynamic_id]=[]
-	return {"version":VERSION,"days":PackedInt32Array(),"values":values,"why":why,"pending":{},"last":{}}
+	return {"version":VERSION,"days":PackedInt32Array(),"values":values,"why":why,"pending":{},"last":{},"month":{}}
 
 static func _ensure(history:Dictionary)->void:
 	if int(history.get("version",0))==VERSION and history.get("days") is PackedInt32Array: return
 	history.clear()
 	history.merge(empty())
 
-## Records this month for the people in scope: the values, what moved each
-## capacity since the last month, and the reading the next month compares to.
+## Counts one day (or a step of `span` days) into the month's mean reading.
+## The practice totals (fx:) change only when the month's practices are
+## counted, so the month reads them at its turn instead.
+static func observe_day(inputs:Dictionary,span:float=1.0)->void:
+	var history:Dictionary=WorldSimulation.state.capacity_history
+	_ensure(history)
+	var month:Dictionary=history.get("month",{})
+	var sums:Dictionary=month.get("sum",{})
+	var weight:=maxf(0.0,span)
+	for key in inputs:
+		if String(key).begins_with("fx:"): continue
+		sums[key]=float(sums.get(key,0.0))+float(inputs[key])*weight
+	history.month={"days":float(month.get("days",0.0))+weight,"sum":sums}
+
+## The month's reading: each daily input at its mean over the days counted
+## since the last record, the practice totals as counted today. A month is
+## never one day's luck: one wet day, one storm, one hard day at the pits
+## moves it by a day's share only. With no day counted yet, today's reading.
+static func month_reading(history:Dictionary,inputs:Dictionary)->Dictionary:
+	var reading:Dictionary=inputs.duplicate()
+	var month:Dictionary=history.get("month",{})
+	var days:=float(month.get("days",0.0))
+	if days<=0.0: return reading
+	var sums:Dictionary=month.get("sum",{})
+	for key in sums:
+		if reading.has(key): reading[key]=float(sums[key])/days
+	return reading
+
+## Records the month just ended for the people in scope: its mean values, what
+## moved each capacity since the last month, and the reading the next month
+## compares to. Every part comes from the one formula on that reading.
 static func record(model:Object,inputs:Dictionary,day:int)->void:
 	var history:Dictionary=WorldSimulation.state.capacity_history
 	_ensure(history)
 	var last:Dictionary=history.last
 	if not last.is_empty() and day<=int(last.get("day",-1)): return
+	var reading:=month_reading(history,inputs)
+	history.month={}
 	var values:Dictionary={}
-	for dynamic_id:String in Society.DYNAMICS: values[dynamic_id]=Society.capacity_value(dynamic_id,inputs)
+	for dynamic_id:String in Society.DYNAMICS: values[dynamic_id]=Society.capacity_value(dynamic_id,reading)
 	var index:=append_month(history,day,values)
 	var basis:Dictionary=model.practice_basis()
 	if (last.get("inputs",{}) as Dictionary).is_empty():
 		for dynamic_id:String in Society.DYNAMICS: history.pending[dynamic_id]=_fresh(day,float(values[dynamic_id]))
 	else:
-		var month:=attribute(model,last,inputs,basis,day)
+		var month:=attribute(model,last,reading,basis,day)
 		var events:=gather_events(model,last,day)
 		for dynamic_id:String in Society.DYNAMICS:
 			accumulate(history,dynamic_id,month[dynamic_id],events,index,day,float(values[dynamic_id]))
-	history.last={"day":day,"inputs":inputs.duplicate(),"basis":basis,"works":WorldSimulation.state.settlement_completed.size(),"offices":_offices()}
+	history.last={"day":day,"inputs":reading,"basis":basis,"works":WorldSimulation.state.settlement_completed.size(),"offices":_offices()}
 
 static func _fresh(day:int,value:float)->Dictionary:
 	return {"since":day,"from":_tenths(value),"d":0.0,"r":{},"e":[]}
@@ -154,7 +188,9 @@ static func attribute(model:Object,last:Dictionary,inputs:Dictionary,basis:Dicti
 		var finish:=Society.capacity_value(dynamic_id,now)
 		var shares:Dictionary={}
 		var told:=0.0
+		var read:=_reads(dynamic_id,now)
 		for key in changed:
+			if not read.has(key): continue
 			var old_value:Variant=before[key]
 			var new_value:Variant=now[key]
 			before[key]=new_value
@@ -184,6 +220,7 @@ static func attribute(model:Object,last:Dictionary,inputs:Dictionary,basis:Dicti
 		# A practice total's share, split among what makes it up.
 		for effect_id:String in sources:
 			var key:="fx:"+effect_id
+			if not read.has(key): continue
 			var change:=float(now[key])-float(before[key])
 			var slope:=0.0
 			if absf(change)>0.000000001:
@@ -198,6 +235,29 @@ static func attribute(model:Object,last:Dictionary,inputs:Dictionary,basis:Dicti
 				reasons[source]=float(reasons.get(source,0.0))+amount
 		result[dynamic_id]={"d":finish-start,"r":reasons}
 	return result
+
+## The inputs one capacity reads, found once from the formula itself: each is
+## moved on a middling reading, where no limit holds, and kept if it moves the
+## capacity. An input it does not read has no share of its change.
+static var _read_cache:Dictionary={}
+
+static func _reads(dynamic_id:String,inputs:Dictionary)->Dictionary:
+	if _read_cache.has(dynamic_id) and (_read_cache[dynamic_id] as Dictionary).get("_count",-1)==inputs.size(): return _read_cache[dynamic_id]
+	var middling:Dictionary={}
+	for key in inputs:
+		var name:=String(key)
+		middling[key]=0.0 if name.begins_with("officials:") or name.begins_with("values:") else 0.3
+	middling["fields"]=6.0
+	middling["works"]=3.0
+	var base:=Society.capacity_value(dynamic_id,middling)
+	var read:Dictionary={"_count":inputs.size()}
+	for key in middling:
+		var held:Variant=middling[key]
+		middling[key]=float(held)+0.05
+		if absf(Society.capacity_value(dynamic_id,middling)-base)>0.000000000001: read[key]=true
+		middling[key]=held
+	_read_cache[dynamic_id]=read
+	return read
 
 static func _reason_key(input:String,dynamic_id:String)->String:
 	if input=="officials:"+dynamic_id: return "officials"
@@ -301,7 +361,7 @@ static func accumulate(history:Dictionary,dynamic_id:String,month:Dictionary,eve
 		if not held: gathered.append_array(code)
 	while gathered.size()>PENDING_EVENTS*3: gathered=gathered.slice(3)
 	pending.e=gathered
-	if absf(float(pending.d))>=TELL_AT:
+	if absf(float(pending.d))>=TELL_AT and not _seasonal(history,dynamic_id,pending,day,value):
 		var entry:=_entry(pending,day,value)
 		var told:Array=history.why.get(dynamic_id,[])
 		told.append(entry)
@@ -312,6 +372,44 @@ static func accumulate(history:Dictionary,dynamic_id:String,month:Dictionary,eve
 	elif learned:
 		_set_mark(history,dynamic_id,index,MARK_DISCOVERY)
 	history.pending[dynamic_id]=pending
+
+## Whether a gathered change is only the year's own round: no event in it,
+## led by how we live rather than by a practice, a work, an office or the age,
+## and standing within a point of the same season in one of the last two
+## years, where it is now and where it began. The seasons are drawn on the
+## line; they are not told as causes. A departure from the seasons, or the way
+## back from one, is told; two years keep one hard year from echoing.
+static func _seasonal(history:Dictionary,dynamic_id:String,pending:Dictionary,day:int,value:float)->bool:
+	if not (pending.get("e",[]) as Array).is_empty(): return false
+	var reasons:Dictionary=pending.get("r",{})
+	var top:=""
+	for key in reasons:
+		if String(key)!="~" and (top=="" or absf(float(reasons[key]))>absf(float(reasons[top]))): top=String(key)
+	if top=="" or _is_practice(top) or top in ["works","officials","values","limit","upkeep"]: return false
+	if _in_season(history,dynamic_id,day,value)!=1: return false
+	# The way back from a departure is told: it began away from its season.
+	return _in_season(history,dynamic_id,int(pending.get("since",day)),float(pending.get("from",0))/1000.0)!=0
+
+## 1 when a value stands within a point of the same season one or two years
+## before, 0 when it does not, -1 when the record does not reach back a year.
+static func _in_season(history:Dictionary,dynamic_id:String,day:int,value:float)->int:
+	var known:=false
+	for years in [1,2]:
+		var before:=_value_near(history,dynamic_id,day-365*years)
+		if before<0.0: continue
+		known=true
+		if absf(value-before)<TELL_AT: return 1
+	return 0 if known else -1
+
+## The recorded value (0-1) of the month nearest `day`, within 20 days; -1
+## when the record does not reach it.
+static func _value_near(history:Dictionary,dynamic_id:String,day:int)->float:
+	var days:PackedInt32Array=history.get("days",PackedInt32Array())
+	var series:PackedByteArray=(history.get("values",{}) as Dictionary).get(dynamic_id,PackedByteArray())
+	var best:=-1
+	for index in mini(days.size(),series.size()/2):
+		if absi(days[index]-day)<=20 and (best<0 or absi(days[index]-day)<absi(days[best]-day)): best=index
+	return float(series.decode_u16(best*2)&_VALUE_BITS)/1000.0 if best>=0 else -1.0
 
 ## Keeps the largest gathered reasons; the rest are summed as "~".
 static func _trim(reasons:Dictionary)->void:
