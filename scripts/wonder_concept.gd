@@ -176,9 +176,12 @@ static func definition(id:String)->Dictionary:
 		"upgrade_from":"","shrine_slots":{"modest":1,"grand":2,"audacious":4}[ambition],"allure":6.0*float(AMBITION_PAY[ambition])*(1.0+t*.4),"concept":true}
 static func _effect_text(purpose:String,ambition:String)->String:
 	var family:=String(PURPOSES[purpose].family)
-	var words:={"civic":"steadies cohesion and legitimacy","covenant":"seals a famine reserve from real surplus","watching_sky":"forecasts lean seasons and famine","long_song":"keeps leaders' memories and lost knowledge","deterrence":"makes rivals weigh war more gravely","traffic":"draws envoys, traders and refugees"}
+	var words:={"civic":"steadies cohesion and legitimacy","covenant":"seals a famine reserve from real surplus","watching_sky":"forecasts lean seasons and famine","long_song":"keeps leaders' memories and lost knowledge","deterrence":"makes rivals weigh war more gravely","traffic":"draws strangers with a pull of %d%%: traders, envoys with real business, and households who judge life here better"}
 	var parts:Array[String]=[]
-	if words.has(family):parts.append(String(words[family]))
+	# A work that stands as planned pulls strangers by its ambition
+	# (undertaking_effects.traffic_of; loaded, as it reaches back here).
+	if family=="traffic":parts.append(String(words.traffic) % roundi(float(load("res://scripts/undertaking_effects.gd").traffic_of({"id":"","effect":{"family":"traffic","strength":pay(ambition,"success")}}))*100.0))
+	elif words.has(family):parts.append(String(words[family]))
 	var rewards:Dictionary=PURPOSES[purpose].rewards
 	if rewards.has("food_capacity") or rewards.has("water_capacity"):parts.append("adds real storage")
 	if rewards.has("research"):parts.append("strengthens research")

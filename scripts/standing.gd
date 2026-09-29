@@ -34,6 +34,12 @@ const ENDURANCE_FOOD_DAYS:=120.0
 ## Envy and Contempt start to move peoples above these.
 const ENVY_RAID_FLOOR:=0.35
 const CONTEMPT_FLOOR:=0.3
+## What Splendor weighs: our great works' renown (great_works.gd renown, the
+## one reading the works screens show), the rest of our culture's allure, and
+## the town's building era (of 6).
+const SPLENDOR_WORKS:=2.4
+const SPLENDOR_CULTURE:=0.6
+const SPLENDOR_ERA:=0.15
 
 ## The nine strengths in the order the Standing page's rose draws them,
 ## clockwise from the top: hard power, plenty, soft power, learning, order.
@@ -155,12 +161,20 @@ static func _reckon_strengths()->Dictionary:
 	for resource in ["Timber","Stone","Clay","Fiber Plants"]: materials+=float(s.resource_stockpiles.get(resource,0.0))
 	var wealth:=clampf(clampf(food_days/WEALTH_FOOD_DAYS,0.0,1.0)*0.65+clampf(materials/maxf(1.0,pop*5.0),0.0,1.0)*0.35,0.0,1.0)
 	result["wealth"]={"value":wealth,"why":"food for %d days, %d loads of materials" % [roundi(food_days),roundi(materials)]}
-	var works:=minf(0.25,Rewards.local_bonus(s,"attraction")+Rewards.local_bonus(s,"reputation")*0.5)
+	# Every standing great work counts, whatever it was built for (its size,
+	# outcome and repair); welcoming and far-famed purposes add on top.
 	var report:=Culture.allure_report(false)
+	var works:=float(report.works)
 	result["_culture"]=float(report.allure)
 	var tier:=float(WorldSimulation.settlements.city_form().get("tier",0.0)) if WorldSimulation.settlements!=null and WorldSimulation.settlements.has_method("city_form") else 0.0
-	var splendor:=clampf(works*2.4+maxf(0.0,float(report.allure)-works)*0.6+clampf(tier/6.0,0.0,1.0)*0.15,0.0,1.0)
-	result["splendor"]={"value":splendor,"why":"%s; the town's building era %d" % ["great works standing" if works>0.0 else "no great work standing yet",roundi(tier)]}
+	var from_works:=works*SPLENDOR_WORKS
+	var from_culture:=maxf(0.0,float(report.allure)-works)*SPLENDOR_CULTURE
+	var from_era:=clampf(tier/6.0,0.0,1.0)*SPLENDOR_ERA
+	var splendor:=clampf(from_works+from_culture+from_era,0.0,1.0)
+	var standing_works:=int(report.get("works_standing",0))
+	var works_words:="no great work standing yet"
+	if from_works>0.0:works_words="%s, %.0f allure among other peoples (+%d)" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),float(report.get("works_points",0.0)),roundi(from_works*100.0)]
+	result["splendor"]={"value":splendor,"why":"%s; our culture and treasures (+%d); the town's building era %d (+%d)" % [works_words,roundi(from_culture*100.0),roundi(tier),roundi(from_era*100.0)]}
 	var legitimacy:=float(m.get("legitimacy",0.5))
 	var cohesion:=float(m.get("cohesion",0.5))
 	var order:=clampf(legitimacy*0.55+cohesion*0.25+_office_skill("Steward","Administration")*0.2,0.0,1.0)

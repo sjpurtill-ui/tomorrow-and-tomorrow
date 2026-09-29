@@ -427,6 +427,80 @@ func test_facade_is_owner_scoped()->void:
 	assert_str(String(site.display_name)).is_equal(U.display_name(mine))
 	assert_dict(site.assessment).is_not_empty()
 
+## One reading of great works (great_works.gd renown) is what the screens show
+## and what Standing and allure use; every standing work is splendid, whatever
+## it was built for.
+func test_every_standing_work_is_splendid_whatever_its_purpose()->void:
+	var Standing:=preload("res://scripts/standing.gd")
+	var Culture:=preload("res://scripts/artifact_culture.gd")
+	var plain:=float(Standing.strengths().splendor.value)
+	# A granary to end hunger: its purpose adds no attraction or reputation, so
+	# the old reading (attraction + half reputation) gave it no Splendor at all.
+	var granary:=_record(city,_id("granary","feed_people","grand","timber",1,"sp1"),.99999)
+	U.apply_outcome(GameState,granary,{},70,"success")
+	assert_float(R.local_bonus(GameState,"attraction")+R.local_bonus(GameState,"reputation")*.5).is_equal(0.0)
+	var renown:=GW.renown()
+	assert_int(int(renown.standing)).is_equal(1)
+	assert_float(float(renown.points)).is_equal_approx(float(C.get_definition(String(granary.id)).allure)*float(granary.condition),.0001)
+	assert_float(float(renown.purpose)).is_equal(0.0)
+	assert_float(float(renown.share)).is_equal_approx(.25*(1.0-exp(-float(renown.points)/GW.RENOWN_SCALE)),.0001)
+	# The simulation reads that very share: allure's works term and Splendor.
+	assert_float(float(Culture.allure_report(false).works)).is_equal_approx(float(renown.share),.00001)
+	var splendid:Dictionary=Standing.strengths().splendor
+	assert_float(float(splendid.value)-plain).is_equal_approx(float(renown.share)*Standing.SPLENDOR_WORKS,.002)
+	assert_str(String(splendid.why)).contains("one great work standing")
+	print("SPLENDOR: ",splendid.why)
+	# And the screens say the same numbers.
+	var sentence:=preload("res://scripts/hud/great_works_atlas.gd").renown_sentence(renown)
+	assert_str(sentence).contains("+%d Splendor" % roundi(float(renown.share)*Standing.SPLENDOR_WORKS*100.0))
+	assert_str(preload("res://scripts/hud/great_works_atlas.gd").renown_tip(renown)).contains(String(renown.breakdown[0].text))
+
+func test_renown_follows_size_outcome_and_repair_and_welcome_adds_on_top()->void:
+	var allure:=func(outcome:String,ambition:String,token:String)->float:
+		var r:=_record(city,_id("gate","welcome_strangers",ambition,"stone",1,token),.99999)
+		U.apply_outcome(GameState,r,{},80,outcome)
+		r.condition=1.0
+		var value:=0.0
+		for part:Dictionary in GW.allure_contribution().breakdown:
+			if String(part.source)==String(r.id):value+=float(part.value)
+		return value
+	var triumph:float=allure.call("triumph","grand","o1")
+	var success:float=allure.call("success","grand","o2")
+	var flawed:float=allure.call("flawed","grand","o3")
+	var modest:float=allure.call("success","modest","o4")
+	assert_float(triumph).is_equal_approx(success*GW.OUTCOME_ALLURE.triumph,.01)
+	assert_float(flawed).is_equal_approx(success*GW.OUTCOME_ALLURE.flawed,.01)
+	assert_float(modest).is_less(success)
+	# Welcoming purposes add on top of the monument; the whole stays within its cap.
+	var renown:=GW.renown()
+	assert_float(float(renown.purpose)).is_greater(0.0)
+	assert_float(float(renown.share)).is_equal_approx(minf(float(renown.cap),float(renown.monument)+float(renown.purpose)),.00001)
+	for i in 12:
+		var big:=_record(city,_id("colossus","awe_rivals","audacious","stone",3,"cap%d" % i),1.0,"functioning")
+		U.apply_outcome(GameState,big,{},81,"triumph")
+	assert_float(float(GW.renown().share)).is_equal_approx(.25,.00001)
+
+func test_renown_is_each_peoples_own()->void:
+	var theirs:Dictionary=_rival(func()->Dictionary:
+		var r:=_record(rival_city,_id("stair","watch_heavens","grand","stone",1,"own"),.99999)
+		U.apply_outcome(WorldSimulation.state,r,{},90,"success")
+		return preload("res://scripts/standing.gd").strengths())
+	assert_float(float(GW.renown(RIVAL).share)).is_greater(0.0)
+	assert_float(float(GW.renown().share)).is_equal(0.0)
+	assert_str(String(theirs.splendor.why)).contains("one great work standing")
+	# A dedication spikes renown for years, and the ceremony says by how much.
+	var before:=GW.renown()
+	var r:=_record(city,_id("ring","honor_dead","grand","stone",1,"ded"),.99999)
+	U.apply_outcome(GameState,r,city,95,"success")
+	var standing:=GW.renown()
+	assert_bool(GW.dedicate(String(city.id),String(r.id),"The Quiet Stones").has("ok")).is_true()
+	var after:=GW.renown()
+	assert_float(float(after.points)).is_greater(float(standing.points))
+	var said:=preload("res://scripts/hud/great_work_ceremony.gd").dedication_words(float(r.ceremony.allure),standing,after)
+	assert_str(said).contains("adds %.0f allure" % float(r.ceremony.allure))
+	assert_str(said).contains("+%d to how alluring" % roundi((float(after.share)-float(standing.share))*100.0))
+	assert_float(float(before.points)).is_equal(0.0)
+
 func test_famine_survived_raises_one_pitch_with_cooldown_and_save_roundtrip()->void:
 	GameState.elapsed_days=4000
 	GameState.simulation_metrics.food_days=90.0

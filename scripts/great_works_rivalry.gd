@@ -632,5 +632,16 @@ static func known_deterrence(observer:String,other:String)->float:
 
 static func trade_routing(owner:String)->float:
 	## Extra external-market access for foreign traders routed toward the holder
-	## (0..0.40 from the effect, scaled to at most +0.10 access).
-	return clampf(Effects.traffic_bonus(owner)*.25,0,.1)
+	## (0..0.40 from the effect, x Effects.TRAFFIC_MARKET, at most TRAFFIC_MARKET_MAX).
+	return clampf(Effects.traffic_bonus(owner)*Effects.TRAFFIC_MARKET,0,Effects.TRAFFIC_MARKET_MAX)
+
+static func known_traffic(observer:String,other:String)->float:
+	## A work that welcomes strangers draws only those who have heard of the
+	## holder's works (a sighting or a traveller's account of one standing), as
+	## deterrence restrains only those who have: the holder's pull, or 0.
+	if other==observer:return 0.0
+	var pull:=Effects.traffic_bonus(other)
+	if pull<=0.0:return 0.0
+	for item:Dictionary in rival_news_for(observer):
+		if String(item.owner)==other and String(item.get("status",""))=="functioning" and String(item.kind) in ["sighting","account"]:return pull
+	return 0.0

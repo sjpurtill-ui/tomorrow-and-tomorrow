@@ -14,6 +14,17 @@ const LESSER_ALLURE:=1.5
 const RIVAL_ALLURE:=.5
 const SPIKE_YEARS:=5.0
 const MAX_ENSHRINED_ALLURE:=12.0
+## How much more or less a standing work is talked of for how it turned out: a
+## triumph beyond its builders' vision, a work that stands, one whose flaws are
+## plain to all. Legacy founding works have no outcome and count as standing.
+const OUTCOME_ALLURE:={"triumph":1.25,"success":1.0,"flawed":.75}
+## Allure points at which great works give about 63% of the most they can add
+## to a people's allure and Splendor (renown); the first works count most.
+const RENOWN_SCALE:=30.0
+## Most that welcoming purposes' household attraction adds to renown (as
+## undertaking_rewards.local_bonus caps it).
+const RENOWN_ATTRACTION_MAX:=.20
+const CULTURE_PATH:="res://scripts/artifact_culture.gd"
 
 # --- Conception -------------------------------------------------------------------
 ## 1–3 fresh concepts in the owner's own image. trigger: {kind:"famine"|"flood"|
@@ -117,7 +128,13 @@ static func site(city_id:String,id:String,owner:String="player")->Dictionary:
 		var r:=U.find(city,id)
 		if r.is_empty():return {}
 		var result:=r.duplicate(true)
-		result.merge({"city_id":city_id,"city_name":String(city.get("name","")),"title":String(Catalog.get_definition(id).title),"display_name":U.display_name(r),"stage":U.stage_of(r),"fraction":U.fraction(r),"total_work":U.total_work(r),"claimed":U.completed(r),"effect_text":Effects.describe(id,float(r.condition),r),"assessment":U.assess_record(r,owner) if r.status in ["building","stalled"] else {},"reward_text":Rewards.description(id,float(r.condition))},true)
+		# The reward line tells the design's effect at a plain success; a work
+		# that stands tells what it actually does, as it turned out.
+		var effect:=Effects.describe(id,float(r.condition),r)
+		var reward:=Rewards.description(id,float(r.condition))
+		var design:=Effects.describe(id,float(r.condition))
+		if U.held(r) and not design.is_empty() and design!=effect:reward=reward.replace(design.trim_suffix("."),effect.trim_suffix("."))
+		result.merge({"city_id":city_id,"city_name":String(city.get("name","")),"title":String(Catalog.get_definition(id).title),"display_name":U.display_name(r),"stage":U.stage_of(r),"fraction":U.fraction(r),"total_work":U.total_work(r),"claimed":U.completed(r),"effect_text":effect,"assessment":U.assess_record(r,owner) if r.status in ["building","stalled"] else {},"reward_text":reward},true)
 		if not r.get("decision",{}).is_empty():
 			result.options=WorldSimulation.settlements.with_city_resources(city_id,func()->Array:return U.decision_options(WorldSimulation.state,r))
 		return result)
@@ -201,42 +218,84 @@ static func notify_audience(kind:String,payload:Dictionary)->void:
 		"proposal":bridge.call("proposal_audience",payload)
 
 # --- Allure, artifacts and effects ------------------------------------------------
-## Great Works are the largest allure source. {value,breakdown:[{source,value,text}]}
-static func allure_contribution(owner:String="player")->Dictionary:
+## Great Works are the largest allure source. Every standing work counts,
+## whatever its purpose: its size (ambition and era, the definition's allure)
+## x how it turned out (OUTCOME_ALLURE) x its repair x its design choices
+## (allure_scale); lesser monuments and unfinished rivals a little; a
+## dedication for SPIKE_YEARS; enshrined objects. Also gathers what the
+## standing works' purposes add (household attraction, reputation), so one
+## pass serves renown(). {value (allure points), breakdown:[{source,value,
+## text}], standing (works counted), attraction, reputation}. Without
+## `with_text` the breakdown's words are left empty (the daily simulation
+## reads only the numbers).
+static func allure_contribution(owner:String="player",with_text:bool=true)->Dictionary:
 	var s:=U.owner_state(owner)
-	var result:={"value":0.0,"breakdown":[]}
+	var result:={"value":0.0,"breakdown":[],"standing":0,"attraction":0.0,"reputation":0.0}
 	if s==null:return result
 	var today:=int(s.elapsed_days)
 	for entry:Dictionary in Effects.controlled_records(owner):
 		var r:Dictionary=entry.record
 		var d:=Catalog.get_definition(String(r.id))
-		var name:=U.display_name(r)
+		var name:=U.display_name(r) if with_text else ""
 		if bool(r.get("lesser",false)) and r.status=="functioning":
-			_add(result,String(r.id),LESSER_ALLURE*float(r.condition),"%s, a lesser monument" % name)
+			_add(result,String(r.id),LESSER_ALLURE*float(r.condition),"%s, a lesser monument" % name if with_text else "")
 			continue
 		if r.status=="rival":
-			_add(result,String(r.id),RIVAL_ALLURE,"%s, an unfinished rival that visitors come to see" % name)
+			_add(result,String(r.id),RIVAL_ALLURE,"%s, an unfinished rival that visitors come to see" % name if with_text else "")
 			continue
 		if not U.held(r):continue
-		_add(result,String(r.id),float(d.allure)*float(r.condition)*float(r.get("allure_scale",1.0)),"%s (%s Great Work%s)" % [name,String(Catalog.ERA_TITLES.get(d.era,"")),", held by conquest" if bool(entry.captured) else ""])
+		result.standing=int(result.standing)+1
+		var table:=Rewards.reward_table(r)
+		result.attraction=float(result.attraction)+float(table.get("attraction",0.0))*float(r.condition)
+		result.reputation=float(result.reputation)+float(table.get("reputation",0.0))*float(r.condition)
+		var outcome:=String(r.get("outcome",""))
+		var fame:=float(OUTCOME_ALLURE.get(outcome,1.0))
+		var words:=""
+		if with_text:
+			var ambition:=String(d.get("ambition","grand"))
+			words="%s: %s %s %s work%s, %d%% in repair%s" % [name,"an" if ambition.begins_with("a") else "a",ambition,String(Catalog.ERA_TITLES.get(d.era,"")),String({"triumph":", a triumph","flawed":", flawed"}.get(outcome,"")),roundi(float(r.condition)*100.0),", held by conquest" if bool(entry.captured) else ""]
+		_add(result,String(r.id),float(d.allure)*fame*float(r.condition)*float(r.get("allure_scale",1.0)),words)
 		var ceremony:Dictionary=r.get("ceremony",{})
 		if String(ceremony.get("status",""))=="dedicated":
 			var fade:=clampf(1.0-float(today-int(ceremony.get("dedicated_day",today)))/(365.0*SPIKE_YEARS),0,1)
-			if fade>0:_add(result,String(r.id),float(ceremony.get("allure",0))*fade,"The dedication of %s is still talked about" % name)
+			if fade>0:_add(result,String(r.id),float(ceremony.get("allure",0))*fade,"The dedication of %s is still talked about" % name if with_text else "")
+		var enshrined:Array=r.get("enshrined",[])
+		if enshrined.is_empty():continue
 		# Enshrined objects belong to the builder's collection until looted.
 		var builder:=U.owner_state(String(entry.owner))
 		var collections:Dictionary=builder.society_exchange.get("collections",{}) if builder!=null else {}
 		var shrine:=0.0
-		for artifact_id in r.get("enshrined",[]):
+		for artifact_id in enshrined:
 			var item:Dictionary=collections.get(artifact_id,{})
 			if item.get("kind","")!="artifact":continue
 			shrine+=minf(4.0,log(1.0+preload("res://scripts/artifact_collection.gd").prestige(item)))
-		if shrine>0:_add(result,String(r.id),minf(MAX_ENSHRINED_ALLURE,shrine),"Pilgrims visit the objects enshrined in %s" % name)
+		if shrine>0:_add(result,String(r.id),minf(MAX_ENSHRINED_ALLURE,shrine),"Pilgrims visit the objects enshrined in %s" % name if with_text else "")
 	return result
 static func _add(result:Dictionary,source:String,value:float,text:String)->void:
 	if value<=0:return
 	result.value=float(result.value)+value
 	result.breakdown.append({"source":source,"value":snappedf(value,.01),"text":text})
+
+## The one reading of a people's great works that Standing (Splendor, and the
+## culture others find alluring), artifact culture and the works screens all
+## use, for any people (`owner`). {points, standing, monument, purpose, share,
+## cap, breakdown}: points are allure_contribution's; monument = cap x (1 -
+## e^(-points / RENOWN_SCALE)), what the works themselves command; purpose is
+## what welcoming and far-famed purposes add on top (their household
+## attraction, at most RENOWN_ATTRACTION_MAX, and half their reputation);
+## share is both, at most `cap` (artifact_culture ALLURE_WORKS, the part of
+## allure great works can supply). The breakdown has words only `with_text`.
+static var _works_cap:=-1.0
+static func renown(owner:String="player",with_text:bool=true)->Dictionary:
+	var allure:=allure_contribution(owner,with_text)
+	if _works_cap<0.0:
+		var culture:=load(CULTURE_PATH) as GDScript
+		_works_cap=float(culture.get_script_constant_map().get("ALLURE_WORKS",.25)) if culture!=null else .25
+	var cap:=_works_cap
+	var points:=float(allure.value)
+	var monument:=cap*(1.0-exp(-points/RENOWN_SCALE))
+	var purpose:=minf(RENOWN_ATTRACTION_MAX,float(allure.attraction))+float(allure.reputation)*.5
+	return {"points":points,"standing":int(allure.standing),"monument":monument,"purpose":purpose,"share":minf(cap,monument+purpose),"cap":cap,"breakdown":allure.breakdown}
 
 ## Enshrine an artifact the owner actually holds in a held work with shrine room.
 static func enshrine(city_id:String,work_id:String,artifact_id:String,owner:String="player")->Dictionary:

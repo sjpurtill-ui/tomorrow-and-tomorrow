@@ -4492,12 +4492,18 @@ func defensive_position()->Dictionary:
 	}
 
 
+## The share of the stores raiders cannot reach, from two independent layers:
+## learned Fortified Stores (adoption x FORTIFIED_STORES_MAX_PROTECTION) and the
+## settlement's defence works (their stage's store protection x integrity).
+## {adoption, learned_protection, stage_protection, integrity,
+## structural_protection, seizure_reduction (the protected share), exposed_share}.
 func store_protection()->Dictionary:
 	var adoption:=_adoption("fortified_stores")
 	var learned_protection:=adoption*FORTIFIED_STORES_MAX_PROTECTION
-	var structural_protection:=float(settlement_defense_snapshot().store_protection)
+	var defense:=settlement_defense_snapshot()
+	var structural_protection:=float(defense.store_protection)
 	var seizure_reduction:=1.0-(1.0-learned_protection)*(1.0-structural_protection)
-	return {"adoption":adoption,"structural_protection":structural_protection,"seizure_reduction":seizure_reduction,"exposed_share":1.0-seizure_reduction}
+	return {"adoption":adoption,"learned_protection":learned_protection,"stage_protection":float(SETTLEMENT_DEFENSE_STAGES[int(defense.stage)].store_protection),"integrity":float(defense.integrity),"structural_protection":structural_protection,"seizure_reduction":seizure_reduction,"exposed_share":1.0-seizure_reduction}
 
 
 func _terrain_defense()->float:

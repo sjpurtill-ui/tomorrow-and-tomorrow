@@ -181,7 +181,9 @@ static func _open_fire(s:Dictionary,day:int,x:Dictionary)->void:
 	var c:=_new(s,"fire",day,x,{"food_lost":lost,"house_lost":cap_before-int(WorldSimulation.state.housing_capacity),"mid_day":day+rng.randi_range(12,20),"end_day":day+rng.randi_range(40,60)})
 	_plan_deaths(s,c,CS._lognormal(rng,0.002,1.1,0.0,0.03))
 	_health(-0.01)
-	_answer(s,c,"rebuild")
+	# The court's silent course (CrisisSystem._default_choice): a people that
+	# has burned before rebuilds apart.
+	_answer(s,c,"apart" if CS.burned_before(s) else "rebuild")
 
 # --------------------------------------------------------------------------
 # The official's answers (CrisisSystem._apply's default courses)
@@ -200,9 +202,17 @@ static func _answer(s:Dictionary,c:Dictionary,choice:String)->void:
 			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.ration)
 			_metric("cohesion",-0.005)
 		"apart":
-			c.mult=float(c.mult)*CS.APART_CUSTOM_FACTOR
-			_policy(c,"apart",{"disease_risk":-0.3},45)
-			_metric("cohesion",-0.01)
+			if String(c.type)=="fire":
+				# The court's _rebuild_apart, from this people's own stores.
+				var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+				var timber:=float(stocks.get("Timber",0.0))
+				stocks["Timber"]=timber-minf(timber,float(c.get("house_lost",0))*0.8)
+				(s.flags as Dictionary)["spaced"]=true
+				_policy(c,"apart",CS.REBUILD_APART_EFFECTS,CS.REBUILD_APART_DAYS)
+			else:
+				c.mult=float(c.mult)*CS.APART_CUSTOM_FACTOR
+				_policy(c,"apart",{"disease_risk":-0.3},45)
+				_metric("cohesion",-0.01)
 		"tend":
 			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.tend)
 			_policy(c,"tend",{"labor_multiplier":-0.05},30)
@@ -241,6 +251,8 @@ static func _advance(s:Dictionary,c:Dictionary,day:int,x:Dictionary)->void:
 	elif String(c.phase)=="mid" and day>=int(c.end_day):
 		_due_deaths(s,c,0.6,"end")
 		if String(c.type) in ["sickness","stranger"]: _after_sickness(s,c,day)
+		# The court's _end: huts rebuilt apart stand again when the fire's course ends.
+		if String(c.type)=="fire" and String(c.choice)=="apart":WorldSimulation.state.housing_capacity=int(WorldSimulation.state.housing_capacity)+int(float(c.get("house_lost",0)))
 		# The dead are remembered (the court's silent "cairn").
 		if int(c.deaths)>0: _policy(c,"cairn",{"labor_multiplier":-0.03},20)
 		_close(s,c)

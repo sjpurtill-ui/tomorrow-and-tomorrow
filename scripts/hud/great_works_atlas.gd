@@ -18,6 +18,9 @@ const P:=preload("res://scripts/hud/paper_sheet.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const CULTURE_PATH:="res://scripts/artifact_culture.gd"
+const GW_PATH:="res://scripts/great_works.gd"
+const EFFECTS_PATH:="res://scripts/undertaking_effects.gd"
+const STANDING:=preload("res://scripts/standing.gd")
 const RIVALRY_PATH:="res://scripts/great_works_rivalry.gd"
 const CATALOG_PATH:="res://scripts/undertaking_catalog.gd"
 const STATUS_WORDS:={"building":"Rising","stalled":"Idle","functioning":"Standing","ruined":"Ruin","abandoned":"Abandoned","rival":"Unfinished","quarried":"Quarried"}
@@ -114,10 +117,12 @@ func _build_header(root:VBoxContainer)->void:
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);header.add_child(words)
 	Kit.label(words,"WONDERS OF OUR MAKING",12,T.GOLD_TEXT,false,.12)
 	Kit.display(words,"Our great works",34)
-	var allure:=Bridge.api_dict("allure_contribution",["player"])
-	var admired:=float(allure.get("value",0))
-	var summary:=Kit.serif(words,"Every work is our own idea, raised or failed by our own hands. %s" % ("Other peoples admire us for them." if admired>0.0 else "None of them is yet admired by other peoples."),16,T.BODY,true)
+	# The same reading Standing and our allure use (great_works.gd renown).
+	var renown:=Bridge.api_dict("renown",["player"])
+	var summary:=Kit.serif(words,"Every work is our own idea, raised or failed by our own hands. %s" % renown_sentence(renown),16,T.BODY,true)
 	summary.name="AllureSummary"
+	summary.tooltip_text=renown_tip(renown)
+	summary.mouse_filter=Control.MOUSE_FILTER_PASS
 	legacy_box=HBoxContainer.new();legacy_box.name="Legacy";legacy_box.add_theme_constant_override("separation",16);header.add_child(legacy_box)
 	_build_legacy()
 	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",8);header.add_child(actions)
@@ -134,6 +139,34 @@ func _build_header(root:VBoxContainer)->void:
 		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,36)
 	var close_button:=Kit.action_button(actions,"Close",close,false,"Close (Esc)")
 	close_button.name="CloseWorks"
+
+## One sentence of what our works command, in the engine's own numbers.
+static func renown_sentence(renown:Dictionary)->String:
+	var points:=float(renown.get("points",0.0))
+	var share:=float(renown.get("share",0.0))
+	if points<=0.0 and share<=0.0:return "None of them is yet admired by other peoples."
+	var standing:=int(renown.get("standing",0))
+	var what:="lesser monuments and remains" if standing==0 else ("one standing work" if standing==1 else "%d standing works" % standing)
+	return "Other peoples admire us for them: %.0f allure from %s. That gives +%d of the %d our works can add to how alluring our culture is, and +%d Splendor." % [points,what,roundi(share*100.0),roundi(float(renown.get("cap",.25))*100.0),roundi(share*STANDING.SPLENDOR_WORKS*100.0)]
+
+## Every source of our works' allure, and the rule that turns it into renown.
+static func renown_tip(renown:Dictionary)->String:
+	var gw:=load(GW_PATH) as GDScript
+	var rules:Dictionary=gw.get_script_constant_map() if gw!=null else {}
+	var lines:PackedStringArray=[]
+	for part:Dictionary in renown.get("breakdown",[]):lines.append("+%.1f  %s" % [float(part.get("value",0.0)),String(part.get("text",""))])
+	if lines.is_empty():lines.append("No work of ours stands yet.")
+	var outcome:Dictionary=rules.get("OUTCOME_ALLURE",{})
+	lines.append("Every standing work counts, whatever it was built for: its size (ambition and era) x how it turned out (a triumph x%.2f, flawed x%.2f) x its repair. A dedication adds allure that fades over %d years; enshrined objects draw pilgrims." % [float(outcome.get("triumph",1.0)),float(outcome.get("flawed",1.0)),roundi(float(rules.get("SPIKE_YEARS",5.0)))])
+	lines.append("The first works count most: %.0f allure gives 63%% of the %d at most (+%d now). Works built to welcome strangers or carry our name add +%d on top. Splendor weighs the total x%.1f." % [float(rules.get("RENOWN_SCALE",30.0)),roundi(float(renown.get("cap",.25))*100.0),roundi(float(renown.get("monument",0.0))*100.0),roundi(float(renown.get("purpose",0.0))*100.0),STANDING.SPLENDOR_WORKS])
+	return "\n".join(lines)
+
+## Allure one work of ours commands now (its share of renown's breakdown).
+func _work_allure(work_id:String)->float:
+	var total:=0.0
+	for part:Dictionary in Bridge.api_dict("renown",["player"]).get("breakdown",[]):
+		if String(part.get("source",""))==work_id:total+=float(part.get("value",0.0))
+	return total
 
 func _record()->Dictionary:
 	var path:="res://scripts/undertaking_rewards.gd"
@@ -286,8 +319,16 @@ func _detail_ours(item:Dictionary)->void:
 		_section("WHAT IT DOES FOR US")
 		var effect_text:=String(site.get("effect_text",""))
 		var reward:=String(site.get("reward_text",""))
-		if not reward.is_empty():Kit.label(detail,reward,14,T.BODY)
-		if not effect_text.is_empty() and not reward.contains(effect_text):Kit.label(detail,effect_text,14,T.BODY)
+		# A work that welcomes strangers: every size and bound of its pull, now.
+		var effects:=load(EFFECTS_PATH) as GDScript
+		var tip:=String(effects.call("traffic_detail","player")) if effects!=null and String(effects.call("family",site))=="traffic" else ""
+		for line:String in ([reward] if not reward.is_empty() else [])+([effect_text] if not effect_text.is_empty() and not reward.contains(effect_text) else []):
+			var shown:=Kit.label(detail,line,14,T.BODY)
+			if not tip.is_empty():shown.tooltip_text=tip;shown.mouse_filter=Control.MOUSE_FILTER_PASS;shown.name="TrafficEffect"
+		var admired:=_work_allure(work_id)
+		if admired>0.0:
+			var fame:=Kit.label(detail,"Admired abroad: %.1f allure, counted in our Splendor and in how alluring our culture is (see the header)." % admired,14,T.BODY)
+			fame.name="WorkAllure"
 		var kept_years:=int(float(site.get("operating_days",0))/365.0)
 		var heard:int=(site.get("heard_by",{}) as Dictionary).size() if site.get("heard_by") is Dictionary else 0
 		Kit.label(detail,"In %s repair. Kept up for %s. Known to %s." % [_condition_words(float(item.get("condition",1))),"less than a year" if kept_years<1 else ("a year" if kept_years==1 else "%d years" % kept_years),"no other people" if heard==0 else ("one other people" if heard==1 else "%d other peoples" % heard)],13,T.TEXT_SOFT)

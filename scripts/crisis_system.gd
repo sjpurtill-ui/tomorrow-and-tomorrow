@@ -103,6 +103,20 @@ const BASE_STRANGER:=0.55
 const CROWD_REF:=0.55
 const HEALTH_REF:=0.9
 const POOL_REF:=0.12
+## Drinking water in the endemic sickness hazard (water_term): water quality
+## is the share of daily water supplied, lowered by disease exposure and raised
+## by water safety and sanitation (practices, and the water and waste works
+## that carry them), up to WATER_Q_MAX. Below plenty (1) each unit short adds
+## WATER_SHORT_BETA to the hazard's exponent; above it, clean water and
+## sanitation keep lowering it by CLEAN_WATER_BETA a unit, so at WATER_Q_MAX a
+## people falls sick about a quarter less often (e^-0.3 = 0.74).
+const WATER_SHORT_BETA:=1.5
+const CLEAN_WATER_BETA:=1.5
+const WATER_Q_MAX:=1.2
+## Huts rebuilt apart after a fire, hearths outside (the fire answer "apart"):
+## every later fire this likely. Earth walls halve it again.
+const SPACED_FIRE_FACTOR:=0.6
+const EARTH_FIRE_FACTOR:=0.5
 ## Reporting thresholds (catalog HISTORICAL_BASE_RATES).
 const SEVERE:={"hunger":0.02,"sickness":0.05,"stranger":0.05}
 ## A mild sickness (everyday fevers, coughs and flux) is not staged at court:
@@ -495,7 +509,7 @@ static func inputs(day:int)->Dictionary:
 		"health":float(WorldSimulation.state.population_health),"food_days":float(m.get("food_days",30.0)),
 		"intake":float(m.get("food_intake_ratio",1.0)),"shortage_days":float(m.get("food_shortage_days",0.0)),
 		"first_shortage":int(forecast.get("first_shortage_day",-1)),
-		"water":water,"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,1.2),
+		"water":water,"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,WATER_Q_MAX),
 		"hk":hk,"H":H,"med":hk*_ramp(MEDICINE_CEILING,H),
 		"inst":float(WorldSimulation.state.society_capacities.get("institutions",0.25)),
 		"divers":clampf(float(EARLY_CARE.diet_window(WorldSimulation.state)),0.0,1.0),
@@ -523,6 +537,20 @@ static func _active_in(s:Dictionary,type:String)->Dictionary:
 static func _until(key:String)->int:
 	return int((state().until as Dictionary).get(key,-1))
 
+## The water term of the endemic sickness hazard's exponent (see
+## WATER_SHORT_BETA): positive when water falls short of plenty, negative
+## (at most CLEAN_WATER_BETA x 0.2) when clean water and sanitation go beyond it.
+static func water_term(water_q:float)->float:
+	var q:=clampf(water_q,0.0,WATER_Q_MAX)
+	return WATER_SHORT_BETA*(1.0-minf(1.0,q))-CLEAN_WATER_BETA*maxf(0.0,q-1.0)
+
+## Whether this people has burned before the fire now open (a crisis state `s`,
+## the court's by default): then, when no one else decides, its huts go back
+## up apart, as a people that has seen fire jump from roof to roof does.
+static func burned_before(s:Dictionary={})->bool:
+	if s.is_empty(): s=state()
+	return float(((s.stats as Dictionary).get("fire",{}) as Dictionary).get("onsets",0.0))>=2.0
+
 static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	## Annual hazard per crisis type from today's real state, for whichever
 	## people is being simulated (`s`: its crisis state; the court's by default).
@@ -542,7 +570,7 @@ static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	out["hunger_shortfall"]=shortfall
 	# Endemic sickness (catalog pestilence form, local base).
 	var season_factor:=1.0+0.35*absf(float(x.season))
-	var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)+1.5*(1.0-minf(1.0,float(x.water_q)))+1.5*(HEALTH_REF-float(x.health))+0.8*hunger_on+0.6*(float(s.pool)-POOL_REF))*(1.0-0.5*float(x.med))*season_factor
+	var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)+water_term(float(x.water_q))+1.5*(HEALTH_REF-float(x.health))+0.8*hunger_on+0.6*(float(s.pool)-POOL_REF))*(1.0-0.5*float(x.med))*season_factor
 	if day<int((s.until as Dictionary).get("after_flood",-1)): sick*=2.0
 	if drought_on>0.0: sick*=1.3
 	if bool(flags.get("apart_custom",false)) or (WorldSimulation.actor_id=="player" and unlocked("sickness:apart_plus")): sick*=0.85
@@ -552,8 +580,8 @@ static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	# Fire.
 	var fire:=BASE_FIRE*exp(1.0*(float(x.crowd)-CROWD_REF))*(1.0+1.5*drought_on+0.8*maxf(0.0,1.0-float(x.weather)))*(1.0+0.3*maxf(0.0,-float(x.season)))
 	if _knows(["ember_tending","cookfire_smoke_venting_habit"]): fire*=0.75
-	if bool(flags.get("spaced",false)): fire*=0.6
-	if bool(flags.get("earth",false)): fire*=0.5
+	if bool(flags.get("spaced",false)): fire*=SPACED_FIRE_FACTOR
+	if bool(flags.get("earth",false)): fire*=EARTH_FIRE_FACTOR
 	if day<int((s.until as Dictionary).get("burn",-1)): fire*=2.0
 	out["fire"]=clampf(fire,0.0,2.0)
 	# Flood: river camps, wet years.
@@ -1347,7 +1375,8 @@ const ASK_SHORT_FACTOR:=0.8
 ## The factor `option_id` puts on this crisis's deaths (1 when it changes none).
 static func death_factor(c:Dictionary,option_id:String)->float:
 	match option_id:
-		"apart": return APART_CUSTOM_FACTOR if apart_custom() else float(DEATH_FACTOR.apart)
+		# Rebuilding apart after a fire changes later fires, not this one's toll.
+		"apart": return 1.0 if String(c.get("type",""))=="fire" else (APART_CUSTOM_FACTOR if apart_custom() else float(DEATH_FACTOR.apart))
 		"water": return WATER_FLUX_FACTOR if String(c.get("kind",""))=="flux" else float(DEATH_FACTOR.water)
 		"rite": return 1.0 if String(c.get("type",""))=="fire" else float(DEATH_FACTOR.rite)
 	return float(DEATH_FACTOR.get(option_id,1.0))
@@ -1433,8 +1462,8 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			out.append(_opt("wait","Wait for the water to go down","Nothing more is lost to effort. Standing water breeds sickness.","neutral"))
 		"fire":
 			out.append(_opt("rebuild","Rebuild at once, as it was","Everyone to it; timber from the stack. The huts will be as close as before.","neutral",{"cost":"timber"}))
-			out.append(_opt("apart","Rebuild the huts apart, hearths outside","Slower, colder for a while. A fire will not jump so easily.","neutral",{"cost":"time"}))
-			if unlocked("fire:earth"): out.append(_opt("earth","Rebuild in earth that will not burn","Clay and months of work. The next fire stops at the wall.","neutral",{"cost":"clay"}))
+			out.append(_opt("apart","Rebuild the huts apart, hearths outside","Timber as for rebuilding, but slower and colder: %d%% less work done and health %d point lower for %d days, and the huts stand again only when the fire's course ends. A fire will not jump so easily: fires come %d%% less often from then on." % [roundi(-float(REBUILD_APART_EFFECTS.labor_multiplier)*100.0),roundi(-float(REBUILD_APART_EFFECTS.health_target)*100.0),REBUILD_APART_DAYS,roundi((1.0-SPACED_FIRE_FACTOR)*100.0)],"neutral",{"cost":"time"}))
+			if unlocked("fire:earth"): out.append(_opt("earth","Rebuild in earth that will not burn","Clay and months of work. The next fire stops at the wall: fires come %d%% less often from then on." % roundi((1.0-EARTH_FIRE_FACTOR)*100.0),"neutral",{"cost":"clay"}))
 			out.append(_opt("blame","Find who let it loose and punish them","Someone was careless. The people will fear your eye.","hostile",{"cost":"String: fear"}))
 			out.append(_opt("rite","Give the ashes to the god","A fire of thanks that it was not worse. They will feel you are with them.","warm"))
 		"thinning":
@@ -1484,7 +1513,8 @@ static func _default_choice(c:Dictionary,phase:String)->String:
 		"drought": return "carry"
 		"cold": return "ration"
 		"flood": return "wait"
-		"fire": return "rebuild"
+		# A people that has seen fire jump from roof to roof before builds apart.
+		"fire": return "apart" if burned_before() else "rebuild"
 		"thinning": return "range"
 	return ""
 
@@ -1630,11 +1660,14 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			outcome="You went among them as their god. It fed no one. They held together."
 			reaction="delighted"
 		"apart":
-			var strong:=apart_custom()
-			c.mult=float(c.mult)*death_factor(c,"apart")
-			_policy(c,"apart",{"disease_risk":-0.3},45)
-			_metric("cohesion",-0.01)
-			outcome="The sick were set at their own fire, with food left at the edge of the light. Their kin grumble."
+			if type=="fire":
+				outcome=_rebuild_apart(c)
+			else:
+				var strong:=apart_custom()
+				c.mult=float(c.mult)*death_factor(c,"apart")
+				_policy(c,"apart",{"disease_risk":-0.3},45)
+				_metric("cohesion",-0.01)
+				outcome="The sick were set at their own fire, with food left at the edge of the light. Their kin grumble."
 			reaction="neutral"
 		"tend":
 			c.mult=float(c.mult)*death_factor(c,"tend")
@@ -1759,6 +1792,21 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			return {"error":"That answer is not open to you here."}
 	_after(c,phase,option_id,outcome,silent)
 	return {"outcome":outcome,"reaction":reaction}
+
+## The fire answer "apart": the burned huts go back up with room between them
+## and the hearths outside. Timber as for rebuilding as it was (0.8 a lost
+## place), but the places come back only when the fire's course ends (_end);
+## hands and warmth are short meanwhile (REBUILD_APART_EFFECTS for
+## REBUILD_APART_DAYS). From then on fires come SPACED_FIRE_FACTOR as often.
+const REBUILD_APART_DAYS:=45
+const REBUILD_APART_EFFECTS:={"labor_multiplier":-0.06,"health_target":-0.01}
+static func _rebuild_apart(c:Dictionary)->String:
+	var timber:=float(GameState.resource_stockpiles.get("Timber",0.0))
+	var cost:=minf(timber,float(c.get("house_lost",0))*0.8)
+	GameState.resource_stockpiles["Timber"]=timber-cost
+	(state().flags as Dictionary)["spaced"]=true
+	_policy(c,"apart",REBUILD_APART_EFFECTS,REBUILD_APART_DAYS)
+	return "The huts go back up apart, the hearths outside, with %d timber from the stack. It is slower and colder until the walls are up; from now on fires come %d%% less often." % [roundi(cost),roundi((1.0-SPACED_FIRE_FACTOR)*100.0)]
 
 static func _raid(c:Dictionary,phase:String,silent:bool)->Dictionary:
 	var mark:=_neighbour(true)
