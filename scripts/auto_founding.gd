@@ -5,21 +5,26 @@ extends RefCounted
 ## saved with the world). The Settlement dock's "New towns" row, the "Our
 ## course" page and the court ("stop founding new towns", "our leaders may
 ## settle new land again": home_orders.gd) all read and set it here, so they
-## always agree. The leaders act on it at their council (civilization_day.gd):
-## a people with an expansionist tradition looks for land at every monthly
-## council, any other people every sixth month, and only while the switch is
-## on. A town the ruler founds by hand never changes it. When the leaders found
-## a town themselves, the Chronicle says so once, with how to stop them.
+## always agree. The leaders act on it at their council (civilization_day.gd),
+## only while the switch is on, by the same rule every computer ruler uses
+## (civilization_strategy.expansion_months): a people with an expansionist
+## tradition looks for land at every monthly council, a bold one every second
+## month, an even-tempered one every third, the most cautious every fifth. A
+## town the ruler founds by hand never changes it. When the leaders found a
+## town themselves, the Chronicle says so once, with how to stop them.
 ## Static helpers; preload.
 
 const Culture:=preload("res://scripts/cultural_inheritance.gd")
+const Strategy:=preload("res://scripts/civilization_strategy.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 ## A caravan's day on the road (caravan_system.gd SPEED_KM_DAY).
 const WALK_KM_PER_DAY:=16.0
-## An expansionist tradition this strong looks for land at every council.
+## An expansionist tradition this strong looks for land at every council
+## (civilization_strategy.gd EXPANSIONIST_DRIVE).
 const EXPANSIONIST_DRIVE:=0.35
-## Otherwise the council looks for land every this many months.
+## The longest any council waits between searches for land, in months
+## (civilization_strategy.gd LONGEST_LOOK_MONTHS).
 const LOOK_EVERY_MONTHS:=6
 ## The way one place lies from another (+x east, +z south; court_facts.compass).
 const COMPASS:=["east","southeast","south","southwest","west","northwest","north","northeast"]
@@ -58,21 +63,26 @@ static func drive(day:int)->float:
 	direction._ensure_cultural_memory()
 	return Culture.weight(direction.cultural_memory,"ambition","expansion",day)
 
+## How many months apart our leaders look for land: the people's temper and
+## its expansionist tradition, by the rule every council shares.
+static func look_months(day:int)->int:
+	return Strategy.expansion_months(Strategy.PERSONALITY.of_owner("player"),drive(day))
+
 ## Does the leaders' council on this day look for land? Only while the switch
-## is on: every council for an expansionist people, else every sixth month.
-## The caller holds the council on the leaders' review day
+## is on, and as often as the shared rule gives (look_months). The caller
+## holds the council on the leaders' review day
 ## (civilization_controller.review_due).
 static func looks_for_land(day:int)->bool:
 	if not on():return false
-	return drive(day)>=EXPANSIONIST_DRIVE or posmod(day/30,LOOK_EVERY_MONTHS)==0
+	return Strategy.looks_for_land(day,look_months(day))
 
 ## The next council, after today, that looks for land; -1 when none falls
 ## within about a year.
 static func next_look(today:int)->int:
-	var strong:=drive(today)>=EXPANSIONIST_DRIVE
+	var months:=look_months(today)
 	var controller:=_controller()
 	for day in range(today+1,today+400):
-		if controller.review_due("player",day) and (strong or posmod(day/30,LOOK_EVERY_MONTHS)==0):return day
+		if controller.review_due("player",day) and Strategy.looks_for_land(day,months):return day
 	return -1
 
 ## What keeps our leaders from sending settlers now, in plain words, or ""

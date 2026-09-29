@@ -623,6 +623,13 @@ class Surrogate:
             w = {r: float(v) for r, v in BASE_ALLOC.items()}
             for role, v in FOCUS_CHANGES.get(self.s.focus, {}).items():
                 w[role] = w.get(role, 0.0) + float(v)
+            # The people's cultural labor bias (cultural_inheritance.gd labor_bias):
+            # every role but Food; the wish for food work deepens the reserve
+            # instead (GovernmentPeopleSystem.reserve_lean_of). Leader scenarios
+            # set these (leaders.py); others have none.
+            for role, v in getattr(self, "culture_bias", {}).items():
+                if role != "Food":
+                    w[role] = w.get(role, 0.0) + float(v)
         # _survival_guard: shortage now, or stores falling with little left. The
         # forecast part is approximated by a falling month with < 20 days left.
         food_risk = self.last["intake"] < 0.995 or (self.stored_days < 20.0 and self.last["production"] < self.last["need"] * 0.97)
@@ -632,11 +639,14 @@ class Surrogate:
         demand, produced, prev = self.last["need"], self.last["production"], self.last["food_share"]
         # GovernmentPeopleSystem reserve planning: below the reserve target the
         # planners plan past today's need in proportion to the gap.
-        target_days = SURPLUS_RELEASE.get("RESERVE_TARGET_DAYS") or 0.0
+        # A people set on lasting abundance keeps up to twice the store, with up
+        # to twice the margin (GovernmentPeopleSystem reserve_lean).
+        lean = clamp(float(getattr(self, "reserve_lean", 0.0)), 0.0, 1.0)
+        target_days = (SURPLUS_RELEASE.get("RESERVE_TARGET_DAYS") or 0.0) * (1.0 + lean)
         if target_days > 0 and demand > 0:
             target_days = min(target_days, self._storage_capacity() / demand * 0.8)
         reserve_gap = clamp((target_days - self.stored_days) / max(1.0, target_days), 0.0, 1.0) if target_days > 0 else 0.0
-        margin = float(SURPLUS_RELEASE.get("RESERVE_MARGIN") or 0.0) * reserve_gap
+        margin = float(SURPLUS_RELEASE.get("RESERVE_MARGIN") or 0.0) * (1.0 + lean) * reserve_gap
         if demand > 0 and prev > 0 and (food_risk or reserve_gap > 0.0 or self.p.get("guard_always", False)):
             if food_risk or self.p.get("guard_always", False):
                 buffer = ((1.08 if food_risk else 1.02) + margin) * float(self.p["food_buffer"]) / 1.10
@@ -1214,8 +1224,10 @@ class Surrogate:
         leg_target = clamp(0.12 + self.food_security * 0.26 + self.health * 0.18 + self.cohesion * 0.20 + self.security * 0.10 + admin_cov * 0.10
                            + e("legitimacy") * 0.12 + self.capacities["institutions"] * 0.05 + self.policy("legitimacy_target"), 0.06, 0.96)
         self.legitimacy = lag(self.legitimacy, leg_target, 0.012, days)
-        # Housing: builders add places until capacity leads population.
-        builders = self.able * self.alloc_pct["Construction"] / 100.0
+        # Housing: builders add places until capacity leads population. A great
+        # work in hand takes its share of the crew first (undertaking_system.gd
+        # advance_record; leaders.py sets construction_diverted).
+        builders = self.able * self.alloc_pct["Construction"] / 100.0 * (1.0 - getattr(self, "construction_diverted", 0.0))
         if self.housing_capacity < pop * float(p["housing_target_ratio"]):
             self.housing_capacity += builders * labor_eff * float(p["housing_build_rate"]) * (1.0 + e("construction_rate") + e("housing_output")) * days
         # Founding works (Hearth, Lean-to, Open Work Area, Gathering Yard, Storage Pits)
@@ -1633,6 +1645,10 @@ class Surrogate:
             cache[period] = w
         return cache[period]
 
+    def _monthly(self, year: float) -> None:
+        """Monthly decisions a subclass models (leaders.py: expansion, great
+        works, raids); the plain surrogate has none."""
+
     def seed_state(self, start_year: float, known_ids: list, adoption: dict, population: float, scholarship: float) -> None:
         """Mirror of truth_probe.gd _seed_era (research_3000 later-era spot check): the
         society at game year start_year with these discoveries, adoption and
@@ -1688,6 +1704,7 @@ class Surrogate:
                 hearth = True
                 self._activity(self.ctx, hearth=True)
             self._allocate_labor()
+            self._monthly(year)
             heavy = (self.alloc_pct["Food"] + self.alloc_pct["Extraction"] + self.alloc_pct["Construction"]) / 100.0
             overwork = clamp(clamp((heavy - 0.74) / 0.22, 0, 1) * 0.7 + (0.5 if "labor_mobilization" in self.s.policies else 0.0), 0.0, 1.0)
             care = self._care(overwork)

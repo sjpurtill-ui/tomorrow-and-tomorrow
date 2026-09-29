@@ -39,11 +39,15 @@ static func execute(order:Dictionary)->Dictionary:
 			# The caravan leader plans the road (round bays and inlets); only a
 			# place with no land route at all is refused here.
 			if not WorldSimulation.world._scout_segment_is_land(WorldSimulation.world.player_world_origin,destination) and preload("res://scripts/army_land_route.gd").find(WorldSimulation.world.player_world_origin,destination,Callable(WorldSimulation.world,"_scout_land_at")).has("error"):return {"error":"The founding route must cross traversable land."}
-			return WorldSimulation.settlements.begin_settlement_convoy(destination,0.0,String(order.get("name","")),true)
+			# The leaders' own judgment of the new town's first rations, when given.
+			var party:Dictionary={}
+			if order.has("establishment_days"):party["establishment_days"]=clampf(float(order.establishment_days),10.0,90.0)
+			return WorldSimulation.settlements.begin_settlement_convoy(destination,0.0,String(order.get("name","")),true,party)
 		"society_policy":return preload("res://scripts/society_exchange.gd").policy(String(order.get("migration","balanced")),String(order.get("sharing","selective")))
 		"scouting_policy":return WorldSimulation.world.scouting_staff.set_policy(float(order.get("share",0)),String(order.get("focus","exploration")),true)
 		"scout":return WorldSimulation.world.dispatch_scouts(int(order.get("days",30)),String(order.get("target","open_world")),String(order.get("heading","")),0,false,String(order.get("origin_city_id","")),bool(order.get("reckless",false)))
-		"diplomacy":return WorldSimulation.world.dispatch_diplomat(String(order.get("target","")),"",String(order.get("action","goodwill")))
+		# A goodwill mission carries its gift from the sender's own stores.
+		"diplomacy":return WorldSimulation.world.dispatch_diplomat(String(order.get("target","")),String(order.get("gift","")),String(order.get("action","goodwill")))
 		"training_policy":return WorldSimulation.military.training_staff.set_policy(String(order.get("service","army")),String(order.get("policy","regular")))
 		"army_reinforce_home":return preload("res://scripts/home_army_reinforcement.gd").transfer(WorldSimulation.military,int(order.get("army",0)),String(order.get("unit","")),int(order.get("count",0)))
 		"deploy":return WorldSimulation.military.create_field_army(int(order.get("count",0)),String(order.get("name","")))

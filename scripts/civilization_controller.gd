@@ -3,24 +3,33 @@ extends RefCounted
 ## must be accepted and paid for by the ordinary commands and simulation.
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
 const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
+## A year of deaths this many times the year before's is a hard year that
+## can move a ruler to build in grief (conception_trigger).
+const HARD_YEAR_DEATHS:=1.4
 
 static func current_plan(id:String)->Dictionary:
 	var state:=WorldSimulation.state
 	var situation:={"food_days":float(state.simulation_metrics.get("food_days",30)),"food_intake_ratio":float(state.simulation_metrics.get("food_intake_ratio",1)),"at_war":false}
 	for metric:String in ["food_consumption","army_provisions_required","army_provision_delivery_ratio"]:
 		if state.simulation_metrics.has(metric):situation[metric]=state.simulation_metrics[metric]
+	var met:=0
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		situation.at_war=bool(situation.at_war) or bool(civ.player_relation.get("at_war",false))
+		if int(civ.player_relation.get("contact_level",0))>=2:met+=1
+	situation["peoples_known"]=met
 	# The same sovereign personality supplies the foreign leader's dialogue.
 	situation["integration_pressure"]=float(preload("res://scripts/society_exchange.gd").pressure().unsettled_share)
 	var exchange_value:=0.0
 	for ties:Dictionary in state.society_exchange.connections.values():exchange_value=maxf(exchange_value,float(ties.get("respect",0)))
 	situation["cultural_exchange"]=exchange_value
 	situation["reception_capacity"]=preload("res://scripts/society_exchange.gd").reception_capacity()
-	var plan:=STRATEGY.preferences(STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
+	# A computer ruler plans by its own personality; the player's leaders by the
+	# temper of the people's ambitions. The rules that read it are the same.
+	var plan:=STRATEGY.preferences(STRATEGY.PERSONALITY.of_owner(id),situation)
 	WorldSimulation.direction._ensure_cultural_memory()
 	var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",int(state.elapsed_days))
 	plan.expansion_food=maxf(45,float(plan.expansion_food)*(1.0-drive*.35))
+	plan.expansion_months=STRATEGY.expansion_months(plan.personality,drive)
 	var choices:=preload("res://scripts/cultural_inheritance.gd").choice_weights(WorldSimulation.direction.cultural_memory,int(state.elapsed_days))
 	var total:=0.0
 	for weight in choices.values():total+=float(weight)
@@ -136,6 +145,10 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 		var plan:Dictionary=plan_source.call()
 		shared.plan=plan
 		shared.eligible=false
+		# One rule for every council: how often it looks for land follows its
+		# temper (civilization_strategy.expansion_months), for a computer ruler
+		# and for the player's leaders (auto_founding.looks_for_land) alike.
+		if not STRATEGY.looks_for_land(int(WorldSimulation.state.elapsed_days),int(plan.get("expansion_months",1))):return null
 		if bool(plan.hungry) or bool(plan.at_war) or float(WorldSimulation.state.simulation_metrics.get("food_days",0))<float(plan.expansion_food):return null
 		if bool(WorldSimulation.state.settlement_convoy.get("active",false)):return null
 		if "Hearth Circle" not in WorldSimulation.state.settlement_completed:return null
@@ -155,7 +168,9 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 			var context:=preload("res://scripts/civilization_day.gd").context(point)
 			if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return
 			var value:=expansion_site_value(context,shared.plan)
-			if value>float(shared.best_value):shared.best={"kind":"settle","destination":point};shared.best_value=value
+			# The settlers carry the rations this temper judges enough for the new
+			# town's first weeks (a bold ruler sends thinner stores).
+			if value>float(shared.best_value):shared.best={"kind":"settle","destination":point,"establishment_days":float((shared.plan as Dictionary).get("settle_margin_days",STRATEGY.ESTABLISHMENT_DAYS))};shared.best_value=value
 		])
 	sites.append(["expansion_order",func()->void:
 		if bool(shared.get("eligible",false)) and not (shared.best as Dictionary).is_empty():WorldSimulation.submit(id,shared.best)
@@ -380,9 +395,15 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 			var urgency:=-float(civ.player_relation.get("opinion",0))
 			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)
 		if action=="":continue
+		var order:={"kind":"diplomacy","target":String(civ.id),"action":action}
+		if action=="goodwill":
+			# Goodwill travels with a real gift from our own stores, or not at all.
+			var gift:=STRATEGY.goodwill_gift(world.diplomatic_gift_options(String(civ.id)),food_days,plan)
+			if gift=="":continue
+			order["gift"]=gift
 		var opinion:=float(civ.player_relation.get("opinion",0))
 		var score:=3.0 if action=="seek_peace" else (2.0-opinion if action=="declare_war" else 1.0+opinion)
-		candidates.append({"order":{"kind":"diplomacy","target":String(civ.id),"action":action},"score":score})
+		candidates.append({"order":order,"score":score})
 	if campaign_enemy!="":campaign_objective(id,campaign_enemy,plan)
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.score)>float(b.score))
 	for candidate in candidates:
@@ -629,7 +650,14 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 	for person:Dictionary in WorldSimulation.government.people:
 		if int(person.get("died_day",-1))>=0 and day-int(person.died_day)<=365 and not String(person.get("office_key","")).is_empty():
 			found.append({"kind":"death","day":int(person.died_day),"text":"The death of %s" % String(person.get("name","a leader"))});break
-	if deaths>=maxi(5,roundi(state.population_exact*.03)):found.append({"kind":"death","day":day,"text":"%d of our people died this year" % deaths})
+	# Grief for a hard year: well past the deaths of the year before. The
+	# ordinary toll (about 3 in 100 a year in the early ages) moves nobody, or
+	# every compassionate ruler would build without end.
+	var year_before:=0.0
+	for row:Dictionary in state.vital_statistics_history:
+		var age:=day-int(row.get("day",day))
+		if age>365 and age<=730:year_before+=float(row.get("deaths",0))
+	if deaths>=maxi(5,roundi(state.population_exact*.03)) and float(deaths)>=year_before*HARD_YEAR_DEATHS:found.append({"kind":"death","day":day,"text":"%d of our people died this year" % deaths})
 	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>60 and not bool(plan.get("hungry",false)):
 		found.append({"kind":"famine","day":day,"text":"We came through a famine that took %d" % hunger})
 	var founded:=int(state.settlement_founded_day)

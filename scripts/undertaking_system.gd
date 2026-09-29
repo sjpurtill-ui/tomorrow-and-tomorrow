@@ -55,9 +55,14 @@ static func days_left(r:Dictionary)->int:
 	if pace<=.00001:return -1
 	return ceili(maxf(0.0,total_work(r)-float(r.get("progress",0.0)))/pace)
 
+## A question at one of the work's gates that still waits for the god's word,
+## in a few plain words; "" when none waits. The crews build on meanwhile.
+static func question_words(r:Dictionary)->String:
+	return "" if (r.get("decision",{}) as Dictionary).is_empty() else "your word is awaited in court"
+
 ## Why a work is not rising today, in a few plain words; "" while it rises.
+## A waiting question does not stop it (question_words says it waits).
 static func idle_words(r:Dictionary)->String:
-	if not (r.get("decision",{}) as Dictionary).is_empty():return "waiting for your word in court"
 	if String(r.get("status",""))!="stalled":return ""
 	var reason:=String(r.get("reason",""))
 	if reason.begins_with("Waiting for "):return reason.trim_suffix(".").to_lower()
@@ -444,13 +449,16 @@ static func valid_pitch(value:Variant)->bool:
 	if proposer.has("figure_id") and not proposer.figure_id is String:return false
 	return true
 
-## Decisions and ceremonies wait for their owner; AI owners answer promptly, and
-## a player's council answers after a long silence so work never deadlocks.
+## Decisions and ceremonies wait for their owner. A computer ruler answers at
+## once; the god has PLAYER_DECISION_DAYS to give a word in court, and then the
+## council answers. Both answer by one rule (auto_option), and the builders
+## keep working while a question waits (advance_record), so no people loses
+## building days by who answers.
 static func _resolve_waiting(r:Dictionary,city:Dictionary,day:int,owner:String)->void:
 	var ai:=is_ai(owner)
 	var decision:Dictionary=r.get("decision",{})
 	if not decision.is_empty() and day-int(decision.get("day",day))>=(AI_DECISION_DAYS if ai else PLAYER_DECISION_DAYS):
-		var choice:=auto_option(WorldSimulation.state,r,ai)
+		var choice:=auto_option(WorldSimulation.state,r)
 		if not choice.is_empty():_apply_decision(WorldSimulation.state,r,String(city.id),choice,day,not ai)
 	var ceremony:Dictionary=r.get("ceremony",{})
 	if String(ceremony.get("status",""))=="pending" and day-int(ceremony.get("day",day))>=(AI_CEREMONY_DAYS if ai else PLAYER_CEREMONY_DAYS):
@@ -483,13 +491,14 @@ static func advance_record(state:Node,r:Dictionary,day:int,city:Dictionary={})->
 		elif int(r.operating_days)>=3650:r.legacy="Enduring achievement" if int(r.strain)<180 else "Enduring, but remembered for its human cost"
 		return
 	var city_id:=String(city.get("id",""))
-	if not r.get("decision",{}).is_empty():
-		r.reason="Awaiting a decision at the %s gate." % String(r.decision.get("key","")).replace("_"," ")
-		return
-	for gate:Array in GATES:
-		if fraction(r)>=float(gate[0]) and String(gate[1]) not in r.gates:
-			_pose(r,String(gate[1]),day)
-			return
+	# A question at a gate does not stop the crews: they go on with the work as
+	# planned until the answer comes (and no new question is put meanwhile).
+	var waiting:=not (r.get("decision",{}) as Dictionary).is_empty()
+	if not waiting:
+		for gate:Array in GATES:
+			if fraction(r)>=float(gate[0]) and String(gate[1]) not in r.gates:
+				_pose(r,String(gate[1]),day)
+				return
 	if int(r.get("halt_until",-1))>day:
 		r.reason="Crews have laid down their tools; work resumes on day %d." % (int(r.halt_until)%365+1)
 		return
@@ -504,6 +513,7 @@ static func advance_record(state:Node,r:Dictionary,day:int,city:Dictionary={})->
 	if not architect.is_empty():quality=clampf(quality*(1+(float(architect.vision)-.5)*.1+float(architect.talent)*.05)+float(r.get("quality_bonus",0)),.1,1)
 	var work:=minf(labor*quality,total_work(r)-float(r.progress))
 	var reason:="Building with local crews and materials."
+	if waiting:reason="Building on as planned while the %s question waits for an answer." % String(r.decision.get("key","")).replace("_"," ")
 	if need<.95:
 		if r.policy=="careful":work=0;reason="Paused to protect food and water needs."
 		else:r.strain+=1;work*=maxf(0,need);reason="Work continues during shortages; resentment accumulates."
@@ -523,7 +533,12 @@ static func advance_record(state:Node,r:Dictionary,day:int,city:Dictionary={})->
 	r.quality+=work*quality;r.progress+=work
 	r.last_work=work
 	if not architect.is_empty():_roll_event(state,r,city_id,day)
-	if float(r.progress)+.00001>=total_work(r):_complete(state,r,city,day)
+	if float(r.progress)+.00001>=total_work(r):
+		# Finished before anyone answered: the question lapses with the work done.
+		if not (r.get("decision",{}) as Dictionary).is_empty():
+			record_event(r,day,"The %s question lapsed: the work was finished first." % String(r.decision.get("key","")).replace("_"," "),"decision")
+			r.erase("decision")
+		_complete(state,r,city,day)
 
 static func _spend(state:Node,d:Dictionary,work:float)->void:
 	for material:String in d.cost:state.resource_stockpiles[material]=float(state.resource_stockpiles.get(material,0))-float(d.cost[material])*work/float(d.work)
@@ -696,27 +711,26 @@ static func decide(city_id:String,work_id:String,option_id:String)->Dictionary:
 		if not bool(chosen.enabled):return {"error":String(chosen.reason)}
 		return _apply_decision(WorldSimulation.state,r,city_id,option_id,int(WorldSimulation.state.elapsed_days),false))
 
-## The choice an AI (or a player's council after long silence) makes.
-static func auto_option(state:Node,r:Dictionary,ai:bool)->String:
-	var options:=decision_options(state,r)
+## The choice a computer ruler makes at once, and the player's council after
+## the god's long silence: one rule for both (civilization_strategy.works_answer).
+## Only the temper differs: a computer ruler's own personality, the council's
+## taken from the people's ambitions (leader_personality.of_owner), or `temper`
+## when the caller gives one.
+static func auto_option(state:Node,r:Dictionary,temper:Dictionary={})->String:
 	var enabled:={}
-	for option:Dictionary in options:
+	for option:Dictionary in decision_options(state,r):
 		if bool(option.enabled):enabled[option.id]=true
 	var d:=Catalog.get_definition(String(r.id))
-	# A ruler presses harder only when the builders are confident.
-	var confident:=float(assess_record(r,WorldSimulation.actor_id).get("score",r.get("feasibility",.6)))>=.7
-	match String(r.decision.get("key","")):
-		"design":
-			var ample:=true
-			for material:String in d.cost:
-				if float(state.resource_stockpiles.get(material,0))<float(d.cost[material])*.5:ample=false
-			return "grander" if ai and ample and confident else "practical"
-		"stores":return "pour" if enabled.has("pour") and _food_days(state)>=120 else "protect"
-		"labor":
-			if ai and float(Concept.values(WorldSimulation.actor_id).get("hierarchy",.5))>=.65 and float(state.simulation_metrics.get("cohesion",.5))>=.65:return "levy"
-			return "paid" if ai and enabled.has("paid") else "volunteers"
-		"demand":return "honor" if enabled.has("honor") and ai else "refuse"
-	return ""
+	var ample:=true
+	for material:String in d.cost:
+		if float(state.resource_stockpiles.get(material,0))<float(d.cost[material])*.5:ample=false
+	var facts:={"enabled":enabled,"ample":ample,"food_days":_food_days(state),
+		# The builders' own odds; a ruler presses harder only when they are confident.
+		"feasibility":float(assess_record(r,WorldSimulation.actor_id).get("score",r.get("feasibility",.6))),
+		"hierarchy":float(Concept.values(WorldSimulation.actor_id).get("hierarchy",.5)),"cohesion":float(state.simulation_metrics.get("cohesion",.5)),
+		"ego":float((r.get("architect",{}) as Dictionary).get("ego",0.0))}
+	if temper.is_empty():temper=preload("res://scripts/leader_personality.gd").of_owner(WorldSimulation.actor_id)
+	return preload("res://scripts/civilization_strategy.gd").works_answer(String(r.decision.get("key","")),facts,temper)
 
 static func _apply_decision(state:Node,r:Dictionary,city_id:String,option:String,day:int,council:bool)->Dictionary:
 	var key:=String(r.decision.get("key",""))

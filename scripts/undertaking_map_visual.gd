@@ -65,12 +65,13 @@ static func time_left_words(days:int)->String:
 	return "%d years to go" % roundi(float(days)/365.0)
 
 ## A short line for the work's map card: empty for a plain standing work.
-## A work that is not rising today says why instead of claiming to rise.
-static func status_line(state:String,progress:float,folly:bool=false,idle:String="",days_left:int=-1)->String:
+## A work that is not rising today says why instead of claiming to rise; a
+## rising work whose builders await the god's word says so (`asks`).
+static func status_line(state:String,progress:float,folly:bool=false,idle:String="",days_left:int=-1,asks:String="")->String:
 	match state:
 		"building":
 			if idle!="":return "Idle · "+idle
-			var left:=time_left_words(days_left)
+			var left:=asks if asks!="" else time_left_words(days_left)
 			return "Rising · %s%s" % [percent_words(progress),(" · "+left) if left!="" else ""]
 		"abandoned":return "Abandoned · %s" % percent_words(progress)
 		"ruined":return "A folly, fallen" if folly else "In ruins"
@@ -80,7 +81,7 @@ static func status_line(state:String,progress:float,folly:bool=false,idle:String
 ## The map card's line for a record, from its live state.
 static func record_status(r:Dictionary)->String:
 	var state:=state_of(r)
-	return status_line(state,U.fraction(r),state=="ruined" and String(r.get("outcome",""))=="collapse",U.idle_words(r))
+	return status_line(state,U.fraction(r),state=="ruined" and String(r.get("outcome",""))=="collapse",U.idle_words(r),-1,U.question_words(r))
 
 ## A work's card line and progress read live from its record, so the map
 ## moves day by day without redrawing the landmark (the mesh rises in courses,

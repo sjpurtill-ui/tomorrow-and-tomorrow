@@ -1403,7 +1403,9 @@ func _survival_guard()->Dictionary:
 	return {"active":water_risk or food_risk,"water":water_risk,"food":food_risk,"reasons":reasons}
 
 
-func _apply_survival_guard(weights:Dictionary)->Dictionary:
+## reserve_lean: how far the people's own ambitions ask for deeper stores
+## (0 none, 1 a people wholly set on lasting abundance: reserve_lean_of).
+func _apply_survival_guard(weights:Dictionary,reserve_lean:float=0.0)->Dictionary:
 	var guard:=_survival_guard()
 	if bool(guard.food):
 		weights.Food=float(weights.get("Food",0.0))+18.0
@@ -1428,10 +1430,13 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 		# today's need, in proportion to how far short the stores are.
 		# Never more than the stores can hold: before storage pits a camp keeps
 		# only what its baskets and bundles carry.
-		var target:=RESERVE_TARGET_DAYS
+		# A people set on lasting abundance keeps up to twice the store, with
+		# up to twice the margin (reserve_lean).
+		var lean:=clampf(reserve_lean,0.0,1.0)
+		var target:=RESERVE_TARGET_DAYS*(1.0+lean)
 		if WorldSimulation.food!=null and WorldSimulation.food.has_method("_food_storage_capacity"):target=minf(target,float(WorldSimulation.food._food_storage_capacity())/demand*0.8)
 		var reserve_gap:=clampf((target-float(metrics.get("food_days",target)))/maxf(1.0,target),0.0,1.0)
-		var buffer:=(1.08 if bool(guard.food) else 1.02)+RESERVE_MARGIN*reserve_gap
+		var buffer:=(1.08 if bool(guard.food) else 1.02)+RESERVE_MARGIN*(1.0+lean)*reserve_gap
 		var ceiling:=.72 if bool(guard.water) else .85
 		var needed:=clampf(previous_share*demand*buffer/maxf(.01,produced),0.0,ceiling)
 		var other:=0.0
@@ -1454,6 +1459,15 @@ const SURPLUS_RELEASE_MARGIN:=1.15
 ## today's need they plan for when the stores are empty.
 const RESERVE_TARGET_DAYS:=60.0
 const RESERVE_MARGIN:=0.15
+## The food work a people wholly set on lasting abundance asks for
+## (cultural_inheritance.gd WORK sustenance "Food"): that wish doubles the
+## reserve and its margin; wellbeing's half as much adds half.
+const RESERVE_FOOD_WISH:=12.0
+
+## How far a people's wish for food work (labor_bias "Food") deepens the
+## reserve its planners keep, 0..1.
+static func reserve_lean_of(food_wish:float)->float:
+	return clampf(food_wish/RESERVE_FOOD_WISH,0.0,1.0)
 
 
 ## research_600 balance: getting, grinding, cooking and storing food took most
@@ -1505,13 +1519,19 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		"research":{"Knowledge":16.0,"Survey":5.0,"Administration":3.0},
 	}).get(focus,{})
 	for role in changes: weights[role]=float(weights.get(role,0.0))+float(changes[role])
+	var reserve_lean:=0.0
 	if cultural:
 		WorldSimulation.direction._ensure_cultural_memory()
 		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
-		for role in bias:weights[role]=float(weights.get(role,0))+float(bias[role])
+		for role in bias:
+			if role!="Food":weights[role]=float(weights.get(role,0))+float(bias[role])
+		# The people's wish for food work (sustenance, wellbeing) is planned as
+		# deeper stores: extra hands on food until the larger reserve is full,
+		# not a share the planners' own floor already covers.
+		reserve_lean=reserve_lean_of(float(bias.get("Food",0.0)))
 	# The workshop officer asks for gatherers while soldiers' gear lacks materials.
 	if WorldSimulation.military!=null:weights.Extraction=float(weights.get("Extraction",0))+float(WorldSimulation.military.workshop.extraction_request().get("weight",0.0))
-	_apply_survival_guard(weights)
+	_apply_survival_guard(weights,reserve_lean)
 	_apply_food_labor_floor(weights) # research_600 balance
 	if not leader.is_empty():
 		var skills:Dictionary=leader.get("skills",{})

@@ -302,6 +302,23 @@ func test_triggers_come_from_the_peoples_own_history_and_news()->void:
 	assert_str(String(envy.get("source_owner",""))).is_equal("beta")
 	print("ENVY TRIGGER: ",envy)
 
+## Grief moves a ruler to build after a hard year, not after the ordinary
+## toll every early people pays (else the compassionate would build without end).
+func test_grief_needs_a_hard_year_not_the_ordinary_toll()->void:
+	_found("alpha")
+	var peaceful:=Strategy.preferences(Peaceful,{"food_days":120})
+	WorldSimulation.scoped("alpha",func()->void:
+		var state:=WorldSimulation.state
+		state.elapsed_days=800
+		state.population_total=300;state.population_exact=300.0
+		state.demographic_ledger.append({"kind":"death","cause":"Illness","count":12,"day":700})
+		# The year before took as many: an ordinary year.
+		state.vital_statistics_history.assign([{"day":300,"births":14,"deaths":6},{"day":420,"births":14,"deaths":6}])
+		assert_dict(Controller.conception_trigger("alpha",peaceful)).is_empty()
+		# The year before took few: this one is hard.
+		state.vital_statistics_history.assign([{"day":300,"births":14,"deaths":2},{"day":420,"births":14,"deaths":2}])
+		assert_str(String(Controller.conception_trigger("alpha",peaceful).get("kind",""))).is_equal("death"))
+
 func test_rulers_conceive_and_commission_through_validated_orders()->void:
 	var engine:=FakeEngine.new()
 	Orders.works_engine_override=engine

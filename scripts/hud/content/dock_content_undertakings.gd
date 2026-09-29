@@ -86,8 +86,8 @@ func _local(id:String)->Dictionary:
 		blocks.append({"type":"rows","heading":"THE WATCHING SKY FORESEES","items":rows})
 	return {"blocks":blocks}
 
-## A work under way: rising (how far, how long to go at today's pace) or idle
-## (and why), in the words the map card uses.
+## A work under way: rising (how far, how long to go at today's pace, or that
+## the builders await your word) or idle (and why), in the words the map card uses.
 func _building_words(item:Dictionary)->String:
 	var Visual=preload("res://scripts/undertaking_map_visual.gd")
 	var idle:=String(item.get("idle",""))
@@ -95,5 +95,6 @@ func _building_words(item:Dictionary)->String:
 	var line:="Idle" if idle!="" else "Rising"
 	if stage!="":line+=" · "+stage
 	line+=" · "+Visual.percent_words(float(item.get("progress",0)))
-	var why:=idle if idle!="" else Visual.time_left_words(int(item.get("days_left",-1)))
+	var asks:=String(item.get("asks",""))
+	var why:=idle if idle!="" else (asks if asks!="" else Visual.time_left_words(int(item.get("days_left",-1))))
 	return line+(" · "+why if why!="" else "")

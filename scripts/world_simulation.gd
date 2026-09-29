@@ -306,6 +306,11 @@ func _projection_steps(timings:Dictionary={},label:String="projections")->Array:
 			# Contact and route queries read normalized position, not world_position.
 			human_projection.position=Vector2(CivilizationSystem.player_world_origin.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,CivilizationSystem.player_world_origin.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 			scoped("player",func()->void:project(human_projection))
+			# Others know our people by its own council's temper (the people's
+			# ambitions), not by the first rival's character it was copied from.
+			var Leader:=preload("res://scripts/leader_personality.gd")
+			human_projection.merge(Leader.character_traits(Leader.of_owner("player")),true)
+			human_projection["character_traits"]=1
 		))
 	for index in CivilizationSystem.civilizations.size():
 		var civ:Dictionary=CivilizationSystem.civilizations[index]

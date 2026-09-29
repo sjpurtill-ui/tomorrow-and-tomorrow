@@ -170,8 +170,10 @@ func test_the_map_card_shows_the_real_progress_and_why_a_work_is_idle()->void:
 	assert_str(Visual.record_status(r)).is_equal("Rising · 7%")
 	r.status="stalled";r.reason="Waiting for stone."
 	assert_str(Visual.record_status(r)).is_equal("Idle · waiting for stone")
+	# A question at a gate no longer stops the crews (every people's builders go
+	# on while its ruler decides); the card says the god's word is awaited.
 	r.status="building";r.decision={"key":"design","day":3}
-	assert_str(Visual.record_status(r)).is_equal("Idle · waiting for your word in court")
+	assert_str(Visual.record_status(r)).is_equal("Rising · 7% · your word is awaited in court")
 
 func test_the_map_reads_a_work_live_between_redraws()->void:
 	var saved:Array=GameState.player_settlements

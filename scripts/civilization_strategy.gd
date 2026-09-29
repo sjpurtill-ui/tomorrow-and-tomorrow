@@ -2,6 +2,8 @@ extends RefCounted
 ## A ruler's preferences choose ordinary orders. These are not simulation bonuses.
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
 const DOMAINS:=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
+## Ambitions worth taking up only once another people is known (preferences).
+const AMBITIONS_NEEDING_OTHERS:=["military","dominion","retribution","commerce"]
 
 static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary:
 	var p:Dictionary={}
@@ -24,7 +26,14 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	weights.culture+=integration*5
 	weights.infrastructure+=integration*5
 	if war:weights.security+=1.5;weights.logistics+=1.0
-	var ambitions:={"horizons":open*.65+risk*.35,"makers":discipline*.55+open*.45,"gathering":empathy*.6+(1-assertive)*.4,"inquiry":open*.85+(1-risk)*.15,"military":assertive*.65+discipline*.35,"sustenance":empathy*.4+(1-risk)*.6,"wellbeing":empathy*.85+(1-assertive)*.15,"commerce":open*.45+empathy*.35+risk*.2}
+	# Every ambition a people can take up is open to its ruler, by fit to temper
+	# (the same table gives the player's council its temper: leader_personality.gd).
+	var ambitions:Dictionary={}
+	for candidate:String in PERSONALITY.AMBITION_TEMPER:ambitions[candidate]=PERSONALITY.ambition_fit(candidate,p)
+	# Arms, rule over others, vengeance and trade need other peoples: until one
+	# is met, a ruler sets its people on something it can use now.
+	if int(situation.get("peoples_known",-1))==0:
+		for candidate:String in AMBITIONS_NEEDING_OTHERS:ambitions[candidate]=float(ambitions[candidate])*.5
 	if constraints.food_shortage:ambitions.sustenance+=2
 	if constraints.delivery_shortage:ambitions.commerce+=2
 	if war:ambitions.military+=1
@@ -36,7 +45,11 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	elif war:training="maintain" if risk<.65 else "regular"
 	return {"personality":p,"goals":goals,"ambition":ambition,"research_weights":weights,"training":training,"at_war":war,"hungry":hungry,"food_shortage":constraints.food_shortage,"delivery_shortage":constraints.delivery_shortage,
 		"recruit_share":clampf(.025+assertive*.055+discipline*.035+risk*.02-empathy*.02+(.08 if war else 0),.02,.22),
-		"capacity_share":clampf(.3+assertive*.45+discipline*.25+(.2 if war else 0),.15,1),"deploy_share":.35+assertive*.25+risk*.2,"expansion_food":30+(1-risk)*60+empathy*15,"settle_distance":12+36*risk,
+		"capacity_share":clampf(.3+assertive*.45+discipline*.25+(.2 if war else 0),.15,1),"deploy_share":.35+assertive*.25+risk*.2,
+		# Boldness settles sooner, farther and oftener, but sends thinner rations:
+		# a bold ruler's new town may go hungry before its first harvest; a
+		# cautious one waits for full stores and sends settlers well provisioned.
+		"expansion_food":45+(1-risk)*40+empathy*15,"settle_distance":16+24*risk,"settle_margin_days":ESTABLISHMENT_DAYS*lerpf(1.35,.65,risk),"expansion_months":expansion_months(p),
 		"scout_days":180 if open>.75 and risk>.65 else (90 if open>.5 else 30),"scout_food":22+(1-risk)*30,
 		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15,"war_food":30+(1-risk)*50,
 		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":12+empathy*18+(1-risk)*12,
@@ -77,6 +90,11 @@ static func preferred_mission(service:String,available:Array,plan:Dictionary)->S
 		if mission in available:return mission
 	return "hold"
 
+## A gift is for making or mending a friendship, not for friends already won.
+const GOODWILL_CEILING:=.5
+## Food goes as a gift only from stores this full (days).
+const GOODWILL_FOOD_DAYS:=90.0
+
 ## A known deterring Great Work (e.g. Crown of the Ridge) lowers the opinion at
 ## which this ruler would start a war against its holder; it never forbids war.
 static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:float,deterrence:float=0.0)->String:
@@ -85,7 +103,48 @@ static func diplomatic_action(relation:Dictionary,plan:Dictionary,food_days:floa
 	var opinion:=float(relation.get("opinion",0))
 	if opinion<float(plan.war_opinion)-clampf(deterrence,0,.3) and food_days>float(plan.war_food) and bool(plan.offensive):return "declare_war"
 	if opinion>float(plan.trade_opinion) and String(relation.get("treaty","none"))=="none":return "open_trade"
-	return "goodwill" if opinion>-.5 and float(plan.personality.empathy)>.65 else ""
+	return "goodwill" if opinion>-.5 and opinion<GOODWILL_CEILING and float(plan.personality.empathy)>.65 else ""
+
+## The gift a goodwill mission carries, paid from real stores: the one the
+## other people will value most that we can spare, or "" when nothing can be
+## spared (then no mission goes). options: CivilizationSystem.diplomatic_gift_options.
+## Food goes only from full stores, a material only while three times the
+## gift is in store.
+static func goodwill_gift(options:Array,food_days:float,plan:Dictionary)->String:
+	var best:="";var score:=-INF
+	for option:Dictionary in options:
+		var amount:=float(option.get("amount",0.0))
+		var available:=float(option.get("available",0.0))
+		if not bool(option.get("can_send",false)) or amount<=0.0:continue
+		if String(option.get("resource",""))=="Food":
+			if food_days<GOODWILL_FOOD_DAYS or bool(plan.get("hungry",false)):continue
+		elif available<amount*3.0:continue
+		var value:=(1.0 if String(option.get("reception",""))=="especially useful" else 0.0)+minf(available/amount,10.0)*.05
+		if value>score:score=value;best=String(option.get("resource",""))
+	return best
+
+# ------------------------------------------------------------------ Expansion
+## Rations for a new town's first weeks, before its own food comes in: what
+## SettlementModel.settlement_convoy_quote carries when nobody says otherwise.
+const ESTABLISHMENT_DAYS:=45.0
+## A people whose expansionist tradition is this strong looks for land every
+## month (auto_founding.gd EXPANSIONIST_DRIVE is the same line).
+const EXPANSIONIST_DRIVE:=.35
+## The longest a council waits between searches for land, in months.
+const LONGEST_LOOK_MONTHS:=6
+
+## How often a council looks for land: every month for the boldest temper or
+## a people with an expansionist tradition, every second month for a bold one,
+## every third for an even temper, every fourth or fifth for the cautious. One
+## rule for a computer ruler and for the player's leaders alike.
+static func expansion_months(p:Dictionary,drive:float=0.0)->int:
+	if drive>=EXPANSIONIST_DRIVE:return 1
+	var caution:=(1.0-clampf(float(p.get("risk_tolerance",.5)),0,1))*.6+(1.0-clampf(float(p.get("assertiveness",.5)),0,1))*.4
+	return clampi(1+roundi(caution*4.0),1,LONGEST_LOOK_MONTHS)
+
+## Does a council held on `day` look for land, at this interval in months?
+static func looks_for_land(day:int,months:int)->bool:
+	return posmod(day/30,maxi(1,months))==0
 
 # ---------------------------------------------------------------- Great Works
 ## Why and how boldly a ruler conceives a wonder. Preferences only: concepts,
@@ -147,6 +206,42 @@ static func wonder_pace(plan:Dictionary,food_days:float)->String:
 ## reckless ones carry on toward triumph or collapse.
 static func wonder_abandon(plan:Dictionary,feasibility:float)->bool:
 	return feasibility>=0 and feasibility<.15 and float(plan.personality.risk_tolerance)<.4
+
+## One rule for every people's answer at a great work's stage gates, whoever
+## gives it: a computer ruler at once, the player's council when the god has
+## given no word (undertaking_system.gd auto_option). The temper moves the
+## lines, never the options. facts: enabled (the options the stores allow),
+## ample (half the work's materials in store), feasibility (the builders'
+## assessed odds), food_days, hierarchy (the people's lived values),
+## cohesion, ego (the architect's).
+static func works_answer(key:String,facts:Dictionary,p:Dictionary)->String:
+	var enabled:Dictionary=facts.get("enabled",{})
+	var open:=clampf(float(p.get("openness",.5)),0,1);var empathy:=clampf(float(p.get("empathy",.5)),0,1)
+	var assertive:=clampf(float(p.get("assertiveness",.5)),0,1);var risk:=clampf(float(p.get("risk_tolerance",.5)),0,1)
+	match key:
+		"design":
+			# The grander design wants materials to spare and builders who believe
+			# in it. The bold believe sooner: assessed odds of 0.57 for the boldest,
+			# 0.70 for an even temper, 0.81 for the most cautious.
+			var bold:=assertive*.5+risk*.5
+			return "grander" if bool(facts.get("ample",false)) and float(facts.get("feasibility",0.0))>=.85-.3*bold else "practical"
+		"stores":
+			# The stores feed extra crews only when full: 120 days for an even
+			# temper, about 95 for the boldest, 143 for the most cautious.
+			return "pour" if enabled.has("pour") and float(facts.get("food_days",0.0))>=150.0-60.0*risk else "protect"
+		"labor":
+			# Only a hard temper levies forced labor, and only from a people that
+			# accepts rank and holds together; a gentle one relies on volunteers;
+			# the rest pay the crews when they can.
+			if assertive*.5+(1.0-empathy)*.5>=.65 and float(facts.get("hierarchy",.5))>=.65 and float(facts.get("cohesion",.5))>=.65:return "levy"
+			if enabled.has("paid") and empathy*.6+(1.0-assertive)*.4<.7:return "paid"
+			return "volunteers"
+		"demand":
+			# Honor the architect's demand when the stores allow it and the temper
+			# prizes the work's glory, or when refusing would drive a vain architect away.
+			if not enabled.has("honor"):return "refuse"
+			return "honor" if open*.5+assertive*.5>=.35 or float(facts.get("ego",0.0))>.7 else "refuse"
+	return ""
 
 ## Envy-driven sabotage: only a proud, callous, reckless ruler even considers it.
 static func wonder_sabotage_temper(plan:Dictionary)->bool:

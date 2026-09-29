@@ -295,6 +295,34 @@ func test_ai_answers_its_own_decisions_and_player_council_waits()->void:
 	assert_bool(mine.has("decision")).is_false()
 	assert_bool(bool(mine.decisions[0].council)).is_true()
 
+## Whoever answers a gate, and however long it takes, the crews build on; no
+## other question is put meanwhile, and one the finished work outruns lapses.
+func test_a_waiting_question_does_not_stop_the_builders()->void:
+	var r:=_record(city,_id("hall","bind_tribes","grand","timber",1,"wait"),.26,"building",false)
+	U.advance_record(GameState,r,40,city)
+	assert_str(String(r.decision.key)).is_equal("design")
+	var posed:=float(r.progress)
+	U.advance_record(GameState,r,41,city)
+	assert_float(float(r.progress)).is_greater(posed)
+	assert_str(String(r.decision.key)).is_equal("design")
+	assert_str(String(r.reason)).contains("waits for an answer")
+	assert_str(U.idle_words(r)).is_empty()
+	assert_str(U.question_words(r)).is_not_empty()
+	# Past the next gate, the first question still waits and no second is put.
+	r.progress=U.total_work(r)*.5;r.quality=float(r.progress)
+	U.advance_record(GameState,r,42,city)
+	assert_str(String(r.decision.key)).is_equal("design")
+	assert_bool("stores" in r.gates).is_false()
+	# Finished first: the question lapses with the work done.
+	r.progress=U.total_work(r)-.001;r.quality=float(r.progress)
+	U.advance_record(GameState,r,43,city)
+	assert_bool(r.has("decision")).is_false()
+	assert_str(String(r.status)).is_not_equal("building")
+	var lapsed:=false
+	for event:Dictionary in r.get("events",[]):
+		if String(event.get("text","")).contains("lapsed"):lapsed=true
+	assert_bool(lapsed).is_true()
+
 var _people:Array=[]
 func _run_events(snapshot:Array)->Dictionary:
 	# Accidents remove real people; restore the same population for each run.

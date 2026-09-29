@@ -33,6 +33,7 @@ const AGE_COHORTS:=["children","youth","early_adults","established_adults","matu
 const COHORT_DURATION_TURNS:={"children":168.0,"youth":132.0,"early_adults":120.0,"established_adults":120.0,"mature_adults":180.0}
 const STRATEGIES:=["sustenance","growth","inquiry","commerce","fortification","expansion"]
 const IDENTITIES=preload("res://scripts/civilization_identity.gd")
+const LEADER_PERSONALITY=preload("res://scripts/leader_personality.gd")
 const REGION_ROLES:=["frontier","granary","market","works","capital"]
 const REGION_TITLES:={"frontier":"MARCH","granary":"BREADLANDS","market":"RIVER GATE","works":"FOUNDRY DISTRICT","capital":"HIGH SEAT"}
 const REGION_POPULATION_SHARES:=[0.07,0.11,0.14,0.13,0.20]
@@ -208,8 +209,11 @@ func reset_for_new_world()->void:
 		# kilometres away; early contact must be earned by travel or long scouting.
 		var distance:=rng.randf_range(0.24,0.96)
 		var angle:=TAU*(float(index)/float(rival_count))+rng.randf_range(-0.18,0.18)
-		var aggression:=rng.randf_range(0.18,0.88)
-		var diplomacy:=rng.randf_range(0.22,0.90)
+		# Aggression, diplomacy and adaptability come from the leader's own
+		# character (leader_personality.character_traits, below). The old draws
+		# stay so every other number of the world comes out as before.
+		rng.randf_range(0.18,0.88)
+		rng.randf_range(0.22,0.90)
 		var knowledge:=rng.randf_range(0.12,0.30)
 		var production:=rng.randf_range(0.10,0.29)
 		var logistics:=rng.randf_range(0.10,0.30)
@@ -220,6 +224,9 @@ func reset_for_new_world()->void:
 		var identity:Dictionary=IDENTITIES.roster(seed_value)[index]
 		var name:=String(identity.name)
 		var civ_id:="civ_%02d" % (index+1)
+		var character:=LEADER_PERSONALITY.character_traits(LEADER_PERSONALITY.foreign(last_world_seed,civ_id))
+		var aggression:=float(character.aggression)
+		var diplomacy:=float(character.diplomacy)
 		var territory:=rng.randf_range(0.65,1.55)
 		var desired_world_position:=Vector2(cos(angle)*distance*CIVILIZATION_WORLD_RADIUS_X_KM,sin(angle)*distance*CIVILIZATION_WORLD_RADIUS_Z_KM)
 		var world_position:=preload("res://scripts/civilization_start.gd").candidate(seed_value,index+1)
@@ -243,7 +250,7 @@ func reset_for_new_world()->void:
 			"health":health,"cohesion":rng.randf_range(0.44,0.78),"knowledge":knowledge,"production":production,
 			"logistics":logistics,"institutions":rng.randf_range(0.18,0.48),"ecology":clampf(0.40+float(environment_profile.get("ecological_resilience",0.5))*0.52+rng.randf_range(-0.05,0.05),0.32,0.96),
 			"military_share":military_share,"military_population":population*military_share,"military_readiness":rng.randf_range(0.38,0.74),"command_readiness":rng.randf_range(0.30,0.68),"training_focus":"camp_drill","training_cycles":0,
-			"aggression":aggression,"diplomacy":diplomacy,"adaptability":rng.randf_range(0.30,0.90),"founding_focus":founding_focus_id,
+			"aggression":aggression,"diplomacy":diplomacy,"adaptability":_drawn_and_replaced(rng.randf_range(0.30,0.90),float(character.adaptability)),"character_traits":1,"founding_focus":founding_focus_id,
 			"strategy":STRATEGIES[(index+abs(seed_value))%STRATEGIES.size()],"allocations":_allocation_for(STRATEGIES[(index+abs(seed_value))%STRATEGIES.size()]),
 			"relations":{},"player_relation":{"opinion":rng.randf_range(-0.34,0.28),"stance":"watchful","treaty":"none","trade":0.0,"at_war":false,"border_tension":clampf(aggression*0.45+(1.0-distance)*0.20,0.0,1.0),"last_incident_day":-9999,"war_goal":"limited","war_target_region_id":"","war_score":0.0,"player_war_exhaustion":0.0,"rival_war_exhaustion":0.0,"conflict_turns":0,"war_started_day":-1,"truce_until_day":0,"last_war_result":"none","war_id":"","front_stance":"balanced","contact_level":0,"contact_intelligence":0.0,"met_day":-1,"contact_source":"","contact_formation_kind":"","contact_formation_id":"","encounter_position":{},"home_location_known":false,"home_position":{},"home_location_source":"","last_observed_day":-1,"rival_contact_level":0,"rival_player_intelligence":0.0,"rival_met_day":-1},
 			"score":0.0,"rank":index+2,"wars_won":0,"wars_lost":0,"trade_total":0.0,"alive":true,
@@ -261,6 +268,26 @@ func reset_for_new_world()->void:
 
 func _initial_progression_tiers()->Dictionary:
 	return {"demography":0,"nutrition":0,"health":0,"labor":0,"knowledge":0,"production":0,"infrastructure":0,"logistics":0,"ecology":0,"institutions":0,"security":0,"culture":0}
+
+
+## `value`, for a trait that once was this random draw: the draw is still
+## taken so the draws after it (and the rest of the world) come out as before.
+func _drawn_and_replaced(_drawn:float,value:float)->float:
+	return value
+
+
+## A people's aggression, diplomacy and adaptability from its leader's own
+## character (leader_personality.character_traits), diplomacy with its founding
+## focus's part as at the start. Older saves drew these at random; they are
+## brought to the character once, on load, and marked "character_traits".
+func _apply_character_traits(civ:Dictionary)->Dictionary:
+	var character:=LEADER_PERSONALITY.character_traits(LEADER_PERSONALITY.foreign(last_world_seed,String(civ.get("id",""))))
+	var effects:Dictionary=WorldSimulation.state.founding_focus_definition(String(civ.get("founding_focus","provision"))).get("effects",{})
+	civ["aggression"]=float(character.aggression)
+	civ["diplomacy"]=clampf(float(character.diplomacy)+float(effects.get("diplomacy",0.0))*0.75,0.0,1.0)
+	civ["adaptability"]=float(character.adaptability)
+	civ["character_traits"]=1
+	return civ
 
 
 func _apply_rival_founding_focus_start(civ:Dictionary)->Dictionary:
@@ -5798,6 +5825,8 @@ func _apply_state(payload:Dictionary)->void:
 			incoming_civilizations[index]["position"]=Vector2(float(position.get("x",0.0)),float(position.get("y",0.0)))
 		elif position is Array and position.size()>=2:
 			incoming_civilizations[index]["position"]=Vector2(float(position[0]),float(position[1]))
+		# Older saves drew these traits at random: bring them to the leader's character.
+		if not (incoming_civilizations[index] as Dictionary).has("character_traits"):incoming_civilizations[index]=_apply_character_traits(incoming_civilizations[index])
 		var hydrated:Dictionary=incoming_civilizations[index]
 		var hydrated_position:=_civilization_world_position(hydrated)
 		hydrated["world_position"]=hydrated_position

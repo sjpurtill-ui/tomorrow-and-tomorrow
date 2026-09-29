@@ -148,6 +148,33 @@ on food with a 40-60% margin, population and discoveries as before; a poor dry
 site goes all in on food and holds 25-60 people; research-heavy grows to about
 1,500 by year 600 against 3,500 for a balanced people.
 
+One rule for every automated leader (2026-09-29): a computer ruler and the
+player's own leaders (the Headman, the council's answers at a great work's
+gates, the search for land) read the same rules; only the temper differs. A
+ruler's temper is its personality; the player's council takes the people's,
+read from their ambitions through `leader_personality.gd` AMBITION_TEMPER, the
+same table a ruler uses to choose its ambition (every ambition is open to
+rulers; arms, dominion, vengeance and trade wait until another people is met).
+
+- Great works: `civilization_strategy.works_answer`; the crews build on while
+  a gate's question waits (90 days for the god's word, 2 for a ruler's).
+- Land: `expansion_months` (every month for the boldest or an expansionist
+  tradition, every third for an even temper, every fifth for the most
+  cautious), settling at 45-100 days of stores, 16-40 km out; bold rulers send
+  thinner rations (32 days for the new town's first weeks against 57).
+- Food: a people's wish for food work (sustenance fully, wellbeing half) is
+  planned as a deeper reserve, up to 120 days with twice the margin.
+- Goodwill carries a real gift from the stores or does not go; a people's
+  aggression, diplomacy and adaptability come from its leader's character.
+
+`python tools/sim/leaders.py` (five archetypes, or `--ambitions`, good and
+poor sites, `--shocks`) checks it: across both sites no temper is as good as
+another everywhere. Sustenance holds 65 days of stores on poor land where the
+rest hold 2-18, bold expansion grows most on good land but loses most settlers,
+works and raids, the warlike are mightiest but fewest, the scholarly live
+longest. The surrogate has no war, conquest or exploration, so the warlike and
+far-ranging tempers show their costs there more than their gains.
+
 ## 8. Build order
 
 1. Research without walls (done: a3b70597).

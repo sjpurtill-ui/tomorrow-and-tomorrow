@@ -1140,7 +1140,10 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	if founders<40:
 		return {"ok":false,"reason":"At least 80 people must remain at the source settlement after a 40-person founding party is organized."}
 	var duration:=maxf(0.5,maxf(duration_days,origin_distance/SETTLEMENT_CONVOY_KM_PER_DAY))
-	var food_required:=float(founders)*(duration+45.0)
+	# The road's rations and about 45 days for the new town's first weeks; the
+	# leaders who send the settlers may judge those weeks thinner or fuller
+	# (civilization_strategy.gd settle_margin_days).
+	var food_required:=float(founders)*(duration+clampf(float(party.get("establishment_days",45.0)),10.0,90.0))
 	if party.has("food"):food_required=maxf(0.0,float(party.food))
 	# Settlers need portable shelter/tool supplies, not one botanically specific
 	# resource. Timber and plant fiber are efficient; clay and stone can substitute
