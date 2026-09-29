@@ -326,16 +326,23 @@ static func record_monthly()->void:
 	var our:=strengths()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
+	var command:=renown(our)
+	metrics["standing_awe"]=float(command.awe)
+	metrics["standing_allure"]=float(command.allure)
 	metrics["standing_pride"]=float(pride(our).value)
 
 static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
-	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5))}
+	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5)),"allure":float(metrics.get("standing_allure",ALLURE_ORDINARY)),"awe":float(metrics.get("standing_awe",0.0))}
 
-## Our warbands menace would-be newcomers; pride keeps our own people.
+## Allure an ordinary people commands (a plain village's culture and plenty).
+const ALLURE_ORDINARY:=0.25
+
+## Our warbands menace would-be newcomers; pride keeps our own people; allure
+## draws others in.
 static func attraction_shift()->float:
 	var m:=monthly()
-	return -float(m.might)*0.08+(float(m.pride)-0.5)*0.08
+	return -float(m.might)*0.08+(float(m.pride)-0.5)*0.08+(float(m.allure)-ALLURE_ORDINARY)*0.08
 
 ## Pride lifts how well the people hold together and trust their chiefs, a little.
 static func cohesion_shift()->float:
@@ -445,7 +452,7 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 ## {attraction, cohesion, legitimacy, menace}.
 static func home_effects()->Dictionary:
 	var m:=monthly()
-	return {"attraction":(float(m.pride)-0.5)*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness()}
+	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness()}
 
 ## Another people's strengths, reckoned in their own scope by the same code as
 ## ours ({} if they are not simulated). Rounded to tens: we know them from
