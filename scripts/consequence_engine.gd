@@ -848,6 +848,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	for key in WorldSimulation.state.simulation_metrics:
 		if previous.has(key) and WorldSimulation.state.simulation_metrics[key] is float:
 			WorldSimulation.state.simulation_trends[key]=float(WorldSimulation.state.simulation_metrics[key])-float(previous[key])
+	# How long we live reads a month of risks, not one day's (game_state.gd).
+	WorldSimulation.state.smooth_exceptional_hazard(SPAN.rate(1.0/30.0))
 	WorldSimulation.state.record_health_history()
 
 	var forecast_90:Dictionary=food_result.get("food_forecast_90",{})
