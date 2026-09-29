@@ -2838,6 +2838,11 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 	var loving:=float(regard.get("love",0.0))>=0.62 and float(regard.get("dread",0.0))<0.3
 	if directive:
 		line=_say(s,envoy,DV.generic("order_dread") if dreadful else ORDER_ACK,rng,{},false,ORDER_ACK)
+	# What the proposal before the ruler gives, costs and risks, and what saying
+	# no costs: the engine's stakes (proposal_stakes.gd), never a stock line.
+	if line.is_empty() and (stakes_gain_question(player_text) or question_type(player_text)=="ifno"):
+		var weighed:=stakes_answer(s,player_text,"gain" if stakes_gain_question(player_text) else "ifno")
+		if weighed!="": line={"key":"envoy","text":weighed,"aside":false,"fact":true}
 	# A factual question to one of our own officials: the numbers from the same
 	# fact sheet the live voice is given (court_answers.gd), exactly as they
 	# stand; never a stock line claiming not to know.
@@ -2855,6 +2860,10 @@ func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->
 		# Asked of our own official and not on the sheet: who would know.
 		if ours and counted==DONT_KNOW: line={"key":"envoy","text":CourtAnswers.redirect(_offices_of(s,envoy)),"aside":false,"fact":true}
 		elif not counted.is_empty(): line=_say(s,envoy,counted,rng,{},false,counted)
+		# "How long would it take?" of the proposal itself (no counted thing named).
+		elif question_type(player_text)=="howlong":
+			var span:=stakes_answer(s,player_text,"howlong")
+			if span!="": line={"key":"envoy","text":span,"aside":false,"fact":true}
 	var answers:=answer_bank(s,player_text) if line.is_empty() else []
 	if not answers.is_empty(): line=_say(s,envoy,answers,rng,{},false)
 	if line.is_empty() and ours and CourtAnswers.factual(player_text):
@@ -3361,9 +3370,12 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var ctx:Dictionary=(s.ctx as Dictionary).duplicate(true)
 	ctx.erase("court"); ctx.erase("audience_id"); ctx.erase("status"); ctx.erase("mood")
 	ctx.erase("history_with_speaker"); ctx.erase("history_with_civ")   # summarized below
+	ctx.erase("stakes")   # its own section below, never cut off with the facts
 	var facts:String=JSON.stringify(ctx)
 	if facts.length()>2400: facts=facts.substr(0,2400)+"...}"
 	parts.append("FACTS YOU MAY USE (nothing else is true): "+facts)
+	var stakes:=stakes_text(s)
+	if stakes!="": parts.append("WHAT THE RULER STANDS TO GAIN (the engine's own reckoning of the proposal; when asked what we gain, what it costs, how likely it is or what happens if refused, say these plainly with these numbers and nothing else): "+stakes)
 	var records:=court_records(s)
 	# Kept on the scene: the numbers on the sheet are the numbers a line may say.
 	s["records"]=records
@@ -3404,6 +3416,46 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	parts.append("NOW: "+_stage_instruction(s,stage,extra))
 	return "\n\n".join(parts)
 
+## The proposal's stakes for the prompt: one short true line per part (gain,
+## cost, how likely, what refusing costs). "" when nothing is proposed.
+func stakes_text(s:Dictionary)->String:
+	var facts:Variant=(s.get("ctx",{}) as Dictionary).get("stakes",{}) if s.get("ctx") is Dictionary else {}
+	if not facts is Dictionary or (facts as Dictionary).is_empty(): return ""
+	var out:PackedStringArray=PackedStringArray()
+	for key in (facts as Dictionary):
+		if String(key)=="for": continue
+		out.append("%s: %s" % [String(key).replace("_"," "),str((facts as Dictionary)[key])])
+	var subject:=String((facts as Dictionary).get("for",""))
+	return ("(%s) " % subject if subject!="" else "")+"; ".join(out)
+
+## The engine's stakes of the proposal before the ruler (proposal_stakes.gd),
+## for an offline answer to "what do we gain?"; {} when none (or no hall).
+func _stakes_of(s:Dictionary)->Dictionary:
+	if String(s.get("origin",""))!="court": return {}
+	# Only the real hall reckons stakes (a test's stand-in hall has none).
+	var h:Variant=_hall()
+	if not h is GDScript or (h as GDScript).resource_path!=HALL_PATH: return {}
+	var found:Variant=(h as GDScript).call("stakes",String(s.get("id","")))
+	return found if found is Dictionary else {}
+
+## "What do we gain?", "what's in it for us?", "is it worth it?", "why should
+## we?": asked of the proposal itself, not "what do you want?" (the need).
+const STAKES_GAIN_RE:="(?i)(\\bgain\\b|\\bget out of\\b|\\bin return\\b|what'?s in it for|what is in it for|what (do|would|will|shall|can) (we|i|us|my people|our people) (get|gain|have|win)|what (does|would|will|can) (it|this|that|the order|the decree|the work|the aim) (give|get|bring|buy|win|do for)|what good (is|would|will|does|can)|\\bbenefits?\\b|worth (it|the|doing)|what'?s the point|what is the point|why should (we|i|my people)|\\bpay off\\b|what('?s| is| would be) the (use|good)|how (does|would|will|can) (it|this|that) help)"
+
+func stakes_gain_question(player_text:String)->bool:
+	if not ("?" in player_text or CourtAnswers.is_question(player_text)): return false
+	var re:=RegEx.new(); re.compile(STAKES_GAIN_RE)
+	return re.search(player_text)!=null
+
+## A question about the proposal itself the stakes answer, in the speaker's
+## words: "gain" (what we get), "ifno" (what refusing costs), "howlong" (how
+## long it runs). "" when nothing is proposed or the stakes do not say.
+func stakes_answer(s:Dictionary,_player_text:String,question:String)->String:
+	if not question in ["gain","ifno","howlong"]: return ""
+	var stakes:=_stakes_of(s)
+	if stakes.is_empty(): return ""
+	return String(load("res://scripts/proposal_stakes.gd").call("spoken",stakes,question))
+
 ## The exact fact sheet for the one addressed at our own court, by office
 ## (court_facts.gd): the war leader has every town's ledger, the headman the
 ## stores. "" for a foreign envoy, who knows nothing of what our people know.
@@ -3431,6 +3483,8 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			if String(s.kind)=="summons": return "'envoy' was sent for by the ruler and brings nothing of their own: exactly ONE short, plain line in their own voice that hands the floor back (like 'You sent for me. What do you need?'). No petition, no request for themselves, no remark on the state of the settlement, no promise to remember, no verbal tic. No official speaks. mood_shift 0."
 			var who:="'envoy' is the petitioning official: they make their case with feeling and a little self-interest." if s.origin=="court" else "'envoy' speaks first: a greeting with flourish and attitude, then the business in plain terms, exact amounts as given."
 			if String(s.kind) in WORK_KINDS: who=_work_open_instruction(s)
+			# The court says what the ruler stands to gain, in the engine's numbers.
+			if stakes_text(s)!="": who+=" The case says plainly what the ruler stands to gain and what it costs, with the numbers in WHAT THE RULER STANDS TO GAIN."
 			if String(s.kind)=="report": who="'envoy' is the Chief Scout, back from the field. Debrief in 2 to 3 lines: plain-spoken, concrete and sensory (what they saw, heard, smelled, who they met, what surprised or worried them, what they covet), opinionated, with uncertainty spoken naturally ('I'd not swear to it, but...'). Use only the findings supplied; never add numbers, places or events."
 			if not (s.get("arc",{}) as Dictionary).is_empty(): who+=" The visitor first acknowledges the earlier audience named in CONTINUING."
 			elif not String((s.get("occasion",{}) as Dictionary).get("text","")).is_empty(): who+=" The visitor's opening grows out of WHY THEY CAME."
@@ -3441,7 +3495,8 @@ func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
 			if bool(extra.get("read",false)): classify=" These words were talk or a question, not an order: nobody acts, nobody is harmed or seized, nobody marches, nothing changes hands; no line claims or promises that anything was done."
 			# Asked "is that all?" or "why not all?": the whole account, runners too.
 			var whole:=" If asked whether that is all, or why not all of them, the line gives every part of the account the facts list: those still there by status, the killed, those who ran or got away and where, those taken, with each number." if String(s.get("origin",""))=="court" else ""
-			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now).%s Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),whole,_gate_words(s),_divine_classify_words(s),classify]
+			var weighed:=" (what the ruler gains, what it costs and how likely it is are in WHAT THE RULER STANDS TO GAIN)" if stakes_text(s)!="" else ""
+			return "The ruler just said: \"%s\". 'envoy' answers in ONE line, in character; if it was a question, the line answers it plainly from FACTS (what they gain, what happens if refused, why now)%s.%s Change no terms and accept nothing new.%s Set mood_shift by how the ruler's words land with 'envoy'.%s%s" % [String(extra.get("player_text","")),weighed,whole,_gate_words(s),_divine_classify_words(s),classify]
 		"divine":
 			return _divine_instruction(s,extra)
 		"command":
