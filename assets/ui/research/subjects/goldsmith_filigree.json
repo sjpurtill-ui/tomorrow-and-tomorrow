@@ -1,0 +1,16 @@
+{
+  "id": "goldsmith_filigree",
+  "line": "production",
+  "game_year": 400,
+  "approx_historical_year": -2333,
+  "prompt": "c. 2333 BCE: Gold and Silver Sheet, Filigree and Granulation. Gold and silver sheet, filigree and granulation. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fabc0c01-393d-416f-9c2c-1a0d87e288c5.png",
+  "asset": "res://assets/ui/research/subjects/goldsmith_filigree-v1.png",
+  "sha256": "baa248d73dbbb51dec23bbd9f37290cfaf78fe8e21bae0d8f1fd21477c54adc6",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.38
+  ]
+}

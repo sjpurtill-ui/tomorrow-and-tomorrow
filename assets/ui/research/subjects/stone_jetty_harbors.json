@@ -1,0 +1,16 @@
+{
+  "id": "stone_jetty_harbors",
+  "line": "logistics",
+  "game_year": 400,
+  "approx_historical_year": -2333,
+  "prompt": "c. 2333 BCE: Sheltered Harbor with a Stone Jetty. Sheltered harbor with a stone jetty. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6b81c68a-a8cd-46a4-a2fc-8213bbdae1cc.png",
+  "asset": "res://assets/ui/research/subjects/stone_jetty_harbors-v1.png",
+  "sha256": "dacb24db013f0d67512275dd28fd780a67ae221983d21e8466d5a8729a203a0b",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}

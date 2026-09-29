@@ -1,0 +1,16 @@
+{
+  "id": "embalming_anatomy",
+  "line": "health",
+  "game_year": 400,
+  "approx_historical_year": -2333,
+  "prompt": "c. 2333 BCE: Organs Known from Preparing the Dead. Organs known from preparing the dead. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d536d71b-b994-44e5-b7ec-3bfc21403a29.png",
+  "asset": "res://assets/ui/research/subjects/embalming_anatomy-v1.png",
+  "sha256": "06d2dc5d15d62e1829cfae26215564ddf24f03bb4d9aefc505cfc7357670a2ac",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.38
+  ]
+}

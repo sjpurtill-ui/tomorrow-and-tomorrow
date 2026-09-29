@@ -4239,5 +4239,21 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "codified_tribute_schedules": {"path": "res://assets/ui/research/subjects/codified_tribute_schedules-v1.png", "focus": [0.5, 0.38]},
+  "embalming_anatomy": {"path": "res://assets/ui/research/subjects/embalming_anatomy-v1.png", "focus": [0.5, 0.38]},
+  "goldsmith_filigree": {"path": "res://assets/ui/research/subjects/goldsmith_filigree-v1.png", "focus": [0.5, 0.38]},
+  "hard_soldering": {"path": "res://assets/ui/research/subjects/hard_soldering-v1.png", "focus": [0.5, 0.38]},
+  "midwife_apprenticeship_lines": {"path": "res://assets/ui/research/subjects/midwife_apprenticeship_lines-v1.png", "focus": [0.5, 0.38]},
+  "shift_overlap_briefings": {"path": "res://assets/ui/research/subjects/shift_overlap_briefings-v1.png", "focus": [0.5, 0.5]},
+  "stone_jetty_harbors": {"path": "res://assets/ui/research/subjects/stone_jetty_harbors-v1.png", "focus": [0.5, 0.5]},
+  "work_gang_bakeries": {"path": "res://assets/ui/research/subjects/work_gang_bakeries-v1.png", "focus": [0.5, 0.5]},
+  "copper_helmets": {"path": "res://assets/ui/research/subjects/copper_helmets-v1.png", "focus": [0.5, 0.5]},
+  "stocked_fish_ponds": {"path": "res://assets/ui/research/subjects/stocked_fish_ponds-v1.png", "focus": [0.5, 0.38]},
+  "upper_storeys": {"path": "res://assets/ui/research/subjects/upper_storeys-v1.png", "focus": [0.5, 0.38]},
+  "wetted_track_sledging": {"path": "res://assets/ui/research/subjects/wetted_track_sledging-v1.png", "focus": [0.5, 0.38]},
+  "bitumen_bedded_brick": {"path": "res://assets/ui/research/subjects/bitumen_bedded_brick-v1.png", "focus": [0.5, 0.38]},
+  "boundary_treaties": {"path": "res://assets/ui/research/subjects/boundary_treaties-v1.png", "focus": [0.5, 0.5]},
+  "bronze_work_hardening": {"path": "res://assets/ui/research/subjects/bronze_work_hardening-v1.png", "focus": [0.5, 0.38]},
+  "navigation_canals": {"path": "res://assets/ui/research/subjects/navigation_canals-v1.png", "focus": [0.5, 0.5]}
 }

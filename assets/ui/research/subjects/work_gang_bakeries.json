@@ -1,0 +1,16 @@
+{
+  "id": "work_gang_bakeries",
+  "line": "nutrition",
+  "game_year": 400,
+  "approx_historical_year": -2333,
+  "prompt": "c. 2333 BCE: Bakeries and Breweries Feeding Work Gangs. Bakeries and breweries feeding work gangs. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-165fe134-849e-403a-acdb-cbf0ba26c3a2.png",
+  "asset": "res://assets/ui/research/subjects/work_gang_bakeries-v1.png",
+  "sha256": "9beddd0a5dde8d4c838c59f23a01a2c3aa0c2d3882b44223f10f6e68b7fa4c94",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}

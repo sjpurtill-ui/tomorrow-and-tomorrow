@@ -1,0 +1,16 @@
+{
+  "id": "shift_overlap_briefings",
+  "line": "labor",
+  "game_year": 400,
+  "approx_historical_year": -2333,
+  "prompt": "c. 2333 BCE: Shift Overlap Briefings. Shift overlap briefings. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3a040090-5574-4790-bc79-ed030f4da8f7.png",
+  "asset": "res://assets/ui/research/subjects/shift_overlap_briefings-v1.png",
+  "sha256": "098df8fc0ecbdafb8b5db0045bddcca51d08f8b1c92452bd456a4f54ac55d7fe",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}
