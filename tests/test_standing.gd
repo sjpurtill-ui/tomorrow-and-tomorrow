@@ -296,3 +296,10 @@ func test_the_months_reading_survives_the_days_and_is_charted()->void:
 	assert_float(float(GameState.simulation_metrics.get("standing_pride",-1.0))).is_equal(before)
 	var scopes:=preload("res://scripts/strategic_history.gd").capture_scopes()
 	assert_bool((scopes.civilization as Dictionary).has("standing_pride")).is_true()
+
+func test_a_heavy_levy_is_resented()->void:
+	_arm(0,0.3)
+	assert_float(Standing.levy_burden()).is_equal(0.0)
+	# A seventh of the people under arms: well past what households carry.
+	_arm(roundi(GameState.population_exact*0.14),0.8)
+	assert_float(Standing.levy_burden()).is_greater(0.05)

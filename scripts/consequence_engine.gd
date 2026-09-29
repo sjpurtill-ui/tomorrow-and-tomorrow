@@ -461,6 +461,10 @@ func _standing_legitimacy()->float:
 func _standing_blame()->float:
 	return preload("res://scripts/standing.gd").blame()
 
+## Levies past what households carry are resented (standing.gd levy_burden).
+func _levy_burden()->float:
+	return preload("res://scripts/standing.gd").levy_burden()
+
 func policy_effect(channel:String)->float:
 	var result:=0.0
 	for modifier_variant in WorldSimulation.state.active_modifiers:
@@ -699,7 +703,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var admin_coverage := clampf(stewards/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
 	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
-	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+_standing_cohesion()+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
+	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+_standing_cohesion()-_levy_burden()*0.6+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
@@ -736,7 +740,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
 	ecology = clampf(ecology+ecology_delta*span,0.04,1.0)
-	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-(administrative_load*0.12+policy_churn*0.18+directive_resistance*0.24)*_standing_blame()+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
+	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-(administrative_load*0.12+policy_churn*0.18+directive_resistance*0.24+_levy_burden()*0.4)*_standing_blame()+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,SPAN.rate(0.012))
 
 	# Mortality is accumulated as population-level risk, while reproduction is

@@ -357,6 +357,16 @@ static func legitimacy_shift()->float:
 static func forgiveness()->float:
 	return clampf((float(monthly().pride)-0.5)*0.8,-0.2,0.3)
 
+## Share of the people under arms (trained, training or called up) that
+## households carry without complaint; beyond it, levies are resented.
+const LEVY_EASY_SHARE:=0.05
+
+## How much a heavy levy weighs on the people, 0..: the share under arms past
+## LEVY_EASY_SHARE (fields without hands, sons away). Read the same way for
+## every people from its own army.
+static func levy_burden()->float:
+	return maxf(0.0,_warriors()/_population()-LEVY_EASY_SHARE)
+
 ## The blame multiplier the daily systems apply (1 - forgiveness).
 static func blame()->float:
 	return 1.0-forgiveness()
@@ -452,7 +462,9 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 ## {attraction, cohesion, legitimacy, menace}.
 static func home_effects()->Dictionary:
 	var m:=monthly()
-	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness()}
+	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness(),"levy":levy_burden(),"under_arms":_warriors()/_population(),
+		# What the levy costs, as ConsequenceEngine's targets take it.
+		"levy_cohesion":levy_burden()*60.0,"levy_trust":levy_burden()*40.0*blame()}
 
 ## Another people's strengths, reckoned in their own scope by the same code as
 ## ours ({} if they are not simulated). Rounded to tens: we know them from
