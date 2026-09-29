@@ -59,3 +59,22 @@ func test_the_food_floor_sits_below_the_typical_share_so_better_farming_frees_ha
 	var share:=float(weights.Food)/(float(weights.Food)+38.0)
 	assert_float(share).is_equal_approx(0.62*GovernmentPeopleSystem.FOOD_FLOOR_OF_TYPICAL,0.01)
 	assert_float(share).is_less(0.62)
+
+## Guards in proportion to how hard the neighbours press, for every people alike.
+func test_hostile_neighbours_draw_more_guards_but_food_comes_first()->void:
+	CivilizationSystem.reset_for_new_world(); CivilizationSystem.initialize()
+	for civ in CivilizationSystem.civilizations: civ.player_relation.contact_level=0
+	var calm:=_planned_split(150.0)
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	civ.player_relation.contact_level=2
+	civ.player_relation.border_tension=0.8
+	civ.player_relation.opinion=-0.5
+	assert_float(GovernmentPeopleSystem.neighbour_threat()).is_greater(0.5)
+	var pressed:=_planned_split(150.0)
+	assert_float(float(pressed.Defense)).is_greater(float(calm.Defense)+2.0)
+	# The food floor still holds its share.
+	assert_float(float(pressed.Food)).is_equal_approx(float(calm.Food),0.5)
+
+func _planned_split(production:float)->Dictionary:
+	GameState.simulation_metrics={"food_consumption":120.0,"food_production":production,"food_labor_share":.5,"food_intake_ratio":1.0,"food_days":90.0,"food_projected_days":90.0}
+	return GovernmentPeopleSystem._allocations_for_focus("balanced",{},false)
