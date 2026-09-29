@@ -1,0 +1,16 @@
+{
+  "id": "sanitation_inspection_customs",
+  "line": "health",
+  "game_year": 384,
+  "approx_historical_year": -2440,
+  "prompt": "c. 2440 BCE: Elders Inspect Wells, Drains and Refuse Pits. Elders inspect wells, drains and refuse pits. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-82b8ce57-7357-4106-ae37-49433c848411.png",
+  "asset": "res://assets/ui/research/subjects/sanitation_inspection_customs-v1.png",
+  "sha256": "5949acd96c09261e1f4c60366e773d12df14c28ad76a77bc8b89cc5efd19a141",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.32
+  ]
+}

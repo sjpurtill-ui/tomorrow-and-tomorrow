@@ -1,0 +1,258 @@
+[
+  {
+    "id": "named_beers",
+    "line": "nutrition",
+    "game_year": 375,
+    "approx_historical_year": -2500,
+    "prompt": "c. 2500 BCE. Ultrawide botanical egg tempera brewer comparing pale and dark beer in opaque shallow earthenware bowls, with separate cereal grain baskets and color-banded opaque storage jars; full-bleed, no glass or text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6e41dd16-3516-4284-b649-8c5229bf097f.png",
+    "asset": "res://assets/ui/research/subjects/named_beers-v1.png",
+    "sha256": "9856903f9804f1f5b50bf0f529e62bb82f660edf95e1266be45d717e3a6d4ee6",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.42
+    ]
+  },
+  {
+    "id": "store_airflow_arrangement",
+    "line": "logistics",
+    "game_year": 375,
+    "approx_historical_year": -2500,
+    "prompt": "c. 2500 BCE: Store Airflow Arrangement. Store airflow arrangement. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b1fb84fe-5db0-4b7c-bfed-309141dedd72.png",
+    "asset": "res://assets/ui/research/subjects/store_airflow_arrangement-v1.png",
+    "sha256": "a6f3061ebdcfc2ef8934f49980a616bafaa6371ca77f6a65a24b76ee2fd8f132",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  {
+    "id": "assembly_petition_rights",
+    "line": "institutions",
+    "game_year": 378,
+    "approx_historical_year": -2480,
+    "prompt": "c. 2480 BCE: Right to Petition the Assembly. Right to petition the assembly. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b02e5747-c217-418a-ae13-81265ee7cbbe.png",
+    "asset": "res://assets/ui/research/subjects/assembly_petition_rights-v1.png",
+    "sha256": "7b21774fa9a9236916389f8435eb88f79c9235bb7904484fbe9aa9cda5f988d3",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "communal_child_supervision_rotas",
+    "line": "demography",
+    "game_year": 378,
+    "approx_historical_year": -2480,
+    "prompt": "c. 2500 BCE. Chalk pastel and cut-paper collage of adult neighbors transferring care of children in a courtyard with clay tally pebbles; no domestic chickens, full-bleed and text-free.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42bb7fcf-2b23-4ed7-9ec5-a93f6b387e4a.png",
+    "asset": "res://assets/ui/research/subjects/communal_child_supervision_rotas-v1.png",
+    "sha256": "17fce72205a049152779b904dcb3122fe5ec546c9ca6b27c3d620c27b1d43bd3",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  {
+    "id": "public_works_priority_review",
+    "line": "infrastructure",
+    "game_year": 378,
+    "approx_historical_year": -2480,
+    "prompt": "c. 2480 BCE: Public Works Priority Review. Public works priority review. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b0fc4afc-b630-4dac-9b94-bceae627e52d.png",
+    "asset": "res://assets/ui/research/subjects/public_works_priority_review-v1.png",
+    "sha256": "8869e25c7b8af0b9f4b085ac0541a4c236d5090db303e7aa0f93b70317e7b62c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.47
+    ]
+  },
+  {
+    "id": "closed_moulds",
+    "line": "production",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2470 BCE. Ultrawide palette-knife impasto of two smiths using long wooden handles to pour copper from a crucible into a closed clay mould supported on stone, hands far from heat; full heads and action in the 3.37:1 crop.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c54cf035-4c15-4c91-9e5d-7a33ea6caf9e.png",
+    "asset": "res://assets/ui/research/subjects/closed_moulds-v1.png",
+    "sha256": "b007d6bdb65deb15a9dd177c1726666588afa7306edf0cc4d5d139713c037510",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.46
+    ]
+  },
+  {
+    "id": "marriage_age_norms",
+    "line": "demography",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2467 BCE: Customary Marriage Ages. Customary marriage ages. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-53adeee4-1e7e-4a53-a14d-19a129b928d6.png",
+    "asset": "res://assets/ui/research/subjects/marriage_age_norms-v1.png",
+    "sha256": "b03a9993238b7de9da7f9007d3b380ddb103301ec4dfae7d4e69701bf1ff8dde",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.31
+    ]
+  },
+  {
+    "id": "massed_formation_training",
+    "line": "security",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2467 BCE: Massed Formation Training. Massed formation training. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8596ddb8-d674-4f97-a5e9-babd095c9c9f.png",
+    "asset": "res://assets/ui/research/subjects/massed_formation_training-v1.png",
+    "sha256": "ac9a756ea9589adc32c54b8dcca0a21d7d429c795630c032eec9ae38d4d7f75c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.29
+    ]
+  },
+  {
+    "id": "rotating_named_gangs",
+    "line": "labor",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2470 BCE. Ultrawide charcoal over ochre of a fresh gang taking a wooden shovel from a tired gang while an overseer holds two distinct knotted cords; full-bleed, no text.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d995aae2-2c5e-4194-bd6e-f223d959f717.png",
+    "asset": "res://assets/ui/research/subjects/rotating_named_gangs-v1.png",
+    "sha256": "72982b3b74bc21022e7370f27a5ea4992d59e7b5c1e3bb8cbb2701e9b3e6200e",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.44
+    ]
+  },
+  {
+    "id": "structural_repair_triage",
+    "line": "infrastructure",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2467 BCE: Structural Repair Triage. Structural repair triage. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-205f342a-a116-4f75-b37b-4186e7b924e7.png",
+    "asset": "res://assets/ui/research/subjects/structural_repair_triage-v1.png",
+    "sha256": "cf5cbf89f706ac916911b4338f929cf45c97012efd185f34a505378c2c3b0f45",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.37
+    ]
+  },
+  {
+    "id": "trade_route_risk_assessment",
+    "line": "logistics",
+    "game_year": 380,
+    "approx_historical_year": -2467,
+    "prompt": "c. 2467 BCE: Trade Route Risk Assessment. Trade route risk assessment. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fd26d78e-709f-4d6d-be4d-a23f5d7d327a.png",
+    "asset": "res://assets/ui/research/subjects/trade_route_risk_assessment-v1.png",
+    "sha256": "fb072d5b71cab26aa26d72cbd2883c19adc1e930cfe8f360f5e1b85652c21d0c",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.39
+    ]
+  },
+  {
+    "id": "protective_gear_customs",
+    "line": "health",
+    "game_year": 381,
+    "approx_historical_year": -2460,
+    "prompt": "Targeted image edit of the accepted three-worker watercolor: remove triangular sailboat, mast, hull and wake from river behind left and center workers; fill with uninterrupted river watercolor, preserve all three anatomically correct workers, aprons, wraps, headcloth, crop and medium.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b2d1137b-feb7-4b92-8c90-5304f7e600de.png",
+    "asset": "res://assets/ui/research/subjects/protective_gear_customs-v1.png",
+    "sha256": "8a31f536dcfe569568e2e3097add08ff4b692dbd51d316551b08a658aae0c04a",
+    "mode": "built-in image_gen / targeted edit of accepted painting",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.46
+    ]
+  },
+  {
+    "id": "household_partition_customs",
+    "line": "demography",
+    "game_year": 382,
+    "approx_historical_year": -2453,
+    "prompt": "c. 2453 BCE: Crowded Households Split by Agreed Rule. Crowded households split by agreed rule. Mature editorial chalk pastel and cut-paper collage. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-984259ac-767d-43db-bcb1-fa44b2c7201d.png",
+    "asset": "res://assets/ui/research/subjects/household_partition_customs-v1.png",
+    "sha256": "e96594913a3d462e1fe1c974d208867f07e5db0b055555c64dc6a2ca10cf376b",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.34
+    ]
+  },
+  {
+    "id": "seasonal_hazard_calendar",
+    "line": "infrastructure",
+    "game_year": 382,
+    "approx_historical_year": -2453,
+    "prompt": "c. 2453 BCE: Seasonal Hazard Calendar. Seasonal hazard calendar. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e502e18f-ea5c-48d2-a30c-b1c89138cf14.png",
+    "asset": "res://assets/ui/research/subjects/seasonal_hazard_calendar-v1.png",
+    "sha256": "271f9a450544c3fce40a17bd430dbadc504cbb60559f0fbdf076d79e8f06fdfd",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.43
+    ]
+  },
+  {
+    "id": "sanitation_inspection_customs",
+    "line": "health",
+    "game_year": 384,
+    "approx_historical_year": -2440,
+    "prompt": "c. 2440 BCE: Elders Inspect Wells, Drains and Refuse Pits. Elders inspect wells, drains and refuse pits. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-82b8ce57-7357-4106-ae37-49433c848411.png",
+    "asset": "res://assets/ui/research/subjects/sanitation_inspection_customs-v1.png",
+    "sha256": "5949acd96c09261e1f4c60366e773d12df14c28ad76a77bc8b89cc5efd19a141",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.32
+    ]
+  },
+  {
+    "id": "distant_timber_reserves",
+    "line": "ecology",
+    "game_year": 385,
+    "approx_historical_year": -2433,
+    "prompt": "c. 2433 BCE: Distant Forests Known as Reserves of Long Timber. Distant forests known as reserves of long timber. Naturalist field painting in layered plant pigments. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f84aeb09-bcd2-4ffb-b8f3-adb2979b361a.png",
+    "asset": "res://assets/ui/research/subjects/distant_timber_reserves-v1.png",
+    "sha256": "3c818ff980b64d898964503e39f9f39ef141bd9736aa6df49b8af4cefbee8b21",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "id": "public_works_priority_review",
+  "line": "infrastructure",
+  "game_year": 378,
+  "approx_historical_year": -2480,
+  "prompt": "c. 2480 BCE: Public Works Priority Review. Public works priority review. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b0fc4afc-b630-4dac-9b94-bceae627e52d.png",
+  "asset": "res://assets/ui/research/subjects/public_works_priority_review-v1.png",
+  "sha256": "8869e25c7b8af0b9f4b085ac0541a4c236d5090db303e7aa0f93b70317e7b62c",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.47
+  ]
+}
