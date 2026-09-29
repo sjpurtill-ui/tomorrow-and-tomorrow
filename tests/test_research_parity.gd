@@ -164,6 +164,22 @@ func test_delegated_research_is_the_rulers_planner_with_the_peoples_culture()->v
 	GameState.research_allocations=saved.allocations;GameState.research_subcategory_allocations=saved.subcategories
 	GameState.active_investigations=saved.active;GameState.research_targets=saved.targets
 
+func test_peoples_in_the_same_conditions_delegate_research_alike_whoever_rules()->void:
+	# A people's delegated research follows its culture, not the name or the
+	# controller of whoever owns it: twins in the same world plan the same.
+	WorldSimulation.create_actor("twin_ruled",4242);WorldSimulation.create_actor("twin_manual",4242)
+	WorldSimulation.actors.twin_manual.controller="manual"
+	var plans:Array[Dictionary]=[]
+	for id:String in ["twin_ruled","twin_manual"]:
+		WorldSimulation.submit(id,{"kind":"ambition","id":"inquiry"})
+		plans.append((WorldSimulation.actors[id].systems.GameState.research_subcategory_allocations as Dictionary).duplicate(true))
+	assert_dict(plans[0]).is_equal(plans[1])
+	var fields:=0
+	for line:String in plans[0]:
+		for value in (plans[0][line] as Dictionary).values():
+			if int(value)>0:fields+=1;break
+	assert_int(fields).is_greater(4)
+
 func test_the_peoples_tendency_comes_from_the_values_they_live_by()->void:
 	var open_minds:={"lived":{"openness":.9,"experimentation":.9,"hierarchy":.2,"collective_obligation":.5,"centralization":.5,"common_stewardship":.5,"restorative_justice":.5,"ecological_restraint":.5}}
 	var closed:={"lived":{"openness":.1,"experimentation":.1,"hierarchy":.8,"collective_obligation":.5,"centralization":.5,"common_stewardship":.5,"restorative_justice":.5,"ecological_restraint":.5}}
