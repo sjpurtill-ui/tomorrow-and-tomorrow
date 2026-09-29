@@ -24,9 +24,14 @@ func test_stone_shortage_points_to_its_open_processing_method_without_unlocking_
 		assert_str(String(order.id)).is_equal("joinery")
 		assert_str(String(order.resource)).is_equal("Stone")
 		assert_bool("joinery" in WorldSimulation.state.known_discoveries).is_false()
-		# Before its age the planner suggests nothing it could not start.
+		# No age is a wall any more (work before a question's age grows in
+		# proportion to the years ahead); the planner only points at questions
+		# near their age, never at costly work years early.
 		WorldSimulation.state.elapsed_days=0
-		assert_dict(P.recommendation()).is_empty()
+		var early:=P.recommendation()
+		if not early.is_empty():
+			var entry:Dictionary=WorldSimulation.discovery.discovery_definition(String(early.id))
+			assert_float(WorldSimulation.discovery.research_years_ahead(entry)).is_less(P.NEAR_AGE)
 	)
 func test_hidden_unsurveyed_exhausted_or_supplied_sources_do_not_drive_research()->void:
 	WorldSimulation.scoped("supply_ruler",func()->void:
