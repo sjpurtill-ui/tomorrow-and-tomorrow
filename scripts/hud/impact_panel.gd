@@ -3,7 +3,7 @@ extends VBoxContainer
 ## effect as a line: a small mark in its tone, what it touches, how much
 ## (right-aligned), and underneath, what that means in this town today.
 ## Lines come from the engine's own rules (building_impact.gd); the panel only
-## lays them out. Block: {"type":"impact", "lead":String, "lines":[{label,
+## lays them out. Block: {"type":"impact_lines", "lead":String, "lines":[{label,
 ## value, words, tone}], "columns":1|2}. Two columns on a wide dock.
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")

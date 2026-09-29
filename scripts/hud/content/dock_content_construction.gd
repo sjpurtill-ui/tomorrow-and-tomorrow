@@ -43,9 +43,9 @@ func _city_tab()->Dictionary:
 	var homes:=Impact.homes()
 	return {"brief":_now_brief(city,project,housing,crews),"blocks":[
 		{"type":"rows","heading":town,"note":_count(int(crews.heads),"builder"),"items":_work_rows(city,project,crews)},
-		{"type":"impact","heading":"What the buildings do for the people now","lead":"Every figure below is the rule the game applies today, worked out for %s as it stands." % town,"lines":Impact.summary()},
+		{"type":"impact_lines","heading":"What the buildings do for the people now","lead":"Every figure below is the rule the game applies today, worked out for %s as it stands." % town,"lines":Impact.summary()},
 		{"type":"rows","heading":"Homes","note":_count(int(housing.people),"person","people"),"items":[_home_row(housing),_new_homes_row(housing,crews)]},
-		{"type":"impact","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"lines":homes.lines},
+		{"type":"impact_lines","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"lines":homes.lines},
 		{"type":"rows","heading":"The town's buildings","items":[_condition_row(),_era_row(crews),_workshops_row()]},
 		{"type":"actions","items":[
 			{"label":"Choose what to build","sub":"Civic works: each work, what it needs, your priority","on_press":jump("construction",1)},
@@ -306,7 +306,7 @@ func _infrastructure_tab()->Dictionary:
 	if blocks.is_empty():blocks.append({"type":"text","heading":"INFRASTRUCTURE","text":"No water works, conduits, rail lines, docks or plants yet. Builders raise them once their practices are adopted and materials arrive."})
 	# The defence works, stage by stage: what each gives, and which stand.
 	for stage:Dictionary in Impact.defences():
-		blocks.append({"type":"impact","heading":("%s · built" if bool(stage.built) else "%s · not yet built") % String(stage.name),"lines":stage.lines,"columns":2})
+		blocks.append({"type":"impact_lines","heading":("%s · built" if bool(stage.built) else "%s · not yet built") % String(stage.name),"lines":stage.lines,"columns":2})
 	return {"blocks":blocks}
 
 static func _infrastructure_rows(city_id:String)->Array:

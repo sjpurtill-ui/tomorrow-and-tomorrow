@@ -69,7 +69,7 @@ func _local(id:String)->Dictionary:
 		var items:Array=[]
 		var site:=Works.api_dict("site",[id,work_id])
 		var impact:=_impact(item,site)
-		if not impact.is_empty():blocks.append({"type":"impact","heading":"What %s does" % String(item.get("name","it")),"lines":impact,"columns":1})
+		if not impact.is_empty():blocks.append({"type":"impact_lines","heading":"What %s does" % String(item.get("name","it")),"lines":impact,"columns":1})
 		if site.get("decision") is Dictionary and not (site.decision as Dictionary).is_empty():
 			items.append({"label":"HEAR THE MASTER BUILDER","sub":String((site.decision as Dictionary).get("prompt","A decision awaits")),"on_press":func()->void:_hear(work_id,id)})
 		if ceremonies.has(work_id):

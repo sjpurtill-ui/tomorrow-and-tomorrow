@@ -130,7 +130,7 @@ func test_the_buildings_page_shows_what_buildings_and_homes_do()->void:
 	var town:Dictionary=dock.tab(0)
 	var kinds:Array=[]
 	for block:Dictionary in town.blocks: kinds.append(String(block.get("type","")))
-	assert_int(kinds.count("impact")).is_greater_equal(2)
+	assert_int(kinds.count("impact_lines")).is_greater_equal(2)
 	var summary:Dictionary={}
 	for block:Dictionary in town.blocks:
 		if String(block.get("heading","")).begins_with("What the buildings do"): summary=block
