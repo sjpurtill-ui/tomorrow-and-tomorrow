@@ -1,0 +1,16 @@
+{
+  "id": "waystation_spacing_judgment",
+  "line": "logistics",
+  "game_year": 385,
+  "approx_historical_year": -2433,
+  "prompt": "c. 2433 BCE: Waystation Spacing. Waystation spacing. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5f2ecf29-650d-49e2-94a8-5b70868f3519.png",
+  "asset": "res://assets/ui/research/subjects/waystation_spacing_judgment-v1.png",
+  "sha256": "02250808dddc243c40ef0cc96df3f8851302b540d0b418c3cd03a7591c584f58",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}

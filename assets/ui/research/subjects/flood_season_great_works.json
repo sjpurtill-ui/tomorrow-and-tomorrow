@@ -1,0 +1,16 @@
+{
+  "id": "flood_season_great_works",
+  "line": "labor",
+  "game_year": 385,
+  "approx_historical_year": -2433,
+  "prompt": "c. 2433 BCE: Great Works Scheduled for the Flood Season. Great works scheduled for the flood season. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3dfeb21c-116f-4eea-9025-582a13940e8f.png",
+  "asset": "res://assets/ui/research/subjects/flood_season_great_works-v1.png",
+  "sha256": "2a5f5bb3569b38fe44ffe89335256e8c8cccc7c110aa416647aab0a368b50bc7",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}

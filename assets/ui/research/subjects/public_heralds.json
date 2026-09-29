@@ -1,0 +1,16 @@
+{
+  "id": "public_heralds",
+  "line": "institutions",
+  "game_year": 390,
+  "approx_historical_year": -2400,
+  "prompt": "c. 2400 BCE: Heralds Proclaim Decisions in the Square. Heralds proclaim decisions in the square. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-316e5092-f951-4592-8418-f96328ba24b4.png",
+  "asset": "res://assets/ui/research/subjects/public_heralds-v1.png",
+  "sha256": "65b6352e0f799205fe0aa8a92b5d7d8591425c1ea3e5cffcf9c67a009192e8d3",
+  "mode": "built-in image_gen / new image",
+  "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+  "focus": [
+    0.5,
+    0.5
+  ]
+}

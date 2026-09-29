@@ -1,0 +1,242 @@
+[
+  {
+    "id": "flood_season_great_works",
+    "line": "labor",
+    "game_year": 385,
+    "approx_historical_year": -2433,
+    "prompt": "c. 2433 BCE: Great Works Scheduled for the Flood Season. Great works scheduled for the flood season. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3dfeb21c-116f-4eea-9025-582a13940e8f.png",
+    "asset": "res://assets/ui/research/subjects/flood_season_great_works-v1.png",
+    "sha256": "2a5f5bb3569b38fe44ffe89335256e8c8cccc7c110aa416647aab0a368b50bc7",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "marked_wine_jars",
+    "line": "nutrition",
+    "game_year": 385,
+    "approx_historical_year": -2433,
+    "prompt": "c. 2433 BCE: Wine Jars Sealed and Marked by Estate and Year. Wine jars sealed and marked by estate and year. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90ed7207-13dc-4290-bc4a-fd252a0ba78e.png",
+    "asset": "res://assets/ui/research/subjects/marked_wine_jars-v1.png",
+    "sha256": "6ddde38f598ce7e09b7349047432d7f66c6325b21ad03c468f45cd08d46af6bd",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "provincial_governors",
+    "line": "institutions",
+    "game_year": 385,
+    "approx_historical_year": -2433,
+    "prompt": "c. 2433 BCE: Governors Over Subject Towns. Governors over subject towns. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d65a51ca-5883-4a40-8ca3-cdf3e288fe7f.png",
+    "asset": "res://assets/ui/research/subjects/provincial_governors-v1.png",
+    "sha256": "00f0fc56b4652e9db3f8f54232fa391f4740a6ec8b98d6d7bd962a2bd125551e",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "waystation_spacing_judgment",
+    "line": "logistics",
+    "game_year": 385,
+    "approx_historical_year": -2433,
+    "prompt": "c. 2433 BCE: Waystation Spacing. Waystation spacing. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5f2ecf29-650d-49e2-94a8-5b70868f3519.png",
+    "asset": "res://assets/ui/research/subjects/waystation_spacing_judgment-v1.png",
+    "sha256": "02250808dddc243c40ef0cc96df3f8851302b540d0b418c3cd03a7591c584f58",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "quarantine_travel_restrictions",
+    "line": "health",
+    "game_year": 387,
+    "approx_historical_year": -2420,
+    "prompt": "c. 2420 BCE: Afflicted Places Avoided by Travelers. Afflicted places avoided by travelers. Transparent watercolor with restrained ink. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3ab23d1b-8974-431e-bb9e-e3745e86d470.png",
+    "asset": "res://assets/ui/research/subjects/quarantine_travel_restrictions-v1.png",
+    "sha256": "af686e95ba7d3dd86c62f9dee4fa1b67a83e43c3e27a6421dfe53708936b9582",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "battle_wagons",
+    "line": "security",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Four-wheeled Battle Wagons Drawn by Onager Hybrids. Four-wheeled battle wagons drawn by onager hybrids. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c055b28e-a43d-476a-aa85-bf55b23c99a5.png",
+    "asset": "res://assets/ui/research/subjects/battle_wagons-v1.png",
+    "sha256": "648548a78f57c0e01c499c94e21985b916685cd13e75153f18dca5277b14cc66",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "onager_hybrid_teams",
+    "line": "logistics",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Onager-hybrid Teams for Four-wheeled Wagons. Onager-hybrid teams for four-wheeled wagons. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9ef720c1-f8fd-46b2-9cfe-a65ca734f7b6.png",
+    "asset": "res://assets/ui/research/subjects/onager_hybrid_teams-v1.png",
+    "sha256": "5948fbff4d68d7081c956dcb66de918f3c12fe7bb58cf5f8b186660db0192a80",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "public_heralds",
+    "line": "institutions",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Heralds Proclaim Decisions in the Square. Heralds proclaim decisions in the square. Matte civic fresco on plaster. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-316e5092-f951-4592-8418-f96328ba24b4.png",
+    "asset": "res://assets/ui/research/subjects/public_heralds-v1.png",
+    "sha256": "65b6352e0f799205fe0aa8a92b5d7d8591425c1ea3e5cffcf9c67a009192e8d3",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "wedge_brick_well_lining",
+    "line": "infrastructure",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Well Shafts Lined with Wedge-shaped Bricks. Well shafts lined with wedge-shaped bricks. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-36b2d5b6-4ade-462c-9110-230afc0ad3ce.png",
+    "asset": "res://assets/ui/research/subjects/wedge_brick_well_lining-v1.png",
+    "sha256": "19f0d8e5ed44933e3662061262a14e4c0053ef3422b9f602b524e09e7a9778f1",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "wool_felting_fulling",
+    "line": "production",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Wool Felted and Fulled. Wool felted and fulled. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ce58b753-fff7-4c32-a120-451ecfc25a88.png",
+    "asset": "res://assets/ui/research/subjects/wool_felting_fulling-v1.png",
+    "sha256": "f9ddef9849b4e1f8790b84c845447768155a75b10f2cb9334ef82a94025fb985",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "workers_villages",
+    "line": "labor",
+    "game_year": 390,
+    "approx_historical_year": -2400,
+    "prompt": "c. 2400 BCE: Workers' Village Beside a Great Work. Workers' village beside a great work. Expressive charcoal over ochre wash. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-36561a28-5493-44ba-9135-2baae7f9f548.png",
+    "asset": "res://assets/ui/research/subjects/workers_villages-v1.png",
+    "sha256": "2875a4521b7ae3a0cf7629ede62f5e391fad7cecea7a460ce56c71ae605f40ad",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "fattened_geese_ducks",
+    "line": "nutrition",
+    "game_year": 395,
+    "approx_historical_year": -2367,
+    "prompt": "c. 2367 BCE: Geese and Ducks Penned and Fattened on Grain. Geese and ducks penned and fattened on grain. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-feb02472-b46c-4cfb-9af8-93e045d924ce.png",
+    "asset": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png",
+    "sha256": "9c36a4e7285b277dafa067431c6416e026f4514614fec4f373dba5d7072d92d8",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "paved_haul_roads",
+    "line": "logistics",
+    "game_year": 395,
+    "approx_historical_year": -2367,
+    "prompt": "c. 2367 BCE: Stone-paved Haul Roads from Quarries. Stone-paved haul roads from quarries. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-733da7f1-b032-4cbf-b730-10fc556bc5cb.png",
+    "asset": "res://assets/ui/research/subjects/paved_haul_roads-v1.png",
+    "sha256": "b36d495fa6e32e4de10d5edddddbb5d2347d7a86344d30b031b82f618d171bfe",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "standing_relief_stores",
+    "line": "security",
+    "game_year": 395,
+    "approx_historical_year": -2367,
+    "prompt": "c. 2367 BCE: Standing Relief Stores. Standing relief stores. Layered hand-cut woodblock print. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d2734b41-9c81-461d-9171-8a8c42f2e046.png",
+    "asset": "res://assets/ui/research/subjects/standing_relief_stores-v1.png",
+    "sha256": "ff3656c01ee7fcad4fc6cbaea472f33830f61e3c2e64a6f95e2c47535cd33cef",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "id": "wadi_dams",
+    "line": "infrastructure",
+    "game_year": 395,
+    "approx_historical_year": -2367,
+    "prompt": "c. 2367 BCE: Stone-faced Dam Across a Wadi. Stone-faced dam across a wadi. Matte architectural casein gouache. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-3cf6c51f-975a-49aa-b188-5ec6bca5f88d.png",
+    "asset": "res://assets/ui/research/subjects/wadi_dams-v1.png",
+    "sha256": "29d55ae01c3ae38057d3d5a45f1d7237f54cf704dcad70403a7c55605e4fb11d",
+    "mode": "built-in image_gen / new image",
+    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  }
+]
