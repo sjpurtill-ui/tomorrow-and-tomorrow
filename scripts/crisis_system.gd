@@ -779,12 +779,12 @@ static func _open_mild(c:Dictionary,day:int)->void:
 	_stat(String(c.type),"mild")
 	if apart_custom():
 		c.choice="apart"
-		c.mult=float(c.mult)*0.4
+		c.mult=float(c.mult)*APART_CUSTOM_FACTOR
 		_policy(c,"apart",{"disease_risk":-0.3},45)
 		_metric("cohesion",-0.004)
 	else:
 		c.choice="tend"
-		c.mult=float(c.mult)*1.25
+		c.mult=float(c.mult)*float(DEATH_FACTOR.tend)
 		_policy(c,"tend",{"labor_multiplier":-0.05},30)
 		_metric("cohesion",0.004)
 	_log("mild","%s went round %s; %d fell ill." % [_cap(String(c.name)),String(c.where),int(c.sick)],{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":String(c.choice)})
@@ -1274,6 +1274,47 @@ static func _aside(c:Dictionary)->String:
 			return "The fire started where the huts touch. They are too close."
 	return ""
 
+## How each answer changes the deaths a crisis will take (its `mult`):
+## the one table the answers apply and the court's stakes quote.
+const DEATH_FACTOR:={"children_apart":0.7,"mothers":1.15,"far_camp":0.65,"send_away":0.55,"roots":0.8,"river_camp":0.6,
+	"ration":0.6,"hunt":0.8,"ask":0.5,"seed":0.45,"pots":0.75,"herd":0.5,"speak":0.95,"apart":0.55,"tend":1.25,"herbs":0.75,
+	"water":0.85,"burn":0.6,"rite":1.05,"close":0.55,"healers":0.7,"carry":0.7,"hardy":0.8,"raid":0.5}
+## Keeping the sick apart once it is the people's own custom.
+const APART_CUSTOM_FACTOR:=0.4
+## Clean water against the flux, the watery sickness.
+const WATER_FLUX_FACTOR:=0.5
+## A neighbour that gives too little to feed a third of the people.
+const ASK_SHORT_FACTOR:=0.8
+
+## The factor `option_id` puts on this crisis's deaths (1 when it changes none).
+static func death_factor(c:Dictionary,option_id:String)->float:
+	match option_id:
+		"apart": return APART_CUSTOM_FACTOR if apart_custom() else float(DEATH_FACTOR.apart)
+		"water": return WATER_FLUX_FACTOR if String(c.get("kind",""))=="flux" else float(DEATH_FACTOR.water)
+		"rite": return 1.0 if String(c.get("type",""))=="fire" else float(DEATH_FACTOR.rite)
+	return float(DEATH_FACTOR.get(option_id,1.0))
+
+## "As things stand about 6 may die; this way about 4." for an answer, from
+## the crisis's own planned deaths ("" when it takes no lives or the answer
+## does not change them).
+static func stakes_words(c:Dictionary,option_id:String,phase:String)->String:
+	if float(c.get("m",0.0))<=0.0 or not DEATH_FACTOR.has(option_id): return ""
+	var ahead:=float(c.get("pop0",0))*float(c.m)*float(c.get("mult",1.0))*(0.6 if phase=="mid" else 1.0)
+	var factor:=death_factor(c,option_id)
+	if option_id=="ask": factor=float(DEATH_FACTOR.ask)
+	var now:=roundi(ahead)
+	var then:=roundi(ahead*factor)
+	if now<=0 and then<=0: return "Few if any are likely to die either way."
+	var tail:=" if they give enough" if option_id=="ask" else ""
+	if then==now: return "As things stand about %d may die; this way about the same." % now
+	return "As things stand about %d may die; this way about %d%s." % [now,then,tail]
+
+static func _with_stakes(c:Dictionary,out:Array[Dictionary],phase:String)->Array[Dictionary]:
+	for o:Dictionary in out:
+		var said:=stakes_words(c,String(o.get("id","")),phase)
+		if said!="": o["sub"]=(String(o.get("sub",""))+" "+said).strip_edges()
+	return out
+
 static func _opt(id:String,label:String,sub:String,tone:String,extra:Dictionary={})->Dictionary:
 	var o:=Hall._option(id,label,sub,tone,bool(extra.get("enabled",true)),String(extra.get("reason","")))
 	for key in ["cost","objection","support"]:
@@ -1288,7 +1329,7 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 		out.append(Hall._option("crisis_past","It is past","This has already been settled.","neutral"))
 		return out
 	if phase=="remember": return _remember_options(c)
-	if phase=="mid": return _mid_options(c)
+	if phase=="mid": return _with_stakes(c,_mid_options(c),"mid")
 	var type:=String(c.type)
 	match type:
 		"hunger":
@@ -1343,7 +1384,7 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			out.append(_opt("rest","Rest the near ground for a year","Less food this year. The roots and game come back.","neutral",{"cost":"food"}))
 			out.append(_opt("burn_brush","Burn the old brush for new growth","New shoots and game in a season. Fire near the camp is a risk.","hostile",{"cost":"String: fire risk"}))
 			out.append(_opt("press","Press on as we are","Nothing changes. The land will thin further.","neutral"))
-	return out
+	return _with_stakes(c,out,"open")
 
 static func _mid_options(c:Dictionary)->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
@@ -1436,32 +1477,32 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 		c.mid_choice=option_id
 		match option_id:
 			"children_apart":
-				c.mult=float(c.mult)*0.7; _metric("cohesion",-0.006)
+				c.mult=float(c.mult)*death_factor(c,"children_apart"); _metric("cohesion",-0.006)
 				outcome="The children were kept from the sick. Their mothers wept at the edge of the fire."
 			"mothers":
-				c.mult=float(c.mult)*1.15; _bonds_all({"love":0.02})
+				c.mult=float(c.mult)*death_factor(c,"mothers"); _bonds_all({"love":0.02})
 				outcome="The mothers nursed their own. The sickness went where they went."
 				reaction="delighted"
 			"far_camp":
-				c.mult=float(c.mult)*0.65; _policy(c,"far_camp",{"labor_multiplier":-0.07},30)
+				c.mult=float(c.mult)*death_factor(c,"far_camp"); _policy(c,"far_camp",{"labor_multiplier":-0.07},30)
 				outcome="The well walked a day upstream to clean water. Fewer hands are left at home."
 			"send_away":
 				var friend:=_neighbour(false)
 				var n:=maxi(1,roundi(pop*0.05))
 				var gone:=int(GameState.register_population_departures(n,"Sent away in %s" % String(c.name)).get("count",0))
-				c.mult=float(c.mult)*0.55
+				c.mult=float(c.mult)*death_factor(c,"send_away")
 				if not friend.is_empty(): ForeignDiplomacy.remember(String(friend.id),"Families of the god's people came to us in their hungry winter.")
 				outcome="%s families' worth of people, %d in all, went away to %s. Fewer mouths at the fire." % [_cap(_count(maxi(1,gone/4))),gone,_the(String(friend.get("name",""))) if not friend.is_empty() else "the far valleys"]
 				reaction="neutral"
 			"roots":
-				c.mult=float(c.mult)*0.8; _policy(c,"roots",{"labor_multiplier":-0.08},30)
+				c.mult=float(c.mult)*death_factor(c,"roots"); _policy(c,"roots",{"labor_multiplier":-0.08},30)
 				var got:=_give_food(Hall._nice(pop*0.25))
 				outcome="Everyone went out for roots and bark and brought back %d Food. It kept them alive." % roundi(got)
 			"raid":
 				return _raid(c,phase,silent)
 			"river_camp":
 				_policy(c,"river_camp",{"water_collection":0.35,"labor_multiplier":-0.06},60)
-				c.mult=float(c.mult)*0.6
+				c.mult=float(c.mult)*death_factor(c,"river_camp")
 				outcome="The sleeping places moved down to the river. Water every day, and a long carry."
 			"send_hunters":
 				var got2:=_give_food(Hall._nice(pop*rng.randf_range(0.1,0.5)))
@@ -1479,13 +1520,13 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 		"ration":
 			var cut:=0.25 if type=="hunger" else 0.15
 			_policy(c,"ration",{"food_demand":-cut,"health_target":-0.02},100 if type!="cold" else 200)
-			c.mult=float(c.mult)*0.6
+			c.mult=float(c.mult)*death_factor(c,"ration")
 			_metric("cohesion",-0.005)
 			outcome="Every portion is smaller from today. The stores will last; the people are hungrier."
 			reaction="neutral"
 		"hunt":
 			_policy(c,"hunt",{"labor_multiplier":-0.06},40)
-			c.mult=float(c.mult)*0.8
+			c.mult=float(c.mult)*death_factor(c,"hunt")
 			var got:=_give_food(Hall._nice(pop*rng.randf_range(0.15,0.8)))
 			var lost_hunter:=rng.randf()<0.3
 			outcome="The hunters went far and came back with %d Food." % roundi(got)
@@ -1499,7 +1540,7 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			if yes:
 				var give:=_take_from_civ(String(friend.id),Hall._nice(pop*0.6))
 				var got3:=_give_food(give)
-				c.mult=float(c.mult)*(0.5 if got3>=pop*0.3 else 0.8)
+				c.mult=float(c.mult)*(death_factor(c,"ask") if got3>=pop*0.3 else ASK_SHORT_FACTOR)
 				Hall._shift_relation(String(friend.id),0.02,-0.02)
 				ForeignDiplomacy.remember(String(friend.id),"We fed the god's people in their hungry winter.")
 				outcome="%s gave %d Food. They will remember that they fed us." % [_cap(_the(String(friend.name))),roundi(got3)]
@@ -1512,47 +1553,47 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 		"raid":
 			return _raid(c,phase,silent)
 		"seed":
-			c.mult=float(c.mult)*0.45
+			c.mult=float(c.mult)*death_factor(c,"seed")
 			_policy(c,"seed",{"food_yield":-0.15},300,60)
 			outcome="The seed is eaten. No one will starve of this; next year's sowing will be thin."
 		"pots":
-			c.mult=float(c.mult)*0.75
+			c.mult=float(c.mult)*death_factor(c,"pots")
 			_policy(c,"pots",{"food_demand":-0.12},90)
 			outcome="The pots are kept boiling day and night: bones, roots, bark. Nothing is wasted."
 		"herd":
-			c.mult=float(c.mult)*0.5
+			c.mult=float(c.mult)*death_factor(c,"herd")
 			var got4:=_give_food(Hall._nice(pop*0.8))
 			_metric("cohesion",-0.004)
 			outcome="Animals from the herd were killed: %d Food. There will be fewer young in spring." % roundi(got4)
 		"speak":
-			c.mult=float(c.mult)*0.95
+			c.mult=float(c.mult)*death_factor(c,"speak")
 			_bonds_all({"love":0.03,"fear":0.01,"hold_days":40})
 			_metric("cohesion",0.01)
 			outcome="You went among them as their god. It fed no one. They held together."
 			reaction="delighted"
 		"apart":
 			var strong:=apart_custom()
-			c.mult=float(c.mult)*(0.4 if strong else 0.55)
+			c.mult=float(c.mult)*death_factor(c,"apart")
 			_policy(c,"apart",{"disease_risk":-0.3},45)
 			_metric("cohesion",-0.01)
 			outcome="The sick were set at their own fire, with food left at the edge of the light. Their kin grumble."
 			reaction="neutral"
 		"tend":
-			c.mult=float(c.mult)*1.25
+			c.mult=float(c.mult)*death_factor(c,"tend")
 			_policy(c,"tend",{"labor_multiplier":-0.05},30)
 			_metric("cohesion",0.01); _bonds_all({"love":0.02})
 			outcome="Everyone tends the sick. No one is alone; more are falling ill."
 			reaction="delighted"
 		"herbs":
-			c.mult=float(c.mult)*0.75
+			c.mult=float(c.mult)*death_factor(c,"herbs")
 			_policy(c,"herbs",{"health_target":0.03},45)
 			outcome="The plant-knowers came with their bitter roots. The fevers break sooner."
 		"water":
-			c.mult=float(c.mult)*(0.5 if String(c.kind)=="flux" else 0.85)
+			c.mult=float(c.mult)*death_factor(c,"water")
 			_policy(c,"water",{"disease_risk":-0.2,"labor_multiplier":-0.03},90)
 			outcome="The water is boiled and the drinking place moved upstream. It costs firewood and walking."
 		"burn":
-			c.mult=float(c.mult)*0.6
+			c.mult=float(c.mult)*death_factor(c,"burn")
 			var cap:=int(GameState.housing_capacity)
 			GameState.housing_capacity=maxi(int(pop*0.5),cap-maxi(1,roundi(float(cap)*0.08)))
 			_metric("cohesion",-0.008)
@@ -1567,14 +1608,14 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			outcome="They came to the fire to hear their god. It cured no one. They went home steadier."
 			reaction="delighted"
 		"close":
-			c.mult=float(c.mult)*0.55
+			c.mult=float(c.mult)*death_factor(c,"close")
 			var civ_id:=String(c.get("civ_id",""))
 			Hall._shift_relation(civ_id,-0.06,0.05)
 			ForeignDiplomacy.remember(civ_id,"The god's people closed their path to us when their fever came, as if we were the sickness.")
 			outcome="The path to %s is closed until the fever passes. They are insulted." % _the(String(c.get("civ_name","")))
 			reaction="neutral"
 		"healers":
-			c.mult=float(c.mult)*0.7
+			c.mult=float(c.mult)*death_factor(c,"healers")
 			var civ_id2:=String(c.get("civ_id",""))
 			Hall._shift_relation(civ_id2,0.02,0.0)
 			DIVINE.add_civ_dread(civ_id2,-0.03)
@@ -1582,11 +1623,11 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			outcome="%s sent two healers who know this sickness. They saw how weak we are." % _cap(_the(String(c.get("civ_name",""))))
 		"carry":
 			_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
-			c.mult=float(c.mult)*0.7
+			c.mult=float(c.mult)*death_factor(c,"carry")
 			outcome="Every strong back is on the water path. Other work waits."
 		"hardy":
 			_policy(c,"hardy",{"food_yield":0.06},180)
-			c.mult=float(c.mult)*0.8
+			c.mult=float(c.mult)*death_factor(c,"hardy")
 			outcome="The seed that needs little water is sown. Some of the ground will still give."
 		"rain":
 			_bonds_all({"love":0.02,"hold_days":30})
@@ -1670,7 +1711,7 @@ static func _raid(c:Dictionary,phase:String,silent:bool)->Dictionary:
 	var pop:=float(maxi(1,GameState.population_total))
 	var taken:=_take_from_civ(String(mark.id),Hall._nice(pop*0.6))
 	var got:=_give_food(taken)
-	c.mult=float(c.mult)*0.5
+	c.mult=float(c.mult)*death_factor(c,"raid")
 	Hall._shift_relation(String(mark.id),-0.2,0.25)
 	DIVINE.add_civ_dread(String(mark.id),0.05)
 	ForeignDiplomacy.remember(String(mark.id),"The god's people robbed our pits in their hungry winter.")

@@ -300,6 +300,7 @@ func _build_hero()->void:
 	posture_label.name="Posture"
 	renown_label=Kit.label(words,"","note")
 	renown_label.name="Renown"
+	renown_label.mouse_filter=Control.MOUSE_FILTER_PASS
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; allure from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	hero_body=GridContainer.new();hero_body.name="Strengths";hero_body.columns=2
 	hero_body.add_theme_constant_override("h_separation",18);hero_body.add_theme_constant_override("v_separation",12)
