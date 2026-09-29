@@ -2468,51 +2468,65 @@ func _settlement_age_years(day:int)->float:
 	if founded_day<0: founded_day=day
 	return maxf(0.0,float(day-founded_day)/365.0)
 
+## Years a town must have stood before each construction era (index = era).
+const FABRIC_ERA_AGE_YEARS:=[0.0,0.25,1.0,3.0,10.0,25.0,40.0,80.0,125.0,175.0,300.0,700.0,1500.0]
+
 func _age_fabric_ceiling(age_years:float)->int:
 	# These are opportunity thresholds from the morphology specification, not free
 	# upgrades. `_supported_fabric_tier` applies the material, labour, knowledge and
 	# institutional ceiling that decides whether an old plot can actually change.
-	if age_years<0.25: return 0
-	if age_years<1.0: return 1
-	if age_years<3.0: return 2
-	if age_years<10.0: return 3
-	if age_years<25.0: return 4
-	if age_years<40.0: return 5
-	if age_years<80.0: return 6
-	if age_years<125.0: return 7
-	if age_years<175.0: return 8
-	if age_years<300.0: return 9
-	if age_years<700.0: return 10
-	if age_years<1500.0: return 11
-	return 12
+	var ceiling:=0
+	for tier in range(1,FABRIC_ERA_AGE_YEARS.size()):
+		if age_years>=float(FABRIC_ERA_AGE_YEARS[tier]): ceiling=tier
+	return ceiling
+
+## What the town's crews, works and knowledge are now, as the era checks read them.
+func fabric_era_inputs()->Dictionary:
+	var state=WorldSimulation.state
+	var discovery=WorldSimulation.discovery
+	return {"lean_to_shelters":1 if "Lean-to Shelters" in state.settlement_completed else 0,"builders":int(state.effective_workers("Construction")),
+		"works":state.settlement_completed.size(),"makers":int(state.population_allocations.get("Crafting",0)),
+		"carriers":int(state.population_allocations.get("Logistics",0)),"stewards":int(state.population_allocations.get("Administration",0)),
+		"districts":_active_nuclei(),"labor":float(state.simulation_metrics.get("labor_efficiency",0.0)),"logistics":float(state.simulation_metrics.get("logistics",0.0)),
+		"construction":discovery.effect("construction_rate"),"route":discovery.effect("route_speed"),"craft":discovery.effect("craft_output"),
+		"standardization":discovery.effect("standardization"),"tools":discovery.effect("tool_quality"),"state_capacity":discovery.effect("state_capacity")}
+
+## What a town needs for a construction era besides its age
+## (FABRIC_ERA_AGE_YEARS) and what its people know of building
+## (settlement_architecture_knowledge.gd). Each check is {"what","have","need",
+## "met"}; the era is supported when every check is met. _supported_fabric_tier
+## and the Buildings page read these same checks.
+func fabric_era_checks(tier:int,inputs:Dictionary={})->Array[Dictionary]:
+	var x:=inputs if not inputs.is_empty() else fabric_era_inputs()
+	var crews:=func(makers:int,carriers:int,stewards:int)->Array[Dictionary]:
+		var checks:Array[Dictionary]=[_era_check("makers",x.makers,makers),_era_check("carriers",x.carriers,carriers)]
+		if stewards>0: checks.append(_era_check("stewards",x.stewards,stewards))
+		return checks
+	var result:Array[Dictionary]=[]
+	match tier:
+		1: result=[_era_check("lean_to_shelters",x.lean_to_shelters,1),_era_check("builders",x.builders,4)]
+		2: result=[_era_check("works",x.works,3),_era_check("makers",x.makers,4)]
+		3: result=crews.call(8,4,0)
+		4: result=crews.call(14,8,0);result.append(_era_check("districts",x.districts,2))
+		5: result=crews.call(24,12,0);result.append(_era_check("labor",x.labor,0.48))
+		6: result=crews.call(36,20,4);result.append(_era_check("knowledge",float(x.logistics)+float(x.route),0.24))
+		7: result=crews.call(54,30,8);result.append(_era_check("knowledge",float(x.construction)+float(x.craft),0.035))
+		8: result=crews.call(80,48,16);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft),0.075))
+		9: result=crews.call(120,72,28);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft),0.13))
+		10: result=crews.call(200,120,60);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization),0.22))
+		11: result=crews.call(350,220,120);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization)+float(x.tools),0.34))
+		12: result=crews.call(600,400,250);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization)+float(x.tools)+float(x.state_capacity),0.50))
+	return result
+
+static func _era_check(what:String,have:Variant,need:Variant)->Dictionary:
+	return {"what":what,"have":have,"need":need,"met":float(have)>=float(need)}
 
 func _supported_fabric_tier(day:int)->int:
 	var age_ceiling:=_age_fabric_ceiling(_settlement_age_years(day))
-	var builders:=int(WorldSimulation.state.effective_workers("Construction"))
-	var craftspeople:=int(WorldSimulation.state.population_allocations.get("Crafting",0))
-	var logisticians:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
-	var administrators:=int(WorldSimulation.state.population_allocations.get("Administration",0))
+	var inputs:=fabric_era_inputs()
 	var support:=0
-	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed and builders>=4: support=1
-	if WorldSimulation.state.settlement_completed.size()>=3 and craftspeople>=4: support=2
-	if craftspeople>=8 and logisticians>=4: support=3
-	if craftspeople>=14 and logisticians>=8 and _active_nuclei()>=2: support=4
-	var logistics_metric:=float(WorldSimulation.state.simulation_metrics.get("logistics",0.0))
-	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.0))
-	var construction_effect:=WorldSimulation.discovery.effect("construction_rate")
-	var route_effect:=WorldSimulation.discovery.effect("route_speed")
-	var craft_effect:=WorldSimulation.discovery.effect("craft_output")
-	if craftspeople>=24 and logisticians>=12 and labor_efficiency>=0.48: support=5
-	if craftspeople>=36 and logisticians>=20 and administrators>=4 and logistics_metric+route_effect>=0.24: support=6
-	if craftspeople>=54 and logisticians>=30 and administrators>=8 and construction_effect+craft_effect>=0.035: support=7
-	if craftspeople>=80 and logisticians>=48 and administrators>=16 and construction_effect+route_effect+craft_effect>=0.075: support=8
-	if craftspeople>=120 and logisticians>=72 and administrators>=28 and construction_effect+route_effect+craft_effect>=0.13: support=9
-	var standardization:=WorldSimulation.discovery.effect("standardization")
-	var state_capacity:=WorldSimulation.discovery.effect("state_capacity")
-	var tool_quality:=WorldSimulation.discovery.effect("tool_quality")
-	if craftspeople>=200 and logisticians>=120 and administrators>=60 and construction_effect+route_effect+craft_effect+standardization>=0.22: support=10
-	if craftspeople>=350 and logisticians>=220 and administrators>=120 and construction_effect+route_effect+craft_effect+standardization+tool_quality>=0.34: support=11
-	if craftspeople>=600 and logisticians>=400 and administrators>=250 and construction_effect+route_effect+craft_effect+standardization+tool_quality+state_capacity>=0.50: support=12
+	for tier in range(1,FABRIC_ERA_AGE_YEARS.size()):
+		if fabric_era_checks(tier,inputs).all(func(check:Dictionary)->bool:return bool(check.met)): support=tier
 	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
 
 func _fabric_form_for(use:String,tier:int,current_form:String)->String:

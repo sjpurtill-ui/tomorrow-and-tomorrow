@@ -72,7 +72,7 @@ static func facts(settlement:Dictionary,strong:Dictionary={})->Dictionary:
 		"classification":String(settlement.get("classification","settlement")).to_lower(),
 		"occupied":String(record.get("occupied_by","")),"founded_day":int(settlement.get("founded_day",record.get("founded_day",0))),
 		"population":population,"places":maxi(0,int(GameState.housing_capacity)),
-		"shelter":Shelter.describe(GameState.settlement_completed,GameState.housing_capacity,population),
+		"shelter":Shelter.describe(GameState.settlement_completed,GameState.housing_capacity,population,Construction.carried_places()),
 		"life":float(health.life_expectancy),"infant":float(health.infant_mortality_per_1000),
 		"keepers":float(science.minds),"education":float(science.education),"known":GameState.known_discoveries.size(),
 		"food_days":float(metrics.get("food_days",-1.0)),"food_reported":metrics.has("food_days"),"flow":flow,

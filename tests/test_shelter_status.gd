@@ -8,6 +8,12 @@ func test_finished_shelters_use_total_capacity()->void:
 	var report:=Status.describe(["Hearth Circle","Lean-to Shelters"],240,108)
 	assert_bool(report.built).is_true()
 	assert_str(report.detail).contains("are built").contains("240 people in all")
+func test_the_carried_tents_are_named_when_known()->void:
+	var report:=Status.describe(["Hearth Circle","Lean-to Shelters"],240,97,150)
+	assert_str(report.detail).contains("240 people in all, 150 of them in the tents carried on the journey").contains("Everyone has a roof")
+	# All built here, or not known: nothing about tents.
+	assert_str(Status.describe(["Lean-to Shelters"],240,97,0).detail).not_contains("tents")
+	assert_str(Status.describe(["Lean-to Shelters"],240,97).detail).not_contains("tents")
 func test_shortage_is_visible_even_with_completed_shelters()->void:
 	var report:=Status.describe(["Lean-to Shelters"],240,300)
 	assert_str(report.detail).contains("60 people sleep in the open")

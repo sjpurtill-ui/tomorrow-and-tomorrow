@@ -47,7 +47,7 @@ func _building(project:Dictionary)->void:
 			materials.tooltip_text=String(project.bill_note)
 			for blocker:String in project.blockers:
 				var note:=T.make_label(blocker,11,T.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(note)
-		var effect:=T.make_label(String(project.effect).capitalize(),11,T.MUTED);effect.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(effect)
+		var effect:=T.make_label(String(project.effect).left(1).to_upper()+String(project.effect).substr(1),11,T.MUTED);effect.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(effect)
 		if not done and bool(data.get("can_prioritize",false)):
 			var actions:=HBoxContainer.new();column.add_child(actions)
 			_button(actions,"Prioritize when ready",func():data.on_priority.call(title),"Leader continues feasible work until this project is ready",title==String(data.get("priority","")))

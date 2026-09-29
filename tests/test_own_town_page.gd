@@ -188,9 +188,10 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_float(float(rows.water.number)).is_equal_approx(float(food.water.intake_ratio),0.0001)
 	assert_str(String(rows.water.value)).is_equal("8 in 10 drink enough")
 	# Roofs, repair and works: the Buildings page.
-	var city:Array=(Construction.new(terrain,hud).tab(0).blocks as Array)[0].items
 	var shown:={}
-	for item:Dictionary in city:shown[String(item.name)]=String(item.value)
+	for city_block:Dictionary in (Construction.new(terrain,hud).tab(0).blocks as Array):
+		for item:Dictionary in city_block.get("items",[]):
+			if item.has("name"):shown[String(item.name)]=String(item.value)
 	assert_str(String(shown.Housing)).is_equal("%d places" % int(rows.roofs.number))
 	assert_str(String(rows.roofs.note)).is_equal("13 sleep out")
 	assert_str(String(shown.Condition)).is_equal("%d%%" % int(rows.damage.number))
