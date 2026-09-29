@@ -92,6 +92,14 @@ func test_a_large_overrun_stays_within_historical_bounds()->void:
 	assert_int(ours_down).is_between(1,250)
 
 
+## Nobody under arms on one side is a walkover, never a battle both sides
+## stand through (the user's five levies before an empty Isolo).
+func test_nobody_under_arms_is_a_walkover()->void:
+	assert_str(Sim.overrun_side(100.0,0.0,5,0)).is_equal("defender")
+	assert_str(Sim.overrun_side(0.0,100.0,0,5)).is_equal("attacker")
+	assert_str(Sim.overrun_side(0.0,0.0,0,0)).is_equal("")
+
+
 func test_a_few_well_armed_are_not_overrun_by_a_larger_rabble()->void:
 	## Odds come from fighting power with the numbers to match, not headcount.
 	assert_str(Sim.overrun_side(10.0,60.0,30,10)).is_equal("")

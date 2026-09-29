@@ -263,6 +263,57 @@ func test_a_real_town_attack_accounts_for_every_fighter()->void:
 		if int(m.get("battle_seed",-1))==int(record.seed): matter=m
 	assert_str(String(matter.get("text",""))).is_equal(Account.text(account))
 
+## The user's Isolo: five levies standing at a town with nobody under arms.
+## It falls the day they go in. Before, it became a battle nobody fought
+## ("neither side is giving ground"), the band stuck "in battle" and deaf to
+## orders; and the report said their side "Had no".
+func test_an_undefended_town_falls_at_once_and_is_told_plainly()->void:
+	var army_id:=_army_at_the_town(5)
+	var nobody:Dictionary=MilitaryCampaign.simulator.create_formation_force("Tsaren watch",[],0.6,0.6)
+	nobody["commander"]=MilitaryCampaign.simulator.create_commander("Masu of Ashbank",0.5,0.5,0.5,0.5)
+	MilitaryCampaign.active_threat={"id":"t0","title":"Campaign for Tsaren","incident_kind":"campaign","campaign_mode":"offensive","source_civ_id":civ_id,"source_name":"Esurai",
+		"field_encounter":false,"formation_id":"","target_region_id":city_id,"target_region_name":"Tsaren","field_army_id":army_id,"enemy_force":nobody,"terrain_defense":1.05,"seed":17,"deadline_day":99999}
+	var result:=MilitaryCampaign.begin_threat_engagement()
+	assert_bool(result.has("error")).override_failure_message(str(result)).is_false()
+	# Settled the day it began: no battle left standing, the band free for orders.
+	assert_dict(MilitaryCampaign.active_engagement).is_empty()
+	assert_bool(MilitaryCampaign._army_in_battle(army_id)).is_false()
+	var record:Dictionary=MilitaryCampaign.battle_history[0]
+	assert_int(int((record.defender as Dictionary).initial_troops)).is_equal(0)
+	assert_str(String(record.outcome)).is_equal("attacker_victory")
+	var account:=Account.build(record,Account.gather(record))
+	var told:=Account.text(account)
+	assert_str(told).not_contains("giving ground")
+	if String(account.kind)=="taken":
+		assert_str(String(account.headline)).contains("nobody stood to defend it")
+		assert_array(account.phases).is_equal(["There was nobody under arms to meet us."])
+	_assert_plain(told)
+	# Their side is one plain row, never "Had no" beside "Killed: none".
+	var panel:=ReportPanel.new()
+	panel.account=account
+	assert_array(panel._their_rows()).is_equal([["Stood to fight","nobody",true]])
+	assert_str(panel._their_note()).not_contains("Few enough to count")
+	panel.free()
+
+
+## A fight won before a town too few or too hungry to hold says why, with
+## the engine's own numbers (siege_recovery.gd capture_capacity).
+func test_a_town_not_held_says_why_with_the_numbers()->void:
+	var short:=Account.hold_shortfall({"message":"The attackers won the battle, but their 5 survivors provide 1.6 effective personnel; holding this city needs 3. Your city remains independent despite the defeat."})
+	assert_int(int(short.troops)).is_equal(5)
+	assert_float(float(short.effective)).is_equal_approx(1.6,0.01)
+	assert_int(int(short.required)).is_equal(3)
+	assert_str(Account.hold_words(short)).is_equal("our five are hungry and worn: they count for about one at holding a town, and it needs three,")
+	assert_dict(Account.hold_shortfall({"message":"The city is occupied."})).is_empty()
+	var record:=_ditch_battle()
+	record.strategic_outcome={"region_captured":false,"message":"The attackers won the battle, but their 16 survivors provide 3.2 effective personnel; holding this city needs 7. Your city remains independent despite the defeat."}
+	var account:=Account.build(record,_state(16))
+	assert_str(String(account.now)).starts_with("We won the fight at Tsaren, but our 16 are hungry and worn")
+	assert_str(String(account.now)).contains("it needs seven")
+	assert_str(String(account.next)).contains("Send more fighters")
+	_assert_plain(Account.text(account))
+
+
 func test_a_broken_band_cannot_be_fought_again_with_no_exchanges()->void:
 	## The "waves": a beaten band with its morale gone was re-engaged and
 	## each time "defeated" with no blow struck and nothing lost.

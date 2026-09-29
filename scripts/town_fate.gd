@@ -405,7 +405,8 @@ static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dict
 		var back:Dictionary=mc.evacuate_occupation(civ_id,region_id) if ruin else world.occupation_resident_order(civ_id,region_id,"restore_self_rule")
 		if not back.has("error"):
 			out.left=true
-			parts.append("The garrison marches home%s." % (" behind the captives" if int(out.captives)>0 else ""))
+			var bands:=bands_home(region_id,int(back.get("army_id",-1)))
+			parts.append("The garrison marches home%s%s." % [" behind the captives" if int(out.captives)>0 else "",(", and %s with it" % bands) if bands!="" else ""])
 			# Nobody of ours stays to guard those we held: they go free, said here.
 			var freed:=Ledger.settle(civ_id,region_id,true)
 			if not freed.is_empty():
@@ -882,7 +883,7 @@ static func _burn(civ_id:String,region_id:String,name:String,fate:Dictionary,gar
 	l=Ledger.of(civ_id,region_id)
 	var remain:=Ledger.present_total(l)
 	var t:="%s was burned: its houses, its stores and its walls." % name
-	if n>0: t+=" %s who were still there scattered %s." % [_cap(_count(n)),Pursuit.toward_words(refuge)]
+	if n>0: t+=" %s who %s still there scattered %s." % [_cap(_count(n)),"was" if n==1 else "were",Pursuit.toward_words(refuge)]
 	var ruin:={"day":day,"before":Ledger.accounted(l),"by":"player","held":true,"left_day":-1,"stores_lost":true,"resettle":{}}
 	l["ruin"]=ruin
 	if not stays:
@@ -894,7 +895,8 @@ static func _burn(civ_id:String,region_id:String,name:String,fate:Dictionary,gar
 			out.left=true
 			ruin.held=false; ruin.left_day=day
 			_schedule_resettle(civ_id,region_id,l,day)
-			t+=" The garrison marches home%s; nobody holds the ruins." % (" behind the captives" if int(out.captives)>0 else "")
+			var bands:=bands_home(region_id,int(gone.get("army_id",-1)))
+			t+=" The garrison marches home%s%s; nobody holds the ruins." % [" behind the captives" if int(out.captives)>0 else "",(", and %s with it" % bands) if bands!="" else ""]
 	else:
 		t+=" %s of ours stay to hold the ruins%s." % [_cap(_count(garrison)),(", with %s under guard" % _count(remain)) if remain>0 else ""]
 	t+=" Nobody lives there now." if remain<=0 else ""
@@ -902,6 +904,28 @@ static func _burn(civ_id:String,region_id:String,name:String,fate:Dictionary,gar
 	# Our own account of it, dated the day, replaces any old report of the place.
 	firsthand(civ_id,region_id,day,"our own fighters")
 	return 0.6
+
+## A town we leave (burned, or given back) has nothing left for our bands to
+## hold there: every band of ours standing idle at it turns for home with the
+## garrison, so nobody is left "holding" a ruin. Returns the bands' names in
+## words ("Vani's band"), "" when none was there.
+static func bands_home(region_id:String,except_army:int=-1)->String:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return ""
+	var names:PackedStringArray=[]
+	for army in (mc.field_armies as Array).duplicate():
+		var a:Dictionary=army
+		var id:=int(a.get("army_id",0))
+		if id==except_army or String(a.get("location_id",""))!=region_id or String(a.get("status",""))!="stationed" or int(a.get("troops",0))<=0: continue
+		if mc._army_in_battle(id): continue
+		var back:Dictionary=mc.return_field_army(id)
+		if back.has("error"): continue
+		var index:int=mc._field_army_index(id)
+		if index>=0: (mc.field_armies[index] as Dictionary).erase("court_order")
+		var general:=String((a.get("commander",{}) as Dictionary).get("name","")).get_slice(" of ",0).get_slice(" ",0)
+		names.append(("%s's band" % general) if general!="" else String(a.get("name","our band")))
+	if names.is_empty(): return ""
+	return names[0] if names.size()==1 else "%s and %s" % [", ".join(names.slice(0,names.size()-1)),names[names.size()-1]]
 
 ## Our people saw it themselves: the city's record is today's, from them.
 static func firsthand(civ_id:String,region_id:String,day:int,source:String)->void:
