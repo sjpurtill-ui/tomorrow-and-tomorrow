@@ -12,6 +12,7 @@ const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
 const HELD=preload("res://scripts/held_town.gd")
+const WorkVisual=preload("res://scripts/undertaking_map_visual.gd")
 ## Cards and emblems ease in and out instead of popping (codex/map-motion).
 const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
 const MODERN_LABELS:={"population":"PEOPLE","science_capacity":"LEARNING","gdp":"DAILY OUTPUT","life_expectancy":"LIFE EXPECTANCY"}
@@ -348,19 +349,22 @@ func _work_entries(camera:Camera3D,viewport_size:Vector2)->Array[Dictionary]:
 		if not screen.has_point(anchor):continue
 		var edge:=camera.unproject_position(world+camera.global_basis.x*float(mark.radius))
 		var radius_px:=anchor.distance_to(edge)
-		var key:=hash([mark.title,mark.status,mark.state])
+		# Read live from the work's record, so the line and bar move day by day.
+		var now:=WorkVisual.live(String(mark.get("city_id","")),String(mark.id))
+		var status:=String(now.get("status",mark.status))
+		var key:=hash([mark.title,status,mark.state])
 		var text:Dictionary=work_measured.get(mark.id,{})
 		if int(text.get("key",0))!=key:
-			text=measure_work(String(mark.title),String(mark.status),voice,ui)
+			text=measure_work(String(mark.title),status,voice,ui)
 			text.key=key
 			work_measured[mark.id]=text
 		var alpha:=work_emblem_alpha(radius_px)
 		# On the chart (the emblem showing) a card is just the name: the emblem's
 		# edge already tells how the work stands.
 		var chart:=alpha>=.5
-		result.append({"id":String(mark.id),"city_id":String(mark.get("city_id","")),"title":String(mark.title),"status":"" if chart else String(mark.status),
+		result.append({"id":String(mark.id),"city_id":String(mark.get("city_id","")),"title":String(mark.title),"status":"" if chart else status,
 			"lines":text.chart_lines if chart else text.lines,"extent":text.chart_extent if chart else text.extent,"compact":chart,
-			"state":String(mark.state),"shape":String(mark.shape),"progress":float(mark.progress),"anchor":anchor,"radius_px":radius_px,"emblem_alpha":alpha})
+			"state":String(mark.state),"shape":String(mark.shape),"progress":float(now.get("progress",mark.progress)),"anchor":anchor,"radius_px":radius_px,"emblem_alpha":alpha})
 	return result
 
 ## A work card's wrapped name and size: icon, name in the book serif, and a
