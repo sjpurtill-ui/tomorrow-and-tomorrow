@@ -910,6 +910,7 @@ func food_account_snapshot(window_days:int=30)->Dictionary:
 			"children":float(demand.get("children",0.0)),"adults":float(demand.get("adults",0.0)),"elders":float(demand.get("elders",0.0)),
 			"work_exertion":float(demand.get("labor",0.0)),"pregnancy_and_nursing":float(demand.get("pregnancy",0.0))+float(demand.get("lactation",0.0)),
 			"travel":float(demand.get("travel",0.0)),"climate":float(demand.get("climate",0.0)),"prisoner_custody":float(demand.get("prisoner_custody",0.0)),
+			"shrine_offerings":float(demand.get("offerings",0.0)),
 			"rationing_adjustment":float(demand.get("rationing",0.0))
 		}},
 		{"id":"field_military","label":"FIELD MILITARY","amount":army_daily,"recurring":"daily"},
