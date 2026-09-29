@@ -216,3 +216,41 @@ func test_memory_grows_with_what_a_people_knows()->void:
 	assert_float(Standing.memory_span("civ_print")).is_equal(3.0)
 	Voice.knowledge_override.erase("civ_oral")
 	Voice.knowledge_override.erase("civ_print")
+
+## Leagues of the fearful (fear_league.gd): two peoples who fear us bind
+## together; each weighs our strength against both, and backs the other's raids.
+func _met_second(population:float=120.0,warriors:float=6.0,readiness:float=0.55)->String:
+	var civ:Dictionary=CivilizationSystem.civilizations[1]
+	civ.player_relation.contact_level=2
+	civ.player_relation.opinion=0.0
+	civ.player_relation.border_tension=0.2
+	civ.population=population
+	civ.military_population=warriors
+	civ.military_readiness=readiness
+	ForeignDiplomacy.leader(String(civ.id))
+	return String(civ.id)
+
+func test_peoples_who_fear_us_stand_together_and_it_costs_us()->void:
+	var first:=_met(100.0,4.0,0.5)
+	var second:=_met_second(100.0,4.0,0.5)
+	_rich(120.0)
+	_arm(14,0.85)
+	var DIVINE:=preload("res://scripts/divine_regard.gd")
+	var League:=preload("res://scripts/fear_league.gd")
+	var alone:=Standing.view_of(first)
+	var raid_alone:=War.envy_raid_chance(first,0.6)
+	DIVINE.add_civ_dread(first,0.4); DIVINE.add_civ_dread(first,0.4)
+	DIVINE.add_civ_dread(second,0.4); DIVINE.add_civ_dread(second,0.4)
+	League.monthly(int(GameState.elapsed_days))
+	assert_array(League.members()).contains_exactly_in_any_order([first,second])
+	var bound:=Standing.view_of(first)
+	# Weighed against both of them, our might awes less.
+	assert_float(float(bound.strength_ratio)).is_less(float(alone.strength_ratio))
+	assert_float(float(bound.awe)).is_less_equal(float(alone.awe))
+	assert_float(War.envy_raid_chance(first,0.6)).is_equal_approx(raid_alone*League.RAID_BACKING,0.00001)
+	var said:=Standing.consequences(first,bound)
+	assert_str(String(said[0].id)).is_equal("league")
+	# Fear gone, the league breaks up.
+	(DIVINE.store().civ_dread as Dictionary).clear()
+	League.monthly(int(GameState.elapsed_days)+30)
+	assert_array(League.members()).is_empty()

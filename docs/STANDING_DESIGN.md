@@ -164,6 +164,12 @@ site goes all in on food and holds 25-60 people; research-heavy grows to about
    god, and trust in the chiefs. The monthly reading of all nine strengths is
    kept in `strategic_history` for the years chart.
 3. Consequences: war and raid decisions, migration, tribute, leagues, pride.
+   Leagues done (fear_league.gd): two or more met peoples holding Fear 0.45+
+   (or Awe 0.6+ with Resentment 0.3+) bind together against us; each weighs
+   our strength against all of theirs, backs the others' raids and demands
+   (x1.5, gifts x0.7) and shares every fresh grudge; they let go below Fear 0.3.
+   Pride forgives (Standing.forgiveness); memory grows with writing and print
+   (Standing.memory_span).
 4. Headman and rival allocation, then the sim calibration across postures.
 5. Era scaling of reach and memory to year 3500.
 

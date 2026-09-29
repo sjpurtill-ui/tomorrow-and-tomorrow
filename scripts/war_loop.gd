@@ -171,6 +171,10 @@ static func valid_state(data:Variant)->bool:
 	if (d.get("refusals",[]) as Array).size()>REFUSALS_MAX or (d.get("log",[]) as Array).size()>LOG_MAX: return false
 	if not d.get("battles",[]) is Array or (d.get("battles",[]) as Array).size()>OBSERVED_MAX: return false
 	if not d.get("stats",{}) is Dictionary: return false
+	if d.has("league"):
+		if not d.league is Dictionary or not (d.league as Dictionary).get("members",[]) is Array or ((d.league as Dictionary).get("members",[]) as Array).size()>16: return false
+		for member in (d.league as Dictionary).get("members",[]):
+			if not member is String: return false
 	return JSON.stringify(d).length()<=200000
 
 static func _stat(key:String,amount:int=1)->void:
@@ -1581,6 +1585,8 @@ static func daily(day:int)->void:
 			war["next_enemy"]=day+_rng("next:%s:%d" % [id,day]).randi_range(50,120)
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
 	if day%30==0:
+		# Who stands together against us, before anyone moves.
+		preload("res://scripts/fear_league.gd").monthly(day)
 		_grudges(day)
 		_rival_wars(day)
 	# Feuds between two other simulated peoples are fought for real.
@@ -1887,12 +1893,17 @@ static func grudge_raid_chance(civ_id:String)->float:
 	var rival:=_rival(civ_id)
 	var weight:=float(rival.get("grudge_weight",0.0))
 	if weight<0.9: return 0.0
-	return clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)
+	return clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)*_league_backing(civ_id)
 
 ## This month's chance that envy of our stores and works sends raiders.
 static func envy_raid_chance(civ_id:String,envy:float)->float:
 	if envy<=Standing.ENVY_RAID_FLOOR: return 0.0
-	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)
+	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)*_league_backing(civ_id)
+
+## Peoples bound together against us back each other's raids (fear_league.gd).
+static func _league_backing(civ_id:String)->float:
+	var league:=preload("res://scripts/fear_league.gd")
+	return league.RAID_BACKING if league.is_member(civ_id) else 1.0
 
 # --------------------------------------------------------------------------
 # The court: the war leader's matter, options, answers

@@ -223,6 +223,9 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	# Might as they see it: ours over theirs, on one scale.
 	var ours:=our_fighting_strength()
 	var theirs:=their_fighting_strength(civ)
+	# Bound with others against us, they weigh us against all of them.
+	var league:=load("res://scripts/fear_league.gd") as GDScript
+	if league!=null and bool(league.call("is_member",civ_id)): theirs=maxf(theirs,float(league.call("combined_strength")))
 	var ratio:=ours/maxf(1.0,theirs)
 	var might_term:=clampf((ratio-0.8)/1.6,0.0,1.0)
 	# Works they have heard of, and what we know that they do not.
@@ -403,6 +406,12 @@ static func times_words(weight:float)->String:
 static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	if not bool(v.get("known",false)): return out
+	var league:=load("res://scripts/fear_league.gd") as GDScript
+	if league!=null and bool(league.call("is_member",civ_id)):
+		var others:PackedStringArray=[]
+		for id in league.call("members"):
+			if String(id)!=civ_id: others.append(String(ForeignDiplomacy.civilization(String(id)).get("name",id)))
+		out.append({"id":"league","tone":"danger","words":"Bound with %s against us, for fear of us" % " and ".join(others),"detail":"They weigh our strength against all of theirs together, back each other's raids and demands (%.1f times as often) and share every grudge." % float(league.get_script_constant_map().get("RAID_BACKING",1.5))})
 	var war:=load("res://scripts/war_loop.gd") as GDScript
 	if war!=null:
 		var grudge:=float(war.call("grudge_raid_chance",civ_id))
