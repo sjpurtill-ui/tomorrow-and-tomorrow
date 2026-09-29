@@ -254,3 +254,21 @@ func test_peoples_who_fear_us_stand_together_and_it_costs_us()->void:
 	(DIVINE.store().civ_dread as Dictionary).clear()
 	League.monthly(int(GameState.elapsed_days)+30)
 	assert_array(League.members()).is_empty()
+
+func test_the_envoy_knows_how_each_people_sees_us_and_says_it()->void:
+	var id:=_met(160.0,10.0,0.7)
+	_rich(120.0)
+	_arm(0,0.3)
+	var Facts:=preload("res://scripts/court_facts.gd")
+	var Answers:=preload("res://scripts/court_answers.gd")
+	var sheet:=Facts.sheet(["common","tribute"])
+	var peoples:Array=sheet.standing.peoples
+	assert_int(peoples.size()).is_equal(1)
+	var name:=String(peoples[0].name)
+	assert_str(Facts.text(sheet)).contains("How the peoples we know see us")
+	var said:=Answers.answer(sheet,"Why do the %s raid us?" % name)
+	assert_str(said).contains("Allure")
+	assert_str(said).contains("each month")
+	# An official who keeps only the stores does not know it.
+	assert_bool(Facts.sheet(["common","stores"]).has("standing")).is_false()
+	assert_bool(id!="").is_true()
