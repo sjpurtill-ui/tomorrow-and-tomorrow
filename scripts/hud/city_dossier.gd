@@ -206,6 +206,7 @@ class Sketch extends Control:
 			houses.append({"x":clampf(cx+rng.randfn(0,1)*spread*(1.0+depth*.5),w*.14,w*.84),"y":ground-4-depth*h*.22,"s":lerpf(13,7,depth),"sure":i<sure,"broken":i<broken,"order":i})
 		houses.sort_custom(func(p:Dictionary,q:Dictionary)->bool:return float(p.y)<float(q.y))
 		var shown:=int(ceil(reveal*maybe))
+		_before_houses(w,h,ground,cx,spread)
 		for house:Dictionary in houses:
 			if int(house.order)>=shown:continue
 			_house(house)
@@ -223,8 +224,9 @@ class Sketch extends Control:
 			draw_circle(Vector2(gx,ground-r),r,T.PAPER_RAISED);draw_arc(Vector2(gx,ground-r),r,0,TAU,24,_stroke("supply",T.INK),1.2,true)
 			draw_colored_polygon(PackedVector2Array([Vector2(gx-r-3,ground-r),Vector2(gx,ground-r*2.9),Vector2(gx+r+3,ground-r)]),Color(T.AMBER,.45))
 			draw_polyline(PackedVector2Array([Vector2(gx-r-3,ground-r),Vector2(gx,ground-r*2.9),Vector2(gx+r+3,ground-r)]),_stroke("supply",T.INK),1.2,true)
-		# The palisade or wall across the front.
-		if not _field("fortification").is_empty():
+		# The palisade or wall across the front. Our own town draws what stands.
+		if data.has("wall_stage"):_stage_walls(int(data.wall_stage),float(data.get("wall_integrity",1.0)),ground,cx,spread,rng.seed)
+		elif not _field("fortification").is_empty():
 			var strength:=_mid("fortification");var left:=cx-spread*2.2;var right:=cx+spread*1.7
 			if strength>.55:
 				var top:=ground+8-10-strength*8
@@ -269,6 +271,73 @@ class Sketch extends Control:
 		if sure:draw_colored_polygon(PackedVector2Array([eave_l,peak,eave_r]),Color(T.AMBER,.38))
 		draw_polyline(PackedVector2Array([eave_l,peak,eave_r,eave_l]),line,1.1,true)
 		if sure:draw_line(Vector2(x,y),Vector2(x,y-s*.5),Color(T.INK,.7),1.0)
+	## Drawn before the houses, so they stand in front of it. Nothing for a
+	## stranger's town; our own town draws its works and its well here.
+	func _before_houses(_w:float,_h:float,_ground:float,_cx:float,_spread:float)->void:
+		pass
+	## What stands across the front of our own town, stage by stage
+	## (military_campaign.gd SETTLEMENT_DEFENSE_STAGES): watch posts, an earth
+	## bank, a palisade, stone walls, then walls with towers. Gaps show where
+	## the works stand broken.
+	func _stage_walls(stage:int,integrity:float,ground:float,cx:float,spread:float,seed:int)->void:
+		if stage<=0:return
+		var left:=cx-spread*2.2;var right:=cx+spread*1.7
+		var ink:=_stroke("fortification",Color(T.INK,.85))
+		var gaps:=RandomNumberGenerator.new();gaps.seed=seed^77
+		var cover:=clampf(.35+integrity*.65,.35,1.0)
+		var foot:=ground+9.0
+		if stage==1:
+			for post:float in [left,right]:
+				var lookout:=ground-26.0
+				draw_line(Vector2(post-4,foot),Vector2(post-2,lookout),ink,1.3,true);draw_line(Vector2(post+4,foot),Vector2(post+2,lookout),ink,1.3,true)
+				draw_line(Vector2(post-6,lookout),Vector2(post+6,lookout),ink,1.3,true)
+				draw_polyline(PackedVector2Array([Vector2(post-7,lookout),Vector2(post,lookout-7),Vector2(post+7,lookout)]),ink,1.2,true)
+				draw_line(Vector2(post-3.5,foot-6),Vector2(post+3,foot-18),Color(ink,.7),1.0,true)
+			return
+		if stage==2:
+			var bank:=PackedVector2Array()
+			for i in 33:
+				var t:=i/32.0
+				bank.append(Vector2(lerpf(left,right,t),foot-5.0-absf(sin(t*PI*5.0))*1.6))
+			var fill:=bank.duplicate();fill.append(Vector2(right,foot));fill.append(Vector2(left,foot))
+			draw_colored_polygon(fill,Color(T.RULE,.45))
+			for i in range(0,bank.size()-1):
+				if gaps.randf()<=cover:draw_line(bank[i],bank[i+1],ink,1.3,true)
+			var dash:=left
+			while dash<right-6:
+				draw_line(Vector2(dash,foot+4),Vector2(dash+6,foot+4),Color(ink,.55),1.0,true);dash+=10
+			return
+		if stage==3:
+			var stakes:=int((right-left)/5.0)
+			for i in stakes:
+				if gaps.randf()>cover:continue
+				var stake:=left+i*5.0
+				var tip:=foot-24.0*gaps.randf_range(.88,1.04)
+				draw_line(Vector2(stake,foot),Vector2(stake+gaps.randf_range(-.6,.6),tip),ink,1.5,true)
+				draw_line(Vector2(stake-1.2,tip+2.5),Vector2(stake,tip),ink,1.0,true)
+			draw_line(Vector2(left,foot-7),Vector2(right,foot-7),Color(ink,.55),1.0,true)
+			return
+		# Stone walls; a walled town with its towers above them.
+		var top:=foot-18.0-(stage-4)*6.0
+		var wall:=Rect2(left,top,right-left,foot-top)
+		draw_rect(wall,Color(T.PAPER_RAISED,.94));draw_rect(wall,ink,false,1.2)
+		var course:=top+6.0
+		while course<foot-2:
+			draw_line(Vector2(left+2,course),Vector2(right-2,course),Color(ink,.25),1.0);course+=6.0
+		var crenel:=left
+		while crenel<right-8:
+			draw_rect(Rect2(crenel,top-5,8,5),ink,false,1.2);crenel+=16
+		# Breaches where the walls stand broken.
+		var breaches:=int(round((1.0-integrity)*6.0))
+		for i in breaches:
+			var at:=lerpf(left+14,right-24,gaps.randf())
+			draw_rect(Rect2(at,top-6,10,9),Color(T.PAPER_SUNK,1.0))
+			draw_polyline(PackedVector2Array([Vector2(at,top+2),Vector2(at+3,top-3),Vector2(at+6,top+1),Vector2(at+10,top-4)]),ink,1.0,true)
+		if stage>=5:
+			for end:float in [left-6,right-12]:
+				var tower:=Rect2(end,top-12,18,foot-top+12)
+				draw_rect(tower,Color(T.PAPER_RAISED,.96));draw_rect(tower,ink,false,1.3)
+				for c in 3:draw_rect(Rect2(end+c*6.5,top-17,4,5),ink,false,1.1)
 	func _stamp(level:int)->void:
 		var status:=String(data.get("fresh_status",""))
 		if status=="":return

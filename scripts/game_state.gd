@@ -408,6 +408,9 @@ var vital_statistics_tracking_start_day := -1
 ## health discovery that occurred in the interval or an explicit conditions
 ## marker, so the chart never implies that every change came from research.
 var health_history: Array[Dictionary] = []
+## Monthly record of the twelve capacities and why each moved
+## (scripts/capacity_history.gd). Older saves start empty.
+var capacity_history:Dictionary={}
 var death_progress := 0.0
 var consecutive_food_shortage_days := 0.0
 var consecutive_water_shortage_days := 0.0
@@ -426,6 +429,14 @@ var early_care:Dictionary={}
 ## 0 for a save written before these rules; rises to 1 over two game years.
 var early_care_blend:=0.0
 # --- end early care ---
+## The exceptional death risks (hunger, sickness, exposure, thirst, insecurity,
+## work) averaged over about a month, for "how long a child born now can hope
+## to live". The day's own risks swing: one wet day resets a village's run of
+## short water, one storm, one hard day at the pits. Read raw, a lucky day on
+## the monthly count showed as three winters gained and lost again. Deaths
+## still happen at each day's own risk; only the projection is steadied.
+## Below zero until the first day is counted (then it starts from that day).
+var exceptional_hazard_smoothed:=-1.0
 var last_population_removal_by_cohort:Dictionary={}
 var observed_death_age_sum:=0.0
 var lifetime_conceptions := 0
@@ -603,6 +614,7 @@ func reset_for_new_world(new_seed:int)->void:
 	vital_statistics_history=[]
 	vital_statistics_tracking_start_day=-1
 	health_history=[]
+	capacity_history={}
 	lifetime_departures=0
 	death_progress=0.0
 	consecutive_food_shortage_days=0.0
@@ -617,6 +629,7 @@ func reset_for_new_world(new_seed:int)->void:
 	mortality_by_age_cohort={}
 	early_care={}
 	early_care_blend=0.0
+	exceptional_hazard_smoothed=-1.0
 	last_population_removal_by_cohort={}
 	observed_death_age_sum=0.0
 	lifetime_conceptions=0
@@ -1378,6 +1391,13 @@ func _current_exceptional_mortality_rate()->float:
 		return exceptional
 	return maxf(0.0,float(simulation_metrics.get("annual_death_rate",0.0))-current_natural_mortality_rate())
 
+## Counts today's exceptional risks into the month-long average the projection
+## reads (exceptional_hazard_smoothed). `weight` is the day span's share of a
+## 30-day mean (ConsequenceEngine passes day_span.rate(1/30)).
+func smooth_exceptional_hazard(weight:float)->void:
+	var today:=_current_exceptional_mortality_rate()
+	exceptional_hazard_smoothed=today if exceptional_hazard_smoothed<0.0 else lerpf(exceptional_hazard_smoothed,today,clampf(weight,0.0,1.0))
+
 ## The early-care profile the day's rates use. Before the first simulated day
 ## of a new world (or of a save loaded without one) it is not yet stored, and
 ## LIVES and the babes lost read the bare life table: 46 winters at the
@@ -1391,7 +1411,8 @@ func care_profile()->Dictionary:
 func projected_life_expectancy() -> float:
 	var care:=care_profile()
 	var condition_factor:=_mortality_condition_factor()
-	var exceptional_hazard:=_current_exceptional_mortality_rate()
+	# A month's average, not one day's luck (exceptional_hazard_smoothed).
+	var exceptional_hazard:=exceptional_hazard_smoothed if exceptional_hazard_smoothed>=0.0 else _current_exceptional_mortality_rate()
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:

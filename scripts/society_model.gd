@@ -138,7 +138,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 	var stewards:=float(WorldSimulation.state.population_allocations.get("Administration",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	var preserved:=clampf(float(WorldSimulation.state.simulation_metrics.get("knowledge",0.18))+effect("knowledge_preservation"),0.05,1.2)
-	if day-last_adoption_day>=30:
+	var month_turned:=day-last_adoption_day>=30
+	if month_turned:
 		var adoption_days:=clampi(day-last_adoption_day,1,30)
 		last_adoption_day=day
 		var teaching:=observers/population*0.055+stewards/population*0.018+makers/population*0.012
@@ -165,16 +166,24 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		WorldSimulation.state.societal_values,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption,
 		_societal_value_context(context),day
 	)
-	capacities=evaluate_capacities(context)
-	capacities["institutions"]=clampf(float(capacities.institutions)+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"institutions"),0.01,1.0)
-	capacities["culture"]=clampf(float(capacities.culture)+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.01,1.0)
-	capacities["knowledge"]=clampf(float(capacities.knowledge)+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"),0.01,1.0)
-	capacities["ecology"]=clampf(float(capacities.ecology)+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"ecology"),0.01,1.0)
-	capacities["security"]=clampf(float(capacities.security)+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.01,1.0)
+	# One ledger: today's capacities, their office holders and shared values
+	# included, come from capacity_value over one reading of the state.
+	var inputs:=capacity_inputs()
+	capacities={}
+	for dynamic_id:String in DYNAMICS: capacities[dynamic_id]=capacity_value(dynamic_id,inputs)
+	_today.inputs=inputs
+	_today.day=day
 	WorldSimulation.state.society_capacities=capacities.duplicate(true)
 	WorldSimulation.state.society_subcategories=evaluate_subcategories(context)
 	WorldSimulation.state.knowledge_effects=effect_totals.duplicate(true)
 	WorldSimulation.state.combined_intelligence=float(capacities.get("knowledge",0.0))
+	# The people's own record of how each capacity moved (rival peoples keep
+	# none): every day counts into the month's mean, and the month just ended
+	# is recorded right after the new month's practices are counted.
+	if WorldSimulation.state==GameState:
+		var history=load(CAPACITY_HISTORY_PATH)
+		if month_turned: history.record(self,inputs,day)
+		history.observe_day(inputs,float(WorldSimulation.span))
 
 func register_discovery(discovery:Dictionary,catalog:Array[Dictionary])->void:
 	var id:=String(discovery.get("id",""))
@@ -228,20 +237,13 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			for effect_name in effects:values.append(float(effects[effect_name]))
 			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
 			_effect_rows[id]=row
-		var adoption_level:=clampf(float(adoption.get(id,0.025)),0.0,1.0)
-		# factor() is exactly 1.0 for ids that are neither special nor techniques.
-		if row[2]:adoption_level*=Goods.factor(String(id))
+		var adoption_level:=_practice_level(String(id),adoption,bool(row[2]))
 		var names:Array=row[0]
 		var values:PackedFloat64Array=row[1]
-		var focus:=float(line_focus.get(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),0.0)) if not line_focus.is_empty() else 0.0
-		# research_600: a focused line's practices are worked harder, every other
-		# line's a little less (benefits only; costs are never scaled).
-		var practice_scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*_max_focus
+		var scale:=practice_scale(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),line_focus,_max_focus)
 		for i in names.size():
 			var effect_name=names[i]
-			var value:=values[i]
-			if practice_scale!=1.0 and (value<0.0)==(String(effect_name) in LOWER_IS_BETTER): value*=practice_scale
-			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+value*adoption_level
+			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+scaled_effect(String(effect_name),values[i],scale)*adoption_level
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
 	ceiling_era=society_era()
@@ -253,49 +255,298 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 func effect(effect_id:String)->float:
 	return float(effect_totals.get(effect_id,0.0))
 
-func evaluate_capacities(_context:Dictionary)->Dictionary:
-	var metrics:=WorldSimulation.state.simulation_metrics
-	var population:=maxf(1.0,WorldSimulation.state.population_exact)
-	var able_ratio:=clampf(float(WorldSimulation.state.able_population())/population,0.0,1.0)
-	var health:=clampf(float(metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
-	var food:=clampf(WorldSimulation.state.food_security,0.0,1.0)
-	var housing:=clampf(float(WorldSimulation.state.housing_capacity)/population,0.0,1.0)
-	var cohesion:=clampf(float(metrics.get("cohesion",0.58)),0.0,1.0)
-	var ecology:=clampf(float(metrics.get("ecology",0.88)),0.0,1.0)
-	var security:=clampf(float(metrics.get("security",0.38)),0.0,1.0)
-	var legitimacy:=clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0)
-	var observers:=float(WorldSimulation.state.effective_workers("Knowledge"))
+## How fully a known practice is carried out: its adoption, times the factor of
+## the tools, works or goods it needs (exactly 1.0 for any other practice).
+func _practice_level(id:String,adoption:Dictionary,needs_means:bool)->float:
+	var level:=clampf(float(adoption.get(id,0.025)),0.0,1.0)
+	if needs_means: level*=Goods.factor(id)
+	return level
+
+## research_600: a focused line's practices are worked harder, every other
+## line's a little less while another line has the focus.
+static func practice_scale(line:String,focus_by_line:Dictionary,max_focus:float)->float:
+	var focus:=float(focus_by_line.get(line,0.0))
+	return 1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*max_focus
+
+## The scale moves a practice's benefits only; its costs are never scaled.
+static func scaled_effect(effect_name:String,value:float,scale:float)->float:
+	if scale!=1.0 and (value<0.0)==(effect_name in LOWER_IS_BETTER): return value*scale
+	return value
+
+# --- The capacity ledger -----------------------------------------------------
+# One ledger (docs/ADJUDICATION.md): capacity_value is the only formula for the
+# twelve capacities. The day's capacities, the monthly history and every screen
+# that breaks a capacity into its parts all call it on one reading of the state
+# (capacity_inputs), so the parts always add up to the value the people have.
+
+const CAPACITY_HISTORY_PATH:="res://scripts/capacity_history.gd"
+## The practice totals (effect()) the capacity formulas read, as "fx:<key>" inputs.
+const CAPACITY_EFFECTS:Array[String]=["maternal_safety","nutrition_quality","health_protection","disease_exposure","health_risk",
+	"labor_efficiency","labor_demand","fatigue","knowledge_preservation","route_speed","standardization","state_capacity","institutional_rigidity",
+	"tool_quality","task_coordination","construction_rate","disaster_resilience","haul_capacity","storage_loss",
+	"ecology_recovery","ecological_pressure","pollution","legitimacy","security_efficiency","warfare_readiness","cohesion"]
+## Capacities the people's shared values move, and the values effect each reads.
+const VALUE_EFFECTS:Dictionary={"institutions":"institutions","culture":"cohesion","knowledge":"knowledge","ecology":"ecology","security":"security"}
+
+## The inputs of the day's capacities, and working caches for the monthly
+## history (an Object, so saves never capture it; all rebuilt as needed).
+class Today extends RefCounted:
+	var inputs:Dictionary={}
+	var day:=-1
+	## Per practice: [effect names the capacities read, their values, line].
+	var rows:Dictionary={}
+	var rows_catalog:=-1
+	## The last practice sources worked out, by what they were worked out from.
+	var sources_key:=0
+	var sources:Dictionary={}
+var _today:=Today.new()
+
+## One reading of everything the twelve capacities are made from.
+func capacity_inputs()->Dictionary:
+	var state=WorldSimulation.state
+	var metrics:Dictionary=state.simulation_metrics
+	var population:=maxf(1.0,state.population_exact)
+	var observers:=float(state.effective_workers("Knowledge"))
 	var inquiry_total:=0.0
 	var active_directions:=0
-	for allocation in WorldSimulation.state.research_allocations.values():
+	for allocation in state.research_allocations.values():
 		inquiry_total+=float(allocation)
 		if int(allocation)>0: active_directions+=1
-	var attention_fit:=clampf(observers/maxf(1.0,inquiry_total),0.10,1.0)
-	var diversity:=clampf(float(active_directions)/12.0,0.05,1.0)
-	var preserved:=clampf(float(metrics.get("knowledge",0.18))+effect("knowledge_preservation")*0.55,0.0,1.0)
-	var communication:=clampf(0.28+effect("route_speed")*0.30+effect("standardization")*0.42+effect("state_capacity")*0.22,0.10,1.0)
-	var institutional_support:=clampf(0.20+float(WorldSimulation.state.population_allocations.get("Administration",0))/maxf(1.0,population*0.06)*0.38+legitimacy*0.22,0.05,1.0)
-	var overload:=clampf(maxf(0.0,inquiry_total-observers)/maxf(1.0,observers)*0.22+effect("institutional_rigidity")*0.25,0.0,0.55)
-	var combined:=clampf((0.18+observers/maxf(1.0,population*0.08)*0.22+health*0.14+preserved*0.17+communication*0.10+institutional_support*0.10+diversity*0.09)*attention_fit*(1.0-overload),0.03,1.0)
-	var labor:=clampf(able_ratio*(0.32+health*0.27+food*0.18+cohesion*0.13+housing*0.10)*(1.0+effect("labor_efficiency")-effect("labor_demand")*0.28-effect("fatigue")*0.20),0.08,1.15)
-	var result:Dictionary={
-		"demography":clampf(health*0.34+food*0.30+housing*0.18+cohesion*0.10+effect("maternal_safety")*0.08,0.02,1.0),
-		"nutrition":clampf(food*0.72+float(metrics.get("food_diet_quality",0.45))*0.20+effect("nutrition_quality")*0.08,0.02,1.0),
-		"health":clampf(health+effect("health_protection")*0.22-effect("disease_exposure")*0.18-effect("health_risk")*0.15,0.02,1.0),
-		"labor":labor,"knowledge":combined,
-		"production":clampf(float(metrics.get("material_capacity",0.12))*0.45+labor*0.30+effect("tool_quality")*0.14+effect("task_coordination")*0.11,0.02,1.0),
-		"infrastructure":clampf(housing*0.38+float(WorldSimulation.state.settlement_completed.size())/10.0*0.32+effect("construction_rate")*0.18+effect("disaster_resilience")*0.12,0.01,1.0),
-		"logistics":clampf(float(metrics.get("logistics",0.16))*0.55+effect("haul_capacity")*0.22+effect("route_speed")*0.16+effect("storage_loss")*-0.07,0.01,1.0),
-		"ecology":clampf(ecology+effect("ecology_recovery")*0.20-effect("ecological_pressure")*0.18-effect("pollution")*0.12,0.01,1.0),
-		"institutions":clampf(institutional_support+effect("state_capacity")*0.22+effect("legitimacy")*0.12,0.02,1.0),
-		"security":clampf(security+effect("security_efficiency")*0.18+effect("warfare_readiness")*0.12,0.02,1.0),
-		"culture":clampf(cohesion*0.52+legitimacy*0.25+diversity*0.12+effect("cohesion")*0.11+preload("res://scripts/artifact_collection.gd").bonus("culture")*.12,0.02,1.0)
+	var inputs:Dictionary={
+		"able":clampf(float(state.able_population())/population,0.0,1.0),
+		"health":clampf(float(metrics.get("health",state.population_health)),0.0,1.0),
+		"food":clampf(state.food_security,0.0,1.0),
+		"housing":clampf(float(state.housing_capacity)/population,0.0,1.0),
+		"cohesion":clampf(float(metrics.get("cohesion",0.58)),0.0,1.0),
+		"ecology":clampf(float(metrics.get("ecology",0.88)),0.0,1.0),
+		"security":clampf(float(metrics.get("security",0.38)),0.0,1.0),
+		"legitimacy":clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0),
+		"diet":float(metrics.get("food_diet_quality",0.45)),
+		"materials":float(metrics.get("material_capacity",0.12)),
+		"hauling":float(metrics.get("logistics",0.16)),
+		"learning":float(metrics.get("knowledge",0.18)),
+		"keepers":observers/maxf(1.0,population*0.08),
+		"attention":observers/maxf(1.0,inquiry_total),
+		"overwork":maxf(0.0,inquiry_total-observers)/maxf(1.0,observers),
+		"fields":float(active_directions),
+		"stewards":float(state.population_allocations.get("Administration",0))/maxf(1.0,population*0.06),
+		"works":float(state.settlement_completed.size()),
+		"treasures":preload("res://scripts/artifact_collection.gd").bonus("culture"),
 	}
+	for key:String in CAPACITY_EFFECTS: inputs["fx:"+key]=effect(key)
 	# An office holder changes execution, judgment and coordination in the same
 	# canonical systems shown to the player. A merely impressive dossier can
 	# never create a thirteenth hidden stat.
-	for dynamic_id in result:
-		result[dynamic_id]=clampf(float(result[dynamic_id])+leadership_effect(String(dynamic_id)),0.01,1.0)
+	for dynamic_id:String in DYNAMICS: inputs["officials:"+dynamic_id]=leadership_effect(dynamic_id)
+	for dynamic_id:String in VALUE_EFFECTS: inputs["values:"+dynamic_id]=SOCIETAL_VALUES_MODEL.simulation_effect(state.societal_values,String(VALUE_EFFECTS[dynamic_id]))
+	return inputs
+
+## THE capacity formula. Returns one capacity's value from `inputs`; when
+## `parts` is a Dictionary it also receives the named parts the value is made
+## of. The parts add up to the value, except "clamp": how far a limit held it.
+static func capacity_value(dynamic_id:String,inputs:Dictionary,parts:Variant=null)->float:
+	var named:=parts is Dictionary
+	var base:=0.0
+	match dynamic_id:
+		"demography":
+			var health:=float(inputs.health);var food:=float(inputs.food);var housing:=float(inputs.housing);var cohesion:=float(inputs.cohesion);var safety:=_fx(inputs,"maternal_safety")
+			base=clampf(health*0.34+food*0.30+housing*0.18+cohesion*0.10+safety*0.08,0.02,1.0)
+			if named: parts.merge({"health":health*0.34,"food":food*0.30,"housing":housing*0.18,"cohesion":cohesion*0.10,"fx:maternal_safety":safety*0.08})
+		"nutrition":
+			var food:=float(inputs.food);var diet:=float(inputs.diet);var quality:=_fx(inputs,"nutrition_quality")
+			base=clampf(food*0.72+diet*0.20+quality*0.08,0.02,1.0)
+			if named: parts.merge({"food":food*0.72,"diet":diet*0.20,"fx:nutrition_quality":quality*0.08})
+		"health":
+			var health:=float(inputs.health);var protection:=_fx(inputs,"health_protection");var exposure:=_fx(inputs,"disease_exposure");var risk:=_fx(inputs,"health_risk")
+			base=clampf(health+protection*0.22-exposure*0.18-risk*0.15,0.02,1.0)
+			if named: parts.merge({"health":health,"fx:health_protection":protection*0.22,"fx:disease_exposure":-exposure*0.18,"fx:health_risk":-risk*0.15})
+		"labor":
+			base=_labor(inputs,parts)
+		"knowledge":
+			var attention_fit:=clampf(float(inputs.attention),0.10,1.0)
+			var diversity:=clampf(float(inputs.fields)/12.0,0.05,1.0)
+			var preserved:=clampf(float(inputs.learning)+_fx(inputs,"knowledge_preservation")*0.55,0.0,1.0)
+			var communication:=clampf(0.28+_fx(inputs,"route_speed")*0.30+_fx(inputs,"standardization")*0.42+_fx(inputs,"state_capacity")*0.22,0.10,1.0)
+			var support:=clampf(0.20+float(inputs.stewards)*0.38+float(inputs.legitimacy)*0.22,0.05,1.0)
+			var overload:=clampf(float(inputs.overwork)*0.22+_fx(inputs,"institutional_rigidity")*0.25,0.0,0.55)
+			var keepers:=float(inputs.keepers);var health:=float(inputs.health)
+			base=clampf((0.18+keepers*0.22+health*0.14+preserved*0.17+communication*0.10+support*0.10+diversity*0.09)*attention_fit*(1.0-overload),0.03,1.0)
+			if named:
+				var sum:=0.18+keepers*0.22+health*0.14+preserved*0.17+communication*0.10+support*0.10+diversity*0.09
+				parts.merge({"common":0.18,"keepers":keepers*0.22,"health":health*0.14,"preserved":preserved*0.17,"communication":communication*0.10,"support":support*0.10,"fields":diversity*0.09,
+					"attention":sum*(attention_fit-1.0),"overwork":-sum*attention_fit*overload})
+		"production":
+			var materials:=float(inputs.materials);var labor:=_labor(inputs);var tools:=_fx(inputs,"tool_quality");var coordination:=_fx(inputs,"task_coordination")
+			base=clampf(materials*0.45+labor*0.30+tools*0.14+coordination*0.11,0.02,1.0)
+			if named: parts.merge({"materials":materials*0.45,"labor":labor*0.30,"fx:tool_quality":tools*0.14,"fx:task_coordination":coordination*0.11})
+		"infrastructure":
+			var housing:=float(inputs.housing);var works:=float(inputs.works);var building:=_fx(inputs,"construction_rate");var resilience:=_fx(inputs,"disaster_resilience")
+			base=clampf(housing*0.38+works/10.0*0.32+building*0.18+resilience*0.12,0.01,1.0)
+			if named: parts.merge({"housing":housing*0.38,"works":works/10.0*0.32,"fx:construction_rate":building*0.18,"fx:disaster_resilience":resilience*0.12})
+		"logistics":
+			var hauling:=float(inputs.hauling);var haul:=_fx(inputs,"haul_capacity");var routes:=_fx(inputs,"route_speed");var loss:=_fx(inputs,"storage_loss")
+			base=clampf(hauling*0.55+haul*0.22+routes*0.16+loss*-0.07,0.01,1.0)
+			if named: parts.merge({"hauling":hauling*0.55,"fx:haul_capacity":haul*0.22,"fx:route_speed":routes*0.16,"fx:storage_loss":loss*-0.07})
+		"ecology":
+			var land:=float(inputs.ecology);var recovery:=_fx(inputs,"ecology_recovery");var pressure:=_fx(inputs,"ecological_pressure");var pollution:=_fx(inputs,"pollution")
+			base=clampf(land+recovery*0.20-pressure*0.18-pollution*0.12,0.01,1.0)
+			if named: parts.merge({"ecology":land,"fx:ecology_recovery":recovery*0.20,"fx:ecological_pressure":-pressure*0.18,"fx:pollution":-pollution*0.12})
+		"institutions":
+			var stewards:=float(inputs.stewards);var legitimacy:=float(inputs.legitimacy);var state_capacity:=_fx(inputs,"state_capacity");var custom:=_fx(inputs,"legitimacy")
+			var support:=clampf(0.20+stewards*0.38+legitimacy*0.22,0.05,1.0)
+			base=clampf(support+state_capacity*0.22+custom*0.12,0.02,1.0)
+			if named: parts.merge({"common":0.20,"stewards":stewards*0.38,"legitimacy":legitimacy*0.22,"fx:state_capacity":state_capacity*0.22,"fx:legitimacy":custom*0.12})
+		"security":
+			var safety:=float(inputs.security);var guard:=_fx(inputs,"security_efficiency");var readiness:=_fx(inputs,"warfare_readiness")
+			base=clampf(safety+guard*0.18+readiness*0.12,0.02,1.0)
+			if named: parts.merge({"security":safety,"fx:security_efficiency":guard*0.18,"fx:warfare_readiness":readiness*0.12})
+		"culture":
+			var cohesion:=float(inputs.cohesion);var legitimacy:=float(inputs.legitimacy);var diversity:=clampf(float(inputs.fields)/12.0,0.05,1.0);var customs:=_fx(inputs,"cohesion");var treasures:=float(inputs.treasures)
+			base=clampf(cohesion*0.52+legitimacy*0.25+diversity*0.12+customs*0.11+treasures*.12,0.02,1.0)
+			if named: parts.merge({"cohesion":cohesion*0.52,"legitimacy":legitimacy*0.25,"fields":diversity*0.12,"fx:cohesion":customs*0.11,"treasures":treasures*.12})
+		_:
+			return 0.0
+	var officials:=float(inputs.get("officials:"+dynamic_id,0.0))
+	var value:=clampf(base+officials,0.01,1.0)
+	if named: parts["officials"]=officials
+	if VALUE_EFFECTS.has(dynamic_id):
+		var values:=float(inputs.get("values:"+dynamic_id,0.0))
+		value=clampf(value+values,0.01,1.0)
+		if named: parts["values"]=values
+	if named:
+		var total:=0.0
+		for key in parts:
+			if String(key)!="clamp": total+=float(parts[key])
+		parts["clamp"]=value-total if absf(value-total)>0.0000001 else 0.0
+	return value
+
+static func _fx(inputs:Dictionary,effect_id:String)->float:
+	return float(inputs.get("fx:"+effect_id,0.0))
+
+## Labor before its office holders: production is made from this same labor.
+static func _labor(inputs:Dictionary,parts:Variant=null)->float:
+	var able:=float(inputs.able);var health:=float(inputs.health);var food:=float(inputs.food);var cohesion:=float(inputs.cohesion);var housing:=float(inputs.housing)
+	var efficiency:=_fx(inputs,"labor_efficiency");var demand:=_fx(inputs,"labor_demand");var fatigue:=_fx(inputs,"fatigue")
+	var value:=clampf(able*(0.32+health*0.27+food*0.18+cohesion*0.13+housing*0.10)*(1.0+efficiency-demand*0.28-fatigue*0.20),0.08,1.15)
+	if parts is Dictionary:
+		var hands:=able*(0.32+health*0.27+food*0.18+cohesion*0.13+housing*0.10)
+		parts.merge({"able":able*0.32,"health":able*health*0.27,"food":able*food*0.18,"cohesion":able*cohesion*0.13,"housing":able*housing*0.10,
+			"fx:labor_efficiency":hands*efficiency,"fx:labor_demand":-hands*demand*0.28,"fx:fatigue":-hands*fatigue*0.20})
+	return value
+
+## The twelve capacities as parts: {dynamic: {"value", "drivers": {part: amount},
+## "clamp"}}. The drivers plus the clamp equal the value exactly. With no
+## inputs given it reads the inputs today's capacities were made from.
+func capacity_ledger(inputs:Dictionary={})->Dictionary:
+	var source:=inputs
+	if source.is_empty(): source=_today.inputs if not _today.inputs.is_empty() else capacity_inputs()
+	var ledger:Dictionary={}
+	for dynamic_id:String in DYNAMICS:
+		var parts:Dictionary={}
+		var value:=capacity_value(dynamic_id,source,parts)
+		var clamp_amount:=float(parts.get("clamp",0.0))
+		parts.erase("clamp")
+		ledger[dynamic_id]={"value":value,"drivers":parts,"clamp":clamp_amount}
+	return ledger
+
+func evaluate_capacities(_context:Dictionary)->Dictionary:
+	var inputs:=capacity_inputs()
+	var result:Dictionary={}
+	for dynamic_id:String in DYNAMICS: result[dynamic_id]=capacity_value(dynamic_id,inputs)
+	return result
+
+## CAPACITY_EFFECTS as a set, for quick membership.
+static var _capacity_effect_set:Dictionary={}
+
+## Whether a practice feeds any total the capacities read.
+static func feeds_capacities(definition:Dictionary)->bool:
+	if _capacity_effect_set.is_empty():
+		for key:String in CAPACITY_EFFECTS: _capacity_effect_set[key]=true
+	for effect_name in definition.get("effects",{}):
+		if _capacity_effect_set.has(effect_name): return true
+	return false
+
+## A known practice's effects on the totals the capacities read, from its
+## definition: [names, values, line], or [] when it feeds none of them.
+func _capacity_row(id:String)->Array:
+	if _today.rows_catalog!=definitions_by_id.size():
+		_today.rows.clear()
+		_today.rows_catalog=definitions_by_id.size()
+	var row:Variant=_today.rows.get(id)
+	if row is Array: return row
+	var built:Array=[]
+	var definition:Dictionary=definitions_by_id.get(id,{})
+	if not definition.is_empty() and feeds_capacities(definition):
+		var names:=PackedStringArray()
+		var values:=PackedFloat64Array()
+		var effects:Dictionary=definition.get("effects",{})
+		for effect_name in effects:
+			names.append(String(effect_name))
+			values.append(float(effects[effect_name]))
+		built=[names,values,String(definition.get("dynamic",""))]
+	_today.rows[id]=built
+	return built
+
+## How fully each known practice that feeds a capacity is carried out, as the
+## effect totals were last built: a two-byte level for each, in the order the
+## practices became known (known_discoveries only grows), with the research
+## focus and lore keepers' upkeep of the moment.
+func practice_basis()->Dictionary:
+	var known:Array=WorldSimulation.state.known_discoveries
+	var adoption:Dictionary=WorldSimulation.state.discovery_adoption
+	var levels:=PackedByteArray()
+	for id_variant in known:
+		var id:=String(id_variant)
+		if _capacity_row(id).is_empty(): continue
+		var level:=_practice_level(id,adoption,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id))
+		levels.resize(levels.size()+2)
+		levels.encode_u16(levels.size()-2,clampi(roundi(level*65535.0),0,65535))
+	return {"n":known.size(),"hash":known.hash(),"levels":levels,"focus":line_focus.duplicate(),"max_focus":_max_focus,"excess":specialist_excess}
+
+## What each known practice adds to each of the given totals under a basis:
+## {effect: {index in known_discoveries: amount}}, the same sum
+## _rebuild_effect_totals makes before the era's ceiling and the upkeep. Empty
+## when the basis does not belong to this people's known practices. A
+## Dictionary passed as levels_out receives each practice's level by index.
+## The monthly history remembers the last sources worked out; a screen that
+## only reads passes remember=false.
+func effect_sources(basis:Dictionary,effect_ids:Array,levels_out:Variant=null,remember:=true)->Dictionary:
+	var known:Array=WorldSimulation.state.known_discoveries
+	var count:=int(basis.get("n",-1))
+	if count<0 or count>known.size() or known.slice(0,count).hash()!=int(basis.get("hash",0)): return {}
+	var levels:PackedByteArray=basis.get("levels",PackedByteArray())
+	var focus:Dictionary=basis.get("focus",{})
+	var max_focus:=float(basis.get("max_focus",0.0))
+	# The same basis gives the same sources: this month's are next month's
+	# "before" (a load only works them out once more).
+	var key:=hash([count,basis.get("hash",0),levels,focus,max_focus,effect_ids,definitions_by_id.size()])
+	if remember and key==_today.sources_key and not _today.sources.is_empty():
+		if levels_out is Dictionary: (levels_out as Dictionary).merge(_today.sources.levels)
+		return _today.sources.result
+	var result:Dictionary={}
+	for effect_id in effect_ids: result[String(effect_id)]={}
+	var by_place:Dictionary={}
+	var cursor:=0
+	for index in count:
+		var row:=_capacity_row(String(known[index]))
+		if row.is_empty(): continue
+		if cursor+2>levels.size(): return {}
+		var level:=float(levels.decode_u16(cursor))/65535.0
+		cursor+=2
+		by_place[index]=level
+		if level==0.0: continue
+		var scale:=practice_scale(String(row[2]),focus,max_focus)
+		var names:PackedStringArray=row[0]
+		var values:PackedFloat64Array=row[1]
+		for position in names.size():
+			var by_source:Variant=result.get(names[position])
+			if by_source==null: continue
+			(by_source as Dictionary)[index]=float((by_source as Dictionary).get(index,0.0))+scaled_effect(names[position],values[position],scale)*level
+	if cursor!=levels.size(): return {}
+	if remember:
+		_today.sources_key=key
+		_today.sources={"result":result,"levels":by_place}
+	if levels_out is Dictionary: (levels_out as Dictionary).merge(by_place)
 	return result
 
 func leadership_effect(dynamic_id:String)->float:
