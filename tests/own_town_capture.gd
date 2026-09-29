@@ -3,7 +3,7 @@ extends Node
 ## (our own town's page) on a prepared test world and saves it, for UX review.
 ## Run it only through tools/run_isolated_gpu_probe.ps1 with user arguments
 ##   --case=early|late|secondary --out=<absolute png path>
-##   [--mode=dark] [--hover=<row key>] [--scroll=<pixels>]
+##   [--mode=dark] [--hover=<row key>] [--scroll=<pixels>] [--dock-width=<px>] [--dump]
 ## early: a hearth of about ninety souls; late: a large lettered town with a
 ## palisade, a levy and works; secondary: our second town, its own figures.
 ## Each case knows one or two foreign towns so their marks can be compared.
@@ -28,13 +28,14 @@ class StubTerrain extends Node:
 
 func _ready()->void:
 	get_tree().create_timer(60.0).timeout.connect(func():get_tree().quit(3))
-	var case:="early";var out:="";var mode:="light";var hover:="";var scroll:=0
+	var case:="early";var out:="";var mode:="light";var hover:="";var scroll:=0;var width:=0.0
 	for argument:String in OS.get_cmdline_user_args():
 		if argument.begins_with("--case="):case=argument.trim_prefix("--case=")
 		elif argument.begins_with("--out="):out=argument.trim_prefix("--out=")
 		elif argument.begins_with("--mode="):mode=argument.trim_prefix("--mode=")
 		elif argument.begins_with("--hover="):hover=argument.trim_prefix("--hover=")
 		elif argument.begins_with("--scroll="):scroll=int(argument.trim_prefix("--scroll="))
+		elif argument.begins_with("--dock-width="):width=float(argument.trim_prefix("--dock-width="))
 	T.set_color_mode(mode)
 	get_window().size=Vector2i(1600,900)
 	_world(case)
@@ -43,7 +44,7 @@ func _ready()->void:
 	var panel=DockPanel.new();hud.add_child(panel);hud.dock=panel
 	# Where the rail HUD puts a wide dock (command_rail_hud.gd _layout).
 	var view:=get_viewport().get_visible_rect().size
-	panel.position=Vector2(T.DOCK_X,56);panel.size=Vector2(clampf(view.x*.65,720.0,980.0),view.y-64-T.DOCK_MARGIN_Y)
+	panel.position=Vector2(T.DOCK_X,56);panel.size=Vector2(width if width>0.0 else clampf(view.x*.65,720.0,980.0),view.y-64-T.DOCK_MARGIN_Y)
 	var terrain:=StubTerrain.new();add_child(terrain)
 	var provider=load("res://scripts/hud/content/dock_content_settlement.gd").new(terrain,hud)
 	panel.present(provider,0)

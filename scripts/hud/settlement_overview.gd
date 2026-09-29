@@ -33,6 +33,11 @@ func setup(block:Dictionary)->void:
 	if bool(block.get("can_direct",false)):
 		var ask:=_choices(self,"Ask %s for more hands on" % (first if not first.is_empty() else "the leader"),block.get("choices",[]),String(block.get("current","")))
 		ask.name="AskForHands"
+		# One compact row under the leader's word.
+		for chip in ask.get_children():
+			if chip is Button:
+				(chip as Button).custom_minimum_size.y=26
+				(chip as Button).add_theme_font_size_override("font_size",12)
 	var groups:Array=block.get("groups",[])
 	if not groups.is_empty():_groups(groups,block.get("legend",[]),String(block.get("town_name","")))
 	var founding:Dictionary=block.get("founding",{})

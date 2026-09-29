@@ -328,6 +328,11 @@ func test_new_towns_switch_leader_card_hands_and_reports_still_act()->void:
 	text="\n".join(_texts(_page(_block())))
 	assert_str(text).contains("Water (now)").contains("You asked")
 
+func test_the_history_tab_is_unchanged()->void:
+	var history:Array=Provider.new(terrain,hud).tab(1).blocks
+	assert_str(String(history[0].type)).is_equal("chronicle")
+	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
+
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door
 # --------------------------------------------------------------------------
