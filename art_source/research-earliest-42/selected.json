@@ -12,7 +12,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.5
+      0.38
     ]
   },
   {
@@ -21,14 +21,14 @@
     "game_year": 385,
     "approx_historical_year": -2433,
     "prompt": "c. 2433 BCE: Wine Jars Sealed and Marked by Estate and Year. Wine jars sealed and marked by estate and year. Opaque botanical egg tempera. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90ed7207-13dc-4290-bc4a-fd252a0ba78e.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e3d0eb4d-e2b0-4d57-9105-849c058a5678.png",
     "asset": "res://assets/ui/research/subjects/marked_wine_jars-v1.png",
-    "sha256": "6ddde38f598ce7e09b7349047432d7f66c6325b21ad03c468f45cd08d46af6bd",
-    "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "sha256": "88afad3378ef1d314760e165028c9962ed000424a086c99f3e59d0504c4f0522",
+    "mode": "built-in image_gen / edited image",
+    "review": "Corrected after actual game-card review; full image and 3.37:1 crop rechecked for period details, anatomy and subject clarity.",
     "focus": [
       0.5,
-      0.5
+      0.38
     ]
   },
   {
@@ -44,7 +44,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.5
+      0.38
     ]
   },
   {
@@ -124,7 +124,7 @@
     "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
     "focus": [
       0.5,
-      0.5
+      0.38
     ]
   },
   {
@@ -149,11 +149,11 @@
     "game_year": 390,
     "approx_historical_year": -2400,
     "prompt": "c. 2400 BCE: Wool Felted and Fulled. Wool felted and fulled. Palette-knife impasto oil. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ce58b753-fff7-4c32-a120-451ecfc25a88.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-184f8871-2cf5-4680-95a6-d6d318fedabb.png",
     "asset": "res://assets/ui/research/subjects/wool_felting_fulling-v1.png",
-    "sha256": "f9ddef9849b4e1f8790b84c845447768155a75b10f2cb9334ef82a94025fb985",
-    "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "sha256": "7af2cf38b2696dc992564861d35743ddb6083d8365f8ff06d9e3fbcd94a474be",
+    "mode": "built-in image_gen / edited image",
+    "review": "Corrected after actual game-card review; full image and 3.37:1 crop rechecked for period details, anatomy and subject clarity.",
     "focus": [
       0.5,
       0.5
@@ -197,11 +197,11 @@
     "game_year": 395,
     "approx_historical_year": -2367,
     "prompt": "c. 2367 BCE: Stone-paved Haul Roads from Quarries. Stone-paved haul roads from quarries. Panoramic travel watercolor. Mature handmade 2D, full-bleed panoramic composition; no text, photorealism, CGI, childlike art or anachronism.",
-    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-733da7f1-b032-4cbf-b730-10fc556bc5cb.png",
+    "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a38ac4d6-acda-4121-9330-3b34b2b83b74.png",
     "asset": "res://assets/ui/research/subjects/paved_haul_roads-v1.png",
-    "sha256": "b36d495fa6e32e4de10d5edddddbb5d2347d7a86344d30b031b82f618d171bfe",
-    "mode": "built-in image_gen / new image",
-    "review": "Selected after full-image and 3.37:1 crop review; subject, period and direction medium clear.",
+    "sha256": "ee55ffe95d6e0042bf31e2bef4a86315cf7486d2a8fe2d4aa7d322d4e6ffd86a",
+    "mode": "built-in image_gen / edited image",
+    "review": "Corrected after actual game-card review; full image and 3.37:1 crop rechecked for period details, anatomy and subject clarity.",
     "focus": [
       0.5,
       0.5
