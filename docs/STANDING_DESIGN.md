@@ -180,6 +180,11 @@ WorldSimulation scope; what differs must be tendency, not rules.
   hazards read from its own state, the same death draws and floors, and the
   court official's own answers when the god is silent, paid from its own
   stores, roofs and labour.
+- Feuds: two small simulated neighbours who fall out (war_loop._rival_wars, at
+  the benchmark rate) now fight their feud for real (rival_feuds.gd): the same
+  bands and combat simulator as raids on the god's people, the dead and the
+  stolen food out of both real ledgers, each side remembering it; grudges fade
+  between feuds. Big peoples declare their own wars through their leaders.
 - Research: capacity from the people at research, emphasis only directs it,
   one budget rule for every ruler (codex/research-parity).
 - Leaders: one rule for great works and expansion for computer rulers and the

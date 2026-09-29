@@ -1583,6 +1583,8 @@ static func daily(day:int)->void:
 	if day%30==0:
 		_grudges(day)
 		_rival_wars(day)
+	# Feuds between two other simulated peoples are fought for real.
+	preload("res://scripts/rival_feuds.gd").tick(day,TICK)
 
 ## The god's own band against a small people (the engine's war flag): the feud
 ## is hot from the day the fight began, and while blood is being spilled.
@@ -1849,6 +1851,9 @@ static func _rival_wars(day:int)->void:
 				if world.has_method("start_rival_feud"): world.start_rival_feud(i,j,day,"old quarrels on the border")
 				_stat("rival_feuds")
 				continue
+			# Two simulated peoples declare their own wars, through their own
+			# leaders' diplomacy; a note here would never be carried.
+			if WorldSimulation.enabled and WorldSimulation.actors.has(String(first.id)) and WorldSimulation.actors.has(String(second.id)): continue
 			var carried:=relation.duplicate(true)
 			carried["pending_message"]="war"
 			carried["pending_message_sent_day"]=day
