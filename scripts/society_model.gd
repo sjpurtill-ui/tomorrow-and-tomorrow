@@ -1,5 +1,6 @@
 extends RefCounted
 const Goods=preload("res://scripts/civilian_goods.gd")
+const Research600=preload("res://scripts/research_600_catalog.gd")
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 
@@ -144,12 +145,15 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		last_adoption_day=day
 		var teaching:=observers/population*0.055+stewards/population*0.018+makers/population*0.012
 		var adoption_factor:=1.0+clampf(effect("adoption_rate")+WorldSimulation.state.founding_effect("adoption_rate")+WorldSimulation.progression.effect("adoption_rate"),-0.35,0.80)
+		# A line's attention is its share of the plan, read in common steps: the
+		# same share helps its practices spread the same for every ruler.
+		var steps:=Research600.attention_steps(WorldSimulation.state.research_allocations)
 		for id in WorldSimulation.state.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
 			var adoption_level:=float(WorldSimulation.state.discovery_adoption.get(id,0.025))
 			var direction:=String(discovery.get("dynamic",discovery.get("direction","knowledge")))
-			var attention:=float(WorldSimulation.state.research_allocations.get(direction,0))
+			var attention:=float(steps.get(direction,0.0))
 			var relevant_activity:=0.0
 			for signal_name in discovery.get("signals",[]): relevant_activity+=float(context.get(signal_name,0.0))
 			var practice:=minf(0.012,relevant_activity*0.0014)
@@ -226,6 +230,7 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		_effect_rows.clear()
 	effect_totals.clear()
 	_refresh_line_focus() # research_600: specialization amplifies the focused line
+	var neglect:=neglect_for(line_focus)
 	var adoption:Dictionary=WorldSimulation.state.discovery_adoption
 	for id in WorldSimulation.state.known_discoveries:
 		var row:Array=_effect_rows.get(id,[])
@@ -240,7 +245,7 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		var adoption_level:=_practice_level(String(id),adoption,bool(row[2]))
 		var names:Array=row[0]
 		var values:PackedFloat64Array=row[1]
-		var scale:=practice_scale(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),line_focus,_max_focus)
+		var scale:=practice_scale(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),line_focus,neglect)
 		for i in names.size():
 			var effect_name=names[i]
 			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+scaled_effect(String(effect_name),values[i],scale)*adoption_level
@@ -263,10 +268,21 @@ func _practice_level(id:String,adoption:Dictionary,needs_means:bool)->float:
 	return level
 
 ## research_600: a focused line's practices are worked harder, every other
-## line's a little less while another line has the focus.
-static func practice_scale(line:String,focus_by_line:Dictionary,max_focus:float)->float:
+## line's a little less (`neglect`, see neglect_for) while another line has the focus.
+static func practice_scale(line:String,focus_by_line:Dictionary,neglect:float)->float:
 	var focus:=float(focus_by_line.get(line,0.0))
-	return 1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*max_focus
+	return 1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-neglect
+
+## Share of its benefits each unfocused line gives up while `focus_by_line` has
+## the focus. The same rule for every ruler: the unfocused lines between them give
+## up SPECIALIZATION_NEGLECT times what the focused lines gain, each an equal part,
+## so a focus moves benefit between lines and never costs more than it brings.
+static func neglect_for(focus_by_line:Dictionary)->float:
+	var gained:=0.0
+	for value:Variant in focus_by_line.values(): gained+=maxf(0.0,float(value))
+	var unfocused:=DYNAMICS.size()-focus_by_line.size()
+	if gained<=0.0 or unfocused<=0: return 0.0
+	return minf(1.0,SPECIALIZATION_HEADROOM*SPECIALIZATION_NEGLECT*gained/float(unfocused))
 
 ## The scale moves a practice's benefits only; its costs are never scaled.
 static func scaled_effect(effect_name:String,value:float,scale:float)->float:
@@ -307,11 +323,12 @@ func capacity_inputs()->Dictionary:
 	var metrics:Dictionary=state.simulation_metrics
 	var population:=maxf(1.0,state.population_exact)
 	var observers:=float(state.effective_workers("Knowledge"))
-	var inquiry_total:=0.0
 	var active_directions:=0
 	for allocation in state.research_allocations.values():
-		inquiry_total+=float(allocation)
 		if int(allocation)>0: active_directions+=1
+	# The keepers a plan asks for follow the lines it covers, not the size of
+	# its numbers, so every ruler's plan is judged the same way.
+	var inquiry_total:=Research600.keepers_asked(state.research_allocations)
 	var inputs:Dictionary={
 		"able":clampf(float(state.able_population())/population,0.0,1.0),
 		"health":clampf(float(metrics.get("health",state.population_health)),0.0,1.0),
@@ -517,6 +534,8 @@ func effect_sources(basis:Dictionary,effect_ids:Array,levels_out:Variant=null,re
 	var levels:PackedByteArray=basis.get("levels",PackedByteArray())
 	var focus:Dictionary=basis.get("focus",{})
 	var max_focus:=float(basis.get("max_focus",0.0))
+	# Read from the basis's own focus, so older saved readings count the same way.
+	var neglect:=neglect_for(focus)
 	# The same basis gives the same sources: this month's are next month's
 	# "before" (a load only works them out once more).
 	var key:=hash([count,basis.get("hash",0),levels,focus,max_focus,effect_ids,definitions_by_id.size()])
@@ -535,7 +554,7 @@ func effect_sources(basis:Dictionary,effect_ids:Array,levels_out:Variant=null,re
 		cursor+=2
 		by_place[index]=level
 		if level==0.0: continue
-		var scale:=practice_scale(String(row[2]),focus,max_focus)
+		var scale:=practice_scale(String(row[2]),focus,neglect)
 		var names:PackedStringArray=row[0]
 		var values:PackedFloat64Array=row[1]
 		for position in names.size():
@@ -684,12 +703,10 @@ func evaluate_subcategories(_context:Dictionary)->Dictionary:
 	var security:=clampf(float(metrics.get("security",0.38)),0.0,1.0)
 	var legitimacy:=clampf(float(metrics.get("legitimacy",0.62)),0.0,1.0)
 	var observers:=float(WorldSimulation.state.effective_workers("Knowledge"))
-	var inquiry_total:=0.0
 	var active_directions:=0
 	for allocation in WorldSimulation.state.research_allocations.values():
-		inquiry_total+=float(allocation)
 		if int(allocation)>0: active_directions+=1
-	var attention:=clampf(observers/maxf(1.0,inquiry_total),0.0,1.0)
+	var attention:=clampf(observers/maxf(1.0,Research600.keepers_asked(WorldSimulation.state.research_allocations)),0.0,1.0)
 	var administration:=clampf(float(WorldSimulation.state.population_allocations.get("Administration",0))/maxf(1.0,population*0.06),0.0,1.0)
 	var diet:=clampf(float(metrics.get("food_diet_quality",0.45))+effect("nutrition_quality")*0.25,0.0,1.0)
 	var stores:=clampf(float(metrics.get("food_days",0.0))/90.0+effect("food_storage")*0.12,0.0,1.0)
@@ -731,10 +748,11 @@ func adoption(discovery_id:String)->float:
 ## adoption, less the specialization neglect when another line has the focus.
 func practiced(discovery_id:String)->float:
 	var level:=adoption(discovery_id)
-	if _max_focus<=0.0: return level
+	var neglect:=neglect_for(line_focus)
+	if neglect<=0.0: return level
 	var line:=String((definitions_by_id.get(discovery_id,{}) as Dictionary).get("dynamic",""))
 	if float(line_focus.get(line,0.0))>0.0: return level
-	return level*(1.0-SPECIALIZATION_NEGLECT*_max_focus)
+	return level*(1.0-neglect)
 
 func validate_catalog(catalog:Array[Dictionary])->Array[String]:
 	var errors:Array[String]=[]
@@ -892,7 +910,7 @@ func era_ceiling(effect_id:String)->Vector2:
 	var focus:=float(line_focus.get(String(EFFECT_LINE.get(effect_id,"")),0.0))
 	# A focused line's channels may pass the common ceiling; a neglected line's
 	# channels stop short of it while another line takes the society's effort.
-	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-SPECIALIZATION_NEGLECT*_max_focus
+	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-neglect_for(line_focus)
 	if scale==1.0: return limit
 	var modern:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
 	if effect_id in LOWER_IS_BETTER: return Vector2(maxf(modern.x,limit.x*scale),limit.y)
@@ -905,8 +923,12 @@ func era_ceiling(effect_id:String)->Vector2:
 ## line is researched less. Each effect key belongs to the line that carries most
 ## of its content (derived from the research data).
 const SPECIALIZATION_HEADROOM:=0.35
-## Share of their benefit the neglected lines lose when another line has full focus.
-const SPECIALIZATION_NEGLECT:=0.35
+## What the other lines give up between them, as a multiple of what the focused
+## lines gain (neglect_for). 1: a focus only moves benefit between lines, so a
+## ruler with one strong aim pays no more for it than it gets. (It was a flat
+## 35% off every other line at full focus, which charged a focused ruler several
+## times what its focus brought.)
+const SPECIALIZATION_NEGLECT:=1.0
 const EFFECT_LINE:Dictionary={"adoption_rate":"knowledge","chemical_control":"production","clay_yield":"production","cohesion":"culture","conception_support":"demography","construction_rate":"infrastructure","container_capacity":"production","craft_output":"production","cultivation_yield":"nutrition","disaster_resilience":"infrastructure","disaster_risk":"infrastructure","disease_exposure":"health","dry_storage":"infrastructure","ecological_pressure":"ecology","ecology_recovery":"ecology","extraction_yield":"production","fatigue":"labor","fiber_yield":"production","food_output":"nutrition","food_spoilage":"nutrition","food_storage":"nutrition","foraging_yield":"ecology","fuel_demand":"ecology","fuel_efficiency":"production","haul_capacity":"logistics","health_protection":"health","health_risk":"labor","housing_output":"infrastructure","hunting_yield":"nutrition","injury_risk":"health","institutional_rigidity":"culture","knowledge_preservation":"knowledge","knowledge_rate":"knowledge","labor_demand":"labor","labor_efficiency":"labor","legitimacy":"institutions","logistics_endurance":"logistics","maternal_safety":"demography","metal_yield":"production","mine_safety":"infrastructure","mobile_shelter":"production","naval_capacity":"logistics","neonatal_survival":"demography","nutrition_quality":"nutrition","observation_rate":"knowledge","pollution":"ecology","repair_capacity":"infrastructure","route_speed":"logistics","sanitation":"health","security_efficiency":"security","soil_productivity":"ecology","standardization":"production","state_capacity":"institutions","stone_yield":"infrastructure","storage_loss":"nutrition","survey_speed":"knowledge","task_coordination":"labor","timber_pressure":"ecology","timber_yield":"ecology","tool_quality":"production","trade_capacity":"logistics","travel_speed":"logistics","warfare_readiness":"security","water_access":"infrastructure","water_pollution":"ecology","water_safety":"health","modern_survival":"health","fertility_transition":"demography","literacy":"knowledge","farm_mechanization":"nutrition"}
 ## Emphasis focus per line, 0 (even spread or less) to 1 (all emphasis).
 var line_focus:Dictionary={}

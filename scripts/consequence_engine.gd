@@ -700,9 +700,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
 
-	var inquiry_points := 0
-	for value in WorldSimulation.state.research_allocations.values(): inquiry_points += int(value)
-	var focus_quality := 1.0 if inquiry_points <= maxi(1,int(observers)) else clampf(observers/maxf(1.0,float(inquiry_points)),0.15,1.0)
+	# The keepers the plan asks for follow the lines it covers, not the size of
+	# its numbers (Research600.keepers_asked), the same for every ruler.
+	var inquiry_points := preload("res://scripts/research_600_catalog.gd").keepers_asked(WorldSimulation.state.research_allocations)
+	var focus_quality := 1.0 if inquiry_points <= maxf(1.0,floorf(observers)) else clampf(observers/maxf(1.0,inquiry_points),0.15,1.0)
 	var knowledge := float(previous.get("knowledge",0.18))
 	var knowledge_gain := observers*labor_efficiency*focus_quality/maxf(3000.0,population*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,WorldSimulation.state.combined_intelligence)
 	knowledge += knowledge_gain*(1.0+modifier_strength("curious_youth")+policy_effect("knowledge_gain")+WorldSimulation.state.founding_effect("knowledge_gain")+WorldSimulation.progression.effect("knowledge_rate")+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"knowledge"))*span

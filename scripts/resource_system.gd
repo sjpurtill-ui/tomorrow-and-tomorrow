@@ -1033,5 +1033,8 @@ func _abundance_label(deposit: Dictionary) -> String:
 
 # These inputs are invariant only within one local-city resource pass. Do not
 # cache them across days, city scopes, allocation changes or policy changes.
+# Research attention counts by its share of the plan, in common steps, so the
+# same plan helps the search the same for every ruler.
 func _local_survey_inputs()->Dictionary:
-	return {"effort":WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor(),"nature":float(WorldSimulation.state.research_allocations.get("ecology",0))*.15,"material":float(WorldSimulation.state.research_allocations.get("production",0))*.12,"speed":1.0+WorldSimulation.discovery.effect("survey_speed")}
+	var steps:=preload("res://scripts/research_600_catalog.gd").attention_steps(WorldSimulation.state.research_allocations)
+	return {"effort":WorldSimulation.state.effective_workers("Survey") / 6.0*WorldSimulation.consequences.survey_factor(),"nature":float(steps.get("ecology",0.0))*.15,"material":float(steps.get("production",0.0))*.12,"speed":1.0+WorldSimulation.discovery.effect("survey_speed")}

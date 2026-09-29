@@ -90,6 +90,57 @@ MODERN_BIRTH_CLAMPS = "\"neonatal_care\",1.0)),0.1,4.0),0.0008,0.18)" in g.sourc
 NEONATAL_CLAMP = (0.1, 0.0008) if MODERN_BIRTH_CLAMPS else (0.5, 0.004)
 MATERNAL_CLAMP = (0.02, 0.00002) if MODERN_BIRTH_CLAMPS else (0.5, 0.0008)
 FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scripts/game_state.gd")
+# Research parity (one rule for every ruler): emphasis is shares. Research600
+# ATTENTION_STEPS / RESEARCH_TEAMS present -> the community's whole work comes
+# from its researchers alone (team_capacity) and each staffed channel does its
+# team strength's part of it (team_strength over all channels' strength); the
+# rules that counted emphasis steps read shares on the common scale; the keepers
+# a plan asks for follow the lines it covers; specialization neglect is zero-sum;
+# and computer rulers plan in the player's 0-12 steps. Absent -> the older rules.
+ATTENTION_STEPS = float(g.const("scripts/research_600_catalog.gd", "ATTENTION_STEPS", default=0.0, optional=True))
+RESEARCH_TEAMS = float(g.const("scripts/research_600_catalog.gd", "RESEARCH_TEAMS", default=0.0, optional=True))
+PARITY = ATTENTION_STEPS > 0.0 and RESEARCH_TEAMS > 0.0
+REPLAN_STEPS = float(g.const("scripts/civilization_controller.gd", "REPLAN_STEPS", default=0.0, optional=True))
+
+
+def team_strength(researchers: float) -> float:
+    """Research600.team_strength (the old per-channel team scale): in full up to
+    one person, then 1 + 0.78 log10(people)."""
+    if researchers < 1.0:
+        return max(0.0, researchers)
+    return 1.0 + math.log10(researchers) * 0.78
+
+
+def team_capacity(researchers: float) -> float:
+    """Research600.team_capacity: the whole community's work, in teams."""
+    if researchers <= RESEARCH_TEAMS:
+        return max(0.0, researchers)
+    return RESEARCH_TEAMS * team_strength(researchers / RESEARCH_TEAMS)
+
+
+def attention_steps(allocations: dict) -> dict:
+    """Research600.attention_steps: each line's share of the plan in common steps."""
+    total = sum(max(0.0, float(v)) for v in allocations.values())
+    if total <= 0.0:
+        return {}
+    return {line: max(0.0, float(v)) / total * ATTENTION_STEPS for line, v in allocations.items()}
+
+
+def keepers_asked(allocations: dict) -> float:
+    """Research600.keepers_asked: two keepers for each line the plan follows."""
+    return ATTENTION_STEPS / 12.0 * sum(1 for v in allocations.values() if int(v) > 0)
+
+
+def neglect_for(focus_by_line: dict) -> float:
+    """SocietyModel.neglect_for (parity): the unfocused lines give up, between
+    them, SPECIALIZATION_NEGLECT times what the focused lines gain."""
+    gained = sum(max(0.0, float(v)) for v in focus_by_line.values() if v > 0)
+    unfocused = 12 - sum(1 for v in focus_by_line.values() if v > 0)
+    if gained <= 0.0 or unfocused <= 0:
+        return 0.0
+    return min(1.0, SPECIALIZATION_HEADROOM * SPECIALIZATION_NEGLECT * gained / unfocused)
+
+
 # Research600.parallel_capacity (research_3000).
 DIFFUSION_TEAM = float(g.const("scripts/research_600_catalog.gd", "DIFFUSION_TEAM", default=0.0, optional=True))
 PARALLEL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
@@ -491,7 +542,8 @@ class Surrogate:
                 focus_by_line = np.array([clamp((max(0.0, float(pol.get(ln, 0))) / tot - even) / (1.0 - even), 0.0, 1.0) for ln in gd.LINES])
                 if focus_by_line.max() > 0:
                     fl = focus_by_line[cat.line]
-                    item_mult = np.where(fl > 0, 1.0 + SPECIALIZATION_HEADROOM * fl, 1.0 - SPECIALIZATION_NEGLECT * focus_by_line.max())
+                    neglect = neglect_for(dict(zip(gd.LINES, focus_by_line.tolist()))) if PARITY else SPECIALIZATION_NEGLECT * focus_by_line.max()
+                    item_mult = np.where(fl > 0, 1.0 + SPECIALIZATION_HEADROOM * fl, 1.0 - neglect)
                     benefit = self.__dict__.get("_benefit")
                     if benefit is None:
                         benefit = self._benefit = np.where(cat.lower_better[None, :], np.minimum(self.E, 0.0), np.maximum(self.E, 0.0))
@@ -516,8 +568,9 @@ class Surrogate:
                 even = 1.0 / 12.0
                 focus = {ln: clamp((max(0.0, float(v)) / total - even) / (1.0 - even), 0.0, 1.0) for ln, v in weights.items()}
                 fmax = max(focus.values()) if focus else 0.0
+                neglect = neglect_for(focus) if PARITY else SPECIALIZATION_NEGLECT * fmax
                 mult = np.array([(1.0 + SPECIALIZATION_HEADROOM * focus.get(EFFECT_LINE.get(k, ""), 0.0)) if focus.get(EFFECT_LINE.get(k, ""), 0.0) > 0
-                                 else (1.0 - SPECIALIZATION_NEGLECT * fmax) for k in cat.effect_keys])
+                                 else (1.0 - neglect) for k in cat.effect_keys])
                 lo = np.where(cat.lower_better, np.maximum(cat.limit_lo, lo * mult), lo)
                 hi = np.where(cat.lower_better, hi, np.minimum(cat.limit_hi, hi * mult))
         self.effects = np.clip(raw, lo, hi)
@@ -543,7 +596,9 @@ class Surrogate:
         k = self.known
         a = self.adoption[k]
         practice = np.minimum(0.012, self.activity_sum[k] * 0.0014)
-        line_weight = np.array([float(self.s_research.get(line, 0)) for line in gd.LINES])[self.cat.line[k]]
+        # Parity: a line's attention is its share of the plan in common steps.
+        steps = attention_steps(self.s_research) if PARITY else self.s_research
+        line_weight = np.array([float(steps.get(line, 0)) for line in gd.LINES])[self.cat.line[k]]
         directed = np.minimum(0.006, line_weight * 0.0012)
         pace = self.c.adoption_pace * self.tune_adoption
         spread = (0.00035 + teaching + practice + directed) * factor * pace * (1.0 - a)
@@ -561,6 +616,9 @@ class Surrogate:
         weights = [float(v) for v in self.s_research.values()] if hasattr(self, "s_research") else [1.0] * 12
         inquiry = sum(weights)
         active_dirs = sum(1 for w in weights if w > 0)
+        if PARITY:
+            # Research600.keepers_asked: the lines the plan follows, not its numbers.
+            inquiry = ATTENTION_STEPS / 12.0 * sum(1 for w in weights if int(w) > 0)
         attention_fit = clamp(observers / max(1.0, inquiry), 0.10, 1.0)
         diversity = clamp(active_dirs / 12.0, 0.05, 1.0)
         preserved = clamp(self.knowledge_metric + e("knowledge_preservation") * 0.55, 0.0, 1.0)
@@ -884,7 +942,8 @@ class Surrogate:
         focus = {ln: clamp((max(0.0, float(v)) / tot - even) / (1.0 - even), 0.0, 1.0) for ln, v in pol.items()}
         fmax = max(focus.values()) if focus else 0.0
         line = gd.LINES[int(self.cat.line[i])]
-        return 1.0 if focus.get(line, 0.0) > 0 or fmax <= 0 else 1.0 - SPECIALIZATION_NEGLECT * fmax
+        neglect = neglect_for(focus) if PARITY else SPECIALIZATION_NEGLECT * fmax
+        return 1.0 if focus.get(line, 0.0) > 0 or fmax <= 0 else 1.0 - neglect
 
     def urban_share(self) -> float:
         """CivilizationIndicators.urban_share (research_3000)."""
@@ -1162,7 +1221,7 @@ class Surrogate:
                            + (1.0 - work_strain) * 0.08 + self.policy("cohesion_target") + float(p["cohesion_offset"]), 0.08, 0.96)
         self.cohesion = lag(self.cohesion, coh_target, 0.014, days)
         observers = self.workers("Knowledge")
-        inquiry = sum(float(v) for v in self.s_research.values())
+        inquiry = keepers_asked(self.s_research) if PARITY else sum(float(v) for v in self.s_research.values())
         focus_q = 1.0 if inquiry <= max(1, int(observers)) else clamp(observers / max(1.0, inquiry), 0.15, 1.0)
         gain = observers * labor_eff * focus_q / max(3000.0, pop * 92.0) * (1.0 + e("knowledge_rate")) * lerp(0.55, 1.45, self.capacities["knowledge"]) * float(p["knowledge_gain_mult"])
         self.knowledge_metric = clamp(self.knowledge_metric + gain * days + float(self.known.sum()) / 240000.0 * days, 0.0, 1.0)
@@ -1284,6 +1343,14 @@ class Surrogate:
             self._alloc_key, self._alloc_weights = alloc_key, weights
         self.channel_weight = weights
         total_weight = max(1.0, weights.sum() + self.study_weight())
+        # DiscoverySystem.research_teams (parity): the whole work of the researchers
+        # not on artifact study, and every staffed channel's team strength.
+        staffed = weights[weights > 0]
+        strength = float(sum(team_strength(researchers_total * w / total_weight) for w in staffed)) if PARITY else 0.0
+        community = team_capacity(researchers_total * float(staffed.sum()) / total_weight) if PARITY else 0.0
+        # Lines with any open question (CivilizationController.research_orders
+        # viability), for the computer ruler's plan.
+        self._line_open = np.bincount(cat.line[open_mask], minlength=len(gd.LINES)) > 0
         found = []
         food_support = lerp(0.62, 1.08, clamp(self.food_security, 0, 1))
         material_support = lerp(0.72, 1.12, clamp(self.material, 0.0, 1.2) / 1.2)
@@ -1352,7 +1419,11 @@ class Surrogate:
                     item = current_item
                 self.active[ch] = item
             researchers = researchers_total * weights[ch] / total_weight
-            team = researchers if researchers < 1.0 else 1.0 + math.log10(researchers) * 0.78
+            team = team_strength(researchers)
+            if PARITY:
+                # DiscoverySystem.research_capacity_for (parity): the channel's team
+                # does its strength's part of the community's whole work.
+                team = community * team / strength if strength > 0 else 0.0
             if weights[ch] <= 0 and ch in diffusion:
                 team = DIFFUSION_TEAM
             attention = team * support * parallel * (1.0 + (self.art_bonus_for(gd.LINES[cat.channel_line[ch]]) if self.art["tier"] else 0.0))
@@ -1582,6 +1653,8 @@ class Surrogate:
         self.active_knowledge_share = self.s.knowledge_share
         if not self.s.ai:
             return self.s.research
+        if PARITY:
+            return self._ruler_plan(year)
         # AI-like: CivilizationController leans toward what hurts (food, health,
         # security) with a floor on every line.
         # CivilizationController (truth runs): 4 emphasis units, re-chosen every
@@ -1604,6 +1677,96 @@ class Surrogate:
                 w[str(pick)] += 1
             cache[period] = w
         return cache[period]
+
+    # Computer ruler's research plan (parity): CivilizationStrategy.preferences
+    # weights for a temperament drawn as LeaderPersonality.generate draws one
+    # (not the engine's own seeded draw), the goal and crisis boosts, the people's
+    # ambitions (the truth probe's "makers", then the ruler's own each century)
+    # at CivilizationController.current_plan's 4 x share, fields with no open
+    # question dropped, CivilizationStrategy.research_plan in ATTENTION_STEPS
+    # steps, and REPLAN_STEPS steadiness. The research supply and foundation
+    # planners' one-step nudges are left out.
+    AMBITION_DOMAINS = {"horizons": ("logistics", "ecology"), "makers": ("production", "infrastructure"), "gathering": ("culture", "institutions"),
+                        "inquiry": ("knowledge", "health"), "military": ("security", "logistics"), "sustenance": ("nutrition", "ecology"),
+                        "wellbeing": ("health", "demography"), "commerce": ("production", "logistics")}
+
+    def _ruler_temperament(self) -> dict:
+        t = self.__dict__.get("_temperament")
+        if t is None:
+            r = np.random.default_rng((self.seed * 2654435761 + 7919) & 0xFFFFFFFF)
+            t = self._temperament = {axis: float(r.uniform(0.12, 0.92)) for axis in ("openness", "discipline", "empathy", "assertiveness", "risk_tolerance")}
+        return t
+
+    def _ruler_weights(self, year: float) -> dict:
+        p = self._ruler_temperament()
+        open_, disc, emp, assertive, risk = p["openness"], p["discipline"], p["empathy"], p["assertiveness"], p["risk_tolerance"]
+        hungry = self.stored_days < 16.0 or self.last["intake"] < 0.98
+        w = {"demography": .25 + emp * .9, "nutrition": .3 + emp * .6 + (1 - risk) * .3, "health": .25 + emp * .8, "labor": .2 + disc * .6,
+             "knowledge": .15 + open_ * 1.2, "production": .25 + disc * .5 + open_ * .4, "infrastructure": .25 + disc * .65,
+             "logistics": .25 + open_ * .5 + assertive * .3, "ecology": .2 + emp * .45 + (1 - risk) * .35, "institutions": .2 + disc * .65,
+             "security": .15 + assertive * .8 + disc * .5, "culture": .2 + emp * .6 + open_ * .4}
+        goals = {"care": 3.0 if hungry else emp, "learning": open_, "security": disc * .6 + (1 - risk) * .4,
+                 "exchange": emp * .55 + open_ * .45, "growth": disc * .45 + assertive * .55}
+        boosts = {"care": {"health": 1.5, "demography": .7}, "learning": {"knowledge": 1.8, "culture": .4}, "security": {"security": 1.8, "infrastructure": .6, "logistics": .4},
+                  "exchange": {"logistics": 1.5, "production": .75, "culture": .5}, "growth": {"infrastructure": 1.5, "demography": 1.0, "production": .5}}
+        for domain, amount in boosts[max(goals, key=goals.get)].items():
+            w[domain] += amount
+        if hungry:
+            w["nutrition"] += 3.0
+            w["health"] += 1.0
+            w["ecology"] += .8
+        # The people's ambitions: makers first (the truth probe), then the ruler's own.
+        scores = {"horizons": open_ * .65 + risk * .35, "makers": disc * .55 + open_ * .45, "gathering": emp * .6 + (1 - assertive) * .4,
+                  "inquiry": open_ * .85 + (1 - risk) * .15, "military": assertive * .65 + disc * .35, "sustenance": emp * .4 + (1 - risk) * .6,
+                  "wellbeing": emp * .85 + (1 - assertive) * .15, "commerce": open_ * .45 + emp * .35 + risk * .2}
+        own = max(scores, key=scores.get)
+        choices: dict = {}
+        for century in range(int(year // 100) + 1):
+            pick = "makers" if century == 0 else own
+            choices[pick] = choices.get(pick, 0.0) + 10.0 * 0.5 ** (max(0.0, year - century * 100.0) / 60.0)
+        total = sum(choices.values())
+        for pick, amount in choices.items():
+            for domain in self.AMBITION_DOMAINS[pick]:
+                w[domain] += amount / total * 4.0
+        return w
+
+    def _ruler_plan(self, year: float) -> dict:
+        key = int(year)
+        cache = self.__dict__.setdefault("_ai_plan", {})
+        if key in cache:
+            return cache[key]
+        w = self._ruler_weights(year)
+        line_open = self.__dict__.get("_line_open")
+        if line_open is not None and line_open.any():
+            for li, line in enumerate(gd.LINES):
+                if not line_open[li]:
+                    w[line] = 0.0
+        # CivilizationStrategy.research_plan: one step on every field weighed at all,
+        # the rest of ATTENTION_STEPS by D'Hondt, twelve at most on any field.
+        plan = dict.fromkeys(gd.LINES, 0)
+        weighed = [line for line in gd.LINES if w[line] > 0]
+        left = int(ATTENTION_STEPS)
+        if weighed and left >= len(weighed):
+            for line in weighed:
+                plan[line] = 1
+            left -= len(weighed)
+        for _ in range(left if weighed else 0):
+            best = max((line for line in weighed if plan[line] < 12), key=lambda line: w[line] / (plan[line] + 1), default=None)
+            if best is None:
+                break
+            plan[best] += 1
+        previous = self.__dict__.get("_ruler_last")
+        if previous is not None and REPLAN_STEPS > 0:
+            # CivilizationController._research_plan_moved: steady unless a field starts
+            # or stops, or REPLAN_STEPS steps of attention would move.
+            before, after = attention_steps(previous), attention_steps(plan)
+            crossing = any((int(previous.get(line, 0)) > 0) != (plan[line] > 0) for line in gd.LINES)
+            moved = sum(abs(before.get(line, 0.0) - after.get(line, 0.0)) for line in gd.LINES) / 2.0
+            if not crossing and moved < REPLAN_STEPS:
+                plan = previous
+        self._ruler_last = plan
+        cache[key] = plan
+        return plan
 
     def seed_state(self, start_year: float, known_ids: list, adoption: dict, population: float, scholarship: float) -> None:
         """Mirror of truth_probe.gd _seed_era (research_3000 later-era spot check): the

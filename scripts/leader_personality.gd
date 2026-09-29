@@ -53,3 +53,19 @@ static func agenda(civ:Dictionary,p:Dictionary)->Array[Dictionary]:
 	goals.resize(3)
 	for goal:Dictionary in goals:goal.erase("weight")
 	return goals
+
+## A people's tendency on the same five axes, read from the values they live by
+## (SocietalValuesModel state). It stands in for a ruler's temperament where
+## the people themselves decide, and stays in the range rulers are drawn from.
+static func from_values(values:Dictionary)->Dictionary:
+	var lived:Variant=values.get("lived",values.get("official",{}))
+	var v:Dictionary=lived if lived is Dictionary else {}
+	var axis:=func(name:String)->float:return clampf(float(v.get(name,.5)),0.0,1.0)
+	var result:={
+		"openness":(axis.call("openness")+axis.call("experimentation"))*.5,
+		"discipline":(axis.call("collective_obligation")+axis.call("centralization"))*.5,
+		"empathy":(axis.call("common_stewardship")+axis.call("restorative_justice"))*.5,
+		"assertiveness":axis.call("hierarchy"),
+		"risk_tolerance":(axis.call("experimentation")+1.0-axis.call("ecological_restraint"))*.5}
+	for key:String in AXES:result[key]=clampf(float(result[key]),.12,.92)
+	return result

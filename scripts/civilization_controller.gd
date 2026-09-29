@@ -4,7 +4,9 @@ extends RefCounted
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
 const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
 
-static func current_plan(id:String)->Dictionary:
+## `personality` stands in for the ruler's own temperament when given (the
+## player's people, whose tendency is their culture: see PeopleDirection).
+static func current_plan(id:String,personality:Dictionary={})->Dictionary:
 	var state:=WorldSimulation.state
 	var situation:={"food_days":float(state.simulation_metrics.get("food_days",30)),"food_intake_ratio":float(state.simulation_metrics.get("food_intake_ratio",1)),"at_war":false}
 	for metric:String in ["food_consumption","army_provisions_required","army_provision_delivery_ratio"]:
@@ -17,7 +19,7 @@ static func current_plan(id:String)->Dictionary:
 	for ties:Dictionary in state.society_exchange.connections.values():exchange_value=maxf(exchange_value,float(ties.get("respect",0)))
 	situation["cultural_exchange"]=exchange_value
 	situation["reception_capacity"]=preload("res://scripts/society_exchange.gd").reception_capacity()
-	var plan:=STRATEGY.preferences(STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
+	var plan:=STRATEGY.preferences(personality if not personality.is_empty() else STRATEGY.PERSONALITY.foreign(state.world_seed,id),situation)
 	WorldSimulation.direction._ensure_cultural_memory()
 	var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",int(state.elapsed_days))
 	plan.expansion_food=maxf(45,float(plan.expansion_food)*(1.0-drive*.35))
@@ -35,9 +37,11 @@ static func review_due(id:String,day:int)->bool:
 	# twelve rulers do not cause a single synchronized computation spike.
 	return posmod(day,30)==posmod(hash(id+":strategy_review"),30)
 
+## The ruler's research emphasis through ordinary orders, with the player's own
+## semantics: every field 0 to 12, shares only. The researchers decide how much
+## work is done; this only decides where it goes, so no plan size is kept or
+## capped (STRATEGY.research_plan).
 static func research_orders(id:String,plan:Dictionary)->void:
-	var budget:=0
-	for value in WorldSimulation.state.research_allocations.values():budget+=int(value)
 	var priorities:Dictionary=plan.research_weights.duplicate()
 	var viable:Dictionary={}
 	# fun-pop performance: only whether each field has an open problem matters,
@@ -56,20 +60,35 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	if not viable.is_empty():
 		for domain:String in STRATEGY.DOMAINS:
 			if not viable.has(domain):priorities[domain]=0.0
-	var support:Dictionary=preload("res://scripts/research_supply_planner.gd").recommendation() if budget>0 else {}
-	if support.is_empty() and budget>0:
+	var support:Dictionary=preload("res://scripts/research_supply_planner.gd").recommendation()
+	if support.is_empty():
 		support=preload("res://scripts/research_foundations.gd").recommendation()
-	var weights:=STRATEGY.research_plan(priorities,budget)
+	var weights:=STRATEGY.research_plan(priorities)
 	if not support.is_empty() and int(weights.get(support.domain,0))==0:
 		var donor:=""
 		for domain:String in weights:
 			if int(weights[domain])>int(weights.get(donor,0)):donor=domain
 		if donor!="":weights[donor]=int(weights[donor])-1;weights[support.domain]=1
-	for domain:String in weights:
-		if int(WorldSimulation.state.research_allocations.get(domain,0))!=int(weights[domain]):
-			WorldSimulation.submit(id,{"kind":"research_emphasis","domain":domain,"weight":weights[domain],"reason":String(plan.goals[0].title)})
-
+	# Lines stay steady: a drift of a step or so in preference moves nobody. The
+	# plan is laid out again when a field starts or stops, or attention moves more.
+	if _research_plan_moved(WorldSimulation.state.research_allocations,weights):
+		for domain:String in weights:
+			if int(WorldSimulation.state.research_allocations.get(domain,0))!=int(weights[domain]):
+				WorldSimulation.submit(id,{"kind":"research_emphasis","domain":domain,"weight":weights[domain],"reason":String(plan.goals[0].title)})
 	if not support.is_empty():WorldSimulation.submit(id,{"kind":"research_target","id":support.id,"reason":String(support.get("reason","Investigate foundations for working "+String(support.get("resource","local materials"))))})
+
+## Steps of attention (on the common scale) that must move before a ruler lays
+## its research out again.
+const REPLAN_STEPS:=2.0
+
+static func _research_plan_moved(current:Dictionary,planned:Dictionary)->bool:
+	var before:=preload("res://scripts/research_600_catalog.gd").attention_steps(current)
+	var after:=preload("res://scripts/research_600_catalog.gd").attention_steps(planned)
+	var moved:=0.0
+	for domain:String in STRATEGY.DOMAINS:
+		if (int(current.get(domain,0))>0)!=(int(planned.get(domain,0))>0):return true
+		moved+=absf(float(before.get(domain,0.0))-float(after.get(domain,0.0)))
+	return moved/2.0>=REPLAN_STEPS
 
 static func choose_orders(id:String)->void:
 	preload("res://scripts/day_job.gd").run_parts(order_steps(id))

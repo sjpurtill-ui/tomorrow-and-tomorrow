@@ -124,6 +124,21 @@ const DEAD_END_VIABLE:=0.5
 ## (contact, trade, artifacts), which names its source; a line with no
 ## researchers makes no deliberate progress.
 const DIFFUSION_TEAM:=0.0
+## One rule for every people, computer-run or player: research emphasis is a
+## set of shares. The researchers alone decide how much work a people does
+## (team_capacity); emphasis only decides where that work goes. The same
+## researchers make the same progress under any ruler and any numbers, and
+## spreading them over more lines gives each line less instead of adding work.
+## ATTENTION_STEPS is the one scale on which a plan's shares are read wherever
+## a rule counts whole steps of attention: two steps for each of the twelve
+## lines, the spread of an ordinary broad plan. A line holding a 24th of all
+## attention counts as one step, whatever numbers the ruler set, and computer
+## rulers lay out their plans in this many steps.
+const ATTENTION_STEPS:=24
+## A people's researchers do the work of about one team for each of the twelve
+## lines of inquiry, whatever the emphasis: up to this many researchers each
+## count in full, and beyond it more people add less (team_capacity).
+const RESEARCH_TEAMS:=12.0
 static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]
@@ -301,6 +316,45 @@ static func effect_row(id:String)->Dictionary:
 
 static func chance_for(research_years:float,design_year:float=0.0)->float:
 	return pace_for(design_year)/(DAILY_SCALE*365.0*maxf(0.25,research_years))
+
+
+## The whole research community's work, in teams, from its researchers alone
+## (before food, tools, schooling and officials). Emphasis shares this out; it
+## never adds to it. Up to RESEARCH_TEAMS researchers each count in full.
+static func team_capacity(researchers:float)->float:
+	if researchers<=RESEARCH_TEAMS: return maxf(0.0,researchers)
+	return RESEARCH_TEAMS*team_strength(researchers/RESEARCH_TEAMS)
+
+
+## How strongly `researchers` people on one question work: in full up to one
+## person, then more slowly than their number (ten people on one question do
+## not work ten times as fast). A line's part of the community's work is its
+## team's strength over all teams' strength, so piling people onto one line has
+## diminishing returns while spreading them never adds to the whole.
+static func team_strength(researchers:float)->float:
+	if researchers<1.0: return maxf(0.0,researchers)
+	return 1.0+log(researchers)/log(10.0)*0.78
+
+
+## Steps of attention (on the ATTENTION_STEPS scale) each line holds under
+## `allocations` ({line: emphasis}): its share of the plan, whatever the size
+## of the numbers. Empty when nothing is emphasized.
+static func attention_steps(allocations:Dictionary)->Dictionary:
+	var total:=0.0
+	for value:Variant in allocations.values(): total+=maxf(0.0,float(value))
+	var result:Dictionary={}
+	if total<=0.0: return result
+	for line:Variant in allocations: result[String(line)]=maxf(0.0,float(allocations[line]))/total*float(ATTENTION_STEPS)
+	return result
+
+
+## Keepers of knowledge a plan asks for: two for each line it follows at all.
+## Only which lines are followed counts, never the size of the numbers.
+static func keepers_asked(allocations:Dictionary)->float:
+	var lines:=0
+	for value:Variant in allocations.values():
+		if int(value)>0: lines+=1
+	return float(ATTENTION_STEPS)/12.0*float(lines)
 
 
 ## research_3000: parallel research capacity (>= 1) for a society of

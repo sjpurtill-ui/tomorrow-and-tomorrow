@@ -273,15 +273,13 @@ func apply_inclinations(day:int)->void:
 		if float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",1))<.98:share=0.0
 		WorldSimulation.world.scouting_staff.set_policy(share,"exploration",true)
 	if auto_research:
+		# Delegated research uses the very planner a computer ruler uses. A ruler
+		# brings its own temperament; the player's people bring their culture,
+		# read from the values they live by, and their chosen ambitions weigh in
+		# the same way for both (CivilizationController.current_plan).
 		var controller=load("res://scripts/civilization_controller.gd")
-		var plan:Dictionary=controller.current_plan(WorldSimulation.actor_id)
-		var weights:Dictionary={}
-		for domain in WorldSimulation.state.research_allocations:weights[domain]=.1
-		var choices:=Culture.choice_weights(cultural_memory,day)
-		for choice in choices:
-			for domain in AMBITIONS[choice].domains:weights[domain]=float(weights.get(domain,.1))+float(choices[choice])
-		plan.research_weights=weights
-		controller.research_orders(WorldSimulation.actor_id,plan)
+		var tendency:Dictionary=preload("res://scripts/leader_personality.gd").from_values(WorldSimulation.state.societal_values) if WorldSimulation.actor_id=="player" else {}
+		controller.research_orders(WorldSimulation.actor_id,controller.current_plan(WorldSimulation.actor_id,tendency))
 func set_delegated(area:String,enabled:bool)->void:
 	match area:
 		"scouting":

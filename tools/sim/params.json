@@ -371,7 +371,7 @@
  },
  "_formula_hashes": {
   "scripts/discovery_system.gd::var probability: float = discovery.chance": "2cfcfb6316",
-  "scripts/discovery_system.gd::team_scale=researchers if": "bbcddf8a7c",
+  "scripts/discovery_system.gd::team_scale=float(teams.work)*Research600.team_strength": "030e78143c",
   "scripts/discovery_system.gd::var support_multiplier:=": "ea46c43dc5",
   "scripts/discovery_system.gd::return (0.45+0.55*staffing)": "94899d3878",
   "scripts/discovery_system.gd::return (0.85+_research_draw": "4906352fb5",

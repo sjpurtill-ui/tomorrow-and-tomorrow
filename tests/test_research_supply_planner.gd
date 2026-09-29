@@ -60,9 +60,12 @@ func test_controller_redirects_one_existing_point_and_selects_actual_investigati
 		weights.security=100
 		WorldSimulation.submit("supply_ruler",{"kind":"research_emphasis","domain":"security","weight":3})
 		C.research_orders("supply_ruler",{"research_weights":weights,"goals":[{"title":"Defend"}]})
+		# Emphasis is shares in the player's own steps; it buys no research.
 		var total:=0
-		for value in WorldSimulation.state.research_allocations.values():total+=int(value)
-		assert_int(total).is_equal(3)
+		for value in WorldSimulation.state.research_allocations.values():
+			total+=int(value);assert_int(int(value)).is_between(0,12)
+		assert_int(total).is_less_equal(preload("res://scripts/research_600_catalog.gd").ATTENTION_STEPS)
+		assert_int(int(WorldSimulation.state.research_allocations.infrastructure)).is_greater(0)
 		assert_bool("joinery" in WorldSimulation.state.active_investigations.values()).is_true()
 		assert_int(WorldSimulation.state.known_discoveries.size()).is_equal(known_before)
 		assert_float(float(WorldSimulation.state.resource_stockpiles.Stone)).is_equal(0.0)
@@ -74,15 +77,21 @@ func test_target_command_cannot_invent_emphasis()->void:
 		assert_bool(WorldSimulation.submit("supply_ruler",{"kind":"research_target","id":"stone_sorting"}).has("error")).is_true()
 		assert_int(int(WorldSimulation.state.research_allocations.production)).is_equal(0)
 	)
-func test_zero_budget_with_a_real_shortage_remains_zero()->void:
+func test_a_real_shortage_moves_attention_and_never_adds_any()->void:
 	WorldSimulation.scoped("supply_ruler",func()->void:
 		source();var weights:Dictionary={}
 		for domain:String in S.DOMAINS:
 			weights[domain]=1.0
 			WorldSimulation.submit("supply_ruler",{"kind":"research_emphasis","domain":domain,"weight":0})
+		weights.infrastructure=0.0
 		C.research_orders("supply_ruler",{"research_weights":weights,"goals":[{"title":"Recover supplies"}]})
-		for value in WorldSimulation.state.research_allocations.values():assert_int(int(value)).is_equal(0)
-		assert_dict(WorldSimulation.state.active_investigations).is_empty()
+		# The ruler weighs infrastructure not at all; the shortage takes one step
+		# from its largest field for joinery rather than adding one.
+		var total:=0
+		for value in WorldSimulation.state.research_allocations.values():total+=int(value)
+		assert_int(total).is_equal(preload("res://scripts/research_600_catalog.gd").ATTENTION_STEPS)
+		assert_int(int(WorldSimulation.state.research_allocations.infrastructure)).is_equal(1)
+		assert_bool("joinery" in WorldSimulation.state.active_investigations.values()).is_true()
 	)
 func test_optional_cycle_terminates_and_keeps_a_grounded_alternative()->void:
 	WorldSimulation.scoped("supply_ruler",func()->void:
