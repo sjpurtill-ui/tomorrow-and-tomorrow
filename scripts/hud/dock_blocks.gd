@@ -57,6 +57,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"provisions":
 				var panel:=preload("res://scripts/hud/provisions_panel.gd").new()
 				section.add_child(panel);panel.setup(block)
+			"impact":
+				var impact:=preload("res://scripts/hud/impact_panel.gd").new()
+				section.add_child(impact);impact.setup(block)
 			"construction_queue":
 				var queue:=preload("res://scripts/hud/construction_queue.gd").new()
 				section.add_child(queue);queue.setup(block)

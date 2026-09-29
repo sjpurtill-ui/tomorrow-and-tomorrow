@@ -635,7 +635,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Owner-wide inputs, read once for every deposit in this pass.
 	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
 	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
-	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")
+	# The Gathering Yard organises digging and cutting at every deposit (civic_building_effects.gd).
+	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")+preload("res://scripts/civic_building_effects.gd").effect("extraction")
 	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
 	# A multi-day step (day_span.gd) extracts, regrows and hauls `span` days of
 	# work; reported "today" figures remain per day.

@@ -27,8 +27,10 @@ static func _settlement_definitions() -> Array[Dictionary]:
 		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
 		{"name":"Public Stores", "days":14.0, "requires":["Storage Pits"], "discovery":"public_stores", "minimum":{"Construction":5,"Logistics":6,"Administration":3},"materials":{"Timber":14.0,"Clay":8.0,"Fiber Plants":6.0},"effect":"keeps a counted, guarded store of food for the whole town"},
 		{"name":"Open Work Area", "days":12.0, "requires":["Hearth Circle"], "minimum":{"Construction":6, "Crafting":4},"materials":{"Timber":12.0,"Fiber Plants":5.0},"effect":"improves tools and material work"},
-		{"name":"Framed Hall", "days":22.0, "requires":["Lean-to Shelters","Open Work Area"], "discovery":"framed_construction", "minimum":{"Construction":8,"Crafting":5,"Logistics":4},"materials":{"Civilian Goods":6.0,"Timber":18.0,"Fiber Plants":12.0,"Clay":8.0},"effect":"puts timber framing to work: building goes faster and new shelters hold more people"},
-		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes digging and cutting at known deposits"}
+		{"name":"Framed Hall", "days":22.0, "requires":["Lean-to Shelters","Open Work Area"], "discovery":"framed_construction", "minimum":{"Construction":8,"Crafting":5,"Logistics":4},"materials":{"Civilian Goods":6.0,"Timber":18.0,"Fiber Plants":12.0,"Clay":8.0},"effect":"gives the council and the feasts a roof: the people heed their leaders more and hold together, the stewards reach further, and timber framing speeds building and makes new homes hold more"},
+		{"name":"Gathering Yard", "days":10.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Extraction":4},"materials":{"Timber":10.0,"Fiber Plants":4.0}, "known_resource":true,"effect":"organizes digging and cutting at known deposits: every deposit worked gives more"},
+		{"name":"Hearth Shrine", "days":5.0, "requires":["Hearth Circle"], "discovery":"hearth_shrine_offerings", "minimum":{"Construction":2},"materials":{"Stone":4.0,"Clay":4.0},"effect":"a hearth-shrine for offerings to the god: the people draw together and toward the god, and give up a little food in offerings"},
+		{"name":"Shrine House", "days":18.0, "requires":["Hearth Shrine","Lean-to Shelters"], "discovery":"first_shrine_house", "minimum":{"Construction":6},"materials":{"Timber":16.0,"Clay":12.0,"Stone":8.0},"effect":"a house for the god, tended by keepers: the people hold together, heed their leaders, love the god more and fear the god less; the offerings cost food and the keepers must be at work"}
 	]
 
 static func _settlement_project_available(project: Dictionary) -> bool:
@@ -76,6 +78,8 @@ static func material_options(project:Dictionary)->Array[Dictionary]:
 			{"cost":{"Civilian Goods":8.0,"Timber":16.0,"Stone":16.0,"Fiber Plants":8.0}}
 		])
 		"Gathering Yard":options.append_array([{"cost":{"Stone":16.0,"Fiber Plants":4.0}}, {"cost":{"Clay":18.0,"Fiber Plants":4.0}}])
+		"Hearth Shrine":options.append_array([{"cost":{"Clay":8.0}}, {"cost":{"Stone":8.0}}, {"cost":{"Timber":6.0,"Clay":3.0}}])
+		"Shrine House":options.append_array([{"cost":{"Timber":22.0,"Clay":18.0}}, {"cost":{"Stone":24.0,"Timber":8.0,"Clay":6.0}}])
 	return options
 
 
@@ -102,6 +106,9 @@ static func _current_settlement_project() -> Dictionary:
 			"Open Work Area": score+=float(WorldSimulation.state.population_allocations.get("Crafting",0))/5.0+float(WorldSimulation.state.effective_workers("Construction"))/12.0
 			"Framed Hall": score+=float(WorldSimulation.state.effective_workers("Construction"))/8.0+float(WorldSimulation.state.population_allocations.get("Crafting",0))/10.0
 			"Gathering Yard": score+=float(WorldSimulation.state.population_allocations.get("Extraction",0))/4.0+float(WorldSimulation.resources.visible_deposits().size())*0.5
+			# A shrine when the people are drifting apart; never before shelter or stores are pressing.
+			"Hearth Shrine": score+=0.5+maxf(0.0,0.62-float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)))*4.0
+			"Shrine House": score+=0.4+maxf(0.0,0.62-float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)))*3.0+WorldSimulation.state.effective_workers("Knowledge")/12.0
 		if score>best_score:
 			best_score=score
 			best=project
@@ -119,9 +126,15 @@ static func daily_work()->float:
 static func housing_work_per_day()->float:
 	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))
 
-## The places one batch of new homes adds.
+## The places one batch of new homes adds, with what the people know of
+## building (housing_output: framing, room division; the Framed Hall's share
+## acts only while it stands and is kept, civilian_goods.gd).
 static func housing_batch_places()->int:
-	return maxi(24,roundi(WorldSimulation.state.population_total*.12))
+	return roundi(maxi(24,roundi(WorldSimulation.state.population_total*.12))*(1.0+housing_output()))
+
+## What the people's building knowledge adds to each new home's places.
+static func housing_output()->float:
+	return maxf(0.0,WorldSimulation.discovery.effect("housing_output")+WorldSimulation.progression.effect("housing_output"))
 
 ## Builders put up homes when the Lean-to Shelters stand and more people live
 ## here than HOUSING_TRIGGER of the places.
@@ -134,7 +147,7 @@ static func housing_trigger_people()->int:
 
 ## The places the Lean-to Shelters add, with what the people know of building.
 static func lean_to_places()->int:
-	return roundi(LEAN_TO_PLACES*(1+WorldSimulation.discovery.effect("housing_output")+WorldSimulation.progression.effect("housing_output")))
+	return roundi(LEAN_TO_PLACES*(1.0+housing_output()))
 
 ## How many of the town's places are the shelters the founders carried. Until
 ## the first shelters are built every place is a carried one; afterwards the

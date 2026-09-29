@@ -352,8 +352,11 @@ func _calculate_aggregate_demand(traveling: bool) -> Dictionary:
 	if not WorldSimulation.enabled and WorldSimulation.state.resource_settlement_id=="" and civilization_system!=null and civilization_system.has_method("player_effects"):
 		occupation_relief=maxf(0.0,float(civilization_system.player_effects().get("occupation_relief_demand",0.0)))
 	var ration_factor:=1.0+_policy_effect("food_demand")
-	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoners
-	return {"base":base,"children":children_base,"adults":adult_base,"elders":elder_base,"mission_absent":away_adults,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,"travel":travel,"climate":climate,"prisoner_custody":prisoners,"army_field":minf(pre_ration,army_field*ration_factor),"occupation_relief":occupation_relief,"rationing":pre_ration*(1.0-ration_factor),"total":pre_ration*ration_factor+occupation_relief}
+	# Offerings at the shrines: a share of what the people eat, given up
+	# (civic_building_effects.gd).
+	var offerings:=base*preload("res://scripts/civic_building_effects.gd").effect("offerings")
+	var pre_ration:=base+labor+pregnancy+lactation+travel+climate+prisoners+offerings
+	return {"base":base,"children":children_base,"adults":adult_base,"elders":elder_base,"mission_absent":away_adults,"labor":labor,"pregnancy":pregnancy,"lactation":lactation,"travel":travel,"climate":climate,"prisoner_custody":prisoners,"offerings":offerings,"army_field":minf(pre_ration,army_field*ration_factor),"occupation_relief":occupation_relief,"rationing":pre_ration*(1.0-ration_factor),"total":pre_ration*ration_factor+occupation_relief}
 
 func _age_need(age: float) -> float:
 	if age<0.5: return 0.08 # represented mostly through lactation demand

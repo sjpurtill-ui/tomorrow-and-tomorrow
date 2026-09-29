@@ -12,6 +12,11 @@ static func texture(index:int)->Texture2D:
 	return result
 static func building(title:String)->int:
 	return {"Hearth Circle":0,"Lean-to Shelters":1,"Storage Pits":2,"Open Work Area":3,"Gathering Yard":4,"Public Stores":5,"Framed Hall":6}.get(title,7)
+## A civic work's picture: the painted sheet's, or the drawn shrines
+## (hud/shrine_art.gd), which the sheet has none of.
+static func for_title(title:String,width:float,height:float)->Control:
+	if title in ["Hearth Shrine","Shrine House"]: return preload("res://scripts/hud/shrine_art.gd").picture(title,width,height)
+	return picture(building(title),width,height)
 static func picture(index:int,width:float,height:float)->TextureRect:
 	var rect:=TextureRect.new();rect.texture=texture(index);rect.custom_minimum_size=Vector2(width,height)
 	rect.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;rect.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED

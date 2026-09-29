@@ -4,6 +4,8 @@ const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Shelter:=preload("res://scripts/hud/shelter_status.gd")
 const Upkeep:=preload("res://scripts/upkeep_warnings.gd")
 const Tasks:=preload("res://scripts/manual_work.gd")
+## What each building does, in the engine's numbers.
+const Impact:=preload("res://scripts/building_impact.gd")
 var selected_project:=""
 var history_filter:=""
 var history:RefCounted
@@ -12,7 +14,7 @@ var history:RefCounted
 ## era; this dock shows what builders actually work on: the city's capacity and
 ## condition, its civic works, its infrastructure and its landmarks.
 func meta()->Dictionary:
-	return {"eyebrow":"CITIES & INFRASTRUCTURE","title":"Construction","serif":true,"subtabs":["CITY","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"]}
+	return {"eyebrow":"CITIES & INFRASTRUCTURE","title":"Buildings","serif":true,"subtabs":["THE TOWN","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"]}
 func tab(sub:int)->Dictionary:
 	if sub==3:return preload("res://scripts/hud/content/dock_content_undertakings.gd").new(terrain,hud).tab(0)
 	if sub==2:return _infrastructure_tab()
@@ -38,9 +40,12 @@ func _city_tab()->Dictionary:
 	if not GameState.settlement_site_committed or GameState.convoy_traveling:
 		return {"brief":_now_brief(city,{},housing,crews),"blocks":[{"type":"rows","heading":town,"items":[_home_row(housing)]}]}
 	var project:=_now_project(city)
+	var homes:=Impact.homes()
 	return {"brief":_now_brief(city,project,housing,crews),"blocks":[
 		{"type":"rows","heading":town,"note":_count(int(crews.heads),"builder"),"items":_work_rows(city,project,crews)},
+		{"type":"impact","heading":"What the buildings do for the people now","lead":"Every figure below is the rule the game applies today, worked out for %s as it stands." % town,"lines":Impact.summary()},
 		{"type":"rows","heading":"Homes","note":_count(int(housing.people),"person","people"),"items":[_home_row(housing),_new_homes_row(housing,crews)]},
+		{"type":"impact","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"lines":homes.lines},
 		{"type":"rows","heading":"The town's buildings","items":[_condition_row(),_era_row(crews),_workshops_row()]},
 		{"type":"actions","items":[
 			{"label":"Choose what to build","sub":"Civic works: each work, what it needs, your priority","on_press":jump("construction",1)},
@@ -299,13 +304,19 @@ func _infrastructure_tab()->Dictionary:
 		var rows:Array=SettlementModel.with_city_resources(id,func()->Array:return _infrastructure_rows(id))
 		if not rows.is_empty():blocks.append({"type":"rows","heading":String(city.get("name","Settlement")).to_upper(),"items":rows})
 	if blocks.is_empty():blocks.append({"type":"text","heading":"INFRASTRUCTURE","text":"No water works, conduits, rail lines, docks or plants yet. Builders raise them once their practices are adopted and materials arrive."})
+	# The defence works, stage by stage: what each gives, and which stand.
+	for stage:Dictionary in Impact.defences():
+		blocks.append({"type":"impact","heading":("%s · built" if bool(stage.built) else "%s · not yet built") % String(stage.name),"lines":stage.lines,"columns":2})
 	return {"blocks":blocks}
 
 static func _infrastructure_rows(city_id:String)->Array:
 	var rows:Array=[]
 	var works=preload("res://scripts/water_waste_works.gd")
 	for work:Dictionary in works.data().get("works",[]):
-		rows.append({"name":String(works.SPECS.get(String(work.kind),{}).get("name",String(work.kind).capitalize())),"value":String(work.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(work.get("condition",1.0))*100.0),"accent":Tokens.TEAL})
+		# What it does, from its practice and its coverage (building_impact.gd).
+		var told:PackedStringArray=[]
+		for line:Dictionary in Impact.water_work(String(work.kind)).lines:told.append("%s %s: %s" % [String(line.label),String(line.value),String(line.words)])
+		rows.append({"name":String(works.SPECS.get(String(work.kind),{}).get("name",String(work.kind).capitalize())),"value":String(work.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(work.get("condition",1.0))*100.0),"detail":String.chr(10).join(told),"accent":Tokens.TEAL})
 	for line:Dictionary in preload("res://scripts/water_conveyance.gd").data().get("lines",[]):
 		rows.append({"name":"Water conduit","value":String(line.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(line.get("condition",1.0))*100.0),"accent":Tokens.TEAL})
 	for line:Dictionary in preload("res://scripts/rail_freight.gd").data().get("lines",[]):
@@ -369,7 +380,7 @@ func _project(project:Dictionary,current:Dictionary,done:bool)->Dictionary:
 	var active:=title==String(current.get("name","")) and blockers.is_empty()
 	var worked:=float(GameState.settlement_projects.get(title,0))
 	var rate:=Construction.daily_work() if active else 0.0
-	return {"name":title,"done":done,"active":active,"progress":1.0 if done else clampf(worked/float(project.days),0,1),"state":"Complete" if done else ("Building" if active else (blockers[0] if not blockers.is_empty() else "Waits its turn")),"blockers":blockers,"inputs":inputs,"bill_note":"Selected material mix" if feasible else "Closest known mix · alternatives considered","effect":String(project.get("effect","")),
+	return {"name":title,"done":done,"active":active,"impact":Impact.work(title),"progress":1.0 if done else clampf(worked/float(project.days),0,1),"state":"Complete" if done else ("Building" if active else (blockers[0] if not blockers.is_empty() else "Waits its turn")),"blockers":blockers,"inputs":inputs,"bill_note":"Selected material mix" if feasible else "Closest known mix · alternatives considered","effect":String(project.get("effect","")),
 		"days_left":maxf(0.0,float(project.days)-worked)/rate if rate>0.0 else -1.0}
 func _select(title:String)->void:
 	selected_project="" if selected_project==title else title;hud.request_immediate_dock_refresh()
