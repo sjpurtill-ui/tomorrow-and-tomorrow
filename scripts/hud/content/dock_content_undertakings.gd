@@ -68,6 +68,8 @@ func _local(id:String)->Dictionary:
 			blocks.append({"type":"bars","items":[{"name":"Raised","ratio":float(item.get("progress",0)),"value":"%d%%" % roundi(float(item.get("progress",0))*100),"color":Tokens.INK}]})
 		var items:Array=[]
 		var site:=Works.api_dict("site",[id,work_id])
+		var impact:=_impact(item,site)
+		if not impact.is_empty():blocks.append({"type":"impact","heading":"What %s does" % String(item.get("name","it")),"lines":impact,"columns":1})
 		if site.get("decision") is Dictionary and not (site.decision as Dictionary).is_empty():
 			items.append({"label":"HEAR THE MASTER BUILDER","sub":String((site.decision as Dictionary).get("prompt","A decision awaits")),"on_press":func()->void:_hear(work_id,id)})
 		if ceremonies.has(work_id):
@@ -85,6 +87,35 @@ func _local(id:String)->Dictionary:
 			if warning is Dictionary:rows.append({"name":"In %d days" % int(warning.get("in_days",0)),"detail":String(warning.get("text",""))})
 		blocks.append({"type":"rows","heading":"THE WATCHING SKY FORESEES","items":rows})
 	return {"blocks":blocks}
+
+## What a great work does, from the engine's own records: while it rises,
+## the builders it takes and its odds on completion (wonder_concept.gd odds)
+## with what each outcome costs; once it stands, what it gives (its rewards
+## and effect, undertaking_rewards.gd and undertaking_effects.gd), its
+## repair and the upkeep that keeps it from ruin (undertaking_system.gd).
+func _impact(item:Dictionary,site:Dictionary)->Array:
+	var lines:Array=[]
+	var status:=String(item.get("status",""))
+	if status in ["building","stalled"]:
+		var careful:=String(site.get("policy","careful"))!="press"
+		var share:=20 if careful else 50
+		lines.append({"label":"Builders taken","value":"%d%%" % share,"words":"%s: %d of every 100 builders work on it, so homes and other works go slower. Food workers are never taken." % ["Protecting daily needs" if careful else "Pressing ahead",share],"tone":"bad"})
+		var assessment:Dictionary=site.get("assessment",{}) if site.get("assessment") is Dictionary else {}
+		if assessment.has("score"):
+			var odds:Dictionary=preload("res://scripts/wonder_concept.gd").odds(float(assessment.score),String(item.get("ambition","grand")))
+			if assessment.get("odds") is Dictionary and not (assessment.odds as Dictionary).is_empty():odds=assessment.odds
+			lines.append({"label":"When it is finished","value":"%d%% falls" % roundi(float(odds.get("collapse",0.0))*100.0),
+				"words":"The engine's odds today: a triumph %d%%, it stands %d%%, it stands flawed %d%%, it falls %d%%. A fall kills some of its builders and costs cohesion and legitimacy; a triumph raises both." % [roundi(float(odds.get("triumph",0.0))*100.0),roundi(float(odds.get("success",0.0))*100.0),roundi(float(odds.get("flawed",0.0))*100.0),roundi(float(odds.get("collapse",0.0))*100.0)],"tone":"bad" if float(odds.get("collapse",0.0))>=0.2 else "plain"})
+		lines.append({"label":"Materials","value":"as it rises","words":"Stone, timber and the rest are drawn from the stores as the work is done; when they run out it stalls, and after five idle years it is abandoned.","tone":"plain"})
+	elif status=="functioning":
+		for key in ["reward_text","effect_text"]:
+			var said:=String(site.get(key,"")).strip_edges()
+			if said!="":lines.append({"label":"What it gives" if key=="reward_text" else "Its own power","value":"%d%%" % roundi(float(item.get("condition",1.0))*100.0),"words":said,"tone":"good"})
+		lines.append({"label":"Upkeep","value":"1% a year","words":"Each year it takes a hundredth of what it cost in materials, fed people and at least one builder. Without them it wears down; at 15% it is a ruin, about four years of neglect. Its gifts act at its repair.","tone":"plain"})
+	elif status=="ruined":
+		lines.append({"label":"A ruin","value":"nothing","words":"It gives nothing now. The site can be quarried for part of what was put into it.","tone":"bad"})
+	return lines
+
 
 ## A work under way: rising (how far, how long to go at today's pace, or that
 ## the builders await your word) or idle (and why), in the words the map card uses.

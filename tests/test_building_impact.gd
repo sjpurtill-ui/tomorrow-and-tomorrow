@@ -156,3 +156,21 @@ func test_the_pages_numbers_match_the_food_rules()->void:
 	var rot_with:Array=food.call("_spoilage_rates",false)
 	assert_float(with_pits-without).is_equal_approx(float(GameState.population_exact)*Impact.PITS_RATIONS,0.5)
 	assert_float(float(rot_with[0])/float(rot_without[0])).is_equal_approx(Impact.PITS_SPOILAGE,0.001)
+
+
+## Great works say what they do: while they rise, the builders taken and the
+## engine's odds of each outcome; once standing, their gifts and upkeep.
+func test_landmarks_explain_each_great_work()->void:
+	var page=preload("res://scripts/hud/content/dock_content_undertakings.gd").new(null,null)
+	var rising:Array=page._impact({"status":"building","ambition":"grand"},{"policy":"careful","assessment":{"score":0.7}})
+	var labels:Array=[]
+	for line:Dictionary in rising: labels.append(String(line.label))
+	assert_array(labels).contains(["Builders taken","When it is finished","Materials"])
+	var odds:String=String(rising[1].words)
+	assert_str(odds).contains("triumph")
+	assert_str(odds).contains("falls")
+	var standing:Array=page._impact({"status":"functioning","condition":0.9},{"reward_text":"Stores hold more.","effect_text":"The sky is read ahead."})
+	assert_int(standing.size()).is_equal(3)
+	assert_str(String(standing[2].label)).is_equal("Upkeep")
+	var ruin:Array=page._impact({"status":"ruined"},{})
+	assert_str(String(ruin[0].value)).is_equal("nothing")
