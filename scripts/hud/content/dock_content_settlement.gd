@@ -6,9 +6,13 @@ const Words:=preload("res://scripts/hud/home_plain.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Works:=preload("res://scripts/hud/water_conveyance_controls.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
-## SETTLEMENT section: People & Labor / Works & Defense / History.
-## Replaces the settlement dashboard, the settler side panel, and the
-## population ledger summary.
+const Model:=preload("res://scripts/hud/own_town_model.gd")
+## SETTLEMENT section: our town's own page (Overview) and its History.
+## The Overview is as rich as a stranger's town's page and exact because the
+## town is ours: the town drawn from its figures, the local leader's word,
+## then every figure grouped, each read from the ledger its owning dock
+## shows (own_town_model.gd) and laid against the foreign towns we know.
+## Any town of ours, first or not, gets the same page from its own figures.
 
 const COHORT_LABELS:Array[Array]=[["children","0–13","Children, not yet working"],["youth","14–24","Young people of working age"],["early_adults","25–34","Adults of working age"],["established_adults","35–44","Adults of working age"],["mature_adults","45–59","Older adults, still working"],["elders","60+","Elders, mostly past heavy work. How long people live is an average from birth, not a limit."]]
 const ROLES:Array[Array]=[
@@ -34,9 +38,17 @@ func meta()->Dictionary:
 func tab(sub:int)->Dictionary:
 	# New towns are the whole realm's business: read outside this place's stores.
 	_founding=founding_block() if sub==0 else {}
+	# The home levy and its walls, read as the Military ledger reads them, and
+	# the foreign towns our scouts have brought home; neither is the town's own.
+	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var primary:=picked.is_empty() or bool(picked.get("primary",false))
+	_strength=Model.strength(primary) if sub==0 else {}
+	_towns=Model.foreign_towns() if sub==0 else []
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab(sub)))
 
 var _founding:Dictionary={}
+var _strength:Dictionary={}
+var _towns:Array=[]
 
 ## The "New towns" switch (auto_founding.gd): whether our leaders found new
 ## towns on their own, in plain words, one click either way.
@@ -122,7 +134,27 @@ func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
 
 
 func signature()->Array:
-	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,GameState.population_total,GameState.population_health,GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,GameState.settlement_completed.size(),GameState.building_ledger.size(),snappedf(float(GameState.simulation_metrics.get("food_days",-1.0)),0.5),GameState.water_waste_works.get("works",[]).hash(),GameState.water_conveyance.get("lines",[]).size(),snappedf(ResourceSystem.stored_bulk(),1.0)]
+	# The town's own figures are read in its own scope, as the page reads them.
+	var local:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
+	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,
+		int(MilitaryCampaign.home_army.get("troops",0)),MilitaryCampaign.settlement_defense.hash(),int(GameState.population_allocations.get("Defense",0)),_known_signature(),int(GameState.elapsed_days)/30]+local
+
+func _city_signature()->Array:
+	var metrics:Dictionary=GameState.simulation_metrics
+	return [GameState.population_total,GameState.population_health,GameState.housing_capacity,float(metrics.get("housing_ratio",-1.0)),GameState.population_allocations.duplicate(),GameState.lifetime_births,GameState.lifetime_deaths,
+		GameState.settlement_completed.size(),GameState.settlement_projects.hash(),GameState.building_ledger.size(),snappedf(float(metrics.get("food_days",-1.0)),0.5),signf(float(metrics.get("food_net",0.0))),
+		roundi(float(GameState.water_metrics.get("intake_ratio",-1.0))*100.0),GameState.water_waste_works.get("works",[]).hash(),GameState.water_conveyance.get("lines",[]).size(),snappedf(ResourceSystem.stored_bulk(),1.0),
+		roundi(float(SettlementModel.city_form().get("condition",1.0))*100.0),roundi(float(metrics.get("material_capacity",0.0))*100.0),roundi(float(metrics.get("logistics",0.0))*100.0),
+		roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),roundi(Indicators.science().minds),GameState.settlement_plots.size(),GameState.morphology_revision]
+
+## The foreign towns our scouts have brought home, and when.
+static func _known_signature()->int:
+	var intel=CivilizationSystem.city_intelligence
+	if intel==null:return 0
+	var book:Dictionary=intel.records.get("player",{})
+	var total:=book.size()
+	for id in book:total=(total*31+int((book[id] as Dictionary).get("reported_day",0)))%2147483647
+	return total
 
 ## What the local leader is putting extra hands on, as a short phrase.
 const FOCUS_WORDS:={"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
@@ -132,43 +164,50 @@ const ASKABLE:=["water","provisions","shelter","research","defense"]
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
 	var management:=GovernmentPeopleSystem.settlement_management(id)
-	var population:=int(settlement.get("population",GameState.population_total))
-	var metrics:Dictionary=GameState.simulation_metrics
-	var flow:={"produced":float(metrics.get("food_production",0.0)),"eaten":float(metrics.get("food_eaten",0.0)),"spoiled":float(metrics.get("food_spoilage",0.0)),"missions":FoodSystem.issued_on_day(int(GameState.elapsed_days)),"net":float(metrics.get("food_net",0.0))}
-	var food_reading:=Words.food(float(metrics.get("food_days",-1.0)),flow,metrics.has("food_days"))
-	var shelter:=preload("res://scripts/hud/shelter_status.gd").describe(GameState.settlement_completed,GameState.housing_capacity,population)
+	var facts:=Model.facts(settlement,_strength)
 	var age:=maxi(0,int(GameState.elapsed_days)-int(settlement.get("founded_day",0)))
 	var leader:Dictionary=management.get("leader",{})
 	var leader_name:=String(leader.get("name","")).get_slice(" ",0)
 	var focus:=String(management.get("focus","balanced"))
 	var managed:=bool(management.get("auto_manage",true))
-	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
+	var holder:=String(SettlementModel.settlement_record(id).get("occupied_by",""))
+	var occupied:=not holder.is_empty()
+	# What the leader is doing, short; the reason is in the tooltip.
 	var direction:=""
+	var direction_tip:=""
 	if management.is_empty():direction="No one runs this place's daily work yet."
-	elif managed:direction="%s chooses the daily work and is putting extra hands on %s. %s" % [leader_name if not leader_name.is_empty() else "The local leader",String(FOCUS_WORDS.get(focus,"everyday needs")),String(management.get("focus_reason",""))]
-	else:direction="You asked %s for more hands on %s. %s" % [leader_name if not leader_name.is_empty() else "the local leader",String(FOCUS_WORDS.get(focus,focus)),String(management.get("focus_effect",""))]
+	elif managed:
+		direction="%s chooses the daily work: more hands on %s." % [leader_name if not leader_name.is_empty() else "The local leader",String(FOCUS_WORDS.get(focus,"everyday needs"))]
+		direction_tip=String(management.get("focus_reason",""))
+	else:
+		direction="You asked %s for more hands on %s." % [leader_name if not leader_name.is_empty() else "the local leader",String(FOCUS_WORDS.get(focus,focus))]
+		direction_tip=String(management.get("focus_effect",""))
 	var choices:Array=[]
 	for key:String in ASKABLE:
 		choices.append({"id":key,"label":String(FOCUS_WORDS[key]).capitalize(),"tip":String(GovernmentPeopleSystem.FOCUS_EFFECTS.get(key,""))+" Other work slows.","on_press":_ask_for_hands.bind(id,key)})
 	choices.append({"id":"","label":"Let %s decide" % (leader_name if not leader_name.is_empty() else "the leader"),"tip":"The leader spreads the work across what the place needs.","on_press":_ask_for_hands.bind(id,"")})
 	var works_context:=_works_context(settlement)
 	var works_city:="" if bool(settlement.get("primary",false)) else id
-	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,
+	var on_population:Callable=focused_action("Ages and families","",_people_report.bind("population")).on_press
+	# Each figure opens the page that owns it; the head count, the town's own ages.
+	var groups:=Model.groups(facts,_towns)
+	for group:Dictionary in groups:
+		for row:Dictionary in group.rows:
+			row["on_open"]=on_population if String(row.section)=="" else jump(String(row.section),int(row.sub))
+	var kind:=String(facts.classification)
+	var caption:=("Held by %s" % CivilizationSystem.city_intelligence.controller_label(holder)) if occupied else "Our %s · settled %s" % [kind if kind!="" else "settlement",Model.since(age)]
+	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,"direction_tip":direction_tip,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
-		"metrics":[{"label":"People living here","value":EraWords.people(population)},{"label":"Settled","value":_since(age)},{"label":EraWords.life_title(),"value":"%.1f years" % GameState.projected_life_expectancy() if EraWords.reckoned() else EraWords.life(GameState.projected_life_expectancy())}],
-		"cards":[
-			{"kind":"building","art":1,"title":"Homes and shelter","show_art":shelter.built,"empty_label":shelter.empty_label,"detail":shelter.detail,"action":"Buildings","on_press":jump("construction",0)},
-			{"kind":"food","art":0,"title":"Food and water","detail":String(food_reading.sentence),"action":"Food","on_press":jump("economy",0)},
-			{"kind":"building","art":3,"title":"Work and making","detail":"What the workshops are making and how fast.","action":"Production","on_press":jump("production",0)}],
+		"town_name":String(facts.name),"sketch":Model.sketch_data(facts,caption),"lead":Model.lead(facts),
+		"groups":groups,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":_founding,
 		"on_leader":court({"settlement_id":String(id)}),
-		"on_population":focused_action("Ages and families","",_people_report.bind("population")).on_press,"on_work":focused_action("Who does what","",_people_report.bind("work")).on_press,
-		"on_rename":terrain._open_settlement_naming_panel.bind(id)}]
+		"on_population":on_population,"on_work":focused_action("Who does what","",_people_report.bind("work")).on_press,
+		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
 
 static func _since(days:int)->String:
-	if days<30:return "this season"
-	return Plain.span_text(float(days))+" ago"
+	return Model.since(days)
 
 func _ask_for_hands(settlement_id:String,focus:String)->void:
 	var result:=GovernmentPeopleSystem.restore_delegation(settlement_id) if focus.is_empty() else GovernmentPeopleSystem.set_settlement_focus(settlement_id,focus)
