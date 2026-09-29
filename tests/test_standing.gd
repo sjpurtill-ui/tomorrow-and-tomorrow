@@ -272,3 +272,15 @@ func test_the_envoy_knows_how_each_people_sees_us_and_says_it()->void:
 	# An official who keeps only the stores does not know it.
 	assert_bool(Facts.sheet(["common","stores"]).has("standing")).is_false()
 	assert_bool(id!="").is_true()
+
+func test_pride_is_reckoned_the_same_for_every_people()->void:
+	# Read from a people's own strengths, never from who has met it: a
+	# computer-run people (no views) and ours stand on the same rule.
+	var our:=Standing.strengths()
+	var alone:=float(Standing.pride(our,[]).value)
+	var admired:=float(Standing.pride(our,[{"awe":1.0,"allure":1.0}]).value)
+	assert_float(admired).is_equal(alone)
+	# Works and might raise it for anyone.
+	our.splendor={"value":0.8,"why":""}
+	our.might={"value":0.7,"why":""}
+	assert_float(float(Standing.pride(our).value)).is_greater(alone)

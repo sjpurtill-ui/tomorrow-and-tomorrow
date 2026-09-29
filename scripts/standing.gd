@@ -287,20 +287,33 @@ static func views()->Array[Dictionary]:
 
 # ---------------------------------------------------------------------- pride
 
-## Our own people's pride in who they are: the splendour they live among, the
-## awe and allure the known world holds of them, and their own order.
-## {value, why}. 0.5 is ordinary.
-static func pride(our:Dictionary={},seen:Array=[])->Dictionary:
+## Our own people's pride in who they are: the splendour they live among and
+## the awe and allure a people like theirs commands. The same for every people,
+## computer-run or not: read from its own strengths (its works, might,
+## learning, plenty, order and culture), never from who happens to have met it.
+## {value, why, awe, allure}. 0.5 is ordinary. `seen` is kept for callers.
+static func pride(our:Dictionary={},_seen:Array=[])->Dictionary:
 	if our.is_empty(): our=strengths()
-	if seen.is_empty(): seen=views()
-	var awe:=0.0
-	var allure:=0.0
-	for v in seen:
-		awe=maxf(awe,float((v as Dictionary).get("awe",0.0)))
-		allure=maxf(allure,float((v as Dictionary).get("allure",0.0)))
-	# 0.5 is an ordinary people; splendour, the world's awe and allure raise it.
-	var value:=clampf(0.5+float(our.splendor.value)*0.25+awe*0.15+allure*0.1,0.0,1.0)
-	return {"value":value,"why":"the works and treasures we live among%s" % (", and how the peoples we know see us" if not seen.is_empty() else "")}
+	var command:=renown(our)
+	# 0.5 is an ordinary people; splendour, awe and allure raise it.
+	var value:=clampf(0.5+float(our.splendor.value)*0.25+float(command.awe)*0.15+float(command.allure)*0.1,0.0,1.0)
+	var words:PackedStringArray=["the works and treasures we live among"]
+	if float(command.awe)>=0.3: words.append("the awe our might and works command")
+	if float(command.allure)>=0.3: words.append("the pull of our plenty and our ways")
+	return {"value":value,"awe":float(command.awe),"allure":float(command.allure),"why":", ".join(words)}
+
+## The awe and allure a people commands by what it is, before anyone in
+## particular sees it (view_of adds each observer's own memories and
+## strength): might, works and a lead in learning awe; culture, plenty,
+## learning and good order draw, and warbands put people off.
+static func renown(our:Dictionary={})->Dictionary:
+	if our.is_empty(): our=strengths()
+	var might:=float(our.might.value)
+	var genius:=float(our.genius.value)
+	var culture:=float(our.get("_culture",0.0))
+	var awe:=clampf(might*0.45+float(our.splendor.value)*0.35+maxf(0.0,genius-0.5)*0.4,0.0,1.0)
+	var allure:=clampf(culture*0.5+float(our.wealth.value)*0.25+maxf(0.0,genius-0.5)*0.2+float(our.order.value)*0.1-might*0.35*0.35,0.0,1.0)
+	return {"awe":awe,"allure":allure}
 
 # -------------------------------------------------------- read by daily systems
 
@@ -313,7 +326,7 @@ static func record_monthly()->void:
 	var our:=strengths()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
-	metrics["standing_pride"]=float(pride(our,views()).value)
+	metrics["standing_pride"]=float(pride(our).value)
 
 static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
