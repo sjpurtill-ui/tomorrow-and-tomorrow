@@ -280,7 +280,12 @@ static func _threshold(civ_id:String)->float:
 	var grudge:=0.0
 	var r:=load(RIVALS_PATH) as GDScript
 	if r!=null: grudge=float(r.call("grudge_weight",civ_id))
-	return clampf(0.95+(float(p.get("assertiveness",0.5))-0.5)*0.4-opinion*0.25-trust*0.15+minf(0.3,grudge*0.15),0.6,1.45)
+	# How they see us (standing.gd): drawn to us or respecting us, they take
+	# thinner terms; holding us in contempt, they drive a harder bargain.
+	var standing:=0.0
+	var view:Dictionary=preload("res://scripts/standing.gd").view_of(civ_id)
+	if bool(view.get("known",false)): standing=-float(view.allure)*0.15-float(view.respect)*0.1+float(view.contempt)*0.15
+	return clampf(0.95+(float(p.get("assertiveness",0.5))-0.5)*0.4-opinion*0.25-trust*0.15+minf(0.3,grudge*0.15)+standing,0.6,1.45)
 
 static func ratio(civ_id:String,terms:Dictionary)->float:
 	## What they receive over what they give, as they value it.

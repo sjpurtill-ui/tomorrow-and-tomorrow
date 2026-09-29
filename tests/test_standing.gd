@@ -303,3 +303,15 @@ func test_a_heavy_levy_is_resented()->void:
 	# A seventh of the people under arms: well past what households carry.
 	_arm(roundi(GameState.population_exact*0.14),0.8)
 	assert_float(Standing.levy_burden()).is_greater(0.05)
+
+func test_allure_softens_their_bargain_and_contempt_hardens_it()->void:
+	var id:=_met(160.0,10.0,0.7)
+	var Pacts:=preload("res://scripts/trade_pacts.gd")
+	_rich(10.0)
+	_arm(14,0.85)
+	var respected:=Pacts._threshold(id)
+	# Unguarded and poor beside them: less allure, more contempt.
+	_arm(0,0.3)
+	GameState.simulation_metrics["food_days"]=0.0
+	var scorned:=Pacts._threshold(id)
+	assert_float(scorned).is_greater(respected)
