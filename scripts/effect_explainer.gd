@@ -1,0 +1,1051 @@
+extends RefCounted
+## EFFECT EXPLAINER: what each research effect does in the simulation, in plain
+## words and in the engine's own numbers.
+##
+## A discovery's "effects" are small signed amounts ({"health_protection":0.012}).
+## SocietyModel sums them over everything the people know, each counted by how
+## widely it is practiced (adoption, times the goods or works it needs, times
+## the research focus on its line), holds each sum under its era ceiling, then
+## adds the upkeep of too many full-time lore keepers (society_model.gd
+## _rebuild_effect_totals). Systems read the sums with DiscoverySystem.effect.
+##
+## KEYS records, per effect, every place the simulation reads it: the quantity
+## it moves, the coefficient ("per": change in that quantity per 1.0 of the
+## effect), its caps, and the source line. Each record's "guards" are exact
+## substrings of the reading code; tests/test_effect_explainer.gd fails when
+## one no longer appears, so a changed coefficient cannot silently leave this
+## table stale. Capacity coefficients are not written down at all: they are
+## measured on the one capacity formula (SocietyModel.capacity_value) at
+## today's inputs. "inert" keys are read by nothing; they are listed, not fixed.
+## On screen everything is plain words; sources stay in the data for designers.
+
+const Society:=preload("res://scripts/society_model.gd")
+const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
+const Goods:=preload("res://scripts/civilian_goods.gd")
+const Research600:=preload("res://scripts/research_600_catalog.gd")
+
+## Size of the probe step when measuring a capacity's response to an effect.
+const SLOPE_STEP:=0.001
+## A new practice starts in this share of households (SocietyModel.register_discovery).
+const FIRST_ADOPTION:=0.025
+
+## The twelve capacities (Culture > Society's strengths): their names and what
+## else reads them. Every capacity also counts toward the people's next scale in
+## its field (ProgressionSystem CAPACITY_FLOORS).
+const CAPACITY_USES:={
+	"demography":"it counts toward the next scale of people and homes; nothing else reads it yet",
+	"nutrition":"it counts toward the next scale of food and farming; nothing else reads it yet",
+	"health":"it counts toward the next scale of health and care; nothing else reads it yet",
+	"labor":"it sets how much every hand gets done each day",
+	"knowledge":"it speeds every discovery and the growth of learning",
+	"production":"it feeds trade and what the workshops make for the army",
+	"infrastructure":"it feeds shelter in wartime and the next building scale",
+	"logistics":"it feeds trade between towns, army supply and the economy",
+	"ecology":"it counts toward the next scale of land and seasons; nothing else reads it yet",
+	"institutions":"it feeds research support, trust in the chiefs, the economy and land claims",
+	"security":"it feeds the army's training and the watch",
+	"culture":"it feeds what treasured works add to culture",
+}
+
+## Fields of research in plain words (the Research page's names).
+const FIELD_WORDS:={"demography":"people and homes","nutrition":"food","health":"health","labor":"work","knowledge":"learning","production":"craft","infrastructure":"building","logistics":"transport","ecology":"land","institutions":"government","security":"defense","culture":"culture"}
+
+## Every effect key. label: as a player would say it. what: what it changes.
+## good: 1 when more is better, -1 when less is better, 0 when mixed.
+## feeds: where the engine reads it (see _feed_line for the kinds).
+const KEYS:={
+	# --- people and homes -------------------------------------------------------
+	"conception_support":{"label":"Ease of conceiving","good":1,
+		"what":"Customs and care that help couples conceive and carry a child. More children are conceived each day.",
+		"feeds":[
+			{"to":"children conceived each day","per":1.0,"unit":"pct","cap":"added to decrees, founding customs and the people's scale; together held between -30% and +30%","src":"game_state.gd:843, consequence_engine.gd:798","guards":[["game_state.gd",'factor*=1.0+clampf(float(context.get("conception_support",0.0)),-0.30,0.30)'],["consequence_engine.gd",'"conception_support":WorldSimulation.discovery.effect("conception_support")']]},
+			{"steer":["demography","Fertility conditions"],"per":0.20,"src":"society_model.gd:719","guards":[["society_model.gd",'effect("conception_support")*0.20']]}]},
+	"maternal_safety":{"label":"Safer childbirth","good":1,
+		"what":"Birth attendants, clean hands and rest after a birth. Fewer pregnancies are lost and fewer mothers die in childbirth.",
+		"feeds":[
+			{"to":"pregnancies lost","per":-1.0,"unit":"pct","cap":"counts up to 60 in 100","src":"game_state.gd:852","guards":[["game_state.gd",'multiplier*=1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.60)'],["consequence_engine.gd",'"maternal_safety":WorldSimulation.discovery.effect("maternal_safety")']]},
+			{"to":"mothers who die in childbirth","per":-1.0,"unit":"pct","cap":"counts up to 65 in 100","src":"game_state.gd:1165","guards":[["game_state.gd",'(1.0-clampf(float(context.get("maternal_safety",0.0)),0.0,0.65))']]},
+			{"cover":"birth","src":"early_life_conditions.gd:39"},
+			{"capacity":"demography"},
+			{"steer":["demography","Maternal safety"],"per":0.38,"src":"society_model.gd:719","guards":[["society_model.gd",'effect("maternal_safety")*0.38']]}]},
+	"neonatal_survival":{"label":"Newborn survival","good":1,
+		"what":"Keeping newborns warm, fed and clean. Fewer babies die in their first days, and the child care that keeps toddlers alive is better covered.",
+		"feeds":[
+			{"to":"newborns who die in their first days","per":-1.0,"unit":"pct","cap":"with care decrees, counts from -50 to +60 in 100","src":"game_state.gd:1163, consequence_engine.gd:799","guards":[["game_state.gd",'(1.0-clampf(float(context.get("neonatal_survival",0.0)),-0.50,0.60))'],["consequence_engine.gd",'"neonatal_survival":WorldSimulation.discovery.effect("neonatal_survival")']]},
+			{"cover":"childcare","src":"early_life_conditions.gd:43"},
+			{"steer":["demography","Child survival"],"per":0.20,"src":"society_model.gd:719","guards":[["society_model.gd",'effect("neonatal_survival")*0.20']]}]},
+	"fertility_transition":{"label":"Choosing smaller families","good":0,
+		"what":"Schooling, pensions, paid work for women and contraception. Couples choose to have fewer children, so births fall.",
+		"feeds":[
+			{"to":"conceptions couples choose not to have","per":1.0,"unit":"pts","cap":"with towns and schooling, at most 80 in 100","src":"early_life_conditions.gd:153","guards":[["early_life_conditions.gd",'discovery.effect("fertility_transition")+TRANSITION_URBAN']]}]},
+	"modern_survival":{"label":"Modern medicine","good":1,
+		"what":"Vaccines, clean piped water, antisepsis and clinics. The old burden of disease is lifted first; past 15 in 100 the risk of death itself falls at every age, children most.",
+		"feeds":[
+			{"to":"the old burden of disease lifted","per":1.0/0.22,"unit":"pts","cap":"fully lifted at 22 in 100","src":"early_life_conditions.gd:165","guards":[["early_life_conditions.gd",'discovery.effect("modern_survival")/MODERN_BURDEN_LIFT']]},
+			{"text":"Past 15 in 100 it also lowers the risk of death at every age, up to 92 in 100 less at 55 in 100 (children gain most, the old least).","src":"early_life_conditions.gd:157","guards":[["early_life_conditions.gd",'clampf(discovery.effect("modern_survival"),0.0,MODERN_SURVIVAL_LIMIT)']]}]},
+	# --- food -------------------------------------------------------------------
+	"food_output":{"label":"Wild food yield","good":1,
+		"what":"Better ways of finding, taking and handling food from the wild. Every gatherer, hunter and fisher brings in more; the harvest from sown fields does not change.",
+		"feeds":[
+			{"to":"food from gathering, hunting and fishing","per":1.0,"unit":"pct","cap":"added to foraging skill, founding customs, decrees and the people's scale","src":"food_system.gd:406","guards":[["food_system.gd",'practice+=WorldSimulation.discovery.effect("food_output")']]},
+			{"to":"people the settled land can carry","per":0.5,"unit":"pct","cap":"only gains count","src":"early_life_conditions.gd:182","guards":[["early_life_conditions.gd",'maxf(0.0,discovery.effect("food_output"))*0.5']]}]},
+	"foraging_yield":{"label":"Foraging skill","good":1,
+		"what":"Knowing where and when wild plants, game and fish are found. The engine adds it to the same multiplier as wild food yield, so gathering, hunting and fishing all rise.",
+		"feeds":[
+			{"to":"food from gathering, hunting and fishing","per":1.0,"unit":"pct","cap":"added to wild food yield, founding customs, decrees and the people's scale","src":"food_system.gd:405","guards":[["food_system.gd",'practice+=WorldSimulation.discovery.effect("foraging_yield")']]}]},
+	"hunting_yield":{"label":"Hunting yield","good":1,
+		"what":"Better weapons, traps and tracking. Hunters bring home more meat.",
+		"feeds":[
+			{"to":"meat from hunting","per":1.0,"unit":"pct","src":"food_system.gd:416","guards":[["food_system.gd",'(1.0+WorldSimulation.discovery.effect("hunting_yield"))']]}]},
+	"cultivation_yield":{"label":"Field harvest","good":1,
+		"what":"Better seed, timing and tending of sown fields. Each farm worker harvests more, and the settled land can feed more people.",
+		"feeds":[
+			{"to":"harvest from sown fields","per":1.0,"unit":"pct","cap":"added to soil fertility","src":"food_system.gd:421","guards":[["food_system.gd",'(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))']]},
+			{"to":"people the settled land can carry","per":1.0,"unit":"pct","cap":"only gains count","src":"early_life_conditions.gd:182","guards":[["early_life_conditions.gd",'1.0+maxf(0.0,discovery.effect("cultivation_yield"))']]}]},
+	"soil_productivity":{"label":"Soil fertility","good":1,
+		"what":"Keeping fields fertile with fallow, manure and rotation. Sown fields give more, and the settled land can feed more people.",
+		"feeds":[
+			{"to":"harvest from sown fields","per":1.0,"unit":"pct","cap":"added to field harvest","src":"food_system.gd:421","guards":[["food_system.gd",'(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))']]},
+			{"to":"people the settled land can carry","per":0.6,"unit":"pct","cap":"only gains count","src":"early_life_conditions.gd:182","guards":[["early_life_conditions.gd",'maxf(0.0,discovery.effect("soil_productivity"))*0.6']]},
+			{"steer":["nutrition","Land productivity"],"per":0.45,"src":"society_model.gd:720","guards":[["society_model.gd",'effect("soil_productivity")*0.45']]}]},
+	"farm_mechanization":{"label":"Farm machinery","good":1,
+		"what":"Machines, fertilizer and bred seed. Each farm worker's harvest multiplies.",
+		"feeds":[
+			{"to":"harvest from sown fields","per":1.0,"unit":"pct","cap":"only gains count","src":"food_system.gd:421","guards":[["food_system.gd",'(1.0+maxf(0.0,WorldSimulation.discovery.effect("farm_mechanization")))']]}]},
+	"food_storage":{"label":"Food preserving","good":1,
+		"what":"Drying, smoking, pits and jars that turn a fresh surplus into stores. More of each day's fresh surplus is put by, and lean seasons fall less hard on children.",
+		"feeds":[
+			{"to":"fresh food put into store each day","per":1.0,"unit":"pct","cap":"of what the carriers and makers can preserve","src":"food_system.gd:526","guards":[["food_system.gd",'(1.0+WorldSimulation.discovery.effect("food_storage"))']]},
+			{"cover":"stores","src":"early_life_conditions.gd:51"},
+			{"to":"people the settled land can carry","per":0.25,"unit":"pct","cap":"only gains count","src":"early_life_conditions.gd:182","guards":[["early_life_conditions.gd",'maxf(0.0,discovery.effect("food_storage"))*0.25']]},
+			{"steer":["nutrition","Stored reserve"],"per":0.12,"src":"society_model.gd:712","guards":[["society_model.gd",'effect("food_storage")*0.12']]},
+			{"steer":["logistics","Storage system"],"per":0.22,"src":"society_model.gd:726","guards":[["society_model.gd",'effect("food_storage")*0.22']]}]},
+	"food_spoilage":{"label":"Food spoilage","good":-1,
+		"what":"How fast food rots. Less is better: stores and fresh food last longer.",
+		"feeds":[
+			{"to":"food rotting each day","per":1.0,"unit":"pct","cap":"never below 30 in 100 of the usual rate","src":"food_system.gd:571","guards":[["food_system.gd",'storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))']]}]},
+	"nutrition_quality":{"label":"Diet quality","good":1,
+		"what":"Cooking, grinding and knowing what to eat together. Meals nourish better, which lifts food security, health, births and children's survival.",
+		"feeds":[
+			{"to":"the quality of the people's diet","per":1.0,"unit":"pts","src":"food_system.gd:638","guards":[["food_system.gd",'var bonus:=WorldSimulation.discovery.effect("nutrition_quality")+technique_lever("diet")']]},
+			{"cover":"cooking","src":"early_life_conditions.gd:47"},
+			{"capacity":"nutrition"},
+			{"steer":["nutrition","Diet quality"],"per":0.25,"src":"society_model.gd:711","guards":[["society_model.gd",'effect("nutrition_quality")*0.25']]}]},
+	# --- health -----------------------------------------------------------------
+	"health_protection":{"label":"Protection from sickness","good":1,
+		"what":"Washing, remedies and care of the sick. The health the people settle toward rises, epidemics strike less hard, and more of the old burden of disease is lifted.",
+		"feeds":[
+			{"to":"the health the people settle toward","per":1.0,"unit":"pts","src":"consequence_engine.gd:684","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("health_protection")+WorldSimulation.discovery.effect("water_safety")*0.25']]},
+			{"cover":"remedies","src":"early_life_conditions.gd:35"},
+			{"relief":true,"src":"early_life_conditions.gd:80"},
+			{"epidemic":1.0/3.0,"src":"crisis_system.gd:484","guards":[["crisis_system.gd",'var hp:=_effect("health_protection")'],["crisis_system.gd",'var hk:=clampf(0.05+(hp+san+ws)/3.0-0.5*de,0.0,1.0)']]},
+			{"capacity":"health"},
+			{"steer":["health","Disease control"],"per":0.45,"src":"society_model.gd:721","guards":[["society_model.gd",'effect("health_protection")*0.45']]}]},
+	"water_safety":{"label":"Safe drinking water","good":1,
+		"what":"Choosing, settling and guarding drinking water. Fewer fall sick from water, children's summer fevers ease, and outbreaks find less to feed on.",
+		"feeds":[
+			{"to":"the health the people settle toward","per":0.25,"unit":"pts","src":"consequence_engine.gd:684","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("water_safety")*0.25']]},
+			{"cover":"water","src":"early_life_conditions.gd:27"},
+			{"relief":true,"src":"early_life_conditions.gd:80"},
+			{"epidemic":1.0/3.0,"src":"crisis_system.gd:484","guards":[["crisis_system.gd",'var ws:=_effect("water_safety")']]},
+			{"to":"drinking water quality when sickness spreads","per":0.2,"unit":"pts","src":"crisis_system.gd:498","guards":[["crisis_system.gd",'"water_q":clampf(water-0.15*de+0.2*ws+0.2*san,0.0,1.2)']]},
+			{"steer":["health","Water & sanitation"],"per":0.65,"src":"society_model.gd:713","guards":[["society_model.gd",'effect("water_safety")*0.65']]}]},
+	"sanitation":{"label":"Sanitation","good":1,
+		"what":"Latrines, drains and clean streets. Sickness from the surroundings and deaths from illness fall, and children's summer fevers ease.",
+		"feeds":[
+			{"to":"sickness from heat, damp and filth","per":-1.0,"unit":"pct","cap":"never below 18 in 100 of it","src":"consequence_engine.gd:693","guards":[["consequence_engine.gd",'disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045']]},
+			{"to":"deaths from illness","per":-1.0,"unit":"pct","cap":"with exposure to disease; never below 35 in 100 of the usual toll","src":"consequence_engine.gd:762","guards":[["consequence_engine.gd",'maxf(0.35,1.0+WorldSimulation.discovery.effect("disease_exposure")-WorldSimulation.discovery.effect("sanitation"))']]},
+			{"to":"deaths from disease in the surroundings","per":-1.0,"unit":"pct","cap":"never below 10 in 100 of it","src":"consequence_engine.gd:762","guards":[["consequence_engine.gd",'disease_pressure*maxf(0.10,1.0-WorldSimulation.discovery.effect("sanitation"))*0.005']]},
+			{"cover":"water","src":"early_life_conditions.gd:27"},
+			{"relief":true,"src":"early_life_conditions.gd:80"},
+			{"epidemic":1.0/3.0,"src":"crisis_system.gd:484","guards":[["crisis_system.gd",'var san:=_effect("sanitation")']]},
+			{"to":"drinking water quality when sickness spreads","per":0.2,"unit":"pts","src":"crisis_system.gd:498","guards":[["crisis_system.gd",'+0.2*ws+0.2*san']]},
+			{"steer":["health","Water & sanitation"],"per":0.45,"src":"society_model.gd:713","guards":[["society_model.gd",'effect("sanitation")*0.45']]}]},
+	"disease_exposure":{"label":"Exposure to disease","good":-1,
+		"what":"How much sickness daily life exposes people to: crowding, waste and animals. Less is better: health rises and fewer die of illness.",
+		"feeds":[
+			{"to":"the health the people settle toward","per":-0.18,"unit":"pts","src":"consequence_engine.gd:684","guards":[["consequence_engine.gd",'-WorldSimulation.discovery.effect("disease_exposure")*0.18']]},
+			{"to":"deaths from illness while health is poor","per":1.0,"unit":"pct","cap":"with sanitation; never below 35 in 100 of the usual toll","src":"consequence_engine.gd:762","guards":[["consequence_engine.gd",'maxf(0.35,1.0+WorldSimulation.discovery.effect("disease_exposure")-WorldSimulation.discovery.effect("sanitation"))']]},
+			{"relief":true,"src":"early_life_conditions.gd:80"},
+			{"epidemic":-0.5,"src":"crisis_system.gd:484","guards":[["crisis_system.gd",'var de:=_effect("disease_exposure")']]},
+			{"to":"drinking water quality when sickness spreads","per":-0.15,"unit":"pts","src":"crisis_system.gd:498","guards":[["crisis_system.gd",'water-0.15*de']]},
+			{"capacity":"health"},
+			{"steer":["health","Disease control"],"per":-0.40,"src":"society_model.gd:721","guards":[["society_model.gd",'effect("disease_exposure")*0.40']]},
+			{"steer":["health","Water & sanitation"],"per":-0.35,"src":"society_model.gd:713","guards":[["society_model.gd",'effect("disease_exposure")*0.35']]}]},
+	"injury_risk":{"label":"Risk of injury","good":-1,
+		"what":"How often work and daily life hurt people. Less is better: fewer die of festering wounds, falls and childbed fever. Accidents at work are a separate risk.",
+		"feeds":[
+			{"cover":"wounds","src":"early_life_conditions.gd:31"},
+			{"steer":["health","Injury safety"],"per":-0.55,"src":"society_model.gd:721","guards":[["society_model.gd",'effect("injury_risk")*0.55']]}]},
+	"health_risk":{"label":"Hazards of dangerous work","good":-1,
+		"what":"Fumes, dust and dangerous processes in mines and workshops. Less is better; it wears down the people's health in proportion to how much they mine and quarry.",
+		"feeds":[
+			{"chain":"industry_health","per":-1.0,"src":"consequence_engine.gd:692","guards":[["consequence_engine.gd",'(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity']]},
+			{"capacity":"health"}]},
+	# --- work -------------------------------------------------------------------
+	"labor_efficiency":{"label":"Working efficiency","good":1,
+		"what":"Better ways of working. It raises the Labor capacity, which sets how much every hand gets done each day: food, building, making and carrying.",
+		"feeds":[
+			{"capacity":"labor"},
+			{"chain":"labor","src":"consequence_engine.gd:639","guards":[["consequence_engine.gd",'labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))']]},
+			{"capacity":"production"}]},
+	"labor_demand":{"label":"Extra work required","good":-1,
+		"what":"The extra tending, carrying and upkeep the people's ways demand. Less is better: it lowers the Labor capacity and so every hand's daily output.",
+		"feeds":[
+			{"capacity":"labor"},
+			{"chain":"labor","src":"consequence_engine.gd:639","guards":[["consequence_engine.gd",'labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))']]},
+			{"capacity":"production"},
+			{"steer":["labor","Workload balance"],"per":-0.55,"src":"society_model.gd:722","guards":[["society_model.gd",'effect("labor_demand")*0.55']]}]},
+	"fatigue":{"label":"Weariness","good":-1,
+		"what":"How worn out people come home. Less is better: it lowers the Labor capacity and so every hand's daily output.",
+		"feeds":[
+			{"capacity":"labor"},
+			{"chain":"labor","src":"consequence_engine.gd:639","guards":[["consequence_engine.gd",'labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))']]},
+			{"capacity":"production"},
+			{"steer":["labor","Workload balance"],"per":-0.35,"src":"society_model.gd:722","guards":[["society_model.gd",'effect("fatigue")*0.35']]}]},
+	"task_coordination":{"label":"Working together","good":1,
+		"what":"Rotas, signals and shared plans so work parties do not get in each other's way. It raises the Production capacity.",
+		"feeds":[
+			{"capacity":"production"},
+			{"steer":["labor","Coordination"],"per":0.45,"src":"society_model.gd:722","guards":[["society_model.gd",'effect("task_coordination")*0.45']]}]},
+	# --- learning ---------------------------------------------------------------
+	"knowledge_rate":{"label":"Pace of learning","good":1,
+		"what":"Better ways of teaching and remembering. What the people know grows faster each day, which in turn speeds discovery. Research questions themselves are not sped directly.",
+		"feeds":[
+			{"to":"daily growth of what the people remember","per":1.0,"unit":"pct","src":"consequence_engine.gd:716","guards":[["consequence_engine.gd",'*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))']]}]},
+	"observation_rate":{"label":"Keen observation","good":1,
+		"what":"Habits of watching, comparing and recording. Every research question moves faster.",
+		"feeds":[
+			{"chain":"discovery","per":0.20,"src":"consequence_engine.gd:1032","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("observation_rate")*0.20,0.35,1.65']]}]},
+	"knowledge_preservation":{"label":"Keeping knowledge","good":1,
+		"what":"Tallies, records and teachers that keep what is known from being lost. Practices nobody uses fade more slowly, the Knowledge capacity rises, and learning is taught better, which speeds every research line.",
+		"feeds":[
+			{"chain":"forget","src":"society_model.gd:141","guards":[["society_model.gd",'effect("knowledge_preservation"),0.05,1.2)']]},
+			{"capacity":"knowledge"},
+			{"chain":"education","per":0.55*0.58,"src":"society_model.gd:714, civilization_indicators.gd:46","guards":[["society_model.gd",'effect("knowledge_preservation")*0.55,0.0,1.0)'],["civilization_indicators.gd",'preservation*0.58+communication*0.42']]}]},
+	"adoption_rate":{"label":"Spread of new ways","good":1,
+		"what":"Teaching, example and custom that carry a practice from household to household. Every known practice spreads faster, so its benefits arrive sooner.",
+		"feeds":[
+			{"chain":"spread","src":"society_model.gd:147","guards":[["society_model.gd",'clampf(effect("adoption_rate")+WorldSimulation.state.founding_effect("adoption_rate")+WorldSimulation.progression.effect("adoption_rate"),-0.35,0.80)']]}]},
+	"literacy":{"label":"Reading and writing","good":1,
+		"what":"The share of adults who read. A large, literate people runs more research questions at once; past 55 in 100 readers, schooling also leads couples to choose smaller families.",
+		"feeds":[
+			{"chain":"parallel","src":"discovery_system.gd:1023","guards":[["discovery_system.gd",'parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))']]},
+			{"text":"Once more than 55 in 100 read, each point beyond adds 0.22 of a point to the births couples choose not to have.","src":"early_life_conditions.gd:152","guards":[["early_life_conditions.gd",'var literacy:=clampf(discovery.effect("literacy"),0.0,1.0)']]}]},
+	"survey_speed":{"label":"Surveying speed","good":1,
+		"what":"Knowing how to read the ground. Surveyors learn the extent of known deposits sooner.",
+		"feeds":[
+			{"to":"survey progress on deposits","per":1.0,"unit":"pct","src":"resource_system.gd:1040","guards":[["resource_system.gd",'"speed":1.0+WorldSimulation.discovery.effect("survey_speed")']]}]},
+	"water_access":{"label":"Water access","good":1,"inert":true,
+		"what":"Meant to widen the people's access to water. Nothing in the simulation reads it yet: access to water comes from the land itself (rivers, springs, distance) and from built works.",
+		"feeds":[]},
+	# --- craft and materials ----------------------------------------------------
+	"tool_quality":{"label":"Tool quality","good":1,
+		"what":"Sharper, tougher tools. The workshops can make more, and the town can reach its last building eras.",
+		"feeds":[
+			{"to":"the making capacity the workshops settle toward","per":0.30,"unit":"pts","src":"consequence_engine.gd:729","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("tool_quality")*0.30']]},
+			{"capacity":"production"},
+			{"eras":"its 11th and 12th building eras","src":"settlement_model.gd:2495","guards":[["settlement_model.gd",'"tools":discovery.effect("tool_quality")']]},
+			{"steer":["production","Tool quality"],"per":0.65,"src":"society_model.gd:724","guards":[["society_model.gd",'effect("tool_quality")*0.65']]}]},
+	"craft_output":{"label":"Craft output","good":1,
+		"what":"Skill and method in the workshops. They can make more, and the town can reach its later building eras.",
+		"feeds":[
+			{"to":"the making capacity the workshops settle toward","per":0.22,"unit":"pts","src":"consequence_engine.gd:729","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("craft_output")*0.22']]},
+			{"eras":"its 7th to 12th building eras","src":"settlement_model.gd:2494","guards":[["settlement_model.gd",'"craft":discovery.effect("craft_output")']]},
+			{"steer":["production","Craft capacity"],"per":0.45,"src":"society_model.gd:724","guards":[["society_model.gd",'effect("craft_output")*0.45']]}]},
+	"extraction_yield":{"label":"Extraction yield","good":1,
+		"what":"Better ways of digging, cutting and quarrying. Every worked deposit gives more each day.",
+		"feeds":[
+			{"to":"daily yield of every worked deposit","per":1.0,"unit":"pct","src":"resource_system.gd:636","guards":[["resource_system.gd",'var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")'],["resource_system.gd",'var knowledge_multiplier:=1.0+extraction_effect']]},
+			{"steer":["production","Material supply"],"per":0.20,"src":"society_model.gd:716","guards":[["society_model.gd",'effect("extraction_yield")*0.20']]}]},
+	"metal_yield":{"label":"Ore yield","good":1,
+		"what":"Knowing good ore and how to work a seam. Every worked ore deposit gives more each day.",
+		"feeds":[
+			{"to":"daily yield of worked ore","per":1.0,"unit":"pct","src":"resource_system.gd:637","guards":[["resource_system.gd",'var metal_effect:=WorldSimulation.discovery.effect("metal_yield")'],["resource_system.gd",'if String(profile.family)=="metal": knowledge_multiplier+=metal_effect']]},
+			{"steer":["production","Material supply"],"per":0.12,"src":"society_model.gd:716","guards":[["society_model.gd",'effect("metal_yield")*0.12']]}]},
+	"timber_yield":{"label":"Timber yield","good":1,
+		"what":"Felling and trimming skill. Worked woodland gives more timber each day.",
+		"feeds":[
+			{"to":"daily yield of worked timber","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+	"stone_yield":{"label":"Stone yield","good":1,
+		"what":"Quarrying skill. Worked stone gives more each day.",
+		"feeds":[
+			{"to":"daily yield of worked stone","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+	"clay_yield":{"label":"Clay yield","good":1,
+		"what":"Digging and sorting clay. Worked clay pits give more each day.",
+		"feeds":[
+			{"to":"daily yield of worked clay","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+	"fiber_yield":{"label":"Fibre yield","good":1,"inert":true,
+		"what":"Meant to raise the fibre gathered from fibre plants. The engine looks a yield bonus up by the resource's own name, and the resource is called Fiber Plants, so this one is never read.",
+		"feeds":[]},
+	"fuel_efficiency":{"label":"Fuel economy","good":1,"inert":true,
+		"what":"Meant to make fires, kilns and furnaces burn less fuel. Nothing in the simulation reads it yet.",
+		"feeds":[]},
+	"repair_capacity":{"label":"Repair skill","good":1,"inert":true,
+		"what":"Meant to mend tools, homes and works sooner. Nothing in the simulation reads it yet.",
+		"feeds":[]},
+	"standardization":{"label":"Shared measures","good":1,
+		"what":"Common weights, lengths and ways of making. Markets open wider, trade loses less to error and haggling, learning is shared more easily, and the town's later building eras come within reach.",
+		"feeds":[
+			{"to":"market access","per":0.24,"unit":"pts","src":"economy_system.gd:232","guards":[["economy_system.gd",'WorldSimulation.discovery.effect("standardization")*0.24']]},
+			{"to":"the share lost on each trade abroad","per":-0.10,"unit":"pts","cap":"the loss stays between 6 and 24 in 100","src":"economy_system.gd:346","guards":[["economy_system.gd",'-WorldSimulation.discovery.effect("standardization")*0.10,0.06,0.24)']]},
+			{"capacity":"knowledge"},
+			{"chain":"education","per":0.42*0.42,"src":"society_model.gd:715, civilization_indicators.gd:46","guards":[["society_model.gd",'effect("standardization")*0.42+effect("state_capacity")*0.22,0.0,1.0)']]},
+			{"eras":"its 10th to 12th building eras","src":"settlement_model.gd:2495","guards":[["settlement_model.gd",'"standardization":discovery.effect("standardization")']]},
+			{"steer":["production","Standardization"],"per":0.82,"src":"society_model.gd:724","guards":[["society_model.gd",'effect("standardization")*0.82']]}]},
+	"chemical_control":{"label":"Control of chemicals","good":1,"inert":true,
+		"what":"Meant to make chemical work purer and safer. Nothing in the simulation reads it yet.",
+		"feeds":[]},
+	# --- building ---------------------------------------------------------------
+	"construction_rate":{"label":"Building speed","good":1,
+		"what":"Better methods and organisation on the building site. Every project goes up faster, the town scores as better built, and its later building eras come within reach.",
+		"feeds":[
+			{"to":"each day's building work","per":1.0,"unit":"pct","cap":"added to building decrees and the people's scale","src":"settlement_construction.gd:116","guards":[["settlement_construction.gd",'(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")']]},
+			{"to":"the town's built-up score","per":0.20,"unit":"pts","src":"settlement_model.gd:3095","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("construction_rate")*0.20']]},
+			{"text":"Once it reaches 2.5 in 100, durable homes rise to three storeys in the town's eighth building era.","src":"settlement_model.gd:2639","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("construction_rate")>=0.025: new_storeys=3']]},
+			{"eras":"its 7th to 12th building eras","src":"settlement_model.gd:2494","guards":[["settlement_model.gd",'"construction":discovery.effect("construction_rate")']]},
+			{"capacity":"infrastructure"},
+			{"steer":["infrastructure","Construction"],"per":0.30,"src":"society_model.gd:725","guards":[["society_model.gd",'effect("construction_rate")*0.30']]}]},
+	"housing_output":{"label":"Room in shelters","good":1,
+		"what":"Better ways of pitching and roofing shelters. It only sets how many people the Lean-to Shelters hold, and only at the moment they are finished; later homes are not affected.",
+		"feeds":[
+			{"chain":"lean_to","src":"settlement_construction.gd:137","guards":[["settlement_construction.gd",'roundi(LEAN_TO_PLACES*(1+WorldSimulation.discovery.effect("housing_output")']]}]},
+	"disaster_resilience":{"label":"Resilience to disaster","good":1,
+		"what":"Building and stores made to ride out floods, fires and storms. Today it only raises the Infrastructure capacity; no flood, fire or storm reads it directly.",
+		"feeds":[
+			{"capacity":"infrastructure"},
+			{"steer":["infrastructure","Resilience"],"per":0.65,"src":"society_model.gd:725","guards":[["society_model.gd",'effect("disaster_resilience")*0.65']]},
+			{"steer":["security","Crisis resilience"],"per":0.48,"src":"society_model.gd:729","guards":[["society_model.gd",'effect("disaster_resilience")*0.48']]}]},
+	"mine_safety":{"label":"Mine safety","good":1,
+		"what":"Props, air and drainage in pits and quarries. Fewer die in accidents at work, and access to new deposits is opened faster.",
+		"feeds":[
+			{"to":"deaths from accidents at work","per":-1.0,"unit":"pct","cap":"with the risk of accidents; never below 15 in 100 of the usual toll","src":"consequence_engine.gd:770","guards":[["consequence_engine.gd",'maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))']]},
+			{"to":"the pace of opening access to deposits","per":0.5,"unit":"pct","src":"resource_system.gd:443","guards":[["resource_system.gd",'WorldSimulation.discovery.effect("mine_safety")*.5']]}]},
+	"mining_output":{"label":"Mine output","good":1,"inert":true,
+		"what":"Meant to raise what mines produce. Nothing in the simulation reads it yet; extraction yield and ore yield are what raise mining.",
+		"feeds":[]},
+	"disaster_risk":{"label":"Risk of accidents","good":-1,
+		"what":"Dangerous works: deep pits, heavy lifting, fire. Less is better; it raises deaths from accidents at work in proportion to mining and quarrying.",
+		"feeds":[
+			{"to":"deaths from accidents at work","per":1.0,"unit":"pct","cap":"with mine safety; never below 15 in 100 of the usual toll","src":"consequence_engine.gd:770","guards":[["consequence_engine.gd",'maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))']]}]},
+	"mobile_shelter":{"label":"Shelter on the move","good":1,
+		"what":"Tents, hides and frames the people carry. While they travel, more of them sleep under cover, which protects health and lowers deaths from exposure.",
+		"feeds":[
+			{"to":"people under cover while travelling","per":1.0,"unit":"pts","cap":"between 18 and 86 in 100","src":"consequence_engine.gd:635","guards":[["consequence_engine.gd",'mobile_shelter_ratio+=WorldSimulation.discovery.effect("mobile_shelter")']]}]},
+	# --- transport and stores ---------------------------------------------------
+	"haul_capacity":{"label":"Carrying capacity","good":1,
+		"what":"Baskets, frames, carts and pack animals. Carriers move more water, materials and trade goods, and the people's hauling strength grows.",
+		"feeds":[
+			{"to":"water brought in by organised carriers","per":1.0,"unit":"pct","cap":"counts from -40% to +150%","src":"resource_system.gd:357","guards":[["resource_system.gd",'(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))']]},
+			{"to":"materials hauled home from worked deposits","per":1.0,"unit":"pct","src":"resource_system.gd:694","guards":[["resource_system.gd",'var haul_effect:=1.0+WorldSimulation.discovery.effect("haul_capacity")']]},
+			{"to":"goods each carrier moves between towns","per":1.0,"unit":"pct","cap":"with the people's scale; only gains count","src":"settlement_model.gd:315","guards":[["settlement_model.gd",'var hauling:=maxf(0.0,WorldSimulation.discovery.effect("haul_capacity")+WorldSimulation.progression.effect("haul_capacity"))']]},
+			{"to":"the hauling strength the carriers settle toward","per":0.18,"unit":"pts","src":"consequence_engine.gd:732","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("haul_capacity")*0.18']]},
+			{"capacity":"logistics"},
+			{"steer":["logistics","Carrying capacity"],"per":0.42,"src":"society_model.gd:726","guards":[["society_model.gd",'effect("haul_capacity")*0.42']]}]},
+	"route_speed":{"label":"Known routes","good":1,
+		"what":"Known paths, markers and roads. Scouts range farther and the known country grows faster, hauls from deposits go easier, trade between towns reaches farther, and learning travels better.",
+		"feeds":[
+			{"to":"how far scouting parties range, and how fast the known country grows","per":1.0,"unit":"pct","cap":"with the people's scale, counts up to 60 in 100; the known country grows one and a half times this","src":"civilization_system.gd:3200","guards":[["civilization_system.gd",'var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)']]},
+			{"to":"the going on every haul from a deposit","per":1.0,"unit":"pts","cap":"a bare track counts 34 and a finished road 100","src":"resource_system.gd:693","guards":[["resource_system.gd",'var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect']]},
+			{"to":"the pace of opening access to deposits","per":1.0,"unit":"pct","src":"resource_system.gd:443","guards":[["resource_system.gd",'"knowledge":1.0+WorldSimulation.discovery.effect("route_speed")']]},
+			{"to":"the reach of trade between towns","per":180.0,"unit":"km","cap":"with the people's scale; only gains count","src":"settlement_model.gd:314","guards":[["settlement_model.gd",'"range_km":12.0+logistics*120.0+transport*180.0']]},
+			{"to":"the hauling strength the carriers settle toward","per":0.12,"unit":"pts","src":"consequence_engine.gd:732","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("route_speed")*0.12']]},
+			{"to":"how well the town is connected","per":0.30,"unit":"pts","src":"settlement_model.gd:3094","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("route_speed")*0.30']]},
+			{"capacity":"logistics"},
+			{"capacity":"knowledge"},
+			{"chain":"education","per":0.30*0.42,"src":"society_model.gd:715, civilization_indicators.gd:46","guards":[["society_model.gd",'clampf(0.28+effect("route_speed")*0.30']]},
+			{"eras":"its 6th and its 8th to 12th building eras","src":"settlement_model.gd:2494","guards":[["settlement_model.gd",'"route":discovery.effect("route_speed")']]},
+			{"steer":["logistics","Route quality"],"per":0.35,"src":"society_model.gd:717","guards":[["society_model.gd",'effect("route_speed")*0.35']]}]},
+	"travel_speed":{"label":"Travel speed","good":1,
+		"what":"Faster going on the roads. Shipments from outlying deposits arrive in fewer days.",
+		"feeds":[
+			{"to":"the speed of shipments from deposits","per":1.0,"unit":"pct","src":"resource_system.gd:695","guards":[["resource_system.gd",'var travel_effect:=1.0+WorldSimulation.discovery.effect("travel_speed")']]}]},
+	"storage_loss":{"label":"Losses from stores","good":-1,
+		"what":"How much stored material rots, rusts or goes missing each day. Less is better. It is added to each material's own small daily loss, and a loss cannot fall below nothing, so a small total already stops all loss.",
+		"feeds":[
+			{"chain":"storage","src":"resource_system.gd:929","guards":[["resource_system.gd",'SPAN.rate(maxf(0.0,float(profile.loss)+WorldSimulation.discovery.effect("storage_loss")))']]},
+			{"capacity":"logistics"},
+			{"steer":["logistics","Storage system"],"per":-0.35,"src":"society_model.gd:726","guards":[["society_model.gd",'effect("storage_loss")*0.35']]}]},
+	"dry_storage":{"label":"Dry storage space","good":1,
+		"what":"Lofts, baskets and granaries that keep things dry. The stores hold more of what must stay dry.",
+		"feeds":[
+			{"to":"dry storage space","per":1.0,"unit":"pct","src":"resource_system.gd:904","guards":[["resource_system.gd",'result.dry*=1.0+WorldSimulation.discovery.effect("dry_storage")']]}]},
+	"container_capacity":{"label":"Containers","good":1,
+		"what":"Pots, jars and sealed vessels. Covered and sealed storage holds more, and once the Open Work Area stands, households keep more water.",
+		"feeds":[
+			{"to":"covered and sealed storage space","per":1.0,"unit":"pct","src":"resource_system.gd:905","guards":[["resource_system.gd",'result.covered*=1.0+WorldSimulation.discovery.effect("container_capacity")'],["resource_system.gd",'result.sealed*=1.0+WorldSimulation.discovery.effect("container_capacity")']]},
+			{"to":"days of water each person can keep, once the Open Work Area stands","per":2.0,"unit":"days","src":"resource_system.gd:369","guards":[["resource_system.gd",'portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0']]}]},
+	"logistics_endurance":{"label":"Supply endurance","good":1,"inert":true,
+		"what":"Meant to let supply parties and armies go longer between fresh supplies. Nothing in the simulation reads it yet.",
+		"feeds":[]},
+	"trade_capacity":{"label":"Trade reach","good":1,
+		"what":"Markets, agents and ways of dealing with strangers. Market access widens, which draws trade and eases the economy's growth.",
+		"feeds":[
+			{"to":"market access","per":0.32,"unit":"pts","src":"economy_system.gd:232","guards":[["economy_system.gd",'WorldSimulation.discovery.effect("trade_capacity")*0.32']]},
+			{"to":"the town's exchange score, where no market reading exists yet","per":0.40,"unit":"pts","src":"settlement_model.gd:3092","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("trade_capacity")*0.40']]},
+			{"steer":["logistics","Trade reach"],"per":0.70,"src":"society_model.gd:726","guards":[["society_model.gd",'effect("trade_capacity")*0.70']]}]},
+	"naval_capacity":{"label":"Seafaring strength","good":1,"inert":true,
+		"what":"Meant to strengthen ships and sailors. Nothing in the simulation reads it yet.",
+		"feeds":[]},
+	# --- government -------------------------------------------------------------
+	"state_capacity":{"label":"Capacity to organize","good":1,
+		"what":"Offices, records and routines of rule. The people hold together better, the realm's administration reaches farther, and learning is shared more widely.",
+		"feeds":[
+			{"to":"the cohesion the people settle toward","per":0.08,"unit":"pts","src":"consequence_engine.gd:706","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("state_capacity")*0.08']]},
+			{"to":"the reach of the realm's administration over land and towns","per":1.0,"unit":"pts","cap":"added to the Institutions capacity, at most 100","src":"settlement_model.gd:834","guards":[["settlement_model.gd",'clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25))+WorldSimulation.discovery.effect("state_capacity"),0.0,1.0)']]},
+			{"capacity":"institutions"},
+			{"capacity":"knowledge"},
+			{"chain":"education","per":0.22*0.42,"src":"society_model.gd:715, civilization_indicators.gd:46","guards":[["society_model.gd",'effect("state_capacity")*0.22,0.0,1.0)']]},
+			{"eras":"its 12th building era","src":"settlement_model.gd:2495","guards":[["settlement_model.gd",'"state_capacity":discovery.effect("state_capacity")']]},
+			{"steer":["institutions","State capacity"],"per":0.70,"src":"society_model.gd:728","guards":[["society_model.gd",'effect("state_capacity")*0.70']]}]},
+	"legitimacy":{"label":"Accepted authority","good":1,
+		"what":"Customs that make rule rightful in the people's eyes. Trust in the chiefs rises.",
+		"feeds":[
+			{"to":"the trust in the chiefs the people settle toward","per":0.12,"unit":"pts","src":"consequence_engine.gd:743","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("legitimacy")*0.12']]},
+			{"capacity":"institutions"}]},
+	"cohesion":{"label":"Social cohesion","good":1,
+		"what":"Feasts, kinship customs and shared rites. The people hold together better.",
+		"feeds":[
+			{"to":"the cohesion the people settle toward","per":0.10,"unit":"pts","src":"consequence_engine.gd:706","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("cohesion")*0.10']]},
+			{"capacity":"culture"}]},
+	"institutional_rigidity":{"label":"Rigid custom","good":-1,
+		"what":"Rules and ranks that resist change. Less is better: rigid custom overloads the keepers of knowledge and lowers the Knowledge capacity.",
+		"feeds":[
+			{"capacity":"knowledge"},
+			{"steer":["institutions","Institutional flexibility"],"per":-0.65,"src":"society_model.gd:728","guards":[["society_model.gd",'effect("institutional_rigidity")*0.65']]}]},
+	# --- defense ----------------------------------------------------------------
+	"warfare_readiness":{"label":"Readiness to fight","good":1,
+		"what":"Drill, weapons and plans for war. The people's safety rises. The army's own training reads the people's scale instead of this.",
+		"feeds":[
+			{"to":"the safety the people settle toward","per":0.14,"unit":"pts","src":"consequence_engine.gd:734","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("warfare_readiness")*0.14']]},
+			{"capacity":"security"},
+			{"steer":["security","Military readiness"],"per":0.65,"src":"society_model.gd:729","guards":[["society_model.gd",'effect("warfare_readiness")*0.65']]}]},
+	"security_efficiency":{"label":"Watch and guard","good":1,
+		"what":"Sentries, signals and patrols. Today it only raises the Security capacity; the daily safety of the people reads the people's scale instead.",
+		"feeds":[
+			{"capacity":"security"},
+			{"steer":["security","Organized defense"],"per":0.48,"src":"society_model.gd:729","guards":[["society_model.gd",'effect("security_efficiency")*0.48']]}]},
+	# --- land -------------------------------------------------------------------
+	"ecology_recovery":{"label":"Land recovery","good":1,
+		"what":"Resting ground, replanting and protecting breeding seasons. Wild food grounds recover faster from use.",
+		"feeds":[
+			{"to":"the daily recovery of wild food grounds","per":1.0,"unit":"pct","src":"food_system.gd:663","guards":[["food_system.gd",'(0.0007 if traveling else 0.00035)*(1.0+WorldSimulation.discovery.effect("ecology_recovery"))']]},
+			{"to":"regrowth of wild plants, game and fish","per":1.0,"unit":"pct","cap":"only gains count","src":"food_system.gd:694","guards":[["food_system.gd",'(1.0+maxf(0.0,WorldSimulation.discovery.effect("ecology_recovery")))']]},
+			{"capacity":"ecology"},
+			{"steer":["ecology","Natural recovery"],"per":0.38,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("ecology_recovery")*0.38']]}]},
+	"ecological_pressure":{"label":"Strain on the land","good":-1,
+		"what":"How hard the people's ways press on wild grounds. Less is better: heavy gathering, hunting and fishing wear the grounds down less.",
+		"feeds":[
+			{"to":"wear on wild food grounds from heavy use","per":1.0,"unit":"pct","src":"food_system.gd:671","guards":[["food_system.gd",'*0.0018*(1.0+WorldSimulation.discovery.effect("ecological_pressure"))'],["food_system.gd",'current*(1.0+WorldSimulation.discovery.effect("ecological_pressure"))']]},
+			{"capacity":"ecology"},
+			{"steer":["ecology","Resource pressure"],"per":-0.62,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("ecological_pressure")*0.62']]}]},
+	"timber_pressure":{"label":"Demand for timber","good":-1,"steer_only":true,
+		"what":"How much wood the people's ways use. It changes nothing the people live with yet: its only use is to guide which land questions the lore keepers take up next.",
+		"feeds":[
+			{"steer":["ecology","Resource pressure"],"per":-0.30,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("timber_pressure")*0.30']]}]},
+	"pollution":{"label":"Smoke and waste","good":-1,
+		"what":"Smoke, slag and refuse from fires and works. Less is better; in proportion to mining and quarrying it wears down health and the land.",
+		"feeds":[
+			{"chain":"industry_health","per":-0.22,"src":"consequence_engine.gd:692","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("pollution")*0.22']]},
+			{"chain":"industry_land","src":"consequence_engine.gd:741","guards":[["consequence_engine.gd",'ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009']]},
+			{"capacity":"ecology"},
+			{"steer":["ecology","Pollution control"],"per":-0.70,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("pollution")*0.70']]}]},
+	"water_pollution":{"label":"Fouled water","good":-1,
+		"what":"Waste and runoff in streams and wells. Less is better; in proportion to mining and quarrying it wears down health and the land.",
+		"feeds":[
+			{"chain":"industry_health","per":-0.18,"src":"consequence_engine.gd:692","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("water_pollution")*0.18']]},
+			{"chain":"industry_land","src":"consequence_engine.gd:741","guards":[["consequence_engine.gd",'ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009']]},
+			{"steer":["ecology","Pollution control"],"per":-0.45,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("water_pollution")*0.45']]}]},
+	"fuel_demand":{"label":"Fuel needed","good":-1,"inert":true,
+		"what":"Meant as the fuel a practice burns. Nothing in the simulation reads it yet, so this cost is never paid.",
+		"feeds":[]},
+}
+
+# --- Reading the table ----------------------------------------------------------
+
+## Every key the table explains.
+static func keys()->Array[String]:
+	var result:Array[String]=[]
+	for key:String in KEYS: result.append(key)
+	return result
+
+static func entry(key:String)->Dictionary:
+	return KEYS.get(key,{})
+
+## The effect's name as a player would say it; an unknown key is still words.
+static func label(key:String)->String:
+	var known:Dictionary=KEYS.get(key,{})
+	if not known.is_empty(): return String(known.label)
+	var words:=key.replace("_"," ").strip_edges()
+	return words.left(1).to_upper()+words.substr(1)
+
+## 1 when more of it is better, -1 when less is, 0 when mixed.
+static func good(key:String)->int:
+	var known:Dictionary=KEYS.get(key,{})
+	if known.has("good"): return int(known.good)
+	return -1 if key in Society.LOWER_IS_BETTER else 1
+
+## Whether an amount helps (1), costs (-1) or neither (0).
+static func tone(key:String,amount:float)->int:
+	if is_zero_approx(amount): return 0
+	return good(key)*(1 if amount>0.0 else -1)
+
+static func is_inert(key:String)->bool:
+	return bool((KEYS.get(key,{}) as Dictionary).get("inert",false))
+
+## Keys nothing in the simulation reads.
+static func inert_keys()->Array[String]:
+	var result:Array[String]=[]
+	for key:String in KEYS:
+		if is_inert(key): result.append(key)
+	return result
+
+## Keys read only to guide which questions the lore keepers take up next.
+static func steer_only_keys()->Array[String]:
+	var result:Array[String]=[]
+	for key:String in KEYS:
+		if bool((KEYS[key] as Dictionary).get("steer_only",false)): result.append(key)
+	return result
+
+## The research line an effect belongs to (SocietyModel.EFFECT_LINE).
+static func line(key:String)->String:
+	return String(Society.EFFECT_LINE.get(key,"production"))
+
+## Where the engine reads the key, for designers: [{src, guards}].
+static func trace(key:String)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for feed:Dictionary in (KEYS.get(key,{}) as Dictionary).get("feeds",[]):
+		if feed.has("capacity"): result.append({"src":"society_model.gd capacity_value (%s)" % String(feed.capacity),"guards":[]})
+		else: result.append({"src":String(feed.get("src","")),"guards":(feed.get("guards",[]) as Array).duplicate(true)})
+	return result
+
+# --- Words and numbers ------------------------------------------------------------
+
+## A signed effect amount as the discovery announcement shows it: "+1.2%".
+static func percent(value:float)->String:
+	var size:=absf(value)*100.0
+	if size<0.0000001: return "0%"
+	var sign:="+" if value>0.0 else "-"
+	if size>=0.05: return "%s%s%%" % [sign,_trim("%.1f" % size)]
+	if size>=0.005: return "%s%s%%" % [sign,"%.2f" % size]
+	return sign+"<0.01%"
+
+## A size without its sign: "12", "1.2", "0.12", "0.012", "<0.01".
+static func number(value:float)->String:
+	var size:=absf(value)
+	if size>=9.95: return str(roundi(size))
+	if size>=0.995: return _trim("%.1f" % size)
+	if size>=0.0995: return "%.2f" % size
+	if size>=0.00995: return "%.3f" % size
+	return "<0.01"
+
+static func _trim(text:String)->String:
+	return text.trim_suffix(".0") if text.ends_with(".0") else text
+
+## A whole number with thousands marked: "4,000".
+static func thousands(value:float)->String:
+	var digits:=str(roundi(absf(value)))
+	var result:=""
+	while digits.length()>3:
+		result=","+digits.right(3)+result
+		digits=digits.left(digits.length()-3)
+	return ("-" if value<0.0 else "")+digits+result
+
+## How widely a practice is used, in words: "taken up by 51 in 100".
+static func adoption_words(level:float)->String:
+	var share:=clampf(level,0.0,1.0)*100.0
+	if share<0.5: return "hardly taken up yet"
+	return "taken up by %d in 100" % roundi(share)
+
+## What a practice needs besides being known (CivilianGoods.factor): its
+## effects count only for the share of it these cover.
+const MEANS:={"wound_cleaning":"water carried for washing wounds","clean_water":"water carried for it","kiln_control":"kiln heat",
+	"lime_burning":"lime in store","lime_mortar":"a town built of masonry, kept in repair","latrine_siting":"the water and waste works",
+	"protected_wellheads":"the water and waste works","rainwater_cisterns":"the water and waste works","water_settling_basins":"the water and waste works",
+	"seed_selection":"a seed reserve and fields tended with it","animal_taming":"a living herd","pack_animals":"a living herd of pack animals",
+	"domesticated_mounts":"a living herd of mounts","mounted_scouts":"mounts for the scouts","public_stores":"a staffed Public Stores",
+	"framed_construction":"a Framed Hall in use"}
+
+## How fully a known practice is carried out, in words: how widely it is taken
+## up and, for one that needs tools, works or supplies, how much of it they cover.
+static func usage_words(id:String)->String:
+	var adoption:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,FIRST_ADOPTION)),0.0,1.0)
+	var words:=adoption_words(adoption)
+	if not (Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)): return words
+	var means:=clampf(Goods.factor(id),0.0,1.0)
+	if means>=0.995: return words
+	var need:=String(MEANS.get(id,"household goods kept in use" if Goods.TECHNIQUES.has(id) else "its tools and works"))
+	return "%s, but it needs %s, which covers only %d in 100 of them" % [words,need,roundi(means*100.0)]
+
+static func _unit_words(value:float,unit:String)->String:
+	match unit:
+		"pts": return "%s points of 100" % number(value*100.0)
+		"day": return "%s in 100 a day" % number(value*100.0)
+		"km": return "%s km" % number(value)
+		"places": return "%s places" % number(value)
+		"days": return "%s days" % number(value)
+	return "%s%%" % number(value*100.0)
+
+## "<quantity>: up about 1.2%" / "down about ..." / "no change now".
+static func quantity(to:String,value:float,unit:String,cap:String="")->String:
+	var text:="%s: %s" % [_upper(to),"no change now" if absf(value)<0.0000000001 else "%s about %s" % ["up" if value>0.0 else "down",_unit_words(value,unit)]]
+	return text+(" (%s)" % cap if cap!="" else "")
+
+static func _upper(text:String)->String:
+	return text.left(1).to_upper()+text.substr(1)
+
+static func _lower(text:String)->String:
+	return text.left(1).to_lower()+text.substr(1)
+
+# --- The engine's state, read once per frame ------------------------------------
+
+static var _cache:Dictionary={}
+static var _cache_key:Array=[]
+
+## Readings shared by every explanation made in one frame of one day.
+static func _frame()->Dictionary:
+	var state=WorldSimulation.state
+	var key:Array=[Engine.get_process_frames(),int(state.elapsed_days),state.known_discoveries.size()]
+	if key!=_cache_key:
+		_cache_key=key
+		_cache={}
+	return _cache
+
+## Forget cached readings (after changing adoption or state inside one frame).
+static func invalidate()->void:
+	_cache_key=[]
+	_cache={}
+
+## One engine reading per frame: made by `make` the first time it is asked for.
+static func _once(name:String,make:Callable)->Variant:
+	var cache:=_frame()
+	if not cache.has(name): cache[name]=make.call()
+	return cache[name]
+
+static func _model()->Object:
+	return WorldSimulation.discovery.society_model if WorldSimulation.discovery!=null else null
+
+## The inputs today's capacities were made from (SocietyModel.capacity_ledger).
+static func _inputs()->Dictionary:
+	var cache:=_frame()
+	if not cache.has("inputs"):
+		var model=_model()
+		var today:Dictionary={}
+		if model!=null: today=model._today.inputs
+		cache["inputs"]=(today if not today.is_empty() else (model.capacity_inputs() if model!=null else {})).duplicate()
+	return cache.inputs
+
+static var _readers:Dictionary={}
+
+## The capacities whose formula reads `key`, found by probing the one capacity
+## formula at neutral inputs (as the capacity pages do).
+static func capacity_readers(key:String)->Array[String]:
+	if _readers.is_empty():
+		var inputs:Dictionary={"able":0.3,"health":0.3,"food":0.3,"housing":0.3,"cohesion":0.3,"ecology":0.3,"security":0.3,"legitimacy":0.3,
+			"diet":0.3,"materials":0.3,"hauling":0.3,"learning":0.3,"keepers":0.3,"attention":0.6,"overwork":0.1,"fields":6.0,"stewards":0.3,"works":3.0,"treasures":0.0}
+		for effect_id:String in Society.CAPACITY_EFFECTS: inputs["fx:"+effect_id]=0.1
+		for effect_id:String in Society.CAPACITY_EFFECTS:
+			var readers:Array[String]=[]
+			for dynamic_id:String in Society.DYNAMICS:
+				var base:=Society.capacity_value(dynamic_id,inputs)
+				inputs["fx:"+effect_id]=0.12
+				if absf(Society.capacity_value(dynamic_id,inputs)-base)>0.0000001: readers.append(dynamic_id)
+				inputs["fx:"+effect_id]=0.1
+			_readers[effect_id]=readers
+	var found:Array[String]=[]
+	found.assign(_readers.get(key,[]))
+	return found
+
+## How many points (0..1) one unit of `key` moves a capacity today: measured
+## on SocietyModel.capacity_value at today's inputs, with its clamps.
+static func capacity_slope(key:String,dynamic_id:String)->float:
+	var cache:=_frame()
+	var slopes:Dictionary=cache.get_or_add("slopes",{})
+	var slot:="%s|%s" % [key,dynamic_id]
+	if slopes.has(slot): return float(slopes[slot])
+	var inputs:=_inputs()
+	var fx:="fx:"+key
+	var slope:=0.0
+	if not inputs.is_empty():
+		var before:=float(inputs.get(fx,0.0))
+		var base:=Society.capacity_value(dynamic_id,inputs)
+		inputs[fx]=before+SLOPE_STEP
+		var raised:=Society.capacity_value(dynamic_id,inputs)
+		inputs[fx]=before
+		slope=(raised-base)/SLOPE_STEP
+	slopes[slot]=slope
+	return slope
+
+# --- What one amount of an effect moves -----------------------------------------
+
+## Everything the explanation of one effect needs. `amount` is the effect's own
+## size, `adoption` how widely it is practiced (0..1), `scale` the research
+## focus on its line (SocietyModel.practice_scale; costs are never scaled).
+## Returns {key, label, amount_words, sentence, now, now_words, feeds, inert,
+## steer_only, good, tone, held}.
+static func describe(key:String,amount:float,adoption:float=1.0,scale:float=1.0)->Dictionary:
+	var known:Dictionary=KEYS.get(key,{})
+	var now:=Society.scaled_effect(key,amount,scale)*clampf(adoption,0.0,1.0)
+	var inert:=is_inert(key) or known.is_empty()
+	var feeds:Array[String]=[]
+	if not inert:
+		for feed:Dictionary in known.get("feeds",[]):
+			var text:=_feed_line(key,feed,now)
+			if text!="": feeds.append(text)
+	var now_words:=""
+	if inert: now_words="No effect in the simulation yet: nothing in the engine reads it."
+	elif bool(known.get("steer_only",false)): now_words="%s now → changes nothing people live with; it only guides which %s questions are taken up next." % [percent(now),String(FIELD_WORDS.get(line(key),"land"))]
+	elif feeds.is_empty(): now_words="%s now" % percent(now)
+	else: now_words="%s now → %s" % [percent(now),_lower(feeds[0])]
+	return {"key":key,"label":label(key),"amount_words":percent(amount),"sentence":String(known.get("what","Nothing in the simulation reads this effect yet.")),
+		"now":now,"now_words":now_words,"feeds":feeds,"inert":inert,"steer_only":bool(known.get("steer_only",false)),
+		"good":good(key),"tone":tone(key,now if not is_zero_approx(now) else amount),"held":held_words(key,amount)}
+
+## Why an amount adds nothing more: the key's total already fills what the
+## society's age allows (SocietyModel.era_ceiling), "" otherwise.
+static func held_words(key:String,amount:float)->String:
+	var model=_model()
+	if model==null or is_inert(key) or is_zero_approx(amount): return ""
+	var ceiling:Vector2=model.era_ceiling(key)
+	var total:=float(model.effect(key))
+	var lower:=key in Society.LOWER_IS_BETTER
+	var pushing:=(amount<0.0) if lower else (amount>0.0)
+	if not pushing: return ""
+	var full:=(total<=ceiling.x+0.000001) if lower else (total>=ceiling.y-0.000001)
+	if not full: return ""
+	var limit:=ceiling.x if lower else ceiling.y
+	if absf(limit)<0.0000001: return "Held back by our age: this age allows none of it yet, so it adds nothing until a later age opens room for it."
+	return "Held back by our age: what the people know already fills all this age allows (%s), so this adds nothing more until a later age opens more room. Scale bonuses for the same thing share that limit." % percent(limit)
+
+static func _feed_line(key:String,feed:Dictionary,now:float)->String:
+	if feed.has("capacity"): return _capacity_line(key,String(feed.capacity),now)
+	if feed.has("cover"): return _cover_line(key,String(feed.cover),now)
+	if feed.has("relief"): return _relief_line(key)
+	if feed.has("epidemic"): return _epidemic_line(float(feed.epidemic),now)
+	if feed.has("steer"): return _steer_line(feed)
+	if feed.has("eras"): return "Counts toward the building know-how the town needs to reach %s." % String(feed.eras)
+	if feed.has("chain"): return _chain_line(key,feed,now)
+	if feed.has("text"): return String(feed.text)
+	return quantity(String(feed.get("to","")),now*float(feed.get("per",1.0)),String(feed.get("unit","pct")),String(feed.get("cap","")))
+
+static func _capacity_line(key:String,dynamic_id:String,now:float)->String:
+	var value:=float(WorldSimulation.state.society_capacities.get(dynamic_id,0.0))
+	var slope:=capacity_slope(key,dynamic_id)
+	var name:="The %s capacity (%d of 100 now)" % [dynamic_id.capitalize(),roundi(clampf(value,0.0,1.0)*100.0)]
+	if is_zero_approx(slope) and not is_zero_approx(now): return "%s: held at its limit today, so no change; %s." % [name,String(CAPACITY_USES.get(dynamic_id,""))]
+	return "%s; %s." % [quantity(name,now*slope,"pts"),String(CAPACITY_USES.get(dynamic_id,""))]
+
+## The early care category a key counts toward (EarlyLifeConditions.CATEGORIES).
+static func _care(category_id:String)->Dictionary:
+	for category:Dictionary in EarlyCare.CATEGORIES:
+		if String(category.id)==category_id: return category
+	return {}
+
+static func _cover_line(key:String,category_id:String,now:float)->String:
+	var category:=_care(category_id)
+	var channels:Dictionary=category.get("channels",{})
+	if not channels.has(key): return ""
+	var scale:=float(channels[key])
+	var covered:=0.0
+	for row:Variant in (WorldSimulation.state.early_care as Dictionary).get("categories",[]):
+		if row is Dictionary and String((row as Dictionary).get("id",""))==category_id: covered=float((row as Dictionary).get("coverage",0.0))
+	var name:="%s counted as covered (%d of 100 now)" % [String(category.get("label","Care")),roundi(clampf(covered,0.0,1.0)*100.0)]
+	var full:="every %s in 100 of it covers this care fully" % number(absf(scale)*100.0)
+	if scale<0.0: full="only cuts count; every %s in 100 cut covers it fully" % number(absf(scale)*100.0)
+	return quantity(name,now/scale,"pts","%s, unless its named practices cover more; care that is missing costs the lives of infants, children and mothers" % full)
+
+static func _relief_line(key:String)->String:
+	var scale:=float(EarlyCare.RELIEF_CHANNELS.get(key,0.0))
+	if is_zero_approx(scale): return ""
+	var relief:=float((WorldSimulation.state.early_care as Dictionary).get("burden_relief",0.0))
+	return "One of four measures (with the other health knowledge) that lift the old burden of disease no single practice removes; each counts up to %s in 100, and the lift grows slowly at first (lifted %d in 100 now)." % [number(absf(scale)*100.0),roundi(clampf(relief,0.0,1.0)*100.0)]
+
+static func _epidemic_line(per:float,now:float)->String:
+	var usable:float=_once("medicine",func()->float:
+		var crisis=load("res://scripts/crisis_system.gd")
+		return float(crisis._ramp(crisis.MEDICINE_CEILING,crisis.hist_year())) if crisis!=null else 0.35)
+	return quantity("Health knowledge used against epidemics",now*per,"pts","outbreaks start less often and kill fewer; the medicine of this age can use %d in 100 of it" % roundi(usable*100.0))
+
+static func _steer_line(feed:Dictionary)->String:
+	var steer:Array=feed.steer
+	var field:=String(steer[0])
+	return "Guides research: counts %s of itself in the %s reading \"%s\", which only steers which %s questions the lore keepers take up next." % [number(absf(float(feed.get("per",1.0)))),field.capitalize(),String(steer[1]),String(FIELD_WORDS.get(field,field))]
+
+## Readings that pass through another engine value before they reach people.
+static func _chain_line(key:String,feed:Dictionary,now:float)->String:
+	var state=WorldSimulation.state
+	match String(feed.chain):
+		"labor":
+			# Labor capacity -> every hand's daily output (ConsequenceEngine).
+			var labor:=clampf(float(state.society_capacities.get("labor",0.5)),0.0,1.0)
+			var moved:=now*capacity_slope(key,"labor")
+			var after:=clampf(labor+moved,0.0,1.0)
+			return quantity("Every hand's daily output, through the Labor capacity",lerpf(0.82,1.08,after)/lerpf(0.82,1.08,labor)-1.0,"pct","the capacity sets output from 82 in 100 at nothing to 108 at full")
+		"discovery":
+			var multiplier:float=_once("discovery_pace",func()->float:
+				var engine=WorldSimulation.consequences
+				return float(engine.discovery_multiplier()) if engine!=null and bool(engine.get("initialized")) else 1.0)
+			return quantity("The pace of every research question",now*float(feed.get("per",0.2))/maxf(0.35,multiplier),"pct","the research pace multiplier stays between 0.35 and 1.65")
+		"spread":
+			var factor:float=_once("spread",func()->float:
+				var others:=float(state.founding_effect("adoption_rate"))+float(WorldSimulation.progression.effect("adoption_rate"))
+				var total:=float(_model().effect("adoption_rate")) if _model()!=null else 0.0
+				return 1.0+clampf(total+others,-0.35,0.80))
+			return quantity("How fast every known practice spreads",now/maxf(0.1,factor),"pct","added to founding customs and the people's scale, held between -35% and +80%")
+		"forget":
+			var loss:float=_once("forgetting",func()->float:
+				var remembered:=clampf(float(state.simulation_metrics.get("knowledge",0.18))+float(_model().effect("knowledge_preservation") if _model()!=null else 0.0),0.05,1.2)
+				return maxf(0.0,0.00018-remembered*0.00015))
+			if loss<=0.0: return "Practices nobody uses: nothing is being forgotten now, because what the people remember is already enough to keep them."
+			return quantity("How fast practices nobody uses are forgotten",maxf(-1.0,-0.00015*now/loss),"pct","forgetting stops once remembered knowledge and this reach 1.2 together")
+		"education":
+			var education:float=_once("education",func()->float: return float(preload("res://scripts/civilization_indicators.gd").education_index()))
+			var moved:=now*float(feed.get("per",0.0))
+			var pace:=lerpf(0.55,1.45,clampf(education+moved,0.0,1.0))/lerpf(0.55,1.45,education)-1.0
+			return "%s, so every research line moves %s." % [quantity("How well learning is taught",moved,"pts"),("about %s%% %s" % [number(absf(pace)*100.0),"faster" if pace>=0.0 else "slower"]) if absf(pace)>0.0000000001 else "at the same pace"]
+		"parallel":
+			var population:=float(state.population_exact)
+			var institutions:=clampf(float(state.society_capacities.get("institutions",0.25)),0.0,1.0)
+			var literacy:=float(_model().effect("literacy")) if _model()!=null else 0.0
+			var before:=Research600.parallel_capacity(population,institutions,literacy)
+			if population<=Research600.PARALLEL_POPULATION_REF: return "Questions researched at once: no change until the people number more than %s." % thousands(Research600.PARALLEL_POPULATION_REF)
+			return quantity("Questions researched at once",Research600.parallel_capacity(population,institutions,literacy+now)/before-1.0,"pct")
+		"industry_health":
+			var industry:=_industry()
+			if industry<=0.0: return "The health the people settle toward: no change while nothing is mined or quarried (it counts in proportion to mining and quarrying)."
+			return quantity("The health the people settle toward, at today's mining and quarrying",now*float(feed.get("per",-1.0))*industry,"pts")
+		"industry_land":
+			var industry:=_industry()
+			if industry<=0.0: return "The health of the land: no change while nothing is mined or quarried (it counts in proportion to mining and quarrying)."
+			return quantity("The health of the land each year, at today's mining and quarrying",-now*industry*0.0009*365.0,"pts")
+		"storage":
+			# Added to each material's own daily loss (ResourceSystem profiles); a
+			# loss never falls below none, so past the largest of them it stops all loss.
+			var rates:Array=_once("storage_rates",func()->Array:
+				var resources=load("res://scripts/resource_system.gd")
+				var found:Array=[float(resources.ORE_PROFILE.loss),float(resources.MINERAL_PROFILE.loss)]
+				for profile:Variant in (resources.MATERIAL_PROFILES as Dictionary).values(): found.append(float((profile as Dictionary).loss))
+				return found)
+			var total:=float(_model().effect("storage_loss")) if _model()!=null else 0.0
+			var line:=quantity("Stored materials lost each day",now,"day","added to each material's own loss of %s to %s in 100 a day; a loss never falls below none" % [number(rates.min()*100.0),number(rates.max()*100.0)])
+			if total<=-float(rates.max()): line+=". The people's total already cuts %s in 100 a day, which stops every material's loss, so more of it changes nothing now" % number(total*100.0)
+			return line
+		"lean_to":
+			var places:float=_once("lean_to",func()->float: return float(load("res://scripts/settlement_construction.gd").LEAN_TO_PLACES))
+			var built:bool="Lean-to Shelters" in state.settlement_completed
+			return quantity("Places in the Lean-to Shelters when they are finished",now*places,"places","%s places before this; %s" % [str(roundi(places)),"they already stand, so this changes nothing now" if built else "counted once, when they are finished"])
+	return ""
+
+## Today's mining and quarrying against the people's size, 0..2 (ConsequenceEngine).
+static func _industry()->float:
+	var state=WorldSimulation.state
+	return clampf(float(state.material_metrics.get("extracted_today",0.0))/maxf(1.0,float(state.population_exact)*0.08),0.0,2.0)
+
+# --- What the people's knowledge adds up to ---------------------------------------
+
+## How fully a known practice is carried out: its adoption, times the goods or
+## works it needs (the same level SocietyModel._practice_level uses).
+static func practice_level(id:String)->float:
+	var level:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,FIRST_ADOPTION)),0.0,1.0)
+	if Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id): level*=Goods.factor(id)
+	return level
+
+## The research-focus scale of a line (SocietyModel.practice_scale).
+static func focus_scale(line_id:String)->float:
+	var cache:=_frame()
+	var scales:Dictionary=cache.get_or_add("scales",{})
+	if scales.has(line_id): return float(scales[line_id])
+	var model=_model()
+	var scale:=1.0
+	if model!=null: scale=Society.practice_scale(line_id,model.line_focus,Society.neglect_for(model.line_focus))
+	scales[line_id]=scale
+	return scale
+
+## What one known practice adds to one total now, before the era's ceiling.
+static func contribution(id:String,key:String)->float:
+	var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+	var effects:Dictionary=definition.get("effects",{})
+	if not effects.has(key): return 0.0
+	return Society.scaled_effect(key,float(effects[key]),focus_scale(String(definition.get("dynamic",""))))*practice_level(id)
+
+## Every total as the engine sums it before the era's ceiling, with what each
+## known practice adds: {key: {"sum": x, "by": {id: amount}}}.
+static func raw_totals()->Dictionary:
+	var cache:=_frame()
+	if cache.has("raw"): return cache.raw
+	var result:Dictionary={}
+	var fields:Dictionary={}
+	for id_variant in WorldSimulation.state.known_discoveries:
+		var id:=String(id_variant)
+		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+		var effects:Dictionary=definition.get("effects",{})
+		if effects.is_empty(): continue
+		var level:=practice_level(id)
+		var field:=String(definition.get("dynamic",""))
+		var scale:=focus_scale(field)
+		var by_field:Dictionary=fields.get_or_add(field,{})
+		for key_variant in effects:
+			var key:=String(key_variant)
+			var amount:=Society.scaled_effect(key,float(effects[key_variant]),scale)*level
+			var slot:Dictionary=result.get_or_add(key,{"sum":0.0,"by":{}})
+			slot["sum"]=float(slot.sum)+amount
+			(slot.by as Dictionary)[id]=float((slot.by as Dictionary).get(id,0.0))+amount
+			by_field[key]=float(by_field.get(key,0.0))+amount
+	cache["raw"]=result
+	cache["fields"]=fields
+	return result
+
+## Each effect's current total from everything the people know, translated
+## like describe(), with the era ceiling, what it holds back, the lore keepers'
+## upkeep and the practices that add most. Sorted by research line, largest first.
+static func totals()->Array[Dictionary]:
+	var cache:=_frame()
+	if cache.has("totals"): return cache.totals
+	var model=_model()
+	var raw:=raw_totals()
+	var ids:Dictionary={}
+	for key:String in raw: ids[key]=true
+	if model!=null:
+		for key:String in model.effect_totals: ids[key]=true
+	var rows:Array[Dictionary]=[]
+	for key:String in ids:
+		var total:=float(model.effect(key)) if model!=null else float((raw.get(key,{}) as Dictionary).get("sum",0.0))
+		var slot:Dictionary=raw.get(key,{"sum":0.0,"by":{}})
+		var ceiling:Vector2=model.era_ceiling(key) if model!=null else Vector2(-INF,INF)
+		var sum:=float(slot.sum)
+		var capped:=clampf(sum,ceiling.x,ceiling.y)
+		var upkeep:=float(Society.SPECIALIST_UPKEEP.get(key,0.0))*float(model.specialist_excess) if model!=null else 0.0
+		var row:=describe(key,total,1.0)
+		row["total"]=total
+		row["raw"]=sum
+		row["ceiling"]=ceiling
+		row["held_back"]=sum-capped
+		row["upkeep"]=upkeep
+		row["line"]=line(key)
+		row["contributors"]=_contributors(slot.by)
+		row["notes"]=_total_notes(key,sum,capped,ceiling,upkeep)
+		rows.append(row)
+	var order:=Society.DYNAMICS
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var first:=order.find(String(a.line));var second:=order.find(String(b.line))
+		if first!=second: return first<second
+		return absf(float(a.total))>absf(float(b.total)))
+	cache["totals"]=rows
+	return rows
+
+## Plain notes on a total: held back by the age, and the keepers' upkeep.
+static func _total_notes(key:String,sum:float,capped:float,ceiling:Vector2,upkeep:float)->Array[String]:
+	var notes:Array[String]=[]
+	if absf(sum-capped)>0.000001:
+		var limit:=ceiling.x if sum<ceiling.x else ceiling.y
+		notes.append("Held back by our age: everything known adds up to %s, but this age allows %s; the rest (%s) counts only as later ages open. Scale bonuses for the same thing share this limit." % [percent(sum),percent(limit),percent(sum-capped)])
+	if absf(upkeep)>0.000001:
+		notes.append("Feeding more full-time lore keepers than this age can spare moves it by %s." % percent(upkeep))
+	return notes
+
+static func _contributors(by:Dictionary,limit:int=5)->Array[Dictionary]:
+	var ids:Array=by.keys().filter(func(id:Variant)->bool: return absf(float(by[id]))>0.0000000001)
+	ids.sort_custom(func(a:Variant,b:Variant)->bool: return absf(float(by[a]))>absf(float(by[b])))
+	var result:Array[Dictionary]=[]
+	for index in mini(limit,ids.size()):
+		var id:=String(ids[index])
+		result.append({"id":id,"name":String(WorldSimulation.discovery.discovery_definition(id).get("name",label(id))),"amount":float(by[ids[index]])})
+	return result
+
+## What one field's known practices add to each total now (before ceilings).
+static func field_totals(domain:String)->Dictionary:
+	raw_totals()
+	return ((_frame().get("fields",{}) as Dictionary).get(domain,{}) as Dictionary).duplicate()
+
+# --- Rows for the research pages --------------------------------------------------
+
+## One ledger row (hud/impact_ledger.gd) for an effect: `amount` at full use,
+## now at `level`, focus `scale`. mode "now" (a known practice), "would" (a
+## question not yet answered, shown at full use) or "total" (everything known).
+## `usage`, when given, says how widely the practice is carried out.
+static func ledger_row(key:String,amount:float,level:float=1.0,scale:float=1.0,mode:String="now",usage_said:String="")->Dictionary:
+	var said:=describe(key,amount,level if mode=="now" else 1.0,scale)
+	var usage:=""
+	match mode:
+		"now": usage="%s now, %s" % [percent(float(said.now)),usage_said if usage_said!="" else adoption_words(level)]
+		"would": usage="at full use; it starts with about %d in 100 households and spreads over years" % roundi(FIRST_ADOPTION*100.0)
+		_: usage="in all, from everything known"
+	var tone_name:String="inert" if bool(said.inert) else ("steer" if bool(said.steer_only) else String(["cost","neutral","good"][int(said.tone)+1]))
+	var notes:Array[String]=[]
+	if String(said.held)!="": notes.append(String(said.held))
+	return {"id":key,"key":key,"label":String(said.label),"amount":String(said.amount_words),"usage":usage,
+		"headline":_upper(meaning(said)),
+		"sentence":String(said.sentence),"feeds":said.feeds,"notes":notes,"tone":tone_name,"inert":bool(said.inert),
+		"direction":"More is better." if good(key)>0 else ("Less is better." if good(key)<0 else "Neither good nor bad in itself.")}
+
+## Rows for one discovery's effects: now (known) or at full use (not yet).
+static func discovery_rows(id:String,known:bool=true)->Array[Dictionary]:
+	var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+	var effects:Dictionary=definition.get("effects",{})
+	var level:=practice_level(id) if known else 1.0
+	var scale:=focus_scale(String(definition.get("dynamic",""))) if known else 1.0
+	var usage:=usage_words(id) if known else ""
+	var rows:Array[Dictionary]=[]
+	for key_variant in effects:
+		var row:=ledger_row(String(key_variant),float(effects[key_variant]),level,scale,"now" if known else "would",usage)
+		row["id"]="%s:%s" % [id,String(key_variant)]
+		rows.append(row)
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return absf(float((effects as Dictionary).get(a.key,0.0)))>absf(float((effects as Dictionary).get(b.key,0.0))))
+	return rows
+
+## The totals as ledger rows, with their notes and main sources.
+static func total_rows()->Array[Dictionary]:
+	var rows:Array[Dictionary]=[]
+	for total:Dictionary in totals():
+		if is_zero_approx(float(total.total)) and is_zero_approx(float(total.raw)): continue
+		var row:=ledger_row(String(total.key),float(total.total),1.0,1.0,"total")
+		(row.notes as Array).append_array(total.notes)
+		var sources:Array[String]=[]
+		for source:Dictionary in total.contributors: sources.append("%s %s" % [String(source.name),percent(float(source.amount))])
+		if not sources.is_empty(): (row.notes as Array).append("Most of it comes from: %s." % ", ".join(sources))
+		row["line"]=String(total.line)
+		row["total"]=float(total.total)
+		rows.append(row)
+	return rows
+
+## "Protection from sickness, safe drinking water and 2 more", for one-line summaries.
+static func summary(effects:Dictionary,limit:int=3)->String:
+	var keys_by_size:Array=effects.keys()
+	keys_by_size.sort_custom(func(a:Variant,b:Variant)->bool: return absf(float(effects[a]))>absf(float(effects[b])))
+	var names:Array[String]=[]
+	for index in mini(limit,keys_by_size.size()): names.append(_lower(label(String(keys_by_size[index]))) if index>0 else label(String(keys_by_size[index])))
+	if names.is_empty(): return ""
+	var rest:=keys_by_size.size()-names.size()
+	if rest>0: return "%s and %d more" % [", ".join(names),rest]
+	if names.size()==1: return names[0]
+	return "%s and %s" % [", ".join(names.slice(0,names.size()-1)),names[-1]]
+
+## What an explained effect moves first, without its amount: the part of
+## now_words after the arrow ("the health the people settle toward: up ...").
+static func meaning(said:Dictionary)->String:
+	var words:=String(said.get("now_words",""))
+	return words.get_slice(" → ",1) if " → " in words else words
+
+## Short lines for a long list's tooltip: each effect's name, size and what it
+## adds now; the full account is one click away (ledger rows).
+static func amount_lines(effects:Dictionary,level:float=1.0,scale:float=1.0,known:bool=true)->String:
+	if effects.is_empty(): return "Changes nothing by itself; it opens the way to later knowledge."
+	var lines:Array[String]=[]
+	for key_variant in effects:
+		var key:=String(key_variant)
+		var amount:=float(effects[key_variant])
+		var tail:=", now %s" % percent(Society.scaled_effect(key,amount,scale)*level) if known else " at full use"
+		lines.append("%s %s%s%s" % [label(key),percent(amount),tail," (nothing reads it yet)" if is_inert(key) else ""])
+	return "\n".join(lines)
+
+## Plain lines for a text slot or tooltip: one per effect, with its first use;
+## `usage` (usage_words) first when given.
+static func effect_lines(effects:Dictionary,level:float=1.0,scale:float=1.0,known:bool=true,usage:String="")->String:
+	if effects.is_empty(): return "Changes nothing by itself; it opens the way to later knowledge."
+	var lines:Array[String]=[]
+	if usage!="": lines.append("In use: %s." % usage)
+	for key_variant in effects:
+		var key:=String(key_variant)
+		var said:=describe(key,float(effects[key_variant]),level if known else 1.0,scale)
+		lines.append("%s %s%s → %s" % [String(said.label),String(said.amount_words),", now %s" % percent(float(said.now)) if known else " at full use",meaning(said)])
+	return "\n".join(lines)

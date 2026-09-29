@@ -194,14 +194,15 @@ static func plain_bottleneck(text:String)->String:
 	var reason:=text.get_slice(" — ",1) if " — " in text else text
 	return reason.left(1).to_upper()+reason.substr(1)+("" if reason.ends_with(".") else ".")
 
-## Costs a discovery brings rather than gains, when they go up.
-const COST_EFFECTS:=["labor_demand","fuel_demand","pollution","ecological_pressure","injury_risk","disease_exposure","storage_loss","food_spoilage","institutional_rigidity"]
+## Whether an amount of an effect is a cost rather than a gain: more of an
+## effect where less is better (SocietyModel.LOWER_IS_BETTER), or less of one
+## where more is better. The effect explainer holds the one direction per key.
 static func effect_is_cost(effect:String,value:float)->bool:
-	return (effect in COST_EFFECTS)==(value>0.0)
+	return preload("res://scripts/effect_explainer.gd").tone(effect,value)<0
 
-## "Food storage up about 3 in 100" rather than "+3.0%  food storage".
+## "Food preserving up about 3%" rather than "+3.0%  food storage".
 static func effect_sentence(effect:String,value:float)->String:
-	var name:=String(DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," ")))
+	var name:=preload("res://scripts/effect_explainer.gd").label(effect)
 	var amount:=absf(value)*100.0
 	var size:="about %d%%" % roundi(amount) if amount>=1.0 else "a little"
 	return "%s %s %s" % [name.left(1).to_upper()+name.substr(1),"up" if value>0.0 else "down",size]
