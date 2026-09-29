@@ -392,11 +392,13 @@ static func _succeed(civ_id:String,day:int)->void:
 	fresh["woman"]=heir_woman
 	fresh["lineage"]=lineage
 	# The child inherits the parent's reputation: grudges soften but stay, debts
-	# and bonds pass down whole.
+	# and bonds pass down whole. A people that writes its wrongs down keeps
+	# more of them (standing.gd memory_span: 0.75 told, 0.825 written, 0.9 printed).
+	var kept:=minf(0.9,0.75+0.075*(float(preload("res://scripts/standing.gd").memory_span(civ_id))-1.0))
 	for g in old.get("grudges",[]):
 		if g is Dictionary and not bool(g.get("settled",false)):
 			var copy:Dictionary=(g as Dictionary).duplicate(true)
-			copy["weight"]=float(g.weight)*0.75; copy["inherited"]=true; copy["returned"]=false
+			copy["weight"]=float(g.weight)*kept; copy["inherited"]=true; copy["returned"]=false
 			(fresh.grudges as Array).append(copy)
 	for d in old.get("debts",[]):
 		if d is Dictionary and not bool(d.get("settled",false)): (fresh.debts as Array).append((d as Dictionary).duplicate(true))

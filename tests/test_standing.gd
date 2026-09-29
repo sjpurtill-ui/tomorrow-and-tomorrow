@@ -207,3 +207,12 @@ func test_pride_forgives_the_chiefs_and_shame_blames_them()->void:
 	GameState.simulation_metrics["standing_pride"]=0.5
 	var plain_cost:=float(Aims.FAIL_METRICS.legitimacy)*Standing.blame()
 	assert_float(absf(proud_cost)).is_less(absf(plain_cost))
+
+func test_memory_grows_with_what_a_people_knows()->void:
+	var Voice:=preload("res://scripts/character_voice.gd")
+	Voice.knowledge_override["civ_oral"]=[]
+	Voice.knowledge_override["civ_print"]=["printing_process"]
+	assert_float(Standing.memory_span("civ_oral")).is_equal(1.0)
+	assert_float(Standing.memory_span("civ_print")).is_equal(3.0)
+	Voice.knowledge_override.erase("civ_oral")
+	Voice.knowledge_override.erase("civ_print")

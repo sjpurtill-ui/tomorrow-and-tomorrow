@@ -65,6 +65,18 @@ const LEANING:={"might":"A people of spears","endurance":"A hardy people","wealt
 const ALSO:={"might":"strong in spears","endurance":"hard to starve out","wealth":"rich in stores","reach":"known far and wide","persuasion":"well spoken","splendor":"rich in works","genius":"learned","cunning":"watchful","order":"orderly"}
 const NEGLECT:={"might":"with few spears","endurance":"who could not hold out long","wealth":"with thin stores","reach":"known to few","persuasion":"whose words carry little weight","splendor":"with nothing to show","genius":"slow to learn","cunning":"blind to what others plan","order":"quarrelsome"}
 
+## How long a people remembers what was done to it, against oral memory: a
+## people that writes keeps its dread and its grudges twice as long, one that
+## prints three times (docs/STANDING_DESIGN.md section 6). Read from what that
+## people itself knows.
+static func memory_span(civ_id:String)->float:
+	var voice:=load("res://scripts/character_voice.gd") as GDScript
+	if voice==null or civ_id=="": return 1.0
+	var known:Array=voice.call("known_ids",civ_id)
+	for id in preload("res://scripts/hud/era_words.gd").STATISTICS:
+		if known.has(id): return 3.0
+	return 2.0 if (voice.call("era_tags",civ_id) as Array).has("writing") else 1.0
+
 static func _lives()->GDScript:
 	return load(LIVES_PATH) as GDScript if ResourceLoader.exists(LIVES_PATH) else null
 
