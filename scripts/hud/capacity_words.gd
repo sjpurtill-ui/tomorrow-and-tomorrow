@@ -173,7 +173,31 @@ static func _era(text:String)->String:
 	return text
 
 ## One told change as a row's name: the two largest reasons.
+## A told change that took more than a month to come about is a run.
+const RUN_DAYS:=45
+
+static func is_run(change:Dictionary)->bool:
+	return int(change.get("day",0))-int(change.get("since",0))>=RUN_DAYS
+
+## How long a run took, as the Chronicle counts time: "over a season",
+## "over three seasons", "over a year", "over three years".
+static func over(days:int)->String:
+	var seasons:=maxi(1,roundi(float(days)/91.3))
+	if seasons<4: return "over a season" if seasons==1 else "over %s seasons" % EraWords.count_word(seasons)
+	var years:=maxi(1,roundi(float(days)/365.25))
+	return "over a year" if years==1 else "over %s years" % EraWords.count_word(years)
+
+## One told change as a row's name. A month's change: its two largest reasons,
+## "More carrying and hauling (+6), Pack animals taken up (+1)". A run: its
+## main cause, what that cause added in all, and how long it took, "More
+## carrying and hauling: +6 over three years".
 static func change_name(change:Dictionary)->String:
+	if is_run(change):
+		var span:=int(change.get("day",0))-int(change.get("since",0))
+		for reason_pair:Array in change.get("reasons",[]):
+			if String(reason_pair[0])=="~": continue
+			return "%s: %s %s" % [reason_words(String(reason_pair[0]),float(reason_pair[1])),points(float(reason_pair[1])),over(span)]
+		return "Many small changes: %s %s" % [points(float(change.get("change",0.0))),over(span)]
 	var parts:PackedStringArray=[]
 	for reason_pair:Array in change.get("reasons",[]):
 		var key:=String(reason_pair[0])
@@ -184,6 +208,15 @@ static func change_name(change:Dictionary)->String:
 		if parts.size()>=2: break
 	if parts.is_empty(): return "Many small changes (%s)" % points(float(change.get("change",0.0)))
 	return ", ".join(parts)
+
+## When a told change came about: its season, or where a run began and ended.
+static func change_when(change:Dictionary)->String:
+	if is_run(change): return "%s to %s" % [EraWords.when(int(change.get("since",0))),EraWords.when(int(change.get("day",0)))]
+	return EraWords.when(int(change.get("day",0)))
+
+## How many of its reasons a change's name already says.
+static func named_reasons(change:Dictionary)->int:
+	return 1 if is_run(change) else 2
 
 ## A practice's own name keeps its capital letter inside a sentence.
 static func _keeps_capital(key:String)->bool:

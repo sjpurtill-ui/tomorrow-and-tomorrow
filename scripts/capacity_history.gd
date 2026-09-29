@@ -24,10 +24,14 @@ extends RefCounted
 ##      food taken by raiders or war, and our dead in battle. An event is never
 ##      given a share it cannot be shown to have.
 ## Small changes are gathered until they come to a point, then told as one;
-## a season that comes round as it did last year is drawn, not told.
+## a season that comes round as it did last year is drawn, not told. A told
+## change that carries on the one before it (the same main cause, moving the
+## same way, with no event in either) is folded into it: one line with its
+## total and span, marked once on the chart where the run stands now.
 ##
 ## Storage stays small (about 60 KB at most): one two-byte word per capacity
-## and month holding the value and the chart's mark, the last KEEP_WHY told
+## and month holding the value, the chart's mark and whether a practice feeding
+## it was learned that month, the last KEEP_WHY told
 ## changes per capacity, what is still gathering, and one reading of the
 ## inputs and practices. A practice is named by its place in
 ## known_discoveries, which only grows; events are stored as short codes and
@@ -59,7 +63,12 @@ const MARK_BUILDING:=4
 const MARK_DECREE:=5
 const MARK_CRISIS:=6
 const MARK_NAMES:=["","discovery","up","down","building","decree","crisis"]
+## A month's word: the value in tenths of a point (bits 0-9), the mark of the
+## change told that month (bits 10-12), and whether a practice feeding the
+## capacity was learned that month (bit 13), which shows when nothing is told.
 const _VALUE_BITS:=1023
+const _MARK_BITS:=7<<10
+const _LEARNED_BIT:=1<<13
 
 ## Policy channels (ConsequenceEngine.policy_effect) and the capacity inputs
 ## they move, as consequence_engine.gd reads them into the daily metrics.
@@ -167,8 +176,22 @@ static func append_month(history:Dictionary,day:int,values:Dictionary)->int:
 static func _set_mark(history:Dictionary,dynamic_id:String,index:int,mark:int)->void:
 	var series:PackedByteArray=history.values[dynamic_id]
 	if index<0 or index*2+2>series.size(): return
-	series.encode_u16(index*2,(series.decode_u16(index*2)&_VALUE_BITS)|(mark<<10))
+	series.encode_u16(index*2,(series.decode_u16(index*2)&~_MARK_BITS)|((mark&7)<<10))
 	history.values[dynamic_id]=series
+
+static func _set_learned(history:Dictionary,dynamic_id:String,index:int)->void:
+	var series:PackedByteArray=history.values[dynamic_id]
+	if index<0 or index*2+2>series.size(): return
+	series.encode_u16(index*2,series.decode_u16(index*2)|_LEARNED_BIT)
+	history.values[dynamic_id]=series
+
+## The row of a recorded day, or -1.
+static func _row_of(history:Dictionary,day:int)->int:
+	var days:PackedInt32Array=history.get("days",PackedInt32Array())
+	for index in range(days.size()-1,-1,-1):
+		if days[index]==day: return index
+		if days[index]<day: break
+	return -1
 
 ## What moved each capacity between the last month and this one:
 ## {dynamic: {"d": change, "r": {reason: share}}}. The shares add up to d.
@@ -334,7 +357,8 @@ static func _effect_changes(model:Object,last:Dictionary,basis:Dictionary,before
 	return result
 
 ## Adds a month to what a capacity has gathered, and tells it once it comes to
-## a point. Marks the month on the chart.
+## a point: a new line, or the run before it carried on. Marks the month on the
+## chart (a run is marked once, where it stands now).
 static func accumulate(history:Dictionary,dynamic_id:String,month:Dictionary,events:Array,index:int,day:int,value:float)->void:
 	var pending:Dictionary=history.pending.get(dynamic_id,{})
 	if pending.is_empty(): pending=_fresh(day,value)
@@ -361,16 +385,26 @@ static func accumulate(history:Dictionary,dynamic_id:String,month:Dictionary,eve
 		if not held: gathered.append_array(code)
 	while gathered.size()>PENDING_EVENTS*3: gathered=gathered.slice(3)
 	pending.e=gathered
-	if absf(float(pending.d))>=TELL_AT and not _seasonal(history,dynamic_id,pending,day,value):
+	if learned: _set_learned(history,dynamic_id,index)
+	if absf(float(pending.d))>=TELL_AT and _seasonal(history,dynamic_id,pending,day,value):
+		# Only the season coming round: drawn on the line, not told, and not
+		# carried into the next change either, which is gathered from here.
+		pending=_fresh(day,value)
+	elif absf(float(pending.d))>=TELL_AT:
 		var entry:=_entry(pending,day,value)
 		var told:Array=history.why.get(dynamic_id,[])
-		told.append(entry)
-		while told.size()>KEEP_WHY: told.pop_front()
+		if not told.is_empty() and _can_fold(told[-1],entry):
+			# The run carries on: one line, marked where it stands now.
+			var earlier:Array=told[-1]
+			_set_mark(history,dynamic_id,_row_of(history,int(earlier[0])),MARK_NONE)
+			entry=_folded(earlier,entry)
+			told[-1]=entry
+		else:
+			told.append(entry)
+			while told.size()>KEEP_WHY: told.pop_front()
 		history.why[dynamic_id]=told
 		_set_mark(history,dynamic_id,index,int(entry[4]))
 		pending=_fresh(day,value)
-	elif learned:
-		_set_mark(history,dynamic_id,index,MARK_DISCOVERY)
 	history.pending[dynamic_id]=pending
 
 ## Whether a gathered change is only the year's own round: no event in it,
@@ -462,6 +496,49 @@ static func _mark(reasons:Array,codes:Array,change:float)->int:
 	for code:Array in codes:
 		if String(code[0])=="decree" and top in ["health","cohesion","security","legitimacy","hauling","materials","learning","ecology","food"]: return MARK_DECREE
 	return MARK_UP if change>0.0 else MARK_DOWN
+
+## Whether a told change carries on the one before it: straight after it, the
+## same main cause moving the same way, and no event in either. An event (a
+## raid, a work built, a decree) or a turn keeps its own line.
+static func _can_fold(earlier:Array,later:Array)->bool:
+	if earlier.size()<7 or later.size()<7: return false
+	if not (earlier[6] as Array).is_empty() or not (later[6] as Array).is_empty(): return false
+	if int(later[1])!=int(earlier[0]): return false
+	var first:=_main_reason(earlier[5] as Array)
+	var second:=_main_reason(later[5] as Array)
+	if first.is_empty() or second.is_empty() or String(first[0])!=String(second[0]): return false
+	if signi(int(first[1]))!=signi(int(second[1])): return false
+	return signi(_flat_sum(earlier[5] as Array))==signi(_flat_sum(later[5] as Array))
+
+## One told change made of two in a row: from where the first began to where
+## the second ends, their reasons summed (the largest kept, the rest together).
+static func _folded(earlier:Array,later:Array)->Array:
+	var totals:Dictionary={}
+	for entry:Array in [earlier,later]:
+		var flat:Array=entry[5]
+		for at in range(0,flat.size(),2): totals[String(flat[at])]=int(totals.get(String(flat[at]),0))+int(flat[at+1])
+	var keys:Array=totals.keys()
+	keys.erase("~")
+	keys.sort_custom(func(a,b)->bool:return absi(int(totals[a]))>absi(int(totals[b])))
+	var kept:Array=[]
+	var rest:=int(totals.get("~",0))
+	for key in keys:
+		if kept.size()<KEEP_REASONS*2 and absi(int(totals[key]))>=roundi(SMALLEST*10000.0): kept.append_array([key,int(totals[key])])
+		else: rest+=int(totals[key])
+	if rest!=0: kept.append_array(["~",rest])
+	return [int(later[0]),int(earlier[1]),int(earlier[2]),int(later[3]),_mark(kept,[],float(_flat_sum(kept))/10000.0),kept,[]]
+
+## The largest named reason of a told change as [key, amount], or [] when
+## only the small ones together are left.
+static func _main_reason(flat:Array)->Array:
+	for at in range(0,flat.size(),2):
+		if String(flat[at])!="~": return [String(flat[at]),int(flat[at+1])]
+	return []
+
+static func _flat_sum(flat:Array)->int:
+	var total:=0
+	for at in range(1,flat.size(),2): total+=int(flat[at])
+	return total
 
 
 # --- Events of the interval -------------------------------------------------
@@ -583,7 +660,10 @@ static func months(dynamic_id:String)->Array[Dictionary]:
 	var series:PackedByteArray=(history.get("values",{}) as Dictionary).get(dynamic_id,PackedByteArray())
 	for index in mini(days.size(),series.size()/2):
 		var word:=series.decode_u16(index*2)
-		result.append({"day":days[index],"value":float(word&_VALUE_BITS)/10.0,"mark":word>>10})
+		# A month with no told change still shows a practice learned in it.
+		var mark:=(word&_MARK_BITS)>>10
+		if mark==MARK_NONE and word&_LEARNED_BIT: mark=MARK_DISCOVERY
+		result.append({"day":days[index],"value":float(word&_VALUE_BITS)/10.0,"mark":mark})
 	if result.is_empty():
 		result.append({"day":int(GameState.elapsed_days),"value":clampf(float(GameState.society_capacities.get(dynamic_id,0.0)),0.0,1.0)*100.0,"mark":MARK_NONE})
 	return result
@@ -607,11 +687,23 @@ static func change_over(dynamic_id:String,span:int=365)->Dictionary:
 	return {"points":now-float(reference.value),"from":float(reference.value),"since":int(reference.day),"full":int(reference.day)<=int(GameState.elapsed_days)-span}
 
 ## The latest told changes, newest first: [{day, since, from, to (0-100),
-## change (points), reasons:[[key, points]], events:[[kind, a, b]], mark}].
-## The reasons, with the rest too small to name, add up to the change.
+## change (points), reasons:[[key, points]], events:[[kind, a, b]], mark,
+## folded_days}]. The reasons, with the rest too small to name, add up to the
+## change. A run stored line by line (before runs were folded as they came) is
+## folded here too; folded_days are the days its earlier lines were told.
 static func changes(dynamic_id:String,limit:int=KEEP_WHY)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	var told:Array=(_history().get("why",{}) as Dictionary).get(dynamic_id,[])
+	var stored:Array=(_history().get("why",{}) as Dictionary).get(dynamic_id,[])
+	var told:Array=[]
+	var folded_days:Array=[]
+	for entry_variant in stored:
+		var entry:Array=entry_variant
+		if not told.is_empty() and _can_fold(told[-1],entry):
+			(folded_days[-1] as Array).append(int((told[-1] as Array)[0]))
+			told[-1]=_folded(told[-1],entry)
+		else:
+			told.append(entry)
+			folded_days.append([])
 	for index in range(told.size()-1,-1,-1):
 		var entry:Array=told[index]
 		var reasons:Array=[]
@@ -623,7 +715,7 @@ static func changes(dynamic_id:String,limit:int=KEEP_WHY)->Array[Dictionary]:
 		var events:Array=[]
 		var codes:Array=entry[6]
 		for at in range(0,codes.size(),3): events.append(codes.slice(at,at+3))
-		result.append({"day":int(entry[0]),"since":int(entry[1]),"from":float(entry[2])/10.0,"to":float(entry[3])/10.0,"change":change,"mark":int(entry[4]),"reasons":reasons,"events":events})
+		result.append({"day":int(entry[0]),"since":int(entry[1]),"from":float(entry[2])/10.0,"to":float(entry[3])/10.0,"change":change,"mark":int(entry[4]),"reasons":reasons,"events":events,"folded_days":folded_days[index]})
 		if result.size()>=limit: break
 	return result
 
