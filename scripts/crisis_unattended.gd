@@ -148,10 +148,10 @@ static func _sick_leave(c:Dictionary,x:Dictionary)->void:
 
 static func _open_drought(s:Dictionary,day:int,x:Dictionary)->void:
 	var rng:=CS._rng("drought:%d" % day)
-	var sev:=clampf(1.0-float(x.weather_season),0.0,0.6)
+	var sev:=maxf(clampf(1.0-float(x.weather_season),0.0,0.6),CS.drought_depth(day))
 	var c:=_new(s,"drought",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
 	_plan_deaths(s,c,CS._lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
-	if sev>=0.18 and not bool(c.severe): c.severe=true; _stat(s,"drought","severe")
+	if sev>=CS.DROUGHT_COURT_DEPTH and not bool(c.severe): c.severe=true; _stat(s,"drought","severe")
 	_answer(s,c,"carry")
 
 static func _open_cold(s:Dictionary,day:int,x:Dictionary)->void:

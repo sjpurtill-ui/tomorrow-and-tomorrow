@@ -27,7 +27,9 @@ const CARD_WIDTH:=430.0
 const BANNER_MAX_HEIGHT:=180.0
 const Painting:=preload("res://scripts/hud/subject_painting.gd")
 const TOP:=70.0
-const ACCENTS:={"discovery":Color("9db9d7"),"birth":Color("e0b88a"),"death":Color("b9ada0"),"contact":Color("d8a56a"),"settlement":Color("c7b27a"),"founding":Color("f0b25a"),"ceremony":Color("e8c35a"),"milestone":Color("f0c96a"),"war":Color("d0735f"),"omen":Color("a9b7e0"),"court":Color("e1b765")}
+const ACCENTS:={"discovery":Color("9db9d7"),"birth":Color("e0b88a"),"death":Color("b9ada0"),"contact":Color("d8a56a"),"settlement":Color("c7b27a"),"founding":Color("f0b25a"),"ceremony":Color("e8c35a"),"milestone":Color("f0c96a"),"war":Color("d0735f"),"omen":Color("a9b7e0"),"court":Color("e1b765"),
+	"drought":Color("e3ad52"),"flood":Color("8db8dc"),"fire":Color("e88a5c"),"sickness":Color("bdc27c"),"stranger":Color("bea6dc"),"cold":Color("b3c6dc"),"hunger":Color("cfa672"),"thinning":Color("b9a07c"),
+	"scout":Color("a9c79c"),"work":Color("dcb783"),"hearth_count":Color("d2c6a4")}
 
 var terrain:Node
 var hud:Node

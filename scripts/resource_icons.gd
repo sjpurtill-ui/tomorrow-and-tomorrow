@@ -283,6 +283,33 @@ static func _moment_glyph(kind:String,c:Color)->Array:
 		"court": return [_ring(28,30,13,2.4,c),_t(28,20,23,33,33,33,hi),_c(28,31,3,Color(1,0.9,0.6,0.95))]
 		"hearth_count": return [_s(15,16,15,40,2.4,c),_s(21,16,21,40,2.4,c),_s(27,16,27,40,2.4,c),_s(33,16,33,40,2.4,c),_s(11,34,39,22,2.2,hi)]
 		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
+		# The troubles a year is remembered by (chronicle_annals.gd glyph_of).
+		# A hard sun over cracked ground.
+		"drought":
+			var sun:Array=[_c(28,19,6.5,hi)]
+			for i in 8:
+				var a:=TAU*float(i)/8.0
+				sun.append(_s(28+cos(a)*9.5,19+sin(a)*9.5,28+cos(a)*12.5,19+sin(a)*12.5,1.8,c))
+			sun.append_array([_s(9,39,47,39,2.4,dim),_s(19,39,22,44,1.4,dim),_s(22,44,20,48,1.2,dim),_s(35,39,32,44,1.4,dim),_s(32,44,35,48,1.2,dim)])
+			return sun
+		# A hut roof above the water, and the waves.
+		"flood": return [_t(28,12,17,24,39,24,hi),_rr(28,28,8,4,1,c),
+			_s(9,35,15,31,2.2,hi),_s(15,31,21,35,2.2,hi),_s(21,35,27,31,2.2,hi),_s(27,31,33,35,2.2,hi),_s(33,35,39,31,2.2,hi),_s(39,31,45,35,2.2,hi),
+			_s(12,43,18,39,2.0,c),_s(18,39,24,43,2.0,c),_s(24,43,30,39,2.0,c),_s(30,39,36,43,2.0,c),_s(36,43,42,39,2.0,c)]
+		# Flames over a hut, and their smoke.
+		"fire": return [_rr(28,40,13,4,1,dim),_t(23,11,14,36,32,36,hi),_t(34,17,27,36,41,36,c),_t(24,21,19,36,29,36,Color(1,0.92,0.62,0.95)),
+			_c(38,10,3.2,Color(0.62,0.60,0.56,0.8)),_c(42,6,2.2,Color(0.62,0.60,0.56,0.6))]
+		# One laid down, and the heat over them.
+		"sickness": return [_s(9,41,47,41,1.6,dim),_c(15,34,4,hi),_rr(30,35,11,3.8,3,c),_s(24,26,24,21,1.6,hi),_s(30,24,30,18,1.6,hi),_s(36,26,36,21,1.6,hi)]
+		# One laid down, and the stranger who brought it.
+		"stranger": return [_s(9,41,47,41,1.6,dim),_c(13,35,3.6,hi),_rr(25,36,9,3.4,3,c),_c(41,19,3.4,dim.lightened(0.25)),_rr(41,29,3.6,7,2.5,dim.lightened(0.25)),_s(30,26,35,22,1.4,hi)]
+		# The sun veiled, and frost beneath.
+		"cold": return [_c(28,20,9,Color(hi,0.8)),_s(12,17,44,17,2.2,Color(0.035,0.066,0.060,0.9)),_s(12,23,44,23,2.2,Color(0.035,0.066,0.060,0.9)),
+			_s(28,33,28,47,1.5,c),_s(22,36,34,44,1.5,c),_s(34,36,22,44,1.5,c)]
+		# An empty bowl.
+		"hunger": return [_c(28,28,13,c),_rr(28,21,15,7.5,0,Color(0.035,0.066,0.060,1)),_s(14,28,42,28,2.4,hi),_c(28,33,4,Color(0.035,0.066,0.060,0.9)),_rr(28,43,6,1.6,1,dim)]
+		# A dead tree on worn ground.
+		"thinning": return [_s(9,42,47,42,2.2,dim),_rr(28,37,2.4,5,1,c),_s(28,33,28,15,1.8,c),_s(28,27,20,19,1.6,c),_s(28,23,36,15,1.6,c),_s(20,19,17,20,1.2,c),_s(28,31,35,27,1.4,c)]
 		# The world view (hud/world_globe.gd): a ring of the world with its
 		# graticule, the side meridians bowed in short strokes.
 		"world": return [_ring(28,28,15,2.4,hi),_s(13.5,28,42.5,28,1.6,c),_s(16,20,40,20,1.2,c),_s(16,36,40,36,1.2,c),_s(28,13,28,43,1.6,c),

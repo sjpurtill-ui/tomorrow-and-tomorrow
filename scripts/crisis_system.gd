@@ -119,6 +119,16 @@ const GRAVE_SICK_SHARE:=0.10
 ## A mild sickness that kills this many before its turn comes to court then.
 const ESCALATE_DEATHS:=2
 const MILD_LOG_MAX:=40
+## A dry spell comes to court only when the season's gathering will fall by a
+## fifth or more at its worst (drought_depth). A shallower one is carried by
+## the people's own custom and told in the year's entry, like a mild sickness:
+## on a site of middling rainfall that stages about one dry season in ten
+## years instead of one in four, and none of the shallow ones names a year.
+const DROUGHT_COURT_DEPTH:=0.20
+## A dry season this deep is remembered as the year the springs failed.
+const DROUGHT_FAILED_DEPTH:=0.28
+## How far ahead the officials judge a dry spell's worst (days).
+const DROUGHT_LOOKAHEAD:=120
 
 const TYPES:={
 	"hunger":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"nutrition"},
@@ -429,6 +439,19 @@ static func _season_wave(day:int)->float:
 	var food=WorldSimulation.food
 	if food==null or not is_instance_valid(food) or not food.has_method("_environment_mix") or not is_instance_valid(PlanetEnvironment): return 0.0
 	return float(PlanetEnvironment.season_wave(food.call("_environment_mix"),float(day)))
+
+## How deep a dry spell beginning on `day` will go: the shortfall of the
+## season's gathering at its worst over the next DROUGHT_LOOKAHEAD days (0 = a
+## normal season, 0.2 = a fifth less). The weather is known a few months ahead
+## (FoodSystem's own pulse), so the officials judge a dry season by its worst,
+## not by the first week it crosses the line.
+static func drought_depth(day:int)->float:
+	var worst:=_weather_mean(day-24,day+36)
+	var t:=day+6
+	while t<=day+DROUGHT_LOOKAHEAD:
+		worst=minf(worst,_weather_mean(t-24,t+36))
+		t+=6
+	return clampf(1.0-worst,0.0,0.6)
 
 static func _weather_mean(from_day:int,to_day:int)->float:
 	var total:=0.0; var n:=0
@@ -789,6 +812,29 @@ static func _open_mild(c:Dictionary,day:int)->void:
 		_metric("cohesion",0.004)
 	_log("mild","%s went round %s; %d fell ill." % [_cap(String(c.name)),String(c.where),int(c.sick)],{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":String(c.choice)})
 
+static func _open_quiet_drought(c:Dictionary,day:int)->void:
+	## A dry spell the people carry: no court, no cards. They do what the
+	## holder does when the god is silent (carry water from farther off, the
+	## same answer every other people gives) and the year's entry tells it.
+	c["quiet"]=true
+	c["season"]=_season(day)
+	c["season_part"]=_season_part(day)
+	_stat("drought","mild")
+	c.choice="carry"
+	_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
+	c.mult=float(c.mult)*death_factor(c,"carry")
+	_log("mild","%s: a dry spell the people carry by custom." % _cap(String(c.name)),{"type":"drought","sub":"drought","name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":"carry"})
+
+static func _end_quiet_drought(c:Dictionary,day:int)->void:
+	## A shallow dry spell passes as it came: its dead (rarely any) are
+	## counted and named, and the year's entry tells it in one line.
+	_due_deaths(c,0.6,"end")
+	var fact:={"id":String(c.id),"kind":"drought","name":String(c.name),"season":String(c.get("season","")),"part":String(c.get("season_part","")),
+		"days":day-int(c.start),"deaths":int(c.deaths),"dead":(c.dead as Array).slice(0,3),"sev":float(c.get("sev",0.0)),"custom":String(c.choice),"start":int(c.start),"end":day}
+	if Chronicle.active(): ANNALS.note_dry(Chronicle.data(),fact)
+	_log("mild_end","%s passed; %d died." % [_cap(String(c.name)),int(fact.deaths)],{"type":"drought","crisis":String(c.id),"deaths":int(fact.deaths),"m":float(c.m),"mult":float(c.mult)})
+	_close(c)
+
 static func _civ_pool(civ:Dictionary)->float:
 	var pop:=float(civ.get("population",100.0))
 	var towns:=maxf(1.0,float(civ.get("settlement_count",civ.get("territory",1.0))))
@@ -818,10 +864,13 @@ static func _open_stranger(day:int,x:Dictionary,civ:Dictionary)->void:
 
 static func _open_drought(day:int,x:Dictionary)->void:
 	var rng:=_rng("drought:%d" % day)
-	var sev:=clampf(1.0-float(x.weather_season),0.0,0.6)
-	var c:=_new("drought","drought","the Dry Year of %s" % _year_words(day) if sev<0.2 else "the Year the Springs Failed",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
+	var sev:=maxf(clampf(1.0-float(x.weather_season),0.0,0.6),drought_depth(day))
+	var c:=_new("drought","drought","the Dry Year of %s" % _year_words(day) if sev<DROUGHT_FAILED_DEPTH else "the Year the Springs Failed",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
 	_plan_deaths(c,_lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
-	if sev>=0.18: c["severe"]=true; _stat("drought","severe")
+	if sev>=DROUGHT_COURT_DEPTH: c["severe"]=true; _stat("drought","severe")
+	if sev<DROUGHT_COURT_DEPTH:
+		_open_quiet_drought(c,day)
+		return
 	# Told a little differently each time: the chronicle keeps every dry year.
 	var dry_words:=_pick(["The rain has not come. The gathering grounds are brown and the %s is low.","No rain for weeks. The %s has shrunk back from its banks and the grass crackles underfoot.","The sky stays hard and clear. The seed-grass is brown before it has filled, and the %s is low."],"dry:%s" % String(c.id))
 	var summary:=(dry_words % ("river" if bool(x.river) else "water"))+(" "+_pick(["What we gather this season will be about %d parts in ten of a good year.","The gatherers expect about %d parts in ten of what a good year brings.","At this rate the season will give about %d parts in ten of the usual."],"dry_tail:%s" % String(c.id)) % clampi(roundi(float(x.weather_season)*10.0),3,9))
@@ -1024,8 +1073,10 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		c.hunger0=true
 	var n:=_due_deaths(c,0.4,"mid")
 	if bool(c.get("quiet",false)):
-		# A mild sickness says nothing at its turn, unless it has turned grave.
-		if int(c.deaths)>=ESCALATE_DEATHS or is_grave(float(c.pop0),float(c.m)): _escalate(c,day,n)
+		# A mild sickness or a shallow dry spell says nothing at its turn,
+		# unless it has turned grave or the dry weather has deepened.
+		var grave:=1.0-_weather_mean(day-18,day+24)>=DROUGHT_COURT_DEPTH if type=="drought" else is_grave(float(c.pop0),float(c.m))
+		if int(c.deaths)>=ESCALATE_DEATHS or grave: _escalate(c,day,n)
 		return
 	var text:=""
 	var needs:=false
@@ -1078,9 +1129,13 @@ static func _escalate(c:Dictionary,day:int,n:int)->void:
 	if n>0: dead_words=" %s died of it%s." % [_cap(_count(n)),(": "+", ".join(PackedStringArray(names.slice(maxi(0,names.size()-mini(n,3)),names.size())))) if not names.is_empty() else ""]
 	var custom:="The sick were kept apart, as the people do now, and still it spreads." if String(c.choice)=="apart" else "Everyone has been tending the sick, and it spreads with them."
 	var text:="%s went round %s like any fever, but it has not passed. %s%s It has reached the children's fire." % [_cap(String(c.name)),String(c.get("where","the camp")),custom,dead_words]
+	var title:="The Sickness Spreads"
+	if String(c.type)=="drought":
+		text="The dry spell has not broken. Water is carried from farther off every week, and the springs near camp are failing.%s" % dead_words
+		title="The Rain Still Does Not Come"
 	(c.notes as Array).append(text)
 	var waits:=" %s waits to be summoned." % _given(String(c.holder)) if String(c.holder)!="" else ""
-	_record(c,"onset","The Sickness Spreads",text+waits,"moment","omen",true,true)
+	_record(c,"onset",title,text+waits,"moment","omen",true,true)
 	_log("onset",text,{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false)),"escalated":true})
 	c["mid_decide_by"]=day+MID_DECIDE_DAYS
 	c.end_day=maxi(int(c.end_day),day+MID_DECIDE_DAYS+14)
@@ -1166,6 +1221,9 @@ static func _sickness_after(c:Dictionary,day:int)->void:
 static func _end_mild(c:Dictionary,day:int)->void:
 	## A mild sickness ends as it began, without the court: its dead are
 	## counted and named, and the year's entry tells it in one line.
+	if String(c.type)=="drought":
+		_end_quiet_drought(c,day)
+		return
 	_due_deaths(c,0.6,"end")
 	_sickness_after(c,day)
 	var fact:={"id":String(c.id),"kind":String(c.kind),"name":String(c.name),"where":String(c.get("where","")),"season":String(c.get("season","")),
