@@ -130,6 +130,24 @@ readings: food first; guards and warriors in proportion to the Envy, Contempt
 and Resentment neighbours actually hold; then the people's ambition; never
 piling everyone into one trade (diminishing returns make it pointless).
 
+Food (2026-09-29): a food worker spends `FoodSystem.FOOD_WORK_SHARE` (0.7) of
+the day getting food; the rest carries, grinds, cooks and stores it, as the
+historical share of labour on food counts both. Before this, 60% of the people
+on food brought in about twice what was eaten, so food never pinched and a
+ruler could move a third of the people to research for free. Now:
+
+- planners work out the share of hands food needs from what each hand brings in,
+  and plan up to `RESERVE_MARGIN` (15%) more while the stores are short of
+  `RESERVE_TARGET_DAYS` (60 days, or what the stores can hold);
+- their floor is `FOOD_FLOOR_OF_TYPICAL` (90%) of the era's typical share, so a
+  people ahead in farming frees hands and one behind must find more;
+- the ruler's own split still has no floor: a lopsided split shows its cost.
+
+Fast-sim reference (tools/sim, 2 seeds, good site): the Headman keeps about 55%
+on food with a 40-60% margin, population and discoveries as before; a poor dry
+site goes all in on food and holds 25-60 people; research-heavy grows to about
+1,500 by year 600 against 3,500 for a balanced people.
+
 ## 8. Build order
 
 1. Research without walls (done: a3b70597).

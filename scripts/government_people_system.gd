@@ -1423,7 +1423,15 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 	var produced:=maxf(0.0,float(metrics.get("food_production",0)))
 	var previous_share:=clampf(float(metrics.get("food_labor_share",0)),0.0,1.0)
 	if demand>0.0 and previous_share>0.0:
-		var buffer:=1.08 if bool(guard.food) else 1.02
+		# Planners keep a reserve against the lean season and bad years: while
+		# the stores hold less than RESERVE_TARGET_DAYS they plan for more than
+		# today's need, in proportion to how far short the stores are.
+		# Never more than the stores can hold: before storage pits a camp keeps
+		# only what its baskets and bundles carry.
+		var target:=RESERVE_TARGET_DAYS
+		if WorldSimulation.food!=null and WorldSimulation.food.has_method("_food_storage_capacity"):target=minf(target,float(WorldSimulation.food._food_storage_capacity())/demand*0.8)
+		var reserve_gap:=clampf((target-float(metrics.get("food_days",target)))/maxf(1.0,target),0.0,1.0)
+		var buffer:=(1.08 if bool(guard.food) else 1.02)+RESERVE_MARGIN*reserve_gap
 		var ceiling:=.72 if bool(guard.water) else .85
 		var needed:=clampf(previous_share*demand*buffer/maxf(.01,produced),0.0,ceiling)
 		var other:=0.0
@@ -1442,6 +1450,10 @@ func _apply_survival_guard(weights:Dictionary)->Dictionary:
 ## planners move surplus food workers to other work.
 const SURPLUS_RELEASE_DAYS:=45.0
 const SURPLUS_RELEASE_MARGIN:=1.15
+## The reserve planners aim to hold (days of food), and how much more than
+## today's need they plan for when the stores are empty.
+const RESERVE_TARGET_DAYS:=60.0
+const RESERVE_MARGIN:=0.15
 
 
 ## research_600 balance: getting, grinding, cooking and storing food took most
@@ -1452,6 +1464,10 @@ const SURPLUS_RELEASE_MARGIN:=1.15
 ## (care rotas, watches, levies) leave less time for everything, so food takes more.
 ## research_3000: the floor follows the benchmark's typical share of labor on
 ## food through 3000 (docs/research/benchmarks_*.json food_labor_share).
+## The planned floor is this share of the era's typical food labour: a safety
+## net under the planners' own reckoning of need, low enough that a people
+## ahead in farming frees hands for other work and one behind must find more.
+const FOOD_FLOOR_OF_TYPICAL:=0.9
 const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1200.0,0.47],[1800.0,0.45],[2400.0,0.38],[2500.0,0.36],[2600.0,0.33],[2700.0,0.28],[2800.0,0.22],[2900.0,0.13],[3000.0,0.08]]
 
 func _apply_food_labor_floor(weights:Dictionary)->void:
@@ -1464,6 +1480,7 @@ func _apply_food_labor_floor(weights:Dictionary)->void:
 			floor_share=lerpf(float(low[1]),float(high[1]),(year-float(low[0]))/(float(high[0])-float(low[0])))
 			break
 	var focus:Dictionary=WorldSimulation.discovery.society_model.line_focus if WorldSimulation.discovery!=null else {}
+	floor_share*=FOOD_FLOOR_OF_TYPICAL
 	floor_share*=1.0-0.25*clampf(float(focus.get("nutrition",0.0))+0.5*float(focus.get("labor",0.0)),0.0,1.0)
 	# Care-focused societies keep more of their sick, old and young alive to feed.
 	floor_share*=1.0+0.12*float(focus.get("health",0.0))+0.08*float(focus.get("demography",0.0))

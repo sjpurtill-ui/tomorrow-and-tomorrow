@@ -89,6 +89,7 @@ class Constants:
     spoilage_stored: float
     standing_harvest: float
     yield_calibration: float
+    food_work_share: float
     conception: list          # youth w, youth rate, early w, early rate, established w, rate, mature w, rate
     reproductive_weights: list
     art: dict = field(default_factory=dict)
@@ -164,6 +165,7 @@ def load_constants() -> Constants:
         spoilage_stored=float(spoil["Stored food"]),
         standing_harvest=float(g.const(fs, "STANDING_HARVEST")),
         yield_calibration=float(g.const(fs, "BASE_SUBSISTENCE_YIELD_CALIBRATION")),
+        food_work_share=float(g.const(fs, "FOOD_WORK_SHARE", default=1.0, optional=True)),
         conception=g.line_numbers(gs, "var baseline_annual:=", expect=8, default=[0.45, 0.23, 0.50, 0.285, 0.45, 0.18, 0.16, 0.040]),
         reproductive_weights=g.line_numbers(gs, "return float(population_cohorts.get(\"youth\",0.0))*0.45", expect=4, default=[0.45, 0.50, 0.45, 0.16]),
         art=art,
