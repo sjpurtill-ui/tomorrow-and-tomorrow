@@ -634,7 +634,7 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		# is the captives' fate) nor a vague directive.
 		var about_a_town:=String(war_reading.get("kind","")) in ["fate","which_town","no_town","pursue","let_go","keep","abandon","measure","town_word","measure_drop","captives","follow_kill","take_first","group_maim"] or bool(war_reading.get("answer",false))
 		var home_kind:=String((cls.get("home",{}) as Dictionary).get("kind","")) if String(cls.verb)=="home" else ""
-		if not war_reading.is_empty() and String(cls.act)!="question" and not home_kind in HomeOrders.ENGINE_KINDS and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
+		if not war_reading.is_empty() and String(cls.act)!="question" and (not home_kind in HomeOrders.ENGINE_KINDS or garrison_labour(clean,war_reading)) and (String(cls.verb) in ["none","order","send","take","give","war"] or named_place or about_a_town):
 			cls.act="command"; cls.verb="war"; cls["war"]=war_reading
 	if foreign and not bool(cls.insist) and String(cls.verb) in ["none","order","send","give"] and not String(cls.act)=="question" and _re(SEND_HOME_PATTERN).search(clean)!=null and _re("(?i)\\b(scouts?|scouting|explore|exploring|outriders|expedition)\\b").search(clean)==null:
 		# "Send him home": the envoy goes home, never made to lead a party nor
@@ -1001,6 +1001,13 @@ static func _subject_key(who:String,who_end:int,found:Array[Dictionary],audience
 	if w in ["you","thou"]: return String(_speaker_entry(list).get("key",""))
 	if w in ["he","she","this one","that one"]: return String(_salient(audience,list,"").get("key",""))
 	return ""
+
+static func garrison_labour(text:String,war_reading:Dictionary)->bool:
+	## Others put to work in a town we hold ("make them build our walls", said
+	## of Tsaren): the garrison's forced labour (occupation_measures.gd), never
+	## our own builders' work, though the words read as building too. "Have
+	## our men build a palisade" stays ours.
+	return String(war_reading.get("kind","")) in WarOrders.COURT_BUSINESS and HomeOrders.others_at_work(text)
 
 static func realm_business(id:String,text:String)->bool:
 	## Are these words the realm's own business the engine carries (a law, the

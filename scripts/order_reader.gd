@@ -500,7 +500,13 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	if String(reading.kind)!="question" and not CC.HomeOrders.stand_down_reading(text).is_empty(): return {"route":"legacy","why":"standing our own fighters down"}
 	# The realm's own functions (realm_orders.gd): a band formed, the army's
 	# training, workshop lines, research, scouting, strangers, a great work.
-	if String(reading.kind)!="question" and not CC.HomeOrders.realm_reading(text).is_empty(): return {"route":"legacy","why":"the realm's own business"}
+	# Others put to work in a town we hold ("make them build our walls") are
+	# the garrison's, though the words read as building too: a measure or a
+	# fate on a town in the reading, or the war leader's own reading.
+	if String(reading.kind)!="question" and not CC.HomeOrders.realm_reading(text).is_empty():
+		var on_a_town:=String(reading.get("action","")) in ["town_measure","town_fate"]
+		var garrison:=CC.HomeOrders.others_at_work(text) and (on_a_town or CC.garrison_labour(text,WarOrders.read(text,String(audience.get("civ_id","")),audience_id)))
+		if not garrison: return {"route":"legacy","why":"the realm's own business"}
 	var action:=String(reading.action)
 	var kind:=String(reading.kind)
 	var conf:=float(reading.confidence)

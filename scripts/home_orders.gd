@@ -312,6 +312,12 @@ static func realm_reading(text:String)->Dictionary:
 	return _realm().call("read",text)
 
 
+## Words that put others to work, not our own people (realm_orders.gd
+## others_at_work): in a town we hold, the garrison's forced labour.
+static func others_at_work(text:String)->bool:
+	return bool(_realm().call("others_at_work",text))
+
+
 ## Our fighters stood down: {kind: "stand_down", count, all, recruits} when
 ## the words dismiss, release or send home a number or a group of our own
 ## fighters; else {}. Not a question, a march, or words about another

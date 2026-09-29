@@ -50,7 +50,7 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## the user's own levy and stand-down lines: 110 more runs a path):
 ## offline 642, live 643, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":642,"live":643,"sloppy":74}
+const BASELINE:={"offline":651,"live":652,"sloppy":74}
 
 var _processing:Dictionary={}
 
