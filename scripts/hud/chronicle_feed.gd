@@ -286,9 +286,8 @@ func _fill()->void:
 
 func _arrange()->void:
 	if hero==null:return
-	var wide:=size.x<=0.0 or size.x>=WIDE_AT
-	if hero.vertical==not wide:return
-	hero.vertical=not wide
+	var stacked:=size.x>0.0 and size.x<WIDE_AT
+	if hero.vertical!=stacked:hero.vertical=stacked
 
 
 ## The chosen year's place in `years`: the chosen number, or the newest year
@@ -322,7 +321,19 @@ func _on_count_hover(index:int)->void:
 # --- The chosen year ------------------------------------------------------------
 
 func _render_folio()->void:
+	if tallies_check.get_parent()==folio:folio.remove_child(tallies_check)
 	for child in folio.get_children():folio.remove_child(child);child.queue_free()
+	_render_folio_body()
+	folio.add_child(tallies_check)
+	var index:=_chosen_index()
+	var tallies:Array=(years[index] as Dictionary).get("tallies",[]) if index>=0 else []
+	tallies_check.visible=not tallies.is_empty() or show_tallies
+	if show_tallies and not tallies.is_empty():
+		var lines:=VBoxContainer.new();lines.name="Tallies";lines.add_theme_constant_override("separation",2);folio.add_child(lines)
+		for e in tallies:_whisper(lines,e)
+
+
+func _render_folio_body()->void:
 	var index:=_chosen_index()
 	if index<0:
 		var quiet:=T.make_label("Nothing has been told yet. The story of the people begins at the first fire.",13,T.TEXT_SOFT)
@@ -407,10 +418,10 @@ func _folio_facts(year:Dictionary)->void:
 
 
 func _chip(row:Node,glyph:String,text:String)->void:
-	var chip:=PanelContainer.new();chip.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK,T.RULE,1,10,0))
-	var inner:=HBoxContainer.new();inner.add_theme_constant_override("separation",5);chip.add_child(inner)
+	var chip:=PanelContainer.new();chip.name="Fact";chip.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK,T.RULE,1,10,0))
 	var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_left",3);margin.add_theme_constant_override("margin_right",9)
-	margin.add_theme_constant_override("margin_top",2);margin.add_theme_constant_override("margin_bottom",2);chip.remove_child(inner);chip.add_child(margin);margin.add_child(inner)
+	margin.add_theme_constant_override("margin_top",2);margin.add_theme_constant_override("margin_bottom",2);chip.add_child(margin)
+	var inner:=HBoxContainer.new();inner.add_theme_constant_override("separation",5);margin.add_child(inner)
 	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(20,20);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	mark.texture=Page.mark_texture(glyph,40);inner.add_child(mark)
 	var label:=T.make_label(text,12,T.BODY);label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;inner.add_child(label)
@@ -438,7 +449,7 @@ func _folio_moments(year:Dictionary)->void:
 
 func _tile(entry:Dictionary)->Button:
 	var key:=String(entry.get("key",""))
-	var tile:=Button.new();tile.name="Moment";tile.custom_minimum_size=TILE_SIZE;tile.toggle_mode=true;tile.button_pressed=key==open_key
+	var tile:=Button.new();tile.name="Moment";tile.custom_minimum_size=TILE_SIZE
 	tile.tooltip_text=String(entry.get("title",""))
 	var open:=key==open_key
 	tile.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH if open else T.PAPER_RAISED,T.GOLD if open else T.RULE,2 if open else 1,4,0))
@@ -509,7 +520,6 @@ func _reading(entry:Dictionary)->void:
 func _folio_telling(year:Dictionary)->void:
 	var text:=String(year.get("text",""))
 	var age:Dictionary=year.get("age",{}) if year.get("age") is Dictionary else {}
-	var tallies:Array=year.get("tallies",[])
 	var era:=String(_voice().get("era","tally"))
 	if text!="" or not age.is_empty():
 		var toggle:=Button.new();toggle.name="Telling";toggle.flat=true;toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
@@ -522,12 +532,6 @@ func _folio_telling(year:Dictionary)->void:
 			if not age.is_empty():
 				folio.add_child(_serif(String(age.get("title","")),17,T.GOLD))
 				folio.add_child(_serif(String(age.get("text","")),14,T.BODY))
-	if tallies.is_empty() and not show_tallies:return
-	if tallies_check.get_parent()!=null:tallies_check.get_parent().remove_child(tallies_check)
-	folio.add_child(tallies_check)
-	if show_tallies:
-		var lines:=VBoxContainer.new();lines.name="Tallies";lines.add_theme_constant_override("separation",2);folio.add_child(lines)
-		for e in tallies:_whisper(lines,e)
 
 
 func _serif(text:String,size:int,color:Color,italic:=false)->Label:
