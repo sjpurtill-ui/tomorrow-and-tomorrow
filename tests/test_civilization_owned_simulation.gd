@@ -275,6 +275,10 @@ func test_human_and_owned_civilization_use_identical_daily_economy_and_demograph
 	# the same evidence so seed trials and surface recognition receive equal inputs.
 	CivilizationSystem._add_revealed_area(Vector2.ZERO,72.0,"founding knowledge")
 	WorldSimulation.enabled=true
+	# Equal worlds: the owned actor sees no other peoples here, so no border
+	# pressure may reach the human fixture's security and trust either.
+	CivilizationSystem.initialize()
+	for civ in CivilizationSystem.civilizations: civ.player_relation["border_tension"]=0.0
 	for id in ["player","alpha"]:
 		WorldSimulation.scoped(id,func()->void:
 			WorldSimulation.state.settlement_name="Parity"
