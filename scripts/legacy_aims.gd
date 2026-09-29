@@ -89,6 +89,21 @@ const FRIEND_GAIN:=0.22
 const RENEW_BEHIND:=0.2
 ## A hostile answer to the envoy of a people we mean to make fear us.
 const FEAR_ANSWER_DREAD:=0.07
+## What an aim's ending does (fulfil, fail, release, _press), one set of numbers
+## that the court's stakes quote before the god chooses (proposal_stakes.gd).
+## Fulfilled: legitimacy by who chose it, cohesion, and every official's bonds.
+const FULFIL_LEGITIMACY:={"god":0.04,"other":0.02}
+const FULFIL_COHESION:=0.02
+const FULFIL_BONDS:={"god":{"love":0.06,"trust":0.03},"other":{"love":0.03,"trust":0.03}}
+## Failed: grief and dread, never ruin.
+const FAIL_METRICS:={"cohesion":-0.015,"legitimacy":-0.01}
+const FAIL_BONDS:={"love":-0.02,"fear":0.04}
+## Let go (or set aside for another aim): a smaller grief.
+const RELEASE_COHESION:=-0.005
+const RELEASE_BONDS:={"love":-0.01,"fear":0.01}
+## Pressed harder: the people strain, the court fears the god's eye.
+const PRESS_COHESION:=-0.01
+const PRESS_BONDS:={"fear":0.02}
 
 ## Each template: its century ambition (focus), research domain, legacy word,
 ## and which office speaks for it first.
@@ -1139,11 +1154,17 @@ static func _answer(audience:Dictionary,option_id:String)->Dictionary:
 static func _feast_food()->float:
 	return Hall._nice(clampf(float(GameState.population_total)*0.25,10.0,80.0))
 
+## The food a friendship aim, pressed harder, sends to the other people.
+static func press_gift_food()->float:
+	return Hall._nice(clampf(float(GameState.population_total)*0.2,10.0,60.0))
+
 static func _press(aim:Dictionary,pid:int)->Dictionary:
 	aim["pressed"]=int(aim.get("pressed",0))+1
 	var metrics:Dictionary=GameState.simulation_metrics
-	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))-0.01,0.01,0.99)
-	for person in _officials(): GovernmentPeopleSystem.adjust_person_bonds(int(person.person_id),{"fear":0.02,"hold_days":30})
+	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))+PRESS_COHESION,0.01,0.99)
+	var bonds:Dictionary=PRESS_BONDS.duplicate()
+	bonds["hold_days"]=30
+	for person in _officials(): GovernmentPeopleSystem.adjust_person_bonds(int(person.person_id),bonds)
 	var template:=String(aim.template)
 	var outcome:="You pressed them harder for %s." % String(aim.title)
 	var result:={"reaction":"pleased"}
@@ -1151,8 +1172,7 @@ static func _press(aim:Dictionary,pid:int)->Dictionary:
 		"work": aim.share=WORK_PRESSED_SHARE
 		"friend":
 			var civ_id:=String(aim.subject)
-			var gift:=Hall._nice(clampf(float(GameState.population_total)*0.2,10.0,60.0))
-			var paid:=Hall._debit_player("Food",gift)
+			var paid:=Hall._debit_player("Food",press_gift_food())
 			if paid>0.0:
 				Hall._credit_civ(civ_id,"Food",paid)
 				Hall._shift_relation(civ_id,0.05,-0.02)
@@ -1548,10 +1568,13 @@ static func fulfil(day:int)->void:
 	if aim.is_empty(): return
 	aim.progress=1.0
 	var god_chose:=String(aim.get("chosen_by",""))=="god"
+	var chooser:="god" if god_chose else "other"
 	var metrics:Dictionary=GameState.simulation_metrics
-	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))+(0.04 if god_chose else 0.02),0.01,0.99)
-	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))+0.02,0.01,0.99)
-	_bonds_all({"love":0.06 if god_chose else 0.03,"trust":0.03,"hold_days":90})
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))+float(FULFIL_LEGITIMACY[chooser]),0.01,0.99)
+	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))+FULFIL_COHESION,0.01,0.99)
+	var bonds:Dictionary=(FULFIL_BONDS[chooser] as Dictionary).duplicate()
+	bonds["hold_days"]=90
+	_bonds_all(bonds)
 	if int(aim.get("by_pid",0))>0:
 		GovernmentPeopleSystem.record_person_memory(int(aim.by_pid),"The aim I proposed was done: %s." % String(aim.title),"aim",0.9,{"emotion":"pride"})
 	var legacy:=String(aim.get("legacy","the Aim Fulfilled"))
@@ -1575,9 +1598,12 @@ static func fail(day:int)->void:
 	var aim:Dictionary=s.active
 	if aim.is_empty(): return
 	var metrics:Dictionary=GameState.simulation_metrics
-	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))-0.015,0.01,0.99)
-	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-0.01,0.01,0.99)
-	_bonds_all({"love":-0.02,"fear":0.04,"hold_days":60})
+	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.58))+float(FAIL_METRICS.cohesion),0.01,0.99)
+	# A proud people forgives a failed aim more (standing.gd).
+	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))+float(FAIL_METRICS.legitimacy)*preload("res://scripts/standing.gd").blame(),0.01,0.99)
+	var bonds:Dictionary=FAIL_BONDS.duplicate()
+	bonds["hold_days"]=60
+	_bonds_all(bonds)
 	if int(aim.get("by_pid",0))>0:
 		GovernmentPeopleSystem.record_person_memory(int(aim.by_pid),"The aim I proposed was not done in time: %s." % String(aim.title),"aim",0.8,{"emotion":"grief"})
 	var text:=_say(Lines.FAIL,{"name":String(aim.title)},"fail:%s" % String(aim.id),Lines.FAIL)
@@ -1595,8 +1621,8 @@ static func release(reason:String,grieve:bool=true)->void:
 	if aim.is_empty(): return
 	var day:=_day()
 	if grieve:
-		_bonds_all({"love":-0.01,"fear":0.01})
-		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.58))-0.005,0.01,0.99)
+		_bonds_all(RELEASE_BONDS.duplicate())
+		GameState.simulation_metrics["cohesion"]=clampf(float(GameState.simulation_metrics.get("cohesion",0.58))+RELEASE_COHESION,0.01,0.99)
 	var text:=_say(Lines.RELEASE,{"name":String(aim.title)},"release:%s" % String(aim.id),Lines.RELEASE)
 	s.stats.released=int(s.stats.released)+1
 	Chronicle.record({"key":"aim:release:"+String(aim.id),"title":"An Aim Set Down: %s" % String(aim.title),"text":"%s It was %s." % [text,reason],

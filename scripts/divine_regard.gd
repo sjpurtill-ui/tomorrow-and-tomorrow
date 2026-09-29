@@ -342,7 +342,9 @@ static func _people_words(id:String)->String:
 static func civ_dread(civ_id:String)->float:
 	var entry:Variant=(store().civ_dread as Dictionary).get(civ_id,{})
 	if not entry is Dictionary or not _num(entry.get("v")): return 0.0
-	return clampf(float(entry.v)*pow(0.5,maxf(0.0,float(_day()-int(entry.get("day",_day()))))/CIV_DREAD_HALF_LIFE),0.0,1.0)
+	# A people that writes remembers our wrath longer (standing.gd memory_span).
+	var half_life:=CIV_DREAD_HALF_LIFE*float(preload("res://scripts/standing.gd").memory_span(civ_id))
+	return clampf(float(entry.v)*pow(0.5,maxf(0.0,float(_day()-int(entry.get("day",_day()))))/half_life),0.0,1.0)
 
 static func add_civ_dread(civ_id:String,amount:float)->float:
 	var value:=clampf(civ_dread(civ_id)+clampf(amount,0.0,0.4),0.0,1.0)

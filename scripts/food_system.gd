@@ -16,6 +16,13 @@ const Goods=preload("res://scripts/civilian_goods.gd")
 const Operations=preload("res://scripts/technology_operations.gd")
 const KCAL_PER_RATION := 2400.0
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
+## Share of a food worker's day spent getting food. The rest goes to carrying,
+## grinding, cooking, drying and storing it: the historical share of labour on
+## food (docs/research/benchmarks_*.json food_labor_share, 62% at year 0)
+## counts both, so at that share the harvest runs only a little ahead of need.
+## On the march people eat what they gather with little keeping, so the
+## journey is not charged for it.
+const FOOD_WORK_SHARE:=0.7
 const FRESH:="Fresh food"
 const STORED:="Stored food"
 const FOOD_TYPES := [FRESH,STORED]
@@ -366,6 +373,7 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 		result["Transferred"]=maxf(0.0,float(civilization_system.player_effects().get("occupation_food_transfer",0.0)))
 	if workers<=0.0:
 		return result
+	if not traveling: workers*=FOOD_WORK_SHARE
 	var access:=_food_resource_access()
 	var coastal:=_coastal_food_profile(traveling)
 	var environment:=_environment_mix()

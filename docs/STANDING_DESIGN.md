@@ -130,6 +130,24 @@ readings: food first; guards and warriors in proportion to the Envy, Contempt
 and Resentment neighbours actually hold; then the people's ambition; never
 piling everyone into one trade (diminishing returns make it pointless).
 
+Food (2026-09-29): a food worker spends `FoodSystem.FOOD_WORK_SHARE` (0.7) of
+the day getting food; the rest carries, grinds, cooks and stores it, as the
+historical share of labour on food counts both. Before this, 60% of the people
+on food brought in about twice what was eaten, so food never pinched and a
+ruler could move a third of the people to research for free. Now:
+
+- planners work out the share of hands food needs from what each hand brings in,
+  and plan up to `RESERVE_MARGIN` (15%) more while the stores are short of
+  `RESERVE_TARGET_DAYS` (60 days, or what the stores can hold);
+- their floor is `FOOD_FLOOR_OF_TYPICAL` (90%) of the era's typical share, so a
+  people ahead in farming frees hands and one behind must find more;
+- the ruler's own split still has no floor: a lopsided split shows its cost.
+
+Fast-sim reference (tools/sim, 2 seeds, good site): the Headman keeps about 55%
+on food with a 40-60% margin, population and discoveries as before; a poor dry
+site goes all in on food and holds 25-60 people; research-heavy grows to about
+1,500 by year 600 against 3,500 for a balanced people.
+
 ## 8. Build order
 
 1. Research without walls (done: a3b70597).
@@ -146,5 +164,34 @@ piling everyone into one trade (diminishing returns make it pointless).
    god, and trust in the chiefs. The monthly reading of all nine strengths is
    kept in `strategic_history` for the years chart.
 3. Consequences: war and raid decisions, migration, tribute, leagues, pride.
+   Leagues done (fear_league.gd): two or more met peoples holding Fear 0.45+
+   (or Awe 0.6+ with Resentment 0.3+) bind together against us; each weighs
+   our strength against all of theirs, backs the others' raids and demands
+   (x1.5, gifts x0.7) and shares every fresh grudge; they let go below Fear 0.3.
+   Pride forgives (Standing.forgiveness); memory grows with writing and print
+   (Standing.memory_span).
 4. Headman and rival allocation, then the sim calibration across postures.
 5. Era scaling of reach and memory to year 3500.
+
+## 9. Every people on the same rules
+
+The player, 2026-09-29: "Make sure all players (computer and player) are
+perfectly balanced and that all automated leaders are equally balanced though
+with varying tendencies." Every people runs the same simulation in its own
+WorldSimulation scope; what differs must be tendency, not rules.
+
+- Food and the Headman: one planner for every people (section 7).
+- Crises: the god's people meet them at court (crisis_system.gd); every other
+  people meets the same ones in its own scope (crisis_unattended.gd): the same
+  hazards read from its own state, the same death draws and floors, and the
+  court official's own answers when the god is silent, paid from its own
+  stores, roofs and labour.
+- Feuds: two small simulated neighbours who fall out (war_loop._rival_wars, at
+  the benchmark rate) now fight their feud for real (rival_feuds.gd): the same
+  bands and combat simulator as raids on the god's people, the dead and the
+  stolen food out of both real ledgers, each side remembering it; grudges fade
+  between feuds. Big peoples declare their own wars through their leaders.
+- Research: capacity from the people at research, emphasis only directs it,
+  one budget rule for every ruler (codex/research-parity).
+- Leaders: one rule for great works and expansion for computer rulers and the
+  delegated player; every personality a trade-off (codex/leader-balance).

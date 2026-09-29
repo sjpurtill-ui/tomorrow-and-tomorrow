@@ -31,6 +31,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|responsible|blame|fault|lying|liar|lie|lied|truth|swear|ledger|tally|confess|tell me (of|about)|where were you|mercy|pardon|exalt|maim|curse|marry|priest)\\b"
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const Stakes:=preload("res://scripts/proposal_stakes.gd")
 const OrderReader:=preload("res://scripts/order_reader.gd")
 const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -72,6 +73,7 @@ var thinking:Label
 var speech_input:LineEdit
 var speak_button:Button
 var options_row:HBoxContainer
+var stakes_box:VBoxContainer       # what the ruler stands to gain from the proposal
 var outcome_box:VBoxContainer
 var wait_button:Button
 var summon_check:CheckBox
@@ -182,7 +184,7 @@ func _reset_card(next_mode:String)->void:
 	civic_settlement="";civic_seen.clear();civic_signature=""
 	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
 	envoy_stage=null;speech_box=null;business_label=null;scene_note=null;envoy_popovers.clear()
-	transcript=null;transcript_scroll=null;thinking=null;options_row=null;outcome_box=null;proposal_box=null
+	transcript=null;transcript_scroll=null;thinking=null;options_row=null;stakes_box=null;outcome_box=null;proposal_box=null
 	speech_input=null;speak_button=null;wait_button=null;next_button=null;queue_label=null;return_button=null
 	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null
 	weigh_clock=-1.0
@@ -442,6 +444,9 @@ func _build_stage(audience:Dictionary)->Control:
 	transcript=VBoxContainer.new();transcript.size_flags_horizontal=Control.SIZE_EXPAND_FILL;transcript.add_theme_constant_override("separation",10)
 	transcript_scroll.add_child(transcript)
 	thinking=Tokens.make_label("",14,Tokens.TEXT_DIM);thinking.name="Thinking";thinking.add_theme_font_override("font",_italic);thinking.visible=false;stack.add_child(thinking)
+	# What the proposal would bring sits under the conversation, just above the
+	# answers; it takes its room from the transcript, never the stage's height.
+	stakes_box=VBoxContainer.new();stakes_box.name="Stakes";stakes_box.visible=false;center.add_child(stakes_box)
 	if not civic_settlement.is_empty():_add_civic_record()
 	return stage
 
@@ -618,6 +623,7 @@ func _build_speech_row()->Control:
 func _build_options()->void:
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=true;outcome_box.visible=false
+	_build_stakes()
 	var listed:=Hall.options(audience_id)
 	_option_count=listed.size()
 	for option:Dictionary in listed:
@@ -626,6 +632,34 @@ func _build_options()->void:
 	_build_persons_row()
 
 const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
+
+func _build_stakes()->void:
+	## WHAT YOU STAND TO GAIN: the proposal's gain, cost, odds and what saying
+	## no costs, from the engine (proposal_stakes.gd), just above the answers.
+	if not is_instance_valid(stakes_box):return
+	for child in stakes_box.get_children():child.queue_free()
+	var weighed:Dictionary=Hall.stakes(audience_id) if resolved_result.is_empty() else {}
+	var rows:=Stakes.lines(weighed)
+	stakes_box.visible=not rows.is_empty()
+	if rows.is_empty():return
+	var compact:=_compact()
+	if compact and rows.size()>3:rows=rows.slice(0,3)
+	var panel:=PanelContainer.new();panel.name="StakesPanel"
+	var style:=Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CARD,0)
+	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=8;style.content_margin_bottom=9
+	panel.add_theme_stylebox_override("panel",style);stakes_box.add_child(panel)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",3);panel.add_child(box)
+	var kicker:=Tokens.make_label("WHAT YOU STAND TO GAIN",12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";box.add_child(kicker)
+	var full:=Stakes.tip(weighed)
+	for row:Dictionary in rows:
+		var line:=HBoxContainer.new();line.name="StakesRow";line.add_theme_constant_override("separation",12);box.add_child(line)
+		var tone:=String(row.get("tone",""))
+		var ink:=Tokens.GREEN_TEXT if tone=="gain" else (Tokens.RED_TEXT if tone=="cost" else Tokens.INK_MUTED)
+		var key:=Tokens.make_label(String(row.get("key","")),13,ink);key.name="StakesKey";key.custom_minimum_size.x=124.0
+		key.add_theme_font_override("font",_bold);key.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;line.add_child(key)
+		var value:=Tokens.make_label(String(row.get("text","")),14 if not compact else 13,Tokens.BODY);value.name="StakesText"
+		value.size_flags_horizontal=Control.SIZE_EXPAND_FILL;value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		value.tooltip_text=full;value.mouse_filter=Control.MOUSE_FILTER_PASS;line.add_child(value)
 
 func _persons_live()->bool:
 	return _voice_ok() and voice.has_method("is_live") and bool(voice.is_live()) and voice.has_method("persons_turn")
@@ -811,6 +845,12 @@ func _option_card(option:Dictionary)->Button:
 	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.custom_minimum_size=Vector2(0,72)
 	button.disabled=not enabled;button.focus_mode=Control.FOCUS_ALL
 	button.tooltip_text=String(option.get("reason","")) if not enabled else String(option.get("sub",""))
+	# A proposal's card says what it gives and costs (proposal_stakes.gd); the
+	# tooltip keeps what is proposed, then the whole of the stakes.
+	var weighed:=String(option.get("stakes_short","")) if enabled else ""
+	if weighed!="" and String(option.get("stakes_tip",""))!="":button.tooltip_text=(String(option.get("sub",""))+"\n\n"+String(option.stakes_tip)).strip_edges()
+	var cost_words:=String(option.get("cost_words","")) if enabled else ""
+	if cost_words!="":button.tooltip_text+="\nCosts: %s" % cost_words
 	var base:=Tokens.flat(tone_color.lerp(Tokens.PANEL_BG_SOLID,.86 if Tokens.is_light() else .80),tone_color,1,8,0)
 	base.border_width_left=5
 	var hover:=base.duplicate() as StyleBoxFlat;hover.bg_color=tone_color.lerp(Tokens.PANEL_BG_SOLID,.72 if Tokens.is_light() else .64);hover.set_border_width_all(2);hover.border_width_left=5
@@ -826,10 +866,16 @@ func _option_card(option:Dictionary)->Button:
 	var title:=Tokens.make_label(String(option.get("label","")),17,ink);title.add_theme_font_override("font",_bold);title.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(title)
 	var sub_text:=String(option.get("sub","")) if enabled else String(option.get("reason",option.get("sub","")))
-	var sub:=Tokens.make_label(sub_text,13,Tokens.BODY_2 if enabled else Tokens.RED);sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if weighed!="":sub_text=weighed
+	var sub:=Tokens.make_label(sub_text,13,Tokens.BODY_2 if enabled else Tokens.RED);sub.name="OptionSub";sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;sub.max_lines_visible=2;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	if not enabled:sub.add_theme_font_override("font",_italic)
 	stack.add_child(sub)
+	# A crisis answer's cost, in plain words (crisis_system.gd cost tags).
+	if cost_words!="":
+		var cost:=Tokens.make_label("Costs: %s" % cost_words,12,Tokens.RED_TEXT);cost.name="OptionCost";cost.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		cost.add_theme_font_override("font",_italic);cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		sub.max_lines_visible=1;stack.add_child(cost)
 	# Who at court objects to this answer, or speaks for it (rival_rulers.gd).
 	# One voice shows on the card (the objection first); both are in the tooltip.
 	# Cards keep their height: the voice takes the second line of the terms.
@@ -848,6 +894,10 @@ func _option_card(option:Dictionary)->Button:
 		voice.name="Option"+side.capitalize();voice.mouse_filter=Control.MOUSE_FILTER_IGNORE;voice.add_theme_font_override("font",_italic)
 		voice.clip_text=true;voice.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		stack.add_child(voice)
+	# A button does not grow with its children; follow a cost or voice line.
+	stack.minimum_size_changed.connect(func():
+		var need:=maxf(72.0,stack.get_combined_minimum_size().y+17.0)
+		if absf(button.custom_minimum_size.y-need)>.5:button.custom_minimum_size.y=need)
 	var chosen:=String(option.get("id",""))
 	button.pressed.connect(func():choose(chosen))
 	return button
@@ -1219,6 +1269,7 @@ func _show_outcome(result:Dictionary)->void:
 	resolved_result=result
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=false
+	if is_instance_valid(stakes_box):stakes_box.visible=false
 	if is_instance_valid(divine_row):divine_row.visible=false
 	if is_instance_valid(persons_row):persons_row.visible=false
 	for child in outcome_box.get_children():child.queue_free()

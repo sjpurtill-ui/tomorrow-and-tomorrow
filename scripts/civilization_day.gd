@@ -86,6 +86,11 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 	),
 		S.step("economy",timings,func()->void:run.result.events.append_array(WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.economy.process_day(daily_context)))),
 		S.step("government",timings,func()->void:run.result.events.append_array(WorldSimulation.government.process_day(day))),
+		# Every people but the god's meets its crises here, from the same hazards
+		# (crisis_unattended.gd); the god's own people meet theirs at court.
+		S.step("hardship",timings,func()->void:
+			if WorldSimulation.actor_id!="player":preload("res://scripts/crisis_unattended.gd").daily(day)
+	),
 		S.step("construction",timings,func()->void:WorldSimulation.settlements.with_local_population(run.build)),
 		S.step("secondary_plan",timings,func()->Array:return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")),
 		S.step("city_trade",timings,func()->void:WorldSimulation.settlements.process_city_trade()),

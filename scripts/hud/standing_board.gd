@@ -535,6 +535,11 @@ func _fill_home()->void:
 		parts.append("%s %s%.1f" % [String(pair[1]),"+" if amount>0.0 else "−",absf(amount)])
 	var note:=Kit.label(column,("This month, in points of 100: "+"; ".join(parts)+".") if not parts.is_empty() else "Pride is ordinary this month: it neither draws people to us nor holds them.","note")
 	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	var forgiving:=float(effects.get("forgiveness",0.0))
+	if absf(forgiving)>=0.02:
+		var said:=("A proud people forgives: the blame its chiefs carry for hard orders, constant change and failed aims is %d%% lighter." % roundi(forgiving*100.0)) if forgiving>0.0 else ("A people ashamed of itself blames its chiefs %d%% more for hard orders, constant change and failed aims." % roundi(-forgiving*100.0))
+		var line:=Kit.label(column,said,"note",T.GREEN if forgiving>0.0 else T.RED)
+		line.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 
 ## First letter up, the rest as written.
 static func _sentence(text:String)->String:

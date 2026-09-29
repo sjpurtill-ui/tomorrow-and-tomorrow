@@ -457,6 +457,10 @@ func _standing_cohesion()->float:
 func _standing_legitimacy()->float:
 	return preload("res://scripts/standing.gd").legitimacy_shift()
 
+## A proud people forgives its chiefs more (standing.gd forgiveness).
+func _standing_blame()->float:
+	return preload("res://scripts/standing.gd").blame()
+
 func policy_effect(channel:String)->float:
 	var result:=0.0
 	for modifier_variant in WorldSimulation.state.active_modifiers:
@@ -732,7 +736,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
 	ecology = clampf(ecology+ecology_delta*span,0.04,1.0)
-	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-administrative_load*0.12-policy_churn*0.18-directive_resistance*0.24+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
+	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()-(administrative_load*0.12+policy_churn*0.18+directive_resistance*0.24)*_standing_blame()+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,SPAN.rate(0.012))
 
 	# Mortality is accumulated as population-level risk, while reproduction is

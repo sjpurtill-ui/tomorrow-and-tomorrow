@@ -30,3 +30,32 @@ func test_zero_yield_preserves_essential_work_and_unknown_ledgers_use_existing_p
 	GameState.simulation_metrics={}
 	var unknown:=GovernmentPeopleSystem._allocations_for_focus("research",{},false)
 	assert_float(float(unknown.Food)).is_less(float(zero.Food))
+
+## Balance (2026-09-29): planners keep a reserve against the lean season. With
+## the same yield, a people whose stores are short plans more food work than
+## one whose stores are full, but never aims past what its stores can hold.
+func _planned(food_days:float,production:float=110.0)->float:
+	GameState.simulation_metrics={"food_consumption":120.0,"food_production":production,"food_labor_share":.5,"food_intake_ratio":1.0,"food_days":food_days,"food_projected_days":food_days}
+	return float(GovernmentPeopleSystem._allocations_for_focus("balanced",{},false).Food)
+
+func test_short_stores_plan_more_food_work_than_full_stores()->void:
+	GameState.founding_manifest["food_storage_rations"]=120.0*200.0
+	var empty:=_planned(0.0)
+	var half:=_planned(30.0)
+	var full:=_planned(90.0)
+	assert_float(empty).is_greater(half)
+	assert_float(half).is_greater_equal(full)
+
+func test_the_reserve_target_is_what_the_stores_can_hold()->void:
+	# Baskets and bundles for about 10 days: 10 days in store is already all
+	# the reserve there is room for, so it plans no more than full stores do.
+	GameState.founding_manifest["food_storage_rations"]=120.0*10.0
+	assert_float(_planned(9.0)).is_equal_approx(_planned(90.0),0.5)
+
+func test_the_food_floor_sits_below_the_typical_share_so_better_farming_frees_hands()->void:
+	GameState.elapsed_days=0.0
+	var weights:={"Food":0.0,"Knowledge":38.0}
+	GovernmentPeopleSystem._apply_food_labor_floor(weights)
+	var share:=float(weights.Food)/(float(weights.Food)+38.0)
+	assert_float(share).is_equal_approx(0.62*GovernmentPeopleSystem.FOOD_FLOOR_OF_TYPICAL,0.01)
+	assert_float(share).is_less(0.62)

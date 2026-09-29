@@ -51,6 +51,8 @@ const UPKEEP_PATH:="res://scripts/upkeep_warnings.gd"
 const TURNING_PATH:="res://scripts/turning_points.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const WAR_PATH:="res://scripts/war_loop.gd"
+## What the ruler stands to gain from a proposal, read from the engine.
+const STAKES_PATH:="res://scripts/proposal_stakes.gd"
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -314,6 +316,14 @@ static func _rivals()->GDScript:
 	## Rival rulers as characters, and the strings envoys carry
 	## (rival_rulers.gd); loaded lazily because it reaches back into this one.
 	return load(RIVALS_PATH) as GDScript
+
+static func _stakes()->GDScript:
+	return load(STAKES_PATH) as GDScript
+
+static func stakes(id:String)->Dictionary:
+	## What the ruler stands to gain, pay and risk by the proposal before them,
+	## and what saying no costs (proposal_stakes.gd); {} when none is proposed.
+	return _stakes().call("for_audience",find(id))
 
 static func _war()->GDScript:
 	## Raids, reprisals and general-led war in the living world (war_loop.gd);
@@ -2459,6 +2469,9 @@ static func options(id:String)->Array[Dictionary]:
 	if String(audience.get("origin",""))=="court":
 		for other in _other_matters(audience):
 			result.append(_option("hear:"+String(other.id),"Hear their other matter",String(other.get("summary","")),"neutral"))
+		# What each proposal gives and costs, on its own card (stakes_short,
+		# stakes_tip), and a crisis answer's cost in plain words (cost_words).
+		_stakes().call("annotate",audience,result)
 	return result
 
 static func _accord_blocker(civ_id:String,accord:String)->String:
@@ -3354,6 +3367,11 @@ static func voice_context(id:String)->Dictionary:
 			var persons:GDScript=load("res://scripts/court_persons.gd")
 			var known:Dictionary=persons.call("by_id",known_id)
 			if not known.is_empty(): context["summoned_person"]=persons.call("view",known)
+		# What the ruler stands to gain from the proposal, as the engine reckons
+		# it: a live voice states these when asked what we gain (audience_voice
+		# gives them their own section of the prompt).
+		var weighed:Dictionary=_stakes().call("voice_facts",stakes(id))
+		if not weighed.is_empty(): context["stakes"]=weighed
 		var person:=_official(int(audience.speaker.person_id))
 		if not person.is_empty():
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})

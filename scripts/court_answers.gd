@@ -176,6 +176,9 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 		if bare and not named and recent!="": group=_group(recent.to_lower())
 		var said:=_town_answer(t,group,topics,lower,offices.has("war"))
 		if said!="": return said
+	# How another people sees us, named or as "our neighbours" (standing.gd).
+	var standing:=_standing_answer(sheet,lower)
+	if standing!="": return standing
 	var common:=_common_answer(sheet,lower)
 	if common!="": return common
 	if offices.has("war"):
@@ -191,6 +194,28 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 		var scouts:=_scouts_answer(sheet,lower)
 		if scouts!="": return scouts
 	return ""
+
+## How the peoples we know see us, from the keeper of our ties' or the war
+## leader's sheet: a named people, or all of them when asked of "our
+## neighbours". Only questions about their view of us or what they do to us.
+static func _standing_answer(sheet:Dictionary,lower:String)->String:
+	var peoples:Array=(sheet.get("standing",{}) as Dictionary).get("peoples",[])
+	if peoples.is_empty(): return ""
+	var about_us:=_has(lower,"\\b(see|think of|feel about|say of|say about|regard|fear|afraid of|scared of|respect|trust|hate|resent|envy|covet|like|admire) (us|we|our people|our folk)\\b|\\bthink of us\\b|\\bwhy (do|are|did|would|will) (the \\w+|they|them|our neighbou?rs) (raid|attack|hate|fear|threaten|demand|come)")
+	var acts:=_has(lower,"\\b(raid(s|ing|ed)?|attack(s|ing|ed)?|demand(s|ing|ed)?|league|stand(ing)? together|band(ed)? together|gang(ed)? up)\\b")
+	var named:Dictionary={}
+	for p:Dictionary in peoples:
+		if _name_in(lower,String(p.name)): named=p
+	if named.is_empty():
+		if not about_us or not _has(lower,"\\b(neighbou?rs|other peoples|the peoples|strangers|foreigners|everyone else|the world)\\b"): return ""
+		var all:PackedStringArray=PackedStringArray()
+		for p:Dictionary in peoples: all.append("the %s: %s" % [String(p.name),String(p.headline)])
+		return _cap("; ".join(all))
+	if not (about_us or acts): return ""
+	var f:Dictionary=named.feelings
+	var said:="The %s: %s Allure %d%%, awe %d%%, fear %d%%, respect %d%%, trust %d%%, resentment %d%%." % [String(named.name),String(named.headline),int(f.get("allure",0)),int(f.get("awe",0)),int(f.get("fear",0)),int(f.get("respect",0)),int(f.get("trust",0)),int(f.get("resentment",0))]
+	if not (named.does as Array).is_empty(): said+=" "+_cap("; ".join(PackedStringArray(named.does)))+"."
+	return said
 
 ## Who would know, or what would find it out, for a question the sheet does
 ## not answer. Never "I don't know" of anything the sheet lists.

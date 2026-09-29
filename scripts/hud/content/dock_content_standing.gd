@@ -160,6 +160,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 			if String(c.tone)!="danger": continue
 			var title:=""
 			match String(c.id):
+				"league": title="%s stand together against us" % String(p.name)
 				"envy": title="%s envy our stores" % String(p.name)
 				"grudge": title="%s nurse a grudge against us" % String(p.name)
 				"tribute_demand": title="%s think us easy to push" % String(p.name)
@@ -176,7 +177,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 	return warnings
 
 static func _rank(id:String)->int:
-	return {"envy":0,"grudge":1,"tribute_demand":2,"redress_demand":3}.get(id,5)
+	return {"league":0,"envy":1,"grudge":2,"tribute_demand":3,"redress_demand":4}.get(id,5)
 
 ## What answers a danger, in the engine's own terms.
 static func _fix_for(id:String,our:Dictionary)->Dictionary:
@@ -185,6 +186,8 @@ static func _fix_for(id:String,our:Dictionary)->Dictionary:
 			return {"words":"More under arms and ready would make them think again (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Warriors"}
 		"grudge","redress_demand":
 			return {"words":"An envoy with gifts or redress can ease a grudge.","section":"","sub":0,"action":""}
+		"league":
+			return {"words":"Fear binds them: fewer warbands at their borders, gifts and kept word ease it; more spears only deepen it.","section":"","sub":0,"action":""}
 	return {"words":"","section":"","sub":0,"action":""}
 
 static func _neglect_words(id:String)->String:
