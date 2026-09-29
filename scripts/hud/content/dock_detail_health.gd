@@ -2,6 +2,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const LIFE_REASONS:=preload("res://scripts/hud/life_change_words.gd")
 ## Dedicated health and longevity view opened directly from the HEALTH KPI.
 
 func meta()->Dictionary:
@@ -64,14 +65,19 @@ func _city_health()->Dictionary:
 		var change:=EraWords.life_change(delta)
 		var detail:=("Life expectancy that month: %s" if EraWords.reckoned() else "That month: %s of life") % change
 		if change=="less than a day" and marker=="discovery":detail="That month: less than a day so far; new ways take years to spread"
+		# What moved it, with its numbers (GameState.life_change_reasons).
+		var reasons:Array=point.get("reasons",[]) if point.get("reasons") is Array else []
+		var told:=LIFE_REASONS.tell(reasons,delta,index,history)
+		var name:=String(point.get("marker_label","")) if marker=="discovery" else String(told.name)
+		if String(told.why)!="":detail+=". "+String(told.why)
 		changes.append({
-			"name":String(point.get("marker_label","Living conditions changed")),
+			"name":name,
 			"sub":EraWords.when(int(point.get("day",0))),
 			"detail":detail,
-			"value":"New knowledge" if marker=="discovery" else "How we live",
+			"value":"New knowledge" if marker=="discovery" else String(told.category),
 			"value_color":Tokens.GOLD_TEXT if marker=="discovery" else (Tokens.RED_TEXT if delta<0.0 else Tokens.BLUE_TEXT),
 			"accent":Tokens.GOLD if marker=="discovery" else (Tokens.RED if delta<0.0 else Tokens.BLUE),
-			"tip":"A health-related discovery came this month. The change shown is the whole month's; the new way adds more as more of the people take it up." if marker=="discovery" else "No health-related discovery came this month; the shift came from how we live."
+			"tip":("A health-related discovery came this month; the new way adds more as more of the people take it up. " if marker=="discovery" else "")+String(told.tip)
 		})
 		if changes.size()>=6: break
 	if not changes.is_empty(): blocks.append({"type":"rows","heading":"Why lives grew longer or shorter","note":"latest changes","items":changes})

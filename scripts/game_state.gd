@@ -437,6 +437,9 @@ var early_care_blend:=0.0
 ## still happen at each day's own risk; only the projection is steadied.
 ## Below zero until the first day is counted (then it starts from that day).
 var exceptional_hazard_smoothed:=-1.0
+## The same month-long mean for each exceptional cause of death (hunger,
+## illness, exposure...), so a change in how long we live can be told by cause.
+var exceptional_hazard_causes_smoothed:Dictionary={}
 var last_population_removal_by_cohort:Dictionary={}
 var observed_death_age_sum:=0.0
 var lifetime_conceptions := 0
@@ -630,6 +633,7 @@ func reset_for_new_world(new_seed:int)->void:
 	early_care={}
 	early_care_blend=0.0
 	exceptional_hazard_smoothed=-1.0
+	exceptional_hazard_causes_smoothed={}
 	last_population_removal_by_cohort={}
 	observed_death_age_sum=0.0
 	lifetime_conceptions=0
@@ -1031,6 +1035,10 @@ func record_health_history(force:bool=false)->void:
 			var discovery_name:=String(event.get("name",event.get("title","Health discovery")))
 			if discovery_name!="" and discovery_name not in discovery_names: discovery_names.append(discovery_name)
 	var delta:=life_expectancy-previous_expectancy
+	var inputs:=life_inputs()
+	var reasons:Array[Dictionary]=[]
+	if not health_history.is_empty() and health_history[-1].get("inputs") is Dictionary:
+		reasons=life_change_reasons(health_history[-1].inputs,inputs,delta)
 	var marker_type:=""
 	var marker_label:=""
 	if not discovery_names.is_empty():
@@ -1041,7 +1049,8 @@ func record_health_history(force:bool=false)->void:
 		marker_label="Living conditions changed"
 	health_history.append({
 		"day":day,"life_expectancy":life_expectancy,"health":population_health,
-		"delta":delta,"marker_type":marker_type,"marker_label":marker_label
+		"delta":delta,"marker_type":marker_type,"marker_label":marker_label,
+		"inputs":inputs,"reasons":reasons
 	})
 	if health_history.size()>480: health_history.pop_front()
 
@@ -1397,6 +1406,12 @@ func _current_exceptional_mortality_rate()->float:
 func smooth_exceptional_hazard(weight:float)->void:
 	var today:=_current_exceptional_mortality_rate()
 	exceptional_hazard_smoothed=today if exceptional_hazard_smoothed<0.0 else lerpf(exceptional_hazard_smoothed,today,clampf(weight,0.0,1.0))
+	var components:Dictionary=simulation_metrics.get("mortality_components",{})
+	for cause_variant in components:
+		var cause:=String(cause_variant)
+		if cause=="Natural causes": continue
+		var value:=maxf(0.0,float(components[cause_variant]))
+		exceptional_hazard_causes_smoothed[cause]=value if not exceptional_hazard_causes_smoothed.has(cause) else lerpf(float(exceptional_hazard_causes_smoothed[cause]),value,clampf(weight,0.0,1.0))
 
 ## The early-care profile the day's rates use. Before the first simulated day
 ## of a new world (or of a save loaded without one) it is not yet stored, and
@@ -1409,10 +1424,22 @@ func care_profile()->Dictionary:
 	return EARLY_CARE.profile(self,WorldSimulation.discovery)
 
 func projected_life_expectancy() -> float:
+	return life_expectancy_from(life_inputs())
+
+## What how long we live is reckoned from this month: health, food to go round,
+## roofs for our numbers and the month's exceptional risks (a month's average,
+## not one day's luck: exceptional_hazard_smoothed), by cause.
+func life_inputs()->Dictionary:
+	var hazard:=exceptional_hazard_smoothed if exceptional_hazard_smoothed>=0.0 else _current_exceptional_mortality_rate()
+	return {"health":population_health,"food":food_security,"housing":clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15),
+		"hazard":hazard,"hazard_causes":exceptional_hazard_causes_smoothed.duplicate()}
+
+## Life expectancy from `inputs` (life_inputs' shape) under today's care of
+## mothers, babies and the sick: the one formula projected_life_expectancy uses.
+func life_expectancy_from(inputs:Dictionary)->float:
 	var care:=care_profile()
-	var condition_factor:=_mortality_condition_factor()
-	# A month's average, not one day's luck (exceptional_hazard_smoothed).
-	var exceptional_hazard:=exceptional_hazard_smoothed if exceptional_hazard_smoothed>=0.0 else _current_exceptional_mortality_rate()
+	var condition_factor:=lerpf(1.90,0.64,clampf(float(inputs.get("health",population_health)),0.0,1.0))*lerpf(2.40,0.78,clampf(float(inputs.get("food",food_security)),0.0,1.0))*lerpf(1.65,0.88,clampf(float(inputs.get("housing",1.0)),0.0,1.0))
+	var exceptional_hazard:=maxf(0.0,float(inputs.get("hazard",0.0)))
 	var survival:=1.0
 	var expected_years:=0.0
 	for age in 110:
@@ -1421,6 +1448,52 @@ func projected_life_expectancy() -> float:
 		expected_years+=survival
 		survival*=1.0-annual_hazard
 	return clampf(expected_years,1.0,110.0)
+
+## Why life expectancy moved between two months' inputs: each input's share of
+## the change (the mean of swapping it alone from either month), the month's
+## exceptional risk split by cause in proportion to each cause's change, and
+## what is left (care of mothers, babies and the sick, and new ways) as "care".
+## [{"key","years","from","to"}], largest first; small shares dropped.
+func life_change_reasons(before:Dictionary,after:Dictionary,total:float)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var base_before:=life_expectancy_from(before)
+	var base_after:=life_expectancy_from(after)
+	var explained:=0.0
+	for key:String in ["health","food","housing","hazard"]:
+		var forward:=before.duplicate();forward[key]=after.get(key,before.get(key))
+		var backward:=after.duplicate();backward[key]=before.get(key,after.get(key))
+		var share:=((life_expectancy_from(forward)-base_before)+(base_after-life_expectancy_from(backward)))*0.5
+		explained+=share
+		if key!="hazard":
+			result.append({"key":key,"years":share,"from":float(before.get(key,0.0)),"to":float(after.get(key,0.0))})
+			continue
+		# The risk's share, told by cause: each cause's change in risk times what
+		# a unit of risk costs in years this month.
+		var causes_before:Dictionary=before.get("hazard_causes",{})
+		var causes_after:Dictionary=after.get("hazard_causes",{})
+		var bumped:=after.duplicate();bumped.hazard=float(after.get("hazard",0.0))+0.001
+		var years_per_risk:=(life_expectancy_from(bumped)-base_after)/0.001
+		var seen:Dictionary={}
+		var parts:Array[Dictionary]=[]
+		var raw_total:=0.0
+		for cause in causes_after.keys()+causes_before.keys():
+			if seen.has(String(cause)): continue
+			seen[String(cause)]=true
+			var from_risk:=float(causes_before.get(cause,0.0))
+			var to_risk:=float(causes_after.get(cause,0.0))
+			var raw:=years_per_risk*(to_risk-from_risk)
+			raw_total+=raw
+			parts.append({"key":"cause:"+String(cause),"years":raw,"from":from_risk,"to":to_risk})
+		# Scaled so the causes add up to the risk's own share exactly.
+		var scale:=share/raw_total if absf(raw_total)>0.000001 and signf(raw_total)==signf(share) else 1.0
+		for part:Dictionary in parts:
+			part.years=float(part.years)*scale
+			result.append(part)
+	# What the inputs above do not explain comes from how we care for the weak.
+	result.append({"key":"care","years":total-explained,"from":0.0,"to":0.0})
+	result=result.filter(func(reason:Dictionary)->bool:return absf(float(reason.years))>=1.0/24.0)
+	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(float(a.years))>absf(float(b.years)))
+	return result
 
 func able_population() -> int:
 	initialize_population_model()
