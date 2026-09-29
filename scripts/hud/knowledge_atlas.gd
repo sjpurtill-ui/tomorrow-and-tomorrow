@@ -97,7 +97,7 @@ func select(id:String)->void:
 %s" % [item.name,item.status,item.description]
 		if mode=="inquiry":
 			var effects:Array[String]=[]
-			for effect:String in item.effects:effects.append("%s %s" % [DiscoverySystem.EFFECT_DISPLAY_NAMES.get(effect,effect.replace("_"," ")),preload("res://scripts/discovery_system.gd").effect_percent(float(item.effects[effect]))])
+			for effect:String in item.effects:effects.append("%s %s" % [preload("res://scripts/effect_explainer.gd").label(effect),preload("res://scripts/effect_explainer.gd").percent(float(item.effects[effect]))])
 			if not effects.is_empty():detail.text+="\n"+" · ".join(effects)
 			if not item.missing.is_empty(): detail.text+=" Waiting for: "+", ".join(item.missing)
 			action.text="Research this question" if bool(item.ready) else "Already discovered" if item.known else "Gather more evidence"

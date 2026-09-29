@@ -1,5 +1,6 @@
 extends "res://scripts/hud/settlement_overview.gd"
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
+const Explainer:=preload("res://scripts/effect_explainer.gd")
 ## Below this board width the questions stack in one column and the lead
 ## painting sits above its words instead of beside them.
 const WIDE:=760.0
@@ -133,8 +134,14 @@ func _question(parent:Node,record:Dictionary,lead:bool)->void:
 	if not restated and not explained.has(why):
 		explained[why]=true;_line(text,why,13 if lead else 12,T.TEXT_SOFT)
 	var holdup:=why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)]
+	# What answering it would do in the game, from the engine's own readings.
+	var effects:Dictionary=record.get("effects",{})
+	var brings:=""
+	if not effects.is_empty():
+		var would:=_line(text,"Would bring: %s." % Explainer.summary(effects),13 if lead else 12,T.TEXT_SOFT);would.name="WouldBring"
+		brings="\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false)
 	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))
-	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+holdup+"\n\nClick to review this field and its current investigations."
+	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+holdup+brings+"\n\nClick to review this field, its current investigations and what they would do."
 func _card_style(pad:float,hover:bool=false)->StyleBoxFlat:
 	return T.flat(T.HOVER_BG if hover else T.ROW_BG,T.GOLD if hover else T.BORDER,1,T.RADIUS_CARD,pad)
 func _clamped(parent:Node,value:String,font:int,ink:Color,lines:int=2)->void:

@@ -74,6 +74,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				section.add_child(board);board.setup(block)
 			"inquiry_board":
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
+			"impact":
+				var ledger:=preload("res://scripts/hud/impact_ledger.gd").new();section.add_child(ledger);ledger.setup(block)
 			"recruit_deploy":
 				var board:=preload("res://scripts/hud/recruit_deploy_board.gd").new()
 				section.add_child(board);board.setup(block)

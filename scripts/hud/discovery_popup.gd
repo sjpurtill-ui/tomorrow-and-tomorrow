@@ -5,12 +5,12 @@ const Art=preload("res://scripts/hud/research_visuals.gd")
 const T=preload("res://scripts/hud/hud_tokens.gd")
 const Motion=preload("res://scripts/hud/motion.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
+const Explainer=preload("res://scripts/effect_explainer.gd")
 ## The hero moment of the research loop: the painting rises from the dark and
 ## wipes in left to right like ink drying (SCENE), then the carved title, a gold
 ## hairline drawn beneath it, and one line of story.
 const HERO_HEIGHT:=300.0
 const HERO_MIN_HEIGHT:=150.0
-const COSTS=["food_spoilage","labor_demand","fuel_demand","pollution","timber_pressure","ecological_pressure","disease_exposure","injury_risk","disaster_risk","health_risk","institutional_rigidity","fatigue"]
 var terrain:Node
 var hud:Node
 var pending:Array[Dictionary]=[]
@@ -129,16 +129,22 @@ func render()->void:
 		Art.label(body,"WHAT CHANGES",12,T.GOLD)
 		var cards:=GridContainer.new();benefits=cards;cards.columns=2;cards.add_theme_constant_override("h_separation",8);cards.add_theme_constant_override("v_separation",8);body.add_child(cards)
 		for key:String in effects:
-			var value:=float(effects[key]);var beneficial:bool=(value<0) if key in COSTS else (value>0)
-			var ink:=T.GREEN if beneficial else T.AMBER
+			var value:=float(effects[key])
+			# Benefit or cost as the engine reads the effect (the explainer's
+			# direction for every key), and the first thing it moves in the game.
+			var said:=Explainer.describe(key,value,1.0)
+			var tone:=Explainer.tone(key,value);var beneficial:bool=tone>0
+			var ink:=T.BLUE if bool(said.inert) or tone==0 else (T.GREEN if tone>0 else T.AMBER)
 			var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_stylebox_override("panel",T.flat(Color("172830"),ink.darkened(.35),1,4,12));cards.add_child(card)
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 			var amount:=Art.label(row,percent(value),24,ink);amount.custom_minimum_size.x=72
 			var names:=VBoxContainer.new();names.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(names)
-			Art.label(names,DiscoverySystem.EFFECT_DISPLAY_NAMES.get(key,key.replace("_"," ")).capitalize(),13,T.INK,true)
-			Art.label(names,"Benefit" if beneficial else "Trade-off",12,ink)
-			effect_cards[key]={"value":amount,"beneficial":beneficial}
-		Art.label(body,"These are the discovery’s effects at full adoption. Their contribution grows as people put the new practice to use.",12,T.TEXT_SOFT,true)
+			Art.label(names,String(said.label),13,T.INK,true)
+			Art.label(names,"No effect yet" if bool(said.inert) else ("Benefit" if tone>0 else ("Trade-off" if tone<0 else "Change")),12,ink)
+			var meaning:=Explainer.meaning(said)
+			var means:=Art.label(names,meaning.left(1).to_upper()+meaning.substr(1),12,T.legible(T.TEXT_SOFT,Color("172830")),true);means.name="Meaning"
+			effect_cards[key]={"value":amount,"beneficial":beneficial,"meaning":means}
+		Art.label(body,"These are the discovery’s effects at full adoption. Their contribution grows as people put the new practice to use; the Research page shows everywhere each one acts.",12,T.TEXT_SOFT,true)
 	else:Art.label(body,"This finding adds to your civilization’s established knowledge. Its practical uses depend on the resources and earlier discoveries your people can combine with it.",13,T.TEXT_SOFT,true)
 	var consequence:=String(current.get("social_consequence",""))
 	if consequence!="":Art.label(body,consequence,13,T.TEXT_SOFT,true)

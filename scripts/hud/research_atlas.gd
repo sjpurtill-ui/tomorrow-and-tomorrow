@@ -12,6 +12,8 @@ const Portrait=preload("res://scripts/hud/person_portrait.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const Words=preload("res://scripts/hud/home_plain.gd")
 const Plain=preload("res://scripts/hud/production_plain.gd")
+const Explainer=preload("res://scripts/effect_explainer.gd")
+const Ledger=preload("res://scripts/hud/impact_ledger.gd")
 # The painting leads each card, full width; text below always wraps.
 const CARD_WIDTH:=236.0
 ## About 2:1, between the wide banner paintings (about 2.7:1) and the older
@@ -63,6 +65,8 @@ var leader_options:Array=[]
 var detail_revision:=""
 var narrow_details:=false
 var detail_back:Button
+## Effect rows opened in the detail pane's impact ledger (impact_ledger.gd).
+var effect_state:Dictionary={}
 func _ready()->void:
 	# This overlay lives under a CanvasLayer, outside the dock theme hierarchy.
 	theme=T.control_theme()
@@ -288,7 +292,7 @@ func select(id:String,open_detail:bool=false)->void:
 	var selected_record:Dictionary={}
 	for item:Dictionary in records:
 		if item.id==id:selected_record=item;break
-	var signature:=str(hash([id,selected_record,main.vertical]))
+	var signature:=str(hash([id,selected_record,main.vertical,GameState.discovery_adoption.get(id,0.0)]))
 	if signature==detail_revision:return
 	detail_revision=signature
 	var view:Dictionary=preload("res://scripts/hud/view_state.gd").capture(detail_scroll) if detail_selected==id else {};detail_selected=id
@@ -377,7 +381,13 @@ func select(id:String,open_detail:bool=false)->void:
 			# Help from abroad is asked for in the court, never through a form here.
 			var abroad:VBoxContainer=preload("res://scripts/hud/research_purchase_panel.gd").new()
 			abroad.subject=String(item.id);detail_body.add_child(abroad)
-		for effect:String in item.effects:Art.label(detail_body,Art.effect_sentence(effect,float(item.effects[effect])),14,T.AMBER_TEXT if Art.effect_is_cost(effect,float(item.effects[effect])) else T.GREEN_TEXT,true)
+		if not (item.effects as Dictionary).is_empty():
+			# Each effect: its size, what it adds now (or would at full use), and
+			# a click away, everywhere the engine reads it.
+			Art.label(detail_body,"WHAT IT DOES" if item.known else "WHAT IT WOULD DO",12,T.GOLD_TEXT)
+			var ledger:VBoxContainer=Ledger.new();detail_body.add_child(ledger)
+			ledger.setup({"state":effect_state,"rows":Explainer.discovery_rows(String(item.id),bool(item.known)),
+				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. A new practice starts with about 3 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:
