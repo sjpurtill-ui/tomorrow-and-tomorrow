@@ -15,17 +15,9 @@ const Model:=preload("res://scripts/hud/own_town_model.gd")
 ## Any town of ours, first or not, gets the same page from its own figures.
 
 const COHORT_LABELS:Array[Array]=[["children","0–13","Children, not yet working"],["youth","14–24","Young people of working age"],["early_adults","25–34","Adults of working age"],["established_adults","35–44","Adults of working age"],["mature_adults","45–59","Older adults, still working"],["elders","60+","Elders, mostly past heavy work. How long people live is an average from birth, not a limit."]]
-const ROLES:Array[Array]=[
-	["Food","Food gatherers","Gather, hunt and fish. Taking too much thins the land nearby."],
-	["Survey","Searchers","Look for wood, stone, clay and water, and judge how good they are."],
-	["Extraction","Cutters and diggers","Cut wood, dig stone and clay, and gather fibre from known places."],
-	["Construction","Builders","Put up shelters, stores and paths as the place needs them."],
-	["Crafting","Makers","Make and mend tools, baskets, pots and cloth."],
-	["Logistics","Carriers","Carry food and materials home; far sources are only useful if someone carries."],
-	["Knowledge","Lore keepers","Watch, remember and work out new ways. Where their attention goes decides what the people learn next."],
-	["Administration","Stewards","Keep track of work and stores; settle quarrels so people pull together."],
-	["Defense","Watch","Keep watch and stand ready; every watcher is away from other work."],
-]
+## Who sets the daily work (manual_work.gd). Who does what is The People's
+## to show and set; this page says who sets it and hands it back.
+const Manual:=preload("res://scripts/manual_work.gd")
 
 func meta()->Dictionary:
 	var settlement:=_selected_settlement()
@@ -88,7 +80,7 @@ func _selected_settlement()->Dictionary:
 		return {"id":"","name":terrain._settlement_display_name(),"classification":"settlement","population":GameState.population_total,"primary":true}
 	return settlement
 
-func _people_blocks(productive:int,local_population:int,local_share:float,settlement:Dictionary,management:Dictionary)->Array:
+func _people_blocks(_productive:int,local_population:int,local_share:float,settlement:Dictionary,_management:Dictionary)->Array:
 	var cohorts:Dictionary=GameState._integer_age_cohorts()
 	var segment_items:Array=[]
 	var dependents:=0
@@ -96,24 +88,10 @@ func _people_blocks(productive:int,local_population:int,local_share:float,settle
 		var count:=roundi(float(cohorts.get(String(entry[0]),0))*local_share)
 		if String(entry[0]) in ["children","elders"]: dependents+=count
 		segment_items.append({"label":String(entry[1]),"value":str(count),"share":maxf(0.5,float(count)),"color":Tokens.COHORT_COLORS[COHORT_LABELS.find(entry)],"tip":String(entry[2])})
-	var local_allocations:Dictionary=management.get("allocations",GameState.population_allocation_percentages)
-	var alloc_items:Array=[]
-	var assigned:=0
-	for index in ROLES.size():
-		var role:Array=ROLES[index]
-		var key:=String(role[0])
-		var count:=roundi(float(local_allocations.get(key,0.0))/100.0*float(maxi(1,productive)))
-		assigned+=count
-		alloc_items.append({
-			"name":String(role[1]),"count":count,
-			"pct":"%d%%" % roundi(float(count)/maxf(1.0,float(productive))*100.0),
-			"color":Tokens.ROLE_COLORS[index],"tip":String(role[2]),
-		})
 	var settlement_id:=String(settlement.get("id",""))
 	var blocks:Array=[
 		Charts.population(settlement_id,true),
 		{"type":"segments","heading":"Ages","note":preload("res://scripts/hud/home_plain.gd").dependency(dependents,local_population-dependents),"items":segment_items,"legend":"Green bands are people of working age; the others are children and elders."},
-		{"type":"alloc","heading":"Who does what each day","note":"%s sets this; about %d of the %d who can work" % [String(management.get("leader",{}).get("name","The local leader")).get_slice(" ",0),assigned,productive],"items":alloc_items},
 		{"type":"actions","items":[
 			{"label":"Talk with the leader","sub":"In the court: ask, order or replace","primary":true,"on_press":court({"settlement_id":settlement_id}),"tip":"The government appoints local leaders. Call this one to the court to talk, give orders or replace them."},
 			{"label":"Rename this place","sub":"The name on the map","on_press":terrain._open_settlement_naming_panel.bind(settlement_id),"tip":"Give this place the name used on the map and in history."},
@@ -175,7 +153,11 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	# What the leader is doing, short; the reason is in the tooltip.
 	var direction:=""
 	var direction_tip:=""
+	var ruler:=Manual.manual()
 	if management.is_empty():direction="No one runs this place's daily work yet."
+	elif ruler:
+		direction="You set the daily work for all our towns."
+		direction_tip=Manual.RULER_TIP
 	elif managed:
 		direction="%s chooses the daily work: more hands on %s." % [leader_name if not leader_name.is_empty() else "The local leader",String(FOCUS_WORDS.get(focus,"everyday needs"))]
 		direction_tip=String(management.get("focus_reason",""))
@@ -198,12 +180,13 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	var caption:=("Held by %s" % CivilizationSystem.city_intelligence.controller_label(holder)) if occupied else "Our %s · settled %s" % [kind if kind!="" else "settlement",Model.since(age)]
 	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,"direction_tip":direction_tip,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
+		"ruler_sets_work":ruler and not management.is_empty() and not occupied,"on_leaders":_work_to_leaders,"on_people":jump("overview",0),
 		"town_name":String(facts.name),"sketch":Model.sketch_data(facts,caption),"lead":Model.lead(facts),
 		"groups":groups,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":_founding,
 		"on_leader":court({"settlement_id":String(id)}),
-		"on_population":on_population,"on_work":focused_action("Who does what","",_people_report.bind("work")).on_press,
+		"on_population":on_population,
 		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
 
 static func _since(days:int)->String:
@@ -238,16 +221,19 @@ func _works_data(context:Dictionary,city_id:String)->Dictionary:
 		items.append(item)
 	return {"progress":Works.progress_lines(),"offers":items}
 
+## The town's own ages and families. Who does what is The People's to show
+## and set (manual_work.gd), not a second screen here.
 func _people_report(kind:String)->Dictionary:
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_people_report(kind)))
 
-func _city_people_report(kind:String)->Dictionary:
+func _city_people_report(_kind:String)->Dictionary:
 	var settlement:=_selected_settlement()
 	var population:=maxi(1,int(settlement.get("population",GameState.population_total)))
 	var share:=float(population)/maxf(1,GameState.population_total)
-	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	var productive:=maxi(0,roundi(float(profile.get("productive",terrain._able_population()))*share))
-	var management:=GovernmentPeopleSystem.settlement_management(String(settlement.get("id","")))
-	var all:=_people_blocks(productive,population,share,settlement,management)
-	if kind=="population":return {"blocks":[all[0],all[1]]}
-	return {"blocks":[{"type":"text","text":"The local leader sets who does what each day. Asking for more hands on something moves some people to it; food and water still come first."},all[2]]}
+	var all:=_people_blocks(0,population,share,settlement,{})
+	return {"blocks":[all[0],all[1]]}
+
+## "Back to our leaders": each town's leader shares out the work again.
+func _work_to_leaders()->void:
+	Manual.set_manual(false)
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()

@@ -40,8 +40,11 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## Early feuds (a small people's fight is a feud: "are we at war with the
 ## Neyali?", "burn their stores" at a home nobody has found, "go to war with
 ## them": 11 more runs a path): offline 519, live 520, sloppy 74.
+## Who sets the daily work ("I will set the work myself", "put 10 more on
+## building", "let the headman decide the work again": 13 more runs a path):
+## offline 532, live 533, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":519,"live":520,"sloppy":74}
+const BASELINE:={"offline":532,"live":533,"sloppy":74}
 
 var _processing:Dictionary={}
 

@@ -18,11 +18,15 @@ extends RefCounted
 ##            new towns on their own (auto_founding.gd), the same switch as the
 ##            Settlement dock's. One town asked for ("found a town by the
 ##            river") is not their leave.
+##   work     "I will set the work myself", "put 10 more on building", "take
+##            three off the watch", "let the headman decide the work again":
+##            who sets the daily work and people moved between tasks
+##            (manual_work.gd), the same switch and split as The People view.
 ## Words about a foreign town or its people ("conscript the men of Tsaren",
 ## "take their weapons") are the war leader's business, never these.
 ##
-## read(text) -> {kind:"recruit"|"arm"|"found_towns", count, item?,
-##   for_recruits?, allow?} or {}.
+## read(text) -> {kind:"recruit"|"arm"|"found_towns"|"work", count, item?,
+##   for_recruits?, allow?, mode?, role?, fewer?, other?} or {}.
 ## perform(reading) -> {ok, says, outcome, kind, count, ...}: says is the
 ##   official's own plain answer, outcome the narration; ok=false when nothing
 ##   could be set in motion (and says what stands in the way).
@@ -134,6 +138,89 @@ static func found_reading(text:String)->Dictionary:
 		if not (_has(lower,SEND_SETTLERS) or _has(lower,NEW_PLACES)) or not (stop or leave): return {}
 	return {"kind":"found_towns","allow":not stop}
 
+## Who sets the daily work, and people moved between tasks (manual_work.gd).
+## The tasks as the People view names them, each to its work.
+const WORK_TASKS:=[
+	["Food","(?:getting |gathering |the )?food|gathering|foraging|hunting|the hunt|fishing|the fields|farming|the harvest|gatherers|hunters|fishers|food gatherers"],
+	["Survey","searching(?: the land)?|searchers|surveying|the survey|scouting the land"],
+	["Extraction","cutting(?: and digging| wood| timber)?|digging|quarrying|the quarr(?:y|ies)|the clay pits|woodcutting|cutters(?: and diggers)?|diggers|fetching wood(?: and stone)?|wood and stone"],
+	["Construction","building|builders|construction|the building work"],
+	["Crafting","making(?: tools| goods)?|makers|crafts?|crafting|toolmaking|tool ?making|the workshops?"],
+	["Logistics","carrying(?: water)?|carriers|hauling|haulers|porters|fetching water|water carrying"],
+	["Knowledge","learning|the lore|lore ?keeping|lore keepers|studying|study|teaching|scholars"],
+	["Administration","keeping the stores|stewards|stewarding|the council'?s business|keeping count"],
+	["Defense","(?:the |keeping )?watch|watchmen|guarding|guard duty|sentries|the guard"],
+]
+## People moved: "put 10 more on building", "take three off the watch",
+## "move 5 from food to building", "ten fewer on the fields".
+const PEOPLE_WORDS:="(?:(?:people|hands|men|women|workers|folk|of them|souls)\\s+)?"
+## The daily work as a whole, never "work the fields" or "put them to work".
+const WORK_NOUNS:="(?:(?:the |our |their )(?:daily )?(?:work|labou?r|tasks|jobs)|daily work|who does what|who works at what|the sharing of (?:the )?work)"
+const WORK_VERBS:="(?:set|decide|assign|share out|share|choose|direct|run|give out|hand out|allot|order)"
+## The god takes the daily work in hand: "I will set the work myself",
+## "leave the work to me", "let me decide who does what".
+const WORK_RULER:="(?i)\\b(?:i|i'll|i will|i shall|let me|myself)\\b[^.!]*?\\b"+WORK_VERBS+"\\b[^.!]*?"+WORK_NOUNS+"\\b|\\bleave "+WORK_NOUNS+" to me\\b|"+WORK_NOUNS+" (?:is|are) mine\\b"
+## ...or gives it back to our leaders: "let the headman decide the work
+## again", "hand the work back to the leaders", "our leaders may set the work
+## again", "I want you to decide the work", "Kishan, decide the work again".
+const WORK_LEADERS:="(?i)\\b(?:let|leave|hand|give|return)\\b(?! me\\b)[^.!]*?\\b"+WORK_VERBS+"\\b[^.!]*?"+WORK_NOUNS+"\\b|\\b(?:hand|give|return|leave)\\b[^.!]*?"+WORK_NOUNS+"\\b[^.!]*?\\b(?:to|with) (?:the |our |my )?(?:headman|head man|leaders?|chiefs?|elders?|hearth chief|stewards?|council|you|them)\\b|\\b(?:our |the )?leaders? (?:may|can|should|will|must|are to) (?:again )?"+WORK_VERBS+"\\b[^.!]*?"+WORK_NOUNS+"\\b|\\byou (?:may |can |should |will |must |are to |to )?(?:again )?"+WORK_VERBS+"\\b[^.!]*?"+WORK_NOUNS+"\\b|^\\s*(?:[\\w' ]{1,24},\\s*)?(?:decide|set|share out|choose|run)\\b[^.!]*?"+WORK_NOUNS+"\\b"
+
+static func _task_role(words:String)->String:
+	var lower:=words.strip_edges().to_lower()
+	for pair in WORK_TASKS:
+		if _re("(?i)^(?:"+String(pair[1])+")$").search(lower)!=null: return String(pair[0])
+	return ""
+
+static func _any_task()->String:
+	var parts:PackedStringArray=[]
+	for pair in WORK_TASKS: parts.append(String(pair[1]))
+	return "(?:"+"|".join(parts)+")"
+
+## Who sets the daily work, or people moved between tasks: {kind: "work",
+## mode: "ruler"|"leaders"} or {kind: "work", role, count, fewer, other}; {}
+## when the words are neither (a question, a foreign town or a march named,
+## a task nobody works at).
+static func work_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
+	var lower:=clean.to_lower().replace("’","'")
+	if _has(lower,FOUND_WAR) or _names_foreign(lower) or _has(lower,"(?i)\\b(captives?|prisoners?|bondservants?|slaves?|enemy|enemies)\\b"): return {}
+	var task:=_any_task()
+	var number:="(\\d{1,5}|a dozen|a score|a hundred|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|some|a few|more|several)"
+	# "move 5 from food to building", "take 3 from the watch and put them on building".
+	var between:=_re("(?i)\\b(?:move|shift|take|send|put|switch)\\s+"+number+"\\s+(?:more\\s+)?"+PEOPLE_WORDS+"(?:off|from|out of)\\s+(?:the\\s+)?("+task+")\\s+(?:to|onto|on|into|and put them (?:on|to))\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if between!=null:
+		var from_role:=_task_role(between.get_string(2))
+		var to_role:=_task_role(between.get_string(3))
+		if from_role!="" and to_role!="" and from_role!=to_role: return {"kind":"work","role":to_role,"count":number_in(between.get_string(1)),"fewer":false,"other":from_role}
+	# Fewer: "take three off the watch", "ten fewer on the fields", "pull 5 people from building".
+	var off:=_re("(?i)\\b(?:take|pull|remove|call|bring)\\s+(?:back\\s+)?"+number+"\\s+(?:more\\s+)?"+PEOPLE_WORDS+"(?:off|from|out of|away from)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if off==null: off=_re("(?i)\\b"+number+"\\s+(?:fewer|less)\\s+"+PEOPLE_WORDS+"(?:on|at|to|in|for|doing)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if off!=null:
+		var role:=_task_role(off.get_string(2))
+		if role!="": return {"kind":"work","role":role,"count":number_in(off.get_string(1)),"fewer":true,"other":""}
+	var fewer:=_re("(?i)\\b(?:fewer|less)\\s+"+PEOPLE_WORDS+"(?:on|at|to|in|for|doing)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if fewer!=null:
+		var role:=_task_role(fewer.get_string(1))
+		if role!="": return {"kind":"work","role":role,"count":0,"fewer":true,"other":""}
+	# More: "put 10 more on building", "add five to the watch", "10 more on the fields".
+	var on:=_re("(?i)\\b(?:put|set|add|move|send|assign|give|have|get|place)\\s+(?:another\\s+)?"+number+"\\s+(?:more\\s+)?"+PEOPLE_WORDS+"(?:on|onto|to|at|into|in|for|doing|to work on)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if on==null: on=_re("(?i)^\\s*(?:and\\s+)?"+number+"\\s+more\\s+"+PEOPLE_WORDS+"(?:on|to|at|in|for|doing)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if on!=null:
+		var role:=_task_role(on.get_string(2))
+		if role!="": return {"kind":"work","role":role,"count":number_in(on.get_string(1)),"fewer":false,"other":""}
+	var more:=_re("(?i)\\b(?:put|set|add|move|send|assign|have|get|place)\\s+more\\s+"+PEOPLE_WORDS+"(?:on|onto|to|at|into|in|for|doing|to work on)\\s+(?:the\\s+)?("+task+")\\b").search(lower)
+	if more!=null:
+		var role:=_task_role(more.get_string(1))
+		if role!="": return {"kind":"work","role":role,"count":0,"fewer":false,"other":""}
+	# Who sets it: the god in so many words ("myself", "leave it to me"), else
+	# the leaders when they are named or told, else the god who speaks.
+	var ruler:=_has(lower,WORK_RULER)
+	if ruler and _has(lower,"\\b(myself|let me|to me|is mine|are mine)\\b"): return {"kind":"work","mode":"ruler"}
+	if _has(lower,WORK_LEADERS): return {"kind":"work","mode":"leaders"}
+	if ruler: return {"kind":"work","mode":"ruler"}
+	return {}
+
 static func read(text:String)->Dictionary:
 	var clean:=text.strip_edges()
 	var lower:=clean.to_lower()
@@ -142,6 +229,10 @@ static func read(text:String)->Dictionary:
 	# someone else's people, and "against my word" is no war.
 	var founding:=found_reading(clean)
 	if not founding.is_empty(): return founding
+	# Who sets the daily work, or people moved between tasks (manual_work.gd):
+	# "let our leaders decide their work again" names nobody else's people.
+	var work:=work_reading(clean)
+	if not work.is_empty(): return work
 	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
 	# Weapons for our fighters: "make the weapons we need", "arm the recruits".
 	var make:=_re(MAKE_VERBS).search(lower)
@@ -174,6 +265,7 @@ static func perform(reading:Dictionary)->Dictionary:
 		"recruit": return _recruit(reading)
 		"arm": return _arm(reading)
 		"found_towns": return preload("res://scripts/auto_founding.gd").court_order(bool(reading.get("allow",true)))
+		"work": return preload("res://scripts/manual_work.gd").court_order(reading)
 	return {"ok":false,"kind":"","says":"","outcome":""}
 
 static func _recruit(reading:Dictionary)->Dictionary:

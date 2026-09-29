@@ -540,6 +540,9 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["envoys_out"]=0 if (CivilizationSystem.diplomatic_mission as Dictionary).is_empty() else 1
 	# Do our leaders found new towns on their own (auto_founding.gd)?
 	m["auto_found"]=1 if bool(PeopleDirection.auto_settlement) else 0
+	# Who sets the daily work, and how many are at each task (manual_work.gd).
+	m["manual_work"]=0 if bool(PeopleDirection.automatic_work) else 1
+	for pair in [["work_food","Food"],["work_build","Construction"],["work_carry","Logistics"],["work_learn","Knowledge"],["work_watch","Defense"]]: m[String(pair[0])]=int(GameState.population_allocations.get(String(pair[1]),0))
 	var audience:=Hall.find(audience_id)
 	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	m["pending_ask"]=String(pending.get("ask",""))
@@ -576,6 +579,8 @@ static func _material(m:Dictionary)->String:
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
 		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
+		# Who sets the daily work and the people at each task (manual_work.gd).
+		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
 		"trackers","feud_ops","feud"]
 	var parts:=PackedStringArray()

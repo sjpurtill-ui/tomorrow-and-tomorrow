@@ -735,6 +735,46 @@
     {"say": "Our leaders may settle new land again", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
      "expect": {"handled": true, "verb": "order", "state": {"auto_found": "==1", "measures": "==before", "m_settle": "==0", "modifiers": "==before"}, "reply_has": ["Nobody goes yet"]}}]},
 
+  {"id": "work.ruler", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "The ruler takes the daily work in hand (manual_work.gd): the same switch as The People view's. The work stands as it was, said with its numbers; never a law or a standing directive.",
+   "say": "I will set the work myself",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_food": "==before", "work_build": "==before", "modifiers": "==before", "moving": "==before"}, "reply_has": ["you set the daily work", "{work_food} getting food"]},
+   "variants": ["Leave the daily work to me", "From now on I decide who does what", "I'll decide the work myself"]},
+
+  {"id": "work.more_building", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Ten more on building, whole people, from the task with the most: the work is the ruler's from now on, and the headman says the new count and where they came from.",
+   "say": "Put 10 more on building",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 10}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_build": ">before", "work_food": "<before", "modifiers": "==before", "moving": "==before"}, "reply_has": ["10 more build", "{work_build} now", "getting food"]},
+   "variants": ["put ten more people on building", "Move 10 from food to building"]},
+
+  {"id": "work.off_watch", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Two taken off the watch go to the task with the most; the count is said.",
+   "say": "Take two off the watch",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 2}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_watch": "<before", "modifiers": "==before", "home_troops": "==before"}, "reply_has": ["2 fewer keep watch", "{work_watch} now"]}},
+
+  {"id": "work.leaders_again", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Set by hand, then handed back: the leaders share out the work again at once, and the headman says what they put first and who is at work now.",
+   "steps": [
+    {"say": "Put 10 more on building", "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 10}, "confidence": 0.9}, "expect": {"state": {"manual_work": "==1"}}},
+    {"say": "Let the headman decide the work again", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+     "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==0", "work_build": "<before", "modifiers": "==before"}, "reply_has": ["share out the daily work again", "{work_food} getting food"]}}],
+   "variants": [{"say": "Our leaders may set the work again"}, {"say": "Hand the work back to the leaders"}]},
+
+  {"id": "work.more_building.war", "domain": "home_orders", "fixture": "war_not_held", "speaker": "suri", "source": "design",
+   "note": "Said to the war leader at war: still the ruler's split at home, never a march or a law.",
+   "say": "Put 10 more on building",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 10}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_build": ">before", "moving": "==before", "to_tsaren": "==before", "modifiers": "==before"}}},
+
+  {"id": "q.work.who_sets", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Who sets the daily work is on the headman's sheet, with who is at work.",
+   "say": "Who decides the work?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["share out the daily work", "{work_food}"], "prompt_has": ["Who sets the daily work:"]}},
+
   {"id": "person.kill_him", "domain": "person_acts", "fixture": "home_peace", "speaker": "headman", "source": "user",
    "say": "Kill him",
    "ideal": {"kind": "order", "action": "kill", "type": "person", "ref": "$headman", "confidence": 0.95},

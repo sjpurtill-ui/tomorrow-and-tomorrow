@@ -490,6 +490,8 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# settle new land again") is the engine's own switch (home_orders.gd),
 	# whatever the reading made of it.
 	if String(reading.kind)!="question" and not CC.HomeOrders.found_reading(text).is_empty(): return {"route":"legacy","why":"the god's word on new towns"}
+	# So is who sets the daily work and people moved between tasks (manual_work.gd).
+	if String(reading.kind)!="question" and not CC.HomeOrders.work_reading(text).is_empty(): return {"route":"legacy","why":"the god's word on the daily work"}
 	var action:=String(reading.action)
 	var kind:=String(reading.kind)
 	var conf:=float(reading.confidence)

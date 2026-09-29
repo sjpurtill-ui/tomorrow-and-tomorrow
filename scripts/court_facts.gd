@@ -46,6 +46,7 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
+const ManualWork:=preload("res://scripts/manual_work.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
 
@@ -423,6 +424,8 @@ static func _stores(out:Dictionary)->void:
 		var n:=int(state.population_allocations[task])
 		if n>0: work[String(task)]=n
 	out["workers_by_task"]=work
+	# Who sets that work: our leaders, or the god by hand (manual_work.gd).
+	out["daily_work"]=ManualWork.court_facts()
 	var season_start:=ceili(float(HearthCount.season_key(int(state.elapsed_days)))*HearthCount.SEASON_DAYS-HearthCount.SEASON_DAYS*0.5)
 	var vital:Dictionary=state.rolling_vital_balance(maxi(1,int(state.elapsed_days)-season_start+1))
 	out["births_this_season"]=int(vital.get("births",0))
@@ -626,6 +629,7 @@ static func text(s:Dictionary)->String:
 		var tasks:Dictionary=s.get("workers_by_task",{})
 		for task in tasks: work.append("%s %d" % [String(task).to_lower(),int(tasks[task])])
 		if not work.is_empty(): lines.append("At work: %s." % ", ".join(work))
+		if s.get("daily_work") is Dictionary: lines.append("Who sets the daily work: %s." % ManualWork.court_words(s.daily_work,false))
 		if not (s.get("brought_home",[]) as Array).is_empty(): lines.append("Brought home from towns we took: %s." % "; ".join(PackedStringArray(s.brought_home)))
 	if (s.get("offices",[]) as Array).has("tribute"):
 		lines.append("Tribute taken: %s." % ("; ".join(PackedStringArray(s.get("tribute_taken",[]))) if not (s.get("tribute_taken",[]) as Array).is_empty() else "none"))

@@ -24,6 +24,7 @@ const Lives:=preload("res://scripts/court_lives.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
+const Manual:=preload("res://scripts/manual_work.gd")
 
 const SEASON_DAYS:=91
 ## The most figures one task's row draws; above it each figure stands for more.
@@ -352,25 +353,33 @@ static func store_cause(trend:int,food_days:float)->String:
 # Labor
 # ---------------------------------------------------------------------------
 
-## How many are at each task today: food labor split by what the food
-## actually came from (plants, game, fish, fields), the rest by allocation.
-static func labor(productive:int)->Array:
-	var alloc:Dictionary=GameState.population_allocation_percentages
-	var counts:Dictionary={}
-	var food_workers:=float(alloc.get("Food",0.0))/100.0*float(productive)
+## Who is at each task today, in whole people, from the one ledger of work
+## (population_allocations, manual_work.gd counts): every task in a fixed
+## order, adding up to the people who can work. The food getters' row carries
+## what the food came from (plants, game, fish, fields) as its mix of figures.
+## [{id: role, label, count, icon, mix:[[icon, people]]}].
+static func labor()->Array:
+	var counts:=Manual.counts()
 	var harvest:Dictionary=GameState.simulation_metrics.get("food_harvest",{}) if GameState.simulation_metrics.get("food_harvest") is Dictionary else {}
 	var split:={"gather":float(harvest.get("Fresh plants",0.0)),"hunt":float(harvest.get("Fresh meat",0.0)),"fish":float(harvest.get("Fish",0.0)),"tend":float(harvest.get("Dry staples",0.0))}
 	var total:=0.0
 	for key in split:total+=float(split[key])
 	if total<=0.0:split={"gather":0.6,"hunt":0.3,"fish":0.1,"tend":0.0};total=1.0
-	for key in split:counts[key]=float(split[key])/total*food_workers
-	for role:String in ROLE_TASK:counts[ROLE_TASK[role]]=float(counts.get(ROLE_TASK[role],0.0))+float(alloc.get(role,0.0))/100.0*float(productive)
+	# The food getters by what they got, whole people adding up to the row.
+	var food:=int(counts.get("Food",0))
+	var mix:Array=[];var given:=0;var remainders:={}
+	for key:String in ["gather","hunt","fish","tend"]:
+		var exact:=float(split[key])/total*float(food)
+		mix.append([key,floori(exact)]);given+=floori(exact);remainders[key]=exact-floorf(exact)
+	while given<food:
+		var best:=0
+		for i in mix.size():
+			if float(remainders[mix[i][0]])>float(remainders[mix[best][0]]):best=i
+		mix[best][1]=int(mix[best][1])+1;remainders[mix[best][0]]=-1.0;given+=1
+	mix=mix.filter(func(pair:Array)->bool:return int(pair[1])>0)
 	var out:Array=[]
-	for task in TASKS:
-		var count:=roundi(float(counts.get(String(task[0]),0.0)))
-		if count<=0:continue
-		out.append({"id":String(task[0]),"label":String(task[1]),"count":count})
-	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count))
+	for role:String in Manual.ROLES:
+		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else []})
 	return out
 
 

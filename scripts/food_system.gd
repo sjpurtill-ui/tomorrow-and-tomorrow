@@ -229,6 +229,9 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	for role:String in WorldSimulation.state.POPULATION_ROLES:working_total+=maxf(0.0,WorldSimulation.state.effective_workers(role))
 	var result:={
 		"food_labor_share":workers/maxf(1.0,working_total),
+		# Read only: the hands getting food in this count, so the People view
+		# can say what another split will bring (manual_work.gd outlook).
+		"food_workers":workers,
 		"clothing":clothing.coverage,
 		"clothing_workers":0.0,
 		"food_days":food_days,

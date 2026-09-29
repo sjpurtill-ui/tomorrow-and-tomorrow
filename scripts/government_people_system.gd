@@ -1507,7 +1507,24 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 	return weights
 
 
+## Lays today's daily work on our towns now (the ruler's split, or the
+## leaders' own): the one entry point the People view and the court use
+## (manual_work.gd), so the split applies at once, not at the next dawn.
+func delegate_now()->void:
+	var was:=initializing
+	initializing=true
+	_delegate_settlements(int(WorldSimulation.state.elapsed_days))
+	initializing=was
+	revision+=1
+
+
 func _delegate_settlements(_day:int)->void:
+	# The ruler sets the daily work (manual_work.gd): the same split for every
+	# town, as the ruler left it. No safeguard or food floor rewrites it; the
+	# People view and the court say what it will do.
+	if not bool(WorldSimulation.direction.automatic_work):
+		_lay_ruler_split()
+		return
 	var aggregate:Dictionary={}
 	for role in GameState.POPULATION_ROLES: aggregate[role]=0.0
 	var total_weight:=0.0
@@ -1560,17 +1577,46 @@ func _delegate_settlements(_day:int)->void:
 	if management_changed: WorldSimulation.state.settlement_network_revision+=1
 
 
+## The ruler's split on every town (manual_work.gd applied_percentages): the
+## realm's ledger and each town's own share of work read the same shares.
+## Each town keeps its leader, the leader's standing and the ruler's last ask
+## of them (auto_manage, the focus), so handing the work back to the leaders
+## returns every town to what it had.
+func _lay_ruler_split()->void:
+	var shares:Dictionary=preload("res://scripts/manual_work.gd").applied_percentages()
+	var management_changed:=false
+	for index in WorldSimulation.state.player_settlements.size():
+		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
+		var leader:=_person_record(int(settlement.get("leader_person_id",0)))
+		var skills:Dictionary=leader.get("skills",{})
+		var competence:=clampf(office_competency(leader,"SettlementLeader"),0.18,0.94) if not leader.is_empty() else 0.18
+		var old_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),bool(settlement.get("survival_guard_active",false)),JSON.stringify(settlement.get("local_allocations",{}))]
+		settlement["survival_guard_active"]=false
+		settlement["local_allocations"]=shares.duplicate(true)
+		settlement["delegated_effects"]={"competence":competence,"work":competence*0.12,"travel":float(skills.get("Logistics",35))/100.0*0.10,"water":float(skills.get("Provisioning",35))/100.0*0.08,"support":competence*0.14}
+		var new_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),false,JSON.stringify(settlement.local_allocations)]
+		management_changed=management_changed or old_signature!=new_signature
+		WorldSimulation.state.player_settlements[index]=settlement
+	for role in GameState.POPULATION_ROLES: WorldSimulation.state.population_allocation_percentages[role]=float(shares.get(role,0.0))
+	WorldSimulation.state.synchronize_population_allocations()
+	if management_changed: WorldSimulation.state.settlement_network_revision+=1
+
+
 func settlement_management(settlement_id:String)->Dictionary:
 	initialize()
 	for settlement in WorldSimulation.state.player_settlements:
 		if String(settlement.get("id",""))!=settlement_id: continue
-		return {"leader":settlement_leader(settlement_id),"leader_title":settlement_leader_title(),"focus":String(settlement.get("management_focus","balanced")),"focus_label":String(settlement.get("management_focus_label",FOCUS_LABELS.balanced)),"focus_reason":String(settlement.get("management_focus_reason","Local priorities have not yet been reassessed.")),"focus_effect":String(settlement.get("management_focus_effect",FOCUS_EFFECTS.balanced)),"survival_guard_active":bool(settlement.get("survival_guard_active",false)),"auto_manage":bool(settlement.get("auto_manage",true)),"allocations":(settlement.get("local_allocations",BASE_ALLOCATIONS) as Dictionary).duplicate(true),"effects":(settlement.get("delegated_effects",{}) as Dictionary).duplicate(true)}
+		return {"leader":settlement_leader(settlement_id),"leader_title":settlement_leader_title(),"focus":String(settlement.get("management_focus","balanced")),"focus_label":String(settlement.get("management_focus_label",FOCUS_LABELS.balanced)),"focus_reason":String(settlement.get("management_focus_reason","Local priorities have not yet been reassessed.")),"focus_effect":String(settlement.get("management_focus_effect",FOCUS_EFFECTS.balanced)),"survival_guard_active":bool(settlement.get("survival_guard_active",false)),"auto_manage":bool(settlement.get("auto_manage",true)),"allocations":(settlement.get("local_allocations",BASE_ALLOCATIONS) as Dictionary).duplicate(true),"effects":(settlement.get("delegated_effects",{}) as Dictionary).duplicate(true),
+			# The ruler sets the daily work for every town (manual_work.gd).
+			"ruler_sets_work":not bool(WorldSimulation.direction.automatic_work)}
 	return {}
 
 
 func set_settlement_focus(settlement_id:String,focus:String)->Dictionary:
 	if not String(WorldSimulation.settlements.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
 	if focus not in FOCUS_LABELS: return {"ok":false,"reason":"Unknown settlement focus."}
+	# While the ruler sets the daily work, no leader can shift hands.
+	if not bool(WorldSimulation.direction.automatic_work): return {"ok":false,"reason":"You set the daily work yourself. Move people in The People, or hand the work back to our leaders."}
 	for index in WorldSimulation.state.player_settlements.size():
 		if String(WorldSimulation.state.player_settlements[index].get("id",""))!=settlement_id: continue
 		WorldSimulation.state.player_settlements[index]["management_focus"]=focus

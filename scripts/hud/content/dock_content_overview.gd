@@ -3,6 +3,7 @@ const Overview=preload("res://scripts/hud/civilization_overview_model.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const People=preload("res://scripts/hud/people_model.gd")
 const Buildings=preload("res://scripts/hud/construction_art.gd")
+const Manual=preload("res://scripts/manual_work.gd")
 ## THE PEOPLE: the god looking down on their people. One living scene (the
 ## settlement at this hour, a headline and one voice from the fires), the
 ## faces of named people, the vitals as meters with a trend and a cause, what
@@ -26,14 +27,7 @@ func tab(_sub:int)->Dictionary:
 		if bool((city as Dictionary).get("primary",false)):primary=String(city.id)
 	var faces:=People.faces(primary)
 	var scene:={"season":People.weather_line(celsius),"register":EraWords.register(),"headline":People.headline(report,totals),"voice":People.voice(faces),"hearth":hearth}
-	var profile:Dictionary=CivilizationSystem.player_population_function_profile() if CivilizationSystem.has_method("player_population_function_profile") else {}
-	var productive:=int(profile.get("productive",roundi(float(GameState.population_total)*0.6)))
-	var tasks:=People.labor(productive)
-	var most:=1
-	for task:Dictionary in tasks:most=maxi(most,int(task.count))
-	var labor:={"heading":"WHAT THE PEOPLE ARE DOING TODAY" if hearth else ("TODAY'S LABOUR, FROM THE ROLLS" if not modern else "LABOR FORCE BY TASK"),
-		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),
-		"note":"%s can work; the rest are small children, the old and the sick." % EraWords.count_word(productive).capitalize() if hearth else "%s of working age at work." % EraWords.grouped(productive)}
+	var labor:=labor_block(hearth,modern)
 	var story:={"heading":"TOLD THIS SEASON" if hearth else "THE SEASON'S ANNALS","items":People.story(4),"link":"The whole Chronicle","on_open":jump("chronicle",0)}
 	var hearths:Array=[]
 	for city:Dictionary in report.cities:
@@ -54,6 +48,46 @@ func tab(_sub:int)->Dictionary:
 		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon}
 	return {"blocks":[block]}
 
+## WHAT THE PEOPLE ARE DOING TODAY, and who sets it (manual_work.gd). Our
+## leaders: the rows are a view, with each leader's word on why. The ruler:
+## each row takes −/+ and ×5 in whole people, and the counts' plain warnings
+## say what the split will do. The rows add up to the people who can work.
+func labor_block(hearth:bool,modern:bool)->Dictionary:
+	var tasks:=People.labor()
+	var manual:=Manual.manual()
+	var able:=0
+	var most:=1
+	for task:Dictionary in tasks:
+		able+=int(task.count);most=maxi(most,int(task.count))
+	if manual:
+		var counts:=Manual.counts()
+		for task:Dictionary in tasks:
+			var role:=String(task.id)
+			var donor:=Manual._most(counts,role)
+			var taker:=Manual._most(counts,role,0)
+			var words:=Manual.task_words(role)
+			task["can_add"]=donor!=""
+			task["can_take"]=int(task.count)>0 and taker!=""
+			task["add_tip"]=("One more on %s, from %s." % [words,Manual.task_words(donor)]) if donor!="" else "Every hand is here already."
+			task["take_tip"]=("One fewer on %s; they go to %s." % [words,Manual.task_words(taker)]) if int(task.count)>0 and taker!="" else "Nobody is on this now."
+			task["five_tip"]="Five more on %s, from the busiest tasks." % words
+	var register:="%s can work" % (EraWords.count_word(able).capitalize() if hearth else EraWords.grouped(able))
+	return {"heading":"WHAT THE PEOPLE ARE DOING TODAY" if hearth else ("TODAY'S LABOUR, FROM THE ROLLS" if not modern else "LABOR FORCE BY TASK"),
+		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),"able":able,
+		"note":"%s; the rest are children, the old and the sick." % register if hearth else "%s of working age at work." % EraWords.grouped(able),
+		"manual":manual,"who":Manual.leaders_lines() if not manual else [],"warnings":Manual.outlook().lines if manual else [],
+		"leaders_tip":Manual.LEADERS_TIP,"ruler_tip":Manual.RULER_TIP,"on_leaders":set_work.bind(false),"on_ruler":set_work.bind(true),"on_move":move_work}
+
+## "Who sets the daily work": our leaders (false) or the ruler (true).
+func set_work(ruler:bool)->void:
+	Manual.set_manual(ruler)
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
+
+## −/+ on a task, in whole people (×5 is five).
+func move_work(role:String,people:int)->void:
+	Manual.move(role,people)
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
+
 func summon(target:Dictionary)->void:
 	court(target).call()
 
@@ -67,7 +101,8 @@ static func days(value:float)->String:
 	return EraWords.days(value) if value>=0 else "Report pending"
 
 func signature()->Array:
-	return [floori(GameState.elapsed_days),GameState.population_total,GameState.settlement_network_revision,GameState.morphology_revision,GovernmentPeopleSystem.revision,MilitaryCampaign.equipment_queue.hash(),GameState.simulation_metrics.hash(),GameState.water_metrics.hash()]
+	return [floori(GameState.elapsed_days),GameState.population_total,GameState.settlement_network_revision,GameState.morphology_revision,GovernmentPeopleSystem.revision,MilitaryCampaign.equipment_queue.hash(),GameState.simulation_metrics.hash(),GameState.water_metrics.hash(),
+		GameState.population_allocations.hash(),PeopleDirection.automatic_work]
 
 static func percent(total:float,population:int)->String:
 	return "%d%%"%roundi(total/population*100) if population>0 else "Report pending"

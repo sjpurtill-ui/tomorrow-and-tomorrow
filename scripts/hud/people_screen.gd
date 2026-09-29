@@ -18,6 +18,8 @@ const Icons:=preload("res://scripts/resource_icons.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
+## The Production screen's hands controls (−, +, ×5), for the daily work.
+const W:=preload("res://scripts/hud/production_widgets.gd")
 
 const SCENE_HEIGHT:=210.0
 const TWO_COLUMNS_AT:=700.0
@@ -294,23 +296,79 @@ func _fill_vitals(parent:Control,vitals:Array)->void:
 		var cause:=T.make_label(String(vital.get("cause","")),12,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
 
 
+## What the people are doing today, and who sets it (manual_work.gd): the
+## switch "Who sets the daily work: Our leaders | I do", then each task as a
+## row of figures and its count. Our leaders: each leader's word on why. The
+## ruler: −/+ and ×5 on each row, in whole people, and the plain warnings.
 func _fill_labor(parent:Control,labor:Dictionary)->void:
 	var per:=maxi(1,int(labor.get("per_figure",1)))
+	var manual:=bool(labor.get("manual",false))
 	parent.add_child(_heading(String(labor.get("heading","WHAT THEY ARE DOING NOW")),"each figure is %s" % ("one person" if per==1 else "%d people" % per)))
+	# How many can work: the rows below add up to them.
+	if String(labor.get("note",""))!="":
+		var note:=T.make_label(String(labor.note),11,T.TEXT_SOFT);note.name="WorkNote";note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(note)
+	# Who sets the daily work: one plain switch, the current side marked.
+	if labor.get("on_leaders") is Callable:
+		var switch:=HFlowContainer.new();switch.name="WorkSwitch";switch.add_theme_constant_override("h_separation",6);switch.add_theme_constant_override("v_separation",6);parent.add_child(switch)
+		var lead:=T.make_label("Who sets the daily work:",12,T.BODY);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;switch.add_child(lead)
+		var leaders:=_choice(switch,"Back to our leaders" if manual else "Our leaders (now)",labor.get("on_leaders"),String(labor.get("leaders_tip","")),not manual)
+		leaders.name="WorkLeaders"
+		var ruler:=_choice(switch,"I do (now)" if manual else "I do",labor.get("on_ruler"),String(labor.get("ruler_tip","")),manual)
+		ruler.name="WorkRuler"
+	for line_variant in labor.get("who",[]):
+		var line:Dictionary=line_variant
+		var said:=T.make_label(String(line.get("text","")),12,T.BODY);said.name="WorkWho";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		said.tooltip_text=String(line.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(said)
+	if manual:
+		var yours:=T.make_label("You set the work in every town; the leaders keep to it.",12,T.BODY);yours.name="WorkYours";yours.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(yours)
+		for warning_variant in labor.get("warnings",[]):
+			var warning:Dictionary=warning_variant
+			var tone:=String(warning.get("tone",""))
+			var ink:=T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.GREEN_TEXT)
+			var warn:=T.make_label(String(warning.get("text","")),12,ink);warn.name="WorkWarning";warn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(warn)
+	var on_move:Variant=labor.get("on_move")
 	for task_variant in labor.get("tasks",[]):
 		var task:Dictionary=task_variant
-		var row:=HBoxContainer.new();row.name="Task_"+String(task.get("id",""));row.add_theme_constant_override("separation",6);parent.add_child(row)
-		var label:=T.make_label(String(task.get("label","")),11,T.BODY);label.custom_minimum_size.x=116;label.clip_text=true;row.add_child(label)
+		var role:=String(task.get("id",""))
+		var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);parent.add_child(row)
+		var label:=T.make_label(String(task.get("label","")),12,T.BODY);label.name="Task";label.custom_minimum_size.x=136;label.clip_text=true;row.add_child(label)
 		var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
 		var count:=int(task.get("count",0))
-		var shown:=clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW)
-		for index in shown:
-			var figure:=TextureRect.new();figure.texture=Icons.people_texture(String(task.get("id","")),T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
+		# The food getters by what they got (plants, game, fish, fields).
+		var kinds:Array=[]
+		for pair in task.get("mix",[]):
+			for index in clampi(ceili(float(pair[1])/float(per)),0,FIGURES_PER_ROW):kinds.append(String(pair[0]))
+		if kinds.is_empty():
+			for index in (clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW) if count>0 else 0):kinds.append(String(task.get("icon",role)))
+		for kind:String in kinds.slice(0,FIGURES_PER_ROW):
+			var figure:=TextureRect.new();figure.texture=Icons.people_texture(kind,T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
 			figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
-		var number:=T.make_label(str(count),12,T.INK);number.custom_minimum_size.x=30;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(number)
-	if String(labor.get("note",""))!="":
-		var note:=T.make_label(String(labor.note),11,T.TEXT_SOFT);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(note)
+		if not (task.get("mix",[]) as Array).is_empty():
+			var parts:PackedStringArray=[]
+			for pair in task.mix:parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
+			row.tooltip_text=", ".join(parts).capitalize().left(1)+", ".join(parts).substr(1)+"."
+		var number:=T.make_label(str(count),12,T.INK);number.name="Count";number.custom_minimum_size.x=30;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(number)
+		if manual and on_move is Callable:
+			var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
+			less.pressed.connect((on_move as Callable).bind(role,-1))
+			var more:=W.IconButton.new("plus",String(task.get("add_tip","")),24);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
+			more.pressed.connect((on_move as Callable).bind(role,1))
+			var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
+			five.pressed.connect((on_move as Callable).bind(role,5))
+
+
+## A plain choice button, the current one marked (home_ledger._choices' look).
+func _choice(parent:Node,label:String,callback:Variant,tip:String,active:bool)->Button:
+	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.custom_minimum_size=Vector2(28,28)
+	b.add_theme_font_size_override("font_size",12);b.add_theme_color_override("font_color",T.INK if active else T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
+	var normal:=T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD if active else T.BORDER_SOFT,1,2,8)
+	if active:normal.border_width_bottom=3
+	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,8));b.add_theme_stylebox_override("pressed",normal)
+	parent.add_child(b)
+	if callback is Callable and (callback as Callable).is_valid():b.pressed.connect(callback)
+	else:b.disabled=true
+	return b
 
 
 func _fill_story(parent:Control,story:Dictionary)->void:

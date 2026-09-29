@@ -30,7 +30,18 @@ func setup(block:Dictionary)->void:
 	_leader(block,spread)
 	var leader:Dictionary=block.get("leader",{})
 	var first:=String(leader.get("name","")).get_slice(" ",0)
-	if bool(block.get("can_direct",false)):
+	if bool(block.get("ruler_sets_work",false)):
+		# The ruler sets the daily work (manual_work.gd): no leader can shift
+		# hands; one click hands it back, and The People is where it is set.
+		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);add_child(yours)
+		var said:=T.make_label("You set the daily work yourself.",13,T.BODY);said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;yours.add_child(said)
+		_button(yours,"Back to our leaders",block.get("on_leaders"),"Each town's leader shares out the work again, food and water first.").name="BackToLeaders"
+		_button(yours,"Set the work",block.get("on_people"),"Move people between tasks in The People.").name="SetTheWork"
+		for chip in yours.get_children():
+			if chip is Button:
+				(chip as Button).custom_minimum_size.y=26
+				(chip as Button).add_theme_font_size_override("font_size",12)
+	elif bool(block.get("can_direct",false)):
 		var ask:=_choices(self,"Ask %s for more hands on" % (first if not first.is_empty() else "the leader"),block.get("choices",[]),String(block.get("current","")))
 		ask.name="AskForHands"
 		# One compact row under the leader's word.
@@ -47,7 +58,6 @@ func setup(block:Dictionary)->void:
 	_rule(self)
 	var footer:=HFlowContainer.new();footer.name="Reports";footer.add_theme_constant_override("h_separation",8);add_child(footer)
 	_button(footer,"Ages and families",block.get("on_population"),"How many children, workers and elders live here")
-	_button(footer,"Who does what",block.get("on_work"),"How the leader shares out the daily work")
 	_button(footer,"Rename this place",block.get("on_rename"),"Change the name on the map")
 	resized.connect(_layout);_layout()
 

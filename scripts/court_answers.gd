@@ -728,7 +728,9 @@ static func _stores_answer(sheet:Dictionary,lower:String)->String:
 		if not tasks.is_empty():
 			var bits:PackedStringArray=PackedStringArray()
 			for task in tasks: bits.append("%d %s" % [int(tasks[task]),String(WORK_WORDS.get(String(task).to_lower(),String(task).to_lower()))])
-			return "At work now: %s." % _join(bits)
+			# And who sets it (manual_work.gd), as the sheet says.
+			var by:=(" "+preload("res://scripts/manual_work.gd").court_words(sheet.daily_work,true)) if sheet.get("daily_work") is Dictionary else ""
+			return "At work now: %s.%s" % [_join(bits),by]
 	if _has(lower,"\\b(food|stores?|grain|eat|hungry|ration)\\b|\\bhow long\\b.*\\blast\\b"):
 		return "We have %d Food in store, enough for about %s days." % [int(sheet.get("food_in_store",0)),str(sheet.get("food_days",0))]
 	if _has(lower,"\\b(water|wells?|drink)\\b"):

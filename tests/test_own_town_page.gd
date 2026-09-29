@@ -322,7 +322,9 @@ func test_new_towns_switch_leader_card_hands_and_reports_still_act()->void:
 	# The town's own reports and its name.
 	var reports:=page.find_child("Reports",true,false)
 	var labels:=_texts(reports)
-	assert_array(Array(labels)).contains(["Ages and families","Who does what","Rename this place"])
+	assert_array(Array(labels)).contains(["Ages and families","Rename this place"])
+	# Who does what is The People's to show and set (manual_work.gd), not a second screen here.
+	assert_array(Array(labels)).not_contains(["Who does what"])
 	for button in reports.find_children("*","Button",true,false):
 		if (button as Button).text=="Rename this place":(button as Button).pressed.emit()
 		if (button as Button).text=="Ages and families":(button as Button).pressed.emit()

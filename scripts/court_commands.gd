@@ -539,6 +539,9 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# act held back or a town's measure. The one spoken to answers.
 	if String(cls.act)!="question" and not bool(cls.insist) and String(audience.get("origin",""))!="foreign" and not is_harm(clean):
 		var founding:=HomeOrders.found_reading(clean)
+		# So is who sets the daily work, and people moved between tasks
+		# ("put 10 more on building": manual_work.gd), never a law or a measure.
+		if founding.is_empty(): founding=HomeOrders.work_reading(clean)
 		if not founding.is_empty():
 			cls.act="command"; cls.verb="home"; cls.confidence=0.85; cls["home"]=founding
 			return _perform(id,audience,list,"home",_speaker_entry(list),{},clean,cls,false,context)
@@ -2300,8 +2303,9 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 	if blocker=="" and bare_assent(words): return _assent(id,audience,r,actor,words)
 	var home:=HomeOrders.read(words) if blocker=="" else {}
 	# A local leader's orders are the civic council's, save the god's word on
-	# new towns, which is the whole realm's (auto_founding.gd).
-	if String(ctx.get("settlement_id",""))!="" and String(home.get("kind",""))!="found_towns": home={}
+	# new towns and on who sets the daily work, which are the whole realm's
+	# (auto_founding.gd, manual_work.gd).
+	if String(ctx.get("settlement_id",""))!="" and not String(home.get("kind","")) in ["found_towns","work"]: home={}
 	if not home.is_empty(): return _home(id,r,actor,words,home)
 	var routed:=custom_order(words,ctx)
 	if int(actor.get("person_id",0))>0:
