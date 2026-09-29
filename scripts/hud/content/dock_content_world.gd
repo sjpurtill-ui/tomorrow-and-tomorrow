@@ -1,5 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## WORLD section: The Known World / Expeditions / Standing.
+## WORLD section: The Known World / Expeditions / Rise and fall (how the
+## peoples we know have fared; how each sees us is the Standing page).
 ## The first tab is "the world as your people know it": a chart drawn from
 ## returned routes only, the peoples met, walkers abroad and what they carried
 ## home. Everything shown physically returned; nothing is read from hidden
@@ -30,7 +31,7 @@ func meta()->Dictionary:
 		"eyebrow":"The world as our people know it",
 		"title":"The Known World",
 		"serif":true,"title_size":26,
-		"subtabs":["The known world","Expeditions","Standing"],
+		"subtabs":["The known world","Expeditions","Rise and fall"],
 	}
 
 func tab(sub:int)->Dictionary:

@@ -110,16 +110,85 @@ func test_the_standing_page_says_what_we_are_and_how_each_people_sees_us()->void
 	var id:=_met(160.0,10.0,0.7)
 	_rich(120.0)
 	_arm(0,0.3)
-	var page=preload("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)
-	var blocks:Array=page.tab(2).blocks
-	assert_str(String(blocks[0].heading)).is_equal("What we are")
-	assert_int((blocks[0].items as Array).size()).is_equal(9)
+	var page=preload("res://scripts/hud/content/dock_content_standing.gd").new(null,null)
+	var tab:Dictionary=page.tab(0)
+	var board:Dictionary=tab.blocks[0]
+	assert_str(String(board.type)).is_equal("standing")
+	assert_int((board.strengths as Array).size()).is_equal(9)
+	assert_str(String(board.posture.words)).is_not_empty()
 	var theirs:Dictionary={}
-	for block:Dictionary in blocks:
-		if String(block.get("heading","")).begins_with("How ") and String(block.get("heading","")).ends_with(" see us"):theirs=block
+	for p:Dictionary in board.peoples:
+		if String(p.civ_id)==id: theirs=p
 	assert_bool(theirs.is_empty()).is_false()
 	var names:Array=[]
-	for item:Dictionary in theirs.items:names.append(String(item.name).get_slice(":",0))
-	assert_array(names).contains(["Allure","Awe","Fear","Respect","Trust","Resentment","Danger"])
-	assert_str(String(blocks[-1].heading)).is_equal("Our own people")
-	assert_bool(id!="").is_true()
+	for view:Dictionary in theirs.views: names.append(String(view.name))
+	assert_array(names).contains_exactly(["Allure","Awe","Fear","Respect","Trust","Resentment"])
+	# Rich and unguarded: the page leads with the raid danger and its odds.
+	assert_str(String(tab.brief.title)).contains("envy our stores")
+	assert_str(String(tab.brief.why)).contains("each month")
+	# The years of our name are charted from the monthly record.
+	assert_str(String(tab.blocks[1].type)).is_equal("trend_chart")
+
+func test_the_odds_on_the_page_are_the_engines()->void:
+	var id:=_met(160.0,10.0,0.7)
+	_rich(120.0)
+	_arm(0,0.3)
+	var view:=Standing.view_of(id)
+	var said:=Standing.consequences(id,view)
+	var raid:Dictionary={}
+	for c:Dictionary in said:
+		if String(c.id)=="envy": raid=c
+	assert_bool(raid.is_empty()).is_false()
+	var chance:=War.envy_raid_chance(id,float(view.envy))
+	assert_float(chance).is_greater(0.0)
+	assert_str(String(raid.words)).contains(Standing.monthly_odds_words(chance))
+	# Envoy business uses the same weights the court's envoys are drawn by.
+	for c:Dictionary in said:
+		if String(c.id)=="tribute_demand": assert_str(String(c.words)).contains(Standing.times_words(Lives.standing_weight("tribute_demand",id,view)))
+
+func test_the_board_draws_the_rose_the_peoples_and_home()->void:
+	var id:=_met(160.0,10.0,0.7)
+	_rich(120.0)
+	_arm(4,0.6)
+	var page=preload("res://scripts/hud/content/dock_content_standing.gd").new(null,null)
+	var board=auto_free(preload("res://scripts/hud/standing_board.gd").new())
+	add_child(board)
+	board.size=Vector2(900,1600)
+	board.setup(page.tab(0).blocks[0])
+	assert_object(board.find_child("Rose",true,false)).is_not_null()
+	assert_int(board.find_child("StrengthList",true,false).get_child_count()).is_equal(10)
+	assert_object(board.find_child("People_"+id,true,false)).is_not_null()
+	assert_object(board.find_child("Home",true,false)).is_not_null()
+	# Laying a people's strengths over ours needs them simulated; a plain
+	# test world has no actors, so the chip says we know too little.
+	var chip:Button=board.find_child("Compare_"+id,true,false)
+	assert_bool(chip.disabled).is_true()
+	# The daily refresh updates in place.
+	assert_bool(board.update_block(page.tab(0).blocks[0])).is_true()
+	# Drawn for real: the rose, the meters and the medallions paint without error.
+	var rose:Control=board.find_child("Rose",true,false)
+	rose.size=Vector2(420,420)
+	rose.set_highlight(2)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_str(rose.tooltip_text).is_equal("")
+	assert_str(rose._get_tooltip(rose.size*0.5+Vector2(0,-120))).contains("Might")
+
+func test_every_strength_is_recorded_each_month_for_the_years_chart()->void:
+	Standing.record_monthly()
+	for row:Array in Standing.STRENGTHS:
+		assert_bool(GameState.simulation_metrics.has("standing_"+String(row[0]))).override_failure_message(String(row[0])).is_true()
+	var scopes:=preload("res://scripts/strategic_history.gd").capture_scopes()
+	assert_bool((scopes.civilization as Dictionary).has("standing_genius")).is_true()
+	assert_float(float(scopes.civilization.standing_pride)).is_between(0.0,100.0)
+
+func test_posture_names_the_lean_and_the_neglect()->void:
+	var our:Dictionary={}
+	for row:Array in Standing.STRENGTHS: our[String(row[0])]={"value":0.4,"why":""}
+	assert_str(String(Standing.posture(our).id)).is_equal("balanced")
+	our.genius={"value":0.95,"why":""}
+	our.might={"value":0.05,"why":""}
+	var lean:=Standing.posture(our)
+	assert_str(String(lean.id)).is_equal("genius")
+	assert_str(String(lean.words)).is_equal("A learned people, with few spears.")
+	assert_bool(bool(lean.lopsided)).is_true()

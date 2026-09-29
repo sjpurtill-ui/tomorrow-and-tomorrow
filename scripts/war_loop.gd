@@ -1868,18 +1868,26 @@ static func _grudges(day:int)->void:
 		if relation.is_empty() or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)) or _truce_binds(id,day): continue
 		var f:=front(id)
 		if not (f.pending as Dictionary).is_empty() or day-int(f.last_harm)<365: continue
-		var rival:=_rival(id)
-		var weight:=float(rival.get("grudge_weight",0.0))
-		if weight>=0.9:
-			var chance:=clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)
-			if _rng("grudge:%s:%d" % [id,day]).randf()<chance:
-				_schedule(id,day+_rng("grudge_day:%s:%d" % [id,day]).randi_range(20,90),"grudge","grudge")
-				continue
-		var envy:=float(Standing.view_of(id,our).get("envy",0.0))
-		if envy<=Standing.ENVY_RAID_FLOOR: continue
-		var envy_chance:=clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(rival.get("trait","")) in ["hunter","magpie"] else 1.0)
-		if _rng("envy:%s:%d" % [id,day]).randf()<envy_chance:
+		var chance:=grudge_raid_chance(id)
+		if chance>0.0 and _rng("grudge:%s:%d" % [id,day]).randf()<chance:
+			_schedule(id,day+_rng("grudge_day:%s:%d" % [id,day]).randi_range(20,90),"grudge","grudge")
+			continue
+		var envy_chance:=envy_raid_chance(id,float(Standing.view_of(id,our).get("envy",0.0)))
+		if envy_chance>0.0 and _rng("envy:%s:%d" % [id,day]).randf()<envy_chance:
 			_schedule(id,day+_rng("envy_day:%s:%d" % [id,day]).randi_range(15,60),"envy","envy")
+
+## This month's chance that a heavy old grudge sends raiders (checked monthly
+## by _grudges; the Standing page states it).
+static func grudge_raid_chance(civ_id:String)->float:
+	var rival:=_rival(civ_id)
+	var weight:=float(rival.get("grudge_weight",0.0))
+	if weight<0.9: return 0.0
+	return clampf((weight-0.8)*0.03,0.0,0.035)*(1.3 if String(rival.get("trait",""))=="grudge" else 1.0)
+
+## This month's chance that envy of our stores and works sends raiders.
+static func envy_raid_chance(civ_id:String,envy:float)->float:
+	if envy<=Standing.ENVY_RAID_FLOOR: return 0.0
+	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)
 
 # --------------------------------------------------------------------------
 # The court: the war leader's matter, options, answers

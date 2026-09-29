@@ -134,7 +134,17 @@ piling everyone into one trade (diminishing returns make it pointless).
 
 1. Research without walls (done: a3b70597).
 2. `scripts/standing.gd`: strengths and views, with a "why" for each (the
-   court's fact sheets and a Standing page read it).
+   court's fact sheets and a Standing page read it). Done: 005c716b.
+   The Standing page is its own rail tab (the player, 2026-09-28: "THIS IS THE
+   HEART OF THE GAME! Should be its own tab!"): `hud/standing_board.gd` draws
+   the rose of nine strengths (last year's shape dashed behind it, a known
+   people's laid over it), each strength with its reason, its change in a year
+   and the place that raises it; the dangers with the engine's own odds
+   (`war_loop.envy_raid_chance`, `grudge_raid_chance`, `court_lives.standing_weight`);
+   one card per people (six feelings, what they make them do, what they
+   remember, a word in the court); and our own pride, love and dread of the
+   god, and trust in the chiefs. The monthly reading of all nine strengths is
+   kept in `strategic_history` for the years chart.
 3. Consequences: war and raid decisions, migration, tribute, leagues, pride.
 4. Headman and rival allocation, then the sim calibration across postures.
 5. Era scaling of reach and memory to year 3500.

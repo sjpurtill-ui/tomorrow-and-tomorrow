@@ -1042,8 +1042,8 @@ static func dread_weight(situation_type:String,civ_id:String)->float:
 	## tests, awe brings gifts, trust and allure bring offers, resentment redress.
 	return _dread_only_weight(situation_type,civ_id)*standing_weight(situation_type,civ_id)
 
-static func standing_weight(situation_type:String,civ_id:String)->float:
-	var v:=preload("res://scripts/standing.gd").view_of(civ_id)
+static func standing_weight(situation_type:String,civ_id:String,view:Dictionary={})->float:
+	var v:=view if not view.is_empty() else preload("res://scripts/standing.gd").view_of(civ_id)
 	if not bool(v.get("known",false)): return 1.0
 	match situation_type:
 		"tribute_demand","emboldened_demand","test_of_resolve":return clampf(1.0+float(v.contempt)*2.0+float(v.envy)*0.8-float(v.awe)*0.6,0.2,3.5)

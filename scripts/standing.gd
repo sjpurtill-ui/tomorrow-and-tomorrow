@@ -35,6 +35,36 @@ const ENDURANCE_FOOD_DAYS:=120.0
 const ENVY_RAID_FLOOR:=0.35
 const CONTEMPT_FLOOR:=0.3
 
+## The nine strengths in the order the Standing page's rose draws them,
+## clockwise from the top: hard power, plenty, soft power, learning, order.
+## [id, name, what it is, the rail section that raises it (and its tab),
+## that section's name, what raising it costs the people]
+const STRENGTHS:=[
+	["might","Might","warriors trained and ready to fight","military",0,"Warriors","people out of the fields, and food and arms for them"],
+	["endurance","Endurance","how long we could hold out, starved or besieged","economy",0,"Food","stores put by, and the hands to fill them"],
+	["wealth","Wealth","food and materials put by","economy",0,"Food","nothing by itself, but plenty draws envy"],
+	["reach","Reach","how far our carriers go and how many peoples know us","world",0,"Known World","carriers and scouts away from home"],
+	["persuasion","Persuasion","our envoy's skill and how open our ways are","government",0,"Government","a skilled envoy, gifts, and time spent abroad"],
+	["splendor","Splendor","great works and treasures others hear of","construction",3,"Landmarks","builders, materials and years"],
+	["genius","Genius","what we know against the peoples we know","inquiry",0,"Research","people at research, and food for them"],
+	["cunning","Cunning","scouts and watchers: what we find out and keep hidden","world",0,"Known World","scouts' days and sometimes their lives"],
+	["order","Order","trust in the chiefs, holding together, a steward's hand","government",0,"Government","able officials, and restraint"],
+]
+## The six views another people holds of us: [id, name, what it makes them do].
+const VIEWS:=[
+	["allure","Allure","they want to come to us, trade with us and learn from us"],
+	["awe","Awe","they defer to us and bring gifts"],
+	["fear","Fear","they remember our wrath and give way"],
+	["respect","Respect","they treat us as equals and weigh our word"],
+	["trust","Trust","they believe our promises: pacts, trade, marriages"],
+	["resentment","Resentment","they want redress, and grudges bring raiders"],
+]
+## What each strength makes of us when it leads, when it is second, and when
+## it is neglected: the words of the Standing page's "what we are".
+const LEANING:={"might":"A people of spears","endurance":"A hardy people","wealth":"A people of full stores","reach":"A far-travelling people","persuasion":"A people of good words","splendor":"A people of great works","genius":"A learned people","cunning":"A watchful people","order":"A well-ordered people"}
+const ALSO:={"might":"strong in spears","endurance":"hard to starve out","wealth":"rich in stores","reach":"known far and wide","persuasion":"well spoken","splendor":"rich in works","genius":"learned","cunning":"watchful","order":"orderly"}
+const NEGLECT:={"might":"with few spears","endurance":"who could not hold out long","wealth":"with thin stores","reach":"known to few","persuasion":"whose words carry little weight","splendor":"with nothing to show","genius":"slow to learn","cunning":"blind to what others plan","order":"quarrelsome"}
+
 static func _lives()->GDScript:
 	return load(LIVES_PATH) as GDScript if ResourceLoader.exists(LIVES_PATH) else null
 
@@ -146,9 +176,17 @@ static func _familiarity()->float:
 	var count:=0
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2: continue
-		total+=float(Exchange.connection(String(civ.id)).get("familiarity",0.0))
+		total+=float(_ties(String(civ.id)).get("familiarity",0.0))
 		count+=1
 	return total/float(count) if count>0 else 0.0
+
+## Our ties with a people, read without creating a record (a reading must
+## never change the ledger it reads).
+static func _ties(civ_id:String)->Dictionary:
+	var connections:Variant=(Exchange.data() as Dictionary).get("connections",{})
+	if not connections is Dictionary: return {}
+	var ties:Variant=(connections as Dictionary).get(Exchange.owner_id(civ_id),{})
+	return ties if ties is Dictionary else {}
 
 static func _best_known_rival()->float:
 	var best:=-1.0
@@ -192,7 +230,7 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	if culture<0.0: culture=float(Culture.allure_report(false).allure)
 	var allure:=clampf(culture*0.5+float(our.wealth.value)*0.25+maxf(0.0,lead)*0.15+float(our.order.value)*0.1-menace*0.35,0.0,1.0)
 	why["allure"]="plenty %d%%, culture %d%%%s" % [roundi(float(our.wealth.value)*100.0),roundi(culture*100.0),(" · our warbands menace them (−%d)" % roundi(menace*35.0)) if menace>0.05 else ""]
-	var ties:=Exchange.connection(civ_id)
+	var ties:=_ties(civ_id)
 	var respect:=clampf(float(ties.get("respect",0.0))+heard*0.25+maxf(0.0,lead)*0.2+clampf(ratio-0.7,0.0,1.0)*0.2+float(our.order.value)*0.15,0.0,1.0)
 	why["respect"]="their scholars' and travellers' regard, works that stand, our order"
 	var rivals:=_rivals()
@@ -259,7 +297,7 @@ static func pride(our:Dictionary={},seen:Array=[])->Dictionary:
 static func record_monthly()->void:
 	var our:=strengths()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
-	metrics["standing_might"]=float(our.might.value)
+	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
 	metrics["standing_pride"]=float(pride(our,views()).value)
 
 static func monthly()->Dictionary:
@@ -277,3 +315,103 @@ static func cohesion_shift()->float:
 
 static func legitimacy_shift()->float:
 	return (float(monthly().pride)-0.5)*0.04
+
+# ------------------------------------------------ read by the Standing page
+
+## What the shape of our strengths makes of us, in plain words:
+## {id, words, top, second, low, mean, spread, lopsided}. id is the leading
+## strength's id, "balanced" or "small".
+static func posture(our:Dictionary={})->Dictionary:
+	if our.is_empty(): our=strengths()
+	var ranked:Array=[]
+	for row:Array in STRENGTHS: ranked.append({"id":String(row[0]),"name":String(row[1]),"value":float((our[String(row[0])] as Dictionary).value)})
+	ranked.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.value)>float(b.value))
+	var top:Dictionary=ranked[0]
+	var second:Dictionary=ranked[1]
+	var low:Dictionary=ranked[-1]
+	var total:=0.0
+	for entry:Dictionary in ranked: total+=float(entry.value)
+	var spread:=float(top.value)-float(low.value)
+	var id:=String(top.id)
+	var words:=""
+	if float(top.value)<0.3:
+		id="small"
+		words="A small people, not yet strong in anything"
+	elif spread<0.3:
+		id="balanced"
+		words="A balanced people: nothing stands far above the rest, nothing is left undone"
+	else:
+		words=String(LEANING[top.id])
+		if float(second.value)>=0.45 and float(second.value)>=float(top.value)-0.25: words+=", "+String(ALSO[second.id])
+		if float(low.value)<0.25: words+=", "+String(NEGLECT[low.id])
+	return {"id":id,"words":words+".","top":top,"second":second,"low":low,"mean":total/float(ranked.size()),"spread":spread,"lopsided":spread>=0.55}
+
+## One sentence of how a people sees us, from its strongest feeling and the
+## dangers it holds.
+static func view_words(v:Dictionary)->String:
+	if not bool(v.get("known",false)): return "They have not met us."
+	var lead:=""
+	var best:=0.2
+	for pair:Array in [["allure","They are drawn to us"],["awe","They hold us in awe"],["fear","They fear us"],["respect","They respect us"],["trust","They trust our word"],["resentment","They resent us"]]:
+		if float(v.get(String(pair[0]),0.0))>best:
+			best=float(v.get(String(pair[0]),0.0))
+			lead=String(pair[1])
+	var parts:PackedStringArray=[]
+	parts.append((lead+".") if lead!="" else "They hardly know what to make of us.")
+	if float(v.get("envy",0.0))>ENVY_RAID_FLOOR: parts.append("They eye our stores.")
+	if float(v.get("contempt",0.0))>CONTEMPT_FLOOR: parts.append("They think us easy to push.")
+	elif float(v.get("resentment",0.0))>=0.4 and not lead.begins_with("They resent"): parts.append("They hold a grudge.")
+	return " ".join(parts)
+
+## "about 2 in 100 each month" for a monthly chance.
+static func monthly_odds_words(chance:float)->String:
+	if chance<=0.0: return "none"
+	if chance>=0.0095: return "about %d in 100 each month" % maxi(1,roundi(chance*100.0))
+	return "about 1 in %d each month" % maxi(100,roundi(1.0/chance/50.0)*50)
+
+## "1.8 times as often" or "half as often" against a people that feels
+## nothing either way about us.
+static func times_words(weight:float)->String:
+	if weight>=1.05: return "%.1f times as often" % weight
+	if weight<=0.55: return "half as often or less"
+	return "less often (%.1f times)" % weight
+
+## What this people's view makes it do, with the engine's own odds and
+## weights: [{id, tone ("danger", "good", "calm"), words, detail}].
+static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	if not bool(v.get("known",false)): return out
+	var war:=load("res://scripts/war_loop.gd") as GDScript
+	if war!=null:
+		var grudge:=float(war.call("grudge_raid_chance",civ_id))
+		if grudge>0.0: out.append({"id":"grudge","tone":"danger","words":"Raiders to settle an old grudge: %s" % monthly_odds_words(grudge),"detail":"Their ruler's grudges weigh heavy enough to send raiders without a new quarrel."})
+		var raid:=float(war.call("envy_raid_chance",civ_id,float(v.get("envy",0.0))))
+		if raid>0.0: out.append({"id":"envy","tone":"danger","words":"Raiders for our stores: %s" % monthly_odds_words(raid),"detail":"Envy %d%%: %s." % [roundi(float(v.envy)*100.0),String((v.get("why",{}) as Dictionary).get("envy",""))]})
+	var lives:=_lives()
+	if lives!=null:
+		for row:Array in [["tribute_demand","Demands for tribute and tests of our resolve","danger"],["redress_demand","Demands to right old wrongs","danger"],["gift_goods","Gifts and offers of peace","good"],["trade_offer","Offers of trade and pacts","good"]]:
+			var weight:=float(lives.call("standing_weight",String(row[0]),civ_id,v))
+			if absf(weight-1.0)<0.15: continue
+			var tone:=String(row[2])
+			if weight<1.0: tone="calm" if tone=="danger" else "danger"
+			out.append({"id":String(row[0]),"tone":tone,"words":"%s: %s" % [String(row[1]),times_words(weight)],"detail":"When their envoys come, against a people that feels nothing either way about us."})
+	return out
+
+## What pride and menace do at home this month, in points of 100:
+## {attraction, cohesion, legitimacy, menace}.
+static func home_effects()->Dictionary:
+	var m:=monthly()
+	return {"attraction":(float(m.pride)-0.5)*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0}
+
+## Another people's strengths, reckoned in their own scope by the same code as
+## ours ({} if they are not simulated). Rounded to tens: we know them from
+## envoys and travellers, not from their own tallies.
+static func their_strengths(civ_id:String)->Dictionary:
+	if civ_id=="" or not WorldSimulation.actors.has(civ_id): return {}
+	var theirs:Variant=WorldSimulation.scoped(civ_id,func()->Dictionary: return strengths())
+	if not theirs is Dictionary: return {}
+	var result:Dictionary={}
+	for row:Array in STRENGTHS:
+		var entry:Variant=(theirs as Dictionary).get(String(row[0]),{})
+		if entry is Dictionary: result[String(row[0])]={"value":snappedf(clampf(float((entry as Dictionary).get("value",0.0)),0.0,1.0),0.1)}
+	return result
