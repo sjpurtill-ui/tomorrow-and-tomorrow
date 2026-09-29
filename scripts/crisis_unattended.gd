@@ -197,19 +197,19 @@ static func _answer(s:Dictionary,c:Dictionary,choice:String)->void:
 		"ration":
 			var cut:=0.25 if String(c.type)=="hunger" else 0.15
 			_policy(c,"ration",{"food_demand":-cut,"health_target":-0.02},100 if String(c.type)!="cold" else 200)
-			c.mult=float(c.mult)*0.6
+			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.ration)
 			_metric("cohesion",-0.005)
 		"apart":
-			c.mult=float(c.mult)*0.4
+			c.mult=float(c.mult)*CS.APART_CUSTOM_FACTOR
 			_policy(c,"apart",{"disease_risk":-0.3},45)
 			_metric("cohesion",-0.01)
 		"tend":
-			c.mult=float(c.mult)*1.25
+			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.tend)
 			_policy(c,"tend",{"labor_multiplier":-0.05},30)
 			_metric("cohesion",0.01)
 		"carry":
 			_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
-			c.mult=float(c.mult)*0.7
+			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.carry)
 		"wait":
 			(s.until as Dictionary)["after_flood"]=CS._day()+75
 		"rebuild":
@@ -232,10 +232,10 @@ static func _advance(s:Dictionary,c:Dictionary,day:int,x:Dictionary)->void:
 		match type:
 			"sickness","stranger":
 				if float(c.pop0)*float(c.m)*float(c.mult)*0.6>=1.5 or bool(c.get("virgin",false)):
-					c.mid_choice="children_apart"; c.mult=float(c.mult)*0.7; _metric("cohesion",-0.006)
+					c.mid_choice="children_apart"; c.mult=float(c.mult)*float(CS.DEATH_FACTOR.children_apart); _metric("cohesion",-0.006)
 			"hunger":
 				if float(x.food_days)<25.0 or float(x.intake)<0.95:
-					c.mid_choice="roots"; c.mult=float(c.mult)*0.8
+					c.mid_choice="roots"; c.mult=float(c.mult)*float(CS.DEATH_FACTOR.roots)
 					_policy(c,"roots",{"labor_multiplier":-0.08},30)
 					EXCHANGE.receive(WorldSimulation.actor_id,"Food",float(x.pop)*0.25)
 	elif String(c.phase)=="mid" and day>=int(c.end_day):

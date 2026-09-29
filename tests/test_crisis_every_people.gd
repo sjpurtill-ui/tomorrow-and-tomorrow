@@ -91,3 +91,18 @@ func test_every_people_steps_its_hardship_in_the_daily_pass()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/civilization_day.gd")
 	assert_str(source).contains("S.step(\"hardship\"")
 	assert_str(source).contains("crisis_unattended.gd")
+
+## The stakes of a crisis answer quote the very factor the answer applies.
+func test_crisis_answers_state_their_deaths_from_the_one_table()->void:
+	var c:={"id":"t1","type":"hunger","kind":"lean_season","m":0.05,"mult":1.0,"pop0":120}
+	var said:=Crises.stakes_words(c,"ration","open")
+	assert_str(said).is_equal("As things stand about 6 may die; this way about %d." % roundi(120*0.05*float(Crises.DEATH_FACTOR.ration)))
+	# Tending everyone spreads it: the stated number rises.
+	var s2:={"id":"t2","type":"sickness","kind":"fever","m":0.05,"mult":1.0,"pop0":120}
+	assert_str(Crises.stakes_words(s2,"tend","open")).contains("this way about 8")
+	# The flux answers clean water best.
+	s2.kind="flux"
+	assert_float(Crises.death_factor(s2,"water")).is_equal(Crises.WATER_FLUX_FACTOR)
+	# A crisis that takes no lives states none.
+	var cold:={"id":"t3","type":"cold","m":0.0,"mult":1.0,"pop0":120}
+	assert_str(Crises.stakes_words(cold,"ration","open")).is_equal("")
