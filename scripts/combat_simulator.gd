@@ -87,6 +87,8 @@ const UNIT_TYPES := {
 	"air_assault":{"name": "Air Assault Infantry", "attack": 1.63, "defense": 1.2, "organization": 1.27}
 }
 
+const Ledger := preload("res://scripts/equipment_ledger.gd")
+## Per-man battle stats of every land kit, read from the equipment ledger.
 const WEAPONS := {
 	"shield_spear":preload("res://scripts/armor_equipment.gd").KITS.shield_spear,
 	"padded_spear":preload("res://scripts/armor_equipment.gd").KITS.padded_spear,
@@ -94,58 +96,75 @@ const WEAPONS := {
 	"scale_spear":preload("res://scripts/armor_equipment.gd").KITS.scale_spear,
 	"mail_spear":preload("res://scripts/armor_equipment.gd").KITS.mail_spear,
 	"plate_spear":preload("res://scripts/armor_equipment.gd").KITS.plate_spear,
-	"repair_kit":{"name":"Armorer tools","attack":0.0,"defense":0.5,"armor":0.0,"penetration":0.0},
-	"medical_kit":{"name":"Medical care equipment","attack":0.0,"defense":0.6,"armor":0.0,"penetration":0.0},
-	"improvised": {"name": "Improvised Arms", "attack": 0.65, "defense": 0.70, "armor": 0.00, "penetration": 0.10},
-	"spear": {"name": "Spears", "attack": 1.00, "defense": 1.18, "armor": 0.05, "penetration": 0.55},
-	"bow": {"name": "Bows", "attack": 1.18, "defense": 0.70, "armor": 0.00, "penetration": 0.35},
-	"sword_shield": {"name": "Sword & Shield", "attack": 1.12, "defense": 1.22, "armor": 0.38, "penetration": 0.42},
-	"lance": {"name": "Lances", "attack": 1.35, "defense": 0.72, "armor": 0.18, "penetration": 0.70},
-	"siege_kit": {"name":"Siege Kit","attack":0.88,"defense":0.72,"armor":0.08,"penetration":0.92},
-	"field_gun":{"name":"Field Gun","attack":5.00,"defense":0.48,"armor":0.12,"penetration":1.45},
-	"service_rifle":{"name":"Service Rifles","attack":1.72,"defense":1.18,"armor":0.05,"penetration":0.88},
-	"machine_gun":{"name":"Machine Guns","attack":4.20,"defense":2.25,"armor":0.08,"penetration":1.05},
-	"motorized_kit":{"name":"Motorized Equipment","attack":1.88,"defense":1.32,"armor":0.28,"penetration":1.02},
-	"armored_vehicle":{"name":"Armored Vehicles","attack":4.80,"defense":3.70,"armor":2.10,"penetration":2.35},
-	"modern_field_gun":{"name":"Modern Field Artillery","attack":7.20,"defense":0.72,"armor":0.18,"penetration":2.10},
-	"axe":{"name": "Axemen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"sling":{"name": "Slingers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"javelin":{"name": "Javelineers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"pike":{"name": "Pikemen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"crossbow":{"name": "Crossbowmen equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"mountain_kit":{"name": "Mountain Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"mounted_bow":{"name": "Horse Archers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"chariot_kit":{"name": "War Chariots equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"armored_lance":{"name": "Armored Cavalry equipment", "attack": 1.05, "defense": 1.0, "armor": 0.6, "penetration": 0.65},
-	"elephant_kit":{"name": "War Elephants equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"dragoon_kit":{"name": "Dragoons equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"ram":{"name": "Battering Ram Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"catapult":{"name": "Catapult Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"trebuchet":{"name": "Trebuchet Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"bombard":{"name": "Bombard Crews equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"horse_gun":{"name": "Horse Artillery equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"mortar":{"name": "Mortar Teams equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"rocket_launcher":{"name": "Rocket Artillery equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
-	"hand_cannon":{"name": "Hand Cannoneers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"musket":{"name": "Musketeers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"grenadier_kit":{"name": "Grenadiers equipment", "attack": 1.05, "defense": 1.0, "armor": 0.1, "penetration": 0.65},
-	"marksman_rifle":{"name": "Sharpshooters equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"assault_kit":{"name": "Assault Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"marine_kit":{"name": "Marines equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"airborne_kit":{"name": "Airborne Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"engineering_kit":{"name": "Combat Engineers equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"anti_tank_kit":{"name": "Antitank Teams equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 3.0},
-	"anti_air_gun":{"name": "Antiaircraft Batteries equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4},
-	"armored_car_kit":{"name": "Armored Reconnaissance equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
-	"light_tank_kit":{"name": "Light Tanks equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
-	"heavy_tank_kit":{"name": "Heavy Tanks equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
-	"tank_destroyer_kit":{"name": "Tank Destroyers equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 3.0},
-	"mechanized_kit":{"name": "Mechanized Infantry equipment", "attack": 1.7, "defense": 1.35, "armor": 1.5, "penetration": 1.4},
-	"air_assault_kit":{"name": "Air Assault Infantry equipment", "attack": 1.7, "defense": 1.0, "armor": 0.1, "penetration": 1.4}
+	"improvised":Ledger.KITS.improvised,
+	"spear":Ledger.KITS.spear,
+	"axe":Ledger.KITS.axe,
+	"sword_shield":Ledger.KITS.sword_shield,
+	"pike":Ledger.KITS.pike,
+	"sling":Ledger.KITS.sling,
+	"bow":Ledger.KITS.bow,
+	"javelin":Ledger.KITS.javelin,
+	"mounted_bow":Ledger.KITS.mounted_bow,
+	"crossbow":Ledger.KITS.crossbow,
+	"chariot_kit":Ledger.KITS.chariot_kit,
+	"lance":Ledger.KITS.lance,
+	"elephant_kit":Ledger.KITS.elephant_kit,
+	"armored_lance":Ledger.KITS.armored_lance,
+	"dragoon_kit":Ledger.KITS.dragoon_kit,
+	"hand_cannon":Ledger.KITS.hand_cannon,
+	"musket":Ledger.KITS.musket,
+	"grenadier_kit":Ledger.KITS.grenadier_kit,
+	"marksman_rifle":Ledger.KITS.marksman_rifle,
+	"mountain_kit":Ledger.KITS.mountain_kit,
+	"service_rifle":Ledger.KITS.service_rifle,
+	"marine_kit":Ledger.KITS.marine_kit,
+	"engineering_kit":Ledger.KITS.engineering_kit,
+	"assault_kit":Ledger.KITS.assault_kit,
+	"airborne_kit":Ledger.KITS.airborne_kit,
+	"air_assault_kit":Ledger.KITS.air_assault_kit,
+	"networked_rifle":Ledger.KITS.networked_rifle,
+	"exosuit":Ledger.KITS.exosuit,
+	"machine_gun":Ledger.KITS.machine_gun,
+	"mortar":Ledger.KITS.mortar,
+	"anti_tank_kit":Ledger.KITS.anti_tank_kit,
+	"anti_air_gun":Ledger.KITS.anti_air_gun,
+	"laser_point_defence":Ledger.KITS.laser_point_defence,
+	"ram":Ledger.KITS.ram,
+	"siege_kit":Ledger.KITS.siege_kit,
+	"catapult":Ledger.KITS.catapult,
+	"trebuchet":Ledger.KITS.trebuchet,
+	"bombard":Ledger.KITS.bombard,
+	"field_gun":Ledger.KITS.field_gun,
+	"horse_gun":Ledger.KITS.horse_gun,
+	"modern_field_gun":Ledger.KITS.modern_field_gun,
+	"rocket_launcher":Ledger.KITS.rocket_launcher,
+	"precision_launcher":Ledger.KITS.precision_launcher,
+	"motorized_kit":Ledger.KITS.motorized_kit,
+	"armored_car_kit":Ledger.KITS.armored_car_kit,
+	"light_tank_kit":Ledger.KITS.light_tank_kit,
+	"armored_vehicle":Ledger.KITS.armored_vehicle,
+	"heavy_tank_kit":Ledger.KITS.heavy_tank_kit,
+	"tank_destroyer_kit":Ledger.KITS.tank_destroyer_kit,
+	"mechanized_kit":Ledger.KITS.mechanized_kit,
+	"main_battle_tank":Ledger.KITS.main_battle_tank,
+	"drone_team":Ledger.KITS.drone_team,
+	"robotic_vehicle":Ledger.KITS.robotic_vehicle,
+	"combat_frame":Ledger.KITS.combat_frame,
+	"repair_kit":Ledger.KITS.repair_kit,
+	"medical_kit":Ledger.KITS.medical_kit
 }
 
-const CREW_PER_EQUIPMENT:Dictionary={"field_gun":5,"machine_gun":8,"motorized_kit":4,"armored_vehicle":5,"modern_field_gun":8,"axe":1,"sling":1,"javelin":1,"pike":1,"crossbow":1,"mountain_kit":1,"mounted_bow":1,"chariot_kit":2,"armored_lance":1,"elephant_kit":1,"dragoon_kit":1,"ram":8,"catapult":8,"trebuchet":8,"bombard":8,"horse_gun":8,"mortar":8,"rocket_launcher":5,"hand_cannon":1,"musket":1,"grenadier_kit":1,"marksman_rifle":1,"assault_kit":1,"marine_kit":1,"airborne_kit":1,"engineering_kit":1,"anti_tank_kit":1,"anti_air_gun":8,"armored_car_kit":5,"light_tank_kit":5,"heavy_tank_kit":5,"tank_destroyer_kit":5,"mechanized_kit":5,"air_assault_kit":1}
-const AMMUNITION_PER_ELEMENT:Dictionary={"bow":6,"field_gun":8,"service_rifle":30,"machine_gun":220,"motorized_kit":24,"armored_vehicle":18,"modern_field_gun":28,"crossbow":24,"mountain_kit":24,"mounted_bow":24,"dragoon_kit":24,"bombard":24,"horse_gun":24,"mortar":24,"rocket_launcher":24,"hand_cannon":24,"musket":24,"grenadier_kit":24,"marksman_rifle":24,"assault_kit":24,"marine_kit":24,"airborne_kit":24,"engineering_kit":24,"anti_tank_kit":24,"anti_air_gun":24,"armored_car_kit":24,"light_tank_kit":24,"heavy_tank_kit":24,"tank_destroyer_kit":24,"mechanized_kit":24,"air_assault_kit":24}
+
+## Men per set (below one, a man runs several machines), rounds per firing
+## element and the round's kind, all from the equipment ledger.
+static func crew_for(weapon_id:String)->float:
+	return Ledger.crew(weapon_id) if Ledger.has(weapon_id) else 1.0
+
+static func ammo_per(weapon_id:String)->int:
+	return maxi(0,int(Ledger.row(weapon_id).get("ammo_per",0)))
+
+static func ammo_type(weapon_id:String)->String:
+	return String(Ledger.row(weapon_id).get("ammo",""))
 
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
 # These are intentionally data, not branches, so discoveries can replace or
@@ -181,14 +200,13 @@ const MATCHUPS := {
 
 
 func equipment_required_for_weapon(weapon_id:String,authorized_count:int)->int:
-	var crew:=maxi(1,int(CREW_PER_EQUIPMENT.get(weapon_id,1)))
-	return ceili(float(maxi(0,authorized_count))/float(crew))
+	return ceili(float(maxi(0,authorized_count))/crew_for(weapon_id)-0.000001)
 
 
 func ammunition_required_for_weapon(weapon_id:String,equipment_required:int,authorized_count:int)->int:
-	if not AMMUNITION_PER_ELEMENT.has(weapon_id): return 0
+	if ammo_per(weapon_id)<=0: return 0
 	var elements:=authorized_count if weapon_id in ["bow","service_rifle"] else equipment_required
-	return maxi(0,elements)*maxi(0,int(AMMUNITION_PER_ELEMENT[weapon_id]))
+	return maxi(0,elements)*ammo_per(weapon_id)
 
 
 func create_force(name: String, troops: int, attack := 1.0, defense := 1.0, morale := 1.0, readiness := 1.0) -> Dictionary:
@@ -1151,10 +1169,10 @@ func _consume_ammunition(formations:Array,intensity:float,rng:RandomNumberGenera
 		var formation:Dictionary=formations[index]
 		var used:=0
 		var weapon:=String(formation.get("weapon","improvised"))
-		if AMMUNITION_PER_ELEMENT.has(weapon):
+		if ammo_per(weapon)>0:
 			var available:=maxi(0,int(formation.get("ammunition",0)))
 			var firing_elements:=maxi(0,int(formation.get("count",0))) if weapon in ["bow","service_rifle"] else maxi(0,int(formation.get("equipment",0)))
-			var rounds_per_element:=maxf(0.25,float(AMMUNITION_PER_ELEMENT.get(weapon,1))*0.06)
+			var rounds_per_element:=maxf(0.25,float(ammo_per(weapon))*0.06)
 			var desired:=maxi(0,roundi(float(firing_elements)*rounds_per_element*rng.randf_range(0.38,0.78)*clampf(intensity,0.25,1.50)))
 			used=mini(available,desired)
 			formation["ammunition"]=available-used
@@ -1312,10 +1330,10 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
-		if AMMUNITION_PER_ELEMENT.has(weapon):
+		if ammo_per(weapon)>0 and ammo_type(weapon)!="":
 			var ammunition:=int(formation.get("ammunition",0))
 			var ammunition_recovered:=clampi(roundi(float(ammunition)*recovery_rate),0,ammunition)
-			var ammunition_type:=String({"bow":"arrows","field_gun":"artillery_rounds","service_rifle":"small_arms_ammunition","machine_gun":"small_arms_ammunition","motorized_kit":"small_arms_ammunition","armored_vehicle":"heavy_shells","modern_field_gun":"heavy_shells"}.get(weapon,""))
+			var ammunition_type:=ammo_type(weapon)
 			consumables[ammunition_type]=int(consumables.get(ammunition_type,0))+ammunition_recovered
 			formation["ammunition"]=ammunition-ammunition_recovered
 		total_equipment+=equipment

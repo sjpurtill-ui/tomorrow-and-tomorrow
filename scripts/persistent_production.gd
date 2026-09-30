@@ -214,6 +214,13 @@ static func move(host:Node,id:int,to_index:int)->Dictionary:
 		host.equipment_queue.insert(to,job)
 	return {"ok":true,"message":"%s is line %d now." % [product_name(String(job.get("item",""))),to+1]}
 
+## Skill a line keeps when it switches product: by the kits' families for
+## land kits (equipment_ledger.gd), otherwise by the kind of job.
+static func retool_retention(from_item:String,to_item:String,from_type:String,to_type:String)->float:
+	var Ledger:=preload("res://scripts/equipment_ledger.gd")
+	if Ledger.has(from_item) and Ledger.has(to_item): return Ledger.retention(from_item,to_item)
+	return .65 if from_type==to_type else .35
+
 static func retool(host: Node, id: int, item: String) -> Dictionary:
 	var definition:=recipe(host,item)
 	if definition.has("error"): return definition
@@ -229,7 +236,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 				WorldSimulation.state.resource_stockpiles[resource]=float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(additions[resource])
 				installed[resource]=float(installed.get(resource,0))+float(additions[resource])
 		job["installed_tooling"]=installed
-		var retention:=.65 if String(job.job_type)==String(definition.job_type) else .35
+		var retention:=retool_retention(String(job.item),item,String(job.job_type),String(definition.job_type))
 		job.efficiency=maxf(.10,float(job.efficiency)*retention)
 		preload("res://scripts/managed_weapon_repair.gd").clear(host,job)
 		job.merge(definition,true);job.progress_days=0.0;job.completed=0;job.last_output=0;job.last_work=0.0;job.last_consumed={}
@@ -308,7 +315,8 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	if produced>0 and job.has("ai_turnover"):
 		job.progress_days=0.0
 		job.paused=true
-	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units)))
+	# Skill grows with the days worked: a step of several days learns as much as those days.
+	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units))*float(WorldSimulation.span))
 
 static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> Dictionary:
 	var result:=job.duplicate(true)
