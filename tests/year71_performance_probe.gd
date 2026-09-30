@@ -106,6 +106,12 @@ func summarize_steps(report:Dictionary)->void:
 	print("WARM_STEPS ",JSON.stringify(report.warm_steps))
 	var durations:Array=[]
 	var by_label:Dictionary={}
+	var warm_by_label:Dictionary={}
+	for record:Dictionary in records:
+		if int(record.day)<=first_day:continue
+		var warm_entry:Dictionary=warm_by_label.get_or_add(String(record.label),{"count":0,"total_ms":0.0,"max_ms":0.0})
+		warm_entry.count+=1;warm_entry.total_ms+=record.usec/1000.0;warm_entry.max_ms=maxf(warm_entry.max_ms,record.usec/1000.0)
+	report["warm_by_label"]=warm_by_label
 	for record:Dictionary in records:
 		durations.append(int(record.usec))
 		var key:=String(record.label)
@@ -147,6 +153,11 @@ func frame_profile()->void:
 	# Warm throughput starts once the cold first day after load has finished.
 	var warm_began:=-1
 	terrain.scheduled_world_days_enabled="--synchronous" not in OS.get_cmdline_user_args()
+	terrain.catch_up_budget="--fixed-budget" not in OS.get_cmdline_user_args()
+	# --render-cost=MS stands in for drawing time on a real machine.
+	var render_cost_usec:=0
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--render-cost="):render_cost_usec=int(float(arg.trim_prefix("--render-cost="))*1000.0)
 	terrain._set_game_speed(5)
 	var trace=preload("res://scripts/performance_trace.gd")
 	trace.enabled="--frame-trace" in OS.get_cmdline_user_args();trace.totals.clear()
@@ -163,6 +174,7 @@ func frame_profile()->void:
 		if trace.enabled:
 			for key:String in trace.totals:before_totals[key]=int(trace.totals[key].microseconds)
 		await get_tree().process_frame
+		if render_cost_usec>0:OS.delay_usec(render_cost_usec)
 		var now:=Time.get_ticks_usec()
 		if trace.enabled and now-last>100000:
 			var spent:Dictionary={}

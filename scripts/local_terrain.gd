@@ -13,6 +13,7 @@ const MAX_CLOSE_ARMY_FORMATIONS:=6
 var close_army_figures:Dictionary={}
 
 const FIT_CONTENT_PANEL:=preload("res://scripts/viewport_fit_panel.gd")
+const PerfMeter:=preload("res://scripts/perf_meter.gd")
 const COAST_SHAPE:=preload("res://scripts/coast_shape.gd")
 const FoodSystemScript := preload("res://scripts/food_system.gd")
 const SettlementModelScript:=preload("res://scripts/settlement_model.gd")
@@ -68,6 +69,13 @@ const DEFAULT_PLAY_SPEED := 4.0
 const DAY_STEP_BUDGET_USEC := 8000
 const DAY_STEP_BUDGET_FAST_USEC := 14000
 const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
+## When the calendar has run ahead of the day being computed at the fast
+## speeds, the day takes what the frame has to spare: the frame aims at
+## DAY_FRAME_TARGET_USEC in all (about 30 a second), never giving the day less
+## than DAY_STEP_BUDGET_FAST_USEC nor more than DAY_STEP_BUDGET_MAX_USEC. The
+## world is the same; only how many of its steps share a frame changes.
+const DAY_FRAME_TARGET_USEC := 33000
+const DAY_STEP_BUDGET_MAX_USEC := 24000
 const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
 const SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM := 2.4
@@ -330,6 +338,12 @@ const CALENDAR_BANK_DAYS:=1.0
 var scheduled_world_days:=0.0
 # False restores whole days inside one frame (diagnostics and fallback).
 var scheduled_world_days_enabled:=true
+## Simulation run this frame and the rest of a frame lately (drawing, the
+## map, the HUD), for _day_step_budget_usec.
+var _frame_sim_usec:=0
+## Off only for comparisons (tests/year71_performance_probe.gd --fixed-budget).
+var catch_up_budget:=true
+var _frame_other_usec:=12000.0
 var world_menu_panel: Control
 var world_seed_input: LineEdit
 var world_seed_status: Label
@@ -917,6 +931,11 @@ func _configure_preview_province() -> void:
 func _process(delta: float) -> void:
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
+	# The pace the player sees, logged once a minute while time runs (perf_meter.gd).
+	PerfMeter.frame(delta,game_speed if not GeneralCampaign.active else 0.0)
+	# What the last frame spent beside the simulation, smoothed.
+	_frame_other_usec=lerpf(_frame_other_usec,maxf(0.0,delta*1000000.0-float(_frame_sim_usec)),0.25)
+	_frame_sim_usec=0
 	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
 	_refresh_discovery_mask()
@@ -988,7 +1007,10 @@ func _process(delta: float) -> void:
 	# A started day always finishes, even if paused, before the century choice
 	# or campaign logic reads its results. Its work is spread across frames.
 	if WorldSimulation.day_in_progress():
+		var pumped:=Time.get_ticks_usec()
 		WorldSimulation.pump_day(_day_step_budget_usec())
+		_frame_sim_usec+=Time.get_ticks_usec()-pumped
+		PerfMeter.sim(Time.get_ticks_usec()-pumped)
 		stamp=trace.mark("frame_world_day",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
 		if game_speed>0.0: _set_game_speed(0.0)
@@ -1009,7 +1031,16 @@ func _process(delta: float) -> void:
 ## exceed it; the budget bounds how many run back to back.
 func _day_step_budget_usec()->int:
 	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
-	return DAY_STEP_BUDGET_FAST_USEC if _speed_hours_per_second()>=24.0 else DAY_STEP_BUDGET_USEC
+	if _speed_hours_per_second()<24.0:return DAY_STEP_BUDGET_USEC
+	if not catch_up_budget or not _world_day_behind():return DAY_STEP_BUDGET_FAST_USEC
+	return clampi(DAY_FRAME_TARGET_USEC-roundi(_frame_other_usec)-_frame_sim_usec,DAY_STEP_BUDGET_FAST_USEC,DAY_STEP_BUDGET_MAX_USEC)
+
+## The calendar has reached the end of the day still being computed (or has
+## time banked past it): the day is behind the clock.
+func _world_day_behind()->bool:
+	if calendar_bank_days>0.0:return true
+	var running:=WorldSimulation.day_in_progress_number()
+	return running>=0 and scheduled_world_elapsed>=float(running+1)
 
 ## The frame-loop calendar. Owned worlds run each day as bounded steps across
 ## frames; legacy worlds and campaign intervals keep the synchronous path.
@@ -1043,9 +1074,12 @@ func _schedule_world_time(days_advanced:float)->void:
 	for city in GameState.player_settlements:
 		if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
 	var begin_stamp:int=preload("res://scripts/performance_trace.gd").start()
+	var began:=Time.get_ticks_usec()
 	WorldSimulation.begin_day(day,daily_context,_process_local_settlement_day,_finish_scheduled_day.bind(day))
 	begin_stamp=preload("res://scripts/performance_trace.gd").mark("schedule_begin_day",begin_stamp)
 	WorldSimulation.pump_day(_day_step_budget_usec())
+	_frame_sim_usec+=Time.get_ticks_usec()-began
+	PerfMeter.sim(Time.get_ticks_usec()-began)
 	preload("res://scripts/performance_trace.gd").mark("schedule_first_pump",begin_stamp)
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
@@ -1177,7 +1211,9 @@ func _process_live_report_refresh(delta:float)->void:
 	if live_report_refresh_elapsed<LIVE_REPORT_REFRESH_INTERVAL_SECONDS: return
 	live_report_refresh_elapsed=fmod(live_report_refresh_elapsed,LIVE_REPORT_REFRESH_INTERVAL_SECONDS)
 	if hud and not _live_report_global_interaction_active():
+		var refreshed:=Time.get_ticks_usec()
 		hud.live_refresh_dock()
+		PerfMeter.dock(Time.get_ticks_usec()-refreshed)
 
 
 func _live_report_global_interaction_active()->bool:
