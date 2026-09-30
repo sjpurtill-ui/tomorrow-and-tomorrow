@@ -548,6 +548,18 @@ func _refresh_all_policy_observations()->void:
 func active_policies()->Array[Dictionary]:
 	refresh_policy_lifecycle()
 	var result:Array[Dictionary]=[]
+	for modifier in _active_policy_records():
+		var policy:=modifier.duplicate(true)
+		if (policy.get("effects",{}) as Dictionary).is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): policy["effects"]=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
+		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",WorldSimulation.state.elapsed_days))-WorldSimulation.state.elapsed_days)
+		result.append(policy)
+	return result
+
+## The records active_policies copies, in its order (soonest end first; the
+## same sort over the same end days gives the same order). Read-only callers
+## use these in place; refresh the lifecycle first.
+func _active_policy_records()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
 	for modifier_variant in WorldSimulation.state.active_modifiers:
 		var modifier:Dictionary=modifier_variant
 		if String(modifier.get("kind",""))!="policy": continue
@@ -556,16 +568,15 @@ func active_policies()->Array[Dictionary]:
 		# Unforeseen side effects of custom orders act on the engine but are not
 		# standing orders anyone chose; they stay out of the policy list.
 		if String(modifier.get("custom_role",""))=="side_effect": continue
-		var policy:=modifier.duplicate(true)
-		if (policy.get("effects",{}) as Dictionary).is_empty() and GovernmentPolicyCatalog.has_policy(String(policy.get("id",""))): policy["effects"]=GovernmentPolicyCatalog.definition(String(policy.id)).get("effects",{})
-		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",WorldSimulation.state.elapsed_days))-WorldSimulation.state.elapsed_days)
-		result.append(policy)
+		result.append(modifier)
 	result.sort_custom(func(a:Dictionary,b:Dictionary): return float(a.get("until_day",INF))<float(b.get("until_day",INF)))
 	return result
 
 func governance_metrics()->Dictionary:
 	refresh_policy_lifecycle()
-	var active:=active_policies()
+	# Only read here, so the live records serve; a second lifecycle pass (as
+	# active_policies makes) would find nothing left to end.
+	var active:=_active_policy_records()
 	var administrative_load:=0.0
 	var resistance_pressure:=0.0
 	var compliance_weighted:=0.0

@@ -330,8 +330,34 @@ const STONE_AGE_TITLES:={"Steward":"Hearth Chief","Quartermaster":"Keeper of Sto
 func _title_era_cap()->int:
 	## Highest title rank the era supports: stone age 0, first villages 1,
 	## first metal or marks 2, iron and letters 4.
+	return [0,1,2,4][clampi(_player_era_tier(),0,3)]
+
+
+## CharacterVoice.era_tier(CharacterVoice.era_tags("player")), asking only
+## about the gates era_tier reads, in its order and each at most once. Titles
+## are read many times a day, and era_tags tests every gate against every
+## known practice. Keep in step with era_tier (test_government_people_system
+## compares the two).
+static func _player_era_tier()->int:
 	var voice:=preload("res://scripts/character_voice.gd")
-	return [0,1,2,4][clampi(voice.era_tier(voice.era_tags("player")),0,3)]
+	var known:Array=voice.known_ids("player")
+	var open:Dictionary={}
+	var has:=func(tag:String)->bool:
+		if not open.has(tag):
+			var hit:=false
+			if voice.ERA_GATES.has(tag):
+				for id in voice.ERA_GATES[tag].ids:
+					if known.has(String(id)):
+						hit=true
+						break
+			open[tag]=hit
+		return bool(open[tag])
+	if has.call("gunpowder") or ((has.call("metal") and has.call("writing")) and (has.call("ships") or has.call("coin"))): return 3
+	for tag in ["metal","writing","wheel","riding","coin"]:
+		if has.call(tag): return 2
+	for tag in ["farming","pottery","dairy","boats","weaving","baking","candles"]:
+		if has.call(tag): return 1
+	return 0
 
 
 func office_definition(office_key:String)->Dictionary:
@@ -913,8 +939,13 @@ func mark_central_appointment(person_id:int,office_key:String)->Dictionary:
 
 
 func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=false)->void:
+	# Nothing below changes what offices exist before the holders are titled,
+	# so the offices are read once (office_definition reads them per key).
 	var active_keys:Array[String]=[]
-	for office in active_offices(): active_keys.append(String(office.key))
+	var titles:Dictionary={}
+	for office in active_offices():
+		active_keys.append(String(office.key))
+		if not titles.has(String(office.key)): titles[String(office.key)]=String(office.title)
 	for person_index in people.size():
 		var assigned_key:=String(people[person_index].get("office_key",""))
 		if assigned_key!="" and assigned_key not in active_keys:
@@ -928,7 +959,7 @@ func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=
 		if key not in active_keys or person.is_empty() or String(person.get("status",""))!="active":
 			WorldSimulation.state.leadership_positions.erase(key)
 			continue
-		person["office_title"]=String(office_definition(key).title)
+		person["office_title"]=String(titles[key])
 		WorldSimulation.state.leadership_positions[key]=person
 	# Every available office remains staffed. The sovereign judges results and may
 	# remove an officeholder, but does not sort candidate slates. Selection uses a
