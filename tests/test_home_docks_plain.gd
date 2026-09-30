@@ -153,3 +153,18 @@ func test_economy_dock_titles_follow_the_rail()->void:
 	assert_array(economy.meta().subtabs).contains_exactly(["Food & water","Materials","Wealth"])
 	var dock:=SubHolder.new();auto_free(dock);dock.sub=2;hud.dock=dock
 	assert_str(String(economy.meta().title)).is_equal("Wealth")
+
+func test_a_shipment_on_the_way_reads_across_the_row()->void:
+	# Regression: the shipment's words folded to one letter a line.
+	var materials:VBoxContainer=auto_free(preload("res://scripts/hud/materials_ledger.gd").new())
+	materials.setup({"city":"Ashford","leader":{},"managed":true,"can_direct":false,"focus":"","storage":40.0,"capacity":100.0,"hauling":0.9,
+		"rows":[],"incoming":[{"quantity":3.0,"resource":"Medicinal Plants","source_name":"Seanstone","arrival_day":14.0}],
+		"day":10,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
+	materials.size=Vector2(1100,600);add_child(materials)
+	await get_tree().process_frame;await get_tree().process_frame
+	var voice:Control=materials._incoming[0].voice
+	var when:Control=materials._incoming[0].when
+	assert_str(_texts(materials)).contains("3 medicinal plants on the way").contains("From Seanstone")
+	assert_float(voice.size.x).is_greater(400.0)
+	assert_float(when.size.x).is_greater(400.0)
+	assert_float(voice.size.y).is_less(80.0)

@@ -53,7 +53,8 @@ func setup(block:Dictionary)->void:
 	if data.rows.is_empty():_line(self,"Nothing is stored or known yet. Surveys find sources of wood, stone and clay.",13,T.MUTED)
 	for shipment:Dictionary in data.incoming:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);add_child(row);row.add_child(Materials.picture(5,140,64))
-		var summary:=VBoxContainer.new();row.add_child(summary)
+		# The words take the row's width; without it a wrapping line folds to one letter.
+		var summary:=VBoxContainer.new();summary.size_flags_horizontal=Control.SIZE_EXPAND_FILL;summary.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(summary)
 		var refs:={"voice":_voice("",18)}
 		summary.add_child(refs.voice)
 		refs.when=_line(summary,"",13,T.MUTED)
