@@ -299,6 +299,9 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	var head:=("Supply %d%%, %s." % [roundi(ratio*100.0),BarModel.report_words(age)]) if reported else shares_words(row)
 	var stores:=float(row.get("stores_share",1.0))
 	if stores<0.995 and not reported:head+="\nFodder, fuel and rounds: %d%% arrive. Short stores weaken horses, guns and machines." % roundi(stores*100.0)
+	var winter:Dictionary=row.get("winter",{})
+	if not winter.is_empty() and not reported and float(winter.ratio)<ratio-0.05:
+		head+="\nIn deep winter here, in about %d days, the same line would bring %d%%%s." % [int(winter.in_days),roundi(float(winter.ratio)*100.0),", and they would go hungry" if float(winter.ratio)<Supply.WELL_FROM else ""]
 	if row.has("line_bread") and not reported:
 		head+="\nIts line asks %s loads a day: bread %s; fodder, fuel and rounds %s." % [EraWords.grouped(roundi(float(row.line_bread)+float(row.line_stores))),EraWords.grouped(roundi(float(row.line_bread))),EraWords.grouped(roundi(float(row.line_stores)))]
 		if int(row.get("carts_alone",-1))>0:head+=" Alone it would keep %s carts on the road." % EraWords.grouped(int(row.carts_alone))

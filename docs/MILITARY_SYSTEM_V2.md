@@ -589,3 +589,11 @@ with machine accounting; (7) recruitment fixes and template numbers.
   - Limits: rivals' generals do not lay depots yet. Only patrols and
     expeditions on the map burn them; a siege host marching on home does
     not.
+- **Iteration 14, the winter warning.** A band's supply report carries the
+  same line on the coldest day of the coming year where it stands, with
+  today's carriers (`supply_state.coldest_day`, `of_force` "winter"). When
+  winter would cost more than five points, the Readiness tooltip says so,
+  and so does the war leader's line: "In deep winter here, in about 239
+  days, the same line would bring 41%, and they would go hungry." A siege
+  of home now cuts the haul from a depot as it does from a held town, since
+  both are stocked from home.

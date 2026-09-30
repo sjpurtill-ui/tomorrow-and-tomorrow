@@ -186,3 +186,25 @@ func test_depots_and_work_in_hand_survive_a_save()->void:
 	saved.erase("field_depots")
 	assert_str(String(MilitaryCampaign.import_state(saved).get("error",""))).is_equal("")
 	assert_int(MilitaryCampaign.field_depots.size()).is_equal(0)
+
+func test_a_siege_of_home_cuts_the_line_from_a_depot_too()->void:
+	MilitaryCampaign.field_depots.assign([{"id":1,"name":"Depot 170 km east","x":home.x+170.0,"z":home.y,"built_day":1,"by":""}])
+	var f:=Supply.field(true)
+	var beyond:=home+Vector2(215,0)
+	var open:=Supply.terms(f,beyond,400,30,false,1.0,1.0,1.0)
+	var ringed:=Supply.terms(f,beyond,400,30,false,1.0,1.0,0.25)
+	assert_str(String(open.hub.kind)).is_equal("depot")
+	assert_float(float(ringed.haul)).is_equal_approx(float(open.haul)*0.25,0.0001)
+
+func test_the_line_in_deep_winter_is_forecast()->void:
+	# Day 400: the coldest day south of the line is day 639, north of it 456.
+	assert_int(Supply.coldest_day(Vector2(0,-5),400)).is_equal(639)
+	assert_int(Supply.coldest_day(Vector2(0,5),400)).is_equal(456)
+	assert_int(Supply.coldest_day(Vector2(0,-5),639)).is_equal(639)
+	var band:=_band(1,Vector2(150,0),60)
+	var report:=Supply.of_force(band)
+	assert_bool(report.has("winter")).is_true()
+	var winter:Dictionary=report.winter
+	assert_float(float(winter.cold)).is_greater(0.0)
+	assert_int(int(winter.in_days)).is_greater(0)
+	assert_float(float(winter.ratio)).is_less_equal(float(report.ratio))

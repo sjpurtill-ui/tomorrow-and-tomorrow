@@ -1025,6 +1025,14 @@ static func cold(day:int,at:Vector2,t:float,swing:float)->float:
 	return clampf((2.0-celsius)/10.0,0.0,1.0)
 
 ## Days of hauling for this much effort by these carriers in this cold.
+## The coldest day (by cold()) on or after `day` where `at` stands: the
+## seasons turn opposite ways north and south of the equator line.
+static func coldest_day(at:Vector2,day:int)->int:
+	var phase:=91 if at.y>0.0 else 274
+	var deep:=day-posmod(day,365)+phase
+	if deep<day: deep+=365
+	return deep
+
 static func haul_days(effort:float,who:String,chill:float)->float:
 	if not is_finite(effort): return INF
 	var c:Dictionary=CARRIERS.get(who,CARRIERS.foot)
@@ -1099,7 +1107,7 @@ static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,tran
 	var source:=int(e.source)
 	var sources:Array=e.sources
 	var hub:Dictionary=(sources[source] as Dictionary) if source>=0 and source<sources.size() else {}
-	if not hub.is_empty() and String(hub.kind) in ["home","held"]: haul*=siege
+	if not hub.is_empty() and (String(hub.kind)=="home" or is_relay(String(hub.kind))): haul*=siege
 	var carried:=clampf(transport*haul*stores,0.0,1.0)
 	var base:=FieldRations.FORAGE_MOVING if moving else FieldRations.FORAGE_STATIONED
 	var share:=minf(FORAGE_SHARE_MAX,base*forage_factor_from(float(land.rich),chill,troops))
@@ -1326,6 +1334,12 @@ static func of_force(force:Dictionary)->Dictionary:
 		var moving:=String(force.get("status","stationed"))=="moving"
 		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
 		report=_report_from_terms(f,t,p)
+		# The same line on the coldest day of the coming year where the band
+		# stands, with today's carriers: the warning before the snow.
+		if kind=="field" and p.is_finite():
+			var deep:=coldest_day(p,int(d.day))
+			var w:=terms(f,p,deep,int(force.get("troops",0)),false,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+			if float(w.cold)>0.0: report["winter"]={"ratio":float(w.ratio),"in_days":deep-int(d.day),"cold":float(w.cold)}
 		# The day's actual rations, as the engine recorded them.
 		var need:=float(force.get("provisions_required_today",0.0))
 		if int(force.get("provision_day",-99))>=day-1 and need>0.0:

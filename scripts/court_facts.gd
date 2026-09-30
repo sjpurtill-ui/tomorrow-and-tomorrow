@@ -398,7 +398,7 @@ static func fed_facts(report:Dictionary)->Dictionary:
 	return {"gets":roundi(float(report.get("ratio",0.0))*100.0),"from_town":int(parts[0]),"foraged":int(parts[1]),"carried":int(parts[2]),
 		"state":Supply.state_words(String(report.get("state",""))),"hungry_days":roundi(float(report.get("hungry_days",0.0))) if bool(report.get("hungry",false)) else 0,
 		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words","")),
-		"stores":roundi(float(report.get("stores_share",1.0))*100.0),"sick":int((report.get("hunger_losses",{}) as Dictionary).get("sick",0)),"deserted":int((report.get("hunger_losses",{}) as Dictionary).get("deserted",0)),"dead":int((report.get("hunger_losses",{}) as Dictionary).get("dead",0))}
+		"stores":roundi(float(report.get("stores_share",1.0))*100.0),"winter":roundi(float((report.get("winter",{}) as Dictionary).get("ratio",-1.0))*100.0) if report.get("winter") is Dictionary and float((report.winter as Dictionary).ratio)<float(report.get("ratio",0.0))-0.05 else -1,"winter_in":int((report.get("winter",{}) as Dictionary).get("in_days",0)) if report.get("winter") is Dictionary else 0,"sick":int((report.get("hunger_losses",{}) as Dictionary).get("sick",0)),"deserted":int((report.get("hunger_losses",{}) as Dictionary).get("deserted",0)),"dead":int((report.get("hunger_losses",{}) as Dictionary).get("dead",0))}
 
 ## "; food 60% (35% foraged, 25% carried), 4 days from Seanstone by cart
 ## track, hungry 3 days" for the prompt's band and garrison lines.
@@ -412,6 +412,7 @@ static func fed_line(fed:Dictionary)->String:
 	var out:="; food %d%%%s, %s" % [int(fed.get("gets",0)),(" ("+", ".join(shares)+")") if not shares.is_empty() else "",String(fed.get("line",""))]
 	if int(fed.get("hungry_days",0))>0: out+=", hungry %d days" % int(fed.hungry_days)
 	if int(fed.get("stores",100))<100: out+=", fodder, fuel and rounds %d%%" % int(fed.stores)
+	if int(fed.get("winter",-1))>=0: out+="; in deep winter there (about %d days off) the same line would bring %d%%" % [int(fed.get("winter_in",0)),int(fed.winter)]
 	var lost:=int(fed.get("sick",0))+int(fed.get("deserted",0))+int(fed.get("dead",0))
 	if lost>0: out+="; hunger has cost %d fallen sick, %d gone home and %d dead" % [int(fed.get("sick",0)),int(fed.get("deserted",0)),int(fed.get("dead",0))]
 	return out
