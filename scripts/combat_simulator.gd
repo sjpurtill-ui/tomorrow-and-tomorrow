@@ -546,7 +546,10 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		defender_troops -= defender_losses
 		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1),options.get("attacker_ordered_targets",{}),Blocks.exposure(state,"attacker",attacker_cohorts.size()))
 		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1),options.get("defender_ordered_targets",{}),Blocks.exposure(state,"defender",defender_cohorts.size()))
-		# Operators whose machines took the blow are not casualties.
+		# Operators whose machines took the blow are not casualties; the
+		# machines wrecked are counted for the report.
+		_count_machines(attacking_force,attacker_cohort_result)
+		_count_machines(defending_force,defender_cohort_result)
 		attacker_troops+=int(attacker_cohort_result.get("restored",0)); attacker_losses-=int(attacker_cohort_result.get("restored",0))
 		defender_troops+=int(defender_cohort_result.get("restored",0)); defender_losses-=int(defender_cohort_result.get("restored",0))
 		var attacker_block_losses:=Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,attacker_cohort_result.losses,attacker_losses),where.attacker)
@@ -891,6 +894,7 @@ func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Di
 		force["formations"]=applied.formations
 		var c:Dictionary=casualties[side]
 		# Operators whose machines took the blow are not casualties.
+		_count_machines(force,applied)
 		var restored:=int(applied.get("restored",0))
 		if restored>0:
 			losses[side]=int(losses[side])-restored
@@ -1483,6 +1487,8 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
+		# Machines left on the field for the victor are lost to their side too.
+		if is_machine(weapon) and recovered>0: loser["machines_lost"]=int(loser.get("machines_lost",0))+recovered
 		if ammo_per(weapon)>0 and ammo_type(weapon)!="":
 			var ammunition:=int(formation.get("ammunition",0))
 			var ammunition_recovered:=clampi(roundi(float(ammunition)*recovery_rate),0,ammunition)
@@ -1507,8 +1513,19 @@ func _winner_name(outcome: String, attacker: Dictionary, defender: Dictionary) -
 	return ""
 
 
+## Machines lost in an exchange (wrecked), kept on the force for the report.
+func _count_machines(force:Dictionary,applied:Dictionary)->void:
+	var formations:Array=applied.get("formations",[])
+	var lost:Array=applied.get("equipment_losses",[])
+	var wrecked:=0
+	for index in mini(formations.size(),lost.size()):
+		if is_machine(String((formations[index] as Dictionary).get("weapon",""))): wrecked+=int(lost[index])
+	if wrecked>0: force["machines_lost"]=int(force.get("machines_lost",0))+wrecked
+
+
 func _force_result(force: Dictionary, initial: int, remaining: int, morale: float) -> Dictionary:
 	return {
+		"machines_lost":int(force.get("machines_lost",0)),
 		"name": String(force.name),
 		"initial_troops": initial,
 		"commander":force.get("commander",{}).duplicate(true),

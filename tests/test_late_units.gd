@@ -112,3 +112,25 @@ func test_a_blow_on_a_frame_cohort_is_as_likely_as_its_machines_make_it()->void:
 	var old_exposure:=float(cohorts[1].count)/float(cohorts[1].defense)
 	assert_float(frame_exposure/old_exposure).is_equal_approx(8.0,0.001)
 	assert_float(frame_exposure/rifle_exposure).is_between(0.02,0.2)
+
+func test_the_battle_counts_the_machines_wrecked()->void:
+	var frames:=_force([["combat_frame_cohort","combat_frame",40]])
+	var rifles:=_force([["rifle_infantry","service_rifle",800]])
+	var result:Dictionary=sim.simulate(rifles,frames,{"seed":17})
+	var formation:Dictionary=(result.defender.formations as Array)[0]
+	assert_int(int(result.defender.machines_lost)).is_equal(320-int(formation.equipment))
+	assert_int(int(result.attacker.machines_lost)).is_equal(0)
+	var line:=preload("res://scripts/battle_account.gd").ledger_line({"in_fight":40,"killed":1,"wounded":0,"fled":0,"captured":0,"detached":0,"present":39,"morale_words":"steady","machines":12})
+	assert_str(line).contains("twelve machines lost")
+
+func test_rival_staffs_counter_what_they_face()->void:
+	var Strategy:=preload("res://scripts/civilization_strategy.gd")
+	var tanks:=[{"unit":"armored_formation","weapon":"armored_vehicle","count":500,"authorized_count":500,"equipment":100,"equipment_required":100,"training":0.8}]
+	var riflemen:=[{"unit":"rifle_infantry","weapon":"service_rifle","count":2000,"authorized_count":2000,"equipment":2000,"equipment_required":2000,"training":0.8}]
+	var at_vs_tanks:=Strategy.counter_score(MilitaryCampaign,"anti_tank","anti_tank_kit",tanks)
+	var rifles_vs_tanks:=Strategy.counter_score(MilitaryCampaign,"rifle_infantry","service_rifle",tanks)
+	var at_vs_rifles:=Strategy.counter_score(MilitaryCampaign,"anti_tank","anti_tank_kit",riflemen)
+	var rifles_vs_rifles:=Strategy.counter_score(MilitaryCampaign,"rifle_infantry","service_rifle",riflemen)
+	assert_float(at_vs_tanks).is_greater(rifles_vs_tanks)
+	assert_float(rifles_vs_rifles).is_greater(at_vs_rifles)
+	assert_float(Strategy.counter_score(MilitaryCampaign,"rifle_infantry","service_rifle",[])).is_equal(0.0)

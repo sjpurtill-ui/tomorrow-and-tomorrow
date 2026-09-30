@@ -487,3 +487,12 @@ with machine accounting; (7) recruitment fixes and template numbers.
   - Known, deferred: machine blocks still wear and break like men in the
     block battle; rivals share the day's supply field with the player
     (inherited); AI unit choice has no counter-value (next iteration).
+- **Iteration 9, know the fight (part one).** Battle reports count machines
+  lost ("twelve machines lost"), wrecked in the fight or left for the victor.
+  Rival staffs choose what to raise by what it is worth against the army
+  they face (the player's, by unit and kit) per what it costs: the combat
+  engine's own reading of pierce against armour, matchups and machines,
+  over training days and workshop days a man
+  (`civilization_strategy.counter_score`, weighed 1.5 beside their tastes).
+  Faced with tanks, a staff raises antitank guns; faced with riflemen,
+  riflemen. Support detachments are never a rival's whole army.

@@ -90,6 +90,46 @@ static func unit_score(definition:Dictionary,plan:Dictionary)->float:
 	# Capability matters, but longest training time is not a universal doctrine.
 	return log(1+float(definition.get("training_days",7)))*(.3+float(p.openness)*.3)+preference*3.0
 
+## The forces a rival staff measures its choices against: the player's
+## army at home and in the field, grouped by unit and kit. [] when the player
+## has no army.
+static func threat_mix()->Array:
+	var mc:Variant=MilitaryCampaign
+	if mc==null: return []
+	var grouped:={}
+	for force in [mc.home_army]+Array(mc.field_armies):
+		if not force is Dictionary: continue
+		for formation in (force as Dictionary).get("formations",[]):
+			var key:=String(formation.get("unit","levy"))+"|"+String(formation.get("weapon","improvised"))
+			var entry:Dictionary=grouped.get(key,{"unit":String(formation.get("unit","levy")),"weapon":String(formation.get("weapon","improvised")),"count":0,"authorized_count":0,"equipment":0,"equipment_required":0,"training":0.7})
+			entry.count=int(entry.count)+maxi(0,int(formation.get("count",0)))
+			entry.authorized_count=int(entry.authorized_count)+maxi(0,int(formation.get("authorized_count",formation.get("count",0))))
+			entry.equipment=int(entry.equipment)+maxi(0,int(formation.get("equipment",0)))
+			entry.equipment_required=int(entry.equipment_required)+maxi(0,int(formation.get("equipment_required",0)))
+			grouped[key]=entry
+	var out:=[]
+	for key in grouped:
+		if int(grouped[key].count)>0: out.append(grouped[key])
+	return out
+
+## What raising this unit is worth against a threat mix, by the combat
+## engine's own reading (pierce against armour, matchups, machines) per what
+## it costs: ln(fighting power a man against them / (1 + training days / 60
+## + workshop days a man / 2)). 0 against no threat.
+static func counter_score(campaign:Object,unit:String,weapon:String,threat:Array)->float:
+	if threat.is_empty(): return 0.0
+	var sim=campaign.simulator
+	var sets:int=sim.equipment_required_for_weapon(weapon,100)
+	var ours:Dictionary=sim.create_formation_force("Candidate",[{"id":1,"unit":unit,"weapon":weapon,"count":100,"authorized_count":100,"equipment":sets,"equipment_required":sets,"ammunition":sim.ammunition_required_for_weapon(weapon,sets,100),"training":0.8}],1.0,1.0)
+	var cohorts:Array=sim.evaluate_force(ours,{"formations":threat},1.0)
+	if cohorts.is_empty(): return 0.0
+	var c:Dictionary=cohorts[0]
+	var power:=sqrt(maxf(0.0001,float(c.attack))*maxf(0.0001,float(c.defense))/maxf(0.05,float(c.get("through",1.0))))
+	var recipe:Dictionary=campaign._equipment_recipe(weapon)
+	var work:=float(recipe.get("days",1.0))*float(sets)/100.0
+	var cost:=1.0+float(campaign.UnitCatalog.training_days(unit))/60.0+work/2.0
+	return log(power/cost)
+
 static func preferred_mission(service:String,available:Array,plan:Dictionary)->String:
 	var p:Dictionary=plan.personality
 	var ranked:Array=[]

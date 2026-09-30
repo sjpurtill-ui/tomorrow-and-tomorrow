@@ -228,7 +228,7 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 	var elsewhere:=maxi(0,sent-before-earlier_total)
 	var ledger:={"sent":sent,"earlier":earlier_total,"earlier_fights":int(earlier.get("fights",0)),"elsewhere":elsewhere,
 		"in_fight":before,"killed":int(lost.killed),"wounded":int(lost.wounded),"fled":int(lost.fled),"unsorted":unsorted,"captured":captured+taken_in_fight,
-		"detached":detached,"present":present,"morale":morale,"morale_words":morale_words(morale)}
+		"detached":detached,"present":present,"morale":morale,"morale_words":morale_words(morale),"machines":int(ours.get("machines_lost",0))}
 
 	# Their side, as our people saw it.
 	var their_before:=int(theirs.get("initial_troops",0))
@@ -598,6 +598,7 @@ static func ledger_line(ours:Dictionary)->String:
 	if int(ours.get("unsorted",0))>0: parts.append("%s out of the fight, dead or hurt" % exact(int(ours.unsorted)))
 	if int(ours.captured)>0: parts.append("%s taken captive" % exact(int(ours.captured)))
 	if int(ours.detached)>0: parts.append("%s left to hold the town" % exact(int(ours.detached)))
+	if int(ours.get("machines",0))>0: parts.append("%s %s lost" % [exact(int(ours.machines)),"machine" if int(ours.machines)==1 else "machines"])
 	var lost:=", ".join(parts) if not parts.is_empty() else "nobody lost"
 	var left:="none" if int(ours.present)<=0 else exact(int(ours.present))
 	return "%s went in: %s; %s still with the band, %s." % [_cap(exact(int(ours.in_fight))),lost,left,String(ours.morale_words)]

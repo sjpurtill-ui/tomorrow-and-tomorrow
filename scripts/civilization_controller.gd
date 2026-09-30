@@ -292,6 +292,10 @@ static func finished_ai_line(id:String,campaign:Node)->int:
 		if campaign.PersistentProduction.state(campaign,job)=="Target met":return int(job.id)
 	return -1
 
+## How much a staff weighs a unit's worth against the army it faces
+## (civilization_strategy.counter_score, a natural log) beside its tastes.
+const COUNTER_WEIGHT:=1.5
+
 static func military_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)
 	var campaign:=WorldSimulation.military
@@ -303,12 +307,16 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	var capacity:=campaign.recruitment_capacity()
 	var target:=mini(roundi(float(capacity)*float(plan.capacity_share)),roundi(WorldSimulation.state.population_exact*float(plan.recruit_share)))
 	if bool(plan.hungry) and not bool(plan.at_war):target=campaign._mobilized_count()
-	var chosen:="";var weapon:="";var score:=-1.0
+	var chosen:="";var weapon:="";var score:=-INF
+	# Staffs weigh what each unit is worth against the army they face, per
+	# its cost (civilization_strategy.counter_score), beside their tastes.
+	var threat:=STRATEGY.threat_mix() if String(WorldSimulation.actor_id)!="player" else []
 	for unit:String in campaign.UnitCatalog.ARCHETYPES:
 		var definition:Dictionary=campaign.UnitCatalog.ARCHETYPES[unit]
+		if String(definition.get("branch",""))=="field_support":continue
 		var item:=preload("res://scripts/armor_equipment.gd").selection(campaign,unit,plan)
 		if item.is_empty():continue
-		var value:=STRATEGY.unit_score(definition,plan)
+		var value:=STRATEGY.unit_score(definition,plan)+COUNTER_WEIGHT*STRATEGY.counter_score(campaign,unit,item,threat)
 		if value>score:chosen=unit;weapon=item;score=value
 	var intake:=preload("res://scripts/military_intake_supply.gd").places(campaign,chosen,weapon)
 	var vacancies:=mini(maxi(0,target-campaign._mobilized_count()),maxi(0,intake-campaign.aggregate_recruits))
