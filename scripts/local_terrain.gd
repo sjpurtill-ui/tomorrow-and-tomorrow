@@ -76,6 +76,12 @@ const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 ## world is the same; only how many of its steps share a frame changes.
 const DAY_FRAME_TARGET_USEC := 33000
 const DAY_STEP_BUDGET_MAX_USEC := 24000
+## Even pacing (_paced_day_budget_usec): a day aims to be done this far
+## through its calendar span, planned for this much more than a day has
+## lately cost, and never with less than this share of a frame.
+const PACING_SPAN_SHARE := 0.6
+const PACING_MARGIN := 1.25
+const DAY_STEP_BUDGET_PACED_MIN_USEC := 1500
 const SETTLEMENT_DETAIL_SCALE := 0.002
 const SETTLEMENT_FABRIC_MAX_ZOOM := 28.0
 const SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM := 2.4
@@ -343,6 +349,14 @@ var scheduled_world_days_enabled:=true
 var _frame_sim_usec:=0
 ## Off only for comparisons (tests/year71_performance_probe.gd --fixed-budget).
 var catch_up_budget:=true
+## Spread each day across the frames of its calendar span at the fast speeds
+## (off only for comparisons: tests/year71_performance_probe.gd --burst).
+var even_pacing:=true
+## A frame's length lately, what a day of simulation has cost lately, and what
+## the day in progress has cost so far.
+var _frame_seconds:=1.0/60.0
+var _day_cost_usec:=0.0
+var _day_spent_usec:=0
 var _frame_other_usec:=12000.0
 var world_menu_panel: Control
 var world_seed_input: LineEdit
@@ -932,9 +946,10 @@ func _process(delta: float) -> void:
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
 	# The pace the player sees, logged once a minute while time runs (perf_meter.gd).
-	PerfMeter.frame(delta,game_speed if not GeneralCampaign.active else 0.0)
+	PerfMeter.frame(delta,game_speed if not GeneralCampaign.active else 0.0,_frame_sim_usec)
 	# What the last frame spent beside the simulation, smoothed.
 	_frame_other_usec=lerpf(_frame_other_usec,maxf(0.0,delta*1000000.0-float(_frame_sim_usec)),0.25)
+	_frame_seconds=lerpf(_frame_seconds,clampf(delta,0.004,0.1),0.2)
 	_frame_sim_usec=0
 	_advance_physical_army_fronts(delta)
 	_advance_close_terrain_job()
@@ -1010,6 +1025,7 @@ func _process(delta: float) -> void:
 		var pumped:=Time.get_ticks_usec()
 		WorldSimulation.pump_day(_day_step_budget_usec())
 		_frame_sim_usec+=Time.get_ticks_usec()-pumped
+		_day_spent_usec+=Time.get_ticks_usec()-pumped
 		PerfMeter.sim(Time.get_ticks_usec()-pumped)
 		stamp=trace.mark("frame_world_day",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
@@ -1032,8 +1048,28 @@ func _process(delta: float) -> void:
 func _day_step_budget_usec()->int:
 	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
 	if _speed_hours_per_second()<24.0:return DAY_STEP_BUDGET_USEC
-	if not catch_up_budget or not _world_day_behind():return DAY_STEP_BUDGET_FAST_USEC
-	return clampi(DAY_FRAME_TARGET_USEC-roundi(_frame_other_usec)-_frame_sim_usec,DAY_STEP_BUDGET_FAST_USEC,DAY_STEP_BUDGET_MAX_USEC)
+	if catch_up_budget and _world_day_behind():
+		return clampi(DAY_FRAME_TARGET_USEC-roundi(_frame_other_usec)-_frame_sim_usec,DAY_STEP_BUDGET_FAST_USEC,DAY_STEP_BUDGET_MAX_USEC)
+	return _paced_day_budget_usec() if even_pacing else DAY_STEP_BUDGET_FAST_USEC
+
+## Keeping up at the fast speeds: the rest of the day's expected work shared
+## over the frames left before its calendar span is PACING_SPAN_SHARE through,
+## so frames carry a steady share instead of a burst and then nothing. The
+## first days, before a day's cost is known, keep the usual share.
+func _paced_day_budget_usec()->int:
+	var running:=WorldSimulation.day_in_progress_number()
+	if _day_cost_usec<=0.0 or running<0:return DAY_STEP_BUDGET_FAST_USEC
+	return paced_budget_usec(_day_cost_usec,_day_spent_usec,float(running+1)-scheduled_world_elapsed,_speed_hours_per_second()/24.0,_frame_seconds,_frame_sim_usec)
+
+## The pacing arithmetic: what a day costs lately, what this one has taken so
+## far, how much of its calendar span is left (in days), the calendar's pace
+## (days a second), a frame's length (seconds), and simulation already run in
+## this frame (microseconds).
+static func paced_budget_usec(day_cost:float,spent:int,span_left:float,days_per_second:float,frame_seconds:float,frame_sim:int)->int:
+	var seconds_left:=maxf(0.0,span_left-(1.0-PACING_SPAN_SHARE))/maxf(0.001,days_per_second)
+	var frames_left:=maxf(1.0,seconds_left/maxf(0.004,frame_seconds))
+	var work_left:=maxf(0.0,day_cost*PACING_MARGIN-float(spent))
+	return clampi(roundi(work_left/frames_left)-frame_sim,DAY_STEP_BUDGET_PACED_MIN_USEC,DAY_STEP_BUDGET_FAST_USEC)
 
 ## The calendar has reached the end of the day still being computed (or has
 ## time banked past it): the day is behind the clock.
@@ -1075,15 +1111,19 @@ func _schedule_world_time(days_advanced:float)->void:
 		if not bool(city.get("primary",false)):_initialize_city_resource_sites(String(city.id))
 	var begin_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	var began:=Time.get_ticks_usec()
+	_day_spent_usec=0
 	WorldSimulation.begin_day(day,daily_context,_process_local_settlement_day,_finish_scheduled_day.bind(day))
 	begin_stamp=preload("res://scripts/performance_trace.gd").mark("schedule_begin_day",begin_stamp)
-	WorldSimulation.pump_day(_day_step_budget_usec())
+	# A frame that already ran the simulation leaves the new day for the next.
+	if _frame_sim_usec<_day_step_budget_usec():WorldSimulation.pump_day(_day_step_budget_usec())
 	_frame_sim_usec+=Time.get_ticks_usec()-began
+	_day_spent_usec+=Time.get_ticks_usec()-began
 	PerfMeter.sim(Time.get_ticks_usec()-began)
 	preload("res://scripts/performance_trace.gd").mark("schedule_first_pump",begin_stamp)
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
 	var trace=preload("res://scripts/performance_trace.gd")
+	_day_cost_usec=float(_day_spent_usec) if _day_cost_usec<=0.0 else lerpf(_day_cost_usec,float(_day_spent_usec),0.3)
 	var stamp:int=trace.start()
 	last_discovery_day=day
 	_commit_world_day(day_result)

@@ -48,3 +48,20 @@ func test_behind_the_calendar_the_day_takes_what_the_frame_spares()->void:
 	# At the slower speeds nothing changes.
 	terrain.catch_up_budget=true;terrain.game_speed=3.0
 	assert_int(terrain._day_step_budget_usec()).is_equal(terrain.DAY_STEP_BUDGET_USEC)
+
+## Keeping up at 3 days a second: the rest of a day's work is shared over the
+## frames before its span is 60 in 100 through, never below a small floor nor
+## above the usual share.
+func test_a_day_is_spread_over_its_calendar_span()->void:
+	var T=terrain.get_script()
+	# A 100 ms day at 3 days a second and 60 frames a second, just begun:
+	# 0.6 of the span is 0.2 s, 12 frames, for 125 ms of planned work.
+	assert_int(T.paced_budget_usec(100000.0,0,1.0,3.0,1.0/60.0,0)).is_equal(roundi(125000.0/12.0))
+	# Half the work done, a third of the span gone: the rest over what remains.
+	var halfway:int=T.paced_budget_usec(100000.0,62500,2.0/3.0,3.0,1.0/60.0,0)
+	assert_int(halfway).is_equal(roundi(62500.0/maxf(1.0,(2.0/3.0-0.4)/3.0*60.0)))
+	# Work already done: only the floor. Late in the span: never more than usual.
+	assert_int(T.paced_budget_usec(100000.0,200000,0.5,3.0,1.0/60.0,0)).is_equal(terrain.DAY_STEP_BUDGET_PACED_MIN_USEC)
+	assert_int(T.paced_budget_usec(400000.0,0,0.41,3.0,1.0/60.0,0)).is_equal(terrain.DAY_STEP_BUDGET_FAST_USEC)
+	# Simulation already run in this frame comes off its share.
+	assert_int(T.paced_budget_usec(100000.0,0,1.0,3.0,1.0/60.0,4000)).is_equal(roundi(125000.0/12.0)-4000)

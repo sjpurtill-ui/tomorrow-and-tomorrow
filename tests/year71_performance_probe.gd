@@ -154,6 +154,7 @@ func frame_profile()->void:
 	var warm_began:=-1
 	terrain.scheduled_world_days_enabled="--synchronous" not in OS.get_cmdline_user_args()
 	terrain.catch_up_budget="--fixed-budget" not in OS.get_cmdline_user_args()
+	terrain.even_pacing="--burst" not in OS.get_cmdline_user_args()
 	# --render-cost=MS stands in for drawing time on a real machine.
 	var render_cost_usec:=0
 	for arg in OS.get_cmdline_user_args():
