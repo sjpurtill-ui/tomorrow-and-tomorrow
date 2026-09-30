@@ -13,11 +13,28 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 
 var initialized := false
 
+## The modifier list keeps every ended order (up to 400, see
+## _prune_policy_history) and each reader below skips an ended, expired record.
+## On the same day such a record cannot open again: ended_reason is never
+## removed and an end day is only ever set before the current day. Records are
+## only appended to the list or removed from it (never inserted or reordered),
+## so its size and last record show whether it has changed. The readers visit
+## only the other records, in list order, until the day, the list or its size
+## or last record changes. An Object field, so saves never capture it.
+class OpenModifiers extends RefCounted:
+	var source:Array=[]
+	var size:=-1
+	var last:Variant=null
+	var day:=INF
+	var records:Array[Dictionary]=[]
+var _open_modifiers:=OpenModifiers.new()
+
 func _food_system() -> Node:
 	return WorldSimulation.system("FoodSystem")
 
 func reset_for_new_world()->void:
 	initialized=false
+	_open_modifiers=OpenModifiers.new()
 	# A save from before field rations has no value; start from a full meal.
 	_home_intake_today=1.0
 
@@ -388,9 +405,29 @@ func _record_policy_churn(magnitude:float,description:String)->void:
 	WorldSimulation.state.active_modifiers.append({"id":"policy_churn","kind":"governance","magnitude":clampf(magnitude,0.0,0.10),"started_day":WorldSimulation.state.elapsed_days,"until_day":WorldSimulation.state.elapsed_days+120.0,"description":description})
 	_add_event("Policy Reversal",description,"institutions","warning")
 
-func refresh_policy_lifecycle()->void:
-	for modifier_variant in WorldSimulation.state.active_modifiers:
+## Every record of the modifier list except the ended, expired ones, in list
+## order (see OpenModifiers). Another day, another list, or a record added or
+## removed builds it again.
+func _open_modifier_records()->Array[Dictionary]:
+	var list:Array=WorldSimulation.state.active_modifiers
+	var now:=float(WorldSimulation.state.elapsed_days)
+	var last:Variant=null if list.is_empty() else list.back()
+	var open:=_open_modifiers
+	if now==open.day and is_same(list,open.source) and list.size()==open.size and is_same(last,open.last): return open.records
+	var records:Array[Dictionary]=[]
+	for modifier_variant in list:
 		var modifier:Dictionary=modifier_variant
+		if modifier.has("ended_reason") and modifier.has("until_day") and now>float(modifier.until_day): continue
+		records.append(modifier)
+	open.source=list
+	open.size=list.size()
+	open.last=last
+	open.day=now
+	open.records=records
+	return records
+
+func refresh_policy_lifecycle()->void:
+	for modifier in _open_modifier_records():
 		if String(modifier.get("kind","")) not in ["policy","governance"] or modifier.has("ended_reason"): continue
 		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",INF)):
 			if String(modifier.get("kind",""))=="policy" and not bool(modifier.get("deadline_resolved",true)):
@@ -443,7 +480,7 @@ func _prune_policy_history(limit:=400)->void:
 
 func modifier_strength(effect_id: String) -> float:
 	var result := 0.0
-	for modifier in WorldSimulation.state.active_modifiers:
+	for modifier in _open_modifier_records():
 		if String(modifier.get("id","")) != effect_id:
 			continue
 		if WorldSimulation.state.elapsed_days > float(modifier.get("until_day",INF)):
@@ -469,8 +506,7 @@ func _levy_burden()->float:
 
 func policy_effect(channel:String)->float:
 	var result:=0.0
-	for modifier_variant in WorldSimulation.state.active_modifiers:
-		var modifier:Dictionary=modifier_variant
+	for modifier in _open_modifier_records():
 		if String(modifier.get("kind",""))!="policy" or WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		# Delayed consequences of an order act only once they begin.
 		if float(modifier.get("started_day",-INF))>WorldSimulation.state.elapsed_days: continue
@@ -540,8 +576,7 @@ func _refresh_policy_observation_record(policy:Dictionary)->void:
 	policy["observation_updated_day"]=WorldSimulation.state.elapsed_days
 
 func _refresh_all_policy_observations()->void:
-	for modifier_variant in WorldSimulation.state.active_modifiers:
-		var modifier:Dictionary=modifier_variant
+	for modifier in _open_modifier_records():
 		if String(modifier.get("kind",""))!="policy" or modifier.has("ended_reason") or WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		_refresh_policy_observation_record(modifier)
 
@@ -560,8 +595,7 @@ func active_policies()->Array[Dictionary]:
 ## use these in place; refresh the lifecycle first.
 func _active_policy_records()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for modifier_variant in WorldSimulation.state.active_modifiers:
-		var modifier:Dictionary=modifier_variant
+	for modifier in _open_modifier_records():
 		if String(modifier.get("kind",""))!="policy": continue
 		if WorldSimulation.state.elapsed_days>float(modifier.get("until_day",-INF)): continue
 		if float(modifier.get("started_day",-INF))>WorldSimulation.state.elapsed_days: continue

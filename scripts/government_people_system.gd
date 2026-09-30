@@ -1043,6 +1043,19 @@ func officeholder(office_key:String)->Dictionary:
 	return person
 
 
+## Whether officeholder(office_key) would name someone, with the same
+## reconciliation and record upkeep (person_snapshot's art indices), without
+## copying the person or listing the offices for a title.
+func has_officeholder(office_key:String)->bool:
+	initialize()
+	var holder:Dictionary=WorldSimulation.state.leadership_positions.get(office_key,{})
+	if holder.is_empty(): return false
+	var person:=_person_record(int(holder.get("person_id",0)))
+	if person.is_empty(): return false
+	if not person.has("early_art_index") or not person.has("early_art_profile"):_assign_early_art_indices()
+	return true
+
+
 func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 	var person_index:=_find_person_index(person_id)
 	if person_index<0 or String(people[person_index].get("status",""))!="active": return {"ok":false,"reason":"That person is not available."}

@@ -664,8 +664,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var storage_priorities:=_storage_gathering_priorities()
 	stamp=trace.mark("flow_workers_and_storage",stamp)
 	var total_weight:=0.0
+	# Orders stay the same for this whole pass; see _stone_drive.
+	var pass_inputs:Dictionary={}
 	for deposit in material_deposits:
-		total_weight+=_extraction_priority(deposit,storage_priorities) if float(deposit.remaining)>0.0 else 0.0
+		total_weight+=_extraction_priority(deposit,storage_priorities,pass_inputs) if float(deposit.remaining)>0.0 else 0.0
 	# Owner-wide inputs, read once for every deposit in this pass.
 	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
 	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
@@ -680,7 +682,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var span:=float(WorldSimulation.span)
 	var extracted_total:=0.0
 	for deposit in material_deposits:
-		var share:=_extraction_priority(deposit,storage_priorities)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
+		var share:=_extraction_priority(deposit,storage_priorities,pass_inputs)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
@@ -735,11 +737,11 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var haul_effect:=1.0+WorldSimulation.discovery.effect("haul_capacity")
 	var travel_effect:=1.0+WorldSimulation.discovery.effect("travel_speed")
 	for deposit in material_deposits:
-		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit,storage_priorities)
+		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit,storage_priorities,pass_inputs)
 	for deposit in material_deposits:
 		var waiting:=float(deposit.stock_at_source)
 		if waiting<=0.0001: continue
-		var share:=waiting*_deposit_priority(deposit,storage_priorities)/maxf(0.001,haul_weight)
+		var share:=waiting*_deposit_priority(deposit,storage_priorities,pass_inputs)/maxf(0.001,haul_weight)
 		var assigned_carriers:=carriers*share
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
@@ -909,13 +911,13 @@ func _storage_gathering_priorities()->Dictionary:
 		if float(used.get(store,0))>float(capacities.get(store,0)):result[resource_name]=0.05
 	return result
 
-func _deposit_priority(deposit:Dictionary,storage_priorities:Dictionary={})->float:
+func _deposit_priority(deposit:Dictionary,storage_priorities:Dictionary={},pass_inputs:Dictionary={})->float:
 	var resource_name:=String(deposit.resource)
 	var named:=float(WorldSimulation.state.resource_priorities.get(resource_name,1.0))
 	if resource_name=="Stone":
 		# A civic stone drive redirects existing extractors and carriers; it does
 		# not create workers, reveal deposits, or produce stone from nothing.
-		named*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("stone_priority"))*3.0
+		named*=_stone_drive(pass_inputs)
 	var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0))
 	# Once a local store is well supplied, release its share of the same finite
 	# workforce. The previous floor of 1 kept most workers gathering already
@@ -924,10 +926,18 @@ func _deposit_priority(deposit:Dictionary,storage_priorities:Dictionary={})->flo
 	var scarcity:=2.0/(1.0+maxf(0.0,stored)/working_stock)
 	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))*float(storage_priorities.get(resource_name,1.0))
 
-func _extraction_priority(deposit:Dictionary,storage_priorities:Dictionary={})->float:
+func _extraction_priority(deposit:Dictionary,storage_priorities:Dictionary={},pass_inputs:Dictionary={})->float:
 	var reserve:=float(deposit.get("remaining",0.0))
 	var working_reserve:=maxf(1.0,float(deposit.get("initial_amount",1.0))*0.05)
-	return _deposit_priority(deposit,storage_priorities)*clampf(reserve/working_reserve,0.0,1.0)
+	return _deposit_priority(deposit,storage_priorities,pass_inputs)*clampf(reserve/working_reserve,0.0,1.0)
+
+## The stone drive's weight on Stone deposits. Orders do not change during one
+## material pass, so the pass reads it once (in `pass_inputs`) instead of
+## searching every order for each Stone deposit's four priority readings.
+func _stone_drive(pass_inputs:Dictionary)->float:
+	if not pass_inputs.has("stone_drive"):
+		pass_inputs["stone_drive"]=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("stone_priority"))*3.0
+	return float(pass_inputs["stone_drive"])
 
 func _storage_capacities()->Dictionary:
 	var pop:=WorldSimulation.state.population_exact
