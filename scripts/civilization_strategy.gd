@@ -103,6 +103,17 @@ static func threat_mix()->Array:
 	if index<0: return []
 	var relation:Dictionary=(civs.civilizations[index] as Dictionary).get("player_relation",{})
 	if int(relation.get("contact_level",0))<1 and not bool(relation.get("at_war",false)): return []
+	return grouped_arms(mc)
+
+## A people's arms as their formations carry them (the levy at home and every
+## band), grouped by unit and kit: what scouts see when they count a town.
+## [{unit, weapon, count, authorized_count, equipment, equipment_required, training}]
+static func arms_of(civ_id:String)->Array:
+	if WorldSimulation==null or not WorldSimulation.actors.has(civ_id): return []
+	return WorldSimulation.scoped(civ_id,func()->Array: return grouped_arms(WorldSimulation.military))
+
+static func grouped_arms(mc:Variant)->Array:
+	if mc==null: return []
 	var grouped:={}
 	for force in [mc.home_army]+Array(mc.field_armies):
 		if not force is Dictionary: continue

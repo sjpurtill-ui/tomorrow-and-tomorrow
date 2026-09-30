@@ -44,3 +44,21 @@ func test_the_words_are_plain_fractions()->void:
 	assert_str(Orders.summary({"ready":true,"likely":"act","men":200,"odds":{"odds":1.5,"ours":true}})).contains("odds 3:2")
 	assert_str(Orders.odds_short(2.0,false)).is_equal("1:2")
 	assert_str(Orders.odds_short(1.05,true)).is_equal("even")
+
+func test_the_arms_our_scouts_saw_set_the_odds_and_are_said()->void:
+	var band:=_band(200)
+	# Their pikes and bows against our spears, the same number of men.
+	var theirs:=[{"unit":"pikeman","weapon":"pike","count":150,"authorized_count":150,"equipment":150,"equipment_required":150,"training":0.7},
+		{"unit":"archer","weapon":"bow","count":50,"authorized_count":50,"equipment":50,"equipment_required":50,"training":0.7}]
+	var as_us:=Orders.stated_odds(band,band.formations,200,200.0,0.0)
+	var seen:=Orders.stated_odds(band,band.formations,200,200.0,0.0,theirs)
+	assert_float(absf(float(seen.odds)-float(as_us.odds))+(0.0 if bool(seen.ours)==bool(as_us.ours) else 1.0)).is_greater(0.001)
+	assert_str(Orders.arms_words(theirs)).is_equal("mostly pikes and some bows")
+	assert_str(Orders.arms_words([{"weapon":"lance","count":5},{"weapon":"spear","count":80},{"weapon":"bow","count":15}])).is_equal("mostly spears, some bows and a few horses and lances")
+	# Our own army, grouped as a rival's scouts would see it.
+	MilitaryCampaign.home_army=band
+	var grouped:=preload("res://scripts/civilization_strategy.gd").grouped_arms(MilitaryCampaign)
+	assert_int(grouped.size()).is_equal(1)
+	assert_int(int(grouped[0].count)).is_equal(200)
+	# Nobody saw them lately: no arms, and the odds assume ours.
+	assert_array(Orders._their_arms("nobody",200)).is_empty()
