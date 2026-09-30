@@ -129,6 +129,9 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 			var army:Dictionary=mc.field_armies[army_index] if army_index>=0 else {}
 			row["priority"]=String(army.get("priority","normal"))
 			row["drafts"]=mc.sustainment.drafts_for(int(report.get("army_id",0)))
+			var depot:Dictionary=preload("res://scripts/field_depots.gd").progress(army)
+			if not depot.is_empty(): depot["at_site"]=String(army.get("status",""))!="moving"
+			row["depot"]=depot
 		# What its line asks a day and the carts that alone would carry it
 		# (carriers.gd), read today at home.
 		var asked:Dictionary=line_asks.get(key,{})

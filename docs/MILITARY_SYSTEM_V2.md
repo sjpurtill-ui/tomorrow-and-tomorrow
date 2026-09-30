@@ -23,6 +23,11 @@ the log. In short:
   a lorry, else a cart, else carries 16 loads, each kind at its own pace.
   Bread is carried first and stores after. The share of carrying set aside
   for food feeds the rations. Stores weaken the kits that live on them.
+- **Depots** (`field_depots.gd`). A band ordered to "Lay a depot" builds one
+  where it stands: 900 man-days, five days at the least. A depot is a relay
+  like a town we hold, so the line from it starts at half the cost of
+  reaching it. It needs Forward Supply Depots. We keep two, or four with
+  Army Magazines. A host at war with us burns one that no band guards.
 - **Staying in the field** (`field_sustainment.gd`).
   - Hunger costs men: 1.1% a day at no food. Of those, 45% fall sick, 35% go
     home and 20% die.
@@ -559,3 +564,28 @@ with machine accounting; (7) recruitment fixes and template numbers.
   (a town's defence 1.03 + 0.34 × fortification). The line says the
   assumption: "Odds, if they are armed as we are: about 3 to 2 for us, their
   walls counting for them." The one-line summary carries "odds 3:2".
+- **Iteration 12, ground by kit.** On the war chart a formation's occupied
+  ground comes from its ledger kit (`army_front_visual.occupied_area`): 4 m²
+  a man, plus 20 m² for each vehicle or gun, 6 m² for each mount, and 4 m²
+  for each machine. A combat frame company covers its frames' ground, not
+  only its supervisors'.
+- **Iteration 13, depots (HOI4's supply hubs, made simple).** The one
+  supply lever left undone after critic round 4. "Lay a depot" is a spot
+  order on the Army grid (`army_orders.gd`). The band marches, then builds:
+  900 man-days, at least five days. Its Readiness row reads "Laying a
+  depot, N days left". A standing depot joins the supply field as a relay
+  source, exactly like a held town (`supply_state.RELAY` 0.5, `is_relay`),
+  so bands beyond it are fed as if the road behind it were half as long.
+  - The rules are stated wherever they apply: in the order preview, on the
+    chart's depot mark (a fenced square), in the war leader's fact sheet
+    and in the Chronicle when a depot is laid or burned.
+  - Research: Forward Supply Depots (about game year 760) opens them; Army
+    Magazines raises the limit from two to four. A new depot past the limit
+    gives up the oldest.
+  - Risk: a host of a people at war with us passing within 12 km of a depot
+    with no band of ours within 12 km burns it.
+  - Save: `field_depots` is saved, and work in hand rides on the band's
+    record. Older saves load with none.
+  - Limits: rivals' generals do not lay depots yet. Only patrols and
+    expeditions on the map burn them; a siege host marching on home does
+    not.

@@ -32,7 +32,7 @@ const PANEL_WIDTH:=452.0
 const PANEL_TOP:=64.0
 ## The orders as the grid shows them: the verb, its icon and a short label.
 const VERB_FACES:=[["attack","attack","Attack"],["siege","besiege","Besiege"],["raid","raid","Raid"],["defend","defend","Defend"],["guard","guard","Guard"],
-	["goto","goto","Go to"],["recall","recall","Come home"],["front","front","Front line"],["arrow","arrow","Arrow"]]
+	["goto","goto","Go to"],["depot","depot","Lay depot"],["recall","recall","Come home"],["front","front","Front line"],["arrow","arrow","Arrow"]]
 const PLAN_HINTS:={"front":"Draw the line they hold: click along it on the map, then right-click to finish.",
 	"arrow":"Draw where they strike: click the town, host or ground they drive at."}
 var domain:="army"
@@ -403,6 +403,7 @@ func _refresh_where()->void:
 			else:words="Click where they strike"
 		_:
 			if kind=="place":icon="attack"
+			elif verb_id=="depot":icon="depot"
 			if chosen:words=_target_words(target)
 			else:words="Click a town on the map" if kind=="place" else "Click the ground on the map"
 	target_icon.texture=Icons.command_texture(icon,T.INK if chosen else T.INK_MUTED,40)

@@ -328,6 +328,17 @@ static func _war(out:Dictionary)->void:
 		for order in mc.training_queue:
 			if order is Dictionary and String((order as Dictionary).get("mode",""))=="field_draft": coming+=int((order as Dictionary).get("count",0))
 		out["replacements"]={"on_road":int(mc.sustainment.drafts_on_road()),"in_training":coming}
+	# Our field depots and those being laid (field_depots.gd).
+	if "depots" in mc:
+		var Depots:=preload("res://scripts/field_depots.gd")
+		var standing:Array=[]
+		for d in mc.field_depots: standing.append({"where":Depots.place_words(Vector2(float(d.x),float(d.z))),"laid_by":String(d.get("by",""))})
+		var laying:Array=[]
+		for a in mc.field_armies:
+			var work:=Depots.progress(a)
+			if not work.is_empty(): laying.append({"band":String((a as Dictionary).get("name","a band")),"where":Depots.place_words(Vector2(float(work.x),float(work.z))),"days_left":int(work.days_left)})
+		if not standing.is_empty() or not laying.is_empty() or mc.depots.known():
+			out["depots"]={"standing":standing,"laying":laying,"keep":int(mc.depots.limit()),"can_build":bool(mc.depots.known())}
 	var chases:Array=[]
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
 	out["chases"]=chases
@@ -643,6 +654,13 @@ static func text(s:Dictionary)->String:
 		var carriers:Dictionary=s.get("carriers",{})
 		if int(carriers.get("asked",0))>0:
 			lines.append("Carriers: %d on foot, %d carts, %d lorries; they bring %d of the %d loads a day the bands and garrisons ask. Bread goes first: %d%% of the bread arrives, %d%% of the fodder, fuel and rounds." % [int(carriers.porters),int(carriers.carts),int(carriers.lorries),int(carriers.brought),int(carriers.asked),int(carriers.bread),int(carriers.stores)])
+		var depots:Dictionary=s.get("depots",{})
+		if not depots.is_empty():
+			var said:=PackedStringArray()
+			for d:Dictionary in depots.get("standing",[]): said.append(String(d.where))
+			var line:="Field depots: "+(", ".join(said) if not said.is_empty() else "none yet")+" (we keep %d at most; the line from one starts at half the cost of reaching it)." % int(depots.keep)
+			for d:Dictionary in depots.get("laying",[]): line+=" %s is laying one %s, %d days to go." % [String(d.band),String(d.where),int(d.days_left)]
+			lines.append(line)
 		var replacements:Dictionary=s.get("replacements",{})
 		if int(replacements.get("on_road",0))+int(replacements.get("in_training",0))>0:
 			lines.append("Replacements for the bands: %d in training at home, %d on the road to them." % [int(replacements.in_training),int(replacements.on_road)])

@@ -19,6 +19,7 @@ extends RefCounted
 ##        defend (home watch, as the court does) · recall (come home)
 ##        guard (hold ground around a clicked spot; a drawn-zone defend order
 ##               with a radius set for the band's size) · goto (march there)
+##        depot (march there and build a supply depot, field_depots.gd)
 ## Static helpers; preload.
 
 const WO:=preload("res://scripts/court_war_orders.gd")
@@ -36,6 +37,7 @@ const VERBS:=[
 	{"id":"defend","label":"Defend home","needs":"","hint":"Bring every band home and keep watch on the approaches for half a year."},
 	{"id":"guard","label":"Guard a place","needs":"spot","hint":"March to the ground you click and hold it against anyone who comes."},
 	{"id":"goto","label":"Go to…","needs":"spot","hint":"March to the ground you click and wait there."},
+	{"id":"depot","label":"Lay a depot","needs":"spot","hint":"March to the ground you click and build a supply depot there. Bands beyond it are fed as if the road behind it were half as long."},
 	{"id":"recall","label":"Come home","needs":"","hint":"Turn for home by the land road."},
 ]
 
@@ -202,12 +204,16 @@ static func unavailable(force_id:int,verb_id:String)->String:
 		if verb_id=="recall":
 			return "" if not (f.away as Array).is_empty() else "Everyone is already at home."
 		if int(f.trained)<=0 and int(f.drilling)<=0 and verb_id!="defend": return "Nobody at home is trained or in drill yet."
-		if int(f.trained)<=0 and verb_id in ["guard","goto"]: return "Nobody at home has finished drilling yet."
+		if int(f.trained)<=0 and verb_id in ["guard","goto","depot"]: return "Nobody at home has finished drilling yet."
+		if verb_id=="depot":
+			var trained:=int(f.trained)
+			return mc.depots.blocked(trained-(ceili(trained*WO.WATCH_SHARE) if trained>=WO.MIN_FORCE*2 else 0))
 		return ""
 	var record:=army(force_id)
 	if record.is_empty(): return "That band is no longer on the rolls."
 	if verb_id=="recall" and (at_home(record) or String(record.get("destination_id",""))=="player_home"): return "Already home or on the way."
 	if verb_id in ["attack","siege","raid"] and not WO.available(record): return "Not free for a new order now. Call it home first, or wait."
+	if verb_id=="depot": return mc.depots.blocked(int(record.get("troops",0)))
 	return ""
 
 static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
@@ -313,6 +319,13 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
 	elif verb_id=="guard":
 		out.lines.append("They hold about %s km around it and fight anyone hostile who comes into it." % EraWords.grouped(roundi(guard_radius(going))))
+	elif verb_id=="depot":
+		var Depots:=preload("res://scripts/field_depots.gd")
+		out.lines.append("There they build a depot: sheds, ovens and a fence, about %d days for %d hands." % [Depots.days_for(going),going])
+		out.lines.append("Bands beyond it are fed as if the road behind it were half as long.")
+		var given_up:Dictionary=mc.depots.replaces()
+		if not given_up.is_empty(): out.lines.append("We keep %d depots; the one %s is given up when this one stands." % [int(mc.depots.limit()),String(given_up.name).trim_prefix("Depot ")])
+		out.lines.append("A hostile host that finds it with no band of ours near burns it.")
 	return out
 
 ## The odds of an attack by the combat engine's own reading: our band as it
@@ -411,6 +424,7 @@ static func give(force_id:int,verb_id:String,target:Dictionary,insist:bool=false
 		"recall": return WO.perform({"kind":"recall","target":{},"full":false,"insist":insist},insist,{} if force_id==HOME else {"army_id":force_id})
 		"guard": return _guard(force_id,target)
 		"goto": return _go_to(force_id,target)
+		"depot": return _lay_depot(force_id,target)
 	var kind:=verb_id
 	var reading:={"kind":kind,"target":{},"full":false,"insist":insist,"place":""}
 	match String(target.get("type","")):
@@ -476,6 +490,20 @@ static func _go_to(force_id:int,target:Dictionary)->Dictionary:
 	out.objective={"army_id":army_id,"kind":"goto","days":days,"troops":int(record.get("troops",0)),"route_km":float(record.get("distance_total_km",0.0))}
 	out.says=("%d of us march to %s: %d km, about %d %s." % [int(record.get("troops",0)),where,roundi(float(record.get("distance_total_km",0.0))),days,"day" if days==1 else "days"]) if days>0 else "We are there already."
 	if keep>0: out.says+=" I keep %d at home to watch the approaches." % keep
+	out.outcome=out.says
+	return out
+
+## March to the spot and build a depot there (field_depots.gd).
+static func _lay_depot(force_id:int,target:Dictionary)->Dictionary:
+	var out:=_go_to(force_id,target)
+	if String(out.get("verdict",""))!="act": out.kind="depot"; return out
+	var army_id:=int((out.get("objective",{}) as Dictionary).get("army_id",-1))
+	var mc:=_mc()
+	mc.depots.assign(army_id,Vector2(float(target.x),float(target.z)))
+	var men:=int(army(army_id).get("troops",0))
+	out.kind="depot"
+	out.objective.kind="depot"
+	out.says+=" There we build the depot, about %d days' work." % preload("res://scripts/field_depots.gd").days_for(men)
 	out.outcome=out.says
 	return out
 

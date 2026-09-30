@@ -133,6 +133,12 @@ func _draw()->void:
 		var s:=_screen(hub.pos,float(hub.get("h",0.0)))
 		if not s.is_finite(): continue
 		var held:=String(hub.kind)=="held"
+		if String(hub.kind)=="depot":
+			# A field depot: a fenced square of stores.
+			draw_rect(Rect2(s-Vector2(9.5,9.5),Vector2(19,19)),Color(PAPER,0.45),true)
+			draw_rect(Rect2(s-Vector2(9.0,9.0),Vector2(18,18)),Color(INK,0.85),false,1.4)
+			draw_rect(Rect2(s-Vector2(4.0,4.0),Vector2(8,8)),Color(INK,0.7),true)
+			continue
 		draw_circle(s,12.5,Color(PAPER,0.35))
 		draw_arc(s,12.0,0.0,TAU,40,Color(INK,0.85),1.4,true)
 		if not held: draw_arc(s,9.0,0.0,TAU,32,Color(INK,0.7),1.0,true)
@@ -317,7 +323,9 @@ func _force_tip(report:Dictionary)->Dictionary:
 	return {"title":name,"state":String(report.get("state","")),"ratio":float(report.get("ratio",0.0)),"text":String(report.get("words","")),"lines":lines}
 
 func _hub_tip(hub:Dictionary)->Dictionary:
-	var text:="Our stores: bands draw their food from here." if String(hub.kind)!="held" else "A town we hold: a depot on the supply line. Its garrison eats from its fields."
+	var text:="Our stores: bands draw their food from here."
+	if String(hub.kind)=="held": text="A town we hold: a depot on the supply line. Its garrison eats from its fields."
+	elif String(hub.kind)=="depot": text="A depot our band laid: stores gathered ahead. The line from it starts at half the cost of reaching it. With no band of ours near, a hostile host burns it."
 	return {"title":String(hub.name),"text":text}
 
 func _land_tip_at(at:Vector2)->Dictionary:

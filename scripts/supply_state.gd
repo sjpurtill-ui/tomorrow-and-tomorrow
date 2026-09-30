@@ -200,7 +200,8 @@ static func carrier()->String:
 static var _main_kind:Dictionary={}
 
 ## Our hubs: home and our other settlements, then the towns we hold.
-## [{id, name, kind: home|town|held, pos:Vector2, civ_id?, region_id?}]
+## Field depots our bands laid (field_depots.gd) join the held towns as relays.
+## [{id, name, kind: home|town|held|depot, pos:Vector2, civ_id?, region_id?}]
 static func hubs()->Array:
 	var out:Array=[]
 	var s:Variant=_state()
@@ -229,7 +230,17 @@ static func hubs()->Array:
 			var at:Vector2=Pursuit.town_position(rid)
 			if not at.is_finite(): continue
 			out.append({"id":"h:"+rid,"name":town_name(civ_id,rid,String(force.get("region_name","the held town"))),"kind":"held","pos":at,"civ_id":civ_id,"region_id":rid})
+	var laid:Variant=mc.get("field_depots") if mc!=null else null
+	if laid is Array:
+		for d in laid:
+			var depot:Dictionary=d
+			out.append({"id":"d:%d" % int(depot.get("id",0)),"name":String(depot.get("name","Depot")),"kind":"depot","pos":Vector2(float(depot.x),float(depot.z))})
 	return out
+
+## A hub whose line starts from what reaching it cost (a held town or a
+## field depot), as against our own stores.
+static func is_relay(kind:String)->bool:
+	return kind=="held" or kind=="depot"
 
 ## A town's name as the map shows it (town_names.gd: one name everywhere).
 static func town_name(civ_id:String,region_id:String,fallback:String="")->String:
@@ -309,7 +320,7 @@ static func _signature()->int:
 			if f is Dictionary and int((f as Dictionary).get("troops",0))>0: garrisons+=1
 	var terrain:Object=March._terrain()
 	return hash([int(s.elapsed_days),int(GameState.world_seed),bool(s.settlement_site_committed),(s.player_settlements as Array).size(),garrisons,
-		mc.occupation_forces.size() if mc!=null else 0,int(world.fog_revision),(world.revealed_areas as Array).size(),
+		mc.occupation_forces.size() if mc!=null else 0,hash(mc.get("field_depots")) if mc!=null else 0,int(world.fog_revision),(world.revealed_areas as Array).size(),
 		float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0,"internal_combustion" in s.known_discoveries,
 		hash(March.ground_override),hash(March.crossing_override),March.use_roads_override,March.roads_override.size(),hash(March.roads_override),
 		March.bridge_override,terrain.get_instance_id() if terrain!=null else 0])
@@ -333,7 +344,7 @@ static func _make_spec()->Dictionary:
 	if hub_list.is_empty(): return {}
 	var settlements:Array=[]
 	var held:Array=[]
-	for h:Dictionary in hub_list: (held if String(h.kind)=="held" else settlements).append(h)
+	for h:Dictionary in hub_list: (held if is_relay(String(h.kind)) else settlements).append(h)
 	if settlements.is_empty(): return {}
 	var terrain:Object=March._terrain()
 	var fixture:=March.ground_override.is_valid()
@@ -596,7 +607,7 @@ static func build(spec:Dictionary,ground:Dictionary={},cancel:Array=[false])->Di
 			# The settlement whose line stocks this depot.
 			var node:=_node_near(field,h_row.pos)
 			var via:=int((found.src as PackedInt32Array)[node]) if node>=0 else -1
-			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":"held","pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id","")),
+			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":String(h_row.kind),"pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id","")),
 				"via":String((sources[via] as Dictionary).name) if via>=0 and via<sources.size() else ""})
 		found=_search(field,ecost,sources,cancel)
 		if found.is_empty(): return {}
@@ -936,14 +947,14 @@ static func _fallback_effort(p:Vector2)->Dictionary:
 	var sources:Array=[]
 	var settlements:Array=[]
 	for h:Dictionary in hub_list:
-		if String(h.kind)!="held": settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
+		if not is_relay(String(h.kind)): settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
 	for h:Dictionary in hub_list:
-		if String(h.kind)!="held": continue
+		if not is_relay(String(h.kind)): continue
 		var reach:=INF; var via:=""
 		for home:Dictionary in settlements:
 			var e:=(home.pos as Vector2).distance_to(h.pos)*FALLBACK_FACTOR
 			if e<reach: reach=e; via=String(home.name)
-		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":"held","pos":h.pos,"base":reach*RELAY,"via":via})
+		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":reach*RELAY,"via":via})
 	var best:=INF; var source:=-1
 	for k in sources.size():
 		var e:=float((sources[k] as Dictionary).base)+((sources[k] as Dictionary).pos as Vector2).distance_to(p)*FALLBACK_FACTOR
@@ -1279,7 +1290,7 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 	var ratio:=float(t.ratio)
 	# Standing at a depot of ours, its line is the settlement that stocks it.
 	var hub_name:=String(hub.get("name","")); var hub_kind:=String(hub.get("kind",""))
-	if hub_kind=="held" and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
+	if is_relay(hub_kind) and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
 		hub_name=String(hub.via); hub_kind="home"
 	var report:={"ratio":ratio,"state":state_of(ratio),"carried":float(t.carried),"foraged":float(t.foraged),"local":float(t.local),"air":0.0,
 		"haul":float(t.haul),"transport":float(t.transport),"stores":float(t.stores),"days":float(t.days),"effort":float(t.effort),

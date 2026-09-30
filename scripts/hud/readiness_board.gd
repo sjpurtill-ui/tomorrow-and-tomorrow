@@ -260,10 +260,11 @@ func _row(row:Dictionary)->void:
 	queue.pressed.connect(func()->void:cycle_priority(army_id))
 	second.add_child(queue)
 	var coming:=_text(second,"",12,T.INK_MUTED);coming.name="Coming";_whole(coming);coming.mouse_filter=Control.MOUSE_FILTER_PASS
+	var building:=_text(second,"",12,T.INK_MUTED);building.name="Depot";_whole(building);building.mouse_filter=Control.MOUSE_FILTER_PASS
 	var gear:=HFlowContainer.new();gear.name="Gear";gear.add_theme_constant_override("h_separation",6);gear.add_theme_constant_override("v_separation",4);gear.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	gear.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(gear)
 	live.append({"key":String(row.key),"panel":panel,"sack":sack,"face":face,"face_key":"","who":who,"title":title,"men":men,"meter":meter,"line":line,"hub_mark":hub_mark,"hub":hub,"span":span,"road":road,
-		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming})
+		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming,"building":building})
 
 
 func _update_values()->void:
@@ -304,7 +305,7 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	control.meter.set_reading(ratio,"%d%%" % roundi(ratio*100.0),Supply.state_color(state),"%s\n%s" % [head,reasons] if reasons!="" else head)
 	var at_home:=bool(row.get("at_home",false))
 	var kind:=String(row.get("hub_kind",""))
-	(control.hub_mark as TextureRect).texture=Icons.logistics_texture("depot" if kind=="held" else "hub",T.INK,32) if not at_home else Icons.command_texture("home",T.INK,32)
+	(control.hub_mark as TextureRect).texture=Icons.logistics_texture("depot" if kind in ["held","depot"] else "hub",T.INK,32) if not at_home else Icons.command_texture("home",T.INK,32)
 	control.hub.text=String(row.get("hub",""))
 	var days:=float(row.get("days",0.0))
 	if unknown:control.span.text="no report yet"
@@ -336,6 +337,13 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	control.coming.visible=field and (coming>0 or String(drafts.get("block",""))=="no_people")
 	control.coming.text="+%s coming" % EraWords.grouped(coming)
 	control.coming.tooltip_text=Model.drafts_words(drafts,int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0)+".\nLosses are replaced by drafts trained at home, who walk out and join."
+	# A depot in hand (field_depots.gd).
+	var depot:Dictionary=row.get("depot",{})
+	control.building.visible=field and not depot.is_empty()
+	if not depot.is_empty():
+		var left:=int(depot.get("days_left",0))
+		control.building.text="Laying a depot, %d %s left" % [left,"day" if left==1 else "days"] if bool(depot.get("at_site",false)) else "Marching to lay a depot"
+		control.building.tooltip_text="When it stands, bands beyond it are fed as if the road behind it were half as long."
 	_update_gear(control,row.get("short",[]))
 
 

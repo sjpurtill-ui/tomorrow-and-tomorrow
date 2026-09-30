@@ -133,6 +133,9 @@ var field_armies:Array[Dictionary]=[]
 ## Replacement drafts walking out to their bands (field_sustainment.gd).
 var field_drafts:Array[Dictionary]=[]
 var sustainment=preload("res://scripts/field_sustainment.gd").new(self)
+## Depots our bands have laid in the field (field_depots.gd); supply relays.
+var field_depots:Array=[]
+var depots=preload("res://scripts/field_depots.gd").new(self)
 var next_field_army_id:=1
 ## Runner messages in flight from field armies back to the settlement. Until
 ## signal-era development, the government knows only what runners deliver.
@@ -234,6 +237,7 @@ func reset_for_new_world()->void:
 	occupation_forces.clear()
 	field_armies.clear()
 	field_drafts.clear()
+	field_depots.clear()
 	runner_messages.clear()
 	next_field_army_id=1
 	army_templates=_default_army_templates()
@@ -3653,6 +3657,7 @@ func export_state()->Dictionary:
 		"siege_recovery":recovery.data.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
 		"field_drafts":field_drafts.duplicate(true),
+		"field_depots":field_depots.duplicate(true),
 		"runner_messages":runner_messages.duplicate(true),
 		"army_templates":army_templates.duplicate(true),
 		"next_army_template_id":next_army_template_id,
@@ -4055,6 +4060,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 		if force_variant is Dictionary: field_armies.append((force_variant as Dictionary).duplicate(true))
 	field_drafts.clear()
 	for draft in preload("res://scripts/field_sustainment.gd").clean_drafts(payload.get("field_drafts",[])): field_drafts.append(draft)
+	field_depots=preload("res://scripts/field_depots.gd").clean(payload.get("field_depots",[]))
 	runner_messages.clear()
 	for message_variant in payload.get("runner_messages",[]):
 		if message_variant is Dictionary: runner_messages.append((message_variant as Dictionary).duplicate(true))
@@ -4707,6 +4713,7 @@ func _process_military_day()->void:
 	if recovery.home_unavailable():
 		_process_field_army_movement_day()
 		sustainment.arrivals_day()
+		depots.day()
 		_process_army_runners_day()
 		occupation_transfers.advance(last_processed_day)
 		# Armies in the field fight on while home is held.
@@ -4731,6 +4738,7 @@ func _process_military_day()->void:
 	_process_training_program_day()
 	_process_field_army_movement_day()
 	sustainment.arrivals_day()
+	depots.day()
 	_process_army_runners_day()
 	_process_siege_day()
 	occupation_transfers.advance(int(WorldSimulation.state.elapsed_days))
