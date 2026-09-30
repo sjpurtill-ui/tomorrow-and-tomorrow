@@ -86,12 +86,12 @@ func _found(people:int,completed:Array,places:int,day:int=40)->void:
 func _page()->Dictionary:
 	return Provider.new(terrain,hud).tab(0)
 
-## Every row of the page by name.
+## Every card (or row) of the page by name.
 static func _rows(page:Dictionary)->Dictionary:
 	var rows:={}
 	for block:Dictionary in page.get("blocks",[]):
-		if String(block.get("type",""))!="rows":continue
-		for item:Dictionary in block.get("items",[]):rows[String(item.name)]=item
+		if not String(block.get("type","")) in ["rows","town_works"]:continue
+		for item:Dictionary in block.get("items",block.get("cards",[])):rows[String(item.name)]=item
 	return rows
 
 ## The page as the player reads it, for the handoff and for review.
@@ -100,7 +100,7 @@ static func _print(label:String,page:Dictionary)->void:
 	print("[brief] %s: %s" % [page.brief.get("title",""),page.brief.get("why","")])
 	for block:Dictionary in page.blocks:
 		print("-- %s%s" % [String(block.get("heading","(actions)")),(" · "+String(block.note)) if block.has("note") else ""])
-		for item:Dictionary in block.get("items",[]):
+		for item:Dictionary in block.get("items",block.get("cards",[])):
 			if item.has("label"):print("   [button] %s: %s" % [item.label,item.get("sub","")]);continue
 			print("   %s | %s | %s" % [item.name,item.get("value",""),item.get("sub","")])
 			if String(item.get("detail",""))!="":print("      %s" % item.detail)
@@ -223,9 +223,12 @@ func test_the_tab_leads_with_the_work_in_hand_at_the_engines_pace()->void:
 	var rate:=Construction.daily_work()
 	var left:=(float(current.days)-float(GameState.settlement_projects.get(current.name,0.0)))/rate
 	assert_str(String(page.brief.why)).contains("about %s left at today's pace" % Plain.span_text(left))
-	assert_str(String(page.brief.why)).contains(String(current.effect))
 	var row:Dictionary=_rows(page)[String(current.name)]
+	assert_str(String(row.detail)).contains(String(current.effect))
 	assert_str(String(row.sub)).is_equal("About %s left at today's pace" % Plain.span_text(left))
+	# Its bar is the work done, and its words the same days left.
+	assert_float(float(row.progress.ratio)).is_equal_approx(float(GameState.settlement_projects.get(current.name,0.0))/float(current.days),0.000001)
+	assert_str(String(row.progress.text)).is_equal("about %s left" % Plain.span_text(left))
 	# The pace shown is the pace worked: a day adds exactly daily_work().
 	var worked:=float(GameState.settlement_projects.get(current.name,0.0))
 	Construction.process_day()
@@ -292,7 +295,8 @@ func test_workshops_and_stores_name_the_hands_they_need()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
 	var row:Dictionary=_rows(_page())["Workshops and stores"]
 	assert_str(String(row.value)).is_equal("Short-handed")
-	assert_str(String(row.sub)).is_equal("3 of the 10 makers and 6 of the 10 carriers they need")
+	assert_str(String(row.sub)).is_equal("3 of 10 makers, 6 of 10 carriers")
+	assert_float(float(row.needs[0].have)).is_equal(3.0);assert_float(float(row.needs[0].need)).is_equal(10.0)
 	assert_str(String(row.detail)).contains("units of store room")
 
 func test_every_row_is_plain_readable_and_has_a_meaning()->void:
@@ -304,8 +308,8 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 	var count:=0
 	for block:Dictionary in page.blocks:
 		assert_object(caps.search(String(block.get("heading","")))).is_null()
-		if String(block.type)!="rows":continue
-		for item:Dictionary in block.items:
+		if not String(block.type) in ["rows","town_works"]:continue
+		for item:Dictionary in block.get("items",block.get("cards",[])):
 			count+=1
 			assert_str(String(item.value)).override_failure_message(String(item.name)).is_not_empty()
 			assert_str(String(item.sub)).override_failure_message(String(item.name)).is_not_empty()
@@ -313,7 +317,8 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 			assert_bool(String(item.value).contains("·")).override_failure_message(String(item.value)).is_false()
 			for text:String in [String(item.name),String(item.value),String(item.sub),String(item.get("detail",""))]:
 				assert_object(caps.search(text)).override_failure_message(text).is_null()
-	assert_int(count).is_equal(7)
+	# The works, the defences, new homes and the town's five figures.
+	assert_int(count).is_equal(8)
 	# It draws: one ink row per item on the dock's paper.
 	var body:=VBoxContainer.new();add_child(body)
 	Blocks.render(body,page.blocks)

@@ -734,7 +734,7 @@ static func _build_work(reading:Dictionary)->Dictionary:
 static func _defences()->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	if mc==null: return _no("defences","There is nobody to raise defences.")
-	var began:Dictionary=mc.start_settlement_defense_upgrade()
+	var began:Dictionary=mc.start_settlement_defense_upgrade("court")
 	if began.has("error"): return _no("defences",_plain(String(began.error)))
 	var index:=int(mc.settlement_defense.get("project_stage",-1))
 	var stages:Array=mc.SETTLEMENT_DEFENSE_STAGES

@@ -1430,3 +1430,52 @@ static func logistics_glyph(kind:String,c:Color)->Array:
 		"find": return [_ring(28,28,13,3.4,c),_s(28,5,28,14,3.4,c),_s(28,42,28,51,3.4,c),_s(5,28,14,28,3.4,c),_s(42,28,51,28,3.4,c),_c(28,28,3.8,c)]
 		"talk": return [_rr(36,33,15,10,6,soft),_t(40,40,48,40,49,50,soft),_rr(21,19,16,11,6,c),_t(12,26,22,28,8,38,c)]
 	return [_c(28,28,6,c)]
+
+
+# -- The town: its works, homes and defences -----------------------------------
+
+static var _town_textures:Dictionary={}
+
+## Small inked marks for the Buildings page's town board (hud/town_works_board.gd),
+## drawn bare like command_texture so they sit beside a figure. Kinds:
+##   the works   hall (a civic work), homes, shrine, stores, yard, workshop
+##   defences    open (open ground), watch (watch posts), earthwork, palisade,
+##               wall (walled districts), bastion (a bastion network)
+##   the town    builders (a hammer), repair (a mallet), era (rising blocks),
+##               lookout (a sighting ring), shield (defenders), danger (a
+##               spearhead), watchers (two figures)
+## Unknown kinds draw a dot, never an error.
+static func town_texture(kind:String,ink:Color,px:int=40)->Texture2D:
+	var key:="%s|%s|%d" % [kind,ink.to_html(),px]
+	if _town_textures.has(key): return _town_textures[key]
+	var texture:=ImageTexture.create_from_image(_render(town_glyph(kind,ink),px,false))
+	_town_textures[key]=texture
+	return texture
+
+
+static func town_glyph(kind:String,c:Color)->Array:
+	var soft:=Color(c,0.5)
+	match kind:
+		"hall": return [_t(5,27,28,9,51,27,c),_rr(28,38,19,10,1,c),_rr(28,42,3.6,6,1,soft)]
+		"homes": return [_t(28,31,39,20,50,31,soft),_rr(39,39,9,7.5,1,soft),_t(6,28,20,14,34,28,c),_rr(20,38,11,10,1,c)]
+		"shrine": return [_t(12,22,28,8,44,22,c),_s(17,23,17,48,3.2,c),_s(39,23,39,48,3.2,c),_s(10,48,46,48,2.6,soft),_c(28,34,4.5,soft)]
+		"stores": return [_rr(28,33,13,14,6,c),_rr(28,16,8,3,1,c),_s(17,30,39,30,1.6,soft)]
+		"yard": return [_rr(16,40,9,6,1,c),_rr(36,40,9,6,1,c),_rr(26,28,9,6,1,soft),_s(6,48,50,48,2.4,soft)]
+		"workshop": return [_rr(28,23,21,3.6,1,c),_s(13,27,11,46,3,c),_s(43,27,45,46,3,c),_s(12,38,44,38,2,soft),_s(22,17,33,13,2.2,c)]
+		"open": return [_s(6,46,50,46,2.4,soft),_s(20,46,20,12,2.6,c),_t(21.5,12,38,18,21.5,24,c)]
+		"watch": return [_s(19,50,24,20,3.2,c),_s(37,50,32,20,3.2,c),_s(21,40,35,30,2,soft),_rr(28,20,11,2.6,1,c),_rr(28,14,7,4,1,c),_t(16,11,28,3,40,11,c)]
+		"earthwork": return [_poly([4,46,15,28,41,28,52,46],c),_s(4,51,52,51,2.4,soft),_s(15,28,41,28,1.6,soft)]
+		"palisade":
+			var stakes:Array=[_s(5,33,51,33,2.4,soft)]
+			for x:float in [10.0,19.0,28.0,37.0,46.0]:stakes.append_array([_s(x,48,x,20,5,c),_t(x-2.5,21,x,11,x+2.5,21,c)])
+			return stakes
+		"wall": return [_rr(28,36,22,12,1,c),_rr(10,20,3.6,4.5,0.5,c),_rr(22,20,3.6,4.5,0.5,c),_rr(34,20,3.6,4.5,0.5,c),_rr(46,20,3.6,4.5,0.5,c),_rr(28,42,5,6.5,2.5,soft)]
+		"bastion": return [_poly([28,5,35,19,51,21,40,33,44,50,28,42,12,50,16,33,5,21,21,19],c),_c(28,28,6,soft)]
+		"builders": return [_s(14,49,33,24,4,c),_ob(24,15,44,31,9,c)]
+		"repair": return [_rr(28,14,17,6.5,2,c),_rr(12,14,3,8,1.5,soft),_s(28,20,28,51,6,c)]
+		"era": return [_rr(13,42,8,7,1,soft),_rr(28,36,8,13,1,c),_rr(43,29,8,20,1,c)]
+		"lookout": return [_ring(28,28,12,3.4,c),_c(28,28,4.5,c),_s(3,28,13,28,3,soft),_s(43,28,53,28,3,soft)]
+		"shield": return [_poly([12,9,44,9,44,27,28,50,12,27],c),_s(28,14,28,40,2.2,soft)]
+		"danger": return [_t(28,5,19,28,37,28,c),_s(28,27,28,52,3.2,c),_s(22,44,34,44,2.4,soft)]
+		"watchers": return _figure(20,c)+_figure(36,soft)
+	return [_c(28,28,6,c)]

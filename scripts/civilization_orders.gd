@@ -69,7 +69,9 @@ static func execute(order:Dictionary)->Dictionary:
 		"settlement_defense":
 			var next:=int(WorldSimulation.military.settlement_defense_snapshot().stage)+1
 			if order.has("stage") and int(order.stage)!=next:return {"error":"The next defence stage is %d, not %d." % [next,int(order.stage)]}
-			return WorldSimulation.military.start_settlement_defense_upgrade()
+			# Who decided goes with the works: the people's own council, the
+			# god's "build now" or the court (home_defense.gd).
+			return WorldSimulation.military.start_settlement_defense_upgrade(String(order.get("by","people")))
 		# Great Works: the same undertaking functions the player's dock uses.
 		"great_work_commission":
 			if not order.get("concept") is Dictionary:return {"error":"Describe the work to be commissioned."}

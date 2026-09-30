@@ -396,6 +396,11 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 				if figured>0:needs["Figured Cloth"]=figured
 				var leather:=preload("res://scripts/household_clothing.gd").leather_target(WorldSimulation.state.population_exact)
 				if leather>0:needs["Flexible Leather"]=leather
+				# The defence works rise at the first town: the next stage's
+				# materials while it is wanted (home_defense.gd material_targets).
+				if bool(city.get("primary",false)):
+					var walls:=preload("res://scripts/home_defense.gd").material_targets()
+					for item:String in walls:needs[item]=maxf(float(needs.get(item,0)),float(walls[item]))
 				return needs))
 	# Resolve each city store once; these are live references, so earlier
 	# dispatches still reduce what later destinations can request.

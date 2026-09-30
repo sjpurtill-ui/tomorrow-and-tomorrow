@@ -224,7 +224,29 @@ static func process_day()->Array[Dictionary]:
 	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":completed_form,"land_use":completed_use,"roof_plan":"thatched_ridge" if title=="Framed Hall" else "","material_family":preload("res://scripts/construction_materials.gd").family_for(materials),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
 	WorldSimulation.state.record_building_event(event)
 	events.append(event)
+	tell_finished(title)
 	return events
+
+## A civic work stands: the god's own people remember it in their Chronicle
+## (rival peoples keep none), with the first things it does in the engine's
+## numbers (building_impact.gd). The Buildings page stamps it too.
+static func tell_finished(title:String)->Dictionary:
+	var chronicle=preload("res://scripts/chronicle.gd")
+	if not chronicle.active():return {}
+	# The Chronicle is told in whole numbers (its voice splits a sentence at a
+	# decimal point): the first two effects that read so.
+	var said:PackedStringArray=[]
+	for line in (preload("res://scripts/building_impact.gd").work(title).get("lines",[]) as Array):
+		var value:=String(line.value)
+		if "." in value or "×" in value or said.size()>=2:continue
+		said.append("%s %s" % [String(line.label).to_lower(),value])
+	var id:=String(WorldSimulation.state.resource_settlement_id)
+	var town:=String(WorldSimulation.settlements.settlement_record(id).get("name","")) if not id.is_empty() else ""
+	if town.is_empty():town=String(WorldSimulation.state.settlement_name)
+	var text:=("Raised at %s" % town) if not town.is_empty() else "Raised"
+	text+=(": "+", ".join(said)+".") if not said.is_empty() else "."
+	return chronicle.record({"key":"work_done:%s:%s" % [id,title],"title":"The %s %s" % [title,"stand" if title.ends_with("s") else "stands"],"text":text,
+		"kind":"work","tier":"notice" if title=="Hearth Circle" else "moment","domain":"infrastructure","action":{"kind":"section","section":"construction","sub":0}})
 
 static func set_priority(city_id:String,title:String)->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)

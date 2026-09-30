@@ -190,8 +190,8 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	# Roofs, repair and works: the Buildings page.
 	var shown:={}
 	for city_block:Dictionary in (Construction.new(terrain,hud).tab(0).blocks as Array):
-		for item:Dictionary in city_block.get("items",[]):
-			if item.has("name"):shown[String(item.name)]=String(item.value)
+		for item:Dictionary in city_block.get("items",city_block.get("cards",[])):
+			if item.has("name"):shown[String(item.name)]=String(item.get("value",""))
 	assert_str(String(shown.Housing)).is_equal("%d places" % int(rows.roofs.number))
 	assert_str(String(rows.roofs.note)).is_equal("13 sleep out")
 	assert_str(String(shown.Condition)).is_equal("%d%%" % int(rows.damage.number))
