@@ -1,4 +1,5 @@
 {
+  "labor_rotations": "res://assets/ui/research/subjects/labor_rotations-v3.png",
   "grain_malting": "res://assets/ui/research/paper/first300-cards/grain_malting.tres",
   "grain_parboiling": "res://assets/ui/research/paper/first300-cards/grain_parboiling.tres",
   "food_pounding_mortars": "res://assets/ui/research/paper/first300-cards/food_pounding_mortars.tres",
