@@ -979,16 +979,17 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var machine:=per_man>1.0
 		var armed_attack:=equipment_ratio if machine else 0.22+equipment_ratio*0.78
 		var armed_defense:=0.20+equipment_ratio*0.80 if machine else 0.35+equipment_ratio*0.65
+		var guard:=1.0+(per_man-1.0)*equipment_ratio
 		if lean:
 			result.append({"count":count,
 				"attack":float(unit.attack)*float(weapon.attack)*per_man*matchup*piercing*stores_factor(weapon_id,stores_share)*armed_attack*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-				"defense":float(unit.defense)*float(weapon.defense)*per_man*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through})
+				"defense":float(unit.defense)*float(weapon.defense)*guard*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through,"per_man":guard})
 			continue
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
 			"attack":float(unit.attack)*float(weapon.attack)*per_man*matchup*piercing*stores_factor(weapon_id,stores_share)*armed_attack*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-			"defense":float(unit.defense)*float(weapon.defense)*per_man*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
-			"doctrine_defense":doctrine_defense,"matchup":matchup,"piercing":piercing,"through":through,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
+			"defense":float(unit.defense)*float(weapon.defense)*guard*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
+			"doctrine_defense":doctrine_defense,"matchup":matchup,"piercing":piercing,"through":through,"per_man":guard,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
 
@@ -1242,7 +1243,7 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		for index in updated.size():
 			var count := int(updated[index].get("count", 0))
 			var defense := maxf(0.05, float(cohorts[index].defense))
-			var exposure := float(count)/defense*contact_factors[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
+			var exposure := float(count)*float(cohorts[index].get("per_man",1.0))/defense*contact_factors[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
 			exposures.append(exposure)
 			total_exposure+=exposure
 		var target := -1
@@ -1266,7 +1267,10 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 			# The blow falls on machines: each man's worth of loss destroys his
 			# machines; only the crewless remainder kills the man himself.
 			var machines_lost:=mini(old_equipment,roundi(float(personnel_losses)*machines_per_man(weapon_id)))
-			var men_lost:=clampi(roundi(float(personnel_losses)*(1.0-Ledger.crewless(weapon_id))),0,personnel_losses)
+			# Blows that found machines mostly wreck them; blows beyond the
+			# machines left fall on the operators themselves.
+			var covered:=float(machines_lost)/machines_per_man(weapon_id)
+			var men_lost:=clampi(roundi(float(personnel_losses)-covered*Ledger.crewless(weapon_id)),0,personnel_losses)
 			var back:=personnel_losses-men_lost
 			updated[index]["count"]=int(updated[index].get("count",0))+back
 			cohort_losses[index]-=back
@@ -1289,7 +1293,7 @@ func _spread_losses(updated:Array,cohorts:Array[Dictionary],contact:Array[float]
 	var total:=0.0
 	for index in updated.size():
 		var count:=int(updated[index].get("count",0))
-		var exposure:=float(count)/maxf(0.05,float(cohorts[index].defense))*contact[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
+		var exposure:=float(count)*float(cohorts[index].get("per_man",1.0))/maxf(0.05,float(cohorts[index].defense))*contact[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
 		exposures.append(exposure); total+=exposure
 	if total<=0.0: return losses
 	var left:=losses

@@ -3346,11 +3346,20 @@ func register_scout_interrogation(method:String,deaths:int=0)->Dictionary:
 ## band's and garrison's loads times its round trip. Read once a day.
 func _field_transport_delivery_ratio()->float:
 	if recovery.home_unavailable():return 0.0
-	return float(carrier_reading().ratio)
+	return float(carrier_reading().food)
 
 var _carrier_cache:Dictionary={}
 func carrier_reading()->Dictionary:
-	var key:=[int(WorldSimulation.state.elapsed_days),field_armies.size(),occupation_forces.size(),int(WorldSimulation.state.population_allocations.get("Logistics",0)),float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0)),float(WorldSimulation.state.resource_stockpiles.get("Supply Lorries",0.0)),WorldSimulation.state.world_seed]
+	# Read once a day and again whenever the bands move, split, merge or the
+	# fleet changes (the cache forgets after each day's marching).
+	var where:=0.0
+	var troops:=0
+	for force in field_armies:
+		troops+=int(force.get("troops",0))
+		var at:Dictionary=force.get("position",{})
+		where+=float(at.get("x",0.0))*1.3+float(at.get("z",0.0))
+	for force in occupation_forces: troops+=int(force.get("troops",0))
+	var key:=[int(WorldSimulation.state.elapsed_days),field_armies.size(),occupation_forces.size(),troops,snappedf(where,0.5),int(WorldSimulation.state.population_allocations.get("Logistics",0)),float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0)),float(WorldSimulation.state.resource_stockpiles.get("Supply Lorries",0.0)),WorldSimulation.state.world_seed]
 	if _carrier_cache.get("key")==key: return _carrier_cache.reading
 	var reading:=preload("res://scripts/carriers.gd").reading(self)
 	_carrier_cache={"key":key,"reading":reading}
@@ -3359,12 +3368,18 @@ func carrier_reading()->Dictionary:
 
 ## A band standing at the home settlement itself, fed from the stores by
 ## hand: no carrier carries its food (carriers.gd, _force_provision_access).
+var _home_point:Dictionary={}
 func at_home_point(force:Dictionary)->bool:
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling or not _army_is_home(force):return false
 	var position:Dictionary=force.get("position",{})
-	var destination:=_movement_destination("player_home")
-	if position.is_empty() or not destination.has("position"):return false
-	return Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(destination.position.get("x",0)),float(destination.position.get("z",0))))<=.25
+	if position.is_empty():return false
+	# The home point, looked up once a day (the destinations list is long).
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if int(_home_point.get("day",-1))!=day or int(_home_point.get("seed",0))!=WorldSimulation.state.world_seed:
+		var destination:=_movement_destination("player_home")
+		_home_point={"day":day,"seed":WorldSimulation.state.world_seed,"ok":destination.has("position"),"at":Vector2(float((destination.get("position",{}) as Dictionary).get("x",0)),float((destination.get("position",{}) as Dictionary).get("z",0)))}
+	if not bool(_home_point.ok):return false
+	return Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(_home_point.at as Vector2)<=.25
 
 
 func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
@@ -3453,7 +3468,8 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		force["formations"]=field_formations
 		# Fodder, fuel, rounds and spares come on the same line; horses can graze.
 		var at_home:=_army_is_home(force)
-		force["stores_share"]=1.0 if at_home else sustainment.stores_share(force,_force_provision_access(force),FieldRations.forage_share(force))
+		# Stores come after every band's bread (carriers.gd stores ratio).
+		force["stores_share"]=1.0 if at_home else sustainment.stores_share(force,float(carrier_reading().stores)*SupplyState.haul_for(force),FieldRations.forage_share(force))
 		sustainment.hunger_day(force,float(WorldSimulation.span))
 		sustainment.recovery_day(force,float(WorldSimulation.span))
 		sustainment.rest_day(force,float(WorldSimulation.span))
@@ -3477,7 +3493,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		var occupation_formations:Array=force.get("formations",[])
 		for formation_index in occupation_formations.size(): occupation_formations[formation_index]["personnel_condition"]=move_toward(float(occupation_formations[formation_index].get("personnel_condition",occupation_condition)),occupation_condition,0.018)
 		force["formations"]=occupation_formations
-		force["stores_share"]=sustainment.stores_share(force,_garrison_provision_access(force),0.0)
+		force["stores_share"]=sustainment.stores_share(force,float(carrier_reading().stores)*SupplyState.haul_for(force),0.0)
 		sustainment.hunger_day(force,float(WorldSimulation.span))
 		sustainment.recovery_day(force,float(WorldSimulation.span))
 		sustainment.rest_day(force,float(WorldSimulation.span))
@@ -4015,7 +4031,6 @@ func _apply_imported_state(payload:Dictionary)->void:
 	for force_variant in payload.get("occupation_forces",[]):
 		if force_variant is Dictionary: occupation_forces.append((force_variant as Dictionary).duplicate(true))
 	field_armies.clear()
-	field_drafts.clear()
 	for force_variant in payload.get("field_armies",[]):
 		if force_variant is Dictionary: field_armies.append((force_variant as Dictionary).duplicate(true))
 	field_drafts.clear()

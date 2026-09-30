@@ -6,10 +6,11 @@ const Combat=preload("res://scripts/combat_simulator.gd")
 const Production=preload("res://scripts/persistent_production.gd")
 
 func test_fifty_land_units_have_combat_equipment_and_reachable_knowledge()->void:
-	# Fifty combat archetypes plus two support detachments added later
-	# (medical_detachment, field_repair_company).
-	assert_int(Land.ARCHETYPES.size()).is_equal(52)
-	assert_int(Land.ARCHETYPES.keys().filter(func(id:String)->bool:return String(Land.ARCHETYPES[id].branch)!="field_support").size()).is_equal(50)
+	# Fifty combat archetypes, eight of the last age (networked infantry to
+	# combat frames, docs/MILITARY_SYSTEM_V2.md §6), plus two support
+	# detachments (medical_detachment, field_repair_company).
+	assert_int(Land.ARCHETYPES.size()).is_equal(60)
+	assert_int(Land.ARCHETYPES.keys().filter(func(id:String)->bool:return String(Land.ARCHETYPES[id].branch)!="field_support").size()).is_equal(58)
 	assert_array(MilitaryCampaign.validate_military_progression()).is_empty()
 	for id:String in Land.ARCHETYPES:
 		assert_bool(Combat.UNIT_TYPES.has(id)).is_true()

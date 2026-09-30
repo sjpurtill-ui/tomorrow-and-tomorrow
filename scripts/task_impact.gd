@@ -467,13 +467,14 @@ static func logistics()->Dictionary:
 		"Built storage holds its full share only when carriers staff it, full at a tenth of the people (%s would).%s" % [_count(ceili(pop*0.10))," The Public Stores also need carriers at 4 in 100 of the people." if "Public Stores" in state.settlement_completed else ""],"good" if staffing>=1.0 else "plain"))
 	lines.append(_line("Putting food by","%s rations a day" % _one(carriers*CARRIER_PRESERVE*(1.0+WorldSimulation.discovery.effect("food_storage"))),
 		"Carriers help dry and store the day's fresh surplus: each can put by about %s rations a day." % _two(CARRIER_PRESERVE),"good" if carriers>0.0 else "plain"))
-	# Soldiers' food: 0.08 + carriers ÷ (9 for every 100 soldiers) × 0.42 + the
-	# commander, carts and supply know-how (military_campaign.gd delivery ratio).
-	var troops:=int(MilitaryCampaign.home_army.get("troops",0))+MilitaryCampaign.field_army_active_personnel()+MilitaryCampaign.occupation_active_personnel()
-	if troops>0:
-		var reach:=MilitaryCampaign._field_transport_delivery_ratio()
-		lines.append(_line("Feeding soldiers","%d of 100 get through" % roundi(reach*100.0),
-			"Carriers bring the soldiers their food: at 9 for every 100 soldiers (%s would) up to 42 more in 100 of it gets through; the commander, carts and supply parties add the rest." % _count(ceili(float(troops)*0.09)),"good" if reach>=0.8 else "bad"))
+	# Soldiers' food and stores (carriers.gd): each carrier drives a lorry or a
+	# cart if there is one, else carries 16 loads; every band away asks its
+	# bread and stores times its round trip; bread goes first.
+	var reading:Dictionary=MilitaryCampaign.carrier_reading()
+	if float(reading.get("demand",0.0))>0.0:
+		var fed:=float(reading.get("food",1.0))
+		lines.append(_line("Feeding soldiers","%d of 100 of their bread" % roundi(fed*100.0),
+			"The bands away and the garrisons ask %s loads a day (bread %s, fodder, fuel and rounds %s). At their distances our carriers bring %s a day: a porter 16 loads a trip, a cart %s, a lorry %s, each out and back at its own pace. Bread goes first; stores get %d of 100." % [_whole(float(reading.demand)),_whole(float(reading.get("bread",0.0))),_whole(float(reading.get("stores_asked",0.0))),_whole(float(reading.moved)),_whole(float((reading.fleet as Dictionary).get("cart_load",250.0))),_whole(float((reading.fleet as Dictionary).get("lorry_load",2000.0))),roundi(float(reading.get("stores",1.0))*100.0)],"good" if fed>=0.8 else "bad"))
 	lines.append(_line("Building faster","+%s a day" % _two(_raw("Logistics")/30.0*_pace_scale()),
 		"Carriers speed the builders: each adds a thirtieth of a builder's pace to the day's work on the town.","good" if carriers>0.0 else "plain"))
 	_great_work_line(lines,"Logistics")

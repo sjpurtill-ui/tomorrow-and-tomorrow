@@ -110,7 +110,7 @@ func test_a_band_reads_the_engines_own_rations_and_the_projection_agrees()->void
 		assert_float(float(report.foraged)).is_equal_approx(float(army.provisions_foraged_today)/need,0.0001)
 		assert_float(float(report.carried)+float(report.foraged)).is_equal_approx(float(report.ratio),0.0001)
 		# And the model's own reckoning at that place is what the engine did.
-		var projected:=Supply.at_point(Supply.force_pos(army),int(army.troops))
+		var projected:=Supply.at_point(Supply.force_pos(army),int(army.troops),false,false)
 		assert_float(float(projected.ratio)).is_equal_approx(float(army.provision_ratio),0.0001)
 		assert_float(float(projected.carried)).is_equal_approx(float(report.carried),0.0001)
 	# Within a day's haul the carriers lose nothing; far out they eat part of it.

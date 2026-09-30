@@ -1,4 +1,7 @@
 extends RefCounted
+## A line's bands raised within this many days of each other go out as one
+## band under one general (while the first is still at home).
+const JOIN_WITHIN_DAYS:=30
 ## Template production lines. Personnel and equipment live only in the existing
 ## military ledger; lines contain orders and IDs, never a second troop pool.
 var host:Node
@@ -120,9 +123,10 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 	if not bool(report.early if early else report.ready):return {"error":"Early deployment needs 20% training; automatic deployment needs full people, equipment and training."}
 	if host._home_battle_running() or host.recovery.home_unavailable():return {"error":"Deployment site is unavailable during a fight at home or occupation."}
 	var target:int=item.target_army
-	# A line's later bands join the band it raised before while that band is
-	# at home, instead of each becoming its own army under a new general.
-	if target==0:
+	# A line's later bands join the band it raised in the last month while
+	# that band is still at home, instead of each becoming its own army under
+	# a new general.
+	if target==0 and int(WorldSimulation.state.elapsed_days)-int(item.get("last_army_day",-100000))<=JOIN_WITHIN_DAYS:
 		var last:=int(item.get("last_army",0))
 		var last_index:int=host._field_army_index(last) if last>0 else -1
 		if last_index>=0 and not host.command_hierarchy.battle.engaged(last):
@@ -147,7 +151,9 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 			host.home_army.troops=int(host.home_army.troops)-int(formation.count)
 	if target==0:
 		var formed:Dictionary=host._assemble_field_army(formations,String(item.name)+" "+str(int(item.deployed)+1))
-		if formed.has("army"):item["last_army"]=int((formed.army as Dictionary).get("army_id",0))
+		if formed.has("army"):
+			item["last_army"]=int((formed.army as Dictionary).get("army_id",0))
+			item["last_army_day"]=int(WorldSimulation.state.elapsed_days)
 	else:
 		var army:Dictionary=host.field_armies[host._field_army_index(target)]
 		for formation:Dictionary in formations:army.formations.append(formation);army.troops=int(army.troops)+int(formation.count)

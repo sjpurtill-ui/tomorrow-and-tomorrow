@@ -88,7 +88,12 @@ func test_the_staff_want_carts_only_as_many_as_there_are_drivers()->void:
 
 func test_lorries_set_the_pace_and_are_made_on_a_line()->void:
 	assert_str(Supply.carrier()).is_not_equal("motor")
+	# The kind moving most of our loads sets the pace: one lorry among many
+	# porters does not make the network motorized.
+	GameState.population_allocations["Logistics"]=1000
 	GameState.resource_stockpiles["Supply Lorries"]=1.0
+	assert_str(Supply.carrier()).is_equal("foot")
+	GameState.population_allocations["Logistics"]=5
 	assert_str(Supply.carrier()).is_equal("motor")
 	assert_str(P.transport_stock("supply_lorry")).is_equal("Supply Lorries")
 	assert_bool(P.recipe(MilitaryCampaign,"supply_lorry").has("error")).is_true()
@@ -104,3 +109,29 @@ func test_a_supply_line_is_drawn_as_heavy_as_its_loads()->void:
 	var tanks:=_band(2,"armored_formation","armored_vehicle",100,60.0)
 	var spears:=_band(1,"spearman","spear",100,60.0)
 	assert_float(Chart.line_weight(Carriers.daily_loads(tanks))).is_greater(Chart.line_weight(Carriers.daily_loads(spears)))
+
+func test_bread_goes_first_so_thirsty_tanks_never_starve_the_infantry()->void:
+	# Infantry fed in full by the carriers; a tank band joins and its fuel
+	# takes only what is left after everyone's bread.
+	var foot:=_band(1,"rifle_infantry","service_rifle",3000,60.0)
+	GameState.population_allocations["Logistics"]=200
+	GameState.resource_stockpiles["Transport Carts"]=200.0
+	MilitaryCampaign.field_armies.assign([foot])
+	var alone:=Carriers.reading(MilitaryCampaign)
+	assert_float(float(alone.food)).is_equal(1.0)
+	var tanks:=_band(2,"armored_formation","armored_vehicle",500,60.0)
+	MilitaryCampaign.field_armies.assign([foot,tanks])
+	var both:=Carriers.reading(MilitaryCampaign)
+	assert_float(float(both.stores)).is_less(1.0)
+	assert_float(float(both.food)).is_equal(1.0)
+
+func test_the_map_is_honest_about_one_more_band()->void:
+	var foot:=_band(1,"spearman","spear",400,60.0)
+	GameState.population_allocations["Logistics"]=40
+	MilitaryCampaign.field_armies.assign([foot])
+	var r:=Carriers.reading(MilitaryCampaign)
+	var here:=Supply.haul_inputs_for(foot)
+	# A band like this one sent to the same place would share the carriers.
+	var alone:=Supply.preview_ratio({"trip":r.preview.trip,"sum_rt":{"lorry":0.0,"cart":0.0,"porter":0.0},"loads":0.0,"bread":0.0,"efficiency":r.efficiency,"rail":0.0},float(here.effort),float(here.cold),400)
+	var shared:=Supply.preview_ratio(r.preview,float(here.effort),float(here.cold),400)
+	assert_float(shared).is_less(alone)

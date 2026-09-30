@@ -247,7 +247,7 @@ func _line_card(item:Dictionary)->void:
 			destination.set_item_disabled(destination.get_item_count()-1,true)
 			if int(army.army_id)==int(item.target_army):waiting_on=Model.Logistics.force_name(army)
 	destination.select(maxi(0,destination.get_item_index(int(item.target_army))))
-	destination.tooltip_text="Where the new men go. Only a band at home can take them in; bands away are greyed."
+	destination.tooltip_text="Where the new men go. Only a band at home can take them in; bands away are greyed.\nNew band: bands this line raises within a month of each other go out together under one general."
 	if waiting_on!="":destination.tooltip_text="Waiting: %s is away. Trained bands wait at home until it returns, or choose New band." % waiting_on
 	destination.item_selected.connect(func(index:int):report(MilitaryCampaign.recruit_deploy.configure(id,"target_army",destination.get_item_id(index))));head.add_child(destination)
 	var pause:=_icon_button(head,"pause","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"paused",not bool(MilitaryCampaign.recruit_deploy.line(id).get("paused",false)))),"");pause.name="Pause"

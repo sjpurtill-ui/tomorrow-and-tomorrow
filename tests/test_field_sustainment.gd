@@ -127,11 +127,16 @@ func test_losses_are_replaced_by_drafts_who_walk_out_and_join()->void:
 
 func test_a_draft_whose_band_is_gone_comes_home()->void:
 	MilitaryCampaign.field_drafts.assign([{"army_id":99,"formation_id":1,"unit":"levy","weapon":"improvised","count":8,"equipment":8,"training":0.4,"left_day":0,"arrive_day":0}])
-	var recruits:int=MilitaryCampaign.aggregate_recruits
 	var stock:=int(MilitaryCampaign.military_inventory.get("improvised",0))
+	var mobilized:int=MilitaryCampaign._mobilized_count()
 	MilitaryCampaign.sustainment.arrivals_day()
-	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(recruits+8)
-	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(stock+8)
+	# Trained men join the army at home as a formation of their own, their
+	# gear with them; nobody is lost or made.
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(8)
+	var home:Dictionary=(MilitaryCampaign.home_army.formations as Array)[-1]
+	assert_float(float(home.training)).is_greater_equal(0.4)
+	assert_int(int(home.equipment)+int(MilitaryCampaign.military_inventory.improvised)).is_equal(stock+8)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(mobilized)
 	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(0)
 
 func test_last_priority_bands_are_not_redrafted()->void:

@@ -6,8 +6,10 @@ extends RefCounted
 ## A soldier's day of food away from home comes three ways (field_rations.gd,
 ## military_campaign.record_daily_provisions, which this model feeds):
 ##   carried  brought from our stores. What reaches a band is the carriers'
-##            capacity at all (military_campaign._field_transport_delivery_ratio:
-##            haulers, carts, the commander's care, supply groups) times the
+##            share of all the bread asked (carriers.gd: porters, carts and
+##            lorries driven by the Logistics workers, each at its own pace,
+##            bread first and stores after, military_campaign
+##            ._field_transport_delivery_ratio) times the
 ##            HAUL: the share of a load the carriers do not eat on the road.
 ##            The haul falls with the days of hauling from the nearest hub
 ##            along the supply line, weighed as march_terrain.gd weighs ground
@@ -179,10 +181,11 @@ static func today()->int:
 static func carrier()->String:
 	var s:Variant=_state()
 	if s==null: return "foot"
-	# Lorries, once we have them, set the pace (carriers.gd drives them).
-	if float((s.resource_stockpiles as Dictionary).get("Supply Lorries",0.0))>=1.0: return "motor"
-	if float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0: return "wheeled"
-	return "foot"
+	# The kind of carrier moving most of our loads sets the line's pace
+	# (carriers.gd): one lorry among a thousand porters does not.
+	var carriers:=load("res://scripts/carriers.gd")
+	var adoption:=func(id:String)->float: return float(WorldSimulation.discovery.adoption(id)) if WorldSimulation.discovery!=null and id in s.known_discoveries else 0.0
+	return String(carriers.ARM[carriers.main_kind(carriers.fleet(s,adoption))])
 
 ## Our hubs: home and our other settlements, then the towns we hold.
 ## [{id, name, kind: home|town|held, pos:Vector2, civ_id?, region_id?}]
@@ -1060,11 +1063,14 @@ static func siege_factor()->float:
 ## share at all), stores (the share the stores could send), siege (the
 ## share of carts a besieged home lets out) and endurance (the people's
 ## supply endurance) are the day's inputs, read once by the caller (day_inputs()).
-static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0)->Dictionary:
+static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0,preview:Dictionary={})->Dictionary:
 	var who:=String(field.carrier) if not field.is_empty() else carrier()
 	var e:=effort_at(field,p)
 	var land:=land_at(field,p,day)
 	var chill:=float(land.cold)
+	# A band not yet out (the map, a point): its share with every band already
+	# out on the carriers too.
+	if not preview.is_empty(): transport=preview_ratio(preview,float(e.effort),chill,troops)
 	var days:=haul_days(float(e.effort),who,chill)
 	var haul:=haul_share(days,who,endurance)
 	var source:=int(e.source)
@@ -1112,7 +1118,7 @@ static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteA
 	for i in n:
 		if i%512==0 and bool(cancel[0]): return {}
 		if land[i]==0 or i>=known.size() or known[i]==0: continue
-		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)))
+		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)),inputs.get("preview",{}))
 		ratio[i]=float(t.ratio); carried[i]=float(t.carried); haul[i]=float(t.haul)
 	return {"ratio":ratio,"carried":carried,"haul":haul,"troops":troops,"day":day,"key":int(field.get("key",0))}
 
@@ -1124,7 +1130,9 @@ static func day_inputs()->Dictionary:
 	var s:Variant=_state()
 	var stores:=1.0
 	if s!=null: stores=clampf(float((s.simulation_metrics as Dictionary).get("food_intake_ratio",1.0)),0.0,1.0)
-	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today()}
+	var preview:Dictionary={}
+	if mc!=null and mc.has_method("carrier_reading"): preview=(mc.carrier_reading() as Dictionary).get("preview",{})
+	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today(),"preview":preview}
 
 ## The people's supply endurance (research_mechanics.gd), 0 without a people.
 static func endurance_today()->float:
@@ -1165,6 +1173,49 @@ static func haul_days_for(force:Dictionary)->float:
 	var who:=String(f.carrier) if not f.is_empty() else carrier()
 	return haul_days(float(e.effort),who,float(land_at(f,p,today()).cold))
 
+## The haul to this force from our nearest hub: {reachable, effort (level
+## km), cold}. Unplaced forces or no hubs: reachable at no effort.
+static func haul_inputs_for(force:Dictionary)->Dictionary:
+	var p:=force_pos(force)
+	if not p.is_finite() or hubs_empty(): return {"reachable":true,"effort":0.0,"cold":0.0}
+	var f:=rations_field()
+	var e:=effort_at(f,p)
+	if not is_finite(float(e.effort)): return {"reachable":false,"effort":INF,"cold":0.0}
+	return {"reachable":true,"effort":float(e.effort),"cold":float(land_at(f,p,today()).cold)}
+
+## Carriers' round trip for a day's loads over a haul of `days`: out and
+## back, at least a day, the railway taking up to RAIL_SHARE of it.
+const MIN_ROUND_TRIP:=1.0
+const RAIL_SHARE:=0.45
+const CARRIER_ARMS:={"lorry":"motor","cart":"wheeled","porter":"foot"}
+static func carrier_round_trip(days:float,rail:float)->float:
+	if not is_finite(days): return INF
+	return maxf(MIN_ROUND_TRIP,2.0*maxf(0.0,days))*(1.0-RAIL_SHARE*clampf(rail,0.0,1.0))
+
+## Loads a day the fleet brings (carriers.gd preview: each kind's trip load
+## over its load-weighted mean round trip), with an extra band of
+## `extra_loads` whose round trips are `extra_rt` (the map's preview).
+static func carried_a_day(preview:Dictionary,extra_loads:float=0.0,extra_rt:Dictionary={})->float:
+	var loads:=float(preview.get("loads",0.0))+extra_loads
+	var trip:Dictionary=preview.get("trip",{})
+	var sum_rt:Dictionary=preview.get("sum_rt",{})
+	var eff:=float(preview.get("efficiency",1.0))
+	var total:=0.0
+	for kind in trip:
+		var mean_rt:=(float(sum_rt.get(kind,0.0))+extra_loads*float(extra_rt.get(kind,MIN_ROUND_TRIP)))/loads if loads>0.0 else MIN_ROUND_TRIP
+		if mean_rt>0.0 and is_finite(mean_rt): total+=float(trip[kind])/mean_rt
+	return total*eff
+
+## The share of its bread a new band of `troops` would get carried here, on
+## top of every band already out: the map is honest about sending one more.
+static func preview_ratio(preview:Dictionary,effort:float,chill:float,troops:int)->float:
+	if preview.is_empty() or not is_finite(effort): return 0.0 if not is_finite(effort) else 1.0
+	var bread:=float(maxi(1,troops))*1.12
+	var rt:={}
+	for kind in CARRIER_ARMS: rt[kind]=carrier_round_trip(haul_days(effort,String(CARRIER_ARMS[kind]),chill),float(preview.get("rail",0.0)))
+	var moved:=carried_a_day(preview,bread,rt)
+	return clampf(moved/(float(preview.get("bread",0.0))+bread),0.0,1.0)
+
 static func hubs_empty()->bool:
 	var s:=spec()
 	return s.is_empty() or (s.get("hubs",[]) as Array).is_empty()
@@ -1184,11 +1235,13 @@ static func forage_factor(force:Dictionary)->float:
 
 ## What a band of `troops` (-1: the middle one of our bands out) would get at
 ## this point today, standing (or moving).
-static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
+## one_more: a band not yet out (the map's land note), sharing the carriers
+## with every band already out; false reads the carriers as they are today.
+static func at_point(point:Vector2,troops:int=-1,moving:=false,one_more:=true)->Dictionary:
 	if troops<0: troops=typical_troops()
 	var f:=field()
 	var d:=day_inputs()
-	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),d.get("preview",{}) if one_more else {})
 	var report:=_report_from_terms(f,t,point)
 	report["force_kind"]="point"; report["troops"]=troops
 	report["words"]=words(report)

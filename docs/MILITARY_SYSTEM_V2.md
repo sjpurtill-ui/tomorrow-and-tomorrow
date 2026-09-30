@@ -455,3 +455,35 @@ with machine accounting; (7) recruitment fixes and template numbers.
   medical detachment; the disabled wait for home. A year-long cadence test
   (`tests/test_field_campaign_year.gd`) holds the draft stream bounded and
   every person accounted for.
+- **Critic round 3 (code review of carriers, machines, looks, templates) and
+  the fixes.**
+  - *Bread first.* The carriers' day is shared bread first across every band
+    and garrison, stores after (`carriers.gd` food and stores ratios): a tank
+    band's fuel never starves the infantry beside it. Horses graze part of
+    their fodder before it is asked of the carriers; a garrison's town gives
+    part of its bread, none of its fuel.
+  - *Each carrier at its own pace.* Porters, carts and lorries each go out
+    and back at their own speed (loads a day = each kind's trip over its
+    load-weighted mean round trip); the line's pace is the kind moving most
+    of our loads, so one lorry no longer motorizes a thousand porters.
+    Railway mobilization takes up to 45% off a trip.
+  - *An honest map.* The supply wash and the land note preview a band not
+    yet sent, sharing the carriers with every band already out
+    (`supply_state.preview_ratio`).
+  - *Machines.* A blow on a machine cohort is picked by its machines'
+    defense (the double count is gone); operators without machines are
+    ordinary men (their guard falls with their machines) and blows beyond
+    the machines left fall on them.
+  - *Drafts.* No draft walks into a band cut off from our roads; trained
+    drafts who cannot join come home as a trained formation, not raw
+    recruits; hunger-sick counts are clamped so they never block drafting; a
+    line's bands merge only within a month.
+  - *Explanations.* The Logistics task's "Feeding soldiers" line, the force
+    story's replacement sentence and the supply model's header now state the
+    carriers' rule with the engine's numbers.
+  - *Doctrine and AI.* Combined-arms rules include the last age's units;
+    precision fires and counter-drone batteries sit in the fires branch the
+    rival staffs score.
+  - Known, deferred: machine blocks still wear and break like men in the
+    block battle; rivals share the day's supply field with the player
+    (inherited); AI unit choice has no counter-value (next iteration).

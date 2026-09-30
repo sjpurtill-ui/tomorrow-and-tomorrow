@@ -1284,6 +1284,10 @@ static func equipment_texture(item:String,ink:Color,accent:Color,px:int=40)->Tex
 static func equipment_arm(item:String)->String:
 	var ledger:=_ledger()
 	if ledger!=null and ledger.has(item): return String(ledger.glyph(item))
+	# Carriers are not fighting kits but draw as what they are.
+	match item:
+		"supply_lorry": return "lorry"
+		"transport_cart": return "support"
 	return ""
 
 

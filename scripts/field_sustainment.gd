@@ -68,14 +68,15 @@ static func stores_demand(force:Dictionary)->Dictionary:
 		if is_fodder(weapon): fodder+=loads
 	return {"loads":total,"fodder":fodder}
 
-## Share of the band's stores that arrives today: what the carriers bring, and
-## for fodder what the country grazes. 1.0 when the band asks for none.
+## Share of the band's stores that arrives today: the country grazes part of
+## the fodder, and the carriers bring `carried` of the rest they were asked
+## for (carriers.gd stores ratio times the haul). 1.0 when it asks for none.
 static func stores_share(force:Dictionary,carried:float,graze:float)->float:
 	var demand:=stores_demand(force)
 	var loads:=float(demand.loads)
 	if loads<=0.0: return 1.0
-	var fodder:=float(demand.fodder)
-	var arrived:=loads*clampf(carried,0.0,1.0)+fodder*(1.0-clampf(carried,0.0,1.0))*clampf(graze,0.0,1.0)
+	var grazed:=float(demand.fodder)*clampf(graze,0.0,1.0)
+	var arrived:=grazed+(loads-grazed)*clampf(carried,0.0,1.0)
 	return clampf(arrived/loads,0.0,1.0)
 
 # --- Hunger ------------------------------------------------------------------
@@ -262,7 +263,8 @@ func _covered(army_id:int)->Dictionary:
 ## fed) nor by drafts in training or on the road, largest gap first.
 func open_places(force:Dictionary)->Dictionary:
 	var covered:=_covered(int(force.get("army_id",0)))
-	var sick:=maxi(0,int(force.get("hunger_sick",0)))
+	# The hunger-sick still in the pool (never more than its able part).
+	var sick:=mini(maxi(0,int(force.get("hunger_sick",0))),maxi(0,int(force.get("wounded_pool",0))-maxi(0,int(force.get("disabled_pool",0)))))
 	var formations:Array=force.get("formations",[])
 	var places:={}
 	for index in gap_order(formations):
@@ -397,7 +399,8 @@ func arrivals_day()->Array:
 		var army_index:int=host._field_army_index(int(draft.army_id))
 		if army_index>=0:
 			var band:Dictionary=host.field_armies[army_index]
-			var blocked:bool=host.command_hierarchy.battle.engaged(int(draft.army_id))
+			# In battle, or cut off from our roads: the draft waits a day.
+			var blocked:bool=host.command_hierarchy.battle.engaged(int(draft.army_id)) or (not host.at_home_point(band) and float(host._force_provision_access(band))<=CUT_OFF)
 			if bool(draft.get("waiting",false)):
 				var days:=travel_days(band)
 				if days>0:
@@ -429,7 +432,7 @@ func arrivals_day()->Array:
 				formation["experience"]=float(formation.get("experience",0.0))*old/maxf(1.0,float(old+men))
 			formations[f_index]=formation
 			if int(draft.count)>men or int(draft.equipment)>sets:
-				_send_home({"count":int(draft.count)-men,"weapon":draft.weapon,"equipment":int(draft.equipment)-sets})
+				_send_home({"count":int(draft.count)-men,"unit":draft.get("unit","levy"),"weapon":draft.weapon,"equipment":int(draft.equipment)-sets,"training":draft.get("training",0.4)})
 			placed=true
 			force["formations"]=formations
 			_rebuild(force)
@@ -440,10 +443,18 @@ func arrivals_day()->Array:
 		if not placed: _send_home(draft)
 	return joined
 
+## Drafts that cannot join come home: trained men join the army at home as
+## a formation of their own (their drill kept), their gear back to store.
 func _send_home(draft:Dictionary)->void:
-	host.aggregate_recruits+=maxi(0,int(draft.get("count",0)))
 	var weapon:=String(draft.get("weapon","improvised"))
 	host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+maxi(0,int(draft.get("equipment",0)))
+	var count:=maxi(0,int(draft.get("count",0)))
+	if count<=0: return
+	var unit:=String(draft.get("unit",""))
+	if unit=="" or host.recovery.home_unavailable():
+		host.aggregate_recruits+=count
+		return
+	host._complete_training({"mode":"new","unit":unit,"weapon":weapon,"count":count,"experience":0.0,"progress_days":1.0,"required_days":1.0,"reserved_equipment":0,"prior_skill":float(draft.get("training",0.4))})
 
 func _army(army_id:int)->Dictionary:
 	var index:int=host._field_army_index(army_id)

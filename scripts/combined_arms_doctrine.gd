@@ -4,11 +4,11 @@ const SUPPORT_PER_TARGET:=.5
 const RULES={
 	"skirmisher_infantry_screens":{"targets": ["spearman", "line_infantry", "pikeman"], "support": ["skirmisher"], "threats": ["cavalry", "light_cavalry", "armored_cavalry"], "defense": 0.15},
 	"engineer_infantry_security":{"targets": ["combat_engineer"], "support": ["rifle_infantry", "motorized_infantry", "mechanized_infantry", "assault_infantry"], "threats": ["rifle_infantry", "machine_gun_company", "assault_infantry"], "defense": 0.2},
-	"infantry_antitank_coordination":{"targets": ["rifle_infantry", "motorized_infantry", "mechanized_infantry"], "support": ["anti_tank", "tank_destroyer"], "threats": ["armored_formation", "light_tank", "heavy_tank"], "defense": 0.2},
+	"infantry_antitank_coordination":{"targets": ["rifle_infantry", "motorized_infantry", "mechanized_infantry", "networked_infantry", "exosuit_infantry"], "support": ["anti_tank", "tank_destroyer"], "threats": ["armored_formation", "light_tank", "heavy_tank", "main_battle_tank", "robot_vehicle_company"], "defense": 0.2},
 
 	"cavalry_infantry_liaison":{"targets":["cavalry","light_cavalry","armored_cavalry"],"support":["spearman","line_infantry","heavy_swordsman"],"threats":["spearman","pikeman","heavy_swordsman"],"defense":.15},
-	"gun_line_security":{"targets":["field_artillery","modern_artillery","horse_artillery","mortar_crew"],"support":["line_infantry","rifle_infantry","musketeer","assault_infantry"],"threats":["cavalry","light_cavalry","armored_cavalry","assault_infantry"],"defense":.25},
-	"infantry_tank_cooperation":{"targets":["armored_formation","light_tank","heavy_tank"],"support":["rifle_infantry","motorized_infantry","mechanized_infantry","assault_infantry"],"threats":["anti_tank","tank_destroyer"],"defense":.20}
+	"gun_line_security":{"targets":["field_artillery","modern_artillery","horse_artillery","mortar_crew","precision_fires"],"support":["line_infantry","rifle_infantry","musketeer","assault_infantry","networked_infantry","counter_drone_battery"],"threats":["cavalry","light_cavalry","armored_cavalry","assault_infantry","drone_operators"],"defense":.25},
+	"infantry_tank_cooperation":{"targets":["armored_formation","light_tank","heavy_tank","main_battle_tank","robot_vehicle_company"],"support":["rifle_infantry","motorized_infantry","mechanized_infantry","assault_infantry","networked_infantry","exosuit_infantry"],"threats":["anti_tank","tank_destroyer","drone_operators"],"defense":.20}
 }
 static func entries()->Array[Dictionary]:
 	return [
