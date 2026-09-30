@@ -128,18 +128,26 @@ func _build_strip()->void:
 func _update_strip(s:Dictionary)->void:
 	var who:=String(s.carrier)
 	chips.carriers.icon.texture=Icons.logistics_texture(String(CARRIER_GLYPH.get(who,"porter")),T.INK,48)
-	var count:=int(s.carts) if who!="foot" else int(s.haulers)
+	var count:=int(s.lorries) if who=="motor" else (int(s.carts) if who!="foot" else int(s.haulers))
 	chips.carriers.value.text=EraWords.grouped(count)
 	chips.carriers.word.text=String(s.carrier_words)
 	var loss:float=Supply.carrier_loss(who,Supply.endurance_today())*100.0
 	var usual:float=Supply.carrier_loss(who,0.0)*100.0
 	var eaten:="They eat about %d%% of a load for each day of hauling." % roundi(loss)
 	if absf(loss-usual)>=0.05:eaten="They eat about %.1f%% of a load for each day of hauling (%d%% without our supply endurance)." % [loss,roundi(usual)]
-	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food from the stores: %s haulers and %s carts.\n%s" % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),eaten]
+	var fleet:Dictionary=(s.get("fleet",{}) as Dictionary).get("fleet",{})
+	var carry:=""
+	if not fleet.is_empty():
+		carry="\n%s drive %s lorries and %s carts; %s carry on their backs.\nA porter carries 16 days' bread for one man, a cart %d, a lorry %d. One trip moves %s loads." % [EraWords.grouped(int(fleet.drivers)),EraWords.grouped(int(fleet.lorries)),EraWords.grouped(int(fleet.carts)),EraWords.grouped(int(fleet.porters)),roundi(float(fleet.cart_load)),roundi(float(fleet.lorry_load)),EraWords.grouped(roundi(float(fleet.loads)))]
+	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food and stores: %s haulers, %s carts and %s lorries.%s\n%s" % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),EraWords.grouped(int(s.lorries)),carry,eaten]
 	var transport:=float(s.transport)
 	chips.carried.value.text="%d%%" % roundi(transport*100.0)
 	chips.carried.value.add_theme_color_override("font_color",Supply.state_text_color(Supply.state_of(transport)))
-	var carried_tip:="Our carriers can move %d%% of what the fighters need.\nMore haulers, carts and a careful commander carry more." % roundi(transport*100.0)
+	var reading:Dictionary=s.get("fleet",{})
+	var carried_tip:="Our carriers can move %d%% of what the fighters away need.\nMore haulers, carts and lorries and a careful commander carry more." % roundi(transport*100.0)
+	if not reading.is_empty() and float(reading.get("demand",0.0))>0.0:
+		carried_tip+="\nThe bands away and the garrisons ask %s load-days of carrying a day (their loads times the days out and back); our carriers can do %s." % [EraWords.grouped(roundi(float(reading.demand))),EraWords.grouped(roundi(float(reading.moved)))]
+		if float(reading.get("rail",0.0))>0.01:carried_tip+="\nRailways take the long leg: the carriers' trips are %d%% shorter." % roundi(float(reading.rail)*60.0)
 	if float(s.stores)<0.97:carried_tip+="\nThe stores are short: %d%% of the people's food came in." % roundi(float(s.stores)*100.0)
 	if float(s.siege)<1.0:carried_tip+="\nHome is besieged: %d%% of the carts get out." % roundi(float(s.siege)*100.0)
 	chips.carried.chip.tooltip_text=carried_tip

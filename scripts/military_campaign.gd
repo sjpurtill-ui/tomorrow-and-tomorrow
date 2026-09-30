@@ -3341,27 +3341,37 @@ func register_scout_interrogation(method:String,deaths:int=0)->Dictionary:
 	return {"method":normalized,"deaths":removed,"foreign_prisoners":foreign_prisoners,"reputation":war_reputation.duplicate(true)}
 
 
+## Share of the bands' loads our carriers can move today (carriers.gd):
+## porters, carts and lorries driven by the Logistics workers, against every
+## band's and garrison's loads times its round trip. Read once a day.
 func _field_transport_delivery_ratio()->float:
 	if recovery.home_unavailable():return 0.0
-	var troops:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
-	if troops<=0: return 1.0
-	var workers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
-	var labor_coverage:=clampf(workers/maxf(1.0,float(troops)*0.09),0.0,1.0)
-	var commander_logistics:=clampf(float((home_army.get("commander",{}) as Dictionary).get("logistics",0.4)),0.0,1.0)
-	var carts:=float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0))
-	var cart_coverage:=clampf(carts/maxf(1.0,float(troops)/24.0),0.0,1.0)
-	return clampf(0.08+labor_coverage*0.42+commander_logistics*0.20+_adoption("supply_groups")*0.20+cart_coverage*0.10,0.0,1.0)
+	return float(carrier_reading().ratio)
+
+var _carrier_cache:Dictionary={}
+func carrier_reading()->Dictionary:
+	var key:=[int(WorldSimulation.state.elapsed_days),field_armies.size(),occupation_forces.size(),int(WorldSimulation.state.population_allocations.get("Logistics",0)),float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0)),float(WorldSimulation.state.resource_stockpiles.get("Supply Lorries",0.0)),WorldSimulation.state.world_seed]
+	if _carrier_cache.get("key")==key: return _carrier_cache.reading
+	var reading:=preload("res://scripts/carriers.gd").reading(self)
+	_carrier_cache={"key":key,"reading":reading}
+	return reading
+
+
+## A band standing at the home settlement itself, fed from the stores by
+## hand: no carrier carries its food (carriers.gd, _force_provision_access).
+func at_home_point(force:Dictionary)->bool:
+	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling or not _army_is_home(force):return false
+	var position:Dictionary=force.get("position",{})
+	var destination:=_movement_destination("player_home")
+	if position.is_empty() or not destination.has("position"):return false
+	return Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(destination.position.get("x",0)),float(destination.position.get("z",0))))<=.25
 
 
 func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
 	if recovery.home_unavailable():return 0.0
 	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
 		if reserve:return 1.0
-		if _army_is_home(force):
-			var position:Dictionary=force.get("position",{})
-			var destination:=_movement_destination("player_home")
-			if not position.is_empty() and destination.has("position"):
-				if Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(Vector2(float(destination.position.get("x",0)),float(destination.position.get("z",0))))<=.25:return 1.0
+		if at_home_point(force):return 1.0
 	# What the carriers bring, less what they eat on the haul (supply_state.gd).
 	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
 

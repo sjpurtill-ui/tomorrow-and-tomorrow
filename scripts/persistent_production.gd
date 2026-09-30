@@ -7,6 +7,11 @@ const Industry=preload("res://scripts/civilian_industry.gd")
 const Bills=preload("res://scripts/goods_bills.gd")
 const MAX_TARGET := 1000000000
 const CIVILIAN_ERROR:="Made as Civilian Goods by Crafting households; workshops no longer make it on a line."
+## A supply lorry (carriers.gd): 2,000 loads, driven by a Logistics worker.
+const LORRY_BILL:={"Iron Ore":12.0,"Copper Ore":1.5,"Crude Oil":0.5,"Civilian Goods":8.0}
+## Where a transport line's product is kept.
+static func transport_stock(item:String)->String:
+	return "Supply Lorries" if item=="supply_lorry" else "Transport Carts"
 
 static func recipe(host: Node, item: String) -> Dictionary:
 	var gate: Dictionary
@@ -17,6 +22,8 @@ static func recipe(host: Node, item: String) -> Dictionary:
 		gate=host._knowledge_gate(String(joint.gate),.10);definition={"materials":Bills.flatten(joint.materials),"days":float(joint.work_days),"tooling":Bills.flatten(joint.get("tooling",{}))}
 	elif item=="transport_cart":
 		gate=host._knowledge_gate("joinery",.10);definition=host._transport_recipe();kind="transport"
+	elif item=="supply_lorry":
+		gate=host._knowledge_gate("motor_freight_lorries",.10);definition={"materials":Bills.flatten(LORRY_BILL),"days":20.0};kind="transport"
 	elif host.CONSUMABLE_KNOWLEDGE.has(item):
 		gate=host.consumable_knowledge_availability(item);definition=host._consumable_recipe(item);kind="consumable"
 	elif host.simulator.WEAPONS.has(item):
@@ -31,7 +38,7 @@ static func product_name(item:String)->String:
 	if not Industry.product(item).is_empty():return String(Industry.product(item).name)
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
 	if not joint.is_empty():return String(joint.label)
-	return {"improvised":"Simple levy weapons","spear":"Spears","bow":"Bows","sword_shield":"Sword & shield sets","siege_kit":"Siege engineer kits"}.get(item,item.replace("_"," ").capitalize())
+	return {"improvised":"Simple levy weapons","spear":"Spears","bow":"Bows","sword_shield":"Sword & shield sets","siege_kit":"Siege engineer kits","supply_lorry":"Supply lorries","transport_cart":"Transport carts"}.get(item,item.replace("_"," ").capitalize())
 
 static func product_description(item:String)->String:
 	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
@@ -45,7 +52,7 @@ static func product_description(item:String)->String:
 
 static func available_products(host:Node)->Array[String]:
 	var result:Array[String]=[]
-	for item:String in host.EQUIPMENT_KNOWLEDGE.keys()+host.CONSUMABLE_KNOWLEDGE.keys()+["transport_cart"]:
+	for item:String in host.EQUIPMENT_KNOWLEDGE.keys()+host.CONSUMABLE_KNOWLEDGE.keys()+["transport_cart","supply_lorry"]:
 		if not recipe(host,item).has("error"):result.append(item)
 	return result
 
@@ -256,7 +263,7 @@ static func retool(host: Node, id: int, item: String) -> Dictionary:
 
 static func stock(host: Node, job: Dictionary) -> int:
 	if String(job.job_type)=="consumable": return int(host.military_consumables.get(String(job.item),0))
-	if String(job.job_type)=="transport": return int(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0))
+	if String(job.job_type)=="transport": return int(WorldSimulation.state.resource_stockpiles.get(transport_stock(String(job.get("item",""))),0))
 	return int(host.military_inventory.get(String(job.item),0))
 
 static func state(host: Node, job: Dictionary) -> String:
@@ -310,7 +317,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	job.progress_days=maxf(0,progress-produced*per_item)
 	job.completed=int(job.completed)+produced;job.last_output=produced;job.last_work=possible*per_item
 	if String(job.job_type)=="consumable": host.military_consumables[String(job.item)]=stock(host,job)+produced
-	elif String(job.job_type)=="transport": WorldSimulation.state.resource_stockpiles["Transport Carts"]=stock(host,job)+produced
+	elif String(job.job_type)=="transport": WorldSimulation.state.resource_stockpiles[transport_stock(String(job.item))]=stock(host,job)+produced
 	else: host.military_inventory[String(job.item)]=stock(host,job)+produced
 	if produced>0 and job.has("ai_turnover"):
 		job.progress_days=0.0

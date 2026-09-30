@@ -22,6 +22,10 @@ func setup()->void:
 		if entry.id not in state.known_discoveries:state.known_discoveries.append(entry.id)
 		state.discovery_adoption[entry.id]=1.0
 	host.home_army.troops=48
+	# Carts serve bands away from home (carriers.gd); lorries would come first
+	# once they can be made, so this people has not learned them.
+	forget("motor_freight_lorries")
+	host.field_armies.assign([{"army_id":1,"name":"Band","troops":80,"status":"stationed","location_id":"field","position":{"x":60.0,"z":0.0},"formations":[]}])
 
 func cart_bill()->Dictionary:return WorldSimulation.military._transport_recipe().materials
 
@@ -48,7 +52,9 @@ func test_orders_build_carts_that_increase_staffed_delivery_capacity()->void:
 				progressed=int(job.completed)>prior
 			assert_bool(progressed).is_true()
 			if not progressed:break
-		assert_float(float(state.resource_stockpiles.get("Transport Carts",0))).is_equal(2.0)
+		var carts:=float(state.resource_stockpiles.get("Transport Carts",0))
+		assert_float(carts).is_greater_equal(1.0)
+		assert_float(carts).is_less_equal(8.0)
 		assert_float(float(state.resource_stockpiles.get("Civilian Goods",0))).is_less(20000.0)
 		assert_float(float(state.resource_stockpiles.Timber)).is_less(timber)
 		assert_float(host._daily_delivery_capacity()).is_greater(before)
@@ -114,7 +120,7 @@ func test_planner_blocks_shortages_unknown_methods_pause_and_absent_demand()->vo
 		assert_bool(host.start_production_line("transport_cart",4).get("ok",false)).is_true()
 		host.equipment_queue.back().paused=true
 		assert_dict(Planner.recommendation()).is_empty()
-		host.equipment_queue.clear();host.home_army.troops=0
+		host.equipment_queue.clear();host.field_armies.clear()
 		assert_dict(Planner.recommendation()).is_empty()
 	)
 

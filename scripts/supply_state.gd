@@ -179,7 +179,8 @@ static func today()->int:
 static func carrier()->String:
 	var s:Variant=_state()
 	if s==null: return "foot"
-	if "internal_combustion" in s.known_discoveries and WorldSimulation.discovery!=null and float(WorldSimulation.discovery.adoption("internal_combustion"))>=0.5: return "motor"
+	# Lorries, once we have them, set the pace (carriers.gd drives them).
+	if float((s.resource_stockpiles as Dictionary).get("Supply Lorries",0.0))>=1.0: return "motor"
 	if float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0: return "wheeled"
 	return "foot"
 
@@ -1151,6 +1152,18 @@ static func haul_for(force:Dictionary)->float:
 	var sources:Array=e.sources
 	if source>=0 and source<sources.size() and String((sources[source] as Dictionary).kind) in ["home","held"]: haul*=siege_factor()
 	return haul
+
+## Days of hauling from our nearest hub to this force today (0 with no place
+## or no hub, INF where no carrier can reach it): the carriers' round trip
+## (carriers.gd) is built on it.
+static func haul_days_for(force:Dictionary)->float:
+	var p:=force_pos(force)
+	if not p.is_finite() or hubs_empty(): return 0.0
+	var f:=rations_field()
+	var e:=effort_at(f,p)
+	if not is_finite(float(e.effort)): return INF
+	var who:=String(f.carrier) if not f.is_empty() else carrier()
+	return haul_days(float(e.effort),who,float(land_at(f,p,today()).cold))
 
 static func hubs_empty()->bool:
 	var s:=spec()

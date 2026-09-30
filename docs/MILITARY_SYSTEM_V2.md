@@ -383,3 +383,18 @@ with machine accounting; (7) recruitment fixes and template numbers.
   - *One priority per band*: Supplied first / in turn / last, on the
     Readiness & supply rows, for gear, rounds and replacements alike. Rows
     also show "+N coming" (drafts on the road and in training).
+- **Iteration 5, carriers that exist** (`scripts/carriers.gd`). The single
+  global carrier formula is replaced by the fleet we have: each Logistics
+  worker drives a lorry (2,000 loads), else a cart (250; 700 once horse
+  freight wagons are adopted), else carries 16 loads on his back. Each band
+  away and each garrison asks its loads a day (men's bread plus its kits'
+  stores; a garrison only what its town does not give) times its round trip
+  (twice its haul days, at least one; railway mobilization cuts the trip up
+  to 60%). The day's transport share is what the fleet moves, times the war
+  leader's logistics and the people's supply practice, against that demand.
+  A band at the home settlement needs no carrier. Lorries are made on a line
+  (gate `motor_freight_lorries`) and, once held, set the network's pace.
+  The staff build lorries once they can, else carts, for the shortfall,
+  never more than there are drivers; the Production stock strip shows what
+  the supply lines lack. The Readiness strip's tooltips give the fleet, the
+  loads per trip and the load-days asked against those moved.
