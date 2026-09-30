@@ -358,3 +358,28 @@ with machine accounting; (7) recruitment fixes and template numbers.
   antitank gun does. Kits the old age table did not name take their battle
   age from their ledger year, so late kits fight at the last age's pace
   instead of the stone age's.
+- **Iteration 4, keeping armies in the field** (`scripts/field_sustainment.gd`).
+  - *Hunger costs men.* A band or garrison hungry three days or more (below
+    three quarters of a ration) loses `men × 1.1% × (0.75 − food)/0.75` a
+    day: at no food about a quarter of the band in a month. Of those, 45%
+    fall sick (the band's wounded pool; 4% a day rejoin their places once
+    fed), 35% go home (they stop being soldiers and are working hands again),
+    20% die (population deaths, "Died of hunger in the field"). Totals are
+    kept on the band and the war leader states them.
+  - *Stores are a second share.* Each kit's supply burden (fodder, fuel,
+    rounds, spares) comes on the same line; horses can graze, fuel cannot.
+    Kits asking a load or more a man a day fight weaker as stores run short
+    (down to 35%). The supply bar's tooltip gives the share.
+  - *Losses are replaced by drafts.* Open places in a band (not the sick)
+    are drafted from free adults, trained at the Reinforce pace (0.58 of a
+    full course), then walk the band's haul days out and join, their drill
+    averaging in. On the road they are field personnel in the ledger; a
+    draft whose band is gone comes home to the recruits with its gear.
+    Drafts survive a save (`field_drafts`).
+  - *Gear and rounds reach bands away* along their line: the day's delivery
+    load is shared out by priority, a distant band receiving only the share
+    its carriers bring over the haul. A distant band's news still comes by
+    runner.
+  - *One priority per band*: Supplied first / in turn / last, on the
+    Readiness & supply rows, for gear, rounds and replacements alike. Rows
+    also show "+N coming" (drafts on the road and in training).

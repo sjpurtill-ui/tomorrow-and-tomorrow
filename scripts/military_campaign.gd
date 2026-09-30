@@ -130,6 +130,9 @@ var occupation_forces:Array[Dictionary]=[]
 var occupation_transfers=preload("res://scripts/occupation_transfers.gd").new()
 var recovery=preload("res://scripts/siege_recovery.gd").new()
 var field_armies:Array[Dictionary]=[]
+## Replacement drafts walking out to their bands (field_sustainment.gd).
+var field_drafts:Array[Dictionary]=[]
+var sustainment=preload("res://scripts/field_sustainment.gd").new(self)
 var next_field_army_id:=1
 ## Runner messages in flight from field armies back to the settlement. Until
 ## signal-era development, the government knows only what runners deliver.
@@ -230,6 +233,7 @@ func reset_for_new_world()->void:
 	sovereign_decisions.clear()
 	occupation_forces.clear()
 	field_armies.clear()
+	field_drafts.clear()
 	runner_messages.clear()
 	next_field_army_id=1
 	army_templates=_default_army_templates()
@@ -382,6 +386,16 @@ func cancel_training_program()->Dictionary:
 	training_program.clear()
 	army_changed.emit(home_army.duplicate(true))
 	return {"cancelled":true,"program":cancelled,"message":"%s cancelled after %.1f of %.0f effective days. Gains already earned remain; spent provisions and equipment wear are not recovered." % [String(cancelled.get("label","Training program")),float(cancelled.get("progress_days",0.0)),float(cancelled.get("duration_days",1.0))]}
+
+
+## Who is served first with gear, rounds and replacements: "first",
+## "normal" or "last" (field_sustainment.gd, _deliver_stationed_field_equipment).
+func set_army_priority(army_id:int,priority:String)->Dictionary:
+	if priority not in ["first","normal","last"]:return {"error":"Priority is first, normal or last."}
+	var index:=_field_army_index(army_id)
+	if index<0:return {"error":"That band is not in the field."}
+	field_armies[index]["priority"]=priority
+	return {"ok":true,"priority":priority}
 
 
 func reinforce_formation(formation_id:int,count:int)->Dictionary:
@@ -710,7 +724,7 @@ func population_commitment_snapshot()->Dictionary:
 
 
 func _field_army_force_total()->int:
-	var total:=0
+	var total:=sustainment.drafts_on_road()
 	for force in field_armies:
 		total+=maxi(0,int(force.get("troops",0)))+maxi(0,int(force.get("wounded_pool",0)))+maxi(0,int(force.get("scattered_pool",0)))+maxi(0,int(force.get("captured_pool",0)))
 	return total
@@ -3427,6 +3441,11 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		var field_formations:Array=force.get("formations",[])
 		for formation_index in field_formations.size(): field_formations[formation_index]["personnel_condition"]=move_toward(float(field_formations[formation_index].get("personnel_condition",field_condition)),field_condition,0.016)
 		force["formations"]=field_formations
+		# Fodder, fuel, rounds and spares come on the same line; horses can graze.
+		var at_home:=_army_is_home(force)
+		force["stores_share"]=1.0 if at_home else sustainment.stores_share(force,_force_provision_access(force),FieldRations.forage_share(force))
+		sustainment.hunger_day(force,float(WorldSimulation.span))
+		sustainment.recovery_day(force,float(WorldSimulation.span))
 		field_armies[force_index]=force
 	for force_index in occupation_forces.size():
 		var force:Dictionary=occupation_forces[force_index]
@@ -3447,6 +3466,9 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		var occupation_formations:Array=force.get("formations",[])
 		for formation_index in occupation_formations.size(): occupation_formations[formation_index]["personnel_condition"]=move_toward(float(occupation_formations[formation_index].get("personnel_condition",occupation_condition)),occupation_condition,0.018)
 		force["formations"]=occupation_formations
+		force["stores_share"]=sustainment.stores_share(force,_garrison_provision_access(force),0.0)
+		sustainment.hunger_day(force,float(WorldSimulation.span))
+		sustainment.recovery_day(force,float(WorldSimulation.span))
 		occupation_forces[force_index]=force
 
 
@@ -3583,6 +3605,7 @@ func export_state()->Dictionary:
 		"occupation_transfers":occupation_transfers.data.duplicate(true),
 		"siege_recovery":recovery.data.duplicate(true),
 		"field_armies":field_armies.duplicate(true),
+		"field_drafts":field_drafts.duplicate(true),
 		"runner_messages":runner_messages.duplicate(true),
 		"army_templates":army_templates.duplicate(true),
 		"next_army_template_id":next_army_template_id,
@@ -3949,8 +3972,13 @@ func _apply_imported_state(payload:Dictionary)->void:
 	for force_variant in payload.get("occupation_forces",[]):
 		if force_variant is Dictionary: occupation_forces.append((force_variant as Dictionary).duplicate(true))
 	field_armies.clear()
+	field_drafts.clear()
 	for force_variant in payload.get("field_armies",[]):
 		if force_variant is Dictionary: field_armies.append((force_variant as Dictionary).duplicate(true))
+	field_drafts.clear()
+	var saved_drafts:Variant=payload.get("field_drafts",[])
+	if preload("res://scripts/field_sustainment.gd").valid_drafts(saved_drafts):
+		for draft in saved_drafts: field_drafts.append((draft as Dictionary).duplicate(true))
 	runner_messages.clear()
 	for message_variant in payload.get("runner_messages",[]):
 		if message_variant is Dictionary: runner_messages.append((message_variant as Dictionary).duplicate(true))
@@ -4617,6 +4645,7 @@ func _process_military_day()->void:
 	_process_equipment_production_day()
 	_process_training_injuries_day()
 	recruit_deploy.prepare()
+	sustainment.draft_day()
 	_process_requested_templates()
 	_ensure_automatic_basic_training()
 	if not home_fighting:
@@ -4624,6 +4653,7 @@ func _process_military_day()->void:
 		recruit_deploy.deploy_ready()
 	_process_training_program_day()
 	_process_field_army_movement_day()
+	sustainment.arrivals_day()
 	_process_army_runners_day()
 	_process_siege_day()
 	occupation_transfers.advance(int(WorldSimulation.state.elapsed_days))
@@ -4848,8 +4878,10 @@ func _deliver_inventory_replacements(delivery_limit:float)->int:
 
 
 func _deliver_stationed_field_equipment(delivery_limit:float)->float:
-	# Home reserve and armies physically at the home settlement share one delivery
-	# budget and inventory. This is not remote resupply or free equipment.
+	# Home reserve and every band share one delivery budget and inventory. A
+	# band at home takes what the budget allows; a band away takes it along its
+	# supply line, so only the share its carriers bring over the haul arrives
+	# (field_sustainment.gd). First-priority bands are served first.
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:return 0.0
 	var destination:=_movement_destination("player_home")
 	if destination.has("error"):return 0.0
@@ -4857,23 +4889,32 @@ func _deliver_stationed_field_equipment(delivery_limit:float)->float:
 	var point:=Vector2(float(home_position.get("x",0)),float(home_position.get("z",0)))
 	var reserve:=home_army
 	var remaining:=maxf(0,delivery_limit)
-	for index in field_armies.size():
+	var order:=range(field_armies.size())
+	order.sort_custom(func(a,b): return sustainment.priority_rank(field_armies[a])<sustainment.priority_rank(field_armies[b]) or (sustainment.priority_rank(field_armies[a])==sustainment.priority_rank(field_armies[b]) and a<b))
+	for index in order:
 		if remaining<=.000001:break
 		var army:Dictionary=field_armies[index]
 		var location:Dictionary=army.get("position",{})
-		if not _army_is_home(army) or location.is_empty():continue
-		if Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_to(point)>.25:continue
+		if location.is_empty():continue
 		if command_hierarchy.battle.engaged(int(army.get("army_id",-1))):continue
+		var at_home:=_army_is_home(army) and Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_to(point)<=.25
+		if not at_home and String(army.get("priority","normal"))=="last":continue
+		# What leaves home for a distant band is what its line can carry there.
+		var reach:=1.0 if at_home else clampf(_force_provision_access(army),0.0,1.0)
+		if reach<=0.01:continue
+		var offered:=remaining*reach
 		home_army=army
-		var delivered:=_deliver_inventory_replacements(remaining)
-		remaining=maxf(0,remaining-float(home_army.get("equipment_delivery_load_used",0)))
-		var ammunition:=_deliver_ammunition(remaining if _next_equipment_delivery_load()<=0 else 0.0)
-		remaining=maxf(0,remaining-float(home_army.get("ammunition_delivery_load_used",0)))
+		var delivered:=_deliver_inventory_replacements(offered)
+		var used:=float(home_army.get("equipment_delivery_load_used",0))
+		var ammunition:=_deliver_ammunition(maxf(0,offered-used) if _next_equipment_delivery_load()<=0 else 0.0)
+		used+=float(home_army.get("ammunition_delivery_load_used",0))
+		remaining=maxf(0,remaining-used)
 		home_army["equipment_delivered_today"]=delivered
 		home_army["ammunition_delivered_today"]=ammunition
 		var rebuilt:Dictionary=simulator.create_formation_force(String(army.get("name","Army")),home_army.get("formations",[]),float(army.get("morale",1)),float(army.get("readiness",1)))
 		for key:String in ["troops","attack","defense","armor","penetration","formations"]:home_army[key]=rebuilt[key]
-		home_army["last_report"]=_army_report_snapshot(home_army)
+		# A distant band's news still comes by runner (_process_army_runners_day).
+		if at_home: home_army["last_report"]=_army_report_snapshot(home_army)
 		field_armies[index]=home_army
 		home_army=reserve
 	return maxf(0,delivery_limit-remaining)
@@ -5193,6 +5234,10 @@ func _process_training_day()->void:
 			continue
 		if training.has("build_batch") or training.has("deployment_line"):
 			training_queue[index]=training;continue
+		if String(training.get("mode",""))=="field_draft":
+			sustainment.dispatch(training)
+			training_queue.remove_at(index)
+			continue
 		_complete_training(training)
 		training_queue.remove_at(index)
 	_complete_ready_build_batches()

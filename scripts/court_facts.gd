@@ -375,7 +375,8 @@ static func fed_facts(report:Dictionary)->Dictionary:
 	var parts:=Supply.percents(float(report.get("ratio",0.0)),[float(report.get("local",0.0)),float(report.get("foraged",0.0)),float(report.get("carried",0.0))])
 	return {"gets":roundi(float(report.get("ratio",0.0))*100.0),"from_town":int(parts[0]),"foraged":int(parts[1]),"carried":int(parts[2]),
 		"state":Supply.state_words(String(report.get("state",""))),"hungry_days":roundi(float(report.get("hungry_days",0.0))) if bool(report.get("hungry",false)) else 0,
-		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words",""))}
+		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words","")),
+		"stores":roundi(float(report.get("stores_share",1.0))*100.0),"sick":int((report.get("hunger_losses",{}) as Dictionary).get("sick",0)),"deserted":int((report.get("hunger_losses",{}) as Dictionary).get("deserted",0)),"dead":int((report.get("hunger_losses",{}) as Dictionary).get("dead",0))}
 
 ## "; food 60% (35% foraged, 25% carried), 4 days from Seanstone by cart
 ## track, hungry 3 days" for the prompt's band and garrison lines.
@@ -388,6 +389,9 @@ static func fed_line(fed:Dictionary)->String:
 	if int(fed.get("carried",0))>0: shares.append("%d%% carried" % int(fed.carried))
 	var out:="; food %d%%%s, %s" % [int(fed.get("gets",0)),(" ("+", ".join(shares)+")") if not shares.is_empty() else "",String(fed.get("line",""))]
 	if int(fed.get("hungry_days",0))>0: out+=", hungry %d days" % int(fed.hungry_days)
+	if int(fed.get("stores",100))<100: out+=", fodder, fuel and rounds %d%%" % int(fed.stores)
+	var lost:=int(fed.get("sick",0))+int(fed.get("deserted",0))+int(fed.get("dead",0))
+	if lost>0: out+="; hunger has cost %d fallen sick, %d gone home and %d dead" % [int(fed.get("sick",0)),int(fed.get("deserted",0)),int(fed.get("dead",0))]
 	return out
 
 const CAPTIVE_FATE:={"enslave":"sent home as bondservants","release":"let go","parole":"let go on their word","ransom":"given back for ransom","execute":"put to death","exchange":"traded for our own people","hold":"held under guard"}

@@ -245,10 +245,16 @@ func _row(row:Dictionary)->void:
 	_glyph(hungry_row,Icons.logistics_texture("hungry",T.RED_TEXT,32),14.0)
 	var hungry_days:=_text(hungry_row,"",12,T.RED_TEXT,true);_whole(hungry_days)
 	if wide:top.move_child(hungry_slot,line.get_index()+1)
+	var queue:=Button.new();queue.name="Priority";queue.focus_mode=Control.FOCUS_NONE;queue.custom_minimum_size=Vector2(0,26);queue.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	queue.visible=String(row.get("force_kind",""))=="field"
+	var army_id:=int(row.get("army_id",0))
+	queue.pressed.connect(func()->void:cycle_priority(army_id))
+	second.add_child(queue)
+	var coming:=_text(second,"",12,T.INK_MUTED);coming.name="Coming";_whole(coming);coming.mouse_filter=Control.MOUSE_FILTER_PASS
 	var gear:=HFlowContainer.new();gear.name="Gear";gear.add_theme_constant_override("h_separation",6);gear.add_theme_constant_override("v_separation",4);gear.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	gear.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(gear)
 	live.append({"key":String(row.key),"panel":panel,"sack":sack,"face":face,"face_key":"","who":who,"title":title,"men":men,"meter":meter,"line":line,"hub_mark":hub_mark,"hub":hub,"span":span,"road":road,
-		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":""})
+		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming})
 
 
 func _update_values()->void:
@@ -281,6 +287,8 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	var reasons:=why_words(row)
 	control.who.tooltip_text="No runner has come from them yet." if unknown else String(row.get("words",""))+("\n"+reasons if reasons!="" and not reported else "")
 	var head:=("Supply %d%%, %s." % [roundi(ratio*100.0),BarModel.report_words(age)]) if reported else shares_words(row)
+	var stores:=float(row.get("stores_share",1.0))
+	if stores<0.995 and not reported:head+="\nFodder, fuel and rounds: %d%% arrive. Short stores weaken horses, guns and machines." % roundi(stores*100.0)
 	control.meter.set_reading(ratio,"%d%%" % roundi(ratio*100.0),Supply.state_color(state),"%s\n%s" % [head,reasons] if reasons!="" else head)
 	var at_home:=bool(row.get("at_home",false))
 	var kind:=String(row.get("hub_kind",""))
@@ -300,7 +308,22 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	(control.hungry as Control).visible=hungry
 	var hungry_days:=roundi(float(row.get("hungry_days",0.0)))
 	control.hungry_days.text="%d day%s" % [hungry_days,"" if hungry_days==1 else "s"]
-	(control.hungry as Control).tooltip_text="Hungry %d days: below a fed day's ration.\nHunger wears down their will and their health." % hungry_days
+	var lost:Dictionary=row.get("hunger_losses",{})
+	var hunger_tip:="Hungry %d days: below three quarters of a day's ration.\nEach hungry day costs men: some fall sick, some go home, some die." % hungry_days
+	if int(lost.get("sick",0))+int(lost.get("deserted",0))+int(lost.get("dead",0))>0:
+		hunger_tip+="\nSo far: %d fallen sick, %d gone home, %d dead." % [int(lost.get("sick",0)),int(lost.get("deserted",0)),int(lost.get("dead",0))]
+	(control.hungry as Control).tooltip_text=hunger_tip
+	var field:=String(row.get("force_kind",""))=="field"
+	var queue:Button=control.queue
+	queue.visible=field and not unknown
+	var priority:=String(row.get("priority","normal"))
+	queue.text=String(Model.PRIORITY_WORDS.get(priority,"Supplied in turn"))
+	queue.tooltip_text=String(Model.PRIORITY_TIPS.get(priority,""))+"\nClick to change."
+	var drafts:Dictionary=row.get("drafts",{})
+	var coming:=int(drafts.get("on_road",0))+int(drafts.get("in_training",0))
+	control.coming.visible=field and coming>0
+	control.coming.text="+%s coming" % EraWords.grouped(coming)
+	control.coming.tooltip_text=Model.drafts_words(drafts,int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0)+".\nLosses are replaced by drafts trained at home, who walk out and join."
 	_update_gear(control,row.get("short",[]))
 
 
@@ -343,6 +366,17 @@ static func why_words(row:Dictionary)->String:
 		var text:=String(reason)
 		if text!="":lines.append(text.substr(0,1).to_upper()+text.substr(1)+".")
 	return "\n".join(lines)
+
+
+## First, in turn, last, first: who gets gear, rounds and replacements
+## before the others (military_campaign.set_army_priority).
+func cycle_priority(army_id:int)->void:
+	var mc:=MilitaryCampaign
+	var index:int=mc._field_army_index(army_id)
+	if index<0:return
+	var now:=String(mc.field_armies[index].get("priority","normal"))
+	mc.set_army_priority(army_id,{"first":"normal","normal":"last","last":"first"}.get(now,"normal"))
+	refresh(true)
 
 
 func open_production()->void:

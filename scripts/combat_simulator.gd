@@ -166,6 +166,17 @@ static func ammo_per(weapon_id:String)->int:
 static func ammo_type(weapon_id:String)->String:
 	return String(Ledger.row(weapon_id).get("ammo",""))
 
+## Stores (fodder, fuel, rounds, spares) a kit asks of the supply line besides
+## bread, per man (equipment_ledger.gd supply). A kit asking a load or more a
+## man a day fights weaker when its band's stores run short, down to 35%.
+const STORES_FLOOR:=0.35
+const STORES_DEPENDENT:=1.0
+
+static func stores_factor(weapon_id:String,share:float)->float:
+	if share>=1.0 or not Ledger.has(weapon_id): return 1.0
+	if Ledger.supply(weapon_id)/Ledger.crew(weapon_id)<STORES_DEPENDENT: return 1.0
+	return STORES_FLOOR+(1.0-STORES_FLOOR)*clampf(share,0.0,1.0)
+
 ## Armour, HOI4's way but once: a formation is as "hard" as its kit's armour
 ## makes it (cloth 0, mail about half, plate and tanks nearly all). Fire at a
 ## hard target gets through by how well it pierces that armour: all of it
@@ -342,6 +353,9 @@ func create_formation_force(name: String, formations: Array, morale := 1.0, read
 func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = {}) -> Dictionary:
 	var attacking_force := _normalize_force(attacker, "Attacker")
 	var defending_force := _normalize_force(defender, "Defender")
+	# Short stores (fodder, fuel, rounds) weaken the kits that need them.
+	attacking_force["stores_share"]=clampf(float(attacker.get("stores_share",1.0)),0.0,1.0)
+	defending_force["stores_share"]=clampf(float(defender.get("stores_share",1.0)),0.0,1.0)
 	var seed := int(options.get("seed", 1))
 	var terrain_defense := clampf(float(options.get("terrain_defense", 1.0)), 0.5, 2.0)
 	var casualty_intensity:=clampf(float(options.get("casualty_intensity",1.0)),0.20,2.0)
@@ -865,6 +879,7 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
 	# The enemy's mix is the same for every formation: weigh it once per arm.
 	var matchups:Dictionary={}
+	var stores_share:=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	var enemy_armor:=_armor_profile(enemy_formations)
 	var enemy_hard:=float(enemy_armor.hard)
 	var enemy_fire:=_fire_profile(enemy_formations)
@@ -902,12 +917,12 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var through:=_through(enemy_fire,weapon_id,equipment_ratio)
 		if lean:
 			result.append({"count":count,
-				"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+				"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*stores_factor(weapon_id,stores_share)*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
 				"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through})
 			continue
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*stores_factor(weapon_id,stores_share)*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
 			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
 			"doctrine_defense":doctrine_defense,"matchup":matchup,"piercing":piercing,"through":through,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})

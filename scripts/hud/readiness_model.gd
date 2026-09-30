@@ -116,6 +116,13 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 				"making_per_day":float(entry.get("making_per_day",0.0)),"category":String(entry.get("category",Logistics.category(item)))})
 		short.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.missing)>int(b.missing))
 		row["short"]=short
+		# A band's place in the supply queue and the replacements walking out
+		# to it (field_sustainment.gd), read today at home.
+		if String(report.get("force_kind",""))=="field":
+			var army_index:int=mc._field_army_index(int(report.get("army_id",0)))
+			var army:Dictionary=mc.field_armies[army_index] if army_index>=0 else {}
+			row["priority"]=String(army.get("priority","normal"))
+			row["drafts"]=mc.sustainment.drafts_for(int(report.get("army_id",0)))
 		row["order"]=ORDER.find(String(report.get("force_kind","field")))*10000+out.size()
 		out.append(row)
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.order)<int(b.order))
@@ -148,6 +155,21 @@ static func _fallback_title(report:Dictionary)->String:
 		"home":return Logistics.levy_name().substr(0,1).to_upper()+Logistics.levy_name().substr(1)
 		"garrison":return "Garrison of %s" % Supply.town_name("",String(report.get("region_id","")),String(report.get("name","the town")))
 	return String(report.get("name","Our band"))
+
+
+## "12 on the road, first in 3 days; 8 in training" for a band's replacements.
+static func drafts_words(drafts:Dictionary,today:int)->String:
+	var parts:PackedStringArray=[]
+	var road:=int(drafts.get("on_road",0))
+	if road>0:
+		var wait:=maxi(0,int(drafts.get("next_arrival_day",today))-today)
+		parts.append("%d replacements on the road, the first %s" % [road,"arriving today" if wait<=0 else ("in %d day%s" % [wait,"" if wait==1 else "s"])])
+	var training:=int(drafts.get("in_training",0))
+	if training>0: parts.append("%d in training at home" % training)
+	return "; ".join(parts)
+
+const PRIORITY_WORDS:={"first":"Supplied first","normal":"Supplied in turn","last":"Supplied last"}
+const PRIORITY_TIPS:={"first":"This band gets gear, rounds and replacements before the others.","normal":"This band waits its turn for gear, rounds and replacements.","last":"This band gets gear only at home and no replacements until the others are served."}
 
 
 ## Plain words for a gear shortfall, for its tooltip.

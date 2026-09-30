@@ -1,0 +1,142 @@
+extends GdUnitTestSuite
+## KEEPING ARMIES IN THE FIELD (scripts/field_sustainment.gd): hunger costs a
+## band men by stated rates and every one of them is accounted for (sick,
+## gone home, dead); the sick come back when fed; fodder, fuel and rounds are
+## a second share that weakens only the kits that need them; losses are
+## replaced by drafts trained at the Reinforce pace who walk out and join,
+## counted as field personnel the whole way; drafts survive a save.
+
+const Sustainment:=preload("res://scripts/field_sustainment.gd")
+const Combat:=preload("res://scripts/combat_simulator.gd")
+
+func before_test()->void:
+	WorldSimulation.clear();GameState.reset_for_new_world(4242);MilitaryCampaign.reset_for_new_world()
+	GameState.settlement_site_committed=true;GameState.settlement_founded_at=Vector3.ZERO
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+
+func after_test()->void:
+	WorldSimulation.clear()
+
+func _formation(id:int,unit:String,weapon:String,count:int,authorized:int=-1)->Dictionary:
+	var sim=MilitaryCampaign.simulator
+	var full:=count if authorized<0 else authorized
+	var sets:int=sim.equipment_required_for_weapon(weapon,full)
+	return {"id":id,"unit":unit,"weapon":weapon,"count":count,"authorized_count":full,"equipment":sets,"equipment_required":sets,"ammunition":0,"ammunition_required":0,"training":0.7,"experience":0.2,"personnel_condition":1.0}
+
+func _band(id:int,formations:Array,x:float=40.0)->Dictionary:
+	var force:Dictionary=MilitaryCampaign.simulator.create_formation_force("Band %d" % id,formations,1.0,1.0)
+	force.merge({"army_id":id,"status":"stationed","location_id":"field","position":{"x":x,"z":0.0},"supply_level":1.0},true)
+	return force
+
+func test_hunger_costs_men_at_the_stated_rate_and_every_man_is_accounted_for()->void:
+	var force:=_band(1,[_formation(1,"spearman","spear",600),_formation(2,"archer","bow",300)])
+	force["provision_ratio"]=0.0
+	force["hungry_days"]=5.0
+	var before:=int(force.troops)
+	var lost:={"sick":0,"deserted":0,"dead":0}
+	for day in 30:
+		var today:Dictionary=MilitaryCampaign.sustainment.hunger_day(force,1.0)
+		for key in lost: lost[key]=int(lost[key])+int(today[key])
+	var total:=int(lost.sick)+int(lost.deserted)+int(lost.dead)
+	# No food at all for a month: about a quarter of the band (1.1% a day).
+	assert_float(float(total)/before).is_between(0.24,0.30)
+	assert_int(int(force.troops)+total).is_equal(before)
+	assert_int(int(force.wounded_pool)).is_equal(int(lost.sick))
+	assert_float(float(lost.sick)/total).is_between(0.40,0.50)
+	assert_float(float(lost.dead)/total).is_between(0.15,0.25)
+	assert_dict(force.hunger_losses as Dictionary).is_equal(lost)
+
+func test_a_fed_band_or_a_short_first_day_costs_nothing()->void:
+	var force:=_band(1,[_formation(1,"spearman","spear",300)])
+	force["provision_ratio"]=0.9;force["hungry_days"]=6.0
+	assert_int(int(MilitaryCampaign.sustainment.hunger_day(force,1.0).dead)).is_equal(0)
+	force["provision_ratio"]=0.2;force["hungry_days"]=1.0
+	for day in 10: MilitaryCampaign.sustainment.hunger_day(force,1.0)
+	assert_int(int(force.troops)).is_equal(300)
+
+func test_the_sick_rejoin_their_places_when_fed()->void:
+	var force:=_band(1,[_formation(1,"spearman","spear",200,300)])
+	force["wounded_pool"]=100
+	force["provision_ratio"]=1.0
+	for day in 60: MilitaryCampaign.sustainment.recovery_day(force,1.0)
+	assert_int(int(force.troops)+int(force.wounded_pool)).is_equal(300)
+	assert_int(int(force.wounded_pool)).is_less(15)
+	assert_int(int(force.formations[0].count)).is_less_equal(300)
+	force["provision_ratio"]=0.3
+	var sick:=int(force.wounded_pool)
+	MilitaryCampaign.sustainment.recovery_day(force,1.0)
+	assert_int(int(force.wounded_pool)).is_equal(sick)
+
+func test_stores_are_a_second_share_that_horses_can_graze_and_tanks_cannot()->void:
+	var tanks:=_band(1,[_formation(1,"armored_formation","armored_vehicle",50)])
+	var horse:=_band(2,[_formation(1,"cavalry","lance",100)])
+	var spears:=_band(3,[_formation(1,"spearman","spear",100)])
+	assert_float(Sustainment.stores_share(tanks,0.5,0.8)).is_equal_approx(0.5,0.0001)
+	assert_float(Sustainment.stores_share(horse,0.5,0.8)).is_equal_approx(0.9,0.0001)
+	assert_float(Sustainment.stores_share(spears,0.0,0.0)).is_equal(1.0)
+	# Short stores weaken tanks and horses, not spearmen.
+	assert_float(Combat.stores_factor("armored_vehicle",0.2)).is_less(0.5)
+	assert_float(Combat.stores_factor("spear",0.0)).is_equal(1.0)
+	var enemy:=_band(9,[_formation(1,"rifle_infantry","service_rifle",200)])
+	var full:float=MilitaryCampaign.simulator.evaluate_force(tanks,enemy,1.0)[0].attack
+	tanks["stores_share"]=0.2
+	var short:float=MilitaryCampaign.simulator.evaluate_force(tanks,enemy,1.0)[0].attack
+	assert_float(short).is_less(full*0.5)
+
+func test_losses_are_replaced_by_drafts_who_walk_out_and_join()->void:
+	GameState.population_cohorts["working_age"]=500.0
+	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
+	MilitaryCampaign.field_armies.assign([band])
+	var mobilized_before:int=MilitaryCampaign._mobilized_count()
+	var started:Array=MilitaryCampaign.sustainment.draft_day()
+	assert_int(started.size()).is_equal(1)
+	assert_int(int(started[0].count)).is_equal(10)
+	var order:Dictionary=MilitaryCampaign.training_queue[-1]
+	assert_str(String(order.mode)).is_equal("field_draft")
+	assert_int(int(order.field_army_id)).is_equal(7)
+	# The Reinforce pace: 0.58 of a full course.
+	assert_float(float(order.required_days)).is_equal_approx(maxf(3.0,preload("res://scripts/military_unit_catalog.gd").training_days("levy")*0.58),0.001)
+	# A second day does not draft the same places twice.
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
+	var mobilized_training:int=MilitaryCampaign._mobilized_count()
+	assert_int(mobilized_training).is_equal(mobilized_before+10)
+	# Training done: they leave for the band and are counted on the road.
+	order.progress_days=order.required_days
+	MilitaryCampaign.training_queue.erase(order)
+	var draft:Dictionary=MilitaryCampaign.sustainment.dispatch(order)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(mobilized_training)
+	assert_int(int(draft.arrive_day)).is_greater(int(GameState.elapsed_days))
+	# On the road the band cannot take them yet.
+	assert_int(MilitaryCampaign.sustainment.arrivals_day().size()).is_equal(0)
+	GameState.elapsed_days=int(draft.arrive_day)
+	var joined:Array=MilitaryCampaign.sustainment.arrivals_day()
+	assert_int(joined.size()).is_equal(1)
+	assert_int(int(MilitaryCampaign.field_armies[0].formations[0].count)).is_equal(30)
+	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(30)
+	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(0)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(mobilized_training)
+
+func test_a_draft_whose_band_is_gone_comes_home()->void:
+	MilitaryCampaign.field_drafts.assign([{"army_id":99,"formation_id":1,"unit":"levy","weapon":"improvised","count":8,"equipment":8,"training":0.4,"left_day":0,"arrive_day":0}])
+	var recruits:int=MilitaryCampaign.aggregate_recruits
+	var stock:=int(MilitaryCampaign.military_inventory.get("improvised",0))
+	MilitaryCampaign.sustainment.arrivals_day()
+	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(recruits+8)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(stock+8)
+	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(0)
+
+func test_last_priority_bands_are_not_redrafted()->void:
+	GameState.population_cohorts["working_age"]=500.0
+	var band:=_band(3,[_formation(5,"levy","improvised",10,20)])
+	band["priority"]="last"
+	MilitaryCampaign.field_armies.assign([band])
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
+
+func test_drafts_on_the_road_survive_a_save()->void:
+	MilitaryCampaign.field_drafts.assign([{"army_id":4,"formation_id":2,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.4,"left_day":1,"arrive_day":9}])
+	var saved:Dictionary=MilitaryCampaign.export_state()
+	MilitaryCampaign.field_drafts.clear()
+	assert_dict(MilitaryCampaign.import_state(saved)).not_contains_keys(["error"])
+	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(1)
+	assert_int(int(MilitaryCampaign.field_drafts[0].arrive_day)).is_equal(9)
+	assert_bool(Sustainment.valid_drafts([{"army_id":-1}])).is_false()

@@ -1261,6 +1261,10 @@ static func of_force(force:Dictionary)->Dictionary:
 	report["supply_level"]=clampf(float(force.get("supply_level",report.ratio)),0.0,1.0)
 	report["hungry_days"]=float(force.get("hungry_days",0.0))
 	report["hungry"]=FieldRations.is_hungry(force)
+	# What hunger has cost the band so far, and its fodder, fuel and rounds
+	# (field_sustainment.gd): the war leader states these numbers.
+	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary else {}
+	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	_siege_and_blockade(report,force)
 	report["why"]=why(report)
 	report["words"]=words(report)

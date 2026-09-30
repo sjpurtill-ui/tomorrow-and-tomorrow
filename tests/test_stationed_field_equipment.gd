@@ -18,11 +18,20 @@ func test_stationed_armies_share_finite_delivery_budget_and_inventory()->void:
 	assert_bool(is_same(reserve,MilitaryCampaign.home_army)).is_true()
 	MilitaryCampaign._deliver_stationed_field_equipment(100)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(2)
-func test_no_remote_or_moving_equipment_teleportation()->void:
-	var moving:=army(2);moving.status="moving"
-	MilitaryCampaign.field_armies.assign([army(1,20),moving])
-	assert_float(MilitaryCampaign._deliver_stationed_field_equipment(100)).is_equal(0.0)
-	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(10)
+func test_distant_bands_get_gear_only_as_far_as_their_line_reaches()->void:
+	# A band away takes gear along its supply line (field_sustainment.gd):
+	# only the share its carriers bring over the haul, never more.
+	var far:=army(1,60);far.troops=4
+	var idle:=army(3,60);idle.troops=4;idle.priority="last"
+	MilitaryCampaign.field_armies.assign([far,idle])
+	var reach:=MilitaryCampaign._force_provision_access(far)
+	assert_float(reach).is_less(1.0)
+	var used:=MilitaryCampaign._deliver_stationed_field_equipment(10)
+	assert_float(used).is_less_equal(10.0*reach+.00001)
+	var given:=int(MilitaryCampaign.field_armies[0].formations[0].equipment)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(10-given)
+	# A Last-priority band away waits for its gear.
+	assert_int(int(MilitaryCampaign.field_armies[1].formations[0].equipment)).is_equal(0)
 func test_sub_item_budget_and_convoy_do_not_issue_equipment()->void:
 	MilitaryCampaign.field_armies.assign([army(1)])
 	assert_float(MilitaryCampaign._deliver_stationed_field_equipment(.1)).is_equal(0.0)
