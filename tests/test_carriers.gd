@@ -135,3 +135,15 @@ func test_the_map_is_honest_about_one_more_band()->void:
 	var alone:=Supply.preview_ratio({"trip":r.preview.trip,"sum_rt":{"lorry":0.0,"cart":0.0,"porter":0.0},"loads":0.0,"bread":0.0,"efficiency":r.efficiency,"rail":0.0},float(here.effort),float(here.cold),400)
 	var shared:=Supply.preview_ratio(r.preview,float(here.effort),float(here.cold),400)
 	assert_float(shared).is_less(alone)
+
+func test_the_war_leader_states_the_carriers_numbers()->void:
+	var Facts:=preload("res://scripts/court_facts.gd")
+	var band:=_band(1,"spearman","spear",400,60.0)
+	GameState.population_allocations["Logistics"]=10
+	MilitaryCampaign.field_armies.assign([band])
+	var s:=Facts.sheet(["war"])
+	var carriers:Dictionary=s.get("carriers",{})
+	var r:=MilitaryCampaign.carrier_reading()
+	assert_int(int(carriers.asked)).is_equal(roundi(float(r.demand)))
+	assert_int(int(carriers.porters)).is_equal(10)
+	assert_str(Facts.text(s)).contains("Carriers: 10 on foot")

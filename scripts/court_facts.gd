@@ -317,6 +317,17 @@ static func _war(out:Dictionary)->void:
 		garrisons.append({"town":TownNames.of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name",""))),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
 			"fed":fed_facts(Supply.of_force(force))})
 	out["garrisons"]=garrisons
+	# Who carries the bands' supply and how much of it (carriers.gd), and the
+	# replacements on their way (field_sustainment.gd): the war leader's to say.
+	if mc.has_method("carrier_reading"):
+		var r:Dictionary=mc.carrier_reading()
+		var fleet:Dictionary=r.get("fleet",{})
+		out["carriers"]={"porters":int(fleet.get("porters",0)),"carts":int(fleet.get("carts",0)),"lorries":int(fleet.get("lorries",0)),"asked":roundi(float(r.get("demand",0.0))),"brought":roundi(minf(float(r.get("moved",0.0)),float(r.get("demand",0.0)))),"bread":roundi(float(r.get("food",1.0))*100.0),"stores":roundi(float(r.get("stores",1.0))*100.0)}
+	if "sustainment" in mc:
+		var coming:=0
+		for order in mc.training_queue:
+			if order is Dictionary and String((order as Dictionary).get("mode",""))=="field_draft": coming+=int((order as Dictionary).get("count",0))
+		out["replacements"]={"on_road":int(mc.sustainment.drafts_on_road()),"in_training":coming}
 	var chases:Array=[]
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
 	out["chases"]=chases
@@ -629,6 +640,12 @@ static func text(s:Dictionary)->String:
 		var gar:PackedStringArray=PackedStringArray()
 		for g:Dictionary in s.get("garrisons",[]): gar.append("%s: %d fighters%s%s%s" % [String(g.town),int(g.fighters),(", %d wounded" % int(g.wounded)) if int(g.wounded)>0 else "",(" under "+String(g.commander)) if String(g.commander)!="" else "",fed_line(g.get("fed",{}))])
 		lines.append("Garrisons: %s." % ("; ".join(gar) if not gar.is_empty() else "none"))
+		var carriers:Dictionary=s.get("carriers",{})
+		if int(carriers.get("asked",0))>0:
+			lines.append("Carriers: %d on foot, %d carts, %d lorries; they bring %d of the %d loads a day the bands and garrisons ask. Bread goes first: %d%% of the bread arrives, %d%% of the fodder, fuel and rounds." % [int(carriers.porters),int(carriers.carts),int(carriers.lorries),int(carriers.brought),int(carriers.asked),int(carriers.bread),int(carriers.stores)])
+		var replacements:Dictionary=s.get("replacements",{})
+		if int(replacements.get("on_road",0))+int(replacements.get("in_training",0))>0:
+			lines.append("Replacements for the bands: %d in training at home, %d on the road to them." % [int(replacements.in_training),int(replacements.on_road)])
 		if not (s.get("chases",[]) as Array).is_empty(): lines.append("Out on a chase: %s." % "; ".join(PackedStringArray(s.chases)))
 		var fights:PackedStringArray=PackedStringArray()
 		for b:Dictionary in s.get("battles",[]): fights.append(battle_words(b))
