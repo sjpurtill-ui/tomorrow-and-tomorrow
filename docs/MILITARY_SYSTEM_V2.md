@@ -5,6 +5,40 @@ Read with `GENERAL_CAMPAIGN_DESIGN.md`, `RECRUIT_DEPLOY_DESIGN.md` and `ADJUDICA
 The general still fights the battles. The player decides purpose, makes the
 army and keeps it fed. Nothing here adds a form to fill in.
 
+## As built: read this first
+
+The sections after this one are the plan as first written. The critic rounds
+and the iteration log at the end record what changed, and the code follows
+the log. In short:
+
+- **Kits.** `scripts/equipment_ledger.gd` has one row per land kit: its
+  family, the year its gate opens, per-man attack, defense, armour and
+  pierce, crew (below one means one man runs several machines), rounds,
+  supply loads a day, recipe and glyph. Gates live in
+  `military_unit_catalog.EQUIPMENT_GATES`.
+- **Armour** works by hardness. The blow is scaled by
+  `(pierce / armour) ^ 2.5`, never below 0.10, and losses fall by how much
+  fire gets through.
+- **Supply** (`carriers.gd`, `supply_state.gd`). Each Logistics worker drives
+  a lorry, else a cart, else carries 16 loads, each kind at its own pace.
+  Bread is carried first and stores after. The share of carrying set aside
+  for food feeds the rations. Stores weaken the kits that live on them.
+- **Staying in the field** (`field_sustainment.gd`).
+  - Hunger costs men: 1.1% a day at no food. Of those, 45% fall sick, 35% go
+    home and 20% die.
+  - Morale and wounded recover in a supplied camp.
+  - Drafts come from those set aside for defence and walk out to fill
+    places.
+  - Gear follows the line, by each band's priority.
+- **The last age.** Networked infantry, main battle tanks, precision fires,
+  drone teams, counter-drone batteries, robotic vehicles, exosuits and
+  combat frames. Machines are run by operators.
+- **Looks.** One ink glyph per kit. The war chart's branch and age come from
+  the kits, and battle marks change by age.
+- **Recruiting and AI.** Template cards give the engine's numbers. A line's
+  bands serve under one general. Rival staffs raise units by what counters
+  the army they face.
+
 ## Where we are (audit, 2026-09-29)
 
 Five read-only audits of the current code found the following. Line numbers are
