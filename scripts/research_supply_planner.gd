@@ -17,7 +17,7 @@ static func frontier(target:String)->Dictionary:
 		visited[id]=true
 		var entry:Dictionary=discovery.discovery_definition(id)
 		if entry.is_empty():continue
-		if discovery._discovery_is_eligible(entry,int(state.elapsed_days)):
+		if discovery._scan_eligible(entry,int(state.elapsed_days)):
 			result[id]=int(item.distance);continue
 		for route:Dictionary in P.routes(entry):
 			var missing:Dictionary=R.evaluate(route,state.known_discoveries)

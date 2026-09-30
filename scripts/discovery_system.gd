@@ -20,6 +20,57 @@ var technology_limits:Dictionary={}
 var catalog_by_id:Dictionary={}
 var catalog_by_channel:Dictionary={}
 var _candidate_index=preload("res://scripts/research_candidate_index.gd").new()
+
+## Transient research bookkeeping, held in one Object so saves never capture it
+## (this system and its society model are saved by reflection).
+##
+## A scan is one batch of research reads (refreshing the lines, a ruler's
+## research review) inside which nothing those reads depend on changes: the
+## known discoveries, the calendar, the society's materials, ground, people,
+## institutions and contacts, its context signals and its evidence. Inside a
+## scan each question's eligibility, the design-condition snapshot, the home
+## ground and each field's need are read once, and a line's best question is
+## scored once per allocation and chosen target. Another calendar day, another
+## discovery count or another acting people starts the batch afresh. The seeded
+## tables depend only on a question, the world seed and the fixed catalog.
+class ResearchScan extends RefCounted:
+	var depth:=0
+	var state:Object=null
+	var day:=-1
+	var known_size:=-1
+	var known:Dictionary={}
+	var has_known:=false
+	var society:Dictionary={}
+	var has_society:=false
+	var environment:Dictionary={}
+	var has_environment:=false
+	var home_resources:Dictionary={}
+	var has_home_resources:=false
+	var eligible:Dictionary={}
+	var best:Dictionary={}
+	var needs:Dictionary={}
+	var seed_value:=0
+	var seeded:=false
+	var seed_tables:Dictionary={}
+	## Tables of technology_catalog, each with the catalog basis it was read
+	## from (_catalog_basis): dynamic -> entries in catalog order; foundation id
+	## -> ascending indices of the questions naming it; entries in order of
+	## this world's opening year.
+	var by_dynamic:Dictionary={}
+	var by_dynamic_basis:Array=[]
+	var children:Dictionary={}
+	var children_basis:Array=[]
+	var by_open_year:Array=[]
+	var by_open_year_basis:Array=[]
+	func clear_batch()->void:
+		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
+		environment={};has_environment=false;home_resources={};has_home_resources=false
+		eligible={};best={};needs={}
+	func clear_catalog()->void:
+		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
+		children={};children_basis=[];by_open_year=[];by_open_year_basis=[]
+var _scan:=ResearchScan.new()
+
 var latest_context:Dictionary={}
 var established_threads_cache:Array[Dictionary]=[]
 var established_threads_signature:=""
@@ -51,6 +102,7 @@ func reset_for_new_world()->void:
 	era_by_id.clear()
 	_open_year_cache.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
+	_scan=ResearchScan.new()
 	latest_context.clear()
 	established_threads_cache.clear()
 	established_threads_signature=""
@@ -108,6 +160,8 @@ func initialize() -> void:
 	era_by_id.clear()
 	_open_year_cache.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
+	_scan.clear_catalog()
+	_scan.clear_batch()
 	rng.seed = WorldSimulation.state.world_seed ^ 0x6c8e9cf5
 	catalog.append_array(ResourceKnowledgeCatalog.entries())
 	catalog.append_array(SocietyKnowledgeCatalog.entries())
@@ -239,6 +293,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	WorldSimulation.state.scholarship_level=scholarship_level()+scholarship_rate()*float(WorldSimulation.span)/365.0
 	_refresh_active_investigations()
 	var teams:=research_teams()
+	# A field's leadership factor is read once for all its lines, and each
+	# office's executing office once for all fields: nothing they read moves
+	# between lines until a question is answered, which clears both.
+	var leader_factors:Dictionary={}
+	var executing_offices:Dictionary={}
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
@@ -252,7 +311,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var activity := 0.65
 		for activity_signal in discovery.signals:
 			activity += float(effective_context.get(activity_signal, 0.0)) * 0.22
-		var leader_factor := _leader_factor(String(discovery.dynamic))
+		var direction:=String(discovery.dynamic)
+		var known_factor:Variant=leader_factors.get(direction)
+		var leader_factor:float=_loop_leader_factor(direction,executing_offices) if known_factor==null else float(known_factor)
+		leader_factors[direction]=leader_factor
 		# Catalog chances describe relative discoverability. The global time scale keeps
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
@@ -264,6 +326,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		if rng.randf()<preload("res://scripts/day_span.gd").chance(probability*0.10): progress+=rng.randf_range(0.025,0.085)
 		WorldSimulation.state.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
 		if progress>=1.0:
+			leader_factors.clear()
+			executing_offices.clear()
 			Pathways.remember(discovery,current_day)
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
@@ -445,13 +509,163 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	if progress<0.75: return "REPLICATION — the proposed method is being tested across cases"
 	return "VALIDATION — the result is close to becoming established knowledge"
 
+## Opens a scan (see ResearchScan) for the acting people. Each call needs its
+## end_research_scan; nested scans share the outermost one.
+func begin_research_scan()->void:
+	if _scan.depth==0:
+		_scan.clear_batch()
+		_scan.state=WorldSimulation.state
+	_scan.depth+=1
+
+func end_research_scan()->void:
+	_scan.depth=maxi(0,_scan.depth-1)
+	if _scan.depth==0:
+		_scan.clear_batch()
+		_scan.state=null
+
+## True inside a scan of the acting people. A new calendar day or a new
+## discovery count starts the scan's tables afresh.
+func _scan_active()->bool:
+	if _scan.depth<=0 or not is_same(_scan.state,WorldSimulation.state): return false
+	var day:=int(floor(WorldSimulation.state.elapsed_days))
+	var known_size:=WorldSimulation.state.known_discoveries.size()
+	if day!=_scan.day or known_size!=_scan.known_size:
+		_scan.clear_batch()
+		_scan.day=day
+		_scan.known_size=known_size
+	return true
+
+## The known discoveries as a set.
+func _scan_known()->Dictionary:
+	if not _scan_active():
+		var fresh:Dictionary={}
+		for id:String in WorldSimulation.state.known_discoveries: fresh[id]=true
+		return fresh
+	if not _scan.has_known:
+		for id:String in WorldSimulation.state.known_discoveries: _scan.known[id]=true
+		_scan.has_known=true
+	return _scan.known
+
+## _discovery_is_eligible, judged once per question inside a scan (with the
+## known discoveries as a set, which answers exactly as the list does).
+func _scan_eligible(discovery:Dictionary,current_day:int,known:Variant=null)->bool:
+	if not _scan_active(): return _discovery_is_eligible(discovery,current_day,known)
+	var id:=String(discovery.get("id",""))
+	var cached:Variant=_scan.eligible.get(id)
+	if cached==null:
+		cached=_discovery_is_eligible(discovery,current_day,_scan_known())
+		_scan.eligible[id]=cached
+	return bool(cached)
+
+## The acting society as the design conditions see it, once per scan.
+func _player_society()->Dictionary:
+	if not _scan_active(): return research_600_player_society()
+	if not _scan.has_society:
+		_scan.society=research_600_player_society()
+		_scan.has_society=true
+	return _scan.society
+
+## The home ground's environment profile (read-only), once per scan.
+func _home_environment()->Dictionary:
+	if WorldSimulation.food==null: return {}
+	if not _scan_active(): return WorldSimulation.food.current_environment_profile()
+	if not _scan.has_environment:
+		_scan.environment=WorldSimulation.food.current_environment_profile()
+		_scan.has_environment=true
+	return _scan.environment
+
+## Research600.home_surface_resources of the acting people, once per scan.
+func _home_surface_resources()->Dictionary:
+	if not _scan_active(): return Research600.home_surface_resources(WorldSimulation.state.player_settlements,_home_environment())
+	if not _scan.has_home_resources:
+		_scan.home_resources=Research600.home_surface_resources(WorldSimulation.state.player_settlements,_home_environment())
+		_scan.has_home_resources=true
+	return _scan.home_resources
+
+## Pathways.need, once per field inside a scan (it reads only the field and
+## the society's housing, food and newcomers).
+func _field_need(discovery:Dictionary)->float:
+	if not _scan_active(): return Pathways.need(discovery)
+	var domain:=String(discovery.get("dynamic",""))
+	var cached:Variant=_scan.needs.get(domain)
+	if cached==null:
+		cached=Pathways.need(discovery)
+		_scan.needs[domain]=cached
+	return float(cached)
+
+## A table of values fixed by a question and this world's seed.
+func _seed_table(table_name:String)->Dictionary:
+	var seed_value:=int(WorldSimulation.state.world_seed)
+	if not _scan.seeded or _scan.seed_value!=seed_value:
+		_scan.seed_tables={}
+		_scan.seed_value=seed_value
+		_scan.seeded=true
+	var table:Variant=_scan.seed_tables.get(table_name)
+	if table==null:
+		table={}
+		_scan.seed_tables[table_name]=table
+	return table
+
+## What a table of technology_catalog was read from: its size and end entries
+## and the world seed. The catalog is fixed once initialized; tests that
+## replace it change these.
+func _catalog_basis()->Array:
+	var size:=technology_catalog.size()
+	return [size,technology_catalog[0] if size>0 else null,technology_catalog[size-1] if size>0 else null,int(WorldSimulation.state.world_seed)]
+
+static func _same_basis(table:Array,basis:Array)->bool:
+	return table.size()==basis.size() and int(table[0])==int(basis[0]) and is_same(table[1],basis[1]) and is_same(table[2],basis[2]) and int(table[3])==int(basis[3])
+
+## technology_catalog entries of one field, in catalog order.
+func _technology_entries(dynamic_id:String)->Array:
+	var basis:=_catalog_basis()
+	if not _same_basis(_scan.by_dynamic_basis,basis):
+		_scan.by_dynamic={}
+		for entry:Dictionary in technology_catalog:
+			var field:=String(entry.get("dynamic",""))
+			if not _scan.by_dynamic.has(field): _scan.by_dynamic[field]=[]
+			(_scan.by_dynamic[field] as Array).append(entry)
+		_scan.by_dynamic_basis=basis
+	return _scan.by_dynamic.get(dynamic_id,[])
+
+## Every foundation named by some question (Pathways.named_foundations), with
+## the ascending technology_catalog indices of the questions naming it.
+func foundation_children()->Dictionary:
+	var basis:=_catalog_basis()
+	if not _same_basis(_scan.children_basis,basis):
+		var children:Dictionary={}
+		for index in technology_catalog.size():
+			for parent:String in Pathways.named_foundations(technology_catalog[index]):
+				var listed:Variant=children.get(parent)
+				if listed==null: children[parent]=[index]
+				elif int((listed as Array)[-1])!=index: (listed as Array).append(index)
+		_scan.children=children
+		_scan.children_basis=basis
+	return _scan.children
+
+## technology_catalog entries in order of this world's opening year
+## (research_open_year, ties in catalog order). Building it reads every
+## entry's opening year once, in catalog order.
+func technology_by_open_year()->Array:
+	var basis:=_catalog_basis()
+	if not _same_basis(_scan.by_open_year_basis,basis):
+		var keyed:Array=[]
+		for index in technology_catalog.size(): keyed.append([research_open_year(technology_catalog[index]),index])
+		keyed.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])<float(b[0]) or (float(a[0])==float(b[0]) and int(a[1])<int(b[1])))
+		var ordered:Array=[]
+		for pair:Array in keyed: ordered.append(technology_catalog[int(pair[1])])
+		_scan.by_open_year=ordered
+		_scan.by_open_year_basis=basis
+	return _scan.by_open_year
+
 func _refresh_active_investigations()->void:
+	begin_research_scan()
 	var current_day:=int(floor(WorldSimulation.state.elapsed_days))
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
-		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or id in WorldSimulation.state.known_discoveries or not _discovery_is_eligible(discovery,current_day):
+		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or _scan_known().has(id) or not _scan_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
 	_switch_to_quicker_questions(current_day)
 	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
@@ -476,6 +690,7 @@ func _refresh_active_investigations()->void:
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
 		WorldSimulation.state.active_observations.append(String(record.observation))
+	end_research_scan()
 
 
 ## A line working a question ahead of its age takes up a quicker one as soon as
@@ -592,7 +807,12 @@ func active_investigation_records_shallow()->Array[Dictionary]:
 func _discovery_is_eligible(discovery:Dictionary,current_day:int,known:Variant=null)->bool:
 	if known==null:known=WorldSimulation.state.known_discoveries
 	var id:=String(discovery.get("id",""))
-	if id in known or not _path_is_viable(discovery):return false
+	if id in known:return false
+	# Most questions still wait on a shared foundation. Every check here is a
+	# pure reading except an opening rule's readiness (it can repair its own
+	# record), so outside those rules the foundations are settled first.
+	if not OpeningOpportunities.RULES.has(id) and not Pathways.common_foundations_known(discovery,known):return false
+	if not _path_is_viable(discovery):return false
 	if not research_600_open(discovery,{},current_day):return false # research_600: era and design conditions
 	if not Research600.pursued(id,society_model.ceiling_era):return false # research_3000: superseded practice abandoned
 	return OpeningOpportunities.ready(id) and Pathways.ready(discovery,current_day,known) and _resource_requirements_met(discovery.get("resource_requirements",[]))
@@ -609,18 +829,32 @@ func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var known:Dictionary=_candidate_index.known
 	var year:=float(current_day)/365.0
 	for discovery:Dictionary in candidates:
-		if research_years_ahead(discovery,year)<NEAR_AGE_YEARS and _discovery_is_eligible(discovery,current_day,known):return true
+		if research_years_ahead(discovery,year)<NEAR_AGE_YEARS and _scan_eligible(discovery,current_day,known):return true
 	return false
 
 
+## The line's best open question. Inside a scan it is chosen once for each
+## allocation and chosen target of the line (the only inputs a scan changes).
 func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
+	if not _scan_active(): return _score_best_candidate(channel,current_day)
+	var home:=_research_600_channel_home(channel)
+	var allocation:=_subcategory_allocation(home[0],home[1])
+	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+	var memo:Variant=_scan.best.get(channel)
+	if memo is Array and int(memo[0])==allocation and String(memo[1])==target and int(memo[2])==current_day: return memo[3]
+	var best:=_score_best_candidate(channel,current_day)
+	_scan.best[channel]=[allocation,target,current_day,best]
+	return best
+
+
+func _score_best_candidate(channel:String,current_day:int)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	var best:Dictionary={}
 	var best_score:=-INF
 	for discovery_variant in candidates:
 		var discovery:Dictionary=discovery_variant
-		if not _discovery_is_eligible(discovery,current_day,known): continue
+		if not _scan_eligible(discovery,current_day,known): continue
 		var score:=_candidate_score(discovery)
 		if String(WorldSimulation.state.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
 		if score>best_score:
@@ -638,8 +872,18 @@ func _path_is_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	if bool(discovery.get("frontier",false)): return false
 	# research_3000: each world offers a seeded subset of the registry's dead ends.
 	var id:=String(discovery.get("id",""))
-	if Research600.has(id) and not Research600.dead_end_offered(id,_research_draw(id,civilization_seed if civilization_seed!=0 else int(WorldSimulation.state.world_seed),"dead_end")): return false
-	return true
+	if civilization_seed!=0: return _registry_route_offered(id,civilization_seed)
+	# Fixed by the question and this world's seed: worked out once.
+	var offered:=_seed_table("route offered")
+	var cached:Variant=offered.get(id)
+	if cached==null:
+		cached=_registry_route_offered(id,int(WorldSimulation.state.world_seed))
+		offered[id]=cached
+	return bool(cached)
+
+## False only for a registry dead end this world's people never meet.
+func _registry_route_offered(id:String,seed_value:int)->bool:
+	return not (Research600.has(id) and not Research600.dead_end_offered(id,_research_draw(id,seed_value,"dead_end")))
 
 func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool:
 	if not bool(discovery.get("frontier",false)): return true
@@ -661,7 +905,7 @@ const EARLY_SCORE_PER_WORK:=60.0
 
 func _candidate_score(discovery:Dictionary)->float:
 	var id:=String(discovery.get("id",""))
-	var score:=research_affinity(discovery,WorldSimulation.state.world_seed,WorldSimulation.food.current_environment_profile())
+	var score:=research_affinity(discovery,WorldSimulation.state.world_seed,_home_environment())
 	var dynamic_id:=String(discovery.get("dynamic",""))
 	var subcategory:=String(discovery.get("subcategory",""))
 	var allocation:=_subcategory_allocation(dynamic_id,subcategory)
@@ -682,21 +926,22 @@ func _candidate_score(discovery:Dictionary)->float:
 	# research_3000: and they take up the current frontier before older leftovers.
 	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
 	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
-	score+=Pathways.need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
+	score+=_field_need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
 	return score
 
 
+const FOUNDING_LENSES:Dictionary={
+	"provision":["Seasonal Comparison","Household Experience","Environmental Contrast"],
+	"generations":["Household Experience","Recorded Cases","Institutional Trial"],
+	"inquiry":["Recorded Cases","Regional Comparison","Material Experiment"],
+	"industry":["Material Experiment","Workplace Practice","Institutional Trial"],
+	"defense":["Workplace Practice","Institutional Trial","Regional Comparison"],
+	"exchange":["Regional Comparison","Seasonal Comparison","Recorded Cases"]
+}
+
 func _founding_lens_affinity(lens:String)->float:
-	var favored:Dictionary={
-		"provision":["Seasonal Comparison","Household Experience","Environmental Contrast"],
-		"generations":["Household Experience","Recorded Cases","Institutional Trial"],
-		"inquiry":["Recorded Cases","Regional Comparison","Material Experiment"],
-		"industry":["Material Experiment","Workplace Practice","Institutional Trial"],
-		"defense":["Workplace Practice","Institutional Trial","Regional Comparison"],
-		"exchange":["Regional Comparison","Seasonal Comparison","Recorded Cases"]
-	}
 	var focus:=WorldSimulation.state.founding_focus if WorldSimulation.state.founding_focus!="" else "provision"
-	var list:Array=favored.get(focus,[])
+	var list:Array=FOUNDING_LENSES.get(focus,[])
 	var index:=list.find(lens)
 	return 1.0-float(index)*0.22 if index>=0 else 0.0
 
@@ -917,10 +1162,12 @@ func _resource_evidence(requirements:Array)->float:
 
 func _home_ground_supplies(resource_name:String,needed_stage:String)->bool:
 	if _stage_rank(needed_stage)>_stage_rank("accessible") or not resource_name in Research600.HOME_SURFACE_RESOURCES: return false
-	return Research600.home_surface_resources(WorldSimulation.state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {}).has(resource_name)
+	return _home_surface_resources().has(resource_name)
+
+const STAGE_RANKS:Dictionary={"unknown":0,"recognized":1,"surveyed":2,"accessible":3,"developed":4}
 
 func _stage_rank(stage:String)->int:
-	return {"unknown":0,"recognized":1,"surveyed":2,"accessible":3,"developed":4}.get(stage,0)
+	return STAGE_RANKS.get(stage,0)
 
 func effect(effect_id:String)->float:
 	initialize()
@@ -949,19 +1196,20 @@ func discovery_definition(discovery_id:String)->Dictionary:
 	if not initialized:initialize()
 	return catalog_by_id.get(discovery_id,{})
 
+# The named-person government has seven canonical aptitudes. Specific fields
+# of inquiry still differ, but they are composed from those visible skills so
+# an excellent Scholar or Steward actually changes research throughput.
+const RESEARCH_OFFICES:Dictionary={
+	"demography":["Steward",["Provisioning","Diplomacy"]],"nutrition":["Quartermaster",["Provisioning","Logistics"]],
+	"health":["Steward",["Provisioning","Knowledge"]],"labor":["Steward",["Administration","Construction"]],
+	"knowledge":["Scholar",["Knowledge","Administration"]],"production":["Quartermaster",["Construction","Logistics"]],
+	"infrastructure":["Steward",["Construction","Administration"]],"logistics":["Quartermaster",["Logistics","Administration"]],
+	"ecology":["Scholar",["Knowledge","Provisioning"]],"institutions":["Steward",["Administration","Diplomacy"]],
+	"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
+}
+
 func research_leadership(direction:String)->Dictionary:
-	# The named-person government has seven canonical aptitudes. Specific fields
-	# of inquiry still differ, but they are composed from those visible skills so
-	# an excellent Scholar or Steward actually changes research throughput.
-	var mapping := {
-		"demography":["Steward",["Provisioning","Diplomacy"]],"nutrition":["Quartermaster",["Provisioning","Logistics"]],
-		"health":["Steward",["Provisioning","Knowledge"]],"labor":["Steward",["Administration","Construction"]],
-		"knowledge":["Scholar",["Knowledge","Administration"]],"production":["Quartermaster",["Construction","Logistics"]],
-		"infrastructure":["Steward",["Construction","Administration"]],"logistics":["Quartermaster",["Logistics","Administration"]],
-		"ecology":["Scholar",["Knowledge","Provisioning"]],"institutions":["Steward",["Administration","Diplomacy"]],
-		"security":["Marshal",["Defense","Administration"]],"culture":["Envoy",["Diplomacy","Knowledge"]]
-	}
-	var assignment: Array = mapping.get(direction,["Scholar",["Knowledge"]])
+	var assignment: Array = RESEARCH_OFFICES.get(direction,["Scholar",["Knowledge"]])
 	var requested:=String(assignment[0])
 	var actual:=WorldSimulation.government.executing_office(requested)
 	var person:Dictionary=WorldSimulation.state.leadership_positions.get(actual,{})
@@ -970,6 +1218,22 @@ func research_leadership(direction:String)->Dictionary:
 func _leader_factor(direction:String)->float:
 	var leadership:=research_leadership(direction)
 	return WorldSimulation.advisors.execution_modifier(leadership.requested_office,leadership.skills)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
+
+## _leader_factor inside the day's research loop, where no office changes
+## until a question is answered (which clears `offices`). `offices` keeps each
+## requested office's executing office (GovernmentPeopleSystem.executing_office),
+## so it is worked out once per office rather than twice per line; the steps
+## after it are AdvisorSystem.execution_modifier's own, in its order.
+func _loop_leader_factor(direction:String,offices:Dictionary)->float:
+	var assignment:Array=RESEARCH_OFFICES.get(direction,["Scholar",["Knowledge"]])
+	var requested:=String(assignment[0])
+	var known_office:Variant=offices.get(requested)
+	var executing:String=WorldSimulation.government.executing_office(requested) if known_office==null else String(known_office)
+	offices[requested]=executing
+	var advisor:Dictionary=WorldSimulation.state.leadership_positions.get(executing,{})
+	var execution:float=WorldSimulation.advisors.execution_modifier_for_advisor(advisor,executing,(assignment[1] as Array).duplicate())
+	if executing!=requested: execution*=0.84
+	return clampf(execution,0.28,1.12)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
 
 func research_assignment(discovery:Dictionary)->Dictionary:
 	# Read the same assignment and capacity used by the daily simulation. Opening
@@ -1372,6 +1636,16 @@ func domain_technology_limits(domain:String)->Dictionary:
 	return limits
 
 func _research_draw(id:String,seed_value:int,purpose:String)->float:
+	# A fixed function of its inputs: this world's draws are worked out once.
+	if seed_value!=int(WorldSimulation.state.world_seed): return _seeded_draw(id,seed_value,purpose)
+	var draws:=_seed_table(purpose)
+	var cached:Variant=draws.get(id)
+	if cached==null:
+		cached=_seeded_draw(id,seed_value,purpose)
+		draws[id]=cached
+	return float(cached)
+
+static func _seeded_draw(id:String,seed_value:int,purpose:String)->float:
 	var random:=RandomNumberGenerator.new()
 	random.seed=hash(id+":"+purpose)^(seed_value*0x45d9f3b)
 	return random.randf()
@@ -1554,7 +1828,7 @@ func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1,hor
 		var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
 		if research_open_year(discovery)-year>horizon_years: return false
 	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
-	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else research_600_player_society())
+	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else _player_society())
 
 
 ## Player-facing reasons the design conditions still hold `discovery` (its age
@@ -1575,11 +1849,11 @@ func research_600_player_society()->Dictionary:
 	for resource_name:Variant in state.resource_stockpiles:
 		if float(state.resource_stockpiles[resource_name])>0.0: resources[String(resource_name)]=true
 	# Materials of the home ground count as known, as they do for rivals.
-	Research600.home_surface_resources(state.player_settlements,WorldSimulation.food.current_environment_profile() if WorldSimulation.food!=null else {},resources)
+	Research600.home_surface_resources(state.player_settlements,_home_environment(),resources)
 	var environment:Dictionary={}
 	for settlement:Dictionary in state.player_settlements:
 		Research600.environment_tags(settlement.get("environment_profile",{}),environment)
-	if environment.is_empty() and WorldSimulation.food!=null: Research600.environment_tags(WorldSimulation.food.current_environment_profile(),environment)
+	if environment.is_empty() and WorldSimulation.food!=null: Research600.environment_tags(_home_environment(),environment)
 	if bool(state.water_metrics.get("source_accessible",false)): environment["river"]=true
 	var contact:=false
 	if WorldSimulation.world!=null:
@@ -1675,8 +1949,8 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	var known:Dictionary={}
 	for id:Variant in WorldSimulation.state.known_discoveries: known[String(id)]=true
 	var frontier:Array[String]=[]
-	for entry:Dictionary in technology_catalog:
-		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))): continue
+	for entry:Dictionary in _technology_entries(dynamic_id):
+		if known.has(String(entry.get("id",""))): continue
 		# Foundation work serves questions within FOUNDATION_HORIZON_YEARS of their age.
 		if research_600_open(entry,{},current_day,FOUNDATION_HORIZON_YEARS) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
 	var found:Dictionary={}
@@ -1689,7 +1963,7 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 			visited[id]=true
 			var foundation:=discovery_definition(id)
 			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
-			if _discovery_is_eligible(foundation,current_day,known): found[id]=research_open_year(foundation)
+			if _scan_eligible(foundation,current_day,known): found[id]=research_open_year(foundation)
 			else: next.append_array(_research_600_missing_parents(foundation,known))
 		frontier=next
 		depth+=1
