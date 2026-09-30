@@ -231,23 +231,6 @@ static func describe(entry:Dictionary,known:Variant=null)->String:
 static func graph_entry(entry:Dictionary)->Dictionary:
 	return {"id":entry.id,"requires_all":[],"learning_routes":routes_for(entry,[],{})}
 
-## Every foundation any route of `entry` could name: the requires,
-## requires_all and requires_any of the entry, of its learning routes and of
-## its experimental alternative (repeats possible). A superset of the parents
-## of every route routes_for builds for it, imported ones included.
-static func named_foundations(entry:Dictionary)->Array[String]:
-	var result:Array[String]=[]
-	var specs:Array=[entry]
-	specs.append_array(entry.get("learning_routes",[]))
-	var alternate:Variant=ALTERNATIVES.get(String(entry.get("id","")))
-	if alternate is Dictionary:specs.append(alternate)
-	for spec:Dictionary in specs:
-		for id:Variant in spec.get("requires",[]):result.append(String(id))
-		for id:Variant in spec.get("requires_all",[]):result.append(String(id))
-		for group:Variant in spec.get("requires_any",[]):
-			for id:Variant in group:result.append(String(id))
-	return result
-
 static func definition_parents(entry:Dictionary)->Array[String]:
 	var parents:Array[String]=[]
 	for route:Dictionary in routes_for(entry,[],{}):

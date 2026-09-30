@@ -165,6 +165,28 @@ func test_scanned_line_answers_match_unscanned_ones()->void:
 		assert_array(mismatches).is_empty()
 	)
 
+func test_viable_fields_match_a_plain_pass()->void:
+	WorldSimulation.scoped(ACTOR,func()->void:
+		var discovery:Node=WorldSimulation.discovery
+		var state:Node=WorldSimulation.state
+		for year:float in [20.0,150.0]:
+			state.known_discoveries.assign(_known_before(discovery,year))
+			var day:=int(year*365.0)
+			state.elapsed_days=day
+			var known:=R.index_known(state.known_discoveries)
+			var expected:Dictionary={}
+			for entry:Dictionary in discovery.technology_catalog:
+				var field:=String(entry.dynamic)
+				if expected.has(field):continue
+				if discovery._discovery_is_eligible(entry,day,known):expected[field]=true
+			assert_int(expected.size()).is_greater(0)
+			assert_dict(discovery.viable_fields(day,known)).is_equal(expected)
+			discovery.begin_research_scan()
+			assert_dict(discovery.viable_fields(day,known)).is_equal(expected)
+			assert_dict(discovery.viable_fields(day,known)).is_equal(expected)
+			discovery.end_research_scan()
+	)
+
 func test_foundations_advice_matches_a_full_pass()->void:
 	WorldSimulation.scoped(ACTOR,func()->void:
 		var discovery:Node=WorldSimulation.discovery
@@ -193,9 +215,37 @@ func test_foundations_advice_reads_every_opening_year_as_a_full_pass_did()->void
 		assert_array(discovery._open_year_cache.keys()).is_equal(ids)
 	)
 
-func test_repeat_foundation_work_matches_first_passes_and_records_the_same_years()->void:
+## DiscoverySystem._research_600_foundation_ids as one full pass over the
+## catalog (without its result cache).
+func _foundation_reference(discovery:Node,dynamic_id:String,current_day:int)->Array[String]:
+	var known:Dictionary={}
+	for id:Variant in WorldSimulation.state.known_discoveries:known[String(id)]=true
+	var frontier:Array[String]=[]
+	for entry:Dictionary in discovery.technology_catalog:
+		if String(entry.get("dynamic",""))!=dynamic_id or known.has(String(entry.get("id",""))):continue
+		if discovery.research_600_open(entry,{},current_day,discovery.FOUNDATION_HORIZON_YEARS) and Catalog.pursued(String(entry.get("id","")),discovery.society_model.ceiling_era):frontier.append_array(discovery._research_600_missing_parents(entry,known))
+	var found:Dictionary={}
+	var visited:Dictionary={}
+	var depth:=0
+	while not frontier.is_empty() and depth<8:
+		var next:Array[String]=[]
+		for id:String in frontier:
+			if visited.has(id) or known.has(id):continue
+			visited[id]=true
+			var foundation:Dictionary=discovery.discovery_definition(id)
+			if foundation.is_empty() or not discovery.research_600_open(foundation,{},current_day):continue
+			if discovery._discovery_is_eligible(foundation,current_day,known):found[id]=discovery.research_open_year(foundation)
+			else:next.append_array(discovery._research_600_missing_parents(foundation,known))
+		frontier=next
+		depth+=1
+	var ids:Array[String]=[]
+	for id:Variant in found:ids.append(String(id))
+	ids.sort_custom(func(a:String,b:String)->bool: return float(found[a])<float(found[b]))
+	return ids
+
+func test_repeat_foundation_work_matches_full_passes_and_records_the_same_years()->void:
 	var records:Array=[]
-	for repeat_reading:bool in [false,true]:
+	for reference:bool in [true,false]:
 		WorldSimulation.clear();WorldSimulation.create_actor(ACTOR,318)
 		WorldSimulation.scoped(ACTOR,func()->void:
 			var discovery:Node=WorldSimulation.discovery
@@ -206,10 +256,8 @@ func test_repeat_foundation_work_matches_first_passes_and_records_the_same_years
 				var day:=int(year*365.0)
 				state.elapsed_days=day
 				discovery._research_600_foundation_cache.clear()
-				# Without repeat readings every pass is a first pass.
-				if not repeat_reading:discovery._scan.foundation_scanned.clear()
 				for dynamic:String in discovery.society_model.DYNAMICS:
-					results.append(discovery._research_600_foundation_ids(dynamic,day))
+					results.append(_foundation_reference(discovery,dynamic,day) if reference else discovery._research_600_foundation_ids(dynamic,day))
 			records.append([results,discovery._open_year_cache.duplicate()])
 		)
 	assert_array(records[1][0]).is_equal(records[0][0])
