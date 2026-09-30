@@ -323,6 +323,21 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			out.likely="object"; out.lines.append("%s will probably object: too few to ring the town." % who_objects)
 		if not WO.at_war(String(p.civ_id)):
 			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
+	elif verb_id=="attack" and String(target.get("type",""))=="host" and going>0:
+		# A host in the open: its size and readiness as our scouts made them
+		# out, no walls; the same odds (war_odds.gd).
+		var seen:Dictionary=WorldSimulation.world.visible_formation_sighting(String(target.get("formation_id","")))
+		if not seen.is_empty():
+			var low:=int(seen.get("strength_estimate_low",0)); var high:=int(seen.get("strength_estimate_high",0))
+			out.lines.append("Their host is %s strong, as our scouts make it out." % Marks.about_range(low,high))
+			var civ:=String(seen.get("civ_id",target.get("civ_id","")))
+			var arms:=_their_arms(civ,0)
+			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
+			var ready:=(float(seen.get("readiness_estimate_low",0.5))+float(seen.get("readiness_estimate_high",0.5)))*0.5
+			var odds:=stated_odds(speed_force,formations,going,float(low+high)*0.5,0.0,arms,civ,true,ready)
+			if not odds.is_empty():
+				out["odds"]=odds
+				out.lines.append("Odds in the open%s: %s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours",odds_words(float(odds.odds),bool(odds.ours))])
 	elif verb_id=="guard":
 		out.lines.append("They hold about %s km around it and fight anyone hostile who comes into it." % EraWords.grouped(roundi(guard_radius(going))))
 	elif verb_id=="depot":
@@ -342,8 +357,8 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 
 ## The stated odds and the scouts' word on their arms live in war_odds.gd,
 ## which the court's spoken orders read too.
-static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="")->Dictionary:
-	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id)
+static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0)->Dictionary:
+	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready)
 
 static func _their_arms(civ_id:String,age:int)->Array: return Odds.their_arms(civ_id,age)
 static func arms_words(arms:Array)->String: return Odds.arms_words(arms)

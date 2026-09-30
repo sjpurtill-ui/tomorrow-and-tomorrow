@@ -644,8 +644,13 @@ with machine accounting; (7) recruitment fixes and template numbers.
     little, and states the 12 km rule.
   - Ground by kit: crew weapons take 10 m², chariots and elephants 16 m²,
     and no more sets are drawn than the men can work.
-  - Not taken: odds against a sighted host (their numbers are a range, not
-    a count), and the held-town wording when a band stands in the town.
+  - Not taken: the held-town wording when a band stands in the town.
+- **Iteration 18, odds in the open.** Attacking a host in sight states the
+  odds too. The host's size is the middle of the range our scouts made out
+  ("Their host is 100 to 140 strong, as our scouts make it out"). Its
+  readiness is the middle of the observed range, and there are no walls
+  (`war_odds.of`, `open_field`). The court's intercept order has no
+  numbers-based objection, so the two cannot disagree.
 - **Iteration 17, research cards speak for the army.** Each research card
   now ends with what the research does for the army, in the engine's own
   numbers (`military_research_notes.gd`, one hook in

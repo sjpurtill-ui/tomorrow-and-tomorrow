@@ -31,7 +31,9 @@ const BINS:=[[1.29,5,4],[1.42,4,3],[1.75,3,2],[2.5,2,1],[4.0,3,1],[6.0,5,1]]
 
 ## {odds (stronger over weaker, 1 or more), ours (true when with us),
 ##  raw (ours over theirs), walls} or {} when there is nothing to weigh.
-static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="")->Dictionary:
+## A host met in the open (`open_field`) has no walls, and its readiness is
+## what our scouts made of it (`their_ready`, when given).
+static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var n:=heads(formations)
 	if mc==null or n<=0 or going<=0 or their_men<1.0: return {}
@@ -42,8 +44,9 @@ static func of(force:Dictionary,formations:Array,going:int,their_men:float,forti
 	var kit:Array=their_arms if heads(their_arms)>0 else _as_a_garrison(formations)
 	var civ:=_civ(civ_id)
 	var fort:=clampf(fortification,0.0,1.0)
-	var walls:=clampf(1.03+fort*0.34+float(civ.get("logistics",0.0))*0.07+float(civ.get("institutions",0.0))*0.05,1.04,1.38)
+	var walls:=1.0 if open_field else clampf(1.03+fort*0.34+float(civ.get("logistics",0.0))*0.07+float(civ.get("institutions",0.0))*0.05,1.04,1.38)
 	var ready:=clampf(float(civ.get("military_readiness",1.0))*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0) if not civ.is_empty() else 1.0
+	if their_ready>=0.0: ready=clampf(their_ready,0.1,1.0)
 	var them:Dictionary=sim.create_formation_force("Them",scaled(kit,their_men/float(heads(kit))),1.0,ready)
 	var raw:float=sim.raw_odds(us,them,walls)
 	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"raw":raw,"walls":walls}

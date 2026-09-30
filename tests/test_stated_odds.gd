@@ -78,3 +78,13 @@ func test_a_raw_levy_is_not_told_it_is_favoured()->void:
 	var weak:=Orders.stated_odds(drilled,drilled.formations,200,600.0,0.0)
 	assert_bool(preload("res://scripts/war_odds.gd").weaker(weak)).is_true()
 	assert_bool(preload("res://scripts/war_odds.gd").weaker(Orders.stated_odds(drilled,drilled.formations,200,100.0,0.0))).is_false()
+
+func test_a_host_in_the_open_has_no_walls_and_its_seen_readiness()->void:
+	var band:=_band(200)
+	var walled:=Orders.stated_odds(band,band.formations,200,150.0,0.5)
+	var open:=Orders.stated_odds(band,band.formations,200,150.0,0.5,[],"",true)
+	assert_float(float(open.walls)).is_equal(1.0)
+	assert_float(float(open.raw)).is_greater(float(walled.raw))
+	# A host our scouts saw was worn out counts for less.
+	var worn:=Orders.stated_odds(band,band.formations,200,150.0,0.0,[],"",true,0.3)
+	assert_float(float(worn.raw)).is_greater(float(open.raw))

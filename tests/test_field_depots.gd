@@ -77,7 +77,7 @@ func _at_war(yes:bool)->void:
 	civ["player_relation"]=relation
 
 func _host_at(at:Vector2,men:int=300)->void:
-	CivilizationSystem.foreign_formations.append({"id":"%s_expedition" % civ_id,"civ_id":civ_id,"kind":"expedition","command_position":{"x":at.x,"z":at.y},"strength_share":0.1,"actual_troops":men})
+	CivilizationSystem.foreign_formations.append({"id":"%s_expedition" % civ_id,"civ_id":civ_id,"kind":"expedition","command_position":{"x":at.x,"z":at.y},"strength_share":0.1,"actual_troops":men,"readiness":0.7})
 
 
 func test_depots_wait_on_the_research_and_need_hands()->void:
@@ -274,3 +274,18 @@ func test_the_research_cards_say_what_they_do_for_the_army()->void:
 	# The card itself carries it.
 	var entry:Dictionary={"id":"forward_supply_depots","effects":{}}
 	assert_str(DiscoverySystem._discovery_effect_summary(entry)).contains("field depots")
+
+func test_an_attack_on_a_host_in_sight_states_the_odds_in_the_open()->void:
+	_at_war(true)
+	_host_at(home+Vector2(8,0),120)
+	var seen:=CivilizationSystem.visible_formation_sighting("%s_expedition" % civ_id)
+	assert_dict(seen).is_not_empty()
+	var sim=MilitaryCampaign.simulator
+	var band:Dictionary=sim.create_formation_force("LEVY BAND 1",[{"id":1,"unit":"spearman","weapon":"spear","count":200,"authorized_count":200,"equipment":200,"equipment_required":200,"training":0.7}],1.0,1.0)
+	band.merge({"army_id":1,"status":"stationed","location_id":"field","position":{"x":home.x+8.0,"z":home.y},"supply_level":1.0},true)
+	MilitaryCampaign.field_armies.assign([band])
+	var plan:=Orders.preview(1,"attack",{"type":"host","formation_id":"%s_expedition" % civ_id,"civ_id":civ_id,"position":{"x":home.x+8.0,"z":home.y}})
+	var said:=" ".join(plan.lines)
+	assert_str(said).contains("as our scouts make it out")
+	assert_str(said).contains("Odds in the open")
+	assert_float(float(plan.odds.walls)).is_equal(1.0)
