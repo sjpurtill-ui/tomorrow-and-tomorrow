@@ -165,7 +165,21 @@ func create_actor(id:String,seed_value:int,origin:Vector2=Vector2.ZERO)->Diction
 	)
 	return actors[id]
 
+## Scripts the daily simulation first loads part-way through a day: they are
+## loaded, not preloaded, to keep compile order free of cycles, and nothing
+## else holds them. A script compiles on its first load, a 0.1-0.2 s stall
+## inside that day's step (the first monthly Standing reading, a returning
+## scout), so the world loads them with itself and keeps them. Their own
+## static data is derived only from constants.
+const LATE_LOADED_SCRIPTS:=["res://scripts/great_works.gd","res://scripts/chief_scout.gd"]
+static var _late_loaded:Array=[]
+static func _keep_late_loaded_scripts()->void:
+	if not _late_loaded.is_empty():return
+	for path:String in LATE_LOADED_SCRIPTS:
+		if ResourceLoader.exists(path):_late_loaded.append(load(path))
+
 func start_world()->void:
+	_keep_late_loaded_scripts()
 	if enabled and _seed==GameState.world_seed:
 		bind_geography()
 		refresh_projections()
@@ -653,6 +667,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 			for other:String in saved.state.get("relations",{}):world.civilizations.append({"id":other,"player_relation":saved.state.relations[other].duplicate(true)})
 		)
 	if not failures.is_empty():return {"error":"; ".join(failures)}
+	_keep_late_loaded_scripts()
 	enabled=bool(payload.enabled)
 	# Older saves omitted the human observer view. Rebuild it before rivals act.
 	if enabled and not payload.has("human_projection"):refresh_projections()

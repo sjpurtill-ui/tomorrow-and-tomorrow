@@ -283,17 +283,19 @@ func government_scope()->String:
 	return ["founding council","settlement offices","town administration","regional government","territorial government"][clampi(government_stage,0,4)]
 
 
+## The central offices and their titles by form and rank (active_offices).
+const OFFICE_DEFINITIONS:=[
+	{"key":"Steward","unlock":0,"titles":{"centralized":["Hearth Chief","Chief Steward","First Administrator","First Minister","Executive Minister"],"federated":["First Speaker","Senior Steward","Council Speaker","First Councillor","Federal Convenor"],"localist":["Hearth Elder","Settlement Speaker","Civic Convenor","Senior Delegate","Commonwealth Speaker"]}},
+	{"key":"Quartermaster","unlock":1,"titles":{"centralized":["Keeper of Stores","Chief Provisioner","Supply Prefect","Minister of Stores","Supply Minister"],"federated":["Storekeeper","Provisioning Delegate","Supply Councillor","Provisioning Secretary","Federal Quartermaster"],"localist":["Stores Keeper","Market Steward","Provisioning Convenor","Supply Delegate","Commons Provisioner"]}},
+	{"key":"Marshal","unlock":2,"titles":{"centralized":["Watch Captain","War Leader","Security Prefect","Marshal","Defense Minister"],"federated":["Watch Speaker","Defense Delegate","Defense Councillor","Federal Marshal","Defense Secretary"],"localist":["Watch Keeper","Shield Speaker","Defense Convenor","Militia Delegate","Commons Marshal"]}},
+	{"key":"Scholar","unlock":3,"titles":{"centralized":["Lore Keeper","Keeper of Records","Chief Examiner","Chancellor of Inquiry","Knowledge Minister"],"federated":["Memory Keeper","Inquiry Delegate","Learned Councillor","Research Secretary","Federal Chancellor"],"localist":["Story Keeper","Learning Speaker","Inquiry Convenor","Scholars' Delegate","Commons Chancellor"]}},
+	# Every band already sends people over the next ridge. The Chief Scout gathers
+	# what they saw and says it plainly, from the founding council onward.
+	{"key":"ChiefScout","unlock":0,"titles":{"centralized":["Pathfinder","Chief of Scouts","Master of Outriders","Director of Reconnaissance","Intelligence Director"],"federated":["Trail Speaker","Scouting Delegate","Outriders' Councillor","Reconnaissance Secretary","Federal Intelligence Secretary"],"localist":["Trail Keeper","Far-Walker","Wayfinders' Convenor","Scouts' Delegate","Commons Pathfinder"]}},
+	{"key":"Envoy","unlock":4,"titles":{"centralized":["Messenger","Chief Emissary","Treaty Prefect","Foreign Secretary","Foreign Minister"],"federated":["Peace Messenger","Emissary Delegate","Treaty Councillor","Federal Envoy","External Secretary"],"localist":["Road Messenger","Guest Speaker","Treaty Convenor","Foreign Delegate","Commons Envoy"]}},
+]
+
 func active_offices()->Array[Dictionary]:
-	var definitions:Array[Dictionary]=[
-		{"key":"Steward","unlock":0,"titles":{"centralized":["Hearth Chief","Chief Steward","First Administrator","First Minister","Executive Minister"],"federated":["First Speaker","Senior Steward","Council Speaker","First Councillor","Federal Convenor"],"localist":["Hearth Elder","Settlement Speaker","Civic Convenor","Senior Delegate","Commonwealth Speaker"]}},
-		{"key":"Quartermaster","unlock":1,"titles":{"centralized":["Keeper of Stores","Chief Provisioner","Supply Prefect","Minister of Stores","Supply Minister"],"federated":["Storekeeper","Provisioning Delegate","Supply Councillor","Provisioning Secretary","Federal Quartermaster"],"localist":["Stores Keeper","Market Steward","Provisioning Convenor","Supply Delegate","Commons Provisioner"]}},
-		{"key":"Marshal","unlock":2,"titles":{"centralized":["Watch Captain","War Leader","Security Prefect","Marshal","Defense Minister"],"federated":["Watch Speaker","Defense Delegate","Defense Councillor","Federal Marshal","Defense Secretary"],"localist":["Watch Keeper","Shield Speaker","Defense Convenor","Militia Delegate","Commons Marshal"]}},
-		{"key":"Scholar","unlock":3,"titles":{"centralized":["Lore Keeper","Keeper of Records","Chief Examiner","Chancellor of Inquiry","Knowledge Minister"],"federated":["Memory Keeper","Inquiry Delegate","Learned Councillor","Research Secretary","Federal Chancellor"],"localist":["Story Keeper","Learning Speaker","Inquiry Convenor","Scholars' Delegate","Commons Chancellor"]}},
-		# Every band already sends people over the next ridge. The Chief Scout gathers
-		# what they saw and says it plainly, from the founding council onward.
-		{"key":"ChiefScout","unlock":0,"titles":{"centralized":["Pathfinder","Chief of Scouts","Master of Outriders","Director of Reconnaissance","Intelligence Director"],"federated":["Trail Speaker","Scouting Delegate","Outriders' Councillor","Reconnaissance Secretary","Federal Intelligence Secretary"],"localist":["Trail Keeper","Far-Walker","Wayfinders' Convenor","Scouts' Delegate","Commons Pathfinder"]}},
-		{"key":"Envoy","unlock":4,"titles":{"centralized":["Messenger","Chief Emissary","Treaty Prefect","Foreign Secretary","Foreign Minister"],"federated":["Peace Messenger","Emissary Delegate","Treaty Councillor","Federal Envoy","External Secretary"],"localist":["Road Messenger","Guest Speaker","Treaty Convenor","Foreign Delegate","Commons Envoy"]}},
-	]
 	var result:Array[Dictionary]=[]
 	var form:=government_form()
 	var cap:=_title_era_cap()
@@ -301,7 +303,7 @@ func active_offices()->Array[Dictionary]:
 	# on; the founding hearth council keeps the size-and-form titles above.
 	var civic:=CivicStages.current()
 	var staged:=int(civic.get("rank",0))>=1
-	for definition in definitions:
+	for definition in OFFICE_DEFINITIONS:
 		if government_stage<int(definition.unlock): continue
 		var titles:Array=definition.titles.get(form,definition.titles.federated)
 		var title:=String(titles[clampi(mini(government_stage,cap),0,titles.size()-1)])
@@ -321,6 +323,23 @@ func active_offices()->Array[Dictionary]:
 		if title=="": title=String(extra.get("title",key))
 		result.append({"key":key,"title":title,"unlock_stage":int(extra.get("min_government_stage",0)),"added_by":"discovery"})
 	return result
+
+
+## The keys of the offices active_offices lists, in its order and by its own
+## tests (the same court readings, in the same order), without titling them:
+## titles need the government's form and era, which offices sit does not.
+func _active_office_keys()->Array[String]:
+	var keys:Array[String]=[]
+	var civic:=CivicStages.current()
+	for definition in OFFICE_DEFINITIONS:
+		if government_stage<int(definition.unlock): continue
+		keys.append(String(definition.key))
+	var held:=CivicStages.held()
+	for extra_variant in CivicStages.office_definitions():
+		var extra:Dictionary=extra_variant
+		if not CivicStages.office_open(extra,civic,held,government_stage): continue
+		keys.append(String(extra.get("key","")))
+	return keys
 
 
 ## Office titles follow what the people know, not only how large the state
@@ -418,7 +437,7 @@ func _desired_pool_size()->int:
 	# figures, not a miniature modern bureaucracy. The cast grows only when
 	# places and specialist offices create real work for it.
 	var settlements:=WorldSimulation.state.player_settlements.size()
-	var offices:=active_offices().size()
+	var offices:=_active_office_keys().size()
 	var ordinary:=clampi(3+government_stage*4+settlements*2+offices,6,NORMAL_GOVERNMENT_POOL)
 	return mini(MAX_GOVERNMENT_PEOPLE,maxi(ordinary,settlements+offices+4))
 
@@ -641,9 +660,11 @@ func dynamic_competency(person:Dictionary,dynamic_id:String)->float:
 
 
 func office_is_active(office_key:String)->bool:
-	for office in active_offices():
-		if String(office.key)==office_key: return true
-	return false
+	# A central office whose rank the government has reached is listed ahead
+	# of anything a discovery adds; it needs no reading of the court.
+	for definition in OFFICE_DEFINITIONS:
+		if String(definition.key)==office_key and government_stage>=int(definition.unlock): return true
+	return office_key in _active_office_keys()
 
 
 func executing_office(requested_office:String)->String:

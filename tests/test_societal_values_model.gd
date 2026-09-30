@@ -131,3 +131,61 @@ func test_compact_save_round_trip_rebuilds_derived_identity_and_institutions()->
 	assert_str(String(restored.institutions.household_councils.form)).is_equal(String(state.institutions.household_councils.form))
 	assert_float(float(restored.lived.experimentation)).is_equal_approx(float(state.lived.experimentation),0.0001)
 	assert_array(MODEL.validate_state(restored)).is_empty()
+
+
+## The frontier reading skips ids outside every unlock's prefix; over mixed
+## practice lists it must match the reading of every id against every unlock.
+func test_organizational_possibilities_match_a_full_reading()->void:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=7731
+	var institution_ids:Array=MODEL.INSTITUTIONS.keys()+MODEL.EMERGENT_INSTITUTIONS.keys()
+	for trial in 200:
+		var known:Array=[]
+		var adoption:Dictionary={}
+		for n in rng.randi_range(0,60):
+			var roll:=rng.randf()
+			var id:String
+			if roll<0.45:
+				var unlock:Dictionary=MODEL.FRONTIER_INSTITUTION_UNLOCKS[rng.randi()%MODEL.FRONTIER_INSTITUTION_UNLOCKS.size()]
+				id="%sstudy_%d_%02d" % [String(unlock.prefix),rng.randi()%5,rng.randi_range(0,14)]
+			elif roll<0.65 and not institution_ids.is_empty():
+				id=String(institution_ids[rng.randi()%institution_ids.size()])
+			elif roll<0.75:
+				id="inquiry_institutions_other_%02d" % rng.randi_range(0,14)
+			else:
+				id="practice_%d" % rng.randi_range(0,40)
+			known.append(id)
+			if rng.randf()<0.8: adoption[id]=rng.randf_range(-0.2,1.2)
+		var read:=MODEL.organizational_possibilities(known,adoption)
+		var full:=_full_reading(known,adoption)
+		assert_bool(read==full and JSON.stringify(read)==JSON.stringify(full)).is_true()
+
+
+## organizational_possibilities as it read every id against every unlock.
+func _full_reading(known_discoveries:Array,adoption:Dictionary)->Dictionary:
+	var known:Array=[]
+	var resolved_adoption:Dictionary={}
+	var sources:Dictionary={}
+	var best_frontier:Dictionary={}
+	for discovery_variant in known_discoveries:
+		var discovery_id:=String(discovery_variant)
+		var spread:=clampf(float(adoption.get(discovery_id,0.025)),0.025,1.0)
+		if not MODEL._institution_definition(discovery_id).is_empty():
+			if discovery_id not in known: known.append(discovery_id)
+			resolved_adoption[discovery_id]=spread
+			sources[discovery_id]=discovery_id
+		for unlock in MODEL.FRONTIER_INSTITUTION_UNLOCKS:
+			var maturity:=MODEL._frontier_maturity(discovery_id,String(unlock.prefix))
+			if maturity<int(unlock.maturity): continue
+			var institution_id:=String(unlock.id)
+			var score:=float(maturity)+spread
+			if score<=float((best_frontier.get(institution_id,{}) as Dictionary).get("score",-INF)): continue
+			best_frontier[institution_id]={"id":discovery_id,"maturity":maturity,"adoption":spread,"score":score}
+	for unlock in MODEL.FRONTIER_INSTITUTION_UNLOCKS:
+		var source:Dictionary=best_frontier.get(String(unlock.id),{})
+		if source.is_empty(): continue
+		var institution_id:=String(unlock.id)
+		if institution_id not in known: known.append(institution_id)
+		resolved_adoption[institution_id]=float(source.adoption)
+		sources[institution_id]=String(source.id)
+	return {"known":known,"adoption":resolved_adoption,"sources":sources}

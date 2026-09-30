@@ -505,6 +505,9 @@ func test_open_modifier_readers_agree_with_a_full_scan()->void:
 		if roll<0.34:
 			var record:={"id":ids[rng.randi()%ids.size()],"kind":kinds[rng.randi()%kinds.size()],"magnitude":rng.randf_range(-0.4,0.4),"started_day":now+rng.randf_range(-30.0,6.0),"effects":{channels[rng.randi()%channels.size()]:rng.randf_range(-1.0,1.0),channels[rng.randi()%channels.size()]:rng.randf_range(-1.0,1.0)}}
 			if rng.randf()<0.9: record["until_day"]=now+rng.randf_range(-10.0,60.0)
+			if rng.randf()<0.7: record["execution_factor"]=rng.randf_range(0.0,1.2)
+			if rng.randf()<0.7: record["resistance"]=rng.randf_range(-0.2,1.2)
+			if rng.randf()<0.3: record["id"]="policy_churn"
 			if rng.randf()<0.3: record["ended_reason"]="repealed"
 			list.append(record)
 		elif roll<0.48 and not list.is_empty():
@@ -527,8 +530,10 @@ func test_open_modifier_readers_agree_with_a_full_scan()->void:
 			assert_int(listed.size()).is_equal(scanned.size())
 			for i in mini(listed.size(),scanned.size()):
 				assert_bool(listed[i]==scanned[i]).is_true()
+			var load:=ConsequenceEngine.administrative_load()
 			var metrics:=ConsequenceEngine.governance_metrics()
 			assert_int(int(metrics.active_policy_count)).is_equal(scanned.size())
+			assert_float(load).is_equal(float(metrics.administrative_load))
 	list.clear()
 
 

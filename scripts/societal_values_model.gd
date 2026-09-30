@@ -273,6 +273,17 @@ static func organizational_possibilities(known_discoveries:Array,adoption:Dictio
 	var resolved_adoption:Dictionary={}
 	var sources:Dictionary={}
 	var best_frontier:Dictionary={}
+	# The unlocks are constant, so their fields are read once. An id outside an
+	# unlock's prefix has frontier maturity 0 (_frontier_maturity), below any
+	# positive threshold: only prefixed ids need reading. Every people runs this
+	# daily over each practice it knows.
+	var prefixes:PackedStringArray=[]
+	var thresholds:PackedInt32Array=[]
+	var unlock_ids:PackedStringArray=[]
+	for unlock in FRONTIER_INSTITUTION_UNLOCKS:
+		prefixes.append(String(unlock.prefix))
+		thresholds.append(int(unlock.maturity))
+		unlock_ids.append(String(unlock.id))
 	for discovery_variant in known_discoveries:
 		var discovery_id:=String(discovery_variant)
 		var spread:=clampf(float(adoption.get(discovery_id,0.025)),0.025,1.0)
@@ -280,10 +291,11 @@ static func organizational_possibilities(known_discoveries:Array,adoption:Dictio
 			if discovery_id not in known: known.append(discovery_id)
 			resolved_adoption[discovery_id]=spread
 			sources[discovery_id]=discovery_id
-		for unlock in FRONTIER_INSTITUTION_UNLOCKS:
-			var maturity:=_frontier_maturity(discovery_id,String(unlock.prefix))
-			if maturity<int(unlock.maturity): continue
-			var institution_id:=String(unlock.id)
+		for u in prefixes.size():
+			if thresholds[u]>0 and not discovery_id.begins_with(prefixes[u]): continue
+			var maturity:=_frontier_maturity(discovery_id,prefixes[u])
+			if maturity<thresholds[u]: continue
+			var institution_id:=unlock_ids[u]
 			var score:=float(maturity)+spread
 			if score<=float((best_frontier.get(institution_id,{}) as Dictionary).get("score",-INF)): continue
 			best_frontier[institution_id]={"id":discovery_id,"maturity":maturity,"adoption":spread,"score":score}
