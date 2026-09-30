@@ -207,14 +207,23 @@ func rebuild_body()->void:
 		_brief_print=brief_print
 		_rebuild_brief(data.get("brief",{}))
 	_render_sections(data.get("blocks",[]))
-	# Every dock, the recruiting board included, is paper and ink.
+	# Every dock, the recruiting board included, is paper and ink. Set again
+	# only when the palette moved: setting a style or ink, even the same one,
+	# lays the whole dock out again on the next frame.
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
-	add_theme_stylebox_override("panel",Tokens.dock_style())
+	var paper:=Tokens.dock_style()
+	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
+	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
+		add_theme_stylebox_override("panel",paper)
 	if military_board:title_label.text="Recruit and deploy"
-	title_label.add_theme_color_override("font_color",Tokens.INK)
-	eyebrow_label.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
-	close_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
+	_ink(title_label,"font_color",Tokens.INK)
+	_ink(eyebrow_label,"font_color",Tokens.GOLD_TEXT)
+	_ink(close_button,"font_color",Tokens.TEXT_DIM)
 	ViewState.restore(body_scroll,view)
+
+
+static func _ink(control:Control,item:StringName,color:Color)->void:
+	if not control.has_theme_color_override(item) or control.get_theme_color(item)!=color:control.add_theme_color_override(item,color)
 
 
 func _render_sections(blocks:Array)->void:

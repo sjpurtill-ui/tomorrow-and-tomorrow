@@ -79,8 +79,19 @@ func update_block(block:Dictionary)->bool:
 		var at:=_drop(finds_frame)
 		_build_finds()
 		move_child(finds_frame,at)
+	elif old.get("finds",[])!=next.get("finds",[]):
+		# Only how far each piece is studied moved: its veil thins in place.
+		_refresh_veils(next.get("finds",[]))
 	_layout()
 	return true
+
+## The finds' tiles take their pieces' study in place (their veils).
+func _refresh_veils(groups:Array)->void:
+	for g in mini(groups.size(),_tiles.size()):
+		var items:Array=(groups[g] as Dictionary).get("items",[])
+		var tiles:Array=_tiles[g]
+		for i in mini(items.size(),tiles.size()):
+			(tiles[i] as FindTile).take(items[i])
 
 ## What each part of the board is drawn from. The models hold only plain
 ## values, cached textures and bound methods; a bound method compares equal
@@ -102,8 +113,21 @@ static func _part(of:Dictionary,part:String)->Array:
 				peoples.append(drawn)
 			return [peoples,of.get("leads",[]),actions.get("rumor_map"),actions.get("plan")]
 		"walkers":return [of.get("parties",[]),int(counts.get("away",0)),int(counts.get("capacity",1))]
-		"finds":return [of.get("finds",[]),of.get("_finds_reports",[]),int(counts.get("unread",0)),int(counts.get("reports",0)),actions.get("summon_label"),actions.get("summon_tip"),actions.get("summon"),actions.get("archive")]
+		"finds":return [_finds_drawn(of.get("finds",[])),of.get("_finds_reports",[]),int(counts.get("unread",0)),int(counts.get("reports",0)),actions.get("summon_label"),actions.get("summon_tip"),actions.get("summon"),actions.get("archive")]
 	return []
+
+## The finds as their sheet draws them, without how far each piece is
+## studied (that only thins a tile's veil, refreshed in place).
+static func _finds_drawn(groups:Array)->Array:
+	var drawn:Array=[]
+	for group:Dictionary in groups:
+		var copy:=group.duplicate()
+		var items:Array=[]
+		for item:Dictionary in group.get("items",[]):
+			var shown:=item.duplicate();shown.erase("study");shown.erase("state");items.append(shown)
+		copy["items"]=items
+		drawn.append(copy)
+	return drawn
 
 ## Takes a part off the board before it is drawn again (so the new part
 ## keeps its name) and says where it stood.
@@ -314,9 +338,12 @@ func _build_walkers(stack:VBoxContainer)->void:
 		var when:=Kit.serif(line,String(party.get("when","")),13,T.RED_TEXT if int(party.get("overdue",0))>0 else T.TEAL_TEXT,true);when.autowrap_mode=TextServer.AUTOWRAP_OFF;when.size_flags_horizontal=Control.SIZE_SHRINK_END;when.name="When"
 	Kit.label(stack,"Nothing they see is known until they walk back in; the day of return is only a guess.",12,T.INK_MUTED)
 
+## The find tiles of each group, in order, for the live refresh.
+var _tiles:Array=[]
 func _build_finds()->void:
 	var stack:=_sheet(self,"Finds")
 	finds_frame=stack.get_parent();finds_grid=null
+	_tiles.clear()
 	var groups:Array=model.get("finds",[])
 	var counts:Dictionary=model.get("counters",{})
 	var unread:=int(counts.get("unread",0))
@@ -345,7 +372,10 @@ func _find_group(group:Dictionary)->Control:
 		var mark:=Kit.label(top,"Not yet told",12,T.GOLD_TEXT,false);mark.name="UnreadMark";mark.tooltip_text="The Chief Scout has not yet told this one."
 	var sub:=Kit.label(column,"%s · %s" % [String(group.get("date","")),String(group.get("place",""))],12,T.TEXT_SOFT,false);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.custom_minimum_size.x=40
 	var shelf:=HBoxContainer.new();shelf.add_theme_constant_override("separation",6);column.add_child(shelf)
-	for item:Dictionary in group.get("items",[]):shelf.add_child(FindTile.make(item))
+	var tiles:Array=[]
+	for item:Dictionary in group.get("items",[]):
+		var tile:=FindTile.make(item);shelf.add_child(tile);tiles.append(tile)
+	_tiles.append(tiles)
 	if int(group.get("more",0))>0:
 		var more:=Kit.label(shelf,"%d more" % int(group.more),13,T.INK_MUTED,false);more.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var open:=Kit.action_button(column,"Read the telling",group.get("on_open",Callable()),false,"The full returned report.")
@@ -615,6 +645,13 @@ class FindTile extends VBoxContainer:
 	var item:Dictionary={}
 	static func make(entry:Dictionary)->FindTile:
 		var tile:=FindTile.new();tile.item=entry;return tile
+	var art:TextureRect
+	## A new day's reading of the same piece: its veil and what the tile says.
+	func take(entry:Dictionary)->void:
+		item=entry
+		tooltip_text="%s\n%s" % [String(item.get("title","")),String(item.get("sub",""))]
+		if art!=null and art.material is ShaderMaterial:
+			(art.material as ShaderMaterial).set_shader_parameter("veil",clampf(Kit.veil_for({"state":String(item.get("state","")),"study_progress":float(item.get("study",0.0))}),0,1))
 	func _ready()->void:
 		name="Find_"+String(item.get("kind","")).validate_node_name()
 		add_theme_constant_override("separation",3);custom_minimum_size.x=80;size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
@@ -626,7 +663,7 @@ class FindTile extends VBoxContainer:
 		var style:=T.flat(Color("ece4d4") if texture is Texture2D else Color(T.TRACK,.45),tier_tone,1,3);style.set_content_margin_all(2)
 		frame.add_theme_stylebox_override("panel",style);add_child(frame)
 		if texture is Texture2D:
-			var art:=TextureRect.new();art.texture=texture;art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;art.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			art=TextureRect.new();art.texture=texture;art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;art.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			art.material=Kit.veil_material(Kit.veil_for({"state":String(item.get("state","")),"study_progress":float(item.get("study",0.0))}),.2);frame.add_child(art)
 		else:
 			var mark:=GlyphBox.new();mark.kind=KnownWorld.resource_glyph(String(item.get("resource","")),String(item.get("kind","")));mark.tone=T.RED if String(item.get("kind",""))=="losses" else T.GOLD;frame.add_child(mark)

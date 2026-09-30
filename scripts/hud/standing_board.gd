@@ -332,11 +332,23 @@ func _build_hero()->void:
 	compare_row.add_theme_constant_override("h_separation",8);compare_row.add_theme_constant_override("v_separation",6)
 	column.add_child(compare_row)
 
+## The strengths keep their rows while the same strengths are shown (and the
+## same ones carry a year's change): the day's values and reasons are written
+## into them. Otherwise the list is drawn again.
+var _strength_shape:Array=[]
+var _strength_refs:Array=[]
 func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
 	rose.configure(items,data.get("year_ago",{}))
+	var shape:Array=[(data.get("year_ago",{}) as Dictionary).is_empty()]
+	for item:Dictionary in items:shape.append([String(item.id),String(item.name),item.has("change")])
+	if shape==_strength_shape and _strength_refs.size()==items.size():
+		for index in items.size():_fill_strength(_strength_refs[index],items[index])
+		return
+	_strength_shape=shape
 	_clear(strength_list)
 	strength_rows.clear()
+	_strength_refs.clear()
 	Kit.label(strength_list,"Faint dashes on the rose: a year ago. Click a strength to raise it." if not (data.get("year_ago",{}) as Dictionary).is_empty() else "Click a strength to raise it.","note")
 	for index in items.size():
 		strength_list.add_child(_strength_row(items[index],index))
@@ -349,7 +361,6 @@ func _strength_row(item:Dictionary,index:int)->Control:
 	var calm:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,T.RADIUS_CONTROL,6.0)
 	var lit:=T.flat(T.GOLD_WASH,T.RULE,1,T.RADIUS_CONTROL,6.0)
 	row.add_theme_stylebox_override("panel",calm)
-	row.tooltip_text="%s: %s.\n%s.\nRaised through %s; it costs %s. Click to open %s." % [String(item.name),String(item.means),String(item.why),String(item.section_name),String(item.cost),String(item.section_name)]
 	row.mouse_entered.connect(func()->void: row.add_theme_stylebox_override("panel",lit);rose.set_highlight(index))
 	row.mouse_exited.connect(func()->void: row.add_theme_stylebox_override("panel",calm);rose.set_highlight(-1))
 	row.gui_input.connect(func(event:InputEvent)->void:
@@ -358,15 +369,33 @@ func _strength_row(item:Dictionary,index:int)->Control:
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(head)
 	var name:=Kit.label(head,String(item.name),"heading",Color(0,0,0,0),false);name.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var refs:={"row":row,"moved":null}
 	if item.has("change"):
+		var moved:=T.make_label("",12,T.MUTED);moved.mouse_filter=Control.MOUSE_FILTER_IGNORE;moved.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(moved)
+		refs.moved=moved
+	var value:=Kit.label(head,"","value",Color(0,0,0,0),false);value.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var meter:=Meter.new();column.add_child(meter)
+	var why:=Kit.label(column,"","note");why.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	refs.value=value;refs.meter=meter;refs.why=why
+	_strength_refs.append(refs)
+	_fill_strength(refs,item)
+	return row
+
+## One strength's value, year's change and reason, for the first drawing and
+## every refresh.
+func _fill_strength(refs:Dictionary,item:Dictionary)->void:
+	(refs.row as Control).tooltip_text="%s: %s.\n%s.\nRaised through %s; it costs %s. Click to open %s." % [String(item.name),String(item.means),String(item.why),String(item.section_name),String(item.cost),String(item.section_name)]
+	if refs.moved!=null:
 		var change:=float(item.change)
 		var words:="steady over the year" if absf(change)<1.0 else ("%s%d in a year" % ["+" if change>0.0 else "−",roundi(absf(change))])
-		var tint:=T.MUTED if absf(change)<1.0 else (T.GREEN_TEXT if change>0.0 else T.RED_TEXT)
-		var moved:=T.make_label(words,12,tint);moved.mouse_filter=Control.MOUSE_FILTER_IGNORE;moved.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(moved)
-	var value:=Kit.label(head,"%d%%" % roundi(float(item.value)*100.0),"value",Color(0,0,0,0),false);value.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var meter:=Meter.new();meter.set_value(float(item.value),T.GOLD);column.add_child(meter)
-	var why:=Kit.label(column,_sentence(String(item.why)),"note");why.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	return row
+		_put(refs.moved,words,T.MUTED if absf(change)<1.0 else (T.GREEN_TEXT if change>0.0 else T.RED_TEXT))
+	_put(refs.value,"%d%%" % roundi(float(item.value)*100.0))
+	(refs.meter as Meter).set_value(float(item.value),T.GOLD)
+	_put(refs.why,_sentence(String(item.why)))
+
+static func _put(label:Label,text:String,color:Variant=null)->void:
+	if label.text!=text:label.text=text
+	if color is Color and label.get_theme_color("font_color")!=color:label.add_theme_color_override("font_color",color)
 
 func _raise(id:String)->void:
 	var raise:Variant=data.get("on_raise")
@@ -447,9 +476,22 @@ func _fill_dangers()->void:
 
 # -------------------------------------------------------------- the peoples
 
+## The peoples keep their cards while the same peoples show the same parts
+## (a ruler, the danger badges, how many doings and memories): the day's
+## feelings and words are written into them. Otherwise the cards are drawn
+## again.
+var _people_shape:Array=[]
+var _people_refs:Array=[]
 func _fill_peoples()->void:
-	_clear(peoples)
 	var list:Array=data.get("peoples",[])
+	var shape:Array=[list.is_empty(),data.get("on_court") is Callable]
+	for p:Dictionary in list:shape.append(_people_card_shape(p))
+	if shape==_people_shape and _people_refs.size()==list.size():
+		for index in list.size():_fill_people_card(_people_refs[index],list[index])
+		return
+	_people_shape=shape
+	_people_refs.clear()
+	_clear(peoples)
 	if list.is_empty():
 		var card:=_card()
 		card.name="NoPeoples"
@@ -477,17 +519,20 @@ func _people_card(p:Dictionary)->Control:
 	top.add_child(emblem)
 	var title:=VBoxContainer.new();title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.add_theme_constant_override("separation",1);top.add_child(title)
 	_voice(title,String(p.name),22,false)
-	Kit.label(title,String(p.relation),"note")
-	if String(p.get("ruler",""))!="": Kit.label(title,String(p.ruler),"note")
-	_voice(column,String(p.headline),18)
+	var refs:={"ruler":null,"badges":[],"doings":[],"memories":[],"feelings":[]}
+	refs.relation=Kit.label(title,String(p.relation),"note")
+	if String(p.get("ruler",""))!="": refs.ruler=Kit.label(title,String(p.ruler),"note")
+	refs.headline=_voice(column,String(p.headline),18)
 	var grid:=GridContainer.new();grid.columns=2
 	grid.add_theme_constant_override("h_separation",16);grid.add_theme_constant_override("v_separation",6)
 	column.add_child(grid)
 	for view:Dictionary in p.get("views",[]):
 		grid.add_child(_feeling(view))
+		(refs.feelings as Array).append(_feeling_refs)
 	var strength:=Kit.label(column,String(p.strength)+".","body")
 	strength.tooltip_text="Fighting strength: everyone who can defend the homes, and warriors trained and ready counted three times over."
 	strength.mouse_filter=Control.MOUSE_FILTER_PASS
+	refs.strength=strength
 	for pair:Array in [["envy","Envy",Standing.ENVY_RAID_FLOOR],["contempt","Contempt",Standing.CONTEMPT_FLOOR]]:
 		var amount:=float(p.get(String(pair[0]),0.0))
 		if amount<=float(pair[2]): continue
@@ -497,6 +542,7 @@ func _people_card(p:Dictionary)->Control:
 		danger.add_child(badge)
 		var why:=Kit.label(danger,String(p.get(String(pair[0])+"_why","")),"note")
 		why.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		(refs.badges as Array).append([String(pair[0]),String(pair[1]),badge,why])
 	var doings:Array=p.get("consequences",[])
 	if not doings.is_empty():
 		Kit.label(column,"What it makes them do","kicker")
@@ -506,69 +552,160 @@ func _people_card(p:Dictionary)->Control:
 			var words:=Kit.label(line,String(c.words),"body")
 			words.tooltip_text=String(c.get("detail",""))
 			words.mouse_filter=Control.MOUSE_FILTER_PASS
+			(refs.doings as Array).append(words)
 	var memories:Array=p.get("memories",[])
 	if not memories.is_empty():
 		Kit.label(column,"What they remember","kicker")
 		for memory:Dictionary in memories:
-			Kit.label(column,String(memory.text),"note",_tone_color(String(memory.tone)))
+			(refs.memories as Array).append(Kit.label(column,String(memory.text),"note",_tone_color(String(memory.tone))))
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);column.add_child(actions)
 	var on_court:Variant=data.get("on_court")
 	var civ_id:=String(p.civ_id)
 	if on_court is Callable: Kit.button(actions,"Send word",false,func()->void: (on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours")
+	_people_refs.append(refs)
 	return card
 
+## What a people's card is made of: who, their colours and emblem, the
+## feelings shown, whether a ruler and each danger badge are named, and the
+## tones of what they do and remember.
+static func _people_card_shape(p:Dictionary)->Array:
+	var views:Array=[]
+	for view:Dictionary in p.get("views",[]):views.append([String(view.id),String(view.name)])
+	var doings:Array=[]
+	for c:Dictionary in p.get("consequences",[]):doings.append(String(c.tone))
+	var memories:Array=[]
+	for memory:Dictionary in p.get("memories",[]):memories.append(String(memory.tone))
+	return [String(p.civ_id),p.get("accent",T.GOLD),p.get("emblem"),String(p.name),String(p.get("ruler",""))!="",views,
+		float(p.get("envy",0.0))>Standing.ENVY_RAID_FLOOR,float(p.get("contempt",0.0))>Standing.CONTEMPT_FLOOR,doings,memories]
+
+## A people's card takes the day's feelings and words in place.
+func _fill_people_card(refs:Dictionary,p:Dictionary)->void:
+	_put(refs.relation,String(p.relation))
+	if refs.ruler!=null:_put(refs.ruler,String(p.ruler))
+	_put(refs.headline,String(p.headline))
+	var views:Array=p.get("views",[])
+	for index in mini(views.size(),(refs.feelings as Array).size()):_fill_feeling(refs.feelings[index],views[index])
+	_put(refs.strength,String(p.strength)+".")
+	for badge:Array in refs.badges:
+		_put(badge[2],"%s %d%%" % [String(badge[1]),roundi(float(p.get(String(badge[0]),0.0))*100.0)])
+		_put(badge[3],String(p.get(String(badge[0])+"_why","")))
+	var doings:Array=p.get("consequences",[])
+	for index in mini(doings.size(),(refs.doings as Array).size()):
+		var words:Label=refs.doings[index]
+		_put(words,String(doings[index].words))
+		words.tooltip_text=String((doings[index] as Dictionary).get("detail",""))
+	var memories:Array=p.get("memories",[])
+	for index in mini(memories.size(),(refs.memories as Array).size()):_put(refs.memories[index],String(memories[index].text))
+
+## The labels of the feeling _feeling made last, for the live refresh.
+var _feeling_refs:Dictionary={}
 func _feeling(view:Dictionary)->Control:
-	var id:=String(view.id)
-	var value:=float(view.value)
 	var cell:=VBoxContainer.new()
 	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	cell.add_theme_constant_override("separation",2)
 	cell.mouse_filter=Control.MOUSE_FILTER_PASS
-	cell.tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(value*100.0),String(view.means),String(view.why)]
 	var head:=HBoxContainer.new();head.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(head)
 	var name:=Kit.label(head,String(view.name),"body",Color(0,0,0,0),false);name.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var amount:=Kit.label(head,"%d%%" % roundi(value*100.0),"value",Color(0,0,0,0),false);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var amount:=Kit.label(head,"","value",Color(0,0,0,0),false);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var meter:=Meter.new()
-	meter.set_value(value,{"allure":T.TEAL,"awe":T.GOLD,"fear":T.RED,"respect":T.BLUE,"trust":T.GREEN,"resentment":T.RED}.get(id,T.GOLD))
 	cell.add_child(meter)
+	_feeling_refs={"cell":cell,"amount":amount,"meter":meter}
+	_fill_feeling(_feeling_refs,view)
 	return cell
+
+func _fill_feeling(refs:Dictionary,view:Dictionary)->void:
+	var value:=float(view.value)
+	(refs.cell as Control).tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(value*100.0),String(view.means),String(view.why)]
+	_put(refs.amount,"%d%%" % roundi(value*100.0))
+	(refs.meter as Meter).set_value(value,{"allure":T.TEAL,"awe":T.GOLD,"fear":T.RED,"respect":T.BLUE,"trust":T.GREEN,"resentment":T.RED}.get(String(view.id),T.GOLD))
 
 # ------------------------------------------------------------ our own people
 
+## Our own people keep their medallions and lines while the same lines are
+## shown; the month's figures are written into them.
+var _home_shape:Array=[]
+var _home_refs:Dictionary={}
 func _fill_home()->void:
-	_clear(home)
 	var h:Dictionary=data.get("home",{})
+	var shape:=_home_shape_of(h)
+	if shape==_home_shape and not _home_refs.is_empty():
+		_fill_home_words(h)
+		return
+	_home_shape=shape
+	_home_refs={"medals":[]}
+	_clear(home)
 	Kit.label(home,"Our own people","kicker")
 	var card:=_card(T.GREEN)
 	home.add_child(card)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);card.add_child(column)
 	var row:=HFlowContainer.new();row.alignment=FlowContainer.ALIGNMENT_CENTER;row.add_theme_constant_override("h_separation",26);row.add_theme_constant_override("v_separation",12);column.add_child(row)
+	for medal:Array in _home_medals(h):
+		row.add_child(_medallion(String(medal[0]),float(medal[1]),medal[2],String(medal[3]),String(medal[4])))
+		(_home_refs.medals as Array).append(_medal_refs)
+	var words:=_home_words(h)
+	if String(h.get("regard_words",""))!="":
+		var said:=_voice(column,String(words.regard),18)
+		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.regard=said
+	var note:=Kit.label(column,String(words.note),"note")
+	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	_home_refs.note=note
+	if words.has("levy"):
+		var heavy:=Kit.label(column,String(words.levy),"note",T.RED)
+		heavy.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.levy=heavy
+	if words.has("forgiving"):
+		var line:=Kit.label(column,String(words.forgiving),"note",T.GREEN if float((h.get("effects",{}) as Dictionary).get("forgiveness",0.0))>0.0 else T.RED)
+		line.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.forgiving=line
+
+## The four medallions: [title, value, ink, word, tip].
+static func _home_medals(h:Dictionary)->Array:
 	var pride:=float(h.get("pride",0.5))
 	var trust:=float(h.get("trust",0.5))
-	row.add_child(_medallion("Pride",pride,T.GREEN,"proud" if pride>=0.62 else ("ashamed" if pride<0.42 else "ordinary"),"How proud our people are of who they are: %s." % String(h.get("pride_why",""))))
-	row.add_child(_medallion("Love of you",float(h.get("love",0.5)),T.GOLD,_band(float(h.get("love",0.5))),"How much our people love their god."))
-	row.add_child(_medallion("Dread of you",float(h.get("dread",0.0)),T.RED,_band(float(h.get("dread",0.0))),"How much our people dread their god's wrath."))
-	row.add_child(_medallion("Trust in chiefs",trust,T.TEAL,_band(trust),"How much our people trust those who lead them."))
-	if String(h.get("regard_words",""))!="":
-		var said:=_voice(column,_sentence(String(h.regard_words))+".",18)
-		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	return [["Pride",pride,T.GREEN,"proud" if pride>=0.62 else ("ashamed" if pride<0.42 else "ordinary"),"How proud our people are of who they are: %s." % String(h.get("pride_why",""))],
+		["Love of you",float(h.get("love",0.5)),T.GOLD,_band(float(h.get("love",0.5))),"How much our people love their god."],
+		["Dread of you",float(h.get("dread",0.0)),T.RED,_band(float(h.get("dread",0.0))),"How much our people dread their god's wrath."],
+		["Trust in chiefs",trust,T.TEAL,_band(trust),"How much our people trust those who lead them."]]
+
+## The lines under the medallions: our regard, the month's effects, a heavy
+## levy and forgiveness (the last two only when they apply).
+static func _home_words(h:Dictionary)->Dictionary:
+	var words:={"regard":_sentence(String(h.get("regard_words","")))+"."}
 	var effects:Dictionary=h.get("effects",{})
 	var parts:PackedStringArray=[]
 	for pair:Array in [["attraction","how much families want to join us and stay"],["cohesion","how well we hold together"],["legitimacy","trust in the chiefs"],["menace","our warbands put off newcomers"]]:
 		var amount:=float(effects.get(String(pair[0]),0.0))
 		if absf(amount)<0.05: continue
 		parts.append("%s %s%.1f" % [String(pair[1]),"+" if amount>0.0 else "−",absf(amount)])
-	var note:=Kit.label(column,("This month, in points of 100: "+"; ".join(parts)+".") if not parts.is_empty() else "Pride is ordinary this month: it neither draws people to us nor holds them.","note")
-	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	words["note"]=("This month, in points of 100: "+"; ".join(parts)+".") if not parts.is_empty() else "Pride is ordinary this month: it neither draws people to us nor holds them."
 	var levy:=float(effects.get("levy",0.0))
 	if levy>0.0:
-		var heavy:=Kit.label(column,"%d%% of the people are under arms: more than households carry without complaint. Holding together −%.1f and trust in the chiefs −%.1f, in points of 100." % [roundi(float(effects.get("under_arms",0.0))*100.0),float(effects.get("levy_cohesion",levy*60.0)),float(effects.get("levy_trust",levy*40.0))],"note",T.RED)
-		heavy.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		words["levy"]="%d%% of the people are under arms: more than households carry without complaint. Holding together −%.1f and trust in the chiefs −%.1f, in points of 100." % [roundi(float(effects.get("under_arms",0.0))*100.0),float(effects.get("levy_cohesion",levy*60.0)),float(effects.get("levy_trust",levy*40.0))]
 	var forgiving:=float(effects.get("forgiveness",0.0))
 	if absf(forgiving)>=0.02:
-		var said:=("A proud people forgives: the blame its chiefs carry for hard orders, constant change and failed aims is %d%% lighter." % roundi(forgiving*100.0)) if forgiving>0.0 else ("A people ashamed of itself blames its chiefs %d%% more for hard orders, constant change and failed aims." % roundi(-forgiving*100.0))
-		var line:=Kit.label(column,said,"note",T.GREEN if forgiving>0.0 else T.RED)
-		line.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		words["forgiving"]=("A proud people forgives: the blame its chiefs carry for hard orders, constant change and failed aims is %d%% lighter." % roundi(forgiving*100.0)) if forgiving>0.0 else ("A people ashamed of itself blames its chiefs %d%% more for hard orders, constant change and failed aims." % roundi(-forgiving*100.0))
+	return words
+
+## Which of our people's lines are shown, and forgiveness's ink.
+static func _home_shape_of(h:Dictionary)->Array:
+	var effects:Dictionary=h.get("effects",{})
+	var forgiving:=float(effects.get("forgiveness",0.0))
+	return [String(h.get("regard_words",""))!="",float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
+
+## Our people's medallions and lines take the month's figures in place.
+func _fill_home_words(h:Dictionary)->void:
+	var medals:=_home_medals(h)
+	for index in mini(medals.size(),(_home_refs.medals as Array).size()):
+		var refs:Dictionary=_home_refs.medals[index];var medal:Array=medals[index]
+		(refs.column as Control).tooltip_text=String(medal[4])
+		(refs.gauge as Medallion).set_value(float(medal[1]),medal[2])
+		_put(refs.word,String(medal[3]))
+	var words:=_home_words(h)
+	if _home_refs.has("regard"):_put(_home_refs.regard,String(words.regard))
+	_put(_home_refs.note,String(words.note))
+	if _home_refs.has("levy"):_put(_home_refs.levy,String(words.get("levy","")))
+	if _home_refs.has("forgiving"):_put(_home_refs.forgiving,String(words.get("forgiving","")))
 
 ## First letter up, the rest as written.
 static func _sentence(text:String)->String:
@@ -581,6 +718,8 @@ static func _band(value:float)->String:
 	if value<0.8: return "much"
 	return "great"
 
+## The parts of the medallion _medallion made last, for the live refresh.
+var _medal_refs:Dictionary={}
 func _medallion(title:String,value:float,tint:Color,word:String,tip:String)->Control:
 	var column:=VBoxContainer.new()
 	column.add_theme_constant_override("separation",4)
@@ -589,4 +728,5 @@ func _medallion(title:String,value:float,tint:Color,word:String,tip:String)->Con
 	var gauge:=Medallion.new();gauge.set_value(value,tint);column.add_child(gauge)
 	var name:=Kit.label(column,title,"heading",Color(0,0,0,0),false);name.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var said:=Kit.label(column,word,"note",Color(0,0,0,0),false);said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;said.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	_medal_refs={"column":column,"gauge":gauge,"word":said}
 	return column
