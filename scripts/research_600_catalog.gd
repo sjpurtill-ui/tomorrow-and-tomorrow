@@ -565,15 +565,32 @@ static func has_conditions(id:String)->bool:
 ## DiscoverySystem.research_600_player_society). Empty when all are met.
 static func unmet_conditions(id:String,society:Dictionary)->Array[String]:
 	var reasons:Array[String]=[]
+	_check_conditions(id,society,reasons)
+	return reasons
+
+
+static func conditions_met(id:String,society:Dictionary)->bool:
+	return _check_conditions(id,society,null)
+
+
+## True when every design condition of `id` holds in `society`. Given an Array
+## as `reasons`, it also lists every unmet condition in words; without one it
+## stops at the first (research scans ask this of thousands of questions).
+static func _check_conditions(id:String,society:Dictionary,reasons:Variant)->bool:
 	var conditions:Dictionary=item(id).get("conditions",{})
-	if conditions.is_empty(): return reasons
+	if conditions.is_empty(): return true
+	var met:=true
 	if conditions.has("min_population") and float(society.get("population",0.0))<float(conditions.min_population):
-		reasons.append("A population of at least %d" % int(conditions.min_population))
+		if reasons==null: return false
+		met=false;reasons.append("A population of at least %d" % int(conditions.min_population))
 	if conditions.has("min_settlements") and int(society.get("settlements",0))<int(conditions.min_settlements):
-		reasons.append("At least %d settlements" % int(conditions.min_settlements))
+		if reasons==null: return false
+		met=false;reasons.append("At least %d settlements" % int(conditions.min_settlements))
 	var resources:Dictionary=society.get("resources",{})
 	for resource:Variant in conditions.get("resources_known",[]):
-		if not resources.has(String(resource)): reasons.append("Knowledge of %s" % String(resource))
+		if not resources.has(String(resource)):
+			if reasons==null: return false
+			met=false;reasons.append("Knowledge of %s" % String(resource))
 	var environments:Array=conditions.get("environment",[])
 	if not environments.is_empty():
 		var tags:Dictionary=society.get("environment",{})
@@ -584,16 +601,16 @@ static func unmet_conditions(id:String,society:Dictionary)->Array[String]:
 			# stand), or timber-working neighbors met through contact, stand in
 			# for a woodland setting.
 			if String(tag)=="woodland" and (resources.has("Timber") or bool(society.get("contact",false))): found=true;break
-		if not found: reasons.append("A settlement by %s" % " or ".join(PackedStringArray(environments.map(func(tag:Variant)->String: return _environment_label(String(tag))))))
+		if not found:
+			if reasons==null: return false
+			met=false;reasons.append("A settlement by %s" % " or ".join(PackedStringArray(environments.map(func(tag:Variant)->String: return _environment_label(String(tag))))))
 	if conditions.has("institutions_min") and float(society.get("institutions",0.0))<float(conditions.institutions_min):
-		reasons.append("Institutional capacity of at least %d%%" % int(round(float(conditions.institutions_min)*100.0)))
+		if reasons==null: return false
+		met=false;reasons.append("Institutional capacity of at least %d%%" % int(round(float(conditions.institutions_min)*100.0)))
 	if bool(conditions.get("contact_required",false)) and not bool(society.get("contact",false)):
-		reasons.append("Contact with another people")
-	return reasons
-
-
-static func conditions_met(id:String,society:Dictionary)->bool:
-	return unmet_conditions(id,society).is_empty()
+		if reasons==null: return false
+		met=false;reasons.append("Contact with another people")
+	return met
 
 
 static func _environment_label(tag:String)->String:

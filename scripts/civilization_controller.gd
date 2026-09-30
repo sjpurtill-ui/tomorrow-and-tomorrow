@@ -60,10 +60,14 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	var known:Dictionary={}
 	for known_id in WorldSimulation.state.known_discoveries:known[known_id]=true
 	var today:=int(WorldSimulation.state.elapsed_days)
-	for entry:Dictionary in WorldSimulation.discovery.technology_catalog:
+	# One research scan (DiscoverySystem.begin_research_scan) serves every read
+	# below: nothing they depend on changes before the orders are given.
+	var discovery:=WorldSimulation.discovery
+	discovery.begin_research_scan()
+	for entry:Dictionary in discovery.technology_catalog:
 		var field:=String(entry.dynamic)
 		if viable.has(field):continue
-		if WorldSimulation.discovery._discovery_is_eligible(entry,today,known):viable[field]=true
+		if discovery._scan_eligible(entry,today,known):viable[field]=true
 	# This ruler chooses its own emphasis through ordinary orders. Do not spend
 	# every point on blocked fields while their cross-field foundations await work.
 	# Player emphasis remains authoritative and is never changed by this controller.
@@ -73,6 +77,7 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	var support:Dictionary=preload("res://scripts/research_supply_planner.gd").recommendation()
 	if support.is_empty():
 		support=preload("res://scripts/research_foundations.gd").recommendation()
+	discovery.end_research_scan()
 	var weights:=STRATEGY.research_plan(priorities)
 	if not support.is_empty() and int(weights.get(support.domain,0))==0:
 		var donor:=""
