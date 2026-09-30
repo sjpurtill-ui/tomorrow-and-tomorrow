@@ -666,8 +666,14 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var total_weight:=0.0
 	# Orders stay the same for this whole pass; see _stone_drive.
 	var pass_inputs:Dictionary={}
-	for deposit in material_deposits:
-		total_weight+=_extraction_priority(deposit,storage_priorities,pass_inputs) if float(deposit.remaining)>0.0 else 0.0
+	# A deposit's priority is read once: nothing it depends on (stores, orders,
+	# its own reserve) changes before its share is taken below.
+	var weights:=PackedFloat64Array()
+	weights.resize(material_deposits.size())
+	for index in material_deposits.size():
+		var deposit:Dictionary=material_deposits[index]
+		weights[index]=_extraction_priority(deposit,storage_priorities,pass_inputs) if float(deposit.remaining)>0.0 else 0.0
+		total_weight+=weights[index]
 	# Owner-wide inputs, read once for every deposit in this pass.
 	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
 	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
@@ -681,16 +687,25 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# work; reported "today" figures remain per day.
 	var span:=float(WorldSimulation.span)
 	var extracted_total:=0.0
-	for deposit in material_deposits:
-		var share:=_extraction_priority(deposit,storage_priorities,pass_inputs)/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
+	# Knowledge multipliers depend only on the resource; each is summed once,
+	# in the same order, for the first deposit of that resource.
+	var knowledge_by_resource:Dictionary={}
+	for index in material_deposits.size():
+		var deposit:Dictionary=material_deposits[index]
+		var share:=weights[index]/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
 		var profile:=_material_profile(String(deposit.resource))
-		var knowledge_multiplier:=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
-		if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
-		if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect
-		# Research names the fibre bonus "fiber_yield"; the resource is "Fiber Plants".
-		if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
+		var known_multiplier:Variant=knowledge_by_resource.get(deposit.resource)
+		var knowledge_multiplier:float
+		if known_multiplier!=null:knowledge_multiplier=known_multiplier
+		else:
+			knowledge_multiplier=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
+			if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
+			if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect
+			# Research names the fibre bonus "fiber_yield"; the resource is "Fiber Plants".
+			if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
+			knowledge_by_resource[deposit.resource]=knowledge_multiplier
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
 		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
 		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)*span) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield)*span)
@@ -716,18 +731,23 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Deliver shipments whose real travel time has elapsed.
 	stamp=trace.mark("flow_extraction",stamp)
 	var delivered_total:=0.0
+	var today:=int(WorldSimulation.state.elapsed_days)
 	for deposit in material_deposits:
-		var still_moving:Array=[]
-		for shipment_variant in deposit.shipments:
-			var shipment:Dictionary=shipment_variant
-			if int(shipment.arrival_day)<=int(WorldSimulation.state.elapsed_days):
-				var quantity:=float(shipment.quantity)
-				WorldSimulation.state.resource_stockpiles[String(deposit.resource)]=float(WorldSimulation.state.resource_stockpiles.get(String(deposit.resource),0.0))+quantity
-				deposit.delivered_today=float(deposit.delivered_today)+quantity
-				deposit.lifetime_delivered=float(deposit.lifetime_delivered)+quantity
-				delivered_total+=quantity
-			else: still_moving.append(shipment)
-		deposit.shipments=still_moving
+		# Loads on the road are kept in order of arrival (_add_shipment), so the
+		# loads due today are the first ones; the rest are not touched.
+		var moving:=_normalized_shipments(deposit)
+		var due:=0
+		while due<moving.size() and int((moving[due] as Dictionary).arrival_day)<=today:
+			var quantity:=float((moving[due] as Dictionary).quantity)
+			WorldSimulation.state.resource_stockpiles[String(deposit.resource)]=float(WorldSimulation.state.resource_stockpiles.get(String(deposit.resource),0.0))+quantity
+			deposit.delivered_today=float(deposit.delivered_today)+quantity
+			deposit.lifetime_delivered=float(deposit.lifetime_delivered)+quantity
+			delivered_total+=quantity
+			deposit.in_transit=float(deposit.in_transit)-quantity
+			due+=1
+		if due>0:
+			deposit.shipments=moving.slice(due)
+			if due==moving.size():deposit.in_transit=0.0
 	# Carriers are distributed by waiting bulk and priority.  Distance lowers daily
 	# throughput and separately creates a visible time-in-transit delay.
 	stamp=trace.mark("flow_deliveries",stamp)
@@ -736,12 +756,18 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var route_speed_effect:=WorldSimulation.discovery.effect("route_speed")
 	var haul_effect:=1.0+WorldSimulation.discovery.effect("haul_capacity")
 	var travel_effect:=1.0+WorldSimulation.discovery.effect("travel_speed")
-	for deposit in material_deposits:
-		haul_weight+=float(deposit.stock_at_source)*_deposit_priority(deposit,storage_priorities,pass_inputs)
-	for deposit in material_deposits:
+	# As with extraction, each deposit's hauling priority is read once.
+	var haul_priorities:=PackedFloat64Array()
+	haul_priorities.resize(material_deposits.size())
+	for index in material_deposits.size():
+		var deposit:Dictionary=material_deposits[index]
+		haul_priorities[index]=_deposit_priority(deposit,storage_priorities,pass_inputs)
+		haul_weight+=float(deposit.stock_at_source)*haul_priorities[index]
+	for index in material_deposits.size():
+		var deposit:Dictionary=material_deposits[index]
 		var waiting:=float(deposit.stock_at_source)
 		if waiting<=0.0001: continue
-		var share:=waiting*_deposit_priority(deposit,storage_priorities,pass_inputs)/maxf(0.001,haul_weight)
+		var share:=waiting*haul_priorities[index]/maxf(0.001,haul_weight)
 		var assigned_carriers:=carriers*share
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
@@ -752,7 +778,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			deposit.stock_at_source=waiting-dispatched
 			var speed_km_day:=maxf(1.0,8.0*route_factor*travel_effect)
 			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
-			deposit.shipments.append({"quantity":dispatched,"departure_day":int(WorldSimulation.state.elapsed_days),"arrival_day":int(WorldSimulation.state.elapsed_days)+int(deposit.travel_days)})
+			_add_shipment(deposit,{"quantity":dispatched,"departure_day":today,"arrival_day":today+int(deposit.travel_days)})
 		_update_deposit_bottleneck(deposit,carriers,events)
 	stamp=trace.mark("flow_hauling",stamp)
 	var loss_report:=_apply_material_storage_losses(events)
@@ -760,18 +786,17 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var lost_total:=float(loss_report.total)
 	var at_source:=0.0
 	var in_transit:=0.0
+	var active_shipments:=0
+	var workable_occurrences:=0
 	for deposit in material_deposits:
 		at_source+=float(deposit.stock_at_source)
-		for shipment_variant in deposit.shipments: in_transit+=float((shipment_variant as Dictionary).quantity)
+		in_transit+=float(deposit.in_transit)
+		active_shipments+=(deposit.shipments as Array).size()
+		if not deposit_exhausted(deposit):workable_occurrences+=1
 	var capacities:=_storage_capacities()
 	var stored_bulk:=_stored_bulk()
 	var capacity_total:=0.0
 	for amount in capacities.values(): capacity_total+=float(amount)
-	var active_shipments:=0
-	var workable_occurrences:=0
-	for deposit in material_deposits:
-		active_shipments+=(deposit.get("shipments",[]) as Array).size()
-		if not deposit_exhausted(deposit):workable_occurrences+=1
 	WorldSimulation.state.material_metrics={"extracted_today":extracted_total/span,"delivered_today":delivered_total/span,"lost_today":lost_total/span,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"bounded":true}
 	WorldSimulation.state.material_history.append({"day":int(WorldSimulation.state.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
 	if WorldSimulation.state.material_history.size()>370: WorldSimulation.state.material_history.pop_front()
@@ -783,6 +808,40 @@ const DEPOSIT_FIELD_DEFAULTS:={"stock_at_source":0.0,"shipments":[],"extracted_t
 func _ensure_deposit_fields(deposit:Dictionary)->void:
 	for key in DEPOSIT_FIELD_DEFAULTS:
 		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
+
+## A deposit's loads on the road, in order of arrival, with their total in
+## `in_transit`. A deposit without that total (an older save, or one made
+## before its first haul) has its loads put in order of arrival once, keeping
+## the order they were sent for loads due the same day.
+func _normalized_shipments(deposit:Dictionary)->Array:
+	var moving:Array=deposit.shipments
+	if deposit.has("in_transit"):return moving
+	var ordered:=true
+	for index in range(1,moving.size()):
+		if int((moving[index] as Dictionary).arrival_day)<int((moving[index-1] as Dictionary).arrival_day):
+			ordered=false
+			break
+	if not ordered:
+		var keyed:Array=[]
+		for index in moving.size():keyed.append([int((moving[index] as Dictionary).arrival_day),index,moving[index]])
+		keyed.sort_custom(func(a:Array,b:Array)->bool:return int(a[0])<int(b[0]) or (int(a[0])==int(b[0]) and int(a[1])<int(b[1])))
+		moving=keyed.map(func(entry:Array)->Dictionary:return entry[2])
+		deposit.shipments=moving
+	var total:=0.0
+	for shipment:Dictionary in moving:total+=float(shipment.quantity)
+	deposit["in_transit"]=total
+	return moving
+
+## Puts a load on the road in order of arrival (after any load due the same
+## day) and adds it to the deposit's `in_transit`.
+func _add_shipment(deposit:Dictionary,shipment:Dictionary)->void:
+	var moving:=_normalized_shipments(deposit)
+	var arrival:=int(shipment.arrival_day)
+	var at:=moving.size()
+	while at>0 and int((moving[at-1] as Dictionary).arrival_day)>arrival:at-=1
+	if at==moving.size():moving.append(shipment)
+	else:moving.insert(at,shipment)
+	deposit.in_transit=float(deposit.in_transit)+float(shipment.quantity)
 
 func _is_material_resource(resource_name:String)->bool:
 	# Civilian Goods are maintained household things in use. CivilianGoods applies
