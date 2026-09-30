@@ -43,6 +43,24 @@ func test_secondary_daily_food_and_water_cannot_consume_capital_stores()->void:
 	SettlementModel.process_city_resources("dawngate",{"origin":Vector3(10,0,0)})
 	assert_int(SettlementModel.city_resource_snapshot("dawngate").food_history.size()).is_equal(1)
 
+## A town's care of mothers, babies and the sick is its own: the town's day
+## never overwrites the capital's. (The capital's life expectancy flipped
+## between its own and the second town's figure each day, as the screen read
+## it before or after that town's day.)
+func test_a_towns_care_is_its_own()->void:
+	GameState.early_care={"categories":[{"id":"water","coverage":0.4}],"marker":"capital"}
+	var capital:=GameState.early_care.duplicate(true)
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		GameState.early_care={"categories":[{"id":"water","coverage":0.9}],"marker":"dawngate"}
+	)
+	assert_dict(GameState.early_care).is_equal(capital)
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		assert_str(String(GameState.early_care.get("marker",""))).is_equal("dawngate")
+	)
+	# A full day in the town leaves the capital's care as it was.
+	SettlementModel.process_city_resources("dawngate",{"origin":Vector3(10,0,0),"traveling":false,"surface_water_distance_km":1.0})
+	assert_dict(GameState.early_care).is_equal(capital)
+
 func test_selection_does_not_change_simulation_or_primary_name()->void:
 	assert_bool(bool(SettlementModel.select_settlement("dawngate").ok)).is_true()
 	assert_str(GameState.settlement_name).is_equal("First City")

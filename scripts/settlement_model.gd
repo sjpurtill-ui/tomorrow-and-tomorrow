@@ -46,6 +46,9 @@ const CITY_RESOURCE_DEFAULTS:={
 	"next_settlement_plot_id":1,"next_settlement_nucleus_id":2,"last_morphology_day":-1,"morphology_revision":0,
 	"settlement_name":"","settlement_founded_at":Vector3.ZERO,"settlement_founded_day":0,"settlement_site_committed":true,
 	"population_health":0.72,"food_security":0.62,"consecutive_food_shortage_days":0.0,"consecutive_water_shortage_days":0.0,
+	# Each town's care of mothers, babies and the sick (early_life_conditions.gd),
+	# kept with it: a town's day never overwrites the capital's.
+	"early_care":{},
 	"convoy_traveling":false,"convoy_exposure_days":0.0,"health_history":[],"last_simulation_event_days":{},
 	"currency_demand":0.0,"currency_issued":0.0,"currency_retired":0.0,
 	"in_kind_labor_arrears":0.0,"in_kind_material_arrears":0.0,
