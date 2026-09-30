@@ -96,7 +96,7 @@ const KITS:={
 	"mechanized_kit":{"name":"Armoured Carriers","family":"vehicle","gen":5,"year":2768,"attack":3.00,"defense":2.80,"armor":2.20,"penetration":1.60,"crew":8.0,"crewless":0.0,"ammo":"small_arms_ammunition","ammo_per":300,"supply":90.0,"materials":{"Iron Ore":26.0,"Copper Ore":2.0,"Crude Oil":0.5,"Civilian Goods":15.0},"days":40.0,"delivery":20.0,"glyph":"carrier","look":"Tracked steel box with a ramp; a squad rides inside, a gun on top."},
 	"main_battle_tank":{"name":"Main Battle Tanks","family":"vehicle","gen":6,"year":2842,"attack":8.50,"defense":6.80,"armor":4.20,"penetration":4.60,"crew":4.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":40,"supply":600.0,"materials":{"Iron Ore":90.0,"Copper Ore":6.0,"Nickel Ore":2.0,"Fine Sand":0.5,"Crude Oil":3.0,"Civilian Goods":60.0},"days":140.0,"delivery":40.0,"glyph":"mbt","look":"Low wide tank with a long stabilised gun, night sights and angular armour."},
 	# Drones and robots.
-	"drone_team":{"name":"Drone Teams","family":"autonomous","gen":0,"year":2980,"attack":9.00,"defense":2.50,"armor":0.00,"penetration":4.00,"crew":2.0,"crewless":0.6,"ammo":"heavy_shells","ammo_per":6,"supply":30.0,"materials":{"Copper Ore":2.0,"Graphite":1.5,"Fine Sand":0.6,"Nickel Ore":0.6,"Fiber Plants":1.0,"Civilian Goods":25.0},"days":14.0,"delivery":3.0,"glyph":"drone","look":"Two operators in a dugout with goggles and a case of small four-rotor drones."},
+	"drone_team":{"name":"Drone Teams","family":"autonomous","gen":0,"year":2980,"attack":9.00,"defense":2.50,"armor":0.00,"penetration":4.40,"crew":2.0,"crewless":0.6,"ammo":"heavy_shells","ammo_per":6,"supply":30.0,"materials":{"Copper Ore":2.0,"Graphite":1.5,"Fine Sand":0.6,"Nickel Ore":0.6,"Fiber Plants":1.0,"Civilian Goods":25.0},"days":14.0,"delivery":3.0,"glyph":"drone","look":"Two operators in a dugout with goggles and a case of small four-rotor drones."},
 	"robotic_vehicle":{"name":"Robotic Combat Vehicles","family":"autonomous","gen":1,"year":2990,"attack":5.4,"defense":3.4,"armor":2.60,"penetration":3.40,"crew":0.3334,"crewless":0.9,"ammo":"heavy_shells","ammo_per":10,"supply":150.0,"materials":{"Iron Ore":20.0,"Copper Ore":4.0,"Nickel Ore":1.5,"Graphite":1.0,"Fine Sand":1.0,"Civilian Goods":50.0},"days":90.0,"delivery":16.0,"glyph":"robot_vehicle","look":"Driverless tracked machine the size of a car, a sensor mast and a remote gun; one operator runs three."},
 	"combat_frame":{"name":"Combat Frames","family":"autonomous","gen":2,"year":2996,"attack":4.3,"defense":2.5,"armor":2.40,"penetration":3.00,"crew":0.125,"crewless":0.95,"ammo":"small_arms_ammunition","ammo_per":120,"supply":25.0,"materials":{"Iron Ore":6.0,"Nickel Ore":1.5,"Bauxite":1.5,"Graphite":1.0,"Fine Sand":0.8,"Copper Ore":1.5,"Civilian Goods":40.0},"days":60.0,"delivery":3.0,"glyph":"combat_frame","look":"Man-tall jointed machine of graphite plates, a sensor slit for a face glowing in the army's colour; one supervisor runs eight."},
 	# Support kits.
@@ -117,14 +117,17 @@ const ARMOR_FAMILY:={
 
 ## The kit's full row: the ledger's own, or an armor kit placed in the
 ## protection family. Empty for ships, aircraft and unknown ids.
+static var _armor_rows:Dictionary={}
 static func row(id:String)->Dictionary:
 	if KITS.has(id): return KITS[id]
 	if ArmorKits.KITS.has(id):
-		var kit:Dictionary=(ArmorKits.KITS[id] as Dictionary).duplicate()
-		kit.merge(ARMOR_FAMILY.get(id,{}),true)
-		kit["family"]="protection"
-		for key in ["crewless","supply"]: if not kit.has(key): kit[key]=0.0
-		return kit
+		if not _armor_rows.has(id):
+			var kit:Dictionary=(ArmorKits.KITS[id] as Dictionary).duplicate()
+			kit.merge(ARMOR_FAMILY.get(id,{}),true)
+			kit["family"]="protection"
+			for key in ["crewless","supply"]: if not kit.has(key): kit[key]=0.0
+			_armor_rows[id]=kit
+		return _armor_rows[id]
 	return {}
 
 static func has(id:String)->bool:

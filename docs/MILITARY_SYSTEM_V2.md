@@ -398,3 +398,37 @@ with machine accounting; (7) recruitment fixes and template numbers.
   never more than there are drivers; the Production stock strip shows what
   the supply lines lack. The Readiness strip's tooltips give the fleet, the
   loads per trip and the load-days asked against those moved.
+- **Critic round 2 (code review of iterations 1–4) and the fixes.**
+  - Saves taken while replacement drafts train now load (the mode is
+    validated); formations saved before the ledger are refitted on load
+    (crew sizes and rounds changed), surplus sets and rounds going back to
+    the stores.
+  - A draft brings gear only for its formation's real gap; arrivals never
+    raise a formation's size; men or sets beyond the gap go home. No set is
+    lost.
+  - No hunger losses while a band is in battle (the battle's copy holds its
+    men) or at the home settlement. Hunger-sick are kept apart from battle
+    wounded; only they rejoin at 4% a fed day.
+  - Drafts go only to bands their line reaches and that are not starving,
+    and only from people already called up or within the Defense share of
+    work. A draft that cannot reach its band waits at home. The Readiness
+    row says why a band gets none.
+  - Draft orders merge per formation and start only at three men or 2% of
+    the formation; the personnel ledger has a "replacements" category so its
+    parts add up; home designs no longer count replacement trainees; a draft
+    whose band is gone joins the army at home as trained men.
+  - Stores weaken only kits living on them (three loads a man a day or
+    more); horse archers graze; stated odds keep the stores share; a far
+    band's deliveries cost the budget in proportion to the distance; bands at
+    sea wait; drafts on the road keep walking while home is held.
+- **Iteration 6, the last age's units.** Networked infantry (night optics,
+  data links), main battle tanks, precision fires, drone teams, counter-drone
+  batteries, robotic combat vehicles, exosuit infantry and combat frames,
+  each on real late research. Machines (crew below one) are run by
+  operators: a formation's count is its operators, each fighting with his
+  machines (a frame supervisor runs eight, a robot vehicle operator three);
+  without machines they cannot fight; a blow mostly destroys machines and
+  only the crewless remainder kills operators. Drones strike armour from
+  above; counter-drone batteries hunt drones and robots; precision fires
+  hunt guns. A frame is worth somewhat more than a networked soldier, not a
+  legion. Known limit: frontage still counts operators, not machines.

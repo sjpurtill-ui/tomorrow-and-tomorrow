@@ -699,7 +699,7 @@ func personnel_ledger()->Dictionary:
 		absent+=maxi(0,int(force.get("scattered_pool",0)))+maxi(0,int(force.get("captured_pool",0)))
 	var occupation:=0
 	for force in occupation_forces: occupation+=maxi(0,int(force.get("troops",0)))
-	return {"total":_mobilized_count(),"naval_air":joint_operations.personnel(),"home":int(home_army.get("troops",0)),"field":field_army_active_personnel(),"occupation":occupation,"recruits":aggregate_recruits,"training":_queued_trainees(),"recovering":wounded,"missing":absent,"capacity":recruitment_capacity()}
+	return {"total":_mobilized_count(),"naval_air":joint_operations.personnel(),"home":int(home_army.get("troops",0)),"field":field_army_active_personnel(),"occupation":occupation,"recruits":aggregate_recruits,"training":_queued_trainees(),"recovering":wounded,"missing":absent,"replacements":sustainment.drafts_on_road(),"capacity":recruitment_capacity()}
 
 
 func population_commitment_snapshot()->Dictionary:
@@ -1415,7 +1415,7 @@ func _matching_training_count(unit:String,weapon:String)->int:
 	var total:=0
 	for order_variant in training_queue:
 		var order:Dictionary=order_variant
-		if String(order.get("mode",""))=="reinforce" or order.has("deployment_line"): continue
+		if String(order.get("mode","")) in ["reinforce","field_draft"] or order.has("deployment_line"): continue
 		if String(order.get("unit",""))==unit and String(order.get("weapon",""))==weapon: total+=maxi(0,int(order.get("count",0)))
 	return total
 
@@ -3678,6 +3678,7 @@ func import_state(payload:Dictionary)->Dictionary:
 			WorldSimulation.figures.import_state(previous.historical_figures)
 			return direction_result
 	_apply_imported_state(incoming)
+	_refit_to_ledger()
 	var errors:=validate_state()
 	if not errors.is_empty():
 		_apply_imported_state(previous)
@@ -3686,6 +3687,35 @@ func import_state(payload:Dictionary)->Dictionary:
 		return {"error":"Invalid military save state.","details":errors}
 	last_world_seed=WorldSimulation.state.world_seed
 	return {"ok":true,"version":SAVE_VERSION}
+
+
+## Formations saved before the equipment ledger (crew sizes and rounds changed)
+## take the ledger's requirements on load; sets and rounds beyond them go back
+## to the stores, so nothing is lost and nothing is invented.
+func _refit_to_ledger()->void:
+	var forces:Array=[home_army]+field_armies+occupation_forces
+	for force_index in forces.size():
+		var force:Dictionary=forces[force_index]
+		var formations:Array=force.get("formations",[])
+		for index in formations.size():
+			var formation:Dictionary=formations[index]
+			var weapon:=String(formation.get("weapon","improvised"))
+			var authorized:=int(formation.get("authorized_count",formation.get("count",0)))
+			var required:int=_equipment_required_for(String(formation.get("unit","levy")),authorized) if force_index==0 else simulator.equipment_required_for_weapon(weapon,authorized)
+			var equipment:=int(formation.get("equipment",0))
+			if equipment>required:
+				military_inventory[weapon]=int(military_inventory.get(weapon,0))+equipment-required
+				formation["equipment"]=required
+			formation["equipment_required"]=required
+			var rounds_required:=_ammunition_required_for(weapon,required)
+			var rounds:=int(formation.get("ammunition",0))
+			if rounds>rounds_required:
+				var kind:=_ammunition_type_for(weapon)
+				if kind!="": military_consumables[kind]=int(military_consumables.get(kind,0))+rounds-rounds_required
+				formation["ammunition"]=rounds_required
+			formation["ammunition_required"]=rounds_required
+			formations[index]=formation
+		force["formations"]=formations
 
 
 func _migrate_legacy_state(payload:Dictionary)->Dictionary:
@@ -3799,7 +3829,8 @@ func validate_state()->Array[String]:
 		if int(training.get("reserved_equipment",0))<0:errors.append("Reserved training equipment cannot be negative.")
 		if training.has("build_batch") and int(training.build_batch)<=0:errors.append("Invalid training batch identity.")
 		if training.has("soldier_ids"): errors.append("Training order contains forbidden individual soldier records.")
-		if training_mode not in ["new","reinforce","retrain"]: errors.append("Training order has an unknown mode.")
+		if training_mode not in ["new","reinforce","retrain","field_draft"]: errors.append("Training order has an unknown mode.")
+		if training_mode=="field_draft" and int(training.get("field_army_id",0))<=0: errors.append("A replacement draft must name its band.")
 		if not simulator.UNIT_TYPES.has(training_unit): errors.append("Training order references an unknown unit type.")
 		if not simulator.WEAPONS.has(training_weapon) or training_weapon not in UnitCatalog.equipment_for(training_unit): errors.append("Training order uses incompatible equipment.")
 		if training_count<=0: errors.append("Training order headcount must be positive.")
@@ -3986,9 +4017,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	for force_variant in payload.get("field_armies",[]):
 		if force_variant is Dictionary: field_armies.append((force_variant as Dictionary).duplicate(true))
 	field_drafts.clear()
-	var saved_drafts:Variant=payload.get("field_drafts",[])
-	if preload("res://scripts/field_sustainment.gd").valid_drafts(saved_drafts):
-		for draft in saved_drafts: field_drafts.append((draft as Dictionary).duplicate(true))
+	for draft in preload("res://scripts/field_sustainment.gd").clean_drafts(payload.get("field_drafts",[])): field_drafts.append(draft)
 	runner_messages.clear()
 	for message_variant in payload.get("runner_messages",[]):
 		if message_variant is Dictionary: runner_messages.append((message_variant as Dictionary).duplicate(true))
@@ -4640,6 +4669,7 @@ func _process_military_day()->void:
 	recovery.advance(last_processed_day)
 	if recovery.home_unavailable():
 		_process_field_army_movement_day()
+		sustainment.arrivals_day()
 		_process_army_runners_day()
 		occupation_transfers.advance(last_processed_day)
 		# Armies in the field fight on while home is held.
@@ -4906,7 +4936,7 @@ func _deliver_stationed_field_equipment(delivery_limit:float)->float:
 		var army:Dictionary=field_armies[index]
 		var location:Dictionary=army.get("position",{})
 		if location.is_empty():continue
-		if command_hierarchy.battle.engaged(int(army.get("army_id",-1))):continue
+		if command_hierarchy.battle.engaged(int(army.get("army_id",-1))) or bool(army.get("embarked",false)):continue
 		var at_home:=_army_is_home(army) and Vector2(float(location.get("x",0)),float(location.get("z",0))).distance_to(point)<=.25
 		if not at_home and String(army.get("priority","normal"))=="last":continue
 		# What leaves home for a distant band is what its line can carry there.
@@ -4918,7 +4948,9 @@ func _deliver_stationed_field_equipment(delivery_limit:float)->float:
 		var used:=float(home_army.get("equipment_delivery_load_used",0))
 		var ammunition:=_deliver_ammunition(maxf(0,offered-used) if _next_equipment_delivery_load()<=0 else 0.0)
 		used+=float(home_army.get("ammunition_delivery_load_used",0))
-		remaining=maxf(0,remaining-used)
+		# The carts that bring it spend the whole trip: a far band costs more
+		# of the day's loads than it receives.
+		remaining=maxf(0,remaining-used/reach)
 		home_army["equipment_delivered_today"]=delivered
 		home_army["ammunition_delivered_today"]=ammunition
 		var rebuilt:Dictionary=simulator.create_formation_force(String(army.get("name","Army")),home_army.get("formations",[]),float(army.get("morale",1)),float(army.get("readiness",1)))

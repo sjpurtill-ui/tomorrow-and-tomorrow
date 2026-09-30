@@ -56,8 +56,12 @@ func test_a_fed_band_or_a_short_first_day_costs_nothing()->void:
 
 func test_the_sick_rejoin_their_places_when_fed()->void:
 	var force:=_band(1,[_formation(1,"spearman","spear",200,300)])
+	# Battle wounded heal by the medical rules; only the hunger-sick come back here.
 	force["wounded_pool"]=100
 	force["provision_ratio"]=1.0
+	for day in 20: MilitaryCampaign.sustainment.recovery_day(force,1.0)
+	assert_int(int(force.wounded_pool)).is_equal(100)
+	force["hunger_sick"]=100
 	for day in 60: MilitaryCampaign.sustainment.recovery_day(force,1.0)
 	assert_int(int(force.troops)+int(force.wounded_pool)).is_equal(300)
 	assert_int(int(force.wounded_pool)).is_less(15)
@@ -83,8 +87,13 @@ func test_stores_are_a_second_share_that_horses_can_graze_and_tanks_cannot()->vo
 	var short:float=MilitaryCampaign.simulator.evaluate_force(tanks,enemy,1.0)[0].attack
 	assert_float(short).is_less(full*0.5)
 
-func test_losses_are_replaced_by_drafts_who_walk_out_and_join()->void:
+func _draftable_world()->void:
 	GameState.population_cohorts["working_age"]=500.0
+	GameState.population_allocations["Defense"]=500
+	GameState.population_allocations["Logistics"]=40
+
+func test_losses_are_replaced_by_drafts_who_walk_out_and_join()->void:
+	_draftable_world()
 	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
 	MilitaryCampaign.field_armies.assign([band])
 	var mobilized_before:int=MilitaryCampaign._mobilized_count()
@@ -126,7 +135,7 @@ func test_a_draft_whose_band_is_gone_comes_home()->void:
 	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(0)
 
 func test_last_priority_bands_are_not_redrafted()->void:
-	GameState.population_cohorts["working_age"]=500.0
+	_draftable_world()
 	var band:=_band(3,[_formation(5,"levy","improvised",10,20)])
 	band["priority"]="last"
 	MilitaryCampaign.field_armies.assign([band])
@@ -140,3 +149,71 @@ func test_drafts_on_the_road_survive_a_save()->void:
 	assert_int(MilitaryCampaign.field_drafts.size()).is_equal(1)
 	assert_int(int(MilitaryCampaign.field_drafts[0].arrive_day)).is_equal(9)
 	assert_bool(Sustainment.valid_drafts([{"army_id":-1}])).is_false()
+
+func test_drafts_come_only_from_those_set_aside_for_defence()->void:
+	_draftable_world()
+	GameState.population_allocations["Defense"]=0
+	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
+	MilitaryCampaign.field_armies.assign([band])
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
+	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("no_people")
+	# Men the player already called up may go.
+	MilitaryCampaign.aggregate_recruits=10
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)
+
+func test_no_drafts_for_a_band_cut_off_or_starving()->void:
+	_draftable_world()
+	GameState.population_allocations["Logistics"]=0
+	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
+	MilitaryCampaign.field_armies.assign([band])
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
+	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("cut_off")
+	GameState.population_allocations["Logistics"]=40
+	MilitaryCampaign.field_armies[0]["hungry_days"]=5.0
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
+	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("hungry")
+
+func test_a_draft_brings_gear_only_for_the_real_gap_and_none_is_lost()->void:
+	_draftable_world()
+	# 20 of 30 men but all 30 sets: the band needs men, not spears.
+	var formation:=_formation(11,"spearman","spear",20,30)
+	var band:=_band(7,[formation],30.0)
+	MilitaryCampaign.field_armies.assign([band])
+	MilitaryCampaign.military_inventory["spear"]=50
+	MilitaryCampaign.sustainment.draft_day()
+	var order:Dictionary=MilitaryCampaign.training_queue[-1]
+	MilitaryCampaign.training_queue.erase(order)
+	var draft:Dictionary=MilitaryCampaign.sustainment.dispatch(order)
+	assert_int(int(draft.equipment)).is_equal(0)
+	var stock:=int(MilitaryCampaign.military_inventory.spear)
+	GameState.elapsed_days=int(draft.arrive_day)
+	MilitaryCampaign.sustainment.arrivals_day()
+	var joined:Dictionary=MilitaryCampaign.field_armies[0].formations[0]
+	assert_int(int(joined.count)).is_equal(30)
+	assert_int(int(joined.equipment)).is_equal(30)
+	assert_int(int(joined.authorized_count)).is_equal(30)
+	assert_int(int(MilitaryCampaign.military_inventory.spear)).is_equal(stock)
+
+func test_a_save_taken_while_drafts_train_loads()->void:
+	_draftable_world()
+	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
+	MilitaryCampaign.field_armies.assign([band])
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)
+	var saved:Dictionary=MilitaryCampaign.export_state()
+	var result:Dictionary=MilitaryCampaign.import_state(saved)
+	assert_dict(result).not_contains_keys(["error"])
+	var drafting:=MilitaryCampaign.training_queue.filter(func(o:Dictionary)->bool:return String(o.get("mode",""))=="field_draft")
+	assert_int(drafting.size()).is_equal(1)
+
+func test_the_personnel_ledger_adds_up_with_drafts_on_the_road()->void:
+	MilitaryCampaign.field_drafts.assign([{"army_id":4,"formation_id":2,"unit":"levy","weapon":"improvised","count":6,"equipment":0,"training":0.4,"left_day":1,"arrive_day":9}])
+	var ledger:Dictionary=MilitaryCampaign.personnel_ledger()
+	var parts:=0
+	for key in ["naval_air","home","field","occupation","recruits","training","recovering","missing","replacements"]: parts+=int(ledger[key])
+	assert_int(parts).is_equal(int(ledger.total))
+	assert_int(int(ledger.replacements)).is_equal(6)
+
+func test_a_bad_saved_draft_is_dropped_alone()->void:
+	var kept:=Sustainment.clean_drafts([{"army_id":4,"formation_id":2,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"arrive_day":9},{"army_id":-1},{"army_id":3,"formation_id":1,"unit":"","weapon":"spear","count":2,"equipment":0,"arrive_day":1}])
+	assert_int(kept.size()).is_equal(1)

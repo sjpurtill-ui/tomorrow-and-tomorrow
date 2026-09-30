@@ -84,7 +84,15 @@ const UNIT_TYPES := {
 	"heavy_tank":{"name": "Heavy Tanks", "attack": 2.62, "defense": 2.24, "organization": 0.97},
 	"tank_destroyer":{"name": "Tank Destroyers", "attack": 2.08, "defense": 1.5, "organization": 1.03},
 	"mechanized_infantry":{"name": "Mechanized Infantry", "attack": 1.98, "defense": 1.82, "organization": 1.22},
-	"air_assault":{"name": "Air Assault Infantry", "attack": 1.63, "defense": 1.2, "organization": 1.27}
+	"air_assault":{"name": "Air Assault Infantry", "attack": 1.63, "defense": 1.2, "organization": 1.27},
+	"networked_infantry":{"name":"Networked Infantry","attack":1.55,"defense":1.45,"organization":1.25},
+	"main_battle_tank":{"name":"Main Battle Tanks","attack":2.9,"defense":2.5,"organization":1.1},
+	"precision_fires":{"name":"Precision Fires","attack":2.5,"defense":0.6,"organization":0.95},
+	"drone_operators":{"name":"Drone Teams","attack":1.4,"defense":0.9,"organization":1.1},
+	"counter_drone_battery":{"name":"Counter-Drone Batteries","attack":0.9,"defense":1.2,"organization":1.0},
+	"robot_vehicle_company":{"name":"Robotic Combat Vehicles","attack":1.8,"defense":1.5,"organization":1.2},
+	"exosuit_infantry":{"name":"Exosuit Infantry","attack":1.7,"defense":1.6,"organization":1.3},
+	"combat_frame_cohort":{"name":"Combat Frames","attack":1.6,"defense":1.5,"organization":1.4}
 }
 
 const Ledger := preload("res://scripts/equipment_ledger.gd")
@@ -158,7 +166,19 @@ const WEAPONS := {
 ## Men per set (below one, a man runs several machines), rounds per firing
 ## element and the round's kind, all from the equipment ledger.
 static func crew_for(weapon_id:String)->float:
-	return Ledger.crew(weapon_id) if Ledger.has(weapon_id) else 1.0
+	return float(_kit(weapon_id)[2])
+
+## [hardness, armor, crew] of a kit, read from the ledger once: the battle
+## asks them for every formation in every exchange.
+static var _kits:Dictionary={}
+static func _kit(weapon_id:String)->Array:
+	var known:Variant=_kits.get(weapon_id)
+	if known!=null: return known
+	var row:=Ledger.row(weapon_id)
+	var armor:=float(row.get("armor",0.0))
+	var entry:=[clampf((armor-0.3)/1.2,0.0,1.0),armor,Ledger.crew(weapon_id) if not row.is_empty() else 1.0]
+	_kits[weapon_id]=entry
+	return entry
 
 static func ammo_per(weapon_id:String)->int:
 	return maxi(0,int(Ledger.row(weapon_id).get("ammo_per",0)))
@@ -166,11 +186,25 @@ static func ammo_per(weapon_id:String)->int:
 static func ammo_type(weapon_id:String)->String:
 	return String(Ledger.row(weapon_id).get("ammo",""))
 
+## Machines (equipment_ledger crew below one): a formation's count is its
+## operators or supervisors, each running several machines. The ledger gives
+## a machine's stats; a man fights with all of his machines, cannot fight
+## without them, and a blow on the formation mostly destroys machines
+## (crewless share) rather than killing him.
+static func machines_per_man(weapon_id:String)->float:
+	var crew:=crew_for(weapon_id)
+	return 1.0/crew if crew<1.0 else 1.0
+
+static func is_machine(weapon_id:String)->bool:
+	return crew_for(weapon_id)<1.0
+
 ## Stores (fodder, fuel, rounds, spares) a kit asks of the supply line besides
-## bread, per man (equipment_ledger.gd supply). A kit asking a load or more a
-## man a day fights weaker when its band's stores run short, down to 35%.
+## bread, per man (equipment_ledger.gd supply). A kit living on them (three
+## loads or more a man a day: horses, guns, vehicles, machines) fights weaker
+## when its band's stores run short, down to 35%. Rounds alone are the
+## ammunition rule's business.
 const STORES_FLOOR:=0.35
-const STORES_DEPENDENT:=1.0
+const STORES_DEPENDENT:=3.0
 
 static func stores_factor(weapon_id:String,share:float)->float:
 	if share>=1.0 or not Ledger.has(weapon_id): return 1.0
@@ -186,7 +220,7 @@ const PIERCE_FLOOR:=0.10
 const PIERCE_STEEPNESS:=2.5
 
 static func kit_hardness(weapon_id:String)->float:
-	return clampf((float(Ledger.row(weapon_id).get("armor",0.0))-0.3)/1.2,0.0,1.0)
+	return float(_kit(weapon_id)[0])
 
 static func pierce_factor(pierce:float,armor:float)->float:
 	if armor<=0.0 or pierce>=armor: return 1.0
@@ -201,11 +235,12 @@ func _armor_profile(formations:Array)->Dictionary:
 	for formation in formations:
 		var count:=float(maxi(0,int(formation.get("count",0))))
 		if count<=0.0: continue
-		var weapon_id:=String(formation.get("weapon","improvised"))
-		var h:=kit_hardness(weapon_id)*issued_equipment_ratio(formation)
 		men+=count
+		var kit:=_kit(String(formation.get("weapon","improvised")))
+		if float(kit[0])<=0.0: continue
+		var h:=float(kit[0])*issued_equipment_ratio(formation)
 		hard+=count*h
-		armor+=count*h*float(Ledger.row(weapon_id).get("armor",0.0))
+		armor+=count*h*float(kit[1])
 	return {"hard":hard/men if men>0.0 else 0.0,"armor":armor/hard if hard>0.0 else 0.0}
 
 ## The enemy's fire by pierce: [pierce, weight] pairs, weight = men x base attack.
@@ -225,9 +260,10 @@ func _fire_profile(formations:Array)->Array:
 
 ## Share of the enemy's fire that gets through a formation's armour.
 static func _through(fire:Array,weapon_id:String,equipment_ratio:float)->float:
-	var hardness:=kit_hardness(weapon_id)*equipment_ratio
+	var kit:=_kit(weapon_id)
+	var hardness:=float(kit[0])*equipment_ratio
 	if hardness<=0.0 or fire.is_empty(): return 1.0
-	var armor:=float(Ledger.row(weapon_id).get("armor",0.0))
+	var armor:=float(kit[1])
 	var total:=0.0
 	var passed:=0.0
 	for pair in fire:
@@ -265,7 +301,15 @@ const MATCHUPS := {
 	"war_elephant":{"levy": 1.7, "line_infantry": 1.25, "javelineer": 0.55, "horse_archer": 0.6},
 	"assault_infantry":{"machine_gun_company": 1.3, "rifle_infantry": 1.15, "armored_formation": 0.6},
 	"anti_tank":{"armored_formation": 1.8, "light_tank": 2.0, "heavy_tank": 1.5, "mechanized_infantry": 1.4, "rifle_infantry": 0.65, "assault_infantry": 0.6},
-	"tank_destroyer":{"armored_formation": 1.8, "light_tank": 2.0, "heavy_tank": 1.5, "mechanized_infantry": 1.4, "rifle_infantry": 0.65, "assault_infantry": 0.6}
+	"tank_destroyer":{"armored_formation": 1.8, "light_tank": 2.0, "heavy_tank": 1.5, "mechanized_infantry": 1.4, "rifle_infantry": 0.65, "assault_infantry": 0.6},
+	# The last age: drones strike armour from above; counter-drone batteries
+	# undo drones and robots; precision fires find guns and depots.
+	"drone_operators":{"main_battle_tank":1.4,"heavy_tank":1.4,"armored_formation":1.4,"robot_vehicle_company":1.3,"precision_fires":1.5,"modern_artillery":1.5,"networked_infantry":1.15},
+	"counter_drone_battery":{"drone_operators":2.4,"robot_vehicle_company":1.6,"combat_frame_cohort":1.6},
+	"precision_fires":{"modern_artillery":1.6,"rocket_artillery":1.6,"precision_fires":1.4,"main_battle_tank":1.2},
+	"main_battle_tank":{"heavy_tank":1.3,"light_tank":1.3,"armored_formation":1.3,"networked_infantry":1.1},
+	"networked_infantry":{"rifle_infantry":1.3,"assault_infantry":1.2,"motorized_infantry":1.2},
+	"combat_frame_cohort":{"networked_infantry":1.25,"rifle_infantry":1.4,"exosuit_infantry":1.1}
 }
 
 
@@ -502,6 +546,9 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		defender_troops -= defender_losses
 		var attacker_cohort_result:=_apply_cohort_losses(attacking_force.get("formations", []), attacker_cohorts, attacker_losses,rng,engagement.get("attacker_target",-1),options.get("attacker_ordered_targets",{}),Blocks.exposure(state,"attacker",attacker_cohorts.size()))
 		var defender_cohort_result:=_apply_cohort_losses(defending_force.get("formations", []), defender_cohorts, defender_losses,rng,engagement.get("defender_target",-1),options.get("defender_ordered_targets",{}),Blocks.exposure(state,"defender",defender_cohorts.size()))
+		# Operators whose machines took the blow are not casualties.
+		attacker_troops+=int(attacker_cohort_result.get("restored",0)); attacker_losses-=int(attacker_cohort_result.get("restored",0))
+		defender_troops+=int(defender_cohort_result.get("restored",0)); defender_losses-=int(defender_cohort_result.get("restored",0))
 		var attacker_block_losses:=Blocks.book_losses(state,"attacker",_block_loss_list(attacking_force,attacker_cohort_result.losses,attacker_losses),where.attacker)
 		var defender_block_losses:=Blocks.book_losses(state,"defender",_block_loss_list(defending_force,defender_cohort_result.losses,defender_losses),where.defender)
 		var attacker_ammunition_used:=_consume_ammunition(attacker_cohort_result.formations,float(engagement.intensity)*casualty_intensity,rng)
@@ -843,6 +890,13 @@ func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Di
 		var ammunition:=_consume_ammunition(applied.formations,0.5 if side==strong else 0.2,rng)
 		force["formations"]=applied.formations
 		var c:Dictionary=casualties[side]
+		# Operators whose machines took the blow are not casualties.
+		var restored:=int(applied.get("restored",0))
+		if restored>0:
+			losses[side]=int(losses[side])-restored
+			c["killed"]=mini(int(c.killed),int(losses[side]))
+			c["wounded"]=int(losses[side])-int(c.killed)
+			c["disabled"]=mini(int(c.get("disabled",0)),int(c.wounded))
 		force["wounded_pool"]=int(force.get("wounded_pool",0))+int(c.wounded)
 		force["disabled_pool"]=int(force.get("disabled_pool",0))+int(c.disabled)
 		force["dead"]=int(force.get("dead",0))+int(c.killed)
@@ -882,7 +936,13 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var stores_share:=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	var enemy_armor:=_armor_profile(enemy_formations)
 	var enemy_hard:=float(enemy_armor.hard)
-	var enemy_fire:=_fire_profile(enemy_formations)
+	# The enemy's fire by pierce matters only to our armoured formations.
+	var own_hard:=false
+	for formation in formations:
+		if kit_hardness(String(formation.get("weapon","improvised")))>0.0:
+			own_hard=true
+			break
+	var enemy_fire:=_fire_profile(enemy_formations) if own_hard else []
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))
 		var weapon_id := String(formation.get("weapon", "improvised"))
@@ -915,15 +975,19 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		# our losses fall (_apply_cohort_losses).
 		var piercing:=(1.0-enemy_hard)+enemy_hard*pierce_factor(float(weapon.penetration),float(enemy_armor.armor)) if enemy_hard>0.0 else 1.0
 		var through:=_through(enemy_fire,weapon_id,equipment_ratio)
+		var per_man:=machines_per_man(weapon_id)
+		var machine:=per_man>1.0
+		var armed_attack:=equipment_ratio if machine else 0.22+equipment_ratio*0.78
+		var armed_defense:=0.20+equipment_ratio*0.80 if machine else 0.35+equipment_ratio*0.65
 		if lean:
 			result.append({"count":count,
-				"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*stores_factor(weapon_id,stores_share)*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-				"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through})
+				"attack":float(unit.attack)*float(weapon.attack)*per_man*matchup*piercing*stores_factor(weapon_id,stores_share)*armed_attack*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+				"defense":float(unit.defense)*float(weapon.defense)*per_man*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through})
 			continue
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*stores_factor(weapon_id,stores_share)*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
+			"attack":float(unit.attack)*float(weapon.attack)*per_man*matchup*piercing*stores_factor(weapon_id,stores_share)*armed_attack*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+			"defense":float(unit.defense)*float(weapon.defense)*per_man*terrain_modifier*armed_defense*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
 			"doctrine_defense":doctrine_defense,"matchup":matchup,"piercing":piercing,"through":through,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
@@ -1193,14 +1257,28 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		updated[target]["count"] = int(updated[target].count) - 1
 		cohort_losses[target]+=1
 		remaining_losses -= 1
+	var restored:=0
 	for index in updated.size():
 		var personnel_losses:=original_counts[index]-int(updated[index].get("count",0))
 		var old_equipment:=int(updated[index].get("equipment",original_counts[index]))
+		var weapon_id:=String(updated[index].get("weapon","improvised"))
+		if is_machine(weapon_id) and personnel_losses>0:
+			# The blow falls on machines: each man's worth of loss destroys his
+			# machines; only the crewless remainder kills the man himself.
+			var machines_lost:=mini(old_equipment,roundi(float(personnel_losses)*machines_per_man(weapon_id)))
+			var men_lost:=clampi(roundi(float(personnel_losses)*(1.0-Ledger.crewless(weapon_id))),0,personnel_losses)
+			var back:=personnel_losses-men_lost
+			updated[index]["count"]=int(updated[index].get("count",0))+back
+			cohort_losses[index]-=back
+			restored+=back
+			updated[index]["equipment"]=old_equipment-machines_lost
+			cohort_equipment_losses[index]=machines_lost
+			continue
 		var personnel_loss_share:=float(personnel_losses)/maxf(1.0,float(original_counts[index]))
 		var equipment_losses:=mini(old_equipment,roundi(float(old_equipment)*personnel_loss_share*0.72+float(old_equipment)*0.006))
 		updated[index]["equipment"]=old_equipment-equipment_losses
 		cohort_equipment_losses[index]=equipment_losses
-	return {"formations":updated,"losses":cohort_losses,"equipment_losses":cohort_equipment_losses}
+	return {"formations":updated,"losses":cohort_losses,"equipment_losses":cohort_equipment_losses,"restored":restored}
 
 
 ## Many losses at once: each formation takes its share of them by exposure
@@ -1273,6 +1351,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		# Men taken when blocks broke, over every day the battle has been fought.
 		formation_force["captured_in_battle"]=int(force.get("captured_in_battle",0))
 		formation_force["dead"]=int(force.get("dead",0))
+		formation_force["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 		return formation_force
 	var normalized := create_force(
 		String(force.get("name", fallback_name)),
@@ -1285,6 +1364,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 	normalized["armor"] = clampf(float(force.get("armor", 0.0)), 0.0, 2.0)
 	normalized["penetration"] = clampf(float(force.get("penetration", 0.0)), 0.0, 2.0)
 	normalized["composition"] = force.get("composition", []).duplicate(true)
+	normalized["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	normalized["commander"] = force.get("commander",{}).duplicate(true)
 	for key in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","captured_in_battle","dead"]: normalized[key]=int(force.get(key,0))
 	return normalized

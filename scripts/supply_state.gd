@@ -1276,7 +1276,10 @@ static func of_force(force:Dictionary)->Dictionary:
 	report["hungry"]=FieldRations.is_hungry(force)
 	# What hunger has cost the band so far, and its fodder, fuel and rounds
 	# (field_sustainment.gd): the war leader states these numbers.
-	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary else {}
+	# Only while hunger is recent (a month since the last loss); older sorrow
+	# stays in the chronicle, not in today's report.
+	var hunger_recent:=today()-int(force.get("hunger_last_day",-100000))<=30
+	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary and hunger_recent else {}
 	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	_siege_and_blockade(report,force)
 	report["why"]=why(report)

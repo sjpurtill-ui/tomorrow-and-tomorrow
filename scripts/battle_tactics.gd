@@ -44,13 +44,13 @@ const ZONE_MIN:=0.8
 const ZONE_MAX:=1.25
 
 const MISSILE:=["skirmisher","archer","slinger","javelineer","crossbowman","horse_archer","sharpshooter"]
-const MOBILE:=["cavalry","light_cavalry","horse_archer","chariot","armored_cavalry","dragoon","war_elephant","motorized_infantry","armored_car","light_tank","heavy_tank","mechanized_infantry","armored_formation","air_assault"]
+const MOBILE:=["cavalry","light_cavalry","horse_archer","chariot","armored_cavalry","dragoon","war_elephant","motorized_infantry","armored_car","light_tank","heavy_tank","mechanized_infantry","armored_formation","air_assault","main_battle_tank","robot_vehicle_company"]
 const SHOCK:=["line_infantry","spearman","pikeman","heavy_swordsman","axeman","mountain_infantry","grenadier"]
 const PIKES:=["pikeman","spearman"]
-const FIREARM:=["hand_cannoneer","musketeer","grenadier","sharpshooter","rifle_infantry","machine_gun_company","motorized_infantry","mechanized_infantry","assault_infantry","marines","paratrooper","dragoon","anti_tank","mountain_infantry"]
-const ARTILLERY:=["field_artillery","modern_artillery","catapult_crew","trebuchet_crew","bombard_crew","horse_artillery","mortar_crew","rocket_artillery"]
+const FIREARM:=["hand_cannoneer","musketeer","grenadier","sharpshooter","rifle_infantry","machine_gun_company","motorized_infantry","mechanized_infantry","assault_infantry","marines","paratrooper","dragoon","anti_tank","mountain_infantry","networked_infantry","exosuit_infantry","combat_frame_cohort","drone_operators"]
+const ARTILLERY:=["field_artillery","modern_artillery","catapult_crew","trebuchet_crew","bombard_crew","horse_artillery","mortar_crew","rocket_artillery","precision_fires"]
 const ENGINEER:=["siege_engineer","combat_engineer","ram_crew"]
-const ARMOUR:=["armored_formation","light_tank","heavy_tank","mechanized_infantry","armored_car","tank_destroyer"]
+const ARMOUR:=["armored_formation","light_tank","heavy_tank","mechanized_infantry","armored_car","tank_destroyer","main_battle_tank","robot_vehicle_company"]
 const ASSAULT:=["assault_infantry","grenadier","marines","paratrooper"]
 
 ## The plain fight, available to everyone. The chosen tactic is this far more

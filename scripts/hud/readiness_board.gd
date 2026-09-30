@@ -329,7 +329,7 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	queue.tooltip_text=String(Model.PRIORITY_TIPS.get(priority,""))+"\nClick to change."
 	var drafts:Dictionary=row.get("drafts",{})
 	var coming:=int(drafts.get("on_road",0))+int(drafts.get("in_training",0))
-	control.coming.visible=field and coming>0
+	control.coming.visible=field and (coming>0 or String(drafts.get("block",""))=="no_people")
 	control.coming.text="+%s coming" % EraWords.grouped(coming)
 	control.coming.tooltip_text=Model.drafts_words(drafts,int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0)+".\nLosses are replaced by drafts trained at home, who walk out and join."
 	_update_gear(control,row.get("short",[]))
@@ -376,14 +376,14 @@ static func why_words(row:Dictionary)->String:
 	return "\n".join(lines)
 
 
-## First, in turn, last, first: who gets gear, rounds and replacements
+## In turn, first, last, in turn: who gets gear, rounds and replacements
 ## before the others (military_campaign.set_army_priority).
 func cycle_priority(army_id:int)->void:
 	var mc:=MilitaryCampaign
 	var index:int=mc._field_army_index(army_id)
 	if index<0:return
 	var now:=String(mc.field_armies[index].get("priority","normal"))
-	mc.set_army_priority(army_id,{"first":"normal","normal":"last","last":"first"}.get(now,"normal"))
+	mc.set_army_priority(army_id,{"normal":"first","first":"last","last":"normal"}.get(now,"normal"))
 	refresh(true)
 
 

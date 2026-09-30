@@ -168,10 +168,13 @@ static func drafts_words(drafts:Dictionary,today:int)->String:
 		parts.append("%d replacements on the road, the first %s" % [road,"arriving today" if wait<=0 else ("in %d day%s" % [wait,"" if wait==1 else "s"])])
 	var training:=int(drafts.get("in_training",0))
 	if training>0: parts.append("%d in training at home" % training)
+	var block:=String(drafts.get("block",""))
+	if block!="" and DRAFT_BLOCKS.has(block): parts.append(String(DRAFT_BLOCKS[block]))
 	return "; ".join(parts)
 
-const PRIORITY_WORDS:={"first":"Supplied first","normal":"Supplied in turn","last":"Supplied last"}
-const PRIORITY_TIPS:={"first":"This band gets gear, rounds and replacements before the others.","normal":"This band waits its turn for gear, rounds and replacements.","last":"This band gets gear only at home and no replacements until the others are served."}
+const PRIORITY_WORDS:={"first":"Reinforced first","normal":"Reinforced in turn","last":"Reinforced last"}
+const PRIORITY_TIPS:={"first":"This band gets gear, rounds and replacements before the others. Food is shared by the carriers alike.","normal":"This band waits its turn for gear, rounds and replacements.","last":"This band gets gear only at home and no replacement drafts."}
+const DRAFT_BLOCKS:={"no_people":"No one to draft: everyone set aside for defence is serving. Raise the Defense share of work, or call up more on Recruit & deploy.","hungry":"No drafts while the band is starving: they would starve too.","cut_off":"No drafts: no road our carriers use reaches the band.","last":"No drafts for a band reinforced last.","campaign":"The general's campaign keeps its own ranks."}
 
 
 ## Plain words for a gear shortfall, for its tooltip.

@@ -93,6 +93,7 @@ const UNIT_TIER:={
 	"hand_cannoneer":3,"musketeer":3,"grenadier":3,"dragoon":3,"bombard_crew":3,"horse_artillery":3,"field_artillery":3,"sharpshooter":3,
 	"rifle_infantry":4,"machine_gun_company":4,"mortar_crew":4,"assault_infantry":4,"combat_engineer":4,"marines":4,"anti_tank":4,"anti_air":4,"armored_car":4,"mountain_infantry":4,
 	"motorized_infantry":5,"armored_formation":5,"modern_artillery":5,"light_tank":5,"heavy_tank":5,"tank_destroyer":5,"mechanized_infantry":5,"rocket_artillery":5,"air_assault":5,"paratrooper":5,
+	"networked_infantry":5,"main_battle_tank":5,"precision_fires":5,"drone_operators":5,"counter_drone_battery":5,"robot_vehicle_company":5,"exosuit_infantry":5,"combat_frame_cohort":5,
 }
 const WEAPON_TIER:={"musket":3,"hand_cannon":3,"grenadier_kit":3,"dragoon_kit":3,"bombard":3,"horse_gun":3,"field_gun":3,
 	"service_rifle":4,"machine_gun":4,"mortar":4,"marksman_rifle":4,"assault_kit":4,"marine_kit":4,"engineering_kit":4,"anti_tank_kit":4,"anti_air_gun":4,"armored_car_kit":4,"mountain_kit":4,
@@ -122,7 +123,10 @@ static func arm_of(unit:String,weapon:String="")->String:
 		"sharpshooter","rifle_infantry","assault_infantry","marines","paratrooper","mountain_infantry","motorized_infantry","mechanized_infantry","air_assault","light_infantry": return "rifle" if int(UNIT_TIER.get(unit,0))>=4 or unit=="sharpshooter" else "spear"
 		"machine_gun_company": return "machine_gun"
 		"field_artillery","modern_artillery","catapult_crew","trebuchet_crew","bombard_crew","horse_artillery","mortar_crew","rocket_artillery","anti_air": return "guns"
-		"armored_formation","light_tank","heavy_tank","tank_destroyer","armored_car","anti_tank": return "armour" if unit!="anti_tank" else "guns"
+		"armored_formation","light_tank","heavy_tank","tank_destroyer","armored_car","anti_tank","main_battle_tank","robot_vehicle_company": return "armour" if unit!="anti_tank" else "guns"
+		# Drones and precision fires strike from behind the line, like guns.
+		"precision_fires","drone_operators","counter_drone_battery": return "guns"
+		"networked_infantry","exosuit_infantry","combat_frame_cohort": return "rifle"
 		"siege_engineer","combat_engineer","ram_crew": return "engineers"
 		"field_repair_company","medical_detachment": return "support"
 		"spearman": return "spear"
