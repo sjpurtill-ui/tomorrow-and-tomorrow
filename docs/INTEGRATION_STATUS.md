@@ -1,3 +1,23 @@
+## September 30 — military v2: ledger, carriers, sustainment, depots, stated odds, last-age units: READY
+
+Worker branch `codex/military-night` (latest commit on the PR, based on main `2ea0f26d`). It is HOI4-grade production and supply with fewer clicks:
+- one equipment ledger for all 56 land kits, and armour by hardness;
+- carriers that exist (porters, carts, wagons, lorries), each at its own pace, bread first;
+- hunger attrition, rest, and drafts that walk out to replace losses;
+- field depots that feed the carriers but not their round trip;
+- the war leader's stated odds from the combat engine, shared by the Army grid and the court's orders;
+- scouts' word on enemy arms;
+- winter warnings and four-month band trends on the Readiness rows;
+- eight last-age units run by operators, and 51 kit glyphs.
+
+The design, the five critic rounds and the iteration log are in `docs/MILITARY_SYSTEM_V2.md`.
+
+Shared hotspots touched:
+- `military_campaign.gd`: wiring, save keys, daily hooks;
+- `save_system.gd` is untouched (saves go through MilitaryCampaign export/import);
+- `discovery_system.gd`: a two-line research-note hook.
+
+Tests: ten new suites plus more than 60 existing military, supply, UI and research suites, all run headless and passing. `test_military_development` has 8 failures, identical on main. Old saves load: formations are refitted to the ledger, and the new keys are optional. The dev campaign's balance shifts. Limits: fuel is not yet drawn from Crude Oil stock; frontage counts operators; rivals do not lay depots. No player or editor was launched or interrupted. Pushing `main` was refused by auto mode without review, so delivery is by PR.
 ## September 29 — opening chronology correction 01: INTEGRATED
 
 Worker5bfee1a3f521c86d7188c4c76d6d2a4db869fee8 combined with current main9e66b7fc61bcedbd66d6c48f9a5e804f1f237ac3 and canonical main. Year1 labor_rotations now resolves to labor_rotations-v3.png before and after year300. Replaces a settled-village/ceramic/metal-tool scene with portable camp work-turn handoff, wooden stick, cord-tied branches, temporary shelter and hearth. Full painting reviewed. Integrator adjusted focus from .34 to .30 in early lookup, manifest and sidecar to retain the central figure's hair in the actual card crop.
