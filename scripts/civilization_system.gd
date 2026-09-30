@@ -970,10 +970,17 @@ func _scout_segment_is_land(start:Vector2,finish:Vector2,sample_step_km:float=SC
 	return true
 
 
+## Open water a scouting party's craft can cross in one stretch: 40 km with
+## coastal watercraft, 10 with river craft, as far again as the people's
+## seafaring strength takes them (research_mechanics.gd sea_reach).
 func _scout_water_crossing_allowance_km()->float:
-	if "coastal_watercraft" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("coastal_watercraft")>=0.10: return 40.0
-	if "river_craft" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("river_craft")>=0.10: return 10.0
-	return 0.0
+	var craft:=0.0
+	if "coastal_watercraft" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("coastal_watercraft")>=0.10: craft=40.0
+	elif "river_craft" in WorldSimulation.state.known_discoveries and WorldSimulation.discovery.adoption("river_craft")>=0.10: craft=10.0
+	if craft<=0.0: return 0.0
+	# Whole kilometres, so the route caches keyed on it stay put between small changes.
+	var reach:float=preload("res://scripts/research_mechanics.gd").sea_reach()
+	return roundf(craft*reach)
 
 
 func _scout_route_is_land(route:Array)->bool:

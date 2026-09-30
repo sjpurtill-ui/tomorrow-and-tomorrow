@@ -23,6 +23,7 @@ const Society:=preload("res://scripts/society_model.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
 const Goods:=preload("res://scripts/civilian_goods.gd")
 const Research600:=preload("res://scripts/research_600_catalog.gd")
+const Mechanics:=preload("res://scripts/research_mechanics.gd")
 
 ## Size of the probe step when measuring a capacity's response to an effect.
 const SLOPE_STEP:=0.001
@@ -49,6 +50,18 @@ const CAPACITY_USES:={
 
 ## Fields of research in plain words (the Research page's names).
 const FIELD_WORDS:={"demography":"people and homes","nutrition":"food","health":"health","labor":"work","knowledge":"learning","production":"craft","infrastructure":"building","logistics":"transport","ecology":"land","institutions":"government","security":"defense","culture":"culture"}
+
+## Where fuel economy and the fuel needed act: one factor on the fuel of every
+## fire the people keep (research_mechanics.gd fuel_factor_of), used by the kept
+## hearth, the smoking fires and the fuel of installed kilns and engines.
+const FUEL_GUARDS:=[["research_mechanics.gd","const FUEL_ECONOMY_SAVING:=0.6"],["research_mechanics.gd","const FUEL_DEMAND_COST:=1.0"],
+	["research_mechanics.gd","var saving:=1.0-FUEL_ECONOMY_SAVING*clampf(economy,FUEL_ECONOMY_LIMITS.x,FUEL_ECONOMY_LIMITS.y)"],
+	["research_mechanics.gd","var need:=1.0+FUEL_DEMAND_COST*clampf(demand,FUEL_DEMAND_LIMITS.x,FUEL_DEMAND_LIMITS.y)"],
+	["research_mechanics.gd","return clampf(saving*need,FUEL_FACTOR_LIMITS.x,FUEL_FACTOR_LIMITS.y)"],
+	["research_mechanics.gd",'return fuel_factor_of(WorldSimulation.discovery.effect("fuel_efficiency"),WorldSimulation.discovery.effect("fuel_demand"))'],
+	["fire_practice.gd","var fuel:float=MAINTENANCE_TIMBER*maintenance_factor()"],["fire_practice.gd",'return preload("res://scripts/research_mechanics.gd").fuel_factor()'],
+	["food_system.gd","var fuel_per_ration:float=SMOKING_FUEL*Mechanics.fuel_factor()"],
+	["technology_operations.gd","return amount+burned*(Mechanics.fuel_factor()-1.0)"],["technology_operations.gd","var amount:=units*input_rate(spec,item)"]]
 
 ## Every effect key. label: as a player would say it. what: what it changes.
 ## good: 1 when more is better, -1 when less is better, 0 when mixed.
@@ -236,9 +249,11 @@ const KEYS:={
 		"what":"Knowing how to read the ground. Surveyors learn the extent of known deposits sooner.",
 		"feeds":[
 			{"to":"survey progress on deposits","per":1.0,"unit":"pct","src":"resource_system.gd:1040","guards":[["resource_system.gd",'"speed":1.0+WorldSimulation.discovery.effect("survey_speed")']]}]},
-	"water_access":{"label":"Water access","good":1,"inert":true,
-		"what":"Meant to widen the people's access to water. Nothing in the simulation reads it yet: access to water comes from the land itself (rivers, springs, distance) and from built works.",
-		"feeds":[]},
+	"water_access":{"label":"Water access","good":1,
+		"what":"Wells, cisterns, channels and pipes that bring water nearer. The walk to the nearest source counts as shorter than the ground: each 1 in 100 takes 0.75 in 100 off it. Households then fetch more of their own water, even from a source that was too far to walk to, and carriers bring in more each day.",
+		"feeds":[
+			{"to":"the walk to the water source","per":-0.75,"unit":"pct","cap":"households fetch all the water they need within about 2 km of walking, less farther out and none past 6 km; carriers lose less on a shorter carry","src":"research_mechanics.gd water_walk_factor_of, resource_system.gd _process_water_flow","guards":[["research_mechanics.gd","const WATER_WALK_CUT:=0.75"],["research_mechanics.gd","return 1.0-WATER_WALK_CUT*clampf(access,WATER_ACCESS_LIMITS.x,WATER_ACCESS_LIMITS.y)"],["research_mechanics.gd",'return water_walk_factor_of(WorldSimulation.discovery.effect("water_access"))'],["resource_system.gd",'var walk_km:float=nearest_source_km*preload("res://scripts/research_mechanics.gd").water_walk_factor()'],["resource_system.gd","var distance_factor:=1.0/maxf(1.0,1.0+walk_km*0.16)"],["resource_system.gd","_household_surface_water_access_ratio(walk_km)"]]},
+			{"chain":"water_today","src":"resource_system.gd _household_surface_water_access_ratio","guards":[["resource_system.gd","return lerpf(1.18,0.38,clampf((distance_km-1.0)/5.0,0.0,1.0))"],["resource_system.gd","if distance_km<0.0 or distance_km==INF or distance_km>6.0: return 0.0"]]}]},
 	# --- craft and materials ----------------------------------------------------
 	"tool_quality":{"label":"Tool quality","good":1,
 		"what":"Sharper, tougher tools. The workshops can make more, and the town can reach its last building eras.",
@@ -279,12 +294,16 @@ const KEYS:={
 		"what":"Gathering and retting skill. Worked fibre plants give more each day.",
 		"feeds":[
 			{"to":"daily yield of worked fibre plants","per":1.0,"unit":"pct","src":"resource_system.gd:653","guards":[["resource_system.gd",'if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")']]}]},
-	"fuel_efficiency":{"label":"Fuel economy","good":1,"inert":true,
-		"what":"Meant to make fires, kilns and furnaces burn less fuel. Nothing in the simulation reads it yet.",
-		"feeds":[]},
-	"repair_capacity":{"label":"Repair skill","good":1,"inert":true,
-		"what":"Meant to mend tools, homes and works sooner. Nothing in the simulation reads it yet.",
-		"feeds":[]},
+	"fuel_efficiency":{"label":"Fuel economy","good":1,
+		"what":"Charcoal, bellows, closed ovens and kilns, chimneys and stoves, and later better engines: the same work from less fuel. Every fire the people keep burns less wood or coal: the kept hearth, the smoking fires that preserve food, and the kilns and engines they install. Each 1 in 100 saves 0.6 in 100 of the usual fuel. Workshop batches that burn charcoal or coal do not read it yet.",
+		"feeds":[
+			{"chain":"fuel","src":"research_mechanics.gd fuel_factor_of; fire_practice.gd advance, food_system.gd _preserve, technology_operations.gd input_rate","guards":FUEL_GUARDS}]},
+	"repair_capacity":{"label":"Repair skill","good":1,
+		"what":"Resharpening and re-hafting, sound joints and footings, repointing and patching. Household goods in use (tools, pots, baskets, cloth) wear out more slowly, and the builders' monthly mending of the town goes further with the same hands and materials, so fewer builders hold it. Army gear and great works do not read it yet.",
+		"feeds":[
+			{"to":"household goods worn out each day","per":-0.5,"unit":"pct","cap":"of the usual wear, 0.4 in 100 of the stock a day","src":"research_mechanics.gd goods_wear_factor_of, civilian_goods.gd daily_wear","guards":[["research_mechanics.gd","const REPAIR_WEAR_CUT:=0.5"],["research_mechanics.gd","return 1.0-REPAIR_WEAR_CUT*repair_skill_of(repair)"],["research_mechanics.gd",'return goods_wear_factor_of(WorldSimulation.discovery.effect("repair_capacity"))'],["civilian_goods.gd",'return DAILY_WEAR*preload("res://scripts/research_mechanics.gd").goods_wear_factor()'],["civilian_goods.gd","var worn:=stock()*(1.0-pow(1.0-daily_wear(),elapsed))"]]},
+			{"to":"the town's mending each month from the same builders and materials","per":1.0,"unit":"pct","cap":"so fewer builders hold the town against its wear of 2 in 100 a month","src":"research_mechanics.gd mending_factor_of, settlement_model.gd _advance_city_form, upkeep_warnings.gd facts","guards":[["research_mechanics.gd","const REPAIR_MENDING_GAIN:=1.0"],["research_mechanics.gd","return 1.0+REPAIR_MENDING_GAIN*repair_skill_of(repair)"],["research_mechanics.gd",'return mending_factor_of(WorldSimulation.discovery.effect("repair_capacity"))'],["settlement_model.gd",'var mending:float=preload("res://scripts/research_mechanics.gd").mending_factor()'],["settlement_model.gd","form.condition=clampf(float(form.condition)+0.04*building_share*paid*mending-0.02,0.05,1.0)"],["upkeep_warnings.gd","var reach:=paid*mending"],["upkeep_warnings.gd","var change:=0.04*share*reach-0.02"]]},
+			{"chain":"repair_today","src":"civilian_goods.gd DAILY_WEAR","guards":[["civilian_goods.gd","const DAILY_WEAR:=.004"]]}]},
 	"standardization":{"label":"Shared measures","good":1,
 		"what":"Common weights, lengths and ways of making. Markets open wider, trade loses less to error and haggling, learning is shared more easily, and the town's later building eras come within reach.",
 		"feeds":[
@@ -294,9 +313,12 @@ const KEYS:={
 			{"chain":"education","per":0.42*0.42,"src":"society_model.gd:715, civilization_indicators.gd:46","guards":[["society_model.gd",'effect("standardization")*0.42+effect("state_capacity")*0.22,0.0,1.0)']]},
 			{"eras":"its 10th to 12th building eras","src":"settlement_model.gd:2495","guards":[["settlement_model.gd",'"standardization":discovery.effect("standardization")']]},
 			{"steer":["production","Standardization"],"per":0.82,"src":"society_model.gd:724","guards":[["society_model.gd",'effect("standardization")*0.82']]}]},
-	"chemical_control":{"label":"Control of chemicals","good":1,"inert":true,
-		"what":"Meant to make chemical work purer and safer. Nothing in the simulation reads it yet.",
-		"feeds":[]},
+	"chemical_control":{"label":"Control of chemicals","good":1,
+		"what":"Knowing what fumes, acids and wastes do and how to hold them back. Part of the harm that smoke, slag and fouled water from the people's works do to their health and to the land is prevented: each 1 in 100 prevents 1.5 in 100 of it, up to 60 in 100. Only harm is cut, and that harm comes in proportion to mining and quarrying. It does not change what the workshops make.",
+		"feeds":[
+			{"to":"the share of the harm from smoke and fouled water that is prevented","per":1.5,"unit":"pts","cap":"at most 60 in 100","src":"research_mechanics.gd chemical_harm_cut_of, consequence_engine.gd","guards":[["research_mechanics.gd","const CHEMICAL_HARM_CUT:=1.5"],["research_mechanics.gd","const CHEMICAL_HARM_CUT_LIMIT:=0.60"],["research_mechanics.gd","return clampf(control*CHEMICAL_HARM_CUT,0.0,CHEMICAL_HARM_CUT_LIMIT)"],["research_mechanics.gd",'return chemical_harm_cut_of(WorldSimulation.discovery.effect("chemical_control"))'],["consequence_engine.gd",'var chemical_cut:float=preload("res://scripts/research_mechanics.gd").chemical_harm_cut()']]},
+			{"chain":"chemical_health","src":"consequence_engine.gd process_day","guards":[["consequence_engine.gd",'process_health_cost-=maxf(0.0,WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity*chemical_cut']]},
+			{"chain":"chemical_land","src":"consequence_engine.gd process_day","guards":[["consequence_engine.gd",'ecology_delta+=maxf(0.0,WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009*chemical_cut']]}]},
 	# --- building ---------------------------------------------------------------
 	"construction_rate":{"label":"Building speed","good":1,
 		"what":"Better methods and organisation on the building site. Every project goes up faster, the town scores as better built, and its later building eras come within reach.",
@@ -322,9 +344,11 @@ const KEYS:={
 		"feeds":[
 			{"to":"deaths from accidents at work","per":-1.0,"unit":"pct","cap":"with the risk of accidents; never below 15 in 100 of the usual toll","src":"consequence_engine.gd:770","guards":[["consequence_engine.gd",'maxf(0.15,1.0+WorldSimulation.discovery.effect("disaster_risk")-WorldSimulation.discovery.effect("mine_safety"))']]},
 			{"to":"the pace of opening access to deposits","per":0.5,"unit":"pct","src":"resource_system.gd:443","guards":[["resource_system.gd",'WorldSimulation.discovery.effect("mine_safety")*.5']]}]},
-	"mining_output":{"label":"Mine output","good":1,"inert":true,
-		"what":"Meant to raise what mines produce. Nothing in the simulation reads it yet; extraction yield and ore yield are what raise mining.",
-		"feeds":[]},
+	"mining_output":{"label":"Mine output","good":1,
+		"what":"Drainage, hoists, pumps and blasting that let mines go deeper and work faster. Every mined deposit gives more each day: ores, coal, sulfur, graphite, phosphate and oil, the things dug from pits and shafts. Stone, clay, sand, salt, peat, timber and plants are cut or gathered, and do not change.",
+		"feeds":[
+			{"to":"daily yield of every mined deposit","per":1.0,"unit":"pct","cap":"added to extraction yield and ore yield","src":"research_mechanics.gd is_mined, resource_system.gd _process_material_flow","guards":[["research_mechanics.gd",'return String(profile.get("family",""))=="metal" or "mine" in (definition.get("access",[]) as Array)'],["research_mechanics.gd",'return mining_bonus_of(WorldSimulation.discovery.effect("mining_output"))'],["resource_system.gd",'var mining_effect:float=preload("res://scripts/research_mechanics.gd").mining_bonus()'],["resource_system.gd",'if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect']]},
+			{"chain":"mines","src":"resource_system.gd catalog access, material profiles","guards":[["resource_system.gd",'"Coal":{"family":"Fuel","renewable":false,"recognition_year":55,"access":["mine"'],["resource_system.gd",'const ORE_PROFILE:={"family":"metal"']]}]},
 	"disaster_risk":{"label":"Risk of accidents","good":-1,
 		"what":"Dangerous works: deep pits, heavy lifting, fire. Less is better; it raises deaths from accidents at work in proportion to mining and quarrying.",
 		"feeds":[
@@ -376,18 +400,25 @@ const KEYS:={
 		"feeds":[
 			{"to":"covered and sealed storage space","per":1.0,"unit":"pct","src":"resource_system.gd:905","guards":[["resource_system.gd",'result.covered*=1.0+WorldSimulation.discovery.effect("container_capacity")'],["resource_system.gd",'result.sealed*=1.0+WorldSimulation.discovery.effect("container_capacity")']]},
 			{"to":"days of water each person can keep, once the Open Work Area stands","per":2.0,"unit":"days","src":"resource_system.gd:369","guards":[["resource_system.gd",'portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0']]}]},
-	"logistics_endurance":{"label":"Supply endurance","good":1,"inert":true,
-		"what":"Meant to let supply parties and armies go longer between fresh supplies. Nothing in the simulation reads it yet.",
-		"feeds":[]},
+	"logistics_endurance":{"label":"Supply endurance","good":1,
+		"what":"Pack animals and saddles, waystations and food caches, relay carrying and food that keeps on the road. The carriers who take food to bands in the field eat less of each load on the way, so food reaches bands farther from home; and a band short of food holds out longer before hunger weakens it. Settler caravans and scouts do not read it yet.",
+		"feeds":[
+			{"to":"the share of each load the carriers eat for each day of hauling","per":-0.5,"unit":"pct","cap":"of the usual share: porters 8 in 100 a day, carts 5, lorries 3, after the first day and a half","src":"research_mechanics.gd haul_loss_factor_of, supply_state.gd carrier_loss","guards":[["research_mechanics.gd","const ENDURANCE_HAUL_CUT:=0.5"],["research_mechanics.gd","return 1.0-ENDURANCE_HAUL_CUT*endurance_of(endurance)"],["research_mechanics.gd",'return endurance_of(WorldSimulation.discovery.effect("logistics_endurance"))'],["supply_state.gd","return float(c.loss)*Mechanics.haul_loss_factor_of(endurance)"],["supply_state.gd","return clampf(1.0-carrier_loss(who,endurance)*maxf(0.0,days-FREE_DAYS),0.0,1.0)"],["supply_state.gd","who,float(land.cold)),who,endurance_today())"],["supply_state.gd",'"endurance":endurance_today()']]},
+			{"to":"how fast a band short of food counts its hungry days","per":-0.5,"unit":"pct","cap":"after 3 such days it goes hungry and fights weaker","src":"research_mechanics.gd hunger_pace_of, field_rations.gd mark_day","guards":[["research_mechanics.gd","const ENDURANCE_HUNGER_SLOW:=0.5"],["research_mechanics.gd","return 1.0-ENDURANCE_HUNGER_SLOW*endurance_of(endurance)"],["field_rations.gd",'var pace:float=preload("res://scripts/research_mechanics.gd").hunger_pace()'],["field_rations.gd",'force["hungry_days"]=days+span*pace if ratio<HUNGRY_BELOW']]},
+			{"chain":"supply_reach","src":"supply_state.gd reach_effort","guards":[["supply_state.gd","return (FREE_DAYS+(1.0-share)/carrier_loss(who,endurance))*float(c.pace)"]]}]},
 	"trade_capacity":{"label":"Trade reach","good":1,
 		"what":"Markets, agents and ways of dealing with strangers. Market access widens, which draws trade and eases the economy's growth.",
 		"feeds":[
 			{"to":"market access","per":0.32,"unit":"pts","src":"economy_system.gd:232","guards":[["economy_system.gd",'WorldSimulation.discovery.effect("trade_capacity")*0.32']]},
 			{"to":"the town's exchange score, where no market reading exists yet","per":0.40,"unit":"pts","src":"settlement_model.gd:3092","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("trade_capacity")*0.40']]},
 			{"steer":["logistics","Trade reach"],"per":0.70,"src":"society_model.gd:726","guards":[["society_model.gd",'effect("trade_capacity")*0.70']]}]},
-	"naval_capacity":{"label":"Seafaring strength","good":1,"inert":true,
-		"what":"Meant to strengthen ships and sailors. Nothing in the simulation reads it yet.",
-		"feeds":[]},
+	"naval_capacity":{"label":"Seafaring strength","good":1,
+		"what":"Sealed and caulked hulls, masts and sails, rigging, pilots and sailing calendars: boats and sailors reach farther out. On a sea coast the fishing grounds hold more fish and each fisher reaches more of the sea, and scouting parties with river or coastal craft cross wider stretches of open water. War fleets do not read it yet.",
+		"feeds":[
+			{"to":"how far out the people's boats and sailors reach","per":1.0,"unit":"pct","cap":"on the sea coast's fishing grounds, each fisher's reach at sea, and the open water scouts can cross","src":"research_mechanics.gd sea_reach_of","guards":[["research_mechanics.gd","const SEA_REACH_GAIN:=1.0"],["research_mechanics.gd","return 1.0+SEA_REACH_GAIN*clampf(naval,NAVAL_LIMITS.x,NAVAL_LIMITS.y)"],["research_mechanics.gd",'return sea_reach_of(WorldSimulation.discovery.effect("naval_capacity"))']]},
+			{"chain":"sea_fishing","src":"research_mechanics.gd fishing_ground_of, food_system.gd wild_food_capacity","guards":[["research_mechanics.gd","return 15.0+water*80.0+shoreline*40.0*reach"],["food_system.gd",'"Fishing":{"rations":Mechanics.fishing_ground_of(water,float(coastal.shoreline_access),sea_reach)*reach'],["food_system.gd","var sea_reach:float=Mechanics.sea_reach()"]]},
+			{"chain":"sea_catch","src":"research_mechanics.gd fishing_access_of, food_system.gd _produce","guards":[["research_mechanics.gd","return maxf(freshwater,minf(1.0,marine*0.90*reach))"],["food_system.gd","var fishing_access:float=Mechanics.fishing_access_of(float(access.freshwater),float(coastal.marine_opportunity),Mechanics.sea_reach())"],["food_system.gd","*(0.76+fishing_access*0.34)*"]]},
+			{"chain":"sea_crossing","src":"civilization_system.gd _scout_water_crossing_allowance_km","guards":[["civilization_system.gd",'var reach:float=preload("res://scripts/research_mechanics.gd").sea_reach()'],["civilization_system.gd","return roundf(craft*reach)"]]}]},
 	# --- government -------------------------------------------------------------
 	"state_capacity":{"label":"Capacity to organize","good":1,
 		"what":"Offices, records and routines of rule. The people hold together better, the realm's administration reaches farther, and learning is shared more widely.",
@@ -445,21 +476,22 @@ const KEYS:={
 		"feeds":[
 			{"steer":["ecology","Resource pressure"],"per":-0.30,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("timber_pressure")*0.30']]}]},
 	"pollution":{"label":"Smoke and waste","good":-1,
-		"what":"Smoke, slag and refuse from fires and works. Less is better; in proportion to mining and quarrying it wears down health and the land.",
+		"what":"Smoke, slag and refuse from fires and works. Less is better; in proportion to mining and quarrying it wears down health and the land. Control of chemicals prevents part of that harm.",
 		"feeds":[
 			{"chain":"industry_health","per":-0.22,"src":"consequence_engine.gd:692","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("pollution")*0.22']]},
 			{"chain":"industry_land","src":"consequence_engine.gd:741","guards":[["consequence_engine.gd",'ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009']]},
 			{"capacity":"ecology"},
 			{"steer":["ecology","Pollution control"],"per":-0.70,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("pollution")*0.70']]}]},
 	"water_pollution":{"label":"Fouled water","good":-1,
-		"what":"Waste and runoff in streams and wells. Less is better; in proportion to mining and quarrying it wears down health and the land.",
+		"what":"Waste and runoff in streams and wells. Less is better; in proportion to mining and quarrying it wears down health and the land. Control of chemicals prevents part of that harm.",
 		"feeds":[
 			{"chain":"industry_health","per":-0.18,"src":"consequence_engine.gd:692","guards":[["consequence_engine.gd",'WorldSimulation.discovery.effect("water_pollution")*0.18']]},
 			{"chain":"industry_land","src":"consequence_engine.gd:741","guards":[["consequence_engine.gd",'ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009']]},
 			{"steer":["ecology","Pollution control"],"per":-0.45,"src":"society_model.gd:727","guards":[["society_model.gd",'effect("water_pollution")*0.45']]}]},
-	"fuel_demand":{"label":"Fuel needed","good":-1,"inert":true,
-		"what":"Meant as the fuel a practice burns. Nothing in the simulation reads it yet, so this cost is never paid.",
-		"feeds":[]},
+	"fuel_demand":{"label":"Fuel needed","good":-1,
+		"what":"The fire-hungry ways the people take up: firing pots and bricks, smoking, boiling water, sweat baths and glass. Less is better: every fire the people keep burns more fuel, the kept hearth, the smoking fires that preserve food, and the kilns and engines they install. Each 1 in 100 adds 1 in 100 of the usual fuel; burning dung or managing fuelwood takes some off.",
+		"feeds":[
+			{"chain":"fuel","src":"research_mechanics.gd fuel_factor_of; fire_practice.gd advance, food_system.gd _preserve, technology_operations.gd input_rate","guards":FUEL_GUARDS}]},
 }
 
 # --- Reading the table ----------------------------------------------------------
@@ -814,11 +846,114 @@ static func _chain_line(key:String,feed:Dictionary,now:float)->String:
 		"industry_health":
 			var industry:=_industry()
 			if industry<=0.0: return "The health the people settle toward: no change while nothing is mined or quarried (it counts in proportion to mining and quarrying)."
-			return quantity("The health the people settle toward, at today's mining and quarrying",now*float(feed.get("per",-1.0))*industry,"pts")
+			# Control of chemicals prevents part of the harm of smoke and fouled
+			# water (consequence_engine.gd chemical_cut); dust and dangerous work are not cut.
+			var kept:float=_chemical_kept(false) if key in ["pollution","water_pollution"] else 1.0
+			return quantity("The health the people settle toward, at today's mining and quarrying",now*float(feed.get("per",-1.0))*industry*kept,"pts",_chemical_note(kept))
 		"industry_land":
 			var industry:=_industry()
 			if industry<=0.0: return "The health of the land: no change while nothing is mined or quarried (it counts in proportion to mining and quarrying)."
-			return quantity("The health of the land each year, at today's mining and quarrying",-now*industry*0.0009*365.0,"pts")
+			var kept:float=_chemical_kept(true)
+			return quantity("The health of the land each year, at today's mining and quarrying",-now*industry*0.0009*365.0*kept,"pts",_chemical_note(kept))
+		"chemical_health","chemical_land":
+			# The harm control of chemicals prevents (consequence_engine.gd): smoke
+			# and fouled water, in proportion to mining and quarrying, only when harmful.
+			var land:=String(feed.chain)=="chemical_land"
+			var name:="The health of the land each year" if land else "The health the people settle toward"
+			var industry:=_industry()
+			if industry<=0.0: return "%s: no change while nothing is mined or quarried (smoke and fouled water harm in proportion to mining and quarrying)." % name
+			var harm:=_chemical_harm(land)
+			if harm<=0.0: return "%s: no change now; on balance the people's ways foul nothing, so there is no harm to prevent." % name
+			var cut:=_chemical_cut()
+			if cut>=Mechanics.CHEMICAL_HARM_CUT_LIMIT-0.000001 and now>0.0: return "%s: no more is prevented; control of chemicals already prevents the most it can, %d in 100 of the harm." % [name,roundi(Mechanics.CHEMICAL_HARM_CUT_LIMIT*100.0)]
+			var per:float=harm*industry*(0.0009*365.0 if land else 1.0)
+			return quantity("%s, at today's mining and quarrying" % name,now*Mechanics.CHEMICAL_HARM_CUT*per,"pts","today %d in 100 of the harm from smoke and fouled water is prevented" % roundi(cut*100.0))
+		"water_today":
+			# Today's walk to water and what it buys (resource_system.gd _process_water_flow).
+			var water:Dictionary=state.water_metrics
+			var km:=float(water.get("source_distance_km",-1.0))
+			if km<0.0 or not bool(water.get("source_accessible",false)): return "Today no water source is within reach, so a shorter walk changes nothing yet."
+			var total:=float(_model().effect("water_access")) if _model()!=null else 0.0
+			var walk:float=km*Mechanics.water_walk_factor_of(total)
+			var resources=WorldSimulation.resources
+			if resources==null: return ""
+			var fetched:=float(resources._household_surface_water_access_ratio(walk))
+			var bare:=float(resources._household_surface_water_access_ratio(km))
+			var carried:=maxf(1.0,1.0+km*0.16)/maxf(1.0,1.0+walk*0.16)-1.0
+			var carriers:="carriers bring in as much as at the full walk" if absf(carried)<0.0005 else "carriers bring in about %s%% %s a day than at the full walk" % [number(absf(carried)*100.0),"more" if carried>0.0 else "less"]
+			return "Today the nearest source is %s km away and counts as %s km of walking: households can fetch %d in 100 of the water they need themselves (%d in 100 at the full walk), and %s." % [number(km),number(walk),roundi(fetched*100.0),roundi(bare*100.0),carriers]
+		"fuel":
+			# One factor on every fire (research_mechanics.gd fuel_factor_of),
+			# counted against the usual fuel: exact for any amount.
+			var model=_model()
+			var economy:=float(model.effect("fuel_efficiency")) if model!=null else 0.0
+			var demand:=float(model.effect("fuel_demand")) if model!=null else 0.0
+			var e:=clampf(economy,Mechanics.FUEL_ECONOMY_LIMITS.x,Mechanics.FUEL_ECONOMY_LIMITS.y)
+			var d:=clampf(demand,Mechanics.FUEL_DEMAND_LIMITS.x,Mechanics.FUEL_DEMAND_LIMITS.y)
+			var moved:float=-Mechanics.FUEL_ECONOMY_SAVING*now*(1.0+Mechanics.FUEL_DEMAND_COST*d) if key=="fuel_efficiency" else Mechanics.FUEL_DEMAND_COST*now*(1.0-Mechanics.FUEL_ECONOMY_SAVING*e)
+			var today:float=Mechanics.fuel_factor_of(economy,demand)
+			return quantity("Fuel burned by every fire the people keep (the hearth, the smoking fires that preserve food, kilns and engines)",moved,"pct","counted against the usual amount; today every fire burns %d in 100 of it" % roundi(today*100.0))
+		"repair_today":
+			var total:=float(_model().effect("repair_capacity")) if _model()!=null else 0.0
+			var wear:float=Goods.DAILY_WEAR*Mechanics.goods_wear_factor_of(total)
+			var mending:float=Mechanics.mending_factor_of(total)
+			var further:="as far as usual"
+			if mending>1.0005: further="%s%% further than usual" % number((mending-1.0)*100.0)
+			elif mending<0.9995: further="%s%% less far than usual" % number((1.0-mending)*100.0)
+			return "Today household goods wear out at %s in 100 of the stock a day (%s without repair skill), and each month's mending of the town goes %s." % [number(wear*100.0),number(Goods.DAILY_WEAR*100.0),further]
+		"mines":
+			var names:Array=_once("mines",func()->Array:
+				var found:Array[String]=[]
+				var resources=WorldSimulation.resources
+				if resources==null: return found
+				for deposit_variant:Variant in state.resource_deposits:
+					var deposit:Dictionary=deposit_variant
+					var resource:=String(deposit.get("resource",""))
+					if String(deposit.get("stage","")) not in ["accessible","developed"] or float(deposit.get("extracted_today",0.0))<=0.0: continue
+					if not Mechanics.is_mined((resources.catalog as Dictionary).get(resource,{}),resources.material_profile(resource)): continue
+					var label:=String(resources.display_name(resource))
+					if not label in found: found.append(label)
+				return found)
+			if names.is_empty(): return "No mined deposit is worked now, so this changes nothing yet."
+			return "Mined deposits worked now: %s." % ", ".join(PackedStringArray(names))
+		"supply_reach":
+			# How far half a load still gets today (supply_state.gd reach_effort).
+			var supply=load("res://scripts/supply_state.gd")
+			var who:=String(supply.carrier())
+			var endurance:=float(supply.endurance_today())
+			var carriers:=String((supply.CARRIERS.get(who,supply.CARRIERS.foot) as Dictionary).words)
+			var reach:=float(supply.reach_effort(who,float(supply.REACH_HAUL),endurance))
+			var bare:=float(supply.reach_effort(who,float(supply.REACH_HAUL),0.0))
+			return "Today our %s eat %s in 100 of a load for each day of hauling, so half a load still reaches a band about %s km away over open, level ground in mild weather (%s km without supply endurance)." % [carriers,number(float(supply.carrier_loss(who,endurance))*100.0),str(roundi(reach)),str(roundi(bare))]
+		"sea_fishing","sea_catch":
+			var food=WorldSimulation.food
+			var coastal:Dictionary=food._coastal_food_profile(false) if food!=null else {}
+			var shoreline:=float(coastal.get("shoreline_access",0.0))
+			var marine:=float(coastal.get("marine_opportunity",0.0))
+			var catch_line:=String(feed.chain)=="sea_catch"
+			if shoreline<=0.0 and marine<=0.0: return "%s: no change; the people's home is not on the sea coast." % ("Each fisher's catch" if catch_line else "The fishing grounds")
+			var total:=float(_model().effect("naval_capacity")) if _model()!=null else 0.0
+			var reach:float=Mechanics.sea_reach_of(total)
+			var worked:="the sea coast is worked as far out as usual" if absf(reach-1.0)<0.0005 else "the sea coast is worked %s%% %s out than usual" % [number(absf(reach-1.0)*100.0),"farther" if reach>1.0 else "less far"]
+			if catch_line:
+				# food_system.gd _produce: each fisher lands (0.76 + access x 0.34) of
+				# a full catch; the sea counts while it beats fresh water, up to 1.
+				var fresh:=float((food._food_resource_access() as Dictionary).get("freshwater",0.0))
+				var access:float=Mechanics.fishing_access_of(fresh,marine,reach)
+				var sea:=marine*0.90*reach
+				var slope:float=marine*0.90*Mechanics.SEA_REACH_GAIN*0.34/(0.76+access*0.34) if sea>fresh and sea<1.0 else 0.0
+				return quantity("Each fisher's catch, at the people's coast",now*slope,"pct","the sea counts while it beats fresh water, up to full reach; "+worked)
+			var environment:Dictionary=food.current_environment_profile()
+			var water:=maxf(clampf(float(environment.get("water_access",0.0)),0.0,1.0),marine)
+			var grounds:float=Mechanics.fishing_ground_of(water,shoreline,reach)
+			return quantity("Fish the fishing grounds give each day, at the people's coast",shoreline*40.0*Mechanics.SEA_REACH_GAIN*now/maxf(1.0,grounds),"pct",worked)
+		"sea_crossing":
+			var world=WorldSimulation.world
+			var today:=float(world._scout_water_crossing_allowance_km()) if world!=null else 0.0
+			if today<=0.0: return "Open water a scouting party can cross: no change until the people have river or coastal craft in use."
+			var total:=float(_model().effect("naval_capacity")) if _model()!=null else 0.0
+			var craft:float=today/maxf(0.1,Mechanics.sea_reach_of(total))
+			return quantity("Open water a scouting party's craft can cross in one stretch",craft*Mechanics.SEA_REACH_GAIN*now,"km","%s km today; coastal craft cross 40 km and river craft 10 before seafaring skill" % str(roundi(today)))
 		"storage":
 			# Added to each material's own daily loss (ResourceSystem profiles); a
 			# loss never falls below none, so past the largest of them it stops all loss.
@@ -844,6 +979,30 @@ static func _chain_line(key:String,feed:Dictionary,now:float)->String:
 static func _industry()->float:
 	var state=WorldSimulation.state
 	return clampf(float(state.material_metrics.get("extracted_today",0.0))/maxf(1.0,float(state.population_exact)*0.08),0.0,2.0)
+
+## Today's share of the harm from smoke and fouled water that control of
+## chemicals prevents (research_mechanics.gd chemical_harm_cut_of).
+static func _chemical_cut()->float:
+	var model=_model()
+	var control:=float(model.effect("chemical_control")) if model!=null else 0.0
+	return float(Mechanics.chemical_harm_cut_of(control))
+
+## Today's harm from smoke and fouled water per unit of mining and quarrying,
+## as ConsequenceEngine weighs it for health or for the land; 0 when the
+## people's ways foul nothing on balance.
+static func _chemical_harm(land:bool)->float:
+	var model=_model()
+	if model==null: return 0.0
+	var smoke:=float(model.effect("pollution"))
+	var fouled:=float(model.effect("water_pollution"))
+	return maxf(0.0,smoke+fouled) if land else maxf(0.0,smoke*0.22+fouled*0.18)
+
+## The share of that harm still suffered today.
+static func _chemical_kept(land:bool)->float:
+	return 1.0-_chemical_cut() if _chemical_harm(land)>0.0 else 1.0
+
+static func _chemical_note(kept:float)->String:
+	return "" if kept>0.9995 else "control of chemicals prevents %d in 100 of this harm today" % roundi((1.0-kept)*100.0)
 
 # --- What the people's knowledge adds up to ---------------------------------------
 

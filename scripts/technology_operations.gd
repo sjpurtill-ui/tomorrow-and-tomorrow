@@ -36,8 +36,26 @@ const PLANTS_SOURCE={
 	"battery_store":{"name": "Supervised battery store", "gate": "battery_bank_wiring", "requires": ["cable_insulation"], "cost": {"Battery Banks": 1.0, "Insulated Cable": 1.0}, "work": 12.0, "workers": 1.0, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 3.0, "discharge_rate": 3.0, "charge_efficiency": 0.8, "discharge_efficiency": 0.8, "self_discharge": 0.001}},
 	"regulated_battery_store":{"name": "Regulated battery store", "gate": "charge_regulation", "requires": ["battery_bank_wiring"], "cost": {"Battery Banks": 1.0, "Charge Controllers": 1.0, "Insulated Cable": 1.0}, "work": 16.0, "workers": 0.25, "inputs": {}, "power": 0.0, "services": {}, "storage": {"capacity": 12.0, "charge_rate": 6.0, "discharge_rate": 6.0, "charge_efficiency": 0.9, "discharge_efficiency": 0.9, "self_discharge": 0.0005}}
 }
+const Mechanics=preload("res://scripts/research_mechanics.gd")
 ## Costs and daily inputs name raw materials and Civilian Goods only (goods_bills.gd).
-static var PLANTS:=preload("res://scripts/goods_bills.gd").flatten_table(PLANTS_SOURCE,["cost","inputs"])
+## Each spec also keeps "fuel": the inputs its authored spec burns as fuel
+## (a part flattened into raw wood is not fuel).
+static var PLANTS:=_with_fuel(preload("res://scripts/goods_bills.gd").flatten_table(PLANTS_SOURCE,["cost","inputs"]))
+static func _with_fuel(table:Dictionary)->Dictionary:
+	for id:String in table:
+		var listed:Dictionary=(PLANTS_SOURCE[id] as Dictionary).get("inputs",{})
+		var fuel:Dictionary={}
+		for item:String in listed:
+			if item in Mechanics.FUEL_ITEMS:fuel[item]=float(listed[item])
+		(table[id] as Dictionary)["fuel"]=fuel
+	return table
+## A plant's daily use of one input per running unit. What it burns as fuel
+## follows fuel economy and the fuel the people's ways need (research_mechanics.gd).
+static func input_rate(spec:Dictionary,item:String)->float:
+	var amount:=float(spec.inputs[item])
+	var burned:=float((spec.get("fuel",{}) as Dictionary).get(item,0.0))
+	if burned<=0.0:return amount
+	return amount+burned*(Mechanics.fuel_factor()-1.0)
 static func empty_state()->Dictionary:return {"last_day":-1,"plants":{},"services":{},"workers":0.0,"inputs":{}}
 static func data()->Dictionary:return WorldSimulation.state.technology_operations
 static func quote(id:String,count:int=1)->Dictionary:
@@ -156,7 +174,7 @@ static func advance(day:int,current_context:Variant=null)->void:
 		if record.is_empty() or not record.enabled or float(PLANTS[id].power)<=0:continue
 		var spec:Dictionary=PLANTS[id]
 		var units:=float(record.installed)*condition
-		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/input_rate(spec,item))
 		demand+=units*float(spec.power)
 	# Serve current demand first; storage covers a generation shortfall.
 	available=_generate(ledger,available,condition,demand)
@@ -169,7 +187,7 @@ static func advance(day:int,current_context:Variant=null)->void:
 		if float(spec.services.get("electricity",0))>0 or spec.has("storage"):continue
 		var units:=minf(float(record.installed),available/float(spec.workers))*condition
 		if float(spec.power)>0:units=minf(units,float(ledger.services.get("electricity",0))/float(spec.power))
-		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(state.resource_stockpiles.get(item,0)))/input_rate(spec,item))
 		if id=="cannery":units=minf(units,canning_demand()/float(spec.services.food_preservation))
 		if id=="water_hammer":units=minf(units,float(WaterDrive.assessment(record.get("river_site",{}),operating_context,day).capacity))
 		if units>0:available=_operate(ledger,record,spec,units,available,condition)
@@ -196,7 +214,7 @@ static func _consumer_staff(power:float,condition:float)->float:
 		var spec:Dictionary=PLANTS[id];var record:Dictionary=data().plants.get(id,{})
 		if record.is_empty() or not record.enabled or float(spec.power)<=0:continue
 		var units:=minf(float(record.installed)*condition,power/float(spec.power))
-		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/input_rate(spec,item))
 		staff+=units/condition*float(spec.workers)
 		power=maxf(0,power-units*float(spec.power))
 	return staff
@@ -209,7 +227,7 @@ static func _generate(ledger:Dictionary,available:float,condition:float,target:f
 		var remaining:=maxf(0,float(record.installed)*condition-float(record.get("running_units",0)))
 		var units:=minf(remaining,available/float(spec.workers)*condition)
 		units=minf(units,maxf(0,target-float(ledger.services.get("electricity",0)))/output)
-		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/float(spec.inputs[item]))
+		for item:String in spec.inputs:units=minf(units,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0)))/input_rate(spec,item))
 		if units>0:available=_operate(ledger,record,spec,units,available,condition)
 	return available
 static func _operate(ledger:Dictionary,record:Dictionary,spec:Dictionary,units:float,available:float,condition:float)->float:
@@ -217,7 +235,7 @@ static func _operate(ledger:Dictionary,record:Dictionary,spec:Dictionary,units:f
 	var staff:=units/condition*float(spec.workers)
 	available-=staff;ledger.workers+=staff
 	for item:String in spec.inputs:
-		var amount:=units*float(spec.inputs[item])
+		var amount:=units*input_rate(spec,item)
 		WorldSimulation.state.resource_stockpiles[item]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(item,0))-amount)
 		ledger.inputs[item]=float(ledger.inputs.get(item,0))+amount
 	if float(spec.power)>0:ledger.services.electricity=maxf(0,float(ledger.services.get("electricity",0))-units*float(spec.power))

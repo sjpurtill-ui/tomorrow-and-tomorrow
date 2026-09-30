@@ -692,6 +692,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if traveling:
 		travel_health_penalty=0.08+maxf(0.0,0.62-housing_ratio)*0.30+minf(0.24,WorldSimulation.state.consecutive_food_shortage_days*0.009)
 	var process_health_cost:=(WorldSimulation.discovery.effect("health_risk")+WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity
+	# Knowing what fumes, acids and wastes do and how to hold them back (research:
+	# control of chemicals) prevents part of the harm smoke and fouled water do.
+	var chemical_cut:float=preload("res://scripts/research_mechanics.gd").chemical_harm_cut()
+	process_health_cost-=maxf(0.0,WorldSimulation.discovery.effect("pollution")*0.22+WorldSimulation.discovery.effect("water_pollution")*0.18)*industrial_activity*chemical_cut
 	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
 	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
 	var clinical:=preload("res://scripts/civilian_care.gd").process_day(clampf((1.0-prior_health)*.6+disease_pressure*.25+malnutrition*.15,0,1))
@@ -742,6 +746,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var ecology_delta := 0.00010+(environmental_resilience-ecology)*0.00018+modifier_strength("sacred_land")*0.00032+policy_effect("ecology_delta")+WorldSimulation.state.founding_effect("ecology_delta")+WorldSimulation.progression.effect("ecology_recovery")*0.00040-WorldSimulation.progression.effect("ecological_pressure")*0.00024-WorldSimulation.progression.effect("pollution")*0.00018+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"ecology")*0.00040
 	ecology_delta -= extraction_pressure*0.00052+foraging_pressure*0.00105
 	ecology_delta-=(WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009
+	ecology_delta+=maxf(0.0,WorldSimulation.discovery.effect("pollution")+WorldSimulation.discovery.effect("water_pollution"))*industrial_activity*0.0009*chemical_cut
 	ecology = clampf(ecology+ecology_delta*span,0.04,1.0)
 	var legitimacy_target := clampf(0.12+WorldSimulation.state.food_security*0.26+WorldSimulation.state.population_health*0.18+cohesion*0.20+security*0.10+admin_coverage*0.10+WorldSimulation.discovery.effect("legitimacy")*0.12+float(dynamics.get("institutions",0.25))*0.05+(council_support-0.5)*0.06+policy_effect("legitimacy_target")+_standing_legitimacy()+CIVIC.effect("legitimacy")-(administrative_load*0.12+policy_churn*0.18+directive_resistance*0.24+_levy_burden()*0.4)*_standing_blame()+economic_social_pressure+float(foreign_effects.treaty_count)*0.008-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.10-float(foreign_effects.get("occupation_burden",0.0))*0.22+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"legitimacy"),0.06,0.96)
 	var legitimacy := lerpf(float(previous.get("legitimacy",0.62)),legitimacy_target,SPAN.rate(0.012))

@@ -74,8 +74,11 @@ static func advance(day:int,wants_fire:bool,traveling:bool=false)->Dictionary:
 		if not available():state.last_event="No maintained settlement fire while traveling"
 		return report()
 	if available():
-		if (_knows("ember_tending") or _has_legacy_fire_knowledge()) and _consume("Timber",MAINTENANCE_TIMBER):
-			state.fuel_today=MAINTENANCE_TIMBER
+		# Fuel economy and the fuel the people's ways need scale the hearth's
+		# daily fuel (research_mechanics.gd fuel_factor).
+		var fuel:float=MAINTENANCE_TIMBER*maintenance_factor()
+		if (_knows("ember_tending") or _has_legacy_fire_knowledge()) and _consume("Timber",fuel):
+			state.fuel_today=fuel
 			var adoption:=clampf(WorldSimulation.discovery.adoption("ember_tending"),0.0,1.0)
 			state.embers=minf(1.0,float(state.embers)+0.05+adoption*0.10)
 			state.last_event="Embers were sheltered and fed"
@@ -85,6 +88,10 @@ static func advance(day:int,wants_fire:bool,traveling:bool=false)->Dictionary:
 			if not available():state.extinctions=int(state.extinctions)+1;state.source="none"
 	if not available() and wants_fire:_ignite(state)
 	return report()
+
+## Share of MAINTENANCE_TIMBER the kept fire burns today.
+static func maintenance_factor()->float:
+	return preload("res://scripts/research_mechanics.gd").fuel_factor()
 
 static func report()->Dictionary:
 	var state:=data()

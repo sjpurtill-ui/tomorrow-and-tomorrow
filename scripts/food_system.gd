@@ -14,6 +14,7 @@ extends Node
 const SPAN=preload("res://scripts/day_span.gd")
 const Goods=preload("res://scripts/civilian_goods.gd")
 const Operations=preload("res://scripts/technology_operations.gd")
+const Mechanics=preload("res://scripts/research_mechanics.gd")
 const KCAL_PER_RATION := 2400.0
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
 ## Share of a food worker's day spent getting food. The rest goes to carrying,
@@ -30,6 +31,8 @@ const FOOD_TYPES := [FRESH,STORED]
 const SOURCES:=["Fresh plants","Fresh meat","Fish","Dry staples"]
 const FOOD_ISSUE_HISTORY_LIMIT:=96
 const SPOILAGE := {FRESH:0.040,STORED:0.0010}
+## Timber a smoking fire burns per ration smoked, before fuel economy.
+const SMOKING_FUEL:=0.04
 ## Former five-type stocks, folded into the two pools when an older save loads.
 const LEGACY_FRESH:=["Fresh plants","Fresh meat","Fish"]
 const LEGACY_STORED:=["Dry staples","Preserved food"]
@@ -417,7 +420,8 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var gathering_bonus:=1.0+technique_lever("gathering")
 	result["Fresh plants"]=workers*gathering_weight*4.55*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_gather*plant_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))*_food_type_weather_multiplier("Fresh plants",weather_factor)*gathering_bonus
 	result["Fresh meat"]=workers*hunting_weight*4.85*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_hunt*game_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+WorldSimulation.discovery.effect("hunting_yield"))*practice*variation*route_factor*_food_type_weather_multiplier("Fresh meat",weather_factor)
-	var fishing_access:=maxf(float(access.freshwater),float(coastal.marine_opportunity)*0.90)
+	# Boats and seamanship (research: seafaring strength) take fishers farther out.
+	var fishing_access:float=Mechanics.fishing_access_of(float(access.freshwater),float(coastal.marine_opportunity),Mechanics.sea_reach())
 	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
 		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
@@ -538,8 +542,10 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 	if "smoking" in WorldSimulation.state.known_discoveries and preload("res://scripts/fire_practice.gd").available() and capacity>0.0:
 		var amount:=minf(float(stocks.get(FRESH,0.0)),capacity*0.5*clampf(WorldSimulation.discovery.adoption("smoking"),0.0,1.0)*Goods.factor("smoking"))
 		# Smoking must maintain an actual wood fire; knowledge alone supplies no heat.
-		amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/0.04)
-		var fuel:=amount*0.04
+		# Fuel economy and the fuel the people's ways need scale it (research_mechanics.gd).
+		var fuel_per_ration:float=SMOKING_FUEL*Mechanics.fuel_factor()
+		amount=minf(amount,maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)))/fuel_per_ration)
+		var fuel:=amount*fuel_per_ration
 		if fuel>0.0:
 			WorldSimulation.state.resource_stockpiles.Timber=maxf(0,float(WorldSimulation.state.resource_stockpiles.Timber)-fuel)
 			inputs["Timber"]=float(inputs.get("Timber",0.0))+fuel
@@ -696,10 +702,12 @@ func wild_food_capacity()->Dictionary:
 	var coastal:=_coastal_food_profile(false)
 	var regrowth:=lerpf(0.55,1.15,ecology)*(1.0+maxf(0.0,WorldSimulation.discovery.effect("ecology_recovery")))
 	var water:=maxf(clampf(float(environment.get("water_access",0.0)),0.0,1.0),float(coastal.marine_opportunity))
+	# The sea coast is worked as far out as the people's boats go (seafaring strength).
+	var sea_reach:float=Mechanics.sea_reach()
 	return {
 		"Wild gathering":{"rations":(60.0+clampf(float(environment.get("forage",0.45)),0.0,1.0)*170.0)*reach,"renewal":0.0040*regrowth,"overuse":0.0025},
 		"Hunting":{"rations":(10.0+clampf(float(environment.get("game",0.40)),0.0,1.0)*60.0)*reach,"renewal":0.0015*regrowth,"overuse":0.0040},
-		"Fishing":{"rations":(15.0+water*80.0+float(coastal.shoreline_access)*40.0)*reach,"renewal":0.0022*regrowth,"overuse":0.0030},
+		"Fishing":{"rations":Mechanics.fishing_ground_of(water,float(coastal.shoreline_access),sea_reach)*reach,"renewal":0.0022*regrowth,"overuse":0.0030},
 	}
 
 func _source_report(harvest: Dictionary,workers: float,traveling: bool) -> Array[Dictionary]:

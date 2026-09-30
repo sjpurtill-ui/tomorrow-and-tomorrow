@@ -143,7 +143,9 @@ func test_inert_list_matches_the_code()->void:
 	var read:=_read_keys()
 	for key:String in Explainer.keys():
 		assert_bool(Explainer.is_inert(key)).override_failure_message("%s: inert=%s but read=%s" % [key,Explainer.is_inert(key),String(read.get(key,"nowhere"))]).is_equal(not read.has(key))
-	assert_array(Explainer.inert_keys()).contains_exactly_in_any_order(["water_access","fuel_efficiency","repair_capacity","chemical_control","mining_output","logistics_endurance","naval_capacity","fuel_demand"])
+	# Every registered effect now acts somewhere (research_mechanics.gd holds the
+	# last eight); none is listed as read by nothing.
+	assert_array(Explainer.inert_keys()).is_empty()
 	# Fiber Plants is extracted, but its yield is looked up under its own name.
 	assert_bool(read.has("fiber_plants_yield")).is_true()
 	# Demand for timber guides research only: the capacities never read it.
@@ -189,10 +191,15 @@ func test_describe_translates_amounts_with_the_engine_coefficients()->void:
 	assert_int(Explainer.tone("disease_exposure",0.01)).is_equal(-1)
 	assert_int(Explainer.tone("fatigue",-0.01)).is_equal(1)
 	assert_str(String(Explainer.describe("disease_exposure",0.01).feeds[0])).is_equal("The health the people settle toward: down about 0.18 points of 100")
-	# Inert keys say so and claim nothing.
+	# Fuel needed is a real cost: every fire burns more of the usual fuel.
 	var fuel:=Explainer.describe("fuel_demand",0.02)
-	assert_bool(fuel.inert).is_true();assert_array(fuel.feeds).is_empty()
-	assert_str(String(fuel.now_words)).starts_with("No effect in the simulation yet")
+	assert_bool(fuel.inert).is_false()
+	assert_int(Explainer.tone("fuel_demand",0.02)).is_equal(-1)
+	assert_str(String(fuel.now_words)).starts_with("+2% now → fuel burned by every fire").contains("up about")
+	# A key nothing reads says so and claims nothing.
+	var unknown:=Explainer.describe("no_such_effect",0.02)
+	assert_bool(unknown.inert).is_true();assert_array(unknown.feeds).is_empty()
+	assert_str(String(unknown.now_words)).starts_with("No effect in the simulation yet")
 
 func test_capacity_slopes_are_measured_on_the_capacity_formula()->void:
 	var model=DiscoverySystem.society_model

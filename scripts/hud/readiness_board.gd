@@ -131,8 +131,11 @@ func _update_strip(s:Dictionary)->void:
 	var count:=int(s.carts) if who!="foot" else int(s.haulers)
 	chips.carriers.value.text=EraWords.grouped(count)
 	chips.carriers.word.text=String(s.carrier_words)
-	var loss:=roundi(float((Supply.CARRIERS.get(who,Supply.CARRIERS.foot) as Dictionary).loss)*100.0)
-	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food from the stores: %s haulers and %s carts.\nThey eat about %d%% of a load for each day of hauling." % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),loss]
+	var loss:float=Supply.carrier_loss(who,Supply.endurance_today())*100.0
+	var usual:float=Supply.carrier_loss(who,0.0)*100.0
+	var eaten:="They eat about %d%% of a load for each day of hauling." % roundi(loss)
+	if absf(loss-usual)>=0.05:eaten="They eat about %.1f%% of a load for each day of hauling (%d%% without our supply endurance)." % [loss,roundi(usual)]
+	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food from the stores: %s haulers and %s carts.\n%s" % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),eaten]
 	var transport:=float(s.transport)
 	chips.carried.value.text="%d%%" % roundi(transport*100.0)
 	chips.carried.value.add_theme_color_override("font_color",Supply.state_text_color(Supply.state_of(transport)))

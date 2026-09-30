@@ -37,9 +37,12 @@ static func occupation_key(force:Dictionary)->String:
 
 
 ## Count hungry days on a force; a fed day wears the count down again.
+## Preserved travel food and supply know-how (research: supply endurance) let a
+## short band hold out longer: its hungry days count slower (research_mechanics.gd).
 static func mark_day(force:Dictionary,ratio:float,span:float)->void:
 	var days:=float(force.get("hungry_days",0.0))
-	force["hungry_days"]=days+span if ratio<HUNGRY_BELOW else maxf(0.0,days-2.0*span)
+	var pace:float=preload("res://scripts/research_mechanics.gd").hunger_pace()
+	force["hungry_days"]=days+span*pace if ratio<HUNGRY_BELOW else maxf(0.0,days-2.0*span)
 
 
 static func is_hungry(force:Dictionary)->bool:

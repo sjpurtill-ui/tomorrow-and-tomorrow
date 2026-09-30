@@ -43,6 +43,7 @@ extends RefCounted
 ## Static helpers; preload.
 
 const FieldRations:=preload("res://scripts/field_rations.gd")
+const Mechanics:=preload("res://scripts/research_mechanics.gd")
 const March:=preload("res://scripts/march_terrain.gd")
 const Sampler:=preload("res://scripts/terrain_patch_sampler.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
@@ -1002,16 +1003,22 @@ static func haul_days(effort:float,who:String,chill:float)->float:
 	var c:Dictionary=CARRIERS.get(who,CARRIERS.foot)
 	return effort/float(c.pace)*(1.0+float(March.WINTER_K.get(String(c.arm),0.5))*chill)
 
-## Share of a load that reaches the band after that many days of hauling.
-static func haul_share(days:float,who:String)->float:
-	if not is_finite(days): return 0.0
+## Share of a load the carriers eat for each day of hauling beyond FREE_DAYS,
+## with the people's supply endurance (research: pack animals, waystations,
+## food caches and travel food; research_mechanics.gd haul_loss_factor_of).
+static func carrier_loss(who:String,endurance:float=0.0)->float:
 	var c:Dictionary=CARRIERS.get(who,CARRIERS.foot)
-	return clampf(1.0-float(c.loss)*maxf(0.0,days-FREE_DAYS),0.0,1.0)
+	return float(c.loss)*Mechanics.haul_loss_factor_of(endurance)
+
+## Share of a load that reaches the band after that many days of hauling.
+static func haul_share(days:float,who:String,endurance:float=0.0)->float:
+	if not is_finite(days): return 0.0
+	return clampf(1.0-carrier_loss(who,endurance)*maxf(0.0,days-FREE_DAYS),0.0,1.0)
 
 ## The effort at which the carriers still deliver `share` of a load in mild weather.
-static func reach_effort(who:String,share:float=REACH_HAUL)->float:
+static func reach_effort(who:String,share:float=REACH_HAUL,endurance:float=0.0)->float:
 	var c:Dictionary=CARRIERS.get(who,CARRIERS.foot)
-	return (FREE_DAYS+(1.0-share)/float(c.loss))*float(c.pace)
+	return (FREE_DAYS+(1.0-share)/carrier_loss(who,endurance))*float(c.pace)
 
 ## How well a band of this size forages this country today, as a factor on
 ## field_rations' base shares: the land's richness, the season, the size.
@@ -1050,15 +1057,15 @@ static func siege_factor()->float:
 
 ## The model at a point for a band of `troops`: transport (the carriers'
 ## share at all), stores (the share the stores could send), siege (the
-## share of carts a besieged home lets out) are the day's inputs, read once
-## by the caller (day_inputs()).
-static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float)->Dictionary:
+## share of carts a besieged home lets out) and endurance (the people's
+## supply endurance) are the day's inputs, read once by the caller (day_inputs()).
+static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0)->Dictionary:
 	var who:=String(field.carrier) if not field.is_empty() else carrier()
 	var e:=effort_at(field,p)
 	var land:=land_at(field,p,day)
 	var chill:=float(land.cold)
 	var days:=haul_days(float(e.effort),who,chill)
-	var haul:=haul_share(days,who)
+	var haul:=haul_share(days,who,endurance)
 	var source:=int(e.source)
 	var sources:Array=e.sources
 	var hub:Dictionary=(sources[source] as Dictionary) if source>=0 and source<sources.size() else {}
@@ -1104,7 +1111,7 @@ static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteA
 	for i in n:
 		if i%512==0 and bool(cancel[0]): return {}
 		if land[i]==0 or i>=known.size() or known[i]==0: continue
-		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege))
+		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)))
 		ratio[i]=float(t.ratio); carried[i]=float(t.carried); haul[i]=float(t.haul)
 	return {"ratio":ratio,"carried":carried,"haul":haul,"troops":troops,"day":day,"key":int(field.get("key",0))}
 
@@ -1116,7 +1123,12 @@ static func day_inputs()->Dictionary:
 	var s:Variant=_state()
 	var stores:=1.0
 	if s!=null: stores=clampf(float((s.simulation_metrics as Dictionary).get("food_intake_ratio",1.0)),0.0,1.0)
-	return {"transport":transport,"stores":stores,"siege":siege_factor(),"day":today()}
+	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today()}
+
+## The people's supply endurance (research_mechanics.gd), 0 without a people.
+static func endurance_today()->float:
+	if WorldSimulation==null or WorldSimulation.discovery==null: return 0.0
+	return Mechanics.supply_endurance()
 
 
 # --------------------------------------------------------------------------
@@ -1134,7 +1146,7 @@ static func haul_for(force:Dictionary)->float:
 	if not is_finite(float(e.effort)): return 0.0
 	var who:=String(f.carrier) if not f.is_empty() else carrier()
 	var land:=land_at(f,p,today())
-	var haul:=haul_share(haul_days(float(e.effort),who,float(land.cold)),who)
+	var haul:=haul_share(haul_days(float(e.effort),who,float(land.cold)),who,endurance_today())
 	var source:=int(e.source)
 	var sources:Array=e.sources
 	if source>=0 and source<sources.size() and String((sources[source] as Dictionary).kind) in ["home","held"]: haul*=siege_factor()
@@ -1163,7 +1175,7 @@ static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
 	if troops<0: troops=typical_troops()
 	var f:=field()
 	var d:=day_inputs()
-	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege))
+	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
 	var report:=_report_from_terms(f,t,point)
 	report["force_kind"]="point"; report["troops"]=troops
 	report["words"]=words(report)
@@ -1223,7 +1235,7 @@ static func of_force(force:Dictionary)->Dictionary:
 		var f:=field()
 		var d:=day_inputs()
 		var moving:=String(force.get("status","stationed"))=="moving"
-		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege))
+		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
 		report=_report_from_terms(f,t,p)
 		# The day's actual rations, as the engine recorded them.
 		var need:=float(force.get("provisions_required_today",0.0))

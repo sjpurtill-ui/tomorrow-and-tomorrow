@@ -202,7 +202,7 @@ func _paint_key(f:Dictionary,forces:Array)->int:
 	var d:=Supply.day_inputs()
 	var rows:Array=[]
 	for force:Dictionary in forces: rows.append([String(force.id),(force.pos as Vector2).snapped(Vector2.ONE*0.5),snappedf(float((force.report as Dictionary).get("ratio",0.0)),0.01)])
-	return hash([int(f.get("key",0)),int(d.day),Supply.typical_troops(),snappedf(float(d.transport),0.01),snappedf(float(d.stores),0.01),snappedf(float(d.siege),0.01),
+	return hash([int(f.get("key",0)),int(d.day),Supply.typical_troops(),snappedf(float(d.transport),0.01),snappedf(float(d.stores),0.01),snappedf(float(d.siege),0.01),snappedf(float(d.get("endurance",0.0)),0.001),
 		int(world.fog_revision) if world!=null else 0,(world.revealed_areas as Array).size() if world!=null else 0,rows,hash(March.roads().map(func(r:Dictionary)->Array: return [r.a,r.b,r.tier]))])
 
 func _start_paint(f:Dictionary,forces:Array,key:int)->void:

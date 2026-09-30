@@ -157,6 +157,11 @@ static func workshop_input_reserve()->Dictionary:
 	for item:String in bills:bills[item]=minf(float(bills[item]),_stock_of(item)*share/(share+.18))
 	return bills
 
+## Share of the stock worn out each day today: DAILY_WEAR, slowed by the
+## people's repair skill (research_mechanics.gd goods_wear_factor).
+static func daily_wear()->float:
+	return DAILY_WEAR*preload("res://scripts/research_mechanics.gd").goods_wear_factor()
+
 ## One day of household goods: wear since the last call, then production.
 ## A multi-day step (day_span.gd) produces `span` days of craft work.
 static func advance()->Dictionary:
@@ -166,7 +171,7 @@ static func advance()->Dictionary:
 	var elapsed:=maxi(1,day-int(data().get("last_day",day-1)))
 	data().last_day=day
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
-	var worn:=stock()*(1.0-pow(1.0-DAILY_WEAR,elapsed))
+	var worn:=stock()*(1.0-pow(1.0-daily_wear(),elapsed))
 	if worn>0.0:stocks[GOODS]=stock()-worn
 	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":""}
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:

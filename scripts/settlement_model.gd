@@ -1532,7 +1532,10 @@ func _advance_city_form(month_day:int)->void:
 		for item:String in basket:stocks[item]=maxf(0.0,float(stocks.get(item,0.0))-need*float(basket[item]))
 	form["materials_paid"]=paid
 	if supported>float(form.tier) and paid>=0.5:form.tier=minf(supported,float(form.tier)+0.25*building_share*paid)
-	form.condition=clampf(float(form.condition)+0.04*building_share*paid-0.02,0.05,1.0)
+	# Repair skill (research) makes the same hands and materials mend more
+	# (research_mechanics.gd mending_factor; upkeep_warnings.gd facts reads the same).
+	var mending:float=preload("res://scripts/research_mechanics.gd").mending_factor()
+	form.condition=clampf(float(form.condition)+0.04*building_share*paid*mending-0.02,0.05,1.0)
 
 ## The current city's era and condition, seeded from its buildings when absent.
 func city_form()->Dictionary:

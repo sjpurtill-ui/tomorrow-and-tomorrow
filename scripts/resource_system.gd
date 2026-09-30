@@ -351,8 +351,11 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	# distant sources. Sanitation, irrigation, storage and dense urban distribution
 	# still depend on knowledge and infrastructure elsewhere in the simulation.
 	var collection_workers:=carriers+food_workers*0.22
-	var distance_factor:=1.0/maxf(1.0,1.0+nearest_source_km*0.16) if nearest_source_km<INF else 0.0
-	var household_access_ratio:=_household_surface_water_access_ratio(nearest_source_km) if accessible_quality>0.0 else 0.0
+	# Wells, cisterns, channels and pipes (research: water access) bring the
+	# water nearer: the walk counts shorter than the ground (research_mechanics.gd).
+	var walk_km:float=nearest_source_km*preload("res://scripts/research_mechanics.gd").water_walk_factor() if nearest_source_km<INF else INF
+	var distance_factor:=1.0/maxf(1.0,1.0+walk_km*0.16) if walk_km<INF else 0.0
+	var household_access_ratio:=_household_surface_water_access_ratio(walk_km) if accessible_quality>0.0 else 0.0
 	var household_collection:=total_required*household_access_ratio
 	var organized_collection:=collection_workers*28.0*clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))
 	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
@@ -635,6 +638,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Owner-wide inputs, read once for every deposit in this pass.
 	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
 	var metal_effect:=WorldSimulation.discovery.effect("metal_yield")
+	# Drainage, hoists, pumps and blasting (research: mine output) raise the
+	# yield of mined deposits only (research_mechanics.gd is_mined).
+	var mining_effect:float=preload("res://scripts/research_mechanics.gd").mining_bonus()
 	# The Gathering Yard organises digging and cutting at every deposit (civic_building_effects.gd).
 	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")+preload("res://scripts/civic_building_effects.gd").effect("extraction")
 	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
@@ -649,6 +655,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var profile:=_material_profile(String(deposit.resource))
 		var knowledge_multiplier:=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
 		if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
+		if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect
 		# Research names the fibre bonus "fiber_yield"; the resource is "Fiber Plants".
 		if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
 		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)

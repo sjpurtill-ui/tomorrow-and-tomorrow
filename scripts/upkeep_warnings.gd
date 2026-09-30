@@ -119,15 +119,18 @@ static func facts()->Dictionary:
 	var per_head:=effective/float(heads) if heads>0 else 0.8
 	per_head=maxf(0.05,per_head)
 	var share:=clampf(effective/maxf(1.0,population*0.05),0.0,1.0)
-	var change:=0.04*share*paid-0.02
-	# Builders needed to hold the town as it is (share*paid=0.5) and to mend it
-	# at about a hundredth a month (share*paid=0.75); none are enough when
-	# fewer than half the materials can be paid.
+	# Repair skill (research) makes the same hands and materials mend more.
+	var mending:float=preload("res://scripts/research_mechanics.gd").mending_factor()
+	var reach:=paid*mending
+	var change:=0.04*share*reach-0.02
+	# Builders needed to hold the town as it is (share*reach=0.5) and to mend it
+	# at about a hundredth a month (share*reach=0.75); none are enough when
+	# the materials paid, with the people's repair skill, cover less than half.
 	var hold:=-1
 	var mend:=-1
-	if paid>=0.5: hold=ceili(population*0.05*(0.5/paid)/per_head)
-	if paid>=0.75: mend=ceili(population*0.05*(0.75/paid)/per_head)
-	elif paid>=0.5: mend=ceili(population*0.05/per_head)
+	if reach>=0.5: hold=ceili(population*0.05*(0.5/reach)/per_head)
+	if reach>=0.75: mend=ceili(population*0.05*(0.75/reach)/per_head)
+	elif reach>=0.5: mend=ceili(population*0.05/per_head)
 	var basket:Dictionary={"Timber":.45,"Fiber Plants":.2,"Clay":.2,"Stone":.15} if tier<3.0 else {"Stone":.45,"Timber":.3,"Clay":.15,"Limestone":.1}
 	var short:=""
 	var lowest:=INF
@@ -143,7 +146,7 @@ static func facts()->Dictionary:
 		if status in ["stressed","damaged"]: stressed+=1
 	var months:=-1.0
 	if change<0.0 and condition>FAILING_BELOW: months=(condition-FAILING_BELOW)/-change
-	return {"condition":snappedf(condition,0.01),"monthly_change":snappedf(change,0.001),"population":roundi(population),"builders":heads,
+	return {"condition":snappedf(condition,0.01),"monthly_change":snappedf(change,0.001),"mending":snappedf(mending,0.01),"population":roundi(population),"builders":heads,
 		"builders_effective":snappedf(effective,0.1),"builders_to_hold":hold,"builders_to_mend":mend,"materials_paid":snappedf(paid,0.01),
 		"short_material":short if paid<0.95 else "","fabric_tier":tier,"stressed_buildings":stressed,"standing_buildings":standing,
 		"months_until_failing":snappedf(months,0.1),"capacity_share":snappedf(clampf(condition/SOUND_REFERENCE,0.0,1.0),0.01)}

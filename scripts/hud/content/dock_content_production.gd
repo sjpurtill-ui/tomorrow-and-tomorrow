@@ -250,7 +250,7 @@ static func _household_card()->Dictionary:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
 		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
 	return {"stock":goods.stock(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
-		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.DAILY_WEAR,"reason":String(report.get("reason","")) if current else "","basket":basket}
+		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket}
 
 ## Household goods as dock rows (used by tests and older reports).
 static func _household_rows()->Array:

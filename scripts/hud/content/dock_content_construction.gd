@@ -186,6 +186,8 @@ func _condition_row()->Dictionary:
 	if change<-0.0005:detail=("%s would hold it. " % _count(hold,"builder") if hold>0 else "Too few materials to hold it, however many build. ")+detail
 	elif hold>0 and int(f.builders)>hold:detail="%s would be enough to hold it. " % _count(hold,"builder")+detail
 	if not String(f.short_material).is_empty():detail+=" Short of %s: only %d%% of the mending is paid for." % [Upkeep._material_words(String(f.short_material)),roundi(float(f.materials_paid)*100.0)]
+	var mending:=float(f.get("mending",1.0))
+	if absf(mending-1.0)>=0.005:detail+=" Our repair skill makes each month's mending go %d%% %s." % [roundi(absf(mending-1.0)*100.0),"further" if mending>1.0 else "less far"]
 	if change<-0.0005 and float(f.months_until_failing)>0.0:detail+=" At this rate it is badly worn in %s." % Plain.span_text(float(f.months_until_failing)*30.4)
 	var color:=Tokens.GREEN if condition>=0.75 else (Tokens.AMBER if condition>=Upkeep.FAILING_BELOW else Tokens.RED)
 	return {"name":"Condition","value":"%d%%" % roundi(condition*100.0),"value_color":color,"sub":sub,"detail":detail,"accent":color}
