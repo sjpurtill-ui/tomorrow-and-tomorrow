@@ -86,7 +86,7 @@ static func research_plan(weights:Dictionary,steps:int=-1)->Dictionary:
 
 static func unit_score(definition:Dictionary,plan:Dictionary)->float:
 	var p:Dictionary=plan.personality
-	var preference:float={"force_generation":.5+(1-float(p.risk_tolerance))*.5,"heavy_infantry":float(p.discipline),"missile_infantry":float(p.openness),"mounted":float(p.risk_tolerance)*.6+float(p.assertiveness)*.4,"protection":1-float(p.risk_tolerance),"reconnaissance":float(p.openness),"siege_fires":float(p.assertiveness)*.6+float(p.discipline)*.4,"specialist_infantry":float(p.openness)*.6+float(p.risk_tolerance)*.4}.get(String(definition.get("branch","")),.5)
+	var preference:float={"force_generation":.5+(1-float(p.risk_tolerance))*.5,"heavy_infantry":float(p.discipline),"missile_infantry":float(p.openness),"mounted":float(p.risk_tolerance)*.6+float(p.assertiveness)*.4,"protection":1-float(p.risk_tolerance),"reconnaissance":float(p.openness),"siege_fires":float(p.assertiveness)*.6+float(p.discipline)*.4,"specialist_infantry":float(p.openness)*.6+float(p.risk_tolerance)*.4,"autonomous":float(p.openness)*.5+(1-float(p.risk_tolerance))*.5}.get(String(definition.get("branch","")),.5)
 	# Capability matters, but longest training time is not a universal doctrine.
 	return log(1+float(definition.get("training_days",7)))*(.3+float(p.openness)*.3)+preference*3.0
 
