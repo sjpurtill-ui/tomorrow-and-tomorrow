@@ -21,6 +21,7 @@ extends RefCounted
 ##            .needs_by_force)
 
 const Supply:=preload("res://scripts/supply_state.gd")
+const Carriers:=preload("res://scripts/carriers.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Upkeep:=preload("res://scripts/routine_military_upkeep.gd")
@@ -100,6 +101,9 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 	var stock:={}
 	for entry:Dictionary in Logistics.rows(mc):stock[String(entry.item)]=entry
 	var out:Array[Dictionary]=[]
+	var fleet_reading:Dictionary=mc.carrier_reading() if mc.has_method("carrier_reading") else {}
+	var line_asks:={}
+	for entry:Dictionary in fleet_reading.get("forces",[]):line_asks[String(entry.key)]=entry
 	for report:Dictionary in _reports(mc):
 		var row:=report.duplicate()
 		var key:=key_of(report)
@@ -125,6 +129,13 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 			var army:Dictionary=mc.field_armies[army_index] if army_index>=0 else {}
 			row["priority"]=String(army.get("priority","normal"))
 			row["drafts"]=mc.sustainment.drafts_for(int(report.get("army_id",0)))
+		# What its line asks a day and the carts that alone would carry it
+		# (carriers.gd), read today at home.
+		var asked:Dictionary=line_asks.get(key,{})
+		if not asked.is_empty():
+			row["line_bread"]=float(asked.bread);row["line_stores"]=float(asked.stores)
+			var rt:=Carriers.kind_round_trip("cart",float(asked.effort),0.0,float(fleet_reading.get("rail",0.0)))
+			row["carts_alone"]=ceili((float(asked.bread)+float(asked.stores))*rt/maxf(1.0,float((fleet_reading.get("fleet",{}) as Dictionary).get("cart_load",Carriers.CART_LOAD)))) if is_finite(rt) else -1
 		row["order"]=ORDER.find(String(report.get("force_kind","field")))*10000+out.size()
 		out.append(row)
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.order)<int(b.order))
