@@ -4,7 +4,9 @@ extends VBoxContainer
 ## (right-aligned), and underneath, what that means in this town today.
 ## Lines come from the engine's own rules (building_impact.gd); the panel only
 ## lays them out. Block: {"type":"impact_lines", "lead":String, "lines":[{label,
-## value, words, tone}], "columns":1|2}. Two columns on a wide dock.
+## value, words, tone}], "columns":1|2|3, "compact":bool}. Two columns on a wide
+## dock (three when asked for and wider still). Compact: each line is its mark,
+## what it touches and how much; its words are the line's tooltip.
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const WIDE_AT:=760.0
@@ -16,6 +18,8 @@ var grid:GridContainer
 ## lines, each with or without its words).
 var _lead:Label
 var _lines:Array=[]
+var compact:=false
+const WIDER_AT:=900.0
 
 
 func setup(block:Dictionary)->void:
@@ -27,6 +31,7 @@ func setup(block:Dictionary)->void:
 	grid=GridContainer.new();grid.name="Lines";grid.columns=1
 	grid.add_theme_constant_override("h_separation",28);grid.add_theme_constant_override("v_separation",10)
 	add_child(grid)
+	compact=bool(block.get("compact",false))
 	for line in block.get("lines",[]):grid.add_child(_line(line))
 	resized.connect(_arrange)
 
@@ -46,6 +51,7 @@ func update_block(block:Dictionary)->bool:
 		_put(refs.label,String(line.get("label","")))
 		_put(refs.value,String(line.get("value","")),ink)
 		if refs.words!=null:_put(refs.words,String(line.words))
+		if compact:(refs.box as Control).tooltip_text=String(line.get("words",""))
 	_arrange()
 	return true
 
@@ -54,7 +60,7 @@ func update_block(block:Dictionary)->bool:
 static func shape_of(block:Dictionary)->Array:
 	var lines:Array=[]
 	for line:Dictionary in block.get("lines",[]):lines.append(String(line.get("words",""))!="")
-	return [String(block.get("lead",""))!="",int(block.get("columns",2)),lines]
+	return [String(block.get("lead",""))!="",int(block.get("columns",2)),lines,bool(block.get("compact",false))]
 
 
 static func _ink(line:Dictionary)->Color:
@@ -69,7 +75,8 @@ static func _put(label:Label,text:String,color:Variant=null)->void:
 
 func _arrange()->void:
 	if grid==null:return
-	var wanted:=2 if int(data.get("columns",2))>=2 and size.x>=WIDE_AT else 1
+	var asked:=int(data.get("columns",2))
+	var wanted:=3 if asked>=3 and size.x>=WIDER_AT else (2 if asked>=2 and size.x>=WIDE_AT else 1)
 	if grid.columns!=wanted:grid.columns=wanted
 
 
@@ -82,8 +89,11 @@ func _line(line:Dictionary)->Control:
 	label.add_theme_font_override("font",T.font("ui_strong"));head.add_child(label)
 	var value:=T.make_label(String(line.get("value","")),14,ink);value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	value.add_theme_font_override("font",T.font("ui_strong"));head.add_child(value)
-	var refs:={"mark":mark,"label":label,"value":value,"words":null}
-	if String(line.get("words",""))!="":
+	var refs:={"mark":mark,"label":label,"value":value,"words":null,"box":box}
+	if compact:
+		# The words wait in the tooltip; the line reads at a glance.
+		box.tooltip_text=String(line.get("words",""));box.mouse_filter=Control.MOUSE_FILTER_STOP
+	elif String(line.get("words",""))!="":
 		var words:=T.make_label(String(line.words),12,T.TEXT_SOFT);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		var inset:=MarginContainer.new();inset.add_theme_constant_override("margin_left",11);inset.add_child(words);box.add_child(inset)
 		refs.words=words

@@ -214,6 +214,19 @@ func test_hold_off_keeps_even_a_frightened_people_from_building()->void:
 	HomeDefense.council("player",_plan(Wary))
 	assert_int(int(MilitaryCampaign.settlement_defense.project_stage)).is_equal(1)
 
+func test_the_war_leader_knows_the_defences_as_the_screen_shows_them()->void:
+	# Asked at court why no walls go up, the war leader reads the same facts.
+	_neighbours(2,0.45)
+	_stores(2.57,251.9)
+	var sheet:=preload("res://scripts/court_facts.gd").sheet(["common","war"])
+	var line:=preload("res://scripts/court_facts.gd").text(sheet)
+	var reading:=HomeDefense.reading()
+	assert_str(line).contains("Town defences: Open ground now")
+	for blocker:Dictionary in reading.blockers:assert_str(line).contains(String(blocker.text))
+	assert_str(line).contains("the god's word: let the people decide")
+	HomeDefense.set_word("hold")
+	assert_str(preload("res://scripts/court_facts.gd").text(preload("res://scripts/court_facts.gd").sheet(["common","war"]))).contains("no new works: the god said hold off")
+
 func test_an_unknown_word_is_refused()->void:
 	assert_bool(HomeDefense.set_word("walls").has("error")).is_true()
 	assert_str(HomeDefense.word()).is_equal("people")

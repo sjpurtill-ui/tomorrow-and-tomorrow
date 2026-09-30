@@ -29,6 +29,9 @@ func _building(project:Dictionary)->void:
 	var work:=VBoxContainer.new();work.size_flags_horizontal=Control.SIZE_EXPAND_FILL;work.size_flags_vertical=Control.SIZE_SHRINK_CENTER;work.add_theme_constant_override("separation",5);row.add_child(work)
 	var heading:=HBoxContainer.new();work.add_child(heading)
 	var label:=T.make_label(title,16,T.INK);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.tooltip_text=String(project.effect);heading.add_child(label)
+	# A work finished lately carries the builders' stamp (hud/town_works_board.gd).
+	if done and int(project.get("finished_ago",-1))>=0 and int(project.finished_ago)<=int(data.get("fresh_days",30)):
+		var stamp:=preload("res://scripts/hud/town_works_board.gd").Stamp.new();stamp.tooltip_text="Finished %s" % String(project.get("finished_words",""));heading.add_child(stamp)
 	heading.add_child(T.make_label("✓" if done else "%d%%" % roundi(float(project.progress)*100),13,T.GREEN if done or active else T.MUTED))
 	_bar(work,float(project.progress),T.GREEN)
 	var state:=T.make_label(String(project.state),11,T.GREEN if done or active else T.RED if not project.blockers.is_empty() else T.MUTED);state.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;state.tooltip_text="\n".join(project.blockers);work.add_child(state)
@@ -52,13 +55,18 @@ func _building(project:Dictionary)->void:
 			var materials:=HBoxContainer.new();materials.add_theme_constant_override("separation",12);column.add_child(materials)
 			for input:Dictionary in project.inputs:_material_chip(materials,input)
 			materials.tooltip_text=String(project.bill_note)
-			for blocker:String in project.blockers:
-				var note:=T.make_label(blocker,11,T.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(note)
-		var effect:=T.make_label(String(project.effect).left(1).to_upper()+String(project.effect).substr(1),12,T.BODY);effect.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(effect)
-		# Everything it does, and why, with the engine's numbers (building_impact.gd).
+			# What stops it, each a short red chip.
+			if not (project.blockers as Array).is_empty():
+				var chips:=HFlowContainer.new();chips.add_theme_constant_override("h_separation",6);chips.add_theme_constant_override("v_separation",4);column.add_child(chips)
+				for blocker:String in project.blockers:
+					var chip:=PanelContainer.new();var style:=T.flat(T.DANGER_BG,T.DANGER_BORDER,1,10);style.content_margin_left=8;style.content_margin_right=8;style.content_margin_top=1;style.content_margin_bottom=2
+					chip.add_theme_stylebox_override("panel",style);chip.add_child(T.make_label(blocker,12,T.RED_TEXT));chips.add_child(chip)
+		# Everything it does with the engine's numbers (building_impact.gd); the
+		# why of each line waits in its tooltip.
 		if not (impact.get("lines",[]) as Array).is_empty():
-			column.add_child(T.make_label("WHAT IT DOES" if done else "WHAT IT WILL DO",10,T.GOLD,0.1))
-			var panel:=preload("res://scripts/hud/impact_panel.gd").new();column.add_child(panel);panel.setup({"lines":impact.lines,"columns":1})
+			column.add_child(T.make_label("What it does" if done else "What it will do",12,T.GOLD_TEXT,0.06))
+			var panel:=preload("res://scripts/hud/impact_panel.gd").new();column.add_child(panel);panel.setup({"lines":impact.lines,"columns":2,"compact":true})
+			panel.tooltip_text=String(project.effect).left(1).to_upper()+String(project.effect).substr(1)
 		if not done and bool(data.get("can_prioritize",false)):
 			var actions:=HBoxContainer.new();column.add_child(actions)
 			_button(actions,"Prioritize when ready",func():data.on_priority.call(title),"Leader continues feasible work until this project is ready",title==String(data.get("priority","")))

@@ -276,6 +276,32 @@ static func watch_fix(stage_index:int)->int:
 	var base:=ceili(float(state.able_population())*float(WorldSimulation.government.BASE_ALLOCATIONS.get("Defense",4.0))/100.0)
 	return maxi(0,maxi(maxi(1,rule_least),mini(full,base))-now)
 
+## What the war leader knows of the town's defences (court_facts.gd), from
+## the same reading as the screen: {stands, rising, progress, days_left,
+## next, word, status, blockers:[text]}.
+static func court_facts()->Dictionary:
+	var r:=reading()
+	var building:Dictionary=r.building
+	return {"stands":String(r.short),"rising":String(building.get("short","")),"progress":roundi(float(building.get("progress",0.0))*100.0),
+		"days_left":roundi(float(building.get("days_left",-1.0))),"next":String((r.next as Dictionary).get("short","")),"word":String(r.word),"status":String(r.status),
+		"blockers":(r.blockers as Array).filter(func(b:Dictionary)->bool:return String(b.kind)!="unsettled").map(func(b:Dictionary)->String:return String(b.text))}
+
+## The war leader's line on the defences: what stands, what goes up or why
+## nothing does, and the god's word.
+static func court_words(f:Dictionary)->String:
+	var parts:PackedStringArray=["%s now" % String(f.get("stands","Open ground"))]
+	var next:=String(f.get("next","")).to_lower()
+	if String(f.get("rising",""))!="":
+		parts.append("the %s going up, %d%% done, %s" % [String(f.rising).to_lower(),int(f.progress),("about %d days left" % int(f.days_left)) if int(f.days_left)>=0 else "stopped"])
+	elif next!="":
+		var why:String={"calm":"the people see no need for the %s yet","waiting":"the %s are wanted, but the means are short","ready":"the %s start at the next check",
+			"held":"no new works: the god said hold off","hungry":"no new works while food is short","stalled":"the %s have stopped"}.get(String(f.get("status","")),"")
+		if why!="":parts.append(why % next if "%s" in why else why)
+	var blockers:Array=f.get("blockers",[])
+	if not blockers.is_empty():parts.append("what stops them: "+", ".join(PackedStringArray(blockers)))
+	parts.append("the god's word: "+String(WORD_LABELS.get(String(f.get("word","people")),"let the people decide")).to_lower())
+	return "; ".join(parts)
+
 ## The next monthly council of the god's people, after `today`.
 static func next_council(today:int)->int:
 	var controller:=_controller()

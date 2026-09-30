@@ -343,6 +343,9 @@ static func _war(out:Dictionary)->void:
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
 	out["chases"]=chases
 	out["battles"]=battles(3,true)
+	# The town's defences: what stands, what goes up or why not, and the
+	# god's word (home_defense.gd, the Buildings page's own reading).
+	if bool(WorldSimulation.state.settlement_site_committed):out["defences"]=preload("res://scripts/home_defense.gd").court_facts()
 
 ## The last fights, newest first, from the battle record and what the war
 ## leader settled after each (the captives and spoils, military_campaign
@@ -666,6 +669,7 @@ static func text(s:Dictionary)->String:
 		if int(replacements.get("on_road",0))+int(replacements.get("in_training",0))>0:
 			lines.append("Replacements for the bands: %d in training at home, %d on the road to them." % [int(replacements.in_training),int(replacements.on_road)])
 		if not (s.get("chases",[]) as Array).is_empty(): lines.append("Out on a chase: %s." % "; ".join(PackedStringArray(s.chases)))
+		if s.get("defences") is Dictionary: lines.append("Town defences: %s." % preload("res://scripts/home_defense.gd").court_words(s.defences))
 		var fights:PackedStringArray=PackedStringArray()
 		for b:Dictionary in s.get("battles",[]): fights.append(battle_words(b))
 		if not fights.is_empty(): lines.append("Last battles: %s." % "; ".join(fights))
