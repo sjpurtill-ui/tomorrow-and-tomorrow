@@ -203,80 +203,77 @@ are not offered); a band deployed to join an army keeps that army's general;
 bands raised together from one line share one general until the player splits
 them.
 
-## 5. Fight: armour matters both ways
+## 5. Fight: armour by hardness (as built)
 
-Attack against an armored enemy is scaled by how well our kit pierces:
+A formation is as hard as its kit's armour: `hardness = clamp((armor − 0.3)
+/ 1.2, 0, 1)`: cloth 0, mail about half, plate and every tank all of it.
+Our blows against the enemy's hard share are scaled by how well our kit
+pierces the armour of that share:
 
 ```
-pierce factor = clamp(0.35 + 0.65 × pierce / max(0.05, enemy armor), 0.35, 1.0)
+pierce factor = clamp((pierce / armor) ^ 2.5, 0.10, 1.0)   (1 when pierce ≥ armor)
+attack vs enemy = attack × ((1 − enemy hard share) + enemy hard share × pierce factor)
 ```
 
-(averaged over the enemy by headcount, as the defense side already is). Rifles
-bounce off tanks; anti-tank guns do not. Crewless kits (drones, robots) take
-their losses as machines: `crewless` is the share of casualties that are
-machines lost rather than men, so a robot company losing 40 frames loses 4
-operators, not 40 people.
+The enemy's fire falls on our formations by how much of it gets through
+their armour (weighted by the enemy's fire at each pierce), so a tank company
+in a rifle army takes few of the rifle losses. The old defence-side bonus is
+gone (it counted armour twice). Rifles hardly scratch a medium tank (0.25), an
+antitank gun pierces it; spears keep about four fifths of their blows against
+mailed men, arrows about three fifths.
 
-## 6. Units after 1945 (game years 2800–3000+)
+Machines (kits whose crew is below one man: robotic vehicles, combat frames)
+are run by operators. The formation's count is its operators; each fights
+with all of his machines (stats are per machine in the ledger, scaled per
+operator), cannot fight without them, and a blow on the formation destroys
+machines: only the crewless remainder kills operators. A combat frame is
+worth somewhat more than a networked soldier, not a legion. Known limit:
+frontage still counts operators, not machines.
 
-Gated on discoveries already in the research blocks (`data/research/blocks/
-y2400_3000.json`):
+## 6. Units after 1945 (game years 2800–3000), as built
 
-| Unit | Kit | Gate (game year) | Men per set |
+Gated on discoveries already in the research blocks (unit gate / kit gate):
+
+| Unit | Kit | Gates (game year) | Men per set |
 |---|---|---|---|
-| Networked infantry | networked rifle | `night_vision_intensifiers` 2842 + `tactical_data_links` 2888 | 1 |
-| Main battle tanks | main battle tank | `tactical_data_links` 2888 | 4 |
+| Networked infantry | networked rifle kit | `night_vision_intensifiers` 2842 / `tactical_data_links` 2888 | 1 |
+| Main battle tanks | main battle tank | `night_vision_intensifiers` 2842 | 4 |
 | Precision fires | precision launcher | `satellite_guided_strike` 2902 | 4 |
-| Drone teams | drone team | `mass_small_drones` 2980 | 2 operators per team of 6 drones |
-| Counter-drone battery | laser point defence | `directed_energy_point_defence` 2995 | 6 |
-| Robotic combat vehicles | robotic vehicle | `machine_assisted_targeting` 2990 | 1 operator per 3 machines |
+| Drone teams | drone team | `mass_small_drones` 2980 | 2 |
+| Counter-drone batteries | laser point defence | `directed_energy_point_defence` 2995 | 6 |
+| Robotic combat vehicles | robotic vehicle | `machine_assisted_targeting` 2990 | one operator runs 3 |
 | Exosuit infantry | exosuit | `solid_state_battery_cells` 2996 | 1 |
-| Combat frames (autonomous humanoid machines) | combat frame | `automated_discovery_labs` 2998 + `machine_assisted_targeting` 2990 | 1 supervisor per 8 frames |
+| Combat frames | combat frame | `collaborative_robots` 2955 / `solid_state_battery_cells` 2996 | one supervisor runs 8 |
 
-A society that runs ahead of history can field them earlier, within the
-research system's own allowed lead. They cost what they should: rare materials,
-long work days, power and charge in the supply demand, and specialist crews.
+A society ahead of history (research allows up to about a century's lead)
+meets combat frames around 2900. They cost what they should: rare ores,
+Civilian Goods for their parts, long work days, charge and parts on the
+supply line, and specialist crews. Drones strike armour from above (they
+pierce a main battle tank); counter-drone batteries hunt drones and robots;
+precision fires hunt guns and launchers.
 
 ## 7. How units look, from the first war band to the combat frame
 
-The game draws armies in ink, not as figures in the world (a deliberate choice
-of 2026-09-26/27). Each age changes four things: the **silhouette** on the
-battle plate and production icon, the **map mark** on the war chart, the
-**ink** (what the paper looks like) and the **wash** (how a side's colour
-shows). Owner colour is always a thin wash or streamer, never a fill.
+The game draws armies in ink on one paper throughout (a deliberate choice of
+2026-09-26/27): battle plates and production icons (`resource_icons.gd`
+`arm_glyph`, one glyph per ledger kit, chosen by `battle_blocks.glyph_of`),
+war-chart marks (branch and age read from the ledger family and year) and
+battle marks (crossed weapons by the armies' kit year). Owner colour is only
+a thin wash or streamer, or a robot's sensor glow.
 
-| Game years (≈ history) | Silhouette on the plate | Map mark | Ink and wash |
+| Game years (≈ history) | Silhouette on the plate | Map mark | Battle mark |
 |---|---|---|---|
-| 0–300 (5000–3000 BC) | Bare-legged figure, hide wrap, fire-hardened spear or club, sling cord | Tally of bound spears | Soot ink on hide; ochre streamer |
-| 300–650 (3000–1200 BC) | Linen kilt, wicker or rawhide shield, bronze spearhead; chariot with two horses | Leader's standard | Brown ink on vellum; painted shield rims |
-| 650–1150 (1200 BC–AD 300) | Crested helmet, big round or oblong shield, pike or short sword; horse archer; elephant | Framed standard with arm sign | Iron-gall ink; shield blazons in the side's colour |
-| 1150–1500 (AD 300–1000) | Mail shirt, conical helm, round shield in a wall; stirruped heavy rider | Framed standard | Iron-gall; heraldic streamers |
-| 1500–2000 (AD 1000–1600) | Surcoat over plate, pike block, crossbow, longbow; bombard on a sledge | Standard with arm sign | Heraldic tabards: the first true side colour on men |
-| 2000–2400 (AD 1600–1800) | Tricorne or shako, long coat, musket and bayonet; limbered field gun | Staff-map box, X to XX | Engraved plate; national coat colour as a narrow band |
-| 2400–2640 (AD 1800–1880) | Kepi or peaked cap, rifle, drab greatcoat; rail wagon | Staff-map box with echelon strokes | Printed map ink; muted coats |
-| 2640–2800 (AD 1880–1950) | Steel helmet, rifle and machine gun, trench coat; tank with tracks; truck | Box with branch symbol (X foot, oval armour, wheels motor) | Lithographed plate; khaki and field-grey |
-| 2800–2900 (AD 1950–1990) | Olive drab, helmet, rifle with short magazine; main battle tank with long gun; helicopter | Box, armour oval with gun, rotor sign | Offset print; olive and sand |
-| 2900–2975 (AD 1990–2020) | Plate carrier, night optic on helmet, short carbine; drone overhead | Box with data-link tick | Clean vector ink; digital-pattern hatching |
-| 2975–3000+ (AD 2020–2030+) | Drone swarm as a flight of dots; tracked robot with a sensor mast; exosuit with a battery spine; combat frame: a tall jointed humanoid machine, plate shoulders, one sensor slit where a face would be | Box with a lattice sign (autonomous) | Luminous line on dark paper; the side's colour as the sensor's glow |
+| 0–300 (5000–3000 BC) | Knobbed club, flint spear, sling cords and stones, self bow | Tally of bound spears | Crossed spears |
+| 300–650 (3000–1200 BC) | Bronze axe, sword and big shield, chariot with driver | Leader's standard | Crossed spears / swords |
+| 650–1150 (1200 BC–AD 300) | Crossed pikes, horse archer drawing a recurved bow, elephant with a tower, catapult | Framed standard with arm sign | Crossed swords |
+| 1150–1800 (AD 300–1500) | Mailed rider with couched lance, crossbow seen from above, trebuchet, bombard on its bed | Framed standard | Crossed swords |
+| 1800–2400 (AD 1500–1800) | Hand cannon on a pole, matchlock, dragoon firing a carbine, field gun on spoked wheels | Square flag on a pike over coloured battalion blocks | Crossed muskets |
+| 2400–2700 (AD 1800–1915) | Rifle with bayonet, mountain rifle over peaks, machine gun on its tripod, howitzer with split trail | Staff-map box | Crossed rifles |
+| 2700–2975 (AD 1915–2020) | Assault rifle, parachute, helicopter, lorry, armoured car, light, medium and heavy tanks, tank destroyer, carrier, main battle tank, networked soldier with night optic | Box with branch sign (armour oval, motor wheels) | Armour sign |
+| 2975–3000+ (AD 2020–2030+) | Four-rotor drone, driverless tracked robot with a sensor mast, exosuit with a battery spine, combat frame: a tall machine, shoulder yoke, bird-jointed legs, one glowing slit for a face | Box with a lattice sign (autonomous) | Lattice sign |
 
-Implementation (all procedural, extending `resource_icons.gd`):
-
-- New battle/production glyphs: halberd-free early figures stay; add
-  **musket**, **rifle (drab)**, **assault rifle**, **networked soldier**,
-  **exosuit**, **combat frame**, **light tank**, **heavy tank**, **main battle
-  tank**, **IFV**, **armored car**, **mortar**, **rocket launcher**,
-  **precision launcher**, **anti-tank gun**, **anti-air gun**, **laser**,
-  **drone team**, **robotic vehicle**, **catapult**, **trebuchet**, **bombard**,
-  **camel/horse archer** (bow rider).
-- `battle_blocks.arm_of` maps every archetype and kit to its own glyph (no more
-  "all modern infantry are rifle").
-- The war chart's branch and era come from the ledger (family and year), so a
-  tank army is an armour box and a musket army gets the gunpowder standard.
-- Battle marks: crossed spears → crossed swords → crossed muskets → crossed
-  rifles → armour sign → lattice sign, by the ledger year of the armies in the
-  battle.
-- Portrait insignia for types with no painting: the same glyph, drawn large on
-  the era's paper.
+History, not fashion, sets the order: shakos after about 1790; blue, red and
+white coats until about 1880, drab after; steel helmets from about 1916.
 
 ## What stays out
 
@@ -432,3 +429,19 @@ with machine accounting; (7) recruitment fixes and template numbers.
   above; counter-drone batteries hunt drones and robots; precision fires
   hunt guns. A frame is worth somewhat more than a networked soldier, not a
   legion. Known limit: frontage still counts operators, not machines.
+- **Looks by age** (worker branch `codex/military-looks`, merged). Every
+  ledger kit draws its own ink glyph (51 in all, two new primitives), chosen
+  by `battle_blocks.glyph_of` so combat's coarse arms are untouched. The war
+  chart reads each force's branch and age from its kits (a new "autonomous"
+  branch with a lattice sign; a square flag on a pike for gunpowder armies);
+  battle marks cross spears, swords, muskets or rifles, or show the armour or
+  lattice sign, by the armies' kit year. Units with no painting show their
+  kit glyph large on the roster.
+- **Iteration 7, recruitment.** Template cards state the engine's numbers:
+  strength (men × √(attack × defense) fully armed and drilled), march km a
+  day, loads a man a day (bread and stores), training days, with a tooltip
+  for attack, defense, armour, pierce, machines and replacement training.
+  The destination list greys bands that are away and says a line is waiting
+  when its chosen band has marched. A line's later bands join the band it
+  raised before while that band is at home, so recruiting no longer makes a
+  new general for every band.

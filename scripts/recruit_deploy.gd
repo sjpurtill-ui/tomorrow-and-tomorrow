@@ -120,6 +120,14 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 	if not bool(report.early if early else report.ready):return {"error":"Early deployment needs 20% training; automatic deployment needs full people, equipment and training."}
 	if host._home_battle_running() or host.recovery.home_unavailable():return {"error":"Deployment site is unavailable during a fight at home or occupation."}
 	var target:int=item.target_army
+	# A line's later bands join the band it raised before while that band is
+	# at home, instead of each becoming its own army under a new general.
+	if target==0:
+		var last:=int(item.get("last_army",0))
+		var last_index:int=host._field_army_index(last) if last>0 else -1
+		if last_index>=0 and not host.command_hierarchy.battle.engaged(last):
+			var previous:Dictionary=host.field_armies[last_index]
+			if String(previous.get("location_id",""))=="player_home" and String(previous.get("status",""))=="stationed":target=last
 	if target!=0:
 		var target_index:int=host._field_army_index(target)
 		if target_index<0:return {"error":"Assigned army no longer exists. Choose another destination."}
@@ -138,7 +146,8 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 			formations.append(formation);host.home_army.formations.remove_at(index)
 			host.home_army.troops=int(host.home_army.troops)-int(formation.count)
 	if target==0:
-		host._assemble_field_army(formations,String(item.name)+" "+str(int(item.deployed)+1))
+		var formed:Dictionary=host._assemble_field_army(formations,String(item.name)+" "+str(int(item.deployed)+1))
+		if formed.has("army"):item["last_army"]=int((formed.army as Dictionary).get("army_id",0))
 	else:
 		var army:Dictionary=host.field_armies[host._field_army_index(target)]
 		for formation:Dictionary in formations:army.formations.append(formation);army.troops=int(army.troops)+int(formation.count)
