@@ -4478,6 +4478,38 @@ func _ensure_settlement_defense()->void:
 	settlement_defense["project_progress"]=clampf(float(settlement_defense.get("project_progress",0.0)),0.0,1.0)
 	settlement_defense["project_work"]=maxf(0.0,float(settlement_defense.get("project_work",0.0)))
 	if not settlement_defense.get("reserved_materials",{}) is Dictionary: settlement_defense["reserved_materials"]={}
+	# The ruler's word on new works (home_defense.gd). Older saves have none:
+	# the people decide, as every people does.
+	if String(settlement_defense.get("word","")) not in DEFENSE_WORDS: settlement_defense["word"]="people"
+
+
+## Who decides when the next defence stage goes up (home_defense.gd): the
+## people by their own reading of the danger, the ruler's "build now", or the
+## ruler's "hold off".
+const DEFENSE_WORDS:=["people","build","hold"]
+
+
+## One day's work on defence stage `stage_index` by today's Defense workers
+## (or `workers` of them): workers x labour efficiency x DEFENSE_WORK_PER_HAND,
+## never more than DEFENSE_DAILY_SHARE of the stage a day. The daily work, the
+## people's council and the screens all read this.
+func settlement_defense_daily_work(stage_index:int,workers:float=-1.0)->float:
+	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0.0
+	if workers<0.0: workers=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))
+	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
+	return minf(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE,workers*efficiency*DEFENSE_WORK_PER_HAND)
+
+
+const DEFENSE_DAILY_SHARE:=0.04
+const DEFENSE_WORK_PER_HAND:=0.38
+
+
+## The fewest on the watch who raise stage `stage_index` at its fastest pace
+## (DEFENSE_DAILY_SHARE a day) at today's labour efficiency.
+func settlement_defense_full_pace_workers(stage_index:int)->int:
+	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0
+	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
+	return ceili(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE/(efficiency*DEFENSE_WORK_PER_HAND)-0.0001)
 
 
 func settlement_defense_upgrade_availability()->Dictionary:
@@ -4500,7 +4532,9 @@ func settlement_defense_upgrade_availability()->Dictionary:
 	return {"available":missing.is_empty(),"reason":reason,"stage_index":next_stage,"stage":stage.duplicate(true),"materials":stage.materials.duplicate(true),"work":float(stage.work)}
 
 
-func start_settlement_defense_upgrade()->Dictionary:
+## `by` says who decided: "people" (their own council), "ruler" (the
+## god's "build now") or "court" (an order spoken at court).
+func start_settlement_defense_upgrade(by:String="ruler")->Dictionary:
 	var availability:=settlement_defense_upgrade_availability()
 	if not bool(availability.get("available",false)): return {"error":String(availability.get("reason","The next defense stage is unavailable."))}
 	var stage_index:=int(availability.stage_index); var stage:Dictionary=SETTLEMENT_DEFENSE_STAGES[stage_index]
@@ -4510,6 +4544,9 @@ func start_settlement_defense_upgrade()->Dictionary:
 	settlement_defense["project_progress"]=0.0
 	settlement_defense["project_work"]=0.0
 	settlement_defense["reserved_materials"]=(stage.materials as Dictionary).duplicate(true)
+	settlement_defense["started_by"]=by
+	settlement_defense["started_day"]=int(WorldSimulation.state.elapsed_days)
+	preload("res://scripts/home_defense.gd").tell_started(stage_index,by)
 	settlement_defense_changed.emit(settlement_defense_snapshot())
 	return {"ok":true,"message":"Construction started: %s. Materials are committed; Defense labor now advances the project." % String(stage.name),"defense":settlement_defense_snapshot()}
 
@@ -4528,8 +4565,11 @@ func settlement_defense_snapshot()->Dictionary:
 	var construction:Dictionary={}
 	if project_index>=0:
 		var project:Dictionary=SETTLEMENT_DEFENSE_STAGES[project_index]
-		construction={"active":true,"stage":project_index,"name":String(project.name),"progress":float(settlement_defense.project_progress),"work_done":float(settlement_defense.project_work),"work_required":float(project.work),"materials":(settlement_defense.reserved_materials as Dictionary).duplicate(true)}
-	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity,"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":float(stage.store_protection)*integrity,"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":maxi(0,troops-trained_troops),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"next":settlement_defense_upgrade_availability()}
+		var daily:=settlement_defense_daily_work(project_index)
+		var left:=maxf(0.0,float(project.work)-float(settlement_defense.project_work))
+		construction={"active":true,"stage":project_index,"name":String(project.name),"short":String(project.short),"progress":float(settlement_defense.project_progress),"work_done":float(settlement_defense.project_work),"work_required":float(project.work),"materials":(settlement_defense.reserved_materials as Dictionary).duplicate(true),
+			"daily_work":daily,"days_left":left/daily if daily>0.0 else -1.0,"started_by":String(settlement_defense.get("started_by","")),"started_day":int(settlement_defense.get("started_day",-1))}
+	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity,"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":float(stage.store_protection)*integrity,"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":maxi(0,troops-trained_troops),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"word":String(settlement_defense.word),"completed_day":int(settlement_defense.get("completed_day",-1)),"next":settlement_defense_upgrade_availability()}
 
 
 func _process_settlement_defense_day()->void:
@@ -4538,11 +4578,9 @@ func _process_settlement_defense_day()->void:
 	var project_index:=int(settlement_defense.project_stage)
 	if project_index>=0:
 		var project:Dictionary=SETTLEMENT_DEFENSE_STAGES[project_index]
-		var workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))
-		var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 		# A bounded project can use vast aggregate labor without creating per-worker
 		# tasks or completing more than 4% of a strategic stage in one simulated day.
-		var daily_work:=minf(float(project.work)*0.04,workers*efficiency*0.38)*WorldSimulation.span
+		var daily_work:=settlement_defense_daily_work(project_index)*WorldSimulation.span
 		if daily_work>0.0:
 			settlement_defense["project_work"]=minf(float(project.work),float(settlement_defense.project_work)+daily_work)
 			settlement_defense["project_progress"]=clampf(float(settlement_defense.project_work)/maxf(0.01,float(project.work)),0.0,1.0)
@@ -4555,7 +4593,12 @@ func _process_settlement_defense_day()->void:
 			settlement_defense["project_work"]=0.0
 			settlement_defense["reserved_materials"]={}
 			settlement_defense["completed_day"]=int(WorldSimulation.state.elapsed_days)
-			WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
+			var by:=String(settlement_defense.get("started_by",""))
+			settlement_defense.erase("started_by");settlement_defense.erase("started_day")
+			# The god's own people hear it in the Chronicle (which also keeps the
+			# ledger line); every other people keeps its clerk's line.
+			if not preload("res://scripts/home_defense.gd").tell_finished(project_index,by):
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
 	var integrity:=float(settlement_defense.integrity)
 	if integrity<1.0 and not _home_battle_running():
 		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))*0.20

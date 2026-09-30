@@ -110,12 +110,18 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			if WorldSimulation.actor_id=="player" and WorldSimulation.state.settlement_site_committed:
 				if controller.review_due("player",day):
 					WorldSimulation.direction.ensure();WorldSimulation.direction._ensure_cultural_memory();WorldSimulation.direction.apply_inclinations(day)
+					# The town's defences: the council every computer ruler holds,
+					# by the same rule, unless the god has said otherwise
+					# (home_defense.gd: build now, hold off, or let the people decide).
+					preload("res://scripts/home_defense.gd").council("player",controller.current_plan("player"))
 					# Every culture can grow organically; expansionist traditions review
 					# more often. Only while the ruler lets our leaders found new towns
 					# (auto_founding.gd: the Settlement dock's switch, or the court).
 					if preload("res://scripts/auto_founding.gd").looks_for_land(day):
 						if expansion_hook.is_valid():expansion_hook.call(day)
 						else:controller.expansion_orders("player",controller.current_plan("player"))
+				# The god's "build now" starts the works the day they can start.
+				preload("res://scripts/home_defense.gd").act("player")
 	),
 	]
 

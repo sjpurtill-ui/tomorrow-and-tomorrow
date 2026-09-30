@@ -410,19 +410,23 @@ const DEFENSE_MAX_DAYS:=1095.0
 ## A computer ruler raises its next defence stage through the validated order
 ## the court's own call uses (civilization_orders "settlement_defense"): the same
 ## works, materials and Defense labour, nothing the player lacks.
+## The god's own people take the same council (home_defense.gd), which also
+## honours the god's word when there is one.
 static func defense_orders(id:String,plan:Dictionary)->void:
-	var decision:=defense_decision(plan)
-	if bool(decision.build):WorldSimulation.submit(id,{"kind":"settlement_defense","stage":int(decision.stage),"reason":String(decision.reason)})
+	preload("res://scripts/home_defense.gd").council(id,plan)
 
 ## Whether this ruler raises its next defence stage now, and why, from its own
 ## world (run in its scope): {build, stage, name, danger, parts, wariness,
-## weighed, need, blockers, reason}.
+## weighed, need, blockers, reason}, and the same facts for a screen:
+## wants (the danger is enough and food allows: only the means may lack),
+## food_days, materials {material: {have, need, spare}}, workers, daily
+## (the day's work, settlement_defense_daily_work) and days.
 static func defense_decision(plan:Dictionary)->Dictionary:
 	var campaign=WorldSimulation.military
 	var state=WorldSimulation.state
 	var snapshot:Dictionary=campaign.settlement_defense_snapshot()
 	var stage:=int(snapshot.stage)+1
-	var result:={"build":false,"stage":stage,"name":"","danger":0.0,"parts":{},"wariness":0.0,"weighed":0.0,"need":1.0,"blockers":[],"reason":""}
+	var result:={"build":false,"wants":false,"stage":stage,"name":"","danger":0.0,"parts":{},"wariness":0.0,"weighed":0.0,"need":1.0,"blockers":[],"reason":"","materials":{},"workers":0.0,"daily":0.0,"days":INF,"food_days":0.0}
 	if not (snapshot.get("construction",{}) as Dictionary).is_empty():
 		result.blockers.append("a stage is already being raised");return result
 	if stage>=campaign.SETTLEMENT_DEFENSE_STAGES.size():
@@ -436,15 +440,19 @@ static func defense_decision(plan:Dictionary)->Dictionary:
 	result.merge({"danger":danger,"parts":parts,"wariness":wariness,"weighed":danger*(.6+.8*wariness),"need":float(DEFENSE_STAGE_NEED[stage])},true)
 	if float(result.weighed)<float(result.need):result.blockers.append("danger %.2f x wariness %.2f is %.2f, below the %.2f %s need" % [danger,wariness,float(result.weighed),float(result.need),String(works.short).to_lower()])
 	var food_days:=float(state.simulation_metrics.get("food_days",0.0))
-	if bool(plan.get("hungry",false)) or food_days<DEFENSE_FOOD_DAYS:result.blockers.append("food for %d days, %d needed" % [roundi(food_days),roundi(DEFENSE_FOOD_DAYS)])
+	result.food_days=food_days
+	var fed:=not bool(plan.get("hungry",false)) and food_days>=DEFENSE_FOOD_DAYS
+	if not fed:result.blockers.append("food for %d days, %d needed" % [roundi(food_days),roundi(DEFENSE_FOOD_DAYS)])
+	result.wants=fed and float(result.weighed)>=float(result.need)
 	for material:String in works.materials:
 		var stored:=float(state.resource_stockpiles.get(material,0.0))
+		result.materials[material]={"have":stored,"need":float(works.materials[material]),"spare":float(works.materials[material])*DEFENSE_SPARE}
 		if stored<float(works.materials[material])*DEFENSE_SPARE:result.blockers.append("%s %.0f in store, %.0f needed to spare it" % [material,stored,float(works.materials[material])*DEFENSE_SPARE])
 	var workers:=float(state.population_allocations.get("Defense",0))
-	var efficiency:=clampf(float(state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 	# The same daily work _process_settlement_defense_day gives the project.
-	var daily:=minf(float(works.work)*.04,workers*efficiency*.38)
+	var daily:float=campaign.settlement_defense_daily_work(stage)
 	var days:=float(works.work)/daily if daily>0.0 else INF
+	result.workers=workers;result.daily=daily;result.days=days
 	if days>DEFENSE_MAX_DAYS:result.blockers.append("%d Defense workers would need %s days" % [roundi(workers),"endless" if days==INF else str(roundi(days))])
 	var available:Dictionary=campaign.settlement_defense_upgrade_availability()
 	if (result.blockers as Array).is_empty() and not bool(available.get("available",false)):result.blockers.append(String(available.get("reason","not possible now")))
