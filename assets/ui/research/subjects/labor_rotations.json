@@ -6,7 +6,7 @@
   "mode": "built-in image_gen / generate",
   "asset": "res://assets/ui/research/subjects/labor_rotations-v3.png",
   "sha256": "ff8d093fc06562988adadc1e3cdfaa102966062331fbe00fe7ef5ff0ae745946",
-  "focus": [0.5, 0.34],
+  "focus": [0.5, 0.30],
   "effective_year": 1,
   "before_early": "res://assets/ui/research/paper/labor_rotations.png",
   "before_later": "res://assets/ui/research/subjects/labor_rotations-v2.png",
