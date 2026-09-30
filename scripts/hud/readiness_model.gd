@@ -132,6 +132,9 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 			var depot:Dictionary=preload("res://scripts/field_depots.gd").progress(army)
 			if not depot.is_empty(): depot["at_site"]=String(army.get("status",""))!="moving"
 			row["depot"]=depot
+			# Its last months, as far as the last report home tells.
+			var told_day:=int(report.get("report_day",int(WorldSimulation.state.elapsed_days)-int(report.get("report_age",0))))
+			row["trend"]=[] if bool(report.get("unknown",false)) else mc.sustainment.trend_known(army,told_day)
 		# What its line asks a day and the carts that alone would carry it
 		# (carriers.gd), read today at home.
 		var asked:Dictionary=line_asks.get(key,{})

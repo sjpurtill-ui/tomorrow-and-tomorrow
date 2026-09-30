@@ -26,6 +26,7 @@ const Board:=preload("res://scripts/hud/recruit_deploy_board.gd")
 const Forces:=preload("res://scripts/hud/forces_board.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const SupplyMap:=preload("res://scripts/hud/supply_map.gd")
+const BandTrend:=preload("res://scripts/hud/band_trend.gd")
 ## Below this width a row puts its line and gear on a second line.
 const WIDE_FROM:=940.0
 const REFRESH_SECONDS:=0.5
@@ -261,10 +262,11 @@ func _row(row:Dictionary)->void:
 	second.add_child(queue)
 	var coming:=_text(second,"",12,T.INK_MUTED);coming.name="Coming";_whole(coming);coming.mouse_filter=Control.MOUSE_FILTER_PASS
 	var building:=_text(second,"",12,T.INK_MUTED);building.name="Depot";_whole(building);building.mouse_filter=Control.MOUSE_FILTER_PASS
+	var trend:Control=BandTrend.new();trend.name="Trend";trend.visible=false;second.add_child(trend)
 	var gear:=HFlowContainer.new();gear.name="Gear";gear.add_theme_constant_override("h_separation",6);gear.add_theme_constant_override("v_separation",4);gear.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	gear.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(gear)
 	live.append({"key":String(row.key),"panel":panel,"sack":sack,"face":face,"face_key":"","who":who,"title":title,"men":men,"meter":meter,"line":line,"hub_mark":hub_mark,"hub":hub,"span":span,"road":road,
-		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming,"building":building})
+		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming,"building":building,"trend":trend})
 
 
 func _update_values()->void:
@@ -340,6 +342,7 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	control.coming.visible=field and (coming>0 or String(drafts.get("block",""))=="no_people")
 	control.coming.text="+%s coming" % EraWords.grouped(coming)
 	control.coming.tooltip_text=Model.drafts_words(drafts,int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0)+".\nLosses are replaced by drafts trained at home, who walk out and join."
+	(control.trend as Control).call("set_samples",row.get("trend",[]) if field else [])
 	# A depot in hand (field_depots.gd).
 	var depot:Dictionary=row.get("depot",{})
 	control.building.visible=field and not depot.is_empty()

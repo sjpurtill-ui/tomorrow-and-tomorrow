@@ -251,3 +251,24 @@ func test_battle_wounded_heal_in_a_supplied_camp_and_medics_double_it()->void:
 	assert_int(healed_plain).is_between(20,35)
 	assert_int(healed_cared).is_greater(healed_plain)
 	assert_int(int(plain.troops)+int(plain.wounded_pool)).is_equal(200)
+
+func test_a_band_trend_is_sampled_kept_and_told_only_as_far_as_reports_go()->void:
+	var band:=_band(3,[_formation(1,"spearman","spear",200)])
+	band["provision_ratio"]=0.8;band["morale"]=0.7
+	MilitaryCampaign.field_armies.assign([band])
+	for day in 200:
+		GameState.elapsed_days=1000+day
+		MilitaryCampaign.field_armies[0]["troops"]=200-day/2
+		MilitaryCampaign.sustainment.trend_day()
+	var trend:Array=MilitaryCampaign.field_armies[0].trend
+	# Every five days, the last four months kept.
+	assert_int(trend.size()).is_equal(Sustainment.TREND_KEEP)
+	assert_int(int(trend[1][0])-int(trend[0][0])).is_equal(Sustainment.TREND_EVERY)
+	assert_int(int(trend[-1][0])).is_equal(1195)
+	assert_array(trend[-1]).is_equal([1195,103,80,70])
+	# Home knows only up to the last runner's day.
+	var known:=Sustainment.trend_known(MilitaryCampaign.field_armies[0],1150)
+	assert_int(int(known[-1][0])).is_equal(1150)
+	var BandTrend:=preload("res://scripts/hud/band_trend.gd")
+	assert_str(BandTrend.words(known)).contains("now 125")
+	assert_str(BandTrend.words(known)).contains("Supply 80%, now 80%")

@@ -528,3 +528,32 @@ static func clean_drafts(drafts:Variant)->Array:
 
 static func valid_drafts(drafts:Variant)->bool:
 	return drafts is Array and clean_drafts(drafts).size()==(drafts as Array).size()
+
+# --- Trend: each band's last months at a glance --------------------------------
+
+## A band's strength, supply and will, sampled every TREND_EVERY days and
+## kept for TREND_KEEP samples (four months): [day, men, supply %, will %].
+## The Readiness row draws it (hud/band_trend.gd) up to the last report home.
+const TREND_EVERY:=5
+const TREND_KEEP:=24
+
+func trend_day()->void:
+	if WorldSimulation.actor_id!="player": return
+	var today:=int(WorldSimulation.state.elapsed_days)
+	for index in host.field_armies.size():
+		var record:Dictionary=host.field_armies[index]
+		if int(record.get("troops",0))<=0: continue
+		var samples:Array=record.get("trend",[]) if record.get("trend") is Array else []
+		if not samples.is_empty() and today-int((samples[-1] as Array)[0])<TREND_EVERY: continue
+		var fed:=float(record.get("provision_ratio",record.get("supply_level",1.0)))
+		samples.append([today,int(record.troops),roundi(clampf(fed,0.0,1.0)*100.0),roundi(clampf(float(record.get("morale",1.0)),0.0,1.0)*100.0)])
+		while samples.size()>TREND_KEEP: samples.pop_front()
+		record["trend"]=samples
+		host.field_armies[index]=record
+
+## The samples home knows of: up to `known_day` (the last report's day).
+static func trend_known(record:Dictionary,known_day:int)->Array:
+	var out:=[]
+	for s in (record.get("trend",[]) if record.get("trend") is Array else []):
+		if s is Array and (s as Array).size()>=4 and int(s[0])<=known_day: out.append(s)
+	return out

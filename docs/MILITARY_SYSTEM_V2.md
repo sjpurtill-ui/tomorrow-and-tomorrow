@@ -597,3 +597,10 @@ with machine accounting; (7) recruitment fixes and template numbers.
   days, the same line would bring 41%, and they would go hungry." A siege
   of home now cuts the haul from a depot as it does from a held town, since
   both are stocked from home.
+- **Iteration 15, the last four months.** Every five days the campaign
+  samples each band's men, supply and will to fight, keeping 24 samples
+  (`field_sustainment.trend_day`, saved on the band). The Readiness row
+  draws them as a small ink line for men over a pale line for supply
+  (`hud/band_trend.gd`). The tooltip gives the numbers ("The last 45 days:
+  820 men, now 640. Supply 90%, now 55%..."). A band away before signals
+  shows only what runners have told home: samples up to the last report.

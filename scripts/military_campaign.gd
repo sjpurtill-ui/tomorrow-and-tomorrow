@@ -4714,6 +4714,7 @@ func _process_military_day()->void:
 		_process_field_army_movement_day()
 		sustainment.arrivals_day()
 		depots.day()
+		sustainment.trend_day()
 		_process_army_runners_day()
 		occupation_transfers.advance(last_processed_day)
 		# Armies in the field fight on while home is held.
@@ -4739,6 +4740,7 @@ func _process_military_day()->void:
 	_process_field_army_movement_day()
 	sustainment.arrivals_day()
 	depots.day()
+	sustainment.trend_day()
 	_process_army_runners_day()
 	_process_siege_day()
 	occupation_transfers.advance(int(WorldSimulation.state.elapsed_days))
