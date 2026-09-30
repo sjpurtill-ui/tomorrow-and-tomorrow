@@ -36,7 +36,7 @@ func tab(sub:int)->Dictionary:
 		var pool:=P.hands(MilitaryCampaign)
 		block.merge({"lines":line_views(lines,context,stock,pool),"capacity":snapshot.capacity,"context":context,
 			"materials":_stores(lines),"hands":{"total":int(pool.total),"lines":int(pool.lines)},"boatyards":_boatyards(),"stock":stock,
-			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":MilitaryCampaign.workshop.owner(),"status":MilitaryCampaign.workshop.data.status,
+			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":workshop_owner(),"status":MilitaryCampaign.workshop.data.status,
 			"repairs":_repair_list(),"recipes":recipe_list(lines,stock),"start_target":START_TARGET,
 			"on_action":_action,"on_detail":workshop._open_workshop_job,"on_header":_header_action,"on_start":_start,
 			"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
@@ -47,10 +47,14 @@ func tab(sub:int)->Dictionary:
 ## Every line as the compact row draws it (see Plain.line_view), in list
 ## order: rank is priority for scarce materials.
 static func line_views(lines:Array,context:Dictionary,stock:Array,pool:Dictionary)->Array:
+	# The bands' needs and the workshop's officer are read per line: with no
+	# line there is nothing to read them for.
+	if lines.is_empty():return []
 	var by_item:={}
 	for row:Dictionary in stock:by_item[String(row.item)]=row
 	var need:=Logistics.needs(MilitaryCampaign)
-	var owner:=Plain.officer(MilitaryCampaign.workshop.owner())
+	var owner_words:=workshop_owner()
+	var owner:=Plain.officer(owner_words)
 	var today:=int(GameState.elapsed_days)
 	var learn:=0.0025*(.65+MilitaryCampaign._adoption("workshop_standards"))
 	var views:Array=[]
@@ -60,7 +64,7 @@ static func line_views(lines:Array,context:Dictionary,stock:Array,pool:Dictionar
 		var category:=Logistics.category(item)
 		var extra:={"name":P.product_name(item),"hands":int((pool.by_line as Dictionary).get(int(line.get("id",0)),0)),"hands_exact":float((pool.exact as Dictionary).get(int(line.get("id",0)),0.0)),"hands_step":Plain.hands_step(float(pool.total)),
 			"badge":Logistics.line_badge(line,MilitaryCampaign,need),"stock":by_item.get(item,{}),"ship":category=="boats","today":today,
-			"learn_per_day":learn,"office":String(owner.get("office","")) if not owner.is_empty() else "","auto":category in ["weapons","ammunition"],"owner":MilitaryCampaign.workshop.owner()}
+			"learn_per_day":learn,"office":String(owner.get("office","")) if not owner.is_empty() else "","auto":category in ["weapons","ammunition"],"owner":owner_words}
 		var view:=Plain.line_view(line,context,extra)
 		view.rank=index+1;view.count=lines.size()
 		view.hands_total=int(pool.total)
@@ -167,7 +171,20 @@ func _report(result:Dictionary)->void:
 func _history()->Dictionary:
 	return {"blocks":[{"type":"production_board","lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"totals":MilitaryCampaign.workshop.data.totals,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
 func signature()->Array:
-	return [MilitaryCampaign.production_lines_snapshot(),GameState.elapsed_days,MilitaryCampaign.workshop.data.enabled,MilitaryCampaign.workshop.owner(),MilitaryCampaign.workshop.data.status,MilitaryCampaign.damaged_equipment,MilitaryCampaign.production_labor_share]
+	return [MilitaryCampaign.production_lines_snapshot(),GameState.elapsed_days,MilitaryCampaign.workshop.data.enabled,workshop_owner(),MilitaryCampaign.workshop.data.status,MilitaryCampaign.damaged_equipment,MilitaryCampaign.production_labor_share]
+
+## MilitaryCampaign.workshop.owner() in the same words, read without copying
+## the officeholders' whole records (that copy made this 0.75 s check cost
+## 2.5 ms): the first of Quartermaster and Steward that is held.
+## tests/test_dock_content_cache.gd holds the two equal.
+static func workshop_owner()->String:
+	for office:String in ["Quartermaster","Steward"]:
+		var holder:Dictionary=WorldSimulation.state.leadership_positions.get(office,{})
+		if holder.is_empty():continue
+		var pid:=int(holder.get("person_id",0))
+		for person:Dictionary in WorldSimulation.government.people:
+			if int(person.get("person_id",0))==pid:return "%s · %s" % [String(person.name),office]
+	return "No workshop officeholder"
 
 ## Damaged sets waiting for staff repair (the stock strip shows them as a
 ## badge on each kind; this list serves the standalone report).

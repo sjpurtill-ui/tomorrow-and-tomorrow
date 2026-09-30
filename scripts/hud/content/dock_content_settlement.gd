@@ -18,6 +18,9 @@ const COHORT_LABELS:Array[Array]=[["children","0–13","Children, not yet workin
 ## Who sets the daily work (manual_work.gd). Who does what is The People's
 ## to show and set; this page says who sets it and hands it back.
 const Manual:=preload("res://scripts/manual_work.gd")
+const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
+## Costly parts of the page, kept while what they are made from holds.
+var memo:=Memo.new()
 
 func meta()->Dictionary:
 	var settlement:=_selected_settlement()
@@ -102,8 +105,12 @@ func _people_blocks(_productive:int,local_population:int,local_share:float,settl
 
 func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
+	# The events are the town's founding, every discovery and its own building
+	# records: made again only when one of those logs moves.
+	var events:Array=memo.take("events",[id,String(settlement.get("name","Settlement")),settlement.has("founded_day"),int(settlement.get("founded_day",0)),Memo.log_identity(GameState.discovery_log),Memo.log_identity(GameState.building_ledger)],
+		func()->Array:return preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger))
 	return [
-		{"type":"chronicle","heading":"The years remembered","events":preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger)},
+		{"type":"chronicle","heading":"The years remembered","events":events,"_print":memo.print_of("events")},
 		Charts.population(id,true),
 		Charts.reserves(id),
 		{"type":"actions","heading":"More of the record","items":[
@@ -114,7 +121,7 @@ func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
 func signature()->Array:
 	# The town's own figures are read in its own scope, as the page reads them.
 	var local:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
-	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),GameState.discovery_log.hash(),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,
+	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),Memo.log_identity(GameState.discovery_log),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,
 		int(MilitaryCampaign.home_army.get("troops",0)),MilitaryCampaign.settlement_defense.hash(),int(GameState.population_allocations.get("Defense",0)),_known_signature(),int(GameState.elapsed_days)/30]+local
 
 func _city_signature()->Array:

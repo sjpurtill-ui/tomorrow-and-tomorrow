@@ -35,6 +35,14 @@ static func texture(person:Dictionary)->Texture2D:
 	var cell:=Vector2(sheet.get_width()/5.0,sheet.get_height())
 	atlas.region=Rect2(Vector2(index_for(person)*cell.x+5,5),cell-Vector2(10,10))
 	return atlas
+## What picture(person) shows, as plain values: the painted sheet, the cell
+## taken from it and whether it is mirrored. The same key is the same picture,
+## so a screen can keep a portrait while the person's other figures change.
+static func picture_key(person:Dictionary)->Array:
+	var image:=texture(person)
+	var atlas:=image as AtlasTexture
+	if atlas!=null:return [String(atlas.atlas.resource_path) if atlas.atlas!=null else "",atlas.region,mirrored(person)]
+	return [String(image.resource_path) if image!=null else "",mirrored(person)]
 ## Distinct paintings for everyone shown together on one screen.
 ## Each person keeps a preferred painting (their own cell, or their court slot).
 ## When two people in the same view would share one, the later one (in a stable

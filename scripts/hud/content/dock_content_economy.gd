@@ -5,6 +5,9 @@ const Plain:=preload("res://scripts/hud/production_plain.gd")
 ## The Food, Materials and Wealth docks (one section, three tabs). The rail
 ## names each tab, so the dock's title follows the tab the player opened.
 const TITLES:=["Food","Materials","Wealth"]
+const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
+## Costly parts of the pages, kept while what they are made from holds.
+var memo:=Memo.new()
 const EYEBROWS:=["What we eat and drink","What we build and make with","What we hold and owe"]
 
 func _current_sub()->int:
@@ -211,6 +214,21 @@ func _provisions_focus(focus:String)->void:
 
 var selected_material:=""
 var materials_priorities:=false
+
+## Each material's monthly counts for its spark, {key: [{day, value}]}, from
+## the town's strategic history (monthly and yearly snapshots). They move only
+## when a snapshot is taken, so they are kept until then.
+func _material_points(id:String,keys:Array)->Dictionary:
+	var ledger:Dictionary=GameState.strategic_history.get("scopes",{}).get(id,{})
+	return memo.take("material_points",[id,keys,Memo.log_identity(ledger.get("monthly",[])),Memo.log_identity(ledger.get("annual",[]))],func()->Dictionary:
+		var history:=preload("res://scripts/strategic_history.gd").points(GameState.strategic_history,id)
+		var result:={}
+		for key in keys:
+			var points:Array=[]
+			for observation:Dictionary in history:
+				points.append({"day":observation.day,"value":observation.get(key,null)})
+			result[key]=points
+		return result)
 func _materials_data()->Dictionary:
 	var id:=GameState.selected_player_settlement_id
 	var city:=SettlementModel.settlement_record(id)
@@ -223,12 +241,10 @@ func _materials_data()->Dictionary:
 		item.sites.append(deposit.duplicate(true));item.delivered+=float(deposit.get("delivered_today",0));grouped[key]=item
 	for key:String in GameState.resource_stockpiles:
 		if key!="Food" and float(GameState.resource_stockpiles[key])>.001 and not grouped.has(key):grouped[key]={"sites":[],"delivered":0.0}
-	var history:=preload("res://scripts/strategic_history.gd").points(GameState.strategic_history,id)
+	var trends:=_material_points(id,grouped.keys())
 	var rows:Array=[]
 	for key:String in grouped:
-		var item:Dictionary=grouped[key];var points:Array=[]
-		for observation:Dictionary in history:
-			points.append({"day":observation.day,"value":observation.get(key,null)})
+		var item:Dictionary=grouped[key];var points:Array=trends[key]
 		var details:Array[String]=[]
 		var blocked:=false
 		for site:Dictionary in item.sites:

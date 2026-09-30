@@ -125,10 +125,10 @@ func apply(block:Dictionary)->void:
 	data=block
 	_assign_face_slots(block.get("faces",[]),block.get("scene",{}))
 	_fill_scene(block.get("scene",{}))
-	_rebuild_if_changed("faces",block.get("faces",[]),_fill_faces)
+	_rebuild_if_changed("faces",_faces_drawn(block.get("faces",[])),_fill_faces_part)
 	_rebuild_if_changed("card",[selected_id,_face(selected_id)],_fill_card)
-	_rebuild_if_changed("vitals",block.get("vitals",[]),_fill_vitals)
-	_rebuild_if_changed("labor",block.get("labor",{}),_fill_labor)
+	_refresh_vitals(block.get("vitals",[]))
+	_rebuild_labor()
 	_rebuild_if_changed("story",block.get("story",{}),_fill_story)
 	_rebuild_if_changed("hearths",block.get("hearths",[]),_fill_hearths)
 	_rebuild_if_changed("tallies",block.get("tallies",[]),_fill_tallies)
@@ -154,7 +154,59 @@ func restore_view_state(state:Dictionary)->void:
 func toggle_task(role:String)->void:
 	open_task="" if open_task==role else role
 	prints.erase("labor")
-	_rebuild_if_changed("labor",data.get("labor",{}),_fill_labor)
+	_rebuild_labor()
+
+
+## The labor part is drawn from the tasks and, for the one task opened, what
+## that work does with today's numbers: asked of the provider for that task
+## alone (labor.impact_of), so the eight closed tasks cost nothing.
+var open_impact:Dictionary={}
+func _rebuild_labor()->void:
+	var labor:Dictionary=data.get("labor",{})
+	open_impact={}
+	if open_task!="":
+		for task:Dictionary in labor.get("tasks",[]):
+			if String(task.get("id",""))!=open_task:continue
+			var ask:Variant=labor.get("impact_of")
+			if task.has("impact"):open_impact=task.get("impact",{})
+			elif ask is Callable and (ask as Callable).is_valid():open_impact=(ask as Callable).call(open_task)
+	var head:=labor.duplicate();head.erase("tasks")
+	var head_print:=_print(head)
+	var tasks:Array=labor.get("tasks",[])
+	var row_prints:Array[String]=[]
+	for task:Dictionary in tasks:
+		var role:=String(task.get("id",""))
+		row_prints.append(_print([task,int(labor.get("per_figure",1)),bool(labor.get("manual",false)),labor.get("on_move") is Callable,open_task==role,open_impact if open_task==role else {}]))
+	var box:Control=parts.labor
+	# The whole part is drawn afresh when its rows are not the ones drawn;
+	# otherwise only the header or the task rows whose print moved.
+	if _labor_head==null or not is_instance_valid(_labor_head) or _labor_rows.size()!=tasks.size() or _labor_row_prints.size()!=tasks.size():
+		for child in box.get_children():box.remove_child(child);child.queue_free()
+		_fill_labor(box,labor)
+		prints["labor"]=head_print
+		_labor_row_prints=row_prints
+		rebuilds+=1
+		return
+	if String(prints.get("labor",""))!=head_print:
+		prints["labor"]=head_print
+		var at:=_labor_head.get_index()
+		box.remove_child(_labor_head);_labor_head.queue_free()
+		_labor_head=_labor_header(labor);box.add_child(_labor_head);box.move_child(_labor_head,at)
+		rebuilds+=1
+	for index in tasks.size():
+		if row_prints[index]==_labor_row_prints[index]:continue
+		var stale:Control=_labor_rows[index]
+		var at:=stale.get_index()
+		box.remove_child(stale);stale.queue_free()
+		var fresh:=_labor_row(labor,tasks[index])
+		box.add_child(fresh);box.move_child(fresh,at)
+		_labor_rows[index]=fresh
+		rebuilds+=1
+	_labor_row_prints=row_prints
+
+var _labor_head:Control
+var _labor_rows:Array[Control]=[]
+var _labor_row_prints:Array[String]=[]
 
 
 # ---------------------------------------------------------------------------
@@ -213,6 +265,19 @@ func _fill_scene(scene:Dictionary)->void:
 # ---------------------------------------------------------------------------
 # Faces and the card
 # ---------------------------------------------------------------------------
+
+## What the faces row draws of each face (the card shows the rest): so a
+## face's regard or wants moving does not redraw the row.
+func _faces_drawn(faces:Array)->Array:
+	var drawn:Array=[selected_id]
+	for face_variant in faces:
+		var face:Dictionary=face_variant
+		var id:=String(face.get("id",""))
+		drawn.append([id,String(face.get("name","")),String(face.get("tag","")),String(face.get("given",face.get("name",""))),bool(face.get("alive",true)),face.get("person",{}),face_slots.get(id,[])])
+	return drawn
+
+func _fill_faces_part(parent:Control,_drawn:Array)->void:
+	_fill_faces(parent,data.get("faces",[]))
 
 func _fill_faces(parent:Control,faces:Array)->void:
 	for face_variant in faces:
@@ -317,26 +382,62 @@ func _fill_card(parent:Control,value:Array)->void:
 # Vitals, labor, story, hearths, tallies
 # ---------------------------------------------------------------------------
 
+## The vitals keep their rows while the same vitals are shown under the same
+## heading: each day's figures, trends and causes are written into them.
+var _vital_rows:Array=[]
+func _refresh_vitals(vitals:Array)->void:
+	var shape:Array=[String(data.get("vitals_heading","HOW THEY FARE"))]
+	for vital:Dictionary in vitals:shape.append(String(vital.get("id","")))
+	if prints.get("vitals_shape")==shape and _vital_rows.size()==vitals.size():
+		if prints.get("vitals")==vitals:return
+		prints["vitals"]=vitals.duplicate(true)
+		for index in vitals.size():_fill_vital(_vital_rows[index],vitals[index])
+		return
+	prints["vitals_shape"]=shape
+	prints["vitals"]=vitals.duplicate(true)
+	var box:Control=parts.vitals
+	for child in box.get_children():box.remove_child(child);child.queue_free()
+	_fill_vitals(box,vitals)
+	rebuilds+=1
+
 func _fill_vitals(parent:Control,vitals:Array)->void:
 	parent.add_child(_heading(String(data.get("vitals_heading","HOW THEY FARE"))))
+	_vital_rows.clear()
 	for vital_variant in vitals:
 		var vital:Dictionary=vital_variant
 		var row:=HBoxContainer.new();row.name="Vital_"+String(vital.get("id",""));row.add_theme_constant_override("separation",10);parent.add_child(row)
-		var fill:=float(vital.get("fill",0.0))
-		var tint:=T.GREEN if fill>=0.66 else (T.AMBER if fill>=0.33 else T.RED)
-		var icon:=TextureRect.new();icon.texture=Icons.people_texture(String(vital.get("id","")),tint.lightened(0.25),40)
+		var icon:=TextureRect.new()
 		icon.custom_minimum_size=Vector2(36,36);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(icon)
 		var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",2);row.add_child(body)
 		var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);body.add_child(top)
-		var label:=T.make_label(String(vital.get("label","")),12,T.MUTED,0.1);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(label)
-		var value:=T.make_label(String(vital.get("value","")),14,T.INK);value.add_theme_font_override("font",_serif());top.add_child(value)
-		var trend:=int(vital.get("trend",0))
-		var arrow:=T.make_label("better this season" if trend>0 else ("worse this season" if trend<0 else "steady this season"),12,T.GREEN_TEXT if trend>0 else (T.RED_TEXT if trend<0 else T.MUTED))
+		var label:=T.make_label("",12,T.MUTED,0.1);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(label)
+		var value:=T.make_label("",14,T.INK);value.add_theme_font_override("font",_serif());top.add_child(value)
+		var arrow:=T.make_label("",12,T.MUTED)
 		arrow.tooltip_text="Compared with last season"
 		arrow.mouse_filter=Control.MOUSE_FILTER_PASS;body.add_child(arrow)
-		var meter:=Meter.new();meter.track=T.TRACK;meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;meter.set_value(fill,tint);body.add_child(meter)
-		var cause:=T.make_label(String(vital.get("cause","")),12,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
+		var meter:=Meter.new();meter.track=T.TRACK;meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_child(meter)
+		var cause:=T.make_label("",12,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
+		var refs:={"icon":icon,"label":label,"value":value,"arrow":arrow,"meter":meter,"cause":cause}
+		_vital_rows.append(refs)
+		_fill_vital(refs,vital)
+
+## One vital's words, meter and mark, for the first drawing and every refresh.
+func _fill_vital(refs:Dictionary,vital:Dictionary)->void:
+	var fill:=float(vital.get("fill",0.0))
+	var tint:=T.GREEN if fill>=0.66 else (T.AMBER if fill>=0.33 else T.RED)
+	(refs.icon as TextureRect).texture=Icons.people_texture(String(vital.get("id","")),tint.lightened(0.25),40)
+	_put(refs.label,String(vital.get("label","")))
+	_put(refs.value,String(vital.get("value","")))
+	var trend:=int(vital.get("trend",0))
+	_put(refs.arrow,"better this season" if trend>0 else ("worse this season" if trend<0 else "steady this season"),T.GREEN_TEXT if trend>0 else (T.RED_TEXT if trend<0 else T.MUTED))
+	(refs.meter as Meter).set_value(fill,tint)
+	_put(refs.cause,String(vital.get("cause","")))
+
+## Words (and their ink) set only when they differ.
+static func _put(label:Label,text:String,color:Variant=null)->void:
+	if label.text!=text:label.text=text
+	if color is Color and label.get_theme_color("font_color")!=color:label.add_theme_color_override("font_color",color)
 
 
 ## What the people are doing today, and who sets it (manual_work.gd): the
@@ -344,6 +445,17 @@ func _fill_vitals(parent:Control,vitals:Array)->void:
 ## row of figures and its count. Our leaders: each leader's word on why. The
 ## ruler: −/+ and ×5 on each row, in whole people, and the plain warnings.
 func _fill_labor(parent:Control,labor:Dictionary)->void:
+	_labor_head=_labor_header(labor);parent.add_child(_labor_head)
+	_labor_rows.clear()
+	for task_variant in labor.get("tasks",[]):
+		var row:=_labor_row(labor,task_variant);parent.add_child(row);_labor_rows.append(row)
+	var hint:=T.make_label("Click a task to see what that work does.",11,T.TEXT_SOFT);hint.name="WorkHint";parent.add_child(hint)
+
+
+## The labor part's head: its heading, who can work, who sets the work (the
+## switch), each leader's word or the ruler's warnings.
+func _labor_header(labor:Dictionary)->VBoxContainer:
+	var parent:=VBoxContainer.new();parent.name="WorkHead";parent.add_theme_constant_override("separation",7)
 	var per:=maxi(1,int(labor.get("per_figure",1)))
 	var manual:=bool(labor.get("manual",false))
 	parent.add_child(_heading(String(labor.get("heading","WHAT THEY ARE DOING NOW")),"each figure is %s" % ("one person" if per==1 else "%d people" % per)))
@@ -369,44 +481,53 @@ func _fill_labor(parent:Control,labor:Dictionary)->void:
 			var tone:=String(warning.get("tone",""))
 			var ink:=T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.GREEN_TEXT)
 			var warn:=T.make_label(String(warning.get("text","")),12,ink);warn.name="WorkWarning";warn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(warn)
+	return parent
+
+
+## One task: its row of figures and count (with −/+ and ×5 for the ruler)
+## and, when it is the task opened, what that work does right under it.
+func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
+	var parent:=VBoxContainer.new();parent.add_theme_constant_override("separation",7)
+	var per:=maxi(1,int(labor.get("per_figure",1)))
+	var manual:=bool(labor.get("manual",false))
 	var on_move:Variant=labor.get("on_move")
-	for task_variant in labor.get("tasks",[]):
-		var task:Dictionary=task_variant
-		var role:=String(task.get("id",""))
-		var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);parent.add_child(row)
-		var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
-		toggle.pressed.connect(toggle_task.bind(role))
-		var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
-		var count:=int(task.get("count",0))
-		# The food getters by what they got (plants, game, fish, fields).
-		var kinds:Array=[]
-		for pair in task.get("mix",[]):
-			for index in clampi(ceili(float(pair[1])/float(per)),0,FIGURES_PER_ROW):kinds.append(String(pair[0]))
-		if kinds.is_empty():
-			for index in (clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW) if count>0 else 0):kinds.append(String(task.get("icon",role)))
-		for kind:String in kinds.slice(0,FIGURES_PER_ROW):
-			var figure:=TextureRect.new();figure.texture=Icons.people_texture(kind,T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
-			figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
-		if not (task.get("mix",[]) as Array).is_empty():
-			var parts:PackedStringArray=[]
-			for pair in task.mix:parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
-			row.tooltip_text=", ".join(parts).capitalize().left(1)+", ".join(parts).substr(1)+"."
-		var number:=T.make_label(str(count),12,T.INK);number.name="Count";number.custom_minimum_size.x=30;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(number)
-		if manual and on_move is Callable:
-			var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
-			less.pressed.connect((on_move as Callable).bind(role,-1))
-			var more:=W.IconButton.new("plus",String(task.get("add_tip","")),24);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
-			more.pressed.connect((on_move as Callable).bind(role,1))
-			var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
-			five.pressed.connect((on_move as Callable).bind(role,5))
-		if open_task==role:_task_impact(parent,task)
-	var hint:=T.make_label("Click a task to see what that work does.",11,T.TEXT_SOFT);hint.name="WorkHint";parent.add_child(hint)
+	var task:Dictionary=task_variant
+	var role:=String(task.get("id",""))
+	parent.name="TaskBox_"+role
+	var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);parent.add_child(row)
+	var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
+	toggle.pressed.connect(toggle_task.bind(role))
+	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
+	var count:=int(task.get("count",0))
+	# The food getters by what they got (plants, game, fish, fields).
+	var kinds:Array=[]
+	for pair in task.get("mix",[]):
+		for index in clampi(ceili(float(pair[1])/float(per)),0,FIGURES_PER_ROW):kinds.append(String(pair[0]))
+	if kinds.is_empty():
+		for index in (clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW) if count>0 else 0):kinds.append(String(task.get("icon",role)))
+	for kind:String in kinds.slice(0,FIGURES_PER_ROW):
+		var figure:=TextureRect.new();figure.texture=Icons.people_texture(kind,T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
+		figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
+	if not (task.get("mix",[]) as Array).is_empty():
+		var parts:PackedStringArray=[]
+		for pair in task.mix:parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
+		row.tooltip_text=", ".join(parts).capitalize().left(1)+", ".join(parts).substr(1)+"."
+	var number:=T.make_label(str(count),12,T.INK);number.name="Count";number.custom_minimum_size.x=30;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(number)
+	if manual and on_move is Callable:
+		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
+		less.pressed.connect((on_move as Callable).bind(role,-1))
+		var more:=W.IconButton.new("plus",String(task.get("add_tip","")),24);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
+		more.pressed.connect((on_move as Callable).bind(role,1))
+		var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
+		five.pressed.connect((on_move as Callable).bind(role,5))
+	if open_task==role:_task_impact(parent,task)
+	return parent
 
 
 ## What an open task does: its lead, then each effect with today's numbers.
 func _task_impact(parent:Control,task:Dictionary)->void:
-	var impact:Dictionary=task.get("impact",{})
+	var impact:Dictionary=task.get("impact",open_impact)
 	var box:=PanelContainer.new();box.name="TaskImpact"
 	box.add_theme_stylebox_override("panel",T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,4,12));parent.add_child(box)
 	var inner:=VBoxContainer.new();inner.add_theme_constant_override("separation",8);box.add_child(inner)

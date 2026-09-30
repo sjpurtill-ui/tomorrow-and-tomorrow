@@ -12,6 +12,9 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
+## Costly parts of the page, kept while what they are made from holds.
+var memo:=Memo.new()
 
 ## The page's own view state, kept across the daily rebuilds: which people's
 ## rose is laid over ours.
@@ -22,17 +25,38 @@ func meta()->Dictionary:
 
 func tab(_sub:int)->Dictionary:
 	var our:=Standing.strengths()
-	var seen:=Standing.views()
+	var seen:=views_of(our)
 	var board:=board_data(our,seen)
 	var blocks:Array=[board]
-	blocks.append(History.block("standing","HOW OUR NAME HAS GROWN","civilization","of 100",[
-		{"key":"standing_awe","label":"Awe","color":Tokens.GOLD},
-		{"key":"standing_allure","label":"Allure","color":Tokens.TEAL},
-		{"key":"standing_pride","label":"Pride","color":Tokens.GREEN},
-		{"key":"standing_might","label":"Might","color":Tokens.RED},
-		{"key":"standing_genius","label":"Genius","color":Tokens.BLUE}],
-		"Read once a month from what the people are and do."))
+	# The years' chart reads the demographic ledger and the monthly record,
+	# which move only on a death, a birth tally or a month's reading.
+	var ledger:Dictionary=WorldSimulation.state.strategic_history.get("scopes",{}).get("civilization",{})
+	var chart:Dictionary=memo.take("history",[Memo.log_identity(WorldSimulation.state.demographic_ledger),Memo.log_identity(ledger.get("monthly",[])),Memo.log_identity(ledger.get("annual",[]))],func()->Dictionary:
+		return History.block("standing","HOW OUR NAME HAS GROWN","civilization","of 100",[
+			{"key":"standing_awe","label":"Awe","color":Tokens.GOLD},
+			{"key":"standing_allure","label":"Allure","color":Tokens.TEAL},
+			{"key":"standing_pride","label":"Pride","color":Tokens.GREEN},
+			{"key":"standing_might","label":"Might","color":Tokens.RED},
+			{"key":"standing_genius","label":"Genius","color":Tokens.BLUE}],
+			"Read once a month from what the people are and do."))
+	chart["_print"]=memo.print_of("history")
+	blocks.append(chart)
 	return {"brief":_brief(board),"blocks":blocks}
+
+## Every people we have met, with its view of us: Standing.views(), read from
+## the strengths this page has already reckoned instead of reckoning them a
+## second time (tests/test_dock_content_cache.gd holds the two equal).
+static func views_of(our:Dictionary)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	if String(WorldSimulation.actor_id)!="player": return result
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if not bool(civ.get("alive",true)): continue
+		var v:=Standing.view_of(String(civ.id),our)
+		if not bool(v.known): continue
+		v["civ_id"]=String(civ.id)
+		v["civ_name"]=String(civ.get("name",civ.id))
+		result.append(v)
+	return result
 
 ## The one danger that matters most now, with the section that answers it.
 func _brief(board:Dictionary)->Dictionary:
@@ -68,7 +92,10 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,
 		"on_raise":func(section:String,sub:int)->void: hud.section_requested.emit(section,sub),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),
-		"on_scouts":func()->void: if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"): terrain.call("_open_scout_dispatch_panel")}
+		"on_scouts":func()->void: if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"): terrain.call("_open_scout_dispatch_panel"),
+		# A people's strengths are reckoned in their own scope only when laid
+		# over our rose; the board asks for them when one is chosen.
+		"their_strengths":their_strengths}
 
 func _our_name()->String:
 	var name:=String(GameState.settlement_name).strip_edges()
@@ -112,7 +139,18 @@ func _people(v:Dictionary,our:Dictionary)->Dictionary:
 		"relation":_relation_words(civ_id,relation),"ruler":_ruler_words(character),"headline":Standing.view_words(v),
 		"views":views,"envy":float(v.envy),"contempt":float(v.contempt),"envy_why":String((v.why as Dictionary).get("envy","")),"contempt_why":String((v.why as Dictionary).get("contempt","")),
 		"strength":_strength_words(float(v.strength_ratio)),"ratio":float(v.strength_ratio),
-		"consequences":Standing.consequences(civ_id,v),"memories":memories,"theirs":Standing.their_strengths(civ_id)}
+		"consequences":Standing.consequences(civ_id,v),"memories":memories,
+		"comparable":comparable(civ_id),"theirs":Standing.their_strengths(civ_id) if String(view_state.get("compare",""))==civ_id else {}}
+
+## A people's strengths as travellers tell them (Standing.their_strengths).
+func their_strengths(civ_id:String)->Dictionary:
+	return Standing.their_strengths(civ_id)
+
+## Whether a people's strengths can be laid over ours: exactly when
+## Standing.their_strengths would give them (a people simulated in its own
+## scope), without reckoning them.
+static func comparable(civ_id:String)->bool:
+	return civ_id!="" and WorldSimulation.actors.has(civ_id)
 
 static func _relation_words(civ_id:String,relation:Dictionary)->String:
 	var parts:PackedStringArray=[]

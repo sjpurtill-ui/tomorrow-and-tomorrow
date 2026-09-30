@@ -29,6 +29,15 @@ func setup(value:Dictionary)->void:
 	note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	add_child(note)
 	_select(int(selected_ranges.get(data.id,1)))
+## The live refresh: the same chart takes its new points; the range buttons,
+## legend and note stay. A different chart (other lines, unit or note) is
+## drawn afresh.
+func update_block(value:Dictionary)->bool:
+	if graph==null or String(value.get("id",""))!=String(data.get("id","")) or String(value.get("unit",""))!=String(data.get("unit","")) or String(value.get("description",""))!=String(data.get("description","")) or value.get("series",[])!=data.get("series",[]):
+		return false
+	data=value
+	_select(int(selected_ranges.get(data.id,1)))
+	return true
 func _select(index:int)->void:
 	selected_ranges[data.id]=index
 	if selected_ranges.size()>1024: selected_ranges.erase(selected_ranges.keys()[0])

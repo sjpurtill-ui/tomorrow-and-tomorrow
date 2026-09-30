@@ -236,8 +236,24 @@ func _refill(part:String,value:Variant,fill:Callable)->void:
 
 func _compare_print()->Array:
 	var out:Array=[]
-	for p:Dictionary in data.get("peoples",[]): out.append([String(p.civ_id),(p.get("theirs",{}) as Dictionary).is_empty()])
+	for p:Dictionary in data.get("peoples",[]): out.append([String(p.civ_id),not _comparable(p),p.get("theirs",{})])
 	return out
+
+## Whether a people's strengths can be laid over ours (the provider says so
+## without reckoning them; older data carries the strengths themselves).
+static func _comparable(p:Dictionary)->bool:
+	return bool(p.get("comparable",not (p.get("theirs",{}) as Dictionary).is_empty()))
+
+## A people's strengths for the rose: carried in the data for the people
+## already chosen, otherwise asked of the provider when one is chosen.
+func _theirs(p:Dictionary)->Dictionary:
+	var theirs:Dictionary=p.get("theirs",{})
+	if theirs.is_empty() and _comparable(p):
+		var ask:Variant=data.get("their_strengths")
+		if ask is Callable and (ask as Callable).is_valid():
+			theirs=(ask as Callable).call(String(p.civ_id))
+			p["theirs"]=theirs
+	return theirs
 
 func _layout()->void:
 	if hero_body: hero_body.columns=2 if size.x>=WIDE_AT else 1
@@ -372,13 +388,13 @@ func _fill_compare()->void:
 	var caption:=Kit.label(compare_row,"Lay beside ours:","note",Color(0,0,0,0),false)
 	caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	for p:Dictionary in list:
-		var theirs:Dictionary=p.get("theirs",{})
+		var comparable:=_comparable(p)
 		var chip:=Button.new()
 		chip.name="Compare_"+String(p.civ_id)
 		chip.toggle_mode=true
 		chip.text=String(p.name)
-		chip.disabled=theirs.is_empty()
-		chip.tooltip_text="We know too little of them yet." if theirs.is_empty() else "Lay %s's strengths, as travellers tell it, over ours." % String(p.name)
+		chip.disabled=not comparable
+		chip.tooltip_text="We know too little of them yet." if not comparable else "Lay %s's strengths, as travellers tell it, over ours." % String(p.name)
 		chip.button_pressed=String(p.civ_id)==chosen
 		chip.add_theme_font_size_override("font_size",13)
 		chip.add_theme_color_override("font_color",T.INK)
@@ -394,7 +410,9 @@ func _fill_compare()->void:
 			prints.erase("compare")
 			_fill_compare())
 		compare_row.add_child(chip)
-		if String(p.civ_id)==chosen and not theirs.is_empty():
+		if String(p.civ_id)==chosen and comparable:
+			var theirs:=_theirs(p)
+			if theirs.is_empty():continue
 			var tint:Color=p.get("accent",T.RED)
 			rose.compare(theirs,tint,String(p.name))
 			shown=true
