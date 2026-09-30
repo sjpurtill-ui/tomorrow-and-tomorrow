@@ -2925,6 +2925,10 @@ func _force_from_round_result(previous:Dictionary,side:Dictionary)->Dictionary:
 		if not side.has(key): continue
 		if key=="remaining_troops": updated["troops"]=int(side[key])
 		else: updated[key]=side[key].duplicate(true) if side[key] is Array or side[key] is Dictionary else side[key]
+	# Machines and vehicles lost add up over the battle's days (each day's
+	# simulation counts only its own).
+	for key in ["machines_lost","vehicles_lost"]:
+		if int(side.get(key,0))>0: updated[key]=int(previous.get(key,0))+int(side.get(key,0))
 	# Carry the army's supply/organization context forward, but let current
 	# manpower, equipment, ammunition, condition, and morale change readiness.
 	var prior_components:Dictionary=simulator.force_readiness(previous,_force_personnel_condition(previous))
@@ -3349,7 +3353,12 @@ func _field_transport_delivery_ratio()->float:
 	return float(carrier_reading().food)
 
 var _carrier_cache:Dictionary={}
+## The reading taken at the start of the day's rations, held for the whole
+## loop so every band is fed by the same numbers (hunger and rest change
+## troop counts inside it).
+var _carrier_frozen:Dictionary={}
 func carrier_reading()->Dictionary:
+	if not _carrier_frozen.is_empty(): return _carrier_frozen
 	# Read once a day and again whenever the bands move, split, merge or the
 	# fleet changes (the cache forgets after each day's marching).
 	var where:=0.0
@@ -3362,6 +3371,9 @@ func carrier_reading()->Dictionary:
 	var key:=[int(WorldSimulation.state.elapsed_days),field_armies.size(),occupation_forces.size(),troops,snappedf(where,0.5),int(WorldSimulation.state.population_allocations.get("Logistics",0)),float(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0.0)),float(WorldSimulation.state.resource_stockpiles.get("Supply Lorries",0.0)),WorldSimulation.state.world_seed]
 	if _carrier_cache.get("key")==key: return _carrier_cache.reading
 	var reading:=preload("res://scripts/carriers.gd").reading(self)
+	# Home held by the enemy: nothing leaves it, and the map shows as much.
+	if recovery.home_unavailable():
+		reading["food"]=0.0;reading["stores"]=0.0;reading["ratio"]=0.0;reading["moved"]=0.0;reading["preview"]={}
 	_carrier_cache={"key":key,"reading":reading}
 	return reading
 
@@ -3420,6 +3432,13 @@ func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary=
 
 func record_daily_provisions(required:float,delivered:float,air_delivery:Dictionary={})->void:
 	if home_army.is_empty() and occupation_forces.is_empty() and field_armies.is_empty(): return
+	_carrier_frozen={}
+	_carrier_frozen=carrier_reading()
+	_record_daily_provisions(required,delivered,air_delivery)
+	_carrier_frozen={}
+
+
+func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictionary={})->void:
 	var need:=maxf(0.0,required)
 	var received:=clampf(delivered,0.0,need)
 	var prepaid:=int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0
@@ -3696,6 +3715,7 @@ func import_state(payload:Dictionary)->Dictionary:
 			WorldSimulation.figures.import_state(previous.historical_figures)
 			return direction_result
 	_apply_imported_state(incoming)
+	_carrier_cache={};_home_point={};_carrier_frozen={}
 	_refit_to_ledger()
 	var errors:=validate_state()
 	if not errors.is_empty():

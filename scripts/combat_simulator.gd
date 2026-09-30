@@ -588,6 +588,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 				# Once the whole army breaks, its blocks go with it: the rout is
 				# the battle's ending (termination), not one block at a time.
 				if float(morale_now[side])<=MORALE_BREAK_AT: break
+				# Machines do not lose heart and run: they fight on until wrecked.
+				if is_machine(String(((state.sides[side].blocks as Array)[b] as Dictionary).get("weapon",""))): continue
 				var men0:=int((state.sides[side].blocks as Array)[b].men0)
 				var split:Dictionary=Blocks.break_block(state,side,b,rng,bool(pursues[enemy]),battle_round)
 				var removed:=_remove_broken(part.force,part.cohorts,split)
@@ -732,6 +734,7 @@ func _remove_broken(force:Dictionary,cohort_result:Dictionary,split:Dictionary)-
 		if index<losses.size(): losses[index]=int(losses[index])+n
 		var equipment_losses:Array=cohort_result.get("equipment_losses",[])
 		if index<equipment_losses.size(): equipment_losses[index]=int(equipment_losses[index])+dropped
+		_book_hardware(force,String(formation.get("weapon","")),dropped)
 	force["formations"]=formations
 	return removed
 
@@ -1487,8 +1490,8 @@ func _battle_spoils(loser: Dictionary,winner: Dictionary,termination_type: Strin
 		var recovered:=clampi(roundi(float(equipment)*recovery_rate),0,equipment)
 		var weapon:=String(formation.get("weapon","improvised"))
 		weapons[weapon]=int(weapons.get(weapon,0))+recovered
-		# Machines left on the field for the victor are lost to their side too.
-		if is_machine(weapon) and recovered>0: loser["machines_lost"]=int(loser.get("machines_lost",0))+recovered
+		# Machines and vehicles left on the field for the victor are lost too.
+		_book_hardware(loser,weapon,recovered)
 		if ammo_per(weapon)>0 and ammo_type(weapon)!="":
 			var ammunition:=int(formation.get("ammunition",0))
 			var ammunition_recovered:=clampi(roundi(float(ammunition)*recovery_rate),0,ammunition)
@@ -1513,19 +1516,24 @@ func _winner_name(outcome: String, attacker: Dictionary, defender: Dictionary) -
 	return ""
 
 
-## Machines lost in an exchange (wrecked), kept on the force for the report.
+## Machines and vehicles lost in an exchange (wrecked), kept on the force
+## for the report.
 func _count_machines(force:Dictionary,applied:Dictionary)->void:
 	var formations:Array=applied.get("formations",[])
 	var lost:Array=applied.get("equipment_losses",[])
-	var wrecked:=0
 	for index in mini(formations.size(),lost.size()):
-		if is_machine(String((formations[index] as Dictionary).get("weapon",""))): wrecked+=int(lost[index])
-	if wrecked>0: force["machines_lost"]=int(force.get("machines_lost",0))+wrecked
+		if int(lost[index])>0: _book_hardware(force,String((formations[index] as Dictionary).get("weapon","")),int(lost[index]))
+
+func _book_hardware(force:Dictionary,weapon:String,count:int)->void:
+	if count<=0: return
+	if is_machine(weapon): force["machines_lost"]=int(force.get("machines_lost",0))+count
+	elif Ledger.family(weapon)=="vehicle": force["vehicles_lost"]=int(force.get("vehicles_lost",0))+count
 
 
 func _force_result(force: Dictionary, initial: int, remaining: int, morale: float) -> Dictionary:
 	return {
 		"machines_lost":int(force.get("machines_lost",0)),
+		"vehicles_lost":int(force.get("vehicles_lost",0)),
 		"name": String(force.name),
 		"initial_troops": initial,
 		"commander":force.get("commander",{}).duplicate(true),

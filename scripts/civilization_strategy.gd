@@ -96,6 +96,13 @@ static func unit_score(definition:Dictionary,plan:Dictionary)->float:
 static func threat_mix()->Array:
 	var mc:Variant=MilitaryCampaign
 	if mc==null: return []
+	# Only a people in contact with ours (or at war with us) has seen our army.
+	var civs:Variant=CivilizationSystem
+	if civs==null: return []
+	var index:int=civs._civilization_index(String(WorldSimulation.actor_id))
+	if index<0: return []
+	var relation:Dictionary=(civs.civilizations[index] as Dictionary).get("player_relation",{})
+	if int(relation.get("contact_level",0))<1 and not bool(relation.get("at_war",false)): return []
 	var grouped:={}
 	for force in [mc.home_army]+Array(mc.field_armies):
 		if not force is Dictionary: continue

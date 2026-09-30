@@ -40,6 +40,8 @@ const DRAFT_MIN_MEN:=3
 const DRAFT_MIN_SHARE:=0.02
 ## A band the carriers cannot reach at all is cut off.
 const CUT_OFF:=0.01
+## Drafts on the road wait this long for a cut-off band before coming home.
+const MAX_WAIT_DAYS:=30
 ## Hunger losses the war leader still speaks of, in days since the last.
 const HUNGER_MEMORY_DAYS:=30
 ## Kits whose stores are mostly fodder: horses, oxen and elephants graze.
@@ -162,7 +164,7 @@ func rest_day(force:Dictionary,span:float)->Dictionary:
 	if Rations.is_hungry(force):
 		morale=maxf(minf(morale,MORALE_HUNGER_FLOOR),morale-MORALE_HUNGER_LOSS*span)
 	else:
-		var pace:=MORALE_REST*(MORALE_MARCHING if String(force.get("status","stationed"))=="moving" else 1.0)
+		var pace:=MORALE_REST*(MORALE_MARCHING if String(force.get("status","stationed")) in ["moving","turning_back"] else 1.0)
 		var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.5)) if force.get("commander") is Dictionary else 0.5,0.0,1.0)
 		var ceiling:=0.55+0.45*supply
 		if morale<ceiling: morale=minf(ceiling,morale+pace*(0.35+0.65*supply)*(0.9+0.2*logistics)*span)
@@ -263,8 +265,11 @@ func _covered(army_id:int)->Dictionary:
 ## fed) nor by drafts in training or on the road, largest gap first.
 func open_places(force:Dictionary)->Dictionary:
 	var covered:=_covered(int(force.get("army_id",0)))
-	# The hunger-sick still in the pool (never more than its able part).
+	# The hunger-sick still in the pool (never more than its able part), and
+	# the battle wounded expected back before a draft could arrive, hold
+	# their own places.
 	var sick:=mini(maxi(0,int(force.get("hunger_sick",0))),maxi(0,int(force.get("wounded_pool",0))-maxi(0,int(force.get("disabled_pool",0)))))
+	sick+=_wounded_back_within(force,_draft_lead(force))
 	var formations:Array=force.get("formations",[])
 	var places:={}
 	for index in gap_order(formations):
@@ -276,6 +281,23 @@ func open_places(force:Dictionary)->Dictionary:
 		open-=healed
 		if open>0: places[id]={"unit":String(formation.get("unit","levy")),"weapon":String(formation.get("weapon","improvised")),"count":open,"size":int(formation.get("authorized_count",formation.get("count",0)))}
 	return places
+
+## Days before a draft raised today would reach the band: its course at the
+## Reinforce pace and the walk out.
+func _draft_lead(force:Dictionary)->int:
+	var course:=0.0
+	for formation in force.get("formations",[]):
+		course=maxf(course,float(host.UnitCatalog.training_days(String(formation.get("unit","levy"))))*DRAFT_TRAINING)
+	return roundi(course)+maxi(1,travel_days(force))
+
+## Battle wounded (not hunger-sick, not disabled) expected back in `days` at
+## the band's present supply (rest_day's own rate).
+func _wounded_back_within(force:Dictionary,days:int)->int:
+	var wounded:=maxi(0,int(force.get("wounded_pool",0))-maxi(0,int(force.get("hunger_sick",0)))-maxi(0,int(force.get("disabled_pool",0))))
+	var supply:=clampf(float(force.get("supply_level",1.0)),0.0,1.0)
+	if wounded<=0 or supply<0.5 or Rations.is_hungry(force): return 0
+	var rate:=WOUNDED_RETURN*(2.0 if _has_medics(force) else 1.0)*supply
+	return floori(float(wounded)*(1.0-pow(1.0-minf(rate,1.0),float(maxi(0,days)))))
 
 ## Why a band gets no drafts today, or "" when it may.
 func draft_block(force:Dictionary)->String:
@@ -409,10 +431,12 @@ func arrivals_day()->Array:
 					draft["arrive_day"]=today+1
 				continue
 			if blocked:
-				draft["arrive_day"]=today+1
-				continue
+				draft["waited"]=int(draft.get("waited",0))+1
+				if int(draft.waited)<=MAX_WAIT_DAYS or host.command_hierarchy.battle.engaged(int(draft.army_id)):
+					draft["arrive_day"]=today+1
+					continue
 		host.field_drafts.remove_at(index)
-		if army_index<0:
+		if army_index<0 or int(draft.get("waited",0))>MAX_WAIT_DAYS:
 			_send_home(draft)
 			continue
 		var force:Dictionary=host.field_armies[army_index]

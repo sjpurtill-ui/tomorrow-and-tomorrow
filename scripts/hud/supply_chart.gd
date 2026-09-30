@@ -313,7 +313,7 @@ func _force_tip(report:Dictionary)->Dictionary:
 	var lines:=PackedStringArray()
 	var why:PackedStringArray=report.get("why",PackedStringArray())
 	for k in range(1,why.size()): lines.append(why[k])
-	if report.has("loads") and float(report.loads)>0.0: lines.append("Its line carries %d loads a day: bread and its kits' fodder, fuel and rounds." % roundi(float(report.loads)))
+	if report.has("loads") and float(report.loads)>0.0: lines.append("Its line is asked %d loads a day: bread and its kits' fodder, fuel and rounds." % roundi(float(report.loads)))
 	return {"title":name,"state":String(report.get("state","")),"ratio":float(report.get("ratio",0.0)),"text":String(report.get("words","")),"lines":lines}
 
 func _hub_tip(hub:Dictionary)->Dictionary:

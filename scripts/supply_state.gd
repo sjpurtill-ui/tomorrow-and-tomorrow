@@ -185,7 +185,19 @@ static func carrier()->String:
 	# (carriers.gd): one lorry among a thousand porters does not.
 	var carriers:=load("res://scripts/carriers.gd")
 	var adoption:=func(id:String)->float: return float(WorldSimulation.discovery.adoption(id)) if WorldSimulation.discovery!=null and id in s.known_discoveries else 0.0
-	return String(carriers.ARM[carriers.main_kind(carriers.fleet(s,adoption))])
+	var fleet:Dictionary=carriers.fleet(s,adoption)
+	var best:=String(carriers.main_kind(fleet))
+	# A new kind takes over the line only once it clearly moves more (a fifth
+	# more than the kind that had it): one cart or one worker does not flip
+	# every band's haul back and forth.
+	var owner:=(s as Object).get_instance_id()
+	var held:=String(_main_kind.get(owner,best))
+	var trips:Dictionary=fleet.get("trip",{})
+	if held!=best and float(trips.get(best,0.0))<1.2*float(trips.get(held,0.0)): best=held
+	_main_kind[owner]=best
+	return String(carriers.ARM[best])
+
+static var _main_kind:Dictionary={}
 
 ## Our hubs: home and our other settlements, then the towns we hold.
 ## [{id, name, kind: home|town|held, pos:Vector2, civ_id?, region_id?}]

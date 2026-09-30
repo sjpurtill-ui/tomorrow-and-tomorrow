@@ -530,3 +530,24 @@ with machine accounting; (7) recruitment fixes and template numbers.
   (`civilization_strategy.counter_score`, weighed 1.5 beside their tastes).
   Faced with tanks, a staff raises antitank guns; faced with riflemen,
   riflemen. Support detachments are never a rival's whole army.
+- **Iteration 10, the fight's truth.** Production cards give each kit's
+  numbers and how it compares with the kit before it; the war leader's fact
+  sheet states the carriers (on foot, carts, lorries; loads asked and
+  brought; bread and stores shares) and the drafts on the way; each band's
+  supply note says what its line asks and the carts it would tie up alone.
+  Machine blocks never break and run in the block battle.
+- **Critic round 4 (final review) and the fixes.**
+  - Machines and vehicles lost ("tanks and armoured vehicles lost") add up
+    over a battle's days and reach the report, including kit dropped when a
+    block breaks and kit left for the victor.
+  - Battle wounded expected back before a draft could arrive hold their
+    places, so healed men and drafts never fill the same places twice.
+  - With home held by the enemy nothing is carried and the map says so.
+  - The day's rations use one carrier reading for every band.
+  - Drafts wait at most a month for a cut-off band, then come home trained.
+  - A line's next band joins the last while it is home and trained within a
+    course and a month.
+  - Rival staffs counter the player's army only once in contact or at war.
+  - The line's carrier kind changes only when the new kind carries a fifth
+    more, so one cart does not flip every band's haul.
+  - Caches are forgotten on load; bands turning back rest at the march pace.

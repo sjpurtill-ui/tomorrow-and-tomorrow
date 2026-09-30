@@ -134,3 +134,29 @@ func test_rival_staffs_counter_what_they_face()->void:
 	assert_float(at_vs_tanks).is_greater(rifles_vs_tanks)
 	assert_float(rifles_vs_rifles).is_greater(at_vs_rifles)
 	assert_float(Strategy.counter_score(MilitaryCampaign,"rifle_infantry","service_rifle",[])).is_equal(0.0)
+
+func test_machine_blocks_do_not_break_and_run()->void:
+	# A long, even fight: rifle blocks may break and run; frame blocks never do.
+	var frames:=_force([["combat_frame_cohort","combat_frame",60],["rifle_infantry","service_rifle",600]])
+	var rifles:=_force([["rifle_infantry","service_rifle",2000]])
+	var result:Dictionary=sim.simulate(rifles,frames,{"seed":29,"max_rounds":48})
+	var blocks:Array=result.battle.sides.defender.blocks
+	var live:Array=result.battle.live.defender
+	var machine_blocks:=0
+	for i in blocks.size():
+		if Combat.is_machine(String(blocks[i].get("weapon",""))):
+			machine_blocks+=1
+			assert_str(String(live[i].st)).is_not_equal("broken")
+	assert_int(machine_blocks).is_greater(0)
+
+func test_machines_and_tanks_lost_add_up_over_a_battles_days()->void:
+	var previous:={"troops":40,"formations":[],"machines_lost":5,"vehicles_lost":1,"readiness":1.0}
+	var day:={"remaining_troops":39,"formations":[],"machines_lost":3,"vehicles_lost":2}
+	var updated:Dictionary=MilitaryCampaign._force_from_round_result(previous,day)
+	assert_int(int(updated.machines_lost)).is_equal(8)
+	assert_int(int(updated.vehicles_lost)).is_equal(3)
+	var tanks:=_force([["armored_formation","armored_vehicle",100]])
+	var guns:=_force([["anti_tank","anti_tank_kit",300]])
+	var result:Dictionary=sim.simulate(guns,tanks,{"seed":3})
+	var formation:Dictionary=(result.defender.formations as Array)[0]
+	assert_int(int(result.defender.vehicles_lost)).is_equal(20-int(formation.equipment))
