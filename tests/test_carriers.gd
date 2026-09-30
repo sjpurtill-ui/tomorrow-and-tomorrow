@@ -95,3 +95,12 @@ func test_lorries_set_the_pace_and_are_made_on_a_line()->void:
 	GameState.known_discoveries.append("motor_freight_lorries");GameState.discovery_adoption["motor_freight_lorries"]=1.0
 	var recipe:=P.recipe(MilitaryCampaign,"supply_lorry")
 	assert_str(String(recipe.get("job_type",""))).is_equal("transport")
+
+func test_a_supply_line_is_drawn_as_heavy_as_its_loads()->void:
+	var Chart:=preload("res://scripts/hud/supply_chart.gd")
+	assert_float(Chart.line_weight(0.0)).is_equal(0.8)
+	assert_float(Chart.line_weight(100.0)).is_less(Chart.line_weight(10000.0))
+	assert_float(Chart.line_weight(10000000.0)).is_equal(2.2)
+	var tanks:=_band(2,"armored_formation","armored_vehicle",100,60.0)
+	var spears:=_band(1,"spearman","spear",100,60.0)
+	assert_float(Chart.line_weight(Carriers.daily_loads(tanks))).is_greater(Chart.line_weight(Carriers.daily_loads(spears)))

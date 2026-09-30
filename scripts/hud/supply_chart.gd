@@ -156,15 +156,17 @@ func _draw_route(route:Dictionary,a:float)->void:
 	if pts.size()<2: return
 	var state:=String(route.get("state","well"))
 	var tip:=Supply.state_color(state)
+	# The line's weight is what it carries: a band's bread and stores a day.
+	var weight:=line_weight(float(route.get("loads",0.0)))
 	# A paper halo so the ink reads over any wash.
-	draw_polyline(pts,Color(PAPER,0.5*a),5.0,true)
+	draw_polyline(pts,Color(PAPER,0.5*a),5.0*weight,true)
 	var run:=PackedVector2Array([pts[0]])
 	var run_on:=on[0]
 	for i in range(1,pts.size()):
 		run.append(pts[i])
 		if on[i]!=run_on or i==pts.size()-1:
-			if run_on==1: draw_polyline(run,Color(INK,0.85*a),2.4,true)
-			else: _dashed(run,Color(INK,0.8*a),1.5,7.0,5.0)
+			if run_on==1: draw_polyline(run,Color(INK,0.85*a),2.4*weight,true)
+			else: _dashed(run,Color(INK,0.8*a),1.5*weight,7.0,5.0)
 			run=PackedVector2Array([pts[i]]); run_on=on[i]
 	# Open chevrons toward the band, in the band's colour at the far end.
 	var total:=0.0
@@ -182,6 +184,12 @@ func _draw_route(route:Dictionary,a:float)->void:
 				draw_polyline(PackedVector2Array([at-d*5.0+n*4.0,at,at-d*5.0-n*4.0]),Color(colour,0.9*a),1.6,true)
 				break
 			walked+=seg
+
+
+## How heavy a supply line is drawn for the loads it carries a day: a war
+## band's line is a thread, an armoured corps' a cable (x0.8 to x2.2).
+static func line_weight(loads:float)->float:
+	return clampf(0.8+0.35*log(1.0+maxf(0.0,loads)/50.0)/log(10.0),0.8,2.2)
 
 
 func _draw_plate(mark:Dictionary)->void:
@@ -305,6 +313,7 @@ func _force_tip(report:Dictionary)->Dictionary:
 	var lines:=PackedStringArray()
 	var why:PackedStringArray=report.get("why",PackedStringArray())
 	for k in range(1,why.size()): lines.append(why[k])
+	if report.has("loads") and float(report.loads)>0.0: lines.append("Its line carries %d loads a day: bread and its kits' fodder, fuel and rounds." % roundi(float(report.loads)))
 	return {"title":name,"state":String(report.get("state","")),"ratio":float(report.get("ratio",0.0)),"text":String(report.get("words","")),"lines":lines}
 
 func _hub_tip(hub:Dictionary)->Dictionary:
