@@ -89,11 +89,11 @@ const KITS:={
 	# Vehicles.
 	"motorized_kit":{"name":"Motor Lorries","family":"vehicle","gen":0,"year":2677,"attack":1.88,"defense":1.32,"armor":0.28,"penetration":1.02,"crew":4.0,"crewless":0.0,"ammo":"small_arms_ammunition","ammo_per":24,"supply":25.0,"materials":{"Iron Ore":18.0,"Copper Ore":2.5,"Fiber Plants":1.0,"Civilian Goods":8.0},"days":26.0,"delivery":12.0,"glyph":"lorry","look":"Canvas-topped lorry; riflemen on benches in the back."},
 	"armored_car_kit":{"name":"Armoured Cars","family":"vehicle","gen":1,"year":2709,"attack":2.60,"defense":1.60,"armor":2.00,"penetration":1.30,"crew":4.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":12,"supply":40.0,"materials":{"Iron Ore":22.0,"Copper Ore":1.5,"Crude Oil":0.3,"Civilian Goods":10.0},"days":30.0,"delivery":14.0,"glyph":"armored_car","look":"Four-wheeled steel box with a small turret; scouts the roads."},
-	"light_tank_kit":{"name":"Light Tanks","family":"vehicle","gen":2,"year":2709,"attack":4.80,"defense":3.00,"armor":2.40,"penetration":1.90,"crew":3.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":30,"supply":80.0,"materials":{"Iron Ore":30.0,"Copper Ore":2.0,"Crude Oil":0.5,"Civilian Goods":15.0},"days":45.0,"delivery":20.0,"glyph":"light_tank","look":"Small tracked tank, riveted plates, one small gun or twin machine guns."},
-	"armored_vehicle":{"name":"Medium Tanks","family":"vehicle","gen":3,"year":2709,"attack":4.80,"defense":3.70,"armor":2.80,"penetration":2.80,"crew":5.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":18,"supply":150.0,"materials":{"Iron Ore":65.0,"Copper Ore":5.0,"Tin Ore":1.0,"Civilian Goods":25.0},"days":80.0,"delivery":28.0,"glyph":"tank","look":"Welded tracked tank, sloped front, medium gun in a round turret."},
-	"heavy_tank_kit":{"name":"Heavy Tanks","family":"vehicle","gen":4,"year":2768,"attack":5.60,"defense":4.60,"armor":3.40,"penetration":3.40,"crew":5.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":20,"supply":220.0,"materials":{"Iron Ore":90.0,"Copper Ore":6.0,"Tin Ore":1.5,"Crude Oil":1.0,"Civilian Goods":35.0},"days":110.0,"delivery":36.0,"glyph":"heavy_tank","look":"Wide slab-sided tank with a long heavy gun; slow and thirsty."},
-	"tank_destroyer_kit":{"name":"Tank Destroyers","family":"vehicle","gen":4,"year":2768,"attack":5.20,"defense":2.60,"armor":2.60,"penetration":4.40,"crew":4.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":20,"supply":130.0,"materials":{"Iron Ore":55.0,"Copper Ore":3.0,"Crude Oil":0.5,"Civilian Goods":20.0},"days":70.0,"delivery":26.0,"glyph":"tank_destroyer","look":"Turretless tracked hull with a very long gun, low to the ground."},
-	"mechanized_kit":{"name":"Armoured Carriers","family":"vehicle","gen":5,"year":2768,"attack":3.00,"defense":2.80,"armor":2.20,"penetration":1.60,"crew":8.0,"crewless":0.0,"ammo":"small_arms_ammunition","ammo_per":300,"supply":90.0,"materials":{"Iron Ore":26.0,"Copper Ore":2.0,"Crude Oil":0.5,"Civilian Goods":15.0},"days":40.0,"delivery":20.0,"glyph":"carrier","look":"Tracked steel box with a ramp; a squad rides inside, a gun on top."},
+	"light_tank_kit":{"name":"Light Tanks","family":"vehicle","gen":3,"year":2709,"attack":4.80,"defense":3.00,"armor":2.40,"penetration":1.90,"crew":3.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":30,"supply":80.0,"materials":{"Iron Ore":30.0,"Copper Ore":2.0,"Crude Oil":0.5,"Civilian Goods":15.0},"days":45.0,"delivery":20.0,"glyph":"light_tank","look":"Small tracked tank, riveted plates, one small gun or twin machine guns."},
+	"armored_vehicle":{"name":"Medium Tanks","family":"vehicle","gen":4,"year":2709,"attack":4.80,"defense":3.70,"armor":2.80,"penetration":2.80,"crew":5.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":18,"supply":150.0,"materials":{"Iron Ore":65.0,"Copper Ore":5.0,"Tin Ore":1.0,"Civilian Goods":25.0},"days":80.0,"delivery":28.0,"glyph":"tank","look":"Welded tracked tank, sloped front, medium gun in a round turret."},
+	"heavy_tank_kit":{"name":"Heavy Tanks","family":"vehicle","gen":5,"year":2768,"attack":5.60,"defense":4.60,"armor":3.40,"penetration":3.40,"crew":5.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":20,"supply":220.0,"materials":{"Iron Ore":90.0,"Copper Ore":6.0,"Tin Ore":1.5,"Crude Oil":1.0,"Civilian Goods":35.0},"days":110.0,"delivery":36.0,"glyph":"heavy_tank","look":"Wide slab-sided tank with a long heavy gun; slow and thirsty."},
+	"tank_destroyer_kit":{"name":"Tank Destroyers","family":"vehicle","gen":5,"year":2768,"attack":5.20,"defense":2.60,"armor":2.60,"penetration":4.40,"crew":4.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":20,"supply":130.0,"materials":{"Iron Ore":55.0,"Copper Ore":3.0,"Crude Oil":0.5,"Civilian Goods":20.0},"days":70.0,"delivery":26.0,"glyph":"tank_destroyer","look":"Turretless tracked hull with a very long gun, low to the ground."},
+	"mechanized_kit":{"name":"Armoured Carriers","family":"vehicle","gen":2,"year":2768,"attack":3.00,"defense":2.80,"armor":2.20,"penetration":1.60,"crew":8.0,"crewless":0.0,"ammo":"small_arms_ammunition","ammo_per":300,"supply":90.0,"materials":{"Iron Ore":26.0,"Copper Ore":2.0,"Crude Oil":0.5,"Civilian Goods":15.0},"days":40.0,"delivery":20.0,"glyph":"carrier","look":"Tracked steel box with a ramp; a squad rides inside, a gun on top."},
 	"main_battle_tank":{"name":"Main Battle Tanks","family":"vehicle","gen":6,"year":2842,"attack":8.50,"defense":6.80,"armor":4.20,"penetration":4.60,"crew":4.0,"crewless":0.0,"ammo":"heavy_shells","ammo_per":40,"supply":600.0,"materials":{"Iron Ore":90.0,"Copper Ore":6.0,"Nickel Ore":2.0,"Fine Sand":0.5,"Crude Oil":3.0,"Civilian Goods":60.0},"days":140.0,"delivery":40.0,"glyph":"mbt","look":"Low wide tank with a long stabilised gun, night sights and angular armour."},
 	# Drones and robots.
 	"drone_team":{"name":"Drone Teams","family":"autonomous","gen":0,"year":2980,"attack":9.00,"defense":2.50,"armor":0.00,"penetration":4.40,"crew":2.0,"crewless":0.6,"ammo":"heavy_shells","ammo_per":6,"supply":30.0,"materials":{"Copper Ore":2.0,"Graphite":1.5,"Fine Sand":0.6,"Nickel Ore":0.6,"Fiber Plants":1.0,"Civilian Goods":25.0},"days":14.0,"delivery":3.0,"glyph":"drone","look":"Two operators in a dugout with goggles and a case of small four-rotor drones."},
@@ -175,6 +175,36 @@ static func retention(from_id:String,to_id:String)->float:
 	if a!="" and a==b: return KEEP_FAMILY
 	if a!="" and b!="": return KEEP_LAND
 	return KEEP_OTHER
+
+## The kit of the same family just before this one (by generation, then
+## year), or "" for the first of its family: what a new kit is weighed
+## against on the production cards.
+static func predecessor(id:String)->String:
+	var fam:=family(id)
+	var gen:=generation(id)
+	var best:=""
+	for other:String in KITS:
+		if other==id or String(KITS[other].family)!=fam or int(KITS[other].gen)>=gen: continue
+		if best=="" or int(KITS[other].gen)>int(KITS[best].gen) or (int(KITS[other].gen)==int(KITS[best].gen) and float(KITS[other].armor)>float(KITS[best].armor)): best=other
+	return best
+
+## Plain words for a kit's numbers on a production card: what one set does
+## in battle and asks in the field, and how it compares with the kit before it.
+static func card_words(id:String)->String:
+	if not KITS.has(id): return ""
+	var r:Dictionary=KITS[id]
+	var crew:=float(r.crew)
+	var lines:=PackedStringArray()
+	var who:="a man" if crew>=1.0 else "a machine"
+	lines.append("In battle, %s: attack %.2f, defense %.2f, armour %.2f, pierce %.2f." % [who,float(r.attack),float(r.defense),float(r.armor),float(r.penetration)])
+	if crew>1.0: lines.append("Crew: %d men to a set." % roundi(crew))
+	elif crew<1.0: lines.append("One operator runs %d." % roundi(1.0/crew))
+	if float(r.supply)>0.0: lines.append("In the field it asks %s loads a day of the supply line (fodder, fuel, rounds or spares)." % (("%.1f" % float(r.supply)).trim_suffix(".0")))
+	var before:=predecessor(id)
+	if before!="":
+		var c:=compare(id,before)
+		lines.append("Against %s: attack %+d%%, defense %+d%%, armour %+.1f, pierce %+.1f." % [label(before),roundi(float(c.attack)*100.0),roundi(float(c.defense)*100.0),float(c.armor),float(c.penetration)])
+	return "\n".join(lines)
 
 ## How the kit compares with another of its family, for the picker:
 ## signed change in attack and defense, as fractions.

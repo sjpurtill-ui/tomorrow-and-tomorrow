@@ -7,6 +7,7 @@ extends VBoxContainer
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const Ledger:=preload("res://scripts/equipment_ledger.gd")
 const GROUP_NAMES:={"weapons":"Weapons","ammunition":"Ammunition","carts":"Carts","boats":"Boats","aircraft":"Aircraft"}
 
 var screen:Node
@@ -50,6 +51,9 @@ func apply(recipes:Array,note:String)->void:
 		var name_label:Label=card.find_child("Title",true,false)
 		name_label.add_theme_color_override("font_color",T.INK if not card.disabled or running else T.INK_MUTED)
 		var tip:PackedStringArray=[String(recipe.name)+": "+String(recipe.get("description",""))]
+		# What the kit does, by the equipment ledger's own numbers.
+		var numbers:=String(Ledger.card_words(String(recipe.item)))
+		if numbers!="":tip.append(numbers)
 		tip.append(String(recipe.get("needs","")))
 		if int(recipe.get("deficit",0))>0 and not running:tip.append("The bands are %d short of these." % int(recipe.deficit))
 		if running:tip.append("A line already makes this. Give it more hands instead.")

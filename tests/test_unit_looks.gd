@@ -126,6 +126,7 @@ func test_production_icons_use_the_ledger_glyph()->void:
 	assert_str(Icons.equipment_arm("plate_spear")).is_equal("spear")
 	for item in ["arrows","heavy_shells","transport_cart","galley_equipment","fighter_equipment"]:
 		assert_str(Icons.equipment_arm(item)).is_equal("")
+	assert_str(Icons.equipment_arm("supply_lorry")).is_equal("lorry")
 	var tank:=Icons.equipment_texture("light_tank_kit",INK,ACCENT,40).get_image()
 	var frame:=Icons.equipment_texture("combat_frame",INK,ACCENT,40).get_image()
 	assert_bool(tank.get_data()==frame.get_data()).is_false()

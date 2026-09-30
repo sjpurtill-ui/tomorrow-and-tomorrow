@@ -109,3 +109,13 @@ func test_retooling_keeps_skill_by_family()->void:
 	assert_float(Ledger.retention("spear","armored_vehicle")).is_equal(Ledger.KEEP_LAND)
 	assert_float(Production.retool_retention("spear","arrows","production","consumable")).is_equal(.35)
 	assert_float(Production.retool_retention("service_rifle","assault_kit","production","production")).is_equal(Ledger.KEEP_FAMILY)
+
+func test_a_production_card_states_the_kits_numbers_and_what_it_improves_on()->void:
+	assert_array(["mountain_kit","marksman_rifle"]).contains([Ledger.predecessor("service_rifle")])
+	assert_str(Ledger.predecessor("improvised")).is_equal("")
+	var words:=Ledger.card_words("main_battle_tank")
+	assert_str(words).contains("attack 8.50")
+	assert_str(words).contains("Crew: 4 men")
+	assert_str(words).contains("Against Heavy Tanks")
+	assert_str(Ledger.card_words("combat_frame")).contains("One operator runs 8")
+	assert_str(Ledger.card_words("not_a_kit")).is_empty()
