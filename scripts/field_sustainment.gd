@@ -137,6 +137,54 @@ func recovery_day(force:Dictionary,span:float)->int:
 	force["hunger_sick"]=int(force.get("hunger_sick",0))-placed
 	return placed
 
+# --- Rest: will to fight and battle wounded -----------------------------------
+
+## Morale regained a day at rest in full supply (camped; a third of it on the
+## march). A band recovers toward a ceiling its supply sets: a fed band to
+## full heart, a half-supplied one only part way. A hungry band loses heart.
+const MORALE_REST:=0.03
+const MORALE_MARCHING:=0.33
+const MORALE_HUNGER_LOSS:=0.008
+const MORALE_HUNGER_FLOOR:=0.30
+## Battle wounded who rejoin a day in full supply (twice with a medical
+## detachment in the band); the disabled stay in the pool until home.
+const WOUNDED_RETURN:=0.015
+
+## A day's rest for a band or garrison: heart regained or lost, and battle
+## wounded back in their places. Nothing while it fights.
+func rest_day(force:Dictionary,span:float)->Dictionary:
+	var result:={"morale":0.0,"wounded_back":0}
+	if force.has("army_id") and host.command_hierarchy.battle.engaged(int(force.get("army_id",0))): return result
+	var supply:=clampf(float(force.get("supply_level",1.0)),0.0,1.0)
+	var morale:=float(force.get("morale",1.0))
+	var before:=morale
+	if Rations.is_hungry(force):
+		morale=maxf(minf(morale,MORALE_HUNGER_FLOOR),morale-MORALE_HUNGER_LOSS*span)
+	else:
+		var pace:=MORALE_REST*(MORALE_MARCHING if String(force.get("status","stationed"))=="moving" else 1.0)
+		var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.5)) if force.get("commander") is Dictionary else 0.5,0.0,1.0)
+		var ceiling:=0.55+0.45*supply
+		if morale<ceiling: morale=minf(ceiling,morale+pace*(0.35+0.65*supply)*(0.9+0.2*logistics)*span)
+	force["morale"]=morale
+	result.morale=morale-before
+	# Battle wounded (not the hunger-sick, not the disabled) heal in camp.
+	var wounded:=maxi(0,int(force.get("wounded_pool",0))-maxi(0,int(force.get("hunger_sick",0)))-maxi(0,int(force.get("disabled_pool",0))))
+	if wounded>0 and supply>=0.5 and not Rations.is_hungry(force):
+		var care:=2.0 if _has_medics(force) else 1.0
+		var owed:=float(force.get("wounded_accumulator",0.0))+float(wounded)*WOUNDED_RETURN*care*supply*span
+		var back:=mini(wounded,floori(owed))
+		force["wounded_accumulator"]=owed-float(back)
+		if back>0:
+			var placed:=_return_men(force,back)
+			force["wounded_pool"]=int(force.get("wounded_pool",0))-placed
+			result.wounded_back=placed
+	return result
+
+static func _has_medics(force:Dictionary)->bool:
+	for formation in force.get("formations",[]):
+		if String(formation.get("unit",""))=="medical_detachment" and int(formation.get("count",0))>0: return true
+	return false
+
 ## Men out of the formations, in proportion to their counts. Returns the
 ## number removed; the formations' gear stays with the band.
 func _take_men(force:Dictionary,count:int)->int:

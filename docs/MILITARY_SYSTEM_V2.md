@@ -445,3 +445,13 @@ with machine accounting; (7) recruitment fixes and template numbers.
   when its chosen band has marched. A line's later bands join the band it
   raised before while that band is at home, so recruiting no longer makes a
   new general for every band.
+- **Iteration 8, rest in the field.** Bands and garrisons never regained
+  heart away from home, and their battle wounded never came back (only the
+  levy at home recovered). Now, each day not in battle, a band recovers
+  morale toward a ceiling its supply sets (`0.55 + 0.45 × supply`) at up to
+  3% a day camped (a third of that on the march, scaled by supply and the
+  general's logistics); a hungry band loses heart (0.8% a day, down to 0.30).
+  Battle wounded rejoin at 1.5% a day in a supplied camp, twice that with a
+  medical detachment; the disabled wait for home. A year-long cadence test
+  (`tests/test_field_campaign_year.gd`) holds the draft stream bounded and
+  every person accounted for.

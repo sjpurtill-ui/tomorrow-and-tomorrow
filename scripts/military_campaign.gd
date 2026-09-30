@@ -3456,6 +3456,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		force["stores_share"]=1.0 if at_home else sustainment.stores_share(force,_force_provision_access(force),FieldRations.forage_share(force))
 		sustainment.hunger_day(force,float(WorldSimulation.span))
 		sustainment.recovery_day(force,float(WorldSimulation.span))
+		sustainment.rest_day(force,float(WorldSimulation.span))
 		field_armies[force_index]=force
 	for force_index in occupation_forces.size():
 		var force:Dictionary=occupation_forces[force_index]
@@ -3479,6 +3480,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 		force["stores_share"]=sustainment.stores_share(force,_garrison_provision_access(force),0.0)
 		sustainment.hunger_day(force,float(WorldSimulation.span))
 		sustainment.recovery_day(force,float(WorldSimulation.span))
+		sustainment.rest_day(force,float(WorldSimulation.span))
 		occupation_forces[force_index]=force
 
 

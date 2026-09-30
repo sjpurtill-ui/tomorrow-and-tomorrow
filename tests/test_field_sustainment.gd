@@ -217,3 +217,32 @@ func test_the_personnel_ledger_adds_up_with_drafts_on_the_road()->void:
 func test_a_bad_saved_draft_is_dropped_alone()->void:
 	var kept:=Sustainment.clean_drafts([{"army_id":4,"formation_id":2,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"arrive_day":9},{"army_id":-1},{"army_id":3,"formation_id":1,"unit":"","weapon":"spear","count":2,"equipment":0,"arrive_day":1}])
 	assert_int(kept.size()).is_equal(1)
+
+func test_a_band_at_rest_regains_heart_by_its_supply_and_a_hungry_one_loses_it()->void:
+	var band:=_band(1,[_formation(1,"spearman","spear",200)])
+	band["morale"]=0.4;band["supply_level"]=1.0;band["provision_ratio"]=1.0
+	for day in 25: MilitaryCampaign.sustainment.rest_day(band,1.0)
+	assert_float(float(band.morale)).is_equal_approx(1.0,0.001)
+	var half:=_band(2,[_formation(1,"spearman","spear",200)])
+	half["morale"]=0.4;half["supply_level"]=0.5;half["provision_ratio"]=0.8
+	for day in 60: MilitaryCampaign.sustainment.rest_day(half,1.0)
+	assert_float(float(half.morale)).is_equal_approx(0.55+0.45*0.5,0.001)
+	var hungry:=_band(3,[_formation(1,"spearman","spear",200)])
+	hungry["morale"]=0.9;hungry["hungry_days"]=6.0;hungry["provision_ratio"]=0.2
+	for day in 10: MilitaryCampaign.sustainment.rest_day(hungry,1.0)
+	assert_float(float(hungry.morale)).is_less(0.9)
+	assert_float(float(hungry.morale)).is_greater_equal(Sustainment.MORALE_HUNGER_FLOOR)
+
+func test_battle_wounded_heal_in_a_supplied_camp_and_medics_double_it()->void:
+	var plain:=_band(1,[_formation(1,"spearman","spear",100,200)])
+	plain["wounded_pool"]=100;plain["supply_level"]=1.0;plain["provision_ratio"]=1.0
+	var cared:=_band(2,[_formation(1,"spearman","spear",100,200),_formation(2,"medical_detachment","medical_kit",10)])
+	cared["wounded_pool"]=100;cared["supply_level"]=1.0;cared["provision_ratio"]=1.0
+	for day in 20:
+		MilitaryCampaign.sustainment.rest_day(plain,1.0)
+		MilitaryCampaign.sustainment.rest_day(cared,1.0)
+	var healed_plain:=100-int(plain.wounded_pool)
+	var healed_cared:=100-int(cared.wounded_pool)
+	assert_int(healed_plain).is_between(20,35)
+	assert_int(healed_cared).is_greater(healed_plain)
+	assert_int(int(plain.troops)+int(plain.wounded_pool)).is_equal(200)
