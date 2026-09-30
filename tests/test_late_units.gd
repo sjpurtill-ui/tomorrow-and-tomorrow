@@ -160,3 +160,13 @@ func test_machines_and_tanks_lost_add_up_over_a_battles_days()->void:
 	var result:Dictionary=sim.simulate(guns,tanks,{"seed":3})
 	var formation:Dictionary=(result.defender.formations as Array)[0]
 	assert_int(int(result.defender.vehicles_lost)).is_equal(20-int(formation.equipment))
+
+func test_a_frame_cohort_stands_on_the_ground_its_machines_need()->void:
+	var Front:=preload("res://scripts/army_front_visual.gd")
+	var frames:=Front.occupied_area({"unit":"combat_frame_cohort","weapon":"combat_frame","count":10,"equipment":80})
+	var men:=Front.occupied_area({"unit":"networked_infantry","weapon":"networked_rifle","count":10,"equipment":10})
+	# Ten supervisors and eighty frames take the ground of ninety bodies.
+	assert_float(frames).is_equal(10*4.0+80*4.0)
+	assert_float(frames).is_greater(men*8.0)
+	var tanks:=Front.occupied_area({"unit":"light_tank","weapon":"light_tank_kit","count":30,"equipment":10})
+	assert_float(tanks).is_equal(30*4.0+10*20.0)
