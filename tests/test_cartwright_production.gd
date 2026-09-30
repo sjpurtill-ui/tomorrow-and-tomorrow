@@ -120,7 +120,7 @@ func test_planner_blocks_shortages_unknown_methods_pause_and_absent_demand()->vo
 		assert_bool(host.start_production_line("transport_cart",4).get("ok",false)).is_true()
 		host.equipment_queue.back().paused=true
 		assert_dict(Planner.recommendation()).is_empty()
-		host.equipment_queue.clear();host.field_armies.clear()
+		host.equipment_queue.clear();host.field_armies.clear();host.home_army.troops=0
 		assert_dict(Planner.recommendation()).is_empty()
 	)
 

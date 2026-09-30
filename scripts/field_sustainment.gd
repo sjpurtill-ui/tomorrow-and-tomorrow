@@ -392,6 +392,7 @@ func dispatch(order:Dictionary)->Dictionary:
 	var reserved:=maxi(0,int(order.get("reserved_equipment",0)))
 	var issued:=mini(wanted,reserved+maxi(0,int(host.military_inventory.get(weapon,0))))
 	host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+reserved-issued
+	host.gear_sent_out+=issued-reserved
 	var access:=clampf(float(order.get("equipment_access_sum",0.0))/maxf(0.01,float(order.get("instruction_progress_sum",order.get("required_days",1.0)))),0.0,1.0)
 	var skill:float=host._training_quality(unit,0.0)*(0.72+access*0.28)
 	var days:=travel_days(force)
@@ -472,6 +473,7 @@ func arrivals_day()->Array:
 func _send_home(draft:Dictionary)->void:
 	var weapon:=String(draft.get("weapon","improvised"))
 	host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+maxi(0,int(draft.get("equipment",0)))
+	host.gear_sent_out-=maxi(0,int(draft.get("equipment",0)))
 	var count:=maxi(0,int(draft.get("count",0)))
 	if count<=0: return
 	var unit:=String(draft.get("unit",""))

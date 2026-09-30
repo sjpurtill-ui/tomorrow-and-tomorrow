@@ -660,3 +660,44 @@ with machine accounting; (7) recruitment fixes and template numbers.
   - lorries: 2,000 loads each at 150 km a day;
   - every kit the workshops can then make and every unit we can then
     raise, from the equipment gates and the unit catalogue.
+- **Iteration 19, the full sweep.** 94 military, supply, battle, AI and UI
+  suites were run one at a time, and `main` was compared in a scratch
+  worktree. Three findings:
+  - The battle evaluation fell from 66 to 49 of 66. Since gear follows the
+    supply line, captured weapons in the stores go out to the band's gaps
+    the next day. The harness's "spoils reached the stores" check now
+    counts the stores plus what went out (`military_campaign.gear_sent_out`,
+    a running tally of sets sent to bands and drafts, less drafts' kit
+    brought back). The evaluation is back to 66 of 66.
+  - Staffs built carts only once bands were short in the field, so rivals
+    marched with porters alone. The old baggage-train rule is back as a
+    floor: a cart for each 24 soldiers, drivers permitting. The carriers'
+    shortfall rule adds to it (`cart_supply_planner.gd`).
+  - A depot finished while another was being laid gave one up too early.
+    It now gives one up only when the standing depots are already at the
+    limit.
+
+  `test_military_development` keeps its 8 failures, which are the same on
+  `main`.
+
+## Next steps (not built)
+
+- **Fuel from the ground.** Lorries and motor kits carry fuel as part of
+  their stores share, but nothing draws it from the Crude Oil stock yet.
+  The HOI4-grade version would work like this:
+  - each lorry and each vehicle, gun tractor or machine burns a stated
+    amount of crude a day in the field;
+  - the day's burn comes out of `resource_stockpiles["Crude Oil"]`;
+  - when the stock runs short, the lorries fall back to carts and the motor
+    kits' stores share falls by the shortfall;
+  - the Readiness strip states the days of fuel left.
+
+  It needs one calibration pass against a late-game save first: the daily
+  crude a real economy brings in, against about 0.1 t a lorry-day and
+  0.2 t a tank-day. Without that it could stall every motor army.
+- **Frontage by machines.** Front width still counts operators. A combat
+  frame company should take the frontage of its frames.
+- **Rival depots.** Rival generals could lay depots on their invasion
+  roads, and our raids could burn them.
+- **Held-town wording.** A band standing in a held town reads "N days from
+  <home>" with the relayed days. It should name the town as its depot.

@@ -135,6 +135,10 @@ var field_drafts:Array[Dictionary]=[]
 var sustainment=preload("res://scripts/field_sustainment.gd").new(self)
 ## Depots our bands have laid in the field (field_depots.gd); supply relays.
 var field_depots:Array=[]
+## Weapon sets sent out of the stores to bands and their drafts since the
+## world was loaded (less what drafts brought back): the ledger's check that
+## gear leaving the stores went somewhere (tests/battle_eval). Not saved.
+var gear_sent_out:=0
 var depots=preload("res://scripts/field_depots.gd").new(self)
 var next_field_army_id:=1
 ## Runner messages in flight from field armies back to the settlement. Until
@@ -5000,6 +5004,7 @@ func _deliver_stationed_field_equipment(delivery_limit:float)->float:
 		remaining=maxf(0,remaining-used/reach)
 		home_army["equipment_delivered_today"]=delivered
 		home_army["ammunition_delivered_today"]=ammunition
+		gear_sent_out+=maxi(0,int(delivered))
 		var rebuilt:Dictionary=simulator.create_formation_force(String(army.get("name","Army")),home_army.get("formations",[]),float(army.get("morale",1)),float(army.get("readiness",1)))
 		for key:String in ["troops","attack","defense","armor","penetration","formations"]:home_army[key]=rebuilt[key]
 		# A distant band's news still comes by runner (_process_army_runners_day).

@@ -161,14 +161,15 @@ func _build_day()->void:
 
 func _finish(record:Dictionary,at:Vector2)->void:
 	var today:=int(WorldSimulation.state.elapsed_days)
-	var given_up:=replaces()
+	# Past the limit now (depots still being laid wait their own turn).
+	var given_up:Dictionary={} if host.field_depots.size()<limit() else host.field_depots[0]
 	if not given_up.is_empty(): host.field_depots.erase(given_up)
 	var next_id:=1
 	for d in host.field_depots: next_id=maxi(next_id,int((d as Dictionary).get("id",0))+1)
 	var name:="Depot "+place_words(at)
 	var band:=String(record.get("name","A band"))
 	host.field_depots.append({"id":next_id,"name":name,"x":at.x,"z":at.y,"built_day":today,"by":band})
-	var text:="%s finished a depot %s. Bands beyond it are fed as if the road behind it were half as long." % [band,place_words(at)]
+	var text:="%s finished a depot %s. Carriers passing it eat from its stores, so more of each load reaches the bands beyond." % [band,place_words(at)]
 	if not given_up.is_empty(): text+=" We keep %d depots; the one %s was given up." % [limit(),String(given_up.name).trim_prefix("Depot ")]
 	_chronicle("A Depot Laid Down",text,"depot:%d:%d" % [next_id,today])
 

@@ -289,3 +289,19 @@ func test_an_attack_on_a_host_in_sight_states_the_odds_in_the_open()->void:
 	assert_str(said).contains("as our scouts make it out")
 	assert_str(said).contains("Odds in the open")
 	assert_float(float(plan.odds.walls)).is_equal(1.0)
+
+func test_a_depot_finished_while_there_is_room_gives_none_up()->void:
+	_learn("forward_supply_depots")
+	MilitaryCampaign.field_depots.assign([{"id":1,"name":"Depot A","x":home.x+30.0,"z":home.y,"built_day":1,"by":""}])
+	_band(1,Vector2(-60,0),300)
+	_band(2,Vector2(0,-60),60)
+	MilitaryCampaign.depots.assign(1,home+Vector2(-60,0))
+	MilitaryCampaign.depots.assign(2,home+Vector2(0,-60))
+	# Band 1 finishes first: one standing, room for it; A stays.
+	_days(5)
+	assert_int(MilitaryCampaign.field_depots.size()).is_equal(2)
+	assert_str(String(MilitaryCampaign.field_depots[0].name)).is_equal("Depot A")
+	# Band 2 finishes later: now A, the oldest, is given up.
+	_days(10)
+	assert_int(MilitaryCampaign.field_depots.size()).is_equal(2)
+	assert_bool(MilitaryCampaign.field_depots.any(func(d:Dictionary)->bool: return String(d.name)=="Depot A")).is_false()

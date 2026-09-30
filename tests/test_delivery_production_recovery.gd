@@ -23,6 +23,12 @@ func test_delivery_shortfall_allows_paid_carts_and_keeps_training_suspended()->v
 	WorldSimulation.scoped("delivery",func()->void:
 		setup();learn("joinery")
 		var state=WorldSimulation.state;var host=WorldSimulation.military
+		# A real shortfall on the carriers' line (carriers.gd): a band of 60
+		# 60 km out asks about 67 loads a day, 8 porters bring about 21, and
+		# two carts close the gap.
+		var out:=WorldSimulation.world.player_world_origin+Vector2(60,0)
+		host.field_armies.append({"army_id":1,"name":"Band","troops":60,"status":"stationed","location_id":"field","position":{"x":out.x,"z":out.y},"formations":[],"supply_level":1.0})
+		assert_int(preload("res://scripts/carriers.gd").wanted_from(host.carrier_reading(),"transport_cart")).is_equal(2)
 		# Carts are built from raw materials and Civilian Goods: stock two carts.
 		var cart:Dictionary=host._transport_recipe().materials
 		for resource:String in cart:state.resource_stockpiles[resource]=float(cart[resource])*2.0
