@@ -1038,8 +1038,11 @@ func tools_factor() -> float:
 	initialize()
 	return clampf(0.18+float(WorldSimulation.state.simulation_metrics.get("material_capacity",0.12))*0.92,0.18,1.10)
 
+## How much each searcher of the land finds and measures (resource_system.gd
+## _local_survey_inputs): the work pace, signs of minerals about, and the
+## founding tradition's promise to searchers (game_state.gd survey_output).
 func survey_factor() -> float:
-	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)*(1.0+WorldSimulation.state.founding_effect("survey_output"))
 
 
 func _threshold_event(events: Array[Dictionary],id: String,title: String,description: String,domain: String,severity: String,cooldown: int) -> void:
