@@ -36,6 +36,7 @@ const Undertakings:=preload("res://scripts/undertaking_system.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const EarlyLife:=preload("res://scripts/early_life_conditions.gd")
 const Injuries:=preload("res://scripts/permanent_injuries.gd")
+const Mechanics:=preload("res://scripts/research_mechanics.gd")
 
 ## Extra food a person on each task eats a day, in rations
 ## (food_system.gd _daily_food_demand extras; checked by the tests).
@@ -347,14 +348,17 @@ static func construction()->Dictionary:
 		lines.append(_line("New homes","after the Lean-tos","Builders start putting up homes of their own once the Lean-to Shelters stand.","plain"))
 	else:
 		lines.append(_line("New homes","room for all","Builders start more homes when the people pass 8 in 10 of the places (%s people)." % _grouped(Construction.housing_trigger_people()),"plain"))
-	# Upkeep: a month's wear of 2 points, mended up to 4 by builders at 5 in 100
-	# of the people, when materials are paid (settlement_model.gd).
+	# Upkeep: a month's wear of 2 points, mended up to 4 × repair skill by
+	# builders at 5 in 100 of the people, when materials are paid
+	# (settlement_model.gd _advance_city_form, research_mechanics.gd mending_factor).
 	var pop:=maxf(1.0,float(state.population_exact))
 	var share:=clampf(builders/maxf(1.0,pop*BUILD_UPKEEP_SHARE),0.0,1.0)
-	var monthly:=BUILD_MEND*share-BUILD_WEAR
+	var mending:float=Mechanics.mending_factor()
+	var monthly:=BUILD_MEND*share*mending-BUILD_WEAR
 	var condition:=clampf(float(WorldSimulation.settlements.city_form().condition),0.0,1.0)
+	var skill:=" Repair skill makes their mending go %s times as far." % _two(mending) if not is_equal_approx(mending,1.0) else ""
 	lines.append(_line("Keeping the town up","%s points a month" % _signed(monthly*100.0),
-		"The town wears %d points a month; builders mend up to %d when 5 in 100 of the people build (%s would) and the materials are paid. Its condition is %d of 100, and it scales what the stores, workshop, hall and shrines do." % [roundi(BUILD_WEAR*100.0),roundi(BUILD_MEND*100.0),_count(ceili(pop*BUILD_UPKEEP_SHARE)),roundi(condition*100.0)],"good" if monthly>=0.0 else "bad"))
+		"The town wears %d points a month; builders mend up to %s when 5 in 100 of the people build (%s would) and the materials are paid.%s Its condition is %d of 100, and it scales what the stores, workshop, hall and shrines do." % [roundi(BUILD_WEAR*100.0),_one(BUILD_MEND*mending*100.0),_count(ceili(pop*BUILD_UPKEEP_SHARE)),skill,roundi(condition*100.0)],"good" if monthly>=0.0 else "bad"))
 	# Walls and ditches: builders and a fifth of the watch mend them
 	# (military_campaign.gd integrity repair).
 	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
@@ -414,21 +418,24 @@ static func logistics()->Dictionary:
 	var pop:=maxf(1.0,float(state.population_exact))
 	var water:Dictionary=state.water_metrics
 	var lines:Array=[]
-	# Water: each carrier brings about 28 × work pace ÷ (1 + distance × 0.16)
-	# a day (resource_system.gd organized_collection).
+	# Water: each carrier brings about 28 × work pace ÷ (1 + walk × 0.16) a day,
+	# the walk being the distance shortened by wells and channels
+	# (resource_system.gd organized_collection, research_mechanics.gd water_walk_factor).
 	var km:=float(water.get("source_distance_km",-1.0))
+	var walk:=maxf(0.0,km)*Mechanics.water_walk_factor()
 	var labor:=clampf(float(state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)
-	var each:=CARRIER_WATER*labor/(1.0+maxf(0.0,km)*0.16)*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5)) if km>=0.0 else 0.0
+	var each:=CARRIER_WATER*labor/(1.0+walk*0.16)*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5)) if km>=0.0 else 0.0
 	var needed:=float(water.get("total_required_today",water.get("required_today",0.0)))
 	var collected:=float(water.get("collected_today",0.0))
 	var households:=float(water.get("household_collected_today",0.0))
+	var off:="from %s km off" % _one(km) if is_equal_approx(walk,maxf(0.0,km)) else "from %s km off, which wells and channels make a %s km walk" % [_one(km),_one(walk)]
 	if km<0.0:
 		lines.append(_line("Drinking water","no source known","No water source is known yet: searchers must find and measure one before carriers can fetch from it.","bad"))
 	elif needed<=0.0:
-		lines.append(_line("Drinking water","counted at dawn","The day's water has not been counted yet. Each carrier brings about %s a day from %s km off." % [_one(each),_one(km)],"plain"))
+		lines.append(_line("Drinking water","counted at dawn","The day's water has not been counted yet. Each carrier brings about %s a day %s." % [_one(each),off],"plain"))
 	else:
 		lines.append(_line("Drinking water","%d of 100 needed" % roundi(minf(1.0,collected/needed)*100.0),
-			"%s of the %s water the people need came in today; households beside the water fetched %s themselves. Each carrier brings about %s a day from %s km off, less the farther it is." % [_whole(collected),_whole(needed),_whole(households),_one(each),_one(km)],
+			"%s of the %s water the people need came in today; households beside the water fetched %s themselves. Each carrier brings about %s a day %s, less the farther it is." % [_whole(collected),_whole(needed),_whole(households),_one(each),off],
 			"good" if collected>=needed else "bad"))
 	# Moving things: carriers ÷ (8 in 100 of the people) × 55 points
 	# (consequence_engine.gd logistics_target).

@@ -154,6 +154,23 @@ func test_searchers_measure_what_is_found_and_nobody_else_can()->void:
 	var share:=clampf(GameState.effective_workers("Survey")/maxf(1.0,float(GameState.able_population())*0.10),0.0,1.0)
 	assert_str(String(claim.value)).is_equal("+%d points of reach" % roundi(share*16.0))
 
+## Repair skill and water access (research_mechanics.gd) show in the builders'
+## and carriers' numbers as they act in the engine.
+func test_research_shows_in_the_builders_and_carriers_numbers()->void:
+	_world()
+	GameState.population_allocations.Construction=12
+	var before:=_line(Impact.of("Construction"),"Keeping the town up")
+	DiscoverySystem.society_model.effect_totals["repair_capacity"]=0.5
+	var skilled:=_line(Impact.of("Construction"),"Keeping the town up")
+	assert_str(String(skilled.words)).contains("Repair skill makes their mending go 1.50 times as far")
+	assert_str(String(before.words)).not_contains("Repair skill")
+	GameState.water_metrics={"source_distance_km":4.0,"total_required_today":100.0,"collected_today":100.0,"household_collected_today":20.0}
+	DiscoverySystem.society_model.effect_totals["water_access"]=0.4
+	var water:=_line(Impact.of("Logistics"),"Drinking water")
+	# 4 km counts as 4 × (1 − 0.75 × 0.4) = 2.8 km of walking.
+	assert_str(String(water.words)).contains("from 4 km off, which wells and channels make a 2.8 km walk")
+	DiscoverySystem.society_model.effect_totals.erase("repair_capacity");DiscoverySystem.society_model.effect_totals.erase("water_access")
+
 func _line(said:Dictionary,label:String)->Dictionary:
 	for line:Dictionary in said.lines:
 		if String(line.label)==label:return line
