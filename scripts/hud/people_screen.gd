@@ -8,6 +8,9 @@ extends VBoxContainer
 ##   ├ the season's story (Chronicle)              │ the hearths
 ##   └ the tallies, one compact row
 ##
+## Each task's name opens what that work does, with today's numbers
+## (task_impact.gd, laid out by impact_panel.gd); one task is open at a time.
+##
 ## Data comes from content/dock_content_overview.gd (people_model.gd). The
 ## daily refresh updates this widget in place (update_block): the scene keeps
 ## its nodes and only parts whose data changed are rebuilt, so the backdrop,
@@ -20,6 +23,8 @@ const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
 ## The Production screen's hands controls (−, +, ×5), for the daily work.
 const W:=preload("res://scripts/hud/production_widgets.gd")
+## What a task does, line by line (the Buildings page's panel).
+const ImpactPanel:=preload("res://scripts/hud/impact_panel.gd")
 
 const SCENE_HEIGHT:=210.0
 const TWO_COLUMNS_AT:=700.0
@@ -36,6 +41,31 @@ class Meter extends Control:
 	func _draw()->void:
 		draw_rect(Rect2(Vector2.ZERO,size),track)
 		draw_rect(Rect2(Vector2.ZERO,Vector2(size.x*fill,size.y)),color)
+
+## A task's name that opens what the work does: a small arrow, then the name.
+## The arrow points at the name while closed and down while open.
+class TaskToggle extends Button:
+	var open:=false
+	func _init(words:String,is_open:bool)->void:
+		text=words;open=is_open;focus_mode=Control.FOCUS_NONE;clip_text=true
+		alignment=HORIZONTAL_ALIGNMENT_LEFT;custom_minimum_size=Vector2(136,24);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		tooltip_text=("Close what %s does" if is_open else "What %s does, with today's numbers") % words
+		add_theme_font_size_override("font_size",12)
+		add_theme_color_override("font_color",T.INK if is_open else T.BODY)
+		for state:String in ["font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:add_theme_color_override(state,T.INK)
+		add_theme_color_override("font_disabled_color",T.DISABLED)
+		var normal:=T.flat(T.ACTIVE_BG if is_open else Color(0,0,0,0),T.GOLD if is_open else Color(0,0,0,0),1,3)
+		var hover:=T.flat(T.HOVER_BG,T.GOLD,1,3)
+		for style:StyleBoxFlat in [normal,hover]:
+			style.content_margin_left=17;style.content_margin_right=4;style.content_margin_top=2;style.content_margin_bottom=2
+		add_theme_stylebox_override("normal",normal);add_theme_stylebox_override("hover",hover)
+		add_theme_stylebox_override("pressed",hover);add_theme_stylebox_override("hover_pressed",hover)
+		add_theme_stylebox_override("disabled",T.flat(Color(0,0,0,0)));add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	func _draw()->void:
+		var ink:=T.INK if open or is_hovered() else T.BODY
+		var c:=Vector2(8.5,size.y*0.5);var r:=3.6
+		var arrow:=PackedVector2Array([c+Vector2(-r,-r*0.55),c+Vector2(0,r*0.6),c+Vector2(r,-r*0.55)]) if open else PackedVector2Array([c+Vector2(-r*0.55,-r),c+Vector2(r*0.6,0),c+Vector2(-r*0.55,r)])
+		draw_polyline(arrow,ink,1.6,true)
 
 var data:Dictionary={}
 var selected_id:=""
@@ -55,6 +85,8 @@ var parts:Dictionary={}
 var prints:Dictionary={}
 ## Face id -> distinct painting slot, so no painting repeats on this screen.
 var face_slots:Dictionary={}
+## The task whose "what this work does" is open ("" for none).
+var open_task:=""
 ## Parts rebuilt since setup (tests read this to prove in-place updates).
 var rebuilds:=0
 
@@ -103,15 +135,26 @@ func apply(block:Dictionary)->void:
 
 
 func view_state()->Dictionary:
-	return {"selected":selected_id}
+	return {"selected":selected_id,"task":open_task}
 
 
 func restore_view_state(state:Dictionary)->void:
+	var changed:=false
 	var wanted:=String(state.get("selected",""))
 	if wanted!=selected_id and (wanted=="" or not _face(wanted).is_empty()):
 		selected_id=wanted
-		prints.erase("card");prints.erase("faces")
-		apply(data)
+		prints.erase("card");prints.erase("faces");changed=true
+	var task:=String(state.get("task",""))
+	if task!=open_task:
+		open_task=task;prints.erase("labor");changed=true
+	if changed:apply(data)
+
+
+## Opens what a task does, or closes it when it is the one open.
+func toggle_task(role:String)->void:
+	open_task="" if open_task==role else role
+	prints.erase("labor")
+	_rebuild_if_changed("labor",data.get("labor",{}),_fill_labor)
 
 
 # ---------------------------------------------------------------------------
@@ -331,7 +374,8 @@ func _fill_labor(parent:Control,labor:Dictionary)->void:
 		var task:Dictionary=task_variant
 		var role:=String(task.get("id",""))
 		var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);parent.add_child(row)
-		var label:=T.make_label(String(task.get("label","")),12,T.BODY);label.name="Task";label.custom_minimum_size.x=136;label.clip_text=true;row.add_child(label)
+		var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
+		toggle.pressed.connect(toggle_task.bind(role))
 		var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
 		var count:=int(task.get("count",0))
 		# The food getters by what they got (plants, game, fish, fields).
@@ -356,6 +400,21 @@ func _fill_labor(parent:Control,labor:Dictionary)->void:
 			more.pressed.connect((on_move as Callable).bind(role,1))
 			var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
 			five.pressed.connect((on_move as Callable).bind(role,5))
+		if open_task==role:_task_impact(parent,task)
+	var hint:=T.make_label("Click a task to see what that work does.",11,T.TEXT_SOFT);hint.name="WorkHint";parent.add_child(hint)
+
+
+## What an open task does: its lead, then each effect with today's numbers.
+func _task_impact(parent:Control,task:Dictionary)->void:
+	var impact:Dictionary=task.get("impact",{})
+	var box:=PanelContainer.new();box.name="TaskImpact"
+	box.add_theme_stylebox_override("panel",T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,4,12));parent.add_child(box)
+	var inner:=VBoxContainer.new();inner.add_theme_constant_override("separation",8);box.add_child(inner)
+	inner.add_child(_heading("WHAT %s DOES" % String(task.get("label","this work")).to_upper()))
+	if (impact.get("lines",[]) as Array).is_empty() and String(impact.get("lead",""))=="":
+		_line(inner,"Nothing is measured for this work yet.");return
+	var panel:=ImpactPanel.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;inner.add_child(panel)
+	panel.setup({"lead":String(impact.get("lead","")),"lines":impact.get("lines",[]),"columns":1})
 
 
 ## A plain choice button, the current one marked (home_ledger._choices' look).

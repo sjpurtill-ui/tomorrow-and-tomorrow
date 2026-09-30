@@ -4,6 +4,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 const People=preload("res://scripts/hud/people_model.gd")
 const Buildings=preload("res://scripts/hud/construction_art.gd")
 const Manual=preload("res://scripts/manual_work.gd")
+const TaskImpact=preload("res://scripts/task_impact.gd")
 ## THE PEOPLE: the god looking down on their people. One living scene (the
 ## settlement at this hour, a headline and one voice from the fires), the
 ## faces of named people, the vitals as meters with a trend and a cause, what
@@ -59,6 +60,8 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 	var most:=1
 	for task:Dictionary in tasks:
 		able+=int(task.count);most=maxi(most,int(task.count))
+		# What the work does, with today's numbers (opened from the task's name).
+		task["impact"]=TaskImpact.of(String(task.id))
 	if manual:
 		var counts:=Manual.counts()
 		for task:Dictionary in tasks:
