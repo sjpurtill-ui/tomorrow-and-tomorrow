@@ -17,6 +17,7 @@ extends RefCounted
 ##   day_words()  a compact date, "12 Spring"
 
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 const SEASONS:=["Spring","Summer","Autumn","Winter"]
 ## A band may be sent off early once this share of its training is done
 ## (scripts/recruit_deploy.gd uses the same fifth).
@@ -195,5 +196,61 @@ static func templates(mc:Node=null)->Array[Dictionary]:
 		if entries.is_empty():reason="Add men to this band first."
 		var first:=String(entries[0].unit) if not entries.is_empty() else "levy"
 		out.append({"id":int(raw.get("template_id",0)),"name":String(raw.get("name","Band")),"men":men,"entries":entries,"gear":gear,
-			"art":art.illustration_path(first),"unit":first,"trainable":reason=="","reason":reason})
+			"art":art.illustration_path(first),"unit":first,"trainable":reason=="","reason":reason,"stats":template_stats(mc,entries)})
 	return out
+
+
+## What a band of this design does, by the engine's own rules, fully armed
+## and drilled (HOI4's division designer, without the width puzzle):
+## {strength, attack, defense, hard, armor, pierce, km_day, loads_man, bread,
+##  stores, days, reinforce_days, machines}
+## strength: the band's fighting power (combat_simulator: men x sqrt(attack x
+## defense) per man, against an unarmoured foe on open ground).
+static func template_stats(mc:Node,entries:Array)->Dictionary:
+	var sim=mc.simulator
+	var Ledger:=preload("res://scripts/equipment_ledger.gd")
+	var formations:=[]
+	var men:=0
+	var machines:=0
+	var days:=0.0
+	var pace:=INF
+	var stores:=0.0
+	for entry:Dictionary in entries:
+		var unit:=String(entry.get("unit","levy"));var weapon:=String(entry.get("weapon","improvised"));var count:=maxi(0,int(entry.get("count",0)))
+		if count<=0:continue
+		var sets:int=sim.equipment_required_for_weapon(weapon,count)
+		formations.append({"id":formations.size()+1,"unit":unit,"weapon":weapon,"count":count,"authorized_count":count,"equipment":sets,"equipment_required":sets,"ammunition":sim.ammunition_required_for_weapon(weapon,sets,count),"training":0.8,"experience":0.0,"personnel_condition":1.0})
+		men+=count
+		if sim.is_machine(weapon):machines+=sets
+		stores+=float(sets)*Ledger.supply(weapon)
+		days=maxf(days,float(mc.UnitCatalog.training_days(unit)))
+		pace=minf(pace,float(mc.UnitCatalog.archetype(unit).get("pace_km_day",24.0)))
+	if men<=0:return {}
+	var force:Dictionary=sim.create_formation_force("Design",formations,1.0,1.0)
+	var cohorts:Array=sim.evaluate_force(force,{"formations":[]},1.0)
+	var strength:=0.0;var attack:=0.0;var defense:=0.0;var hard:=0.0
+	for i in cohorts.size():
+		var c:Dictionary=cohorts[i]
+		strength+=float(c.count)*sqrt(float(c.attack)*float(c.defense))
+		attack+=float(c.count)*float(c.attack);defense+=float(c.count)*float(c.defense)
+		hard+=float(c.count)*sim.kit_hardness(String(formations[i].weapon))
+	var bread:=float(men)*1.12
+	return {"strength":strength,"attack":attack/men,"defense":defense/men,"hard":hard/men,"armor":float(force.get("armor",0.0)),"pierce":float(force.get("penetration",0.0)),
+		"km_day":pace if is_finite(pace) else 24.0,"loads_man":(bread+stores)/men,"bread":bread/men,"stores":stores/men,"days":days,"reinforce_days":maxf(3.0,days*0.58),"machines":machines}
+
+
+## "Strength 210 · 24 km/day · 1.6 loads · 90 days" and its tooltip (the
+## loads are per man per day).
+static func stats_words(stats:Dictionary)->Array:
+	if stats.is_empty():return ["",""]
+	var line:="Strength %s · %d km/day · %s loads · %d days" % [EraWords.grouped(roundi(float(stats.strength))),roundi(float(stats.km_day)),("%.1f" % float(stats.loads_man)).trim_suffix(".0"),roundi(float(stats.days))]
+	var tip:=PackedStringArray()
+	tip.append("Strength %s: the band's fighting power, fully armed and drilled, on open ground (men × √(attack × defense) a man)." % EraWords.grouped(roundi(float(stats.strength))))
+	tip.append("Each man: attack %.2f, defense %.2f." % [float(stats.attack),float(stats.defense)])
+	if int(stats.machines)>0:tip.append("Machines: %d, run by the band's operators; they fight only with their machines." % int(stats.machines))
+	if float(stats.hard)>0.01:tip.append("Armour: %d%% of the band is hard; blows that cannot pierce armour %.1f glance off it." % [roundi(float(stats.hard)*100.0),float(stats.armor)/maxf(0.01,float(stats.hard))])
+	tip.append("Pierce %.1f: armour below this takes its blows in full." % float(stats.pierce))
+	tip.append("Marches %d km a day on open level ground (its slowest arm)." % roundi(float(stats.km_day)))
+	tip.append("Asks the supply line %.1f loads a man a day: bread %.1f, fodder, fuel and rounds %.1f." % [float(stats.loads_man),float(stats.bread),float(stats.stores)])
+	tip.append("Trains in %d days; replacements train in %d." % [roundi(float(stats.days)),roundi(float(stats.reinforce_days))])
+	return [line,"\n".join(tip)]

@@ -6,8 +6,10 @@ extends RefCounted
 ## A soldier's day of food away from home comes three ways (field_rations.gd,
 ## military_campaign.record_daily_provisions, which this model feeds):
 ##   carried  brought from our stores. What reaches a band is the carriers'
-##            capacity at all (military_campaign._field_transport_delivery_ratio:
-##            haulers, carts, the commander's care, supply groups) times the
+##            share of all the bread asked (carriers.gd: porters, carts and
+##            lorries driven by the Logistics workers, each at its own pace,
+##            bread first and stores after, military_campaign
+##            ._field_transport_delivery_ratio) times the
 ##            HAUL: the share of a load the carriers do not eat on the road.
 ##            The haul falls with the days of hauling from the nearest hub
 ##            along the supply line, weighed as march_terrain.gd weighs ground
@@ -19,8 +21,12 @@ extends RefCounted
 ##
 ## Hubs are home and our other settlements (their stores). A held town is a
 ## depot on the line: the carts rest and stores gather there, so a line
-## from it starts at RELAY of the cost of reaching it. When home is under
-## siege, carts get out only as far as the besiegers let them.
+## from it starts at RELAY of the cost of reaching it. A field depot our band
+## laid (field_depots.gd) feeds the carriers on the way: what they eat is
+## reckoned from it (at RELAY of the cost of reaching it), but they still
+## walk the whole road from home, so it does not shorten their round trip
+## (trip_effort). When home is under siege, carts get out only as far as the
+## besiegers let them, whatever line they take.
 ##
 ## The supply field: one multi-source search (Dijkstra) over a square
 ## lattice round home (its side doubling as our hubs and known land spread).
@@ -179,12 +185,27 @@ static func today()->int:
 static func carrier()->String:
 	var s:Variant=_state()
 	if s==null: return "foot"
-	if "internal_combustion" in s.known_discoveries and WorldSimulation.discovery!=null and float(WorldSimulation.discovery.adoption("internal_combustion"))>=0.5: return "motor"
-	if float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0: return "wheeled"
-	return "foot"
+	# The kind of carrier moving most of our loads sets the line's pace
+	# (carriers.gd): one lorry among a thousand porters does not.
+	var carriers:=load("res://scripts/carriers.gd")
+	var adoption:=func(id:String)->float: return float(WorldSimulation.discovery.adoption(id)) if WorldSimulation.discovery!=null and id in s.known_discoveries else 0.0
+	var fleet:Dictionary=carriers.fleet(s,adoption)
+	var best:=String(carriers.main_kind(fleet))
+	# A new kind takes over the line only once it clearly moves more (a fifth
+	# more than the kind that had it): one cart or one worker does not flip
+	# every band's haul back and forth.
+	var owner:=(s as Object).get_instance_id()
+	var held:=String(_main_kind.get(owner,best))
+	var trips:Dictionary=fleet.get("trip",{})
+	if held!=best and float(trips.get(best,0.0))<1.2*float(trips.get(held,0.0)): best=held
+	_main_kind[owner]=best
+	return String(carriers.ARM[best])
+
+static var _main_kind:Dictionary={}
 
 ## Our hubs: home and our other settlements, then the towns we hold.
-## [{id, name, kind: home|town|held, pos:Vector2, civ_id?, region_id?}]
+## Field depots our bands laid (field_depots.gd) join the held towns as relays.
+## [{id, name, kind: home|town|held|depot, pos:Vector2, civ_id?, region_id?}]
 static func hubs()->Array:
 	var out:Array=[]
 	var s:Variant=_state()
@@ -213,7 +234,17 @@ static func hubs()->Array:
 			var at:Vector2=Pursuit.town_position(rid)
 			if not at.is_finite(): continue
 			out.append({"id":"h:"+rid,"name":town_name(civ_id,rid,String(force.get("region_name","the held town"))),"kind":"held","pos":at,"civ_id":civ_id,"region_id":rid})
+	var laid:Variant=mc.get("field_depots") if mc!=null else null
+	if laid is Array:
+		for d in laid:
+			var depot:Dictionary=d
+			out.append({"id":"d:%d" % int(depot.get("id",0)),"name":String(depot.get("name","Depot")),"kind":"depot","pos":Vector2(float(depot.x),float(depot.z))})
 	return out
+
+## A hub whose line starts from what reaching it cost (a held town or a
+## field depot), as against our own stores.
+static func is_relay(kind:String)->bool:
+	return kind=="held" or kind=="depot"
 
 ## A town's name as the map shows it (town_names.gd: one name everywhere).
 static func town_name(civ_id:String,region_id:String,fallback:String="")->String:
@@ -293,7 +324,7 @@ static func _signature()->int:
 			if f is Dictionary and int((f as Dictionary).get("troops",0))>0: garrisons+=1
 	var terrain:Object=March._terrain()
 	return hash([int(s.elapsed_days),int(GameState.world_seed),bool(s.settlement_site_committed),(s.player_settlements as Array).size(),garrisons,
-		mc.occupation_forces.size() if mc!=null else 0,int(world.fog_revision),(world.revealed_areas as Array).size(),
+		mc.occupation_forces.size() if mc!=null else 0,hash(mc.get("field_depots")) if mc!=null else 0,int(world.fog_revision),(world.revealed_areas as Array).size(),
 		float((s.resource_stockpiles as Dictionary).get("Transport Carts",0.0))>=1.0,"internal_combustion" in s.known_discoveries,
 		hash(March.ground_override),hash(March.crossing_override),March.use_roads_override,March.roads_override.size(),hash(March.roads_override),
 		March.bridge_override,terrain.get_instance_id() if terrain!=null else 0])
@@ -317,7 +348,7 @@ static func _make_spec()->Dictionary:
 	if hub_list.is_empty(): return {}
 	var settlements:Array=[]
 	var held:Array=[]
-	for h:Dictionary in hub_list: (held if String(h.kind)=="held" else settlements).append(h)
+	for h:Dictionary in hub_list: (held if is_relay(String(h.kind)) else settlements).append(h)
 	if settlements.is_empty(): return {}
 	var terrain:Object=March._terrain()
 	var fixture:=March.ground_override.is_valid()
@@ -580,7 +611,7 @@ static func build(spec:Dictionary,ground:Dictionary={},cancel:Array=[false])->Di
 			# The settlement whose line stocks this depot.
 			var node:=_node_near(field,h_row.pos)
 			var via:=int((found.src as PackedInt32Array)[node]) if node>=0 else -1
-			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":"held","pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id","")),
+			sources.append({"id":String(h_row.id),"name":String(h_row.name),"kind":String(h_row.kind),"pos":h_row.pos,"base":reach*RELAY,"region_id":String(h_row.get("region_id","")),"civ_id":String(h_row.get("civ_id","")),
 				"via":String((sources[via] as Dictionary).name) if via>=0 and via<sources.size() else ""})
 		found=_search(field,ecost,sources,cancel)
 		if found.is_empty(): return {}
@@ -920,14 +951,14 @@ static func _fallback_effort(p:Vector2)->Dictionary:
 	var sources:Array=[]
 	var settlements:Array=[]
 	for h:Dictionary in hub_list:
-		if String(h.kind)!="held": settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
+		if not is_relay(String(h.kind)): settlements.append(h); sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":0.0})
 	for h:Dictionary in hub_list:
-		if String(h.kind)!="held": continue
+		if not is_relay(String(h.kind)): continue
 		var reach:=INF; var via:=""
 		for home:Dictionary in settlements:
 			var e:=(home.pos as Vector2).distance_to(h.pos)*FALLBACK_FACTOR
 			if e<reach: reach=e; via=String(home.name)
-		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":"held","pos":h.pos,"base":reach*RELAY,"via":via})
+		if is_finite(reach): sources.append({"id":String(h.id),"name":String(h.name),"kind":String(h.kind),"pos":h.pos,"base":reach*RELAY,"via":via})
 	var best:=INF; var source:=-1
 	for k in sources.size():
 		var e:=float((sources[k] as Dictionary).base)+((sources[k] as Dictionary).pos as Vector2).distance_to(p)*FALLBACK_FACTOR
@@ -998,6 +1029,14 @@ static func cold(day:int,at:Vector2,t:float,swing:float)->float:
 	return clampf((2.0-celsius)/10.0,0.0,1.0)
 
 ## Days of hauling for this much effort by these carriers in this cold.
+## The coldest day (by cold()) on or after `day` where `at` stands: the
+## seasons turn opposite ways north and south of the equator line.
+static func coldest_day(at:Vector2,day:int)->int:
+	var phase:=91 if at.y>0.0 else 274
+	var deep:=day-posmod(day,365)+phase
+	if deep<day: deep+=365
+	return deep
+
 static func haul_days(effort:float,who:String,chill:float)->float:
 	if not is_finite(effort): return INF
 	var c:Dictionary=CARRIERS.get(who,CARRIERS.foot)
@@ -1059,23 +1098,29 @@ static func siege_factor()->float:
 ## share at all), stores (the share the stores could send), siege (the
 ## share of carts a besieged home lets out) and endurance (the people's
 ## supply endurance) are the day's inputs, read once by the caller (day_inputs()).
-static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0)->Dictionary:
+static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0,preview:Dictionary={})->Dictionary:
 	var who:=String(field.carrier) if not field.is_empty() else carrier()
 	var e:=effort_at(field,p)
+	var trip:=trip_effort(e)
 	var land:=land_at(field,p,day)
 	var chill:=float(land.cold)
-	var days:=haul_days(float(e.effort),who,chill)
-	var haul:=haul_share(days,who,endurance)
+	# A band not yet out (the map, a point): its share with every band already
+	# out on the carriers too.
+	if not preview.is_empty(): transport=preview_ratio(preview,trip,chill,troops)
+	# The carriers walk `days`; what they eat on the way is reckoned from a
+	# field depot when they pass one (effort), else the same road.
+	var days:=haul_days(trip,who,chill)
+	var haul:=haul_share(haul_days(float(e.effort),who,chill),who,endurance)
 	var source:=int(e.source)
 	var sources:Array=e.sources
 	var hub:Dictionary=(sources[source] as Dictionary) if source>=0 and source<sources.size() else {}
-	if not hub.is_empty() and String(hub.kind) in ["home","held"]: haul*=siege
+	if not hub.is_empty() and (String(hub.kind)=="home" or is_relay(String(hub.kind))): haul*=siege
 	var carried:=clampf(transport*haul*stores,0.0,1.0)
 	var base:=FieldRations.FORAGE_MOVING if moving else FieldRations.FORAGE_STATIONED
 	var share:=minf(FORAGE_SHARE_MAX,base*forage_factor_from(float(land.rich),chill,troops))
 	var foraged:=(1.0-carried)*share
 	return {"ratio":clampf(carried+foraged,0.0,1.0),"carried":carried,"foraged":foraged,"local":0.0,"air":0.0,"haul":haul,"transport":transport,"stores":stores,
-		"effort":float(e.effort),"days":days,"cold":chill,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
+		"effort":float(e.effort),"trip_effort":trip,"days":days,"cold":chill,"sources":e.sources,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
 
 ## A node's place on the land.
 static func node_pos(field:Dictionary,i:int)->Vector2:
@@ -1111,7 +1156,7 @@ static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteA
 	for i in n:
 		if i%512==0 and bool(cancel[0]): return {}
 		if land[i]==0 or i>=known.size() or known[i]==0: continue
-		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)))
+		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)),inputs.get("preview",{}))
 		ratio[i]=float(t.ratio); carried[i]=float(t.carried); haul[i]=float(t.haul)
 	return {"ratio":ratio,"carried":carried,"haul":haul,"troops":troops,"day":day,"key":int(field.get("key",0))}
 
@@ -1123,7 +1168,9 @@ static func day_inputs()->Dictionary:
 	var s:Variant=_state()
 	var stores:=1.0
 	if s!=null: stores=clampf(float((s.simulation_metrics as Dictionary).get("food_intake_ratio",1.0)),0.0,1.0)
-	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today()}
+	var preview:Dictionary={}
+	if mc!=null and mc.has_method("carrier_reading"): preview=(mc.carrier_reading() as Dictionary).get("preview",{})
+	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today(),"preview":preview}
 
 ## The people's supply endurance (research_mechanics.gd), 0 without a people.
 static func endurance_today()->float:
@@ -1149,8 +1196,77 @@ static func haul_for(force:Dictionary)->float:
 	var haul:=haul_share(haul_days(float(e.effort),who,float(land.cold)),who,endurance_today())
 	var source:=int(e.source)
 	var sources:Array=e.sources
-	if source>=0 and source<sources.size() and String((sources[source] as Dictionary).kind) in ["home","held"]: haul*=siege_factor()
+	if source>=0 and source<sources.size():
+		var kind:=String((sources[source] as Dictionary).kind)
+		if kind=="home" or is_relay(kind): haul*=siege_factor()
 	return haul
+
+## The level km the carriers walk to reach a point: the field's effort, or
+## for a line through a field depot the whole road from home (the depot
+## feeds them on the way but does not carry for them).
+static func trip_effort(e:Dictionary)->float:
+	var effort:=float(e.get("effort",INF))
+	var source:=int(e.get("source",-1))
+	var sources:Array=e.get("sources",[])
+	if source<0 or source>=sources.size() or not is_finite(effort): return effort
+	var s:Dictionary=sources[source]
+	if String(s.get("kind",""))!="depot": return effort
+	return effort+float(s.get("base",0.0))*(1.0/RELAY-1.0)
+
+## Days of hauling from our nearest hub to this force today (0 with no place
+## or no hub, INF where no carrier can reach it): the carriers' round trip
+## (carriers.gd) is built on it.
+static func haul_days_for(force:Dictionary)->float:
+	var p:=force_pos(force)
+	if not p.is_finite() or hubs_empty(): return 0.0
+	var f:=rations_field()
+	var e:=effort_at(f,p)
+	if not is_finite(float(e.effort)): return INF
+	var who:=String(f.carrier) if not f.is_empty() else carrier()
+	return haul_days(trip_effort(e),who,float(land_at(f,p,today()).cold))
+
+## The haul to this force from our nearest hub: {reachable, effort (level
+## km), cold}. Unplaced forces or no hubs: reachable at no effort.
+static func haul_inputs_for(force:Dictionary)->Dictionary:
+	var p:=force_pos(force)
+	if not p.is_finite() or hubs_empty(): return {"reachable":true,"effort":0.0,"cold":0.0}
+	var f:=rations_field()
+	var e:=effort_at(f,p)
+	if not is_finite(float(e.effort)): return {"reachable":false,"effort":INF,"cold":0.0}
+	return {"reachable":true,"effort":trip_effort(e),"cold":float(land_at(f,p,today()).cold)}
+
+## Carriers' round trip for a day's loads over a haul of `days`: out and
+## back, at least a day, the railway taking up to RAIL_SHARE of it.
+const MIN_ROUND_TRIP:=1.0
+const RAIL_SHARE:=0.45
+const CARRIER_ARMS:={"lorry":"motor","cart":"wheeled","porter":"foot"}
+static func carrier_round_trip(days:float,rail:float)->float:
+	if not is_finite(days): return INF
+	return maxf(MIN_ROUND_TRIP,2.0*maxf(0.0,days))*(1.0-RAIL_SHARE*clampf(rail,0.0,1.0))
+
+## Loads a day the fleet brings (carriers.gd preview: each kind's trip load
+## over its load-weighted mean round trip), with an extra band of
+## `extra_loads` whose round trips are `extra_rt` (the map's preview).
+static func carried_a_day(preview:Dictionary,extra_loads:float=0.0,extra_rt:Dictionary={})->float:
+	var loads:=float(preview.get("loads",0.0))+extra_loads
+	var trip:Dictionary=preview.get("trip",{})
+	var sum_rt:Dictionary=preview.get("sum_rt",{})
+	var eff:=float(preview.get("efficiency",1.0))
+	var total:=0.0
+	for kind in trip:
+		var mean_rt:=(float(sum_rt.get(kind,0.0))+extra_loads*float(extra_rt.get(kind,MIN_ROUND_TRIP)))/loads if loads>0.0 else MIN_ROUND_TRIP
+		if mean_rt>0.0 and is_finite(mean_rt): total+=float(trip[kind])/mean_rt
+	return total*eff
+
+## The share of its bread a new band of `troops` would get carried here, on
+## top of every band already out: the map is honest about sending one more.
+static func preview_ratio(preview:Dictionary,effort:float,chill:float,troops:int)->float:
+	if preview.is_empty() or not is_finite(effort): return 0.0 if not is_finite(effort) else 1.0
+	var bread:=float(maxi(1,troops))*1.12
+	var rt:={}
+	for kind in CARRIER_ARMS: rt[kind]=carrier_round_trip(haul_days(effort,String(CARRIER_ARMS[kind]),chill),float(preview.get("rail",0.0)))
+	var moved:=carried_a_day(preview,bread,rt)
+	return clampf(moved/(float(preview.get("bread",0.0))+bread),0.0,1.0)
 
 static func hubs_empty()->bool:
 	var s:=spec()
@@ -1171,11 +1287,13 @@ static func forage_factor(force:Dictionary)->float:
 
 ## What a band of `troops` (-1: the middle one of our bands out) would get at
 ## this point today, standing (or moving).
-static func at_point(point:Vector2,troops:int=-1,moving:=false)->Dictionary:
+## one_more: a band not yet out (the map's land note), sharing the carriers
+## with every band already out; false reads the carriers as they are today.
+static func at_point(point:Vector2,troops:int=-1,moving:=false,one_more:=true)->Dictionary:
 	if troops<0: troops=typical_troops()
 	var f:=field()
 	var d:=day_inputs()
-	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),d.get("preview",{}) if one_more else {})
 	var report:=_report_from_terms(f,t,point)
 	report["force_kind"]="point"; report["troops"]=troops
 	report["words"]=words(report)
@@ -1201,12 +1319,24 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 	var ratio:=float(t.ratio)
 	# Standing at a depot of ours, its line is the settlement that stocks it.
 	var hub_name:=String(hub.get("name","")); var hub_kind:=String(hub.get("kind",""))
-	if hub_kind=="held" and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
+	var depot:=""
+	var km:=float(roads.km)
+	if hub_kind=="depot":
+		# The line is the settlement's; the depot feeds the carriers on it.
+		# Its km run from the settlement: to the depot, then on.
+		depot=hub_name
+		if String(hub.get("via",""))!="": hub_name=String(hub.via)
+		for s_row in t.get("sources",[]):
+			var row:Dictionary=s_row
+			if String(row.get("name",""))==hub_name and not is_relay(String(row.get("kind",""))):
+				km+=(row.pos as Vector2).distance_to(hub.get("pos",row.pos))
+				break
+	elif is_relay(hub_kind) and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
 		hub_name=String(hub.via); hub_kind="home"
 	var report:={"ratio":ratio,"state":state_of(ratio),"carried":float(t.carried),"foraged":float(t.foraged),"local":float(t.local),"air":0.0,
 		"haul":float(t.haul),"transport":float(t.transport),"stores":float(t.stores),"days":float(t.days),"effort":float(t.effort),
-		"km":float(roads.km),"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
-		"hub":hub_name,"hub_kind":hub_kind,"hub_position":hub.get("pos",Vector2.INF),
+		"km":km,"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
+		"hub":hub_name,"hub_kind":hub_kind,"hub_position":hub.get("pos",Vector2.INF),"depot_name":depot,
 		"season":"winter" if float(t.cold)>=0.3 else "","cold":float(t.cold),"rich":float(t.rich),"carrier":String(t.carrier),
 		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio,"fallback":bool(t.fallback)}
 	report["why"]=why(report)
@@ -1237,6 +1367,12 @@ static func of_force(force:Dictionary)->Dictionary:
 		var moving:=String(force.get("status","stationed"))=="moving"
 		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
 		report=_report_from_terms(f,t,p)
+		# The same line on the coldest day of the coming year where the band
+		# stands, with today's carriers: the warning before the snow.
+		if kind=="field" and p.is_finite():
+			var deep:=coldest_day(p,int(d.day))
+			var w:=terms(f,p,deep,int(force.get("troops",0)),false,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+			if float(w.cold)>0.0: report["winter"]={"ratio":float(w.ratio),"in_days":deep-int(d.day),"cold":float(w.cold)}
 		# The day's actual rations, as the engine recorded them.
 		var need:=float(force.get("provisions_required_today",0.0))
 		if int(force.get("provision_day",-99))>=day-1 and need>0.0:
@@ -1261,6 +1397,13 @@ static func of_force(force:Dictionary)->Dictionary:
 	report["supply_level"]=clampf(float(force.get("supply_level",report.ratio)),0.0,1.0)
 	report["hungry_days"]=float(force.get("hungry_days",0.0))
 	report["hungry"]=FieldRations.is_hungry(force)
+	# What hunger has cost the band so far, and its fodder, fuel and rounds
+	# (field_sustainment.gd): the war leader states these numbers.
+	# Only while hunger is recent (a month since the last loss); older sorrow
+	# stays in the chronicle, not in today's report.
+	var hunger_recent:=today()-int(force.get("hunger_last_day",-100000))<=30
+	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary and hunger_recent else {}
+	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	_siege_and_blockade(report,force)
 	report["why"]=why(report)
 	report["words"]=words(report)
@@ -1339,7 +1482,8 @@ static func line_words(report:Dictionary)->String:
 	elif float(report.get("road_share",0.0))>=0.15: way=" partly by road"
 	else: way=" across open country"
 	var from:="from" if String(report.get("hub_kind",""))!="held" else "from our depot at"
-	return "%s %s %s%s" % [days_words(float(report.days)),from,hub,way]
+	var fed:=", the carriers eating at the %s on the way" % String(report.depot_name).to_lower() if String(report.get("depot_name",""))!="" else ""
+	return "%s %s %s%s%s" % [days_words(float(report.days)),from,hub,way,fed]
 
 ## One plain line: "Gets 60% of its food: 35% foraged, 25% carried; 4 days
 ## from Seanstone by cart track."

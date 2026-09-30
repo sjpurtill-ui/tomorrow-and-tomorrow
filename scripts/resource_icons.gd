@@ -26,6 +26,15 @@ static func _s(x1:float,y1:float,x2:float,y2:float,w:float,col:Color)->Dictionar
 static func _t(ax:float,ay:float,bx:float,by:float,cx:float,cy:float,col:Color)->Dictionary: return {"k":3,"a":Vector2(ax,ay),"b":Vector2(bx,by),"c":Vector2(cx,cy),"col":col}
 static func _rr(x:float,y:float,hw:float,hh:float,rad:float,col:Color)->Dictionary: return {"k":4,"a":Vector2(x,y),"b":Vector2(hw,hh),"r":rad,"col":col}
 static func _d(x:float,y:float,s:float,col:Color)->Dictionary: return {"k":5,"a":Vector2(x,y),"r":s,"col":col}
+## A bar from (x1, y1) to (x2, y2), w wide, with square ends (a gun barrel,
+## a rail, a launcher pod at an angle).
+static func _ob(x1:float,y1:float,x2:float,y2:float,w:float,col:Color)->Dictionary: return {"k":6,"a":Vector2(x1,y1),"b":Vector2(x2,y2),"r":w*0.5,"col":col}
+## A filled polygon from flat coordinates [x1, y1, x2, y2, ...] (a hull, a
+## sloped glacis, a wedge turret, a canopy).
+static func _poly(coords:Array,col:Color)->Dictionary:
+	var points:=PackedVector2Array()
+	for i in range(0,coords.size()-1,2): points.append(Vector2(float(coords[i]),float(coords[i+1])))
+	return {"k":7,"a":points[0],"pts":points,"col":col}
 
 
 # -- signed distance evaluation --------------------------------------------
@@ -56,6 +65,28 @@ static func _sd(primitive:Dictionary,p:Vector2)->float:
 		5:
 			var q:=p-(primitive.a as Vector2)
 			return (absf(q.x)+absf(q.y)-float(primitive.r))*0.7071
+		6:
+			var a:Vector2=primitive.a
+			var along:=(primitive.b as Vector2)-a
+			var length:=maxf(0.0001,along.length())
+			var dir:=along/length
+			var q:=p-(a+(primitive.b as Vector2))*0.5
+			var local:=Vector2(absf(q.dot(dir)),absf(q.dot(dir.orthogonal())))-Vector2(length*0.5,float(primitive.r))
+			return Vector2(maxf(local.x,0.0),maxf(local.y,0.0)).length()+minf(maxf(local.x,local.y),0.0)
+		7:
+			var points:PackedVector2Array=primitive.pts
+			var d:=(p-points[0]).length_squared()
+			var s:=1.0
+			var j:=points.size()-1
+			for i in points.size():
+				var e:=points[j]-points[i]
+				var w:=p-points[i]
+				var b:=w-e*clampf(w.dot(e)/maxf(0.0001,e.length_squared()),0.0,1.0)
+				d=minf(d,b.length_squared())
+				var c1:=p.y>=points[i].y; var c2:=p.y<points[j].y; var c3:=e.x*w.y>e.y*w.x
+				if (c1 and c2 and c3) or (not c1 and not c2 and not c3): s=-s
+				j=i
+			return s*sqrt(d)
 	return 1e6
 
 
@@ -368,10 +399,13 @@ static var _army_textures:Dictionary={}
 ##   "band:N"    a tally of N spears bound together (N 2..5);
 ##   "host"      a leader's standard: pole, crossbar and a streamer;
 ##   "army"      a framed standard with the arm's symbol on its cloth;
+##   "colours"   the gunpowder age's standard: a square flag flying from a
+##               pike, the arm's symbol on it;
 ##   "formation" a staff-map box with the branch symbol.
-## branch: foot, horse, missile, guns, engineers, motor, armour. ink draws
-## the strokes; accent (the owner's colour) touches only the streamer, the
-## tally's tie or a wash on the cloth.
+## branch: foot, horse, missile, guns, engineers, motor, armour, autonomous
+## (drones, robots and combat frames: a lattice). ink draws the strokes;
+## accent (the owner's colour) touches only the streamer, the tally's tie or
+## a wash on the cloth.
 static func army_texture(kind:String,branch:String,ink:Color,accent:Color,px:int=64)->Texture2D:
 	var key:="%s|%s|%s|%s|%d" % [kind,branch,ink.to_html(),accent.to_html(),px]
 	if _army_textures.has(key): return _army_textures[key]
@@ -410,6 +444,12 @@ static func army_glyph(kind:String,branch:String,ink:Color,accent:Color)->Array:
 			for x in [18.0,23.0,28.0,33.0,38.0]: cloth.append(_s(x,39,x,42,1.4,ink))
 			cloth.append_array(_arm_symbol(branch,28,25,8.5,ink))
 			return cloth
+		"colours":
+			var flag:=[_s(18,55,18,7,2.8,ink),_t(18,0.5,15,8,21,8,ink),_c(18,9.5,2.0,ink),
+				_rr(33,22,14,12,0.8,ink),_rr(33,22,11.8,9.8,0.5,paper),_rr(33,22,11.8,9.8,0.5,wash),
+				_s(19,10,14,24,1.3,ink),_c(13.6,25.5,1.9,ink),_s(12,55,24,55,2.6,ink)]
+			flag.append_array(_arm_symbol(branch,33,22,7.5,ink))
+			return flag
 		"formation":
 			var box:=[_rr(28,31,21,14,0.6,ink),_rr(28,31,18.8,11.8,0.3,paper),_rr(28,31,18.8,11.8,0.3,wash)]
 			box.append_array(_branch_symbol(branch,28,31,18.8,11.8,ink,paper))
@@ -427,6 +467,8 @@ static func _arm_symbol(branch:String,x:float,y:float,r:float,ink:Color)->Array:
 			for k in range(1,bow.size()): out.append(_s(bow[k-1].x,bow[k-1].y,bow[k].x,bow[k].y,2.0,ink))
 			return out
 		"guns","engineers": return [_ring(x,y,r*0.62,2.0,ink),_c(x,y,1.8,ink)]
+		"armour": return [_rr(x,y,r*0.9,r*0.5,r*0.5,ink),_rr(x,y,r*0.9-1.8,r*0.5-1.8,r*0.5-1.8,Color(0.95,0.91,0.80,1.0))]
+		"autonomous": return lattice(x,y,r*0.9,r*0.8,1.6,ink)
 	return [_s(x-r,y+r*0.8,x+r,y-r*0.8,2.2,ink),_s(x-r,y-r*0.8,x+r,y+r*0.8,2.2,ink)]
 
 
@@ -441,7 +483,19 @@ static func _branch_symbol(branch:String,x:float,y:float,hw:float,hh:float,ink:C
 		"motor": return [diagonal_a,diagonal_b,_c(x-hw*0.5,y+hh+4.5,2.2,ink),_c(x+hw*0.5,y+hh+4.5,2.2,ink)]
 		"engineers": return [_s(x-hw*0.55,y-hh*0.45,x+hw*0.55,y-hh*0.45,2.0,ink),_s(x-hw*0.55,y-hh*0.45,x-hw*0.55,y+hh*0.4,2.0,ink),_s(x+hw*0.55,y-hh*0.45,x+hw*0.55,y+hh*0.4,2.0,ink),_s(x,y-hh*0.45,x,y+hh*0.4,2.0,ink)]
 		"missile": return [diagonal_a,diagonal_b,_c(x,y-hh*0.55,1.8,ink)]
+		"autonomous": return lattice(x,y,hw*0.62,hh*0.74,1.7,ink)
 	return [diagonal_a,diagonal_b]
+
+
+## The autonomous sign: a lattice (a diamond cut into four by its midlines,
+## a node at each crossing), for drones, robots and combat frames.
+static func lattice(x:float,y:float,rx:float,ry:float,w:float,ink:Color)->Array:
+	var top:=Vector2(x,y-ry); var right:=Vector2(x+rx,y); var bottom:=Vector2(x,y+ry); var left:=Vector2(x-rx,y)
+	var out:Array=[]
+	for edge in [[top,right],[right,bottom],[bottom,left],[left,top],[(top+left)*0.5,(right+bottom)*0.5],[(top+right)*0.5,(left+bottom)*0.5]]:
+		out.append(_s(edge[0].x,edge[0].y,edge[1].x,edge[1].y,w,ink))
+	for node in [top,right,bottom,left,Vector2(x,y)]: out.append(_c(node.x,node.y,w*1.15,ink))
+	return out
 
 
 ## A paper halo beneath a glyph: each primitive again, grown, in paper.
@@ -493,9 +547,13 @@ static func _bounds(primitive:Dictionary)->Rect2:
 	match int(primitive.k):
 		0,5: return Rect2(a,Vector2.ZERO).grow(float(primitive.r))
 		1: return Rect2(a,Vector2.ZERO).grow(float(primitive.r)+float(primitive.w)*0.5)
-		2: return Rect2(a,Vector2.ZERO).expand(primitive.b).grow(float(primitive.r))
+		2,6: return Rect2(a,Vector2.ZERO).expand(primitive.b).grow(float(primitive.r))
 		3: return Rect2(a,Vector2.ZERO).expand(primitive.b).expand(primitive.c)
 		4: return Rect2(a-(primitive.b as Vector2),(primitive.b as Vector2)*2.0)
+		7:
+			var box:=Rect2(a,Vector2.ZERO)
+			for point in (primitive.pts as PackedVector2Array): box=box.expand(point)
+			return box
 	return Rect2(0,0,ICON_PX,ICON_PX)
 
 
@@ -881,10 +939,13 @@ static func _great_work_form(shape:String,c:Color,paper:Color)->Array:
 
 static var _arm_textures:Dictionary={}
 
-## The arm a block fights as, drawn as its weapon or mount, inked on a paper
-## halo (hud/battle_panel.gd plates): club, spear, pike, sword, axe, bow,
-## sling, javelin, horse, chariot, elephant, musket, rifle, machine_gun,
-## guns, armour, engineers, support. accent touches one small detail.
+## A block, a production line or a roster card, drawn as its weapon, mount or
+## machine, inked on a paper halo (hud/battle_panel.gd plates, the Production
+## screen, roster insignia). Every land kit's ledger glyph
+## (equipment_ledger.gd "glyph") has its own mark, from the club to the
+## combat frame; the battle rules' coarse arms (guns, armour, engineers)
+## keep theirs. accent (the side's colour) touches one small detail only: a
+## sash, a pennon, a shield boss, a sensor's glow.
 static func arm_texture(arm:String,ink:Color,accent:Color,px:int=48)->Texture2D:
 	var key:="%s|%s|%s|%d" % [arm,ink.to_html(),accent.to_html(),px]
 	if _arm_textures.has(key): return _arm_textures[key]
@@ -893,9 +954,19 @@ static func arm_texture(arm:String,ink:Color,accent:Color,px:int=48)->Texture2D:
 	return texture
 
 
+## Every mark arm_glyph draws: the ledger's glyphs and the coarse arms.
+const ARM_GLYPHS:=["club","spear","pike","sword","axe","bow","sling","javelin","horse_archer","crossbow",
+	"horse","chariot","elephant","heavy_horse","dragoon","hand_cannon","musket","rifle","mountain","marine",
+	"engineer","assault_rifle","paratrooper","helicopter","networked","exosuit","machine_gun","mortar",
+	"anti_tank","anti_air","laser","ram","catapult","trebuchet","bombard","field_gun","howitzer","rocket",
+	"precision","lorry","armored_car","light_tank","tank","heavy_tank","tank_destroyer","carrier","mbt",
+	"drone","robot_vehicle","combat_frame","support","guns","armour","engineers"]
+
+
 static func arm_glyph(arm:String,ink:Color,accent:Color)->Array:
 	var paper:=Color(0.95,0.91,0.80,1.0)
 	match arm:
+		# Hand arms and missiles, the first ages.
 		"club": return [_s(15,46,33,20,3.4,ink),_c(35,16,7,ink),_c(29,22,4,ink),_s(13,48,19,42,2.0,accent)]
 		"spear": return [_s(11,47,37,17,2.6,ink),_t(45,8,33,15,40,22,ink),_s(16,42,21,47,2.2,accent)]
 		"pike": return [_s(7,51,43,11,2.2,ink),_t(49,5,40,10,45,15,ink),_s(7,11,43,51,2.2,ink),_t(49,55,40,50,45,45,ink),_c(25,31,2.6,accent)]
@@ -908,19 +979,199 @@ static func arm_glyph(arm:String,ink:Color,accent:Color)->Array:
 			return out
 		"sling": return [_s(14,10,25,31,1.8,ink),_s(35,10,25,31,1.8,ink),_c(25,34,4.6,ink),_c(42,42,4.2,ink),_s(31,47,37,44,1.4,accent),_s(29,42,35,40,1.4,accent)]
 		"javelin": return [_s(9,43,38,14,2.2,ink),_t(44,8,35,12,40,17,ink),_s(16,51,45,22,2.2,ink),_t(51,16,42,20,47,25,ink),_c(24,40,2.2,accent)]
-		"horse", "chariot":
-			if arm=="chariot":
-				return [_ring(19,40,9,2.4,ink),_s(19,31,19,49,1.4,ink),_s(10,40,28,40,1.4,ink),_rr(32,30,10,7,1.5,ink),_s(41,33,53,41,2.2,ink),_c(32,17,3.6,ink),_s(32,20,32,25,2.8,ink),_s(29,22,36,24,1.6,accent)]
-			return battle_figure_glyph("horse",ink,accent)
-		"elephant": return [_rr(28,30,15,10,9,ink),_c(44,24,8,ink),_s(50,28,52,46,3.2,ink),_s(19,36,19,49,4.4,ink),_s(33,36,33,49,4.4,ink),_c(41,21,3.6,accent),_s(45,32,49,36,1.6,paper)]
+		# A crossbow from above: the stock, the bent prod, the drawn string, a bolt.
+		"crossbow":
+			var prod:=[Vector2(7,27),Vector2(15,18),Vector2(28,14),Vector2(41,18),Vector2(49,27)]
+			var crossbow:=[_s(28,12,28,52,3.6,ink),_t(28,4,24.6,12,31.4,12,ink),_s(7,27,28,33,1.2,ink),_s(49,27,28,33,1.2,ink),_rr(28,40,3.4,2.4,0.8,ink),_s(28,43,33,48,1.8,ink),_c(28,23,2.0,accent)]
+			for k in range(1,prod.size()): crossbow.append(_s(prod[k-1].x,prod[k-1].y,prod[k].x,prod[k].y,3.0,ink))
+			return crossbow
+		# A ship's fighter: round shield with a boss, a boat hook, the waves.
+		"marine":
+			var sea:Array=[_s(12,42,41,9,2.4,ink),_s(41,9,45,4,2.0,ink),_s(41,9,46,11,2.0,ink),_s(46,11,45,15,1.8,ink),
+				_c(24,29,10,ink),_ring(24,29,7,1.3,paper),_c(24,29,2.6,accent)]
+			for k in 8:
+				var x:=5.0+float(k)*6.0
+				sea.append(_s(x,47.0 if k%2==0 else 43.0,x+6.0,43.0 if k%2==0 else 47.0,2.2,ink))
+			return sea
+		# Mounts.
+		"horse": return battle_figure_glyph("horse",ink,accent)
+		"chariot": return [_ring(19,40,9,2.4,ink),_s(19,31,19,49,1.4,ink),_s(10,40,28,40,1.4,ink),_rr(32,30,10,7,1.5,ink),_s(41,33,53,41,2.2,ink),_c(32,17,3.6,ink),_s(32,20,32,25,2.8,ink),_s(29,22,36,24,1.6,accent)]
+		# An elephant with its driver on the neck and a tower on its back.
+		"elephant": return [_rr(28,32,15,10,9,ink),_c(44,26,8,ink),_s(50,30,52,48,3.2,ink),_s(19,38,19,51,4.4,ink),_s(33,38,33,51,4.4,ink),_s(45,34,49,38,1.6,paper),_c(46.5,23.5,1.0,paper),
+			_rr(24,19,7,4.5,1,ink),_s(17,14,17,19,1.6,ink),_s(24,14,24,19,1.6,ink),_s(31,14,31,19,1.6,ink),_c(40,15,2.8,ink),_rr(40,20,2.4,3,1.2,ink),_s(17.5,22,30.5,22,1.3,accent)]
+		# A rider at the gallop, a short recurved bow drawn forward.
+		"horse_archer":
+			var archer:Array=[_rr(27,35,13,5.5,5,ink),_s(38,33,45,23,4.0,ink),_rr(46,22,4.5,2.6,1.5,ink),
+				_s(35,39,45,46,2.4,ink),_s(33,39,40,51,2.4,ink),_s(19,39,9,45,2.4,ink),_s(22,39,15,51,2.4,ink),_s(15,33,7,37,1.8,ink),
+				_c(26,11,3.8,ink),_rr(26,21,4.2,6.5,2.6,ink),_s(26,26,30,33,2.6,ink),_s(28,17,39,15,2.2,ink),
+				_s(35,3,28,15,0.9,ink),_s(35,27,28,15,0.9,ink),_s(28,15,46,15,1.2,ink),_t(49,15,45,13,45,17,ink),_s(23,19,31,24,1.8,accent)]
+			var limb:=[Vector2(35,3),Vector2(39,6),Vector2(41,15),Vector2(39,24),Vector2(35,27)]
+			for k in range(1,limb.size()): archer.append(_s(limb[k-1].x,limb[k-1].y,limb[k].x,limb[k].y,2.4,ink))
+			return archer
+		# A big horse in a trapper to the knees, a helmed rider, the lance
+		# couched level with a pennon.
+		"heavy_horse": return [_rr(27,34,14,6.5,5,ink),_poly([11,30,43,30,45,42,42,46,39,42,35,46,31,42,27,46,23,42,19,46,15,42,11,46,9,42],ink),_s(12,37,42,37,1.0,paper),
+			_s(16,45,16,52,2.8,ink),_s(22,45,22,52,2.8,ink),_s(34,45,35,52,2.8,ink),_s(40,45,41,52,2.8,ink),
+			_s(40,32,47,21,4.6,ink),_rr(48,20,4.8,2.8,1.5,ink),_s(11,33,6,41,2.0,ink),
+			_c(25,12,3.4,ink),_t(25,4,21.4,11,28.6,11,ink),_rr(25,22,4.6,6.2,2.2,ink),_s(8,26,55,19,2.2,ink),_t(49,19.8,41,17,41.5,22.5,accent)]
+		# A rider in a long coat and cocked hat, firing his carbine from the saddle.
+		"dragoon": return [_rr(27,35,13,5.5,5,ink),_s(38,33,45,22,4.0,ink),_rr(46,21,4.5,2.6,1.5,ink),_s(17,39,15,52,2.4,ink),_s(21,39,21,52,2.4,ink),
+			_s(33,39,34,52,2.4,ink),_s(37,39,39,52,2.4,ink),_s(15,33,9,40,1.8,ink),
+			_c(27,12.5,3.4,ink),_ob(19,9.6,35,9.6,1.8,ink),_rr(27,7.4,4,2.4,1.5,ink),_rr(27,21,4.2,6,2.6,ink),_poly([22,24,32,24,34,33,20,32],ink),
+			_poly([25,15,30,14,31,20,26,21],ink),_ob(28,16,47,12,2.2,ink),_s(29,18,38,17,2.2,ink),_c(51,10,3.0,Color(ink,0.45)),_c(55,7,2.0,Color(ink,0.3)),_s(24,19,31,24,1.8,accent)]
+		# Firearms.
+		# A bronze tube on a pole, the match glowing at the touch-hole.
+		"hand_cannon": return [_s(6,51,25,31,2.6,ink),_ob(23,33,41,15,6.4,ink),_ob(39.5,16.5,43.5,12.5,8.2,ink),_c(26,25,2.2,accent),
+			_c(47,8,3.2,Color(ink,0.45)),_c(52,4.5,2.2,Color(ink,0.3))]
 		"musket": return [_s(11,45,48,12,2.4,ink),_t(6,52,18,43,11,38,ink),_c(22,36,2.6,ink),_s(24,39,26,43,1.6,accent)]
 		"rifle": return [_s(11,45,45,15,2.2,ink),_s(45,15,52,8,1.4,ink),_t(6,52,17,43,11,38,ink),_rr(27,33,2.2,3.4,0.6,ink),_s(17,38,32,26,1.2,accent)]
+		# A rifle across the peaks.
+		"mountain": return [_poly([2,50,19,17,28,31,36,21,54,50],ink),_poly([19,17,15,25,19,23,23,25],paper),_poly([36,21,33,26,36,25,39,27],paper),
+			_s(9,47,48,12,5.6,paper),_s(11,45,45,15,2.2,ink),_s(45,15,52,8,1.4,ink),_t(6,52,17,43,11,38,ink),_rr(27,33,2.2,3.4,0.6,ink),_s(19,17,19,7,1.2,ink),_t(19.5,7,19.5,12,25,9.5,accent)]
+		# A short automatic from the side: pistol grip and a curved magazine.
+		"assault_rifle": return [_poly([4,23,17,21,17,29,6,34],ink),_rr(25,24,9,3.6,1.2,ink),_ob(33,23,52,23,2.2,ink),_ob(33,20,43,20,1.8,ink),
+			_s(46,23,46,18.5,1.8,ink),_s(21,27,18,36,3.4,ink),_s(29,27,30.5,35,4.2,ink),_s(30.5,35,35,41,4.2,ink),_s(8,31,27,31,1.1,accent)]
+		# A soldier under a canopy.
+		"paratrooper":
+			var canopy:Array=[28,24]
+			for k in 13:
+				var a:=PI+PI*float(k)/12.0
+				canopy.append_array([28.0+18.0*cos(a),24.0+14.0*sin(a)])
+			return [_poly(canopy,ink),_s(28,11,19,24,1.0,paper),_s(28,11,37,24,1.0,paper),_c(28,11.5,1.8,accent),
+				_s(10,24,26.5,40,1.1,ink),_s(46,24,29.5,40,1.1,ink),_s(19,24,27,40,1.0,ink),_s(37,24,29,40,1.0,ink),
+				_c(28,40,3.0,ink),_rr(28,46,3,4,1.6,ink),_s(27,49.5,25.5,54,2.0,ink),_s(29,49.5,30.5,54,2.0,ink)]
+		# A transport helicopter: the rotor bar over the cabin.
+		"helicopter": return [_s(3,11,53,11,2.2,ink),_rr(25,11,3.2,1.8,0.8,ink),_s(25,11,25,20,2.6,ink),_rr(25,27,13,7,6.5,ink),_rr(34,24.5,4,3,1.8,paper),
+			_s(36,25,51,21,3.0,ink),_s(51,21,53,14,2.4,ink),_ring(52,19,3.6,1.2,ink),
+			_s(12,41,38,41,2.2,ink),_s(38,41,41,38.5,2.0,ink),_s(18,33,17,41,1.6,ink),_s(32,33,33,41,1.6,ink),_s(41,23.4,47,22.2,1.2,accent)]
+		# A helmeted head and shoulders with a night optic and a radio mast;
+		# the data link's tick in the side's colour.
+		"networked": return [_s(24,33,20,51,3.6,ink),_s(28,33,33,51,3.6,ink),_rr(26,26,5.5,8.5,3,ink),_rr(27,24,6.8,6,1.5,ink),_rr(27,24,4.6,1,0.4,paper),
+			_c(28,13.5,4.4,ink),_rr(27,10.5,6.2,3.8,3.6,ink),_ob(31.5,8.5,35.5,11.5,1.6,ink),_rr(37,13.5,2.8,1.8,0.8,ink),
+			_s(22,21,17,4,1.2,ink),_s(29,20,38,21,2.6,ink),_ob(22,19,49,19,2.4,ink),_s(37,20,38,26,2.6,ink),_s(46,19,46,15.5,1.6,ink),
+			_s(9,6,12,9,1.7,accent),_s(12,9,17,2,1.7,accent)]
+		# A soldier inside a frame: battery spine, thick jointed limbs, a
+		# heavy weapon carried in one arm.
+		"exosuit": return [_rr(19,21,3,10,1.2,ink),_s(17,24,21,24,0.9,paper),_s(17,28,21,28,0.9,paper),_rr(19,15,1.2,1.8,0.4,accent),
+			_c(30,9,4.4,ink),_s(32,9,34.5,9,1.2,paper),_rr(28,15.5,5.5,1.8,0.8,ink),_poly([21,16,35,16,33,31,24,31],ink),
+			_s(32,18,37,25,4.4,ink),_ob(31,28,53,26,4.0,ink),_rr(38,31.5,3,2.6,0.6,ink),_rr(28,33,5.5,2.4,1,ink),
+			_s(26,34,22,41,4.6,ink),_s(22,41,21,49,4.2,ink),_rr(23,50.5,4.2,1.6,0.6,ink),
+			_s(31,34,34,41,4.8,ink),_s(34,41,32,49,4.4,ink),_rr(34,50.5,4.4,1.6,0.6,ink),_c(34,41,1.2,paper),_c(22,41,1.1,paper)]
+		# Crew weapons.
 		"machine_gun": return [_s(12,22,48,22,3.2,ink),_rr(19,22,7,5.5,1.2,ink),_s(22,27,13,46,2.2,ink),_s(22,27,31,46,2.2,ink),_s(22,27,22,46,2.2,ink),_s(16,29,10,38,1.8,accent)]
-		"guns": return [_s(15,34,47,18,5.6,ink),_ring(20,41,8,2.6,ink),_c(20,41,2.2,ink),_s(20,41,7,49,2.6,ink),_c(48,17,2.0,accent)]
-		"armour": return [_rr(28,39,20,6,5.5,ink),_rr(28,32,17,4,1.5,ink),_rr(25,24,9,5,2.5,ink),_s(33,23,51,20,2.6,ink),_c(15,39,2.0,paper),_c(23,39,2.0,paper),_c(31,39,2.0,paper),_c(39,39,2.0,paper),_s(20,24,29,24,1.4,accent)]
-		"engineers": return [_s(14,47,40,15,2.4,ink),_rr(43,11,4.4,6,1.8,ink),_s(14,15,40,47,2.4,ink),_s(8,21,21,7,2.8,ink),_c(27,31,2.2,accent)]
+		# A short fat tube on a base plate, a bomb in the air.
+		"mortar": return [_rr(16,48,9,2.2,1,ink),_ob(16,46,31,16,5.6,ink),_ob(30,18,32,14,7.0,ink),_s(26,26,36,48,2.2,ink),_s(26,26,30,48,1.8,ink),_s(31,37,35,37,1.4,ink),
+			_s(43,13,47,7,4.2,ink),_t(41,15,38.5,15.5,41.5,12.5,ink),_s(44,12,46,9,1.2,accent)]
+		# A low gun behind a shield, its barrel long and thin.
+		"anti_tank": return [_poly([18,20,23.5,20,28.5,40,23,40],ink),_ob(18,30,53,30,2.2,ink),_rr(53,30,1.8,2.6,0.4,ink),_rr(27,32,6,2.4,1,ink),
+			_c(23,43,5.6,ink),_c(23,43,2.0,paper),_s(21,39,4,48,2.8,ink),_s(22,24,25,24,1.2,accent)]
+		# A quick-firing gun pointed at the sky on a cross mount.
+		"anti_air": return [_s(8,49,48,43,2.6,ink),_s(8,43,48,49,2.6,ink),_rr(28,42,5,4,1.2,ink),_c(28,36,4.6,ink),_ob(28,36,39,5,3.0,ink),_ob(37.6,9,40.4,1,4.4,ink),
+			_poly([20,33,26,31,26,40,20,40],ink),_ring(35,20,4.2,1.1,ink),_s(21,36,24,36,1.2,accent)]
+		# A turret on a truck with a glass eye, and its beam.
+		"laser": return [_rr(26,42,21,2.4,0.8,ink),_rr(46,37,5,5,1.2,ink),_rr(48,35,2.4,2,0.5,paper),_c(14,46,4.2,ink),_c(14,46,1.5,paper),_c(38,46,4.2,ink),_c(38,46,1.5,paper),
+			_rr(22,34,10,5,2,ink),_c(26,27,6.4,ink),_ring(26,27,4.0,1.3,paper),_c(26,27,2.2,accent),_s(31,23,55,4,1.2,ink),_s(51,4,55,8,1.0,ink),_s(51,8,55,4,1.0,ink)]
+		# Siege engines and guns.
+		# A tree trunk on ropes under a hide roof, on rollers.
+		"ram": return [_t(28,9,4,28,52,28,ink),_s(8,23,48,23,1.0,paper),_s(10,28,10,42,2.6,ink),_s(46,28,46,42,2.6,ink),_ob(3,36,52,36,5.2,ink),_rr(52.5,36,2.8,4,1,ink),
+			_s(22,28,22,33,1.2,ink),_s(34,28,34,33,1.2,ink),_ring(16,46,4,2,ink),_ring(40,46,4,2,ink),_t(28,9,28,2,35,5.5,accent)]
+		# A torsion engine: a throwing arm and cup on a low timber frame.
+		"catapult": return [_ob(5,45,51,45,3.6,ink),_rr(8,46,2.4,3.4,0.6,ink),_rr(48,46,2.4,3.4,0.6,ink),_c(17,41,4.2,ink),_c(17,41,1.6,paper),
+			_s(17,41,38,11,2.8,ink),_c(39.5,9,3.6,ink),_s(34,45,31,25,2.6,ink),_s(42,45,37,25,2.6,ink),_rr(34,24,6,2.2,1,ink),_s(24,45,34,34,1.6,ink),_c(39.5,9,1.3,accent)]
+		# A tall frame, a long arm with its sling, a box of stones for a counterweight.
+		"trebuchet": return [_s(5,51,51,51,2.6,ink),_s(14,51,27,18,2.6,ink),_s(40,51,29,18,2.6,ink),_s(18,41,37,41,1.8,ink),_c(28,18,2.4,ink),
+			_s(28,18,6,5,2.4,ink),_s(28,18,38,24,3.0,ink),_s(38,24,38,28,1.6,ink),_rr(38,33,6.5,5.5,1,ink),_s(32,33,44,33,1.2,accent),
+			_s(6,5,4,14,1.0,ink),_c(4,15.5,2.2,ink)]
+		# A huge banded tube raised on a timber bed, stakes behind to take the kick.
+		"bombard":
+			var bombard:Array=[_rr(27,45.5,21,2.6,0.8,ink),_s(5,35,3,49,2.4,ink),_s(9,37,8,49,2.0,ink),_t(32,43,46,43,46,33,ink),
+				_ob(8,38.5,18,36,8.4,ink),_ob(16,36.5,44,29.5,12.6,ink),_ob(43,29.75,47,28.75,15.4,ink)]
+			var along:=Vector2(28,-7).normalized(); var across:=along.orthogonal()
+			for t in [9.0,17.0,25.0]:
+				var mid:=Vector2(16,36.5)+along*float(t)
+				bombard.append(_s(mid.x-across.x*5.6,mid.y-across.y*5.6,mid.x+across.x*5.6,mid.y+across.y*5.6,1.1,paper))
+			bombard.append(_c(12,33,1.5,accent))
+			return bombard
+		# A cast gun on a two-wheeled carriage: the big spoked wheel and the trail.
+		"field_gun":
+			var gun:Array=[_s(22,36,4,50,3.8,ink),_s(20,33,50,23,4.6,ink),_c(51,22.6,2.8,ink),_c(17,34,2.4,ink)]
+			for k in 6:
+				var a:=TAU*float(k)/6.0+0.3
+				gun.append(_s(25,39,25+cos(a)*9.5,39+sin(a)*9.5,1.4,ink))
+			gun.append_array([_ring(25,39,10,2.6,ink),_c(25,39,2.4,ink),_c(17,34,1.2,accent)])
+			return gun
+		# A steel howitzer: recoil cylinder under the barrel, tyred wheel, split trail.
+		"howitzer": return [_s(24,39,2,47,2.6,ink),_s(24,39,14,52,2.6,ink),_ob(21,34,52,16,3.4,ink),_ob(50.5,17,54.5,14.6,5.2,ink),_ob(22,38,38,28.5,2.6,ink),
+			_poly([28,25,34,22,35,36,29,38],ink),_c(26,43,7,ink),_ring(26,43,3.4,1.3,paper),_s(30,26,33,24.5,1.2,accent)]
+		# A rack of rails on a lorry.
+		"rocket":
+			var rack:Array=[_rr(25,40,22,2.4,0.8,ink),_poly([40,40,40,30,46,30,51,35,51,40],ink),_rr(45,33,1.8,1.6,0.4,paper),
+				_c(12,45,4.2,ink),_c(12,45,1.5,paper),_c(24,45,4.2,ink),_c(24,45,1.5,paper),_c(44,45,4.2,ink),_c(44,45,1.5,paper),
+				_s(22,38,28,27,2.4,ink),_s(34,38,31,27,2.0,ink)]
+			for k in 4:
+				var o:=float(k)*3.2
+				rack.append(_ob(6+o*0.45,34-o,40+o*0.45,18-o,1.7,ink))
+			rack.append(_t(46,14,41,15.5,42.5,11.5,ink))
+			rack.append(_s(7,32,12,29.6,1.2,accent))
+			return rack
+		# A boxy launcher pod raised on a wheeled lorry.
+		"precision": return [_rr(25,41,22,2.4,0.8,ink),_rr(45,34,6,6,1,ink),_rr(47,32,2.4,2,0.4,paper),
+			_c(11,46,4,ink),_c(11,46,1.4,paper),_c(22,46,4,ink),_c(22,46,1.4,paper),_c(43,46,4,ink),_c(43,46,1.4,paper),
+			_ob(8,32,36,17,11,ink),_s(22,39,24,29,2.4,ink),_ob(33.5,18.3,34.8,20.8,1.2,paper),_ob(30,20.2,31.3,22.7,1.2,paper),
+			_s(45,28,45,23,1.2,ink),_c(45,22,1.8,accent)]
+		# Vehicles.
+		# A canvas-topped lorry.
+		"lorry": return [_rr(20,27,15,10,5,ink),_s(13,19,13,36,1.2,paper),_s(20,17.5,20,36,1.2,paper),_s(27,19,27,36,1.2,paper),
+			_poly([38,39,38,24,45,24,50,32,51,39],ink),_rr(43.5,28,2.6,2.8,0.5,paper),_rr(27,39,24,2.6,0.8,ink),
+			_c(14,44,5,ink),_c(14,44,1.8,paper),_c(43,44,5,ink),_c(43,44,1.8,paper),_s(6,34,10,34,1.2,accent)]
+		# A four-wheeled steel box with a small turret.
+		"armored_car": return [_poly([5,38,7,29,17,26,41,26,49,31,51,38],ink),_c(15,42,6.2,ink),_c(15,42,2.2,paper),_c(41,42,6.2,ink),_c(41,42,2.2,paper),
+			_s(8,35.5,49,35.5,1.0,paper),_rr(28,21,6.5,4.5,3,ink),_ob(34,20.5,45,20.5,2.0,ink),_rr(40,30,2.4,1.6,0.4,paper),_s(24,19.5,30,19.5,1.2,accent)]
+		# A small tank on a tall track frame, a tail skid behind.
+		"light_tank": return [_poly([11,48,39,48,47,38,44,30,14,33,9,40],ink),_c(15,44,1.7,paper),_c(21,44.5,1.7,paper),_c(27,44.5,1.7,paper),_c(33,44.5,1.7,paper),_c(41,38,2.0,paper),
+			_s(11,41,3,49,2.6,ink),_rr(27,26,6,5,2.5,ink),_rr(27,19.6,3,2,1,ink),_ob(32,25.5,41,25.5,2.2,ink),_s(23,24,27,24,1.2,accent)]
+		# A medium tank: sloped front, round turret, a medium gun.
+		"tank": return _tracks(28,42,21,5.5,6,ink,paper)+[_poly([7,38,11,31,39,31,50,38],ink),_rr(26,25,9,5.5,4.5,ink),_ob(34,24,51,23,2.6,ink),_s(20,23,27,23,1.4,accent)]
+		# A heavy tank: slab sides, a box turret, a long gun with a muzzle brake.
+		"heavy_tank": return _tracks(28,43,24,5,8,ink,paper)+[_rr(28,34,22,5,0.6,ink),_rr(26,24,11,5.5,1,ink),_ob(37,23.5,53,23.5,2.8,ink),_ob(51,23.5,55,23.5,4.6,ink),_s(19,21,25,21,1.4,accent)]
+		# A tank destroyer: a low turretless casemate and a very long gun.
+		"tank_destroyer": return _tracks(27,43,21,5,6,ink,paper)+[_poly([6,39,10,29,32,26,46,39],ink),_c(39,32,3,ink),_ob(39,32,56,27,2.4,ink),_s(14,30,20,29,1.4,accent)]
+		# An armoured carrier: a tall tracked box with its ramp down behind.
+		"carrier": return _tracks(30,44,18,4.5,5,ink,paper)+[_poly([13,41,13,21,36,21,48,34,48,41],ink),_ob(13,40,4,48,2.4,ink),
+			_rr(18,31,2,6,0.5,paper),_s(28,21,28,16,1.6,ink),_ob(27,16,37,16,1.6,ink),_s(17,23.5,24,23.5,1.4,accent)]
+		# A main battle tank: low hull and skirts, a flat wedge turret, a very long gun.
+		"mbt": return [_rr(28,45,20,3,3,ink),_c(14,45,1.3,paper),_c(22,45,1.3,paper),_c(30,45,1.3,paper),_c(38,45,1.3,paper),_rr(28,39.5,21.5,3.2,0.5,ink),
+			_poly([5,37,9,32,47,32,52,37],ink),_poly([13,31,14,25,31,24,42,28.5,40,31],ink),_ob(38,28,56,28,2.2,ink),_rr(21,22.8,2.6,1.6,0.4,ink),_s(24,26.5,30,26.5,1.2,accent)]
+		# Drones and robots.
+		# A four-rotor drone from above.
+		"drone": return [_s(14,14,42,42,2.8,ink),_s(42,14,14,42,2.8,ink),_ring(14,14,7.5,2.2,ink),_ring(42,14,7.5,2.2,ink),_ring(14,42,7.5,2.2,ink),_ring(42,42,7.5,2.2,ink),
+			_c(14,14,1.8,ink),_c(42,14,1.8,ink),_c(14,42,1.8,ink),_c(42,42,1.8,ink),_rr(28,28,5.5,5.5,1.8,ink),_c(28,28,2.2,accent)]
+		# A driverless tracked machine: no hatch, a sensor mast, a remote gun.
+		"robot_vehicle": return _tracks(26,44,20,4.5,5,ink,paper)+[_poly([7,40,10,34,40,34,46,40],ink),_rr(20,31,4.5,2.6,0.8,ink),_ob(24,31,35,31,1.6,ink),
+			_s(38,34,38,16,2.0,ink),_rr(38,13,5,3.4,1.6,ink),_c(40.5,13,1.9,accent)]
+		# A combat frame: a tall jointed machine, a shoulder yoke, one sensor
+		# slit glowing where a face would be.
+		"combat_frame": return [_rr(28,8,4,3.4,1,ink),_s(25.2,8,30.8,8,1.4,accent),_rr(28,13,1.8,2,0.4,ink),_rr(28,16,13.5,2.4,1,ink),
+			_rr(14.5,19,4,5,1.4,ink),_rr(41.5,19,4,5,1.4,ink),_poly([21,17,35,17,32,30,24,30],ink),
+			_s(14,24,13,35,3.0,ink),_s(42,24,43,35,3.0,ink),_ob(43,33,43,42,4.0,ink),_rr(28,31.5,6,2,1,ink),
+			_s(25,32,18,40,4.2,ink),_s(18,40,23,49,3.6,ink),_s(20,51,29,51,2.6,ink),
+			_s(32,32,26,40,4.4,ink),_s(26,40,34,49,3.8,ink),_s(32,51,42,51,2.8,ink),_c(18,40,2.6,ink),_c(26,40,2.8,ink)]
+		# Engineers and the trains.
+		"engineer","engineers": return [_s(14,47,40,15,2.4,ink),_rr(43,11,4.4,6,1.8,ink),_s(14,15,40,47,2.4,ink),_s(8,21,21,7,2.8,ink),_c(27,31,2.2,accent)]
 		"support": return [_rr(28,25,15,9,1.5,ink),_ring(19,39,5.5,2.2,ink),_ring(37,39,5.5,2.2,ink),_s(43,24,53,18,2.2,ink),_s(28,19,28,31,2.4,paper),_s(22,25,34,25,2.4,paper)]
+		# The battle rules' coarse arms: a gun, and armour as the medium tank.
+		"guns": return [_s(15,34,47,18,5.6,ink),_ring(20,41,8,2.6,ink),_c(20,41,2.2,ink),_s(20,41,7,49,2.6,ink),_c(48,17,2.0,accent)]
+		"armour": return arm_glyph("tank",ink,accent)
 	return [_c(28,28,8,ink)]
+
+
+## A tank's running gear: the track as a band of ink with paper road wheels.
+static func _tracks(x:float,y:float,hw:float,hh:float,wheels:int,ink:Color,paper:Color)->Array:
+	var out:Array=[_rr(x,y,hw,hh,hh,ink)]
+	for k in wheels:
+		var t:=float(k)/float(maxi(1,wheels-1))
+		out.append(_c(lerpf(x-hw+hh,x+hw-hh,t),y,hh*0.42,paper))
+	return out
 
 
 # -- Battle figures ---------------------------------------------------------
@@ -991,6 +1242,8 @@ static func command_glyph(kind:String,c:Color)->Array:
 		"defend": return [_rr(28,16,16,8,1.2,c),_t(12,20,44,20,28,52,c)]
 		"guard": return [_s(19,52,25,20,3.4,c),_s(37,52,31,20,3.4,c),_rr(28,18,11,3.4,1,c),_t(28,4,14,14,42,14,c),_s(21,42,35,32,2.6,c),_s(35,42,21,32,2.6,c)]
 		"goto": return [_s(36,52,36,8,3.4,c),_t(37.5,9,37.5,27,53,18,c),_c(12,48,3.8,soft),_c(19,40,3.8,soft),_c(13,31,3.8,c)]
+		# A storehouse under a pitched roof, stacked sacks beside it.
+		"depot": return [_t(22,12,4,26,40,26,c),_rr(22,38,15,12,1,c),_rr(45,45,6,5,1.5,soft),_rr(45,34,5,4.5,1.5,soft),_s(4,52,54,52,2.4,soft)]
 		"recall": return [_t(38,10,22,26,54,26,c),_rr(38,36,12,10,1,c),_s(4,40,17,40,4,c),_t(24,40,15,33,15,47,c)]
 		"front": return [_s(4,34,52,34,4.4,c),_t(6,33,16,33,11,21,c),_t(19,33,29,33,24,21,c),_t(32,33,42,33,37,21,c),_t(45,33,53,33,49,22,c)]
 		"arrow": return [_s(6,50,17,36,7,c),_s(17,36,29,27,6.4,c),_s(29,27,36,23.5,5.8,c),_t(52,15,32,14,40,33,c)]
@@ -1026,29 +1279,26 @@ static func equipment_texture(item:String,ink:Color,accent:Color,px:int=40)->Tex
 	return texture
 
 
-## The battle arm whose mark stands for this equipment, or "" when the
-## workshop draws its own (see equipment_kind).
+## The mark that stands for this equipment: every land kit draws its own
+## glyph from the equipment ledger (equipment_ledger.gd "glyph", the same
+## mark its blocks carry in battle); "" when the workshop draws its own
+## (arrows, rounds, carts, boats, aircraft: see equipment_kind).
 static func equipment_arm(item:String)->String:
-	match item:
-		"improvised": return "club"
-		"spear","shield_spear","padded_spear","lamellar_spear","scale_spear","mail_spear","plate_spear": return "spear"
-		"javelin": return "javelin"
-		"bow","mounted_bow","crossbow": return "bow"
-		"sling": return "sling"
-		"sword_shield": return "sword"
-		"axe": return "axe"
-		"pike": return "pike"
-		"lance","armored_lance","dragoon_kit": return "horse"
-		"chariot_kit": return "chariot"
-		"elephant_kit": return "elephant"
-		"siege_kit","ram","engineering_kit","repair_kit": return "engineers"
-		"catapult","trebuchet","bombard","field_gun","horse_gun","mortar","rocket_launcher","modern_field_gun","anti_air_gun","anti_tank_kit": return "guns"
-		"hand_cannon","musket","grenadier_kit": return "musket"
-		"service_rifle","marksman_rifle","assault_kit","marine_kit","airborne_kit","mountain_kit","air_assault_kit": return "rifle"
-		"machine_gun": return "machine_gun"
-		"armored_vehicle","armored_car_kit","light_tank_kit","heavy_tank_kit","tank_destroyer_kit","mechanized_kit": return "armour"
-		"motorized_kit","medical_kit": return "support"
+	var ledger:=_ledger()
+	if ledger!=null and ledger.has(item): return String(ledger.glyph(item))
+	# Supply lorries are not a fighting kit but draw as what they are (carts
+	# keep their own mark, equipment_kind).
+	if item=="supply_lorry": return "lorry"
 	return ""
+
+
+static var _ledger_script:GDScript
+
+## The equipment ledger, loaded on first use (it is data; loading it here
+## keeps this icon engine free of a load-order dependency on it).
+static func _ledger()->GDScript:
+	if _ledger_script==null: _ledger_script=load("res://scripts/equipment_ledger.gd")
+	return _ledger_script
 
 
 ## The workshop's own mark for items without a battle arm: arrows, shell,

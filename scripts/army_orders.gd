@@ -19,9 +19,12 @@ extends RefCounted
 ##        defend (home watch, as the court does) · recall (come home)
 ##        guard (hold ground around a clicked spot; a drawn-zone defend order
 ##               with a radius set for the band's size) · goto (march there)
+##        depot (march there and build a supply depot, field_depots.gd)
 ## Static helpers; preload.
 
 const WO:=preload("res://scripts/court_war_orders.gd")
+const Odds:=preload("res://scripts/war_odds.gd")
+const Supply:=preload("res://scripts/supply_state.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const R:=preload("res://scripts/joint_regions.gd")
@@ -36,6 +39,7 @@ const VERBS:=[
 	{"id":"defend","label":"Defend home","needs":"","hint":"Bring every band home and keep watch on the approaches for half a year."},
 	{"id":"guard","label":"Guard a place","needs":"spot","hint":"March to the ground you click and hold it against anyone who comes."},
 	{"id":"goto","label":"Go to…","needs":"spot","hint":"March to the ground you click and wait there."},
+	{"id":"depot","label":"Lay a depot","needs":"spot","hint":"March to the ground you click and build a supply depot there. Bands beyond it are fed as if the road behind it were half as long."},
 	{"id":"recall","label":"Come home","needs":"","hint":"Turn for home by the land road."},
 ]
 
@@ -202,12 +206,16 @@ static func unavailable(force_id:int,verb_id:String)->String:
 		if verb_id=="recall":
 			return "" if not (f.away as Array).is_empty() else "Everyone is already at home."
 		if int(f.trained)<=0 and int(f.drilling)<=0 and verb_id!="defend": return "Nobody at home is trained or in drill yet."
-		if int(f.trained)<=0 and verb_id in ["guard","goto"]: return "Nobody at home has finished drilling yet."
+		if int(f.trained)<=0 and verb_id in ["guard","goto","depot"]: return "Nobody at home has finished drilling yet."
+		if verb_id=="depot":
+			var trained:=int(f.trained)
+			return mc.depots.blocked(trained-(ceili(trained*WO.WATCH_SHARE) if trained>=WO.MIN_FORCE*2 else 0))
 		return ""
 	var record:=army(force_id)
 	if record.is_empty(): return "That band is no longer on the rolls."
 	if verb_id=="recall" and (at_home(record) or String(record.get("destination_id",""))=="player_home"): return "Already home or on the way."
 	if verb_id in ["attack","siege","raid"] and not WO.available(record): return "Not free for a new order now. Call it home first, or wait."
+	if verb_id=="depot": return mc.depots.blocked(int(record.get("troops",0)))
 	return ""
 
 static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
@@ -293,9 +301,21 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		var ratio:=strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
 		var drill:=WO.drill_of(formations)
 		var who_objects:=leader if leader!="" else "The war leader"
+		# The war leader's stated odds (war_odds.gd), reckoned before he
+		# objects so that he objects by them.
+		var arms:=[]
+		var odds:={}
+		if bool(enemy.known) and going>0:
+			arms=_their_arms(String(p.civ_id),int(enemy.age))
+			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
+			odds=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),arms,String(p.civ_id))
+			if not odds.is_empty():
+				out["odds"]=odds
+				out.lines.append("Odds%s: %s%s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours",odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
+		var weaker:=Odds.weaker(odds) if not odds.is_empty() else ratio<WO.OBJECT_RATIO
 		if going<WO.MIN_FORCE:
 			out.likely="impossible"; out.lines.append("%d cannot take a town; %s will refuse." % [going,who_objects])
-		elif bool(enemy.known) and ratio<WO.OBJECT_RATIO:
+		elif bool(enemy.known) and weaker:
 			out.likely="object"; out.lines.append("%s will probably object: we would be the weaker side." % who_objects)
 		elif drill<WO.UNDRILLED:
 			out.likely="object"; out.lines.append("%s will probably object: they have hardly drilled." % who_objects)
@@ -303,9 +323,47 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			out.likely="object"; out.lines.append("%s will probably object: too few to ring the town." % who_objects)
 		if not WO.at_war(String(p.civ_id)):
 			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
+	elif verb_id=="attack" and String(target.get("type",""))=="host" and going>0:
+		# A host in the open: its size and readiness as our scouts made them
+		# out, no walls; the same odds (war_odds.gd).
+		var seen:Dictionary=WorldSimulation.world.visible_formation_sighting(String(target.get("formation_id","")))
+		if not seen.is_empty():
+			var low:=int(seen.get("strength_estimate_low",0)); var high:=int(seen.get("strength_estimate_high",0))
+			out.lines.append("Their host is %s strong, as our scouts make it out." % Marks.about_range(low,high))
+			var civ:=String(seen.get("civ_id",target.get("civ_id","")))
+			var arms:=_their_arms(civ,0)
+			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
+			var ready:=(float(seen.get("readiness_estimate_low",0.5))+float(seen.get("readiness_estimate_high",0.5)))*0.5
+			var odds:=stated_odds(speed_force,formations,going,float(low+high)*0.5,0.0,arms,civ,true,ready)
+			if not odds.is_empty():
+				out["odds"]=odds
+				out.lines.append("Odds in the open%s: %s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours",odds_words(float(odds.odds),bool(odds.ours))])
 	elif verb_id=="guard":
 		out.lines.append("They hold about %s km around it and fight anyone hostile who comes into it." % EraWords.grouped(roundi(guard_radius(going))))
+	elif verb_id=="depot":
+		var Depots:=preload("res://scripts/field_depots.gd")
+		out.lines.append("There they build a depot: sheds, ovens and a fence, about %d days for %d hands." % [Depots.days_for(going),going])
+		# What it does here, by today's line (field_depots.impact_at).
+		var gain:=Depots.impact_at(there)
+		if gain.is_empty(): pass
+		elif float(gain.with)-float(gain.now)<0.03:
+			out.lines.append("A depot here would save little: the carriers eat little on the way already.")
+		else:
+			out.lines.append("Carriers walk %s to get here. Eating at the depot, %d%% of each load would arrive instead of %d%%, here and beyond." % [Supply.days_words(float(gain.days)),roundi(float(gain.with)*100.0),roundi(float(gain.now)*100.0)])
+		var given_up:Dictionary=mc.depots.replaces()
+		if not given_up.is_empty(): out.lines.append("We keep %d depots; the one %s is given up when this one stands." % [int(mc.depots.limit()),String(given_up.name).trim_prefix("Depot ")])
+		out.lines.append("A host at war with us passing within %d km burns it, unless our bands there are at least half its strength." % roundi(Depots.RAID_KM))
 	return out
+
+## The stated odds and the scouts' word on their arms live in war_odds.gd,
+## which the court's spoken orders read too.
+static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0)->Dictionary:
+	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready)
+
+static func _their_arms(civ_id:String,age:int)->Array: return Odds.their_arms(civ_id,age)
+static func arms_words(arms:Array)->String: return Odds.arms_words(arms)
+static func odds_words(odds:float,ours:bool)->String: return Odds.words(odds,ours)
+static func odds_short(odds:float,ours:bool)->String: return Odds.short(odds,ours)
 
 static func _sentence(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)
@@ -351,6 +409,7 @@ static func give(force_id:int,verb_id:String,target:Dictionary,insist:bool=false
 		"recall": return WO.perform({"kind":"recall","target":{},"full":false,"insist":insist},insist,{} if force_id==HOME else {"army_id":force_id})
 		"guard": return _guard(force_id,target)
 		"goto": return _go_to(force_id,target)
+		"depot": return _lay_depot(force_id,target)
 	var kind:=verb_id
 	var reading:={"kind":kind,"target":{},"full":false,"insist":insist,"place":""}
 	match String(target.get("type","")):
@@ -419,6 +478,20 @@ static func _go_to(force_id:int,target:Dictionary)->Dictionary:
 	out.outcome=out.says
 	return out
 
+## March to the spot and build a depot there (field_depots.gd).
+static func _lay_depot(force_id:int,target:Dictionary)->Dictionary:
+	var out:=_go_to(force_id,target)
+	if String(out.get("verdict",""))!="act": out.kind="depot"; return out
+	var army_id:=int((out.get("objective",{}) as Dictionary).get("army_id",-1))
+	var mc:=_mc()
+	mc.depots.assign(army_id,Vector2(float(target.x),float(target.z)))
+	var men:=int(army(army_id).get("troops",0))
+	out.kind="depot"
+	out.objective.kind="depot"
+	out.says+=" There we build the depot, about %d days' work." % preload("res://scripts/field_depots.gd").days_for(men)
+	out.outcome=out.says
+	return out
+
 static func _guard(force_id:int,target:Dictionary)->Dictionary:
 	## A defend order on a drawn zone the staff lay out round the clicked
 	## ground, sized for the band. The zone staff march, patrol and fight.
@@ -481,6 +554,7 @@ static func summary(plan:Dictionary)->String:
 		parts.append("%d %s" % [days,"day" if days==1 else "days"])
 		if int(plan.get("arrive_day",-1))>=0: parts.append("arrive "+Dates.day_words(int(plan.arrive_day)))
 	elif not (plan.get("road",[]) as Array).is_empty(): parts.append("already there")
+	if plan.has("odds"): parts.append("odds "+odds_short(float(plan.odds.odds),bool(plan.odds.ours)))
 	if String(plan.get("likely",""))=="object":
 		var leader:=war_leader_name()
 		parts.append("%s will object" % (leader if leader!="" else "the war leader"))

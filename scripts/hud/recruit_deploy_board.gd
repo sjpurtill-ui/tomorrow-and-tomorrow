@@ -164,6 +164,11 @@ func build_templates()->void:
 			var short:=int(gear.stock)<int(gear.need)
 			_fact(facts,"gear",EraWords.grouped(int(gear.need)),T.AMBER_TEXT if short else T.INK,"%s: %d a band · %d in store." % [MilitaryCampaign.PersistentProduction.product_name(weapon),int(gear.need),int(gear.stock)])
 		var kinds:=T.make_label(" · ".join(arms),12,T.INK_MUTED);kinds.clip_text=true;kinds.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;kinds.tooltip_text=kinds.text;kinds.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(kinds)
+		# What the design does, by the engine's own rules (deployment_model.template_stats).
+		var said:Array=Model.stats_words(item.get("stats",{}))
+		if String(said[0])!="":
+			var stats:=T.make_label(String(said[0]),12,T.INK);stats.name="Stats%d" % id;stats.clip_text=true;stats.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+			stats.tooltip_text=String(said[1]);stats.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(stats)
 		var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",6);words.add_child(actions)
 		var train:=_icon_button(actions,"drill","Train",func():report(MilitaryCampaign.recruit_deploy.add(id,1,1,false)),"Raise and drill one band of %d." % int(item.men))
 		train.name="TrainTemplate%d" % id;train.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -231,11 +236,19 @@ func _line_card(item:Dictionary)->void:
 	automatic.toggled.connect(func(on:bool):report(MilitaryCampaign.recruit_deploy.configure(id,"auto_deploy",on)));head.add_child(automatic)
 	var destination:=OptionButton.new();destination.name="Destination";destination.fit_to_longest_item=false;destination.custom_minimum_size.x=128;destination.clip_text=true;destination.focus_mode=Control.FOCUS_NONE
 	destination.add_item("New band",0)
+	# Only a band at home can take new men in (they cannot teleport); bands away
+	# are listed greyed so the choice is plain.
+	var waiting_on:=""
 	for army:Dictionary in MilitaryCampaign.field_armies:
 		if int(army.get("troops",0))<=0:continue
-		destination.add_item("Join "+Model.Logistics.force_name(army),int(army.army_id))
+		var home:=String(army.get("location_id",""))=="player_home" and String(army.get("status",""))=="stationed"
+		destination.add_item(("Join " if home else "Away: ")+Model.Logistics.force_name(army),int(army.army_id))
+		if not home:
+			destination.set_item_disabled(destination.get_item_count()-1,true)
+			if int(army.army_id)==int(item.target_army):waiting_on=Model.Logistics.force_name(army)
 	destination.select(maxi(0,destination.get_item_index(int(item.target_army))))
-	destination.tooltip_text="Where the new men go. A band in the field must come home to take them in."
+	destination.tooltip_text="Where the new men go. Only a band at home can take them in; bands away are greyed.\nNew band: while this line's last band is still at home, the next one (trained within a course and a month) joins it under the same general."
+	if waiting_on!="":destination.tooltip_text="Waiting: %s is away. Trained bands wait at home until it returns, or choose New band." % waiting_on
 	destination.item_selected.connect(func(index:int):report(MilitaryCampaign.recruit_deploy.configure(id,"target_army",destination.get_item_id(index))));head.add_child(destination)
 	var pause:=_icon_button(head,"pause","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"paused",not bool(MilitaryCampaign.recruit_deploy.line(id).get("paused",false)))),"");pause.name="Pause"
 	var stop:=_icon_button(head,"stop","",func():report(MilitaryCampaign.recruit_deploy.cancel(id)),"Stop this line: the recruits go home, their gear back to store.");stop.name="Stop"

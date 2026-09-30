@@ -26,6 +26,7 @@ const Board:=preload("res://scripts/hud/recruit_deploy_board.gd")
 const Forces:=preload("res://scripts/hud/forces_board.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const SupplyMap:=preload("res://scripts/hud/supply_map.gd")
+const BandTrend:=preload("res://scripts/hud/band_trend.gd")
 ## Below this width a row puts its line and gear on a second line.
 const WIDE_FROM:=940.0
 const REFRESH_SECONDS:=0.5
@@ -128,27 +129,40 @@ func _build_strip()->void:
 func _update_strip(s:Dictionary)->void:
 	var who:=String(s.carrier)
 	chips.carriers.icon.texture=Icons.logistics_texture(String(CARRIER_GLYPH.get(who,"porter")),T.INK,48)
-	var count:=int(s.carts) if who!="foot" else int(s.haulers)
+	var count:=int(s.lorries) if who=="motor" else (int(s.carts) if who!="foot" else int(s.haulers))
 	chips.carriers.value.text=EraWords.grouped(count)
 	chips.carriers.word.text=String(s.carrier_words)
 	var loss:float=Supply.carrier_loss(who,Supply.endurance_today())*100.0
 	var usual:float=Supply.carrier_loss(who,0.0)*100.0
 	var eaten:="They eat about %d%% of a load for each day of hauling." % roundi(loss)
 	if absf(loss-usual)>=0.05:eaten="They eat about %.1f%% of a load for each day of hauling (%d%% without our supply endurance)." % [loss,roundi(usual)]
-	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food from the stores: %s haulers and %s carts.\n%s" % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),eaten]
+	var fleet:Dictionary=(s.get("fleet",{}) as Dictionary).get("fleet",{})
+	var carry:=""
+	if not fleet.is_empty():
+		carry="\n%s drive %s lorries and %s carts; %s carry on their backs.\nA porter carries 16 days' bread for one man at 20 km a day, a cart %d at 20, a lorry %d at 150. One trip moves %s loads." % [EraWords.grouped(int(fleet.drivers)),EraWords.grouped(int(fleet.lorries)),EraWords.grouped(int(fleet.carts)),EraWords.grouped(int(fleet.porters)),roundi(float(fleet.cart_load)),roundi(float(fleet.lorry_load)),EraWords.grouped(roundi(float(fleet.loads)))]
+	chips.carriers.chip.tooltip_text="Our %s carry the fighters' food and stores: %s haulers, %s carts and %s lorries.%s\n%s" % [String(s.carrier_words),EraWords.grouped(int(s.haulers)),EraWords.grouped(int(s.carts)),EraWords.grouped(int(s.lorries)),carry,eaten]
 	var transport:=float(s.transport)
 	chips.carried.value.text="%d%%" % roundi(transport*100.0)
 	chips.carried.value.add_theme_color_override("font_color",Supply.state_text_color(Supply.state_of(transport)))
-	var carried_tip:="Our carriers can move %d%% of what the fighters need.\nMore haulers, carts and a careful commander carry more." % roundi(transport*100.0)
+	var reading:Dictionary=s.get("fleet",{})
+	var carried_tip:="Our carriers can move %d%% of what the fighters away need.\nMore haulers, carts and lorries and a careful commander carry more." % roundi(transport*100.0)
+	if not reading.is_empty() and float(reading.get("demand",0.0))>0.0:
+		carried_tip+="\nThe bands away and the garrisons ask %s loads a day: bread %s, fodder, fuel and rounds %s. At their distances our carriers bring %s a day, bread first." % [EraWords.grouped(roundi(float(reading.demand))),EraWords.grouped(roundi(float(reading.get("bread",0.0)))),EraWords.grouped(roundi(float(reading.get("stores_asked",0.0)))),EraWords.grouped(roundi(float(reading.moved)))]
+		carried_tip+="\nBread %d%% carried; fodder, fuel and rounds %d%%." % [roundi(float(reading.get("food",1.0))*100.0),roundi(float(reading.get("stores",1.0))*100.0)]
+		if float(reading.get("rail",0.0))>0.01:carried_tip+="\nRailways take the long leg: the carriers' trips are %d%% shorter." % roundi(float(reading.rail)*45.0)
 	if float(s.stores)<0.97:carried_tip+="\nThe stores are short: %d%% of the people's food came in." % roundi(float(s.stores)*100.0)
 	if float(s.siege)<1.0:carried_tip+="\nHome is besieged: %d%% of the carts get out." % roundi(float(s.siege)*100.0)
 	chips.carried.chip.tooltip_text=carried_tip
-	var hubs:Array=s.hubs;var depots:Array=s.depots
+	var hubs:Array=s.hubs;var depots:Array=s.depots;var laid:Array=s.get("laid",[])
 	chips.hubs.value.text=str(hubs.size());chips.hubs.word.text="hub" if hubs.size()==1 else "hubs"
 	chips.hubs.chip.tooltip_text="Our stores the carts load from: %s." % ", ".join(hubs) if not hubs.is_empty() else "No stores to load from."
-	chips.depots.value.text=str(depots.size());chips.depots.word.text="depot" if depots.size()==1 else "depots"
-	chips.depots.chip.visible=not depots.is_empty()
-	chips.depots.chip.tooltip_text="Towns we hold, where the carts rest and stores gather: %s.\nA line from a depot starts at half the haul of reaching it." % ", ".join(depots)
+	var relays:=depots.size()+laid.size()
+	chips.depots.value.text=str(relays);chips.depots.word.text="depot" if relays==1 else "depots"
+	chips.depots.chip.visible=relays>0
+	var depot_tip:=PackedStringArray()
+	if not depots.is_empty():depot_tip.append("Towns we hold, where the carts rest and stores gather: %s. A line from one starts at half the haul of reaching it." % ", ".join(depots))
+	if not laid.is_empty():depot_tip.append("Depots our bands laid: %s. Carriers passing one eat from it, so more of each load arrives beyond it; they still walk the whole road." % ", ".join(laid))
+	chips.depots.chip.tooltip_text="\n".join(depot_tip)
 	chips.rations.value.text=_amount(float(s.rations))
 	chips.rations.chip.tooltip_text="The fighters eat about %s rations a day, at home and in the field." % _amount(float(s.rations))
 	var mending:Dictionary=s.mending
@@ -245,10 +259,18 @@ func _row(row:Dictionary)->void:
 	_glyph(hungry_row,Icons.logistics_texture("hungry",T.RED_TEXT,32),14.0)
 	var hungry_days:=_text(hungry_row,"",12,T.RED_TEXT,true);_whole(hungry_days)
 	if wide:top.move_child(hungry_slot,line.get_index()+1)
+	var queue:=Button.new();queue.name="Priority";queue.focus_mode=Control.FOCUS_NONE;queue.custom_minimum_size=Vector2(0,26);queue.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	queue.visible=String(row.get("force_kind",""))=="field"
+	var army_id:=int(row.get("army_id",0))
+	queue.pressed.connect(func()->void:cycle_priority(army_id))
+	second.add_child(queue)
+	var coming:=_text(second,"",12,T.INK_MUTED);coming.name="Coming";_whole(coming);coming.mouse_filter=Control.MOUSE_FILTER_PASS
+	var building:=_text(second,"",12,T.INK_MUTED);building.name="Depot";_whole(building);building.mouse_filter=Control.MOUSE_FILTER_PASS
+	var trend:Control=BandTrend.new();trend.name="Trend";trend.visible=false;second.add_child(trend)
 	var gear:=HFlowContainer.new();gear.name="Gear";gear.add_theme_constant_override("h_separation",6);gear.add_theme_constant_override("v_separation",4);gear.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	gear.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(gear)
 	live.append({"key":String(row.key),"panel":panel,"sack":sack,"face":face,"face_key":"","who":who,"title":title,"men":men,"meter":meter,"line":line,"hub_mark":hub_mark,"hub":hub,"span":span,"road":road,
-		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":""})
+		"hungry":hungry,"hungry_days":hungry_days,"gear":gear,"gear_key":"","queue":queue,"coming":coming,"building":building,"trend":trend})
 
 
 func _update_values()->void:
@@ -281,10 +303,18 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	var reasons:=why_words(row)
 	control.who.tooltip_text="No runner has come from them yet." if unknown else String(row.get("words",""))+("\n"+reasons if reasons!="" and not reported else "")
 	var head:=("Supply %d%%, %s." % [roundi(ratio*100.0),BarModel.report_words(age)]) if reported else shares_words(row)
+	var stores:=float(row.get("stores_share",1.0))
+	if stores<0.995 and not reported:head+="\nFodder, fuel and rounds: %d%% arrive. Short stores weaken horses, guns and machines." % roundi(stores*100.0)
+	var winter:Dictionary=row.get("winter",{})
+	if not winter.is_empty() and not reported and float(winter.ratio)<ratio-0.05:
+		head+="\nIn deep winter here, in about %d days, the same line would bring %d%%%s." % [int(winter.in_days),roundi(float(winter.ratio)*100.0),", and they would go hungry" if float(winter.ratio)<Supply.WELL_FROM else ""]
+	if row.has("line_bread") and not reported:
+		head+="\nIts line asks %s loads a day: bread %s; fodder, fuel and rounds %s." % [EraWords.grouped(roundi(float(row.line_bread)+float(row.line_stores))),EraWords.grouped(roundi(float(row.line_bread))),EraWords.grouped(roundi(float(row.line_stores)))]
+		if int(row.get("carts_alone",-1))>0:head+=" Alone it would keep %s carts on the road." % EraWords.grouped(int(row.carts_alone))
 	control.meter.set_reading(ratio,"%d%%" % roundi(ratio*100.0),Supply.state_color(state),"%s\n%s" % [head,reasons] if reasons!="" else head)
 	var at_home:=bool(row.get("at_home",false))
 	var kind:=String(row.get("hub_kind",""))
-	(control.hub_mark as TextureRect).texture=Icons.logistics_texture("depot" if kind=="held" else "hub",T.INK,32) if not at_home else Icons.command_texture("home",T.INK,32)
+	(control.hub_mark as TextureRect).texture=Icons.logistics_texture("depot" if kind in ["held","depot"] else "hub",T.INK,32) if not at_home else Icons.command_texture("home",T.INK,32)
 	control.hub.text=String(row.get("hub",""))
 	var days:=float(row.get("days",0.0))
 	if unknown:control.span.text="no report yet"
@@ -300,7 +330,30 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	(control.hungry as Control).visible=hungry
 	var hungry_days:=roundi(float(row.get("hungry_days",0.0)))
 	control.hungry_days.text="%d day%s" % [hungry_days,"" if hungry_days==1 else "s"]
-	(control.hungry as Control).tooltip_text="Hungry %d days: below a fed day's ration.\nHunger wears down their will and their health." % hungry_days
+	var lost:Dictionary=row.get("hunger_losses",{})
+	var hunger_tip:="Hungry %d days: below three quarters of a day's ration.\nEach hungry day costs men: some fall sick, some go home, some die." % hungry_days
+	if int(lost.get("sick",0))+int(lost.get("deserted",0))+int(lost.get("dead",0))>0:
+		hunger_tip+="\nSo far: %d fallen sick, %d gone home, %d dead." % [int(lost.get("sick",0)),int(lost.get("deserted",0)),int(lost.get("dead",0))]
+	(control.hungry as Control).tooltip_text=hunger_tip
+	var field:=String(row.get("force_kind",""))=="field"
+	var queue:Button=control.queue
+	queue.visible=field and not unknown
+	var priority:=String(row.get("priority","normal"))
+	queue.text=String(Model.PRIORITY_WORDS.get(priority,"Supplied in turn"))
+	queue.tooltip_text=String(Model.PRIORITY_TIPS.get(priority,""))+"\nClick to change."
+	var drafts:Dictionary=row.get("drafts",{})
+	var coming:=int(drafts.get("on_road",0))+int(drafts.get("in_training",0))
+	control.coming.visible=field and (coming>0 or String(drafts.get("block",""))=="no_people")
+	control.coming.text="+%s coming" % EraWords.grouped(coming)
+	control.coming.tooltip_text=Model.drafts_words(drafts,int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0)+".\nLosses are replaced by drafts trained at home, who walk out and join."
+	(control.trend as Control).call("set_samples",row.get("trend",[]) if field else [])
+	# A depot in hand (field_depots.gd).
+	var depot:Dictionary=row.get("depot",{})
+	control.building.visible=field and not depot.is_empty()
+	if not depot.is_empty():
+		var left:=int(depot.get("days_left",0))
+		control.building.text="Laying a depot, %d %s left" % [left,"day" if left==1 else "days"] if bool(depot.get("at_site",false)) else "Marching to lay a depot"
+		control.building.tooltip_text="When it stands, bands beyond it are fed as if the road behind it were half as long."
 	_update_gear(control,row.get("short",[]))
 
 
@@ -343,6 +396,17 @@ static func why_words(row:Dictionary)->String:
 		var text:=String(reason)
 		if text!="":lines.append(text.substr(0,1).to_upper()+text.substr(1)+".")
 	return "\n".join(lines)
+
+
+## In turn, first, last, in turn: who gets gear, rounds and replacements
+## before the others (military_campaign.set_army_priority).
+func cycle_priority(army_id:int)->void:
+	var mc:=MilitaryCampaign
+	var index:int=mc._field_army_index(army_id)
+	if index<0:return
+	var now:=String(mc.field_armies[index].get("priority","normal"))
+	mc.set_army_priority(army_id,{"normal":"first","first":"last","last":"normal"}.get(now,"normal"))
+	refresh(true)
 
 
 func open_production()->void:

@@ -38,8 +38,26 @@ static func combat_force(force: Dictionary, termination: Dictionary) -> Dictiona
 static func occupied_area(form: Dictionary) -> float:
 	var count:=maxf(0,float(form.get("count",0)))
 	var unit:=String(form.get("unit","unknown"))
+	var weapon:=String(form.get("weapon",""))
+	var sets:=maxf(0,float(form.get("equipment",0)))
+	var ledger:=preload("res://scripts/equipment_ledger.gd")
+	if ledger.has(weapon):
+		# By the kit (equipment_ledger.gd): a vehicle or gun takes its own
+		# ground, a chariot or elephant most of that, a crew weapon (machine
+		# gun, mortar, antitank gun) some, a horse a little, and machines run
+		# by operators each stand on the field, eight frames to a supervisor.
+		var family:=ledger.family(weapon)
+		var per_set:=0.0
+		if family in ["vehicle","guns"] or weapon=="robotic_vehicle": per_set=20.0
+		elif weapon in ["chariot_kit","elephant_kit"]: per_set=16.0
+		elif family=="crew": per_set=10.0
+		elif family=="mount" or weapon=="mounted_bow": per_set=6.0
+		elif ledger.crew(weapon)<1.0: per_set=4.0
+		# No more sets on the field than the men can work.
+		var worked:=minf(sets,count/maxf(0.01,ledger.crew(weapon)))
+		return count*4.0+worked*per_set
 	var extra:=20.0 if unit in ["armored_formation","field_artillery","modern_artillery","siege_engineer"] else (6.0 if unit in ["cavalry","motorized_infantry","mobile"] else 0.0)
-	return count*4.0+minf(count,maxf(0,float(form.get("equipment",0))))*extra
+	return count*4.0+minf(count,sets)*extra
 
 static func layout(force: Dictionary, deployment: float = 1.0, facing: float = 0.0) -> Array[Dictionary]:
 	var total := active_count(force)

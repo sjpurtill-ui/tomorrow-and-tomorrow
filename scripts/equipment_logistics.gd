@@ -1,4 +1,5 @@
 extends RefCounted
+const Carriers:=preload("res://scripts/carriers.gd")
 ## What the bands hold and what they still need, per kind of equipment: in
 ## store, missing on serving formations, owed to recruits in training, and
 ## asked for by called-up levies and requested recruitment. One reading shared
@@ -37,7 +38,7 @@ static func _host(host:Node)->Node:
 static func category(item:String)->String:
 	var joint:=Joint.by_equipment(item)
 	if not joint.is_empty():return "boats" if String(joint.domain)=="navy" else "aircraft"
-	if item=="transport_cart":return "carts"
+	if item in ["transport_cart","supply_lorry"]:return "carts"
 	if MilitaryCampaign.CONSUMABLE_KNOWLEDGE.has(item):return "ammunition"
 	return "weapons"
 
@@ -45,7 +46,7 @@ static func stock(item:String,host:Node=null)->int:
 	host=_host(host)
 	match category(item):
 		"ammunition":return int(host.military_consumables.get(item,0))
-		"carts":return int(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0))
+		"carts":return int(WorldSimulation.state.resource_stockpiles.get(P.transport_stock(item),0))
 	return int(host.military_inventory.get(item,0))
 
 ## Who uses it, in a few words: "levy, spearmen", "bows", "patrol, 4 crew".
@@ -56,6 +57,7 @@ static func arms(item:String,limit:int=2)->String:
 		if purpose.length()>18:purpose=String(joint.get("mission","")).to_lower()
 		return "%s, %d crew" % [purpose,int(joint.get("crew",0))]
 	if item=="transport_cart":return "carries supplies"
+	if item=="supply_lorry":return "carries supplies fast"
 	var users:Array[String]=[]
 	if MilitaryCampaign.CONSUMABLE_KNOWLEDGE.has(item):
 		for weapon:String in MilitaryCampaign.EQUIPMENT_KNOWLEDGE:
@@ -187,6 +189,15 @@ static func rows(host:Node=null,snapshot:Dictionary={})->Array[Dictionary]:
 		for item:String in table:
 			if int(table[item])>0:items[item]=true
 	if int(WorldSimulation.state.resource_stockpiles.get("Transport Carts",0))>0:items["transport_cart"]=true
+	if int(WorldSimulation.state.resource_stockpiles.get("Supply Lorries",0))>0:items["supply_lorry"]=true
+	# What the supply lines lack (carriers.gd): lorries once we can make them,
+	# else carts, counted against what we hold.
+	if host.has_method("carrier_reading"):
+		var carrier_item:="supply_lorry" if not P.recipe(host,"supply_lorry").has("error") else "transport_cart"
+		var want:=Carriers.wanted_from(host.carrier_reading(),carrier_item)
+		if want>0:
+			need[carrier_item]={"fielded":stock(carrier_item,host)+want,"training":0,"requisitioned":0,"for":{"lines":{"who":"the supply lines","count":want}}}
+			items[carrier_item]=true
 	for item:String in items:result.append(_row(host,item,need,making,line_ids))
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var ca:=CATEGORY_ORDER.find(String(a.category));var cb:=CATEGORY_ORDER.find(String(b.category))

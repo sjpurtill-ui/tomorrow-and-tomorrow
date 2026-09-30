@@ -317,6 +317,28 @@ static func _war(out:Dictionary)->void:
 		garrisons.append({"town":TownNames.of(String(force.get("civ_id","")),String(force.get("region_id","")),String(force.get("region_name",""))),"fighters":int(force.get("troops",0)),"wounded":int(force.get("wounded_pool",0)),"commander":String((force.get("commander",{}) as Dictionary).get("name","")) if force.get("commander") is Dictionary else "",
 			"fed":fed_facts(Supply.of_force(force))})
 	out["garrisons"]=garrisons
+	# Who carries the bands' supply and how much of it (carriers.gd), and the
+	# replacements on their way (field_sustainment.gd): the war leader's to say.
+	if mc.has_method("carrier_reading"):
+		var r:Dictionary=mc.carrier_reading()
+		var fleet:Dictionary=r.get("fleet",{})
+		out["carriers"]={"porters":int(fleet.get("porters",0)),"carts":int(fleet.get("carts",0)),"lorries":int(fleet.get("lorries",0)),"asked":roundi(float(r.get("demand",0.0))),"brought":roundi(minf(float(r.get("moved",0.0)),float(r.get("demand",0.0)))),"bread":roundi(float(r.get("food",1.0))*100.0),"stores":roundi(float(r.get("stores",1.0))*100.0)}
+	if "sustainment" in mc:
+		var coming:=0
+		for order in mc.training_queue:
+			if order is Dictionary and String((order as Dictionary).get("mode",""))=="field_draft": coming+=int((order as Dictionary).get("count",0))
+		out["replacements"]={"on_road":int(mc.sustainment.drafts_on_road()),"in_training":coming}
+	# Our field depots and those being laid (field_depots.gd).
+	if "depots" in mc:
+		var Depots:=preload("res://scripts/field_depots.gd")
+		var standing:Array=[]
+		for d in mc.field_depots: standing.append({"where":Depots.place_words(Vector2(float(d.x),float(d.z))),"laid_by":String(d.get("by",""))})
+		var laying:Array=[]
+		for a in mc.field_armies:
+			var work:=Depots.progress(a)
+			if not work.is_empty(): laying.append({"band":String((a as Dictionary).get("name","a band")),"where":Depots.place_words(Vector2(float(work.x),float(work.z))),"days_left":int(work.days_left)})
+		if not standing.is_empty() or not laying.is_empty() or mc.depots.known():
+			out["depots"]={"standing":standing,"laying":laying,"keep":int(mc.depots.limit()),"can_build":bool(mc.depots.known())}
 	var chases:Array=[]
 	for d:Dictionary in Pursuit.detachments(): chases.append("%d fighters %s" % [int(d.troops),"chasing the men who fled "+String(d.town) if String(d.state)=="chasing" else ("walking back to "+String(d.town) if String(d.state)=="returning" else "marching home")])
 	out["chases"]=chases
@@ -375,7 +397,8 @@ static func fed_facts(report:Dictionary)->Dictionary:
 	var parts:=Supply.percents(float(report.get("ratio",0.0)),[float(report.get("local",0.0)),float(report.get("foraged",0.0)),float(report.get("carried",0.0))])
 	return {"gets":roundi(float(report.get("ratio",0.0))*100.0),"from_town":int(parts[0]),"foraged":int(parts[1]),"carried":int(parts[2]),
 		"state":Supply.state_words(String(report.get("state",""))),"hungry_days":roundi(float(report.get("hungry_days",0.0))) if bool(report.get("hungry",false)) else 0,
-		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words",""))}
+		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words","")),
+		"stores":roundi(float(report.get("stores_share",1.0))*100.0),"winter":roundi(float((report.get("winter",{}) as Dictionary).get("ratio",-1.0))*100.0) if report.get("winter") is Dictionary and float((report.winter as Dictionary).ratio)<float(report.get("ratio",0.0))-0.05 else -1,"winter_in":int((report.get("winter",{}) as Dictionary).get("in_days",0)) if report.get("winter") is Dictionary else 0,"sick":int((report.get("hunger_losses",{}) as Dictionary).get("sick",0)),"deserted":int((report.get("hunger_losses",{}) as Dictionary).get("deserted",0)),"dead":int((report.get("hunger_losses",{}) as Dictionary).get("dead",0))}
 
 ## "; food 60% (35% foraged, 25% carried), 4 days from Seanstone by cart
 ## track, hungry 3 days" for the prompt's band and garrison lines.
@@ -388,6 +411,10 @@ static func fed_line(fed:Dictionary)->String:
 	if int(fed.get("carried",0))>0: shares.append("%d%% carried" % int(fed.carried))
 	var out:="; food %d%%%s, %s" % [int(fed.get("gets",0)),(" ("+", ".join(shares)+")") if not shares.is_empty() else "",String(fed.get("line",""))]
 	if int(fed.get("hungry_days",0))>0: out+=", hungry %d days" % int(fed.hungry_days)
+	if int(fed.get("stores",100))<100: out+=", fodder, fuel and rounds %d%%" % int(fed.stores)
+	if int(fed.get("winter",-1))>=0: out+="; in deep winter there (about %d days off) the same line would bring %d%%" % [int(fed.get("winter_in",0)),int(fed.winter)]
+	var lost:=int(fed.get("sick",0))+int(fed.get("deserted",0))+int(fed.get("dead",0))
+	if lost>0: out+="; hunger has cost %d fallen sick, %d gone home and %d dead" % [int(fed.get("sick",0)),int(fed.get("deserted",0)),int(fed.get("dead",0))]
 	return out
 
 const CAPTIVE_FATE:={"enslave":"sent home as bondservants","release":"let go","parole":"let go on their word","ransom":"given back for ransom","execute":"put to death","exchange":"traded for our own people","hold":"held under guard"}
@@ -625,6 +652,19 @@ static func text(s:Dictionary)->String:
 		var gar:PackedStringArray=PackedStringArray()
 		for g:Dictionary in s.get("garrisons",[]): gar.append("%s: %d fighters%s%s%s" % [String(g.town),int(g.fighters),(", %d wounded" % int(g.wounded)) if int(g.wounded)>0 else "",(" under "+String(g.commander)) if String(g.commander)!="" else "",fed_line(g.get("fed",{}))])
 		lines.append("Garrisons: %s." % ("; ".join(gar) if not gar.is_empty() else "none"))
+		var carriers:Dictionary=s.get("carriers",{})
+		if int(carriers.get("asked",0))>0:
+			lines.append("Carriers: %d on foot, %d carts, %d lorries; they bring %d of the %d loads a day the bands and garrisons ask. Bread goes first: %d%% of the bread arrives, %d%% of the fodder, fuel and rounds." % [int(carriers.porters),int(carriers.carts),int(carriers.lorries),int(carriers.brought),int(carriers.asked),int(carriers.bread),int(carriers.stores)])
+		var depots:Dictionary=s.get("depots",{})
+		if not depots.is_empty():
+			var said:=PackedStringArray()
+			for d:Dictionary in depots.get("standing",[]): said.append(String(d.where))
+			var line:="Field depots: "+(", ".join(said) if not said.is_empty() else "none yet")+" (we keep %d at most; the line from one starts at half the cost of reaching it)." % int(depots.keep)
+			for d:Dictionary in depots.get("laying",[]): line+=" %s is laying one %s, %d days to go." % [String(d.band),String(d.where),int(d.days_left)]
+			lines.append(line)
+		var replacements:Dictionary=s.get("replacements",{})
+		if int(replacements.get("on_road",0))+int(replacements.get("in_training",0))>0:
+			lines.append("Replacements for the bands: %d in training at home, %d on the road to them." % [int(replacements.in_training),int(replacements.on_road)])
 		if not (s.get("chases",[]) as Array).is_empty(): lines.append("Out on a chase: %s." % "; ".join(PackedStringArray(s.chases)))
 		var fights:PackedStringArray=PackedStringArray()
 		for b:Dictionary in s.get("battles",[]): fights.append(battle_words(b))

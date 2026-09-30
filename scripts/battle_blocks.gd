@@ -93,6 +93,7 @@ const UNIT_TIER:={
 	"hand_cannoneer":3,"musketeer":3,"grenadier":3,"dragoon":3,"bombard_crew":3,"horse_artillery":3,"field_artillery":3,"sharpshooter":3,
 	"rifle_infantry":4,"machine_gun_company":4,"mortar_crew":4,"assault_infantry":4,"combat_engineer":4,"marines":4,"anti_tank":4,"anti_air":4,"armored_car":4,"mountain_infantry":4,
 	"motorized_infantry":5,"armored_formation":5,"modern_artillery":5,"light_tank":5,"heavy_tank":5,"tank_destroyer":5,"mechanized_infantry":5,"rocket_artillery":5,"air_assault":5,"paratrooper":5,
+	"networked_infantry":5,"main_battle_tank":5,"precision_fires":5,"drone_operators":5,"counter_drone_battery":5,"robot_vehicle_company":5,"exosuit_infantry":5,"combat_frame_cohort":5,
 }
 const WEAPON_TIER:={"musket":3,"hand_cannon":3,"grenadier_kit":3,"dragoon_kit":3,"bombard":3,"horse_gun":3,"field_gun":3,
 	"service_rifle":4,"machine_gun":4,"mortar":4,"marksman_rifle":4,"assault_kit":4,"marine_kit":4,"engineering_kit":4,"anti_tank_kit":4,"anti_air_gun":4,"armored_car_kit":4,"mountain_kit":4,
@@ -106,7 +107,23 @@ const DEPLOY_ORDER:={"spear":3,"pike":3,"sword":3,"axe":3,"club":3,"musket":3,"r
 
 # --- Arms and ages --------------------------------------------------------------
 
-## The arm a formation fights as, for its icon and its words.
+const Ledger:=preload("res://scripts/equipment_ledger.gd")
+const Catalog:=preload("res://scripts/military_unit_catalog.gd")
+
+## The mark a formation is drawn with (battle plates, production icons,
+## roster insignia): its kit's own glyph in the equipment ledger, so a light
+## tank, a howitzer and a combat frame each look like themselves; a known
+## unit with an unknown weapon draws its first catalog kit; anything else
+## draws the arm it fights as. Drawing only: the battle rules keep keying on
+## arm_of.
+static func glyph_of(unit:String,weapon:String="")->String:
+	if weapon!="" and Ledger.has(weapon): return Ledger.glyph(weapon)
+	var kits:Array=Catalog.archetype(unit).get("equipment",[])
+	if not kits.is_empty() and Ledger.has(String(kits[0])): return Ledger.glyph(String(kits[0]))
+	return arm_of(unit,weapon)
+
+
+## The arm a formation fights as, for its words and the battle rules.
 static func arm_of(unit:String,weapon:String="")->String:
 	match unit:
 		"skirmisher","archer","crossbowman","horse_archer": return "bow" if unit!="horse_archer" else "horse"
@@ -122,7 +139,10 @@ static func arm_of(unit:String,weapon:String="")->String:
 		"sharpshooter","rifle_infantry","assault_infantry","marines","paratrooper","mountain_infantry","motorized_infantry","mechanized_infantry","air_assault","light_infantry": return "rifle" if int(UNIT_TIER.get(unit,0))>=4 or unit=="sharpshooter" else "spear"
 		"machine_gun_company": return "machine_gun"
 		"field_artillery","modern_artillery","catapult_crew","trebuchet_crew","bombard_crew","horse_artillery","mortar_crew","rocket_artillery","anti_air": return "guns"
-		"armored_formation","light_tank","heavy_tank","tank_destroyer","armored_car","anti_tank": return "armour" if unit!="anti_tank" else "guns"
+		"armored_formation","light_tank","heavy_tank","tank_destroyer","armored_car","anti_tank","main_battle_tank","robot_vehicle_company": return "armour" if unit!="anti_tank" else "guns"
+		# Drones and precision fires strike from behind the line, like guns.
+		"precision_fires","drone_operators","counter_drone_battery": return "guns"
+		"networked_infantry","exosuit_infantry","combat_frame_cohort": return "rifle"
 		"siege_engineer","combat_engineer","ram_crew": return "engineers"
 		"field_repair_company","medical_detachment": return "support"
 		"spearman": return "spear"
@@ -152,8 +172,20 @@ static func tier_of(force:Dictionary)->int:
 		var formation:Dictionary=formation_variant
 		var count:=maxi(0,int(formation.get("count",0)))
 		if count<=0 or float(count)<float(total)*0.05: continue
-		tier=maxi(tier,maxi(int(UNIT_TIER.get(String(formation.get("unit","levy")),0)),int(WEAPON_TIER.get(String(formation.get("weapon","")),0))))
+		tier=maxi(tier,maxi(int(UNIT_TIER.get(String(formation.get("unit","levy")),0)),weapon_tier(String(formation.get("weapon","")))))
 	return clampi(tier,0,TIERS.size()-1)
+
+
+## The age a kit dates its bearers to: the table where it names the kit,
+## otherwise the kit's year in the equipment ledger (gunpowder, rifles and
+## motors; anything later fights at the last age's pace).
+static func weapon_tier(weapon:String)->int:
+	if WEAPON_TIER.has(weapon): return int(WEAPON_TIER[weapon])
+	var year:=preload("res://scripts/equipment_ledger.gd").year(weapon)
+	if year>=2600.0: return 5
+	if year>=2500.0: return 4
+	if year>=1800.0: return 3
+	return 0
 
 
 ## A round size a clerk would give a unit of this many.

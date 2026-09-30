@@ -685,7 +685,7 @@ func _ledger_for(key:Dictionary)->Dictionary:
 	var force:=_force_now(key)
 	return {"troops":int(force.get("troops",0)),"dead":int(force.get("dead",0)),"wounded":int(force.get("wounded_pool",0)),"scattered":int(force.get("scattered_pool",0)),"captured":int(force.get("captured_pool",0)),
 		"prisoners":int(MilitaryCampaign.foreign_prisoners),"bound":float(GameState.resource_stockpiles.get("Forced Labor",0.0)),"food":float(GameState.resource_stockpiles.get("Food",0.0)),
-		"carts":float(GameState.resource_stockpiles.get("Transport Carts",0.0)),"gear":_inventory_total(),"population":int(GameState.population_total),"generals":MilitaryCampaign.held_generals.size()}
+		"carts":float(GameState.resource_stockpiles.get("Transport Carts",0.0)),"gear":_gear_total(),"population":int(GameState.population_total),"generals":MilitaryCampaign.held_generals.size()}
 
 
 func _force_now(key:Dictionary)->Dictionary:
@@ -699,6 +699,11 @@ func _inventory_total()->int:
 	var n:=0
 	for item in MilitaryCampaign.military_inventory: n+=int(MilitaryCampaign.military_inventory[item])
 	return n
+
+## The stores and what has left them for bands away and their drafts (gear
+## follows the supply line, military_campaign.gear_sent_out).
+func _gear_total()->int:
+	return _inventory_total()+int(MilitaryCampaign.gear_sent_out)
 
 
 func _sum_rounds(record:Dictionary,side:String)->Dictionary:
@@ -798,7 +803,7 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 			_check(carts==int(taken.get("carts",0)),"ledger","%s: the spoils had %d carts, the stores gained %d" % [label,int(taken.get("carts",0)),carts])
 			var weapons:=0
 			for w in (taken.get("weapons",{}) as Dictionary): weapons+=int(taken.weapons[w])
-			_check(_inventory_total()-int(before.get("gear",0))>=weapons,"ledger","%s: the spoils had %d weapons, the stores gained %d" % [label,weapons,_inventory_total()-int(before.get("gear",0))])
+			_check(_gear_total()-int(before.get("gear",0))>=weapons,"ledger","%s: the spoils had %d weapons, the stores gained %d (with what went out to the bands)" % [label,weapons,_gear_total()-int(before.get("gear",0))])
 	# --- The report: once, from the war leader, with the right numbers.
 	var cards:=resolved.filter(func(r:Dictionary)->bool: return int(r.seed)==seed)
 	_check(cards.size()==1,"report","%s: its report was sent %d times (should be once)" % [label,cards.size()])

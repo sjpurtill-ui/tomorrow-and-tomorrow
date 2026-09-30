@@ -159,7 +159,7 @@ static func describe(row:Dictionary,ctx:Dictionary)->Dictionary:
 				result.people="%s. New recruits join this army when you choose it as the destination of a recruitment in Recruit & deploy." % empty(short)
 				action={"id":"recruitment","label":"Recruit for it"}
 			else:
-				result.people="%s. New recruits can only join them once they are back home." % empty(short)
+				result.people="%s. Replacements are drafted at home from those set aside for defence and walk out to them while their supply line reaches them and they are fed." % empty(short)
 			reasons.append("%s has %s empty places" % [name,number(short)])
 		else:
 			lead="%s is %s: %s %s, every place filled." % [name,where,number(count),who]

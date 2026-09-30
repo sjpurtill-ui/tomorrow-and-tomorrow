@@ -414,8 +414,15 @@ func test_readiness_rows_follow_the_one_supply_rule()->void:
 	_garrison(12,4)
 	_ration_day()
 	far["hungry_days"]=5.0
+	# Its last months, sampled by the campaign (field_sustainment.trend_day).
+	var today:=int(GameState.elapsed_days)
+	near["trend"]=[[today-10,30,90,80],[today-5,29,88,79],[today,28,85,78]]
 	var board:=_readiness_board()
 	assert_int(board.rows.size()).is_equal(Supply.forces().size())
+	var drawn:Dictionary=_control_for(board,"army:%d" % int(near.army_id))
+	assert_bool((drawn.trend as Control).visible).is_true()
+	assert_str(String((drawn.trend as Control).tooltip_text)).contains("The last 10 days: 30 men, now 28")
+	assert_bool((_control_for(board,"army:%d" % int(far.army_id)).trend as Control).visible).is_false()
 	# The levy at home and the town we hold are known today: the supply
 	# model's own reading.
 	for force:Dictionary in [MilitaryCampaign.home_army,MilitaryCampaign.occupation_forces[0]]:

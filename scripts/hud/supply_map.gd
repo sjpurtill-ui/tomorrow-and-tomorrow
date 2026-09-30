@@ -17,6 +17,7 @@ extends Node
 ## changes. With the map off, this node only keeps the supply field ready
 ## for the day's rations while forces are out. Observe-only.
 
+const Carriers:=preload("res://scripts/carriers.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Chart:=preload("res://scripts/hud/supply_chart.gd")
@@ -190,11 +191,19 @@ func _forces()->Array:
 		# has come); the army bar and the Military screen read the same.
 		var known:=BarModel.known_supply(mc,a)
 		var p:Vector2=known.get("position",Vector2.INF) if not known.is_empty() else Vector2.INF
-		if p.is_finite(): out.append({"id":"army:%d" % int(a.get("army_id",0)),"pos":p,"report":known,"route":Supply.route_to(Supply.field(),p)})
+		# The loads its line carries a day (carriers.gd): the line's weight.
+		var loads:=Carriers.daily_loads(a)
+		if p.is_finite(): out.append({"id":"army:%d" % int(a.get("army_id",0)),"pos":p,"report":_with_loads(known,loads),"route":Supply.route_to(Supply.field(),p),"loads":loads})
 	for g in mc.occupation_forces:
 		if not g is Dictionary or int((g as Dictionary).get("troops",0))<=0: continue
 		var p:=Supply.force_pos(g)
-		if p.is_finite(): out.append({"id":"held:"+String(g.get("region_id","")),"pos":p,"report":Supply.of_force(g),"route":Supply.route_to(Supply.field(),p)})
+		var loads:=Carriers.daily_loads(g)
+		if p.is_finite(): out.append({"id":"held:"+String(g.get("region_id","")),"pos":p,"report":_with_loads(Supply.of_force(g),loads),"route":Supply.route_to(Supply.field(),p),"loads":loads})
+	return out
+
+static func _with_loads(report:Dictionary,loads:float)->Dictionary:
+	var out:=report.duplicate()
+	out["loads"]=loads
 	return out
 
 func _paint_key(f:Dictionary,forces:Array)->int:
@@ -359,7 +368,7 @@ class PaintJob:
 				var q:=smooth[k]
 				var qx:=clampi(roundi((q.x-origin.x)/cell),0,nx-1); var qy:=clampi(roundi((q.y-origin.y)/cell),0,ny-1)
 				road[k]=1 if tiers[qy*nx+qx]>=0 else 0
-			routes.append({"id":String(force.id),"points":smooth,"heights":_heights(f,smooth),"road":road,"state":String(report.get("state","well"))})
+			routes.append({"id":String(force.id),"points":smooth,"heights":_heights(f,smooth),"road":road,"state":String(report.get("state","well")),"loads":float(force.get("loads",0.0))})
 		var hubs:Array=[]
 		for s:Dictionary in f.sources: hubs.append({"pos":s.pos,"h":_height_at(f,s.pos),"kind":String(s.kind),"name":String(s.name)})
 		var road_rows:Array=[]

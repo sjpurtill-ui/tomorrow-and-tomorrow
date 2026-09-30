@@ -8,7 +8,7 @@ const P=preload("res://scripts/persistent_production.gd")
 ## Former recipe table; infrastructure planners read product metadata through it.
 const I=preload("res://scripts/civilian_industry.gd")
 ## Stockpile resources that a military line makes, keyed to its product id.
-const LINE_PRODUCTS:={"Transport Carts":"transport_cart"}
+const LINE_PRODUCTS:={"Transport Carts":"transport_cart","Supply Lorries":"supply_lorry"}
 
 ## No civilian line orders remain: studies, clothing, crop nutrients and plant
 ## operating inputs draw on Civilian Goods and raw materials directly.

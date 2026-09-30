@@ -21,6 +21,7 @@ extends RefCounted
 ##            .needs_by_force)
 
 const Supply:=preload("res://scripts/supply_state.gd")
+const Carriers:=preload("res://scripts/carriers.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Upkeep:=preload("res://scripts/routine_military_upkeep.gd")
@@ -40,15 +41,19 @@ static func strip(mc:Node=null)->Dictionary:
 	var state:Variant=WorldSimulation.state
 	var inputs:=Supply.day_inputs()
 	var who:=Supply.carrier()
-	var hubs:Array[String]=[];var depots:Array[String]=[]
+	var hubs:Array[String]=[];var depots:Array[String]=[];var laid:Array[String]=[]
 	for hub:Dictionary in Supply.hubs():
-		if String(hub.get("kind",""))=="held":depots.append(String(hub.get("name","")))
-		else:hubs.append(String(hub.get("name","")))
+		match String(hub.get("kind","")):
+			"held":depots.append(String(hub.get("name","")))
+			"depot":laid.append(String(hub.get("name","")))
+			_:hubs.append(String(hub.get("name","")))
 	return {"carrier":who,"carrier_words":String((Supply.CARRIERS.get(who,Supply.CARRIERS.foot) as Dictionary).words),
 		"haulers":int((state.population_allocations as Dictionary).get("Logistics",0)) if state!=null else 0,
 		"carts":int(float((state.resource_stockpiles as Dictionary).get("Transport Carts",0.0))) if state!=null else 0,
+		"lorries":int(float((state.resource_stockpiles as Dictionary).get("Supply Lorries",0.0))) if state!=null else 0,
+		"fleet":(mc.carrier_reading() as Dictionary) if mc.has_method("carrier_reading") else {},
 		"transport":float(inputs.transport),"stores":float(inputs.stores),"siege":float(inputs.siege),
-		"hubs":hubs,"depots":depots,"rations":float(mc.economic_burden_snapshot().get("daily_field_provisions",0.0)),"mending":mending(mc)}
+		"hubs":hubs,"depots":depots,"laid":laid,"rations":float(mc.economic_burden_snapshot().get("daily_field_provisions",0.0)),"mending":mending(mc)}
 
 
 ## Gear waiting to be mended: {count, lines:["Simple levy weapons: ..."]}
@@ -98,6 +103,9 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 	var stock:={}
 	for entry:Dictionary in Logistics.rows(mc):stock[String(entry.item)]=entry
 	var out:Array[Dictionary]=[]
+	var fleet_reading:Dictionary=mc.carrier_reading() if mc.has_method("carrier_reading") else {}
+	var line_asks:={}
+	for entry:Dictionary in fleet_reading.get("forces",[]):line_asks[String(entry.key)]=entry
 	for report:Dictionary in _reports(mc):
 		var row:=report.duplicate()
 		var key:=key_of(report)
@@ -116,6 +124,26 @@ static func rows(mc:Node=null)->Array[Dictionary]:
 				"making_per_day":float(entry.get("making_per_day",0.0)),"category":String(entry.get("category",Logistics.category(item)))})
 		short.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.missing)>int(b.missing))
 		row["short"]=short
+		# A band's place in the supply queue and the replacements walking out
+		# to it (field_sustainment.gd), read today at home.
+		if String(report.get("force_kind",""))=="field":
+			var army_index:int=mc._field_army_index(int(report.get("army_id",0)))
+			var army:Dictionary=mc.field_armies[army_index] if army_index>=0 else {}
+			row["priority"]=String(army.get("priority","normal"))
+			row["drafts"]=mc.sustainment.drafts_for(int(report.get("army_id",0)))
+			var depot:Dictionary=preload("res://scripts/field_depots.gd").progress(army)
+			if not depot.is_empty(): depot["at_site"]=String(army.get("status",""))!="moving"
+			row["depot"]=depot
+			# Its last months, as far as the last report home tells.
+			var told_day:=int(report.get("report_day",int(WorldSimulation.state.elapsed_days)-int(report.get("report_age",0))))
+			row["trend"]=[] if bool(report.get("unknown",false)) else mc.sustainment.trend_known(army,told_day)
+		# What its line asks a day and the carts that alone would carry it
+		# (carriers.gd), read today at home.
+		var asked:Dictionary=line_asks.get(key,{})
+		if not asked.is_empty():
+			row["line_bread"]=float(asked.bread);row["line_stores"]=float(asked.stores)
+			var rt:=Carriers.kind_round_trip("cart",float(asked.effort),0.0,float(fleet_reading.get("rail",0.0)))
+			row["carts_alone"]=ceili((float(asked.bread)+float(asked.stores))*rt/maxf(1.0,float((fleet_reading.get("fleet",{}) as Dictionary).get("cart_load",Carriers.CART_LOAD)))) if is_finite(rt) else -1
 		row["order"]=ORDER.find(String(report.get("force_kind","field")))*10000+out.size()
 		out.append(row)
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.order)<int(b.order))
@@ -148,6 +176,24 @@ static func _fallback_title(report:Dictionary)->String:
 		"home":return Logistics.levy_name().substr(0,1).to_upper()+Logistics.levy_name().substr(1)
 		"garrison":return "Garrison of %s" % Supply.town_name("",String(report.get("region_id","")),String(report.get("name","the town")))
 	return String(report.get("name","Our band"))
+
+
+## "12 on the road, first in 3 days; 8 in training" for a band's replacements.
+static func drafts_words(drafts:Dictionary,today:int)->String:
+	var parts:PackedStringArray=[]
+	var road:=int(drafts.get("on_road",0))
+	if road>0:
+		var wait:=maxi(0,int(drafts.get("next_arrival_day",today))-today)
+		parts.append("%d replacements on the road, the first %s" % [road,"arriving today" if wait<=0 else ("in %d day%s" % [wait,"" if wait==1 else "s"])])
+	var training:=int(drafts.get("in_training",0))
+	if training>0: parts.append("%d in training at home" % training)
+	var block:=String(drafts.get("block",""))
+	if block!="" and DRAFT_BLOCKS.has(block): parts.append(String(DRAFT_BLOCKS[block]))
+	return "; ".join(parts)
+
+const PRIORITY_WORDS:={"first":"Reinforced first","normal":"Reinforced in turn","last":"Reinforced last"}
+const PRIORITY_TIPS:={"first":"This band gets gear, rounds and replacements before the others. Food is shared by the carriers alike.","normal":"This band waits its turn for gear, rounds and replacements.","last":"This band gets gear only at home and no replacement drafts."}
+const DRAFT_BLOCKS:={"no_people":"No one to draft: everyone set aside for defence is serving. Raise the Defense share of work, or call up more on Recruit & deploy.","hungry":"No drafts while the band is starving: they would starve too.","cut_off":"No drafts: no road our carriers use reaches the band.","last":"No drafts for a band reinforced last.","campaign":"The general's campaign keeps its own ranks."}
 
 
 ## Plain words for a gear shortfall, for its tooltip.

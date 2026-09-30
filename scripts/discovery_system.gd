@@ -1771,6 +1771,14 @@ func food_storage_multipliers(food_types:Array,traveling:bool)->Dictionary:
 
 
 func _discovery_effect_summary(entry:Dictionary)->String:
+	# What it does for the army, in the engine's numbers (supply, kits, units).
+	var army:=preload("res://scripts/military_research_notes.gd").note(String(entry.get("id","")))
+	var summary:=_discovery_effect_summary_base(entry)
+	return summary if army=="" else (summary+"
+"+army if summary!="" else army)
+
+
+func _discovery_effect_summary_base(entry:Dictionary)->String:
 	var opening:=preload("res://scripts/civilian_goods.gd")
 	var opening_id:=String(entry.get("id",""))
 	if opening.TECHNIQUES.has(opening_id):

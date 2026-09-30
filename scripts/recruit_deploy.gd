@@ -1,4 +1,7 @@
 extends RefCounted
+## A line's bands go out as one band under one general while the first is
+## still at home and the next finishes within a course and this many days.
+const JOIN_WITHIN_DAYS:=30
 ## Template production lines. Personnel and equipment live only in the existing
 ## military ledger; lines contain orders and IDs, never a second troop pool.
 var host:Node
@@ -120,6 +123,15 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 	if not bool(report.early if early else report.ready):return {"error":"Early deployment needs 20% training; automatic deployment needs full people, equipment and training."}
 	if host._home_battle_running() or host.recovery.home_unavailable():return {"error":"Deployment site is unavailable during a fight at home or occupation."}
 	var target:int=item.target_army
+	# A line's later bands join the band it raised in the last month while
+	# that band is still at home, instead of each becoming its own army under
+	# a new general.
+	if target==0 and int(WorldSimulation.state.elapsed_days)-int(item.get("last_army_day",-100000))<=JOIN_WITHIN_DAYS+_course_days(item):
+		var last:=int(item.get("last_army",0))
+		var last_index:int=host._field_army_index(last) if last>0 else -1
+		if last_index>=0 and not host.command_hierarchy.battle.engaged(last):
+			var previous:Dictionary=host.field_armies[last_index]
+			if String(previous.get("location_id",""))=="player_home" and String(previous.get("status",""))=="stationed":target=last
 	if target!=0:
 		var target_index:int=host._field_army_index(target)
 		if target_index<0:return {"error":"Assigned army no longer exists. Choose another destination."}
@@ -138,7 +150,10 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 			formations.append(formation);host.home_army.formations.remove_at(index)
 			host.home_army.troops=int(host.home_army.troops)-int(formation.count)
 	if target==0:
-		host._assemble_field_army(formations,String(item.name)+" "+str(int(item.deployed)+1))
+		var formed:Dictionary=host._assemble_field_army(formations,String(item.name)+" "+str(int(item.deployed)+1))
+		if formed.has("army"):
+			item["last_army"]=int((formed.army as Dictionary).get("army_id",0))
+			item["last_army_day"]=int(WorldSimulation.state.elapsed_days)
 	else:
 		var army:Dictionary=host.field_armies[host._field_army_index(target)]
 		for formation:Dictionary in formations:army.formations.append(formation);army.troops=int(army.troops)+int(formation.count)
@@ -147,6 +162,11 @@ func deploy(id:int,slot:int,early:bool=false)->Dictionary:
 		host._refresh_readiness()
 	item.slots.erase(slot);item.deployed=int(item.deployed)+1
 	return {"ok":true,"message":"%d soldiers deployed at home%s." % [int(report.people)," with incomplete training" if early else ""]}
+## The longest course among a line's entries, in days.
+func _course_days(item:Dictionary)->int:
+	var days:=0.0
+	for entry:Dictionary in item.get("entries",[]): days=maxf(days,float(host.UnitCatalog.training_days(String(entry.get("unit","levy")))))
+	return ceili(days)
 ## One band more or fewer on a line, as HOI4's -/+ beside a queued
 ## template: +1 asks for another band trained alongside the others; -1
 ## drops a band not yet started, else the newest band in training (its

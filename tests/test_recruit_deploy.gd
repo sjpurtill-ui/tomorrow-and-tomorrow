@@ -121,6 +121,26 @@ func test_assigning_to_existing_home_army_preserves_its_people()->void:
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(20)
 	assert_int(int(first.id)).is_not_equal(int(second.id))
 
+func test_a_lines_later_bands_join_its_earlier_band_while_it_is_home()->void:
+	var result:=MilitaryCampaign.recruit_deploy.add(1,1,1,true)
+	for order:Dictionary in MilitaryCampaign.training_queue:order.progress_days=order.required_days
+	MilitaryCampaign.recruit_deploy.deploy_ready()
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(1)
+	MilitaryCampaign.recruit_deploy.prepare()
+	for order:Dictionary in MilitaryCampaign.training_queue:order.progress_days=order.required_days
+	MilitaryCampaign.recruit_deploy.deploy_ready()
+	# One band, one general: the second band joined the first at home.
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(1)
+	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(20)
+	# Once that band has marched off, the next forms a band of its own.
+	MilitaryCampaign.field_armies[0]["status"]="moving";MilitaryCampaign.field_armies[0]["location_id"]="road"
+	MilitaryCampaign.recruit_deploy.prepare()
+	for order:Dictionary in MilitaryCampaign.training_queue:order.progress_days=order.required_days
+	MilitaryCampaign.recruit_deploy.deploy_ready()
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(2)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(30)
+	assert_int(int(result.id)).is_greater(0)
+
 func test_paused_line_does_not_spend_instruction_rations()->void:
 	var result:=MilitaryCampaign.recruit_deploy.add(1)
 	MilitaryCampaign.recruit_deploy.configure(int(result.id),"paused",true)
