@@ -657,7 +657,8 @@ class Plate extends Control:
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
 		if state=="front": draw_rect(Rect2(0,0,w,3),accent)
 		var ink:=T.INK if not faded else Color(T.INK_MUTED,0.8)
-		var icon:=Icons.arm_texture(String(data.get("arm","spear")),T.INK if not faded else T.INK_MUTED,accent)
+		# Drawn as its own kit (a howitzer, a light tank, a combat frame); named by its arm.
+		var icon:=Icons.arm_texture(String(data.get("glyph",data.get("arm","spear"))),T.INK if not faded else T.INK_MUTED,accent)
 		var strong:=T.font("ui_strong"); var plain:=T.font("ui")
 		var men:=int(data.get("men",0))
 		var number:=preload("res://scripts/hud/era_words.gd").grouped(men) if men>0 else ("broke" if state=="broken" else "gone")

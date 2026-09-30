@@ -206,7 +206,9 @@ static func _name_for(civ_id:String,fallback:String,context:Dictionary)->String:
 
 static func _side(force:Dictionary,initial:int,civ_id:String,name:String,colour:Color)->Dictionary:
 	return {"civ_id":civ_id,"name":name,"colour":colour,"troops":maxi(0,int(force.get("troops",force.get("remaining_troops",0)))),"initial":maxi(0,initial),
-		"morale":clampf(float(force.get("morale",MORALE_FULL)),0.0,1.5)}
+		"morale":clampf(float(force.get("morale",MORALE_FULL)),0.0,1.5),
+		# The latest kit it carries (equipment ledger year): the battle mark's weapons.
+		"year":ArmyMarks.force_year(force.get("formations",[]) if force.get("formations") is Array else [])}
 
 
 # --- Our battles --------------------------------------------------------------------------

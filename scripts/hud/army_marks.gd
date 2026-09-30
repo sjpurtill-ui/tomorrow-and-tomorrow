@@ -12,8 +12,14 @@ extends RefCounted
 ##   host       a leader's standard: a pole, a crossbar and a streamer;
 ##   army       a framed standard with its arm's symbol on the cloth, as the
 ##              drilled armies of the lettered ages carried;
+##   colours    the gunpowder age's standard: a square flag flying from a
+##              pike, the arm's symbol on it, once powder arms are fielded;
 ##   formation  a staff-map box with the branch symbol and echelon strokes,
 ##              once rifles, machine guns or motors are in the field.
+## What a force is drawn as comes from what it carries (the equipment
+## ledger's family and year for each formation's kit): a tank army is an
+## armour box, a musket army flies colours, a force of drones, robots and
+## combat frames carries the lattice sign of the autonomous branch.
 ## Owner colour is used only as a small accent (a streamer, a wash on the
 ## cloth or in the box); the marks themselves are iron-gall ink.
 ##
@@ -29,6 +35,8 @@ extends RefCounted
 ## of front stand as one mark ("3 bands · 1,240").
 
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Ledger:=preload("res://scripts/equipment_ledger.gd")
+const Catalog:=preload("res://scripts/military_unit_catalog.gd")
 
 const MAX_OURS:=64
 const MAX_THEIRS:=96
@@ -77,6 +85,7 @@ static func noun(troops:int,stage:String,era:int=0,corps_known:bool=false)->Stri
 static func kind(troops:int,stage:String,era:int=0,staffs_known:bool=false)->String:
 	if era>=2 or (stage=="reckoned" and staffs_known and troops>=1000): return "formation"
 	if troops<250: return "band"
+	if era==1: return "colours"
 	if stage=="hearth" or troops<5000: return "host"
 	return "army"
 
@@ -98,7 +107,8 @@ static func echelon_marks(troops:int)->int:
 	return 4
 
 
-## The branch of arms a mark shows, from the formation's leading arm.
+## The branch of arms a mark shows, from a sighting's leading arm (our own
+## forces are read from their kits: force_branch).
 static func branch(role:String,unit:String="")->String:
 	match unit:
 		"cavalry": return "horse"
@@ -111,7 +121,127 @@ static func branch(role:String,unit:String="")->String:
 		"mobile": return "horse"
 		"artillery": return "guns"
 		"armored": return "armour"
+	# Any other unit the catalog knows: the branch of the kit it carries.
+	var kit:=formation_kit({"unit":unit})
+	return kit_branch(kit) if kit!="" else "foot"
+
+
+# --- What a force carries (the equipment ledger) -------------------------------------
+
+## A formation's share of its force below which its kit does not date the
+## force (a medical detachment does not make a spear host modern).
+const ERA_SHARE:=0.05
+## Game years (equipment_ledger "year") at which the chart's era turns:
+## powder (hand cannon, bombards, muskets), rifles and machine guns, then
+## motors, modern guns and armour.
+const MAP_ERA_YEARS:=[1800.0,2400.0,2660.0]
+
+
+## The kit a formation carries: its weapon when the equipment ledger knows
+## it, else its unit's first catalog kit; "" when neither is known.
+static func formation_kit(formation:Dictionary)->String:
+	var weapon:=String(formation.get("weapon",""))
+	if weapon!="" and Ledger.has(weapon): return weapon
+	var kits:Array=Catalog.archetype(String(formation.get("unit",""))).get("equipment",[])
+	if not kits.is_empty() and Ledger.has(String(kits[0])): return String(kits[0])
+	return ""
+
+
+## The staff-map branch of a kit, from its ledger family and glyph: tanks,
+## armoured cars and carriers are armour; lorries motor; siege engines,
+## guns, rockets, launchers and crew guns are guns (the machine gun stays
+## with the foot); mounts and horse archers are horse; drones, robots and
+## combat frames are autonomous; bows, slings, javelins and crossbows are
+## missile; engineers are engineers; the rest is foot.
+static func kit_branch(kit:String)->String:
+	var row:=Ledger.row(kit)
+	var glyph:=String(row.get("glyph",""))
+	if glyph=="engineer": return "engineers"
+	match String(row.get("family","")):
+		"vehicle": return "motor" if glyph=="lorry" else "armour"
+		"autonomous": return "autonomous"
+		"mount": return "horse"
+		"guns": return "guns"
+		"crew": return "foot" if glyph=="machine_gun" else "guns"
+		"missile": return "horse" if glyph=="horse_archer" else "missile"
 	return "foot"
+
+
+static var _kit_facts:Dictionary={}
+
+## What the chart needs of a kit, read from the ledger once: its branch, its
+## punch per man for weighing (below) and its year.
+static func kit_facts(kit:String)->Dictionary:
+	if _kit_facts.has(kit): return _kit_facts[kit]
+	var row:=Ledger.row(kit)
+	var family:=String(row.get("family",""))
+	var punch:=maxf(0.25,float(row.get("attack",1.0)))
+	if family in ["vehicle","autonomous"]: punch*=2.0
+	if family=="support": punch=0.1
+	var facts:={"branch":kit_branch(kit) if kit!="" else "foot","punch":punch,"year":float(row.get("year",0.0))}
+	_kit_facts[kit]=facts
+	return facts
+
+
+## How much a formation counts toward what its force is read as: its men
+## times its kit's punch per man, doubled for machines (a tank's crew stands
+## for the tank), so a few tanks or guns lead how a force is read while a
+## lone mortar team does not turn an army into a battery. Trains (medical,
+## repair) barely count.
+static func formation_weight(formation:Dictionary,kit:String="")->float:
+	return maxf(0.0,float(formation.get("count",0)))*float(kit_facts(kit).punch)
+
+
+## The branch a force is drawn with: the branch whose formations weigh most.
+static func force_branch(formations:Array)->String:
+	var weights:Dictionary={}
+	for formation_variant in formations:
+		if not formation_variant is Dictionary: continue
+		var formation:Dictionary=formation_variant
+		var kit:=formation_kit(formation)
+		var arm:=String(kit_facts(kit).branch)
+		weights[arm]=float(weights.get(arm,0.0))+formation_weight(formation,kit)
+	var best:="foot"
+	var most:=float(weights.get("foot",0.0))
+	for arm in weights:
+		if float(weights[arm])>most:
+			best=String(arm)
+			most=float(weights[arm])
+	return best
+
+
+## The latest year among the kits a force fields in real measure (each
+## formation weighing at least ERA_SHARE of the force); -1 when none of its
+## kits is known.
+static func force_year(formations:Array)->float:
+	var total:=0.0
+	var rows:Array=[]
+	for formation_variant in formations:
+		if not formation_variant is Dictionary: continue
+		var formation:Dictionary=formation_variant
+		var kit:=formation_kit(formation)
+		if kit=="" or int(formation.get("count",0))<=0: continue
+		var weight:=formation_weight(formation,kit)
+		total+=weight
+		rows.append([kit,weight])
+	var year:=-1.0
+	for row in rows:
+		if float(row[1])>=total*ERA_SHARE: year=maxf(year,float(kit_facts(String(row[0])).year))
+	return year
+
+
+## The chart's era for a kit year: 0 before powder, 1 powder, 2 rifles and
+## machine guns, 3 motors and armour (and after).
+static func map_era(year:float)->int:
+	var era:=0
+	for turn in MAP_ERA_YEARS:
+		if year>=float(turn): era+=1
+	return era
+
+
+## The chart's era of a force, from what it carries.
+static func force_era(formations:Array)->int:
+	return map_era(force_year(formations))
 
 
 ## A count said the way a clerk would say it: exact when small, then
@@ -391,7 +521,7 @@ static func fade(days:int)->float:
 ## Mark height in screen pixels for a zoom band. Constant on screen within a
 ## band, so a mark never swells over a small front as the view pulls back.
 static func size_px(band:String,mark_kind:String)->float:
-	var base:float={"band":22.0,"host":26.0,"army":30.0,"formation":28.0}.get(mark_kind,24.0)
+	var base:float={"band":22.0,"host":26.0,"army":30.0,"colours":30.0,"formation":28.0}.get(mark_kind,24.0)
 	match band:
 		"ground","local": return base
 		"regional": return roundf(base*0.8)
