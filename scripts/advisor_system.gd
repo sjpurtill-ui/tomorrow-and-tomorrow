@@ -2061,9 +2061,8 @@ func execution_modifier(office: String, relevant_skills: Array) -> float:
 
 
 func execution_modifier_for_advisor(advisor:Dictionary,office:String,relevant_skills:Array)->float:
-	var governance:Dictionary=WorldSimulation.consequences.governance_metrics()
 	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.5)),0.0,1.0)
-	var burden:=float(governance.get("administrative_load",0.0))
+	var burden:=float(WorldSimulation.consequences.administrative_load())
 	if advisor.is_empty(): return clampf(0.34+institutional_capacity*0.32-burden*0.45,0.28,0.64)
 	var task_competence:=WorldSimulation.government.competency(advisor,relevant_skills)
 	var office_competence:=WorldSimulation.government.office_competency(advisor,office)

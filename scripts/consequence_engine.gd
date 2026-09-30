@@ -617,10 +617,9 @@ func governance_metrics()->Dictionary:
 	var directive_weight:=0.0
 	var offices:Dictionary={}
 	for policy in active:
-		var execution:=maxf(0.35,float(policy.get("execution_factor",0.62)))
 		var weight:=absf(float(policy.get("magnitude",0.0)))
 		var resistance:=clampf(float(policy.get("resistance",0.0)),0.0,1.0)
-		administrative_load+=weight*(0.10+maxf(0.0,1.0-execution)*0.08+resistance*0.08)
+		administrative_load+=_policy_load(policy)
 		resistance_pressure+=weight*resistance
 		compliance_weighted+=weight*clampf(float(policy.get("compliance",1.0)),0.0,1.0)
 		directive_weight+=weight
@@ -628,6 +627,22 @@ func governance_metrics()->Dictionary:
 	var churn:=maxf(0.0,modifier_strength("policy_churn"))
 	administrative_load=clampf(administrative_load+churn*0.25,0.0,0.30)
 	return {"active_policy_count":active.size(),"administrative_load":administrative_load,"policy_churn":churn,"directive_resistance_pressure":clampf(resistance_pressure,0.0,0.35),"directive_compliance":compliance_weighted/directive_weight if directive_weight>0.0001 else 1.0,"council_support":_council_support(),"office_policy_counts":offices}
+
+## One standing order's share of the stewards' load (governance_metrics).
+static func _policy_load(policy:Dictionary)->float:
+	var execution:=maxf(0.35,float(policy.get("execution_factor",0.62)))
+	var weight:=absf(float(policy.get("magnitude",0.0)))
+	var resistance:=clampf(float(policy.get("resistance",0.0)),0.0,1.0)
+	return weight*(0.10+maxf(0.0,1.0-execution)*0.08+resistance*0.08)
+
+## governance_metrics().administrative_load alone, from the same lifecycle
+## pass, orders and sums, for readers that need nothing else (every official's
+## execution reads it, many times a day).
+func administrative_load()->float:
+	refresh_policy_lifecycle()
+	var load:=0.0
+	for policy in _active_policy_records(): load+=_policy_load(policy)
+	return clampf(load+maxf(0.0,modifier_strength("policy_churn"))*0.25,0.0,0.30)
 
 func _council_support()->float:
 	if WorldSimulation.state.advisor_roster.is_empty(): return 0.5
