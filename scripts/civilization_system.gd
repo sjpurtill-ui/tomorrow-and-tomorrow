@@ -2808,11 +2808,20 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	_erase_scout_mission(mission)
 
 
+## The Chief Scout's script once loaded. A script nothing holds is freed and
+## compiled again by its next load (about 0.15 s, a stall in the day).
+static var _chief_scout_script:Script=null
+
 func _chief_scout_report(event:Dictionary,source:String)->void:
+	# Only the god's own court hears returning parties: report_returned
+	# (chief_scout.gd) answers nothing to any other people.
+	if WorldSimulation.actor_id!="player": return
 	# Loaded, not preloaded: the court debrief is optional and must never stop
 	# the world simulation from compiling or a party from coming home.
-	if not ResourceLoader.exists("res://scripts/chief_scout.gd"): return
-	var script:=load("res://scripts/chief_scout.gd") as Script
+	if _chief_scout_script==null:
+		if not ResourceLoader.exists("res://scripts/chief_scout.gd"): return
+		_chief_scout_script=load("res://scripts/chief_scout.gd") as Script
+	var script:=_chief_scout_script
 	if script==null or not script.can_instantiate(): return
 	script.call("report_returned",event,source)
 

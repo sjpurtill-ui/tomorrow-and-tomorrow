@@ -488,6 +488,86 @@ func test_billion_population_directive_keeps_fixed_aggregate_records()->void:
 	assert_int(GameState.active_modifiers.size()).is_less_equal(3)
 
 
+## The engine's modifier readers skip ended, expired records through a kept
+## list (ConsequenceEngine.OpenModifiers). Through appends, endings, removals
+## and a clock that moves both ways they must agree with a full scan.
+func test_open_modifier_readers_agree_with_a_full_scan()->void:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=5501
+	var channels:=["labor_multiplier","violence","cohesion_target","stone_priority"]
+	var ids:=["policy_churn","sickly_arrival","divided_camp","curious_youth"]
+	var kinds:=["policy","policy","policy","governance","event"]
+	var list:Array[Dictionary]=GameState.active_modifiers
+	list.clear()
+	for step in 600:
+		var roll:=rng.randf()
+		var now:=float(GameState.elapsed_days)
+		if roll<0.34:
+			var record:={"id":ids[rng.randi()%ids.size()],"kind":kinds[rng.randi()%kinds.size()],"magnitude":rng.randf_range(-0.4,0.4),"started_day":now+rng.randf_range(-30.0,6.0),"effects":{channels[rng.randi()%channels.size()]:rng.randf_range(-1.0,1.0),channels[rng.randi()%channels.size()]:rng.randf_range(-1.0,1.0)}}
+			if rng.randf()<0.9: record["until_day"]=now+rng.randf_range(-10.0,60.0)
+			if rng.randf()<0.3: record["ended_reason"]="repealed"
+			list.append(record)
+		elif roll<0.48 and not list.is_empty():
+			var ended:Dictionary=list[rng.randi()%list.size()]
+			ended["until_day"]=now-0.001
+			ended["ended_reason"]="repealed"
+		elif roll<0.58 and not list.is_empty():
+			list.remove_at(rng.randi()%list.size())
+		elif roll<0.78:
+			GameState.elapsed_days=now+rng.randf_range(0.0,12.0)
+		elif roll<0.82:
+			GameState.elapsed_days=maxf(0.0,now-rng.randf_range(0.0,8.0))
+		for channel:String in channels:
+			assert_float(ConsequenceEngine.policy_effect(channel)).is_equal(_scanned_policy_effect(channel))
+		for id:String in ids:
+			assert_float(ConsequenceEngine.modifier_strength(id)).is_equal(_scanned_modifier_strength(id))
+		if step%7==0:
+			var listed:=ConsequenceEngine.active_policies()
+			var scanned:=_scanned_policy_list()
+			assert_int(listed.size()).is_equal(scanned.size())
+			for i in mini(listed.size(),scanned.size()):
+				assert_bool(listed[i]==scanned[i]).is_true()
+			var metrics:=ConsequenceEngine.governance_metrics()
+			assert_int(int(metrics.active_policy_count)).is_equal(scanned.size())
+	list.clear()
+
+
+## The readers' own rules over every record, as they read before OpenModifiers.
+func _scanned_policy_effect(channel:String)->float:
+	var result:=0.0
+	for modifier:Dictionary in GameState.active_modifiers:
+		if String(modifier.get("kind",""))!="policy" or GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if float(modifier.get("started_day",-INF))>GameState.elapsed_days: continue
+		var effects:Dictionary=modifier.get("effects",{})
+		if not effects.has(channel): continue
+		result+=clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)*float(effects[channel])
+	return clampf(result,-1.0,1.0)
+
+
+func _scanned_modifier_strength(effect_id:String)->float:
+	var result:=0.0
+	for modifier:Dictionary in GameState.active_modifiers:
+		if String(modifier.get("id",""))!=effect_id: continue
+		if GameState.elapsed_days>float(modifier.get("until_day",INF)): continue
+		if float(modifier.get("started_day",-INF))>GameState.elapsed_days: continue
+		result+=clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)
+	return clampf(result,-0.50,0.50)
+
+
+func _scanned_policy_list()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for modifier:Dictionary in GameState.active_modifiers:
+		if String(modifier.get("kind",""))!="policy": continue
+		if GameState.elapsed_days>float(modifier.get("until_day",-INF)): continue
+		if float(modifier.get("started_day",-INF))>GameState.elapsed_days: continue
+		if String(modifier.get("custom_role",""))=="side_effect": continue
+		var policy:=modifier.duplicate(true)
+		policy["remaining_days"]=maxf(0.0,float(policy.get("until_day",GameState.elapsed_days))-GameState.elapsed_days)
+		result.append(policy)
+	result.sort_custom(func(a:Dictionary,b:Dictionary): return float(a.get("until_day",INF))<float(b.get("until_day",INF)))
+	return result
+
+
 func _reset_directive_world(seed:int,population:int,funded:bool)->void:
 	PronouncementInterpreter.reset_for_new_world()
 	GameState.reset_for_new_world(seed)

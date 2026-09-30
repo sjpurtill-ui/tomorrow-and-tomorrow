@@ -33,6 +33,34 @@ func test_founding_government_is_one_office_held_by_a_real_mortal_person()->void
 	assert_int(int(GovernmentPeopleSystem.settlement_leader(founding_settlement_id).person_id)).is_equal(int(holder.person_id))
 
 
+## Titles read the era through a shortcut that tests only the gates era_tier
+## asks about; over any knowledge it must give era_tier's own answer.
+func test_title_era_tier_agrees_with_the_voice_era_tier()->void:
+	var voice:=preload("res://scripts/character_voice.gd")
+	var had:=voice.knowledge_override.has("player")
+	var previous:Variant=voice.knowledge_override.get("player",[])
+	var ids:Array=[]
+	for tag:String in voice.ERA_GATES:
+		for id in voice.ERA_GATES[tag].ids:
+			if not ids.has(String(id)): ids.append(String(id))
+	var cases:Array=[[],["not_a_gate_practice"]]
+	for id in ids: cases.append([id])
+	cases.append_array([["copper_smelting","pictographic_records"],["copper_smelting","pictographic_records","mast_making"],["copper_smelting","pictographic_records","public_credit"],["copper_smelting","public_credit","mast_making"],["black_powder"],ids.duplicate()])
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=90211
+	for n in 300:
+		var known:Array=[]
+		var share:=rng.randf()
+		for id in ids:
+			if rng.randf()<share*0.3: known.append(id)
+		cases.append(known)
+	for known:Array in cases:
+		voice.knowledge_override["player"]=known
+		assert_int(GovernmentPeopleSystem._player_era_tier()).is_equal(voice.era_tier(voice.era_tags("player")))
+	if had: voice.knowledge_override["player"]=previous
+	else: voice.knowledge_override.erase("player")
+
+
 func test_each_settlement_has_a_named_delegate_and_player_can_redirect_or_restore_them()->void:
 	var settlement_id:=String(GameState.player_settlements[0].id)
 	var leader:=GovernmentPeopleSystem.settlement_leader(settlement_id)

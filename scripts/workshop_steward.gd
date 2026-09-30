@@ -43,7 +43,7 @@ func delegate_line(id:int)->Dictionary:
 	return {"error":"Select an active production line."}
 func review_arrivals()->void:
 	if WorldSimulation.actor_id!="player" or not bool(data.enabled) or not WorldSimulation.state.settlement_site_committed:return
-	if WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty():return
+	if not WorldSimulation.government.has_officeholder("Quartermaster") and not WorldSimulation.government.has_officeholder("Steward"):return
 	var food:=preload("res://scripts/leader_personality.gd").food_constraints(WorldSimulation.state.simulation_metrics)
 	if preload("res://scripts/civilization_controller.gd").production_food_blocked(food):return
 	var civilian:=preload("res://scripts/civilian_investment_planner.gd").recommendation()
@@ -56,7 +56,7 @@ func advance(day:int)->void:
 	data.last_day=day
 	if not bool(data.enabled):return
 	if not WorldSimulation.state.settlement_site_committed:return
-	if WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty():
+	if not WorldSimulation.government.has_officeholder("Quartermaster") and not WorldSimulation.government.has_officeholder("Steward"):
 		data.status="Appoint a steward or quartermaster to manage the workshops.";return
 	preload("res://scripts/ai_workshop_turnover.gd").advance("player",host,true)
 	var demands:=army_demands()
@@ -249,9 +249,9 @@ func _top_up_player_line(job:Dictionary,target:int)->Dictionary:
 	return {"changed":true,"message":"The %s raised your %s order from %d to %d so %d waiting soldiers are armed. Pause the line to stop this." % [_office(),name.to_lower(),current,target,waiting]}
 
 func _office()->String:
-	return "Quartermaster" if not WorldSimulation.government.officeholder("Quartermaster").is_empty() else "Steward"
+	return "Quartermaster" if WorldSimulation.government.has_officeholder("Quartermaster") else "Steward"
 func _has_officer()->bool:
-	return not (WorldSimulation.government.officeholder("Quartermaster").is_empty() and WorldSimulation.government.officeholder("Steward").is_empty())
+	return WorldSimulation.government.has_officeholder("Quartermaster") or WorldSimulation.government.has_officeholder("Steward")
 
 ## Materials that stores cannot cover for the gear soldiers still lack:
 ## {resource:{"needed","stored","missing"}}.
