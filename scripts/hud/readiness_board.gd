@@ -153,12 +153,16 @@ func _update_strip(s:Dictionary)->void:
 	if float(s.stores)<0.97:carried_tip+="\nThe stores are short: %d%% of the people's food came in." % roundi(float(s.stores)*100.0)
 	if float(s.siege)<1.0:carried_tip+="\nHome is besieged: %d%% of the carts get out." % roundi(float(s.siege)*100.0)
 	chips.carried.chip.tooltip_text=carried_tip
-	var hubs:Array=s.hubs;var depots:Array=s.depots
+	var hubs:Array=s.hubs;var depots:Array=s.depots;var laid:Array=s.get("laid",[])
 	chips.hubs.value.text=str(hubs.size());chips.hubs.word.text="hub" if hubs.size()==1 else "hubs"
 	chips.hubs.chip.tooltip_text="Our stores the carts load from: %s." % ", ".join(hubs) if not hubs.is_empty() else "No stores to load from."
-	chips.depots.value.text=str(depots.size());chips.depots.word.text="depot" if depots.size()==1 else "depots"
-	chips.depots.chip.visible=not depots.is_empty()
-	chips.depots.chip.tooltip_text="Towns we hold, where the carts rest and stores gather: %s.\nA line from a depot starts at half the haul of reaching it." % ", ".join(depots)
+	var relays:=depots.size()+laid.size()
+	chips.depots.value.text=str(relays);chips.depots.word.text="depot" if relays==1 else "depots"
+	chips.depots.chip.visible=relays>0
+	var depot_tip:=PackedStringArray()
+	if not depots.is_empty():depot_tip.append("Towns we hold, where the carts rest and stores gather: %s. A line from one starts at half the haul of reaching it." % ", ".join(depots))
+	if not laid.is_empty():depot_tip.append("Depots our bands laid: %s. Carriers passing one eat from it, so more of each load arrives beyond it; they still walk the whole road." % ", ".join(laid))
+	chips.depots.chip.tooltip_text="\n".join(depot_tip)
 	chips.rations.value.text=_amount(float(s.rations))
 	chips.rations.chip.tooltip_text="The fighters eat about %s rations a day, at home and in the field." % _amount(float(s.rations))
 	var mending:Dictionary=s.mending

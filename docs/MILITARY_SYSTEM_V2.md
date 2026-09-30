@@ -24,10 +24,15 @@ the log. In short:
   Bread is carried first and stores after. The share of carrying set aside
   for food feeds the rations. Stores weaken the kits that live on them.
 - **Depots** (`field_depots.gd`). A band ordered to "Lay a depot" builds one
-  where it stands: 900 man-days, five days at the least. A depot is a relay
-  like a town we hold, so the line from it starts at half the cost of
-  reaching it. It needs Forward Supply Depots. We keep two, or four with
-  Army Magazines. A host at war with us burns one that no band guards.
+  where it stands: 900 man-days, five days at the least. Carriers passing a
+  depot eat from it, so more of each load reaches the bands beyond. They
+  still walk the whole road, so a depot saves food, not carriers. It needs
+  Forward Supply Depots. We keep two (four with Army Magazines), counting
+  those being laid. A host at war with us whose march passes within 12 km
+  burns one unless our bands there are half its strength.
+- **Stated odds** (`war_odds.gd`). Before an attack on a counted town the
+  war leader states the combat engine's odds against the arms the scouts
+  saw, and objects as the weaker side by those same odds.
 - **Staying in the field** (`field_sustainment.gd`).
   - Hunger costs men: 1.1% a day at no food. Of those, 45% fall sick, 35% go
     home and 20% die.
@@ -604,3 +609,40 @@ with machine accounting; (7) recruitment fixes and template numbers.
   (`hud/band_trend.gd`). The tooltip gives the numbers ("The last 45 days:
   820 men, now 640. Supply 90%, now 55%..."). A band away before signals
   shows only what runners have told home: samples up to the last report.
+- **Iteration 16, their arms.** Scouts who counted a town in the last 90
+  days also saw what its people carry: the preview says so ("They carry
+  mostly pikes and some bows") and the odds are reckoned against those
+  arms (`civilization_strategy.arms_of`, the rival's own formations).
+- **Critic round 5 (odds, ground by kit, depots) and the fixes.**
+  - One panel said both "we would be the weaker side" and "about 3 to 2 for
+    us". The objection used a drill heuristic, and the odds copied our raw
+    band as the enemy. Now `war_odds.gd` is the one reckoning. The enemy
+    carries the scouts' arms, or ours drilled as a garrison is (0.7), as
+    ready as their people's army. The walls are the battle's own, from
+    fortification, logistics and institutions. The Army grid and the
+    court's spoken order both object below 0.8 by those odds, and the
+    objection states them. "More than 5 to 1" loses its "about".
+  - A siege of home now cuts depot lines in the rations (`haul_for`), not
+    only on the map.
+  - Depots were a free doubling of the carrier fleet. They now feed the
+    carriers, who eat as if the road behind the depot were half as long,
+    but the round trip is the whole road (`supply_state.trip_effort`). A
+    band's line reads "10 days from Seanstone by cart track, the carriers
+    eating at the depot 170 km east on the way", with km counted from
+    Seanstone.
+  - Guards must be at least half the passing host's strength, and a host
+    burns a depot anywhere on its day's march, not only where it ends.
+  - The Readiness strip no longer counts field depots as stores.
+  - Chronicle keys carry the day, so a burned depot's id is never silenced.
+  - Depots being laid count against the limit. The preview names the right
+    depot to give up, or refuses when the bands already lay as many as we
+    keep.
+  - The preview states what a depot does at the clicked spot, in the form
+    "Carriers walk 10 days to get here. Eating at the depot, N% of each
+    load would arrive instead of M%, here and beyond". For porters 200 km
+    out that is about 70% instead of 32%. It warns when a depot would save
+    little, and states the 12 km rule.
+  - Ground by kit: crew weapons take 10 m², chariots and elephants 16 m²,
+    and no more sets are drawn than the men can work.
+  - Not taken: odds against a sighted host (their numbers are a range, not
+    a count), and the held-town wording when a band stands in the town.

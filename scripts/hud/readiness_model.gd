@@ -41,17 +41,19 @@ static func strip(mc:Node=null)->Dictionary:
 	var state:Variant=WorldSimulation.state
 	var inputs:=Supply.day_inputs()
 	var who:=Supply.carrier()
-	var hubs:Array[String]=[];var depots:Array[String]=[]
+	var hubs:Array[String]=[];var depots:Array[String]=[];var laid:Array[String]=[]
 	for hub:Dictionary in Supply.hubs():
-		if String(hub.get("kind",""))=="held":depots.append(String(hub.get("name","")))
-		else:hubs.append(String(hub.get("name","")))
+		match String(hub.get("kind","")):
+			"held":depots.append(String(hub.get("name","")))
+			"depot":laid.append(String(hub.get("name","")))
+			_:hubs.append(String(hub.get("name","")))
 	return {"carrier":who,"carrier_words":String((Supply.CARRIERS.get(who,Supply.CARRIERS.foot) as Dictionary).words),
 		"haulers":int((state.population_allocations as Dictionary).get("Logistics",0)) if state!=null else 0,
 		"carts":int(float((state.resource_stockpiles as Dictionary).get("Transport Carts",0.0))) if state!=null else 0,
 		"lorries":int(float((state.resource_stockpiles as Dictionary).get("Supply Lorries",0.0))) if state!=null else 0,
 		"fleet":(mc.carrier_reading() as Dictionary) if mc.has_method("carrier_reading") else {},
 		"transport":float(inputs.transport),"stores":float(inputs.stores),"siege":float(inputs.siege),
-		"hubs":hubs,"depots":depots,"rations":float(mc.economic_burden_snapshot().get("daily_field_provisions",0.0)),"mending":mending(mc)}
+		"hubs":hubs,"depots":depots,"laid":laid,"rations":float(mc.economic_burden_snapshot().get("daily_field_provisions",0.0)),"mending":mending(mc)}
 
 
 ## Gear waiting to be mended: {count, lines:["Simple levy weapons: ..."]}

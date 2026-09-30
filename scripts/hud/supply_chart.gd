@@ -325,7 +325,7 @@ func _force_tip(report:Dictionary)->Dictionary:
 func _hub_tip(hub:Dictionary)->Dictionary:
 	var text:="Our stores: bands draw their food from here."
 	if String(hub.kind)=="held": text="A town we hold: a depot on the supply line. Its garrison eats from its fields."
-	elif String(hub.kind)=="depot": text="A depot our band laid: stores gathered ahead. The line from it starts at half the cost of reaching it. With no band of ours near, a hostile host burns it."
+	elif String(hub.kind)=="depot": text="A depot our band laid. Carriers passing it eat from its stores, so more of each load reaches the bands beyond; they still walk the whole road from home. A host at war with us passing within 12 km burns it, unless our bands there are half its strength."
 	return {"title":String(hub.name),"text":text}
 
 func _land_tip_at(at:Vector2)->Dictionary:

@@ -4,13 +4,16 @@ extends RefCounted
 ##
 ## A band told to lay a depot (army_orders.gd, "depot") marches to the spot
 ## and builds it there: sheds, bread ovens and a fence, DEPOT_WORK man-days
-## and never fewer than MIN_DAYS. A standing depot is a relay on the supply
-## line exactly as a town we hold (supply_state.RELAY): the line from it
-## starts at half the cost of reaching it, so the bands beyond it are fed as
-## if the road behind the depot were half as long. It asks Forward Supply
-## Depots (research); we keep LIMIT at once (MAGAZINE_LIMIT with Army
-## Magazines), and a new one gives up the oldest. A hostile host passing
-## within RAID_KM of a depot no band of ours stands by burns it.
+## and never fewer than MIN_DAYS. A standing depot feeds the carriers who
+## pass it: what they eat on the road is reckoned as if the road behind the
+## depot were half as long (supply_state.RELAY), so more of each load
+## arrives beyond it. They still walk the whole road from home, so it does
+## not shorten their round trip (supply_state.trip_effort): a depot saves
+## food, not carriers. It asks Forward Supply Depots (research); we keep
+## LIMIT at once (MAGAZINE_LIMIT with Army Magazines), counting those being
+## laid, and a new one gives up the oldest. A hostile host whose day's march
+## passes within RAID_KM of a depot burns it, unless our bands within RAID_KM
+## are at least half its strength (GUARD_SHARE).
 ##
 ## Records: host.field_depots [{id, name, x, z, built_day, by}] (saved);
 ## a band's work in hand: its record's depot_site {x, z, work, days}.
@@ -30,8 +33,10 @@ const MIN_MEN:=20
 const GATE:=0.1
 const LIMIT:=2
 const MAGAZINE_LIMIT:=4
-## A hostile host this near a depot no band of ours stands by burns it.
+## A hostile host this near a depot burns it unless our bands this near are
+## at least GUARD_SHARE of its strength.
 const RAID_KM:=12.0
+const GUARD_SHARE:=0.5
 ## A band this near its site is at work there.
 const AT_SITE_KM:=3.0
 
@@ -54,12 +59,37 @@ static func days_for(men:int)->int:
 func blocked(men:int)->String:
 	if not known(): return "We have not learned to stock depots ahead of a campaign (Forward Supply Depots)."
 	if men<MIN_MEN: return "A depot takes at least %d hands to build." % MIN_MEN
+	if laying()>=limit(): return "Bands are already laying %d depots, as many as we keep." % laying()
 	return ""
 
-## The depot a new one would give up ({} while there is room).
+## Depots our bands are laying now.
+func laying()->int:
+	var n:=0
+	for a in host.field_armies:
+		if not progress(a).is_empty(): n+=1
+	return n
+
+## The depot a new one would give up when it stands, counting those being
+## laid first ({} while there is room).
 func replaces()->Dictionary:
-	if host.field_depots.size()<limit(): return {}
-	return host.field_depots[0]
+	var index:int=host.field_depots.size()+laying()-limit()
+	if index<0 or index>=host.field_depots.size(): return {}
+	return host.field_depots[index]
+
+## What a depot at `at` would do for a band standing there, on today's
+## line: {days the carriers walk, now and with: the share of each load that
+## arrives}; {} where no carrier reaches.
+static func impact_at(at:Vector2)->Dictionary:
+	var f:=Supply.field()
+	var e:=Supply.effort_at(f,at)
+	if not is_finite(float(e.effort)): return {}
+	var who:=String(f.carrier) if not f.is_empty() else Supply.carrier()
+	var chill:=float(Supply.land_at(f,at,Supply.today()).cold)
+	var trip:=Supply.trip_effort(e)
+	var endurance:=Supply.endurance_today()
+	var now:=Supply.haul_share(Supply.haul_days(float(e.effort),who,chill),who,endurance)
+	var with_depot:=Supply.haul_share(Supply.haul_days(minf(float(e.effort),trip*Supply.RELAY),who,chill),who,endurance)
+	return {"days":Supply.haul_days(trip,who,chill),"now":now,"with":with_depot}
 
 ## "a depot 60 km north-east" (where it stands from home).
 static func place_words(at:Vector2)->String:
@@ -116,6 +146,7 @@ func _build_day()->void:
 			continue
 		if not pos.is_finite() or pos.distance_to(at)>AT_SITE_KM or men<MIN_MEN or bool(record.get("embarked",false)):
 			record.erase("depot_site"); host.field_armies[index]=record
+			if men<MIN_MEN and men>0: _chronicle("A Depot Left Unfinished","%s, down to %d, could not finish the depot %s." % [String(record.get("name","A band")),men,place_words(at)],"depot_dropped:%d:%d" % [int(record.get("army_id",0)),int(WorldSimulation.state.elapsed_days)])
 			continue
 		if host.command_hierarchy.battle.engaged(int(record.get("army_id",0))): continue
 		site["work"]=float(site.get("work",0.0))+float(men)*span
@@ -139,39 +170,53 @@ func _finish(record:Dictionary,at:Vector2)->void:
 	host.field_depots.append({"id":next_id,"name":name,"x":at.x,"z":at.y,"built_day":today,"by":band})
 	var text:="%s finished a depot %s. Bands beyond it are fed as if the road behind it were half as long." % [band,place_words(at)]
 	if not given_up.is_empty(): text+=" We keep %d depots; the one %s was given up." % [limit(),String(given_up.name).trim_prefix("Depot ")]
-	_chronicle("A Depot Laid Down",text,"depot:%d" % next_id)
+	_chronicle("A Depot Laid Down",text,"depot:%d:%d" % [next_id,today])
 
-## A depot no band of ours stands by burns when a host at war with us passes.
+## A host at war with us whose day's march passes a depot burns it, unless
+## our bands there are at least half its strength.
 func _raid_day()->void:
 	if host.field_depots.is_empty() or WorldSimulation.world==null: return
 	var today:=float(WorldSimulation.state.elapsed_days)
+	var span:=maxf(1.0,float(WorldSimulation.span))
 	var hostile:Array=[]
 	var world:Variant=WorldSimulation.world
 	for f in world.foreign_formations:
 		var rec:Dictionary=f
 		if String(rec.get("kind",""))=="scout" or today<float(rec.get("disabled_until_day",0)): continue
-		if not WO.at_war(String(rec.get("civ_id",""))): continue
+		var civ_id:=String(rec.get("civ_id",""))
+		if not WO.at_war(civ_id): continue
 		var at:Vector2=world._foreign_formation_position(rec,today)
-		if at.is_finite(): hostile.append({"pos":at,"civ_id":String(rec.get("civ_id",""))})
+		var was:Vector2=world._foreign_formation_position(rec,today-span)
+		if not at.is_finite(): continue
+		if not was.is_finite(): was=at
+		hostile.append({"from":was,"to":at,"civ_id":civ_id,"men":_host_men(world,rec)})
 	if hostile.is_empty(): return
 	var ours:Array=[]
 	for a in host.field_armies:
 		var record:Dictionary=a
 		if int(record.get("troops",0))<=0 or bool(record.get("embarked",false)): continue
 		var p:=Supply.force_pos(record)
-		if p.is_finite(): ours.append(p)
+		if p.is_finite(): ours.append({"pos":p,"men":int(record.troops)})
 	for i in range(host.field_depots.size()-1,-1,-1):
 		var depot:Dictionary=host.field_depots[i]
 		var at:=Vector2(float(depot.x),float(depot.z))
-		var guarded:=false
-		for p:Vector2 in ours:
-			if p.distance_to(at)<=RAID_KM: guarded=true; break
-		if guarded: continue
+		var guards:=0
+		for b:Dictionary in ours:
+			if (b.pos as Vector2).distance_to(at)<=RAID_KM: guards+=int(b.men)
 		for h:Dictionary in hostile:
-			if (h.pos as Vector2).distance_to(at)>RAID_KM: continue
+			var nearest:=Geometry2D.get_closest_point_to_segment(at,h.from,h.to)
+			if nearest.distance_to(at)>RAID_KM or float(guards)>=float(h.men)*GUARD_SHARE: continue
 			host.field_depots.remove_at(i)
-			_chronicle("A Depot Burned","The %s burned our depot %s. No band of ours stood by it." % [_host_words(String(h.civ_id)),place_words(at)],"depot_burned:%d" % int(depot.get("id",0)))
+			var guarded:=(" Our %d there were too few to stop them." % guards) if guards>0 else " No band of ours stood by it."
+			_chronicle("A Depot Burned","The %s burned our depot %s.%s" % [_host_words(String(h.civ_id)),place_words(at),guarded],"depot_burned:%d:%d" % [int(depot.get("id",0)),int(today)])
 			break
+
+## A host's men, as the world counts them (civilization_system).
+static func _host_men(world:Variant,rec:Dictionary)->int:
+	if rec.has("actual_troops"): return int(rec.actual_troops)
+	var index:int=world._civilization_index(String(rec.get("civ_id","")))
+	if index<0: return 1
+	return maxi(1,roundi(float(world.land_military_population(world.civilizations[index]))*float(rec.get("strength_share",0.06))))
 
 static func _host_words(civ_id:String)->String:
 	var name:=WO.civ_name(civ_id)

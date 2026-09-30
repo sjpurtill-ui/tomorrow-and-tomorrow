@@ -24,6 +24,7 @@ extends RefCounted
 
 const WO:=preload("res://scripts/court_war_orders.gd")
 const Odds:=preload("res://scripts/war_odds.gd")
+const Supply:=preload("res://scripts/supply_state.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const R:=preload("res://scripts/joint_regions.gd")
@@ -327,10 +328,16 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 	elif verb_id=="depot":
 		var Depots:=preload("res://scripts/field_depots.gd")
 		out.lines.append("There they build a depot: sheds, ovens and a fence, about %d days for %d hands." % [Depots.days_for(going),going])
-		out.lines.append("Bands beyond it are fed as if the road behind it were half as long.")
+		# What it does here, by today's line (field_depots.impact_at).
+		var gain:=Depots.impact_at(there)
+		if gain.is_empty(): pass
+		elif float(gain.with)-float(gain.now)<0.03:
+			out.lines.append("A depot here would save little: the carriers eat little on the way already.")
+		else:
+			out.lines.append("Carriers walk %s to get here. Eating at the depot, %d%% of each load would arrive instead of %d%%, here and beyond." % [Supply.days_words(float(gain.days)),roundi(float(gain.with)*100.0),roundi(float(gain.now)*100.0)])
 		var given_up:Dictionary=mc.depots.replaces()
 		if not given_up.is_empty(): out.lines.append("We keep %d depots; the one %s is given up when this one stands." % [int(mc.depots.limit()),String(given_up.name).trim_prefix("Depot ")])
-		out.lines.append("A hostile host that finds it with no band of ours near burns it.")
+		out.lines.append("A host at war with us passing within %d km burns it, unless our bands there are at least half its strength." % roundi(Depots.RAID_KM))
 	return out
 
 ## The stated odds and the scouts' word on their arms live in war_odds.gd,
