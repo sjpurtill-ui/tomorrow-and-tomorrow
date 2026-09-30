@@ -852,11 +852,16 @@ func overrun_expected(attacker:Dictionary,defender:Dictionary,terrain_defense:=1
 ## Effective odds (stronger over weaker, at least 1) of two forces: fighting
 ## power weighed with numbers (effective_odds).
 func odds_of(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->float:
+	var odds:=raw_odds(attacker,defender,terrain_defense)
+	return odds if odds>=1.0 else 1.0/maxf(0.0001,odds)
+
+## The attacker's effective odds over the defender (below 1 when the defender
+## is the stronger): the stated odds (war_odds.gd) read this.
+func raw_odds(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->float:
 	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
 	var ap:=_cohort_power(evaluate_force(a,d,1.0),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
 	var dp:=_cohort_power(evaluate_force(d,a,clampf(terrain_defense,0.5,2.0)),float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)))
-	var odds:=effective_odds(ap,dp,int(a.troops),int(d.troops))
-	return odds if odds>=1.0 else 1.0/maxf(0.0001,odds)
+	return effective_odds(ap,dp,int(a.troops),int(d.troops))
 
 
 ## One exchange in which the weak side is overrun. The weak side: most of a

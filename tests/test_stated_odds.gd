@@ -40,7 +40,7 @@ func test_numbers_walls_and_heart_set_the_odds()->void:
 func test_the_words_are_plain_fractions()->void:
 	assert_str(Orders.odds_words(1.5,true)).is_equal("about 3 to 2 for us")
 	assert_str(Orders.odds_words(2.0,false)).is_equal("about 2 to 1 against us")
-	assert_str(Orders.odds_words(9.0,true)).is_equal("about more than 5 to 1 for us")
+	assert_str(Orders.odds_words(9.0,true)).is_equal("more than 5 to 1 for us")
 	assert_str(Orders.summary({"ready":true,"likely":"act","men":200,"odds":{"odds":1.5,"ours":true}})).contains("odds 3:2")
 	assert_str(Orders.odds_short(2.0,false)).is_equal("1:2")
 	assert_str(Orders.odds_short(1.05,true)).is_equal("even")
@@ -62,3 +62,19 @@ func test_the_arms_our_scouts_saw_set_the_odds_and_are_said()->void:
 	assert_int(int(grouped[0].count)).is_equal(200)
 	# Nobody saw them lately: no arms, and the odds assume ours.
 	assert_array(Orders._their_arms("nobody",200)).is_empty()
+
+func test_a_raw_levy_is_not_told_it_is_favoured()->void:
+	# 200 barely drilled against 120 counted: the garrison is reckoned drilled
+	# as a garrison is, not as raw as we are.
+	var sim=MilitaryCampaign.simulator
+	var raw:=[{"id":1,"unit":"spearman","weapon":"spear","count":200,"authorized_count":200,"equipment":200,"equipment_required":200,"training":0.1}]
+	var band:Dictionary=sim.create_formation_force("Band",raw,1.0,1.0)
+	var odds:=Orders.stated_odds(band,band.formations,200,120.0,0.0)
+	# Their better drill counts against us: less than the bare 200 to 120.
+	assert_float(float(odds.raw)).is_less(200.0/120.0)
+	var drilled:=_band(200)
+	assert_float(float(Orders.stated_odds(drilled,drilled.formations,200,120.0,0.0).raw)).is_greater(float(odds.raw))
+	# The raw figure is ours over theirs; the war leader objects below 0.8.
+	var weak:=Orders.stated_odds(drilled,drilled.formations,200,600.0,0.0)
+	assert_bool(preload("res://scripts/war_odds.gd").weaker(weak)).is_true()
+	assert_bool(preload("res://scripts/war_odds.gd").weaker(Orders.stated_odds(drilled,drilled.formations,200,100.0,0.0))).is_false()

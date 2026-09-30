@@ -44,6 +44,7 @@ const Ledger:=preload("res://scripts/town_ledger.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
+const Odds:=preload("res://scripts/war_odds.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
 const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives","follow_kill"]
@@ -1986,6 +1987,15 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var days:=int(mc.march_days(speed_force,road)) if speed>0.0 else ceili(float(road.length_km)/2.0) # march-terrain: the one estimate
 	var enemy:=_enemy_estimate(String(target.city_id))
 	var ratio:=going_strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
+	# The stated odds (war_odds.gd), the same the Army grid shows: he objects
+	# as the weaker side by them. Recruits still in drill are not yet in any
+	# formation, so a force with them is weighed by numbers and drill alone.
+	var stated_odds:={}
+	if bool(enemy.known) and going>0 and not with_recruits:
+		var forms:Array=use_army.get("formations",[]) if not use_army.is_empty() else mc.home_army.get("formations",[])
+		stated_odds=Odds.of(speed_force,forms,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),Odds.their_arms(String(target.civ_id),int(enemy.get("age",-1))),String(target.civ_id))
+		if not stated_odds.is_empty(): out["odds"]=stated_odds
+	var weaker:=Odds.weaker(stated_odds) if not stated_odds.is_empty() else ratio<OBJECT_RATIO
 	out["estimate"]=enemy
 	out["going"]=going
 	out["days"]=days
@@ -2012,10 +2022,11 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 			var held_note:=""
 			for town:Dictionary in f.garrisons: held_note+=" %s more hold %s and cannot leave it unguarded." % [_cap(_number(int(town.garrison))),String(town.name)]
 			return _object(out,"too_few","%s against a walled town? %s would shut the gate and wait us out.%s" % [_fighters(going),name,held_note],"Give me more soldiers, or say the word and they go anyway.")
-		if bool(enemy.known) and ratio<OBJECT_RATIO:
+		if bool(enemy.known) and weaker:
 			var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
 			var ours:="my band of %d" % going if own_band else "%d" % going
-			return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %s%s. I would lose them for nothing." % [name,their,ours,", most of them half-drilled" if ratio<0.5 else ""],("Let the drill finish first, about %d days, or %s" % [int(t.days),take_word]) if int(t.heads)>0 else "Give me more trained soldiers first, or %s" % take_word)
+			var stated:=(" The odds are %s." % Odds.words(float(stated_odds.odds),bool(stated_odds.ours))) if not stated_odds.is_empty() else ""
+			return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %s%s. I would lose them for nothing.%s" % [name,their,ours,", most of them half-drilled" if ratio<0.5 else "",stated],("Let the drill finish first, about %d days, or %s" % [int(t.days),take_word]) if int(t.heads)>0 else "Give me more trained soldiers first, or %s" % take_word)
 		var raw:=drilled<UNDRILLED
 		var bare:=unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE
 		if raw or bare:

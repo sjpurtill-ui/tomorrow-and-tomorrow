@@ -23,6 +23,7 @@ extends RefCounted
 ## Static helpers; preload.
 
 const WO:=preload("res://scripts/court_war_orders.gd")
+const Odds:=preload("res://scripts/war_odds.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const R:=preload("res://scripts/joint_regions.gd")
@@ -299,25 +300,26 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		var ratio:=strength/maxf(1.0,float(enemy.get("mid",0.0))*0.9) if bool(enemy.known) else 1.0
 		var drill:=WO.drill_of(formations)
 		var who_objects:=leader if leader!="" else "The war leader"
+		# The war leader's stated odds (war_odds.gd), reckoned before he
+		# objects so that he objects by them.
+		var arms:=[]
+		var odds:={}
+		if bool(enemy.known) and going>0:
+			arms=_their_arms(String(p.civ_id),int(enemy.age))
+			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
+			odds=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),arms,String(p.civ_id))
+			if not odds.is_empty():
+				out["odds"]=odds
+				out.lines.append("Odds%s: %s%s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours",odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
+		var weaker:=Odds.weaker(odds) if not odds.is_empty() else ratio<WO.OBJECT_RATIO
 		if going<WO.MIN_FORCE:
 			out.likely="impossible"; out.lines.append("%d cannot take a town; %s will refuse." % [going,who_objects])
-		elif bool(enemy.known) and ratio<WO.OBJECT_RATIO:
+		elif bool(enemy.known) and weaker:
 			out.likely="object"; out.lines.append("%s will probably object: we would be the weaker side." % who_objects)
 		elif drill<WO.UNDRILLED:
 			out.likely="object"; out.lines.append("%s will probably object: they have hardly drilled." % who_objects)
 		elif verb_id=="siege" and going<WO.MIN_FORCE*3:
 			out.likely="object"; out.lines.append("%s will probably object: too few to ring the town." % who_objects)
-		# The war leader's stated odds (the combat engine's own reading): our
-		# band as it stands against the men counted there, armed as we are,
-		# behind the walls our scouts saw.
-		if bool(enemy.known) and going>0:
-			# Scouts who counted their fighters saw what they carry.
-			var arms:=_their_arms(String(p.civ_id),int(enemy.age))
-			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
-			var odds:=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),arms)
-			if not odds.is_empty():
-				out["odds"]=odds
-				out.lines.append("Odds%s: %s%s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they are armed as we are",odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
 		if not WO.at_war(String(p.civ_id)):
 			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
 	elif verb_id=="guard":
@@ -331,86 +333,15 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		out.lines.append("A hostile host that finds it with no band of ours near burns it.")
 	return out
 
-## The odds of an attack by the combat engine's own reading: our band as it
-## stands (its morale, readiness, kit and stores) against `their_men` armed
-## as our scouts saw them (`their_arms`, grouped formations), or as we are
-## when nobody saw, behind walls of `fortification` (a town's defence,
-## 1.03 + 0.34 x fortification, as the campaign gives it).
-## {odds (stronger over weaker, 1 or more), ours (true when with us), walls}
-static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[])->Dictionary:
-	var mc:=_mc()
-	var heads:=_heads(formations)
-	if mc==null or heads<=0 or going<=0 or their_men<1.0: return {}
-	var sim=mc.simulator
-	var us:Dictionary=sim.create_formation_force("Us",_scaled(formations,float(going)/float(heads)),float(force.get("morale",1.0)),float(force.get("readiness",1.0)))
-	us["stores_share"]=float(force.get("stores_share",1.0))
-	if force.get("commander") is Dictionary: us["commander"]=force.commander
-	var kit:=their_arms if _heads(their_arms)>0 else formations
-	var them:Dictionary=sim.create_formation_force("Them",_scaled(kit,their_men/float(_heads(kit))),1.0,1.0)
-	var walls:=clampf(1.03+clampf(fortification,0.0,1.0)*0.34,1.03,1.38)
-	var a:Dictionary=sim._normalize_force(us,"Us")
-	var d:Dictionary=sim._normalize_force(them,"Them")
-	var ap:float=sim._cohort_power(sim.evaluate_force(a,d,1.0),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
-	var dp:float=sim._cohort_power(sim.evaluate_force(d,a,walls),float(d.morale),float(d.readiness),0.5)
-	var raw:float=sim.effective_odds(ap,dp,int(a.troops),int(d.troops))
-	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"walls":walls}
+## The stated odds and the scouts' word on their arms live in war_odds.gd,
+## which the court's spoken orders read too.
+static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="")->Dictionary:
+	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id)
 
-## Their arms as our scouts saw them: the people's formations, when the count
-## of the town is fresh enough (ARMS_SEEN_DAYS) to trust what they carry.
-const ARMS_SEEN_DAYS:=90
-static func _their_arms(civ_id:String,age:int)->Array:
-	if civ_id=="" or age>ARMS_SEEN_DAYS: return []
-	return preload("res://scripts/civilization_strategy.gd").arms_of(civ_id)
-
-## "mostly spears, some bows and a few horses and lances".
-static func arms_words(arms:Array)->String:
-	var total:=0
-	for f in arms: total+=maxi(0,int((f as Dictionary).get("count",0)))
-	if total<=0: return ""
-	var sorted:=arms.duplicate()
-	sorted.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.count)>int(b.count))
-	var Ledger:=preload("res://scripts/equipment_ledger.gd")
-	var parts:=PackedStringArray()
-	var seen:={}
-	for f:Dictionary in sorted:
-		if parts.size()>=3: break
-		var name:=Ledger.label(String(f.get("weapon","improvised"))).to_lower().replace(" & "," and ")
-		if seen.has(name): continue
-		seen[name]=true
-		var share:=float(int(f.count))/float(total)
-		parts.append(("mostly " if share>=0.5 else ("some " if share>=0.15 else "a few "))+name)
-	if parts.size()==1: return parts[0]
-	return ", ".join(parts.slice(0,parts.size()-1))+" and "+parts[-1]
-
-static func _scaled(formations:Array,share:float)->Array:
-	var out:=[]
-	for f in formations:
-		var g:Dictionary=(f as Dictionary).duplicate()
-		for key in ["count","authorized_count","equipment","equipment_required","ammunition","ammunition_required"]:
-			if g.has(key): g[key]=maxi(0,roundi(float(g[key])*share))
-		out.append(g)
-	return out
-
-## "3:2" (for us), "2:3" (against us), "even": the summary line's short form.
-static func odds_short(odds:float,ours:bool)->String:
-	var words:=odds_words(odds,ours)
-	if words=="about even": return "even"
-	var fraction:=words.trim_prefix("about ").get_slice(" for",0).get_slice(" against",0)
-	var a:=fraction.get_slice(" to ",0)
-	var b:=fraction.get_slice(" to ",1)
-	if fraction.begins_with("more"): return ">5:1" if ours else "<1:5"
-	return "%s:%s" % [a,b] if ours else "%s:%s" % [b,a]
-
-## "about 3 to 2 for us", "about even", "about 2 to 1 against us".
-static func odds_words(odds:float,ours:bool)->String:
-	if odds<1.15: return "about even"
-	var words:="more than 5 to 1"
-	# Each named fraction covers the odds nearer to it than to its neighbours.
-	for pair in [[1.29,"5 to 4"],[1.42,"4 to 3"],[1.75,"3 to 2"],[2.5,"2 to 1"],[4.0,"3 to 1"],[6.0,"5 to 1"]]:
-		if odds<float(pair[0]):
-			words=String(pair[1])
-			break
-	return "about %s %s" % [words,"for us" if ours else "against us"]
+static func _their_arms(civ_id:String,age:int)->Array: return Odds.their_arms(civ_id,age)
+static func arms_words(arms:Array)->String: return Odds.arms_words(arms)
+static func odds_words(odds:float,ours:bool)->String: return Odds.words(odds,ours)
+static func odds_short(odds:float,ours:bool)->String: return Odds.short(odds,ours)
 
 static func _sentence(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)
