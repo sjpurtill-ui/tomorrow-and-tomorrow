@@ -313,6 +313,8 @@ static func extraction()->Dictionary:
 		"Cutting and digging wear the land's health, in step with the share of workers at it (%d in 100 now)." % roundi(share*100.0),"bad" if share>0.0 else "plain"))
 	lines.append(_line("Knowing the ground","finds come easier",
 		"Every day worked on a material teaches the people its kind: searchers find and measure related deposits up to %s times as fast." % _two(1.55),"good" if cutters>0.0 else "plain"))
+	var wood:=_wood_line()
+	if not wood.is_empty():lines.append(wood)
 	lines.append(_heavy_line())
 	_great_work_line(lines,"Extraction")
 	lines.append(_cost_line("Extraction",cutters))
@@ -442,6 +444,16 @@ static func logistics()->Dictionary:
 	var lift:=_raw("Logistics")/maxf(1.0,pop*CARRIER_SHARE)*CARRIER_POINTS
 	lines.append(_line("Moving things about","+%d points" % roundi(lift*100.0),
 		"Carriers lift how smoothly goods and people move around the town: %d points when 8 in 100 of the people carry (%s would). It is %d of 100 now, and it adds to safety, trade and the army's supply." % [roundi(CARRIER_POINTS*100.0),_count(ceili(pop*CARRIER_SHARE)),roundi(float(state.simulation_metrics.get("logistics",0.16))*100.0)],"good" if lift>0.0 else "bad"))
+	# New ground: when the woods, stone and fibre the people work run low, the
+	# carriers look for more one ring farther for every 6 at work
+	# (resource_system.gd surface_search_rings, woodland_outlook).
+	var wood:=_wood_line()
+	if not wood.is_empty():lines.append(wood)
+	else:
+		var reach:Dictionary=WorldSimulation.resources.woodland_outlook()
+		var farther:=" %s carrying would take them to %d km." % [_cap(_count(int(reach.carriers_for_next))),roundi(float(reach.next_km))] if int(reach.carriers_for_next)>0 else " That is as far as they ever look."
+		lines.append(_line("Looking for new ground","within %d km" % roundi(float(reach.reach_km)),
+			"When the woods, stone and fibre the people work run low, carriers look for new ground within %d km.%s" % [roundi(float(reach.reach_km)),farther],"plain"))
 	var flows:Dictionary=state.material_metrics
 	var cut:=float(flows.get("extracted_today",0.0))
 	if cut>0.0:
@@ -623,6 +635,17 @@ static func defense()->Dictionary:
 
 
 # --- Shared lines ----------------------------------------------------------------------
+
+## No wood left: every stand of trees the people know is cut down; how far
+## the carriers look for new woods and how many would look farther
+## (resource_system.gd woodland_outlook). {} while a stand still gives wood.
+static func _wood_line()->Dictionary:
+	var wood:Dictionary=WorldSimulation.resources.woodland_outlook()
+	if int(wood.stands_known)<=0 or int(wood.stands_working)>0:return {}
+	var farther:=" With %s carrying they would look as far as %d km." % [_count(int(wood.carriers_for_next)),roundi(float(wood.next_km))] if int(wood.carriers_for_next)>0 else " That is as far as they ever look."
+	return _line("No wood left","%s in store" % _one(float(wood.timber)),
+		"Every stand of trees the people know is cut down, so tools, weapons and building that need wood wait. Carriers look for new woods within %d km.%s" % [roundi(float(wood.reach_km)),farther],"bad")
+
 
 ## Heavy work: food, cutting and building together. Past 74 in 100 of the
 ## workers the people are overworked (consequence_engine.gd work_strain, overwork).

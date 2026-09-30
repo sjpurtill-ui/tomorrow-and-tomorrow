@@ -9,6 +9,8 @@ const POLICIES:Dictionary={
 const EXERCISE_TIME_MULTIPLIER:=6.0
 const EXERCISE_COST_MULTIPLIER:=4.0
 const RESERVE_DAYS:=7.0
+## A drill standing still this many days lapses (prepare_army_day).
+const STALLED_DRILL_DAYS:=60
 var host:Node
 var data:Dictionary={}
 func _init(campaign:Node)->void:host=campaign;reset()
@@ -121,6 +123,20 @@ func army_rotation()->Dictionary:
 		var count:=mini(places,maxi(0,int(entry.formation.get("count",0))))
 		entry.formation.training_attending=count;attending+=count;places-=count
 	return {"attending":attending,"total":total,"entries":entries}
+## Every soldier at home who could exercise already meets the policy's
+## training target (false when there is nobody).
+func _all_meet_target(current:Dictionary)->bool:
+	var anyone:=false
+	for force:Dictionary in host._exercise_forces():
+		for formation:Dictionary in force.get("formations",[]):
+			if int(formation.get("count",0))<=0:continue
+			anyone=true
+			if float(formation.get("training",0.0))<float(current.target):return false
+	return anyone
+## The drill under way ends unfinished; what it already taught stays.
+func _end_drill()->void:
+	host.training_program.clear()
+	host.army_changed.emit(host.home_army.duplicate(true))
 func prepare_army_day()->bool:
 	var current:=policy("army")
 	for force:Dictionary in [host.home_army]+host.field_armies:
@@ -130,11 +146,24 @@ func prepare_army_day()->bool:
 	elif host._home_battle_running() or not host.active_threat.is_empty():reason="Staff released training rotations for the military emergency."
 	elif spendable_food()<=0:reason="Training paused to protect seven days of civilian food."
 	var rotation:=army_rotation() if reason=="" else {"attending":0,"total":0}
-	if reason=="" and int(rotation.attending)==0:reason="No training rotation: units meet the target, need equipment, or are recovering."
+	if reason=="" and int(rotation.attending)==0:
+		reason="No training rotation: units meet the target, need equipment, or are recovering."
+		if _all_meet_target(current):reason="Every soldier at home already meets the training target; the drill waits for anyone who falls below it."
 	if reason!="":
 		data.status.army=reason
-		if not host.training_program.is_empty():host.training_program.paused_reason=reason;host.training_program.last_efficiency=0.0;host.training_program.participants=0
+		if not host.training_program.is_empty():
+			host.training_program.paused_reason=reason;host.training_program.last_efficiency=0.0;host.training_program.participants=0
+			# A drill that cannot go on for STALLED_DRILL_DAYS lapses (what it
+			# taught stays); the staff begin a fresh one when soldiers need it.
+			# One the ruler suspended waits, with its progress, for as long as
+			# the ruler likes.
+			var today:=int(WorldSimulation.state.elapsed_days)
+			var since:=int(host.training_program.get("stalled_since",-1))
+			if current.id=="suspended":host.training_program.erase("stalled_since")
+			elif since<0:host.training_program["stalled_since"]=today
+			elif today-since>=STALLED_DRILL_DAYS:_end_drill()
 		return false
+	host.training_program.erase("stalled_since")
 	if host.training_program.is_empty():
 		var choice:="camp_drill"
 		if float(host.home_army.get("supply_level",1))<.8:choice="route_rehearsal"

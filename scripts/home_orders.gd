@@ -14,9 +14,16 @@ extends RefCounted
 ##            named when our people can train them), and the weapons they lack
 ##            are put in hand in the workshops (queue_equipment_production:
 ##            only what the store and the work already under way will not
-##            cover). Words that only drill ("train the recruits") drill those
-##            waiting; with none waiting, those under arms at home go to camp
-##            drill.
+##            cover). New fighters asked for without a calling verb ("I need
+##            10 levies", "give me ten more levies", "raise a levy of 10 men")
+##            are called up the same way. "Train 10 levies" drills those
+##            waiting and calls up the rest; words that only drill ("train the
+##            recruits") drill those waiting; with none waiting, those under
+##            arms at home go to camp drill, and a drill that stands still is
+##            said to stand still. The days said are the drill's real pace
+##            with the weapons they have, and when the weapons cannot be made
+##            for want of wood, the court says so and how far the carriers
+##            look for new woods (ResourceSystem.woodland_outlook).
 ##   stand_down  "Please dismiss 5 of our soldiers and return them to the
 ##            workforce", "send the recruits home", "stand the levy down":
 ##            MilitaryCampaign.demobilize(n), those hurt first, then the
@@ -73,6 +80,17 @@ const DRILL_VERBS:="(?i)\\b(train|trains|training|trained|drill|drills|drilling|
 const NEW_FIGHTERS:="(?i)\\b(recruits?|levies|levy|conscripts?|draftees?|new (?:fighters|warriors|men|soldiers|spearmen|archers|bowmen))\\b"
 ## "Recruit a scout", "call up the builders": people for other work.
 const OTHER_CALLINGS:="(?i)\\b(scouts?|builders?|workers?|hunters?|gatherers?|farmers?|settlers?|healers?|teachers?|carriers?|porters?|stewards?|elders?|priests?|makers?|smiths?|potters?|weavers?|traders?|envoys?|messengers?|runners?|a law|laws?|a plan|plans?|a letter)\\b"
+## "Raise a levy of 10 men", "call up a new levy": a levy as a thing raised.
+const LEVY_NOUN:="(?i)\\b((a|the|our|new|fresh|another) levy|levy of)\\b"
+## New fighters wanted with no calling verb ("I need 10 levies", "give me ten
+## more fighters", "have 10 recruits ready").
+const WANT_VERBS:="(?i)\\b(need|needs|want|wants|require|requires|give me|get me|bring me|find me|send me|prepare|ready|form|gather|assemble|i'?d like|let there be)\\b"
+const WANTED_FIGHTERS:="(?i)\\b(levies|levy|recruits?|conscripts?|draftees?|(?:new|more|fresh) (?:fighters|warriors|men|soldiers|spearmen|archers|bowmen|troops))\\b"
+## Only the fighters asked for, nothing else said: "10 levies", "ten more
+## recruits!".
+const BARE_ASK:="(?i)^(?:\\d+|[a-z]+)(?: (?:more|new|fresh))? (?:levies|recruits|conscripts|draftees|fighters|warriors|men|soldiers|spearmen|archers|bowmen|troops)[.!]*$"
+## Fighters we already have, named as ours: "the 7 levies", "our recruits".
+const OUR_NAMED:="(?i)\\b(the|our|those|these|my)\\s+(?!new\\b|more\\b|fresh\\b)(?:[a-z0-9]+\\s+)?(levies|soldiers|fighters|warriors|troops|recruits)\\b"
 ## "Levy a tax", "levy ten hides from each family": goods, not fighters.
 const LEVY_GOODS:="(?i)\\b(tax|taxes|tribute|tithe|dues?|shares?|hides?|food|grain|goods|stores?|payment|furs?|meat|timber|stone)\\b"
 ## Standing our fighters down: dismissed, released, sent home or back to work.
@@ -332,9 +350,12 @@ static func stand_down_reading(text:String)->Dictionary:
 	return {"kind":"stand_down","count":number_in(lower),"all":_has(lower,"\\b(all|every|everyone|each|the whole)\\b"),"recruits":recruits}
 
 
-## New fighters of our own: {kind: "levy", count, recruit, arm_said, unit,
-## item} when the words call up new fighters, or drill the ones called up;
-## else {}. Arming alone ("arm the recruits", "make twenty spears") is read()'s
+## New fighters of our own: {kind: "levy", count, recruit, fill, arm_said,
+## unit, item} when the words call up new fighters, or drill the ones called
+## up; else {}. A number of new fighters asked for with no calling verb ("I
+## need 10 levies", "give me ten more levies", "raise a levy of 10 men") calls
+## them up too; "train 10 levies" drills those waiting and calls up the rest
+## (fill). Arming alone ("arm the recruits", "make twenty spears") is read()'s
 ## "arm". Not a question, a march, words about another people's fighters, or
 ## people called for other work ("recruit a scout", "draft a law", "levy a
 ## tax").
@@ -354,13 +375,23 @@ static func levy_reading(text:String)->Dictionary:
 		var word:=verb.get_string(1)
 		# "Recruit 20": the verb and a number are enough; "draft", "enlist",
 		# "conscript" and "levy" need fighters or a number of people named;
-		# "raise" and "call up" need fighters named ("raise the wall").
+		# "raise" and "call up" need fighters named ("raise the wall"), or a
+		# levy raised as a thing ("raise a levy of 10 men"), never a tax.
 		if word=="recruit": recruit=not other
 		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or (n>0 and not other and not _has(lower,LEVY_GOODS))
-		else: recruit=noun
+		else: recruit=noun or (_has(named,LEVY_NOUN) and not _has(lower,LEVY_GOODS))
 		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): recruit=false
+	# Fighters we already have, named as ours ("the 7 levies", "our recruits").
+	var ours:=_has(lower,OUR_NAMED)
+	# A number of new fighters wanted, with no calling verb: "I need 10
+	# levies", "give me ten more levies", "10 levies", "have 10 levies ready".
+	if not recruit and verb==null and n>0 and not ours and not other and _has(lower,WANTED_FIGHTERS) and (_has(lower,WANT_VERBS) or _has(lower,BARE_ASK)):
+		recruit=true
 	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")))
 	if not recruit and not drill: return {}
+	# "Train 10 levies": ten in drill, those waiting first and the rest called
+	# up; "train the recruits" drills only those already called up.
+	var fill:=drill and not recruit and n>0 and not ours
 	var make:=_re(MAKE_VERBS).search(lower)
 	var weapon:=_re(WEAPON_NOUNS).search(lower)
 	var arm_said:=_has(lower,"\\b(arm|arms|armed|equip|equipped|outfit|fit out)\\b") or (make!=null and weapon!=null)
@@ -371,7 +402,7 @@ static func levy_reading(text:String)->Dictionary:
 	if item=="":
 		for pair in ITEM_WORDS:
 			if _has(lower,String(pair[1])): item=String(pair[0]); break
-	return {"kind":"levy","count":n,"recruit":recruit,"arm_said":arm_said,"unit":unit,"item":item}
+	return {"kind":"levy","count":n,"recruit":recruit,"fill":fill,"arm_said":arm_said,"unit":unit,"item":item}
 
 # --------------------------------------------------------------------------
 # Carrying them out
@@ -464,19 +495,24 @@ static func _levy(reading:Dictionary)->Dictionary:
 	var asked:=int(reading.get("count",0))
 	var named:=asked>0
 	var calling:=bool(reading.get("recruit",false))
+	# "Train 10 levies" with fewer waiting: those waiting drill first, and the
+	# rest are called up to make the number asked for.
+	var waiting_before:=int(mc.aggregate_recruits)
+	var filling:=not calling and bool(reading.get("fill",false)) and asked>waiting_before
 	var out:={"ok":false,"kind":"levy","asked":asked,"count":0,"raised":0,"drilling":0,"made":0}
 	var says:PackedStringArray=[]
 	var done:PackedStringArray=[]
 	var raised:=0
-	if calling:
-		var n:=asked if named else DEFAULT_RECRUITS
+	if calling or filling:
+		var n:=(asked if named else DEFAULT_RECRUITS) if calling else asked-waiting_before
 		var r:Dictionary=mc.raise_recruits(n)
 		raised=int(r.get("raised",0))
 		out.raised=raised
 		if raised>0:
 			var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
 			var unnamed:=(" You named no number, so I called up %d." % raised) if not named else ""
-			says.append("%d are called up and leave their work in the fields and workshops.%s%s" % [raised,short,unnamed])
+			var making_up:=(" with the %d already waiting that makes the %d you asked for" % [waiting_before,asked]) if filling and waiting_before>0 else ""
+			says.append("%d are called up and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
 			done.append("%d called up from our own people" % raised)
 		elif int(mc.aggregate_recruits)<=0:
 			out.says="There is nobody left to call up: every able adult is already under arms or away."
@@ -505,12 +541,11 @@ static func _levy(reading:Dictionary)->Dictionary:
 		out.says=" ".join(says);out.outcome=", ".join(done)+"." if not done.is_empty() else "Nothing more is set in motion."
 		return out
 	var drilling:=int(started.get("accepted",drill_count))
-	var days:=ceili(float(started.get("required_days",0.0)))
+	var required:=float(started.get("required_days",0.0))
 	out.drilling=drilling
 	if String(kit.get("note",""))!="": says.append(String(kit.note))
 	var as_what:=String(KIND_NAMES.get(String(kit.unit),"a levy"))
-	says.append("%s begin their drill as %s with %s now: about %d days before they are fit to fight." % ["They" if raised>0 else ("The %d waiting" % drilling),as_what,arms,days])
-	done.append("%d begin drill as %s with %s, about %d days" % [drilling,as_what,arms,days])
+	var begin_at:=says.size()
 	# Armed: what they need, less the store and the work already under way
 	# that nobody else in drill is counting on.
 	var need:int=mc._equipment_required_for(String(kit.unit),drilling)
@@ -519,23 +554,80 @@ static func _levy(reading:Dictionary)->Dictionary:
 	var spoken:=_spoken_for(mc,weapon,int(started.get("id",-1)))
 	var cover:=maxi(0,stock+making-spoken)
 	var short:=maxi(0,need-cover)
+	var coming:=short<=0
 	if short<=0:
 		says.append("We have the %s for them%s." % [arms," in store" if stock>=need else " in store and in the making"])
 	else:
 		var have:=("%d in store" % cover) if cover>0 else "none in store"
 		var put:=_put_in_hand(mc,weapon,short,stock)
 		if put.has("error"):
-			says.append("Of the %d %s they need we have %s, and the workshops cannot make the rest now: %s They drill with what they have until then." % [need,arms,have,String(put.error)])
+			says.append("Of the %d %s they need we have %s, and the workshops cannot make the rest now: %s" % [need,arms,have,String(put.error)])
+			var wood:=_wood_words(weapon)
+			if wood!="":says.append(wood)
 			done.append("%d short of %s" % [short,arms])
 		else:
+			coming=true
 			out.made=short
 			says.append("Of the %d %s they need we have %s; %s" % [need,arms,have,String(put.says)])
 			done.append("%d %s put in hand in the workshops" % [short,arms])
+	# How long the drill really takes: the instructors' pace for everyone in
+	# drill, and a drill without weapons in hand goes slower
+	# (military_campaign.gd _process_training_day).
+	var in_hand:=clampf(float(mini(need,maxi(0,stock-spoken)))/maxf(1.0,float(need)),0.0,1.0)
+	var pace:=_drill_pace(mc,weapon,in_hand)
+	var full:=_drill_pace(mc,weapon,1.0)
+	var days:=ceili(required/maxf(0.01,pace)) if pace>0.0 else -1
+	var armed_days:=ceili(required/maxf(0.01,full)) if full>0.0 else -1
+	var when:=""
+	if full<=0.0:when="but %s" % _drill_halted(mc)
+	elif in_hand>=1.0:when="about %d days before they are fit to fight" % days
+	elif coming:when="about %d days before they are fit to fight once their %s are in hand; until then they drill without them and go slower" % [armed_days,arms]
+	else:when="but without %s they drill at %s the pace, about %d days before they are fit to fight instead of %d" % [arms,_share_words(pace/full),days,armed_days]
+	says.insert(begin_at,"%s begin their drill as %s with %s now, %s." % ["They" if raised>0 else ("The %d waiting" % drilling),as_what,arms,when])
+	done.insert(mini(done.size(),1 if raised>0 else 0),"%d begin drill as %s with %s, %s" % [drilling,as_what,arms,("about %d days" % days) if days>0 else "held up"])
 	out.ok=true
 	out.count=drilling
 	out.says=" ".join(says)
 	out.outcome=_cap_first("; ".join(done))+"."
 	return out
+
+
+## Days of drill made a day, for everyone in drill now, with this share of
+## their weapons in hand: the instructors' pace (shared by all in drill), the
+## army's training policy, and the slower drill of those without weapons
+## (military_campaign.gd _process_training_day). 0 while training is halted.
+static func _drill_pace(mc:Variant,weapon:String,in_hand:float)->float:
+	var intake:=float(mc.training_staff.policy("army").intake)
+	if intake<=0.0 or float(mc.training_staff.instruction_food())<=0.0:return 0.0
+	var floor_share:=0.55 if weapon=="improvised" else 0.25
+	return float(mc._effective_training_rate(int(mc._queued_trainees())))*intake*(floor_share+(1.0-floor_share)*clampf(in_hand,0.0,1.0))
+
+
+## Why no drill moves at all, in plain words.
+static func _drill_halted(mc:Variant)->String:
+	if float(mc.training_staff.policy("army").intake)<=0.0:return "the army's training is suspended, so they will not progress until it is resumed"
+	return "there is no food to spare for their drill, so they will not progress until there is"
+
+
+## A share as the people say it: "half", "a quarter", "a third".
+static func _share_words(share:float)->String:
+	if share>=0.9:return "nearly the full"
+	for pair in [[0.7,"three quarters"],[0.6,"two thirds"],[0.45,"half"],[0.3,"a third"],[0.2,"a quarter"]]:
+		if share>=float(pair[0])-0.04:return String(pair[1])
+	return "a fraction of"
+
+
+## When the weapons cannot be made for want of wood: no wood in store, every
+## stand we know cut down, and how far the carriers would have to look for
+## more (ResourceSystem.woodland_outlook). "" when wood is not the trouble.
+static func _wood_words(weapon:String)->String:
+	var recipe:Dictionary=WorldSimulation.military._equipment_recipe(weapon)
+	var timber:=float((recipe.get("materials",{}) as Dictionary).get("Timber",0.0))
+	if timber<=0.0:return ""
+	var wood:Dictionary=WorldSimulation.resources.woodland_outlook()
+	if float(wood.timber)>=timber or int(wood.stands_working)>0:return ""
+	var farther:=" With %d or more carrying, they would look as far as %d km." % [int(wood.carriers_for_next),roundi(float(wood.next_km))] if int(wood.carriers_for_next)>0 else ""
+	return "We have no wood for them: every stand of trees we know is cut down, and our carriers look for new woods no farther than %d km.%s" % [roundi(float(wood.reach_km)),farther]
 
 
 ## Nobody waiting to be drilled: those under arms at home go to camp drill.
@@ -545,7 +637,14 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 		out.says="There is nobody waiting to be drilled and nobody under arms at home. Call up a levy first."
 		out.outcome="Nothing is set in motion: nobody is waiting to be drilled."
 		return out
-	if not (mc.training_program as Dictionary).is_empty():
+	var program:Dictionary=mc.training_program
+	if not program.is_empty():
+		# A drill that stands still is never reported as under way.
+		var still:=String(program.get("paused_reason",""))
+		if still!="" or int(program.get("participants",0))<=0:
+			out.says="The %d under arms at home have a %s under way, but it stands still: %s" % [home,String(program.get("label","drill")).to_lower(),still if still!="" else "nobody is at it."]
+			out.outcome="Nothing more is set in motion: the drill at home stands still."
+			return out
 		out.ok=true;out.count=home
 		out.says="The %d under arms at home are already at their drill." % home
 		out.outcome="The drill at home goes on."

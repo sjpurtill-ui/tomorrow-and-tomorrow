@@ -5,6 +5,8 @@ var initialized := false
 const SPAN:=preload("res://scripts/day_span.gd")
 const SURFACE_FRONT_SPACING_KM:=3.0
 const MAX_SURFACE_FRONT_RING:=3
+## Carriers at work for each ring of new ground searched past the first.
+const SURFACE_SEARCH_CARRIERS:=6.0
 const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
 
 # Identification follows observations and existing methods, never campaign age.
@@ -561,6 +563,35 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 	supply["access"]=1.0
 	supply["blockers"]=[]
 
+## How many rings of new ground (SURFACE_FRONT_SPACING_KM apart) the people
+## search for new timber, stone and fibre once the fronts they work run low:
+## one more ring for every 6 carriers at work (_next_surface_front).
+func surface_search_rings()->int:
+	return clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/SURFACE_SEARCH_CARRIERS),1,MAX_SURFACE_FRONT_RING)
+
+
+## The people's wood, for the screens and the court: {timber in store,
+## stands_known, stands_working (a working reserve left), reach_km (how far
+## the carriers look for new woods), next_km and carriers_for_next (the
+## carriers on the roll, at today's share still working, who would look one
+## ring farther; 0 at the farthest ring)}.
+func woodland_outlook()->Dictionary:
+	var known:=0;var working:=0
+	for deposit_variant in WorldSimulation.state.resource_deposits:
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("resource",""))!="Timber":continue
+		known+=1
+		if float(deposit.get("remaining",0.0))>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):working+=1
+	var rings:=surface_search_rings()
+	var raw:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
+	var at_work:=WorldSimulation.state.effective_workers("Logistics")
+	var share:=at_work/raw if raw>0.0 else 1.0
+	var next:=0
+	if rings<MAX_SURFACE_FRONT_RING:next=ceili(SURFACE_SEARCH_CARRIERS*float(rings)/maxf(0.05,share)-0.0001)
+	return {"timber":float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)),"stands_known":known,"stands_working":working,
+		"reach_km":SURFACE_FRONT_SPACING_KM*rings,"next_km":SURFACE_FRONT_SPACING_KM*(rings+1) if next>0 else 0.0,"carriers_for_next":next}
+
+
 func _next_surface_front(resource:String,source:String,context:Dictionary,minimum_density:float)->Dictionary:
 	if not WorldSimulation.context_provider.is_valid():return {}
 	var used:Dictionary={}
@@ -570,7 +601,7 @@ func _next_surface_front(resource:String,source:String,context:Dictionary,minimu
 		used[_surface_front_key(resource,deposit)]=true
 	var origin_value:Variant=context.get("origin",WorldSimulation.state.settlement_founded_at)
 	var origin:=Vector2(origin_value.x,origin_value.z) if origin_value is Vector3 else Vector2(origin_value.x,origin_value.y)
-	var max_ring:=clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/6.0),1,MAX_SURFACE_FRONT_RING)
+	var max_ring:=surface_search_rings()
 	# Only the authored-terrain provider promises stable catchment potential.
 	# Cache failed searches too; a desert should not be resurveyed every day.
 	# New fronts, more logistics, a new origin/seed or provider all change the key.
