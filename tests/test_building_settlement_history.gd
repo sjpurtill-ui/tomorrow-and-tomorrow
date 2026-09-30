@@ -27,4 +27,4 @@ func test_history_filters_settlement_and_keeps_unassigned_only_in_all()->void:
 	assert_str(ledger.tab(0).kpis[0].value).is_equal("3")
 func test_construction_dock_shows_city_civic_infrastructure_and_landmarks()->void:
 	var provider=Buildings.new(null,null)
-	assert_array(provider.meta().subtabs).is_equal(["CITY","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"])
+	assert_array(provider.meta().subtabs).is_equal(["THE TOWN","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"])
