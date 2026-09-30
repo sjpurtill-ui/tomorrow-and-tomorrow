@@ -320,9 +320,15 @@ static func _reception(event:Dictionary,source:String,civ_id:String)->Dictionary
 		var accepted:=bool(event.get("accepted",false))
 		var outcome:=String(event.get("outcome",""))
 		return _fact("reception","received" if accepted else "turned away",outcome if outcome!="" else ("The delegation was received." if accepted else "The proposal was refused."),1.0,{"band":"welcome" if accepted else "refused"})
-	var response:Dictionary=event.get("recruitment_account",{}).get("diplomatic_response",{}) if event.get("recruitment_account",{}) is Dictionary else {}
-	if String(response.get("severity",""))=="hostile":
-		return _fact("reception","hostile",String(response.get("message","They answered the visit with open hostility.")),0.9,{"band":"hostile"})
+	# A recruitment party's account keeps the answer's words and its severity
+	# side by side (civilization_system.gd _recruitment_account); older records
+	# kept them together in one dictionary.
+	var account:Dictionary=event.get("recruitment_account",{}) if event.get("recruitment_account",{}) is Dictionary else {}
+	var answer:Variant=account.get("diplomatic_response","")
+	var words:=String((answer as Dictionary).get("message","")) if answer is Dictionary else String(answer)
+	var severity:=String(account.get("diplomatic_severity",(answer as Dictionary).get("severity","") if answer is Dictionary else ""))
+	if severity=="hostile":
+		return _fact("reception","hostile",words if words!="" else "They answered the visit with open hostility.",0.9,{"band":"hostile"})
 	var relation:Dictionary=event.get("relation",{}) if event.get("relation",{}) is Dictionary else {}
 	if relation.is_empty() or civ_id=="": return {}
 	if bool(relation.get("at_war",false)):
