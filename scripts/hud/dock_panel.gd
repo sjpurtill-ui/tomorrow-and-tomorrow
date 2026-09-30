@@ -31,6 +31,9 @@ var back_mode:bool=false
 ## Fingerprints of the rendered body sections, KPI row and brief, so a live
 ## refresh only replaces what changed.
 var _section_prints:Array[String]=[]
+## Each section's frame (type, heading, note): a widget takes new data in
+## place only under the same frame, so its heading is never left stale.
+var _section_frames:Array[String]=[]
 var _kpi_print:=""
 var _brief_print:=""
 ## Sections created since the dock was made (tests read this to prove reuse).
@@ -204,14 +207,23 @@ func rebuild_body()->void:
 		_brief_print=brief_print
 		_rebuild_brief(data.get("brief",{}))
 	_render_sections(data.get("blocks",[]))
-	# Every dock, the recruiting board included, is paper and ink.
+	# Every dock, the recruiting board included, is paper and ink. Set again
+	# only when the palette moved: setting a style or ink, even the same one,
+	# lays the whole dock out again on the next frame.
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
-	add_theme_stylebox_override("panel",Tokens.dock_style())
+	var paper:=Tokens.dock_style()
+	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
+	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
+		add_theme_stylebox_override("panel",paper)
 	if military_board:title_label.text="Recruit and deploy"
-	title_label.add_theme_color_override("font_color",Tokens.INK)
-	eyebrow_label.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
-	close_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
+	_ink(title_label,"font_color",Tokens.INK)
+	_ink(eyebrow_label,"font_color",Tokens.GOLD_TEXT)
+	_ink(close_button,"font_color",Tokens.TEXT_DIM)
 	ViewState.restore(body_scroll,view)
+
+
+static func _ink(control:Control,item:StringName,color:Color)->void:
+	if not control.has_theme_color_override(item) or control.get_theme_color(item)!=color:control.add_theme_color_override(item,color)
 
 
 func _render_sections(blocks:Array)->void:
@@ -219,15 +231,19 @@ func _render_sections(blocks:Array)->void:
 	## changed one is replaced in place, at the same index.
 	var old:Array[Node]=body.get_children()
 	var prints:Array[String]=[]
+	var frames:Array[String]=[]
 	for index in blocks.size():
 		var block:Dictionary=blocks[index]
-		var block_print:=String(block.get("type",""))+"|"+fingerprint(block)
+		var block_print:=section_print(block)
+		var frame:=section_frame(block)
 		prints.append(block_print)
-		if index<old.size() and index<_section_prints.size() and _section_prints[index]==block_print and String(block.get("type","")) in PURE_BLOCKS:
+		frames.append(frame)
+		var known:=index<old.size() and index<_section_prints.size() and index<_section_frames.size()
+		if known and _section_prints[index]==block_print and reusable(block):
 			continue
 		# A widget that can take new data in place keeps its nodes (the People
 		# screen's scene, open card and figures) instead of being replaced.
-		if index<old.size() and index<_section_prints.size() and _section_prints[index].get_slice("|",0)==String(block.get("type","")):
+		if known and _section_frames[index]==frame:
 			var widget:=_in_place_widget(old[index])
 			if widget!=null and bool(widget.call("update_block",block)):continue
 		var before:=body.get_child_count()
@@ -243,6 +259,28 @@ func _render_sections(blocks:Array)->void:
 		if is_instance_valid(old[index]) and old[index].get_parent()==body:
 			body.remove_child(old[index]);old[index].queue_free()
 	_section_prints=prints
+	_section_frames=frames
+
+
+## What a body section is compared by between refreshes. A pure block: its
+## whole dictionary. A block whose provider gives a `_print` (the exact inputs
+## it was made from; the same print always means the same content): that
+## print, so it keeps its nodes like a pure block. Any other widget: only its
+## frame, since it is rebuilt or updated in place whatever its data (walking
+## a large widget's data here cost more than drawing it).
+static func section_print(block:Dictionary)->String:
+	var type:=String(block.get("type",""))
+	if block.has("_print"):return section_frame(block)+"|#"+str(block._print)
+	if type in PURE_BLOCKS:return type+"|"+fingerprint(block)
+	return section_frame(block)
+
+## A section's type and the heading and note drawn above it.
+static func section_frame(block:Dictionary)->String:
+	return "%s|%s|%s" % [String(block.get("type","")),str(block.get("heading","")),str(block.get("note",""))]
+
+## A section whose print is unchanged keeps its nodes.
+static func reusable(block:Dictionary)->bool:
+	return block.has("_print") or String(block.get("type","")) in PURE_BLOCKS
 
 
 static func _in_place_widget(section:Node)->Node:
@@ -277,6 +315,7 @@ static func fingerprint(value:Variant)->String:
 func _clear_body()->void:
 	## A different view: nothing of the previous one is kept.
 	_section_prints.clear()
+	_section_frames.clear()
 	for child in body.get_children():
 		body.remove_child(child);child.queue_free()
 

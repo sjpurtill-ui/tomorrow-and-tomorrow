@@ -220,13 +220,18 @@ var count_caption:Label
 var folio:VBoxContainer
 var list:VBoxContainer
 var tallies_check:CheckBox
+var intro:Label
+## What the chosen year and each listed year were last drawn from, so a live
+## refresh redraws only what changed (see update_block).
+var _folio_print:Array=[]
+var _row_prints:Array=[]
+var _list_shape:Array=[]
 
 
 func setup(block:Dictionary)->void:
 	data=block;name="ChronicleFeed";add_theme_constant_override("separation",14)
 	years=block.get("years",[]) if block.get("years") is Array else []
-	var voice:Dictionary=_voice()
-	var intro:=T.make_label(EraWords.word("chronicle.caption",String(voice.get("subtitle",""))),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(intro)
+	intro=T.make_label(_intro_text(),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(intro)
 	hero=BoxContainer.new();hero.name="Hero";hero.add_theme_constant_override("separation",18);add_child(hero)
 	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",6);left.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;hero.add_child(left)
 	count=YearCount.new();count.name="YearCount";left.add_child(count)
@@ -236,7 +241,7 @@ func setup(block:Dictionary)->void:
 	count_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;count_caption.custom_minimum_size.x=300;left.add_child(count_caption)
 	folio=VBoxContainer.new();folio.name="Folio";folio.size_flags_horizontal=Control.SIZE_EXPAND_FILL;folio.add_theme_constant_override("separation",10);hero.add_child(folio)
 	tallies_check=CheckBox.new();tallies_check.name="ShowTallies"
-	tallies_check.text=EraWords.word("chronicle.tallies",String(voice.get("show_whispers","Show every season's tally")))
+	tallies_check.text=_tallies_text()
 	tallies_check.add_theme_font_size_override("font_size",12);tallies_check.add_theme_color_override("font_color",T.TEXT_SOFT)
 	tallies_check.button_pressed=show_tallies
 	tallies_check.toggled.connect(func(on:bool)->void:show_tallies=on;_render_folio())
@@ -247,6 +252,44 @@ func setup(block:Dictionary)->void:
 
 func _voice()->Dictionary:
 	return data.get("voice",Chronicle.voice()) if data.get("voice") is Dictionary else Chronicle.voice()
+
+
+func _intro_text()->String:
+	return EraWords.word("chronicle.caption",String(_voice().get("subtitle","")))
+
+
+func _tallies_text()->String:
+	return EraWords.word("chronicle.tallies",String(_voice().get("show_whispers","Show every season's tally")))
+
+
+## The live refresh: the same page takes the new years. The count is placed
+## again; the chosen year is drawn again only when what it is drawn from
+## changed, and of the listed years only the lines that changed are replaced.
+## Page state (the chosen year, an opened moment, how far back the list goes)
+## simply stays.
+func update_block(block:Dictionary)->bool:
+	if count==null:return false
+	data=block
+	years=block.get("years",[]) if block.get("years") is Array else []
+	var words:=_intro_text()
+	if intro.text!=words:intro.text=words
+	words=_tallies_text()
+	if tallies_check.text!=words:tallies_check.text=words
+	count.configure(years,_chosen_index())
+	count._set_hover(-1)
+	_on_count_hover(-1)
+	if _make_folio_print()!=_folio_print:_render_folio()
+	_update_list()
+	_arrange()
+	return true
+
+
+## Everything the chosen year's folio is drawn from.
+func _make_folio_print()->Array:
+	var index:=_chosen_index()
+	var pops:=PackedInt32Array()
+	for y in years:pops.append(int((y as Dictionary).get("pop",-1)))
+	return [index,years.size(),(years[index] as Dictionary).duplicate(true) if index>=0 else {},pops,_voice().duplicate(true),open_key,telling,more_tiles,show_tallies]
 
 
 ## Kept across a live refresh (see view_state.gd).
@@ -331,6 +374,7 @@ func _render_folio()->void:
 	if show_tallies and not tallies.is_empty():
 		var lines:=VBoxContainer.new();lines.name="Tallies";lines.add_theme_constant_override("separation",2);folio.add_child(lines)
 		for e in tallies:_whisper(lines,e)
+	_folio_print=_make_folio_print()
 
 
 func _render_folio_body()->void:
@@ -550,6 +594,8 @@ func _whisper(parent:Node,entry:Dictionary)->void:
 
 func _render_list()->void:
 	for child in list.get_children():list.remove_child(child);child.queue_free()
+	_row_prints.clear()
+	_list_shape=_list_shape_now()
 	if years.size()<2:return
 	var heading:=T.make_label("THE YEARS",11,T.GOLD,0.12);list.add_child(heading)
 	var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);list.add_child(rule)
@@ -558,12 +604,48 @@ func _render_list()->void:
 	for i in range(years.size()-1,-1,-1):
 		if listed>=shown:break
 		list.add_child(_year_row(years[i],i==chosen))
+		_row_prints.append(_row_print(years[i],i==chosen))
 		listed+=1
 	if years.size()>shown:
 		var more:=Button.new();more.name="EarlierYears";more.flat=true;more.text="Earlier years"
 		more.add_theme_color_override("font_color",T.GOLD)
 		more.pressed.connect(func()->void:shown+=PAGE;_render_list())
 		list.add_child(more)
+
+
+## How many lines the list holds and whether "Earlier years" follows them.
+func _list_shape_now()->Array:
+	return [years.size()<2,mini(years.size(),shown),years.size()>shown]
+
+
+## What a year's line is drawn from: its record without the year's entries
+## and account (a line shows only how many things were told), and whether it
+## is the chosen year.
+func _row_print(year:Dictionary,chosen:bool)->Array:
+	var record:=year.duplicate()
+	for heavy in ["story","tallies","text","age"]:record.erase(heavy)
+	return [record.duplicate(true),(year.get("story",[]) as Array).size(),chosen]
+
+
+## A live refresh of the list: the same lines, with only those whose year
+## changed drawn again in place.
+func _update_list()->void:
+	if _list_shape_now()!=_list_shape or list.get_child_count()<2+_row_prints.size():
+		_render_list()
+		return
+	var chosen:=_chosen_index()
+	var listed:=0
+	for i in range(years.size()-1,-1,-1):
+		if listed>=shown or listed>=_row_prints.size():break
+		var row_print:=_row_print(years[i],i==chosen)
+		if row_print!=_row_prints[listed]:
+			# The old line goes first, so the new one keeps its name.
+			var stale:=list.get_child(2+listed)
+			list.remove_child(stale);stale.queue_free()
+			var fresh:=_year_row(years[i],i==chosen)
+			list.add_child(fresh);list.move_child(fresh,2+listed)
+			_row_prints[listed]=row_print
+		listed+=1
 
 
 func _year_row(year:Dictionary,chosen:bool)->Button:

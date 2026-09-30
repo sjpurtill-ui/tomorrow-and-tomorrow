@@ -13,8 +13,16 @@ var lead_row:BoxContainer
 ## Holdup sentences already shown: each is written out once, on the first card
 ## that has it; later cards with the same holdup keep only its short name.
 var explained:Dictionary={}
+## The daily refresh (update_block) writes new words into the same cards while
+## the board keeps its shape: the same questions in the same places, each
+## showing the same lines, and the same fields. _card_words and _field_words
+## make every word for the first drawing and every refresh alike.
+var _shape:Array=[]
+var _cards:Array=[]
+var _fields:Array=[]
 func setup(block:Dictionary)->void:
 	data=block;name="InquiryBoard";add_theme_constant_override("separation",16)
+	_shape=_plan(block).shape
 	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",16);add_child(heading)
 	var intro:=VBoxContainer.new();intro.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(intro)
 	intro.add_child(_serif("At the edge of what we know",27))
@@ -46,14 +54,60 @@ func setup(block:Dictionary)->void:
 		var card:=VBoxContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_constant_override("separation",5);row.add_child(card)
 		card.add_child(_serif(Visuals.name_for(String(field.id)),18))
 		var goal:=String(field.goal).left(1).to_upper()+String(field.goal).substr(1);_clamped(card,goal,12,T.TEXT_SOFT);outer.get_parent().tooltip_text=goal
-		_meter(card,float(field.share),Visuals.color(String(field.id)))
+		var meter:=_meter(card,float(field.share),Visuals.color(String(field.id)))
 		var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",6);card.add_child(controls)
-		var share_words:="No attention" if float(field.share)<=0.0 else "About %d in 100 of our attention" % maxi(1,roundi(float(field.share)*100))
-		var share:=T.make_label("%s; %s"%[share_words,"%d question%s being worked on" % [int(field.active),"" if int(field.active)==1 else "s"] if int(field.active)>0 else "nothing being worked on"],12,T.BODY);share.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_child(share);card.move_child(share,controls.get_index())
-		_button(controls,"Less",field.on_less,"Give one step of this field's attention to the others").disabled=int(field.weight)<=0
+		var share:=T.make_label(_field_words(field),12,T.BODY);share.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_child(share);card.move_child(share,controls.get_index())
+		var less:=_button(controls,"Less",field.on_less,"Give one step of this field's attention to the others");less.disabled=int(field.weight)<=0
 		_button(controls,"More",field.on_more,"Move one step of attention to this field")
 		_button(controls,"Open",field.on_open,"What this field is for, and what is being worked on")
+		_fields.append({"meter":meter,"share":share,"less":less})
 	resized.connect(_arrange);_arrange()
+
+## The live refresh: while the board keeps its shape the cards and fields
+## take the day's evidence, people and attention in place; otherwise the board
+## is drawn afresh.
+func update_block(block:Dictionary)->bool:
+	var plan:=_plan(block)
+	if _cards.size()+_fields.size()==0 or plan.shape!=_shape:return false
+	data=block
+	for index in mini((plan.words as Array).size(),_cards.size()):
+		var words:Dictionary=plan.words[index]
+		var card:Dictionary=_cards[index]
+		(card.meter as ProgressBar).value=float(words.progress)*100
+		_put(card.line,String(words.evidence))
+		_put(card.phase,String(words.phase))
+		if card.why!=null:_put(card.why,String(words.why))
+		if card.would!=null:_put(card.would,String(words.would))
+		(card.panel as Control).tooltip_text=String(words.tooltip)
+	for index in mini((data.fields as Array).size(),_fields.size()):
+		var field:Dictionary=data.fields[index]
+		var refs:Dictionary=_fields[index]
+		(refs.meter as ProgressBar).value=float(field.share)*100
+		_put(refs.share,_field_words(field))
+		(refs.less as Button).disabled=int(field.weight)<=0
+	return true
+
+## The cards' words in board order, and the board's shape: each question in
+## its place (the lead with its painting, the others in order) with the lines
+## its card shows, whether the board stands empty, and the fields.
+static func _plan(block:Dictionary)->Dictionary:
+	var investigations:Array=block.get("investigations",[])
+	var order:=question_order(investigations)
+	var records:Array=([] if (order.lead as Dictionary).is_empty() else [order.lead])+order.rest
+	var cards:Array=[]
+	var all_words:Array=[]
+	var shown:={}
+	for index in records.size():
+		var record:Dictionary=records[index]
+		var words:=_card_words(record)
+		all_words.append(words)
+		var why_shown:=not bool(words.restated) and not shown.has(words.why)
+		if why_shown:shown[words.why]=true
+		var lead:=index==0 and not (order.lead as Dictionary).is_empty()
+		cards.append([String(record.get("id","")),lead,has_painting(record),Visuals.subject_art_key(record) if has_painting(record) else "",field_name(record),String(record.get("name","An open question")),why_shown,String(words.would)!="",String(record.get("dynamic",record.get("direction","")))])
+	var fields:Array=[]
+	for field:Dictionary in block.get("fields",[]):fields.append([String(field.get("id","")),String(field.get("goal",""))])
+	return {"shape":[cards,investigations.is_empty(),fields],"words":all_words}
 
 ## The question nearest to proof that has a painting leads the section at full
 ## width; the rest keep a steady order (by field, then name) so cards do not
@@ -84,6 +138,34 @@ static func field_name(record:Dictionary)->String:
 	var domain:=String(record.get("dynamic",record.get("direction","")))
 	if not domain.is_empty():return Visuals.name_for(domain)
 	return String(record.get("subcategory","")).strip_edges()
+
+## A question card's words from its record: the evidence meter, who works it
+## and how far the evidence has come, its phase and holdup, what answering it
+## would bring, and its tooltip.
+static func _card_words(record:Dictionary)->Dictionary:
+	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
+	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
+	var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
+	if phase.is_empty():
+		var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
+	var why:=Visuals.plain_bottleneck(bottleneck)
+	var restated:=why.trim_suffix(".").to_lower()==phase.to_lower()
+	var holdup:=why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)]
+	# What answering it would do in the game, from the engine's own readings.
+	var effects:Dictionary=record.get("effects",{})
+	var would:=""
+	var brings:=""
+	if not effects.is_empty():
+		would="Would bring: %s." % Explainer.summary(effects)
+		brings="\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false)
+	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))
+	return {"progress":progress,"evidence":"%s; %s"%[Words.researchers(researchers),Words.evidence(progress)],"phase":phase,"why":why,"restated":restated,"would":would,
+		"tooltip":(goal+"\n\n" if not goal.is_empty() else "")+holdup+brings+"\n\nClick to review this field, its current investigations and what they would do."}
+
+## A field card's line: its share of attention and what is being worked on.
+static func _field_words(field:Dictionary)->String:
+	var share_words:="No attention" if float(field.share)<=0.0 else "About %d in 100 of our attention" % maxi(1,roundi(float(field.share)*100))
+	return "%s; %s"%[share_words,"%d question%s being worked on" % [int(field.active),"" if int(field.active)==1 else "s"] if int(field.active)>0 else "nothing being worked on"]
 
 ## One card per question: its field, the question, how far the evidence has
 ## come, who works it and what holds it back. A card is as tall as its own
@@ -121,27 +203,17 @@ func _question(parent:Node,record:Dictionary,lead:bool)->void:
 	if not field.is_empty():
 		var kicker:=T.make_label(field.to_upper(),12,T.legible(accent));kicker.name="FieldLabel";text.add_child(kicker)
 	text.add_child(_serif(String(record.get("name","An open question")),24 if lead else 19))
-	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
-	_meter(text,progress,accent)
-	_line(text,"%s; %s"%[Words.researchers(researchers),Words.evidence(progress)],14 if lead else 13,T.BODY)
-	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
-	var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
-	if phase.is_empty():
-		var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
-	_line(text,phase,14 if lead else 13,T.INK)
-	var why:=Visuals.plain_bottleneck(bottleneck)
-	var restated:=why.trim_suffix(".").to_lower()==phase.to_lower()
-	if not restated and not explained.has(why):
-		explained[why]=true;_line(text,why,13 if lead else 12,T.TEXT_SOFT)
-	var holdup:=why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)]
-	# What answering it would do in the game, from the engine's own readings.
-	var effects:Dictionary=record.get("effects",{})
-	var brings:=""
-	if not effects.is_empty():
-		var would:=_line(text,"Would bring: %s." % Explainer.summary(effects),13 if lead else 12,T.TEXT_SOFT);would.name="WouldBring"
-		brings="\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false)
-	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))
-	panel.tooltip_text=(goal+"\n\n" if not goal.is_empty() else "")+holdup+brings+"\n\nClick to review this field, its current investigations and what they would do."
+	var words:=_card_words(record)
+	var refs:={"panel":panel,"why":null,"would":null}
+	refs.meter=_meter(text,float(words.progress),accent)
+	refs.line=_line(text,String(words.evidence),14 if lead else 13,T.BODY)
+	refs.phase=_line(text,String(words.phase),14 if lead else 13,T.INK)
+	if not bool(words.restated) and not explained.has(words.why):
+		explained[words.why]=true;refs.why=_line(text,String(words.why),13 if lead else 12,T.TEXT_SOFT)
+	if String(words.would)!="":
+		var would:=_line(text,String(words.would),13 if lead else 12,T.TEXT_SOFT);would.name="WouldBring";refs.would=would
+	panel.tooltip_text=String(words.tooltip)
+	_cards.append(refs)
 func _card_style(pad:float,hover:bool=false)->StyleBoxFlat:
 	return T.flat(T.HOVER_BG if hover else T.ROW_BG,T.GOLD if hover else T.BORDER,1,T.RADIUS_CARD,pad)
 func _clamped(parent:Node,value:String,font:int,ink:Color,lines:int=2)->void:
@@ -151,9 +223,10 @@ func _card(parent:Node)->VBoxContainer:
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(panel)
 	panel.add_theme_stylebox_override("panel",_card_style(12))
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",9);panel.add_child(box);return box
-func _meter(parent:Node,fraction:float,color:Color)->void:
+func _meter(parent:Node,fraction:float,color:Color)->ProgressBar:
 	var bar:=ProgressBar.new();bar.custom_minimum_size.y=6;bar.show_percentage=false;bar.value=fraction*100;parent.add_child(bar)
 	bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(color))
+	return bar
 func _arrange()->void:
 	var wide:=size.x>=WIDE
 	if fields_grid:fields_grid.columns=3 if size.x>=1100 else (2 if size.x>=520 else 1)

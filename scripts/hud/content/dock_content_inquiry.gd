@@ -16,6 +16,9 @@ const ArtifactCulture:=preload("res://scripts/artifact_culture.gd")
 const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
 const ARTIFACT_COLOR:=Color("#b98a5e")
+const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
+## Costly parts of the pages, kept while what they are made from holds.
+var memo:=Memo.new()
 
 ## What each domain's research actually improves — the end goal a player is
 ## buying when they raise its weight. Aligned with the frontier catalog's
@@ -62,8 +65,7 @@ func tab(sub:int)->Dictionary:
 	# the same as the cards. Only the board refreshes the lines' questions.
 	var investigations:Array=DiscoverySystem.active_investigation_records() if sub==0 else []
 	var questions:=investigations.size() if sub==0 else _questions_under_way()
-	var established_threads:=DiscoverySystem.established_knowledge_threads()
-	var established:=established_threads.size()
+	var established:=_threads().size()
 	var kpis:Array=[
 		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":preload("res://scripts/hud/production_plain.gd").number(float(science.capacity)) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"about %s people at it" % preload("res://scripts/hud/production_plain.gd").number(float(science.minds)) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"People at learning, weighted by how well they were taught."},
 		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"How well what is known is kept and passed on."},
@@ -156,8 +158,15 @@ func _investigation_blocks(domain_filter:String="")->Array:
 		blocks.append({"type":"text","heading":"WHAT COMPLETION UNLOCKS","text":"\n".join(unlock_lines)})
 	return blocks
 
+## What the people know, one entry per body of knowledge
+## (DiscoverySystem.established_knowledge_threads, a deep copy of its own
+## cache on every call): made again only when the discovery log moves, and a
+## logged discovery is never edited afterwards.
+func _threads()->Array:
+	return memo.take("threads",[Memo.log_identity(WorldSimulation.state.discovery_log)],func()->Array:return DiscoverySystem.established_knowledge_threads())
+
 func _established_blocks()->Array:
-	var log:Array=DiscoverySystem.established_knowledge_threads()
+	var log:Array=_threads()
 	var blocks:Array=[_knowledge_acts_block()]
 	if log.is_empty():
 		blocks.append({"type":"text","heading":"ESTABLISHED KNOWLEDGE","text":"Nothing has yet been tried, used and remembered long enough to count as known."})

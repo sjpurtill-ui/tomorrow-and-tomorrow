@@ -21,9 +21,16 @@ var sketch:OwnSketch
 var grid:GridContainer
 ## The drawing and the leader, side by side on a wide page, stacked on a narrow one.
 var spread:BoxContainer
+## The daily refresh (update_block) keeps every node while the page keeps its
+## shape (the same leader, choices, figures, works) and writes the day's
+## figures, words and drawing into them.
+var _page_shape:Array=[]
+var _page_refs:Dictionary={}
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="SettlementOverview";add_theme_constant_override("separation",14)
+	_page_shape=shape_of(block)
+	_page_refs={"rows":[],"progress":[],"offers":[]}
 	spread=BoxContainer.new();spread.name="Spread";spread.add_theme_constant_override("separation",22);add_child(spread)
 	var drawing:Dictionary=block.get("sketch",{})
 	if not drawing.is_empty():_sketch(drawing,spread)
@@ -61,6 +68,62 @@ func setup(block:Dictionary)->void:
 	_button(footer,"Rename this place",block.get("on_rename"),"Change the name on the map")
 	resized.connect(_layout);_layout()
 
+## The live refresh: while the page keeps its shape, the drawing, the
+## leader's words, every figure and the works take the day's values in place;
+## a page of another shape is drawn afresh.
+func update_block(block:Dictionary)->bool:
+	if name!="SettlementOverview" or _page_refs.is_empty() or shape_of(block)!=_page_shape:return false
+	data=block
+	if sketch!=null:
+		sketch.data=block.get("sketch",{});sketch.queue_redraw()
+	var leader:Dictionary=block.get("leader",{})
+	if _page_refs.has("office"):_put(_page_refs.office,_office_words(leader))
+	if _page_refs.has("lead"):_put(_page_refs.lead,String(block.get("lead","")))
+	if _page_refs.has("direction"):
+		_put(_page_refs.direction,String(block.get("direction","")))
+		(_page_refs.direction as Control).tooltip_text=String(block.get("direction_tip",""))
+	var rows:Array=[]
+	for group:Dictionary in block.get("groups",[]):rows.append_array(group.rows)
+	for index in mini(rows.size(),(_page_refs.rows as Array).size()):_fill_row(_page_refs.rows[index],rows[index])
+	var founding:Dictionary=block.get("founding",{})
+	if _page_refs.has("founding"):_put(_page_refs.founding,String(founding.get("words","")))
+	var works:Dictionary=block.get("works",{})
+	var progress:Array=works.get("progress",[])
+	for index in mini(progress.size(),(_page_refs.progress as Array).size()):_put(_page_refs.progress[index],String(progress[index]))
+	var offers:Array=works.get("offers",[])
+	for index in mini(offers.size(),(_page_refs.offers as Array).size()):
+		var offer:Dictionary=offers[index];var refs:Dictionary=_page_refs.offers[index]
+		var ready:=String(offer.get("blocked","")).is_empty()
+		_put(refs.title,String(offer.title));_put(refs.sentence,String(offer.sentence))
+		_put(refs.cost,String(offer.cost) if ready else String(offer.blocked),T.MUTED if ready else tone_color("warn"))
+		(refs.start as Button).tooltip_text=String(offer.cost) if ready else String(offer.blocked)
+	return true
+
+## What the page's nodes are: the drawing's town, the leader's picture and
+## name, the work switch and choices, each figure's key and parts, the
+## legend, the New towns switch, the works on offer and the footer's actions.
+static func shape_of(block:Dictionary)->Array:
+	var leader:Dictionary=block.get("leader",{})
+	var drawing:Dictionary=block.get("sketch",{})
+	var choices:Array=[]
+	for choice:Dictionary in block.get("choices",[]):choices.append([String(choice.get("id","")),String(choice.get("label","")),String(choice.get("tip","")),callable_key(choice.get("on_press"))])
+	var rows:Array=[]
+	for group:Dictionary in block.get("groups",[]):
+		var keys:Array=[String(group.title)]
+		for row:Dictionary in group.rows:keys.append([String(row.key),bool(row.get("bar",true)),String(row.get("note",""))!="",String(row.get("note_tone","muted")),callable_key(row.get("on_open")),row.get("section",""),row.get("sub",0)])
+		rows.append(keys)
+	var founding:Dictionary=block.get("founding",{})
+	var founding_shape:Array=[] if founding.is_empty() else [founding.get("options",[]),bool(founding.get("on",true))]
+	var works:Dictionary=block.get("works",{})
+	var works_shape:Array=[]
+	if not works.is_empty():
+		works_shape=[(works.get("progress",[]) as Array).size()]
+		for offer:Dictionary in works.get("offers",[]):works_shape.append([String(offer.get("id","")),String(offer.get("action","")),String(offer.get("blocked","")).is_empty(),callable_key(offer.get("on_press"))])
+	return [not drawing.is_empty(),String(drawing.get("city_id","")),leader.is_empty(),Portrait.picture_key(leader) if not leader.is_empty() else [],String(leader.get("name","No leader yet")),
+		String(block.get("lead",""))!="",bool(block.get("ruler_sets_work",false)),bool(block.get("can_direct",false)),choices,String(block.get("current","")),
+		callable_key(block.get("on_leaders")),callable_key(block.get("on_people")),callable_key(block.get("on_leader")),callable_key(block.get("on_population")),callable_key(block.get("on_rename")),
+		rows,block.get("legend",[]),String(block.get("town_name","")),founding_shape,works_shape]
+
 # --------------------------------------------------------------------------
 # The drawing
 # --------------------------------------------------------------------------
@@ -96,8 +159,9 @@ func _leader(block:Dictionary,parent:Node)->void:
 	named.add_child(T.make_label("LOCAL LEADER",12,T.GOLD_TEXT))
 	named.add_child(_voice(String(leader.get("name","No leader yet")),22))
 	var office:=T.text(Label.new(),"small",T.INK_MUTED) as Label
-	office.text=("%s, age %d" % [String(leader.get("title","Local leader")),int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
+	office.text=_office_words(leader)
 	office.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;named.add_child(office)
+	if not _page_refs.is_empty():_page_refs["office"]=office
 	var talk:=_button(named,"Talk with %s in court" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
 	talk.name="TalkWithLeader";talk.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	var lead:=String(block.get("lead",""))
@@ -107,8 +171,13 @@ func _leader(block:Dictionary,parent:Node)->void:
 		quote.add_theme_stylebox_override("panel",rule);column.add_child(quote)
 		var words:=Label.new();words.name="LeadWords";words.text=lead;words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		T.text(words,"voice_small",T.BODY);words.add_theme_font_override("font",T.voice_font(true));quote.add_child(words)
+		if not _page_refs.is_empty():_page_refs["lead"]=words
 	var direction:=_line(column,String(block.get("direction","")),13,T.BODY)
 	direction.name="Direction";direction.tooltip_text=String(block.get("direction_tip",""));direction.mouse_filter=Control.MOUSE_FILTER_PASS
+	if not _page_refs.is_empty():_page_refs["direction"]=direction
+
+static func _office_words(leader:Dictionary)->String:
+	return ("%s, age %d" % [String(leader.get("title","Local leader")),int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
 
 # --------------------------------------------------------------------------
 # The figures, in four groups
@@ -161,13 +230,28 @@ func _row(row:Dictionary)->Control:
 	var icon:=TextureRect.new();icon.texture=V.tinted(key,V.accent(key));icon.custom_minimum_size=Vector2(22,22);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",4);body.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(body)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",8);top.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(top)
-	var label:=T.text(Label.new(),"body",T.INK) as Label;label.name="Name";label.text=String(row.name);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(label)
-	var value:=T.text(Label.new(),"body",T.INK) as Label;value.name="Value";value.text=String(row.value);value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(value)
+	var label:=T.text(Label.new(),"body",T.INK) as Label;label.name="Name";label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(label)
+	var value:=T.text(Label.new(),"body",T.INK) as Label;value.name="Value";value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(value)
+	var refs:={"panel":panel,"name":label,"value":value,"bar":null,"note":null}
 	if bool(row.get("bar",true)):
-		var bar:=OwnScale.new();bar.name="Scale";bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=row.get("marks",[]) if bool(row.get("bands",true)) else [];body.add_child(bar)
+		var bar:=OwnScale.new();bar.name="Scale";body.add_child(bar);refs.bar=bar
 	if String(row.get("note",""))!="":
-		var note:=T.text(Label.new(),"small",tone_color(String(row.get("note_tone","muted")))) as Label;note.name="Note";note.text=String(row.note);note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note)
+		var note:=T.text(Label.new(),"small",tone_color(String(row.get("note_tone","muted")))) as Label;note.name="Note";note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note);refs.note=note
+	_fill_row(refs,row)
+	if not _page_refs.is_empty():(_page_refs.rows as Array).append(refs)
 	return panel
+
+## A figure's words and scale, for the first drawing and every refresh.
+func _fill_row(refs:Dictionary,row:Dictionary)->void:
+	(refs.panel as Control).tooltip_text=String(row.get("tip",""))
+	_put(refs.name,String(row.name))
+	_put(refs.value,String(row.value))
+	if refs.bar!=null:
+		var bar:OwnScale=refs.bar
+		var marks:Array=row.get("marks",[]) if bool(row.get("bands",true)) else []
+		if bar.own!=float(row.get("own",0.0)) or bar.top!=maxf(0.0001,float(row.get("top",1.0))) or bar.marks!=marks:
+			bar.own=float(row.get("own",0.0));bar.top=maxf(0.0001,float(row.get("top",1.0)));bar.marks=marks
+	if refs.note!=null:_put(refs.note,String(row.note))
 
 func _layout()->void:
 	if spread:spread.vertical=size.x<760
@@ -190,7 +274,8 @@ func _new_towns(founding:Dictionary)->void:
 	_rule(self)
 	var box:=VBoxContainer.new();box.name="NewTowns";box.add_theme_constant_override("separation",6);add_child(box)
 	box.add_child(_voice("New towns",20))
-	_line(box,String(founding.get("words","")),13,T.BODY).name="NewTownsWords"
+	var words:=_line(box,String(founding.get("words","")),13,T.BODY);words.name="NewTownsWords"
+	if not _page_refs.is_empty():_page_refs["founding"]=words
 	_choices(box,"",founding.get("options",[]),"leaders" if bool(founding.get("on",true)) else "ruler").name="NewTownsChoice"
 
 ## Water and waste works: what is built, and what can be started, each with
@@ -199,19 +284,22 @@ func _works(works:Dictionary)->void:
 	_rule(self)
 	var box:=VBoxContainer.new();box.name="WaterWorks";box.add_theme_constant_override("separation",8);add_child(box)
 	box.add_child(T.make_label("WATER AND WASTE WORKS",12,T.GOLD_TEXT))
-	for line:String in works.get("progress",[]):_line(box,line,13,T.BODY)
+	for line:String in works.get("progress",[]):
+		var said:=_line(box,line,13,T.BODY)
+		if not _page_refs.is_empty():(_page_refs.progress as Array).append(said)
 	if (works.get("progress",[]) as Array).is_empty():
 		var none:=_line(box,"Nothing is built yet.",13,T.MUTED)
 		none.tooltip_text="Clean water, and waste kept apart from it, mean fewer sick.";none.mouse_filter=Control.MOUSE_FILTER_PASS
 	for offer:Dictionary in works.get("offers",[]):
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);box.add_child(row)
 		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
-		text.add_child(_voice(String(offer.title),18))
-		_line(text,String(offer.sentence),13,T.BODY)
+		var title:=_voice(String(offer.title),18);text.add_child(title)
+		var sentence:=_line(text,String(offer.sentence),13,T.BODY)
 		var ready:=String(offer.get("blocked","")).is_empty()
-		_line(text,String(offer.cost) if ready else String(offer.blocked),13,T.MUTED if ready else tone_color("warn"))
+		var cost:=_line(text,String(offer.cost) if ready else String(offer.blocked),13,T.MUTED if ready else tone_color("warn"))
 		var start:=_button(row,String(offer.action),offer.get("on_press"),String(offer.cost) if ready else String(offer.blocked))
 		start.name="Start_"+String(offer.id).replace(":","_");start.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		if not _page_refs.is_empty():(_page_refs.offers as Array).append({"title":title,"sentence":sentence,"cost":cost,"start":start})
 
 # --------------------------------------------------------------------------
 # Drawing classes

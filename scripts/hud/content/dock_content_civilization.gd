@@ -187,10 +187,22 @@ func signature()->Array:
 	var settlement:=_civic_settlement()
 	var history:=AdvisorSystem.civic_dialogue_history(String(settlement.get("id","")),6)
 	var latest_dialogue_status:=String(history.back().get("status","")) if not history.is_empty() else ""
-	var leader:=GovernmentPeopleSystem.settlement_leader(String(settlement.get("id","")))
-	var latest_order:=_latest_civic_order(String(settlement.get("id","")),int(leader.get("person_id",0)))
+	var latest_order:=_latest_civic_order(String(settlement.get("id","")),leader_person_id(String(settlement.get("id",""))))
 	return [GameState.elapsed_days,WorldSimulation.direction.auto_scouting,MilitaryCampaign.war_reputation_snapshot(),GameState.societal_values.get("lived",{}).duplicate(),WorldSimulation.direction.ambition,WorldSimulation.direction.cultural_memory.get("events",[]).size(),GameState.society_capacities.duplicate(),ids,GameState.sovereign_orders.size(),ConsequenceEngine.active_policies().size(),GovernmentPeopleSystem.revision,GameState.player_settlements.size(),history.size(),latest_dialogue_status,String(latest_order.get("status","")),_artifact_signature()]
 
+
+## The local leader's person id as GovernmentPeopleSystem.settlement_leader()
+## gives it (0 when the place has no living leader record), read without
+## copying the whole record. tests/test_dock_content_cache.gd holds the two
+## equal.
+static func leader_person_id(settlement_id:String)->int:
+	for settlement:Dictionary in WorldSimulation.state.player_settlements:
+		if String(settlement.get("id",""))!=settlement_id:continue
+		var pid:=int(settlement.get("leader_person_id",0))
+		for person:Dictionary in GovernmentPeopleSystem.people:
+			if int(person.get("person_id",0))==pid:return pid
+		return 0
+	return 0
 
 func _civic_settlement()->Dictionary:
 	var settlement:=SettlementModel.selected_settlement_snapshot()

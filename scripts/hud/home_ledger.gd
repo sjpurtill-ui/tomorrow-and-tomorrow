@@ -54,6 +54,20 @@ func _rule(parent:Node)->void:
 func _line(parent:Node,text:String,size:int=13,color:Color=T.BODY)->Label:
 	var label:=T.make_label(text,size,color);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(label);return label
 
+## A callable as a live refresh compares it: its method and what it is bound
+## to (dock_panel.fingerprint's rule). A lambda is made anew on every refresh
+## and never equals the last one, and a bound method equals any binding of
+## the same method, so neither can be compared as it is.
+static func callable_key(value:Variant)->Variant:
+	if value is Callable:return ["fn",String((value as Callable).get_method()),(value as Callable).get_bound_arguments()]
+	return value
+
+## Words (and their ink) set only when they differ, so a live refresh does
+## not lay out an unchanged line again.
+static func _put(label:Label,text:String,color:Variant=null)->void:
+	if label.text!=text:label.text=text
+	if color is Color and label.get_theme_color("font_color")!=color:label.add_theme_color_override("font_color",color)
+
 func _voice(text:String,font_size:int)->Label:
 	var label:=T.make_label(text,font_size,T.INK);label.add_theme_font_override("font",T.voice_font());label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return label
 

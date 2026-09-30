@@ -60,8 +60,6 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 	var most:=1
 	for task:Dictionary in tasks:
 		able+=int(task.count);most=maxi(most,int(task.count))
-		# What the work does, with today's numbers (opened from the task's name).
-		task["impact"]=TaskImpact.of(String(task.id))
 	if manual:
 		var counts:=Manual.counts()
 		for task:Dictionary in tasks:
@@ -79,7 +77,14 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),"able":able,
 		"note":"%s; the rest are children, the old and the sick." % register if hearth else "%s of working age at work." % EraWords.grouped(able),
 		"manual":manual,"who":Manual.leaders_lines() if not manual else [],"warnings":Manual.outlook().lines if manual else [],
-		"leaders_tip":Manual.LEADERS_TIP,"ruler_tip":Manual.RULER_TIP,"on_leaders":set_work.bind(false),"on_ruler":set_work.bind(true),"on_move":move_work}
+		"leaders_tip":Manual.LEADERS_TIP,"ruler_tip":Manual.RULER_TIP,"on_leaders":set_work.bind(false),"on_ruler":set_work.bind(true),"on_move":move_work,
+		# What a task does, with today's numbers: asked for only for the task
+		# the player has opened (people_screen.gd), not all nine every day.
+		"impact_of":task_impact}
+
+## What one daily task does, with today's numbers (task_impact.gd).
+func task_impact(role:String)->Dictionary:
+	return TaskImpact.of(role)
 
 ## "Who sets the daily work": our leaders (false) or the ruler (true).
 func set_work(ruler:bool)->void:

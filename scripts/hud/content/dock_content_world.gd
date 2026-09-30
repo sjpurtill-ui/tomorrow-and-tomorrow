@@ -35,6 +35,12 @@ func meta()->Dictionary:
 	}
 
 func tab(sub:int)->Dictionary:
+	# The known world and the expeditions tab show no peoples-met or lookout
+	# figures, so only Rise and fall reads those snapshots.
+	if sub==0:return {"blocks":[{"type":"known_world","model":known_world_model(CivilizationSystem.exploration_status())}]}
+	if sub==1:
+		var away:Dictionary=CivilizationSystem.exploration_status()
+		return {"kpis":[_tellings_kpi(away)],"brief":{"title":"Scouts are away" if bool(away.get("active",false)) else "Read what came home, then send the next party","why":"The day they come home is only a guess. A late party is still on the road until word or loss comes back." if bool(away.get("active",false)) else "Recent returns are below. Every telling holds all the rest."},"blocks":_scouting_blocks(away)}
 	var competition:Dictionary=CivilizationSystem.known_competition_snapshot()
 	var knowledge:Dictionary=CivilizationSystem.strategic_knowledge_snapshot()
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
@@ -44,7 +50,7 @@ func tab(sub:int)->Dictionary:
 	var kpis:Array=[
 		{"label":"Peoples met","value":str(contacts),"delta":"there may be more","delta_color":Tokens.INK_MUTED,"accent":Tokens.AMBER,"tip":"Seen with our own eyes or told of by scouts who came home"},
 		{"label":"In sight","value":str(visible_foreign),"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.INK_MUTED,"accent":Tokens.TEAL,"tip":"Strangers our lookouts can see right now"},
-		{"label":"Tellings","value":str(int(exploration.get("report_count",0))),"delta":"brought home","delta_color":Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Accounts our scouts carried home"},
+		_tellings_kpi(exploration),
 	]
 	var brief:Dictionary
 	if bool(exploration.get("active",false)):
@@ -53,10 +59,11 @@ func tab(sub:int)->Dictionary:
 		brief={"tone":"warn","title":"We have met no other people","why":"Only scouts who come home can tell us of new land or new peoples."}
 	else:
 		brief={"tone":"info","title":"We know of %s" % ("one other people" if contacts==1 else "%d other peoples" % contacts),"why":"We know only what our people brought home, and older word grows less certain."}
-	match sub:
-		1: return {"kpis":[kpis[2]],"brief":{"title":"Scouts are away" if bool(exploration.get("active",false)) else "Read what came home, then send the next party","why":"The day they come home is only a guess. A late party is still on the road until word or loss comes back." if bool(exploration.get("active",false)) else "Recent returns are below. Every telling holds all the rest."},"blocks":_scouting_blocks(exploration)}
-		2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
+	if sub==2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
 	return {"blocks":[{"type":"known_world","model":known_world_model(exploration)}]}
+
+func _tellings_kpi(exploration:Dictionary)->Dictionary:
+	return {"label":"Tellings","value":str(int(exploration.get("report_count",0))),"delta":"brought home","delta_color":Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Accounts our scouts carried home"}
 
 func _scouting_blocks(exploration:Dictionary)->Array:
 	var blocks:Array=[]
@@ -81,7 +88,7 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 	var archive_model:=preload("res://scripts/scout_archive.gd")
 	var archive_provider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
 	var highlights:Array=[]
-	var newest:=archive_model.select(CivilizationSystem.scout_reports,"",0,false).slice(0,8)
+	var newest:=newest_tellings(CivilizationSystem.scout_reports,8)
 	newest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.priority)>int(b.priority))
 	for item:Dictionary in newest.slice(0,3):
 		var saved_report:Dictionary=item.report
@@ -91,6 +98,22 @@ func _scouting_blocks(exploration:Dictionary)->Array:
 	blocks.append({"type":"actions","items":[{"label":"Plan an expedition","sub":"Where they go, how many, how long, and what they carry","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
 	blocks.append({"type":"text","text":"What a party sees stays with them until they come home. The people and food they take go with them, and a party that is caught may never come back. Up to %d parties can be out at once; knowing the roads, and having mounts and supplies, lets them go further." % int(exploration.get("capacity",1))})
 	return blocks
+
+## The newest tellings exactly as scout_archive.select(reports,"",0,false)
+## orders them (latest day first, then by identity), summarised only for the
+## ones returned: select summarises and serialises every telling kept to
+## search them, which cost this tab 12 ms a day for eight lines.
+## tests/test_dock_content_cache.gd holds the two equal.
+static func newest_tellings(reports:Array,count:int)->Array:
+	var archive:=preload("res://scripts/scout_archive.gd")
+	var order:Array=[]
+	for report:Dictionary in reports:order.append(report)
+	order.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		if int(a.get("day",0))!=int(b.get("day",0)):return int(a.get("day",0))>int(b.get("day",0))
+		return archive.identity(a)<archive.identity(b))
+	var result:Array=[]
+	for report:Dictionary in order.slice(0,count):result.append(archive.summary(report))
+	return result
 
 func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 	var blocks:Array=[
@@ -138,6 +161,7 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 	var chief_name:=String(chief.get("name",""))
 	var summon_label:=("Summon %s, your Chief Scout, to hear it" % chief_name) if not chief_name.is_empty() else "Call in the returned walkers to hear it"
 	var summon_tip:="Call them into the audience hall; they will tell what the walkers saw."
+	var finds_open:Array=[]
 	if matters>0:summon_tip="%s holds %d matter%s from the road. Returned findings are told in the audience hall." % [chief_name if not chief_name.is_empty() else "The Chief Scout",matters,"" if matters==1 else "s"]
 	return {
 		"tier":tier,
@@ -147,7 +171,10 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 		"peoples":_peoples_model(encounters,home,pace),
 		"leads":_leads_model(leads,home,pace),
 		"parties":_parties_model(exploration),
-		"finds":_finds_model(reports),
+		"finds":_finds_model(reports,finds_open),
+		# Which reports and pieces the finds open: the board compares its parts
+		# by value, and a bound report is not part of that comparison.
+		"_finds_reports":finds_open,
 		"chief_name":chief_name,
 		# What the people strive for, and what rivals have sworn (legacy_aims.gd).
 		"aims":preload("res://scripts/legacy_aims.gd").board_model(),
@@ -386,11 +413,12 @@ func _artifact(id:String)->Dictionary:
 	var found:Variant=culture.call("artifact",id)
 	return found if found is Dictionary else {}
 
-func _finds_model(reports:Array)->Array:
+func _finds_model(reports:Array,opens:Array=[])->Array:
 	var groups:Array=[]
 	for report:Dictionary in reports:
 		if groups.size()>=FIND_GROUPS:break
 		var items:Array=[]
+		var pieces:Array=[]
 		var on_report:Callable=open_report.bind(report)
 		for contact:Variant in report.get("contacts",[]):
 			items.append({"kind":"contact","title":"Met the %s" % String(contact),"sub":"a first meeting","on_open":on_report})
@@ -403,11 +431,13 @@ func _finds_model(reports:Array)->Array:
 					items.append({"kind":"artifact","title":_find_name(card),"sub":"carried home","on_open":on_report})
 				else:
 					items.append({"kind":"artifact","title":String(piece.get("name","")),"sub":String(piece.get("rarity","")).to_lower(),"texture":piece.get("texture"),"rarity_index":int(piece.get("rarity_index",0)),"state":String(piece.get("state","")),"study":float(piece.get("study_progress",0.0)),"on_open":open_piece.bind(id)})
+					pieces.append(id)
 			else:
 				items.append({"kind":kind,"title":_find_name(card),"sub":find_sub(kind),"resource":String(card.get("resource","")),"on_open":on_report})
 		if int(report.get("recruits",0))>0:items.append({"kind":"recruits","title":"%d came home with them" % int(report.recruits),"sub":"newcomers","on_open":on_report})
 		if int(report.get("lost_personnel",0))>0:items.append({"kind":"losses","title":"%d did not come home" % int(report.lost_personnel),"sub":"lost on the road","on_open":on_report})
 		if items.is_empty():continue
+		opens.append([report.get("mission_id",0),report.get("day",0),report.get("target_id",""),pieces])
 		var route:=points(report.get("route",[]))
 		groups.append({"party":Archive.party_name(report),"date":Archive.calendar_date(int(report.get("day",0))),
 			"place":route_phrase(report,route) if route.size()>=2 else title_case(String(report.get("target_label","Open exploration"))),
