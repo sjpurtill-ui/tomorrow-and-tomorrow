@@ -660,6 +660,10 @@ func dynamic_competency(person:Dictionary,dynamic_id:String)->float:
 
 
 func office_is_active(office_key:String)->bool:
+	# A central office whose rank the government has reached is listed ahead
+	# of anything a discovery adds; it needs no reading of the court.
+	for definition in OFFICE_DEFINITIONS:
+		if String(definition.key)==office_key and government_stage>=int(definition.unlock): return true
 	return office_key in _active_office_keys()
 
 
