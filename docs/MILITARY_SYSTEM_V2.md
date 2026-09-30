@@ -551,3 +551,11 @@ with machine accounting; (7) recruitment fixes and template numbers.
   - The line's carrier kind changes only when the new kind carries a fifth
     more, so one cart does not flip every band's haul.
   - Caches are forgotten on load; bands turning back rest at the march pace.
+- **Iteration 11, stated odds.** Before an attack, siege or raid on a town
+  whose fighters our scouts have counted, the order preview states the odds
+  by the combat engine's own reading (`army_orders.stated_odds`): our band as
+  it stands (its morale, readiness, kit, stores and general) against the men
+  counted there, assumed armed as we are, behind the walls our scouts saw
+  (a town's defence 1.03 + 0.34 × fortification). The line says the
+  assumption: "Odds, if they are armed as we are: about 3 to 2 for us, their
+  walls counting for them." The one-line summary carries "odds 3:2".

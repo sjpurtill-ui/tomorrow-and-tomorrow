@@ -301,11 +301,71 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 			out.likely="object"; out.lines.append("%s will probably object: they have hardly drilled." % who_objects)
 		elif verb_id=="siege" and going<WO.MIN_FORCE*3:
 			out.likely="object"; out.lines.append("%s will probably object: too few to ring the town." % who_objects)
+		# The war leader's stated odds (the combat engine's own reading): our
+		# band as it stands against the men counted there, armed as we are,
+		# behind the walls our scouts saw.
+		if bool(enemy.known) and going>0:
+			var odds:=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)))
+			if not odds.is_empty():
+				out["odds"]=odds
+				out.lines.append("Odds, if they are armed as we are: %s%s." % [odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
 		if not WO.at_war(String(p.civ_id)):
 			out.lines.append("We are not at war with %s. The war starts when they arrive, and %s will hear of the march before then." % [WO.civ_name(String(p.civ_id)),name])
 	elif verb_id=="guard":
 		out.lines.append("They hold about %s km around it and fight anyone hostile who comes into it." % EraWords.grouped(roundi(guard_radius(going))))
 	return out
+
+## The odds of an attack by the combat engine's own reading: our band as it
+## stands (its morale, readiness, kit and stores) against `their_men` armed
+## as we are, behind walls of `fortification` (a town's defence,
+## 1.03 + 0.34 x fortification, as the campaign gives it).
+## {odds (stronger over weaker, 1 or more), ours (true when with us), walls}
+static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float)->Dictionary:
+	var mc:=_mc()
+	var heads:=_heads(formations)
+	if mc==null or heads<=0 or going<=0 or their_men<1.0: return {}
+	var sim=mc.simulator
+	var us:Dictionary=sim.create_formation_force("Us",_scaled(formations,float(going)/float(heads)),float(force.get("morale",1.0)),float(force.get("readiness",1.0)))
+	us["stores_share"]=float(force.get("stores_share",1.0))
+	if force.get("commander") is Dictionary: us["commander"]=force.commander
+	var them:Dictionary=sim.create_formation_force("Them",_scaled(formations,their_men/float(heads)),1.0,1.0)
+	var walls:=clampf(1.03+clampf(fortification,0.0,1.0)*0.34,1.03,1.38)
+	var a:Dictionary=sim._normalize_force(us,"Us")
+	var d:Dictionary=sim._normalize_force(them,"Them")
+	var ap:float=sim._cohort_power(sim.evaluate_force(a,d,1.0),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
+	var dp:float=sim._cohort_power(sim.evaluate_force(d,a,walls),float(d.morale),float(d.readiness),0.5)
+	var raw:float=sim.effective_odds(ap,dp,int(a.troops),int(d.troops))
+	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"walls":walls}
+
+static func _scaled(formations:Array,share:float)->Array:
+	var out:=[]
+	for f in formations:
+		var g:Dictionary=(f as Dictionary).duplicate()
+		for key in ["count","authorized_count","equipment","equipment_required","ammunition","ammunition_required"]:
+			if g.has(key): g[key]=maxi(0,roundi(float(g[key])*share))
+		out.append(g)
+	return out
+
+## "3:2" (for us), "2:3" (against us), "even": the summary line's short form.
+static func odds_short(odds:float,ours:bool)->String:
+	var words:=odds_words(odds,ours)
+	if words=="about even": return "even"
+	var fraction:=words.trim_prefix("about ").get_slice(" for",0).get_slice(" against",0)
+	var a:=fraction.get_slice(" to ",0)
+	var b:=fraction.get_slice(" to ",1)
+	if fraction.begins_with("more"): return ">5:1" if ours else "<1:5"
+	return "%s:%s" % [a,b] if ours else "%s:%s" % [b,a]
+
+## "about 3 to 2 for us", "about even", "about 2 to 1 against us".
+static func odds_words(odds:float,ours:bool)->String:
+	if odds<1.15: return "about even"
+	var words:="more than 5 to 1"
+	# Each named fraction covers the odds nearer to it than to its neighbours.
+	for pair in [[1.29,"5 to 4"],[1.42,"4 to 3"],[1.75,"3 to 2"],[2.5,"2 to 1"],[4.0,"3 to 1"],[6.0,"5 to 1"]]:
+		if odds<float(pair[0]):
+			words=String(pair[1])
+			break
+	return "about %s %s" % [words,"for us" if ours else "against us"]
 
 static func _sentence(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)
@@ -481,6 +541,7 @@ static func summary(plan:Dictionary)->String:
 		parts.append("%d %s" % [days,"day" if days==1 else "days"])
 		if int(plan.get("arrive_day",-1))>=0: parts.append("arrive "+Dates.day_words(int(plan.arrive_day)))
 	elif not (plan.get("road",[]) as Array).is_empty(): parts.append("already there")
+	if plan.has("odds"): parts.append("odds "+odds_short(float(plan.odds.odds),bool(plan.odds.ours)))
 	if String(plan.get("likely",""))=="object":
 		var leader:=war_leader_name()
 		parts.append("%s will object" % (leader if leader!="" else "the war leader"))

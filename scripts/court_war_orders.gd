@@ -1215,7 +1215,10 @@ static func _enemy_estimate(city_id:String)->Dictionary:
 	var field:Dictionary=(report.get("fields",{}) as Dictionary).get("garrison",{})
 	if field.is_empty(): return {"known":false,"age":int(report.get("age_days",-1))}
 	var low:=float(field.get("low",0)); var high:=float(field.get("high",0))
-	return {"known":true,"low":roundi(low),"high":roundi(high),"mid":(low+high)*0.5,"age":int(field.get("age_days",report.get("age_days",0)))}
+	# The walls, as far as our scouts saw them (a town's defence in battle).
+	var walls:Dictionary=(report.get("fields",{}) as Dictionary).get("fortification",{})
+	var fortification:=(float(walls.get("low",0.25))+float(walls.get("high",0.25)))*0.5 if not walls.is_empty() else 0.25
+	return {"known":true,"low":roundi(low),"high":roundi(high),"mid":(low+high)*0.5,"age":int(field.get("age_days",report.get("age_days",0))),"fortification":fortification}
 
 static func _muster_trainees()->int:
 	## "Take them as they are": every recruit still in drill leaves the drill
