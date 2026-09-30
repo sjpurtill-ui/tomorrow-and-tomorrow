@@ -152,8 +152,20 @@ static func tier_of(force:Dictionary)->int:
 		var formation:Dictionary=formation_variant
 		var count:=maxi(0,int(formation.get("count",0)))
 		if count<=0 or float(count)<float(total)*0.05: continue
-		tier=maxi(tier,maxi(int(UNIT_TIER.get(String(formation.get("unit","levy")),0)),int(WEAPON_TIER.get(String(formation.get("weapon","")),0))))
+		tier=maxi(tier,maxi(int(UNIT_TIER.get(String(formation.get("unit","levy")),0)),weapon_tier(String(formation.get("weapon","")))))
 	return clampi(tier,0,TIERS.size()-1)
+
+
+## The age a kit dates its bearers to: the table where it names the kit,
+## otherwise the kit's year in the equipment ledger (gunpowder, rifles and
+## motors; anything later fights at the last age's pace).
+static func weapon_tier(weapon:String)->int:
+	if WEAPON_TIER.has(weapon): return int(WEAPON_TIER[weapon])
+	var year:=preload("res://scripts/equipment_ledger.gd").year(weapon)
+	if year>=2600.0: return 5
+	if year>=2500.0: return 4
+	if year>=1800.0: return 3
+	return 0
 
 
 ## A round size a clerk would give a unit of this many.

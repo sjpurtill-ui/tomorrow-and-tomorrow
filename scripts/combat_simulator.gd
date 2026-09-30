@@ -166,6 +166,65 @@ static func ammo_per(weapon_id:String)->int:
 static func ammo_type(weapon_id:String)->String:
 	return String(Ledger.row(weapon_id).get("ammo",""))
 
+## Armour, HOI4's way but once: a formation is as "hard" as its kit's armour
+## makes it (cloth 0, mail about half, plate and tanks nearly all). Fire at a
+## hard target gets through by how well it pierces that armour: all of it
+## when the pierce matches the armour, falling steeply below, never under the
+## floor. Rifles hardly scratch a heavy tank; an antitank gun does.
+const PIERCE_FLOOR:=0.10
+const PIERCE_STEEPNESS:=2.5
+
+static func kit_hardness(weapon_id:String)->float:
+	return clampf((float(Ledger.row(weapon_id).get("armor",0.0))-0.3)/1.2,0.0,1.0)
+
+static func pierce_factor(pierce:float,armor:float)->float:
+	if armor<=0.0 or pierce>=armor: return 1.0
+	return clampf(pow(maxf(0.0,pierce)/armor,PIERCE_STEEPNESS),PIERCE_FLOOR,1.0)
+
+## The enemy's armour as our fire meets it: the hard share of its men (by
+## kit and issued sets) and the armour of that hard part.
+func _armor_profile(formations:Array)->Dictionary:
+	var men:=0.0
+	var hard:=0.0
+	var armor:=0.0
+	for formation in formations:
+		var count:=float(maxi(0,int(formation.get("count",0))))
+		if count<=0.0: continue
+		var weapon_id:=String(formation.get("weapon","improvised"))
+		var h:=kit_hardness(weapon_id)*issued_equipment_ratio(formation)
+		men+=count
+		hard+=count*h
+		armor+=count*h*float(Ledger.row(weapon_id).get("armor",0.0))
+	return {"hard":hard/men if men>0.0 else 0.0,"armor":armor/hard if hard>0.0 else 0.0}
+
+## The enemy's fire by pierce: [pierce, weight] pairs, weight = men x base attack.
+func _fire_profile(formations:Array)->Array:
+	var by_pierce:={}
+	for formation in formations:
+		var count:=float(maxi(0,int(formation.get("count",0))))
+		if count<=0.0: continue
+		var weapon_id:=String(formation.get("weapon","improvised"))
+		var weapon:Dictionary=WEAPONS.get(weapon_id,WEAPONS.improvised)
+		var unit:Dictionary=UNIT_TYPES.get(String(formation.get("unit","levy")),UNIT_TYPES.levy)
+		var pierce:=float(weapon.get("penetration",0.0))
+		by_pierce[pierce]=float(by_pierce.get(pierce,0.0))+count*float(unit.attack)*float(weapon.attack)*(0.22+issued_equipment_ratio(formation)*0.78)
+	var fire:=[]
+	for pierce in by_pierce: fire.append([float(pierce),float(by_pierce[pierce])])
+	return fire
+
+## Share of the enemy's fire that gets through a formation's armour.
+static func _through(fire:Array,weapon_id:String,equipment_ratio:float)->float:
+	var hardness:=kit_hardness(weapon_id)*equipment_ratio
+	if hardness<=0.0 or fire.is_empty(): return 1.0
+	var armor:=float(Ledger.row(weapon_id).get("armor",0.0))
+	var total:=0.0
+	var passed:=0.0
+	for pair in fire:
+		total+=float(pair[1])
+		passed+=float(pair[1])*pierce_factor(float(pair[0]),armor)
+	var share:=passed/total if total>0.0 else 1.0
+	return (1.0-hardness)+hardness*share
+
 # Attack multipliers against the opposing unit mix. Unlisted matchups are 1.0.
 # These are intentionally data, not branches, so discoveries can replace or
 # extend the table later without rewriting battle resolution.
@@ -806,7 +865,9 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
 	# The enemy's mix is the same for every formation: weigh it once per arm.
 	var matchups:Dictionary={}
-	var enemy_penetration:=_enemy_penetration(enemy_formations)
+	var enemy_armor:=_armor_profile(enemy_formations)
+	var enemy_hard:=float(enemy_armor.hard)
+	var enemy_fire:=_fire_profile(enemy_formations)
 	for formation in formations:
 		var unit_id := String(formation.get("unit", "levy"))
 		var weapon_id := String(formation.get("weapon", "improvised"))
@@ -834,17 +895,21 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var matchup:=float(matchups[unit_id])
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var doctrine_defense:=preload("res://scripts/combined_arms_doctrine.gd").defense(formation,formations,enemy_formations)
-		var armor_protection := 1.0 + maxf(0.0, float(weapon.armor) * equipment_ratio - enemy_penetration) * 0.35
+		# Our blows against the enemy's hard share lose what our kit cannot pierce;
+		# how much of the enemy's fire gets through our own armour sets where
+		# our losses fall (_apply_cohort_losses).
+		var piercing:=(1.0-enemy_hard)+enemy_hard*pierce_factor(float(weapon.penetration),float(enemy_armor.armor)) if enemy_hard>0.0 else 1.0
+		var through:=_through(enemy_fire,weapon_id,equipment_ratio)
 		if lean:
 			result.append({"count":count,
-				"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-				"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0))})
+				"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+				"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),"through":through})
 			continue
 		result.append({
 			"unit": unit_id, "weapon": weapon_id, "count": count,
-			"attack":float(unit.attack)*float(weapon.attack)*matchup*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
-			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*armor_protection*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
-			"doctrine_defense":doctrine_defense,"matchup":matchup,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
+			"attack":float(unit.attack)*float(weapon.attack)*matchup*piercing*(0.22+equipment_ratio*0.78)*ammunition_attack_factor*training_factor*experience_factor*condition_factor*formation_attack_modifier*float(formation.get("round_order_attack",1.0)),
+			"defense":float(unit.defense)*float(weapon.defense)*terrain_modifier*(0.35+equipment_ratio*0.65)*training_factor*experience_factor*condition_factor*formation_defense_modifier*doctrine_defense*float(formation.get("round_order_defense",1.0)),
+			"doctrine_defense":doctrine_defense,"matchup":matchup,"piercing":piercing,"through":through,"terrain":terrain_modifier,"equipment":equipment,"equipment_required":equipment_required,"equipment_ratio":equipment_ratio,"ammunition":ammunition,"ammunition_required":ammunition_required,"ammunition_ratio":ammunition_ratio,"training":training,"experience":experience,"personnel_condition":personnel_condition
 		})
 	return result
 
@@ -989,17 +1054,6 @@ func issued_equipment_ratio(formation:Dictionary)->float:
 	return clampf(float(formation.get("equipment",count))/float(required),0,1)
 
 
-func _enemy_penetration(enemy_formations: Array) -> float:
-	var total := 0
-	var weighted := 0.0
-	for enemy in enemy_formations:
-		var count := maxi(0, int(enemy.get("count", 0)))
-		var weapon: Dictionary = WEAPONS.get(String(enemy.get("weapon", "improvised")), WEAPONS.improvised)
-		total += count
-		weighted += count * float(weapon.penetration) * issued_equipment_ratio(enemy)
-	return weighted / float(total) if total > 0 else 0.0
-
-
 ## Fighting power. weights: per formation, the share of its men in the line
 ## (battle_blocks.weights); empty means everyone fights.
 func _cohort_power(cohorts: Array[Dictionary], morale: float, readiness: float,command: float,weights:PackedFloat32Array=PackedFloat32Array()) -> float:
@@ -1109,7 +1163,7 @@ func _apply_cohort_losses(formations: Array, cohorts: Array[Dictionary], losses:
 		for index in updated.size():
 			var count := int(updated[index].get("count", 0))
 			var defense := maxf(0.05, float(cohorts[index].defense))
-			var exposure := float(count)/defense*contact_factors[index] if count>0 else 0.0
+			var exposure := float(count)/defense*contact_factors[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
 			exposures.append(exposure)
 			total_exposure+=exposure
 		var target := -1
@@ -1142,7 +1196,7 @@ func _spread_losses(updated:Array,cohorts:Array[Dictionary],contact:Array[float]
 	var total:=0.0
 	for index in updated.size():
 		var count:=int(updated[index].get("count",0))
-		var exposure:=float(count)/maxf(0.05,float(cohorts[index].defense))*contact[index] if count>0 else 0.0
+		var exposure:=float(count)/maxf(0.05,float(cohorts[index].defense))*contact[index]*float(cohorts[index].get("through",1.0)) if count>0 else 0.0
 		exposures.append(exposure); total+=exposure
 	if total<=0.0: return losses
 	var left:=losses

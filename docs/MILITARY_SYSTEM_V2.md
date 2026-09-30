@@ -348,3 +348,13 @@ with machine accounting; (7) recruitment fixes and template numbers.
   firearms are weaker per man than bows but pierce armour. Spoils no longer
   file rounds under an empty name. Retooling keeps skill by family (100 /
   80 / 40 / 20%) and the skill ramp counts multi-day steps.
+- **Iteration 3, armour by hardness.** The defence-side armour bonus is gone.
+  Each kit's hardness comes from its armour (cloth 0, mail about half, plate
+  and tanks nearly all). Our blows against the enemy's hard share are scaled
+  by `(pierce/armor)^2.5`, never below 0.10; the enemy's fire falls on our
+  formations by how much of it gets through their armour, so a tank company
+  in an infantry army takes few of the rifle losses. Vehicle armour and
+  pierce were recalibrated so rifles hardly scratch a medium tank and an
+  antitank gun does. Kits the old age table did not name take their battle
+  age from their ledger year, so late kits fight at the last age's pace
+  instead of the stone age's.

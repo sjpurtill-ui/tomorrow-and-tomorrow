@@ -93,11 +93,13 @@ func test_zero_partial_full_armor_and_penetration_follow_issued_kit_fraction()->
 			var force:=sim.create_formation_force("Armor",[f])
 			assert_float(float(force.armor)).is_equal_approx(float(A.KITS[item].armor)*issued/20.0,.000001)
 			assert_float(float(force.penetration)).is_equal_approx(.55*issued/20.0,.000001)
-			assert_float(sim._enemy_penetration([f])).is_equal_approx(.55*issued/20.0,.000001)
+			# Armour makes the men hard in proportion to the kit issued (hardness,
+			# combat_simulator.gd); it no longer multiplies their defense as well.
+			assert_float(float(sim._armor_profile([f]).hard)).is_equal_approx(CombatSimulator.kit_hardness(item)*issued/20.0,.000001)
 			var evaluation:Dictionary=sim.evaluate_force(force,{"formations":[]})[0]
 			var normalized_defense:=float(evaluation.defense)/(.35+.65*issued/20.0)
 			var baseline:=1.18*float(A.KITS[item].defense)*.94
-			assert_float(normalized_defense).is_equal_approx(baseline*(1+float(A.KITS[item].armor)*issued/20.0*.35),.000001)
+			assert_float(normalized_defense).is_equal_approx(baseline,.000001)
 			if issued==0:
 				var bare:=sim.create_formation_force("Bare",[formation("spear",0)])
 				assert_float(float(evaluation.defense)).is_equal(float(sim.evaluate_force(bare,{"formations":[]})[0].defense))
@@ -106,9 +108,12 @@ func test_penetration_reduces_armor_advantage_and_missing_armor_has_none()->void
 	var defender:=sim.create_formation_force("Plate",[formation("plate_spear",20)])
 	var low:={"formations":[formation("bow",20,"archer")]}
 	var high:={"formations":[formation("armored_vehicle",4,"armored_formation")]}
-	assert_float(float(sim.evaluate_force(defender,low)[0].defense)).is_greater(float(sim.evaluate_force(defender,high)[0].defense))
+	# Arrows mostly glance off plate; tank guns do not.
+	assert_float(float(sim.evaluate_force(defender,low)[0].through)).is_less(float(sim.evaluate_force(defender,high)[0].through))
+	assert_float(float(sim.evaluate_force(defender,high)[0].through)).is_equal(1.0)
 	var empty_plate:=sim.create_formation_force("Empty plate",[formation("plate_spear",0)])
 	var empty_spear:=sim.create_formation_force("Empty spear",[formation("spear",0)])
+	assert_float(float(sim.evaluate_force(empty_plate,low)[0].through)).is_equal(1.0)
 	assert_float(float(sim.evaluate_force(empty_plate,low)[0].defense)).is_equal(float(sim.evaluate_force(empty_spear,low)[0].defense))
 func test_existing_personnel_and_crew_equipment_retain_full_values()->void:
 	var sim:=CombatSimulator.new()
