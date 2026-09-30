@@ -54,21 +54,28 @@ class ResearchScan extends RefCounted:
 	var seed_tables:Dictionary={}
 	## Tables of technology_catalog, each with the catalog basis it was read
 	## from (_catalog_basis): dynamic -> entries in catalog order; foundation id
-	## -> ascending indices of the questions naming it; entries in order of
-	## this world's opening year.
+	## -> ascending indices of the questions naming it; each entry's opening
+	## year (research_open_year), by catalog index.
 	var by_dynamic:Dictionary={}
 	var by_dynamic_basis:Array=[]
 	var children:Dictionary={}
 	var children_basis:Array=[]
-	var by_open_year:Array=[]
-	var by_open_year_basis:Array=[]
+	var open_years:=PackedFloat64Array()
+	var open_years_basis:Array=[]
+	## Foundation work (_research_600_foundation_ids), per field: its entries by
+	## whole opening year, and the discovery count at which every question of
+	## the field then unknown had its opening year recorded.
+	var year_buckets:Dictionary={}
+	var year_buckets_basis:Array=[]
+	var foundation_scanned:Dictionary={}
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
 		eligible={};best={};needs={}
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
-		children={};children_basis=[];by_open_year=[];by_open_year_basis=[]
+		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
+		year_buckets={};year_buckets_basis=[];foundation_scanned={}
 var _scan:=ResearchScan.new()
 
 var latest_context:Dictionary={}
@@ -269,6 +276,10 @@ func initialize() -> void:
 			var second_order:int=int(second.get("day",0))+absi(hash("%s:%s" % [WorldSimulation.state.world_seed,second.get("id","")]))%240
 			return first_order<second_order)
 		catalog_by_channel[channel_variant]=channel_catalog
+	# Tables that follow the fixed catalog alone are built with it, keeping
+	# their cost out of the day's steps.
+	foundation_children()
+	_technology_entries("")
 	initialized = true
 	_refresh_active_investigations()
 
@@ -298,6 +309,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# between lines until a question is answered, which clears both.
 	var leader_factors:Dictionary={}
 	var executing_offices:Dictionary={}
+	# The known discoveries as a set for the route checks, kept current below.
+	var known_set:Dictionary={}
+	for known_id:String in WorldSimulation.state.known_discoveries: known_set[known_id]=true
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
@@ -319,7 +333,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
 		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
-		probability*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
+		probability*=Pathways.multiplier(discovery,known_set)*(.85 if Exchange.studying() else 1.0)
 		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
 		# A multi-day step (day_span.gd) covers `span` days of inquiry.
 		progress+=probability*rng.randf_range(0.72,1.28)*WorldSimulation.span
@@ -330,6 +344,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			executing_offices.clear()
 			Pathways.remember(discovery,current_day)
 			WorldSimulation.state.known_discoveries.append(discovery.id)
+			known_set[String(discovery.id)]=true
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
 			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_discovery_effect_summary(discovery),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
@@ -628,35 +643,60 @@ func _technology_entries(dynamic_id:String)->Array:
 		_scan.by_dynamic_basis=basis
 	return _scan.by_dynamic.get(dynamic_id,[])
 
-## Every foundation named by some question (Pathways.named_foundations), with
-## the ascending technology_catalog indices of the questions naming it.
+## Every foundation some question could name, with the ascending
+## technology_catalog indices of the questions naming it: the requires,
+## requires_all and requires_any of the question, of its learning routes and
+## of its experimental alternative (Pathways.ALTERNATIVES). That covers the
+## parents of every route Pathways.routes_for builds for it, imported copies
+## included. Built with the catalog (initialize), so no day's step pays for it.
 func foundation_children()->Dictionary:
 	var basis:=_catalog_basis()
 	if not _same_basis(_scan.children_basis,basis):
 		var children:Dictionary={}
 		for index in technology_catalog.size():
-			for parent:String in Pathways.named_foundations(technology_catalog[index]):
-				var listed:Variant=children.get(parent)
-				if listed==null: children[parent]=[index]
-				elif int((listed as Array)[-1])!=index: (listed as Array).append(index)
+			var entry:Dictionary=technology_catalog[index]
+			_name_children(children,entry,index)
+			for route:Variant in entry.get("learning_routes",[]): _name_children(children,route,index)
+			var alternate:Variant=Pathways.ALTERNATIVES.get(String(entry.get("id","")))
+			if alternate is Dictionary: _name_children(children,alternate,index)
 		_scan.children=children
 		_scan.children_basis=basis
 	return _scan.children
 
-## technology_catalog entries in order of this world's opening year
-## (research_open_year, ties in catalog order). Building it reads every
-## entry's opening year once, in catalog order.
-func technology_by_open_year()->Array:
+static func _name_children(children:Dictionary,spec:Dictionary,index:int)->void:
+	for key:String in ["requires","requires_all"]:
+		for id:Variant in spec.get(key,[]): _add_child(children,String(id),index)
+	for group:Variant in spec.get("requires_any",[]):
+		for id:Variant in group: _add_child(children,String(id),index)
+
+static func _add_child(children:Dictionary,parent:String,index:int)->void:
+	var listed:Variant=children.get(parent)
+	if listed==null: children[parent]=[index]
+	elif int((listed as Array)[-1])!=index: (listed as Array).append(index)
+
+## Each technology_catalog entry's opening year (research_open_year), by
+## index. Building it reads every entry's opening year once, in catalog order,
+## as research_foundations always did on its first pass.
+func technology_open_years()->PackedFloat64Array:
 	var basis:=_catalog_basis()
-	if not _same_basis(_scan.by_open_year_basis,basis):
-		var keyed:Array=[]
-		for index in technology_catalog.size(): keyed.append([research_open_year(technology_catalog[index]),index])
-		keyed.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])<float(b[0]) or (float(a[0])==float(b[0]) and int(a[1])<int(b[1])))
-		var ordered:Array=[]
-		for pair:Array in keyed: ordered.append(technology_catalog[int(pair[1])])
-		_scan.by_open_year=ordered
-		_scan.by_open_year_basis=basis
-	return _scan.by_open_year
+	if not _same_basis(_scan.open_years_basis,basis):
+		var years:=PackedFloat64Array()
+		years.resize(technology_catalog.size())
+		# research_open_year for every entry in turn, inlined: the same records,
+		# made in the same order.
+		var seed_value:=int(WorldSimulation.state.world_seed)
+		if not technology_catalog.is_empty() and _open_year_seed!=seed_value: _open_year_cache.clear();_open_year_seed=seed_value
+		for index in technology_catalog.size():
+			var entry:Dictionary=technology_catalog[index]
+			var id:=String(entry.get("id",""))
+			var recorded:Variant=_open_year_cache.get(id)
+			if recorded==null:
+				recorded=Research600.open_year(float(entry.get("earliest_year",0.0)),_research_draw(id,seed_value,"open_year"))
+				_open_year_cache[id]=recorded
+			years[index]=float(recorded)
+		_scan.open_years=years
+		_scan.open_years_basis=basis
+	return _scan.open_years
 
 func _refresh_active_investigations()->void:
 	begin_research_scan()
@@ -828,10 +868,39 @@ func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	var year:=float(current_day)/365.0
+	# _scan_eligible, inlined for the channel's many candidates.
+	var scanning:=_scan_active()
+	var memo:Dictionary=_scan.eligible
+	var judged_known:Dictionary=_scan_known() if scanning else known
 	for discovery:Dictionary in candidates:
-		if research_years_ahead(discovery,year)<NEAR_AGE_YEARS and _scan_eligible(discovery,current_day,known):return true
+		if research_years_ahead(discovery,year)>=NEAR_AGE_YEARS: continue
+		var id:=String(discovery.get("id","")) if scanning else ""
+		var eligible:Variant=memo.get(id) if scanning else null
+		if eligible==null:
+			eligible=_discovery_is_eligible(discovery,current_day,judged_known)
+			if scanning: memo[id]=eligible
+		if eligible: return true
 	return false
 
+
+## The fields with an eligible question (a ruler's research review): questions
+## are judged in catalog order, each field's only until it shows one, and
+## inside a scan through its memo (_scan_eligible, inlined).
+func viable_fields(current_day:int,known:Dictionary)->Dictionary:
+	var viable:Dictionary={}
+	var scanning:=_scan_active()
+	var memo:Dictionary=_scan.eligible
+	var judged_known:Dictionary=_scan_known() if scanning else known
+	for entry:Dictionary in technology_catalog:
+		var field:=String(entry.dynamic)
+		if viable.has(field):continue
+		var id:=String(entry.get("id","")) if scanning else ""
+		var eligible:Variant=memo.get(id) if scanning else null
+		if eligible==null:
+			eligible=_discovery_is_eligible(entry,current_day,judged_known)
+			if scanning: memo[id]=eligible
+		if eligible:viable[field]=true
+	return viable
 
 ## The line's best open question. Inside a scan it is chosen once for each
 ## allocation and chosen target of the line (the only inputs a scan changes).
@@ -852,9 +921,18 @@ func _score_best_candidate(channel:String,current_day:int)->Dictionary:
 	var known:Dictionary=_candidate_index.known
 	var best:Dictionary={}
 	var best_score:=-INF
+	# _scan_eligible, inlined for the channel's many candidates.
+	var scanning:=_scan_active()
+	var memo:Dictionary=_scan.eligible
+	var judged_known:Dictionary=_scan_known() if scanning else known
 	for discovery_variant in candidates:
 		var discovery:Dictionary=discovery_variant
-		if not _scan_eligible(discovery,current_day,known): continue
+		var id:=String(discovery.get("id","")) if scanning else ""
+		var eligible:Variant=memo.get(id) if scanning else null
+		if eligible==null:
+			eligible=_discovery_is_eligible(discovery,current_day,judged_known)
+			if scanning: memo[id]=eligible
+		if not eligible: continue
 		var score:=_candidate_score(discovery)
 		if String(WorldSimulation.state.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
 		if score>best_score:
@@ -1949,10 +2027,20 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	var known:Dictionary={}
 	for id:Variant in WorldSimulation.state.known_discoveries: known[String(id)]=true
 	var frontier:Array[String]=[]
-	for entry:Dictionary in _technology_entries(dynamic_id):
+	# The first pass over a field reads the opening year of every question of
+	# it then unknown. Discoveries are never lost, so afterwards (or at once,
+	# when those years are already on record) only questions near the horizon
+	# need reading: the others are passed over below all the same.
+	var known_size:=WorldSimulation.state.known_discoveries.size()
+	var buckets:=_foundation_year_buckets(dynamic_id)
+	var scanned:Variant=_scan.foundation_scanned.get(dynamic_id)
+	var entries:=_technology_entries(dynamic_id)
+	if (scanned!=null and known_size>=int(scanned)) or _years_recorded(entries,known): entries=_foundation_horizon_entries(buckets,entries,current_day)
+	for entry:Dictionary in entries:
 		if known.has(String(entry.get("id",""))): continue
 		# Foundation work serves questions within FOUNDATION_HORIZON_YEARS of their age.
 		if research_600_open(entry,{},current_day,FOUNDATION_HORIZON_YEARS) and Research600.pursued(String(entry.get("id","")),society_model.ceiling_era): frontier.append_array(_research_600_missing_parents(entry,known)) # research_3000: only questions still pursued
+	if scanned==null or known_size<int(scanned): _scan.foundation_scanned[dynamic_id]=known_size
 	var found:Dictionary={}
 	var visited:Dictionary={}
 	var depth:=0
@@ -1973,6 +2061,60 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 	_research_600_foundation_cache[key]=ids
 	return ids
 
+
+## A field's questions by whole opening year: {"buckets": {year: indices into
+## _technology_entries(field)}, "last": the latest year}. A question's year is
+## its recorded opening year, or the one research_open_year would record
+## (nothing is recorded here).
+func _foundation_year_buckets(dynamic_id:String)->Dictionary:
+	var basis:=_catalog_basis()
+	if not _same_basis(_scan.year_buckets_basis,basis):
+		_scan.year_buckets={}
+		_scan.foundation_scanned={}
+		_scan.year_buckets_basis=basis
+	var table:Variant=_scan.year_buckets.get(dynamic_id)
+	if table==null:
+		var buckets:Dictionary={}
+		var last:=0
+		var seed_value:=int(WorldSimulation.state.world_seed)
+		var entries:=_technology_entries(dynamic_id)
+		for index in entries.size():
+			var entry:Dictionary=entries[index]
+			var id:=String(entry.get("id",""))
+			var recorded:Variant=_open_year_cache.get(id) if _open_year_seed==seed_value else null
+			var open:float=float(recorded) if recorded!=null else Research600.open_year(float(entry.get("earliest_year",0.0)),_research_draw(id,seed_value,"open_year"))
+			var bucket:=int(floor(open))
+			if not buckets.has(bucket): buckets[bucket]=[]
+			(buckets[bucket] as Array).append(index)
+			last=maxi(last,bucket)
+		table={"buckets":buckets,"last":last}
+		_scan.year_buckets[dynamic_id]=table
+	return table
+
+## Whether every question of `entries` not in `known` has its opening year on
+## record for this world's seed (research_open_year would record nothing new).
+func _years_recorded(entries:Array,known:Dictionary)->bool:
+	if _open_year_seed!=int(WorldSimulation.state.world_seed): return false
+	for entry:Dictionary in entries:
+		var id:=String(entry.get("id",""))
+		if not known.has(id) and not _open_year_cache.has(id): return false
+	return true
+
+## The field's questions, in catalog order, whose whole opening year stands
+## within FOUNDATION_HORIZON_YEARS of `day` (a question in a later year opens
+## beyond the horizon, as does every question after it).
+func _foundation_horizon_entries(table:Dictionary,entries:Array,day:int)->Array:
+	var year:=float(day)/365.0
+	var buckets:Dictionary=table.buckets
+	var indices:Array=[]
+	for bucket in int(table.last)+1:
+		if float(bucket)-year>FOUNDATION_HORIZON_YEARS: break
+		var listed:Variant=buckets.get(bucket)
+		if listed!=null: indices.append_array(listed)
+	indices.sort()
+	var result:Array=[]
+	for index:int in indices: result.append(entries[index])
+	return result
 
 func _research_600_missing_parents(entry:Dictionary,known:Dictionary)->Array[String]:
 	var parents:Array[String]=[]

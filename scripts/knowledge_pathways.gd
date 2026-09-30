@@ -127,10 +127,62 @@ static func _route_ready(definition:Dictionary,entry:Dictionary,known:Variant,co
 	# IDs and score. They do not inherit the local experimental-support gate.
 	return not source.is_empty() and support+progress*preload("res://scripts/society_exchange.gd").evidence_strength(source)+.1>-1.0
 
-static func multiplier(entry:Dictionary)->float:
-	var route:=chosen(entry,int(WorldSimulation.state.elapsed_days))
+## `known` (default: the acting people's discoveries) may be the same
+## discoveries as a set.
+static func multiplier(entry:Dictionary,known:Variant=null)->float:
+	var route:=_chosen_terms(entry,WorldSimulation.state.known_discoveries if known==null else known,WorldSimulation.discovery.latest_context,evidence(String(entry.id)))
 	if route.is_empty():return 1.0
-	return preload("res://scripts/scholar_visits.gd").bonus(String(entry.id),int(WorldSimulation.state.elapsed_days))*float(route.progress_multiplier)*(1.0 if route.get("imported",false) else 1.0+minf(.4,float(route.support)*.15))
+	return preload("res://scripts/scholar_visits.gd").bonus(String(entry.id),int(WorldSimulation.state.elapsed_days))*float(route.progress_multiplier)*(1.0 if route.imported else 1.0+minf(.4,float(route.support)*.15))
+
+## chosen() reduced to what multiplier() reads, for the daily research step:
+## the routes routes_for builds, in its order, judged and scored exactly as
+## routes_for and chosen() judge and score them, without copying a route
+## record. {} when no route is ready, else the chosen route's "support",
+## "progress_multiplier" and "imported". Keep in step with those two.
+static func _chosen_terms(entry:Dictionary,known:Variant,context:Dictionary,source:Dictionary)->Dictionary:
+	var common_all:Array=entry.get("requires_all",[])
+	var common_any:Array=entry.get("requires_any",[])
+	var definitions:Array=entry.get("learning_routes",[])
+	var renamed:=-1
+	if definitions.is_empty():
+		definitions=[{"id":"local","requires":entry.get("requires",[])}]
+		if ALTERNATIVES.has(String(entry.id)):
+			definitions.append(ALTERNATIVES[String(entry.id)])
+			renamed=1 # routes_for names the alternative "experimental"
+	var routes:Array=[]
+	for index in definitions.size():
+		var definition:Dictionary=definitions[index]
+		var id:="experimental" if index==renamed else String(definition.get("id",""))
+		var met:=true
+		for parent:String in definition.get("requires_all",definition.get("requires",[])):
+			if parent not in known:met=false;break
+		if met:
+			for parent:String in common_all:
+				if parent not in known:met=false;break
+		if met:
+			for group:Array in definition.get("requires_any",[])+common_any:
+				var found:=false
+				for parent:String in group:
+					if parent in known:found=true;break
+				if not found:met=false;break
+		var signals:Array=definition.get("signals",entry.get("signals",[]))
+		var support:=0.0
+		for signal_name:String in signals:support+=clampf(float(context.get(signal_name,0)),0,2)
+		support=support/maxi(1,signals.size())
+		routes.append([id,met,support,float(definition.get("progress_multiplier",1.0)),definition.get("imported",false)])
+	# A studied example adds one imported copy of each approach, after them all.
+	if not source.is_empty():
+		var strength:float=preload("res://scripts/society_exchange.gd").evidence_strength(source)
+		for index in definitions.size():
+			var foundation:Array=routes[index]
+			routes.append([("fieldwork" if source.kind=="specimen" else "exchange")+("" if foundation[0]=="local" else ":"+String(foundation[0])),foundation[1],foundation[2],float(foundation[3])*strength,source.kind!="specimen"])
+	var result:Dictionary={};var best:=-1.0
+	for route:Array in routes:
+		var id:=String(route[0])
+		if not bool(route[1]) or (id.begins_with("experimental") and float(route[2])<.25):continue
+		var score:=float(route[2])+float(route[3])+(0.05 if id=="local" else .1)
+		if score>best:result={"support":route[2],"progress_multiplier":route[3],"imported":route[4]};best=score
+	return result
 
 static func missing(entry:Dictionary,day:int,known:Variant=null)->Array[String]:
 	if ready(entry,day,known):return []
@@ -178,23 +230,6 @@ static func describe(entry:Dictionary,known:Variant=null)->String:
 
 static func graph_entry(entry:Dictionary)->Dictionary:
 	return {"id":entry.id,"requires_all":[],"learning_routes":routes_for(entry,[],{})}
-
-## Every foundation any route of `entry` could name: the requires,
-## requires_all and requires_any of the entry, of its learning routes and of
-## its experimental alternative (repeats possible). A superset of the parents
-## of every route routes_for builds for it, imported ones included.
-static func named_foundations(entry:Dictionary)->Array[String]:
-	var result:Array[String]=[]
-	var specs:Array=[entry]
-	specs.append_array(entry.get("learning_routes",[]))
-	var alternate:Variant=ALTERNATIVES.get(String(entry.get("id","")))
-	if alternate is Dictionary:specs.append(alternate)
-	for spec:Dictionary in specs:
-		for id:Variant in spec.get("requires",[]):result.append(String(id))
-		for id:Variant in spec.get("requires_all",[]):result.append(String(id))
-		for group:Variant in spec.get("requires_any",[]):
-			for id:Variant in group:result.append(String(id))
-	return result
 
 static func definition_parents(entry:Dictionary)->Array[String]:
 	var parents:Array[String]=[]

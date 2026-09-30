@@ -148,10 +148,14 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		# A line's attention is its share of the plan, read in common steps: the
 		# same share helps its practices spread the same for every ruler.
 		var steps:=Research600.attention_steps(WorldSimulation.state.research_allocations)
+		# Terms common to every practice, read once (same arithmetic, same order).
+		var adoption_table:Dictionary=WorldSimulation.state.discovery_adoption
+		var common_spread:=0.00035+teaching
+		var idle_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE
 		for id in WorldSimulation.state.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
-			var adoption_level:=float(WorldSimulation.state.discovery_adoption.get(id,0.025))
+			var adoption_level:=float(adoption_table.get(id,0.025))
 			var direction:=String(discovery.get("dynamic",discovery.get("direction","knowledge")))
 			var attention:=float(steps.get(direction,0.0))
 			var relevant_activity:=0.0
@@ -160,11 +164,11 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 			var directed:=minf(0.006,attention*0.0012)
 			# research_600 balance: ADOPTION_PACE spreads a practice over years to
 			# decades instead of weeks (see ERA CEILINGS below).
-			var spread:=(0.00035+teaching+practice+directed)*adoption_factor*ADOPTION_PACE
+			var spread:=(common_spread+practice+directed)*adoption_factor*ADOPTION_PACE
 			spread*=1.0-adoption_level
-			var retention_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE if relevant_activity<=0.05 else 0.0
+			var retention_loss:=idle_loss if relevant_activity<=0.05 else 0.0
 			adoption_level=clampf(adoption_level+(spread-retention_loss)*adoption_days,0.015,1.0)
-			WorldSimulation.state.discovery_adoption[id]=adoption_level
+			adoption_table[id]=adoption_level
 		_rebuild_effect_totals(catalog)
 	WorldSimulation.state.societal_values=SOCIETAL_VALUES_MODEL.advance(
 		WorldSimulation.state.societal_values,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption,
@@ -232,6 +236,9 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	_refresh_line_focus() # research_600: specialization amplifies the focused line
 	var neglect:=neglect_for(line_focus)
 	var adoption:Dictionary=WorldSimulation.state.discovery_adoption
+	# Each line's practice_scale is read once; scaled_effect is applied inline.
+	var scales:Dictionary={}
+	if _lower_keys.is_empty(): _build_key_sets()
 	for id in WorldSimulation.state.known_discoveries:
 		var row:Array=_effect_rows.get(id,[])
 		if row.is_empty():
@@ -245,10 +252,15 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		var adoption_level:=_practice_level(String(id),adoption,bool(row[2]))
 		var names:Array=row[0]
 		var values:PackedFloat64Array=row[1]
-		var scale:=practice_scale(String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic","")),line_focus,neglect)
+		var line:=String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic",""))
+		var known_scale:Variant=scales.get(line)
+		var scale:float=practice_scale(line,line_focus,neglect) if known_scale==null else float(known_scale)
+		scales[line]=scale
 		for i in names.size():
 			var effect_name=names[i]
-			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+scaled_effect(String(effect_name),values[i],scale)*adoption_level
+			var value:=values[i]
+			if scale!=1.0 and (value<0.0)==_lower_keys.has(String(effect_name)): value=value*scale
+			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+value*adoption_level
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
 	ceiling_era=society_era()
@@ -286,8 +298,23 @@ static func neglect_for(focus_by_line:Dictionary)->float:
 
 ## The scale moves a practice's benefits only; its costs are never scaled.
 static func scaled_effect(effect_name:String,value:float,scale:float)->float:
-	if scale!=1.0 and (value<0.0)==(effect_name in LOWER_IS_BETTER): return value*scale
+	if scale!=1.0 and (value<0.0)==_lower_is_better(effect_name): return value*scale
 	return value
+
+## LOWER_IS_BETTER, TECH_KEYS and EARLY_MATURE as sets, for the effect
+## rebuilds that ask of every practice's every effect (static: never saved).
+static var _lower_keys:Dictionary={}
+static var _tech_keys:Dictionary={}
+static var _early_keys:Dictionary={}
+
+static func _build_key_sets()->void:
+	for key:String in LOWER_IS_BETTER: _lower_keys[key]=true
+	for key:String in TECH_KEYS: _tech_keys[key]=true
+	for key:String in EARLY_MATURE: _early_keys[key]=true
+
+static func _lower_is_better(effect_name:String)->bool:
+	if _lower_keys.is_empty(): _build_key_sets()
+	return _lower_keys.has(effect_name)
 
 # --- The capacity ledger -----------------------------------------------------
 # One ledger (docs/ADJUDICATION.md): capacity_value is the only formula for the
@@ -315,6 +342,10 @@ class Today extends RefCounted:
 	## The last practice sources worked out, by what they were worked out from.
 	var sources_key:=0
 	var sources:Dictionary={}
+	## era_ceiling_for of each effect at `ceilings_era` (a fixed function of
+	## the two).
+	var ceilings:Dictionary={}
+	var ceilings_era:=INF
 var _today:=Today.new()
 
 ## One reading of everything the twelve capacities are made from.
@@ -890,30 +921,37 @@ static func _rise(curve:Array,era:float)->float:
 ## Allowed [lower, upper] range of an effect total at game-year `era`.
 static func era_ceiling_for(effect_id:String,era:float)->Vector2:
 	var limit:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
-	var lower:=effect_id in LOWER_IS_BETTER
+	var lower:=_lower_is_better(effect_id)
 	var modern:=absf(limit.x) if lower else limit.y
 	var anchor:=minf(modern,float(ERA_CEILING_600.get(effect_id,modern*0.5)))
 	var curve:Array=ERA_RISE
 	if OWN_EARLY_RISE.has(effect_id): curve=OWN_EARLY_RISE[effect_id]
-	elif effect_id in EARLY_MATURE: curve=EARLY_MATURE_RISE
-	elif effect_id in TECH_KEYS: curve=TECH_RISE
+	elif _early_keys.has(effect_id): curve=EARLY_MATURE_RISE
+	elif _tech_keys.has(effect_id): curve=TECH_RISE
 	var bound:=anchor*_rise(curve,era)
 	if era>600.0:
-		var later:Array=OWN_LATER_RISE.get(effect_id,TECH_LATER_RISE if effect_id in TECH_KEYS else LATER_RISE)
+		var later:Array=OWN_LATER_RISE.get(effect_id,TECH_LATER_RISE if _tech_keys.has(effect_id) else LATER_RISE)
 		bound=anchor+(modern-anchor)*_rise(later,era)
 	return Vector2(-bound,limit.y) if lower else Vector2(limit.x,bound)
 
 ## Allowed range of `effect_id` for this society as of its latest effect totals,
 ## including the headroom its research focus earns on that key's line.
 func era_ceiling(effect_id:String)->Vector2:
-	var limit:=era_ceiling_for(effect_id,ceiling_era)
+	if _today.ceilings_era!=ceiling_era:
+		_today.ceilings={}
+		_today.ceilings_era=ceiling_era
+	var common:Variant=_today.ceilings.get(effect_id)
+	if common==null:
+		common=era_ceiling_for(effect_id,ceiling_era)
+		_today.ceilings[effect_id]=common
+	var limit:Vector2=common
 	var focus:=float(line_focus.get(String(EFFECT_LINE.get(effect_id,"")),0.0))
 	# A focused line's channels may pass the common ceiling; a neglected line's
 	# channels stop short of it while another line takes the society's effort.
 	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-neglect_for(line_focus)
 	if scale==1.0: return limit
 	var modern:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
-	if effect_id in LOWER_IS_BETTER: return Vector2(maxf(modern.x,limit.x*scale),limit.y)
+	if _lower_is_better(effect_id): return Vector2(maxf(modern.x,limit.x*scale),limit.y)
 	return Vector2(limit.x,minf(modern.y,limit.y*scale))
 
 ## Specialization: a society that pours its research into one line works that

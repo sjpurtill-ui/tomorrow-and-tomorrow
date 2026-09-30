@@ -64,10 +64,7 @@ static func research_orders(id:String,plan:Dictionary)->void:
 	# below: nothing they depend on changes before the orders are given.
 	var discovery:=WorldSimulation.discovery
 	discovery.begin_research_scan()
-	for entry:Dictionary in discovery.technology_catalog:
-		var field:=String(entry.dynamic)
-		if viable.has(field):continue
-		if discovery._scan_eligible(entry,today,known):viable[field]=true
+	viable=discovery.viable_fields(today,known)
 	# This ruler chooses its own emphasis through ordinary orders. Do not spend
 	# every point on blocked fields while their cross-field foundations await work.
 	# Player emphasis remains authoritative and is never changed by this controller.
