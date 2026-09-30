@@ -1359,7 +1359,8 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
 	var institutional_capacity:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
-	var education:=preload("res://scripts/civilization_indicators.gd").education_index()
+	# Each people is taught by its own schooling (the one being simulated).
+	var education:=preload("res://scripts/civilization_indicators.gd").education_index(WorldSimulation.state)
 	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.55,1.45,education)
 	# research_3000: a large, literate, well-governed society runs many investigations at once.
 	var parallel:=preload("res://scripts/research_600_catalog.gd").parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))

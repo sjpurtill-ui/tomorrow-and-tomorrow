@@ -188,3 +188,19 @@ func test_the_peoples_tendency_comes_from_the_values_they_live_by()->void:
 	assert_float(float(a.assertiveness)).is_less(float(b.assertiveness))
 	for tendency:Dictionary in [a,b,P.from_values({})]:
 		for axis:String in P.AXES:assert_float(float(tendency[axis])).is_between(.12,.92)
+
+## Each people's research is taught by its own schooling, never the player's:
+## a computer-run people's research support read the player's education.
+func test_a_peoples_research_reads_its_own_education()->void:
+	var players:Dictionary=GameState.society_subcategories.duplicate(true)
+	GameState.society_subcategories={"knowledge":{"Preserved knowledge":0.95,"Communication":0.95}}
+	WorldSimulation.scoped("parity",func()->void:
+		WorldSimulation.state.society_subcategories={"knowledge":{"Preserved knowledge":0.10,"Communication":0.10}}
+		var own:=preload("res://scripts/civilization_indicators.gd").education_index(WorldSimulation.state)
+		var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations
+		var line:String=String(allocations.keys()[0])
+		var sub:String=String((allocations[line] as Dictionary).keys()[0])
+		assert_float(float(WorldSimulation.discovery.research_capacity_for(line,sub).education)).is_equal_approx(own,0.0001)
+		assert_float(own).is_less(0.2)
+	)
+	GameState.society_subcategories=players
