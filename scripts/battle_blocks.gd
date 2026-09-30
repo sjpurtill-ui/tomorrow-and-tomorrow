@@ -106,7 +106,23 @@ const DEPLOY_ORDER:={"spear":3,"pike":3,"sword":3,"axe":3,"club":3,"musket":3,"r
 
 # --- Arms and ages --------------------------------------------------------------
 
-## The arm a formation fights as, for its icon and its words.
+const Ledger:=preload("res://scripts/equipment_ledger.gd")
+const Catalog:=preload("res://scripts/military_unit_catalog.gd")
+
+## The mark a formation is drawn with (battle plates, production icons,
+## roster insignia): its kit's own glyph in the equipment ledger, so a light
+## tank, a howitzer and a combat frame each look like themselves; a known
+## unit with an unknown weapon draws its first catalog kit; anything else
+## draws the arm it fights as. Drawing only: the battle rules keep keying on
+## arm_of.
+static func glyph_of(unit:String,weapon:String="")->String:
+	if weapon!="" and Ledger.has(weapon): return Ledger.glyph(weapon)
+	var kits:Array=Catalog.archetype(unit).get("equipment",[])
+	if not kits.is_empty() and Ledger.has(String(kits[0])): return Ledger.glyph(String(kits[0]))
+	return arm_of(unit,weapon)
+
+
+## The arm a formation fights as, for its words and the battle rules.
 static func arm_of(unit:String,weapon:String="")->String:
 	match unit:
 		"skirmisher","archer","crossbowman","horse_archer": return "bow" if unit!="horse_archer" else "horse"

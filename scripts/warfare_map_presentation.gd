@@ -63,25 +63,22 @@ static func formation_echelon(personnel:int)->int:
 
 
 static func formation_role(army:Dictionary)->String:
-	# The counter glyph reflects the formation's real aggregate composition. Weighted
-	# roles allow scarce high-impact armor or artillery to define how a combined force
-	# is read without drawing a tank, gun, mount, or soldier for every cohort.
-	var weights:Dictionary={"infantry":0.0,"mobile":0.0,"artillery":0.0,"armored":0.0}
-	for formation_variant in (army.get("formations",[]) as Array):
-		var formation:Dictionary=formation_variant
-		var count:=maxf(0.0,float(formation.get("count",0)))
-		var unit:=String(formation.get("unit","levy"))
-		if unit=="armored_formation": weights.armored=float(weights.armored)+count*4.0
-		elif unit in ["motorized_infantry","cavalry"]: weights.mobile=float(weights.mobile)+count*1.65
-		elif unit in ["siege_engineer","field_artillery","modern_artillery"]: weights.artillery=float(weights.artillery)+count*3.25
-		else: weights.infantry=float(weights.infantry)+count
-	var role:="infantry"
-	var highest:=float(weights.infantry)
-	for candidate in ["mobile","artillery","armored"]:
-		if float(weights[candidate])>highest:
-			role=candidate
-			highest=float(weights[candidate])
-	return role
+	# The counter glyph reflects the formation's real aggregate composition, read
+	# from the kits it carries (equipment ledger family, weighted by men and punch):
+	# scarce high-impact armour or guns define how a combined force is read
+	# without drawing a tank, gun, mount, or soldier for every cohort.
+	match formation_branch(army):
+		"armour","autonomous": return "armored"
+		"guns","engineers": return "artillery"
+		"horse","motor": return "mobile"
+	return "infantry"
+
+
+## The staff-map branch a force is drawn with, from its kits (hud/army_marks.gd
+## force_branch): armour, motor, guns, horse, missile, engineers, autonomous
+## or foot.
+static func formation_branch(army:Dictionary)->String:
+	return ArmyMarks.force_branch(army.get("formations",[]) as Array)
 
 
 static func dominant_unit(army:Dictionary)->String:
@@ -98,14 +95,9 @@ static func dominant_unit(army:Dictionary)->String:
 
 static func formation_era(army:Dictionary)->int:
 	# A bounded capability band changes counter finish, never its scene complexity.
-	# 0 pre-gunpowder, 1 gunpowder, 2 industrial, 3 mechanized/modern.
-	var era:=0
-	for formation_variant in (army.get("formations",[]) as Array):
-		var unit:=String((formation_variant as Dictionary).get("unit","levy"))
-		if unit in ["motorized_infantry","armored_formation","modern_artillery"]: era=maxi(era,3)
-		elif unit in ["rifle_infantry","machine_gun_company"]: era=maxi(era,2)
-		elif unit in ["siege_engineer","field_artillery"]: era=maxi(era,1)
-	return era
+	# 0 pre-gunpowder, 1 gunpowder, 2 industrial, 3 mechanized/modern: the latest
+	# ledger year among the kits the force fields in real measure.
+	return ArmyMarks.force_era(army.get("formations",[]) as Array)
 
 
 static func formation_damage_ratio(army:Dictionary)->float:
@@ -416,7 +408,7 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 		# Selection is the gold outer ring, never a temporary change of faction color.
 		# Keeping the counter blue makes ownership stable while orders are being issued.
 		"selected":selected,"moving":moving,"color":PLAYER_COLOR,"selection_color":PLAYER_SELECTED_COLOR,
-		"front_force":army.duplicate(true),"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_unit":dominant_unit(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
+		"front_force":army.duplicate(true),"troops":troops,"echelon":formation_echelon(troops),"formation_role":formation_role(army),"formation_branch":formation_branch(army),"formation_unit":dominant_unit(army),"formation_era":formation_era(army),"readiness":readiness,"readiness_band":readiness_text,"readiness_color":readiness_color(readiness),"supply":supply,"supply_color":supply_color(supply),
 		"order_state":visual_state.order_state,"damage_state":visual_state.damage_state,"damage_ratio":visual_state.damage_ratio,"scatter":visual_state.scatter,"missing_elements":visual_state.missing_elements,"visual_element_budget":visual_state.element_budget,
 		"position":position_data,"destination_id":String(army.get("destination_id","")),"heading":heading,
 		"destination_name":destination,

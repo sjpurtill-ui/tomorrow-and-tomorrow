@@ -584,11 +584,11 @@ func collect()->Dictionary:
 			if days_left>0: entry["days_left"]=days_left
 		if not at_home: entry.merge(_withdrawal(army,pos,home,id==campaign_army))
 		if bool(entry.get("withdrawing",false)): entry.offensive=false
-		# What its mark and card need: its arm, its era, its general, what it is doing.
-		var role:=Presentation.formation_role(army)
+		# What its mark and card need: its arm and era (read from the kits it
+		# carries), its general, what it is doing.
 		var condition:=String(Presentation.formation_visual_state(army).damage_state)
 		var morale:=clampf(float(shown.get("morale",army.get("morale",0.6))),0.0,1.0)
-		entry.merge({"era":Presentation.formation_era(army),"branch":ArmyMarks.branch(role,Presentation.dominant_unit(army) if not (army.get("formations",[]) as Array).is_empty() else ""),
+		entry.merge({"era":Presentation.formation_era(army),"branch":Presentation.formation_branch(army),
 			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":condition,
 			"full":ArmyMarks.full_strength(army),"morale":morale,
 			"doing_context":{"status":String(shown.get("status",army.get("status",""))),"destination_name":String(army.get("destination_name","")),"destination_id":String(army.get("destination_id","")),
@@ -1225,8 +1225,9 @@ static func compose(inputs:Dictionary)->Dictionary:
 	# The tactic's diagram is drawn round the battle's own mark.
 	for clash in out.clashes:
 		if not bool(clash.get("finished",false)) and fought.has(int(clash.get("army_id",0))): clash["pos"]=fought[int(clash.army_id)]
-	# Spears before the lettered ages, swords after.
-	out.era=0 if stage=="hearth" else 1
+	# Each battle crosses its armies' own weapons (battle_marks.weapons_era of
+	# their kits); battles whose kits are unknown take the chart's.
+	out.era=BattleMarks.chart_era(out.battles,stage)
 	for raid in (inputs.get("raids",[]) as Array).slice(0,Model.MAX_CLASHES):
 		var from:Vector2=raid.from; var to:Vector2=raid.to
 		var delta:=to-from

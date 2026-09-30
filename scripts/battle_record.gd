@@ -242,6 +242,7 @@ static func _plates_of(battle:Dictionary,snap:Dictionary,left:String,right:Strin
 			var men:=maxi(0,int(row[0]))
 			var state:=String(Blocks.CODE_STATE[clampi(int(row[2]),0,3)])
 			var plate:={"id":String(block.get("id","")),"arm":String(block.get("arm","spear")),"unit":String(block.get("unit","")),
+				"glyph":Blocks.glyph_of(String(block.get("unit","")),String(block.get("weapon",""))) if String(block.get("unit",""))!="" else String(block.get("arm","spear")),
 				"men":men,"men0":men0,"strength":clampf(float(men)/float(maxi(1,men0)),0.0,1.0),"cohesion":clampf(float(row[1])/100.0,0.0,1.0),
 				"state":state,"state_words":String(STATE_WORDS.get(state,state)),"slot":int(row[3]) if row.size()>3 else -1}
 			if state=="front": front.append(plate)

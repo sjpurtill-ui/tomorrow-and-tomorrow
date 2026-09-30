@@ -3,7 +3,9 @@ extends RefCounted
 ## the war chart.
 ##
 ## A battle is a small crossed-weapons mark standing on the front where the
-## two sides touch (spears before the lettered ages, swords after), with a
+## two sides touch, the weapons those armies carry (by the equipment ledger's
+## year of their kits: crossed spears, swords, muskets, rifles, then the
+## armour sign, then the lattice of drones and robots), with a
 ## two-colour bar in the sides' colours: the split sits at the middle when
 ## neither side gives ground and moves toward whoever is being pushed back.
 ## Beneath it the chart letters where and how long ("Tsaren · day 2"). A
@@ -40,6 +42,43 @@ const SNAP_SIGMA:=0.9
 ## How far along the front a battle heats the worm (share of sigma).
 const HEAT_SIGMA:=0.45
 const STATES:=["marching","holding","besieging","fighting","broken","hungry"]
+## Game years (equipment_ledger "year") at which a battle's mark changes:
+## swords (bronze blades), muskets (powder), rifles, the armour sign, the
+## lattice sign (drones, robots and combat frames).
+const WEAPONS_ERA_YEARS:=[400.0,1800.0,2400.0,2700.0,2975.0]
+
+
+# --- Which weapons a battle crosses -----------------------------------------------------
+
+## The weapons era for a kit year: 0 spears, 1 swords, 2 muskets, 3 rifles,
+## 4 the armour sign, 5 the lattice sign.
+static func weapons_era(year:float)->int:
+	var era:=0
+	for turn in WEAPONS_ERA_YEARS:
+		if year>=float(turn): era+=1
+	return era
+
+
+## The latest kit year either side of a battle fields (hud/army_marks.gd
+## force_year, carried on each side as "year"); -1 when neither is known.
+static func battle_year(battle:Dictionary)->float:
+	var sides:Dictionary=battle.get("sides",{})
+	var year:=-1.0
+	for key in ["a","b"]:
+		var side:Variant=sides.get(key,{})
+		if side is Dictionary: year=maxf(year,float((side as Dictionary).get("year",-1.0)))
+	return year
+
+
+## The chart's own era for battle marks that name no kits: the latest era
+## among the battles that do, else the stage's (spears in the first age,
+## swords after).
+static func chart_era(battles:Array,stage:String)->int:
+	var era:=-1
+	for battle in battles:
+		if battle is Dictionary and (battle as Dictionary).has("era"): era=maxi(era,int(battle.era))
+	if era>=0: return era
+	return 0 if stage=="hearth" else 1
 
 
 # --- Words ------------------------------------------------------------------------------
@@ -167,6 +206,8 @@ static func place(battles:Array,fronts:Array,sigma:float)->Array:
 				battle["vertex"]=int(near.index)+(1 if float(near.t)>0.5 else 0)
 		battle["label"]=label(battle)
 		battle["hover"]=hover_line(battle)
+		var year:=battle_year(battle)
+		if year>=0.0: battle["era"]=weapons_era(year)
 		out.append(battle)
 	return out
 
@@ -231,15 +272,19 @@ static func state_words(state:String)->String:
 
 # --- Drawing (on the overlay's own canvas) -------------------------------------------------
 
-## Crossed spears (before the lettered ages) or crossed swords, r = half size.
-## Both weapons' paper halos are laid first, then both in ink, so the
-## crossing reads as one inked mark.
+## The battle's weapons, r = half size, by weapons era: crossed spears,
+## swords, muskets or rifles (0-3), then the staff map's armour sign (4) and
+## the lattice sign of drones and robots (5). Paper halos are laid first,
+## then the ink, so the mark reads as one.
 static func draw_weapons(canvas:CanvasItem,at:Vector2,r:float,era:int,ink:Color,halo:Color)->void:
 	var w:=maxf(1.8,r*0.2)
 	for pass_index in (2 if halo.a>0.0 else 1):
 		var inking:=pass_index==1 or halo.a<=0.0
 		var colour:=ink if inking else halo
 		var grow:=0.0 if inking else 3.0
+		if era>=4:
+			_draw_sign(canvas,at,r,era,colour,w,grow)
+			continue
 		for side in [-1.0,1.0]:
 			var hilt:=at+Vector2(-0.86*side,0.86)*r
 			var tip:=at+Vector2(0.86*side,-0.86)*r
@@ -251,13 +296,43 @@ static func draw_weapons(canvas:CanvasItem,at:Vector2,r:float,era:int,ink:Color,
 				canvas.draw_line(hilt-along*r*0.12,neck,colour,w*0.9+grow,true)
 				var head:=PackedVector2Array([tip+along*r*(0.1+grow*0.05),neck+across*(r*0.24+grow*0.5),neck-along*(r*0.06+grow*0.5),neck-across*(r*0.24+grow*0.5)])
 				canvas.draw_colored_polygon(head,colour)
-			else:
+			elif era==1:
 				# A sword: blade, cross-guard, grip and pommel.
 				var guard:=hilt+along*r*0.38
 				canvas.draw_line(guard,tip,colour,w+grow,true)
 				canvas.draw_line(guard-across*r*0.34,guard+across*r*0.34,colour,w*0.95+grow,true)
 				canvas.draw_line(hilt+along*r*0.06,guard,colour,w*0.85+grow,true)
 				canvas.draw_circle(hilt,w*0.9+grow*0.5,colour)
+			else:
+				# A long gun: the barrel, a broad stock at the butt, the lock;
+				# a rifle is shorter in the barrel and carries its bayonet.
+				var heel:Vector2=across*float(side)
+				var wrist:=hilt+along*r*0.5
+				var muzzle:=tip if era==2 else tip-along*r*0.34
+				canvas.draw_line(wrist,muzzle,colour,w*0.8+grow,true)
+				var butt:=hilt-along*r*0.1
+				canvas.draw_colored_polygon(PackedVector2Array([wrist+heel*(w*0.45+grow*0.5),butt+heel*(r*0.3+grow*0.5),butt-heel*(r*0.06+grow*0.5),wrist-heel*(w*0.45+grow*0.5)]),colour)
+				var lock:=wrist+along*r*0.14
+				canvas.draw_line(lock,lock-heel*r*(0.2 if era==3 else 0.14),colour,w*0.7+grow,true)
+				if era==3: canvas.draw_line(muzzle,tip,colour,w*0.45+grow,true)
+
+
+## The signs that stand alone on a battle mark: the staff map's armour oval
+## with its gun (era 4) and the lattice of drones and robots (era 5).
+static func _draw_sign(canvas:CanvasItem,at:Vector2,r:float,era:int,colour:Color,w:float,grow:float)->void:
+	var width:=w*0.85+grow
+	if era==4:
+		var hw:=r*0.62; var hh:=r*0.36
+		canvas.draw_line(at+Vector2(-hw,-hh),at+Vector2(hw,-hh),colour,width,true)
+		canvas.draw_line(at+Vector2(-hw,hh),at+Vector2(hw,hh),colour,width,true)
+		canvas.draw_arc(at+Vector2(-hw,0),hh,PI*0.5,PI*1.5,10,colour,width,true)
+		canvas.draw_arc(at+Vector2(hw,0),hh,-PI*0.5,PI*0.5,10,colour,width,true)
+		canvas.draw_line(at+Vector2(hw*0.2,-hh),at+Vector2(r*0.95,-hh-r*0.34),colour,width,true)
+		return
+	var top:=at+Vector2(0,-r*0.9); var right:=at+Vector2(r*0.9,0); var bottom:=at+Vector2(0,r*0.9); var left:=at+Vector2(-r*0.9,0)
+	for edge in [[top,right],[right,bottom],[bottom,left],[left,top],[(top+left)*0.5,(right+bottom)*0.5],[(top+right)*0.5,(left+bottom)*0.5]]:
+		canvas.draw_line(edge[0],edge[1],colour,width*0.85,true)
+	for node in [top,right,bottom,left,at]: canvas.draw_circle(node,w*0.75+grow*0.5,colour)
 
 
 ## The two-colour bar: side a from the left, side b from the right, the
@@ -275,6 +350,8 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,progress:float,a:Color,b:Color
 ## A battle mark at `at`: the crossed weapons over a soft paper ground, the
 ## bar below. Returns the rect it covers (for hits and lettering clearance).
 static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,scale:float=1.0,alpha:float=1.0)->Rect2:
+	# The battle's own weapons when its armies' kits are known; else the chart's.
+	era=int(battle.get("era",era))
 	var sides:Dictionary=battle.get("sides",{})
 	var r:=MARK_RADIUS*scale
 	var seen_before:=int(battle.get("age_days",0))>0

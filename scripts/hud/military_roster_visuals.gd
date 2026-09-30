@@ -3,6 +3,14 @@ extends Node
 const COLORS:={"army":Color("d9b772"),"navy":Color("76bbce"),"air":Color("a9bbec")}
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const Early=preload("res://scripts/hud/early_civ_art.gd")
+const Icons=preload("res://scripts/resource_icons.gd")
+const Catalog=preload("res://scripts/military_unit_catalog.gd")
+const Blocks=preload("res://scripts/battle_blocks.gd")
+## The insignia of a type with no painting: its own mark in iron-gall ink
+## on the one paper every mark is drawn on, a touch of gold for its detail.
+const INSIGNIA_PAPER:=Color(0.95,0.91,0.80)
+const INSIGNIA_INK:=Color("#2b2118")
+const INSIGNIA_ACCENT:=Color("#8a6118")
 const EARLY_UNITS:={
 	"line_infantry":"res://assets/ui/military/paper/line-infantry-v1.png",
 	"levy":"res://assets/ui/military/paper/levy-v1.png",
@@ -54,6 +62,15 @@ static func illustration_path(type_id:String)->String:
 	if Early.active() and EARLY_UNITS.has(type_id):return EARLY_UNITS[type_id]
 	return String(manifest().get(type_id,{}).get("path",""))
 
+## The mark a land unit with no painting wears: the glyph of the first kit
+## the catalog gives it (the same mark its blocks carry in battle), or ""
+## for other services and types the catalog does not know.
+static func insignia_glyph(type_id:String,service:String)->String:
+	if service!="army": return ""
+	var kits:Array=Catalog.archetype(type_id).get("equipment",[])
+	if kits.is_empty(): return ""
+	return Blocks.glyph_of(type_id,String(kits[0]))
+
 static func role_symbol(type_id:String,service:String)->String:
 	if "balloon" in type_id or "airship" in type_id:return "balloon"
 	if service=="navy":return "ship"
@@ -81,13 +98,17 @@ func portrait(type_id:String,service:String,unknown:bool=false)->Control:
 		image.texture=load(path)
 		image.tooltip_text="Painted role illustration. Actual personnel, equipment and training are listed alongside."
 	else:
-		# Unknown legacy types use a neutral role insignia; named catalogue types require their own art.
+		# No painting: a land unit the catalog knows wears its own kit's mark
+		# drawn large on paper; unknown legacy types keep a neutral role insignia.
 		image.texture=null
-		var shade:=ColorRect.new();shade.color=Color(0.025,0.06,0.075,.7);shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var glyph:=insignia_glyph(type_id,service)
+		var shade:=ColorRect.new();shade.color=INSIGNIA_PAPER if glyph!="" else Color(0.025,0.06,0.075,.7);shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		image.add_child(shade);shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		var badge:=TextureRect.new();badge.texture=symbol(role_symbol(type_id,service),COLORS[service])
+		var badge:=TextureRect.new()
+		badge.texture=Icons.arm_texture(glyph,INSIGNIA_INK,INSIGNIA_ACCENT,128) if glyph!="" else symbol(role_symbol(type_id,service),COLORS[service])
 		badge.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;badge.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;image.add_child(badge)
-		badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);badge.offset_left=22;badge.offset_right=-22;badge.offset_top=22;badge.offset_bottom=-22
-		image.tooltip_text="Role insignia. Actual equipment is listed alongside."
+		var inset:=10 if glyph!="" else 22
+		badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);badge.offset_left=inset;badge.offset_right=-inset;badge.offset_top=inset;badge.offset_bottom=-inset
+		image.tooltip_text="Its mark: the arms it carries into battle. Actual equipment is listed alongside." if glyph!="" else "Role insignia. Actual equipment is listed alongside."
 	return image
