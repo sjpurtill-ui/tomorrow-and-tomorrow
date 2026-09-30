@@ -262,3 +262,15 @@ func test_the_line_in_deep_winter_is_forecast()->void:
 	assert_float(float(winter.cold)).is_greater(0.0)
 	assert_int(int(winter.in_days)).is_greater(0)
 	assert_float(float(winter.ratio)).is_less_equal(float(report.ratio))
+
+func test_the_research_cards_say_what_they_do_for_the_army()->void:
+	var Notes:=preload("res://scripts/military_research_notes.gd")
+	assert_str(Notes.note("forward_supply_depots")).contains("2 at once")
+	assert_str(Notes.note("army_supply_magazines")).contains("4 field depots instead of 2")
+	assert_str(Notes.note("horse_freight_wagons")).contains("700 loads instead of 250")
+	assert_str(Notes.note("motor_freight_lorries")).contains("2,000 loads each")
+	assert_str(Notes.note("collaborative_robots")).contains("combat frames")
+	assert_str(Notes.note("an_unknown_idea")).is_equal("")
+	# The card itself carries it.
+	var entry:Dictionary={"id":"forward_supply_depots","effects":{}}
+	assert_str(DiscoverySystem._discovery_effect_summary(entry)).contains("field depots")

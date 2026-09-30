@@ -646,3 +646,12 @@ with machine accounting; (7) recruitment fixes and template numbers.
     and no more sets are drawn than the men can work.
   - Not taken: odds against a sighted host (their numbers are a range, not
     a count), and the held-town wording when a band stands in the town.
+- **Iteration 17, research cards speak for the army.** Each research card
+  now ends with what the research does for the army, in the engine's own
+  numbers (`military_research_notes.gd`, one hook in
+  `discovery_system._discovery_effect_summary`):
+  - the depot research gives the number of depots and what they do;
+  - horse wagons: 700 loads instead of 250;
+  - lorries: 2,000 loads each at 150 km a day;
+  - every kit the workshops can then make and every unit we can then
+    raise, from the equipment gates and the unit catalogue.
