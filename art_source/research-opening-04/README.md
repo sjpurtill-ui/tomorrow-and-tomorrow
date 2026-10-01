@@ -41,6 +41,9 @@ in the European record; it does not establish a specific ember vessel.
 Fresh worktree's initial Godot import exited -1073741819. Its log and separate
 retry are retained locally. This is isolated test infrastructure evidence;
 it does not diagnose the user's earlier Codex chat crashes.
+The first retry exited 0 but logged transient dependency compile errors;
+the later incremental checkpoint import and runtime were clean. Exit status
+alone was not treated as compilation success.
 
 First validated checkpoint: Alarm Relay Signals, Council Messenger Duty and
 Dawn Task Briefings. All three originals and 3.77:1 crops inspected. Retry
@@ -49,3 +52,27 @@ exit 0, PASS count=3. Final capture disables project viewport scaling in the
 test window so card review uses its intended pixel dimensions. Captured
 cards inspected; no errors in final import/runtime/GPU logs. No gameplay,
 save or research progression changes. Generated import churn excluded.
+
+Material research for timber selection: Leder et al. (2024), primary study
+of Schoningen wooden artifacts: https://pubmed.ncbi.nlm.nih.gov/38557183/
+and Milks et al. (2023), analysis of a wooden throwing stick:
+https://pubmed.ncbi.nlm.nih.gov/37467169/
+The latter reports selection of a spruce branch, debarking and shaping;
+seasoning is the authors' inference. For this game's earlier timber-grading
+scene, contrasting straight, knotty and decayed natural wood makes selection
+visible. That is an artistic interpretation, not a reconstruction of the
+specific throwing stick or permission to introduce later saw-cut stock.
+PubMed page opens for these two wood studies were blocked/empty; the 2023
+paper's primary publisher page and abstract were successfully read:
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0287719
+
+Second validated checkpoint adds Named Descent Lines, Sickness Pattern Memory
+and Ember Tending. Full originals and narrow crops reviewed; ember composition
+was compacted with a targeted edit before acceptance. Initial source/prompt
+retained, final original only bound. Clean import, headless and private GPU
+PASS count=6, exit 0, no logged errors, captured game cards inspected.
+
+Shared research_visuals.gd focus support matches the pending PR #25 changes:
+optional art_600 focus, and opening_focus only for identical assigned paths.
+Integration should preserve that identical behavior and PR #25's separate
+ecology-overview change. Probe checks legacy art600 and first300 defaults.

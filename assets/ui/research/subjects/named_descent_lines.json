@@ -2,11 +2,16 @@
   "id": "named_descent_lines",
   "line": "demography",
   "game_year": 3,
-  "approx_historical_year": -4980,
-  "prompt": "c. 4980 BCE: an elder orally names how three generations are related, pointing from grandparent to parent to child. Mature chalk pastel and torn-paper collage, flat angular terracotta, rust and ivory shapes; early Neolithic wraps, no lineage diagram or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e5b98587-1552-4306-b53c-02ebfa3737f0.png",
-  "asset": "res://assets/ui/research/subjects/named_descent_lines-v1.png",
-  "sha256": "fa854f48d814527588be3328bedc9aa117f241f12dd9467f9350901ef5d2c2c9",
-  "mode": "built-in image_gen / new image",
-  "review": "Third generation selected; upper crop focus preserves heads and pointing gestures. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3457b130-f402-487e-be95-6e4fcc4bb339.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/named_descent_lines-v1.png",
+  "prompt": "Edit this Named Descent Lines painting for game year 3, preserving mature terracotta/ivory/slate chalk pastel and cut-paper collage, angular flat adult silhouettes and elder recounting kin connections to younger generations by hand gesture. Replace ALL woven linen-like garments, robes, tunics and head cloths with irregular ragged unstitched animal-hide wraps, natural uneven edges and coarse hide texture, no fabric folds or woven trim. The elder's white head covering becomes uncovered gray hair, the child is modestly hide-clad. Remove dark ceramic pot at far left entirely, leave natural rocks and loose twigs. Remove the neat vertical wall ribs at far left and regular shelter roof: only a low irregular hide windbreak loosely on crooked branches if needed. Keep faces, shared attention and elder's pointing/open-hand explanation in central horizontal band for 3.77:1 card crop. No genealogy diagram, text, symbols, baskets, pottery, metal, finished architecture, photorealism, volumetric painting or cute faces. Preserve the intimate multigeneration scene and exact handmade medium.",
+  "review": "Full original inspected: elder with uncovered gray hair recounts kin connections by pointing/open-hand gesture to parent, child and adult listener. Ragged unstitched hide wraps replace woven robes; ceramic pot and regular shelter ribs removed. Mature flat terracotta/ivory cut-paper and chalk-pigment rendering preserved. Full original and 3.77:1 crop inspected; all four faces, elder gestures and child remain visible.",
+  "asset": "res://assets/ui/research/subjects/named_descent_lines-v2.png",
+  "sha256": "b83316f2946a5fef9c7410b4cb286ac2db074ac9d70a45f190dccfd30b23c1d9",
+  "mode": "built-in image_gen / edit"
 }

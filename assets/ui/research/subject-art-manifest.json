@@ -3677,8 +3677,8 @@
   "hazard_landmark_memory": {"path": "res://assets/ui/research/subjects/hazard_landmark_memory-v1.png", "focus": [0.5, 0.5]},
   "labor_position_customs": {"path": "res://assets/ui/research/subjects/labor_position_customs-v1.png", "focus": [0.5, 0.5]},
   "landmark_route_naming": {"path": "res://assets/ui/research/subjects/landmark_route_naming-v1.png", "focus": [0.5, 0.5]},
-  "named_descent_lines": {"path": "res://assets/ui/research/subjects/named_descent_lines-v1.png", "focus": [0.5, 0.4]},
-  "sickness_pattern_memory": {"path": "res://assets/ui/research/subjects/sickness_pattern_memory-v1.png", "focus": [0.5, 0.4]},
+  "named_descent_lines": {"path": "res://assets/ui/research/subjects/named_descent_lines-v2.png", "focus": [0.5, 0.5]},
+  "sickness_pattern_memory": {"path": "res://assets/ui/research/subjects/sickness_pattern_memory-v2.png", "focus": [0.5, 0.45]},
   "aptitude_trials": {"path": "res://assets/ui/research/subjects/aptitude_trials-v1.png", "focus": [0.5, 0.5]},
   "dawn_readiness_drill": {"path": "res://assets/ui/research/subjects/dawn_readiness_drill-v1.png", "focus": [0.5, 0.4]},
   "dissenting_voice_custom": {"path": "res://assets/ui/research/subjects/dissenting_voice_custom-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4239,6 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "ember_tending": {"path": "res://assets/ui/research/subjects/ember_tending-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }

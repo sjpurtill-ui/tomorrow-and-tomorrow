@@ -4,6 +4,9 @@ func _ready()->void:
 	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_StylizedArt_Test"))
 	GameState.civic_api_enabled=false
 	DiscoverySystem.initialize()
+	GameState.elapsed_days=3.0*365.0
+	assert(Art.focus_for({"id":"agreed_signal_codes"}).is_equal_approx(Vector2(.5,.5)))
+	assert(Art.focus_for({"id":"nut_kernel_shelling"}).is_equal_approx(Vector2(.5,.72)))
 	var rows:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-04/selected.json"))
 	assert(not rows.is_empty())
 	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(18,18);add_child(grid)
