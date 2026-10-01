@@ -144,11 +144,16 @@ func recovery_day(force:Dictionary,span:float)->int:
 
 ## Morale regained a day at rest in full supply (camped; a third of it on the
 ## march). A band recovers toward a ceiling its supply sets: a fed band to
-## full heart, a half-supplied one only part way. A hungry band loses heart.
+## full heart, a half-supplied one only part way. A hungry band loses heart:
+## its will wears down toward MORALE_HUNGER_FLOOR, below the one break line
+## (a quarter, army_lines.gd), so a band starved long enough breaks and the
+## war leader brings it back to be fed (band_upkeep.gd). One already lower,
+## beaten in a fight, regains a little toward that floor instead of staying
+## where the fight left it.
 const MORALE_REST:=0.03
 const MORALE_MARCHING:=0.33
 const MORALE_HUNGER_LOSS:=0.008
-const MORALE_HUNGER_FLOOR:=0.30
+const MORALE_HUNGER_FLOOR:=preload("res://scripts/army_lines.gd").BREAK*0.6
 ## Battle wounded who rejoin a day in full supply (twice with a medical
 ## detachment in the band); the disabled stay in the pool until home.
 const WOUNDED_RETURN:=0.015
@@ -162,7 +167,7 @@ func rest_day(force:Dictionary,span:float)->Dictionary:
 	var morale:=float(force.get("morale",1.0))
 	var before:=morale
 	if Rations.is_hungry(force):
-		morale=maxf(minf(morale,MORALE_HUNGER_FLOOR),morale-MORALE_HUNGER_LOSS*span)
+		morale=move_toward(morale,MORALE_HUNGER_FLOOR,MORALE_HUNGER_LOSS*span)
 	else:
 		var pace:=MORALE_REST*(MORALE_MARCHING if String(force.get("status","stationed")) in ["moving","turning_back"] else 1.0)
 		var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.5)) if force.get("commander") is Dictionary else 0.5,0.0,1.0)

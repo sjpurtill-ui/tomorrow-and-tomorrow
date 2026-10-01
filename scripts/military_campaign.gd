@@ -27,8 +27,9 @@ const RUNNER_INTERVAL_DAYS:=5
 const RUNNER_SPEED_KM_DAY:=30.0
 const RUNNERS_PER_ARMY:=2
 const MAP_ENGAGEMENT_RANGE_KM:=6.0
-## Morale at or below which a side is broken (combat_simulator.gd _outcome).
-const MORALE_BREAK:=0.15
+## The one break line (army_lines.gd): a side breaks when its will falls
+## below a quarter (combat_simulator.gd _outcome reads the same).
+const MORALE_BREAK:=preload("res://scripts/army_lines.gd").BREAK
 const ABSOLUTE_MAX_PRODUCTION_LINES:=12
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const FORTIFIED_STORES_MAX_PROTECTION:=0.60
@@ -2763,7 +2764,7 @@ func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	# victory with nothing lost, day after day, against the same beaten band.
 	# Field contacts only: an undefended town still falls through its battle.
 	var foe:Dictionary=threat.get("enemy_force",{})
-	if offensive and bool(threat.get("field_encounter",false)) and (int(foe.get("troops",0))<=0 or float(foe.get("morale",1.0))<=MORALE_BREAK):
+	if offensive and bool(threat.get("field_encounter",false)) and (int(foe.get("troops",0))<=0 or float(foe.get("morale",1.0))<MORALE_BREAK):
 		active_threat.clear(); threat_changed.emit({})
 		return {"error":"Their band is already broken and scattering; there is nobody left there to fight.","nobody_to_fight":true}
 	var attacker:Dictionary=home_force if offensive else threat.enemy_force.duplicate(true)
