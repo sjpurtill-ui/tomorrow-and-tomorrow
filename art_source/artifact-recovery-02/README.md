@@ -58,9 +58,29 @@ shortened it before approval. Both exact requests and source paths are retained
 in reviewed.json. Recovered originals retain their hashes and prior sources;
 their invocation prompts remain explicitly unknown.
 
+Old-image hold 1252: the image shows a pointed flint laid across a fork, but
+does not clearly communicate a reversed broken point used through its fresh
+scraper edge or rough resin retention. Preserve it unapproved for revision.
+Old-image hold 1305: the antler rests against a large cobble rather than a clear
+thick flint edge; the two detached chips are missing. Preserve it for revision.
+
 Clean incremental import, headless runtime and private GPU review PASS count=13.
 The GPU startup again failed before initialization with native exit 3221226505;
 the separate retry exited 0 and its capture was visually inspected. The probe
 validates all reviewed records but displays only the newest twelve at once to
 keep its capture legible as this continuous batch grows. Audit: 1,324 approved,
 10 generated awaiting review, 2,762 pending, no errors. Production continues.
+
+Final artifact handoff: twelve new originals 1315–1326 and nine individually
+recovered approvals 1019, 1098, 1182, 1185, 1186, 1188, 1193, 1286 and 1287.
+All fifteen older generated images were inspected; six remain held (1012,
+1091, 1129, 1131, 1252, 1305) for the specific issues documented above.
+Import, headless runtime and private GPU capture PASS count=21 with no final
+logged errors; latest twelve thumbnails were visually inspected. Bank audit:
+1,332 approved, 6 generated, 2,758 pending, no errors. Counts exclude PR #11.
+
+No save or simulation changes. Shared integration files are the prehistoric
+manifest and approved image index; merge these entry changes deliberately with
+PR #11's reserved 1313–1314. Runtime import limits are 512 pixels while original
+PNGs remain intact. Captures, caches and the isolated user-directory override
+are excluded from delivery. Only the designated integrator updates main.
