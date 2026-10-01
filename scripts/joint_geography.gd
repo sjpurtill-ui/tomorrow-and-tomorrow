@@ -3,6 +3,8 @@ extends RefCounted
 ## Routes are computed on orders and daily search steps, never per frame.
 var land_query:Callable
 var route_cache:Dictionary={}
+## sea_point answers by area and starting place (see sea_point).
+var point_cache:Dictionary={}
 
 func is_land(location:Vector2)->bool:
 	if land_query.is_valid():return bool(land_query.call(location))
@@ -62,6 +64,16 @@ func _result(points:Array,key:String)->Dictionary:
 	return result
 
 func sea_point(region:Dictionary,from:Vector2)->Dictionary:
+	# The same area asked from the same place has the same nearest water: a
+	# ruler's monthly review asks it once for every ship in a harbour.
+	var key:=[WorldSimulation.state.world_seed,region.get("vertices",[]),region.get("position",{}),from]
+	if point_cache.has(key):return (point_cache[key] as Dictionary).duplicate(true)
+	var found:=_sea_point(region,from)
+	if point_cache.size()>=256:point_cache.clear()
+	point_cache[key.duplicate(true)]=found.duplicate(true)
+	return found
+
+func _sea_point(region:Dictionary,from:Vector2)->Dictionary:
 	# Keep geography independent of the region helper to avoid preload cycles.
 	var points:=PackedVector2Array()
 	for vertex:Dictionary in region.get("vertices",[]):points.append(unpack(vertex))

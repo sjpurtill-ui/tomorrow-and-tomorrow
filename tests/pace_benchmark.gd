@@ -10,6 +10,7 @@ extends Node
 ## --save-out writes the world after the run to res://artifacts/pace_NAME.save
 ## and reports its size; --compare=NAME compares the world after the run with
 ## an earlier --save-out (the same world must come out of the same days).
+## --frames runs the game's own scene and frame loop instead (see _frames).
 class Snapshot extends "res://scripts/save_system.gd":
 	var fixture:=""
 	func slot_path(slot:String)->String:
@@ -46,6 +47,9 @@ func run()->void:
 	GameState.civic_api_enabled=false
 	for id in WorldSimulation.actors:WorldSimulation.actors[id].systems.GameState.civic_api_enabled=false
 	if _arg("span","")!="":WorldSimulation.span_limit=maxi(1,int(_arg("span","3")))
+	if "--frames" in args:
+		await _frames(load_ms)
+		return
 	var terrain:=Terrain.new();add_child(terrain)
 	terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise()
 	terrain._prepare_river_course()
@@ -87,6 +91,15 @@ func run()->void:
 		day_ms.append(ms)
 		print("PACE_DAY ",day," ",snappedf(ms,.1))
 		if i<warm:continue
+		if ms>=float(_arg("explain-over","400")):
+			var by_step:Dictionary={}
+			for record:Dictionary in records:
+				var key:="%s:%s" % [String(record.owner),String(record.label)]
+				by_step[key]=snappedf(float(by_step.get(key,0.0))+int(record.usec)/1000.0,.1)
+			var heavy:Dictionary={}
+			for key:String in by_step:
+				if float(by_step[key])>=10.0:heavy[key]=by_step[key]
+			print("PACE_HEAVY_DAY ",day," ",snappedf(ms,.1)," ",JSON.stringify(_sorted_desc(heavy)))
 		for record:Dictionary in records:
 			var owner:=String(record.owner)
 			var usec:=int(record.usec)
@@ -119,7 +132,7 @@ func run()->void:
 	if not warm_steps.is_empty():
 		report["steps"]={"count_per_day":float(warm_steps.size())/warm_days,"p50_ms":warm_steps[warm_steps.size()/2]/1000.0,"p95_ms":warm_steps[int(warm_steps.size()*.95)]/1000.0,"p99_ms":warm_steps[int(warm_steps.size()*.99)]/1000.0,"max_ms":warm_steps[-1]/1000.0,"over_16ms":_count_over(warm_steps,16000),"over_33ms":_count_over(warm_steps,33000)}
 	slowest.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.ms)>float(b.ms))
-	report["slowest_steps"]=slowest.slice(0,25)
+	report["slowest_steps"]=slowest.slice(0,int(_arg("slowest","25")))
 	if trace.enabled:
 		var traced:Dictionary={}
 		for key:String in trace.totals:traced[key]=snappedf(float(trace.totals[key].microseconds)/1000.0/warm_days,.01)
@@ -151,6 +164,57 @@ func run()->void:
 	if out:out.store_string(JSON.stringify(report,"  "));out.close()
 	print("PACE_DONE ",json_path)
 	terrain.free();WorldSimulation.clear();get_tree().quit(0)
+
+## --frames: the game's own terrain scene at a chosen speed (default 5), its
+## frame loop scheduling the days, for [--seconds=60] after the map settles.
+## --render-cost=MS stands in for drawing (headless draws nothing). Prints
+## the same PERF line the player's log carries, plus the frame phases.
+func _frames(load_ms:float)->void:
+	var began:=Time.get_ticks_usec()
+	var terrain=load("res://local_terrain.tscn").instantiate();add_child(terrain)
+	for node in get_tree().root.get_children():
+		if node!=self and node!=terrain:node.set_process(false);node.set_physics_process(false)
+	await get_tree().process_frame
+	var settle_began:=Time.get_ticks_msec()
+	var idle:=0
+	while idle<30 and Time.get_ticks_msec()-settle_began<60000:
+		await get_tree().process_frame
+		idle=idle+1 if terrain.terrain_patch_job==null else 0
+	print("PACE_SCENE_READY_MS ",(Time.get_ticks_usec()-began)/1000," load_ms ",roundi(load_ms))
+	var render_usec:=int(float(_arg("render-cost","14"))*1000.0)
+	var seconds:=float(_arg("seconds","60"))
+	var trace=preload("res://scripts/performance_trace.gd")
+	trace.enabled=true;trace.totals.clear()
+	var meter=preload("res://scripts/perf_meter.gd")
+	terrain._set_game_speed(float(_arg("speed","5")))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var start_day:=float(GameState.elapsed_days)
+	var start:=Time.get_ticks_usec()
+	var frames:=PackedFloat32Array()
+	var last:=start
+	while Time.get_ticks_usec()-start<int(seconds*1000000.0):
+		await get_tree().process_frame
+		if render_usec>0:OS.delay_usec(render_usec)
+		var now:=Time.get_ticks_usec()
+		frames.append((now-last)/1000.0)
+		last=now
+	var elapsed:=(last-start)/1000000.0
+	print("PACE_PERF ",meter.line(last))
+	var sorted:=frames.duplicate();sorted.sort()
+	var phases:Dictionary={}
+	for key:String in trace.totals:phases[key]=snappedf(float(trace.totals[key].microseconds)/1000.0/maxf(.001,elapsed),.1)
+	var report:={"seconds":elapsed,"days":float(GameState.elapsed_days)-start_day,"days_per_s":(float(GameState.elapsed_days)-start_day)/maxf(.001,elapsed),"fps":frames.size()/maxf(.001,elapsed),"p50_ms":sorted[sorted.size()/2],"p95_ms":sorted[int(sorted.size()*.95)],"max_ms":sorted[-1],"over_50ms":Array(sorted).filter(func(v:float)->bool:return v>50.0).size(),"render_cost_ms":render_usec/1000.0,"phase_ms_per_s":_sorted_desc(phases)}
+	var slow:Array=preload("res://scripts/day_job.gd").slow_steps.duplicate()
+	slow.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.usec)>int(b.usec))
+	report["slow_steps"]=slow.slice(0,30)
+	report["slow_step_count"]=slow.size()
+	print("PACE_FRAMES ",JSON.stringify(report))
+	var out:=FileAccess.open(_arg("json","res://artifacts/pace_frames.json"),FileAccess.WRITE)
+	if out:out.store_string(JSON.stringify(report.merged({"frames_ms":frames}),"  "));out.close()
+	terrain._set_game_speed(0)
+	WorldSimulation.flush_day()
+	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0)
 
 ## Why each rival steps as often as it does (world_simulation.gd _span_waits).
 func _census()->void:
