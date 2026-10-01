@@ -216,6 +216,8 @@ func refresh()->void:
 		var record:Dictionary={}
 		if bool(source.foreign):record=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
 		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
+		# A town of ours wears our nation's name once it has one (nation_name.gd).
+		if not bool(source.foreign) and kind=="city":affiliation=String(GameState.nation_name).strip_edges()
 		# Who holds it, in words, and our guard there (scripts/map_ownership.gd).
 		var ownership:Dictionary=label.get_meta("map_ownership",{})
 		if not String(ownership.get("line","")).is_empty():affiliation=String(ownership.line)

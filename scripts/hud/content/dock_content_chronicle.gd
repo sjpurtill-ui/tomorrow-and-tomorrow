@@ -9,7 +9,9 @@ const Years:=preload("res://scripts/hud/chronicle_year_model.gd")
 
 func meta()->Dictionary:
 	var voice:=Chronicle.voice()
-	return {"eyebrow":"THE STORY OF THE PEOPLE","title":String(voice.feed),"subtabs":[]}
+	# Our nation's name once given: "THE STORY OF THE REEDFOLK" (nation_name.gd).
+	var nation:=preload("res://scripts/nation_name.gd").in_sentence()
+	return {"eyebrow":"THE STORY OF %s" % (nation.to_upper() if nation!="" else "THE PEOPLE"),"title":String(voice.feed),"subtabs":[]}
 
 func tab(_sub:int)->Dictionary:
 	var today:=int(GameState.elapsed_days)

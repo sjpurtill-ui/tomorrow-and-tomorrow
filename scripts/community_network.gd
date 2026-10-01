@@ -19,7 +19,9 @@ func reset_for_new_world()->void:
 	active=""; progress=0; completed.clear(); history.clear(); last_day=0; world_seed=-999999
 	if is_instance_valid(panel): panel.queue_free()
 func nodes()->Array[Dictionary]:
-	var result:Array[Dictionary]=[{"id":"player","name":WorldSimulation.state.settlement_name if WorldSimulation.state.settlement_name!="" else "Your people","treaty":"home","war":false}]
+	# Our node: the nation's name once given (nation_name.gd), else the home town's.
+	var ours:=WorldSimulation.state.nation_name.strip_edges() if WorldSimulation.state.nation_name.strip_edges()!="" else WorldSimulation.state.settlement_name
+	var result:Array[Dictionary]=[{"id":"player","name":ours if ours!="" else "Your people","treaty":"home","war":false}]
 	for known:Dictionary in WorldSimulation.world.known_competition_snapshot().get("leaders",[]):
 		if String(known.get("id",""))=="player": continue
 		var relation:Dictionary=known.get("player_relation",{})

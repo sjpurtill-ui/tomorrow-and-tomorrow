@@ -308,6 +308,8 @@ var settlement_name_input: LineEdit
 var settlement_name_confirm: Button
 var naming_previous_speed := 0.0
 var settlement_naming_target_id:=""
+## The naming card's "And our nation" line at a town's founding (hud/nation_name_card.gd).
+var nation_name_input: LineEdit
 var suppress_naming_prompt := false
 var map_help_button:Button
 var map_help_panel:PanelContainer
@@ -12007,6 +12009,9 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		stamp=trace.mark("found_camera",stamp)
 		# A new hearth is told in the Chronicle and shown on the map; the dock
 		# does not open by itself over it.
+		# Our second town (or a later one) while the nation has no name: its
+		# naming card also asks for the nation's (nation_name.gd).
+		if preload("res://scripts/nation_name.gd").ask_at_founding():_open_settlement_naming_panel.call_deferred(String(settlement.get("id","")),true)
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -12825,7 +12830,7 @@ func _screen_direction_arrow(delta:Vector2)->String:
 	var arrows:=["→","↘","↓","↙","←","↖","↑","↗"]
 	return arrows[wrapi(roundi(angle/(PI/4.0)),0,8)]
 
-func _open_settlement_naming_panel(settlement_id:String="") -> void:
+func _open_settlement_naming_panel(settlement_id:String="",with_nation:bool=false) -> void:
 	if not GameState.settlement_site_committed:
 		if travel_status_label:
 			travel_status_label.text="Found the first settlement before you name it."
@@ -12859,12 +12864,17 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 		fire.later_button.pressed.connect(_dismiss_settlement_naming_panel)
 		return
 	# A paper card over the dimmed map (paper_kit.gd): the name, Not now, Rename.
+	# A town just founded while our nation has no name: the nation's name too.
+	var nation_card:=preload("res://scripts/hud/nation_name_card.gd")
+	var founding:=with_nation and preload("res://scripts/nation_name.gd").ask_at_founding()
 	var parts:=PaperKit.modal(interface_layer,520.0,HudT.GOLD,"RenameSettlement")
 	settlement_naming_panel=parts[0]
 	var column:VBoxContainer=parts[1]
-	PaperKit.label(column,"Rename","kicker")
-	PaperKit.label(column,"A new name for %s" % String(target.get("name","this settlement")),"title")
-	PaperKit.label(column,"The name shows on the map, in the Chronicle and in what our people say.","body").custom_minimum_size.x=460
+	if founding: nation_card.founding_heading(column,String(target.get("name","this settlement")))
+	else:
+		PaperKit.label(column,"Rename","kicker")
+		PaperKit.label(column,"A new name for %s" % String(target.get("name","this settlement")),"title")
+		PaperKit.label(column,"The name shows on the map, in the Chronicle and in what our people say.","body").custom_minimum_size.x=460
 	settlement_name_input=LineEdit.new()
 	settlement_name_input.placeholder_text="The new name"
 	settlement_name_input.max_length=32
@@ -12874,12 +12884,15 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	settlement_name_input.text_changed.connect(_on_settlement_name_changed)
 	settlement_name_input.text_submitted.connect(_on_settlement_name_submitted)
 	column.add_child(settlement_name_input)
+	if founding:
+		settlement_name_input.set_meta("founded_as",String(target.get("name","")))
+		nation_name_input=nation_card.add_field(column)
 	var footer:=HBoxContainer.new()
 	footer.alignment=BoxContainer.ALIGNMENT_END
 	footer.add_theme_constant_override("separation",10)
 	column.add_child(footer)
 	PaperKit.button(footer,"Not now",false,_dismiss_settlement_naming_panel)
-	settlement_name_confirm=PaperKit.button(footer,"Rename",true,_commit_settlement_name)
+	settlement_name_confirm=PaperKit.button(footer,"Name them" if founding else "Rename",true,_commit_settlement_name)
 	settlement_name_confirm.disabled=settlement_name_input.text.strip_edges()==""
 	settlement_name_input.grab_focus.call_deferred()
 
@@ -12906,6 +12919,16 @@ func _commit_settlement_name() -> void:
 		if travel_status_label: travel_status_label.text=PaperKit.sentence(String(result.get("reason","That name could not be given")))
 		return
 	var final_name:=String(result.get("name",chosen))
+	if nation_name_input!=null:
+		# A town's founding card: the nation is named when its line holds a name
+		# (a refusal stays on the card); the town is told only if renamed.
+		var told:Dictionary=preload("res://scripts/hud/nation_name_card.gd").commit_founding(nation_name_input,final_name)
+		if not told.is_empty() and not bool(told.get("ok",false)): return
+		if final_name==String(settlement_name_input.get_meta("founded_as","")):
+			if travel_status_label and not told.is_empty(): travel_status_label.text=String(told.get("line",""))
+			_update_time_interface()
+			_dismiss_settlement_naming_panel()
+			return
 	var description:="The selected settlement is now known as %s." % final_name
 	if settlement_naming_panel and settlement_naming_panel.has_method("named_line"):
 		description="%s At the first fire the people named their home %s." % [String(settlement_naming_panel.named_line(final_name)),final_name]
@@ -12923,6 +12946,7 @@ func _dismiss_settlement_naming_panel() -> void:
 		settlement_naming_panel=null
 	settlement_name_input=null
 	settlement_name_confirm=null
+	nation_name_input=null
 	settlement_naming_target_id=""
 	_set_game_speed(naming_previous_speed)
 

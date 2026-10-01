@@ -144,6 +144,8 @@ static func _standing(out:Dictionary)->void:
 static func _common(out:Dictionary)->void:
 	var state:Variant=WorldSimulation.state
 	out["home"]=String(state.settlement_name) if state!=null else ""
+	# What all our towns together are called, once named (nation_name.gd).
+	if state!=null and String(state.nation_name).strip_edges()!="": out["nation"]=String(state.nation_name).strip_edges()
 	out["home_people"]=int(state.population_total) if state!=null else 0
 	var wars:Array=[]
 	var feuds:Array=[]
@@ -680,6 +682,7 @@ static func hands()->Array:
 static func text(s:Dictionary)->String:
 	var lines:PackedStringArray=PackedStringArray()
 	lines.append("Today: %s. Home: %s, %d people." % [String(s.get("when","")),String(s.get("home","")),int(s.get("home_people",0))])
+	if String(s.get("nation",""))!="": lines.append("Our nation, all our towns together, is called %s." % String(s.nation))
 	var hands_said:Array=s.get("hands",[])
 	if not hands_said.is_empty(): lines.append("What the council's hands are worth, against an ordinary holder: %s." % "; ".join(PackedStringArray(hands_said)))
 	var wars:Array=s.get("at_war_with",[])

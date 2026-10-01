@@ -33,6 +33,8 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const NationName:=preload("res://scripts/nation_name.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 static func _re(pattern:String)->RegEx:
 	var re:=RegEx.new(); re.compile(pattern)
@@ -592,3 +594,83 @@ static func perform_rename(id:String,r:Dictionary,reading:Dictionary)->Dictionar
 	r.outcome="From today %s is called %s. The name is cried at every hearth, and the court will use no other." % [String(reading.get("old","our home")),String(done.get("name",reading.name))]
 	preload("res://scripts/chronicle.gd").record({"key":"rename:%s:%d" % [String(primary.get("id","")),Hall._day()],"title":"A New Name: %s" % String(done.get("name","")),"text":"By the god's word, %s is called %s from this day." % [String(reading.get("old","our home")),String(done.get("name",""))],"tier":"moment","kind":"milestone","domain":"culture","ledger":true})
 	return r
+
+# --------------------------------------------------------------------------
+# Our nation's name (nation_name.gd)
+# --------------------------------------------------------------------------
+
+## All our towns together, as the god says it: "our people", "our folk",
+## "our tribe", or "our", "the" or "this" for a realm ("the nation").
+const NATION_WHOLE:="(?:(?:our|my)\\s+(?:people|folk|tribe|clan|kin|land|nation|realm|kingdom|country|state)|(?:the|this)\\s+(?:nation|realm|kingdom|country|state))"
+## "Kishan, ..." or "From now on, ..." before the words (a harsh act there is
+## no name for anyone: nation() refuses it).
+const NATION_LEAD:="(?:(?<voc>[\\w' ]{1,40}),\\s*)?(?:(?:from\\s+(?:now|today|this\\s+day)(?:\\s+on(?:ward)?)?|henceforth|hereafter)\\s*,?\\s+)?"
+const NATION_TAIL:="(?:\\s*,?\\s+(?:from\\s+(?:now|today|this\\s+day)(?:\\s+on(?:ward)?)?|henceforth|hereafter|forever|for all time))?"
+const NATION_PATTERNS:=[
+	# "call our nation the Reedfolk", "name our realm Ashmark", "I name our people X", "rename the nation to X"
+	"(?i)^{lead}(?:(?:i|we)\\s+(?:(?:shall|will)\\s+)?)?(?:(?:call|name|dub)\\s+{whole}|rename\\s+{whole}(?:\\s+(?:to|as|into))?)\\s+{name}{tail}$",
+	# "our people shall be called X", "let our nation be known as X", "the realm is to be named X"
+	"(?i)^{lead}(?:let\\s+)?{whole}\\s+(?:(?:shall|will|must|is\\s+to|are\\s+to)\\s+)?(?:now\\s+)?be\\s+(?:called|named|known\\s+as)\\s+{name}{tail}$",
+	# "our nation is now called X", "our people are named X"
+	"(?i)^{lead}{whole}\\s+(?:is|are)\\s+(?:now\\s+)?(?:called|named|known\\s+as)\\s+{name}{tail}$",
+	# "the name of our nation is X", "our people's name shall be X"
+	"(?i)^{lead}(?:the\\s+name\\s+of\\s+{whole}|{whole}'s\\s+name)\\s+(?:is|shall\\s+be|will\\s+be)\\s+(?:now\\s+)?{name}{tail}$",
+	# "we shall be known as the Reedfolk", "let us be called X", "from now on we are called X"
+	"(?i)^{lead}(?:let\\s+us\\s+be|we\\s+(?:are|shall\\s+be|will\\s+be))\\s+(?:now\\s+)?(?:called|named|known\\s+as)\\s+{name}{tail}$",
+]
+## A "name" that is no name: "call our people to the fire", "...home".
+const NATION_NOT_A_NAME:=["to","in","into","at","for","from","with","back","home","out","up","down","together","here","there","now","again","forth","away","off","on","upon","before","after","and","or","so","if","when","because","by","a","an","our","my","your","their","his","her","its","them","him","us","me","you","it","that","this","these","those","what","who","whom","which","something","anything","nothing","everyone","everybody","all","every","today","tomorrow","not","no","never"]
+
+static func nation(text:String)->Dictionary:
+	## {name} when the words give all our towns together a name ("call our
+	## nation the Reedfolk", "our people shall be called the Reedfolk", "name
+	## our realm Ashmark"); {} otherwise, and for any question.
+	var clean:=text.strip_edges().replace("’","'").trim_suffix(".").trim_suffix("!").strip_edges()
+	if clean=="" or clean.ends_with("?"): return {}
+	for pat in NATION_PATTERNS:
+		var full:=String(pat).replace("{lead}",NATION_LEAD).replace("{whole}",NATION_WHOLE).replace("{tail}",NATION_TAIL).replace("{name}","(?<new>[\\w' -]{2,32}?)")
+		var m:=_re(full).search(clean)
+		if m==null: continue
+		# Words before a comma are whom the god speaks to, never another order.
+		var voc:=m.get_string("voc").strip_edges()
+		if voc!="" and (voc.split(" ",false).size()>4 or _has(voc,HARSH_RE) or _has(voc,"(?i)\\b(and|attack|march|raid|send|give|take|bring|make|build|stop|don'?t|never|not)\\b")): continue
+		var said:=m.get_string("new").strip_edges().trim_prefix("'").trim_suffix("'").strip_edges()
+		var first:=said.get_slice(" ",0).to_lower()
+		if said=="" or first in NATION_NOT_A_NAME: continue
+		var name:=NationName.tidy(said)
+		if name.length()<2: continue
+		return {"name":name}
+	return {}
+
+static func perform_nation(id:String,r:Dictionary,reading:Dictionary)->Dictionary:
+	## Names (or renames) our nation at the god's word; the one before the god
+	## answers. With one town, the people go by its name and nothing changes.
+	r.verb="nation_name"; r.stage="none"
+	var place:=EraWords.word("place","town")
+	var home:=String(GameState.settlement_name).strip_edges()
+	var done:=NationName.give_name(String(reading.get("name","")),"court")
+	r.executed=bool(done.get("ok",false))
+	var why:="" if r.executed else String(done.get("why","refused"))
+	match why:
+		"one_town":
+			r["actor_says"]="We are one %s yet, and the people go by %s. When a second %s stands, they can take a name of their own." % [place,home if home!="" else "its name",place]
+			r.outcome="Nothing is changed: our people live in one %s%s and go by its name until a second %s stands." % [place,(", "+home) if home!="" else "",place]
+		"same":
+			r["actor_says"]="We are %s already, as you named us." % NationName.in_sentence(String(done.get("name","")))
+			r.outcome="Nothing is changed: our people are already called %s." % NationName.in_sentence(String(done.get("name","")))
+		"taken":
+			r["actor_says"]=String(done.get("reason",""))
+			r.outcome="Nothing is changed: %s" % _lower_first(String(done.get("reason","")))
+		"":
+			var name:=NationName.in_sentence(String(done.get("name","")))
+			var old:=String(done.get("old",""))
+			var towns:=NationName.towns_words()
+			r["actor_says"]=("No longer %s, then, but %s. I will send word to %s." % [NationName.in_sentence(old),name,towns]) if old!="" else ("Then we are %s. I will send word to %s." % [name,towns])
+			r.outcome="From today our people are called %s. The name is told in %s, and the court will use no other." % [name,towns]
+		_:
+			r["actor_says"]=""
+			r.outcome="Nothing is changed: %s" % _lower_first(String(done.get("reason","the name cannot be given.")))
+	return r
+
+static func _lower_first(text:String)->String:
+	return text.substr(0,1).to_lower()+text.substr(1)

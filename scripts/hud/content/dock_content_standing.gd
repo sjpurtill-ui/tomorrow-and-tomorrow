@@ -97,9 +97,9 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 		# over our rose; the board asks for them when one is chosen.
 		"their_strengths":their_strengths}
 
+## Our row's name: the nation's once named, else the people of the first town.
 func _our_name()->String:
-	var name:=String(GameState.settlement_name).strip_edges()
-	return "The people of %s" % name if name!="" else "Our people"
+	return preload("res://scripts/nation_name.gd").people_title()
 
 ## Our strengths as they were read a year ago (points of 100), from the
 ## monthly record (strategic_history.gd): {id: points}.
@@ -240,4 +240,4 @@ func signature()->Array:
 		if int(relation.get("contact_level",0))>=2: met+=1
 		if bool(relation.get("at_war",false)): at_war+=1
 	# The page reads live state; a new reading every few days is plenty.
-	return [int(GameState.elapsed_days)/5,met,at_war,int(MilitaryCampaign.home_army.get("troops",0)),GameState.known_discoveries.size(),String(view_state.get("compare","")),GameState.strategic_history.get("last_day",-1)]
+	return [int(GameState.elapsed_days)/5,met,at_war,int(MilitaryCampaign.home_army.get("troops",0)),GameState.known_discoveries.size(),String(view_state.get("compare","")),GameState.strategic_history.get("last_day",-1),GameState.nation_name]

@@ -156,6 +156,8 @@ var settlement_completed: Array[String] = []
 var settlement_site_committed := false
 var settlement_founded_at := Vector3.ZERO
 var settlement_name := ""
+## What all our towns together are called, once there are two (nation_name.gd); "" until named.
+var nation_name := ""
 var settlement_founded_day := -1
 var settlement_plots:Array[Dictionary]=[]
 var settlement_nuclei:Array[Dictionary]=[]
@@ -522,6 +524,7 @@ func reset_for_new_world(new_seed:int)->void:
 	settlement_site_committed=false
 	settlement_founded_at=Vector3.ZERO
 	settlement_name=""
+	nation_name=""
 	settlement_founded_day=-1
 	settlement_plots=[]
 	settlement_nuclei=[]
