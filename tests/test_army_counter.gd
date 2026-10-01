@@ -92,3 +92,19 @@ func test_those_in_drill_lead_the_army_bar()->void:
 	# The Forces list keeps to the forces.
 	assert_bool(Model.cards(MilitaryCampaign).any(func(c:Dictionary)->bool: return String(c.kind)=="drill")).is_false()
 	WorldSimulation.clear()
+
+func test_a_force_shows_who_carries_what_and_the_odds_as_a_bar()->void:
+	var Strips:=preload("res://scripts/hud/force_strips.gd")
+	var blocks:=Strips.composition([{"unit":"archer","weapon":"bow","count":6},{"unit":"spearman","weapon":"spear","count":12},{"unit":"spearman","weapon":"spear","count":3},{"unit":"levy","weapon":"improvised","count":2}])
+	assert_int(blocks.size()).is_equal(3)
+	assert_str(String(blocks[0].glyph)).is_equal("spear")
+	assert_int(int(blocks[0].count)).is_equal(15)
+	assert_str(Strips.composition_words(blocks)).is_equal("Spears 15, Bows 6, Improvised Arms 2")
+	var bar:=Strips.OddsBar.new()
+	add_child(bar)
+	bar.set_odds({"raw":3.0,"odds":3.0,"ours":true},"about 3 to 1 for us")
+	assert_bool(bar.visible).is_true()
+	assert_float(bar.raw).is_equal(3.0)
+	bar.set_odds({},"")
+	assert_bool(bar.visible).is_false()
+	bar.queue_free()

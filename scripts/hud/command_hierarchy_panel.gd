@@ -27,6 +27,7 @@ const Portrait=preload("res://scripts/hud/person_portrait.gd")
 const BattleMarks=preload("res://scripts/hud/battle_marks.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const Board=preload("res://scripts/hud/recruit_deploy_board.gd")
+const Strips=preload("res://scripts/hud/force_strips.gd")
 const PICK_RADIUS_PX:=26.0
 const PANEL_WIDTH:=452.0
 const PANEL_TOP:=64.0
@@ -80,6 +81,9 @@ var force_face:TextureRect
 var force_state:Control
 var force_doing:Label
 var force_meters:Array=[]
+## Who carries what (force_strips.gd CompositionStrip) and the odds as a bar.
+var force_strip:Control
+var odds_bar:Control
 var verb_buttons:Dictionary={}
 var target_row:HBoxContainer
 var target_icon:TextureRect
@@ -167,6 +171,7 @@ func _build_plain_orders(parent:VBoxContainer)->void:
 	for kind:String in ["gear","will","supply"]:
 		var meter:Control=Board.Meter.new();meter.kind=kind;meter.name=kind.capitalize();meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;meter.custom_minimum_size=Vector2(96,22);meters.add_child(meter);force_meters.append(meter)
 	force_meters[0].clicked.connect(_open_production)
+	force_strip=Strips.CompositionStrip.new();force_strip.name="Composition";force_strip.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_child(force_strip)
 	# What: the orders by their icons.
 	var grid:=GridContainer.new();grid.name="Verbs";grid.columns=5;grid.add_theme_constant_override("h_separation",5);grid.add_theme_constant_override("v_separation",5);parent.add_child(grid)
 	for face:Array in VERB_FACES:
@@ -190,6 +195,7 @@ func _build_plain_orders(parent:VBoxContainer)->void:
 	var mark:=TextureRect.new();mark.texture=Icons.command_texture("date",T.INK_MUTED,40);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.custom_minimum_size=Vector2(20,20);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;happens.add_child(mark)
 	happens_label=_label(happens,"",15);happens_label.name="WhatHappens";happens_label.add_theme_font_override("font",T.font("ui_strong"))
 	happens_label.autowrap_mode=TextServer.AUTOWRAP_OFF;happens_label.clip_text=true;happens_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;happens_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	odds_bar=Strips.OddsBar.new();odds_bar.name="Odds";odds_bar.visible=false;parent.add_child(odds_bar)
 	answer_box=PanelContainer.new();answer_box.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.GOLD,1,4,10));parent.add_child(answer_box);answer_box.hide()
 	var answer_column:=VBoxContainer.new();answer_column.add_theme_constant_override("separation",6);answer_box.add_child(answer_column)
 	answer_label=_label(answer_column,"",15);answer_label.max_lines_visible=3;answer_label.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -373,6 +379,8 @@ func _refresh_force_card()->void:
 		force_face.texture=Portrait.texture({"name":String(general.get("full_name",general.get("name",""))),"person_id":absi(String(general.get("figure_id",general.get("name",""))).hash())%997+1})
 	var state_words:=BattleMarks.state_words(String(card.get("state","holding")))
 	(force_state as StateGlyph).state=String(card.get("state","holding"));force_state.tooltip_text=state_words.substr(0,1).to_upper()+state_words.substr(1);force_state.queue_redraw()
+	var formations:Array=MilitaryCampaign.home_army.get("formations",[]) if force_id==Orders.HOME else Orders.army(force_id).get("formations",[])
+	(force_strip as Object).call("set_blocks",Strips.composition(formations))
 	var doing:=String(card.get("doing",""))
 	force_doing.text="%s men · %s" % [EraWords.grouped(int(card.get("men",0))),doing] if doing!="" else "%s men" % EraWords.grouped(int(card.get("men",0)))
 	force_doing.tooltip_text=BarModel.tooltip(card).get_slice("\nClick",0)
@@ -469,6 +477,8 @@ func _refresh_plan()->void:
 	elif not bool(reading.get("ready",false)) and String(reading.get("likely",""))!="impossible":line=""
 	happens_label.text=line
 	happens_label.get_parent().visible=line!=""
+	var odds:Dictionary=reading.get("odds",{}) if reading.get("odds") is Dictionary else {}
+	if is_instance_valid(odds_bar):(odds_bar as Object).call("set_odds",odds,Orders.odds_words(float(odds.get("odds",1.0)),bool(odds.get("ours",true))) if not odds.is_empty() else "")
 	var likely:=String(reading.get("likely",""))
 	happens_label.add_theme_color_override("font_color",T.RED_TEXT if likely=="impossible" else (T.AMBER_TEXT if likely=="object" else T.INK))
 	happens_label.tooltip_text="\n".join(reading.get("lines",[])) if not (reading.get("lines",[]) as Array).is_empty() else line
