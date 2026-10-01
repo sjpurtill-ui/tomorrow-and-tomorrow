@@ -83,7 +83,7 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 ## The pointer's words: the title, then one line per band or people, then
 ## where a click goes.
 static func tip(alert:Dictionary)->String:
-	var page:String={"support":"Readiness & supply","forces":"Forces","wars":"Feuds","recruitment":"Recruit & deploy"}.get(String(alert.page),"the Warriors screen")
+	var page:="the War screen"
 	return "%s\n%s\nClick to open %s." % [String(alert.title),"\n".join(alert.lines as PackedStringArray),page]
 
 

@@ -372,33 +372,21 @@ func test_talk_calls_the_bands_own_general_to_court()->void:
 	assert_bool(closed[0]).is_false()
 	assert_str(board.feedback.text).is_equal("The court cannot sit just now")
 
-func test_a_full_war_fits_the_military_screen_at_the_default_size()->void:
+func test_a_full_war_fits_the_war_screen_at_the_default_size()->void:
 	_train(160)
 	for i in 4:_band(30,"Levy band %d" % (i+1))
 	var away:Dictionary=MilitaryCampaign.field_armies[0]
 	_send_out(away,Vector2(30,-30))
-	away.last_report["day"]=int(GameState.elapsed_days)-7
 	_garrison(12,3)
-	(MilitaryCampaign.home_army.formations as Array)[0]["authorized_count"]=int((MilitaryCampaign.home_army.formations as Array)[0].count)+6
 	# 1600x900 at the game's 125% interface is 1280x720 of room.
 	var view:SubViewport=auto_free(SubViewport.new());view.size=Vector2i(1280,720);add_child(view)
 	var screen:CanvasLayer=auto_free(Roster.new());view.add_child(screen)
 	var room:=1280.0-2.0*maxf(16.0,1280.0*0.045)
-	for page:String in ["forces","support"]:
-		screen._show_page(page)
-		for frame in 4:await await_idle_frame()
-		var board:VBoxContainer=screen.forces_board if page=="forces" else screen.readiness_board
-		assert_bool(board.wide).override_failure_message(page).is_true()
-		# The rows fit the panel as laid out; it never grows past the screen's room.
-		assert_float(screen.panel.size.x).override_failure_message(page).is_less_equal(room+0.5)
-		assert_float(screen.body.get_combined_minimum_size().x).override_failure_message(page).is_less_equal(screen.scroll.size.x)
-	# A band away says where and how old its word is, in full.
-	screen._show_page("forces")
 	for frame in 4:await await_idle_frame()
-	var where:Label=_control(screen.forces_board,"army:%d" % int(away.army_id)).where
-	assert_str(where.text).contains("north-east").contains("reported 7 days ago")
-	var need:=where.get_theme_font("font").get_string_size(where.text,HORIZONTAL_ALIGNMENT_LEFT,-1,where.get_theme_font_size("font_size")).x
-	assert_float(need).override_failure_message("%s needs %.0f px, has %.0f" % [where.text,need,where.size.x]).is_less_equal(where.size.x)
+	assert_object(screen.body.get_node_or_null("WarBoard")).is_not_null()
+	# The War screen fits the panel as laid out; it never grows past the screen's room.
+	assert_float(screen.panel.size.x).is_less_equal(room+0.5)
+	assert_float(screen.body.get_combined_minimum_size().x).is_less_equal(screen.scroll.size.x)
 
 # ---------------------------------------------------------------------------
 # Readiness & supply: HOI4's logistics view
@@ -630,12 +618,11 @@ func test_no_visible_label_over_twelve_words_on_either_tab()->void:
 		await get_tree().process_frame
 		assert_array(_long_texts(forces)).is_empty()
 		assert_array(_long_texts(readiness)).is_empty()
-	# And inside the Military screen, where the old paragraphs were.
-	for page:String in ["forces","support","training"]:
-		MilitaryCampaign.open_roster("army",page=="training",page)
-		await get_tree().process_frame
-		assert_array(_long_texts(MilitaryCampaign.roster_screen.body)).override_failure_message(page).is_empty()
-		MilitaryCampaign.roster_screen.free()
+	# And on the War screen, the army's one page.
+	MilitaryCampaign.open_roster("army")
+	await get_tree().process_frame
+	assert_array(_long_texts(MilitaryCampaign.roster_screen.body)).is_empty()
+	MilitaryCampaign.roster_screen.free()
 
 ## What a label sits on: the nearest panel's paper, laid over what is below.
 func _ground_of(node:Node)->Color:

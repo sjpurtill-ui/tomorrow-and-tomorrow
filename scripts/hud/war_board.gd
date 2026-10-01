@@ -1,0 +1,318 @@
+extends VBoxContainer
+## THE WAR SCREEN: grand strategy, one page, no tabs. The ruler decides three
+## things and the war leader and the generals do the rest (who goes, the
+## road, the camps, the pace, the fight):
+##   the army   how many of the people serve, as a share that reads the same
+##              for 120 people and a billion (army_levy_law.gd). The war
+##              leader calls up, drills and arms to that share, and sends the
+##              surplus home;
+##   enemies    one row per people at feud or war with us: the dead on each
+##              side, what is happening now, and a stance (war_loop.gd order):
+##              Leave them be, Defend, Punish (burn their stores), Take a town
+##              of theirs (the war leader marches on it: army_orders.gd), Seek
+##              peace (messengers), and where a feud's blood price would end
+##              it, Pay;
+##   leaders    the war leader and the generals: who they are, how they are
+##              rated, and what they are doing now.
+## Nothing here moves a band or draws a line: the map shows what happens.
+
+signal close_wanted
+
+const T:=preload("res://scripts/hud/hud_tokens.gd")
+const Law:=preload("res://scripts/army_levy_law.gd")
+const Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
+const LedgerMarks:=preload("res://scripts/hud/war_ledger_marks.gd")
+const Identity:=preload("res://scripts/city_map_identity.gd")
+const WarLoop:=preload("res://scripts/war_loop.gd")
+const Orders:=preload("res://scripts/army_orders.gd")
+const Commands:=preload("res://scripts/leader_commands.gd")
+const Record:=preload("res://scripts/battle_record.gd")
+const Portrait:=preload("res://scripts/hud/person_portrait.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Icons:=preload("res://scripts/resource_icons.gd")
+const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+const REFRESH_SECONDS:=1.0
+## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
+const STANCES:=[
+	["leave","Leave them be","war_let","Bury the dead and let it pass this year. Their grudge cools, unless they are the kind to come back bolder."],
+	["defend","Defend","war_guard","Keep a watch on the approaches for half a year. Their raiders meet our fighters, not our fields."],
+	["punish","Punish","war_burn","Send a band to burn their stores. If no one knows where they live, they track the raiders home first."],
+	["take","Take a town","","March on a town of theirs and take it. The war leader chooses who goes and how; you choose the town."],
+	["peace","Seek peace","war_parley","Send two messengers to ask for an end to it."],
+]
+
+var army_box:VBoxContainer
+var enemy_box:VBoxContainer
+var leader_box:VBoxContainer
+var feedback:Label
+var clock:=0.0
+var signature:=""
+
+
+func setup(_block:Dictionary={})->void:
+	name="WarBoard"
+	size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	add_theme_constant_override("separation",14)
+	army_box=_section("The army")
+	feedback=_line("",15,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
+	enemy_box=_section("Our enemies")
+	leader_box=_section("Our leaders")
+	refresh(true)
+
+
+func _process(delta:float)->void:
+	clock+=delta
+	if clock<REFRESH_SECONDS:return
+	clock=0.0
+	refresh()
+
+
+func refresh(force:=false)->void:
+	var reading:=Law.reading(MilitaryCampaign)
+	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
+	var commands:=Commands.commands(MilitaryCampaign)
+	var next:=str([reading,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
+		commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.hungry])])
+	if not force and next==signature:return
+	signature=next
+	_build_army(reading)
+	_build_enemies(entries)
+	_build_leaders(commands)
+
+
+# --- The army -------------------------------------------------------------
+
+func _build_army(reading:Dictionary)->void:
+	_clear(army_box)
+	var panel:=_panel(army_box,"Army")
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",18);column.add_child(head)
+	var serving:=_number(head,EraWords.grouped(int(reading.now)),"serving now")
+	serving.tooltip_text="Everyone under arms: fighters, those in drill, recruits waiting and the hurt."
+	var drill:=BarModel.drill_card(MilitaryCampaign)
+	if not drill.is_empty():_number(head,EraWords.grouped(int(drill.men)+int(drill.get("drafts",0))),"in drill · about %d days" % int(drill.get("days",0)))
+	if int(reading.target)>=0:
+		var gap:=int(reading.gap)
+		_number(head,EraWords.grouped(int(reading.target)),"to keep"+((" · %s more to call up" % EraWords.grouped(gap)) if gap>0 else (" · %s too many" % EraWords.grouped(-gap) if gap<0 else "")))
+	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",6);column.add_child(pick)
+	for entry:Dictionary in Law.LEVELS:
+		var id:=String(entry.id)
+		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+		button.text="%s · %d%%" % [Law.level_name(id),roundi(float(entry.share)*100.0)]
+		button.set_pressed_no_signal(id==String(reading.level))
+		button.tooltip_text=Law.cost_words(id,int(reading.population),int(reading.able))+".\nThe war leader calls up, drills and arms them, and sends home any more than that. Every person serving is one fewer at work."
+		button.pressed.connect(func()->void:_choose_level(id))
+		pick.add_child(button)
+	var said:=("Choose how many of our people serve." if String(reading.level)=="" else
+		"%s: %s" % [Law.level_name(String(reading.level)),Law.cost_words(String(reading.level),int(reading.population),int(reading.able))])
+	var line:=_line(said,14,T.INK_MUTED,true);line.tooltip_text="The war leader keeps the army at the share you choose: calling up, drilling and arming, and sending home any surplus."
+	column.add_child(line)
+
+
+func _choose_level(id:String)->void:
+	var result:=Law.choose(MilitaryCampaign,id)
+	_say(String(result.get("said",result.get("error",""))) if String(result.get("said",""))!="" else "%s. The war leader will keep the army at that size." % Law.level_name(id))
+	refresh(true)
+
+
+# --- Our enemies ----------------------------------------------------------
+
+func _build_enemies(entries:Array)->void:
+	_clear(enemy_box)
+	if entries.is_empty():
+		var calm:=_panel(enemy_box,"Calm")
+		calm.add_child(_line("At peace: no feud or war with anyone.",14,T.INK_MUTED,true))
+		return
+	for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+
+
+func _enemy_row(e:Dictionary)->Control:
+	var civ_id:=String(e.civ_id)
+	var panel:=PanelContainer.new();panel.name="Enemy_%s" % civ_id
+	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,LedgerMarks.chip_tone(Ledger.state_word(e)),12,3))
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);column.add_child(head)
+	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(40,40);head.add_child(emblem)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(words)
+	var title:=Label.new();title.text=String(e.name);T.text(title,"voice",T.INK);words.add_child(title)
+	words.add_child(_line(Ledger.subtitle(e),13,T.INK_MUTED))
+	var dead:=DeadStrip.new();dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(220,26);dead.tooltip_text="The dead of it all told: %d of ours, %d of theirs." % [int(e.our_dead),int(e.their_dead)];head.add_child(dead)
+	var chip:=Chip.new();chip.word=Ledger.state_word(e);head.add_child(chip)
+	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
+	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
+	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
+	for spec:Array in STANCES:
+		var id:=String(spec[0])
+		if id=="take":
+			var take:=_take_button(civ_id,chosen=="take");stances.add_child(take);continue
+		var button:=Button.new();button.name="Stance_%s" % id;button.text=String(spec[1]);button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+		button.set_pressed_no_signal(chosen==id);button.tooltip_text=String(spec[3])
+		button.pressed.connect(func()->void:_stance(civ_id,id,String(spec[2])))
+		stances.add_child(button)
+	if String(e.kind)=="feud" and float(e.get("blood_price",0.0))>0.0:
+		var pay:=Button.new();pay.name="Stance_pay";pay.text="Pay %s food to end it" % EraWords.grouped(roundi(float(e.blood_price)));pay.focus_mode=Control.FOCUS_NONE
+		pay.tooltip_text="A blood price for the dead of theirs ends the feud at once; their raiders will not come for it."
+		pay.pressed.connect(func()->void:_stance(civ_id,"pay","war_price"))
+		stances.add_child(pay)
+	return panel
+
+
+## What is happening with this people now, in a few words (the details in
+## now_details).
+static func now_words(e:Dictionary)->String:
+	var band:Dictionary=e.get("band",{})
+	if not band.is_empty():
+		var who:=String(band.get("general","")).get_slice(" ",0)
+		return "%s %s" % [who if who!="" else "Our band",String(band.words)]
+	var bands:Array=e.get("bands",[])
+	if not bands.is_empty():
+		var b:Dictionary=bands[0]
+		return "%s %s%s" % [String(b.name),String(b.where),(" and %d more" % (bands.size()-1)) if bands.size()>1 else ""]
+	if bool(e.get("hot",false)):return "nobody of ours is out; their raiders may come"
+	return "quiet for %s" % Ledger.span_words(int(e.get("quiet",0)))
+
+
+## Everything happening with this people now, for the pointer.
+static func now_details(e:Dictionary)->String:
+	var parts:=PackedStringArray()
+	var band:Dictionary=e.get("band",{})
+	if not band.is_empty():
+		var who:=String(band.get("general","")).get_slice(" ",0)
+		parts.append("%s %s%s" % [(who+" and %d" % int(band.men)) if who!="" and int(band.get("men",0))>0 else "Our band",String(band.words),(", back in %s" % Ledger.span_words(int(band.days_left))) if int(band.get("days_left",0))>0 else ""])
+	for b:Dictionary in e.get("bands",[]):parts.append("%s · %s · %s" % [String(b.name),EraWords.grouped(int(b.troops)),String(b.where)])
+	var raid:Dictionary=e.get("last_raid",{})
+	if not raid.is_empty() and int(raid.get("days_ago",9999))<=120:parts.append("their last raid %s ago" % Ledger.span_words(int(raid.days_ago)))
+	if parts.is_empty():
+		if bool(e.get("hot",false)):parts.append("no one of ours is out against them; their raiders may come")
+		else:parts.append("quiet for %s" % Ledger.span_words(int(e.get("quiet",0))))
+	return "; ".join(parts)+"."
+
+
+func _take_button(civ_id:String,chosen:bool)->Control:
+	var pick:=MenuButton.new();pick.name="Stance_take";pick.text="Take a town ▾";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
+	pick.tooltip_text=String(STANCES[3][3])
+	if chosen:pick.add_theme_stylebox_override("normal",T.button_pressed_style())
+	var popup:=pick.get_popup()
+	var towns:=Orders.places().filter(func(p:Dictionary)->bool:return String(p.get("civ_id",""))==civ_id and String(p.get("controller",""))!="player")
+	if towns.is_empty():
+		pick.disabled=true;pick.tooltip_text="We know of no town of theirs yet: scouts find their towns."
+		return pick
+	var preview:=towns.slice(0,8)
+	for i in preview.size():
+		var p:Dictionary=preview[i]
+		var look:=Orders.preview(Orders.HOME,"attack",{"type":"place","place":p})
+		var days:=int(look.get("days",0))
+		popup.add_item("%s%s" % [Orders.place_name(p),(" · %d days" % days) if days>0 else ""],i)
+		popup.set_item_tooltip(i,"\n".join(look.get("lines",[])))
+	popup.id_pressed.connect(func(index:int)->void:_take(civ_id,preview[index]))
+	return pick
+
+
+func _stance(civ_id:String,id:String,objective:String)->void:
+	WarLoop.front(civ_id)["stance"]=id
+	_say(WarLoop.order(civ_id,objective))
+	refresh(true)
+
+
+func _take(civ_id:String,place:Dictionary,insist:=false)->void:
+	var answer:=Orders.give(Orders.HOME,"attack",{"type":"place","place":place},insist)
+	if String(answer.get("verdict",""))=="act":WarLoop.front(civ_id)["stance"]="take"
+	_say(String(answer.get("says",answer.get("reason",""))))
+	if String(answer.get("verdict",""))=="object" and not insist:
+		var go:=Button.new();go.text="Go anyway";go.pressed.connect(func()->void:go.queue_free();_take(civ_id,place,true))
+		feedback.add_sibling(go)
+	refresh(true)
+
+
+# --- Our leaders ----------------------------------------------------------
+
+func _build_leaders(commands:Array)->void:
+	_clear(leader_box)
+	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
+
+
+func _leader_row(c:Dictionary)->Control:
+	var leader:Dictionary=c.leader
+	var panel:=PanelContainer.new();panel.name="Leader_%s" % String(c.id);panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,8,0))
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);panel.add_child(row)
+	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(44,52);frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK));row.add_child(frame)
+	var face:=TextureRect.new();face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	var key:=String(leader.get("figure_id","")) if String(leader.get("figure_id",""))!="" else String(leader.get("name",""))
+	face.texture=Portrait.texture({"name":String(leader.get("name","")),"person_id":absi(key.hash())%997+1});frame.add_child(face)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
+	var name_label:=_line("%s · %s" % [String(leader.name),String(leader.title).to_lower()],15,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));words.add_child(name_label)
+	var rated:=Record.general_line(leader.get("commander",{}),EraWords.stage())
+	if rated!="":words.add_child(_line(rated,13,T.INK_MUTED))
+	words.add_child(_line(leader_doing(c),13,T.INK))
+	return panel
+
+
+## What a leader is doing now: their bands and men and where, or "at home".
+static func leader_doing(c:Dictionary)->String:
+	var bands:=(c.bands as Array).size()
+	if bands==0:return "Keeps the watch at home." if String(c.id)==Commands.WAR_LEADER else "Waits at home for a command."
+	var places:=PackedStringArray()
+	for place in (c.get("places",{}) as Dictionary):places.append(String(place))
+	var hungry:=(" · %d hungry" % int(c.hungry)) if int(c.get("hungry",0))>0 else ""
+	return "Leads %s men in %d %s · %s%s" % [EraWords.grouped(int(c.men)),bands,"band" if bands==1 else "bands",", ".join(places),hungry]
+
+
+# --- Pieces ---------------------------------------------------------------
+
+func _say(text:String)->void:
+	feedback.text=text
+	feedback.visible=text!=""
+
+
+func _section(title:String)->VBoxContainer:
+	var kicker:=_line(title.to_upper(),13,T.INK_MUTED);kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(kicker)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);add_child(box)
+	return box
+
+
+func _panel(parent:Node,name_hint:String)->PanelContainer:
+	var panel:=PanelContainer.new();panel.name=name_hint;panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,12,0));parent.add_child(panel)
+	return panel
+
+
+func _number(parent:Node,value:String,word:String)->Control:
+	var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",6);chip.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(chip)
+	var big:=_line(value,22,T.INK);big.add_theme_font_override("font",T.font("ui_strong"));chip.add_child(big)
+	var small:=_line(word,13,T.INK_MUTED);small.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(small)
+	return chip
+
+
+func _clear(box:Node)->void:
+	for child in box.get_children():box.remove_child(child);child.queue_free()
+
+
+static func _skin(bg:Color,border:Color,margin:int,left:int)->StyleBoxFlat:
+	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(1)
+	if left>0:style.border_width_left=left
+	style.set_corner_radius_all(T.RADIUS_CARD);style.set_content_margin_all(margin)
+	return style
+
+
+static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
+	var label:=Label.new();label.text=text;label.mouse_filter=Control.MOUSE_FILTER_PASS
+	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
+	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	return label
+
+
+## The dead on each side, compact (war_ledger_marks.draw_dead).
+class DeadStrip extends Control:
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
+	var ours:=0
+	var theirs:=0
+	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:Marks.draw_dead(self,Rect2(Vector2.ZERO,size),ours,theirs,true)
+
+
+## HOT, SIMMERING, WAR (war_ledger_marks.draw_chip).
+class Chip extends Control:
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
+	var word:=""
+	func _ready()->void:
+		custom_minimum_size=Vector2(Marks.chip_width(word),28);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	func _draw()->void:Marks.draw_chip(self,Rect2(Vector2(0,0),Vector2(size.x,28)),word)

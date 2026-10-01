@@ -168,7 +168,7 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_array(ids).contains(["hungry","will","men"])
 	var hungry:Dictionary=shown[ids.find("hungry")]
 	assert_str(String(hungry.tone)).is_equal("red")
-	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("Readiness & supply")
+	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("War screen")
 	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
 	WorldSimulation.clear()
 

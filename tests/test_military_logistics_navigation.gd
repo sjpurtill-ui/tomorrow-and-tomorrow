@@ -18,7 +18,7 @@ func test_logistics_has_no_production_board_or_order_actions()->void:
 		for item in block.get("items",[]):
 			assert_bool(String(item.get("label","")) in ["ADD ORDER","MANAGEMENT","BUILD CARTS"]).is_false()
 	assert_str(provider.meta().title).is_equal("Military")
-	assert_str(provider.meta().subtabs[3]).is_equal("LOGISTICS")
+	assert_str(provider.meta().subtabs[0]).is_equal("WAR")
 func test_production_reports_staff_managed_repairs()->void:
 	MilitaryCampaign.damaged_equipment={"improvised":3}
 	var provider=Production.new(null,null)

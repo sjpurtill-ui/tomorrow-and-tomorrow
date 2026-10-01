@@ -83,6 +83,9 @@ var military_inventory:Dictionary={}
 var military_consumables:Dictionary={}
 var damaged_equipment:Dictionary={}
 var aggregate_recruits:=0
+## How many of the people serve: a level of army_levy_law.gd ("" until the
+## ruler chooses; then the war leader keeps the army at that share).
+var army_levy_level:=""
 var training_queue:Array[Dictionary]=[]
 var training_injury_pool:=0
 var training_injury_recovery_accumulator:=0.0
@@ -161,7 +164,9 @@ func open_roster(service:String="army",training:bool=false,page:String="")->void
 		scene.hud.close_detail();scene.hud.close_dock()
 	roster_screen=load("res://scripts/hud/military_roster_screen.gd").new()
 	roster_screen.service=service;roster_screen.training_view=training
-	roster_screen.page=page if not page.is_empty() else ("training" if training else "leaders")
+	# The army's one page is the War screen; boats and aircraft keep theirs.
+	roster_screen.page="war" if service=="army" else (page if not page.is_empty() else ("training" if training else "forces"))
+	if service=="army":roster_screen.training_view=false
 	get_tree().root.add_child(roster_screen)
 
 
@@ -213,6 +218,7 @@ func reset_for_new_world()->void:
 	military_consumables=_empty_consumable_inventory()
 	damaged_equipment=_empty_equipment_inventory()
 	aggregate_recruits=0
+	army_levy_level=""
 	training_queue.clear()
 	training_injury_pool=0
 	training_injury_recovery_accumulator=0.0
@@ -3632,6 +3638,7 @@ func export_state()->Dictionary:
 		"military_consumables":military_consumables.duplicate(true),
 		"damaged_equipment":damaged_equipment.duplicate(true),
 		"aggregate_recruits":aggregate_recruits,
+		"army_levy_level":army_levy_level,
 		"training_queue":training_queue.duplicate(true),
 		"training_strategy":training_staff.data.duplicate(true),
 		"recruit_deploy":recruit_deploy.data.duplicate(true),
@@ -4022,6 +4029,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	damaged_equipment=_empty_equipment_inventory()
 	for item in (payload.get("damaged_equipment",{}) as Dictionary): damaged_equipment[item]=int(payload.damaged_equipment[item])
 	aggregate_recruits=maxi(0,int(payload.get("aggregate_recruits",0)))
+	army_levy_level=String(payload.get("army_levy_level","")) if payload.get("army_levy_level") is String else ""
 	training_queue.assign(payload.get("training_queue",[]))
 	for order in training_queue:
 		order.erase("soldier_ids")
@@ -4787,6 +4795,8 @@ func _process_military_day()->void:
 	sustainment.draft_day()
 	_process_requested_templates()
 	_ensure_automatic_basic_training()
+	# The war leader keeps the army at the share the ruler chose.
+	preload("res://scripts/army_levy_law.gd").keep(self,int(WorldSimulation.state.elapsed_days))
 	if not home_fighting:
 		_process_training_day()
 		recruit_deploy.deploy_ready()

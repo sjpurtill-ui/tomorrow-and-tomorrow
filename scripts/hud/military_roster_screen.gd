@@ -16,6 +16,7 @@ const ForcesBoard=preload("res://scripts/hud/forces_board.gd")
 const ReadinessBoard=preload("res://scripts/hud/readiness_board.gd")
 const WarLedger=preload("res://scripts/hud/war_ledger_board.gd")
 const LeadersBoard=preload("res://scripts/hud/leaders_board.gd")
+const WarBoard=preload("res://scripts/hud/war_board.gd")
 const WarLedgerModel=preload("res://scripts/hud/war_ledger_model.gd")
 var TEXT:=T.INK
 var MUTED:=T.INK_MUTED
@@ -60,6 +61,9 @@ var stories:Dictionary={}
 var forces_board:VBoxContainer
 var readiness_board:VBoxContainer
 var army_filter:="all"
+## The page buttons' row: hidden for the army, whose one page is the War
+## screen (hud/war_board.gd); boats and aircraft keep their pages.
+var nav_row:Control
 
 func accent(domain:String="")->Color:
 	return {"army":T.GOLD,"navy":T.TEAL,"air":T.BLUE}.get(service if domain.is_empty() else domain,T.GOLD)
@@ -87,7 +91,7 @@ func _ready()->void:
 		# A lone land force needs no service switch.
 		button.visible=services.size()>1
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
-	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
+	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav);nav_row=nav
 	for entry:Array in [["leaders","Leaders"],["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"],["wars",_wars_label()]]:
 		var key:=String(entry[0]);var button:=_button(nav,String(entry[1]),func():_show_page(key))
 		button.toggle_mode=true;page_buttons[key]=button
@@ -184,6 +188,12 @@ func _wars_label()->String:
 	var word:="Wars & feuds" if open.any(func(e:Dictionary)->bool: return String(e.kind)=="war") else "Feuds"
 	return "%s · %d" % [word,open.size()] if not open.is_empty() else word
 
+## The War screen: the army's one page (hud/war_board.gd).
+func _war()->void:
+	var board:=WarBoard.new();body.add_child(board)
+	board.setup({})
+	board.close_wanted.connect(queue_free)
+
 ## The Military Leaders screen: commands by leader (hud/leaders_board.gd).
 func _leaders()->void:
 	var board:=LeadersBoard.new();body.add_child(board)
@@ -265,7 +275,7 @@ func _process(delta:float)->void:
 	if timer<.5:return
 	timer=0;stories.clear()
 	# The embedded recruitment, forces and readiness boards own live updates.
-	if page in ["recruitment","wars","leaders"] or (service=="army" and page in ["forces","support"]):return
+	if service=="army" or page in ["recruitment","wars","leaders"]:return
 	if page=="support":_update_support();return
 	if training_view:_update_policy();return
 	var rows:=_rows();_update_hero(rows)
@@ -310,6 +320,11 @@ func _build_body()->void:
 		service_buttons[domain].set_pressed_no_signal(domain==service)
 	if training_view:page="training"
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
+	# The army is grand strategy on one page: how many serve, our enemies and
+	# what to do about each, and our leaders (hud/war_board.gd). No tabs.
+	if is_instance_valid(nav_row):nav_row.visible=service!="army"
+	if service=="army":
+		_war();return
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
 	if page=="wars":_wars();return
