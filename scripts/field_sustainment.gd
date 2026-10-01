@@ -387,8 +387,10 @@ func draft_day()->Array:
 	var reserve:=home_reserve()
 	var targets:Array=host.field_armies.duplicate()
 	targets.sort_custom(func(a,b): return priority_rank(a)<priority_rank(b))
+	var day:=int(WorldSimulation.state.elapsed_days)
 	for garrison in host.occupation_forces:
-		_fit_garrison(garrison)
+		# The town's need is reckoned again every few days, not every day.
+		if day%GARRISON_FIT_EVERY==0 or not (garrison as Dictionary).has("need"): _fit_garrison(garrison)
 		targets.append(garrison)
 	for force:Dictionary in targets:
 		force["draft_block"]=draft_block(force)
@@ -444,6 +446,9 @@ static func _has_gap(force:Dictionary)->bool:
 	for formation in force.get("formations",[]):
 		if formation is Dictionary and _gap(formation)>0: return true
 	return false
+
+## How often (days) a garrison's need is reckoned again.
+const GARRISON_FIT_EVERY:=5
 
 ## A garrison's full strength is what its town needs while its men are fed
 ## (town_hold.gd): when that grows past its places, its largest formation is

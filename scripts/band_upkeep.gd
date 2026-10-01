@@ -22,10 +22,11 @@ extends RefCounted
 ##    fed the same way. A resting band is not sent to fight: the war council
 ##    reads `resting` (and ArmyLines.unfit) before it plans an operation.
 ##  - MERGE. Weak bands standing in the same place join into one under the
-##    senior general: the band of the general with the best command, then
-##    the larger band. Men, gear, the hurt, the drafts on their way and their
-##    places go with them; nobody is lost or made. The other general is free
-##    for another command.
+##    senior general among them: the band of the general with the best
+##    command, then the larger band. A fit band there is left as it is, so a
+##    merge never takes a fit band out of the fighting. Men, gear, the hurt,
+##    the drafts on their way and their places go with them; nobody is lost
+##    or made. The other general is free for another command.
 ## What it does is said in plain words: a line of the day's news
 ## (simulation_events) and the band's own record, which the army bar, the
 ## counters and the alerts read: resting, rest_reason, rest_place,
@@ -220,7 +221,8 @@ func _at(army:Dictionary,place:Dictionary)->bool:
 # --- Merging weak bands -----------------------------------------------------------
 
 ## Weak bands standing in the same place join the senior general's band
-## there. Returns how many bands were merged away.
+## among them (a fit band there is left as it is). Returns how many bands
+## were merged away.
 func merge_day(today:int)->int:
 	var places:={}
 	for army in host.field_armies:
@@ -238,8 +240,8 @@ func merge_day(today:int)->int:
 		for id in ids:
 			var army:Dictionary=host.field_armies[host._field_army_index(int(id))]
 			if Lines.weak(int(army.get("troops",0)),Lines.full_strength(army)) or Lines.broken(float(army.get("morale",1.0))): weak.append(int(id))
-		if weak.is_empty(): continue
-		var senior:=_senior(ids)
+		if weak.size()<2: continue
+		var senior:=_senior(weak)
 		for id in weak:
 			if int(id)==senior: continue
 			if merge(int(id),senior,today): merged+=1
