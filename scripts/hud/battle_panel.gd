@@ -580,7 +580,8 @@ func _battle_day_words()->String:
 
 
 ## How many the ground lets fight at once, when it holds some back: "Room
-## for about 1,900 a side: 11 of 21 companies fighting." "" otherwise.
+## for about 1,900 a side: 11 of 21 companies fighting" ("in line" before
+## the first blow). "" otherwise.
 func _frontage_note()->String:
 	var phase:=Model.phase_at(view,maxi(1,step))
 	var capacity:=int(phase.get("capacity",0))
@@ -590,7 +591,7 @@ func _frontage_note()->String:
 	var total:=fighting+(side.get("rear",[]) as Array).filter(func(p:Dictionary)->bool: return String(p.state)=="reserve").size()
 	if capacity<=0 or total<=fighting or fighting<=0: return ""
 	var word:=String(view.sides.left.word)
-	return "Room for %s a side: %s of %s %s %s" % [Marks.about(capacity),_grouped(fighting),_grouped(total),preload("res://scripts/battle_blocks.gd").plural(word),"in the line" if step==0 else "fighting"]
+	return "Room for %s a side: %s of %s %s %s" % [Marks.about(capacity),_grouped(fighting),_grouped(total),preload("res://scripts/battle_blocks.gd").plural(word),"in line" if step==0 else "fighting"]
 
 
 ## A stop on the track, pointed at: the day, its hours and what each side lost.
