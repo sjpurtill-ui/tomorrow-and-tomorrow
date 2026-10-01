@@ -1291,7 +1291,7 @@ static func _march_ground_words(route:Dictionary)->String:
 func _field_supply_advice(army:Dictionary)->String:
 	var fed:=SupplyState.fed(army)
 	var words:=""
-	if fed<FieldRations.HUNGRY_BELOW: words+=" They eat %d%% of a ration." % roundi(fed*100.0)
+	if fed<FieldRations.HUNGRY_BELOW: words+=" They eat %d%% of a ration: the march is slowed." % roundi(fed*100.0)
 	if float(army.get("march_slowing",1.0))>1.01: words+=" Where the carriers cannot reach them they live off the land at half pace; the days count it."
 	return words
 
