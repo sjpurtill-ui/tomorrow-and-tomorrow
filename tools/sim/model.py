@@ -174,9 +174,10 @@ TRIAL_SHARE = [float(x) for x in g.const("scripts/research_600_catalog.gd", "TRI
 AGE_BUCKET_SCORE = float(g.const("scripts/discovery_system.gd", "AGE_BUCKET_SCORE", default=0.0, optional=True))
 # DiscoverySystem.FAR_BANDS: work further ahead than NEAR_AGE_YEARS is taken band
 # by band (years ahead), the nearest band any line offers first; a line that has
-# waited TEAM_MAX_WAIT_YEARS counts its far work one band nearer (_team_rank);
-# monthly, a team more than a band ahead moves to the work a free team would
-# take when that stands two bands nearer and is SWITCH_MARGIN less work.
+# waited TEAM_MAX_WAIT_YEARS counts its far work two bands nearer, never nearer
+# than the first far band (_team_rank); monthly, a team more than FAR_BANDS[1]
+# years ahead moves to the work a free team would take when that stands two
+# bands nearer and is SWITCH_MARGIN less work.
 FAR_BANDS = [float(x) for x in g.const("scripts/discovery_system.gd", "FAR_BANDS", default=[], optional=True)]
 TIER_LAST = 2 + len(FAR_BANDS)
 
@@ -1693,7 +1694,7 @@ class Surrogate:
 
     def _team_pick(self, placements: list, shares, turns, last, held, followed, year: float):
         """DiscoverySystem._pick_team_placement: the nearest band first (a line that
-        has waited TEAM_MAX_WAIT_YEARS counts its far work one band nearer); then a
+        has waited TEAM_MAX_WAIT_YEARS counts its far work two bands nearer); then a
         waiting line (longest first); then the line furthest below its share of
         recent turns; then the question's score."""
         total = float(turns[followed].sum())
@@ -1702,7 +1703,7 @@ class Surrogate:
         def key(pl):
             b, score, li, ch, item = pl
             waited = held[li] == 0 and year - last[li] >= wait
-            rank = b - 1 if (FAR_BANDS and waited and b > 2) else b
+            rank = max(2, b - 2) if (FAR_BANDS and waited and b > 2) else b
             return (rank, 0 if waited else 1, -(year - last[li]) if waited else 0.0, -(shares[li] * total - turns[li]), -score, ch)
         return min(placements, key=key)
 
@@ -1755,9 +1756,9 @@ class Surrogate:
             busy.add(item)
             free -= 1
         # 4. Monthly, a team working ahead of its age moves to a question of its age
-        # (any followed line); one more than a band ahead, to the work a free team
-        # would take when that stands two bands nearer and is SWITCH_MARGIN less
-        # work; or, in its own channel, to a much quicker one.
+        # (any followed line); one more than FAR_BANDS[1] years ahead, to the work a
+        # free team would take when that stands two bands nearer and is
+        # SWITCH_MARGIN less work; or, in its own channel, to a much quicker one.
         if SWITCH_CHECK_DAYS > 0:
             due_free = None
             for ch in np.where(self.active >= 0)[0].tolist():
@@ -1780,11 +1781,12 @@ class Surrogate:
                     held[li] += 1
                     turns[li] += 1
                 tier = self._team_tier_of(item, year) if FAR_BANDS else 0
-                if best is None and tier >= 3:
+                if best is None and tier >= 4:
                     li = ch_line[ch]
                     held[li] -= 1
                     turns[li] -= 1
-                    rows = self._team_placements(month, followed, busy, (ch,), tier - 1)
+                    # Rows of rank tier - 2 or nearer: a waiting line's up to `tier` itself.
+                    rows = self._team_placements(month, followed, busy, (ch,), tier)
                     near = self._team_pick(rows, shares, turns, last, held, followed, year) if rows else None
                     held[li] += 1
                     turns[li] += 1

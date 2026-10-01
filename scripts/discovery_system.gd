@@ -845,17 +845,18 @@ func team_tier(discovery:Dictionary,year:float=NAN)->int:
 	return TEAM_TIER_LAST
 
 ## Where work of band `tier` stands in the order free teams take it. A line
-## that has waited TEAM_MAX_WAIT_YEARS for a team counts its far work one band
-## nearer: it still gets its turn, unless its next question stands more than a
-## band further ahead than the nearest work any line offers.
+## that has waited TEAM_MAX_WAIT_YEARS for a team counts its far work two bands
+## nearer (never nearer than the first far band): it still gets its turn,
+## unless its next question stands three bands or more further ahead than the
+## nearest work any line offers.
 static func _team_rank(tier:int,waiting:bool)->int:
-	return tier-1 if waiting and tier>2 else tier
+	return maxi(2,tier-2) if waiting and tier>2 else tier
 
 ## The bands a line reads for a free team's `rank` (_team_rank).
 static func _rank_tiers(rank:int,waiting:bool)->Array:
 	if not waiting or rank<2: return [rank]
-	if rank==2: return [2,3]
-	return [rank+1] if rank<TEAM_TIER_LAST else []
+	if rank==2: return [2,3,4]
+	return [rank+2] if rank+2<=TEAM_TIER_LAST else []
 
 ## A line's weight in the plan: its steps of attention over its channels.
 func _line_weight(dynamic_id:String)->int:
@@ -1113,7 +1114,7 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 
 ## Once a month each team working ahead of its age looks again: a question of
 ## its age on any followed line takes the team; failing that, for a team more
-## than a band ahead (FAR_BANDS), the work a free team would take when it
+## than FAR_BANDS[1] years ahead, the work a free team would take when it
 ## stands two bands nearer its age or more and is SWITCH_MARGIN less work;
 ## failing that, a much quicker question (SWITCH_MARGIN less work) in its own
 ## channel. The progress made stays with the question for later. A question the
@@ -1163,7 +1164,7 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		_count_turn(held,turns,line,-1)
 		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0)
 		var tier:=team_tier(current)
-		if best.is_empty() and tier>=3:
+		if best.is_empty() and tier>=4:
 			# Far ahead: the work a free team would take, two bands nearer or more.
 			var nearer:=_next_team_placement(lines,turns,held,current_day,busy,channel,tier-2)
 			if not nearer.is_empty() and int(nearer.tier)<=tier-2 and String(nearer.id)!=current_id and _expected_work(discovery_definition(String(nearer.id)))*SWITCH_MARGIN<_expected_work(current): best=nearer

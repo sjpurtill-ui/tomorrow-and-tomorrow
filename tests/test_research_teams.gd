@@ -249,13 +249,18 @@ func test_a_line_waiting_five_years_still_gets_its_turn_unless_it_would_leap_ban
 	var turns:=DiscoverySystem._team_turns(lines,{},today)
 	assert_float(DiscoverySystem._line_wait_years(turns,"culture",today)).is_greater(R.TEAM_MAX_WAIT_YEARS)
 	var nutrition:={"line":"nutrition","channel":"nutrition::Daily supply","id":"nutrition_near","tier":2,"score":300.0}
-	# Its next question one band further than nutrition's: culture takes its turn.
+	# Its next question one or two bands further than nutrition's: culture takes its turn.
 	var one_band:={"line":"culture","channel":"culture::Social cohesion","id":"culture_one_band","tier":3,"score":-300.0}
 	assert_str(String(DiscoverySystem._pick_team_placement([nutrition,one_band],lines,turns,{},today).id)).is_equal("culture_one_band")
+	var two_bands:={"line":"culture","channel":"culture::Social cohesion","id":"culture_two_bands","tier":4,"score":-300.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([nutrition,two_bands],lines,turns,{},today).id)).is_equal("culture_two_bands")
 	# A 40-year leap stands three bands further: the cheaper work goes first, and
 	# culture's turn comes as its questions draw nearer their age.
 	var leap:={"line":"culture","channel":"culture::Social cohesion","id":"culture_leap","tier":5,"score":300.0}
 	assert_str(String(DiscoverySystem._pick_team_placement([nutrition,leap],lines,turns,{},today).id)).is_equal("nutrition_near")
+	# Against work 10 to 20 years ahead, the leap is only two bands further: its turn.
+	var farther:={"line":"nutrition","channel":"nutrition::Daily supply","id":"nutrition_farther","tier":3,"score":300.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([farther,leap],lines,turns,{},today).id)).is_equal("culture_leap")
 	# Questions of their age always come first, waiting or not.
 	var of_age:={"line":"nutrition","channel":"nutrition::Daily supply","id":"nutrition_of_age","tier":0,"score":-900.0}
 	assert_str(String(DiscoverySystem._pick_team_placement([of_age,one_band],lines,turns,{},today).id)).is_equal("nutrition_of_age")
