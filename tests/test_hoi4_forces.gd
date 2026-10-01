@@ -380,7 +380,7 @@ func test_a_full_war_fits_the_war_screen_at_the_default_size()->void:
 	_garrison(12,3)
 	# 1600x900 at the game's 125% interface is 1280x720 of room.
 	var view:SubViewport=auto_free(SubViewport.new());view.size=Vector2i(1280,720);add_child(view)
-	var screen:CanvasLayer=auto_free(Roster.new());view.add_child(screen)
+	var screen:CanvasLayer=auto_free(Roster.new());screen.page="war";view.add_child(screen)
 	var room:=1280.0-2.0*maxf(16.0,1280.0*0.045)
 	for frame in 4:await await_idle_frame()
 	assert_object(screen.body.get_node_or_null("WarBoard")).is_not_null()

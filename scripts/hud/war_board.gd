@@ -46,7 +46,14 @@ var enemy_box:VBoxContainer
 var leader_box:VBoxContainer
 var feedback:Label
 var clock:=0.0
-var signature:=""
+## Each section's last signature, and how long a rebuild has waited on the
+## ruler's hand (seconds).
+var signatures:={}
+var waited:={}
+## A section under the pointer waits this long for the pointer to leave
+## before its numbers are read again; never while one of its menus is open
+## or a button is held.
+const HOVER_HOLD_SECONDS:=5.0
 
 
 func setup(_block:Dictionary={})->void:
@@ -67,18 +74,42 @@ func _process(delta:float)->void:
 	refresh()
 
 
+## Each section is read again only when what it shows has changed, and not
+## under the ruler's hand: a menu of it open, a button held, or the pointer
+## on it (for a few seconds). After the ruler's own word (force) all three.
 func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
-	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
-	var commands:=Commands.commands(MilitaryCampaign)
 	var glance:=strength(MilitaryCampaign)
-	var next:=str([reading,glance,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
-		commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.hungry])])
-	if not force and next==signature:return
-	signature=next
-	_build_army(reading,glance)
-	_build_enemies(entries)
-	_build_leaders(commands)
+	_rebuild("army",army_box,str([reading,glance]),force,func()->void:_build_army(reading,glance))
+	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
+	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
+		var front:Dictionary=WarLoop.front(String(e.civ_id))
+		return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),front.get("stance",""),front.get("general",""),e.get("strength",1.0),now_words(e)])),force,func()->void:_build_enemies(entries))
+	var commands:=Commands.commands(MilitaryCampaign)
+	_rebuild("leaders",leader_box,str(commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.full,c.hungry,snappedf(float(c.will),0.05),snappedf(float(c.supply),0.05)])),force,func()->void:_build_leaders(commands))
+
+
+func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->void:
+	if not force and next==String(signatures.get(key,"")):
+		waited.erase(key)
+		return
+	if not force and _in_use(box,float(waited.get(key,0.0))):
+		waited[key]=float(waited.get(key,0.0))+REFRESH_SECONDS
+		return
+	signatures[key]=next
+	waited.erase(key)
+	build.call()
+
+
+## Whether the ruler is using a section: one of its menus open or a button
+## held on it always; the pointer resting on it, for HOVER_HOLD_SECONDS.
+func _in_use(box:Control,waited_seconds:float)->bool:
+	if box==null or not box.is_visible_in_tree():return false
+	for node in box.find_children("*","",true,false):
+		if node is MenuButton and (node as MenuButton).get_popup().visible:return true
+		if node is OptionButton and (node as OptionButton).get_popup().visible:return true
+	if not box.get_global_rect().has_point(box.get_global_mouse_position()):return false
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or waited_seconds<HOVER_HOLD_SECONDS
 
 
 # --- The army -------------------------------------------------------------
@@ -149,6 +180,11 @@ func _enemy_row(e:Dictionary)->Control:
 	words.add_child(_line(Ledger.subtitle(e),13,T.INK_MUTED))
 	var dead:=DeadStrip.new();dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(220,26);dead.tooltip_text="The dead of it all told: %d of ours, %d of theirs." % [int(e.our_dead),int(e.their_dead)];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);head.add_child(chip)
+	# HOI4's read of who is stronger: our share of the strength against theirs.
+	var odds:=Strips.OddsBar.new();odds.name="Odds";column.add_child(odds)
+	odds.set_odds(Ledger.odds(e),Ledger.odds_words(e))
+	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
+Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
@@ -328,6 +364,10 @@ func _leader_row(c:Dictionary)->Control:
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
 		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
 	words.add_child(_line(leader_doing(c),13,T.INK))
+	if int(c.get("men",0))>0:
+		var bars:=CommandBars.new();bars.name="Bars";bars.men=int(c.men);bars.full=int(c.full);bars.will=float(c.will);bars.fed=float(c.supply)
+		bars.tooltip_text="Men %d of %d · will %d%% · fed %d%%" % [int(c.men),int(c.full),roundi(float(c.will)*100.0),roundi(float(c.supply)*100.0)]
+		words.add_child(bars)
 	if String(c.id)==Commands.WAR_LEADER:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Name another";other.flat=true;other.focus_mode=Control.FOCUS_NONE
 		other.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -347,9 +387,9 @@ func _name_war_leader()->void:
 
 
 ## What a leader is best and worst at, by the skills the engine fights,
-## camps and marches with: "Best at standing firm (5 of 5) · weakest at
-## keeping them fed (2 of 5)".
-const SKILL_WORDS:={"command":"planning the fight","tactics":"leading it","resolve":"standing firm","logistics":"keeping them fed"}
+## camps and marches with: "Best at holding firm (5/5) · weakest at supply
+## (2/5)".
+const SKILL_WORDS:={"command":"planning","tactics":"fighting","resolve":"holding firm","logistics":"supply"}
 static func skill_words(commander:Dictionary)->String:
 	if commander.is_empty():return ""
 	var best:="";var worst:="";var high:=-1;var low:=6
@@ -357,8 +397,8 @@ static func skill_words(commander:Dictionary)->String:
 		var pips:=Strips.GeneralPips.pips(float(commander.get(skill,0.5)))
 		if pips>high:high=pips;best=skill
 		if pips<low:low=pips;worst=skill
-	if high==low:return "Even in every skill: %d of 5" % high
-	return "Best at %s (%d of 5) · weakest at %s (%d of 5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
+	if high==low:return "Even in every skill (%d/5)" % high
+	return "Best at %s (%d/5) · weakest at %s (%d/5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
 
 
 ## What a leader is doing now: their bands and men and where, or "at home".
@@ -437,6 +477,23 @@ class StrengthBar extends Control:
 		if target>0:
 			var tick:=clampf(size.x*float(target)/scale,1.0,size.x-1.0)
 			draw_line(Vector2(tick,-3.0),Vector2(tick,size.y+3.0),T.INK,2.0)
+
+
+## A command at a glance, as HOI4's army card: men of full strength, will
+## and fed, each a short bar in the army bar's colours.
+class CommandBars extends Control:
+	const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var men:=0
+	var full:=0
+	var will:=0.0
+	var fed:=0.0
+	func _ready()->void:custom_minimum_size=Vector2(240,14);mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		var width:=minf(120.0,(size.x-16.0)/3.0)
+		var shares:=[float(men)/maxf(1.0,float(full)),will,fed]
+		var inks:=[T.GREEN,BarModel.will_color(will),T.TEAL if fed>=0.75 else (T.AMBER if fed>=0.4 else T.RED)]
+		for i in 3:BarModel.draw_bar(self,Rect2(Vector2(float(i)*(width+8.0),2.0),Vector2(width,10.0)),clampf(float(shares[i]),0.0,1.0),inks[i])
 
 
 ## The dead on each side, compact (war_ledger_marks.draw_dead).
