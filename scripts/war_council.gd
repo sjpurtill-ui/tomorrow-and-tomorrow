@@ -41,6 +41,7 @@ const LEDGER_PATH:="res://scripts/town_ledger.gd"
 const CONTROLLER_PATH:="res://scripts/civilization_controller.gd"
 const TRACKER_PATH:="res://scripts/order_tracker.gd"
 const COMMANDS_PATH:="res://scripts/leader_commands.gd"
+const LAW:=preload("res://scripts/army_levy_law.gd")
 
 const VERSION:=1
 const STANCES:=["leave","defend","punish","take","peace"]
@@ -69,6 +70,12 @@ const PICKS:=3
 const STORM_ODDS:=2.0
 ## A siege needs at least this many to ring a town (court_war_orders MIN_FORCE x3).
 const SIEGE_MIN:=15
+## Men to hold a town after the fight, over what holding it takes
+## (civilization_system.occupation_requirement): the fight's losses, and the
+## band's readiness and food on arrival, take their share.
+const HOLD_MARGIN:=1.5
+## After a band could not take or hold a town, the next try waits this long.
+const TAKE_REST_DAYS:=30
 const WORDS_MAX:=260
 const FRONTS_MAX:=64
 
@@ -172,6 +179,9 @@ static func day(today:int)->void:
 	if WorldSimulation.state==null or not WorldSimulation.state.settlement_site_committed: return
 	if WorldSimulation.military==null or WorldSimulation.world==null: return
 	if WorldSimulation.military.recovery.home_unavailable(): return
+	# The god lowered the share: bands with nothing to do come home to be sent
+	# back to work (on the levy law's own days, army_levy_law.gd KEEP_EVERY).
+	if _player() and today%int(LAW.KEEP_EVERY)==0: fold_idle_bands()
 	var s:=state()
 	var every:=LIVE_DAYS if bool(s.get("live",false)) else (WAIT_DAYS if bool(s.get("waiting",false)) else PEACE_DAYS)
 	if today-int(s.get("last",-99999))<every: return
@@ -355,6 +365,7 @@ static func call_raid(civ_id:String,cause:String,ref:String)->void:
 # --------------------------------------------------------------------------
 
 static func _act(civ_id:String,stance:String,today:int,options:Dictionary)->Dictionary:
+	_see_them_coming(civ_id,today)
 	var done:Dictionary
 	match stance:
 		"take": done=_take(civ_id,today,options)
@@ -367,6 +378,22 @@ static func _act(civ_id:String,stance:String,today:int,options:Dictionary)->Dict
 	f["says"]=String(done.get("says","")).substr(0,WORDS_MAX)
 	f["sat"]=today
 	return done
+
+## Their band in sight near a town of ours, in words for the screens, worked
+## out at the sitting ("Their band of 40 is 30 km from Ashford, here in about
+## 2 days"): the screens read it, never the sightings themselves.
+static func _see_them_coming(civ_id:String,today:int)->void:
+	if not _player(): return
+	var f:=_front(civ_id)
+	var coming:=their_bands(civ_id)
+	if coming.is_empty():
+		f.erase("coming"); f.erase("coming_band")
+		return
+	var c:Dictionary=coming[0]
+	var town:=_nearest_town_name(c.position)
+	f["coming"]="%s of %d is %s from %s, here in about %s" % ["Their band" if String(c.label)=="Their band" else String(c.label),int(c.strength),_km_words(float(c.km)),town,_span(int(c.days))]
+	f["coming_day"]=today
+	f["coming_band"]={"strength":int(c.strength),"town":town,"days":int(c.days),"km":snappedf(float(c.km),0.1)}
 
 static func _record(civ_id:String,verdict:String,says:String,extra:Dictionary={})->Dictionary:
 	var out:={"verdict":verdict,"says":says,"live":false}
@@ -387,11 +414,36 @@ static func _take(civ_id:String,today:int,options:Dictionary)->Dictionary:
 	if _ours(civ_id,String(town.city_id)):
 		if _player(): (_war_loop().call("front",civ_id) as Dictionary).erase("take")
 		return _record(civ_id,"hold","%s is ours already; %s holds it." % [String(town.name),_who()])
+	var f:=_front(civ_id)
+	var rest:=TAKE_REST_DAYS-(today-int(f.get("take_failed",-99999)))
+	if rest>0 and not insist and not bool(options.get("now",false)):
+		return _record(civ_id,"rest","%s mends the band after %s; it goes again in about %s." % [_who(),String(town.name),_span(rest)])
 	if not insist:
-		var fed:=_fed_at(town,_free_men())
+		# Enough to hold it after the fight, or nobody goes (no tiny-force
+		# capture: docs/GENERAL_CAMPAIGN_DESIGN.md).
+		var need:=_hold_need(town)
+		var free:=_free_men()
+		if need>0 and free<need:
+			return _record(civ_id,"wait","%s waits: holding %s after the fight would take about %d of ours, by our scouts' count of its people, and we can send %d. About %d more would do it." % [_who(),String(town.name),need,free,need-free],{"need":need})
+		var fed:=_fed_at(town,free)
 		if not fed.is_empty() and float(fed.ratio)<FED_MIN:
 			return _record(civ_id,"wait",_hungry_road_words(town,fed),{"fed":float(fed.ratio)})
 	return _launch(civ_id,town,"take",insist,options)
+
+## About how many of ours holding this town would take after the fight: the
+## world's own rule for holding a town (civilization_system
+## occupation_requirement) on our scouts' count of its people, with
+## HOLD_MARGIN for the fight's losses. -1 when nobody counted its people.
+static func _hold_need(town:Dictionary)->int:
+	var world:Variant=WorldSimulation.world
+	var report:Dictionary=world.city_intelligence.known("player",String(town.city_id))
+	var field:Dictionary=((report.get("fields",{}) as Dictionary).get("population",{}) as Dictionary)
+	if field.is_empty(): return -1
+	var civ:=_civ(String(town.civ_id))
+	var region:Dictionary=world.region_snapshot(String(town.civ_id),String(town.city_id))
+	if civ.is_empty() or region.is_empty(): return -1
+	region["population"]=(float(field.get("low",0.0))+float(field.get("high",0.0)))*0.5
+	return ceili(float(world.occupation_requirement(civ,region))*HOLD_MARGIN)
 
 ## The town to take: the god's pick while it is still theirs, else the
 ## council's by the odds.
@@ -439,7 +491,7 @@ static func _punish(civ_id:String,today:int,options:Dictionary)->Dictionary:
 	var town:=_punish_target(civ_id,options)
 	if town.is_empty():
 		if called: f.erase("raid_call")
-		return _find_them(civ_id,today)
+		return _find_them(civ_id,today,String(options.get("asked","")))
 	if not insist:
 		var fed:=_fed_at(town,_raid_size(town))
 		if not fed.is_empty() and float(fed.ratio)<FED_MIN:
@@ -467,7 +519,7 @@ static func _punish_target(civ_id:String,options:Dictionary)->Dictionary:
 ## Nobody knows where they live: the god's war leader sends trackers after
 ## their raiders' trail (war_loop.gd war_track); a computer ruler waits for
 ## its scouts.
-static func _find_them(civ_id:String,_today_day:int)->Dictionary:
+static func _find_them(civ_id:String,_today_day:int,asked:String="")->Dictionary:
 	if not _player():
 		return _record(civ_id,"wait","The war leader does not know where %s live." % _name(civ_id))
 	var wl:=_war_loop()
@@ -480,7 +532,7 @@ static func _find_them(civ_id:String,_today_day:int)->Dictionary:
 		return _record(civ_id,"wait","We know where %s live, but no town of theirs is on our charts yet. Scouts must count it first." % _name(civ_id))
 	if not op.is_empty():
 		return _record(civ_id,"wait","%s is already out against %s; the raid waits until they are back." % [String(op.get("general",_who())),_name(civ_id)])
-	var said:=String(wl.call("send_trackers",civ_id))
+	var said:=String(wl.call("send_trackers",civ_id,asked))
 	return _record(civ_id,"act",said,{"live":true})
 
 ## The band a raid needs: a raiding party (RAID_FLOOR at least, the
@@ -768,9 +820,10 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 				_send_home(band)
 				return _record(civ_id,"hold","%s is ours. %s leaves %s to hold it and brings the rest home." % [name,who,_fighters(held)],ids.merged({"taken":town_id},true))
 			# Beaten at the walls or too few to hold: home to mend, then the
-			# council weighs it again.
+			# council weighs it again after a rest.
+			_front(civ_id)["take_failed"]=today
 			_send_home(band)
-			return _record(civ_id,"wait","%s could not take %s and brings the band home to mend." % [who,name],ids)
+			return _record(civ_id,"rest","%s could not take %s and brings the band home to mend." % [who,name],ids)
 		"punish":
 			_front(civ_id)["raided"]=today
 			_send_home(band)
@@ -805,6 +858,39 @@ static func _send_home(band:Dictionary)->bool:
 	if r.has("error"): return false
 	index=mc._field_army_index(army_id)
 	if index>=0: mc.field_armies[index].erase("court_order")
+	return true
+
+## The army stands above the share the god chose (army_levy_law.gd): the
+## bands with no errand (no stance needs them, no march, siege, chase or
+## fight under way) come home and fold back into the levy at home, where the
+## law's next look sends the surplus back to work. Bands on an errand stay
+## out until it ends. Returns the bands called in.
+static func fold_idle_bands()->int:
+	var mc:=_mc()
+	var reading:=LAW.reading(mc)
+	if String(reading.get("level",""))=="" or int(reading.get("gap",0))>=0: return 0
+	var called:=0
+	for army in (mc.field_armies as Array).duplicate():
+		if not army is Dictionary or not _idle(army): continue
+		var army_id:=int((army as Dictionary).get("army_id",0))
+		if _at_home(army):
+			if not mc.disband_field_army(army_id).has("error"): called+=1
+		elif _send_home(army): called+=1
+	return called
+
+## A band with nothing to do: no errand of the council's under way, no march
+## ordered elsewhere, no siege, chase, fight, voyage or zone order.
+static func _idle(army:Dictionary)->bool:
+	var mc:=_mc()
+	var army_id:=int(army.get("army_id",0))
+	if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): return false
+	if army.get("pursuit") is Dictionary: return false
+	var c:Variant=army.get("council")
+	if c is Dictionary and not String((c as Dictionary).get("phase","")) in ["home","done"]: return false
+	if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))!="player_home": return false
+	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
+	if mc.command_hierarchy.controls_army(army_id): return false
+	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
 	return true
 
 ## Bands the council formed, home again, go back into the levy at home.
@@ -1008,17 +1094,15 @@ static func operation_words(civ_id:String)->String:
 	for band in bands_against(civ_id):
 		var said:=band_words(band)
 		if said!="": return said
-	var coming:=their_bands(civ_id)
-	if not coming.is_empty():
-		var c:Dictionary=coming[0]
-		return "%s of %d is %s from %s, here in about %s" % ["Their band" if String(c.label)=="Their band" else String(c.label),int(c.strength),_km_words(float(c.km)),_nearest_town_name(c.position),_span(int(c.days))]
+	var f:=peek(civ_id)
+	var coming:String=String(f.get("coming","")) if _today()-int(f.get("coming_day",-99999))<=LIVE_DAYS else ""
+	if coming!="": return coming
 	var op:=_loop_op(civ_id)
 	if not op.is_empty():
 		var left:=maxi(0,int(op.get("due",_today()))-_today())
 		match String(op.get("objective","")):
 			"war_track": return "%s's trackers follow their trail home, back in about %s" % [String(op.get("general",_who())),_span(left)]
 			"war_parley": return "Our messengers are on their way to them, back in about %s" % _span(left)
-	var f:=peek(civ_id)
 	var says:=String(f.get("says",""))
 	if says!="": return says.trim_suffix(".")
 	return ""
@@ -1076,11 +1160,11 @@ static func band_words(band:Dictionary)->String:
 		"reinforce": return "%d march to hold %s%s" % [men,name,(", there in about %s" % _span(days)) if moving and days>0 else ""]
 	return ""
 
+## How the band was fed on its last day, as the engine recorded its rations
+## (military_campaign provision_ratio; cheap: no supply reckoning here).
 static func _fed_words(band:Dictionary)->String:
-	if not _player(): return ""
-	var report:Dictionary=(load(SUPPLY_PATH) as GDScript).call("of_force",band)
-	if not report.has("ratio"): return ""
-	return "fed %d%%" % roundi(float(report.ratio)*100.0)
+	if not band.has("provision_ratio") and not band.has("supply_level"): return ""
+	return "fed %d%%" % roundi(clampf(float(band.get("provision_ratio",band.get("supply_level",1.0))),0.0,1.0)*100.0)
 
 ## "3 to 2", "even", "2 to 3": ours over theirs in the screen's short form.
 static func _odds_short(raw:float)->String:
@@ -1117,15 +1201,21 @@ static func _nearest_town_name(at:Vector2)->String:
 
 ## Bands of theirs in sight coming at a town of ours, for the alerts:
 ## [{civ_id, source_name, target_region_name, estimated_strength, days}].
+## As the council last saw them (at its sitting; nothing is reckoned here,
+## so the screens may ask every second).
 static func incoming()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	if WorldSimulation.world==null: return out
+	var today:=_today()
 	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
 		var id:=String((civ as Dictionary).get("id",""))
-		if id=="" or id=="player" or not fighting(id): continue
-		for c in their_bands(id):
-			out.append({"civ_id":id,"source_name":"The %s band" % _name(id),"target_region_name":_nearest_town_name(c.position),"estimated_strength":int(c.strength),"days":int(c.days),"deadline_day":_today()+int(c.days)})
+		if id=="" or id=="player": continue
+		var f:=peek(id)
+		if not f.get("coming_band") is Dictionary or today-int(f.get("coming_day",-99999))>LIVE_DAYS: continue
+		var c:Dictionary=f.coming_band
+		var days:=maxi(0,int(c.get("days",0))-(today-int(f.coming_day)))
+		out.append({"civ_id":id,"source_name":"The %s band" % _name(id),"target_region_name":String(c.get("town","")),"estimated_strength":int(c.get("strength",0)),"days":days,"deadline_day":today+days})
 	return out
 
 # --------------------------------------------------------------------------

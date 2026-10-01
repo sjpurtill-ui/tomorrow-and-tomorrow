@@ -48,7 +48,7 @@ const Odds:=preload("res://scripts/war_odds.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 const COUNCIL_PATH:="res://scripts/war_council.gd"
 
-const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives","follow_kill"]
+const KINDS:=["attack","siege","raid","intercept","recall","defend","peace","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives","follow_kill"]
 ## A strike by stealth: by night, unseen, on them asleep ("sneak attack
 ## Eldwick under cover of night"). The attack goes in as a night approach
 ## (battle_tactics.night_approach) at a chance stated when it is ordered.
@@ -89,8 +89,12 @@ const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|l
 const LOOSE_ARMY_WORDS:="(men|bands?|spears|companies|people)"
 const ATTACK_WORDS:="(attack|assault|storm|strike|fall (up)?on|march (on|against|to war|to battle|into battle)|go (to war|against|to battle)|make war|wage war|war on|(?:we are|we're) (?:now )?at war with|declare war|battle|into battle|fight|take the (city|town|village|settlement)|capture|conquer|sack|crush|destroy|wipe out|invade|smash|raze|burn [\\w' ]{0,20}?to the ground|put [\\w' ]{0,20}? to the sword)"
 const SIEGE_WORDS:="(besiege|lay siege|siege|starve [\\w' ]{0,20}?out|surround (the|their) (city|town|walls|village))"
-const RAID_WORDS:="(raid|plunder|pillage|loot|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
+const RAID_WORDS:="(raid|plunder|pillage|loot|punish|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
 const INTERCEPT_WORDS:="(attack|fight|meet|catch|hunt down|destroy|engage|smash|crush|intercept|fall (up)?on|go after|chase|pursue) (their|the enemy'?s?|the) (army|host|war ?band|column|forces?|fighters|raiders|warriors|soldiers|troops|men)"
+## "Make peace with the Esurai", "end the feud": the war council's Seek peace
+## (war_council.gd). Envoys sent with words of peace are the envoys' own
+## business (court_commands.dispatch_envoy), not this.
+const PEACE_WORDS:="((make|seek|sue for|ask for|want|offer) peace|end (the|this|our) (feud|war|fighting)|stop the (feud|fighting|war)|send for a truce)"
 const RECALL_WORDS:="((march|come|go|bring|call|send|pull|get|fall)\\w* [\\w' ]{0,30}?(home|back)\\b|withdraw|retreat|fall back|pull back|recall|disengage)"
 const DEFEND_WORDS:="(defend|hold|guard|protect|garrison|man the walls|stand guard)"
 const FULL_WORDS:="(full|whole|all (of )?(our|my|the)|every|everything|everyone|each and every|all we have|all you have|to the last)"
@@ -341,13 +345,16 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	if not besieged.is_empty() and (named.is_empty() or String(named.get("city_id",""))==String(besieged.city_id)) and (_has(lower,STORM_WORDS) or (String(named.get("city_id",""))==String(besieged.city_id) and _has(lower,ATTACK_WORDS))):
 		return {"kind":"storm","target":besieged,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":army,"text":clean.substr(0,300)}
 	if _has(lower,DRILL_WORDS): return {"kind":"drill","target":{},"full":false,"insist":false,"place":"","army_words":true,"text":clean.substr(0,300)}
+	if _has(lower,PEACE_WORDS) and not _has(lower,"(envoys?|ambassadors?|emissar\\w*|messengers?)\\b"):
+		if named.is_empty() and _the_feud()=="" and not _any_war(): return {}
+		return {"kind":"peace","target":named,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
 	if _has(lower,INTERCEPT_WORDS): kind="intercept"
 	elif _has(lower,SIEGE_WORDS): kind="siege"
 	elif _has(lower,RAID_WORDS): kind="raid"
 	elif _has(lower,RECALL_WORDS) and (army or _has(lower,"(march|come) home|withdraw|retreat|fall back|pull back|recall")): kind="recall"
 	elif _has(lower,RECALL_BACK) and (army or _has(lower,GROUP_RECALL) or _re("^\\W*(come|get|head|turn|return|go|march|call|all|everyone|everybody)\\b").search(lower)!=null): kind="recall"
 	elif _has(lower,ATTACK_WORDS): kind="attack"
-	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,"(defend|hold|guard|protect|garrison) (the|our|my) "+PLACE_WORDS)): kind="defend"
+	elif _has(lower,DEFEND_WORDS) and (army or _has(lower,"(defend|hold|guard|protect|garrison) (the|our|my) "+PLACE_WORDS) or _has(lower,"(defend|guard|protect) (us |ourselves |our people |our town )?against")): kind="defend"
 	elif army and _has(lower,"(send|march|lead|take|move)") and _has(lower,"(on|against|to|at|toward|towards)\\b"): kind="attack"
 	elif _has(lower,LOOSE_ARMY_WORDS) and _has(lower,"(send|march|lead|take)") and _has(lower,"(on|against)\\b") and named_town: kind="attack"
 	# "Send everything we have against Tsaren", "throw all we have at them".
@@ -359,7 +366,7 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	# order ("strike him", "destroy the old hut").
 	if kind in ["attack","siege","raid"] and target.is_empty() and not army and not _has(lower,"(their|the enemy)"): return {}
 	if kind=="intercept" and target.is_empty() and not _has(lower,"(their|the enemy)"): return {}
-	if kind=="defend" and not army and not _has(lower,"\\b(the|our|my) "+PLACE_WORDS): return {}
+	if kind=="defend" and not army and not _has(lower,"\\b(the|our|my) "+PLACE_WORDS) and not _has(lower,"against"): return {}
 	var place:=""
 	var pm:=_re("\\b(the|our|my) "+PLACE_WORDS+"\\b").search(lower)
 	if pm!=null: place=pm.get_string()
@@ -1296,6 +1303,7 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 		"measure_drop": return _measure_drop(out,reading)
 		"recall": return _recall(out,reading)
 		"defend": return _defend(out,reading)
+		"peace": return _peace_word(out,reading)
 		"intercept": return _intercept(out,reading,insist)
 		"drill": return _drill_first(out)
 		"fate": return _fate(out,reading)
@@ -2428,29 +2436,66 @@ static func _defend(out:Dictionary,reading:Dictionary)->Dictionary:
 	var f:=forces()
 	var place:=String(reading.get("place",""))
 	var home_words:=place=="" or _has(place,"(home|walls?|village|town|camp|fields|gate)")
-	var recalled:=_recall(out.duplicate(true))
+	# Defending against one people: the war council brings home the bands out
+	# against them (war_council.gd). Defending home: every band comes home.
+	var against:=String(named.get("civ_id","")) if not bool(named.get("held",false)) else ""
+	var recalled:=_recall(out.duplicate(true)) if against=="" else {"verdict":"noted","objective":{}}
 	var brought:Array=(recalled.objective as Dictionary).get("recalled",[]) if String(recalled.verdict)=="act" else []
 	var watchers:=int(f.trained)
 	if watchers<=0 and brought.is_empty():
 		return _no(out,"no_trained","There is no one trained to put on watch.%s" % (" %d are in their first drill, about %d days from done." % [int(f.drilling),int(f.drill_days)] if int(f.drilling)>0 else ""),"Until then the whole village keeps its own watch.")
-	# The real effect: every front with a hostile people is watched for half a year.
+	# The real effect: the war council's stance toward the people named (or
+	# toward every people we fight) becomes Defend (war_council.gd): the
+	# approaches watched for half a year at least, short garrisons manned, and
+	# their band met in the field when the watch sees it.
 	var war_loop:GDScript=load(WAR_LOOP_PATH)
+	var council:GDScript=load(COUNCIL_PATH)
 	var day:=int(WorldSimulation.state.elapsed_days)
 	for c:Dictionary in WorldSimulation.world.civilizations:
 		var cid:=String(c.get("id",""))
 		if cid=="" or cid=="player": continue
 		var front:Dictionary=war_loop.call("front",cid)
-		if _at_war(cid) or int(front.get("level",0))>0: front["guard_until"]=day+180
+		if (against!="" and cid==against) or (against=="" and (_at_war(cid) or int(front.get("level",0))>0)):
+			front["guard_until"]=day+180
+			front["stance"]="defend"
+	if WorldSimulation.military!=null:
+		(council.call("state") as Dictionary)["live"]=true
+		if against!="": council.call("order",against,"defend",{})
 	var here:=String(WorldSimulation.state.settlement_name) if String(WorldSimulation.state.settlement_name)!="" else "home"
 	out.verdict="act"
 	out.objective={"army_id":0,"kind":"defend","watch":watchers,"recalled":brought,"until_day":day+180}
 	var brought_words:=" %s %s coming back to join them." % [", ".join(PackedStringArray(brought)),"is" if brought.size()==1 else "are"] if not brought.is_empty() else ""
-	if home_words:
+	if home_words and against!="":
+		out.says="%d of us will stand watch on the approaches to %s against the %s, and go out to meet their band when the watch sees it coming.%s" % [watchers,here,Hall._civ_name(against).trim_prefix("The ").trim_prefix("the "),brought_words]
+	elif home_words:
 		out.says="%d of us will stand watch on the approaches to %s for half a year.%s" % [watchers,here,brought_words]
 	else:
 		out.says="%s is not a place on any chart we have, so I cannot post a guard there. I will keep all %d at %s, watching every approach, for half a year.%s" % [place.capitalize(),watchers,here,brought_words]
 		out.reason="unknown_place"
 	out.outcome="The watch is set for half a year."
+	return out
+
+## "Make peace with the Esurai": the war council's Seek peace toward them
+## (war_council.gd): our bands against them come home, no raid goes out, and
+## messengers go to ask for an end to it.
+static func _peace_word(out:Dictionary,reading:Dictionary)->Dictionary:
+	var target:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+	var civ_id:=String(target.get("civ_id",""))
+	if civ_id=="": civ_id=_the_feud()
+	if civ_id=="":
+		var wars:=PackedStringArray()
+		for c in WorldSimulation.world.civilizations:
+			if c is Dictionary and _at_war(String((c as Dictionary).get("id",""))): wars.append(String((c as Dictionary).get("id","")))
+		if wars.size()==1: civ_id=wars[0]
+	if civ_id=="": return _no(out,"no_target","With whom? Name the people and I will send to them.","")
+	var council:GDScript=load(COUNCIL_PATH)
+	var done:Dictionary=council.call("order",civ_id,"peace",{"words":String(reading.get("text",""))})
+	out["target"]={"civ_id":civ_id,"civ_name":Hall._civ_name(civ_id)}
+	out.verdict="act"
+	out.reason="peace"
+	out.says=String(done.get("says",""))
+	out.outcome=out.says
+	out.objective={"army_id":0,"kind":"peace","civ_id":civ_id}
 	return out
 
 static func _intercept(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:

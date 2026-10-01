@@ -75,6 +75,7 @@ func after_test()->void:
 	GameState.reset_for_new_world(74017)
 	ProgressionSystem.reset_for_new_world()
 	WorldSimulation.clear()
+	WorldSimulation.context_provider=Callable()
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
 # ---------------------------------------------------------------------------
@@ -279,8 +280,10 @@ func test_defend_sends_a_band_to_meet_their_band_when_the_watch_sees_it()->void:
 	CivilizationSystem.foreign_formations.append({"id":"%s_raiders" % civ_id,"civ_id":civ_id,"kind":"expedition","command_position":{"x":at.x,"z":at.y},"strength_share":0.5,"actual_troops":15,"readiness":0.5})
 	CivilizationSystem._process_local_observation(day,true)
 	assert_dict(CivilizationSystem.visible_formation_sighting("%s_raiders" % civ_id)).is_not_empty()
-	assert_str(Council.operation_words(civ_id)).contains("km from")
 	var held:=Council.order(civ_id,"defend")
+	# What the watch saw is kept for the screens at the sitting.
+	assert_str(String(Council.peek(civ_id).get("coming",""))).contains("km from")
+	assert_int(Council.incoming().size()).is_equal(1)
 	var band:=_band("intercept")
 	assert_dict(band).override_failure_message(str(held)).is_not_empty()
 	assert_str(String(held.says)).contains("out after")
@@ -369,3 +372,99 @@ func test_a_few_years_of_punishing_give_a_sane_number_of_raids()->void:
 	assert_int(sittings).override_failure_message("sittings: %d" % sittings).is_less(3*365/2)
 	assert_int(raids).is_less_equal(bands_seen.size())
 	assert_int(Time.get_ticks_msec()-start).is_less(90000)
+
+# ---------------------------------------------------------------------------
+# Every people the same council: a rival against another rival
+# ---------------------------------------------------------------------------
+
+## Two simulated peoples, each with its own systems, their towns a day's
+## march apart; the first at war with the second.
+func _two_peoples()->Dictionary:
+	var first:=String(CivilizationSystem.civilizations[1].id)
+	var second:=String(CivilizationSystem.civilizations[2].id)
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	var origins:={first:CivilizationSystem.player_world_origin+Vector2(200.0,0.0),second:CivilizationSystem.player_world_origin+Vector2(225.0,0.0)}
+	for id in [first,second]:
+		WorldSimulation.create_actor(id,hash(id)&0x7fffffff,origins[id])
+		WorldSimulation.actors[id].controller="manual"
+		WorldSimulation.actors[id].systems.CivilizationSystem.scout_land_authority=func(_p:Vector2)->bool:return true
+		assert_bool(WorldSimulation.submit(id,{"kind":"found"}).get("ok",false)).is_true()
+		WorldSimulation.scoped(id,func()->void:
+			WorldSimulation.state.ensure_population_total(2400)
+			WorldSimulation.state.settlement_completed=["Hearth Circle"]
+			WorldSimulation.settlements.ensure_founded()
+			WorldSimulation.state.resource_stockpiles["Food"]=100000.0
+			WorldSimulation.state.simulation_metrics["food_days"]=120.0)
+	WorldSimulation.enabled=true
+	WorldSimulation.refresh_projections()
+	WorldSimulation.refresh_views()
+	return {"first":first,"second":second}
+
+func _relation_in(viewer:String,other:String)->Dictionary:
+	return WorldSimulation.scoped(viewer,func()->Dictionary:
+		for c in WorldSimulation.world.civilizations:
+			if String((c as Dictionary).get("id",""))==other: return (c as Dictionary).player_relation
+		return {})
+
+func test_a_rival_takes_a_town_of_another_rival_through_the_same_council()->void:
+	var pair:=_two_peoples()
+	var first:=String(pair.first); var second:=String(pair.second)
+	# At war, both ways.
+	for v in [[first,second],[second,first]]:
+		var rel:=_relation_in(String(v[0]),String(v[1]))
+		rel["at_war"]=true; rel["treaty"]="war"; rel["contact_level"]=2
+	var day:=int(GameState.elapsed_days)
+	var their_town:String=WorldSimulation.scoped(first,func()->String:
+		var mc=WorldSimulation.military
+		mc.military_inventory["improvised"]=420
+		mc.raise_recruits(420)
+		mc.start_training("levy","improvised",420)
+		mc._complete_training(mc.training_queue[0].duplicate(true))
+		mc.training_queue.clear()
+		# The first people's scouts have counted the second's chief town.
+		var chart=WorldSimulation.world.city_intelligence
+		var town:=String(chart.primary_id(second))
+		chart.publish("player",chart.capture("player",town,0.8,day,"scout report","test"),day)
+		# A bold ruler: its plan takes towns at war (civilization_strategy offensive).
+		Council.state()["plan"]={"day":day,"offensive":true,"peace_food":0.0}
+		Council.sit(day)
+		return town)
+	assert_str(their_town).is_not_empty()
+	var band:Dictionary=WorldSimulation.scoped(first,func()->Dictionary:
+		for a in WorldSimulation.military.field_armies:
+			var c:Variant=(a as Dictionary).get("council")
+			if c is Dictionary and String((c as Dictionary).get("civ",""))==second: return (a as Dictionary).duplicate(true)
+		return {})
+	var said:Dictionary=WorldSimulation.scoped(first,func()->Dictionary:return Council.peek(second))
+	assert_dict(band).override_failure_message(str(said)).is_not_empty()
+	# The same stance word and the same act as the god's own people: take.
+	assert_str(String(said.get("stance",""))).is_equal("take")
+	assert_str(String((band.council as Dictionary).act)).is_equal("take")
+	assert_str(String(band.status)).is_equal("moving")
+	assert_str(String(band.destination_id)).is_equal(their_town)
+	assert_int(int(band.troops)).is_greater(100)
+	# The watch stays home in their world too.
+	assert_int(int(WorldSimulation.scoped(first,func()->int:return int(WorldSimulation.military.home_army.troops)))).is_greater(0)
+	# Days pass in the first people's own world: the band arrives, fights the
+	# second people's own defenders and takes the town, leaving a garrison
+	# big enough to hold it; the second people's own record has it occupied.
+	var held:=false
+	for i in 30:
+		day+=1
+		var today:=day
+		WorldSimulation.scoped(first,func()->void:
+			WorldSimulation.state.elapsed_days=today
+			WorldSimulation.military.last_processed_day=today
+			WorldSimulation.military._process_military_day()
+			for e in WorldSimulation.military.own_engagements.values(): (e as Dictionary).erase("awaiting_player_view")
+			Council.day(today))
+		held=String(WorldSimulation.scoped(first,func()->String:return String(WorldSimulation.world.region_snapshot(second,their_town).get("controller",""))))=="player"
+		if held: break
+	assert_bool(held).override_failure_message("the town never fell: %s" % str(WorldSimulation.scoped(first,func()->Dictionary:return Council.peek(second)))).is_true()
+	var garrison:Dictionary=WorldSimulation.scoped(first,func()->Dictionary:return WorldSimulation.military.occupation_force_for_region(second,their_town))
+	assert_int(int(garrison.get("troops",0))).is_greater_equal(int(float(garrison.get("required",1.0))))
+	var occupied:String=WorldSimulation.scoped(second,func()->String:
+		for c in WorldSimulation.state.player_settlements:
+			if bool((c as Dictionary).get("primary",false)): return String((c as Dictionary).get("occupied_by",""))
+		return "")
+	assert_str(occupied).is_equal(first)

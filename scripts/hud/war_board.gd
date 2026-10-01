@@ -294,6 +294,9 @@ func _take_button(civ_id:String,chosen:bool)->Control:
 ## acts on it at once with the real army, says what it did or why it waits,
 ## and keeps to it. Pay settles the feud with a blood price (war_loop.gd).
 func _stance(civ_id:String,id:String,objective:String)->void:
+	# One "Go anyway" at most, and only for the latest word.
+	for child in get_children():
+		if String(child.name).begins_with("GoAnyway"):remove_child(child);child.queue_free()
 	if id=="pay":
 		_say(WarLoop.order(civ_id,objective))
 		refresh(true)
@@ -317,6 +320,9 @@ func _stance(civ_id:String,id:String,objective:String)->void:
 
 
 func _take(civ_id:String,place:Dictionary,insist:=false)->void:
+	# One "Go anyway" at most, and only for the latest word.
+	for child in get_children():
+		if String(child.name).begins_with("GoAnyway"):remove_child(child);child.queue_free()
 	var council:GDScript=load("res://scripts/war_council.gd")
 	var answer:Dictionary=council.call("order",civ_id,"take",{"place":place,"insist":insist,"card":true,"words":"Take %s%s" % [Orders.place_name(place),", go anyway" if insist else ""]})
 	_say(String(answer.get("says",answer.get("outcome",""))))
