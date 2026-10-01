@@ -396,8 +396,10 @@ static func _slim_force(force:Dictionary)->Dictionary:
 static func _cap_dead(n:int,pop:float)->int:
 	return clampi(n,0,maxi(1,ceili(pop*CLASH_DEATH_CAP)))
 
+## The official who carries the war's matters at court: the Marshal, else the
+## headman, who stands in for the war (court_war_orders.war_leader).
 static func _general()->Dictionary:
-	return Hall._relevant_official(["Marshal"])
+	return Hall._relevant_official(["Marshal","Steward"])
 
 static func _general_skill(general:Dictionary)->float:
 	var skills:Dictionary=general.get("skills",{}) if general.get("skills") is Dictionary else {}
@@ -1478,7 +1480,11 @@ static func _council()->GDScript:
 
 ## A few trackers follow their raiders' trail to find where they live (the
 ## war council's first step when nobody knows the way). Their odds are stated;
-## the roll is the op's own when they come back (_resolve_op).
+## the roll is the op's own when they come back (_resolve_op). Said once, in
+## plain words: why the trackers go first, what they do, their odds, and what
+## follows. The band goes when the way is found only while the stance toward
+## them sends one (war_council.gd: Punish or Take a town); otherwise the found
+## home goes on the map and the god gives the word.
 static func send_trackers(civ_id:String,asked:String="")->String:
 	var day:=_day()
 	var f:=front(civ_id)
@@ -1497,9 +1503,11 @@ static func send_trackers(civ_id:String,asked:String="")->String:
 	if not war.is_empty(): war["op"]=op
 	else: f["op"]=op
 	_log(civ_id,"order","war_track",{"band":band,"due":due})
-	var way:="their stores" if asked=="war_burn" else ("their chief" if asked=="war_chief" else "their towns")
+	var people:=name if name.to_lower().begins_with("the ") else "the "+name
+	var why:="their chief is out of reach for now" if asked=="war_chief" else "there is nothing of theirs to strike at yet"
 	var odds:=_track_odds_words(track_chance(civ_id,_general_skill(general)))
-	return "No one here knows where %s live, so %s cannot be reached yet. %s takes %d to follow %s's raiders' trail and find where they live. %s They should be back in about %d days. When the way is found, the war band goes." % [name,way,gname,band,name,odds,due-day]
+	var next:="When the way is found, the war band goes." if String(f.get("stance","")) in ["punish","take"] else "When they find it, it goes on our map, and the war band waits for your word."
+	return "Nobody here knows where %s live, so %s. %s takes %d to follow %s raiders' trail and find where they live. %s They should be back in about %d days. %s" % [people,why,gname,band,people,odds,due-day,next]
 
 ## Two messengers go to ask for an end to it (the war council's Seek peace).
 ## A truce or the feud's end is rolled when they come back (_resolve_op).

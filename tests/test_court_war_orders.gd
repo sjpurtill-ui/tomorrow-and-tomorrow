@@ -622,3 +622,62 @@ func test_the_last_fights_captives_hold_up_no_march()->void:
 	var r:=CC.hear(id,"Attack Tsaren with 17 troops")
 	assert_str(String(r.war.reason)).is_not_equal("busy")
 	assert_str(String(r.get("actor_says",""))).not_contains("captives")
+
+# ---------------------------------------------------------------------------
+# Who answers for the war while no one holds the Marshal's office
+# ---------------------------------------------------------------------------
+
+## An early court: the government has not reached the Marshal's office yet.
+func _no_marshal()->Dictionary:
+	GovernmentPeopleSystem.reset_for_new_world()
+	GameState.society_capacities["institutions"]=0.0
+	GovernmentPeopleSystem.initialize()
+	assert_dict(GovernmentPeopleSystem.officeholder("Marshal")).is_empty()
+	var headman:=GovernmentPeopleSystem.officeholder("Steward")
+	assert_dict(headman).is_not_empty()
+	return headman
+
+func test_with_no_marshal_the_armys_own_general_at_home_answers_for_the_war()->void:
+	var headman:=_no_marshal()
+	# The army puts a general at its head at home (military_campaign._marshal_commander):
+	# the court's war leader is that same general, never another official.
+	_train(30)
+	var home:Dictionary=MilitaryCampaign.home_army.get("commander",{})
+	assert_str(String(home.get("figure_id",""))).is_not_empty()
+	var leader:=WO.war_leader()
+	assert_str(String(leader.get("figure_id",""))).is_equal(String(home.figure_id))
+	assert_bool(bool(leader.get("stand_in",false))).is_false()
+	# Said to the headman, the order goes to that general.
+	var id:=String(Hall.summon({"person_id":int(headman.person_id)}).id)
+	var r:=CC.hear(id,"Attack Tsaren")
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.get("actor_name",""))).is_equal(String(leader.name))
+	assert_str(String(r.get("actor_says",""))).not_contains("No one holds the Marshal's office")
+
+## No Marshal, and no general to put at the army's head at home: every general
+## dead and the roll of figures full, so none can come forward. The headman
+## answers for the war and says so plainly, once in the audience.
+func test_with_no_marshal_and_no_general_the_headman_stands_in_and_says_so_once()->void:
+	var headman:=_no_marshal()
+	_train(30)
+	var day:=int(GameState.elapsed_days)
+	for figure:Dictionary in HistoricalFigures.people:
+		if String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead": HistoricalFigures.record_death(String(figure.id),day,"old age")
+	while HistoricalFigures.living_count()<HistoricalFigures.MAX_LIVING:
+		if HistoricalFigures._create("Scholar",day).is_empty(): break
+	var leader:=WO.war_leader()
+	assert_int(int(leader.get("person_id",0))).is_equal(int(headman.person_id))
+	assert_bool(bool(leader.get("stand_in",false))).is_true()
+	# Never another official: not the keeper of stores, not the pathfinder.
+	for office in ["Quartermaster","ChiefScout"]:
+		var other:=GovernmentPeopleSystem.officeholder(String(office))
+		if not other.is_empty(): assert_int(int(leader.person_id)).is_not_equal(int(other.person_id))
+	# He keeps his own sheets and gets the war's too.
+	assert_array(preload("res://scripts/court_facts.gd").offices({"office_key":"Steward"},{"person_id":int(headman.person_id)})).contains(["war","stores"])
+	var id:=String(Hall.summon({"person_id":int(headman.person_id)}).id)
+	var r:=CC.hear(id,"Attack Tsaren")
+	assert_str(String(r.get("verb",""))).is_equal("war")
+	assert_str(String(r.get("actor_says",""))).starts_with(WO.STAND_IN_WORDS)
+	var again:=CC.hear(id,"March on Tsaren")
+	assert_str(String(again.get("verb",""))).is_equal("war")
+	assert_str(String(again.get("actor_says",""))).not_contains("No one holds the Marshal's office")

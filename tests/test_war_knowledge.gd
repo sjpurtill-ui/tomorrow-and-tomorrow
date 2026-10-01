@@ -63,7 +63,7 @@ func test_an_order_to_burn_an_unfound_home_sends_trackers()->void:
 	var said:=WAR.order(civ_id,"war_burn",false)
 	assert_str(String(_op().get("objective",""))).is_equal("war_track")
 	assert_int(int(_op().get("band",0))).is_between(WAR.TRACKERS_MIN,WAR.TRACKERS_MAX)
-	assert_str(said).contains("No one here knows where")
+	assert_str(said).contains("Nobody here knows where")
 	assert_str(said).contains("raiders' trail")
 	# The stance stands: when the way is found, the war council sends the band
 	# without being told again (war_council.gd).
