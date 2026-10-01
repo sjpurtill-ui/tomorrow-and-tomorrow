@@ -24,12 +24,12 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"MILITARY COMMAND",
 		"title":"Military",
-		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","LOGISTICS"],
+		"subtabs":["FORCES","RECRUIT & DEPLOY","TRAINING","LOGISTICS","FEUDS"],
 	}
 
 func open_expanded_tab(sub:int)->bool:
 	if GeneralCampaign.active:return false
-	MilitaryCampaign.open_roster("army",sub==2,["forces","recruitment","training","support"][clampi(sub,0,3)])
+	MilitaryCampaign.open_roster("army",sub==2,["forces","recruitment","training","support","wars"][clampi(sub,0,4)])
 	return true
 
 func tab(sub:int)->Dictionary:
