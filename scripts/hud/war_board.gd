@@ -31,6 +31,7 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Strips:=preload("res://scripts/hud/force_strips.gd")
+const GeneralRecord:=preload("res://scripts/general_record.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -221,7 +222,8 @@ func _led_by(civ_id:String)->Control:
 	var selected:=0
 	for general:Dictionary in generals:
 		var commander:Dictionary=general.get("commander",{})
-		pick.add_item("%s · command %d of 5" % [String(general.name),Strips.GeneralPips.pips(float(commander.get("command",0.5)))])
+		var levers:=GeneralRecord.levers(commander)
+		pick.add_item("%s · fight %+d%%, march %+d%%" % [String(general.name),roundi(float(levers.fight)*100.0),roundi(float(levers.pace)*100.0)])
 		pick.set_item_metadata(pick.item_count-1,String(general.id))
 		if String(general.id)==chosen:selected=pick.item_count-1
 	pick.select(selected)
@@ -346,6 +348,18 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
 	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
+	var name_one:=Button.new();name_one.name="NameGeneral";name_one.text="Name a general";name_one.focus_mode=Control.FOCUS_NONE
+	name_one.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	name_one.tooltip_text="Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people."
+	name_one.pressed.connect(_name_general)
+	leader_box.add_child(name_one)
+
+
+func _name_general()->void:
+	var result:Dictionary=Commands.commission_general(MilitaryCampaign)
+	if result.has("error"):_say(String(result.error));return
+	_say(("%s is named a general. %s" if bool(result.get("new",false)) else "%s is free to lead already. %s") % [String(result.name),String(result.get("line",""))])
+	refresh(true)
 
 
 func _leader_row(c:Dictionary)->Control:
@@ -360,6 +374,15 @@ func _leader_row(c:Dictionary)->Control:
 	var name_label:=_line("%s · %s" % [String(leader.name),String(leader.title).to_lower()],15,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));words.add_child(name_label)
 	var rated:=skill_words(leader.get("commander",{}))
 	if rated!="":words.add_child(_line(rated,13,T.INK_MUTED))
+	# What their hand changes, in the engine's numbers, and what they have done.
+	var record:=Commands.record(leader)
+	var fought:=int(record.get("battles",0))
+	if fought>0:words.add_child(_line("Fought %d · won %d · lost %d" % [fought,int(record.get("won",0)),int(record.get("lost",0))],13,T.INK_MUTED))
+	var told:=PackedStringArray()
+	for said:String in [GeneralRecord.lever_line(leader.get("commander",{}),String(leader.name),float(c.get("men",0))),GeneralRecord.words(record)]:
+		if said!="":told.append(said)
+	panel.tooltip_text="
+".join(told)
 	if not (leader.get("commander",{}) as Dictionary).is_empty():
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
 		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
