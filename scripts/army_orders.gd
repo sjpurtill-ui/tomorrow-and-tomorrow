@@ -489,6 +489,7 @@ static func _go_to(force_id:int,target:Dictionary)->Dictionary:
 	if r.has("error"):
 		if formed: mc.disband_field_army(army_id)
 		return _answer("impossible","goto","order_failed",String(r.error),"")
+	_post(army_id,Vector2(float(target.x),float(target.z)))
 	var record:=army(army_id)
 	var days:=maxi(0,int(record.get("arrival_day",_today()))-_today())
 	var out:=_answer("act","goto","","","")
@@ -497,6 +498,19 @@ static func _go_to(force_id:int,target:Dictionary)->Dictionary:
 	if keep>0: out.says+=" I keep %d at home to watch the approaches." % keep
 	out.outcome=out.says
 	return out
+
+## The ground the band was sent to wait on (where its road ends, which may
+## stop short of the click): the war council does not call it home while it
+## waits there (war_council.gd _at_post).
+static func _post(army_id:int,at:Vector2)->void:
+	var mc:=_mc()
+	var index:int=mc._field_army_index(army_id)
+	if index<0: return
+	var record:Dictionary=mc.field_armies[index]
+	var heading:Variant=record.get("destination_position",{})
+	if String(record.get("status",""))=="moving" and heading is Dictionary and (heading as Dictionary).has("x"):
+		at=Vector2(float(heading.x),float(heading.get("z",at.y)))
+	record["post"]={"x":at.x,"z":at.y,"day":_today()}
 
 ## March to the spot and build a depot there (field_depots.gd).
 static func _lay_depot(force_id:int,target:Dictionary)->Dictionary:
