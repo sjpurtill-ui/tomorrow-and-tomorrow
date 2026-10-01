@@ -682,6 +682,13 @@
    "expect": {"handled": true, "state": {"training": ">before"}},
    "variants": ["recruit 20", "Raise thirty new fighters", "Call up fifteen more men to fight"]},
 
+  {"id": "home.soldiers_asked", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "user",
+   "note": "Year 183: the player typed 'raise 20 soldiers' and saw nothing happen. Every plain way of asking for soldiers calls them up and starts their drill; none is a standing order, a march or talk.",
+   "say": "raise 20 soldiers",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 20}, "confidence": 0.9},
+   "expect": {"handled": true, "state": {"training": ">before", "modifiers": "==before"}},
+   "variants": ["I want 20 soldiers", "Give me 20 warriors", "I need 20 fighters", "Train 20 soldiers", "We need twenty soldiers", "Give me 20 men"]},
+
   {"id": "home.rations", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "Double the rations for the children this winter",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},

@@ -17,6 +17,7 @@ extends GdUnitTestSuite
 const HomeOrders:=preload("res://scripts/home_orders.gd")
 const CC:=preload("res://scripts/court_commands.gd")
 const Fixtures:=preload("res://tests/court_eval/fixtures.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
 
 const USER_LINE:="Raise an army of five levies and train them and arm them."
 
@@ -303,3 +304,111 @@ func test_the_court_never_says_a_stalled_drill_is_under_way()->void:
 	var done:=HomeOrders.perform(HomeOrders.read("Train the recruits"))
 	assert_str(String(done.says)).contains("stands still")
 	assert_str(String(done.says)).not_contains("already at their drill")
+
+
+# --------------------------------------------------------------------------
+# "I asked for 20 soldiers and NOTHING happened" (year 183). The player typed
+# "raise 20 soldiers" in court. Many plain ways of asking for soldiers were
+# never read as a levy: "I want 20 soldiers" and "give me 20 warriors" became
+# a vague standing order, "give me 20 fighters" a march with nowhere to go,
+# and "train 20 soldiers" said to a town overseer went to the town council,
+# who answered "I'll train twenty folk" while nobody was called up. Every one
+# now calls up, drills and arms, or says in numbers why it cannot.
+# --------------------------------------------------------------------------
+
+const PLAYER_SOLDIERS:="raise 20 soldiers"
+const SOLDIER_ASKS:=["raise 20 soldiers","Raise 20 soldiers","I want 20 soldiers","Give me 20 soldiers","Recruit 20 soldiers","20 more soldiers","I need 20 soldiers",
+	"I want 20 warriors","Give me 20 warriors","Raise 20 warriors","I need 20 warriors","I want 20 fighters","Give me 20 fighters","I need 20 fighters",
+	"I want 20 men","Give me 20 men","Raise 20 men","Recruit 20 men","20 more men","I need 20 men","Get me 20 soldiers","We need 20 soldiers",
+	"I want an army of 20","Make 20 soldiers","Build an army of 20 soldiers","Create 20 soldiers","I want twenty soldiers","20 soldiers"]
+const SOLDIER_DRILLS:=["Train 20 soldiers","Train 20 warriors","Train 20 fighters","Train 20 men"]
+
+
+func _in_drill()->int:
+	var n:=0
+	for order:Dictionary in MilitaryCampaign.training_queue:n+=int(order.get("count",0))
+	return n
+
+
+func test_the_players_words_raise_twenty_soldiers()->void:
+	var reading:=HomeOrders.read(PLAYER_SOLDIERS)
+	assert_str(String(reading.get("kind",""))).is_equal("levy")
+	assert_int(int(reading.count)).is_equal(20)
+	assert_bool(bool(reading.recruit)).is_true()
+	var before:=_in_drill()
+	var done:=HomeOrders.perform(reading)
+	assert_bool(bool(done.ok)).is_true()
+	assert_int(int(done.raised)).is_equal(20)
+	assert_int(_in_drill()-before).is_equal(20)
+	assert_str(String(done.says)).starts_with("20 are called up")
+
+
+func test_asking_for_soldiers_in_any_words_calls_them_up()->void:
+	for said:String in SOLDIER_ASKS:
+		var r:=HomeOrders.read(said)
+		assert_str(String(r.get("kind",""))).override_failure_message("'%s' was not read as a levy: %s" % [said,str(r)]).is_equal("levy")
+		assert_bool(bool(r.get("recruit",false))).override_failure_message("'%s' did not call anyone up: %s" % [said,str(r)]).is_true()
+		assert_int(int(r.count)).override_failure_message("'%s' lost its number" % said).is_equal(20)
+	for said:String in SOLDIER_DRILLS:
+		var r:=HomeOrders.read(said)
+		assert_str(String(r.get("kind",""))).override_failure_message("'%s' was not read as a levy: %s" % [said,str(r)]).is_equal("levy")
+		assert_bool(bool(r.get("fill",false))).override_failure_message("'%s' would not call up the rest: %s" % [said,str(r)]).is_true()
+	# Look-alikes: soldiers we have, sent, lost or counted; men for other work;
+	# a march; a question.
+	for said:String in ["Send 20 soldiers to the ford","We lost 20 soldiers","I have 20 soldiers","I need 20 men on the fields","Give 20 soldiers to the war leader","Train the 20 soldiers","How many soldiers do we have?","Give me 20 soldiers to attack Tsaren","Put 20 men on building"]:
+		var r:=HomeOrders.read(said)
+		assert_bool(String(r.get("kind",""))=="levy" and (bool(r.get("recruit",false)) or bool(r.get("fill",false)))).override_failure_message("'%s' called people up: %s" % [said,str(r)]).is_false()
+
+
+func test_train_twenty_soldiers_drills_twenty()->void:
+	var before:=_in_drill()
+	var done:=HomeOrders.perform(HomeOrders.read("Train 20 soldiers"))
+	assert_bool(bool(done.ok)).is_true()
+	assert_int(_in_drill()-before).is_equal(20)
+
+
+## Whoever the god speaks to in court, the levy is carried out by the same
+## mechanic: the war leader, the headman, a town's overseer (who once sent it
+## to the town council as a lesson to teach).
+func test_the_court_raises_them_whoever_hears_it()->void:
+	for entry:Dictionary in Hall.summonable():
+		MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
+		var audience:=Hall.summon(entry.target as Dictionary)
+		if audience.is_empty():continue
+		for said:String in [PLAYER_SOLDIERS,"I want 20 soldiers","Train 20 soldiers"]:
+			MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
+			var heard:=CC.hear(String(audience.id),said,{})
+			assert_bool(bool(heard.get("handled",false))).override_failure_message("'%s' to %s was not heard as an order" % [said,String(entry.name)]).is_true()
+			assert_int(_in_drill()).override_failure_message("'%s' to %s raised nobody: %s" % [said,String(entry.name),String(heard.get("outcome",""))]).is_equal(20)
+			assert_str(String(heard.get("outcome",""))).override_failure_message("'%s' to %s became a standing order" % [said,String(entry.name)]).not_contains("standing order")
+
+
+## With nobody free, the court says so with the engine's own count.
+func test_nobody_free_is_said_with_the_numbers()->void:
+	var adults:=MilitaryCampaign.recruitment_capacity()
+	MilitaryCampaign.raise_recruits(adults)
+	MilitaryCampaign.start_training("levy","improvised",MilitaryCampaign.aggregate_recruits)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_false()
+	assert_str(String(done.says)).contains("0 of the 20 you asked for")
+	assert_str(String(done.says)).contains("Of our %d able adults at home" % adults)
+	assert_str(String(done.outcome)).starts_with("Nothing is set in motion")
+
+
+## Too little wood for all their spears at once is no reason to make none: a
+## workshop line makes them as the stores fill, and the court says so.
+func test_weapons_short_of_wood_go_to_a_line_not_nowhere()->void:
+	MilitaryCampaign.equipment_queue.clear()
+	for item in ["spear","improvised"]:MilitaryCampaign.military_inventory[item]=0
+	GameState.resource_stockpiles["Timber"]=3.0
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var weapon:=String(MilitaryCampaign.training_queue.back().weapon)
+	var line:={}
+	for job:Dictionary in MilitaryCampaign.equipment_queue:
+		if String(job.get("item",""))==weapon and bool(job.get("persistent",false)):line=job
+	assert_bool(line.is_empty()).override_failure_message("no workshop line makes their %s: %s" % [weapon,String(done.says)]).is_false()
+	var timber:=ceili(float((MilitaryCampaign._equipment_recipe(weapon).materials as Dictionary).get("Timber",0.0))*20)
+	assert_str(String(done.says)).contains("a workshop line is set to make them one by one as the stores fill")
+	assert_str(String(done.says)).contains("only 3 of the %d Timber" % timber)
+	assert_str(String(done.says)).contains("once their %s are in hand" % String(HomeOrders.ITEM_NAMES.get(weapon,weapon)))

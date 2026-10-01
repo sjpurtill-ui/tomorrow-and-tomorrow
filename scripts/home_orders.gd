@@ -89,6 +89,18 @@ const WANTED_FIGHTERS:="(?i)\\b(levies|levy|recruits?|conscripts?|draftees?|(?:n
 ## Only the fighters asked for, nothing else said: "10 levies", "ten more
 ## recruits!".
 const BARE_ASK:="(?i)^(?:\\d+|[a-z]+)(?: (?:more|new|fresh))? (?:levies|recruits|conscripts|draftees|fighters|warriors|men|soldiers|spearmen|archers|bowmen|troops)[.!]*$"
+## A number said with the fighters themselves: "20 soldiers", "twenty more
+## warriors", "a dozen fighting men", "an army of 20", "a band of thirty".
+## Asked for ("I want 20 soldiers", "give me 20 fighters", "we need twenty
+## warriors", "make 20 soldiers") they are new fighters to call up; "train 20
+## soldiers" drills those waiting and calls up the rest.
+const NUMBER_SAID:="(?:\\d{1,5}|a dozen|a score|a hundred|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)"
+const COUNTED_FIGHTERS:="(?i)\\b"+NUMBER_SAID+"\\s+(?:(?:more|new|fresh|extra|additional|able|strong|young|armed|good)\\s+)?(?:soldiers|warriors|fighters|troops|spearmen|archers|bowmen|levies|recruits|fighting men|men[- ]at[- ]arms|armed men)\\b|\\b(?:army|war ?band|band|host|force|levy) of\\s+"+NUMBER_SAID+"\\b"
+## "20 men" are fighters only when nothing else is asked of them ("20 men for
+## the fields" is the daily work's): said alone, or to fight.
+const COUNTED_MEN:="(?i)\\b"+NUMBER_SAID+"\\s+(?:(?:more|new|fresh|extra|able|strong|young|good)\\s+)?men(?:\\s+(?:to fight|who can fight|under arms|to bear arms|for (?:the |a |our )?(?:band|army|host|levy|war ?band|fight|war)))?[.!]*$"
+## Asking for fighters to be made: "make 20 soldiers", "create an army of 20".
+const MAKE_FIGHTERS:="(?i)\\b(make|create|build|produce|put together|train up|get|find)\\b"
 ## Fighters we already have, named as ours: "the 7 levies", "our recruits".
 const OUR_NAMED:="(?i)\\b(the|our|those|these|my)\\s+(?!new\\b|more\\b|fresh\\b)(?:[a-z0-9]+\\s+)?(levies|soldiers|fighters|warriors|troops|recruits)\\b"
 ## "Levy a tax", "levy ten hides from each family": goods, not fighters.
@@ -369,7 +381,10 @@ static func levy_reading(text:String)->Dictionary:
 	var named:=lower if verb==null else lower.substr(0,verb.get_start())+" "+lower.substr(verb.get_end())
 	var noun:=_has(named,FIGHTER_NOUNS)
 	var n:=number_in(lower)
-	var other:=_has(lower,OTHER_CALLINGS) and not noun
+	# A number said with the fighters ("20 soldiers", "an army of 20", "raise
+	# 20 men"): new fighters, whatever else the words call them.
+	var counted:=_has(named,COUNTED_FIGHTERS) or _has(named.strip_edges(),COUNTED_MEN)
+	var other:=_has(lower,OTHER_CALLINGS) and not noun and not counted
 	var recruit:=false
 	if verb!=null:
 		var word:=verb.get_string(1)
@@ -378,16 +393,19 @@ static func levy_reading(text:String)->Dictionary:
 		# "raise" and "call up" need fighters named ("raise the wall"), or a
 		# levy raised as a thing ("raise a levy of 10 men"), never a tax.
 		if word=="recruit": recruit=not other
-		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or (n>0 and not other and not _has(lower,LEVY_GOODS))
-		else: recruit=noun or (_has(named,LEVY_NOUN) and not _has(lower,LEVY_GOODS))
+		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or counted or (n>0 and not other and not _has(lower,LEVY_GOODS))
+		else: recruit=noun or counted or (_has(named,LEVY_NOUN) and not _has(lower,LEVY_GOODS))
 		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): recruit=false
 	# Fighters we already have, named as ours ("the 7 levies", "our recruits").
 	var ours:=_has(lower,OUR_NAMED)
 	# A number of new fighters wanted, with no calling verb: "I need 10
-	# levies", "give me ten more levies", "10 levies", "have 10 levies ready".
-	if not recruit and verb==null and n>0 and not ours and not other and _has(lower,WANTED_FIGHTERS) and (_has(lower,WANT_VERBS) or _has(lower,BARE_ASK)):
+	# levies", "give me ten more levies", "10 levies", "have 10 levies ready",
+	# "I want 20 soldiers", "give me twenty warriors", "make 20 soldiers".
+	if not recruit and verb==null and n>0 and not ours and not other and (_has(lower,WANTED_FIGHTERS) or counted) and (_has(lower,WANT_VERBS) or _has(lower,BARE_ASK) or (counted and _has(lower,MAKE_FIGHTERS))):
 		recruit=true
-	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")))
+	# "Train 20 soldiers": a number of fighters to drill that are not ours yet
+	# drills those waiting and calls up the rest (fill, below).
+	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")) or (counted and not ours))
 	if not recruit and not drill: return {}
 	# "Train 10 levies": ten in drill, those waiting first and the rest called
 	# up; "train the recruits" drills only those already called up.
@@ -431,14 +449,26 @@ static func _recruit(reading:Dictionary)->Dictionary:
 	var waiting:=int(r.get("recruit_reserve",mc.aggregate_recruits))
 	var out:={"ok":raised>0,"kind":"recruit","count":raised,"asked":n,"waiting":waiting}
 	if raised<=0:
-		out.says="There is nobody left to call up: every able adult is already under arms or away."
-		out.outcome="Nothing is set in motion: no free adults remain to be called up."
+		out.says=_nobody_free_says(mc,n)
+		out.outcome=_nobody_free_outcome(mc,n)
 		return out
 	var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
 	var unnamed:=" You named no number, so I called up %d." % raised if not named else ""
 	out.says="%d are called up and leave their work in the fields and workshops.%s%s %d now wait for weapons and drill." % [raised,short,unnamed,waiting]
 	out.outcome="%d called up from our own people; %d recruits now wait for weapons and drill, and that much less work is done at home." % [raised,waiting]
 	return out
+
+## Nobody free to call up, with the engine's own count: the able adults at
+## home (MilitaryCampaign.recruitment_capacity) and how many of them are
+## already under arms, in drill or away with the bands.
+static func _nobody_free_says(mc:Variant,asked:int)->String:
+	var adults:=int(mc.recruitment_capacity())
+	var taken:=int(mc._mobilized_count())
+	if adults<=0: return "Nobody can be called up: 0 of the %d you asked for. No able adults are at home; all are away." % asked
+	return "Nobody can be called up: 0 of the %d you asked for. Of our %d able adults at home, %d are already under arms, in drill or with the bands." % [asked,adults,mini(taken,adults)]
+
+static func _nobody_free_outcome(mc:Variant,asked:int)->String:
+	return "Nothing is set in motion: 0 of %d called up, no free adults (%d able, %d under arms)." % [asked,int(mc.recruitment_capacity()),int(mc._mobilized_count())]
 
 ## Fighters stood down (MilitaryCampaign.demobilize): those hurt first, then
 ## the recruits waiting, then the fighters at home; bands away in the field
@@ -515,8 +545,8 @@ static func _levy(reading:Dictionary)->Dictionary:
 			says.append("%d are called up and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
 			done.append("%d called up from our own people" % raised)
 		elif int(mc.aggregate_recruits)<=0:
-			out.says="There is nobody left to call up: every able adult is already under arms or away."
-			out.outcome="Nothing is set in motion: no free adults remain to be called up."
+			out.says=_nobody_free_says(mc,n)
+			out.outcome=_nobody_free_outcome(mc,n)
 			return out
 		else:
 			says.append("There is nobody left to call up, so I drill those already waiting.")
@@ -710,6 +740,13 @@ static func _put_in_hand(mc:Variant,weapon:String,short:int,stock:int)->Dictiona
 		for m in (recipe.get("materials",{}) as Dictionary):
 			materials.append("%d %s" % [ceili(float(recipe.materials[m])*short),String(m)])
 		return {"says":"the workshops will make %d more, about %d days of work, and %s are set aside for it now." % [short,ceili(float(queued.get("work_days",0.0))),", ".join(materials) if not materials.is_empty() else "nothing"]}
+	if String(queued.error).begins_with("Insufficient") and mc.equipment_queue.size()<int(mc.production_line_capacity()):
+		# Not enough in the stores for all of them at once: a workshop line
+		# makes them one by one as the stores fill (it takes the materials item
+		# by item), rather than nothing at all.
+		var line:Dictionary=mc.start_production_line(weapon,stock+short)
+		if not line.has("error"):
+			return {"says":"the stores hold %s, so a workshop line is set to make them one by one as the stores fill, %d to keep in store." % [_stores_for(mc,weapon,short),stock+short],"line":true}
 	if not String(queued.error).begins_with("All "):
 		return {"error":_plain_shortage(String(queued.error))}
 	# Every line is taken: a paused line is turned over to them.
@@ -746,6 +783,20 @@ static func _grow_batch(mc:Variant,job:Dictionary,weapon:String,count:int)->Dict
 	job["count"]=int(job.get("count",0))+count
 	job["required_days"]=float(job.get("required_days",0.0))+per*count
 	return {"days":per*count,"materials":", ".join(words) if not words.is_empty() else "nothing"}
+
+
+## What the stores hold against what `count` of this weapon needs, for the
+## material that runs short first: "only 2 of the 13 Timber".
+static func _stores_for(mc:Variant,weapon:String,count:int)->String:
+	var recipe:Dictionary=mc._equipment_recipe(weapon)
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	var worst:="";var worst_share:=2.0
+	for m in (recipe.get("materials",{}) as Dictionary):
+		var need:=float(recipe.materials[m])*count
+		var share:=float(stocks.get(m,0.0))/maxf(0.001,need)
+		if share<worst_share: worst_share=share;worst=String(m)
+	if worst=="": return "too little for them all"
+	return "only %d of the %d %s they need" % [floori(float(stocks.get(worst,0.0))),ceili(float(recipe.materials[worst])*count),worst]
 
 
 ## A workshop's refusal in the people's words.
