@@ -60,9 +60,11 @@ func test_the_counter_draws_on_a_canvas()->void:
 	canvas.queue_redraw()
 	await get_tree().process_frame
 	await get_tree().process_frame
+	# The plate stands where it was asked; the footprint takes in the days tab.
 	var rect:Rect2=drawn.rect
-	assert_vector(rect.size).is_equal(Counter.BASE)
-	assert_vector(rect.get_center()).is_equal_approx(Vector2(200,100),Vector2(1,1))
+	assert_vector(rect.position).is_equal_approx(Vector2(200,100)-Counter.BASE*0.5,Vector2(1,1))
+	assert_float(rect.size.y).is_equal_approx(Counter.BASE.y,0.5)
+	assert_float(rect.size.x).is_greater(Counter.BASE.x)
 	canvas.queue_free()
 
 func test_those_in_drill_lead_the_army_bar()->void:
@@ -125,3 +127,16 @@ func test_drilling_outside_the_lines_is_listed_and_grouped()->void:
 	assert_str(Board.drilling_words(groups[0])).is_equal("2 Levy")
 	assert_str(Board.drilling_words(groups[1])).contains("3 drafts for")
 	WorldSimulation.clear()
+
+func test_the_levy_at_home_stands_on_the_map_with_those_in_drill()->void:
+	var levy:={"pos":Vector2(10,20),"troops":9,"drilling":4,"full":9,"morale":0.8,"glyph":"club","general":"Corvan of the Birch","town":"Sean Springs","era":0,"branch":"foot"}
+	var marks:=Overlay._marks({"stage":"reckoned","home_levy":levy,"garrisons":[]},[],[],{})
+	assert_int(marks.size()).is_equal(1)
+	var home:Dictionary=marks[0]
+	assert_bool(bool(home.home_levy)).is_true()
+	assert_int(int(home.troops)).is_equal(9)
+	var data:=Overlay.counter_data(home,Color.BLUE)
+	assert_str(String(data.tab)).is_equal("+4 in drill")
+	assert_str(String(data.glyph)).is_equal("club")
+	# Nobody at home and nobody drilling: no mark.
+	assert_array(Overlay._marks({"stage":"reckoned","home_levy":{},"garrisons":[]},[],[],{})).is_empty()

@@ -74,7 +74,8 @@ static func supply_color(state:String)->Color:
 		"starving": return OXBLOOD
 	return Color(INK,0.35)
 
-## Draws the counter centred at `center`; returns the plate's rectangle.
+## Draws the counter centred at `center`; returns the ground it covers (the
+## plate and any tab at its side).
 static func draw(canvas:CanvasItem,center:Vector2,data:Dictionary,scale:float=1.0,alpha:float=1.0)->Rect2:
 	var size:=BASE*scale
 	var rect:=Rect2((center-size*0.5).round(),size.round())
@@ -122,6 +123,7 @@ static func draw(canvas:CanvasItem,center:Vector2,data:Dictionary,scale:float=1.
 	elif supply!="":
 		canvas.draw_circle(dot,3.6*scale,Color(supply_color(supply),a))
 		canvas.draw_arc(dot,3.6*scale,0.0,TAU,14,Color(INK,0.6*a),1.0,true)
+	var footprint:=rect
 	# On the march: how far along, as a strip along the plate's foot, and
 	# the days still to go on a tab at its side.
 	if data.has("march_done"):
@@ -131,15 +133,10 @@ static func draw(canvas:CanvasItem,center:Vector2,data:Dictionary,scale:float=1.
 		if done>0.0: canvas.draw_rect(Rect2(foot.position,Vector2(foot.size.x*done,foot.size.y)),Color(MARCH,a))
 		var days:=int(data.get("days_left",0))
 		if days>0:
-			var tab_text:="%d %s" % [days,"day" if days==1 else "days"]
-			var tfs:=maxi(9,roundi(12.0*scale))
-			var tw:=font.get_string_size(tab_text,HORIZONTAL_ALIGNMENT_LEFT,-1,tfs).x
-			var tab:=Rect2(Vector2(rect.end.x-1.0,rect.position.y+rect.size.y*0.5-9.0*scale),Vector2(tw+18.0*scale,18.0*scale))
-			canvas.draw_rect(tab,Color(PAPER,0.96*a))
-			canvas.draw_rect(tab,Color(INK,0.75*a),false,1.0)
-			canvas.draw_string(font,Vector2(tab.position.x+5.0*scale,tab.position.y+13.0*scale),tab_text,HORIZONTAL_ALIGNMENT_LEFT,-1,tfs,Color(INK,a))
-			var tip:=Vector2(tab.end.x-4.0*scale,tab.get_center().y)
-			canvas.draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-5.0,-4.0)*scale,tip+Vector2(-5.0,4.0)*scale]),Color(MARCH,a))
+			footprint=footprint.merge(_tab(canvas,rect,"%d %s" % [days,"day" if days==1 else "days"],font,scale,a,true))
+	# A word on a tab at the side (those in drill behind the levy at home).
+	if String(data.get("tab",""))!="" and not data.has("march_done"):
+		footprint=footprint.merge(_tab(canvas,rect,String(data.tab),font,scale,a,false))
 	# The edge: ink, gold when selected, broken when the report is stale.
 	if stale:
 		var step:=6.0*scale
@@ -167,7 +164,21 @@ static func draw(canvas:CanvasItem,center:Vector2,data:Dictionary,scale:float=1.
 	if state!="":
 		var heading:Vector2=data.get("heading",Vector2.RIGHT)
 		BattleMarks.draw_state(canvas,Vector2(rect.position.x-1.0*scale,rect.position.y+1.0*scale),state,maxf(5.0,6.0*scale),a,heading)
-	return rect
+	return footprint
+
+## A paper tab on the plate's right side: the days to go (with the march's
+## arrow) or a word.
+static func _tab(canvas:CanvasItem,rect:Rect2,tab_text:String,font:Font,scale:float,a:float,arrow:bool)->Rect2:
+	var tfs:=maxi(9,roundi(12.0*scale))
+	var tw:=font.get_string_size(tab_text,HORIZONTAL_ALIGNMENT_LEFT,-1,tfs).x
+	var tab:=Rect2(Vector2(rect.end.x-1.0,rect.position.y+rect.size.y*0.5-9.0*scale),Vector2(tw+(18.0 if arrow else 10.0)*scale,18.0*scale))
+	canvas.draw_rect(tab,Color(PAPER,0.96*a))
+	canvas.draw_rect(tab,Color(INK,0.75*a),false,1.0)
+	canvas.draw_string(font,Vector2(tab.position.x+5.0*scale,tab.position.y+13.0*scale),tab_text,HORIZONTAL_ALIGNMENT_LEFT,-1,tfs,Color(INK,a))
+	if arrow:
+		var tip:=Vector2(tab.end.x-4.0*scale,tab.get_center().y)
+		canvas.draw_colored_polygon(PackedVector2Array([tip,tip+Vector2(-5.0,-4.0)*scale,tip+Vector2(-5.0,4.0)*scale]),Color(MARCH,a))
+	return tab
 
 ## A small green sprig: the band forages and hunts as it goes.
 static func _sprig(canvas:CanvasItem,at:Vector2,r:float,a:float)->void:
