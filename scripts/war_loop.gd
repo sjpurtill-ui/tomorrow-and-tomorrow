@@ -55,6 +55,7 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const Scale:=preload("res://scripts/conflict_scale.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+const COUNCIL_PATH:="res://scripts/war_council.gd"
 const Standing:=preload("res://scripts/standing.gd")
 
 const VERSION:=1
@@ -114,6 +115,9 @@ const PRICE_MIN:=10.0
 ## A feud settled (a blood price, a parley, a marriage) keeps the raiders
 ## home this long.
 const SETTLED_DAYS:=3*365
+## "Bring me their chief" stands this long: a band of ours that beats the
+## defenders of their chief town within it takes him (_chief_seized).
+const CHIEF_DAYS:=180
 ## A people with no town of its own left and fewer than this many living is
 ## broken past feuding (broken()): a band of three would be most of its men.
 const BROKEN_PEOPLE:=10.0
@@ -240,6 +244,28 @@ static func _our_pop()->float:
 
 static func _band_size(pop:float,share:float)->int:
 	return maxi(3,roundi(pop*clampf(share,MOBILIZE_MIN,MOBILIZE_MAX)))
+
+## Our soldiers as the war council counts them (war_council.gd _forces): at
+## home, free to go beyond the watch that stays, and all under arms.
+static func _soldiers()->Dictionary:
+	var forces:Dictionary=_council().call("_forces")
+	var all:=int(forces.get("home",0))
+	for army in WorldSimulation.military.field_armies:
+		if army is Dictionary: all+=maxi(0,int((army as Dictionary).get("troops",0)))
+	return {"home":int(forces.get("home",0)),"free":int(forces.get("free",0)),"all":all}
+
+## Their fighters as the world counts their army (land_military_population).
+static func _their_fighters(civ_id:String)->int:
+	var civ:=_civ(civ_id)
+	if civ.is_empty() or not WorldSimulation.world.has_method("land_military_population"): return 0
+	return floori(float(WorldSimulation.world.land_military_population(civ)))
+
+## "They have about 240 under arms; we have 90." from the real counts.
+static func _strength_words(civ_id:String)->String:
+	var theirs:=_their_fighters(civ_id)
+	var ours:=int(_soldiers().all)
+	var they:="They keep no soldiers to speak of" if theirs<=0 else "They have about %s under arms" % EraWords.grouped(theirs)
+	return "%s; %s." % [they,"we have none trained" if ours<=0 else "we have %s" % EraWords.grouped(ours)]
 
 static func ratio(civ_id:String)->float:
 	## Their fighting strength over ours: people, warriors and readiness on one
@@ -633,7 +659,21 @@ static func _cause_words(civ_id:String,cause:String)->String:
 # Raids and skirmishes
 # --------------------------------------------------------------------------
 
+## THEIR RAID ON US, fought by the one war engine. A simulated people that
+## knows a town of ours and has men to spare sends a real band by the land
+## road (its own war council, war_council.gd: our watch may go out to meet it,
+## the map shows it coming, the battle is the engine's and both armies bury
+## their own). Otherwise their raiders fall on our people out at the work
+## here and now: men of their real army (a band formed from their levy, or
+## their counted fighters), against our watch (our real soldiers at home,
+## when the war leader keeps the approaches: Defend) or against those out at
+## the work. The dead on each side come off the real ledgers: their army,
+## our army or our people.
 static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=false)->Dictionary:
+	if not ambush and _their_council_marches(civ_id,day,cause):
+		_log(civ_id,"raid_called","%s's war leader calls a raid on us, by the land road." % _name(civ_id),{"cause":cause})
+		_stat("raids_marched")
+		return {}
 	var f:=front(civ_id)
 	var name:=_name(civ_id)
 	var key:="raid:%s:%d" % [civ_id,day]
@@ -644,20 +684,36 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	if ambush and target=="herds" and not "animal_taming" in GameState.known_discoveries: target="hunters"
 	var t:Dictionary=TARGETS[target]
 	var guarded:=int(f.guard_until)>day
-	var their_n:=_band_size(_their_pop(civ_id),rng.randf_range(0.05,0.07) if skirmish else rng.randf_range(0.03,0.05))
-	# Those they lie in wait for are the few out at the work, not a war band.
-	var our_n:=_band_size(_our_pop(),rng.randf_range(0.02,0.035) if ambush and not guarded else (rng.randf_range(0.04,0.06) if (skirmish or guarded) else rng.randf_range(0.02,0.035)))
-	var civ:=_civ(civ_id)
+	# Their raiders: the benchmark share of their people (3-7%), as far as
+	# their real army has the men.
+	var want:=_band_size(_their_pop(civ_id),rng.randf_range(0.05,0.07) if skirmish else rng.randf_range(0.03,0.05))
+	var raiders:=_their_raiders(civ_id,want,name)
+	var their_n:=int(raiders.get("n",0))
+	if their_n<RAIDERS_MIN:
+		_log(civ_id,"stood_down","No raiders came from %s: they have too few under arms to send." % name,{"cause":cause})
+		_stat("raids_unmanned")
+		return {}
 	var general:=_general()
-	var attacker:=_band("%s raiders" % name,their_n,float(civ.get("knowledge",0.15)),float(civ.get("military_readiness",0.5)),"their war leader",0.5)
-	var defender:=_band("%s" % String(GameState.settlement_name),our_n,_our_tech(),0.55 if guarded else 0.4,String(general.get("name","")),_general_skill(general) if guarded else 0.4)
+	var mc:Variant=WorldSimulation.military
+	# Ours: the watch at the approaches (our real soldiers at home) while the
+	# war leader keeps it; else those out at the work, who are no soldiers.
+	var soldiers:bool=guarded and not ambush and mc!=null and int(mc.home_army.get("troops",0))>0 and not bool(mc._home_battle_running())
+	var defender:Dictionary
+	var our_n:=0
+	if soldiers:
+		defender=mc._home_defense_force(true)
+		our_n=int(defender.get("troops",0))
+	else:
+		our_n=_band_size(_our_pop(),rng.randf_range(0.02,0.035) if ambush else (rng.randf_range(0.04,0.06) if skirmish else rng.randf_range(0.02,0.035)))
+		defender=_band(String(GameState.settlement_name),our_n,_our_tech(),0.4,String(general.get("name","")),0.4)
 	# An ambush strikes from cover; the watch at the approaches takes that away.
-	var fight:=_clash(attacker,defender,1.35 if guarded else (0.85 if ambush else 1.0),key)
+	var fight:=_clash(raiders.force,defender,1.35 if guarded else (0.85 if ambush else 1.0),key)
 	var won:=bool(fight.won)
 	var lethal:=bool(t.lethal)
-	var our_dead:=_cap_dead(int(fight.def_dead),_our_pop()) if lethal else 0
-	var their_dead:=_cap_dead(int(fight.att_dead),_their_pop(civ_id))
-	if not skirmish and not won: their_dead=mini(their_dead,1)
+	var our_dead:=0
+	if soldiers: our_dead=_commit_watch(fight,defender,civ_id,key)
+	else: our_dead=_cap_dead(_killed(fight.get("result",{}),"defender"),_our_pop()) if lethal else 0
+	var their_dead:=_commit_raiders(civ_id,raiders,fight,key)
 	var stock:=Hall.player_stock("Food")
 	var loot:=0.0
 	# They came for blood, not stores: an ambush carries off little.
@@ -669,8 +725,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	var captives:=0
 	if won and lethal and target in ["gathering","hunters","herds"] and rng.randf()<(0.35 if ambush else (0.3 if skirmish else 0.18)): captives=1
 	var names:=_names(our_dead,key,0.5 if target in ["gathering","racks"] else 0.15)
-	our_dead=_our_deaths(our_dead)
-	their_dead=_their_deaths(civ_id,their_dead)
+	if not soldiers: our_dead=_our_deaths(our_dead)
 	captives=_our_captives_lost(captives,civ_id)
 	Hall._shift_relation(civ_id,-0.06 if skirmish else -0.04,0.14 if skirmish else 0.1)
 	var rivals:=_rivals()
@@ -682,7 +737,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	f["last_harm"]=day
 	if skirmish: f["last_skirmish"]=day
 	f["taken"]=taken
-	f["last_raid"]={"day":day,"target":target,"their_n":their_n,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"skirmish":skirmish,"ambush":ambush,"cause":cause,"names":names}
+	f["last_raid"]={"day":day,"target":target,"their_n":their_n,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"skirmish":skirmish,"ambush":ambush,"cause":cause,"names":names,"watch":soldiers}
 	_tally(civ_id,"raids",our_dead+captives,their_dead)
 	_mark_harm(civ_id,day)
 	_stat("ambushes" if ambush else ("skirmishes" if skirmish else "raids"))
@@ -694,15 +749,21 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	# Vengeance that drew no blood is not yet paid: they may come again.
 	if cause=="vengeance" and our_dead+captives<=0 and (f.pending as Dictionary).is_empty() and float(f.get("their_exh",0.0))<ENEMY_SPENT and rng.randf()<0.5:
 		_schedule(civ_id,day+rng.randi_range(60,240),"vengeance",key)
-	# Told plainly: who came, where, who died, what was taken, and why.
+	# Told plainly: who came, where, who met them, who died, what was taken, and why.
 	var where:=String(t.words)
 	var text:=""
+	var who:=String(t.who)
+	if soldiers: who="watch"
 	if target=="scouts":
 		text="%d %s men caught %s in the open and drove them home. They took %d Food from the packs." % [their_n,name,where,roundi(taken)]
 	elif ambush:
 		text="%d %s men lay in wait for our %s and fell on them. %s" % [their_n,name,String(t.who),_dead_words(our_dead,names,String(t.who))]
 		if their_dead>0: text+=" %d of theirs fell." % their_dead
 		if taken>=1.0: text+=" They took %d Food." % roundi(taken)
+	elif soldiers:
+		text="%d %s fighters came for %s and our watch of %d met them at the approaches. %s" % [their_n,name,where,our_n,_dead_words(our_dead,names,"watch")]
+		if their_dead>0: text+=" %d of theirs fell." % their_dead
+		text+=" They took %d Food." % roundi(taken) if taken>=1.0 else " They took nothing."
 	elif skirmish:
 		text="%d %s fighters crossed the border at %s and our people met them. %s" % [their_n,name,where,_dead_words(our_dead,names,String(t.who))]
 		if their_dead>0: text+=" %d of theirs fell." % their_dead
@@ -712,15 +773,90 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		text+=" They carried off %d Food." % roundi(taken) if taken>=1.0 else " They were driven off empty-handed."
 		if their_dead>0: text+=" %d of the raiders did not go home." % their_dead
 	if captives>0: text+=" One of ours was taken away with them."
-	if guarded and not won: text+=" The watch at the approaches held."
+	if guarded and not won and not soldiers: text+=" The watch at the approaches held."
 	text+=" It was for %s." % _cause_words(civ_id,cause) if cause!="" else ""
 	var title:="%s Ambush Our %s" % [name,_cap(String(t.who))] if ambush else "%s %s at %s" % [name,"Fighters" if skirmish else "Raiders",_title_place(where.trim_prefix("our "))]
 	var seen:=_observe(key,title,String(WHERE.get(target,"")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
 	_chronicle(key,title,text,"moment" if our_dead>0 or skirmish or captives>0 else "notice",civ_id,seen)
 	ForeignDiplomacy.remember(civ_id,"Our %s went against the god's people at %s and came home with %d Food." % ["fighters" if skirmish else "raiders",where,roundi(taken)])
-	_log(civ_id,"ambush" if ambush else ("skirmish" if skirmish else "raid"),text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause})
+	_log(civ_id,"ambush" if ambush else ("skirmish" if skirmish else "raid"),text,{"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives,"target":target,"cause":cause,"watch":soldiers})
 	_file(civ_id,"raided",text,day)
 	return f.last_raid
+
+## The fewest raiders worth the name.
+const RAIDERS_MIN:=3
+
+## A simulated people that knows a town of ours and has men to spare: its
+## war council sends the raid as a real band (war_council.call_raid). True
+## when the raid went to their council.
+static func _their_council_marches(civ_id:String,day:int,cause:String)->bool:
+	if not WorldSimulation.enabled or not WorldSimulation.actors.has(civ_id): return false
+	return bool(WorldSimulation.scoped(civ_id,func()->bool:
+		var council:=_council()
+		if (council.call("known_towns","human") as Array).is_empty(): return false
+		if int((council.call("_forces") as Dictionary).get("free",0))<RAIDERS_MIN: return false
+		council.call("call_raid","human",cause,"war_loop:%s:%d" % [civ_id,day])
+		return true))
+
+## Their raiders, out of their real army: {n, force, band_id}. In a world of
+## simulated peoples a band formed from their own levy at home (their watch
+## stays), which fights and is folded back (_commit_raiders); else as many of
+## their counted fighters (CivilizationSystem.land_military_population).
+static func _their_raiders(civ_id:String,want:int,name:String)->Dictionary:
+	if WorldSimulation.enabled and WorldSimulation.actors.has(civ_id):
+		return WorldSimulation.scoped(civ_id,func()->Dictionary:
+			var mc:Variant=WorldSimulation.military
+			var home:=int(mc.home_army.get("troops",0))
+			var n:=mini(want,home-ceili(float(home)*0.2))
+			if n<RAIDERS_MIN: return {"n":0}
+			var made:Dictionary=mc.create_field_army(n,"%s raiders" % name)
+			if made.has("error"): return {"n":0}
+			var band:Dictionary=made.army
+			return {"n":int(band.get("troops",0)),"force":band.duplicate(true),"band_id":int(band.get("army_id",0))})
+	var civ:=_civ(civ_id)
+	var have:=floori(float(WorldSimulation.world.land_military_population(civ))) if WorldSimulation.world.has_method("land_military_population") else 0
+	var n:=mini(want,have)
+	if n<RAIDERS_MIN: return {"n":0}
+	return {"n":n,"force":_band("%s raiders" % name,n,float(civ.get("knowledge",0.15)),float(civ.get("military_readiness",0.5)),"their war leader",0.5),"band_id":0}
+
+## Those of a side killed in a fight, as the engine counts them (its rounds).
+static func _killed(result:Dictionary,side:String)->int:
+	var n:=0
+	for r in result.get("rounds",[]):
+		if r is Dictionary: n+=int(((r as Dictionary).get(side+"_casualties",{}) as Dictionary).get("killed",0))
+	return n
+
+## Our watch fought them: the fight is committed to our real army at home
+## (MilitaryCampaign: its dead, hurt and scattered, the watch's neighbours who
+## stood with it sent back to work), recorded like any battle of ours. The
+## killed of ours.
+static func _commit_watch(fight:Dictionary,defender:Dictionary,civ_id:String,key:String)->int:
+	var mc:Variant=WorldSimulation.military
+	var result:Dictionary=(fight.get("result",{}) as Dictionary).duplicate(true)
+	result["home_side"]="defender"
+	result["home_force_kind"]="field"
+	result["militia_id"]=int(defender.get("emergency_militia_id",-1))
+	result["campaign_mode"]="defensive"
+	result["threat"]={"source_civ_id":civ_id,"source_name":_name(civ_id),"incident_kind":"raid","campaign_mode":"defensive","war_loop":key}
+	mc._commit_campaign_battle(result)
+	return _killed(result,"defender")
+
+## Their raiders' losses off their real army: a simulated people's band takes
+## the fight (civilization_combat.commit_enemy) and what is left of it goes
+## back into their levy; else their counted fighters and people. The killed.
+static func _commit_raiders(civ_id:String,raiders:Dictionary,fight:Dictionary,key:String)->int:
+	var result:Dictionary=(fight.get("result",{}) as Dictionary).duplicate(true)
+	var killed:=_killed(result,"attacker")
+	var band_id:=int(raiders.get("band_id",0))
+	if band_id>0 and WorldSimulation.actors.has(civ_id):
+		result["home_side"]="defender"
+		result["threat"]={"source_civ_id":civ_id,"owned_target":{"actor":civ_id,"field_id":band_id,"city_id":""},"war_loop":key}
+		preload("res://scripts/civilization_combat.gd").commit_enemy(result)
+		WorldSimulation.scoped(civ_id,func()->void:
+			var mc:Variant=WorldSimulation.military
+			if mc._field_army_index(band_id)>=0: mc.disband_field_army(band_id))
+		return killed
+	return _their_deaths(civ_id,_cap_dead(killed,_their_pop(civ_id)))
 
 ## Where an ambush waits: people out at their work in the open.
 const AMBUSHED:=["hunters","gathering","herds"]
@@ -789,10 +925,8 @@ static func declare(civ_id:String,day:int,cause:String,ally:String="")->bool:
 		"op":{},"objective":"","queued":"","next_enemy":day+rng.randi_range(25,70),"filed_day":day,"chief_held":false,"ally":ally,"terms":{},"terms_day":-1,"ops":0}
 	_stat("wars")
 	var name:=_name(civ_id)
-	var theirs:=_band_size(_their_pop(civ_id),0.06)
-	var ours:=_band_size(_our_pop(),0.06)
-	var text:="%s has come to war over %s. They can put about %d fighters in the field; we have about %d." % [name,cause,theirs,ours]
-	if ally!="": text="Your fighters go to stand with %s. %s is at war with us now: about %d of theirs against about %d of ours." % [_name(ally),name,theirs,ours]
+	var text:="%s has come to war over %s. %s" % [name,cause,_strength_words(civ_id)]
+	if ally!="": text="Your fighters go to stand with %s. %s is at war with us now. %s" % [_name(ally),name,_strength_words(civ_id)]
 	var general:=_general()
 	if not general.is_empty(): text+=" %s waits at the fire for your word." % EraNames.given_of(String(general.get("name","")))
 	_chronicle("declared:%s:%d" % [civ_id,day],"War With %s" % name,text,"moment",civ_id)
@@ -868,6 +1002,7 @@ static func hot(civ_id:String,day:int=-1)->bool:
 	if not (f.get("pending",{}) as Dictionary).is_empty() and not _truce_binds(civ_id,day): return true
 	var op:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
 	if not op.is_empty() and String(op.get("objective",""))!="war_parley": return true
+	if _bands_out(civ_id): return true
 	return int(f.get("level",0))>=1 and day-int(f.get("last_harm",-99999))<FEUD_HOT_DAYS
 
 ## Is there a feud with this people (hot or simmering, not yet cold)?
@@ -1075,6 +1210,7 @@ static func peace_due(civ_id:String,day:int=-1)->bool:
 	if f.is_empty() or quiet_days(civ_id,day)<PEACE_QUIET_DAYS: return false
 	var op:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
 	if not op.is_empty() and String(op.get("objective",""))!="war_parley": return false
+	if _bands_out(civ_id): return false
 	if not (f.get("pending",{}) as Dictionary).is_empty(): return false
 	return float(f.get("their_exh",0.0))>=PEACE_WORN or _dread(civ_id)>=PEACE_DREAD or bool(Hall._aftermath().call("defeated",civ_id))
 
@@ -1267,49 +1403,30 @@ static func _march_days(civ_id:String,rng:RandomNumberGenerator)->int:
 		km=maxf(5.0,here.distance_to(there))
 	return clampi(ceili(km/18.0)+rng.randi_range(1,4),3,30)
 
+## The god's word on a people (a court matter's choice, the War screen's
+## blood price): the old objectives are the war council's stances now
+## (war_council.gd), carried out with the real army.
+##   war_guard            Defend      war_burn, war_pursue  Punish
+##   war_chief            Take their chief town              war_parley  Seek peace
+##   war_let              Leave them be                       war_general the war
+##                        leader's own judgment (no stance: he defends)
+## war_track sends trackers, war_price and war_pay settle at once.
 static func order(civ_id:String,objective:String,auto:bool=false)->String:
-	## The god's word (or the general's own judgment) becomes an operation.
 	var day:=_day()
 	var f:=front(civ_id)
 	var war:Dictionary=f.get("war",{})
 	var at_war:=not war.is_empty()
 	var general:=_general()
 	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
-	if objective=="war_general": objective=_objective_for_general(civ_id,general,at_war)
-	if objective=="war_rest": objective="war_guard" if at_war else "war_let"
-	# Their stores and their chief are at their home: until someone has found
-	# it, the band can only follow the raiders' trail to look for it.
-	var asked:=objective
-	if objective in NEEDS_HOME and not home_known(civ_id): objective="war_track"
-	if objective=="war_track" and home_known(civ_id):
-		var where:=_way_words(civ_id)
-		return "We know where %s live already%s. Say what you want done there." % [_name(civ_id),(": "+where) if where!="" else ""]
-	if at_war and not (war.op as Dictionary).is_empty():
-		war["queued"]=objective
-		return "%s is already in the field. Your word will stand when they are back." % gname
-	# In a feud one band goes out at a time; the word waits for it to come back.
-	var out_now:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
-	if not at_war and not out_now.is_empty() and objective in ["war_pursue","war_burn","war_chief","war_track","war_parley"]:
-		return "%s is already out against %s. Give your word again when they are back." % [String(out_now.get("general",gname)),_name(civ_id)]
-	var rng:=_rng("order:%s:%s:%d" % [civ_id,objective,day])
 	var name:=_name(civ_id)
+	if objective=="war_rest": objective="war_guard" if at_war else "war_let"
 	_stat("orders_auto" if auto else "orders")
-	var prefix:="With no word from you, " if auto else ""
-	if at_war:
-		war["objective"]=objective
-		war["ordered_day"]=day
 	match objective:
-		"war_guard":
-			f["guard_until"]=day+GUARD_DAYS
-			var n:=_band_size(_our_pop(),0.05)
-			_log(civ_id,"order","guard",{"auto":auto})
-			return "%s%s takes %d to watch the approaches for half a year. Anyone who comes from %s will meet them." % [prefix,gname,n,name]
-		"war_let":
-			_log(civ_id,"order","let",{"auto":auto})
-			_rivals().call("settle_grudges",civ_id,0.3)
-			if String(_rival(civ_id).get("trait","")) in ["hunter","bluffer","grudge"] and rng.randf()<0.35:
-				_schedule(civ_id,day+rng.randi_range(120,330),"grudge","bolder")
-			return "The dead are buried. No one goes after %s this year." % name
+		"war_track":
+			if home_known(civ_id):
+				var where:=_way_words(civ_id)
+				return "We know where %s live already%s. Say what you want done there." % [name,(": "+where) if where!="" else ""]
+			return send_trackers(civ_id)
 		"war_pay":
 			var terms:Dictionary=war.get("terms",{})
 			var paid:=Hall._debit_player("Food",float(terms.get("amount",0.0)))
@@ -1327,33 +1444,95 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 			var dead:=int(f.get("their_dead",0))
 			_end_feud(civ_id,day,"blood price","You sent %d Food to %s as a blood price%s. The blood between us is paid, and their raiders will not come for it." % [roundi(paid2),name,(" for the %d of theirs we killed" % dead) if dead>0 else ""])
 			_log(civ_id,"order","price",{"auto":auto,"paid":roundi(paid2)})
+			# The feud is settled: nothing more goes out against them.
+			f["stance"]="leave"
 			return "%s carries %d Food to %s as a blood price. The feud is settled; their raiders will not come for it." % [gname,roundi(paid2),name]
-	var band:=_band_size(_our_pop(),rng.randf_range(0.05,0.07)) if objective!="war_parley" else 2
-	if objective=="war_track": band=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
+		"war_general":
+			# The war leader's own judgment: no stance from the god, so he holds
+			# the approaches (war_council.stance_of) until told otherwise.
+			var held:Dictionary=_council().call("order",civ_id,"defend",{})
+			f.erase("stance")
+			_log(civ_id,"order","general",{"auto":auto})
+			return "%s will see to it as he judges. %s" % [gname,String(held.get("says",""))]
+	var stance:=String({"war_guard":"defend","war_burn":"punish","war_pursue":"punish","war_chief":"punish","war_parley":"peace","war_let":"leave"}.get(objective,""))
+	if stance=="": return "%s does not know what you want done." % gname
+	var options:={"asked":objective}
+	# Their chief sits in their chief town: a band that beats its defenders
+	# brings him (_chief_seized); it holds no town.
+	if objective=="war_chief":
+		var chart=WorldSimulation.world.get("city_intelligence") if WorldSimulation.world!=null else null
+		var chief_town:=String(chart.primary_id(civ_id)) if chart!=null else ""
+		if chief_town=="" or chart.known("player",chief_town).is_empty():
+			return "%s does not know which town %s's chief sits in. Scouts must find it first." % [gname,name]
+		options["place"]={"city_id":chief_town,"name":String(chart.known("player",chief_town).get("name",""))}
+		f["chief_at"]={"city_id":chief_town,"day":day}
+	var done:Dictionary=_council().call("order",civ_id,stance,options)
+	_log(civ_id,"order",objective,{"auto":auto,"stance":stance})
+	if at_war:
+		war["objective"]=objective
+		war["ordered_day"]=day
+	return String(done.get("says",done.get("outcome","")))
+
+static func _council()->GDScript:
+	return load(COUNCIL_PATH) as GDScript
+
+## A few trackers follow their raiders' trail to find where they live (the
+## war council's first step when nobody knows the way). Their odds are stated;
+## the roll is the op's own when they come back (_resolve_op).
+static func send_trackers(civ_id:String,asked:String="")->String:
+	var day:=_day()
+	var f:=front(civ_id)
+	var general:=_general()
+	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
+	var name:=_name(civ_id)
+	var war:Dictionary=f.get("war",{})
+	var out_now:Dictionary=f.get("op",{}) if f.get("op") is Dictionary else {}
+	if out_now.is_empty() and war.get("op") is Dictionary: out_now=war.op
+	if not out_now.is_empty():
+		return "%s is already out against %s; the trackers wait for them." % [String(out_now.get("general",gname)),name]
+	var rng:=_rng("order:%s:war_track:%d" % [civ_id,day])
+	var band:=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
 	var due:=day+_march_days(civ_id,rng)
-	var op:={"objective":objective,"start":day,"due":due,"band":band,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":auto}
-	if at_war: war["op"]=op
+	var op:={"objective":"war_track","start":day,"due":due,"band":band,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":false}
+	if not war.is_empty(): war["op"]=op
 	else: f["op"]=op
-	_log(civ_id,"order",objective,{"auto":auto,"band":band,"due":due})
-	match objective:
-		"war_parley": return "%s%s sends two messengers to %s to ask for an end to it. They should be back in %d days." % [prefix,gname,name,due-day]
-		"war_pursue": return "%s%s takes %d after the raiders, on their trail toward %s. Word will come back when it is done." % [prefix,gname,band,name]
-		"war_burn": return "%s%s leaves at dusk with %d to burn %s's stores." % [prefix,gname,band,name]
-		"war_chief": return "%s%s takes %d of the best to bring back %s's chief. Few of them expect to come home unhurt." % [prefix,gname,band,name]
-		"war_track":
-			var way:="their stores" if asked=="war_burn" else ("their chief" if asked=="war_chief" else "")
-			var why:=("No one here knows where %s live, so %s cannot be reached yet. " % [name,way]) if way!="" and not auto else ""
-			var again:=" When the way is found, give the word again." if way!="" and not auto else ""
-			var odds:=_track_odds_words(track_chance(civ_id,_general_skill(general)))
-			return "%s%s%s takes %d to follow %s's raiders' trail and find where they live. %s They should be back in about %d days.%s" % [why,prefix,gname,band,name,odds,due-day,again]
-	return "%s goes." % gname
+	_log(civ_id,"order","war_track",{"band":band,"due":due})
+	var way:="their stores" if asked=="war_burn" else ("their chief" if asked=="war_chief" else "their towns")
+	var odds:=_track_odds_words(track_chance(civ_id,_general_skill(general)))
+	return "No one here knows where %s live, so %s cannot be reached yet. %s takes %d to follow %s's raiders' trail and find where they live. %s They should be back in about %d days. When the way is found, the war band goes." % [name,way,gname,band,name,odds,due-day]
+
+## Two messengers go to ask for an end to it (the war council's Seek peace).
+## A truce or the feud's end is rolled when they come back (_resolve_op).
+static func send_messengers(civ_id:String)->String:
+	var day:=_day()
+	var f:=front(civ_id)
+	var general:=_general()
+	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
+	var rng:=_rng("order:%s:war_parley:%d" % [civ_id,day])
+	var due:=day+_march_days(civ_id,rng)
+	var op:={"objective":"war_parley","start":day,"due":due,"band":2,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":false}
+	var war:Dictionary=f.get("war",{})
+	if not war.is_empty(): war["op"]=op
+	else: f["op"]=op
+	_log(civ_id,"order","war_parley",{"band":2,"due":due})
+	return "%s sends two messengers to %s to ask for an end to it. They should be back in %d days." % [gname,_name(civ_id),due-day]
+
+## Leave them be: the dead are buried and their grudge cools, unless they
+## are the kind to come back bolder.
+static func let_be(civ_id:String)->String:
+	var day:=_day()
+	var rng:=_rng("order:%s:war_let:%d" % [civ_id,day])
+	_log(civ_id,"order","let",{})
+	_rivals().call("settle_grudges",civ_id,0.3)
+	if String(_rival(civ_id).get("trait","")) in ["hunter","bluffer","grudge"] and rng.randf()<0.35:
+		_schedule(civ_id,day+rng.randi_range(120,330),"grudge","bolder")
+	return "The dead are buried. No one goes after %s this year; their raids are met at home." % _name(civ_id)
 
 static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 	var f:=front(civ_id)
 	var war:Dictionary=f.get("war",{})
 	var at_war:=not war.is_empty()
 	var name:=_name(civ_id)
-	var civ:=_civ(civ_id)
 	var objective:=String(op.get("objective",""))
 	var gname:=String(op.get("general","The war leader"))
 	var key:="op:%s:%s:%d" % [civ_id,objective,int(op.get("start",day))]
@@ -1394,134 +1573,45 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 		_log(civ_id,"op_track",said,{"found":found,"chance":snappedf(chance,0.01)})
 		if at_war: _file(civ_id,"report",said,day)
 		return
-	var their_share:=rng.randf_range(0.04,0.06) if objective=="war_pursue" else (rng.randf_range(0.05,0.07) if at_war else rng.randf_range(0.03,0.05))
-	var their_n:=_band_size(_their_pop(civ_id),their_share)
-	var general:=Hall._official(int(op.get("general_pid",0)))
-	if general.is_empty(): general=_general()
-	var skill:=_general_skill(general)
-	var ours:=_band(String(GameState.settlement_name),int(op.get("band",4)),_our_tech(),0.6,gname,skill)
-	var terrain:=1.0 if objective=="war_pursue" else (1.45 if objective=="war_chief" else 1.15)
-	var defender:=_band(name,their_n,float(civ.get("knowledge",0.15)),float(civ.get("military_readiness",0.5)),"their war leader",0.5)
-	var fight:=_clash(ours,defender,terrain,key)
-	var won:=bool(fight.won)
-	if objective=="war_chief": won=won and rng.randf()<0.55
-	var our_dead:=_cap_dead(int(fight.att_dead)+(1 if objective=="war_chief" and not won else 0),_our_pop())
-	var their_dead:=_cap_dead(int(fight.def_dead),_their_pop(civ_id))
-	var names:=_names(our_dead,key,0.1)
-	our_dead=_our_deaths(our_dead)
-	their_dead=_their_deaths(civ_id,their_dead)
-	var loot:=0.0
-	var captives:=0
-	var text:=""
-	var title:=""
-	match objective:
-		"war_pursue":
-			title="The Raiders Overtaken" if won else "The Trail Went Cold"
-			if won:
-				loot=EXCHANGE.take(civ_id,"Food",minf(maxf(float(f.get("taken",0.0)),8.0),float(op.get("band",4))*CARRY))
-				captives=_their_captives(civ_id,1 if rng.randf()<0.4 else 0)
-				text="%s caught the %s raiders two days out.%s We brought back %d Food%s." % [gname,name," %d of theirs fell." % their_dead if their_dead>0 else "",roundi(loot)," and one captive" if captives>0 else ""]
-			else:
-				text="%s followed the %s raiders to their own ground and turned back." % [gname,name]
-				if their_dead>0: text+=" %d of theirs fell in a fight at the edge of it." % their_dead
-		"war_burn":
-			title="%s's Stores Burned" % name if won else "Beaten Back From %s" % name
-			if won:
-				var stock:=Hall.foreign_stock(civ_id,"Food")
-				var burned:=EXCHANGE.take(civ_id,"Food",minf(stock*rng.randf_range(0.15,0.3),float(op.get("band",4))*rng.randf_range(30.0,50.0)))
-				loot=minf(burned*rng.randf_range(0.25,0.45),float(op.get("band",4))*CARRY)
-				text="%s's band reached %s's stores by night and burned them. They carried %d Food home and left %d burning." % [gname,name,roundi(loot),roundi(burned-loot)]
-				if their_dead>0: text+=" %d of theirs fell." % their_dead
-			else:
-				text="%s's band was seen before it reached %s's stores and had to fight its way out." % [gname,name]
-				if their_dead>0: text+=" %d of theirs fell." % their_dead
-		"war_chief":
-			title="%s's Chief Taken" % name if won else "The Strike at %s's Chief Failed" % name
-			if won:
-				if at_war: war["chief_held"]=true
-				text="%s came back with %s. %s is held at our fire." % [gname,String(_rival(civ_id).get("name","their chief")),String(_rival(civ_id).get("name","their chief")).get_slice(" ",0)]
-				_rivals().call("grudge",civ_id,"how you dragged our chief to your fire",1.0,"chief:"+key)
-			else:
-				text="%s's band could not get near %s's chief." % [gname,name]
-	var dead_text:=_dead_words(our_dead,names,"fighters")
-	if our_dead>0: text+=" "+dead_text
-	if loot>0.0: EXCHANGE.receive("player","Food",loot)
-	# A headman taken in a feud is ransomed at once, and his people swear off.
-	var ransomed:=0.0
-	if objective=="war_chief" and won and not at_war:
-		ransomed=EXCHANGE.take(civ_id,"Food",maxf(10.0,Hall.foreign_stock(civ_id,"Food")*0.25))
-		if ransomed>0.0: EXCHANGE.receive("player","Food",ransomed)
-		text+=" %s ransomed their chief for %d Food and swore to send no more raiders." % [name,roundi(ransomed)]
-	if at_war:
-		war["score"]=int(war.get("score",0))+(1 if won else -1)
-		war["last_fight"]=day
-		_exhaust(civ_id,our_dead,their_dead)
-		_record_battle(civ_id,title,our_dead,their_dead,captives,"won" if won else "lost")
-	else:
-		# Blood for blood: a people you strike may come back for more.
-		if int(f.level)<1 or int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>FEUD_COLD_DAYS: _begin_feud(f,day)
-		f["level"]=maxi(int(f.level),2 if objective=="war_burn" or their_dead>0 else 1)
-		f["last_harm"]=day
-		f["last_strike"]=day
-		_tally(civ_id,"strikes",our_dead,their_dead+captives)
-		if their_dead>0 or objective=="war_burn":
-			_rivals().call("grudge",civ_id,"the %s you burned" % "stores" if objective=="war_burn" else "hunters you killed on our own ground",0.4,"struck:"+key)
-			if ransomed<=0.0 and rng.randf()<(0.6 if objective=="war_burn" else 0.4) and (f.pending as Dictionary).is_empty(): _schedule(civ_id,day+rng.randi_range(60,300),"vengeance",key)
-	Hall._shift_relation(civ_id,-0.05,0.08)
-	var seen:=_observe(key,title,String(OP_WHERE.get(objective,"on their own ground")),civ_id,"attacker",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":0,"away_taken":captives})
-	_chronicle(key,title,text,"moment",civ_id,seen)
-	_log(civ_id,"op_"+objective.trim_prefix("war_"),text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"loot":roundi(loot),"captives":captives})
-	if ransomed>0.0 or (objective=="war_chief" and won and not at_war):
-		_end_feud(civ_id,day,"ransom","%s ransomed their chief for %d Food." % [name,roundi(ransomed)])
-		return
-	if at_war and bool(war.get("chief_held",false)): return
-	_file(civ_id,"report",text,day)
+	# A band of the old reckoning out on a save from before the war council
+	# (pursue, burn, their chief): it had no men of our army in it, so it
+	# comes home without a fight, told once. The council's real bands do this
+	# work now (war_council.gd).
+	_log(civ_id,"op_dropped","%s's band came back from %s without a fight: the war council sends the real bands now." % [gname,name],{"objective":objective})
+	_stat("ops_dropped")
 
-static func _enemy_op(civ_id:String,day:int)->void:
+## A band of ours sent for their chief ("Bring me their chief": war_chief)
+## beat the defenders of their chief town: their chief is taken.
+static func _chief_seized(civ_id:String,r:Dictionary,when:int,place:String)->void:
 	var f:=front(civ_id)
-	var war:Dictionary=f.war
+	var at:Dictionary=f.get("chief_at",{}) if f.get("chief_at") is Dictionary else {}
+	if at.is_empty(): return
+	if when-int(at.get("day",when))>CHIEF_DAYS:
+		f.erase("chief_at")
+		return
+	var threat:Dictionary=r.get("threat",{}) if r.get("threat") is Dictionary else {}
+	var target:=String(r.get("target_region_id",threat.get("target_region_id","")))
+	if target!=String(at.get("city_id","")) or when<int(at.get("day",0)): return
+	f.erase("chief_at")
+	chief_taken(civ_id,place if place!="" else "their chief town",when)
+
+## Their chief taken at his own town by a band of ours. At war they ransom him
+## and ask for peace (_check_end); in a feud they ransom him and swear off it.
+## Either way nothing more goes out against them.
+static func chief_taken(civ_id:String,town:String,day:int)->void:
+	var f:=front(civ_id)
+	var war:Dictionary=f.get("war",{})
 	var name:=_name(civ_id)
-	var civ:=_civ(civ_id)
-	var key:="enemy:%s:%d" % [civ_id,day]
-	var rng:=_rng(key)
-	var guarded:=int(f.guard_until)>day
-	var their_n:=_band_size(_their_pop(civ_id),rng.randf_range(0.05,0.07))
-	var our_n:=_band_size(_our_pop(),rng.randf_range(0.05,0.07) if guarded else rng.randf_range(0.03,0.05))
-	var general:=_general()
-	var attacker:=_band(name,their_n,float(civ.get("knowledge",0.15)),float(civ.get("military_readiness",0.5)),"their war leader",0.5)
-	var defender:=_band(String(GameState.settlement_name),our_n,_our_tech(),0.6 if guarded else 0.45,String(general.get("name","")),_general_skill(general))
-	var fight:=_clash(attacker,defender,1.4 if guarded else 1.1,key)
-	var won:=bool(fight.won)
-	var target:=_pick_target(civ_id,rng)
-	var t:Dictionary=TARGETS[target] if target!="scouts" else TARGETS.gathering
-	var our_dead:=_cap_dead(int(fight.def_dead),_our_pop())
-	var their_dead:=_cap_dead(int(fight.att_dead),_their_pop(civ_id))
-	var names:=_names(our_dead,key,0.3)
-	our_dead=_our_deaths(our_dead)
-	their_dead=_their_deaths(civ_id,their_dead)
-	var taken:=0.0
-	var captives:=0
-	if won:
-		taken=EXCHANGE.take("player","Food",minf(Hall.player_stock("Food")*rng.randf_range(0.06,0.14),float(their_n)*CARRY))
-		if taken>0.0: Hall._credit_civ(civ_id,"Food",taken)
-		if rng.randf()<0.3: captives=_our_captives_lost(1,civ_id)
-	war["score"]=int(war.get("score",0))+(-1 if won else 1)
-	war["last_fight"]=day
-	war["last_attack"]={"day":day,"target":target if target!="scouts" else "gathering","our_dead":our_dead,"taken":roundi(taken),"won":won}
-	_exhaust(civ_id,our_dead,their_dead)
-	_record_battle(civ_id,"%s attack at %s" % [name,String(t.words)],our_dead,their_dead,0,"lost" if won else "held")
-	var text:=""
-	if won:
-		text="%d %s fighters broke through at %s. %s They carried off %d Food%s." % [their_n,name,String(t.words),_dead_words(our_dead,names,String(t.who)),roundi(taken)," and one of ours" if captives>0 else ""]
-		if their_dead>0: text+=" %d of theirs fell." % their_dead
-	else:
-		text="%d %s fighters came at %s and were thrown back%s. %s" % [their_n,name,String(t.words)," by the watch at the approaches" if guarded else "",_dead_words(our_dead,names,String(t.who))]
-		if their_dead>0: text+=" %d of theirs did not go home." % their_dead
-	var title:="%s %s" % [name,"Break Through" if won else "Thrown Back"]
-	var seen:=_observe(key,title,String(WHERE.get(target if target!="scouts" else "gathering","")),civ_id,"defender",fight,{"home_dead":our_dead,"away_dead":their_dead,"home_taken":captives,"away_taken":0})
-	_chronicle(key,title,text,"moment" if our_dead>0 or captives>0 or won else "notice",civ_id,seen)
-	_log(civ_id,"enemy_attack",text,{"won":won,"our_dead":our_dead,"their_dead":their_dead,"taken":roundi(taken),"captives":captives})
-	if (war.op as Dictionary).is_empty() and day-int(front(civ_id).get("matter_day",-1))>45: _file(civ_id,"report",text,day)
+	f["stance"]="leave"
+	if not war.is_empty():
+		war["chief_held"]=true
+		_log(civ_id,"chief_taken","Our band beat the defenders of %s and took %s's chief." % [town,name])
+		return
+	if not feuding(civ_id): return
+	var ransom:=EXCHANGE.take(civ_id,"Food",maxf(10.0,Hall.foreign_stock(civ_id,"Food")*0.25))
+	if ransom>0.0: EXCHANGE.receive("player","Food",ransom)
+	_log(civ_id,"chief_taken","Our band beat the defenders of %s and took %s's chief; ransomed for %d Food." % [town,name,roundi(ransom)])
+	_end_feud(civ_id,day,"chief ransomed","Our band beat the defenders of %s and took %s's chief. They ransomed him for %d Food and swore off the feud." % [town,name,roundi(ransom)])
 
 static func _check_end(civ_id:String,day:int)->void:
 	var f:=front(civ_id)
@@ -1548,12 +1638,12 @@ static func _check_end(civ_id:String,day:int)->void:
 		_chronicle("terms:%s:%d" % [civ_id,day],"%s Names Its Price" % name,text,"notice",civ_id)
 		_file(civ_id,"terms",text,day)
 		return
-	if not (war.terms as Dictionary).is_empty() and day-int(war.get("terms_day",day))>=TERMS_WAIT and (war.op as Dictionary).is_empty():
+	if not (war.terms as Dictionary).is_empty() and day-int(war.get("terms_day",day))>=TERMS_WAIT and (war.op as Dictionary).is_empty() and not _bands_out(civ_id):
 		_close_war(civ_id,day,"exhaustion","No one answered %s's herald. Our people stopped going out to fight, and so did theirs." % name)
 		return
 	# A handful of fighters on each side cannot keep a war alive with no one
 	# fighting: after a quiet year with no band out, the feud goes quiet.
-	if day-int(war.get("last_fight",war.get("start",day)))>=QUIET_DAYS and (war.op as Dictionary).is_empty():
+	if day-int(war.get("last_fight",war.get("start",day)))>=QUIET_DAYS and (war.op as Dictionary).is_empty() and not _bands_out(civ_id):
 		_close_war(civ_id,day,"quiet","Neither side has sent fighters for a year. The feud has gone quiet.")
 		return
 	if (length>=int(2.5*365) and ours>=0.3 and theirs>=0.3) or length>=4*365:
@@ -1594,6 +1684,9 @@ static func daily(day:int)->void:
 	# The authored General Campaign runs its own war; leave it alone.
 	if WorldSimulation.system("GeneralCampaign")!=null and bool(WorldSimulation.campaign.active): return
 	var s:=state()
+	# The real fights since the last look (ours and, in a world of simulated
+	# peoples, theirs against us) go into the feud's and the war's ledger.
+	from_battles(day)
 	# A small people found "at war" fights on as a feud once no band of ours is
 	# out against it (an older save, a war opened before the rule).
 	reconcile(day)
@@ -1632,23 +1725,14 @@ static func daily(day:int)->void:
 		if not bool(_relation(id).get("at_war",false)):
 			_close_war(id,day,"truce","%s and your people have made peace." % _name(id))
 			continue
+		# The trackers or messengers out in the war (the war council's small
+		# parties) come back. Our bands and their host are the real army's
+		# (war_council.gd, MilitaryCampaign): nothing here fights for either.
 		var op2:Dictionary=war.get("op",{})
 		if not op2.is_empty() and day>=int(op2.get("due",day)):
 			war["op"]={}
 			_resolve_op(id,op2,day)
 			if (front(id).war as Dictionary).is_empty(): continue
-			if String(war.get("queued",""))!="":
-				var next:=String(war.queued); war["queued"]=""
-				order(id,next,false)
-		elif op2.is_empty() and day-int(war.get("filed_day",day))>=GENERAL_WAIT and day-int(war.get("ordered_day",-9999))>=GENERAL_WAIT*3 and int(f.guard_until)<day:
-			var general:=_general()
-			if not general.is_empty():
-				var said:=order(id,"war_general",true)
-				_chronicle("auto:%s:%d" % [id,day],"%s Acts Alone" % EraNames.given_of(String(general.get("name",""))),said,"notice",id)
-		if day>=int(war.get("next_enemy",day+1)):
-			# Spent raiders stay home; the war may then go quiet.
-			if float(war.get("their_exh",0.0))<ENEMY_SPENT: _enemy_op(id,day)
-			war["next_enemy"]=day+_rng("next:%s:%d" % [id,day]).randi_range(50,120)
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
 	if day%30==0:
 		# Who stands together against us, before anyone moves.
@@ -1657,6 +1741,126 @@ static func daily(day:int)->void:
 		_rival_wars(day)
 	# Feuds between two other simulated peoples are fought for real.
 	preload("res://scripts/rival_feuds.gd").tick(day,TICK)
+
+## Battles already counted into the ledger (by record), the newest kept.
+const BATTLES_SEEN_MAX:=80
+## A battle older than this when first looked at is history, not news.
+const BATTLES_LOOK_DAYS:=60
+
+## THE ONE LEDGER FROM THE REAL FIGHTS. Every battle our army fought against
+## a people (MilitaryCampaign.battle_history: our bands' raids, sieges and
+## assaults, our watch against their raiders, our band meeting theirs in the
+## field) and, in a world of simulated peoples, every battle their army
+## fought against ours (their own records: we are "human" there), is counted
+## once into the feud's or the war's ledger: the dead on each side, who
+## struck, the heat, the exhaustion and their answer. The raids already
+## counted where they were fought (_raid) carry their own mark and are passed.
+static func from_battles(day:int)->void:
+	var s:=state()
+	var seen:Dictionary=s.get("battles_seen",{}) if s.get("battles_seen") is Dictionary else {}
+	var mc:Variant=WorldSimulation.military
+	if mc!=null:
+		for record in mc.battle_history:
+			if not record is Dictionary: continue
+			var r:Dictionary=record
+			if day-int(r.get("day",-99999))>BATTLES_LOOK_DAYS: break
+			var threat:Dictionary=r.get("threat",{}) if r.get("threat") is Dictionary else {}
+			if String(threat.get("war_loop",""))!="": continue
+			var civ_id:=String(threat.get("source_civ_id",""))
+			# Their side of a fight in their world, told back to ours: counted
+			# from their own record below.
+			if civ_id in ["","human","player"]: continue
+			var key:="ours:%d:%d" % [int(r.get("seed",0)),int(r.get("day",0))]
+			if seen.has(key): continue
+			seen[key]=day
+			_count_battle(civ_id,r,String(r.get("home_side","attacker")),day,false)
+	if WorldSimulation.enabled:
+		for id in WorldSimulation.actors.keys():
+			var systems:Dictionary=WorldSimulation.actors[id].get("systems",{})
+			var theirs:Variant=systems.get("MilitaryCampaign")
+			if theirs==null: continue
+			for record in theirs.battle_history:
+				if not record is Dictionary: continue
+				var r:Dictionary=record
+				if day-int(r.get("day",-99999))>BATTLES_LOOK_DAYS: break
+				var threat:Dictionary=r.get("threat",{}) if r.get("threat") is Dictionary else {}
+				if String(threat.get("source_civ_id",""))!="human" or String(threat.get("war_loop",""))!="": continue
+				var key:="theirs:%s:%d:%d" % [String(id),int(r.get("seed",0)),int(r.get("day",0))]
+				if seen.has(key): continue
+				seen[key]=day
+				var their_side:=String(r.get("home_side","attacker"))
+				_count_battle(String(id),r,"defender" if their_side=="attacker" else "attacker",day,true)
+	while seen.size()>BATTLES_SEEN_MAX: seen.erase(seen.keys()[0])
+	s["battles_seen"]=seen
+
+## One real battle into the ledger. our_side: which side of the record is
+## ours. told_here: the battle is theirs, told back to us (their band at our
+## town): the Chronicle and the war leader hear of it from here.
+static func _count_battle(civ_id:String,r:Dictionary,our_side:String,day:int,told_here:bool)->void:
+	if _civ(civ_id).is_empty(): return
+	var their_side:="defender" if our_side=="attacker" else "attacker"
+	var ours:Dictionary=r.get(our_side,{}) if r.get(our_side) is Dictionary else {}
+	var theirs:Dictionary=r.get(their_side,{}) if r.get(their_side) is Dictionary else {}
+	var our_dead:=maxi(0,int(ours.get("dead",_killed(r,our_side))))
+	var their_dead:=maxi(0,int(theirs.get("dead",_killed(r,their_side))))
+	var we_struck:=our_side=="attacker"
+	var when:=int(r.get("day",day))
+	var termination:Dictionary=r.get("termination",{}) if r.get("termination") is Dictionary else {}
+	var we_won:=String(termination.get("captor",""))!="" and String(termination.get("captor",""))==String(ours.get("name","~"))
+	var they_won:=String(termination.get("captor",""))!="" and String(termination.get("captor",""))==String(theirs.get("name","~"))
+	var f:=front(civ_id)
+	var war:Dictionary=f.get("war",{}) if f.get("war") is Dictionary else {}
+	var name:=_name(civ_id)
+	var strategic:Dictionary=r.get("strategic_outcome",{}) if r.get("strategic_outcome") is Dictionary else {}
+	var spoils:Dictionary=strategic.get("raid_spoils",{}) if strategic.get("raid_spoils") is Dictionary else {}
+	var taken:=roundi(float(spoils.get("Food",0.0)))
+	var place:=String(r.get("target_region_name",(r.get("threat",{}) as Dictionary).get("target_region_name","") if r.get("threat") is Dictionary else ""))
+	if not war.is_empty():
+		war["score"]=int(war.get("score",0))+(1 if we_won else (-1 if they_won else 0))
+		war["last_fight"]=maxi(int(war.get("last_fight",-99999)),when)
+		_exhaust(civ_id,our_dead,their_dead)
+		if not we_struck: war["last_attack"]={"day":when,"target":"town","our_dead":our_dead,"taken":taken,"won":they_won}
+	else:
+		if int(f.get("level",0))<1 or int(f.get("feud_since",-1))<0 or when-int(f.get("last_harm",-99999))>FEUD_COLD_DAYS: _begin_feud(f,when)
+		f["level"]=maxi(int(f.get("level",0)),2)
+		f["last_harm"]=maxi(int(f.get("last_harm",-99999)),when)
+		f.erase("settled_until")
+		if we_struck: f["last_strike"]=when
+		else:
+			f["last_skirmish"]=when
+			f["last_raid"]={"day":when,"target":"town","their_n":int(theirs.get("initial_troops",0)),"our_dead":our_dead,"their_dead":their_dead,"taken":taken,"captives":0,"skirmish":true,"ambush":false,"cause":"raid","names":[],"place":place}
+		_tally(civ_id,"strikes" if we_struck else "raids",our_dead,their_dead)
+		# Blood for blood: a people we struck, or whose raiders we killed, may
+		# come back for more unless the feud has worn them out.
+		if their_dead>0 and (f.get("pending",{}) as Dictionary).is_empty() and float(f.get("their_exh",0.0))<ENEMY_SPENT:
+			var rng:=_rng("answer:%s:%d:%d" % [civ_id,when,int(r.get("seed",0))])
+			if rng.randf()<(0.6 if we_struck else 0.4): _schedule(civ_id,when+rng.randi_range(60,300),"vengeance","battle:%d" % int(r.get("seed",0)))
+	if their_dead>0: _rivals().call("grudge",civ_id,"the %s you killed in the fighting" % ("fighters" if their_dead>1 else "fighter"),0.3 if we_struck else 0.2,"battle_dead:%d" % int(r.get("seed",0)))
+	_mark_harm(civ_id,when)
+	_stat("battles_counted")
+	_log(civ_id,"battle_ours" if we_struck else "battle_theirs","%s: %d of ours and %d of theirs killed." % [place if place!="" else name,our_dead,their_dead],{"our_dead":our_dead,"their_dead":their_dead,"won":we_won,"lost":they_won,"seed":int(r.get("seed",0))})
+	if we_struck and we_won: _chief_seized(civ_id,r,when,place)
+	if told_here:
+		# Their band came at a town of ours: the battle was fought in their
+		# world and told back to ours; told here once, as the raid it was.
+		var where:=place if place!="" else String(GameState.settlement_name)
+		var text:="%d %s fighters came for %s and our people met them. %s" % [int(theirs.get("initial_troops",0)),name,where,"%d of ours were killed." % our_dead if our_dead>0 else "No one of ours was killed."]
+		if their_dead>0: text+=" %d of theirs fell." % their_dead
+		text+=(" They carried off %d Food." % taken) if taken>0 else (" They were driven off." if not they_won else "")
+		var key:="battle:%s:%d" % [civ_id,int(r.get("seed",0))]
+		var seen_seed:=_observe(key,"%s Raiders at %s" % [name,_title_place(where)],"at %s" % where,civ_id,"defender",{"result":r,"tactics":r.get("tactics",{})},{"home_dead":our_dead,"away_dead":their_dead,"home_taken":0,"away_taken":0})
+		_chronicle(key,"%s Raiders at %s" % [name,_title_place(where)],text,"moment" if our_dead>0 or they_won else "notice",civ_id,seen_seed)
+		_file(civ_id,"raided" if war.is_empty() else "report",text,day)
+
+## A band of ours out against this people on the war council's errand.
+static func _bands_out(civ_id:String)->bool:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return false
+	for army in mc.field_armies:
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+		var c:Variant=(army as Dictionary).get("council")
+		if c is Dictionary and String((c as Dictionary).get("civ",""))==civ_id: return true
+	return false
 
 ## The god's own band against a small people (the engine's war flag): the feud
 ## is hot from the day the fight began, and while blood is being spilled.
@@ -1698,7 +1902,7 @@ static func _feud_day(civ_id:String,day:int)->void:
 	if not _married(civ_id).is_empty():
 		_end_feud(civ_id,day,"marriage","The marriage between our peoples has ended the feud with %s: kin do not raid kin." % _name(civ_id))
 		return
-	if day-int(f.last_harm)>=FEUD_COLD_DAYS and (f.pending as Dictionary).is_empty() and (f.get("op",{}) as Dictionary).is_empty():
+	if day-int(f.last_harm)>=FEUD_COLD_DAYS and (f.pending as Dictionary).is_empty() and (f.get("op",{}) as Dictionary).is_empty() and not _bands_out(civ_id):
 		_feud_cold(civ_id,day)
 		return
 	_peace_seeker(civ_id,day)
@@ -1787,6 +1991,22 @@ static func _war_cause(civ_id:String,war:Dictionary,relation:Dictionary)->String
 ## ours is still out against them, so the engine's war flag and record stay
 ## until it is home. When the god's own strike on a people already feuding
 ## with us is over, the feud simply goes on (no new word in the Chronicle).
+## The engine's war flag on a small people lowered (no host marches against
+## them: a feud, or a settlement).
+static func _lower_war_flag(civ_id:String,day:int,war_id:String,why:String,stance:String)->void:
+	var index:=Hall._civ_index(civ_id)
+	if index<0: return
+	var world:=WorldSimulation.world
+	var civ:Dictionary=world.civilizations[index]
+	var relation:Dictionary=civ.get("player_relation",{})
+	relation["at_war"]=false; relation["treaty"]="none"; relation["stance"]=stance
+	relation["war_goal"]="limited"; relation["war_target_region_id"]=""; relation["war_score"]=0.0; relation["conflict_turns"]=0
+	relation["last_war_result"]=why
+	civ["player_relation"]=relation
+	world.civilizations[index]=civ
+	if war_id!="" and world.has_method("_end_war"): world._end_war(war_id,day,why)
+	if world.has_method("_remove_pending_player_incidents"): world._remove_pending_player_incidents(civ_id)
+
 static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
 	var index:=Hall._civ_index(civ_id)
 	if index<0: return
@@ -1798,6 +2018,11 @@ static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
 	var started:=int(relation.get("war_started_day",war.get("start",day)))
 	if started<0: started=int(war.get("start",day))
 	started=mini(started,day)
+	# A fight that ended in a settlement (their chief ransomed, a blood price
+	# paid) lowers the engine's flag and leaves the feud settled.
+	if war.is_empty() and int(f.get("level",0))<1 and int((f.get("feud_end",{}) as Dictionary).get("day",-99999))>=started:
+		if not keep_flag: _lower_war_flag(civ_id,day,String(relation.get("war_id","")),"settled","watchful")
+		return
 	var last:=maxi(int(war.get("last_fight",war.get("start",started))),int((war.get("last_attack",{}) as Dictionary).get("day",-99999)))
 	last=maxi(last,int(f.get("last_harm",-99999)))
 	if last<0: last=started
@@ -1835,14 +2060,7 @@ static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
 	if (f.pending as Dictionary).is_empty() and day-last<FEUD_HOT_DAYS:
 		var next:=maxi(day+20,int(war.get("next_enemy",day+_rng("feud_next:%s:%d" % [civ_id,day]).randi_range(30,90))))
 		_schedule(civ_id,next,"vengeance","war")
-	if not keep_flag:
-		relation["at_war"]=false; relation["treaty"]="none"; relation["stance"]="hostile"
-		relation["war_goal"]="limited"; relation["war_target_region_id"]=""; relation["war_score"]=0.0; relation["conflict_turns"]=0
-		relation["last_war_result"]="became a feud"
-		civ["player_relation"]=relation
-		world.civilizations[index]=civ
-		if war_id!="" and world.has_method("_end_war"): world._end_war(war_id,day,"became a feud")
-		if world.has_method("_remove_pending_player_incidents"): world._remove_pending_player_incidents(civ_id)
+	if not keep_flag: _lower_war_flag(civ_id,day,war_id,"became a feud","hostile")
 	var r:GDScript=_rivals()
 	if r!=null and not ForeignDiplomacy.leader(civ_id).is_empty():
 		var c:Dictionary=r.call("character",civ_id)
@@ -2036,18 +2254,21 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 	if civ_id=="" or _civ(civ_id).is_empty() or (mode in ["war","terms"] and war.is_empty() and not feuding(civ_id)):
 		out.append(Hall._option("war_rest","It is past","That war is over.","neutral"))
 		return out
-	var band:=_band_size(_our_pop(),0.06)
-	var theirs:=_band_size(_their_pop(civ_id),0.06)
-	var busy:=not (war.get("op",{}) as Dictionary).is_empty() or not (f.get("op",{}) as Dictionary).is_empty()
-	var note:=" (after the band now in the field is back)" if busy else ""
+	# The war council's real numbers: the soldiers at home, and those free to
+	# go beyond the watch that stays (war_council.gd).
+	var men:=_soldiers()
+	var free:=EraWords.grouped(int(men.free))
+	var home:=EraWords.grouped(int(men.home))
+	# Trackers or messengers already out: the next go when they are back.
+	var note:=" (after those now out are back)" if not (f.get("op",{}) as Dictionary).is_empty() else ""
 	# Their stores and chief are at a home we must first find (NEEDS_HOME).
 	var findable:=home_known(civ_id)
 	var track:=Hall._option("war_track","Find where they live","Nobody knows where %s live. A few trackers follow their raiders' trail home. %s%s" % [name,_track_odds_words(track_chance(civ_id,_general_skill(_general()))),note],"neutral")
 	if not war.is_empty():
-		out.append(Hall._option("war_guard","Hold the approaches","Keep %d at the approaches for half a year; whoever comes meets spears.%s" % [band,note],"neutral"))
+		out.append(Hall._option("war_guard","Hold the approaches","The %s soldiers at home hold the approaches, and go out to meet their band when the watch sees it coming." % home,"neutral"))
 		if findable:
-			out.append(Hall._option("war_burn","Burn their stores","Take %d against %s's stores by night. %s%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),note],"hostile"))
-			out.append(Hall._option("war_chief","Bring me their chief","Go for %s's chief. %s If it fails, few come back.%s" % [name,_odds_words(_odds(civ_id,"war_chief")),note],"hostile"))
+			out.append(Hall._option("war_burn","Burn their stores","A raiding band from our %s free soldiers against %s's stores by night. %s" % [free,name,_odds_words(_odds(civ_id,"war_burn"))],"hostile"))
+			out.append(Hall._option("war_chief","Bring me their chief","A band from our %s free soldiers strikes at %s's chief town, where their chief sits. %s If he is taken, they will ransom him and ask for peace." % [free,name,_odds_words(_odds(civ_id,"war_chief"))],"hostile"))
 		else: out.append(track)
 		out.append(Hall._option("war_parley","Send for a truce","Two messengers to %s. %s" % [name,"They may listen now." if float(war.get("their_exh",0.0))>=0.3 else "They are not tired of it yet."],"warm"))
 		var terms:Dictionary=war.get("terms",{})
@@ -2059,13 +2280,14 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 	# A feud (or raids short of war): the feud's own acts.
 	var raid:Dictionary=f.get("last_raid",{})
 	var small:=not Scale.formal(civ_id)
-	out.append(Hall._option("war_pursue","Go after them","Take %d on the raiders' trail%s. %s Blood may answer blood.%s" % [band," and bring back the %d Food" % int(raid.get("taken",0)) if int(raid.get("taken",0))>0 else "",_odds_words(_odds(civ_id,"war_pursue")),note],"hostile"))
+	out.append(Hall._option("war_pursue","Go after them","A band from our %s free soldiers goes after them%s. %s Blood may answer blood." % [free," to take back the %d Food" % int(raid.get("taken",0)) if int(raid.get("taken",0))>0 else "",_odds_words(_odds(civ_id,"war_pursue"))],"hostile"))
 	if findable:
-		out.append(Hall._option("war_burn","Burn their stores in return","Take %d against %s's stores. %s %s%s" % [band,name,_odds_words(_odds(civ_id,"war_burn")),("%s will want blood for it." % name) if small else ("%s may come to war over it." % name),note],"hostile"))
-		# Their chief at their own fire: taken, he is ransomed and they swear off.
-		if int(f.level)>=2: out.append(Hall._option("war_chief","Bring me their chief","Go for %s's chief at their own fire. %s If he is taken, they will ransom him and swear off the feud; if it fails, few come back.%s" % [name,_odds_words(_odds(civ_id,"war_chief")),note],"hostile"))
+		out.append(Hall._option("war_burn","Burn their stores in return","A raiding band from our %s free soldiers against %s's stores. %s %s" % [free,name,_odds_words(_odds(civ_id,"war_burn")),("%s will want blood for it." % name) if small else ("%s may come to war over it." % name)],"hostile"))
+		# Their chief sits in their chief town: a band that beats its defenders
+		# takes him, and he is ransomed (chief_taken).
+		if int(f.level)>=2: out.append(Hall._option("war_chief","Bring me their chief","A band from our %s free soldiers strikes at %s's chief town, where their chief sits. %s If he is taken, they will ransom him and swear off the feud." % [free,name,_odds_words(_odds(civ_id,"war_chief"))],"hostile"))
 	else: out.append(track)
-	out.append(Hall._option("war_guard","Guard the approaches","A watch of %d for half a year. The next raiders meet spears." % band,"neutral"))
+	out.append(Hall._option("war_guard","Guard the approaches","The %s soldiers at home keep the approaches. The next raiders meet spears." % home,"neutral"))
 	out.append(Hall._option("war_parley","Send word: enough","Messengers to %s to settle it. Some will call it weakness." % name,"warm"))
 	# A blood price for the lives of theirs we took settles the feud itself.
 	if int(f.level)>=2 or int(f.get("their_dead",0))>0:
@@ -2085,8 +2307,7 @@ static func on_open(audience:Dictionary)->void:
 	if general.is_empty(): general={"person_id":int(speaker.get("person_id",0)),"name":String(speaker.get("name",""))}
 	var name:=_name(civ_id)
 	var mode:=String(part.get("mode",""))
-	var band:=_band_size(_our_pop(),0.06)
-	var theirs:=_band_size(_their_pop(civ_id),0.06)
+	var free:=int(_soldiers().free)
 	var said:=""
 	var at_war_now:=not (front(civ_id).war as Dictionary).is_empty()
 	# A war that became a feud is spoken of as the feud.
@@ -2102,9 +2323,9 @@ static func on_open(audience:Dictionary)->void:
 			var raid:Dictionary=front(civ_id).get("last_raid",{})
 			said="%s came to %s. %s" % [name,String((TARGETS.get(String(raid.get("target","gathering")),TARGETS.gathering) as Dictionary).words),"We lost %d." % int(raid.get("our_dead",0)) if int(raid.get("our_dead",0))>0 else "No one of ours died."]
 			if int(raid.get("taken",0))>0: said+=" They took %d Food." % int(raid.get("taken",0))
-			said+=" I can take %d after them, or keep the approaches. Tell me which." % band
+			said+=(" I can take a band of our %s free soldiers after them, or keep the approaches. Tell me which." % EraWords.grouped(free)) if free>=RAIDERS_MIN else " We have no soldiers free to go after them; I can keep the approaches."
 		"war":
-			said="%s is at war with us. They have about %d who can fight; we have about %d. Tell me what you want done, and I will see to it." % [name,theirs,band]
+			said="%s is at war with us. %s Tell me what you want done, and I will see to it." % [name,_strength_words(civ_id)]
 		"report":
 			if String(part.get("account",""))!="":
 				# A battle: the war leader tells the whole account himself.

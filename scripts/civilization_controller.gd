@@ -329,15 +329,11 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	# This count cannot stand down a serving formation.
 	var surplus:=maxi(0,campaign.aggregate_recruits-intake)
 	if surplus>0:WorldSimulation.submit(id,{"kind":"demobilize","count":surplus})
-	var starving_at_peace:=bool(plan.get("food_shortage",false)) and not bool(plan.at_war)
-	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4 and not starving_at_peace:
-		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
+	# The army stands at home, where it defends the town; the war council
+	# (war_council.gd, the same for every people) forms the bands an errand
+	# needs and sends them by the land road: no standing band in a home zone.
 	var reinforcement:=preload("res://scripts/home_army_reinforcement.gd").recommendation(campaign)
 	if not reinforcement.is_empty():WorldSimulation.submit(id,reinforcement)
-	campaign.command_hierarchy.sync()
-	if campaign.command_hierarchy.data.zones.is_empty() and not campaign.field_armies.is_empty():
-		var zone:=WorldSimulation.submit(id,{"kind":"area","service":"army","name":"Home defense","vertices":campaign.command_hierarchy.R.rectangle(WorldSimulation.world.player_world_origin,8.0)})
-		if zone.has("region"):WorldSimulation.submit(id,{"kind":"objective","command":"army","region":zone.region,"mission":"defend","vision":"Protect the settlement and its approaches."})
 	if bool(plan.get("food_shortage",false)):
 		hunger_stand_down(id,plan,share_cap)
 		# No sorties while the people go hungry, unless the enemy is at the door.
@@ -578,7 +574,6 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 	if license_acquisition_orders(id,plan):return
 	if research_acquisition_orders(id,plan):return
 	var candidates:Array[Dictionary]=[]
-	var campaign_enemy:="";var campaign_urgency:=-INF
 	for civ:Dictionary in world.civilizations:
 		if int(civ.player_relation.get("contact_level",0))<2:continue
 		var relationship:Dictionary=civ.player_relation.duplicate(true)
@@ -587,9 +582,6 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		# Lasting grievances over seized, looted or sabotaged works; known deterrence.
 		relationship.opinion=clampf(float(relationship.opinion)-GREAT_WORKS.grievance(id,other),-1,1)
 		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other)+preload("res://scripts/standing.gd").war_deterrence(civ))
-		if bool(civ.player_relation.get("at_war",false)) and action!="seek_peace":
-			var urgency:=-float(civ.player_relation.get("opinion",0))
-			if urgency>campaign_urgency:campaign_urgency=urgency;campaign_enemy=String(civ.id)
 		if action=="":continue
 		var order:={"kind":"diplomacy","target":String(civ.id),"action":action}
 		if action=="goodwill":
@@ -601,7 +593,8 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		var score:=3.0 if action=="seek_peace" else (2.0-opinion if action=="declare_war" else 1.0+opinion)
 		score*=mission_pull(id,other,action)
 		candidates.append({"order":order,"score":score})
-	if campaign_enemy!="":campaign_objective(id,campaign_enemy,plan)
+	# The war itself (which town, when, with whom) is the war council's
+	# (war_council.gd): the same five stances and acts as the god's own people.
 	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.score)>float(b.score))
 	for candidate in candidates:
 		if not WorldSimulation.submit(id,candidate.order).has("error"):break
@@ -611,29 +604,6 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 ## (undertaking_effects traffic): x(1 + pull), at most x1.40; 1 otherwise.
 static func mission_pull(id:String,other:String,action:String)->float:
 	return 1.0+GREAT_WORKS.known_traffic(id,other) if action in ["open_trade","goodwill"] else 1.0
-
-static func campaign_objective(id:String,enemy:String,plan:Dictionary)->void:
-	var campaign:=WorldSimulation.military
-	var world:=WorldSimulation.world
-	var target:="";var point:Vector2=world.player_world_origin
-	var mission:="defend";var vision:="Hold the home approaches. Preserve our people and avoid an unsupported advance."
-	if bool(plan.offensive):
-		var best:=-INF
-		# Dated known city reports only: no omniscient target lookup.
-		for report:Dictionary in world.city_intelligence.known_cities("player",enemy,false):
-			var position:=world.city_intelligence.vector(report.position)
-			var score:=-position.distance_to(world.player_world_origin)
-			# A reported standing Great Work is a prize to bold rulers (a few km of reach).
-			for sighting:Dictionary in report.get("works",[]):
-				if String(sighting.get("status",""))=="functioning":score+=12.0*float(plan.personality.assertiveness)
-			if score>best:best=score;target=String(report.city_id);point=position
-		if target!="":
-			mission="occupy" if float(plan.personality.assertiveness)>.6 else "encircle"
-			vision="Isolate the enemy and cut its supply before advancing. Protect civilians and preserve the army." if float(plan.personality.empathy)>.5 else "Seize the initiative, isolate opposing forces, and take the objective when supply permits."
-	var current:Dictionary=campaign.command_hierarchy.order_for("army")
-	if String(current.get("target",""))==target and String(current.get("mission",""))==mission:return
-	var region:=WorldSimulation.submit(id,{"kind":"area","service":"army","name":"Homeland defense" if target=="" else "Campaign objective","vertices":campaign.command_hierarchy.R.rectangle(point,8)})
-	if region.has("region"):WorldSimulation.submit(id,{"kind":"objective","command":"army","region":region.region,"mission":mission,"target":target,"vision":vision})
 
 static func service_orders(id:String,plan:Dictionary={})->void:
 	if plan.is_empty():plan=current_plan(id)

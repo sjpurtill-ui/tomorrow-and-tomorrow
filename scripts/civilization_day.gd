@@ -105,6 +105,11 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 				WorldSimulation.military._process_military_day()
 			preload("res://scripts/civilization_travel.gd").advance(float(WorldSimulation.span))
 	),
+		# The war: the god's war ledger (their raids, the feuds, the real fights
+		# counted, war_loop.gd), then every people's war council
+		# (war_council.gd), which sits monthly in peace and every few days
+		# while its bands are out. Both return at once on other days.
+		S.step("war_council",timings,func()->void:_war_day(day)),
 		S.step("convoy",timings,func()->void:
 			run.result.arrival=advance_convoy()
 			if WorldSimulation.actor_id=="player" and WorldSimulation.state.settlement_site_committed:
@@ -124,6 +129,20 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 				preload("res://scripts/home_defense.gd").act("player")
 	),
 	]
+
+const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
+const COUNCIL_PATH:="res://scripts/war_council.gd"
+static var _war_loop_script:GDScript
+static var _council_script:GDScript
+
+## A day of war for the owner in scope: loaded here, not preloaded, to keep
+## the calendar's compile order free of the court's scripts.
+static func _war_day(day:int)->void:
+	if WorldSimulation.actor_id=="player":
+		if _war_loop_script==null:_war_loop_script=load(WAR_LOOP_PATH)
+		_war_loop_script.call("daily",day)
+	if _council_script==null:_council_script=load(COUNCIL_PATH)
+	_council_script.call("day",day)
 
 ## Each unoccupied secondary town is its own step, in settlement order.
 static func _city_steps(build:Callable,secondary_timings:Dictionary,timings:Dictionary,label:String)->Array:

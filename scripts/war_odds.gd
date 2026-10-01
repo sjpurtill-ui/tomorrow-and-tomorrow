@@ -23,6 +23,14 @@ const ARMS_SEEN_DAYS:=90
 ## Odds against us by more than 5 to 4 (ours over theirs below this): the
 ## war leader objects that we would be the weaker side.
 const OBJECT_BELOW:=0.8
+## THE WAR COUNCIL'S LINES (war_council.gd), the same for every people:
+## before going at a town's walls the war leader gathers until the odds are
+## 3 to 2 for us; a raid on a town's fields and stores goes at even odds or
+## better, with a band sized to make it 3 to 2 when the men are there.
+const TAKE_ODDS:=1.5
+const RAID_ODDS:=1.0
+## The steps by which the war leader reckons how many more he would need.
+const MORE_STEPS:=[1.1,1.25,1.5,1.75,2.0,2.5,3.0,4.0,6.0]
 ## Odds under this are "about even".
 const EVEN_BELOW:=1.15
 ## Each named fraction covers the odds nearer to it than to its neighbours:
@@ -54,6 +62,29 @@ static func of(force:Dictionary,formations:Array,going:int,their_men:float,forti
 ## True when the war leader would object that we are the weaker side.
 static func weaker(odds:Dictionary)->bool:
 	return not odds.is_empty() and float(odds.get("raw",1.0))<OBJECT_BELOW
+
+## The odds a kind of blow wants before the war leader goes unbidden: 3 to 2
+## at a town's walls, even odds for a raid on its fields and stores.
+static func wanted(kind:String)->float:
+	return RAID_ODDS if kind=="raid" else TAKE_ODDS
+
+## How many more men than `going` (the same kit, drilled the same) would
+## bring the odds to `want`: 0 when they already do, -1 when even six times
+## as many would not. Bounded: a few readings of the combat engine.
+static func more_for(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array,civ_id:String,want:float,open_field:bool=false,their_ready:float=-1.0)->int:
+	if going<=0 or heads(formations)<=0 or their_men<1.0: return -1
+	var now:=of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready)
+	if not now.is_empty() and float(now.raw)>=want: return 0
+	for step in MORE_STEPS:
+		var n:=ceili(float(going)*float(step))
+		var o:=of(force,formations,n,their_men,fortification,their_arms,civ_id,open_field,their_ready)
+		if not o.is_empty() and float(o.raw)>=want: return n-going
+	return -1
+
+## "about 3 to 2 for us" / "about 2 to 3 against us" from a reading of of().
+static func said(odds:Dictionary)->String:
+	if odds.is_empty(): return ""
+	return words(float(odds.odds),bool(odds.ours))
 
 ## Our kit carried by men drilled as a garrison is, fully armed.
 static func _as_a_garrison(formations:Array)->Array:

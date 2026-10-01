@@ -277,12 +277,15 @@ static func strength_words(glance:Dictionary,now:int,target:int)->String:
 
 
 ## What is happening with this people now, in a few words (the details in
-## now_details).
+## now_details): the war council's own reading (war_council.gd
+## operation_words): our band out and how it stands ("Rovik besieges
+## Oakford, day 12: odds 3 to 2, fed 80%"), their band coming, the trackers
+## or messengers out, or why the war leader waits.
 static func now_words(e:Dictionary)->String:
-	var band:Dictionary=e.get("band",{})
-	if not band.is_empty():
-		var who:=String(band.get("general","")).get_slice(" ",0)
-		return "%s %s" % [who if who!="" else "Our band",String(band.words)]
+	var civ_id:=String(e.get("civ_id",""))
+	var council:GDScript=load("res://scripts/war_council.gd")
+	var said:=String(council.call("operation_words",civ_id)) if civ_id!="" else ""
+	if said!="":return said
 	var bands:Array=e.get("bands",[])
 	if not bands.is_empty():
 		var b:Dictionary=bands[0]
@@ -291,13 +294,15 @@ static func now_words(e:Dictionary)->String:
 	return "quiet for %s" % Ledger.span_words(int(e.get("quiet",0)))
 
 
-## Everything happening with this people now, for the pointer.
+## Everything happening with this people now, for the pointer: the council's
+## account (the band, the odds it set out at, how it is fed, the stance in
+## force), our other bands at their towns, and their last raid.
 static func now_details(e:Dictionary)->String:
+	var civ_id:=String(e.get("civ_id",""))
 	var parts:=PackedStringArray()
-	var band:Dictionary=e.get("band",{})
-	if not band.is_empty():
-		var who:=String(band.get("general","")).get_slice(" ",0)
-		parts.append("%s %s%s" % [(who+" and %d" % int(band.men)) if who!="" and int(band.get("men",0))>0 else "Our band",String(band.words),(", back in %s" % Ledger.span_words(int(band.days_left))) if int(band.get("days_left",0))>0 else ""])
+	var council:GDScript=load("res://scripts/war_council.gd")
+	var said:=String(council.call("operation_details",civ_id)).trim_suffix(".") if civ_id!="" else ""
+	if said!="":parts.append(said)
 	for b:Dictionary in e.get("bands",[]):parts.append("%s · %s · %s" % [String(b.name),EraWords.grouped(int(b.troops)),String(b.where)])
 	var raid:Dictionary=e.get("last_raid",{})
 	if not raid.is_empty() and int(raid.get("days_ago",9999))<=120:parts.append("their last raid %s ago" % Ledger.span_words(int(raid.days_ago)))
@@ -309,36 +314,66 @@ static func now_details(e:Dictionary)->String:
 
 func _take_button(civ_id:String,chosen:bool)->Control:
 	var pick:=MenuButton.new();pick.name="Stance_take";pick.text="Take a town ▾";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
-	pick.tooltip_text=String(STANCES[3][3])
+	pick.tooltip_text=String(STANCES[3][3])+" The war leader gathers until the odds are 3 to 2, feeds the march or waits, then lays siege or storms."
 	if chosen:pick.add_theme_stylebox_override("normal",T.button_pressed_style())
 	var popup:=pick.get_popup()
-	var towns:=Orders.places().filter(func(p:Dictionary)->bool:return String(p.get("civ_id",""))==civ_id and String(p.get("controller",""))!="player")
+	var council:GDScript=load("res://scripts/war_council.gd")
+	var towns:Array=council.call("known_towns",civ_id)
 	if towns.is_empty():
 		pick.disabled=true;pick.tooltip_text="We know of no town of theirs yet: scouts find their towns."
 		return pick
+	var aim:Dictionary=WarLoop.front(civ_id).get("take",{}) if WarLoop.front(civ_id).get("take") is Dictionary else {}
 	var preview:=towns.slice(0,8)
 	for i in preview.size():
 		var p:Dictionary=preview[i]
 		var look:=Orders.preview(Orders.HOME,"attack",{"type":"place","place":p})
 		var days:=int(look.get("days",0))
-		popup.add_item("%s%s" % [Orders.place_name(p),(" · %d days" % days) if days>0 else ""],i)
+		var odds:Dictionary=look.get("odds",{}) if look.get("odds") is Dictionary else {}
+		var marked:=" ✓" if String(aim.get("city_id",""))==String(p.city_id) else ""
+		popup.add_item("%s%s%s%s" % [Orders.place_name(p),(" · %d days" % days) if days>0 else "",(" · odds "+Orders.odds_short(float(odds.odds),bool(odds.ours))) if not odds.is_empty() else "",marked],i)
 		popup.set_item_tooltip(i,"\n".join(look.get("lines",[])))
 	popup.id_pressed.connect(func(index:int)->void:_take(civ_id,preview[index]))
 	return pick
 
 
+## A stance is the god's word to the war council (war_council.gd order): it
+## acts on it at once with the real army, says what it did or why it waits,
+## and keeps to it. Pay settles the feud with a blood price (war_loop.gd).
 func _stance(civ_id:String,id:String,objective:String)->void:
-	WarLoop.front(civ_id)["stance"]=id
-	_say(WarLoop.order(civ_id,objective))
+	# One "Go anyway" at most, and only for the latest word.
+	for child in get_children():
+		if String(child.name).begins_with("GoAnyway"):remove_child(child);child.queue_free()
+	if id=="pay":
+		_say(WarLoop.order(civ_id,objective))
+		refresh(true)
+		return
+	var council:GDScript=load("res://scripts/war_council.gd")
+	var label:=""
+	for spec:Array in STANCES:
+		if String(spec[0])==id:label=String(spec[1])
+	var answer:Dictionary=council.call("order",civ_id,id,{"card":true,"words":"%s: %s" % [WarLoop._name(civ_id),label.to_lower()]})
+	_say(String(answer.get("says",answer.get("outcome",""))))
+	# The war leader waits for the odds or the road: the god can send them anyway.
+	if String(answer.get("verdict","")) in ["object","wait"] and id=="punish":
+		var go:=Button.new();go.text="Go anyway";go.name="GoAnyway"
+		go.pressed.connect(func()->void:
+			go.queue_free()
+			var again:Dictionary=council.call("order",civ_id,id,{"insist":true,"card":true,"words":"%s: %s, go anyway" % [WarLoop._name(civ_id),label.to_lower()]})
+			_say(String(again.get("says",again.get("outcome",""))))
+			refresh(true))
+		feedback.add_sibling(go)
 	refresh(true)
 
 
 func _take(civ_id:String,place:Dictionary,insist:=false)->void:
-	var answer:=Orders.give(Orders.HOME,"attack",{"type":"place","place":place},insist)
-	if String(answer.get("verdict",""))=="act":WarLoop.front(civ_id)["stance"]="take"
-	_say(String(answer.get("says",answer.get("reason",""))))
-	if String(answer.get("verdict",""))=="object" and not insist:
-		var go:=Button.new();go.text="Go anyway";go.pressed.connect(func()->void:go.queue_free();_take(civ_id,place,true))
+	# One "Go anyway" at most, and only for the latest word.
+	for child in get_children():
+		if String(child.name).begins_with("GoAnyway"):remove_child(child);child.queue_free()
+	var council:GDScript=load("res://scripts/war_council.gd")
+	var answer:Dictionary=council.call("order",civ_id,"take",{"place":place,"insist":insist,"card":true,"words":"Take %s%s" % [Orders.place_name(place),", go anyway" if insist else ""]})
+	_say(String(answer.get("says",answer.get("outcome",""))))
+	if String(answer.get("verdict","")) in ["object","wait"] and not insist:
+		var go:=Button.new();go.text="Go anyway";go.name="GoAnyway";go.pressed.connect(func()->void:go.queue_free();_take(civ_id,place,true))
 		feedback.add_sibling(go)
 	refresh(true)
 
