@@ -9,8 +9,9 @@ const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catal
 const SocietyModelScript = preload("res://scripts/society_model.gd")
 const TechnologyEras=preload("res://scripts/technology_eras.gd")
 const Research600=preload("res://scripts/research_600_catalog.gd")
-## Kept so older saves (which hold it) still load; the monthly look is per
-## team now (_switch_checked).
+## The last day free teams read questions far ahead of their age
+## (_place_free_teams, at most once in each block of SWITCH_CHECK_DAYS days).
+## The name is older: saves hold it.
 var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
 
@@ -1034,11 +1035,11 @@ func _release_extra_teams(count:int)->void:
 
 ## Free teams take up questions (see the section's notes). A question the player
 ## chose is taken up first and may hold a team beyond the count. Questions of
-## their age and near it are read every day; free teams read further ahead on
-## the first day of each month, on a day a question is proven, or when `full`
-## asks: such a look reads every line's questions, and on the days between it
-## would find nothing new. The rule reads only the saved state and the calendar,
-## so a loaded game places its teams as the saved one would have.
+## their age and near it are read every day; free teams read further ahead once
+## in each block of SWITCH_CHECK_DAYS days, on a day a question is proven, or
+## when `full` asks: such a look reads every line's questions, and on the days
+## between it would find nothing new. The rule reads only the saved state and
+## the calendar, so a loaded game places its teams as the saved one would have.
 func _place_free_teams(current_day:int,count:int,full:=false)->void:
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var lines:=_team_lines()
@@ -1059,7 +1060,10 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 	if active.size()>=capacity: return
 	var log:Array=WorldSimulation.state.discovery_log
 	var proved_today:=not log.is_empty() and log[0] is Dictionary and int((log[0] as Dictionary).get("day",-1))==current_day
-	var reach:=2 if full or proved_today or posmod(current_day,SWITCH_CHECK_DAYS)==0 else 1
+	var reach:=1
+	if full or proved_today or floori(float(current_day)/SWITCH_CHECK_DAYS)!=floori(float(_research_600_return_day)/SWITCH_CHECK_DAYS):
+		reach=2
+		_research_600_return_day=current_day
 	var busy:=_busy_ids()
 	var held:=_teams_by_line()
 	var turns:=_team_turns(lines,held,current_day)
