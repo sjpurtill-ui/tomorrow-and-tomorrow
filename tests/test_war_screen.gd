@@ -135,3 +135,12 @@ func test_the_watch_at_home_is_not_the_army()->void:
 	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
 	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(5)
 	WorldSimulation.state.population_allocations.erase("Defense")
+
+func test_a_leader_with_bands_shows_men_will_and_fed_as_bars()->void:
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	var row:Control=board._leader_row({"id":"war_leader","leader":{"name":"Corvan","title":"War leader at home","commander":{"command":0.6}},"bands":[1,2],"men":18,"full":33,"will":0.4,"supply":0.86,"hungry":0,"places":{"Ashford":2}})
+	var bars:Node=row.find_child("Bars",true,false)
+	assert_object(bars).is_not_null()
+	assert_str((bars as Control).tooltip_text).is_equal("Men 18 of 33 · will 40% · fed 86%")
+	row.free()

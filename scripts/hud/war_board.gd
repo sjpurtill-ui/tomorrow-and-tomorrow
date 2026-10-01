@@ -333,6 +333,10 @@ func _leader_row(c:Dictionary)->Control:
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
 		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
 	words.add_child(_line(leader_doing(c),13,T.INK))
+	if int(c.get("men",0))>0:
+		var bars:=CommandBars.new();bars.name="Bars";bars.men=int(c.men);bars.full=int(c.full);bars.will=float(c.will);bars.fed=float(c.supply)
+		bars.tooltip_text="Men %d of %d · will %d%% · fed %d%%" % [int(c.men),int(c.full),roundi(float(c.will)*100.0),roundi(float(c.supply)*100.0)]
+		words.add_child(bars)
 	if String(c.id)==Commands.WAR_LEADER:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Name another";other.flat=true;other.focus_mode=Control.FOCUS_NONE
 		other.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -442,6 +446,23 @@ class StrengthBar extends Control:
 		if target>0:
 			var tick:=clampf(size.x*float(target)/scale,1.0,size.x-1.0)
 			draw_line(Vector2(tick,-3.0),Vector2(tick,size.y+3.0),T.INK,2.0)
+
+
+## A command at a glance, as HOI4's army card: men of full strength, will
+## and fed, each a short bar in the army bar's colours.
+class CommandBars extends Control:
+	const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var men:=0
+	var full:=0
+	var will:=0.0
+	var fed:=0.0
+	func _ready()->void:custom_minimum_size=Vector2(240,14);mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		var width:=minf(120.0,(size.x-16.0)/3.0)
+		var shares:=[float(men)/maxf(1.0,float(full)),will,fed]
+		var inks:=[T.GREEN,BarModel.will_color(will),T.TEAL if fed>=0.75 else (T.AMBER if fed>=0.4 else T.RED)]
+		for i in 3:BarModel.draw_bar(self,Rect2(Vector2(float(i)*(width+8.0),2.0),Vector2(width,10.0)),clampf(float(shares[i]),0.0,1.0),inks[i])
 
 
 ## The dead on each side, compact (war_ledger_marks.draw_dead).
