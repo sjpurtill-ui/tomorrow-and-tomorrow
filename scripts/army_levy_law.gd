@@ -16,10 +16,17 @@ extends RefCounted
 ## (MilitaryCampaign.personnel_ledger).
 ## MilitaryCampaign.army_levy_level holds the chosen level ("" until the ruler
 ## chooses: then nobody is called up or sent home on its account).
+## The war leader drills them as the best foot our people can train and arm
+## (kit()), so the levy of the musket age carries muskets, not spears. A levy
+## the ruler orders in court stands: it lifts the level to cover it (cover()).
 ## Static helpers; preload.
 
 const HomeOrders:=preload("res://scripts/home_orders.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Kit:=preload("res://scripts/armor_equipment.gd")
+## The kinds of foot an army is mostly made of; the war leader drills the
+## best of them our people can train and arm.
+const LINE_BRANCHES:=["force_generation","heavy_infantry","missile_infantry"]
 
 ## The levels, smallest first: {id, share, early (words before numbers were
 ## kept), modern}.
@@ -32,8 +39,9 @@ const LEVELS:=[
 ]
 ## The war leader looks at the army's size this often (days).
 const KEEP_EVERY:=5
-## They call up when short by more than this share of the target (at least
-## one), and send home when over by more than RELEASE_SLACK of it.
+## They call up when short by more than this share of the target (so a band
+## of 120 keeping one under arms calls that one up), and send home when over
+## by more than RELEASE_SLACK of it (at least one).
 const RAISE_SLACK:=0.02
 const RELEASE_SLACK:=0.10
 
@@ -99,9 +107,10 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 	var read:=reading(mc)
 	var target:=int(read.target)
 	var have:=int(read.now)
-	if target-have>maxi(0,ceili(float(target)*RAISE_SLACK)):
+	if target-have>floori(float(target)*RAISE_SLACK):
 		var asked:=target-have
-		var result:Dictionary=HomeOrders.perform({"kind":"levy","count":asked,"recruit":true,"fill":false,"arm_said":true,"unit":"levy","item":""})
+		var pick:=kit(mc)
+		var result:Dictionary=HomeOrders.perform({"kind":"levy","count":asked,"recruit":true,"fill":false,"arm_said":true,"unit":String(pick.unit),"item":String(pick.item),"by_law":true})
 		var raised:=int(result.get("raised",0))
 		return {"raised":raised,"released":0,"said":("%d called up to keep %s: they begin their drill." % [raised,level_name(id).to_lower()]) if raised>0 else "Nobody free to call up: every able adult is already serving or away."}
 	if have-target>maxi(0,ceili(float(target)*RELEASE_SLACK)):
@@ -119,6 +128,41 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 		var released:=int(result.get("released",0))
 		if released>0:return {"raised":0,"released":released,"said":"%d sent home to their work: the army stood above %s." % [released,level_name(id).to_lower()]}
 	return {}
+
+
+## The kind of foot the war leader drills new levies as: {unit, item}. The
+## best fighting kit (attack × defence, with armour) among the line kinds our
+## people can train and can arm from store or workshop; the plain levy with
+## whatever comes to hand when there is none.
+static func kit(mc:Node)->Dictionary:
+	var best:={"unit":"levy","item":""}
+	var score:=-INF
+	for unit:String in mc.UnitCatalog.ARCHETYPES:
+		if String((mc.UnitCatalog.ARCHETYPES[unit] as Dictionary).get("branch","")) not in LINE_BRANCHES:continue
+		var item:=Kit.selection(mc,unit,{})
+		if item=="" or not mc.simulator.WEAPONS.has(item):continue
+		var value:=Kit.preference(mc,item,{})
+		if value>score:score=value;best={"unit":unit,"item":item}
+	return best
+
+
+## A levy the ruler orders in court stands. When it lifts the army above the
+## chosen level, the level rises to the smallest that holds everyone; above
+## the largest, the war leader stops keeping a share (nobody is sent home on
+## its account). The words to add to the court's answer, or "".
+static func cover(mc:Node)->String:
+	var id:=_level_of(mc)
+	if id=="":return ""
+	var population:=int(WorldSimulation.state.population_total)
+	var now:=under_arms(mc)
+	var target:=target_men(id,population)
+	if now<=target+maxi(0,ceili(float(target)*RELEASE_SLACK)):return ""
+	for entry:Dictionary in LEVELS:
+		if target_men(String(entry.id),population)>=now:
+			mc.set("army_levy_level",String(entry.id))
+			return "The war leader now keeps the army at %s." % level_name(String(entry.id)).to_lower()
+	mc.set("army_levy_level","")
+	return "That is more than any share the war leader keeps: none is kept now, and nobody is sent home on its account."
 
 
 ## What a level costs, in plain words: "16 of 535 serve · 1 in 21 hands

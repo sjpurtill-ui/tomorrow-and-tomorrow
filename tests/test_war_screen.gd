@@ -85,3 +85,24 @@ func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
 	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
 	# Nobody out: no fed share to show.
 	assert_float(float(Board.strength(MilitaryCampaign).fed)).is_equal(-1.0)
+
+func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->void:
+	var people:=int(WorldSimulation.state.population_total)
+	Law.choose(MilitaryCampaign,"few")
+	var kept:=Law.under_arms(MilitaryCampaign)
+	assert_int(kept).is_equal(Law.target_men("few",people))
+	# The ruler calls up more in court than the share keeps.
+	var more:=Law.target_men("many",people)-kept
+	var answer:Dictionary=preload("res://scripts/home_orders.gd").perform({"kind":"levy","count":more,"recruit":true,"fill":false,"arm_said":true,"unit":"levy","item":""})
+	assert_int(int(answer.get("raised",0))).is_equal(more)
+	assert_str(Law.reading(MilitaryCampaign).level).is_equal("many")
+	assert_str(String(answer.get("says",""))).contains("now keeps the army at")
+	# The war leader's next look sends nobody home.
+	assert_dict(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true)).is_empty()
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(kept+more)
+
+func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
+	var pick:=Law.kit(MilitaryCampaign)
+	# Early on that is spears or the plain levy: never a kit nobody can make.
+	assert_str(String(pick.unit)).is_not_empty()
+	if String(pick.item)!="":assert_bool(MilitaryCampaign._training_gate(String(pick.unit),String(pick.item)).has("error")).is_false()
