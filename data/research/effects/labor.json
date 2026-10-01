@@ -650,6 +650,9 @@
   },
   "mill_house_grinding": {
    "art": "res://assets/ui/research/subjects/portion_allotment_customs-v1.png"
+  },
+  "worst_tasks_by_lot": {
+   "art": "res://assets/ui/research/subjects/shared_labor_registers-v1.png"
   }
  },
  "balance_600": {

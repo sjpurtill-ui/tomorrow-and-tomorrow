@@ -959,6 +959,9 @@
   "stamped_bricks": {
    "art": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png"
   },
+  "wooden_mallet_carving": {
+   "art": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png"
+  },
   "pleated_linen": {
    "art": "res://assets/ui/research/subjects/output_quality_sorting-v1.png"
   },

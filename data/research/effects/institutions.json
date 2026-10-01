@@ -978,6 +978,9 @@
   "canal_wardens": {
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png"
   },
+  "office_seals": {
+   "art": "res://assets/ui/research/discovery-600/cylinder_seals.png"
+  },
   "third_party_border_judgment": {
    "art": "res://assets/ui/research/subjects/regional_arbitration_circuits-v1.png"
   },

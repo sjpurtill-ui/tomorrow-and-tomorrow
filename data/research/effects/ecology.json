@@ -839,6 +839,9 @@
   "canal_refuse_ban": {
    "art": "res://assets/ui/research/subjects/greywater_diversion_practice-v1.png"
   },
+  "slope_bush_planting": {
+   "art": "res://assets/ui/research/subjects/slope_erosion_watch-v1.png"
+  },
   "salt_land_survey_notes": {
    "art": "res://assets/ui/research/subjects/waterlogging_recognition-v1.png"
   }

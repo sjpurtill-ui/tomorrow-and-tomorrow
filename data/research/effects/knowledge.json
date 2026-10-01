@@ -810,6 +810,9 @@
   "foreman_daily_logs": {
    "art": "res://assets/ui/research/subjects/crew_count_scribes-v1.png"
   },
+  "two_road_runners": {
+   "art": "res://assets/ui/research/subjects/runner_relays_between_work_sites-v1.png"
+  },
   "duplicate_contract_copies": {
    "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
   },

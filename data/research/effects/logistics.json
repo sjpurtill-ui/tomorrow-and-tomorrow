@@ -981,6 +981,9 @@
   "granaries_on_high_ground": {
    "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
   },
+  "jars_bedded_in_floor": {
+   "art": "res://assets/ui/research/subjects/layered_pit_storage-v1.png"
+  },
   "island_market_trade": {
    "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png"
   },

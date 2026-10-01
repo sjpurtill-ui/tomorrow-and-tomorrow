@@ -6,10 +6,10 @@
 "registry_source": "origin/codex/research-plausibility:docs/research/registry.json",
 "source_commit": "2ffd5b734a2f9a69ce9c7025ffc429ccb660fbd9",
 "year_adjustments": "applied (proposed_year; band shifted by the same amount)",
-"node_count": 1330,
+"node_count": 1336,
 "design_node_count": 1101,
 "amendments": "tools/research/design_amendments_600.json",
-"adopted_count": 229
+"adopted_count": 235
 },
 "lines": [
 "knowledge",
@@ -22468,6 +22468,29 @@
 ]
 },
 {
+"id": "office_seals",
+"line": "institutions",
+"status": "adopted",
+"name": "Each Office Keeps Its Own Seal",
+"one_liner": "Each Office Keeps Its Own Seal",
+"observation": "Each Office Keeps Its Own Seal.",
+"key_threshold": false,
+"target_year": 345,
+"proposed_year": 345,
+"band_low": 310.0,
+"band_high": 380.0,
+"min_year": 310.0,
+"research_years": 2.0,
+"requires_all": [
+"cylinder_seals",
+"temple_high_steward"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "separate_temple_palace_stores",
 "line": "institutions",
 "status": "new",
@@ -25951,6 +25974,29 @@
 "shared_with": []
 },
 {
+"id": "two_road_runners",
+"line": "knowledge",
+"status": "adopted",
+"name": "Urgent Messages Sent with Two Runners by Different Roads",
+"one_liner": "Urgent Messages Sent with Two Runners by Different Roads",
+"observation": "Urgent Messages Sent with Two Runners by Different Roads.",
+"key_threshold": false,
+"target_year": 410,
+"proposed_year": 410,
+"band_low": 375.0,
+"band_high": 445.0,
+"min_year": 375.0,
+"research_years": 2.0,
+"requires_all": [
+"runner_relays_between_work_sites",
+"verbatim_messages"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "boundary_treaties",
 "line": "institutions",
 "status": "new",
@@ -27339,6 +27385,29 @@
 "travel",
 "logistics"
 ]
+},
+{
+"id": "jars_bedded_in_floor",
+"line": "logistics",
+"status": "adopted",
+"name": "Store Jars Bedded in the Storeroom Floor",
+"one_liner": "Store Jars Bedded in the Storeroom Floor",
+"observation": "Store Jars Bedded in the Storeroom Floor.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"hermetic_grain_storage",
+"storerooms_by_kind"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "leveled_basin_fields",
@@ -30449,6 +30518,29 @@
 ]
 },
 {
+"id": "wooden_mallet_carving",
+"line": "production",
+"status": "adopted",
+"name": "Chisels Struck with Wooden Mallets",
+"one_liner": "Chisels Struck with Wooden Mallets",
+"observation": "Chisels Struck with Wooden Mallets.",
+"key_threshold": false,
+"target_year": 495,
+"proposed_year": 495,
+"band_low": 460.0,
+"band_high": 530.0,
+"min_year": 460.0,
+"research_years": 2.0,
+"requires_all": [
+"copper_carpentry_tools",
+"dressed_stone_masonry"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "named_breads",
 "line": "nutrition",
 "status": "new",
@@ -30938,7 +31030,7 @@
 "min_year": 470.0,
 "research_years": 2.0,
 "requires_all": [
-"cylinder_seals",
+"office_seals",
 "offices_father_to_son"
 ],
 "requires_any": [],
@@ -33580,6 +33672,29 @@
 ]
 },
 {
+"id": "worst_tasks_by_lot",
+"line": "labor",
+"status": "adopted",
+"name": "The Worst Tasks Given Out by Lot",
+"one_liner": "The Worst Tasks Given Out by Lot",
+"observation": "The Worst Tasks Given Out by Lot.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"levy_service_turns",
+"daily_task_norms"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "cast_on_tool_repair",
 "line": "production",
 "status": "adopted",
@@ -33690,6 +33805,29 @@
 "requires_all": [
 "hermetic_grain_storage",
 "storage_humidity_judging"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "slope_bush_planting",
+"line": "ecology",
+"status": "adopted",
+"name": "Bushes Planted on Stripped Slopes to Hold the Soil",
+"one_liner": "Bushes Planted on Stripped Slopes to Hold the Soil",
+"observation": "Bushes Planted on Stripped Slopes to Hold the Soil.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"slope_erosion_watch",
+"topsoil_saved_on_terraces"
 ],
 "requires_any": [],
 "precedents": [],
