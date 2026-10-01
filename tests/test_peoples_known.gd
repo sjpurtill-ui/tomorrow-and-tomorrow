@@ -243,13 +243,13 @@ func _board(model:Dictionary,view:={},on_town:=Callable())->Control:
 
 ## A ledger with all its parts: a feud with a stance, bands seen, a town of
 ## unknown people, a people unknown, our row, and one row opened.
-func _full_model(stage:String)->Dictionary:
+func _full_model(stage:String,our_people:=420.0,width:=0.05)->Dictionary:
 	var peoples:=three_peoples()
 	peoples[0]["feud"]=true;peoples[0]["hot"]=true;peoples[0]["stance"]="take";peoples[0]["trust"]=-0.4
 	peoples[1]["treaty"]="trade";peoples[1]["trust"]=0.5
 	var bands:=[{"civ_id":"a","kind":"army","strength_estimate_low":20,"strength_estimate_high":40,"last_seen_day":TODAY-3}]
-	var us:={"name":"Oakford","values":{"population":420.0,"garrison":30.0,"supply":45.0,"production":0.4,"science_capacity":3.0,"life_expectancy":31.0,"gdp":200.0,"fortification":0.4},"towns":[{"name":"Oakford","values":{"population":420.0,"garrison":30.0,"supply":45.0,"fortification":0.4}}]}
-	var rows:=Model.rows(peoples,[report("a","a1",TODAY-5,1.0),report("a","a2",TODAY-200,1.5),report("b","b1",TODAY-100,2.0)],bands,us,TODAY,stage)
+	var us:={"name":"Oakford","values":{"population":our_people,"garrison":30.0,"supply":45.0,"production":0.4,"science_capacity":3.0,"life_expectancy":31.0,"gdp":200.0,"fortification":0.4},"towns":[{"name":"Oakford","values":{"population":our_people,"garrison":30.0,"supply":45.0,"fortification":0.4}}]}
+	var rows:=Model.rows(peoples,[report("a","a1",TODAY-5,1.0,width),report("a","a2",TODAY-200,1.5,width),report("b","b1",TODAY-100,2.0,width)],bands,us,TODAY,stage)
 	return {"stage":stage,"rows":rows,"unplaced":[{"city_id":"x","name":"Unidentified settlement"}]}
 
 func _walk(node:Node,out:Array)->void:
@@ -320,6 +320,39 @@ func _people_rows(board:Node)->Array:
 	for child in board.find_child("Rows",true,false).get_children():
 		if String(child.name).begins_with("People_") and not child.is_queued_for_deletion():names.append(String(child.name))
 	return names
+
+## What a drawn ledger shows: every node's words, inks, pointer notes,
+## visibility and marks, in order.
+func _snap(node:Node,out:=PackedStringArray(),depth:=0)->PackedStringArray:
+	if node.is_queued_for_deletion():return out
+	var line:=node.get_class()
+	if not String(node.name).contains("@"):line+="#"+String(node.name)
+	if node is CanvasItem:line+=" vis=%s" % (node as CanvasItem).visible
+	if node is Control:line+=" tip=%s min=%s" % [(node as Control).tooltip_text,(node as Control).custom_minimum_size]
+	if node is Label:line+=" text=%s ink=%s" % [(node as Label).text,(node as Label).get_theme_color("font_color")]
+	elif node is Button:line+=" text=%s" % (node as Button).text
+	if "level" in node:line+=" level=%s" % node.get("level")
+	out.append("  ".repeat(depth)+line)
+	for child in node.get_children():_snap(child,out,depth+1)
+	return out
+
+func test_a_new_day_is_written_in_place_and_reads_as_drawn_fresh()->void:
+	GameState.elapsed_days=TODAY
+	var view:={"sort":"people","flip":false,"open":""}
+	var board:=_board(_full_model("hearth"),view)
+	var row:Node=board.find_child("People_a",true,false)
+	# A day on: our count and their ageing ranges move; the ledger's shape holds.
+	var next:=_full_model("hearth",431.0,0.08)
+	board.update_block({"model":next,"view":view,"on_town":Callable()})
+	assert_bool(board.find_child("People_a",true,false)==row).override_failure_message("the same shape keeps its nodes").is_true()
+	var fresh:=_board(next,view.duplicate())
+	assert_array(_snap(board.get_child(0))).is_equal(_snap(fresh.get_child(0)))
+	assert_str((board.find_child("People_player",true,false).find_child("Cell_people",true,false).find_child("Value",true,false) as Label).text).is_equal("431")
+	# A new order is a new shape: drawn afresh, the same as fresh again.
+	var reordered:=_full_model("hearth",100.0,0.08)
+	board.update_block({"model":reordered,"view":view,"on_town":Callable()})
+	var redrawn:=_board(reordered,view.duplicate())
+	assert_array(_snap(board.get_child(0))).is_equal(_snap(redrawn.get_child(0)))
 
 func test_a_narrow_page_lets_the_least_needed_columns_give_way()->void:
 	GameState.elapsed_days=TODAY

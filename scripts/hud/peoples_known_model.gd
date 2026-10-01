@@ -213,8 +213,18 @@ static func rows(peoples:Array,records:Array,bands:Array,us:Dictionary,day:int,s
 	if stage=="":stage=EraWords.stage()
 	var names:={}
 	for people:Dictionary in peoples:names[String(people.civ_id)]=String(people.name)
+	# Each report filed once under the people it was first seen with and under
+	# its holder.
+	var filed:={}
+	for record:Dictionary in records:
+		var seen_with:=String(record.get("civ_id",""))
+		var holder:=holder_of(record)
+		for id:String in ([seen_with] if holder==seen_with else [seen_with,holder]):
+			if id=="":continue
+			if not filed.has(id):filed[id]=[]
+			(filed[id] as Array).append(record)
 	var result:Array=[]
-	for people:Dictionary in peoples:result.append(_people_row(people,records,bands,names,day,stage))
+	for people:Dictionary in peoples:result.append(_people_row(people,filed.get(String(people.civ_id),[]),bands,names,day,stage))
 	if not us.is_empty():result.append(_our_row(us,stage))
 	for column:String in RANKED:rank(result,column)
 	return result
@@ -225,6 +235,8 @@ static func holder_of(record:Dictionary)->String:
 	var controller:=String(record.get("controller",""))
 	return controller if controller!="" else String(record.get("civ_id",""))
 
+## One people's row from the reports of their towns (first seen with them, or
+## held by them).
 static func _people_row(people:Dictionary,records:Array,bands:Array,names:Dictionary,day:int,stage:String)->Dictionary:
 	var id:=String(people.civ_id)
 	var held:Array=[]
@@ -254,11 +266,11 @@ static func _people_row(people:Dictionary,records:Array,bands:Array,names:Dictio
 static func cell(column:Dictionary,towns:Array,stage:String,bands:Array=[])->Dictionary:
 	var id:=String(column.id)
 	var field:=String(column.field)
-	var giving:=towns.filter(func(t:Dictionary)->bool:return (t.get("fields",{}) as Dictionary).has(field))
+	var giving:=_giving(towns,field)
 	var unit:="main"
 	if giving.is_empty() and column.has("fallback"):
 		field=String(column.fallback)
-		giving=towns.filter(func(t:Dictionary)->bool:return (t.get("fields",{}) as Dictionary).has(field))
+		giving=_giving(towns,field)
 		unit="index"
 	if giving.is_empty() and bands.is_empty():
 		return {"known":false,"text":"unknown" if id=="people" else "?","tip":("No town of theirs has been seen." if towns.is_empty() else "No report tells us this."),"unit":unit}
@@ -283,6 +295,13 @@ static func cell(column:Dictionary,towns:Array,stage:String,bands:Array=[])->Dic
 	result["tip"]=_evidence_tip(giving,field,towns.size(),bands,partial)
 	return result
 
+## The towns whose report gives this figure.
+static func _giving(towns:Array,field:String)->Array:
+	var giving:Array=[]
+	for town:Dictionary in towns:
+		if (town.get("fields",{}) as Dictionary).has(field):giving.append(town)
+	return giving
+
 ## Each town counts by how many live there, where that was seen.
 static func _weights(towns:Array)->Array:
 	var mids:Array=[]
@@ -293,7 +312,9 @@ static func _weights(towns:Array)->Array:
 		mids.append(mid)
 		if mid>0.0:told+=mid;count+=1
 	var fill:=told/float(count) if count>0 else 1.0
-	return mids.map(func(mid:float)->float:return mid if mid>0.0 else fill)
+	for i in mids.size():
+		if float(mids[i])<=0.0:mids[i]=fill
+	return mids
 
 ## "From 2 of 3 towns · scouts, the watch · seen this season to a year ago."
 static func _evidence_tip(giving:Array,field:String,towns:int,bands:Array,partial:bool)->String:
@@ -311,7 +332,7 @@ static func _evidence_tip(giving:Array,field:String,towns:int,bands:Array,partia
 				newest=maxi(newest,seen)
 				oldest=seen if oldest<0 else mini(oldest,seen)
 		parts.append(", ".join(sources))
-		if newest>=0:parts.append("seen %s" % EraWords.ago(newest) if oldest==newest or EraWords.ago(oldest)==EraWords.ago(newest) else "seen %s to %s" % [EraWords.ago(newest),EraWords.ago(oldest)])
+		if newest>=0:parts.append("seen %s" % ago(newest) if oldest==newest or ago(oldest)==ago(newest) else "seen %s to %s" % [ago(newest),ago(oldest)])
 	if not bands.is_empty():
 		parts.append("%d band%s seen in the field" % [bands.size(),"" if bands.size()==1 else "s"])
 	var said:=" · ".join(parts)+"."
@@ -351,6 +372,18 @@ static func _towns_cell(count:int,tip:String)->Dictionary:
 # Words and numbers
 # --------------------------------------------------------------------------
 
+## EraWords.ago(), kept for the day: a ledger asks it of the same few days
+## many times over.
+static var _ago_today:=-1
+static var _ago_said:={}
+static func ago(day:int)->String:
+	var today:=int(floor(GameState.elapsed_days))
+	if today!=_ago_today:
+		_ago_today=today
+		_ago_said.clear()
+	if not _ago_said.has(day):_ago_said[day]=EraWords.ago(day)
+	return String(_ago_said[day])
+
 ## A figure in the people's own reckoning: counts rounded as a crowd is
 ## counted ("about 300", "250–400"), stores in days, lives in winters or
 ## years, levels in words before the statistical age and in hundredths after.
@@ -360,7 +393,7 @@ static func value_text(column:String,low:float,high:float,exact:bool,partial:boo
 	match column:
 		"towns":return str(roundi(low))
 		"people","fighters","wealth":return count_text(low,high,exact,partial,stage)
-		"lore":return lore_text(low,high,exact,partial)
+		"lore":return lore_text(low,high,exact,partial,stage)
 		"stores":return days_text(low,high,exact,stage)
 		"lives":return years_text(low,high,exact,stage)
 		"crafts","walls":return level_text(low,high,exact,stage)
@@ -386,8 +419,12 @@ static func nice(value:float)->int:
 	var step:=pow(10.0,floorf(log(value)/log(10.0))-1.0)
 	return roundi(value/step)*roundi(step)
 
-## Those who work at learning: a few, so tenths while under ten.
-static func lore_text(low:float,high:float,exact:bool,partial:bool)->String:
+## Those who work at learning. Before the statistical age they are counted
+## as people ("about 2", "under 1"); after it, in tenths while under ten.
+static func lore_text(low:float,high:float,exact:bool,partial:bool,stage:String="reckoned")->String:
+	if stage!="reckoned":
+		if high<1.0:return "under 1"
+		return count_text(low,high,exact,partial,stage)
 	var fine:=high<10.0
 	var a:=("%.1f" % low) if fine else EraWords.grouped(roundi(low))
 	var b:=("%.1f" % high) if fine else EraWords.grouped(roundi(high))
@@ -418,8 +455,16 @@ static func level_word(value:float)->String:
 		if value<float(pair[0]):return String(pair[1])
 	return "great"
 
-## Who brought the word, in one or two plain words.
+## Who brought the word, in one or two plain words (kept per source).
+static var _sources:={}
 static func source_word(source:String,reference:String="")->String:
+	var key:=source+"|"+reference.get_slice(":",0)
+	if not _sources.has(key):
+		if _sources.size()>=256:_sources.clear()
+		_sources[key]=_source_word(source,reference)
+	return String(_sources[key])
+
+static func _source_word(source:String,reference:String)->String:
 	var s:=source.to_lower();var ref:=reference.to_lower()
 	if ref.begins_with("covert") or "spy" in s or "spies" in s or "covert" in s or "agent" in s:return "spies"
 	if s.begins_with("shared by") or "envoy" in s or "messenger" in s or "delegat" in s:return "envoys"
@@ -450,8 +495,8 @@ static func freshness(records:Array,day:int)->Dictionary:
 	var age:=maxi(0,day-int(newest.observed_day))
 	var level:="recent" if age<=30 else ("aging" if age<=180 else "stale")
 	var tip:=String({"recent":"Recent: seen within the month.","aging":"Aging: seen within half a year; it may have changed.","stale":"Stale: over half a year old; much may have changed."}[level])
-	if oldest>=0 and oldest<int(newest.observed_day) and EraWords.ago(oldest)!=EraWords.ago(int(newest.observed_day)):tip+=" Our oldest word of them is from %s." % EraWords.ago(oldest)
-	return {"level":level,"text":EraWords.ago(int(newest.observed_day)),"source":source_word(String(newest.get("source","")),String(newest.get("reference",""))),"age_days":age,"tip":tip}
+	if oldest>=0 and oldest<int(newest.observed_day) and ago(oldest)!=ago(int(newest.observed_day)):tip+=" Our oldest word of them is from %s." % ago(oldest)
+	return {"level":level,"text":ago(int(newest.observed_day)),"source":source_word(String(newest.get("source","")),String(newest.get("reference",""))),"age_days":age,"tip":tip}
 
 ## One of their towns as we know it, for the opened row.
 static func town_row(record:Dictionary,people_id:String,names:Dictionary,day:int,stage:String,home:Dictionary={})->Dictionary:
@@ -472,7 +517,7 @@ static func town_row(record:Dictionary,people_id:String,names:Dictionary,day:int
 	if seen<0:level="undated"
 	elif not level in ["recent","aging","stale"]:level="recent" if day-seen<=30 else ("aging" if day-seen<=180 else "stale")
 	return {"city_id":String(record.get("city_id","")),"name":String(record.get("name","A town")),"home":is_home,"theirs":holder==people_id,"held":held,"cells":shown,
-		"fresh":{"level":level,"text":EraWords.ago(seen) if seen>=0 else "undated","source":source_word(String(record.get("source","")),String(record.get("reference","")))},"open":true}
+		"fresh":{"level":level,"text":ago(seen) if seen>=0 else "undated","source":source_word(String(record.get("source","")),String(record.get("reference","")))},"open":true}
 
 ## Their bands our lookouts saw in the last season: [{low, high, seen}].
 static func bands_of(bands:Array,civ_id:String,day:int)->Array:
@@ -523,18 +568,19 @@ static func envoys_cell(people:Dictionary)->Dictionary:
 	return {"text":"welcome","tone":"ink","order":3,"tip":"Envoys may pass between us."}
 
 ## The War screen's word for a stance ("Defend", "Take a town").
+static var _stances:={}
 static func stance_word(id:String)->String:
 	if id=="":return ""
-	var board:=load(WAR_BOARD_PATH) as GDScript
-	for spec:Array in board.get_script_constant_map().get("STANCES",[]):
-		if String(spec[0])==id:return String(spec[1])
-	return ""
+	if _stances.is_empty():
+		var board:=load(WAR_BOARD_PATH) as GDScript
+		for spec:Array in board.get_script_constant_map().get("STANCES",[]):_stances[String(spec[0])]=String(spec[1])
+	return String(_stances.get(id,""))
 
 ## When we met them and what we know of their home, in short phrases.
 static func contact_words(people:Dictionary)->Array:
 	var words:Array=[]
 	var met:=int(people.get("met_day",-1))
-	words.append("Met %s" % EraWords.ago(met) if met>=0 else "Met some time ago")
+	words.append("Met %s" % ago(met) if met>=0 else "Met some time ago")
 	words.append("their home found" if bool(people.get("home_known",false)) else "their home not yet found")
 	return words
 
@@ -548,22 +594,22 @@ static func contact_words(people:Dictionary)->Array:
 ## Only figures of the same kind are ranked; with fewer than two, none is.
 static func rank(rows:Array,column:String)->void:
 	var ranked:Array=[]
+	var lows:=PackedFloat64Array();var highs:=PackedFloat64Array();var names:=PackedStringArray()
 	for row:Dictionary in rows:
 		var c:Dictionary=row.cells.get(column,{})
 		c.erase("rank");c.erase("rank_tip");c.erase("place")
-		if bool(c.get("known",false)) and String(c.get("unit","main"))=="main":ranked.append(row)
+		if bool(c.get("known",false)) and String(c.get("unit","main"))=="main":
+			ranked.append(c);lows.append(float(c.low));highs.append(float(c.high))
+			names.append("us" if bool(row.us) else String(row.name))
 	if ranked.size()<2:return
 	for i in ranked.size():
-		var row:Dictionary=ranked[i]
-		var c:Dictionary=row.cells[column]
+		var c:Dictionary=ranked[i]
 		var ahead:=0
 		var level:=PackedStringArray()
 		for j in ranked.size():
 			if j==i:continue
-			var other:Dictionary=ranked[j]
-			var o:Dictionary=other.cells[column]
-			if float(o.low)>float(c.high):ahead+=1
-			elif float(o.low)<=float(c.high) and float(c.low)<=float(o.high):level.append("us" if bool(other.us) else String(other.name))
+			if lows[j]>highs[i]:ahead+=1
+			elif lows[j]<=highs[i] and lows[i]<=highs[j]:level.append(names[j])
 		c["place"]=ahead+1
 		if level.is_empty():
 			c["rank"]=ordinal(ahead+1)
