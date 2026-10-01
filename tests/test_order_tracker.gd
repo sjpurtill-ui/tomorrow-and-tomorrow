@@ -173,8 +173,56 @@ func test_the_workshop_buildings_defence_and_research_screens_register_orders()-
 	assert_str(String(_newest().source)).is_equal("research")
 	assert_str(String(_newest().words)).starts_with("Research ")
 	for o in Tracker.orders():
-		assert_bool(String((o as Dictionary).state) in ["accepted","under_way","done","stalled","refused","nothing"]).is_true()
+		assert_bool(String((o as Dictionary).state) in ["accepted","under_way","done","stalled","refused","nothing","called_off"]).is_true()
 		assert_bool(bool((o as Dictionary).claimed) or String((o as Dictionary).state)=="nothing").override_failure_message("unclaimed: %s" % str(o)).is_true()
+
+
+func test_a_later_word_on_the_same_subject_calls_off_the_earlier_card()->void:
+	var host:Host=auto_free(Host.new())
+	add_child(host)
+	var construction:RefCounted=preload("res://scripts/hud/content/dock_content_construction.gd").new(host,host)
+	construction._set_defence_word("build")
+	var build:=int(_newest().id)
+	construction._set_defence_word("hold")
+	var earlier:=Tracker.find(build)
+	# "Hold off" does not stand on top of "Build now": it calls it off.
+	assert_str(String(earlier.state)).is_equal("called_off")
+	assert_str(Stack.status_words(earlier)).is_equal("Called off · now: hold off new defences")
+	for o in Tracker.orders():
+		if String((o as Dictionary).source)=="defences" and int((o as Dictionary).id)!=build:assert_str(String((o as Dictionary).state)).is_equal("done")
+	# A town's first work: the later choice replaces the earlier.
+	construction._priority("Storage Pits")
+	var pits:=int(_newest().id)
+	construction._priority("")
+	assert_str(String(Tracker.find(pits).state)).is_equal("called_off")
+
+
+func test_an_older_saves_replaced_card_closes_when_next_read()->void:
+	preload("res://scripts/home_defense.gd").set_word("hold")
+	var id:=Tracker.register("Build the next defences now","defences")
+	Tracker.claim(id,"defences",{"word":"build"},"Tam","construction")
+	assert_str(String(Tracker.find(id).state)).is_equal("called_off")
+	assert_str(String(Tracker.find(id).line)).is_equal("Replaced by your later word")
+
+
+func test_a_days_progress_moves_the_card_where_it_stands()->void:
+	var id:=Tracker.register("Build the next defences now","defences")
+	var o:=Tracker.find(id)
+	o.merge({"claimed":true,"kind":"settled","state":"under_way","line":"Walls rising · 10% · 30 days left","value":10,"total":100},true)
+	var stack:Control=auto_free(Stack.new())
+	add_child(stack)
+	await get_tree().process_frame
+	stack.rebuild()
+	var card:Control=stack.cards.get_child(0)
+	# A day's progress: the same card, new words (rebuilding shook the stack).
+	o.merge({"line":"Walls rising · 11% · 29 days left","value":11},true)
+	stack.rebuild()
+	assert_object(stack.cards.get_child(0)).is_same(card)
+	assert_str((card.find_child("OrderStatus",true,false) as Label).text).is_equal("Walls rising · 11% · 29 days left")
+	# A new state builds the card again.
+	o.merge({"state":"stalled","line":"Stalled: nobody is building"},true)
+	stack.rebuild()
+	assert_object(stack.cards.get_child(0)).is_not_same(card)
 
 
 # --------------------------------------------------------------------------

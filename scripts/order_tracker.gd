@@ -10,6 +10,9 @@ extends RefCounted
 ##   done       finished
 ##   stalled    it moved, then stopped, with the reason in numbers
 ##   refused    it could not be done, and why
+##   called_off a later word of the god's on the same subject replaced it
+##              (supersede): "Build the next defences now", then "Hold off
+##              new defences", leaves one card, not two stacked.
 ##   nothing    THE FAIL-SAFE: by the end of the next game day no mechanic
 ##              moved it ("Nothing has happened yet: <the engine's reason>"),
 ##              or no system ever took it ("No one took this order"), or the
@@ -38,7 +41,7 @@ const KEEP_FINISHED_DAYS:=60
 const STALL_DAYS:=3
 ## Most words a card line may hold.
 const MAX_WORDS:=12
-const ENDED:=["done","refused"]
+const ENDED:=["done","refused","called_off"]
 ## The screen each source opens (command_rail_hud section ids; "court" opens
 ## the court).
 const SCREENS:={"court":"court","army":"military","recruit":"military:1","production":"production","buildings":"construction","defences":"construction","research":"inquiry"}
@@ -121,6 +124,28 @@ static func nothing(id:int,line:String="Not carried out: nobody could act on thi
 	o["state"]="nothing"
 	o["line"]=short(line)
 	o["updated_day"]=_today()
+	_changed()
+
+## The god's later word on the same subject (one knob of the realm: the
+## town's defences, a town's first work, a research question, the stance
+## toward a people) calls off any earlier order on it still open: its card
+## ends "Called off · now: <the later order>" and fades, instead of standing
+## under the new one waiting forever.
+static func supersede(id:int,subject:String)->void:
+	var o:=find(id)
+	if o.is_empty() or subject=="":return
+	o["subject"]=subject
+	var now:=_lower_first(String(o.get("words","")))
+	for other in orders():
+		var earlier:Dictionary=other
+		if int(earlier.get("id",0))==id or String(earlier.get("subject",""))!=subject:continue
+		if String(earlier.get("state",""))in ENDED:continue
+		earlier["claimed"]=true
+		if String(earlier.get("kind",""))=="":earlier["kind"]="settled"
+		earlier["state"]="called_off"
+		earlier["line"]=short("now: "+now)
+		earlier["ended_day"]=_today()
+		earlier["updated_day"]=_today()
 	_changed()
 
 static func _end(id:int,state:String,line:String,who:String)->void:
@@ -392,6 +417,8 @@ static func setting_order(words:String,result:Dictionary,source:String,who:Strin
 static func building_order(title:String,result:Dictionary,settlement_id:String="")->int:
 	var card:=register(("Build %s first" % title) if title!="" else "Let the leader choose the works","buildings")
 	if result.has("error"):refuse(card,String(result.error));return card
+	# One work comes first in a town: a later choice replaces the earlier.
+	supersede(card,"priority:%s" % settlement_id)
 	if title=="":done(card,"The town's leader chooses what is built");return card
 	var built:=0
 	for t in GameState.settlement_completed:
@@ -404,6 +431,8 @@ static func defence_order(word:String,result:Dictionary)->int:
 	var labels:={"people":"Let the people decide the defences","build":"Build the next defences now","hold":"Hold off new defences"}
 	var card:=register(String(labels.get(word,"Defences: "+word)),"defences")
 	if result.has("error"):refuse(card,String(result.error));return card
+	# One word on the defences stands: the later one replaces the earlier.
+	supersede(card,"defences")
 	claim(card,"defences",{"word":word},_war_leader(),"construction")
 	return card
 
@@ -411,6 +440,7 @@ static func defence_order(word:String,result:Dictionary)->int:
 static func research_order(id:String,name:String,result:Dictionary)->int:
 	var card:=register("Research %s" % name,"research")
 	if not bool(result.get("ok",false)):refuse(card,String(result.get("reason","It cannot be studied now")));return card
+	supersede(card,"research:%s" % id)
 	claim(card,"research",{"id":id,"start":float(GameState.discovery_progress.get(id,0.0))},_lore_keeper(),"inquiry")
 	return card
 
