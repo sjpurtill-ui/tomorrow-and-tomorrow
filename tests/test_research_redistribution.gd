@@ -1,4 +1,7 @@
 extends GdUnitTestSuite
+## Teams move, emphasis stays: when a line's questions run out its teams take up
+## questions elsewhere, and nobody's steps of attention are moved behind the
+## player's back.
 
 func before_test()->void:
 	WorldSimulation.clear()
@@ -10,10 +13,11 @@ func after_test()->void:
 func _question(id:String,domain:String,channel:String,day:int=0)->Dictionary:
 	return {"id":id,"dynamic":domain,"subcategory":channel,"day":day,"requires":[],"signals":[]}
 
-func test_exhausted_domains_reassign_independently_and_conserve_emphasis()->void:
+func test_exhausted_lines_send_their_teams_on_and_conserve_emphasis()->void:
 	WorldSimulation.scoped("research_review",func()->void:
 		var state:=WorldSimulation.state
 		var research:=WorldSimulation.discovery
+		state.population_allocations.Knowledge=30
 		state.active_investigations.clear()
 		state.research_subcategory_allocations={"nutrition":{"Old question":3,"New question":0},"health":{"Old question":2,"New question":0},"culture":{"Continuing question":4}}
 		state.research_allocations={"nutrition":3,"health":2,"culture":4}
@@ -23,16 +27,21 @@ func test_exhausted_domains_reassign_independently_and_conserve_emphasis()->void
 			"culture::Continuing question":[_question("continuing_culture","culture","Continuing question")]
 		}
 		var rng_before:=research.rng.state
-		research._redistribute_stranded_attention(100)
-		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":0,"New question":3},"health":{"Old question":0,"New question":2},"culture":{"Continuing question":4}})
+		research.refresh_investigations()
+		# A line's team may work any of its channels, whatever steps they hold.
+		assert_str(String(state.active_investigations.get("nutrition::New question",""))).is_equal("new_food")
+		assert_str(String(state.active_investigations.get("health::New question",""))).is_equal("new_health")
+		assert_str(String(state.active_investigations.get("culture::Continuing question",""))).is_equal("continuing_culture")
+		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":3,"New question":0},"health":{"Old question":2,"New question":0},"culture":{"Continuing question":4}})
 		assert_dict(state.research_allocations).is_equal({"nutrition":3,"health":2,"culture":4})
 		assert_int(research.rng.state).is_equal(rng_before)
 	)
 
-func test_unrelated_live_work_cannot_take_waiting_emphasis_and_later_evidence_wakes_it()->void:
+func test_waiting_emphasis_stays_put_and_later_evidence_wakes_it()->void:
 	WorldSimulation.scoped("research_review",func()->void:
 		var state:=WorldSimulation.state
 		var research:=WorldSimulation.discovery
+		state.population_allocations.Knowledge=30
 		state.active_investigations.clear()
 		state.research_subcategory_allocations={"nutrition":{"Old question":3,"New question":0},"culture":{"Continuing question":4}}
 		state.research_allocations={"nutrition":3,"culture":4}
@@ -42,13 +51,14 @@ func test_unrelated_live_work_cannot_take_waiting_emphasis_and_later_evidence_wa
 		research.catalog_by_channel={"nutrition::New question":[gated],"culture::Continuing question":[_question("continuing_culture","culture","Continuing question")]}
 		var waiting:=state.research_subcategory_allocations.duplicate(true)
 		for day in [100,101]:
-			research._redistribute_stranded_attention(day)
+			state.elapsed_days=float(day)
+			research.refresh_investigations()
 			assert_dict(state.research_subcategory_allocations).is_equal(waiting)
+			assert_bool("new_food" in state.active_investigations.values()).is_false()
 		state.known_discoveries.append("food_drying")
-		research._redistribute_stranded_attention(100)
+		research.refresh_investigations()
 		# The approved revamp opens causal routes without a calendar unlock.
-		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":0,"New question":3},"culture":{"Continuing question":4}})
-		research._redistribute_stranded_attention(101)
-		assert_dict(state.research_subcategory_allocations).is_equal({"nutrition":{"Old question":0,"New question":3},"culture":{"Continuing question":4}})
+		assert_str(String(state.active_investigations.get("nutrition::New question",""))).is_equal("new_food")
+		assert_dict(state.research_subcategory_allocations).is_equal(waiting)
 		assert_dict(state.research_allocations).is_equal({"nutrition":3,"culture":4})
 	)

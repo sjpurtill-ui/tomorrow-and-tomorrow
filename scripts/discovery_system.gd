@@ -9,7 +9,8 @@ const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catal
 const SocietyModelScript = preload("res://scripts/society_model.gd")
 const TechnologyEras=preload("res://scripts/technology_eras.gd")
 const Research600=preload("res://scripts/research_600_catalog.gd")
-## research_600: last day waiting observers were returned to reopened lines.
+## Last day the teams working ahead of their age looked again (monthly,
+## _switch_to_quicker_questions). The name is older: saves hold it.
 var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
 
@@ -68,6 +69,9 @@ class ResearchScan extends RefCounted:
 	var year_buckets:Dictionary={}
 	var year_buckets_basis:Array=[]
 	var foundation_scanned:Dictionary={}
+	## Each channel's open questions in order of their opening years, with the
+	## list they were read from (_channel_by_age).
+	var by_age:Dictionary={}
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
@@ -75,7 +79,7 @@ class ResearchScan extends RefCounted:
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
 		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
-		year_buckets={};year_buckets_basis=[];foundation_scanned={}
+		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={}
 var _scan:=ResearchScan.new()
 
 var latest_context:Dictionary={}
@@ -110,6 +114,7 @@ func reset_for_new_world()->void:
 	_open_year_cache.clear()
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	_scan=ResearchScan.new()
+	_team_memo=TeamMemo.new()
 	latest_context.clear()
 	established_threads_cache.clear()
 	established_threads_signature=""
@@ -312,13 +317,14 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# The known discoveries as a set for the route checks, kept current below.
 	var known_set:Dictionary={}
 	for known_id:String in WorldSimulation.state.known_discoveries: known_set[known_id]=true
+	# Questions that reached a step to proof today (first cases, repeated).
+	var stepped:Array[Dictionary]=[]
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(discovery_id)
 		if discovery.is_empty(): continue
 		var home:=_research_600_channel_home(channel) # research_600: foundation work is staffed by its channel
-		var allocation:=_subcategory_allocation(home[0],home[1])
 		var research_capacity:=research_capacity_for(home[0],home[1],teams)
 		var attention:=float(research_capacity.get("progress_multiplier",0.0))
 		if attention<=0.0: continue
@@ -335,10 +341,13 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
 		probability*=Pathways.multiplier(discovery,known_set)*(.85 if Exchange.studying() else 1.0)
 		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
+		var before:=progress
 		# A multi-day step (day_span.gd) covers `span` days of inquiry.
 		progress+=probability*rng.randf_range(0.72,1.28)*WorldSimulation.span
 		if rng.randf()<preload("res://scripts/day_span.gd").chance(probability*0.10): progress+=rng.randf_range(0.025,0.085)
 		WorldSimulation.state.discovery_progress[discovery_id]=clampf(progress,0.0,1.0)
+		if progress<1.0 and Research600.stage(progress)>Research600.stage(before):
+			stepped.append({"day":current_day,"id":discovery_id,"name":String(discovery.get("name",discovery_id)),"dynamic":String(discovery.get("dynamic","")),"stage":Research600.stage(progress),"share":Research600.trial_share(progress)})
 		if progress>=1.0:
 			leader_factors.clear()
 			executing_offices.clear()
@@ -348,12 +357,22 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 			WorldSimulation.figures.record_discovery(String(discovery.dynamic),String(discovery.name),current_day)
 			society_model.register_discovery(discovery,catalog)
 			var event := player_facing_discovery_event({"day": current_day, "id":discovery.id, "name": discovery.name, "description": discovery.observation, "ability_reason":String(discovery.get("ability_reason","")),"social_consequence":String(discovery.get("social_consequence","")),"effect_summary":_discovery_effect_summary(discovery),"direction":discovery.dynamic,"dynamic":discovery.dynamic,"subcategory":discovery.subcategory,"effects":discovery.get("effects",{}).duplicate(true),"adoption":society_model.adoption(String(discovery.id))})
+			# The line whose team proved it: its turns count from the log (_team_turns).
+			event["team_line"]=home[0]
 			WorldSimulation.state.discovery_log.push_front(event)
 			if WorldSimulation.state.discovery_log.size()>512: WorldSimulation.state.discovery_log.resize(512)
 			WorldSimulation.state.active_investigations.erase(channel)
 			WorldSimulation.state.discovery_progress.erase(discovery_id)
 			results.append(event)
-	if not results.is_empty():_refresh_active_investigations()
+	if not stepped.is_empty():
+		# Trial use starts with the step (SocietyModel trial levels).
+		society_model._rebuild_effect_totals(catalog)
+		_team_memo.steps.append_array(stepped)
+		if _team_memo.steps.size()>32: _team_memo.steps=_team_memo.steps.slice(_team_memo.steps.size()-32)
+	if not results.is_empty():
+		var held:=WorldSimulation.state.active_investigations.duplicate()
+		_refresh_active_investigations()
+		_note_freed_teams(results,held)
 	return results
 
 func refresh_investigations()->void:
@@ -410,10 +429,11 @@ func _auto_allocate_domain_attention(dynamic_id:String,weight:int,current_day:in
 
 func active_investigation_records()->Array[Dictionary]:
 	initialize()
+	begin_research_scan()
 	_refresh_active_investigations()
-	# One record per question. Two lines can hold the same question for a day
+	# One record per question. Two teams can hold the same question for a day
 	# (its own line takes up a question another line borrowed as foundation
-	# work, or the player chooses it); their people are one team working it.
+	# work, or the player chooses it); both are listed on its one record.
 	var lines_by_id:Dictionary={}
 	for channel in WorldSimulation.state.active_investigations:
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
@@ -422,40 +442,73 @@ func active_investigation_records()->Array[Dictionary]:
 		(lines_by_id[id] as Array).append(String(channel))
 	var records:Array[Dictionary]=[]
 	var teams:=research_teams()
+	var normal:=Research600.normal_team(float(WorldSimulation.state.population_exact))
 	for id:String in lines_by_id:
 		var discovery:=discovery_definition(id).duplicate(true)
 		if discovery.is_empty(): continue
 		var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
 		var channels:Array=lines_by_id[id]
 		var allocation:=0
-		var research_capacity:={"researchers":0.0,"workforce_share":0.0,"progress_multiplier":0.0,"support_multiplier":1.0}
+		var followed:=0
+		var research_capacity:={"researchers":0.0,"team_people":0.0,"workforce_share":0.0,"progress_multiplier":0.0,"support_multiplier":1.0}
 		for channel:String in channels:
 			var home:=_research_600_channel_home(channel) # research_600
 			allocation+=_subcategory_allocation(home[0],home[1])
+			followed=maxi(followed,_line_weight(home[0]))
 			var line:=research_capacity_for(home[0],home[1],teams)
-			for key:String in ["researchers","workforce_share","progress_multiplier"]: research_capacity[key]=float(research_capacity[key])+float(line.get(key,0.0))
+			for key:String in ["researchers","team_people","progress_multiplier"]: research_capacity[key]=float(research_capacity[key])+float(line.get(key,0.0))
 			research_capacity["support_multiplier"]=float(line.get("support_multiplier",1.0))
+		research_capacity["workforce_share"]=float(research_capacity.team_people)/maxf(0.000001,float(teams.researchers)) if float(teams.researchers)>0.0 else 0.0
 		var leader_factor:=_leader_factor(String(discovery.get("dynamic","")))
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var baseline_momentum:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*float(research_capacity.get("progress_multiplier",0.0))*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
-		baseline_momentum*=Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
+		var daily:=daily_progress(discovery,float(research_capacity.progress_multiplier),leader_factor,material_evidence)
 		discovery["discovery_name"]=String(discovery.get("name","Undetermined discovery"))
 		discovery["name"]=String(discovery.get("name","Investigation"))
 		discovery["progress"]=progress
 		discovery["observer_allocation"]=allocation
-		discovery["research_workforce"]=float(research_capacity.get("researchers",0.0))
-		discovery["research_share"]=float(research_capacity.get("workforce_share",0.0))
-		discovery["research_capacity_multiplier"]=float(research_capacity.get("progress_multiplier",0.0))
+		discovery["research_workforce"]=float(research_capacity.team_people)
+		discovery["research_share"]=float(research_capacity.workforce_share)
+		discovery["research_capacity_multiplier"]=float(research_capacity.progress_multiplier)
+		discovery["teams_on"]=channels.size()
+		discovery["normal_team"]=normal
 		discovery["leader_factor"]=leader_factor
 		discovery["material_evidence"]=material_evidence
 		discovery["project_goal"]=_project_goal(discovery)
 		discovery["project_method"]=_project_method(discovery)
 		discovery["unlock_summary"]=String(discovery.get("observation",""))+"\n"+_discovery_effect_summary(discovery)
-		discovery["bottleneck"]=_investigation_bottleneck(discovery,allocation,leader_factor,material_evidence,progress,research_capacity)
-		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,baseline_momentum))
+		discovery["bottleneck"]=_investigation_bottleneck(discovery,followed,leader_factor,material_evidence,progress,research_capacity)
+		# The clock: days to proof at today's pace.
+		discovery["estimated_days"]=ceili((1.0-progress)/maxf(0.000001,daily))
+		discovery["stage"]=Research600.stage(progress)
+		discovery["trial_share"]=Research600.trial_share(progress)
+		discovery["years_ahead"]=research_years_ahead(discovery)
+		discovery["work_factor"]=research_early_factor(discovery)
+		discovery["opens"]=questions_opened(id)
 		discovery["channels"]=channels
 		records.append(discovery)
+	end_research_scan()
 	return records
+
+
+## A question's expected progress per day with a team of `team_multiplier`
+## (research_capacity_for progress_multiplier): the day's own steps without
+## their luck (process_day), the lines' activity included.
+func daily_progress(discovery:Dictionary,team_multiplier:float,leader_factor:float=NAN,material_evidence:float=NAN)->float:
+	if is_nan(leader_factor): leader_factor=_leader_factor(String(discovery.get("dynamic","")))
+	if is_nan(material_evidence): material_evidence=_resource_evidence(discovery.get("resource_requirements",[]))
+	var activity:=0.65
+	for activity_signal in discovery.get("signals",[]): activity+=float(latest_context.get(activity_signal,0.0))*0.22
+	var daily:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*team_multiplier*activity*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
+	return daily*Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
+
+
+## Unknown questions that build on `id` (name it among their foundations).
+func questions_opened(id:String)->int:
+	var count:=0
+	var known:=_scan_known()
+	for index:Variant in foundation_children().get(id,[]):
+		if not known.has(String((technology_catalog[int(index)] as Dictionary).get("id",""))): count+=1
+	return count
 
 
 func _default_line_name(discovery:Dictionary)->String:
@@ -510,19 +563,32 @@ static func work_words(factor:float)->String:
 	return "about %s times the usual work" % (["","","","three","four","five","six","seven","eight","nine","ten"][whole] if whole<=10 else str(whole))
 
 
+## What holds a question back, as a key and its words. Ahead of its age is
+## told first, so a thin team never hides the price of working ahead; a thin
+## team is one under a third of the team a people of this size would put on a
+## question (Research600.normal_team); with nothing holding it back, its step.
 func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor:float,material_evidence:float,progress:float,research_capacity:Dictionary={}) -> String:
 	if allocation<=0: return "NO RESEARCH PRIORITY — project is paused"
-	var research_workforce:=float(research_capacity.get("researchers",0.0))
-	if research_workforce<1.0: return "RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
-	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
 	var ahead:=research_years_ahead(discovery)
 	if ahead>=1.0: return "AHEAD OF ITS AGE — %d years early: %s" % [roundi(ahead),work_words(research_early_factor(discovery))]
+	var team:=float(research_capacity.get("team_people",research_capacity.get("researchers",0.0)))
+	var normal:=Research600.normal_team(float(WorldSimulation.state.population_exact))
+	if team<normal*Research600.THIN_TEAM_FRACTION: return "RESEARCH WORKFORCE — a thin team: %s at it, where a people of our size would put %s on one question" % [people_words(team),people_words(normal)]
+	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
 	if era_cost_multiplier(discovery)>=2.0: return "BEYOND OUR SCHOLARSHIP — broader learning must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
-	if progress<0.25: return "EARLY EVIDENCE — more repeated cases are required"
-	if progress<0.75: return "REPLICATION — the proposed method is being tested across cases"
-	return "VALIDATION — the result is close to becoming established knowledge"
+	match Research600.stage(progress):
+		0: return "EARLY EVIDENCE — gathering the first cases"
+		1: return "REPLICATION — the first cases hold; %d in 100 households try it" % roundi(Research600.trial_share(progress)*100.0)
+	return "VALIDATION — repeated with the same result; %d in 100 households use it" % roundi(Research600.trial_share(progress)*100.0)
+
+## A number of people as the people would say it: "one person", "about 3 people".
+static func people_words(amount:float)->String:
+	if amount<0.75: return "less than one person"
+	if amount<1.5: return "about one person"
+	if amount<9.5: return "about %d people" % roundi(amount)
+	return "about %d people" % (roundi(amount/5.0)*5)
 
 ## Opens a scan (see ResearchScan) for the acting people. Each call needs its
 ## end_research_scan; nested scans share the outermost one.
@@ -701,44 +767,317 @@ func technology_open_years()->PackedFloat64Array:
 func _refresh_active_investigations()->void:
 	begin_research_scan()
 	var current_day:=int(floor(WorldSimulation.state.elapsed_days))
+	# A team keeps its question until it is proven. It lets go only when the
+	# question is known, out of reach, or its line is no longer followed.
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
 		var discovery:=discovery_definition(id)
 		if discovery.is_empty() or not _research_600_investigation_placed(channel,discovery) or _scan_known().has(id) or not _scan_eligible(discovery,current_day):
 			WorldSimulation.state.active_investigations.erase(channel)
+	var count:=int(research_teams().count)
+	_release_extra_teams(count)
+	_place_free_teams(current_day,count)
 	_switch_to_quicker_questions(current_day)
-	# Attention is a strategic resource, not a queue of forty-eight tiny chores.
-	# When a line completes or temporarily runs out of evidence, keep the same
-	# number of observers working by redirecting them toward a live frontier. The
-	# redirect prefers the same broad domain, then the civilization's seeded focus,
-	# actual activity, leadership and material evidence decide the specific line.
-	_redistribute_stranded_attention(current_day)
-	_research_600_return_waiting_attention(current_day) # research_600: staffed lines come back when they reopen
-	for channel_data in _allocated_channels():
-		var dynamic_id:=String(channel_data.dynamic)
-		var subcategory:=String(channel_data.subcategory)
-		var channel:=_channel_key(dynamic_id,subcategory)
-		if String(WorldSimulation.state.active_investigations.get(channel,""))!="": continue
-		var candidate:=_best_candidate_for_channel(channel,current_day)
-		if candidate.is_empty(): candidate=_research_600_foundation_candidate(dynamic_id,current_day) # research_600
-		elif Research600.deferred(String(candidate.get("id","")),society_model.ceiling_era):
-			# research_3000: foundations of current questions before a dead end or leftover.
-			var foundation:=_research_600_foundation_candidate(dynamic_id,current_day)
-			if not foundation.is_empty(): candidate=foundation
-		if not candidate.is_empty(): WorldSimulation.state.active_investigations[channel]=String(candidate.id)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
 		WorldSimulation.state.active_observations.append(String(record.observation))
 	end_research_scan()
 
 
-## A line working a question ahead of its age takes up a quicker one as soon as
-## it opens; the progress made stays with the question for later. So people
-## can stay on their lines while work runs where it pays best. Checked once a
-## month per line; a question the player chose is never set aside.
+# --- Research teams (begin) ----------------------------------------------------
+# Teams carry questions (Research600.TEAMS_*). Each entry of
+# active_investigations is one team: its key is the team's desk, a channel of a
+# followed line, and its value the question it works until proof. A people
+# fields Research600.team_count of its researchers on the lines; every team does
+# an equal part of their whole work, so spreading attention never adds work.
+# A followed line's share of the plan sets how often it gets a team (its turns,
+# read from the discovery log); no line with a question of its age waits more
+# than TEAM_MAX_WAIT_YEARS. A free team takes a question of its age from any
+# followed line first, then one within NEAR_AGE_YEARS of its age, then one
+# further ahead at the proportional extra work: lines help each other before
+# working ahead.
+
+## Transient team bookkeeping, never saved (an Object): the steps to proof
+## reached since the chronicle last took them, and when free teams last found
+## nothing to take up (they look again once something new is known, the plan
+## or the teams change, or a month has passed).
+class TeamMemo extends RefCounted:
+	var steps:Array[Dictionary]=[]
+	var idle_known:=-1
+	var idle_day:=-100000
+	var idle_key:=""
+var _team_memo:=TeamMemo.new()
+
+## Whether the team at `channel` works the question the player chose for it
+## (select_research_target): it keeps that question until it is proven.
+func _pinned(channel:String)->bool:
+	var id:=String(WorldSimulation.state.active_investigations.get(channel,""))
+	return id!="" and String(WorldSimulation.state.research_targets.get(channel,""))==id
+
+## How a question stands to its age: 0 its age has come, 1 within
+## NEAR_AGE_YEARS of it, 2 further ahead (at the proportional extra work).
+func age_bucket(discovery:Dictionary,year:float=NAN)->int:
+	var ahead:=research_years_ahead(discovery,year)
+	if ahead<=0.0: return 0
+	return 1 if ahead<NEAR_AGE_YEARS else 2
+
+## A line's weight in the plan: its steps of attention over its channels.
+func _line_weight(dynamic_id:String)->int:
+	var total:=0
+	for value:Variant in (WorldSimulation.state.research_subcategory_allocations.get(dynamic_id,{}) as Dictionary).values(): total+=maxi(0,int(value))
+	return total
+
+## The followed lines and their weights: {line: weight}.
+func _team_lines()->Dictionary:
+	var lines:Dictionary={}
+	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
+		var weight:=_line_weight(String(dynamic_variant))
+		if weight>0: lines[String(dynamic_variant)]=weight
+	return lines
+
+## Teams held by each line (by the line of the team's desk): {line: count}.
+func _teams_by_line()->Dictionary:
+	var held:Dictionary={}
+	for channel_variant in WorldSimulation.state.active_investigations:
+		var line:=_research_600_channel_home(String(channel_variant))[0]
+		held[line]=int(held.get(line,0))+1
+	return held
+
+## Questions some team holds now: {id: true}.
+func _busy_ids()->Dictionary:
+	var busy:Dictionary={}
+	for id:Variant in WorldSimulation.state.active_investigations.values(): busy[String(id)]=true
+	return busy
+
+## Each followed line's recent turns: its teams' proofs over TEAM_TURN_YEARS
+## (from the discovery log; a proof names its team's line) plus the teams it
+## holds now; and the day of its last proof (-1 when none is on record).
+func _team_turns(lines:Dictionary,held:Dictionary,today:int)->Dictionary:
+	var turns:Dictionary={}
+	var last:Dictionary={}
+	for line:String in lines:
+		turns[line]=float(held.get(line,0))
+		last[line]=-1
+	var since:=float(today)-Research600.TEAM_TURN_YEARS*365.0
+	for event_variant:Variant in WorldSimulation.state.discovery_log:
+		if not event_variant is Dictionary: continue
+		var event:Dictionary=event_variant
+		var line:=String(event.get("team_line",event.get("dynamic","")))
+		if not turns.has(line): continue
+		var day:=int(event.get("day",0))
+		if int(last[line])<0: last[line]=day
+		if float(day)>=since: turns[line]=float(turns[line])+1.0
+	return {"turns":turns,"last":last}
+
+## One team more (+1) or fewer (-1) on `line`, in the counts a pick reads.
+static func _count_turn(held:Dictionary,turns:Dictionary,line:String,change:int)->void:
+	held[line]=int(held.get(line,0))+change
+	var counts:Dictionary=turns.turns
+	if counts.has(line): counts[line]=float(counts[line])+float(change)
+
+## Years since `line` last proved a question (since the world began when it
+## never has).
+static func _line_wait_years(turns:Dictionary,line:String,today:int)->float:
+	return float(today-maxi(0,int((turns.last as Dictionary).get(line,-1))))/365.0
+
+## Each followed line's place in the queue for the next free team: a line that
+## has gone TEAM_MAX_WAIT_YEARS without a team first (longest first), then the
+## line furthest below its share of the recent turns (its weight's share of all
+## turns, less its own): {line: [waiting, years waited, claim] as a sort key}.
+func _turn_keys(lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Dictionary:
+	var weight_total:=0.0
+	var turn_total:=0.0
+	for line:String in lines:
+		weight_total+=float(lines[line])
+		turn_total+=float((turns.turns as Dictionary).get(line,0.0))
+	var keys:Dictionary={}
+	for line:String in lines:
+		var waited:=_line_wait_years(turns,line,today)
+		var waiting:=int(held.get(line,0))<=0 and waited>=Research600.TEAM_MAX_WAIT_YEARS
+		var claim:=float(lines[line])/maxf(1.0,weight_total)*turn_total-float((turns.turns as Dictionary).get(line,0.0))
+		keys[line]=[0.0 if waiting else 1.0,-waited if waiting else 0.0,-claim]
+	return keys
+
+## The placement a free team takes from `placements`: the best age bucket first
+## (a question of its age, then one within NEAR_AGE_YEARS of it, then one
+## further ahead); then the line whose turn it is (_turn_keys); then the best
+## question. _next_team_placement finds the same placement without reading
+## every row.
+func _pick_team_placement(placements:Array,lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Dictionary:
+	var turn_keys:=_turn_keys(lines,turns,held,today)
+	var best:Dictionary={}
+	var best_key:Array=[]
+	for placement:Dictionary in placements:
+		var key:Array=[float(placement.bucket)]
+		key.append_array(turn_keys.get(String(placement.line),[1.0,0.0,0.0]))
+		key.append(-float(placement.score))
+		if best.is_empty() or _key_before(key,best_key) or (_key_same(key,best_key) and String(placement.channel)<String(best.channel)):
+			best=placement
+			best_key=key
+	return best
+
+static func _key_before(key:Array,other:Array)->bool:
+	for index in key.size():
+		if is_equal_approx(float(key[index]),float(other[index])): continue
+		return float(key[index])<float(other[index])
+	return false
+
+static func _key_same(key:Array,other:Array)->bool:
+	return not _key_before(key,other) and not _key_before(other,key)
+
+## Lines lending a team to foundation work (a desk holding another channel's
+## question), the desk `also` left out: {line: true}. A line lends one team at a
+## time, so a field waiting on others' foundations never fills its every desk.
+func _lending_lines(also:String="")->Dictionary:
+	var lending:Dictionary={}
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	for desk_variant in active:
+		var desk:=String(desk_variant)
+		if desk==also: continue
+		var held:=discovery_definition(String(active[desk]))
+		if _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))!=desk: lending[_research_600_channel_home(desk)[0]]=true
+	return lending
+
+## Where a free team can work in `line`, among questions of age bucket `bucket`
+## (age_bucket): the line's best question on each channel without a team (and
+## `also`, a team looking again) whose best stands in that bucket; and, when
+## none of its channels holds a question at least that near its age, its
+## foundation work of that bucket. Rows: line, channel, id, bucket, score.
+func _line_placements(line:String,current_day:int,busy:Dictionary,bucket:int,lending:Dictionary,also:String="")->Array:
+	var rows:Array=[]
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	var free:Array[String]=[]
+	var own:=false
+	var lends:=lending.has(line)
+	for sub_variant in (WorldSimulation.state.research_subcategory_allocations.get(line,{}) as Dictionary):
+		var channel:=_channel_key(line,String(sub_variant))
+		if active.has(channel) and channel!=also: continue
+		free.append(channel)
+		var candidate:=_best_free_candidate(channel,current_day,busy,bucket)
+		if candidate.is_empty(): continue
+		own=true
+		if age_bucket(candidate)!=bucket: continue
+		if not lends and Research600.deferred(String(candidate.get("id","")),society_model.ceiling_era):
+			# research_3000: foundations of current questions before a dead end or leftover.
+			var foundation:=_research_600_foundation_candidate(line,current_day,busy)
+			if not foundation.is_empty() and age_bucket(foundation)<=bucket:
+				var row:=_placement(line,channel,foundation)
+				row["bucket"]=bucket
+				rows.append(row)
+				lends=true
+				continue
+		rows.append(_placement(line,channel,candidate))
+	if not own and not lends and not free.is_empty():
+		var foundation:=_research_600_foundation_candidate(line,current_day,busy)
+		if not foundation.is_empty() and age_bucket(foundation)==bucket: rows.append(_placement(line,free[0],foundation))
+	return rows
+
+## The followed lines in the order their turns come (_turn_keys). Lines that
+## stand level share a group (their best question decides between them).
+func _lines_by_turn(lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Array:
+	var turn_keys:=_turn_keys(lines,turns,held,today)
+	var keyed:Array=[]
+	for line:String in lines: keyed.append([turn_keys[line],line])
+	keyed.sort_custom(func(a:Array,b:Array)->bool: return _key_before(a[0],b[0]) or (_key_same(a[0],b[0]) and String(a[1])<String(b[1])))
+	var groups:Array=[]
+	var last:Array=[]
+	for entry:Array in keyed:
+		if groups.is_empty() or not _key_same(entry[0],last): groups.append([])
+		(groups[-1] as Array).append(String(entry[1]))
+		last=entry[0]
+	return groups
+
+## The placement a free team takes, as _pick_team_placement would choose it
+## from every row, read lazily: bucket by bucket, line by line in turn order, so
+## a scan reads a line's questions further ahead only when it is that line's
+## turn and nothing nearer its age is open anywhere. {} when nothing is open.
+func _next_team_placement(lines:Dictionary,turns:Dictionary,held:Dictionary,current_day:int,busy:Dictionary,also:String="",max_bucket:int=2,skip_channels:Dictionary={})->Dictionary:
+	var groups:=_lines_by_turn(lines,turns,held,current_day)
+	var lending:=_lending_lines(also)
+	for bucket in range(0,max_bucket+1):
+		for group:Array in groups:
+			var best:Dictionary={}
+			for line:String in group:
+				for row:Dictionary in _line_placements(line,current_day,busy,bucket,lending,also):
+					if skip_channels.has(String(row.channel)): continue
+					if best.is_empty() or float(row.score)>float(best.score) or (is_equal_approx(float(row.score),float(best.score)) and String(row.channel)<String(best.channel)): best=row
+			if not best.is_empty(): return best
+	return {}
+
+func _placement(line:String,channel:String,discovery:Dictionary)->Dictionary:
+	return {"line":line,"channel":channel,"id":String(discovery.get("id","")),"bucket":age_bucket(discovery),"score":_candidate_score(discovery)}
+
+## The channel's best open question that no team holds yet (no further from its
+## age than `max_bucket`).
+func _best_free_candidate(channel:String,current_day:int,busy:Dictionary,max_bucket:int=2)->Dictionary:
+	if max_bucket<2: return _score_best_candidate(channel,current_day,busy,max_bucket)
+	var best:=_best_candidate_for_channel(channel,current_day)
+	if best.is_empty() or not busy.has(String(best.get("id",""))): return best
+	return _score_best_candidate(channel,current_day,busy)
+
+## Fewer researchers, fewer teams: the teams furthest ahead of their age stop
+## first; their progress stays with the question. A question the player chose
+## keeps its team.
+func _release_extra_teams(count:int)->void:
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	var pins:=0
+	var order:Array=[]
+	for channel_variant in active:
+		var channel:=String(channel_variant)
+		if _pinned(channel): pins+=1
+		else: order.append([research_years_ahead(discovery_definition(String(active[channel]))),channel])
+	var extra:=active.size()-maxi(count,pins)
+	if extra<=0: return
+	order.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])>float(b[0]) if not is_equal_approx(float(a[0]),float(b[0])) else String(a[1])<String(b[1]))
+	for index in mini(extra,order.size()): active.erase(String(order[index][1]))
+
+## Free teams take up questions (see the section's notes). A question the player
+## chose is taken up first and may hold a team beyond the count.
+func _place_free_teams(current_day:int,count:int)->void:
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	var lines:=_team_lines()
+	if lines.is_empty(): return
+	var pins:=0
+	for channel_variant in WorldSimulation.state.research_targets:
+		var channel:=String(channel_variant)
+		var id:=String(WorldSimulation.state.research_targets[channel])
+		if String(active.get(channel,""))==id:
+			pins+=1
+			continue
+		if active.has(channel) or not lines.has(_research_600_channel_home(channel)[0]): continue
+		var target:=discovery_definition(id)
+		if target.is_empty() or _scan_known().has(id) or not _scan_eligible(target,current_day): continue
+		active[channel]=id
+		pins+=1
+	var capacity:=maxi(count,pins)
+	if active.size()>=capacity: return
+	var known_size:=WorldSimulation.state.known_discoveries.size()
+	var plan_key:="%s|%d|%d" % [str(lines),active.size(),capacity]
+	if _team_memo.idle_known==known_size and _team_memo.idle_key==plan_key and current_day>=_team_memo.idle_day and current_day-_team_memo.idle_day<SWITCH_CHECK_DAYS: return
+	var busy:=_busy_ids()
+	var held:=_teams_by_line()
+	var turns:=_team_turns(lines,held,current_day)
+	while active.size()<capacity:
+		var pick:=_next_team_placement(lines,turns,held,current_day,busy)
+		if pick.is_empty(): break
+		active[String(pick.channel)]=String(pick.id)
+		busy[String(pick.id)]=true
+		_count_turn(held,turns,String(pick.line),1)
+	if active.size()<capacity:
+		_team_memo.idle_known=known_size
+		_team_memo.idle_day=current_day
+		_team_memo.idle_key="%s|%d|%d" % [str(lines),active.size(),capacity]
+	else:
+		_team_memo.idle_known=-1
+
+## Once a month the teams working ahead of their age look again: a question of
+## its age on any followed line takes the team; failing that, a much quicker
+## question (SWITCH_MARGIN less work) in its own channel. The progress made
+## stays with the question for later. A question the player chose keeps its team.
 const SWITCH_CHECK_DAYS:=30
 const SWITCH_MARGIN:=1.5
+## Kept so saves that recorded the old per-line monthly checks still load.
 var _switch_checked:Dictionary={}
 
 func _expected_work(discovery:Dictionary)->float:
@@ -746,86 +1085,169 @@ func _expected_work(discovery:Dictionary)->float:
 	return (1.0-progress)*research_difficulty(discovery,WorldSimulation.state.world_seed)/maxf(0.000001,float(discovery.get("chance",0.001)))
 
 func _switch_to_quicker_questions(current_day:int)->void:
-	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
+	# Once in each block of SWITCH_CHECK_DAYS days, whoever reads the teams first.
+	if floori(float(current_day)/SWITCH_CHECK_DAYS)==floori(float(_research_600_return_day)/SWITCH_CHECK_DAYS): return
+	_research_600_return_day=current_day
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	var ahead:Array=[]
+	for channel_variant in active:
 		var channel:=String(channel_variant)
-		if current_day-int(_switch_checked.get(channel,-SWITCH_CHECK_DAYS))<SWITCH_CHECK_DAYS: continue
-		_switch_checked[channel]=current_day
-		var current:=discovery_definition(String(WorldSimulation.state.active_investigations.get(channel,"")))
-		if current.is_empty() or research_early_factor(current)<=1.0: continue
-		if String(WorldSimulation.state.research_targets.get(channel,""))==String(current.id): continue
-		# Foundation work borrowed by another line keeps its own rules.
-		if channel!=_channel_key(String(current.get("dynamic","")),String(current.get("subcategory",""))): continue
-		var best:=_best_candidate_for_channel(channel,current_day)
-		if best.is_empty() or String(best.id)==String(current.id): continue
-		if _expected_work(best)*SWITCH_MARGIN<_expected_work(current): WorldSimulation.state.active_investigations[channel]=String(best.id)
+		var current:=discovery_definition(String(active[channel]))
+		if current.is_empty() or _pinned(channel): continue
+		var years:=research_years_ahead(current)
+		if years>0.0: ahead.append([years,channel])
+	if ahead.is_empty(): return
+	ahead.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])>float(b[0]) if not is_equal_approx(float(a[0]),float(b[0])) else String(a[1])<String(b[1]))
+	var lines:=_team_lines()
+	var held:=_teams_by_line()
+	var turns:=_team_turns(lines,held,current_day)
+	var busy:=_busy_ids()
+	for entry:Array in ahead:
+		var channel:=String(entry[1])
+		if not active.has(channel): continue
+		var current:=discovery_definition(String(active[channel]))
+		var current_id:=String(current.get("id",""))
+		var line:=_research_600_channel_home(channel)[0]
+		busy.erase(current_id)
+		# Only questions of their age are read here, so the monthly look stays cheap.
+		_count_turn(held,turns,line,-1)
+		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0)
+		_count_turn(held,turns,line,1)
+		if best.is_empty() and channel==_channel_key(String(current.get("dynamic","")),String(current.get("subcategory",""))):
+			# In its own channel, a much quicker question (SWITCH_MARGIN less work).
+			var quicker:=_best_free_candidate(channel,current_day,busy)
+			if not quicker.is_empty() and String(quicker.get("id",""))!=current_id and _expected_work(quicker)*SWITCH_MARGIN<_expected_work(current): best=_placement(line,channel,quicker)
+		if best.is_empty():
+			busy[current_id]=true
+			continue
+		active.erase(channel)
+		_count_turn(held,turns,line,-1)
+		active[String(best.channel)]=String(best.id)
+		busy[String(best.id)]=true
+		_count_turn(held,turns,String(best.line),1)
 
+## The questions the teams freed by today's proofs took up, kept on each proof's
+## record ("next"): for a season the research dock offers that team the next
+## best questions instead (team_choices). Only the player's people is offered.
+func _note_freed_teams(results:Array,held:Dictionary)->void:
+	if WorldSimulation.state!=GameState: return
+	var taken:Array=[]
+	for channel_variant in WorldSimulation.state.active_investigations:
+		var channel:=String(channel_variant)
+		var id:=String(WorldSimulation.state.active_investigations[channel])
+		if String(held.get(channel,""))!=id: taken.append({"channel":channel,"id":id})
+	for index in mini(taken.size(),results.size()):
+		(results[index] as Dictionary)["next"]=taken[index]
 
-func _redistribute_stranded_attention(current_day:int)->void:
-	var stranded:Array[Dictionary]=[]
-	var stranded_domains:Dictionary={}
-	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
-		var dynamic_id:=String(dynamic_variant)
-		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
-		for subcategory_variant in subcategories:
-			var subcategory:=String(subcategory_variant)
-			var allocation:=int(subcategories[subcategory_variant])
-			if allocation<=0: continue
-			var channel:=_channel_key(dynamic_id,subcategory)
-			# An existing investigation was validated immediately above. To
-			# detect stranded attention we only need eligibility, not a scored
-			# ranking of every alternative in the same channel.
-			if String(WorldSimulation.state.active_investigations.get(channel,""))!="" or _channel_has_candidate(channel,current_day): continue
-			stranded.append({"dynamic":dynamic_id,"subcategory":subcategory,"count":allocation})
-			stranded_domains[dynamic_id]=true
-			subcategories[subcategory_variant]=0
-		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
-	if stranded.is_empty(): return
-	var live_channels:Array[Dictionary]=[]
-	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
-		var dynamic_id:=String(dynamic_variant)
-		# Observers can only move within their chosen domain. Ranking other
-		# domains cannot affect redistribution, even when they have live work.
-		if not stranded_domains.has(dynamic_id): continue
-		for subcategory_variant in (WorldSimulation.state.research_subcategory_allocations[dynamic_variant] as Dictionary):
-			var subcategory:=String(subcategory_variant)
-			var channel:=_channel_key(dynamic_id,subcategory)
-			var candidate:=_best_candidate_for_channel(channel,current_day)
-			if candidate.is_empty() or research_years_ahead(candidate)>=NEAR_AGE_YEARS: continue
-			live_channels.append({"dynamic":dynamic_id,"subcategory":subcategory,"channel":channel,"candidate":candidate})
-	if live_channels.is_empty():
-		# A genuine evidence drought should not erase the player's broad emphasis.
-		# Leave the allocation waiting quietly; new evidence or foundations will wake it.
-		for entry in stranded:
-			var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
-			restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+int(entry.count)
-			WorldSimulation.state.research_subcategory_allocations[String(entry.dynamic)]=restored
-		_rebuild_research_domain_totals()
-		return
-	for entry in stranded:
-		for _observer in int(entry.count):
-			var best:Dictionary={}
-			var best_score:=-INF
-			for live in live_channels:
-				var target_dynamic:=String(live.dynamic)
-				# Macro emphasis is authoritative. A Nutrition priority may shift between
-				# food questions, but it can never silently become Military or Culture.
-				if target_dynamic!=String(entry.dynamic): continue
-				var target_subcategory:=String(live.subcategory)
-				var current_allocation:=_subcategory_allocation(target_dynamic,target_subcategory)
-				var candidate:Dictionary=live.candidate
-				var score:=_candidate_score(candidate)-float(current_allocation)*14.0
-				if score>best_score:
-					best_score=score
-					best=live
-			if best.is_empty():
-				var restored:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(entry.dynamic),{})
-				restored[String(entry.subcategory)]=int(restored.get(String(entry.subcategory),0))+1
-				WorldSimulation.state.research_subcategory_allocations[String(entry.dynamic)]=restored
-				continue
-			var target_allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations.get(String(best.dynamic),{})
-			target_allocations[String(best.subcategory)]=int(target_allocations.get(String(best.subcategory),0))+1
-			WorldSimulation.state.research_subcategory_allocations[String(best.dynamic)]=target_allocations
-	_rebuild_research_domain_totals()
+## Steps to proof reached since the last call (first cases, repeated), oldest
+## first; the chronicle tells them in the season's tally.
+func take_research_steps()->Array[Dictionary]:
+	var steps:=_team_memo.steps
+	_team_memo.steps=[]
+	return steps
+## How long a freed team's choice stays open: a season. Past it the question
+## the team took up stays its own (the default).
+const CHOICE_DAYS:=91
+
+## Free-team choices for the research dock, newest first. A team freed by a
+## proof this season took up the best question open to it (the default); the
+## player may send it to one of the next best two instead. Each choice: the
+## proof that freed the team, the question it took, the days left to choose,
+## and its options (choice_option).
+func team_choices(limit:int=2)->Array[Dictionary]:
+	initialize()
+	var result:Array[Dictionary]=[]
+	var today:=int(floor(WorldSimulation.state.elapsed_days))
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	begin_research_scan()
+	for event_variant:Variant in WorldSimulation.state.discovery_log:
+		if not event_variant is Dictionary: continue
+		var event:Dictionary=event_variant
+		var day:=int(event.get("day",0))
+		if today-day>CHOICE_DAYS: break
+		if event.has("choice") or not event.get("next") is Dictionary: continue
+		var next:Dictionary=event.next
+		var channel:=String(next.get("channel",""))
+		var taken:=String(next.get("id",""))
+		if String(active.get(channel,""))!=taken: continue
+		var options:=_choice_options(channel,taken,today)
+		if options.size()<2: continue
+		result.append({"key":choice_key(event),"proved":String(event.get("name","")),"proved_id":String(event.get("id","")),"day":day,
+			"channel":channel,"taken":taken,"days_left":maxi(0,CHOICE_DAYS-(today-day)),"options":options})
+		if result.size()>=limit: break
+	end_research_scan()
+	return result
+
+static func choice_key(event:Dictionary)->String:
+	return "%d:%s" % [int(event.get("day",0)),String(event.get("id",""))]
+
+## The question a freed team took (first) and the next two it would take in
+## its place, in the order a free team chooses (_pick_team_placement).
+func _choice_options(channel:String,taken:String,today:int)->Array[Dictionary]:
+	var options:Array[Dictionary]=[]
+	var lines:=_team_lines()
+	if lines.is_empty(): return options
+	var busy:=_busy_ids()
+	var held:=_teams_by_line()
+	var home:=_research_600_channel_home(channel)[0]
+	var turns:=_team_turns(lines,held,today)
+	_count_turn(held,turns,home,-1)
+	options.append(choice_option(channel,taken))
+	var used:Dictionary={}
+	while options.size()<3:
+		var pick:=_next_team_placement(lines,turns,held,today,busy,channel,2,used)
+		if pick.is_empty(): break
+		options.append(choice_option(String(pick.channel),String(pick.id)))
+		busy[String(pick.id)]=true
+		used[String(pick.channel)]=true
+	return options
+
+## One option of a free team's choice: the question, its field, the team's
+## time to proof at today's pace, its effects at full use, how many questions
+## it opens, and how far ahead of its age it stands.
+func choice_option(channel:String,id:String)->Dictionary:
+	var discovery:=discovery_definition(id)
+	var home:=_research_600_channel_home(channel)
+	var capacity:=research_capacity_for(home[0],home[1])
+	var daily:=daily_progress(discovery,float(capacity.progress_multiplier))
+	var progress:=float(WorldSimulation.state.discovery_progress.get(id,0.0))
+	return {"id":id,"channel":channel,"name":String(discovery.get("name",id)),"dynamic":String(discovery.get("dynamic","")),
+		"days":ceili((1.0-progress)/maxf(0.000001,daily)),"progress":progress,"effects":(discovery.get("effects",{}) as Dictionary).duplicate(true),
+		"opens":questions_opened(id),"years_ahead":research_years_ahead(discovery),"work_factor":research_early_factor(discovery),
+		"observation":String(discovery.get("observation",""))}
+
+## The player's choice for a freed team (`key` from team_choices): `id` is the
+## question it took, which it keeps, or one of its other options, which it
+## takes up instead until it is proven. The progress already made stays with
+## the question it leaves.
+func choose_team_question(key:String,id:String)->Dictionary:
+	initialize()
+	var today:=int(floor(WorldSimulation.state.elapsed_days))
+	var active:Dictionary=WorldSimulation.state.active_investigations
+	for event_variant:Variant in WorldSimulation.state.discovery_log:
+		if not event_variant is Dictionary or choice_key(event_variant)!=key: continue
+		var event:Dictionary=event_variant
+		if event.has("choice"): return {"ok":false,"reason":"That choice was already made."}
+		var next:Dictionary=event.get("next",{})
+		var channel:=String(next.get("channel",""))
+		var taken:=String(next.get("id",""))
+		if String(active.get(channel,""))!=taken: return {"ok":false,"reason":"That team has moved on to other work."}
+		if id==taken:
+			event["choice"]="kept"
+			return {"ok":true,"id":id}
+		begin_research_scan()
+		var options:=_choice_options(channel,taken,today)
+		end_research_scan()
+		for option:Dictionary in options:
+			if String(option.id)!=id: continue
+			active.erase(channel)
+			active[String(option.channel)]=id
+			WorldSimulation.state.research_targets[String(option.channel)]=id
+			event["choice"]=id
+			return {"ok":true,"id":id}
+		return {"ok":false,"reason":"That question is no longer open to this team."}
+	return {"ok":false,"reason":"The season for that choice has passed."}
+# --- Research teams (end) ------------------------------------------------------
 
 
 func _rebuild_research_domain_totals()->void:
@@ -916,29 +1338,65 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 	return best
 
 
-func _score_best_candidate(channel:String,current_day:int)->Dictionary:
+## The line's best open question, passing over the questions in `skip` (ids
+## other teams hold) and any standing further from its age than `max_bucket`
+## (age_bucket). Age first: the bucket outweighs every other part of a score
+## (AGE_BUCKET_SCORE), so a later bucket is read only when the earlier ones
+## hold nothing open; a question the player chose wins wherever it stands.
+func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max_bucket:int=2)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
-	var best:Dictionary={}
-	var best_score:=-INF
 	# _scan_eligible, inlined for the channel's many candidates.
 	var scanning:=_scan_active()
 	var memo:Dictionary=_scan.eligible
 	var judged_known:Dictionary=_scan_known() if scanning else known
-	for discovery_variant in candidates:
-		var discovery:Dictionary=discovery_variant
-		var id:=String(discovery.get("id","")) if scanning else ""
-		var eligible:Variant=memo.get(id) if scanning else null
-		if eligible==null:
-			eligible=_discovery_is_eligible(discovery,current_day,judged_known)
-			if scanning: memo[id]=eligible
-		if not eligible: continue
-		var score:=_candidate_score(discovery)
-		if String(WorldSimulation.state.research_targets.get(channel,""))==String(discovery.id): score+=100000.0
-		if score>best_score:
-			best_score=score
-			best=discovery
-	return best
+	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+	if target!="" and not known.has(target) and not skip.has(target):
+		var chosen:Dictionary=catalog_by_id.get(target,{})
+		if not chosen.is_empty() and _channel_key(String(chosen.get("dynamic","")),String(chosen.get("subcategory","")))==channel:
+			var open:Variant=memo.get(target) if scanning else null
+			if open==null:
+				open=_discovery_is_eligible(chosen,current_day,judged_known)
+				if scanning: memo[target]=open
+			if open: return chosen
+	var year:=float(WorldSimulation.state.elapsed_days)/365.0
+	var by_age:=_channel_by_age(channel,candidates)
+	var index:=0
+	for bucket in range(0,max_bucket+1):
+		var best:Dictionary={}
+		var best_score:=-INF
+		while index<by_age.size():
+			var discovery:Dictionary=by_age[index]
+			if age_bucket(discovery,year)>bucket: break
+			index+=1
+			var id:=String(discovery.get("id",""))
+			if id==target or (not skip.is_empty() and skip.has(id)): continue
+			var eligible:Variant=memo.get(id) if scanning else null
+			if eligible==null:
+				eligible=_discovery_is_eligible(discovery,current_day,judged_known)
+				if scanning: memo[id]=eligible
+			if not eligible: continue
+			var score:=_candidate_score(discovery)
+			if score>best_score:
+				best_score=score
+				best=discovery
+		if not best.is_empty(): return best
+	return {}
+
+## A channel's open questions (`candidates`, those not yet known) in order of
+## their opening years, kept while that list stands: a look for questions of
+## their age reads only the front of it.
+func _channel_by_age(channel:String,candidates:Array)->Array:
+	var cached:Variant=_scan.by_age.get(channel)
+	if cached is Array and is_same((cached as Array)[0],candidates): return (cached as Array)[1]
+	var opens:Dictionary={}
+	for discovery:Dictionary in candidates: opens[String(discovery.get("id",""))]=research_open_year(discovery)
+	var by_age:=candidates.duplicate()
+	by_age.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var first:=float(opens[String(a.get("id",""))]);var second:=float(opens[String(b.get("id",""))])
+		return first<second if first!=second else String(a.get("id",""))<String(b.get("id","")))
+	_scan.by_age[channel]=[candidates,by_age]
+	return by_age
 
 
 # Each world has a different but generous subset of the 4,608 latent routes.
@@ -980,6 +1438,9 @@ func _legacy_path_was_viable(discovery:Dictionary,civilization_seed:int=0)->bool
 ## Score a line gives up for each extra "usual work" a question ahead of its
 ## age costs (research_early_factor - 1).
 const EARLY_SCORE_PER_WORK:=60.0
+## Age first: a question of its age always outranks one ahead of it, and one
+## within NEAR_AGE_YEARS of its age outranks one further ahead (age_bucket).
+const AGE_BUCKET_SCORE:=1000.0
 
 func _candidate_score(discovery:Dictionary)->float:
 	var id:=String(discovery.get("id",""))
@@ -1001,6 +1462,8 @@ func _candidate_score(discovery:Dictionary)->float:
 	# goes ahead only when nothing of its own age is open.
 	score-=log(era_cost_multiplier(discovery))/log(2.0)*20.0
 	score-=(research_early_factor(discovery)-1.0)*EARLY_SCORE_PER_WORK
+	# Age first: a question of its age outranks any question ahead of it.
+	score-=AGE_BUCKET_SCORE*float(age_bucket(discovery))
 	# research_3000: and they take up the current frontier before older leftovers.
 	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
 	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
@@ -1324,7 +1787,11 @@ func research_assignment(discovery:Dictionary)->Dictionary:
 	var channel:=_channel_key(domain,subcategory)
 	var active:=String(WorldSimulation.state.active_investigations.get(channel,""))==id
 	var evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-	return {"leader":leadership,"capacity":capacity,"active":active,"channel":channel,"current_target":String(WorldSimulation.state.active_investigations.get(channel,"")),"bottleneck":_investigation_bottleneck(discovery,int(capacity.weight),_leader_factor(domain),evidence,float(WorldSimulation.state.discovery_progress.get(id,0)),capacity) if active else "","method":_project_method(discovery) if active else ""}
+	# Who would work it: a team (teams carry questions), and its part of the
+	# people's hours at learning.
+	capacity["researchers"]=float(capacity.team_people)
+	capacity["workforce_share"]=float(capacity.team_people)/maxf(0.000001,float(capacity.total_researchers)) if float(capacity.total_researchers)>0.0 else 0.0
+	return {"leader":leadership,"capacity":capacity,"active":active,"channel":channel,"current_target":String(WorldSimulation.state.active_investigations.get(channel,"")),"bottleneck":_investigation_bottleneck(discovery,_line_weight(domain),_leader_factor(domain),evidence,float(WorldSimulation.state.discovery_progress.get(id,0)),capacity) if active else "","method":_project_method(discovery) if active else ""}
 
 
 func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
@@ -1332,17 +1799,20 @@ func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 
 
 # Research allocation values are strategic weights, never person records. The
-# Knowledge labor role supplies the aggregate workforce; emphasis divides that
-# workforce among at most 48 fixed inquiry channels. More people therefore
-# create more parallel and faster science without creating runtime work per
-# researcher. One rule for every people: the community's whole work comes from
-# its researchers alone (Research600.team_capacity) and each channel does its
-# team's part of it (Research600.team_strength), so the same researchers make
-# the same total progress under any emphasis and any ruler; opening more
-# channels adds nothing, and piling people onto one has diminishing returns.
-# Logarithmic team returns prevent a billion people from completing every
-# discovery in a single tick, while knowledge, institutions, materials, and
-# food compound the civilization's ability to use that scale.
+# Knowledge labor role supplies the aggregate workforce; emphasis shares it out
+# by turns. One rule for every people: the community's whole work comes from
+# its researchers alone (Research600.team_capacity) and it works in equal teams,
+# each on one question until proof (Research600.team_count of them), so the same
+# researchers make the same total progress under any emphasis and any ruler: a
+# line's share sets how often it gets a team, never how much work there is.
+# Logarithmic returns prevent a billion people from completing every discovery
+# in a single tick, while knowledge, institutions, materials, and food compound
+# the civilization's ability to use that scale.
+#
+# For a channel: "researchers" and "workforce_share" are the people its own
+# steps of attention follow it with; "team_people" the people on a team working
+# it (the team at work there, or one a free team would bring); "team_scale" that
+# team's part of the community's work; "progress_multiplier" its pace.
 func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary={})->Dictionary:
 	if teams.is_empty(): teams=research_teams()
 	var weight:=maxi(0,_subcategory_allocation(dynamic_id,subcategory))
@@ -1350,9 +1820,15 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 	var total_researchers:=float(teams.researchers)
 	var workforce_share:=float(weight)/maxf(1.0,float(total_weight)) if weight>0 else 0.0
 	var researchers:=total_researchers*workforce_share
+	# Every team does an equal part of the whole work. A team at work shares it
+	# with the teams at work (fewer questions than teams: they double up).
+	var holds:=WorldSimulation.state.active_investigations.has(_channel_key(dynamic_id,subcategory))
+	var sharing:=maxi(1,int(teams.placed) if holds else int(teams.count))
 	var team_scale:=0.0
-	if researchers>0.0 and float(teams.strength)>0.0:
-		team_scale=float(teams.work)*Research600.team_strength(researchers)/float(teams.strength)
+	var team_people:=0.0
+	if _line_weight(dynamic_id)>0 and float(teams.work)>0.0:
+		team_scale=float(teams.work)/float(sharing)
+		team_people=float(teams.on_lines)/float(sharing)
 	elif weight==0 and subcategory==_diffusion_subcategory(dynamic_id):
 		team_scale=Research600.DIFFUSION_TEAM # research_3000: diffusion
 	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
@@ -1366,28 +1842,28 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 	var parallel:=preload("res://scripts/research_600_catalog.gd").parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
-		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,
+		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,"team_people":team_people,
+		"teams":int(teams.count),"placed":int(teams.placed),
 		"education":education,"science_capacity":researchers*education,"parallel":parallel,
 		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
 	}
 
 
-## The research community as the channels share it: the emphasis total, the
-## researchers, their whole work (Research600.team_capacity of those not on
-## artifact study) and the summed strength of every staffed channel's team.
-## One reading serves every channel of a day (research_capacity_for).
+## The research community as the teams share it: the emphasis total, the
+## researchers, those on the lines (not on artifact study), their whole work
+## (Research600.team_capacity), how many teams they field (Research600.team_count)
+## and how many are at work. One reading serves every team of a day.
 func research_teams()->Dictionary:
 	var total_weight:=research_emphasis_total()
 	var researchers:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
 	var per_step:=researchers/maxf(1.0,float(total_weight))
 	var staffed:=0
-	var strength:=0.0
 	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
 		for value in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary).values():
-			if int(value)<=0: continue
-			staffed+=int(value)
-			strength+=Research600.team_strength(per_step*float(value))
-	return {"total_weight":total_weight,"researchers":researchers,"work":Research600.team_capacity(per_step*float(staffed)),"strength":strength}
+			if int(value)>0: staffed+=int(value)
+	var on_lines:=per_step*float(staffed)
+	return {"total_weight":total_weight,"researchers":researchers,"on_lines":on_lines,"work":Research600.team_capacity(on_lines),
+		"count":Research600.team_count(on_lines) if staffed>0 else 0,"placed":WorldSimulation.state.active_investigations.size()}
 
 
 func research_emphasis_total()->int:
@@ -1400,34 +1876,20 @@ func research_emphasis_total()->int:
 
 func research_program_summary()->Dictionary:
 	var active_lines:=0
-	var weighted_capacity:=0.0
 	var total_weight:=research_emphasis_total()
 	var teams:=research_teams()
 	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
-		for subcategory in (WorldSimulation.state.research_subcategory_allocations[dynamic_id] as Dictionary):
-			var weight:=_subcategory_allocation(String(dynamic_id),String(subcategory))
-			if weight<=0: continue
-			active_lines+=1
-			weighted_capacity+=float(research_capacity_for(String(dynamic_id),String(subcategory),teams).get("progress_multiplier",0.0))*float(weight)
+		if _line_weight(String(dynamic_id))>0: active_lines+=1
+	var team_people:=float(teams.on_lines)/maxf(1.0,float(maxi(int(teams.count),int(teams.placed))))
 	return {
 		"researchers":maxi(0,int(WorldSimulation.state.effective_workers("Knowledge"))),
 		"emphasis_total":total_weight,"active_lines":active_lines,
-		"average_line_capacity":weighted_capacity/maxf(1.0,float(total_weight))
+		"teams":int(teams.count),"teams_at_work":int(teams.placed),"team_people":team_people,
+		"average_line_capacity":float(teams.work)/maxf(1.0,float(maxi(int(teams.count),int(teams.placed))))
 	}
 
 func _channel_key(dynamic_id:String,subcategory:String)->String:
 	return "%s::%s" % [dynamic_id,subcategory]
-
-func _allocated_channels()->Array[Dictionary]:
-	var result:Array[Dictionary]=[]
-	for dynamic_id in WorldSimulation.state.research_subcategory_allocations:
-		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_id]
-		for subcategory in subcategories:
-			if int(subcategories[subcategory])>0: result.append({"dynamic":dynamic_id,"subcategory":subcategory})
-		# research_3000: an unemphasized line still takes up questions by diffusion.
-		var diffusion:=_diffusion_subcategory(String(dynamic_id))
-		if not diffusion.is_empty(): result.append({"dynamic":dynamic_id,"subcategory":diffusion,"diffusion":true})
-	return result
 
 ## research_3000: the channel through which a line with no emphasis learns by
 ## diffusion (its first subcategory), or "" when the line has emphasis.
@@ -1550,12 +2012,14 @@ static func plain_wait_reason(missing:Array)->String:
 func line_wait_reason(dynamic_id:String,subcategory:String,rows:Array=[])->String:
 	var channel:=_channel_key(dynamic_id,subcategory)
 	var today:=int(floor(WorldSimulation.state.elapsed_days))
-	if _channel_has_candidate(channel,today):return ""
-	# Only questions ahead of their age: its people help this field's other lines
-	# until one comes of age, or all work ahead when the whole field is ahead.
-	var ahead:=_best_candidate_for_channel(channel,today)
-	if not ahead.is_empty():
-		return "Its next question, %s, is %d years ahead of its age (%s); its people help this field's other lines meanwhile." % [String(ahead.get("name","")),roundi(research_years_ahead(ahead)),work_words(research_early_factor(ahead))]
+	var next:=_best_candidate_for_channel(channel,today)
+	# Open work near its age: teams take questions in turns, by each line's share.
+	if _channel_has_candidate(channel,today):
+		return "%s waits for a free team; teams take up the questions of their age in turns, each field as often as its share of attention." % (String(next.get("name","")) if not next.is_empty() else "Its next question")
+	# Only questions ahead of their age: its turns go to other lines' questions of
+	# their age until one comes of age, or all work ahead when none has any.
+	if not next.is_empty():
+		return "Its next question, %s, is %d years ahead of its age (%s); until it comes of age this field's turns help other fields' questions of their age." % [String(next.get("name","")),roundi(research_years_ahead(next)),work_words(research_early_factor(next))]
 	if rows.is_empty():rows=technology_tree(dynamic_id)
 	var frontier:=technology_frontier(rows)
 	var best:Dictionary={}
@@ -1966,32 +2430,6 @@ func research_600_rival_society(civ:Dictionary)->Dictionary:
 		"resources":resources,"environment":Research600.environment_tags(profile,{}),"institutions":float(civ.get("institutions",0.0)),"contact":contact}
 
 
-## Observers leave a line whose questions are all answered or not yet open
-## (_redistribute_stranded_attention) and previously never came back when a new
-## question opened there. Once a month, a line of a staffed domain that has
-## open work but nobody on it takes one observer back from the domain's most
-## crowded line (only from a line with two or more, so no running line stops).
-func _research_600_return_waiting_attention(current_day:int)->void:
-	if current_day<_research_600_return_day+30 and current_day>=_research_600_return_day: return
-	_research_600_return_day=current_day
-	var moved:=false
-	for dynamic_variant in WorldSimulation.state.research_subcategory_allocations:
-		var dynamic_id:=String(dynamic_variant)
-		var subcategories:Dictionary=WorldSimulation.state.research_subcategory_allocations[dynamic_variant]
-		for subcategory_variant in subcategories.keys():
-			if int(subcategories[subcategory_variant])>0: continue
-			var donor:Variant=null
-			for other_variant in subcategories:
-				if int(subcategories[other_variant])>=2 and (donor==null or int(subcategories[other_variant])>int(subcategories[donor])): donor=other_variant
-			if donor==null: break
-			if not _channel_has_candidate(_channel_key(dynamic_id,String(subcategory_variant)),current_day): continue
-			subcategories[donor]=int(subcategories[donor])-1
-			subcategories[subcategory_variant]=1
-			moved=true
-		WorldSimulation.state.research_subcategory_allocations[dynamic_variant]=subcategories
-	if moved: _rebuild_research_domain_totals()
-
-
 ## A line whose domain has no open question of its own does foundation work:
 ## it investigates an open prerequisite, from any line, of one of its domain's
 ## era-open questions (the design has 534 cross-line foundations). Without this
@@ -2006,7 +2444,8 @@ func _research_600_channel_home(channel:String)->Array[String]:
 
 func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bool:
 	var home:=_research_600_channel_home(channel)
-	if _subcategory_allocation(home[0],home[1])<=0 and home[1]!=_diffusion_subcategory(home[0]): return false
+	# A team's desk is any channel of a followed line.
+	if _line_weight(home[0])<=0 and home[1]!=_diffusion_subcategory(home[0]): return false
 	var own:=_channel_key(String(discovery.get("dynamic","")),String(discovery.get("subcategory","")))
 	if channel==own: return true
 	# Foundation work is for questions no line of their own is pursuing. Once the
@@ -2016,10 +2455,10 @@ func _research_600_investigation_placed(channel:String,discovery:Dictionary)->bo
 	return String(discovery.get("id","")) in _research_600_foundation_ids(home[0],int(floor(WorldSimulation.state.elapsed_days)))
 
 
-func _research_600_foundation_candidate(dynamic_id:String,current_day:int)->Dictionary:
+func _research_600_foundation_candidate(dynamic_id:String,current_day:int,busy:Dictionary={})->Dictionary:
 	var active:Array=WorldSimulation.state.active_investigations.values()
 	for id:String in _research_600_foundation_ids(dynamic_id,current_day):
-		if not id in active: return discovery_definition(id)
+		if not id in active and not busy.has(id): return discovery_definition(id)
 	return {}
 
 
@@ -2060,7 +2499,9 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 			visited[id]=true
 			var foundation:=discovery_definition(id)
 			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
-			if _scan_eligible(foundation,current_day,known): found[id]=research_open_year(foundation)
+			if _scan_eligible(foundation,current_day,known):
+				# Foundation work keeps near its age: no more than NEAR_AGE_YEARS ahead.
+				if research_years_ahead(foundation,float(current_day)/365.0)<NEAR_AGE_YEARS: found[id]=research_open_year(foundation)
 			else: next.append_array(_research_600_missing_parents(foundation,known))
 		frontier=next
 		depth+=1

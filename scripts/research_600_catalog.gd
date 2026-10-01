@@ -78,7 +78,11 @@ const DAILY_SCALE:=0.12
 ## item's design year. Calibrated with tools/sim so milestones land inside their
 ## design bands (docs/research/BENCHMARKS_600.md).
 ## research_3000: the curve continues through every design block to 3000.
-const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.30],[1200.0,0.20],[1800.0,0.17],[2400.0,0.15],[3000.0,0.10]]
+## Research pacing: past 600 it falls gently (0.55 at 700, not 0.30), so a
+## question of the classical age and after takes years, not decades, once its
+## team takes it up; refitted with tools/sim so the 1200-3000 milestones land in
+## their bands (they were mostly late).
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
 ## research_3000 parallel research capacity. A band of a few hundred works one
 ## question per staffed channel; a large, literate, well-governed society runs
 ## many investigations at once (academies, universities, laboratories), so a
@@ -139,6 +143,67 @@ const ATTENTION_STEPS:=24
 ## lines of inquiry, whatever the emphasis: up to this many researchers each
 ## count in full, and beyond it more people add less (team_capacity).
 const RESEARCH_TEAMS:=12.0
+## Teams carry questions. A people's researchers work in equal teams, each on
+## one question until it is proven, so every question under way moves visibly
+## season by season instead of twenty questions crawling at once. A band of a
+## hundred with two or three at learning runs 4 questions; every tenfold more
+## researchers adds 4 more, up to 24 (team_count). The teams share the
+## community's whole work (team_capacity) equally: more teams never add work.
+const TEAMS_BASE:=4
+const TEAMS_PER_TENFOLD:=4
+const TEAMS_REF:=2.5
+const TEAMS_MAX:=24
+## A followed line with a question of its age never goes longer than this
+## without a team (DiscoverySystem team turns).
+const TEAM_MAX_WAIT_YEARS:=5.0
+## A line's turns are counted over its proofs of this many recent years.
+const TEAM_TURN_YEARS:=25.0
+## Steps to proof: a question reaches its first cases at a third of the
+## evidence and is repeated at two thirds. Each step starts trial use in a
+## share of households (TRIAL_SHARE), whose effects count in proportion and stay
+## under the age's limits; recipes, buildings and gates still wait for proof.
+const STAGES:=[0.3333333,0.6666667]
+const TRIAL_SHARE:=[0.05,0.15]
+## Households using a practice on the day it is proven (it was already tried).
+const PROOF_ADOPTION:=0.15
+## A normal research share of a people (keepers per person); a team below a
+## third of the team such a share would give is a thin team.
+const NORMAL_RESEARCH_SHARE:=0.025
+const THIN_TEAM_FRACTION:=0.3333333
+
+## Questions a community of `researchers` works at once: 4 for a band of 2-3,
+## 4 more for every tenfold, at most TEAMS_MAX (never fewer than one).
+static func team_count(researchers:float)->int:
+	if researchers<=0.0: return 1
+	return clampi(roundi(TEAMS_BASE+TEAMS_PER_TENFOLD*log(researchers/TEAMS_REF)/log(10.0)),1,TEAMS_MAX)
+
+## The step a question's evidence has reached: 0 early cases, 1 first cases
+## (a third), 2 repeated (two thirds).
+static func stage(progress:float)->int:
+	var reached:=0
+	for threshold:float in STAGES:
+		if progress>=threshold-0.000001: reached+=1
+	return reached
+
+## Share of households trying a question at `progress` (0 before first cases).
+static func trial_share(progress:float)->float:
+	var step:=stage(progress)
+	return 0.0 if step<=0 else float(TRIAL_SHARE[mini(step,TRIAL_SHARE.size())-1])
+
+## Questions in trial use: {id: share of households} for every unknown question
+## whose evidence (`progress`, DiscoverySystem's) has reached its first cases.
+static func trial_levels(progress:Dictionary,known:Array)->Dictionary:
+	var trials:Dictionary={}
+	for id:Variant in progress:
+		var share:=trial_share(float(progress[id]))
+		if share>0.0 and not known.has(id): trials[id]=share
+	return trials
+
+## The research team a people of `population` would normally field (people per
+## team at NORMAL_RESEARCH_SHARE of them at learning).
+static func normal_team(population:float)->float:
+	var researchers:=maxf(0.0,population)*NORMAL_RESEARCH_SHARE
+	return researchers/float(team_count(researchers)) if researchers>0.0 else 0.0
 static var _relevance:Dictionary={}
 ## Keys the design governs; Phase 2 effect files cannot override them.
 const PROTECTED_KEYS:=["id","dynamic","direction","requires","requires_all","requires_any","learning_routes","day","chance","research_600","earliest_year","design_year","precedents","conditions"]

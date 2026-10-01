@@ -64,7 +64,8 @@ func test_two_lines_on_one_question_are_one_record_with_both_teams()->void:
 	assert_array(record.channels).contains_exactly_in_any_order([borrowed.line,borrowed.own])
 	assert_int(int(record.observer_allocation)).is_equal(2)
 	var own_parts:=String(borrowed.own).split("::");var line_parts:=String(borrowed.line).split("::")
-	var team:=float(DiscoverySystem.research_capacity_for(own_parts[0],own_parts[1]).researchers)+float(DiscoverySystem.research_capacity_for(line_parts[0],line_parts[1]).researchers)
+	# Two teams on it for the day: both teams' people.
+	var team:=float(DiscoverySystem.research_capacity_for(own_parts[0],own_parts[1]).team_people)+float(DiscoverySystem.research_capacity_for(line_parts[0],line_parts[1]).team_people)
 	assert_float(team).is_greater(0.0)
 	assert_float(float(record.research_workforce)).is_equal_approx(team,0.0001)
 
@@ -88,7 +89,7 @@ func test_a_borrowed_question_goes_back_to_its_own_line()->void:
 
 # --- The board -----------------------------------------------------------------
 
-const WORKFORCE:="RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"
+const WORKFORCE:="RESEARCH WORKFORCE — a thin team: less than one person at it, where a people of our size would put about 3 on one question"
 func _records()->Array:
 	return [
 		{"id":"clay_shaping","name":"Clay Vessels","dynamic":"production","progress":0.46,"research_workforce":0.5,"bottleneck":WORKFORCE},
@@ -162,7 +163,7 @@ func test_a_shared_holdup_is_written_out_once()->void:
 	var written:=0;var named:=0
 	for label:Node in board.find_children("*","Label",true,false):
 		if (label as Label).text==sentence:written+=1
-		if (label as Label).text=="Thinly spread team":named+=1
+		if (label as Label).text=="Thin team":named+=1
 	assert_int(written).is_equal(1)
 	assert_int(named).is_equal(4)
 	for card:Control in board.find_children("Question_*","",true,false):

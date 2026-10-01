@@ -139,10 +139,10 @@ func test_health_and_research_docks_build_plain_pages()->void:
 	assert_array(inquiry.meta().subtabs).contains_exactly(["Where we look","Knowledge tree","What we know"])
 	var board:VBoxContainer=auto_free(preload("res://scripts/hud/inquiry_board.gd").new())
 	board.setup({"fields":[{"id":"health","goal":"keeping people well","weight":2,"share":0.25,"active":1,"on_open":func():pass,"on_more":func():pass,"on_less":func():pass}],
-		"investigations":[{"name":"Wound cleaning","dynamic":"health","progress":0.5,"research_workforce":0.5,"bottleneck":"RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher"}],
+		"investigations":[{"name":"Wound cleaning","dynamic":"health","progress":0.5,"research_workforce":0.5,"estimated_days":400,"bottleneck":"RESEARCH WORKFORCE — a thin team: less than one person at it, where a people of our size would put about 3 on one question"}],
 		"on_tree":func():pass,"on_work":func():pass,"on_domain":func(_d:String):pass})
 	var words:=_texts(board)
-	assert_str(words).contains("About 25 in 100 of our attention").contains("One person, part of the time").contains("about half proven").contains("Fewer than one person's full time")
+	assert_str(words).contains("About 25 in 100 of our attention").contains("One person, part of the time").contains("about 13 months to proof").contains("Thin team").contains("A thin team: less than one person at it")
 	assert_str(words).not_contains("−").not_contains("% attention ·").not_contains("researchers")
 
 func test_economy_dock_titles_follow_the_rail()->void:

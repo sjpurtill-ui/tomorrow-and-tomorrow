@@ -179,16 +179,14 @@ static func workforce(amount:float)->String:
 	return preload("res://scripts/hud/home_plain.gd").researchers(amount)
 
 ## What holds an investigation back, in one plain sentence.
+## Holdups without their own numbers; the rest (a thin team, a question ahead
+## of its age, the steps to proof) are told in the engine's own words.
 const BOTTLENECK_WORDS:={
 	"NO RESEARCH":"No attention is given to this field just now, so the work has stopped.",
-	"RESEARCH WORKFORCE":"Fewer than one person's full time goes to this; more lore keepers, or more attention to this field, would speed it.",
 	"MATERIAL BASIS":"They need to find or work the material this depends on first.",
-	"AHEAD OF ITS AGE":"This is ahead of its time: other knowledge must grow before it can be answered quickly.",
 	"LEADERSHIP":"The official in charge is weak, or the office is empty.",
 	"RESEARCH SUPPORT":"Short food, tools, records or order are slowing the work.",
-	"EARLY EVIDENCE":"Nothing holds it back; they are still gathering early cases.",
-	"REPLICATION":"Nothing holds it back; they are testing the method case after case.",
-	"VALIDATION":"Nothing holds it back; the result is nearly proven.",
+	"EARLY EVIDENCE":"Nothing holds it back; they are gathering the first cases.",
 }
 static func plain_bottleneck(text:String)->String:
 	for key:String in BOTTLENECK_WORDS:
@@ -223,13 +221,14 @@ static func lead(item:Dictionary)->String:
 static func phase(item:Dictionary)->String:
 	var text:=String(item.get("assignment",{}).get("bottleneck",""))
 	if text.begins_with("NO RESEARCH"):return "No attention assigned"
-	if text.begins_with("RESEARCH WORKFORCE"):return "Thinly spread team" if team(item)>0 else "Needs research workers"
+	if text.begins_with("RESEARCH WORKFORCE"):return "Thin team" if team(item)>0 else "Needs research workers"
+	if text.begins_with("AHEAD OF ITS AGE"):return "Ahead of its age"
 	if text.begins_with("MATERIAL BASIS"):return "Needs material evidence"
 	if text.begins_with("LEADERSHIP"):return "Needs stronger leadership"
 	if text.begins_with("RESEARCH SUPPORT"):return "Supplies constrain research"
-	if text.begins_with("EARLY EVIDENCE"):return "Gathering evidence"
-	if text.begins_with("REPLICATION"):return "Testing the method"
-	if text.begins_with("VALIDATION"):return "Validating results"
+	if text.begins_with("EARLY EVIDENCE"):return "Gathering first cases"
+	if text.begins_with("REPLICATION"):return "First cases"
+	if text.begins_with("VALIDATION"):return "Repeated"
 	return ""
 static func paint(parent:Node,domain:String,height:float=96)->TextureRect:
 	var image:=TextureRect.new();image.texture=art(domain);image.custom_minimum_size.y=height;image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE;parent.add_child(image);return image

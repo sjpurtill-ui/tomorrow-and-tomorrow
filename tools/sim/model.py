@@ -158,6 +158,36 @@ SWITCH_CHECK_DAYS = float(g.const("scripts/discovery_system.gd", "SWITCH_CHECK_D
 SWITCH_MARGIN = float(g.const("scripts/discovery_system.gd", "SWITCH_MARGIN", default=1.5, optional=True))
 EARLY_SCORE_PER_WORK = float(g.const("scripts/discovery_system.gd", "EARLY_SCORE_PER_WORK", default=0.0, optional=True))
 NEAR_AGE_YEARS = float(g.const("scripts/discovery_system.gd", "NEAR_AGE_YEARS", default=1e9, optional=True))
+# Research pacing (DiscoverySystem teams): Research600.TEAMS_* present -> the
+# researchers work in team_count(researchers) equal teams, each on one question
+# until proof (the community's whole work shared equally, so parity holds); a
+# followed line's share sets how often it gets a team (its turns: proofs over
+# TEAM_TURN_YEARS plus teams held), a line with work of its age never waits past
+# TEAM_MAX_WAIT_YEARS, questions of their age come before any ahead of it (lines
+# help each other first), foundation work keeps within NEAR_AGE_YEARS, and the
+# steps to proof (STAGES) start trial use (TRIAL_SHARE) before proof.
+TEAMS = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
+         for k in ("TEAMS_BASE", "TEAMS_PER_TENFOLD", "TEAMS_REF", "TEAMS_MAX", "TEAM_MAX_WAIT_YEARS", "TEAM_TURN_YEARS", "PROOF_ADOPTION")}
+TEAM_MODE = TEAMS["TEAMS_MAX"] > 0
+STAGES = [float(x) for x in g.const("scripts/research_600_catalog.gd", "STAGES", default=[], optional=True)]
+TRIAL_SHARE = [float(x) for x in g.const("scripts/research_600_catalog.gd", "TRIAL_SHARE", default=[], optional=True)]
+AGE_BUCKET_SCORE = float(g.const("scripts/discovery_system.gd", "AGE_BUCKET_SCORE", default=0.0, optional=True))
+
+
+def team_count(researchers: float) -> int:
+    """Research600.team_count: questions a community works at once."""
+    if researchers <= 0.0:
+        return 1
+    x = TEAMS["TEAMS_BASE"] + TEAMS["TEAMS_PER_TENFOLD"] * math.log10(researchers / TEAMS["TEAMS_REF"])
+    return int(clamp(math.floor(x + 0.5) if x >= 0 else -math.floor(-x + 0.5), 1, TEAMS["TEAMS_MAX"]))
+
+
+def trial_share(progress):
+    """Research600.trial_share (vectorized): households trying a question before proof."""
+    out = np.zeros_like(progress, dtype=float)
+    for k, threshold in enumerate(STAGES):
+        out = np.where(progress >= threshold - 1e-6, TRIAL_SHARE[min(k, len(TRIAL_SHARE) - 1)], out)
+    return out
 # FoodSystem technique levers and AgronomyKnowledge.factors (engine features the
 # 0-600 surrogate left out; they matter once fertilizer and breeding arrive).
 FOOD_TECHNIQUES = g.const("scripts/food_system.gd", "TECHNIQUES", default={}, optional=True)
@@ -535,6 +565,10 @@ class Surrogate:
         the era ceiling of society_era() (calendar vs 95th percentile of known eras)."""
         cat = self.cat
         weights = np.where(self.known, np.clip(self.adoption, 0.0, 1.0), 0.0)
+        if STAGES and TRIAL_SHARE:
+            # SocietyModel._rebuild_effect_totals: questions past their first cases
+            # are tried in a share of households before proof.
+            weights = np.where(self.known, weights, trial_share(self.progress))
         raw = weights @ self.E
         # SocietyModel specialization (Phase 3 R3): a focused line's benefits count more.
         focus_by_line = None
@@ -1329,6 +1363,9 @@ class Surrogate:
             k = self.stale_k
             doublings = np.where(self.relevance >= 0, np.maximum(0.0, self.ceiling_era - self.relevance - k["STALE_GRACE"]) / k["STALE_DOUBLING"], 0.0)
             open_mask &= doublings <= math.log2(k["STALE_ABANDON"])
+        if TEAM_MODE:
+            self._line_open = np.bincount(cat.line[open_mask], minlength=len(gd.LINES)) > 0
+            return self._research_teams(days, year, open_mask, researchers_total)
         # DiscoverySystem._channel_has_candidate: a line is live only with an open
         # question within NEAR_AGE_YEARS of its age; otherwise its units help the
         # line's live channels, and work ahead only when none is live.
@@ -1487,6 +1524,235 @@ class Surrogate:
             self._learn(item)
         return found
 
+    # ---------------------------------------------------------- research: teams
+    def _team_bucket(self, items, year: float):
+        """DiscoverySystem.age_bucket: 0 of its age, 1 within NEAR_AGE_YEARS, 2 further ahead."""
+        ahead = self.open_year[items] - year
+        return np.where(ahead <= 0.0, 0, np.where(ahead < NEAR_AGE_YEARS, 1, 2))
+
+    def _team_scores(self, cand, units: float, year: float):
+        """DiscoverySystem._candidate_score over one channel's open questions,
+        with the age bucket (a question of its age before any ahead of it)."""
+        cat = self.cat
+        era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
+        early_work = np.exp2(self._early_doublings(cand, year)) - 1.0
+        score = self.affinity[cand] + self.signal_score[cand] + units * 8.0 - era_cost * 20.0 - early_work * EARLY_SCORE_PER_WORK + self.targets[cand] * 1e5
+        if self.stale_k.get("STALE_DOUBLING"):
+            rel = self.relevance[cand]
+            score = score - np.where(rel >= 0, np.maximum(0.0, self.ceiling_era - rel) / self.stale_k["STALE_DOUBLING"], 0.0) * 20.0
+            score = score - np.where((rel >= 0) & (rel <= cat.design_year[cand] + 0.5), self.stale_k.get("DEAD_END_PENALTY", 0.0), 0.0)
+        return score - AGE_BUCKET_SCORE * self._team_bucket(cand, year)
+
+    def _team_foundations(self, li: int, year: float, open_mask, busy: set) -> list:
+        """DiscoverySystem._research_600_foundation_ids, within NEAR_AGE_YEARS of their age."""
+        return [i for i in self._foundation_ids(li, year, open_mask) if i not in busy and self.open_year[i] - year < NEAR_AGE_YEARS]
+
+    def _team_placements(self, year: float, open_mask, followed, units_ch, busy: set, also: tuple = (), max_bucket: int = 2) -> list:
+        """DiscoverySystem._line_placements over every followed line and bucket:
+        each line's best question on each of its channels without a team (and the
+        channels in ``also``); a deferred best (dead end or leftover) yields to the
+        line's foundation work when that is at least as near its age; and the
+        line's foundation work alone when none of its channels holds a question
+        at least that near its age. A line lends one team to foundations at a
+        time. Rows: (bucket, score, line, channel, item)."""
+        cat = self.cat
+        out = []
+        lending = set()
+        for ch in np.where(self.active >= 0)[0].tolist():
+            if int(ch) not in also and int(cat.channel[int(self.active[ch])]) != int(ch):
+                lending.add(int(cat.channel_line[ch]))
+        for li in np.where(followed)[0].tolist():
+            free = [int(ch) for ch in self.line_channels[li] if self.active[ch] < 0 or int(ch) in also]
+            if not free:
+                continue
+            lends = li in lending
+            own_min = 3
+            for ch in free:
+                items = self.chan_items[ch]
+                cand = items[open_mask[items]]
+                if busy and len(cand):
+                    cand = cand[np.array([int(i) not in busy for i in cand], dtype=bool)]
+                if len(cand) == 0:
+                    continue
+                score = self._team_scores(cand, float(units_ch[ch]), year)
+                k = int(np.argmax(score))
+                item = int(cand[k])
+                b = int(self._team_bucket(np.array([item]), year)[0])
+                own_min = min(own_min, b)
+                if b > max_bucket:
+                    continue
+                if not lends and self.stale_k.get("STALE_DOUBLING") and FOUNDATION_WORK:
+                    rel_i = self.relevance[item]
+                    if rel_i >= 0 and (rel_i <= cat.design_year[item] + 0.5 or self.ceiling_era - rel_i > self.stale_k["STALE_GRACE"]):
+                        found_ids = self._team_foundations(li, year, open_mask, busy)
+                        if found_ids and int(self._team_bucket(np.array([found_ids[0]]), year)[0]) <= b:
+                            f = found_ids[0]
+                            out.append((b, float(self._team_scores(np.array([f]), float(units_ch[int(cat.channel[f])]), year)[0]), li, ch, f))
+                            lends = True
+                            continue
+                out.append((b, float(score[k]), li, ch, item))
+            if not lends and FOUNDATION_WORK:
+                found_ids = self._team_foundations(li, year, open_mask, busy)
+                if found_ids:
+                    f = found_ids[0]
+                    bf = int(self._team_bucket(np.array([f]), year)[0])
+                    if bf < own_min and bf <= max_bucket:
+                        out.append((bf, float(self._team_scores(np.array([f]), float(units_ch[int(cat.channel[f])]), year)[0]), li, free[0], f))
+        return out
+
+    def _team_turns(self, year: float, held, followed):
+        """DiscoverySystem._team_turns: each followed line's recent turns (its proofs
+        over TEAM_TURN_YEARS plus the teams it holds) and the year of its last proof."""
+        log = self.__dict__.setdefault("team_proofs", [])
+        turns = held.astype(float).copy()
+        last = np.zeros(len(gd.LINES))
+        since = year - TEAMS["TEAM_TURN_YEARS"]
+        for y, li in log:
+            last[li] = max(last[li], y)
+            if y >= since:
+                turns[li] += 1.0
+        return turns, last
+
+    def _team_pick(self, placements: list, shares, turns, last, held, followed, year: float):
+        """DiscoverySystem._pick_team_placement: the best age bucket first; then a
+        line that has waited TEAM_MAX_WAIT_YEARS (longest first); then the line
+        furthest below its share of recent turns; then the question's score."""
+        total = float(turns[followed].sum())
+        wait = TEAMS["TEAM_MAX_WAIT_YEARS"]
+
+        def key(pl):
+            b, score, li, ch, item = pl
+            waited = held[li] == 0 and year - last[li] >= wait
+            return (b, 0 if waited else 1, -(year - last[li]) if waited else 0.0, -(shares[li] * total - turns[li]), -score, ch)
+        return min(placements, key=key)
+
+    def _research_teams(self, days: float, year: float, open_mask, researchers_total: float) -> list:
+        """DiscoverySystem research with teams (see TEAMS above)."""
+        cat, c, p = self.cat, self.c, self.p
+        units = np.array([max(0, int(self.s_research.get(line, 0))) for line in gd.LINES], dtype=float)
+        lines_total = float(units.sum())
+        study = float(self.study_weight())
+        on_lines = researchers_total * lines_total / max(1.0, lines_total + study) if lines_total > 0 else 0.0
+        q = team_count(on_lines) if lines_total > 0 else 0
+        self.team_count_now = q
+        followed = units > 0
+        shares = units / lines_total if lines_total > 0 else units
+        ch_line = cat.channel_line
+        # Sub-line units only prefer a channel (_candidate_score); spread evenly.
+        units_ch = np.zeros(len(cat.channel_keys))
+        for li in range(len(gd.LINES)):
+            chans = self.line_channels[li]
+            for k in range(int(units[li])):
+                if len(chans):
+                    units_ch[chans[k % len(chans)]] += 1
+        # 1. A team keeps its question while it is open and its line followed.
+        for ch in np.where(self.active >= 0)[0].tolist():
+            if not followed[ch_line[ch]] or not open_mask[int(self.active[ch])]:
+                self.active[ch] = -1
+        held = np.bincount(ch_line[np.where(self.active >= 0)[0]], minlength=len(gd.LINES))
+        turns, last = self._team_turns(year, held, followed)
+        # 2. Fewer teams (fewer researchers): the teams furthest ahead stop first.
+        teams = np.where(self.active >= 0)[0].tolist()
+        if len(teams) > q:
+            teams.sort(key=lambda ch: (-(self.open_year[int(self.active[ch])] - year), shares[ch_line[ch]] * turns[followed].sum() - turns[ch_line[ch]]))
+            for ch in teams[:len(teams) - q]:
+                self.active[ch] = -1
+                held[ch_line[ch]] -= 1
+                turns[ch_line[ch]] -= 1
+        busy = set(int(i) for i in self.active[self.active >= 0])
+        # 3. Monthly, a team working ahead of its age moves to a question of its age
+        # (any followed line) or, in its own line, to a much quicker one.
+        if SWITCH_CHECK_DAYS > 0:
+            for ch in np.where(self.active >= 0)[0].tolist():
+                item = int(self.active[ch])
+                if self.open_year[item] <= year or self.targets[item] > 0:
+                    continue
+                busy.discard(item)
+                best = None
+                due = self._team_placements(year, open_mask, followed, units_ch, busy, also=(ch,), max_bucket=0)
+                if due:
+                    li = ch_line[ch]
+                    held[li] -= 1
+                    turns[li] -= 1
+                    best = self._team_pick(due, shares, turns, last, held, followed, year)
+                    held[li] += 1
+                    turns[li] += 1
+                elif int(cat.channel[item]) == ch:
+                    # In its own channel, a much quicker question (SWITCH_MARGIN less work).
+                    items = self.chan_items[ch]
+                    cand = items[open_mask[items]]
+                    cand = cand[np.array([int(i) not in busy and int(i) != item for i in cand], dtype=bool)] if len(cand) else cand
+                    if len(cand):
+                        quick = int(cand[int(np.argmax(self._team_scores(cand, float(units_ch[ch]), year)))])
+                        if self._expected_work(quick, year) * SWITCH_MARGIN < self._expected_work(item, year):
+                            best = (int(self._team_bucket(np.array([quick]), year)[0]), 0.0, int(ch_line[ch]), ch, quick)
+                if best is None:
+                    busy.add(item)
+                    continue
+                self.active[ch] = -1
+                held[ch_line[ch]] -= 1
+                turns[ch_line[ch]] -= 1
+                b, score, li, nch, nitem = best
+                self.active[nch] = nitem
+                held[li] += 1
+                turns[li] += 1
+                busy.add(nitem)
+        # 4. Free teams take questions: their age first, then lines below their share.
+        free = q - int((self.active >= 0).sum())
+        while free > 0:
+            # DiscoverySystem._next_team_placement: read afresh after every pick.
+            placements = self._team_placements(year, open_mask, followed, units_ch, busy)
+            if not placements:
+                break
+            b, score, li, ch, item = self._team_pick(placements, shares, turns, last, held, followed, year)
+            self.active[ch] = item
+            held[li] += 1
+            turns[li] += 1
+            busy.add(item)
+            free -= 1
+        teams = np.where(self.active >= 0)[0]
+        self.channel_weight = np.zeros(len(cat.channel_keys))
+        self.channel_weight[teams] = 1.0
+        found = []
+        if len(teams) == 0:
+            return found
+        # 5. Every team does an equal part of the community's whole work.
+        community = team_capacity(on_lines)
+        share = community / float(len(teams))
+        food_support = lerp(0.62, 1.08, clamp(self.food_security, 0, 1))
+        material_support = lerp(0.72, 1.12, clamp(self.material, 0.0, 1.2) / 1.2)
+        support = food_support * material_support * lerp(0.78, 1.18, clamp(self.capacities["institutions"], 0, 1)) * lerp(0.55, 1.45, self.education)
+        parallel = self.parallel_capacity()
+        throughput = float(p["throughput"]) * math.exp(float(p["throughput_growth"]) * min(year, float(p.get("throughput_growth_until", 100.0))) / 100.0)
+        known_ext = None
+        kr = 1.0 + self.eff("knowledge_rate")
+        log = self.__dict__.setdefault("team_proofs", [])
+        for ch in teams.tolist():
+            item = int(self.active[ch])
+            line = gd.LINES[ch_line[ch]]
+            attention = share * support * parallel * (1.0 + (self.art_bonus_for(line) if self.art["tier"] else 0.0))
+            precedent = 1.0
+            if cat.has_precedents[item]:
+                if known_ext is None:
+                    known_ext = np.concatenate([self.known, [False, False]])
+                precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
+            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
+            if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
+                difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
+            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
+                * kr * 0.12 * 1.0055
+            noise = 1.0 + self.rng.normal(0.0, 0.16 / math.sqrt(max(1.0, days)))
+            self.progress[item] += prob * days * noise
+            if self.progress[item] >= 1.0:
+                found.append(item)
+                self.active[ch] = -1
+                log.append((self.day / YEAR, int(ch_line[ch])))
+        if len(log) > 2048:
+            del log[:1024]
+        for item in found:
+            self._learn(item)
+        return found
+
     def _expected_work(self, i: int, year: float) -> float:
         """DiscoverySystem._expected_work: remaining work over the question's chance."""
         era_cost = max(0.0, float(self.cat.era[i]) - self.scholarship - self.tune_window) / self.tune_doubling
@@ -1550,7 +1816,9 @@ class Surrogate:
     def _learn(self, item: int) -> None:
         self.known[item] = True
         self.ready[item] = False
-        self.adoption[item] = max(0.025, self.adoption[item])
+        # SocietyModel.register_discovery: a proven practice starts in PROOF_ADOPTION
+        # of households when it was tried before proof (else 2.5%).
+        self.adoption[item] = max(TEAMS["PROOF_ADOPTION"] or 0.025, self.adoption[item])
         self.discovered_day[item] = self.day
         self.progress[item] = 0.0
         if len(self.children[item]):

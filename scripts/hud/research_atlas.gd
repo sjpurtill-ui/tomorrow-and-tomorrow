@@ -387,7 +387,7 @@ func select(id:String,open_detail:bool=false)->void:
 			Art.label(detail_body,"WHAT IT DOES" if item.known else "WHAT IT WOULD DO",12,T.GOLD_TEXT)
 			var ledger:VBoxContainer=Ledger.new();detail_body.add_child(ledger)
 			ledger.setup({"state":effect_state,"rows":Explainer.discovery_rows(String(item.id),bool(item.known)),
-				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. A new practice starts with about 3 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
+				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. Tried in a few households before it is proven, a new practice starts with about 15 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:

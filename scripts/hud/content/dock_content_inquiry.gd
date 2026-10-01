@@ -15,6 +15,8 @@ const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const ArtifactCulture:=preload("res://scripts/artifact_culture.gd")
 const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
+const Research600:=preload("res://scripts/research_600_catalog.gd")
+const Plain:=preload("res://scripts/hud/home_plain.gd")
 const ARTIFACT_COLOR:=Color("#b98a5e")
 const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
 ## Costly parts of the pages, kept while what they are made from holds.
@@ -70,7 +72,7 @@ func tab(sub:int)->Dictionary:
 		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":preload("res://scripts/hud/production_plain.gd").number(float(science.capacity)) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"about %s people at it" % preload("res://scripts/hud/production_plain.gd").number(float(science.minds)) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"People at learning, weighted by how well they were taught."},
 		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"How well what is known is kept and passed on."},
 		{"label":"FIELDS WATCHED","value":str(emphasis_total),"delta":"steps of attention","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"All the attention you have given out across the fields; each field gets its share of the people"},
-		{"label":"BEING LEARNED","value":str(questions),"delta":"question" if questions==1 else "questions","delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now"},
+		{"label":"BEING LEARNED","value":str(questions),"delta":("question" if questions==1 else "questions")+(" · %d team%s" % [int(summary.get("teams",0)),"" if int(summary.get("teams",0))==1 else "s"] if int(summary.get("teams",0))>0 else ""),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now. The people at learning work in teams, each on one question until it is proven; more of them field more teams."},
 		{"label":"THINGS WE KNOW","value":str(established),"delta":"kinds of knowledge","accent":Tokens.GREEN,"tip":"Each is one body of knowledge, with the tests and refinements that followed it"},
 	]
 	var brief:Dictionary
@@ -125,10 +127,15 @@ func _investigation_blocks(domain_filter:String="")->Array:
 		var progress:=roundi(clampf(float(record.get("progress",0.0)),0.0,1.0)*100.0)
 		var domain:=String(record.get("dynamic",""))
 		var effects:Dictionary=record.get("effects",{})
+		# Plain words for the team, its clock and its step or holdup.
+		var bottleneck:=String(record.get("bottleneck",""))
+		var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":float(record.get("research_workforce",0.0))}}})
+		var clock:=Plain.clock(float(record.get("estimated_days",0.0)))
+		var team_line:=Plain.team(float(record.get("research_workforce",0.0)),int(record.get("teams_on",1)))+("; "+clock if not clock.is_empty() else "")+"."
 		items.append({
 			"name":String(record.get("name","Investigation")),
-			"sub":"%s · %s" % [domain.capitalize(),String(record.get("bottleneck","accumulating evidence"))],
-			"detail":"Would bring: %s." % Explainer.summary(effects) if not effects.is_empty() else "",
+			"sub":"%s · %s" % [Visuals.name_for(domain),phase if not phase.is_empty() else "under way"],
+			"detail":team_line+" "+Visuals.plain_bottleneck(bottleneck)+(" Would bring: %s." % Explainer.summary(effects) if not effects.is_empty() else ""),
 			"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS.get(domain,Tokens.TEAL)),
 			"value":"%d%%" % progress,"value_color":DOMAIN_COLORS.get(domain,Tokens.TEAL),
 			"accent":DOMAIN_COLORS.get(domain,Tokens.TEAL),
@@ -357,7 +364,7 @@ func _technology_blocks()->Array:
 		blocks.append({"type":"rows","items":[row]})
 		if open and not effects.is_empty():
 			blocks.append({"type":"impact","state":effect_state,"rows":Explainer.discovery_rows(id,known),
-				"intro":("What it does now, at how widely it is used." if known else "What it would do once answered, at full use. A new practice starts with about 3 in 100 households and spreads over years, so its effects grow as it is taken up.")})
+				"intro":("What it does now, at how widely it is used." if known else "What it would do once answered, at full use. Tried in a few households before it is proven, a new practice starts with about %d in 100 households and spreads over years, so its effects grow as it is taken up." % roundi(Research600.PROOF_ADOPTION*100.0))})
 		if bool(technology.ready) and status!="RESEARCHING": blocks.append({"type":"actions","items":[{"label":"RESEARCH "+String(technology.name).to_upper(),"primary":true,"on_press":_research_technology.bind(id)}]})
 	if int(frontier.beyond)>0:blocks.append({"type":"rows","items":[{"name":"%d further questions beyond" % int(frontier.beyond),"sub":"LOCKED","detail":"They open as the questions above are answered. Their outcomes are not yet known.","accent":Tokens.MUTED}]})
 	return blocks
@@ -412,7 +419,7 @@ func _domain_report(id:String)->Dictionary:
 		if String(record.get("dynamic",""))!=id or (record.get("effects",{}) as Dictionary).is_empty(): continue
 		blocks.append({"type":"impact","heading":"IF %s IS ANSWERED" % String(record.get("name","this question")).to_upper(),"note":"at full use","state":effect_state,
 			"rows":Explainer.discovery_rows(String(record.id),false),
-			"intro":"What this question under way would do. A new practice starts with about 3 in 100 households and spreads over years."})
+			"intro":"What this question under way would do. Tried in a few households before it is proven, a new practice starts with about %d in 100 households and spreads over years." % roundi(Research600.PROOF_ADOPTION*100.0)})
 	return {"blocks":blocks}
 func _research_work_report()->Dictionary:
 	var id:=SettlementModel._primary_settlement_id()
@@ -437,7 +444,15 @@ func _discovery_board(investigations:Array)->Dictionary:
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
 		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
-	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
+	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"on_choose":_choose_team_question,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
+
+## A free team's choice from the board: keep the question it took, or send it
+## to another until that one is proven.
+func _choose_team_question(key:String,id:String)->void:
+	# A choice that has lapsed (the team moved on, the season passed) simply
+	# leaves the board when it is drawn again.
+	DiscoverySystem.choose_team_question(key,id)
+	hud.request_immediate_dock_refresh()
 
 ## Artifact study is a research-team role inside the same attention budget.
 func _artifact_study_item(total_weight:int,observers:int)->Dictionary:
