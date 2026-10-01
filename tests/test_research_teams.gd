@@ -349,6 +349,36 @@ func test_a_freed_team_offers_a_choice_for_a_season_then_keeps_its_question()->v
 	for open:Dictionary in DiscoverySystem.team_choices():assert_str(String(open.key)).is_not_equal(String(pending.key))
 	assert_str(String(GameState.active_investigations.get(String(pending.channel),""))).is_equal(String(pending.taken))
 
+# --- Older saves -------------------------------------------------------------------------------
+
+func test_an_older_save_with_a_question_on_every_line_settles_into_teams()->void:
+	# Before teams every staffed sub-line held a question; such a save loads with
+	# more questions under way than teams. The furthest ahead pause first and keep
+	# their evidence; a proof logged before teams counts for its field's turns.
+	for line:String in GameState.research_subcategory_allocations:DiscoverySystem.set_domain_research_priority(line,4)
+	var day:=int(GameState.elapsed_days)
+	var placed:=0
+	for channel_variant in DiscoverySystem.catalog_by_channel:
+		var channel:=String(channel_variant)
+		if not GameState.research_subcategory_allocations.has(channel.split("::")[0]):continue
+		for entry:Dictionary in DiscoverySystem.catalog_by_channel[channel]:
+			if String(entry.id) in GameState.known_discoveries or String(entry.id) in GameState.active_investigations.values():continue
+			if not DiscoverySystem._discovery_is_eligible(entry,day):continue
+			GameState.active_investigations[channel]=String(entry.id)
+			GameState.discovery_progress[String(entry.id)]=0.3
+			placed+=1
+			break
+	var count:=int(DiscoverySystem.research_teams().count)
+	assert_int(placed).is_greater(count)
+	var before:=GameState.discovery_progress.duplicate()
+	GameState.discovery_log.push_front({"day":day-30,"id":"older_save_proof","dynamic":"culture"})
+	DiscoverySystem.refresh_investigations()
+	assert_int(GameState.active_investigations.size()).is_less_equal(count)
+	for id:String in before:assert_float(float(GameState.discovery_progress.get(id,0.0))).is_equal(float(before[id]))
+	var turns:=DiscoverySystem._team_turns(DiscoverySystem._team_lines(),{},day)
+	assert_float(float(turns.turns.culture)).is_greater_equal(1.0)
+	GameState.discovery_log.clear()
+
 # --- A founding band's first season -----------------------------------------------------------
 
 func test_a_founding_band_sees_steps_within_a_year_and_proofs_soon_after()->void:

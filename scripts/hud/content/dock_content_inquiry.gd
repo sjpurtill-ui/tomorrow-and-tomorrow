@@ -417,9 +417,12 @@ func _domain_report(id:String)->Dictionary:
 		"empty":"Nothing known in this field acts on the world yet."})
 	for record:Dictionary in DiscoverySystem.active_investigation_records():
 		if String(record.get("dynamic",""))!=id or (record.get("effects",{}) as Dictionary).is_empty(): continue
+		# Its trial use counts already: the households trying it before proof.
+		var trying:=roundi(float(record.get("trial_share",0.0))*100.0)
+		var now:=" Its first cases hold, so %d in 100 households try it now and that share of each effect counts already." % trying if trying>0 else ""
 		blocks.append({"type":"impact","heading":"IF %s IS ANSWERED" % String(record.get("name","this question")).to_upper(),"note":"at full use","state":effect_state,
 			"rows":Explainer.discovery_rows(String(record.id),false),
-			"intro":"What this question under way would do. Tried in a few households before it is proven, a new practice starts with about %d in 100 households and spreads over years." % roundi(Research600.PROOF_ADOPTION*100.0)})
+			"intro":"What this question under way would do.%s Proven, it starts with about %d in 100 households and spreads over years." % [now,roundi(Research600.PROOF_ADOPTION*100.0)]})
 	return {"blocks":blocks}
 func _research_work_report()->Dictionary:
 	var id:=SettlementModel._primary_settlement_id()

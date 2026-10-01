@@ -375,9 +375,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		_note_freed_teams(results,held)
 	return results
 
+## Settles the teams now, reading every line's questions (a request from outside
+## the day's step).
 func refresh_investigations()->void:
 	initialize()
-	_refresh_active_investigations()
+	_refresh_active_investigations(true)
 
 
 func set_domain_research_priority(dynamic_id:String,weight:int)->void:
@@ -386,7 +388,7 @@ func set_domain_research_priority(dynamic_id:String,weight:int)->void:
 	var bounded_weight:=clampi(weight,0,12)
 	WorldSimulation.state.research_allocations[dynamic_id]=bounded_weight
 	_auto_allocate_domain_attention(dynamic_id,bounded_weight,int(floor(WorldSimulation.state.elapsed_days)))
-	_refresh_active_investigations()
+	_refresh_active_investigations(true)
 
 
 func _auto_allocate_domain_attention(dynamic_id:String,weight:int,current_day:int)->void:
@@ -764,7 +766,9 @@ func technology_open_years()->PackedFloat64Array:
 		_scan.open_years_basis=basis
 	return _scan.open_years
 
-func _refresh_active_investigations()->void:
+## `full`: free teams also read questions far ahead of their age today (see
+## _place_free_teams); a change of plan by the player asks for it.
+func _refresh_active_investigations(full:=false)->void:
 	begin_research_scan()
 	var current_day:=int(floor(WorldSimulation.state.elapsed_days))
 	# A team keeps its question until it is proven. It lets go only when the
@@ -777,7 +781,7 @@ func _refresh_active_investigations()->void:
 			WorldSimulation.state.active_investigations.erase(channel)
 	var count:=int(research_teams().count)
 	_release_extra_teams(count)
-	_place_free_teams(current_day,count)
+	_place_free_teams(current_day,count,full)
 	_switch_to_quicker_questions(current_day)
 	WorldSimulation.state.active_observations.clear()
 	for record in active_investigation_records_shallow():
@@ -799,14 +803,10 @@ func _refresh_active_investigations()->void:
 # working ahead.
 
 ## Transient team bookkeeping, never saved (an Object): the steps to proof
-## reached since the chronicle last took them, and when free teams last found
-## nothing to take up (they look again once something new is known, the plan
-## or the teams change, or a month has passed).
+## reached since the chronicle last took them. Nothing here steers research, so
+## a loaded game goes on exactly as the one that was saved.
 class TeamMemo extends RefCounted:
 	var steps:Array[Dictionary]=[]
-	var idle_known:=-1
-	var idle_day:=-100000
-	var idle_key:=""
 var _team_memo:=TeamMemo.new()
 
 ## Whether the team at `channel` works the question the player chose for it
@@ -1033,8 +1033,13 @@ func _release_extra_teams(count:int)->void:
 	for index in mini(extra,order.size()): active.erase(String(order[index][1]))
 
 ## Free teams take up questions (see the section's notes). A question the player
-## chose is taken up first and may hold a team beyond the count.
-func _place_free_teams(current_day:int,count:int)->void:
+## chose is taken up first and may hold a team beyond the count. Questions of
+## their age and near it are read every day; free teams read further ahead on
+## the first day of each month, on a day a question is proven, or when `full`
+## asks: such a look reads every line's questions, and on the days between it
+## would find nothing new. The rule reads only the saved state and the calendar,
+## so a loaded game places its teams as the saved one would have.
+func _place_free_teams(current_day:int,count:int,full:=false)->void:
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var lines:=_team_lines()
 	if lines.is_empty(): return
@@ -1052,24 +1057,18 @@ func _place_free_teams(current_day:int,count:int)->void:
 		pins+=1
 	var capacity:=maxi(count,pins)
 	if active.size()>=capacity: return
-	var known_size:=WorldSimulation.state.known_discoveries.size()
-	var plan_key:="%s|%d|%d" % [str(lines),active.size(),capacity]
-	if _team_memo.idle_known==known_size and _team_memo.idle_key==plan_key and current_day>=_team_memo.idle_day and current_day-_team_memo.idle_day<SWITCH_CHECK_DAYS: return
+	var log:Array=WorldSimulation.state.discovery_log
+	var proved_today:=not log.is_empty() and log[0] is Dictionary and int((log[0] as Dictionary).get("day",-1))==current_day
+	var reach:=2 if full or proved_today or posmod(current_day,SWITCH_CHECK_DAYS)==0 else 1
 	var busy:=_busy_ids()
 	var held:=_teams_by_line()
 	var turns:=_team_turns(lines,held,current_day)
 	while active.size()<capacity:
-		var pick:=_next_team_placement(lines,turns,held,current_day,busy)
+		var pick:=_next_team_placement(lines,turns,held,current_day,busy,"",reach)
 		if pick.is_empty(): break
 		active[String(pick.channel)]=String(pick.id)
 		busy[String(pick.id)]=true
 		_count_turn(held,turns,String(pick.line),1)
-	if active.size()<capacity:
-		_team_memo.idle_known=known_size
-		_team_memo.idle_day=current_day
-		_team_memo.idle_key="%s|%d|%d" % [str(lines),active.size(),capacity]
-	else:
-		_team_memo.idle_known=-1
 
 ## Once a month each team working ahead of its age looks again: a question of
 ## its age on any followed line takes the team; failing that, a much quicker
