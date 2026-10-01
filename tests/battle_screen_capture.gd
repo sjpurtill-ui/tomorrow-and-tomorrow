@@ -8,6 +8,7 @@ extends Control
 ##   gunpowder   musket, pike, horse and guns, two days in
 ##   modern      forty thousand with armour and guns, two days in
 ##   siege       Seanstone ringed, then its palisade stormed
+##   pass, forest, hills   the narrow pass, a forest edge, broken hills
 ## Run only through tools/run_isolated_gpu_probe.ps1 with
 ## -UserArguments "--capture-dir=<absolute dir>". Quits by itself.
 
@@ -46,6 +47,8 @@ func _ready()->void:
 	if _wanted("modern"): await _modern()
 	if _wanted("siege"): await _siege()
 	if _wanted("pass"): await _pass()
+	if _wanted("forest"): await _ground("stone_forest_edge","stone_forest_edge_day1")
+	if _wanted("hills"): await _ground("battle_in_the_hills","stone_hills_day1")
 	T.set_color_mode("light")
 	print("BATTLE_SCREEN_CAPTURE_DONE %s" % directory)
 	get_tree().quit(0)
@@ -101,6 +104,7 @@ func _classical()->void:
 	await _both(id,"classical_ford_day1")
 	_days(12)
 	await _both(id,"classical_ford_finished")
+	await _both(id,"classical_ford_drawn_up",0)
 
 
 func _gunpowder()->void:
@@ -108,6 +112,8 @@ func _gunpowder()->void:
 	var id:=_field(s)
 	_days(2)
 	await _both(id,"gunpowder_8000v7000_day2")
+	_days(12)
+	await _both(id,"gunpowder_8000v7000_finished_day1",1)
 
 
 func _modern()->void:
@@ -115,6 +121,14 @@ func _modern()->void:
 	var id:=_field(s,Vector2(8.0,-3.0))
 	_days(2)
 	await _both(id,"modern_40000v35000_day2")
+
+
+## A first-age fight on its own ground (a forest edge, broken hills), a day in.
+func _ground(scenario:String,name:String)->void:
+	var s:=_begin(scenario)
+	var id:=_field(s)
+	_days(1)
+	await _both(id,name)
 
 
 func _pass()->void:
@@ -156,17 +170,19 @@ func _siege()->void:
 
 # --- Photographs --------------------------------------------------------------------------
 
-## The battle screen in the light paper, then the dark.
-func _both(target:Variant,name:String)->void:
+## The battle screen in the light paper, then the dark; at a given day of
+## the battle when `day` is 0 or more.
+func _both(target:Variant,name:String,day:int=-1)->void:
 	for mode in ["light","dark"]:
 		T.set_color_mode(mode)
-		await _panel(target,"%s_%s" % [name,mode])
+		await _panel(target,"%s_%s" % [name,mode],day)
 	T.set_color_mode("light")
 
 
-func _panel(target:Variant,name:String)->void:
+func _panel(target:Variant,name:String,day:int=-1)->void:
 	var panel:=View.open(target,self)
 	if panel==null: push_warning("CAPTURE no battle %s to open" % str(target)); return
+	if day>=0: panel.call("_select",day,false)
 	# Past the panel's fade-in (timed in seconds; the probe draws frames fast).
 	await get_tree().create_timer(1.6).timeout
 	for i in 4: await get_tree().process_frame

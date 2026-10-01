@@ -33,7 +33,7 @@ const Account:=preload("res://scripts/battle_account.gd")
 ## Share of the field's width the fighting can use, by ground: open country
 ## is wide; a forest edge, a pass, a ford, a bridge or a gap in the walls is
 ## narrow (drawn, not to scale: battle_blocks.GROUNDS has the real widths).
-const OPENING:={"open":0.9,"rough":0.8,"forest":0.64,"marsh":0.58,"pass":0.38,"ford":0.4,"bridge":0.24,"breach":0.3,"gate":0.22}
+const OPENING:={"open":0.9,"rough":0.8,"forest":0.64,"marsh":0.58,"pass":0.42,"ford":0.5,"bridge":0.3,"breach":0.34,"gate":0.26}
 ## How far the line moves from the middle (share of the field's height) when
 ## one side is driving the other from the field.
 const SWING:=0.11
@@ -58,54 +58,88 @@ const PUSHING:=0.15
 ## block: {id, key, state, rect, men, men0, strength, cohesion, glyph, arm,
 ## unit, slot, tilt, alpha, data (the plate)}. Each arrow: {kind, key,
 ## points, weight, dashed, blunt}. Each mark: {kind, key, points}.
-static func build(view:Dictionary,record:Dictionary,step:int,size:Vector2,with_arrows:=true)->Dictionary:
+static func build(view:Dictionary,record:Dictionary,step:int,size:Vector2)->Dictionary:
+	var chain:=build_all(view,record,size)
+	return chain[clampi(step,0,chain.size()-1)]
+
+
+## Every day's field up to `last` (all when -1), each laid out from the day
+## before, so a block that breaks falls back from where it stood and the
+## day's arrows run from where things were to where they are.
+static func build_all(view:Dictionary,record:Dictionary,size:Vector2,last:int=-1)->Array:
 	var count:=(view.get("phases",[]) as Array).size()
-	step=clampi(step,0,count)
+	var n:=count if last<0 else clampi(last,0,count)
+	var out:Array=[]
+	var previous:={}
+	var sizing:=_sizing(view,size)
+	var era:=era_of(record,String(view.get("stage","hearth")))
+	for k in n+1:
+		var layout:=_lay(view,k,size,previous,sizing,era)
+		if k>0 and not bool(layout.drawn_up): _arrows(layout,previous,view,record,k)
+		out.append(layout)
+		previous=layout
+	return out
+
+
+## One scale for the whole battle, so a block keeps its size from day to
+## day and only its fill shows its losses: the fullest line of any day fills
+## the opening, and blocks are as tall as the deepest side of any day lets
+## every row fit in the narrower half. {scale, block_h, opening:[x0, x1]}.
+static func _sizing(view:Dictionary,size:Vector2)->Dictionary:
+	var ground:=String((view.get("ground",{}) as Dictionary).get("kind","open"))
+	var w:=maxf(200.0,size.x); var h:=maxf(160.0,size.y)
+	var count:=(view.get("phases",[]) as Array).size()
+	var most:=1
+	for k in count+1:
+		var plates:=plates_at(view,k)
+		for key in ["left","right"]: most=maxi(most,((plates.get(key,{}) as Dictionary).get("front",[]) as Array).size())
+	var opening:=clampf(maxf(w*float(OPENING.get(ground,0.9)),float(most)*(MIN_W+SPACING)),0.0,w-PAD*2.0)
+	var scale:=INF
+	var biggest:=1
+	for k in count+1:
+		var plates:=plates_at(view,k)
+		for key in ["left","right"]:
+			var side:Dictionary=plates.get(key,{})
+			var front:Array=side.get("front",[])
+			var men:=0
+			for plate in front: men+=maxi(1,int(plate.men0))
+			if men>0: scale=minf(scale,(opening-SPACING*float(front.size()-1))/float(men))
+			for row in ["front","rear"]:
+				for plate in (side.get(row,[]) as Array): biggest=maxi(biggest,int(plate.men0))
+	if scale==INF: scale=MAX_W*0.6/float(biggest)
+	var need:=1.0
+	for k in count+1:
+		var plates:=plates_at(view,k)
+		for key in ["left","right"]: need=maxf(need,_depth_units(plates.get(key,{}),scale,w))
+	var room:=h*(0.5-SWING)-6.0-6.0
+	return {"scale":scale,"block_h":clampf(room/need,16.0,MAX_H),"opening":[(w-opening)*0.5,(w+opening)*0.5]}
+
+
+static func _lay(view:Dictionary,step:int,size:Vector2,previous:Dictionary,sizing:Dictionary,era:int)->Dictionary:
 	var ground:=String((view.get("ground",{}) as Dictionary).get("kind","open"))
 	var spec:Dictionary=Blocks.GROUNDS.get(ground,Blocks.GROUNDS.open)
 	var w:=maxf(200.0,size.x); var h:=maxf(160.0,size.y)
 	var phase:=phase_at(view,step)
 	var progress:=float(phase.get("progress",0.0)) if step>0 else 0.0
 	var out:={"step":step,"size":Vector2(w,h),"ground":ground,"river":bool(spec.get("river",false)),"walls":bool(spec.get("walls",false)),"flank":bool(spec.get("flank",true)),
-		"era":era_of(record,String(view.get("stage","hearth"))),"progress":progress,"blocks":[],"arrows":[],"marks":[],
+		"era":era,"progress":progress,"blocks":[],"arrows":[],"marks":[],
 		"defender":"left" if String(view.get("left",""))=="defender" else "right"}
 	var mid:=h*0.5
 	var contact:=mid-clampf(progress,-1.0,1.0)*h*SWING
 	var drawn_up:=step==0 or (bool(phase.get("current",false)) and int(phase.get("to",0))<int(phase.get("from",1)))
-	var apart:=h*0.07 if drawn_up else 6.0
+	var block_h:=float(sizing.block_h)
+	# Drawn up, the two lines stand apart (as far as the depth leaves room).
+	var apart:=minf(h*0.07,block_h*0.9) if drawn_up else 6.0
 	out["contact"]=contact; out["apart"]=apart; out["drawn_up"]=drawn_up
 	var plates:=plates_at(view,step)
-	# One scale for both sides: the fuller line fills the opening.
-	var opening:=w*float(OPENING.get(ground,0.9))
-	var most:=1
-	for key in ["left","right"]: most=maxi(most,((plates.get(key,{}) as Dictionary).get("front",[]) as Array).size())
-	opening=clampf(maxf(opening,float(most)*(MIN_W+SPACING)),0.0,w-PAD*2.0)
-	var scale:=INF
-	for key in ["left","right"]:
-		var front:Array=(plates.get(key,{}) as Dictionary).get("front",[])
-		var men:=0
-		for plate in front: men+=maxi(1,int(plate.men0))
-		if men>0: scale=minf(scale,(opening-SPACING*float(front.size()-1))/float(men))
-	if scale==INF:
-		# Nobody in the line: size by the biggest block there is.
-		var biggest:=1
-		for key in ["left","right"]:
-			for row in ["front","rear"]:
-				for plate in ((plates.get(key,{}) as Dictionary).get(row,[]) as Array): biggest=maxi(biggest,int(plate.men0))
-		scale=MAX_W*0.6/float(biggest)
-	out["opening"]=[(w-opening)*0.5,(w+opening)*0.5]
+	var scale:=float(sizing.scale)
+	out["opening"]=sizing.opening
 	out["scale"]=scale
-	# As tall as the deepest side lets every row fit in the narrowest half.
-	var room:=h*(0.5-SWING)-apart-6.0
-	var need:=1.0
-	for key in ["left","right"]: need=maxf(need,_depth_units(plates.get(key,{}),scale,w))
-	var block_h:=clampf(room/need,16.0,MAX_H)
 	out["block_h"]=block_h
+	var where:={}
+	for block in previous.get("blocks",[]): where[String(block.key)+"|"+String(block.id)]=(block.rect as Rect2)
 	for key in ["left","right"]:
-		_lay_side(out,(plates.get(key,{}) as Dictionary),key,contact,apart,block_h,scale,w,h)
-	if with_arrows and step>0 and not drawn_up:
-		var previous:=build(view,record,step-1,size,false)
-		_arrows(out,previous,view,record,step)
+		_lay_side(out,(plates.get(key,{}) as Dictionary),key,contact,apart,block_h,scale,w,h,where)
 	return out
 
 
@@ -137,8 +171,10 @@ static func _width(plate:Dictionary,scale:float,factor:float)->float:
 
 
 ## Blocks of one side: the line by slot, then behind it the reserve in rows,
-## the broken fallen back, and the fled at the field's edge.
-static func _lay_side(out:Dictionary,side:Dictionary,key:String,contact:float,apart:float,block_h:float,scale:float,w:float,h:float)->void:
+## the broken fallen back behind where each stood, and the fled at the
+## field's edge behind where each stood. `where`: the rect each block had
+## the day before ("key|id").
+static func _lay_side(out:Dictionary,side:Dictionary,key:String,contact:float,apart:float,block_h:float,scale:float,w:float,h:float,where:Dictionary)->void:
 	var blocks:Array=out.blocks
 	var front:Array=side.get("front",[])
 	var widths:Array=[]
@@ -154,21 +190,63 @@ static func _lay_side(out:Dictionary,side:Dictionary,key:String,contact:float,ap
 		x+=float(widths[i])+SPACING
 	var groups:=_rear_groups(side)
 	var d:=apart+block_h*1.3
-	for state in ["reserve","broken"]:
-		var factor:=_factor(state)
-		var row_h:=block_h*factor
-		for row in _rows(groups[state],scale,factor,w-PAD*2.0):
-			_lay_row(blocks,row,key,contact,d,row_h,scale,factor,w,state=="broken")
-			d+=row_h+block_h*float(ROWS[state][1])
-		d+=block_h*0.1
+	var reserve_h:=block_h*_factor("reserve")
+	for row in _rows(groups.reserve,scale,_factor("reserve"),w-PAD*2.0):
+		_lay_row(blocks,row,key,contact,d,reserve_h,scale,_factor("reserve"),w,false)
+		d+=reserve_h+block_h*float(ROWS.reserve[1])
+	d+=block_h*0.1
+	var broken_h:=block_h*_factor("broken")
+	d=_lay_fallen(blocks,groups.broken,key,contact,d,broken_h,block_h*float(ROWS.broken[1]),scale,_factor("broken"),w,where,true)
 	# The fled, at the rear edge of the field.
-	var fled_rows:=_rows(groups.fled,scale,_factor("fled"),w-PAD*2.0)
 	var fled_h:=block_h*_factor("fled")
+	var fled_rows:=_rows(groups.fled,scale,_factor("fled"),w-PAD*2.0)
 	var edge:=absf((h-4.0 if key=="left" else 4.0)-contact)
-	var start:=maxf(d,edge-float(fled_rows.size())*(fled_h+block_h*0.12))
-	for row in fled_rows:
-		_lay_row(blocks,row,key,contact,start,fled_h,scale,_factor("fled"),w,false)
-		start+=fled_h+block_h*0.12
+	var start:=maxf(d,edge-float(maxi(1,fled_rows.size()))*(fled_h+block_h*0.12)+block_h*0.12)
+	_lay_fallen(blocks,groups.fled,key,contact,start,fled_h,block_h*0.12,scale,_factor("fled"),w,where,false)
+
+
+## Blocks that have fallen back: each behind where it stood the day before
+## (pushed aside where two would overlap), the rest centred; wrapped into
+## rows only when they cannot fit across. Returns the depth after them.
+static func _lay_fallen(blocks:Array,plates:Array,key:String,contact:float,d:float,row_h:float,gap:float,scale:float,factor:float,w:float,where:Dictionary,tilted:bool)->float:
+	if plates.is_empty(): return d
+	var total:=0.0
+	for plate in plates: total+=_width(plate,scale,factor)+SPACING
+	if total>w-PAD*2.0:
+		for row in _rows(plates,scale,factor,w-PAD*2.0):
+			_lay_row(blocks,row,key,contact,d,row_h,scale,factor,w,tilted)
+			d+=row_h+gap
+		return d
+	# Where each wants to be: behind its old place, or in a centred run.
+	var items:Array=[]
+	var loose:Array=[]
+	for plate in plates:
+		var old:Variant=where.get(key+"|"+String(plate.get("id","")))
+		if old is Rect2: items.append([(old as Rect2).get_center().x,plate])
+		else: loose.append(plate)
+	var loose_w:=0.0
+	for plate in loose: loose_w+=_width(plate,scale,factor)+SPACING
+	var lx:=(w-loose_w)*0.5
+	for plate in loose:
+		var bw:=_width(plate,scale,factor)
+		items.append([lx+bw*0.5,plate]); lx+=bw+SPACING
+	items.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])<float(b[0]))
+	# Sweep apart, then back inside the field.
+	var lefts:Array=[]
+	var right_edge:=-INF
+	for item in items:
+		var bw:=_width(item[1],scale,factor)
+		var left:=maxf(float(item[0])-bw*0.5,right_edge+SPACING)
+		lefts.append(left); right_edge=left+bw
+	var shift:=minf(0.0,w-PAD-right_edge)
+	if lefts.size()>0: shift=maxf(shift,PAD-float(lefts[0]))
+	var y:=contact+d if key=="left" else contact-d-row_h
+	for i in items.size():
+		var plate:Dictionary=items[i][1]
+		var block:=_block(plate,key,Rect2(float(lefts[i])+shift,y,_width(plate,scale,factor),row_h))
+		if tilted: block["tilt"]=(0.07 if i%2==0 else -0.07)
+		blocks.append(block)
+	return d+row_h+gap
 
 
 ## One row of blocks behind the line, centred, `d` from the contact.
@@ -347,6 +425,9 @@ static func _arrows(out:Dictionary,previous:Dictionary,view:Dictionary,record:Di
 		for b in gone: box=box.merge(b.rect)
 		var toward:=-1.0 if key=="left" else 1.0
 		var from:=Vector2(box.get_center().x,box.get_center().y)
+		# Clear of the victors' thrusts down the same lane.
+		for arrow in arrows:
+			if String(arrow.kind)=="thrust" and absf((arrow.points as PackedVector2Array)[0].x-from.x)<46.0: from.x+=70.0 if from.x<(out.size as Vector2).x*0.8 else -70.0
 		var rear:=(out.size as Vector2).y-6.0 if key=="left" else 6.0
 		var to:=Vector2(from.x,rear)
 		if absf(to.y-from.y)<20.0: continue

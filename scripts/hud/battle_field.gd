@@ -25,6 +25,8 @@ const Motion:=preload("res://scripts/hud/motion.gd")
 const EASE_SECONDS:=0.6
 ## The kit glyphs' ink: the chart's own, on each glyph's paper halo.
 const GLYPH_INK:=Color("2b2118")
+## How to read a block, lettered in the corner.
+const LEGEND:="Block width: men at the start · fill: men left · edge: heart"
 
 var view:Dictionary={}
 var record:Dictionary={}
@@ -33,16 +35,26 @@ var left_colour:=Color("356f66")
 var right_colour:=Color("a34435")
 ## Each side's name as the field letters it ("Sirra's host", "the Esurai").
 var names:={"left":"","right":""}
+## How much of each side the ground lets fight at once, lettered top right.
+var frontage:=""
 ## What is drawn now, and what it eases from.
 var layout:Dictionary={}
 var before:Dictionary={}
+## The layout being left, by "key|id".
+var _from:Dictionary={}
 var blend:=1.0:
 	set(value):
 		blend=value
 		queue_redraw()
 var _tween:Tween
+## Every day's layout for the view and size shown, laid out once.
+var chain:Array=[]
+var _chain_view:Dictionary={}
+var _chain_size:=Vector2.ZERO
 ## Times the field has been drawn (tests read it).
 var drawn:=0
+## Blocks' numbers, drawn last so no arrow hides them.
+var _texts:Array=[]
 
 
 func _init()->void:
@@ -56,10 +68,12 @@ func _init()->void:
 ## Shows the field at `new_step`; eases from what was shown when `animate`.
 func show_step(new_view:Dictionary,new_record:Dictionary,new_step:int,animate:bool)->void:
 	view=new_view; record=new_record; step=new_step
-	var next:=Model.build(view,record,step,_field_size())
+	var next:=_layout_for(step)
 	if is_instance_valid(_tween): _tween.kill()
 	if animate and not layout.is_empty() and not Motion.reduced() and is_inside_tree():
 		before=_blended(); layout=next
+		_from.clear()
+		for block in before.get("blocks",[]): _from[String(block.key)+"|"+String(block.id)]=block
 		blend=0.0
 		_tween=create_tween(); _tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 		_tween.tween_property(self,"blend",1.0,EASE_SECONDS)
@@ -68,13 +82,20 @@ func show_step(new_view:Dictionary,new_record:Dictionary,new_step:int,animate:bo
 	queue_redraw()
 
 
+func _layout_for(index:int)->Dictionary:
+	var at:=_field_size()
+	if chain.is_empty() or not is_same(_chain_view,view) or _chain_size!=at:
+		chain=Model.build_all(view,record,at); _chain_view=view; _chain_size=at
+	return chain[clampi(index,0,chain.size()-1)]
+
+
 func _field_size()->Vector2:
 	return size if size.x>=200.0 and size.y>=160.0 else Vector2(maxf(size.x,1200.0),maxf(size.y,420.0))
 
 
 func _notification(what:int)->void:
 	if what==NOTIFICATION_RESIZED and not view.is_empty():
-		layout=Model.build(view,record,step,_field_size()); before={}
+		layout=_layout_for(step); before={}
 		queue_redraw()
 
 
@@ -86,7 +107,7 @@ func _get_tooltip(at:Vector2)->String:
 		if (block.rect as Rect2).grow(2.0).has_point(at): return block_words(block.get("data",{}),String(block.key),names)
 	for arrow in layout.get("arrows",[]):
 		var points:PackedVector2Array=arrow.points
-		if points.size()>=2 and Geometry2D.get_closest_point_to_segment(at,points[0],points[-1]).distance_to(at)<=8.0: return arrow_words(arrow,names,bool(view.get("player",false)))
+		if points.size()>=2 and Geometry2D.get_closest_point_to_segment(at,points[0],points[-1]).distance_to(at)<=8.0: return arrow_words(arrow,names,bool(view.get("player",false)),int(layout.get("era",2)))
 	return ""
 
 
@@ -100,7 +121,7 @@ static func block_words(plate:Dictionary,key:String,side_names:Dictionary)->Stri
 	return "%s\n%s of %s still with it, %s.\n%s." % [head,EraWords.grouped(int(plate.get("men",0))),EraWords.grouped(int(plate.get("men0",0))),Account.morale_words(float(plate.get("cohesion",1.0))),_cap(where)]
 
 
-static func arrow_words(arrow:Dictionary,side_names:Dictionary,player:bool)->String:
+static func arrow_words(arrow:Dictionary,side_names:Dictionary,player:bool,era:int=2)->String:
 	var key:=String(arrow.get("key","left"))
 	var who:=("We" if key=="left" else "They") if player else _cap(String(side_names.get(key,"")))
 	match String(arrow.get("kind","")):
@@ -108,9 +129,9 @@ static func arrow_words(arrow:Dictionary,side_names:Dictionary,player:bool)->Str
 		"hook": return "%s come round the flank." % who
 		"reserve": return "A fresh block goes into the line."
 		"rout": return "A block broke and ran."
-		"flight": return "They left the field." if key=="right" else ("We left the field." if player else "%s left the field." % who)
+		"flight": return "%s left the field." % who
 		"pursuit": return "%s ride down the fleeing." % who
-		"fire": return "Guns fire over their own line."
+		"fire": return "Engines hurl stones over their own line." if era<=1 else "Guns fire over their own line."
 	return ""
 
 
@@ -128,7 +149,7 @@ func _blended()->Dictionary:
 	var blocks:Array=[]
 	for block in layout.get("blocks",[]):
 		var b:Dictionary=(block as Dictionary).duplicate()
-		var from:=_match(before,b)
+		var from:Dictionary=_from.get(String(b.key)+"|"+String(b.id),{})
 		if not from.is_empty(): b["rect"]=_lerp_rect(from.rect,b.rect,_eased())
 		blocks.append(b)
 	out["blocks"]=blocks
@@ -138,12 +159,6 @@ func _blended()->Dictionary:
 
 func _eased()->float:
 	return clampf(blend,0.0,1.0)
-
-
-static func _match(source:Dictionary,block:Dictionary)->Dictionary:
-	for other in source.get("blocks",[]):
-		if String(other.id)==String(block.id) and String(other.key)==String(block.key): return other
-	return {}
 
 
 static func _lerp_rect(a:Rect2,b:Rect2,t:float)->Rect2:
@@ -161,9 +176,11 @@ func _draw()->void:
 	_draw_paper(w,h,contact)
 	_draw_ground(w,h)
 	_draw_marks(t)
+	_texts.clear()
 	_draw_blocks(t)
 	_draw_contact(w,h,contact,t)
 	_draw_arrows(t)
+	_draw_texts()
 	_draw_names(w,h)
 
 
@@ -218,13 +235,15 @@ func _draw_ground(w:float,h:float)->void:
 			for side in [[8.0,x0-6.0],[x1+6.0,w-8.0]]:
 				var a:=float(side[0]); var b:=float(side[1])
 				if b-a<12.0: continue
+				# Thick at the forest's edge by the opening, thinning away from it.
 				var y:=10.0
 				while y<h-6.0:
-					var x:=a+rng.randf_range(0,10)
+					var x:=a+rng.randf_range(0,12)
 					while x<b:
-						_tree(Vector2(x,y),rng.randf_range(7,11))
-						x+=rng.randf_range(16,24)
-					y+=rng.randf_range(16,22)
+						var near:=1.0-clampf(minf(absf(x-x0),absf(x-x1))/maxf(1.0,(b-a)),0.0,1.0)
+						if rng.randf()<0.35+0.6*near: _tree(Vector2(x,y),rng.randf_range(7,11))
+						x+=rng.randf_range(20,30)
+					y+=rng.randf_range(20,28)
 			for i in 6: _tree(Vector2(rng.randf_range(x0+10,x1-10),rng.randf_range(16,h-16)),rng.randf_range(6,9))
 		"marsh":
 			for side in [[8.0,x0-6.0],[x1+6.0,w-8.0]]:
@@ -269,7 +288,7 @@ func _tree(at:Vector2,r:float)->void:
 
 func _pool(at:Vector2,r:float)->void:
 	var points:=PackedVector2Array()
-	for k in 13:
+	for k in 12:
 		var a:=TAU*float(k)/12.0
 		points.append(at+Vector2(cos(a)*r,sin(a)*r*0.45))
 	draw_colored_polygon(points,Color(T.BLUE,0.14))
@@ -349,12 +368,13 @@ func _river(w:float,mid:float,x0:float,x1:float,bridge:bool,rng:RandomNumberGene
 func _walls(w:float,h:float,mid:float,x0:float,x1:float,gate:bool,rng:RandomNumberGenerator)->void:
 	var defender:=String(layout.get("defender","right"))
 	var outward:=1.0 if defender=="right" else -1.0
-	var thick:=9.0
-	var wall:=_ink(0.85)
+	var thick:=12.0
+	var wall:=_ink(0.9)
+	var stone:=Color(T.RULE_STRONG,0.75)
 	for run in [[0.0,x0],[x1,w]]:
 		var a:=float(run[0]); var b:=float(run[1])
 		if b-a<2.0: continue
-		draw_rect(Rect2(a,mid-thick*0.5,b-a,thick),Color(T.PAPER_SUNK,1.0))
+		draw_rect(Rect2(a,mid-thick*0.5,b-a,thick),stone)
 		draw_rect(Rect2(a,mid-thick*0.5,b-a,thick),wall,false,1.6)
 		var x:=a+4.0
 		while x<b-6.0:
@@ -362,8 +382,8 @@ func _walls(w:float,h:float,mid:float,x0:float,x1:float,gate:bool,rng:RandomNumb
 			x+=11.0
 	if gate:
 		for x in [x0,x1]:
-			var tower:=Rect2(x-12.0,mid-15.0,24.0,30.0)
-			draw_rect(tower,Color(T.PAPER_SUNK,1.0)); draw_rect(tower,wall,false,1.8)
+			var tower:=Rect2(x-13.0,mid-16.0,26.0,32.0)
+			draw_rect(tower,stone); draw_rect(tower,wall,false,1.8)
 		# The gate's two leaves, standing open inward.
 		var leaf:=minf(26.0,(x1-x0)*0.25)
 		draw_line(Vector2(x0+12.0,mid),Vector2(x0+12.0+leaf*0.7,mid-outward*leaf*0.7),wall,2.4,true)
@@ -377,7 +397,7 @@ func _walls(w:float,h:float,mid:float,x0:float,x1:float,gate:bool,rng:RandomNumb
 	var back:=2.0 if defender=="right" else h-2.0
 	for i in 9:
 		var x:=rng.randf_range(20,w-20)
-		var y:=back+outward*-1.0*rng.randf_range(8,22)
+		var y:=back+(rng.randf_range(12,26) if defender=="right" else -rng.randf_range(4,18))
 		var p:=Vector2(x,y)
 		draw_colored_polygon(PackedVector2Array([p+Vector2(-7,0),p+Vector2(0,-7),p+Vector2(7,0)]),Color(T.PAPER_SUNK,1.0))
 		draw_polyline(PackedVector2Array([p+Vector2(-7,0),p+Vector2(0,-7),p+Vector2(7,0)]),_ink(0.5),1.1,true)
@@ -391,7 +411,7 @@ func _ground_label(kind:String,w:float,h:float,x0:float,x1:float,mid:float)->voi
 	if words=="": return
 	var font:=T.font("voice_italic")
 	var at:=Vector2(x1+10.0,mid-18.0) if kind in ["ford","bridge","breach","gate"] else Vector2(maxf(10.0,x0-150.0),h-12.0)
-	if kind in ["forest","marsh","pass","rough"]: at=Vector2(w-12.0-font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x,h-10.0)
+	if kind in ["forest","marsh","pass","rough"]: at=Vector2(w-12.0-font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x,h-28.0)
 	draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,15,4,Color(T.PAPER_RAISED,0.9))
 	draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,15,T.INK_MUTED)
 
@@ -431,7 +451,7 @@ func _draw_blocks(t:float)->void:
 		var rect:Rect2=b.rect
 		var alpha:=float(b.get("alpha",1.0))
 		if not before.is_empty():
-			var from:=_match(before,b)
+			var from:Dictionary=_from.get(String(b.key)+"|"+String(b.id),{})
 			if not from.is_empty():
 				rect=_lerp_rect(from.rect,rect,t)
 				alpha=lerpf(float(from.get("alpha",1.0)),alpha,t)
@@ -489,24 +509,33 @@ func _draw_block(b:Dictionary,rect:Rect2,alpha:float)->void:
 	# The kit is inked on its own paper token, so it reads on either paper.
 	var icon:=Icons.arm_texture(String(b.glyph),GLYPH_INK,colour)
 	draw_texture_rect(icon,Rect2(gx,gy,glyph_px,glyph_px),false,Color(1,1,1,alpha*(0.55 if state in ["broken","fled"] else 1.0)))
+	var paper_back:=Color(paper,0.85*alpha)
 	if stacked:
 		var small:=12
 		var sw:=font.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,small).x
-		draw_string(font,Vector2(local.get_center().x-sw*0.5,gy+glyph_px+12.0),number,HORIZONTAL_ALIGNMENT_LEFT,-1,small,Color(T.RED_TEXT if state=="broken" else T.INK,alpha))
+		_texts.append([rect.get_center(),tilt,Vector2(local.get_center().x-sw*0.5,gy+glyph_px+12.0),number,font,small,Color(T.RED_TEXT if state=="broken" else T.INK,alpha),paper_back])
 	if show_number:
 		var text_colour:=T.RED_TEXT if state=="broken" else T.INK
 		var word:=Record.arm_words(String(b.arm),maxi(2,men))
 		var word_w:=T.font("ui").get_string_size(word,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		var with_word:=local.size.y>=46.0 and word_w<=room
 		var ny:=local.get_center().y+float(font_size)*0.36-(7.0 if with_word else 0.0)
-		draw_string(font,Vector2(local.end.x-4.0-number_w,ny),number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,Color(text_colour,alpha))
-		if with_word: draw_string(T.font("ui"),Vector2(local.end.x-4.0-word_w,ny+15.0),word,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(T.INK_MUTED,alpha))
+		_texts.append([rect.get_center(),tilt,Vector2(local.end.x-4.0-number_w,ny),number,font,font_size,Color(text_colour,alpha),paper_back])
+		if with_word: _texts.append([rect.get_center(),tilt,Vector2(local.end.x-4.0-word_w,ny+15.0),word,T.font("ui"),12,Color(T.INK_MUTED,alpha),paper_back])
 	# Heart: a thin bar along its back edge.
 	if state in ["front","reserve"] and men>0 and local.size.y>=16.0:
 		var heart:=float(b.cohesion)
 		var heart_colour:=T.GREEN if heart>=0.5 else (T.AMBER if heart>=0.25 else T.RED)
 		var y:=local.end.y-3.0 if faces_up else local.position.y
 		draw_rect(Rect2(local.position.x+1.0,y,(local.size.x-2.0)*heart,2.0),Color(heart_colour,0.95*alpha))
+	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
+
+
+func _draw_texts()->void:
+	for entry in _texts:
+		draw_set_transform(entry[0],float(entry[1]),Vector2.ONE)
+		draw_string_outline(entry[4],entry[2],String(entry[3]),HORIZONTAL_ALIGNMENT_LEFT,-1,int(entry[5]),3,entry[7])
+		draw_string(entry[4],entry[2],String(entry[3]),HORIZONTAL_ALIGNMENT_LEFT,-1,int(entry[5]),entry[6])
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
 
 
@@ -521,7 +550,7 @@ func _dashed_rect(rect:Rect2,colour:Color)->void:
 func _draw_contact(w:float,h:float,contact:float,t:float)->void:
 	var span:=_fighting_span(w)
 	if span.x>=span.y: return
-	var drawn_up:=int(layout.get("step",0))==0 or float(layout.get("apart",2.0))>4.0
+	var drawn_up:=bool(layout.get("drawn_up",int(layout.get("step",0))==0))
 	if drawn_up:
 		_dashed(PackedVector2Array([Vector2(span.x,contact),Vector2(span.y,contact)]),Color(T.INK_MUTED,0.45),1.2,10.0,8.0)
 		return
@@ -688,16 +717,27 @@ func _dashed(points:PackedVector2Array,colour:Color,width:float,dash:float,gap:f
 			d+=dash+gap
 
 
-## Each side named at its own rear corner.
+## Each side named at its own rear corner; how to read a block, bottom
+## right; how many the ground lets fight at once, top right.
 func _draw_names(w:float,h:float)->void:
 	var font:=T.font("ui_strong")
+	var plain:=T.font("ui")
+	var halo:=Color(T.PAPER_RAISED,0.9)
 	for key in ["right","left"]:
 		var text:=String(names.get(key,"")).to_upper()
 		if text=="": continue
 		var colour:=T.text_for(_side_colour(key))
 		var y:=18.0 if key=="right" else h-8.0
-		draw_string_outline(font,Vector2(10,y),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,4,Color(T.PAPER_RAISED,0.9))
+		draw_string_outline(font,Vector2(10,y),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,4,halo)
 		draw_string(font,Vector2(10,y),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,colour)
+	var legend:=LEGEND
+	var lw:=plain.get_string_size(legend,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+	draw_string_outline(plain,Vector2(w-10.0-lw,h-8.0),legend,HORIZONTAL_ALIGNMENT_LEFT,-1,12,4,halo)
+	draw_string(plain,Vector2(w-10.0-lw,h-8.0),legend,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+	if frontage!="":
+		var fw:=plain.get_string_size(frontage,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+		draw_string_outline(plain,Vector2(w-10.0-fw,18.0),frontage,HORIZONTAL_ALIGNMENT_LEFT,-1,12,4,halo)
+		draw_string(plain,Vector2(w-10.0-fw,18.0),frontage,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 
 
 static func _cap(text:String)->String:

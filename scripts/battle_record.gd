@@ -343,10 +343,14 @@ static func event_words(event:Dictionary,battle:Dictionary,left:String,out:Dicti
 			if taken>0: line+=("; they took %s of them" if ours else "; we took %s of them") % _amount(taken,ours) if bool(out.player) else "; %s were taken" % _amount(taken,true)
 			return line
 		"countered":
+			# Said without the tactics' own names, which are phrases of every
+			# shape ("locked shields", "a double envelopment"); the battle
+			# screen names them beside each side.
 			var id:=String(event.get("id","")); var by:=String(event.get("by",""))
 			if id=="" or by=="": return ""
-			if bool(out.player): return "%s %s undid %s %s" % [("Their" if ours else "Our"),Tactics.name_of(by,stage).trim_prefix("a ").trim_prefix("an "),("our" if ours else "their"),Tactics.name_of(id,stage).trim_prefix("a ").trim_prefix("an ")]
-			return "The %s undid the %s" % [Tactics.name_of(by,stage).trim_prefix("a ").trim_prefix("an "),Tactics.name_of(id,stage).trim_prefix("a ").trim_prefix("an ")]
+			if bool(out.player): return "%s undid %s way of fighting" % [("They" if ours else "We"),("our" if ours else "their")]
+			var other:String=names.right if mine else names.left
+			return "%s undid %s way of fighting" % [_cap(other),_strip_the(owner)+("'" if _strip_the(owner).ends_with("s") else "'s")]
 		"tactic":
 			var to:=String(event.get("to",""))
 			if to=="": return ""
@@ -390,13 +394,14 @@ static func _slots_words(slots:Variant,battle:Dictionary,side:String)->String:
 	for block in (battle.get("live",{}) as Dictionary).get(side,[]):
 		if String(block.get("st",""))=="front": front+=1
 	front=maxi(front,1)
-	var places:Array=[]
+	var places:={}
 	for slot in slots:
 		var at:=float(int(slot))/float(front)
-		var word:="on the left" if at<0.34 else ("in the centre" if at<0.67 else "on the right")
-		if not places.has(word): places.append(word)
+		places["left" if at<0.34 else ("centre" if at<0.67 else "right")]=true
 	if places.size()>=3: return " all along the line"
-	return " "+" and ".join(PackedStringArray(places)).replace("on the left and on the right","on both wings")
+	if places.size()==1: return String({"left":" on the left","centre":" in the centre","right":" on the right"}[places.keys()[0]])
+	if places.has("left") and places.has("right"): return " on both wings"
+	return ", left and centre" if places.has("left") else ", centre and right"
 
 
 ## Why one side is winning: the signed modifiers of a phase in plain words,

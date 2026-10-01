@@ -267,7 +267,7 @@ func _build_balance(parent:Node)->void:
 	var left_name:=_label(ends,"","small",left_text); left_name.size_flags_horizontal=SIZE_EXPAND_FILL
 	left_name.add_theme_font_override("font",T.font("ui_strong")); left_name.autowrap_mode=TextServer.AUTOWRAP_OFF
 	var odds:=_label(ends,"","body",T.INK); odds.name="Odds"; odds.size_flags_horizontal=SIZE_EXPAND_FILL
-	odds.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; odds.add_theme_font_override("font",T.font("ui_strong")); odds.autowrap_mode=TextServer.AUTOWRAP_OFF
+	odds.mouse_filter=Control.MOUSE_FILTER_PASS; odds.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; odds.add_theme_font_override("font",T.font("ui_strong")); odds.autowrap_mode=TextServer.AUTOWRAP_OFF
 	var right_name:=_label(ends,"","small",right_text); right_name.size_flags_horizontal=SIZE_EXPAND_FILL
 	right_name.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT; right_name.add_theme_font_override("font",T.font("ui_strong")); right_name.autowrap_mode=TextServer.AUTOWRAP_OFF
 	parts.left_name=left_name; parts.right_name=right_name; parts.odds=odds
@@ -285,9 +285,9 @@ func _build_sides(parent:Node)->void:
 		var general:=_label(top,"","small",T.BODY); general.name="General"; general.size_flags_horizontal=SIZE_EXPAND_FILL
 		general.autowrap_mode=TextServer.AUTOWRAP_OFF; general.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; general.size_flags_vertical=SIZE_SHRINK_CENTER
 		parts[key+"_name"]=name; parts[key+"_general"]=general
-		var how:=HBoxContainer.new(); how.add_theme_constant_override("separation",8); box.add_child(how)
+		var how:=HBoxContainer.new(); how.add_theme_constant_override("separation",8); how.custom_minimum_size.y=26.0; box.add_child(how)
 		var chip:=_label(how,"","small",T.INK); chip.name="Tactic"; chip.autowrap_mode=TextServer.AUTOWRAP_OFF
-		chip.add_theme_stylebox_override("normal",T.chip_style())
+		chip.add_theme_stylebox_override("normal",T.chip_style()); chip.mouse_filter=Control.MOUSE_FILTER_PASS
 		var undone:=_label(how,"","small",T.RED_TEXT); undone.name="Countered"; undone.autowrap_mode=TextServer.AUTOWRAP_OFF
 		undone.size_flags_vertical=SIZE_SHRINK_CENTER
 		parts[key+"_tactic"]=chip; parts[key+"_undone"]=undone
@@ -335,7 +335,9 @@ func _build_timeline(parent:Node)->void:
 
 
 func _build_reasons(parent:Node)->void:
+	# A fixed height, so the field never changes size from one day to the next.
 	var row:=HBoxContainer.new(); row.name="Reasons"; row.add_theme_constant_override("separation",40); parent.add_child(row)
+	row.custom_minimum_size.y=122.0; row.clip_contents=true
 	var why:=VBoxContainer.new(); why.name="Why"; why.size_flags_horizontal=SIZE_EXPAND_FILL; why.size_flags_stretch_ratio=1.2; why.add_theme_constant_override("separation",4)
 	row.add_child(why)
 	var top:=HBoxContainer.new(); top.add_theme_constant_override("separation",12); why.add_child(top)
@@ -437,11 +439,15 @@ func _show_step(animate:bool)->void:
 		var undone:Label=parts[key+"_undone"]
 		undone.text=""
 		if step>0 and bool(tactic.get("countered",false)):
-			var by:=String(tactic.get("by","")).to_lower().trim_prefix("a ").trim_prefix("an ")
-			undone.text="Undone by %s %s" % ["their" if key=="left" and player else ("our" if player else "the other side's"),by]
+			var by:=String(tactic.get("by",""))
+			var whose:=("Their" if key=="left" else "Our") if player else _cap(_possessive(String(view.names["right" if key=="left" else "left"])))
+			undone.text="Undone. %s answer: %s" % [whose,by.substr(0,1).to_lower()+by.substr(1)] if by!="" else "Undone by %s way of fighting" % whose.to_lower()
 		elif step>0 and bool(tactic.get("changed",false)): undone.text="A new way of fighting"
 		undone.add_theme_color_override("font_color",T.RED_TEXT if bool(tactic.get("countered",false)) else T.INK_MUTED)
+		undone.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; undone.size_flags_horizontal=SIZE_EXPAND_FILL
+		undone.tooltip_text=undone.text; undone.mouse_filter=Control.MOUSE_FILTER_PASS
 	# The field, the days, the reasons.
+	field.set("frontage",_frontage_note())
 	field.call("show_step",view,record,step,animate)
 	timeline.select(step)
 	_show_reasons(shown)
@@ -458,18 +464,22 @@ func _show_reasons(shown:Dictionary)->void:
 	bars.left_text=left_text; bars.right_text=right_text
 	bars.empty_words="Nothing has been fought yet." if step==0 else "Too little is known to say."
 	bars.queue_redraw()
-	(parts.why_legend as Label).text=("Bars toward us help us; toward them, help them." if player else "Each bar leans to the side it helps.") if not items.is_empty() else ""
+	(parts.why_legend as Label).text=("Bars to the left help us; to the right, them." if player else "Each bar leans toward the side it helps.") if not items.is_empty() else ""
 	var lines:VBoxContainer=parts.changes
 	for child in lines.get_children(): child.queue_free()
 	var events:Array=shown.get("events",[]) if step>0 else []
 	if events.is_empty():
 		_label(lines,"The two sides stand facing each other." if step==0 else "Nothing changed but the slow wearing down of both lines.","small",T.INK_MUTED)
 	for line in events.slice(0,CHANGES_SHOWN):
-		var label:=_label(lines,"•  %s." % String(line),"body",T.BODY)
+		# The main clause on the screen; the whole line when pointed at.
+		var said:=String(line).get_slice("; ",0)
+		var label:=_label(lines,"•  %s." % said,"body",T.BODY)
 		label.autowrap_mode=TextServer.AUTOWRAP_OFF; label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.tooltip_text=String(line)+"."
+		label.mouse_filter=Control.MOUSE_FILTER_PASS
 	if events.size()>CHANGES_SHOWN:
 		var more:=_label(lines,"and %s more" % _count_word(events.size()-CHANGES_SHOWN),"small",T.INK_MUTED)
+		more.mouse_filter=Control.MOUSE_FILTER_PASS
 		more.tooltip_text=". ".join(PackedStringArray(events.slice(CHANGES_SHOWN)))+"."
 
 
@@ -566,6 +576,20 @@ func _battle_day_words()->String:
 	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else int(view.started)
 	var day:=int(preload("res://scripts/hud/battle_marker_source.gd").day_of(record,today))
 	return "Day %s of the battle" % _count_word(day)
+
+
+## How many the ground lets fight at once, when it holds some back: "Room
+## for about 1,900 a side: 11 of 21 companies fighting." "" otherwise.
+func _frontage_note()->String:
+	var phase:=Model.phase_at(view,maxi(1,step))
+	var capacity:=int(phase.get("capacity",0))
+	var plates:=Model.plates_at(view,step)
+	var side:Dictionary=plates.get("left",{})
+	var fighting:=(side.get("front",[]) as Array).size()
+	var total:=fighting+(side.get("rear",[]) as Array).filter(func(p:Dictionary)->bool: return String(p.state)=="reserve").size()
+	if capacity<=0 or total<=fighting or fighting<=0: return ""
+	var word:=String(view.sides.left.word)
+	return "Room for %s a side: %s of %s %s %s" % [Marks.about(capacity),_grouped(fighting),_grouped(total),preload("res://scripts/battle_blocks.gd").plural(word),"in the line" if step==0 else "fighting"]
 
 
 ## A stop on the track, pointed at: the day, its hours and what each side lost.
