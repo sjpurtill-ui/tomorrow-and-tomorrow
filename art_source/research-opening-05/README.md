@@ -25,3 +25,16 @@ originals inspected, appropriate flat watercolor/ink treatment and raw-hide
 materials. Retain pending final card review. Fever-watch and sleeping-rotation
 regular reed architecture/mats need raw hide replacements. This is a capability
 constraint of this game's opening, not a universal absence of early reed work.
+
+Six-painting checkpoint: fever_watch_customs, sleeping_area_rotation and
+dawn_readiness_drill added. Full originals and actual rendered cards inspected;
+caregiver face/forehead contact and infant visible, all three sleeping-hide
+lifting actions remain visible, readiness faces/grips/cue remain legible.
+Headless import/runtime and private GPU PASS6 exit0 without logged errors.
+
+Pressure-flaking research: Mourre et al. (2010), primary abstract read:
+https://pubmed.ncbi.nlm.nih.gov/21030655/
+Replication and artifact morphology support controlled final shaping of
+bifacial points through pressure flaking. This distinguishes the illustrated
+edge contact from the prior hammerstone strike; the depicted antler/flint
+pair and hand position are illustrative, not a site-specific reconstruction.

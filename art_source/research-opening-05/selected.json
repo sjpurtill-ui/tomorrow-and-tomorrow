@@ -47,5 +47,49 @@
     ],
     "replace_first300": true,
     "review": "Wide 2055x765 source inspected. Actual current production reference anchors simplified angular copper/umber painted hands and wide canvas. Raw antler tine directly contacts flint edge, narrow released chip visible. One targeted contact correction retained all other composition. Prior unreferenced 3:2 result held and unbound after user aesthetic/width correction."
+  },
+  {
+    "id": "fever_watch_customs",
+    "line": "demography",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b1953cf5-6444-498e-83e7-188aa015a048.png",
+    "prompt": "Edit this current-game WIDE demography research banner, preserving approximately 2056x765 proportions and its flat angular chalk-pastel/cut-paper painted figures, terracotta/rust/warm ivory/slate palette. Keep caregiver checking a feverish infant's forehead during a night watch, dignified quiet gesture, infant wrapped in rough hide at center-right. Replace ALL regular tied reed-wall panels with ONE low ragged hide windbreak draped on crooked natural branches. Replace the neatly tied reed sleeping mat with an irregular thick raw hide on bare earth. Reduce large flame at far right to a small banked ember glow safely separated from infant. Keep night opening visible with slate sky. Make caregiver complete head and hand, infant face and sleeping hide visible inside central 70 percent height for a 3.37:1 crop; move scene slightly inward if needed. No pottery, woven cloth, baskets, finished house or fence. Preserve current flat handmade aesthetic, no photography, no CGI or dramatic light. No text or border. Canvas remains wide.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fever_watch_customs-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "review": "Full 2056x765 wide original inspected. Current flat angular terracotta/slate medium retained; regular reed walls and mat replaced by ragged hide windbreak and sleeping hide. Caregiver forehead contact with infant visible, fire reduced to safe small separated banked glow. Focus raised to retain caregiver face and infant in card."
+  },
+  {
+    "id": "sleeping_area_rotation",
+    "line": "demography",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c57c96be-4af4-4ed2-83d5-0430145b30aa.png",
+    "prompt": "Fix framing ONLY in this current wide painting. Keep the full 2060x763 wide canvas and matte demography pigment aesthetic. Scale the ENTIRE central action group (all three people, their three moved raw hides, and central hearth) to 75 percent of its present size, centered vertically in the canvas. This must create at least 100 pixels of clear ground above the TOP of every head and 100 pixels below the LOWEST working hand. All heads, lifting hands, hides and hearth fit within the middle 560 pixels of height. Preserve overhead arrangement and rough-hide windbreaks, no reed mats, no permanent fence, no additional objects. Keep flat painted faces/planes, no photography or 3D. No text.",
+    "initial_prompt": "Edit this actual CURRENT GAME wide demography research banner, preserving its approximately 2059x764 proportions, overhead layout, mature flat chalk-pastel/cut-paper painted people, terracotta/rust/warm ivory/slate palette. Subject is sleeping places rotated near hearth. Replace ALL neatly rectangular reed mats with irregular folded raw animal hides being moved by the same three adults. Replace the tall regular tied reed enclosure with two low broken ragged hide windbreak sections on crooked branches, leaving camp open to natural ground. Keep central small stone-ring hearth and three adults moving the hides to different sleeping positions; no permanent house, neat fence, woven cloth, baskets, pottery or metal. For wide 3.37:1 card crop, bring the upper two adults slightly downward and lower adult upward so ALL three complete heads, lifting hands, moved hides and hearth sit inside central 70 percent height. Preserve handmade flat medium, no photographic skin/lighting, CGI or impasto. Wide canvas stays wide, no text or borders.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7eed07b1-6d5a-4626-b5a3-f4d163583315.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/sleeping_area_rotation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full wide 2058x764 original inspected: overhead three adults rotate irregular raw sleeping hides around hearth, regular reed enclosure removed for isolated ragged hide windbreaks. Entire action group reduced to preserve heads, lifting hands, moved hides and hearth inside wide crop. Current flat demography pigment retained."
+  },
+  {
+    "id": "dawn_readiness_drill",
+    "line": "security",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7970f50e-6dca-426f-994c-2e0d45598165.png",
+    "prompt": "Edit this CURRENT GAME wide security woodblock banner, preserving its approximately 2158x729 WIDE canvas, mature flat carved black silhouettes, vermilion/charcoal/parchment limited layers and knife-cut texture. Keep three hide-clad adults rehearsing a dawn readiness signal with simple raw wooden/flint spears and raised signaling hand. Remove the finished reed hut, its reed walls, baskets, pottery and canoe completely. Replace hut with one low ragged hide windbreak on crooked branches, resting on natural ground; riverbank remains without boats. Crude portable camp, no refined buildings, metal, woven cloth or polished components. Reduce figure group slightly so every full head, signaling arm, spear grip and tip is visible inside central 70 percent height for wide card cropping. Preserve established graphic woodblock rendering and wide proportions. No photographic lighting, CGI, cute cartoon, words or border.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full 2157x729 original inspected: three flat carved woodblock adults rehearse dawn readiness, raised hand/weapon cue, raw wooden/flint spears. Hut, baskets, pottery and canoe removed, one ragged hide windbreak retained. Complete adult faces and spear grips inside wide central band. Existing vermilion/charcoal/parchment medium retained."
   }
 ]
