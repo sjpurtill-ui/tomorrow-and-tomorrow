@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1315,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f8c63817-9f15-441e-aef0-cfa2ead3e31f.png",
+    "prompt": "Use case: historical-scene. Artifact 1315, The shell that caught a flame, braced at the weak point. One square fictional prehistoric find. Reference supplies ONLY matte gouache/dry-brush medium and ivory fibrous paper; no people, tools or table from reference. Lower half: a shallow naturally uneven unworked shell with soot blackening at one edge, charred moss tuft embedded in pale animal-fat residue. No flame. The shell rests against just one small coarse natural stone under its cracked weak edge; no invented handle, manufactured lamp body or complex brace. Show interior and crude residue clearly in three-quarter view. Flat broken ochre/charcoal/earth pigment, warm paper, sparse dust, upper half untouched cream, rough fading painted margins. No pottery, metal, refined ornament, standardized parts, writing, alphabet, polished 3D, photographs, figures, architecture, border, labels or watermark.",
+    "review": "Full image inspected: shallow irregular natural shell, charred moss and soot at rim, pale fat residue, one coarse supporting stone below cracked edge. Broken matte gouache on ivory paper, no manufactured lamp, pottery, metal or ornament."
+  },
+  {
+    "id": 1316,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-42c33c2e-a672-4df4-8da7-4182f058c789.png",
+    "prompt": "Use case: historical-scene. Prehistoric artifact 1316: The pebble that marked a return, braced at the weak point. Square, one distinct painting. One pale rough pebble bears ONE broad red-ochre thumb smear. The smear is interrupted by a natural ridge, and resumes on the small adjacent face on the same stone, not an alphabet or ornament. Two otherwise similar unmarked small stones sit apart to imply recognizing the marked one. Crude intentional trace, no carved writing or elaborate symbols. Match reference ONLY for matte gouache and dry brush, ivory fibrous paper, broken flat pigments, restrained ochre/charcoal/olive/earth. No copied people, table or workshop. Composition low left-to-right cluster with broad untouched cream upper half; oblique side view makes interrupted smear legible. Natural weathering, sparse dust. No photographic light, polished 3D, jewelry, metal, pottery, refined standardized tools, frame, labels or watermark.",
+    "review": "Full image inspected: one red-ochre smear continues across naturally divided faces of a pale pebble; two unmarked neighboring stones show comparison. Broken matte pigment and spare ivory paper; no alphabet, formal motif or refined manufacture."
+  },
+  {
+    "id": 1019,
+    "source": "C:/Users/sjpur/tt-artifact-production-recovery-02/assets/ui/artifacts/prehistoric-v1/artifact-1019.png",
+    "prompt_verified": false,
+    "review": "Recovered original individually inspected: short coarse twig carries ragged thin wood curls with scorched ends; mismatched natural stone supports at its opposite ends. Paper/gouache medium, no metal-cut shavings or later manufacture. Original source and hash preserved; original invocation prompt not recovered."
+  },
+  {
+    "id": 1317,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-08ef2eae-2217-49ce-aa69-287093ee1b11.png",
+    "prompt": "Use case: historical-scene. Prehistoric artifact 1317, The bone that held a cord end, braced at the weak point. Square paper/gouache game illustration. A short irregular broken bone toggle with rough raw plant fiber looped around its middle lies partially turned behind a simple slit in a ragged hide scrap, showing how the crosspiece stops a fastening pulling through. ONE short crude twig splint is placed beside a small crack at one bone end, held with a sparse fiber turn; otherwise asymmetrical and unsupported. Not a modern button or finished needle, no drilled standardized holes, no refined clothing. View close and overhead oblique with slit, fiber and bone crosspiece all clear in the lower half. Reference supplies ONLY ivory fibrous paper and matte gouache/dry brush, worn flat pigment, earthy ochre, bone cream, charcoal and muted hide brown. Broad untouched upper paper, sparse dust and fading rough pigment margins. No people, pottery, metal, workshop, alphabets, symbols, formal ornament, polished 3D, photographic light, frames, labels or watermark.",
+    "review": "Full image inspected: irregular broken bone crosspiece, rough fiber loop at middle, ragged hide slit, one short twig brace at cracked end. Crude fastening in broken matte gouache, no polished button, standardized hole, metal or lettering."
+  },
+  {
+    "id": 1098,
+    "source": "C:/Users/sjpur/tt-artifact-production-recovery-02/assets/ui/artifacts/prehistoric-v1/artifact-1098.png",
+    "prompt_verified": false,
+    "review": "Recovered original individually inspected: worn forked bough and two coarse sticks lashed with raw fiber, partly nested in ragged bark with loose outer tie; fork and sliding ends remain exposed. Flat broken gouache on paper, no wheels, refined sledge or later manufacture. Original source and hash preserved."
+  }
+]
