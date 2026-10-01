@@ -102,6 +102,23 @@ static func raid_details(raid:Dictionary)->String:
 	return text
 
 
+## A people broken past feuding (war_loop.survivors): its survivors are a
+## few people in the hills, never a feud. "" when none of them lives.
+static func remnant_tag(left:Dictionary)->String:
+	if int(left.get("living",0))<=0: return ""
+	return "%s survivors in the hills" % String(left.get("name","Strangers"))
+
+
+static func remnant_details(left:Dictionary)->String:
+	var living:=int(left.get("living",0))
+	if living<=0: return ""
+	var name:=String(left.get("name","Strangers"))
+	var lost:Array=left.get("towns_lost",[])
+	var towns:=("No town of theirs is left: %s is ash or ours." % " and ".join(PackedStringArray(lost))) if not lost.is_empty() else "No town of theirs is left."
+	var who:="One of them lives" if living==1 else "%s of them live" % _cap(EraWords.count_word(living))
+	return "%s: %s %s in the hills. They are too few to raid anyone, and the feud is over." % [name,towns,who]
+
+
 ## Raid smoke fades over RAID_FADE_DAYS; 0 means gone.
 static func raid_alpha(days_ago:int)->float:
 	if days_ago<0 or days_ago>=RAID_FADE_DAYS: return 0.0

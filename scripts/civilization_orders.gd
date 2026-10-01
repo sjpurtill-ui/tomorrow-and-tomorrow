@@ -62,6 +62,12 @@ static func execute(order:Dictionary)->Dictionary:
 		"production":return WorldSimulation.military.start_production_line(String(order.get("item","")),int(order.get("target",0)))
 		"base":return WorldSimulation.military.joint_operations.build_base(String(order.get("city","")),String(order.get("service","")))
 		"service_mission":return WorldSimulation.military.joint_operations.assign(int(order.get("force",0)),order.get("region",{}),String(order.get("mission","")))
+		# Lay up a ship or wing standing at its home base: its craft go back to
+		# the stores and its crew home to ordinary work (joint_operations.disband).
+		"disband_force":return WorldSimulation.military.joint_operations.disband(int(order.get("force",0)))
+		# A field army standing at home goes back into the home host (its men
+		# and their gear), where demobilize can send them home.
+		"dissolve_army":return WorldSimulation.military.disband_field_army(int(order.get("army",0)))
 		"transport":return WorldSimulation.military.joint_operations.logistics.start(int(order.get("force",0)),String(order.get("destination","")),float(order.get("food",0.0)),int(order.get("army",0)))
 		"commission":return WorldSimulation.military.joint_operations.commission(int(order.get("base",0)),String(order.get("unit","")),int(order.get("count",0)),String(order.get("name","")))
 		# Settlement defences: the court's own call (realm_orders), with the same

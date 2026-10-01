@@ -114,6 +114,9 @@ const PRICE_MIN:=10.0
 ## A feud settled (a blood price, a parley, a marriage) keeps the raiders
 ## home this long.
 const SETTLED_DAYS:=3*365
+## A people with no town of its own left and fewer than this many living is
+## broken past feuding (broken()): a band of three would be most of its men.
+const BROKEN_PEOPLE:=10.0
 ## A killing ambush, the feud's top rung, after a fight at the border.
 const AMBUSH_CHANCE:=0.35
 ## Envoy business a hot conflict still lets through: those who come to end it.
@@ -854,6 +857,7 @@ static func _peek(civ_id:String)->Dictionary:
 static func hot(civ_id:String,day:int=-1)->bool:
 	if day<0: day=_day()
 	if bool(_relation(civ_id).get("at_war",false)): return true
+	if broken(civ_id): return false
 	var f:=_peek(civ_id)
 	if f.is_empty(): return false
 	if not (f.get("war",{}) as Dictionary).is_empty(): return true
@@ -866,10 +870,63 @@ static func hot(civ_id:String,day:int=-1)->bool:
 static func feuding(civ_id:String,day:int=-1)->bool:
 	if day<0: day=_day()
 	if Scale.formal(civ_id) and bool(_relation(civ_id).get("at_war",false)): return false
+	# A broken people keeps no feud (its end is told once, _end_broken).
+	if broken(civ_id) and not bool(_relation(civ_id).get("at_war",false)): return false
 	var f:=_peek(civ_id)
 	if f.is_empty(): return bool(_relation(civ_id).get("at_war",false))
 	if not (f.get("war",{}) as Dictionary).is_empty(): return false
 	return int(f.get("level",0))>=1 or bool(_relation(civ_id).get("at_war",false))
+
+## BROKEN PAST FEUDING: a people that has no town of its own left (burned,
+## held by us or lost: envoy_aftermath.silenced) and fewer than BROKEN_PEOPLE
+## living, or none at all. Its feud with us is over (_end_broken, told once),
+## no raid of theirs comes, the hall hears nobody from them and the map shows
+## its survivors, not a feud (survivors()).
+static func broken(civ_id:String)->bool:
+	var civ:=_civ(civ_id)
+	if civ.is_empty(): return false
+	if not bool(civ.get("alive",true)): return true
+	if float(civ.get("population",0.0))>=BROKEN_PEOPLE: return false
+	return bool(Hall._aftermath().call("silenced",civ_id))
+
+## A broken people's survivors as the map and court tell them: {} when the
+## people is not broken. {civ_id, name, living (whole people, 0 when none),
+## where (their last town's name), position (Vector2), towns_lost [names]}.
+static func survivors(civ_id:String)->Dictionary:
+	if not broken(civ_id): return {}
+	var civ:=_civ(civ_id)
+	var st:Dictionary=Hall._aftermath().call("standing",civ_id)
+	var lost:Array=[]
+	for town:Dictionary in st.get("held",[]): lost.append(String(town.get("name","")))
+	for town_name in st.get("burned",[]): if not String(town_name) in lost: lost.append(String(town_name))
+	var where:=String(st.get("capital_name",""))
+	if where=="" and not lost.is_empty(): where=String(lost[0])
+	var home:Variant=(civ.get("player_relation",{}) as Dictionary).get("home_position",{})
+	var position:=Vector2(float((home as Dictionary).get("x",0.0)),float((home as Dictionary).get("z",0.0))) if home is Dictionary else Vector2.ZERO
+	var living:=roundi(float(civ.get("population",0.0))) if bool(civ.get("alive",true)) else 0
+	return {"civ_id":civ_id,"name":_name(civ_id),"living":living,"where":where,"position":position,"towns_lost":lost}
+
+## The feud with a people broken past fighting ends, told once: no town of
+## theirs stands and only a few of them live, so nobody is left to raid us or
+## to answer for it. Their raiders scheduled to come never come; the grudges
+## stay (survivors remember).
+static func _end_broken(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	var name:=_name(civ_id)
+	var left:=survivors(civ_id)
+	var living:=int(left.get("living",0))
+	var where:=String(left.get("where",""))
+	var lost:=("%s is ash or ours, and " % where) if where!="" else ""
+	var who:="nobody of them is left" if living<=0 else ("only %s of them %s, in the hills" % [EraWords.count_word(living),"lives" if living==1 else "live"])
+	var text:="The feud with %s is over: %s%s. Nobody is left to raid us or to answer for it. In all, %d of ours and %d of theirs died in the feud." % [name,lost,who,int(f.get("our_dead",0)),int(f.get("their_dead",0))]
+	f["level"]=0; f["pending"]={}; f["op"]={}
+	f["feud_end"]={"day":day,"why":"broken"}
+	f["guard_until"]=-1
+	_chronicle("feud_broken:%s:%d" % [civ_id,day],"The Feud With %s Is Over" % name,text,"moment",civ_id)
+	ForeignDiplomacy.remember(civ_id,"Our towns are gone and the god's people are no longer fought: %s." % ("nobody is left" if living<=0 else "a few of us live on in the hills"))
+	_log(civ_id,"feud_end",text,{"why":"broken","living":living,"our_dead":int(f.get("our_dead",0)),"their_dead":int(f.get("their_dead",0))})
+	_stat("feud_ends_broken")
+	_drop_matters(civ_id)
 
 ## Days since blood was last spilled either way (99999 when never).
 static func quiet_days(civ_id:String,day:int=-1)->int:
@@ -1549,6 +1606,11 @@ static func daily(day:int)->void:
 		var id:=String(civ_id)
 		var f:=front(id)
 		var civ:=_civ(id)
+		# Nobody left to fight: the feud ends, told once (no town of theirs
+		# stands and only a handful live, or none).
+		if not civ.is_empty() and int(f.get("level",0))>=1 and (f.war as Dictionary).is_empty() and not bool(_relation(id).get("at_war",false)) and broken(id):
+			_end_broken(id,day)
+			continue
 		if civ.is_empty() or not bool(civ.get("alive",true)):
 			if not (f.war as Dictionary).is_empty(): f["war"]={}
 			continue

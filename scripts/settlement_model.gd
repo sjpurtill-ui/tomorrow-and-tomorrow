@@ -504,6 +504,26 @@ func reset_for_new_world()->void:
 	_local_population_scope=false
 	_national_population_in_scope=0.0
 
+## Whether the ordinary deliveries (process_city_trade) can reach this town
+## at all: the nearest other town of ours and how far our carriers go.
+## {reachable, ready (deliveries organised at all), nearest (name),
+## nearest_km, range_km}; {} with fewer than two towns. Read for the town
+## page and the court, so a town beyond reach is said to be so.
+func delivery_reach(settlement_id:String,_resource:String="Food")->Dictionary:
+	var towns:=WorldSimulation.state.player_settlements
+	if towns.size()<2:return {}
+	var here:=settlement_record(settlement_id)
+	if here.is_empty():return {}
+	var capacity:=city_trade_capacity()
+	var at:=_record_position(here)
+	var nearest:={};var best:=INF
+	for other:Dictionary in towns:
+		if String(other.id)==settlement_id or not String(other.get("occupied_by","")).is_empty():continue
+		var distance:=_record_position(other).distance_to(at)
+		if distance<best:best=distance;nearest=other
+	if nearest.is_empty():return {}
+	return {"reachable":bool(capacity.ready) and best<=float(capacity.range_km),"ready":bool(capacity.ready),"nearest":String(nearest.get("name","")),"nearest_km":best,"range_km":float(capacity.range_km)}
+
 func _autoload_node(node_name:String)->Node:
 	return WorldSimulation.system(node_name)
 

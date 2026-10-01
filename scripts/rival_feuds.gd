@@ -44,7 +44,13 @@ static func tick(day:int,days:int)->void:
 			# A declaration between two simulated peoples is theirs to make
 			# (their own leaders' diplomacy); an old undelivered note is dropped.
 			if String(relation.get("pending_message",""))=="war": relation["pending_message"]=""
-			if int(relation.get("feud_since",-1))>=0: _feud(first,second,relation,day,days)
+			# A people down to a handful (war_loop.BROKEN_PEOPLE) keeps no feud:
+			# nobody is left to send raiders, and nobody needs raiding.
+			var spent:=minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<War.BROKEN_PEOPLE
+			if int(relation.get("feud_since",-1))>=0 and spent:
+				for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
+				relation["feud_ended_day"]=day
+			elif int(relation.get("feud_since",-1))>=0: _feud(first,second,relation,day,days)
 			elif day%30<days: _calm(relation)
 			if relation.hash()!=before: world._set_pair_relation(i,j,relation)
 

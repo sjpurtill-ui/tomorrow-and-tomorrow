@@ -1686,9 +1686,12 @@ func delegate_now()->void:
 func _delegate_settlements(_day:int)->void:
 	# The ruler sets the daily work (manual_work.gd): the same split for every
 	# town, as the ruler left it. No safeguard or food floor rewrites it; the
-	# People view and the court say what it will do.
+	# People view and the court say what it will do, and the chronicle warns
+	# early when a town's stores will run out (manual_work.warn_towns).
 	if not bool(WorldSimulation.direction.automatic_work):
 		_lay_ruler_split()
+		var manual:=preload("res://scripts/manual_work.gd")
+		if _day%manual.WARN_EVERY==0:manual.warn_towns(_day)
 		return
 	var aggregate:Dictionary={}
 	for role in GameState.POPULATION_ROLES: aggregate[role]=0.0

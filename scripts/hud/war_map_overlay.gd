@@ -138,8 +138,9 @@ func collect()->Array[Dictionary]:
 	var civ_ids:Array=at_war.keys()
 	for civ_id in ledger.keys():
 		var f:Dictionary=ledger[civ_id]
-		# A feud short of war: blood spilled within the last year.
-		if not civ_ids.has(civ_id) and int(f.get("level",0))>=1 and today-int(f.get("last_harm",-99999))<=WarLoop.FEUD_HOT_DAYS: civ_ids.append(civ_id)
+		# A feud short of war: blood spilled within the last year. A people
+		# broken past feuding shows its survivors instead (below).
+		if not civ_ids.has(civ_id) and int(f.get("level",0))>=1 and today-int(f.get("last_harm",-99999))<=WarLoop.FEUD_HOT_DAYS and not WarLoop.broken(String(civ_id)): civ_ids.append(civ_id)
 	for civ_variant in civ_ids:
 		var civ_id:=String(civ_variant)
 		var f:Dictionary=ledger.get(civ_id,{}) if ledger.get(civ_id) is Dictionary else {}
@@ -185,6 +186,17 @@ func collect()->Array[Dictionary]:
 		var segment:=Marks.border_segment(home,there)
 		out.append({"id":"border:"+civ_id,"kind":"border","points":[_v3(segment[0]),_v3(segment[1])],"tip":"The border with %s. Their men cross here." % enemy,"color":WAR_COLOR,"alpha":1.0})
 		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
+	# A people we met that is broken past feuding (no town left, a handful
+	# living): its survivors at its last home, in a quiet ink; none when
+	# nobody of them lives (war_loop.survivors).
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		var id:=String(civ.get("id",""))
+		if id=="" or civ_ids.has(id) or int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<1: continue
+		var left:=WarLoop.survivors(id)
+		var remnant:=Marks.remnant_tag(left)
+		if remnant=="": continue
+		var spot:Vector2=left.position if left.position!=Vector2.ZERO else _enemy_position(id,home)
+		out.append({"id":"remnant:"+id,"kind":"remnant","points":[_v3(spot)],"tag":remnant,"tip":Marks.remnant_details(left),"color":THEIRS_COLOR,"alpha":0.85})
 	# Before writing, strangers under arms are a handful of men, not a counter.
 	if stage=="hearth":
 		for sighting:Dictionary in CivilizationSystem.local_observation_snapshot().get("visible",[]):
@@ -243,10 +255,10 @@ func _layout_tags(viewport:Rect2)->void:
 	var reserved:=_reserved()
 	var signature:=str(viewport.size)+str(reserved)
 	for entry:Dictionary in screen:
-		if entry.kind!="war": continue
+		if not entry.kind in ["war","remnant"]: continue
 		var extent:=Vector2(ceilf(font.get_string_size(String(entry.tag),HORIZONTAL_ALIGNMENT_LEFT,-1,TAG_SIZE).x)+18.0,22.0)
 		var anchor:Vector2=entry.screen[0]
-		entries.append({"id":String(entry.id),"anchor":anchor,"extent":extent,"foreign":false,"tag":String(entry.tag)})
+		entries.append({"id":String(entry.id),"anchor":anchor,"extent":extent,"foreign":false,"tag":String(entry.tag),"color":entry.color})
 		signature+=String(entry.id)+str(anchor.round())+String(entry.tag)
 	if signature==layout_signature: return
 	layout_signature=signature
@@ -303,14 +315,18 @@ func _draw()->void:
 			var texture:=Icons.war_texture(glyph,entry.color)
 			var center:Vector2=entry.screen[0]
 			draw_texture_rect(texture,Rect2(center-Vector2(ICON,ICON)*0.5,Vector2(ICON,ICON)),false,Color(1,1,1,float(entry.alpha)))
+	# Survivors of a broken people: a small open ring, never a war glyph.
+	for entry:Dictionary in screen:
+		if entry.kind=="remnant": draw_arc(entry.screen[0],ICON*0.22,0.0,TAU,20,Color(entry.color,float(entry.alpha)),2.0,true)
 	var font:=ThemeDB.fallback_font
 	for tag:Dictionary in tags:
 		var box:Rect2=tag.rect
 		var anchor:Vector2=tag.anchor
+		var ink:Color=tag.get("color",WAR_COLOR)
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
-		if end.distance_to(anchor)>ICON*0.5+2.0: draw_line(anchor,end,Color(WAR_COLOR,0.55),1.0,true)
-		draw_style_box(T.flat(T.MAP_LABEL_BG,Color(WAR_COLOR,0.7),1,4,0),box)
-		draw_rect(Rect2(box.position+Vector2(0,4),Vector2(3,box.size.y-8)),WAR_COLOR)
+		if end.distance_to(anchor)>ICON*0.5+2.0: draw_line(anchor,end,Color(ink,0.55),1.0,true)
+		draw_style_box(T.flat(T.MAP_LABEL_BG,Color(ink,0.7),1,4,0),box)
+		draw_rect(Rect2(box.position+Vector2(0,4),Vector2(3,box.size.y-8)),ink)
 		draw_string(font,box.position+Vector2(10,15),String(tag.tag),HORIZONTAL_ALIGNMENT_LEFT,-1,TAG_SIZE,T.INK)
 	var open:=pinned_id if pinned_id!="" else hover_id
 	if open=="": return
