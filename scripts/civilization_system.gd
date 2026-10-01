@@ -657,6 +657,7 @@ func owned_day_steps(target_day:int)->Array:
 			city_intelligence.sample_missions(target_day)],
 		["world_exchange",func()->void:Exchange.sample_missions(self,target_day)],
 		["world_scouts",func()->void:_complete_due_scout_missions(target_day)],
+		["world_held_scouts",func()->void:age_held_scouts(target_day)],
 	]+scouting_staff.advance_steps(target_day)+[
 		["world_diplomatic_mission",func()->void:_process_diplomatic_mission(target_day)],
 		["world_observation",func()->void:_process_local_observation(target_day)],
@@ -890,6 +891,65 @@ func _captured_player_scout_count()->int:
 	var total:=0
 	for cohort in captured_player_scouts.values(): total+=maxi(0,int((cohort as Dictionary).get("count",0)))
 	return total
+
+
+## SCOUTS OF OURS HELD BY ANOTHER PEOPLE do not stay away for life. They
+## were never counted dead: they are still our people, away, and the count
+## of them is taken from those who can work and from the mothers at home
+## (player_population_commitments). Kept for ever, a few lost scouting
+## parties left a small people with nobody at home to bear children: the
+## Oruq stopped having children at 49 people with 13 of their scouts held
+## abroad, and died out of old age. So, the same for every people:
+## - each year about HELD_HOME_YEARLY of them get home (let go, traded back,
+##   or slipped away) and about HELD_DEATH_YEARLY die where they are held
+##   (counted dead, "Died in captivity"); the fractions carry over, so the
+##   same days give the same outcome;
+## - never more are held than we have working-age people: when our own
+##   people dwindle, so did they (no deaths are counted twice).
+## Scouts held by the god's people ("human" in another people's world) wait
+## for the court's word (envoy_requests.gd); only peoples run by their own
+## rulers let them go this way.
+const HELD_HOME_YEARLY:=0.25
+const HELD_DEATH_YEARLY:=0.08
+const HELD_STEP_DAYS:=30
+
+func age_held_scouts(day:int)->Dictionary:
+	var out:={"home":0,"died":0,"gone":0}
+	if captured_player_scouts.is_empty():return out
+	WorldSimulation.state.initialize_population_model()
+	var working:=maxi(0,floori(float(WorldSimulation.state.population_cohorts.get("working_age",WorldSimulation.state.population_exact*0.6))))
+	for holder in captured_player_scouts.keys():
+		var cohort:Dictionary=captured_player_scouts[holder]
+		var count:=maxi(0,int(cohort.get("count",0)))
+		# Nobody is away who is not among our people at all.
+		if count>working:
+			out.gone+=count-working
+			count=working
+		if String(holder)!="human":
+			var since:=int(cohort.get("aged_day",cohort.get("captured_day",day)))
+			var days:=day-since
+			if days>=HELD_STEP_DAYS and count>0:
+				var years:=float(days)/365.0
+				var home_exact:=float(count)*(1.0-pow(1.0-HELD_HOME_YEARLY,years))+float(cohort.get("home_carry",0.0))
+				var home:=mini(count,floori(home_exact))
+				var died_exact:=float(count)*(1.0-pow(1.0-HELD_DEATH_YEARLY,years))+float(cohort.get("death_carry",0.0))
+				var died:=mini(count-home,floori(died_exact))
+				cohort["home_carry"]=clampf(home_exact-float(home),0.0,1.0)
+				cohort["death_carry"]=clampf(died_exact-float(died),0.0,1.0)
+				cohort["aged_day"]=day
+				if died>0:died=int((WorldSimulation.state.register_population_deaths(died,"Died in captivity") as Dictionary).get("count",died))
+				count-=home+died
+				out.home+=home;out.died+=died
+				if home+died>0:
+					var index:=_civilization_index(String(holder))
+					var who:=String(civilizations[index].get("name","strangers")) if index>=0 else "strangers"
+					var parts:PackedStringArray=[]
+					if home>0:parts.append("%d came home" % home)
+					if died>0:parts.append("%d died there" % died)
+					_record_world_event("Scouts held by %s" % who,"Of our scouts held by %s, %s. %d %s still held." % [who," and ".join(parts),count,"is" if count==1 else "are"],"diplomacy",day,{"kind":"held_scouts","civ_id":String(holder),"home":home,"died":died,"held":count})
+		if count<=0:captured_player_scouts.erase(holder)
+		else:cohort["count"]=count
+	return out
 
 
 func _route_distance_to_point(route:Array,point:Vector2)->float:

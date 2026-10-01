@@ -22,6 +22,8 @@ const Answers:=preload("res://scripts/court_answers.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Marks:=preload("res://scripts/war_map_marks.gd")
+const Overlay:=preload("res://scripts/hud/war_map_overlay.gd")
 
 ## Words a feud never says of itself.
 const WAR_WORDS:=["declare","declared","declaration","goes to war","go to war","generals","general take","front","war with","war over","herald","terms"]
@@ -599,3 +601,91 @@ func test_a_rival_feud_raids_a_little_and_goes_cold()->void:
 	# A feud between bands kills a few, never a war's toll (EPOCHAL_SHIFTS s3.4).
 	assert_float(lost).is_less(pop_before*0.07)
 	assert_bool(bool(rel2.get("at_war",false))).is_false()
+
+# --------------------------------------------------------------------------
+# 7. A people broken past feuding (Oruq, year 187: its last town burned with
+# one of them left, and the map still read "Feud with Oruq")
+# --------------------------------------------------------------------------
+
+## Every town of theirs burned or held by us, and only `living` of them left.
+func _break(id:String,living:float)->void:
+	var civ:=_civ(id)
+	_set_pop(civ,living)
+	for region in civ.strategic_regions:
+		if bool(region.get("settlement_founded",true)): region["controller"]="player"
+
+func test_a_people_with_no_town_and_a_handful_left_ends_its_feud_once()->void:
+	_civ(civ_id)["name"]="Oruq"
+	WAR.blood_feud(civ_id,10,"our attack on them")
+	assert_bool(WAR.feuding(civ_id)).is_true()
+	assert_bool((WAR.front(civ_id).pending as Dictionary).is_empty()).is_false()
+	_break(civ_id,1.3)
+	# Read at once: no feud, nothing hot, survivors.
+	assert_bool(WAR.broken(civ_id)).is_true()
+	assert_bool(WAR.feuding(civ_id)).is_false()
+	assert_bool(WAR.hot(civ_id)).is_false()
+	assert_int(int(WAR.survivors(civ_id).living)).is_equal(1)
+	assert_array(WAR.feuds().map(func(v:Dictionary)->String:return String(v.civ_id))).not_contains([civ_id])
+	# The tick ends it, told once; the raiders scheduled never come.
+	var raids_before:=int(WAR.front(civ_id).get("raids",0))
+	_run(200)
+	var f:=WAR.front(civ_id)
+	assert_int(int(f.level)).is_equal(0)
+	assert_bool((f.pending as Dictionary).is_empty()).is_true()
+	assert_str(String((f.feud_end as Dictionary).why)).is_equal("broken")
+	assert_int(int(f.get("raids",0))).is_equal(raids_before)
+	var told:=_chronicle_about(civ_id)
+	assert_str(told).contains("the feud with oruq is over")
+	assert_str(told).contains("only one of them lives, in the hills")
+	assert_int(told.count("is over:")).is_equal(1)
+	# An old grudge sends nobody either: no chance, and a raid already
+	# scheduled stands down when its day comes.
+	assert_float(WAR.grudge_raid_chance(civ_id)).is_equal(0.0)
+	var day:=int(GameState.elapsed_days)
+	WAR._schedule(civ_id,day+1,"grudge","grudge")
+	_run(10)
+	assert_int(int(WAR.front(civ_id).get("raids",0))).is_equal(raids_before)
+	assert_bool((WAR.front(civ_id).pending as Dictionary).is_empty()).is_true()
+	assert_int(int(WAR.front(civ_id).level)).is_equal(0)
+
+func test_a_people_with_many_left_but_no_town_keeps_its_feud()->void:
+	# Burned out but forty strong in the hills: they can still raid.
+	WAR.blood_feud(civ_id,10,"our attack on them")
+	_break(civ_id,40.0)
+	assert_bool(WAR.broken(civ_id)).is_false()
+	assert_bool(WAR.feuding(civ_id)).is_true()
+
+func test_the_map_and_the_court_tell_survivors_not_a_feud()->void:
+	_civ(civ_id)["name"]="Oruq"
+	WAR.blood_feud(civ_id,10,"our attack on them")
+	_break(civ_id,2.0)
+	var left:=WAR.survivors(civ_id)
+	assert_str(Marks.remnant_tag(left)).is_equal("Oruq survivors in the hills")
+	assert_str(Marks.remnant_details(left)).contains("Two of them live in the hills").contains("too few to raid anyone")
+	# The overlay draws the survivors, never "Feud with Oruq".
+	GameState.settlement_site_committed=true
+	var overlay:Control=auto_free(Overlay.new())
+	var tags:Array=overlay.collect().map(func(m:Dictionary)->String:return String(m.get("tag","")))
+	assert_array(tags).contains(["Oruq survivors in the hills"])
+	assert_array(tags).not_contains(["Feud with Oruq"])
+	# The court: neither at peace nor at feud, but broken, with the numbers.
+	var text:=Facts.text(Facts.sheet(["common","war"]))
+	assert_str(text).contains("Broken, with no town left: Oruq (")
+	assert_str(text).contains("2 of them live, in the hills")
+	assert_str(text).not_contains("In a feud with: Oruq")
+	# None of them left: no label at all.
+	_civ(civ_id)["alive"]=false
+	assert_str(Marks.remnant_tag(WAR.survivors(civ_id))).is_equal("")
+
+func test_a_rival_feud_ends_when_one_people_is_down_to_a_handful()->void:
+	var was:=WorldSimulation.enabled
+	WorldSimulation.enabled=true
+	var b:=CivilizationSystem.civilizations[2]
+	CivilizationSystem.start_rival_feud(1,2,0,"a quarrel on the border")
+	assert_int(int(((CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)] as Dictionary).get("feud_since",-1))).is_greater_equal(0)
+	_set_pop(CivilizationSystem.civilizations[2],3.0)
+	preload("res://scripts/rival_feuds.gd").tick(WAR.TICK,WAR.TICK)
+	WorldSimulation.enabled=was
+	var rel:Dictionary=(CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)]
+	assert_int(int(rel.get("feud_since",-1))).is_equal(-1)
+	assert_int(int(rel.get("feud_ended_day",-1))).is_equal(WAR.TICK)

@@ -185,9 +185,13 @@ func _overview_blocks(settlement:Dictionary)->Array:
 			row["on_open"]=on_population if String(row.section)=="" else jump(String(row.section),int(row.sub))
 	var kind:=String(facts.classification)
 	var caption:=("Held by %s" % CivilizationSystem.city_intelligence.controller_label(holder)) if occupied else "Our %s · settled %s" % [kind if kind!="" else "settlement",Model.since(age)]
+	# The ruler's split, read for this town: what it does to the stores here,
+	# early and plainly, with the one click that mends it (manual_work.gd).
+	var warning:Dictionary=Manual.town_warning(id) if ruler and not management.is_empty() and not occupied else {}
 	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,"direction_tip":direction_tip,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
 		"ruler_sets_work":ruler and not management.is_empty() and not occupied,"on_leaders":_work_to_leaders,"on_people":jump("overview",0),
+		"work_warning":warning,"on_food_fix":_put_on_food.bind(int(warning.get("fix",0))) if int(warning.get("fix",0))>0 else Callable(),
 		"town_name":String(facts.name),"sketch":Model.sketch_data(facts,caption),"lead":Model.lead(facts),
 		"groups":groups,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
@@ -239,6 +243,14 @@ func _city_people_report(_kind:String)->Dictionary:
 	var share:=float(population)/maxf(1,GameState.population_total)
 	var all:=_people_blocks(0,population,share,settlement,{})
 	return {"blocks":[all[0],all[1]]}
+
+## The warning's one click: that many more people on getting food, each
+## from the task with the most (manual_work.move), in every town.
+func _put_on_food(people:int)->void:
+	var moved:=Manual.move("Food",people)
+	if is_instance_valid(terrain) and terrain.has_method("_report_military_action") and bool(moved.get("ok",false)):
+		terrain._report_military_action({"message":"%d more now get food in every town, from %s." % [int(moved.moved),Manual.moved_words(moved.from)]})
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
 ## "Back to our leaders": each town's leader shares out the work again.
 func _work_to_leaders()->void:

@@ -593,3 +593,105 @@ func test_era_words_short_labels_and_both_palettes()->void:
 				var contrast:=T.contrast((button as Button).get_theme_color(String(state[0])),ground)
 				assert_float(contrast).override_failure_message("'%s' %s %.2f:1 in %s" % [(button as Button).text,state[1],contrast,mode]).is_greater_equal(float(state[2]))
 	T.set_color_mode("light")
+
+# --------------------------------------------------------------------------
+# A town out of food under the ruler's split (Riverbank, year 187: the People
+# view said "the stores in Sean Springs last about 3½ years" while Riverbank's
+# were gone, and nothing on its own page said why)
+# --------------------------------------------------------------------------
+
+## The day's count for a town whose stores are gone: it needed 100, got and
+## ate 87. With `counted` below 1, fewer hands were counted than work today
+## (a band came home), so tomorrow's harvest at today's hands reads above
+## the need: still the town is out of food now.
+func _starving(counted:float=1.0)->void:
+	GameState.simulation_metrics.merge({"food_total_stock":0.0,"food_intake_ratio":0.87,"food_eaten":87.0,"food_consumption":100.0,"food_production":87.0,"food_spoilage":0.0,"food_net":0.0},true)
+	GameState.simulation_metrics["food_workers"]=float(GameState.simulation_metrics.food_workers)*counted
+	GameState.resource_stockpiles["Food"]=0.0
+
+func test_a_town_out_of_food_is_named_first_and_never_read_as_holding()->void:
+	_world()
+	Manual.set_manual(true)
+	_starving(0.8)
+	var look:=Manual.outlook()
+	var first:Dictionary=look.lines[0]
+	assert_str(String(first.text)).is_equal("The food is gone: 87 of the 100 it needs a day come in.")
+	assert_str(String(first.tone)).is_equal("bad")
+	assert_float(float(look.food_days)).is_equal(0.0)
+	for line:Dictionary in look.lines:assert_str(String(line.text)).not_contains("the stores hold")
+
+func test_the_town_page_warns_at_the_split_with_the_one_click_fix()->void:
+	_world()
+	var hud:=FakeHud.new();add_child(hud);auto_free(hud)
+	var terrain:=StubTerrain.new();add_child(terrain);auto_free(terrain)
+	Manual.set_manual(true)
+	_starving()
+	var block:Dictionary=(Settlement.new(terrain,hud).tab(0).blocks as Array)[0]
+	var warning:Dictionary=block.work_warning
+	assert_str(String(warning.text)).is_equal("At your split Keansburg's food is gone: 87 of the 100 it needs a day come in.")
+	assert_int(int(warning.fix)).is_greater(0)
+	var page:VBoxContainer=auto_free(TownPage.new());page.size=Vector2(940,1200);add_child(page);page.setup(block)
+	assert_str((page.find_child("SplitWarning",true,false) as Label).text).is_equal(String(warning.text))
+	var fix:=page.find_child("FoodFix",true,false) as Button
+	assert_str(fix.text).is_equal("Put %d more on getting food" % int(warning.fix))
+	var before:=int(Manual.counts().Food)
+	fix.pressed.emit()
+	# The fix is the ruler's own split, a few more on food: still the ruler's.
+	assert_int(int(Manual.counts().Food)).is_equal(before+int(warning.fix))
+	assert_bool(Manual.manual()).is_true()
+	# The stores holding again, the page says nothing more.
+	_count(130.0,100.0)
+	GameState.simulation_metrics.merge({"food_total_stock":2000.0,"food_intake_ratio":1.0,"food_eaten":100.0},true)
+	assert_bool(Manual.town_warning(String(GameState.player_settlements[0].id)).is_empty()).is_true()
+
+func test_a_town_beyond_the_carriers_reach_is_said_to_be_so()->void:
+	_world()
+	GameState.society_capacities.merge({"logistics":0.5,"institutions":0.4},true)
+	var far:Dictionary=GameState.player_settlements[0].duplicate(true)
+	far.merge({"id":"settlement_far","name":"Riverbank","primary":false,"position":Vector2(14.0+300.0,-9.0),"population_share":0.2,"local_resources":{}},true)
+	GameState.player_settlements.append(far)
+	var reach:=SettlementModel.delivery_reach("settlement_far","Food")
+	assert_bool(bool(reach.ready)).is_true()
+	assert_bool(bool(reach.reachable)).is_false()
+	assert_str(String(reach.nearest)).is_equal("Keansburg")
+	assert_float(float(reach.nearest_km)).is_equal_approx(300.0,0.5)
+	assert_float(float(reach.range_km)).is_less(300.0)
+	# Its own count: nothing put by, 46 of the 52 it needs.
+	Manual.set_manual(true)
+	SettlementModel.with_city_resources("settlement_far",func()->void:
+		GameState.simulation_metrics={"food_total_stock":0.0,"food_intake_ratio":0.87,"food_eaten":46.0,"food_consumption":52.0,"food_production":46.0,"food_spoilage":0.5,"food_workers":0.0,"food_forecast_90":{"first_shortage_day":6}})
+	var warning:=Manual.town_warning("settlement_far")
+	assert_str(String(warning.text)).contains("At your split Riverbank's food is gone: 46 of the 52 it needs a day come in.")
+	assert_str(String(warning.text)).contains("No town of ours is near enough to send food: Keansburg is 300 km away, and our carriers reach %d km." % roundi(float(reach.range_km)))
+	# The People view names Riverbank first, whatever the other town's count.
+	assert_str(String((Manual.outlook().lines[0] as Dictionary).text)).is_equal("Riverbank's food is gone: 46 of the 52 it needs a day come in.")
+
+func test_the_chronicle_warns_once_early_and_again_only_after_the_stores_recover()->void:
+	_world()
+	Manual.set_manual(true)
+	var day:=int(GameState.elapsed_days)
+	# Short: stores for about forty days at this split.
+	_count(80.0,100.0)
+	GameState.simulation_metrics.merge({"food_total_stock":800.0},true)
+	var told:=Manual.warn_towns(day)
+	assert_int(told.size()).is_equal(1)
+	assert_str(String((told[0] as Dictionary).title)).is_equal("Keansburg Will Run Out of Food")
+	assert_str(String((told[0] as Dictionary).text)).contains("At your split Keansburg gets").contains("more on getting food, or hand the work back to the leaders.")
+	assert_bool(Manual.warn_towns(day+5).is_empty()).is_true()
+	# Gone: told once more, as a moment.
+	_starving()
+	told=Manual.warn_towns(day+10)
+	assert_int(told.size()).is_equal(1)
+	assert_str(String((told[0] as Dictionary).title)).is_equal("Keansburg's Food Is Gone")
+	assert_bool(Manual.warn_towns(day+15).is_empty()).is_true()
+	# Recovered: the next shortage is told again.
+	_count(130.0,100.0)
+	GameState.simulation_metrics.merge({"food_total_stock":2000.0},true)
+	assert_bool(Manual.warn_towns(day+20).is_empty()).is_true()
+	_count(80.0,100.0)
+	GameState.simulation_metrics.merge({"food_total_stock":800.0},true)
+	assert_int(Manual.warn_towns(day+25).size()).is_equal(1)
+	# With the leaders sharing out the work, the split warns nothing.
+	Manual.set_manual(false)
+	_starving()
+	assert_bool(Manual.warn_towns(day+30).is_empty()).is_true()

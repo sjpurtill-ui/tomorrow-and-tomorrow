@@ -306,6 +306,9 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	for demand:Dictionary in campaign.workshop.army_demands():production_order(id,demand)
 	var capacity:=campaign.recruitment_capacity()
 	var target:=mini(roundi(float(capacity)*float(plan.capacity_share)),roundi(WorldSimulation.state.population_exact*float(plan.recruit_share)))
+	# Crews of ships and wings come out of the same share of the people as
+	# the army: four paddlers in a war canoe are four fewer at the fish weirs.
+	var share_cap:=target
 	if bool(plan.hungry) and not bool(plan.at_war):target=campaign._mobilized_count()
 	var chosen:="";var weapon:="";var score:=-INF
 	# Staffs weigh what each unit is worth against the army they face, per
@@ -326,7 +329,8 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	# This count cannot stand down a serving formation.
 	var surplus:=maxi(0,campaign.aggregate_recruits-intake)
 	if surplus>0:WorldSimulation.submit(id,{"kind":"demobilize","count":surplus})
-	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4:
+	var starving_at_peace:=bool(plan.get("food_shortage",false)) and not bool(plan.at_war)
+	if campaign.field_armies.is_empty() and int(campaign.home_army.get("troops",0))>=4 and not starving_at_peace:
 		WorldSimulation.submit(id,{"kind":"deploy","count":maxi(4,roundi(float(campaign.home_army.troops)*float(plan.deploy_share)))})
 	var reinforcement:=preload("res://scripts/home_army_reinforcement.gd").recommendation(campaign)
 	if not reinforcement.is_empty():WorldSimulation.submit(id,reinforcement)
@@ -334,7 +338,13 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	if campaign.command_hierarchy.data.zones.is_empty() and not campaign.field_armies.is_empty():
 		var zone:=WorldSimulation.submit(id,{"kind":"area","service":"army","name":"Home defense","vertices":campaign.command_hierarchy.R.rectangle(WorldSimulation.world.player_world_origin,8.0)})
 		if zone.has("region"):WorldSimulation.submit(id,{"kind":"objective","command":"army","region":zone.region,"mission":"defend","vision":"Protect the settlement and its approaches."})
+	if bool(plan.get("food_shortage",false)):
+		hunger_stand_down(id,plan,share_cap)
+		# No sorties while the people go hungry, unless the enemy is at the door.
+		if not bool(plan.at_war):return
 	for service in ["navy","air"]:
+		# A hungry people builds no ships, bases or wings.
+		if bool(plan.hungry):break
 		if WorldSimulation.state.player_settlements.is_empty():continue
 		var city:=String(WorldSimulation.state.player_settlements[0].id)
 		if not campaign.joint_operations.available_base(service):WorldSimulation.submit(id,{"kind":"base","city":city,"service":service})
@@ -345,7 +355,7 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			for unit:String in campaign.joint_operations.C.UNITS:
 				var definition:Dictionary=campaign.joint_operations.C.UNITS[unit]
 				if definition.domain!=service or not bool(campaign._knowledge_gate(String(definition.gate),.10).unlocked):continue
-				if int(definition.crew)>maxi(0,capacity-campaign._mobilized_count()):continue
+				if not may_commission(campaign._mobilized_count(),int(definition.crew),share_cap,capacity,bool(plan.hungry)):continue
 				var equipment:=String(definition.equipment)
 				var supply:=preload("res://scripts/joint_manufacturing_planner.gd").plan(campaign,equipment)
 				if supply.is_empty():continue
@@ -358,6 +368,55 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			production_order(id,{"item":equipment,"target":1})
 			WorldSimulation.submit(id,{"kind":"commission","base":int(base.id),"unit":candidate,"count":1})
 	service_orders(id,plan)
+
+## Whether a ruler may put `crew` more people into a new ship or wing:
+## never while the people is hungry, and never past the share of the people
+## its army may take (`share_cap`, the land army's own bound) nor past the
+## adults it has (`capacity`). Before, only the adults bounded it, so a ruler
+## commissioned a canoe a month until every adult was at the paddles.
+static func may_commission(mobilized:int,crew:int,share_cap:int,capacity:int,hungry:bool)->bool:
+	return not hungry and mobilized+crew<=mini(share_cap,capacity)
+
+## A HUNGRY PEOPLE SENDS ITS MEN HOME TO THE FOOD WORK. Under arms or at
+## sea nobody fishes, hunts or gathers (GameState.civilian_workforce_fraction):
+## the Aruven kept a war canoe for every four adults while their stores were
+## empty, and with no hands left for food the whole people starved. While a
+## people is short of food (leader_personality.food_constraints) its ruler
+## lets waiting recruits go, calls ships and wings home, and lays up those
+## standing at their home base until no more are under arms than `keep` (at
+## peace only the people's own watch, the Defense share; at war the ordinary
+## share). The same orders the court can give. {released, laid_up, recalled}.
+static func hunger_stand_down(id:String,plan:Dictionary,keep:int)->Dictionary:
+	var out:={"released":0,"laid_up":0,"recalled":0,"stood_down":0}
+	if not bool(plan.get("food_shortage",false)):return out
+	var campaign=WorldSimulation.military
+	var at_war:=bool(plan.get("at_war",false))
+	if not at_war:keep=int(WorldSimulation.state.population_allocations.get("Defense",0))
+	var waiting:=int(campaign.aggregate_recruits)
+	if waiting>0 and not WorldSimulation.submit(id,{"kind":"demobilize","count":waiting}).has("error"):out.released+=waiting
+	# At peace, bands standing at home go back to the fires too: their men
+	# join the home host, which stands down to the watch below.
+	if not at_war:
+		for army:Dictionary in (campaign.field_armies as Array).duplicate():
+			if String(army.get("status",""))!="stationed" or String(army.get("location_id",""))!="player_home":continue
+			WorldSimulation.submit(id,{"kind":"dissolve_army","army":int(army.get("army_id",0))})
+	var op=campaign.joint_operations
+	for force:Dictionary in (op.state.forces as Array).duplicate():
+		if campaign._mobilized_count()<=keep:break
+		if String(force.get("owner",""))!="player":continue
+		if op.organized_at_home(force):
+			var crew:=int(op.crew(force))
+			if not WorldSimulation.submit(id,{"kind":"disband_force","force":int(force.id)}).has("error"):
+				out.laid_up+=1;out.released+=crew
+		elif String(force.get("mission",""))!="hold" and not op.logistics.busy(int(force.id)):
+			if not WorldSimulation.submit(id,{"kind":"service_mission","force":int(force.id),"region":{},"mission":"hold"}).has("error"):out.recalled+=1
+	# Then the men under arms at home, down to the watch (or at war, the
+	# ordinary share): demobilize releases the injured, then the home host.
+	var excess:int=campaign._mobilized_count()-keep
+	if excess>0 and int(campaign.home_army.get("troops",0))>0:
+		var freed:Dictionary=WorldSimulation.submit(id,{"kind":"demobilize","count":mini(excess,int(campaign.home_army.get("troops",0)))})
+		if not freed.has("error"):out.stood_down+=int(freed.get("released",0))
+	return out
 
 static func land_training_orders(id:String,chosen:String,weapon:String,target:int,plan:Dictionary)->void:
 	if chosen.is_empty():return

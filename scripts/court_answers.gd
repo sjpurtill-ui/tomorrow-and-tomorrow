@@ -798,7 +798,7 @@ static func _scouts_answer(sheet:Dictionary,lower:String)->String:
 		return "%s %s out: %s." % [str(parties.size()) if parties.size()>1 else "One",("parties are" if parties.size()>1 else "party is"),_join(bits)]
 	if _has(lower,"\\b(out there|beyond|around us|who else|other peoples?|any peoples?|neighbou?rs?|strangers|met|have we found|what lies|what is there|what's there|the world|the lands?)\\b"):
 		var met:PackedStringArray=PackedStringArray()
-		for p:Dictionary in sheet.get("met_peoples",[]): met.append("the %s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else "at peace"),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		for p:Dictionary in sheet.get("met_peoples",[]): met.append("the %s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else ("broken, no town of theirs left" if bool(p.get("broken",false)) else "at peace")),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
 		var towns:PackedStringArray=PackedStringArray()
 		for t:Dictionary in sheet.get("known_towns",[]): towns.append((load("res://scripts/court_facts.gd") as GDScript).call("town_way_words",t))
 		if met.is_empty() and towns.is_empty(): return "We have met no other people yet; the scouts have found nobody."

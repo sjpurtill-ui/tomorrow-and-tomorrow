@@ -145,6 +145,7 @@ static func _common(out:Dictionary)->void:
 	var wars:Array=[]
 	var feuds:Array=[]
 	var peace:Array=[]
+	var broken:Array=[]
 	var world:Variant=_world()
 	var war_loop:GDScript=load(WAR_LOOP_PATH)
 	if world!=null:
@@ -155,12 +156,17 @@ static func _common(out:Dictionary)->void:
 			# A small people's fight is a feud, never a war (conflict_scale.gd):
 			# raids and killings back and forth, the numbers from the war ledger.
 			var feud:Dictionary=war_loop.call("feud_view",String(c.get("id",""))) if war_loop!=null else {}
+			# A people broken past feuding (war_loop.survivors) is neither at
+			# peace nor at feud: no town of theirs is left, a handful live.
+			var left:Dictionary=war_loop.call("survivors",String(c.get("id",""))) if war_loop!=null and feud.is_empty() and not bool(rel.get("at_war",false)) else {}
 			if not feud.is_empty(): feuds.append(feud)
 			elif bool(rel.get("at_war",false)): wars.append(String(c.get("name","")))
+			elif not left.is_empty(): broken.append(left)
 			else: peace.append(String(c.get("name","")))
 	out["at_war_with"]=wars
 	out["feuding_with"]=feuds
 	out["at_peace_with"]=peace
+	out["broken_peoples"]=broken
 	# The last fight, as everyone has heard it: where, when and who won.
 	out["last_fights"]=battles(1,false)
 	# How the people hold the god, in words (divine_regard.people_regard), and
@@ -556,7 +562,8 @@ static func _scouts(out:Dictionary)->void:
 			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
 			if int(rel.get("contact_level",0))<=0 and not bool(rel.get("at_war",false)): continue
 			var feud:=war_loop!=null and bool(war_loop.call("feuding",String(c.get("id",""))))
-			peoples.append({"name":String(c.get("name","")),"at_war":bool(rel.get("at_war",false)) and not feud,"feud":feud,"home_known":bool(rel.get("home_location_known",false)),"met":int(rel.get("contact_level",0))>=2})
+			var broken:=war_loop!=null and not feud and bool(war_loop.call("broken",String(c.get("id",""))))
+			peoples.append({"name":String(c.get("name","")),"at_war":bool(rel.get("at_war",false)) and not feud,"feud":feud,"broken":broken,"home_known":bool(rel.get("home_location_known",false)),"met":int(rel.get("contact_level",0))>=2})
 	out["met_peoples"]=peoples
 	var towns:Array=[]
 	for t:Dictionary in WarOrders.held_towns()+WarOrders.known_places():
@@ -639,6 +646,9 @@ static func text(s:Dictionary)->String:
 	var feud_rows:PackedStringArray=PackedStringArray()
 	for v:Dictionary in s.get("feuding_with",[]): feud_rows.append(feud_words(v))
 	lines.append("At war with: %s.%s At peace with: %s." % [", ".join(PackedStringArray(wars)) if not wars.is_empty() else "nobody",(" In a feud with: %s (a feud, not a war: raids and killings back and forth, nothing declared)." % "; ".join(feud_rows)) if not feud_rows.is_empty() else "",", ".join(PackedStringArray(peace)) if not peace.is_empty() else "nobody we know"])
+	var broken_rows:PackedStringArray=PackedStringArray()
+	for left:Dictionary in s.get("broken_peoples",[]): broken_rows.append(broken_words(left))
+	if not broken_rows.is_empty(): lines.append("Broken, with no town left: %s. No feud with them goes on: they are too few to raid anyone." % "; ".join(broken_rows))
 	if s.get("new_towns") is Dictionary: lines.append("New towns: %s." % AutoFounding.court_words(s.new_towns,false))
 	var war:=(s.get("offices",[]) as Array).has("war")
 	for t:Dictionary in s.get("towns",[]):
@@ -700,7 +710,7 @@ static func text(s:Dictionary)->String:
 		for p:Dictionary in s.get("parties",[]): out_now.append(party_words(p))
 		lines.append("Scouting parties out: %s." % ("; ".join(out_now) if not out_now.is_empty() else "none"))
 		var met:PackedStringArray=PackedStringArray()
-		for p:Dictionary in s.get("met_peoples",[]): met.append("%s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else "at peace"),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
+		for p:Dictionary in s.get("met_peoples",[]): met.append("%s (%s%s)" % [String(p.name),"in a feud with us" if bool(p.get("feud",false)) else ("at war with us" if bool(p.at_war) else ("broken, no town of theirs left" if bool(p.get("broken",false)) else "at peace")),"" if bool(p.get("home_known",false)) else ", their home not yet found"])
 		lines.append("Peoples we have met: %s." % (", ".join(met) if not met.is_empty() else "none"))
 		var places:PackedStringArray=PackedStringArray()
 		for t:Dictionary in s.get("known_towns",[]): places.append(town_way_words(t))
@@ -740,6 +750,16 @@ static func feud_words(v:Dictionary)->String:
 	if not bool(v.get("hot",true)): bits.append("quiet now")
 	bits.append("their home not yet found" if not bool(v.get("home_known",false)) else ("their home %s" % String(v.way) if String(v.get("way",""))!="" else "their home known"))
 	return "%s (%s)" % [String(v.get("name","")),"; ".join(bits)]
+
+## A people broken past feuding (war_loop.survivors), exact: "Oruq (Iglan is
+## ash or ours; one of them lives, in the hills)".
+static func broken_words(left:Dictionary)->String:
+	var bits:=PackedStringArray()
+	var lost:Array=left.get("towns_lost",[])
+	if not lost.is_empty(): bits.append("%s %s ash or ours" % [" and ".join(PackedStringArray(lost)),"is" if lost.size()==1 else "are"])
+	var living:=int(left.get("living",0))
+	bits.append("none of them lives" if living<=0 else ("one of them lives, in the hills" if living==1 else "%d of them live, in the hills" % living))
+	return "%s (%s)" % [String(left.get("name","")),"; ".join(bits)]
 
 ## One fight in plain words, exact: who won, the dead on each side, the
 ## captives and what became of them, the spoils and where they went.

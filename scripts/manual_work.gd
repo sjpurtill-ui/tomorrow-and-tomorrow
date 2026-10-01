@@ -205,28 +205,24 @@ static func move(role:String,people:int,other:String="")->Dictionary:
 ## this split, how many drink enough, and the warning words.
 ## {food_days (-1: the stores hold), shortage_day, water_ratio, town, lines:[{text, tone}]}.
 static func outlook()->Dictionary:
-	var state=_state()
-	var rows:Array=[]
-	if state.player_settlements.is_empty():rows.append(_town_outlook())
-	for city:Dictionary in state.player_settlements:
-		if not String(city.get("occupied_by","")).is_empty():continue
-		var id:=String(city.get("id",""))
-		var row:Dictionary=WorldSimulation.settlements.with_city_resources(id,func()->Dictionary:
-			return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _town_outlook()))
-		row["town"]=String(city.get("name",""))
-		rows.append(row)
+	var rows:=town_rows()
 	var worst_food:={}
 	var worst_water:={}
+	var starving:Array=[]
 	for row:Dictionary in rows:
+		if bool(row.get("starving",false)):starving.append(row)
 		if float(row.food_days)>=0.0 and (worst_food.is_empty() or float(row.food_days)<float(worst_food.food_days)):worst_food=row
 		if float(row.water_ratio)>=0.0 and (worst_water.is_empty() or float(row.water_ratio)<float(worst_water.water_ratio)):worst_water=row
 	var lines:Array=[]
 	var towns:=rows.size()>1
-	if not worst_food.is_empty():
+	# A town already out of food is told first, by name, with its numbers;
+	# a town whose stores are gone is never hidden behind another's count.
+	for row:Dictionary in starving:lines.append({"text":hunger_words(row,towns),"tone":"bad","town":String(row.get("town",""))})
+	if not worst_food.is_empty() and not bool(worst_food.get("starving",false)):
 		var days:=float(worst_food.food_days)
 		var where:=(" in %s" % String(worst_food.town)) if towns and String(worst_food.get("town",""))!="" else ""
 		lines.append({"text":"At this split the stores%s last %s." % [where,Plain.duration_text(days)],"tone":"bad" if days<60.0 else "warn"})
-	elif not rows.is_empty() and bool(rows[0].get("counted",false)):
+	elif worst_food.is_empty() and not rows.is_empty() and bool(rows[0].get("counted",false)):
 		lines.append({"text":"At this split the stores hold.","tone":"good"})
 	if not worst_water.is_empty() and float(worst_water.water_ratio)<0.98:
 		var where:=(" in %s" % String(worst_water.town)) if towns and String(worst_water.get("town",""))!="" else ""
@@ -236,7 +232,103 @@ static func outlook()->Dictionary:
 	elif not worst_water.is_empty():
 		lines.append({"text":"Water: enough for all.","tone":"good"})
 	return {"food_days":float(worst_food.get("food_days",-1.0)) if not worst_food.is_empty() else -1.0,"shortage_day":int(worst_food.get("shortage_day",-1)) if not worst_food.is_empty() else -1,
-		"water_ratio":float(worst_water.get("water_ratio",-1.0)) if not worst_water.is_empty() else -1.0,"lines":lines}
+		"water_ratio":float(worst_water.get("water_ratio",-1.0)) if not worst_water.is_empty() else -1.0,"lines":lines,
+		"starving":starving.map(func(row:Dictionary)->String:return String(row.get("town",""))),"worst":worst_food}
+
+## Each town of ours read in its own scope (_town_outlook), with its name
+## and id.
+static func town_rows()->Array:
+	var state=_state()
+	var rows:Array=[]
+	if state.player_settlements.is_empty():rows.append(_town_outlook())
+	for city:Dictionary in state.player_settlements:
+		if not String(city.get("occupied_by","")).is_empty():continue
+		var id:=String(city.get("id",""))
+		var row:Dictionary=WorldSimulation.settlements.with_city_resources(id,func()->Dictionary:
+			return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _town_outlook()))
+		row["town"]=String(city.get("name",""))
+		row["id"]=id
+		rows.append(row)
+	return rows
+
+## THE SPLIT'S WARNING IN THE CHRONICLE, early: while the ruler sets the
+## work, once when a town's stores will run out within WARN_NOTICE_DAYS and
+## once when they are gone, each town again only after its stores recover
+## (beyond RECOVERED_DAYS, or holding). The words name the town, its own
+## numbers and the fix. Called from the ruler's daily split
+## (GovernmentPeopleSystem._lay_ruler_split) every WARN_EVERY days.
+## Returns the entries told.
+const WARN_NOTICE_DAYS:=60.0
+const RECOVERED_DAYS:=120.0
+const WARN_EVERY:=5
+static func warn_towns(day:int)->Array:
+	var told:Array=[]
+	if not manual() or not preload("res://scripts/chronicle.gd").active():return told
+	for row:Dictionary in town_rows():
+		var record:Dictionary=WorldSimulation.settlements.settlement_record(String(row.get("id","")))
+		if record.is_empty():continue
+		var days:=float(row.get("food_days",-1.0))
+		var warned:Dictionary=record.get("split_warned",{}) if record.get("split_warned") is Dictionary else {}
+		if days<0.0 or days>RECOVERED_DAYS:
+			if not warned.is_empty():record.erase("split_warned")
+			continue
+		var town:=String(row.get("town",""))
+		var stage:="gone" if bool(row.get("starving",false)) else ("short" if days<=WARN_NOTICE_DAYS else "")
+		if stage=="" or warned.has(stage):continue
+		warned[stage]=day
+		record["split_warned"]=warned
+		var fix:=food_fix(row)
+		var mend:=("Put %d more on getting food, or hand the work back to the leaders." % fix) if fix>0 else "Put more on getting food, or hand the work back to the leaders."
+		var reach:Dictionary=WorldSimulation.settlements.delivery_reach(String(row.get("id","")),"Food")
+		var far:=(" No town of ours is near enough to send food: %s is %d km away." % [String(reach.nearest),roundi(float(reach.nearest_km))]) if not reach.is_empty() and not bool(reach.get("reachable",true)) else ""
+		var title:="%s's Food Is Gone" % town if stage=="gone" else "%s Will Run Out of Food" % town
+		var text:=("At your split %s%s %s" % [hunger_words(row),far,mend]) if stage=="gone" else ("At your split %s gets %d food a day and eats %d: its stores last %s.%s %s" % [town,floori(float(row.get("produced",0.0))),ceili(float(row.get("need",0.0))+float(row.get("spoiled",0.0))),Plain.duration_text(days),far,mend])
+		var entry:=preload("res://scripts/chronicle.gd").record({"key":"split_food:%s:%s:%d" % [String(row.get("id","")),stage,day],"day":day,"title":title,"text":text,
+			"tier":"moment" if stage=="gone" else "notice","priority":stage=="gone","kind":"warning","domain":"food"})
+		if not entry.is_empty():told.append(entry)
+	return told
+
+## "Riverbank's food is gone: 46 of the 52 it needs a day come in." The
+## town's own count, exact (a row of _town_outlook).
+static func hunger_words(row:Dictionary,named:bool=true)->String:
+	var town:=String(row.get("town",""))
+	var whose:=("%s's" % town) if named and town!="" else "The"
+	return "%s food is gone: %d of the %d it needs a day come in." % [whose,floori(float(row.get("got",0.0))),ceili(float(row.get("need",0.0)))]
+
+## The people to move onto getting food so the town in `row` (a row of
+## _town_outlook) gets what it eats and what spoils, with a twentieth to
+## spare: the ruler's split is every town's, so every town gains as many.
+## 0 when it already does.
+static func food_fix(row:Dictionary)->int:
+	var produced:=float(row.get("produced",0.0))
+	var wanted:=(float(row.get("need",0.0))+float(row.get("spoiled",0.0)))*1.05
+	if produced<=0.01 or wanted<=produced:return 0
+	var share:=float(split().get("Food",0.0))
+	var more:=share*(wanted/produced-1.0)
+	return mini(ceili(more/100.0*float(able())),maxi(0,able()-int(counts().get("Food",0))))
+
+## The town page's warning while the ruler sets the work: what the split
+## does to this town, from its own count; {} while its stores hold beyond
+## WARN_DAYS. {text, tone, fix (people to put on food), fix_text}. Read
+## inside the town's scope by the caller (dock_content_settlement.gd).
+const WARN_DAYS:=180.0
+static func town_warning(settlement_id:String)->Dictionary:
+	if not manual():return {}
+	var record:Dictionary=WorldSimulation.settlements.settlement_record(settlement_id)
+	var row:Dictionary=WorldSimulation.settlements.with_city_resources(settlement_id,func()->Dictionary:
+		return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _town_outlook()))
+	var town:=String(record.get("name",""))
+	row["town"]=town
+	var days:=float(row.get("food_days",-1.0))
+	if days<0.0 or days>WARN_DAYS:return {}
+	var text:="At your split %s gets %d food a day and eats %d: its stores last %s." % [town,floori(float(row.get("produced",0.0))),ceili(float(row.get("need",0.0))+float(row.get("spoiled",0.0))),Plain.duration_text(days)]
+	if bool(row.get("starving",false)):text="At your split %s" % hunger_words(row)
+	var reach:Dictionary=WorldSimulation.settlements.delivery_reach(settlement_id,"Food")
+	if not reach.is_empty() and not bool(reach.get("reachable",true)) and String(reach.get("nearest",""))!="":
+		text+=" No town of ours is near enough to send food: %s is %d km away, and our carriers reach %d km." % [String(reach.nearest),roundi(float(reach.nearest_km)),roundi(float(reach.range_km))]
+	var fix:=food_fix(row)
+	return {"text":text,"tone":"bad" if bool(row.get("starving",false)) or days<60.0 else "warn","fix":fix,
+		"fix_text":"Put %d more on getting food" % fix if fix>0 else "","town":town,"starving":bool(row.get("starving",false)),"days":days}
 
 ## One town, inside its own scope: the day's count with today's split. Food
 ## comes in as the hands getting it (the count's own food_workers), less what
@@ -259,7 +351,19 @@ static func _town_outlook()->Dictionary:
 		if lean>0 and ratio<=1.02:
 			days=float(lean) if days<0.0 else minf(days,float(lean))
 			out["shortage_day"]=lean
+		# Already out of food and eating less than it needs: starving now,
+		# whatever tomorrow's count would make (Riverbank, year 187, read as
+		# "the stores hold" while its people went hungry).
+		var intake:=clampf(float(m.get("food_intake_ratio",1.0)),0.0,1.0)
+		if stock<=1.0 and intake<0.995:
+			days=0.0
+			out["starving"]=true
 		out["food_days"]=days
+		out["need"]=float(m.get("food_consumption",0.0))
+		out["got"]=float(m.get("food_eaten",float(m.get("food_consumption",0.0))*intake))
+		out["produced"]=produced
+		out["spoiled"]=float(m.get("food_spoilage",0.0))
+		out["stock"]=stock
 	var water:Dictionary=state.water_metrics
 	var need:=float(water.get("required_today",0.0))
 	if need>0.0:

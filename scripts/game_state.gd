@@ -1138,8 +1138,12 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var postpartum:=float(pregnancy_cohorts.get("postpartum",0.0))
 	# People physically away on missions (scouts, envoys, convoys) are drawn
 	# from the working-age cohort; they cannot conceive at home while out.
+	# They are men and women of every working age, so they take their share
+	# of the mothers-to-be away, not one each: counted one each, 11 scouts
+	# held abroad left a people of 43 with one mother able to conceive.
 	var absent_adults:=maxf(0.0,float(context.get("absent_adults",0.0)))
-	var eligible:=maxf(0.0,reproductive_population-active-postpartum*0.55-absent_adults)
+	var away_share:=clampf(absent_adults/maxf(1.0,float(population_cohorts.get("working_age",population_exact*0.6))),0.0,1.0)
+	var eligible:=maxf(0.0,reproductive_population*(1.0-away_share)-active-postpartum*0.55)
 	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
 	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability*clampf(float(context.get("conception_care",1.0)),0.3,2.0)

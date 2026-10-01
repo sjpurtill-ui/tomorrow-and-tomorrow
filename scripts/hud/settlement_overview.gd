@@ -40,8 +40,19 @@ func setup(block:Dictionary)->void:
 	if bool(block.get("ruler_sets_work",false)):
 		# The ruler sets the daily work (manual_work.gd): no leader can shift
 		# hands; one click hands it back, and The People is where it is set.
+		# What the ruler's split does to this town's food, early and plainly
+		# (manual_work.town_warning), with the click that mends it.
+		var warning:Dictionary=block.get("work_warning",{})
+		if not warning.is_empty():
+			var warned:=T.make_label(String(warning.get("text","")),13,tone_color(String(warning.get("tone","warn"))))
+			warned.name="SplitWarning";warned.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(warned)
+			_page_refs["warning"]=warned
 		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);add_child(yours)
 		var said:=T.make_label("You set the daily work yourself.",13,T.BODY);said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;yours.add_child(said)
+		var fix:Variant=block.get("on_food_fix")
+		if fix is Callable and (fix as Callable).is_valid() and String(warning.get("fix_text",""))!="":
+			var mend:=_button(yours,String(warning.fix_text),fix,"Every town gets as many more on getting food, each taken from the task with the most people.");mend.name="FoodFix"
+			_page_refs["fix"]=mend
 		_button(yours,"Back to our leaders",block.get("on_leaders"),"Each town's leader shares out the work again, food and water first.").name="BackToLeaders"
 		_button(yours,"Set the work",block.get("on_people"),"Move people between tasks in The People.").name="SetTheWork"
 		for chip in yours.get_children():
@@ -82,6 +93,8 @@ func update_block(block:Dictionary)->bool:
 	if _page_refs.has("direction"):
 		_put(_page_refs.direction,String(block.get("direction","")))
 		(_page_refs.direction as Control).tooltip_text=String(block.get("direction_tip",""))
+	var warning:Dictionary=block.get("work_warning",{})
+	if _page_refs.has("warning"):_put(_page_refs.warning,String(warning.get("text","")),tone_color(String(warning.get("tone","warn"))))
 	var rows:Array=[]
 	for group:Dictionary in block.get("groups",[]):rows.append_array(group.rows)
 	for index in mini(rows.size(),(_page_refs.rows as Array).size()):_fill_row(_page_refs.rows[index],rows[index])
@@ -122,6 +135,9 @@ static func shape_of(block:Dictionary)->Array:
 	return [not drawing.is_empty(),String(drawing.get("city_id","")),leader.is_empty(),Portrait.picture_key(leader) if not leader.is_empty() else [],String(leader.get("name","No leader yet")),
 		String(block.get("lead",""))!="",bool(block.get("ruler_sets_work",false)),bool(block.get("can_direct",false)),choices,String(block.get("current","")),
 		callable_key(block.get("on_leaders")),callable_key(block.get("on_people")),callable_key(block.get("on_leader")),callable_key(block.get("on_population")),callable_key(block.get("on_rename")),
+		# A split warning appearing or going, or its fix changing, redraws the
+		# page; the warning's words update in place.
+		not (block.get("work_warning",{}) as Dictionary).is_empty(),callable_key(block.get("on_food_fix")),String((block.get("work_warning",{}) as Dictionary).get("fix_text","")),
 		rows,block.get("legend",[]),String(block.get("town_name","")),founding_shape,works_shape]
 
 # --------------------------------------------------------------------------
