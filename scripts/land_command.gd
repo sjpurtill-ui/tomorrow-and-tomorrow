@@ -4,6 +4,10 @@ extends RefCounted
 const R=preload("res://scripts/joint_regions.gd")
 const G=preload("res://scripts/joint_geography.gd")
 const March=preload("res://scripts/march_terrain.gd")
+## The one break line and strength line (army_lines.gd) and the one supply
+## number (supply_state.gd fed): the zone staff read them as every check does.
+const Lines=preload("res://scripts/army_lines.gd")
+const Supply=preload("res://scripts/supply_state.gd")
 var _command:WeakRef
 var command:RefCounted:
 	get:return _command.get_ref()
@@ -53,7 +57,7 @@ func strength(actual:Dictionary)->float:
 		var count:=maxi(0,int(formation.get("count",0)))
 		var gear:=minf(1,float(formation.get("equipment",0))/maxf(1,float(formation.get("equipment_required",count))))
 		equipped+=count*(.2+.8*gear)*(.35+.65*float(formation.get("training",.3)))*float(formation.get("personnel_condition",1))
-	return equipped*(.25+.75*float(actual.get("supply_level",.5)))*(.4+.6*float(actual.get("morale",.7)))
+	return equipped*(.25+.75*Supply.fed(actual))*(.4+.6*float(actual.get("morale",.7)))
 func frontage(troops:int)->float:
 	# A tiny squad cannot seal kilometres of ground. Later communications and
 	# equipment improve execution through existing readiness and movement rates.
@@ -178,7 +182,6 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	actual["position"]=G.pack(current);actual["status"]="stationed";actual["location_id"]="field_position"
 	actual["location_name"]="Commanded ground";actual["distance_remaining_km"]=current.distance_to(destination)
 	actual["destination_position"]=G.pack(destination);actual["destination_id"]=""
-	actual["supply_level"]=clampf(float(actual.get("supply_level",1))-.0008*current.distance_to(start),.0,1)
 	if current.distance_to(WorldSimulation.world.player_world_origin)<.5:actual["location_id"]="player_home";actual["location_name"]="Home settlement"
 func _engage(actual:Dictionary,enemy:Dictionary,order:Dictionary,allies:Array)->void:
 	if command.battle.enemy_engaged(String(enemy.id)) or command.data.battles.size()>=32:return
@@ -247,9 +250,10 @@ func advance(day:int)->void:
 			if order.mission=="withdraw":destination=G.pack(WorldSimulation.world.player_world_origin)
 			if destination.is_empty():actual["command_status"]="No charted assembly ground · awaiting reconnaissance";continue
 			actual["command_status"]="Assembling in zone" if not R.contains(region,point(actual)) else "Patrolling assigned ground"
-			var supply:=float(actual.get("supply_level",0))
-			if supply<.2 or float(actual.get("morale",1))<.22 or day<int(actual.get("command_recover_until",0)):
-				actual["command_status"]="Commander withdrawing to recover supply and morale";_move(actual,WorldSimulation.world.player_world_origin,{"mission":"withdraw"},day);continue
+			# Broken, under strength or going hungry: brought back to rest and
+			# refill, as the war leader's upkeep does for every other band.
+			if Lines.unfit(actual) or Supply.fed(actual)<Supply.STARVING_BELOW or day<int(actual.get("command_recover_until",0)):
+				actual["command_status"]="Withdrawing to rest and refill";_move(actual,WorldSimulation.world.player_world_origin,{"mission":"withdraw"},day);continue
 			var target:Dictionary={};var nearest:=INF
 			for enemy:Dictionary in known:
 				if not R.contains(region,point(enemy)) or order.mission=="withdraw":continue
@@ -314,7 +318,7 @@ func battle_order()->String:
 	var engagement:Dictionary=host.active_engagement
 	var side:String=host._engagement_home_side(engagement);var enemy:String=host._engagement_enemy_side(engagement)
 	var actual:Dictionary=engagement[side];var rival:Dictionary=engagement[enemy]
-	if float(actual.get("morale",1))<.25 or float(actual.get("supply_level",1))<.15 or int(actual.troops)<int(engagement.get(side+"_initial",actual.troops))*.45:return "retreat"
+	if Lines.broken(float(actual.get("morale",1))) or Lines.weak(int(actual.troops),int(engagement.get(side+"_initial",actual.troops))) or Supply.fed(actual)<Supply.STARVING_BELOW:return "retreat"
 	return "push" if strength(actual)>strength(rival)*1.25 or float(engagement.get("encirclement",0))>=.95 else "hold"
 func _build_fronts(day:int)->void:
 	var fronts:Array=[]

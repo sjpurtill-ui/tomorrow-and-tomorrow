@@ -45,6 +45,7 @@ const TownNames:=preload("res://scripts/town_names.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const Odds:=preload("res://scripts/war_odds.gd")
+const ArmyLines:=preload("res://scripts/army_lines.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 const COUNCIL_PATH:="res://scripts/war_council.gd"
 
@@ -1156,6 +1157,9 @@ static func _available(army:Dictionary)->bool:
 	var id:=int(army.get("army_id",0))
 	if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): return false
 	if mc.command_hierarchy.battle.engaged(id): return false
+	# Broken, under strength or resting: the war leader is resting and
+	# refilling it (army_lines.gd, band_upkeep.gd); it is not sent.
+	if bool(army.get("resting",false)) or ArmyLines.unfit(army): return false
 	if army.has("court_order") and String(army.get("status",""))=="moving": return false
 	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==id: return false
 	if WorldSimulation.campaign!=null and WorldSimulation.campaign.active and id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
@@ -1199,7 +1203,7 @@ static func forces(general:Dictionary={})->Dictionary:
 		var army:Dictionary=a
 		if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): continue
 		var at_home:=_at_home(army)
-		if at_home and not mc.command_hierarchy.battle.engaged(int(army.army_id)) and not army.has("court_order"): idle.append(army)
+		if at_home and not mc.command_hierarchy.battle.engaged(int(army.army_id)) and not army.has("court_order") and _available(army): idle.append(army)
 		elif not at_home: away.append(army)
 	# A fight elsewhere does not stop a march: the bands in it are simply not
 	# free (engaged above). The captives of a fight never hold anything up:
@@ -2382,7 +2386,7 @@ static func _reinforce(out:Dictionary,reading:Dictionary)->Dictionary:
 	while i>=0:
 		var army:Dictionary=mc.field_armies[i]
 		var here:bool=String(army.get("location_id",""))==city_id and String(army.get("status",""))=="stationed"
-		var idle_home:bool=full and _at_home(army) and not army.has("court_order") and not bool(mc.command_hierarchy.battle.engaged(int(army.army_id)))
+		var idle_home:bool=full and _at_home(army) and not army.has("court_order") and not bool(mc.command_hierarchy.battle.engaged(int(army.army_id))) and _available(army)
 		if int(army.get("troops",0))>0 and not army.get("pursuit") is Dictionary and (here or idle_home):
 			army["pursuit"]={"state":"returning","civ_id":civ_id,"region_id":city_id,"town":name,"start_day":day,"reinforce":true}
 			mc.field_armies[i]=army
@@ -2551,6 +2555,8 @@ static func _busy_words(army:Dictionary)->String:
 	if mc.command_hierarchy.battle.engaged(int(army.army_id)): return "it is fighting"
 	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==int(army.army_id): return "it is laying siege"
 	if bool(army.get("embarked",false)): return "it is at sea"
+	if ArmyLines.unfit(army): return "it is not fit to fight (%s); it rests and refills first" % ArmyLines.why_unfit(army)
+	if bool(army.get("resting",false)): return "it is resting and refilling"
 	if army.has("court_order"): return "it is marching on %s" % String((army.court_order as Dictionary).get("city_name","a town"))
 	return "it is not free"
 
