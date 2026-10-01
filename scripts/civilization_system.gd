@@ -4223,13 +4223,14 @@ func occupation_control(civ_id:String,region_id:String,coercive:bool=false)->Dic
 	if index<0 or region.is_empty() or String(region.get("controller",""))!="player":return {"error":"Select an occupied city."}
 	var force:=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
 	var troops:=maxi(0,int(force.get("troops",0)))
-	var supply:=clampf(float(force.get("supply_level",1.0)),0,1)
-	var readiness:=clampf(float(force.get("readiness",1.0)),0,1)
-	var effective:=troops*supply*(.5+.5*readiness)
+	# The one rule for holding a town (town_hold.gd): men x fed x readiness.
+	var supply:=preload("res://scripts/town_hold.gd").fed(force) if not force.is_empty() else 1.0
+	var effective:=preload("res://scripts/town_hold.gd").force_strength(force) if not force.is_empty() else 0.0
 	var base:=occupation_requirement(civilizations[index],region)
 	var required:=base
 	if coercive:required+=float(region.get("population",0))*.3*(.25+.75*clampf(float(region.get("resistance",.5)),0,1))
-	var result:={"troops":troops,"effective":effective,"required":ceili(required),"base_required":ceili(base),"supply":supply,"controlled":effective>=ceili(required)}
+	var result:={"troops":troops,"effective":effective,"required":ceili(required),"base_required":ceili(base),"supply":supply,"controlled":effective>=ceili(required),
+		"need":preload("res://scripts/town_hold.gd").need(required,supply,float(force.get("readiness",1.0)))}
 	if not bool(result.controlled):result.error="%d soldiers present, %.1f effective after supply and readiness; %d needed for %s. Bring and supply a larger garrison, or return local control."%[troops,effective,int(result.required),"city-wide coercion" if coercive else "effective occupation"]
 	return result
 
@@ -4848,7 +4849,8 @@ func _capture_region(civ:Dictionary,region_id:String,home_result:Dictionary,riva
 	var held:=region.duplicate(true)
 	held.controller="player";held.resistance=clampf(.38+float(civ.cohesion)*.30+(.14 if String(region.get("role",""))=="capital" else 0.0),.25,.92)
 	var hold_need:=ceili(occupation_requirement(owner,held))
-	var effective_survivors:=surviving*clampf(float(home_result.get("supply_level",1)),0,1)*(.5+.45*clampf(float(home_result.get("readiness",1)),0,1))
+	# The one rule for holding a town (town_hold.gd).
+	var effective_survivors:=preload("res://scripts/town_hold.gd").force_strength(home_result)
 	if effective_survivors<hold_need:
 		var message:="Battle won, but %d surviving soldiers lack the supplied, ready strength to hold %s; about %d effective personnel are required. The city remains outside your control. Reinforce before another occupation attempt."%[surviving,String(region.name),hold_need]
 		_record_world_event("Victory without occupation",message,"war",int(WorldSimulation.state.elapsed_days))

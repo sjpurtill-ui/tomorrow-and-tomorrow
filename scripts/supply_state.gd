@@ -85,6 +85,16 @@ const FORAGE_TYPICAL:=0.42
 ## force finds less each, by the square root (field_rations.gd).
 const FORAGE_FEEDS:=150.0
 const FORAGE_SHARE_MAX:=1.0
+## The land round a camp holds food for FORAGE_FEEDS men for CAMP_FORAGE_DAYS
+## in ordinary country (more in rich country, less in poor). A band camped
+## in one place eats it out: what it forages falls with what it has found
+## there already, down to CAMP_FORAGE_FLOOR (game farther out, what regrows).
+## A band of twenty lives off ordinary country for about three months, one of
+## a hundred and fifty for a few days. Moving on more than CAMP_KM, or
+## marching, it finds fresh country and the count starts again.
+const CAMP_FORAGE_DAYS:=20.0
+const CAMP_FORAGE_FLOOR:=0.1
+const CAMP_KM:=3.0
 ## Ground weight when nothing is surveyed (tests, headless): open land.
 const NEUTRAL_RICH:=FORAGE_TYPICAL
 const NEUTRAL_SWING:=12.0
@@ -1284,12 +1294,53 @@ static func forage_factor(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite(): return 1.0
 	var land:=land_at(rations_field(),p,today())
-	return forage_factor_from(float(land.rich),float(land.cold),int(force.get("troops",0)))
+	return forage_factor_from(float(land.rich),float(land.cold),int(force.get("troops",0)))*camp_left_from(float(land.rich),force)
+
+## Share of the country's food still to be found round a band's camp: 1 on
+## the march or new to a place, falling as it eats the country out.
+static func camp_left_from(rich:float,force:Dictionary)->float:
+	if String(force.get("status","stationed"))=="moving": return 1.0
+	var eaten:=maxf(0.0,float(force.get("forage_eaten",0.0)))
+	if eaten<=0.0: return 1.0
+	var stock:=FORAGE_FEEDS*CAMP_FORAGE_DAYS*clampf(rich/FORAGE_TYPICAL,0.3,1.5)
+	return clampf(1.0-eaten/stock,CAMP_FORAGE_FLOOR,1.0)
+
+static func camp_left(force:Dictionary)->float:
+	var p:=force_pos(force)
+	if not p.is_finite(): return 1.0
+	return camp_left_from(float(land_at(rations_field(),p,today()).rich),force)
+
+## A day of foraging at a band's camp (military_campaign
+## .record_daily_provisions): the food it found there, in men-days (the
+## share of a ration foraged x men x days). Marching, or moved on more than
+## CAMP_KM, it is fresh country: the count starts again. Kept on the band:
+## camp_days, forage_eaten, forage_left (for the screens).
+static func eat_camp(force:Dictionary,man_days:float,span:float)->void:
+	var p:=force_pos(force)
+	if String(force.get("status","stationed"))=="moving" or not p.is_finite():
+		force["camp_days"]=0.0; force["forage_eaten"]=0.0; force["forage_left"]=1.0; force.erase("camp_at")
+		return
+	var camp:Variant=force.get("camp_at")
+	var at:=Vector2(float((camp as Dictionary).get("x",0.0)),float((camp as Dictionary).get("z",0.0))) if camp is Dictionary else Vector2.INF
+	if not at.is_finite() or at.distance_to(p)>CAMP_KM:
+		force["camp_at"]={"x":p.x,"z":p.y}; force["camp_days"]=0.0; force["forage_eaten"]=0.0
+	force["camp_days"]=float(force.get("camp_days",0.0))+maxf(0.0,span)
+	force["forage_eaten"]=float(force.get("forage_eaten",0.0))+maxf(0.0,man_days)
+	force["forage_left"]=camp_left(force)
 
 
 # --------------------------------------------------------------------------
 # Reports for the screens
 # --------------------------------------------------------------------------
+
+## THE ONE SUPPLY NUMBER of a band, a garrison or the levy at home: the share
+## of a full ration it ate on its last day of rations (provision_ratio, kept
+## by military_campaign.record_daily_provisions). Every screen, runner, report
+## and the hold of a town say this one. supply_level, the slower condition
+## of its stores, is read only for a force that keeps no ration record
+## (another people's host).
+static func fed(force:Dictionary)->float:
+	return clampf(float(force.get("provision_ratio",force.get("supply_level",1.0))),0.0,1.0)
 
 ## What a band of `troops` (-1: the middle one of our bands out) would get at
 ## this point today, standing (or moving).
@@ -1411,6 +1462,10 @@ static func of_force(force:Dictionary)->Dictionary:
 	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary and hunger_recent else {}
 	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
 	report["living_off_land"]=bool(force.get("living_off_land",false)) and String(force.get("status",""))=="moving"
+	# How long they have camped here and how much of the country's food is left.
+	if kind=="field" and String(force.get("status",""))!="moving" and not bool(report.get("at_home",false)):
+		report["camp_days"]=float(force.get("camp_days",0.0))
+		report["forage_left"]=clampf(float(force.get("forage_left",1.0)),0.0,1.0)
 	_siege_and_blockade(report,force)
 	report["why"]=why(report)
 	report["words"]=words(report)
@@ -1513,6 +1568,7 @@ static func words(report:Dictionary)->String:
 	text+="; "+line_words(report)+"."
 	var hungry:=float(report.get("hungry_days",0.0))
 	if bool(report.get("hungry",false)) and hungry>=1.0: text+=" Hungry %d days." % roundi(hungry)
+	if float(report.get("forage_left",1.0))<0.5: text+=" Camped %d days, they have eaten out %s the country round them." % [roundi(float(report.get("camp_days",0.0))),"most of" if float(report.forage_left)>CAMP_FORAGE_FLOOR+0.05 else "all"]
 	return text
 
 ## The short reasons behind the numbers, plainest first.
@@ -1532,6 +1588,7 @@ static func why(report:Dictionary)->PackedStringArray:
 	if rich<FORAGE_TYPICAL*0.7: out.append("poor country to forage")
 	elif rich>FORAGE_TYPICAL*1.25: out.append("rich country to forage")
 	if bool(report.get("living_off_land",false)): out.append("living off the land: half pace, foraging and hunting as they go")
+	if float(report.get("forage_left",1.0))<0.5: out.append("%d days in one camp: the country round it is eaten out" % roundi(float(report.get("camp_days",0.0))))
 	if String(report.get("siege",""))!="": out.append(String(report.siege))
 	if String(report.get("blockade",""))!="": out.append(String(report.blockade))
 	return out

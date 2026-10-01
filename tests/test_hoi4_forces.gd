@@ -453,6 +453,8 @@ func test_one_band_shows_one_supply_number_on_every_screen()->void:
 	_send_out(band,Vector2(40,6))
 	# The runner left seven days ago saying 82%; since then they have marched
 	# on, and today they get less. Home knows only what he said.
+	# The runner's one supply number (supply_state.gd fed): what they ate.
+	band.last_report["provision_ratio"]=0.82
 	band.last_report["supply_level"]=0.82
 	band.last_report["day"]=int(GameState.elapsed_days)-7
 	band["position"]={"x":home.x+60.0,"z":home.y+10.0}

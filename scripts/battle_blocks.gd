@@ -53,7 +53,10 @@ const MAX_EXCHANGES:=48
 ## waiting block at READY_AT or better can go in.
 const ROTATE_BELOW:=0.45
 const READY_AT:=0.75
-## A block breaks at the same point a whole army breaks (MORALE_BREAK).
+## A block in the line runs when its cohesion (the army's will times the
+## block's own condition) falls to this. A fresh block holds as long as its
+## army does: the army breaks first, at the one break line (a quarter,
+## army_lines.gd); a worn, tired or hard-struck block runs sooner.
 const BREAK_AT:=0.15
 ## Losses to blocks waiting in reserve, as a share of a front block's
 ## exposure: nothing reaches them before guns, a little after.
