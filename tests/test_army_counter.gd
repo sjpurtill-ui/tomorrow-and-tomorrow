@@ -160,3 +160,9 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("Readiness & supply")
 	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
 	WorldSimulation.clear()
+
+func test_the_queue_counts_those_drilling_outside_the_lines()->void:
+	var Board:=preload("res://scripts/hud/recruit_deploy_board.gd")
+	assert_str(Board.queue_words(4,0,1)).is_equal("4 drilling · 1 sent")
+	assert_str(Board.queue_words(0,2,0)).is_equal("2 bands training")
+	assert_str(Board.queue_words(0,0,0)).is_equal("")

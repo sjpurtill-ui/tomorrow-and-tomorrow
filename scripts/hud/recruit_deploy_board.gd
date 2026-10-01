@@ -243,6 +243,15 @@ static func drilling_groups()->Array:
 		out.append(g)
 	return out
 
+## The count over the queue: "4 drilling · 2 bands training · 1 sent", the
+## men in drill outside the lines first; "" when nothing is under way.
+static func queue_words(drilling:int,bands:int,sent:int)->String:
+	var parts:=PackedStringArray()
+	if drilling>0: parts.append("%d drilling" % drilling)
+	if bands>0: parts.append("%d %s training" % [bands,"band" if bands==1 else "bands"])
+	if sent>0: parts.append("%d sent" % sent)
+	return " · ".join(parts)
+
 ## What a drilling group is for, in a few words.
 static func drilling_words(group:Dictionary)->String:
 	var units:=preload("res://scripts/military_unit_catalog.gd")
@@ -262,7 +271,6 @@ func _rebuild_drilling()->void:
 	drill_live.clear()
 	var groups:=drilling_groups()
 	if groups.is_empty():return
-	_kicker(drill_box,"Drilling now")
 	for g in groups.slice(0,6):
 		var group:Dictionary=g
 		var panel:=PanelContainer.new();panel.name="Drill_"+String(group.key).replace("|","_");panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,8));drill_box.add_child(panel)
@@ -379,7 +387,7 @@ func update_values()->void:
 	var bands:=0;var sent:=0
 	for item:Dictionary in lines:
 		by_id[int(item.id)]=item;bands+=int(item.in_training);sent+=int(item.deployed)
-	queue_counts.text="%d training · %d sent" % [bands,sent] if not lines.is_empty() else ""
+	queue_counts.text=queue_words(drilling_groups().reduce(func(total:int,g:Dictionary)->int: return total+int(g.count),0),bands,sent)
 	var stock:=Model.stock_rows() if not lines.is_empty() else {}
 	for control:Dictionary in live:
 		var item:Dictionary=by_id.get(int(control.id),{})

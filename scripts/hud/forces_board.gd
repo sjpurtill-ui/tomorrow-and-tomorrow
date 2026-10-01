@@ -164,6 +164,15 @@ func _build_strip()->void:
 	(chips.training.chip as Control).gui_input.connect(func(event:InputEvent):
 		if _clicked(event):page_wanted.emit("recruitment"))
 	(chips.training.chip as Control).mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	# Hot feuds, as HOI4 keeps the wars in sight: a click opens the Feuds page.
+	var feuds:=HBoxContainer.new();feuds.name="Chip_feuds";feuds.add_theme_constant_override("separation",7);feuds.mouse_filter=Control.MOUSE_FILTER_STOP;flow.add_child(feuds)
+	_glyph(feuds,Icons.war_texture("feud",T.RED,48),22.0)
+	var feud_value:=_text(feuds,"",19,T.RED_TEXT,true);_whole(feud_value)
+	var feud_word:=_text(feuds,"hot feuds",13,T.RED_TEXT);_whole(feud_word);feud_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	chips["feuds"]={"chip":feuds,"value":feud_value,"word":feud_word}
+	feuds.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	feuds.gui_input.connect(func(event:InputEvent):
+		if _clicked(event):page_wanted.emit("wars"))
 	if not strip_only:
 		policy_button=_button(row,"",func():page_wanted.emit("training"),Icons.command_texture("drill",T.INK,40),"How hard the forces drill, and what it costs.")
 		policy_button.name="TrainingLevel";policy_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -198,6 +207,11 @@ func _update_strip(sum:Dictionary)->void:
 	chips.training.value.text=EraWords.grouped(int(sum.training))
 	chips.training.chip.tooltip_text="%s drilling or called up and waiting.\nClick for Recruit & deploy." % EraWords.grouped(int(sum.training))
 	if is_instance_valid(policy_button):policy_button.text="Training: %s" % String(MilitaryCampaign.training_staff.policy("army").label).to_lower()
+	var hot:=preload("res://scripts/hud/war_ledger_model.gd").entries().filter(func(e:Dictionary)->bool: return String(e.kind)!="ended" and bool(e.get("hot",false)))
+	chips.feuds.chip.visible=not hot.is_empty()
+	chips.feuds.value.text=str(hot.size())
+	chips.feuds.word.text="hot feud" if hot.size()==1 else "hot feuds"
+	chips.feuds.chip.tooltip_text="Blood spilled within the year: %s.\nClick for the Feuds page." % ", ".join(hot.map(func(e:Dictionary)->String: return String(e.name)))
 
 
 # --- Filters and rows -------------------------------------------------------------
