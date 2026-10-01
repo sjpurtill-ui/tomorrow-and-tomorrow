@@ -1685,9 +1685,10 @@ func delegate_now()->void:
 
 func _delegate_settlements(_day:int)->void:
 	# The ruler sets the daily work (manual_work.gd): the same split for every
-	# town, as the ruler left it. No safeguard or food floor rewrites it; the
-	# People view and the court say what it will do, and the chronicle warns
-	# early when a town's stores will run out (manual_work.warn_towns).
+	# town, as the ruler left it, except that a town's leader puts more on food
+	# when its food is running out (_ruler_split_fed). The People view and the
+	# court say what it will do; the chronicle tells when a leader steps in,
+	# and warns of a town no leader is feeding (manual_work.warn_towns).
 	if not bool(WorldSimulation.direction.automatic_work):
 		_lay_ruler_split()
 		var manual:=preload("res://scripts/manual_work.gd")
@@ -1731,6 +1732,7 @@ func _delegate_settlements(_day:int)->void:
 			focus_effect+=" Survival safeguard: %s." % "; ".join(guard.reasons)
 		settlement["management_focus_effect"]=focus_effect
 		settlement["survival_guard_active"]=bool(guard.active)
+		settlement.erase("fed_by_leader")
 		settlement["auto_manage"]=auto_manage
 		settlement["local_allocations"]=allocations
 		settlement["delegated_effects"]={"competence":competence,"work":competence*0.12,"travel":float(skills.get("Logistics",35))/100.0*0.10,"water":float(skills.get("Provisioning",35))/100.0*0.08,"support":competence*0.14}
@@ -1745,29 +1747,110 @@ func _delegate_settlements(_day:int)->void:
 	if management_changed: WorldSimulation.state.settlement_network_revision+=1
 
 
-## The ruler's split on every town (manual_work.gd applied_percentages): the
-## realm's ledger and each town's own share of work read the same shares.
-## Each town keeps its leader, the leader's standing and the ruler's last ask
-## of them (auto_manage, the focus), so handing the work back to the leaders
-## returns every town to what it had.
+## The ruler's split on every town (manual_work.gd applied_percentages), as
+## each town's leader lays it. The realm's ledger and each town's share of
+## work read the same shares, except that no leader lets a town starve
+## (_ruler_split_fed): a town whose food is running out gets just enough more
+## on food from its own leader, and the rest of the split keeps the ruler's
+## proportions. Each town keeps its leader, the leader's standing and the
+## ruler's last ask of them (auto_manage, the focus), so handing the work back
+## to the leaders returns every town to what it had.
 func _lay_ruler_split()->void:
 	var shares:Dictionary=preload("res://scripts/manual_work.gd").applied_percentages()
 	var management_changed:=false
+	var aggregate:Dictionary={}
+	for role in GameState.POPULATION_ROLES: aggregate[role]=0.0
+	var total_weight:=0.0
+	var satellite_share:=0.0
+	for settlement in WorldSimulation.state.player_settlements:
+		if not bool(settlement.get("primary",false)): satellite_share+=maxf(0.0,float(settlement.get("population_share",0.0)))
 	for index in WorldSimulation.state.player_settlements.size():
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
+		var share:=maxf(0.01,1.0-satellite_share) if bool(settlement.get("primary",false)) else maxf(0.001,float(settlement.get("population_share",0.0)))
 		var leader:=_person_record(int(settlement.get("leader_person_id",0)))
 		var skills:Dictionary=leader.get("skills",{})
 		var competence:=clampf(office_competency(leader,"SettlementLeader"),0.18,0.94) if not leader.is_empty() else 0.18
 		var old_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),bool(settlement.get("survival_guard_active",false)),JSON.stringify(settlement.get("local_allocations",{}))]
-		settlement["survival_guard_active"]=false
-		settlement["local_allocations"]=shares.duplicate(true)
+		# The leader's own feeding under the ruler's split (fed_by_leader),
+		# apart from the leaders' food-and-water guard of their own work.
+		var guarded:=bool(settlement.get("fed_by_leader",false))
+		var yesterday:=float((settlement.get("local_allocations",{}) as Dictionary).get("Food",float(shares.get("Food",0.0))))
+		var laid:Dictionary=WorldSimulation.settlements.with_city_resources(String(settlement.get("id","")),func()->Dictionary:return _ruler_split_fed(shares,yesterday,guarded))
+		var allocations:Dictionary=laid.allocations
+		settlement["fed_by_leader"]=bool(laid.active)
+		settlement["survival_guard_active"]=bool(laid.active)
+		settlement["local_allocations"]=allocations.duplicate(true)
 		settlement["delegated_effects"]={"competence":competence,"work":competence*0.12,"travel":float(skills.get("Logistics",35))/100.0*0.10,"water":float(skills.get("Provisioning",35))/100.0*0.08,"support":competence*0.14}
-		var new_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),false,JSON.stringify(settlement.local_allocations)]
+		if bool(laid.active) and not guarded and float(laid.food)>float(shares.get("Food",0.0))+0.01: _tell_fed(settlement,leader,laid,float(shares.get("Food",0.0)))
+		var new_signature:="%s|%s|%s" % [String(settlement.get("management_focus","")),bool(laid.active),JSON.stringify(settlement.local_allocations)]
 		management_changed=management_changed or old_signature!=new_signature
 		WorldSimulation.state.player_settlements[index]=settlement
-	for role in GameState.POPULATION_ROLES: WorldSimulation.state.population_allocation_percentages[role]=float(shares.get(role,0.0))
+		for role in GameState.POPULATION_ROLES: aggregate[role]=float(aggregate[role])+float(allocations.get(role,0.0))*share
+		total_weight+=share
+	for role in GameState.POPULATION_ROLES: WorldSimulation.state.population_allocation_percentages[role]=float(aggregate[role])/total_weight if total_weight>0.0 else float(shares.get(role,0.0))
 	WorldSimulation.state.synchronize_population_allocations()
 	if management_changed: WorldSimulation.state.settlement_network_revision+=1
+
+
+## A leader keeps feeding a town past the ruler's split until its stores hold
+## this many days of eating again, once the food alarm made them step in.
+const RULER_RELEASE_DAYS:=120.0
+## No leader puts more than this share of a town's hands on food.
+const FOOD_CEILING_SHARE:=85.0
+
+## The ruler's split for one town, read in the town's own scope: the ruler's
+## shares (`shares`, percent), unless the leaders' own food alarm
+## (_survival_guard: short now, losing food with under 45 days left, or a lean
+## season forecast within 60) is up, or the town's leader is already feeding
+## it (`guarded`) and its stores hold less than RULER_RELEASE_DAYS. Then the
+## leader puts enough on food to cover what the town eats and spoils, with
+## more while the stores are under RESERVE_TARGET_DAYS, from the town's own
+## food per hand (the count's food_labor_share, else yesterday's share), and
+## takes those hands from the ruler's other tasks in proportion.
+## {active, allocations, food (share %), days (of eating in store)}.
+func _ruler_split_fed(shares:Dictionary,yesterday_food:float,guarded:bool)->Dictionary:
+	var ruler_food:=float(shares.get("Food",0.0))
+	var out:={"active":false,"allocations":shares.duplicate(true),"food":ruler_food,"days":-1.0}
+	var m:Dictionary=WorldSimulation.state.simulation_metrics
+	if not m.has("food_production"):return out
+	var need:=maxf(0.0,float(m.get("food_consumption",0.0)))
+	if need<=0.0:return out
+	var eats:=need+maxf(0.0,float(m.get("food_spoilage",0.0)))
+	var produced:=maxf(0.0,float(m.get("food_production",0.0)))
+	var stock:=maxf(0.0,float(m.get("food_total_stock",WorldSimulation.state.resource_stockpiles.get("Food",0.0))))
+	var days:=stock/need
+	out.days=days
+	var alarm:=bool(_survival_guard().food)
+	if not alarm and not (guarded and days<RULER_RELEASE_DAYS):return out
+	out.active=true
+	var working:=clampf(float(m.get("food_labor_share",0.0)),0.0,1.0)*100.0
+	if working<=0.01:working=maxf(yesterday_food,ruler_food)
+	var gap:=clampf((RESERVE_TARGET_DAYS-days)/RESERVE_TARGET_DAYS,0.0,1.0)
+	var wanted:=eats*(1.05+RESERVE_MARGIN*gap)
+	var food:=working*wanted/produced if produced>0.01 else FOOD_CEILING_SHARE
+	food=clampf(food,ruler_food,maxf(ruler_food,FOOD_CEILING_SHARE))
+	if food<=ruler_food+0.01:return out
+	var others:=100.0-ruler_food
+	var scale:=(100.0-food)/others if others>0.01 else 0.0
+	var allocations:={}
+	for role in GameState.POPULATION_ROLES:allocations[role]=food if role=="Food" else float(shares.get(role,0.0))*scale
+	out.allocations=allocations
+	out.food=food
+	return out
+
+## The chronicle's word when a town's leader first puts more on food than the
+## ruler's split: the town, its stores, the leader and the shares.
+func _tell_fed(settlement:Dictionary,leader:Dictionary,laid:Dictionary,ruler_food:float)->void:
+	var chronicle:=preload("res://scripts/chronicle.gd")
+	if not chronicle.active():return
+	var town:=String(settlement.get("name","The town"))
+	var who:=("%s, its %s," % [String(leader.get("name","")),settlement_leader_title().to_lower()]) if not leader.is_empty() else "Its leader"
+	var days:=float(laid.get("days",-1.0))
+	var stores:=("its stores held %d days of eating" % roundi(days)) if days>=1.0 else "its stores were empty"
+	var day:=int(WorldSimulation.state.elapsed_days)
+	chronicle.record({"key":"split_fed:%s:%d" % [String(settlement.get("id","")),day],"day":day,"title":"%s's Leader Puts More on Food" % town,
+		"text":"At your split %s was eating more than it gathered, and %s. %s has put %d in 100 of its hands on getting food, against your %d, until the stores hold %d days again. The rest of your split stands." % [town,stores,who,roundi(float(laid.food)),roundi(ruler_food),roundi(RULER_RELEASE_DAYS)],
+		"tier":"notice","kind":"warning","domain":"food"})
 
 
 func settlement_management(settlement_id:String)->Dictionary:

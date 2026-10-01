@@ -4,7 +4,8 @@ extends GdUnitTestSuite
 ## split (PeopleDirection.work_baseline), set the same way from The People
 ## view, the town page and the court. GovernmentPeopleSystem stays the owner
 ## of daily labour: in the ruler's hands its daily delegation lays the split
-## on every town as it is, with no hidden guard or floor, and the People view
+## on every town, except that a town's leader puts more on food when its food
+## is running out (the rest keeps the ruler's proportions); the People view
 ## warns from the counts. Everything reads population_allocations.
 
 const Manual:=preload("res://scripts/manual_work.gd")
@@ -233,22 +234,37 @@ func test_the_ruler_split_holds_day_after_day_in_every_town()->void:
 	var mine:=Manual.counts()
 	assert_int(int(mine.Construction)).is_equal(int(before.Construction)+6)
 	assert_int(_total(mine)).is_equal(GameState.able_population())
-	# A lean count would make the leaders put more on food; the ruler's split
-	# holds, day after day, with no guard and no floor.
-	_count(40.0,100.0)
+	# While the food holds (a little short, stores for 400 days), the ruler's
+	# split holds day after day: no guard and no floor.
+	_count(95.0,100.0)
 	for day in 3:
 		GameState.elapsed_days+=1
 		GovernmentPeopleSystem.process_day(int(GameState.elapsed_days))
 		assert_that(Manual.counts()).is_equal(mine)
 	for city:Dictionary in GameState.player_settlements:
-		assert_bool(bool(city.get("survival_guard_active",true))).is_false()
+		assert_bool(bool(city.get("fed_by_leader",false))).is_false()
 		_assert_same(city.local_allocations,Manual.applied_percentages())
 		assert_bool(bool(GovernmentPeopleSystem.settlement_management(String(city.id)).ruler_sets_work)).is_true()
+	# A lean count (stores for about a month at this split): the town's leader
+	# puts enough more on food to cover what it eats, takes them from the
+	# ruler's other tasks in proportion, and the ruler's split is unchanged.
+	_count(40.0,100.0)
+	GameState.elapsed_days+=1
+	GovernmentPeopleSystem.process_day(int(GameState.elapsed_days))
+	var primary:Dictionary=GameState.player_settlements[0]
+	var applied:=Manual.applied_percentages()
+	assert_bool(bool(primary.get("fed_by_leader",false))).is_true()
+	assert_float(float(primary.local_allocations.Food)).is_greater(float(applied.Food))
+	var kept:=float(primary.local_allocations.Construction)/float(applied.Construction)
+	for role:String in ["Survey","Extraction","Crafting","Logistics","Knowledge","Administration","Defense"]:
+		if float(applied[role])>0.0:assert_float(float(primary.local_allocations[role])/float(applied[role])).is_equal_approx(kept,0.000001)
+	assert_that(Manual.whole_people(Manual.split(),Manual.able())).is_equal(mine)
+	assert_int(int(Manual.counts().Food)).is_greater(int(mine.Food))
 	# No leader can shift hands meanwhile; the reason is said.
 	var asked:=GovernmentPeopleSystem.set_settlement_focus("second","water")
 	assert_bool(bool(asked.ok)).is_false()
 	assert_str(String(asked.reason)).contains("You set the daily work yourself")
-	assert_that(Manual.counts()).is_equal(mine)
+	assert_that(Manual.whole_people(Manual.split(),Manual.able())).is_equal(mine)
 
 func test_minus_plus_and_five_move_whole_people()->void:
 	_world()
@@ -400,7 +416,7 @@ func test_a_save_keeps_the_mode_and_the_split_and_an_old_save_loads_in_leaders_m
 # Plain warnings, nothing overridden
 # --------------------------------------------------------------------------
 
-func test_warnings_show_the_real_forecast_and_nothing_is_overridden()->void:
+func test_warnings_show_the_real_forecast_and_only_hunger_moves_hands()->void:
 	_world()
 	var food_hands:=float(GameState.simulation_metrics.food_workers)
 	Manual.set_manual(true)
@@ -423,13 +439,17 @@ func test_warnings_show_the_real_forecast_and_nothing_is_overridden()->void:
 	for line:Dictionary in look.lines:
 		if String(line.text).begins_with("Water"):water=String(line.text)
 	assert_str(water).is_equal("Water: %d in 10 drink enough." % roundi(float(look.water_ratio)*10.0))
-	# Nothing rewrites the split: not the day's delegation, not a lean count.
+	# Nothing rewrites the ruler's split. A lean count makes the town's
+	# leader put more on food, and only on food: the ruler's carriers stay
+	# at none, short of water or not.
 	var mine:=Manual.counts()
+	var ruler:=Manual.whole_people(Manual.split(),Manual.able())
 	_count(20.0,100.0)
 	GameState.water_metrics["intake_ratio"]=0.5
 	GovernmentPeopleSystem.process_day(int(GameState.elapsed_days)+1)
-	assert_that(Manual.counts()).is_equal(mine)
-	assert_int(int(mine.Logistics)).is_equal(0)
+	assert_that(Manual.whole_people(Manual.split(),Manual.able())).is_equal(ruler)
+	assert_int(int(Manual.counts().Food)).is_greater(int(mine.Food))
+	assert_int(int(Manual.counts().Logistics)).is_equal(0)
 
 # --------------------------------------------------------------------------
 # The court's words
@@ -634,10 +654,10 @@ func test_the_town_page_warns_at_the_split_with_the_one_click_fix()->void:
 	assert_str((page.find_child("SplitWarning",true,false) as Label).text).is_equal(String(warning.text))
 	var fix:=page.find_child("FoodFix",true,false) as Button
 	assert_str(fix.text).is_equal("Put %d more on getting food" % int(warning.fix))
-	var before:=int(Manual.counts().Food)
+	var before:=int(Manual.whole_people(Manual.split(),Manual.able()).Food)
 	fix.pressed.emit()
 	# The fix is the ruler's own split, a few more on food: still the ruler's.
-	assert_int(int(Manual.counts().Food)).is_equal(before+int(warning.fix))
+	assert_int(int(Manual.whole_people(Manual.split(),Manual.able()).Food)).is_equal(before+int(warning.fix))
 	assert_bool(Manual.manual()).is_true()
 	# The stores holding again, the page says nothing more.
 	_count(130.0,100.0)
