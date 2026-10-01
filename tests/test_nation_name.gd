@@ -26,6 +26,7 @@ class Hud extends Control:
 	func request_immediate_dock_refresh()->void:refreshes+=1
 
 var slot:=""
+var fx:Fixtures
 var _processing:Dictionary={}
 
 
@@ -36,8 +37,10 @@ func before()->void:
 
 func before_test()->void:
 	slot="nation_name_%d_%d" % [OS.get_process_id(),Time.get_ticks_usec()]
-	# Seanstone, its court (Kishan the headman, Suri, Kavu, Imeri), the Esurai.
-	Fixtures.new(self).base(false)
+	# Seanstone, its court (Kishan the headman, Suri, Kavu, Imeri), the Esurai;
+	# second_town() founds another town of ours as a caravan's arrival does.
+	fx=Fixtures.new(self)
+	fx.base(false)
 
 
 func after_test()->void:
@@ -58,20 +61,6 @@ func after()->void:
 	WorldSimulation.clear()
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 	preload("res://scripts/ai_mode.gd").reset_for_tests(preload("res://scripts/ai_mode.gd").SETTINGS_PATH)
-
-
-## A town of ours founded the way a caravan's arrival founds one.
-func _found_town(name:String)->Dictionary:
-	var primary:Dictionary=GameState.player_settlements[0]
-	var sequence:=GameState.next_player_settlement_id
-	var record:={"id":"settlement_%03d" % sequence,"sequence":sequence,"primary":false,"name":name,"position":(primary.position as Vector2)+Vector2(6.0+sequence,4.0),
-		"population_share":0.2,"founded_day":int(GameState.elapsed_days),"status":"established","source_settlement_id":String(primary.id),
-		"territory_context":{},"environment_profile":{},"auto_manage":true,"management_focus":"establishment","leader_person_id":0}
-	GameState.next_player_settlement_id+=1
-	GameState.player_settlements.append(record)
-	SettlementModel._ensure_city_resources(record)
-	GameState.settlement_network_revision+=1
-	return record
 
 
 ## The Chronicle's lines about our nation's name, newest first.
@@ -121,7 +110,7 @@ func test_one_town_reads_as_the_town_and_cannot_be_named_yet()->void:
 
 
 func test_the_second_founding_asks_and_its_card_names_the_nation()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	assert_int(NationName.towns()).is_equal(2)
 	assert_bool(NationName.ask_at_founding()).is_true()
 	# The founding card: the heading, "And our nation", and names heard among
@@ -153,12 +142,12 @@ func test_the_second_founding_asks_and_its_card_names_the_nation()->void:
 	assert_str(String(told[0].text)).contains("Reedmouth")
 	assert_str(String(told[0].text)).contains(NationName.in_sentence(heard[0]))
 	# A third founding does not ask again.
-	_found_town("Ashbank")
+	fx.second_town("Ashbank")
 	assert_bool(NationName.ask_at_founding()).is_false()
 
 
 func test_skipping_names_nothing_and_only_the_next_founding_asks_again()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	var inbox:=GameState.council_inbox.size()
 	var column:VBoxContainer=auto_free(VBoxContainer.new())
 	add_child(column)
@@ -175,12 +164,12 @@ func test_skipping_names_nothing_and_only_the_next_founding_asks_again()->void:
 	assert_str(String(page.blocks[0].items[0].value)).is_equal("Name it")
 	assert_str(String(page.blocks[1].type)).is_equal("cabinet")
 	# The next founding asks again.
-	_found_town("Ashbank")
+	fx.second_town("Ashbank")
 	assert_bool(NationName.ask_at_founding()).is_true()
 
 
 func test_the_government_screen_renames_the_nation()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	assert_bool(bool(NationName.give_name("the reedfolk","screen").ok)).is_true()
 	assert_str(GameState.nation_name).is_equal("The Reedfolk")
 	var hud:Hud=auto_free(Hud.new())
@@ -235,14 +224,16 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	assert_str(String(early.card.state)).is_equal("nothing")
 	assert_str(GameState.nation_name).is_equal("")
 	# Two towns: named, the headman answers in his own words, the card is done.
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	var steward:=GovernmentPeopleSystem.officeholder("Steward")
 	var r:=_speak("Our people shall be called the Reedfolk")
 	assert_bool(bool(r.handled)).is_true()
 	assert_str(String(r.verb)).is_equal("nation_name")
 	assert_bool(bool(r.executed)).is_true()
 	assert_str(String(r.actor_name)).is_equal(String(steward.name))
-	assert_str(String(r.actor_says)).is_equal("Then we are the Reedfolk. I will send word to Seanstone and Reedmouth.")
+	# In their own manner (their disposition), always the name and the word sent out.
+	var firsts:=Realm.NATION_ANSWERS.values().map(func(pair:Array)->String: return String(pair[0]).replace("{Name}","The Reedfolk").replace("{name}","the Reedfolk").replace("{towns}","Seanstone and Reedmouth"))
+	assert_bool(firsts.has(String(r.actor_says))).override_failure_message(String(r.actor_says)).is_true()
 	assert_str(String(r.outcome)).contains("our people are called the Reedfolk")
 	assert_str(String(r.card.state)).is_equal("done")
 	assert_str(GameState.nation_name).is_equal("The Reedfolk")
@@ -254,7 +245,12 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	# A new name, and the same name again.
 	var again:=_speak("name our realm Ashmark")
 	assert_bool(bool(again.executed)).is_true()
-	assert_str(String(again.actor_says)).starts_with("No longer the Reedfolk, then, but Ashmark.")
+	assert_str(String(again.actor_says)).contains("Ashmark")
+	assert_str(String(again.actor_says)).contains("Seanstone and Reedmouth")
+	# Every manner answers both a first name and a new one, the facts kept.
+	for pair:Array in Realm.NATION_ANSWERS.values():
+		assert_int(pair.size()).is_equal(2)
+		for template:String in pair: assert_bool(template.contains("{towns}") and (template.contains("{name}") or template.contains("{Name}"))).override_failure_message(template).is_true()
 	var same:=_speak("call our nation Ashmark")
 	assert_bool(bool(same.executed)).is_false()
 	assert_str(String(same.card.state)).is_equal("nothing")
@@ -263,7 +259,7 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 
 
 func test_the_save_keeps_the_name_and_an_older_save_loads_unnamed()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	assert_bool(bool(NationName.give_name("The Reedfolk","court").ok)).is_true()
 	var saved:=SaveSystem.save_game(slot)
 	assert_bool(saved.has("error")).override_failure_message(str(saved)).is_false()
@@ -287,7 +283,7 @@ func test_the_save_keeps_the_name_and_an_older_save_loads_unnamed()->void:
 
 
 func test_foreign_and_chronicle_uses_show_the_name()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	NationName.give_name("The Reedfolk","court")
 	var civ_id:=String(CivilizationSystem.civilizations[0].id)
 	# The world's name for us: wars, the competition row, the battle markers.
@@ -315,7 +311,7 @@ func test_foreign_and_chronicle_uses_show_the_name()->void:
 
 
 func test_the_home_towns_own_uses_stay_the_town()->void:
-	_found_town("Reedmouth")
+	fx.second_town("Reedmouth")
 	NationName.give_name("The Reedfolk","court")
 	assert_str(GameState.settlement_name).is_equal("Seanstone")
 	assert_str(CivilizationSystem._player_home_name()).is_equal("SEANSTONE")

@@ -480,6 +480,8 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["legitimacy_x100"]=roundi(float(GameState.simulation_metrics.get("legitimacy",0.5))*100.0)
 	m["cohesion_x100"]=roundi(float(GameState.simulation_metrics.get("cohesion",0.5))*100.0)
 	m["settlement_name"]=String(GameState.settlement_name)
+	# What all our towns together are called (nation_name.gd), "" until named.
+	m["nation_name"]=String(GameState.nation_name)
 	# The court's known persons (court_persons.gd): the living, the dead and
 	# the driven out, who is waiting before the ruler, whom the court spoke of.
 	var living:=0; var gone:=0; var bound:=0
@@ -618,7 +620,7 @@ static func _material(m:Dictionary)->String:
 		# Offices, the god's standing with each official and with the people, the
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
-		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
+		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","nation_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
 		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",

@@ -10,7 +10,7 @@ const Years:=preload("res://scripts/hud/chronicle_year_model.gd")
 func meta()->Dictionary:
 	var voice:=Chronicle.voice()
 	# Our nation's name once given: "THE STORY OF THE REEDFOLK" (nation_name.gd).
-	var nation:=preload("res://scripts/nation_name.gd").in_sentence()
+	var nation:=preload("res://scripts/nation_name.gd").in_sentence(String(GameState.nation_name))
 	return {"eyebrow":"THE STORY OF %s" % (nation.to_upper() if nation!="" else "THE PEOPLE"),"title":String(voice.feed),"subtabs":[]}
 
 func tab(_sub:int)->Dictionary:

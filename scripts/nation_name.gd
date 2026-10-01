@@ -61,9 +61,10 @@ static func ask_at_founding()->bool:
 	return not named() and towns()>=TOWNS_TO_NAME
 
 
-## Inside a sentence: "the Reedfolk" (a leading "The" lower-cased).
-static func in_sentence(name:String="")->String:
-	var clean:=(name if name!="" else current()).strip_edges()
+## A name inside a sentence: "the Reedfolk" (a leading "The" lower-cased);
+## "" stays "".
+static func in_sentence(name:String)->String:
+	var clean:=name.strip_edges()
 	return "the "+clean.substr(4) if clean.begins_with("The ") else clean
 
 

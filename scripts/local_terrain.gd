@@ -310,6 +310,7 @@ var naming_previous_speed := 0.0
 var settlement_naming_target_id:=""
 ## The naming card's "And our nation" line at a town's founding (hud/nation_name_card.gd).
 var nation_name_input: LineEdit
+var naming_offers_nation := false
 var suppress_naming_prompt := false
 var map_help_button:Button
 var map_help_panel:PanelContainer
@@ -12011,7 +12012,7 @@ func _show_convoy_arrival(completed:Dictionary)->void:
 		# does not open by itself over it.
 		# Our second town (or a later one) while the nation has no name: its
 		# naming card also asks for the nation's (nation_name.gd).
-		if preload("res://scripts/nation_name.gd").ask_at_founding():_open_settlement_naming_panel.call_deferred(String(settlement.get("id","")),true)
+		if preload("res://scripts/nation_name.gd").ask_at_founding():_open_founding_naming_panel.call_deferred(String(settlement.get("id","")))
 	_update_time_interface()
 
 func _start_settlement_here() -> void:
@@ -12830,7 +12831,14 @@ func _screen_direction_arrow(delta:Vector2)->String:
 	var arrows:=["→","↘","↓","↙","←","↖","↑","↗"]
 	return arrows[wrapi(roundi(angle/(PI/4.0)),0,8)]
 
-func _open_settlement_naming_panel(settlement_id:String="",with_nation:bool=false) -> void:
+## A town's founding while our nation has no name: its naming card also asks
+## for the nation's (nation_name.gd).
+func _open_founding_naming_panel(settlement_id:String) -> void:
+	naming_offers_nation=true
+	_open_settlement_naming_panel(settlement_id)
+	naming_offers_nation=false
+
+func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	if not GameState.settlement_site_committed:
 		if travel_status_label:
 			travel_status_label.text="Found the first settlement before you name it."
@@ -12866,7 +12874,7 @@ func _open_settlement_naming_panel(settlement_id:String="",with_nation:bool=fals
 	# A paper card over the dimmed map (paper_kit.gd): the name, Not now, Rename.
 	# A town just founded while our nation has no name: the nation's name too.
 	var nation_card:=preload("res://scripts/hud/nation_name_card.gd")
-	var founding:=with_nation and preload("res://scripts/nation_name.gd").ask_at_founding()
+	var founding:=naming_offers_nation and preload("res://scripts/nation_name.gd").ask_at_founding()
 	var parts:=PaperKit.modal(interface_layer,520.0,HudT.GOLD,"RenameSettlement")
 	settlement_naming_panel=parts[0]
 	var column:VBoxContainer=parts[1]

@@ -50,7 +50,7 @@ const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Leaders:=preload("res://scripts/leader_commands.gd")
 
-const NAMES:=["home_peace","home_charted","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
+const NAMES:=["home_peace","home_charted","home_towns","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
 
 ## The user's own words used to make the worlds.
 const BIND_WORDS:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
@@ -196,6 +196,20 @@ func _rename(pid:int,name:String)->void:
 	for key in GameState.leadership_positions:
 		if int((GameState.leadership_positions[key] as Dictionary).get("person_id",0))==pid: GameState.leadership_positions[key]["name"]=name
 
+## A town of ours founded beside the home town, as a caravan's arrival founds
+## one (settlement_model.complete_settlement_convoy). Returns its record.
+func second_town(name:String)->Dictionary:
+	var primary:Dictionary=GameState.player_settlements[0]
+	var sequence:=GameState.next_player_settlement_id
+	var record:={"id":"settlement_%03d" % sequence,"sequence":sequence,"primary":false,"name":name,"position":(primary.position as Vector2)+Vector2(4.0+2.0*float(sequence),4.0),
+		"population_share":0.2,"founded_day":int(GameState.elapsed_days),"status":"established","source_settlement_id":String(primary.id),
+		"territory_context":{},"environment_profile":{},"auto_manage":true,"management_focus":"establishment","leader_person_id":0}
+	GameState.next_player_settlement_id+=1
+	GameState.player_settlements.append(record)
+	SettlementModel._ensure_city_resources(record)
+	GameState.settlement_network_revision+=1
+	return record
+
 func _name_the_court(info:Dictionary)->void:
 	# The court at this stage has no Scholar: Imeri keeps the trails (Chief Scout).
 	var names:={"Steward":["headman","Kishan of Reedwater"],"Marshal":["suri","Suri Ashvale"],"Quartermaster":["kavu","Kavu Dunmere"],"ChiefScout":["imeri","Imeri of Windgap"]}
@@ -294,6 +308,12 @@ func _build(name:String)->Dictionary:
 			# Our scouts have charted the land around home: a new town can be
 			# founded there (realm_orders.gd found_town).
 			CivilizationSystem._add_revealed_area(home,45.0,"scout report")
+		"home_towns":
+			info=base(false)
+			train(12)
+			# Our second town, Reedmouth: our nation, unnamed, can now take a
+			# name of its own (nation_name.gd).
+			second_town("Reedmouth")
 		"war_not_held":
 			info=base(true)
 			train(30)

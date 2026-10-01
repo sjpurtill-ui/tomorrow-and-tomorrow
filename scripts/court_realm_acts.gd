@@ -653,8 +653,8 @@ static func perform_nation(id:String,r:Dictionary,reading:Dictionary)->Dictionar
 	var why:="" if r.executed else String(done.get("why","refused"))
 	match why:
 		"one_town":
-			r["actor_says"]="We are one %s yet, and the people go by %s. When a second %s stands, they can take a name of their own." % [place,home if home!="" else "its name",place]
-			r.outcome="Nothing is changed: our people live in one %s%s and go by its name until a second %s stands." % [place,(", "+home) if home!="" else "",place]
+			r["actor_says"]="We have one %s yet, and the people go by %s. When a second %s stands, they can take a name of their own." % [place,home if home!="" else "its name",place]
+			r.outcome="Nothing is changed: our people have one %s%s and go by its name until a second %s stands." % [place,(", %s," % home) if home!="" else "",place]
 		"same":
 			r["actor_says"]="We are %s already, as you named us." % NationName.in_sentence(String(done.get("name","")))
 			r.outcome="Nothing is changed: our people are already called %s." % NationName.in_sentence(String(done.get("name","")))
@@ -663,14 +663,30 @@ static func perform_nation(id:String,r:Dictionary,reading:Dictionary)->Dictionar
 			r.outcome="Nothing is changed: %s" % _lower_first(String(done.get("reason","")))
 		"":
 			var name:=NationName.in_sentence(String(done.get("name","")))
-			var old:=String(done.get("old",""))
 			var towns:=NationName.towns_words()
-			r["actor_says"]=("No longer %s, then, but %s. I will send word to %s." % [NationName.in_sentence(old),name,towns]) if old!="" else ("Then we are %s. I will send word to %s." % [name,towns])
+			r["actor_says"]=_nation_answer(r,name,NationName.in_sentence(String(done.get("old",""))),towns)
 			r.outcome="From today our people are called %s. The name is told in %s, and the court will use no other." % [name,towns]
 		_:
 			r["actor_says"]=""
 			r.outcome="Nothing is changed: %s" % _lower_first(String(done.get("reason","the name cannot be given.")))
 	return r
+
+## The one before the god answers a new name in their own manner (their
+## disposition, government_people_system.leader_disposition): the name, and
+## that word goes to our towns. old: the name it replaces, or "".
+const NATION_ANSWERS:={
+	"pragmatic":["Then we are {name}. I will send word to {towns}.","No longer {old}, then, but {name}. I will send word to {towns}."],
+	"sycophantic":["{Name}! A fine name, and it suits us. I will have it cried in {towns}.","{Name}! A better name than {old}. I will have it cried in {towns}."],
+	"principled":["{Name}, then. It is a good plain name. I will send word to {towns}.","{Name}, then, and not {old}. I will send word to {towns}."],
+	"cantankerous":["{Name}. The people will grumble at a new name for a season, then use it. I will send word to {towns}.","Another name? Still, {name} it is. I will send word to {towns}."],
+	"diplomatic":["{Name}. Strangers will know us by it now. I will send word to {towns}, and to any people we meet.","{Name}. Those who knew us as {old} will need telling too. I will send word to {towns}."],
+}
+
+static func _nation_answer(r:Dictionary,name:String,old:String,towns:String)->String:
+	var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int((r.get("actor",{}) as Dictionary).get("person_id",0))) if int((r.get("actor",{}) as Dictionary).get("person_id",0))>0 else {}
+	var manner:=String(GovernmentPeopleSystem.leader_disposition(person).get("id","pragmatic")) if not person.is_empty() else "pragmatic"
+	var pair:Array=NATION_ANSWERS.get(manner,NATION_ANSWERS.pragmatic)
+	return String(pair[1] if old!="" else pair[0]).replace("{Name}",name.substr(0,1).to_upper()+name.substr(1)).replace("{name}",name).replace("{old}",old).replace("{towns}",towns)
 
 static func _lower_first(text:String)->String:
 	return text.substr(0,1).to_lower()+text.substr(1)

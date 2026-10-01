@@ -1808,6 +1808,45 @@
    "say": "Mend the broken weapons",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"handled": true, "state": {"modifiers": "==before"}},
-   "variants": ["Repair the damaged spears"]}
+   "variants": ["Repair the damaged spears"]},
+
+  {"id": "cul.nation.name", "domain": "culture", "fixture": "home_towns", "speaker": "headman", "source": "design",
+   "note": "The user: 'Need to be able to name our nation when we have more than one city.' Two towns, no name yet: the nation is named (nation_name.gd), the headman answers, the towns keep their own names, no standing order.",
+   "say": "Call our nation the Reedfolk",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "=='The Reedfolk'", "settlement_name": "==before", "modifiers": "==before"}, "reply_has": ["the Reedfolk", "Reedmouth"]},
+   "variants": ["our people shall be called the Reedfolk", "name our realm the Reedfolk", "call our people the reedfolk", "From now on we shall be known as the Reedfolk", "Let our nation be called the Reedfolk.", "the name of our nation is the Reedfolk", "Kishan, call our nation the Reedfolk"]},
+
+  {"id": "cul.nation.one_town", "domain": "culture", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "One town: the people go by its name. The headman says so plainly; nothing is named and nothing else changes.",
+   "say": "Call our nation the Reedfolk",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "==before", "settlement_name": "==before", "modifiers": "==before"}, "reply_has": ["Seanstone", "Nothing is changed"]},
+   "variants": ["our people shall be called the Reedfolk"]},
+
+  {"id": "cul.nation.any_official", "domain": "culture", "fixture": "home_towns", "speaker": "suri", "source": "design",
+   "note": "Any official before the god answers the naming, not only the headman.",
+   "say": "Our people shall be called the Reedfolk",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "=='The Reedfolk'", "modifiers": "==before"}, "reply_has": ["the Reedfolk"]}},
+
+  {"id": "cul.nation.asked", "domain": "culture", "fixture": "home_towns", "speaker": "headman", "source": "design",
+   "note": "Officials answer from the exact fact sheet: what our people are called, once named.",
+   "steps": [
+    {"say": "Name our realm the Reedfolk", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"nation_name": "=='The Reedfolk'"}}},
+    {"say": "What is our nation called?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_has": ["We are the Reedfolk"], "prompt_has": ["is called The Reedfolk"]}}]},
+
+  {"id": "cul.nation.town_stays_town", "domain": "culture", "fixture": "home_towns", "speaker": "headman", "source": "design",
+   "note": "Renaming the home town renames the town only, never the nation.",
+   "say": "Rename Seanstone to Godshold",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"settlement_name": "=='Godshold'", "nation_name": "==before", "modifiers": "==before"}}},
+
+  {"id": "cul.nation.not_a_name", "domain": "culture", "fixture": "home_towns", "speaker": "headman", "source": "design",
+   "note": "Words that only call our people somewhere name nothing.",
+   "say": "Call our people to the fire",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"state": {"settlement_name": "==before", "nation_name": "==before"}},
+   "variants": ["call our people home"]}
 ]
 }

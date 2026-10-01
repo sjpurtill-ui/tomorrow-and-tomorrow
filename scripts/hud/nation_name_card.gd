@@ -61,7 +61,7 @@ static func open(host:Node,on_done:Callable=Callable())->Control:
 	var column:VBoxContainer=parts[1]
 	var named:=NationName.named()
 	Kit.label(column,"Our nation","kicker")
-	Kit.label(column,("A new name for %s" % NationName.in_sentence()) if named else ("A name for all our %s" % EraWords.word("places","towns")),"title")
+	Kit.label(column,("A new name for %s" % NationName.in_sentence(NationName.current())) if named else ("A name for all our %s" % EraWords.word("places","towns")),"title")
 	Kit.label(column,"The name other peoples know us by, and the one the Chronicle uses. Each %s keeps its own name." % EraWords.word("place","town"),"body").custom_minimum_size.x=460
 	var input:=_line(column,NationName.current())
 	var status:=Kit.label(column,"","note")
