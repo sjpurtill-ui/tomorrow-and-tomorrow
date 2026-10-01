@@ -36,6 +36,11 @@ func _ready()->void:
 	if batch=="earliest-20":get_window().size=Vector2i(1440,1320)
 	if "--opening-chronology-01" in OS.get_cmdline_user_args():
 		batch="earliest-opening-01";selected=["labor_rotations"]
+	if "--opening-chronology-03" in OS.get_cmdline_user_args():
+		batch="earliest-opening-03";selected=[]
+		var selection:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-03/selected.json"))
+		for row:Dictionary in selection:selected.append(row.id)
+		assert(not selected.is_empty())
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true

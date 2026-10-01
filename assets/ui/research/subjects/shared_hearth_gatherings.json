@@ -1,0 +1,18 @@
+{
+  "id": "shared_hearth_gatherings",
+  "line": "culture",
+  "game_year": 1,
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_art600": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-cba600e8-9a7c-4490-8717-642b764a7218.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/radio_broadcasting-v1.png",
+  "prompt": "Create a completely new opening-era research painting for Shared Hearth Gatherings, game year 1. The attached reference supplies ONLY mature tapestry-inspired PAINTING MEDIUM: interlocking flat pigment shapes, rhythmic angular adult silhouettes, coarse fiber-like paint grain, indigo, dusty rose, warm gold and dusk violet. Copy none of its objects, clothing, architecture or radio. Scene: six dignified adults in simple ragged unstitched animal-hide wraps sit in a loose curved group on bare ground around a small shared fire, exchanging a gesture and listening to one another. No later craft objects. A few rough stones contain the small fire, loose natural firewood. Open prehistoric landscape in flat dusk bands, no automatic river. Warm communal attention, varied adult profiles, no cute faces. Very wide panoramic painting approx 3:1; place all faces, hands, communal gesture and fire together across the central horizontal band for 3.37:1 card cropping. Deliberate flat shapes and visible handmade paint, no digital volume or cinematic light. Tapestry is rendering only: no woven garments, physical tapestry, rugs, baskets, pottery, sewn tunics, metal, finished furniture, buildings, alphabet, emblems, captions, border or watermark.",
+  "review": "Full image inspected: six adult hide-clad figures exchange gesture around small shared fire on bare earth, no later furnishings or craft objects. Mature interlocking flat painted shapes and fiber-like pigment grain, indigo/rose/gold/violet culture palette. Reference used for medium only. Full image and 3.37:1 crop inspected; all six adult faces, communal gesture and shared fire remain visible.",
+  "asset": "res://assets/ui/research/subjects/shared_hearth_gatherings-v1.png",
+  "sha256": "e65434d7f771bd6c2abc0b8fd40431d3c9dc18532c4157d493d68cfff663397b",
+  "mode": "built-in image_gen / edit"
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "carried_load_balancing",
+    "line": "logistics",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d1c86699-c0e9-4da1-9759-d389e2b2fc3d.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/carried_load_balancing-v1.png",
+    "prompt": "Edit this existing research painting for Carried Loads Balanced on Tumpline and Back, an opening-era logistics discovery. Preserve its mature handmade watercolor and restrained ink aesthetic, muted blue/ochre on warm paper, side-on figure, walking posture, broad panoramic landscape and composition. Replace ONLY the tightly woven basket on the person's back with a ragged unstitched hide sheet gathered around the loose bundle of reeds, held by a few rough raw-fiber ties. Keep the loose reed ends visible. The simple tumpline must run from the gathered hide load up over the person's forehead to carry the weight; keep that functional route legible. No woven basket, no sewn pack, no modern straps or metal fittings. Preserve all other details, watercolor transparency and flat painted silhouette. No text or frame, no photorealism or 3D.",
+    "review": "Full image inspected: rough gathered hide wraps loose reeds; coarse ties and forehead tumpline carry load visibly. Existing mature panoramic watercolor, adult posture and landscape retained. Removes woven basket before game-year-8 basketry; no sewn pack or metal fittings. Full image and 3.37:1 crop inspected; forehead tie, gathered hide and reeds remain legible."
+  },
+  {
+    "id": "shared_hearth_gatherings",
+    "line": "culture",
+    "game_year": 1,
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_art600": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-cba600e8-9a7c-4490-8717-642b764a7218.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/radio_broadcasting-v1.png",
+    "prompt": "Create a completely new opening-era research painting for Shared Hearth Gatherings, game year 1. The attached reference supplies ONLY mature tapestry-inspired PAINTING MEDIUM: interlocking flat pigment shapes, rhythmic angular adult silhouettes, coarse fiber-like paint grain, indigo, dusty rose, warm gold and dusk violet. Copy none of its objects, clothing, architecture or radio. Scene: six dignified adults in simple ragged unstitched animal-hide wraps sit in a loose curved group on bare ground around a small shared fire, exchanging a gesture and listening to one another. No later craft objects. A few rough stones contain the small fire, loose natural firewood. Open prehistoric landscape in flat dusk bands, no automatic river. Warm communal attention, varied adult profiles, no cute faces. Very wide panoramic painting approx 3:1; place all faces, hands, communal gesture and fire together across the central horizontal band for 3.37:1 card cropping. Deliberate flat shapes and visible handmade paint, no digital volume or cinematic light. Tapestry is rendering only: no woven garments, physical tapestry, rugs, baskets, pottery, sewn tunics, metal, finished furniture, buildings, alphabet, emblems, captions, border or watermark.",
+    "review": "Full image inspected: six adult hide-clad figures exchange gesture around small shared fire on bare earth, no later furnishings or craft objects. Mature interlocking flat painted shapes and fiber-like pigment grain, indigo/rose/gold/violet culture palette. Reference used for medium only. Full image and 3.37:1 crop inspected; all six adult faces, communal gesture and shared fire remain visible."
+  },
+  {
+    "id": "raw_material_prestaging",
+    "line": "production",
+    "game_year": 1,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9dcf34d2-48c1-49b9-90b4-aecdf8c860c9.png",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abe235d5-5be6-4c59-a366-bf52486daa91.png",
+    "prompt": "Make one precise historical correction to this painting, preserving the adult figures, arrangement of stone/wood/reed/clay raw heaps, absence of baskets, hide lean-to, flat copper and ember-orange palette-knife impasto style and wide composition. Change the few round clean cut ends of the wood logs in the central raw-stock pile to irregular jagged broken branch ends with crude splinters and uneven fracture faces. No circular saw-cut discs or neatly standardized logs. Keep raw bark, crooked lengths and all other scene details. No new tools, pottery, weaving, metal, text, frame or photographic rendering.",
+    "initial_prompt": "Edit this existing research painting for Raw Stock Set Out Before a Work Session, game year 1. Keep its mature palette-knife impasto oil aesthetic, scraped chunky flat paint planes, copper/ember orange/soot/umber palette, adult hide-clad figures and broad horizontal composition. Preserve the visible action of laying out rough stones, wood, reeds and clay for later work. Remove every woven basket, woven fence or structured reed container in the background, at both far edges and anywhere else. Replace those only with loose ragged bundles of raw reeds resting on earth; no weaving or lattice. The hide lean-to may remain crude and minimal. Preserve rough stone material heaps and natural irregular wood. No finished tools, pottery, metal, standardized carpentry, writing, labels, frame, photorealism or CGI. Keep all hands and piles legible in wide card crop.",
+    "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/raw_material_prestaging-v1.png",
+    "review": "Full corrected image inspected: four hide-clad adults lay out rough stone, broken wood, loose reeds and clay. Woven containers/fences removed, central wood ends made jagged and irregular. Mature chunky flat impasto pigment and copper/ember/soot palette preserved. No saw-cut stock, metal, pottery or woven objects. Full image and 3.37:1 crop inspected; sorting hands and all four raw heaps remain legible."
+  }
+]
