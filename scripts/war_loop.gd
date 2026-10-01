@@ -587,6 +587,10 @@ static func _execute(civ_id:String,day:int)->void:
 		elif int(f.get("settled_until",-1))>day: why="%s kept to the settlement of the feud." % _name(civ_id)
 		_log(civ_id,"held_back",why)
 		return
+	# A people broken past fighting has nobody to send (broken()).
+	if broken(civ_id):
+		_log(civ_id,"stood_down","No raiders came from %s: no town of theirs is left, and too few of them live." % _name(civ_id),{"ref":String(pending.get("ref",""))})
+		return
 	# A people worn out by the feud keeps its raiders home.
 	if not formal and float(f.get("their_exh",0.0))>=ENEMY_SPENT:
 		_log(civ_id,"stood_down","%s has buried too many of its own; no raiders came." % _name(civ_id),{"ref":String(pending.get("ref",""))})
@@ -1903,6 +1907,8 @@ static func _rival_wars(day:int)->void:
 			var first:Dictionary=civs[i]; var second:Dictionary=civs[j]
 			if not bool(first.get("alive",true)) or not bool(second.get("alive",true)): continue
 			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
+			# A people down to a handful starts no quarrel and is worth none.
+			if minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<BROKEN_PEOPLE: continue
 			var a:Vector2=first.get("position",Vector2.ZERO); var b:Vector2=second.get("position",Vector2.ZERO)
 			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
 			var relation:Dictionary=(first.get("relations",{}) as Dictionary).get(String(second.id),{})
@@ -1952,6 +1958,7 @@ static func _grudges(day:int)->void:
 ## This month's chance that a heavy old grudge sends raiders (checked monthly
 ## by _grudges; the Standing page states it).
 static func grudge_raid_chance(civ_id:String)->float:
+	if broken(civ_id): return 0.0
 	var rival:=_rival(civ_id)
 	var weight:=float(rival.get("grudge_weight",0.0))
 	if weight<0.9: return 0.0
@@ -1959,7 +1966,7 @@ static func grudge_raid_chance(civ_id:String)->float:
 
 ## This month's chance that envy of our stores and works sends raiders.
 static func envy_raid_chance(civ_id:String,envy:float)->float:
-	if envy<=Standing.ENVY_RAID_FLOOR: return 0.0
+	if envy<=Standing.ENVY_RAID_FLOOR or broken(civ_id): return 0.0
 	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)*_league_backing(civ_id)
 
 ## Peoples bound together against us back each other's raids (fear_league.gd).

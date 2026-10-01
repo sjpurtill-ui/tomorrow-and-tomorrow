@@ -638,6 +638,15 @@ func test_a_people_with_no_town_and_a_handful_left_ends_its_feud_once()->void:
 	assert_str(told).contains("the feud with oruq is over")
 	assert_str(told).contains("only one of them lives, in the hills")
 	assert_int(told.count("is over:")).is_equal(1)
+	# An old grudge sends nobody either: no chance, and a raid already
+	# scheduled stands down when its day comes.
+	assert_float(WAR.grudge_raid_chance(civ_id)).is_equal(0.0)
+	var day:=int(GameState.elapsed_days)
+	WAR._schedule(civ_id,day+1,"grudge","grudge")
+	_run(10)
+	assert_int(int(WAR.front(civ_id).get("raids",0))).is_equal(raids_before)
+	assert_bool((WAR.front(civ_id).pending as Dictionary).is_empty()).is_true()
+	assert_int(int(WAR.front(civ_id).level)).is_equal(0)
 
 func test_a_people_with_many_left_but_no_town_keeps_its_feud()->void:
 	# Burned out but forty strong in the hills: they can still raid.
