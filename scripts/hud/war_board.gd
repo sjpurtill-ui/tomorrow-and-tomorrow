@@ -162,7 +162,40 @@ func _enemy_row(e:Dictionary)->Control:
 		pay.tooltip_text="A blood price for the dead of theirs ends the feud at once; their raiders will not come for it."
 		pay.pressed.connect(func()->void:_stance(civ_id,"pay","war_price"))
 		stances.add_child(pay)
+	column.add_child(_led_by(civ_id))
 	return panel
+
+
+## Who leads against this people: the war leader's choice, or a general the
+## ruler names (WarLoop.front(civ_id).general: a figure id, "" for the war
+## leader's choice). The war council gives that general the bands it sends.
+func _led_by(civ_id:String)->Control:
+	var row:=HBoxContainer.new();row.name="LedBy";row.add_theme_constant_override("separation",8)
+	var generals:=Commands.leaders(MilitaryCampaign).filter(func(l:Dictionary)->bool:return String(l.id)!=Commands.WAR_LEADER and String(l.get("status",""))=="living")
+	var chosen:=String(WarLoop.front(civ_id).get("general",""))
+	row.add_child(_line("Led by",13,T.INK_MUTED))
+	if generals.is_empty():
+		row.add_child(_line("the war leader · no general has come forward yet",13,T.INK))
+		return row
+	var pick:=OptionButton.new();pick.name="General";pick.focus_mode=Control.FOCUS_NONE
+	pick.add_item("The war leader's choice");pick.set_item_metadata(0,"")
+	var selected:=0
+	for general:Dictionary in generals:
+		var commander:Dictionary=general.get("commander",{})
+		pick.add_item("%s · command %d of 5" % [String(general.name),Strips.GeneralPips.pips(float(commander.get("command",0.5)))])
+		pick.set_item_metadata(pick.item_count-1,String(general.id))
+		if String(general.id)==chosen:selected=pick.item_count-1
+	pick.select(selected)
+	pick.tooltip_text="The general who leads what we send against them. The war leader's choice: whoever the war leader thinks best for the work."
+	pick.item_selected.connect(func(index:int)->void:_lead(civ_id,String(pick.get_item_metadata(index)),pick.get_item_text(index).get_slice(" · ",0)))
+	row.add_child(pick)
+	return row
+
+
+func _lead(civ_id:String,general:String,name_words:String)->void:
+	WarLoop.front(civ_id)["general"]=general
+	_say(("%s leads against them from now on." % name_words) if general!="" else "The war leader chooses who leads against them.")
+	refresh(true)
 
 
 ## The army at a glance: {ready (fighters at home, in the field and holding
@@ -287,7 +320,22 @@ func _leader_row(c:Dictionary)->Control:
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
 		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
 	words.add_child(_line(leader_doing(c),13,T.INK))
+	if String(c.id)==Commands.WAR_LEADER:
+		var other:=Button.new();other.name="NameWarLeader";other.text="Name another";other.flat=true;other.focus_mode=Control.FOCUS_NONE
+		other.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		other.tooltip_text="The war leader at home is the Marshal among the officials, or the best of the field staff while no one holds that office. Choose the Marshal among the officials."
+		other.pressed.connect(_name_war_leader)
+		row.add_child(other)
 	return panel
+
+
+## The officials, where the ruler names the Marshal (the war leader at home).
+func _name_war_leader()->void:
+	var scene:=get_tree().current_scene if is_inside_tree() else null
+	var hud:Variant=scene.get("hud") if scene!=null else null
+	if hud==null or not hud.has_method("has_provider") or not hud.has_provider("government"):return
+	close_wanted.emit()
+	hud.open_dock("government",0)
 
 
 ## What a leader is doing now: their bands and men and where, or "at home".

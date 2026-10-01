@@ -71,6 +71,8 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	assert_object(row).is_not_null()
 	for id in ["leave","defend","punish","take","peace","pay"]:assert_object(row.find_child("Stance_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Leader_war_leader",true,false)).is_not_null()
+	# Who leads against them: the war leader until a general comes forward.
+	assert_object(row.find_child("LedBy",true,false)).is_not_null()
 	# A stance is the war leader's order, and the row remembers it.
 	(row.find_child("Stance_defend",true,false) as Button).pressed.emit()
 	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("defend")
