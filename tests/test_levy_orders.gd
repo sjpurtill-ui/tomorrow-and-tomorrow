@@ -17,6 +17,7 @@ extends GdUnitTestSuite
 const HomeOrders:=preload("res://scripts/home_orders.gd")
 const CC:=preload("res://scripts/court_commands.gd")
 const Fixtures:=preload("res://tests/court_eval/fixtures.gd")
+const Hall:=preload("res://scripts/audience_hall.gd")
 
 const USER_LINE:="Raise an army of five levies and train them and arm them."
 
@@ -221,13 +222,16 @@ func test_train_ten_levies_drills_those_waiting_and_calls_up_the_rest()->void:
 
 
 ## The days said are the drill's real pace: the instructors' pace for all in
-## drill, and a quarter of it for a spear levy with no spears in hand.
+## drill with their weapons in hand, and a quarter of it for a spear levy
+## whose spears cannot be made.
 func test_the_court_says_how_long_the_drill_really_takes()->void:
+	# Their weapons in store: the armed pace from the first day.
+	for item in ["spear","improvised"]:MilitaryCampaign.military_inventory[item]=40
 	var armed:=HomeOrders.perform(HomeOrders.read("Recruit 4 levies"))
 	var order:Dictionary=MilitaryCampaign.training_queue.back()
 	var pace:=HomeOrders._drill_pace(MilitaryCampaign,String(order.weapon),1.0)
 	assert_float(pace).is_greater(0.0)
-	assert_str(String(armed.says)).contains("about %d days before they are fit to fight" % ceili(float(order.required_days)/pace))
+	assert_str(String(armed.says)).contains("about %d days before they are fit to fight." % ceili(float(order.required_days)/pace))
 	# No spears, and none can be made: the slower drill, said plainly.
 	MilitaryCampaign.training_queue.clear();MilitaryCampaign.equipment_queue.clear()
 	GameState.resource_stockpiles["Timber"]=0.0;GameState.resource_stockpiles["Stone"]=0.0
@@ -303,3 +307,234 @@ func test_the_court_never_says_a_stalled_drill_is_under_way()->void:
 	var done:=HomeOrders.perform(HomeOrders.read("Train the recruits"))
 	assert_str(String(done.says)).contains("stands still")
 	assert_str(String(done.says)).not_contains("already at their drill")
+
+
+# --------------------------------------------------------------------------
+# "I asked for 20 soldiers and NOTHING happened" (year 183). The player typed
+# "raise 20 soldiers" in court. Many plain ways of asking for soldiers were
+# never read as a levy: "I want 20 soldiers" and "give me 20 warriors" became
+# a vague standing order, "give me 20 fighters" a march with nowhere to go,
+# and "train 20 soldiers" said to a town overseer went to the town council,
+# who answered "I'll train twenty folk" while nobody was called up. Every one
+# now calls up, drills and arms, or says in numbers why it cannot.
+# --------------------------------------------------------------------------
+
+const PLAYER_SOLDIERS:="raise 20 soldiers"
+const SOLDIER_ASKS:=["raise 20 soldiers","Raise 20 soldiers","I want 20 soldiers","Give me 20 soldiers","Recruit 20 soldiers","20 more soldiers","I need 20 soldiers",
+	"I want 20 warriors","Give me 20 warriors","Raise 20 warriors","I need 20 warriors","I want 20 fighters","Give me 20 fighters","I need 20 fighters",
+	"I want 20 men","Give me 20 men","Raise 20 men","Recruit 20 men","20 more men","I need 20 men","Get me 20 soldiers","We need 20 soldiers",
+	"I want an army of 20","Make 20 soldiers","Build an army of 20 soldiers","Create 20 soldiers","I want twenty soldiers","20 soldiers"]
+const SOLDIER_DRILLS:=["Train 20 soldiers","Train 20 warriors","Train 20 fighters","Train 20 men"]
+
+
+func _in_drill()->int:
+	var n:=0
+	for order:Dictionary in MilitaryCampaign.training_queue:n+=int(order.get("count",0))
+	return n
+
+
+func test_the_players_words_raise_twenty_soldiers()->void:
+	var reading:=HomeOrders.read(PLAYER_SOLDIERS)
+	assert_str(String(reading.get("kind",""))).is_equal("levy")
+	assert_int(int(reading.count)).is_equal(20)
+	assert_bool(bool(reading.recruit)).is_true()
+	var before:=_in_drill()
+	var done:=HomeOrders.perform(reading)
+	assert_bool(bool(done.ok)).is_true()
+	assert_int(int(done.raised)).is_equal(20)
+	assert_int(_in_drill()-before).is_equal(20)
+	assert_str(String(done.says)).starts_with("20 are called up")
+
+
+func test_asking_for_soldiers_in_any_words_calls_them_up()->void:
+	for said:String in SOLDIER_ASKS:
+		var r:=HomeOrders.read(said)
+		assert_str(String(r.get("kind",""))).override_failure_message("'%s' was not read as a levy: %s" % [said,str(r)]).is_equal("levy")
+		assert_bool(bool(r.get("recruit",false))).override_failure_message("'%s' did not call anyone up: %s" % [said,str(r)]).is_true()
+		assert_int(int(r.count)).override_failure_message("'%s' lost its number" % said).is_equal(20)
+	for said:String in SOLDIER_DRILLS:
+		var r:=HomeOrders.read(said)
+		assert_str(String(r.get("kind",""))).override_failure_message("'%s' was not read as a levy: %s" % [said,str(r)]).is_equal("levy")
+		assert_bool(bool(r.get("fill",false))).override_failure_message("'%s' would not call up the rest: %s" % [said,str(r)]).is_true()
+	# Look-alikes: soldiers we have, sent, lost or counted; men for other work;
+	# a march; a question.
+	for said:String in ["Send 20 soldiers to the ford","We lost 20 soldiers","I have 20 soldiers","I need 20 men on the fields","Give 20 soldiers to the war leader","Train the 20 soldiers","How many soldiers do we have?","Give me 20 soldiers to attack Tsaren","Put 20 men on building"]:
+		var r:=HomeOrders.read(said)
+		assert_bool(String(r.get("kind",""))=="levy" and (bool(r.get("recruit",false)) or bool(r.get("fill",false)))).override_failure_message("'%s' called people up: %s" % [said,str(r)]).is_false()
+
+
+func test_train_twenty_soldiers_drills_twenty()->void:
+	var before:=_in_drill()
+	var done:=HomeOrders.perform(HomeOrders.read("Train 20 soldiers"))
+	assert_bool(bool(done.ok)).is_true()
+	assert_int(_in_drill()-before).is_equal(20)
+
+
+## Whoever the god speaks to in court, the levy is carried out by the same
+## mechanic: the war leader, the headman, a town's overseer (who once sent it
+## to the town council as a lesson to teach).
+func test_the_court_raises_them_whoever_hears_it()->void:
+	for entry:Dictionary in Hall.summonable():
+		MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
+		var audience:=Hall.summon(entry.target as Dictionary)
+		if audience.is_empty():continue
+		for said:String in [PLAYER_SOLDIERS,"I want 20 soldiers","Train 20 soldiers"]:
+			MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
+			var heard:=CC.hear(String(audience.id),said,{})
+			assert_bool(bool(heard.get("handled",false))).override_failure_message("'%s' to %s was not heard as an order" % [said,String(entry.name)]).is_true()
+			assert_int(_in_drill()).override_failure_message("'%s' to %s raised nobody: %s" % [said,String(entry.name),String(heard.get("outcome",""))]).is_equal(20)
+			assert_str(String(heard.get("outcome",""))).override_failure_message("'%s' to %s became a standing order" % [said,String(entry.name)]).not_contains("standing order")
+
+
+## With nobody free, the court says so with the engine's own count.
+func test_nobody_free_is_said_with_the_numbers()->void:
+	var adults:=MilitaryCampaign.recruitment_capacity()
+	MilitaryCampaign.raise_recruits(adults)
+	MilitaryCampaign.start_training("levy","improvised",MilitaryCampaign.aggregate_recruits)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_false()
+	assert_str(String(done.says)).contains("0 of the 20 you asked for")
+	assert_str(String(done.says)).contains("Of our %d able adults at home" % adults)
+	assert_str(String(done.outcome)).starts_with("Nothing is set in motion")
+
+
+## The days the court says are the engine's own (levy_forecast.gd). In year
+## 183 the court said the drill took 468 days (as if no spear would ever be
+## made) and that the spears could not be made, though the workshops made all
+## 20 within 9 days and the drill ended in about 120. Here the engine's own
+## daily workshop and drill steps run until the levy is fit to fight: the day
+## the last weapon is in hand and the day the drill ends must be the days the
+## court said.
+const WEAPONS_SAID:="All (\\d+) are in hand in about (\\d+) days?"
+const DRILL_SAID:="about (\\d+) days? before they are fit to fight"
+
+func _said(says:String,pattern:String,group:int)->int:
+	var m:=RegEx.create_from_string(pattern).search(says)
+	return int(m.get_string(group)) if m!=null else -1
+
+## The engine's own days for the levy `training_id`: each day the town's own
+## deliveries (the deposits' delivered_today), then the workshops and the
+## drill exactly as the military day runs them. {weapons_day, drill_day}.
+func _run_days(training_id:int,weapon:String,need:int,limit:int=400,trade:bool=false)->Dictionary:
+	var out:={"weapons_day":-1,"drill_day":-1}
+	if int(MilitaryCampaign.military_inventory.get(weapon,0))>=need:out.weapons_day=0
+	for day in range(1,limit+1):
+		GameState.elapsed_days+=1
+		for deposit in GameState.resource_deposits:
+			var m:=String((deposit as Dictionary).get("resource",""))
+			GameState.resource_stockpiles[m]=float(GameState.resource_stockpiles.get(m,0.0))+float((deposit as Dictionary).get("delivered_today",0.0))
+		# Our other towns' deliveries, by the engine's own city trade.
+		if trade:SettlementModel.process_city_trade()
+		MilitaryCampaign._process_equipment_production_day()
+		MilitaryCampaign._process_training_day()
+		if int(out.weapons_day)<0 and int(MilitaryCampaign.military_inventory.get(weapon,0))>=need:out.weapons_day=day
+		var drilling:=false
+		for order:Dictionary in MilitaryCampaign.training_queue:
+			if int(order.get("id",-1))==training_id:drilling=true
+		if not drilling:
+			out.drill_day=day
+			return out
+	return out
+
+func _levy_world(timber:float)->void:
+	MilitaryCampaign.equipment_queue.clear()
+	MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
+	for item in ["spear","improvised"]:MilitaryCampaign.military_inventory[item]=0
+	GameState.resource_stockpiles["Timber"]=timber
+	for deposit in GameState.resource_deposits:(deposit as Dictionary)["delivered_today"]=0.0
+
+## Wood enough: the workshops make the weapons in a batch, and the court's days
+## are the days the engine takes.
+func test_the_courts_days_are_the_engines_days_when_the_workshops_make_them()->void:
+	_levy_world(300.0)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(0)
+	assert_int(drill_said).override_failure_message("no drill days in: "+says).is_greater(0)
+	assert_int(int(done.weapons_day)).is_equal(weapons_said)
+	assert_int(int(done.drill_days)).is_equal(drill_said)
+	var real:=_run_days(int(order.id),weapon,need)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d" % [weapons_said,weapon,int(real.weapons_day)]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)
+
+## Too little wood for all of them at once, as in year 183: a workshop line
+## makes them as the wood comes in, at the rate the engine makes them, never
+## "cannot be made"; and the drill counts the weapons as they come.
+func test_short_of_wood_the_line_makes_them_at_the_engines_rate()->void:
+	_levy_world(3.0)
+	var stand:Dictionary={}
+	for deposit in GameState.resource_deposits:
+		if String((deposit as Dictionary).get("resource",""))=="Timber":stand=deposit;break
+	if stand.is_empty():
+		stand={"id":"test_stand","resource":"Timber","stage":"developed","remaining":500.0,"initial_amount":800.0,"position":Vector3(2.0,0.0,1.0),"quality":0.8,"shipments":[],"stock_at_source":0.0}
+		GameState.resource_deposits.append(stand)
+	# Our own cutters bring in one load of wood a day.
+	stand["delivered_today"]=1.0
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	assert_str(says).contains("a workshop line is set to make them")
+	assert_str(says).contains("It makes them as the timber comes in")
+	assert_str(says).contains("slower at first until their")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(1)
+	var per:=float((MilitaryCampaign._equipment_recipe(weapon).materials as Dictionary).get("Timber",1.0))
+	assert_str(says).contains("the store holds timber for %d of them now" % floori(3.0/per+0.000001))
+	var real:=_run_days(int(order.id),weapon,need)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d" % [weapons_said,weapon,int(real.weapons_day)]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)
+	# Counting the weapons as they come: no shorter than the armed pace, far
+	# shorter than a drill that never gets them.
+	var full:=HomeOrders._drill_pace(MilitaryCampaign,weapon,1.0)
+	var bare:=HomeOrders._drill_pace(MilitaryCampaign,weapon,0.0)
+	assert_int(drill_said).is_greater_equal(ceili(float(order.required_days)/full))
+	assert_int(drill_said).is_less(ceili(float(order.required_days)/bare))
+
+## The order's card says the same days as the court, from the same forecast.
+func test_the_card_says_the_courts_days()->void:
+	_levy_world(300.0)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	var card:=preload("res://scripts/order_probes.gd").read({"kind":"levy","refs":{"training_id":int(done.training_id),"asked":20,"raised":20}})
+	assert_str(String(card.line)).contains("fit in about %d days" % int(done.drill_days))
+
+
+## Short of wood with another town that has plenty, as in year 183 (Sean
+## Springs held 2 timber, Dawngate 393): our other town sends wood when the
+## store runs short, the line makes the weapons as it comes, and the court's
+## days are the days the engine takes, its own city trade included.
+func test_short_of_wood_our_other_towns_send_it_at_the_engines_pace()->void:
+	_levy_world(3.0)
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var there:=home+Vector2(24.0,0.0)
+	GameState.player_settlements.append({"id":"dawngate","name":"Dawngate","primary":false,"position":there,"population_share":0.25,"founded_day":0})
+	CivilizationSystem.record_player_travel(there)
+	SettlementModel.with_city_resources("dawngate",func()->void:GameState.resource_stockpiles["Timber"]=300.0)
+	GameState.society_capacities["logistics"]=0.8
+	GameState.society_capacities["institutions"]=0.8
+	GameState.last_city_trade_day=int(GameState.elapsed_days)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	assert_str(says).contains("our other towns send more when it runs short")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(1)
+	var real:=_run_days(int(order.id),weapon,need,400,true)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d: %s" % [weapons_said,weapon,int(real.weapons_day),says]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)

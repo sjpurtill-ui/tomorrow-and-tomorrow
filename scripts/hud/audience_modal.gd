@@ -95,6 +95,10 @@ var orders_row:HFlowContainer
 ## as a real mechanic.
 var suggest_row:HFlowContainer
 var _last_words:=""
+## The card for the order being given here (order_tracker.gd): registered when
+## the god's words are an order, settled by whatever carries it out.
+var _order_card:=0
+const Tracker:=preload("res://scripts/order_tracker.gd")
 var speaker_frame:PanelContainer
 var bench_cards:Dictionary={}      # person_id -> PanelContainer
 var envoy_color:=Color.WHITE
@@ -747,14 +751,59 @@ func _clear_suggestions()->void:
 	for child in suggest_row.get_children():child.queue_free()
 	suggest_row.visible=false
 
+# --- The order's card (order_tracker.gd) ---------------------------------------
+
+## The god's words are an order: a card for it, carried out by the one
+## spoken to (or whoever the result names). An answer to the court's own
+## question continues the card already open. force: an order whatever the
+## words look like (an office button, the live reader's reading).
+func _open_card(text:String,force:bool=false)->void:
+	var audience:=Hall.find(audience_id)
+	var waiting:=false
+	if audience.get("reader_pending") is Dictionary:waiting=not (audience.reader_pending as Dictionary).is_empty()
+	if not waiting and audience.get("pending_command") is Dictionary:waiting=not (audience.pending_command as Dictionary).is_empty()
+	var open:=Tracker.find(_order_card)
+	if _order_card>0 and waiting and not open.is_empty() and (not bool(open.get("claimed",false)) or String(open.get("kind",""))=="waiting"):return
+	# A foreign envoy's audience is talk with another people: a card only when
+	# the engine acts on the words (_settle_card).
+	if not force and (String(audience.get("origin",""))=="foreign" or not Tracker.is_order_words(text)):
+		_order_card=0
+		return
+	_order_card=Tracker.register(Tracker.court_title(text),"court",text,_speaker_name())
+
+## What carried the order out, from the engine's result.
+func _settle_card(result:Dictionary)->void:
+	if not bool(result.get("handled",true)):return
+	if _order_card<=0:
+		var words:=String(result.get("text",_last_words))
+		if words.strip_edges()=="" or bool(result.get("speech",false)):return
+		_order_card=Tracker.register(Tracker.court_title(words),"court",words,_speaker_name())
+	Tracker.from_court(_order_card,result)
+	# A question back from the war leader keeps the card open for the answer.
+	if String(Tracker.find(_order_card).get("kind",""))!="waiting":_order_card=0
+
+## The words reached no mechanic: the card says so in red at once.
+func _card_nothing()->void:
+	if _order_card<=0:return
+	if not bool(Tracker.find(_order_card).get("claimed",false)):Tracker.nothing(_order_card)
+	_order_card=0
+
+## A town's leader took the words to their council (pronouncement_interpreter).
+func _card_civic(settlement_id:String,person_id:int)->void:
+	if _order_card<=0:return
+	Tracker.claim(_order_card,"civic",{"settlement_id":settlement_id,"person_id":person_id,"start_day":int(GameState.elapsed_days)},_speaker_name(),"court")
+	_order_card=0
+
 ## One of the official's orders, chosen (or given by a test): the words go
 ## to the court as if spoken, and the court answers in the same way.
 func office_order(text:String)->Dictionary:
 	if mode!="audience" or audience_id.is_empty() or not resolved_result.is_empty() or text.strip_edges()=="":return {}
 	_clear_suggestions()
 	_last_words=""
+	_open_card(text,true)
 	var heard:=Commands.hear(audience_id,text,{"terrain":terrain,"civic_settlement":civic_settlement})
 	if bool(heard.get("handled",false)):_after_command(heard)
+	else:_card_nothing()
 	return heard
 
 func _fill_persons_menus(row:HBoxContainer,all:Array[Dictionary])->void:
@@ -799,6 +848,11 @@ func persons_choose(choice:Dictionary)->Dictionary:
 	return result
 
 func _after_persons(result:Dictionary)->void:
+	if _order_card>0:
+		var said:=String(result.get("outcome",result.get("line","")))
+		if bool(result.get("ok",false)):Tracker.done(_order_card,Tracker._why(said,"Done"))
+		else:_card_nothing()
+		_order_card=0
 	var next_id:=String(result.get("summon_audience_id",""))
 	if next_id!="" and next_id!=audience_id:
 		if mode=="audience" and resolved_result.is_empty() and not audience_id.is_empty():Hall.defer(audience_id)
@@ -1057,6 +1111,7 @@ func _speak()->void:
 	speech_input.clear()
 	_last_words=text
 	_clear_suggestions()
+	_open_card(text)
 	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
 	if resolved_result.is_empty():
 		var named:=String(Lives.typed_choice(audience_id,text))
@@ -1157,6 +1212,8 @@ func _after_order_reading(id:String,text:String,read:Dictionary,about_people:boo
 	else:plan=OrderReader.offline_confirm(id,text)
 	if plan.is_empty():plan={"route":"legacy"}
 	var route:=String(plan.get("route","legacy"))
+	# The live reader read an order the words alone did not show: it gets a card.
+	if _order_card<=0 and read.get("reading") is Dictionary and String((read.reading as Dictionary).get("kind",""))=="order" and route!="clarify":_open_card(text,true)
 	if route=="speak" and not civic_settlement.is_empty() and not text.ends_with("?"):route="legacy"
 	if about_people and _voice_ok() and voice.has_method("persons_turn") and not _fact_question(text) and (route=="speak" or (route=="legacy" and _persons_take(text))):
 		# Talk about people, or a summons: the persons engine answers (it shows
@@ -1174,10 +1231,13 @@ func _after_order_reading(id:String,text:String,read:Dictionary,about_people:boo
 			if bool(heard.get("handled",false)):
 				_after_command(heard);return
 			# Read as an order, but the engine had nothing to do: the room answers.
+			_card_nothing()
 			if _voice_ok():voice.player_speaks(id,text,false,true)
 			_pump();return
 		"speak":
 			if bool(plan.get("clear_pending",false)):Hall.find(id).erase("reader_pending")
+			# An order the reader could map to nothing: said so on its card.
+			_card_nothing()
 			if _voice_ok():voice.player_speaks(id,text,false,true)
 			_pump();return
 	_unecho(text)
@@ -1244,13 +1304,18 @@ func _speak_rest(text:String)->void:
 	# go through the civic pipeline, which answers, objects or refuses.
 	if not civic_settlement.is_empty() and resolved_result.is_empty() and not text.ends_with("?") and Hall.divine_intent(audience_id,text).is_empty():
 		_civic_say(text)
+		_card_civic(civic_settlement,speaker_person_id)
 		return
 	# Words that are themselves an act of the god (terror, penance, blessing,
 	# exaltation) are carried out; the room reacts to the act.
 	var spoken_act:=Hall.divine_intent(audience_id,text)
 	if not spoken_act.is_empty():
 		Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
-		divine(spoken_act,text)
+		var acted:=divine(spoken_act,text)
+		if _order_card>0:
+			if bool(acted.get("ok",false)):Tracker.done(_order_card,Tracker._why(String(acted.get("outcome","")),"Done"))
+			else:Tracker.refuse(_order_card,Tracker._why(String(acted.get("outcome","")),"It could not be done"))
+			_order_card=0
 		return
 	var before:=(Hall.find(audience_id).get("lines",[]) as Array).size()
 	if live_reads:
@@ -1264,6 +1329,10 @@ func _speak_rest(text:String)->void:
 	if String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text(text)
 		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Your words go out to the council as an order.","day":int(GameState.elapsed_days),"aside":false})
+		_card_civic(String(GameState.selected_player_settlement_id),0)
+	elif not live_reads:
+		# Talk only: no mechanic took these words.
+		_card_nothing()
 	# The ruler's own words always appear, even if the voice defers them.
 	var lines:Array=Hall.find(audience_id).get("lines",[])
 	var echoed:=false
@@ -1285,6 +1354,7 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 ## Shows a command's result: the voice stages it (a bracketed direction, the
 ## actor's answer as decided, a witness), then the outcome line and receipt.
 func _after_command(result:Dictionary)->void:
+	_settle_card(result)
 	# Carried out only as a vague standing order: the closest real orders are
 	# offered, so the god can pick instead of rephrasing.
 	if String(result.get("route",""))=="custom_directive" and _last_words!="":_offer_closest(_last_words)
@@ -1343,6 +1413,9 @@ func choose(option_id:String)->Dictionary:
 		if not decree.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 			terrain.issue_civic_directive_text(decree)
 	if _voice_ok():voice.closing(audience_id,result)
+	if _order_card>0:
+		Tracker.done(_order_card,Tracker._why(String(result.get("outcome","")),"Answered"))
+		_order_card=0
 	_show_outcome(result)
 	return result
 

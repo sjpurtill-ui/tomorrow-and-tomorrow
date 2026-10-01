@@ -98,6 +98,7 @@ func _process(delta:float)->void:
 	if _information_refresh_elapsed<INFORMATION_REFRESH_SECONDS:return
 	_information_refresh_elapsed=fmod(_information_refresh_elapsed,INFORMATION_REFRESH_SECONDS)
 	refresh_information_bar()
+	_sync_order_layer()
 
 func refresh_information_bar()->void:
 	# The command bar owns its updates, including while a report is open.
@@ -120,6 +121,7 @@ func _ready()->void:
 	_build_toolbar()
 	_build_army_bar()
 	_build_dock()
+	_build_order_stack()
 	dock.visibility_changed.connect(_layout)
 	detail_dock.visibility_changed.connect(_layout)
 	get_viewport().size_changed.connect(_layout)
@@ -175,9 +177,11 @@ func _layout()->void:
 			_hide_kpi(String(id))
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),1)
+	_layout_orders()
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
-		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,view.y-Tokens.EDGE_MARGIN-queue_root.size.y)
+		# The council's waiting matters stand just above your orders.
+		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,orders_top()-queue_root.size.y)
 	if dock:
 		dock.position=Vector2(Tokens.DOCK_X,64)
 		# Before the first container sort, autowrap labels report inflated
@@ -212,7 +216,13 @@ func _position_toolbar()->void:
 	# it restores the map toolbar; keyboard map controls remain available.
 	toolbar.visible=active_section=="" or view.x>=1400
 	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
-	toolbar.position=Vector2(free_left+(view.x-free_left)*0.5-toolbar.size.x*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y)
+	# Your orders hold the bottom right: the toolbar centres in the room left
+	# of them when it fits there (else the cards stand above it).
+	var right:=view.x
+	if _orders_at_bottom():right=view.x-Tokens.EDGE_MARGIN-OrderStackScript.WIDTH-12.0
+	if toolbar.size.x>right-free_left:right=view.x
+	toolbar.position=Vector2(free_left+(right-free_left)*0.5-toolbar.size.x*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y)
+	_layout_orders()
 	_position_army_bar()
 
 # --- Army bar (hud/army_bar.gd): HOI4's army cards above the map toolbar ------
@@ -238,6 +248,7 @@ func _position_army_bar()->void:
 	if help is Control and (help as Control).is_visible_in_tree() and (help as Control).get_global_rect().end.y>bottom-height:left=maxf(left,(help as Control).get_global_rect().end.x+12.0)
 	var right:=view.x-Tokens.EDGE_MARGIN
 	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:right-=Tokens.QUEUE_WIDTH+12.0
+	elif _orders_at_bottom():right-=order_stack.size.x+12.0
 	army_bar.place(Rect2(left,bottom-height,maxf(0.0,right-left),height))
 
 ## The top of what sits along the map's bottom edge (the army bar, else the
@@ -251,6 +262,91 @@ func select_army(army_id:int)->void:
 	army_bar.refresh()
 	for card:Dictionary in army_bar.cards:
 		if army_id in (card.get("members",[]) as Array) or (army_id==0 and String(card.kind)=="home"):army_bar.select_card(card);return
+
+# --- Your orders (hud/order_stack.gd): the fail-safe, bottom right ---------
+
+const OrderStackScript:=preload("res://scripts/hud/order_stack.gd")
+## Above the court (AudienceHallLayer 85) while it is open, so an order given
+## there shows at once in the court's right margin; otherwise just above the
+## HUD, under every other screen.
+const ORDER_LAYER_COURT:=86
+var order_layer:CanvasLayer
+var order_stack:Control
+
+func _build_order_stack()->void:
+	order_layer=CanvasLayer.new();order_layer.name="OrderLayer"
+	add_child(order_layer)
+	order_stack=OrderStackScript.new()
+	order_layer.add_child(order_stack)
+	order_stack.open_requested.connect(_open_order_screen)
+	order_stack.resized.connect(_layout_orders)
+	order_stack.relayout.connect(_layout_orders)
+	order_stack.visibility_changed.connect(_layout)
+	_sync_order_layer()
+
+func _court_open()->bool:
+	var director:Node=get_tree().get_first_node_in_group("court_director") if is_inside_tree() else null
+	return director!=null and director.has_method("court_open") and bool(director.call("court_open"))
+
+func _sync_order_layer()->void:
+	if order_layer==null:return
+	var base:=get_canvas_layer_node()
+	var layer:=ORDER_LAYER_COURT if _court_open() else (base.layer+1 if base!=null else 1)
+	if order_layer.layer!=layer:
+		order_layer.layer=layer
+		_layout_orders()
+
+## The stack's rect at the bottom right would lie under an open dock (or the
+## court's card): then it shrinks to its one-line plate at the top right,
+## where the status strip stands aside for the dock.
+func _orders_covered(view:Vector2)->bool:
+	var left:=view.x-Tokens.EDGE_MARGIN-OrderStackScript.WIDTH
+	if _court_open():
+		var court:=minf(1280.0,view.x-40.0)
+		return (view.x+court)*0.5>left
+	for panel in [dock,detail_dock]:
+		if panel!=null and panel.visible and panel.position.x+panel.size.x>left-4.0:return true
+	return false
+
+func _orders_at_bottom()->bool:
+	return order_stack!=null and order_stack.visible and not bool(order_stack.compact)
+
+## The top of what stands at the bottom right (your orders), for the council
+## queue above it.
+func orders_top()->float:
+	var view:=get_viewport().get_visible_rect().size
+	if _orders_at_bottom():return order_stack.position.y-8.0
+	return view.y-Tokens.EDGE_MARGIN
+
+func _layout_orders()->void:
+	if order_stack==null:return
+	var view:=get_viewport().get_visible_rect().size
+	var covered:=_orders_covered(view)
+	# In the court there is no top bar to stand in: with no room in its
+	# margin, the court's own transcript tells the order and the cards wait.
+	order_stack.set_suppressed(covered and _court_open())
+	order_stack.set_compact(covered and not _court_open())
+	order_stack.reset_size()
+	var size:Vector2=order_stack.get_combined_minimum_size()
+	if bool(order_stack.compact):
+		order_stack.position=Vector2(view.x-Tokens.EDGE_MARGIN-size.x,8.0)
+	else:
+		var bottom:=view.y-Tokens.EDGE_MARGIN
+		# The map toolbar too wide to stand beside the cards: they stand above it.
+		if toolbar!=null and toolbar.visible and toolbar.position.x+toolbar.size.x>view.x-Tokens.EDGE_MARGIN-size.x-4.0 and not _court_open():bottom=toolbar.position.y-8.0
+		order_stack.position=Vector2(view.x-Tokens.EDGE_MARGIN-size.x,bottom-size.y)
+	if queue_root!=null:queue_root.position.y=orders_top()-queue_root.size.y
+
+## A card was clicked: the screen where that order lives ("military:2" is
+## the Military screen's third page, the drill).
+func _open_order_screen(screen:String)->void:
+	if screen=="":return
+	if screen=="court":
+		if not _court_open():open_court()
+		return
+	var section:=screen.get_slice(":",0)
+	var sub:=int(screen.get_slice(":",1)) if ":" in screen else 0
+	section_requested.emit(section,sub)
 
 # --- Rail -------------------------------------------------------------------
 

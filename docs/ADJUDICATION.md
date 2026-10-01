@@ -73,6 +73,12 @@ invent ignorance or an excuse.
 
 - Never say an order is or will be carried out unless a mechanic did it or has
   queued it. When nothing is set in motion, say so and say what it would need.
+- Every order the god gives, from the court or any screen, gets a card at the
+  bottom right (scripts/order_tracker.gd, hud/order_stack.gd) that reads its
+  state from the ledger itself (order_probes.gd). An order no mechanic took,
+  or that nothing in the ledger moved by the end of the next game day, turns
+  red: "Nothing has happened yet", with the engine's reason. A new order
+  screen registers its orders there.
 - An unclear grave order (kill, maim, burn, march to war, abandon a town) gets
   one specific question with options; a second unclear reply is acted on by the
   speaker's nearest reading, never the same question again.

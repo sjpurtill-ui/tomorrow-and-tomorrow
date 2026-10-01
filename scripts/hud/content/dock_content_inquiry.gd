@@ -367,7 +367,8 @@ func _choose_tree_domain(domain:String)->void:
 	hud.request_immediate_dock_refresh()
 
 func _research_technology(id:String)->void:
-	DiscoverySystem.select_research_target(id)
+	var result:Dictionary=DiscoverySystem.select_research_target(id)
+	preload("res://scripts/order_tracker.gd").research_order(id,String(DiscoverySystem.discovery_definition(id).get("name",id.replace("_"," "))),result)
 	hud.request_immediate_dock_refresh()
 
 func _latest_discovery_block()->Dictionary:

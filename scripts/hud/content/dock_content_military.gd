@@ -506,6 +506,8 @@ func _queue_supply_order(kind:String,item:String,count:int)->void:
 		"transport":result=MilitaryCampaign.queue_transport_cart_production(count)
 		"repair":result=MilitaryCampaign.queue_equipment_repair(item,count)
 		_:result=MilitaryCampaign.queue_equipment_production(item,count)
+	var what:=String(MilitaryCampaign.PersistentProduction.product_name(item)).to_lower() if kind!="transport" else "carts"
+	preload("res://scripts/order_tracker.gd").workshop_order(("Mend %d %s" if kind=="repair" else "Make %d %s") % [count,what],result,"cart" if kind=="transport" else item,count,false)
 	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
 func _open_workshop_job(id:int)->void:
 	var action:=focused_action("WORKSHOP ORDER","",_workshop_job_report.bind(id));action.on_press.call()
@@ -583,6 +585,18 @@ func _production_labor_report()->Dictionary:
 func _production_result(result:Dictionary)->void:
 	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
 
+## A line started from the workshop order screen: its card follows the stock.
+func _start_line(item:String,target:int)->void:
+	var result:=MilitaryCampaign.start_production_line(item,target)
+	var what:=String(MilitaryCampaign.PersistentProduction.product_name(item)).to_lower()
+	preload("res://scripts/order_tracker.gd").workshop_order(("Keep %d %s in store" % [target,what]) if target>0 else ("Make %s without end" % what),result,item,target,true)
+	_production_result(result)
+
+## A line paused, resumed or closed: done at once, on its card.
+func _line_setting(words:String,result:Dictionary)->Dictionary:
+	preload("res://scripts/order_tracker.gd").setting_order(words,result,"production","the workshops","production")
+	return result
+
 func _persistent_order_report(item:String)->Dictionary:
 	var recipe:=MilitaryCampaign.PersistentProduction.recipe(MilitaryCampaign,item)
 	var gate:=MilitaryCampaign._production_line_gate()
@@ -595,7 +609,7 @@ func _persistent_order_report(item:String)->Dictionary:
 	var blocks:Array=[_production_mode_block()]
 	if production_mode==0:blocks.append({"type":"actions","heading":"READY STOCK TARGET","items":quantities})
 	blocks.append({"type":"text","heading":MilitaryCampaign.PersistentProduction.product_name(item).to_upper(),"text":MilitaryCampaign.PersistentProduction.product_description(item)+"\nPer item: "+", ".join(costs)+".\n"+("Maintain %d in stores. Pauses at target; resumes after equipment is issued." % equipment_batch if production_mode==0 else "CONTINUOUS: NO LIMIT. Production continues until you pause it or supplies run out.")+("\nCannot start: "+reason if not reason.is_empty() else "")})
-	blocks.append({"type":"actions","items":[{"label":"START PRODUCTION LINE","primary":true,"disabled":not reason.is_empty(),"tip":reason,"on_press":func():_production_result(MilitaryCampaign.start_production_line(item,equipment_batch if production_mode==0 else 0))},focused_action("CRAFTING ALLOCATION","Share labor with civilian needs",_production_labor_report)]})
+	blocks.append({"type":"actions","items":[{"label":"START PRODUCTION LINE","primary":true,"disabled":not reason.is_empty(),"tip":reason,"on_press":func():_start_line(item,equipment_batch if production_mode==0 else 0)},focused_action("CRAFTING ALLOCATION","Share labor with civilian needs",_production_labor_report)]})
 	return {"blocks":blocks}
 
 func _persistent_job_report(job:Dictionary)->Dictionary:
@@ -611,10 +625,10 @@ func _persistent_job_report(job:Dictionary)->Dictionary:
 			if not result.has("error"):result=MilitaryCampaign.set_production_line_allocation(id,weight)
 			_production_result(result),
 		"on_delegate":func():_production_result(MilitaryCampaign.workshop.delegate_line(id)),
-		"on_pause":func():_production_result(MilitaryCampaign.configure_production_line(id,int(job.target_stock),not bool(job.paused))),
+		"on_pause":func():_production_result(_line_setting(("Resume the %s line" if bool(job.paused) else "Pause the %s line") % String(MilitaryCampaign.PersistentProduction.product_name(String(job.item))).to_lower(),MilitaryCampaign.configure_production_line(id,int(job.target_stock),not bool(job.paused)))),
 		"on_retool":focused_action("RETOOL LINE","",_retool_report.bind(id)).on_press,
 		"on_labor":focused_action("WORKFORCE","",_production_labor_report).on_press,
-		"on_close":func():_production_result(MilitaryCampaign.cancel_equipment_job(id))}]}
+		"on_close":func():_production_result(_line_setting("Close the %s line" % String(MilitaryCampaign.PersistentProduction.product_name(String(job.item))).to_lower(),MilitaryCampaign.cancel_equipment_job(id)))}]}
 
 func _line_materials_block(line:Dictionary)->Dictionary:
 	var rows:Array=[]

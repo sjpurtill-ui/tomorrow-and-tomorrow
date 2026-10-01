@@ -488,6 +488,7 @@ static func _defence_detail(r:Dictionary,next_name:String)->String:
 
 func _set_defence_word(id:String)->void:
 	var result:=HomeDefense.set_word(id)
+	preload("res://scripts/order_tracker.gd").defence_order(id,result)
 	if result.has("ok"):
 		var begun:=bool(result.get("started",false))
 		terrain._report_military_action({"ok":true,"message":("Work begins on the %s." % String(MilitaryCampaign.SETTLEMENT_DEFENSE_STAGES[int(MilitaryCampaign.settlement_defense.project_stage)].short).to_lower()) if begun else "Defences: %s." % String(HomeDefense.WORD_LABELS[id]).to_lower()})
@@ -660,7 +661,9 @@ static func _finished_ago(title:String)->int:
 func _select(title:String)->void:
 	selected_project="" if selected_project==title else title;hud.request_immediate_dock_refresh()
 func _priority(title:String)->void:
-	terrain._report_military_action(Construction.set_priority(GameState.selected_player_settlement_id,title));hud.request_immediate_dock_refresh()
+	var result:Dictionary=Construction.set_priority(GameState.selected_player_settlement_id,title)
+	preload("res://scripts/order_tracker.gd").building_order(title,result,String(GameState.selected_player_settlement_id))
+	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
 func signature()->Array:
 	return [MilitaryCampaign.settlement_defense.duplicate(true),GameState.selected_player_settlement_id,GameState.settlement_site_committed,GameState.settlement_projects.duplicate(true),GameState.settlement_completed.duplicate(),GameState.resource_stockpiles.duplicate(),GameState.population_allocations.duplicate(),GameState.elapsed_days,GameState.settlement_network_revision,selected_project,GameState.building_ledger.size(),GameState.next_building_record_id,history_filter,history.signature() if history!=null else []]
 

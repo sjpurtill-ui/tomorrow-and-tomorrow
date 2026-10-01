@@ -57,6 +57,9 @@ extends RefCounted
 ## Static helpers; preload.
 
 const DEFAULT_RECRUITS:=10
+## When the weapons are in hand and when the drill ends: the engine's own
+## days run forward (levy_forecast.gd).
+const Forecast:=preload("res://scripts/levy_forecast.gd")
 ## Home orders a real system carries out: never turned into a law, a war
 ## order or a standing directive on the way (court_commands.gd).
 const ENGINE_KINDS:=["levy","recruit","arm","stand_down","found_towns","work","deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace",
@@ -89,6 +92,18 @@ const WANTED_FIGHTERS:="(?i)\\b(levies|levy|recruits?|conscripts?|draftees?|(?:n
 ## Only the fighters asked for, nothing else said: "10 levies", "ten more
 ## recruits!".
 const BARE_ASK:="(?i)^(?:\\d+|[a-z]+)(?: (?:more|new|fresh))? (?:levies|recruits|conscripts|draftees|fighters|warriors|men|soldiers|spearmen|archers|bowmen|troops)[.!]*$"
+## A number said with the fighters themselves: "20 soldiers", "twenty more
+## warriors", "a dozen fighting men", "an army of 20", "a band of thirty".
+## Asked for ("I want 20 soldiers", "give me 20 fighters", "we need twenty
+## warriors", "make 20 soldiers") they are new fighters to call up; "train 20
+## soldiers" drills those waiting and calls up the rest.
+const NUMBER_SAID:="(?:\\d{1,5}|a dozen|a score|a hundred|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[ -](?:one|two|three|four|five|six|seven|eight|nine))?|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)"
+const COUNTED_FIGHTERS:="(?i)\\b"+NUMBER_SAID+"\\s+(?:(?:more|new|fresh|extra|additional|able|strong|young|armed|good)\\s+)?(?:soldiers|warriors|fighters|troops|spearmen|archers|bowmen|levies|recruits|fighting men|men[- ]at[- ]arms|armed men)\\b|\\b(?:army|war ?band|band|host|force|levy) of\\s+"+NUMBER_SAID+"\\b"
+## "20 men" are fighters only when nothing else is asked of them ("20 men for
+## the fields" is the daily work's): said alone, or to fight.
+const COUNTED_MEN:="(?i)\\b"+NUMBER_SAID+"\\s+(?:(?:more|new|fresh|extra|able|strong|young|good)\\s+)?men(?:\\s+(?:to fight|who can fight|under arms|to bear arms|for (?:the |a |our )?(?:band|army|host|levy|war ?band|fight|war)))?[.!]*$"
+## Asking for fighters to be made: "make 20 soldiers", "create an army of 20".
+const MAKE_FIGHTERS:="(?i)\\b(make|create|build|produce|put together|train up|get|find)\\b"
 ## Fighters we already have, named as ours: "the 7 levies", "our recruits".
 const OUR_NAMED:="(?i)\\b(the|our|those|these|my)\\s+(?!new\\b|more\\b|fresh\\b)(?:[a-z0-9]+\\s+)?(levies|soldiers|fighters|warriors|troops|recruits)\\b"
 ## "Levy a tax", "levy ten hides from each family": goods, not fighters.
@@ -369,7 +384,10 @@ static func levy_reading(text:String)->Dictionary:
 	var named:=lower if verb==null else lower.substr(0,verb.get_start())+" "+lower.substr(verb.get_end())
 	var noun:=_has(named,FIGHTER_NOUNS)
 	var n:=number_in(lower)
-	var other:=_has(lower,OTHER_CALLINGS) and not noun
+	# A number said with the fighters ("20 soldiers", "an army of 20", "raise
+	# 20 men"): new fighters, whatever else the words call them.
+	var counted:=_has(named,COUNTED_FIGHTERS) or _has(named.strip_edges(),COUNTED_MEN)
+	var other:=_has(lower,OTHER_CALLINGS) and not noun and not counted
 	var recruit:=false
 	if verb!=null:
 		var word:=verb.get_string(1)
@@ -378,16 +396,19 @@ static func levy_reading(text:String)->Dictionary:
 		# "raise" and "call up" need fighters named ("raise the wall"), or a
 		# levy raised as a thing ("raise a levy of 10 men"), never a tax.
 		if word=="recruit": recruit=not other
-		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or (n>0 and not other and not _has(lower,LEVY_GOODS))
-		else: recruit=noun or (_has(named,LEVY_NOUN) and not _has(lower,LEVY_GOODS))
+		elif word in ["enlist","draft","conscript","levy"]: recruit=noun or counted or (n>0 and not other and not _has(lower,LEVY_GOODS))
+		else: recruit=noun or counted or (_has(named,LEVY_NOUN) and not _has(lower,LEVY_GOODS))
 		if word=="raise" and (_has(lower,"\\braise [\\w' ]{0,30}?up\\b") or _has(lower,"\\b(spirits?|morale|hopes?|hearts?|pay|wages?|rations?|banners?|standards?|voices?|the alarm)\\b")): recruit=false
 	# Fighters we already have, named as ours ("the 7 levies", "our recruits").
 	var ours:=_has(lower,OUR_NAMED)
 	# A number of new fighters wanted, with no calling verb: "I need 10
-	# levies", "give me ten more levies", "10 levies", "have 10 levies ready".
-	if not recruit and verb==null and n>0 and not ours and not other and _has(lower,WANTED_FIGHTERS) and (_has(lower,WANT_VERBS) or _has(lower,BARE_ASK)):
+	# levies", "give me ten more levies", "10 levies", "have 10 levies ready",
+	# "I want 20 soldiers", "give me twenty warriors", "make 20 soldiers".
+	if not recruit and verb==null and n>0 and not ours and not other and (_has(lower,WANTED_FIGHTERS) or counted) and (_has(lower,WANT_VERBS) or _has(lower,BARE_ASK) or (counted and _has(lower,MAKE_FIGHTERS))):
 		recruit=true
-	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")))
+	# "Train 20 soldiers": a number of fighters to drill that are not ours yet
+	# drills those waiting and calls up the rest (fill, below).
+	var drill:=_has(lower,DRILL_VERBS) and (_has(lower,NEW_FIGHTERS) or (recruit and _has(lower,"\\b(them|they)\\b")) or (counted and not ours))
 	if not recruit and not drill: return {}
 	# "Train 10 levies": ten in drill, those waiting first and the rest called
 	# up; "train the recruits" drills only those already called up.
@@ -431,14 +452,26 @@ static func _recruit(reading:Dictionary)->Dictionary:
 	var waiting:=int(r.get("recruit_reserve",mc.aggregate_recruits))
 	var out:={"ok":raised>0,"kind":"recruit","count":raised,"asked":n,"waiting":waiting}
 	if raised<=0:
-		out.says="There is nobody left to call up: every able adult is already under arms or away."
-		out.outcome="Nothing is set in motion: no free adults remain to be called up."
+		out.says=_nobody_free_says(mc,n)
+		out.outcome=_nobody_free_outcome(mc,n)
 		return out
 	var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
 	var unnamed:=" You named no number, so I called up %d." % raised if not named else ""
 	out.says="%d are called up and leave their work in the fields and workshops.%s%s %d now wait for weapons and drill." % [raised,short,unnamed,waiting]
 	out.outcome="%d called up from our own people; %d recruits now wait for weapons and drill, and that much less work is done at home." % [raised,waiting]
 	return out
+
+## Nobody free to call up, with the engine's own count: the able adults at
+## home (MilitaryCampaign.recruitment_capacity) and how many of them are
+## already under arms, in drill or away with the bands.
+static func _nobody_free_says(mc:Variant,asked:int)->String:
+	var adults:=int(mc.recruitment_capacity())
+	var taken:=int(mc._mobilized_count())
+	if adults<=0: return "Nobody can be called up: 0 of the %d you asked for. No able adults are at home; all are away." % asked
+	return "Nobody can be called up: 0 of the %d you asked for. Of our %d able adults at home, %d are already under arms, in drill or with the bands." % [asked,adults,mini(taken,adults)]
+
+static func _nobody_free_outcome(mc:Variant,asked:int)->String:
+	return "Nothing is set in motion: 0 of %d called up, no free adults (%d able, %d under arms)." % [asked,int(mc.recruitment_capacity()),int(mc._mobilized_count())]
 
 ## Fighters stood down (MilitaryCampaign.demobilize): those hurt first, then
 ## the recruits waiting, then the fighters at home; bands away in the field
@@ -515,8 +548,8 @@ static func _levy(reading:Dictionary)->Dictionary:
 			says.append("%d are called up and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
 			done.append("%d called up from our own people" % raised)
 		elif int(mc.aggregate_recruits)<=0:
-			out.says="There is nobody left to call up: every able adult is already under arms or away."
-			out.outcome="Nothing is set in motion: no free adults remain to be called up."
+			out.says=_nobody_free_says(mc,n)
+			out.outcome=_nobody_free_outcome(mc,n)
 			return out
 		else:
 			says.append("There is nobody left to call up, so I drill those already waiting.")
@@ -541,6 +574,8 @@ static func _levy(reading:Dictionary)->Dictionary:
 		out.says=" ".join(says);out.outcome=", ".join(done)+"." if not done.is_empty() else "Nothing more is set in motion."
 		return out
 	var drilling:=int(started.get("accepted",drill_count))
+	# Where the order's drill stands in the ledger (order_tracker.gd).
+	out["training_id"]=int(started.get("id",-1));out["weapon"]=weapon
 	var required:=float(started.get("required_days",0.0))
 	out.drilling=drilling
 	if String(kit.get("note",""))!="": says.append(String(kit.note))
@@ -554,37 +589,51 @@ static func _levy(reading:Dictionary)->Dictionary:
 	var spoken:=_spoken_for(mc,weapon,int(started.get("id",-1)))
 	var cover:=maxi(0,stock+making-spoken)
 	var short:=maxi(0,need-cover)
-	var coming:=short<=0
+	var put:={}
+	if short>0:put=_put_in_hand(mc,weapon,short,stock)
+	# Nothing in store to start a line on, but the materials are on their way:
+	# the workshop officer starts one the day they are in.
+	var officer:=bool(put.get("officer_starts",false))
+	# When the weapons are really in hand and when the drill really ends: the
+	# engine's own days, run forward from today (levy_forecast.gd).
+	var plan:=Forecast.levy(int(started.get("id",-1)),{"weapon":weapon,"target":stock+short} if officer else {})
+	var days:=int(plan.get("days",-1))
+	var all_day:=int(plan.get("all_day",-1))
+	out["drill_days"]=days;out["weapons_day"]=all_day
 	if short<=0:
-		says.append("We have the %s for them%s." % [arms," in store" if stock>=need else " in store and in the making"])
+		var ready:=" in store" if stock-spoken>=need else " in store and in the making"
+		says.append("We have the %s for them%s%s." % [arms,ready,(": all in hand in about %s" % _days_words(all_day)) if all_day>0 else ""])
+	elif put.has("error") and not officer:
+		var have:=("%d in store" % cover) if cover>0 else "none in store"
+		says.append("Of the %d %s they need we have %s, and the workshops cannot make the rest now: %s" % [need,arms,have,String(put.error)])
+		var wood:=_wood_words(weapon)
+		if wood!="":says.append(wood)
+		done.append("%d short of %s" % [short,arms])
 	else:
 		var have:=("%d in store" % cover) if cover>0 else "none in store"
-		var put:=_put_in_hand(mc,weapon,short,stock)
-		if put.has("error"):
-			says.append("Of the %d %s they need we have %s, and the workshops cannot make the rest now: %s" % [need,arms,have,String(put.error)])
-			var wood:=_wood_words(weapon)
-			if wood!="":says.append(wood)
-			done.append("%d short of %s" % [short,arms])
-		else:
-			coming=true
-			out.made=short
-			says.append("Of the %d %s they need we have %s; %s" % [need,arms,have,String(put.says)])
-			done.append("%d %s put in hand in the workshops" % [short,arms])
+		out.made=short
+		var doing:=String(put.get("says","")) if not officer else "the workshops cannot start on them until their materials are in store, and the workshop officer starts a line the day they are"
+		says.append("Of the %d %s they need we have %s; %s." % [need,arms,have,doing])
+		var coming_words:=_making_words(plan,weapon,short,"line" if officer else String(put.get("how","")))
+		if coming_words!="":says.append(coming_words)
+		done.append("%d %s put in hand in the workshops%s" % [short,arms,(", all in about %s" % _days_words(all_day)) if all_day>0 else ""])
 	# How long the drill really takes: the instructors' pace for everyone in
-	# drill, and a drill without weapons in hand goes slower
-	# (military_campaign.gd _process_training_day).
-	var in_hand:=clampf(float(mini(need,maxi(0,stock-spoken)))/maxf(1.0,float(need)),0.0,1.0)
-	var pace:=_drill_pace(mc,weapon,in_hand)
+	# drill, and slower while their weapons are not yet in hand, day by day as
+	# the workshops make them (military_campaign.gd _process_training_day).
 	var full:=_drill_pace(mc,weapon,1.0)
-	var days:=ceili(required/maxf(0.01,pace)) if pace>0.0 else -1
-	var armed_days:=ceili(required/maxf(0.01,full)) if full>0.0 else -1
 	var when:=""
-	if full<=0.0:when="but %s" % _drill_halted(mc)
-	elif in_hand>=1.0:when="about %d days before they are fit to fight" % days
-	elif coming:when="about %d days before they are fit to fight once their %s are in hand; until then they drill without them and go slower" % [armed_days,arms]
-	else:when="but without %s they drill at %s the pace, about %d days before they are fit to fight instead of %d" % [arms,_share_words(pace/full),days,armed_days]
+	if String(plan.get("halted",""))!="" or full<=0.0:when="but %s" % _drill_halted(mc)
+	elif days<0:when="but at this pace their drill would take more than three years"
+	elif all_day==0:when="about %s before they are fit to fight" % _days_words(days)
+	elif all_day>0:when="about %s before they are fit to fight, slower at first until their %s are in hand" % [_days_words(days),arms]
+	else:
+		var last:=int(plan.get("last",0))
+		var pace:=_drill_pace(mc,weapon,float(last)/maxf(1.0,float(need)))
+		var armed_days:=ceili(required/maxf(0.01,full))
+		if last<=0:when="but without %s they drill at %s the pace, about %s before they are fit to fight instead of %d" % [arms,_share_words(pace/full),_days_words(days),armed_days]
+		else:when="but with only %d of their %d %s they drill at %s the pace, about %s before they are fit to fight instead of %d" % [last,need,arms,_share_words(pace/full),_days_words(days),armed_days]
 	says.insert(begin_at,"%s begin their drill as %s with %s now, %s." % ["They" if raised>0 else ("The %d waiting" % drilling),as_what,arms,when])
-	done.insert(mini(done.size(),1 if raised>0 else 0),"%d begin drill as %s with %s, %s" % [drilling,as_what,arms,("about %d days" % days) if days>0 else "held up"])
+	done.insert(mini(done.size(),1 if raised>0 else 0),"%d begin drill as %s with %s, %s" % [drilling,as_what,arms,("about %s" % _days_words(days)) if days>0 else "held up"])
 	out.ok=true
 	out.count=drilling
 	out.says=" ".join(says)
@@ -645,7 +694,7 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 			out.says="The %d under arms at home have a %s under way, but it stands still: %s" % [home,String(program.get("label","drill")).to_lower(),still if still!="" else "nobody is at it."]
 			out.outcome="Nothing more is set in motion: the drill at home stands still."
 			return out
-		out.ok=true;out.count=home
+		out.ok=true;out.count=home;out["camp"]=true
 		out.says="The %d under arms at home are already at their drill." % home
 		out.outcome="The drill at home goes on."
 		return out
@@ -654,7 +703,7 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 		out.says="Nobody is waiting to be drilled, and camp drill cannot begin: %s" % String(began.error)
 		out.outcome="Nothing is set in motion: %s" % String(began.error)
 		return out
-	out.ok=true;out.count=home
+	out.ok=true;out.count=home;out["camp"]=true
 	out.says="Nobody new is waiting, so the %d under arms at home go to camp drill: musters, signals and changes of formation, for about %d days." % [home,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))]
 	out.outcome="The %d under arms at home begin camp drill." % home
 	return out
@@ -685,8 +734,14 @@ static func _kit(mc:Variant,unit:String,item:String)->Dictionary:
 
 ## `short` weapons put in hand, the way the workshops' own lines work: a line
 ## that already makes them keeps that many more in store (and works again if
-## it was paused); else a batch of them; else, when every line is taken, a
-## paused line is turned over to them. {says} or {error} in plain words.
+## it was paused); else a batch of them, its materials set aside now; else,
+## when the store holds too little for all of them at once or every line is
+## taken, a line that makes them item by item as the materials come in (a new
+## one, or an idle one turned over to them). {says (what was done, no full
+## stop), how: "line"|"batch"} or {error} in plain words; officer_starts:
+## nothing could start for want of one weapon's materials in store, but they
+## are on their way and the workshop officer starts a line the day they are
+## in (workshop_steward.gd advance).
 static func _put_in_hand(mc:Variant,weapon:String,short:int,stock:int)->Dictionary:
 	var arms:=String(ITEM_NAMES.get(weapon,weapon.replace("_"," ")))
 	for job in mc.equipment_queue:
@@ -695,24 +750,31 @@ static func _put_in_hand(mc:Variant,weapon:String,short:int,stock:int)->Dictiona
 		var target:=maxi(int(j.get("target_stock",0)),stock+short) if int(j.get("target_stock",0))>0 else 0
 		var set:Dictionary=mc.configure_production_line(int(j.id),target,false)
 		if set.has("error"):return {"error":String(set.error)}
-		return {"says":"the workshop line that makes %s is set to keep %d in store, and is at work on them now." % [arms,target] if target>0 else "the workshop line that makes %s keeps on making them." % arms}
+		return {"says":"the workshop line that makes %s is set to keep %d in store" % [arms,target] if target>0 else "the workshop line that makes %s keeps on making them" % arms,"how":"line"}
 	# A batch of them already in the workshops takes these too.
 	for job in mc.equipment_queue:
 		var j:Dictionary=job
 		if bool(j.get("persistent",false)) or String(j.get("item",""))!=weapon or String(j.get("job_type","production"))!="production":continue
 		var grown:=_grow_batch(mc,j,weapon,short)
 		if grown.has("error"):return grown
-		return {"says":"the %s already being made in the workshops are %d more now, about %d more days of work, and %s are set aside for them now." % [arms,short,ceili(float(grown.days)),String(grown.materials)]}
+		return {"says":"the %s already being made in the workshops are %d more now, and %s are set aside for them" % [arms,short,String(grown.materials)],"how":"batch"}
 	var queued:Dictionary=mc.queue_equipment_production(weapon,short)
 	if not queued.has("error"):
 		var materials:PackedStringArray=PackedStringArray()
 		var recipe:Dictionary=mc._equipment_recipe(weapon)
 		for m in (recipe.get("materials",{}) as Dictionary):
 			materials.append("%d %s" % [ceili(float(recipe.materials[m])*short),String(m)])
-		return {"says":"the workshops will make %d more, about %d days of work, and %s are set aside for it now." % [short,ceili(float(queued.get("work_days",0.0))),", ".join(materials) if not materials.is_empty() else "nothing"]}
-	if not String(queued.error).begins_with("All "):
+		return {"says":"the workshops will make %d more, and %s are set aside for it now" % [short,", ".join(materials) if not materials.is_empty() else "nothing"],"how":"batch"}
+	var wanting:=String(queued.error).begins_with("Insufficient")
+	if not wanting and not String(queued.error).begins_with("All "):
 		return {"error":_plain_shortage(String(queued.error))}
-	# Every line is taken: a paused line is turned over to them.
+	# Not enough in store for all of them at once, or every line taken: a
+	# workshop line makes them item by item as the materials come in.
+	if mc.equipment_queue.size()<int(mc.production_line_capacity()):
+		var line:Dictionary=mc.start_production_line(weapon,stock+short)
+		if not line.has("error"):
+			return {"says":"a workshop line is set to make them, keeping %d in store" % (stock+short),"how":"line"}
+	# Every line is taken: an idle line is turned over to them.
 	for job in mc.equipment_queue:
 		var j:Dictionary=job
 		if not bool(j.get("persistent",false)) or not bool(j.get("paused",false)):continue
@@ -721,8 +783,55 @@ static func _put_in_hand(mc:Variant,weapon:String,short:int,stock:int)->Dictiona
 		if turned.has("error"):continue
 		var set:Dictionary=mc.configure_production_line(int(j.id),stock+short,false)
 		if set.has("error"):return {"error":String(set.error)}
-		return {"says":"every workshop line was taken, so the idle line that made %s now makes %s, to keep %d in store." % [was,arms,stock+short]}
+		return {"says":"every workshop line was taken, so the idle line that made %s now makes %s, keeping %d in store" % [was,arms,stock+short],"how":"line"}
+	if wanting:
+		var out:={"error":_plain_shortage(String(queued.error))}
+		# A line cannot start without one weapon's materials in store; when they
+		# are on their way, the workshop officer starts it the day they are in.
+		if mc.equipment_queue.size()<int(mc.production_line_capacity()) and Forecast.coming(weapon) and bool(mc.workshop.data.get("enabled",false)) and mc.workshop._has_officer():out["officer_starts"]=true
+		return out
 	return {"error":"every workshop line is already at other work."}
+
+
+## How the weapons come, in the engine's days (levy_forecast.gd): what holds
+## them back, how fast they come, and the day all of them are in hand.
+static func _making_words(plan:Dictionary,weapon:String,short:int,how:String)->String:
+	var need:=int(plan.get("need",short))
+	var all_day:=int(plan.get("all_day",-1))
+	var parts:PackedStringArray=PackedStringArray()
+	var scarce:=Forecast.scarce(weapon,short)
+	if scarce!="" and how!="batch":
+		var name:=preload("res://scripts/resource_names.gd").label(scarce).to_lower()
+		var makes:=Forecast.store_makes(weapon)
+		var comes:PackedStringArray=PackedStringArray()
+		var local:=float((plan.get("local",{}) as Dictionary).get(scarce,0.0))
+		var trade:Dictionary=plan.get("trade",{})
+		var donor:Dictionary=(trade.get("donors",{}) as Dictionary).get(scarce,{})
+		if local>=0.05:comes.append("our own people bring in a little each day" if local<1.0 else "our own people bring in about %d a day" % roundi(local))
+		if bool(trade.get("ready",false)) and not donor.is_empty():comes.append("our other towns send more when it runs short, about %d at a time, %s on the road" % [roundi(float(trade.get("target",0.0))),_days_words(int(donor.days))])
+		var store:=("%s for %d of them now" % [name,makes]) if makes>0 else "no %s now" % name
+		parts.append("It makes them as the %s comes in: the store holds %s; %s." % [name,store,", and ".join(comes) if not comes.is_empty() else "no more is coming in"])
+	if all_day>0:
+		parts.append("All %d are in hand in about %s, %s." % [need,_days_words(all_day),_rate_words(float(plan.get("rate",0.0)))])
+	elif all_day<0:
+		var last:=int(plan.get("last",0))
+		parts.append(("Only %d can be made with what we have, and no more is coming in." % last) if last>int(plan.get("in_hand",0)) else "None can be made until more comes in.")
+		var wood:=_wood_words(weapon)
+		if wood!="":parts.append(wood)
+	return " ".join(parts)
+
+
+## "about 3 a day", "about one a day", "about one every 4 days".
+static func _rate_words(rate:float)->String:
+	if rate>=1.5:return "about %d a day" % roundi(rate)
+	if rate>=0.7:return "about one a day"
+	if rate<=0.0:return "slowly"
+	return "about one every %d days" % maxi(2,roundi(1.0/rate))
+
+
+## "a day", "9 days".
+static func _days_words(days:int)->String:
+	return "a day" if days==1 else "%d days" % days
 
 
 ## A batch already in hand grows by `count`: its work and its materials,

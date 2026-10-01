@@ -23,6 +23,7 @@ extends RefCounted
 ## Static helpers; preload.
 
 const WO:=preload("res://scripts/court_war_orders.gd")
+const Tracker:=preload("res://scripts/order_tracker.gd")
 const Odds:=preload("res://scripts/war_odds.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
@@ -394,7 +395,26 @@ static func guard_radius(troops:int)->float:
 # Giving the order
 # --------------------------------------------------------------------------
 
+## Every order from the Army screen gets its card (order_tracker.gd): the
+## war leader's answer settles it, a march is followed on the road.
 static func give(force_id:int,verb_id:String,target:Dictionary,insist:bool=false)->Dictionary:
+	var card:=Tracker.register(order_words(force_id,verb_id,target),"army")
+	var answer:=_give(force_id,verb_id,target,insist)
+	Tracker.from_war(card,answer)
+	return answer
+
+## The order in plain words for its card: "Attack Tsaren", "Guard the
+## ground near the ford", "Come home".
+static func order_words(force_id:int,verb_id:String,target:Dictionary)->String:
+	var label:=String(verb(verb_id).get("label",verb_id.capitalize())).trim_suffix("…")
+	var aim:=target_title(target)
+	var who:=""
+	if force_id!=HOME:
+		var name:=String(army(force_id).get("name",""))
+		if name!="":who=name+": "
+	return (who+label+(" "+aim if aim!="" else "")).strip_edges()
+
+static func _give(force_id:int,verb_id:String,target:Dictionary,insist:bool=false)->Dictionary:
 	## The war leader's answer, the same shape as WO.perform():
 	## {verdict:"act"|"object"|"impossible", kind, general, says, outcome,
 	##  reason, fix, objective}.
@@ -665,8 +685,14 @@ static func give_plan(force_id:int,plan:Dictionary,insist:bool=false)->Dictionar
 		"arrow":
 			var aim:Dictionary=plan if plan.has("verb") else arrow_target(_v2(plan.get("to",{})))
 			return give(force_id,String(aim.verb),aim.target,insist)
-		"front": return _hold_front(force_id,plan.get("points",[]))
-	return _answer("impossible","plan","no_plan","Draw the line or the arrow on the map first.","")
+		"front":
+			var card:=Tracker.register(order_words(force_id,"front",{}).replace("Front","Hold the line"),"army")
+			var held:=_hold_front(force_id,plan.get("points",[]))
+			Tracker.from_war(card,held)
+			return held
+	var none:=_answer("impossible","plan","no_plan","Draw the line or the arrow on the map first.","")
+	Tracker.refuse(Tracker.register("A battle plan","army"),String(none.says))
+	return none
 
 
 static func _hold_front(force_id:int,points:Array)->Dictionary:

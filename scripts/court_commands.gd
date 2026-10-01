@@ -2327,6 +2327,9 @@ static func _order(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,t
 	var who:=String(actor.get("name",""))
 	r.outcome=("%s%s " % [blocker+" " if blocker!="" else "","%s takes up your order." % who if who!="" else "Your order is taken up."])+String(routed.get("outcome",""))
 	r.route=String(routed.get("route",""))
+	# What carried it out, for the order's card (order_tracker.gd).
+	for key in ["home","war","applied","order_id","settlement_id"]:
+		if routed.has(key):r[key]=routed[key]
 	r.executed=true; r.stage="order"; r.reaction="neutral"
 	if not bool(routed.get("ok",true)):
 		# Nothing was set in motion: the plain truth, never "it will be done".
@@ -2566,7 +2569,7 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	if civic and (sid!="" or Hall.is_directive(text)):
 		if sid!="": SettlementModel.select_settlement(sid)
 		(terrain as Object).call("issue_civic_directive_text",text)
-		return {"ok":true,"route":"civic","outcome":"It goes out to the council to be carried out."}
+		return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}
 	var plan:=CustomDirective.offline_plan(text)
 	if plan.is_empty(): plan=CustomDirective.attempt_plan(text)
 	var policy:=CustomDirective.policy_from_plan(plan)
@@ -2582,7 +2585,7 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	if not bool(applied.get("applied",false)):
 		if civic:
 			(terrain as Object).call("issue_civic_directive_text",text)
-			return {"ok":true,"route":"civic","outcome":"It goes out to the council to be carried out."}
+			return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}
 		# Nothing was set in motion: say so, never that it will be done.
 		return {"ok":false,"route":"recorded","outcome":"Nothing is set in motion: nobody here has a way to carry that out as it was said. Say plainly what is to be done, and by whom."}
 	var rate:=float((applied.get("assessment",{}) as Dictionary).get("implementation_rate",0.5))
