@@ -11,12 +11,14 @@ extends RefCounted
 ## home_orders.gd) all read and set it here, so they always agree.
 ##
 ## GovernmentPeopleSystem stays the owner of daily labour: in the ruler's
-## hands its daily delegation lays this split on every town as it is
-## (applied_percentages), with no hidden survival guard or food floor. The
-## split keeps its shares as the people grow or shrink; a task the ruler
-## gave anyone keeps at least one person while there are people enough. When
-## the split will leave people short, outlook() says so in plain words from
-## the food and water counts.
+## hands its daily delegation lays this split on every town
+## (applied_percentages), except that a town's leader puts more on food when
+## that town's food is running out, and says so in the chronicle
+## (GovernmentPeopleSystem._ruler_split_fed). Nobody is left to starve by a
+## split set for the whole realm. The split keeps its shares as the people
+## grow or shrink; a task the ruler gave anyone keeps at least one person
+## while there are people enough. When the split will leave people short,
+## outlook() says so in plain words from the food and water counts.
 ##
 ## Everything reads population_allocations, the one ledger of who works at
 ## what: the People view's rows, the court's "At work" and the economy.
@@ -44,7 +46,7 @@ const FOCUS_FIRST:={"water":"water first","provisions":"food first","shelter":"s
 	"development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
 
 const LEADERS_TIP:="Each town's leader shares out the work every day, food and water first."
-const RULER_TIP:="You set how many do each task. Nothing changes it until you do."
+const RULER_TIP:="You set how many do each task. A town's leader puts more on food only when its food is running out, and says so."
 
 static func _state()->Variant:
 	return WorldSimulation.state
@@ -174,7 +176,9 @@ static func move(role:String,people:int,other:String="")->Dictionary:
 	if not role in ROLES or people==0:return {"ok":false,"role":role,"moved":0,"from":{},"to":{},"reason":"No such work."}
 	var was_manual:=manual()
 	if not was_manual:set_manual(true)
-	var before:=counts()
+	# The ruler's own split in people: a town leader's extra hands on food
+	# (GovernmentPeopleSystem._ruler_split_fed) are theirs, never baked in.
+	var before:=whole_people(split(),able())
 	var now:=before.duplicate()
 	var gave:={};var took:={}
 	for step in absi(people):
@@ -195,7 +199,7 @@ static func move(role:String,people:int,other:String="")->Dictionary:
 	if moved>0:
 		_direction().work_baseline=_shares_of(now)
 		apply()
-	return {"ok":moved>0,"role":role,"moved":moved,"from":gave,"to":took,"before":before,"after":counts(),"took_charge":not was_manual}
+	return {"ok":moved>0,"role":role,"moved":moved,"from":gave,"to":took,"before":before,"after":whole_people(split(),able()),"took_charge":not was_manual}
 
 # --------------------------------------------------------------------------
 # What the split will do: the food and water counts, read for this split
@@ -267,6 +271,8 @@ static func warn_towns(day:int)->Array:
 	for row:Dictionary in town_rows():
 		var record:Dictionary=WorldSimulation.settlements.settlement_record(String(row.get("id","")))
 		if record.is_empty():continue
+		# A town whose leader is already feeding it is told by that leader.
+		if bool(record.get("fed_by_leader",false)):continue
 		var days:=float(row.get("food_days",-1.0))
 		var warned:Dictionary=record.get("split_warned",{}) if record.get("split_warned") is Dictionary else {}
 		if days<0.0 or days>RECOVERED_DAYS:
@@ -326,6 +332,7 @@ static func town_warning(settlement_id:String)->Dictionary:
 	var reach:Dictionary=WorldSimulation.settlements.delivery_reach(settlement_id,"Food")
 	if not reach.is_empty() and not bool(reach.get("reachable",true)) and String(reach.get("nearest",""))!="":
 		text+=" No town of ours is near enough to send food: %s is %d km away, and our carriers reach %d km." % [String(reach.nearest),roundi(float(reach.nearest_km)),roundi(float(reach.range_km))]
+	if bool(record.get("fed_by_leader",false)):text+=" Its leader has put more on getting food until the stores recover."
 	var fix:=food_fix(row)
 	return {"text":text,"tone":"bad" if bool(row.get("starving",false)) or days<60.0 else "warn","fix":fix,
 		"fix_text":"Put %d more on getting food" % fix if fix>0 else "","town":town,"starving":bool(row.get("starving",false)),"days":days}
