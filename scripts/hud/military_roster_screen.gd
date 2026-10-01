@@ -15,6 +15,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 const ForcesBoard=preload("res://scripts/hud/forces_board.gd")
 const ReadinessBoard=preload("res://scripts/hud/readiness_board.gd")
 const WarLedger=preload("res://scripts/hud/war_ledger_board.gd")
+const LeadersBoard=preload("res://scripts/hud/leaders_board.gd")
 const WarLedgerModel=preload("res://scripts/hud/war_ledger_model.gd")
 var TEXT:=T.INK
 var MUTED:=T.INK_MUTED
@@ -87,9 +88,10 @@ func _ready()->void:
 		button.visible=services.size()>1
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
 	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
-	for entry:Array in [["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"],["wars",_wars_label()]]:
+	for entry:Array in [["leaders","Leaders"],["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"],["wars",_wars_label()]]:
 		var key:=String(entry[0]);var button:=_button(nav,String(entry[1]),func():_show_page(key))
 		button.toggle_mode=true;page_buttons[key]=button
+	page_buttons.leaders.tooltip_text="Your leaders and the bands under each: put bands under a leader, and they see to supply, gear, organization and pacing."
 	page_buttons.wars.tooltip_text="Every feud and war with a people we know: the dead, their strength against ours, how worn each side is, and what would end it."
 	roster_button=page_buttons.forces;training_button=page_buttons.training;management_button=page_buttons.recruitment
 	var map_button:=_button(nav,"Command on map ↗",_map_command)
@@ -182,6 +184,12 @@ func _wars_label()->String:
 	var word:="Wars & feuds" if open.any(func(e:Dictionary)->bool: return String(e.kind)=="war") else "Feuds"
 	return "%s · %d" % [word,open.size()] if not open.is_empty() else word
 
+## The Military Leaders screen: commands by leader (hud/leaders_board.gd).
+func _leaders()->void:
+	var board:=LeadersBoard.new();body.add_child(board)
+	board.setup({})
+	board.close_wanted.connect(queue_free)
+
 ## Feuds and wars, as HOI4's war overview (hud/war_ledger_board.gd).
 func _wars()->void:
 	var board:=WarLedger.new();body.add_child(board)
@@ -257,7 +265,7 @@ func _process(delta:float)->void:
 	if timer<.5:return
 	timer=0;stories.clear()
 	# The embedded recruitment, forces and readiness boards own live updates.
-	if page in ["recruitment","wars"] or (service=="army" and page in ["forces","support"]):return
+	if page in ["recruitment","wars","leaders"] or (service=="army" and page in ["forces","support"]):return
 	if page=="support":_update_support();return
 	if training_view:_update_policy();return
 	var rows:=_rows();_update_hero(rows)
@@ -305,6 +313,7 @@ func _build_body()->void:
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
 	if page=="wars":_wars();return
+	if page=="leaders":_leaders();return
 	if service=="army":
 		# HOI4's army overview; over the Training page only its strip of totals.
 		_forces(training_view)

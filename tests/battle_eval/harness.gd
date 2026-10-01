@@ -365,6 +365,9 @@ func our_army(spec:Array,opts:Dictionary={})->int:
 	army["supply_level"]=float(opts.get("supply",1.0))
 	if opts.has("morale"): army["morale"]=float(opts.morale)
 	if bool(opts.get("hungry",false)): army["hungry_days"]=6.0; army["supply_level"]=0.3
+	# A field army is led by a general, as the ruler puts one in command
+	# (leader_commands.gd); a new band alone serves under the war leader.
+	army["commander"]=WorldSimulation.figures.commander(MilitaryCampaign._acting_field_commander(false),"army_%d" % army_id)
 	var general:Dictionary=opts.get("general",{})
 	if not general.is_empty():
 		# Skill and resolve only: the name stays the general's own (his

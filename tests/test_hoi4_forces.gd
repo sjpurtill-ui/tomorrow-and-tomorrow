@@ -288,10 +288,14 @@ func test_filters_pick_bands_in_the_field_garrisons_and_those_short_of_gear()->v
 	var shown:=func(filter:String)->Array:
 		board.set_filter(filter)
 		return board.live.map(func(control:Dictionary)->String:return String(control.id))
-	assert_array(shown.call("field")).contains_exactly(["army:%d" % int(out.army_id)])
+	# Both new bands serve under the war leader (leader_commands.gd): a filter
+	# shows the command's row over only the bands it picks.
+	assert_array(shown.call("field")).contains_exactly(["general:war_leader","army:%d" % int(out.army_id)])
 	assert_array(shown.call("garrison")).contains_exactly(["garrison:%s/%s" % [civ_id,city_id]])
-	assert_array(shown.call("short")).contains_exactly(["army:%d" % int(short.army_id)])
-	assert_int((shown.call("all") as Array).size()).is_equal(board.rows.size())
+	assert_array(shown.call("short")).contains_exactly(["general:war_leader","army:%d" % int(short.army_id)])
+	var every:=0
+	for row:Dictionary in board.rows:every+=1+(row.get("bands",[]) as Array).size()
+	assert_int((shown.call("all") as Array).size()).is_equal(every)
 	assert_bool(board.filter_buttons.all.button_pressed).is_true()
 	# A band away is read from its runner's report, and says where it is.
 	var away:=_control(board,"army:%d" % int(out.army_id))

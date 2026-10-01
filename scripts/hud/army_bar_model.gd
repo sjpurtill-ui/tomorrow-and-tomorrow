@@ -347,16 +347,20 @@ static func _grouped(mc:Node,singles:Array[Dictionary])->Array[Dictionary]:
 		if String(top.get("id",""))!=String(entry.get("id","")):
 			key_of[int(entry.force_id)]="group:"+String(top.id)
 			names["group:"+String(top.id)]=String(top.get("name",""))
+	# One card per command (leader_commands.gd): the bands of one general
+	# together, and every band without a named general under the war leader.
 	var by_general:={}
 	for card:Dictionary in singles:
 		var figure:=String((card.general as Dictionary).get("figure_id",""))
-		if figure!="" and not key_of.has(int(card.army_id)):by_general[figure]=int(by_general.get(figure,0))+1
+		if figure=="":figure="war_leader"
+		if not key_of.has(int(card.army_id)):by_general[figure]=int(by_general.get(figure,0))+1
 	var groups:={}
 	var order:Array[String]=[]
 	for card:Dictionary in singles:
 		var key:=String(key_of.get(int(card.army_id),""))
 		var figure:=String((card.general as Dictionary).get("figure_id",""))
-		if key=="" and figure!="" and int(by_general.get(figure,0))>1:key="general:"+figure
+		if figure=="":figure="war_leader"
+		if key=="" and int(by_general.get(figure,0))>1:key="general:"+figure
 		if key=="":key=String(card.id)
 		if not groups.has(key):groups[key]=[];order.append(key)
 		(groups[key] as Array).append(card)
