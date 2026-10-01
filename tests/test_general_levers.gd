@@ -249,6 +249,8 @@ func test_generals_differ_from_one_another()->void:
 
 func test_the_war_screen_can_shortlist_and_commission_generals()->void:
 	HistoricalFigures.ensure()
+	# The first general may already lead the band at home; two more come forward.
+	for n in 2: HistoricalFigures._create("General",int(GameState.elapsed_days))
 	var free:=Commands.shortlist_generals(MilitaryCampaign,300.0,5)
 	assert_bool(free.is_empty()).is_false()
 	for i in range(1,free.size()): assert_float(float(free[i-1].levers.fight)).is_greater_equal(float(free[i].levers.fight))
