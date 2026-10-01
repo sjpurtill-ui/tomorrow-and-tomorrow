@@ -3667,8 +3667,8 @@
   "raw_material_prestaging": {"path": "res://assets/ui/research/subjects/raw_material_prestaging-v2.png", "focus": [0.5, 0.5]},
   "carried_load_balancing": {"path": "res://assets/ui/research/subjects/carried_load_balancing-v2.png", "focus": [0.5, 0.4]},
   "common_ground_marking": {"path": "res://assets/ui/research/subjects/common_ground_marking-v1.png", "focus": [0.5, 0.5]},
-  "household_task_division": {"path": "res://assets/ui/research/subjects/household_task_division-v1.png", "focus": [0.5, 0.5]},
-  "lactational_spacing_awareness": {"path": "res://assets/ui/research/subjects/lactational_spacing_awareness-v1.png", "focus": [0.5, 0.5]},
+  "household_task_division": {"path": "res://assets/ui/research/subjects/household_task_division-v2.png", "focus": [0.5, 0.45]},
+  "lactational_spacing_awareness": {"path": "res://assets/ui/research/subjects/lactational_spacing_awareness-v2.png", "focus": [0.5, 0.5]},
   "seasonal_duty_rosters": {"path": "res://assets/ui/research/subjects/seasonal_duty_rosters-v1.png", "focus": [0.5, 0.5]},
   "alarm_relay_signals": {"path": "res://assets/ui/research/subjects/alarm_relay_signals-v1.png", "focus": [0.5, 0.5]},
   "council_messenger_duty": {"path": "res://assets/ui/research/subjects/council_messenger_duty-v1.png", "focus": [0.5, 0.5]},
@@ -4240,5 +4240,6 @@
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
   "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
-  "shared_hearth_gatherings": {"path": "res://assets/ui/research/subjects/shared_hearth_gatherings-v1.png", "focus": [0.5, 0.5]}
+  "shared_hearth_gatherings": {"path": "res://assets/ui/research/subjects/shared_hearth_gatherings-v1.png", "focus": [0.5, 0.5]},
+  "communal_work_songs": {"path": "res://assets/ui/research/subjects/communal_work_songs-v2.png", "focus": [0.5, 0.43]}
 }

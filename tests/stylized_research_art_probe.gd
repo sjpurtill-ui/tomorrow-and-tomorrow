@@ -41,6 +41,7 @@ func _ready()->void:
 		var selection:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-03/selected.json"))
 		for row:Dictionary in selection:selected.append(row.id)
 		assert(not selected.is_empty())
+		assert(Art.focus_for({"id":"agreed_signal_codes"}).is_equal_approx(Vector2(.5,.5)))
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true
@@ -64,6 +65,8 @@ func _ready()->void:
 		var sha:=FileAccess.get_sha256(expected)
 		var provenance:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://assets/ui/research/subjects/"+id+".json"))
 		assert(sha==provenance.sha256 and not hashes.has(sha));hashes[sha]=true
+		if batch=="earliest-opening-03":
+			assert(Art.focus_for(item).is_equal_approx(Vector2(provenance.focus[0],provenance.focus[1])))
 		for dimensions in [Vector2(708,210),Vector2(264,70)]:
 			var crop:=Art.crop_region(texture,dimensions,Art.focus_for(item))
 			assert(Rect2(Vector2.ZERO,texture.get_size()).grow(.01).encloses(crop))

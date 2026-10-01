@@ -50,7 +50,7 @@ for row in rows:
         prior_binding = HERE / 'prior' / (key + '-art600.json')
         if not prior_binding.exists():
             prior_binding.write_text(json.dumps(art600[key], indent=2) + '\n')
-        art600[key] = {'path': metadata['asset'], 'style': 'culture: tapestry-inspired painting'}
+        art600[key] = {'path': metadata['asset'], 'style': row.get('binding_style', 'culture: tapestry-inspired painting'), 'focus': row['focus']}
 raw_manifest = manifest_path.read_text(encoding='utf-8')
 for row in rows:
     raw_manifest = replace_member(raw_manifest, row['id'], manifest[row['id']], True)

@@ -2,11 +2,16 @@
   "id": "household_task_division",
   "line": "labor",
   "game_year": 2,
-  "approx_historical_year": -4987,
-  "prompt": "Early Neolithic household divides tasks by age and season; older adult sorts food and fiber while another gathers kindling. Mature expressive charcoal over ochre wash, coarse grain and hand-drawn diagonals. Simple hide-and-fiber clothing, no metal, later architecture, photorealism or writing. Wide card crop.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-049d932b-9224-4c9f-9963-07d00c3064e4.png",
-  "asset": "res://assets/ui/research/subjects/household_task_division-v1.png",
-  "sha256": "96eaf5a885b08dd8d17fa8d099fb97a3599955406c3328c20c052e0770328edf",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected: graphic charcoal figures and clearer distinct tasks. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f55523ee-75b6-4070-b10a-0a5ed97fbcb2.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/household_task_division-v1.png",
+  "prompt": "Make one precise historical correction to this Household Tasks Divided by Age and Season research painting, game year 2. Preserve its expressive charcoal over ochre wash, coarse smears, adult figures, pointing task assignment gesture, twig gathering and simple hide shelters. Replace ONLY the woven seed basket at lower left with an irregular ragged hide sheet laid directly on the ground, with loose wild seeds scattered on that hide. Keep the crouching person's hands sorting those seeds. No woven rim or vessel shape; a simple flat unstitched animal-hide scrap. Preserve all other scene details and wide composition. No new technology, text, labels, frame, photorealism or 3D.",
+  "review": "Full image inspected: woven basket replaced by flat ragged hide with wild seeds, crouching sorting hands retained. Adult assigning gesture, gathered twigs and bare hearth preserved. Expressive charcoal smears on ochre wash; no refined vessels or later materials. 3.37:1 crop inspected; sorting hands, seeds, task assignment and twig gathering remain clear, focus [.5,.45] retains assigner's head.",
+  "asset": "res://assets/ui/research/subjects/household_task_division-v2.png",
+  "sha256": "a329a6ddf66142333709955ddfb9e860af76294648e89fbbb07f7e99b82938af",
+  "mode": "built-in image_gen / edit"
 }

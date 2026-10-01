@@ -43,5 +43,50 @@
     "initial_prompt": "Edit this existing research painting for Raw Stock Set Out Before a Work Session, game year 1. Keep its mature palette-knife impasto oil aesthetic, scraped chunky flat paint planes, copper/ember orange/soot/umber palette, adult hide-clad figures and broad horizontal composition. Preserve the visible action of laying out rough stones, wood, reeds and clay for later work. Remove every woven basket, woven fence or structured reed container in the background, at both far edges and anywhere else. Replace those only with loose ragged bundles of raw reeds resting on earth; no weaving or lattice. The hide lean-to may remain crude and minimal. Preserve rough stone material heaps and natural irregular wood. No finished tools, pottery, metal, standardized carpentry, writing, labels, frame, photorealism or CGI. Keep all hands and piles legible in wide card crop.",
     "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/raw_material_prestaging-v1.png",
     "review": "Full corrected image inspected: four hide-clad adults lay out rough stone, broken wood, loose reeds and clay. Woven containers/fences removed, central wood ends made jagged and irregular. Mature chunky flat impasto pigment and copper/ember/soot palette preserved. No saw-cut stock, metal, pottery or woven objects. Full image and 3.37:1 crop inspected; sorting hands and all four raw heaps remain legible."
+  },
+  {
+    "id": "communal_work_songs",
+    "line": "culture",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.43
+    ],
+    "replace_art600": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2552990d-4193-4867-9b03-f70777a0059b.png",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png",
+    "prompt": "Make one precise composition correction to this Communal Work Songs painting, preserving the four adult hide-clad figures, open singing mouth, group grips on rough branched trunk, flat tapestry-inspired culture painting and all landscape details. Lower the lead singer's raised free arm: bend it into an outward cue at about shoulder height, with the OPEN HAND no higher than the top of his head. Keep a clear rhythmic cue toward the group. His head, cueing hand and all four grips on the trunk must fit within the same compact middle horizontal band for very wide 3.37:1 and 3.77:1 game-card crops. No other change, no new technology, text, borders, photo lighting or 3D.",
+    "review": "Full corrected image inspected: lead singer cues at shoulder height with open mouth, all four adults grip naturally branched trunk in shared rhythmic lift. Flat culture medium preserved, no later technology. Initial high hand did not fit narrow crops; corrected before final approval. Focus [.5,.43] checked for wide and narrow cards.",
+    "initial_prompt": "Create a distinct opening-era research painting for Communal Work Songs, game year 2. Use the supplied painting ONLY for its mature tapestry-inspired paint medium and indigo/dusty rose/warm gold/dusk violet palette, interlocking flat angular shapes and visible coarse fiber-like pigment grain. Do not copy the hearth, seated circle or fire. New scene: four dignified adults in ragged unstitched hide wraps jointly lift and move a rough fallen branch trunk, their grips and alternating stepping postures creating a visible shared rhythm. One adult at the left sings a work call, mouth subtly open and free hand raised in time; others look toward that cue as they lift together. Crude natural timber, bare ground and flat landscape bands, no saw-cut log ends. No written music, symbols or soundwave graphics. Wide panorama approx 3:1, faces/hands/trunk/call gesture across the middle horizontal band for 3.37:1 crop. Adult angular proportions, tactile flat paint, restrained expressive profiles. No physical tapestry, woven clothes, baskets, pottery, sewn tunics, refined tools, metal, wheels, buildings, furniture, borders, captions, watermarks, photographic lighting, smooth digital volume or childlike illustration.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png"
+  },
+  {
+    "id": "household_task_division",
+    "line": "labor",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f55523ee-75b6-4070-b10a-0a5ed97fbcb2.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/household_task_division-v1.png",
+    "prompt": "Make one precise historical correction to this Household Tasks Divided by Age and Season research painting, game year 2. Preserve its expressive charcoal over ochre wash, coarse smears, adult figures, pointing task assignment gesture, twig gathering and simple hide shelters. Replace ONLY the woven seed basket at lower left with an irregular ragged hide sheet laid directly on the ground, with loose wild seeds scattered on that hide. Keep the crouching person's hands sorting those seeds. No woven rim or vessel shape; a simple flat unstitched animal-hide scrap. Preserve all other scene details and wide composition. No new technology, text, labels, frame, photorealism or 3D.",
+    "review": "Full image inspected: woven basket replaced by flat ragged hide with wild seeds, crouching sorting hands retained. Adult assigning gesture, gathered twigs and bare hearth preserved. Expressive charcoal smears on ochre wash; no refined vessels or later materials. 3.37:1 crop inspected; sorting hands, seeds, task assignment and twig gathering remain clear, focus [.5,.45] retains assigner's head."
+  },
+  {
+    "id": "lactational_spacing_awareness",
+    "line": "demography",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1e07844f-660a-4b66-ba1b-14da9f5ecc65.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/lactational_spacing_awareness-v1.png",
+    "prompt": "Make a precise opening-era correction to this Nursing Delays the Next Pregnancy research painting, game year 2. Preserve the respectful nursing mother and infant, seated elder's explanatory gesture, intimate full figures, mature chalk pastel and torn cut-paper collage, flat terracotta/warm ivory/slate palette, open paper and wide composition. Remove ALL woven baskets and the dark manufactured bowl beside them. Replace those vessel spots with a few loose natural reeds and irregular stones on bare earth, no container. Replace the neat latticed reed shelter panel on the right with a crude uneven hide sheet draped over a few rough branches; no weaving or straight manufactured panel. Preserve the nursing action, adult expressions, posture and all other composition details. No new pottery, woven cloth, metal, sewn clothing, text, diagram, labels, frame, photorealism or 3D.",
+    "review": "Full corrected image inspected: respectful nursing mother/infant and explaining elder retained, woven baskets and manufactured bowl removed, lattice panel replaced by irregular hide draped over rough branches. Flat chalk/paper pigment, terracotta/ivory/slate palette, adult profiles and nursing action clear. Full image and 3.37:1 crop inspected; both adult faces, infant and nursing/teaching gestures remain visible."
   }
 ]

@@ -98,7 +98,9 @@ static func subject_art_key(item:Dictionary)->String:
 	return path
 static func focus_for(item:Dictionary)->Vector2:
 	var id:=String(item.get("id",""))
-	if art600_manifest().has(id):return Vector2(.5,.5)
+	if art600_manifest().has(id):
+		var crop_point:Array=art600_manifest()[id].get("focus",[.5,.5])
+		return Vector2(float(crop_point[0]),float(crop_point[1]))
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):
 		if id=="labor_rotations":return Vector2(.5,.30)
 		return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)
