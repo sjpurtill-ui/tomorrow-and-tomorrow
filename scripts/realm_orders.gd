@@ -728,7 +728,7 @@ static func _build_work(reading:Dictionary)->Dictionary:
 		return {"ok":true,"kind":"build","count":0,"says":"The %s already stand." % work.to_lower(),"outcome":"The %s already stand." % work.to_lower()}
 	var set:Dictionary=preload("res://scripts/settlement_construction.gd").set_priority(sid,work)
 	if set.has("error"): return _no("build",_plain(String(set.error)))
-	return {"ok":true,"kind":"build","count":1,"says":"The builders put the %s first. They go up as soon as what they need is at hand." % work.to_lower(),"outcome":"The %s are put first by the builders." % work.to_lower()}
+	return {"ok":true,"kind":"build","count":1,"work":work,"settlement_id":sid,"says":"The builders put the %s first. They go up as soon as what they need is at hand." % work.to_lower(),"outcome":"The %s are put first by the builders." % work.to_lower()}
 
 
 static func _defences()->Dictionary:

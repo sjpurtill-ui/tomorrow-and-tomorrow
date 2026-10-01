@@ -170,16 +170,28 @@ func build_templates()->void:
 			var stats:=T.make_label(String(said[0]),12,T.INK);stats.name="Stats%d" % id;stats.clip_text=true;stats.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			stats.tooltip_text=String(said[1]);stats.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(stats)
 		var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",6);words.add_child(actions)
-		var train:=_icon_button(actions,"drill","Train",func():report(MilitaryCampaign.recruit_deploy.add(id,1,1,false)),"Raise and drill one band of %d." % int(item.men))
+		var train:=_icon_button(actions,"drill","Train",func():report(raise_bands(id,1,int(item.men),String(item.name))),"Raise and drill one band of %d." % int(item.men))
 		train.name="TrainTemplate%d" % id;train.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		train.add_theme_stylebox_override("normal",T.gold_outline_style());train.add_theme_color_override("font_color",T.GOLD_TEXT)
-		var five:=_icon_button(actions,"plus","×5",func():report(MilitaryCampaign.recruit_deploy.add(id,5,1,false)),"Raise five bands at once, drilled side by side.")
+		var five:=_icon_button(actions,"plus","×5",func():report(raise_bands(id,5,int(item.men),String(item.name))),"Raise five bands at once, drilled side by side.")
 		five.name="TrainFive%d" % id
 		var change:=_icon_button(actions,"edit","",func():edit.call(id),"Change who is in this band.")
 		change.name="EditTemplate%d" % id
 		for button:Button in [train,five]:
 			button.disabled=not bool(item.trainable)
 			if not bool(item.trainable):button.tooltip_text=String(item.reason)
+
+
+## Raise and drill bands from a design: the order gets its card at the bottom
+## right (order_tracker.gd), followed from the recruitment line's own ledger.
+func raise_bands(template_id:int,bands:int,men:int,design:String)->Dictionary:
+	const Tracker:=preload("res://scripts/order_tracker.gd")
+	var words:=("Raise a band of %d" % men) if bands==1 else ("Raise %d bands of %d" % [bands,men])
+	var card:=Tracker.register(words+(" (%s)" % design.to_lower() if design!="" else ""),"recruit")
+	var result:Dictionary=MilitaryCampaign.recruit_deploy.add(template_id,bands,1,false)
+	if result.has("error"):Tracker.refuse(card,String(result.error))
+	else:Tracker.claim(card,"recruit_line",{"line_id":int(result.get("id",-1))},Tracker._war_leader(),"military:1")
+	return result
 
 
 func _fact(parent:Node,icon:String,value:String,color:Color,tip:String)->void:

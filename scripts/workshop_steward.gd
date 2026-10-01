@@ -238,6 +238,8 @@ func _set_muster_priority(job:Dictionary)->bool:
 ## leaves pausing the line as the player's way to stop him.
 func _top_up_player_line(job:Dictionary,target:int)->Dictionary:
 	var name:=P.product_name(String(job.item))
+	# A batch (the court's levy puts one in hand) has no stock target to raise.
+	if not bool(job.get("persistent",false)):return {"message":"%s: a batch in the workshops already makes them." % name}
 	var waiting:=_waiting_total(String(job.item))
 	if bool(job.get("paused",false)):
 		return {"message":"%s is paused on your order while %d soldiers wait for them. Resume the line or hand it to the %s." % [name,waiting,_office()]}

@@ -571,6 +571,8 @@ static func _levy(reading:Dictionary)->Dictionary:
 		out.says=" ".join(says);out.outcome=", ".join(done)+"." if not done.is_empty() else "Nothing more is set in motion."
 		return out
 	var drilling:=int(started.get("accepted",drill_count))
+	# Where the order's drill stands in the ledger (order_tracker.gd).
+	out["training_id"]=int(started.get("id",-1));out["weapon"]=weapon
 	var required:=float(started.get("required_days",0.0))
 	out.drilling=drilling
 	if String(kit.get("note",""))!="": says.append(String(kit.note))
@@ -675,7 +677,7 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 			out.says="The %d under arms at home have a %s under way, but it stands still: %s" % [home,String(program.get("label","drill")).to_lower(),still if still!="" else "nobody is at it."]
 			out.outcome="Nothing more is set in motion: the drill at home stands still."
 			return out
-		out.ok=true;out.count=home
+		out.ok=true;out.count=home;out["camp"]=true
 		out.says="The %d under arms at home are already at their drill." % home
 		out.outcome="The drill at home goes on."
 		return out
@@ -684,7 +686,7 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 		out.says="Nobody is waiting to be drilled, and camp drill cannot begin: %s" % String(began.error)
 		out.outcome="Nothing is set in motion: %s" % String(began.error)
 		return out
-	out.ok=true;out.count=home
+	out.ok=true;out.count=home;out["camp"]=true
 	out.says="Nobody new is waiting, so the %d under arms at home go to camp drill: musters, signals and changes of formation, for about %d days." % [home,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))]
 	out.outcome="The %d under arms at home begin camp drill." % home
 	return out

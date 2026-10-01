@@ -227,13 +227,19 @@ func _region(region:Dictionary)->void:
 	map.selected=region
 	_refresh_status()
 func _assign()->void:
-	_report(op.assign(selected_id,map.selected,String(_selected(mission_picker))))
+	var result:Dictionary=op.assign(selected_id,map.selected,String(_selected(mission_picker)))
+	preload("res://scripts/order_tracker.gd").setting_order("Give the %s a %s mission" % ["navy" if domain=="navy" else "air service",String(_selected(mission_picker)).replace("_"," ")],result,"army","","military")
+	_report(result)
 func _produce()->void:
 	var id:=String(_selected(type_picker))
 	if not C.UNITS.has(id):_report({"error":"Our people do not yet know how to build any."});return
-	_report(MilitaryCampaign.start_production_line(String(C.UNITS[id].equipment),int(quantity.value)))
+	var made:=MilitaryCampaign.start_production_line(String(C.UNITS[id].equipment),int(quantity.value))
+	preload("res://scripts/order_tracker.gd").workshop_order("Keep %d %s in store" % [int(quantity.value),String(MilitaryCampaign.PersistentProduction.product_name(String(C.UNITS[id].equipment))).to_lower()],made,String(C.UNITS[id].equipment),int(quantity.value),true)
+	_report(made)
 func _commission()->void:
-	_report(op.commission(int(_selected(base_picker)),String(_selected(type_picker)),int(quantity.value)))
+	var result:Dictionary=op.commission(int(_selected(base_picker)),String(_selected(type_picker)),int(quantity.value))
+	preload("res://scripts/order_tracker.gd").setting_order("Commission %d %s" % [int(quantity.value),String(_selected(type_picker)).replace("_"," ")],result,"army","","military")
+	_report(result)
 func _recall()->void:
 	for convoy:Dictionary in op.state.convoys:
 		if int(convoy.force_id)==selected_id and convoy.status in ["preparing","outbound"]:_report(op.logistics.recall(int(convoy.id)));return

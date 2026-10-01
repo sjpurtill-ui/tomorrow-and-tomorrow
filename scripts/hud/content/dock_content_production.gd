@@ -135,6 +135,9 @@ static func _boatyards()->int:
 
 func _action(id:int,action:String,value:float)->void:
 	var result:Dictionary={"error":"That line is no longer active."}
+	var line_name:="workshop";var was_paused:=false
+	for job:Dictionary in MilitaryCampaign.equipment_queue:
+		if int(job.id)==id:line_name=P.product_name(String(job.get("item",""))).to_lower();was_paused=bool(job.get("paused",false))
 	for job:Dictionary in MilitaryCampaign.equipment_queue:
 		if int(job.id)!=id:continue
 		var name:=P.product_name(String(job.get("item","")))
@@ -155,6 +158,11 @@ func _action(id:int,action:String,value:float)->void:
 			"move_to":result=P.move(MilitaryCampaign,id,int(value))
 			"close":result=MilitaryCampaign.cancel_equipment_job(id)
 		break
+	# A click that changes a line is an order with its card; dragged
+	# shares, moves and hands are adjustments, not orders.
+	if action in ["pause","close","delegate","auto"]:
+		var words:={"pause":("Resume the %s line" if was_paused else "Pause the %s line"),"close":"Close the %s line","delegate":"Hand the %s line to the staff","auto":"Change who runs the %s line"}
+		preload("res://scripts/order_tracker.gd").setting_order(String(words[action]) % line_name,result,"production","the workshops","production")
 	if action in QUIET_ACTIONS and not result.has("error"):
 		if hud!=null:hud.request_immediate_dock_refresh()
 		return
@@ -164,7 +172,9 @@ func _header_action(kind:String)->void:
 	var manager=MilitaryCampaign.workshop
 	_report(manager.set_enabled(false) if kind=="take_over" else manager.delegate_lines())
 func _start(item:String)->void:
-	_report(MilitaryCampaign.start_production_line(item,START_TARGET))
+	var result:=MilitaryCampaign.start_production_line(item,START_TARGET)
+	preload("res://scripts/order_tracker.gd").workshop_order("Keep %d %s in store" % [START_TARGET,P.product_name(item).to_lower()],result,item,START_TARGET,true)
+	_report(result)
 func _report(result:Dictionary)->void:
 	if terrain!=null:terrain._report_military_action(result)
 	if hud!=null:hud.request_immediate_dock_refresh()
