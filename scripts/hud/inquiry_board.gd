@@ -160,14 +160,15 @@ static func field_name(record:Dictionary)->String:
 ## would bring, and its tooltip.
 static func _card_words(record:Dictionary)->Dictionary:
 	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
-	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
+	var bottleneck:=String(record.get("bottleneck","EARLY EVIDENCE"))
 	# Its step to proof, always: first cases, repeated, and the households trying it.
 	var step:=Words.step(int(record.get("stage",preload("res://scripts/research_600_catalog.gd").stage(progress))),float(record.get("trial_share",preload("res://scripts/research_600_catalog.gd").trial_share(progress))))
 	step=step.left(1).to_upper()+step.substr(1)
 	# What holds it back, if anything: a short name, and its sentence once a board.
 	var phase:=""
 	var why:=""
-	if not (bottleneck.begins_with("EARLY EVIDENCE") or bottleneck.begins_with("REPLICATION") or bottleneck.begins_with("VALIDATION")):
+	# The engine names a holdup "KEY — words"; its steps are no holdup.
+	if " — " in bottleneck and not (bottleneck.begins_with("EARLY EVIDENCE") or bottleneck.begins_with("REPLICATION") or bottleneck.begins_with("VALIDATION")):
 		phase=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
 		if phase.is_empty():
 			var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
