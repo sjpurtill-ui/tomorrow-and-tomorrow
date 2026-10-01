@@ -26,6 +26,18 @@ var clock:=REFRESH_SECONDS
 var signature:=""
 ## For tests: the alerts last shown.
 var shown:Array[Dictionary]=[]
+## Bands hungry or ready to break: the red badge on the rail's Warriors
+## button, which shows even while a dock covers this row (-1: not yet set).
+var urgent:=-1
+
+
+## How many bands are in a state that will not wait: hungry in the field or
+## ready to break. Hot feuds are a state of things, not an interruption.
+static func urgent_count(list:Array)->int:
+	var count:=0
+	for alert:Dictionary in list:
+		if String(alert.id) in ["hungry","will"] and String(alert.tone)=="red": count+=int(alert.count)
+	return count
 
 
 ## What is wrong with our fighters, worst first:
@@ -90,6 +102,11 @@ func _process(delta:float)->void:
 
 func refresh()->void:
 	var next:=alerts()
+	var pressing:=urgent_count(next)
+	if pressing!=urgent:
+		urgent=pressing
+		var hud:=get_parent()
+		if hud!=null and hud.has_method("_set_badge"): hud.call("_set_badge","military",str(pressing) if pressing>0 else "",T.RED)
 	var words:=str(next)
 	if words==signature: return
 	signature=words

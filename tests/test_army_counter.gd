@@ -219,3 +219,11 @@ func test_men_gained_or_lost_flash_over_the_counter()->void:
 	# The levy grew by 4; the band lost one; a new band and their host are not news here.
 	assert_dict(by).is_equal({"home":4,"ours:4":-1})
 	overlay.free()
+
+func test_only_hungry_or_breaking_bands_badge_the_rail()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	var list:=[{"id":"hungry","tone":"red","count":2},{"id":"will","tone":"amber","count":1},{"id":"feud","tone":"red","count":2},{"id":"men","tone":"amber","count":3}]
+	assert_int(Alerts.urgent_count(list)).is_equal(2)
+	list[1]["tone"]="red"
+	assert_int(Alerts.urgent_count(list)).is_equal(3)
+	assert_int(Alerts.urgent_count([])).is_equal(0)
