@@ -7,8 +7,9 @@ func verify()->void:
 	var rows:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/artifact-recovery-02/reviewed.json"))
 	var manifest:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/prehistoric-art/manifest.json"))
 	var hashes:Dictionary={}
-	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(16,16);add_child(grid)
-	get_window().size=Vector2i(1040,360*ceili(rows.size()/3.0)+20)
+	var grid:=GridContainer.new();grid.columns=4;grid.position=Vector2(16,16);add_child(grid)
+	var visible_rows:=mini(rows.size(),12)
+	get_window().size=Vector2i(1040,280*ceili(visible_rows/4.0)+20)
 	for row:Dictionary in rows:
 		var id:=int(row.id)
 		var record:Dictionary=load("res://scripts/prehistoric_artifacts.gd").definition(id)
@@ -20,10 +21,11 @@ func verify()->void:
 		var digest:=FileAccess.get_sha256(expected)
 		assert(digest==String(manifest.entries[id].sha256) and not hashes.has(digest));hashes[digest]=true
 		assert(manifest.entries[id].status=="approved")
-		var column:=VBoxContainer.new();grid.add_child(column)
-		var view:=TextureRect.new();view.texture=texture;view.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-		view.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;view.custom_minimum_size=Vector2(320,320);column.add_child(view)
-		var label:=Label.new();label.text="%04d — %s" % [id,String(record.name).left(36)];column.add_child(label)
+		if rows.find(row)>=rows.size()-visible_rows:
+			var column:=VBoxContainer.new();grid.add_child(column)
+			var view:=TextureRect.new();view.texture=texture;view.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+			view.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;view.custom_minimum_size=Vector2(240,240);column.add_child(view)
+			var label:=Label.new();label.text="%04d — %s" % [id,String(record.name).left(26)];column.add_child(label)
 		record["source_id"]="living-maker"
 		assert(art.image_path(record).is_empty())
 	for frame in 4:await get_tree().process_frame

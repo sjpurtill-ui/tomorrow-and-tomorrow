@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bi6t6hhp1p62y"
-path="res://.godot/imported/artifact-1182.png-cbf85ca8dd69aa1c542b5b1ed0d20f0b.ctex"
+uid="uid://ck7y0tdqlilw0"
+path="res://.godot/imported/artifact-1322.png-71ea0c6ad5767a64bd18bed4c0529f0e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/artifacts/prehistoric-v1/artifact-1182.png"
-dest_files=["res://.godot/imported/artifact-1182.png-cbf85ca8dd69aa1c542b5b1ed0d20f0b.ctex"]
+source_file="res://assets/ui/artifacts/prehistoric-v1/artifact-1322.png"
+dest_files=["res://.godot/imported/artifact-1322.png-71ea0c6ad5767a64bd18bed4c0529f0e.ctex"]
 
 [params]
 

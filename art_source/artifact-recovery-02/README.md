@@ -49,3 +49,18 @@ Keep generation in the built-in tool, one image per specimen, with the supplied
 paper/gouache reference as medium only. Every result must depict its specified
 prehistoric material and mechanism. The bank is incomplete. Only the designated
 integrator merges/pushes main; worker checkpoints do not update the player game.
+
+Third checkpoint adds 1320 (hide cushioning a battered stone), 1321 (wild seed
+held in a split twig) and 1322 (hide gathered around a cobble anchor), plus
+individually reviewed recovered originals 1182, 1185 and 1186. The first 1320
+generation had a protruding twig resembling a handle; a targeted built-in edit
+shortened it before approval. Both exact requests and source paths are retained
+in reviewed.json. Recovered originals retain their hashes and prior sources;
+their invocation prompts remain explicitly unknown.
+
+Clean incremental import, headless runtime and private GPU review PASS count=13.
+The GPU startup again failed before initialization with native exit 3221226505;
+the separate retry exited 0 and its capture was visually inspected. The probe
+validates all reviewed records but displays only the newest twelve at once to
+keep its capture legible as this continuous batch grows. Audit: 1,324 approved,
+10 generated awaiting review, 2,762 pending, no errors. Production continues.

@@ -4714,6 +4714,10 @@
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1181.png",
       "sha256": "1b0c91429ef9ed6f93a9d91076b0e2334a54e0de0b1dedc231f790d3f5b4bf1b"
     },
+    "1182": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1182.png",
+      "sha256": "8899d92e6ab1eba02c2b6f16cf1dd83c0a7056bfad642498c106372438cf8294"
+    },
     "1183": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1183.png",
       "sha256": "3e447b21422af31d21718ea3c862b319034e0a60ea63f9c2d897e2b0b4336dcc"
@@ -4721,6 +4725,14 @@
     "1184": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1184.png",
       "sha256": "79b3bcd6dd9a474f08491a017c346f29bf34a87d6844e5ab0d95919888645c34"
+    },
+    "1185": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1185.png",
+      "sha256": "293aec9c09ed87a97c0e69bb7d8e0e99f5784bc2294717557b117266add5455f"
+    },
+    "1186": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1186.png",
+      "sha256": "7266b5ec656783914a714c712da8a236c6b76e7b2232ee26123cf8ca6195790f"
     },
     "1187": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1187.png",
@@ -5221,6 +5233,18 @@
     "1319": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1319.png",
       "sha256": "1a3c2da4036812fa3507d807403cb75608f3a15da915ae5b30c12782b0d6f998"
+    },
+    "1320": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1320.png",
+      "sha256": "4c4b1da785edd58ac99f182762b8c6b8f2b8f2b30a20c15ce82b303fb0269d90"
+    },
+    "1321": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1321.png",
+      "sha256": "7b140779b46e6403f1dc845c1c6423a21a449724dbc366f66c1b7115ea4eafba"
+    },
+    "1322": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1322.png",
+      "sha256": "24fed5b8f271709f555de99df32751e2467315a65d6ac69d8f88be5200735577"
     },
     "1390": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1390.png",
