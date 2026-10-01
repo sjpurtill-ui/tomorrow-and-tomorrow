@@ -785,7 +785,7 @@ func _why(state:Dictionary,a:Dictionary,d:Dictionary,ac:Array[Dictionary],dc:Arr
 		var commander:Dictionary=force.get("commander",{})
 		sides[side]={"men":Blocks.standing_men(state,side),"front":Blocks.front_men(state,side),"quality":weighted/maxf(1.0,men),"terrain":t,
 			"river":Blocks.RIVER_ATTACK if river and side=="attacker" else 1.0,"cohesion":cohesion/maxf(1.0,front) if front>0.0 else (am if side=="attacker" else dm),
-			"readiness":float(force.get("readiness",1.0)),"command":0.90+clampf(float(commander.get("command",0.5)),0.0,1.0)*0.20,
+			"readiness":float(force.get("readiness",1.0)),"command":command_factor(float(commander.get("command",0.5)),float(force.get("troops",0))),
 			"fatigue":fatigue/maxf(1.0,front) if front>0.0 else 1.0,"hunger":Blocks.HUNGER_POWER if bool(hungry[side]) else 1.0}
 	var ids:={"attacker":String((plan.get("attacker",{}) as Dictionary).get("id","")),"defender":String((plan.get("defender",{}) as Dictionary).get("id",""))}
 	var surprise:=""
@@ -1150,12 +1150,38 @@ func issued_equipment_ratio(formation:Dictionary)->float:
 ## (battle_blocks.weights); empty means everyone fights.
 func _cohort_power(cohorts: Array[Dictionary], morale: float, readiness: float,command: float,weights:PackedFloat32Array=PackedFloat32Array()) -> float:
 	var power := 0.0
+	var men := 0.0
 	var weighted:=not weights.is_empty()
 	for index in cohorts.size():
 		var cohort:Dictionary=cohorts[index]
 		var weight:=float(weights[index]) if weighted and index<weights.size() else 1.0
 		power += float(cohort.count) * weight * sqrt(float(cohort.attack) * float(cohort.defense))
-	return power*maxf(MIN_EFFECTIVE_STRENGTH,morale)*readiness*(0.90+clampf(command,0.0,1.0)*0.20)
+		men += float(cohort.count)
+	return power*maxf(MIN_EFFECTIVE_STRENGTH,morale)*readiness*command_factor(command,men)
+
+
+## What the commander's command (0..1) does to a force's fighting power:
+## COMMAND_FLOOR at none, COMMAND_FLOOR + COMMAND_SPAN at the best, 1.0 for
+## an ordinary one (0.5). A great general against a poor one is worth about
+## a third more power in a fight they direct themselves.
+const COMMAND_FLOOR:=0.85
+const COMMAND_SPAN:=0.30
+## A commander directs about COMMAND_REACH_MEN in person; past that their
+## hand reaches the fight through subordinates (whose quality is the
+## realm's), so their edge over an ordinary commander shrinks as
+## sqrt(COMMAND_REACH_MEN / men), to no less than COMMAND_REACH_MIN of it:
+## a war chief's own skill is everything to a band, a general's is diluted
+## across a corps (and shows instead in its march, supply and desertion).
+const COMMAND_REACH_MEN:=5000.0
+const COMMAND_REACH_MIN:=0.5
+
+static func command_reach(men:float)->float:
+	if men<=COMMAND_REACH_MEN: return 1.0
+	return maxf(COMMAND_REACH_MIN,sqrt(COMMAND_REACH_MEN/men))
+
+static func command_factor(command:float,men:float=0.0)->float:
+	var directed:=0.5+(clampf(command,0.0,1.0)-0.5)*command_reach(men)
+	return COMMAND_FLOOR+directed*COMMAND_SPAN
 
 
 func _engagement_context(rng: RandomNumberGenerator,attacker_share: float,defender_share: float,attacker_morale: float,defender_morale: float,terrain: float) -> Dictionary:

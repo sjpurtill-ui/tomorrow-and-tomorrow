@@ -91,6 +91,10 @@ func forecast(id:String,accord:String,tone:String,generous:bool=false)->Dictiona
 	var allure_bonus:=preload("res://scripts/artifact_culture.gd").diplomatic_bonus(p.personality)
 	score+=allure_bonus
 	if allure_bonus>.02:reasons.append("Your people's culture and treasured heritage lend your envoys standing.")
+	# The messenger who carries the words (office_levers.gd: -5 to +10 points).
+	var sway:float=preload("res://scripts/office_levers.gd").value("Envoy")
+	score+=sway
+	if absf(sway)>=.01:reasons.append("Our messenger carries the words %s (%+d points)." % ["well" if sway>0.0 else "poorly",roundi(sway*100.0)])
 	var ties:Dictionary=preload("res://scripts/society_exchange.gd").known_relation(id)
 	if float(ties.get("respect",0))>.02:reasons.append("Useful knowledge and cultural exchange give this relationship weight.")
 	if float(ties.get("resentment",0))>.02:reasons.append("The movement of households has created political friction.")

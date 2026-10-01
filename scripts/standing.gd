@@ -265,8 +265,11 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var rivals:=_rivals()
 	var character:Dictionary=rivals.call("rival_character",civ_id) if rivals!=null else {}
 	var leader:=ForeignDiplomacy.leader(civ_id)
-	var trust:=clampf(0.5+float(leader.get("trust",0.0))*0.5+(0.15 if String(relation.get("treaty","none")) not in ["none","","war"] else 0.0)-(0.3 if bool(relation.get("at_war",false)) else 0.0),0.0,1.0)
-	why["trust"]="their ruler's trust in our word%s" % (" · a treaty between us" if String(relation.get("treaty","none")) not in ["none","","war"] else "")
+	# How our envoys carry themselves (persuasion: the messenger's skill, our
+	# openness) moves their trust in our word by up to 10 points either way.
+	var persuaded:=(float((our.get("persuasion",{}) as Dictionary).get("value",0.5))-0.5)*0.2
+	var trust:=clampf(0.5+float(leader.get("trust",0.0))*0.5+(0.15 if String(relation.get("treaty","none")) not in ["none","","war"] else 0.0)-(0.3 if bool(relation.get("at_war",false)) else 0.0)+persuaded,0.0,1.0)
+	why["trust"]="their ruler's trust in our word%s%s" % [(" · a treaty between us" if String(relation.get("treaty","none")) not in ["none","","war"] else ""),(" · our envoys' persuasion %+d" % roundi(persuaded*100.0)) if absf(persuaded)>=0.01 else ""]
 	var grudge:=float(character.get("grudge_weight",0.0))
 	var resentment:=clampf(float(ties.get("resentment",0.0))+grudge*0.5,0.0,1.0)
 	why["resentment"]="grudges held against us" if resentment>0.05 else "no grudge held"

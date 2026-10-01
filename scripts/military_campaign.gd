@@ -1133,7 +1133,10 @@ func _field_army_speed(force:Dictionary)->float:
 		personnel+=count
 	if personnel==0: return 0.0
 	var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.4))*0.35+float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))*0.35+float(force.get("supply_level",0.5))*0.30,0.15,1.0)
-	return maxf(2.0,slowest*(quality/float(personnel))*(0.55+logistics*0.45)*(0.5+0.5*clampf(float(force.get("supply_level",0.5)),0.0,1.0)))
+	# The general's own staff work on the road: x0.9 with none, x1.1 at the
+	# best (a band under the war leader at home takes the war leader's).
+	var staff:=0.9+0.2*clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.5)),0.0,1.0)
+	return maxf(2.0,slowest*(quality/float(personnel))*(0.55+logistics*0.45)*(0.5+0.5*clampf(float(force.get("supply_level",0.5)),0.0,1.0))*staff)
 
 
 func field_route_availability(start:Vector2,target:Vector2)->Dictionary:
@@ -2509,7 +2512,7 @@ func combat_summary(force:Dictionary={},opponent:Dictionary={},terrain_modifier:
 	var readiness:=clampf(float(subject.get("readiness",calculated_readiness)),0.0,1.5)
 	var morale:=clampf(float(subject.get("morale",1.0)),0.0,1.5)
 	var commander:Dictionary=subject.get("commander",{})
-	var command_factor:=0.90+clampf(float(commander.get("command",0.5)),0.0,1.0)*0.20
+	var command_factor:=CombatSimulator.command_factor(float(commander.get("command",0.5)),float(subject.get("troops",0)))
 	var effective_strength:=base_effective_strength*maxf(CombatSimulator.MIN_EFFECTIVE_STRENGTH,morale)*readiness*command_factor
 	return {"troops":int(subject.get("troops",0)),"attack_strength":attack_strength,"defense_strength":defense_strength,"raw_attack_strength":raw_attack_strength,"raw_defense_strength":raw_defense_strength,"base_effective_strength":base_effective_strength,"effective_strength":effective_strength,"average_attack":attack_strength/maxf(1.0,float(subject.get("troops",0))),"average_defense":defense_strength/maxf(1.0,float(subject.get("troops",0))),"readiness":readiness,"calculated_readiness":calculated_readiness,"readiness_components":readiness_components,"morale":morale,"command_factor":command_factor,"commander":commander.duplicate(true)}
 
@@ -4345,16 +4348,11 @@ func _formations_for_strength(total:int)->Array[Dictionary]:
 
 func _marshal_commander()->Dictionary:
 	var marshal:Dictionary=WorldSimulation.state.leadership_positions.get("Marshal",{})
-	var security:=float(WorldSimulation.state.society_capacities.get("security",0.38))
-	var logistics:=float(WorldSimulation.state.society_capacities.get("logistics",0.16))
 	if marshal.is_empty(): return WorldSimulation.figures.commander(_acting_field_commander(false),"home")
-	# Field command now derives from the same visible aptitudes used by every
-	# other appointment. Compatibility composites keep older commanders valid.
-	var command:=clampf(WorldSimulation.government.skill_value(marshal,"Strategy",50.0)/100.0*0.68+security*0.32,0.0,1.0)
-	var tactics:=clampf(WorldSimulation.government.skill_value(marshal,"Tactics",50.0)/100.0*0.72+security*0.28,0.0,1.0)
-	var supply_command:=clampf(WorldSimulation.government.skill_value(marshal,"Logistics",50.0)/100.0*0.66+logistics*0.34,0.0,1.0)
-	var resolve:=clampf(WorldSimulation.government.skill_value(marshal,"Discipline",50.0)/100.0*0.60+security*0.40,0.0,1.0)
-	var commander:Dictionary=simulator.create_commander(String(marshal.get("name","MARSHAL'S OFFICE")),command,tactics,supply_command,resolve)
+	# The war leader's own aptitudes, read as every official's are, with a
+	# real strength and weakness (office_levers.gd marshal_command).
+	var skills:Dictionary=preload("res://scripts/office_levers.gd").marshal_command(marshal)
+	var commander:Dictionary=simulator.create_commander(String(marshal.get("name","MARSHAL'S OFFICE")),float(skills.command),float(skills.tactics),float(skills.logistics),float(skills.resolve))
 	commander["office"]="Marshal"
 	commander["institutional"]=true
 	return _apply_command_development(commander)

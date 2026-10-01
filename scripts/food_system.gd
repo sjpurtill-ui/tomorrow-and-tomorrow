@@ -580,6 +580,8 @@ func _spoilage_rates(traveling:bool)->Array:
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if not traveling:storage_multiplier*=1.0-preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"spoilage")
 	if traveling: storage_multiplier*=1.28
+	# The keeper of stores' hand on what rots (office_levers.gd: x1.15 to x0.80).
+	storage_multiplier*=preload("res://scripts/office_levers.gd").value("Quartermaster")
 	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,stocks)
 	var fresh_rate:=float(SPOILAGE[FRESH])*storage_multiplier*fresh_preservation*cooling*(1.0-technique_lever("fresh_spoilage"))
 	var stored_rate:=float(SPOILAGE[STORED])*storage_multiplier*stored_preservation*(1.0-technique_lever("stored_spoilage"))

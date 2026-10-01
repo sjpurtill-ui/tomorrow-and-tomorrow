@@ -9,6 +9,7 @@ const CIVIC:=preload("res://scripts/civic_building_effects.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
 ## The sickness & disaster log (hardship_log.gd): words only.
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
+const OfficeLevers:=preload("res://scripts/office_levers.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -90,6 +91,8 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	var coercion:=clampf(float(contract.get("coercion",0.0)),0.0,1.0)
 	var compliance:=clampf(0.12+legitimacy*0.38+cohesion*0.34+(1.0-coercion)*0.12+security_capacity*coercion*0.28,0.05,0.98)
 	var resistance:=clampf(1.0-compliance+coercion*(1.0-security_capacity)*0.25,0.0,1.0)
+	# The arbiter's hand on how orders are taken (office_levers.gd: x1.15 to x0.75).
+	resistance=clampf(resistance*OfficeLevers.value("Justice"),0.0,1.0)
 	var requested:=clampf(requested_magnitude,0.0,0.25)
 	var duration:=clampf(duration_days,7.0,730.0)
 	var stored_food:=maxf(0.0,float(_food_system().call("total_stored")))
@@ -702,6 +705,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var labor_efficiency := clampf(0.34+prior_health*0.34+prior_cohesion*0.18+housing_ratio*0.12,0.25,1.08)
 	labor_efficiency*=lerpf(0.82,1.08,clampf(float(dynamics.get("labor",0.5)),0.0,1.0))
 	labor_efficiency*=(1.0+policy_effect("labor_multiplier")+WorldSimulation.state.founding_effect("labor_multiplier")+WorldSimulation.progression.effect("labor_efficiency"))*(1.0-administrative_load)
+	# The headman's hand on the day's work, and each town leader's on their
+	# town's (office_levers.gd labour: x0.95 to x1.06).
+	labor_efficiency*=OfficeLevers.labour()
 	# Scouts, envoys, and moving settlement populations are real aggregate
 	# commitments absent from ordinary work until they arrive or return. One
 	# bounded ratio changes output without traveler or person records.
