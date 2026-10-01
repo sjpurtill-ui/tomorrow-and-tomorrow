@@ -601,6 +601,8 @@ func collect()->Dictionary:
 		entry["supply"]="" if at_home else preload("res://scripts/supply_state.gd").state_of(clampf(float(shown.get("provision_ratio",shown.get("supply_level",army.get("supply_level",1.0)))),0.0,1.0))
 		if not at_home and preload("res://scripts/field_rations.gd").is_hungry(army): entry["supply"]="starving"
 		entry["foraging"]=moving_now and bool(army.get("living_off_land",false))
+		# Drafts in drill for this band (known at home, where they drill).
+		entry["drafts"]=drafts_for(id)
 		if moving_now:
 			var total:=float(army.get("distance_total_km",0.0))
 			entry["march_done"]=clampf(1.0-float(army.get("distance_remaining_km",total))/total,0.0,1.0) if total>0.0 else 0.0
@@ -1313,7 +1315,7 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving",
 			"full":full,"will":clampf(float(f.get("morale",0.6)),0.0,1.0),"state":BattleMarks.state_of(context),"heading":context.get("delta",Vector2.ZERO),
 			"glyph":String(f.get("glyph","")),"supply":String(f.get("supply","")),"foraging":bool(f.get("foraging",false)),
-			"days_left":int(f.get("days_left",0)),"march_done":float(f.get("march_done",-1.0))})
+			"days_left":int(f.get("days_left",0)),"march_done":float(f.get("march_done",-1.0)),"drafts":int(f.get("drafts",0))})
 	# Towns we hold: the garrison's mark stands on the town.
 	for g in (inputs.get("garrisons",[]) as Array):
 		var held:=int(g.get("troops",0))
@@ -2152,6 +2154,7 @@ static func counter_data(entry:Dictionary,accent:Color)->Dictionary:
 		data["supply"]=String(entry.get("supply",""))
 		data["foraging"]=bool(entry.get("foraging",false))
 		if int(entry.get("drilling",0))>0: data["tab"]="+%s in drill" % EraWords.grouped(int(entry.drilling))
+		elif int(entry.get("drafts",0))>0: data["tab"]="+%s coming" % EraWords.grouped(int(entry.drafts))
 		if members<=1 and float(entry.get("march_done",-1.0))>=0.0:
 			data["march_done"]=float(entry.march_done); data["days_left"]=int(entry.get("days_left",0))
 	else:
@@ -2305,6 +2308,14 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		hits.append({"kind":"sighting","centre":rect.get_center(),"radius":reach,"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
 
 
+## The drafts drilling at home for a band (training_queue field drafts).
+static func drafts_for(army_id:int)->int:
+	var count:=0
+	for o in MilitaryCampaign.training_queue:
+		if o is Dictionary and String((o as Dictionary).get("mode",""))=="field_draft" and int((o as Dictionary).get("army_id",0))==army_id: count+=maxi(0,int((o as Dictionary).get("count",0)))
+	return count
+
+
 ## A mark whose card on the army bar is under the pointer (army_bar
 ## ArmyCard._point_map sets the terrain's "pointed_marks": mark ids).
 func _pointed(entry:Dictionary)->bool:
@@ -2326,7 +2337,10 @@ func _card_lines(entry:Dictionary)->PackedStringArray:
 	var data:=entry.duplicate()
 	data.members=members
 	if bool(entry.get("garrison",false)) and members<=1: return ArmyMarks.card_garrison(data)
-	if String(entry.side)=="ours": return ArmyMarks.card_ours(data)
+	if String(entry.side)=="ours":
+		var lines:PackedStringArray=ArmyMarks.card_ours(data)
+		if int(entry.get("drafts",0))>0: lines.append("%s more drilling at home for them" % EraWords.grouped(int(entry.drafts)))
+		return lines
 	if members>1:
 		data.low=int(entry.get("members_low",entry.get("low",0))); data.high=int(entry.get("members_high",entry.get("high",0)))
 	return ArmyMarks.card_theirs(data)

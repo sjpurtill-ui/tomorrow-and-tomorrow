@@ -196,3 +196,15 @@ func test_a_card_under_the_pointer_rings_its_counter()->void:
 	assert_bool(overlay._pointed({"id":"home","members":["home"]})).is_true()
 	overlay.free()
 	holder.queue_free()
+
+func test_drafts_drilling_for_a_band_show_on_its_counter()->void:
+	WorldSimulation.clear();GameState.reset_for_new_world(818);MilitaryCampaign.reset_for_new_world()
+	MilitaryCampaign.training_queue.assign([
+		{"id":1,"mode":"field_draft","army_id":4,"unit":"spearman","weapon":"spear","count":3,"progress_days":1.0,"required_days":17.0},
+		{"id":2,"mode":"field_draft","army_id":9,"unit":"spearman","weapon":"spear","count":2,"progress_days":1.0,"required_days":17.0},
+		{"id":3,"unit":"levy","weapon":"improvised","count":5,"progress_days":1.0,"required_days":45.0}])
+	assert_int(Overlay.drafts_for(4)).is_equal(3)
+	assert_int(Overlay.drafts_for(5)).is_equal(0)
+	var data:=Overlay.counter_data({"side":"ours","army_id":4,"troops":4,"full":13,"will":0.2,"drafts":3},Color.BLUE)
+	assert_str(String(data.tab)).is_equal("+3 coming")
+	WorldSimulation.clear()
