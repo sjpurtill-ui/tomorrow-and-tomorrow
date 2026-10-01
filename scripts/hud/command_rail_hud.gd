@@ -744,7 +744,7 @@ func _time_card()->Dictionary:
 		"facts":[{"text":"Warming day by day" if _temperature_text().ends_with("↑") else "Cooling day by day" if _temperature_text().ends_with("↓") else "Much like yesterday","trend":1 if _temperature_text().ends_with("↑") else -1 if _temperature_text().ends_with("↓") else 0,"good":true}],
 		"action":"Keys 0–5 stop time or set its pace"}
 
-const SPEED_WORDS:Array[String]=["Time stands still","Half an hour a moment","Two hours a moment","A third of a day a moment","A day a moment","Three days a moment"]
+const SPEED_WORDS:Array[String]=["Time stands still","Half an hour a moment","Two hours a moment","A third of a day a moment","A day a moment","Six days a moment"]
 
 func _speed_card(index:int)->Dictionary:
 	var paused:=terrain!=null and int(terrain.game_speed)==0

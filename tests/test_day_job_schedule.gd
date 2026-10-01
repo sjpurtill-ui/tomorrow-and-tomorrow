@@ -103,3 +103,21 @@ func test_clearing_the_world_discards_its_day()->void:
 	WorldSimulation.clear()
 	assert_bool(WorldSimulation.day_in_progress()).is_false()
 	assert_bool(WorldSimulation.advancing).is_false()
+
+## A step that has lately run longer than what a frame has left waits for the
+## next frame and runs first there; a frame's first step always runs.
+func test_a_long_step_starts_the_next_frame_instead_of_overrunning()->void:
+	var Job=preload("res://scripts/day_job.gd")
+	var saved:Dictionary=Job.step_costs.duplicate()
+	Job.step_costs.clear()
+	var ran:Array=[]
+	var job=Job.new()
+	job.add_group("player",[Job.step("quick",{},func()->void:ran.append("quick")),Job.step("long_test_step",{},func()->void:ran.append("long")),Job.step("quick",{},func()->void:ran.append("quick"))])
+	Job.step_costs["player:long_test_step"]=40000
+	job.run_for(20000)
+	assert_array(ran).is_equal(["quick"])
+	job.run_for(20000)
+	assert_array(ran).is_equal(["quick","long","quick"])
+	# Its cost is kept per kind of step, whose ever it is.
+	assert_bool(Job.step_costs.has("player:quick")).is_true()
+	Job.step_costs.clear();Job.step_costs.merge(saved)

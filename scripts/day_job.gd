@@ -43,14 +43,34 @@ func add_group(owner:String,steps:Array,run:Dictionary={},done:Callable=Callable
 func finished()->bool:
 	return groups.is_empty()
 
-## Runs at least one step, then continues until the budget is spent.
-## Returns true when every group has completed.
+## Runs at least one step, then continues until the budget is spent. A step
+## that has lately taken longer than the budget has left waits for the next
+## call (the next frame), where it runs first: a long step starts a frame
+## instead of overrunning one. Which frame a step runs in never changes what
+## it does. Returns true when every group has completed.
 func run_for(budget_usec:int)->bool:
 	var deadline:=Time.get_ticks_usec()+maxi(0,budget_usec)
+	var first:=true
 	while not groups.is_empty():
+		if not first and Time.get_ticks_usec()+_expected_usec()>deadline:break
 		step_once()
+		first=false
 		if Time.get_ticks_usec()>=deadline:break
 	return groups.is_empty()
+
+## What each kind of step has lately taken (microseconds), by whose it is
+## (the human civilization's or a rival's) and its label. Never saved.
+static var step_costs:Dictionary={}
+
+static func _cost_key(owner:String,label:String)->String:
+	return ("player:" if owner=="player" else "rival:")+label
+
+## The next step's recent cost, or 0 when it has not run yet.
+func _expected_usec()->int:
+	var group:Dictionary=groups[0]
+	var steps:Array=group.steps
+	if steps.is_empty():return 0
+	return int(step_costs.get(_cost_key(String(group.owner),String((steps[0] as Dictionary).label)),0))
 
 func run_all()->void:
 	while not groups.is_empty():step_once()
@@ -73,6 +93,11 @@ func step_once()->void:
 			var step_key:="%s:%s" % [String(group.owner),String(next.label)]
 			steps_trace[step_key]=float(steps_trace.get(step_key,0.0))+change
 	var elapsed:=Time.get_ticks_usec()-start
+	var cost_key:=_cost_key(String(group.owner),String(next.label))
+	var known_cost:Variant=step_costs.get(cost_key)
+	# Recent cost: steps that are always long are expected long; a rare long
+	# one (a monthly review) moves the expectation only a little.
+	step_costs[cost_key]=elapsed if known_cost==null else roundi(lerpf(float(known_cost),float(elapsed),0.3))
 	steps_run+=1
 	longest_step_usec=maxi(longest_step_usec,elapsed)
 	last_step={"owner":String(group.owner),"label":String(next.label),"usec":elapsed}

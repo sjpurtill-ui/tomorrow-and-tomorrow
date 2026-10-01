@@ -226,6 +226,31 @@ func _societal_value_context(context:Dictionary)->Dictionary:
 ## Per-discovery effect names, values and whether its adoption is scaled by a
 ## technique factor; rebuilt with the definitions.
 var _effect_rows:Dictionary={}
+## Each effect name's slot for _rebuild_effect_totals' sums (never saved).
+static var _effect_slots:Dictionary={}
+static var _effect_names:Array=[]
+## Per practice: [slots of its effects, lower-is-better flags, its line]: all
+## from the catalog, which never changes while the game runs (never saved).
+static var _extras_by_id:Dictionary={}
+
+func _row_extras(id:Variant,row:Array)->Array:
+	var known:Variant=_extras_by_id.get(id)
+	if known!=null and (known[0] as PackedInt32Array).size()==(row[0] as Array).size():return known
+	var slots:=PackedInt32Array()
+	var lower:=PackedByteArray()
+	for effect_name:Variant in row[0]:
+		var slot:Variant=_effect_slots.get(effect_name)
+		if slot==null:
+			slot=_effect_names.size()
+			_effect_slots[effect_name]=slot
+			_effect_names.append(effect_name)
+		slots.append(int(slot))
+		lower.append(1 if _lower_keys.has(String(effect_name)) else 0)
+	var definition:Dictionary=definitions_by_id.get(id,{})
+	var extras:=[slots,lower,String(definition.get("dynamic",""))]
+	# Kept only once its definition is known (the line comes from it).
+	if not definition.is_empty():_extras_by_id[id]=extras
+	return extras
 
 func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	if definitions_by_id.size()!=_catalog.size():
@@ -239,9 +264,17 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
 	if _lower_keys.is_empty(): _build_key_sets()
+	var goods_coverage:=-1.0
+	# Sums by effect slot (see _row_extras), in the order each effect is first
+	# met: the same additions in the same order as summing into the totals.
+	var sums:=PackedFloat64Array()
+	sums.resize(_effect_slots.size())
+	var seen:=PackedByteArray()
+	seen.resize(_effect_slots.size())
+	var order:PackedInt32Array=PackedInt32Array()
 	for id in WorldSimulation.state.known_discoveries:
-		var row:Array=_effect_rows.get(id,[])
-		if row.is_empty():
+		var row:Variant=_effect_rows.get(id)
+		if row==null or (row as Array).is_empty():
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
 			var effects:Dictionary=discovery.get("effects",{})
@@ -249,18 +282,30 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			for effect_name in effects:values.append(float(effects[effect_name]))
 			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
 			_effect_rows[id]=row
-		var adoption_level:=_practice_level(String(id),adoption,bool(row[2]))
-		var names:Array=row[0]
+		var extras:Array=_row_extras(id,row)
+		var adoption_level:float
+		if bool(row[2]) and not Goods.FACTOR_SPECIAL.has(id):
+			# A technique works as far as household goods cover it
+			# (civilian_goods.gd factor); nothing in this pass changes that cover.
+			if goods_coverage<0.0:goods_coverage=Goods.coverage()
+			adoption_level=clampf(float(adoption.get(id,0.025)),0.0,1.0)*goods_coverage
+		else:adoption_level=_practice_level(String(id),adoption,bool(row[2]))
 		var values:PackedFloat64Array=row[1]
-		var line:=String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic",""))
+		var line:String=extras[2]
 		var known_scale:Variant=scales.get(line)
 		var scale:float=practice_scale(line,line_focus,neglect) if known_scale==null else float(known_scale)
 		scales[line]=scale
-		for i in names.size():
-			var effect_name=names[i]
+		var slots:PackedInt32Array=extras[0]
+		var lower:PackedByteArray=extras[1]
+		if sums.size()<_effect_slots.size():
+			sums.resize(_effect_slots.size());seen.resize(_effect_slots.size())
+		for i in slots.size():
 			var value:=values[i]
-			if scale!=1.0 and (value<0.0)==_lower_keys.has(String(effect_name)): value=value*scale
-			effect_totals[effect_name]=float(effect_totals.get(effect_name,0.0))+value*adoption_level
+			if scale!=1.0 and (value<0.0)==(lower[i]==1): value=value*scale
+			var slot:=slots[i]
+			if seen[slot]==0:seen[slot]=1;order.append(slot)
+			sums[slot]+=value*adoption_level
+	for slot in order:effect_totals[_effect_names[slot]]=sums[slot]
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
 	ceiling_era=society_era()
@@ -346,6 +391,9 @@ class Today extends RefCounted:
 	## the two).
 	var ceilings:Dictionary={}
 	var ceilings_era:=INF
+	## society_era's knowledge frontier, by what was known when it was found.
+	var frontier_key:Array=[]
+	var frontier:=-1.0
 var _today:=Today.new()
 
 ## One reading of everything the twelve capacities are made from.
@@ -991,15 +1039,22 @@ func _refresh_line_focus()->void:
 ## are 0.9 x their dated era (Research600.ERA_BAND_FRACTION).
 func society_era()->float:
 	var elapsed:=float(WorldSimulation.state.elapsed_days)/365.0
-	var eras:=PackedFloat64Array()
-	for id:Variant in WorldSimulation.state.known_discoveries:
-		var definition:Dictionary=definitions_by_id.get(id,{})
-		if definition.is_empty(): continue
-		if definition.has("design_year"): eras.append(float(definition.design_year))
-		else: eras.append(float(definition.get("earliest_year",0.0))/0.9)
-	if eras.is_empty(): return 0.0
-	eras.sort()
-	return clampf(minf(elapsed,eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]),0.0,MODERN_ERA)
+	# The frontier depends only on what is known; it is worked out again only
+	# when that changes.
+	var known:Array=WorldSimulation.state.known_discoveries
+	var key:=[known.size(),known.hash(),definitions_by_id.size()]
+	if _today.frontier_key!=key:
+		var eras:=PackedFloat64Array()
+		for id:Variant in known:
+			var definition:Dictionary=definitions_by_id.get(id,{})
+			if definition.is_empty(): continue
+			if definition.has("design_year"): eras.append(float(definition.design_year))
+			else: eras.append(float(definition.get("earliest_year",0.0))/0.9)
+		eras.sort()
+		_today.frontier=-1.0 if eras.is_empty() else eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]
+		_today.frontier_key=key
+	if _today.frontier<0.0: return 0.0
+	return clampf(minf(elapsed,_today.frontier),0.0,MODERN_ERA)
 
 ## Research is never free. Full-time specialists (the Knowledge role) beyond what
 ## the era's surplus could keep (about 4% of workers at year 0, 10% by year 600:

@@ -29,6 +29,8 @@ var _views_day:=-1
 ## See day_span.gd. `span_limit` 1 restores strictly daily rivals.
 var span:=1
 var span_limit:=DaySpan.MAX_SPAN
+## Longest step for a calm rival the player has not met (day_span.gd).
+var uncontacted_span_limit:=DaySpan.UNCONTACTED_SPAN
 # Autoload system references for the human scope, in _bind_scope order.
 var _player_binding:Array=[]
 var last_day:=-1
@@ -288,7 +290,7 @@ func _span_limit_for(id:String)->int:
 		if String(civ.get("id",""))!=id:continue
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=1:return span_limit
 		break
-	return maxi(span_limit,DaySpan.UNCONTACTED_SPAN)
+	return maxi(span_limit,uncontacted_span_limit)
 
 ## Whether a rival is expected to advance on `day`, from the same schedule
 ## `_span_waits` applies. A rival that stepped daily is assumed to continue.
@@ -693,7 +695,7 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 	_plan_rivals(job,day,timings)
 	var phases:Dictionary={} if timings.is_empty() else timings.get_or_add("player_phases",{"enabled":true})
 	var clock=preload("res://scripts/civilization_day.gd")
-	var run:=clock.plan(day,daily_context,construction)
+	var run:=clock.plan(day,daily_context,construction,{} if timings.is_empty() else timings.get_or_add("player_secondary",{"enabled":true}))
 	job.add_group("player",clock.steps(run,phases),run)
 	job.add_group("player",[
 		S.step("player_world",timings,func()->Array:

@@ -1021,8 +1021,24 @@ static func active_rites(day:int=-1)->Array[Dictionary]:
 static func rival_dread(civ_id:String)->float:
 	## How much a foreign people dreads the god: their own memory of its wrath,
 	## and what travellers say of how it treats its own.
+	return clampf(DIVINE.civ_dread(civ_id)+_people_dread()*0.35,0.0,1.0)
+
+## A reading under way (standing.gd: the month's views of every people we
+## know) reads our own people's dread once: every foreign view in it shares
+## it, and reading changes nothing it depends on.
+static var _reading_depth:=0
+static var _reading_dread:Dictionary={}
+static func begin_reading()->void:
+	_reading_depth+=1
+static func end_reading()->void:
+	_reading_depth=maxi(0,_reading_depth-1)
+	if _reading_depth==0:_reading_dread.clear()
+static func _people_dread()->float:
+	var scope:=String(WorldSimulation.actor_id)
+	if _reading_depth>0 and _reading_dread.has(scope):return float(_reading_dread[scope])
 	var people:=float(DIVINE.people_regard(Hall._officials()).get("dread",0.0))
-	return clampf(DIVINE.civ_dread(civ_id)+people*0.35,0.0,1.0)
+	if _reading_depth>0:_reading_dread[scope]=people
+	return people
 
 static func rival_stance(civ_id:String)->String:
 	## "tribute", "avoid" or "provoke": how this people answers dread. Their

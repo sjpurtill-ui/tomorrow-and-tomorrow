@@ -19,6 +19,7 @@ var state:Dictionary={"bases":[],"forces":[],"contacts":{},"events":[],"convoys"
 func _init(campaign:Node)->void:host=campaign
 func reset()->void:
 	geography.route_cache.clear()
+	geography.point_cache.clear()
 	state={"bases":[],"forces":[],"contacts":{},"events":[],"convoys":[],"regions":[],"rival_orders":{},"blockades":{},"wounded":[],"captured_holding":0,"raiding":{},"raids_out":{},"war_ledger":{},"next_id":1,"last_day":-1}
 func personnel()->int:
 	var total:=0

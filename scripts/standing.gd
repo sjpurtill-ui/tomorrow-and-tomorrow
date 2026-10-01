@@ -289,6 +289,7 @@ static func _ratio_words(ratio:float)->String:
 static func views()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	if String(WorldSimulation.actor_id)!="player": return result
+	_begin_reading()
 	var our:=strengths()
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		if not bool(civ.get("alive",true)): continue
@@ -297,6 +298,7 @@ static func views()->Array[Dictionary]:
 		v["civ_id"]=String(civ.id)
 		v["civ_name"]=String(civ.get("name",civ.id))
 		result.append(v)
+	_end_reading()
 	return result
 
 # ---------------------------------------------------------------------- pride
@@ -337,6 +339,38 @@ static func renown(our:Dictionary={})->Dictionary:
 ## reading kept with the state can never belong to another world or save.
 ## ConsequenceEngine.process_day calls this once a month.
 static func record_monthly()->void:
+	_begin_reading()
+	_record_monthly()
+	_end_reading()
+
+## One reading of every view of us shares what does not change while it is
+## read: our people's own dread (court_lives.gd begin_reading), and the roll
+## of officials, reconciled once at the start (GovernmentPeopleSystem
+## initialize, as its own day does for its lookups) instead of again for
+## every officeholder each view asks after.
+static var _reading_depth:=0
+static var _reading_government:Object=null
+static var _reading_was_initializing:=false
+static func _begin_reading()->void:
+	if _reading_depth==0:
+		var government=WorldSimulation.government
+		if government!=null and "initializing" in government and not bool(government.initializing):
+			government.initialize()
+			_reading_government=government
+			_reading_was_initializing=bool(government.initializing)
+			government.initializing=true
+	_reading_depth+=1
+	var lives:=_lives()
+	if lives!=null:lives.call("begin_reading")
+static func _end_reading()->void:
+	_reading_depth=maxi(0,_reading_depth-1)
+	if _reading_depth==0 and _reading_government!=null:
+		if is_instance_valid(_reading_government):_reading_government.initializing=_reading_was_initializing
+		_reading_government=null
+	var lives:=_lives()
+	if lives!=null:lives.call("end_reading")
+
+static func _record_monthly()->void:
 	var our:=strengths()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
@@ -353,12 +387,14 @@ static func danger_count(our:Dictionary={})->int:
 	var count:=0
 	var league:=load("res://scripts/fear_league.gd") as GDScript
 	var war:=load("res://scripts/war_loop.gd") as GDScript
+	_begin_reading()
 	for v:Dictionary in views():
 		var id:=String(v.civ_id)
 		var moved:=float(v.envy)>ENVY_RAID_FLOOR or float(v.contempt)>CONTEMPT_FLOOR
 		if not moved and war!=null: moved=float(war.call("grudge_raid_chance",id))>0.0
 		if not moved and league!=null: moved=bool(league.call("is_member",id))
 		if moved: count+=1
+	_end_reading()
 	return count
 
 static func monthly()->Dictionary:
