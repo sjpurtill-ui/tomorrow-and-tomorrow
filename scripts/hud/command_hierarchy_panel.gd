@@ -85,6 +85,9 @@ var force_meters:Array=[]
 var force_strip:Control
 ## The general's skills as pips (force_strips.gd GeneralPips).
 var general_pips:Control
+## "All 3 of Ennis's bands": the order goes to the chosen band's whole
+## command (leader_commands.gd), as HOI4 orders an army, not a division.
+var whole_command:CheckButton
 var odds_bar:Control
 var verb_buttons:Dictionary={}
 var target_row:HBoxContainer
@@ -206,6 +209,8 @@ func _build_plain_orders(parent:VBoxContainer)->void:
 	var answer_row:=_row(answer_column)
 	insist_button=_button(answer_row,"Insist",func():_give(true));insist_button.hide()
 	insist_button.tooltip_text="Give the order again. They will go, whatever they think of it."
+	whole_command=CheckButton.new();whole_command.name="WholeCommand";whole_command.button_pressed=true;whole_command.focus_mode=Control.FOCUS_NONE;whole_command.visible=false
+	whole_command.tooltip_text="Give the order to every band under this leader. Each goes by its own road; their leader sees to the pace and the camps.";parent.add_child(whole_command)
 	var action:=_row(parent)
 	give_button=_button(action,"Give the order",func():_give(false))
 	give_button.add_theme_stylebox_override("normal",T.gold_outline_style());give_button.add_theme_color_override("font_color",T.GOLD_BRIGHT);give_button.custom_minimum_size.y=42
@@ -386,6 +391,9 @@ func _refresh_force_card()->void:
 	(force_strip as Object).call("set_blocks",Strips.composition(formations))
 	var commander:Dictionary=(MilitaryCampaign.home_army if force_id==Orders.HOME else Orders.army(force_id)).get("commander",{})
 	(general_pips as Object).call("set_commander",commander,String(general.get("full_name",general.get("name",""))),force_id==Orders.HOME)
+	var bands:=command_bands()
+	whole_command.visible=bands.size()>1
+	if whole_command.visible:whole_command.text="All %d of %s's bands" % [bands.size(),String(general.get("name","their leader")).get_slice(" ",0)]
 	var doing:=String(card.get("doing",""))
 	force_doing.text="%s men · %s" % [EraWords.grouped(int(card.get("men",0))),doing] if doing!="" else "%s men" % EraWords.grouped(int(card.get("men",0)))
 	force_doing.tooltip_text=BarModel.tooltip(card).get_slice("\nClick",0)
@@ -512,14 +520,40 @@ func _show_answer()->void:
 	var tone:Color=T.GREEN if String(last_answer.verdict)=="act" else (T.AMBER if String(last_answer.verdict)=="object" else T.RED)
 	answer_box.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,tone,1,4,10))
 
+## The bands under the chosen band's leader, the chosen one first; just the
+## chosen band when it serves alone or is the levy at home.
+func command_bands()->Array:
+	if force_id==Orders.HOME:return [force_id]
+	var record:=Orders.army(force_id)
+	if record.is_empty():return [force_id]
+	var Commands:=preload("res://scripts/leader_commands.gd")
+	var leader:=Commands.leader_of(record)
+	var out:=[force_id]
+	for army_variant in MilitaryCampaign.field_armies:
+		var army:Dictionary=army_variant
+		var id:=int(army.get("army_id",0))
+		if id!=force_id and int(army.get("troops",0))>0 and Commands.leader_of(army)==leader:out.append(id)
+	return out
+
 func _give(insist:bool)->void:
 	var result:Dictionary
+	# How many of a command's bands went, said under the panel; the answer
+	# card carries the chosen band's reply.
+	var summary:=""
 	if verb_id in ["front","arrow"]:result=Orders.give_plan(force_id,_plan_request(),insist)
-	else:result=Orders.give(force_id,verb_id,target,insist)
+	else:
+		var bands:=command_bands() if is_instance_valid(whole_command) and whole_command.visible and whole_command.button_pressed else [force_id]
+		var went:=0;var stayed:=PackedStringArray()
+		for id in bands:
+			var one:Dictionary=Orders.give(int(id),verb_id,target,insist)
+			if int(id)==force_id:result=one
+			if String(one.get("verdict",""))=="act":went+=1
+			else:stayed.append(preload("res://scripts/equipment_logistics.gd").force_name(Orders.army(int(id))))
+		if bands.size()>1:summary="%d of %d bands go."  % [went,bands.size()]+((" Not going: "+", ".join(stayed)+".") if not stayed.is_empty() else "")
 	last_answer=result
-	# The answer card carries the reply; the line under the panel stays quiet.
-	feedback.text="";feedback.hide()
-	if String(result.verdict)=="act":
+	feedback.text=summary
+	feedback.visible=summary!=""
+	if String(result.get("verdict",""))=="act":
 		var army_id:=int((result.get("objective",{}) as Dictionary).get("army_id",0))
 		verb_id="";target={};plan_points.clear()
 		force_signature=""

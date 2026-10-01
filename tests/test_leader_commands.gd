@@ -130,3 +130,15 @@ func test_each_command_wears_its_own_colour()->void:
 	assert_str(Commands.leader_of_card({"id":"general:figure_5151_3"})).is_equal("figure_5151_3")
 	assert_str(Commands.leader_of_card({"id":"general:war_leader"})).is_equal(Commands.WAR_LEADER)
 	assert_str(Commands.leader_of_card({"id":"army:2","general":{"figure_id":""}})).is_equal(Commands.WAR_LEADER)
+
+func test_an_order_can_go_to_a_whole_command()->void:
+	MilitaryCampaign.home_army["commander"]=MilitaryCampaign._marshal_commander()
+	var led:Dictionary=WorldSimulation.figures.commander(MilitaryCampaign._acting_field_commander(false),"army_1")
+	MilitaryCampaign.field_armies.assign([_band(1,12,led),_band(2,8,led),_band(3,6,MilitaryCampaign._marshal_commander())])
+	var Panel:=preload("res://scripts/hud/command_hierarchy_panel.gd")
+	var panel=auto_free(Panel.new())
+	panel.force_id=2
+	# The chosen band first, then the rest of its leader's command; not band 3.
+	assert_array(panel.command_bands()).is_equal([2,1])
+	panel.force_id=3
+	assert_array(panel.command_bands()).is_equal([3])
