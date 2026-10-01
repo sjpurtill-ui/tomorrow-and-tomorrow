@@ -144,3 +144,20 @@ func test_a_leader_with_bands_shows_men_will_and_fed_as_bars()->void:
 	assert_object(bars).is_not_null()
 	assert_str((bars as Control).tooltip_text).is_equal("Men 18 of 33 · will 40% · fed 86%")
 	row.free()
+
+func test_an_open_menu_is_never_rebuilt_under_the_rulers_hand()->void:
+	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
+	var take:MenuButton=row.find_child("Stance_take",true,false)
+	# Their dead change while the ruler has a menu of that row open.
+	take.get_popup().visible=true
+	WAR.front(civ_id).merge({"their_dead":7},true)
+	board.refresh()
+	assert_bool(is_instance_valid(take) and take.is_inside_tree()).is_true()
+	# Once it closes, the row is read again.
+	take.get_popup().visible=false
+	board.refresh()
+	assert_object(board.find_child("Enemy_%s" % civ_id,true,false)).is_not_same(row)

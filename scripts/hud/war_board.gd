@@ -46,7 +46,14 @@ var enemy_box:VBoxContainer
 var leader_box:VBoxContainer
 var feedback:Label
 var clock:=0.0
-var signature:=""
+## Each section's last signature, and how long a rebuild has waited on the
+## ruler's hand (seconds).
+var signatures:={}
+var waited:={}
+## A section under the pointer waits this long for the pointer to leave
+## before its numbers are read again; never while one of its menus is open
+## or a button is held.
+const HOVER_HOLD_SECONDS:=5.0
 
 
 func setup(_block:Dictionary={})->void:
@@ -67,18 +74,42 @@ func _process(delta:float)->void:
 	refresh()
 
 
+## Each section is read again only when what it shows has changed, and not
+## under the ruler's hand: a menu of it open, a button held, or the pointer
+## on it (for a few seconds). After the ruler's own word (force) all three.
 func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
-	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
-	var commands:=Commands.commands(MilitaryCampaign)
 	var glance:=strength(MilitaryCampaign)
-	var next:=str([reading,glance,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
-		commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.hungry])])
-	if not force and next==signature:return
-	signature=next
-	_build_army(reading,glance)
-	_build_enemies(entries)
-	_build_leaders(commands)
+	_rebuild("army",army_box,str([reading,glance]),force,func()->void:_build_army(reading,glance))
+	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
+	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
+		var front:Dictionary=WarLoop.front(String(e.civ_id))
+		return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),front.get("stance",""),front.get("general",""),e.get("strength",1.0),now_words(e)])),force,func()->void:_build_enemies(entries))
+	var commands:=Commands.commands(MilitaryCampaign)
+	_rebuild("leaders",leader_box,str(commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.full,c.hungry,snappedf(float(c.will),0.05),snappedf(float(c.supply),0.05)])),force,func()->void:_build_leaders(commands))
+
+
+func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->void:
+	if not force and next==String(signatures.get(key,"")):
+		waited.erase(key)
+		return
+	if not force and _in_use(box,float(waited.get(key,0.0))):
+		waited[key]=float(waited.get(key,0.0))+REFRESH_SECONDS
+		return
+	signatures[key]=next
+	waited.erase(key)
+	build.call()
+
+
+## Whether the ruler is using a section: one of its menus open or a button
+## held on it always; the pointer resting on it, for HOVER_HOLD_SECONDS.
+func _in_use(box:Control,waited_seconds:float)->bool:
+	if box==null or not box.is_visible_in_tree():return false
+	for node in box.find_children("*","",true,false):
+		if node is MenuButton and (node as MenuButton).get_popup().visible:return true
+		if node is OptionButton and (node as OptionButton).get_popup().visible:return true
+	if not box.get_global_rect().has_point(box.get_global_mouse_position()):return false
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or waited_seconds<HOVER_HOLD_SECONDS
 
 
 # --- The army -------------------------------------------------------------
