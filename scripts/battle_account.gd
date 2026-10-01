@@ -292,7 +292,9 @@ static func build(record:Dictionary,state:Dictionary={})->Dictionary:
 			if amount>0: taken_goods.append("%s %s" % [exact(amount),String(item).to_lower()])
 		if not taken_goods.is_empty(): now["now"]=String(now.now)+" They broke into the stores and carried off %s." % _and_list(taken_goods)
 	if at_home and kind in ["lost","withdrew"] and not occupation.is_empty() and not bool(occupation.get("ok",false)):
-		now["now"]=String(now.now)+" They broke through, but they are too few to hold %s; it is still ours." % home_place
+		# Home is lost only if the ruler yields it (MilitaryCampaign.surrender_home).
+		if bool(occupation.get("surrender_only",false)): now["now"]=String(now.now)+" They broke through, but they cannot take %s from us: it is still ours unless you yield it." % home_place
+		else: now["now"]=String(now.now)+" They broke through, but they are too few to hold %s; it is still ours." % home_place
 	if at_home and kind in ["lost","withdrew"] and bool(occupation.get("ok",false)):
 		now={"now":"%s is theirs now: they hold it, and the %s of ours still there are in their hands." % [home_place,exact(int(ledger.present))],
 			"next":"What becomes of %s and its people is for you to say: talk with them, or gather our people elsewhere to take it back." % home_place}

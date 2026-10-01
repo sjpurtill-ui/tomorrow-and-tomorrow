@@ -1,6 +1,8 @@
 extends RefCounted
 ## Contact views resolve back to the actual owner. Both sides commit the same
 ## battle result through MilitaryCampaign, including injuries, gear and captives.
+## Every town has its guards: home its levy and watch, a band its men, and any
+## other town its own watch (town_watch), whose losses are that town's own.
 static func owner(id:String)->String:return "player" if id=="human" else id
 
 static func force_for(incident:Dictionary)->Dictionary:
@@ -21,10 +23,32 @@ static func force_for(incident:Dictionary)->Dictionary:
 			if index>=0:force=WorldSimulation.military.field_armies[index].duplicate(true)
 		elif local_id.is_empty() or bool(WorldSimulation.settlements.settlement_record(local_id).get("primary",false)):
 			force=WorldSimulation.military._home_defense_force(false)
+		else:
+			force=town_watch(local_id)
 		if force.is_empty():force=WorldSimulation.military.simulator.create_formation_force(WorldSimulation.state.settlement_name+" defenders",[],.5,.1)
 		force["owned_target"]={"actor":id,"field_id":field_id,"city_id":local_id}
 		return force
 	)
+
+## A town's own watch: its share of those set to defence work (the Defense
+## share of work, as home's watch: MilitaryCampaign._home_garrison_target), in
+## proportion to the town's people, with whatever comes to hand. {} when the
+## town keeps none. Run in the town's owner's scope.
+static func town_watch(city_id:String)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty() or mc==null: return {}
+	var people:=float(WorldSimulation.settlements._settlement_population(city))
+	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
+	var watch:=mini(roundi(float(mc._home_garrison_target())*share),floori(people))
+	if watch<=0: return {}
+	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":watch,"authorized_count":watch,"equipment":0,"equipment_required":watch,"ammunition":0,"ammunition_required":0,
+		"training":0.20,"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
+	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),[formation],float(mc._campaign_morale()),0.18)
+	force["commander"]=mc.simulator.create_commander("TOWN WATCH",0.35,0.35,0.35,0.45)
+	force["supply_level"]=1.0
+	force["town_watch"]=city_id
+	return force
 
 static func commit_enemy(result:Dictionary)->void:
 	var target:Dictionary=result.get("threat",{}).get("owned_target",{})
@@ -34,6 +58,11 @@ static func commit_enemy(result:Dictionary)->void:
 	mirrored.home_side="defender" if String(result.get("home_side","attacker"))=="attacker" else "attacker"
 	mirrored.home_force_id=int(target.field_id)
 	mirrored.home_force_kind="field_army" if int(target.field_id)>0 else "field"
+	# A town's own watch fought: its losses are that town's (not home's levy).
+	var town_id:=String(target.get("city_id",""))
+	if int(target.field_id)<=0 and town_id!="" and bool(WorldSimulation.scoped(id,func()->bool:return not WorldSimulation.settlements.settlement_record(town_id).is_empty() and not bool(WorldSimulation.settlements.settlement_record(town_id).get("primary",false)))):
+		mirrored.home_force_kind="town"
+		mirrored["home_force_city_id"]=town_id
 	mirrored.command_participants=[]
 	mirrored.commander_managed=id!="player"
 	WorldSimulation.scoped(id,func()->void:WorldSimulation.military._commit_campaign_battle(mirrored))
@@ -88,6 +117,11 @@ static func capture(civ:Dictionary,region_id:String,force:Dictionary)->Dictionar
 	var city_id:=local_city(String(civ.id),region_id)
 	var occupying_id:="human" if attacker=="player" else attacker
 	var result:Dictionary=WorldSimulation.scoped(target,func()->Dictionary:
+		# Our home is lost only if our ruler yields it, never by a fight
+		# (MilitaryCampaign._home_after_defeat); another people's ruler yields
+		# theirs when the victors could hold it (capture_city).
+		if target=="player" and bool(WorldSimulation.settlements.settlement_record(city_id).get("primary",false)):
+			return {"error":"They broke through, but our home is still ours: it is lost only if its ruler yields it.","surrender_only":true}
 		return WorldSimulation.military.recovery.capture_city(city_id,occupying_id,force)
 	)
 	var region:=WorldSimulation.world.region_snapshot(String(civ.id),region_id).duplicate(true)
@@ -194,8 +228,9 @@ static func occupation_presence(occupier:String,city_id:String)->Dictionary:
 			if owner(String(force.get("civ_id","")))!=resident:continue
 			var region:=WorldSimulation.world.region_snapshot(String(force.civ_id),String(force.region_id))
 			if String(region.get("local_city_id",""))!=city_id:continue
-			var supply:=float(force.get("supply_level",0))
-			var effective:=float(force.get("troops",0))*supply*(.5+.5*float(force.get("readiness",0)))
-			return {"control":clampf(effective/maxf(1,float(force.get("required",1))),0,1),"logistics":supply}
+			# The one rule for holding a town (town_hold.gd).
+			var Hold:=preload("res://scripts/town_hold.gd")
+			var effective:=Hold.force_strength(force)
+			return {"control":clampf(effective/maxf(1,float(force.get("required",1))),0,1),"logistics":Hold.fed(force)}
 		return {"control":0.0,"logistics":0.0}
 	)

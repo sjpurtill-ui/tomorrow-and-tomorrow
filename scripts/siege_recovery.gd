@@ -77,7 +77,8 @@ func capture_capacity(force:Dictionary)->Dictionary:
 	var region:Dictionary={"population":population,"role":"capital","controller":"player","resistance":clampf(.38+cohesion*.30+.14,.25,.92)}
 	var required:=ceili(WorldSimulation.world.occupation_requirement({"id":"player","cohesion":cohesion},region))
 	var troops:=maxi(0,int(force.get("remaining_troops",force.get("troops",0))))
-	var effective:=troops*clampf(float(force.get("supply_level",1)),0,1)*(.5+.45*clampf(float(force.get("readiness",1)),0,1))
+	# The one rule for holding a town (town_hold.gd).
+	var effective:=preload("res://scripts/town_hold.gd").force_strength(force)
 	var result:Dictionary={"required":required,"effective":effective,"troops":troops,"controlled":effective>=required}
 	if not bool(result.controlled):result.error="The attackers won the battle, but their %d survivors provide %.1f effective personnel; holding this city needs %d. Your city remains independent despite the defeat."%[troops,effective,required]
 	return result
@@ -413,15 +414,15 @@ func _lose_people(count:int,reason:String,city_id:String="")->Dictionary:
 			city.population_share=maxf(0,amount)/maxf(1,WorldSimulation.state.population_exact)
 	return result
 
-func capture_city(city_id:String,civ_id:String,force:Dictionary)->Dictionary:
+func capture_city(city_id:String,civ_id:String,force:Dictionary,yielded:bool=false)->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty():return {"error":"The city no longer exists."}
-	if bool(city.get("primary",false)):return capture(civ_id,force)
+	if bool(city.get("primary",false)):return capture(civ_id,force,yielded)
 	if not String(city.get("occupied_by","")).is_empty():return {"error":"The city is already occupied."}
 	var population:=WorldSimulation.settlements._settlement_population(city)
 	var region:Dictionary={"population":population,"role":"frontier","controller":"player","resistance":.45,"integration":0.0,"damage":.35}
 	var required:=WorldSimulation.world.occupation_requirement({"id":"player","cohesion":.58},region)
-	var strength:=float(force.get("remaining_troops",force.get("troops",0)))*clampf(float(force.get("supply_level",1)),0,1)*(.5+.45*clampf(float(force.get("readiness",1)),0,1))
+	var strength:=preload("res://scripts/town_hold.gd").force_strength(force)
 	if strength<required:return {"error":"The attackers won the battle but lack the supplied personnel to hold the city."}
 	city.occupied_by=civ_id
 	region.governance=GOVERNANCE.state(region)

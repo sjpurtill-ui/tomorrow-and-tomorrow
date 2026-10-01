@@ -98,7 +98,8 @@ func reinforce_occupation(civ_id:String,region_id:String,participants:Array,desi
 	var index:int=host._occupation_force_index(civ_id,region_id)
 	if index<0:return
 	var occupation:Dictionary=host.occupation_forces[index]
-	var target:=ceili((float(occupation.required) if desired<0 else desired)/maxf(.05,float(occupation.supply_level)*(.5+.5*float(occupation.readiness))))
+	# The one rule for holding a town (town_hold.gd).
+	var target:=preload("res://scripts/town_hold.gd").force_need(occupation,float(occupation.required) if desired<0 else desired)
 	for member:Dictionary in participants:
 		var remaining:=maxi(0,target-int(occupation.troops))
 		if remaining<=0:break
