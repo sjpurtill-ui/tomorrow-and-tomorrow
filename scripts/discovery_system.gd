@@ -9,8 +9,8 @@ const DiscoveryFrontierCatalog = preload("res://scripts/discovery_frontier_catal
 const SocietyModelScript = preload("res://scripts/society_model.gd")
 const TechnologyEras=preload("res://scripts/technology_eras.gd")
 const Research600=preload("res://scripts/research_600_catalog.gd")
-## Last day the teams working ahead of their age looked again (monthly,
-## _switch_to_quicker_questions). The name is older: saves hold it.
+## Kept so older saves (which hold it) still load; the monthly look is per
+## team now (_switch_checked).
 var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
 
@@ -1071,13 +1071,14 @@ func _place_free_teams(current_day:int,count:int)->void:
 	else:
 		_team_memo.idle_known=-1
 
-## Once a month the teams working ahead of their age look again: a question of
+## Once a month each team working ahead of its age looks again: a question of
 ## its age on any followed line takes the team; failing that, a much quicker
 ## question (SWITCH_MARGIN less work) in its own channel. The progress made
-## stays with the question for later. A question the player chose keeps its team.
+## stays with the question for later. A question the player chose keeps its
+## team. Each team looks on its own day of the month, so the looks spread out.
 const SWITCH_CHECK_DAYS:=30
 const SWITCH_MARGIN:=1.5
-## Kept so saves that recorded the old per-line monthly checks still load.
+## The day each desk's team last looked again ({channel: day}).
 var _switch_checked:Dictionary={}
 
 func _expected_work(discovery:Dictionary)->float:
@@ -1085,17 +1086,21 @@ func _expected_work(discovery:Dictionary)->float:
 	return (1.0-progress)*research_difficulty(discovery,WorldSimulation.state.world_seed)/maxf(0.000001,float(discovery.get("chance",0.001)))
 
 func _switch_to_quicker_questions(current_day:int)->void:
-	# Once in each block of SWITCH_CHECK_DAYS days, whoever reads the teams first.
-	if floori(float(current_day)/SWITCH_CHECK_DAYS)==floori(float(_research_600_return_day)/SWITCH_CHECK_DAYS): return
-	_research_600_return_day=current_day
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var ahead:Array=[]
 	for channel_variant in active:
 		var channel:=String(channel_variant)
+		# A desk new to the record looks first on its own day of the month.
+		var last:=int(_switch_checked.get(channel,current_day-SWITCH_CHECK_DAYS+posmod(hash(channel),SWITCH_CHECK_DAYS)))
+		if current_day>=last and current_day-last<SWITCH_CHECK_DAYS: continue
+		_switch_checked[channel]=current_day
 		var current:=discovery_definition(String(active[channel]))
 		if current.is_empty() or _pinned(channel): continue
 		var years:=research_years_ahead(current)
 		if years>0.0: ahead.append([years,channel])
+	if _switch_checked.size()>96:
+		for desk:Variant in _switch_checked.keys():
+			if not active.has(desk): _switch_checked.erase(desk)
 	if ahead.is_empty(): return
 	ahead.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])>float(b[0]) if not is_equal_approx(float(a[0]),float(b[0])) else String(a[1])<String(b[1]))
 	var lines:=_team_lines()

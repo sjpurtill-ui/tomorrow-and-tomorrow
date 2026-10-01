@@ -116,6 +116,40 @@ func test_a_question_of_its_age_outranks_any_ahead_of_it()->void:
 	var rows:=[{"line":"nutrition","channel":"nutrition::Daily supply","id":"ahead","bucket":2,"score":500.0},{"line":"culture","channel":"culture::Social cohesion","id":"of_age","bucket":0,"score":-500.0}]
 	assert_str(String(DiscoverySystem._pick_team_placement(rows,lines,turns,held,int(GameState.elapsed_days)).id)).is_equal("of_age")
 
+func test_a_team_working_ahead_moves_to_a_question_of_its_age_within_a_month()->void:
+	WorldSimulation.create_actor("teams_ahead",515)
+	WorldSimulation.scoped("teams_ahead",func()->void:
+		var state:=WorldSimulation.state
+		var research:=WorldSimulation.discovery
+		state.elapsed_days=float(10*365)
+		# No one at learning: one team, so it has to choose.
+		state.population_allocations.Knowledge=0
+		state.active_investigations.clear();state.research_targets.clear()
+		state.research_subcategory_allocations={"culture":{"Social cohesion":6},"nutrition":{"Daily supply":1}}
+		state.research_allocations={"culture":6,"nutrition":1}
+		var ahead:={"id":"teams_far_ahead","name":"Far Ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":40.0,"day":0,"requires":[],"signals":[]}
+		var of_age:={"id":"teams_of_age","name":"Of Its Age","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":0.0,"day":0,"requires":["teams_gate"],"signals":[]}
+		state.known_discoveries.erase("teams_gate")
+		research.catalog_by_channel={"culture::Social cohesion":[ahead],"nutrition::Daily supply":[of_age]}
+		# Only these two questions exist here: no foundation work elsewhere.
+		research.technology_catalog.clear()
+		research.refresh_investigations()
+		assert_int(int(research.research_teams().count)).is_equal(1)
+		assert_str(String(state.active_investigations.get("culture::Social cohesion",""))).is_equal("teams_far_ahead")
+		state.discovery_progress["teams_far_ahead"]=0.2
+		# The question of its age opens: within a month the team takes it up, and
+		# the work done ahead of the age stays with the question it leaves.
+		state.known_discoveries.append("teams_gate")
+		var moved:=-1
+		for day in 31:
+			state.elapsed_days+=1.0
+			research.refresh_investigations()
+			if String(state.active_investigations.get("nutrition::Daily supply",""))=="teams_of_age":moved=day;break
+		assert_int(moved).is_between(0,30)
+		assert_bool(state.active_investigations.has("culture::Social cohesion")).is_false()
+		assert_float(float(state.discovery_progress.get("teams_far_ahead",0.0))).is_equal(0.2)
+	)
+
 func test_a_line_share_sets_how_often_it_gets_a_team_and_none_waits_past_five_years()->void:
 	var lines:={"knowledge":4,"culture":1}
 	var rows:=[{"line":"knowledge","channel":"knowledge::Observers","id":"k","bucket":0,"score":0.0},{"line":"culture","channel":"culture::Social cohesion","id":"c","bucket":0,"score":0.0}]
