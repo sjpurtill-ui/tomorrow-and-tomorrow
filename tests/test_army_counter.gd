@@ -140,3 +140,23 @@ func test_the_levy_at_home_stands_on_the_map_with_those_in_drill()->void:
 	assert_str(String(data.glyph)).is_equal("club")
 	# Nobody at home and nobody drilling: no mark.
 	assert_array(Overlay._marks({"stage":"reckoned","home_levy":{},"garrisons":[]},[],[],{})).is_empty()
+
+func test_alerts_say_what_is_wrong_with_our_fighters()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(717);MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	assert_array(Alerts.alerts()).is_empty()
+	var sim=MilitaryCampaign.simulator
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var force:Dictionary=sim.create_formation_force("Ennis band",[{"id":1,"unit":"spearman","weapon":"spear","count":4,"authorized_count":13,"equipment":3,"equipment_required":4,"training":0.6}],0.1,0.8)
+	force.merge({"army_id":1,"name":"Ennis band","status":"stationed","position":{"x":home.x,"z":home.y},"supply_level":0.3,"provision_ratio":0.3,"hungry_days":5.0,"commander":{"name":"Ennis"},"morale":0.1},true)
+	MilitaryCampaign.field_armies.assign([force])
+	var shown:=Alerts.alerts()
+	var ids:=shown.map(func(a:Dictionary)->String: return String(a.id))
+	assert_array(ids).contains(["hungry","will","men"])
+	var hungry:Dictionary=shown[ids.find("hungry")]
+	assert_str(String(hungry.tone)).is_equal("red")
+	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("Readiness & supply")
+	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
+	WorldSimulation.clear()

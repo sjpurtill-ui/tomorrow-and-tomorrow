@@ -120,6 +120,7 @@ func _ready()->void:
 	_build_decision_queue()
 	_build_toolbar()
 	_build_army_bar()
+	_build_army_alerts()
 	_build_dock()
 	dock.visibility_changed.connect(_layout)
 	detail_dock.visibility_changed.connect(_layout)
@@ -189,6 +190,10 @@ func _layout()->void:
 		detail_dock.position=Vector2(Tokens.DOCK_X,64)
 		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
 	_position_toolbar()
+	if army_alerts:
+		# Under the clock at the map's top left; a dock covers that corner.
+		army_alerts.position=Vector2(Tokens.DOCK_X,64)
+		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 	if action_feedback:
 		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
 
@@ -219,6 +224,12 @@ func _position_toolbar()->void:
 # --- Army bar (hud/army_bar.gd): HOI4's army cards above the map toolbar ------
 
 var army_bar:Control
+## HOI4's alerts for our fighters, under the clock (hud/army_alerts.gd).
+var army_alerts:Control
+
+func _build_army_alerts()->void:
+	army_alerts=preload("res://scripts/hud/army_alerts.gd").new()
+	add_child(army_alerts)
 
 func _build_army_bar()->void:
 	army_bar=preload("res://scripts/hud/army_bar.gd").new()
