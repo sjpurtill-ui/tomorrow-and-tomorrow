@@ -61,6 +61,9 @@ const EASE_REDRAW_SECONDS:=1.0/30.0
 ## A new clash rings once, briefly, like ink dropped on the chart (codex/map-motion).
 const CLASH_PULSE_SECONDS:=1.3
 const MAX_CLASH_PULSES:=6
+## Men joining or lost show over the counter this long, a few at a time.
+const TROOP_PULSE_SECONDS:=2.4
+const MAX_TROOP_PULSES:=8
 ## Every drawn front is carried on this many points, so any two can morph.
 const FRONT_POINTS:=96
 ## Arrows are carried on this many points, so each eases as its army moves.
@@ -168,6 +171,9 @@ var last_compose_usec:=0
 var last_draw_usec:=0
 ## Newly joined battles: [{pos, t}] (bounded, visual only).
 var clash_pulses:Array[Dictionary]=[]
+## Our marks' men gained or lost since the day before: {id, delta, t}
+## (visual only).
+var troop_pulses:Array[Dictionary]=[]
 ## Arrows as drawn, keyed by what they belong to: {points (world), target,
 ## grow 0..1, alpha, target_alpha, data}. New ones draw out; gone ones fade.
 var live_arrows:Dictionary={}
@@ -235,6 +241,13 @@ func _process(delta:float)->void:
 			if float(pulse.t)<CLASH_PULSE_SECONDS:live.append(pulse)
 		clash_pulses=live
 		view.append(roundi(Time.get_ticks_msec()/33.0))
+	if not troop_pulses.is_empty():
+		var alive:Array[Dictionary]=[]
+		for pulse in troop_pulses:
+			pulse["t"]=float(pulse.t)+delta
+			if float(pulse.t)<TROOP_PULSE_SECONDS:alive.append(pulse)
+		troop_pulses=alive
+		view.append(roundi(Time.get_ticks_msec()/33.0))
 	if settling or arrows_moving or surging:
 		ease_elapsed+=delta
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
@@ -262,6 +275,7 @@ func set_scene(next:Dictionary,immediate:bool=false)->void:
 	if not immediate and not scene.is_empty():
 		_note_new_clashes(scene,next)
 		_note_front_events(scene,next)
+		_note_troop_changes(scene,next)
 	previous=scene if not immediate else {}
 	scene=next
 	blend=1.0 if immediate or previous.is_empty() else 0.0
@@ -2291,6 +2305,8 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
 		if probe.is_finite() and _screen(entry.pos).is_finite(): data["heading"]=(probe-_screen(entry.pos)).normalized()
 	var rect:=Counter.draw(self,centre,data,scale,alpha)
+	for pulse in troop_pulses:
+		if (entry.get("members",[entry.get("id","")]) as Array).has(String(pulse.id)): _draw_troop_pulse(rect,pulse)
 	if _pointed(entry):
 		# Its card on the army bar is under the pointer: a gold ring.
 		draw_rect(rect.grow(7.0),Color(Counter.GOLD,0.22),false,6.0)
@@ -2386,6 +2402,37 @@ func _note_new_clashes(before:Dictionary,after:Dictionary)->void:
 static func _clash_key(pos:Vector2)->Vector2i:
 	# Contacts drift a little day to day; the same battle keeps its key.
 	return Vector2i(roundi(pos.x/2.0),roundi(pos.y/2.0))
+
+## Men gained or lost by our marks from one day to the next: a "+20" in
+## gold rising over the counter (the levy grows, drafts arrive) or a "−3"
+## in red sinking under it (hunger, desertion, a fight). A mark that
+## appears or goes is not counted here.
+func _note_troop_changes(before:Dictionary,after:Dictionary)->void:
+	if preload("res://scripts/hud/motion.gd").reduced():return
+	var had:={}
+	for mark in before.get("marks",[]):
+		if mark is Dictionary and String((mark as Dictionary).get("side",""))=="ours": had[String(mark.id)]=int((mark as Dictionary).get("troops",0))
+	for mark in after.get("marks",[]):
+		if not mark is Dictionary or String((mark as Dictionary).get("side",""))!="ours": continue
+		var id:=String(mark.id)
+		if not had.has(id): continue
+		var change:=int((mark as Dictionary).get("troops",0))-int(had[id])
+		if change!=0: troop_pulses.append({"id":id,"delta":change,"t":0.0})
+	while troop_pulses.size()>MAX_TROOP_PULSES:troop_pulses.pop_front()
+
+func _draw_troop_pulse(rect:Rect2,pulse:Dictionary)->void:
+	var k:=clampf(float(pulse.t)/TROOP_PULSE_SECONDS,0.0,1.0)
+	var gain:=int(pulse.delta)>0
+	var tone:=Counter.GOLD.darkened(0.25) if gain else OXBLOOD
+	var fade:=1.0-k*k
+	var text:=("+%s" if gain else "−%s") % EraWords.grouped(absi(int(pulse.delta)))
+	var font:=T.font("ui_strong")
+	var w:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
+	var drift:=k*18.0
+	var at:=Vector2(rect.get_center().x-w*0.5,rect.position.y-8.0-drift) if gain else Vector2(rect.get_center().x-w*0.5,rect.end.y+22.0+drift)
+	draw_string_outline(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,20,5,Color(PAPER,0.92*fade))
+	draw_string(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color(tone,fade))
+	if k<0.5: draw_rect(rect.grow(2.0+k*16.0),Color(tone,0.7*(1.0-k/0.5)),false,2.0)
 
 ## Two fine rings spreading from the contact and fading: brief and quiet.
 func _draw_clash_pulse(pulse:Dictionary,wide:bool)->void:

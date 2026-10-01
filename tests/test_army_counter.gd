@@ -208,3 +208,14 @@ func test_drafts_drilling_for_a_band_show_on_its_counter()->void:
 	var data:=Overlay.counter_data({"side":"ours","army_id":4,"troops":4,"full":13,"will":0.2,"drafts":3},Color.BLUE)
 	assert_str(String(data.tab)).is_equal("+3 coming")
 	WorldSimulation.clear()
+
+func test_men_gained_or_lost_flash_over_the_counter()->void:
+	var overlay:=Overlay.new()
+	var before:={"marks":[{"id":"home","side":"ours","troops":9},{"id":"ours:4","side":"ours","troops":5},{"id":"theirs:x","side":"theirs","troops":40}]}
+	var after:={"marks":[{"id":"home","side":"ours","troops":13},{"id":"ours:4","side":"ours","troops":4},{"id":"ours:7","side":"ours","troops":20},{"id":"theirs:x","side":"theirs","troops":30}]}
+	overlay._note_troop_changes(before,after)
+	var by:={}
+	for pulse in overlay.troop_pulses: by[String(pulse.id)]=int(pulse.delta)
+	# The levy grew by 4; the band lost one; a new band and their host are not news here.
+	assert_dict(by).is_equal({"home":4,"ours:4":-1})
+	overlay.free()
