@@ -128,18 +128,29 @@ func test_drilling_outside_the_lines_is_listed_and_grouped()->void:
 	assert_str(Board.drilling_words(groups[1])).contains("3 drafts for")
 	WorldSimulation.clear()
 
-func test_the_levy_at_home_stands_on_the_map_with_those_in_drill()->void:
-	var levy:={"pos":Vector2(10,20),"troops":9,"drilling":4,"full":9,"morale":0.8,"glyph":"club","general":"Corvan of the Birch","town":"Sean Springs","era":0,"branch":"foot"}
-	var marks:=Overlay._marks({"stage":"reckoned","home_levy":levy,"garrisons":[]},[],[],{})
-	assert_int(marks.size()).is_equal(1)
-	var home:Dictionary=marks[0]
-	assert_bool(bool(home.home_levy)).is_true()
-	assert_int(int(home.troops)).is_equal(9)
-	var data:=Overlay.counter_data(home,Color.BLUE)
-	assert_str(String(data.tab)).is_equal("+4 in drill")
-	assert_str(String(data.glyph)).is_equal("club")
-	# Nobody at home and nobody drilling: no mark.
-	assert_array(Overlay._marks({"stage":"reckoned","home_levy":{},"garrisons":[]},[],[],{})).is_empty()
+func test_home_defence_is_beside_the_town_name_not_an_army()->void:
+	# No counter for the levy at home on the war chart, whatever comes in.
+	assert_array(Overlay._marks({"stage":"reckoned","home_levy":{"pos":Vector2(10,20),"troops":9},"garrisons":[]},[],[],{})).is_empty()
+	# Our town's guard beside its name: its watch, and at home the levy too.
+	WorldSimulation.clear();GameState.reset_for_new_world(919)
+	SettlementModel.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.initialize_population_model();GameState.ensure_population_total(120)
+	GameState.settlement_name="Keansburg";GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"]
+	GameState.settlement_founded_at=Vector3(14.0,0.0,-9.0)
+	CivilizationSystem.register_player_origin(Vector2(14.0,-9.0))
+	SettlementModel.ensure_founded()
+	var Labels:=preload("res://scripts/hud/city_labels.gd")
+	var home:Dictionary=GameState.player_settlements[0]
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	var watch:=Labels.home_guard(String(home.id))
+	MilitaryCampaign.home_army["troops"]=9
+	assert_int(Labels.home_guard(String(home.id))).is_equal(watch+(9 if bool(home.get("primary",false)) else 0))
+	assert_int(Labels.home_guard("nowhere")).is_equal(0)
+	assert_int(Labels.home_guard("__founding_convoy__")).is_equal(0)
+	# The army bar keeps to armies: no card for home defence.
+	var Bar:=preload("res://scripts/hud/army_bar.gd")
+	assert_bool(Bar.bar_cards(MilitaryCampaign).any(func(c:Dictionary)->bool: return String(c.kind)=="home")).is_false()
+	WorldSimulation.clear()
 
 func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
@@ -219,3 +230,11 @@ func test_men_gained_or_lost_flash_over_the_counter()->void:
 	# The levy grew by 4; the band lost one; a new band and their host are not news here.
 	assert_dict(by).is_equal({"home":4,"ours:4":-1})
 	overlay.free()
+
+func test_only_hungry_or_breaking_bands_badge_the_rail()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	var list:=[{"id":"hungry","tone":"red","count":2},{"id":"will","tone":"amber","count":1},{"id":"feud","tone":"red","count":2},{"id":"men","tone":"amber","count":3}]
+	assert_int(Alerts.urgent_count(list)).is_equal(2)
+	list[1]["tone"]="red"
+	assert_int(Alerts.urgent_count(list)).is_equal(3)
+	assert_int(Alerts.urgent_count([])).is_equal(0)

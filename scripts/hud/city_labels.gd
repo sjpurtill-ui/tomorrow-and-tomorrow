@@ -270,12 +270,27 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if has_flag else 22))
 	var note:=String(ownership.get("note",""))
 	var badge:=int(ownership.get("garrison",0))
+	# Our own town: those guarding it beside its name (home_guard). Home
+	# defence is not an army, so it has no counter of its own on the map.
+	if not foreign and badge<=0:badge=home_guard(String(label.get_meta("city_map_id","")))
 	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	# A town we hold carries its guard's count beside the name.
 	if badge>0:name_width+=badge_width(badge)+6
 	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
 	if not summary.is_empty():detail=Vector2(maxf(260,maxf(width,name_width)),float(lines.size())*20+130+(18 if not note.is_empty() else 0))
 	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge}
+
+## Those guarding one of our towns: its watch (the town's own hands on
+## keeping watch) and, at the home town, the levy at home. 0 for a place
+## that is not one of our towns.
+static func home_guard(settlement_id:String)->int:
+	if settlement_id=="" or settlement_id.begins_with("__"):return 0
+	var record:Dictionary=SettlementModel.settlement_record(settlement_id)
+	if record.is_empty() or not String(record.get("occupied_by","")).is_empty():return 0
+	var watch:=roundi(float(SettlementModel.with_city_resources(settlement_id,func()->float:
+		return SettlementModel.with_local_population(func()->float:return float(GameState.population_allocations.get("Defense",0.0))))))
+	if bool(record.get("primary",false)):watch+=maxi(0,int(MilitaryCampaign.home_army.get("troops",0)))
+	return maxi(0,watch)
 
 ## The width of the small garrison badge: a shield and the count holding it.
 static func badge_width(count:int)->float:

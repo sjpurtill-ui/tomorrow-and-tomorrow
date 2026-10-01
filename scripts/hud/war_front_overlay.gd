@@ -682,7 +682,7 @@ func collect()->Dictionary:
 	var battles:Array=[]
 	if BattleSource.any_fighting(MilitaryCampaign,rivals) or not rival_memory.is_empty():
 		battles=BattleSource.collect(MilitaryCampaign,rivals,_battle_context(today,home,friendly,garrisons),rival_memory)
-	var inputs:={"garrisons":garrisons,"home_levy":_home_levy(home),"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+	var inputs:={"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
 		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today),"battles":battles}
@@ -707,20 +707,6 @@ static func _rival_militaries()->Dictionary:
 ## What the battle source needs to know of our side of the map: where our
 ## armies and held towns stand (our watchers too), the towns we know by
 ## name, and which peoples we know well enough to name and colour.
-## The levy at home, for its counter on the home town (never a front's
-## held ground): {} while nobody trained stands there.
-func _home_levy(home:Vector2)->Dictionary:
-	var army:Dictionary=MilitaryCampaign.home_army
-	var troops:=int(army.get("troops",0))
-	var drilling:=0
-	for o in MilitaryCampaign.training_queue:
-		if o is Dictionary and String((o as Dictionary).get("mode",""))!="field_draft": drilling+=maxi(0,int((o as Dictionary).get("count",0)))
-	if troops<=0 and drilling<=0: return {}
-	return {"pos":home,"troops":troops,"drilling":drilling,"full":maxi(troops,ArmyMarks.full_strength(army)),"morale":clampf(float(army.get("morale",0.6)),0.0,1.0),
-		"glyph":Counter.main_glyph(army.get("formations",[]),"club"),"general":String((army.get("commander",{}) as Dictionary).get("name","")),
-		"town":String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "home","era":Presentation.formation_era(army),"branch":Presentation.formation_branch(army)}
-
-
 func _battle_context(today:int,home:Vector2,friendly:Array,garrisons:Array)->Dictionary:
 	var armies:Dictionary={}; var troops:Dictionary={}
 	for army in MilitaryCampaign.field_armies:
@@ -1338,15 +1324,6 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
 			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note","")),"away":int(g.get("away",0)),
 			"full":maxi(held,int(g.get("required",held))),"will":clampf(float(g.get("morale",0.6)),0.0,1.0),"state":"hungry" if bool(g.get("hungry",false)) else "holding"})
-	# The levy at home: its own counter on the home town (HOI4 shows every
-	# unit), with those in drill on its tab.
-	var levy:Dictionary=inputs.get("home_levy",{})
-	if not levy.is_empty():
-		var held:=int(levy.troops)
-		out.append({"id":"home","side":"ours","army_id":0,"garrison":true,"home_levy":true,"pos":levy.pos,"troops":held,"era":int(levy.get("era",0)),"branch":String(levy.get("branch","foot")),
-			"noun":"levy","kind":ArmyMarks.kind(maxi(1,held),stage,int(levy.get("era",0)),staffs_known),"name":"","town":String(levy.town),"general":String(levy.general),
-			"doing":"keeping watch at home","report_age":0,"selected":false,"condition":"intact","moving":false,"full":maxi(1,int(levy.full)),"will":float(levy.morale),
-			"state":"holding","glyph":String(levy.glyph),"drilling":int(levy.drilling)})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])
@@ -2167,8 +2144,7 @@ static func counter_data(entry:Dictionary,accent:Color)->Dictionary:
 		data["troops"]=int(entry.get("members_troops",entry.get("troops",0))) if members>1 else int(entry.get("troops",0))
 		data["supply"]=String(entry.get("supply",""))
 		data["foraging"]=bool(entry.get("foraging",false))
-		if int(entry.get("drilling",0))>0: data["tab"]="+%s in drill" % EraWords.grouped(int(entry.drilling))
-		elif int(entry.get("drafts",0))>0: data["tab"]="+%s coming" % EraWords.grouped(int(entry.drafts))
+		if int(entry.get("drafts",0))>0: data["tab"]="+%s coming" % EraWords.grouped(int(entry.drafts))
 		if members<=1 and float(entry.get("march_done",-1.0))>=0.0:
 			data["march_done"]=float(entry.march_done); data["days_left"]=int(entry.get("days_left",0))
 	else:
@@ -2344,11 +2320,6 @@ func _pointed(entry:Dictionary)->bool:
 
 
 func _card_lines(entry:Dictionary)->PackedStringArray:
-	if bool(entry.get("home_levy",false)):
-		var general:=String(entry.get("general","")).get_slice(" ",0)
-		var lines:=PackedStringArray(["The levy at home · %s" % EraWords.grouped(int(entry.get("troops",0))),("%s's watch in %s" % [general,String(entry.get("town","home"))]) if general!="" else "the watch in %s" % String(entry.get("town","home"))])
-		if int(entry.get("drilling",0))>0: lines.append("%s more in drill" % EraWords.grouped(int(entry.drilling)))
-		return lines
 	var members:=(entry.get("members",[]) as Array).size()
 	var data:=entry.duplicate()
 	data.members=members

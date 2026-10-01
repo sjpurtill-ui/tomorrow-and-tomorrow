@@ -123,7 +123,9 @@ static func shown_cards(all:Array[Dictionary])->Array[Dictionary]:
 ## The bar's cards: HOI4's deployment queue first (those in drill, before
 ## they are anyone's band), then the forces as the model lists them.
 static func bar_cards(mc:Node=null)->Array[Dictionary]:
-	var all:=Model.cards(mc)
+	# Home defence is not an army: the levy at home is told beside its town's
+	# name on the map (city_labels.gd home_guard), not as a card here.
+	var all:=Model.cards(mc).filter(func(card:Dictionary)->bool:return String(card.get("kind",""))!="home")
 	var host:Node=mc if mc!=null else MilitaryCampaign
 	var drill:=Model.drill_card(host) if host!=null else {}
 	if not drill.is_empty():all.insert(0,drill)
