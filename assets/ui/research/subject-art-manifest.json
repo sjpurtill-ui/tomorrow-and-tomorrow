@@ -84,10 +84,10 @@
     ]
   },
   "wound_cleaning": {
-    "path": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
+    "path": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.3
     ]
   },
   "herbal_classification": {
@@ -147,10 +147,10 @@
     ]
   },
   "watch_rotation": {
-    "path": "res://assets/ui/research/subjects/watch_rotation-v1.png",
+    "path": "res://assets/ui/research/subjects/watch_rotation-v2.png",
     "focus": [
       0.5,
-      0.42
+      0.4
     ]
   },
   "formation_drill": {
@@ -2709,10 +2709,10 @@
     ]
   },
   "edible_resource_recognition": {
-    "path": "res://assets/ui/research/paper/edible_resource_recognition.png",
+    "path": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.55
     ]
   },
   "fiber_pulp_beating": {

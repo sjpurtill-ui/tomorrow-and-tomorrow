@@ -36,6 +36,8 @@ func _ready()->void:
 	if batch=="earliest-20":get_window().size=Vector2i(1440,1320)
 	if "--opening-chronology-01" in OS.get_cmdline_user_args():
 		batch="earliest-opening-01";selected=["labor_rotations"]
+	if "--opening-chronology-02" in OS.get_cmdline_user_args():
+		batch="earliest-opening-02";selected=["watch_rotation","wound_cleaning","edible_resource_recognition"]
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true

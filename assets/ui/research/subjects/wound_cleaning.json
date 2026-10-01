@@ -1,9 +1,15 @@
 {
   "id": "wound_cleaning",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Wound Cleaning. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. A compassionate early healer gently pours clear water from a simple hollow wooden scoop over a small, non-graphic scrape on another adult's forearm. Clean woven cloth and a stream beside them. Tender natural close-up of careful washing. No herbs, surgery, blood, bandage wrapping, metal medical tools, ceramic vessels or modern clinic. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-ba050309-d13a-4645-8f5f-0630d4b338e9.png",
-  "asset": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
-  "sha256": "8dfbe02f43d5fe90ecc9eb63d2b362949032e2c330af5abb2a8890c86bb93ec9",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "asset": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9380723c-9910-48d7-b838-454f662dfc1c.png",
+  "prompt": "Use case: historical-scene. One game research illustration for Washing Wounds with Clean Water, an opening expedition before pottery or farming. Two dignified adults in roughly joined hides crouch at a clear shallow spring: caregiver uses cupped bare hands to pour clean water gently onto a small superficial scrape on the other's forearm; a few small water droplets make rinsing unmistakable. No gore. No basin, bowl, jug, ceramic, cloth, basket, metal, syringe, buildings or writing. Approved Health & care style: mature transparent watercolor with restrained ink on warm linen paper, sage/celadon, muted skin tones, bleeding washes, simplified flat adult forms, compassionate readable gesture. No photography, volumetric digital painting, cute characters or borders. Wide 3:2 landscape, generous paper. Arrange both faces, rinsing hands and forearm inside a single horizontal band centered 50 percent down; they must all remain readable in a 3.37:1 research banner crop. No labels or watermark.",
+  "focus": [
+    0.5,
+    0.3
+  ],
+  "effective_year": 2,
+  "before_early": "res://assets/ui/research/paper/wound_cleaning.png",
+  "review": "Full-image review: watercolor/ink with sage washes; cupped hands rinse small forearm scrape at spring. Hide clothing, no ceramic basin or advanced equipment. Full image and 3.37:1 banner visually reviewed; runtime and private GPU card checks passed.",
+  "sha256": "7add6238d825080b4ae33d3088c262928b31ac6f3bbdf6502174245977fd94f8",
+  "mode": "built-in image_gen"
 }
