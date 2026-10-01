@@ -105,12 +105,16 @@ static func _fresh(today:int)->Dictionary:
 	var phase:=posmod(hash("council:"+String(WorldSimulation.actor_id)),PEACE_DAYS)
 	return {"version":VERSION,"last":today-PEACE_DAYS+phase,"live":false,"waiting":false,"fronts":{}}
 
+## A saved council (audience_hall validate_state): its fronts are records
+## of short words and day numbers, at most FRONTS_MAX of them.
 static func valid_state(data:Variant)->bool:
 	if not data is Dictionary: return false
 	var d:Dictionary=data
 	if d.is_empty(): return true
 	if not d.get("fronts",{}) is Dictionary or (d.get("fronts",{}) as Dictionary).size()>FRONTS_MAX: return false
-	return JSON.stringify(d).length()<=60000
+	for front in (d.get("fronts",{}) as Dictionary).values():
+		if not front is Dictionary: return false
+	return JSON.stringify(d).length()<=FRONTS_MAX*2500
 
 static func _front(civ_id:String)->Dictionary:
 	var fronts:Dictionary=state().fronts
@@ -414,7 +418,7 @@ static func _see_them_coming(civ_id:String,today:int)->void:
 		return
 	var c:Dictionary=coming[0]
 	var town:=_nearest_town_name(c.position)
-	f["coming"]="%s of %d is %s from %s, here in about %s" % ["Their band" if String(c.label)=="Their band" else String(c.label),int(c.strength),_km_words(float(c.km)),town,_span(int(c.days))]
+	f["coming"]=("%s of %d is %s from %s, here in about %s" % ["Their band" if String(c.label)=="Their band" else String(c.label),int(c.strength),_km_words(float(c.km)),town,_span(int(c.days))]).substr(0,WORDS_MAX)
 	f["coming_day"]=today
 	f["coming_band"]={"strength":int(c.strength),"town":town,"days":int(c.days),"km":snappedf(float(c.km),0.1)}
 

@@ -609,3 +609,43 @@ func test_their_raid_marches_on_our_town_as_a_band_of_their_own_army()->void:
 	var raid:Dictionary=WAR.front(them).get("last_raid",{})
 	assert_int(people-int(GameState.population_total)).is_equal(int(raid.get("our_dead",0)))
 	assert_int(their_people-int(WorldSimulation.scoped(them,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(int(raid.get("their_dead",0)))
+
+# ---------------------------------------------------------------------------
+# Saves
+# ---------------------------------------------------------------------------
+
+## The council's word and its band's errand survive a save: the diplomacy
+## payload keeps the council (checked with the hall's own state), the military
+## payload keeps the band's errand, and after loading the council follows the
+## same band. A broken council in a save is refused like any broken hall state.
+func test_the_council_and_its_band_survive_a_save()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	Council.order(civ_id,"take",{"place":{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}})
+	var band:=_band("take")
+	assert_dict(band).is_not_empty()
+	var said:=String(Council.peek(civ_id).get("says",""))
+	assert_str(said).is_not_empty()
+	# Through JSON, as a save file carries them.
+	var diplomacy:Dictionary=JSON.parse_string(JSON.stringify(ForeignDiplomacy.export_state()))
+	var military:Dictionary=JSON.parse_string(JSON.stringify(MilitaryCampaign.export_state()))
+	ForeignDiplomacy.reset_for_new_world();ForeignDiplomacy.ensure()
+	MilitaryCampaign.reset_for_new_world()
+	assert_dict(_band("take")).is_empty()
+	assert_bool(ForeignDiplomacy.import_state(diplomacy).get("ok",false)).override_failure_message(str(ForeignDiplomacy.import_state(diplomacy))).is_true()
+	assert_bool(MilitaryCampaign.import_state(military).get("ok",false)).is_true()
+	var loaded:=_band("take")
+	assert_int(int(loaded.get("army_id",0))).is_equal(int(band.army_id))
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("take")
+	assert_str(String(Council.peek(civ_id).get("says",""))).is_equal(said)
+	# The council goes on with the same band: no second band is formed.
+	Council.sit(int(GameState.elapsed_days)+3)
+	assert_int(Council.bands_against(civ_id).size()).is_equal(1)
+	assert_str(Council.operation_words(civ_id)).contains("Tsaren")
+	# A broken council in a save is refused.
+	var bad:Dictionary=diplomacy.duplicate(true)
+	(bad.audiences as Dictionary)["council"]={"version":1,"fronts":{civ_id:"not a front"}}
+	assert_bool(ForeignDiplomacy.import_state(bad).has("error")).is_true()
