@@ -29,6 +29,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 		match String(block.get("type","text")):
 			"known_world":
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
+			"peoples_known":
+				var board:=preload("res://scripts/hud/peoples_known_board.gd").new();section.add_child(board);board.setup(block)
 			"city_dossier":
 				var dossier:=preload("res://scripts/hud/city_dossier.gd").new();section.add_child(dossier);dossier.setup(block)
 			"held_town":

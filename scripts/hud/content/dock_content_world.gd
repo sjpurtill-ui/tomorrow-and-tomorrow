@@ -7,8 +7,13 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## world state. Deep reports open in the second (detail) dock, conversations
 ## with foreign leaders go to the court, returned findings are told by the
 ## Chief Scout when summoned. Dispatch flows stay as pausing confirm modals.
+## Once we have met another people, the first tab opens with "Peoples we
+## know" (hud/peoples_known_board.gd): every people met, ranked, as we know
+## them, with our own row to measure them by.
 
 const DetailCivReport:=preload("res://scripts/hud/content/dock_detail_civ_report.gd")
+const PeoplesModel:=preload("res://scripts/hud/peoples_known_model.gd")
+const ForeignCity:=preload("res://scripts/hud/content/dock_detail_foreign_city.gd")
 const Archive:=preload("res://scripts/scout_archive.gd")
 const ArchiveProvider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
 const ReportProvider:=preload("res://scripts/hud/content/dock_detail_scout_report.gd")
@@ -25,6 +30,9 @@ const TRAIL_LIMIT:=30
 const PLACE_LIMIT:=16
 const FIND_GROUPS:=6
 const FIND_ITEMS:=3
+## The Peoples-we-know ledger's own view (the column it is sorted by, the
+## other way round, whose towns are open), kept across the daily rebuilds.
+var peoples_view:Dictionary={"sort":"people","flip":false,"open":""}
 
 func meta()->Dictionary:
 	return {
@@ -37,7 +45,7 @@ func meta()->Dictionary:
 func tab(sub:int)->Dictionary:
 	# The known world and the expeditions tab show no peoples-met or lookout
 	# figures, so only Rise and fall reads those snapshots.
-	if sub==0:return {"blocks":[{"type":"known_world","model":known_world_model(CivilizationSystem.exploration_status())}]}
+	if sub==0:return {"blocks":known_world_blocks(CivilizationSystem.exploration_status())}
 	if sub==1:
 		var away:Dictionary=CivilizationSystem.exploration_status()
 		return {"kpis":[_tellings_kpi(away)],"brief":{"title":"Scouts are away" if bool(away.get("active",false)) else "Read what came home, then send the next party","why":"The day they come home is only a guess. A late party is still on the road until word or loss comes back." if bool(away.get("active",false)) else "Recent returns are below. Every telling holds all the rest."},"blocks":_scouting_blocks(away)}
@@ -61,6 +69,25 @@ func tab(sub:int)->Dictionary:
 		brief={"tone":"info","title":"We know of %s" % ("one other people" if contacts==1 else "%d other peoples" % contacts),"why":"We know only what our people brought home, and older word grows less certain."}
 	if sub==2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
 	return {"blocks":[{"type":"known_world","model":known_world_model(exploration)}]}
+
+## The first tab: the ledger of the peoples we know (once we know any), then
+## the world as our people know it.
+func known_world_blocks(exploration:Dictionary)->Array:
+	var blocks:Array=[]
+	var peoples:=peoples_block()
+	if not peoples.is_empty():blocks.append(peoples)
+	blocks.append({"type":"known_world","model":known_world_model(exploration)})
+	return blocks
+
+## "Peoples we know" (hud/peoples_known_board.gd); {} before we meet anyone.
+func peoples_block()->Dictionary:
+	var model:=PeoplesModel.build()
+	if int(model.get("met",0))<=0:return {}
+	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"_print":model.hash()}
+
+## A town in the ledger opens its report (the city dossier).
+func open_town(city_id:String)->void:
+	if is_instance_valid(hud) and city_id!="":hud.open_detail(ForeignCity.new(terrain,hud,city_id))
 
 func _tellings_kpi(exploration:Dictionary)->Dictionary:
 	return {"label":"Tellings","value":str(int(exploration.get("report_count",0))),"delta":"brought home","delta_color":Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Accounts our scouts carried home"}
@@ -135,7 +162,8 @@ func signature()->Array:
 	var overdue_total:=0
 	for party_variant in (exploration.get("parties",[]) as Array):
 		overdue_total+=int((party_variant as Dictionary).get("overdue_days",0))
-	return [CivilizationSystem.rumor_network.revision,int(GameState.elapsed_days),CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]
+	var reports:Variant=CivilizationSystem.city_intelligence.records.get("player",{}) if CivilizationSystem.city_intelligence!=null else {}
+	return [CivilizationSystem.rumor_network.revision,int(GameState.elapsed_days),(reports as Dictionary).size(),CivilizationSystem.contact_encounters_snapshot().size(),CivilizationSystem.rumored_civilizations_snapshot().size(),int(exploration.get("active_count",0)),int(exploration.get("days_remaining",0)),overdue_total,int(exploration.get("report_count",0)),preload("res://scripts/scout_archive.gd").revision(CivilizationSystem.scout_reports)]
 
 
 # ---------------------------------------------------------------------------

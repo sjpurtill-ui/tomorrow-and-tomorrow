@@ -202,8 +202,22 @@ func _build_enemies(entries:Array)->void:
 	if entries.is_empty():
 		var calm:=_panel(enemy_box,"Calm")
 		calm.add_child(_line("At peace: no feud or war with anyone.",14,T.INK_MUTED,true))
-		return
-	for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+	else:
+		for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+	# Every people we know, ranked as we know them (hud/peoples_known_board.gd,
+	# at the head of the Known World).
+	var all:=Button.new();all.name="AllPeoples";all.text="All peoples we know";all.focus_mode=Control.FOCUS_NONE
+	all.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;all.tooltip_text="Every people we have met, ranked as we know them."
+	all.add_theme_color_override("font_color",T.GOLD_TEXT);all.add_theme_color_override("font_hover_color",T.INK);all.add_theme_color_override("font_pressed_color",T.INK)
+	for state:String in ["normal","pressed","disabled"]:all.add_theme_stylebox_override(state,_skin(Color(0,0,0,0),Color(0,0,0,0),4,0))
+	all.add_theme_stylebox_override("hover",_skin(T.HOVER_BG,Color(0,0,0,0),4,0))
+	all.pressed.connect(func()->void:
+		var scene:=get_tree().current_scene if is_inside_tree() else null
+		var hud:Variant=scene.get("hud") if scene!=null else null
+		if hud==null or not hud.has_method("has_provider") or not hud.has_provider("world"):return
+		close_wanted.emit()
+		hud.open_dock("world",0))
+	enemy_box.add_child(all)
 
 
 func _enemy_row(e:Dictionary)->Control:
