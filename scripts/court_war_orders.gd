@@ -1169,18 +1169,34 @@ static func _at_home(army:Dictionary)->bool:
 	return preload("res://scripts/hud/army_marks.gd").at_home(army,WorldSimulation.world.player_world_origin)
 
 static func _band_of(general:Dictionary)->Dictionary:
-	## The field army this war leader leads himself (his own band), wherever
-	## it stands, when it can take an order. {} when he leads none.
+	## The band this war leader leads himself (his own band), wherever it
+	## stands, when it can take an order. Who leads a band is read one way,
+	## from its commander (leader_commands.gd): a general leads the bands the
+	## ruler put under him; the war leader at home (the Marshal, or the general
+	## in that place) every band with no general of its own. Of several, the
+	## strongest. {} when he leads none.
 	if general.is_empty() or WorldSimulation.military==null: return {}
-	var fid:=String(general.get("figure_id",""))
-	var pid:=int(general.get("person_id",0))
-	var full_name:=String(general.get("name",""))
-	for a in _mc().field_armies:
+	var command:=_command_of(general)
+	if command=="": return {}
+	var Commands:=preload("res://scripts/leader_commands.gd")
+	var mc:=_mc()
+	var best:={}
+	for a in mc.field_armies:
 		var army:Dictionary=a
-		if not _available(army): continue
-		var c:Dictionary=army.get("commander",{}) if army.get("commander") is Dictionary else {}
-		if (fid!="" and String(c.get("figure_id",""))==fid) or (pid>0 and int(c.get("person_id",0))==pid) or (full_name!="" and String(c.get("name",""))==full_name): return army
-	return {}
+		if not _available(army) or Commands.leader_of(army,mc)!=command: continue
+		if best.is_empty() or int(army.get("troops",0))>int(best.get("troops",0)): best=army
+	return best
+
+static func _command_of(general:Dictionary)->String:
+	## The command a war leader heads (leader_commands.gd): a general's own
+	## figure id; WAR_LEADER for the war leader at home (the Marshal in office,
+	## or the general who holds that place); "" for anyone else.
+	var Commands:=preload("res://scripts/leader_commands.gd")
+	var fid:=String(general.get("figure_id",""))
+	if fid!="": return Commands.WAR_LEADER if fid==Commands.war_leader_figure(_mc()) else fid
+	var pid:=int(general.get("person_id",0))
+	var marshal:Variant=WorldSimulation.state.leadership_positions.get("Marshal",{}) if WorldSimulation.state!=null else {}
+	return Commands.WAR_LEADER if pid>0 and marshal is Dictionary and int((marshal as Dictionary).get("person_id",0))==pid else ""
 
 static func _where(army:Dictionary)->String:
 	## Where a force stands, in plain words.

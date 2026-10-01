@@ -24,6 +24,7 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const AiMode:=preload("res://scripts/ai_mode.gd")
 const Voice:=preload("res://scripts/audience_voice.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 const USERS_SENTENCE:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 const USERS_KILL:="Kill all the men of Tsaren that you have tied up!"
@@ -114,12 +115,22 @@ func _train(count:int)->void:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 ## Tsaren taken; about 17 of the band hold it.
 func _captured_tsaren(troops:int=18)->Dictionary:
 	_train(troops)
 	var made:=MilitaryCampaign.create_field_army(troops,"LEVY BAND %d" % (MilitaryCampaign.field_armies.size()+1))
 	assert_bool(made.has("error")).override_failure_message(str(made)).is_false()
 	var army_id:=int((made.army as Dictionary).army_id)
+	_under_a_general(army_id)
 	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}

@@ -19,6 +19,7 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const AiMode:=preload("res://scripts/ai_mode.gd")
 const Voice:=preload("res://scripts/audience_voice.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 const USERS_SENTENCE:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 const USERS_KILL:="Kill all the men of Tsaren that you have tied up!"
@@ -112,10 +113,21 @@ func _train(count:int)->void:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 func _captured_tsaren(troops:int=18)->Dictionary:
 	_train(troops)
 	var made:=MilitaryCampaign.create_field_army(troops,"LEVY BAND %d" % (MilitaryCampaign.field_armies.size()+1))
 	var army_id:=int((made.army as Dictionary).army_id)
+	# Rovik leads it: the ruler put the band under him.
+	_under_a_general(army_id)
 	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}
@@ -130,7 +142,8 @@ func _captured_tsaren(troops:int=18)->Dictionary:
 	var at:=MilitaryCampaign._field_army_index(army_id)
 	return MilitaryCampaign.field_armies[at] if at>=0 else MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
 
-## Rovik, the war leader of renown who leads the band.
+## Rovik, the war leader of renown who leads the band (a general: the
+## HistoricalFigures record its commander carries).
 func _war_leader(band:Dictionary)->String:
 	var audience:=Hall.summon({"figure_id":String((band.commander as Dictionary).get("figure_id",""))})
 	assert_dict(audience).is_not_empty()

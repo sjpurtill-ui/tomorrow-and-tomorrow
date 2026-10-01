@@ -29,6 +29,7 @@ const PlainSpeech:=preload("res://scripts/plain_speech.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Ledger:=preload("res://scripts/town_ledger.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 const USERS_SENTENCE:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 const SECRET:="sk-test-DO-NOT-LOG-0123456789"
@@ -116,12 +117,24 @@ func _train(count:int)->void:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 ## Tsaren taken; about 17 of the band hold it, one fighter stays with the band.
-func _captured_tsaren(troops:int=18)->void:
+## led: the ruler put the band under a general (leader_commands.gd) before
+## it took the town; otherwise it serves under the war leader at home.
+func _captured_tsaren(troops:int=18,led:bool=false)->void:
 	_train(troops)
 	var made:=MilitaryCampaign.create_field_army(troops,"LEVY BAND %d" % (MilitaryCampaign.field_armies.size()+1))
 	assert_bool(made.has("error")).override_failure_message(str(made)).is_false()
 	var army_id:=int((made.army as Dictionary).army_id)
+	if led: _under_a_general(army_id)
 	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}
@@ -621,9 +634,10 @@ func test_nobody_in_the_hall_is_harmed_by_orders_about_a_people()->void:
 	_nobody_here_harmed(careless.result,"careless detain",before2,headman2)
 
 func test_the_fact_he_said_is_not_said_again_underneath()->void:
-	_captured_tsaren()
-	# Before the band's own war leader, as the user was.
-	var band:Dictionary=MilitaryCampaign.field_armies[0]
+	_captured_tsaren(18,true)
+	# Before the band's own war leader, as the user was: every man of the band
+	# stayed to hold the town, its general with it.
+	var band:Dictionary=MilitaryCampaign.field_armies[0] if not MilitaryCampaign.field_armies.is_empty() else MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
 	var summoned:=Hall.summon({"figure_id":String((band.commander as Dictionary).get("figure_id",""))})
 	assert_dict(summoned).is_not_empty()
 	var id:=String(summoned.id)
