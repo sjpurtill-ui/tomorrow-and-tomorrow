@@ -64,3 +64,31 @@ func test_the_counter_draws_on_a_canvas()->void:
 	assert_vector(rect.size).is_equal(Counter.BASE)
 	assert_vector(rect.get_center()).is_equal_approx(Vector2(200,100),Vector2(1,1))
 	canvas.queue_free()
+
+func test_those_in_drill_lead_the_army_bar()->void:
+	var Model:=preload("res://scripts/hud/army_bar_model.gd")
+	var Bar:=preload("res://scripts/hud/army_bar.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(515);MilitaryCampaign.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	assert_dict(Model.drill_card(MilitaryCampaign)).is_empty()
+	MilitaryCampaign.training_queue.assign([
+		{"id":1,"unit":"spearman","weapon":"spear","count":20,"progress_days":10.0,"required_days":30.0},
+		{"id":2,"mode":"field_draft","army_id":4,"unit":"spearman","weapon":"spear","count":3,"progress_days":1.0,"required_days":17.0}])
+	MilitaryCampaign.aggregate_recruits=6
+	var card:=Model.drill_card(MilitaryCampaign)
+	assert_int(int(card.men)).is_equal(20)
+	assert_int(int(card.drafts)).is_equal(3)
+	assert_int(int(card.waiting)).is_equal(6)
+	assert_float(float(card.progress)).is_equal_approx(1.0/3.0,0.001)
+	assert_str(String(card.glyph)).is_equal("spear")
+	# The same days the court says.
+	assert_int(int(card.days)).is_equal(int(preload("res://scripts/court_war_orders.gd").forces().drill_days))
+	assert_str(Model.drill_words(card)).contains("20 in drill at home, 33% through it").contains("6 called up").contains("3 drafts")
+	# It leads the bar, and the bar shows while anyone drills.
+	var shown:=Bar.bar_cards(MilitaryCampaign)
+	assert_bool(shown.is_empty()).is_false()
+	assert_str(String(shown[0].kind)).is_equal("drill")
+	# The Forces list keeps to the forces.
+	assert_bool(Model.cards(MilitaryCampaign).any(func(c:Dictionary)->bool: return String(c.kind)=="drill")).is_false()
+	WorldSimulation.clear()
