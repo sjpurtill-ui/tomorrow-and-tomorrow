@@ -262,7 +262,8 @@ static func _answer(kind:String,civ_id:String,city_id:String,cover:String,agent:
 			return "%sI can send %s to burn their stores or foul a well %s: %s it is done, %s they are caught." % [lead,who,cv,Covert.odds_words(float(odds.success)),Covert.odds_words(float(odds.get("caught",0.1)))]
 		"assassinate":
 			var reach:=float(odds.get("reach",odds.get("access",0.3)))
-			return "%sI can send %s to strike at their leaders %s. %s they get close enough; if they do, they will likely kill one, two or three at most before they are cut down. In all, %s the blow lands." % [lead,who,cv,Covert.odds_words(reach),Covert.odds_words(float(odds.success))]
+			var rw:=Covert.odds_words(reach)
+			return "%sI can send %s to strike at their leaders %s. %s%s they get close enough; if they do, they will likely kill one, two or three at most before they are cut down. In all, %s the blow lands." % [lead,who,cv,rw.substr(0,1).to_upper(),rw.substr(1),Covert.odds_words(float(odds.success))]
 	return ""
 
 static func _sets_out(kind:String,agent:Dictionary,the:String,days:int)->String:
