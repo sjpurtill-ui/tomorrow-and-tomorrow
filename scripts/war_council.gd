@@ -42,6 +42,8 @@ const CONTROLLER_PATH:="res://scripts/civilization_controller.gd"
 const TRACKER_PATH:="res://scripts/order_tracker.gd"
 const COMMANDS_PATH:="res://scripts/leader_commands.gd"
 const LAW:=preload("res://scripts/army_levy_law.gd")
+const Logistics:=preload("res://scripts/equipment_logistics.gd")
+const DEPOTS:=preload("res://scripts/field_depots.gd")
 
 const VERSION:=1
 const STANCES:=["leave","defend","punish","take","peace"]
@@ -78,6 +80,12 @@ const SIEGE_MIN:=15
 const HOLD_MARGIN:=1.5
 ## After a band could not take or hold a town, the next try waits this long.
 const TAKE_REST_DAYS:=30
+## A band this near the ground the ruler sent it to (army_orders "Go to…")
+## is still waiting there.
+const POST_KM:=2.0
+## A band the ruler formed at home and has not yet sent anywhere waits this
+## long for his word before it goes back into the army at home.
+const FORMED_GRACE_DAYS:=30
 const WORDS_MAX:=260
 const FRONTS_MAX:=64
 
@@ -215,6 +223,7 @@ static func sit(today:int)->void:
 	var waiting:=false
 	var seen:={}
 	var plan:={}
+	var stances:={}
 	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary: continue
 		var id:=String((civ as Dictionary).get("id",""))
@@ -226,12 +235,21 @@ static func sit(today:int)->void:
 			continue
 		var stance:=_stance_now(id,civ,today,plan)
 		if stance=="" and bands.is_empty(): continue
-		var done:=_act(id,stance,today,{})
+		stances[id]=stance
+	# Bands left in the field (old orders, a court order carried out): the
+	# stance's work takes them up where it fits, the rest come home. Before
+	# the acts, so those already home are free to go with the next band.
+	_gather_strays(stances,today)
+	for id in stances:
+		var done:=_act(String(id),String(stances[id]),today,{})
 		live=live or bool(done.get("live",false))
 		waiting=waiting or String(done.get("verdict","")) in ["wait","object"]
 	# Bands sent against a people no longer in our world come home.
 	for band in _council_bands():
 		if not seen.has(String((band.council as Dictionary).get("civ",""))): _send_home(band)
+	# A band with nobody left standing never stays on the field (after the
+	# acts: the council has read how its errand ended).
+	_strike_off_empty()
 	_tidy_home()
 	s["live"]=live or _any_out()
 	s["waiting"]=waiting
@@ -913,14 +931,161 @@ static func _idle(army:Dictionary)->bool:
 	var mc:=_mc()
 	var army_id:=int(army.get("army_id",0))
 	if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): return false
-	if army.get("pursuit") is Dictionary: return false
+	if army.get("pursuit") is Dictionary or bool(army.get("relief_assignment",false)): return false
 	var c:Variant=army.get("council")
 	if c is Dictionary and not String((c as Dictionary).get("phase","")) in ["home","done"]: return false
 	if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))!="player_home": return false
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
 	if mc.command_hierarchy.controls_army(army_id): return false
 	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
+	if _at_post(army): return false
 	return true
+
+## A band at work or on watch where the ruler put it: waiting on the ground
+## he sent it to (army_orders "Go to…"), laying a depot, or standing by a
+## depot of ours (field_depots: bands near it keep it from the torch).
+static func _at_post(army:Dictionary)->bool:
+	var site:Variant=army.get("depot_site")
+	if site is Dictionary and not (site as Dictionary).is_empty(): return true
+	var here:=_v2(army.get("position",{}))
+	if not here.is_finite(): return false
+	var post:Variant=army.get("post")
+	if post is Dictionary and here.distance_to(_v2(post))<=POST_KM: return true
+	var mc:=_mc()
+	for depot in mc.field_depots:
+		if depot is Dictionary and here.distance_to(Vector2(float((depot as Dictionary).get("x",0.0)),float((depot as Dictionary).get("z",0.0))))<=float(DEPOTS.RAID_KM): return true
+	return false
+
+# --- Bands left in the field -----------------------------------------------
+
+## Every sitting: our bands with no errand of the council's, not guarding a
+## town we hold, not fighting and not on a live order (on the road, under a
+## standing command, pursuing, aboard ship). Those at home go back into the
+## army at home at once. One out in the field takes up the stance's work
+## where it fits (_take_up); the rest come home, and go back into the army
+## when they arrive (_tidy_home). The Chronicle tells it once.
+static func _gather_strays(stances:Dictionary,today:int)->void:
+	var mc:=_mc()
+	if mc==null: return
+	var called:Array[String]=[]
+	var taken:Array[String]=[]
+	for army in (mc.field_armies as Array).duplicate():
+		if not army is Dictionary: continue
+		var band:Dictionary=army
+		if band.get("council") is Dictionary or not _idle(band) or _guards_ours(band): continue
+		var army_id:=int(band.get("army_id",0))
+		var name:="%s (%s)" % [Logistics.force_name(band),EraWords.grouped(int(band.get("troops",0)))]
+		if _at_home(band):
+			# Formed at home and never sent anywhere: it waits a while for
+			# the ruler's word (realm_orders "form a band").
+			if int(band.get("arrival_day",-1))<0 and int(band.get("departure_day",-1))<0:
+				if not band.has("idle_since"): band["idle_since"]=today
+				if today-int(band.get("idle_since",today))<FORMED_GRACE_DAYS: continue
+			if not mc.disband_field_army(army_id).has("error"): called.append(name)
+			continue
+		var errand:=_take_up(band,stances,today)
+		if errand!="":
+			taken.append(errand)
+			continue
+		if not _send_home(band): continue
+		var index:int=mc._field_army_index(army_id)
+		if index>=0: mc.field_armies[index]["council"]={"civ":"","act":"home","city":"","name":"","since":today,"phase":"home","formed":true}
+		called.append(name)
+	if called.is_empty() and taken.is_empty(): return
+	var s:=state()
+	if not _player() or bool(s.get("strays_told",false)): return
+	s["strays_told"]=true
+	var parts:=PackedStringArray()
+	if not called.is_empty(): parts.append("The war leader called home the bands left in the field: %s. Their men go back to the army at home." % _and_list(called))
+	for errand in taken: parts.append(errand+".")
+	preload("res://scripts/chronicle.gd").record({"key":"council:strays:%d" % today,"title":"The Bands Come Home","text":" ".join(parts),"tier":"notice","kind":"war","domain":"security"})
+
+## A band left out in the field takes up the stance's work where it fits:
+## punish or take against a people with no band of the council's out on it
+## and no rest due, at the town the council would choose, when the band
+## stands nearer that town than the home does and its own men make the
+## odds there (and, to take it, are enough to hold it). The words for the
+## Chronicle, or "" when it does not fit.
+static func _take_up(band:Dictionary,stances:Dictionary,today:int)->String:
+	var here:=_v2(band.get("position",{}))
+	if not here.is_finite(): return ""
+	var home:Vector2=WorldSimulation.world.player_world_origin
+	for key in stances:
+		var civ_id:=String(key)
+		var stance:=String(stances[key])
+		if not stance in ["punish","take"] or not _band_on(civ_id,[stance]).is_empty(): continue
+		var f:=_front(civ_id)
+		if stance=="punish" and today-int(f.get("raided",-99999))<RAID_REST_DAYS and not _raid_called(civ_id): continue
+		if stance=="take" and today-int(f.get("take_failed",-99999))<TAKE_REST_DAYS: continue
+		var town:=_punish_target(civ_id,{}) if stance=="punish" else _take_target(civ_id,{})
+		if town.is_empty() or _ours(civ_id,String(town.city_id)): continue
+		var at:=_v2(town.get("position",{}))
+		if not at.is_finite() or here.distance_to(at)>home.distance_to(at): continue
+		var kind:="raid" if stance=="punish" else "take"
+		var reading:=_band_odds(band,town,kind)
+		if reading.is_empty() or float(reading.raw)<Odds.wanted(kind): continue
+		if stance=="take" and _hold_need(town)>int(band.get("troops",0)): continue
+		var army_id:=int(band.get("army_id",0))
+		var name:=Logistics.force_name(band)
+		var order:Dictionary=_mc().order_city_operation(army_id,civ_id,String(town.city_id),stance=="take",stance=="punish")
+		if order.has("error"): continue
+		var index:int=_mc()._field_army_index(army_id)
+		if index>=0: (_mc().field_armies[index] as Dictionary).erase("court_order")
+		_tag(army_id,civ_id,stance,town,reading,true)
+		if stance=="punish" and _raid_called(civ_id): _raid_sent(f)
+		return "%s, out in the field, takes up the %s %s" % [name,"raid on" if stance=="punish" else "march on",String(town.name)]
+	return ""
+
+## The odds this band, as it stands, would face at the town.
+static func _band_odds(band:Dictionary,town:Dictionary,kind:String)->Dictionary:
+	var going:=int(band.get("troops",0))
+	var formations:Array=band.get("formations",[]) if band.get("formations") is Array else []
+	if going<=0 or Odds.heads(formations)<=0: return {}
+	var enemy:=_estimate(String(town.city_id))
+	if not bool(enemy.get("known",false)): return {}
+	var mid:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
+	return Odds.of(band,formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id))
+
+## A band standing in a town of ours other than the home (one of our own
+## settlements, or a town of another people we hold): it is its guard.
+static func _guards_ours(band:Dictionary)->bool:
+	if String(band.get("status",""))!="stationed": return false
+	var at:=String(band.get("location_id",""))
+	if at=="" or at=="player_home": return false
+	for city in WorldSimulation.state.player_settlements:
+		if city is Dictionary and String((city as Dictionary).get("id",""))==at: return String((city as Dictionary).get("occupied_by","")) in ["","player"]
+	var world:Variant=WorldSimulation.world
+	if world==null or not world.has_method("_region_location"): return false
+	var where:Dictionary=world._region_location(at)
+	if where.is_empty(): return false
+	var region:Dictionary=world.civilizations[int(where.owner_index)].strategic_regions[int(where.region_index)]
+	return String(region.get("controller",""))=="player"
+
+## Bands with nobody left standing, not in a fight, are struck off where
+## they are: at home dissolved as any band is; out in the field their wounded,
+## scattered and taken are counted with the army at home, and the gear of the
+## fallen is lost with them.
+static func _strike_off_empty()->void:
+	var mc:=_mc()
+	if mc==null: return
+	for army in (mc.field_armies as Array).duplicate():
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))>0: continue
+		var band:Dictionary=army
+		var army_id:=int(band.get("army_id",0))
+		if bool(band.get("embarked",false)) or band.get("pursuit") is Dictionary: continue
+		if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): continue
+		if _at_home(band) and not mc.disband_field_army(army_id).has("error"): continue
+		var index:int=mc._field_army_index(army_id)
+		if index<0: continue
+		mc.field_armies.remove_at(index)
+		for pool in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool"]:
+			mc.home_army[pool]=int(mc.home_army.get(pool,0))+int(band.get(pool,0))
+		mc._refresh_readiness()
+		mc.army_changed.emit(mc.home_army.duplicate(true))
+
+static func _and_list(items:Array)->String:
+	if items.size()<=1: return "".join(PackedStringArray(items))
+	return "%s and %s" % [", ".join(PackedStringArray(items.slice(0,items.size()-1))),String(items[-1])]
 
 ## Bands the council formed, home again, go back into the levy at home.
 static func _tidy_home()->void:

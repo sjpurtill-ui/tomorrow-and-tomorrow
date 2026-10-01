@@ -14,6 +14,7 @@ const Odds:=preload("res://scripts/war_odds.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 const Board:=preload("res://scripts/hud/war_board.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
+const Orders:=preload("res://scripts/army_orders.gd")
 
 var civ_id:=""
 var city_id:=""
@@ -649,3 +650,133 @@ func test_the_council_and_its_band_survive_a_save()->void:
 	var bad:Dictionary=diplomacy.duplicate(true)
 	(bad.audiences as Dictionary)["council"]={"version":1,"fronts":{civ_id:"not a front"}}
 	assert_bool(ForeignDiplomacy.import_state(bad).has("error")).is_true()
+
+# ---------------------------------------------------------------------------
+# Bands left in the field
+# ---------------------------------------------------------------------------
+
+## A band of the old hand orders: formed from the levy at home, then left
+## where its order ended (a town, the road), named as the old orders named
+## it.
+func _old_band(count:int,name:String,region_id:String="",at:Vector2=Vector2.INF)->int:
+	var made:Dictionary=MilitaryCampaign.create_field_army(count,name)
+	assert_bool(made.has("army")).override_failure_message(str(made)).is_true()
+	var army_id:=int((made.army as Dictionary).army_id)
+	# It marched out and back under its old order long ago.
+	var old:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
+	old["departure_day"]=int(GameState.elapsed_days)-120;old["arrival_day"]=int(GameState.elapsed_days)-100
+	if region_id!="":
+		var band:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
+		band["status"]="stationed";band["location_id"]=region_id;band["location_name"]=name;band["destination_id"]=""
+		band["position"]={"x":at.x,"z":at.y}
+	return army_id
+
+func _army(army_id:int)->Dictionary:
+	var index:=MilitaryCampaign._field_army_index(army_id)
+	return MilitaryCampaign.field_armies[index] if index>=0 else {}
+
+func _told(words:String)->int:
+	var n:=0
+	for e in (GameState.chronicle.get("entries",[]) as Array):
+		if String((e as Dictionary).get("text","")).contains(words): n+=1
+	return n
+
+## The old hand orders left bands about (a save from before the council):
+## at every sitting those with no errand of the council's, not guarding a
+## town we hold, not fighting and not on a live order come home and go back
+## into the army at home; a band with nobody left is struck off. Told once.
+func test_bands_left_by_old_orders_come_home_and_rejoin_the_army()->void:
+	_train(80)
+	var held:Dictionary={}
+	var esurai:Dictionary=CivilizationSystem.civilizations[0]
+	for region in esurai.strategic_regions:
+		if String((region as Dictionary).get("id",""))!=city_id: held=region; break
+	held["controller"]="player"
+	var held_at:Vector2=held.get("position",city+Vector2(6.0,6.0)) if held.get("position") is Vector2 else city+Vector2(6.0,6.0)
+	var idle_a:=_old_band(4,"BUILD 2 1")
+	var idle_b:=_old_band(6,"Host marching on Iglan")
+	var afield:=_old_band(5,"Host marching on Eldwick",city_id,city)
+	var emptied:=_old_band(3,"Withdrawal from Iglan",city_id,city)
+	var guard:=_old_band(4,"Guard of the held town",String(held.id),held_at)
+	var marching:=_old_band(4,"Band on the road")
+	assert_bool(MilitaryCampaign.move_field_army(marching,city_id).has("error")).is_false()
+	# One the ruler sent to wait on open ground (the Army screen's "Go to…"),
+	# and one laying a depot: both are at the ruler's work.
+	CivilizationSystem._add_revealed_area(CivilizationSystem.player_world_origin,72.0,"home ground")
+	var posted:=_old_band(4,"Band sent to the ford")
+	var sent:Dictionary=Orders.give(posted,"goto",{"type":"spot","x":CivilizationSystem.player_world_origin.x+9.0,"z":CivilizationSystem.player_world_origin.y-4.0})
+	assert_str(String(sent.get("verdict",""))).override_failure_message(str(sent)).is_equal("act")
+	var post:Dictionary=_army(posted).get("post",{})
+	assert_dict(post).is_not_empty()
+	var standing:=_army(posted)
+	standing["status"]="stationed";standing["location_id"]="field_position";standing["destination_id"]=""
+	standing["position"]={"x":float(post.x),"z":float(post.z)}
+	var digging:=_old_band(20,"Depot layers",city_id,city+Vector2(9.0,0.0))
+	_army(digging)["depot_site"]={"x":city.x+9.0,"z":city.y,"work":100.0,"days":2}
+	# Nobody left of one of them, its wounded still to be counted.
+	var gone:=_army(emptied)
+	gone["troops"]=0;gone["wounded_pool"]=2
+	for f in gone.get("formations",[]): (f as Dictionary)["count"]=0
+	# A band the ruler has just formed at home, not yet sent anywhere.
+	var fresh:=int((MilitaryCampaign.create_field_army(4,"").army as Dictionary).army_id)
+	var home_before:=int(MilitaryCampaign.home_army.troops)
+	var wounded_before:=int(MilitaryCampaign.home_army.get("wounded_pool",0))
+	Council.sit(int(GameState.elapsed_days))
+	# The fresh one waits for the ruler's word a while.
+	assert_dict(_army(fresh)).is_not_empty()
+	# Those at home are back in the army at home at once.
+	assert_dict(_army(idle_a)).is_empty()
+	assert_dict(_army(idle_b)).is_empty()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(home_before+10)
+	# The one out in the field turns for home, to rejoin it there.
+	var walking:=_army(afield)
+	assert_str(String(walking.status)).is_equal("moving")
+	assert_str(String(walking.destination_id)).is_equal("player_home")
+	assert_str(String((walking.get("council",{}) as Dictionary).get("phase",""))).is_equal("home")
+	# Nobody left: struck off, its wounded counted at home.
+	assert_dict(_army(emptied)).is_empty()
+	assert_int(int(MilitaryCampaign.home_army.get("wounded_pool",0))).is_equal(wounded_before+2)
+	# The guard of a town we hold stays; the band on the road goes on.
+	assert_str(String(_army(guard).get("location_id",""))).is_equal(String(held.id))
+	assert_bool(_army(guard).has("council")).is_false()
+	assert_str(String(_army(marching).status)).is_equal("moving")
+	assert_str(String(_army(marching).destination_id)).is_equal(city_id)
+	assert_bool(_army(posted).has("council")).is_false()
+	assert_str(String(_army(posted).status)).is_equal("stationed")
+	assert_bool(_army(digging).has("council")).is_false()
+	# Told once in the Chronicle.
+	assert_int(_told("called home the bands left in the field")).is_equal(1)
+	# Days pass: the band from the field reaches home and rejoins the army.
+	_days(30,func()->bool:return _army(afield).is_empty())
+	assert_dict(_army(afield)).is_empty()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater_equal(home_before+15)
+	# Another band left about later comes home too, without another telling;
+	# the fresh one, given no word in a month, goes back into the army.
+	var later:=_old_band(4,"Left after a court order")
+	GameState.elapsed_days=int(GameState.elapsed_days)+Council.FORMED_GRACE_DAYS
+	Council.sit(int(GameState.elapsed_days))
+	assert_dict(_army(later)).is_empty()
+	assert_dict(_army(fresh)).is_empty()
+	assert_int(_told("called home the bands left in the field")).is_equal(1)
+
+## Where the stance has work for a band left in the field (punish, nobody out
+## on it yet, its own men make the odds at the town and it stands nearer it
+## than the home), it takes up the raid from where it stands; no other band
+## goes from home.
+func test_a_band_left_at_their_town_takes_up_the_raid()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(60)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	WAR.front(civ_id)["stance"]="punish"
+	var afield:=_old_band(30,"Host marching on Tsaren",city_id,city)
+	var home_before:=int(MilitaryCampaign.home_army.troops)
+	Council.sit(int(GameState.elapsed_days))
+	var band:=_army(afield)
+	assert_dict(band).is_not_empty()
+	var tag:Dictionary=band.get("council",{})
+	assert_str(String(tag.get("act",""))).override_failure_message(str(Council.peek(civ_id))).is_equal("punish")
+	assert_str(String(tag.get("civ",""))).is_equal(civ_id)
+	assert_int(Council.bands_against(civ_id).size()).is_equal(1)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(home_before)
+	assert_int(_told("takes up the raid on Tsaren")).is_equal(1)
