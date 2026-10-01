@@ -116,6 +116,9 @@ func reset_for_new_world()->void:
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	_scan=ResearchScan.new()
 	_team_memo=TeamMemo.new()
+	# The teams' look days start afresh with the world (a save restores its own).
+	_switch_checked={}
+	_research_600_return_day=-100000
 	latest_context.clear()
 	established_threads_cache.clear()
 	established_threads_signature=""
@@ -1114,8 +1117,9 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 ## stands two bands nearer its age or more and is SWITCH_MARGIN less work;
 ## failing that, a much quicker question (SWITCH_MARGIN less work) in its own
 ## channel. The progress made stays with the question for later. A question the
-## player chose keeps its team. Each team looks on its own day of the month, so
-## the looks spread out.
+## player chose keeps its team. The teams look together on the first day of each
+## block of SWITCH_CHECK_DAYS days, so the month's reading of every line is done
+## once; a team placed during a block first looks in the next.
 const SWITCH_CHECK_DAYS:=30
 const SWITCH_MARGIN:=1.5
 ## The day each desk's team last looked again ({channel: day}).
@@ -1130,11 +1134,10 @@ func _switch_to_quicker_questions(current_day:int)->void:
 	var ahead:Array=[]
 	for channel_variant in active:
 		var channel:=String(channel_variant)
-		# A desk new to the record looks first on its own day of the month (within
-		# SWITCH_CHECK_DAYS of joining it), then once a month.
-		if not _switch_checked.has(channel): _switch_checked[channel]=current_day-SWITCH_CHECK_DAYS+posmod(hash(channel),SWITCH_CHECK_DAYS)
-		var last:=int(_switch_checked[channel])
-		if current_day>=last and current_day-last<SWITCH_CHECK_DAYS: continue
+		# Once in each block of SWITCH_CHECK_DAYS days; a desk new to the record
+		# first looks in the next block.
+		if not _switch_checked.has(channel): _switch_checked[channel]=current_day
+		if floori(float(current_day)/SWITCH_CHECK_DAYS)==floori(float(int(_switch_checked[channel]))/SWITCH_CHECK_DAYS): continue
 		_switch_checked[channel]=current_day
 		var current:=discovery_definition(String(active[channel]))
 		if current.is_empty() or _pinned(channel): continue
