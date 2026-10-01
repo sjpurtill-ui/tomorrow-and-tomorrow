@@ -63,14 +63,15 @@ func test_research_selection_matches_full_catalog_scan_across_knowledge_states()
 			state.known_discoveries.assign(all.slice(0,int(all.size()*fraction)))
 			var known:=preload("res://scripts/technology_requirements.gd").index_known(state.known_discoveries)
 			for channel in discovery.catalog_by_channel:
-				var best:Dictionary={};var score:=-INF;var near_age:=false
+				var best:Dictionary={};var score:=-INF;var band:=INF;var near_age:=false
 				for entry in discovery.catalog_by_channel[channel]:
 					if not discovery._discovery_is_eligible(entry,100000,known):continue
 					# A line counts as having work of its own age only within NEAR_AGE_YEARS.
 					if discovery.research_years_ahead(entry,100000.0/365.0)<discovery.NEAR_AGE_YEARS:near_age=true
+					# The nearest band first (team_tier), then the best score; a chosen question wins.
+					var tier:=-1.0 if String(state.research_targets.get(channel,""))==String(entry.id) else float(discovery.team_tier(entry))
 					var value:float=discovery._candidate_score(entry)
-					if String(state.research_targets.get(channel,""))==String(entry.id):value+=100000.0
-					if value>score:score=value;best=entry
+					if tier<band or (tier==band and value>score):band=tier;score=value;best=entry
 				assert_dict(discovery._best_candidate_for_channel(channel,100000)).is_equal(best)
 				assert_bool(discovery._channel_has_candidate(channel,100000)).is_equal(near_age)
 	)
