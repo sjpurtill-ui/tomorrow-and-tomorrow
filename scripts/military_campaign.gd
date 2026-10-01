@@ -1674,7 +1674,11 @@ func _process_field_army_movement_day()->void:
 		var packed:Array=army.get("march_route",[])
 		var legs:=ArmyLandRoute.unpack(packed)
 		var mix:=MarchTerrain.mix_of(army)
-		var speed:=_field_army_speed(army)
+		# Where the carriers cannot feed the band, the general lives off the
+		# land: half pace, foraging and hunting as they go, when that feeds the
+		# men better than the full march (field_rations.gd). A chase keeps pace.
+		army["living_off_land"]=intercept_target_id.is_empty() and FieldRations.should_live_off_land(_force_provision_access(army),SupplyState.forage_factor(army))
+		var speed:=_field_army_speed(army)*(FieldRations.FORAGE_PACE if bool(army.living_off_land) else 1.0)
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var done_before:=float(army.get("march_effort_done",0.0))
 		var done:=MarchTerrain.walk_day(origin,packed,done_before,speed,today,mix)
