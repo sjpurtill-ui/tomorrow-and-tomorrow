@@ -18,9 +18,6 @@ paper/gouache rendering. References supply medium only. Prior originals remain
 intact; approved status requires visual inspection. Runtime texture limits and
 origin separation are separate checks from visual mechanism review.
 
-First accepted original: 1327, interrupted ochre hand trace on naturally
-ridged cave-rock flake. Full square painting inspected; catalogue audit has
-no errors. Runtime validation is pending before the first checkpoint push.
 Canonical game/player and save data remain untouched. Integrator owns main.
 
 First two accepted originals: 1327 hand-trace continuation across natural
@@ -30,3 +27,21 @@ Fresh-cache import exited 0 with transient font/dependency errors; separate
 incremental import, runtime and private GPU were clean, exit 0, PASS count=2.
 Catalogue audit has no errors. Technical validation does not date these
 fictional experiments. Exact prompts and original paths are in reviewed.json.
+
+Primary material research: Xhauflair et al. (2023), use-wear evidence for
+plant-fiber thinning at Tabon Cave:
+https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0281415
+The study compares stone-tool wear with experimental fiber thinning. It
+supports depicting raw fibers becoming supple strips; it does not document
+our imagined ridged shell or twig brace. The game's staged basket/weaving
+capabilities are art constraints, not a claim that prehistoric people lacked
+fiber technology. Kvavadze et al. (2009) was also located, but has a published
+comment and erratum; no new species/date claim is based on it here.
+
+Six-original checkpoint: 1327–1332 individually inspected and registered.
+New subjects: bruised wild root on a pebble-supported slab; red/yellow earth
+mixed orange in a shell using a braced forked twig; bulky knot caught behind
+a ragged hide slit; raised heavy stone with small pebble and braced raw lever.
+Incremental import, headless runtime and private GPU exit 0, PASS count=6;
+the six 240-pixel tiles were inspected. Audit: 1317 approved, 15 generated,
+2764 pending, errors empty. These totals exclude other delivered branches.
