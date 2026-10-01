@@ -1,0 +1,371 @@
+extends GdUnitTestSuite
+## THE WAR COUNCIL (war_council.gd): one planner for every people, the god's
+## own included, acting on a stance toward each people with the REAL army
+## (MilitaryCampaign field armies, their land roads, the combat simulator,
+## sieges and garrisons). The user: "Military needs to be stupidly simple, but
+## not UNIT BASED... You assign units to a LEADER's command... The leader sees
+## to supply, logistics, organization, pacing." These tests pin each stance
+## with real bands, a rival's council against another rival, no double strike
+## in a formal war, and a sane cadence over years.
+
+const Council:=preload("res://scripts/war_council.gd")
+const WAR:=preload("res://scripts/war_loop.gd")
+const Odds:=preload("res://scripts/war_odds.gd")
+const Route:=preload("res://scripts/army_land_route.gd")
+const Board:=preload("res://scripts/hud/war_board.gd")
+
+var civ_id:=""
+var city_id:=""
+var city:=Vector2.ZERO
+var _processing:Dictionary={}
+
+func _land(_p:Vector2)->bool:
+	return true
+
+func before_test()->void:
+	if _processing.is_empty():
+		for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]: _processing[node]=node.is_processing()
+	WorldSimulation.clear()
+	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
+	GameState.reset_for_new_world(74017);GameState.civic_api_enabled=false
+	DiscoverySystem.reset_for_new_world();FoodSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world();ForeignDiplomacy.ensure();GovernmentPeopleSystem.reset_for_new_world()
+	GameState.ensure_population_total(900);GameState.housing_capacity=1000
+	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];SettlementModel.ensure_founded()
+	GameState.select_founding_focus("provision")
+	GameState.settlement_name="Seanstone"
+	GameState.society_capacities["institutions"]=0.4
+	GovernmentPeopleSystem._update_government_stage(false)
+	GovernmentPeopleSystem.initialize()
+	GameState.resource_stockpiles["Food"]=1000000.0
+	GameState.elapsed_days=88*365
+	Route.clear_cache()
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	civ["name"]="Esurai"
+	civ_id=String(civ.id)
+	var relation:Dictionary=civ.player_relation
+	relation.at_war=false; relation.treaty="none"; relation.contact_level=2; relation.home_location_known=true; relation.met_day=0
+	var region:Dictionary=civ.strategic_regions[CivilizationSystem._frontline_region_index(civ)]
+	region["name"]="Tsaren"
+	city_id=String(region.id)
+	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",city_id,.8,int(GameState.elapsed_days),"scout report","test"),int(GameState.elapsed_days))
+	city=CivilizationSystem.player_world_origin+Vector2(-20.0,8.0)
+	_place_town(city)
+	CivilizationSystem.set_scout_geography_authority(Callable(self,"_land"))
+
+## Tsaren stands here, in the world and on our chart alike (a battle's report
+## charts the town again where it truly stands).
+func _place_town(at:Vector2)->void:
+	city=at
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	for region in civ.strategic_regions:
+		if String((region as Dictionary).get("id",""))==city_id: (region as Dictionary)["position"]=at
+	CivilizationSystem.city_intelligence.records.player[city_id]["position"]={"x":at.x,"z":at.y}
+
+func after_test()->void:
+	CivilizationSystem.set_scout_geography_authority(Callable())
+	Route.clear_cache()
+	GameState.elapsed_days=0
+	MilitaryCampaign.reset_for_new_world()
+	GovernmentPeopleSystem.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world()
+	CivilizationSystem.reset_for_new_world()
+	FoodSystem.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
+	GameState.reset_for_new_world(74017)
+	ProgressionSystem.reset_for_new_world()
+	WorldSimulation.clear()
+	for node:Node in _processing: node.set_process(bool(_processing[node]))
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+## Trained and armed fighters at home (the levy, finished drill).
+func _train(count:int,drill:float=0.6)->void:
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+count
+	MilitaryCampaign.raise_recruits(count)
+	MilitaryCampaign.start_training("levy","improvised",count)
+	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
+	MilitaryCampaign.training_queue.clear()
+	for f in MilitaryCampaign.home_army.get("formations",[]): (f as Dictionary)["training"]=maxf(float((f as Dictionary).get("training",0.0)),drill)
+
+## Our scouts' count of the fighters in Tsaren.
+func _counted(mid:float)->void:
+	var rec:Dictionary=CivilizationSystem.city_intelligence.records.player[city_id]
+	rec.fields["garrison"]={"low":mid,"high":mid,"observed_day":int(GameState.elapsed_days),"reported_day":int(GameState.elapsed_days)}
+
+## Their real fighters: the aggregate the town's defence is drawn from.
+func _their_men(n:float)->void:
+	CivilizationSystem.civilizations[0]["military_population"]=n
+
+## Days pass: the army marches and fights, battles are fought out, the war
+## ledger counts and the council sits when it is due.
+func _days(n:int,stop:Callable=Callable())->void:
+	for i in n:
+		GameState.elapsed_days=int(GameState.elapsed_days)+1
+		var day:=int(GameState.elapsed_days)
+		MilitaryCampaign.last_processed_day=day
+		MilitaryCampaign._process_military_day()
+		for e in MilitaryCampaign.own_engagements.values(): (e as Dictionary).erase("awaiting_player_view")
+		WAR.daily(day)
+		Council.day(day)
+		if stop.is_valid() and bool(stop.call()): return
+
+func _band(act:String)->Dictionary:
+	for a in MilitaryCampaign.field_armies:
+		var c:Variant=(a as Dictionary).get("council")
+		if c is Dictionary and String((c as Dictionary).get("act",""))==act: return a
+	return {}
+
+func _held()->bool:
+	return String(CivilizationSystem.region_snapshot(civ_id,city_id).get("controller",""))=="player"
+
+# ---------------------------------------------------------------------------
+# Take a town
+# ---------------------------------------------------------------------------
+
+func test_take_waits_for_three_to_two_then_marches_besieges_or_storms_and_garrisons()->void:
+	_their_men(8.0)
+	_counted(60.0)
+	_train(40)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	var place:={"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}
+	# 40 against the 60 our scouts counted behind walls: short of 3 to 2. The
+	# war leader waits and says how many more would make it.
+	var first:=Council.order(civ_id,"take",{"place":place})
+	assert_bool(String(first.verdict) in ["object","wait"]).override_failure_message(str(first)).is_true()
+	assert_str(String(first.says)).contains("3 to 2")
+	assert_str(String(first.says)).contains("more would make it")
+	assert_dict(_band("take")).is_empty()
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("take")
+	assert_str(Council.operation_words(civ_id)).is_not_empty()
+	# The levy grows (the god raised the share): the council, sitting, finds
+	# the odds and goes by the land road.
+	_train(260)
+	Council.sit(int(GameState.elapsed_days))
+	var band:=_band("take")
+	assert_dict(band).override_failure_message(str(Council.peek(civ_id))).is_not_empty()
+	assert_str(String(band.status)).is_equal("moving")
+	assert_str(String(band.destination_id)).is_equal(city_id)
+	assert_bool(band.has("city_operation")).is_true()
+	assert_array(band.get("march_route",[])).is_not_empty()
+	# The watch stays home.
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater(0)
+	# The War screen says it in one plain line.
+	var said:=Council.operation_words(civ_id)
+	assert_str(said).contains("Tsaren")
+	assert_str(said).contains("there in about")
+	# Days pass: they arrive, fight or lay siege, and Tsaren changes hands.
+	_days(240,func()->bool:return _held() and _band("take").is_empty())
+	assert_bool(_held()).override_failure_message("Tsaren never fell: %s / %s" % [str(Council.peek(civ_id)),str(MilitaryCampaign.battle_history.map(func(b:Dictionary)->String:return String(b.get("message",""))))]).is_true()
+	# A garrison of ours holds it, out of the band that took it.
+	var garrison:=MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
+	assert_int(int(garrison.get("troops",0))).is_greater(0)
+	# Taken: the stance is to hold what we took, and the rest come home.
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("defend")
+	# The fight is in the war ledger, counted once.
+	assert_int(int(WAR.front(civ_id).get("strikes",0))).is_greater_equal(1)
+
+# ---------------------------------------------------------------------------
+# Punish
+# ---------------------------------------------------------------------------
+
+func test_punish_sends_a_real_band_that_raids_their_stores_and_comes_home()->void:
+	_their_men(40.0)
+	_counted(8.0)
+	_train(80)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	var their_food_before:=float(CivilizationSystem.civilizations[0].get("food_days",0.0))
+	var people_before:=int(GameState.population_total)
+	var said:=Council.order(civ_id,"punish")
+	assert_str(String(said.verdict)).override_failure_message(str(said)).is_equal("act")
+	var band:=_band("punish")
+	assert_dict(band).is_not_empty()
+	# A raid, sized by the odds: not everyone, and the watch stays home.
+	assert_bool(bool((band.city_operation as Dictionary).get("raid",false))).is_true()
+	assert_int(int(band.troops)).is_less(80)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater(0)
+	var army_id:=int(band.army_id)
+	var sent:=int(band.troops)
+	assert_str(Council.operation_words(civ_id)).contains("raiders")
+	# Days pass: they reach Tsaren, raid it and turn for home.
+	_days(60,func()->bool:return _band("punish").is_empty() and MilitaryCampaign._field_army_index(army_id)<0)
+	var record:={}
+	for b in MilitaryCampaign.battle_history:
+		if int((b as Dictionary).get("home_force_id",-1))==army_id: record=b
+	assert_dict(record).override_failure_message("no raid was fought").is_not_empty()
+	assert_str(String((record.threat as Dictionary).get("incident_kind",""))).is_equal("raid")
+	# Our dead are our own fighters, out of our own people.
+	var ours_dead:=int((record[String(record.home_side)] as Dictionary).get("dead",0))
+	assert_int(people_before-int(GameState.population_total)).is_equal(ours_dead)
+	# Won, their stores fell and ours rose by what the band carried home.
+	var strategic:Dictionary=record.get("strategic_outcome",{})
+	if bool(strategic.get("player_won",false)):
+		assert_float(float((strategic.get("raid_spoils",{}) as Dictionary).get("Food",0.0))).is_greater(0.0)
+		assert_float(float(CivilizationSystem.civilizations[0].get("food_days",0.0))).is_less(their_food_before)
+	# The band came home and went back into the levy.
+	assert_int(MilitaryCampaign._field_army_index(army_id)).is_equal(-1)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater(80-sent)
+	# The feud's ledger counted the strike once, with the dead as fought.
+	assert_int(int(WAR.front(civ_id).get("strikes",0))).is_equal(1)
+	assert_int(int(WAR.front(civ_id).get("our_dead",0))).is_equal(ours_dead)
+	# The next raid waits out its rest.
+	Council.sit(int(GameState.elapsed_days))
+	assert_dict(_band("punish")).is_empty()
+	assert_str(String(Council.peek(civ_id).get("verdict",""))).is_equal("rest")
+
+func test_punish_sends_trackers_first_when_nobody_knows_where_they_live()->void:
+	_train(40)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	CivilizationSystem.city_intelligence.records.player.erase(city_id)
+	CivilizationSystem.civilizations[0].player_relation["home_location_known"]=false
+	var said:=Council.order(civ_id,"punish")
+	assert_dict(_band("punish")).is_empty()
+	assert_str(String((WAR.front(civ_id).get("op",{}) as Dictionary).get("objective",""))).is_equal("war_track")
+	assert_str(String(said.says)).contains("raiders' trail")
+	assert_str(Council.operation_words(civ_id)).contains("trackers")
+
+# ---------------------------------------------------------------------------
+# Defend
+# ---------------------------------------------------------------------------
+
+func test_defend_calls_the_raiders_home_and_their_raid_meets_our_watch()->void:
+	_their_men(40.0)
+	_counted(8.0)
+	_train(80)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	Council.order(civ_id,"punish")
+	var army_id:=int(_band("punish").army_id)
+	_days(1)
+	var held:=Council.order(civ_id,"defend")
+	# The band out on the road turns for home; the approaches are watched.
+	var index:=MilitaryCampaign._field_army_index(army_id)
+	assert_int(index).is_greater_equal(0)
+	assert_str(String(MilitaryCampaign.field_armies[index].get("destination_id",""))).is_equal("player_home")
+	assert_int(int(WAR.front(civ_id).get("guard_until",-1))).is_greater(int(GameState.elapsed_days))
+	assert_str(String(held.says)).is_not_empty()
+	_days(20)
+	# Their raid comes: men of their real army against our real watch.
+	var their_men:=float(CivilizationSystem.civilizations[0].get("military_population",0.0))
+	var people:=int(GameState.population_total)
+	var watch:=int(MilitaryCampaign.home_army.troops)
+	var day:=int(GameState.elapsed_days)
+	WAR._schedule(civ_id,day,"vengeance","test")
+	WAR._execute(civ_id,day)
+	var raid:Dictionary=WAR.front(civ_id).get("last_raid",{})
+	assert_dict(raid).override_failure_message(str((WAR.state().log as Array).slice(0,3))).is_not_empty()
+	assert_int(int(raid.get("day",-1))).is_equal(day)
+	assert_bool(bool(raid.get("watch",false))).override_failure_message(str(raid)).is_true()
+	var record:Dictionary=MilitaryCampaign.battle_history[0]
+	assert_str(String((record.threat as Dictionary).get("war_loop",""))).is_not_empty()
+	# Our dead came off our watch at home and our people; theirs off their army.
+	assert_int(people-int(GameState.population_total)).is_equal(int(raid.our_dead))
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_less_equal(watch)
+	assert_float(float(CivilizationSystem.civilizations[0].get("military_population",0.0))).is_less_equal(their_men)
+	# Counted once: the raid is its own, the scan of the battles passes it.
+	var raids_before:=int(WAR.front(civ_id).get("raids",0))
+	WAR.from_battles(day)
+	assert_int(int(WAR.front(civ_id).get("raids",0))).is_equal(raids_before)
+
+func test_defend_sends_a_band_to_meet_their_band_when_the_watch_sees_it()->void:
+	_their_men(30.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	var day:=int(GameState.elapsed_days)
+	CivilizationSystem._add_revealed_area(CivilizationSystem.player_world_origin,72.0,"home ground")
+	var at:=CivilizationSystem.player_world_origin+Vector2(14.0,0.0)
+	CivilizationSystem.foreign_formations.append({"id":"%s_raiders" % civ_id,"civ_id":civ_id,"kind":"expedition","command_position":{"x":at.x,"z":at.y},"strength_share":0.5,"actual_troops":15,"readiness":0.5})
+	CivilizationSystem._process_local_observation(day,true)
+	assert_dict(CivilizationSystem.visible_formation_sighting("%s_raiders" % civ_id)).is_not_empty()
+	assert_str(Council.operation_words(civ_id)).contains("km from")
+	var held:=Council.order(civ_id,"defend")
+	var band:=_band("intercept")
+	assert_dict(band).override_failure_message(str(held)).is_not_empty()
+	assert_str(String(held.says)).contains("out after")
+	# The watch stays home while the band goes out.
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater(0)
+
+# ---------------------------------------------------------------------------
+# Leave them be, seek peace
+# ---------------------------------------------------------------------------
+
+func test_leave_and_peace_bring_the_bands_home_and_send_no_raid()->void:
+	_their_men(40.0)
+	_counted(8.0)
+	_train(80)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	Council.order(civ_id,"punish")
+	var army_id:=int(_band("punish").army_id)
+	_days(1)
+	var left:=Council.order(civ_id,"leave")
+	assert_str(String(left.says)).contains("No one goes after")
+	var index:=MilitaryCampaign._field_army_index(army_id)
+	assert_str(String(MilitaryCampaign.field_armies[index].destination_id)).is_equal("player_home")
+	_days(40)
+	# Home, folded back into the levy; and nothing new went out.
+	assert_int(MilitaryCampaign._field_army_index(army_id)).is_equal(-1)
+	assert_dict(_band("punish")).is_empty()
+	for b in MilitaryCampaign.battle_history: assert_int(int((b as Dictionary).get("home_force_id",-1))).is_not_equal(army_id)
+	# Peace: messengers go; no band goes out.
+	var peace:=Council.order(civ_id,"peace")
+	assert_str(String((WAR.front(civ_id).get("op",{}) as Dictionary).get("objective",""))).is_equal("war_parley")
+	assert_str(String(peace.says)).contains("messengers")
+	Council.sit(int(GameState.elapsed_days))
+	assert_array(MilitaryCampaign.field_armies.filter(func(a:Dictionary)->bool:return a.has("council"))).is_empty()
+	assert_str(Council.operation_words(civ_id)).contains("messengers")
+
+# ---------------------------------------------------------------------------
+# One engine: no second, made-up strike in a war
+# ---------------------------------------------------------------------------
+
+func test_no_double_strike_in_a_formal_war()->void:
+	GameState.ensure_population_total(2400); GameState.housing_capacity=3200
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	civ["population"]=3000.0
+	_train(60)
+	assert_bool(WAR.declare(civ_id,int(GameState.elapsed_days),"the tribute you would not pay")).is_true()
+	assert_dict(WAR.front(civ_id).war as Dictionary).is_not_empty()
+	var people:=int(GameState.population_total)
+	var day:=int(GameState.elapsed_days)
+	for i in 400:
+		day+=1
+		GameState.elapsed_days=day
+		WAR.daily(day)
+	var kinds:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==civ_id).map(func(e:Dictionary)->String:return String(e.kind))
+	# Their host comes only through the real army: war_loop sends nobody of its own.
+	assert_array(kinds).not_contains(["enemy_attack","op_burn","op_pursue","op_chief"])
+	assert_int(int(GameState.population_total)).is_equal(people)
+	# Nor does the war leader strike on his own: with no word he defends.
+	assert_str(Council.stance_of(civ_id)).is_equal("defend")
+
+# ---------------------------------------------------------------------------
+# Cadence: a few years of it, no daily spam
+# ---------------------------------------------------------------------------
+
+func test_a_few_years_of_punishing_give_a_sane_number_of_raids()->void:
+	_their_men(30.0)
+	_counted(6.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	Council.order(civ_id,"punish")
+	var sittings:=0
+	var last_sat:=int(Council.peek(civ_id).get("sat",-1))
+	var bands_seen:={}
+	var start:=Time.get_ticks_msec()
+	for i in 3*365:
+		_days(1)
+		var sat:=int(Council.peek(civ_id).get("sat",-1))
+		if sat!=last_sat: sittings+=1; last_sat=sat
+		for a in MilitaryCampaign.field_armies:
+			if (a as Dictionary).has("council"): bands_seen[int((a as Dictionary).army_id)]=true
+	var raids:=0
+	for e in (WAR.state().log as Array):
+		if String((e as Dictionary).get("kind",""))=="battle_ours": raids+=1
+	# One raid at a time, a rest between: about one a season, never daily.
+	assert_int(bands_seen.size()).override_failure_message("bands: %d" % bands_seen.size()).is_between(3,14)
+	assert_int(sittings).override_failure_message("sittings: %d" % sittings).is_less(3*365/2)
+	assert_int(raids).is_less_equal(bands_seen.size())
+	assert_int(Time.get_ticks_msec()-start).is_less(90000)

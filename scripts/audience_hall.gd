@@ -454,7 +454,8 @@ static func daily(day:int)->Array[Dictionary]:
 		_crises().call("daily",day)
 		_upkeep().call("daily",day)
 	_rivals().call("daily",day)
-	if not envoys_only: _war().call("daily",day)
+	# The war (war_loop.gd) is the simulation's own, advanced by the day itself
+	# (civilization_day.gd), never by the hall catching up.
 	_requests().call("daily",day)
 	# Standing exchanges sealed in talk with foreign rulers (trade_pacts.gd).
 	(load(PACTS_PATH) as GDScript).call("daily",day)

@@ -46,6 +46,7 @@ const Tactics:=preload("res://scripts/battle_tactics.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const Odds:=preload("res://scripts/war_odds.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
+const COUNCIL_PATH:="res://scripts/war_council.gd"
 
 const KINDS:=["attack","siege","raid","intercept","recall","defend","drill","fate","held","storm","which_town","no_town","take_first","group_maim","pursue","let_go","abandon","keep","measure","town_word","measure_drop","captives","follow_kill"]
 ## A strike by stealth: by night, unseen, on them asleep ("sneak attack
@@ -1313,10 +1314,53 @@ static func perform(reading:Dictionary,insist:bool=false,context:Dictionary={})-
 	if bool((reading.get("target",{}) as Dictionary).get("held",false)): return _held(out,reading.target)
 	if bool((reading.get("target",{}) as Dictionary).get("ruin",false)): return _ruin(out,reading.target)
 	if bool((reading.get("target",{}) as Dictionary).get("unguarded",false)): return _unguarded(out,reading.target)
+	# A blow at a town of theirs is the war council's (war_council.gd): the
+	# stance toward that people becomes Take a town (attack, siege) or Punish
+	# (raid) with this town, and the council acts on it now through strike()
+	# below, the war leader stating the odds or objecting.
+	var aim:Dictionary=reading.get("target",{}) if reading.get("target") is Dictionary else {}
+	if not bool(context.get("council",false)) and kind in ["attack","siege","raid"] and String(aim.get("city_id",""))!="" and String(aim.get("civ_id",""))!="":
+		return _through_council(out,reading,insist,context)
 	var struck:=_strike(out,reading,insist)
 	# A strike by night: the chance of reaching them unseen, stated plainly.
 	if String(struck.get("night_words",""))!="": struck["says"]=(String(struck.says)+" "+String(struck.night_words)).strip_edges()
 	return struck
+
+## The war leader's blow at a town as the war council sends it
+## (war_council.gd): the same validation, objections, numbers, Chronicle and
+## report as a spoken order. Never goes back through the council.
+static func strike(reading:Dictionary,insist:bool=false,context:Dictionary={})->Dictionary:
+	var through:=context.duplicate()
+	through["council"]=true
+	return perform(reading,insist,through)
+
+## "Attack Tsaren", "lay siege to it", "raid their fields": the stance toward
+## that people, with that town, given to the war council, which acts on it at
+## once. Its answer is the war leader's own (strike), or, when the council
+## holds back before any march (the road would starve the band), its reason
+## in his words, which the god can insist past.
+static func _through_council(out:Dictionary,reading:Dictionary,insist:bool,context:Dictionary)->Dictionary:
+	var target:Dictionary=reading.get("target",{})
+	var civ_id:=String(target.get("civ_id",""))
+	var stance:="punish" if String(out.kind)=="raid" else "take"
+	var council:=load(COUNCIL_PATH) as GDScript
+	var done:Dictionary=council.call("order",civ_id,stance,{"place":target,"insist":insist,"words":String(reading.get("text","")),"context":context,"reading":reading})
+	if done.has("objective") and done.has("general"): return done
+	out["target"]=target.duplicate(true)
+	var says:=String(done.get("says",""))
+	match String(done.get("verdict","")):
+		"wait","rest":
+			var objected:=_object(out,"council_wait",says,"" if insist else "Say the word and we go anyway.")
+			return objected
+		"hold","noted":
+			out.verdict="noted"; out.reason="council"; out.says=says; out.outcome=says
+			out.objective={"army_id":0,"kind":stance,"civ_id":civ_id,"city_id":String(target.get("city_id",""))}
+			return out
+		"act":
+			out.verdict="act"; out.reason="council"; out.says=says; out.outcome=says
+			out.objective={"army_id":int(done.get("army_id",0)),"kind":stance,"civ_id":civ_id,"city_id":String(target.get("city_id",""))}
+			return out
+	return _no(out,"council",says if says!="" else "Nothing could be set in motion.","")
 
 static func _ruin(out:Dictionary,town:Dictionary)->Dictionary:
 	## A town we burned and left: nothing there to attack or burn again. Said
@@ -1910,8 +1954,8 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var general:Dictionary=out.general_ref
 	var f:=forces(general)
 	var t:Dictionary=f.trainees
-	if String(f.busy)!="":
-		return _no(out,"busy","We cannot start another fight while %s." % String(f.busy),"When that is done, give the order again.")
+	# A fight elsewhere (a siege of ours, their band at our door) never bars
+	# a blow with other men: the bands in it are simply not free (_available).
 	for marching:Dictionary in f.marching:
 		if String((marching.court_order as Dictionary).get("city_id",""))==String(target.city_id):
 			var left_days:=maxi(0,int(marching.get("arrival_day",0))-int(WorldSimulation.state.elapsed_days))
@@ -1980,7 +2024,9 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		var recruits:=int(t.heads) if with_recruits else 0
 		var recruit_drill:=float(mc._training_quality("levy"))*float(t.drill)
 		drilled=(_drill(home_forms)*send+recruit_drill*recruits)/maxf(1.0,float(send+recruits))
-		unarmed=(ceili(float(_unarmed(home_forms))*float(send)/float(trained)) if trained>0 else 0)+(int(t.unarmed) if with_recruits else 0)
+		# Those going take their share of the unarmed, rounded (not raised:
+		# two unarmed among 120 are not two of a party of six).
+		unarmed=(roundi(float(_unarmed(home_forms))*float(send)/float(trained)) if trained>0 else 0)+(int(t.unarmed) if with_recruits else 0)
 		going_strength=float(f.home_strength)*(float(send)/maxf(1.0,float(trained)))+recruits*(0.35+0.65*recruit_drill)*(0.45+0.55*(1.0-float(t.unarmed)/maxf(1.0,float(t.heads))))
 	var speed_force:Dictionary=use_army if not use_army.is_empty() else mc.home_army
 	var speed:float=mc._field_army_speed(speed_force) if not speed_force.is_empty() else 0.0
@@ -1991,11 +2037,25 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	# as the weaker side by them. Recruits still in drill are not yet in any
 	# formation, so a force with them is weighed by numbers and drill alone.
 	var stated_odds:={}
+	# The war council's line for this blow (war_odds.wanted): 3 to 2 at a
+	# town's walls, even odds for a raid on its fields and stores; and how
+	# many more the war leader would want when they fall short.
+	var want:=Odds.wanted(kind)
+	var more:=0
 	if bool(enemy.known) and going>0 and not with_recruits:
 		var forms:Array=use_army.get("formations",[]) if not use_army.is_empty() else mc.home_army.get("formations",[])
-		stated_odds=Odds.of(speed_force,forms,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),Odds.their_arms(String(target.civ_id),int(enemy.get("age",-1))),String(target.civ_id))
-		if not stated_odds.is_empty(): out["odds"]=stated_odds
+		# A raid meets the part of their fighters out at the fields and stores
+		# (civilization_system.offensive_campaign_data: 0.72 of the garrison).
+		var theirs_here:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
+		var walls:=float(enemy.get("fortification",0.25))
+		var arms:=Odds.their_arms(String(target.civ_id),int(enemy.get("age",-1)))
+		stated_odds=Odds.of(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id))
+		if not stated_odds.is_empty():
+			out["odds"]=stated_odds
+			if float(stated_odds.raw)<want: more=Odds.more_for(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),want)
 	var weaker:=Odds.weaker(stated_odds) if not stated_odds.is_empty() else ratio<OBJECT_RATIO
+	var short_of_line:=not stated_odds.is_empty() and float(stated_odds.raw)<want
+	out["more"]=more
 	out["estimate"]=enemy
 	out["going"]=going
 	out["days"]=days
@@ -2022,11 +2082,17 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 			var held_note:=""
 			for town:Dictionary in f.garrisons: held_note+=" %s more hold %s and cannot leave it unguarded." % [_cap(_number(int(town.garrison))),String(town.name)]
 			return _object(out,"too_few","%s against a walled town? %s would shut the gate and wait us out.%s" % [_fighters(going),name,held_note],"Give me more soldiers, or say the word and they go anyway.")
-		if bool(enemy.known) and weaker:
+		if bool(enemy.known) and (weaker or short_of_line):
 			var their:="about %d" % roundi(float(enemy.mid)) if int(enemy.low)!=int(enemy.high) else "%d" % int(enemy.low)
 			var ours:="my band of %d" % going if own_band else "%d" % going
 			var stated:=(" The odds are %s." % Odds.words(float(stated_odds.odds),bool(stated_odds.ours))) if not stated_odds.is_empty() else ""
-			return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %s%s. I would lose them for nothing.%s" % [name,their,ours,", most of them half-drilled" if ratio<0.5 else "",stated],("Let the drill finish first, about %d days, or %s" % [int(t.days),take_word]) if int(t.heads)>0 else "Give me more trained soldiers first, or %s" % take_word)
+			var line:="3 to 2" if want>=Odds.TAKE_ODDS else "even odds"
+			var more_said:=(" About %d more would make it %s." % [more,line]) if more>0 else (" Even many more would not make it %s." % line if more<0 and short_of_line else "")
+			var fix:=("Let the drill finish first, about %d days, or %s" % [int(t.days),take_word]) if int(t.heads)>0 else "Give me more trained soldiers first, or %s" % take_word
+			if weaker:
+				return _object(out,"outnumbered","%s keeps %s under arms behind its walls; we would bring %s%s. I would lose them for nothing.%s%s" % [name,their,ours,", most of them half-drilled" if drilled<0.45 else "",stated,more_said],fix)
+			var at:="go at their walls" if kind!="raid" else "raid them"
+			return _object(out,"short_of_odds","%s keeps %s under arms; we would bring %s.%s I want %s before I %s.%s" % [name,their,ours,stated,line,at,more_said],fix)
 		var raw:=drilled<UNDRILLED
 		var bare:=unarmed>0 and float(unarmed)>=float(going)*UNARMED_SHARE
 		if raw or bare:
