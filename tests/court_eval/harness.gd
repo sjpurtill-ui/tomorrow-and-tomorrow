@@ -534,6 +534,10 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["feud"]=1 if bool(WarLoop.call("feuding",feud_civ)) else 0
 	m["trackers"]=1 if String(feud_op.get("objective",""))=="war_track" else 0
 	m["feud_ops"]=0 if feud_op.is_empty() else 1
+	# The war council's stance toward the feud world's people (or the Esurai)
+	# and toward the Esurai: what the god's word set (war_council.gd).
+	m["stance"]=String((WarLoop.call("_peek",feud_civ) as Dictionary).get("stance",""))
+	m["stance_esurai"]=String((WarLoop.call("_peek",civ) as Dictionary).get("stance",""))
 	m["opinion_x100"]=roundi(float(relation.get("opinion",0.0))*100.0)
 	m["dread_x100"]=roundi(Divine.civ_dread(civ)*100.0)
 	m["scouts"]=CivilizationSystem.scout_missions.size()
@@ -609,7 +613,7 @@ static func _material(m:Dictionary)->String:
 	## Everything an order could really change (not words, memories or moods).
 	var keys:=["here","free","bound","hostage","worker","conscript","killed","fled","taken","displaced","running","on_road","garrison","held","ruin","ours","armies","moving","field_troops","chases","home_troops",
 		"recruits","training","equipment_orders","prisoners","food","timber","stone","fiber_plants","forced_labor","transport_carts","spears","population","modifiers","practice_prisoners","practice_spoils",
-		"settlement_prisoners","settlement_spoils","officials","status_headman","status_suri","status_kavu","status_imeri","status_rovik","aim_active","aim_god","at_war","scouts","going_home","dread_x100",
+		"settlement_prisoners","settlement_spoils","officials","status_headman","status_suri","status_kavu","status_imeri","status_rovik","aim_active","aim_god","at_war","scouts","going_home","dread_x100","stance","stance_esurai",
 		"measures","envoy_state","released","freed","envoys_out",
 		# Offices, the god's standing with each official and with the people, the
 		# court's known persons, the realm's name: what acts at home really change.

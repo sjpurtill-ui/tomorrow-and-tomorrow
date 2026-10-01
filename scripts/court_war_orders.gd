@@ -90,7 +90,15 @@ const ARMY_WORDS:="(army|armies|forces?|troops|soldiers|warriors|fighters|host|l
 const LOOSE_ARMY_WORDS:="(men|bands?|spears|companies|people)"
 const ATTACK_WORDS:="(attack|assault|storm|strike|fall (up)?on|march (on|against|to war|to battle|into battle)|go (to war|against|to battle)|make war|wage war|war on|(?:we are|we're) (?:now )?at war with|declare war|battle|into battle|fight|take the (city|town|village|settlement)|capture|conquer|sack|crush|destroy|wipe out|invade|smash|raze|burn [\\w' ]{0,20}?to the ground|put [\\w' ]{0,20}? to the sword)"
 const SIEGE_WORDS:="(besiege|lay siege|siege|starve [\\w' ]{0,20}?out|surround (the|their) (city|town|walls|village))"
-const RAID_WORDS:="(raid|plunder|pillage|loot|punish|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
+## Deeds that are a raid wherever they are said.
+const RAID_DEEDS:="(raid|plunder|pillage|loot|burn their (fields|crops|stores|granar\\w*|barns|harvest|grain)|steal their|drive off their (herds|cattle|flocks))"
+## A raid, or the stance Punish toward a people ("punish the Neyali", "punish
+## their raiders"). Said of the people of a town we hold, "punish them" is the
+## garrison's business instead (_punishes_held_people).
+const RAID_WORDS:="("+RAID_DEEDS+"|punish)"
+## Their fighters: punishing these is a raid on them, never a measure on a
+## town's people.
+const THEIR_FIGHTERS:="\\b(raiders?|warriors?|fighters?|war ?bands?|soldiers|army|armies|host|troops)\\b"
 const INTERCEPT_WORDS:="(attack|fight|meet|catch|hunt down|destroy|engage|smash|crush|intercept|fall (up)?on|go after|chase|pursue) (their|the enemy'?s?|the) (army|host|war ?band|column|forces?|fighters|raiders|warriors|soldiers|troops|men)"
 ## "Make peace with the Esurai", "end the feud": the war council's Seek peace
 ## (war_council.gd). Envoys sent with words of peace are the envoys' own
@@ -349,6 +357,9 @@ static func read(text:String,context_civ:String="",audience_id:String="")->Dicti
 	if _has(lower,PEACE_WORDS) and not _has(lower,"(envoys?|ambassadors?|emissar\\w*|messengers?)\\b"):
 		if named.is_empty() and _the_feud()=="" and not _any_war(): return {}
 		return {"kind":"peace","target":named,"full":false,"insist":false,"place":"","army_words":army,"text":clean.substr(0,300)}
+	# "Punish them" said of the people of a town we hold: the garrison's
+	# business (an occupation measure), never a raid on the people we fight.
+	if _punishes_held_people(clean,lower,audience_id): return _implied_word(clean,lower,audience_id)
 	if _has(lower,INTERCEPT_WORDS): kind="intercept"
 	elif _has(lower,SIEGE_WORDS): kind="siege"
 	elif _has(lower,RAID_WORDS): kind="raid"
@@ -729,6 +740,25 @@ static func _implied_word(clean:String,lower:String,audience_id:String)->Diction
 	if town.is_empty() and held.size()==1 and _has(lower,TownFate.TOWN_REF): town=held[0]
 	if town.is_empty(): return {}
 	return {"kind":"town_word","target":town,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":false,"text":clean.substr(0,300),"implied":true}
+
+## "Punish them" said of the people of a town we hold (the one this audience
+## speaks of, or our only one when the words say "the town"): an occupation
+## measure, which the war leader asks about once (_implied_word), never a
+## raid. A people or a town of theirs named, their fighters ("punish their
+## raiders"), or a raid's own deeds keep it a raid, the stance Punish.
+static func _punishes_held_people(clean:String,lower:String,audience_id:String)->bool:
+	if not _has(lower,"\\bpunish") or _has(lower,RAID_DEEDS) or _has(lower,THEIR_FIGHTERS): return false
+	# A town or a people named outright is a raid. "Them" alone is whoever
+	# this audience speaks of, before the one people we fight (find_target).
+	if names_a_town(clean) or _names_a_people(lower): return false
+	return not _implied_word(clean,lower,audience_id).is_empty()
+
+## Do the words name a people we know, by its own name?
+static func _names_a_people(lower:String)->bool:
+	if WorldSimulation.world==null: return false
+	for c in WorldSimulation.world.civilizations:
+		if c is Dictionary and String((c as Dictionary).get("id",""))!="player" and _name_hit(lower,String((c as Dictionary).get("name",""))): return true
+	return false
 
 static func _any_war()->bool:
 	if WorldSimulation.world==null: return false
@@ -1275,22 +1305,50 @@ static func _muster_trainees()->int:
 # Deciding and doing
 # --------------------------------------------------------------------------
 
+## The headman's words when he answers for the war: no one holds the Marshal's
+## office and no general stands in that place (war_leader: stand_in).
+const STAND_IN_WORDS:="No one holds the Marshal's office; I answer for the war until you name one."
+
 static func war_leader(speaker:Dictionary={})->Dictionary:
 	## The war leader who answers: a summoned war leader of renown answers for
-	## himself; otherwise the Marshal (war leader office); else a living war
-	## leader of renown (HistoricalFigures General) who leads our bands.
+	## himself; otherwise the Marshal (the war leader's office). With that office
+	## empty, the one the army itself puts at its head at home
+	## (military_campaign._marshal_commander: the general in HistoricalFigures'
+	## "home" place, else the general it would take there). Failing that the
+	## headman stands in for the war and says so (stand_in: STAND_IN_WORDS).
+	## Never another official.
 	var figures:Variant=Engine.get_main_loop().root.get_node_or_null("HistoricalFigures") if Engine.get_main_loop() is SceneTree else null
 	var fid:=String(speaker.get("figure_id",""))
 	if fid!="" and figures!=null:
 		var figure:Dictionary=figures.by_id(fid)
 		if String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead":
 			return {"name":String(figure.get("name","")),"person_id":0,"figure_id":fid}
-	var marshal:=Hall._relevant_official(["Marshal"])
-	if not marshal.is_empty(): return marshal
-	if figures!=null:
-		for figure in figures.people:
-			if figure is Dictionary and String(figure.get("role",""))=="General" and String(figure.get("status",""))!="dead":
-				return {"name":String(figure.get("name","")),"person_id":0,"figure_id":String(figure.get("id",""))}
+	var officials:=Hall._officials()
+	for person in officials:
+		if String(person.get("office_key",""))=="Marshal": return person
+	var home:=_home_general(figures)
+	if not home.is_empty(): return home
+	for person in officials:
+		if String(person.get("office_key",""))=="Steward":
+			var headman:=person.duplicate()
+			headman["stand_in"]=true
+			return headman
+	return {}
+
+## The general the army puts at its head at home while no one holds the
+## Marshal's office (HistoricalFigures.commander(..., "home")): the one in the
+## "home" place, else the first living general free of any band or garrison,
+## as commander() would take him. Read only: nothing is assigned here.
+static func _home_general(figures:Variant)->Dictionary:
+	if figures==null: return {}
+	var assigned:Dictionary=figures.get("assignments") if figures.get("assignments") is Dictionary else {}
+	var placed:Dictionary=figures.by_id(String(assigned.get("home","")))
+	if String(placed.get("role",""))=="General" and String(placed.get("status",""))=="living":
+		return {"name":String(placed.get("name","")),"person_id":0,"figure_id":String(placed.get("id",""))}
+	var busy:=assigned.values()
+	for figure in figures.people:
+		if figure is Dictionary and String(figure.get("role",""))=="General" and String(figure.get("status",""))=="living" and not String(figure.get("id","")) in busy:
+			return {"name":String(figure.get("name","")),"person_id":0,"figure_id":String(figure.get("id",""))}
 	return {}
 
 static func _speaker_of(audience:Dictionary)->Dictionary:
@@ -1373,6 +1431,12 @@ static func _through_council(out:Dictionary,reading:Dictionary,insist:bool,conte
 	var stance:="punish" if String(out.kind)=="raid" else "take"
 	var council:=load(COUNCIL_PATH) as GDScript
 	var done:Dictionary=council.call("order",civ_id,stance,{"place":target,"insist":insist,"words":String(reading.get("text","")),"context":context,"reading":reading})
+	return _council_answer(out,done,stance,civ_id,target,insist)
+
+## The war council's answer to a stance the god set, as the war leader's own:
+## his strike's result, his objection the god can insist past, a stance held,
+## or why nothing could be set in motion.
+static func _council_answer(out:Dictionary,done:Dictionary,stance:String,civ_id:String,target:Dictionary,insist:bool)->Dictionary:
 	if done.has("objective") and done.has("general"): return done
 	out["target"]=target.duplicate(true)
 	var says:=String(done.get("says",""))
@@ -1798,7 +1862,7 @@ static func _take_first(out:Dictionary,reading:Dictionary)->Dictionary:
 	## nothing moves until the god says yes (court_commands.gd keeps the
 	## march as the pending order). Nothing to march with: said plainly.
 	var target:Dictionary=reading.get("target",{})
-	if not target.has("city_id"): return _target_problem(out,target,"attack")
+	if not target.has("city_id"): return _target_problem(out,target,"attack",reading)
 	var name:=String(target.get("name","")).trim_prefix("Reported home of ")
 	out["target"]=target.duplicate(true)
 	var fate:Dictionary=reading.get("fate",{})
@@ -1899,7 +1963,7 @@ static func _object(out:Dictionary,reason:String,says:String,fix:String)->Dictio
 	out.outcome="No one marches yet."
 	return out
 
-static func _target_problem(out:Dictionary,target:Dictionary,kind:String)->Dictionary:
+static func _target_problem(out:Dictionary,target:Dictionary,kind:String,reading:Dictionary={},insist:bool=false)->Dictionary:
 	if target.has("ambiguous"):
 		return _no(out,"ambiguous_target","Which people? We know of %s." % " and ".join(PackedStringArray(target.ambiguous)),"Name the town and I will look to it.")
 	# A people we feud with whose home nobody has found: "attack them", "go to
@@ -1908,7 +1972,7 @@ static func _target_problem(out:Dictionary,target:Dictionary,kind:String)->Dicti
 	var feud_civ:=String(target.get("civ_id",""))
 	if feud_civ=="" and target.is_empty(): feud_civ=_the_feud()
 	if feud_civ!="" and kind in ["attack","raid","siege"]:
-		var tracked:=_track_them(out,feud_civ)
+		var tracked:=_track_them(out,feud_civ,reading,insist)
 		if not tracked.is_empty(): return tracked
 	if target.has("unknown"):
 		return _no(out,"unknown_place","No scout has brought back where %s stands. I cannot march on a place nobody has seen." % String(target.unknown),"Send scouts toward it; once they are back, give the order again.")
@@ -1927,10 +1991,16 @@ static func _the_feud()->String:
 		found=id
 	return found
 
-## A feud order against a people whose home is not found: trackers go out
-## after their raiders' trail (war_loop.order war_track), the odds stated.
-## {} when this is not that (their home is known, or it is no feud).
-static func _track_them(out:Dictionary,civ_id:String)->Dictionary:
+## A feud order against a people whose home is not found: "attack them",
+## "go to war with them", "burn their stores". It is the feud's strike, as the
+## war leader's own matter reads those words (war_loop TYPED: war_burn): the
+## war council takes the stance Punish toward them, so the court and the
+## matter give the same order. While nobody knows where they live, its first
+## step is a few trackers on their raiders' trail, the odds stated
+## (war_council._find_them, war_loop.send_trackers, which says it once); when
+## the way is found the stance sends the band. {} when this is not that (their
+## home is known, or it is no feud).
+static func _track_them(out:Dictionary,civ_id:String,reading:Dictionary={},insist:bool=false)->Dictionary:
 	var war_loop:GDScript=load(WAR_LOOP_PATH)
 	if war_loop==null or not bool(war_loop.call("feuding",civ_id)) or bool(war_loop.call("home_known",civ_id)): return {}
 	var name:=Hall._civ_name(civ_id)
@@ -1941,13 +2011,24 @@ static func _track_them(out:Dictionary,civ_id:String)->Dictionary:
 		var already:=_no(out,"already_out","%s is already out against the %s with %s; they should be back in about %d %s." % [String(busy.get("general","Our band")),name,_fighters(int(busy.get("band",0))),left,"day" if left==1 else "days"],"")
 		already.outcome="Nothing new is set in motion: a band of ours is already out against the %s." % name
 		return already
-	var said:=String(war_loop.call("order",civ_id,"war_track",false))
-	var op:Dictionary=(war_loop.call("front",civ_id) as Dictionary).get("op",{})
 	var day:=int(WorldSimulation.state.elapsed_days)
+	var target:={"civ_id":civ_id,"civ_name":name,"unknown":name}
+	var context:={"general":(out.get("general_ref",{}) as Dictionary).duplicate(),"audience_id":String(out.get("audience_id",""))}
+	if int(out.get("chosen",0))>0: context["army_id"]=int(out.chosen)
+	var council:=load(COUNCIL_PATH) as GDScript
+	var done:Dictionary=council.call("order",civ_id,"punish",{"insist":insist,"words":String(reading.get("text","")),"context":context,"reading":reading})
+	var op:Dictionary=(war_loop.call("front",civ_id) as Dictionary).get("op",{})
+	# A town of theirs on our charts though their home is not: the council
+	# strikes it, or says why it waits, as for any town.
+	if String(op.get("objective",""))!="war_track" or int(op.get("start",-1))!=day: return _council_answer(out,done,"punish",civ_id,target,insist)
 	out.verdict="act"; out.kind="track"; out.reason="track"
-	out["target"]={"civ_id":civ_id,"civ_name":name,"unknown":name}
+	out["target"]=target
 	out.objective={"army_id":0,"kind":"track","civ_id":civ_id,"band":int(op.get("band",0)),"days":maxi(0,int(op.get("due",day))-day)}
-	out.says="Nobody here knows where the %s live, so there is nothing of theirs to strike at yet. %s" % [name,said]
+	var says:=String(done.get("says",""))
+	# Spoken by the one who sends them: "I send 6 to follow", not his own name.
+	var pid:=int((out.get("general_ref",{}) as Dictionary).get("person_id",0))
+	if pid>0 and pid==int(op.get("general_pid",0)): says=says.replace("%s takes %d to follow" % [String(op.get("general","")),int(op.get("band",0))],"I send %d to follow" % int(op.get("band",0)))
+	out.says=says
 	out.outcome="%d trackers set out on the %s raiders' trail to find where they live." % [int(op.get("band",0)),name]
 	return out
 
@@ -1976,7 +2057,7 @@ static func _home_extras(f:Dictionary,band_used:bool)->String:
 static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var kind:=String(out.kind)
 	var target:Dictionary=reading.get("target",{})
-	if target.is_empty() or not target.has("city_id"): return _target_problem(out,target,kind)
+	if target.is_empty() or not target.has("city_id"): return _target_problem(out,target,kind,reading,insist)
 	var name:=String(target.name).trim_prefix("Reported home of ")
 	out["target"]=target.duplicate(true)
 	var general:Dictionary=out.general_ref

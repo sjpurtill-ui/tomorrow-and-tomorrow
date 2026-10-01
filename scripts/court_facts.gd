@@ -78,6 +78,9 @@ static func offices(persona:Dictionary,speaker:Dictionary={},holder_key:String="
 	if key=="" and pid>0: key=String(GovernmentPeopleSystem.person_snapshot(pid).get("office_key",""))
 	var office:=(String(persona.get("title",""))+" "+String(persona.get("office_title",""))+" "+String(speaker.get("title",""))).to_lower()
 	var war:=key in WAR_KEYS or (key=="" and _any(office,WAR_WORDS))
+	# His own office is war (the Marshal's): he keeps no store sheet. A headman
+	# standing in for the war keeps his own sheets and gets the war's too.
+	var own_war:=war
 	# A war leader of renown (a General among the historical figures).
 	var fid:=String(persona.get("figure_id",speaker.get("figure_id","")))
 	if fid=="" and holder_key.begins_with("figure:"): fid=holder_key.trim_prefix("figure:")
@@ -87,7 +90,7 @@ static func offices(persona:Dictionary,speaker:Dictionary={},holder_key:String="
 	if not war and pid>0:
 		war=int(WarOrders.war_leader().get("person_id",-1))==pid
 	if war: out.append("war")
-	if not war and (key in STORE_KEYS or (key=="" and _any(office,STORE_WORDS))): out.append("stores")
+	if not own_war and (key in STORE_KEYS or (key=="" and _any(office,STORE_WORDS))): out.append("stores")
 	if key in TRIBUTE_KEYS or (key=="" and _any(office,TRIBUTE_WORDS)): out.append("tribute")
 	if key in SCOUT_KEYS or (key=="" and _any(office,SCOUT_WORDS)): out.append("scouts")
 	return out

@@ -2518,6 +2518,11 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
 	r.verb="war"
 	var decision:=WarOrders.perform(reading,insist,{"general":general,"army_id":int(reading.get("army_id",0)),"audience_id":id})
+	# No one holds the Marshal's office and no general stands in that place:
+	# the headman answers for the war, and says so once in the audience.
+	if bool(general.get("stand_in",false)) and String(decision.get("says",""))!="" and WarOrders._asked(id,"stand_in")==0:
+		decision["says"]=WarOrders.STAND_IN_WORDS+" "+String(decision.says)
+		WarOrders._mark_asked(id,"stand_in")
 	r["war"]=decision
 	r["objective"]=(decision.get("objective",{}) as Dictionary).duplicate(true)
 	r["actor_says"]=String(decision.get("says",""))
@@ -2577,6 +2582,7 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 	# business, and a march already on the road has nothing in its way.
 	if String(decision.get("kind",""))=="captives" and verdict=="fate": r.stage="war_captives"
 	elif String(decision.get("reason",""))=="already_marching": r.stage="war_already"
+	elif String(decision.get("kind",""))=="track" and verdict=="act": r.stage="war_track"
 	# The war leader asked something back (a chase, leaving a town): the answer carries it.
 	if decision.get("pending") is Dictionary:
 		audience["pending_command"]=(decision.pending as Dictionary).merged({"verb":"war","actor":String(carrier.get("key","")),"target":"","day":Hall._day()},true)
@@ -2765,6 +2771,7 @@ const STAGE:={
 		"[{actor} touches their brow to the floor and is gone before the fire settles, shouting for packs and water skins.]"],
 	"war_march":["[{actor} is on their feet at once, calling for the fighters to gather their spears and food.]",
 		"[{actor} goes out to the drill ground; within the hour the fighters are being counted and loaded for the road.]"],
+	"war_track":["[{actor} sends for the best trackers; before dusk a few of them are gone on the raiders' trail.]"],
 	"war_object":["[{actor} does not move to the door. They stand where they are and answer you plainly.]"],
 	"war_refuse":["[{actor} stays where they are and tells you what stands in the way.]"],
 	"war_fate":["[{actor} bows and sends a runner to the garrison with your word.]","[{actor} goes out to send your word to the garrison; the court is very quiet.]"],

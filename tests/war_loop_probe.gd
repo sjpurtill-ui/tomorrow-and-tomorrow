@@ -327,7 +327,7 @@ func _feud_unknown_home()->void:
 		check(typed=="war_track","'Burn their stores' at an unfound home mapped to '%s'" % typed)
 		var r:=HALL.resolve(String(a2.id),typed)
 		out.append("  You: Burn their stores.\n  -> %s" % String(r.get("outcome","")))
-		check(String(r.get("outcome","")).contains("No one here knows where"),"Burning an unfound home did not send trackers first")
+		check(String(r.get("outcome","")).contains("Nobody here knows where"),"Burning an unfound home did not send trackers first")
 		var op:Dictionary=WAR.front(civ_id).get("op",{})
 		check(String(op.get("objective",""))=="war_track","The band went to burn a home nobody knows")
 		check(int(op.get("band",0))>=WAR.TRACKERS_MIN and int(op.get("band",0))<=WAR.TRACKERS_MAX,"The trackers are a war band (%d)" % int(op.get("band",0)))

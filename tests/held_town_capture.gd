@@ -87,6 +87,13 @@ func _take()->void:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(18,"LEVY BAND 1")
+	# Rovik leads it: the ruler put the band under him (leader_commands.gd); a
+	# new band serves under the war leader at home until then. Loaded at run
+	# time, so the capture still runs on code from before leaders.
+	if ResourceLoader.exists("res://scripts/leader_commands.gd"):
+		var leaders:GDScript=load("res://scripts/leader_commands.gd")
+		var general:Dictionary=leaders.call("commission_general",MilitaryCampaign)
+		leaders.call("assign",MilitaryCampaign,int(MilitaryCampaign.field_armies[0].army_id),String(general.get("figure_id","")))
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army["supply_level"]=1.0;army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}
