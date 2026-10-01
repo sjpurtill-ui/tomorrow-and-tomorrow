@@ -151,7 +151,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		# Terms common to every practice, read once (same arithmetic, same order).
 		var adoption_table:Dictionary=WorldSimulation.state.discovery_adoption
 		var common_spread:=0.00035+teaching
-		var idle_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE
+		# The lore keeper's hand on what is forgotten (office_levers.gd: x1.20 to x0.60).
+		var idle_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE*preload("res://scripts/office_levers.gd").value("Scholar")
 		for id in WorldSimulation.state.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue

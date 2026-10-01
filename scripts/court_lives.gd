@@ -569,7 +569,10 @@ static func _file_mourning(dead:Dictionary,office:Dictionary,day:int)->int:
 	for candidate in candidates:
 		var cid:=int(candidate.get("person_id",0))
 		rows.append({"pid":cid,"name":String(candidate.get("name","")).substr(0,60),"kin":kin_words(cid,dead_pid),"acting":not acting.is_empty() and cid==int(acting.get("person_id",0)),
-			"age":GovernmentPeopleSystem.age_years(candidate),"own":_own_words(candidate)})
+			"age":GovernmentPeopleSystem.age_years(candidate),"own":_own_words(candidate),
+			# What their hand would do in the office against the dead holder's,
+			# in the engine's numbers (office_levers.gd).
+			"lever":preload("res://scripts/office_levers.gd").compare_line(String(office.key),candidate,dead).substr(0,220)})
 	var names:PackedStringArray=PackedStringArray()
 	for row in rows: names.append(String(row.name))
 	var audience:=Hall._new_audience("court","petition",day)
@@ -659,6 +662,8 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 				var alive:=not person.is_empty() and String(person.get("status",""))=="active"
 				var kin:=String(row.get("kin",""))
 				var sub:="%s, aged %d.%s %s" % [String(row.get("name","")),int(row.get("age",0))," %s's %s." % [String(m.get("given","")),kin] if kin!="" else "",("Already keeps the fire." if bool(row.get("acting",false)) else "Has %s." % String(row.get("own","")))]
+				var lever:=String(row.get("lever",""))
+				if lever!="": sub+=" In the office: %s." % lever
 				var label:=("Confirm %s" if bool(row.get("acting",false)) else "Choose %s") % EraNames.given_of(String(row.get("name","")))
 				out.append(Hall._option("choose:%d" % int(row.get("pid",0)),label,sub.strip_edges(),"warm",alive,"%s is no longer among the living cast." % String(row.get("name",""))))
 			out.append(Hall._option("mourn_only","Choose later","Honour %s; the one acting as %s stays for now." % [String(m.get("given","")),title.to_lower()],"neutral"))

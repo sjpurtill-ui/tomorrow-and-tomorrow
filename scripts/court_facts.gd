@@ -177,6 +177,9 @@ static func _common(out:Dictionary)->void:
 	var council:Array=[]
 	for p:Dictionary in officials: council.append({"title":String(p.get("office_title","")),"name":String(p.get("name","")),"office":String(p.get("office_key",""))})
 	out["council"]=council
+	# What each office's holder changes, in the engine's numbers (office
+	# levers): everyone at court knows what the council's hands are worth.
+	out["hands"]=hands()
 	# The god's word on new towns (auto_founding.gd), which everyone at court
 	# knows; the headman also knows what keeps the leaders home.
 	if state!=null: out["new_towns"]=AutoFounding.court_facts("stores" in (out.get("offices",[]) as Array))
@@ -638,9 +641,26 @@ static func people_text(p:Dictionary)->String:
 # --------------------------------------------------------------------------
 
 ## The sheet as plain lines, exact figures, for the voice's prompt.
+## What each office's holder changes, against an ordinary holder, in the
+## engine's numbers: ["Iska, Keeper of Stores: saves 12% of what would rot
+## (an ordinary one 0%)", ...] (office_levers.gd).
+static func hands()->Array:
+	var Levers:=preload("res://scripts/office_levers.gd")
+	var out:Array=[]
+	for office:Dictionary in GovernmentPeopleSystem.active_offices():
+		var key:=String(office.key)
+		var holder:Dictionary=WorldSimulation.state.leadership_positions.get(key,{}) if WorldSimulation.state!=null else {}
+		if holder.is_empty() or int(holder.get("person_id",0))<=0: continue
+		var card:Dictionary=Levers.marshal_card() if key=="Marshal" else Levers.card(key)
+		if card.is_empty(): continue
+		out.append("%s, %s: %s" % [String(holder.get("name","")),String(office.title),String(card.text).get_slice(" · ",0).to_lower()])
+	return out
+
 static func text(s:Dictionary)->String:
 	var lines:PackedStringArray=PackedStringArray()
 	lines.append("Today: %s. Home: %s, %d people." % [String(s.get("when","")),String(s.get("home","")),int(s.get("home_people",0))])
+	var hands_said:Array=s.get("hands",[])
+	if not hands_said.is_empty(): lines.append("What the council's hands are worth, against an ordinary holder: %s." % "; ".join(PackedStringArray(hands_said)))
 	var wars:Array=s.get("at_war_with",[])
 	var peace:Array=s.get("at_peace_with",[])
 	var feud_rows:PackedStringArray=PackedStringArray()

@@ -965,7 +965,7 @@ static func _appoint_reading(clean:String,audience:Dictionary,list:Array[Diction
 	## {key, negated:true} for the one they take it from ("Suri is no longer
 	## war leader", "you are not my war leader any more"); {}.
 	var office:=_office_in(clean)
-	if office=="" and _re(PRIEST_WORDS).search(clean)==null: return {}
+	if office=="" and _re(PRIEST_WORDS).search(clean)==null and town_post(clean).is_empty(): return {}
 	var said:=clean.replace("’","'")
 	var found:=mentions(said,list)
 	# "X is no longer ...": taken from them.
@@ -2179,11 +2179,17 @@ static func _appoint(id:String,audience:Dictionary,r:Dictionary,target:Dictionar
 	# A figure of renown holds no office of the council: the honour is theirs.
 	if String(target.get("kind",""))=="figure": return _figure_act(id,r,"raise",target)
 	if String(target.get("kind",""))!="official": return _fallback(id,r,"")
+	# "Make Iska headman of Riverford": one of our towns is given to them.
+	var town:=town_post(text)
+	if not town.is_empty(): return _appoint_town(id,r,target,town)
 	var office:=_office_in(text)
 	var pid:=int(target.person_id)
 	if office=="" or not GovernmentPeopleSystem.office_is_active(office) or String(target.office_key)==office:
 		return _spoken_act(id,audience,r,"raise",target)
 	var former:Dictionary=GovernmentPeopleSystem.officeholder(office)
+	# What the change of hands does, in the engine's numbers, said before the
+	# office passes (office_levers.gd).
+	var change:=preload("res://scripts/office_levers.gd").appointment_note(office,_person(target),former)
 	var appointed:=GovernmentPeopleSystem.mark_central_appointment(pid,office)
 	if appointed.is_empty(): return _spoken_act(id,audience,r,"raise",target)
 	GovernmentPeopleSystem.adjust_person_bonds(pid,{"respect":0.08,"love":0.05,"obligation":0.06})
@@ -2191,7 +2197,61 @@ static func _appoint(id:String,audience:Dictionary,r:Dictionary,target:Dictionar
 	if not former.is_empty() and int(former.person_id)!=pid:
 		GovernmentPeopleSystem.adjust_person_bonds(int(former.person_id),{"resentment":0.1,"respect":-0.04})
 		GovernmentPeopleSystem.record_person_memory(int(former.person_id),"The god gave my office to %s before the court." % String(target.name),"divine",0.7,{"emotion":"shame","outcome":"replaced"})
-	r.outcome="%s is now %s by your word.%s" % [String(target.name),String(appointed.get("office_title",office))," %s no longer holds it." % String(former.name) if not former.is_empty() and int(former.person_id)!=pid else ""]
+	r.outcome="%s is now %s by your word.%s%s" % [String(target.name),String(appointed.get("office_title",office))," %s no longer holds it." % String(former.name) if not former.is_empty() and int(former.person_id)!=pid else "",(" "+change) if change!="" else ""]
+	r.executed=true; r.reaction="delighted"; r.stage="appoint"; r.witness_ids=_witness_ids(id,[pid])
+	return r
+
+## Words for a town's leader: "headman", "elder", the town leader's own
+## title, before "of", "over", "for" or "in" and the name of one of our towns.
+const TOWN_POSTS:=["headman","head man","headwoman","elder","leader","chief","speaker","steward","governor","mayor","delegate","convenor","prefect","keeper"]
+
+## One of our towns whose leadership these words give: {id, name}, or {}.
+## "Make Iska headman of Riverford", "Iska shall lead Riverford", "put Oda
+## over Riverford".
+static func town_post(text:String)->Dictionary:
+	var lower:=text.to_lower().replace("’","'")
+	var titles:Array=TOWN_POSTS.duplicate()
+	var own:=String(GovernmentPeopleSystem.settlement_leader_title()).to_lower()
+	if own!="" and not titles.has(own): titles.push_front(own)
+	for settlement in GameState.player_settlements:
+		var name:=String((settlement as Dictionary).get("name","")).strip_edges()
+		if name=="": continue
+		var n:=_escape(name.to_lower())
+		var posts:="|".join(PackedStringArray(titles.map(func(t:Variant)->String: return _escape(String(t)))))
+		if _re("\\b(%s)\\s+(of|over|for|in)\\s+(the\\s+)?%s\\b" % [posts,n]).search(lower)!=null or _re("\\b(lead|leads|rule|rules|govern|governs)\\s+(the\\s+town\\s+of\\s+)?%s\\b" % n).search(lower)!=null or _re("\\b(put|set|place)\\b[\\w' ]{1,40}?\\b(over|in charge of)\\s+%s\\b" % n).search(lower)!=null:
+			return {"id":String((settlement as Dictionary).get("id","")),"name":name}
+	return {}
+
+## A town given to an official at the god's word (GovernmentPeopleSystem
+## assign_settlement_leader, its rules): the one who led it is put out with
+## a grudge, the new one honoured; the report says what each would do there.
+static func _appoint_town(id:String,r:Dictionary,target:Dictionary,town:Dictionary)->Dictionary:
+	var pid:=int(target.person_id)
+	var former:=GovernmentPeopleSystem.settlement_leader(String(town.id))
+	var title:=String(GovernmentPeopleSystem.settlement_leader_title()).to_lower()
+	if int(former.get("person_id",0))==pid:
+		r.outcome="%s already leads %s." % [String(target.name),String(town.name)]
+		r.executed=false; r.stage="none"; r.reaction="neutral"
+		return r
+	var done:=GovernmentPeopleSystem.assign_settlement_leader(String(town.id),pid)
+	if not bool(done.get("ok",false)):
+		r.outcome="%s cannot lead %s: %s" % [String(target.name),String(town.name),String(done.get("reason","the town is not ours to give."))]
+		r.executed=false; r.stage="none"; r.reaction="neutral"
+		return r
+	GovernmentPeopleSystem.adjust_person_bonds(pid,{"respect":0.06,"love":0.04,"obligation":0.05})
+	GovernmentPeopleSystem.record_person_memory(pid,"The god made me %s of %s before the whole court." % [title,String(town.name)],"divine",0.75,{"emotion":"awe","outcome":"appointed","settlement_id":String(town.id)})
+	if not former.is_empty():
+		GovernmentPeopleSystem.adjust_person_bonds(int(former.person_id),{"resentment":0.08,"respect":-0.03})
+		GovernmentPeopleSystem.record_person_memory(int(former.person_id),"The god gave %s to %s before the court." % [String(town.name),String(target.name)],"divine",0.65,{"emotion":"shame","outcome":"replaced","settlement_id":String(town.id)})
+	var words:="%s now leads %s as its %s, by your word." % [String(target.name),String(town.name),title]
+	if not former.is_empty(): words+=" %s no longer does." % String(former.name)
+	# The town leader is the headman of their town's work (office_levers.gd
+	# labour): what their hand does there, against the one before.
+	var Levers:=preload("res://scripts/office_levers.gd")
+	var now:=Levers.town_labour(GovernmentPeopleSystem.person_snapshot(pid))
+	words+=" Under them %s gets %d%% %s work done%s." % [String(town.name),roundi(absf(now-1.0)*100.0),"more" if now>=1.0 else "less",
+		(" (under %s: %+d%%)" % [String(former.name).get_slice(" ",0),roundi((Levers.town_labour(former)-1.0)*100.0)]) if not former.is_empty() else ""]
+	r.outcome=words
 	r.executed=true; r.reaction="delighted"; r.stage="appoint"; r.witness_ids=_witness_ids(id,[pid])
 	return r
 

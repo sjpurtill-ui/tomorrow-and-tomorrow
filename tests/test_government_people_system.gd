@@ -122,6 +122,9 @@ func test_auto_management_reacts_to_forecast_shortages_inside_the_same_month()->
 
 func test_research_override_exists_but_does_not_disable_survival_safeguards()->void:
 	var settlement_id:=String(GameState.player_settlements[0].id)
+	# The guard is judged on the same leader's plan: the founding leader lives
+	# through the three-year jump (a successor's own skills would move it).
+	GovernmentPeopleSystem._person_record(int(GovernmentPeopleSystem.officeholder("Steward").person_id))["death_age_years"]=200.0
 	GameState.elapsed_days=1095.0
 	GameState.water_metrics={"intake_ratio":1.0,"source_accessible":true,"days":4.0,"required_today":120.0,"collected_today":162.0}
 	GameState.simulation_metrics.merge({"food_days":60.0,"food_net":4.0,"food_projected_days":9999.0,"food_intake_ratio":1.0,"housing_ratio":1.0},true)

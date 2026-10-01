@@ -84,6 +84,7 @@ static func leader_of(army:Dictionary,mc:Variant=null)->String:
 ## then the generals by name.
 static func leaders(mc:Variant=null)->Array[Dictionary]:
 	var host:=_mc(mc)
+	sync_commanders(host)
 	var out:Array[Dictionary]=[]
 	var home:Dictionary=host.home_army.get("commander",{}) if host.home_army is Dictionary else {}
 	var figures:=_figures()
@@ -102,6 +103,24 @@ static func leaders(mc:Variant=null)->Array[Dictionary]:
 	return out
 
 
+## Each band (and garrison, and the band at home when a named general holds
+## it) keeps its general's commander record, drawn when the general took it.
+## When the general's own skills have changed since (they grew in battle or
+## in the field, or the save is older than generals' own skills), the record
+## is drawn again from them, so the engine, the leaders' screen and the War
+## screen read the same numbers. Idempotent; returns how many were redrawn.
+static func sync_commanders(host:Node)->int:
+	var figures:=_figures()
+	if figures==null or host==null: return 0
+	var base:Dictionary={}
+	var changed:=0
+	for force in host.field_armies:
+		if figures.sync_force(host,force as Dictionary,base): changed+=1
+	for force in host.occupation_forces:
+		if figures.sync_force(host,force as Dictionary,base): changed+=1
+	if host.home_army is Dictionary and not (host.home_army as Dictionary).is_empty() and figures.sync_force(host,host.home_army,base): changed+=1
+	return changed
+
 ## A general's skills as the engine gives them to the bands they lead: the
 ## commander record of any band they lead, else as one would be made.
 static func _commander_of(host:Node,figure_id:String)->Dictionary:
@@ -112,12 +131,9 @@ static func _commander_of(host:Node,figure_id:String)->Dictionary:
 	var figures:=_figures()
 	var person:Dictionary=figures.by_id(figure_id) if figures!=null else {}
 	if person.is_empty():return {}
-	var base:Dictionary=host._acting_field_commander(false)
-	var result:=base.duplicate(true)
-	result["name"]=String(person.name);result["figure_id"]=figure_id;result["institutional"]=false
-	for skill in ["command","tactics","logistics","resolve"]:
-		result[skill]=clampf(float(base.get(skill,.5))*.75+float(person.get("talent",.5))*.25+figures.living_bonus(person)*.2,0.0,1.0)
-	return result
+	# The same record HistoricalFigures.commander puts on a band they lead:
+	# the general's own skills, with what the realm's army lends them.
+	return figures.commander_record(person,host._acting_field_commander(false))
 
 
 ## The commands as they stand: one per leader with bands (the war leader's
@@ -201,11 +217,19 @@ static func assign(mc:Variant,army_id:int,leader_id:String)->Dictionary:
 	return {"ok":true,"message":"%s now serves under %s." % [before,leader_name],"leader":leader_name}
 
 
-## A leader's record from the figure: battles fought, won and lost, and the
-## years in public life. {} for the war leader at home.
+## A leader's record from the figure: battles fought, won and lost, our men
+## lost under them and theirs, their pace on the march, the days their bands
+## went hungry, the men who deserted them, the days in the field and the
+## years in public life (HistoricalFigures RECORD_KEYS). {} for the war
+## leader at home.
 static func record(leader:Dictionary)->Dictionary:
 	var person:Dictionary=leader.get("person",{})
 	if person.is_empty():return {}
 	var today:=int(WorldSimulation.state.elapsed_days)
+	var kept:Dictionary=person.get("record",{}) if person.get("record") is Dictionary else {}
+	var march_days:=float(kept.get("march_days",0.0))
 	return {"battles":(person.get("battle_keys",[]) as Array).size(),"won":int(person.get("battles_won",0)),"lost":int(person.get("battles_lost",0)),
-		"years":maxi(0,(today-int(person.get("emerged",today)))/365),"age":maxi(0,(today-int(person.get("born",today)))/365),"renown":int(person.get("renown",0))}
+		"years":maxi(0,(today-int(person.get("emerged",today)))/365),"age":maxi(0,(today-int(person.get("born",today)))/365),"renown":int(person.get("renown",0)),
+		"men_lost":roundi(float(kept.get("men_lost",0.0))),"enemy_lost":roundi(float(kept.get("enemy_lost",0.0))),
+		"km_day":float(kept.get("march_km",0.0))/march_days if march_days>=1.0 else 0.0,"march_days":roundi(march_days),
+		"hungry_days":roundi(float(kept.get("hungry_days",0.0))),"deserted":roundi(float(kept.get("deserted",0.0))),"field_days":roundi(float(kept.get("field_days",0.0)))}

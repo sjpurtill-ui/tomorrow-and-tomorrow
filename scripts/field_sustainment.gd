@@ -21,6 +21,14 @@ extends RefCounted
 ## formation counts, the wounded pool (hunger-sick kept apart from battle
 ## wounded), the drafts on the road (the "replacements" personnel category),
 ## inventories and population deaths.
+##
+## The band's own general carries it (their commander record's skills,
+## historical_figures.gd): their logistics sets how much hunger costs
+## (x1.2 at none, x0.8 at the best: HUNGER_BY_LOGISTICS), and their command
+## and resolve set the band's discipline, and so how many slip away under
+## hardship, by the same rule as the band at home (desertion_day). Each
+## general's record keeps the days, the march, the hungry days and the
+## deserters (HistoricalFigures.note_field_day, note_record).
 
 const Ledger:=preload("res://scripts/equipment_ledger.gd")
 const Rations:=preload("res://scripts/field_rations.gd")
@@ -44,6 +52,10 @@ const CUT_OFF:=0.01
 const MAX_WAIT_DAYS:=30
 ## Hunger losses the war leader still speaks of, in days since the last.
 const HUNGER_MEMORY_DAYS:=30
+## Hunger's cost under a general: x(HUNGER_BASE - HUNGER_BY_LOGISTICS *
+## logistics), so x1.0 under an ordinary one (0.5).
+const HUNGER_BASE:=1.2
+const HUNGER_BY_LOGISTICS:=0.4
 ## Kits whose stores are mostly fodder: horses, oxen and elephants graze.
 const FODDER_KITS:=["mounted_bow","field_gun","horse_gun","bombard"]
 
@@ -98,7 +110,7 @@ func hunger_day(force:Dictionary,span:float)->Dictionary:
 	if not Rations.is_hungry(force) or food>=Rations.HUNGRY_BELOW or troops<=0 or _held(force):
 		force["hunger_accumulator"]=0.0
 		return result
-	var rate:=HUNGER_RATE*(Rations.HUNGRY_BELOW-food)/Rations.HUNGRY_BELOW
+	var rate:=HUNGER_RATE*(Rations.HUNGRY_BELOW-food)/Rations.HUNGRY_BELOW*hunger_factor(force)
 	var owed:=float(force.get("hunger_accumulator",0.0))+float(troops)*rate*span
 	var lost:=mini(troops,floori(owed))
 	force["hunger_accumulator"]=owed-float(lost)
@@ -114,10 +126,30 @@ func hunger_day(force:Dictionary,span:float)->Dictionary:
 	# are working hands at home again (military_campaign._mobilized_count).
 	var totals:Dictionary=force.get("hunger_losses",{"sick":0,"deserted":0,"dead":0})
 	for key in result: totals[key]=int(totals.get(key,0))+int(result[key])
+	_general_note(force,"deserted",float(result.deserted))
 	force["hunger_losses"]=totals
 	force["hunger_last_day"]=int(WorldSimulation.state.elapsed_days)
 	force["hunger_today"]=result.duplicate()
 	return result
+
+## How much hunger costs a band under its general: their logistics, x1.2 at
+## none to x0.8 at the best (1.0 for an ordinary one or none named).
+static func hunger_factor(force:Dictionary)->float:
+	return HUNGER_BASE-HUNGER_BY_LOGISTICS*_skill(force,"logistics")
+
+static func _skill(force:Dictionary,skill:String)->float:
+	var commander:Dictionary=force.get("commander",{}) if force.get("commander") is Dictionary else {}
+	return clampf(float(commander.get(skill,0.5)),0.0,1.0)
+
+## The named general of a band ("" for the war leader at home or none).
+static func general_of(force:Dictionary)->String:
+	var commander:Dictionary=force.get("commander",{}) if force.get("commander") is Dictionary else {}
+	return String(commander.get("figure_id",""))
+
+func _general_note(force:Dictionary,key:String,amount:float)->void:
+	var id:=general_of(force)
+	if id=="" or amount<=0.0 or WorldSimulation.figures==null: return
+	WorldSimulation.figures.note_record(id,key,amount)
 
 ## Hunger's losses the war leader still speaks of: {} once a month has passed
 ## without any.
@@ -157,7 +189,11 @@ const WOUNDED_RETURN:=0.015
 ## wounded back in their places. Nothing while it fights.
 func rest_day(force:Dictionary,span:float)->Dictionary:
 	var result:={"morale":0.0,"wounded_back":0}
-	if force.has("army_id") and host.command_hierarchy.battle.engaged(int(force.get("army_id",0))): return result
+	if force.has("army_id") and host.command_hierarchy.battle.engaged(int(force.get("army_id",0))):
+		_general_day(force,span)
+		return result
+	desertion_day(force,span)
+	_general_day(force,span)
 	var supply:=clampf(float(force.get("supply_level",1.0)),0.0,1.0)
 	var morale:=float(force.get("morale",1.0))
 	var before:=morale
@@ -182,6 +218,73 @@ func rest_day(force:Dictionary,span:float)->Dictionary:
 			force["wounded_pool"]=int(force.get("wounded_pool",0))-placed
 			result.wounded_back=placed
 	return result
+
+# --- Discipline: who slips away --------------------------------------------
+
+## A band's discipline under its general, by the home band's rule
+## (military_campaign._process_aggregate_service_strain_day): 0.18 +
+## leadership (command 0.55, resolve 0.45) x 0.42 + drill x 0.30 + a
+## professional corps x 0.18.
+func discipline_of(force:Dictionary)->float:
+	var leadership:=clampf(_skill(force,"command")*0.55+_skill(force,"resolve")*0.45,0.0,1.0)
+	var weighted:=0.0
+	var men:=0.0
+	for formation in force.get("formations",[]):
+		weighted+=float(formation.get("training",0.0))*float(formation.get("count",0))
+		men+=float(formation.get("count",0))
+	var training:=clampf(weighted/maxf(1.0,men),0.0,1.0)
+	var corps:=float(host._adoption("professional_corps")) if host!=null and host.has_method("_adoption") else 0.0
+	return clampf(0.18+leadership*0.42+training*0.30+corps*0.18,0.0,1.0)
+
+## A day's desertion from a band or garrison away from home, by the home
+## band's rule: hardship (short supply, broken heart, the march) builds a
+## strain that eases slowly; past it men slip away at a pressure that a
+## well-led, drilled band (discipline_of) holds down and a cohesive people
+## holds down further. Deserters go home to work (the mobilized count falls),
+## counted on the band and on its general's record. {deserted, pressure}.
+func desertion_day(force:Dictionary,span:float)->Dictionary:
+	var out:={"deserted":0,"pressure":0.0}
+	var troops:=maxi(0,int(force.get("troops",0)))
+	if troops<=0 or (force.has("army_id") and host.at_home_point(force)): return out
+	var supply:=clampf(float(force.get("supply_level",1.0)),0.0,1.0)
+	var morale:=clampf(float(force.get("morale",1.0)),0.0,1.0)
+	var marching:=String(force.get("status","stationed")) in ["moving","turning_back"]
+	var hardship:=clampf(maxf(0.0,0.70-supply)/0.70+maxf(0.0,0.50-morale)*1.5+(0.15 if marching else 0.0),0.0,1.0)
+	var strain:=float(force.get("service_strain",0.0))
+	strain=move_toward(strain,hardship,(0.012 if hardship<strain else 0.006)*span)
+	var discipline:=discipline_of(force)
+	var cohesion:=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58)),0.0,1.0)
+	var pressure:=(maxf(0.0,strain-0.42)*0.020*clampf(hardship*2.0,0.0,1.0)+maxf(0.0,0.42-supply)*0.024+maxf(0.0,0.32-morale)*0.018)*(1.15-discipline*0.65)*(1.10-cohesion*0.35)
+	force["service_strain"]=strain
+	force["discipline"]=discipline
+	force["desertion_pressure"]=pressure
+	if pressure<=0.0:
+		force["desertion_accumulator"]=0.0
+		return out
+	var owed:=float(force.get("desertion_accumulator",0.0))+float(troops)*pressure*span
+	var gone:=mini(troops,floori(owed))
+	force["desertion_accumulator"]=owed-float(gone)
+	out.pressure=pressure
+	if gone<=0: return out
+	var removed:=_take_men(force,gone)
+	force["desertions_total"]=int(force.get("desertions_total",0))+removed
+	force["morale"]=clampf(morale-minf(0.12,float(removed)/maxf(1.0,float(troops))*0.5),0.0,1.5)
+	_general_note(force,"deserted",float(removed))
+	out.deserted=removed
+	return out
+
+## The general's day in the field, for their record: the days, the march at
+## the band's pace, and hunger (HistoricalFigures.note_field_day).
+func _general_day(force:Dictionary,span:float)->void:
+	var id:=general_of(force)
+	if id=="" or WorldSimulation.figures==null: return
+	# Their record follows their own skills as they grow (leader_commands.gd).
+	WorldSimulation.figures.sync_force(host,force)
+	id=general_of(force)
+	if id=="": return
+	if force.has("army_id") and host.at_home_point(force): return
+	var marching:=String(force.get("status","stationed")) in ["moving","turning_back"]
+	WorldSimulation.figures.note_field_day(id,span,marching,float(force.get("speed_km_day",0.0)),Rations.is_hungry(force))
 
 static func _has_medics(force:Dictionary)->bool:
 	for formation in force.get("formations",[]):

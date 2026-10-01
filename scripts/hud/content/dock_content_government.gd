@@ -4,6 +4,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## to question, order, dismiss or punish them. Nothing consequential happens
 ## from this screen with one click.
 const Words:=preload("res://scripts/hud/home_plain.gd")
+const Levers:=preload("res://scripts/office_levers.gd")
 
 func meta()->Dictionary:
 	var government:=GovernmentPeopleSystem.structure_snapshot()
@@ -33,8 +34,29 @@ func _office_blocks(legitimacy:float,support:float)->Array:
 		var traits:Array=holder.get("traits",[])
 		var top_skills:Array=_top_skills(holder)
 		var disposition:=GovernmentPeopleSystem.leader_disposition(holder)
-		items.append({"office_key":key,"office_title":String(office.title),"name":String(holder.get("name","Unknown")),"person_id":int(holder.get("person_id",1)),"appearance_civ_id":holder.get("appearance_civ_id","player"),"appearance_world_seed":holder.get("appearance_world_seed",GameState.world_seed),"early_art_index":holder.get("early_art_index",0),"early_art_profile":holder.get("early_art_profile",""),"traits":traits,"skills":top_skills,"fit":GovernmentPeopleSystem.office_competency(holder,key),"fit_words":Words.fit_words(GovernmentPeopleSystem.office_competency(holder,key)),"accent":_office_color(key),"tip":"Age %d · %s · %s" % [int(holder.get("age",0)),String(holder.get("background","Public figure")),String(disposition.get("label","pragmatic")).capitalize()],"on_summon":court({"person_id":int(holder.get("person_id",0))}),"summon_tip":"Call %s to the court to question them, give orders, or dismiss or punish them." % String(holder.get("name","them"))})
+		# What they do, in the engine's numbers, against an ordinary holder and
+		# the best free candidate (office_levers.gd).
+		var lever:=Levers.marshal_card() if key=="Marshal" else Levers.card(key)
+		var standing_in:=_standing_in(key)
+		# Who else could hold it, best judged first, each one press from the
+		# court (where the appointment is spoken).
+		var shortlist:Array=[]
+		for row:Dictionary in Levers.shortlist_rows(key,3): shortlist.append(row.merged({"on_summon":court({"person_id":int(row.person_id)})}))
+		items.append({"lever":lever,"standing_in":standing_in,"work_line":Levers.work_line(key,holder),"shortlist":shortlist,"office_key":key,"office_title":String(office.title),"name":String(holder.get("name","Unknown")),"person_id":int(holder.get("person_id",1)),"appearance_civ_id":holder.get("appearance_civ_id","player"),"appearance_world_seed":holder.get("appearance_world_seed",GameState.world_seed),"early_art_index":holder.get("early_art_index",0),"early_art_profile":holder.get("early_art_profile",""),"traits":traits,"skills":top_skills,"fit":GovernmentPeopleSystem.office_competency(holder,key),"fit_words":Words.fit_words(GovernmentPeopleSystem.office_competency(holder,key)),"accent":_office_color(key),"tip":"Age %d · %s · %s" % [int(holder.get("age",0)),String(holder.get("background","Public figure")),String(disposition.get("label","pragmatic")).capitalize()],"on_summon":court({"person_id":int(holder.get("person_id",0))}),"summon_tip":"Call %s to the court to question them, give orders, or dismiss or punish them." % String(holder.get("name","them"))})
 	return [{"type":"cabinet","legitimacy":legitimacy,"support":support,"items":items}]
+
+## The offices not yet open whose work this office's holder stands in for
+## (the Headman keeps the stores, the lore and the messengers until each has
+## its own keeper): their lever lines.
+func _standing_in(key:String)->Array:
+	var out:Array=[]
+	if key!="Steward": return out
+	for office in ["Quartermaster","Scholar","Envoy"]:
+		var who:=Levers.holder_of(office)
+		if not bool(who.acting): continue
+		var card:=Levers.card(office)
+		if not card.is_empty(): out.append({"office":office,"text":"For the %s: %s" % [Levers.office_title(office).to_lower(),String(card.text).get_slice(" · ",0).to_lower()],"tip":String(card.tip)})
+	return out
 
 func _top_skills(person:Dictionary)->Array:
 	var ranked:Array=[]

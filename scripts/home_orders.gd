@@ -429,7 +429,14 @@ static func levy_reading(text:String)->Dictionary:
 # Carrying them out
 # --------------------------------------------------------------------------
 
+## The order carried out, at the pace and yield of the official whose office
+## carries it, and the report says so (office_levers.gd with_holder).
 static func perform(reading:Dictionary)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	var job_from:=int(mc.next_equipment_job_id) if mc!=null else -1
+	return preload("res://scripts/office_levers.gd").with_holder(_carry_out(reading),job_from)
+
+static func _carry_out(reading:Dictionary)->Dictionary:
 	match String(reading.get("kind","")):
 		"levy": return _levy(reading)
 		"stand_down": return _stand_down(reading)

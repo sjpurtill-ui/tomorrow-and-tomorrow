@@ -205,6 +205,9 @@ func process_day(day:int)->Array[Dictionary]:
 	preload("res://scripts/civic_administration.gd").finish_day(self)
 	_sync_advisor_roster()
 	initializing=false
+	# Officials who love the god take up their own business unbidden when it
+	# plainly needs doing (office_initiative.gd), by the ordinary paths.
+	events.append_array(preload("res://scripts/office_initiative.gd").month(day))
 	return events
 
 
@@ -503,7 +506,7 @@ func _generate_person(person_id:int)->Dictionary:
 	var profile:=_dynamic_profile(skills,personality)
 	return {
 		"person_id":person_id,"name":name,"given":String(identity.get("given","")),"family":String(identity.get("family","")),"sex":"female" if woman else "male","born_day":born_day,"death_age_years":death_age,"adult_life":1,"died_day":-1,"status":"active","known_since_day":int(WorldSimulation.state.elapsed_days),
-		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,
+		"home_settlement_id":home_id,"office_key":"","local_leader_of":"","appointed_day":-1,"experience_months":0,"aged_years":0,
 		"background":background,"institutional":false,"traits":[trait_a,trait_b],"personality":personality,"skills":skills,"doctrine":doctrine,
 		"dynamic_profile":profile,"subcategory_profile":{},"support":clampi(roundi(28.0+float(profile.culture)*34.0+float(profile.institutions)*26.0),18,92),
 		"beliefs":[],"memories":[],"goals":["serve_home","preserve_reputation"],
@@ -987,26 +990,117 @@ func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=
 	# stable seed-dependent order, so a save reload never rerolls its government.
 	for key in active_keys:
 		if key in WorldSimulation.state.leadership_positions: continue
-		var successor:=_automatic_successor(key)
+		var predecessor:=_last_holder_of(key)
+		var successor:=_automatic_successor(key,0,predecessor)
 		if successor.is_empty(): continue
 		var person:=mark_central_appointment(int(successor.person_id),key)
 		if person.is_empty(): continue
 		if record_events:
 			var event_title:="Local Succession" if key=="Steward" and government_stage==0 else "%s Appointed" % String(office_definition(key).title)
-			var description:="%s now carries the founding council and local leadership of %s." % [String(person.get("name","A successor")),String(WorldSimulation.state.player_settlements[0].get("name","the settlement"))] if key=="Steward" and government_stage==0 and WorldSimulation.state.player_settlements.size()==1 else "%s was selected to serve as %s." % [String(person.get("name","A successor")),String(office_definition(key).title)]
+			var why:=succession_words(String(successor.get("succession_rule","ablest")),String(_person_record(predecessor).get("name","")))
+			var description:="%s now carries the founding council and local leadership of %s, %s." % [String(person.get("name","A successor")),String(WorldSimulation.state.player_settlements[0].get("name","the settlement")),why] if key=="Steward" and government_stage==0 and WorldSimulation.state.player_settlements.size()==1 else "%s was chosen to serve as %s: %s." % [String(person.get("name","A successor")),String(office_definition(key).title),why]
 			events.append({"day":int(WorldSimulation.state.elapsed_days),"title":event_title,"description":description,"domain":"institutions","severity":"notice"})
 
 
-func _automatic_successor(office_key:String,excluded_person_id:int=0)->Dictionary:
+## Who fills an office by the stated rule (succession_rule): the eldest able
+## kin of the one who held it, where custom keeps the seat in a house; else
+## the ablest the council knows, by its judgement of their fit
+## (estimated_fit: true fit seen through an error that shrinks with service
+## and acquaintance). Someone without another central office first; local
+## and central duty may overlap in a small polity, as the founding Steward
+## shows. The candidate carries "succession_rule" ("kin" or "ablest").
+func _automatic_successor(office_key:String,excluded_person_id:int=0,predecessor_id:int=0)->Dictionary:
 	var candidates:=candidates_for_office(office_key,"",MAX_GOVERNMENT_PEOPLE,false)
-	# Prefer someone without another central portfolio. Local and central duty may
-	# overlap in a small polity, as the founding Steward already demonstrates.
-	for candidate in candidates:
-		if int(candidate.get("person_id",0))==excluded_person_id: continue
-		if String(candidate.get("office_key",""))=="": return candidate
-	for candidate in candidates:
-		if int(candidate.get("person_id",0))!=excluded_person_id: return candidate
+	if succession_rule()=="kin" and predecessor_id>0:
+		var heir:=_eldest_able_kin(predecessor_id,office_key,candidates,excluded_person_id)
+		if not heir.is_empty():
+			heir["succession_rule"]="kin"
+			return heir
+	for free_only in [true,false]:
+		var best:Dictionary={}
+		var best_fit:=-1.0
+		for candidate in candidates:
+			if int(candidate.get("person_id",0))==excluded_person_id: continue
+			if free_only and String(candidate.get("office_key",""))!="": continue
+			var guess:=estimated_fit(candidate,office_key)
+			if guess>best_fit+0.000001: best_fit=guess; best=candidate
+		if not best.is_empty():
+			best["succession_rule"]="ablest"
+			return best
 	return {}
+
+
+## How this people fills an empty office: "kin" where its order is
+## centralized (a chief's house keeps the seat: the eldest able kin of the
+## last holder), else "ablest" (the council's best judgement of fit).
+func succession_rule()->String:
+	return "kin" if government_form()=="centralized" else "ablest"
+
+## The rule in plain words, for the chronicle and the court.
+func succession_words(rule:String,predecessor_name:String="")->String:
+	if rule=="kin": return "as custom keeps the seat in the house of %s, the eldest of their kin able to hold it" % (predecessor_name if predecessor_name!="" else "the last holder")
+	return "the ablest the council knows for the work, by its own judgement"
+
+## The least office fit an heir must show to inherit a seat.
+const HEIR_MIN_FIT:=0.40
+
+func _eldest_able_kin(predecessor_id:int,office_key:String,candidates:Array[Dictionary],excluded_person_id:int)->Dictionary:
+	var kin_ids:Dictionary={}
+	for link in _person_record(predecessor_id).get("kin",[]):
+		if link is Dictionary: kin_ids[int((link as Dictionary).get("pid",0))]=true
+	var eldest:Dictionary={}
+	for candidate in candidates:
+		var pid:=int(candidate.get("person_id",0))
+		if pid==excluded_person_id or not kin_ids.has(pid) or String(candidate.get("office_key",""))!="": continue
+		if office_competency(candidate,office_key)<HEIR_MIN_FIT: continue
+		if eldest.is_empty() or int(candidate.get("born_day",0))<int(eldest.get("born_day",0)): eldest=candidate
+	return eldest
+
+## The council's judgement of someone's fit for an office (0..1): their
+## true fit seen through a seeded error of up to FIT_GUESS_ERROR that shrinks
+## as they serve (experience_months, sure at 48) and as the court comes to
+## know them (eight years).
+const FIT_GUESS_ERROR:=0.10
+
+func estimated_fit(person:Dictionary,office_key:String)->float:
+	var fit:=office_competency(person,office_key)
+	return clampf(fit+_guess_noise(person,office_key)*FIT_GUESS_ERROR*(1.0-how_sure(person)),0.0,1.0)
+
+## How well the court knows someone's work, 0..1.
+func how_sure(person:Dictionary)->float:
+	var months:=float(person.get("experience_months",0))
+	var known:=maxf(0.0,float(WorldSimulation.state.elapsed_days)-float(person.get("known_since_day",WorldSimulation.state.elapsed_days)))
+	return clampf(months/48.0+known/(365.0*8.0),0.0,1.0)
+
+func _guess_noise(person:Dictionary,office_key:String)->float:
+	return float(posmod(hash("%d:fit_guess:%s:%d" % [WorldSimulation.state.world_seed,office_key,int(person.get("person_id",0))]),2001)-1000)/1000.0
+
+## The free people the council would weigh for an office, best judged fit
+## first: [{person_id, name, fit (judged), low, high, sure}]. Those holding
+## another central office and the holder themselves are left out.
+func shortlist(office_key:String,limit:int=3)->Array[Dictionary]:
+	if not initializing: initialize()
+	var out:Array[Dictionary]=[]
+	var holder_id:=int((WorldSimulation.state.leadership_positions.get(office_key,{}) as Dictionary).get("person_id",0))
+	for person in people:
+		if String(person.get("status",""))!="active" or String(person.get("office_key",""))!="" or int(person.get("person_id",0))==holder_id: continue
+		var guess:=estimated_fit(person,office_key)
+		var spread:=FIT_GUESS_ERROR*(1.0-how_sure(person))
+		out.append({"person_id":int(person.get("person_id",0)),"name":String(person.get("name","")),"fit":guess,"low":clampf(guess-spread,0.0,1.0),"high":clampf(guess+spread,0.0,1.0),"sure":how_sure(person)})
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.fit)>float(b.fit) if absf(float(a.fit)-float(b.fit))>0.000001 else int(a.person_id)<int(b.person_id))
+	if out.size()>limit: out.resize(limit)
+	return out
+
+## The one who held an office and died in it this past month (for the kin
+## rule); 0 when the office is new or long empty.
+func _last_holder_of(office_key:String)->int:
+	var last:=-1
+	var who:=0
+	var since:=int(WorldSimulation.state.elapsed_days)-MONTH_DAYS-1
+	for person in people:
+		if String(person.get("died_office_key",""))!=office_key or int(person.get("died_day",-1))<since: continue
+		if int(person.get("died_day",-1))>last: last=int(person.get("died_day",-1)); who=int(person.get("person_id",0))
+	return who
 
 
 func remove_central_officeholder(office_key:String,action:String="dismiss")->Dictionary:
@@ -1150,13 +1244,16 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 		WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))-0.002,0.01,0.99)
 	_ensure_pool()
 	var successors:=candidates_for_office("SettlementLeader",settlement_id,MAX_GOVERNMENT_PEOPLE,false)
+	# The ablest the council knows for the town (estimated_fit), the same rule
+	# as the central offices.
 	var successor:Dictionary={}
+	var successor_fit:=-1.0
 	for candidate_variant in successors:
 		var candidate:Dictionary=candidate_variant
 		if int(candidate.get("person_id",0))==previous_id: continue
 		if String(candidate.get("status","active"))!="active": continue
-		successor=candidate
-		break
+		var guess:=estimated_fit(candidate,"SettlementLeader")
+		if guess>successor_fit+0.000001: successor_fit=guess; successor=candidate
 	var appointment:Dictionary={}
 	if not successor.is_empty():
 		if combined_founding_office:
@@ -1353,7 +1450,10 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		if String(person.get("status","")) not in ["active","detained"]: continue
 		if String(person.get("office_key",""))!="" or String(person.get("local_leader_of",""))!="":
 			person["experience_months"]=int(person.get("experience_months",0))+1
+			# A year in office sharpens what the office asks of them.
+			if int(person.experience_months)%12==0: _grow_in_office(person)
 		var age:=float(day-int(person.get("born_day",day)))/365.0
+		_decline_with_age(person,age)
 		if not person.has("adult_life"):
 			# Records from before adult life tables: a grown person gets the
 			# adult span (never a shorter one than they had).
@@ -1383,6 +1483,45 @@ func _process_lifespans(day:int,events:Array[Dictionary])->void:
 		if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
 		revision+=1
 
+
+## Growth in office: each year served adds GROWTH_PER_YEAR to the two skills
+## the office weighs most (a town's leader: its own), up to SKILL_CAP; the
+## Ambitious grow half again as fast. Age takes it back: from DECLINE_AGE on,
+## every skill loses DECLINE_PER_YEAR a year, to no less than SKILL_FLOOR.
+## Losing a seasoned official therefore costs what they had learned.
+const GROWTH_PER_YEAR:=1
+const SKILL_CAP:=95
+const DECLINE_AGE:=60
+const DECLINE_PER_YEAR:=1
+const SKILL_FLOOR:=10
+
+func _grow_in_office(person:Dictionary)->void:
+	var office:=String(person.get("office_key",""))
+	if office=="": office="SettlementLeader"
+	var weights:Dictionary=OFFICE_SKILL_WEIGHTS.get(office,OFFICE_SKILL_WEIGHTS.SettlementLeader)
+	var keys:Array=weights.keys()
+	keys.sort_custom(func(a:Variant,b:Variant)->bool: return float(weights[a])>float(weights[b]))
+	var years:=int(person.get("experience_months",0))/12
+	var amount:=GROWTH_PER_YEAR+(1 if "Ambitious" in (person.get("traits",[]) as Array) and years%2==0 else 0)
+	var skills:Dictionary=person.get("skills",{})
+	for key in keys.slice(0,2):
+		if skills.has(String(key)): skills[String(key)]=mini(SKILL_CAP,maxi(int(skills[String(key)]),int(skills[String(key)])+amount))
+	person["skills"]=skills
+	person["grown_years"]=int(person.get("grown_years",0))+1
+
+func _decline_with_age(person:Dictionary,age:float)->void:
+	var past:=floori(age)-DECLINE_AGE
+	if past<=0: return
+	# Records from before this rule start counting from today, never all at once.
+	if not person.has("aged_years"):
+		person["aged_years"]=past
+		return
+	var done:=int(person.get("aged_years",0))
+	if past<=done: return
+	var skills:Dictionary=person.get("skills",{})
+	for key in skills: skills[key]=maxi(SKILL_FLOOR,int(skills[key])-DECLINE_PER_YEAR*(past-done))
+	person["skills"]=skills
+	person["aged_years"]=past
 
 func _focus_decision_for_settlement(settlement:Dictionary)->Dictionary:
 	var age_days:=maxi(0,int(WorldSimulation.state.elapsed_days)-int(settlement.get("founded_day",0)))

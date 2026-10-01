@@ -1,8 +1,10 @@
 extends VBoxContainer
 ## Compact government cards. Vacancies have no invented person or actions.
 ## Each official shows, in words, how well they suit the office and what they
-## are best at; the one action is to summon them to the court, where dismissal
-## and punishment are spoken orders with their consequences shown.
+## are best at, and in numbers what they change (office_levers.gd): "Saves
+## 12% of what would rot · an ordinary keeper of stores 0% · Iska would save
+## 17%". The one action is to summon them to the court, where appointment,
+## dismissal and punishment are spoken orders with their consequences shown.
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Glyph:=preload("res://scripts/hud/government_glyph.gd")
@@ -33,6 +35,12 @@ func update_block(block:Dictionary)->bool:
 		(refs.card as Control).tooltip_text=String(item.get("tip",""))
 		if refs.fit!=null:_put(refs.fit,_fit_words(item))
 		if refs.skills!=null:_put(refs.skills,_skill_words(item))
+		if refs.lever!=null:
+			_put(refs.lever,String((item.get("lever",{}) as Dictionary).get("text","")))
+			(refs.lever as Label).tooltip_text=String((item.get("lever",{}) as Dictionary).get("tip",""))
+		if refs.work!=null:_put(refs.work,String(item.get("work_line","")))
+		var extra:Array=item.get("standing_in",[])
+		for i in mini(extra.size(),(refs.stand_ins as Array).size()):_put(refs.stand_ins[i],String((extra[i] as Dictionary).get("text","")))
 	return true
 
 ## What the cabinet's nodes are: each office, whether it is held and by whom
@@ -44,7 +52,8 @@ static func shape_of(block:Dictionary)->Array:
 		var vacant:=bool(item.get("vacant",false))
 		offices.append([String(item.get("office_key","")),String(item.get("office_title","")),vacant,String(item.get("name","")),int(item.get("person_id",0)),
 			[] if vacant else preload("res://scripts/hud/person_portrait.gd").picture_key(item),item.get("accent",Tokens.GOLD),traits.slice(0,2),not (item.get("skills",[]) as Array).is_empty(),
-			String(item.get("summon_tip","")),item.get("on_summon") is Callable])
+			String(item.get("summon_tip","")),item.get("on_summon") is Callable,not (item.get("lever",{}) as Dictionary).is_empty(),String(item.get("work_line",""))!="",(item.get("standing_in",[]) as Array).size(),
+			(item.get("shortlist",[]) as Array).map(func(row:Variant)->String: return String((row as Dictionary).get("text","")))])
 	return [preload("res://scripts/hud/early_civ_art.gd").active(),offices]
 
 static func _put(label:Label,text:String)->void:
@@ -78,7 +87,7 @@ func _add_office(item:Dictionary)->void:
 	var vacant:=bool(item.get("vacant",false))
 	var accent:Color=item.get("accent",Tokens.GOLD)
 	var card:=PanelContainer.new();card.name="OfficeCard";card.tooltip_text=String(item.get("tip",""))
-	var refs:={"card":card,"fit":null,"skills":null}
+	var refs:={"card":card,"fit":null,"skills":null,"lever":null,"work":null,"stand_ins":[]}
 	_cards.append(refs)
 	var style:=Tokens.flat(Tokens.ROW_BG,Tokens.BORDER_SOFT,1,6,12)
 	card.add_theme_stylebox_override("panel",style);add_child(card)
@@ -110,6 +119,37 @@ func _add_office(item:Dictionary)->void:
 	if not skills.is_empty():
 		var skill_label:=Tokens.make_label(_skill_words(item),13,Tokens.TEXT_SOFT);skill_label.name="OfficeSkills";skill_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;identity.add_child(skill_label)
 		refs.skills=skill_label
+	# What they change, in the engine's numbers (office_levers.gd).
+	var lever:Dictionary=item.get("lever",{})
+	if not lever.is_empty():
+		var lever_label:=Tokens.make_label(String(lever.get("text","")),13,Tokens.INK);lever_label.name="OfficeLever";lever_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		lever_label.tooltip_text=String(lever.get("tip",""));lever_label.mouse_filter=Control.MOUSE_FILTER_PASS;identity.add_child(lever_label)
+		refs.lever=lever_label
+	for extra_variant in item.get("standing_in",[]):
+		var extra:Dictionary=extra_variant
+		var extra_label:=Tokens.make_label(String(extra.get("text","")),13,Tokens.BODY);extra_label.name="OfficeStandIn";extra_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		extra_label.tooltip_text=String(extra.get("tip",""));extra_label.mouse_filter=Control.MOUSE_FILTER_PASS;identity.add_child(extra_label)
+		(refs.stand_ins as Array).append(extra_label)
+	# The shortlist: who else could hold it, best judged first; a press
+	# summons them to the court, where the appointment is spoken.
+	var shortlist:Array=item.get("shortlist",[])
+	if not shortlist.is_empty():
+		var flow:=HFlowContainer.new();flow.name="OfficeShortlist";flow.add_theme_constant_override("h_separation",6);flow.add_theme_constant_override("v_separation",4);identity.add_child(flow)
+		flow.add_child(Tokens.make_label("Could hold it:",12,Tokens.MUTED))
+		for row_variant in shortlist:
+			var row_item:Dictionary=row_variant
+			var pick:=Button.new();pick.name="Shortlisted";pick.text=String(row_item.get("text",""));pick.tooltip_text=String(row_item.get("tip",""))
+			pick.add_theme_font_size_override("font_size",12);pick.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT,Tokens.BORDER_SOFT,1,2,6));pick.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,Tokens.GOLD,1,2,6))
+			pick.add_theme_color_override("font_color",Tokens.BODY);pick.add_theme_color_override("font_hover_color",Tokens.INK)
+			var call:Variant=row_item.get("on_summon",Callable())
+			pick.disabled=not call is Callable or not (call as Callable).is_valid()
+			if not pick.disabled:pick.pressed.connect(call as Callable)
+			flow.add_child(pick)
+	var work:=String(item.get("work_line",""))
+	if work!="":
+		var work_label:=Tokens.make_label(work,12,Tokens.TEXT_SOFT);work_label.name="OfficeWork";work_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		work_label.tooltip_text="How much of an order they carry out, and how fast the lines of study they lead go, against an ordinary holder of the office: their skills and fit, their bond with you, and any foot-dragging.";work_label.mouse_filter=Control.MOUSE_FILTER_PASS;identity.add_child(work_label)
+		refs.work=work_label
 	var summon:=Button.new();summon.name="CabinetSummon";summon.text="Summon to court";summon.tooltip_text=String(item.get("summon_tip","Call them to the court"))
 	summon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;summon.custom_minimum_size=Vector2(0,32)
 	summon.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT,Tokens.BORDER_SOFT,1,2,10));summon.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,Tokens.GOLD,1,2,10))

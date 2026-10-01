@@ -2078,7 +2078,16 @@ func execution_modifier_for_advisor(advisor:Dictionary,office:String,relevant_sk
 	# A frightened, resentful official who has already let it show drags their
 	# feet: bounded quiet sabotage of the work (see divine_regard.gd).
 	var sabotage:=DivineRegard.sabotage(advisor)
-	return clampf(0.36+competence*0.46+float(relationship.get("trust",0.5))*0.055+float(relationship.get("respect",0.5))*0.035+institutional_capacity*0.16+structural_adjustment-burden*0.42-sabotage,0.35,1.12)
+	# Who holds the office matters: competence weighs COMPETENCE_WEIGHT (was
+	# 0.46), pivoting on an ordinary holder (ORDINARY_COMPETENCE), so an
+	# ordinary official carries out as much as before while the best and the
+	# worst pull further apart (office_levers.gd shows the numbers).
+	return clampf(0.36+ORDINARY_COMPETENCE*0.46+(competence-ORDINARY_COMPETENCE)*COMPETENCE_WEIGHT+float(relationship.get("trust",0.5))*0.055+float(relationship.get("respect",0.5))*0.035+institutional_capacity*0.16+structural_adjustment-burden*0.42-sabotage,0.35,1.12)
+
+## How much an official's competence (0..1) moves execution, and the
+## competence of an ordinary holder (every skill 47) it pivots on.
+const COMPETENCE_WEIGHT:=0.60
+const ORDINARY_COMPETENCE:=0.47
 
 func respond_to_council_item(item_id: String, response: String) -> void:
 	for item in WorldSimulation.state.council_inbox:
