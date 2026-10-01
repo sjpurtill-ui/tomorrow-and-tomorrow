@@ -487,10 +487,13 @@ func _generate_person(person_id:int)->Dictionary:
 			used_names["given:"+era_names.given_of(String(existing_person.get("name","")))]=true
 	var identity:Dictionary=era_names.make(int(WorldSimulation.state.world_seed),person_id,woman,owner,used_names,{"skill":String(SKILL_KEYS[primary_index])})
 	var name:=String(identity.get("name","Nameless"))
-	for existing in people:
-		if String(existing.get("name",""))==name:
-			name="%s %s" % [name,String.chr(65+posmod(person_id,26))]
-			break
+	# A second person of the same name and place is told apart the way people
+	# are: the younger, then the third, never a stray letter.
+	var taken:={}
+	for existing in people:taken[String(existing.get("name",""))]=true
+	if taken.has(name):
+		for word in ["the Younger","the Third","the Fourth","the Fifth"]:
+			if not taken.has("%s %s" % [name,word]):name="%s %s" % [name,word];break
 	var trait_a:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	var trait_b:=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])
 	while trait_b==trait_a: trait_b=String(TRAITS[rng.randi_range(0,TRAITS.size()-1)])

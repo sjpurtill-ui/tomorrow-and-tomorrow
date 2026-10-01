@@ -108,3 +108,12 @@ func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
 	# Early on that is spears or the plain levy: never a kit nobody can make.
 	assert_str(String(pick.unit)).is_not_empty()
 	if String(pick.item)!="":assert_bool(MilitaryCampaign._training_gate(String(pick.unit),String(pick.item)).has("error")).is_false()
+
+func test_each_leader_reads_by_what_they_are_best_and_worst_at()->void:
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.95,"logistics":0.2})).is_equal("Best at standing firm (5 of 5) · weakest at keeping them fed (1 of 5)")
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.5,"logistics":0.5})).is_equal("Even in every skill: 3 of 5")
+	assert_str(Board.skill_words({})).is_empty()
+	# The battle report's words for a beaten commander and their captives.
+	assert_str(CombatSimulator.captive_words(1)).is_equal("1 prisoner")
+	assert_str(CombatSimulator.fate_words("escaped")).is_equal("got away")
+	assert_str(CombatSimulator.fate_words("wounded, but escaped")).is_equal("was wounded but got away")

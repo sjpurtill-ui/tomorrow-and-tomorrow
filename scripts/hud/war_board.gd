@@ -26,7 +26,6 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
 const Orders:=preload("res://scripts/army_orders.gd")
 const Commands:=preload("res://scripts/leader_commands.gd")
-const Record:=preload("res://scripts/battle_record.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -314,7 +313,7 @@ func _leader_row(c:Dictionary)->Control:
 	face.texture=Portrait.texture({"name":String(leader.get("name","")),"person_id":absi(key.hash())%997+1});frame.add_child(face)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
 	var name_label:=_line("%s · %s" % [String(leader.name),String(leader.title).to_lower()],15,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));words.add_child(name_label)
-	var rated:=Record.general_line(leader.get("commander",{}),EraWords.stage())
+	var rated:=skill_words(leader.get("commander",{}))
 	if rated!="":words.add_child(_line(rated,13,T.INK_MUTED))
 	if not (leader.get("commander",{}) as Dictionary).is_empty():
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
@@ -336,6 +335,21 @@ func _name_war_leader()->void:
 	if hud==null or not hud.has_method("has_provider") or not hud.has_provider("government"):return
 	close_wanted.emit()
 	hud.open_dock("government",0)
+
+
+## What a leader is best and worst at, by the skills the engine fights,
+## camps and marches with: "Best at standing firm (5 of 5) · weakest at
+## keeping them fed (2 of 5)".
+const SKILL_WORDS:={"command":"planning the fight","tactics":"leading it","resolve":"standing firm","logistics":"keeping them fed"}
+static func skill_words(commander:Dictionary)->String:
+	if commander.is_empty():return ""
+	var best:="";var worst:="";var high:=-1;var low:=6
+	for skill:String in SKILL_WORDS:
+		var pips:=Strips.GeneralPips.pips(float(commander.get(skill,0.5)))
+		if pips>high:high=pips;best=skill
+		if pips<low:low=pips;worst=skill
+	if high==low:return "Even in every skill: %d of 5" % high
+	return "Best at %s (%d of 5) · weakest at %s (%d of 5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
 
 
 ## What a leader is doing now: their bands and men and where, or "at home".
