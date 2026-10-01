@@ -116,6 +116,9 @@ func reset_for_new_world()->void:
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	_scan=ResearchScan.new()
 	_team_memo=TeamMemo.new()
+	# The teams' look days start afresh with the world (a save restores its own).
+	_switch_checked={}
+	_research_600_return_day=-100000
 	latest_context.clear()
 	established_threads_cache.clear()
 	established_threads_signature=""
@@ -800,8 +803,9 @@ func _refresh_active_investigations(full:=false)->void:
 # read from the discovery log); no line with a question of its age waits more
 # than TEAM_MAX_WAIT_YEARS. A free team takes a question of its age from any
 # followed line first, then one within NEAR_AGE_YEARS of its age, then one
-# further ahead at the proportional extra work: lines help each other before
-# working ahead.
+# further ahead at the proportional extra work, the nearest band first
+# (FAR_BANDS): lines help each other before working ahead, and a cheap lead in
+# one line comes before another line's long leap.
 
 ## Transient team bookkeeping, never saved (an Object): the steps to proof
 ## reached since the chronicle last took them. Nothing here steers research, so
@@ -822,6 +826,37 @@ func age_bucket(discovery:Dictionary,year:float=NAN)->int:
 	var ahead:=research_years_ahead(discovery,year)
 	if ahead<=0.0: return 0
 	return 1 if ahead<NEAR_AGE_YEARS else 2
+
+## Bands of work further ahead than NEAR_AGE_YEARS (years ahead of the
+## question's age, upper bounds): a free team takes work in the nearest band
+## any followed line offers before work in a band further ahead.
+const FAR_BANDS:=[10.0,20.0,35.0,60.0]
+## The band beyond the last of FAR_BANDS (2 + FAR_BANDS.size()).
+const TEAM_TIER_LAST:=6
+
+## A question's band in the order free teams take work: 0 its age has come, 1
+## within NEAR_AGE_YEARS of it, then 2 to TEAM_TIER_LAST by FAR_BANDS.
+func team_tier(discovery:Dictionary,year:float=NAN)->int:
+	var ahead:=research_years_ahead(discovery,year)
+	if ahead<=0.0: return 0
+	if ahead<NEAR_AGE_YEARS: return 1
+	for index in FAR_BANDS.size():
+		if ahead<=float(FAR_BANDS[index]): return 2+index
+	return TEAM_TIER_LAST
+
+## Where work of band `tier` stands in the order free teams take it. A line
+## that has waited TEAM_MAX_WAIT_YEARS for a team counts its far work two bands
+## nearer (never nearer than the first far band): it still gets its turn,
+## unless its next question stands three bands or more further ahead than the
+## nearest work any line offers.
+static func _team_rank(tier:int,waiting:bool)->int:
+	return maxi(2,tier-2) if waiting and tier>2 else tier
+
+## The bands a line reads for a free team's `rank` (_team_rank).
+static func _rank_tiers(rank:int,waiting:bool)->Array:
+	if not waiting or rank<2: return [rank]
+	if rank==2: return [2,3,4]
+	return [rank+2] if rank+2<=TEAM_TIER_LAST else []
 
 ## A line's weight in the plan: its steps of attention over its channels.
 func _line_weight(dynamic_id:String)->int:
@@ -900,18 +935,19 @@ func _turn_keys(lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Di
 		keys[line]=[0.0 if waiting else 1.0,-waited if waiting else 0.0,-claim]
 	return keys
 
-## The placement a free team takes from `placements`: the best age bucket first
-## (a question of its age, then one within NEAR_AGE_YEARS of it, then one
-## further ahead); then the line whose turn it is (_turn_keys); then the best
-## question. _next_team_placement finds the same placement without reading
+## The placement a free team takes from `placements`: the nearest band first
+## (a question of its age, then one within NEAR_AGE_YEARS of it, then each of
+## FAR_BANDS; _team_rank); then the line whose turn it is (_turn_keys); then the
+## best question. _next_team_placement finds the same placement without reading
 ## every row.
 func _pick_team_placement(placements:Array,lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Dictionary:
 	var turn_keys:=_turn_keys(lines,turns,held,today)
 	var best:Dictionary={}
 	var best_key:Array=[]
 	for placement:Dictionary in placements:
-		var key:Array=[float(placement.bucket)]
-		key.append_array(turn_keys.get(String(placement.line),[1.0,0.0,0.0]))
+		var turn:Array=turn_keys.get(String(placement.line),[1.0,0.0,0.0])
+		var key:Array=[float(_team_rank(int(placement.tier),float(turn[0])==0.0))]
+		key.append_array(turn)
 		key.append(-float(placement.score))
 		if best.is_empty() or _key_before(key,best_key) or (_key_same(key,best_key) and String(placement.channel)<String(best.channel)):
 			best=placement
@@ -940,12 +976,12 @@ func _lending_lines(also:String="")->Dictionary:
 		if _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))!=desk: lending[_research_600_channel_home(desk)[0]]=true
 	return lending
 
-## Where a free team can work in `line`, among questions of age bucket `bucket`
-## (age_bucket): the line's best question on each channel without a team (and
-## `also`, a team looking again) whose best stands in that bucket; and, when
+## Where a free team can work in `line`, among questions of band `tier`
+## (team_tier): the line's best question on each channel without a team (and
+## `also`, a team looking again) whose best stands in that band; and, when
 ## none of its channels holds a question at least that near its age, its
-## foundation work of that bucket. Rows: line, channel, id, bucket, score.
-func _line_placements(line:String,current_day:int,busy:Dictionary,bucket:int,lending:Dictionary,also:String="")->Array:
+## foundation work of that band. Rows: line, channel, id, tier, score.
+func _line_placements(line:String,current_day:int,busy:Dictionary,tier:int,lending:Dictionary,also:String="")->Array:
 	var rows:Array=[]
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var free:Array[String]=[]
@@ -955,29 +991,29 @@ func _line_placements(line:String,current_day:int,busy:Dictionary,bucket:int,len
 		var channel:=_channel_key(line,String(sub_variant))
 		if active.has(channel) and channel!=also: continue
 		free.append(channel)
-		var candidate:=_best_free_candidate(channel,current_day,busy,bucket)
+		var candidate:=_best_free_candidate(channel,current_day,busy,tier)
 		if candidate.is_empty(): continue
 		own=true
-		if age_bucket(candidate)!=bucket: continue
+		if team_tier(candidate)!=tier: continue
 		if not lends and Research600.deferred(String(candidate.get("id","")),society_model.ceiling_era):
 			# research_3000: foundations of current questions before a dead end or leftover.
 			var foundation:=_research_600_foundation_candidate(line,current_day,busy)
-			if not foundation.is_empty() and age_bucket(foundation)<=bucket:
+			if not foundation.is_empty() and team_tier(foundation)<=tier:
 				var row:=_placement(line,channel,foundation)
-				row["bucket"]=bucket
+				row["tier"]=tier
 				rows.append(row)
 				lends=true
 				continue
 		rows.append(_placement(line,channel,candidate))
 	if not own and not lends and not free.is_empty():
 		var foundation:=_research_600_foundation_candidate(line,current_day,busy)
-		if not foundation.is_empty() and age_bucket(foundation)==bucket: rows.append(_placement(line,free[0],foundation))
+		if not foundation.is_empty() and team_tier(foundation)==tier: rows.append(_placement(line,free[0],foundation))
 	return rows
 
-## The followed lines in the order their turns come (_turn_keys). Lines that
-## stand level share a group (their best question decides between them).
-func _lines_by_turn(lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)->Array:
-	var turn_keys:=_turn_keys(lines,turns,held,today)
+## The followed lines in the order their turns come (`turn_keys`, from
+## _turn_keys). Lines that stand level share a group (their best question
+## decides between them).
+func _lines_by_turn(lines:Dictionary,turn_keys:Dictionary)->Array:
 	var keyed:Array=[]
 	for line:String in lines: keyed.append([turn_keys[line],line])
 	keyed.sort_custom(func(a:Array,b:Array)->bool: return _key_before(a[0],b[0]) or (_key_same(a[0],b[0]) and String(a[1])<String(b[1])))
@@ -990,29 +1026,31 @@ func _lines_by_turn(lines:Dictionary,turns:Dictionary,held:Dictionary,today:int)
 	return groups
 
 ## The placement a free team takes, as _pick_team_placement would choose it
-## from every row, read lazily: bucket by bucket, line by line in turn order, so
-## a scan reads a line's questions further ahead only when it is that line's
-## turn and nothing nearer its age is open anywhere. {} when nothing is open.
-func _next_team_placement(lines:Dictionary,turns:Dictionary,held:Dictionary,current_day:int,busy:Dictionary,also:String="",max_bucket:int=2,skip_channels:Dictionary={})->Dictionary:
-	var groups:=_lines_by_turn(lines,turns,held,current_day)
+## from every row, read lazily: rank by rank (_team_rank), line by line in turn
+## order, so a scan reads a band further ahead only when nothing nearer is open
+## anywhere. No further than `max_rank`; {} when nothing is open.
+func _next_team_placement(lines:Dictionary,turns:Dictionary,held:Dictionary,current_day:int,busy:Dictionary,also:String="",max_rank:int=TEAM_TIER_LAST,skip_channels:Dictionary={})->Dictionary:
+	var turn_keys:=_turn_keys(lines,turns,held,current_day)
+	var groups:=_lines_by_turn(lines,turn_keys)
 	var lending:=_lending_lines(also)
-	for bucket in range(0,max_bucket+1):
+	for rank in range(0,max_rank+1):
 		for group:Array in groups:
 			var best:Dictionary={}
 			for line:String in group:
-				for row:Dictionary in _line_placements(line,current_day,busy,bucket,lending,also):
-					if skip_channels.has(String(row.channel)): continue
-					if best.is_empty() or float(row.score)>float(best.score) or (is_equal_approx(float(row.score),float(best.score)) and String(row.channel)<String(best.channel)): best=row
+				for tier:int in _rank_tiers(rank,float((turn_keys[line] as Array)[0])==0.0):
+					for row:Dictionary in _line_placements(line,current_day,busy,tier,lending,also):
+						if skip_channels.has(String(row.channel)): continue
+						if best.is_empty() or float(row.score)>float(best.score) or (is_equal_approx(float(row.score),float(best.score)) and String(row.channel)<String(best.channel)): best=row
 			if not best.is_empty(): return best
 	return {}
 
 func _placement(line:String,channel:String,discovery:Dictionary)->Dictionary:
-	return {"line":line,"channel":channel,"id":String(discovery.get("id","")),"bucket":age_bucket(discovery),"score":_candidate_score(discovery)}
+	return {"line":line,"channel":channel,"id":String(discovery.get("id","")),"tier":team_tier(discovery),"score":_candidate_score(discovery)}
 
-## The channel's best open question that no team holds yet (no further from its
-## age than `max_bucket`).
-func _best_free_candidate(channel:String,current_day:int,busy:Dictionary,max_bucket:int=2)->Dictionary:
-	if max_bucket<2: return _score_best_candidate(channel,current_day,busy,max_bucket)
+## The channel's best open question that no team holds yet (in its nearest
+## band, and no further from its age than `max_tier`).
+func _best_free_candidate(channel:String,current_day:int,busy:Dictionary,max_tier:int=TEAM_TIER_LAST)->Dictionary:
+	if max_tier<2: return _score_best_candidate(channel,current_day,busy,max_tier)
 	var best:=_best_candidate_for_channel(channel,current_day)
 	if best.is_empty() or not busy.has(String(best.get("id",""))): return best
 	return _score_best_candidate(channel,current_day,busy)
@@ -1062,7 +1100,7 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 	var proved_today:=not log.is_empty() and log[0] is Dictionary and int((log[0] as Dictionary).get("day",-1))==current_day
 	var reach:=1
 	if full or proved_today or floori(float(current_day)/SWITCH_CHECK_DAYS)!=floori(float(_research_600_return_day)/SWITCH_CHECK_DAYS):
-		reach=2
+		reach=TEAM_TIER_LAST
 		_research_600_return_day=current_day
 	var busy:=_busy_ids()
 	var held:=_teams_by_line()
@@ -1075,10 +1113,14 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 		_count_turn(held,turns,String(pick.line),1)
 
 ## Once a month each team working ahead of its age looks again: a question of
-## its age on any followed line takes the team; failing that, a much quicker
-## question (SWITCH_MARGIN less work) in its own channel. The progress made
-## stays with the question for later. A question the player chose keeps its
-## team. Each team looks on its own day of the month, so the looks spread out.
+## its age on any followed line takes the team; failing that, for a team more
+## than FAR_BANDS[1] years ahead, the work a free team would take when it
+## stands two bands nearer its age or more and is SWITCH_MARGIN less work;
+## failing that, a much quicker question (SWITCH_MARGIN less work) in its own
+## channel. The progress made stays with the question for later. A question the
+## player chose keeps its team. The teams look together on the first day of each
+## block of SWITCH_CHECK_DAYS days, so the month's reading of every line is done
+## once; a team placed during a block first looks in the next.
 const SWITCH_CHECK_DAYS:=30
 const SWITCH_MARGIN:=1.5
 ## The day each desk's team last looked again ({channel: day}).
@@ -1093,9 +1135,10 @@ func _switch_to_quicker_questions(current_day:int)->void:
 	var ahead:Array=[]
 	for channel_variant in active:
 		var channel:=String(channel_variant)
-		# A desk new to the record looks first on its own day of the month.
-		var last:=int(_switch_checked.get(channel,current_day-SWITCH_CHECK_DAYS+posmod(hash(channel),SWITCH_CHECK_DAYS)))
-		if current_day>=last and current_day-last<SWITCH_CHECK_DAYS: continue
+		# Once in each block of SWITCH_CHECK_DAYS days; a desk new to the record
+		# first looks in the next block.
+		if not _switch_checked.has(channel): _switch_checked[channel]=current_day
+		if floori(float(current_day)/SWITCH_CHECK_DAYS)==floori(float(int(_switch_checked[channel]))/SWITCH_CHECK_DAYS): continue
 		_switch_checked[channel]=current_day
 		var current:=discovery_definition(String(active[channel]))
 		if current.is_empty() or _pinned(channel): continue
@@ -1117,9 +1160,14 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		var current_id:=String(current.get("id",""))
 		var line:=_research_600_channel_home(channel)[0]
 		busy.erase(current_id)
-		# Only questions of their age are read here, so the monthly look stays cheap.
+		# Questions of their age first: the monthly look stays cheap.
 		_count_turn(held,turns,line,-1)
 		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0)
+		var tier:=team_tier(current)
+		if best.is_empty() and tier>=4:
+			# Far ahead: the work a free team would take, two bands nearer or more.
+			var nearer:=_next_team_placement(lines,turns,held,current_day,busy,channel,tier-2)
+			if not nearer.is_empty() and int(nearer.tier)<=tier-2 and String(nearer.id)!=current_id and _expected_work(discovery_definition(String(nearer.id)))*SWITCH_MARGIN<_expected_work(current): best=nearer
 		_count_turn(held,turns,line,1)
 		if best.is_empty() and channel==_channel_key(String(current.get("dynamic","")),String(current.get("subcategory",""))):
 			# In its own channel, a much quicker question (SWITCH_MARGIN less work).
@@ -1203,7 +1251,7 @@ func _choice_options(channel:String,taken:String,today:int)->Array[Dictionary]:
 	options.append(choice_option(channel,taken))
 	var used:Dictionary={}
 	while options.size()<3:
-		var pick:=_next_team_placement(lines,turns,held,today,busy,channel,2,used)
+		var pick:=_next_team_placement(lines,turns,held,today,busy,channel,TEAM_TIER_LAST,used)
 		if pick.is_empty(): break
 		options.append(choice_option(String(pick.channel),String(pick.id)))
 		busy[String(pick.id)]=true
@@ -1347,11 +1395,12 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 
 
 ## The line's best open question, passing over the questions in `skip` (ids
-## other teams hold) and any standing further from its age than `max_bucket`
-## (age_bucket). Age first: the bucket outweighs every other part of a score
-## (AGE_BUCKET_SCORE), so a later bucket is read only when the earlier ones
-## hold nothing open; a question the player chose wins wherever it stands.
-func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max_bucket:int=2)->Dictionary:
+## other teams hold) and any standing further from its age than `max_tier`
+## (team_tier). Nearest first: the best question of the nearest band with one
+## open (a question of its age, then within NEAR_AGE_YEARS, then each of
+## FAR_BANDS), so a further band is read only when the nearer ones hold nothing
+## open; a question the player chose wins wherever it stands.
+func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	# _scan_eligible, inlined for the channel's many candidates.
@@ -1370,12 +1419,12 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 	var year:=float(WorldSimulation.state.elapsed_days)/365.0
 	var by_age:=_channel_by_age(channel,candidates)
 	var index:=0
-	for bucket in range(0,max_bucket+1):
+	for tier in range(0,max_tier+1):
 		var best:Dictionary={}
 		var best_score:=-INF
 		while index<by_age.size():
 			var discovery:Dictionary=by_age[index]
-			if age_bucket(discovery,year)>bucket: break
+			if team_tier(discovery,year)>tier: break
 			index+=1
 			var id:=String(discovery.get("id",""))
 			if id==target or (not skip.is_empty() and skip.has(id)): continue
@@ -2027,7 +2076,7 @@ func line_wait_reason(dynamic_id:String,subcategory:String,rows:Array=[])->Strin
 	# Only questions ahead of their age: its turns go to other lines' questions of
 	# their age until one comes of age, or all work ahead when none has any.
 	if not next.is_empty():
-		return "Its next question, %s, is %d years ahead of its age (%s); until it comes of age this field's turns help other fields' questions of their age." % [String(next.get("name","")),roundi(research_years_ahead(next)),work_words(research_early_factor(next))]
+		return "Its next question, %s, is %d years ahead of its age (%s); free teams take nearer work in other fields first, so this field's turn comes as its questions draw nearer their age." % [String(next.get("name","")),roundi(research_years_ahead(next)),work_words(research_early_factor(next))]
 	if rows.is_empty():rows=technology_tree(dynamic_id)
 	var frontier:=technology_frontier(rows)
 	var best:Dictionary={}
