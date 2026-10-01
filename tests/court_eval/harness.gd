@@ -34,6 +34,7 @@ const Aims:=preload("res://scripts/legacy_aims.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const Covert:=preload("res://scripts/covert_ops.gd")
 
 const PATHS:=["offline","live","sloppy"]
 ## A fake key: it must never appear in a prompt, a line or a receipt.
@@ -606,6 +607,9 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
 	m["ration"]=ration; m["clean_water"]=water
 	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
+	# Spies and assassins (covert_ops.gd): operations set in motion, agents out.
+	var covert:Dictionary=Covert.summary()
+	m["covert_ops"]=int(covert.ops); m["covert_abroad"]=int(covert.abroad)
 	m["_material"]=_material(m)
 	return m
 
@@ -623,7 +627,9 @@ static func _material(m:Dictionary)->String:
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
-		"trackers","feud_ops","feud"]
+		"trackers","feud_ops","feud",
+		# Spies and assassins set in motion (covert_ops.gd).
+		"covert_ops","covert_abroad"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

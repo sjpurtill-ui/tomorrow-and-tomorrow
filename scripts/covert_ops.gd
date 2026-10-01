@@ -1097,6 +1097,30 @@ static func caught_spies(limit:int=8)->Array:
 		if out.size()>=limit: break
 	return out
 
+static func op_by_id(id:int)->Dictionary:
+	for op in state().ops:
+		if int((op as Dictionary).get("id",0))==id: return op
+	return {}
+
+## The order card's reading of an operation (order_probes.gd): how it stands,
+## in plain words, from the op itself.
+static func op_card(id:int)->Dictionary:
+	var op:=op_by_id(id)
+	if op.is_empty(): return {"state":"stalled","line":"The venture is no more","progress":0.0,"moved":true}
+	var day:=_day()
+	match String(op.get("stage","")):
+		"travelling":
+			var left:=maxi(0,int(op.arrive_day)-day)
+			return {"state":"under_way","line":"%s on the road to %s · %d days" % [String(op.agent_name),_the(String(op.civ_id)),left],"value":maxi(0,day-int(op.start_day)),"total":maxi(1,int(op.arrive_day)-int(op.start_day)),"progress":float(day-int(op.start_day)),"moved":true}
+		"in_place":
+			if String(op.kind)=="plant": return {"state":"under_way","line":"%s is a source in %s · word every %d days" % [String(op.agent_name),_the(String(op.civ_id)),PLANT_REPORT_DAYS],"progress":1.0,"moved":true,"standing":true}
+			return {"state":"under_way","line":"%s watching %s · word back in %d days" % [String(op.agent_name),_the(String(op.civ_id)),maxi(0,int(op.get("report_day",day))-day)],"progress":1.0,"moved":true}
+		"struck":
+			return {"state":"under_way","line":"%s has struck; word is awaited" % String(op.agent_name),"progress":1.5,"moved":true}
+		"done":
+			return {"state":"done","line":_outcome_line(op),"progress":2.0,"moved":true}
+	return {"state":"accepted","line":"%s sets out" % String(op.agent_name),"progress":0.0}
+
 static func eyes_on(civ_id:String)->Dictionary:
 	## Our agents abroad in this people's lands, and how fresh their word is,
 	## for the War screen's enemy row.
@@ -1120,6 +1144,31 @@ static func eyes_on(civ_id:String)->Dictionary:
 # Court questions: "what have our spies learned?", caught spies
 # --------------------------------------------------------------------------
 
+## Recent covert news for the alert row under the clock (hud/army_alerts.gd):
+## an agent caught or killed, a strike done, their spy caught. Shaped for the
+## alert marks; they go under the clock and the chronicle, never a pop-up.
+const ALERT_DAYS:=12
+static func alerts(day:int=-1)->Array:
+	if day<0: day=_day()
+	var out:Array=[]
+	var theirs:PackedStringArray=PackedStringArray()
+	for c in state().caught:
+		if day-int((c as Dictionary).day)<=ALERT_DAYS: theirs.append("%s of %s taken in our town" % [("an assassin" if String((c as Dictionary).kind)=="assassinate" else "a spy"),_the(String((c as Dictionary).civ_id))])
+	if not theirs.is_empty(): out.append({"id":"covert_caught","war":"feud","tone":"amber","count":theirs.size(),"title":"Spies of theirs caught","lines":theirs,"page":"wars"})
+	var ours:PackedStringArray=PackedStringArray()
+	var red:=false
+	for op in state().ops:
+		var o:Dictionary=op
+		if String(o.get("stage",""))!="done" or day-int(o.get("report_day",o.start_day))>ALERT_DAYS: continue
+		var outcome:Dictionary=o.get("outcome",{})
+		match String(outcome.get("kind","")):
+			"struck": ours.append("%s struck %s's leaders" % [String(o.agent_name),_name(String(o.civ_id))]); red=true
+			"caught": ours.append("%s caught among %s" % [String(o.agent_name),_the(String(o.civ_id))]); red=true
+			"sabotaged": ours.append("%s struck %s's %s" % [String(o.agent_name),_name(String(o.civ_id)),String(outcome.get("what",""))])
+			"stole": ours.append("%s carried off a secret of %s" % [String(o.agent_name),_name(String(o.civ_id))])
+	if not ours.is_empty(): out.append({"id":"covert_done","war":"band","tone":"red" if red else "amber","count":ours.size(),"title":"Our agents abroad","lines":ours,"page":"wars"})
+	return out
+
 static func is_covert_question(text:String)->bool:
 	var re:=RegEx.create_from_string("(?i)\\b(spy|spies|agent|agents|assassin|assassins|our eyes|spying|informant|informants|saboteur)\\b")
 	return re.search(text)!=null
@@ -1128,7 +1177,7 @@ static func answer(text:String)->String:
 	## A plain answer from the covert ledger, "" when the words ask nothing it
 	## holds. (court_facts hands factual covert questions here.)
 	var lower:=text.to_lower()
-	if not is_covert_question(text) and not RegEx.create_from_string("(?i)what (have|did|do) (our|we)\\b").search(lower): return ""
+	if not is_covert_question(text): return ""
 	# Caught spies of theirs.
 	if RegEx.create_from_string("(?i)\\b(caught|catch|taken|found|took)\\b").search(lower)!=null and RegEx.create_from_string("(?i)\\b(spy|spies|agent|assassin|their|them|theirs)\\b").search(lower)!=null:
 		var caught:=caught_spies(6)

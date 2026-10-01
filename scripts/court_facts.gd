@@ -108,6 +108,8 @@ static func answer_for(audience_id:String,text:String)->String:
 	if audience.is_empty() or String(audience.get("origin",""))!="court": return ""
 	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
 	if String(speaker.get("known_id",""))!="": return ""
+	var covert:=String((load("res://scripts/covert_ops.gd") as GDScript).call("answer",text))
+	if covert!="": return covert
 	var which:=offices({},speaker,String(audience.get("holder_key","")))
 	return String((load("res://scripts/court_answers.gd") as GDScript).call("answer",sheet(which),text))
 

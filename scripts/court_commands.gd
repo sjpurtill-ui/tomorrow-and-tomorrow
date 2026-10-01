@@ -544,12 +544,13 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# is read as the covert act it is. Words that hold it back ("don't send a
 	# spy") are not carried out; "do it anyway" after an objection sends it.
 	if String(audience.get("origin",""))!="foreign" and String(cls.act)!="question":
-		if bool(cls.insist):
-			var pend:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
-			if String(pend.get("verb",""))=="covert" and Hall._day()-int(pend.get("day",-99))<=PENDING_DAYS:
-				var again:=CovertOrders.read(String(pend.get("text","")),String(audience.get("civ_id","")),id)
-				if not again.is_empty(): return _covert(id,audience,list,String(pend.get("text","")),again,context,true)
-		elif CovertOrders.cue(clean) and not holds_back(id,clean):
+		var covert_pend:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+		var covert_waiting:=String(covert_pend.get("verb",""))=="covert" and Hall._day()-int(covert_pend.get("day",-99))<=PENDING_DAYS
+		var affirm:=bool(cls.insist) or bool(context.get("insist",false)) or (covert_waiting and _re("(?i)^\\W*(yes|yeah|aye|do it|go ahead|go on|carry on|send (them|him|her|the)|i insist|i command|anyway|now|very well|so be it|proceed)\\b").search(clean)!=null)
+		if covert_waiting and affirm:
+			var again:=CovertOrders.read(String(covert_pend.get("text","")),String(audience.get("civ_id","")),id)
+			if not again.is_empty(): return _covert(id,audience,list,String(covert_pend.get("text","")),again,context,true)
+		elif not bool(cls.insist) and CovertOrders.cue(clean) and not holds_back(id,clean):
 			var covert:=CovertOrders.read(clean,String(audience.get("civ_id","")),id)
 			if not covert.is_empty(): return _covert(id,audience,list,clean,covert,context,false)
 	# The god's word on new towns ("stop founding new towns", "our leaders may
@@ -2477,6 +2478,12 @@ static func _home(id:String,r:Dictionary,actor:Dictionary,words:String,home:Dict
 static func dispatch_envoy(civ:Dictionary,text:String,gift:String="")->Dictionary:
 	var civ_id:=String(civ.get("id",""))
 	var name:=String(civ.get("name","their people"))
+	# Envoy sanctity broken (covert_orders.gd): no ruler will receive our
+	# envoys for a time, so none can be sent.
+	if CovertOrders.Covert.envoys_barred():
+		var days:=CovertOrders.Covert.sanctity_days_left()
+		return {"ok":false,"purpose":"","why":"No ruler will receive our envoys now: our own envoy carried a knife, and the sanctity of envoys is broken. Give it about %d days." % days,
+			"says":"No envoy of ours can go to the %s now. Since our envoy turned killer, no ruler will receive our heralds; it will be some %d days before that is forgotten." % [name,days]}
 	var lower:=text.to_lower()
 	var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 	var at_war:=bool(rel.get("at_war",false))

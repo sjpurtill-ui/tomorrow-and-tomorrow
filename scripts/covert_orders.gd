@@ -27,7 +27,9 @@ const EraNames:=preload("res://scripts/era_names.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 
 ## A covert cue must be present, or these are ordinary words.
-const CUE:="(?i)\\b(spy|spies|spying|spied|assassin|assassins|assassinate|assassinated|saboteur|sabotage|sabotaged|infiltrat\\w*|informant|informants|disguis\\w*|secretly|in secret|under cover|poison(ed|s|er)?|dagger|slip (into|in among)|sneak (into|in)|steal (their|the enemy'?s|ruvak'?s|[a-z]+'?s) (secret|secrets|knowledge|craft|way|ways|art)|foul (a|the|their|its) (well|wells|water)|spoil (their|the|its) (harvest|crop|crops)|eyes (in|on|among)|find out what (they|the \\w+) (plan|planning|have|hold|intend|are doing)|learn what (they|the \\w+) (plan|planning|intend))\\b"
+## A covert cue must be present, or these are ordinary words. "Under cover of
+## night" is an open night attack (court_war_orders), never a cue on its own.
+const CUE:="(?i)\\b(spy|spies|spying|spied|assassin|assassins|assassinate|assassinated|saboteur|sabotage|sabotaged|infiltrat\\w*|informant|informants|disguis\\w*|secretly|in secret|by stealth|poison(ed|s|er)?|dagger|slip (into|in among)|sneak (into|in among)|steal (their|the enemy'?s|ruvak'?s|[a-z]+'?s) (secret|secrets|knowledge|craft|way|ways|art)|foul (a|the|their|its) (well|wells|water)|spoil (their|the|its) (harvest|crop|crops)|eyes (in|on|among)|find out what (they|the \\w+) (plan|planning|have|hold|intend|are doing)|learn what (they|the \\w+) (plan|planning|intend))\\b"
 ## How the agent travels among them.
 const COVER_WORDS:={
 	"envoy":"(?i)\\b(envoy|envoys|herald|heralds|messenger|ambassador|emissary|a flag of truce|peace envoy)\\b",
@@ -38,17 +40,23 @@ const COVER_WORDS:={
 ## The verbs of each operation, checked assassinate -> sabotage -> steal ->
 ## plant -> watch (so "a spy to kill their chief" is a killing, not a watch).
 const ASSASSINATE:="(?i)(assassin|assassinate|murder|slay|stab|dagger|poison (their|the|its|ruvak'?s)? ?(chief|chieftain|ruler|king|queen|leader|leaders|elders|headman|lord)|stick (a|the) (dagger|knife|blade)|slit (their|the) throats?|put (their|the) (chief|ruler|leaders?) to (death|the sword)|do away with (their|the) (chief|ruler|leader)|have (their|the) (chief|ruler|leaders?|king) killed|kill (their|the|ruvak'?s|[a-z]+'?s) (chief|chieftain|ruler|king|queen|leader|leaders|elders|headman|lords?))"
-const SABOTAGE:="(?i)(sabotage|saboteur|foul (a|the|their|its) (well|wells|water)|poison (a|the|their|its) (well|wells|water|crops?|harvest|grain|food)|spoil (their|the|its) (harvest|crop|crops|grain)|wreck (their|the|its)|burn (their|the|its) (granar\\w+|stores?|wells?|harvest|barns?|carts?))"
+const SABOTAGE:="(?i)(sabotage|saboteur|foul (a|the|their|its|[a-z]+'?s) (well|wells|water)|poison (a|the|their|its|[a-z]+'?s) (well|wells|water|crops?|harvest|grain|food)|spoil (their|the|its|[a-z]+'?s) (harvest|crop|crops|grain)|wreck (their|the|its|[a-z]+'?s)|burn (their|the|its|[a-z]+'?s) (granar\\w+|stores?|wells?|harvest|barns?|carts?))"
 const STEAL:="(?i)(steal|take|carry off|make off with) (their|the enemy'?s|ruvak'?s|[a-z]+'?s|its)? ?(secret|secrets|knowledge|craft|crafts|way|ways|art|arts)"
 const PLANT:="(?i)(plant|leave|place|keep) (a|an|one|our)? ?(spy|agent|source|informant|watcher|ear|eye)s? (among|in|inside|with|within)|a (standing|lasting|kept) (spy|source|agent|ear)"
-const WATCH:="(?i)(spy on|spy out|send (a |our |some )?(spy|spies)|send (someone|a man|a woman|one of ours) to (spy|watch)|watch what|watch (the|their)|keep (an? )?(eye|eyes|watch) on|find out what (they|the \\w+)|learn what (they|the \\w+) (plan|intend)|scout (them|their|the \\w+) (out )?secretly|eyes (in|on|among))"
+const WATCH:="(?i)(spy on|spy out|send (a |our |some )?(spy|spies)|send (someone|a man|a woman|one of ours) to (spy|watch)|watch\\b|keep (an? )?(eye|eyes|watch) on|find out what (they|the \\w+)|learn what (they|the \\w+) (plan|intend)|scout (them|their|the \\w+) (out )?secretly|eyes (in|on|among))"
 
 static func _re(pattern:String)->RegEx:
 	var re:=RegEx.new(); re.compile(pattern)
 	return re
 
 static func cue(text:String)->bool:
-	return _re(CUE).search(text)!=null
+	if _re(CUE).search(text)!=null: return true
+	# "Watch Ruvak", "keep an eye on the Esurai": a watch is covert when it
+	# names a foreign people or town, never the ford, the walls or the watch
+	# at home (those name no foreign target).
+	if _re("(?i)\\b(watch|keep (an? )?eye on|keep watch on)\\b").search(text)!=null and not _match_target(text).is_empty():
+		return true
+	return false
 
 # --------------------------------------------------------------------------
 # Reading the words
@@ -95,8 +103,8 @@ static func _kind(text:String)->String:
 	if _re(STEAL).search(text)!=null: return "steal"
 	if _re(PLANT).search(text)!=null: return "plant"
 	if _re(WATCH).search(text)!=null: return "watch"
-	# A cue with no clear verb, but a target and a covert word: eyes on them.
-	if cue(text): return "watch"
+	# A covert word with no operation verb (a bare "secretly", "in secret") is
+	# not an order on its own: the ordinary path reads it.
 	return ""
 
 ## A named agent ("send Kael", "have Kael do it"): the given name, or "".
@@ -223,24 +231,34 @@ static func _objection(kind:String,civ_id:String,cover:String,odds:Dictionary)->
 		return "Their guard is up; if our agent is caught it may be traced to us. Shall I send them anyway?"
 	return ""
 
+static func _cover_phrase(cover:String)->String:
+	match cover:
+		"envoy": return "under an envoy's cover"
+		"trader": return "under a trader's cover"
+		"pilgrim": return "as a pilgrim"
+		"refugee": return "as a refugee fleeing to them"
+	return "unseen"
+
 static func _answer(kind:String,civ_id:String,city_id:String,cover:String,agent:Dictionary,odds:Dictionary,named_missing:bool)->String:
-	## The official's plain answer with the odds in numbers.
+	## The official's plain answer with the odds in numbers (covert_ops.gd
+	## odds_words already reads "about even", "about 2 in 5"...).
 	var the:=_the(civ_id)
 	var who:=String(agent.get("given",agent.get("name","the one I would send")))
+	var cv:=_cover_phrase(cover)
 	var lead:=""
 	if named_missing: lead="I know no one of that name to send; I would send %s instead. " % who
 	match kind:
 		"watch":
-			return "%sI can put eyes on %s under a %s's cover: about %s that %s gets word home, in some %d days. If they are caught, their chance is about %s." % [lead,the,_cover_word(cover),Covert.odds_words(float(odds.success)),who,int(odds.days),Covert.odds_words(float(odds.get("caught",0.1)))]
+			return "%sI can put eyes on %s %s: %s that %s gets word home, in some %d days. If caught, the risk is %s." % [lead,the,cv,Covert.odds_words(float(odds.success)),who,int(odds.days),Covert.odds_words(float(odds.get("caught",0.1)))]
 		"plant":
-			return "%sI can leave %s as a standing source among them, under a %s's cover: about %s they take root and send word until found." % [lead,who,_cover_word(cover),Covert.odds_words(float(odds.success))]
+			return "%sI can leave %s as a standing source among them %s: %s they take root and send word until they are found." % [lead,who,cv,Covert.odds_words(float(odds.success))]
 		"steal":
-			return "%s%s can try to carry off a craft of theirs we lack: about %s they succeed, about %s they are caught." % [lead,who.capitalize(),Covert.odds_words(float(odds.success)),Covert.odds_words(float(odds.get("caught",0.1)))]
+			return "%s%s can try to carry off a craft of theirs we lack: %s to succeed, %s to be caught." % [lead,who.capitalize(),Covert.odds_words(float(odds.success)),Covert.odds_words(float(odds.get("caught",0.1)))]
 		"sabotage":
-			return "%sI can send %s to burn their stores or foul a well under a %s's cover: about %s it is done, about %s they are caught." % [lead,who,_cover_word(cover),Covert.odds_words(float(odds.success)),Covert.odds_words(float(odds.get("caught",0.1)))]
+			return "%sI can send %s to burn their stores or foul a well %s: %s it is done, %s they are caught." % [lead,who,cv,Covert.odds_words(float(odds.success)),Covert.odds_words(float(odds.get("caught",0.1)))]
 		"assassinate":
 			var reach:=float(odds.get("reach",odds.get("access",0.3)))
-			return "%sI can send %s to %s under a %s's cover. About %s they get close enough; if they do, they will likely kill one of their leaders, two or three at most before they are cut down. In all, about %s the blow lands." % [lead,who,"strike at their leaders",_cover_word(cover),Covert.odds_words(reach),Covert.odds_words(float(odds.success))]
+			return "%sI can send %s to strike at their leaders %s. %s they get close enough; if they do, they will likely kill one, two or three at most before they are cut down. In all, %s the blow lands." % [lead,who,cv,Covert.odds_words(reach),Covert.odds_words(float(odds.success))]
 	return ""
 
 static func _sets_out(kind:String,agent:Dictionary,the:String,days:int)->String:
