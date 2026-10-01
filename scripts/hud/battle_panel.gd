@@ -375,6 +375,7 @@ func _update_static()->void:
 		(parts[key+"_general"] as Label).text=(who+(", " if who!="" and about!="" else "")+(about.substr(0,1).to_lower()+about.substr(1) if who!="" else about)).strip_edges()
 	field.set("left_colour",left_colour); field.set("right_colour",right_colour)
 	field.set("names",{"left":String(view.names.left),"right":String(view.names.right)})
+	field.set("block_kinds",{"left":String(view.sides.left.word),"right":String(view.sides.right.word)})
 	var labels:Array=[]; var tips:Array=[]
 	for index in _count()+1:
 		labels.append(Model.day_label(view,index))

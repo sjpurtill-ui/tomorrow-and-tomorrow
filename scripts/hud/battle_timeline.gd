@@ -85,7 +85,8 @@ func _draw()->void:
 	var font:=T.font("ui")
 	var strong:=T.font("ui_strong")
 	var first:=_stop_x(0); var last:=_stop_x(labels.size()-1)
-	draw_line(Vector2(first,line_y),Vector2(last,line_y),T.TRACK,4.0,true)
+	# The track reads on either paper; the days played so far in gold.
+	draw_line(Vector2(first,line_y),Vector2(last,line_y),Color(T.INK_MUTED,0.4),4.0,true)
 	draw_line(Vector2(first,line_y),Vector2(_stop_x(selected),line_y),T.GOLD,4.0,true)
 	# The men lost each day, on one scale for the whole battle.
 	var most:=1
@@ -106,7 +107,7 @@ func _draw()->void:
 		var x:=_stop_x(i)
 		var shown:=i==selected
 		draw_circle(Vector2(x,line_y),7.0 if shown else 5.0,T.PAPER_RAISED)
-		draw_circle(Vector2(x,line_y),5.0 if shown else 3.6,T.GOLD if i<=selected else T.RULE_STRONG)
+		draw_circle(Vector2(x,line_y),5.0 if shown else 3.6,T.GOLD if i<=selected else T.INK_MUTED)
 		if shown: draw_arc(Vector2(x,line_y),9.0,0.0,TAU,24,T.GOLD,2.0,true)
 		if i==now: draw_arc(Vector2(x,line_y),12.0,0.0,TAU,24,Color(T.RED,0.8),1.4,true)
 		if i%every!=0 and not shown and i!=labels.size()-1: continue

@@ -27,6 +27,8 @@ const EASE_SECONDS:=0.6
 const GLYPH_INK:=Color("2b2118")
 ## How to read a block, lettered in the corner.
 const LEGEND:="Block width: men at the start · fill: men left · edge: heart"
+## The staff map's echelon marks, by the engine's block word.
+const ECHELONS:={"company":"I","battalion":"II","regiment":"III","brigade":"X","division":"XX"}
 
 var view:Dictionary={}
 var record:Dictionary={}
@@ -37,6 +39,10 @@ var right_colour:=Color("a34435")
 var names:={"left":"","right":""}
 ## How much of each side the ground lets fight at once, lettered top right.
 var frontage:=""
+## Each side's block, in the engine's word ("band", "company", "brigade"):
+## from the rifle age on, its staff-map echelon mark stands behind each box
+## in the line.
+var block_kinds:={"left":"","right":""}
 ## What is drawn now, and what it eases from.
 var layout:Dictionary={}
 var before:Dictionary={}
@@ -469,15 +475,44 @@ func _draw_block(b:Dictionary,rect:Rect2,alpha:float)->void:
 	var faces_up:=key=="left"
 	var strength:=float(b.strength)
 	var men:=int(b.men)
-	# The ground it covered at the start, then the men still with it.
+	# The ground it covered at the start, then the men still with it, in the
+	# age's manner: an inked band with its corners worn (spears and swords),
+	# a battalion under its colours (muskets), a staff-map box with its
+	# echelon (rifles, armour and after).
+	var era:=int(layout.get("era",0))
 	var paper:=T.PAPER_RAISED if state=="front" else T.PAPER
-	draw_rect(local,Color(paper,0.92*alpha))
-	draw_rect(local,Color(T.RULE_STRONG,0.7*alpha),false,1.0)
+	if era<=1:
+		_chamfered(local,4.0,Color(paper,0.92*alpha),Color(T.RULE_STRONG,0.7*alpha),1.0)
+	else:
+		draw_rect(local,Color(paper,0.92*alpha))
+		draw_rect(local,Color(T.RULE_STRONG,0.7*alpha),false,1.0)
 	if state in ["front","reserve"] and men>0:
 		var fill_h:=maxf(2.0,local.size.y*strength)
 		var fill:=Rect2(local.position.x,local.position.y if faces_up else local.end.y-fill_h,local.size.x,fill_h)
-		draw_rect(fill,Color(colour,(0.30 if state=="front" else 0.16)*alpha))
-		draw_rect(fill,Color(T.INK,0.85*alpha),false,1.3)
+		var wash:=Color(colour,(0.30 if state=="front" else 0.16)*alpha)
+		if era<=1: _chamfered(fill,minf(4.0,fill_h*0.4),wash,Color(T.INK,0.85*alpha),1.3)
+		else:
+			draw_rect(fill,wash)
+			draw_rect(fill,Color(T.INK,0.85*alpha),false,1.3 if era==2 else 1.8)
+	# Behind each block in the line: its colours on a pole (muskets), or its
+	# echelon over the staff-map box (rifles and after).
+	if state=="front" and men>0 and local.size.y>=20.0:
+		var back_y:=local.end.y if faces_up else local.position.y
+		var outward:=1.0 if faces_up else -1.0
+		if era==2:
+			var pole:=Vector2(local.position.x+5.0,back_y)
+			var tip:=pole+Vector2(0,outward*9.0)
+			draw_line(pole,tip,Color(T.INK,0.9*alpha),1.2,true)
+			var flag:=Rect2(tip.x,tip.y-5.0 if faces_up else tip.y,8.0,5.0)
+			draw_rect(flag,Color(colour,0.95*alpha))
+			draw_rect(flag,Color(T.INK,0.8*alpha),false,0.8)
+		elif era>=3:
+			var mark:=String(ECHELONS.get(String(block_kinds.get(key,"")),""))
+			if mark!="":
+				var f:=T.font("ui_strong")
+				var mw:=f.get_string_size(mark,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+				var my:=back_y+(12.0 if faces_up else -3.0)
+				_texts.append([rect.get_center(),tilt,Vector2(-mw*0.5,my),mark,f,12,Color(T.INK,0.9*alpha),Color(T.PAPER_RAISED,0.85*alpha)])
 	elif state=="broken":
 		var hatch:=Color(T.RED,0.38*alpha)
 		var x:=local.position.x-local.size.y
@@ -537,6 +572,17 @@ func _draw_texts()->void:
 		draw_string_outline(entry[4],entry[2],String(entry[3]),HORIZONTAL_ALIGNMENT_LEFT,-1,int(entry[5]),3,entry[7])
 		draw_string(entry[4],entry[2],String(entry[3]),HORIZONTAL_ALIGNMENT_LEFT,-1,int(entry[5]),entry[6])
 	draw_set_transform(Vector2.ZERO,0.0,Vector2.ONE)
+
+
+## A rectangle with its corners cut (an inked band, not a staff-map box).
+func _chamfered(rect:Rect2,cut:float,fill:Color,edge:Color,width:float)->void:
+	if rect.size.x<2.0 or rect.size.y<2.0: return
+	var c:=minf(cut,minf(rect.size.x,rect.size.y)*0.45)
+	var p:=rect.position; var e:=rect.end
+	var shape:=PackedVector2Array([p+Vector2(c,0),Vector2(e.x-c,p.y),Vector2(e.x,p.y+c),Vector2(e.x,e.y-c),Vector2(e.x-c,e.y),Vector2(p.x+c,e.y),Vector2(p.x,e.y-c),Vector2(p.x,p.y+c)])
+	draw_colored_polygon(shape,fill)
+	var closed:=shape.duplicate(); closed.append(shape[0])
+	draw_polyline(closed,edge,width,true)
 
 
 func _dashed_rect(rect:Rect2,colour:Color)->void:
