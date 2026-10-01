@@ -69,6 +69,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	assert_object(board.find_child("Strength",true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
+	assert_object(row.find_child("Odds",true,false)).is_not_null()
 	for id in ["leave","defend","punish","take","peace","pay"]:assert_object(row.find_child("Stance_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Leader_war_leader",true,false)).is_not_null()
 	# Who leads against them: the war leader until a general comes forward.

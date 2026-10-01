@@ -149,6 +149,11 @@ func _enemy_row(e:Dictionary)->Control:
 	words.add_child(_line(Ledger.subtitle(e),13,T.INK_MUTED))
 	var dead:=DeadStrip.new();dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(220,26);dead.tooltip_text="The dead of it all told: %d of ours, %d of theirs." % [int(e.our_dead),int(e.their_dead)];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);head.add_child(chip)
+	# HOI4's read of who is stronger: our share of the strength against theirs.
+	var odds:=Strips.OddsBar.new();odds.name="Odds";column.add_child(odds)
+	odds.set_odds(Ledger.odds(e),Ledger.odds_words(e))
+	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
+Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
